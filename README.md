@@ -49,6 +49,25 @@ companion as much as a working library.
 
 ## Quick tour
 
+The dedicated [`isogeny` executable](tools/isogeny-cli/README.md) screens P192/P224
+prime degrees, constructs explicit isogenies, and verifies their certificates.
+Download its platform archive from [Releases](https://github.com/aburan28/crypto/releases)
+and run it directly:
+
+```sh
+isogeny search --curve p224 --ell 1471 --out ./p224-1471
+isogeny search --curve p192 --ell 10453 --out ./p192-10453
+isogeny verify --input ./p224-1471
+isogeny curves
+isogeny search --curve P-384 --ell 19 --out ./p384-19
+isogeny search --curve P-521 --ell 7 --out ./p521-7
+```
+
+The executable embeds its algorithms and standard curve data. The kernel route at
+these two degrees constructs one Frobenius eigenline of two and labels coverage
+`PARTIAL`. The repository's Release workflow builds the platform archives and
+publishes them through ReleaseMe; PR runs test the archives before publication.
+
 ```bash
 # Build
 cargo build --release
@@ -115,6 +134,12 @@ The [report](docs/ecdlp-surfaces/REPORT.md) includes the diagram, PDF, fixtures,
 and native identity certificates. Run `tools/ecdlp-surfaces/check.sh` to validate
 the crate and replay its examples. The [n=83 report](research/ecdlp_surfaces_n83_20261012/reports/run-20261012T0331Z/REPORT.md)
 records the binary checks and includes an inspected PDF.
+
+For genus-2 and higher Jacobian transfers, use the
+[`ecdlp-surfaces` skill](.agents/skills/ecdlp-surfaces/SKILL.md) and its
+[higher-genus reference](.agents/skills/ecdlp-surfaces/references/higher-genus.md)
+for the existing cover/arithmetic tools, native pullback APIs, and construction
+and subgroup-validation requirements.
 
 ## Isogeny walks
 

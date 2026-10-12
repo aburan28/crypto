@@ -1,0 +1,17 @@
+
+running 1 test
+
+thread 'cryptanalysis::prime_fast::tests::hasse_bsgs_reproduces_the_ladder_rungs' (9464359) panicked at src/cryptanalysis/prime_fast.rs:1584:13:
+assertion `left == right` failed
+  left: (65519, 65447, (2, 25056))
+ right: (65519, 65447, (2, 40463))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test cryptanalysis::prime_fast::tests::hasse_bsgs_reproduces_the_ladder_rungs ... FAILED
+
+failures:
+
+failures:
+    cryptanalysis::prime_fast::tests::hasse_bsgs_reproduces_the_ladder_rungs
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3916 filtered out; finished in 0.00s
+

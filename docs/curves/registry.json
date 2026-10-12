@@ -1386,6 +1386,56 @@
    ]
   },
   {
+   "slug": "icv1-f2m24-tm5983-28fa8b30",
+   "icv1": "ICV1:f2m-24-4580e493:-5983:16783200:0x1:-7:unk:r:28fa8b30f52d",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 24,
+    "modulus": "0x100001b",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-24-4580e493\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x100001b\",\"v\":\"1\"}",
+   "trace": -5983,
+   "order": "16783200",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "pdp-oracle-speedup-l8"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/pdp_oracle_speedup_20261011/baseline_v1/curves.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-f2m27-t7555-cb6a4c9d",
+   "icv1": "ICV1:f2m-27-070a37b6:7555:134210174:0x1:-7:unk:r:cb6a4c9d029f",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 27,
+    "modulus": "0x8000027",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-27-070a37b6\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8000027\",\"v\":\"1\"}",
+   "trace": 7555,
+   "order": "134210174",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "pdp-oracle-speedup-l9"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/pdp_oracle_speedup_20261011/baseline_v1/curves.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-f2m29-tm40309-30c52b96",
    "icv1": "ICV1:f2m-29-1a13acc8:-40309:536911222:0x1:-7:unk:r:30c52b963005",
    "family": "koblitz",
@@ -1534,6 +1584,31 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "icv1-f2m30-t10089-8ab21610",
+   "icv1": "ICV1:f2m-30-90c23011:10089:1073731736:0x1:-7:unk:r:8ab21610aab0",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 30,
+    "modulus": "0x40000003",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-30-90c23011\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x40000003\",\"v\":\"1\"}",
+   "trace": 10089,
+   "order": "1073731736",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "pdp-oracle-speedup-l10"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/pdp_oracle_speedup_20261011/baseline_v1/curves.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-f2m31-tm90707-c95f16f5",
@@ -1708,6 +1783,56 @@
    ],
    "representations": [],
    "ec1_unresolved": "KoblitzCurve::new(1, 31) finds no usable prime-order subgroup, so the repository has built no generator on it"
+  },
+  {
+   "slug": "icv1-f2m33-tm110885-f5e5693b",
+   "icv1": "ICV1:f2m-33-4427d20e:-110885:8590045478:0x1:-7:unk:r:f5e5693b4533",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 33,
+    "modulus": "0x200000401",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-33-4427d20e\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x200000401\",\"v\":\"1\"}",
+   "trace": -110885,
+   "order": "8590045478",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "pdp-oracle-speedup-l11"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/pdp_oracle_speedup_20261011/baseline_v1/curves.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-f2m36-t473713-f90ff4d7",
+   "icv1": "ICV1:f2m-36-6a897026:473713:68719003024:0x1:-7:unk:r:f90ff4d7d40f",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 36,
+    "modulus": "0x1000000201",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-36-6a897026\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x1000000201\",\"v\":\"1\"}",
+   "trace": 473713,
+   "order": "68719003024",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "pdp-oracle-speedup-l12"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/pdp_oracle_speedup_20261011/baseline_v1/curves.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-f2m37-tm534059-32aad96b",
@@ -11215,6 +11340,141 @@
    ]
   },
   {
+   "slug": "icv1-fp19-t241-08557336",
+   "icv1": "ICV1:fp-343073:241:342833:134867:unk:unk:r:0855733664af",
+   "family": "prime",
+   "params": {
+    "p": "343073",
+    "a": "4202",
+    "b": "45429"
+   },
+   "model_json": "{\"a\":\"4202\",\"b\":\"45429\",\"field\":\"fp-343073\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"343073\",\"v\":\"1\"}",
+   "trace": 241,
+   "order": "342833",
+   "j": "134867",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19-ic16.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp19-t241-76834871",
+   "icv1": "ICV1:fp-343073:241:342833:177916:unk:unk:r:7683487151ea",
+   "family": "prime",
+   "params": {
+    "p": "343073",
+    "a": "248905",
+    "b": "168314"
+   },
+   "model_json": "{\"a\":\"248905\",\"b\":\"168314\",\"field\":\"fp-343073\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"343073\",\"v\":\"1\"}",
+   "trace": 241,
+   "order": "342833",
+   "j": "177916",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19-ic16.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp19-t241-c8307dcf",
+   "icv1": "ICV1:fp-343073:241:342833:86743:unk:unk:r:c8307dcf08cb",
+   "family": "prime",
+   "params": {
+    "p": "343073",
+    "a": "145160",
+    "b": "299911"
+   },
+   "model_json": "{\"a\":\"145160\",\"b\":\"299911\",\"field\":\"fp-343073\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"343073\",\"v\":\"1\"}",
+   "trace": 241,
+   "order": "342833",
+   "j": "86743",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19-ic16.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp19-t241-e695174e",
+   "icv1": "ICV1:fp-343073:241:342833:186499:unk:unk:r:e695174e697e",
+   "family": "prime",
+   "params": {
+    "p": "343073",
+    "a": "43182",
+    "b": "57354"
+   },
+   "model_json": "{\"a\":\"43182\",\"b\":\"57354\",\"field\":\"fp-343073\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"343073\",\"v\":\"1\"}",
+   "trace": 241,
+   "order": "342833",
+   "j": "186499",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19-ic16.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp19-t241-fba4a099",
+   "icv1": "ICV1:fp-343073:241:342833:144483:unk:unk:r:fba4a0999a42",
+   "family": "prime",
+   "params": {
+    "p": "343073",
+    "a": "36086",
+    "b": "72172"
+   },
+   "model_json": "{\"a\":\"36086\",\"b\":\"72172\",\"field\":\"fp-343073\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"343073\",\"v\":\"1\"}",
+   "trace": 241,
+   "order": "342833",
+   "j": "144483",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19-ic16.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp20-t727-cd198a38",
    "icv1": "ICV1:fp-563153:727:562427:476305:unk:unk:r:cd198a38cd5f",
    "family": "prime",
@@ -11341,6 +11601,50 @@
    ]
   },
   {
+   "slug": "icv1-fp21-tm700-56b6783a",
+   "icv1": "ICV1:fp-1048583:-700:1049284:60314:unk:unk:r:56b6783a1485",
+   "family": "prime",
+   "params": {
+    "p": "1048583",
+    "a": "2",
+    "b": "2"
+   },
+   "model_json": "{\"a\":\"2\",\"b\":\"2\",\"field\":\"fp-1048583\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1048583\",\"v\":\"1\"}",
+   "trace": -700,
+   "order": "1049284",
+   "j": "60314",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/isogeny_fibers_20261010/round4/16_7_agm_isogeny_oracles/out_seed7.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp21-tm700-7ee99c50",
+   "icv1": "ICV1:fp-1048583:-700:1049284:188138:unk:unk:r:7ee99c50b352",
+   "family": "prime",
+   "params": {
+    "p": "1048583",
+    "a": "1048579",
+    "b": "1048579"
+   },
+   "model_json": "{\"a\":\"1048579\",\"b\":\"1048579\",\"field\":\"fp-1048583\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1048583\",\"v\":\"1\"}",
+   "trace": -700,
+   "order": "1049284",
+   "j": "188138",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/isogeny_fibers_20261010/round4/16_7_agm_isogeny_oracles/out_seed7.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp22-t3005-4a2f93e7",
    "icv1": "ICV1:fp-2345743:3005:2342739:1332958:unk:unk:r:4a2f93e75297",
    "family": "prime",
@@ -11419,7 +11723,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -11476,10 +11781,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -11536,10 +11841,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -11770,7 +12075,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -12288,7 +12594,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -12869,10 +13176,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -13043,7 +13350,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -13100,10 +13408,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -13278,7 +13586,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -13909,7 +14218,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -14140,7 +14450,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -14483,7 +14794,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -14540,10 +14852,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -14656,10 +14968,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -14772,10 +15084,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -14888,10 +15200,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -14950,7 +15262,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -15063,10 +15376,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -15123,10 +15436,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -15185,7 +15498,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -15653,10 +15967,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -15713,10 +16027,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -15831,7 +16145,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -15946,7 +16261,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -16627,10 +16943,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -16689,7 +17005,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -16802,10 +17119,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -16980,7 +17297,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -17435,7 +17753,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -17670,7 +17989,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -17727,10 +18047,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -17843,10 +18163,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -18357,7 +18677,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -18476,7 +18797,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -18701,10 +19023,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -18761,10 +19083,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -18823,7 +19145,8 @@
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber/spec.json"
    ],
    "representations": [
     {
@@ -18936,10 +19259,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -19052,10 +19375,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/plan.json",
-    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/fiber_prime_large_h.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_22_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22/spec.json"
    ],
    "representations": [
     {
@@ -19224,7 +19547,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -19281,7 +19607,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -19394,7 +19723,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -19731,6 +20063,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -19900,6 +20234,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -19957,6 +20293,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -20070,11 +20408,11 @@
    "standard_names": [],
    "sources": [
     "docs/curves/sources/generated.json",
+    "docs/perf/ecbench-children.json",
     "research/ecbench_calibration_20261002/sessions/followup-prime/plan.json",
     "research/ecbench_calibration_20261002/sessions/followup-prime/spec.json",
     "research/ecbench_calibration_20261002/sessions/prime/plan.json",
-    "research/ecbench_calibration_20261002/sessions/prime/spec.json",
-    "research/ecbench_calibration_20261002/specs/followup-prime.json"
+    "research/ecbench_calibration_20261002/sessions/prime/spec.json"
    ],
    "representations": [
     {
@@ -20411,6 +20749,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -20468,6 +20808,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -20525,6 +20867,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -20694,7 +21038,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/e2_glv_crater_floor/plan.json"
    ],
    "representations": [
     {
@@ -20975,7 +21322,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/e2_glv_crater_floor/plan.json"
    ],
    "representations": [
     {
@@ -21144,7 +21494,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/e2_glv_crater_floor/plan.json"
    ],
    "representations": [
     {
@@ -21257,6 +21610,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -21314,6 +21669,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -21371,6 +21728,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -21652,6 +22011,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -21765,6 +22126,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -21990,6 +22353,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -22103,7 +22468,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -22160,7 +22528,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -22273,7 +22644,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -22442,7 +22816,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/e2_glv_crater_floor/plan.json"
    ],
    "representations": [
     {
@@ -22499,7 +22876,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/e2_glv_crater_floor/plan.json"
    ],
    "representations": [
     {
@@ -22612,7 +22992,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/e2_glv_crater_floor/plan.json"
    ],
    "representations": [
     {
@@ -22725,7 +23108,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -22782,7 +23168,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -22895,7 +23284,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -22952,7 +23344,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -23065,7 +23460,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -23178,7 +23576,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -23235,7 +23636,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -23348,7 +23752,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -23405,7 +23812,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -23462,7 +23872,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_h5408/plan.json"
    ],
    "representations": [
     {
@@ -23631,7 +24044,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_h5408/plan.json"
    ],
    "representations": [
     {
@@ -23688,7 +24104,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_h5408/plan.json"
    ],
    "representations": [
     {
@@ -23857,6 +24276,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -23970,6 +24391,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -24027,6 +24450,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -24084,7 +24509,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/e2_glv_crater_floor/plan.json"
    ],
    "representations": [
     {
@@ -24197,7 +24625,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/e2_glv_crater_floor/plan.json"
    ],
    "representations": [
     {
@@ -24254,7 +24685,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/e2_glv_crater_floor/plan.json"
    ],
    "representations": [
     {
@@ -24535,7 +24969,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/e2_glv_crater_floor/plan.json"
    ],
    "representations": [
     {
@@ -24704,7 +25141,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/e2_glv_crater_floor/plan.json"
    ],
    "representations": [
     {
@@ -24817,7 +25257,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/e2_glv_crater_floor/plan.json"
    ],
    "representations": [
     {
@@ -24930,7 +25373,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -25155,7 +25601,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -25212,7 +25661,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -25249,6 +25701,114 @@
    ]
   },
   {
+   "slug": "icv1-fp29-t47-14392892",
+   "icv1": "ICV1:fp-320092037:47:320091991:319207301:unk:unk:r:143928926945",
+   "family": "prime",
+   "params": {
+    "p": "320092037",
+    "a": "254576120",
+    "b": "276414759"
+   },
+   "model_json": "{\"a\":\"254576120\",\"b\":\"276414759\",\"field\":\"fp-320092037\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"320092037\",\"v\":\"1\"}",
+   "trace": 47,
+   "order": "320091991",
+   "j": "319207301",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29_ic16/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29_ic16/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell8209-q29-ic16.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell8209-q29.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp29-t47-1f934956",
+   "icv1": "ICV1:fp-320092037:47:320091991:109564187:unk:unk:r:1f934956bec0",
+   "family": "prime",
+   "params": {
+    "p": "320092037",
+    "a": "101186781",
+    "b": "57596093"
+   },
+   "model_json": "{\"a\":\"101186781\",\"b\":\"57596093\",\"field\":\"fp-320092037\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"320092037\",\"v\":\"1\"}",
+   "trace": 47,
+   "order": "320091991",
+   "j": "109564187",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29_ic16/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29_ic16/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell8209-q29-ic16.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell8209-q29.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp29-t47-4a644ab5",
+   "icv1": "ICV1:fp-320092037:47:320091991:65269815:unk:unk:r:4a644ab57764",
+   "family": "prime",
+   "params": {
+    "p": "320092037",
+    "a": "234001141",
+    "b": "79995391"
+   },
+   "model_json": "{\"a\":\"234001141\",\"b\":\"79995391\",\"field\":\"fp-320092037\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"320092037\",\"v\":\"1\"}",
+   "trace": 47,
+   "order": "320091991",
+   "j": "65269815",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29_ic16/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29_ic16/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell8209-q29-ic16.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell8209-q29.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp29-t47-522e6830",
+   "icv1": "ICV1:fp-320092037:47:320091991:147640356:unk:unk:r:522e68308a4c",
+   "family": "prime",
+   "params": {
+    "p": "320092037",
+    "a": "64570613",
+    "b": "54195252"
+   },
+   "model_json": "{\"a\":\"64570613\",\"b\":\"54195252\",\"field\":\"fp-320092037\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"320092037\",\"v\":\"1\"}",
+   "trace": 47,
+   "order": "320091991",
+   "j": "147640356",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29_ic16/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29_ic16/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell8209-q29-ic16.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell8209-q29.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp29-t41337-1c4dddbf",
    "icv1": "ICV1:fp-427510427:41337:427469091:24550836:unk:unk:r:1c4dddbf1d14",
    "family": "prime",
@@ -25269,7 +25829,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -25326,7 +25889,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -25383,7 +25949,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -25552,7 +26121,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -25665,7 +26237,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -25778,7 +26353,10 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
-    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
+    "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json",
+    "research/isogeny_conductor_gap_round2_20261011/sessions/a0_coset_prime26/plan.json"
    ],
    "representations": [
     {
@@ -25891,6 +26469,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -26116,6 +26696,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -26229,6 +26811,8 @@
    "sources": [
     "docs/curves/sources/isogeny-conductor-gap-20261010.json",
     "research/isogeny_conductor_gap_ic_20261010/pairs/prime_pairs.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/plan.json",
+    "research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber/spec.json",
     "research/isogeny_conductor_gap_ic_20261010/specs/prime_gap_26_fiber.json"
    ],
    "representations": [
@@ -26320,6 +26904,142 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "icv1-fp32-t6738-7a2b626e",
+   "icv1": "ICV1:fp-2790788831:6738:2790782094:2418553708:unk:unk:r:7a2b626e94e2",
+   "family": "prime",
+   "params": {
+    "p": "2790788831",
+    "a": "666561205",
+    "b": "2453577277"
+   },
+   "model_json": "{\"a\":\"666561205\",\"b\":\"2453577277\",\"field\":\"fp-2790788831\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"2790788831\",\"v\":\"1\"}",
+   "trace": 6738,
+   "order": "2790782094",
+   "j": "2418553708",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/isogeny_fibers_20261010/round4/16_5_class_multitarget_rho/run_r28.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp36-tm47184-1daf0972",
+   "icv1": "ICV1:fp-68190058247:-47184:68190105432:47521970854:unk:unk:r:1daf0972773a",
+   "family": "prime",
+   "params": {
+    "p": "68190058247",
+    "a": "65137035636",
+    "b": "33544543934"
+   },
+   "model_json": "{\"a\":\"65137035636\",\"b\":\"33544543934\",\"field\":\"fp-68190058247\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"68190058247\",\"v\":\"1\"}",
+   "trace": -47184,
+   "order": "68190105432",
+   "j": "47521970854",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/isogeny_fibers_20261010/round4/16_5_class_multitarget_rho/run_r32.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp37-t51-ff3fd2db",
+   "icv1": "ICV1:fp-68723001073:51:68723001023:31674567464:unk:unk:r:ff3fd2db0071",
+   "family": "prime",
+   "params": {
+    "p": "68723001073",
+    "a": "48478586416",
+    "b": "24234773000"
+   },
+   "model_json": "{\"a\":\"48478586416\",\"b\":\"24234773000\",\"field\":\"fp-68723001073\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"68723001073\",\"v\":\"1\"}",
+   "trace": 51,
+   "order": "68723001023",
+   "j": "31674567464",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/lit2026_w3_ggm_audit_20261011/reports/run-20261011T2012Z/measure.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp37-t277-090dc414",
+   "icv1": "ICV1:fp-81640512137:277:81640511861:15573395165:unk:unk:r:090dc4148486",
+   "family": "prime",
+   "params": {
+    "p": "81640512137",
+    "a": "6064550680",
+    "b": "68678790390"
+   },
+   "model_json": "{\"a\":\"6064550680\",\"b\":\"68678790390\",\"field\":\"fp-81640512137\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"81640512137\",\"v\":\"1\"}",
+   "trace": 277,
+   "order": "81640511861",
+   "j": "15573395165",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell131101_q37/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell131101_q37/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell131101-q37.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp37-t277-91fd6e29",
+   "icv1": "ICV1:fp-81640512137:277:81640511861:81639627401:unk:unk:r:91fd6e293bdf",
+   "family": "prime",
+   "params": {
+    "p": "81640512137",
+    "a": "6206588639",
+    "b": "31351229805"
+   },
+   "model_json": "{\"a\":\"6206588639\",\"b\":\"31351229805\",\"field\":\"fp-81640512137\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"81640512137\",\"v\":\"1\"}",
+   "trace": 277,
+   "order": "81640511861",
+   "j": "81639627401",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell131101_q37/plan.json",
+    "research/conductor_gap_cm_pairs_20261010/sessions/ell131101_q37/spec.json",
+    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell131101-q37.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp40-tm88926-7cb4feb5",
+   "icv1": "ICV1:fp-931154352071:-88926:931154440998:537080125957:unk:unk:r:7cb4feb5ac2e",
+   "family": "prime",
+   "params": {
+    "p": "931154352071",
+    "a": "194304939514",
+    "b": "873553658046"
+   },
+   "model_json": "{\"a\":\"194304939514\",\"b\":\"873553658046\",\"field\":\"fp-931154352071\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"931154352071\",\"v\":\"1\"}",
+   "trace": -88926,
+   "order": "931154440998",
+   "j": "537080125957",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/isogeny_fibers_20261010/round4/16_5_class_multitarget_rho/run_r36.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-fp112-t72213667414400864-3ecbdc5f",
@@ -106620,32 +107340,7 @@
     "research/iso1_weak_classes_20261007/large_population_20261009/population_run1/curve_records.json"
    ],
    "standard_names": [],
-   "trace": "-2491251533173327737941972795111971366"
-  },
-  {
-   "slug": "icv1-fp19-t241-08557336",
-   "icv1": "ICV1:fp-343073:241:342833:134867:unk:unk:r:0855733664af",
-   "family": "prime",
-   "params": {
-    "p": "343073",
-    "a": "4202",
-    "b": "45429"
-   },
-   "model_json": "{\"a\":\"4202\",\"b\":\"45429\",\"field\":\"fp-343073\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"343073\",\"v\":\"1\"}",
-   "trace": 241,
-   "order": "342833",
-   "j": "134867",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19-ic16.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19.json"
-   ],
+   "trace": "-2491251533173327737941972795111971366",
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
@@ -106845,32 +107540,7 @@
     "research/iso1_weak_classes_20261007/large_population_20261009/population_run1/curve_records.json"
    ],
    "standard_names": [],
-   "trace": "-29792387245275262226064940024003903270"
-  },
-  {
-   "slug": "icv1-fp19-t241-76834871",
-   "icv1": "ICV1:fp-343073:241:342833:177916:unk:unk:r:7683487151ea",
-   "family": "prime",
-   "params": {
-    "p": "343073",
-    "a": "248905",
-    "b": "168314"
-   },
-   "model_json": "{\"a\":\"248905\",\"b\":\"168314\",\"field\":\"fp-343073\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"343073\",\"v\":\"1\"}",
-   "trace": 241,
-   "order": "342833",
-   "j": "177916",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19-ic16.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19.json"
-   ],
+   "trace": "-29792387245275262226064940024003903270",
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
@@ -107070,32 +107740,7 @@
     "research/iso1_weak_classes_20261007/large_population_20261009/population_run1/curve_records.json"
    ],
    "standard_names": [],
-   "trace": "-42685072077033061909020167905304827814"
-  },
-  {
-   "slug": "icv1-fp19-t241-c8307dcf",
-   "icv1": "ICV1:fp-343073:241:342833:86743:unk:unk:r:c8307dcf08cb",
-   "family": "prime",
-   "params": {
-    "p": "343073",
-    "a": "145160",
-    "b": "299911"
-   },
-   "model_json": "{\"a\":\"145160\",\"b\":\"299911\",\"field\":\"fp-343073\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"343073\",\"v\":\"1\"}",
-   "trace": 241,
-   "order": "342833",
-   "j": "86743",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19-ic16.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19.json"
-   ],
+   "trace": "-42685072077033061909020167905304827814",
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
@@ -107295,32 +107940,7 @@
     "research/iso1_weak_classes_20261007/large_population_20261009/population_run1/curve_records.json"
    ],
    "standard_names": [],
-   "trace": "-47625218402626040157351434367347524950"
-  },
-  {
-   "slug": "icv1-fp19-t241-e695174e",
-   "icv1": "ICV1:fp-343073:241:342833:186499:unk:unk:r:e695174e697e",
-   "family": "prime",
-   "params": {
-    "p": "343073",
-    "a": "43182",
-    "b": "57354"
-   },
-   "model_json": "{\"a\":\"43182\",\"b\":\"57354\",\"field\":\"fp-343073\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"343073\",\"v\":\"1\"}",
-   "trace": 241,
-   "order": "342833",
-   "j": "186499",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19-ic16.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19.json"
-   ],
+   "trace": "-47625218402626040157351434367347524950",
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
@@ -107520,32 +108140,7 @@
     "research/iso1_weak_classes_20261007/large_population_20261009/population_run1/curve_records.json"
    ],
    "standard_names": [],
-   "trace": "-64034012845409394729220743976057956986"
-  },
-  {
-   "slug": "icv1-fp19-t241-fba4a099",
-   "icv1": "ICV1:fp-343073:241:342833:144483:unk:unk:r:fba4a0999a42",
-   "family": "prime",
-   "params": {
-    "p": "343073",
-    "a": "36086",
-    "b": "72172"
-   },
-   "model_json": "{\"a\":\"36086\",\"b\":\"72172\",\"field\":\"fp-343073\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"343073\",\"v\":\"1\"}",
-   "trace": 241,
-   "order": "342833",
-   "j": "144483",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell263_q19_ic16/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19-ic16.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell263-q19.json"
-   ],
+   "trace": "-64034012845409394729220743976057956986",
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
@@ -107745,32 +108340,7 @@
     "research/iso1_weak_classes_20261007/large_population_20261009/population_run1/curve_records.json"
    ],
    "standard_names": [],
-   "trace": "-81933216907660852315187676140185091926"
-  },
-  {
-   "slug": "icv1-fp29-t47-14392892",
-   "icv1": "ICV1:fp-320092037:47:320091991:319207301:unk:unk:r:143928926945",
-   "family": "prime",
-   "params": {
-    "p": "320092037",
-    "a": "254576120",
-    "b": "276414759"
-   },
-   "model_json": "{\"a\":\"254576120\",\"b\":\"276414759\",\"field\":\"fp-320092037\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"320092037\",\"v\":\"1\"}",
-   "trace": 47,
-   "order": "320091991",
-   "j": "319207301",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29_ic16/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29_ic16/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell8209-q29-ic16.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell8209-q29.json"
-   ],
+   "trace": "-81933216907660852315187676140185091926",
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
@@ -107970,32 +108540,7 @@
     "research/iso1_weak_classes_20261007/large_population_20261009/population_run1/curve_records.json"
    ],
    "standard_names": [],
-   "trace": "-94337795294083411234614731411795056966"
-  },
-  {
-   "slug": "icv1-fp29-t47-1f934956",
-   "icv1": "ICV1:fp-320092037:47:320091991:109564187:unk:unk:r:1f934956bec0",
-   "family": "prime",
-   "params": {
-    "p": "320092037",
-    "a": "101186781",
-    "b": "57596093"
-   },
-   "model_json": "{\"a\":\"101186781\",\"b\":\"57596093\",\"field\":\"fp-320092037\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"320092037\",\"v\":\"1\"}",
-   "trace": 47,
-   "order": "320091991",
-   "j": "109564187",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29_ic16/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29_ic16/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell8209-q29-ic16.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell8209-q29.json"
-   ],
+   "trace": "-94337795294083411234614731411795056966",
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
@@ -108045,32 +108590,7 @@
     "research/iso1_weak_classes_20261007/large_population_20261009/population_run1/curve_records.json"
    ],
    "standard_names": [],
-   "trace": "-94425043260925418064943765136461443902"
-  },
-  {
-   "slug": "icv1-fp29-t47-4a644ab5",
-   "icv1": "ICV1:fp-320092037:47:320091991:65269815:unk:unk:r:4a644ab57764",
-   "family": "prime",
-   "params": {
-    "p": "320092037",
-    "a": "234001141",
-    "b": "79995391"
-   },
-   "model_json": "{\"a\":\"234001141\",\"b\":\"79995391\",\"field\":\"fp-320092037\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"320092037\",\"v\":\"1\"}",
-   "trace": 47,
-   "order": "320091991",
-   "j": "65269815",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29_ic16/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29_ic16/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell8209-q29-ic16.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell8209-q29.json"
-   ],
+   "trace": "-94425043260925418064943765136461443902",
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
@@ -108120,32 +108640,7 @@
     "research/iso1_weak_classes_20261007/large_population_20261009/population_run1/curve_records.json"
    ],
    "standard_names": [],
-   "trace": "-96457303662662337409351348340650293994"
-  },
-  {
-   "slug": "icv1-fp29-t47-522e6830",
-   "icv1": "ICV1:fp-320092037:47:320091991:147640356:unk:unk:r:522e68308a4c",
-   "family": "prime",
-   "params": {
-    "p": "320092037",
-    "a": "64570613",
-    "b": "54195252"
-   },
-   "model_json": "{\"a\":\"64570613\",\"b\":\"54195252\",\"field\":\"fp-320092037\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"320092037\",\"v\":\"1\"}",
-   "trace": 47,
-   "order": "320091991",
-   "j": "147640356",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29_ic16/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell8209_q29_ic16/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell8209-q29-ic16.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell8209-q29.json"
-   ],
+   "trace": "-96457303662662337409351348340650293994",
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
@@ -108195,29 +108690,7 @@
     "research/iso1_weak_classes_20261007/larger_fields_20261009/curve_records.json"
    ],
    "standard_names": [],
-   "trace": "80369948951667839190628429049567884210"
-  },
-  {
-   "slug": "icv1-fp37-t277-090dc414",
-   "icv1": "ICV1:fp-81640512137:277:81640511861:15573395165:unk:unk:r:090dc4148486",
-   "family": "prime",
-   "params": {
-    "p": "81640512137",
-    "a": "6064550680",
-    "b": "68678790390"
-   },
-   "model_json": "{\"a\":\"6064550680\",\"b\":\"68678790390\",\"field\":\"fp-81640512137\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"81640512137\",\"v\":\"1\"}",
-   "trace": 277,
-   "order": "81640511861",
-   "j": "15573395165",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell131101_q37/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell131101_q37/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell131101-q37.json"
-   ],
+   "trace": "80369948951667839190628429049567884210",
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
@@ -108267,29 +108740,7 @@
     "research/iso1_weak_classes_20261007/larger_fields_20261009/curve_records.json"
    ],
    "standard_names": [],
-   "trace": "80369948951667839190628429049567884210"
-  },
-  {
-   "slug": "icv1-fp37-t277-91fd6e29",
-   "icv1": "ICV1:fp-81640512137:277:81640511861:81639627401:unk:unk:r:91fd6e293bdf",
-   "family": "prime",
-   "params": {
-    "p": "81640512137",
-    "a": "6206588639",
-    "b": "31351229805"
-   },
-   "model_json": "{\"a\":\"6206588639\",\"b\":\"31351229805\",\"field\":\"fp-81640512137\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"81640512137\",\"v\":\"1\"}",
-   "trace": 277,
-   "order": "81640511861",
-   "j": "81639627401",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell131101_q37/plan.json",
-    "research/conductor_gap_cm_pairs_20261010/sessions/ell131101_q37/spec.json",
-    "research/conductor_gap_cm_pairs_20261010/specs/gap-ell131101-q37.json"
-   ],
+   "trace": "80369948951667839190628429049567884210",
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   }

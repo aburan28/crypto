@@ -1,0 +1,37 @@
+   Compiling p192-p224-kernel-first-replay v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008/research/p192_p224_large_degree_isogenies_20261009)
+warning: function `sha224` is never used
+   --> ../../src/hash/sha256.rs:147:8
+    |
+147 | pub fn sha224(data: &[u8]) -> [u8; 28] {
+    |        ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: struct `Sha256` is never constructed
+   --> ../../src/hash/sha256.rs:172:12
+    |
+172 | pub struct Sha256 {
+    |            ^^^^^^
+
+warning: associated items `new`, `update`, and `finalize` are never used
+   --> ../../src/hash/sha256.rs:186:12
+    |
+185 | impl Sha256 {
+    | ----------- associated items in this implementation
+186 |     pub fn new() -> Self {
+    |            ^^^
+...
+195 |     pub fn update(&mut self, mut data: &[u8]) {
+    |            ^^^^^^
+...
+214 |     pub fn finalize(mut self) -> [u8; 32] {
+    |            ^^^^^^^^
+
+warning: function `compress_blocks` is never used
+   --> ../../src/hash/sha256.rs:230:4
+    |
+230 | fn compress_blocks(state: &mut [u32; 8], blocks: &[u8]) {
+    |    ^^^^^^^^^^^^^^^
+
+warning: `p192-p224-kernel-first-replay` (bin "replay-control") generated 4 warnings
+    Finished `release` profile [optimized] target(s) in 3.87s

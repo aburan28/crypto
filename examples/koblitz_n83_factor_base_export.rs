@@ -18,13 +18,14 @@ use std::path::Path;
 use std::process::Command;
 use std::time::{Duration, Instant};
 
-// The cold-replay source is shared with its own frozen research driver;
-// this program uses only part of it, so keep its lints out of this gate.
-#[allow(dead_code, unused_imports, clippy::all)]
+// Archived research snapshots, compiled here unchanged. research/ is not
+// linted (rust-lint.yml), so their lints are allowed at the include.
 #[path = "../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs"]
+#[allow(dead_code, unused_imports, clippy::all)]
 mod compact_cold;
 #[allow(clippy::all)]
 #[path = "../research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs"]
+#[allow(dead_code, unused_imports, clippy::all)]
 mod primary_adapter;
 
 const STUDY: &str = "koblitz_n83_factor_base_sweep_20261008";

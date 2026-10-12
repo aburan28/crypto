@@ -1,0 +1,59 @@
+name: Weak curve evidence database
+on:
+  pull_request:
+    paths:
+      - 'research/weak_curve_database_20261012/**'
+      - 'docs/curves/weak-families/catalog.json'
+      - 'docs/curves/weak-families/models.json'
+      - 'docs/curves/weak-families/properties.json'
+      - 'research/weak_curve_conjectures_20261012/conjectures.json'
+      - 'research/iso1_weak_classes_20261007/two_branch_20261009/p*_classes.csv'
+      - 'research/iso1_weak_classes_20261007/p41_twist_derived.csv'
+      - 'research/iso1_weak_classes_20261007/p43_twist_derived.csv'
+      - 'research/iso1_weak_classes_20261007/p47_orbit.csv'
+      - 'examples/weak_curve_cubic_identity.rs'
+      - '.github/workflows/weak-curve-database.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: research/weak_curve_database_20261012
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Check source-locked database and graph
+        run: |
+          cargo test --release --locked
+          cargo run --release --locked -- check
+          test -s REPORT.pdf
+          test -s class_counts.png
+      - name: Replay algebraic identity certificate
+        working-directory: .
+        run: cargo run --release --example weak_curve_cubic_identity -- check research/weak_curve_database_20261012/cubic_identity.certificate.json
+  lean-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: research/weak_curve_database_20261012/lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build cubic norm-one theorems and replay in a fresh kernel
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/weak_curve_database_20261012/lean
+          auto-config: false
+          use-mathlib-cache: true
+          build: true
+          build-args: 'WeakCurveDatabase'
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: '--fresh --verbose WeakCurveDatabase'
+      - name: Audit transitive axioms
+        run: lake env lean AxiomAudit.lean

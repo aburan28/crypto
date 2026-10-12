@@ -1,0 +1,128 @@
+{
+  "covered_over_r": [
+    {
+      "bits": 16,
+      "covered_over_r_median": 1.3717642186117438,
+      "max": 2.7435284372234876,
+      "min": 0.8001957941901839,
+      "runs_with_collision": 7
+    },
+    {
+      "bits": 18,
+      "covered_over_r_median": 1.3218036406087452,
+      "max": 3.125514858522762,
+      "min": 0.16522545507609315,
+      "runs_with_collision": 8
+    },
+    {
+      "bits": 20,
+      "covered_over_r_median": 0.9167767550277637,
+      "max": 2.9741104178853432,
+      "min": 0.028874858426071296,
+      "runs_with_collision": 8
+    },
+    {
+      "bits": 22,
+      "covered_over_r_median": 0.9866816322626282,
+      "max": 2.551260792615513,
+      "min": 0.017919303196597108,
+      "runs_with_collision": 8
+    },
+    {
+      "bits": 24,
+      "covered_over_r_median": 0.37449557102364234,
+      "max": 1.0669549929800244,
+      "min": 0.09660209640054626,
+      "runs_with_collision": 8
+    },
+    {
+      "bits": 26,
+      "covered_over_r_median": 2.127594722989984,
+      "max": 4.735130249554748,
+      "min": 0.04285185746203392,
+      "runs_with_collision": 8
+    }
+  ],
+  "fits_log2_vs_log2r": {
+    "rho.negation [field ops]": {
+      "intercept": 4.917572463278203,
+      "n": 192,
+      "slope": 0.37719170726320234,
+      "slope_ci95_bootstrap": [
+        0.3499657906670561,
+        0.404039213895791
+      ],
+      "slope_ci95_t": [
+        0.35036553065433906,
+        0.4040178838720656
+      ]
+    },
+    "rho.negation [group ops]": {
+      "intercept": 2.282717497353211,
+      "n": 192,
+      "slope": 0.40049767558881016,
+      "slope_ci95_bootstrap": [
+        0.3707035090051557,
+        0.4297800447499971
+      ],
+      "slope_ci95_t": [
+        0.371231371667169,
+        0.4297639795104513
+      ]
+    },
+    "zero_minor, d = 3 runs only [field ops, all phases]": {
+      "intercept": 9.19121563558531,
+      "n": 40,
+      "slope": 0.6311133866751397,
+      "slope_ci95_bootstrap": [
+        0.5421120880088581,
+        0.7171597362235868
+      ],
+      "slope_ci95_t": [
+        0.5277942787165818,
+        0.7344324946336976
+      ]
+    },
+    "zero_minor, d by Eq.(4) rule [d-subsets covered]": {
+      "intercept": 1.0067095767785936,
+      "n": 47,
+      "slope": 0.929338483412691,
+      "slope_ci95_bootstrap": [
+        0.7930531586345292,
+        1.0478910929911993
+      ],
+      "slope_ci95_t": [
+        0.7632469452350755,
+        1.0954300215903063
+      ]
+    },
+    "zero_minor, d by Eq.(4) rule [field ops, all phases]": {
+      "intercept": 6.436513603822643,
+      "n": 48,
+      "slope": 0.7830446476280719,
+      "slope_ci95_bootstrap": [
+        0.6689749013540662,
+        0.8789818448785073
+      ],
+      "slope_ci95_t": [
+        0.6694203645329604,
+        0.8966689307231834
+      ]
+    },
+    "zero_minor, d by Eq.(4) rule [field ops, search phases only]": {
+      "intercept": 3.243765321594463,
+      "n": 47,
+      "slope": 0.9048872689679589,
+      "slope_ci95_bootstrap": [
+        0.7694935150928458,
+        1.0205203480507377
+      ],
+      "slope_ci95_t": [
+        0.7456553950273697,
+        1.0641191429085481
+      ]
+    }
+  },
+  "input": "scaling.json",
+  "schema": "lit2026-w12-zero-minor-refit/v1"
+}

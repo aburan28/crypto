@@ -1,0 +1,25 @@
+saved research/ecbench_conductor_gap_20261012/sessions/ell8209-q29/comparisons/rho-neg__ic-mitm.json
+ops (ok): ic-mitm / rho-neg = 20.7349 [14.690, 31.106] (cluster) over 16 pairs on 16 workloads, 2 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 43.0009, not a result: 16 of 16 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-mitm / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp29-t47-14392892 | 28.25 | 8 | 21.8173 | [13.0027, 43.1439] | cluster |
+| icv1-fp29-t47-1f934956 | 28.25 | 8 | 19.7311 | [12.8615, 31.3814] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-mitm mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W02ae1bd475b0 | icv1-fp29-t47-1f934956 | 28.25 | 0.8112 | 21.1834 | 26.1123 |
+| W2e48fd31d527 | icv1-fp29-t47-1f934956 | 28.25 | 0.3586 | 26.5852 | 74.1447 |
+| W549daa7f1e9c | icv1-fp29-t47-14392892 | 28.25 | 0.3062 | 26.1839 | 85.5008 |
+| W62c80ae3988d | icv1-fp29-t47-14392892 | 28.25 | 0.4592 | 21.6135 | 47.0655 |
+| W65cba157e813 | icv1-fp29-t47-14392892 | 28.25 | 1.6692 | 11.4504 | 6.8598 |
+| W673ae02b7582 | icv1-fp29-t47-14392892 | 28.25 | 0.2944 | 14.1908 | 48.1946 |
+| W8bc9e1bf846b | icv1-fp29-t47-1f934956 | 28.25 | 1.4536 | 27.0554 | 18.6131 |
+| W90b7bea975f1 | icv1-fp29-t47-14392892 | 28.25 | 0.3660 | 30.3638 | 82.9630 |
+| W994787c95133 | icv1-fp29-t47-14392892 | 28.25 | 1.8929 | 20.0835 | 10.6099 |
+| Wa95e5dcf91c6 | icv1-fp29-t47-1f934956 | 28.25 | 0.8736 | 20.8174 | 23.8289 |
+| Wae604389a862 | icv1-fp29-t47-1f934956 | 28.25 | 0.6038 | 21.4152 | 35.4662 |
+| Wb710a9e566f6 | icv1-fp29-t47-1f934956 | 28.25 | 1.7019 | 7.9244 | 4.6562 |
+| We7e2f26656cd | icv1-fp29-t47-14392892 | 28.25 | 1.0805 | 22.9407 | 21.2319 |
+| Wecae5a064035 | icv1-fp29-t47-14392892 | 28.25 | 1.4024 | 16.1674 | 11.5286 |
+| Wf33c820d0eea | icv1-fp29-t47-1f934956 | 28.25 | 0.4554 | 8.3592 | 18.3549 |
+| Wfa8cf16b48cc | icv1-fp29-t47-1f934956 | 28.25 | 1.7981 | 25.6184 | 14.2475 |

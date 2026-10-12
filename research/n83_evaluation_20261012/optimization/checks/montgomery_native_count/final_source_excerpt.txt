@@ -1,0 +1,47 @@
+   474	        Model::Extension { p, k, modulus, .. } => {
+   475	            if field["degree"].as_u64()? != u64::from(*k)
+   476	                || value_uint(&field["characteristic"])? != *p
+   477	                || !field["representation"].as_str()?.starts_with("polynomial")
+   478	            {
+   479	                return None;
+   480	            }
+   481	            let field_modulus = field["modulus"].as_array()?;
+   482	            if field_modulus.len() != *k as usize + 1
+   483	                || value_uint(field_modulus.last()?)? != BigUint::one()
+   484	                || !field_modulus[..*k as usize]
+   485	                    .iter()
+   486	                    .zip(modulus)
+   487	                    .all(|(value, coefficient)| value_uint(value).as_ref() == Some(coefficient))
+   488	            {
+   489	                return None;
+   490	            }
+   491	        }
+  1287	mod tests {
+  1288	    #[test]
+  1289	    fn coordinate_models_keep_exact_fields_and_available_order_certificates() {
+  1290	        use super::*;
+  1291	        let (montgomery, _) = parse_model(
+  1292	            r#"{"field":"fp-101","form":"B*y^2=x^3+A*x^2+x","p":"101","A":"3","B":"1"}"#,
+  1293	        )
+  1294	        .unwrap();
+  1295	        assert_eq!(montgomery.q(), BigUint::from(101u64));
+  1296	        // The prime-field Montgomery adapter now supports exact counting;
+  1297	        // field size and curve order are distinct quantities.
+  1298	        assert_eq!(
+  1299	            certify::check_order(&montgomery, &BigUint::from(96u64), &[]).unwrap(),
+  1300	            (Status::Proved, "exhaustive point count")
+  1301	        );
+  1302	        assert!(certify::check_order(&montgomery, &BigUint::from(101u64), &[]).is_err());
+  1303	
+  1304	        let (extension, _) = parse_model(
+  1305	            r#"{"field":"fpk-37-2-example","form":"y^2=x^3+a*x+b","p":"37","k":"2","modulus":["2","0"],"a":["1","0"],"b":["1","0"]}"#,
+  1306	        )
+  1307	        .unwrap();
+  1308	        assert_eq!(extension.q(), BigUint::from(1369u64));
+  1309	        assert_eq!(
+  1310	            certify::check_order(&extension, &BigUint::from(1369u64), &[])
+  1311	                .unwrap()
+  1312	                .0,
+  1313	            Status::NotEvaluated
+  1314	        );
+  1315	    }

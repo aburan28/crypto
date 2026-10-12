@@ -1,0 +1,97 @@
+{
+  "agent_priorities": [
+    {
+      "beat": "Retain the n=61/n=71/n=73/n=83 claim-check failures with their missing fields explicit. Obtain a new verified one-target online IC/rho pair on the same point with complete phases and a qualifying CPU-isolation receipt. Higher-n rho projections remain secondary estimates.",
+      "rank": 1,
+      "regime": "koblitz",
+      "stage": "vs_rho"
+    },
+    {
+      "beat": "Advance the representative-plus-Frobenius factor-base construction under its memory gate; report setup separately from one-target online cost.",
+      "rank": 2,
+      "regime": "koblitz",
+      "stage": "factor_base"
+    },
+    {
+      "beat": "Measure the selected n=31 dim-16 m=2 decomposition policy on a frozen single target first; multi-target distribution work is secondary and cannot stand in for one-target online cost.",
+      "rank": 3,
+      "regime": "koblitz",
+      "stage": "decomposition"
+    },
+    {
+      "beat": "sub-2^(2l) oracle at l=8 with FFD logged on a single frozen target.",
+      "rank": 4,
+      "regime": "binary",
+      "stage": "decomposition"
+    },
+    {
+      "beat": "Extend the j=0 known-answer IC ladder to >=20 bits with split stage timers; pair each one-target result on the identical public point with rho.",
+      "rank": 5,
+      "regime": "prime",
+      "stage": "end_to_end_dlp"
+    },
+    {
+      "beat": "Publish single-target query yield and rank distributions first; label any multi-target summaries as secondary.",
+      "rank": 6,
+      "regime": "binary_and_prime",
+      "stage": "relation_yield"
+    }
+  ],
+  "checks": [
+    {
+      "detail": "schema_version=2",
+      "name": "ledger_schema_v2",
+      "ok": true
+    },
+    {
+      "detail": "/opt/homebrew/bin/cargo",
+      "name": "cargo",
+      "ok": true
+    },
+    {
+      "detail": "/opt/homebrew/bin/rustc",
+      "name": "rustc",
+      "ok": true
+    },
+    {
+      "detail": "/opt/homebrew/bin/cryptominisat5",
+      "name": "cryptominisat5_optional",
+      "ok": true
+    },
+    {
+      "detail": "/Volumes/SSD990/ic-auto3/examples/koblitz_rank_fixture.rs",
+      "name": "producer_source_direct",
+      "ok": true
+    },
+    {
+      "detail": "/Volumes/SSD990/ic-auto3/examples/koblitz_rho_fixture.rs",
+      "name": "producer_source_rho",
+      "ok": true
+    },
+    {
+      "detail": "c62555b7a1746490dba707589d791669a20bb0d0",
+      "name": "git_head",
+      "ok": true
+    },
+    {
+      "detail": "0 dirty paths",
+      "name": "git_status_recorded",
+      "ok": true
+    }
+  ],
+  "claim_boundary": "preflight only; not a fixed-arm cost, relation, rank, memory, rho, or crossover result",
+  "created_at": "2026-10-12T16:16:05.819804+00:00",
+  "host": {
+    "cpu_count": 14,
+    "machine": "arm64",
+    "node": "Mac.attlocal.net",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.9.10"
+  },
+  "kind": "local_autolab_preflight",
+  "ledger_sha256": "3577441f36cff5901288b5201c56c792cc53d7029681dcaac3fc55a7fb9e06fa",
+  "ok": true,
+  "protocol_sha256": "ff593f71fe6e403ef2fbec0177e264c1a8787065359a0ac5f0047abb0f81cee4",
+  "schema_version": "1.0",
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910"
+}

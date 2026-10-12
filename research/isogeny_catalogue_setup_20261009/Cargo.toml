@@ -1,0 +1,12 @@
+[package]
+name = "isogeny-setup-report"
+version = "0.1.0"
+edition = "2021"
+[workspace]
+[[bin]]
+name = "setup-report"
+path = "report.rs"
+test = false
+[dependencies]
+serde_json = { version = "1.0", features = ["arbitrary_precision"] }
+sha2 = { version = "=0.11.0", default-features = false }

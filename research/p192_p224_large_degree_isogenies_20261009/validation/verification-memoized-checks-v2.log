@@ -1,0 +1,486 @@
+   Compiling p192-p224-kernel-first-replay v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008/research/p192_p224_large_degree_isogenies_20261009)
+warning: methods `modulus`, `from_i64`, `from_u128`, `div`, and `hex` are never used
+   --> ../../src/cryptanalysis/isogeny_walk/field.rs:125:12
+    |
+ 85 | impl Field {
+    | ---------- methods in this implementation
+...
+125 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+212 |     pub fn from_i64(&self, v: i64) -> Fe {
+    |            ^^^^^^^^
+...
+221 |     pub fn from_u128(&self, v: u128) -> Fe {
+    |            ^^^^^^^^^
+...
+253 |     pub fn div(&self, a: &Fe, b: &Fe) -> Option<Fe> {
+    |            ^^^
+...
+300 |     pub fn hex(&self, a: &Fe) -> String {
+    |            ^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `constant` is never used
+  --> verification_poly.rs:27:8
+   |
+27 | pub fn constant(f: &Field, c: Fe) -> Poly {
+   |        ^^^^^^^^
+
+warning: function `x` is never used
+  --> verification_poly.rs:32:8
+   |
+32 | pub fn x(f: &Field) -> Poly {
+   |        ^
+
+warning: function `add` is never used
+  --> verification_poly.rs:36:8
+   |
+36 | pub fn add(f: &Field, a: &Poly, b: &Poly) -> Poly {
+   |        ^^^
+
+warning: function `scale` is never used
+  --> verification_poly.rs:54:8
+   |
+54 | pub fn scale(f: &Field, a: &Poly, c: &Fe) -> Poly {
+   |        ^^^^^
+
+warning: function `mulmod` is never used
+   --> verification_poly.rs:184:8
+    |
+184 | pub fn mulmod(f: &Field, a: &Poly, b: &Poly, m: &Poly) -> Poly {
+    |        ^^^^^^
+
+warning: function `monic` is never used
+   --> verification_poly.rs:188:8
+    |
+188 | pub fn monic(f: &Field, a: &Poly) -> Poly {
+    |        ^^^^^
+
+warning: function `gcd` is never used
+   --> verification_poly.rs:196:8
+    |
+196 | pub fn gcd(f: &Field, a: &Poly, b: &Poly) -> Poly {
+    |        ^^^
+
+warning: function `invmod` is never used
+   --> verification_poly.rs:207:8
+    |
+207 | pub fn invmod(f: &Field, a: &Poly, m: &Poly) -> Option<Poly> {
+    |        ^^^^^^
+
+warning: function `powmod` is never used
+   --> verification_poly.rs:223:8
+    |
+223 | pub fn powmod(f: &Field, base: &Poly, e: &BigUint, m: &Poly) -> Poly {
+    |        ^^^^^^
+
+warning: function `derivative` is never used
+   --> verification_poly.rs:235:8
+    |
+235 | pub fn derivative(f: &Field, a: &Poly) -> Poly {
+    |        ^^^^^^^^^^
+
+warning: function `eval` is never used
+   --> verification_poly.rs:246:8
+    |
+246 | pub fn eval(f: &Field, a: &Poly, x: &Fe) -> Fe {
+    |        ^^^^
+
+warning: function `eval_mod` is never used
+   --> verification_poly.rs:253:8
+    |
+253 | pub fn eval_mod(f: &Field, a: &Poly, x: &Poly, m: &Poly) -> Poly {
+    |        ^^^^^^^^
+
+warning: function `roots` is never used
+   --> verification_poly.rs:262:8
+    |
+262 | pub fn roots(f: &Field, a: &Poly, seed: u64) -> Vec<Fe> {
+    |        ^^^^^
+
+warning: function `split_linear` is never used
+   --> verification_poly.rs:277:4
+    |
+277 | fn split_linear(f: &Field, g: Poly, rng: &mut SmallRng, out: &mut Vec<Fe>) {
+    |    ^^^^^^^^^^^^
+
+warning: function `power_sums` is never used
+   --> verification_poly.rs:302:8
+    |
+302 | pub fn power_sums(f: &Field, h: &Poly, n: usize) -> Vec<Fe> {
+    |        ^^^^^^^^^^
+
+warning: function `from_power_sums` is never used
+   --> verification_poly.rs:346:8
+    |
+346 | pub fn from_power_sums(f: &Field, s: &[Fe], d: usize) -> Poly {
+    |        ^^^^^^^^^^^^^^^
+
+warning: function `constant` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/poly.rs:27:8
+   |
+27 | pub fn constant(f: &Field, c: Fe) -> Poly {
+   |        ^^^^^^^^
+
+warning: function `x` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/poly.rs:32:8
+   |
+32 | pub fn x(f: &Field) -> Poly {
+   |        ^
+
+warning: function `add` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/poly.rs:36:8
+   |
+36 | pub fn add(f: &Field, a: &Poly, b: &Poly) -> Poly {
+   |        ^^^
+
+warning: function `sub` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/poly.rs:45:8
+   |
+45 | pub fn sub(f: &Field, a: &Poly, b: &Poly) -> Poly {
+   |        ^^^
+
+warning: function `scale` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/poly.rs:54:8
+   |
+54 | pub fn scale(f: &Field, a: &Poly, c: &Fe) -> Poly {
+   |        ^^^^^
+
+warning: function `mulmod` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:101:8
+    |
+101 | pub fn mulmod(f: &Field, a: &Poly, b: &Poly, m: &Poly) -> Poly {
+    |        ^^^^^^
+
+warning: function `monic` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:105:8
+    |
+105 | pub fn monic(f: &Field, a: &Poly) -> Poly {
+    |        ^^^^^
+
+warning: function `gcd` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:113:8
+    |
+113 | pub fn gcd(f: &Field, a: &Poly, b: &Poly) -> Poly {
+    |        ^^^
+
+warning: function `invmod` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:124:8
+    |
+124 | pub fn invmod(f: &Field, a: &Poly, m: &Poly) -> Option<Poly> {
+    |        ^^^^^^
+
+warning: function `powmod` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:140:8
+    |
+140 | pub fn powmod(f: &Field, base: &Poly, e: &BigUint, m: &Poly) -> Poly {
+    |        ^^^^^^
+
+warning: function `derivative` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:152:8
+    |
+152 | pub fn derivative(f: &Field, a: &Poly) -> Poly {
+    |        ^^^^^^^^^^
+
+warning: function `eval` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:163:8
+    |
+163 | pub fn eval(f: &Field, a: &Poly, x: &Fe) -> Fe {
+    |        ^^^^
+
+warning: function `eval_mod` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:170:8
+    |
+170 | pub fn eval_mod(f: &Field, a: &Poly, x: &Poly, m: &Poly) -> Poly {
+    |        ^^^^^^^^
+
+warning: function `roots` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:179:8
+    |
+179 | pub fn roots(f: &Field, a: &Poly, seed: u64) -> Vec<Fe> {
+    |        ^^^^^
+
+warning: function `split_linear` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:194:4
+    |
+194 | fn split_linear(f: &Field, g: Poly, rng: &mut SmallRng, out: &mut Vec<Fe>) {
+    |    ^^^^^^^^^^^^
+
+warning: function `power_sums` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:219:8
+    |
+219 | pub fn power_sums(f: &Field, h: &Poly, n: usize) -> Vec<Fe> {
+    |        ^^^^^^^^^^
+
+warning: function `from_power_sums` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:263:8
+    |
+263 | pub fn from_power_sums(f: &Field, s: &[Fe], d: usize) -> Poly {
+    |        ^^^^^^^^^^^^^^^
+
+warning: `p192-p224-kernel-first-replay` (bin "verification-poly-checks" test) generated 34 warnings
+warning: constant `CANONICAL_RULE` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/curve.rs:18:11
+   |
+18 | pub const CANONICAL_RULE: &str =
+   |           ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: methods `rhs`, `discriminant`, `j`, and `on_curve` are never used
+  --> ../../src/cryptanalysis/isogeny_walk/curve.rs:25:12
+   |
+24 | impl Model {
+   | ---------- methods in this implementation
+25 |     pub fn rhs(&self, f: &Field, x: &Fe) -> Fe {
+   |            ^^^
+...
+31 |     pub fn discriminant(&self, f: &Field) -> Fe {
+   |            ^^^^^^^^^^^^
+...
+40 |     pub fn j(&self, f: &Field) -> Option<Fe> {
+   |            ^
+...
+46 |     pub fn on_curve(&self, f: &Field, x: &Fe, y: &Fe) -> bool {
+   |            ^^^^^^^^
+
+warning: function `isomorphism` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/curve.rs:54:8
+   |
+54 | pub fn isomorphism(f: &Field, m: &Model, m2: &Model) -> Option<Fe> {
+   |        ^^^^^^^^^^^
+
+warning: function `a_minus_3_models` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/curve.rs:64:8
+   |
+64 | pub fn a_minus_3_models(f: &Field, m: &Model) -> Vec<(Fe, Fe)> {
+   |        ^^^^^^^^^^^^^^^^
+
+warning: function `canonical_model` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/curve.rs:86:8
+   |
+86 | pub fn canonical_model(f: &Field, m: &Model) -> Option<(Model, Fe)> {
+   |        ^^^^^^^^^^^^^^^
+
+warning: struct `Jac` is never constructed
+   --> ../../src/cryptanalysis/isogeny_walk/curve.rs:117:8
+    |
+117 | struct Jac {
+    |        ^^^
+
+warning: function `jac_double` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/curve.rs:123:4
+    |
+123 | fn jac_double(f: &Field, m: &Model, p: &Jac) -> Jac {
+    |    ^^^^^^^^^^
+
+warning: function `jac_add_affine` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/curve.rs:147:4
+    |
+147 | fn jac_add_affine(f: &Field, m: &Model, p: &Jac, qx: &Fe, qy: &Fe) -> Jac {
+    |    ^^^^^^^^^^^^^^
+
+warning: function `scalar_mul` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/curve.rs:185:8
+    |
+185 | pub fn scalar_mul(f: &Field, m: &Model, x: &Fe, y: &Fe, k: &BigUint) -> Option<(Fe, Fe)> {
+    |        ^^^^^^^^^^
+
+warning: function `least_point` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/curve.rs:207:8
+    |
+207 | pub fn least_point(f: &Field, m: &Model, start: u64) -> (Fe, Fe) {
+    |        ^^^^^^^^^^^
+
+warning: constant `GENERATOR_RULE` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/curve.rs:224:11
+    |
+224 | pub const GENERATOR_RULE: &str =
+    |           ^^^^^^^^^^^^^^
+
+warning: function `deterministic_generator` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/curve.rs:229:8
+    |
+229 | pub fn deterministic_generator(f: &Field, m: &Model, cofactor: &BigUint) -> (Fe, Fe) {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: enum `OrderAudit` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/curve.rs:242:10
+    |
+242 | pub enum OrderAudit {
+    |          ^^^^^^^^^^
+
+warning: function `audit_order` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/curve.rs:254:8
+    |
+254 | pub fn audit_order(
+    |        ^^^^^^^^^^^
+
+warning: function `qr_prefix_64` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/curve.rs:282:8
+    |
+282 | pub fn qr_prefix_64(f: &Field, m: &Model) -> u32 {
+    |        ^^^^^^^^^^^^
+
+warning: methods `modulus`, `div`, and `hex` are never used
+   --> ../../src/cryptanalysis/isogeny_walk/field.rs:125:12
+    |
+ 85 | impl Field {
+    | ---------- methods in this implementation
+...
+125 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+253 |     pub fn div(&self, a: &Fe, b: &Fe) -> Option<Fe> {
+    |            ^^^
+...
+300 |     pub fn hex(&self, a: &Fe) -> String {
+    |            ^^^
+
+warning: struct `Isogeny` is never constructed
+  --> verification_kernel.rs:42:12
+   |
+42 | pub struct Isogeny {
+   |            ^^^^^^^
+
+warning: variants `SpecialJ`, `MultipleRoot`, `CodomainMismatch`, and `NotIsomorphic` are never constructed
+  --> verification_kernel.rs:53:5
+   |
+52 | pub enum EdgeError {
+   |          --------- variants in this enum
+53 |     SpecialJ,
+   |     ^^^^^^^^
+54 |     MultipleRoot,
+   |     ^^^^^^^^^^^^
+...
+59 |     CodomainMismatch,
+   |     ^^^^^^^^^^^^^^^^
+60 |     NotIsomorphic,
+   |     ^^^^^^^^^^^^^
+   |
+   = note: `EdgeError` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `wp_coefficients` is never used
+   --> verification_kernel.rs:300:4
+    |
+300 | fn wp_coefficients(f: &Field, m: &Model, n: usize) -> Vec<Fe> {
+    |    ^^^^^^^^^^^^^^^
+
+warning: function `elkies_isogeny` is never used
+   --> verification_kernel.rs:322:8
+    |
+322 | pub fn elkies_isogeny(f: &Field, e: &Model, phi: &ModPoly, j2: &Fe) -> Result<Isogeny, EdgeError> {
+    |        ^^^^^^^^^^^^^^
+
+warning: function `kernel_from_sums` is never used
+   --> verification_kernel.rs:387:4
+    |
+387 | fn kernel_from_sums(f: &Field, e: &Model, e2: &Model, s1: Fe, d: usize) -> Result<Poly, EdgeError> {
+    |    ^^^^^^^^^^^^^^^^
+
+warning: function `link_to_target` is never used
+   --> verification_kernel.rs:433:8
+    |
+433 | pub fn link_to_target(f: &Field, codomain: &Model, target: &Model) -> Result<Fe, EdgeError> {
+    |        ^^^^^^^^^^^^^^
+
+warning: fields `ell` and `checks_passed` are never read
+  --> ../../src/cryptanalysis/isogeny_walk/modpoly.rs:28:9
+   |
+27 | pub struct ModPoly {
+   |            ------- fields in this struct
+28 |     pub ell: u64,
+   |         ^^^
+...
+32 |     pub checks_passed: usize,
+   |         ^^^^^^^^^^^^^
+   |
+   = note: `ModPoly` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: methods `at_x` and `partial` are never used
+   --> ../../src/cryptanalysis/isogeny_walk/modpoly.rs:206:12
+    |
+204 | impl ModPoly {
+    | ------------ methods in this implementation
+205 |     /// `Φ_ℓ(x, Y)` as a polynomial in `Y`.
+206 |     pub fn at_x(&self, f: &Field, x: &Fe) -> Poly {
+    |            ^^^^
+...
+223 |     pub fn partial(&self, f: &Field, x: &Fe, y: &Fe, dx: u32, dy: u32) -> Fe {
+    |            ^^^^^^^
+
+warning: struct `Isogeny` is never constructed
+  --> ../../src/cryptanalysis/isogeny_walk/kernel.rs:42:12
+   |
+42 | pub struct Isogeny {
+   |            ^^^^^^^
+
+warning: variants `SpecialJ`, `MultipleRoot`, `CodomainMismatch`, and `NotIsomorphic` are never constructed
+  --> ../../src/cryptanalysis/isogeny_walk/kernel.rs:53:5
+   |
+52 | pub enum EdgeError {
+   |          --------- variants in this enum
+53 |     SpecialJ,
+   |     ^^^^^^^^
+54 |     MultipleRoot,
+   |     ^^^^^^^^^^^^
+...
+59 |     CodomainMismatch,
+   |     ^^^^^^^^^^^^^^^^
+60 |     NotIsomorphic,
+   |     ^^^^^^^^^^^^^
+   |
+   = note: `EdgeError` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `wp_coefficients` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/kernel.rs:219:4
+    |
+219 | fn wp_coefficients(f: &Field, m: &Model, n: usize) -> Vec<Fe> {
+    |    ^^^^^^^^^^^^^^^
+
+warning: function `elkies_isogeny` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/kernel.rs:241:8
+    |
+241 | pub fn elkies_isogeny(f: &Field, e: &Model, phi: &ModPoly, j2: &Fe) -> Result<Isogeny, EdgeError> {
+    |        ^^^^^^^^^^^^^^
+
+warning: function `kernel_from_sums` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/kernel.rs:306:4
+    |
+306 | fn kernel_from_sums(f: &Field, e: &Model, e2: &Model, s1: Fe, d: usize) -> Result<Poly, EdgeError> {
+    |    ^^^^^^^^^^^^^^^^
+
+warning: function `link_to_target` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/kernel.rs:352:8
+    |
+352 | pub fn link_to_target(f: &Field, codomain: &Model, target: &Model) -> Result<Fe, EdgeError> {
+    |        ^^^^^^^^^^^^^^
+
+warning: `p192-p224-kernel-first-replay` (bin "verification-kernel-checks" test) generated 48 warnings (18 duplicates)
+    Finished `release` profile [optimized] target(s) in 3.91s
+     Running unittests verification_kernel_checks.rs (/private/tmp/p192-p224-continuation.f9sck4/replay/release/deps/verification_kernel_checks-646c1ee1778eb18f)
+
+running 9 tests
+test modular_polynomial::tests::modular_polynomial_storage_scaling_barrier ... ok
+test modular_polynomial::tests::phi_2_basic_properties ... ok
+test modular_polynomial::tests::phi_3_basic_properties ... ok
+test modpoly::tests::j_series_matches_the_integer_expansion ... ok
+test tests::known_kernel_and_mutation_keep_the_original_verdict ... ok
+test modpoly::tests::phi2_and_phi3_match_the_literature_tables ... ok
+test field::tests::arithmetic_matches_biguint_on_p224_and_small_primes ... ok
+test tests::selected_recurrence_matches_all_original_indices ... ok
+test tests::blocked_composition_matches_original_horner ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.80s
+
+     Running unittests verification_poly_checks.rs (/private/tmp/p192-p224-continuation.f9sck4/replay/release/deps/verification_poly_checks-d664e63002a9f7df)
+
+running 3 tests
+test field::tests::arithmetic_matches_biguint_on_p224_and_small_primes ... ok
+test tests::reciprocal_remainder_matches_original_long_division ... ok
+test tests::agrees_with_unchanged_schoolbook_on_both_source_fields ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+

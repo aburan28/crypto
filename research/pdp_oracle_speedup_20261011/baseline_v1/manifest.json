@@ -1,0 +1,23 @@
+{
+  "date_utc": "2026-10-11T21:07:17Z",
+  "commit": "4b6e09b78f010d72de866b7eed2236782c47f656",
+  "worktree_dirty": true,
+  "cpu_model": " Intel(R) Xeon(R) Processor @ 2.80GHz",
+  "cpu_flags_of_interest": "adx aes avx avx2 avx512_vnni avx512bw avx512cd avx512dq avx512f avx512vl bmi1 bmi2 fma pclmulqdq ",
+  "vcpus": 4,
+  "lscpu_caches": "Hypervisor vendor:                       KVM\nVirtualization type:                     full\nL1d cache:                               128 KiB (4 instances)\nL1i cache:                               128 KiB (4 instances)\nL2 cache:                                4 MiB (4 instances)\nL3 cache:                                33 MiB (1 instance)",
+  "cpufreq_control": false,
+  "cgroup_cpu_max": "none",
+  "memory": "MemTotal:       16479424 kB",
+  "kernel": "Linux 6.18.44-fc-v114 #1 SMP PREEMPT_DYNAMIC @0",
+  "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)\nbinary: rustc\ncommit-hash: 2d8144b7880597b6e6d3dfd63a9a9efae3f533d3\ncommit-date: 2026-07-07\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.0\nLLVM version: 22.1.6",
+  "cargo": "cargo 1.97.0 (c980f4866 2026-06-30)",
+  "valgrind": "valgrind-3.22.0",
+  "cargo_profile_release": "",
+  "gpu": "none",
+  "binaries": {
+    "pdp_speedup_A": "9fa1271547de1f72dea81108a7b3c1e85cc891fa3d9b7af82917338d362d4cf6",
+    "pdp_speedup_B": "9fa1271547de1f72dea81108a7b3c1e85cc891fa3d9b7af82917338d362d4cf6",
+    "pdp_speedup_opcount": "463690ddb60a6ad5300705499a3b3fa5edbfa865563543337390756fd8384c56"
+  }
+}

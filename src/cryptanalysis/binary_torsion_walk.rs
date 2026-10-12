@@ -211,6 +211,32 @@ pub struct Ext {
 
 pub type El = Vec<u64>;
 
+thread_local! {
+    /// `F_{q^m}` multiplications, squarings and inversions issued by
+    /// [`Ext`] on this thread (lit2026 W11 op counts).
+    static EXT_OPS: std::cell::Cell<[u64; 3]> = const { std::cell::Cell::new([0; 3]) };
+}
+
+/// `[mul, sqr, inv]` issued by [`Ext`] on this thread since the last
+/// [`ext_ops_reset`].
+pub fn ext_ops() -> [u64; 3] {
+    EXT_OPS.with(|c| c.get())
+}
+
+/// Zero this thread's [`ext_ops`].
+pub fn ext_ops_reset() {
+    EXT_OPS.with(|c| c.set([0; 3]));
+}
+
+#[inline]
+fn ext_bump(i: usize) {
+    EXT_OPS.with(|c| {
+        let mut v = c.get();
+        v[i] += 1;
+        c.set(v);
+    });
+}
+
 impl Ext {
     /// Find a monic irreducible of degree `m` over `F_q` by Ben-Or's test and
     /// build the field.  Deterministic in `seed`.
@@ -301,6 +327,7 @@ impl Ext {
         v
     }
     pub fn mul(&self, a: &El, b: &El) -> El {
+        ext_bump(0);
         let m = self.m;
         let mut out = vec![0u64; 2 * m - 1];
         for i in 0..m {
@@ -316,6 +343,7 @@ impl Ext {
         self.reduce(out)
     }
     pub fn sqr(&self, a: &El) -> El {
+        ext_bump(1);
         let m = self.m;
         let mut out = vec![0u64; 2 * m - 1];
         for i in 0..m {
@@ -324,6 +352,7 @@ impl Ext {
         self.reduce(out)
     }
     pub fn inv(&self, a: &El) -> Option<El> {
+        ext_bump(2);
         if self.is_zero(a) {
             return None;
         }
@@ -868,6 +897,70 @@ pub fn velu_x_from_abscissae(k: &Ext, abscissae: &[El], x0: u64) -> Option<(u64,
     Some((xx[0], k.is_base(&xx)))
 }
 
+/// How [`KernelOutcome`] evaluates the abscissa map (lit2026 W11): env
+/// `BTW_XEVAL=fraction` selects [`velu_x_pair_fraction`], anything else the
+/// original per-point batch inversion [`velu_x_from_abscissae`].
+pub fn xeval_fraction_selected() -> bool {
+    static SEL: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *SEL.get_or_init(|| std::env::var("BTW_XEVAL").as_deref() == Ok("fraction"))
+}
+
+/// Vélu's abscissa map at two base-field points with **one** inversion
+/// (lit2026 W11, after ePrint 2026/704's one-inversion x-only evaluation):
+/// `Σ_j 1/(x + x_j) = N/D` accumulated as `N ← N·d + D`, `D ← D·d`
+/// (two multiplications per kernel abscissa, against three for the batch
+/// inversion), then `1/(D_P·D_Q)` serves both points.  Same results as two
+/// calls of [`velu_x_from_abscissae`]; `None` for a point that is a kernel
+/// abscissa.
+pub fn velu_x_pair_fraction(k: &Ext, abscissae: &[El], xs: [u64; 2]) -> [Option<(u64, bool)>; 2] {
+    let frac = |x0: u64| -> Option<(El, El, El)> {
+        let x = k.base(x0);
+        let mut it = abscissae.iter();
+        let Some(x1) = it.next() else {
+            return Some((x, k.zero(), k.one()));
+        };
+        let mut den = k.add(&x, x1);
+        if k.is_zero(&den) {
+            return None;
+        }
+        let mut num = k.one();
+        for xj in it {
+            let d = k.add(&x, xj);
+            if k.is_zero(&d) {
+                return None;
+            }
+            num = k.add(&k.mul(&num, &d), &den);
+            den = k.mul(&den, &d);
+        }
+        Some((x, num, den))
+    };
+    let finish = |x: &El, num: &El, inv_den: &El| -> (u64, bool) {
+        let mut a = k.mul(&k.mul(x, num), inv_den);
+        if abscissae.len() % 2 == 1 {
+            a = k.add(&a, &k.one());
+        }
+        let xx = k.add(&k.add(x, &a), &k.sqr(&a));
+        (xx[0], k.is_base(&xx))
+    };
+    match (frac(xs[0]), frac(xs[1])) {
+        (Some((xp, np, dp)), Some((xq, nq, dq))) => {
+            let Some(inv) = k.inv(&k.mul(&dp, &dq)) else {
+                return [None, None];
+            };
+            let ip = k.mul(&inv, &dq);
+            let iq = k.mul(&inv, &dp);
+            [Some(finish(&xp, &np, &ip)), Some(finish(&xq, &nq, &iq))]
+        }
+        (a, b) => {
+            let one = |v: Option<(El, El, El)>| {
+                let (x, n, d) = v?;
+                Some(finish(&x, &n, &k.inv(&d)?))
+            };
+            [one(a), one(b)]
+        }
+    }
+}
+
 // ── the walk ────────────────────────────────────────────────────────
 
 /// Kernels built in parallel per batch; also the checkpoint granularity.
@@ -899,8 +992,15 @@ impl KernelOutcome {
         }
         let tv = ker.t[0];
         let a6p = a6 ^ tv ^ ext.gf.mul(tv, tv);
-        let img_p = velu_x_from_abscissae(ext, &ker.abscissae, xp);
-        let img_q = velu_x_from_abscissae(ext, &ker.abscissae, xq);
+        let (img_p, img_q) = if xeval_fraction_selected() {
+            let [a, b] = velu_x_pair_fraction(ext, &ker.abscissae, [xp, xq]);
+            (a, b)
+        } else {
+            (
+                velu_x_from_abscissae(ext, &ker.abscissae, xp),
+                velu_x_from_abscissae(ext, &ker.abscissae, xq),
+            )
+        };
         match (img_p, img_q) {
             (Some((xpp, rp)), Some((xqq, rq))) => KernelOutcome::Edge {
                 a6p,
@@ -1564,6 +1664,51 @@ mod tests {
                 .map(to_u64)
                 .collect();
             assert_eq!(from_points, from_psi, "a₂ = {a2}");
+        }
+    }
+
+    /// lit2026 W11: the one-inversion pair evaluator returns exactly what
+    /// two batch-inversion calls return, kernel abscissae included, and
+    /// spends fewer extension multiplications and one inversion.
+    #[test]
+    fn pair_fraction_matches_batch_inversion() {
+        let n = 16;
+        let irr = field(n);
+        let q = 1u64 << n;
+        for a2 in [0u8, 1] {
+            let base = Curve::new(n, &irr, a2, 1).expect("K_a");
+            let t = (q + 1) as i64 - base.order as i64;
+            let lam = scalar_eigenvalue(q, t, 3).expect("3 | c at n = 16");
+            let m = mult_order(lam, 3) as usize;
+            let ext = Ext::new(&irr, m, 17);
+            let om = order_over_extension(q, t, m);
+            let ec = ExtCurve::new(&ext, a2 as u64, 1);
+            let mut rng = StdRng::seed_from_u64(23);
+            let Torsion::Rank2(p1, p2) = torsion_basis(&ec, &om, 3, 8, &mut rng) else {
+                panic!("rank 2 at the crater");
+            };
+            for ker in all_kernels(&ec, &p1, &p2, 3) {
+                let mut pts: Vec<u64> = (1..40u64).map(|i| i * 1543 % q).collect();
+                if ext.is_base(&ker.abscissae[0]) {
+                    pts.push(ker.abscissae[0][0]);
+                }
+                for w in pts.windows(2) {
+                    ext_ops_reset();
+                    let want = [
+                        velu_x_from_abscissae(&ext, &ker.abscissae, w[0]),
+                        velu_x_from_abscissae(&ext, &ker.abscissae, w[1]),
+                    ];
+                    let before = ext_ops();
+                    ext_ops_reset();
+                    let got = velu_x_pair_fraction(&ext, &ker.abscissae, [w[0], w[1]]);
+                    let after = ext_ops();
+                    assert_eq!(got, want, "a2={a2} x={w:?}");
+                    if want[0].is_some() && want[1].is_some() {
+                        assert_eq!(before[2], 2);
+                        assert_eq!(after[2], 1);
+                    }
+                }
+            }
         }
     }
 

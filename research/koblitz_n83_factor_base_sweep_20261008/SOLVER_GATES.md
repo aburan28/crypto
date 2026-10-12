@@ -150,3 +150,10 @@ N83 one-orbit known-answer test exercises the split precompute/descent
 arithmetic, while the retained S3 bases have not supplied a natural relation
 or complete single-target cold runtime. The source merge does not promote a
 factor-base winner or reset the exhausted local-pilot clock.
+
+The later [matched K=1,182/K=2,048 retained-base gate](verification/matched-k1182-k2048-900s-20261011/RESULT.md)
+used exact prefix-related S3 objects, the same public point and a single
+source-matched Linux worker. Both five-summand trials reached 5,000 conflicts
+with zero models, relations and rank. They are censored solver-stage receipts,
+not a measured yield or cold-runtime ranking. Their full 900-second extension
+raises the cumulative conservative local charge to 11,700 seconds.

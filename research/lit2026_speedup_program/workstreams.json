@@ -11,7 +11,7 @@
     {"id": "W3", "kind": "audit", "title": "Structured generic-group delta table for every IC configuration; adaptive/non-adaptive precompute classification; multi-target slope",
      "papers": ["ePrint 2026/384", "arXiv 2505.00894", "ePrint 2026/2253"], "status": "PR open", "prs": ["aburan28/crypto#1683"]},
     {"id": "W4", "kind": "speedup", "title": "Early abort at the refutation degree in GF(2) F4/F5 decomposition solves",
-     "papers": ["arXiv 2603.24890"], "status": "not started", "prs": []},
+     "papers": ["arXiv 2603.24890"], "status": "PR open", "prs": ["aburan28/crypto#1687"]},
     {"id": "W5", "kind": "speedup", "title": "Lane-batched inherited-F4 replay (k targets per step plan) and F4-tracer cost-model check",
      "papers": ["arXiv 2607.06372", "arXiv 2603.16378"], "status": "PR open", "prs": ["aburan28/crypto#1714"]},
     {"id": "W6", "kind": "speedup", "title": "Crossbred: preprocessing trimming, admissibility condition, smoothed degree, oracle multistep; Hamming-ball / decremental Boolean exhaustive phase",
@@ -23,10 +23,10 @@
     {"id": "W9", "kind": "speedup", "title": "F_p F4 Las-Vegas probabilistic echelon; F5 criteria data structure (gated on profile share); tracer zero-reduction predictor",
      "papers": ["arXiv 2609.14433", "arXiv 2601.05026", "arXiv 2505.23696"], "status": "not started", "prs": []},
     {"id": "W10", "kind": "feasibility", "title": "Prime-field S5 small-root oracle: asymptotic Coppersmith bound (LP / optimal shifts) against delta = 1/5",
-     "papers": ["ePrint 2024/1577", "ePrint 2026/1027", "ePrint 2026/423"], "status": "not started", "prs": []},
+     "papers": ["ePrint 2024/1577", "ePrint 2026/1027", "ePrint 2026/423"], "status": "PR open", "prs": ["aburan28/crypto#1691"]},
     {"id": "W11", "kind": "speedup", "title": "Generic-method engineering: co-Z paired BSGS with windowed batch inversion; binary x-only isogeny evaluation; k=2 biextension pairing; DP hit-rate statistics; external challenge ladder",
-     "papers": ["ePrint 2026/2102", "ePrint 2026/704", "ePrint 2025/1652", "ePrint 2026/1823", "arXiv 2508.14011"], "status": "not started", "prs": []},
+     "papers": ["ePrint 2026/2102", "ePrint 2026/704", "ePrint 2025/1652", "ePrint 2026/1823", "arXiv 2508.14011"], "status": "PR open", "prs": ["aburan28/crypto#1692"]},
     {"id": "W12", "kind": "audit", "title": "Flagged claims: reproduce the zero-minor ECDLP method at 20-30 bits against rho; record ePrint 2025/015 as unimplementable from its abstract",
-     "papers": ["arXiv 2607.09814", "ePrint 2025/015"], "status": "not started", "prs": []}
+     "papers": ["arXiv 2607.09814", "ePrint 2025/015"], "status": "PR open", "prs": ["aburan28/crypto#1713"]}
   ]
 }

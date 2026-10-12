@@ -1,0 +1,18 @@
+{
+  "schema": "isogeny-profile-interruption/v1",
+  "observed_at_utc": "2026-10-10 04:54:04 UTC",
+  "driver_error_at_local_time": "2026-10-09T21:13:57-07:00",
+  "driver_exit_code": 125,
+  "driver_error": "error waiting for container: unexpected EOF",
+  "phase": "search-p192 round 4 candidate",
+  "completed_screening_pairs": 5,
+  "completed_verification_pairs": 5,
+  "completed_search_pairs": 3,
+  "additional_completed_reference_searches": 1,
+  "interrupted_parent_counter_bytes": 0,
+  "interrupted_child_counter_bytes": 0,
+  "mathematical_status": "UNKNOWN",
+  "interrupted_instruction_cost": "UNMEASURED",
+  "recovery": "Preserve the interrupted directory and driver log; retain all completed commands; resume the three missing commands with unchanged immutable executables, image and limits. Preserve each environment receipt directory separately.",
+  "interpretation": "Per-command medians exclude the externally interrupted command with an unavailable counter. Total campaign instruction cost is unmeasured."
+}

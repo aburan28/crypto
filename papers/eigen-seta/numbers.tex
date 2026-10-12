@@ -1,0 +1,26 @@
+% Measured and derived numbers used in the text.  Each value cites its record
+% in the sentence or table that uses it.  Edit here only.
+% Filter acceptance rates (log2 rho) and admissible-degree counts, from
+% run-20261011T1955Z-verify/records/f_filter_rate.txt:
+%   admissible = log2 f_lo - 1 + log2 rho;  Grover = admissible / 2.
+\newcommand{\RhoLOne}{-8.13}
+\newcommand{\RhoLThree}{-8.64}
+\newcommand{\RhoLFive}{-9.02}
+\newcommand{\FspaceLOne}{267.8}
+\newcommand{\FspaceLThree}{398.6}
+\newcommand{\FspaceLFive}{525.1}
+\newcommand{\GroverFLOne}{133.9}
+\newcommand{\GroverFLThree}{199.3}
+\newcommand{\GroverFLFive}{262.5}
+% Decapsulation failure counts (run-20261011T1955Z-verify/records/failrate/):
+\newcommand{\FailTotalTrials}{3,635}
+\newcommand{\FailRows}{%
+Toy16 & 3,005 & 0 & verification run (3,000), benchmark run (5)\\
+Toy32 & 603 & 0 & verification run (600), benchmark run (3)\\
+L1 & 23 & 0 & verification run (20), benchmark run (3)\\
+L3 & 2 & 0 & benchmark run\\
+L5 & 2 & 0 & benchmark run\\}
+\newcommand{\CTRows}{%
+Toy16 & 4 & 2 valid, 1 foreign & 1,116,209,216 in all 12 runs\\
+L1 & 2 & key 1: 2 valid, 1 foreign; key 2: 1 valid & 120,996,429,610 in all 4 runs\\}
+\newcommand{\DudectT}{$+1.17$ on the raw samples and at most $2.36$ in absolute value after cropping at the 50th, 75th and 90th percentiles}
