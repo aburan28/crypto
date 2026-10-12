@@ -1,0 +1,124 @@
+{
+  "backend_library": "host emulation only (built without RF_HAVE_CUDA)",
+  "claim_boundary": "decomposition subroutine on public synthetic known-answer instances; emulation backend; no key-recovery, sub-rho or deployed-curve claim",
+  "collect_relations": {
+    "relations": 0,
+    "targets_scanned": 200000
+  },
+  "configurations": [
+    {
+      "backend": "emulate",
+      "chunk": 16,
+      "controls_missing": 0,
+      "duplicates": 0,
+      "kernel_seconds": 0.33719087501231115,
+      "lookup": "sorted",
+      "missing_vs_cpu": 0,
+      "pairs_per_second": 105925523.6331527,
+      "pass": true,
+      "readd_failures": 0,
+      "relations": 528,
+      "spurious_vs_cpu": 0,
+      "wall_seconds": 0.337321375
+    },
+    {
+      "backend": "emulate",
+      "chunk": 32,
+      "controls_missing": 0,
+      "duplicates": 0,
+      "kernel_seconds": 0.33035299999755807,
+      "lookup": "sorted",
+      "missing_vs_cpu": 0,
+      "pairs_per_second": 108118043.42707351,
+      "pass": true,
+      "readd_failures": 0,
+      "relations": 528,
+      "spurious_vs_cpu": 0,
+      "wall_seconds": 0.330470333
+    },
+    {
+      "backend": "emulate",
+      "chunk": 64,
+      "controls_missing": 0,
+      "duplicates": 0,
+      "kernel_seconds": 0.2980047079909127,
+      "lookup": "sorted",
+      "missing_vs_cpu": 0,
+      "pairs_per_second": 119854213.8505045,
+      "pass": true,
+      "readd_failures": 0,
+      "relations": 528,
+      "spurious_vs_cpu": 0,
+      "wall_seconds": 0.298056666
+    },
+    {
+      "backend": "emulate",
+      "chunk": 16,
+      "controls_missing": 0,
+      "duplicates": 0,
+      "kernel_seconds": 0.34059599999454804,
+      "lookup": "hash",
+      "missing_vs_cpu": 0,
+      "pairs_per_second": 104866528.08773951,
+      "pass": true,
+      "readd_failures": 0,
+      "relations": 528,
+      "spurious_vs_cpu": 0,
+      "wall_seconds": 0.340643166
+    },
+    {
+      "backend": "emulate",
+      "chunk": 32,
+      "controls_missing": 0,
+      "duplicates": 0,
+      "kernel_seconds": 0.2826213340013055,
+      "lookup": "hash",
+      "missing_vs_cpu": 0,
+      "pairs_per_second": 126378003.72081965,
+      "pass": true,
+      "readd_failures": 0,
+      "relations": 528,
+      "spurious_vs_cpu": 0,
+      "wall_seconds": 0.282683041
+    },
+    {
+      "backend": "emulate",
+      "chunk": 64,
+      "controls_missing": 0,
+      "duplicates": 0,
+      "kernel_seconds": 0.26177445899520535,
+      "lookup": "hash",
+      "missing_vs_cpu": 0,
+      "pairs_per_second": 136442341.00261933,
+      "pass": true,
+      "readd_failures": 0,
+      "relations": 528,
+      "spurious_vs_cpu": 0,
+      "wall_seconds": 0.261823333
+    }
+  ],
+  "cpu_reference": {
+    "relations": 528,
+    "seconds": 0.499016125
+  },
+  "cuda_available": false,
+  "curve": {
+    "a": "-3",
+    "bits": 61,
+    "n": "2305843010818082053",
+    "name": "a3-fast-61bit-p256class",
+    "p": "2305843009213693951"
+  },
+  "date": "2026-10-12",
+  "example": "gpu_rootfind_validate",
+  "factor_base": 4096,
+  "failures": 0,
+  "targets": {
+    "degenerate_controls": 16,
+    "positive_controls": 512,
+    "production": 0,
+    "random": 8192,
+    "total": 8720
+  },
+  "verdict": "PASS"
+}

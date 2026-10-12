@@ -100,12 +100,19 @@ path = "src/bin/cryptopro_b_chain_sweep.rs"
 name = "crypto_lib"
 path = "src/lib.rs"
 
+[build-dependencies]
+cc = "1"
+
 [features]
 # Keep the existing Redis TLS behavior in normal builds. The isolated,
 # network-disabled N83 capacity worker can omit its unused native OpenSSL
 # dependency when cross-building a static Linux binary.
 default = ["redis-native-tls"]
 redis-native-tls = ["redis/tls-native-tls"]
+# Link the GPU root-finding decomposition oracle (gpu/rootfind/).  Without
+# CUDA the build compiles the host-emulation backend via build.rs; see
+# RESEARCH_GPU_ROOTFIND_DECOMPOSITION.md for the CUDA link mode.
+gpu-rootfind = []
 f4-four-tables = []
 f4-five-tables = []
 f4-wide-tables = []
