@@ -1,0 +1,122 @@
+[
+  {
+    "id": "anomalous_prime",
+    "name": "Anomalous prime-field group",
+    "method": "Trace-one reduction",
+    "domain": "E/F_p, p prime",
+    "recognition": "Verify a nonsingular model and #E(F_p)=p, equivalently trace t=1.",
+    "witness": "Exact point count, field and model coefficients, and selected point order.",
+    "construction": "Search nonsingular short Weierstrass models and count points; keep only trace-one models.",
+    "status": "exact_instance_present",
+    "source": "Smart (1999)",
+    "url": "https://doi.org/10.1007/s001459900052"
+  },
+  {
+    "id": "smooth_selected_order",
+    "name": "Smooth selected subgroup",
+    "method": "Pohlig–Hellman",
+    "domain": "Any finite cyclic elliptic subgroup",
+    "recognition": "Factor the actual selected generator order and bound its largest prime-power component.",
+    "witness": "Generator, exact order, complete factorization, and membership of the target.",
+    "construction": "Count a candidate curve, factor the group order, then certify a point with smooth exact order.",
+    "status": "exact_instance_present",
+    "source": "Pohlig–Hellman (1978)",
+    "url": "https://doi.org/10.1109/TIT.1978.1055817"
+  },
+  {
+    "id": "mov_weil_pairing",
+    "name": "MOV / Weil-pairing transfer",
+    "method": "Finite-field DLP transfer",
+    "domain": "Selected r-subgroup of E/F_q, gcd(r,q)=1",
+    "recognition": "Compute k=ord_r(q), so r divides q^k−1; small k is a screening signal.",
+    "witness": "Independent r-torsion pairing argument, explicit nondegenerate image of the chosen generator, and target transport.",
+    "construction": "Choose q,r,k with r | #E(F_q) and ord_r(q)=k; construct E and certify pairing data.",
+    "status": "exact_embedding_candidate_present_map_open",
+    "source": "Menezes–Okamoto–Vanstone (1991)",
+    "url": "https://doi.org/10.1145/103418.103434"
+  },
+  {
+    "id": "frey_ruck_tate_pairing",
+    "name": "Frey–Rück / Tate-pairing transfer",
+    "method": "Finite-field DLP transfer",
+    "domain": "Selected r-torsion, gcd(r,q)=1",
+    "recognition": "Check the multiplicative embedding degree k=ord_r(q) for the chosen r.",
+    "witness": "A Tate-pairing class giving an injective image of the chosen subgroup, plus destination-field DLP cost.",
+    "construction": "Start with r | #E(F_q), compute k, and exhibit the Tate-pairing auxiliary input.",
+    "status": "published_criterion_no_local_transfer",
+    "source": "Frey–Rück (1994)",
+    "url": "https://doi.org/10.1090/S0025-5718-1994-1218343-6"
+  },
+  {
+    "id": "supersingular_pairing",
+    "name": "Supersingular pairing geometry",
+    "method": "MOV / Frey–Rück screen",
+    "domain": "Supersingular E/F_q with selected r",
+    "recognition": "Certify supersingularity, selected r and its embedding degree; compare target-field arithmetic.",
+    "witness": "Point-count and supersingularity certificates, r-subgroup generator, pairing transfer, and destination cost.",
+    "construction": "Choose a supersingular family, count the curve, and certify a prime-to-characteristic r-subgroup.",
+    "status": "exact_structural_candidate_present",
+    "source": "Menezes–Okamoto–Vanstone (1991)",
+    "url": "https://doi.org/10.1145/103418.103434"
+  },
+  {
+    "id": "ghs_binary",
+    "name": "Binary-field GHS descent",
+    "method": "Weil restriction to a Jacobian",
+    "domain": "E/F_(2^m) with a specified subfield tower",
+    "recognition": "Construct a lower-genus covering curve and the induced Jacobian map.",
+    "witness": "Cover equation, genus, maps, selected subgroup kernel check, and destination solver cost.",
+    "construction": "Screen extension-field coefficients by the published GHS descent conditions, then construct and check the cover.",
+    "status": "published_family_import_open",
+    "source": "Gaudry–Hess–Smart (2002)",
+    "url": "https://www.iacr.org/cryptodb/data/paper.php?pubkey=14115"
+  },
+  {
+    "id": "ghs_odd_covering",
+    "name": "Odd-characteristic GHS covering",
+    "method": "(2,…,2)-covering over a smaller field",
+    "domain": "Prime extension degree d∈{2,3,5,7}, odd characteristic",
+    "recognition": "Match a published case and realize its equations and covering conditions for the exact model.",
+    "witness": "Defining equations, smoothness/genus, cover map, Jacobian isogeny, selected subgroup injection, and cost.",
+    "construction": "Choose one of 36 published cases, instantiate parameters over the finite field, and certify each geometric gate.",
+    "status": "published_case_metadata_imported",
+    "source": "Iijima–Momose–Chao (2015)",
+    "url": "https://eprint.iacr.org/2015/805.pdf"
+  },
+  {
+    "id": "cubic_norm_one",
+    "name": "Cubic norm-one genus-three branch",
+    "method": "Odd-characteristic covering",
+    "domain": "E/F_(p^6), q=p², p>3",
+    "recognition": "Require a norm-one λ and exact model witness; v₂(f_π)≥2 is a necessary class screen, not a decision rule.",
+    "witness": "λ=α^q/α, exact coefficients, cover and genus certificate, subgroup map and charged construction.",
+    "construction": "Choose λ in ker Norm_(F_(q³)/F_q), solve α^q=λα, and build y²=x(x−α)(x−α^q).",
+    "status": "exact_small_field_models_present",
+    "source": "Local theorem and construction record",
+    "url": "https://github.com/aburan28/crypto/tree/main/research/weak_curve_database_20261012"
+  },
+  {
+    "id": "quadratic_torus",
+    "name": "Nonsplit quadratic genus-three branch",
+    "method": "Odd-characteristic covering",
+    "domain": "E/F_(p^6), q=p², p>3",
+    "recognition": "Use the exact second-branch class oracle and model witness; keep it separate from cubic support.",
+    "witness": "Exact model, covering construction, genus and induced subgroup map.",
+    "construction": "Select a class admitted by the nonsplit quadratic-torus branch, then construct and verify its representative.",
+    "status": "exact_small_field_models_present",
+    "source": "Local two-branch census",
+    "url": "https://github.com/aburan28/crypto/tree/main/research/weak_curve_database_20261012"
+  },
+  {
+    "id": "proper_subfield_points",
+    "name": "Selected points over a proper subfield",
+    "method": "Descent to a smaller point group",
+    "domain": "E/F_(p^n) with a proper subfield",
+    "recognition": "Show the selected points, not only the j-invariant or a model, descend to the smaller field.",
+    "witness": "Explicit field isomorphism/model transport and point-containment certificate for generator and target.",
+    "construction": "Lift a curve from a proper subfield, select points in that subfield, and verify exact orders.",
+    "status": "model_controls_present_point_gate_open",
+    "source": "Local weak-curve database",
+    "url": "https://github.com/aburan28/crypto/tree/main/research/weak_curve_database_20261012"
+  }
+]

@@ -1,0 +1,14 @@
+import PrimeExamples
+
+#print axioms WeakCurveLeaderboard.anomalous_F101_affine
+#print axioms WeakCurveLeaderboard.smooth_F101_affine
+#print axioms WeakCurveLeaderboard.pairing_F103_affine
+#print axioms WeakCurveLeaderboard.anomalous_trace_identity
+#print axioms WeakCurveLeaderboard.pairing_embedding_degree_two
+#print axioms WeakCurveLeaderboard.anomalous_nonsingular
+#print axioms WeakCurveLeaderboard.smooth_nonsingular
+#print axioms WeakCurveLeaderboard.pairing_nonsingular
+#print axioms WeakCurveLeaderboard.anomalous_point_on_curve
+#print axioms WeakCurveLeaderboard.smooth_point_on_curve
+#print axioms WeakCurveLeaderboard.pairing_point_on_curve
+#print axioms WeakCurveLeaderboard.pairing_selected_order_divides_group_order
