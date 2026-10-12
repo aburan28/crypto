@@ -153,7 +153,7 @@ they expire.
 | `gha-37156392134-1` | `compact-orbit-n61-single-target-W256` | 11287912438 | `sha256:8cd7bc1b6a2b137f…` | 2027-01-01 |
 
 
-## L=65,536 attempt (2026-10-12) — runner saturation
+## L=65,536 attempt (2026-10-12) — runner saturation, then re-dispatch
 
 Timeout bump landed in PR #1736 (`timeout-minutes` 300→480 on the measure
 job). Confirmed YAML `workflow_dispatch` inputs: `targets`, `blocks`, `k`.
@@ -162,11 +162,22 @@ Dispatched:
 
 | Actions run | Ref | Inputs | Outcome |
 |---|---|---|---|
-| [38288893010](https://github.com/aburan28/crypto/actions/runs/38288893010) | `main` (newest) | targets=65536, blocks=2, k=700 | left **live** — still queued/pending after ~15–20 min poll (no runner) |
-| [38285023608](https://github.com/aburan28/crypto/actions/runs/38285023608) | `main` @ `be456ef51` | targets=65536, blocks=2, k=700 | **cancelled** as superseded duplicate of 38288893010 |
+| [38302195019](https://github.com/aburan28/crypto/actions/runs/38302195019) | `main` (re-dispatch) | targets=65536, blocks=2, k=700 | **live** — `validate` **success**; `measure` **in_progress** (panel on reserved core) as of 2026-10-12 ~20:19Z |
+| [38288893010](https://github.com/aburan28/crypto/actions/runs/38288893010) | `main` | targets=65536, blocks=2, k=700 | **cancelled** (superseded; never completed measure) |
+| [38285023608](https://github.com/aburan28/crypto/actions/runs/38285023608) | `main` @ `be456ef51` | targets=65536, blocks=2, k=700 | **cancelled** earlier (queued duplicate) |
 | [38283955374](https://github.com/aburan28/crypto/actions/runs/38283955374) | `cursor/ic-n61-l65536-hosted-20261012` | workflow_dispatch (sibling) | **cancelled** earlier (branch dispatch) |
 
-Repo Actions queue depth remained saturated (same class as #1621). No measure
-job completed; no receipts to archive yet. Fallthrough after n31: binary
-`l8_pairs_baseline` evidence in
-[`../20261012-binary-decomposition-l8-pairs-baseline/`](../20261012-binary-decomposition-l8-pairs-baseline/README.md).
+No `gha-38302195019-*` archive yet — wait for measure + artifact upload, then
+land under `autolab_runs/` matching prior `gha-*` style. Do **not** spam
+re-dispatch while measure is running. If this run dies without starting
+measure, one re-dispatch only:
+
+```bash
+gh workflow run compact-orbit-n61-isolated.yml --repo aburan28/crypto \
+  --ref main -f targets=65536 -f blocks=2 -f k=700
+```
+
+Fallthrough docs: binary `l8_pairs_baseline` in
+[`../20261012-binary-decomposition-l8-pairs-baseline/`](../20261012-binary-decomposition-l8-pairs-baseline/README.md);
+FFD/DoR gap map in
+[`../20261012-ffd-dor-backfill-inventory/`](../20261012-ffd-dor-backfill-inventory/README.md).
