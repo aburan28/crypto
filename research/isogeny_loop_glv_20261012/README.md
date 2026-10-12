@@ -21,7 +21,7 @@ the stated argument), **proposed** (untested). All computation is native Rust in
 | round-2 item | round-3 status |
 |:--|:--|
 | point-level validation of the GLV-GLS eigenvalue | **measured, all pass.** Curves were built from H_D at D ∈ {−619, −23, −71, −431, −3019}, with p of 127 bits. ψ acts as +μ, and each closing loop acts as ±λ(±s), on 24 points per check (§2). |
-| benchmark at D = −619 | **measured.** GLV-GLS-4 with a projective loop takes 0.872× the time of GLS-2 (median/median, 1.147× faster) and 0.498× the time of plain wNAF. The A/A control reads 0.987. The measured gain is below the round-2 model at every D tested (§3). |
+| benchmark at D = −619 | **measured, two runs on two hosts.** GLV-GLS-4 with a projective loop is 1.147× faster than GLS-2 in run 1 and 1.091× in run 2 (median/median). In run 1 it takes 0.872× GLS-2's time and 0.498× the time of plain wNAF. The A/A control reads 0.987. The measured gain is below the round-2 model at every D tested (§3). |
 | binary-field GLS version | **constructed and validated at toy size.** The construction uses Frobenius-assisted loops 𝔩·F^k. Scans at m = 83, 127 and 131 find loops on prime-order GLS twists. An x-only point check at m = 31 over GF(2^62) passes on 2 discriminants (§4). Not timed. |
 | native sweeper port | §5 (subagent run; see there for status) |
 | x-only re-run of the searches | §5 |
@@ -82,7 +82,7 @@ This closes round 2's "not established": the derived eigenvalue holds on points.
 
 ## 3. Timing (measured)
 
-`bench_run1.*` (D = −619) and `bench_D{23,71,431,3019}.*`, each with its `_env.txt`
+`bench_run1.*`, `bench_run2.*` (D = −619) and `bench_D{23,71,431,3019}.*`, each with its `_env.txt`
 (load averages before and after, CPU) and `_start_utc.txt`.
 
 **Setup.**
@@ -106,6 +106,26 @@ D = −619 (r 251 bits). Times are ns per scalar multiplication over 30 rounds:
 | GLV-GLS-4, affine loop | 73,066 | 67,012 | 1.954 | 1.118 |
 | GLV-GLS-4, projective loop | 71,172 | 64,788 | 2.006 | 1.147 |
 | wNAF again (A/A control) | 144,657 | 125,440 | 0.987 | — |
+
+**Confirmation run 2** (`bench_run2.*`, 2026-10-12T02:16Z). It used the same
+command and seed, pinned to core 3, but ran on a *different host*: the container
+restarted onto an Intel Xeon at 2.80 GHz. Load average was 1.23 at start, with
+the sweeper agent beginning to build. Absolute times are about 1.45× run 1's on
+this host. All correctness checks passed again, with the same sink value.
+
+| arm | median ns | min ns | wNAF / arm | GLS-2 / arm |
+|:--|--:|--:|--:|--:|
+| wNAF | 211,895 | 204,256 | 1.000 | 0.542 |
+| GLS-2 | 114,823 | 109,972 | 1.845 | 1.000 |
+| GLV-GLS-4, affine loop | 106,268 | 101,386 | 1.994 | 1.081 |
+| GLV-GLS-4, projective loop | 105,273 | 99,253 | 2.013 | 1.091 |
+| wNAF again (A/A) | 214,312 | 205,225 | 0.989 | — |
+
+Stages (median ns): decomposition 5,306; α′(P) affine 9,556; α′(P) projective 7,574.
+At D = −619 the measured GLS-2 / GLV-GLS-4 ratio is therefore 1.147 (run 1) and
+1.091 (run 2), against the round-2 model's 1.220. The between-run difference
+(0.056) is larger than either run's A/A deviation, and its cause is not
+isolated: host, load, and decomposition time (2.9 vs 5.3 µs) all changed.
 
 Stage diagnostics at D = −619 (median ns):
 - 4-dimensional decomposition: 2,850
@@ -251,7 +271,8 @@ isolated. All commands and the kernel log lines are in `binary_validate_cmd.txt`
 | file | what | run report |
 |:--|:--|:--|
 | `gls_validate.*`, `validate_run_start_utc.txt` | §2 | `reports/run-…-gls-validate/` |
-| `bench_run1.*`, `bench_D*.*` | §3 | `reports/run-…-bench/` |
+| `bench_run1.*`, `bench_D*.*` | §3 | `reports/run-20261011T2333Z-bench/` |
+| `bench_run2.*` | §3 confirmation | `reports/run-20261012T0216Z-bench-confirm/` |
 | `binary_scan_m{83,127,131}.*` | §4 scans | `reports/run-…-binary-scan/` |
 | `binary_validate.*`, `binary_validate_run1_hmax160.*`, `binary_validate_attempt3_killed.*`, `binary_validate_cmd.txt` | §4 validation | `reports/run-…-binary-validate/` |
 | `sweeper_native/` | §5 | see §5 |

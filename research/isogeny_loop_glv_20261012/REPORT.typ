@@ -22,7 +22,7 @@ Round 2 left the 4-dimensional GLV-GLS split as a lead backed only by lattices a
 
 #table(columns: (auto, 1fr),
   [*point-level validation*], [*measured, all pass.* Curves at $D in {-619, -23, -71, -431, -3019}$, with $p$ of 127 bits, are built from a natively computed $H_D$. $psi$ acts as $+mu$, and each closing loop acts as $plus.minus lambda(plus.minus s)$, on 24 points of order $r$ (248–253 bits). The two closing walks land on conjugate embeddings.],
-  [*benchmark, $D = -619$*], [*measured.* GLV-GLS-4 with a projective loop runs in 0.872× the time of GLS-2 (1.147×, median/median) and 0.498× the time of wNAF; the A/A control reads 0.987. Across five $D$, the ratio is 1.06–1.21, which is 0.05–0.17 below round 2's model.],
+  [*benchmark, $D = -619$*], [*measured.* GLV-GLS-4 with a projective loop beats GLS-2 by 1.147× (run 1) and 1.091× (run 2, a different host), median/median. In run 1 it runs and 0.498× the time of wNAF; the A/A control reads 0.987. Across five $D$, the ratio is 1.06–1.21, which is 0.05–0.17 below round 2's model.],
   [*binary GLS*], [*constructed; validated at toy size.* Frobenius-assisted loops $frak(l) dot F^k$ exist on prime-order GLS twists at $m = 127$ and $131$, but not at $m = 83$ for $l <= 61$. An x-only point check at $m = 31$ over GF($2^62$) passes on 2 discriminants. *Not timed.*],
   [*native sweeper, x-only*], [§5.],
 )
@@ -62,12 +62,14 @@ All arms run in one binary on the same arithmetic: `Fp2<FpM<2>>` (Montgomery, Ka
 )
 Stage medians: decomposition 2,850 ns; $alpha'(P)$ 7,776 ns affine and 5,602 ns projective.
 
-#figure(image("figures/bench_arms.svg", width: 62%), caption: [Per-round values (µs per scalar multiplication, mean over 256 scalars), 30 rounds, D = −619. Run `run-20261011T2333Z-bench`.])
+*Confirmation run 2* (`run-20261012T0216Z-bench-confirm`): same command and seed, but a different host after a container restart (Xeon at 2.80 GHz, load average 1.23 at start). Medians: wNAF 211,895, GLS-2 114,823, GLV-GLS-4 105,273 (projective) and 106,268 (affine); A/A 0.989. That makes GLS-2 / GLV-GLS-4 = 1.091, against 1.147 in run 1. The 0.056 difference exceeds either run's A/A deviation; its cause is not isolated (host, load, and decomposition 2.9 vs 5.3 µs all changed).
+
+#figure(image("figures/bench_arms.svg", width: 100%), caption: [Per-round values (µs per scalar multiplication, mean over 256 scalars), 30 rounds, D = −619: run 1 (left, `run-20261011T2333Z-bench`) and run 2 (right, `run-20261012T0216Z-bench-confirm`, a different host).])
 
 #figure(image("figures/bench_trend.svg", width: 82%), caption: [GLS-2 median / GLV-GLS-4 median at five $D$, against the certified loop's model cost, beside round 2's derived operation-count model. A/A controls 0.987–1.019.])
 
 *Observations.*
-- The split was faster than GLS-2 at every $D$ tested: 1.214, 1.120, 1.115, 1.147 and 1.062 with the projective loop.
+- The split was faster than GLS-2 at every $D$ tested: 1.214, 1.120, 1.115, 1.147 (1.091 in run 2) and 1.062 with the projective loop.
 - Every measurement is below the model. Two costs the model left out are visible in the stage timings:
   - the decomposition, about 3.5% of a GLS-2 call;
   - $alpha'(P)$, 2–10.5% of a GLS-2 call. Its stage time rises with model cost: 1.7, 2.7, 4.2, 5.6 and 8.5 µs.
