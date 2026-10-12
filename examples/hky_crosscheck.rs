@@ -36,7 +36,16 @@ struct Space {
 
 impl Space {
     fn new(nv: u32, c: u32) -> Space {
-        let mut monos: Vec<u64> = (0u64..1 << nv).filter(|m| m.count_ones() <= c).collect();
+        // all subsets of size ≤ c, by iterating sizes and Gosper's hack
+        let mut monos: Vec<u64> = vec![0];
+        for k in 1..=c.min(nv) {
+            let mut m: u64 = (1u64 << k) - 1;
+            while m < (1u64 << nv) {
+                monos.push(m);
+                let t = m | (m - 1);
+                m = (t + 1) | (((!t & (t + 1)) - 1) >> (m.trailing_zeros() + 1));
+            }
+        }
         // descending (degree, mask): column 0 is the largest monomial, so a
         // lowest-column pivot is the leading monomial, as in lfd_fast.sage
         // (which sorts its columns descending before echelon_form)

@@ -52,13 +52,13 @@ use std::time::Instant;
 // ------------------------------------------------------------------ F_{2^n}
 
 #[derive(Clone, Copy)]
-struct Field {
-    n: u32,
-    poly: u64,
+pub struct Field {
+    pub n: u32,
+    pub poly: u64,
 }
 
 impl Field {
-    fn mul(&self, mut a: u64, mut b: u64) -> u64 {
+    pub fn mul(&self, mut a: u64, mut b: u64) -> u64 {
         let mut r = 0;
         while b != 0 {
             if b & 1 == 1 {
@@ -72,7 +72,7 @@ impl Field {
         }
         r
     }
-    fn sqr(&self, a: u64) -> u64 {
+    pub fn sqr(&self, a: u64) -> u64 {
         self.mul(a, a)
     }
     fn inv(&self, a: u64) -> u64 {
@@ -157,14 +157,14 @@ fn parse_elem(s: &str) -> u64 {
 
 /// Solutions `t` of `t² + t = c` (all of them), by linear algebra on the
 /// `F₂`-linear map `t ↦ t² + t`.
-struct ArtinSchreier {
+pub struct ArtinSchreier {
     /// rows (image, source) in echelon form on the image
     rows: Vec<(u64, u64)>,
     kernel: Vec<u64>,
 }
 
 impl ArtinSchreier {
-    fn new(f: &Field) -> Self {
+    pub fn new(f: &Field) -> Self {
         let n = f.n;
         let mut rows: Vec<(u64, u64)> = (0..n)
             .map(|i| {
@@ -212,7 +212,7 @@ impl ArtinSchreier {
 }
 
 /// All roots in `F_{2^n}` of `α T² + β T + γ`.
-fn quad_roots(f: &Field, asl: &ArtinSchreier, a: u64, b: u64, c: u64) -> Vec<u64> {
+pub fn quad_roots(f: &Field, asl: &ArtinSchreier, a: u64, b: u64, c: u64) -> Vec<u64> {
     match (a, b) {
         (0, 0) => {
             if c == 0 {
@@ -292,7 +292,7 @@ fn descend(f: &Field, v: &Subspace, x3: u64, b: u64) -> Vec<Vec<u64>> {
     let np = v.basis.len();
     let n = f.n as usize;
     let mut eqs: Vec<HashMap<u64, ()>> = vec![HashMap::new(); n];
-    let mut toggle = |coeff: u64, mono: u64, eqs: &mut Vec<HashMap<u64, ()>>| {
+    let toggle = |coeff: u64, mono: u64, eqs: &mut Vec<HashMap<u64, ()>>| {
         for (i, eq) in eqs.iter_mut().enumerate() {
             if coeff >> i & 1 == 1 {
                 if eq.remove(&mono).is_none() {
@@ -341,7 +341,7 @@ fn solutions(f: &Field, asl: &ArtinSchreier, v: &Subspace, x3: u64, b: u64) -> V
 
 /// Multilinear monomials of degree `≤ c` in `nv` variables, in Sage's deglex
 /// order (`x₀ > x₁ > …`), ascending.
-fn monomials_deglex(nv: u32, c: u32) -> Vec<u64> {
+pub fn monomials_deglex(nv: u32, c: u32) -> Vec<u64> {
     let mut out = vec![];
     for d in 0..=c {
         let mut level = vec![];
@@ -364,12 +364,12 @@ fn monomials_deglex(nv: u32, c: u32) -> Vec<u64> {
     out
 }
 
-fn eval(mono: u64, point: u64) -> bool {
+pub fn eval(mono: u64, point: u64) -> bool {
     point & mono == mono
 }
 
 /// `dim (I(S) ∩ R_{≤c})` for each `c ≤ cmax`, and `DG`.
-fn ideal_side(nv: u32, sols: &[u64], cmax: u32) -> (Vec<usize>, u32) {
+pub fn ideal_side(nv: u32, sols: &[u64], cmax: u32) -> (Vec<usize>, u32) {
     let monos = monomials_deglex(nv, cmax);
     let s = sols.len();
     if s == 0 {
@@ -510,7 +510,7 @@ impl Ring {
 }
 
 /// `(dim V_{F,c} without mutants, dim V_{F,c})`, the second capped at `target`.
-fn closure_dims(eqs: &[Vec<u64>], nv: u32, c: u32, target: usize) -> (usize, usize) {
+pub fn closure_dims(eqs: &[Vec<u64>], nv: u32, c: u32, target: usize) -> (usize, usize) {
     let ring = Ring::new(nv, c);
     let mut ech = Echelon::new(ring.monos.len());
     let _ = ech.words;
@@ -553,6 +553,10 @@ fn closure_dims(eqs: &[Vec<u64>], nv: u32, c: u32, target: usize) -> (usize, usi
         if ech.dim() >= target {
             break;
         }
+        // 1 ∈ V (pivot at the constant monomial, column 0): V_{F,c} is everything
+        if ech.pivots.contains_key(&0) {
+            return (plain, ring.monos.len().min(target));
+        }
         let row = ech.pivots[&t].clone();
         let products: Vec<Vec<u64>> = (0..nv)
             .into_par_iter()
@@ -565,6 +569,9 @@ fn closure_dims(eqs: &[Vec<u64>], nv: u32, c: u32, target: usize) -> (usize, usi
                 }
             }
         }
+    }
+    if ech.pivots.contains_key(&0) {
+        return (plain, ring.monos.len().min(target));
     }
     (plain, ech.dim())
 }
@@ -839,6 +846,49 @@ fn main() {
             for s in 0..draws {
                 let d = new_draw(n, &family, &target, seed.wrapping_mul(1000).wrapping_add(s), poly);
                 println!("{}", measure(&d, cmax));
+            }
+        }
+        Some("ladder") => {
+            // E4: d_F (= PC refutation degree) on committed unsat dreg_ladder draws.
+            use crypto_lib::binary_ecc::F2mElement;
+            use crypto_lib::cryptanalysis::koblitz_groebner::{build_decomposition_system, FieldStructure};
+            use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+            let m: usize = arg(&args, "--m", Some(3));
+            let cmax: u32 = arg(&args, "--cmax", Some(6));
+            let text = std::fs::read_to_string(&args[2]).expect("read ladder records");
+            for line in text.lines().filter(|l| !l.trim().is_empty()) {
+                let rec: Value = serde_json::from_str(line).unwrap();
+                if rec.get("draw").is_none() || rec["solutions"].as_u64() != Some(0) {
+                    continue;
+                }
+                let t0 = Instant::now();
+                let n = rec["n"].as_u64().unwrap() as u32;
+                let irr = find_irreducible_sparse(n).unwrap();
+                let st = FieldStructure::new(n, &irr);
+                let el = |w: u64| F2mElement::from_biguint(&num_bigint::BigUint::from(w), n);
+                let basis: Vec<F2mElement> = rec["v_basis"].as_array().unwrap().iter().map(|w| el(w.as_u64().unwrap())).collect();
+                let sys = build_decomposition_system(&basis, &el(rec["x_r"].as_u64().unwrap()), &F2mElement::one(n), m, &st)
+                    .expect("system builds");
+                assert_eq!(sys.n_vars as u64, rec["n_vars"].as_u64().unwrap(), "rebuilt shape");
+                let eqs: Vec<Vec<u64>> = sys.equations.iter().map(|p| p.terms.iter().map(|t| t.mask).collect()).collect();
+                let nv = sys.n_vars as u32;
+                let mut d_f = None;
+                let mut dims = serde_json::Map::new();
+                for c in 2..=cmax {
+                    let full = monomials_deglex(nv, c).len();
+                    let (_, closed) = closure_dims(&eqs, nv, c, full);
+                    dims.insert(c.to_string(), json!(closed));
+                    if closed == full {
+                        d_f = Some(c);
+                        break;
+                    }
+                }
+                println!("{}", json!({
+                    "schema": "hky_ladder_d_f/v1", "m": m, "cell": rec["cell"], "n": n, "ell": rec["ell"], "draw": rec["draw"],
+                    "n_vars": nv, "n_eqs": eqs.len(), "d_star": rec["outcome"], "ffd_recorded": rec["ffd"],
+                    "d_f": d_f, "censored_above": if d_f.is_none() { Some(cmax) } else { None },
+                    "closure_dims": dims, "secs": (t0.elapsed().as_secs_f64() * 10.0).round() / 10.0,
+                }));
             }
         }
         _ => eprintln!("usage: hky_last_fall_degree replay RECORDS.jsonl [--modulus HEX] | cell --n N [--family random|subfield] [--target rand|sat] [--draws K] --seed S [--cmax C]"),

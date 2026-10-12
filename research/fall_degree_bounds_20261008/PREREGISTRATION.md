@@ -302,3 +302,38 @@ Even "bounded" is evidence at toy size only. The ledger's conditional (§2.2) sa
 must eventually be `ω(m²)` unless ECDLP over `F_{2^n}` is subexponential.
 
 Nothing from any E6 draw has been computed. Part B's draws have not been generated.
+
+## Amendment 5 (2026-10-12, before any control is measured): E6 Part D, structure-matched random controls
+
+**Why.** Every Semaev draw measured so far has `d_F ∈ {3, 4}`. Without a control, "`d_F = 4`"
+could be a property of any system of this shape at these sizes, rather than of Semaev
+systems.
+
+**Controls.** `koblitz_bench::random_control_system(n_vars, n_vars + 4, 3, terms_per_eq, seed)`,
+the `dreg_ladder` control construction. It has degree 3 and the Semaev cell's own term
+density. With 4 more equations than unknowns it is unsatisfiable with high probability:
+- every control is checked unsatisfiable by exhaustive evaluation over `F₂^N`;
+- a satisfiable one is skipped and logged.
+
+The shapes are the committed ladder controls' `(n_vars, terms_per_eq)`:
+
+| cell | `n_vars` | `terms_per_eq` |
+|:--|--:|--:|
+| `n5l2` | 11 | 14 |
+| `n7l3` | 16 | 39 |
+| `n11l4` | 23 | 83 |
+| `n13l5` | 28 | `ladder_terms_per_eq(13, 5, 20261012)` |
+
+- **Draws:** 4 controls per shape, seeds `20261012·100 + t`.
+- **Measurement:** `d_F` is the first `c` with `1 ∈ V_{F,c}`, with `cmax = 5`.
+
+**Reading rule (fixed now).** The control is more constrained than the Semaev system
+(`N + 4` equations against Semaev's `2n`).
+
+| reading | condition |
+|:--|:--|
+| **"Semaev-specific"** | the control's median `d_F` is `≥` the Semaev cell's median `d_F` + 1 at every shape |
+| **"generic at toy size"** | the control's median `d_F ≤ 4` at every shape |
+| **mixed** | otherwise |
+
+Nothing from any control has been computed.
