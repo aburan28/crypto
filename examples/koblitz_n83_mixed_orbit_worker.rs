@@ -3,6 +3,8 @@
 //! `verify` imports both S3 objects and checks their exact orbit-labelled
 //! prefix. `run` additionally requires a 4 GiB, zero-swap Linux cgroup and
 //! an external budget supervisor. Neither mode downloads an object.
+//! `verify-control` and `control-run` use a pinned known-answer witness only;
+//! their outcomes are not natural-target relation-yield measurements.
 
 use crypto_lib::binary_ecc::curve::point_neg;
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
@@ -33,6 +35,7 @@ const ENVELOPE_MANIFEST: &[u8] = include_bytes!("../research/koblitz_n83_factor_
 const SMALL_HASH: &str = "76e1cbe4ea5a9d26e5b24a2d27f9401271dc471846529190a0416d8e09837a92";
 const ENVELOPE_HASH: &str = "82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851";
 const PUBLIC_CORPUS_HASH: &str = "831eaa7be2387634fd610f6706103b2af9b4e274f0db59923c0280af3cbed74b";
+const CONTROL_FIXTURE: &[u8] = include_bytes!("../research/koblitz_n83_factor_base_sweep_20261008/verification/mixed-orbit-known-witness-source-20261012/fixture.json");
 
 struct PinnedBase {
     manifest: &'static [u8],
@@ -357,6 +360,185 @@ fn trial_coefficient(label: &[u8], trial: u64, modulus: &BigUint) -> BigUint {
     BigUint::from_bytes_le(hash.finalize().as_bytes()) % modulus
 }
 
+fn parse_control_bytes(bytes: &[u8]) -> Result<Value> {
+    if bytes != CONTROL_FIXTURE {
+        return Err("known-answer fixture differs from pinned bytes".into());
+    }
+    let fixture: Value = serde_json::from_slice(bytes)?;
+    if fixture["schema"] != "n83.mixed-orbit-known-witness/v1"
+        || fixture["scope"] != "known_answer_control_only"
+        || fixture["curve_slug"] != CURVE
+        || fixture["equation"]["a"] != "0"
+        || fixture["equation"]["b"] != "1"
+        || fixture["equation"]["small_summands"] != 3
+        || fixture["equation"]["residual_summands"] != 2
+        || fixture["archive"]["small"]["s3_uri"] != format!("{PREFIX}objects/{SMALL_HASH}.jsonl.gz")
+        || fixture["archive"]["envelope"]["s3_uri"]
+            != format!("{PREFIX}objects/{ENVELOPE_HASH}.jsonl.gz")
+    {
+        return Err("known-answer fixture metadata".into());
+    }
+    Ok(fixture)
+}
+
+fn control_target(
+    path: &Path,
+    curve: &KoblitzCurve,
+    small: &FrobeniusFactorBase,
+    residual: &FrobeniusFactorBase,
+) -> Result<BinaryPoint> {
+    let fixture = parse_control_bytes(&fs::read(path)?)?;
+    if fixture["subgroup_order"] != curve.subgroup_order.to_string() {
+        return Err("known-answer subgroup order".into());
+    }
+    let terms = fixture["terms"].as_array().ok_or("known-answer terms")?;
+    let indices = [0usize, 166, 332, 196_212, 196_378];
+    if terms.len() != indices.len() {
+        return Err("known-answer term count".into());
+    }
+    let mut sum = BinaryPoint::Infinity;
+    for (&index, term) in indices.iter().zip(terms) {
+        let selected = if index < 196_212 {
+            &small.points[index]
+        } else {
+            &residual.points[index - 196_212]
+        };
+        if term["global_point_index"] != index
+            || term["domain"] != if index < 196_212 { "small" } else { "residual" }
+            || term["column"] != index / 166
+            || term["phase"] != 0
+            || term["negative"] != false
+            || term["coefficient"] != "1"
+            || point(&term["point"])? != *selected
+        {
+            return Err("known-answer selected point differs from imported base".into());
+        }
+        sum = curve.add(&sum, selected);
+    }
+    let target = point(&fixture["equation"]["target"])?;
+    if target == BinaryPoint::Infinity
+        || !curve.curve.is_on_curve(&target)
+        || curve.mul(&target, &curve.subgroup_order) != BinaryPoint::Infinity
+        || sum != target
+    {
+        return Err("known-answer group sum mismatch".into());
+    }
+    Ok(target)
+}
+
+fn control_run(args: &[String]) -> Result<()> {
+    if args.len() != 10 {
+        return Err("usage: control-run SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT FIXTURE BUDGET_SECONDS CONFLICT_BUDGET MAX_MODELS OUTPUT_DIR".into());
+    }
+    let budget: u64 = args[6].parse()?;
+    let conflicts: u64 = args[7].parse()?;
+    let models: usize = args[8].parse()?;
+    if !(1..=7200).contains(&budget)
+        || !(1..=10_000_000).contains(&conflicts)
+        || !(1..=1024).contains(&models)
+    {
+        return Err("invalid bounded control configuration".into());
+    }
+    cgroup_gate()?;
+    let start = Instant::now();
+    let output = Path::new(&args[9]);
+    fs::create_dir(output)?;
+    write_new(
+        &output.join("config.json"),
+        &json!({
+            "schema":"n83.mixed-orbit-known-witness-config/v1",
+            "scope":"known_answer_control_only", "study":STUDY,
+            "fixture_blake3":blake3::hash(CONTROL_FIXTURE).to_hex().to_string(),
+            "small_object_blake3":SMALL_HASH, "envelope_object_blake3":ENVELOPE_HASH,
+            "budget_seconds":budget, "conflict_budget":conflicts, "max_models":models,
+            "small_summands":3, "residual_summands":2,
+            "memory_cgroup_limit_bytes":4294967296u64,
+            "memory_cgroup_swap_limit_bytes":0
+        }),
+    )?;
+    let cap_path = output.join("cap.json");
+    std::thread::spawn(move || {
+        std::thread::sleep(Duration::from_secs(budget));
+        let _ = write_new(
+            &cap_path,
+            &json!({
+                "schema":"n83.mixed-orbit-known-witness-cap/v1",
+                "status":"UNKNOWN_budget", "budget_seconds":budget,
+                "elapsed_process_wall_ms":start.elapsed().as_secs_f64()*1000.0
+            }),
+        );
+        std::process::exit(124);
+    });
+    let (curve, small, residual) = import_pair(args)?;
+    let target = control_target(Path::new(&args[5]), &curve, &small, &residual)?;
+    let import_ms = start.elapsed().as_secs_f64() * 1000.0;
+    let domains = MixedOrbitDomains::new(&curve, &small, &residual)?;
+    let limits = ChainS3Limits {
+        max_variables: 150_000,
+        max_domain_clauses: 12_000_000,
+        max_models: models,
+        conflict_budget: conflicts,
+    };
+    let (candidate, stats) = domains.search(
+        1,
+        &BigUint::from(0u8),
+        &BigUint::from(1u8),
+        &target,
+        3,
+        2,
+        limits,
+        true,
+    );
+    let candidate_record = candidate.as_ref().map(|row| -> Result<Value> {
+        let mut sum = BinaryPoint::Infinity;
+        for &index in &row.small_point_indices {
+            sum = curve.add(&sum, small.points.get(index).ok_or("candidate small index")?);
+        }
+        for point in &row.residual_points {
+            sum = curve.add(&sum, point);
+        }
+        if sum != target || row.coef_a != BigUint::from(0u8)
+            || row.coef_b != BigUint::from(1u8)
+        {
+            return Err("known-answer candidate failed group replay".into());
+        }
+        Ok(json!({
+            "a":row.coef_a.to_string(), "b":row.coef_b.to_string(),
+            "small_point_indices":row.small_point_indices,
+            "residual_points":row.residual_points.iter().map(point_json).collect::<Result<Vec<_>>>()?
+        }))
+    }).transpose()?;
+    let status = if stats.invalid_models != 0 {
+        "PRODUCER_FAILURE_invalid_model"
+    } else if candidate_record.is_some() {
+        "PASS_known_witness_solver_access"
+    } else if stats.exhausted && stats.patterns_attempted == 0 {
+        "UNKNOWN_preflight_cap"
+    } else if stats.exhausted {
+        "UNKNOWN_search_cap"
+    } else if stats.refuted {
+        "PRODUCER_FAILURE_known_witness_refuted"
+    } else {
+        "PRODUCER_FAILURE_unclassified_solver_result"
+    };
+    write_new(
+        &output.join("result.json"),
+        &json!({
+            "schema":"n83.mixed-orbit-known-witness-result/v1",
+            "scope":"known_answer_control_only", "status":status,
+            "candidate":candidate_record, "search":stats,
+            "target":point_json(&target)?,
+            "base_import_elapsed_ms_L0":import_ms,
+            "worker_wall_ms_L0":start.elapsed().as_secs_f64()*1000.0,
+            "memory_cgroup_peak_bytes":cgroup_peak_bytes()?,
+            "natural_relations":Value::Null,
+            "total_index_calculus_runtime_ms":Value::Null,
+            "selected_best_total_runtime":Value::Null
+        }),
+    )?;
+    Ok(())
+}
+
 fn run(args: &[String]) -> Result<()> {
     if args.len() != 13 {
         return Err("usage: run SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT CORPUS BUDGET_SECONDS MAX_TRIALS CONFLICT_BUDGET MAX_MODELS SMALL_SUMMANDS RESIDUAL_SUMMANDS OUTPUT_DIR".into());
@@ -564,13 +746,31 @@ fn main() -> Result<()> {
             Ok(())
         }
         Some("run") => run(&args),
-        _ => Err("usage: verify SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT | run SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT CORPUS BUDGET_SECONDS MAX_TRIALS CONFLICT_BUDGET MAX_MODELS SMALL_SUMMANDS RESIDUAL_SUMMANDS OUTPUT_DIR".into()),
+        Some("verify-control") if args.len() == 6 => {
+            let (curve, small, residual) = import_pair(&args)?;
+            let target = control_target(Path::new(&args[5]), &curve, &small, &residual)?;
+            println!("{}", json!({"schema":"n83.mixed-orbit-known-witness-verify/v1",
+                "status":"PASS", "scope":"known_answer_control_only",
+                "target":point_json(&target)?, "solver_search_executed":false}));
+            Ok(())
+        }
+        Some("control-run") => control_run(&args),
+        _ => Err("usage: verify SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT | verify-control SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT FIXTURE | run SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT CORPUS BUDGET_SECONDS MAX_TRIALS CONFLICT_BUDGET MAX_MODELS SMALL_SUMMANDS RESIDUAL_SUMMANDS OUTPUT_DIR | control-run SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT FIXTURE BUDGET_SECONDS CONFLICT_BUDGET MAX_MODELS OUTPUT_DIR".into()),
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn known_witness_fixture_is_pinned_and_distinct_from_natural_corpus() {
+        let fixture = parse_control_bytes(CONTROL_FIXTURE).unwrap();
+        assert_eq!(fixture["scope"], "known_answer_control_only");
+        let mut altered = CONTROL_FIXTURE.to_vec();
+        altered[0] ^= 1;
+        assert!(parse_control_bytes(&altered).is_err());
+    }
 
     #[test]
     fn pinned_manifests_reject_wrong_bytes_or_archive() {
