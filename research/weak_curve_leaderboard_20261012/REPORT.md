@@ -7,7 +7,7 @@ databases and the repository's named-curve and transfer registries to a
 static catalog. The snapshot contains 814 prior exact models, 103 named
 curves (101 standards-provenance curves and two challenge curves), 36
 published odd-characteristic parameter cases, three exact prime-field
-examples and ten criterion entries. Each evaluated finding has a
+examples and thirteen criterion entries. Each evaluated finding has a
 [WID1 identifier](IDENTIFIERS.md) distinct from its curve's ICV1 identity.
 
 ## What the leaderboard ranks
@@ -111,8 +111,8 @@ independent `ellgroup` result is `[10,10]`.
 ## Mechanism map
 
 The [machine-readable registry](criteria.json) specifies domain, recognition,
-required witness, construction and primary source for ten criteria. The
-entries make three crucial separations.
+required witness, construction and primary source for thirteen criteria. The
+entries make four crucial separations.
 
 First, the [MOV reduction](https://doi.org/10.1145/103418.103434) uses a
 Weil pairing, while [Frey–Rück](https://doi.org/10.1090/S0025-5718-1994-1218343-6)
@@ -133,7 +133,20 @@ criterion for weak curves. The p41, p43 and p47 cubic diagnostics retain
 396, 376 and 424 ordinary high-depth zero rows respectively, so the
 depth screen cannot serve as a sufficient classifier even there.
 
-Third, the ambient curve order, a selected point order, and an exact
+Third, the atlas now distinguishes three additional routes. Direct
+[extension-field decomposition](https://eprint.iacr.org/2010/157) works on
+the elliptic group itself; [cover-and-decomposition](https://eprint.iacr.org/2011/020)
+combines a covering with a destination relation method; and a
+[cubic Jacobian isogeny](https://arxiv.org/abs/2012.07173) can transfer a
+prime-order group without a literal covering map. Their published methods
+are present as criteria. Exact atlas joins and complete selected-subgroup
+measurements remain open; the repository's separate Joux–Vitse replay is
+tracked in the coverage audit.
+The [coverage audit](COVERAGE_AUDIT.md) maps these methods, the 36
+prime-degree cases, and same-field hyperelliptic covers to their distinct
+construction and measurement gates.
+
+Fourth, the ambient curve order, a selected point order, and an exact
 transfer all answer different questions. A curve with a smooth ambient
 order still needs a selected point and target membership to support a
 selected-group claim. A model over an extension field only yields a

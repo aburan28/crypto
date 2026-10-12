@@ -108,6 +108,42 @@
     "url": "https://github.com/aburan28/crypto/tree/main/research/weak_curve_database_20261012"
   },
   {
+    "id": "extension_index_calculus",
+    "name": "Direct extension-field decomposition",
+    "method": "Summation-polynomial index calculus on E",
+    "domain": "Selected subgroup of E/F_(q^d), d>1, with an explicit subfield factor base",
+    "recognition": "Fix the extension representation, subgroup, factor base, and decomposition system; field degree alone does not establish useful relation yield or cost.",
+    "witness": "Verified natural-query relations, rank growth, final linear algebra, target descent, scalar replay, and a matched one-target reference.",
+    "construction": "Use a subfield factor base and solve the summation-polynomial decomposition system on the original elliptic curve.",
+    "status": "transfer_registry_formula_rows_no_atlas_finding",
+    "source": "Joux–Vitse (2010), extending Gaudry–Diem",
+    "url": "https://eprint.iacr.org/2010/157"
+  },
+  {
+    "id": "cover_and_decomposition",
+    "name": "Cover-and-decomposition index calculus",
+    "method": "Partial covering with decomposition on the destination",
+    "domain": "Elliptic curves over composite-degree odd-characteristic extensions, especially F_(p^6)",
+    "recognition": "Construct the exact cover or correspondence and the decomposition factor base for the selected group; compare the full relation pipeline with the source-group reference.",
+    "witness": "Destination curve and genus, explicit subgroup transport, verified relation yield and rank, target descent, and charged construction and solver costs.",
+    "construction": "Apply the published Joux–Vitse cover-and-decomposition method to a specified extension-field model and subgroup.",
+    "status": "published_method_and_separate_local_replays_not_joined_to_atlas",
+    "source": "Joux–Vitse (2012)",
+    "url": "https://eprint.iacr.org/2011/020"
+  },
+  {
+    "id": "cubic_jacobian_isogeny",
+    "name": "Cubic Weil-restriction Jacobian isogeny",
+    "method": "Direct isogeny to a genus-three Jacobian",
+    "domain": "Selected prime-order subgroup of E/F_(q^3) satisfying the isogeny construction",
+    "recognition": "Test the stated (ell,ell,ell)-isogeny conditions for the exact Weil restriction and construct the destination genus-three curve.",
+    "witness": "Explicit isogeny and genus-three Jacobian, selected-subgroup kernel check, transported points, destination solver, and full cost.",
+    "construction": "Follow Tian's cubic-extension construction; its homomorphism does not require a covering map C→E.",
+    "status": "published_method_not_screened_in_atlas",
+    "source": "Tian (2023)",
+    "url": "https://arxiv.org/abs/2012.07173"
+  },
+  {
     "id": "proper_subfield_points",
     "name": "Selected points over a proper subfield",
     "method": "Descent to a smaller point group",

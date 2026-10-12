@@ -1,5 +1,41 @@
 # Validation record
 
+## Extension-field coverage audit, 12 October 2026
+
+- The source-linked [coverage audit](COVERAGE_AUDIT.md) adds three distinct
+  routes to `criteria.json`: direct extension-field decomposition,
+  Joux–Vitse cover-and-decomposition, and Tian's cubic Jacobian isogeny.
+  The criterion count is 13; the exact-curve, WID1, and published-case
+  counts remain 920, 29, and 36. The new entries assign no unverified
+  weakness IDs.
+- Primary source pages checked: [Joux–Vitse 2010/157](https://eprint.iacr.org/2010/157),
+  [Joux–Vitse 2011/020](https://eprint.iacr.org/2011/020),
+  [Tian 2012.07173](https://arxiv.org/abs/2012.07173),
+  [Iijima–Momose–Chao 2015/805](https://eprint.iacr.org/2015/805),
+  [2009/613](https://eprint.iacr.org/2009/613), and
+  [2008/215](https://eprint.iacr.org/2008/215). The repository's
+  `jacobian-transfers.json` reports nine extension-index-calculus and 312
+  same-field-cover formula rows; the snapshot has 661 degree-six, 77
+  degree-ten, and 76 degree-fourteen local models.
+- `cargo test --release --locked --offline` in this crate: four passed.
+  `cargo run --release --locked --offline -- check snapshot.json`: passed.
+  JSON parsing, 13 unique criterion IDs, source/site byte parity, HTML
+  section balance, and `node --check` for `app.js`: passed.
+- `CARGO_NET_OFFLINE=true cargo test --release --locked --lib --quiet` at
+  repository root: **3,991 passed, nine failed, 113 ignored**, exit 101.
+  All nine failures are the same `pollard_collab::{cairn,net}` local-socket
+  `Operation not permitted` cases recorded in [root_lib_v2.log](validation/root_lib_v2.log).
+  No Rust library source changed in this audit.
+- The Sites source helper opened the existing Site and pushed source commit
+  `e481237f3017a641935f0efc1a2ff9a34af2761c`. It packaged
+  `/Volumes/SSD990/llm/tmp/weakcurves-static-v7.tar.gz`, saved version
+  `appgprj_6acd13c887f0819194ae65d7f61c7b33~appgver_b7e1e7c4c3cc8191948b33fad0d8f4c2`,
+  and deployed it publicly as
+  `appgdep_6acd2a72945c8191ba910d9e7194ec44` with status
+  `succeeded` at <https://weakcurves.aburan28.chatgpt.site>.
+  The existing public audience was preserved.
+
+
 ## Snapshot 02: named curves and WID1
 
 - `cargo test --release --locked`: four focused tests passed, including

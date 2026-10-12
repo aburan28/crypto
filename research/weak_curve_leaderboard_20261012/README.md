@@ -5,10 +5,11 @@ weak-curve database, **103 named curves** from the repository's curve registry,
 and **36 published odd-characteristic covering cases**. The named roster
 includes Oakley Groups 3 and 4, with exact GHS invariant candidates and
 separate WID1 finding IDs. It adds three exhaustively checked prime-field
-examples and a ten-criterion
+examples and a thirteen-criterion
 registry for anomalous, smooth-order, MOV, Frey–Rück, supersingular,
 binary-GHS, odd-characteristic GHS, cubic norm-one, quadratic-torus and
-proper-subfield mechanisms. The first [WeakCurves site](../../website/weakcurves/)
+proper-subfield mechanisms, plus direct extension-field decomposition,
+cover-and-decomposition, and cubic Jacobian-isogeny routes. The first [WeakCurves site](../../website/weakcurves/)
 uses this exact export.
 
 The default leaderboard contains 29 finding rows: two prime-field models
@@ -41,6 +42,8 @@ The site is static and reads the JSON files in the browser.
 The [report](REPORT.md) gives the ranking contract, Oakley source checks,
 exact example certificates, mechanism recognition gates, and next research
 steps. The [WID1 specification](IDENTIFIERS.md) defines the weakness marker.
+The [coverage audit](COVERAGE_AUDIT.md) maps prime-degree extensions,
+hyperelliptic covers, and other Jacobian routes to their exact open witnesses.
 The [proof map](PROOF_MAP.md)
 specifies the Lean boundary. [VALIDATION.md](VALIDATION.md) records the build,
 PARI replay, and site checks. This release does not infer a single security
