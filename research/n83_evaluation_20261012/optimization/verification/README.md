@@ -1,5 +1,26 @@
 # Native optimization fixtures and later output verification
 
+Completed output verification now reports **PASS for all 161 recorded
+answers: 156 rho and five IC**, with all five IC four-point witnesses
+independently re-added to their exact frozen targets. Zero invalid rows
+were found. All 157 child-process dispositions are retained as
+`COMPLETED_VERIFIED`; the IC child produced five target rows.
+Read [FRESH_VERIFICATION_REPORT.md](FRESH_VERIFICATION_REPORT.md) and its
+[PDF](FRESH_VERIFICATION_REPORT.pdf). The immutable final arithmetic receipt
+is [final_receipt.json](final_receipt.json), SHA-256:
+
+```text
+6640a9f69e8ef66f3e31a3eab70c18925bdc8140a623aac3559c01fdeb57e294
+```
+
+The separate native [file-hash audit](final_file_hash_audit.json) passed:
+157 execution receipts, 157 producer files and 656 bound files. It compared
+recorded executable, argument input/config, semantic output, stdout and
+stderr SHA-256 values against their actual bytes, and checked that all
+157 recorded known-answer environment flags were false. This is provenance
+verification, not a second timing run or a universal library-arithmetic
+certificate. Source: `verify_file_provenance.cpp`.
+
 The generator froze **three training points, then five holdout points** with
 SplitMix64 seed `202610128301`. All eight are nonidentity points on the exact
 legacy field/model, belong to the prime subgroup and pass native `[d]G=Q`
@@ -71,11 +92,13 @@ IC four-point witness against the independently checked 99,600-point base,
 and preserves cap/failure/missing-answer process dispositions. The scalar
 sidecar is compared after the recovered answer's point replay.
 
-Output verification is compiled and ready; no optimization benchmark or its
-completed output replay is claimed here. Full factor-log/rank transcript,
-performance reproducibility and second-host/isolation gates remain separate
-obligations. The parent task owns the protocol, runner, timed records,
-statistics and final study report.
+The parent ran the final output verifier after all timed children finished;
+this source/receipt review checked its counts and file provenance without
+rerunning the arithmetic checker or either benchmark. Full factor-log/rank
+transcript, independent performance reproducibility and second-host/isolation
+gates remain separate obligations. The parent task owns the protocol,
+runner, timed records, statistics and final study report. No new algebraic
+identity or library-arithmetic discovery is asserted by these checks.
 
 The fixture-generation [report](GENERATION_REPORT.md) and editable
 [diagram](generation.svg) describe this freeze without a timing claim.

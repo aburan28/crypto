@@ -13,14 +13,14 @@ IC measured **1149.151700 s of reusable preparation** and **1164.439320 s for th
 | Requirement | Completed evidence |
 | --- | --- |
 | Freeze target law and selection rules | [PROTOCOL.md](PROTOCOL.md); [machine protocol](records/protocol.json) |
-| Compare arithmetic backends | 18 kernel solves; all nine paired trajectories/outcomes/charges match; [selection](records/panel/kernel/selection.json) |
+| Compare arithmetic backends | 18 kernel solves; all nine paired verified outcomes, walk counters and reported charges match; no full step trace exported; [selection](records/panel/kernel/selection.json) |
 | Evaluate declared policy grid | 108 solves across 12 policies, all completed; [selection](records/panel/policy/selection.json) |
 | Freeze choice before held-out timing | Stage manifests bind selection hashes and earlier selection timestamps |
 | Default/selected held-out rho | 30 completed verified solves; [native statistics](records/panel/statistics.json) |
 | Same-target prepared IC | Five completed verified target rows; [IC observations](records/panel/ic/observations.json) |
 | Independent arithmetic replay | 161 scalar replays and five witnesses; [final receipt](verification/final_receipt.json), zero invalid rows |
 | Isolation observations | Four stage receipts, all exit 0 and zero observed contended samples; [records](records/) |
-| Verification tests | Four worker, 20 native-runner and 3947 library tests passed; 112 library tests ignored; [logs](checks/) |
+| Verification tests | Before timing: four worker,20 native-runner and3947 library tests passed. Integrated delivery:3992 library and four worker tests passed,0 failed,112 library tests ignored; test-only upstream corrections and preserved failures are in [logs](checks/) |
 | Statistical/accounting review | [FINAL_MEASUREMENT_AUDIT.md](FINAL_MEASUREMENT_AUDIT.md) |
 
 Native statistics SHA-256: `6250c42f5a7f6644db5c7c39bd5c712155b2667d081309b5e99202f64f8918f7`. Independent final-receipt SHA-256: `6640a9f69e8ef66f3e31a3eab70c18925bdc8140a623aac3559c01fdeb57e294`. [Reports](reports/) contain the source-linked rendering work; layout and packaging completion are tracked separately from this measured outcome.
@@ -30,3 +30,5 @@ No timed arm failed, reached its cap, or was excluded. Rho's 60-second process c
 The full 600-row rank/factor-log transcript, calibrated common operation unit, applicable sealed legacy-wide ecbench adapter and independent-host/isolation promotion gates remain unresolved. Zero observed contention does not prove physical-host exclusivity. Canonical ledger/graphs remain unchanged because this is diagnostic evidence. See [MEASUREMENT_REVIEW.md](MEASUREMENT_REVIEW.md) and [OPTIMIZATION_SCOPE_AUDIT.md](OPTIMIZATION_SCOPE_AUDIT.md).
 
 Original delivery PR 1719 had merged before this follow-up. This work uses branch `codex/n83-rho-optimization-20261012`; the parent study owns commit/PR delivery, integrity manifests and artifact packaging. Frozen original evidence is preserved.
+
+Separate post-merge delivery checks pass: release library 3992 passed / 0 failed / 112 ignored in 402.32 s, and the configured example 4 passed / 0 failed in 12.19 s. These checks do not replace the pre-measurement results or measured-source identities.
