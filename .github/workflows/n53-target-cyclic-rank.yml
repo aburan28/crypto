@@ -13,6 +13,7 @@ on:
       - 'research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/**'
       - 'research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928/**'
       - '.github/workflows/n53-target-cyclic-rank.yml'
+      - '.github/scripts/*frozen-workflow-check*'
 
 permissions:
   contents: write
@@ -33,20 +34,37 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Verify replay freeze and released protocol bytes
-        run: python3 research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928/replay.py --mode freeze
-      - name: Verify held hashes and disjoint target schedule against pinned release sources; never run n53 producer
+      - name: Verify frozen scheduling metadata, source custody, target schedule and archive
         run: |
-          python3 research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928/replay.py --mode preflight
-          git diff --check
-      - name: Check fail-closed snapshot substitution
-        run: python3 -m unittest discover -s research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928 -p 'test_replay.py' -v
-      - name: Rehash immutable attempted outcome if later committed
-        run: |
-          bundle=research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/evidence
-          if test -f "$bundle/archive_manifest.json"; then
-            python3 research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928/replay.py --mode archive --bundle "$bundle"
-          fi
+          node .github/scripts/frozen-workflow-check.mjs \
+            --workflow .github/workflows/n53-target-cyclic-rank.yml \
+            --revision aa0cee7bd1769222e5706e61b64478d5aad6d573 \
+            --manifest research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928/FROZEN.json \
+            --root research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928 \
+            --root research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925 \
+            --root Cargo.toml \
+            --root examples/koblitz_s5_sat_instance.rs \
+            --root research/sat_factor_base_review_20260908/autolab_combined_l384_coldbase_n53_20260925/Cargo.lock \
+            --root research/sat_factor_base_review_20260908/autolab_combined_l384_coldbase_n53_20260925/run_panel.py \
+            --root research/sat_factor_base_review_20260908/autolab_combined_l384_coldbase_n53_20260925/archive.py \
+            --root research/sat_factor_base_review_20260908/autolab_combined_l384_coldbase_n53_20260925/points_L384.jsonl \
+            --root research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/generate_targets.py \
+            --root research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/TARGET_MANIFEST.json \
+            --root research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay_20260924_codex/replay.py \
+            --root research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay_20260924_codex/base_header.jsonl.gz \
+            --root research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/cold_batch_rank.py \
+            -- bash -e -c '
+              replay=research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928/replay.py
+              python3 "$replay" --mode freeze
+              python3 "$replay" --mode preflight
+              python3 -m unittest discover -s research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928 -p "test_replay.py" -v
+              bundle=research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/evidence
+              if test -f "$bundle/archive_manifest.json"; then
+                python3 "$replay" --mode archive --bundle "$bundle"
+              fi
+            '
+      - name: Current checkout whitespace check
+        run: git diff --check
 
   outcome:
     if: github.event.action == 'labeled' && github.event.label.name == 'run-n53-rotation-once' && github.event.pull_request.head.repo.full_name == github.repository
