@@ -7,6 +7,7 @@ directory per paper.
 |---|---|---|
 | [`structural-completeness/`](structural-completeness/) | Structural Completeness of Prime-Field Elliptic Curves Against Isogeny-Graph Cryptanalysis | research draft, anonymized, not submitted; Markdown twin in `research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md` |
 | [`lll-degeneracy-note/`](lll-degeneracy-note/) | An Empirical Note on LLL Degeneracy of the Boneh–Venkatesan Lattice for secp256k1 | research note, anonymized, not submitted |
+| [`eigen-seta/`](eigen-seta/) | Eigen-Séta: an isogeny KEM whose trapdoor is a hidden-degree endomorphism | historical research draft from PR #1680 (`74bec88bd`), anonymized, not peer reviewed or submitted; [source and implementation limits](eigen-seta/INTEGRATION_PROVENANCE.md) |
 
 Markdown drafts that are not yet typeset stay with their notes and are listed
 here so they are not lost: `research/ecdlp_autolab/PAPER_DRAFT.md` (An Empirical
