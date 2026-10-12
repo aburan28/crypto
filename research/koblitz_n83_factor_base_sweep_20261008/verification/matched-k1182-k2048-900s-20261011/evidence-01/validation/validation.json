@@ -1,0 +1,35 @@
+{
+  "logs_sha256": {
+    "release-lib-loopback.log": "794898655df51d9ae33e2633acff5bc80aeff7b26908357fe0eb503d9190385d",
+    "release-lib-sandbox.log": "0508a0b348f15178bc24445dc9939b8ef0da4d6ad0374898e7aa90bbfb5900a0",
+    "study-python.log": "66ec36c12bb19436c23c106f1c704d52c11b3b27f68fc2ad7625a45961c657e3"
+  },
+  "receipt_audit": {
+    "command": "python3 research/koblitz_n83_factor_base_sweep_20261008/verification/matched-k1182-k2048-900s-20261011/audit.py",
+    "docker_socket_access": "read_only_local",
+    "status": "PASS_bounded_receipts_only"
+  },
+  "release_library_initial": {
+    "command": "TMPDIR=/Volumes/SSD990/crypto/target/n83-matched-test-tmp RUST_TEST_THREADS=4 cargo test --release --lib",
+    "failed": 9,
+    "ignored": 110,
+    "log": "release-lib-sandbox.log",
+    "passed": 3889,
+    "status": "SANDBOX_LOOPBACK_DENIED"
+  },
+  "release_library_recheck": {
+    "command": "TMPDIR=/Volumes/SSD990/crypto/target/n83-matched-test-tmp RUST_TEST_THREADS=4 cargo test --release --lib",
+    "failed": 0,
+    "ignored": 110,
+    "log": "release-lib-loopback.log",
+    "passed": 3898,
+    "status": "PASS"
+  },
+  "schema": "n83.matched-retained-size-validation/v1",
+  "study_python": {
+    "command": "python3 -m unittest discover -s research/koblitz_n83_factor_base_sweep_20261008 -p test_*.py -q",
+    "log": "study-python.log",
+    "status": "PASS",
+    "tests": 39
+  }
+}
