@@ -54,3 +54,16 @@ warning: unused variable: `projected`
 warning: `crypto` (lib) generated 2 warnings (run `cargo fix --lib -p crypto` to apply 2 suggestions)
    Compiling crypto v0.1.0 (/home/user/crypto)
     Finished `release` profile [optimized] target(s) in 3.48s
+n=11 w=2: base 23 abscissae, oracle 360 keys, 528 pair sums, 0 ms
+n=23 w=2: base 162 abscissae, oracle 2584 keys, 26243 pair sums, 6 ms
+n=29 w=2: base 175 abscissae, oracle 2792 keys, 30624 pair sums, 8 ms
+n=33 w=2: base 232 abscissae, oracle 3704 keys, 53823 pair sums, 16 ms
+n=35 w=2: base 211 abscissae, oracle 3368 keys, 44520 pair sums, 12 ms
+n=39 w=2: base 430 abscissae, oracle 6872 keys, 184899 pair sums, 45 ms
+n=41 w=2: base 288 abscissae, oracle 4600 keys, 82943 pair sums, 34 ms
+n=11 w=3: base 100 abscissae, oracle 1591 keys, 9999 pair sums, 3 ms
+n=23 w=3: base 1197 abscissae, oracle 19144 keys, 1432808 pair sums, 236 ms
+n=29 w=3: base 2031 abscissae, oracle 32488 keys, 4124960 pair sums, 745 ms
+n=33 w=3: base 3246 abscissae, oracle 51928 keys, 10536515 pair sums, 2269 ms
+n=35 w=3: base 3151 abscissae, oracle 50408 keys, 9928800 pair sums, 2248 ms
+n=39 w=3: base 4993 abscissae, oracle 79880 keys, 24930048 pair sums, 5338 ms
