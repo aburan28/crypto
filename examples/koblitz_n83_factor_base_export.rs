@@ -23,6 +23,7 @@ use std::time::{Duration, Instant};
 #[path = "../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs"]
 #[allow(dead_code, unused_imports, clippy::all)]
 mod compact_cold;
+#[allow(clippy::all)]
 #[path = "../research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs"]
 #[allow(dead_code, unused_imports, clippy::all)]
 mod primary_adapter;
