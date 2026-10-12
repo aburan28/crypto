@@ -13,10 +13,10 @@
       "plain_sha256": "469bd06770c742a5eeb0cec9573c4bc367d22951b89e6f926c2a39fa20df99f4"
     },
     "study_python": {
-      "compressed_sha256": "eaf49be826ff4c980f6a3d60f730f8877137fa5cbc66a293dc8e797de7770d7f",
+      "compressed_sha256": "946ee0bfc0e123dfd70add2bee03975adc280bc61dd2ebf33b80247753953086",
       "log": "study_python.log.gz",
       "plain_bytes": 98,
-      "plain_sha256": "9d79762f3e220183a5bd50cd47ba0fc4b9038a1815eafaab2a86eba56cdbc0b7"
+      "plain_sha256": "646ec4f0f7168df0077d4f10dcfda6c1dca9270086cd006880f462c4dee1723c"
     },
     "wdsat_isolated": {
       "compressed_sha256": "91d6ae53477d556bd52f2794154cef1c093375fea9c733a81462af686d834764",
@@ -26,6 +26,11 @@
     }
   },
   "complete_runtime": null,
+  "first_trial_source_coefficients": {
+    "a": "1833078656608906180176350",
+    "b": "163089659398503559150141",
+    "derivation": "BLAKE3(n83.mixed-orbit-partial-trial/v1 || label || 0u64_le) modulo subgroup order"
+  },
   "relation_yield": null,
   "results": {
     "diff_check": "PASS",
@@ -55,10 +60,10 @@
   "source_sha256": {
     "research/koblitz_n83_factor_base_sweep_20261008/chain_search_supervisor.py": "fa0443e453e5fb7011019a08b61a219834e1594acc99e007f405f27e44b97a66",
     "research/koblitz_n83_factor_base_sweep_20261008/compact_probe_supervisor.py": "4a9c363d8164f000ac3a6b654e37d001375d64744173bd90d7ad3dd2be692d37",
-    "research/koblitz_n83_factor_base_sweep_20261008/mixed_orbit_supervisor.py": "3a88270da320c9836051ad5f2fdf0256080d0d38f765c06f4c912cdd62c0fb4c",
+    "research/koblitz_n83_factor_base_sweep_20261008/mixed_orbit_supervisor.py": "c39a564c80e26da7fc2eb9f115e650ad8a95af7c7b598a02071443b34ea286f0",
     "research/koblitz_n83_factor_base_sweep_20261008/structured_orbit_search_supervisor.py": "045d2eed66f2ae49ec3be7564dee3a2f563e89151d2f682cf7587d321b2145f7",
-    "research/koblitz_n83_factor_base_sweep_20261008/test_mixed_orbit_supervisor.py": "4e918d8a5299a568e9aa2fa17fb2619c078698d8fe233a416478c31843de8254",
-    "research/koblitz_n83_factor_base_sweep_20261008/verification/mixed-orbit-supervisor-source-20261012/PROTOCOL.md": "afb8afd1a08b06c1790db0cfabdd13a07641702d0456afb5c7bf8c2cbf8c40c9"
+    "research/koblitz_n83_factor_base_sweep_20261008/test_mixed_orbit_supervisor.py": "4fb63c09cbb62f4e792b0149b4389ab5ecb3ffd8f6370b81f4b42808b933318d",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/mixed-orbit-supervisor-source-20261012/PROTOCOL.md": "87ecb5474882328d713297ec0a1f1538841d304ebac1066b6e6be75c9dea2e79"
   },
   "status": "PASS_source_only_with_retained_concurrent_timing_failure"
 }

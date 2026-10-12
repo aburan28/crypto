@@ -168,7 +168,8 @@ class MixedOrbitSupervisorTests(unittest.TestCase):
                         (output / "run/config.json").write_text(json.dumps(config()))
                         (output / "run/result.json").write_text(json.dumps(result()))
                         (output / "run/events.jsonl").write_text(json.dumps({
-                            "trial": 0, "a": "1", "b": "0",
+                            "trial": 0, "a": gate.FIRST_TRIAL_A,
+                            "b": gate.FIRST_TRIAL_B,
                             "elapsed_process_wall_ms": 10.0,
                             "search": {"solver_calls": 1, "conflicts": 5000,
                                        "models": 0, "invalid_models": 0,
@@ -200,6 +201,10 @@ class MixedOrbitSupervisorTests(unittest.TestCase):
                                              [negative] * 2, generator))
         self.assertFalse(gate.replay_equation("1", "0", [generator] * 3,
                                               [negative, generator], generator))
+        a, b = int(gate.FIRST_TRIAL_A), int(gate.FIRST_TRIAL_B)
+        target_scalar = ((1 - a) * pow(b, -1, gate.PRIMARY_ORDER)) % gate.PRIMARY_ORDER
+        target = gate.point_mul(generator, target_scalar)
+        self.assertIsNotNone(target)
         with tempfile.TemporaryDirectory(prefix="n83-mixed-replay-") as folder:
             root = Path(folder)
             archive = root / "small.jsonl.gz"
@@ -209,16 +214,19 @@ class MixedOrbitSupervisorTests(unittest.TestCase):
                 for _ in range(3):
                     stream.write(json.dumps({"point": point}) + "\n")
             event = {
-                "trial": 0, "a": "1", "b": "0", "elapsed_process_wall_ms": 1.0,
+                "trial": 0, "a": gate.FIRST_TRIAL_A,
+                "b": gate.FIRST_TRIAL_B, "elapsed_process_wall_ms": 1.0,
                 "search": {"solver_calls": 1, "conflicts": 20, "models": 1,
                            "invalid_models": 0, "group_rejected_models": 0,
                            "exhausted": False, "refuted": False},
                 "candidate": {
-                    "source_id": 1, "a": "1", "b": "0",
+                    "source_id": 1, "a": gate.FIRST_TRIAL_A,
+                    "b": gate.FIRST_TRIAL_B,
                     "small_point_indices": [0, 1, 2],
                     "residual_points": [[str(negative[0]), str(negative[1])]] * 2,
                 },
-                "graph": {"kind": "full", "a": "1", "b": "0",
+                "graph": {"kind": "full", "a": gate.FIRST_TRIAL_A,
+                          "b": gate.FIRST_TRIAL_B,
                           "small": [["0", "1"]], "source_coeffs": [["1", "1"]],
                           "merge_depth": 0},
             }
@@ -230,21 +238,26 @@ class MixedOrbitSupervisorTests(unittest.TestCase):
                 "solver_conflicts": 20, "solver_models": 1,
                 "graph_accepted_candidates": 1, "completed_rows": 1,
             })
-            self.assertIsNone(gate.replay_events(events, archive, generator, report))
+            self.assertIsNone(gate.replay_events(events, archive, target, report))
+            event["a"] = "1"
+            events.write_text(json.dumps(event) + "\n")
+            self.assertIn("frozen first-trial", gate.replay_events(
+                events, archive, target, report))
+            event["a"] = gate.FIRST_TRIAL_A
             event["candidate"]["residual_points"][0] = point
             events.write_text(json.dumps(event) + "\n")
             self.assertIn("partial point equation", gate.replay_events(
-                events, archive, generator, report))
+                events, archive, target, report))
             event["candidate"]["residual_points"][0] = [str(negative[0]), str(negative[1])]
             event["graph"]["source_coeffs"] = [["1", "2"]]
             events.write_text(json.dumps(event) + "\n")
             self.assertIn("source combination", gate.replay_events(
-                events, archive, generator, report))
+                events, archive, target, report))
             event["graph"]["source_coeffs"] = [["1", "1"]]
             event["graph"]["small"] = [["0", "2"]]
             events.write_text(json.dumps(event) + "\n")
             self.assertIn("completed row failed", gate.replay_events(
-                events, archive, generator, report))
+                events, archive, target, report))
 
 
 if __name__ == "__main__":

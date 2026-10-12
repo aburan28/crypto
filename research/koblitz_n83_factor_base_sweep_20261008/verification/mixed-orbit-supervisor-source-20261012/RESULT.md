@@ -12,7 +12,8 @@ digests, committed source, matched public corpus, one trial and its hard
 resource limits. It retains stage commands, exit/timeout/OOM/cleanup states,
 raw logs, frozen input hashes and conservative charges. It validates the
 worker's import and search receipts, checks per-trial counters against the
-event ledger, and independently replays any partial and completed row using
+event ledger, pins the first trial's source coefficients independently of the
+worker, and replays any partial and completed row using
 binary-curve group arithmetic. Censored solver, graph and resource outcomes
 remain separate from producer failures. The frozen [first-run protocol](PROTOCOL.md)
 sets the exact gate and its accounting; it is not a runtime ranking.

@@ -17,6 +17,10 @@ Search one deterministic public equation with three small and two residual
 summands, ordered first small pair, at most 150,000 variables, 12,000,000
 domain clauses, 32 models and 5,000 conflicts. These settings are a capacity
 and partial-yield gate; they do not establish a factor-base runtime ranking.
+The independently derived first-trial coefficients are
+`a=1833078656608906180176350` and `b=163089659398503559150141` modulo
+the pinned subgroup order. The outer event audit rejects a different source
+equation before considering any partial or graph row.
 
 The frozen local objects must be downloaded from their retained S3 URIs and
 checked against these SHA-256 digests before launch:

@@ -66,6 +66,10 @@ CONFLICTS = 5000
 MODELS = 32
 SMALL_SUMMANDS = 3
 RESIDUAL_SUMMANDS = 2
+# Independently derived from the worker's published BLAKE3 trial schedule:
+# BLAKE3("n83.mixed-orbit-partial-trial/v1" || label || 0u64_le) mod r.
+FIRST_TRIAL_A = "1833078656608906180176350"
+FIRST_TRIAL_B = "163089659398503559150141"
 
 
 def authorization_error(record: object, build: Path, output: Path) -> str | None:
@@ -368,6 +372,8 @@ def replay_events(path: Path, small_object: Path, target: tuple[int, int],
                 or not canonical_decimal(event.get("b"), PRIMARY_ORDER)
                 or not finite_nonnegative(event.get("elapsed_process_wall_ms"))):
             return "event source equation or wall time malformed"
+        if trial == 0 and (event["a"], event["b"]) != (FIRST_TRIAL_A, FIRST_TRIAL_B):
+            return "event differs from frozen first-trial coefficient schedule"
         search = event.get("search")
         if not isinstance(search, dict):
             return "event search statistics missing"
