@@ -1286,19 +1286,25 @@ impl TraitFile {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn unavailable_coordinate_models_keep_exact_fields_without_order_certificates() {
+    fn unsupported_coordinate_models_keep_exact_fields_without_order_certificates() {
         use super::*;
-        for (text, q) in [
+        // x^2 + 2 is irreducible over F_37. This field and its exact
+        // coefficient vectors are supported as data, not group arithmetic.
+        let (extension, _) = parse_model(
+            r#"{"field":"fpk-37-2-example","form":"y^2=x^3+a*x+b","p":"37","k":"2","modulus":["2","0"],"a":["1","0"],"b":["1","0"]}"#,
+        )
+        .unwrap();
+        assert!(matches!(&extension, Model::Extension { .. }));
+        for (model, q) in [
             (
-                r#"{"field":"fp-101","form":"B*y^2=x^3+A*x^2+x","p":"101","A":"3","B":"1"}"#,
+                Model::Other {
+                    p: BigUint::from(101u32),
+                    degree: 1,
+                },
                 101u64,
             ),
-            (
-                r#"{"field":"fpk-37-2-example","form":"y^2=x^3+a*x+b","p":"37","k":"2","a":["1","0"],"b":["1","0"]}"#,
-                1369u64,
-            ),
+            (extension, 1369u64),
         ] {
-            let (model, _) = parse_model(text).unwrap();
             assert_eq!(model.q(), BigUint::from(q));
             assert_eq!(
                 certify::check_order(&model, &BigUint::from(q), &[])
@@ -1307,6 +1313,35 @@ mod tests {
                 Status::NotEvaluated
             );
         }
+    }
+
+    #[test]
+    fn supported_montgomery_model_certifies_its_count_and_rejects_an_incorrect_order() {
+        use super::*;
+        let (model, map) = parse_model(
+            r#"{"field":"fp-101","form":"B*y^2=x^3+A*x^2+x","p":"101","A":"3","B":"1"}"#,
+        )
+        .unwrap();
+        assert_eq!(model.q(), BigUint::from(101u32));
+        assert!(matches!(model, Model::Prime { .. }));
+        assert!(matches!(map, CoordinateMap::Montgomery { .. }));
+
+        // Count the original Montgomery equation independently of the
+        // short-Weierstrass adapter used by the certificate.
+        let mut counted = 1u64;
+        for x in 0..101u64 {
+            for y in 0..101u64 {
+                counted += u64::from(y * y % 101 == (x * x * x + 3 * x * x + x) % 101);
+            }
+        }
+        assert_eq!(counted, 96);
+        assert_eq!(
+            certify::check_order(&model, &BigUint::from(counted), &[])
+                .unwrap()
+                .0,
+            Status::Proved
+        );
+        assert!(certify::check_order(&model, &BigUint::from(101u32), &[]).is_err());
     }
     use super::*;
 
