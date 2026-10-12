@@ -899,6 +899,11 @@ struct Fit {
     slope_ci95_bootstrap: [f64; 2],
 }
 
+/// At least two distinct curve sizes: a slope needs them.
+fn spread(points: &[(f64, f64)]) -> bool {
+    points.iter().any(|p| p.0 != points[0].0)
+}
+
 fn ols(xs: &[f64], ys: &[f64]) -> (f64, f64, f64) {
     let n = xs.len() as f64;
     let mx = xs.iter().sum::<f64>() / n;
@@ -942,7 +947,7 @@ fn fit(points: &[(f64, f64)]) -> Fit {
         }
         slopes.push(ols(&bx, &by).0);
     }
-    slopes.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    slopes.sort_by(|a, b| a.total_cmp(b));
     Fit {
         slope,
         intercept,
@@ -1043,7 +1048,7 @@ fn run_rho(c: &Curve, t_idx: usize, target: PrimePoint, seed: u64, bits: u32) ->
 }
 
 fn median(v: &mut [f64]) -> f64 {
-    v.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    v.sort_by(|a, b| a.total_cmp(b));
     let n = v.len();
     if n % 2 == 1 {
         v[n / 2]
@@ -1052,9 +1057,158 @@ fn median(v: &mut [f64]) -> f64 {
     }
 }
 
+/// `refit --in scaling.json --out fits.json`: the slope fits over the
+/// zero-minor runs pooled across defects (the run's own fits group by the
+/// method string, which carries `d`), plus covered/r per curve.
+fn refit(input: &str, out: &str) {
+    let doc: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(input).unwrap()).unwrap();
+    let runs = doc["runs"].as_array().unwrap();
+    let is_zm = |r: &serde_json::Value| r["method"].as_str().unwrap().starts_with("zero_minor");
+    let ok = |r: &serde_json::Value| r["verified"].as_bool().unwrap();
+    let pts = |sel: &dyn Fn(&serde_json::Value) -> Option<f64>| -> Vec<(f64, f64)> {
+        runs.iter()
+            .filter(|r| ok(r))
+            .filter_map(|r| {
+                let y = sel(r)?;
+                (y > 0.0).then(|| (r["log2_r"].as_f64().unwrap(), y.log2()))
+            })
+            .collect()
+    };
+    let mut fits = BTreeMap::new();
+    let defs: Vec<(&str, Box<dyn Fn(&serde_json::Value) -> Option<f64>>)> = vec![
+        (
+            "rho.negation [field ops]",
+            Box::new(move |r| (!is_zm(r)).then(|| r["ops"].as_f64().unwrap())),
+        ),
+        (
+            "rho.negation [group ops]",
+            Box::new(move |r| (!is_zm(r)).then(|| r["group_ops"].as_f64().unwrap())),
+        ),
+        (
+            "zero_minor, d by Eq.(4) rule [field ops, all phases]",
+            Box::new(move |r| is_zm(r).then(|| r["ops"].as_f64().unwrap())),
+        ),
+        (
+            "zero_minor, d by Eq.(4) rule [field ops, search phases only]",
+            Box::new(move |r| is_zm(r).then(|| r["search_ops"].as_f64().unwrap())),
+        ),
+        (
+            "zero_minor, d by Eq.(4) rule [d-subsets covered]",
+            Box::new(move |r| {
+                if !is_zm(r) {
+                    return None;
+                }
+                r["detail"]["counters"]["covered_d_subsets"].as_f64()
+            }),
+        ),
+        (
+            "zero_minor, d = 3 runs only [field ops, all phases]",
+            Box::new(move |r| {
+                (is_zm(r) && r["detail"]["d"].as_u64() == Some(3))
+                    .then(|| r["ops"].as_f64().unwrap())
+            }),
+        ),
+    ];
+    for (name, sel) in &defs {
+        let p = pts(sel.as_ref());
+        let xs: std::collections::BTreeSet<u64> = p.iter().map(|q| q.0.to_bits()).collect();
+        if p.len() >= 3 && xs.len() >= 2 {
+            fits.insert(name.to_string(), fit(&p));
+        }
+    }
+    let mut cov = Vec::new();
+    let mut bits: Vec<u64> = runs.iter().map(|r| r["bits"].as_u64().unwrap()).collect();
+    bits.sort();
+    bits.dedup();
+    for b in bits {
+        let mut v: Vec<f64> = runs
+            .iter()
+            .filter(|r| is_zm(r) && r["bits"].as_u64() == Some(b))
+            .filter_map(|r| {
+                Some(r["detail"]["counters"]["covered_d_subsets"].as_f64()? / r["r"].as_f64()?)
+            })
+            .collect();
+        if v.is_empty() {
+            continue;
+        }
+        let n = v.len();
+        let mn = v.iter().cloned().fold(f64::INFINITY, f64::min);
+        let mx = v.iter().cloned().fold(0.0, f64::max);
+        cov.push(json!({"bits": b, "runs_with_collision": n,
+            "covered_over_r_median": median(&mut v), "min": mn, "max": mx}));
+    }
+    let doc = json!({
+        "schema": "lit2026-w12-zero-minor-refit/v1",
+        "input": input,
+        "fits_log2_vs_log2r": fits,
+        "covered_over_r": cov,
+    });
+    std::fs::write(out, serde_json::to_string_pretty(&doc).unwrap()).unwrap();
+    for (k, f) in &fits {
+        println!(
+            "{k}: slope {:.3} boot [{:.3},{:.3}] t [{:.3},{:.3}] n={}",
+            f.slope,
+            f.slope_ci95_bootstrap[0],
+            f.slope_ci95_bootstrap[1],
+            f.slope_ci95_t[0],
+            f.slope_ci95_t[1],
+            f.n
+        );
+    }
+}
+
+/// `compare --a X --b Y`: whether two runs recorded identical counts and
+/// recovered values row by row (the replay check).
+fn compare(a: &str, b: &str) {
+    let load = |p: &str| -> serde_json::Value {
+        serde_json::from_str(&std::fs::read_to_string(p).unwrap()).unwrap()
+    };
+    let (da, db) = (load(a), load(b));
+    let (ra, rb) = (
+        da["runs"].as_array().unwrap(),
+        db["runs"].as_array().unwrap(),
+    );
+    let mut same = 0;
+    let mut diff = 0;
+    for (x, y) in ra.iter().zip(rb) {
+        let key = |r: &serde_json::Value| {
+            (
+                r["method"].clone(),
+                r["bits"].clone(),
+                r["target"].clone(),
+                r["seed"].clone(),
+                r["ops"].clone(),
+                r["group_ops"].clone(),
+                r["search_ops"].clone(),
+                r["verified"].clone(),
+                r["detail"]["recovered"].clone(),
+            )
+        };
+        if key(x) == key(y) {
+            same += 1;
+        } else {
+            diff += 1;
+        }
+    }
+    println!(
+        "rows a={} b={} identical={} different={}",
+        ra.len(),
+        rb.len(),
+        same,
+        diff
+    );
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let mode = args.get(1).map(|s| s.as_str()).unwrap_or("run");
+    if mode == "refit" {
+        return refit(arg(&args, "--in").unwrap(), arg(&args, "--out").unwrap());
+    }
+    if mode == "compare" {
+        return compare(arg(&args, "--a").unwrap(), arg(&args, "--b").unwrap());
+    }
     let out = arg(&args, "--out").expect("--out FILE");
     let bits_list: Vec<u32> = list(arg(&args, "--bits").unwrap_or("16,18,20,22,24,26"))
         .into_iter()
@@ -1151,7 +1305,7 @@ fn main() {
             .filter(|r| &r.method == m && r.verified)
             .map(|r| (r.log2_r, (r.ops as f64).log2()))
             .collect();
-        if pts.len() >= 3 {
+        if pts.len() >= 3 && spread(&pts) {
             fits.insert(m.clone(), fit(&pts));
         }
         let spts: Vec<(f64, f64)> = rows
@@ -1159,7 +1313,7 @@ fn main() {
             .filter(|r| &r.method == m && r.verified && r.search_ops > 0)
             .map(|r| (r.log2_r, (r.search_ops as f64).log2()))
             .collect();
-        if spts.len() >= 3 && m.starts_with("zero_minor") {
+        if spts.len() >= 3 && spread(&spts) && m.starts_with("zero_minor") {
             fits.insert(format!("{m} [search phases only]"), fit(&spts));
             let cpts: Vec<(f64, f64)> = rows
                 .iter()
@@ -1169,7 +1323,7 @@ fn main() {
                     (c > 0).then(|| (r.log2_r, (c as f64).log2()))
                 })
                 .collect();
-            if cpts.len() >= 3 {
+            if cpts.len() >= 3 && spread(&cpts) {
                 fits.insert(format!("{m} [d-subsets covered]"), fit(&cpts));
             }
         }
@@ -1239,7 +1393,7 @@ fn main() {
                     (s / lg.len() as f64).exp()
                 })
                 .collect();
-            bs.sort_by(|a, b| a.partial_cmp(b).unwrap());
+            bs.sort_by(|a, b| a.total_cmp(b));
             let mn = ratios.iter().cloned().fold(f64::INFINITY, f64::min);
             let mx = ratios.iter().cloned().fold(0.0, f64::max);
             paired.push(json!({
