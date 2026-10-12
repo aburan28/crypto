@@ -1,0 +1,30 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W8",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1712",
+  "slug": "eg-quotient-s4-m3",
+  "papers": [
+    "ePrint 2026/1299"
+  ],
+  "kind": "diagnostic",
+  "workload": {
+    "id": "koblitz-fghr-sym-s4-m3",
+    "description": "descended FGHR-symmetrised S4 (m = 3) against S4 of E/<T>, u-plain and x-direct on icv1-f2m15-t275-b7f03703 (r = 211), icv1-f2m15-tm275-2d22ff5d (r = 751), icv1-f2m9-t5-81e744be (r = 127)",
+    "curve_ids": [
+      "icv1-f2m15-t275-b7f03703",
+      "icv1-f2m15-tm275-2d22ff5d",
+      "icv1-f2m9-t5-81e744be"
+    ]
+  },
+  "metric": "F4 word XORs per solve (median over targets x rounds)",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 40,
+  "arms": [],
+  "ratio_original_over_candidate": null,
+  "ratio_previous_over_candidate": null,
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w8_summation_models_20261011/reports/run-20261011T2017Z/report.pdf",
+  "note": "Res_s(sym, s^2+s+Sum w) = S4 of E/<T> in w (certificate IDC1hcf83176ae9a93715). At n = 15 the E/<T> system (Boolean degree 6, 12 vars) needs 1.55-1.89x fewer word ops than sym (degree 4, 13 vars) but 4.9-7.5x more splits and 1.6-2.0x the wall time; identical root sets. K1/F2^17 m = 3 stopped unfinished after 2 h."
+}

@@ -1,20 +1,22 @@
 name: ECC2K130 disjoint-Q compact cold CPU panel
 
 on:
-  pull_request:
-    paths:
-      - .github/workflows/ecc2k130-disjoint-cold-q.yml
-      - research/notes/ecc2k130/disjoint_cold_q_20260930/**
-      - research/notes/ecc2k130/compact_frozen_source_replay_20260929/**
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   validate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 35 }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,6 +25,9 @@ jobs:
           sparse-checkout: |
             Cargo.toml
             docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            docs/ecbench/schema.sql
+            docs/curves/registry.json
             src
             examples/koblitz_orbit_dlp_s3_batch.rs
             examples/koblitz_rho_batch_ks_v2_n61.rs
@@ -41,12 +46,13 @@ jobs:
             research/notes/ecc2k130/point_sum_cold_20260930
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             tools/isolated_bench.py
+      - uses: Swatinem/rust-cache@v2
       - name: Replay every frozen public Q and check Python syntax
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/disjoint-cold"
           python3 -m py_compile research/notes/ecc2k130/disjoint_cold_q_20260930/*.py
-          python3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p test_materialize.py -v
+          cargo test --release --locked --manifest-path research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.toml
           python3 research/notes/ecc2k130/disjoint_cold_q_20260930/verify_frozen.py > "$RUNNER_TEMP/disjoint-cold/input_replay.json"
           cmp "$RUNNER_TEMP/disjoint-cold/input_replay.json" research/notes/ecc2k130/disjoint_cold_q_20260930/INPUT_RECEIPT.json
       - name: Rehash and independently replay both archived local smoke blocks
@@ -83,7 +89,7 @@ jobs:
       - name: Materialize and build exact frozen source
         run: |
           set -euo pipefail
-          python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+          cargo run --release --locked --quiet --manifest-path research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.toml -- materialize \
             --freeze research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json \
             --dest "$RUNNER_TEMP/disjoint-cold-frozen-src" \
             --receipt "$RUNNER_TEMP/disjoint-cold/materialization.json"
@@ -132,6 +138,9 @@ jobs:
           sparse-checkout: |
             Cargo.toml
             docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            docs/ecbench/schema.sql
+            docs/curves/registry.json
             src
             examples/koblitz_orbit_dlp_s3_batch.rs
             examples/koblitz_rho_batch_ks_v2_n61.rs
@@ -150,11 +159,12 @@ jobs:
             research/notes/ecc2k130/point_sum_cold_20260930
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             tools/isolated_bench.py
+      - uses: Swatinem/rust-cache@v2
       - name: Materialize and build exact frozen source
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/disjoint-cold"
-          python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+          cargo run --release --locked --quiet --manifest-path research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.toml -- materialize \
             --freeze research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json \
             --dest "$RUNNER_TEMP/disjoint-cold-frozen-src" \
             --receipt "$RUNNER_TEMP/disjoint-cold/materialization.json"

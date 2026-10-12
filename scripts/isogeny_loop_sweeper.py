@@ -1,6 +1,19 @@
 #!/usr/bin/env python3
 """Isogeny-loop endomorphism sweeper for GLV-style scalar multiplication.
 
+LEGACY PYTHON TOOL.  AGENTS.md ("Implementation language: no Python") forbids
+Python for research result generation and requires a native replacement before
+this execution path is extended or used for further research comparisons.  It
+was merged in PR #1644 in breach of that rule; its outputs in
+research/isogeny_loop_glv_20261010/ stay as frozen evidence with Python
+provenance.  The native follow-up work is examples/isogeny_loop_degree_bound.rs
+and examples/isogeny_loop_glv_gls_lattice.rs.  The one change since PR #1644 is
+a correction (see RESEARCH_ISOGENY_LOOP_GLV.md, "Erratum"): in characteristic 2
+the 2-step along the conjugate of the Frobenius prime is the Verschiebung
+V = [2] o F^-1 and is now priced as a doubling, not as two squarings.  Porting
+the class-group part (PARI bnfinit at 130-bit discriminants) needs a native
+subexponential class-group algorithm the crate does not have.
+
 Implements, as a tool, the construction of Koshelev–Sanso, "Endomorphisms for
 Faster Cryptography on Elliptic Curves of Moderate CM Discriminants"
 (ePrint 2024/1985; De Cifris Koine, CIFRIS25 ACTA, doi:10.69091/koine/vol-7-W09):
@@ -191,16 +204,31 @@ def is_fundamental(D):
 # --------------------------------------------------------------------------
 # Cost model (field multiplications per isogeny step)
 # --------------------------------------------------------------------------
-def step_cost(ell, char2, model):
+def step_cost(ell, char2, model, doubling_cost=8.0):
+    """(cost of a step along the chosen prime ideal, cost along its conjugate),
+    in field multiplications.
+
+    Odd l, or l = 2 in odd characteristic: Velu, the same in both directions.
+    l = 2 in characteristic 2 is asymmetric: along the prime that contains pi
+    the step is the Frobenius F (x, y) -> (x^2, y^2), two squarings; along the
+    conjugate it is the Verschiebung V = [2] o F^-1, i.e. a doubling composed
+    with a square root, so it costs a doubling plus two square roots.  (An
+    earlier revision charged 2 M in both directions, which underpriced V.)
+    The caller orients the pair so that the first entry is the F direction."""
     if char2 and ell == 2:
-        # Frobenius (inseparable 2-isogeny) or Verschiebung: a couple of
-        # squarings; charged 2 M so the weight stays positive.
-        return 2.0
+        return (2.0, doubling_cost + 2.0)
     if model == "projective":
-        return 7.5 * ell          # paper, Section 2.2: Horner on homogenised Vélu maps
-    if model == "affine":
-        return 2.0 * ell + 2.0    # Kohel-affine, inversion not charged (batched)
-    raise ValueError(model)
+        c = 7.5 * ell          # paper, Section 2.2: Horner on homogenised Velu maps
+    elif model == "affine":
+        c = 2.0 * ell + 2.0    # Kohel-affine, inversion not charged (batched)
+    else:
+        raise ValueError(model)
+    return (c, c)
+
+
+def dir_cost(w, x):
+    """Cost of |x| steps in the direction given by the sign of x."""
+    return (w[0] if x > 0 else w[1]) * abs(x)
 
 
 # --------------------------------------------------------------------------
@@ -253,6 +281,11 @@ class ClassGroupCtx:
         pr = pari.idealprimedec(self.bnf, ell)
         if len(pr) != 2:
             return None
+        if ell == 2 and t is not None:
+            # orient: pr[0] must be the prime that contains pi (the Frobenius direction)
+            pi = self.frobenius_element(t, f)
+            if int(pari.idealval(self.bnf, pi, pr[0])) == 0 and int(pari.idealval(self.bnf, pi, pr[1])) > 0:
+                pr = [pr[1], pr[0]]
         P = pr[0]
         v = [int(c) for c in pari.bnfisprincipal(self.bnf, P, 0)]
         order = 1
@@ -339,14 +372,17 @@ def weighted_shortest(B, weights, enum_cap=200000, dlogs=None, cyc=None, radius_
     the search is exhaustive within R whenever it finishes under `node_cap`.
     Returns (ranked list of (cost, e), exhaustive, R)."""
     k = int(pari.matsize(B)[1])
-    wint = [max(1, int(round(2 * w))) for w in weights]  # integer weights (half-M units)
+    weights = [w if isinstance(w, tuple) else (w, w) for w in weights]
+    # LLL only needs a positive diagonal; the true (possibly asymmetric) cost is
+    # applied to every candidate below, and the enumeration is exact in it.
+    wint = [max(1, int(round(2 * math.sqrt(a * b)))) for a, b in weights]  # half-M units
     W = pari.matdiagonal(wint)
     G = pari.mattranspose(B) * W * B
     T = pari.qflllgram(G)
     Bred = B * T
 
     def l1cost(e):
-        return sum(w * abs(x) for w, x in zip(weights, e))
+        return sum(dir_cost(w, x) for w, x in zip(weights, e))
 
     cands = {}
     for j in range(k):
@@ -361,7 +397,7 @@ def weighted_shortest(B, weights, enum_cap=200000, dlogs=None, cyc=None, radius_
     exhaustive = False
     if dlogs is not None:
         m = len(cyc)
-        order = sorted(range(k), key=lambda i: -weights[i])  # heavy coordinates first
+        order = sorted(range(k), key=lambda i: -min(weights[i]))  # heavy coordinates first
         nodes = 0
         hit_cap = False
         v = [0] * k
@@ -378,10 +414,9 @@ def weighted_shortest(B, weights, enum_cap=200000, dlogs=None, cyc=None, radius_
                     cands[e] = l1cost(e)
                 return
             i = order[pos]
-            w = weights[i]
-            lim = int(budget // w)
+            wp, wm = weights[i]
             dl = dlogs[i]
-            for x in range(-lim, lim + 1):
+            for x in range(-int(budget // wm), int(budget // wp) + 1):
                 nodes += 1
                 if nodes > node_cap:
                     hit_cap = True
@@ -389,7 +424,7 @@ def weighted_shortest(B, weights, enum_cap=200000, dlogs=None, cyc=None, radius_
                 v[i] = x
                 for t_ in range(m):
                     acc[t_] += x * dl[t_]
-                dfs(pos + 1, budget - w * abs(x))
+                dfs(pos + 1, budget - (wp if x > 0 else wm) * abs(x))
                 for t_ in range(m):
                     acc[t_] -= x * dl[t_]
             v[i] = 0
@@ -410,7 +445,7 @@ def weighted_shortest(B, weights, enum_cap=200000, dlogs=None, cyc=None, radius_
     for e in list(cands):
         ne = tuple(-x for x in e)
         if ne not in cands:
-            cands[ne] = cands[e]
+            cands[ne] = l1cost(ne)
     ranked = sorted(cands.items(), key=lambda kv: (kv[1], sum(abs(x) for x in kv[0]), [-x for x in kv[0]]))
     out = [(c, e) for e, c in ranked]
     return out, exhaustive, R, lll_best
@@ -555,8 +590,8 @@ def heuristic_estimate(DK, args, char2, saving):
             continue
         l2 = math.sqrt(k / (2 * math.pi * math.e)) * h_est ** (1.0 / k)
         l1 = l2 * math.sqrt(2 * k / math.pi)  # 1-norm of a random direction of that 2-norm
-        cmin = min(step_cost(p, char2, args.cost_model) for p in ps)
-        cmean = sum(step_cost(p, char2, args.cost_model) for p in ps) / k
+        cmin = min(min(step_cost(p, char2, args.cost_model, args.doubling_cost)) for p in ps)
+        cmean = sum(sum(step_cost(p, char2, args.cost_model, args.doubling_cost)) / 2 for p in ps) / k
         rows.append(dict(prime_bound=L, split_primes=k, log2_h_est=round(math.log2(h_est), 1),
                          shortest_L2_est=round(l2, 1), shortest_L1_est=round(l1, 1),
                          cost_lower_bound_M=round(cmin * l2),
@@ -582,7 +617,7 @@ def analyse_order(DK, g, t, fpi, r, s, char2, args, saving, cv):
         pd = ctx.prime_data(ell, t, fpi)
         if pd is None:
             continue
-        pd["cost"] = step_cost(ell, char2, args.cost_model)
+        pd["cost"] = step_cost(ell, char2, args.cost_model, args.doubling_cost)
         primes.append(pd)
     if not primes:
         res["error"] = "no split primes below the bound"
@@ -606,8 +641,9 @@ def analyse_order(DK, g, t, fpi, r, s, char2, args, saving, cv):
             m = 1
             for c in [Fraction(str(x)) for x in coords]:
                 m = math.lcm(m, c.denominator)
+        c1 = m * min(pd["cost"])
         single.append(dict(ell=pd["ell"], loop_length=m, degree_bits=round(m * math.log2(pd["ell"]), 1),
-                           cost_M=m * pd["cost"], ratio_to_saving=round(m * pd["cost"] / saving, 3)))
+                           cost_M=c1, ratio_to_saving=round(c1 / saving, 3)))
     single.sort(key=lambda d: d["cost_M"])
     res["single_prime_loops"] = single[: args.top]
     res["relation_search"] = dict(rank=len(primes), exhaustive_within_radius=exhaustive, radius_M=R,
@@ -713,7 +749,9 @@ def analyse_disc(DK, args, saving_bits=None):
         pd = ctx.prime_data(ell)
         if pd is None:
             continue
-        pd["cost"] = step_cost(ell, char2, args.cost_model)
+        # no curve here: the first prime above 2 is taken as the Frobenius
+        # direction (the conjugate labelling gives the conjugate loops, same costs)
+        pd["cost"] = step_cost(ell, char2, args.cost_model, args.doubling_cost)
         primes.append(pd)
     res = dict(DK=DK, h=ctx.hK, cyc=ctx.cyc, dmin=(-DK if DK % 4 == 0 else (1 - DK)) // 4,
                saving_M=saving, half_bits=lprime)
@@ -733,7 +771,7 @@ def analyse_disc(DK, args, saving_bits=None):
                          exponents={pd["ell"]: int(x) for pd, x in zip(primes, e) if x},
                          chain_length=sum(abs(x) for x in e), degree=norm,
                          alpha=f"({2*a0} + {2*a1}*sqrt({DK}))/2"))
-    single = sorted((dict(ell=pd["ell"], loop_length=pd["order_in_ClK"], cost_M=pd["order_in_ClK"] * pd["cost"])
+    single = sorted((dict(ell=pd["ell"], loop_length=pd["order_in_ClK"], cost_M=pd["order_in_ClK"] * min(pd["cost"]))
                      for pd in primes), key=lambda d: d["cost_M"])
     res.update(primes=[pd["ell"] for pd in primes], exhaustive_within_radius=exhaustive, radius_M=R, lll_upper_bound_M=lll_best, loops=best, single_prime_loops=single[:3])
     return res
@@ -895,7 +933,7 @@ def selftest(args):
         if int(pari.kronecker(DK, ell)) != 1:
             continue
         pd = ctx.prime_data(ell, t, fpi)
-        pd["cost"] = step_cost(ell, False, "projective")
+        pd["cost"] = step_cost(ell, False, "projective")  # odd characteristic: symmetric
         primes.append(pd)
     B = ctx.relation_lattice(primes)
     ranked, _, _, _ = weighted_shortest(B, [pd["cost"] for pd in primes], dlogs=[pd["dlog"] for pd in primes], cyc=ctx.cyc, radius_cap=400)
@@ -997,7 +1035,7 @@ def selftest(args):
         results.append(dict(exponents={pd["ell"]: x for pd, x in zip(primes, e) if x}, chain=chain,
                             alpha=f"({2*a0} + {2*a1}*sqrt({DK}))/2", degree=norm, trace=tr,
                             lambda_=lam, lambda_conj=lamc, action=match,
-                            cost_M=sum(pd["cost"] * abs(x) for pd, x in zip(primes, e))))
+                            cost_M=sum(dir_cost(pd["cost"], x) for pd, x in zip(primes, e))))
         log.append(f"loop {results[-1]['exponents']}: degree {norm}, alpha = {results[-1]['alpha']}, acts as {match}")
     # the generator is defined up to the unit -1 (the sign of the final isomorphism u),
     # so the composite acts as +lambda or -lambda; a conjugate would mean a wrong direction
