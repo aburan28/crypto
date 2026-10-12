@@ -5346,6 +5346,215 @@ fn closure_rounds() -> u32 {
     })
 }
 
+thread_local! {
+    /// Root bases built ahead by [`prebuild_inherited_roots_lanes`], each
+    /// with the system, degree and multiplier policy it was built for.
+    static LANE_ROOTS: std::cell::RefCell<Vec<(Vec<F2BoolPoly>, u32, bool, ReducedBasis, InheritCost)>> =
+        const { std::cell::RefCell::new(Vec::new()) };
+}
+
+/// Take the root basis built ahead for exactly this system, if any.
+fn take_lane_root(
+    system: &[F2BoolPoly],
+    degree: u32,
+    support_local: bool,
+) -> Option<(ReducedBasis, InheritCost)> {
+    LANE_ROOTS.with(|roots| {
+        let mut roots = roots.borrow_mut();
+        if roots.is_empty() {
+            return None;
+        }
+        let i = roots.iter().position(|(s, d, local, _, _)| {
+            *d == degree && *local == support_local && s == system
+        })?;
+        let (_, _, _, basis, cost) = roots.swap_remove(i);
+        Some((basis, cost))
+    })
+}
+
+/// Root bases built ahead and not yet consumed on this thread.
+pub fn lane_roots_pending() -> usize {
+    LANE_ROOTS.with(|roots| roots.borrow().len())
+}
+
+/// Drop every root basis built ahead on this thread.
+pub fn clear_lane_roots() {
+    LANE_ROOTS.with(|roots| roots.borrow_mut().clear());
+}
+
+/// `KIC_F4_LANES=k`: how many decomposition roots a caller builds together
+/// with [`prebuild_inherited_roots_lanes`] (`1`, the default, builds each
+/// on its own).  Read once; capped at 64.
+pub fn f4_lanes() -> usize {
+    static LANES: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
+    *LANES.get_or_init(|| {
+        std::env::var("KIC_F4_LANES")
+            .ok()
+            .and_then(|v| v.parse::<usize>().ok())
+            .unwrap_or(1)
+            .clamp(1, 64)
+    })
+}
+
+/// **Lane-batched root replay** (lit2026 W5).  Build the inherited-F4 root
+/// bases of up to 64 solves at once with
+/// [`ReducedBasis::from_systems_lanes`] and keep them for the solves, whose
+/// first from-scratch build of an identical system at the same degree takes
+/// its basis instead of building one ([`take_lane_root`]).  `systems` are
+/// the equations each solve is handed.  A system the root would not reduce
+/// as it stands — one holding `1`, a linear generator the solver eliminates
+/// first, or a degree ladder of more than one rung — gets no basis and its
+/// solve builds as before; so does any lane the batch could not hold.
+///
+/// Exact: a lane's basis is the reduced row echelon form of its own root
+/// Macaulay row space, which is what the from-scratch root computes under
+/// `KIC_F4_INHERIT_ROOT=rref` and spans the same space as the default
+/// echelon root, so every refutation, forced variable, split and root is
+/// the same.  Returns the batch's [`crate::cryptanalysis::inherited_f4::LaneStats`]
+/// and how many lanes got a basis.
+pub fn prebuild_inherited_roots_lanes(
+    systems: &[Vec<F2BoolPoly>],
+    n_vars: usize,
+    engine: SolverEngine,
+) -> (crate::cryptanalysis::inherited_f4::LaneStats, usize) {
+    let engine = engine.effective();
+    let none = (crate::cryptanalysis::inherited_f4::LaneStats::default(), 0);
+    if !matches!(engine, SolverEngine::InheritedF4 { .. }) || closure_rounds() != 0 {
+        return none;
+    }
+    let policy = InheritPolicy::resolve(engine);
+    let mut eligible: Vec<(usize, Vec<F2BoolPoly>, u32)> = Vec::new();
+    for (i, s) in systems.iter().enumerate() {
+        let system: Vec<F2BoolPoly> = s.iter().filter(|p| !p.is_zero()).cloned().collect();
+        if system.is_empty()
+            || system.iter().any(is_constant_one)
+            || (policy.linear_elimination && system.iter().any(is_linear_generator))
+        {
+            continue;
+        }
+        let Some(ladder) = engine.degree_ladder(system_degree(&system), n_vars) else {
+            continue;
+        };
+        if ladder.start() != ladder.end() {
+            continue;
+        }
+        eligible.push((i, system, *ladder.end()));
+    }
+    let mut total = crate::cryptanalysis::inherited_f4::LaneStats::default();
+    let mut placed = 0usize;
+    let mut degrees: Vec<u32> = eligible.iter().map(|e| e.2).collect();
+    degrees.sort_unstable();
+    degrees.dedup();
+    for d in degrees {
+        let group: Vec<&(usize, Vec<F2BoolPoly>, u32)> =
+            eligible.iter().filter(|e| e.2 == d).collect();
+        let slices: Vec<&[F2BoolPoly]> = group.iter().map(|e| e.1.as_slice()).collect();
+        let (bases, stats) =
+            ReducedBasis::from_systems_lanes(&slices, n_vars, d, policy.support_local);
+        total.lanes += stats.lanes;
+        total.lane_bits = total.lane_bits.max(stats.lane_bits);
+        total.rows += stats.rows;
+        total.columns += stats.columns;
+        total.pivot_columns += stats.pivot_columns;
+        total.pivot_passes += stats.pivot_passes;
+        total.shared_columns += stats.shared_columns;
+        total.lane_word_ops += stats.lane_word_ops;
+        total.word_equivalent += stats.word_equivalent;
+        total.oversize |= stats.oversize;
+        LANE_ROOTS.with(|roots| {
+            let mut roots = roots.borrow_mut();
+            for (e, basis) in group.iter().zip(bases) {
+                if let Some((basis, cost)) = basis {
+                    roots.push((e.1.clone(), d, policy.support_local, basis, cost));
+                    placed += 1;
+                }
+            }
+        });
+    }
+    (total, placed)
+}
+
+/// `KIC_F6_GATE_FIRST=1`: when a node's reduction forces variables, assign
+/// them and ask the node oracle (the F6-IC geometry gate) **before**
+/// specialising the node's bases by them, instead of after.  The oracle
+/// reads only the assignment and the defined variables, so it decides the
+/// same way either way; a refuted node then never pays for the
+/// specialisations, and a continuing one specialises exactly as before
+/// and is not asked again.  Every verdict, root, counter of the solve and
+/// call of the oracle is unchanged; only the stage unit drops.  Off by
+/// default; [`set_gate_first`] overrides it on the calling thread.
+fn gate_first() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    if let Some(v) = GATE_FIRST_OVERRIDE.with(|c| c.get()) {
+        return v;
+    }
+    *ENABLED.get_or_init(|| std::env::var("KIC_F6_GATE_FIRST").as_deref() == Ok("1"))
+}
+
+thread_local! {
+    static GATE_FIRST_OVERRIDE: std::cell::Cell<Option<bool>> = const { std::cell::Cell::new(None) };
+    /// Nodes the gate refuted before their forced variables were
+    /// specialised in, and the specialisations so skipped.
+    static GATE_FIRST_SKIPS: std::cell::Cell<(u64, u64)> = const { std::cell::Cell::new((0, 0)) };
+    /// Per-node trace for the lane lockstep diagnostic.
+    static NODE_TRACE: std::cell::RefCell<Option<Vec<NodeTraceEvent>>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+/// Override `KIC_F6_GATE_FIRST` on this thread (`None` restores it).
+pub fn set_gate_first(enabled: Option<bool>) {
+    GATE_FIRST_OVERRIDE.with(|c| c.set(enabled));
+}
+
+/// `(nodes, specialisations)` the gate-first order skipped on this thread.
+pub fn gate_first_skips_thread() -> (u64, u64) {
+    GATE_FIRST_SKIPS.with(|c| c.get())
+}
+
+/// One reduction of the splitting tree, as the lane lockstep diagnostic
+/// sees it: which variables were assigned (or eliminated) and to what, and
+/// the thread's stage-unit total when the node reduced.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct NodeTraceEvent {
+    pub assigned: u64,
+    pub values: u64,
+    pub word_ops: u64,
+}
+
+/// Start (`true`) or stop recording [`NodeTraceEvent`]s on this thread.
+pub fn set_node_trace(enabled: bool) {
+    NODE_TRACE.with(|t| *t.borrow_mut() = enabled.then(Vec::new));
+}
+
+/// Take the events recorded so far, leaving the trace on and empty.
+pub fn take_node_trace() -> Vec<NodeTraceEvent> {
+    NODE_TRACE.with(|t| {
+        t.borrow_mut()
+            .as_mut()
+            .map(std::mem::take)
+            .unwrap_or_default()
+    })
+}
+
+fn note_node(assignment: &[Option<bool>]) {
+    NODE_TRACE.with(|t| {
+        if let Some(events) = t.borrow_mut().as_mut() {
+            let (mut assigned, mut values) = (0u64, 0u64);
+            for (v, a) in assignment.iter().enumerate() {
+                if let Some(x) = a {
+                    assigned |= 1u64 << v;
+                    values |= u64::from(*x) << v;
+                }
+            }
+            events.push(NodeTraceEvent {
+                assigned,
+                values,
+                word_ops: f4_word_ops_thread(),
+            });
+        }
+    });
+}
+
 /// The inherited engine's reduction: read the decisive rows off the node's
 /// bases, building a basis from scratch only for a degree no ancestor has
 /// reached.  Mirrors `reduce_system_uncached`'s ladder, decisiveness test
@@ -5393,8 +5602,21 @@ fn reduce_inherited(
                         .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                 }
                 let rounds = if d == top { closure_rounds() } else { 0 };
-                let built =
-                    ReducedBasis::from_system_closed_with(system, n_vars, d, rounds, support_local);
+                let prebuilt = if rounds == 0 {
+                    take_lane_root(system, d, support_local)
+                } else {
+                    None
+                };
+                let built = match prebuilt {
+                    Some(root) => Some(root),
+                    None => ReducedBasis::from_system_closed_with(
+                        system,
+                        n_vars,
+                        d,
+                        rounds,
+                        support_local,
+                    ),
+                };
                 if profile {
                     inherited_basis_counters::ROOT_NS.fetch_add(
                         started.elapsed().as_nanos() as u64,
@@ -5894,6 +6116,7 @@ fn solve_rec(
                 }
             }
         }
+        note_node(&assignment);
         let reduced = if inherit {
             reduce_inherited(
                 &system,
@@ -5918,6 +6141,57 @@ fn solve_rec(
         let forced: Vec<(u32, bool)> = reduced.iter().filter_map(forced_assignment).collect();
         if forced.is_empty() {
             break;
+        }
+        if inherit && gate_first() {
+            // Assign first, in the same order and with the same checks;
+            // then ask the gate, and specialise only if it continues.
+            let mut fresh: Vec<(u32, bool)> = Vec::with_capacity(forced.len());
+            for (v, val) in forced {
+                match assignment[v as usize] {
+                    Some(existing) if existing != val => {
+                        stats.infeasible_branches += 1;
+                        return;
+                    }
+                    Some(_) => {}
+                    None => {
+                        stats.propagations += 1;
+                        assignment[v as usize] = Some(val);
+                        fresh.push((v, val));
+                    }
+                }
+            }
+            if stats.reductions >= opts.node_budget {
+                stats.exhausted = true;
+                return;
+            }
+            let defined_mask = defined
+                .iter()
+                .fold(0u64, |mask, &(v, _, _)| mask | (1u64 << v));
+            match node_oracle(&assignment, defined_mask) {
+                NodeOracleDecision::Continue => oracle_decided = true,
+                NodeOracleDecision::Refute => {
+                    GATE_FIRST_SKIPS.with(|c| {
+                        let (n, s) = c.get();
+                        c.set((n + 1, s + fresh.len() as u64));
+                    });
+                    stats.geometric_refutations += 1;
+                    return;
+                }
+                NodeOracleDecision::Witness => {
+                    stats.geometric_witnesses += 1;
+                    *stop = true;
+                    return;
+                }
+            }
+            for (v, val) in fresh {
+                let substituted: Vec<F2BoolPoly> = system
+                    .iter()
+                    .map(|p| substitute_in_solve(p, v, val, canonical))
+                    .collect();
+                (bases, system) = bases.specialise_owned(v, val, substituted, policy);
+                drop_zeros(&mut system);
+            }
+            continue;
         }
         for (v, val) in forced {
             match assignment[v as usize] {
