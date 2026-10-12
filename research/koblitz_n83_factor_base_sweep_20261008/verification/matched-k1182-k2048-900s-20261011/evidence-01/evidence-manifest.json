@@ -1,9 +1,9 @@
 {
   "files": [
     {
-      "bytes": 2505,
+      "bytes": 2555,
       "path": "audit.json",
-      "sha256": "8df33c99d5f898747be58ee9a72511a2dc5e82031371035173fe7233e52202e1"
+      "sha256": "7f12d549ac08c62b64ccb359d3b1c509822f97f6bede465750f999dbd8d8a495"
     },
     {
       "bytes": 1936,
@@ -136,6 +136,21 @@
       "sha256": "f1139c1dd61beac0e1d9e80a1d02e983f98c7b1abc6887f1816f013d4693bf4c"
     },
     {
+      "bytes": 244020,
+      "path": "source-snapshot.tar.gz",
+      "sha256": "ec64438ad14b2f7dbcdcff052f0d94f96a52d4a8362712175ff2251f0626216e"
+    },
+    {
+      "bytes": 343552,
+      "path": "validation/current-main-release-lib.log",
+      "sha256": "5cb03c0c8f4a26cc7ae5fcad02272c26f1bba53b267d000c32823b01f9a0e3c7"
+    },
+    {
+      "bytes": 98,
+      "path": "validation/current-main-study-python.log",
+      "sha256": "1dab655b9c9be33467d84a2142ea6c55ff04682b42d13afa18454d0983912e24"
+    },
+    {
       "bytes": 338970,
       "path": "validation/release-lib-loopback.log",
       "sha256": "794898655df51d9ae33e2633acff5bc80aeff7b26908357fe0eb503d9190385d"
@@ -146,14 +161,19 @@
       "sha256": "0508a0b348f15178bc24445dc9939b8ef0da4d6ad0374898e7aa90bbfb5900a0"
     },
     {
+      "bytes": 236,
+      "path": "validation/snapshot-only-audit.log",
+      "sha256": "f77c82651ef23a5bf5e2f1845ab33b48e2e1e50510408f29a966a01805ba1f93"
+    },
+    {
       "bytes": 98,
       "path": "validation/study-python.log",
       "sha256": "66ec36c12bb19436c23c106f1c704d52c11b3b27f68fc2ad7625a45961c657e3"
     },
     {
-      "bytes": 1396,
+      "bytes": 2662,
       "path": "validation/validation.json",
-      "sha256": "bcab65ecc72dcc566477fbee23d8ffb1d2db5569580de3dce90536b002a28f42"
+      "sha256": "6223cdf2c8325d5a4e1ed2ed312fdcc12257527ec507bd9ede4758a49599a304"
     }
   ],
   "schema": "n83.matched-retained-size-evidence-manifest/v1"

@@ -51,16 +51,26 @@ were removed. The independent [audit](audit.py) reruns receipt and hash
 checks, complete object-prefix traversal, original-curve query replay and
 container-absence checks. Its [machine result](evidence-01/audit.json) is
 `PASS_bounded_receipts_only`; [raw evidence](evidence-01/) includes build,
-worker, outer, panel, exact outer commands and evidence-manifest receipts. The Linux worker and
-compressed objects remain outside Git at their frozen local/S3 locations.
+worker, outer, panel, exact outer commands, the frozen source archive and
+evidence-manifest receipts. The five source files attested by the worker are
+retained in `evidence-01/source-snapshot.tar.gz`; the audit checks their exact
+hashes and, when the original source commit is locally available, its Git
+blobs. That source commit remains reachable on branch
+`codex/n83-ordered-first-pair-20261011`. The Linux worker and compressed
+objects remain outside Git at their frozen local/S3 locations.
 
-Validation: the study Python suite passed 39/39, and the required full
-`cargo test --release --lib` recheck passed 3,898 tests with 110 ignored.
-An initial sandboxed full run had 3,889 passes and nine unrelated local-socket
-tests blocked by `Operation not permitted`; the loopback-enabled full recheck
-passed them. Both logs and the [validation receipt](evidence-01/validation/validation.json)
-are retained. The receipt audit passed with read-only Docker access, and
-`git diff --check` was clean.
+Validation: the original worker source's study Python suite passed 39/39, and
+its required full `cargo test --release --lib` recheck passed 3,898 tests with
+110 ignored. An initial sandboxed full run had 3,889 passes and nine unrelated
+local-socket tests blocked by `Operation not permitted`; the loopback-enabled
+full recheck passed them. After this evidence was ported onto current main
+`c62555b7a1746490dba707589d791669a20bb0d0`, the study suite again passed
+39/39 and the full release library suite passed 3,986 tests with 112 ignored.
+All logs and the [validation receipt](evidence-01/validation/validation.json)
+are retained. The receipt audit passed with read-only Docker access both with
+the original Git object and with an empty Git database using only the source
+archive. The source/document diff check was clean; raw logs retain their exact
+output.
 
 The predeclared [protocol](PROTOCOL.md) charges 280 seconds for each launched
 build/search stage and 60 seconds for cleanup and receipts, regardless of

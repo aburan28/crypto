@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import tarfile
 
 
 HERE = Path(__file__).resolve().parent
@@ -69,6 +70,22 @@ def main() -> None:
     geometry = prefix.check_prefix(frozen[1182][1], frozen[2048][1], 1182, 2048, 166)
     assert geometry["representative_prefix"] is True
     assert geometry["point_row_prefix"] is True
+    git_source_present = subprocess.run(
+        ["git", "-C", str(REPO), "cat-file", "-e", f"{build['source_commit']}^{{commit}}"],
+        capture_output=True, timeout=15,
+    ).returncode == 0
+    with tarfile.open(evidence / "source-snapshot.tar.gz", "r:gz") as archive:
+        members = archive.getmembers()
+        assert len(members) == len(search.SOURCES)
+        assert {member.name for member in members} == set(search.SOURCES)
+        source_bytes = {}
+        for member in members:
+            assert member.isfile() and 0 < member.size <= 5_000_000
+            source = archive.extractfile(member)
+            assert source is not None
+            data = source.read()
+            assert len(data) == member.size
+            source_bytes[member.name] = data
     arms = []
     targets = []
     for columns in (1182, 2048):
@@ -95,14 +112,18 @@ def main() -> None:
             assert digest(Path(config["panel_dir"]) / name) == expected
         for name, expected in config["fixture_sha256"].items():
             assert digest(Path(config["fixture_dir"]) / name) == expected
+        assert set(config["source_sha256"]) == set(search.SOURCES) | {"attestation.json"}
         for name, expected in config["source_sha256"].items():
             if name == "attestation.json":
                 actual = digest(arm / "source" / name)
             else:
-                actual = sha256(subprocess.check_output(
-                    ["git", "-C", str(REPO), "show", f"{build['source_commit']}:{name}"],
-                    timeout=15,
-                )).hexdigest()
+                actual = sha256(source_bytes[name]).hexdigest()
+                if git_source_present:
+                    committed = sha256(subprocess.check_output(
+                        ["git", "-C", str(REPO), "show", f"{build['source_commit']}:{name}"],
+                        timeout=15,
+                    )).hexdigest()
+                    assert committed == actual
             assert actual == expected
         for name, path in (("config_sha256", arm / "config.json"),
                            ("worker_config_sha256", arm / "run/config.json"),
@@ -151,6 +172,7 @@ def main() -> None:
         "schema": "n83.matched-retained-size-audit/v1",
         "status": "PASS_bounded_receipts_only",
         "source_commit": build["source_commit"],
+        "source_git_object_and_snapshot_checked": git_source_present,
         "binary_sha256": build["binary_sha256"],
         "target": targets[0], "prefix_geometry": geometry,
         "build_wall_ms_L0": build["wall_elapsed_seconds_L0"] * 1000,
