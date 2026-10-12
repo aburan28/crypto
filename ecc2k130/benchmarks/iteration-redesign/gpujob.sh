@@ -14,6 +14,7 @@ VERIFY_LAUNCHES=${VERIFY_LAUNCHES:-6}
 VERIFY_DP_CAP=${VERIFY_DP_CAP:-262144}
 LAUNCHES=${LAUNCHES:-32}
 REPEATS=${REPEATS:-3}
+BENCH_STEPS=${BENCH_STEPS:-1024}
 REDESIGN_PIVOT=${REDESIGN_PIVOT:-1}
 fail=0
 
@@ -102,7 +103,7 @@ printf 'arm\trepeat\trateMps\tlogSha256\tgpuState\n' > "$R/samples.tsv"
 sample() {
   local arm=$1 repeat=$2 log rc rate digest state
   log="$R/bench-${arm}-${repeat}.log"
-  ./ecc2k130-$arm --curve 131 --packed --bench --steps 1024 --launches "$LAUNCHES" \
+  ./ecc2k130-$arm --curve 131 --packed --bench --steps "$BENCH_STEPS" --launches "$LAUNCHES" \
     > "$log" 2>&1
   rc=$?
   rate=$(sed -nE 's/^[[:space:]]*finished: ([0-9.]+) M it\/s.*/\1/p' "$log")
