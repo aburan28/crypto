@@ -1,0 +1,38 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.cubic"
+      },
+      "name": "rho-cubic",
+      "role": "candidate"
+    }
+  ],
+  "description": "The same crater as the rho spec (same target seed, so identical targets), walked by rho.cubic over its six automorphism classes.",
+  "label": "Drastic gap round 2, cubic crater: D=-3, ell=1016839",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261012,
+    "timeout_seconds": 600,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 0,
+        "b": 654254041891,
+        "group_order": 775471436947,
+        "gx": 1,
+        "gy": 507178549694,
+        "kind": "prime_explicit",
+        "p": 775471435903,
+        "r": 775471436947
+      }
+    ],
+    "target_seed": 2026101202,
+    "targets_per_curve": 32
+  }
+}

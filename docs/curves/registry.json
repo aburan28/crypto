@@ -27478,6 +27478,58 @@
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
+   "slug": "icv1-fp40-tm1043-a68449f5",
+   "icv1": "ICV1:fp-775471435903:-1043:775471436947:245719404051:unk:unk:r:a68449f5360d",
+   "family": "prime",
+   "params": {
+    "p": "775471435903",
+    "a": "483575337897",
+    "b": "620539964477"
+   },
+   "model_json": "{\"a\":\"483575337897\",\"b\":\"620539964477\",\"field\":\"fp-775471435903\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"775471435903\",\"v\":\"1\"}",
+   "trace": -1043,
+   "order": "775471436947",
+   "j": "245719404051",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/drastic_prime_conductor_gap_round2_20261012/pairs/pairs.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/sessions/d3-ell1016839-rho/plan.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/sessions/d3-ell1016839-rho/spec.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/specs/d3-ell1016839-rho.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp40-tm1043-e27d97c8",
+   "icv1": "ICV1:fp-775471435903:-1043:775471436947:0:unk:unk:r:e27d97c8a145",
+   "family": "prime",
+   "params": {
+    "p": "775471435903",
+    "a": "0",
+    "b": "654254041891"
+   },
+   "model_json": "{\"a\":\"0\",\"b\":\"654254041891\",\"field\":\"fp-775471435903\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"775471435903\",\"v\":\"1\"}",
+   "trace": -1043,
+   "order": "775471436947",
+   "j": "0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/drastic_prime_conductor_gap_round2_20261012/pairs/pairs.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/sessions/d3-ell1016839-cubic/plan.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/sessions/d3-ell1016839-cubic/spec.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/sessions/d3-ell1016839-rho/plan.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/sessions/d3-ell1016839-rho/spec.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/specs/d3-ell1016839-cubic.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp40-tm88926-7cb4feb5",
    "icv1": "ICV1:fp-931154352071:-88926:931154440998:537080125957:unk:unk:r:7cb4feb5ac2e",
    "family": "prime",
@@ -27600,6 +27652,58 @@
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
+   "slug": "icv1-fp42-t763-aebf527a",
+   "icv1": "ICV1:fp-3101674319203:763:3101674318441:2835398390472:unk:unk:r:aebf527a21dc",
+   "family": "prime",
+   "params": {
+    "p": "3101674319203",
+    "a": "173708838450",
+    "b": "1353164309739"
+   },
+   "model_json": "{\"a\":\"173708838450\",\"b\":\"1353164309739\",\"field\":\"fp-3101674319203\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"3101674319203\",\"v\":\"1\"}",
+   "trace": 763,
+   "order": "3101674318441",
+   "j": "2835398390472",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/drastic_prime_conductor_gap_round2_20261012/pairs/pairs.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/sessions/d3-ell2033609-rho/plan.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/sessions/d3-ell2033609-rho/spec.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/specs/d3-ell2033609-rho.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp42-t763-f4cdb4ec",
+   "icv1": "ICV1:fp-3101674319203:763:3101674318441:0:unk:unk:r:f4cdb4ec31eb",
+   "family": "prime",
+   "params": {
+    "p": "3101674319203",
+    "a": "0",
+    "b": "1258454212334"
+   },
+   "model_json": "{\"a\":\"0\",\"b\":\"1258454212334\",\"field\":\"fp-3101674319203\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"3101674319203\",\"v\":\"1\"}",
+   "trace": 763,
+   "order": "3101674318441",
+   "j": "0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/drastic_prime_conductor_gap_round2_20261012/pairs/pairs.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/sessions/d3-ell2033609-cubic/plan.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/sessions/d3-ell2033609-cubic/spec.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/sessions/d3-ell2033609-rho/plan.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/sessions/d3-ell2033609-rho/spec.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/specs/d3-ell2033609-cubic.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp43-t355-c904a335",
    "icv1": "ICV1:fp-4911317403131:355:4911317402777:4911316518395:unk:unk:r:c904a3350220",
    "family": "prime",
@@ -27669,7 +27773,9 @@
     "research/drastic_prime_conductor_gap_20261012/pairs/pairs.json",
     "research/drastic_prime_conductor_gap_20261012/sessions/d43-ell1016839/plan.json",
     "research/drastic_prime_conductor_gap_20261012/sessions/d43-ell1016839/spec.json",
-    "research/drastic_prime_conductor_gap_20261012/specs/d43-ell1016839.json"
+    "research/drastic_prime_conductor_gap_20261012/specs/d43-ell1016839.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/sessions/replicate-d43-ell1016839/plan.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/sessions/replicate-d43-ell1016839/spec.json"
    ],
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
@@ -27694,7 +27800,9 @@
     "research/drastic_prime_conductor_gap_20261012/pairs/pairs.json",
     "research/drastic_prime_conductor_gap_20261012/sessions/d43-ell1016839/plan.json",
     "research/drastic_prime_conductor_gap_20261012/sessions/d43-ell1016839/spec.json",
-    "research/drastic_prime_conductor_gap_20261012/specs/d43-ell1016839.json"
+    "research/drastic_prime_conductor_gap_20261012/specs/d43-ell1016839.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/sessions/replicate-d43-ell1016839/plan.json",
+    "research/drastic_prime_conductor_gap_round2_20261012/sessions/replicate-d43-ell1016839/spec.json"
    ],
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"

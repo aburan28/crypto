@@ -19777,6 +19777,84 @@
         "construction": "prime_quadratic_pullback_v1",
         "degree": 2,
         "f": [
+          "0x907b106c3d",
+          "0x0",
+          "0x70975613a9",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "genus": 2,
+        "h": [],
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "dlp_advantage": null,
+      "exists": true,
+      "field_check": "20_fixed_base_probable_prime_screen; primality remains an input assumption",
+      "field_relation": "same_field",
+      "map_direction": "H -> E",
+      "minimal_degree": null,
+      "minimal_genus": null,
+      "model_sha256": "a68449f5360d3f1492735d792406c4addadc911a5b6b1ac99c4dc393bdc4b26d",
+      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+      "slug": "icv1-fp40-tm1043-a68449f5",
+      "status": "verified_over_declared_field",
+      "subfield_descent": "not_tested",
+      "subgroup_transfer": "not_tested"
+    },
+    {
+      "certificate": {
+        "construction": "prime_quadratic_pullback_v1",
+        "degree": 2,
+        "f": [
+          "0x9854946b23",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "genus": 2,
+        "h": [],
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "dlp_advantage": null,
+      "exists": true,
+      "field_check": "20_fixed_base_probable_prime_screen; primality remains an input assumption",
+      "field_relation": "same_field",
+      "map_direction": "H -> E",
+      "minimal_degree": null,
+      "minimal_genus": null,
+      "model_sha256": "e27d97c8a145dcf346a3ce5cbbd9f53e1ef23774d312060a08317f331a475243",
+      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+      "slug": "icv1-fp40-tm1043-e27d97c8",
+      "status": "verified_over_declared_field",
+      "subfield_descent": "not_tested",
+      "subgroup_transfer": "not_tested"
+    },
+    {
+      "certificate": {
+        "construction": "prime_quadratic_pullback_v1",
+        "degree": 2,
+        "f": [
           "0xcb63db00be",
           "0x0",
           "0x2d3d7a15fa",
@@ -19963,6 +20041,84 @@
       "model_sha256": "e6b37c6c0abe3a3581b3706138e05e979b2060aad987759df005f2f57fb303cb",
       "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
       "slug": "icv1-fp42-t39-e6b37c6c",
+      "status": "verified_over_declared_field",
+      "subfield_descent": "not_tested",
+      "subgroup_transfer": "not_tested"
+    },
+    {
+      "certificate": {
+        "construction": "prime_quadratic_pullback_v1",
+        "degree": 2,
+        "f": [
+          "0x13b0ee0c4eb",
+          "0x0",
+          "0x2871da8632",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "genus": 2,
+        "h": [],
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "dlp_advantage": null,
+      "exists": true,
+      "field_check": "20_fixed_base_probable_prime_screen; primality remains an input assumption",
+      "field_relation": "same_field",
+      "map_direction": "H -> E",
+      "minimal_degree": null,
+      "minimal_genus": null,
+      "model_sha256": "aebf527a21dc2700fdc8406fe853545a656d1302797b9c6ff37152891a3fc5d5",
+      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+      "slug": "icv1-fp42-t763-aebf527a",
+      "status": "verified_over_declared_field",
+      "subfield_descent": "not_tested",
+      "subgroup_transfer": "not_tested"
+    },
+    {
+      "certificate": {
+        "construction": "prime_quadratic_pullback_v1",
+        "degree": 2,
+        "f": [
+          "0x12501b75eee",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "genus": 2,
+        "h": [],
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "dlp_advantage": null,
+      "exists": true,
+      "field_check": "20_fixed_base_probable_prime_screen; primality remains an input assumption",
+      "field_relation": "same_field",
+      "map_direction": "H -> E",
+      "minimal_degree": null,
+      "minimal_genus": null,
+      "model_sha256": "f4cdb4ec31eb45f93713c396b336114c9855164db12c24947352efb8e96e7f8f",
+      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+      "slug": "icv1-fp42-t763-f4cdb4ec",
       "status": "verified_over_declared_field",
       "subfield_descent": "not_tested",
       "subgroup_transfer": "not_tested"
@@ -83888,12 +84044,12 @@
   ],
   "generated_by": "cargo run --bin curve_cover_check --",
   "proof": "docs/curves/COVERS.md",
-  "registry_sha256": "a66b33bf7b9b5cadcdfec9b87cdc7fab66a55ff7c76c2621bbcbc14eaa726f80",
+  "registry_sha256": "9e420a7f2e69a1d72a2590899e6bffb8b3d45eff0f197c5c898ee66c1219e872",
   "schema_version": "curve-covers/v1",
   "scope": "same-field existence for the supplied elliptic model; no optimality, descent, subgroup-map or DLP-cost claim",
   "summary": {
     "invalid_input": 0,
     "unsupported": 0,
-    "verified": 2087
+    "verified": 2091
   }
 }
