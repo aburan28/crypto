@@ -1,0 +1,89 @@
+\section{Implementation and side channels}\label{sec:impl}
+
+The implementation is the Rust crate \art{crypto:eigen_seta/} (about 4,300 lines
+plus tests). It is generic over the limb count, so one code base serves all
+parameter sets. Variable-time big integers (\texttt{num-bigint}) appear only
+in key generation and in public constants.
+
+\subsection{Arithmetic}
+\begin{itemize}
+\item \emph{$\F_p$.} Montgomery multiplication. For our primes $p+1\equiv0
+  \bmod 2^{64Z}$, where $Z$ is 16, 24 and 32 limbs out of 21, 32 and 42, so the
+  reduction skips the zero limbs of $p+1$ (``Montgomery-friendly'' primes) and
+  costs $N(N-Z)$ instead of $N^2$ word products.
+\item \emph{Inversion.} Bernstein--Yang safegcd~\cite{BY19}, generalising the
+  structure of libsecp256k1's \texttt{modinv64} to any limb count, with the
+  proven divstep bound. It is 40 to 140 times faster than Fermat inversion
+  at L1--L5 (Table~\ref{tab:field}).
+\item \emph{$\F_{p^2}$.} Karatsuba multiplication, inversion via the norm,
+  and the constant-time square root of Adj and Rodr\'iguez-Henr\'iquez~\cite{AR14}.
+\item \emph{Curves and isogenies.} x-only Montgomery ladders, including a
+  three-point ladder, with Okeya--Sakurai $y$-recovery~\cite{OS01}; SIDH-style
+  3-isogeny chains with optimal strategies~\cite{CLN16}; Weierstrass
+  arithmetic with constant-time selection between the doubling and addition
+  formulas; and the gluing, Richelot and splitting maps of~\cite{CD23} in
+  Mumford coordinates, with batched inversions. The Weil pairing uses a
+  projective Miller loop over the public bits of $3^F$. Discrete logarithms in
+  $\mu_{3^F}$ are computed digit by digit with constant-time comparisons.
+\end{itemize}
+
+\subsection{Constant-time decapsulation}
+Decapsulation is split into two functions so that each can be checked
+separately.
+\begin{itemize}
+\item \texttt{decaps\_prepare} depends only on $(\mathit{pk},\mathit{ct})$.
+  It parses both, lifts $S$ and $T$, and computes both canonical bases. It
+  runs in variable time.
+\item \texttt{decaps\_core} contains everything secret: the Kani chain with
+  its fixed schedule, the identification over the 8 sign and order choices,
+  the pairings and DLPs, the 3-isogeny chain, the re-encryption, and the
+  selection.
+\end{itemize}
+In the core, no branch and no memory index depends on secret data, and all
+loop counts are public. Selections use \texttt{subtle}'s constant-time
+primitives, and every mask passes through \texttt{core::hint::black\_box}.
+Scalars have fixed widths. Secret scalars and secret byte buffers are wiped on
+drop. The only loop whose trip count depends on data, the canonical-basis
+search, runs on public curves and is capped. A crafted public key or
+ciphertext makes it return a refusal rather than spin.
+
+\paragraph{A compiler-introduced leak.} The masks in safegcd's final
+normalisation (add $m$ if negative, negate if requested) are computed
+arithmetically, as \texttt{r + (m \& mask)}. LLVM compiled the add into a
+conditional that skipped the work when the mask was zero, so the instruction
+count depended on the sign of a secret-dependent intermediate. That leak
+affected every field inversion. The source had no branch. The
+instruction-count probe of \S\ref{sec:results} found it, and annotating the
+probe at line level located it. Passing the masks through
+\texttt{black\_box} fixed it. This is a reminder that constant-time code must
+be checked on the binary.
+
+\subsection{Residual issues}
+\begin{itemize}
+\item Key generation is variable time: rejection sampling, Cornacchia and
+  primality tests. It must run where no attacker can time it.
+\item Allocation: the core allocates vectors whose sizes are fixed by the
+  parameter set. glibc's allocator then executes a number of instructions
+  that depends on the heap state left by earlier variable-time work, though
+  not on secrets. A production implementation should use fixed buffers.
+\item Points and field elements on the stack are not wiped, only scalars and
+  byte buffers.
+\item The memory-address side of constant time is argued, not measured: there
+  are no secret-indexed tables. Power, EM and fault attacks are out of scope.
+  The FO check catches faults that corrupt $s$, but not faults that skip the
+  check.
+\item Constant time is verified for one compiler (rustc~1.97, release
+  profile) and one target (x86-64). Other builds need the probe re-run.
+\end{itemize}
+
+\subsection{Tests}
+The crate's tests compare the field arithmetic with a big-integer reference
+at 1, 2, 9, 21 and 42 limbs, the chain with direct endomorphism evaluation,
+and the pairing with bilinearity. They also run round trips at Toy16 and
+Toy32. Known-answer tests pin SHA3-256 digests of the public key, ciphertext
+and shared secret produced from fixed seeds at Toy16, Toy32 and L1. The
+robustness tests feed decapsulation 48 adversarial ciphertexts
+(\S\ref{sec:cca}) and encapsulation 14 adversarial public keys; every call
+terminates without a panic. A
+regression test covers a key-generation hang that we fixed: Tonelli--Shanks
+accepted $z=0$ as a non-residue.

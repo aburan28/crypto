@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="240" viewBox="0 0 1120 240" role="img" aria-label="Cubic norm-one covering construction and verification route">
+  <rect width="1120" height="240" rx="12" fill="#f8fafc"/>
+  <text x="24" y="32" font-family="sans-serif" font-size="21" font-weight="bold" fill="#0f172a">Cubic norm-one covering construction</text>
+  <text x="24" y="55" font-family="sans-serif" font-size="13" fill="#475569">Each arrow needs the stated witness before the next claim is entered in the database.</text>
+  <g font-family="sans-serif" font-size="13" fill="#0f172a">
+    <rect x="24" y="78" width="194" height="112" rx="9" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <text x="38" y="105" font-weight="bold">1. Norm-one parameter</text>
+    <text x="38" y="127">λ = α^q / α</text>
+    <text x="38" y="148">λ^(q²+q+1) = 1</text>
+    <text x="38" y="173" font-size="11" fill="#1d4ed8">Lean algebra checked</text>
+    <rect x="244" y="78" width="194" height="112" rx="9" fill="#ccfbf1" stroke="#0d9488" stroke-width="2"/>
+    <text x="258" y="105" font-weight="bold">2. Reconstruct α</text>
+    <text x="258" y="127">α^q = λ α</text>
+    <text x="258" y="148">Hilbert 90; α outside F_q</text>
+    <text x="258" y="173" font-size="11" fill="#0f766e">save exact field witness</text>
+    <rect x="464" y="78" width="194" height="112" rx="9" fill="#ccfbf1" stroke="#0d9488" stroke-width="2"/>
+    <text x="478" y="105" font-weight="bold">3. Form E and twists</text>
+    <text x="478" y="127">y² = x(x−α)(x−α^q)</text>
+    <text x="478" y="148">count points; record ICV1</text>
+    <text x="478" y="173" font-size="11" fill="#0f766e">model certificate required</text>
+    <rect x="684" y="78" width="194" height="112" rx="9" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+    <text x="698" y="105" font-weight="bold">4. Verify cover/map</text>
+    <text x="698" y="127">smooth genus-3 C</text>
+    <text x="698" y="148">C → Res(E), exact maps</text>
+    <text x="698" y="173" font-size="11" fill="#b45309">branch witness required</text>
+    <rect x="904" y="78" width="194" height="112" rx="9" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+    <text x="918" y="105" font-weight="bold">5. Select subgroup</text>
+    <text x="918" y="127">check r, G, target map</text>
+    <text x="918" y="148">kernel, cost and replay</text>
+    <text x="918" y="173" font-size="11" fill="#b45309">route-specific evidence</text>
+  </g>
+  <g fill="#334155" stroke="#334155" stroke-width="3">
+    <path d="M221 133 H238"/><path d="M238 133 l-7 -5 v10 z"/>
+    <path d="M441 133 H458"/><path d="M458 133 l-7 -5 v10 z"/>
+    <path d="M661 133 H678"/><path d="M678 133 l-7 -5 v10 z"/>
+    <path d="M881 133 H898"/><path d="M898 133 l-7 -5 v10 z"/>
+  </g>
+  <text x="24" y="217" font-family="sans-serif" font-size="12" fill="#475569">Base field q=p², extension L=F_(q³), p&gt;3. Covering and subgroup status are separate database fields.</text>
+</svg>

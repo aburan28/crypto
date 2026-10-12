@@ -1,0 +1,820 @@
+{
+  "protocol": "research/ecbench_conductor_gap_20261012/PROTOCOL.md",
+  "resamples": 20000,
+  "schema": "conductor-gap-analysis/v1",
+  "seed": 20261012,
+  "sessions": [
+    {
+      "aa": {
+        "mismatches": [],
+        "pairs": 16
+      },
+      "arms": {
+        "ic-mitm": {
+          "cross_curve": {
+            "ci95": [
+              0.6838537000872276,
+              1.324265669791282
+            ],
+            "ci99": [
+              0.6034629735497213,
+              1.4509336258980807
+            ],
+            "cross_curve_targets_transported": false,
+            "method": "independent workload bootstrap on each fixed curve; label permutation",
+            "permutation_p_two_sided": 0.8939553022348883,
+            "ratio_floor_over_crater": 0.9752416204412402,
+            "resamples": 20000,
+            "seed": 20261012
+          },
+          "curves": [
+            {
+              "factor_base": {
+                "abscissae": 256,
+                "columns": 256,
+                "description": "smallest 256 abscissae",
+                "dimension": null,
+                "family": "prime-abscissa",
+                "fb_id": "FB1h7f4deff25c73",
+                "fb_sha256": "7f4deff25c7324e8790452494a2d97ca2e70b5005651e50e9e9a41f4d2a25014",
+                "params": {
+                  "size": "256"
+                },
+                "points_sha256": "afb61b3215d1c5d9186d8c392e505f7ae4929f6ae0549530153ad6b3140f75fa",
+                "signed_points": 512
+              },
+              "floor_s": 0.8862269254527579,
+              "isolation_levels": {
+                "L0": 8
+              },
+              "lower_bound": true,
+              "max_s": 30.363786952053054,
+              "mean_s": 20.374247374445414,
+              "measured": 8,
+              "min_s": 11.45043232810523,
+              "phase_mean_gae": {
+                "factor_base": 0.0,
+                "linear_algebra": 0.0,
+                "oracle_setup": 65792.0,
+                "relations": 298687.75,
+                "verify": 38.25
+              },
+              "role": "crater",
+              "run_ids": [
+                "ECM1h0a90b9dbc108W62c80ae3988dR2",
+                "ECM1h0a90b9dbc108We7e2f26656cdR2",
+                "ECM1h0a90b9dbc108W65cba157e813R2",
+                "ECM1h0a90b9dbc108W549daa7f1e9cR2",
+                "ECM1h0a90b9dbc108W673ae02b7582R2",
+                "ECM1h0a90b9dbc108W90b7bea975f1R2",
+                "ECM1h0a90b9dbc108W994787c95133R2",
+                "ECM1h0a90b9dbc108Wecae5a064035R2"
+              ],
+              "slug": "icv1-fp29-t47-14392892",
+              "statuses": {
+                "verified": 8
+              },
+              "unpriced": [
+                "legendre_symbols_uncharged",
+                "lookups_uncharged",
+                "row_ops_uncharged",
+                "sqrt_solves_uncharged",
+                "target_guard_probes_uncharged"
+              ],
+              "valid": true,
+              "workloads": 8
+            },
+            {
+              "factor_base": {
+                "abscissae": 256,
+                "columns": 256,
+                "description": "smallest 256 abscissae",
+                "dimension": null,
+                "family": "prime-abscissa",
+                "fb_id": "FB1hf1a829b51277",
+                "fb_sha256": "f1a829b51277cd0f80ef1383378ae30505c6d85634b190dff2a6e3c7173127f8",
+                "params": {
+                  "size": "256"
+                },
+                "points_sha256": "5cecc40151a6c90bd60848d2781499accda01a2fa1b1b8dcc6a33f09984fa3eb",
+                "signed_points": 512
+              },
+              "floor_s": 0.8862269254527579,
+              "isolation_levels": {
+                "L0": 8
+              },
+              "lower_bound": true,
+              "max_s": 27.05544085640504,
+              "mean_s": 19.86981402472483,
+              "measured": 8,
+              "min_s": 7.924380403051078,
+              "phase_mean_gae": {
+                "factor_base": 0.0,
+                "linear_algebra": 0.0,
+                "oracle_setup": 65792.0,
+                "relations": 289660.875,
+                "verify": 40.25
+              },
+              "role": "floor",
+              "run_ids": [
+                "ECM1h0a90b9dbc108Wfa8cf16b48ccR2",
+                "ECM1h0a90b9dbc108W02ae1bd475b0R2",
+                "ECM1h0a90b9dbc108W2e48fd31d527R2",
+                "ECM1h0a90b9dbc108W8bc9e1bf846bR2",
+                "ECM1h0a90b9dbc108Wf33c820d0eeaR2",
+                "ECM1h0a90b9dbc108Wa95e5dcf91c6R2",
+                "ECM1h0a90b9dbc108Wae604389a862R2",
+                "ECM1h0a90b9dbc108Wb710a9e566f6R2"
+              ],
+              "slug": "icv1-fp29-t47-1f934956",
+              "statuses": {
+                "verified": 8
+              },
+              "unpriced": [
+                "legendre_symbols_uncharged",
+                "lookups_uncharged",
+                "row_ops_uncharged",
+                "sqrt_solves_uncharged",
+                "target_guard_probes_uncharged"
+              ],
+              "valid": true,
+              "workloads": 8
+            }
+          ]
+        },
+        "rho-neg": {
+          "cross_curve": {
+            "ci95": [
+              0.6009224320204738,
+              2.089817330464788
+            ],
+            "ci99": [
+              0.4950051163505754,
+              2.694866471240455
+            ],
+            "cross_curve_targets_transported": false,
+            "method": "independent workload bootstrap on each fixed curve; label permutation",
+            "permutation_p_two_sided": 0.8088095595220239,
+            "ratio_floor_over_crater": 1.0783543565112,
+            "resamples": 20000,
+            "seed": 20261012
+          },
+          "curves": [
+            {
+              "factor_base": null,
+              "floor_s": 0.8862269254527579,
+              "isolation_levels": {
+                "L0": 8
+              },
+              "lower_bound": true,
+              "max_s": 1.8928948956785905,
+              "mean_s": 0.9338573995533564,
+              "measured": 8,
+              "min_s": 0.29444783294262133,
+              "phase_mean_gae": {
+                "internal_verification": 38.25,
+                "search": 16322.625,
+                "setup": 346.875
+              },
+              "role": "crater",
+              "run_ids": [
+                "ECM1hefea4e0ebe79W62c80ae3988dR4",
+                "ECM1hefea4e0ebe79We7e2f26656cdR4",
+                "ECM1hefea4e0ebe79W65cba157e813R4",
+                "ECM1hefea4e0ebe79W549daa7f1e9cR4",
+                "ECM1hefea4e0ebe79W673ae02b7582R4",
+                "ECM1hefea4e0ebe79W90b7bea975f1R4",
+                "ECM1hefea4e0ebe79W994787c95133R4",
+                "ECM1hefea4e0ebe79Wecae5a064035R4"
+              ],
+              "slug": "icv1-fp29-t47-14392892",
+              "statuses": {
+                "verified": 8
+              },
+              "unpriced": [
+                "canonicalisations_uncharged"
+              ],
+              "valid": true,
+              "workloads": 8
+            },
+            {
+              "factor_base": null,
+              "floor_s": 0.8862269254527579,
+              "isolation_levels": {
+                "L0": 8
+              },
+              "lower_bound": true,
+              "max_s": 1.7980992379962275,
+              "mean_s": 1.0070291951685821,
+              "measured": 8,
+              "min_s": 0.3585578679436059,
+              "phase_mean_gae": {
+                "internal_verification": 40.25,
+                "search": 17632.875,
+                "setup": 343.75
+              },
+              "role": "floor",
+              "run_ids": [
+                "ECM1hefea4e0ebe79Wfa8cf16b48ccR4",
+                "ECM1hefea4e0ebe79W02ae1bd475b0R4",
+                "ECM1hefea4e0ebe79W2e48fd31d527R4",
+                "ECM1hefea4e0ebe79W8bc9e1bf846bR4",
+                "ECM1hefea4e0ebe79Wf33c820d0eeaR4",
+                "ECM1hefea4e0ebe79Wa95e5dcf91c6R4",
+                "ECM1hefea4e0ebe79Wae604389a862R4",
+                "ECM1hefea4e0ebe79Wb710a9e566f6R4"
+              ],
+              "slug": "icv1-fp29-t47-1f934956",
+              "statuses": {
+                "verified": 8
+              },
+              "unpriced": [
+                "canonicalisations_uncharged"
+              ],
+              "valid": true,
+              "workloads": 8
+            }
+          ]
+        },
+        "rho-neg-aa": {
+          "cross_curve": {
+            "ci95": [
+              0.6009224320204738,
+              2.089817330464788
+            ],
+            "ci99": [
+              0.4950051163505754,
+              2.694866471240455
+            ],
+            "cross_curve_targets_transported": false,
+            "method": "independent workload bootstrap on each fixed curve; label permutation",
+            "permutation_p_two_sided": 0.8088095595220239,
+            "ratio_floor_over_crater": 1.0783543565112,
+            "resamples": 20000,
+            "seed": 20261012
+          },
+          "curves": [
+            {
+              "factor_base": null,
+              "floor_s": 0.8862269254527579,
+              "isolation_levels": {
+                "L0": 8
+              },
+              "lower_bound": true,
+              "max_s": 1.8928948956785905,
+              "mean_s": 0.9338573995533564,
+              "measured": 8,
+              "min_s": 0.29444783294262133,
+              "phase_mean_gae": {
+                "internal_verification": 38.25,
+                "search": 16322.625,
+                "setup": 346.875
+              },
+              "role": "crater",
+              "run_ids": [
+                "ECM1hefea4e0ebe79W62c80ae3988dR3",
+                "ECM1hefea4e0ebe79We7e2f26656cdR3",
+                "ECM1hefea4e0ebe79W65cba157e813R3",
+                "ECM1hefea4e0ebe79W549daa7f1e9cR3",
+                "ECM1hefea4e0ebe79W673ae02b7582R3",
+                "ECM1hefea4e0ebe79W90b7bea975f1R3",
+                "ECM1hefea4e0ebe79W994787c95133R3",
+                "ECM1hefea4e0ebe79Wecae5a064035R3"
+              ],
+              "slug": "icv1-fp29-t47-14392892",
+              "statuses": {
+                "verified": 8
+              },
+              "unpriced": [
+                "canonicalisations_uncharged"
+              ],
+              "valid": true,
+              "workloads": 8
+            },
+            {
+              "factor_base": null,
+              "floor_s": 0.8862269254527579,
+              "isolation_levels": {
+                "L0": 8
+              },
+              "lower_bound": true,
+              "max_s": 1.7980992379962275,
+              "mean_s": 1.0070291951685821,
+              "measured": 8,
+              "min_s": 0.3585578679436059,
+              "phase_mean_gae": {
+                "internal_verification": 40.25,
+                "search": 17632.875,
+                "setup": 343.75
+              },
+              "role": "floor",
+              "run_ids": [
+                "ECM1hefea4e0ebe79Wfa8cf16b48ccR3",
+                "ECM1hefea4e0ebe79W02ae1bd475b0R3",
+                "ECM1hefea4e0ebe79W2e48fd31d527R3",
+                "ECM1hefea4e0ebe79W8bc9e1bf846bR3",
+                "ECM1hefea4e0ebe79Wf33c820d0eeaR3",
+                "ECM1hefea4e0ebe79Wa95e5dcf91c6R3",
+                "ECM1hefea4e0ebe79Wae604389a862R3",
+                "ECM1hefea4e0ebe79Wb710a9e566f6R3"
+              ],
+              "slug": "icv1-fp29-t47-1f934956",
+              "statuses": {
+                "verified": 8
+              },
+              "unpriced": [
+                "canonicalisations_uncharged"
+              ],
+              "valid": true,
+              "workloads": 8
+            }
+          ]
+        }
+      },
+      "curve_manifests": [
+        {
+          "curve": {
+            "coefficients": {
+              "a": "0xf2c85f8",
+              "b": "0x1079c127"
+            },
+            "cofactor": "1",
+            "generator": [
+              "0x1",
+              "0x16c5e08"
+            ],
+            "group_order": "320091991",
+            "model": "short-weierstrass",
+            "subgroup_order": "320091991",
+            "target_group": "prime-order cyclic subgroup generated by the recorded generator"
+          },
+          "curve_id": "EC1P29Ccmcraterhae811e480428",
+          "curve_sha256": "ae811e480428595a3ede9019006aaea4d8049d984502ad3bb8fb262803400fd0",
+          "curve_uid": "urn:ec-record:1:sha256:ae811e480428595a3ede9019006aaea4d8049d984502ad3bb8fb262803400fd0",
+          "field": {
+            "characteristic": 320092037,
+            "degree": 1,
+            "element_encoding": "lowercase hex with 0x prefix",
+            "representation": "prime-residue"
+          },
+          "field_sha256": "dac1fc848602cd2735542aadb261120492f9e9c5240fdc154091db29ea28737c",
+          "role": "crater",
+          "status": "metadata identity of the exact frozen representation; not an additional mathematical certificate"
+        },
+        {
+          "curve": {
+            "coefficients": {
+              "a": "0x607fcdd",
+              "b": "0x36ed8bd"
+            },
+            "cofactor": "1",
+            "generator": [
+              "0x0",
+              "0x6b053da"
+            ],
+            "group_order": "320091991",
+            "model": "short-weierstrass",
+            "subgroup_order": "320091991",
+            "target_group": "prime-order cyclic subgroup generated by the recorded generator"
+          },
+          "curve_id": "EC1P29Ccmfloorh12dba562e91a",
+          "curve_sha256": "12dba562e91af4e2ddbe56f3ccea704568d87f5df115e104e2edc1b863923b1b",
+          "curve_uid": "urn:ec-record:1:sha256:12dba562e91af4e2ddbe56f3ccea704568d87f5df115e104e2edc1b863923b1b",
+          "field": {
+            "characteristic": 320092037,
+            "degree": 1,
+            "element_encoding": "lowercase hex with 0x prefix",
+            "representation": "prime-residue"
+          },
+          "field_sha256": "dac1fc848602cd2735542aadb261120492f9e9c5240fdc154091db29ea28737c",
+          "role": "floor",
+          "status": "metadata identity of the exact frozen representation; not an additional mathematical certificate"
+        }
+      ],
+      "ell": 8209,
+      "failed": [],
+      "ic_vs_rho": {
+        "crater": {
+          "ic_over_rho_count_diagnostic": 21.817300354625846,
+          "ratio_of_lower_bounds": true
+        },
+        "floor": {
+          "ic_over_rho_count_diagnostic": 19.731120130433272,
+          "ratio_of_lower_bounds": true
+        }
+      },
+      "measured": 48,
+      "records": 96,
+      "records_sha256": "cb0e0fb9474108d8e12b4d659c919132af9701a7bfdb0b8b3629f2159daaed98",
+      "session": "research/ecbench_conductor_gap_20261012/sessions/ell8209-q29",
+      "session_id": "ECBS1h2686905ba61d",
+      "status": "observations on two fixed curves; no population hardness or speedup claim"
+    },
+    {
+      "aa": {
+        "mismatches": [],
+        "pairs": 16
+      },
+      "arms": {
+        "ic-mitm": {
+          "cross_curve": {
+            "ci95": [
+              0.9708008815807896,
+              1.2908377256515553
+            ],
+            "ci99": [
+              0.9224713156147041,
+              1.3416943110064028
+            ],
+            "cross_curve_targets_transported": false,
+            "method": "independent workload bootstrap on each fixed curve; label permutation",
+            "permutation_p_two_sided": 0.1449427528623569,
+            "ratio_floor_over_crater": 1.1271341819922416,
+            "resamples": 20000,
+            "seed": 20261012
+          },
+          "curves": [
+            {
+              "factor_base": {
+                "abscissae": 2048,
+                "columns": 2048,
+                "description": "smallest 2048 abscissae",
+                "dimension": null,
+                "family": "prime-abscissa",
+                "fb_id": "FB1ha0548e6b38c6",
+                "fb_sha256": "a0548e6b38c60f31e53d90bdf9e607561c9768ea3e7635ea68d2ae30c5250997",
+                "params": {
+                  "size": "2048"
+                },
+                "points_sha256": "79991361a0c28ee608b92d5505003ece772fc27951a01e284ce1f153a1f60c3f",
+                "signed_points": 4096
+              },
+              "floor_s": 0.8862269254527579,
+              "isolation_levels": {
+                "L0": 8
+              },
+              "lower_bound": true,
+              "max_s": 52.1463349888235,
+              "mean_s": 44.124055258157306,
+              "measured": 8,
+              "min_s": 34.91014413546485,
+              "phase_mean_gae": {
+                "factor_base": 0.0,
+                "linear_algebra": 0.0,
+                "oracle_setup": 4196352.0,
+                "relations": 8411075.375,
+                "verify": 52.375
+              },
+              "role": "crater",
+              "run_ids": [
+                "ECM1hf001d28db50bW603d04f825bfR2",
+                "ECM1hf001d28db50bW0415e5bd2d6eR2",
+                "ECM1hf001d28db50bWf54d2cda2916R2",
+                "ECM1hf001d28db50bW858cdab46c91R2",
+                "ECM1hf001d28db50bW864a96f42f90R2",
+                "ECM1hf001d28db50bWfe7b7ba27047R2",
+                "ECM1hf001d28db50bWe9f6a73081e3R2",
+                "ECM1hf001d28db50bWeece426f3bcdR2"
+              ],
+              "slug": "icv1-fp37-t277-91fd6e29",
+              "statuses": {
+                "verified": 8
+              },
+              "unpriced": [
+                "legendre_symbols_uncharged",
+                "lookups_uncharged",
+                "row_ops_uncharged",
+                "sqrt_solves_uncharged",
+                "target_guard_probes_uncharged"
+              ],
+              "valid": true,
+              "workloads": 8
+            },
+            {
+              "factor_base": {
+                "abscissae": 2048,
+                "columns": 2048,
+                "description": "smallest 2048 abscissae",
+                "dimension": null,
+                "family": "prime-abscissa",
+                "fb_id": "FB1h07c983c12398",
+                "fb_sha256": "07c983c123983d76559e2a274ca8e67f1207e5391330a3a0779bde66b3ef6f67",
+                "params": {
+                  "size": "2048"
+                },
+                "points_sha256": "163c73671ac3129e02daa17c8d43ffc6ecfa296caf7f7583dd23f3f7db1e3cb0",
+                "signed_points": 4096
+              },
+              "floor_s": 0.8862269254527579,
+              "isolation_levels": {
+                "L0": 8
+              },
+              "lower_bound": true,
+              "max_s": 55.69384123319275,
+              "mean_s": 49.7337309295836,
+              "measured": 8,
+              "min_s": 32.405069714692424,
+              "phase_mean_gae": {
+                "factor_base": 0.0,
+                "linear_algebra": 0.0,
+                "oracle_setup": 4196352.0,
+                "relations": 10013917.375,
+                "verify": 52.0
+              },
+              "role": "floor",
+              "run_ids": [
+                "ECM1hf001d28db50bWafd981f8ee50R2",
+                "ECM1hf001d28db50bW30fbca1376d1R2",
+                "ECM1hf001d28db50bW131b677b4f41R2",
+                "ECM1hf001d28db50bW57ef05ee88f3R2",
+                "ECM1hf001d28db50bW3272f900dba4R2",
+                "ECM1hf001d28db50bWb4ceee6a1766R2",
+                "ECM1hf001d28db50bW66be038fe1c0R2",
+                "ECM1hf001d28db50bW482a690133dfR2"
+              ],
+              "slug": "icv1-fp37-t277-090dc414",
+              "statuses": {
+                "verified": 8
+              },
+              "unpriced": [
+                "legendre_symbols_uncharged",
+                "lookups_uncharged",
+                "row_ops_uncharged",
+                "sqrt_solves_uncharged",
+                "target_guard_probes_uncharged"
+              ],
+              "valid": true,
+              "workloads": 8
+            }
+          ]
+        },
+        "rho-neg": {
+          "cross_curve": {
+            "ci95": [
+              0.6179558804129167,
+              1.9933436990479587
+            ],
+            "ci99": [
+              0.4727976046697817,
+              2.3428393480457785
+            ],
+            "cross_curve_targets_transported": false,
+            "method": "independent workload bootstrap on each fixed curve; label permutation",
+            "permutation_p_two_sided": 0.6073196340182991,
+            "ratio_floor_over_crater": 1.1797430677943024,
+            "resamples": 20000,
+            "seed": 20261012
+          },
+          "curves": [
+            {
+              "factor_base": null,
+              "floor_s": 0.8862269254527579,
+              "isolation_levels": {
+                "L0": 8
+              },
+              "lower_bound": true,
+              "max_s": 1.6284646155001818,
+              "mean_s": 0.9350898028966059,
+              "measured": 8,
+              "min_s": 0.31678375193399383,
+              "phase_mean_gae": {
+                "internal_verification": 52.375,
+                "search": 266774.5,
+                "setup": 354.5
+              },
+              "role": "crater",
+              "run_ids": [
+                "ECM1hefea4e0ebe79W603d04f825bfR4",
+                "ECM1hefea4e0ebe79W0415e5bd2d6eR4",
+                "ECM1hefea4e0ebe79Wf54d2cda2916R4",
+                "ECM1hefea4e0ebe79W858cdab46c91R4",
+                "ECM1hefea4e0ebe79W864a96f42f90R4",
+                "ECM1hefea4e0ebe79Wfe7b7ba27047R4",
+                "ECM1hefea4e0ebe79We9f6a73081e3R4",
+                "ECM1hefea4e0ebe79Weece426f3bcdR4"
+              ],
+              "slug": "icv1-fp37-t277-91fd6e29",
+              "statuses": {
+                "verified": 8
+              },
+              "unpriced": [
+                "canonicalisations_uncharged"
+              ],
+              "valid": true,
+              "workloads": 8
+            },
+            {
+              "factor_base": null,
+              "floor_s": 0.8862269254527579,
+              "isolation_levels": {
+                "L0": 8
+              },
+              "lower_bound": true,
+              "max_s": 2.3937097811968875,
+              "mean_s": 1.1031657127324115,
+              "measured": 8,
+              "min_s": 0.1809202915844607,
+              "phase_mean_gae": {
+                "internal_verification": 52.0,
+                "search": 314793.25,
+                "setup": 360.125
+              },
+              "role": "floor",
+              "run_ids": [
+                "ECM1hefea4e0ebe79Wafd981f8ee50R4",
+                "ECM1hefea4e0ebe79W30fbca1376d1R4",
+                "ECM1hefea4e0ebe79W131b677b4f41R4",
+                "ECM1hefea4e0ebe79W57ef05ee88f3R4",
+                "ECM1hefea4e0ebe79W3272f900dba4R4",
+                "ECM1hefea4e0ebe79Wb4ceee6a1766R4",
+                "ECM1hefea4e0ebe79W66be038fe1c0R4",
+                "ECM1hefea4e0ebe79W482a690133dfR4"
+              ],
+              "slug": "icv1-fp37-t277-090dc414",
+              "statuses": {
+                "verified": 8
+              },
+              "unpriced": [
+                "canonicalisations_uncharged"
+              ],
+              "valid": true,
+              "workloads": 8
+            }
+          ]
+        },
+        "rho-neg-aa": {
+          "cross_curve": {
+            "ci95": [
+              0.6179558804129167,
+              1.9933436990479587
+            ],
+            "ci99": [
+              0.4727976046697817,
+              2.3428393480457785
+            ],
+            "cross_curve_targets_transported": false,
+            "method": "independent workload bootstrap on each fixed curve; label permutation",
+            "permutation_p_two_sided": 0.6073196340182991,
+            "ratio_floor_over_crater": 1.1797430677943024,
+            "resamples": 20000,
+            "seed": 20261012
+          },
+          "curves": [
+            {
+              "factor_base": null,
+              "floor_s": 0.8862269254527579,
+              "isolation_levels": {
+                "L0": 8
+              },
+              "lower_bound": true,
+              "max_s": 1.6284646155001818,
+              "mean_s": 0.9350898028966059,
+              "measured": 8,
+              "min_s": 0.31678375193399383,
+              "phase_mean_gae": {
+                "internal_verification": 52.375,
+                "search": 266774.5,
+                "setup": 354.5
+              },
+              "role": "crater",
+              "run_ids": [
+                "ECM1hefea4e0ebe79W603d04f825bfR3",
+                "ECM1hefea4e0ebe79W0415e5bd2d6eR3",
+                "ECM1hefea4e0ebe79Wf54d2cda2916R3",
+                "ECM1hefea4e0ebe79W858cdab46c91R3",
+                "ECM1hefea4e0ebe79W864a96f42f90R3",
+                "ECM1hefea4e0ebe79Wfe7b7ba27047R3",
+                "ECM1hefea4e0ebe79We9f6a73081e3R3",
+                "ECM1hefea4e0ebe79Weece426f3bcdR3"
+              ],
+              "slug": "icv1-fp37-t277-91fd6e29",
+              "statuses": {
+                "verified": 8
+              },
+              "unpriced": [
+                "canonicalisations_uncharged"
+              ],
+              "valid": true,
+              "workloads": 8
+            },
+            {
+              "factor_base": null,
+              "floor_s": 0.8862269254527579,
+              "isolation_levels": {
+                "L0": 8
+              },
+              "lower_bound": true,
+              "max_s": 2.3937097811968875,
+              "mean_s": 1.1031657127324115,
+              "measured": 8,
+              "min_s": 0.1809202915844607,
+              "phase_mean_gae": {
+                "internal_verification": 52.0,
+                "search": 314793.25,
+                "setup": 360.125
+              },
+              "role": "floor",
+              "run_ids": [
+                "ECM1hefea4e0ebe79Wafd981f8ee50R3",
+                "ECM1hefea4e0ebe79W30fbca1376d1R3",
+                "ECM1hefea4e0ebe79W131b677b4f41R3",
+                "ECM1hefea4e0ebe79W57ef05ee88f3R3",
+                "ECM1hefea4e0ebe79W3272f900dba4R3",
+                "ECM1hefea4e0ebe79Wb4ceee6a1766R3",
+                "ECM1hefea4e0ebe79W66be038fe1c0R3",
+                "ECM1hefea4e0ebe79W482a690133dfR3"
+              ],
+              "slug": "icv1-fp37-t277-090dc414",
+              "statuses": {
+                "verified": 8
+              },
+              "unpriced": [
+                "canonicalisations_uncharged"
+              ],
+              "valid": true,
+              "workloads": 8
+            }
+          ]
+        }
+      },
+      "curve_manifests": [
+        {
+          "curve": {
+            "coefficients": {
+              "a": "0x171f106df",
+              "b": "0x74cadcd6d"
+            },
+            "cofactor": "1",
+            "generator": [
+              "0x3",
+              "0x408fe9564"
+            ],
+            "group_order": "81640511861",
+            "model": "short-weierstrass",
+            "subgroup_order": "81640511861",
+            "target_group": "prime-order cyclic subgroup generated by the recorded generator"
+          },
+          "curve_id": "EC1P37Ccmcraterh28d36d6728fd",
+          "curve_sha256": "28d36d6728fd54cba045cf9814801b0aa24cd146a585e1ac95227c99aa4b7729",
+          "curve_uid": "urn:ec-record:1:sha256:28d36d6728fd54cba045cf9814801b0aa24cd146a585e1ac95227c99aa4b7729",
+          "field": {
+            "characteristic": 81640512137,
+            "degree": 1,
+            "element_encoding": "lowercase hex with 0x prefix",
+            "representation": "prime-residue"
+          },
+          "field_sha256": "5f5b3ef82674f849ab7d22f6ecae4107892423b3c8c0650c7a6b27dda153ee2a",
+          "role": "crater",
+          "status": "metadata identity of the exact frozen representation; not an additional mathematical certificate"
+        },
+        {
+          "curve": {
+            "coefficients": {
+              "a": "0x16979b318",
+              "b": "0xffd932cf6"
+            },
+            "cofactor": "1",
+            "generator": [
+              "0x2",
+              "0x5fef6707f"
+            ],
+            "group_order": "81640511861",
+            "model": "short-weierstrass",
+            "subgroup_order": "81640511861",
+            "target_group": "prime-order cyclic subgroup generated by the recorded generator"
+          },
+          "curve_id": "EC1P37Ccmfloorh892cd9d9b053",
+          "curve_sha256": "892cd9d9b0539e2071254e19931cc6b9249c0bbbaa70ddfc9ba22d55a0bfd7e2",
+          "curve_uid": "urn:ec-record:1:sha256:892cd9d9b0539e2071254e19931cc6b9249c0bbbaa70ddfc9ba22d55a0bfd7e2",
+          "field": {
+            "characteristic": 81640512137,
+            "degree": 1,
+            "element_encoding": "lowercase hex with 0x prefix",
+            "representation": "prime-residue"
+          },
+          "field_sha256": "5f5b3ef82674f849ab7d22f6ecae4107892423b3c8c0650c7a6b27dda153ee2a",
+          "role": "floor",
+          "status": "metadata identity of the exact frozen representation; not an additional mathematical certificate"
+        }
+      ],
+      "ell": 131101,
+      "failed": [],
+      "ic_vs_rho": {
+        "crater": {
+          "ic_over_rho_count_diagnostic": 47.18697083582266,
+          "ratio_of_lower_bounds": true
+        },
+        "floor": {
+          "ic_over_rho_count_diagnostic": 45.08273811955142,
+          "ratio_of_lower_bounds": true
+        }
+      },
+      "measured": 48,
+      "records": 96,
+      "records_sha256": "c46193b81034cc3252b353544b0729efb0f860a790c481d7dd161e70c3a83cc1",
+      "session": "research/ecbench_conductor_gap_20261012/sessions/ell131101-q37",
+      "session_id": "ECBS1h8dc7fcf4f74b",
+      "status": "observations on two fixed curves; no population hardness or speedup claim"
+    }
+  ]
+}

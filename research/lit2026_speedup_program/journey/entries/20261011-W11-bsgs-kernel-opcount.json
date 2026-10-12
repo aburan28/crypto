@@ -1,0 +1,27 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W11",
+  "slug": "bsgs-kernel-opcount",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1692",
+  "papers": ["ePrint 2026/2102"],
+  "kind": "speedup",
+  "workload": {
+    "id": "bsgs-fast-step-opcount-secp48k1",
+    "description": "bsgs_fast giant-phase step on secp48k1 (arXiv 2508.14011 ladder), W=8 chains of 16384 points, counted on CountingField; identical (index, x) visits for every kernel",
+    "curve_ids": ["secp48k1 (arXiv 2508.14011 Appendix A card)"]
+  },
+  "metric": "field M-equivalents per visited point (M + S + I x Fermat cost 89)",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 1,
+  "arms": [
+    {"role": "original", "label": "program baseline (counting harness absent)", "commit": "4b6e09b78", "value": null},
+    {"role": "previous", "label": "chain kernel (the original algorithm)", "commit": "680f3cf9d", "value": 16.75},
+    {"role": "candidate", "label": "paired, K=32", "commit": "680f3cf9d", "value": 3.71}
+  ],
+  "ratio_previous_over_candidate": {"value": 4.515, "interval": [4.515, 4.515], "interval_kind": "none"},
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w11_generic_engineering_20261011/reports/run-20261011T2049Z/report.pdf",
+  "note": "Deterministic count. Without the inversion share: 5.625 vs 3.539 M+S (1.59x). The co-Z kernel (our reading of 2026/2102) counts 7.34 M-equivalents, about twice the affine paired kernel."
+}

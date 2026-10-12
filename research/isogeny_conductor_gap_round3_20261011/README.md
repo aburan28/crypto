@@ -29,6 +29,23 @@ Rounds 1 and 2:
 
 ## Findings
 
+> **Correction (2026-10-12), to finding 1.**  The direct system it
+> compares against uses an `H`-stable base of `B` points.  After the `[h]`
+> projection every pipeline here applies, `P` and `P + K` are the same
+> column, so that base has only `B/|H|` distinct columns.  At a matched
+> number of columns, the direct and quotient systems have the same degree
+> and the same F4 cost.  The 4–20× saving is the cost of the redundant
+> orbit base, not a free gain.
+>
+> What the quotient can buy is a yield gain: a base `V` pushed forward to
+> `W = X(V)` on `E/H` keeps `|V|` columns and degree `|V|`, but lands in an
+> index-`|H|` subgroup, so it should hit `|H|` times as often.  This round
+> did not measure yield.  It is tested as E6 in
+> [`../isogeny_conductor_gap_round5_20261012/`](../isogeny_conductor_gap_round5_20261012/README.md).
+> The measured counts in this note stand; their reading in finding 1 does
+> not.
+
+
 1. **Two-torsion symmetrisation is a quotient isogeny, and it pays as
    predicted.**
    - Writing the `S₃` decomposition system for an `H`-stable factor base on

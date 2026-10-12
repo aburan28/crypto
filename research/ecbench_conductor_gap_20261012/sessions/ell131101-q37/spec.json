@@ -1,0 +1,70 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Large-prime conductor-gap IC follow-up: ell=131101, 37-bit field",
+  "description": "Frozen D=-19 CM pair; fresh independent one-target workloads on each curve. No explicit isogeny or cross-curve target transport. Counts are primary, wall times descriptive. New IC coverage at ell=131101.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "prime_explicit",
+        "p": 81640512137,
+        "a": 6206588639,
+        "b": 31351229805,
+        "group_order": 81640511861,
+        "r": 81640511861,
+        "gx": 3,
+        "gy": 17330771300
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 81640512137,
+        "a": 6064550680,
+        "b": 68678790390,
+        "group_order": 81640511861,
+        "r": 81640511861,
+        "gx": 2,
+        "gy": 25752399999
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 2026101201
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "rho-neg-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-mitm",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=2048",
+          "oracle": "mitm:m=2,negation_folded=1",
+          "linalg": "structured-gauss",
+          "targets": "walk",
+          "max_trials": "100000000",
+          "solver_budget_seconds": "0"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 20261012,
+    "isolation_required": "L2",
+    "timeout_seconds": 1200
+  }
+}

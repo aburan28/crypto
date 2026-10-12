@@ -1,0 +1,4 @@
+
+thread 'main' (48891377) panicked at report.rs:36:70:
+called `Result::unwrap()` on an `Err` value: Error("trailing characters", line: 22207, column: 3)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

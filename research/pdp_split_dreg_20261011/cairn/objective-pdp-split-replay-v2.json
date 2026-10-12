@@ -1,0 +1,36 @@
+{
+  "created_at": "2026-10-11T00:00:00+00:00",
+  "funder": "aburan28/crypto:research/pdp_split_dreg_20261011",
+  "goal": "pdp_split_dreg_20261011: replay the split/hybrid PDP stage diagnostic on K_0/GF(2^13), l = 4 (v2: host-independent fields only)",
+  "reward": 0,
+  "statement": "Replay objective, unfunded. Claim: on the Koblitz curve icv1-f2m13-t181-515ee569 (K_0 / GF(2^13)) with factor base the standard subspace span(1, z, z^2, z^3), for the four seeded targets of seed 20261011, the unsplit S4 system and the S3-chain split (plans [3] and [2,1]), each with g = 0, 2, 4 guessed Boolean unknowns, solved by the repository's F4 (pq_f4_f2::groebner_basis_f4), reach the per-run solving degrees and F4 word-XOR counts in `profile`, find exactly the decompositions an exhaustive enumeration finds (all_complete_and_exact), and total word_xors_total XORs and verified_total verified decompositions. Wall time is deliberately not a field. Reproduce from a checkout of github.com/aburan28/crypto on branch claude/pdp-split-dreg (protocol commit 51bb1dc5) after `cargo build --release --bin pdp_split_dreg`; protocol: research/pdp_split_dreg_20261011/PROTOCOL.md. v2 of the objective: the first posting (sha256:f4375085…) declared branches_timed_out reproducible, which cairn rejected as machine-dependent; all_complete_and_exact already fails if any branch timed out.",
+  "verifier": {
+    "kind": "replay",
+    "command": [
+      "sh",
+      "-c",
+      "f=$(mktemp -u) && target/release/pdp_split_dreg --cells 3:0:13:4 --guesses 0,2,4 --targets 4 --seed 20261011 --budget-secs 300 --max-free 24 --lambda-targets 256 --out \"$f\" --replay-summary 2>/dev/null; rm -f \"$f\""
+    ],
+    "cwd": ".",
+    "reproducible_fields": [
+      "runs",
+      "profile",
+      "word_xors_total",
+      "verified_total",
+      "all_complete_and_exact"
+    ],
+    "timeout_seconds": 1800
+  },
+  "artifact_schema": {
+    "type": "object",
+    "required": [
+      "results"
+    ],
+    "properties": {
+      "results": {
+        "type": "object",
+        "description": "The JSON object the pinned command prints on stdout; every reproducible field must be present and equal."
+      }
+    }
+  }
+}

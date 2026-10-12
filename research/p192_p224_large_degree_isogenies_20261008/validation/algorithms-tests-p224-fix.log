@@ -1,0 +1,386 @@
+    Blocking waiting for file lock on artifact directory
+warning: field `hw` is never read
+  --> src/gf2n.rs:17:5
+   |
+12 | pub struct GF2n {
+   |            ---- field in this struct
+...
+17 |     hw: bool,
+   |     ^^
+   |
+   = note: `GF2n` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `isogeny_algos` (lib) generated 1 warning
+   Compiling isogeny_algos v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008/isogeny_algos)
+warning: `isogeny_algos` (lib test) generated 1 warning (1 duplicate)
+    Finished `release` profile [optimized] target(s) in 9m 27s
+     Running unittests src/lib.rs (isogeny_algos/target/release/deps/isogeny_algos-cbde64ee63b6d654)
+
+running 3 tests
+test gf3n::tests::bitsliced_digits ... ok
+test gf3n::tests::moduli_match_exhaustive_scan ... ok
+test gf3n::tests::mul_inv_match_digit_schoolbook ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/bin/bench.rs (isogeny_algos/target/release/deps/bench-6f9c6cd7e5621fc7)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/gen_mont_adx.rs (isogeny_algos/target/release/deps/gen_mont_adx-2c64c194755005b5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/isogeny-algos.rs (isogeny_algos/target/release/deps/isogeny_algos-556ce84ecd89c757)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/micro.rs (isogeny_algos/target/release/deps/micro-f973085858f1bffc)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/report.rs (isogeny_algos/target/release/deps/report-45169f6c693d1572)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/adx_gen.rs (isogeny_algos/target/release/deps/adx_gen-570437161a80946f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/api.rs (isogeny_algos/target/release/deps/api-73facd4bc1befea1)
+
+running 7 tests
+test field_dispatch_handles_every_limb_boundary ... ok
+test isogenies_match_modular_roots_and_velu ... ok
+test p224_small_low_limb_does_not_reject_modular_construction ... ok
+test cli_records_and_exit_codes ... ok
+test counts_match_bsgs ... ok
+test p192_order_and_split_degree_maps_are_supported ... ok
+test standard_curves_certified_and_named_as_in_the_registry ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.83s
+
+     Running tests/bigfield.rs (isogeny_algos/target/release/deps/bigfield-ee4b5e7ed8f57961)
+
+running 2 tests
+test kernel_algorithms_agree_at_256_bits ... ok
+test kernel_algorithms_agree_at_512_bits ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+     Running tests/binary.rs (isogeny_algos/target/release/deps/binary-914daa51f337d05a)
+
+running 5 tests
+test gf2n_arithmetic ... ok
+test phi_mod2_matches_kernel_oracle ... ok
+test group_law_and_point_counting ... ok
+test velu_kohel_and_division_polynomials ... ok
+test path_finding_on_binary_curves ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.68s
+
+     Running tests/bmss.rs (isogeny_algos/target/release/deps/bmss-77d8352a40f416a2)
+
+running 5 tests
+test bmss_family_on_galois_stable_kernels ... ok
+test end_to_end_from_phi_matches_v1 ... ok
+test bmss_family_agrees_with_kohel ... ok
+test ode_solvers_agree ... ok
+test bmss_family_larger_l_no_phi ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.53s
+
+     Running tests/chain.rs (isogeny_algos/target/release/deps/chain-880af957eda8ddd5)
+
+running 2 tests
+test sidh_key_exchange_all_strategies_agree ... ok
+test smooth_composite_kernel ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/csidh.rs (isogeny_algos/target/release/deps/csidh-d5f60c271a6be77a)
+
+running 9 tests
+test generic_csidh_on_fpm1_matches_zp ... ok
+test class_number_known_values ... ok
+test batched_action_equals_stepwise ... ok
+test csidh_toy_action_is_a_group_action ... ok
+test csidh512_action_commutes ... ok
+test fast_action_equals_stepwise ... ok
+test ideal_orders_divide_class_number ... ok
+test mitm_recovers_exponents ... ok
+test csidh512_fast_action_matches_batched ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/dual.rs (isogeny_algos/target/release/deps/dual-7de6e215f03b6da3)
+
+running 1 test
+test dual_composes_to_multiplication_by_l ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/endo.rs (isogeny_algos/target/release/deps/endo-2cccfaa1629c5718)
+
+running 2 tests
+test conductor_one_when_discriminant_is_squarefree ... ok
+test conductor_drops_by_l_along_ascent ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.01s
+
+     Running tests/find.rs (isogeny_algos/target/release/deps/find-399a6fefcf3c6b97)
+
+running 3 tests
+test phi2_matches_known ... ok
+test divpoly_kernels_are_isogenies_and_match_velu ... ok
+test elkies_bmss_matches_kohel ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/fpm.rs (isogeny_algos/target/release/deps/fpm-a69cdd5f6a8028c1)
+
+running 2 tests
+test fpm_matches_bigint_arithmetic ... ok
+test fpm1_agrees_with_zp_on_isogenies ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/fpm_inv.rs (isogeny_algos/target/release/deps/fpm_inv-85c814b8641f999e)
+
+running 3 tests
+test adx_multiplication_matches_portable ... ok
+test miller_rabin_known_values ... ok
+test bingcd_inverse_matches_fermat ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.34s
+
+     Running tests/fpr.rs (isogeny_algos/target/release/deps/fpr-5ac0e1750156e43b)
+
+running 1 test
+test fpr_is_a_field ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/genus2.rs (isogeny_algos/target/release/deps/genus2-2238da87d25331e2)
+
+running 5 tests
+test richelot_correspondence_maps_points_to_codomain ... ok
+test degenerate_richelot_splits ... ok
+test superspecial_richelot_graph ... ok
+test richelot_preserves_l_polynomial ... ok
+test gluing_matches_product_l_polynomial ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 8.96s
+
+     Running tests/gf3n.rs (isogeny_algos/target/release/deps/gf3n-780b09428b434058)
+
+running 1 test
+test gf3n_field_axioms ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/hessian.rs (isogeny_algos/target/release/deps/hessian-3035967d1a994cab)
+
+running 1 test
+test hessian_group_law_isogenies_and_codomain ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.62s
+
+     Running tests/icv1.rs (isogeny_algos/target/release/deps/icv1-0e4deba6454bf089)
+
+running 2 tests
+test icv1_prime_matches_the_reference_vectors ... ok
+test sha256_known_answers ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/int.rs (isogeny_algos/target/release/deps/int-069bf2b2ab6d9938)
+
+running 3 tests
+test knuth_division ... ok
+test signed_arithmetic ... ok
+test miller_rabin_matches_u128_reference ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.40s
+
+     Running tests/kernel.rs (isogeny_algos/target/release/deps/kernel-eaeae914ab45c578)
+
+running 3 tests
+test order_matches_naive ... ok
+test bsgs_order_consistent ... ok
+test three_kernel_algorithms_agree ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+
+     Running tests/kernel2.rs (isogeny_algos/target/release/deps/kernel2-54bf823295c9dea0)
+
+running 5 tests
+test general_velu_even_degree ... ok
+test general_velu_cyclic_order_4_and_6 ... ok
+test xonly_velu_matches_and_handles_extension_kernels ... ok
+test fast_xonly_velu_matches ... ok
+test fast_sqrt_velu_matches_velu ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.90s
+
+     Running tests/models.rs (isogeny_algos/target/release/deps/models-0c547ba7b0825d40)
+
+running 2 tests
+test edwards_isogenies ... ok
+test huff_isogenies ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/mont.rs (isogeny_algos/target/release/deps/mont-834a0c32b500a20e)
+
+running 1 test
+test montgomery_velu_matches_weierstrass_along_a_chain ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/path.rs (isogeny_algos/target/release/deps/path-68a950071c2f3559)
+
+running 5 tests
+test galbraith_ghs_find_paths ... ok
+test kohel_volcano_and_ghs_volcano_with_conductor ... ok
+test delfs_galbraith_supersingular ... ok
+test couveignes_recovers_exponents ... ok
+test galbraith_stolbunov_weighted_walk ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+
+     Running tests/phi_fast.rs (isogeny_algos/target/release/deps/phi_fast-58792ba648cf6f46)
+
+running 1 test
+test hecke_construction_matches_linear_algebra ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+     Running tests/polyfast.rs (isogeny_algos/target/release/deps/polyfast-685604fb3248eaca)
+
+running 3 tests
+test fast_poly_and_series_match_reference ... ok
+test composer_matches_naive_and_frobenius_powers ... ok
+test ddf_matches_exponentiation_ddf ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.39s
+
+     Running tests/quat.rs (isogeny_algos/target/release/deps/quat-6a03b9918ce890de)
+
+running 4 tests
+test maximal_order_and_ideals ... ok
+test klpt_outputs_equivalent_two_power_norm_ideals ... ok
+test brandt_matrix_spectrum_matches_supersingular_graph ... ok
+test deuring_classes_to_supersingular_curves ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.37s
+
+     Running tests/radical.rs (isogeny_algos/target/release/deps/radical-ff6c580976b2b553)
+
+running 3 tests
+test radical7_steps_are_isogenies ... ok
+test radical_steps_are_isogenies ... ok
+test radical_chains_match_csidh_action_on_csidh512 ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests/relation.rs (isogeny_algos/target/release/deps/relation-e725f2c2524d0e86)
+
+running 3 tests
+test form_group_and_class_number ... ok
+test relations_act_trivially_on_toy_csidh ... ok
+test explicit_lattice_handles_non_cyclic_groups ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.84s
+
+     Running tests/report.rs (isogeny_algos/target/release/deps/report-8828088907f2b478)
+
+running 1 test
+test report_regenerates_committed_tables ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+
+     Running tests/sea.rs (isogeny_algos/target/release/deps/sea-b09b79d24d08e0fa)
+
+running 7 tests
+test atkin_candidate_sets_partition ... ok
+test sea_with_atkin_towers_matches_bsgs ... ok
+test isogeny_cycles_give_t_mod_l_power ... ok
+test atkin_degree_matches_gcd_definition ... ok
+test atkin_tower_eigenvalue_matches_true_trace ... ok
+test sea_at_128_bits ... ok
+test sea_matches_bsgs_at_40_and_61_bits ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.57s
+
+     Running tests/sqrt_velu_mont.rs (isogeny_algos/target/release/deps/sqrt_velu_mont-0b2d8f3b59ae4b0a)
+
+running 2 tests
+test sqrt_velu_mont_large_degree ... ok
+test sqrt_velu_mont_matches_velu_on_csidh512 ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/sutherland.rs (isogeny_algos/target/release/deps/sutherland-204790bae27d10eb)
+
+running 2 tests
+test sutherland_phi_crt_matches_integer_phi ... ok
+test sutherland_phi_mod_p_matches_qexpansion ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/theta.rs (isogeny_algos/target/release/deps/theta-f793c6732ccdf901)
+
+running 6 tests
+test theta_dimension_one ... ok
+test theta_factor_point_roundtrip ... ok
+test theta_kani_chain_splits_at_e0_times_x ... ok
+test theta_split_detection_and_gluing_vs_hlp ... ok
+test theta_kani_endomorphism_126_bit ... ok
+test theta_step_is_a_richelot_neighbour ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/theta_g.rs (isogeny_algos/target/release/deps/theta_g-e6ee1491661cac41)
+
+running 2 tests
+test theta_g2_matches_dimension_two_kani ... ok
+test theta_g4_kani_embedding_splits ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+
+     Running tests/two_power.rs (isogeny_algos/target/release/deps/two_power-3497f713ae5ba461)
+
+running 2 tests
+test four_and_two_chains_agree_with_weierstrass_velu ... ok
+test fp2_generic_matches_zp2 ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/weier.rs (isogeny_algos/target/release/deps/weier-eb91abb48eab8b00)
+
+running 2 tests
+test gw_velu_characteristic_three ... ok
+test gw_velu_matches_short_form_large_char ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 8.41s
+
+   Doc-tests isogeny_algos
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

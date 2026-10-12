@@ -1,0 +1,1914 @@
+{
+  "args": [
+    "dsweep",
+    "--bits",
+    "20",
+    "--ds",
+    "2,3,4",
+    "--targets",
+    "8",
+    "--out",
+    "dsweep.json"
+  ],
+  "curves": [
+    {
+      "a": 51142,
+      "b": 548946,
+      "bits": 20,
+      "cofactor": 1,
+      "covered_per_guess_with_multiplicity": 11875500.0,
+      "d_auto": 3,
+      "distinct_maximal_minors_per_guess": 8679556.0,
+      "ell": 54,
+      "ell_half": 27,
+      "eq4_success_d_auto": 0.9999999993238772,
+      "generator": [
+        1,
+        232756
+      ],
+      "generator_call": "find_prime_order_curve(20, 59297)",
+      "nprime": 18,
+      "p": 563153,
+      "r": 562427,
+      "slug": "icv1-fp20-t727-cd198a38"
+    }
+  ],
+  "fits_log2ops_vs_log2r": {},
+  "mode": "dsweep",
+  "paired_ratio": [],
+  "per_curve": [
+    {
+      "bits": 20,
+      "covered_d_subsets_median": 474614.0,
+      "method": "zero_minor.guess_determine(d=2)",
+      "ops_max": 42479354.0,
+      "ops_mean": 16202356.875,
+      "ops_median": 12099636.5,
+      "ops_min": 958408.0,
+      "r": 562427,
+      "runs": 8,
+      "search_ops_median": 11265936.5,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "verified": 8,
+      "wall_ms_median": 325.120125
+    },
+    {
+      "bits": 20,
+      "covered_d_subsets_median": 515620.0,
+      "method": "zero_minor.guess_determine(d=3)",
+      "ops_max": 6303986.0,
+      "ops_mean": 2904280.875,
+      "ops_median": 2539712.0,
+      "ops_min": 914577.0,
+      "r": 562427,
+      "runs": 8,
+      "search_ops_median": 1705291.0,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "verified": 8,
+      "wall_ms_median": 284.051208
+    },
+    {
+      "bits": 20,
+      "covered_d_subsets_median": 660765.0,
+      "method": "zero_minor.guess_determine(d=4)",
+      "ops_max": 9881434.0,
+      "ops_mean": 4400905.75,
+      "ops_median": 3321709.0,
+      "ops_min": 910834.0,
+      "r": 562427,
+      "runs": 8,
+      "search_ops_median": 2487216.5,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "verified": 8,
+      "wall_ms_median": 801.760125
+    }
+  ],
+  "runs": [
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 917154,
+          "decode_support": 54,
+          "guesses_a": 7,
+          "guesses_b": 2259,
+          "hash_probes_uncharged": 65504,
+          "kernels": 1,
+          "signature_kernels": 65504
+        },
+        "d": 2,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2764,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 43169
+          },
+          "determine_kernels": {
+            "invs": 65504,
+            "muls": 60988
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 234936
+          },
+          "determine_t": {
+            "invs": 56475,
+            "muls": 21121639
+          },
+          "guess_reduce": {
+            "invs": 189,
+            "muls": 209034
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2764,
+            "muls": 15616
+          }
+        },
+        "recovered": 233591,
+        "total": {
+          "invs": 125093,
+          "muls": 22457860
+        }
+      },
+      "group_ops": 2764,
+      "invs": 125093,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=2)",
+      "muls": 22457860,
+      "ops": 22582953,
+      "r": 562427,
+      "search_ops": 21748765,
+      "seed": 85919606929,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 0,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.80 103.04 97.13",
+      "verified": true,
+      "wall_ms": 628.6849169999999
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 64960,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 16,
+          "hash_probes_uncharged": 6625,
+          "kernels": 1,
+          "signature_kernels": 6625
+        },
+        "d": 3,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2743,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 43177
+          },
+          "determine_kernels": {
+            "invs": 13250,
+            "muls": 48560
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 3600
+          },
+          "determine_t": {
+            "invs": 384,
+            "muls": 142464
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2743,
+            "muls": 15649
+          }
+        },
+        "recovered": 233591,
+        "total": {
+          "invs": 16565,
+          "muls": 1055790
+        }
+      },
+      "group_ops": 2743,
+      "invs": 16565,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=3)",
+      "muls": 1055790,
+      "ops": 1072355,
+      "r": 562427,
+      "search_ops": 238147,
+      "seed": 85919606928,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 0,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.80 103.04 97.13",
+      "verified": true,
+      "wall_ms": 9.294917
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 31465,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 1,
+          "hash_probes_uncharged": 1541,
+          "kernels": 1,
+          "signature_kernels": 1541
+        },
+        "d": 4,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2736,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 41983
+          },
+          "determine_kernels": {
+            "invs": 4623,
+            "muls": 34480
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 384
+          },
+          "determine_t": {
+            "invs": 23,
+            "muls": 8441
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2736,
+            "muls": 15636
+          }
+        },
+        "recovered": 233591,
+        "total": {
+          "invs": 7570,
+          "muls": 903264
+        }
+      },
+      "group_ops": 2736,
+      "invs": 7570,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=4)",
+      "muls": 903264,
+      "ops": 910834,
+      "r": 562427,
+      "search_ops": 77840,
+      "seed": 85919606935,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 0,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.80 103.04 97.13",
+      "verified": true,
+      "wall_ms": 3.458625
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 4060,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 10,
+          "hash_probes_uncharged": 279,
+          "kernels": 1,
+          "signature_kernels": 279
+        },
+        "d": 2,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2733,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 42358
+          },
+          "determine_kernels": {
+            "invs": 279,
+            "muls": 261
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 1040
+          },
+          "determine_t": {
+            "invs": 250,
+            "muls": 93500
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2733,
+            "muls": 15459
+          }
+        },
+        "recovered": 336118,
+        "total": {
+          "invs": 3450,
+          "muls": 954958
+        }
+      },
+      "group_ops": 2733,
+      "invs": 3450,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=2)",
+      "muls": 954958,
+      "ops": 958408,
+      "r": 562427,
+      "search_ops": 125219,
+      "seed": 85919607185,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 1,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.80 103.04 97.13",
+      "verified": true,
+      "wall_ms": 3.655625
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 462840,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 114,
+          "hash_probes_uncharged": 49275,
+          "kernels": 1,
+          "signature_kernels": 49275
+        },
+        "d": 3,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2755,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 43500
+          },
+          "determine_kernels": {
+            "invs": 98550,
+            "muls": 360938
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 25650
+          },
+          "determine_t": {
+            "invs": 2736,
+            "muls": 1015056
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2755,
+            "muls": 15693
+          }
+        },
+        "recovered": 336118,
+        "total": {
+          "invs": 104229,
+          "muls": 2263177
+        }
+      },
+      "group_ops": 2755,
+      "invs": 104229,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=3)",
+      "muls": 2263177,
+      "ops": 2367406,
+      "r": 562427,
+      "search_ops": 1532819,
+      "seed": 85919607184,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 1,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.80 103.04 97.13",
+      "verified": true,
+      "wall_ms": 280.642291
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 1919365,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 61,
+          "hash_probes_uncharged": 271359,
+          "kernels": 1,
+          "signature_kernels": 271359
+        },
+        "d": 4,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2768,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 43671
+          },
+          "determine_kernels": {
+            "invs": 814077,
+            "muls": 5860952
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 23424
+          },
+          "determine_t": {
+            "invs": 1403,
+            "muls": 514901
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2768,
+            "muls": 15696
+          }
+        },
+        "recovered": 336118,
+        "total": {
+          "invs": 818436,
+          "muls": 7260984
+        }
+      },
+      "group_ops": 2768,
+      "invs": 818436,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=4)",
+      "muls": 7260984,
+      "ops": 8079420,
+      "r": 562427,
+      "search_ops": 7244646,
+      "seed": 85919607191,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 1,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.80 103.04 97.13",
+      "verified": true,
+      "wall_ms": 2636.677417
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 49532,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 122,
+          "hash_probes_uncharged": 3536,
+          "kernels": 1,
+          "signature_kernels": 3536
+        },
+        "d": 2,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2760,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 42309
+          },
+          "determine_kernels": {
+            "invs": 3536,
+            "muls": 3294
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 12688
+          },
+          "determine_t": {
+            "invs": 3050,
+            "muls": 1140700
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2760,
+            "muls": 15720
+          }
+        },
+        "recovered": 269891,
+        "total": {
+          "invs": 9534,
+          "muls": 2017051
+        }
+      },
+      "group_ops": 2760,
+      "invs": 9534,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=2)",
+      "muls": 2017051,
+      "ops": 2026585,
+      "r": 562427,
+      "search_ops": 1193157,
+      "seed": 85919607441,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 2,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.80 103.04 97.13",
+      "verified": true,
+      "wall_ms": 6.482792
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 568400,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 140,
+          "hash_probes_uncharged": 60743,
+          "kernels": 1,
+          "signature_kernels": 60743
+        },
+        "d": 3,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2770,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 43096
+          },
+          "determine_kernels": {
+            "invs": 121486,
+            "muls": 444968
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 31500
+          },
+          "determine_t": {
+            "invs": 3360,
+            "muls": 1246560
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2770,
+            "muls": 15750
+          }
+        },
+        "recovered": 269891,
+        "total": {
+          "invs": 127804,
+          "muls": 2584214
+        }
+      },
+      "group_ops": 2770,
+      "invs": 127804,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=3)",
+      "muls": 2584214,
+      "ops": 2712018,
+      "r": 562427,
+      "search_ops": 1877763,
+      "seed": 85919607440,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 2,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.80 103.04 97.13",
+      "verified": true,
+      "wall_ms": 255.00887500000002
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 2391340,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 76,
+          "hash_probes_uncharged": 339248,
+          "kernels": 1,
+          "signature_kernels": 339248
+        },
+        "d": 4,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2744,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 43060
+          },
+          "determine_kernels": {
+            "invs": 1017744,
+            "muls": 7327234
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 29184
+          },
+          "determine_t": {
+            "invs": 1748,
+            "muls": 641516
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2744,
+            "muls": 15676
+          }
+        },
+        "recovered": 269891,
+        "total": {
+          "invs": 1022424,
+          "muls": 8859010
+        }
+      },
+      "group_ops": 2744,
+      "invs": 1022424,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=4)",
+      "muls": 8859010,
+      "ops": 9881434,
+      "r": 562427,
+      "search_ops": 9047315,
+      "seed": 85919607447,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 2,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.50 102.97 97.15",
+      "verified": true,
+      "wall_ms": 3864.367416
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 725116,
+          "decode_support": 54,
+          "guesses_a": 6,
+          "guesses_b": 1786,
+          "hash_probes_uncharged": 51791,
+          "kernels": 1,
+          "signature_kernels": 51791
+        },
+        "d": 2,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2766,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 42069
+          },
+          "determine_kernels": {
+            "invs": 51791,
+            "muls": 48221
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 185744
+          },
+          "determine_t": {
+            "invs": 44650,
+            "muls": 16699072
+          },
+          "guess_reduce": {
+            "invs": 162,
+            "muls": 179172
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2766,
+            "muls": 15698
+          }
+        },
+        "recovered": 461203,
+        "total": {
+          "invs": 99530,
+          "muls": 17942454
+        }
+      },
+      "group_ops": 2766,
+      "invs": 99530,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=2)",
+      "muls": 17942454,
+      "ops": 18041984,
+      "r": 562427,
+      "search_ops": 17208812,
+      "seed": 85919607697,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 3,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.50 102.97 97.15",
+      "verified": true,
+      "wall_ms": 663.949708
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 454720,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 112,
+          "hash_probes_uncharged": 48467,
+          "kernels": 1,
+          "signature_kernels": 48467
+        },
+        "d": 3,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2768,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 43178
+          },
+          "determine_kernels": {
+            "invs": 96934,
+            "muls": 355030
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 25200
+          },
+          "determine_t": {
+            "invs": 2688,
+            "muls": 997248
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2768,
+            "muls": 15652
+          }
+        },
+        "recovered": 461203,
+        "total": {
+          "invs": 102578,
+          "muls": 2238648
+        }
+      },
+      "group_ops": 2768,
+      "invs": 102578,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=3)",
+      "muls": 2238648,
+      "ops": 2341226,
+      "r": 562427,
+      "search_ops": 1506989,
+      "seed": 85919607696,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 3,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.70 103.00 97.19",
+      "verified": true,
+      "wall_ms": 289.08125
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 597835,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 19,
+          "hash_probes_uncharged": 82516,
+          "kernels": 1,
+          "signature_kernels": 82516
+        },
+        "d": 4,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2783,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 43636
+          },
+          "determine_kernels": {
+            "invs": 247548,
+            "muls": 1782998
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 7296
+          },
+          "determine_t": {
+            "invs": 437,
+            "muls": 160379
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2783,
+            "muls": 15817
+          }
+        },
+        "recovered": 461203,
+        "total": {
+          "invs": 250956,
+          "muls": 2812466
+        }
+      },
+      "group_ops": 2783,
+      "invs": 250956,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=4)",
+      "muls": 2812466,
+      "ops": 3063422,
+      "r": 562427,
+      "search_ops": 2228547,
+      "seed": 85919607703,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 3,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.70 103.00 97.19",
+      "verified": true,
+      "wall_ms": 676.685667
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 224112,
+          "decode_support": 54,
+          "guesses_a": 2,
+          "guesses_b": 552,
+          "hash_probes_uncharged": 16001,
+          "kernels": 1,
+          "signature_kernels": 16001
+        },
+        "d": 2,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2778,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 43061
+          },
+          "determine_kernels": {
+            "invs": 16001,
+            "muls": 14899
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 57408
+          },
+          "determine_t": {
+            "invs": 13800,
+            "muls": 5161175
+          },
+          "guess_reduce": {
+            "invs": 54,
+            "muls": 59724
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2778,
+            "muls": 15750
+          }
+        },
+        "recovered": 9960,
+        "total": {
+          "invs": 32794,
+          "muls": 6124495
+        }
+      },
+      "group_ops": 2778,
+      "invs": 32794,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=2)",
+      "muls": 6124495,
+      "ops": 6157289,
+      "r": 562427,
+      "search_ops": 5323061,
+      "seed": 85919607953,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 4,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.70 103.00 97.19",
+      "verified": true,
+      "wall_ms": 21.555333
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 1006880,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 248,
+          "hash_probes_uncharged": 107579,
+          "kernels": 1,
+          "signature_kernels": 107579
+        },
+        "d": 3,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2772,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 43202
+          },
+          "determine_kernels": {
+            "invs": 215158,
+            "muls": 787967
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 55800
+          },
+          "determine_t": {
+            "invs": 5952,
+            "muls": 2208192
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2772,
+            "muls": 15748
+          }
+        },
+        "recovered": 9960,
+        "total": {
+          "invs": 224070,
+          "muls": 3913249
+        }
+      },
+      "group_ops": 2772,
+      "invs": 224070,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=3)",
+      "muls": 3913249,
+      "ops": 4137319,
+      "r": 562427,
+      "search_ops": 3302958,
+      "seed": 85919607952,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 4,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.70 103.00 97.19",
+      "verified": true,
+      "wall_ms": 590.354917
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 1510320,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 48,
+          "hash_probes_uncharged": 212948,
+          "kernels": 1,
+          "signature_kernels": 212948
+        },
+        "d": 4,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2749,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 43450
+          },
+          "determine_kernels": {
+            "invs": 638844,
+            "muls": 4599655
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 18432
+          },
+          "determine_t": {
+            "invs": 1104,
+            "muls": 405168
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2749,
+            "muls": 15635
+          }
+        },
+        "recovered": 9960,
+        "total": {
+          "invs": 642885,
+          "muls": 5884680
+        }
+      },
+      "group_ops": 2749,
+      "invs": 642885,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=4)",
+      "muls": 5884680,
+      "ops": 6527565,
+      "r": 562427,
+      "search_ops": 5693092,
+      "seed": 85919607959,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 4,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.70 103.00 97.19",
+      "verified": true,
+      "wall_ms": 1653.6575
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 38570,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 95,
+          "hash_probes_uncharged": 2754,
+          "kernels": 1,
+          "signature_kernels": 2754
+        },
+        "d": 2,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2753,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 42228
+          },
+          "determine_kernels": {
+            "invs": 2754,
+            "muls": 2564
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 9878
+          },
+          "determine_t": {
+            "invs": 2375,
+            "muls": 888250
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2753,
+            "muls": 15639
+          }
+        },
+        "recovered": 501554,
+        "total": {
+          "invs": 8070,
+          "muls": 1760899
+        }
+      },
+      "group_ops": 2753,
+      "invs": 8070,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=2)",
+      "muls": 1760899,
+      "ops": 1768969,
+      "r": 562427,
+      "search_ops": 935710,
+      "seed": 85919608209,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 5,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.70 103.00 97.19",
+      "verified": true,
+      "wall_ms": 4.72575
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 16240,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 4,
+          "hash_probes_uncharged": 1566,
+          "kernels": 1,
+          "signature_kernels": 1566
+        },
+        "d": 3,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2742,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 42475
+          },
+          "determine_kernels": {
+            "invs": 3132,
+            "muls": 11546
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 900
+          },
+          "determine_t": {
+            "invs": 96,
+            "muls": 35616
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2742,
+            "muls": 15542
+          }
+        },
+        "recovered": 501554,
+        "total": {
+          "invs": 6158,
+          "muls": 908419
+        }
+      },
+      "group_ops": 2742,
+      "invs": 6158,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=3)",
+      "muls": 908419,
+      "ops": 914577,
+      "r": 562427,
+      "search_ops": 81179,
+      "seed": 85919608208,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 5,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.70 103.00 97.19",
+      "verified": true,
+      "wall_ms": 2.8621250000000003
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 314650,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 10,
+          "hash_probes_uncharged": 41460,
+          "kernels": 1,
+          "signature_kernels": 41460
+        },
+        "d": 4,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2798,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 42847
+          },
+          "determine_kernels": {
+            "invs": 124380,
+            "muls": 896167
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 3840
+          },
+          "determine_t": {
+            "invs": 230,
+            "muls": 84410
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2798,
+            "muls": 15878
+          }
+        },
+        "recovered": 501554,
+        "total": {
+          "invs": 127596,
+          "muls": 1845482
+        }
+      },
+      "group_ops": 2798,
+      "invs": 127596,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=4)",
+      "muls": 1845482,
+      "ops": 1973078,
+      "r": 562427,
+      "search_ops": 1138916,
+      "seed": 85919608215,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 5,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.70 103.00 97.19",
+      "verified": true,
+      "wall_ms": 349.03154199999994
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 1466472,
+          "decode_support": 54,
+          "guesses_a": 11,
+          "guesses_b": 3612,
+          "hash_probes_uncharged": 104735,
+          "kernels": 1,
+          "signature_kernels": 104735
+        },
+        "d": 2,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2767,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 43067
+          },
+          "determine_kernels": {
+            "invs": 104735,
+            "muls": 97513
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 375648
+          },
+          "determine_t": {
+            "invs": 90300,
+            "muls": 33772192
+          },
+          "guess_reduce": {
+            "invs": 297,
+            "muls": 328482
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2767,
+            "muls": 15673
+          }
+        },
+        "recovered": 211256,
+        "total": {
+          "invs": 198260,
+          "muls": 35405053
+        }
+      },
+      "group_ops": 2767,
+      "invs": 198260,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=2)",
+      "muls": 35405053,
+      "ops": 35603313,
+      "r": 562427,
+      "search_ops": 34769167,
+      "seed": 85919608465,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 6,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.64 102.98 97.22",
+      "verified": true,
+      "wall_ms": 1202.496416
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 1672720,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 412,
+          "hash_probes_uncharged": 178917,
+          "kernels": 1,
+          "signature_kernels": 178917
+        },
+        "d": 3,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2760,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 43650
+          },
+          "determine_kernels": {
+            "invs": 357834,
+            "muls": 1310462
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 92700
+          },
+          "determine_t": {
+            "invs": 9888,
+            "muls": 3668448
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2760,
+            "muls": 15716
+          }
+        },
+        "recovered": 211256,
+        "total": {
+          "invs": 370670,
+          "muls": 5933316
+        }
+      },
+      "group_ops": 2760,
+      "invs": 370670,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=3)",
+      "muls": 5933316,
+      "ops": 6303986,
+      "r": 562427,
+      "search_ops": 5469221,
+      "seed": 85919608464,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 6,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.64 102.98 97.22",
+      "verified": true,
+      "wall_ms": 1209.236625
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 723695,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 23,
+          "hash_probes_uncharged": 102092,
+          "kernels": 1,
+          "signature_kernels": 102092
+        },
+        "d": 4,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2743,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 43139
+          },
+          "determine_kernels": {
+            "invs": 306276,
+            "muls": 2206217
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 8832
+          },
+          "determine_t": {
+            "invs": 529,
+            "muls": 194143
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2743,
+            "muls": 15589
+          }
+        },
+        "recovered": 211256,
+        "total": {
+          "invs": 309736,
+          "muls": 3270260
+        }
+      },
+      "group_ops": 2743,
+      "invs": 309736,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=4)",
+      "muls": 3270260,
+      "ops": 3579996,
+      "r": 562427,
+      "search_ops": 2745886,
+      "seed": 85919608471,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 6,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.64 102.98 97.22",
+      "verified": true,
+      "wall_ms": 926.834583
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 1756762,
+          "decode_support": 54,
+          "guesses_a": 13,
+          "guesses_b": 4327,
+          "hash_probes_uncharged": 125483,
+          "kernels": 1,
+          "signature_kernels": 125483
+        },
+        "d": 2,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2727,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 42422
+          },
+          "determine_kernels": {
+            "invs": 125483,
+            "muls": 116828
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 450006
+          },
+          "determine_t": {
+            "invs": 108175,
+            "muls": 40457040
+          },
+          "guess_reduce": {
+            "invs": 351,
+            "muls": 388206
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2727,
+            "muls": 15477
+          }
+        },
+        "recovered": 559546,
+        "total": {
+          "invs": 236897,
+          "muls": 42242457
+        }
+      },
+      "group_ops": 2727,
+      "invs": 236897,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=2)",
+      "muls": 42242457,
+      "ops": 42479354,
+      "r": 562427,
+      "search_ops": 41646089,
+      "seed": 85919608721,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 7,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.64 102.98 97.22",
+      "verified": true,
+      "wall_ms": 1414.131542
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 775460,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 191,
+          "hash_probes_uncharged": 82909,
+          "kernels": 1,
+          "signature_kernels": 82909
+        },
+        "d": 3,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2765,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 43019
+          },
+          "determine_kernels": {
+            "invs": 165818,
+            "muls": 607312
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 42975
+          },
+          "determine_t": {
+            "invs": 4584,
+            "muls": 1700664
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2765,
+            "muls": 15695
+          }
+        },
+        "recovered": 559546,
+        "total": {
+          "invs": 173355,
+          "muls": 3212005
+        }
+      },
+      "group_ops": 2765,
+      "invs": 173355,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=3)",
+      "muls": 3212005,
+      "ops": 3385360,
+      "r": 562427,
+      "search_ops": 2551242,
+      "seed": 85919608720,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 7,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.64 102.98 97.22",
+      "verified": true,
+      "wall_ms": 287.460125
+    },
+    {
+      "bits": 20,
+      "detail": {
+        "counters": {
+          "covered_d_subsets": 94395,
+          "decode_support": 54,
+          "guesses_a": 1,
+          "guesses_b": 3,
+          "hash_probes_uncharged": 12163,
+          "kernels": 1,
+          "signature_kernels": 12163
+        },
+        "d": 4,
+        "ell": 54,
+        "found_by": "signature_collision",
+        "group_ops_setup": 2736,
+        "nprime": 18,
+        "phases": {
+          "anti_diagonal": {
+            "invs": 54,
+            "muls": 2916
+          },
+          "decode": {
+            "invs": 53,
+            "muls": 43304
+          },
+          "determine_kernels": {
+            "invs": 36489,
+            "muls": 264272
+          },
+          "determine_signatures": {
+            "invs": 0,
+            "muls": 1152
+          },
+          "determine_t": {
+            "invs": 69,
+            "muls": 25323
+          },
+          "guess_reduce": {
+            "invs": 27,
+            "muls": 29862
+          },
+          "left_kernel": {
+            "invs": 54,
+            "muls": 749150
+          },
+          "matrix_m": {
+            "invs": 0,
+            "muls": 20412
+          },
+          "points": {
+            "invs": 2736,
+            "muls": 15624
+          }
+        },
+        "recovered": 559546,
+        "total": {
+          "invs": 39482,
+          "muls": 1152015
+        }
+      },
+      "group_ops": 2736,
+      "invs": 39482,
+      "log2_r": 19.101306328859888,
+      "method": "zero_minor.guess_determine(d=4)",
+      "muls": 1152015,
+      "ops": 1191497,
+      "r": 562427,
+      "search_ops": 357194,
+      "seed": 85919608727,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "target": 7,
+      "uptime": "17:23  up 17:02, 12 users, load averages: 102.64 102.98 97.22",
+      "verified": true,
+      "wall_ms": 62.754084
+    }
+  ],
+  "schema": "lit2026-w12-zero-minor/v1",
+  "unit": "field ops = F_p multiplications (squarings included) + inversions, each counted once; additions free"
+}

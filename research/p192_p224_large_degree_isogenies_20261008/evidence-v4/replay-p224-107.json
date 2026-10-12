@@ -1,0 +1,48 @@
+{
+  "method": "existing walker kernel verifier, separate field and polynomial implementation",
+  "records": [
+    {
+      "certificate_sha256": "65803f1555a952c5bc43d2041c7ec3fba742c29979a703920f76ff2e58467dc8",
+      "codomain_check": "PASS",
+      "ell": 107,
+      "exact_rational_map_check": "PASS",
+      "index": 0,
+      "kernel_check": "PASS",
+      "kernel_degree": 53,
+      "map_denominator_coefficients": 107,
+      "map_numerator_coefficients": 108,
+      "public_scalar_transport_checks": 20,
+      "source_curve_uid": "urn:ec-record:1:sha256:8e110c5854808bfd2283aa4b15063d4c3052a0d742a47224e34876c6ade763bd",
+      "source_ec1": "EC1P224Cp224h8e110c585480",
+      "source_icv1": "icv1-fp224-t4733100108545601916421827343930821-fec01e99",
+      "status": "PASS",
+      "subgroup_check": "PASS",
+      "target_curve_uid": "urn:ec-record:1:sha256:eb037147d4b94f7c9750ebfff46f7aa11c8877412fa5ac487b28fb4f18cfd619",
+      "target_ec1": "EC1P224Cfpheb037147d4b9",
+      "target_icv1": "icv1-fp224-t4733100108545601916421827343930821-d5703be1"
+    },
+    {
+      "certificate_sha256": "65803f1555a952c5bc43d2041c7ec3fba742c29979a703920f76ff2e58467dc8",
+      "codomain_check": "PASS",
+      "ell": 107,
+      "exact_rational_map_check": "PASS",
+      "index": 1,
+      "kernel_check": "PASS",
+      "kernel_degree": 53,
+      "map_denominator_coefficients": 107,
+      "map_numerator_coefficients": 108,
+      "public_scalar_transport_checks": 20,
+      "source_curve_uid": "urn:ec-record:1:sha256:8e110c5854808bfd2283aa4b15063d4c3052a0d742a47224e34876c6ade763bd",
+      "source_ec1": "EC1P224Cp224h8e110c585480",
+      "source_icv1": "icv1-fp224-t4733100108545601916421827343930821-fec01e99",
+      "status": "PASS",
+      "subgroup_check": "PASS",
+      "target_curve_uid": "urn:ec-record:1:sha256:7240230099496aceeca406092372f71f66e1648f81d0b11dd7d898a5d1c09685",
+      "target_ec1": "EC1P224Cfph724023009949",
+      "target_icv1": "icv1-fp224-t4733100108545601916421827343930821-93cbacf7"
+    }
+  ],
+  "schema": "large-degree-isogeny-replay/v1",
+  "scope": "same-host independent implementation",
+  "status": "PASS"
+}

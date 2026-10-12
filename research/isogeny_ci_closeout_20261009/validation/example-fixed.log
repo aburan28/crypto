@@ -1,0 +1,11 @@
+    Blocking waiting for file lock on artifact directory
+   Compiling isogeny_algos v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008/isogeny_algos)
+    Finished `release` profile [optimized] target(s) in 1m 05s
+     Running unittests examples/p192_p224_large_degree_search.rs (/private/tmp/isogeny-catalogue-setup/algorithms-target/release/examples/p192_p224_large_degree_search-34fba3328fab21f1)
+
+running 2 tests
+test tests::published_orders_give_registry_traces ... ok
+test tests::split_and_inert_predictions_match_existing_small_degree_records ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+

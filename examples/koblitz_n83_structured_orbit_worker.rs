@@ -380,17 +380,19 @@ fn run(args: &[String]) -> Result<()> {
     let (kc, fb) = import(Path::new(&args[1]), Path::new(&args[2]))?;
     let import_ms = start.elapsed().as_secs_f64() * 1000.0;
     let (target, corpus_hash) = public_target(Path::new(&args[3]), &kc)?;
-    let mut opts = KoblitzIcOptions::default();
-    opts.m = 5;
-    opts.strategy = DecompositionStrategy::ChainedS3FrobeniusOrbit;
-    opts.max_trials = max_trials;
-    opts.seed = 2026100901;
-    opts.allow_direct_relation = false;
-    opts.chain_s3_limits = ChainS3Limits {
-        max_variables: 150_000,
-        max_domain_clauses: 12_000_000,
-        max_models: models,
-        conflict_budget: conflicts,
+    let opts = KoblitzIcOptions {
+        m: 5,
+        strategy: DecompositionStrategy::ChainedS3FrobeniusOrbit,
+        max_trials,
+        seed: 2026100901,
+        allow_direct_relation: false,
+        chain_s3_limits: ChainS3Limits {
+            max_variables: 150_000,
+            max_domain_clauses: 12_000_000,
+            max_models: models,
+            conflict_budget: conflicts,
+        },
+        ..KoblitzIcOptions::default()
     };
     let mut events = OpenOptions::new()
         .write(true)

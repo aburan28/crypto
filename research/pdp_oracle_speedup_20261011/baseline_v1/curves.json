@@ -1,0 +1,89 @@
+{
+ "_comment": "The five toy Koblitz curves K_1 = y^2+xy=x^3+x^2+1 of the PDP oracle speedup program (research/pdp_oracle_speedup_20261011), one per rung l = 8..12 (n = 3l), over the moduli examples/pdp_speedup picks (smallest trinomial, else pentanomial). Group orders from the Koblitz trace recurrence (scripts/curve_id.py koblitz_order).",
+ "curves": [
+  {
+   "name": "pdp-oracle-speedup-l8",
+   "koblitz": true,
+   "suppress_koblitz_aliases": true,
+   "field": {
+    "kind": "binary",
+    "degree": 24,
+    "polynomial_low_terms": [
+     0,
+     1,
+     3,
+     4
+    ]
+   },
+   "a": "0x1",
+   "b": "0x1",
+   "group_order": "16783200"
+  },
+  {
+   "name": "pdp-oracle-speedup-l9",
+   "koblitz": true,
+   "suppress_koblitz_aliases": true,
+   "field": {
+    "kind": "binary",
+    "degree": 27,
+    "polynomial_low_terms": [
+     0,
+     1,
+     2,
+     5
+    ]
+   },
+   "a": "0x1",
+   "b": "0x1",
+   "group_order": "134210174"
+  },
+  {
+   "name": "pdp-oracle-speedup-l10",
+   "koblitz": true,
+   "suppress_koblitz_aliases": true,
+   "field": {
+    "kind": "binary",
+    "degree": 30,
+    "polynomial_low_terms": [
+     0,
+     1
+    ]
+   },
+   "a": "0x1",
+   "b": "0x1",
+   "group_order": "1073731736"
+  },
+  {
+   "name": "pdp-oracle-speedup-l11",
+   "koblitz": true,
+   "suppress_koblitz_aliases": true,
+   "field": {
+    "kind": "binary",
+    "degree": 33,
+    "polynomial_low_terms": [
+     0,
+     10
+    ]
+   },
+   "a": "0x1",
+   "b": "0x1",
+   "group_order": "8590045478"
+  },
+  {
+   "name": "pdp-oracle-speedup-l12",
+   "koblitz": true,
+   "suppress_koblitz_aliases": true,
+   "field": {
+    "kind": "binary",
+    "degree": 36,
+    "polynomial_low_terms": [
+     0,
+     9
+    ]
+   },
+   "a": "0x1",
+   "b": "0x1",
+   "group_order": "68719003024"
+  }
+ ]
+}

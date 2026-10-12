@@ -113,7 +113,7 @@ k = 1, 4, 16, 32. The `measure` sub-command adds k = 1, 2, 4, 8, 16 with 24 batc
 - **Curves.**
   - A prime-field curve with q = 68,723,001,073 and prime order N = 68,723,001,023 (36.0 bits), with
     A = 2. It is an ordinary j from `ecbench::conductor_gap::floor` with (ℓ, t) = (120283, 51).
-  - `icv1-f2m41-tm2308219-7f48b14a` (K₀/GF(2^41), r = 549,756,390,943), with A = 82.
+  - `icv1-f2m41-tm2308219-7f48b14a` (icv1-f2m41-tm2308219-7f48b14a, r = 549,756,390,943), with A = 82.
 - **Method.** `ic_boundary::rho_batch_with` (negation classes, `RhoWalk::negation`) and
   `signed_frobenius_rho_batch`, counted in GAE. Every logarithm is checked against the planted one.
 - **Reproducibility.** The run is deterministic in its seeds. A rebuild reproduced `measure.json`
@@ -186,9 +186,9 @@ is the floor for its class. Adaptive preprocessing rho at the same advice needs 
 
 | source | curve | A | k | slope | 95% bootstrap | Kuhn–Struik slope (same k) |
 |:--|:--|--:|:--|--:|:--|--:|
-| committed records | K₀/GF(2^41) | 82 | 1, 4, 16, 32 | 0.547 | [0.487, 0.622] | 0.533 |
-| committed records | K₀/GF(2^53) | 106 | 1, 4, 16, 32 | 0.585 | [0.504, 0.671] | 0.533 |
-| committed records | K₀/GF(2^61) | 122 | 1, 32 | 0.521 | [0.416, 0.681] | 0.534 |
+| committed records | icv1-f2m41-tm2308219-7f48b14a | 82 | 1, 4, 16, 32 | 0.547 | [0.487, 0.622] | 0.533 |
+| committed records | icv1-f2m53-tm56619371-dac20a85 | 106 | 1, 4, 16, 32 | 0.585 | [0.504, 0.671] | 0.533 |
+| committed records | icv1-f2m61-t158598901-ab42b6c5 | 122 | 1, 32 | 0.521 | [0.416, 0.681] | 0.534 |
 | fresh, 24 batches per k | prime field, 36.0 bits | 2 | 1, 2, 4, 8, 16 | 0.526 | [0.453, 0.608] | 0.539 |
 | fresh, 24 batches per k | icv1-f2m41 | 82 | 1, 2, 4, 8, 16 | 0.561 | [0.500, 0.637] | 0.539 |
 

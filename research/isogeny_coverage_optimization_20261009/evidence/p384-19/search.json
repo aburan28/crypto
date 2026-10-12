@@ -1,0 +1,55 @@
+{
+  "attempts": [
+    {
+      "curve": "icv1-fp384-t1388124618062372383606759648309780106643088307173319169677-cf66c6c9",
+      "ell": 19,
+      "receipt": {
+        "command": [
+          "/private/tmp/isogeny-cli-build/release/isogeny",
+          "isogenies",
+          "--curve",
+          "icv1-fp384-t1388124618062372383606759648309780106643088307173319169677-cf66c6c9",
+          "--ell",
+          "19",
+          "--order",
+          "39402006196394479212279040100143613805079739270465446667946905279627659399113263569398956308152294913554433653942643",
+          "--seed",
+          "1"
+        ],
+        "elapsed_ms_operational_only": 64,
+        "exit_code": 0,
+        "map_count": 2,
+        "memory_monitor_grace_ms": 100,
+        "memory_sampling_interval_ms": 25,
+        "resident_memory_limit_bytes": "8589934592",
+        "sampled_peak_resident_bytes": "8486912",
+        "status": "PASS",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "ell-19.json",
+        "stdout_sha256": "4cbf38b53d381ff4527d99cc2e04cd8e2d711f8735488848e27490c2f55a91e8",
+        "unavailable_memory_samples": 0
+      }
+    }
+  ],
+  "executable_sha256": "3ebca44e7c726af0b651ca6905827665c273b6bbd4721b3a7a74b025628f9ca9",
+  "execution_spec": {
+    "construction_timeout_seconds": 180,
+    "curve": "icv1-fp384-t1388124618062372383606759648309780106643088307173319169677-cf66c6c9",
+    "ell": 19,
+    "independent_replay": true,
+    "method": "modpoly",
+    "resident_memory_limit_bytes": "8589934592",
+    "seed": 1
+  },
+  "reference_protocol_sha256": "55f6483843623aeb3742b0dd07daf1d3b2a835054e6b9d71c53cf37a647133b6",
+  "schema": "isogeny-search/v1",
+  "source_commit": "663bceb60e5bd8498fc38fd0f99b8848f1c49262",
+  "timeout_seconds": 180,
+  "tool": {
+    "git_commit": "663bceb60e5bd8498fc38fd0f99b8848f1c49262",
+    "git_dirty": "true",
+    "name": "isogeny",
+    "standards_sha256": "6cadc45b189b30492e0b6e4ac47a6bc703cf04358792970c408564d3c05b2beb",
+    "version": "0.1.0"
+  }
+}
