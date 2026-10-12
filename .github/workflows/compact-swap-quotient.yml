@@ -58,10 +58,10 @@ jobs:
             research/notes/ecc2k130/compact_frozen_source_replay_20260929
             .github/workflows/compact-swap-quotient.yml
       - name: Check fail-closed frozen-source materialization
-        run: python3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p 'test_materialize.py' -v
+        run: cargo test --release --locked --manifest-path research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.toml
       - name: Materialize frozen source tree from committed snapshots
         run: |
-          python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+          cargo run --release --locked --quiet --manifest-path research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.toml -- materialize \
             --freeze research/notes/ecc2k130/compact_swap_quotient_20260929/FROZEN.json \
             --dest "${{ runner.temp }}/frozen-src"
       - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
