@@ -1,9 +1,16 @@
 attempt 1 (recorded as binary_validate_run1_hmax160.*):
   binary_gls_validate --m 31 --count 3 --points 24 --seed 20261012   (defaults hmax 160, lmax 41)
   1 discriminant found before |D| reached 1e7; PASS; 17.9 s wall
-attempt 2 (not recorded as JSON):
+attempt 2 (no JSON):
   timeout 900 binary_gls_validate --m 31 --count 3 --hmax 320 --lmax 61 --points 24 --seed 20261012 --json <scratch path>
-  11m10s wall. Output ends after these two rows, with no "verdict" line and no JSON file; cause not determined:
+  printed the two PASS rows below, then was killed by the container's memory-cgroup OOM killer
+  (dmesg: "Killed process 3841 (binary_gls_vali) ... anon-rss:11544924kB") while working on a later candidate D (|D| > 482623).
   | -39583 | 62 | 61 | (31, 11) | (-463 + -1 sqrt(-39583))/2, N = 31*2^11 | 4162 / -200 | 62 | 1 | 24/24 | +-lambda(s) (24/24) | PASS |
   | -482623 | 186 | 61 | (31, 12) | (-159 + 1 sqrt(-482623))/2, N = 31*2^12 | 14081 / -473 | 186 | 1 | 24/24 | +-lambda(s) (24/24) | PASS |
-attempt 3 (recorded as binary_validate.*): same parameters as attempt 2, JSON into this directory.
+attempt 3 (recorded as binary_validate_attempt3_killed.*):
+  same parameters, JSON into this directory; same two PASS rows, then OOM-killed
+  (dmesg: "Killed process 5125 (binary_gls_vali) ... anon-rss:13904496kB"), 11m50s wall.
+  Which stage (H_D at h <= 320, or root finding) exhausts memory was not isolated.
+attempt 4 (recorded as binary_validate.*):
+  binary_gls_validate --m 31 --count 3 --hmax 320 --lmax 61 --dmax 500000 --points 24 --seed 20261012 --json ...
+  --dmax (added after attempt 3) stops the search at |D| < 500000, past both discriminants found.

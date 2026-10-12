@@ -19,7 +19,7 @@
 //! Field: `GF2n` with `n = 2m <= 63`.
 //!
 //! ```bash
-//! cargo run --release --example binary_gls_validate -- [--m 31] [--count 3] [--hmax 160] \
+//! cargo run --release --example binary_gls_validate -- [--m 31] [--count 3] [--hmax 160] [--dmax 10000000] \
 //!     [--lmax 41] [--points 24] [--seed 20261012] [--json out.json]
 //! ```
 use isogeny_algos::binary::{kernel_polys, kohel_codomain, x_map, BinCurve};
@@ -61,6 +61,7 @@ fn main() {
     let m: usize = arg(&args, "--m", 31);
     let count: usize = arg(&args, "--count", 3);
     let hmax: usize = arg(&args, "--hmax", 160);
+    let dmax: i64 = arg(&args, "--dmax", 10_000_000);
     let lmax: u64 = arg(&args, "--lmax", 41);
     let npts: usize = arg(&args, "--points", 24);
     let seed: u64 = arg(&args, "--seed", 20_261_012);
@@ -80,7 +81,7 @@ fn main() {
     println!("| D | h | r bits | loop (l, F steps) | alpha | H_D precision / worst rounding | crater roots | closing walks | psi acts as [mu] | twisted loop acts as | verdict |");
     println!("|--:|--:|--:|:--|:--|:--|--:|--:|:--|:--|:--|");
     let mut d = -15i64;
-    while rows.len() < count && -d < 10_000_000 {
+    while rows.len() < count && -d < dmax {
         d -= 8;
         if !squarefree(-d) {
             continue;
@@ -278,6 +279,7 @@ fn main() {
             ("pass", Json::Bool(pass)),
         ]));
     }
+    println!("\nsearched fundamental D = 1 mod 8 down to D = {d} (bound |D| < {dmax}, h <= {hmax}, l <= {lmax})");
     println!(
         "\nverdict: {}",
         if all_pass && !rows.is_empty() {
@@ -291,6 +293,8 @@ fn main() {
             ("schema", Json::str("binary_gls_validate/v1")),
             ("command", Json::str(args.join(" "))),
             ("m", Json::Num(m as i64)),
+            ("d_reached", Json::Num(d)),
+            ("dmax", Json::Num(dmax)),
             ("all_pass", Json::Bool(all_pass)),
             ("rows", Json::Arr(rows)),
         ]);

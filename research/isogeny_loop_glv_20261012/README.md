@@ -203,13 +203,17 @@ check at m = 31: curves over F_{2^31}, twisted over GF(2^62).
 | −39583 | 62 | ℓ = 31, 11 F steps, α = (−463 − √D)/2 | 24/24 | ±λ(s) 24/24 | PASS |
 | −482623 | 186 | ℓ = 31, 12 F steps, α = (−159 + √D)/2 | 24/24 | ±λ(s) 24/24 | PASS |
 
-The discriminant search runs to |D| < 10⁷, and only these 2 discriminants met
-every condition with h ≤ 320 and ℓ ≤ 61. An earlier run with hmax 160 and
-ℓ ≤ 41 found only the first; it is kept as `binary_validate_run1_hmax160.*`.
-A second attempt, with the same parameters as the recorded run, printed the
-same two PASS rows. It then ended without its verdict line or JSON; the cause
-was not determined. Its rows and all command lines are in
-`binary_validate_cmd.txt`, and the recorded run is the re-run.
+The recorded run searches |D| < 5·10⁵ (`--dmax 500000`). Two discriminants met
+every condition with h ≤ 320 and ℓ ≤ 61. Other attempts:
+- **attempt 1** (hmax 160, ℓ ≤ 41, |D| < 10⁷): found only the first, PASS.
+  Kept as `binary_validate_run1_hmax160.*`.
+- **attempts 2 and 3** (hmax 320, ℓ ≤ 61, |D| < 10⁷): both printed the same two
+  PASS rows, then the container's memory-cgroup OOM killer stopped them at 11.5
+  and 13.9 GB resident, while they worked on a later candidate. Attempt 3's
+  partial output is kept as `binary_validate_attempt3_killed.*`.
+
+`--dmax` was added after attempt 3. Which stage exhausts memory was not
+isolated. All commands and the kernel log lines are in `binary_validate_cmd.txt`.
 
 **Binary cost model (derived, not measured).**
 - Over F_{2^254}, a 4-dimensional split replaces about 127 shared doublings
@@ -249,5 +253,5 @@ was not determined. Its rows and all command lines are in
 | `gls_validate.*`, `validate_run_start_utc.txt` | §2 | `reports/run-…-gls-validate/` |
 | `bench_run1.*`, `bench_D*.*` | §3 | `reports/run-…-bench/` |
 | `binary_scan_m{83,127,131}.*` | §4 scans | `reports/run-…-binary-scan/` |
-| `binary_validate.*`, `binary_validate_run1_hmax160.*`, `binary_validate_cmd.txt` | §4 validation | `reports/run-…-binary-validate/` |
+| `binary_validate.*`, `binary_validate_run1_hmax160.*`, `binary_validate_attempt3_killed.*`, `binary_validate_cmd.txt` | §4 validation | `reports/run-…-binary-validate/` |
 | `sweeper_native/` | §5 | see §5 |

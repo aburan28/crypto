@@ -5,16 +5,18 @@
 #show table: set text(7.6pt)
 #text(13pt, weight: "bold")[Run report: run-20261012T0002Z-binary-validate]
 
-*What ran.* `./target/release/examples/binary_gls_validate --m 31 --count 3 --hmax 320 --lmax 61 --points 24 --seed 20261012 --json research/isogeny_loop_glv_20261012/binary_validate.json`. Final source (clippy-clean). rustc 1.97.0, release, cloud container shared with another agent's builds, not isolated. Start: `../../binary_validate_start_utc.txt`. Wall time: `../../binary_validate.log`.
+*What ran.* `./target/release/examples/binary_gls_validate --m 31 --count 3 --hmax 320 --lmax 61 --dmax 500000 --points 24 --seed 20261012 --json research/isogeny_loop_glv_20261012/binary_validate.json`. Final source (clippy-clean). rustc 1.97.0, release, cloud container shared with another agent's builds, not isolated. Start: `../../binary_validate_start_utc.txt`. Wall time: `../../binary_validate.log`. The run id is the start of the first attempt (00:02Z); the recorded attempt 4 started later, and its start time is in that file.
 
 *Method.* Curves over F#sub[2#super[31]] are built from H#sub[D] mod 2, with H#sub[D] computed natively; the field is GF(2#super[62]). The walk takes an odd ℓ-isogeny from Kohel kernel polynomials, keeps it only if its codomain is on the crater, and closes it with F#super[kk]. The GLS twist is a#sub[2] + δ with Tr(δ) = 1. Checks run x-only on 24 points of prime order r on E′:
 - x(ψP) = x#super[q] against x([μ]P);
 - (R(x))#super[2#super[kk]] against x([λ(±s)]P).
 
-*Runs requested / completed.* Three attempts:
-+ hmax 160, ℓ ≤ 41: found 1 discriminant before |D| reached 10#super[7]. PASS. Kept as `../../binary_validate_run1_hmax160.*`.
-+ hmax 320, ℓ ≤ 61: found 2, both PASS, 11 min 10 s. Its output stops after the two PASS rows: no verdict line and no JSON. The cause was not determined; the run was under `timeout 900` inside a shell that the tool moved to the background. Its printed rows are quoted in `../../binary_validate_cmd.txt`.
-+ The re-run recorded here.
+*Runs requested / completed.* Four attempts; one recorded.
++ hmax 160, ℓ ≤ 41, |D| < 10#super[7]: 1 discriminant, PASS. Kept as `../../binary_validate_run1_hmax160.*`.
++ hmax 320, ℓ ≤ 61, |D| < 10#super[7]: printed the 2 PASS rows below, then was OOM-killed at 11.5 GB resident (kernel log). No JSON.
++ Same parameters: the same 2 PASS rows, then OOM-killed at 13.9 GB after 11 min 50 s. Kept as `../../binary_validate_attempt3_killed.*`.
++ `--dmax 500000` added, which stops the search past both discriminants: the run recorded here.
+Which stage exhausts memory on the later candidate was not isolated. Commands and kernel log lines: `../../binary_validate_cmd.txt`.
 
 *Recorded values* (`../../binary_validate.md`):
 #table(columns: 6,
