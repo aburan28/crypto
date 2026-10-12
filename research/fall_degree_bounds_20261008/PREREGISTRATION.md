@@ -259,3 +259,46 @@ The same measurement is taken on the committed unsatisfiable draws of:
 - **Censoring.** A draw not refuted by `cmax` is censored (`d_F > cmax`).
 
 Nothing from any E4 or extension draw has been computed.
+
+## Amendment 4 (2026-10-12, before any E6 draw is measured): E6, `d_F` beyond the ladder's reach
+
+**Why.** On every E4 and extension draw (`m = 3`, ℓ = 2–4; `m = 4`, ℓ = 2–3; 32 draws,
+each cross-checked by an independent implementation, `examples/hky_crosscheck.rs`), `d_F`
+is 3 or 4. Meanwhile the plain refutation degree `D*` rises from 5 to `≥ 7`. E6 asks
+whether `d_F` stays at 4 where `N`, `ℓ` and `m` are larger. It also asks the question that
+matters for relation finding: satisfiable targets (HKY Prop 2.8 solves at
+`max(d_F, #solutions)`).
+
+**Part A (committed draws).** `m = 3`, cells (13, 5) and (15, 5), with `N = 28, 30`. These
+are the four unsatisfiable draws each in `research/dreg_fixed_surplus_20260923/runs/cell-1{3,5}-5-6.u*.jsonl`,
+with recorded `D* ≥ 7`. `cmax = 5`.
+
+**Part B (new draws).** Drawn exactly as `dreg_ladder` draws them: `ladder_sample` with
+`cell_seed(20261012, n, ℓ, m)`, keeping the first 4 draws with no solutions. `cmax = 4`;
+a draw not refuted by degree 4 is reported as `d_F ≥ 5`.
+
+| `m` | cell | `N` |
+|--:|:--|--:|
+| 3 | (18, 6) | 36 |
+| 4 | (13, 4) | 42 |
+| 5 | (10, 2) | 40 |
+
+**Part C (satisfiable draws).** `m = 3`, using the committed satisfiable draws
+(`solutions > 0`) of cells (7, 3), (9, 3) and (11, 4), up to 4 per cell.
+- `d_F` uses the record's own definition: `d_last` from closure dimensions against
+  `dim (I(S) ∩ R_{≤c})`, with `DG` from the standard monomials of `S`.
+- `S` is enumerated from the chain and checked against every equation.
+- `cmax = 5`.
+
+**Reading rule (fixed now; exploratory, not part of the registered E3/E4 scoring).**
+
+| reading | condition |
+|:--|:--|
+| **`d_F` bounded at toy size** | every A and B draw has `d_F ≤ 4`, **and** every C draw has `d_last ≤ 4` |
+| **`d_F` grows** | the median `d_F` of some A or B cell is `≥ 5`, or some C cell's median `d_last` is `≥ 5` |
+| **mixed** | otherwise |
+
+Even "bounded" is evidence at toy size only. The ledger's conditional (§2.2) says `d_F`
+must eventually be `ω(m²)` unless ECDLP over `F_{2^n}` is subexponential.
+
+Nothing from any E6 draw has been computed. Part B's draws have not been generated.
