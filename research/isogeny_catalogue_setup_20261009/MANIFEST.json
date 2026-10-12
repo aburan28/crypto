@@ -1,0 +1,277 @@
+{
+  "files": [
+    {
+      "bytes": 69,
+      "path": ".gitattributes",
+      "sha256": "dca586663d69c9b414213ab7f5181aa4fc1c2b7619f1219d8200ca87d2701535"
+    },
+    {
+      "bytes": 9,
+      "path": ".gitignore",
+      "sha256": "306fd52e74fca6746e12acc750f232de15e71da917756a1270d74c91f5eb7368"
+    },
+    {
+      "bytes": 2787,
+      "path": "COMMAND_SETUP.svg",
+      "sha256": "0950a3c09935680d0ec4691bd541d459814818944da11a5bc0bc99a89af7b3b2"
+    },
+    {
+      "bytes": 4639,
+      "path": "Cargo.lock",
+      "sha256": "829e6267778f6cddec24e77b97859164064ff5131c60d5e0aa431d972f559ed4"
+    },
+    {
+      "bytes": 290,
+      "path": "Cargo.toml",
+      "sha256": "3daae473fac5f93c535c2da06b3648096e8fb9eba5ea4b5827d25c12ae008a80"
+    },
+    {
+      "bytes": 923,
+      "path": "INTERRUPTION.json",
+      "sha256": "3bf60c4082d4b0bee0eb28a0f531e576ac0a674132c95656150d9b6af1de4da7"
+    },
+    {
+      "bytes": 1017,
+      "path": "INTERRUPTION_2.json",
+      "sha256": "8937256bbea65429afa429291e5be456cc10721934018591b5616c17b79ec9e5"
+    },
+    {
+      "bytes": 2546,
+      "path": "PROFILE_SUMMARY.json",
+      "sha256": "14cc38007209472a986f8a327f3ed1acd564ce882bc6ae402101f179119bad34"
+    },
+    {
+      "bytes": 4255,
+      "path": "PROTOCOL.md",
+      "sha256": "c69648ca8d985f996bbe7fca167383ea4a26b14806240993a6c6bfd19f326967"
+    },
+    {
+      "bytes": 6756,
+      "path": "REPORT.pdf",
+      "sha256": "aced232c543c7af3803c7777a9002b75f96b1ad081cd4f54fde37a65e4b20471"
+    },
+    {
+      "bytes": 2934,
+      "path": "RESULTS.md",
+      "sha256": "cffa9c77e08cc09ef6b3436b768457f980a5e6db9224edee9f38a7303e5e8534"
+    },
+    {
+      "bytes": 554,
+      "path": "evidence/archive-sha256.txt",
+      "sha256": "93c68abdde7c5138dc4ba3c2653d1a9134fc8eac5b6e585a376761dff0012cef"
+    },
+    {
+      "bytes": 806488,
+      "path": "evidence/baseline-catalogue.json",
+      "sha256": "612f39c0e4499a17114951263ce43b8e6ad9d6b4302dc5d3319b9d887fdb0b69"
+    },
+    {
+      "bytes": 41,
+      "path": "evidence/baseline-revision.txt",
+      "sha256": "b0d6b7afb21b440805a798813c1b101edba5948876178af98910eca89e2efc03"
+    },
+    {
+      "bytes": 688225,
+      "path": "evidence/baseline-source.tar.gz",
+      "sha256": "76dce79a06b723df64f5e7e7e207d47223e721b50911b05a5291797e1d8f4f8f"
+    },
+    {
+      "bytes": 277,
+      "path": "evidence/baseline-version.json",
+      "sha256": "754ccd076d2eae116f2fa35a548c8f291b5768b878f710767df3ad8de4f0139b"
+    },
+    {
+      "bytes": 197,
+      "path": "evidence/build-toolchain.txt",
+      "sha256": "a20a14f978c7adba215e1dc7337e438197b29baa71ba4b2ddfa0ee8a83e84bd0"
+    },
+    {
+      "bytes": 806488,
+      "path": "evidence/candidate-catalogue.json",
+      "sha256": "612f39c0e4499a17114951263ce43b8e6ad9d6b4302dc5d3319b9d887fdb0b69"
+    },
+    {
+      "bytes": 41,
+      "path": "evidence/candidate-revision.txt",
+      "sha256": "c30ebda6f3f806db21648f2b2c2445c6187ec295f4ed9ef5fb3be9dbd9448e46"
+    },
+    {
+      "bytes": 689341,
+      "path": "evidence/candidate-source.tar.gz",
+      "sha256": "b5f48b78d75b72a9f4140dc2909b6d1756165b4e9ca70b91b8f5e7968c310933"
+    },
+    {
+      "bytes": 277,
+      "path": "evidence/candidate-version.json",
+      "sha256": "f5db36ef82df80d1e91d03f52d5b958593ada67f4af44121fb61e936ad611e6b"
+    },
+    {
+      "bytes": 929053,
+      "path": "evidence/catalogue-349.json",
+      "sha256": "4b6a02bdfe2db4e39b6e295a396a9a8a41a14edc09bfab7942cdfe37e38929c4"
+    },
+    {
+      "bytes": 8833262,
+      "path": "evidence/native-binaries.tar.gz",
+      "sha256": "58c1cfbe6333d798d35ec8bd624f912f182923dbca6d8a3d8e78f076e66fac0f"
+    },
+    {
+      "bytes": 1035,
+      "path": "evidence/profile-resumed.log",
+      "sha256": "c12e4031d18601d536cbf379eb78709763ceef1371f0393b1082c0b3bb67d8f3"
+    },
+    {
+      "bytes": 984,
+      "path": "evidence/profile-resumed2.log",
+      "sha256": "819893c55b77a195a9ce3de01faf936c611a5d328f6d8596d92ef23f7cd03a09"
+    },
+    {
+      "bytes": 585,
+      "path": "evidence/profile.log",
+      "sha256": "49c65b6c867c63934413e6d38eee3d65e599dfb48c16360b436471075692ed8a"
+    },
+    {
+      "bytes": 2913618,
+      "path": "evidence/profiles.tar.gz",
+      "sha256": "362b74283e7389714ce4083eafb7adcded975d7f14f64e711d3a7cccaf5bdf4d"
+    },
+    {
+      "bytes": 2502,
+      "path": "evidence/resume_profile-2.sh",
+      "sha256": "6948e69efec53bd12f56da5109409c46d6850bff05a4559f2c3e02d360a9f098"
+    },
+    {
+      "bytes": 14271,
+      "path": "report.rs",
+      "sha256": "1f6c1766d0cf1335e066e84034e0799b728a18bc46e4947010496959baff5221"
+    },
+    {
+      "bytes": 2480,
+      "path": "resume_profile.sh",
+      "sha256": "4e49cf662d55a3f1829f45ab0d4987441a2e1cd9641dfe0bfaa0b190f9a0a0d1"
+    },
+    {
+      "bytes": 1753,
+      "path": "run_profile.sh",
+      "sha256": "185b5d42fe97e04be72cf0a67b0a678d77054e3bd6fc1afae89c626c5cbebf45"
+    },
+    {
+      "bytes": 16054,
+      "path": "validation/algorithm-tests.log",
+      "sha256": "e81c3a98a8d546addc075e4fdb8cb76fabb2567d3f9529877ab3f9c35e3325b5"
+    },
+    {
+      "bytes": 9464,
+      "path": "validation/baseline-build.log",
+      "sha256": "98a896c3d8ae5a20de59315a8c1f0b614a64ae1ad31527635fb6996b4040f3c2"
+    },
+    {
+      "bytes": 9684,
+      "path": "validation/candidate-build.log",
+      "sha256": "e16e924e25ce0c2ef0a274a1999e265843a0a5d47493bef626a15cfa875a5b0f"
+    },
+    {
+      "bytes": 9371,
+      "path": "validation/candidate-tests.log",
+      "sha256": "70db2d19bef39b3770d921e2e4b290887626d1b2e2a09c7c3d1fb1f39f265181"
+    },
+    {
+      "bytes": 547,
+      "path": "validation/final-report-build.log",
+      "sha256": "9e33d3b974bc527768ede4dd20c0809136b636f650ca48c83a94833c6db69534"
+    },
+    {
+      "bytes": 414739,
+      "path": "validation/root-release-library.log",
+      "sha256": "371229ec2339972cad770b4019a7d13e67dc101ff022f36abae5e02e8e253936"
+    },
+    {
+      "bytes": 2315,
+      "path": "validation/software-hash-test.log",
+      "sha256": "6443ce51fe9b3e721936a3f5cad3f5eb2129a24a10e8e1c78852992a6b998fc2"
+    },
+    {
+      "bytes": 4704,
+      "path": "visuals.rs",
+      "sha256": "73f5868b7d9e22e0217f6a6385607c62ecaa900ef2e6d185621735bff05c1339"
+    }
+  ],
+  "schema": "isogeny-setup-manifest/v1",
+  "tool_sources": [
+    {
+      "bytes": 29,
+      "path": "tools/isogeny-cli/.gitignore",
+      "sha256": "b67c50cd88a8d394b3cf105f1e724f6566ebc979a760917a7a92e8e98d234621"
+    },
+    {
+      "bytes": 9529,
+      "path": "tools/isogeny-cli/Cargo.lock",
+      "sha256": "72bbabb2dc8b964028c9592adf25c1a4f078924d4e1de49e1b3d6aa99cbf8170"
+    },
+    {
+      "bytes": 825,
+      "path": "tools/isogeny-cli/Cargo.toml",
+      "sha256": "5c7a0eb009d03570c2121f96db90a37c736a3579642863cf5c3a3f39e444d725"
+    },
+    {
+      "bytes": 5744,
+      "path": "tools/isogeny-cli/README.md",
+      "sha256": "7a5ba1efd4893dcb4fbc2a2e55118d699a00d9b19fc3dd60f37a97a9d7eb154e"
+    },
+    {
+      "bytes": 6589,
+      "path": "tools/isogeny-cli/VALIDATION.md",
+      "sha256": "581ede09ace1467a81f88f125abf4c9c1197aeec4c7dbfcba9a80a0478891a91"
+    },
+    {
+      "bytes": 4892,
+      "path": "tools/isogeny-cli/build.rs",
+      "sha256": "b57307ac0116d81fb452f44c6a0ae7f1208d19d68263f4a843cfdc313bdc9c8a"
+    },
+    {
+      "bytes": 2266,
+      "path": "tools/isogeny-cli/src/bin/field_checks.rs",
+      "sha256": "3e0baccfacbc9c5178f528856889a4da0cb97f255012d4acdf3c657955d14004"
+    },
+    {
+      "bytes": 7642,
+      "path": "tools/isogeny-cli/src/catalog.rs",
+      "sha256": "cf916920439e585e545366280fd57caed1675bab521f0456a51a0999e342ae47"
+    },
+    {
+      "bytes": 6402,
+      "path": "tools/isogeny-cli/src/constructor.rs",
+      "sha256": "d886b7b98055e1342c4734c9b8dbc2d015d0acd25e32030498f5d74db4bb221a"
+    },
+    {
+      "bytes": 20725,
+      "path": "tools/isogeny-cli/src/main.rs",
+      "sha256": "5f0bb3dca2c2699887878fa4e03ba56ce20d1d36c5e66a3efb7e135e001f6089"
+    },
+    {
+      "bytes": 10617,
+      "path": "tools/isogeny-cli/src/replay.rs",
+      "sha256": "fffef96e9d0ad8a31df4353c581672879086f3de3301c5a138f5fdac4c385c38"
+    },
+    {
+      "bytes": 12495,
+      "path": "tools/isogeny-cli/src/supervisor.rs",
+      "sha256": "a12ddcf484ab5f1413812de62be59135b13c2dc6cb03504aec6911ad15508c64"
+    },
+    {
+      "bytes": 11438,
+      "path": "tools/isogeny-cli/src/verification_field.rs",
+      "sha256": "d91e463be410dfe6a87361df209c1008f42ed63169db14ba985a893d205c5c76"
+    },
+    {
+      "bytes": 1821,
+      "path": "tools/isogeny-cli/src/verification_map.rs",
+      "sha256": "8af87ece402ca0c6839e27fa68696fb8ac0daa8952cf03d36b0dca9ef70860dc"
+    },
+    {
+      "bytes": 11185,
+      "path": "tools/isogeny-cli/src/verification_modpoly.rs",
+      "sha256": "a8b3f82fa594a713fa72a3c0efab9ba88329a7ba51883e0aa37b3e6a9e6b1e7e"
+    }
+  ]
+}

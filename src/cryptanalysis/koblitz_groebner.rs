@@ -4963,7 +4963,6 @@ pub struct SolveStats {
     pub propagations: usize,
     /// Splitting decisions made.
     pub splits: usize,
-    /// Split nodes that deferred an F4 reduction.
     /// Number of algebraically reduced nodes closed by direct enumeration of
     /// the remaining small Boolean cube.
     #[serde(default)]

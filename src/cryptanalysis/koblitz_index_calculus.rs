@@ -17411,6 +17411,25 @@ mod tests {
     }
 
     #[test]
+    fn wide_linearised_kernels_preserve_high_coordinates() {
+        let n = 71;
+        let irr = find_irreducible_sparse_wide(n).unwrap();
+        // X^2 + X has exactly the prime subfield as its kernel.
+        assert_eq!(
+            linearised_kernel_basis(&[0, 1], n, &irr),
+            vec![F2mElement::one(n)]
+        );
+        // The identity has no kernel; the zero map preserves every basis
+        // coordinate, including those beyond the first machine word.
+        assert!(linearised_kernel_basis(&[0], n, &irr).is_empty());
+        let zero = linearised_kernel_basis(&[], n, &irr);
+        assert_eq!(zero.len(), n as usize);
+        for (i, basis) in zero.iter().enumerate() {
+            assert_eq!(*basis, F2mElement::from_bit_positions(&[i as u32], n));
+        }
+    }
+
+    #[test]
     fn the_folded_table_decomposes_at_every_summand_count() {
         // The trap the compact table fell into once: a search path that
         // walks `entries` reports no witness for a target that has one.
