@@ -46,7 +46,8 @@ fn mean(xs: &[f64]) -> Option<f64> {
 }
 
 fn u(v: &Value, k: &str) -> u64 {
-    v[k].as_u64().unwrap_or_else(|| panic!("missing integer {k}"))
+    v[k].as_u64()
+        .unwrap_or_else(|| panic!("missing integer {k}"))
 }
 
 /// Mean `S` and mean online wall of each (arm, field degree) in a session.
@@ -241,7 +242,11 @@ fn main() {
         "replica_runs_mismatched": replica_mismatch,
         "cells": cells_out,
     });
-    fs::write(&out_path, serde_json::to_string_pretty(&analysis).unwrap() + "\n").expect("write");
+    fs::write(
+        &out_path,
+        serde_json::to_string_pretty(&analysis).unwrap() + "\n",
+    )
+    .expect("write");
     print!("{table}");
     println!("\nreplica: {replica_compared} runs compared, {replica_mismatch} mismatched (solving degree, word XORs, verified count)");
 }

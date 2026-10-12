@@ -91,7 +91,7 @@ def per_g_panels(analysis, field, ylabel, title, out, log=False):
 
 def projection_figure(analysis, out):
     cells = [c for c in ordered_cells(analysis["cells"]) if c["rho_strong"]]
-    fig, ax = plt.subplots(figsize=(10, 4.2))
+    fig, ax = plt.subplots(figsize=(10, 5.0))
     xs = []
     for xi, c in enumerate(cells):
         xs.append(cell_label(c))
@@ -137,7 +137,7 @@ def projection_figure(analysis, out):
         plt.Line2D([], [], color=INK2, linewidth=2, linestyle=(0, (2, 2)),
                    label="signed-Frobenius rho, measured (ecbench)"),
     ]
-    ax.legend(handles=handles, fontsize=7, loc="upper left", ncol=2, frameon=False)
+    ax.legend(handles=handles, fontsize=7, loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=3, frameon=False)
     ax.set_title(
         "Relation phase of each PDP variant, PROJECTED in S (pinned XOR ratio; marker size = g ∈ {0,2,4}),\n"
         "against measured rho on the same curve",
