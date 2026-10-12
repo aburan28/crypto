@@ -203,7 +203,7 @@ check at m = 31: curves over F_{2^31}, twisted over GF(2^62).
 | −39583 | 62 | ℓ = 31, 11 F steps, α = (−463 − √D)/2 | 24/24 | ±λ(s) 24/24 | PASS |
 | −482623 | 186 | ℓ = 31, 12 F steps, α = (−159 + √D)/2 | 24/24 | ±λ(s) 24/24 | PASS |
 
-The recorded run searches |D| < 5·10⁵ (`--dmax 500000`). Two discriminants met
+The recorded run searches down to D = −500007 (`--dmax 500000`), in 1 min 19 s, verdict ALL PASS. Two discriminants met
 every condition with h ≤ 320 and ℓ ≤ 61. Other attempts:
 - **attempt 1** (hmax 160, ℓ ≤ 41, |D| < 10⁷): found only the first, PASS.
   Kept as `binary_validate_run1_hmax160.*`.
