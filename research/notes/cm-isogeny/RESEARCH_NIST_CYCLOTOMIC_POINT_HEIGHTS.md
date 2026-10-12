@@ -1,7 +1,10 @@
 # Research Note: Cyclotomic Factorisation of P-192, P-224, P-256 — What Reaches the Points, and Point Heights
 
 **Date.** 2026-10-11.  **Status.** Derived and natively verified; no attack
-claimed, no ECDLP cost measured.  Closes open items 4 and 5 of
+claimed, no ECDLP cost measured.  **Corrected 2026-10-11** after a
+controlled re-test of every comparative claim
+([`research/nist_cyclotomic_controls_20261011/REPORT.md`](../../nist_cyclotomic_controls_20261011/REPORT.md)):
+see "Corrections" below; struck claims are marked in place.  Closes open items 4 and 5 of
 [`RESEARCH_NIST_SOLINAS_STRUCTURE.md`](RESEARCH_NIST_SOLINAS_STRUCTURE.md)
 and corrects one line there and in
 [`docs/ECDLP_CALIBRATION_PRIMES.md`](../../../docs/ECDLP_CALIBRATION_PRIMES.md).
@@ -17,6 +20,54 @@ Curves are the FIPS 186 / SEC 2 curves `P-192`, `P-224`, `P-256`
 P-192 and P-256 are in `docs/curves/registry.json`.
 
 ---
+
+## Corrections (2026-10-11, controlled re-test)
+
+The first version of this note made comparative claims ("outlier",
+"as random as", "orthogonal") with no control population.  They were
+re-tested against random Hasse-interval primes and lifted random points,
+with positive controls and a frozen decision rule (`PROTOCOL.md`, amended
+by `AMENDMENT_1.md` because the first protocol could not reject).  Claim
+classes: **[exact]** computation or certified identity, unaffected;
+**[measured]** controlled result; **[heuristic]** an estimate, not a test.
+
+1. **P-256 `n − 1` "outlier, a 1-in-30 accident": withdrawn.**  Against
+   2000 random group orders it ranks 1992/2000 on the `< 2^{32}` smooth
+   part (p = 0.009) and 1991/2000 on the count of such primes (p = 0.010),
+   above the pre-registered α = 0.05/18.  It is within the control
+   distribution, more extreme than 99.6% of controls before correction.  The
+   Dickman `ρ(256/92)` figure used random integers as the null and is
+   withdrawn.  [measured]
+2. **Other `n ± 1` and twist orders unremarkable: supported**, p ≥ 0.20.
+   [measured]
+3. **"No small points" on the canonical lift: supported only within the
+   census box.**  The census found 90/90 planted points and nothing on 30
+   random-`b` curves.  The licensed statement is "no point with `|x| ≤ 10⁶`,
+   or `x = u/d²`, `d ≤ 40`, `|u| ≤ 10⁵`".  The `10^{-22}` expectations are
+   [heuristic].
+4. **Lifted generator height: typical, not extreme.**  `ĥ(G̃)/ln p` is
+   within the lifted-random-point distribution (p ≥ 0.37).  "As large as a
+   random point can be" is replaced by "as large as a random point
+   typically is".  [measured]
+5. **Two-point lift: "independent" supported, "orthogonal, cos < 0.002"
+   withdrawn.**  det/(ĥĥ) is 1.0000 for random pairs against −0.005 to
+   −0.002 for exactly dependent pairs.  But the height routine reads
+   `|cos|` = 1.0011–1.0025 on dependent pairs, and random pairs pile up at
+   0.0013, so cosines below about 0.003 are below its resolution.
+   [measured]
+6. **§3.3's "model invariant only up to rescaling": wrong.**  The canonical
+   height is invariant under every `Q`-isomorphism, rescaling included.
+   `E_2` and `E_1` are different curves, so `G̃` simply has a different
+   height on each.  [exact]
+7. **§3.4 "the small-height points are the small-`x` points": too
+   strong.**  Small `x` gives a lift of small *naive* height.  On the
+   one-point lift, points with `x < 2^{32}` have `h_x/ln p` of 0.09–0.17 but
+   canonical height `ĥ/ln p` of 0.64–0.67, because `B ≈ y² ≈ p²`.  Small
+   naive height is necessary for a small-height lift but not sufficient.
+   [measured]
+8. **"It never arrives" (§0, §2.1)** means exactly this: the embedding
+   degree is `(n − 1)/10`, `(n − 1)/3`, `(n − 1)/3`, so no MOV/FR pairing
+   transfer exists into a field of feasible size.  [exact]
 
 ## 0. The question, and the one-paragraph answer
 
@@ -36,19 +87,21 @@ through the embedding degree, which is `(n − 1)/10`, `(n − 1)/3`,
 that *do* act on the points — `n ∓ 1` (Cheon / Brown–Gallant), the twist
 order `N(Φ_2(π))`, and the cyclotomic norms `N(Φ_d(π))` that factor
 `#E(F_{p^k})` — are not algebraically forced by the Solinas form; they are
-arithmetic accidents of each curve, and the one notable accident is P-256's
-`n − 1`, whose twelve prime factors are all at most 92 bits (§2.2).  On
+arithmetic accidents of each curve.  P-256's `n − 1` has twelve prime
+factors, all at most 92 bits (§2.2), but against random group orders it is
+within the control distribution (correction 1).  On
 heights (§3): the canonical lift `y² = x³ − 3x + b` has no integer or
 small-denominator rational point in a census of `9.8·10⁶` candidates per
-curve (expected `10⁻²²`–`10⁻³²`), the generator lifted xedni-style has
-canonical height `ĥ = (0.986–0.998)·log p` with the Lang ratio
-`ĥ / log|Δ| ≈ 1/6`, and a two-point lift has regulator `≈ ĥ(G̃)ĥ(R̃)` with
-pairing cosine `< 0.002`: lifted points are as large and as independent as
-a random point can be.  A point of `E(F_p)` has a lift of naive height
-`≤ H` nats only when `|x| ≤ e^H` or `|x − p| ≤ e^H`, i.e. the small-height
-points *are* the small-`x` factor base of
+curve (a census whose detector found 90/90 planted points), the generator
+lifted xedni-style has canonical height `ĥ = (0.986–0.998)·log p`, which is
+typical of lifted random points, with the Lang ratio `ĥ / log|Δ| ≈ 1/6`, and
+a two-point lift has regulator `≈ ĥ(G̃)ĥ(R̃)`: lifted points are as large as
+a random point typically is, and not dependent.  A point of `E(F_p)` has a
+lift of naive height `≤ H` nats only when `|x| ≤ e^H` or `|x − p| ≤ e^H`, so
+small-height lifts can only come from the small-`x` factor base of
 [`RESEARCH_PRIME_FIELD_BREAKTHROUGH_PROGRAM.md`](../../../RESEARCH_PRIME_FIELD_BREAKTHROUGH_PROGRAM.md),
-whose reach is already bounded there.
+whose reach is already bounded there (and even those have canonical height
+`≈ (2/3) log p` on the one-point lift: correction 7).
 
 Everything in §1–§3 is recomputed or verified by the example (polynomial
 identities by exact expansion and sealed as `identity.certificate/v1`
@@ -138,11 +191,13 @@ nothing about `n ∓ 1`.  Complete factorisations:
 | P-224 | `2² · 3⁶ · 5 · 17 · 2153 · 50520606258875818707470860153287666700917696099933389351507` | 196 | `2 · 7 · 19 · 641707280681 · 157943015469068292359817151928968170360745244072702747` | 177 |
 | P-256 | `2^4 · 3 · 71 · 131 · 373 · 3407 · 17449 · 38189 · 187019741 · 622491383 · 1002328039319 · 2624747550333869278416773953` | 92 | `2 · 5 · 1879 · 176337611 · 34946779280882916835155272231706129710560967816144871596921775673` | 215 |
 
-P-256's `n − 1` is the outlier: twelve prime factors, none above 92 bits,
-smooth part (everything but the largest prime) `2^{164}`.  For a random
-256-bit integer the probability that the largest prime factor is below
-`2^{92}` is Dickman `ρ(256/92) ≈ 0.03`, so this is a 1-in-30 accident,
-not a design artefact.  P-224's smooth part is `2^{28}`, P-192's `2^{100}`
+P-256's `n − 1` has twelve prime factors, none above 92 bits, and smooth
+part (everything but the largest prime) `2^{164}`.  ~~For a random 256-bit
+integer the probability that the largest prime factor is below `2^{92}` is
+Dickman `ρ(256/92) ≈ 0.03`, so this is a 1-in-30 accident, not a design
+artefact.~~  *(Withdrawn 2026-10-11: wrong null.  Against 2000 random
+prime group orders in the Hasse interval it ranks 1992/2000, p = 0.009, not
+significant at the pre-registered α = 0.0028; correction 1.)*  P-224's smooth part is `2^{28}`, P-192's `2^{100}`
 but with nothing usable between `2^{17.5}` and `2^{83}`.
 
 Where it matters: a protocol that publishes `[α^i]G` for `i ≤ Q` (`q`-SDH
@@ -273,12 +328,17 @@ its curve.
 | P-224 | 229.73 | 229.77 | 0.297 | 0.0013 | `5.28·10⁴` |
 | P-256 | 263.97 | 264.03 | 0.457 | 0.0017 | `6.97·10⁴` |
 
-(Heights on `E_2` exceed those on `E_1` by the factor `≈ 1.48` because
+(Heights on `E_2` exceed those on `E_1` by the factor `≈ 1.48`.  ~~because
 clearing the 189–253-bit denominator of `A` rescales the model; the
-canonical height is a model invariant only up to that rescaling.)  Xedni
+canonical height is a model invariant only up to that rescaling.~~
+*Corrected 2026-10-11:* the canonical height is invariant under every
+`Q`-isomorphism.  `E_2` and `E_1` are different curves through `G̃`, so the
+heights differ; correction 6.)  Xedni
 needs the lifted points to be *dependent*; the regulator is as large as
-the product of the heights allows and the pairing is zero to three
-decimals.  This is Jacobson–Koblitz–Silverman–Stein–Teske (2000) seen in
+the product of the heights allows (exactly dependent pairs give ≈ 0 with
+the same routine).  ~~and the pairing is zero to three decimals.~~
+*(Withdrawn 2026-10-11: the routine's cosine floor is about 0.003;
+correction 5.)*  This is Jacobson–Koblitz–Silverman–Stein–Teske (2000) seen in
 the numbers, and it is the same obstruction
 [`RESEARCH_IC_LEADS_AND_CONNECTIONS_20261010.md`](../../../RESEARCH_IC_LEADS_AND_CONNECTIONS_20261010.md)
 §(d) states through the parallelogram law `ĥ(P + Q) + ĥ(P − Q) = 2ĥ(P) +
@@ -299,8 +359,10 @@ of the group with that property is `2e^H / p`:
 | 128 | `2^{−127}` | `√p`: a base as large as rho's running time |
 | 255 | `≈ 1` | every point: height `log p`, the measured `ĥ(G̃)` |
 
-So the only points with "smaller heights" are the small-`x` points, their
-usefulness is exactly the Coppersmith-reach question already closed in
+So the only points with small *naive* lift heights are the small-`x`
+points (on the one-point lift their canonical height is still
+`≈ 0.66 log p`; correction 7), their usefulness is exactly the
+Coppersmith-reach question already closed in
 `RESEARCH_PRIME_FIELD_BREAKTHROUGH_PROGRAM.md` §2, and the cyclotomic shape
 of `p` does not enter: the height of a lift depends on the *size* of `x`,
 not on the arithmetic of `p`.

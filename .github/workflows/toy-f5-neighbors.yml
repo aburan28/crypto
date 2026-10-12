@@ -1,9 +1,8 @@
 name: Toy F5 neighbor measurements
 on:
-  pull_request:
-    paths:
-      - "research/toy_f5_neighbors_20260924/**"
-      - ".github/workflows/toy-f5-neighbors.yml"
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
 permissions:
   contents: read

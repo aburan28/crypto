@@ -1,24 +1,26 @@
 name: Boolean F5 affine signature
 
 on:
-  push:
-    paths:
-      - 'research/boolean_f5_affine_signature_20261002/**'
-      - '.github/workflows/boolean-f5-affine-signature.yml'
-  pull_request:
-    paths:
-      - 'research/boolean_f5_affine_signature_20261002/**'
-      - '.github/workflows/boolean-f5-affine-signature.yml'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   native-replay:
     runs-on: ubuntu-latest
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 360 }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: Native algebra and verifier tests
         run: |
           python3 tools/isolated_bench.py busy -- cargo test --locked --release --manifest-path research/boolean_f5_affine_signature_20261002/Cargo.toml -- --test-threads=1

@@ -1,0 +1,27 @@
+{
+  "command": "wu --rounds 5 --targets 8 --out research/lit2026_w8_summation_models_20261011/reports/run-20261011T2017Z/raw/wu.json",
+  "git_head": "3c239129d2ccf26706d56b05304c1f35a7c44d7f",
+  "result": {
+    "cells": [
+      {
+        "curve": "icv1-f2m15-tm275-2d22ff5d",
+        "error": "binary Edwards w is not Möbius in x on 60 of 64 points"
+      },
+      {
+        "curve": "icv1-f2m15-t5-d9fb183e",
+        "error": "binary Edwards w is not Möbius in x on 60 of 64 points"
+      },
+      {
+        "curve": "icv1-f2m17-t101-e6c4b64d",
+        "error": "binary Edwards w is not Möbius in x on 60 of 64 points"
+      },
+      {
+        "curve": "icv1-f2m17-t209-0eba1a1e",
+        "error": "binary Edwards w is not Möbius in x on 60 of 64 points"
+      }
+    ],
+    "part": "wu"
+  },
+  "schema": "lit2026-w8-run/v1",
+  "started_unix": 1791750577
+}

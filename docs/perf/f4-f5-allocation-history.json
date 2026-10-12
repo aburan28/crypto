@@ -1,0 +1,16 @@
+{
+  "schema": "f4-f5.allocation-history/v1",
+  "studies": [
+    {
+      "id": "f4_f5_row_build_20261011",
+      "date": "2026-10-11",
+      "comparison": "research/f4_f5_row_build_20261011/records/comparison.json",
+      "baseline_records": "research/f4_f5_row_build_20261011/records/baseline.jsonl",
+      "candidate_records": "research/f4_f5_row_build_20261011/records/candidate.jsonl",
+      "baseline_revision": "e957e48c2b8cf1f84a7fc44a1d673103964a789d",
+      "candidate_revision": "2e3dffda681a4771be511653180da8354de3bce3",
+      "baseline_run": "run-20261011T1655Z",
+      "candidate_run": "run-20261011T1715Z"
+    }
+  ]
+}
