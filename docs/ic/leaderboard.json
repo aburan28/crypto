@@ -96,7 +96,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "cfc8d85cd56bc0f5414ea888122e2e70bc5d3d68b0eab4c806ba4fe96713e266"
+   "sha256": "023322e9aae2fc8e370eb055a2c7c71491e2ce32c7229c282edff8c81afa621a"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -9248,6 +9248,34 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp18-tm22-a5ba8c3f",
+   "family": "prime",
+   "field": "GF(p), 18-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 18,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp18-t334-97871af7",
+   "family": "prime",
+   "field": "GF(p), 18-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 18,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp18-tm337-d28d5e09",
    "family": "prime",
    "field": "GF(p), p = 212099",
@@ -9261,6 +9289,34 @@
    "legacy": [
     "generated-18bit-212099"
    ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp18-tm204-54b2fadf",
+   "family": "prime",
+   "field": "GF(p), 18-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 18,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp18-t872-49a6dd87",
+   "family": "prime",
+   "field": "GF(p), 18-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 18,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
@@ -9386,6 +9442,20 @@
     "bench-20bit"
    ],
    "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp22-tm2826-0afa05b6",
+   "family": "prime",
+   "field": "GF(p), 22-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 22,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
   },
@@ -9745,6 +9815,48 @@
    "legacy": [
     "isogeny-gap-prime-D4-l3-h6-22b-level-L3"
    ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp22-tm1214-827be133",
+   "family": "prime",
+   "field": "GF(p), 22-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 22,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp22-tm2412-15c27732",
+   "family": "prime",
+   "field": "GF(p), 22-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 22,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp22-tm1504-967cbbde",
+   "family": "prime",
+   "field": "GF(p), 22-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 22,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
@@ -12126,6 +12238,34 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp26-t374-04f2b312",
+   "family": "prime",
+   "field": "GF(p), 26-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 26,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp26-t8250-b50c04e1",
+   "family": "prime",
+   "field": "GF(p), 26-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 26,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp26-t14228-081c2f9a",
    "family": "prime",
    "field": "GF(p), p = 54329083",
@@ -12463,6 +12603,34 @@
    "legacy": [
     "isogeny-gap-prime-D3-l2-h8-26b-floor-L8"
    ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp26-tm7664-a6fbaf53",
+   "family": "prime",
+   "field": "GF(p), 26-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 26,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp26-tm1038-caffe525",
+   "family": "prime",
+   "field": "GF(p), 26-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 26,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
@@ -14157,6 +14325,76 @@
    "legacy": [
     "isogeny-gap-prime-D8-l3-h6-26b-level-L2"
    ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp30-t8770-57966dac",
+   "family": "prime",
+   "field": "GF(p), 30-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 30,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp30-tm29402-75bd2650",
+   "family": "prime",
+   "field": "GF(p), 30-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 30,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp30-tm48354-87c391fd",
+   "family": "prime",
+   "field": "GF(p), 30-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 30,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp30-tm45748-31aed113",
+   "family": "prime",
+   "field": "GF(p), 30-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 30,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp37-t51-ff3fd2db",
+   "family": "prime",
+   "field": "GF(p), 37-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 37,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"

@@ -294,6 +294,7 @@ const retainedPanels = [
   ['isogeny-conductor-gap-20261011','Isogeny conductor gap and fiber-aware relations · 11 October 2026'],
   ['isogeny-conductor-gap-round2-20261011','Conductor gap round 2: partial fibers and crater automorphisms · 11 October 2026'],
   ['isogeny-conductor-gap-round3-20261011','Conductor gap round 3: two-torsion summation polynomials and the combined descent audited · 11 October 2026'],
+  ['fiber-ic-scaling-20261011','Fiber-aware IC against rho across sizes · 11 October 2026'],
   ['lab-ecbench-all','Cross-method evidence · every measured candidate'],
   ['lab-pair-claw','Pair claw of cryptanalysis#175 · same-target strong rho'],
   ['lab-progress','Research progress over time · separate regimes and references'],

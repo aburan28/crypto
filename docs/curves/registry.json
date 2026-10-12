@@ -11091,6 +11091,57 @@
    ]
   },
   {
+   "slug": "icv1-fp18-tm22-a5ba8c3f",
+   "icv1": "ICV1:fp-193153:-22:193176:7422:unk:unk:r:a5ba8c3f9610",
+   "family": "prime",
+   "params": {
+    "p": "193153",
+    "a": "64274",
+    "b": "72577"
+   },
+   "model_json": "{\"a\":\"64274\",\"b\":\"72577\",\"field\":\"fp-193153\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"193153\",\"v\":\"1\"}",
+   "trace": -22,
+   "order": "193176",
+   "j": "7422",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72/spec.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72_small_b/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72_small_b/spec.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h72.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h72_small_b.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp18-t334-97871af7",
+   "icv1": "ICV1:fp-195809:334:195476:85780:unk:unk:r:97871af73223",
+   "family": "prime",
+   "params": {
+    "p": "195809",
+    "a": "164607",
+    "b": "94287"
+   },
+   "model_json": "{\"a\":\"164607\",\"b\":\"94287\",\"field\":\"fp-195809\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"195809\",\"v\":\"1\"}",
+   "trace": 334,
+   "order": "195476",
+   "j": "85780",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h4/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h4/spec.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h4.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp18-tm337-d28d5e09",
    "icv1": "ICV1:fp-212099:-337:212437:4738:unk:unk:r:d28d5e094103",
    "family": "prime",
@@ -11148,6 +11199,57 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "icv1-fp18-tm204-54b2fadf",
+   "icv1": "ICV1:fp-232567:-204:232772:33623:unk:unk:r:54b2fadff844",
+   "family": "prime",
+   "params": {
+    "p": "232567",
+    "a": "132404",
+    "b": "49808"
+   },
+   "model_json": "{\"a\":\"132404\",\"b\":\"49808\",\"field\":\"fp-232567\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"232567\",\"v\":\"1\"}",
+   "trace": -204,
+   "order": "232772",
+   "j": "33623",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h4/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h4/spec.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h4.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp18-t872-49a6dd87",
+   "icv1": "ICV1:fp-252223:872:251352:174184:unk:unk:r:49a6dd878b31",
+   "family": "prime",
+   "params": {
+    "p": "252223",
+    "a": "75683",
+    "b": "198802"
+   },
+   "model_json": "{\"a\":\"75683\",\"b\":\"198802\",\"field\":\"fp-252223\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"252223\",\"v\":\"1\"}",
+   "trace": 872,
+   "order": "251352",
+   "j": "174184",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72/spec.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72_small_b/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72_small_b/spec.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h72.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h72_small_b.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-fp18-t175-45770ebc",
@@ -11474,6 +11576,30 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "icv1-fp22-tm2826-0afa05b6",
+   "icv1": "ICV1:fp-2218057:-2826:2220884:299102:unk:unk:r:0afa05b68970",
+   "family": "prime",
+   "params": {
+    "p": "2218057",
+    "a": "2007230",
+    "b": "645620"
+   },
+   "model_json": "{\"a\":\"2007230\",\"b\":\"645620\",\"field\":\"fp-2218057\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"2218057\",\"v\":\"1\"}",
+   "trace": -2826,
+   "order": "2220884",
+   "j": "299102",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h4/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h4/spec.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h4.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-fp22-t3005-4a2f93e7",
@@ -12630,6 +12756,84 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "icv1-fp22-tm1214-827be133",
+   "icv1": "ICV1:fp-2654677:-1214:2655892:719768:unk:unk:r:827be1336c94",
+   "family": "prime",
+   "params": {
+    "p": "2654677",
+    "a": "2063683",
+    "b": "2379919"
+   },
+   "model_json": "{\"a\":\"2063683\",\"b\":\"2379919\",\"field\":\"fp-2654677\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"2654677\",\"v\":\"1\"}",
+   "trace": -1214,
+   "order": "2655892",
+   "j": "719768",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h4/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h4/spec.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h4.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp22-tm2412-15c27732",
+   "icv1": "ICV1:fp-2828123:-2412:2830536:1736349:unk:unk:r:15c27732c7aa",
+   "family": "prime",
+   "params": {
+    "p": "2828123",
+    "a": "792805",
+    "b": "1619461"
+   },
+   "model_json": "{\"a\":\"792805\",\"b\":\"1619461\",\"field\":\"fp-2828123\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"2828123\",\"v\":\"1\"}",
+   "trace": -2412,
+   "order": "2830536",
+   "j": "1736349",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72/spec.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72_small_b/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72_small_b/spec.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h72.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h72_small_b.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp22-tm1504-967cbbde",
+   "icv1": "ICV1:fp-2933143:-1504:2934648:384910:unk:unk:r:967cbbde25e8",
+   "family": "prime",
+   "params": {
+    "p": "2933143",
+    "a": "670721",
+    "b": "621666"
+   },
+   "model_json": "{\"a\":\"670721\",\"b\":\"621666\",\"field\":\"fp-2933143\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"2933143\",\"v\":\"1\"}",
+   "trace": -1504,
+   "order": "2934648",
+   "j": "384910",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72/spec.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72_small_b/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72_small_b/spec.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h72.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h72_small_b.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-fp22-t411-86337907",
@@ -20246,6 +20450,57 @@
    ]
   },
   {
+   "slug": "icv1-fp26-t374-04f2b312",
+   "icv1": "ICV1:fp-43270121:374:43269748:2805739:unk:unk:r:04f2b312931e",
+   "family": "prime",
+   "params": {
+    "p": "43270121",
+    "a": "32209946",
+    "b": "16484923"
+   },
+   "model_json": "{\"a\":\"32209946\",\"b\":\"16484923\",\"field\":\"fp-43270121\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"43270121\",\"v\":\"1\"}",
+   "trace": 374,
+   "order": "43269748",
+   "j": "2805739",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h4/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h4/spec.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h4.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp26-t8250-b50c04e1",
+   "icv1": "ICV1:fp-46534577:8250:46526328:42129152:unk:unk:r:b50c04e1bada",
+   "family": "prime",
+   "params": {
+    "p": "46534577",
+    "a": "15055406",
+    "b": "4993146"
+   },
+   "model_json": "{\"a\":\"15055406\",\"b\":\"4993146\",\"field\":\"fp-46534577\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"46534577\",\"v\":\"1\"}",
+   "trace": 8250,
+   "order": "46526328",
+   "j": "42129152",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72/spec.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72_small_b/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72_small_b/spec.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h72.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h72_small_b.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp26-t14228-081c2f9a",
    "icv1": "ICV1:fp-54329083:14228:54314856:51423398:unk:unk:r:081c2f9a2aeb",
    "family": "prime",
@@ -21314,6 +21569,57 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "icv1-fp26-tm7664-a6fbaf53",
+   "icv1": "ICV1:fp-58396643:-7664:58404308:47657216:unk:unk:r:a6fbaf534a2b",
+   "family": "prime",
+   "params": {
+    "p": "58396643",
+    "a": "46806758",
+    "b": "44139131"
+   },
+   "model_json": "{\"a\":\"46806758\",\"b\":\"44139131\",\"field\":\"fp-58396643\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"58396643\",\"v\":\"1\"}",
+   "trace": -7664,
+   "order": "58404308",
+   "j": "47657216",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h4/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h4/spec.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h4.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp26-tm1038-caffe525",
+   "icv1": "ICV1:fp-61777049:-1038:61778088:27127596:unk:unk:r:caffe525bd33",
+   "family": "prime",
+   "params": {
+    "p": "61777049",
+    "a": "56499920",
+    "b": "6261201"
+   },
+   "model_json": "{\"a\":\"56499920\",\"b\":\"6261201\",\"field\":\"fp-61777049\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"61777049\",\"v\":\"1\"}",
+   "trace": -1038,
+   "order": "61778088",
+   "j": "27127596",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72/spec.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72_small_b/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72_small_b/spec.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h72.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h72_small_b.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-fp27-t16691-005dba65",
@@ -26563,6 +26869,130 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "icv1-fp30-t8770-57966dac",
+   "icv1": "ICV1:fp-680883517:8770:680874748:14184071:unk:unk:r:57966dac3701",
+   "family": "prime",
+   "params": {
+    "p": "680883517",
+    "a": "200232922",
+    "b": "71738869"
+   },
+   "model_json": "{\"a\":\"200232922\",\"b\":\"71738869\",\"field\":\"fp-680883517\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"680883517\",\"v\":\"1\"}",
+   "trace": 8770,
+   "order": "680874748",
+   "j": "14184071",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h4/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h4/spec.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h4.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp30-tm29402-75bd2650",
+   "icv1": "ICV1:fp-742423369:-29402:742452772:667186435:unk:unk:r:75bd2650d912",
+   "family": "prime",
+   "params": {
+    "p": "742423369",
+    "a": "88213311",
+    "b": "477410590"
+   },
+   "model_json": "{\"a\":\"88213311\",\"b\":\"477410590\",\"field\":\"fp-742423369\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"742423369\",\"v\":\"1\"}",
+   "trace": -29402,
+   "order": "742452772",
+   "j": "667186435",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h4/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h4/spec.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h4.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp30-tm48354-87c391fd",
+   "icv1": "ICV1:fp-820300997:-48354:820349352:480338326:unk:unk:r:87c391fd5ae8",
+   "family": "prime",
+   "params": {
+    "p": "820300997",
+    "a": "328904430",
+    "b": "615695294"
+   },
+   "model_json": "{\"a\":\"328904430\",\"b\":\"615695294\",\"field\":\"fp-820300997\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"820300997\",\"v\":\"1\"}",
+   "trace": -48354,
+   "order": "820349352",
+   "j": "480338326",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72/spec.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72_small_b/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72_small_b/spec.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h72.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h72_small_b.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp30-tm45748-31aed113",
+   "icv1": "ICV1:fp-1018663027:-45748:1018708776:922083301:unk:unk:r:31aed113d651",
+   "family": "prime",
+   "params": {
+    "p": "1018663027",
+    "a": "231747828",
+    "b": "874681434"
+   },
+   "model_json": "{\"a\":\"231747828\",\"b\":\"874681434\",\"field\":\"fp-1018663027\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1018663027\",\"v\":\"1\"}",
+   "trace": -45748,
+   "order": "1018708776",
+   "j": "922083301",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72/spec.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72_small_b/plan.json",
+    "research/fiber_ic_scaling_20261011/sessions/scaling_h72_small_b/spec.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h72.json",
+    "research/fiber_ic_scaling_20261011/specs/scaling_h72_small_b.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp37-t51-ff3fd2db",
+   "icv1": "ICV1:fp-68723001073:51:68723001023:31674567464:unk:unk:r:ff3fd2db0071",
+   "family": "prime",
+   "params": {
+    "p": "68723001073",
+    "a": "48478586416",
+    "b": "24234773000"
+   },
+   "model_json": "{\"a\":\"48478586416\",\"b\":\"24234773000\",\"field\":\"fp-68723001073\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"68723001073\",\"v\":\"1\"}",
+   "trace": 51,
+   "order": "68723001023",
+   "j": "31674567464",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/lit2026_w3_ggm_audit_20261011/reports/run-20261011T2012Z/measure.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-fp37-t277-090dc414",
