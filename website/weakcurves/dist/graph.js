@@ -144,10 +144,11 @@
     appendLine(selection,'h4',`Certified maps (${incident.length})`);
     if(!incident.length) appendLine(selection,'p','No explicit map indexed for this model. Class peers below are related by the trace theorem.');
     for(const edge of incident) {
-      const other=nodes.get(edge.source===node.id?edge.target:edge.source);
+      const outbound=edge.source===node.id;
+      const other=nodes.get(outbound?edge.target:edge.source);
       const row=document.createElement('div');row.className='neighbor-row';
       const button=document.createElement('button');button.type='button';button.className='neighbor-button';
-      button.textContent=`degree ${edge.degree} → ${other.label}`;
+      button.textContent=`degree ${edge.degree} ${outbound?'→':'←'} ${other.label}`;
       button.title=`${edge.evidence} · ${edge.id}`;button.addEventListener('click',()=>focus(other.id));row.append(button);
       const proof=document.createElement('a');proof.href=`https://github.com/aburan28/crypto/blob/codex/weak-curves-leaderboard-20261012/${edge.map_ref||edge.source_ref}`;
       proof.target='_blank';proof.rel='noopener noreferrer';proof.textContent='map ↗';proof.title=edge.certificate_sha256||edge.id;row.append(proof);selection.append(row);
