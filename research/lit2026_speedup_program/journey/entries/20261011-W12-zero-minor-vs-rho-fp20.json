@@ -1,0 +1,60 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W12",
+  "slug": "zero-minor-vs-rho-fp20",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#PRNUM",
+  "papers": [
+    "arXiv 2607.09814",
+    "arXiv 2310.04132",
+    "arXiv 1703.07544"
+  ],
+  "kind": "negative",
+  "workload": {
+    "id": "zero-minor-planted-fp20",
+    "description": "8 planted ECDLP targets on icv1-fp20-t727-cd198a38 (find_prime_order_curve(20, 59297), prime order r = 562427, cofactor 1, whole group)",
+    "curve_ids": [
+      "icv1-fp20-t727-cd198a38"
+    ]
+  },
+  "metric": "median counted field ops per solved target (F_p mul+sqr+inv)",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 8,
+  "arms": [
+    {
+      "role": "original",
+      "label": "program baseline (method absent)",
+      "commit": "4b6e09b78",
+      "value": null
+    },
+    {
+      "role": "reference",
+      "label": "rho.negation (rho_walk_with + NegationClasses), 32 runs",
+      "commit": "c70d57ec7",
+      "value": 4622.0
+    },
+    {
+      "role": "candidate",
+      "label": "zero_minor.guess_determine(d=3) (arXiv 2607.09814 as specified)",
+      "commit": "c70d57ec7",
+      "value": 2539712.0
+    }
+  ],
+  "ratio_original_over_candidate": {
+    "value": null,
+    "interval": null,
+    "interval_kind": "none"
+  },
+  "ratio_zero_minor_over_reference": {
+    "value": 562.9252741925791,
+    "interval": [
+      349.75264300048633,
+      883.0440320318082
+    ],
+    "interval_kind": "paired bootstrap 95% (geometric mean over targets of zero-minor/rho field ops)"
+  },
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w12_flagged_claims_20261011/reports/run-20261012T0009Z/report.pdf",
+  "note": "All 8 zero-minor and 32 rho runs recovered the planted logarithm; the zero-minor method costs 563x rho.negation per target in counted field ops (95% bootstrap 350-883). A replay reproduced every count."
+}
