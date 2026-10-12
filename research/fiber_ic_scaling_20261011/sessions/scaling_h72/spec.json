@@ -1,0 +1,174 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=16",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1,fiber_gen=coset"
+        }
+      },
+      "name": "closed-b16",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1,fiber_gen=coset"
+        }
+      },
+      "name": "closed-b32",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=64",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1,fiber_gen=coset"
+        }
+      },
+      "name": "closed-b64",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=128",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1,fiber_gen=coset"
+        }
+      },
+      "name": "closed-b128",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=256",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1,fiber_gen=coset"
+        }
+      },
+      "name": "closed-b256",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=128",
+          "oracle": "mitm-fiber:fiber=blind,negation_folded=1"
+        }
+      },
+      "name": "blind-b128",
+      "role": "control"
+    }
+  ],
+  "description": "research/fiber_ic_scaling_20261011/PROTOCOL.md: random prime curves with #E = 72·r at [18, 22, 26, 30] bits (2 per size); rho against the coset fiber-closed MITM at factor-base sizes 16 to 256 and the blind MITM at 128.",
+  "label": "fiber-closed IC against rho across field sizes, cofactor 72",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 2,
+    "seed": 1,
+    "timeout_seconds": 900,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 75683,
+        "b": 198802,
+        "group_order": 251352,
+        "gx": 16324,
+        "gy": 70616,
+        "kind": "prime_explicit",
+        "p": 252223,
+        "r": 3491
+      },
+      {
+        "a": 64274,
+        "b": 72577,
+        "group_order": 193176,
+        "gx": 43397,
+        "gy": 168751,
+        "kind": "prime_explicit",
+        "p": 193153,
+        "r": 2683
+      },
+      {
+        "a": 670721,
+        "b": 621666,
+        "group_order": 2934648,
+        "gx": 1134630,
+        "gy": 780390,
+        "kind": "prime_explicit",
+        "p": 2933143,
+        "r": 40759
+      },
+      {
+        "a": 792805,
+        "b": 1619461,
+        "group_order": 2830536,
+        "gx": 1510708,
+        "gy": 2145476,
+        "kind": "prime_explicit",
+        "p": 2828123,
+        "r": 39313
+      },
+      {
+        "a": 56499920,
+        "b": 6261201,
+        "group_order": 61778088,
+        "gx": 51205610,
+        "gy": 50083274,
+        "kind": "prime_explicit",
+        "p": 61777049,
+        "r": 858029
+      },
+      {
+        "a": 15055406,
+        "b": 4993146,
+        "group_order": 46526328,
+        "gx": 6875838,
+        "gy": 1139051,
+        "kind": "prime_explicit",
+        "p": 46534577,
+        "r": 646199
+      },
+      {
+        "a": 231747828,
+        "b": 874681434,
+        "group_order": 1018708776,
+        "gx": 684174056,
+        "gy": 148341121,
+        "kind": "prime_explicit",
+        "p": 1018663027,
+        "r": 14148733
+      },
+      {
+        "a": 328904430,
+        "b": 615695294,
+        "group_order": 820349352,
+        "gx": 376373189,
+        "gy": 650016349,
+        "kind": "prime_explicit",
+        "p": 820300997,
+        "r": 11393741
+      }
+    ],
+    "target_seed": 20261011,
+    "targets_per_curve": 3
+  }
+}
