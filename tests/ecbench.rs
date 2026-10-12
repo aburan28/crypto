@@ -642,6 +642,39 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
         .starts_with("IC1N17Ckb1fb442PDP2mitmfrobeniusRCwalkLAincrementalgaussTDjointISO0h"));
     assert_eq!(claim["target_count"], 1);
     assert_eq!(claim["timing_class"], "single_target_online_wall");
+    assert_eq!(claim["record_class"], "verified_answer_exploratory_wall");
+    let accounting = &claim["operation_accounting"];
+    assert_eq!(accounting["counter_scope"], "whole_measured_record");
+    assert_eq!(accounting["calibration_status"], "unknown");
+    for key in [
+        "common_operation_unit",
+        "calibrated_operation_ratio",
+        "total_work_S",
+    ] {
+        assert!(accounting[key].is_null(), "{key} must remain unknown");
+    }
+    let measured: Vec<Value> = std::fs::read_to_string(out.join("records.jsonl"))
+        .unwrap()
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    for (claim_arm, measured_arm) in [("ic", "ic"), ("rho", "rho-strong")] {
+        let record = measured
+            .iter()
+            .find(|record| record["arm"] == measured_arm)
+            .unwrap();
+        assert_eq!(record["isolation"]["level"], "L0");
+        assert_eq!(accounting[claim_arm]["record_id"], record["record_id"]);
+        assert_eq!(accounting[claim_arm]["native_counters"], record["counters"]);
+        assert_eq!(
+            accounting[claim_arm]["cost_is_lower_bound"],
+            record["cost"]["lower_bound"]
+        );
+        assert_eq!(
+            accounting[claim_arm]["unpriced_work"],
+            record["cost"]["unpriced"]
+        );
+    }
     assert_eq!(claim["ic_online_ms"], claim["ic_online_wall_ms"]);
     assert_eq!(claim["ic_target_hash"], claim["rho_target_hash"]);
     assert_eq!(
@@ -659,10 +692,17 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
             "ic_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
             "rho_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
             "isolation_levels.ic L0 is below required L2",
-            "isolation_levels.rho L0 is below required L2"
+            "isolation_levels.rho L0 is below required L2",
+            "record_class must be verified_answer_controlled_wall for a primary wall claim"
         ])
     );
-    assert_eq!(c["missing_stage_fields"], serde_json::json!([]));
+    assert_eq!(
+        c["missing_stage_fields"],
+        serde_json::json!([
+            "ic_replay_certificate_sha256",
+            "rho_replay_certificate_sha256"
+        ])
+    );
     assert_eq!(c["missing_global_provenance"], serde_json::json!([]));
 
     // A replay on the session's own host class is not independent.
@@ -716,16 +756,16 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
         .iter()
         .any(|e| e.as_str() == Some("isolation_levels.ic L0 is below required L2")));
 
-    // Schema-only test: edited levels exercise the checker, but this
-    // report is no evidence that the test host earned L2.
-    let mut simulated_l2: Value =
+    // Relabeling the L0 report cannot change the class derived from its
+    // sealed measurements or turn it into controlled wall evidence.
+    let mut relabeled_l0: Value =
         serde_json::from_str(&std::fs::read_to_string(&claim_path).unwrap()).unwrap();
-    simulated_l2["isolation_levels"]["ic"] = Value::from("L2");
-    simulated_l2["isolation_levels"]["rho"] = Value::from("L2");
+    relabeled_l0["isolation_levels"]["ic"] = Value::from("L2");
+    relabeled_l0["isolation_levels"]["rho"] = Value::from("L2");
     let simulated_path = dir.join("simulated-l2.json");
     std::fs::write(
         &simulated_path,
-        serde_json::to_string(&simulated_l2).unwrap(),
+        serde_json::to_string(&relabeled_l0).unwrap(),
     )
     .unwrap();
     let (ok, checked, err) = ecbench(&[
@@ -734,8 +774,34 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
         "--report",
         simulated_path.to_str().unwrap(),
     ]);
-    assert!(ok, "{checked} {err}");
-    let mut invalid_floor = simulated_l2;
+    assert!(!ok, "{checked} {err}");
+    let checked: Value = serde_json::from_str(&checked).unwrap();
+    assert_eq!(checked["status"], "FAIL");
+    assert_eq!(
+        checked["validation_errors"],
+        serde_json::json!([
+            "record_class must be verified_answer_controlled_wall for a primary wall claim"
+        ])
+    );
+    for (name, expected) in [
+        ("fake", "operation_accounting.counter_scope must be whole_measured_record"),
+        ("empty", "operation_accounting.ic.native_counters must be a nonempty object of native u64 counters"),
+        ("mismatched-id", "operation_accounting.ic.record_id must match ecbench_records.ic"),
+    ] {
+        let mut malformed = relabeled_l0.clone();
+        match name {
+            "fake" => malformed["operation_accounting"] = serde_json::json!({"junk": true}),
+            "empty" => malformed["operation_accounting"]["ic"]["native_counters"] = serde_json::json!({}),
+            _ => malformed["operation_accounting"]["ic"]["record_id"] = Value::from("another-record"),
+        }
+        let path = dir.join(format!("accounting-{name}.json"));
+        std::fs::write(&path, serde_json::to_string(&malformed).unwrap()).unwrap();
+        let (ok, checked, err) = ecbench(&["claim", "check", "--report", path.to_str().unwrap()]);
+        assert!(!ok, "{checked} {err}");
+        let checked: Value = serde_json::from_str(&checked).unwrap();
+        assert!(checked["validation_errors"].as_array().unwrap().iter().any(|e| e.as_str() == Some(expected)), "{checked}");
+    }
+    let mut invalid_floor = relabeled_l0;
     invalid_floor["isolation_levels"]["required"] = Value::from("L0");
     let invalid_path = dir.join("invalid-floor.json");
     std::fs::write(
