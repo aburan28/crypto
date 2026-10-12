@@ -1,0 +1,7 @@
+name = "fall_degree"
+version = "0.1.0"
+defaultTargets = ["FallDegree"]
+
+[[lean_lib]]
+name = "FallDegree"
+roots = ["FallDegree.Rule", "FallDegree.Data", "FallDegree.Verdict"]

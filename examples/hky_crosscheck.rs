@@ -110,7 +110,10 @@ fn mul_mono(poly: &[u64], m: u64) -> Vec<u64> {
         let e = acc.entry(t | m).or_insert(false);
         *e = !*e;
     }
-    acc.into_iter().filter(|&(_, b)| b).map(|(t, _)| t).collect()
+    acc.into_iter()
+        .filter(|&(_, b)| b)
+        .map(|(t, _)| t)
+        .collect()
 }
 
 fn deg(poly: &[u64]) -> u32 {
@@ -140,7 +143,11 @@ fn contains_one(basis: &[Vec<u64>], sp: &Space) -> bool {
     let last = sp.monos.len() - 1;
     basis.iter().any(|r| {
         r.iter().enumerate().all(|(k, &x)| {
-            if k == last / 64 { x == 1u64 << (last % 64) } else { x == 0 }
+            if k == last / 64 {
+                x == 1u64 << (last % 64)
+            } else {
+                x == 0
+            }
         })
     })
 }
@@ -176,7 +183,11 @@ fn main() {
             .position(|a| a == k)
             .map_or(d, |i| args[i + 1].parse().unwrap())
     };
-    let (m, cmax, plain_max) = (get("--m", 3) as usize, get("--cmax", 5), get("--plain-max", 0));
+    let (m, cmax, plain_max) = (
+        get("--m", 3) as usize,
+        get("--cmax", 5),
+        get("--plain-max", 0),
+    );
     let text = std::fs::read_to_string(&args[1]).expect("read ladder records");
     for line in text.lines().filter(|l| !l.trim().is_empty()) {
         let rec: Value = serde_json::from_str(line).unwrap();
@@ -193,8 +204,14 @@ fn main() {
             .iter()
             .map(|w| el(w.as_u64().unwrap()))
             .collect();
-        let sys = build_decomposition_system(&basis, &el(rec["x_r"].as_u64().unwrap()), &F2mElement::one(n), m, &st)
-            .unwrap();
+        let sys = build_decomposition_system(
+            &basis,
+            &el(rec["x_r"].as_u64().unwrap()),
+            &F2mElement::one(n),
+            m,
+            &st,
+        )
+        .unwrap();
         let eqs: Vec<Vec<u64>> = sys
             .equations
             .iter()

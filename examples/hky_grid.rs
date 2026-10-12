@@ -18,11 +18,15 @@
 mod engine;
 
 use crypto_lib::binary_ecc::F2mElement;
-use crypto_lib::cryptanalysis::koblitz_bench::{chained_s3_solution_count, chained_solution_count, ladder_sample};
+use crypto_lib::cryptanalysis::koblitz_bench::{
+    chained_s3_solution_count, chained_solution_count, ladder_sample, random_control_system,
+    random_subspace_basis,
+};
 use crypto_lib::cryptanalysis::koblitz_groebner::{build_decomposition_system, FieldStructure};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
 use engine::{closure_dims, eval, ideal_side, monomials_deglex, quad_roots, ArtinSchreier, Field};
 use rand::rngs::StdRng;
+use rand::Rng;
 use rand::SeedableRng;
 use serde_json::{json, Value};
 use std::time::Instant;
@@ -44,7 +48,8 @@ fn word(e: &F2mElement) -> u64 {
 fn system(m: usize, n: u32, basis: &[F2mElement], x_r: &F2mElement) -> (Vec<Vec<u64>>, u32) {
     let irr = find_irreducible_sparse(n).unwrap();
     let st = FieldStructure::new(n, &irr);
-    let sys = build_decomposition_system(basis, x_r, &F2mElement::one(n), m, &st).expect("system builds");
+    let sys =
+        build_decomposition_system(basis, x_r, &F2mElement::one(n), m, &st).expect("system builds");
     let eqs = sys
         .equations
         .iter()
@@ -53,7 +58,11 @@ fn system(m: usize, n: u32, basis: &[F2mElement], x_r: &F2mElement) -> (Vec<Vec<
     (eqs, sys.n_vars as u32)
 }
 
-fn refutation_degree(eqs: &[Vec<u64>], nv: u32, cmax: u32) -> (Option<u32>, serde_json::Map<String, Value>) {
+fn refutation_degree(
+    eqs: &[Vec<u64>],
+    nv: u32,
+    cmax: u32,
+) -> (Option<u32>, serde_json::Map<String, Value>) {
     let mut dims = serde_json::Map::new();
     for c in 2..=cmax {
         let full = monomials_deglex(nv, c).len();
@@ -117,7 +126,11 @@ fn chain3_solutions(n: u32, basis: &[u64], x_r: u64) -> Vec<u64> {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let get = |k: &str| args.iter().position(|a| a == k).map(|i| args[i + 1].clone());
+    let get = |k: &str| {
+        args.iter()
+            .position(|a| a == k)
+            .map(|i| args[i + 1].clone())
+    };
     match args.get(1).map(String::as_str) {
         Some("newcells") => {
             // --cells m:n:ell,... --seed S --keep K --cmax C
@@ -213,6 +226,81 @@ fn main() {
                     "d_last_at_least": if d_last.is_none() { Some(cmax + 1) } else { None },
                     "closure_vs_ideal_dims": dims, "secs": (t0.elapsed().as_secs_f64() * 10.0).round() / 10.0,
                 }));
+            }
+        }
+        Some("control") => {
+            // Part D: --shape n_vars:terms (or n:ell for a fresh density) ... --cmax C
+            let cmax: u32 = get("--cmax").map_or(5, |v| v.parse().unwrap());
+            let count: u64 = get("--count").map_or(4, |v| v.parse().unwrap());
+            for shape in get("--shapes").unwrap().split(',') {
+                let p: Vec<String> = shape.split(':').map(String::from).collect();
+                let (label, nv, terms) = if p[0] == "cell" {
+                    // cell:n:ell -> dreg_ladder's ladder_terms_per_eq(n, ell, 20261012)
+                    let (n, ell): (u32, usize) = (p[1].parse().unwrap(), p[2].parse().unwrap());
+                    let mut rng = StdRng::seed_from_u64(20261012);
+                    let irr = find_irreducible_sparse(n).unwrap();
+                    let st = FieldStructure::new(n, &irr);
+                    let basis = random_subspace_basis(n, ell, &mut rng);
+                    let x_r = F2mElement::from_biguint(&num_bigint::BigUint::from(rng.gen::<u64>() & ((1u64 << n) - 1)), n);
+                    let sys = build_decomposition_system(&basis, &x_r, &F2mElement::one(n), 3, &st).unwrap();
+                    let t = sys.equations.iter().map(|e| e.terms.len()).sum::<usize>() / sys.equations.len().max(1);
+                    (format!("n{n}l{ell}"), sys.n_vars, t)
+                } else {
+                    (p[2].clone(), p[0].parse::<usize>().unwrap(), p[1].parse::<usize>().unwrap())
+                };
+                for t in 0..count {
+                    let seed = 20261012u64 * 100 + t;
+                    let polys = random_control_system(nv, nv + 4, 3, terms, seed);
+                    let eqs: Vec<Vec<u64>> = polys.iter().map(|p| p.terms.iter().map(|x| x.mask).collect()).collect();
+                    let t0 = Instant::now();
+                    if get("--dlast").is_some() {
+                        // Part D′: d_last on a satisfiable control, as Part C computes it
+                        let sols: Vec<u64> = (0u64..1 << nv)
+                            .filter(|&x| eqs.iter().all(|e| !e.iter().fold(false, |acc, &m| acc ^ eval(m, x))))
+                            .collect();
+                        let (idim, dg) = ideal_side(nv as u32, &sols, cmax);
+                        let (mut clo, mut e0) = (std::collections::HashMap::new(), None);
+                        let mut cd = serde_json::Map::new();
+                        for c in 2..=cmax {
+                            let (_, closed) = closure_dims(&eqs, nv as u32, c, idim[c as usize]);
+                            clo.insert(c, closed);
+                            cd.insert(c.to_string(), json!([closed, idim[c as usize]]));
+                            if closed == idim[c as usize] && c >= dg {
+                                e0 = Some(c);
+                                break;
+                            }
+                        }
+                        let d_last = e0.map(|e| {
+                            let mut dl = e;
+                            for c in (2..e).rev() {
+                                if clo.get(&c) == Some(&idim[c as usize]) { dl = c; } else { break; }
+                            }
+                            dl
+                        });
+                        println!("{}", json!({
+                            "schema": "hky_grid_control_dlast/v1", "shape": label, "n_vars": nv, "n_eqs": nv + 4,
+                            "terms_per_eq": terms, "seed": seed, "solutions": sols.len(), "DG": dg, "e0": e0,
+                            "d_last": d_last, "d_last_at_least": if d_last.is_none() { Some(cmax + 1) } else { None },
+                            "closure_vs_ideal_dims": cd, "secs": (t0.elapsed().as_secs_f64() * 10.0).round() / 10.0,
+                        }));
+                        continue;
+                    }
+                    let (d_f, dims) = refutation_degree(&eqs, nv as u32, cmax);
+                    // a refutation (1 ∈ V_{F,c}) proves unsatisfiability; otherwise check exhaustively
+                    let sat_points = if d_f.is_some() {
+                        0u64
+                    } else {
+                        (0u64..1 << nv)
+                            .filter(|&x| eqs.iter().all(|e| !e.iter().fold(false, |acc, &m| acc ^ eval(m, x))))
+                            .count() as u64
+                    };
+                    println!("{}", json!({
+                        "schema": "hky_grid_control/v1", "shape": label, "n_vars": nv, "n_eqs": nv + 4, "terms_per_eq": terms,
+                        "seed": seed, "d_f": d_f, "d_f_at_least": if d_f.is_none() { Some(cmax + 1) } else { None },
+                        "unsat_by": if d_f.is_some() { "refutation" } else { "exhaustive" }, "solutions": sat_points,
+                        "closure_dims": dims, "secs": (t0.elapsed().as_secs_f64() * 10.0).round() / 10.0,
+                    }));
+                }
             }
         }
         _ => eprintln!("usage: hky_grid newcells --cells m:n:ell,... --seed S [--keep K] [--cmax C] | sat LADDER.jsonl [--keep K] [--cmax C]"),

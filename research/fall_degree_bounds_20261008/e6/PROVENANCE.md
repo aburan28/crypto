@@ -11,3 +11,4 @@
   code paths are unchanged in the diff, which adds only a match arm and two imports, so
   their outputs do not depend on which build ran them.
 - Part D used the rebuilt binary.
+- 2026-10-12T00:57:25Z: rebuilt again for Part D′ (`--dlast`); sha256 `0ef3a347a2e32dd3cdc6d3bee216743ff2bda692a2e504569b78bc97079679ac`. Part B cells launched after this time and Part D′ used it. The `newcells` path is unchanged.
