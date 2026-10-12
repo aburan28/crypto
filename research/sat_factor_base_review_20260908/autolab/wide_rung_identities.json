@@ -1,0 +1,95 @@
+{
+ "convention": "docs/curve-identities.md, tools/curve_identity.py",
+ "source": {
+  "records": "KoblitzCurve::new encoding of the n=71 a=0 and n=83 a=1 beat fixtures (examples/koblitz_curve_records.rs)",
+  "records_sha256": "39a805f0ee7a97324600eec4b911147307dae979e0c2fc5725ebf31943fefcff",
+  "producer": "examples/koblitz_curve_records.rs"
+ },
+ "candidate_uid": null,
+ "curves": [
+  {
+   "label": "K_0/GF(2^71)",
+   "a": 0,
+   "n": 71,
+   "model": "E_0: y^2 + xy = x^3 + 1 (the ECC2K-130 family)",
+   "proper_intermediate_subfields_over_gf2": [],
+   "curve_id": "EC1N71Ce0hac1355ef3db6",
+   "curve_sha256": "ac1355ef3db6e4a4ddcffb7c98dc7b22a53f806e23e08a6e82415b5e2b3df897",
+   "curve_uid": "urn:ec-record:1:sha256:ac1355ef3db6e4a4ddcffb7c98dc7b22a53f806e23e08a6e82415b5e2b3df897",
+   "field_sha256": "54fccbfca0ae2e3e2f4865cc5789b9e138bfb96ba89629682519c2be80353858",
+   "field": {
+    "characteristic": 2,
+    "degree": 71,
+    "representation": "polynomial",
+    "modulus_exponents": [
+     71,
+     5,
+     3,
+     1,
+     0
+    ],
+    "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+   },
+   "curve": {
+    "model": "binary Weierstrass",
+    "coefficients": [
+     1,
+     0,
+     0,
+     0,
+     1
+    ],
+    "subgroup_order": "5513228015079457",
+    "cofactor": 428276,
+    "generator": [
+     "0x1907df26d8ab0a9b66",
+     "0x17f0e34088b4f1dc4f"
+    ],
+    "target_group": "prime-order subgroup"
+   },
+   "group_order": "2361183241386169526132"
+  },
+  {
+   "label": "K_1/GF(2^83)",
+   "a": 1,
+   "n": 83,
+   "model": "E_1: y^2 + xy = x^3 + x^2 + 1 (not the ECC2K-130 family)",
+   "proper_intermediate_subfields_over_gf2": [],
+   "curve_id": "EC1N83Ce1h35c7ced6b497",
+   "curve_sha256": "35c7ced6b497231fbc82fe24db596fd55379a87356962dad47a7dc774388ce9d",
+   "curve_uid": "urn:ec-record:1:sha256:35c7ced6b497231fbc82fe24db596fd55379a87356962dad47a7dc774388ce9d",
+   "field_sha256": "ad8dd02f82f1738e511a756c2198675e77193bb8d4e498ec41d57b82a2c4bde6",
+   "field": {
+    "characteristic": 2,
+    "degree": 83,
+    "representation": "polynomial",
+    "modulus_exponents": [
+     83,
+     7,
+     4,
+     2,
+     0
+    ],
+    "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+   },
+   "curve": {
+    "model": "binary Weierstrass",
+    "coefficients": [
+     1,
+     1,
+     0,
+     0,
+     1
+    ],
+    "subgroup_order": "8569786107849059",
+    "cofactor": 1128547018,
+    "generator": [
+     "0x5789eebc7f493ecfe93af",
+     "0x755ed5c31e037ed90b549"
+    ],
+    "target_group": "prime-order subgroup"
+   },
+   "group_order": "9671406556910881928556062"
+  }
+ ]
+}

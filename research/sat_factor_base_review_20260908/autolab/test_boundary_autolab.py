@@ -1155,6 +1155,68 @@ class SingleTargetPanelTests(unittest.TestCase):
         self.assertEqual(self.stp.untimed(record, ("relation_checks",)), {"kind": "k", "probes": 3})
 
 
+class WideSingleTargetBeatTests(unittest.TestCase):
+    def test_n71_and_n83_resolve_curve_records_and_u128_producers(self) -> None:
+        from curve_identity import inspect_manifest
+
+        protocol = lab.load_protocol()
+        for beat_id, a, n in (
+            ("koblitz.compact_orbit.n71_single_target", 0, 71),
+            ("koblitz.compact_orbit.n83_single_target", 1, 83),
+        ):
+            beat = protocol["beats"][beat_id]
+            self.assertEqual((beat["a"], beat["n"]), (a, n))
+            curve_ids = lab.read_json(lab.REPO / beat["curve_ids"])
+            rec = next(c for c in curve_ids["curves"] if (c["a"], c["n"]) == (a, n))
+            inspect_manifest({"field": rec["field"], "curve": {**rec["curve"], "curve_id": rec["curve_id"]}})
+            self.assertTrue(rec["curve_id"].startswith(f"EC1N{n}Ce{a}h"))
+            ic = beat["panel_producers"]["ic"]
+            rho = beat["panel_producers"]["rho"]
+            self.assertEqual(ic["example"], "koblitz_orbit_dlp_fast")
+            self.assertEqual(rho["example"], "koblitz_rho_fixture")
+            self.assertEqual(beat["frozen_originals"]["ic"]["example"], ic["example"])
+            self.assertEqual(beat["frozen_originals"]["rho"]["example"], rho["example"])
+            ic_src = (lab.REPO / ic["source"]).read_text()
+            rho_src = (lab.REPO / rho["source"]).read_text()
+            self.assertIn("FastBinaryCurve128", ic_src)
+            self.assertIn("n > 63", ic_src)
+            self.assertIn("packed_u128_polynomial_basis", rho_src)
+            self.assertIn("if n > 63", rho_src)
+            for source in beat["ic_sources"] + beat["rho_sources"]:
+                self.assertTrue((lab.REPO / source).is_file(), source)
+
+    def test_wide_producer_records_fill_the_online_claim_fields(self) -> None:
+        record, summary = panel.adopt_wide_ic(
+            {"kind": "compact_orbit_dlp_target", "target_ms": 1.5, "target": ["3", "4"],
+             "generator": ["1", "2"], "x_codes": ["9"], "group_verified": True},
+            {"timing_ms": {"setup_total": 10, "rank_stage": 2, "linear_algebra": 0.5}},
+        )
+        self.assertEqual(record["online_ms"], 1.5)
+        self.assertEqual(record["target"], [3, 4])
+        self.assertEqual(record["generator"], [1, 2])
+        self.assertEqual(record["x_codes"], [9])
+        self.assertEqual(summary["setup_complete_ns"], 12.5 * 1_000_000)
+        self.assertLessEqual(summary["setup_complete_ns"], record["online_start_ns"])
+        self.assertGreater(record["online_stop_ns"], record["online_start_ns"])
+        narrow, narrow_summary = panel.adopt_wide_ic(
+            {"online_ms": 3, "online_start_ns": 9, "target": [1, 2], "x_codes": [4]},
+            {"setup_complete_ns": 4},
+        )
+        self.assertEqual((narrow["online_ms"], narrow["online_start_ns"], narrow["target"]), (3, 9, [1, 2]))
+        self.assertEqual(narrow_summary["setup_complete_ns"], 4)
+        rho = panel.adopt_wide_rho({
+            "kind": "rho_public_fixture", "setup_ms": 1, "walk_ms": 4, "validation_ms": 0.5,
+            "total_ms": 5.5, "published_q": ["8", "9"], "verified": True,
+        })
+        self.assertEqual(rho["online_ms"], 5.5)
+        self.assertEqual(rho["walk_and_collision_ms"], 5)
+        self.assertEqual(rho["recovery_check_ms"], 0.5)
+        self.assertEqual(rho["published_q"], [8, 9])
+        self.assertEqual(panel.adopt_wide_rho({"online_ms": 2, "published_q": [1, 2]})["online_ms"], 2)
+        self.assertEqual(panel.target_line([1, 2], 61), "[1, 2]\n")
+        self.assertEqual(panel.target_line([1, 2 ** 70], 71),
+                         '["1", "1180591620717411303424"]\n')
+
 
 if __name__ == "__main__":
     unittest.main()

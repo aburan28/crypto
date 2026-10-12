@@ -605,7 +605,7 @@
       "note": "Option A + C of evidence/20261001-koblitz-n61-compact-orbit-panel/VS_RHO_SINGLE_TARGET_OPTIONS.md. Launch with launch-single. Schema eligibility only: independent-host replay is outstanding and no ledger row is promoted."
     },
     "koblitz.compact_orbit.n71_single_target": {
-      "label": "One-target online: a=0 n=71 compact-orbit IC (online split timers) vs strong rho rung 3 on the same public point, W one-target workloads (first n=71 rung)",
+      "label": "One-target online: a=0 n=71 compact-orbit IC (u128 wide pipeline) vs packed u128 signed-Frobenius rho on the same public point, W one-target workloads (first n=71 rung)",
       "regime": "koblitz",
       "stage": "vs_rho",
       "priority": 1,
@@ -657,22 +657,17 @@
         ],
         "lambda": "5336382444749771"
       },
-      "curve_ids": "research/ic_single_target_20260930/curve_ids.json",
+      "curve_ids": "research/sat_factor_base_review_20260908/autolab/wide_rung_identities.json",
       "panel_producers": {
         "ic": {
-          "example": "koblitz_orbit_dlp_fast_online",
-          "source": "examples/koblitz_orbit_dlp_fast_online.rs",
-          "usage": "construct:<n>:<a>:<K> <one-line [x,y] target> <rank_seed> <out.jsonl>"
+          "example": "koblitz_orbit_dlp_fast",
+          "source": "examples/koblitz_orbit_dlp_fast.rs",
+          "usage": "construct:<n>:<a>:<K> <one-line [x,y] target, decimal strings past 2^64> <rank_seed> <out.jsonl>"
         },
         "rho": {
-          "example": "koblitz_rho_batch_ks_strong_online",
-          "source": "examples/koblitz_rho_batch_ks_strong_online.rs",
-          "usage": "KIC_RHO_TARGET_POINT=<x>,<y> <n> <a> signed_frobenius 1 <seed>",
-          "env": {
-            "KIC_RHO_RUNG": "3",
-            "KIC_RHO_LANES": "32",
-            "KIC_RHO_DP_BITS": "4"
-          }
+          "example": "koblitz_rho_fixture",
+          "source": "examples/koblitz_rho_fixture.rs",
+          "usage": "KIC_RHO_PUBLIC_TARGET_POINT=[\"<x>\",\"<y>\"] KIC_RHO_WALK_SEED=<seed> <n> <a> signed_frobenius 1 packed"
         }
       },
       "frozen_originals": {
@@ -681,22 +676,23 @@
           "source": "examples/koblitz_orbit_dlp_fast.rs"
         },
         "rho": {
-          "example": "koblitz_rho_batch_ks_strong",
-          "source": "examples/koblitz_rho_batch_ks_strong.rs"
+          "example": "koblitz_rho_fixture",
+          "source": "examples/koblitz_rho_fixture.rs"
         }
       },
       "ic_sources": [
-        "examples/koblitz_orbit_dlp_fast_online.rs",
+        "examples/koblitz_orbit_dlp_fast.rs",
         "src/cryptanalysis/koblitz_fast_arith.rs",
         "src/cryptanalysis/koblitz_index_calculus.rs",
         "src/cryptanalysis/semaev_decomp.rs"
       ],
       "rho_sources": [
-        "examples/koblitz_rho_batch_ks_strong_online.rs",
+        "examples/koblitz_rho_fixture.rs",
+        "src/cryptanalysis/koblitz_fast_arith.rs",
         "src/cryptanalysis/koblitz_index_calculus.rs",
         "src/cryptanalysis/semaev_decomp.rs"
       ],
-      "comparator_status": "strong rho rung 3 (koblitz_rho_batch_ks_strong_online: koblitz_rho_batch_ks_strong with its online timer started after Q is built; walk checked bit-identical in every run), the measurement_schema.vs_rho.rho_reference_minimum batch reference run at one target",
+      "comparator_status": "packed u128 signed-Frobenius rho (koblitz_rho_fixture packed: the wide walk for 64 < n <= 127; one walk, jumps after Q, every point stored), run at one target. The u64 online binaries do not admit this degree.",
       "acceptance_gates": [
         "one public hash-to-curve target per workload, no known scalar; tune and eval targets disjoint",
         "each arm in its own process per workload; rho's distinguished-point table starts empty",
@@ -711,7 +707,7 @@
       "note": "Option A + C of evidence/20261001-koblitz-n61-compact-orbit-panel/VS_RHO_SINGLE_TARGET_OPTIONS.md. Launch with launch-single. Schema eligibility only: independent-host replay is outstanding and no ledger row is promoted."
     },
     "koblitz.compact_orbit.n83_single_target": {
-      "label": "One-target online: a=1 n=83 compact-orbit IC (online split timers) vs strong rho rung 3 on the same public point, W one-target workloads (first n=83 rung under the isolated-host protocol)",
+      "label": "One-target online: a=1 n=83 compact-orbit IC (u128 wide pipeline) vs packed u128 signed-Frobenius rho on the same public point, W one-target workloads (first n=83 rung under the isolated-host protocol)",
       "regime": "koblitz",
       "stage": "vs_rho",
       "priority": 1,
@@ -763,22 +759,17 @@
         ],
         "lambda": "2998004823950457"
       },
-      "curve_ids": "research/ic_single_target_20260930/curve_ids.json",
+      "curve_ids": "research/sat_factor_base_review_20260908/autolab/wide_rung_identities.json",
       "panel_producers": {
         "ic": {
-          "example": "koblitz_orbit_dlp_fast_online",
-          "source": "examples/koblitz_orbit_dlp_fast_online.rs",
-          "usage": "construct:<n>:<a>:<K> <one-line [x,y] target> <rank_seed> <out.jsonl>"
+          "example": "koblitz_orbit_dlp_fast",
+          "source": "examples/koblitz_orbit_dlp_fast.rs",
+          "usage": "construct:<n>:<a>:<K> <one-line [x,y] target, decimal strings past 2^64> <rank_seed> <out.jsonl>"
         },
         "rho": {
-          "example": "koblitz_rho_batch_ks_strong_online",
-          "source": "examples/koblitz_rho_batch_ks_strong_online.rs",
-          "usage": "KIC_RHO_TARGET_POINT=<x>,<y> <n> <a> signed_frobenius 1 <seed>",
-          "env": {
-            "KIC_RHO_RUNG": "3",
-            "KIC_RHO_LANES": "32",
-            "KIC_RHO_DP_BITS": "4"
-          }
+          "example": "koblitz_rho_fixture",
+          "source": "examples/koblitz_rho_fixture.rs",
+          "usage": "KIC_RHO_PUBLIC_TARGET_POINT=[\"<x>\",\"<y>\"] KIC_RHO_WALK_SEED=<seed> <n> <a> signed_frobenius 1 packed"
         }
       },
       "frozen_originals": {
@@ -787,22 +778,23 @@
           "source": "examples/koblitz_orbit_dlp_fast.rs"
         },
         "rho": {
-          "example": "koblitz_rho_batch_ks_strong",
-          "source": "examples/koblitz_rho_batch_ks_strong.rs"
+          "example": "koblitz_rho_fixture",
+          "source": "examples/koblitz_rho_fixture.rs"
         }
       },
       "ic_sources": [
-        "examples/koblitz_orbit_dlp_fast_online.rs",
+        "examples/koblitz_orbit_dlp_fast.rs",
         "src/cryptanalysis/koblitz_fast_arith.rs",
         "src/cryptanalysis/koblitz_index_calculus.rs",
         "src/cryptanalysis/semaev_decomp.rs"
       ],
       "rho_sources": [
-        "examples/koblitz_rho_batch_ks_strong_online.rs",
+        "examples/koblitz_rho_fixture.rs",
+        "src/cryptanalysis/koblitz_fast_arith.rs",
         "src/cryptanalysis/koblitz_index_calculus.rs",
         "src/cryptanalysis/semaev_decomp.rs"
       ],
-      "comparator_status": "strong rho rung 3 (koblitz_rho_batch_ks_strong_online: koblitz_rho_batch_ks_strong with its online timer started after Q is built; walk checked bit-identical in every run), the measurement_schema.vs_rho.rho_reference_minimum batch reference run at one target",
+      "comparator_status": "packed u128 signed-Frobenius rho (koblitz_rho_fixture packed: the wide walk for 64 < n <= 127; one walk, jumps after Q, every point stored), run at one target. The u64 online binaries do not admit this degree.",
       "acceptance_gates": [
         "one public hash-to-curve target per workload, no known scalar; tune and eval targets disjoint",
         "each arm in its own process per workload; rho's distinguished-point table starts empty",

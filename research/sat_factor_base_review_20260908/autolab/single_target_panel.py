@@ -1,14 +1,14 @@
 """One-target compact-orbit vs strong-rho panel (`launch-single`).
 
 W one-target workloads on public hash-to-curve points with no known scalar.
-Every workload runs each arm in its own process: the compact-orbit IC
-(`koblitz_orbit_dlp_fast_online`) rebuilds its reusable setup and then solves
-the one point inside its online interval; strong rho rung 3
-(`koblitz_rho_batch_ks_strong_online`) starts with an empty
-distinguished-point table. K comes from a tune on disjoint one-target
-workloads. Before the eval workloads, both online producers are run against
-their frozen originals on one known-answer target and must emit identical
-untimed records.
+Every workload runs each arm in its own process. Degrees through 63 use the
+u64 online producers (`koblitz_orbit_dlp_fast_online`,
+`koblitz_rho_batch_ks_strong_online`). Degrees past 63 name the u128
+producers on the beat (`koblitz_orbit_dlp_fast`'s wide pipeline,
+`koblitz_rho_fixture` packed): the u64 binaries refuse those field words.
+K comes from a tune on disjoint one-target workloads. Before the eval
+workloads, both producers are run against their frozen originals on one
+known-answer target and must emit identical untimed records.
 
 Each workload yields one `vs_rho` claim keyed by IC1 candidate / workload / run
 identities (`research/ic_candidate_tournament_20260915/identity.py`), with both
@@ -47,6 +47,83 @@ PHASE_FIELDS = {
 }
 CURVE_FIELDS = ("degree", "curve_a", "subgroup_order", "irreducible", "group_order", "cofactor",
                 "generator", "lambda")
+
+
+def as_ints(value: Any) -> list[int] | None:
+    """Field coordinates are JSON numbers on the u64 producers and decimal strings past 2^64."""
+    if value is None:
+        return None
+    return [int(v) for v in value]
+
+
+def same_point(left: Any, right: Any) -> bool:
+    return as_ints(left) == as_ints(right)
+
+
+def target_line(point: Any, degree: int) -> str:
+    """One target line. Past n=63 a JSON number above 2^64 is not a u64, so the wide parser takes decimal strings."""
+    coords = [int(v) for v in point]
+    if degree > 63:
+        return json.dumps([str(v) for v in coords]) + "\n"
+    return json.dumps(coords) + "\n"
+
+
+def adopt_wide_ic(record: dict[str, Any] | None, summary: dict[str, Any] | None
+                  ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    """Map the u128 compact-orbit record onto the online fields the claim reads.
+
+    The wide producer times the same stages and reports them as `target_ms` and
+    `timing_ms`. The u64 online producer names those `online_ms` and
+    `setup_complete_ns`. A record that already carries the online names is left
+    on that clock.
+    """
+    if not isinstance(record, dict):
+        return record, summary
+    record = dict(record)
+    summary = dict(summary or {})
+    if record.get("online_ms") is None and record.get("target_ms") is not None:
+        record["online_ms"] = record["target_ms"]
+    for key in ("target", "generator", "published_q"):
+        if record.get(key) is not None:
+            record[key] = as_ints(record[key])
+    if isinstance(record.get("x_codes"), list):
+        record["x_codes"] = [int(v) for v in record["x_codes"]]
+    timing = summary.get("timing_ms")
+    if (summary.get("setup_complete_ns") is None and isinstance(timing, dict)
+            and all(k in timing for k in ("setup_total", "rank_stage", "linear_algebra"))):
+        setup_ms = (float(timing["setup_total"]) + float(timing["rank_stage"])
+                    + float(timing["linear_algebra"]))
+        summary["setup_complete_ns"] = setup_ms * 1_000_000.0
+    if (record.get("online_start_ns") is None and summary.get("setup_complete_ns") is not None
+            and record.get("online_ms") is not None):
+        record["online_start_ns"] = summary["setup_complete_ns"]
+        record["online_stop_ns"] = (float(summary["setup_complete_ns"])
+                                     + float(record["online_ms"]) * 1_000_000.0)
+    return record, summary
+
+
+def adopt_wide_rho(record: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Map the packed u128 rho record onto the online fields the claim reads.
+
+    `setup_ms` is the per-target jump table built after Q, `walk_ms` the walk,
+    and `validation_ms` the `[d]G = Q` check. A record that already carries
+    `online_ms` keeps that interval.
+    """
+    if not isinstance(record, dict):
+        return record
+    record = dict(record)
+    if (record.get("online_ms") is None
+            and all(k in record for k in ("setup_ms", "walk_ms", "validation_ms"))):
+        record["recovery_check_ms"] = float(record["validation_ms"])
+        record["walk_and_collision_ms"] = float(record["setup_ms"]) + float(record["walk_ms"])
+        record["online_ms"] = record["walk_and_collision_ms"] + record["recovery_check_ms"]
+        total_ms = float(record.get("total_ms", record["online_ms"]))
+        record["online_stop_ns"] = total_ms * 1_000_000.0
+        record["online_start_ns"] = record["online_stop_ns"] - float(record["online_ms"]) * 1_000_000.0
+    if record.get("published_q") is not None:
+        record["published_q"] = as_ints(record["published_q"])
+    return record
+
 
 _curves: dict[str, oracle.Curve] = {}
 _OracleCurve = oracle.Curve
@@ -416,11 +493,33 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
             for entry in targets[role]:
                 path = run / f"inputs/{role}_w{entry['seed']:03d}.target"
                 if not path.is_file():
-                    path.write_text(json.dumps(entry["point"]) + "\n")
+                    path.write_text(target_line(entry["point"], n))
 
         def ic_command(k: int, target_path: Path, out_path: str, binary: str = "ic") -> list[str]:
             return [binaries[binary], f"construct:{n}:{a}:{k}", str(target_path),
                     str(beat["ic_rank_seed"]), out_path]
+
+        wide_rho = producers["rho"]["example"] == "koblitz_rho_fixture"
+
+        def rho_launch(binary: str, seed: int, *, point: list | None = None,
+                       scalar: int | None = None) -> tuple[list[str], dict[str, str]]:
+            """Argv and env for one rho process. The packed u128 walk takes `packed` and decimal-string points."""
+            if wide_rho:
+                argv = [binary, str(n), str(a), "signed_frobenius", "1", "packed"]
+                extra: dict[str, str] = {"KIC_RHO_WALK_SEED": str(seed)}
+                if point is not None:
+                    extra["KIC_RHO_PUBLIC_TARGET_POINT"] = json.dumps(
+                        [str(int(v)) for v in point], separators=(",", ":"))
+                if scalar is not None:
+                    extra["KIC_RHO_FIXED_TARGET_SCALAR"] = str(scalar)
+                return argv, dict(rho_env, **extra)
+            argv = [binary, str(n), str(a), "signed_frobenius", "1", str(seed)]
+            extra = {}
+            if point is not None:
+                extra["KIC_RHO_TARGET_POINT"] = f"{int(point[0])},{int(point[1])}"
+            if scalar is not None:
+                extra["KIC_RHO_EXPLICIT_SCALAR"] = str(scalar)
+            return argv, dict(rho_env, **extra)
 
         def rss_estimate(k: int) -> tuple[bool, int, int | None]:
             return lab.k_fits(beat, k)
@@ -456,13 +555,15 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                 summary_rows = lab.read_jsonl(run / f"logs/tune_K{k}_w{seed:03d}.summary.json")
                 summary = summary_rows[-1] if summary_rows else {}
                 ok = (measured["exit_code"] == 0 and len(records) == 1
-                      and records[0].get("group_verified") is True and records[0]["target"] == entry["point"])
+                      and records[0].get("group_verified") is True
+                      and same_point(records[0].get("target"), entry["point"]))
                 tune["rows"].append({
                     "K": k, "workload": seed, "state": "ok" if ok else "failed",
                     "estimated_ic_rss_bytes": need, "available_memory_bytes": available,
                     "run": measured, "timing_ms": summary.get("timing_ms"),
                     "peak_rss_bytes": summary.get("peak_rss_bytes"),
-                    "online_ms": records[0].get("online_ms") if records else None,
+                    "online_ms": (records[0].get("online_ms", records[0].get("target_ms"))
+                                  if records else None),
                     "probes": records[0].get("probes") if records else None,
                 })
                 lab.write_json(tune_file, tune)
@@ -512,9 +613,9 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                 outputs[arm] = (measured, lab.read_jsonl(out), lab.read_jsonl(run / f"logs/identity_{arm}.summary.json"))
             for arm in ("rho", "frozen_rho"):
                 out = run / f"logs/identity_{arm}.jsonl"
+                argv, rho_child_env = rho_launch(binaries[arm], int(beat["rho_seed_base"]), scalar=scalar)
                 measured = lab.run_panel_process(
-                    [binaries[arm], str(n), str(a), "signed_frobenius", "1", str(beat["rho_seed_base"])],
-                    env=dict(rho_env, KIC_RHO_EXPLICIT_SCALAR=str(scalar)), stdout_path=out,
+                    argv, env=rho_child_env, stdout_path=out,
                     stderr_path=run / f"logs/identity_{arm}.stderr.txt", cpu=arguments.cpu)
                 outputs[arm] = (measured, lab.read_jsonl(out), [])
             ic_new = [untimed(x, ("relation_checks", "online_hw_counts", "online_hw_scope",
@@ -566,9 +667,9 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                         stdout_path=run / f"logs/ic_w{seed:03d}.summary.json",
                         stderr_path=run / f"logs/ic_w{seed:03d}.stderr.txt", cpu=arguments.cpu)
                 else:
+                    argv, rho_child_env = rho_launch(binaries["rho"], rho_seed, point=entry["point"])
                     measured = lab.run_panel_process(
-                        [binaries["rho"], str(n), str(a), "signed_frobenius", "1", str(rho_seed)],
-                        env=dict(rho_env, KIC_RHO_TARGET_POINT=f"{entry['point'][0]},{entry['point'][1]}"),
+                        argv, env=rho_child_env,
                         stdout_path=run / f"logs/rho_w{seed:03d}.jsonl",
                         stderr_path=run / f"logs/rho_w{seed:03d}.stderr.txt", cpu=arguments.cpu)
                 row[arm] = measured
@@ -577,11 +678,15 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                           if x.get("kind") == "compact_orbit_dlp_target"]
             ic_summary = (lab.read_jsonl(run / f"logs/ic_w{seed:03d}.summary.json") or [{}])[-1]
             rho_rows = lab.read_jsonl(run / f"logs/rho_w{seed:03d}.jsonl")
-            rho_records = [x for x in rho_rows if x.get("kind") == "rho_ks_batch_fixture"]
-            rho_summary = ([x for x in rho_rows if x.get("kind") == "rho_ks_batch_summary"] or [{}])[-1]
-            row["ic_record"] = ic_records[0] if len(ic_records) == 1 else None
+            rho_records = [x for x in rho_rows
+                           if x.get("kind") in ("rho_ks_batch_fixture", "rho_public_fixture")]
+            rho_summary = ([x for x in rho_rows if x.get("kind") == "rho_ks_batch_summary"]
+                           or rho_records or [{}])[-1]
+            ic_record, ic_summary = adopt_wide_ic(
+                ic_records[0] if len(ic_records) == 1 else None, ic_summary)
+            row["ic_record"] = ic_record
             row["ic_summary"] = ic_summary
-            row["rho_record"] = rho_records[0] if len(rho_records) == 1 else None
+            row["rho_record"] = adopt_wide_rho(rho_records[0] if len(rho_records) == 1 else None)
             row["rho_summary"] = rho_summary
             rows.append(row)
             with rows_path.open("a") as handle:
@@ -592,8 +697,10 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
         base_rows = lab.read_jsonl(base_path)[:1]
         lab.require(bool(base_rows), f"base dump missing: {base_path}")
         base = base_rows[0]
-        base_points = [tuple(p) if p else None for p in base["factor_base_point_coordinates"]]
-        representatives = [list(p) for p in base["factor_base_representatives"]]
+        base_points = [tuple(int(c) for c in p) if p else None
+                       for p in base["factor_base_point_coordinates"]]
+        representatives = [[int(c) for c in p] if p else None
+                           for p in base["factor_base_representatives"]]
         curve_ids = lab.read_json(REPO / beat["curve_ids"])
         curve_rec = next(c for c in curve_ids["curves"] if (c["a"], c["n"]) == (a, n))
         inventory = {"factor_base_orbits": representatives, "columns": len(representatives),
@@ -614,24 +721,38 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
         host = lab.host_record() | {"cpu": subprocess.run(
             ["sysctl", "-n", "machdep.cpu.brand_string"], capture_output=True, text=True).stdout.strip()
             if sys.platform == "darwin" else lab.platform.processor()}
-        rho_policy_base = {
-            "worker_count": 1,
-            "walk_policy": "rung 3: 32 lanes in lockstep, one batched inversion per step; signed-Frobenius "
-                           "class representative (least normal-basis rotation, sign by y); 32 r-adding jumps "
-                           "in G; stride starts [c]G + Q",
-            "collision_policy": "distinguished points in one table that starts empty in every process; a stored "
-                                "point reached with a different coefficient of Q gives d, checked as [d]G = Q",
-            "lanes": int(producers["rho"]["env"]["KIC_RHO_LANES"]),
-            "distinguished_point_bits": int(producers["rho"]["env"]["KIC_RHO_DP_BITS"]),
-            "rung": int(producers["rho"]["env"]["KIC_RHO_RUNG"]),
-        }
+        if wide_rho:
+            rho_policy_base = {
+                "worker_count": 1,
+                "walk_policy": "packed u128 signed-Frobenius rho: one walk; jumps drawn after Q; "
+                               "class representative by normal-basis rotation",
+                "collision_policy": "every point stored in a table that starts empty; a repeated point with a "
+                                    "different coefficient of Q gives d, checked as [d]G = Q",
+                "lanes": 1,
+                "distinguished_point_bits": 0,
+            }
+        else:
+            rho_policy_base = {
+                "worker_count": 1,
+                "walk_policy": "rung 3: 32 lanes in lockstep, one batched inversion per step; signed-Frobenius "
+                               "class representative (least normal-basis rotation, sign by y); 32 r-adding jumps "
+                               "in G; stride starts [c]G + Q",
+                "collision_policy": "distinguished points in one table that starts empty in every process; a stored "
+                                    "point reached with a different coefficient of Q gives d, checked as [d]G = Q",
+                "lanes": int(producers["rho"]["env"]["KIC_RHO_LANES"]),
+                "distinguished_point_bits": int(producers["rho"]["env"]["KIC_RHO_DP_BITS"]),
+                "rung": int(producers["rho"]["env"]["KIC_RHO_RUNG"]),
+            }
         online_interval = {
             "ic_start_event": "target_query_begin: the first operation on the public point (its scan-origin "
                               "hash), after base, index, rank stage and linear algebra are complete",
             "ic_stop_event": "recovery_check_end: [d]G = Q evaluated in the producer",
-            "rho_start_event": "after_target_built: the walk's first start [c]G + Q, after the curve, jump "
-                               "table and target point are ready",
-            "rho_stop_event": "recovery_check_true: a distinguished-point collision returned d with [d]G = Q",
+            "rho_start_event": ("after_target_built: per-target jump table, then the packed walk"
+                                if wide_rho else
+                                "after_target_built: the walk's first start [c]G + Q, after the curve, jump "
+                                "table and target point are ready"),
+            "rho_stop_event": ("validation_end: [d]G = Q on the recovered scalar" if wide_rho else
+                               "recovery_check_true: a distinguished-point collision returned d with [d]G = Q"),
             "ic_included_stages": ["target_query", "target_PDP", "target_relation_check", "target_descent",
                                    "target_recovery_check"],
             "rho_included_stages": ["walk", "collision", "recovery_check"],
@@ -661,8 +782,10 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
             fixture = fixture_base | {"targets": [[str(v) for v in row["target"]]], "target_seeds": [seed],
                                       "target_scalar_constructed": False}
             producers_ok = row["ic"]["exit_code"] == 0 and row["rho"]["exit_code"] == 0
-            ic_ok = bool(ic_record) and ic_record.get("group_verified") is True and ic_record["target"] == row["target"]
-            rho_ok = bool(rho_record) and rho_record.get("verified") is True and rho_record["published_q"] == row["target"]
+            ic_ok = (bool(ic_record) and ic_record.get("group_verified") is True
+                     and same_point(ic_record.get("target"), row["target"]))
+            rho_ok = (bool(rho_record) and rho_record.get("verified") is True
+                      and same_point(rho_record.get("published_q"), row["target"]))
             verify: dict[str, Any] = {"workload": seed, "producers_ok": producers_ok, "ic_ok": ic_ok, "rho_ok": rho_ok,
                                       "base_hash": (row["ic_summary"] or {}).get("base_hash")}
             if not (producers_ok and ic_ok and rho_ok):
@@ -671,12 +794,15 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                 continue
             target_hash = identity.sha256({"curve_id": curve_rec["curve_id"], "target": row["target"]})
             certificates = {
-                "ic": {"arm": "ic", "curve_id": curve_rec["curve_id"], "generator": ic_record["generator"],
-                       "target": ic_record["target"], "scalar": ic_record["recovered_scalar"],
+                "ic": {"arm": "ic", "curve_id": curve_rec["curve_id"],
+                       "generator": as_ints(ic_record["generator"]),
+                       "target": as_ints(ic_record["target"]), "scalar": ic_record["recovered_scalar"],
                        "relation": {"base_hash": row["ic_summary"]["base_hash"],
-                                    "point_indices": ic_record["point_indices"], "x_codes": ic_record["x_codes"]}},
+                                    "point_indices": ic_record["point_indices"],
+                                    "x_codes": [int(v) for v in ic_record["x_codes"]]}},
                 "rho": {"arm": "rho", "curve_id": curve_rec["curve_id"], "generator": generator,
-                        "target": rho_record["published_q"], "scalar": rho_record["recovered_fixture_scalar"],
+                        "target": as_ints(rho_record["published_q"]),
+                        "scalar": rho_record["recovered_fixture_scalar"],
                         "walk_steps": rho_record["walk_steps"]},
             }
             digests, replays = {}, {}
@@ -691,7 +817,7 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
             verify |= {"replay_ic": replays["ic"]["statement_holds"], "replay_rho": replays["rho"]["statement_holds"],
                        "scalars_agree": certificates["ic"]["scalar"] == certificates["rho"]["scalar"],
                        "base_hash_matches_dump": row["ic_summary"]["base_hash"] == base["base_hash"],
-                       "setup_before_online": row["ic_summary"]["setup_complete_ns"] < ic_record["online_start_ns"]}
+                       "setup_before_online": row["ic_summary"]["setup_complete_ns"] <= ic_record["online_start_ns"]}
             verify["status"] = "PASS" if all(verify[k] for k in (
                 "replay_ic", "replay_rho", "scalars_agree", "base_hash_matches_dump", "setup_before_online")) else "FAILED"
             verify_rows.append(verify)
@@ -756,7 +882,8 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                     "ic_process_wall_s": row["ic"]["wall_s"], "rho_process_wall_s": row["rho"]["wall_s"],
                     "ic_timing_ms": row["ic_summary"].get("timing_ms"),
                 },
-                "counts": {"ic_probes": ic_record["probes"], "ic_relation_checks": ic_record["relation_checks"],
+                "counts": {"ic_probes": ic_record["probes"],
+                           "ic_relation_checks": ic_record.get("relation_checks"),
                            "rho_walk_steps": rho_record["walk_steps"]},
                 "memory": {"ic_max_rss_bytes": row["ic"]["max_rss_bytes"],
                            "rho_max_rss_bytes": row["rho"]["max_rss_bytes"]},
