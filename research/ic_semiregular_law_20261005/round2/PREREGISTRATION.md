@@ -68,3 +68,9 @@ CPU-s and 13.5 GB. Censoring is never evidence, and there are no retries.
 
 Two Koblitz curves, `n` 23–59, `ℓ` 3–6, `m = 3`, four draws per cell, one engine. A
 stage diagnostic about one decomposition step's degree; no end-to-end cost.
+
+## Correction, 2026-10-12, before any registered draw ran
+
+§3 says one `rr` draw of `K₁/2⁵⁹ ℓ = 4` is excluded. It is two: draws 0 and 3 both have
+`d_red = 0` in `predictions.jsonl`. Both are excluded, which leaves that cell's `rr` with
+two draws. Nothing else changes.
