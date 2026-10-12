@@ -485,6 +485,21 @@ targets = 8, seed = 24269, node budget = 50000, SAT conflict budget = 2000000, t
         self.assertEqual(parsed["ladder"][-1]["pairs_s"], 0.068)
         self.assertEqual(parsed["ladder"][-1]["speedup_vs_triples"], 8.9)
 
+    def test_parse_j0_known_answer_stdout(self) -> None:
+        sample = (
+            "curve=j0-bench-16bit p_bits≈16 n=65521 orbits=40\n"
+            '{"bits":16,"curve":"j0-bench-16bit","ic_ms":12.5,"ic_ok":true,'
+            '"ic_matches_truth":true,"rho_ms":1.25,"rho_ok":true,'
+            '"ic_agrees_rho":true,"target_orbits":40,"max_trials":200000,'
+            '"rho_steps":65536,"claim_boundary":"synthetic known-answer j=0 IC vs rho"}\n'
+        )
+        parsed = lab.parse_j0_known_answer_stdout(sample)
+        self.assertEqual(parsed["bits"], 16)
+        self.assertTrue(parsed["ic_ok"])
+        self.assertTrue(parsed["rho_ok"])
+        self.assertTrue(parsed["ic_agrees_rho"])
+        self.assertEqual(parsed["ic_ms"], 12.5)
+
 
 class HelperTests(unittest.TestCase):
     def test_nested_collection_is_rejected_and_precomputation_is_charged_once(self) -> None:
