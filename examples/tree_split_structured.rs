@@ -364,7 +364,7 @@ fn build_v(vtype: &str, f: &Field, ell: u32, seed: u64, rng: &mut Rng) -> (Vec<u
             ((0..1u64 << ell).collect(), none)
         }
         "subfield" => {
-            assert!(n % ell == 0, "subfield V needs ℓ | n");
+            assert!(n.is_multiple_of(ell), "subfield V needs ℓ | n");
             let g = (1u64 << ell) | 1;
             (
                 frobenius_kernel(f, g),
@@ -378,7 +378,7 @@ fn build_v(vtype: &str, f: &Field, ell: u32, seed: u64, rng: &mut Rng) -> (Vec<u
         "frob" => {
             let fac = factor_xn1(n);
             let subfields: Vec<u64> = (1..n)
-                .filter(|d| n % d == 0)
+                .filter(|d| n.is_multiple_of(*d))
                 .map(|d| (1u64 << d) | 1)
                 .collect();
             let mut cands = vec![];
@@ -888,7 +888,7 @@ fn selftest() {
                 curve.add(p, curve.add(q, r)),
                 "associativity"
             );
-            assert!(curve.add(p, q).map_or(true, |s| curve.on_curve(s)));
+            assert!(curve.add(p, q).is_none_or(|s| curve.on_curve(s)));
         }
     }
     // #K_0(GF(2^7)) = 116, and 116·P = O.

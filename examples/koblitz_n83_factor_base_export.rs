@@ -18,8 +18,12 @@ use std::path::Path;
 use std::process::Command;
 use std::time::{Duration, Instant};
 
+// The cold-replay source is shared with its own frozen research driver;
+// this program uses only part of it, so keep its lints out of this gate.
+#[allow(dead_code, unused_imports, clippy::all)]
 #[path = "../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs"]
 mod compact_cold;
+#[allow(clippy::all)]
 #[path = "../research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs"]
 mod primary_adapter;
 
@@ -850,7 +854,7 @@ fn replay(root: &Path) -> Result<()> {
         for ((rep, source), index) in reps.iter().zip(&sources).zip(&indices) {
             let gp = general(*rep);
             let sp = general(*source);
-            if *rep == None
+            if rep.is_none()
                 || source.map(|p| p.0)
                     != Some(public_x(
                         policy,

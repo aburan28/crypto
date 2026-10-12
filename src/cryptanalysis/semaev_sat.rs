@@ -102,7 +102,6 @@
 //!   calculus*, 1968 — the AND/XOR gate-CNF encoding.
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
-use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
 use crate::cryptanalysis::binary_semaev_s4::{
     descend_symmetrised_s4_e_only, weil_descend_s4, S4System,
 };

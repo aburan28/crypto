@@ -2398,7 +2398,17 @@ fn poly_mul_full(a: u64, b: u64) -> Option<u64> {
 /// [`factor_x_n_minus_1`] returns only the non-trivial factors; a
 /// divisor may use `x + 1` too, so the divisor-based constructions take
 /// their indices into this list.
+///
+/// Memoised (pure in `n`); the uncached scan follows.
 pub fn all_factors_of_x_n_minus_1(n: u32) -> Vec<u64> {
+    if let Some(hit) = memo_get(&ALL_FACTORS_MEMO, n) {
+        return hit;
+    }
+    memo_put(&ALL_FACTORS_MEMO, n, all_factors_of_x_n_minus_1_uncached(n))
+}
+
+/// Uncached scan behind [`all_factors_of_x_n_minus_1`].
+fn all_factors_of_x_n_minus_1_uncached(n: u32) -> Vec<u64> {
     let mut out = vec![0b11u64]; // x + 1
                                  // The degrees that occur are exactly the cyclotomic coset sizes;
                                  // the size-1 coset is {0}, already covered by x + 1 above.
@@ -8792,20 +8802,19 @@ fn build_projected_signed_orbit_map(
     if let Some(map) = projected_signed_orbit_map_fast(kc, fb) {
         return map;
     }
+    // One [h]-multiplication per signed orbit instead of one per point;
+    // the result is identical point for point (see the projection test).
     let (projected, _) = project_by_frobenius_orbits_generic(kc, fb);
-    projected_signed_orbit_map_slow(kc, fb)
+    projected_signed_orbit_map_slow(kc, fb, projected)
 }
 
 /// General-field reference for the projected signed-orbit map.
 fn projected_signed_orbit_map_slow(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
+    projected: Vec<BinaryPoint>,
 ) -> ProjectedSignedOrbitMap {
-    let projected: Vec<_> = fb
-        .points
-        .iter()
-        .map(|point| kc.mul(point, &kc.cofactor))
-        .collect();
+    debug_assert_eq!(projected.len(), fb.points.len());
     let mut representatives: Vec<BinaryPoint> = Vec::new();
     let mut seen = HashSet::new();
 
@@ -9545,6 +9554,11 @@ pub fn koblitz_index_calculus_dlp_with_factor_base_and_progress(
 /// relation streams remain bit-for-bit unchanged.  A wider order is sampled
 /// by masked rejection; taking its low limb would silently restrict the
 /// relation workload to a different coefficient distribution.
+// #1599 (zero-inclusive full-width draw, pinned by
+// `n83_relation_queries_use_full_width_zero_inclusive_additive_draw`) and
+// #1605 (this sampler) were merged on top of each other; the collector uses
+// #1599's draw, so this has no production caller until the two are reconciled.
+#[allow(dead_code)]
 fn sample_relation_scalar(r: &BigUint, rng: &mut StdRng) -> BigUint {
     if r.bits() <= 64 {
         let word = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
@@ -9800,8 +9814,6 @@ fn koblitz_index_calculus_dlp_observed(
         let batch_size = opts.relation_batch_size.max(1).min(remaining_trials);
         let attempts: Vec<_> = (0..batch_size)
             .map(|_| {
-                let a = sample_relation_scalar(r, &mut rng);
-                let b = sample_relation_scalar(r, &mut rng);
                 // A zero-inclusive additive draw gives full subgroup support;
                 // under uniform RNG bits the query is uniform for fixed b, Q.
                 let (a, b) = if let Some(order) = wide_order {
@@ -15394,7 +15406,7 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = kc.generator() else {
             panic!("N83 generator must be affine");
         };
-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()])
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x))
             .expect("complete signed orbit");
         let expected: Vec<_> = fb
             .points
@@ -15419,7 +15431,7 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = kc.generator() else {
             panic!("N83 generator must be affine");
         };
-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()])
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x))
             .expect("complete signed orbit");
         let target = kc.mul(kc.generator(), &BigUint::from(7u32));
         let opts = KoblitzIcOptions {
@@ -15459,7 +15471,7 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = kc.generator() else {
             panic!("generator must be affine");
         };
-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()]).unwrap();
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x)).unwrap();
         let index = fb.index_map();
         let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
         let target = kc.mul(&fb.points[0], &BigUint::from(3u32));
@@ -15541,7 +15553,7 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = kc.generator() else {
             panic!("generator is affine");
         };
-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()]).unwrap();
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x)).unwrap();
         for m in [5usize, 6] {
             let target = kc.mul(&fb.points[0], &BigUint::from(m as u32));
             let (found, stats) = sat_decompose_chained_s3(
@@ -15689,7 +15701,7 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = kc.generator() else {
             panic!("generator is affine");
         };
-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()]).unwrap();
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x)).unwrap();
         let known = BigUint::from(3u32) % &kc.subgroup_order;
         let target = kc.mul(kc.generator(), &known);
         let opts = KoblitzIcOptions {
