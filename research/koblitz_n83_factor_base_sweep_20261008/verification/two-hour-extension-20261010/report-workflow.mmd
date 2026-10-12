@@ -1,0 +1,15 @@
+flowchart LR
+  A["N83 a=0 exact retained point set"] --> B["K64 factored S4 construction PASS"]
+  A --> C["K64 m5 chained S3 construction PASS"]
+  C --> D["Zero-trial preflight PASS"]
+  D --> E["One bounded SAT trial: separate receipt"]
+  A --> J["K64 m6 chained S3 construction PASS"]
+  J --> K["One trial interrupted by Docker daemon EOF: producer failure"]
+  A --> L["K256 m5: 3M domain cap UNKNOWN; separate 8M construction PASS"]
+  L --> M["One SAT call reaches 10,000-conflict cap: UNKNOWN"]
+  F["K1182 signed-Frobenius construction PASS"] --> G["Generic multi-limb replay PASS"]
+  G --> H["S3 upload/download hash PASS"]
+  E --> I["Natural rank, complete cold runtime and winner unmeasured"]
+  K --> I
+  M --> I
+  H --> I

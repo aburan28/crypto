@@ -290,7 +290,10 @@ impl FactorBaseDocument {
         curve_label(self.degree, self.curve_a, self.subfield, self.curve_b)
     }
 }
+/// `path` may be a store reference (`store:NAME`, `sha256:DIGEST`), fetched into the
+/// local cache and verified on first use; a plain path is read as is.
 pub fn load_factor_base(path: &Path) -> Result<FactorBaseDocument, String> {
+    let path = &crypto_lib::store::resolve_path(path)?;
     let mut data = Vec::new();
     File::open(path)
         .map_err(|e| format!("{}: {e}", path.display()))?
@@ -1352,6 +1355,7 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
             "algebra_cache_current_thread":crypto_lib::cryptanalysis::algebra_cache::stats(),
             "f4_reductions":r.reductions,
             "f4_word_ops":crypto_lib::cryptanalysis::koblitz_groebner::f4_profile().word_ops,"sat_calls":r.sat_calls,"sat_unknowns":r.sat_unknowns,"sat_invalid_models":r.sat_invalid_models,
+            "sat_group_rejected_models":r.sat_group_rejected_models,
             "sat_conflicts":r.sat_conflicts,"linear_solve_attempts":r.linear_solve_attempts,"cofactor_admissible":r.m_cofactor_admissible},
         "timing_seconds":{"pair_table":r.pair_table_ns as f64/1e9,"relation_collection":r.relation_collection_ns as f64/1e9,
             "linear_algebra":r.linear_algebra_ns as f64/1e9},

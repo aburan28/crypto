@@ -481,7 +481,10 @@ pub fn gray_find_all_wide(
             debug_assert!(fq.iter().zip(&fq_shared).all(|(a, b)| *a as u32 == *b));
         }
     }
+    #[cfg_attr(not(target_arch = "x86_64"), allow(unused_mut))]
     let mut out = Vec::new();
+    #[cfg(not(target_arch = "x86_64"))]
+    let _ = max_solutions;
     #[cfg(target_arch = "x86_64")]
     unsafe {
         // SAFETY: `wide_lanes` confirmed the feature each kernel is

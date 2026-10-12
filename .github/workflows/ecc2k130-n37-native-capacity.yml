@@ -1,13 +1,9 @@
 name: ECC2K-130 n37 native-column capacity replay
 
 on:
-  pull_request:
-    paths:
-      - "research/notes/ecc2k130/n37_native_column_capacity_20261001/**"
-      - "research/notes/ecc2k130/disjoint_cold_v2_20261001/FROZEN.json"
-      - "research/koblitz_isogeny_descent_37_results_20260925/raw.json.gz"
-      - "research/koblitz_isogeny_descent_37_20260925/contract.json"
-      - ".github/workflows/ecc2k130-n37-native-capacity.yml"
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
 
 permissions:

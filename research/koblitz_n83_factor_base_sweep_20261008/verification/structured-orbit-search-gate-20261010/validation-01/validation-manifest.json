@@ -1,0 +1,27 @@
+{
+  "boundary_python": "PASS_39_OF_39",
+  "export_example": "PASS_1_OF_1",
+  "files_sha256": {
+    "boundary-python.log": "8f0b9feaffcc4012ba9bbb79af4e0fb22bde8de456eb89a67bd3693de348ed17",
+    "export-example.log": "e751ab6e01299e32bc0f94876c3861b73d9f29e1bb63825e26d0e3a5731918dd",
+    "jv-replayed_f4_agrees_with_the_full_solver_and_the_oracle.log": "7f54610c2c364b4ee14901df74b9d94a6bd466ee5621338bded1cc5f99c6088b",
+    "jv-stopped_f4_agrees_with_the_full_solver_and_the_oracle.log": "a20956bda2675a5646236e23e0cbfc55acd8258b8f94e9ed4b894cb062da30f7",
+    "jv-the_solver_loses_no_rational_solution_at_small_p.log": "ab10b8890644d91a39c99d698dc1d11b52fd71dcb0502886902e119b5178aa54",
+    "library-interrupted.log": "7d66da97a85cf9444d3307f9bc41a8e2d84d3c21389ab5fb5bd499b651f85882",
+    "loopback-enabled.log": "7f7ff137544f6da7fba6578961757b7aaac7df21f093a9548c7dd79390b55a15",
+    "study-python.log": "bcad7814a1a63b665b9e87e2c0504fd2ee2ea0f3994b62c68ab147a3ea4ff85b",
+    "worker-example.log": "4e531e80373659a6d790c548b3b2f5673852cde77ce512d0ac4585ad620d674d"
+  },
+  "individual_jv": "PASS_3_OF_3",
+  "library_completed": {
+    "failed": 12,
+    "ignored": 71,
+    "passed": 3824
+  },
+  "library_overall": "FAILED_AND_INTERRUPTED",
+  "loopback_enabled": "PASS_37_OF_37",
+  "schema": "n83.structured-orbit-gate-validation/v1",
+  "source_commit": "5e798094406e11a137f6ce6c906bc95570256c51",
+  "study_python": "PASS_29_OF_29",
+  "worker_example": "PASS_2_OF_2"
+}
