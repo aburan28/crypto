@@ -1,0 +1,26 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W8",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1712",
+  "slug": "convolution-e-splitting",
+  "papers": [
+    "arXiv 2609.18866"
+  ],
+  "kind": "negative",
+  "workload": {
+    "id": "binary-s4-e-variable-split",
+    "description": "symmetrised S4 (b = 1) in e-variables with correspondence, V = <1..z^(l-1)>, n = 3l, l = 3, 4, 5, random target abscissae (polynomial-level decomposition, no curve group)",
+    "curve_ids": []
+  },
+  "metric": "F4 word XORs per solve (median over targets x rounds)",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 40,
+  "arms": [],
+  "ratio_original_over_candidate": null,
+  "ratio_previous_over_candidate": null,
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w8_summation_models_20261011/reports/run-20261011T2017Z/report.pdf",
+  "note": "Convolution split (f = X1 X2): degree 3 -> 2, 4-14% fewer monomials, same split tree, 1.21-2.07x more word ops and 2.4-2.9x wall time. Lucas factorisation has no counterpart for F_{2^n}-valued summands; m = 4 measured at correspondence level only (no binary symmetrised S5 in the repo)."
+}

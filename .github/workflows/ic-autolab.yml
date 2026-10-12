@@ -2,6 +2,10 @@ name: IC autolab integration
 on:
   pull_request:
     paths:
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - 'src/**'
       - 'examples/ic_tournament_worker.rs'
       - 'examples/ic_query_law_vectors.rs'
@@ -14,11 +18,11 @@ permissions:
   contents: read
 concurrency:
   group: ic-autolab-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   linux-integration:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

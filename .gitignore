@@ -39,6 +39,9 @@ gpu/ecc/test_toyj0_mont
 gpu/ecc/test_bsgs_toy
 gpu/ecc/test_bsgs_secp_fast
 gpu/ecc/test_bsgs_secp_mont
+gpu/ecc/test_25519_fast
+gpu/ecc/test_25519_mont
+gpu/ecc/test_bsgs_25519_fast
 gpu/ecc/bench
 
 # GHDL analysis artifacts
@@ -110,3 +113,8 @@ hdl/ecc2k130/aws/cl_ecc2k130/build/constraints/generated_cl_clocks_aws.xdc
 # plus a 5 MB zip; rebuilt on demand and never a source of truth).
 ecc2k130/aws/build/
 ecc2k130/aws/ingest_lambda.zip
+
+# The compact-orbit frozen-source materializer is a standalone crate with its
+# own locked dependencies; its build output is not repository content.
+!research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.lock
+research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/target/

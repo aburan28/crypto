@@ -167,6 +167,17 @@ The preregistered one-target workload `f6d79f6dd9f2` on `icv1-f2m9-tm5-4a3ea183`
 | 19 | `icv1-f2m19-t797-b6cf2467` | 8 | 3.134 | 1.582 | 2090.849 | 0.433 |
 | 23 | `icv1-f2m23-t5197-69e76b73` | 8 | 1.046 | 2.091 | 2.721 | 0.000 |
 
+## F4, F5 and F6-IC on Koblitz and generic binary curves, outside tables A–C
+
+Matrix F4, matrix F5, inherited F4 and F6-IC through `pdp3-binary` on eight public one-target workloads per cell, beside same-target rho. IC `S` is a lower bound (solver word XORs unpriced; F6-IC's geometric additions charged). `W` is counted solver word XORs. Prime curves have no algebraic oracle in `ecbench`. Read the [analysis](../../research/f4_f5_f6_cross_family_20261011/ANALYSIS.json).
+
+| family | m | curve | base points | rho-negation S | strong rho S | inherited F4 S | F6-IC S | W F5/F4 | W F4 matrix/inherited | median log2(W inh/W F6) |
+|:--|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| koblitz | 13 | `icv1-f2m13-t181-515ee569` | 33 | 2.290 | 14.318 | 16.285 | 1161.733 | 0.646 | 198.634 | 0.291 |
+| binary | 13 | `icv1-f2m13-tm9-6863a838` | 31 | 3.232 | — | 18.500 | 1177.658 | 0.641 | 222.104 | 0.302 |
+| koblitz | 19 | `icv1-f2m19-t797-b6cf2467` | 139 | 1.310 | 3.090 | 5.106 | 6483.443 | — | — | 0.359 |
+| binary | 19 | `icv1-f2m19-tm649-a9133fe6` | 129 | 1.387 | — | 3.405 | 4714.506 | — | — | 0.372 |
+
 ## n41/n53 shared-rank counted panel, outside tables A–C
 
 The four n37 arms (strong signed-Frobenius rho, K8, K16 and an identical K16 control, method parameters unchanged) ran on 16 new public one-target workloads on each of the next two registered sizes, five paired rounds each, on macOS at L0. Counted cold IC/rho is a quotient of two lower bounds (native work unpriced); a cell whose arm never verifies under the frozen parameters is unknown, not a cost. 206 of 640 measured runs verified; decision `frozen_parameters_do_not_transfer`; the L2 host run is pending. Read the [frozen decision](../../research/ecbench_n41_n53_shared_rank_20261005/DECISION.json).
@@ -206,7 +217,8 @@ The four n37 arms (strong signed-Frobenius rho, K8, K16 and an identical K16 con
 - `research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl` — sha256 `b65613c68d68d744…`
 - `research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json` — sha256 `307f02ce84e5cb46…`
 - `research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json` — sha256 `69ca54385c62a50e…`
+- `research/f4_f5_f6_cross_family_20261011/ANALYSIS.json` — sha256 `143247c6b81d3539…`
 - `research/ecbench_n41_n53_shared_rank_20261005/DECISION.json` — sha256 `fe55908f837840ee…`
-- `docs/curves/registry.json` — sha256 `c22f388cfcd208c2…`
+- `docs/curves/registry.json` — sha256 `0bdcfb2c7a497a35…`
 - `docs/curves/ic/curves.schema.json` — sha256 `42cd9793dd299384…`
 - `docs/curves/ic/curves.yaml` — sha256 `566ed698a961aae8…`

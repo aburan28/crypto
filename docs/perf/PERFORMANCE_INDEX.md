@@ -16,6 +16,67 @@ python3 scripts/perf/perfindex.py compare ... --threads 4 --out /tmp/pi-4t
 python3 scripts/perf/perfindex.py instr --base ... --cand ... --out /tmp/pi-ir
 ```
 
+## Progress over time: the history
+
+The index above compares two revisions.  The **history** records every
+measured revision so progress can be read off a chart instead of a chain
+of PR descriptions: `scripts/perf/perfhistory.py` writes one snapshot per
+commit (callgrind `Ir` and a wall-time reading for every quick kernel, plus
+the frozen `ecbench exec` children in `docs/perf/ecbench-children.json`) and
+renders `HISTORY.md`, `history.svg` and a machine-readable `history.json`
+from them.  The snapshots and the rendered files live on the
+[`perf-history`](https://github.com/aburan28/crypto/tree/perf-history/docs/perf)
+branch, appended by `.github/workflows/perf-history.yml` on every push to
+`main`; pull requests that touch measured code get a comparison against the
+latest snapshot in their job summary.
+
+```bash
+git fetch origin perf-history
+git show origin/perf-history:docs/perf/HISTORY.md | less      # the tables
+git show origin/perf-history:docs/perf/history.json > /tmp/h.json   # per-kernel series
+# locally, for the working tree:
+cargo build --release --example perfbench --bin ecbench
+python3 scripts/perf/perfhistory.py check --binary target/release/examples/perfbench \
+    --ecbench target/release/ecbench --history <checkout of perf-history>/docs/perf/history
+```
+
+The chained index takes no credit across a fingerprint change: a kernel
+that computes something else is re-based, not sped up.  `Ir` is charted
+because it is deterministic for one binary; across two builds of different
+sources the untouched kernels still move by up to a few per cent (the
+release profile's codegen units are partitioned afresh and cross-module
+inlining follows), so one step under about 5 % on one kernel is build
+noise and a trend or an area index is the signal.  The wall column is one
+reading on the recording host and is informational.  Recording a snapshot
+takes about fifteen minutes of callgrind on four cores.
+
+### Separate F4/F5 groups
+
+The [separate algorithm reports](https://github.com/aburan28/crypto/blob/perf-history/docs/perf/groebner/REPORT.md)
+retain F4 and F5 as separate series for the shared Boolean matrix-step and
+solver workloads, with instruction and diagnostic-runtime graphs. Complete-call
+allocation and F5 criterion allocation have separate groups. Every group has a
+PDF, and a combined PDF, SVGs, editable sources and native plot data are saved
+together. The history workflow regenerates them when it records a revision.
+
+The [frozen initial rendering](../../research/f4_f5_history_20261012/REPORT.md)
+retains seven imported historical snapshots and the native allocation audit.
+The [group registry](groebner-groups.json) and
+[allocation history index](f4-f5-allocation-history.json) define the inputs;
+[the native tool](../../tools/groebner-history/README.md) validates the raw
+records before rendering. Historical CI timings are diagnostic, and the
+recorded profiler scope has incomplete worker coverage. Lines break when the
+fingerprint, host, compiler, harness or profiler changes. These displays make
+no new runtime-speedup or complete-DLP claim.
+
+The [native F5 hashing follow-up](../../research/f4_f5_hash_20261012/REPORT.md)
+adds its own fixed eleven-system instruction-history and peak-live-allocation
+groups, with SVGs, group PDFs and a combined PDF. Five paired A/B/A′ rounds
+record 3.71% fewer complete-F5 instructions and 45.14% fewer criterion
+instructions; F4 is neutral. Its merged-worker profiler contract, native
+controls and live-byte intervals stay separate from earlier CI diagnostics.
+Runtime and process RSS remain unmeasured.
+
 ## What it measures, and what it does not
 
 `examples/perfbench` is a registry of **kernels**: each runs a fixed,
@@ -31,7 +92,7 @@ kernels are grouped into eight **areas**:
 | `fp_gb` | Gröbner bases over F_p and extension fields: F4, F5/signature, tower F4 |
 | `sat` | CDCL with native XOR clauses; Semaev and WDSat encodings |
 | `pdp` | point decomposition: summation polynomials and decomposition oracles |
-| `field_ec` | F₂ᵐ, F_p, F₃ᵐ arithmetic; point addition; scalar multiplication; batch inversion |
+| `field_ec` | F₂ᵐ, F_p, F₃ᵐ arithmetic; point addition; scalar multiplication; batch inversion; the isogeny-walk `GF(p)` |
 | `relation` | relation collection, index-calculus pipelines, relation-matrix algebra |
 | `dlp` | generic discrete logarithm: Pollard rho, BSGS, kangaroo, Pohlig–Hellman |
 

@@ -1,0 +1,28 @@
+{
+  "schema": "n83.structured-orbit-candidate/v1",
+  "study": "koblitz_n83_factor_base_sweep_20261008",
+  "curve": "icv1-f2m83-tm6151469093347-debefd74",
+  "curve_a": 0,
+  "modulus_low_terms": [0, 1, 2, 45],
+  "subgroup_order": "2417851639230796216685689",
+  "source_domain": {
+    "family": "standard_polynomial_subspace",
+    "dimension": 12,
+    "ordered_x_codes": "integers 0 through 4095 in ascending order",
+    "point_choice": "first rational affine point returned by the pinned fast curve for each x",
+    "cofactor": 4
+  },
+  "closure": {
+    "frobenius_phases": 83,
+    "signs": [false, true],
+    "orbit_key": "lexicographically least tagged 33-byte affine point among all phases and signs",
+    "expected_columns": 2001,
+    "expected_point_records": 332166,
+    "historical_set_blake3": "db3e7f25877c75dfd6f53db46447972ce6a44434cb7ea1e53e450d21af0fe79c"
+  },
+  "storage": {
+    "prefix": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v3-structured-orbit/a0/",
+    "object_path": "objects/<compressed-blake3>.jsonl.gz"
+  },
+  "claim_scope": "construction and generic arithmetic replay only; relation, rank and complete cold runtime remain unset"
+}

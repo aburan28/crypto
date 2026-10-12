@@ -39,10 +39,12 @@ companion as much as a working library.
 | `research/<topic>_<date>/` | frozen experiment directories (harness, contract, results) that the notes cite |
 | `experiments/`, `figures/` | older frozen run outputs and plots referenced by the notes |
 | `isolab/` | standalone experiment execution environment: NATS hub, Linux workers with enforced measurement fidelity, MCP server; see [`isolab/README.md`](isolab/README.md) |
+| `spotlab/` | resumable throughput jobs on the cheapest AWS/GCP spot capacity: checkpoints in S3/GCS, automatic resume after preemption, MCP server; not a measurement environment; see [`spotlab/README.md`](spotlab/README.md) |
 | `docs/` | published pages (`index-calculus-scoreboard.html`, `algorithm-lab.html`, the ECC2K-130 status site), guides and primers in `docs/guides/`, the roadmap in `docs/DEFERRED.md` |
 | `ecc2k130/`, `gpu/`, `hdl/` | the ECC2K-130 rho campaign: fleet tooling, GPU kernels, FPGA cost models |
 | `sage/`, `scripts/`, `secp256k1_cm_audit/`, `cd_attack/`, `quantum_circuit_secp256k1/` | Sage/PARI/Python companions to specific notes |
-| `paper/` | manuscript sources |
+| `papers/` | manuscript sources, one directory per paper (`papers/README.md` is the index) |
+| [`problems/`](problems/README.md) | named research and audit blockers, supporting evidence, and concrete conditions for moving past them |
 | `AGENTS.md` | the reporting convention (boundary, table, ratio) every research thread follows |
 
 ## Quick tour
@@ -117,6 +119,21 @@ command remains the default for cargo run.
 The [EC index-calculus baseline](research/index_calculus_baseline_20260914/README.md)
 adds counting bounds, an operation-accounting contract, and a certified WDSat control
 with frozen measurements and reproducible commands.
+
+## Elliptic-curve surface tools
+
+[`tools/ecdlp-surfaces`](tools/ecdlp-surfaces/README.md) is a standalone Rust
+crate with four command-line tools: `surface_search` enumerates containing
+quadrics, `transfer_check` checks the transported group law and prime subgroup,
+and `frobenius_filter` applies necessary conditions to supplied abelian-surface
+polynomials. `binary_surface_check` checks the pinned a=0/a=1 Koblitz fixtures
+over GF(2^83), including exact pencil counts and subgroup transport. The
+odd-prime arithmetic uses primes up to 10,000. Equivalent
+embeddings preserve the ECDLP; no destination-solver speedup is established.
+The [report](docs/ecdlp-surfaces/REPORT.md) includes the diagram, PDF, fixtures,
+and native identity certificates. Run `tools/ecdlp-surfaces/check.sh` to validate
+the crate and replay its examples. The [n=83 report](research/ecdlp_surfaces_n83_20261012/reports/run-20261012T0331Z/REPORT.md)
+records the binary checks and includes an inspected PDF.
 
 ## Isogeny walks
 

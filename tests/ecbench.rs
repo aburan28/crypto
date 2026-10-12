@@ -143,6 +143,24 @@ fn a_session_runs_verifies_compares_and_loads() {
     assert_eq!(c["ops"]["status"], "ok");
     assert!(c["ops"]["ci95"].is_array());
 
+    // The resource vector includes every measured attempt, excludes the
+    // warm-ups, and preserves native work in its original units.
+    let (ok, stdout, err) = ecbench(&["resources", "--dir", out.to_str().unwrap()]);
+    assert!(ok, "resources failed: {err}");
+    let resources: Value = serde_json::from_str(&stdout).unwrap();
+    assert_eq!(resources["schema"], "ecbench.resources/v1");
+    let arms = resources["arms"].as_array().unwrap();
+    assert_eq!(arms.len(), 4);
+    for arm in arms {
+        assert_eq!(arm["measured"], 8);
+        assert_eq!(arm["verified"], 8);
+        assert!(arm["process_wall_ns_sum"].as_u64().unwrap() > 0);
+        assert!(arm["peak_rss_kib"].as_u64().unwrap() > 0);
+        assert!(arm["phase_gae_totals"].is_object());
+        assert_eq!(arm["online_complete_runs"], 8);
+        assert!(arm["method_counter_totals"].is_object());
+    }
+
     // Tampering with a record is caught.
     let tampered = dir.join("t");
     copy_dir(&out, &tampered);
@@ -236,6 +254,63 @@ fn run_spec(dir: &Path, out: &Path, extra: &[&str]) -> (bool, String) {
     args.extend_from_slice(extra);
     let (ok, _, err) = ecbench(&args);
     (ok, err)
+}
+
+#[test]
+fn counted_ic_sat_replays_with_different_solver_wall_times() {
+    let dir = scratch("counted-sat");
+    let spec = dir.join("spec.json");
+    std::fs::write(
+        &spec,
+        r#"{
+  "schema":"ecbench.spec/v1",
+  "label":"counted SAT replay regression",
+  "workloads":{"curves":[{"kind":"koblitz","a":1,"n":17}],"targets_per_curve":2,"target_seed":41,"target_kind":"public"},
+  "arms":[
+    {"name":"rho","role":"reference","method":{"id":"rho.signed_frobenius_strong"}},
+    {"name":"sat-cnf","role":"candidate","method":{"id":"ic.pipeline_counted","params":{"factor_base":"koblitz-orbit:divisor=0;1","oracle":"descent-algebraic:m=2","solver":"sat-cdcl:sat_conflict_budget=20000,sat_xor_encoding=cnf","max_trials":"20000"}}},
+    {"name":"sat-xor","role":"candidate","method":{"id":"ic.pipeline_counted","params":{"factor_base":"koblitz-orbit:divisor=0;1","oracle":"descent-algebraic:m=2","solver":"sat-cdcl:sat_conflict_budget=20000,sat_xor_encoding=native","max_trials":"20000"}}}
+  ],
+  "measurement":{"rounds":1,"warmup":0,"seed":9123401,"isolation_required":"L0","timeout_seconds":60}
+}"#,
+    )
+    .unwrap();
+    let out = dir.join("session");
+    let (ok, err) = run_spec(&dir, &out, &[]);
+    assert!(ok, "{err}");
+    let records: Vec<Value> = std::fs::read_to_string(out.join("records.jsonl"))
+        .unwrap()
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    assert_eq!(records.len(), 6);
+    for r in records.iter().filter(|r| r["method"]["family"] == "ic") {
+        assert_eq!(r["outcome"]["status"], "verified");
+        assert_eq!(r["cost"]["lower_bound"], true);
+        assert!(r["cost"]["unpriced"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|u| u == "solver_conflicts_uncharged"));
+    }
+    let receipt = dir.join("audit.json");
+    let (ok, _, err) = ecbench(&[
+        "verify",
+        "--dir",
+        out.to_str().unwrap(),
+        "--replay-all",
+        "--out",
+        receipt.to_str().unwrap(),
+        "--exit-code",
+    ]);
+    assert!(ok, "{err}");
+    let audit: Value = serde_json::from_str(&std::fs::read_to_string(receipt).unwrap()).unwrap();
+    assert_eq!(audit["replays"].as_array().unwrap().len(), 6);
+    assert!(audit["replays"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .all(|r| r["reproduced"] == true));
 }
 
 #[test]
@@ -502,9 +577,9 @@ fn first_workload(spec: &Path) -> String {
 fn a_public_target_session_yields_a_checked_vs_rho_claim() {
     // One public target, the strong rho reference, an IC pipeline and the
     // plain signed-Frobenius rho: the claim builds from the IC and strong
-    // rho runs, the checker fails it on the independent replay alone, a
-    // receipt from the session's own host class is refused, and a receipt
-    // from another host class (simulated by its recorded class) passes.
+    // rho runs, the checker requires an independent replay and L2 wall
+    // isolation. A receipt from the session's own host class is refused;
+    // a simulated other-host receipt cannot promote this L0 diagnostic.
     let dir = scratch("claim");
     let spec = r#"{
       "schema": "ecbench.spec/v1",
@@ -566,6 +641,9 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
         .unwrap()
         .starts_with("IC1N17Ckb1fb442PDP2mitmfrobeniusRCwalkLAincrementalgaussTDjointISO0h"));
     assert_eq!(claim["target_count"], 1);
+    assert_eq!(claim["timing_class"], "single_target_online");
+    assert_eq!(claim["timing_class"], "single_target_online_wall");
+    assert_eq!(claim["ic_online_ms"], claim["ic_online_wall_ms"]);
     assert_eq!(claim["ic_target_hash"], claim["rho_target_hash"]);
     assert_eq!(
         claim["ic_resource_envelope"],
@@ -574,21 +652,18 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
     let (ok, c, _) = check();
     assert!(!ok);
     assert_eq!(c["status"], "FAIL");
+    assert_eq!(c["pairing_errors"], serde_json::json!([]));
     assert_eq!(
         c["validation_errors"],
         serde_json::json!([
             "independent_validation must be true",
             "ic_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
-            "rho_replay_certificate_sha256 must be a full lowercase SHA-256 digest"
+            "rho_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
+            "isolation_levels.ic L0 is below required L2",
+            "isolation_levels.rho L0 is below required L2"
         ])
     );
-    assert_eq!(
-        c["missing_stage_fields"],
-        serde_json::json!([
-            "ic_replay_certificate_sha256",
-            "rho_replay_certificate_sha256"
-        ])
-    );
+    assert_eq!(c["missing_stage_fields"], serde_json::json!([]));
     assert_eq!(c["missing_global_provenance"], serde_json::json!([]));
 
     // A replay on the session's own host class is not independent.
@@ -614,11 +689,12 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
     );
     assert!(!ok && err.contains("own host class"), "{err}");
 
-    // The same receipt as another host class would record it.  The
-    // receipt is the auditor's word: a claim cites its digest and pointer
-    // so a reader can fetch it and rerun the audit.
+    // Synthetic receipt metadata exercises the class gate only.  A real
+    // independence assertion also needs the external runner's custody
+    // record; self-reported classes do not attest physical separation.
     let mut r: Value = serde_json::from_str(&std::fs::read_to_string(&receipt).unwrap()).unwrap();
     r["auditor_env_class_id"] = Value::from("ECBENV2h000000000000");
+    r["auditor_hardware_class_id"] = Value::from("ECBHW1h000000000000");
     let elsewhere = dir.join("receipt-elsewhere.json");
     std::fs::write(&elsewhere, serde_json::to_string_pretty(&r).unwrap()).unwrap();
     let (ok, _, err) = build(
@@ -631,10 +707,74 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
             "--exit-code",
         ],
     );
-    assert!(ok, "{err}");
+    assert!(!ok && err.contains("below required L2"), "{err}");
     let (ok, c, err) = check();
-    assert!(ok, "{c} {err}");
-    assert_eq!(c["status"], "PASS");
+    assert!(!ok, "{c} {err}");
+    assert_eq!(c["status"], "FAIL");
+    assert!(c["validation_errors"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|e| e.as_str() == Some("isolation_levels.ic L0 is below required L2")));
+
+    // Schema-only test: edited levels exercise the checker, but this
+    // report is no evidence that the test host earned L2.
+    let mut simulated_l2: Value =
+        serde_json::from_str(&std::fs::read_to_string(&claim_path).unwrap()).unwrap();
+    simulated_l2["isolation_levels"]["ic"] = Value::from("L2");
+    simulated_l2["isolation_levels"]["rho"] = Value::from("L2");
+    let simulated_path = dir.join("simulated-l2.json");
+    std::fs::write(
+        &simulated_path,
+        serde_json::to_string(&simulated_l2).unwrap(),
+    )
+    .unwrap();
+    let (ok, checked, err) = ecbench(&[
+        "claim",
+        "check",
+        "--report",
+        simulated_path.to_str().unwrap(),
+    ]);
+    assert!(ok, "{checked} {err}");
+    let mut invalid_floor = simulated_l2;
+    invalid_floor["isolation_levels"]["required"] = Value::from("L0");
+    let invalid_path = dir.join("invalid-floor.json");
+    std::fs::write(
+        &invalid_path,
+        serde_json::to_string(&invalid_floor).unwrap(),
+    )
+    .unwrap();
+    let (ok, checked, err) =
+        ecbench(&["claim", "check", "--report", invalid_path.to_str().unwrap()]);
+    assert!(!ok, "{checked} {err}");
+    assert!(checked.contains("isolation_levels.required must be L2 or L3"));
+
+    // The current ledger names the five phases through
+    // `primary_ic_online_phase_keys`. Dropping their explicit older
+    // field list must never make the phase-sum check vacuous.
+    let mut bad_phase: Value =
+        serde_json::from_str(&std::fs::read_to_string(&claim_path).unwrap()).unwrap();
+    bad_phase["ic_online_phase_ms"]["T_target_query_ms"] = Value::from(
+        bad_phase["ic_online_phase_ms"]["T_target_query_ms"]
+            .as_f64()
+            .unwrap()
+            + 1.0,
+    );
+    let bad_phase_path = dir.join("bad-phase.json");
+    std::fs::write(&bad_phase_path, serde_json::to_string(&bad_phase).unwrap()).unwrap();
+    let (ok, out, err) = ecbench(&[
+        "claim",
+        "check",
+        "--report",
+        bad_phase_path.to_str().unwrap(),
+    ]);
+    assert!(!ok, "{err}");
+    let checked: Value = serde_json::from_str(&out).unwrap();
+    assert!(checked["validation_errors"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|e| e.as_str() == Some("IC exclusive phase costs must sum to ic_online_wall_ms")));
 
     // The claim loads into the database beside its session, checked again.
     let (ok, sql, err) = ecbench(&["db", "sql", s, claim_path.to_str().unwrap()]);
@@ -643,7 +783,7 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
         sql.contains("INSERT OR REPLACE INTO claims VALUES ("),
         "{sql}"
     );
-    assert!(sql.contains("'PASS'"));
+    assert!(sql.contains("'FAIL'"));
 
     // A receipt for other bytes is refused.
     let mut r2 = r.clone();
@@ -732,6 +872,67 @@ fn pdp3_koblitz_f4_and_f6_verify_on_one_query_stream() {
             );
         }
     }
+    let (ok, _, err) = ecbench(&[
+        "verify",
+        "--dir",
+        out.to_str().unwrap(),
+        "--replay-all",
+        "--exit-code",
+    ]);
+    assert!(ok, "replay: {err}");
+}
+
+#[test]
+fn pdp3_binary_runs_every_engine_on_a_generic_binary_curve() {
+    // The PDP3 plug-in on a random binary curve (b ∉ F_2, no Frobenius
+    // endomorphism) through its Frobenius-free view, with all four engines:
+    // every run verifies; matrix F5 builds matrix F4's matrices less the
+    // rows its criterion predicts reduce to zero, so the two share a tree
+    // and find the same relations; F6-IC charges its gate's additions.
+    let dir = scratch("pdp3-binary");
+    let arm = |name: &str, engine: &str| {
+        format!(
+            r#"{{"name": "{name}", "role": "candidate", "method": {{"id": "ic.pipeline", "params": {{
+              "factor_base": "binary-standard-subspace:dimension=5",
+              "oracle": "pdp3-binary:m=3,engine={engine},degree=3,node_budget=8192"}}}}}}"#
+        )
+    };
+    let spec = format!(
+        r#"{{
+      "schema": "ecbench.spec/v1",
+      "label": "pdp3-binary test",
+      "workloads": {{"curves": [{{"kind": "binary_random", "n": 13, "seed": 59297, "max_cofactor": 8}}],
+                    "targets_per_curve": 1, "target_seed": 7, "target_kind": "public"}},
+      "arms": [{}, {}, {}, {}],
+      "measurement": {{"rounds": 1, "warmup": 0, "seed": 5, "isolation_required": "L0", "timeout_seconds": 300}}
+    }}"#,
+        arm("f4m", "matrix-f4"),
+        arm("f5m", "matrix-f5"),
+        arm("f4i", "inherited-f4"),
+        arm("f6", "f6-ic"),
+    );
+    std::fs::write(dir.join("spec.json"), spec).unwrap();
+    let out = dir.join("s");
+    let (ok, err) = run_spec(&dir, &out, &[]);
+    assert!(ok, "{err}");
+    let text = std::fs::read_to_string(out.join("records.jsonl")).unwrap();
+    let mut by_arm: std::collections::BTreeMap<String, Value> = Default::default();
+    for line in text.lines() {
+        let r: Value = serde_json::from_str(line).unwrap();
+        assert_eq!(r["outcome"]["status"], "verified", "{line}");
+        assert!(r["solver"]["ops"].as_u64().unwrap() > 0, "{line}");
+        by_arm.insert(r["arm"].as_str().unwrap().to_string(), r);
+    }
+    assert_eq!(by_arm.len(), 4);
+    for key in ["targets_tried", "relations_found", "matrix_rank"] {
+        assert_eq!(
+            by_arm["f4m"]["counters"][key], by_arm["f5m"]["counters"][key],
+            "matrix F4 and F5 diverged at {key}"
+        );
+    }
+    let geometry = |a: &str| by_arm[a]["solver"]["extra"]["geometric_group_additions"].as_u64();
+    assert!(geometry("f6").unwrap() > 0, "F6-IC charged no geometry");
+    assert_eq!(geometry("f4i"), Some(0));
     let (ok, _, err) = ecbench(&[
         "verify",
         "--dir",

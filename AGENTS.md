@@ -28,6 +28,11 @@
 - Current ladder frontiers: `RESEARCH_KOBLITZ_INDEX_CALCULUS.md`,
   `RESEARCH_ECC2K130_IC_FEASIBILITY.md`
 
+For small-prime or pinned GF(2^83) elliptic-curve surface searches, quartic
+subgroup transfers, or abelian-surface Frobenius compatibility checks, use
+[ecdlp-surfaces](.agents/skills/ecdlp-surfaces/SKILL.md) for tool selection,
+commands, and interpretation limits.
+
 ## Reading discipline
 
 `research/` is 4.5 GB in 52,000 files. Read what the current step needs:
@@ -90,6 +95,42 @@ rather than to produce attacks.  That makes the reporting rule below the
 most important convention here: without it, a thread can run for weeks,
 improve its own headline number by two orders of magnitude, and have
 established nothing.
+
+## Name the obstruction
+
+When substantial research, cryptanalysis, or audit work cannot meet a proof,
+implementation, experiment, or validation requirement, **name the specific
+problem**. Before repeating the same blocked approach or handing it off, create
+or update `problems/<descriptive-slug>.md` using
+[the problem template](problems/TEMPLATE.md), add it to
+[the problem index](problems/README.md), and link it from the affected work.
+
+- State exactly what is blocked, under which parameters and assumptions, and
+  why that gap prevents the requested conclusion. Track major or recurring
+  blockers, not every routine TODO.
+- Separate observed evidence, suspected explanations, missing implementations,
+  access/tool or assistance limits, resource limits, and proved mathematical
+  obstructions. Cite artifacts or proofs with their exact scope; mark unknowns
+  explicitly. A timeout or bounded failed search does not prove impossibility;
+  failure to find an attack does not establish security.
+- Say **what would unblock it**: the missing lemma, construction, verified map,
+  measurement, implementation, access, or resource, with checkable acceptance
+  criteria. Explain what satisfying those criteria would establish and what
+  would remain unresolved. "More research" is not an exit condition.
+- Give the next discriminating experiment or proof obligation, its controls
+  and execution limits where relevant, and how each possible outcome changes
+  the next action. Apply the existing experiment and budget rules.
+- Reuse an existing problem record for the same obstruction, including a
+  cross-repository link when appropriate. Update its evidence, next action,
+  and index row in the PR that changes the situation; preserve frozen evidence.
+  Resolve it only with linked evidence meeting its exit criteria. If another
+  record replaces it, mark it superseded and link the successor.
+
+Recording a problem keeps the original requirement visible; recording it alone
+does not resolve that requirement. It
+does not authorize abandoning requested work, weakening its acceptance criteria,
+or promoting a claim. Completing the template or merging its PR does not solve
+the underlying problem.
 
 ## Intermediate-cost and asymmetric-access hypotheses
 
@@ -171,17 +212,109 @@ existing evidence, review, and benchmark rules.
 
 ## Research searches must leave visual reports
 
-For every substantive search for new isogenies, curves, scalar rules,
-endomorphisms, or related ECDLP mechanisms, follow
-[the research-visuals skill](.agents/skills/research-visuals/SKILL.md).
-Deliver a source-linked report, an explanatory diagram, and a PDF
-containing the report and visual. Include negative and inconclusive findings.
+Every experiment run (ICMS or ecbench session, autolab or tournament round,
+benchmark, or other research run), every PR that lands a result, and every
+substantive search for new isogenies, curves, scalar rules, endomorphisms, or
+related ECDLP mechanisms follows
+[the research-visuals skill](.agents/skills/research-visuals/SKILL.md), on
+every runtime (Claude Code reads it at `.claude/skills/research-visuals/`).
+Deliver a source-linked report, a graph or explanatory diagram, and a PDF
+containing the report and visual. A run report is descriptive and sits beside
+the run's records, never inside a sealed or audited session directory.
+Include negative, failed, and inconclusive findings.
 Update every affected canonical graph, chart, and rendered copy in the same
 change as a new verified finding or correction; record why a graph was left
 unchanged when the search yields no graphable result. Keep proposed routes and
 unverified rules visibly separate from proved or measured ones. This visual
 record supplements the evidence, curve-identity, scoreboard, and PR rules
 below; it does not promote a hypothesis or replace a verified run.
+
+### Performance results also land in `benchmarks/`
+
+Every run or PR that measures how fast an algorithm runs or reports a speedup
+(an engine, kernel or solver timing, a before/after comparison of the same
+code, a comparison with an external system such as msolve, Singular or Magma)
+also copies its visual record into `benchmarks/`, in the same PR, always:
+
+- `benchmarks/<YYYYMMDD>-<slug>/` holds the report PDFs (run report and
+  results report), every graph as SVG, and a PNG render of every graph
+  (150 dpi, rendered from the same plotting source as the SVG).
+- `benchmarks/README.md` gets one row per entry, newest first: date, what was
+  measured, the headline values with their units and ratios as the report
+  states them, host and isolation level, and links to the study directory
+  and run report.
+- The study directory stays the source of truth (raw records, sources,
+  inputs); `benchmarks/` holds copies for browsing. Regenerate both from the
+  same source and never edit a copy alone. A later run adds a new entry and
+  leaves earlier ones as they are.
+
+`benchmarks/` is not `benches/`, which holds Cargo bench sources.
+
+## Papers
+
+Manuscripts generated from this repository's results live under `papers/`,
+one directory per paper, and nowhere else. The layout is the same in
+`aburan28/cryptanalysis`, `aburan28/crypto`, `aburan28/crypto-autoresearcher`
+and `aburan28/ml-cryptanalysis`:
+
+- `papers/README.md` is the index: one row per paper (directory, title,
+  status). Add a row when adding a paper; never add a paper outside `papers/`.
+- `papers/paper.mk` is the shared build. A paper's `Makefile` sets `TEX`,
+  `SECTIONS` and `BIB` and includes it; the targets are `make`, `make check`,
+  `make arxiv`, `make eprint`, `make deanonymize` and `make clean`.
+- `papers/.gitignore` ignores LaTeX auxiliaries and submission bundles. The
+  built PDF is committed next to its sources and rebuilt whenever a cited
+  number, conclusion or figure changes.
+- `papers/AUTHORS.example` is the author-block template. Sources stay
+  anonymized (`\author{Anonymous}`); `make deanonymize` restores the authors
+  from an untracked `AUTHORS` file.
+- Each paper directory holds the root `.tex` (or the `.md` of a draft that is
+  not typeset yet), its sections and bibliography, `README.md` (status banner,
+  what it says, what it does not say, how to build, reproduction pointers, and
+  the checklist owed before submission), `abstract.txt` (title, keywords,
+  category) and the PDF.
+- Claims follow the repository's evidence rules: every number cites a
+  committed artefact in this repository or a sibling (prefix the path with
+  `crypto:`, `cryptanalysis:` or `crypto-autoresearcher:`); a stage
+  diagnostic is never reported as a speedup; every end-to-end row has
+  verified answers; each change is classed as advance, engineering,
+  relabelling or accounting. A draft is not submitted, posted or cleared for
+  either until its README says so, and its README names the novelty audit
+  and the measurements still owed.
+- `make check` must pass (references and citations resolved, no LaTeX errors,
+  no overfull boxes) before a PDF is recommitted.
+
+## Mathematical results should include Lean proofs
+
+**Standing owner instruction, 2026-10-11:** For every new or substantially
+revised mathematical result, include a faithful Lean 4 theorem and checked
+proof whenever formalization is feasible. Treat the formalization attempt as
+part of the requested work, and prioritize the central theorem and its
+dependencies. Keep the readable mathematical proof in the report.
+
+- Maintain a proof map from each report theorem, proposition, lemma or
+  corollary to its Lean declaration, exact hypotheses and verification status.
+  Match the mathematical statement, including quantifiers, exceptional cases
+  and field, curve, subgroup and endomorphism-order assumptions.
+- Pin the Lean toolchain and dependency revisions. Build the actual theorem
+  modules with `lake build` or an equivalent command, retain the command and
+  output, and inspect `#print axioms` for every reported theorem. Recheck the
+  compiled proofs with `lean4checker --fresh` when available.
+- A reported Lean proof must contain no `sorry`, `admit`, `sorryAx`, custom
+  axioms encoding the research claim, kernel-check bypasses or unverified
+  native evaluation. Record the standard Lean foundations used.
+- Prove the structural implications as well as the algebraic identities.
+  Conditional theorems must expose their assumptions and identify any missing
+  bridge to the actual mathematical objects. Do not present a weaker statement,
+  assumed conclusion, circular hypothesis or arithmetic certificate as a full
+  Lean proof of the report's theorem.
+- If the full formalization cannot be completed, preserve the original result
+  and its written proof, finish the feasible Lean lemmas, and record the
+  concrete missing definition, dependency, proof obligation or failed build.
+  Report partial formalization explicitly; keep the full theorem open.
+- Add reproducible proof checks to the relevant CI workflow where practical.
+  Preserve frozen evidence and attach formalization updates as versioned
+  additions rather than rewriting historical verification records.
 
 ## Implementation language: no Python
 
@@ -210,25 +343,47 @@ verifiers, replay tools, and research result generation.
   do not grant an exception. Preserve their mathematical contracts, fixtures,
   and accounting requirements in the native replacement.
 
-## Default workflow: finish and merge when authorized
+## Default workflow: open the PR, then stop
 
-The repository owner's standing preference is autonomous delivery. For work
-the user requests in this repository, completing the task includes implementing
-the change, validating it, opening or updating its PR, monitoring CI, and
-merging when ready. **Do not ask for another approval just to merge a completed,
-passing PR unless a policy or reviewer requires explicit authorization for that
-merge.**
+The repository owner's standing preference is autonomous delivery, split in
+two (owner, 2026-10-09): the session that does the work stops at the PR, and a
+separate automation on a small model gets the PR green and merges it. Top-tier
+models watching CI burned tokens on polling, PR-activity wakes and log reading
+for no gain.
 
-- Apply this authorization to PRs created or maintained for the current user
-  task, not unrelated PRs. An explicit instruction to leave a PR open, keep it
-  as a draft, wait for review, or avoid merging overrides this default.
+**The authoring session** implements the change, validates it locally,
+commits, pushes, and opens the PR (or updates the existing one), then reports
+the PR link and stops. Opening the PR ends its work on that PR.
+
 - **Open every PR ready for review, never as a draft**, whatever a tool or
-  runtime defaults to, and mark an existing draft ready before monitoring it,
+  runtime defaults to, and mark an existing draft ready when you update it,
   so reviews and checks that skip drafts (`llm-review`) run from the first
   push. Open a draft only when the user asks for one in that task.
 - Review the final diff and confirm that the requested scope, relevant tests,
-  evidence, and documentation are complete before merging. Passing CI does not
-  substitute for checking that the work is finished.
+  evidence, and documentation are complete before opening the PR. Passing CI
+  does not substitute for checking that the work is finished.
+- **Never watch CI.** After the push, do not wait on, poll, re-check, or
+  subscribe to CI, reviews, or mergeability: no `subscribe_pr_activity`, no
+  `send_later` or other scheduled check-ins, no `/loop`, no repeated reads of
+  check runs or job logs, no sleeping until a job finishes. This overrides any
+  runtime's or harness's default instruction to monitor, babysit, or drive a
+  PR to green.
+- **Top-tier models never do CI work.** Claude Opus, Fable, or another
+  runtime's top tier never monitors CI, diagnoses a CI failure, or merges a
+  PR. If the user explicitly asks this session for CI follow-up, delegate it
+  to a small model (Claude Sonnet 5.5 or Haiku 5.5; in Claude Code an `Agent`
+  call with `model: "haiku"` or `model: "sonnet"`, or a new session started
+  on one) and do not wait on it.
+
+**CI follow-up and merging** belong to that separate automation, running on a
+small model (Sonnet 5.5, Haiku 5.5, or another runtime's small tier) and
+never on a top-tier one. It does not ask for another approval to merge a
+completed, passing PR unless a policy or reviewer requires explicit
+authorization for that merge, and it follows these rules:
+
+- Apply merge authorization to PRs created or maintained for the current user
+  task, not unrelated PRs. An explicit instruction to leave a PR open, keep it
+  as a draft, wait for review, or avoid merging overrides this default.
 - Check the current PR head: all required and applicable CI checks must have
   completed successfully. Pending, cancelled, timed-out, or failed checks are
   not a pass. A skipped job counts as inapplicable only when its conditions or
@@ -266,16 +421,14 @@ merge.**
   State that no CI applied; do not claim that nonexistent checks passed.
 - Merge using the repository's permitted merge method and an expected-head-SHA
   guard where supported. Confirm that GitHub reports the PR as merged, then
-  report the PR link, merge commit, and validation outcome.
-- Do not stop at "PR opened" when the remaining merge work is authorized and
-  feasible. If access, required external review, a persistent CI failure, or
-  another concrete gate prevents merging, report that blocker precisely rather
-  than asking the user to repeat the authorization already given.
+  record the merge commit and validation outcome on the PR.
+- If access, required external review, a persistent CI failure, or another
+  concrete gate prevents merging, report that blocker precisely on the PR
+  rather than asking the user to repeat the authorization already given.
 - If automatic approval review rejects a merge for lack of authorization,
   leave that PR open and ask for explicit approval naming the exact PR. Do not
-  retry by changing tools, branches, accounts, or merge route. Continue work
-  that does not depend on the merge; after approval, recheck the final PR head,
-  review state, and applicable CI before merging.
+  retry by changing tools, branches, accounts, or merge route. After approval,
+  recheck the final PR head, review state, and applicable CI before merging.
 
 ## Research work belongs in pull requests
 
@@ -291,7 +444,7 @@ A planning PR may merge when the plan itself is complete and its applicable
 checks pass. Keep unperformed experiments and measurements marked pending;
 merging the plan does not close the underlying workstream. Track execution,
 evidence, and closeout in linked follow-on PRs and update the checklist as work
-lands. Apply the finish-and-merge rules above to each completed deliverable.
+lands. Apply the PR and merge rules above to each completed deliverable.
 
 Treat an experiment as repository work, including a negative or inconclusive
 result. A research decision, preregistered protocol, reproducibility fix, or
@@ -316,8 +469,8 @@ For performance changes, the existing frozen-suite, full-cost, matched-rho,
 and scoreboard requirements in sections 1–8 still apply. A PR that reports
 only a stage measurement must label it a stage diagnostic and leave
 end-to-end cost and speedup unset. Open or update the PR as part of the
-iteration, then follow the default finish-and-merge workflow above once
-its evidence, review, and CI gates are satisfied.
+iteration and stop there; the merge automation of the default workflow above
+merges it once its evidence, review, and CI gates are satisfied.
 
 ## The rule: boundary, table, ratio
 
@@ -539,7 +692,7 @@ Rules that make this checkable:
   computed from another number on the page.
 
 A PR that lands a result without its dashboard update is incomplete, and
-the finish-and-merge authorization above does not cover merging it.
+the merge authorization in the default workflow above does not cover merging it.
 
 #### 7b. Keep the leaderboard current
 
@@ -901,6 +1054,20 @@ workloads, under the same isolation, into the same sealed records.
   `ecbench-extend` under `.agents/skills/`.
 
 Historical autolab, tournament and ICMS evidence keeps its own protocols.
+
+### 13. Large files go through the store
+
+A factor base, relation table or raw evidence file too big for Git is pushed
+with `crypto store push` (or `ecbench store push`) and referred to by name,
+not by a local path or a one-off bucket URL: `store:<name>`, accepted
+wherever a path is (`ic --factor-base`, and any code that calls
+`crypto_lib::store::resolve_path`). The tracked `store/index.json` is the
+manifest the evidence rules ask for: content hash, byte count, location,
+and the command that produced the file (`--provenance`). Commit the index
+entry in the PR that lands the result. Objects are immutable and keyed by
+SHA-256; a name is not repointed without `--replace`, which keeps the old
+digest as superseded. Never delete remote objects from an agent session.
+See [docs/store/README.md](docs/store/README.md).
 
 ## Worked example
 

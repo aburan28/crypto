@@ -6,7 +6,9 @@
 //! `cargo bench --bench pqc_speed -- ml-kem` and compare: the difference is
 //! what the ring arithmetic costs. The measured split is recorded in
 //! `docs/pqc-speed.md`.
+#[cfg(target_arch = "x86_64")]
 use crypto_lib::hash::sha3::{shake128, shake256};
+#[cfg(target_arch = "x86_64")]
 use std::hint::black_box;
 
 #[cfg(target_arch = "x86_64")]
@@ -27,6 +29,7 @@ fn cycles() -> u64 {
     START.get_or_init(Instant::now).elapsed().as_nanos() as u64
 }
 
+#[cfg(target_arch = "x86_64")]
 fn measure<T>(reps: usize, mut f: impl FnMut() -> T) -> f64 {
     for _ in 0..reps / 4 {
         black_box(f());
@@ -41,6 +44,7 @@ fn measure<T>(reps: usize, mut f: impl FnMut() -> T) -> f64 {
     v[v.len() / 2] as f64
 }
 
+#[cfg(target_arch = "x86_64")]
 fn main() {
     let seed = [3u8; 34];
     // An ML-KEM-768 key generation hashes k*k = 9 matrix polynomials out of
@@ -73,4 +77,9 @@ fn main() {
         (mat + cbd) / 1000.0
     );
     println!("compare against the ML-KEM-768 keygen row of `cargo bench --bench pqc_speed`");
+}
+
+#[cfg(not(target_arch = "x86_64"))]
+fn main() {
+    eprintln!("pqc_split requires an x86_64 cycle counter; no measurements were taken");
 }
