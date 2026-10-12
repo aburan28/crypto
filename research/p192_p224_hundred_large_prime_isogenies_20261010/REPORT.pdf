@@ -1,0 +1,169 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 3 /Kids [4 0 R 6 0 R 8 0 R] >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 4831 >>
+stream
+0.08 0.14 0.2 rg BT /F1 20 Tf 42 750 Td (One hundred large prime-degree isogeny maps) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 710 Td (The campaign independently verified 100 distinct maps: 50 consecutive edges in each public) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 694 Td (P192/P224 isogeny class. There are two distinct prime degrees, 2341 and 1117. The first) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 678 Td (maps start on the published sources; later maps start on their independently verified) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 662 Td (codomains.) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 630 Td (The frozen protocol \(PROTOCOL.md\) defines map-level uniqueness and retains one-eigenline) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 614 Td (coverage PARTIAL at every step. Existing P192/10453 and P224/1471 maps and repeated replays) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 598 Td (are excluded. This meets a hundred-map target with repeated prime degrees allowed; a) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 582 Td (hundred different prime degrees remains a separate task.) Tj ET
+0.08 0.14 0.2 rg BT /F1 9 Tf 42 550 Td (Class) Tj ET
+0.08 0.14 0.2 rg BT /F1 9 Tf 116 550 Td (Degree) Tj ET
+0.08 0.14 0.2 rg BT /F1 9 Tf 190 550 Td (Maps) Tj ET
+0.08 0.14 0.2 rg BT /F1 9 Tf 245 550 Td (Construct \(s\)) Tj ET
+0.08 0.14 0.2 rg BT /F1 9 Tf 360 550 Td (Replay \(s\)) Tj ET
+0.08 0.14 0.2 rg BT /F1 9 Tf 462 550 Td (Total \(s\)) Tj ET
+0.8 0.85 0.9 RG 42 545 m 570 545 l S
+0.08 0.14 0.2 rg BT /F1 9 Tf 42 526 Td (p192) Tj ET
+0.08 0.14 0.2 rg BT /F1 9 Tf 116 526 Td (2341) Tj ET
+0.08 0.14 0.2 rg BT /F1 9 Tf 190 526 Td (50) Tj ET
+0.08 0.14 0.2 rg BT /F1 9 Tf 245 526 Td (257.592) Tj ET
+0.08 0.14 0.2 rg BT /F1 9 Tf 360 526 Td (2466.415) Tj ET
+0.08 0.14 0.2 rg BT /F1 9 Tf 462 526 Td (2724.952) Tj ET
+0.8 0.85 0.9 RG 42 521 m 570 521 l S
+0.08 0.14 0.2 rg BT /F1 9 Tf 42 502 Td (p224) Tj ET
+0.08 0.14 0.2 rg BT /F1 9 Tf 116 502 Td (1117) Tj ET
+0.08 0.14 0.2 rg BT /F1 9 Tf 190 502 Td (50) Tj ET
+0.08 0.14 0.2 rg BT /F1 9 Tf 245 502 Td (124.170) Tj ET
+0.08 0.14 0.2 rg BT /F1 9 Tf 360 502 Td (667.004) Tj ET
+0.08 0.14 0.2 rg BT /F1 9 Tf 462 502 Td (792.191) Tj ET
+0.8 0.85 0.9 RG 42 497 m 570 497 l S
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 470 Td (These are complete operational intervals on a shared Apple M4 Pro host, with two concurrent) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 454 Td (walks. Constructors have an 1800-second limit and 8 GiB RSS cap. Independent replay is) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 438 Td (outside that constructor cap. These measurements do not establish a matched speedup. All) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 422 Td (100 exact kernel, codomain and rational curve-equation checks passed, alongside) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 406 Td (subgroup-order checks and 20 public scalar-transport checks per map \(2000 total\). Replay) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 390 Td (uses separate field and polynomial implementations on the same host.) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 358 Td (SUMMARY.json \(SUMMARY.json\) lists all exact source/destination ICV1 and EC1 records,) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 342 Td (degrees and map hashes. P192 walk \(evidence/p192/walk.json\) and P224 walk) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 326 Td (\(evidence/p224/walk.json\) link every raw kernel and rational map, resource and stderr) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 310 Td (receipt, mapped public generator and independent replay. The embedded source revision was) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 294 Td (clean; both walks retain the binary digest.) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 254 Td (The screen covered every prime from 1010 through 1000000 on both sources. Orders at most 8) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 238 Td (selected 2 P192 and 3 P224 candidates; orders at most 64 selected 40 and 38. These are) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 222 Td (structural candidates. The generalized constructor supports checked extension degrees 2) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 206 Td (through 16. All enabled degrees passed field-law tests, and the original degree-3/5) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 190 Td (selections remain unchanged.) Tj ET
+0.08 0.14 0.2 rg BT /F1 15 Tf 42 158 Td (Validation and delivery) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 118 Td (The CLI passed 62 tests plus 3 limb-field reference tests. Standalone algorithm suites) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 102 Td (passed 114 tests. The initial required root compilation failed with 643 errors. Three) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 86 Td (existing upstream type-repair commits restored compilation. The first complete runtime) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 70 Td (attempt exposed catalogue parser gaps, a serde-feature-dependent fixture, one sparse) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 3473 >>
+stream
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 750 Td (fixture omission and a one MiB digest buffer overflowing the default test stack. Their) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 734 Td (original diagnostics are retained, and the parser, fixture reference and buffer allocation) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 718 Td (were repaired without changing map acceptance checks. An additional strict CLI Clippy) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 702 Td (diagnostic retains 35 errors from inherited/generated modules; that check is not presented) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 686 Td (as passing. The required algorithm Clippy job is checked separately. PR #1606 remains open) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 670 Td (and the release remains unpublished.) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 638 Td (Canonical updates append the 100 verified models and mapped generators, rebuild covers and) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 622 Td (links, and refresh aliases, leaderboard rosters and browser joins. The complete route graph) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 606 Td (is in ROUTES.mmd \(ROUTES.mmd\). The IC boundary ledger, performance scoreboard and timeline) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 590 Td (retain their existing measurements because this round does not measure an IC improvement.) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 574 Td (Earlier frozen studies retain their historical findings.) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 542 Td (Run the actual executable with: isogeny walk --curve p224 --ell 1117 --count 50 --out) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 526 Td (./p224-walk. Replay it with: isogeny verify-walk --input ./p224-walk. Both arithmetic) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 510 Td (implementations and pinned public anchors are embedded. Runtime Cargo and a checkout are) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 494 Td (unnecessary. See tool instructions \(../../tools/isogeny-cli/README.md\), commands) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 478 Td (\(COMMANDS.md\) and manifest \(MANIFEST.json\).) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 446 Td (The final required library suite is running. Push/publication remains gated on its result.) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 414 Td (The unsandboxed full library run has at least 10 observed failures outside the dedicated) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 398 Td (map verification path. Its retained log prefix) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 382 Td (\(evidence/validation/root-complete-prefix.log\) is a checkpoint, not a completed passing) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 366 Td (suite. PR push is awaiting the owner's explicit choice to continue broader repairs or) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 350 Td (publish with merge/release still blocked.) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 318 Td (The rebuilt 449-model executable passed 62 CLI tests and 3 independent limb-field reference) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 302 Td (tests. It also passed a two-step saved-chain replay and complete two-map P384/19) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 286 Td (construction/replay from a directory without a checkout. The Apple silicon executable) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 270 Td (archive \(evidence/isogeny-aarch64-apple-darwin-3c39c5f23.tar.gz\) includes BUILD.json and) Tj ET
+0.08 0.14 0.2 rg BT /F1 10 Tf 42 254 Td (source commit 3c39c5f23e0bd1590d220fb32386ad9ed79bf399. Its source state was clean.) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 1100 760] /Resources << /Font << /F1 3 0 R >> >> /Contents 9 0 R >>
+endobj
+9 0 obj
+<< /Length 3484 >>
+stream
+q 0.71 0 0 -0.71 26 568 cm
+0.08 0.14 0.2 rg BT /F1 26 Tf 1 0 0 -1 35 45 Tm (100 verified large prime-degree maps) Tj ET
+0.08 0.14 0.2 rg BT /F1 15 Tf 1 0 0 -1 35 77 Tm (50 per class; 2 distinct degrees; one of two eigenlines per edge \(PARTIAL\)) Tj ET
+0.9294117647058824 0.9529411764705882 0.9725490196078431 rg 35 112 1030 150 re f
+0.08 0.14 0.2 rg BT /F1 17 Tf 1 0 0 -1 52 138 Tm (P192 class: prime degree 2341 on every edge) Tj ET
+0.08 0.14 0.2 rg BT /F1 12 Tf 1 0 0 -1 52 163 Tm (icv1-fp192-t31607402316713927207482677199-52e4af59) Tj ET
+0.08 0.14 0.2 rg BT /F1 12 Tf 1 0 0 -1 52 185 Tm (icv1-fp192-t31607402316713927207482677199-1263f86d) Tj ET
+0.09411764705882353 0.36470588235294116 0.5686274509803921 RG 2 w 66 201 m 1000 201 l S
+0.08 0.14 0.2 rg BT /F1 13 Tf 1 0 0 -1 80 221 Tm (Verified edge 1 -> ... -> verified edge 50; full identities in SUMMARY.json) Tj ET
+0.08 0.14 0.2 rg BT /F1 12 Tf 1 0 0 -1 52 245 Tm (icv1-fp192-t31607402316713927207482677199-db628b10) Tj ET
+0.08 0.14 0.2 rg BT /F1 16 Tf 1 0 0 -1 40 545 Tm (P192) Tj ET
+0.09411764705882353 0.36470588235294116 0.5686274509803921 rg 135 525 850 31 re f
+0.08 0.14 0.2 rg BT /F1 17 Tf 1 0 0 -1 1000 547 Tm (50) Tj ET
+0.9294117647058824 0.9529411764705882 0.9725490196078431 rg 35 290 1030 150 re f
+0.08 0.14 0.2 rg BT /F1 17 Tf 1 0 0 -1 52 316 Tm (P224 class: prime degree 1117 on every edge) Tj ET
+0.08 0.14 0.2 rg BT /F1 12 Tf 1 0 0 -1 52 341 Tm (icv1-fp224-t4733100108545601916421827343930821-fec01e99) Tj ET
+0.08 0.14 0.2 rg BT /F1 12 Tf 1 0 0 -1 52 363 Tm (icv1-fp224-t4733100108545601916421827343930821-a120b97a) Tj ET
+0.13333333333333333 0.5137254901960784 0.3411764705882353 RG 2 w 66 379 m 1000 379 l S
+0.08 0.14 0.2 rg BT /F1 13 Tf 1 0 0 -1 80 399 Tm (Verified edge 1 -> ... -> verified edge 50; full identities in SUMMARY.json) Tj ET
+0.08 0.14 0.2 rg BT /F1 12 Tf 1 0 0 -1 52 423 Tm (icv1-fp224-t4733100108545601916421827343930821-a4d1f195) Tj ET
+0.08 0.14 0.2 rg BT /F1 16 Tf 1 0 0 -1 40 600 Tm (P224) Tj ET
+0.13333333333333333 0.5137254901960784 0.3411764705882353 rg 135 580 850 31 re f
+0.08 0.14 0.2 rg BT /F1 17 Tf 1 0 0 -1 1000 602 Tm (50) Tj ET
+0.08 0.14 0.2 rg BT /F1 19 Tf 1 0 0 -1 35 495 Tm (New distinct maps independently replayed \(count\)) Tj ET
+0.39215686274509803 0.4549019607843137 0.5450980392156862 RG 2 w 135 625 m 135 632 l S
+0.08 0.14 0.2 rg BT /F1 12 Tf 1 0 0 -1 130 650 Tm (0) Tj ET
+0.39215686274509803 0.4549019607843137 0.5450980392156862 RG 2 w 305 625 m 305 632 l S
+0.08 0.14 0.2 rg BT /F1 12 Tf 1 0 0 -1 300 650 Tm (10) Tj ET
+0.39215686274509803 0.4549019607843137 0.5450980392156862 RG 2 w 475 625 m 475 632 l S
+0.08 0.14 0.2 rg BT /F1 12 Tf 1 0 0 -1 470 650 Tm (20) Tj ET
+0.39215686274509803 0.4549019607843137 0.5450980392156862 RG 2 w 645 625 m 645 632 l S
+0.08 0.14 0.2 rg BT /F1 12 Tf 1 0 0 -1 640 650 Tm (30) Tj ET
+0.39215686274509803 0.4549019607843137 0.5450980392156862 RG 2 w 815 625 m 815 632 l S
+0.08 0.14 0.2 rg BT /F1 12 Tf 1 0 0 -1 810 650 Tm (40) Tj ET
+0.39215686274509803 0.4549019607843137 0.5450980392156862 RG 2 w 985 625 m 985 632 l S
+0.08 0.14 0.2 rg BT /F1 12 Tf 1 0 0 -1 980 650 Tm (50) Tj ET
+0.08 0.14 0.2 rg BT /F1 12 Tf 1 0 0 -1 990 671 Tm (maps) Tj ET
+0.08 0.14 0.2 rg BT /F1 13 Tf 1 0 0 -1 35 701 Tm (Population: 100 maps, two public curve classes; exact checks, no sampling uncertainty.) Tj ET
+0.08 0.14 0.2 rg BT /F1 13 Tf 1 0 0 -1 35 727 Tm (Kernel + exact rational identity + subgroup preservation + 2000 public scalar checks: PASS) Tj ET
+Q
+endstream
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000127 00000 n 
+0000000197 00000 n 
+0000000323 00000 n 
+0000005205 00000 n 
+0000005331 00000 n 
+0000008855 00000 n 
+0000008982 00000 n 
+trailer
+<< /Size 10 /Root 1 0 R >>
+startxref
+12517
+%%EOF

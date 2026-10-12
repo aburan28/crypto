@@ -1,0 +1,19 @@
+{
+  "schema": "isogeny-instruction-profile/v1",
+  "baseline_commit": "c87d96eda0309b36af4a608905d3cdc4065a1361",
+  "candidate_commit": "6e3147ad9",
+  "architecture": "aarch64 Linux under the local Docker VM",
+  "compiler": "Rust 1.93.1, release defaults, identical compiler and flags",
+  "counter": "Valgrind Callgrind Ir, summed across traced child processes",
+  "wall_time_claim": false,
+  "rounds": 5,
+  "timeout_seconds": 1800,
+  "container_memory_limit": "4 GiB",
+  "cases": [
+    {"name":"screen-p224", "arguments":["screen","--curve","p224","--from","1010","--to","5000","--max-order","8"], "scope":"entire screening command including setup and output"},
+    {"name":"verify-p224", "arguments":["verify","--input","/fixtures/p224-1471"], "scope":"entire verification command including setup and output; construction excluded"},
+    {"name":"search-p192", "arguments":["search","--curve","p192","--ell","73","--out","RUN_DIRECTORY","--timeout","1800"], "scope":"entire search command, constructor child, output, and independent replay"}
+  ],
+  "correctness": "all commands must pass; candidate records, explicit maps, curve/subgroup identities and all mathematical checks must match; provenance and operational elapsed values are excluded from output-equivalence comparisons",
+  "interpretation": "instruction-count comparisons on this compiler/architecture; no native Mac throughput or security claim"
+}
