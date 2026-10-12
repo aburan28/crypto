@@ -41,7 +41,21 @@ When a node's reduction forces variables, the default specialises its bases by e
   [K0/2^31 dim 9], [278 237 634], [156 423 046], [1.7788], [2.13 [2.04–2.52]],
 )
 
-RUN2_SECTION
+== Gate-first with the RREF root (run-20261012T0008Z)
+
+A second session (5 rounds, load 76–132) repeated `orig`, `prev`, `gate` and added `rref` (the existing switch `KIC_F4_INHERIT_ROOT=rref`) and `gaterref` (both). Every stage unit of the repeated arms equals run 1's. The RREF root, which the code comments describe as no longer paying, lowers the stage unit on all four cells (f4 1.07–1.48×, f6p 1.09–1.49× against original; CPU previous/rref 1.12–1.68× and 1.22–1.74×), and it composes with gate-first:
+
+#table(columns: 4, align: (left, right, right, right),
+  [cell (f6p)], [gaterref], [original / gaterref], [CPU previous / gaterref],
+  [K1/2^17 dim 6], [7 696 852], [1.6417], [2.85 [2.65–3.15]],
+  [K1/2^23 dim 7], [26 902 588], [1.9299], [3.49 [3.26–3.69]],
+  [K0/2^23 dim 8], [56 940 731], [2.1944], [3.41 [3.39–3.53]],
+  [K0/2^31 dim 9], [115 269 611], [2.4138], [3.69 [3.50–3.96]],
+)
+
+#figure(image("reports/run-20261012T0008Z/arms.svg", width: 100%), caption: [run-20261012T0008Z, 5 interleaved rounds: stage unit original / arm, wall original / arm (L0), process CPU previous / arm (L0).])
+
+The RREF root is not a W5 change; it is recorded as a lead.
 
 == Cost model
 

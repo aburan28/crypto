@@ -1,0 +1,22 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W5",
+  "slug": "rref-root-with-gate-first",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#PRNUM",
+  "papers": ["arXiv 2607.06372"],
+  "kind": "diagnostic",
+  "workload": {
+    "id": "f6-ic-probe-4-cells-rref-root",
+    "description": "f6_ic_probe, inherited F4 and F6-IC + pair index, on icv1-f2m17-tm101-00378d4e dim 6 (8 targets), icv1-f2m23-tm5197-1f85e9e1 dim 7 (4), icv1-f2m23-t5197-69e76b73 dim 8 (4), icv1-f2m31-tm90707-c95f16f5 dim 9 (1, budget 2000), prime-order subgroups of KoblitzCurve::new, m = 3, reps 3",
+    "curve_ids": ["icv1-f2m17-tm101-00378d4e", "icv1-f2m23-tm5197-1f85e9e1", "icv1-f2m23-t5197-69e76b73", "icv1-f2m31-tm90707-c95f16f5"]
+  },
+  "metric": "stage-unit word XORs (word_xors), original / arm",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 5,
+  "arms": [],
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w5_lane_batched_f4_20261011/reports/run-20261012T0008Z/report.pdf",
+  "note": "Lead outside W5: the existing KIC_F4_INHERIT_ROOT=rref (fully reduced root) lowers word_xors 1.07-1.48x (f4) and 1.09-1.49x (f6p) against the default echelon root; with gate-first, f6p reaches 1.64 / 1.93 / 2.19 / 2.41x against original (CPU previous/arm 2.85-3.69, L0). Verdicts and counters identical."
+}

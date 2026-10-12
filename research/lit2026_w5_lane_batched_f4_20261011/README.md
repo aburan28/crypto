@@ -155,6 +155,22 @@ Gate-first skipped 447 / 432 / 840 / 405 refuted nodes and 4 641 / 5 835 / 11 00
 6 591 specialisations per arm pass (three repetitions) on the four cells. The inherited-F4 arm has
 no node oracle, so the switch changes nothing there.
 
+### Gate-first with the RREF root (run-20261012T0008Z)
+
+Second session, 5 rounds, load 76.5–131.8: `orig`, `prev`, `gate`, `rref`
+(`KIC_F4_INHERIT_ROOT=rref`), `gaterref` (both). Every stage unit of the repeated arms
+equals run 1's.
+
+| cell | engine | gaterref | original / gaterref | CPU previous / gaterref, median [min–max] |
+|:--|:--|--:|--:|--:|
+| K1/2^17 | f6p | 7 696 852 | 1.6417 | 2.85 [2.65–3.15] |
+| K1/2^23 | f6p | 26 902 588 | 1.9299 | 3.49 [3.26–3.69] |
+| K0/2^23 | f6p | 56 940 731 | 2.1944 | 3.41 [3.39–3.53] |
+| K0/2^31 | f6p | 115 269 611 | 2.4138 | 3.69 [3.50–3.96] |
+| K1/2^17 … K0/2^31 | f4 | = rref | 1.0650 / 1.1915 / 1.2859 / 1.4780 | 1.13 / 1.32 / 1.38 / 1.71 |
+
+Gate-first alone in run 2: CPU previous/gate f6p 2.27 / 2.56 / 2.27 / 2.11, f4 0.95–1.00.
+
 ### Lane-batched roots (run-20261011T2225Z, `lanes` = `KIC_F4_LANES=k` + RREF root)
 
 | cell (k) | engine | rref (sequential) | lanes | rref / lanes | CPU rref / lanes, median [min–max] |
@@ -248,9 +264,11 @@ figure quoted above, still L0.
 - **Gate-first is exact and halves F6-IC's CPU time on these cells**: a default-on
   candidate, after a check on more cells and on x86 with the eager rewrite.
 - **The RREF root (`KIC_F4_INHERIT_ROOT=rref`) beats the default echelon root** on all four
-  cells: 1.07–1.48× fewer stage units (f4) and 1.09–1.49× (f6p), CPU 1.16–1.72× (f4),
-  1.20–1.78× (f6p), identical verdicts. The code comment says the fully reduced root no
-  longer pays; on this host and these cells it does. Run 2 measures it with gate-first.
+  cells: 1.07–1.48× fewer stage units (f4) and 1.09–1.49× (f6p), CPU previous/rref
+  1.16–1.72× (f4) and 1.20–1.78× (f6p) in run 1, 1.12–1.68× and 1.22–1.74× in run 2,
+  identical verdicts. The comment in `ReducedBasis::from_system_with` says the fully
+  reduced root no longer pays; on this host and these cells it does. It composes with
+  gate-first (next section). Not a W5 change; a default-on candidate for a follow-up.
 - **Parametric decomposition.** The trees of different targets coincide in shape and
   the target enters the last link linearly; treating the target bits as parameters
   (one comprehensive basis for all targets) is the structural form of "one trace, many
