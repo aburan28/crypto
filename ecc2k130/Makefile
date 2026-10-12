@@ -22,6 +22,8 @@
 #   PACKED_ONB_INV  ONB two-product multiply inside inv131 (default 0)
 #   PACKED_FROM_REDUCED  5-word inverse of toPolynomial131 (default 0)
 #   PACKED_SIGMA_TABLE  fused-walk Frobenius steps from shared nibble tables (default 0)
+#   ordinary sigma table  exact polynomial-coordinate table in the
+#                       witness-carrying ordinary sigma walk (default 0)
 #   PACKED_CLMUL_FLAT  issue 128-bit Karatsuba as 3x lo then 3x hi clmad
 #   PACKED_PAIR_CLMUL  twelve-clmad interleaved pair product (default 0)
 #   PACKED_ALU_SQR  ONB sqr131 on the logic pipe instead of clmad (default 0)
@@ -824,13 +826,26 @@ PRO6000_SIGMA_TABLE_KNOBS = $(PRO6000_SIGMA_FUSED_KNOBS) THREADS=512 MINBLOCKS=1
 gpu-rtx-pro6000-sigma-table:
 	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_TABLE_KNOBS)
 
+# Same-walk DP32 candidate: retain the ordinary witness-carrying sigma walk,
+# but evaluate I+sigma^j directly from the exact polynomial-coordinate nibble
+# table. Keep this separate until device replay and DP corpus identity qualify
+# it for the production campaign.
+PRO6000_DP32_SIGMA_TABLE_KNOBS = BATCH=16 THREADS=512 MINBLOCKS=1 \
+	PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
+	PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
+	PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
+	PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
+	PACKED_INLINE_POLY=3 PACKED_SIGMA_TABLE=1 SIGMA_FUSED=0 WITNESS=1 WALK_TABLE=0
+gpu-rtx-pro6000-dp32-sigma-table:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_DP32_SIGMA_TABLE_KNOBS)
+
 # Headline protocol (A/A panel, five A/B pairs, 64 launches) for the table
 # against the fused preset; benchmark-only, receipts in benchmarks/sigma-table/.
 bench-rtx-pro6000-sigma-table:
 	$(MODAL) run --detach modal_job.py --job benchmarks/sigma-table/gpujob-headline.sh \
 	    --out $(TABLE_BENCH_OUT)
 TABLE_BENCH_OUT ?= /tmp/ecc2k-sigma-table-benchmark
-.PHONY: gpu-rtx-pro6000-sigma-table bench-rtx-pro6000-sigma-table
+.PHONY: gpu-rtx-pro6000-sigma-table gpu-rtx-pro6000-dp32-sigma-table bench-rtx-pro6000-sigma-table
 
 # Matched replay, A/A noise and five-pair confirmation; benchmark-only.
 bench-rtx-pro6000-sigma-fused:
