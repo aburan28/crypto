@@ -46,6 +46,44 @@ sage factor_base_dor.sage --field 8 --dim 4 --selftest 8   # validate first
 sage factor_base_dor.sage --field 8 --dim 4 --targets 48 --out dor.json
 ```
 
+`--summands 3` uses the chained Semaev system (two `S_3` with a full-field
+intermediate). Two findings there: symmetry breaking (`nb_break`) lifts the
+decomposable fraction toward `3! = 6` (5.4x at n=11, dim 3), but the chained
+`D*` is structure-independent (= 5 across subfield/standard/random), because
+the full-field intermediate dilutes the factor base. The special-subspace
+degree drop lives in the direct symmetric `S_4` encoding, which needs more
+variables than this dense instrument handles; the direct `m = 2` results
+already show it (subfield and standard below random).
+
+`--frobenius-windows` checks the GGMP §3.1 mechanism: the windows
+`V_i = <θ^(2^j)>` satisfy `π^dim(V_i) = V_{i+1}` and are disjoint, so a
+summand from `F_i` folds into `F_1` as `[λ^((i-1)·dim)] P'`. That yields the
+`m!` saving with only `|F_1|` unknowns. It does not yield the `n`-fold
+invariance saving: a window is not Frobenius-invariant, and on the prime
+subgroup Frobenius acts as `λ`, so a relation's Frobenius images are scalar
+multiples of it. The `n`-fold needs each base to be invariant itself (GGMP
+Theorems 3.4 and 3.5). The check needs only a normal basis, so it holds at
+`n = 131`:
+
+```
+sage factor_base_dor.sage --frobenius-windows --field 131 --dim 4 --summands 3
+```
+
+`--stacking A,B` asks whether both savings can coexist without an invariant
+subspace. It uses the normal-basis weight classes
+`W_w = {x : normal-basis weight w}`: Frobenius rotates normal-basis
+coordinates, so each class is invariant, and distinct weights are disjoint.
+Pairing `W_A` with `W_B` breaks symmetry while keeping the orbit saving. It
+reports `trials = (unknowns + 1) / coverage` and an enumeration-work proxy
+against the windows. At `n = 11` and `13` (same `x^n - 1` shape as 131) the
+weight classes cut unknowns by exactly `n` and trials by about 10–20x, and
+cross-class pairing lowers enumeration work a further 1.2–1.9x. Membership is
+a cardinality constraint, so this suits the SAT oracle, not a linear descent.
+
+```
+sage factor_base_dor.sage --stacking 1,2 --field 11 --dim 4
+```
+
 Run `--selftest` before trusting a number. It checks that the descended
 system has a Boolean zero exactly when brute force finds a decomposition,
 and that a satisfiable target never derives `1`.
@@ -68,8 +106,11 @@ What it does not cover:
   ECC2K-130 has. `--field 11` has the same `x^n - 1` factorization as 131.
 - **Symmetric-function rewriting** (Faugère–Gaudry–Huot–Renault). Writing
   the summands in elementary symmetric variables drops binary `S_4` from
-  total degree 12 to degree 4. The engine descends the raw summand
-  coordinates, so it does not yet measure this lever.
+  total degree 12 to degree 4. Over a vector-space factor base this does not
+  by itself lower the solving degree (Galbraith–Gebregiyorgis 2014; HKY need
+  a "special subspace" closed under products, which is the subfield case).
+  The engine measures the chained `m = 3` system, not the direct symmetric
+  `S_4`, so it does not yet capture the full lever.
 - **Prime fields.** There is no subfield to descend into, so the degree of
   regularity is a different object (Diem's degree-`k` extension, or the
   symmetric Semaev system over `F_p`). `--curve p256` prints this note.

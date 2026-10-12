@@ -205,6 +205,33 @@ def descent_equations(field, basis1, basis2, target_int, b_int):
     return [eq for eq in s3 if eq]
 
 
+def descent_equations_m3(field, basis1, basis2, basis3, target_int, b_int):
+    """Chained Semaev for a 3-point decomposition: x(P1)+x(P2) meet at an
+    intermediate abscissa U, which with x(P3) sums to the target. Variables
+    are the V-coordinates of P1, P2, P3 and the n full-field coordinates of
+    U. Common zero <=> some sign choice of P1, P2, P3 sums to the target.
+    This is the repo's Weil-chained form; it is how m >= 3 is handled."""
+    d1, d2, d3 = len(basis1), len(basis2), len(basis3)
+    X1 = fe_linear(field, basis1, 0)
+    X2 = fe_linear(field, basis2, d1)
+    X3 = fe_linear(field, basis3, d1 + d2)
+    U = fe_linear(field, [1 << i for i in range(field.n)], d1 + d2 + d3)
+    xr = fe_const(field, target_int)
+    bvec = fe_const(field, b_int)
+
+    def s3(a, c, e):
+        s = fe_add(a, c)
+        p = fe_mul(field, a, c)
+        t1 = fe_mul(field, fe_square(field, s), fe_square(field, e))
+        t2 = fe_mul(field, p, e)
+        t3 = fe_add(fe_square(field, p), bvec)
+        return fe_add(fe_add(t1, t2), t3)
+
+    eqs = [eq for eq in s3(X1, X2, U) if eq]
+    eqs += [eq for eq in s3(U, X3, xr) if eq]
+    return eqs, d1 + d2 + d3 + field.n
+
+
 def poly_degree(poly):
     return max((popcount(m) for m in poly), default=0)
 
@@ -435,6 +462,39 @@ def label_targets(field, basis1, basis2, targets_int, b_int):
     return labels
 
 
+def label_targets_m3(field, basis1, basis2, basis3, targets_int, b_int):
+    """True per target if the chained 3-point system has no common zero.
+    For fixed x1, x2 the first S_3 is a quadratic in U (never identically
+    zero since b = 1), so its at most two roots stand in for enumerating U
+    over the whole field; this labels the descended system exactly."""
+    K = field.K
+    T = PolynomialRing(K, "T").gen()
+    m1 = [field.from_int(v) for v in span_members(basis1)]
+    m2 = [field.from_int(v) for v in span_members(basis2)]
+    m3 = [field.from_int(v) for v in span_members(basis3)]
+    b = field.from_int(b_int)
+    roots_u = []
+    for x1 in m1:
+        for x2 in m2:
+            poly = (x1 + x2)**2 * T**2 + x1 * x2 * T + (x1 * x2)**2 + b
+            roots_u.extend(r for r, _ in poly.roots())
+    roots_u = list(set(roots_u))
+    labels = {}
+    for t_int in targets_int:
+        xr = field.from_int(t_int)
+        xr2 = xr * xr
+        unsat = True
+        for u in roots_u:
+            for x3 in m3:
+                if (u + x3)**2 * xr2 + u * x3 * xr + (u * x3)**2 + b == 0:
+                    unsat = False
+                    break
+            if not unsat:
+                break
+        labels[t_int] = unsat
+    return labels
+
+
 # ── self-test: the measurement is only as good as the descent ──────────
 
 def eval_poly(poly, assignment_mask):
@@ -481,6 +541,241 @@ def selftest(field, dim, dmax, seed, samples):
             checked += 1
     sys.stderr.write("selftest: %d cases, %d failures\n" % (checked, failures))
     return failures == 0
+
+
+def verify_frobenius_windows(n, dim, m, seed, tries=400):
+    """Check the GGMP section 3.1 mechanism: for a normal element theta, the
+    windows V_i = <theta^(2^j)> over consecutive blocks of dim satisfy
+    pi^dim(V_i) = V_{i+1} and are disjoint, so a summand from F_i folds into
+    F_1 by a power of lambda. This gives the m! saving, not the n-fold one,
+    which needs each base to be Frobenius-invariant. Uses a random normal
+    element so it runs at n = 131."""
+    field = BinaryField(n)
+    rng = rng_for(seed)
+    conj = None
+    for _ in range(tries):
+        theta = field.from_int(rng.randrange(1, 2**n))
+        cand, cur = [], theta
+        for _ in range(n):
+            cand.append(cur)
+            cur = cur**2
+        if len(subspace_from_generators(field, cand)) == n:
+            conj = cand
+            break
+    if conj is None:
+        sys.stderr.write("no normal element in %d random draws\n" % tries)
+        sys.exit(int(1))
+    if m * dim > n:
+        sys.stderr.write("need m*dim <= n\n")
+        sys.exit(int(1))
+    windows = [conj[i * dim:(i + 1) * dim] for i in range(m)]
+
+    def rank(gens):
+        return len(subspace_from_generators(field, gens))
+
+    shift = 2**dim
+    permuted = all(
+        rank(windows[i + 1]) == dim
+        and rank([g**shift for g in windows[i]] + windows[i + 1]) == dim
+        for i in range(m - 1))
+    disjoint = rank([g for w in windows for g in w]) == m * dim
+    sys.stderr.write("n=%d dim=%d m=%d: normal element found; pi^dim(V_i) = V_(i+1): %s; "
+                     "windows disjoint: %s\n" % (n, dim, m, permuted, disjoint))
+    sys.exit(int(0 if permuted and disjoint else 1))
+
+
+def stacking_report(n, dim, weights, seed):
+    """Can symmetry breaking and the n-fold invariance saving stack where no
+    invariant subspace exists? Compare, for m = 2, four bases by the repo's
+    relation-collection metric trials = (unknowns + 1) / coverage:
+
+      win_sym   both summands in a normal-basis window V1 (no orbit saving)
+      win_break P1 in V1, P2 in pi^dim(V1), folded by lambda (GGMP 3.1)
+      wt_sym    both summands in W_a u W_b, unknowns = Frobenius orbits
+      wt_break  P1 in W_a, P2 in W_b with a != b: classes are invariant and
+                disjoint, so the orbit saving and the broken symmetry coexist
+
+    W_w = {x : normal-basis Hamming weight of x is w}. Frobenius rotates the
+    normal-basis coordinates, so each W_w is invariant and orbits are
+    rotation classes. Coverage counts target abscissae over the whole field.
+    pairs_per_target is an enumeration proxy for per-trial cost; a SAT or
+    Groebner oracle costs differently."""
+    field = BinaryField(n)
+    K = field.K
+    T = PolynomialRing(K, "T").gen()
+    b = K(1)
+    conj = normal_conjugates(field, seed)
+    full = (1 << n) - 1
+
+    def element(mask):
+        acc = K(0)
+        for j in range(n):
+            if (mask >> j) & 1:
+                acc += conj[j]
+        return acc
+
+    def valid(x):
+        return x != 0 and (x + x**(-2)).trace() == 0
+
+    def rot_class(mask):
+        best, cur = mask, mask
+        for _ in range(n - 1):
+            cur = ((cur << 1) | (cur >> (n - 1))) & full
+            best = min(best, cur)
+        return best
+
+    def masks_of_weight(w):
+        out = []
+        for comb in itertools.combinations(range(n), w):
+            m = 0
+            for j in comb:
+                m |= 1 << j
+            out.append(m)
+        return out
+
+    def window(i):
+        masks = []
+        for bits in range(1, 1 << dim):
+            m = 0
+            for j in range(dim):
+                if (bits >> j) & 1:
+                    m |= 1 << (i * dim + j)
+            masks.append(m)
+        return masks
+
+    def coverage(pairs):
+        reach = set()
+        for x1, x2 in pairs:
+            poly = (x1 + x2)**2 * T**2 + x1 * x2 * T + (x1 * x2)**2 + b
+            for r, _ in poly.roots():
+                if r != 0:
+                    reach.add(r)
+        return len(reach) / (2**n - 1)
+
+    def scheme(name, side1, side2, unknown_masks, use_orbits, symmetric):
+        xs1 = [element(m) for m in side1 if valid(element(m))]
+        xs2 = [element(m) for m in side2 if valid(element(m))]
+        if symmetric:
+            pairs = [(xs1[i], xs1[j]) for i in range(len(xs1)) for j in range(i, len(xs1))]
+        else:
+            pairs = [(a, c) for a in xs1 for c in xs2]
+        valid_masks = [m for m in unknown_masks if valid(element(m))]
+        unknowns = len(set(rot_class(m) for m in valid_masks)) if use_orbits else len(valid_masks)
+        cov = coverage(pairs)
+        trials = (unknowns + 1) / cov if cov else None
+        return {"scheme": name, "base_abscissae": len(valid_masks), "unknowns": unknowns,
+                "pairs_per_target": len(pairs), "coverage": float(cov),
+                "trials": float(trials) if trials else None,
+                "enumeration_work": float(trials * len(pairs)) if trials else None}
+
+    wa, wb = weights
+    v1, v2 = window(0), window(1)
+    a_masks, b_masks = masks_of_weight(wa), masks_of_weight(wb)
+    rows = [
+        scheme("win_sym", v1, v1, v1, False, True),
+        scheme("win_break", v1, v2, v1, False, False),
+        scheme("wt_sym", a_masks + b_masks, a_masks + b_masks, a_masks + b_masks, True, True),
+        scheme("wt_break", a_masks, b_masks, a_masks + b_masks, True, False),
+    ]
+    sys.stderr.write("n=%d windows dim %d, weight classes %d and %d\n" % (n, dim, wa, wb))
+    sys.stderr.write("  %-10s %9s %9s %8s %9s %11s %14s\n" % (
+        "scheme", "abscissae", "unknowns", "pairs", "coverage", "trials", "enum work"))
+    for r in rows:
+        sys.stderr.write("  %-10s %9d %9d %8d %9.4f %11s %14s\n" % (
+            r["scheme"], r["base_abscissae"], r["unknowns"], r["pairs_per_target"], r["coverage"],
+            "%.1f" % r["trials"] if r["trials"] else "-",
+            "%.0f" % r["enumeration_work"] if r["enumeration_work"] else "-"))
+    return rows
+
+
+# ── three summands ─────────────────────────────────────────────────────
+
+def structure_bases3(field, name, dim, seed):
+    """(basis1, basis2, basis3), or (None, reason). nb_break uses three
+    consecutive normal-basis windows V1, pi^dim(V1), pi^(2 dim)(V1), the
+    m = 3 symmetry breaking whose expected probability gain is 3! = 6."""
+    if name in ("nb_window", "nb_break"):
+        if 3 * dim > field.n:
+            return None, "3 nb windows need 3*dim <= n (%d > %d)" % (3 * dim, field.n)
+        conj = normal_conjugates(field, seed)
+        v1 = subspace_from_generators(field, conj[:dim])
+        if name == "nb_window":
+            return (v1, v1, v1), None
+        v2 = subspace_from_generators(field, conj[dim:2 * dim])
+        v3 = subspace_from_generators(field, conj[2 * dim:3 * dim])
+        return (v1, v2, v3), None
+    basis, err = structure_basis(field, name, dim, seed)
+    if basis is None:
+        return None, err
+    return (basis, basis, basis), None
+
+
+def selftest_m3(field, dim, dmax, seed, samples):
+    """Same two checks as selftest, for the chained 3-point system. Brute
+    force over every Boolean assignment, so keep 3*dim + n small."""
+    b_int = field.one_int
+    failures = 0
+    checked = 0
+    rng = rng_for(seed)
+    for name in ("standard", "random", "subfield", "nb_window", "nb_break"):
+        triple, err = structure_bases3(field, name, dim, seed)
+        if triple is None:
+            continue
+        targets = [rng.randrange(1, 2**field.n) for _ in range(samples)]
+        labels = label_targets_m3(field, *triple, targets, b_int)
+        for t in targets:
+            eqs, nvars = descent_equations_m3(field, *triple, t, b_int)
+            if nvars > 18:
+                sys.stderr.write("selftest_m3: %d vars too many to brute force\n" % nvars)
+                return False
+            has_zero = any(all(eval_poly(eq, a) == 0 for eq in eqs)
+                           for a in range(1 << nvars))
+            if has_zero == labels[t]:
+                failures += 1
+                sys.stderr.write("M3 DESCENT MISMATCH %s target 0x%x: zero=%s unsat=%s\n"
+                                 % (name, t, has_zero, labels[t]))
+            if not labels[t]:
+                dstar, _ = refutation_degree(eqs, nvars, dmax)
+                if dstar is not None:
+                    failures += 1
+                    sys.stderr.write("M3 FALSE REFUTATION %s target 0x%x at D=%d\n"
+                                     % (name, t, dstar))
+            checked += 1
+    sys.stderr.write("selftest_m3: %d cases, %d failures\n" % (checked, failures))
+    return failures == 0
+
+
+def measure_structure_m3(field, name, dim, dmax, targets_int, seed, dstar_sample=None):
+    triple, err = structure_bases3(field, name, dim, seed)
+    if triple is None:
+        return {"structure": name, "skipped": err}
+    b_int = field.one_int
+    labels = label_targets_m3(field, *triple, targets_int, b_int)
+    decomposable = sum(1 for t in targets_int if not labels[t])
+    results = []
+    nvars = None
+    for t_int in targets_int:
+        if not labels[t_int]:
+            continue
+        if dstar_sample is not None and len(results) >= dstar_sample:
+            break
+        eqs, nvars = descent_equations_m3(field, *triple, t_int, b_int)
+        dstar, profile = refutation_degree(eqs, nvars, dmax)
+        results.append({"target": "0x%x" % t_int, "d_star": dstar,
+                        "rank_profile": {str(k): v for k, v in profile.items()}})
+    solved = [r["d_star"] for r in results if r["d_star"] is not None]
+    summary = {
+        "structure": name, "dim": dim, "summands": 3, "nvars": nvars,
+        "decomposable_fraction": decomposable / len(targets_int),
+        "unsat_targets": len(results),
+        "censored_above_dmax": sum(1 for r in results if r["d_star"] is None),
+    }
+    if solved:
+        summary["d_star_min"] = min(solved)
+        summary["d_star_max"] = max(solved)
+        summary["d_star_mean"] = sum(solved) / len(solved)
+    summary["targets"] = results
+    return summary
 
 
 # ── driver ─────────────────────────────────────────────────────────────
@@ -539,14 +834,40 @@ def main():
     parser.add_argument("--structures", default="subfield,standard,frobenius,random,nb_window,nb_break",
                         help="comma-separated factor-base structures to compare")
     parser.add_argument("--curve", help="p192/p224/p256 print the prime-field DoR note and exit")
+    parser.add_argument("--stacking", metavar="A,B",
+                        help="compare window vs invariant weight-class bases W_A, W_B for m=2 by "
+                             "trials = (unknowns+1)/coverage, then exit")
+    parser.add_argument("--frobenius-windows", action="store_true",
+                        help="check that Frobenius maps each symmetry-breaking window to the next "
+                             "(the GGMP section 3.1 fold), then exit; works at n=131")
     parser.add_argument("--out", help="write the JSON report here; default stdout")
     parser.add_argument("--selftest", type=int, default=0, metavar="N",
                         help="validate descent and refutation on N targets per structure, then exit")
+    parser.add_argument("--summands", type=int, default=2, choices=(2, 3),
+                        help="points per decomposition; 3 uses the chained Semaev system")
+    parser.add_argument("--dstar-sample", type=int, default=None, metavar="K",
+                        help="with --summands 3, compute D* on at most K non-decomposable targets; "
+                             "the decomposable fraction still uses every target")
     args = parser.parse_args()
 
     if args.selftest:
-        ok = selftest(BinaryField(args.field), args.dim, args.dmax, args.seed, args.selftest)
+        check = selftest_m3 if args.summands == 3 else selftest
+        ok = check(BinaryField(args.field), args.dim, args.dmax, args.seed, args.selftest)
         sys.exit(int(0 if ok else 1))
+
+    if args.frobenius_windows:
+        verify_frobenius_windows(args.field, args.dim, args.summands, args.seed)
+        return
+
+    if args.stacking:
+        wa, wb = (int(w) for w in args.stacking.split(","))
+        rows = stacking_report(args.field, args.dim, (wa, wb), args.seed)
+        if args.out:
+            with open(args.out, "w") as handle:
+                handle.write(json.dumps({"schema": "factor-base-stacking-v1", "field_degree": args.field,
+                                         "window_dim": args.dim, "weights": [wa, wb], "seed": args.seed,
+                                         "rows": rows}, indent=2) + "\n")
+        return
 
     if args.curve in ("p192", "p224", "p256"):
         sys.stderr.write(
@@ -570,16 +891,21 @@ def main():
         targets_int.append(t)
 
     structures = [s.strip() for s in args.structures.split(",") if s.strip()]
+    if args.summands == 3:
+        def measure(field, s, dim, dmax, targets_int, seed):
+            return measure_structure_m3(field, s, dim, dmax, targets_int, seed, args.dstar_sample)
+    else:
+        measure = measure_structure
     report = {
         "schema": "factor-base-dor-v1",
         "curve": "Koblitz y^2+xy=x^3+1 over F_2^%d" % args.field,
         "field_degree": args.field,
         "dim": args.dim,
-        "summands": 2,
+        "summands": args.summands,
         "dmax": args.dmax,
         "targets": len(targets_int),
         "observable": "D* = solving/refutation degree on non-decomposable targets",
-        "results": [measure_structure(field, s, args.dim, args.dmax, targets_int, args.seed)
+        "results": [measure(field, s, args.dim, args.dmax, targets_int, args.seed)
                     for s in structures],
     }
     ranked = [r for r in report["results"] if "d_star_mean" in r]
