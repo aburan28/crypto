@@ -1,0 +1,328 @@
+{
+  "schema": "factor-base-dor-results-v1",
+  "date": "2026-10-12",
+  "evidence_scope": "synthetic toy binary fields only; no deployed-curve security claim",
+  "observable": "D* = Macaulay refutation (solving) degree on non-decomposable targets, S_3, 2 summands",
+  "curve": "Koblitz y^2 + xy = x^3 + 1 over F_2^n",
+  "producer": "sage/factor_base_dor.sage",
+  "validation": "--selftest passed: descended zero set == brute-force decomposition; no satisfiable target derives 1",
+  "single_seed_48_targets": {
+    "7-d3": [
+      {
+        "structure": "frobenius",
+        "d_star_mean": 2.257142857142857,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 35
+      },
+      {
+        "structure": "standard",
+        "d_star_mean": 2.764705882352941,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 34
+      },
+      {
+        "structure": "random",
+        "d_star_mean": 2.9166666666666665,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 36
+      }
+    ],
+    "8-d4": [
+      {
+        "structure": "standard",
+        "d_star_mean": 2.121212121212121,
+        "d_star_min": 2,
+        "d_star_max": 4,
+        "unsat_targets": 33
+      },
+      {
+        "structure": "subfield",
+        "d_star_mean": 2.25,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 40
+      },
+      {
+        "structure": "frobenius",
+        "d_star_mean": 2.25,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 40
+      },
+      {
+        "structure": "random",
+        "d_star_mean": 3.6,
+        "d_star_min": 3,
+        "d_star_max": 4,
+        "unsat_targets": 30
+      }
+    ],
+    "9-d3": [
+      {
+        "structure": "subfield",
+        "d_star_mean": 2.0,
+        "d_star_min": 2,
+        "d_star_max": 2,
+        "unsat_targets": 47
+      },
+      {
+        "structure": "frobenius",
+        "d_star_mean": 2.0,
+        "d_star_min": 2,
+        "d_star_max": 2,
+        "unsat_targets": 47
+      },
+      {
+        "structure": "standard",
+        "d_star_mean": 2.4318181818181817,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 44
+      },
+      {
+        "structure": "random",
+        "d_star_mean": 2.511111111111111,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 45
+      }
+    ],
+    "11-d3": [
+      {
+        "structure": "standard",
+        "d_star_mean": 2.1041666666666665,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 48
+      },
+      {
+        "structure": "random",
+        "d_star_mean": 2.1041666666666665,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 48
+      }
+    ]
+  },
+  "n7_dim3_all_targets_seeds_1_6": {
+    "summary": {
+      "frobenius": {
+        "mean": 2.335,
+        "min": 2.3043,
+        "max": 2.3962,
+        "runs": 6
+      },
+      "random": {
+        "mean": 2.8134,
+        "min": 2.3299,
+        "max": 2.9368,
+        "runs": 6
+      },
+      "standard": {
+        "mean": 2.7391,
+        "min": 2.7391,
+        "max": 2.7391,
+        "runs": 6
+      }
+    },
+    "note": "n=7 has exactly two Frobenius-stable 3-dim subspaces, neither a subfield; the six frobenius runs cover those two. Random seed 6 reached 2.330.",
+    "runs": [
+      {
+        "seed": 1,
+        "structure": "frobenius",
+        "d_star_mean": 2.3043,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 1,
+        "structure": "random",
+        "d_star_mean": 2.9368,
+        "unsat_targets": 95,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 1,
+        "structure": "standard",
+        "d_star_mean": 2.7391,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 2,
+        "structure": "frobenius",
+        "d_star_mean": 2.3043,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 2,
+        "structure": "random",
+        "d_star_mean": 2.9184,
+        "unsat_targets": 98,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 2,
+        "structure": "standard",
+        "d_star_mean": 2.7391,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 3,
+        "structure": "frobenius",
+        "d_star_mean": 2.3043,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 3,
+        "structure": "random",
+        "d_star_mean": 2.9271,
+        "unsat_targets": 96,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 3,
+        "structure": "standard",
+        "d_star_mean": 2.7391,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 4,
+        "structure": "frobenius",
+        "d_star_mean": 2.3043,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 4,
+        "structure": "random",
+        "d_star_mean": 2.8526,
+        "unsat_targets": 95,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 4,
+        "structure": "standard",
+        "d_star_mean": 2.7391,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 5,
+        "structure": "frobenius",
+        "d_star_mean": 2.3962,
+        "unsat_targets": 106,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 5,
+        "structure": "random",
+        "d_star_mean": 2.9158,
+        "unsat_targets": 95,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 5,
+        "structure": "standard",
+        "d_star_mean": 2.7391,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 6,
+        "structure": "frobenius",
+        "d_star_mean": 2.3962,
+        "unsat_targets": 106,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 6,
+        "structure": "random",
+        "d_star_mean": 2.3299,
+        "unsat_targets": 97,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 6,
+        "structure": "standard",
+        "d_star_mean": 2.7391,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      }
+    ]
+  },
+  "n11_dim5_critical_ratio_seeds_1_3": {
+    "summary": {
+      "standard": {
+        "mean": 3.2416,
+        "min": 3.2308,
+        "max": 3.2571,
+        "runs": 3
+      },
+      "random": {
+        "mean": 3.9116,
+        "min": 3.8684,
+        "max": 3.9474,
+        "runs": 3
+      }
+    },
+    "note": "x^11-1 factors [1,10] like x^131-1 [1,130]: no subfield, no small Frobenius-stable subspace. standard = span{1..z^4}.",
+    "runs": [
+      {
+        "seed": 1,
+        "structure": "standard",
+        "d_star_mean": 3.2368,
+        "unsat_targets": 38,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 1,
+        "structure": "random",
+        "d_star_mean": 3.8684,
+        "unsat_targets": 38,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 2,
+        "structure": "standard",
+        "d_star_mean": 3.2571,
+        "unsat_targets": 35,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 2,
+        "structure": "random",
+        "d_star_mean": 3.9189,
+        "unsat_targets": 37,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 3,
+        "structure": "standard",
+        "d_star_mean": 3.2308,
+        "unsat_targets": 39,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 3,
+        "structure": "random",
+        "d_star_mean": 3.9474,
+        "unsat_targets": 38,
+        "censored_above_dmax": 0
+      }
+    ]
+  },
+  "structural_fact_ecc2k130": "ord_131(2)=130 so x^131-1 = (x+1)*(irreducible deg 130); 131 prime so no proper subfield. Only Frobenius-stable subspace dims are 0,1,130,131.",
+  "reproduce": [
+    "sage factor_base_dor.sage --field 8 --dim 4 --selftest 8",
+    "sage factor_base_dor.sage --field 7 --dim 3 --targets 127 --seed S --structures frobenius,random,standard   # S=1..6",
+    "sage factor_base_dor.sage --field 11 --dim 5 --targets 48 --seed S --structures standard,random   # S=1..3"
+  ]
+}

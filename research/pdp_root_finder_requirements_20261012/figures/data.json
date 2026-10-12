@@ -1,0 +1,35 @@
+{
+  "_note": "Recorded values only, copied from the cited repository notes; nothing here is a new measurement. 'madds' are F4 multiply-adds (f4_fp_tower, round-2/3 build), 'word_xors' are 64-bit word XORs of the Boolean F4 (pq_f4_f2). Reference slopes and admissible degrees are calculations from README section 6.4.",
+  "prime_f4_kummer_p1": {
+    "source": "research/notes/index-calculus/RESEARCH_PKM_TOWER_ORACLE.md sections 11.7, 12.7, 13.7, 16.9",
+    "columns": ["N", "D", "madds"],
+    "m2": [[12, 5, 6.50e7], [14, 5, null], [16, 5, 6.18e9], [18, 5, 4.60e10], [20, 6, 4.84e11], [22, 6, null]],
+    "m3": [[9, 6, 1.59e8], [12, 6, 1.06e10], [15, 7, 3.19e12], [18, 7, 8.99e13]],
+    "m4": [[8, 6, 4.84e7], [12, 7, 8.55e10], [16, 7, 2.7e13]]
+  },
+  "binary_f4_split_dreg": {
+    "source": "research/pdp_split_dreg_20261011/README.md (runs-v2, g = 0, mean over 4 targets)",
+    "columns": ["n", "ell", "D", "word_xors"],
+    "unsplit_m3": [[11, 4, 7, 3.08e7], [13, 4, 7, 4.94e7], [17, 4, 7, 3.95e7], [19, 4, 7, 4.99e7], [13, 5, 7, 1.93e10], [17, 5, 7, 2.43e10]],
+    "chain_m3": [[11, 4, 4, 1.19e8], [13, 4, 4, 3.95e8], [17, 4, 4, 1.12e9], [19, 4, 4, 3.44e9], [13, 5, 4, 9.28e8], [17, 5, 4, 3.68e9]],
+    "two_way_m4": [[11, 3, 7, 2.80e10], [13, 3, 7, 2.95e10]],
+    "three_way_m4": [[11, 3, 4, 2.49e8], [13, 3, 4, 3.82e10]]
+  },
+  "binary_macaulay_refutation_degree": {
+    "source": "research/notes/index-calculus/RESEARCH_DREG_MEASUREMENT.md Results 2-3 (chained S3, m = 3)",
+    "columns": ["n", "ell", "D_refute"],
+    "rows": [[5, 4, 6], [7, 3, 6]]
+  },
+  "reference_slopes_bits_per_tower_variable": {
+    "derivation": "README 6.1: enumeration (m-1)/m, pair table floor(m/2)/m",
+    "enumeration": {"m2": 0.5, "m3": 0.6667, "m4": 0.75},
+    "pair_table": {"m2": 0.5, "m3": 0.3333, "m4": 0.5}
+  },
+  "reference_slopes_bits_per_rung_of_ell_binary": {"enumeration_m3": 2, "pair_table_m3": 1},
+  "admissible_macaulay_degree": {
+    "derivation": "README 6.4 (calculation, with the stated conversion models)",
+    "binary_m4_n131": 2,
+    "prime_m4_256bit": 3,
+    "prime_m5_256bit": 4
+  }
+}
