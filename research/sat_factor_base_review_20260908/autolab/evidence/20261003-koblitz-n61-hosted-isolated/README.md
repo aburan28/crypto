@@ -160,12 +160,13 @@ job). Confirmed YAML `workflow_dispatch` inputs: `targets`, `blocks`, `k`.
 
 Dispatched:
 
-| Actions run | Ref | Inputs | Outcome after ~40+ min |
+| Actions run | Ref | Inputs | Outcome |
 |---|---|---|---|
-| [38285023608](https://github.com/aburan28/crypto/actions/runs/38285023608) | `main` @ `be456ef51` | targets=65536, blocks=2, k=700 | `validate` still **queued** (never started) |
-| [38283955374](https://github.com/aburan28/crypto/actions/runs/38283955374) | `cursor/ic-n61-l65536-hosted-20261012` @ `43a69f870` | workflow_dispatch (sibling) | `validate` still **queued** |
+| [38288893010](https://github.com/aburan28/crypto/actions/runs/38288893010) | `main` (newest) | targets=65536, blocks=2, k=700 | left **live** — still queued/pending after ~15–20 min poll (no runner) |
+| [38285023608](https://github.com/aburan28/crypto/actions/runs/38285023608) | `main` @ `be456ef51` | targets=65536, blocks=2, k=700 | **cancelled** as superseded duplicate of 38288893010 |
+| [38283955374](https://github.com/aburan28/crypto/actions/runs/38283955374) | `cursor/ic-n61-l65536-hosted-20261012` | workflow_dispatch (sibling) | **cancelled** earlier (branch dispatch) |
 
-Repo Actions queue depth was ~100 queued / 0–1 in progress. Prior L=65536
-attempts on 2026-10-10 were cancelled (e.g. [38024710170](https://github.com/aburan28/crypto/actions/runs/38024710170)).
-No receipts to archive yet. Fallthrough: `koblitz.decomposition.n31_m2_dim16`
-evidence in [`../20261012-koblitz-decomposition-n31-m2-dim16/`](../20261012-koblitz-decomposition-n31-m2-dim16/README.md).
+Repo Actions queue depth remained saturated (same class as #1621). No measure
+job completed; no receipts to archive yet. Fallthrough after n31: binary
+`l8_pairs_baseline` evidence in
+[`../20261012-binary-decomposition-l8-pairs-baseline/`](../20261012-binary-decomposition-l8-pairs-baseline/README.md).
