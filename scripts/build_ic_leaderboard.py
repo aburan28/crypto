@@ -68,6 +68,7 @@ SOURCES = {
     "f6_small_cold_rows": "research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl",
     "f6_small_cold_replay": "research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json",
     "f6_ecbench_ladder": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
+    "f4_f5_f6_cross_family": "research/f4_f5_f6_cross_family_20261011/ANALYSIS.json",
     "n41_n53_counted": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
     "registry": "docs/curves/registry.json",
     "curves_schema": "docs/curves/ic/curves.schema.json",
@@ -647,6 +648,40 @@ def build() -> dict:
         "online_speedup": None,
         "fully_priced_cold_speedup": None,
     }
+    cross = load(SOURCES["f4_f5_f6_cross_family"])
+    if cross["schema"] != "f4f5f6-cross-family-analysis/v1":
+        raise SystemExit("review the F4/F5/F6 cross-family analysis before updating the leaderboard")
+
+    def med(arms: dict, arm: str, field: str):
+        v = (arms.get(arm) or {}).get(field)
+        return v["median"] if v else None
+
+    cross_rows = []
+    for key in ("K13", "R13", "K19", "R19"):
+        for c in cross["sessions"][key]["cells"]:
+            q = c["questions"]
+            cross_rows.append({
+                "session": key,
+                "family": c["family"],
+                "m": c["m"],
+                "curve": names(c["slug"])["slug"],
+                "base_points": (c["arms"].get("f6-ic") or {}).get("base_points"),
+                "rho_negation_s": med(c["arms"], "rho-negation", "s"),
+                "rho_strong_s": med(c["arms"], "rho-strong", "s"),
+                "inherited_s": med(c["arms"], "inherited-f4", "s"),
+                "f6_s": med(c["arms"], "f6-ic", "s"),
+                "f5_over_f4_w": (q.get("q1_f5_over_f4_word_xors") or {}).get("ratio", {}).get("median"),
+                "matrix_f4_over_inherited_w": (q.get("q2_matrix_f4_over_inherited_word_xors") or {}).get("ratio", {}).get("median"),
+                "log2_inherited_over_f6_w": q["q3_log2_inherited_over_f6_word_xors"]["log2_ratio"]["median"],
+                "f6_verdict": q["q3_log2_inherited_over_f6_word_xors"]["verdict"],
+            })
+    cross_diagnostic = {
+        "source": SOURCES["f4_f5_f6_cross_family"],
+        "class": "relabelling; stage diagnostic with solver word XORs unpriced (S is a lower bound)",
+        "rows": cross_rows,
+        "online_speedup": None,
+        "fully_priced_cold_speedup": None,
+    }
     rank_columns = load(SOURCES["n37_rank_columns"])
     if (rank_columns["status"] != "independently_replayed_l0_bounded_diagnostic"
             or rank_columns["selection"]["decision"] != "COUNTED_ENGINEERING_LEAD"
@@ -849,6 +884,7 @@ def build() -> dict:
         "n37_native_wall_diagnostic": native_wall_diagnostic,
         "f6_small_cold_diagnostic": small_cold_diagnostic,
         "f6_ecbench_ladder_diagnostic": ladder_diagnostic,
+        "f4_f5_f6_cross_family_diagnostic": cross_diagnostic,
         "curve_records": {
             "registry": SOURCES["registry"], "schema": SOURCES["curves_schema"], "yaml": SOURCES["curves_yaml"],
             "yaml_records": n_records,
@@ -1072,6 +1108,25 @@ def markdown(doc: dict) -> str:
         L.append(f"| {z['m']} | `{z['curve']}` | {z['targets']} | {z['rho_s']:.3f} | "
                  f"{z['f4_s_lower_over_rho']:.3f} | {z['f6_s_lower_over_rho']:.3f} | "
                  f"{z['median_log2_w4_over_w6']:.3f} |")
+    L.append("")
+    y = doc["f4_f5_f6_cross_family_diagnostic"]
+
+    def f3(v):
+        return "—" if v is None else f"{v:.3f}"
+    L += ["## F4, F5 and F6-IC on Koblitz and generic binary curves, outside tables A–C", "",
+          "Matrix F4, matrix F5, inherited F4 and F6-IC through `pdp3-binary` on eight public "
+          "one-target workloads per cell, beside same-target rho. IC `S` is a lower bound "
+          "(solver word XORs unpriced; F6-IC's geometric additions charged). `W` is counted "
+          "solver word XORs. Prime curves have no algebraic oracle in `ecbench`. "
+          f"Read the [analysis](../../{y['source']}).", "",
+          "| family | m | curve | base points | rho-negation S | strong rho S | inherited F4 S | F6-IC S "
+          "| W F5/F4 | W F4 matrix/inherited | median log2(W inh/W F6) |",
+          "|:--|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|"]
+    for z in y["rows"]:
+        L.append(f"| {z['family']} | {z['m']} | `{z['curve']}` | {z['base_points']} | "
+                 f"{f3(z['rho_negation_s'])} | {f3(z['rho_strong_s'])} | {f3(z['inherited_s'])} | "
+                 f"{f3(z['f6_s'])} | {f3(z['f5_over_f4_w'])} | {f3(z['matrix_f4_over_inherited_w'])} | "
+                 f"{f3(z['log2_inherited_over_f6_w'])} |")
     L.append("")
     v = doc["n41_n53_counted_diagnostic"]
 
@@ -1375,6 +1430,25 @@ def page(doc: dict, standalone: bool) -> str:
         P.append(f'<tr><td>{z["m"]}</td><td><code>{esc(z["curve"])}</code></td><td>{z["targets"]}</td>'
                  f'<td>{z["rho_s"]:.3f}</td><td>{z["f4_s_lower_over_rho"]:.3f}</td>'
                  f'<td>{z["f6_s_lower_over_rho"]:.3f}</td><td>{z["median_log2_w4_over_w6"]:.3f}</td></tr>')
+    P.append('</tbody></table></section>')
+    y = doc["f4_f5_f6_cross_family_diagnostic"]
+
+    def h3(v):
+        return "—" if v is None else f"{v:.3f}"
+    P.append(f'<section class="card" id="bounded-f4-f5-f6-cross-family"><h2>F4, F5 and F6-IC on Koblitz and generic binary curves, outside the priced tables</h2>'
+             '<p>Matrix F4, matrix F5, inherited F4 and F6-IC through <code>pdp3-binary</code> on eight public '
+             'one-target workloads per cell, beside same-target rho. IC S is a lower bound: solver word XORs '
+             'are unpriced and F6-IC\'s geometric additions are charged. W is counted solver word XORs. '
+             'Prime curves have no algebraic oracle in <code>ecbench</code>. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(y["source"])}">Analysis</a>.</p>')
+    P.append('<table><thead><tr><th>Family</th><th>m</th><th>Curve</th><th>Base points</th><th>Rho-negation S</th>'
+             '<th>Strong rho S</th><th>Inherited F4 S</th><th>F6-IC S</th><th>W F5/F4</th>'
+             '<th>W matrix F4/inherited</th><th>Median log₂(W inh/W F6)</th></tr></thead><tbody>')
+    for z in y["rows"]:
+        P.append(f'<tr><td>{esc(z["family"])}</td><td>{z["m"]}</td><td><code>{esc(z["curve"])}</code></td>'
+                 f'<td>{z["base_points"]}</td><td>{h3(z["rho_negation_s"])}</td><td>{h3(z["rho_strong_s"])}</td>'
+                 f'<td>{h3(z["inherited_s"])}</td><td>{h3(z["f6_s"])}</td><td>{h3(z["f5_over_f4_w"])}</td>'
+                 f'<td>{h3(z["matrix_f4_over_inherited_w"])}</td><td>{h3(z["log2_inherited_over_f6_w"])}</td></tr>')
     P.append('</tbody></table></section>')
     v = doc["n41_n53_counted_diagnostic"]
 

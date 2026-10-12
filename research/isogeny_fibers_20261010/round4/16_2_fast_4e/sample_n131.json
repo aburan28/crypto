@@ -1,0 +1,347 @@
+{
+  "analytic_members_of_G": {
+    "binary_ld": {
+      "formula": "3(L-1)+8(w-1) M, 5(L-1)+5(w-1) S, L=bitlen(r), w=popcount(r)",
+      "mul": 667,
+      "sqr": 820
+    },
+    "closed_form_chain": {
+      "mul": 1,
+      "sqr": 130,
+      "trace": 3
+    },
+    "closed_form_table": {
+      "halftrace_table_lookups": 17,
+      "mul": 1,
+      "sqr": 0,
+      "trace": 3
+    },
+    "tnaf_ld": {
+      "formula": "8(z-1) M, 3(len-1)+5(z-1) S, len/z = tau-NAF length/nonzeros",
+      "mul": 352,
+      "sqr": 616
+    }
+  },
+  "bench": [
+    {
+      "rows": [
+        {
+          "contended_wall_ns_per_check_max": 6089.80419921875,
+          "contended_wall_ns_per_check_median": 5378.47216796875,
+          "contended_wall_ns_per_check_min": 5165.93359375,
+          "method": "closed_form_chain",
+          "points": 2048,
+          "reps": 5
+        },
+        {
+          "contended_wall_ns_per_check_max": 86.96435546875,
+          "contended_wall_ns_per_check_median": 81.4794921875,
+          "contended_wall_ns_per_check_min": 75.55712890625,
+          "method": "closed_form_table",
+          "points": 2048,
+          "reps": 5
+        },
+        {
+          "contended_wall_ns_per_check_max": 279837.4443359375,
+          "contended_wall_ns_per_check_median": 256660.880859375,
+          "contended_wall_ns_per_check_min": 182041.458984375,
+          "method": "binary_ld_rP",
+          "points": 2048,
+          "reps": 5
+        },
+        {
+          "contended_wall_ns_per_check_max": 167744.72021484375,
+          "contended_wall_ns_per_check_median": 163447.3984375,
+          "contended_wall_ns_per_check_min": 158556.357421875,
+          "method": "tnaf_ld_rP",
+          "points": 2048,
+          "reps": 5
+        }
+      ],
+      "set": "uniform"
+    },
+    {
+      "rows": [
+        {
+          "contended_wall_ns_per_check_max": 22989.0537109375,
+          "contended_wall_ns_per_check_median": 22841.52099609375,
+          "contended_wall_ns_per_check_min": 19189.9873046875,
+          "method": "closed_form_chain",
+          "points": 2048,
+          "reps": 5
+        },
+        {
+          "contended_wall_ns_per_check_max": 153.71728515625,
+          "contended_wall_ns_per_check_median": 124.03857421875,
+          "contended_wall_ns_per_check_min": 121.6123046875,
+          "method": "closed_form_table",
+          "points": 2048,
+          "reps": 5
+        },
+        {
+          "contended_wall_ns_per_check_max": 251130.46435546875,
+          "contended_wall_ns_per_check_median": 232170.0888671875,
+          "contended_wall_ns_per_check_min": 152431.05029296875,
+          "method": "binary_ld_rP",
+          "points": 2048,
+          "reps": 5
+        },
+        {
+          "contended_wall_ns_per_check_max": 163561.9130859375,
+          "contended_wall_ns_per_check_median": 160293.73876953125,
+          "contended_wall_ns_per_check_min": 106441.6044921875,
+          "method": "tnaf_ld_rP",
+          "points": 2048,
+          "reps": 5
+        }
+      ],
+      "set": "members_of_G"
+    }
+  ],
+  "chain_vs_table_disagreements": 0,
+  "checks": {
+    "field_vs_library_and_halftrace_identity": true,
+    "ld_tnaf_vs_library_affine": true,
+    "order": {
+      "log2_norm_rho": 131,
+      "norm_tau_n_minus_1_equals_order": true,
+      "order_formula": "2722258935367507707729280517973639940516",
+      "order_mod_8": "4",
+      "r": "680564733841876926932320129493409985129",
+      "r_bits": 130,
+      "r_equals_ECC2K130_literature_value": true,
+      "r_popcount": 36,
+      "r_probable_prime": true,
+      "tnaf_length": 133,
+      "tnaf_nonzero": 45
+    }
+  },
+  "classification_wall_seconds": 311.091779799,
+  "clmul_kernel": "pclmulqdq",
+  "confusion": [
+    {
+      "bits_00": 249897,
+      "bits_01": 0,
+      "bits_10": 0,
+      "bits_11": 0,
+      "in_4E": true,
+      "test_accept": 249897,
+      "test_reject": 0,
+      "true_coset": 0
+    },
+    {
+      "bits_00": 0,
+      "bits_01": 0,
+      "bits_10": 249504,
+      "bits_11": 0,
+      "in_4E": false,
+      "test_accept": 0,
+      "test_reject": 249504,
+      "true_coset": 1
+    },
+    {
+      "bits_00": 0,
+      "bits_01": 250049,
+      "bits_10": 0,
+      "bits_11": 0,
+      "in_4E": false,
+      "test_accept": 0,
+      "test_reject": 250049,
+      "true_coset": 2
+    },
+    {
+      "bits_00": 0,
+      "bits_01": 0,
+      "bits_10": 0,
+      "bits_11": 250559,
+      "in_4E": false,
+      "test_accept": 0,
+      "test_reject": 250559,
+      "true_coset": 3
+    }
+  ],
+  "counted_ops_all_points": {
+    "binary_ld_rP": {
+      "checks": 1000009,
+      "halftrace_table_lookups_per_check": 0.0,
+      "inv_per_check": 0.0,
+      "mul_per_check": 665.4986745119294,
+      "sqr_per_check": 818.9980200178198,
+      "trace_per_check": 0.0
+    },
+    "closed_form_chain": {
+      "checks": 1000009,
+      "halftrace_table_lookups_per_check": 0.0,
+      "inv_per_check": 0.0,
+      "mul_per_check": 0.49994050053549516,
+      "sqr_per_check": 64.99226506961438,
+      "trace_per_check": 1.9998800010799902
+    },
+    "closed_form_chain_sqr_min_max": [
+      0,
+      130
+    ],
+    "closed_form_table": {
+      "checks": 1000009,
+      "halftrace_table_lookups_per_check": 8.498988509103418,
+      "inv_per_check": 0.0,
+      "mul_per_check": 0.49994050053549516,
+      "sqr_per_check": 0.0,
+      "trace_per_check": 1.9998800010799902
+    },
+    "points": 1000009,
+    "tnaf_ld_rP": {
+      "checks": 1000009,
+      "halftrace_table_lookups_per_check": 0.0,
+      "inv_per_check": 0.0,
+      "mul_per_check": 350.4996695029745,
+      "sqr_per_check": 614.2494677547902,
+      "trace_per_check": 0.0
+    }
+  },
+  "counted_ops_members_of_G": {
+    "binary_ld_rP": {
+      "checks": 249896,
+      "halftrace_table_lookups_per_check": 0.0,
+      "inv_per_check": 0.0,
+      "mul_per_check": 661.0,
+      "sqr_per_check": 816.0,
+      "trace_per_check": 0.0
+    },
+    "binary_mul_min_max": [
+      661,
+      661
+    ],
+    "closed_form_chain": {
+      "checks": 249896,
+      "halftrace_table_lookups_per_check": 0.0,
+      "inv_per_check": 0.0,
+      "mul_per_check": 1.0,
+      "sqr_per_check": 130.0,
+      "trace_per_check": 3.0
+    },
+    "closed_form_table": {
+      "checks": 249896,
+      "halftrace_table_lookups_per_check": 17.0,
+      "inv_per_check": 0.0,
+      "mul_per_check": 1.0,
+      "sqr_per_check": 0.0,
+      "trace_per_check": 3.0
+    },
+    "points": 249896,
+    "tnaf_ld_rP": {
+      "checks": 249896,
+      "halftrace_table_lookups_per_check": 0.0,
+      "inv_per_check": 0.0,
+      "mul_per_check": 346.0,
+      "sqr_per_check": 609.0,
+      "trace_per_check": 0.0
+    }
+  },
+  "curve": "y^2 + xy = x^3 + 1 over F_2^131 (a = 0 Koblitz), the ECC2K-130 curve",
+  "errors_total": 0,
+  "generator_x": "00000000000000067f2b72a64c1ec25107a1ebe28917d1da",
+  "library_oracle": {
+    "agree": 2000,
+    "checked": 2000,
+    "contended_wall_ns_per_check": 2055385.4585,
+    "disagree": 0,
+    "note": "BinaryCurve::is_valid_public_point (on-curve + affine [r]P); O excluded since it returns false for O by design"
+  },
+  "mode": "sample",
+  "modulus_low_terms": [
+    0,
+    2,
+    3,
+    8
+  ],
+  "points_by_stream_and_true_coset": {
+    "balanced:k0": [
+      100000,
+      0,
+      0,
+      0
+    ],
+    "balanced:k1": [
+      0,
+      100000,
+      0,
+      0
+    ],
+    "balanced:k2": [
+      0,
+      0,
+      100000,
+      0
+    ],
+    "balanced:k3": [
+      0,
+      0,
+      0,
+      100000
+    ],
+    "edge:-G": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "edge:-P4": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "edge:G": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "edge:G+P4": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "edge:G+T": [
+      0,
+      0,
+      1,
+      0
+    ],
+    "edge:G-P4": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "edge:O": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "edge:P4": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "edge:T": [
+      0,
+      0,
+      1,
+      0
+    ],
+    "uniform": [
+      149894,
+      149502,
+      150047,
+      150557
+    ]
+  },
+  "points_total": 1000009,
+  "seed": 131,
+  "tnaf_vs_binary_disagreements": 0
+}

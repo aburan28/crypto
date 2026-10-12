@@ -33,6 +33,7 @@ pub mod kdf;
 pub mod keys;
 pub mod pqc;
 pub mod prime_hyperelliptic;
+pub mod store;
 pub mod symmetric;
 pub mod tls13;
 pub mod utils;

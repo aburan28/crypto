@@ -1,0 +1,10 @@
+# 2026-10-11T20:18:45Z r4_16_1_m_crossover --curves 19:0 --ms 2,3,4 --targets 24 --node-budget 4096 --cell-wall-s 300
+n=19 a=0 r=130873 h=4  ns/XOR 0.691 ns/add 142.0  GAE/XOR 0.00487
+  n=19 m=2 ell=10 x-direct    |F|= 1079 cols= 537 vars=20 found 13 refuted 11 budget  0 unbuildable  0 truth 13 gate 0 | XOR/att 7.546e5 XOR/rel 1.393e6 S_rel 1.008e4 wall 0.2s
+  n=19 m=2 ell=10 sym         |F|=  985 cols= 245 vars=19 found 10 refuted 14 budget  0 unbuildable  0 truth 10 gate 0 | XOR/att 6.251e5 XOR/rel 1.500e6 S_rel 4.965e3 wall 0.2s
+  n=19 m=3 ell=8 x-direct    |F|=  257 cols= 127 vars=24 found  9 refuted  0 budget 15 unbuildable  0 truth 24 gate 0 | XOR/att 2.669e9 XOR/rel 7.118e9 S_rel 1.226e7 wall 92.5s
+  n=19 m=3 ell=8 x-chained   |F|=  257 cols= 127 vars=43 found 24 refuted  0 budget  0 unbuildable  0 truth 24 gate 0 | XOR/att 4.646e6 XOR/rel 4.646e6 S_rel 8.002e3 wall 1.0s
+  n=19 m=3 ell=8 sym         |F|=  245 cols=  61 vars=22 found  6 refuted  0 budget 18 unbuildable  0 truth 18 gate 0 | XOR/att 8.618e6 XOR/rel 3.447e7 S_rel 2.875e4 wall 7.3s
+  n=19 m=4 ell=6 x-chained   |F|=   87 cols=  42 vars=62 found 23 refuted  0 budget  1 unbuildable  0 truth 24 gate 0 | XOR/att 2.605e7 XOR/rel 2.719e7 S_rel 1.573e4 wall 7.3s
+  n=19 m=4 ell=6 sym-chained |F|=   49 cols=  12 vars=59 found  0 refuted  0 budget 24 unbuildable  0 truth  1 gate 0 | XOR/att 1.800e7 XOR/rel inf S_rel inf wall 5.2s
+# exit 0 at 2026-10-11T20:20:39Z
