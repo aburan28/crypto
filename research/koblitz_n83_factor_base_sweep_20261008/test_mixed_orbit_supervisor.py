@@ -61,9 +61,10 @@ class MixedOrbitSupervisorTests(unittest.TestCase):
             build, output = root / "build", root / "run"
             auth = root / "authorization.json"
             record = {
-                "schema": "n83.additional-local-budget/v1", "study": gate.STUDY,
+                "schema": "n83.additional-local-budget/v2", "study": gate.STUDY,
                 "purpose": "mixed_orbit_two_residual_first_gate",
-                "prior_pilot_charged_seconds": "11700",
+                "prior_total_charged_seconds": "12600",
+                "prior_import_audit_sha256": gate.PRIOR_IMPORT_AUDIT_SHA256,
                 "build_dir": str(build), "output_dir": str(output),
                 "additional_authorized_seconds": "2399",
                 "user_approval_reference": "synthetic-test-only",
@@ -76,8 +77,26 @@ class MixedOrbitSupervisorTests(unittest.TestCase):
             self.assertFalse(build.exists())
             record["additional_authorized_seconds"] = "2400"
             self.assertIsNone(gate.authorization_error(record, build, output))
-            record["prior_pilot_charged_seconds"] = "10800"
-            self.assertIn("prior_pilot", gate.authorization_error(record, build, output))
+            record["prior_total_charged_seconds"] = "11700"
+            self.assertIn("prior_total", gate.authorization_error(record, build, output))
+            record["prior_total_charged_seconds"] = "12600"
+            record["prior_import_audit_sha256"] = "0" * 64
+            self.assertIn("prior_import_audit", gate.authorization_error(record, build, output))
+            record["prior_import_audit_sha256"] = gate.PRIOR_IMPORT_AUDIT_SHA256
+            record["schema"] = "n83.additional-local-budget/v1"
+            self.assertIn("schema", gate.authorization_error(record, build, output))
+
+    def test_prior_import_receipt_is_exact_and_charged(self):
+        self.assertIsNone(gate.prior_import_evidence_error(gate.ROOT))
+        with tempfile.TemporaryDirectory(prefix="n83-mixed-prior-") as folder:
+            root = Path(folder)
+            path = root / gate.PRIOR_IMPORT_AUDIT
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps({"status": "PASS", "conservative_charge_seconds": 900}))
+            self.assertIn("bytes changed", gate.prior_import_evidence_error(root))
+            with patch.object(gate, "sha256_file",
+                              return_value=gate.PRIOR_IMPORT_AUDIT_SHA256):
+                self.assertIn("disposition", gate.prior_import_evidence_error(root))
 
     def test_receipts_reject_false_success_and_bad_counters(self):
         verify = {
@@ -120,9 +139,10 @@ class MixedOrbitSupervisorTests(unittest.TestCase):
             envelope.write_bytes(b"synthetic envelope object")
             auth = root / "authorization.json"
             auth.write_text(json.dumps({
-                "schema": "n83.additional-local-budget/v1", "study": gate.STUDY,
+                "schema": "n83.additional-local-budget/v2", "study": gate.STUDY,
                 "purpose": "mixed_orbit_two_residual_first_gate",
-                "prior_pilot_charged_seconds": "11700",
+                "prior_total_charged_seconds": "12600",
+                "prior_import_audit_sha256": gate.PRIOR_IMPORT_AUDIT_SHA256,
                 "build_dir": str(build_dir), "output_dir": str(output),
                 "additional_authorized_seconds": "2400",
                 "user_approval_reference": "synthetic-test-only",

@@ -3,7 +3,7 @@
 
 Preparing or testing this file launches no retained N83 job. ``build`` and
 ``run`` require a separate, run-specific grant beyond the fully charged
-11,700-second local allowance. Each stage is launched once and charged its
+12,600-second local allowance. Each stage is launched once and charged its
 entire declared cap even when it fails early.
 """
 
@@ -42,6 +42,8 @@ CORPUS_BLAKE3 = "831eaa7be2387634fd610f6706103b2af9b4e274f0db59923c0280af3cbed74
 SMALL_MANIFEST = f"research/{STUDY}/verification/matched-k1182-k2048-900s-20261011/evidence-01/panel-k1182/manifest.json"
 ENVELOPE_MANIFEST = f"research/{STUDY}/verification/remaining-budget-k2048-20261010/manifest.json"
 CORPUS = f"research/{STUDY}/pilot-01/probe-corpus.json"
+PRIOR_IMPORT_AUDIT = f"research/{STUDY}/verification/mixed-orbit-import-900s-20261012/audit.json"
+PRIOR_IMPORT_AUDIT_SHA256 = "76a8bf74e46feb0ef4fbe650395f39733f4ff95d31c35f8829cb506a9ad04c7d"
 SOURCE_PATHS = (
     "examples/koblitz_n83_mixed_orbit_worker.rs",
     "src/cryptanalysis/koblitz_large_prime.rs",
@@ -51,7 +53,7 @@ SOURCE_PATHS = (
     f"research/{STUDY}/chain_search_supervisor.py",
     f"research/{STUDY}/structured_orbit_search_supervisor.py",
     f"research/{STUDY}/compact_probe_supervisor.py",
-    SMALL_MANIFEST, ENVELOPE_MANIFEST, CORPUS,
+    SMALL_MANIFEST, ENVELOPE_MANIFEST, CORPUS, PRIOR_IMPORT_AUDIT,
 )
 BUILD_CAP = 600
 BUILD_WALL = 450
@@ -76,10 +78,11 @@ def authorization_error(record: object, build: Path, output: Path) -> str | None
     if not isinstance(record, dict):
         return "additional-budget record must be an object"
     expected = {
-        "schema": "n83.additional-local-budget/v1",
+        "schema": "n83.additional-local-budget/v2",
         "study": STUDY,
         "purpose": "mixed_orbit_two_residual_first_gate",
-        "prior_pilot_charged_seconds": "11700",
+        "prior_total_charged_seconds": "12600",
+        "prior_import_audit_sha256": PRIOR_IMPORT_AUDIT_SHA256,
         "build_dir": str(build.resolve()),
         "output_dir": str(output.resolve()),
     }
@@ -126,6 +129,24 @@ def source_hashes(checkout: Path) -> dict[str, str]:
     return {relative: sha256_file(checkout / relative) for relative in SOURCE_PATHS}
 
 
+def prior_import_evidence_error(checkout: Path) -> str | None:
+    path = checkout / PRIOR_IMPORT_AUDIT
+    try:
+        if sha256_file(path) != PRIOR_IMPORT_AUDIT_SHA256:
+            return "prior import audit bytes changed"
+        evidence = json.loads(path.read_text())
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return "prior import audit missing or malformed"
+    if (not isinstance(evidence, dict)
+            or evidence.get("schema") != "n83.mixed-orbit-import-900-audit/v1"
+            or evidence.get("status") != "PASS"
+            or evidence.get("conservative_charge_seconds") != 900
+            or evidence.get("solver_search_executed") is not False
+            or evidence.get("total_index_calculus_runtime_ms") is not None):
+        return "prior import audit disposition mismatch"
+    return None
+
+
 def is_linux_elf(path: Path) -> bool:
     if not path.is_file():
         return False
@@ -143,6 +164,9 @@ def build(authorization: Path, build_dir: Path, output_dir: Path,
     authorization = authorization.resolve(strict=True)
     _, auth_hash = load_authorization(authorization, build_dir, output_dir)
     commit = clean_commit(checkout)
+    prior_error = prior_import_evidence_error(checkout)
+    if prior_error:
+        raise ValueError(prior_error)
     sources = source_hashes(checkout)
     image = image_identity()
     registry = Path(os.environ.get("CARGO_HOME", str(Path.home() / ".cargo"))) / "registry"
@@ -514,6 +538,9 @@ def run(authorization: Path, build_dir: Path, output_dir: Path,
     envelope_object = envelope_object.resolve(strict=True)
     auth, auth_hash = load_authorization(authorization, build_dir, output_dir)
     commit = clean_commit(checkout)
+    prior_error = prior_import_evidence_error(checkout)
+    if prior_error:
+        raise ValueError(prior_error)
     binary = build_dir / "worker"
     build_receipt = build_dir / "build.json"
     build_record = json.loads(build_receipt.read_text())
@@ -684,9 +711,10 @@ def run(authorization: Path, build_dir: Path, output_dir: Path,
                   + (CLEANUP_RESERVE if stages else 0))
     total_charge = BUILD_CAP + run_charge
     write_new_json(output_dir / "budget.json", {
-        "schema": "n83.mixed-orbit-supervisor-budget/v1",
+        "schema": "n83.mixed-orbit-supervisor-budget/v2",
         "authorization_sha256": auth_hash,
-        "prior_pilot_charged_seconds": "11700",
+        "prior_total_charged_seconds": "12600",
+        "prior_import_audit_sha256": PRIOR_IMPORT_AUDIT_SHA256,
         "additional_authorized_seconds": auth["additional_authorized_seconds"],
         "build_conservative_charge_seconds": BUILD_CAP,
         "run_conservative_charge_seconds": run_charge,
