@@ -1,0 +1,522 @@
+{
+  "bound": "P(rank >= K after q queries) <= 0 if q < K; otherwise min(1, q*min(M,r)/(r*K)), where M=binomial(B+m-1,m)",
+  "cases": [
+    {
+      "curve_a": 0,
+      "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+      "minimum_queries_before_half_rank_probability_is_possible": "1370858477239289138",
+      "orbit_columns": 64,
+      "point_count": 10624,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "1208925819615398107691875"
+      },
+      "required_rank_rows": 64,
+      "summands": 2,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "56440000"
+      }
+    },
+    {
+      "curve_a": 0,
+      "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+      "minimum_queries_before_half_rank_probability_is_possible": "387029496679642",
+      "orbit_columns": 64,
+      "point_count": 10624,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "1208925819615397477151250"
+      },
+      "required_rank_rows": 64,
+      "summands": 3,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "199910480000"
+      }
+    },
+    {
+      "curve_a": 0,
+      "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+      "minimum_queries_before_half_rank_probability_is_possible": "145677800576",
+      "orbit_columns": 64,
+      "point_count": 10624,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "4835703278461592433371378",
+        "numerator": "2417851639218239639078125"
+      },
+      "required_rank_rows": 64,
+      "summands": 4,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "531112167740000"
+      }
+    },
+    {
+      "curve_a": 0,
+      "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+      "minimum_queries_before_half_rank_probability_is_possible": "68534909",
+      "orbit_columns": 64,
+      "point_count": 10624,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "1208925818528638503293000"
+      },
+      "required_rank_rows": 64,
+      "summands": 5,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "1128932023748144000"
+      }
+    },
+    {
+      "curve_a": 0,
+      "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+      "minimum_queries_before_half_rank_probability_is_possible": "38688",
+      "orbit_columns": 64,
+      "point_count": 10624,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "1208910163416590433327375"
+      },
+      "required_rank_rows": 64,
+      "summands": 6,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "1999903080069837096000"
+      }
+    },
+    {
+      "curve_a": 0,
+      "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+      "minimum_queries_before_half_rank_probability_is_possible": "342738812637773187",
+      "orbit_columns": 256,
+      "point_count": 42496,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "1208925819615398108091686"
+      },
+      "required_rank_rows": 256,
+      "summands": 2,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "902976256"
+      }
+    },
+    {
+      "curve_a": 0,
+      "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+      "minimum_queries_before_half_rank_probability_is_possible": "24194466514032",
+      "orbit_columns": 256,
+      "point_count": 42496,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "1208925819615362694491646"
+      },
+      "required_rank_rows": 256,
+      "summands": 3,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "12791561642496"
+      }
+    },
+    {
+      "curve_a": 0,
+      "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+      "minimum_queries_before_half_rank_probability_is_possible": "2277179841",
+      "orbit_columns": 256,
+      "point_count": 42496,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "1208925819166109058836640"
+      },
+      "required_rank_rows": 256,
+      "summands": 4,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "135907144561109376"
+      }
+    },
+    {
+      "curve_a": 0,
+      "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+      "minimum_queries_before_half_rank_probability_is_possible": "267904",
+      "orbit_columns": 256,
+      "point_count": 42496,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "1208923515115298921279250"
+      },
+      "required_rank_rows": 256,
+      "summands": 5,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "1155210728769429696000"
+      }
+    },
+    {
+      "curve_a": 0,
+      "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+      "minimum_queries_before_half_rank_probability_is_possible": "256",
+      "orbit_columns": 256,
+      "point_count": 42496,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "1",
+        "numerator": "0"
+      },
+      "required_rank_rows": 256,
+      "summands": 6,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "2417851639230796216685689"
+      }
+    },
+    {
+      "curve_a": 0,
+      "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+      "minimum_queries_before_half_rank_probability_is_possible": "146237199633210983",
+      "orbit_columns": 600,
+      "point_count": 99600,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "1208925819615398102509106"
+      },
+      "required_rank_rows": 600,
+      "summands": 2,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "4960129800"
+      }
+    },
+    {
+      "curve_a": 0,
+      "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+      "minimum_queries_before_half_rank_probability_is_possible": "4404646481995",
+      "orbit_columns": 600,
+      "point_count": 99600,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "1208925819615214693442868"
+      },
+      "required_rank_rows": 600,
+      "summands": 3,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "164679616113200"
+      }
+    },
+    {
+      "curve_a": 0,
+      "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+      "minimum_queries_before_half_rank_probability_is_possible": "176888106",
+      "orbit_columns": 600,
+      "point_count": 99600,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "4835703278461592433371378",
+        "numerator": "2417851638453553297871715"
+      },
+      "required_rank_rows": 600,
+      "summands": 4,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "4100645950930764900"
+      }
+    },
+    {
+      "curve_a": 0,
+      "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+      "minimum_queries_before_half_rank_probability_is_possible": "8880",
+      "orbit_columns": 600,
+      "point_count": 99600,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "12089258196153981083428445",
+        "numerator": "6044242207022822845228914"
+      },
+      "required_rank_rows": 600,
+      "summands": 5,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "81688147859301581419920"
+      }
+    },
+    {
+      "curve_a": 0,
+      "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+      "minimum_queries_before_half_rank_probability_is_possible": "600",
+      "orbit_columns": 600,
+      "point_count": 99600,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "1",
+        "numerator": "0"
+      },
+      "required_rank_rows": 600,
+      "summands": 6,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "2417851639230796216685689",
+        "numerator": "2417851639230796216685689"
+      }
+    },
+    {
+      "curve_a": 1,
+      "curve_slug": "icv1-f2m83-t6151469093347-cdcc5432",
+      "minimum_queries_before_half_rank_probability_is_possible": "4858844002",
+      "orbit_columns": 64,
+      "point_count": 10624,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "8569786107849059",
+        "numerator": "4284893053381875"
+      },
+      "required_rank_rows": 64,
+      "summands": 2,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "8569786107849059",
+        "numerator": "56440000"
+      }
+    },
+    {
+      "curve_a": 1,
+      "curve_slug": "icv1-f2m83-t6151469093347-cdcc5432",
+      "minimum_queries_before_half_rank_probability_is_possible": "1371780",
+      "orbit_columns": 64,
+      "point_count": 10624,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "8569786107849059",
+        "numerator": "4284890599123750"
+      },
+      "required_rank_rows": 64,
+      "summands": 3,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "8569786107849059",
+        "numerator": "199910480000"
+      }
+    },
+    {
+      "curve_a": 1,
+      "curve_slug": "icv1-f2m83-t6151469093347-cdcc5432",
+      "minimum_queries_before_half_rank_probability_is_possible": "517",
+      "orbit_columns": 64,
+      "point_count": 10624,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "8569786107849059",
+        "numerator": "4282091852403750"
+      },
+      "required_rank_rows": 64,
+      "summands": 4,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "8569786107849059",
+        "numerator": "531112167740000"
+      }
+    },
+    {
+      "curve_a": 1,
+      "curve_slug": "icv1-f2m83-t6151469093347-cdcc5432",
+      "minimum_queries_before_half_rank_probability_is_possible": "64",
+      "orbit_columns": 64,
+      "point_count": 10624,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "1",
+        "numerator": "0"
+      },
+      "required_rank_rows": 64,
+      "summands": 5,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "8569786107849059",
+        "numerator": "8569786107849059"
+      }
+    },
+    {
+      "curve_a": 1,
+      "curve_slug": "icv1-f2m83-t6151469093347-cdcc5432",
+      "minimum_queries_before_half_rank_probability_is_possible": "64",
+      "orbit_columns": 64,
+      "point_count": 10624,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "1",
+        "numerator": "0"
+      },
+      "required_rank_rows": 64,
+      "summands": 6,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "8569786107849059",
+        "numerator": "8569786107849059"
+      }
+    },
+    {
+      "curve_a": 1,
+      "curve_slug": "icv1-f2m83-t6151469093347-cdcc5432",
+      "minimum_queries_before_half_rank_probability_is_possible": "1214796751",
+      "orbit_columns": 256,
+      "point_count": 42496,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "8569786107849059",
+        "numerator": "4284893051234250"
+      },
+      "required_rank_rows": 256,
+      "summands": 2,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "8569786107849059",
+        "numerator": "902976256"
+      }
+    },
+    {
+      "curve_a": 1,
+      "curve_slug": "icv1-f2m83-t6151469093347-cdcc5432",
+      "minimum_queries_before_half_rank_probability_is_possible": "85755",
+      "orbit_columns": 256,
+      "point_count": 42496,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "8569786107849059",
+        "numerator": "4284873348010164"
+      },
+      "required_rank_rows": 256,
+      "summands": 3,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "8569786107849059",
+        "numerator": "12791561642496"
+      }
+    },
+    {
+      "curve_a": 1,
+      "curve_slug": "icv1-f2m83-t6151469093347-cdcc5432",
+      "minimum_queries_before_half_rank_probability_is_possible": "256",
+      "orbit_columns": 256,
+      "point_count": 42496,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "1",
+        "numerator": "0"
+      },
+      "required_rank_rows": 256,
+      "summands": 4,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "8569786107849059",
+        "numerator": "8569786107849059"
+      }
+    },
+    {
+      "curve_a": 1,
+      "curve_slug": "icv1-f2m83-t6151469093347-cdcc5432",
+      "minimum_queries_before_half_rank_probability_is_possible": "256",
+      "orbit_columns": 256,
+      "point_count": 42496,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "1",
+        "numerator": "0"
+      },
+      "required_rank_rows": 256,
+      "summands": 5,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "8569786107849059",
+        "numerator": "8569786107849059"
+      }
+    },
+    {
+      "curve_a": 1,
+      "curve_slug": "icv1-f2m83-t6151469093347-cdcc5432",
+      "minimum_queries_before_half_rank_probability_is_possible": "256",
+      "orbit_columns": 256,
+      "point_count": 42496,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "1",
+        "numerator": "0"
+      },
+      "required_rank_rows": 256,
+      "summands": 6,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "8569786107849059",
+        "numerator": "8569786107849059"
+      }
+    },
+    {
+      "curve_a": 1,
+      "curve_slug": "icv1-f2m83-t6151469093347-cdcc5432",
+      "minimum_queries_before_half_rank_probability_is_possible": "518320274",
+      "orbit_columns": 600,
+      "point_count": 99600,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "8569786107849059",
+        "numerator": "4284893053419059"
+      },
+      "required_rank_rows": 600,
+      "summands": 2,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "8569786107849059",
+        "numerator": "4960129800"
+      }
+    },
+    {
+      "curve_a": 1,
+      "curve_slug": "icv1-f2m83-t6151469093347-cdcc5432",
+      "minimum_queries_before_half_rank_probability_is_possible": "15612",
+      "orbit_columns": 600,
+      "point_count": 99600,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "25709358323547177",
+        "numerator": "12854067435715826"
+      },
+      "required_rank_rows": 600,
+      "summands": 3,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "8569786107849059",
+        "numerator": "164679616113200"
+      }
+    },
+    {
+      "curve_a": 1,
+      "curve_slug": "icv1-f2m83-t6151469093347-cdcc5432",
+      "minimum_queries_before_half_rank_probability_is_possible": "600",
+      "orbit_columns": 600,
+      "point_count": 99600,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "1",
+        "numerator": "0"
+      },
+      "required_rank_rows": 600,
+      "summands": 4,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "8569786107849059",
+        "numerator": "8569786107849059"
+      }
+    },
+    {
+      "curve_a": 1,
+      "curve_slug": "icv1-f2m83-t6151469093347-cdcc5432",
+      "minimum_queries_before_half_rank_probability_is_possible": "600",
+      "orbit_columns": 600,
+      "point_count": 99600,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "1",
+        "numerator": "0"
+      },
+      "required_rank_rows": 600,
+      "summands": 5,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "8569786107849059",
+        "numerator": "8569786107849059"
+      }
+    },
+    {
+      "curve_a": 1,
+      "curve_slug": "icv1-f2m83-t6151469093347-cdcc5432",
+      "minimum_queries_before_half_rank_probability_is_possible": "600",
+      "orbit_columns": 600,
+      "point_count": 99600,
+      "probability_ceiling_at_preceding_query_count": {
+        "denominator": "1",
+        "numerator": "0"
+      },
+      "required_rank_rows": 600,
+      "summands": 6,
+      "uniform_all_target_one_query_hit_ceiling": {
+        "denominator": "8569786107849059",
+        "numerator": "8569786107849059"
+      }
+    }
+  ],
+  "oracle_model": "at most one full-smooth relation row per query; K independent rows required for rank K",
+  "schema": "n83.rank-query-screen/v1",
+  "scope_limit": "does not apply to biased query targets, multiple rows returned per query, large-prime partials, or solvers whose accepted event differs; no runtime inference",
+  "selected_best_total_runtime": null,
+  "study": "koblitz_n83_factor_base_sweep_20261008",
+  "support_moments_sha256": "38abcfd36691b9565f97b6d86d4e89ce71ce0b18675586c65b40f945320b8c3f",
+  "target_model": "each query target is uniform over the whole prime-order subgroup; independence is not required"
+}

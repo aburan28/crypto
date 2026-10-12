@@ -1,0 +1,185 @@
+{
+  "schema": "weak_curve.conjectures/v1",
+  "audit_date_utc": "2026-10-12",
+  "scope": "Public synthetic mathematical families and the fixed ISO-1 census; conjectures are separate from verified family labels.",
+  "global_completeness": "open",
+  "references": [
+    {
+      "id": "mc2009",
+      "url": "https://eprint.iacr.org/2009/236"
+    },
+    {
+      "id": "mc2005",
+      "url": "https://eprint.iacr.org/2005/277"
+    },
+    {
+      "id": "mc2006",
+      "url": "https://eprint.iacr.org/2006/347"
+    },
+    {
+      "id": "imc2013",
+      "url": "https://eprint.iacr.org/2013/487"
+    },
+    {
+      "id": "jv2011",
+      "url": "https://eprint.iacr.org/2011/020"
+    },
+    {
+      "id": "smith2008",
+      "url": "https://arxiv.org/abs/0806.2995"
+    },
+    {
+      "id": "tian2020",
+      "url": "https://arxiv.org/abs/2012.07173"
+    },
+    {
+      "id": "iso1",
+      "path": "research/iso1_weak_classes_20261007/two_branch_20261009/REPORT.md"
+    },
+    {
+      "id": "lean1710",
+      "url": "https://github.com/aburan28/crypto/pull/1710",
+      "commit": "038cad83dc146bbcf88504e82dec12b9a7fdb6f0"
+    }
+  ],
+  "entries": [
+    {
+      "id": "WCQ1:boundary-strip",
+      "title": "Union zeros lie in a 64p Hasse-boundary strip",
+      "kind": "finite_universal",
+      "status": "refuted",
+      "novelty": "exploratory screen; no priority claim",
+      "domain": "Seven fixed complete p6 censuses, ordinary signed t=2 mod 4",
+      "statement": "Every union-zero row has 2*p^3-abs(t)<=64*p.",
+      "evidence": "FALSIFIERS.tsv: 1184 violations; p7 trace +/-22 has gap 664 and limit 448.",
+      "falsifier": "One certified union-zero row outside the strip.",
+      "next_experiment": "No further confirmation runs; retain the counterexamples as controls.",
+      "lean_status": "Input-label truth retains parent native/PARI verification; aggregation lemmas checked separately.",
+      "references": [
+        "iso1"
+      ]
+    },
+    {
+      "id": "WCQ1:gap-count",
+      "title": "Subpolynomial corrections to linear growth of uncovered classes",
+      "kind": "asymptotic_bound",
+      "status": "open",
+      "novelty": "Exact class-uniform statement unresolved in bounded source audit",
+      "domain": "Primes p>3; ordinary signed t=2 mod 4 over F_(p^6); two named hyperelliptic branches",
+      "statement": "For every epsilon>0, Z(p)=O_epsilon(p^(1+epsilon)) as p tends to infinity over primes.",
+      "evidence": "REVIEW.tsv: seven exact census counts, not an asymptotic proof.",
+      "falsifier": "An unbounded prime sequence with a fixed superlinear exponent lower bound; a finite outlier only rejects a separately specified finite prediction.",
+      "next_experiment": "Retrospective extensions 53,59,61 have historical cubic artifacts; proposed prospective panel 71,73,79 has no matching filename in the inspected ISO-1 archive. Freeze before labels; finite forecast Z(p)<=24*p.",
+      "lean_status": "Open bound on exact finite class-support sets; count semantics mapped in PROOF_MAP.md.",
+      "references": [
+        "iso1",
+        "mc2009"
+      ]
+    },
+    {
+      "id": "WCQ1:cm-mass",
+      "title": "Selected CM mass and residual global obstruction",
+      "kind": "statistical_model",
+      "status": "open",
+      "novelty": "Branch-conditioned occupancy study unresolved; CM mass is established",
+      "domain": "D_K<-4, fixed branch and sampling stratum, selected order conductors",
+      "statement": "Zero frequencies in preregistered bins of mu=M_B*H_B(t)/sum H_B approximately follow exp(-mu), with residual marked-CM orbit effects evaluated separately.",
+      "evidence": "Motivated by interior zero classes and local-filter failures; CM mass has not been evaluated in this addition.",
+      "falsifier": "Absolute zero-fraction calibration error greater than 1/5 in a preregistered unpooled bin with at least 30 held-out classes rejects the finite forecast; retain dependencies within each prime census.",
+      "next_experiment": "Freeze parameter occurrence law and selected CM masses on training primes before opening held-out labels.",
+      "lean_status": "Probability-model premise is unproved; algebraic definitions and exact support statements must be formalized separately.",
+      "references": [
+        "iso1"
+      ]
+    },
+    {
+      "id": "WCQ1:nonhyper-only",
+      "title": "Non-hyperelliptic support outside both current branches",
+      "kind": "finite_existential",
+      "status": "open",
+      "novelty": "Class-support difference unresolved; Type I/II covering geometries are published",
+      "domain": "The 46 exact p7 union-zero classes, published Type I/II genus-3 non-hyperelliptic coverings",
+      "statement": "At least one such class has a Type I or Type II non-hyperelliptic covering representative.",
+      "evidence": "Parent zero-class oracle complete; new covering certificates not yet produced.",
+      "falsifier": "A complete Type I/II support oracle is empty on all 46 classes; capped absence remains unresolved.",
+      "next_experiment": "Freeze all 46 evaluation classes; construct and independently certify covering geometry, field and isogeny condition.",
+      "lean_status": "Open actual-cover and Weil-restriction theorem; no conjecture axioms.",
+      "references": [
+        "mc2009",
+        "imc2013",
+        "iso1"
+      ]
+    },
+    {
+      "id": "WCQ1:two-towers",
+      "title": "Primitive simultaneous degree-two and degree-three tower coverings",
+      "kind": "finite_existential",
+      "status": "open",
+      "novelty": "Primitive intersection unresolved; individual tower constructions are published",
+      "domain": "Ordinary E/F_(7^6), exact j degree six, no isogeny-class descent to a proper subfield",
+      "statement": "One E admits a genus-2 cover over F_(7^3) and a genus-3 cover over F_(7^2), each satisfying the corresponding Weil-restriction isogeny condition.",
+      "evidence": "No simultaneous primitive witness established.",
+      "falsifier": "A complete empty intersection in the specified finite domain.",
+      "next_experiment": "Intersect declared published conditions on a frozen synthetic population and independently certify both covers and four descent degrees.",
+      "lean_status": "Open simultaneous geometric construction and class-descent bridge.",
+      "references": [
+        "mc2005",
+        "mc2009",
+        "imc2013"
+      ]
+    },
+    {
+      "id": "WCQ1:smaller-genus",
+      "title": "Primitive higher-degree covers with smaller-genus quotient",
+      "kind": "existential_family",
+      "status": "open",
+      "novelty": "Special locus unresolved against general classifications",
+      "domain": "Relative degree n=5 or 7, q odd; primitive ordinary source; compositum genus 25 or 161",
+      "statement": "A primitive special locus has a base-defined quotient D with n<=g(D)<G_n and a surjective map J(D) to the full n-dimensional source Weil restriction.",
+      "evidence": "Existing higher-degree controls certify the original genus; no qualifying quotient established.",
+      "falsifier": "A global exclusion theorem; complete finite-subfamily absence rejects only that subfamily.",
+      "next_experiment": "Analyze rational quotient geometry and automorphisms in prescribed synthetic loci, rejecting subfield and class-descent controls.",
+      "lean_status": "Open geometric quotient, dimension and factor-survival proofs; elementary scaling screen remains a mapped field lemma.",
+      "references": [
+        "mc2006",
+        "imc2013",
+        "iso1"
+      ]
+    },
+    {
+      "id": "WCQ1:primitive-j",
+      "title": "Exact j degree of primitive quadratic torus lifts",
+      "kind": "universal_degree_statement",
+      "status": "open",
+      "novelty": "Generalization of own degree-six result; broader prior implication unresolved",
+      "domain": "p>3, q=p^2, odd n>=3; lambda of exact absolute degree 4n in torus order (q^n+1)/(q+1)",
+      "statement": "Legendre j(lambda) has exact absolute degree 2n.",
+      "evidence": "Degree-six theorem and higher-degree controls are motivators; general universal theorem unproved here.",
+      "falsifier": "One parameter satisfying the full domain with a shorter j Frobenius period.",
+      "next_experiment": "Certify primitive lambda and all candidate j periods on frozen n=5,7 synthetic controls.",
+      "lean_status": "Open actual finite-field anharmonic-fibre and period proof, including exceptional cases.",
+      "references": [
+        "mc2006",
+        "iso1",
+        "lean1710"
+      ]
+    },
+    {
+      "id": "WCQ1:quartic-profile",
+      "title": "Polarization geometry beyond coarse arithmetic labels",
+      "kind": "finite_existential",
+      "status": "open",
+      "novelty": "Conditioned profile unresolved; genus-3 isogenies are published",
+      "domain": "Prescribed p7 two-branch hyperelliptic covering models and rational maximal isotropic 2-kernels",
+      "statement": "Two coverings from different branches with the same Frobenius polynomial and 2-torsion Frobenius cycle type have different multisets of nonsingular polarized target types.",
+      "evidence": "No complete target profiles established.",
+      "falsifier": "A complete profile oracle finding no such pair in the specified finite population.",
+      "next_experiment": "Freeze covering models and certify every mathematical kernel and target type; retain unknown classifications.",
+      "lean_status": "Open actual polarized-Jacobian and target-type proof.",
+      "references": [
+        "smith2008",
+        "iso1"
+      ]
+    }
+  ]
+}

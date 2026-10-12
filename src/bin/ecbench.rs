@@ -54,6 +54,8 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Cmd {
+    /// Push, pull and index large files (factor bases, tables) in the object store.
+    Store(crypto_lib::store::cli::StoreArgs),
     /// List every method with its parameters.
     Methods {
         #[arg(long)]
@@ -533,6 +535,7 @@ fn emit_claim(
 
 fn run(cli: Cli) -> Result<ExitCode, String> {
     match cli.cmd {
+        Cmd::Store(args) => crypto_lib::store::cli::run(&args)?,
         Cmd::Methods { json } => {
             if json {
                 let v: Vec<_> = methods::registry()

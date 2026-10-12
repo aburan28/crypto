@@ -1,0 +1,6 @@
+Command: cargo run --release --example run -- L1 1
+Exit: 0
+Stdout:
+L1 keygen_s 31.050 pk_bytes 1344 ct_bytes 1344 f_bits 277
+L1 trial 0 encaps_s 0.3032 decaps_s 11.464 ok true
+L1 RESULT 1/1 decapsulations correct

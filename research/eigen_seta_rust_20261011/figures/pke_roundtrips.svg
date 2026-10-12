@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="470" viewBox="0 0 760 470">
+  <rect width="760" height="470" fill="white"/>
+  <text x="28" y="30" font-family="sans-serif" font-size="17" font-weight="bold">Authenticated PKE round trips: recorded wall time</text>
+  <text x="28" y="52" font-family="sans-serif" font-size="12">L1, L3, L5 · n=1 each · shared VM · no uncertainty interval · descriptive only</text>
+  <g stroke="#c7d0dc" stroke-width="1">
+    <line x1="230" y1="76" x2="230" y2="411"/><line x1="348" y1="76" x2="348" y2="411"/>
+    <line x1="465" y1="76" x2="465" y2="411"/><line x1="583" y1="76" x2="583" y2="411"/><line x1="700" y1="76" x2="700" y2="411"/>
+    <line x1="28" y1="190" x2="720" y2="190"/><line x1="28" y1="300" x2="720" y2="300"/>
+  </g>
+  <g font-family="sans-serif" font-size="12" fill="#26374c">
+    <text x="44" y="109">L1 KeyGen</text><text x="44" y="144">L1 Encrypt</text><text x="44" y="179">L1 Decrypt</text>
+    <text x="44" y="219">L3 KeyGen</text><text x="44" y="254">L3 Encrypt</text><text x="44" y="289">L3 Decrypt</text>
+    <text x="44" y="329">L5 KeyGen</text><text x="44" y="364">L5 Encrypt</text><text x="44" y="399">L5 Decrypt</text>
+    <text x="215" y="431">0.1</text><text x="345" y="431">1</text><text x="458" y="431">10</text><text x="576" y="431">100</text><text x="686" y="431">1000</text>
+  </g>
+  <g stroke-width="2" fill="none">
+    <g stroke="#2678b8"><line x1="230" y1="105" x2="512" y2="105"/><line x1="230" y1="140" x2="299" y2="140"/><line x1="230" y1="175" x2="471" y2="175"/></g>
+    <g stroke="#39925b"><line x1="230" y1="215" x2="614" y2="215"/><line x1="230" y1="250" x2="353" y2="250"/><line x1="230" y1="285" x2="544" y2="285"/></g>
+    <g stroke="#b06028"><line x1="230" y1="325" x2="638" y2="325"/><line x1="230" y1="360" x2="390" y2="360"/><line x1="230" y1="395" x2="585" y2="395"/></g>
+  </g>
+  <g fill="#2678b8"><circle cx="512" cy="105" r="5"/><circle cx="299" cy="140" r="5"/><circle cx="471" cy="175" r="5"/></g>
+  <g fill="#39925b"><circle cx="614" cy="215" r="5"/><circle cx="353" cy="250" r="5"/><circle cx="544" cy="285" r="5"/></g>
+  <g fill="#b06028"><circle cx="638" cy="325" r="5"/><circle cx="390" cy="360" r="5"/><circle cx="585" cy="395" r="5"/></g>
+  <text x="300" y="461" font-family="sans-serif" font-size="12">Wall time (seconds, logarithmic axis)</text>
+</svg>

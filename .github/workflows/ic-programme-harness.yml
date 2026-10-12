@@ -10,6 +10,10 @@ name: ic programme harness
 on:
   pull_request:
     paths:
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - 'src/bin/icprog.rs'
       - 'src/bin/icprog/**'
       - 'src/bin/prepared_sat_worker.rs'
@@ -70,10 +74,11 @@ concurrency:
 jobs:
   harness:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: Install valgrind, for callgrind_annotate
         run: sudo apt-get update && sudo apt-get install -y valgrind
       - name: Fetch ledger §23's build commit, whose sources its claims hash
@@ -94,10 +99,11 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: Bootstrap native build serialization
         run: rustc --edition 2021 src/bin/isolated_bench/busy_unix.rs -o "$RUNNER_TEMP/native-busy"
       - name: Resolve and retain the ignored development lockfile before replay builds

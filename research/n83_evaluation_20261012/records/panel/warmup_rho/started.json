@@ -1,0 +1,42 @@
+{
+  "argv": [
+    "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+    "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+    "202610060",
+    "/workspace/n83_evaluation/panel/warmup_rho/producer.json"
+  ],
+  "argv_existing_file_sha256": {
+    "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl": "d4f9872d9d4e22d26770ecb749b29f1da944d701fb85c8bbc8f20489cd0345c5"
+  },
+  "arm": "rho",
+  "binary_sha256": "98949b7127baeb1fa55420d23dc13604069fcc8fde8d92b8f2e6bebd09718542",
+  "cwd": "/workspace/repos/crypto",
+  "environment": {
+    "KIC_RANK_THREADS": "1",
+    "KIC_RHO_THREADS": "1",
+    "KIC_TARGET_THREADS": "1",
+    "KIC_THREADS": "1",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 1800.0
+  },
+  "schema": "n83.process-start/v1",
+  "started_epoch_ms": 1791771993711,
+  "target_file": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+  "target_sha256": "d4f9872d9d4e22d26770ecb749b29f1da944d701fb85c8bbc8f20489cd0345c5"
+}
