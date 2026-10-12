@@ -1,0 +1,163 @@
+{
+  "pairs": [
+    {
+      "aa": {
+        "mismatches": [],
+        "pairs": 64
+      },
+      "best_method_floor_neg_over_crater_cubic": {
+        "ci95": [
+          1.3239304542803545,
+          2.164739618307159
+        ],
+        "ci99": [
+          1.2168911841745997,
+          2.3624499696584373
+        ],
+        "method": "independent workload bootstrap on each fixed curve",
+        "quotient": 1.691665787154224,
+        "resamples": 20000,
+        "seed": 20261012
+      },
+      "best_method_wall_descriptive": {
+        "ci95": [
+          1.1619782260952058,
+          2.0647888679599666
+        ],
+        "ci99": [
+          1.0568991347944081,
+          2.27084702777815
+        ],
+        "method": "independent workload bootstrap on each fixed curve",
+        "quotient": 1.5543744237671309,
+        "resamples": 20000,
+        "seed": 20261012
+      },
+      "crater_wall_cubic_descriptive": 117.62568359375001,
+      "crater_wall_neg_descriptive": 128.96411181250002,
+      "d": 3,
+      "ell": 1016839,
+      "failed": [],
+      "same_method_rho_neg": {
+        "ci95": [
+          0.745564639802995,
+          1.1973720286987326
+        ],
+        "ci99": [
+          0.6872839939771054,
+          1.2741241460090038
+        ],
+        "method": "independent workload bootstrap on each fixed curve",
+        "quotient": 0.9469561586869837,
+        "resamples": 20000,
+        "seed": 20261012
+      },
+      "within_crater_neg_over_cubic": {
+        "ci95": [
+          1.4232463777142823,
+          2.272436207596263
+        ],
+        "ci99": [
+          1.3157797456873903,
+          2.4555585241348976
+        ],
+        "method": "independent workload bootstrap on each fixed curve",
+        "quotient": 1.7864246107230863,
+        "resamples": 20000,
+        "seed": 20261012
+      }
+    },
+    {
+      "aa": {
+        "mismatches": [],
+        "pairs": 64
+      },
+      "best_method_floor_neg_over_crater_cubic": {
+        "ci95": [
+          1.3425466743850474,
+          2.2573454306613026
+        ],
+        "ci99": [
+          1.246897258033874,
+          2.461323073899849
+        ],
+        "method": "independent workload bootstrap on each fixed curve",
+        "quotient": 1.7297218528894633,
+        "resamples": 20000,
+        "seed": 20261012
+      },
+      "best_method_wall_descriptive": {
+        "ci95": [
+          1.2136580943640298,
+          2.0189720328758516
+        ],
+        "ci99": [
+          1.129487967835324,
+          2.1774161767204965
+        ],
+        "method": "independent workload bootstrap on each fixed curve",
+        "quotient": 1.5562389977800946,
+        "resamples": 20000,
+        "seed": 20261012
+      },
+      "crater_wall_cubic_descriptive": 293.31188284374997,
+      "crater_wall_neg_descriptive": 272.23607940625004,
+      "d": 3,
+      "ell": 2033609,
+      "failed": [],
+      "same_method_rho_neg": {
+        "ci95": [
+          0.8267501146494883,
+          1.3597684805135053
+        ],
+        "ci99": [
+          0.7671790774737327,
+          1.4675573646129372
+        ],
+        "method": "independent workload bootstrap on each fixed curve",
+        "quotient": 1.060479527532882,
+        "resamples": 20000,
+        "seed": 20261012
+      },
+      "within_crater_neg_over_cubic": {
+        "ci95": [
+          1.3041019755226937,
+          2.0651342816456357
+        ],
+        "ci99": [
+          1.2142818452125488,
+          2.242599836258308
+        ],
+        "method": "independent workload bootstrap on each fixed curve",
+        "quotient": 1.631075195683898,
+        "resamples": 20000,
+        "seed": 20261012
+      }
+    }
+  ],
+  "replication_d43_ell1016839": {
+    "aa": {
+      "mismatches": [],
+      "pairs": 64
+    },
+    "failed": [],
+    "same_method_rho_neg": {
+      "ci95": [
+        0.7256366307250272,
+        1.2339424635959177
+      ],
+      "ci99": [
+        0.662209136549958,
+        1.347376648518588
+      ],
+      "method": "independent workload bootstrap on each fixed curve",
+      "quotient": 0.9468181616008536,
+      "resamples": 20000,
+      "seed": 20261012
+    }
+  },
+  "resamples": 20000,
+  "schema": "drastic-prime-conductor-gap-round2-analysis/v1",
+  "seed": 20261012,
+  "status": "count diagnostics on fixed pairs; frozen rules in PROTOCOL.md"
+}
