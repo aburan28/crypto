@@ -1,0 +1,83 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-11",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/isogeny_conductor_gap_round3_20261011",
+  "runs": [
+    "run-20261011T1714Z",
+    "run-20261011T1727Z",
+    "run-20261011T1758Z"
+  ],
+  "files": [
+    {
+      "source": "research/isogeny_conductor_gap_round3_20261011/report.pdf",
+      "copy": "results-report.pdf",
+      "sha256": "0beb78efcca6384666b416f0fa2eba197f6d111c08ea2644c484e86e2617301a",
+      "bytes": 105848
+    },
+    {
+      "source": "research/isogeny_conductor_gap_round3_20261011/reports/run-20261011T1714Z/report.pdf",
+      "copy": "run-20261011T1714Z-report.pdf",
+      "sha256": "eab43c1ead5c0605f1345e7854e3b6bb30ecdd3d808e85ad0e9b688ef6dc9934",
+      "bytes": 80253
+    },
+    {
+      "source": "research/isogeny_conductor_gap_round3_20261011/reports/run-20261011T1714Z/e4_gap_b64.svg",
+      "copy": "run-20261011T1714Z-e4_gap_b64.svg",
+      "sha256": "d89ab884ab16d24315b9b3ec1db35a27e8f42a08a211f0f92d7d176c99003e9a",
+      "bytes": 70786
+    },
+    {
+      "source": "research/isogeny_conductor_gap_round3_20261011/reports/run-20261011T1714Z/e4_ops_vs_degree.svg",
+      "copy": "run-20261011T1714Z-e4_ops_vs_degree.svg",
+      "sha256": "d7d30bac22aee630d863b69a564a84f83d4da63da00fb03d1d19ea5e55a1f2b8",
+      "bytes": 208829
+    },
+    {
+      "source": "research/isogeny_conductor_gap_round3_20261011/reports/run-20261011T1727Z/report.pdf",
+      "copy": "run-20261011T1727Z-report.pdf",
+      "sha256": "34b08b423526d6a077f4ff8bc325e61a00f4800ebe4d0466a9543328126c4b9c",
+      "bytes": 47901
+    },
+    {
+      "source": "research/isogeny_conductor_gap_round3_20261011/reports/run-20261011T1727Z/e5_arms.svg",
+      "copy": "run-20261011T1727Z-e5_arms.svg",
+      "sha256": "45cf3e7beade30073e33ba363b505dad79d4824216563e7496acbd0f28dec049",
+      "bytes": 80487
+    },
+    {
+      "source": "research/isogeny_conductor_gap_round3_20261011/reports/run-20261011T1758Z/report.pdf",
+      "copy": "run-20261011T1758Z-report.pdf",
+      "sha256": "f05b84c1afab798e58d4c80cc0367ecb243ba9f820296bb0a845ed656dec2aa7",
+      "bytes": 47744
+    },
+    {
+      "source": "research/isogeny_conductor_gap_round3_20261011/reports/run-20261011T1758Z/e5_arms.svg",
+      "copy": "run-20261011T1758Z-e5_arms.svg",
+      "sha256": "772055c6641ab1f5998e1785c9b5748da82e8784eab112322787aca19ed9e2ab",
+      "bytes": 76711
+    }
+  ],
+  "pngs": [
+    {
+      "source": "run-20261011T1714Z-e4_gap_b64.svg",
+      "copy": "run-20261011T1714Z-e4_gap_b64.png",
+      "dpi": 150
+    },
+    {
+      "source": "run-20261011T1714Z-e4_ops_vs_degree.svg",
+      "copy": "run-20261011T1714Z-e4_ops_vs_degree.png",
+      "dpi": 150
+    },
+    {
+      "source": "run-20261011T1727Z-e5_arms.svg",
+      "copy": "run-20261011T1727Z-e5_arms.png",
+      "dpi": 150
+    },
+    {
+      "source": "run-20261011T1758Z-e5_arms.svg",
+      "copy": "run-20261011T1758Z-e5_arms.png",
+      "dpi": 150
+    }
+  ]
+}
