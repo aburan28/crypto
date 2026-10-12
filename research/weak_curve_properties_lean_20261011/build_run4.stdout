@@ -1,0 +1,51 @@
+✖ [1632/1634] Building WeakCurveProperties.WeierstrassTwists (40s)
+trace: .> LEAN_PATH=/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/Cli/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/batteries/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/Qq/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/aesop/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/proofwidgets/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/importGraph/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/plausible/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/mathlib/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/lib/lean /Users/adamburan/.elan/toolchains/leanprover--lean4---v4.34.1/bin/lean /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/WeakCurveProperties/WeierstrassTwists.lean -o /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/lib/lean/WeakCurveProperties/WeierstrassTwists.olean -i /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/lib/lean/WeakCurveProperties/WeierstrassTwists.ilean -c /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/ir/WeakCurveProperties/WeierstrassTwists.c --setup /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/ir/WeakCurveProperties/WeierstrassTwists.setup.json --json
+warning: WeakCurveProperties/WeierstrassTwists.lean:28:4: This simp argument is unused:
+  zero_sub
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [WeierstrassCurve.variableChange_a₂, shortModel, hs0, zero_mul, zero_add,
+    zero_pow (by decide : 2 ≠ 0), sub_zero, Units.val_inv_eq_inv_val] at hr
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+error: WeakCurveProperties/WeierstrassTwists.lean:54:6: Type mismatch: After simplification, term
+  congrArg (fun x => ↑C.u ^ 4 * x) ha
+ has type
+  ↑C.u ^ 4 * ((↑C.u ^ 4)⁻¹ * a) = ↑C.u ^ 4 * a'
+but is expected to have type
+  a = ↑C.u ^ 4 * a'
+error: WeakCurveProperties/WeierstrassTwists.lean:56:6: Type mismatch: After simplification, term
+  congrArg (fun x => ↑C.u ^ 6 * x) hb
+ has type
+  ↑C.u ^ 6 * ((↑C.u ^ 6)⁻¹ * b) = ↑C.u ^ 6 * b'
+but is expected to have type
+  b = ↑C.u ^ 6 * b'
+warning: WeakCurveProperties/WeierstrassTwists.lean:52:62: This simp argument is unused:
+  hs
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [WeierstrassCurve.variableChange_a₆, shortModel, hr, ht] at hb
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: WeakCurveProperties/WeierstrassTwists.lean:63:14: This simp argument is unused:
+  mul_assoc
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [shortModel, WeierstrassCurve.variableChange_a₁, WeierstrassCurve.variableChange_a₂,
+    WeierstrassCurve.variableChange_a₃, WeierstrassCurve.variableChange_a₄, WeierstrassCurve.variableChange_a₆, ha, hb]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: WeakCurveProperties/WeierstrassTwists.lean:86:12: Unused tactic linter: `ring` does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+warning: WeakCurveProperties/WeierstrassTwists.lean:90:12: Unused tactic linter: `ring` does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+warning: WeakCurveProperties/WeierstrassTwists.lean:86:12: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+warning: WeakCurveProperties/WeierstrassTwists.lean:90:12: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+Some required targets logged failures:
+- WeakCurveProperties.WeierstrassTwists

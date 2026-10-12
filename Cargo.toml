@@ -14,6 +14,14 @@ path = "experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs"
 name = "s3_pair_candidate_frozen"
 path = "experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs"
 
+[[example]]
+name = "koblitz_n53_compact_replay"
+path = "experiments/koblitz-n53-compact-cold-20261009/native_replay.rs"
+
+[[example]]
+name = "koblitz_n53_compact_protocol"
+path = "experiments/koblitz-n53-compact-cold-20261009/native_run.rs"
+
 [[bin]]
 name = "crypto"
 path = "src/main.rs"
@@ -36,6 +44,13 @@ path = "src/bin/hyperelliptic_cover.rs"
 [[bin]]
 name = "icx"
 path = "src/bin/icx.rs"
+
+# `ecdlp-nist` — ECDLP across the fifteen NIST curves (prime, binary,
+# Koblitz) with the structural audit, interval solvers, folded rho and the
+# Smart attack on constructed anomalous curves.
+[[bin]]
+name = "ecdlp-nist"
+path = "src/bin/ecdlp_nist.rs"
 
 # `ecc2k-guard` — the ECC2K-130 rho campaign's no-fruitless-cycle
 # certificate and verifiable seed provenance.

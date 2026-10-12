@@ -100,7 +100,7 @@ fn factor_u64(mut v: u64) -> Vec<(u64, u32)> {
     let mut d = 2u64;
     while d * d <= v && d < (1 << 20) {
         let mut e = 0;
-        while v % d == 0 {
+        while v.is_multiple_of(d) {
             v /= d;
             e += 1;
         }
@@ -123,7 +123,7 @@ fn factor_u64(mut v: u64) -> Vec<(u64, u32)> {
 
 fn valuation(mut v: u64, ell: u64) -> u32 {
     let mut k = 0;
-    while v > 0 && v % ell == 0 {
+    while v > 0 && v.is_multiple_of(ell) {
         v /= ell;
         k += 1;
     }
@@ -145,9 +145,7 @@ struct PrimeLevel {
 }
 
 struct PrimeCtx {
-    p: u64,
     n: u64,
-    r: u64,
     ell: u64,
     rng: StdRng,
 }
@@ -318,12 +316,12 @@ fn cm_search(dk: i64, ell: u64, h: u32, bits: u32, seed: u64) -> Option<(u64, i6
         }
         let mut r = n / (ell * ell);
         let mut c = 1u64;
-        while r % 2 == 0 && c < 32 {
+        while r.is_multiple_of(2) && c < 32 {
             r /= 2;
             c *= 2;
         }
         let mut c3 = 0;
-        while r % 3 == 0 && c3 < 2 {
+        while r.is_multiple_of(3) && c3 < 2 {
             r /= 3;
             c3 += 1;
         }
@@ -396,9 +394,7 @@ fn prime_ladder(dk: i64, ell: u64, h: u32, bits: u32, seed: u64) -> Result<Value
     let gap_total: u64 = steps.iter().map(|&(l, e)| l.pow(e)).product();
     let h_total: u32 = steps.iter().map(|&(_, e)| e).sum();
     let mut ctx = PrimeCtx {
-        p,
         n,
-        r,
         ell,
         rng: StdRng::seed_from_u64(seed ^ p),
     };

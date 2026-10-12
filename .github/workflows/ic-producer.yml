@@ -2,6 +2,11 @@ name: Optimized IC producer admission
 on:
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - 'research/ic_candidate_tournament_20260915/producer/**'
       - 'research/ic_candidate_tournament_20260915/identity.py'
       - 'research/ic_candidate_tournament_20260915/measurement.py'
@@ -36,11 +41,11 @@ permissions:
   contents: read
 concurrency:
   group: ic-producer-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   archived-producer:
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 90 }}
     strategy:
       fail-fast: false
       matrix:

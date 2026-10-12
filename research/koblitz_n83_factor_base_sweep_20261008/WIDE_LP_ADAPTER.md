@@ -4,9 +4,24 @@ The main-branch large-prime collector inspected for this study uses u64 field
 coordinates and relation coefficients. It cannot import the primary F2^83
 curve or its 81-bit subgroup order. The integrated source contains
 src/cryptanalysis/koblitz_large_prime.rs, a separate exact BigUint row
-eliminator for zero, one or two residual points. This is an algebra and
-verification component, not a relation-discovery backend or a measured
+eliminator for zero, one or two residual points. It also contains a bounded
+chained-S3 partial-relation producer over two disjoint signed-Frobenius
+x-domains. Neither component has been measured as a retained N83
 index-calculus run.
+
+`MixedOrbitDomains::new` checks that each supplied ambient factor base has
+an exact Frobenius closure and that the small and residual x-domains are
+disjoint. `search` assigns three or more small summands followed by one or
+two residual summands, for five or six summands in total. It constructs the
+public equation [a]G + [b]Q, searches each intermediate-identity pattern
+under explicit variable, domain-clause, conflict and model caps, and checks
+the original field equations, per-position domain membership, every sign
+choice and subgroup membership before returning a `PartialCandidate`.
+An exhausted cap or invalid SAT model is inconclusive; only exhaustive
+pattern completion is marked refuted. First-pair ordering is optional and
+applies to the exchangeable first two small domains. The caller must still
+charge unsuccessful searches and feed every accepted candidate to the
+independent graph replay.
 
 An input partial carries a unique source ID and the point equation
 [a]G + [b]Q = sum(small points) + sum(residual points). The adapter checks
@@ -46,13 +61,19 @@ They also combine the cycle with an independent full row to check target and
 orbit-log extraction, distinguish dependent rows from full rank, and reject a
 tampered completed row.
 A separate 81-bit modular test checks double-large-prime cycle coefficients,
-source provenance and cap classifications. These tests establish the adapter's
-algebra on those fixtures. They do not demonstrate a partial-relation yield,
-rank gain, N83 graph size, factor-base advantage or complete DLP runtime.
+source provenance and cap classifications. A Koblitz F2^7 regression builds
+disjoint two-orbit domains and obtains one SAT-discovered one-residual point
+equation, then independently feeds it to the graph. It also checks an exact
+two-residual sign lift and graph feed, overlap rejection and fail-closed
+preflight caps. The two-residual SAT search has no positive regression or
+retained N83 yield measurement. These checks establish algebra and one
+small-curve producer
+path. They do not measure retained N83 partial-relation yield, rank gain,
+graph size, factor-base advantage or complete runtime.
 
-The next integration gate is a source-pinned partial-relation producer for the
-retained primary N83 base. It must supply exact original point equations,
-collect and charge unsuccessful partials, retain each input source, and pass
-independent graph and group replay. The new matrix bridge is not a retained
-N83 rank measurement. Only with a producer can graph filtering, matrix rank
-and a complete one-target cold run be compared with the other sweep arms.
+The next integration gate is a source-pinned retained-N83 producer run with
+the small and residual base hashes fixed. It must collect and charge
+unsuccessful searches and partials, retain every source equation, and pass
+independent graph and group replay. It must then measure graph filtering,
+matrix rank, sparse linear algebra and one complete cold target run against
+matched rho. The matrix bridge above is not a retained-N83 rank measurement.

@@ -1,0 +1,9 @@
+mkdir -p failed for path /home/agent/.config/matplotlib: [Errno 30] Read-only file system: '/home/agent/.config/matplotlib'
+Matplotlib created a temporary cache directory at /tmp/matplotlib-jrk6byyc because there was an issue with the default path (/home/agent/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+Fontconfig error: No writable cache directories
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/perf/render_groebner_history.py", line 167, in <module>
+    main()
+  File "/workspace/crypto/scripts/perf/render_groebner_history.py", line 138, in main
+    typst.compile(str(source), output=str(out / (group["id"] + ".pdf")))
+typst.TypstError: the character `#` is not valid in code

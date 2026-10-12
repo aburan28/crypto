@@ -5,12 +5,6 @@ on:
       - '.github/workflows/compact-s3-batch.yml'
       - 'research/notes/ecc2k130/compact_s3_batch_20260929/**'
       - 'research/notes/ecc2k130/compact_frozen_source_replay_20260929/**'
-      - 'examples/koblitz_orbit_dlp_s3_batch.rs'
-      - 'examples/koblitz_rho_batch_ks_v3.rs'
-      - 'src/cryptanalysis/koblitz_fast.rs'
-      - 'src/cryptanalysis/koblitz_index_calculus.rs'
-      - 'src/cryptanalysis/semaev_decomp.rs'
-      - 'src/lib.rs'
   push:
     branches: [main]
     paths:
@@ -25,10 +19,12 @@ concurrency:
   group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# PRs retain source, correctness and existing-evidence checks.
+# Fresh timing panels and their result gates run only after merge or by manual dispatch.
 jobs:
   paired-s3-batch:
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 90 }}
     strategy:
       fail-fast: false
       matrix:
@@ -61,10 +57,10 @@ jobs:
             research/notes/ecc2k130/compact_frozen_source_replay_20260929
             .github/workflows/compact-s3-batch.yml
       - name: Check fail-closed frozen-source materialization
-        run: python3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p 'test_materialize.py' -v
+        run: cargo test --release --locked --manifest-path research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.toml
       - name: Materialize frozen source tree from committed snapshots
         run: |
-          python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+          cargo run --release --locked --quiet --manifest-path research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.toml -- materialize \
             --freeze research/notes/ecc2k130/compact_s3_batch_20260929/FROZEN.json \
             --dest "${{ runner.temp }}/frozen-src"
       - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
@@ -75,6 +71,7 @@ jobs:
         working-directory: ${{ runner.temp }}/frozen-src
         run: cargo test --release --locked --example koblitz_orbit_dlp_s3_batch
       - name: Run nine Latin-balanced cold arms on the same public points
+        if: github.event_name != 'pull_request'
         id: run
         working-directory: ${{ runner.temp }}/frozen-src
         env:
@@ -86,7 +83,7 @@ jobs:
             --batch target/release/examples/koblitz_orbit_dlp_s3_batch \
             --out "${{ runner.temp }}/compact-s3-batch/n${{ matrix.n }}_L1024"
       - name: Independently replay every rank and logarithm
-        if: always() && steps.run.outcome != 'skipped'
+        if: github.event_name != 'pull_request' && (always() && steps.run.outcome != 'skipped')
         working-directory: ${{ runner.temp }}/frozen-src
         run: |
           python3 research/notes/ecc2k130/compact_s3_batch_20260929/verify_panel.py \
@@ -94,7 +91,7 @@ jobs:
             --run-dir "${{ runner.temp }}/compact-s3-batch/n${{ matrix.n }}_L1024" \
             --out "${{ runner.temp }}/compact-s3-batch/n${{ matrix.n }}_L1024/receipt.json"
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: github.event_name != 'pull_request' && (always())
         with:
           name: compact-s3-batch-n${{ matrix.n }}-L1024
           path: ${{ runner.temp }}/compact-s3-batch/n${{ matrix.n }}_L1024

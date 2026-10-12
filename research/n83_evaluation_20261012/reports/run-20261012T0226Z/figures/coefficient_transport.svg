@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="820" viewBox="0 0 1440 820"
+     role="img" aria-labelledby="title description">
+  <title id="title">IC and strong rho preserve the same signed-Frobenius coefficient invariant</title>
+  <desc id="description">The same exact field has 83 F2 coordinates and the prime-order subgroup has one scalar dimension over Z/rZ. IC uses 600 formal factor-log coefficients. Strong rho tracks two formal state coefficients a and b for P=aG+bQ. Signed Frobenius transports either labeling by epsilon lambda to the k. IC recovers the target scalar from a factor-log dot product; rho recovers it from a distinguished-point collision with a nonzero denominator. Both require independent dG=Q replay. This is an algebraic comparison without any timing claim.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 Z" fill="#087F83"/></marker>
+    <style>
+      text { font-family: "DejaVu Sans", sans-serif; fill: #25354A; }
+      .title { font-size: 36px; font-weight: 700; fill: #142B45; }
+      .heading { font-size: 29px; font-weight: 700; fill: #142B45; }
+      .label { font-size: 19px; font-weight: 700; letter-spacing: 1px; fill: #087F83; }
+      .body { font-size: 24px; }
+      .formula { font-size: 27px; }
+      .small { font-size: 20px; fill: #5B6A7A; }
+      .box { fill: #F4F7F9; stroke: #DAE4EB; stroke-width: 2; }
+      .accent { fill: #EFF6F7; stroke: #087F83; stroke-width: 2; }
+      .arrow { fill: none; stroke: #087F83; stroke-width: 3; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1440" height="820" fill="#FFFFFF"/>
+  <rect x="36" y="32" width="70" height="5" fill="#087F83"/>
+  <text class="title" x="36" y="87">The same invariant, two coefficient systems</text>
+  <text class="small" x="36" y="126">83 F₂ field coordinates · one scalar dimension in the prime-order subgroup · λ = 2998004823950457</text>
+  <rect class="accent" x="36" y="154" width="1368" height="77" rx="10"/>
+  <text class="formula" x="720" y="201" text-anchor="middle">C = ε τᵏ(P) = [ε λᵏ]P · forward phase transport on the same exact group</text>
+  <path class="arrow" d="M355,241 L355,277"/>
+  <path class="arrow" d="M1085,241 L1085,277"/>
+
+  <rect class="box" x="36" y="285" width="654" height="344" rx="10"/>
+  <text class="label" x="58" y="320">IC / 600 FORMAL FACTOR-LOG COLUMNS</text>
+  <text class="heading" x="58" y="365">v(P) ∈ (Z/rZ)⁶⁰⁰</text>
+  <text class="formula" x="58" y="412">v(C) = ε λᵏ v(P)</text>
+  <text class="body" x="58" y="454">For P = Rⱼ: v(P) = eⱼ; Lⱼ = log_G(Rⱼ).</text>
+  <text class="body" x="58" y="498">Root-index extraction yields a four-point</text>
+  <text class="body" x="58" y="529">witness and its coefficient vector v_Q.</text>
+  <text class="formula" x="58" y="581">d = v_Q · L (mod r)</text>
+  <text class="small" x="58" y="611">Full rank/log preparation transcript remains absent.</text>
+
+  <rect class="box" x="750" y="285" width="654" height="344" rx="10"/>
+  <text class="label" x="772" y="320">STRONG RHO / TWO FORMAL STATE SCALARS</text>
+  <text class="heading" x="772" y="365">P = [a]G + [b]Q</text>
+  <text class="formula" x="772" y="412">(a,b) → (ε λᵏa, ε λᵏb)</text>
+  <text class="body" x="772" y="454">Equal canonical collision points imply</text>
+  <text class="formula" x="772" y="498">(a₁ − a₂) + (b₁ − b₂)d = 0 (mod r).</text>
+  <text class="formula" x="772" y="544">d = (a₂ − a₁) / (b₁ − b₂) (mod r)</text>
+  <text class="small" x="772" y="579">Requires b₁ − b₂ ≠ 0; zero gives no scalar.</text>
+  <text class="small" x="772" y="611">Two labels do not mean a two-dimensional subgroup.</text>
+
+  <path class="arrow" d="M355,639 L355,661 L708,661 L708,680"/>
+  <path class="arrow" d="M1085,639 L1085,661 L732,661 L732,680"/>
+  <rect class="accent" x="330" y="690" width="780" height="64" rx="10"/>
+  <text class="heading" x="720" y="731" text-anchor="middle">Independent final-answer replay: [d]G = Q</text>
+  <text class="small" x="36" y="784">Same algebraic transport does not imply the same work or runtime. Source: verification/INVARIANTS.md.</text>
+  <text class="small" x="36" y="811">Exact legacy model: icv1-f2m83-t6151469093347-9eba6cd5 · method comparison only; no fresh timing claim</text>
+</svg>

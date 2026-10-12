@@ -14,6 +14,22 @@ sect131r2, sect113r1; and, as controls, secp256k1 and the GOST CryptoPro-B curve
 **Evidence.** `research/isogeny_loop_glv_20261010/` (one Markdown table and one JSON
 per sweep group, the self-test transcript, the scans).
 
+> **Erratum and round 2 (2026-10-11), see `research/isogeny_loop_glv_20261011/`
+> ([README](research/isogeny_loop_glv_20261011/README.md), [PDF](research/isogeny_loop_glv_20261011/REPORT.pdf)).**
+> (1) The sweeper is Python, which AGENTS.md ("Implementation language: no
+> Python") forbade for research result generation before this note was merged.
+> The evidence below keeps its Python provenance. The sweeper is now marked
+> legacy, and round 2's numbers come from native Rust.
+> (2) §4.3 under-priced the Verschiebung. In characteristic 2 the conjugate
+> 2-step is V = [2] ∘ F⁻¹, a doubling, so the folklore split via Vⁿ costs n
+> doublings to save n/2: a provable loss (ratio ≥ 2.5 at c_dbl = 8), not
+> "0.49, not established". All other conclusions here stand a fortiori, since
+> raising a step weight only raises loop costs.
+> (3) Round 2 adds a class-group-free lower bound that excludes loops on every
+> random challenge curve and on CryptoPro-A under the paper's cost model. It
+> also adds a measured lattice-level study of 4-dimensional GLV-GLS with
+> moderate-D loop endomorphisms.
+
 ---
 
 ## 1. The construction (what the paper does, in the terms used here)
@@ -164,7 +180,9 @@ Verschiebung V, so the 2-loops are {2: +n} = π (acts as 1 on E(F_q): useless) a
 {2: −n} = π̄ = V^n (acts as q ≡ t − 1 (mod r) on E(F_q)).  Both lie in Z[π].  A GLV
 split with λ = t − 1 is the paper's "folklore" split: it trades the n/2 doublings of
 [t − 1]P for n Verschiebung steps x ↦ x + b_i/x (x-only: 1 M + 2 S per step, but y has
-to be recovered).  Under the 2 M/step model the ratio is 0.49; under realistic
+to be recovered).  *[Corrected 2026-10-11: the next sentence is wrong. Vⁿ = [2ⁿ] ∘ π⁻¹ is n
+doublings, so the split is a provable loss (ratio ≥ 2.5); see the erratum at the top.]*
+Under the 2 M/step model the ratio is 0.49; under realistic
 binary-field costs (LD doubling ≈ 4 M + 5 S, full-coordinate V step 3–8 M, or two x-only
 chains plus a y-recovery) it is close to 1.  **Not established as a gain**; it is not an
 isogeny-loop endomorphism in the paper's sense (α ∈ Z[π]).  No loop with α ∉ Z[π]
