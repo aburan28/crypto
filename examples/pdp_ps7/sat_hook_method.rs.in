@@ -1,0 +1,172 @@
+    /// **PS-7 hook** (example-local copy only; not in the library).
+    ///
+    /// [`Solver::solve_with_lazy_clauses`] with three differences, and
+    /// nothing else:
+    ///
+    /// * the theory is a [`ShellHooks`] object, so it can keep state next to
+    ///   the other hooks;
+    /// * `trigger_vars = Some(vars)` is the library's rule (the theory runs at
+    ///   a propagation fixpoint only when every listed variable is assigned);
+    ///   `None` runs it at every fixpoint and leaves the test to the theory;
+    /// * before the solver's own `pick_branching_variable`, [`ShellHooks::decide`]
+    ///   may name the next decision literal, and every learnt clause is shown
+    ///   to [`ShellHooks::learnt`] right after conflict analysis.
+    ///
+    /// With `Some(vars)`, a `decide` that returns `None` and a no-op `learnt`
+    /// this runs the library's code path step for step (checked by the
+    /// `fidelity` command of the example).
+    pub fn solve_with_hooks<H: ShellHooks>(
+        &mut self,
+        trigger_vars: Option<&[u32]>,
+        hooks: &mut H,
+    ) -> SolveResult {
+        if self.is_unsat {
+            return SolveResult::Unsat;
+        }
+        if self.propagate().is_some() {
+            return SolveResult::Unsat;
+        }
+        if self.max_learnts == 0 {
+            self.max_learnts = (self.n_orig_clauses / 3).max(4000);
+        }
+        self.detached.resize(self.clause_at.len(), false);
+        let mut luby_index = 1u64;
+        let mut restart_limit = 100u64 * luby(luby_index);
+        let mut pending_conflict = None;
+        loop {
+            if let Some(conflict_idx) = pending_conflict.take().or_else(|| self.propagate()) {
+                self.conflicts += 1;
+                self.stats.conflicts += 1;
+                let lvl = self.trail_lim.len() as u64;
+                self.stats.conflict_level_sum += lvl;
+                self.stats.max_level = self.stats.max_level.max(lvl);
+                self.conflicts_since_restart += 1;
+                if self.conflicts >= self.conflict_budget
+                    || self
+                        .deadline
+                        .is_some_and(|d| std::time::Instant::now() >= d)
+                {
+                    return SolveResult::Unknown;
+                }
+                if self.trail_lim.is_empty() {
+                    return SolveResult::Unsat;
+                }
+                let t = std::time::Instant::now();
+                let (learnt, bj_level) = self.analyze(conflict_idx);
+                self.stats.ns_analyze += t.elapsed().as_nanos() as u64;
+                hooks.learnt(&learnt);
+                self.backjump(bj_level);
+                if learnt.len() == 1 {
+                    let _ = self.enqueue(learnt[0], Reason::Propagated(self.next_cref()));
+                    self.push_clause(&learnt);
+                } else {
+                    self.stats.learnt_clauses += 1;
+                    let l0 = learnt[0];
+                    let l1 = learnt[1];
+                    let idx = self.push_clause(&learnt);
+                    let (w0, w1) = (self.watch_slot(l0), self.watch_slot(l1));
+                    self.watches[w0].push(Watcher {
+                        cref: idx,
+                        blocker: l1,
+                    });
+                    self.watches[w1].push(Watcher {
+                        cref: idx,
+                        blocker: l0,
+                    });
+                    let _ = self.enqueue(l0, Reason::Propagated(idx));
+                }
+                if self.conflicts_since_restart >= restart_limit {
+                    self.backjump(0);
+                    self.stats.restarts += 1;
+                    self.conflicts_since_restart = 0;
+                    if !self.xors.is_empty() {
+                        self.rebuild_matrix();
+                        self.xor_epoch = u64::MAX;
+                    }
+                    let learnt_now = self.clause_at.len() - self.n_orig_clauses;
+                    if learnt_now > self.max_learnts {
+                        let t = std::time::Instant::now();
+                        self.reduce_db();
+                        self.stats.ns_reduce_db += t.elapsed().as_nanos() as u64;
+                        self.max_learnts = self.max_learnts + self.max_learnts / 2;
+                    }
+                    luby_index += 1;
+                    restart_limit = 100u64 * luby(luby_index);
+                }
+            } else {
+                let triggered = match trigger_vars {
+                    None => true,
+                    Some(vars) => {
+                        !vars.is_empty() && {
+                            let assignment = self.assignment();
+                            vars.iter()
+                                .all(|&variable| assignment[(variable - 1) as usize].is_some())
+                        }
+                    }
+                };
+                if triggered {
+                    if let Some(clauses) = hooks.theory(self.assignment()) {
+                        assert!(!clauses.is_empty(), "lazy theory returned an empty update");
+                        let mut normalized = Vec::with_capacity(clauses.len());
+                        for mut clause in clauses {
+                            clause.sort_by_key(|&lit| (var_of(lit), lit));
+                            clause.dedup();
+                            if clause.windows(2).any(|pair| pair[0] == -pair[1]) {
+                                continue;
+                            }
+                            self.assert_names_variables(&clause);
+                            normalized.push(clause);
+                        }
+                        let has_current_conflict = normalized.iter().any(|clause| {
+                            !clause.is_empty()
+                                && clause.iter().all(|&lit| self.lit_value(lit) == Some(false))
+                        });
+                        if has_current_conflict || normalized.iter().any(|clause| clause.len() < 2)
+                        {
+                            self.backjump(0);
+                            for clause in normalized {
+                                if !self.add_clause(clause) {
+                                    return SolveResult::Unsat;
+                                }
+                            }
+                            self.detached.resize(self.clause_at.len(), false);
+                        } else {
+                            for clause in normalized {
+                                let conflict = self.add_lazy_clause_at_current_level(clause);
+                                if pending_conflict.is_none() {
+                                    pending_conflict = conflict;
+                                }
+                            }
+                        }
+                        continue;
+                    }
+                }
+                let hinted = hooks.decide(self.assignment());
+                let decision = match hinted {
+                    Some(lit) => {
+                        assert!(
+                            self.lit_value(lit).is_none(),
+                            "decide() named the assigned literal {lit}"
+                        );
+                        Some(lit)
+                    }
+                    None => self.pick_branching_variable().map(|v| {
+                        if self.saved_phase[v as usize] {
+                            (v + 1) as i32
+                        } else {
+                            -((v + 1) as i32)
+                        }
+                    }),
+                };
+                match decision {
+                    None => return SolveResult::Sat,
+                    Some(lit) => {
+                        self.stats.decisions += 1;
+                        self.trail_lim.push(self.trail.len());
+                        self.assign(lit, Reason::Decision);
+                    }
+                }
+            }
+        }
+    }
+

@@ -1,0 +1,14 @@
+
+/// PS-7 hook object for [`Solver::solve_with_hooks`] (example-local).
+pub trait ShellHooks {
+    /// The lazy-clause theory: the library's callback, with the same contract
+    /// (`None` = the current frontier has been handled).
+    fn theory(&mut self, assignment: &[Option<bool>]) -> Option<Vec<Vec<Lit>>>;
+    /// The next decision literal, or `None` for the solver's own choice.
+    fn decide(&mut self, _assignment: &[Option<bool>]) -> Option<Lit> {
+        None
+    }
+    /// Called with every clause conflict analysis learns, before the
+    /// backjump installs it.
+    fn learnt(&mut self, _clause: &[Lit]) {}
+}
