@@ -30,4 +30,5 @@ Unit: number of points (N1, N2, N3, divisor checks) or group elements (orders). 
 
 == Missing data
 - No divisor-class arithmetic on the quartic: homomorphism and injectivity of the transfer were not executed.
-- Points of E0 whose preimages on C are not K-rational were not tested (counts in `points_skipped`).
+- E0 points not tested, exactly accounted (`#E0(K) = tested + nonsquare + ramification + 2`): the 2 points at infinity of the quartic model (always); the points with `y0 = 0` (`e0_ramification_points_y0_zero`: 0 when `u` is irreducible, 4 when `u` splits); and the affine points with `y0 != 0` where `u u'(t0)` is zero or a non-square (`e0_affine_points_nonsquare_uu1`).
+- `projected_points_on_E0` only checks that the projected coordinates satisfy the E0 equation; the pushforward of a divisor and `pi0_* phi(P) = [2]P` were not executed.

@@ -34,8 +34,10 @@ For each:
   `1 − t_E T³ + q³T⁶`, hence **`#Jac(C)(F_q) = #E0(K)`**;
 - every transfer divisor tested is an `F_q`-rational divisor on it.
 
-So the census of PR #1759 counted objects that exist as assumed. What is
-still not shown by execution is the transfer as a group homomorphism,
+So, in the eleven built cases, the covers that the census of PR #1759
+counted by branch data exist as curves over `F_q` with the predicted
+Jacobian order. That is a statement about these eleven cases only, not
+about every cover the census counted. What is still not shown by execution is the transfer as a group homomorphism,
 because no class arithmetic on a plane quartic is implemented
 ([problem record](../../problems/plane-quartic-jacobian-class-arithmetic-missing.md)).
 
@@ -71,12 +73,33 @@ roots, `u, u', u''` linearly independent.
 | cancelling `u`; the function field; descent; step 5 | none | **not formalized** |
 
 Lean: [lean/DescentCycle.lean](lean/DescentCycle.lean), toolchain v4.34.1,
-no Mathlib, no axioms. No identity certificate: the report's identities
-are conditional on the curve equations, not polynomial identities.
+no Mathlib, no axioms.
+
+Identity certificates (`identity.certificate/v1`, see
+[docs/identity-certificates/README.md](../../docs/identity-certificates/README.md)).
+The two Lean statements are conditional on the curve equations, so they are
+not themselves polynomial identities. The polynomial identities underneath
+them are the cofactor expansions of the conclusion differences in the
+relations `y0² − u·u''`, `y1² − u·u'`, `u·y2 − y0·y1`, and those are
+certified, with the Lean file as the `proof` pointer (recorded, not run by
+the checker):
+
+| Identity | Certificate | File |
+| --- | --- | --- |
+| `(u·y2)² − u²·u'·u''` `= (u·y2 − y0·y1)(u·y2 + y0·y1) + y1²(y0² − u·u'') + u·u''(y1² − u·u')` | `IDC1h4304bc232b34fa40` | [third_cover.json](certificates/third_cover.json) |
+| `u·y1·y2 − u·u'·y0 = y1(u·y2 − y0·y1) + y0(y1² − u·u')` | `IDC1h14765be340922acc` | [cycle_closes.json](certificates/cycle_closes.json) |
+
+Issued and self-checked by `examples/identity_certificate_ghs_cubic_genus3.rs`
+(32 points each). Not certified: the step from the cofactor identity to
+`y2² = u'·u''` (cancelling `u`), the function field, the descent, and the
+quartic equation `G` of step 3, which is a linear-algebra consequence over
+`K` of the matrix `R` and is instead checked by the point counts below.
 
 ## Measurements (run 20261013T0320Z, exact counts)
 
-Tool: [genus3_build.rs](genus3_build.rs). `u = t² + bt + c` in
+Tool: [genus3_build.rs](genus3_build.rs). The records of both runs were
+regenerated after review (see "Review changes" below); every pre-existing
+field is unchanged. `u = t² + bt + c` in
 lexicographic order of field index; the first cases with `#E0(K) = 4ℓ`.
 `N_k` are projective point counts of the `F_q` quartic over `F_{q^k}` by
 exhaustion; `N3` was also counted on the `K` model and agreed in all
@@ -114,25 +137,36 @@ All eleven quartics are in the records (`quartic_Fq`, entries
 `[i, j, k, coefficient]` for `W0^i W1^j W2^k`; the two order-332 quartics
 are in the addendum run's records).
 
-Transfer divisors (P4). For each `P = (t0, y0) ∈ E0(K)` with `u·u'(t0)` a
-non-zero square, the two points of `C` over `P` and their two Frobenius
-images each:
+Transfer divisors (P4). For each affine `P = (t0, y0) ∈ E0(K)` with
+`y0 ≠ 0` and `u·u'(t0)` a non-zero square, the two points of `C` over `P`
+and their two Frobenius images each. `#E0(K)` is accounted exactly:
+`#E0(K) = tested + nonsquare + ramification + 2`, where the 2 are the points
+at infinity of the quartic model (never tested), `ramification` are the
+points with `y0 = 0` (never tested; 0 when `u` is irreducible, 4 when `u`
+splits), and `nonsquare` are the affine points with `y0 ≠ 0` for which
+`u·u'(t0)` is zero or a non-square (their preimages are not K-rational or
+are ramified, and need a field the tool does not build). The records carry
+all four counts (`e0_points_tested`, `e0_affine_points_nonsquare_uu1`,
+`e0_ramification_points_y0_zero`, `e0_points_at_infinity`) and the tool
+asserts the sum.
 
-| `q` | `u` | points tested | on the `F_q` quartic | `q`-power = model `Fr` | image on `E0` | points of `E0` not tested |
-| --- | --- | --- | --- | --- | --- | --- |
-| 5 | 5, 30 | 564 | 564 | 564 | 564 | 52 |
-| 5 | 5, 51 | 564 | 564 | 564 | 564 | 48 |
-| 7 | 7, 52 / 7, 54 | 1128 each | 1128 | 1128 | 1128 | 166 each |
-| 7 | 7, 110 / 118 / 129 | 1092 each | 1092 | 1092 | 1092 | 168 each |
-| 11 | 11, 130 | 4128 | 4128 | 4128 | 4128 | 658 |
-| 11 | 11, 172 | 3876 | 3876 | 3876 | 3876 | 672 |
-| 7† | 49, 8 / 49, 9 | 912 each | 912 | 912 | 912 | 178 each |
+| `q` | `u` | `#E0(K)` | E0 points tested | tests (6 per point) | on the `F_q` quartic | `q`-power = model `Fr` | projected point satisfies the E0 equation | nonsquare `u·u'` | `y0 = 0` | infinity |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 5 | 5, 30 | 148 | 94 | 564 | 564 | 564 | 564 | 52 | 0 | 2 |
+| 5 | 5, 51 | 148 | 94 | 564 | 564 | 564 | 564 | 48 | 4 | 2 |
+| 7 | 7, 52 / 7, 54 | 356 | 188 | 1128 | 1128 | 1128 | 1128 | 166 | 0 | 2 |
+| 7 | 7, 110 / 118 / 129 | 356 | 182 | 1092 | 1092 | 1092 | 1092 | 168 | 4 | 2 |
+| 11 | 11, 130 | 1348 | 688 | 4128 | 4128 | 4128 | 4128 | 658 | 0 | 2 |
+| 11 | 11, 172 | 1324 | 646 | 3876 | 3876 | 3876 | 3876 | 672 | 4 | 2 |
+| 7† | 49, 8 / 49, 9 | 332 | 152 | 912 | 912 | 912 | 912 | 178 | 0 | 2 |
 
 † Addendum run `20261013T0347Z` (order-332 class).
 
-The untested points are those where `u·u'(t0)` is not a square: their
-two preimages are conjugate over `F_{q⁶}` and need a field the tool does
-not build.
+"Projected point satisfies the E0 equation" (record field
+`projected_points_on_E0`) is only the check that the `(t, y0)` coordinates
+of each tested point satisfy `y0² = u·u''`. It is **not** the pushforward
+`π0_*` of a divisor and does not verify `π0_*φ(P) = [2]P`; that check is
+not executed (see Scope and limits).
 
 ![Orders](reports/run-20261013T0347Z/orders_all11.svg)
 
@@ -142,7 +176,8 @@ P1, P2, P3 and P4 hold on every case; no falsifier fired.
 
 ## Scope and limits
 
-- **Not executed:** `φ` as a homomorphism, its injectivity on `E0[ℓ]`,
+- **Not executed:** the pushforward `π0_*` of a divisor and the identity
+  `π0_*φ(P) = [2]P`; `φ` as a homomorphism, its injectivity on `E0[ℓ]`,
   any discrete logarithm, any relation collection. These need class
   arithmetic on the quartic; see the problem record.
 - **Selection.** The frozen rule takes the first cases in index order.
@@ -167,6 +202,39 @@ on the `q = 7` case (7, 110); then relation collection by lines through
 pairs of `F_q`-points, counted against rho. The acceptance conditions are
 in the problem record.
 
+## Curve identity (ICV1)
+
+Each source `E0` is recorded as the short Weierstrass model
+`Y² = X³ − 27·I·X − 27·J` of the Jacobian of the quartic `y0² = u·u''`
+(`I, J` the quartic's invariants; the quartic has `K`-rational points at
+infinity, so the Jacobian is `E0`), over
+`F_{q³} = F_q[x]/(x³ + c₂x² + c₁x + c₀)` with the modulus the tool built.
+The tool emits the field modulus and `(a, b)` as coefficient lists
+(`E0_weierstrass_ext`) and asserts that the Weierstrass model has the same
+order as the quartic. [reports/e0_icv1.py](reports/e0_icv1.py) recounts that order
+independently with `scripts/curve_id.py` and computes each model's ICV1
+identity, written to [results/e0_icv1.json](results/e0_icv1.json) (field
+modulus, `a`, `b`, order, ICV1 string, model JSON, for all 11 cases). The
+order agrees with `order_E0` in all eleven.
+
+**Not registered yet.** `docs/curves/registry.json` has not been updated:
+registering needs `scripts/build_curve_registry.py` and a harvester for this
+record shape, under `docs/curves/`, which is reserved by Conductor task
+T-2240. Until the registration PR lands, this README writes no slug (an
+unregistered slug fails `scripts/check_curve_names.py`); cases are named by
+`(q, u index)` as in the tables, and the exact binding of each case to its
+field and model is `results/e0_icv1.json`.
+
+## Review changes
+
+- `points_skipped` counted only the affine points with non-square or zero
+  `u·u'`; it omitted the 2 points at infinity and, when `u` splits, the 4
+  points with `y0 = 0`. Replaced by `e0_affine_points_nonsquare_uu1` plus the
+  other explicit counts above; the original values are unchanged.
+- `pushforward_on_E0` renamed `projected_points_on_E0` (values unchanged).
+- Runs `20261013T0320Z` and `20261013T0347Z` regenerated with the updated
+  tool (new `source sha256` in each `.env.txt`); `all11.jsonl` rebuilt.
+
 ## Graphs checked and left unchanged
 
 No canonical graph changes (no ECDLP rung, no timing; no `benchmarks/`
@@ -181,6 +249,8 @@ python3 reports/plot.py results/run-20261013T0320Z.jsonl reports/run-20261013T03
 cat results/run-20261013T0320Z.jsonl results/run-20261013T0347Z.jsonl > results/all11.jsonl
 python3 reports/plot.py results/all11.jsonl reports/run-20261013T0347Z   # then orders.* renamed to orders_all11.*
 cd lean && lake build
+python3 reports/e0_icv1.py                 # from the repository root: results/e0_icv1.json
+cargo run --example identity_certificate_ghs_cubic_genus3 -- research/ghs_cubic_genus3_build_20261012/certificates
 ```
 
 The fourth argument to `genus3_build` is an optional target order (0 or

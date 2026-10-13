@@ -30,4 +30,4 @@ Both cases: `N` equals `N_predicted = (q+1, q²+1, q³+1−3t_E)`, `N3` also cou
 Exhausting the parametrization `u = t² + bt + c`, the order-332 class has exactly two irreducible-u representatives meeting the genus-3 conditions and no split-u representative. (The order-356 run was not exhaustive — it stopped at the requested 3 split + 2 irreducible — so this is not a comparison of multiplicities between the two classes.)
 
 == Missing data
-- As in the parent run: no divisor-class arithmetic, so the transfer is not executed as a homomorphism; points of E0 whose preimages are not K-rational are not tested (178 per case).
+- As in the parent run: no divisor-class arithmetic, so the transfer is not executed as a homomorphism; E0 points not tested, exactly accounted: 152 tested + 178 affine points with `u u'` zero or non-square (`e0_affine_points_nonsquare_uu1`) + 0 with `y0 = 0` + 2 at infinity = 332 per case; `projected_points_on_E0` only checks the E0 equation, not the pushforward.

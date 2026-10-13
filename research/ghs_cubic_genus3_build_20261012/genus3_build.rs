@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 
 // GF(q^n): 0 is zero, e >= 1 is alpha^(e-1).
 #[allow(dead_code)]
-struct Fld { q: u32, n: u32, size: u32, m: u32, zech: Vec<u32>, idx_of: Vec<u32>, el_of: Vec<u32> }
+struct Fld { q: u32, n: u32, size: u32, m: u32, zech: Vec<u32>, idx_of: Vec<u32>, el_of: Vec<u32>, modc: Vec<u32> }
 impl Fld {
     fn build(q: u32, n: u32) -> Fld {
         let size = q.pow(n); let m = size - 1; let nn = n as usize;
@@ -23,7 +23,7 @@ impl Fld {
                 for k in 0..m as usize { el_of[exp_idx[k] as usize] = k as u32 + 1; idx_of[k + 1] = exp_idx[k]; }
                 let mut zech = vec![0u32; m as usize];
                 for k in 0..m as usize { let mut dv = digits(exp_idx[k]); dv[0] = (dv[0] + 1) % q; zech[k] = el_of[index(&dv) as usize]; }
-                return Fld { q, n, size, m, zech, idx_of, el_of };
+                return Fld { q, n, size, m, zech, idx_of, el_of, modc: md };
             } }
         panic!("no field");
     }
@@ -38,6 +38,8 @@ impl Fld {
     #[inline] fn sqrt(&self, a: u32) -> u32 { if a == 0 { 0 } else { (a - 1) / 2 + 1 } }
     #[inline] fn in_fq(&self, a: u32) -> bool { a == 0 || (a - 1) % (self.m / (self.q - 1)) == 0 }
     fn int(&self, c: u32) -> u32 { self.el_of[(c % self.q) as usize] }
+    // coefficients (c_0..c_{n-1}) in the polynomial basis 1, x, .., x^{n-1} of GF(q)[x]/(x^n + modc[n-1] x^{n-1} + .. + modc[0])
+    fn coeffs(&self, a: u32) -> Vec<u32> { let mut i = if a == 0 { 0 } else { self.idx_of[a as usize] }; (0..self.n).map(|_| { let d = i % self.q; i /= self.q; d }).collect() }
 }
 
 type Q2 = [u32; 3]; // quadratic c0 + c1 t + c2 t^2
@@ -102,11 +104,23 @@ fn build(f: &Fld, u: &Q2, kind: &str, target: u64) -> Option<String> {
     let q = f.q as i64; let p: Vec<i64> = (0..3).map(|k| q.pow(k as u32 + 1) + 1 - n[k] as i64).collect();
     let e1 = p[0]; let e2 = (e1 * p[0] - p[1]) / 2; let e3 = (e2 * p[0] - e1 * p[1] + p[2]) / 3;
     let jac = 1 - e1 + e2 - e3 + q * e2 - q * q * e1 + q * q * q; let te = q * q * q + 1 - ord as i64;
+    // Weierstrass model of E0 (for the ICV1 identity): the Jacobian of y^2 = A t^4 + B t^3 + C t^2 + D t + E is Y^2 = X^3 - 27 I X - 27 J.
+    let pm = |a: &Q2, b: &Q2| -> [u32; 5] { let mut r = [0u32; 5]; for i in 0..3 { for j in 0..3 { r[i + j] = f.add(r[i + j], f.mul(a[i], b[j])); } } r };
+    let qc = pm(u, &u2); // coefficients of u u'', degree 4 monic
+    let (qa, qb, qcc, qd, qe) = (qc[4], qc[3], qc[2], qc[1], qc[0]);
+    let m = |x: u32, y: u32| f.mul(x, y); let ic = |c: u32| f.int(c);
+    let ii = f.add(f.sub(m(ic(12), m(qa, qe)), m(ic(3), m(qb, qd))), m(qcc, qcc));
+    let jj = f.sub(f.sub(f.add(m(ic(72), m(m(qa, qcc), qe)), m(ic(9), m(m(qb, qcc), qd))), m(ic(27), m(qa, m(qd, qd)))), f.add(m(ic(27), m(qe, m(qb, qb))), m(ic(2), m(qcc, m(qcc, qcc)))));
+    let (wa, wb) = (f.neg(m(ic(27), ii)), f.neg(m(ic(27), jj)));
+    let mut word = 1u64; for x in 0..f.size { let rhs = f.add(m(x, m(x, x)), f.add(m(wa, x), wb)); word += if rhs == 0 { 1 } else if f.is_sq(rhs) { 2 } else { 0 }; }
+    assert_eq!(word, ord, "Weierstrass model order differs from the quartic model order");
+    let cl = |v: Vec<u32>| v.iter().map(|d| d.to_string()).collect::<Vec<_>>().join(",");
+    let wjson = format!("{{\"p\":{},\"k\":3,\"modulus\":[{}],\"a\":[{}],\"b\":[{}],\"order\":{}}}", f.q, cl(f.modc.clone()), cl(f.coeffs(wa)), cl(f.coeffs(wb)), word);
     // transfer divisors
     let xyz = |y: [u32; 3]| [f.mul(y[1], y[2]), f.mul(y[0], y[2]), f.mul(y[0], y[1])];
     let to_w = |p: [u32; 3]| { let mut r = [0u32; 3]; for j in 0..3 { for i in 0..3 { r[j] = f.add(r[j], f.mul(om[j][i], p[i])); } } r };
-    let (mut tested, mut on_curve, mut frob_ok, mut on_e0, mut skipped) = (0u64, 0u64, 0u64, 0u64, 0u64);
-    for t in 0..f.size { let (v0, v1) = (f0(t), f1(t)); if v0 == 0 || !f.is_sq(v0) { continue; }
+    let (mut tested, mut on_curve, mut frob_ok, mut on_e0, mut skipped, mut ram) = (0u64, 0u64, 0u64, 0u64, 0u64, 0u64);
+    for t in 0..f.size { let (v0, v1) = (f0(t), f1(t)); if v0 == 0 { ram += 1; continue; } if !f.is_sq(v0) { continue; }
         if v1 == 0 || !f.is_sq(v1) || ev(f, u, t) == 0 { skipped += 2; continue; }
         for s0 in 0..2 { let y0 = if s0 == 0 { f.sqrt(v0) } else { f.neg(f.sqrt(v0)) }; // P = (t, y0) on E0
             for s1 in 0..2 { let y1 = if s1 == 0 { f.sqrt(v1) } else { f.neg(f.sqrt(v1)) }; let y2 = f.mul(f.mul(y0, y1), f.inv(ev(f, u, t)));
@@ -118,9 +132,9 @@ fn build(f: &Fld, u: &Q2, kind: &str, target: u64) -> Option<String> {
                     let wq = [f.frob(wp[0]), f.frob(wp[1]), f.frob(wp[2])];
                     if normalize(f, wq) == normalize(f, to_w(xyz(nx.1))) { frob_ok += 1; }
                     pt = nx; } } } }
-    Some(format!("{{\"rec\":\"case\",\"q\":{},\"kind\":\"{}\",\"u_idx\":[{},{}],\"roots_in_K\":{},\"order_E0\":{},\"ell\":{},\"trace_E0\":{},\"descends\":{},\"smooth\":{},\"quartic_Fq\":[{}],\"N\":[{},{},{}],\"N3_K_model\":{},\"N_predicted\":[{},{},{}],\"e\":[{},{},{}],\"jac_order\":{},\"jac_equals_E0\":{},\"divisor_points_tested\":{},\"on_quartic\":{},\"frobenius_matches\":{},\"pushforward_on_E0\":{},\"points_skipped\":{}}}",
+    Some(format!("{{\"rec\":\"case\",\"q\":{},\"kind\":\"{}\",\"u_idx\":[{},{}],\"roots_in_K\":{},\"order_E0\":{},\"ell\":{},\"trace_E0\":{},\"descends\":{},\"smooth\":{},\"quartic_Fq\":[{}],\"N\":[{},{},{}],\"N3_K_model\":{},\"N_predicted\":[{},{},{}],\"e\":[{},{},{}],\"jac_order\":{},\"jac_equals_E0\":{},\"divisor_points_tested\":{},\"on_quartic\":{},\"frobenius_matches\":{},\"projected_points_on_E0\":{},\"e0_points_tested\":{},\"e0_affine_points_nonsquare_uu1\":{},\"e0_ramification_points_y0_zero\":{},\"e0_points_at_infinity\":2,\"e0_points_accounted\":{},\"E0_weierstrass_ext\":{}}}",
         f.q, kind, f.idx_of[u[1] as usize], f.idx_of[u[0] as usize], roots(f, u).len(), ord, ord / 4, te, descends, smooth, ints.join(","), n[0], n[1], n[2], n3_kmodel,
-        q + 1, q * q + 1, q * q * q + 1 - 3 * te, e1, e2, e3, jac, jac == ord as i64, tested, on_curve, frob_ok, on_e0, skipped))
+        q + 1, q * q + 1, q * q * q + 1 - 3 * te, e1, e2, e3, jac, jac == ord as i64, tested, on_curve, frob_ok, on_e0, tested / 6, skipped, ram, tested / 6 + skipped + ram + 2, wjson))
 }
 
 fn main() { let a: Vec<String> = std::env::args().collect(); let q: u32 = a[1].parse().unwrap(); let want = [a[2].parse::<usize>().unwrap(), a[3].parse::<usize>().unwrap()];
