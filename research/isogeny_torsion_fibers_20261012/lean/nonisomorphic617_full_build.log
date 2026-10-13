@@ -1,0 +1,19 @@
+ℹ [2/9] Replayed FiberCofactor
+info: FiberCofactor.lean:21:0: 'FiberCofactor.rationalKernelOrderDvdCofactor' depends on axioms: [propext, Quot.sound]
+info: FiberCofactor.lean:22:0: 'FiberCofactor.degreeThreeNotDvdCofactorOne' depends on axioms: [propext]
+ℹ [4/9] Replayed CubicAutomorphism
+info: CubicAutomorphism.lean:33:0: 'CubicAutomorphism.zeta13' does not depend on any axioms
+info: CubicAutomorphism.lean:34:0: 'CubicAutomorphism.zeta199' does not depend on any axioms
+info: CubicAutomorphism.lean:35:0: 'CubicAutomorphism.scaling13' does not depend on any axioms
+info: CubicAutomorphism.lean:36:0: 'CubicAutomorphism.scaling199' does not depend on any axioms
+info: CubicAutomorphism.lean:37:0: 'CubicAutomorphism.cubicPreservesEquation' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CubicAutomorphism.lean:38:0: 'CubicAutomorphism.scalingPreservesEquation' depends on axioms: [propext, Classical.choice, Quot.sound]
+ℹ [6/9] Replayed SixClassCoefficients
+info: SixClassCoefficients.lean:34:0: 'SixClassCoefficients.endomorphismWalkCoefficients' does not depend on any axioms
+info: SixClassCoefficients.lean:35:0: 'SixClassCoefficients.scaledCoefficientValue' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: SixClassCoefficients.lean:36:0: 'SixClassCoefficients.negatedCoefficientValue' depends on axioms: [propext, Classical.choice, Quot.sound]
+ℹ [8/9] Replayed Nonisomorphic617
+info: Nonisomorphic617.lean:23:0: 'Nonisomorphic617.ratioNotSixthPower' does not depend on any axioms
+info: Nonisomorphic617.lean:24:0: 'Nonisomorphic617.targetCoprimeKernel' does not depend on any axioms
+info: Nonisomorphic617.lean:25:0: 'Nonisomorphic617.kernelScalarVanishes' depends on axioms: [propext]
+Build completed successfully (9 jobs).

@@ -186,3 +186,37 @@ pricing, and independent-host replay. The [problem record](../../problems/nonrat
 tracks the remaining work. The canonical scoreboard graphs were checked
 and left unchanged because this is a bounded counted-operation diagnostic,
 not a new complete-cost or scaling finding.
+
+## 2026-10-13 follow-on: non-isomorphic pair and rational torsion fiber
+
+The [F617 result report](nonisomorphic_pair_20261013/REPORT.md),
+[clean run report](nonisomorphic_pair_20261013/reports/run-20261013T1744Z/README.md),
+[24-row raw file](nonisomorphic_pair_20261013/raw-v2.tsv), and
+[explicit transport diagram](nonisomorphic_pair_20261013/transport-v2.svg)
+now give a base-field non-isomorphic degree-three pair. Both curves have
+618 rational points; the target subgroup has order 103. The source
+`y²=x³+1` has rational map kernel `{O,(0,1),(0,616)}`, and each of the
+eight tested transported targets has three checked rational preimages.
+The two factor bases were projected by the cofactor 6 into the target
+subgroups before relation collection.
+
+On the same eight public source targets, all 24 source-relation,
+destination-relation and matched negation-rho arm records recovered and
+verified the scalar. Source and destination relation totals were 3,312
+and 3,794 counted group operations; rho used 664. The destination/source
+ratio is 1.145531 in this diagnostic unit. The two relation arms used
+231 and 290 collection trials. The destination arm used fewer operations
+on three individual targets and more on five. An independent native
+checker verified all results and eight explicit three-point target fibers;
+the clean run and replay matched byte for byte. The first wrapper-failure
+receipt is retained separately.
+
+This control removes the public scaling-isomorphism confound of the
+F13/F199 round for its exact pair. It does not provide a complete native-cost
+or wall-time comparison: map field work, roots, lookups, row arithmetic,
+memory and construction require a pinned conversion, and this is one
+small order on a shared host. The canonical scoreboard and prior F13/F199
+graphs remain unchanged because this new bounded pair does not meet their
+full-cost or scaling admission gates. The [problem record](../../problems/nonrational-isogeny-fiber-dlp-cost-gap.md)
+now marks the non-isomorphic construction complete and keeps the growing-size
+performance gate open.

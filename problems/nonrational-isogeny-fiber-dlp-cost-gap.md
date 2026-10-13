@@ -6,7 +6,8 @@
 - **Affected work:** [fiber report](../RESEARCH_ISOGENY_FIBERS_ECDLP.md),
   [2026-10-12 correction and bounded control](../research/isogeny_torsion_fibers_20261012/REPORT.md),
   [same-target paired round](../research/isogeny_torsion_fibers_20261012/paired_round/REPORT.md),
-  [2026-10-13 isomorphism and six-class controls](../research/isogeny_torsion_fibers_20261012/paired_round/iso_control_20261013/REPORT.md)
+  [2026-10-13 isomorphism and six-class controls](../research/isogeny_torsion_fibers_20261012/paired_round/iso_control_20261013/REPORT.md),
+  [2026-10-13 non-isomorphic rational-fiber control](../research/isogeny_torsion_fibers_20261012/nonisomorphic_pair_20261013/REPORT.md)
 - **Next action owner:** unassigned
 - **Last updated:** 2026-10-13
 
@@ -26,8 +27,10 @@ Both destination models are also isomorphic to the sources over the
 base field: `ψ_u(x,y)=(u²x,u³y)` with `u=2` at `p=13` and `u=14` at
 `p=199`. The completed isomorphism-only solver arm showed a similar
 destination relation workload at order 211. This does not assign the
-recorded difference specifically to the degree-three map; a base-field
-non-isomorphic pair and broader controls are still missing.
+recorded difference specifically to the degree-three map. A later
+base-field non-isomorphic `F617` pair with a three-point rational kernel
+has now been solved in both relation arms. Broader sizes and complete
+native-cost controls are still missing.
 
 ## Evidence and uncertainty
 
@@ -65,12 +68,25 @@ non-isomorphic pair and broader controls are still missing.
   for negation rho in the same group-operation unit; at order 19 it
   required three charged restarts. V3 replay is byte-identical on the
   same host. These observations are bounded and do not price all native work.
+- **Observed on a non-isomorphic pair:** the
+  [F617 report](../research/isogeny_torsion_fibers_20261012/nonisomorphic_pair_20261013/REPORT.md)
+  records two order-618 models without a base-field isomorphism, an
+  explicit degree-three map with a rational kernel of size three, eight
+  checked target fibers, and 24/24 independently verified
+  source-relation, destination-relation and matched rho rows. Source and
+  destination relation totals were 3,312 and 3,794 counted group operations
+  on the same targets; rho used 664. The destination/source ratio is
+  1.145531 in that unit. Clean v2 execution and replay were byte-identical;
+  v1's post-child timing-wrapper failure remains preserved. This is one
+  small subgroup order on a shared host, with native costs unpriced.
 - **Missing capability:** a native ecbench or equivalently audited paired
   session that prices map evaluation, factor-base lifts, table lookups,
   modular algebra and memory in a common unit, at growing sizes and with
-  independent-host replay. A base-field non-isomorphic pair is needed to
-  test a degree-three-specific relation effect. The current runner counts
-  these activities but has no pinned conversion for all of them.
+  independent-host replay. The F617 pair removes the public scaling
+  isomorphism confound for its exact workload, but one order and eight
+  targets do not establish a general degree-three-specific effect. The
+  current runner counts these activities but has no pinned conversion for
+  all of them.
 - **What this evidence does not establish:** an admitted end-to-end speed
   ratio, an asymptotic improvement, or a result for deployed curves or
   other fields.
@@ -84,11 +100,16 @@ non-isomorphic pair and broader controls are still missing.
   control on the same frozen targets, with complete relation recovery,
   failure preservation, independent arithmetic verification, and
   byte-identical same-host replay. See the [follow-on](../research/isogeny_torsion_fibers_20261012/paired_round/iso_control_20261013/REPORT.md).
+- [x] Construct and verify a base-field non-isomorphic degree-three pair
+  with rational kernel size three, exact target fibers, subgroup projection,
+  complete paired relation recovery, original-source scalar checks,
+  matched negation rho, and independent native verification. See the
+  [F617 report](../research/isogeny_torsion_fibers_20261012/nonisomorphic_pair_20261013/REPORT.md).
 - [ ] Obtain verified logs for both solver arms, full phase accounting,
   **priced** native work, failed-attempt records, and independent-host replay;
   compare the degree-three arm with a scaling-isomorphism arm and a
-  base-field non-isomorphic pair, calibrate both negation and six-class
-  rho, then report a cold-cost ratio
+  base-field non-isomorphic pair across growing sizes, calibrate the
+  rational automorphism-aware rho available on each curve, then report a cold-cost ratio
   and interval in the repository's counted unit at at least four growing
   sizes. The bounded rounds have verified logs, phase counts and retained
   failed record versions, but do not meet the full pricing and replay gate.
@@ -108,21 +129,23 @@ It would not prove a general exponent change or a result for another curve.
   charged six-class rho arm with explicit orbit and coefficient
   canonicalization, verified all 16 scalars in v3, and preserved v1/v2
   cap failures. Stronger tuning and larger-order calibration remain open.
-- **Next mechanism test:** preregister and construct at least one exact
-  base-field non-isomorphic source/destination pair with an explicit
-  verified map and prime-order target subgroup. Check complete relation
-  solves, recovery, and both rho controls on paired public targets; this
-  tests whether the present coordinate result persists when degree-one
-  transport to the same model is unavailable.
+- **Completed non-isomorphic mechanism test:** the
+  [F617 control](../research/isogeny_torsion_fibers_20261012/nonisomorphic_pair_20261013/REPORT.md)
+  used an explicit rational-kernel degree-three map, a prime-order target
+  subgroup, both relation solves, recovery, and matched negation rho on
+  eight public targets. No base-field degree-one scaling exists for this
+  pair. Destination relation work was higher in the aggregate and lower
+  on three of eight individual targets. This observation is exact for the
+  frozen workload.
 - **Action:** extend native ecbench with a paired target transport path or
   an equivalently audited counted runner; preregister at least four
   increasing prime-order subgroup isogeny pairs, eight or more public
   targets per size, and five interleaved rounds. Include a base-field
-  non-isomorphic pair to test a degree-three-specific effect.
+  non-isomorphic pairs at growing sizes to test a degree-three-specific effect.
 - **Inputs and controls:** exact ICV1/EC1 pairs, executable isogeny,
   same source target transported to destination, source relation baseline,
-  matched negation rho, six-class automorphism-aware rho, and A/A timing
-  control if wall time is used.
+  matched negation rho, six-class automorphism-aware rho where rationally
+  available, and A/A timing control if wall time is used.
 - **Limits:** pin conversions for map, roots, lookups and modular work;
   include memory, construction and failed attempts; use ecbench's
   isolation and independent-host receipt gates. Stop on correctness or
@@ -147,3 +170,11 @@ not cover every rational automorphism of these curves.
 The final structural audit found the two public scaling isomorphisms;
 the isomorphism-only relation arm is now the cheapest discriminating
 experiment. The v4 measurement and its frozen inputs remain unchanged.
+
+2026-10-13: the isomorphism-only arm and charged six-class rho control
+completed on the frozen F13/F199 targets. A separate preregistered F617
+pair then supplied a non-isomorphic destination, rational kernel of size
+three, and eight explicitly checked three-point target fibers. All 24
+same-target relation/rho rows verified, with destination/source counted
+group operations 3,794/3,312 and same-host byte-identical replay. Full
+native pricing, growing sizes and independent-host replay remain open.

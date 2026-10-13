@@ -1,6 +1,6 @@
 name = "isogeny_torsion_fibers"
 version = "0.1.0"
-defaultTargets = ["FiberCofactor", "CubicAutomorphism", "SixClassCoefficients"]
+defaultTargets = ["FiberCofactor", "CubicAutomorphism", "SixClassCoefficients", "Nonisomorphic617"]
 
 [[lean_lib]]
 name = "FiberCofactor"
@@ -10,3 +10,6 @@ name = "CubicAutomorphism"
 
 [[lean_lib]]
 name = "SixClassCoefficients"
+
+[[lean_lib]]
+name = "Nonisomorphic617"

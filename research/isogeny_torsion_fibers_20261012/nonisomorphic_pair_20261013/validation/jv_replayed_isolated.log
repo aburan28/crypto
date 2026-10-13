@@ -1,0 +1,98 @@
+warning: unused import: `ToPrimitive`
+  --> src/cryptanalysis/curve_traits/mod.rs:50:31
+   |
+50 | use num_traits::{One, Signed, ToPrimitive, Zero};
+   |                               ^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:727:13
+    |
+727 |         let current = LegacyFloatFixture {
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:733:13
+    |
+733 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:734:13
+    |
+734 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:735:13
+    |
+735 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: field `plans` is never read
+   --> src/cryptanalysis/inherited_f4.rs:513:5
+    |
+505 | struct LayoutStep {
+    |        ---------- field in this struct
+...
+513 |     plans: RefCell<HashMap<u32, Rc<RewritePlan>>>,
+    |     ^^^^^
+    |
+    = note: `LayoutStep` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `zeroed_words` is never used
+    --> src/cryptanalysis/inherited_f4.rs:1019:4
+     |
+1019 | fn zeroed_words(n: usize) -> Rc<[u64]> {
+     |    ^^^^^^^^^^^^
+
+warning: method `rewrite_plan` is never used
+    --> src/cryptanalysis/inherited_f4.rs:1808:8
+     |
+1330 | impl ReducedBasis {
+     | ----------------- method in this implementation
+...
+1808 |     fn rewrite_plan(&self, from: u32) -> Rc<RewritePlan> {
+     |        ^^^^^^^^^^^^
+
+warning: function `trace_on` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:9351:4
+     |
+9351 | fn trace_on() -> bool {
+     |    ^^^^^^^^
+
+warning: function `trace_cost` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:9357:4
+     |
+9357 | fn trace_cost(w0: Option<u64>, refuted: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `trace` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:9371:4
+     |
+9371 | fn trace(f: impl FnOnce(&mut RefutationDegreeTrace)) {
+     |    ^^^^^
+
+warning: `crypto` (lib test) generated 11 warnings (run `cargo fix --lib -p crypto --tests` to apply 5 suggestions)
+    Finished `release` profile [optimized] target(s) in 0.37s
+     Running unittests src/lib.rs (target/release/deps/crypto_lib-e89b2f0dbc9b5389)
+
+running 1 test
+test cryptanalysis::jv_cover::tests::replayed_f4_agrees_with_the_full_solver_and_the_oracle ... full f4 680566 (231 × 255, degree 7) vs replay 296036 (197 × 252, degree 7)
+full f4 692379 (231 × 255, degree 7) vs replay 301797 (197 × 252, degree 7)
+full f4 696269 (231 × 255, degree 7) vs replay 303599 (197 × 252, degree 7)
+replayed 31 of 40, cheaper 31, mismatches 8
+  trace step 0: degree 2 useful rows 3 new lms 2
+  trace step 1: degree 3 useful rows 17 new lms 9
+  trace step 2: degree 4 useful rows 34 new lms 10
+  trace step 3: degree 5 useful rows 31 new lms 9
+  trace step 4: degree 6 useful rows 28 new lms 5
+  trace step 5: degree 7 useful rows 13 new lms 1
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4121 filtered out; finished in 34.89s
+
