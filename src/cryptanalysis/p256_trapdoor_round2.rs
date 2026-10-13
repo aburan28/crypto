@@ -28,7 +28,9 @@
 //! null result is recorded precisely because it is what a 1999 grind
 //! could not have hidden behind.
 
-use crate::cryptanalysis::p256_structural::{deep_factor, p256_n, p256_p, p256_trace, p256_twist_order};
+use crate::cryptanalysis::p256_structural::{
+    deep_factor, p256_n, p256_p, p256_trace, p256_twist_order,
+};
 use num_bigint::BigUint;
 use num_integer::Integer;
 use num_traits::{One, Zero};
@@ -155,9 +157,9 @@ fn nth_root_exact(x: &BigUint, e: u32) -> (BigUint, bool) {
     }
     let mut lo = BigUint::one();
     let mut hi: BigUint = {
-            let seed: BigUint = BigUint::one();
-            seed << ((x.bits() / e as u64) + 1)
-        };
+        let seed: BigUint = BigUint::one();
+        seed << ((x.bits() / e as u64) + 1)
+    };
     while &hi - &lo > one {
         let mid: BigUint = (&lo + &hi) >> 1;
         if mid.pow(e) <= *x {
@@ -266,12 +268,7 @@ fn poly_mul_mod(a: &[BigUint; 3], b: &[BigUint; 3], f: &[BigUint; 4], p: &BigUin
 /// `f(x) = x³ + f1x² + f2x + f3` (coefficients already reduced mod `p`),
 /// computed as `deg gcd(f, x^p − x)`.
 pub fn cubic_rational_root_count(f1: &BigUint, f2: &BigUint, f3: &BigUint, p: &BigUint) -> usize {
-    let f = [
-        BigUint::one(),
-        f1.clone(),
-        f2.clone(),
-        f3.clone(),
-    ];
+    let f = [BigUint::one(), f1.clone(), f2.clone(), f3.clone()];
     // Compute x^p mod f by square-and-multiply on the exponent p.
     let mut result = [BigUint::one(), BigUint::zero(), BigUint::zero()]; // 1
     let mut base: [BigUint; 3] = [BigUint::zero(), BigUint::one(), BigUint::zero()]; // x
@@ -323,11 +320,7 @@ pub fn cubic_rational_root_count(f1: &BigUint, f2: &BigUint, f3: &BigUint, p: &B
                 // keep at least 4 slots; no truncation needed
             }
         }
-        let mut out = [
-            BigUint::zero(),
-            BigUint::zero(),
-            BigUint::zero(),
-        ];
+        let mut out = [BigUint::zero(), BigUint::zero(), BigUint::zero()];
         for (i, slot) in out.iter_mut().enumerate().take(3) {
             *slot = rem.get(i).cloned().unwrap_or_else(BigUint::zero);
         }
@@ -342,11 +335,11 @@ pub fn cubic_rational_root_count(f1: &BigUint, f2: &BigUint, f3: &BigUint, p: &B
         }
         // Shift: f := g (pad), g := r.
         let mut f_next = [
-                BigUint::zero(),
-                BigUint::zero(),
-                BigUint::zero(),
-                BigUint::zero(),
-            ];
+            BigUint::zero(),
+            BigUint::zero(),
+            BigUint::zero(),
+            BigUint::zero(),
+        ];
         for (i, slot) in g_cur.iter().enumerate() {
             f_next[i] = slot.clone();
         }
@@ -459,7 +452,11 @@ pub fn p256_trapdoor_round2_report(pollard_iters: u64) -> Vec<TrapdoorProbeRecor
                 "{} bits ({}); p-1 {}",
                 ord.bits(),
                 format!("{:x}", ord),
-                if fully_factored_pm1 { "fully factored: exact" } else { "partially factored: order divides this" }
+                if fully_factored_pm1 {
+                    "fully factored: exact"
+                } else {
+                    "partially factored: order divides this"
+                }
             ),
             anomaly: false,
         });
@@ -613,7 +610,11 @@ pub fn p256_trapdoor_round2_report(pollard_iters: u64) -> Vec<TrapdoorProbeRecor
         measured: format!(
             "{} rational roots ({} rational 2-isogenies), fully_splits={}",
             split.rational_roots,
-            if split.rational_roots == 0 { 1 } else { split.rational_roots },
+            if split.rational_roots == 0 {
+                1
+            } else {
+                split.rational_roots
+            },
             split.fully_splits
         ),
         anomaly: false,
@@ -657,10 +658,7 @@ mod tests {
     fn multiplicative_order_mod_is_correct_on_a_small_prime() {
         // p = 101, p−1 = 2^2 · 5 · 5. ord(2) = 100? 2^50 mod 101…
         let p = BigUint::from(101u32);
-        let factors = vec![
-            (BigUint::from(2u32), 2u32),
-            (BigUint::from(5u32), 2u32),
-        ];
+        let factors = vec![(BigUint::from(2u32), 2u32), (BigUint::from(5u32), 2u32)];
         let ord = multiplicative_order_mod(&BigUint::from(2u32), &p, &factors);
         assert_eq!(BigUint::from(2u32).modpow(&ord, &p), BigUint::one());
         assert!((&p - BigUint::one()) % &ord == BigUint::zero());
@@ -702,12 +700,8 @@ mod tests {
         // Compute by brute force and compare.
         let f = |x: u64| (x * x * x + x + 1) % 11;
         let brute: Vec<u64> = (0..11).filter(|&x| f(x) == 0).collect();
-        let count = cubic_rational_root_count(
-            &BigUint::zero(),
-            &BigUint::one(),
-            &BigUint::one(),
-            &p,
-        );
+        let count =
+            cubic_rational_root_count(&BigUint::zero(), &BigUint::one(), &BigUint::one(), &p);
         assert_eq!(count, brute.len());
     }
 
@@ -721,4 +715,3 @@ mod tests {
         assert!(records.iter().all(|r| !r.name.is_empty()));
     }
 }
-

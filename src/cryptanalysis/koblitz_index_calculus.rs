@@ -10062,7 +10062,11 @@ fn koblitz_index_calculus_dlp_observed(
                 }
                 DecompositionStrategy::ChainedS3FrobeniusOrbitOrdered => {
                     let (idxs, stats) = sat_decompose_chained_s3_frobenius_orbit_ordered(
-                        kc, fb, target, opts.m, opts.chain_s3_limits,
+                        kc,
+                        fb,
+                        target,
+                        opts.m,
+                        opts.chain_s3_limits,
                     );
                     RelationAttemptOutcome::ChainedS3(idxs, stats)
                 }
@@ -11829,7 +11833,11 @@ fn decompose_once(
         }
         DecompositionStrategy::ChainedS3FrobeniusOrbitOrdered => {
             let (points, stats) = sat_decompose_chained_s3_frobenius_orbit_ordered(
-                kc, fb, target, opts.m, opts.chain_s3_limits,
+                kc,
+                fb,
+                target,
+                opts.m,
+                opts.chain_s3_limits,
             );
             PdpAttempt::chained(points, stats)
         }
@@ -12583,8 +12591,7 @@ impl<'a> LogSystem<'a> {
         }
         // The sparse path needs a word width for `r`; without one the
         // rows stay empty over a placeholder and the dense path runs.
-        let (sparse_opts, sparse_rows) = match (opts.linear_algebra, SparseRows::for_modulus(r))
-        {
+        let (sparse_opts, sparse_rows) = match (opts.linear_algebra, SparseRows::for_modulus(r)) {
             (LinearAlgebra::Sparse(s), Some(rows)) => (Some(s), rows),
             _ => (
                 None,
@@ -12616,7 +12623,12 @@ impl<'a> LogSystem<'a> {
     fn uncovered_columns(&self) -> Vec<usize> {
         let mut covered = vec![false; self.n_cols];
         if self.sparse_opts.is_some() {
-            for (column, weight) in self.sparse_rows.column_weights(self.n_cols).into_iter().enumerate() {
+            for (column, weight) in self
+                .sparse_rows
+                .column_weights(self.n_cols)
+                .into_iter()
+                .enumerate()
+            {
                 covered[column] = weight > 0;
             }
         } else {
@@ -15783,7 +15795,8 @@ mod tests {
                 } else {
                     sat_decompose_chained_s3_frobenius_orbit(&kc, &fb, &target, m, limits)
                 };
-                let indices = found.unwrap_or_else(|| panic!("m={m}, ordered={ordered}: {stats:?}"));
+                let indices =
+                    found.unwrap_or_else(|| panic!("m={m}, ordered={ordered}: {stats:?}"));
                 assert_eq!(indices.len(), m);
                 assert_eq!(
                     indices.iter().fold(BinaryPoint::Infinity, |acc, &index| {
@@ -18520,7 +18533,10 @@ mod tests {
             if solver.system.sparse_opts.is_some() {
                 solver.system.sparse_rows.clear();
                 for _ in 0..cols {
-                    solver.system.sparse_rows.push_dense(&zero, &BigUint::zero());
+                    solver
+                        .system
+                        .sparse_rows
+                        .push_dense(&zero, &BigUint::zero());
                 }
             } else {
                 solver.system.dense_matrix = vec![zero; cols];

@@ -26,7 +26,7 @@
 use crate::cryptanalysis::p256_backdoor_map::x962_candidate_r;
 use crate::cryptanalysis::p256_structural::p256_p;
 use crate::cryptanalysis::p256_trapdoor_round2::{
-    continued_fraction, is_dth_power_residue, is_quadratic_residue, popcount, p256_b,
+    continued_fraction, is_dth_power_residue, is_quadratic_residue, p256_b, popcount,
 };
 use crate::hash::sha1::sha1;
 use num_bigint::BigUint;
@@ -45,16 +45,18 @@ pub struct X962Candidate {
 /// runs are exactly reproducible and independent of any RNG library
 /// version.
 fn seed_from_counter(counter: u64) -> [u8; 20] {
-    let mut z = counter
-        .wrapping_add(0x9e37_79b9_7f4a_7c15);
+    let mut z = counter.wrapping_add(0x9e37_79b9_7f4a_7c15);
     z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
     z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
     z ^= z >> 31;
     // Two splitmix draws fill 16 bytes; a third fills the rest.
     let mut bytes = Vec::with_capacity(20);
-    for c in [counter, counter ^ 0x1234_5678_9abc_def0, counter.rotate_left(17)] {
-        let mut w = c
-            .wrapping_add(0x9e37_79b9_7f4a_7c15);
+    for c in [
+        counter,
+        counter ^ 0x1234_5678_9abc_def0,
+        counter.rotate_left(17),
+    ] {
+        let mut w = c.wrapping_add(0x9e37_79b9_7f4a_7c15);
         w = (w ^ (w >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
         w = (w ^ (w >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
         w ^= w >> 31;
@@ -170,16 +172,16 @@ fn erf(x: f64) -> f64 {
     // Numerical Recipes 6.2, maximum error 1.2e-7 — ample for p-values.
     let z = x.abs();
     let t = 1.0 / (1.0 + 0.5 * z);
-    let tau = t * (-z * z - 1.26551223
-        + t * (1.00002368
-            + t * (0.37409196
-                + t * (0.09678418
-                    + t * (-0.18628806
-                        + t * (0.27886807
-                            + t * (-1.13520398
-                                + t * (1.48851587
-                                    + t * (-0.82215223 + t * 0.17087277)))))))))
-        .exp();
+    let tau = t
+        * (-z * z - 1.26551223
+            + t * (1.00002368
+                + t * (0.37409196
+                    + t * (0.09678418
+                        + t * (-0.18628806
+                            + t * (0.27886807
+                                + t * (-1.13520398
+                                    + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))))
+            .exp();
     if x >= 0.0 {
         1.0 - tau
     } else {
@@ -315,11 +317,7 @@ pub const P256_SEED_HEX: &str = "c49d360886e704936a6678e1139d26b7819f7e90";
 /// the published 160-bit seed.
 pub fn seed_preimage_probe(phrases: &[String]) -> Option<String> {
     let mut target = [0u8; 20];
-    for (i, hexbyte) in P256_SEED_HEX
-        .as_bytes()
-        .chunks(2)
-        .enumerate()
-    {
+    for (i, hexbyte) in P256_SEED_HEX.as_bytes().chunks(2).enumerate() {
         let hi = (hexbyte[0] as char).to_digit(16).unwrap() as u8;
         let lo = (hexbyte[1] as char).to_digit(16).unwrap() as u8;
         target[i] = (hi << 4) | lo;
@@ -359,9 +357,27 @@ pub fn curated_phrase_list() -> Vec<String> {
         "safe curve",
     ];
     let suffixes = [
-        "", " 1999", "1999", " 2000", "2000", " x", "!", "?", "1", "0",
-        " seed", " seed)", " curve", " prime", " NSA", " nsa", " is good",
-        " is best", " is great", " says so", " was here",
+        "",
+        " 1999",
+        "1999",
+        " 2000",
+        "2000",
+        " x",
+        "!",
+        "?",
+        "1",
+        "0",
+        " seed",
+        " seed)",
+        " curve",
+        " prime",
+        " NSA",
+        " nsa",
+        " is good",
+        " is best",
+        " is great",
+        " says so",
+        " was here",
     ];
     let mut out = Vec::new();
     for b in bases {
@@ -410,10 +426,13 @@ mod tests {
         let phrases = vec!["abc".to_string()];
         // SHA-1("abc") = a9993e364706816aba3e25717850c26c9cd0d89d
         let digest = sha1(b"abc");
-        assert_eq!(digest, [
-            0xa9, 0x99, 0x3e, 0x36, 0x47, 0x06, 0x81, 0x6a, 0xba, 0x3e,
-            0x25, 0x71, 0x78, 0x50, 0xc2, 0x6c, 0x9c, 0xd0, 0xd8, 0x9d,
-        ]);
+        assert_eq!(
+            digest,
+            [
+                0xa9, 0x99, 0x3e, 0x36, 0x47, 0x06, 0x81, 0x6a, 0xba, 0x3e, 0x25, 0x71, 0x78, 0x50,
+                0xc2, 0x6c, 0x9c, 0xd0, 0xd8, 0x9d,
+            ]
+        );
         assert!(!phrases.is_empty());
     }
 
