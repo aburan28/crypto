@@ -51,8 +51,8 @@ pub struct ChildInput {
     pub curve: CurveSpec,
     pub target_seed: u64,
     pub target_index: u64,
-    /// Planted or public; older inputs are planted.
-    #[serde(default, skip_serializing_if = "TargetKind::is_planted")]
+    /// Planted, planted_shared or public; older inputs are planted.
+    #[serde(default, skip_serializing_if = "TargetKind::is_plain_planted")]
     pub target_kind: TargetKind,
     pub expected_workload_id: String,
     pub method: MethodSpec,

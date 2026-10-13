@@ -1444,6 +1444,119 @@ impl RhoClasses<PrimeCurve> for CubicClasses {
     }
 }
 
+/// `{±ι^i(P)}` on a `j = 1728` curve `y² = x³ + ax` over `F_p` with
+/// `p ≡ 1 (mod 4)` (`A = 4`): the orbit of the rational order-4
+/// automorphism `ι: (x, y) ↦ (−x, iy)` — `i` a square root of `−1` in
+/// `F_p` — which already contains negation (`ι² = −1`).  `ι` acts on
+/// the order-`r` subgroup as `[κ]` for a square root `κ` of `−1`
+/// mod `r` (it exists exactly when `r ≡ 1 (mod 4)`); `κ` is kept only
+/// when `[κ]G = ι(G)` holds, verified with two counted scalar
+/// multiplications on the caller's ledger.  The one `i`-rotation a
+/// canonicalisation performs is a counted field multiplication.
+pub struct QuarticClasses {
+    r: u64,
+    iota: u64,
+    kappa: u64,
+}
+
+impl QuarticClasses {
+    /// The test-visible primitive fourth root of `−1` in `F_p`.
+    pub fn iota_for_test(&self) -> u64 {
+        self.iota
+    }
+    /// The test-visible square root of `−1` mod `r`.
+    pub fn kappa_for_test(&self) -> u64 {
+        self.kappa
+    }
+    /// The four classes of a `j = 1728` prime instance, or `None` when
+    /// the curve, field or subgroup lacks the structure: `b ≠ 0`,
+    /// `p ≢ 1 (mod 4)`, `4 ∤ r − 1`, or `ι` fixes the subgroup.
+    pub fn new(
+        g: &PrimeCurve,
+        generator: PrimePoint,
+        r: u64,
+        ops: &mut GroupOps,
+    ) -> Option<Self> {
+        if g.b != 0 || g.a == 0 || g.p < 5 || g.p % 4 != 1 || r % 4 != 1 {
+            return None;
+        }
+        let p = g.p;
+        let iota = g.sqrt(submod(0, 1, p))?;
+        if iota <= 1 || mulmod(iota, iota, p) != submod(0, 1, p) {
+            return None;
+        }
+        // kappa: a square root of -1 mod r whose multiple of the generator
+        // is iota(generator). (-1/r) = 1 when r = 1 (mod 4).
+        let kappa = PrimeCurve { p: r, a: 0, b: 0 }.sqrt(submod(0, 1, r))?;
+        if kappa <= 1 || kappa >= r {
+            return None;
+        }
+        let iota_g = if generator.infinity {
+            generator
+        } else {
+            PrimePoint::affine(submod(0, generator.x, p), mulmod(iota, generator.y, p))
+        };
+        if !g.is_on_curve(iota_g) || iota_g == generator {
+            return None;
+        }
+        // The action is [kappa] or [-kappa]; exactly one of the two
+        // square roots of -1 mod r names it.
+        let scaled = g.mul(ops, generator, kappa);
+        if scaled == iota_g {
+            Some(Self { r, iota, kappa })
+        } else if g.neg(scaled) == iota_g {
+            Some(Self {
+                r,
+                iota,
+                kappa: submod(0, kappa, r),
+            })
+        } else {
+            None
+        }
+    }
+}
+
+impl RhoClasses<PrimeCurve> for QuarticClasses {
+    fn automorphisms(&self) -> u32 {
+        4
+    }
+    fn canon(&self, g: &PrimeCurve, ops: &mut GroupOps, p: PrimePoint) -> (PrimePoint, u64) {
+        if p.infinity {
+            return (p, 1);
+        }
+        let (a, b, c) = (g.p, self.iota, self.r);
+        // The four orbit points: P, iota(P) = (-x, iy), -P, -iota(P).
+        // The one rotation is counted field work.
+        let rot = PrimePoint::affine(submod(0, p.x, a), mulmod(b, p.y, a));
+        ops.field_ops.muls += 1;
+        let mut best = p;
+        let mut best_key = g.key(&p);
+        let mut best_mu = 1u64;
+        let neg = g.neg(p);
+        let neg_key = g.key(&neg);
+        if neg_key < best_key {
+            best = neg;
+            best_key = neg_key;
+            best_mu = submod(0, 1, c);
+        }
+        for (pt, mu) in [
+            (rot, self.kappa),
+            (g.neg(rot), submod(0, self.kappa, c)),
+        ] {
+            let k = g.key(&pt);
+            if k < best_key {
+                best = pt;
+                best_key = k;
+                best_mu = mu;
+            }
+        }
+        (best, best_mu)
+    }
+    fn method(&self) -> &'static str {
+        "quartic-automorphism r-adding walk on {±i^i(P)}: look-ahead, short-cycle escape by doubling, distinguished points, stride starts"
+    }
+}
+
 /// `{±φ^t(P)}` on a Koblitz curve (`A = 2n`): the conjugate whose
 /// abscissa has the least normal-basis rotation ([`FrobeniusCanon`]),
 /// with `x` and `y` carried there by table ([`FrobeniusPowers`]), then
@@ -4495,6 +4608,20 @@ impl FrobeniusPairTable {
     /// `None` when the base is not closed under the Frobenius, has more
     /// than `2^26` points, or the field yields no normal basis.
     pub fn build(inst: &BinaryInstance, fb: &FactorBase<FastPoint>) -> Option<Self> {
+        Self::build_filtered(inst, fb, |_, _| true)
+    }
+
+    /// [`build`](Self::build) over the pairs `keep(rep, j)` admits, where
+    /// `rep` is an orbit representative's base index and `j` the other
+    /// member's.  The large-prime collector uses this to leave the
+    /// large×large pairs of an envelope base out of a single-large-prime
+    /// table; with `keep` always true the table, its counters and its
+    /// entry order are exactly those of `build`.
+    pub fn build_filtered(
+        inst: &BinaryInstance,
+        fb: &FactorBase<FastPoint>,
+        keep: impl Fn(usize, usize) -> bool,
+    ) -> Option<Self> {
         let start = Instant::now();
         let g = BinaryGroup(&inst.fast);
         let n = inst.n as usize;
@@ -4542,7 +4669,7 @@ impl FrobeniusPairTable {
         let mut map: FastMap<(u32, u32)> = fast_map(f * f / (4 * n) + 1);
         for (orbit, &rep) in rep_of_orbit.iter().enumerate() {
             for j in 0..f {
-                if (orbit_of[j] as usize) < orbit {
+                if (orbit_of[j] as usize) < orbit || !keep(rep, j) {
                     continue;
                 }
                 let u = g.add(&mut ops, fb.points[rep], fb.points[j]);
@@ -4602,6 +4729,14 @@ impl FrobeniusPairTable {
             ctr.frobfold_mismatches += 1;
             None
         }
+    }
+
+    /// The canonical (least normal-basis rotation) name of an abscissa:
+    /// the same for every member of a signed Frobenius orbit, so a set of
+    /// orbits is a set of these keys.  Costs one canonicalisation, which
+    /// the caller counts.
+    pub fn orbit_key(&self, x: u64) -> u64 {
+        self.canon.canon(x)
     }
 
     pub fn calibrate_lookup(&self, samples: u64) -> f64 {
@@ -5186,6 +5321,28 @@ pub fn collect_and_solve_with<G: CountedGroup, L: RelationSolver + ?Sized>(
     )
 }
 
+/// What an oracle hands the relation loop for one target.
+///
+/// The classic oracle answers with the indices of signed base points
+/// whose sum is the target; the loop writes the row from the base's
+/// `coef_of` and the trial's own `(a, b)`.  A large-prime collector
+/// (`ic_framework::large_prime`) instead returns rows it merged from
+/// several trials' partial relations, with explicit column coefficients
+/// and the merged `(a, b)`; those rows have already been checked as
+/// group equations, and the loop treats them exactly like a classic row
+/// once they arrive.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Relation {
+    /// Indices into the base: `target = Σ points[i]`.
+    Summands(Vec<usize>),
+    /// `h·a + h·b·d = Σ coef · x_col` over the listed columns.
+    Row {
+        columns: Vec<(usize, u64)>,
+        a: u64,
+        b: u64,
+    },
+}
+
 /// The shared relation loop with an explicit completion rule. The
 /// `TargetPinned` wrapper above preserves historical run semantics.
 #[allow(clippy::too_many_arguments)]
@@ -5203,6 +5360,48 @@ pub fn collect_and_solve_with_completion<G: CountedGroup, L: RelationSolver + ?S
     matrix: &mut L,
     completion: CompletionRule,
     mut oracle: impl FnMut(&mut GroupOps, &mut OracleCounters, G::Elt) -> Option<Vec<usize>>,
+) -> PipelineOutcome {
+    collect_and_solve_relations(
+        g,
+        generator,
+        target,
+        r,
+        h,
+        fb,
+        seed,
+        max_trials,
+        targets,
+        pool_mode,
+        matrix,
+        completion,
+        |ops, ctr, point, _a, _b| match oracle(ops, ctr, point) {
+            Some(summands) => vec![Relation::Summands(summands)],
+            None => Vec::new(),
+        },
+    )
+}
+
+/// [`collect_and_solve_with_completion`] for an oracle that may answer a
+/// target with several relations, some of them merged rows with their
+/// own `(a, b)` (see [`Relation`]).  The oracle receives the target's
+/// coefficients so a collector can store a partial relation against
+/// them; nothing else differs, and the classic wrapper above produces
+/// bit-identical counters.
+#[allow(clippy::too_many_arguments)]
+pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
+    g: &G,
+    generator: G::Elt,
+    target: G::Elt,
+    r: u64,
+    h: u64,
+    fb: &FactorBase<G::Elt>,
+    seed: u64,
+    max_trials: u64,
+    targets: TargetSource,
+    pool_mode: RestartPool,
+    matrix: &mut L,
+    completion: CompletionRule,
+    mut oracle: impl FnMut(&mut GroupOps, &mut OracleCounters, G::Elt, u64, u64) -> Vec<Relation>,
 ) -> PipelineOutcome {
     let mut rng = StdRng::seed_from_u64(seed ^ 0x5245_4C41_5449_4F4E);
     let mut rel = PhaseCost::default();
@@ -5405,75 +5604,101 @@ pub fn collect_and_solve_with_completion<G: CountedGroup, L: RelationSolver + ?S
             }
         }
         measurement::mark(measurement::Phase::TargetPdp);
-        let Some(summands) = oracle(&mut rel.group_ops, &mut ctr, point) else {
+        let relations = oracle(&mut rel.group_ops, &mut ctr, point, a, b);
+        if relations.is_empty() {
             continue;
-        };
-        found += 1;
+        }
         // The relation enters the target's elimination: in this classic
         // form every relation carries the target, so the solve is the
         // target's descent.
         measurement::mark(measurement::Phase::TargetDescent);
         let la_start = Instant::now();
-        let mut row = vec![0u64; cols];
-        for &i in &summands {
-            let c = fb.col_of[i];
-            row[c] = addmod(row[c], fb.coef_of[i], r);
-        }
-        // How many columns the row touches: with orbit columns a sum of
-        // two points of one signed orbit is a single-column row, and two
-        // of those on one column pin the logarithm by themselves.
-        let support = row[..d_col].iter().filter(|&&c| c != 0).count();
-        match support {
-            1 => single_column_rows += 1,
-            2 => two_column_rows += 1,
-            _ => {}
-        }
-        let repeated = column_parts
-            .insert(column_part_key(&row[..d_col]), ())
-            .is_some();
-        if repeated {
-            repeated_column_rows += 1;
-        }
-        // h·a + h·b·d = Σ coef·x  ⇒  Σ coef·x − h·b·d = h·a
-        row[d_col] = submod(0, mulmod(h_mod, b, r), r);
-        let rhs = mulmod(h_mod, a, r);
-        match matrix.add_row(row, rhs) {
-            RowStatus::Inconsistent => {
+        let mut stop = false;
+        let mut la_timed = false;
+        for relation in relations {
+            found += 1;
+            let mut row = vec![0u64; cols];
+            let (ra, rb) = match relation {
+                Relation::Summands(summands) => {
+                    for &i in &summands {
+                        let c = fb.col_of[i];
+                        row[c] = addmod(row[c], fb.coef_of[i], r);
+                    }
+                    (a, b)
+                }
+                Relation::Row { columns, a, b } => {
+                    for &(c, coef) in &columns {
+                        row[c] = addmod(row[c], coef % r, r);
+                    }
+                    (a, b)
+                }
+            };
+            // How many columns the row touches: with orbit columns a sum of
+            // two points of one signed orbit is a single-column row, and two
+            // of those on one column pin the logarithm by themselves.
+            let support = row[..d_col].iter().filter(|&&c| c != 0).count();
+            match support {
+                1 => single_column_rows += 1,
+                2 => two_column_rows += 1,
+                _ => {}
+            }
+            let repeated = column_parts
+                .insert(column_part_key(&row[..d_col]), ())
+                .is_some();
+            if repeated {
+                repeated_column_rows += 1;
+            }
+            // h·a + h·b·d = Σ coef·x  ⇒  Σ coef·x − h·b·d = h·a
+            row[d_col] = submod(0, mulmod(h_mod, rb, r), r);
+            let rhs = mulmod(h_mod, ra, r);
+            match matrix.add_row(row, rhs) {
+                RowStatus::Inconsistent => {
+                    la.count("inconsistent", 1);
+                    stop = true;
+                    break;
+                }
+                RowStatus::Dependent => {}
+                RowStatus::Independent => {}
+            }
+            let pinned = matrix.pinned(d_col);
+            if completion == CompletionRule::FullRank
+                && first_target_pin.is_none()
+                && pinned.is_some()
+            {
+                first_target_pin = Some((matrix.rank() as u64, trials, found));
+            }
+            if completion == CompletionRule::FullRank && matrix.rank() == cols && pinned.is_none()
+            {
+                la.count("full_rank_unpinned", 1);
+                stop = true;
+                break;
+            }
+            if let Some(d) = pinned
+                .filter(|_| completion == CompletionRule::TargetPinned || matrix.rank() == cols)
+            {
+                pinned_by_repeated_row = repeated;
                 la_ns += la_start.elapsed().as_nanos() as u64;
-                la.count("inconsistent", 1);
+                la_timed = true;
+                measurement::mark(measurement::Phase::RecoveryCheck);
+                let v_start = Instant::now();
+                let check = g.mul(&mut ver.group_ops, generator, d);
+                ver.wall_ns = v_start.elapsed().as_nanos() as u64;
+                if check == target {
+                    recovered = Some(d);
+                    verified = true;
+                } else {
+                    ver.count("verification_failures", 1);
+                }
+                stop = true;
                 break;
             }
-            RowStatus::Dependent => {}
-            RowStatus::Independent => {}
         }
-        let pinned = matrix.pinned(d_col);
-        if completion == CompletionRule::FullRank && first_target_pin.is_none() && pinned.is_some()
-        {
-            first_target_pin = Some((matrix.rank() as u64, trials, found));
-        }
-        if completion == CompletionRule::FullRank && matrix.rank() == cols && pinned.is_none() {
+        if !la_timed {
             la_ns += la_start.elapsed().as_nanos() as u64;
-            la.count("full_rank_unpinned", 1);
+        }
+        if stop {
             break;
         }
-        if let Some(d) =
-            pinned.filter(|_| completion == CompletionRule::TargetPinned || matrix.rank() == cols)
-        {
-            pinned_by_repeated_row = repeated;
-            la_ns += la_start.elapsed().as_nanos() as u64;
-            measurement::mark(measurement::Phase::RecoveryCheck);
-            let v_start = Instant::now();
-            let check = g.mul(&mut ver.group_ops, generator, d);
-            ver.wall_ns = v_start.elapsed().as_nanos() as u64;
-            if check == target {
-                recovered = Some(d);
-                verified = true;
-                break;
-            }
-            ver.count("verification_failures", 1);
-            break;
-        }
-        la_ns += la_start.elapsed().as_nanos() as u64;
     }
     rel.wall_ns = rel_start.elapsed().as_nanos() as u64 - la_ns - ver.wall_ns;
     rel.count("trials", trials);
@@ -7808,6 +8033,57 @@ mod tests {
             );
             assert_eq!(res.recovered, Some(k));
             assert_eq!(res.automorphisms, 6);
+        }
+    }
+
+    /// The four-class canonicalisation of a j = 1728 curve: the orbit of
+    /// iota collapses to one representative whose multiplier really maps
+    /// the point to it, and rho.quartic solves planted instances.
+    #[test]
+    fn quartic_classes_name_the_class_and_solve() {
+        // p = 10037 (10037 = 1 mod 4), y^2 = x^3 + 8x: order 9946 = 2 * 4973
+        // (4973 = 1 mod 4), a j = 1728 curve with the full four classes.
+        let curve = PrimeCurve { p: 10037, a: 8, b: 0 };
+        assert_eq!(curve.point_count(), 9946);
+        let r = 4973u64;
+        // a generator of the order-r subgroup: twice a full-order point
+        let full = PrimePoint::affine(1, 10034);
+        let mut ops = GroupOps::default();
+        let g = curve.double(&mut ops, full);
+        assert!(!g.infinity);
+        let classes = QuarticClasses::new(&curve, g, r, &mut ops)
+            .expect("the j = 1728 curve over p = 10037 has the four classes");
+        let mut rng = StdRng::seed_from_u64(23);
+        for _ in 0..64 {
+            let k = rng.gen_range(1..r);
+            let p = curve.mul(&mut ops, g, k);
+            let (rep, mu) = classes.canon(&curve, &mut ops, p);
+            assert_eq!(rep, curve.mul(&mut ops, g, mulmod(k, mu, r)), "k = {k}");
+            let iota_p = PrimePoint::affine(
+                submod(0, p.x, curve.p),
+                mulmod(classes.iota_for_test(), p.y, curve.p),
+            );
+            for q in [iota_p, curve.neg(iota_p)] {
+                let (rep2, _) = classes.canon(&curve, &mut ops, q);
+                assert_eq!(rep2, rep, "k = {k}");
+            }
+        }
+        let mut rng = StdRng::seed_from_u64(2026);
+        for _ in 0..8 {
+            let k = rng.gen_range(1..r);
+            let target = curve.mul(&mut ops, g, k);
+            let res = rho_walk_with(
+                &curve,
+                &classes,
+                g,
+                target,
+                r,
+                k,
+                1 << 24,
+                RhoWalk::negation(),
+            );
+            assert_eq!(res.recovered, Some(k));
+            assert_eq!(res.automorphisms, 4);
         }
     }
 

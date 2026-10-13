@@ -1,0 +1,39 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.quartic"
+      },
+      "name": "rho-quartic",
+      "role": "candidate"
+    }
+  ],
+  "description": "The same crater as the rho spec (same target seed and shared law, so identical scalars), walked by the automorphism-class rho.",
+  "label": "Drastic gap round 3, automorphism crater: d4 ell=1016839",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261012,
+    "timeout_seconds": 900,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 175699121631,
+        "b": 0,
+        "group_order": 1033961567546,
+        "gx": 628792900021,
+        "gy": 538304981282,
+        "kind": "prime_explicit",
+        "p": 1033961567797,
+        "r": 516980783773
+      }
+    ],
+    "target_kind": "planted_shared",
+    "target_seed": 2026101204,
+    "targets_per_curve": 32
+  }
+}

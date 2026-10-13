@@ -1343,23 +1343,100 @@ mod wide {
         gf.sqr(c)
     }
 
-    /// Open-addressing `u128 -> u64` table; `u128::MAX` marks empty
-    /// (keys are `< 2^71`, so the marker is unreachable).
+    /// Store the canonical key and its witness in one `u128` slot when their
+    /// combined bit widths leave the top bit free for the empty marker.
+    /// The witness uses exact widths for the number of representatives and
+    /// Frobenius rotations; insertion order and the first witness are kept.
+    #[derive(Clone, Copy)]
+    struct PackedRootLayout {
+        rep_bits: u32,
+        rot_bits: u32,
+        value_bits: u32,
+        rep_mask: u128,
+        rot_mask: u128,
+        value_mask: u128,
+        key_mask: u128,
+    }
+
+    impl PackedRootLayout {
+        fn new(degree: u32, representatives: usize) -> Self {
+            assert!(degree > 0 && degree < 128);
+            assert!(representatives > 0 && representatives <= u16::MAX as usize + 1);
+            let rep_bits = usize::BITS - (representatives - 1).leading_zeros();
+            let rot_bits = u32::BITS - (degree - 1).leading_zeros();
+            let value_bits = 2 * (rep_bits + rot_bits);
+            assert!(
+                degree + value_bits <= 127,
+                "packed root slot needs a free marker bit"
+            );
+            Self {
+                rep_bits,
+                rot_bits,
+                value_bits,
+                rep_mask: (1u128 << rep_bits) - 1,
+                rot_mask: (1u128 << rot_bits) - 1,
+                value_mask: (1u128 << value_bits) - 1,
+                key_mask: (1u128 << degree) - 1,
+            }
+        }
+
+        #[inline(always)]
+        fn encode(self, key: u128, value: u64) -> u128 {
+            assert_eq!(key & !self.key_mask, 0, "root key exceeds field degree");
+            let (left, right, relative, shift) = unpack(value);
+            assert!((left as u128) <= self.rep_mask && (right as u128) <= self.rep_mask);
+            assert!((relative as u128) <= self.rot_mask && (shift as u128) <= self.rot_mask);
+            let witness = (left as u128)
+                | ((right as u128) << self.rep_bits)
+                | ((relative as u128) << (2 * self.rep_bits))
+                | ((shift as u128) << (2 * self.rep_bits + self.rot_bits));
+            (key << self.value_bits) | witness
+        }
+
+        #[inline(always)]
+        fn decode(self, slot: u128) -> (u128, u64) {
+            let witness = slot & self.value_mask;
+            let left = (witness & self.rep_mask) as u16;
+            let right = ((witness >> self.rep_bits) & self.rep_mask) as u16;
+            let relative = ((witness >> (2 * self.rep_bits)) & self.rot_mask) as u16;
+            let shift = ((witness >> (2 * self.rep_bits + self.rot_bits)) & self.rot_mask) as u32;
+            (slot >> self.value_bits, pack(left, right, relative, shift))
+        }
+    }
+
+    enum RootSlots128 {
+        Wide(Vec<(u128, u64)>),
+        Packed(Vec<u128>),
+    }
+
+    /// Open-addressing `u128 -> u64` table; `u128::MAX` marks empty.
     struct RootTable128 {
-        slots: Vec<(u128, u64)>,
+        slots: RootSlots128,
         shift: u32,
         len: usize,
         bloom: Option<RootBloom>,
+        packed_layout: Option<PackedRootLayout>,
     }
 
     impl RootTable128 {
-        fn with_capacity(entries: usize) -> Self {
+        fn with_capacity(
+            entries: usize,
+            degree: u32,
+            representatives: usize,
+            packed: bool,
+        ) -> Self {
             let slots = (entries * 2).next_power_of_two().max(16);
+            let packed_layout = packed.then(|| PackedRootLayout::new(degree, representatives));
             Self {
-                slots: vec![(u128::MAX, 0); slots],
+                slots: if packed {
+                    RootSlots128::Packed(vec![u128::MAX; slots])
+                } else {
+                    RootSlots128::Wide(vec![(u128::MAX, 0); slots])
+                },
                 shift: 128 - slots.trailing_zeros(),
                 len: 0,
                 bloom: root_bloom_enabled().then(|| RootBloom::with_capacity(entries)),
+                packed_layout,
             }
         }
 
@@ -1368,22 +1445,57 @@ mod wide {
             (key.wrapping_mul(0x9E37_79B9_7F4A_7C15_9E37_79B9_7F4A_7C15) >> self.shift) as usize
         }
 
+        fn layout_receipt(&self) -> (&'static str, usize, usize) {
+            match &self.slots {
+                RootSlots128::Wide(slots) => (
+                    "wide_u128_u64",
+                    std::mem::size_of::<(u128, u64)>(),
+                    slots.len() * std::mem::size_of::<(u128, u64)>(),
+                ),
+                RootSlots128::Packed(slots) => (
+                    "packed_u128",
+                    std::mem::size_of::<u128>(),
+                    slots.len() * std::mem::size_of::<u128>(),
+                ),
+            }
+        }
+
         fn insert_if_absent(&mut self, key: u128, value: u64) {
-            let mask = self.slots.len() - 1;
+            let mask = match &self.slots {
+                RootSlots128::Wide(slots) => slots.len() - 1,
+                RootSlots128::Packed(slots) => slots.len() - 1,
+            };
             let mut slot = self.slot(key);
-            loop {
-                if self.slots[slot].0 == u128::MAX {
-                    self.slots[slot] = (key, value);
-                    self.len += 1;
-                    if let Some(bloom) = &mut self.bloom {
-                        bloom.insert(key);
+            let inserted = match &mut self.slots {
+                RootSlots128::Wide(slots) => loop {
+                    if slots[slot].0 == u128::MAX {
+                        slots[slot] = (key, value);
+                        break true;
                     }
-                    return;
+                    if slots[slot].0 == key {
+                        break false;
+                    }
+                    slot = (slot + 1) & mask;
+                },
+                RootSlots128::Packed(slots) => {
+                    let layout = self.packed_layout.expect("packed slots need layout");
+                    loop {
+                        if slots[slot] == u128::MAX {
+                            slots[slot] = layout.encode(key, value);
+                            break true;
+                        }
+                        if (slots[slot] >> layout.value_bits) == key {
+                            break false;
+                        }
+                        slot = (slot + 1) & mask;
+                    }
                 }
-                if self.slots[slot].0 == key {
-                    return;
+            };
+            if inserted {
+                self.len += 1;
+                if let Some(bloom) = &mut self.bloom {
+                    bloom.insert(key);
                 }
-                slot = (slot + 1) & mask;
             }
         }
 
@@ -1396,31 +1508,49 @@ mod wide {
             {
                 return None;
             }
-            let mask = self.slots.len() - 1;
+            let mask = match &self.slots {
+                RootSlots128::Wide(slots) => slots.len() - 1,
+                RootSlots128::Packed(slots) => slots.len() - 1,
+            };
             let mut slot = self.slot(key);
-            loop {
-                let (stored, value) = self.slots[slot];
-                if stored == key {
-                    return Some(value);
+            match &self.slots {
+                RootSlots128::Wide(slots) => loop {
+                    let (stored, value) = slots[slot];
+                    if stored == key {
+                        return Some(value);
+                    }
+                    if stored == u128::MAX {
+                        return None;
+                    }
+                    slot = (slot + 1) & mask;
+                },
+                RootSlots128::Packed(slots) => {
+                    let layout = self.packed_layout.expect("packed slots need layout");
+                    loop {
+                        let stored = slots[slot];
+                        if stored == u128::MAX {
+                            return None;
+                        }
+                        if (stored >> layout.value_bits) == key {
+                            return Some(layout.decode(stored).1);
+                        }
+                        slot = (slot + 1) & mask;
+                    }
                 }
-                if stored == u128::MAX {
-                    return None;
-                }
-                slot = (slot + 1) & mask;
             }
         }
     }
 
     #[cfg(test)]
     mod root_bloom_table_tests {
-        use super::{RootBloom, RootTable128};
+        use super::{PackedRootLayout, RootBloom, RootSlots128, RootTable128};
         use crate::mix_root_bloom;
 
         #[test]
         fn canonical_u128_lookup_matches_unscreened_table() {
-            let mut reference = RootTable128::with_capacity(4096);
+            let mut reference = RootTable128::with_capacity(4096, 83, 900, false);
             reference.bloom = None;
-            let mut screened = RootTable128::with_capacity(4096);
+            let mut screened = RootTable128::with_capacity(4096, 83, 900, false);
             screened.bloom = Some(RootBloom::with_capacity(4096));
             for i in 0..4096u64 {
                 let key = ((mix_root_bloom(i) as u128 & (u64::MAX as u128 >> 1)) << 64)
@@ -1437,12 +1567,87 @@ mod wide {
                     | mix_root_bloom(i ^ 0x3F19_7C2B_74A8_65ED) as u128;
                 assert_eq!(screened.get(key), reference.get(key));
             }
-            for &(key, value) in &reference.slots {
+            let RootSlots128::Wide(slots) = &reference.slots else {
+                unreachable!()
+            };
+            for &(key, value) in slots {
                 if key != u128::MAX {
                     assert!(screened.bloom.as_ref().unwrap().contains(key));
                     assert_eq!(screened.get(key), Some(value));
                 }
             }
+        }
+
+        #[test]
+        fn packed_slots_preserve_first_witness_and_exact_lookup() {
+            let layout = PackedRootLayout::new(83, 900);
+            assert_eq!(layout.value_bits, 34);
+            assert_eq!(std::mem::size_of::<u128>(), 16);
+            let mut wide = RootTable128::with_capacity(8192, 83, 900, false);
+            let mut packed = RootTable128::with_capacity(8192, 83, 900, true);
+            assert_eq!(
+                wide.layout_receipt(),
+                (
+                    "wide_u128_u64",
+                    std::mem::size_of::<(u128, u64)>(),
+                    16384 * std::mem::size_of::<(u128, u64)>()
+                )
+            );
+            assert_eq!(packed.layout_receipt(), ("packed_u128", 16, 1 << 18));
+            wide.bloom = None;
+            packed.bloom = None;
+            for i in 0..8192u64 {
+                let key = ((mix_root_bloom(i) as u128) << 19)
+                    ^ ((mix_root_bloom(i ^ 0xD1B5_4A32_D192_ED03) as u128) & ((1u128 << 19) - 1));
+                let key = key & ((1u128 << 83) - 1);
+                let value = super::pack(
+                    (i % 900) as u16,
+                    ((i * 17) % 900) as u16,
+                    (i % 83) as u16,
+                    ((i * 7) % 83) as u32,
+                );
+                wide.insert_if_absent(key, value);
+                packed.insert_if_absent(key, value);
+                wide.insert_if_absent(key, 0);
+                packed.insert_if_absent(key, 0);
+            }
+            for i in 0..20_000u64 {
+                let key = (mix_root_bloom(i ^ 0x3F19_7C2B_74A8_65ED) as u128) & ((1u128 << 83) - 1);
+                assert_eq!(packed.get(key), wide.get(key));
+            }
+            let RootSlots128::Wide(slots) = &wide.slots else {
+                unreachable!()
+            };
+            for &(key, value) in slots {
+                if key != u128::MAX {
+                    assert_eq!(packed.get(key), Some(value));
+                }
+            }
+            assert_eq!(packed.len, wide.len);
+        }
+
+        #[test]
+        fn denser_packed_slots_preserve_first_witness_and_exact_lookup() {
+            let mut dense = RootTable128::with_capacity(512, 83, 900, true);
+            let mut regular = RootTable128::with_capacity(1024, 83, 900, true);
+            assert_eq!(dense.layout_receipt(), ("packed_u128", 16, 1 << 14));
+            assert_eq!(regular.layout_receipt(), ("packed_u128", 16, 1 << 15));
+            dense.bloom = None;
+            regular.bloom = None;
+            for i in 0..768u64 {
+                let key = ((i as u128) << 16) | (mix_root_bloom(i) as u128 & 0xffff);
+                dense.insert_if_absent(key, i + 1);
+                regular.insert_if_absent(key, i + 1);
+                dense.insert_if_absent(key, 0);
+                regular.insert_if_absent(key, 0);
+            }
+            for i in 0..2048u64 {
+                let key = ((i as u128) << 16) | (mix_root_bloom(i) as u128 & 0xffff);
+                assert_eq!(dense.get(key), regular.get(key));
+                assert_eq!(dense.get(key), (i < 768).then_some(i + 1));
+            }
+            assert_eq!(dense.len, 768);
+            assert_eq!(regular.len, 768);
         }
     }
 
@@ -1457,6 +1662,8 @@ mod wide {
         states: Vec<State128>,
         table: RootTable128,
         shifted: Vec<Vec<u128>>,
+        dense_table: bool,
+        root_table_request_entries: usize,
     }
 
     struct Relation128 {
@@ -1616,13 +1823,17 @@ mod wide {
         let inner = line.trim().trim_start_matches('[').trim_end_matches(']');
         let mut words = inner.split(',');
         let parse = |raw: &str| -> u128 {
-            raw.trim().trim_matches('"').parse().expect(
-                "wide field coordinate must be a decimal integer or string",
-            )
+            raw.trim()
+                .trim_matches('"')
+                .parse()
+                .expect("wide field coordinate must be a decimal integer or string")
         };
         let x = parse(words.next().expect("wide point needs two coordinates"));
         let y = parse(words.next().expect("wide point needs two coordinates"));
-        assert!(words.next().is_none(), "wide point must have two coordinates");
+        assert!(
+            words.next().is_none(),
+            "wide point must have two coordinates"
+        );
         [x, y]
     }
 
@@ -1690,7 +1901,19 @@ mod wide {
                 }
             }
         }
-        let mut table = RootTable128::with_capacity(states.len() * 2);
+        let packed = std::env::var("KIC_PACKED_ROOT_TABLE").as_deref() == Ok("1");
+        let dense_table = std::env::var("KIC_PACKED_ROOT_TABLE_DENSE").as_deref() == Ok("1");
+        assert!(
+            !dense_table || packed,
+            "dense root table requires packed slots"
+        );
+        let root_table_request_entries = if dense_table {
+            states.len()
+        } else {
+            states.len() * 2
+        };
+        let mut table =
+            RootTable128::with_capacity(root_table_request_entries, gf.n, reps.len(), packed);
         for state in &states {
             for &root in &state.normal_roots {
                 let (canonical, shift) = basis.canonical_selected(root);
@@ -1704,6 +1927,8 @@ mod wide {
             states,
             table,
             shifted,
+            dense_table,
+            root_table_request_entries,
         }
     }
 
@@ -2343,6 +2568,8 @@ mod wide {
         let mut sorted = target_query_ms.clone();
         sorted.sort_by(|x, y| x.partial_cmp(y).unwrap());
         let median = sorted.get(sorted.len() / 2).copied();
+        let (root_table_layout, root_table_slot_bytes, root_table_allocated_bytes) =
+            index.table.layout_receipt();
         let summary = json!({
             "kind":"compact_orbit_dlp_summary",
             "schema_version":"1.0",
@@ -2354,6 +2581,11 @@ mod wide {
             "factor_base_points":base.points.len(),
             "regular_states":index.states.len(),
             "root_table_entries":index.table.len,
+            "root_table_dense_enabled":index.dense_table,
+            "root_table_request_entries":index.root_table_request_entries,
+            "root_table_layout":root_table_layout,
+            "root_table_slot_bytes":root_table_slot_bytes,
+            "root_table_allocated_bytes":root_table_allocated_bytes,
             "root_bloom_enabled":index.table.bloom.is_some(),
             "root_bloom_bytes":index.table.bloom.as_ref().map_or(0, RootBloom::bytes),
             "sparse_canonical_enabled":basis.sparse_canonical,
