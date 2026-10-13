@@ -459,6 +459,15 @@ pub fn run_pipeline<G: CountedGroup>(
                 },
                 Some(ns),
             ),
+            // Field multiplications counted by the same field whose
+            // additions the group charges (the `gaudry-d4` oracle on
+            // `E(F_{p⁴})`): priced by count at the curve's own
+            // multiplications per addition, which the oracle reports.
+            ("F_p multiplications", _) if t.extra.get("fp_muls_per_add").is_some_and(|&v| v > 0) => (
+                t.ops as f64 / t.extra["fp_muls_per_add"] as f64,
+                "counted",
+                None,
+            ),
             _ if calib.ns_per_add > 0.0 => {
                 (t.wall_ns as f64 / calib.ns_per_add, "measured", wall_per_op)
             }

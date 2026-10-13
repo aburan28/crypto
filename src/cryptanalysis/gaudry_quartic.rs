@@ -773,10 +773,39 @@ fn axpy_dyn(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
 }
 
 #[inline(always)]
+/// Every prime `p ≡ 1 (mod 4)` below 300 gets the constant-modulus loop
+/// (the `k = 4` solves run there); others take the run-time remainder.
 fn axpy_portable(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
     match p {
-        269 => axpy_const::<269>(row, piv, f),
+        5 => axpy_const::<5>(row, piv, f),
+        13 => axpy_const::<13>(row, piv, f),
+        17 => axpy_const::<17>(row, piv, f),
+        29 => axpy_const::<29>(row, piv, f),
+        37 => axpy_const::<37>(row, piv, f),
+        41 => axpy_const::<41>(row, piv, f),
+        53 => axpy_const::<53>(row, piv, f),
+        61 => axpy_const::<61>(row, piv, f),
+        73 => axpy_const::<73>(row, piv, f),
+        89 => axpy_const::<89>(row, piv, f),
+        97 => axpy_const::<97>(row, piv, f),
+        101 => axpy_const::<101>(row, piv, f),
+        109 => axpy_const::<109>(row, piv, f),
+        113 => axpy_const::<113>(row, piv, f),
+        137 => axpy_const::<137>(row, piv, f),
+        149 => axpy_const::<149>(row, piv, f),
+        157 => axpy_const::<157>(row, piv, f),
+        173 => axpy_const::<173>(row, piv, f),
+        181 => axpy_const::<181>(row, piv, f),
+        193 => axpy_const::<193>(row, piv, f),
+        197 => axpy_const::<197>(row, piv, f),
+        229 => axpy_const::<229>(row, piv, f),
+        233 => axpy_const::<233>(row, piv, f),
+        241 => axpy_const::<241>(row, piv, f),
         257 => axpy_const::<257>(row, piv, f),
+        269 => axpy_const::<269>(row, piv, f),
+        277 => axpy_const::<277>(row, piv, f),
+        281 => axpy_const::<281>(row, piv, f),
+        293 => axpy_const::<293>(row, piv, f),
         _ => axpy_dyn(row, piv, f, p),
     }
 }

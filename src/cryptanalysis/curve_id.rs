@@ -274,6 +274,102 @@ pub fn prime_with_verified_j(
     prime_identity(p, a, b, order, j)
 }
 
+/// `y² = x³ + a·x + b` over `GF(p^k) = GF(p)[t]/(f)`, `f = t^k + c_{k−1}t^{k−1}
+/// + … + c₀` with `modulus = [c₀, …, c_{k−1}]`, `a` and `b` coefficient
+/// lists in the basis `1, t, …, t^{k−1}`, and `order = #E(GF(p^k))`, the
+/// whole group: `extension_id` of `scripts/curve_id.py`, for a prime that
+/// fits a word (`p < 2^31`).  The caller has checked that `f` is
+/// irreducible.  `None` for `p < 5`, `k < 2`, a singular curve or an
+/// order outside the Hasse interval.
+pub fn extension(
+    p: u64,
+    modulus: &[u64],
+    a: &[u64],
+    b: &[u64],
+    order: &BigUint,
+) -> Option<CurveId> {
+    let k = modulus.len();
+    if p < 5 || p >= 1 << 31 || k < 2 || a.len() != k || b.len() != k {
+        return None;
+    }
+    let md: Vec<u64> = modulus.iter().map(|c| c % p).collect();
+    let reduce = |u: Vec<u64>| -> Vec<u64> {
+        let mut u: Vec<u64> = u.into_iter().map(|x| x % p).collect();
+        for i in (k..u.len()).rev() {
+            let c = u[i];
+            if c != 0 {
+                u[i] = 0;
+                for j in 0..k {
+                    let sub = c * md[j] % p;
+                    u[i - k + j] = (u[i - k + j] + p - sub) % p;
+                }
+            }
+        }
+        u.resize(k.max(u.len()), 0);
+        u.truncate(k);
+        u
+    };
+    let mul = |u: &[u64], v: &[u64]| -> Vec<u64> {
+        let mut prod = vec![0u64; u.len() + v.len() - 1];
+        for (i, &x) in u.iter().enumerate() {
+            for (j, &y) in v.iter().enumerate() {
+                prod[i + j] = (prod[i + j] + x * y) % p;
+            }
+        }
+        reduce(prod)
+    };
+    let a: Vec<u64> = a.iter().map(|x| x % p).collect();
+    let b: Vec<u64> = b.iter().map(|x| x % p).collect();
+    let a3 = mul(&mul(&a, &a), &a);
+    let b2 = mul(&b, &b);
+    let disc = reduce(a3.iter().zip(&b2).map(|(x, y)| 4 * x + 27 * y).collect());
+    if disc.iter().all(|&x| x == 0) {
+        return None;
+    }
+    let coeffs: Vec<String> = md.iter().map(u64::to_string).collect();
+    let field = format!(
+        "fpk-{p}-{k}-{}",
+        &hex_digest(&format!("fpk-modulus:{p}:{}", coeffs.join(",")))[..8]
+    );
+    let q = BigUint::from(p).pow(k as u32);
+    if !hasse_ok(&q, order) {
+        return None;
+    }
+    let list = |v: &[u64]| -> String {
+        let items: Vec<String> = v.iter().map(|x| format!("\"{x}\"")).collect();
+        format!("[{}]", items.join(","))
+    };
+    let model_json = format!(
+        r#"{{"a":{},"b":{},"field":"{field}","form":"y^2=x^3+a*x+b","k":"{k}","modulus":{},"p":"{p}","v":"{VERSION}"}}"#,
+        list(&a),
+        list(&b),
+        list(&md)
+    );
+    // disc⁻¹ = disc^(q − 2), by square and multiply on the exponent's bits.
+    let mut inv = reduce(vec![1]);
+    let mut base = disc;
+    let e = &q - BigUint::from(2u8);
+    for i in 0..e.bits() {
+        if e.bit(i) {
+            inv = mul(&inv, &base);
+        }
+        base = mul(&base, &base);
+    }
+    let a3x: Vec<u64> = a3.iter().map(|x| 1728 * 4 % p * x % p).collect();
+    let j = mul(&a3x, &inv);
+    let jstr: Vec<String> = j.iter().map(u64::to_string).collect();
+    let trace = BigInt::from(q) + 1 - BigInt::from(order.clone());
+    Some(identity(
+        &field,
+        &format!("fp{}k{k}", 64 - p.leading_zeros()),
+        &trace,
+        order,
+        &jstr.join(","),
+        "unk",
+        model_json,
+    ))
+}
+
 /// The comparison key for a spelling: case, whitespace, braces,
 /// underscores, surrounding backticks and subscript digits folded away.
 /// Identical to `normalise_alias` in `scripts/curve_id.py`.

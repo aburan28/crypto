@@ -39,7 +39,11 @@ use super::gaudry_cubic::rref_mod_p;
 use super::gaudry_quartic::{
     solve_system_n_inner, split_quartic, Curve4, Fp4, Pt4, QuarticSolve, E4,
 };
-use super::residual_walk::{pow_mod, sqrt_mod};
+use super::ic_boundary::{CountedGroup, FactorBase, GroupOps, OracleCounters};
+use super::ic_framework::stages::{
+    DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SolverTotals, SystemShape,
+};
+use super::residual_walk::{is_prime_u64, pow_mod, sqrt_mod};
 
 /// The interpolation nodes for `Y_R` (`Y = 1` is the pole of `x(Y)`).
 const NODES: [u64; 9] = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -329,6 +333,9 @@ pub struct D4Solve {
     /// summing (with signs) to `R`: the decompositions, as sorted
     /// `Y`-quadruples.
     pub decompositions: Vec<[u64; 4]>,
+    /// The first decomposition found, as four signed points summing to `R`.
+    #[serde(skip)]
+    pub witness: Option<[Pt4; 4]>,
 }
 
 /// The base points `{P : Y(P) ∈ F_p \ {±1}}`, one per `Y` (with `−P`
@@ -345,22 +352,25 @@ pub fn y_base(inst: &D4Instance, rng: &mut StdRng) -> Vec<(u64, Pt4)> {
         .collect()
 }
 
-fn signed_sum_is(curve: &Curve4, pts: &[Pt4; 4], r: &Pt4) -> bool {
+/// The signs that make the four points sum to `r`, applied, if any do.
+fn signed_sum(curve: &Curve4, pts: &[Pt4; 4], r: &Pt4) -> Option<[Pt4; 4]> {
     for s in 0..16u32 {
-        let mut acc = Pt4 {
-            x: E4::ZERO,
-            y: E4::ZERO,
-            inf: true,
-        };
-        for (i, q) in pts.iter().enumerate() {
-            let q = if s >> i & 1 == 1 { curve.neg(q) } else { *q };
-            acc = curve.add(&acc, &q);
+        let signed: [Pt4; 4] = core::array::from_fn(|i| {
+            if s >> i & 1 == 1 {
+                curve.neg(&pts[i])
+            } else {
+                pts[i]
+            }
+        });
+        let mut acc = Pt4::INF;
+        for q in &signed {
+            acc = curve.add(&acc, q);
         }
         if !acc.inf && acc.x == r.x && acc.y == r.y {
-            return true;
+            return Some(signed);
         }
     }
-    false
+    None
 }
 
 /// One decomposition by the `D₄` system: Weil restriction, the Macaulay
@@ -446,8 +456,11 @@ pub fn solve_d4(
                 continue;
             };
             let pts: [Pt4; 4] = [pts[0], pts[1], pts[2], pts[3]];
-            if signed_sum_is(&inst.curve, &pts, r) {
+            if let Some(signed) = signed_sum(&inst.curve, &pts, r) {
                 found.insert(sorted);
+                if out.witness.is_none() {
+                    out.witness = Some(signed);
+                }
             }
         }
     }
@@ -500,6 +513,393 @@ pub fn mitm_y_decompositions(curve: &Curve4, base: &[(u64, Pt4)], r: &Pt4) -> BT
     out
 }
 
+// ── In ecbench: the curve, its counted group, the base and the oracle ─────
+
+/// `x ↦ x₀ + p x₁ + p² x₂ + p³ x₃ < p⁴`, an element as one word.
+pub fn pack_e4(p: u64, e: &E4) -> u64 {
+    e.0[0] + p * (e.0[1] + p * (e.0[2] + p * e.0[3]))
+}
+
+/// The inverse of [`pack_e4`].
+pub fn unpack_e4(p: u64, mut v: u64) -> E4 {
+    let mut out = [0u64; 4];
+    for o in &mut out {
+        *o = v % p;
+        v /= p;
+    }
+    E4(out)
+}
+
+/// `E(F_{p⁴})` as a counted group: every addition and doubling one unit
+/// on the ledger.  A point's key is its packed abscissa and one bit for
+/// the ordinate (`y` or `−y`, the larger packed value), so it identifies
+/// the point exactly for `p < 2^15`.
+impl CountedGroup for Curve4 {
+    type Elt = Pt4;
+    fn identity(&self) -> Pt4 {
+        Pt4::INF
+    }
+    fn is_identity(&self, p: &Pt4) -> bool {
+        p.inf
+    }
+    fn add(&self, ops: &mut GroupOps, p: Pt4, q: Pt4) -> Pt4 {
+        if p.inf || q.inf || p.x != q.x {
+            ops.adds += 1;
+        } else {
+            ops.doubles += 1;
+        }
+        Curve4::add(self, &p, &q)
+    }
+    fn double(&self, ops: &mut GroupOps, p: Pt4) -> Pt4 {
+        ops.doubles += 1;
+        Curve4::add(self, &p, &p)
+    }
+    fn neg(&self, p: Pt4) -> Pt4 {
+        Curve4::neg(self, &p)
+    }
+    fn key(&self, p: &Pt4) -> u64 {
+        if p.inf {
+            return u64::MAX;
+        }
+        let q = self.f.p;
+        let y = pack_e4(q, &p.y);
+        let ny = pack_e4(q, &self.f.neg(&p.y));
+        pack_e4(q, &p.x) * 2 + u64::from(y > ny)
+    }
+}
+
+/// A curve of [`generate_d4_instance`]'s family with its group order
+/// `#E(F_{p⁴}) = h·r`, `r` prime, and a generator of the order-`r`
+/// subgroup.
+pub struct D4Curve {
+    pub inst: D4Instance,
+    /// The instance seed [`generate_d4_instance`] was called with.
+    pub instance_seed: u64,
+    pub group_order: u64,
+    pub r: u64,
+    pub cofactor: u64,
+    pub generator: Pt4,
+}
+
+impl D4Curve {
+    pub fn p(&self) -> u64 {
+        self.inst.curve.f.p
+    }
+    /// `T = (x₀, 0)`.
+    pub fn torsion(&self) -> Pt4 {
+        Pt4 {
+            x: self.inst.x0,
+            y: E4::ZERO,
+            inf: false,
+        }
+    }
+}
+
+/// `#E(F_{p⁴})`: the one multiple in the Hasse interval
+/// `[p⁴ + 1 − 2p², p⁴ + 1 + 2p²]` that kills every one of a few random
+/// points, by a walk through the interval.  `None` if the candidates do
+/// not narrow to one.
+pub fn group_order_d4(curve: &Curve4, rng: &mut StdRng) -> Option<u64> {
+    let p = curve.f.p;
+    let q = p.pow(4);
+    let (lo, hi) = (q + 1 - 2 * p * p, q + 1 + 2 * p * p);
+    let mut cands: Option<Vec<u64>> = None;
+    for _ in 0..24 {
+        let pt = loop {
+            let x = curve.f.random(rng);
+            if let Some(pt) = curve.lift_x(&x, rng) {
+                break pt;
+            }
+        };
+        let mut scratch = GroupOps::default();
+        let mut acc = CountedGroup::mul(curve, &mut scratch, pt, lo);
+        let mut here = Vec::new();
+        for m in lo..=hi {
+            if acc.inf {
+                here.push(m);
+            }
+            acc = Curve4::add(curve, &acc, &pt);
+        }
+        cands = Some(match cands {
+            None => here,
+            Some(c) => c.into_iter().filter(|m| here.contains(m)).collect(),
+        });
+        if cands.as_ref().is_some_and(|c| c.len() == 1) {
+            return cands.map(|c| c[0]);
+        }
+    }
+    None
+}
+
+/// The first instance seed from `seed` whose curve has `#E = h·r`, `r`
+/// prime, `h ≤ max_cofactor` (even: `T` is rational), and a generator of
+/// the order-`r` subgroup.  Deterministic in `(p, seed, max_cofactor)`.
+pub fn find_d4_curve(p: u64, seed: u64, max_cofactor: u64) -> Result<D4Curve, String> {
+    for s in seed..seed + 2_000 {
+        let inst = generate_d4_instance(p, s);
+        let mut rng = StdRng::seed_from_u64(s ^ 0x0c0f);
+        let Some(order) = group_order_d4(&inst.curve, &mut rng) else {
+            continue;
+        };
+        let Some(h) = (2..=max_cofactor).find(|&h| order % h == 0 && is_prime_u64(order / h))
+        else {
+            continue;
+        };
+        let r = order / h;
+        let mut scratch = GroupOps::default();
+        let generator = loop {
+            let x = inst.curve.f.random(&mut rng);
+            let Some(pt) = inst.curve.lift_x(&x, &mut rng) else {
+                continue;
+            };
+            let g = CountedGroup::mul(&inst.curve, &mut scratch, pt, h);
+            if !g.inf {
+                break g;
+            }
+        };
+        if !CountedGroup::mul(&inst.curve, &mut scratch, generator, r).inf {
+            continue;
+        }
+        return Ok(D4Curve {
+            inst,
+            instance_seed: s,
+            group_order: order,
+            r,
+            cofactor: h,
+            generator,
+        });
+    }
+    Err(format!(
+        "no curve with rational 2-torsion and cofactor ≤ {max_cofactor} over F_{{{p}^4}} from seed {seed}"
+    ))
+}
+
+/// F_p multiplications one affine addition of two distinct points costs
+/// on this curve, by [`Fp4`]'s own count: the ratio the `D₄` oracle's
+/// work is priced at.
+pub fn fp_muls_per_add(curve: &Curve4) -> u64 {
+    let mut rng = StdRng::seed_from_u64(0xadd);
+    let pts: Vec<Pt4> = (0..2)
+        .map(|_| loop {
+            let x = curve.f.random(&mut rng);
+            if let Some(pt) = curve.lift_x(&x, &mut rng) {
+                break pt;
+            }
+        })
+        .collect();
+    let before = curve.f.muls();
+    let _ = Curve4::add(curve, &pts[0], &pts[1]);
+    curve.f.muls() - before
+}
+
+/// **`fghr-y-line`**: `{P : Y(P) ∈ F_p \ {0, ±1}}`, a column per pair
+/// `{Y, −Y}`: the four points `±P, ±(P + T)`, with `P + T` computed (one
+/// addition, charged) and `[h](P + T) = [h]P` because `h` is even.
+pub struct YLineBase<'a> {
+    pub curve: &'a D4Curve,
+}
+
+impl FactorBaseBuilder<Curve4> for YLineBase<'_> {
+    fn name(&self) -> &str {
+        "fghr-y-line"
+    }
+    fn describe(&self, _params: &Params) -> String {
+        "FGHR's Y-line: Y(P) ∈ F_p, columns {±P, ±(P + T)}".into()
+    }
+    fn build(
+        &self,
+        _ctx: &InstanceCtx<Curve4>,
+        _params: &Params,
+        ops: &mut GroupOps,
+    ) -> Result<FactorBase<Pt4>, String> {
+        let d = self.curve;
+        let inst = &d.inst;
+        let c = &inst.curve;
+        let p = d.p();
+        let t = d.torsion();
+        let mut rng = StdRng::seed_from_u64(0x9b);
+        let (mut points, mut col_of, mut coef_of) = (Vec::new(), Vec::new(), Vec::new());
+        let (mut columns, mut lifts) = (0usize, 0u64);
+        for y in 2..=(p - 1) / 2 {
+            let x = inst.x_of_y(&c.f.from_fp(y));
+            lifts += 1;
+            let Some(pt) = c.lift_x(&x, &mut rng) else {
+                continue;
+            };
+            // The lift's sign is the sampler's: fix the one with the
+            // larger key, so the base does not depend on it.
+            let pt = if c.key(&pt) & 1 == 1 {
+                pt
+            } else {
+                Curve4::neg(c, &pt)
+            };
+            let pt_t = CountedGroup::add(c, ops, pt, t);
+            for (q, coef) in [
+                (pt, 1),
+                (Curve4::neg(c, &pt), d.r - 1),
+                (pt_t, 1),
+                (Curve4::neg(c, &pt_t), d.r - 1),
+            ] {
+                points.push(q);
+                col_of.push(columns);
+                coef_of.push(coef);
+            }
+            columns += 1;
+        }
+        if columns == 0 {
+            return Err("no Y in F_p carries a point".into());
+        }
+        let mut fb = FactorBase::from_column_map(
+            format!("FGHR Y-line over F_{p}^4, {columns} columns {{±P, ±(P + T)}}"),
+            points,
+            col_of,
+            coef_of,
+            columns,
+            |q| c.key(q),
+            |q| c.key(&Curve4::neg(c, q)),
+            |q| pack_e4(p, &q.x),
+        )?;
+        fb.cost.count("sqrt_solves", lifts);
+        Ok(fb)
+    }
+}
+
+/// **`gaudry-d4`**: the four-summand decomposition by [`solve_d4`] at
+/// Macaulay degree `macaulay`.  Its `F_p` multiplications are reported as
+/// solver work in the unit `F_p multiplications`, with the curve's own
+/// `fp_muls_per_add` in `extra` so the runner prices them by count;
+/// the additions that check a decomposition are charged as additions.
+pub struct D4Oracle<'a> {
+    pub curve: &'a D4Curve,
+    pub macaulay: u8,
+    pub seed: u64,
+    pre: Option<SymmetrisedD4>,
+    totals: SolverTotals,
+    per_add: u64,
+}
+
+impl<'a> D4Oracle<'a> {
+    pub fn new(curve: &'a D4Curve, macaulay: u8, seed: u64) -> Self {
+        D4Oracle {
+            curve,
+            macaulay,
+            seed,
+            pre: None,
+            totals: SolverTotals {
+                solver: "d4-macaulay".into(),
+                op_unit: "F_p multiplications".into(),
+                ..Default::default()
+            },
+            per_add: fp_muls_per_add(&curve.inst.curve),
+        }
+    }
+
+    fn shape() -> SystemShape {
+        SystemShape {
+            n_vars: 5,
+            n_equations: 5,
+            degrees: vec![4, 4, 4, 4, 2],
+            semi_regular_degree: Some(14),
+        }
+    }
+}
+
+impl DecompositionOracle<Curve4> for D4Oracle<'_> {
+    fn name(&self) -> &str {
+        "gaudry-d4"
+    }
+    fn summands(&self) -> u32 {
+        4
+    }
+    fn describe(&self, _params: &Params) -> String {
+        format!(
+            "S₅ in FGHR's D₄ invariants (σ₁, σ₂, σ₃, σ₄, π): Bézout 512, Macaulay degree {}",
+            self.macaulay
+        )
+    }
+    fn prepare(
+        &mut self,
+        _ctx: &InstanceCtx<Curve4>,
+        _fb: &FactorBase<Pt4>,
+        _params: &Params,
+        _ops: &mut GroupOps,
+    ) -> Result<(), String> {
+        let mut rng = StdRng::seed_from_u64(self.seed ^ 0x9e);
+        let pre = SymmetrisedD4::precompute(&self.curve.inst, &mut rng, 8)?;
+        // The interpolation is solver work done once: priced with it.
+        self.totals.ops += pre.precompute_muls;
+        self.totals
+            .extra
+            .insert("precompute_fp_muls".into(), pre.precompute_muls);
+        self.totals
+            .extra
+            .insert("fp_muls_per_add".into(), self.per_add);
+        self.pre = Some(pre);
+        Ok(())
+    }
+    fn decompose(
+        &mut self,
+        _ctx: &InstanceCtx<Curve4>,
+        fb: &FactorBase<Pt4>,
+        ops: &mut GroupOps,
+        counters: &mut OracleCounters,
+        point: Pt4,
+    ) -> Option<Vec<usize>> {
+        let pre = self.pre.as_ref()?;
+        let c = &self.curve.inst.curve;
+        let mut rng =
+            StdRng::seed_from_u64(self.seed ^ self.totals.calls.wrapping_mul(0x9e37_79b9));
+        let adds_before = c.ops();
+        let t = std::time::Instant::now();
+        let sol = solve_d4(
+            &self.curve.inst,
+            pre,
+            &point,
+            self.macaulay,
+            &mut rng,
+            false,
+        );
+        self.totals.wall_ns += t.elapsed().as_nanos() as u64;
+        // The additions that test a candidate's signs.
+        ops.adds += c.ops() - adds_before;
+        self.totals.calls += 1;
+        self.totals.shape = Some(Self::shape());
+        let Some(sol) = sol else {
+            *self
+                .totals
+                .extra
+                .entry("degenerate_systems".into())
+                .or_insert(0) += 1;
+            return None;
+        };
+        self.totals.ops += sol.solve.total_muls;
+        for (k, v) in [
+            ("echelon_fp_muls", sol.solve.echelon_muls),
+            ("normal_form_fp_muls", sol.solve.nf_muls),
+            ("charpoly_fp_muls", sol.solve.charpoly_muls),
+            ("rational_solutions", sol.rational_solutions as u64),
+        ] {
+            *self.totals.extra.entry(k.into()).or_insert(0) += v;
+        }
+        self.totals.solving_degree_sum += u64::from(self.macaulay);
+        self.totals.solving_degree_max =
+            self.totals.solving_degree_max.max(u32::from(self.macaulay));
+        self.totals.calls_with_a_degree += 1;
+        let w = sol.witness?;
+        let idx: Option<Vec<usize>> = w.iter().map(|q| fb.index_of_key(c.key(q))).collect();
+        if idx.is_none() {
+            counters.lift_failures += 1;
+        }
+        idx
+    }
+    fn last_system(&self) -> Option<SystemShape> {
+        Some(Self::shape())
+    }
+    fn solver_totals(&self) -> Option<SolverTotals> {
+        Some(self.totals.clone())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -528,6 +928,28 @@ mod tests {
             assert_eq!(inst.x_of_y(&inst.y_of_x(&pt.x)), pt.x);
             checked += 1;
         }
+    }
+
+    #[test]
+    fn the_ecbench_curve_and_its_identity_match_the_registry() {
+        // `scripts/curve_id.py`'s `extension_id` on the same model gives
+        // this slug and ICV1 (the registry's entry for SPEC-k4-p29).
+        let c = find_d4_curve(29, 1, 16).unwrap();
+        assert_eq!((c.group_order, c.cofactor, c.r), (708_208, 16, 44_263));
+        let f = &c.inst.curve.f;
+        let id = crate::cryptanalysis::curve_id::extension(
+            29,
+            &[(29 - f.c % 29) % 29, 0, 0, 0],
+            &c.inst.curve.a.0,
+            &c.inst.curve.b.0,
+            &num_bigint::BigUint::from(c.group_order),
+        )
+        .unwrap();
+        assert_eq!(id.slug, "icv1-fp5k4-tm926-7bc5b359");
+        assert_eq!(
+            id.icv1,
+            "ICV1:fpk-29-4-9dbb234a:-926:708208:5,20,2,25:unk:unk:r:7bc5b3595444"
+        );
     }
 
     #[test]

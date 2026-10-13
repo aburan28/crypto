@@ -25,7 +25,7 @@ use crypto_lib::cryptanalysis::gaudry_quartic::{
     factor_base, mitm_decompositions, Pt4, QuarticSolve,
 };
 use crypto_lib::cryptanalysis::gaudry_quartic_d4::{
-    generate_d4_instance, mitm_y_decompositions, solve_d4, y_base, SymmetrisedD4,
+    find_d4_curve, generate_d4_instance, mitm_y_decompositions, solve_d4, y_base, SymmetrisedD4,
 };
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -64,7 +64,19 @@ fn main() {
         .iter()
         .position(|a| a == "--json")
         .map(|i| args[i + 1].clone());
-    let inst = generate_d4_instance(p, seed);
+    // `--find H`: the curve ecbench's `fp4_torsion` builds (the first
+    // instance seed from `seed` with cofactor ≤ H and a prime r).
+    let find = get("--find", 0);
+    let inst = if find > 0 {
+        let c = find_d4_curve(p, seed, find).expect("a curve");
+        eprintln!(
+            "fp4_torsion({p}, {seed}, {find}): instance seed {}, #E = {} = {} · {}, t^4 = {}, a = {:?}, b = {:?}, G = ({:?}, {:?})",
+            c.instance_seed, c.group_order, c.cofactor, c.r, c.inst.curve.f.c, c.inst.curve.a.0, c.inst.curve.b.0, c.generator.x.0, c.generator.y.0
+        );
+        c.inst
+    } else {
+        generate_d4_instance(p, seed)
+    };
     let mut rng = StdRng::seed_from_u64(seed ^ 0x55);
     let t = Instant::now();
     let pre = SymmetrisedD4::precompute(&inst, &mut rng, 8).expect("H is D₄-invariant");
