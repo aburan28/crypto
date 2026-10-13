@@ -123,5 +123,5 @@ paths prefixed `cryptanalysis:` are in the sibling library.
   three-repeat protocol;
   the `gpu/ecc` occupancy and stack tables predate the order-six fold
   and the cycle ring and are quoted as such.
-- The author block is anonymized; `make deanonymize` with an `AUTHORS`
+- The author block is restored (Adam Buran, Kevin Nguyen, Isogeny Labs) for the ePrint release; `make deanonymize` with an `AUTHORS`
   file restores it.
