@@ -191,6 +191,41 @@ round-2 algebraic invariants (orders, residuosity, powers, heights).
 What remains for a curve-level trapdoor is either a weak class whose
 membership test is *not* one of these cheap shapes, or hypothesis 4.
 
+### Round 3 (2026-10-12): honest-distribution comparison
+
+Round 3 (`src/cryptanalysis/p256_trapdoor_round3.rs`, example
+`p256_trapdoor_round3`) tests the *distributional* signature of a
+grind: a 1999 grinder who kept only seeds whose `b` satisfied a secret
+predicate shifts `b` off the honest X9.62 A.3.3.1 distribution for
+every statistic correlated with that predicate. We simulated 2^20
+deterministic random seeds, derived `r` and the valid `±√(−27/r)`
+candidates (`p ≡ 3 mod 4`, one exponentiation), pooled 1,048,170
+roots, and placed the published `b` in each empirical distribution
+with Bonferroni correction over the six-probe family
+(`research/p256_trapdoor_round2_20261012/round3_records.json`):
+
+- **QR(b)**: honest pool 0.500; published true. Cubic residuosity:
+  honest pool 0.332; published false.
+- **Hamming weight of b**: honest 128.00 ± 8.00; published 134
+  (z ≈ +0.75). Of `r`: honest 127.50 ± 7.99; published 125.
+- **CF max quotient of b/p**: honest median bucket ≈ 11 bits, 51% of
+  honest samples at or above the published 1275; published 1275 (11
+  bits) — dead center.
+- All corrected p-values: 1.000.
+- **Seed-preimage phrase probe**: SHA-1 over a 1000-phrase curated
+  list (Solinas/NIST-era words and suffixes, ≤ 20 bytes) found no
+  preimage of `c49d360886e704936a6678e1139d26b7819f7e90`; expected,
+  the public bounty remains the reference for this direction.
+
+**Round-3 verdict.** The published `b` is a *median* member of the
+honest X9.62 candidate distribution on every probed statistic — there
+is no distributional residue of a grind on the round-1/2 invariant
+family. Combined with rounds 1–2, a P-256 curve-level trapdoor now
+requires a weak class whose membership predicate is neither a public
+weak class, nor an algebraic invariant of `(p, a, b)` (orders,
+residuosity, powers, heights), nor visible as an outlier in the
+honest-candidate distribution of those invariants — or hypothesis 4.
+
 ## 6. Overall
 
 The P-256 curve is almost certainly clean; the documented sabotage was
