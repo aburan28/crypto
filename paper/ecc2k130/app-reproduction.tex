@@ -31,7 +31,9 @@ directory each note links.
 {\small\begin{verbatim}
 make -C gpu/ecc test        # secp256k1 field, folds, BSGS; ptx_asm_check
 make -C gpu/btcpuzzle test  # kangaroo invariant, planted 28/32/36-bit solves
-make -C gpu/nist test       # P-256/P-384 against Boost.Multiprecision
+make -C gpu/nist test       # P-256/P-384 fields (Boost) and the rho walk
+cargo test --release --lib cryptanalysis::ecdlp_nist   # fifteen-curve CPU solver
+# device: cd gpu/nist && modal run modal_app.py::validate ; ::sweep_rho
 make -C gpu/ecc2k test      # ECC2K-95 field, steppers, pair table, tsan
 make -C gpu/semaev test && make -C gpu/semaev bench-host L=7
 \end{verbatim}}
