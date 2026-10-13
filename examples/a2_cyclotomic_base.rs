@@ -490,10 +490,17 @@ fn run_cell_parent(spec: &CellSpec, timeout: Duration) -> CellResult {
             Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => break,
         }
         if let Ok(Some(_)) = child.try_wait() {
-            // Drain whatever is left.
+            // Drain whatever is left (the child's stdout is flushed at exit).
             while let Ok(line) = rx.try_recv() {
-                if let Ok(t) = serde_json::from_str::<TargetLine>(&line) {
-                    lines.push(t);
+                if let Ok(v) = serde_json::from_str::<Value>(&line) {
+                    if v.get("census").is_some() {
+                        census = v.get("census").cloned();
+                        encoding = v.get("encoding").cloned();
+                    } else if v.get("unsupported").is_some() {
+                        unsupported += 1;
+                    } else if let Ok(t) = serde_json::from_value::<TargetLine>(v) {
+                        lines.push(t);
+                    }
                 }
             }
             break;
@@ -533,6 +540,13 @@ struct WdsatNeed {
     max_terms: u32,
     /// Terms over all equations (the parse buffer).
     total_terms: u32,
+    /// Entries WDSat's CNF implication buffer takes for the linearised
+    /// monomials: a degree-`d` monomial becomes `d` binary clauses
+    /// (2 entries each) and one `(d+1)`-clause (`d·(d+1)` entries), so
+    /// `Σ_d count_d · (d² + 3d)`.  The buffer is sized by
+    /// `__MAX_BUFFER_SIZE__` too, and on the `n = 23` ONB systems this
+    /// term, not the XOR-term count, is what overflows it.
+    cnf_implication_entries: u64,
 }
 
 impl WdsatNeed {
@@ -554,6 +568,13 @@ impl WdsatNeed {
             max_terms = max_terms.max(terms);
             total_terms += terms;
         }
+        let cnf_implication_entries = distinct
+            .iter()
+            .map(|mask| {
+                let d = mask.count_ones() as u64;
+                d * d + 3 * d
+            })
+            .sum();
         Self {
             n_vars: sys.n_vars as u32,
             nonlinear_monomials: distinct.len() as u32,
@@ -561,6 +582,7 @@ impl WdsatNeed {
             equations: sys.equations.len() as u32,
             max_terms,
             total_terms,
+            cnf_implication_entries,
         }
     }
 
@@ -572,6 +594,7 @@ impl WdsatNeed {
             equations: self.equations.max(other.equations),
             max_terms: self.max_terms.max(other.max_terms),
             total_terms: self.total_terms.max(other.total_terms),
+            cnf_implication_entries: self.cnf_implication_entries.max(other.cnf_implication_entries),
         }
     }
 
@@ -599,7 +622,9 @@ impl WdsatNeed {
         (self.max_terms as u64 * 5 / 4 + 64).max(64)
     }
     fn max_buffer(&self) -> u64 {
-        (self.total_terms as u64 * (self.max_degree as u64 + 2) * 5 / 4 + 5000).max(5000)
+        let xor_terms = self.total_terms as u64 * (self.max_degree as u64 + 2) * 5 / 4 + 5000;
+        let cnf_entries = self.cnf_implication_entries * 5 / 4 + 5000;
+        xor_terms.max(cnf_entries).max(5000)
     }
 
     /// Bytes of the static arrays WDSat declares with these constants
@@ -990,6 +1015,7 @@ fn main() {
     };
     let want_n11 = matches!(args.cells.as_str(), "all" | "n11");
     let want_n23 = matches!(args.cells.as_str(), "all" | "n23") && !args.skip_n23_solver;
+    let want_n23_w2 = args.cells == "n23_w2";
     if want_n11 {
         for arm in ["cyclotomic", "onb_matched"] {
             cells.push(mk(1, 11, 1, 2, arm));

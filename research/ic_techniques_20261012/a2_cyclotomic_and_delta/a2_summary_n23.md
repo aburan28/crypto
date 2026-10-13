@@ -31,8 +31,8 @@
 
 | cell | encoding | vars | eqs | sys deg | Macaulay solving deg (resolved/targets) | F4 mean ms | F4 median ms | F4 mean word XORs | F4 max deg | mean splits | lifted | WDSat runs | WDSat mean ms | WDSat verdicts | timed out |
 |:--|:--|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|
-| K0/n23/w1/m2/cyclotomic | cyclotomic_unity(w=1) | 46 | 69 | 5 | null..null (0/1) reached 0 | 21026.8 | 21026.8 | 2.434e6 | 0 | 1024.00 | 0 | 1 | 243.307875 | {"error: WDSat exited with status signal: 6 (SIGABRT)":1} | true |
-| K0/n23/w1/m2/onb_matched | onb_weight(w=2) | 46 | 3567 | 3 | null..null (0/16) reached 3 | 465.8 | 417.0 | 3.653e7 | 3 | 234.31 | 0 | 16 | 35.5160025 | {"error: WDSat exited with status signal: 6 (SIGABRT)":16} | false |
-| K1/n23/w1/m2/cyclotomic | cyclotomic_unity(w=1) | 46 | 69 | 5 | null..null (0/1) reached 0 | 22946.6 | 22946.6 | 2.589e5 | 0 | 1024.00 | 0 | 1 | 49.247417 | {"error: WDSat exited with status signal: 6 (SIGABRT)":1} | true |
-| K1/n23/w1/m2/onb_matched | onb_weight(w=2) | 46 | 3567 | 3 | null..null (0/16) reached 3 | 793.9 | 763.5 | 3.506e7 | 3 | 232.12 | 0 | 16 | 32.4664064375 | {"error: WDSat exited with status signal: 6 (SIGABRT)":16} | false |
+| K0/n23/w1/m2/cyclotomic | cyclotomic_unity(w=1) | null | null | null | null..null (null/0) reached null | 0.0 | 0.0 | 0.000e0 | null | 0.00 | null | null | null | null | true |
+| K0/n23/w1/m2/onb_matched | onb_weight(w=2) | 46 | 3567 | 3 | null..null (0/14) reached 3 | 4678.3 | 4745.8 | 3.654e7 | 3 | 234.36 | 0 | 0 | null | {} | true |
+| K1/n23/w1/m2/cyclotomic | cyclotomic_unity(w=1) | null | null | null | null..null (null/0) reached null | 0.0 | 0.0 | 0.000e0 | null | 0.00 | null | null | null | null | true |
+| K1/n23/w1/m2/onb_matched | onb_weight(w=2) | 46 | 3567 | 3 | null..null (0/13) reached 3 | 5073.5 | 5438.1 | 3.507e7 | 3 | 232.15 | 0 | 0 | null | {} | true |
 | K0/n23/w2/m2/cyclotomic | cyclotomic_unity(w=2) | null | null | null | null..null (null/0) reached null | 0.0 | 0.0 | 0.000e0 | null | 0.00 | null | null | null | null | false |
