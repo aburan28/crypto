@@ -131,7 +131,12 @@ fn verify_arm(
 ) -> Result<Value, Box<dyn std::error::Error>> {
     let dir = study.join("runs").join(class).join(arm);
     if !dir.exists() {
-        return Ok(json!({"arm": arm, "status": "MISSING"}));
+        return Ok(
+            json!({"arm": arm, "status": if class == "panel" && arm == "k2202_load75" { "NOT_RUN_RESOURCE_GUARD" } else { "MISSING" }}),
+        );
+    }
+    if !dir.join("exit_status.txt").exists() {
+        return Ok(json!({"arm":arm, "status":"INTERRUPTED_NO_EXIT_RECEIPT"}));
     }
     let exit: i32 = fs::read_to_string(dir.join("exit_status.txt"))?
         .trim()

@@ -58,4 +58,6 @@ arm in the results. Keep online wall times exploratory on this shared host.
 arm. Each run directory is write-once. Raw statuses remain immutable. The
 first outer timer failed after its producer run; [AMENDMENT.md](AMENDMENT.md)
 records the preserved failed attempt, corrected `primary_v2` timer, and
-the peak-RSS wrapper frozen before the secondary panel.
+the peak-RSS wrapper frozen before the secondary panel. The K2202 primary
+hit a local memory-pressure guard; the amendment preserves its partial row
+and freezes a two-arm panel before that panel began.

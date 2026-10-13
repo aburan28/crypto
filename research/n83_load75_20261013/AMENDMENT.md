@@ -26,3 +26,22 @@ receipt is `usage_preflight.json`. The independent checker accepts only
 complete zero-exit rows and checks each panel resource receipt.
 The panel starts its producer with a clean environment containing the declared
 KIC flags, so optional Bloom and sparse-canonical paths are explicitly off.
+
+## K2202 local resource guard
+
+The K2202 primary attempt produced no target or summary row. After about
+9.5 minutes, the producer was in macOS uninterruptible I/O state with a few
+MiB resident and almost no CPU progress; `vm.swapusage` reported all 13,056
+MiB used. The raw process and swap snapshots are
+`k2202_pressure_ps.txt` and `k2202_pressure_swap.txt`. The operator
+interrupted this owned process to release memory pressure; the outer script
+exited 130 before writing `exit_status.txt`. The write-once partial directory
+remains in `runs/primary_v2/k2202_load75`. This is a censored resource row.
+
+`run_panel_v3.sh` was frozen but never launched. Before any panel arm,
+`run_panel_v4.sh` removed K2202 under this resource guard and retained
+K2000 followed by K1798, reversing their primary order. Both use the same
+public 64-point panel, 8 GiB packed table bucket, 900-second cap, source,
+binary and clean environment. The panel selection is therefore among these
+two completed local candidates only. K2202 requires a host with enough
+memory headroom for a separate rerun.
