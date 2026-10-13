@@ -143,7 +143,11 @@ fn ratio(slow: Duration, fast: Duration) -> String {
         return "—".into();
     }
     let r = slow.as_secs_f64() / fast.as_secs_f64();
-    if r >= 1.0 { format!("{r:.0}×") } else { format!("{:.2}× (baseline faster)", r) }
+    if r >= 1.0 {
+        format!("{r:.0}×")
+    } else {
+        format!("{:.2}× (baseline faster)", r)
+    }
 }
 
 fn env_list(key: &str, default: &[u32]) -> Vec<u32> {
@@ -160,11 +164,24 @@ fn binary_section(json: &mut Json) {
     println!("Single-DLP CPU time includes the pair-table build (no amortisation). F4 at its best max_degree per n.");
     println!(
         "{:>3} {:>5} {:>5} {:>7} | {:>12} {:>12} | {:>12} {:>12} | {:>10} {:>14}",
-        "n", "|F|", "rbits", "d", "root (min)", "root (mean)", "F4 (min)", "F4 (mean)", "single", "per-extra-DLP"
+        "n",
+        "|F|",
+        "rbits",
+        "d",
+        "root (min)",
+        "root (mean)",
+        "F4 (min)",
+        "F4 (mean)",
+        "single",
+        "per-extra-DLP"
     );
     for n in [5u32, 9, 13, 23] {
-        let Some(kc) = KoblitzCurve::new(0, n) else { continue };
-        let Some(fb) = build_frobenius_factor_base(&kc, 0) else { continue };
+        let Some(kc) = KoblitzCurve::new(0, n) else {
+            continue;
+        };
+        let Some(fb) = build_frobenius_factor_base(&kc, 0) else {
+            continue;
+        };
         let fb_size = fb.points.len();
         if fb_size < 2 {
             continue;
@@ -173,7 +190,11 @@ fn binary_section(json: &mut Json) {
         let g = kc.generator().clone();
         let d = (&r / BigUint::from(3u32)).max(BigUint::from(2u32));
         let q = kc.mul(&g, &d);
-        let seeds = [0x4b6f626c69747a00u64, 0x1111_2222_3333_4444, 0x9e37_79b9_7f4a_7c15];
+        let seeds = [
+            0x4b6f626c69747a00u64,
+            0x1111_2222_3333_4444,
+            0x9e37_79b9_7f4a_7c15,
+        ];
 
         // (1) Give F4 its best configuration: sweep max_degree on seed 0.
         let mut best: Option<(u32, Duration)> = None;
@@ -185,14 +206,18 @@ fn binary_section(json: &mut Json) {
                 ..KoblitzIcOptions::default()
             };
             let t = Instant::now();
-            let ok = koblitz_index_calculus_dlp(&kc, &q, &opts).map(|rep| rep.log == Some(d.clone())).unwrap_or(false);
+            let ok = koblitz_index_calculus_dlp(&kc, &q, &opts)
+                .map(|rep| rep.log == Some(d.clone()))
+                .unwrap_or(false);
             let w = t.elapsed();
             if ok && best.map(|(_, bw)| w < bw).unwrap_or(true) {
                 best = Some((max_degree, w));
             }
         }
         let Some((best_deg, _)) = best else {
-            println!("{n:>3} {fb_size:>5}  matrix-F4 failed to verify at every max_degree; skipping");
+            println!(
+                "{n:>3} {fb_size:>5}  matrix-F4 failed to verify at every max_degree; skipping"
+            );
             continue;
         };
 
@@ -203,14 +228,20 @@ fn binary_section(json: &mut Json) {
                 .map(|&seed| {
                     let opts = KoblitzIcOptions {
                         strategy,
-                        engine: SolverEngine::MatrixF4 { max_degree: best_deg },
+                        engine: SolverEngine::MatrixF4 {
+                            max_degree: best_deg,
+                        },
                         seed,
                         ..KoblitzIcOptions::default()
                     };
                     let t = Instant::now();
                     let rep = koblitz_index_calculus_dlp(&kc, &q, &opts).expect("DLP ran");
                     let w = t.elapsed();
-                    assert_eq!(rep.log, Some(d.clone()), "n={n} {strategy:?} seed={seed:#x}: wrong log");
+                    assert_eq!(
+                        rep.log,
+                        Some(d.clone()),
+                        "n={n} {strategy:?} seed={seed:#x}: wrong log"
+                    );
                     w
                 })
                 .collect()
@@ -233,13 +264,21 @@ fn binary_section(json: &mut Json) {
 
         println!(
             "{:>3} {:>5} {:>5} {:>7} | {:>12} {:>12} | {:>12} {:>12} | {:>10} {:>14}",
-            n, fb_size, r.bits(), d,
-            fmt_dur(min(&root)), fmt_dur(mean(&root)),
-            fmt_dur(min(&f4)), fmt_dur(mean(&f4)),
+            n,
+            fb_size,
+            r.bits(),
+            d,
+            fmt_dur(min(&root)),
+            fmt_dur(mean(&root)),
+            fmt_dur(min(&f4)),
+            fmt_dur(mean(&f4)),
             ratio(mean(&f4), mean(&root)),
             ratio(mean(&f4), root_amortised),
         );
-        println!("      table build {} (deg {best_deg} best for F4)", fmt_dur(table));
+        println!(
+            "      table build {} (deg {best_deg} best for F4)",
+            fmt_dur(table)
+        );
         json.rows.push(format!(
             "{{\"section\":\"binary_e2e\",\"n\":{n},\"fb\":{fb_size},\"r_bits\":{},\"log\":{d},\"seeds\":3,\"f4_max_degree\":{best_deg},\"root_wall_s\":[{}],\"f4_wall_s\":[{}],\"table_build_s\":{:.6},\"all_logs_verified\":true}}",
             r.bits(),
@@ -325,7 +364,12 @@ fn eval_mpoly(poly: &MPoly, point: &[FieldElement]) -> FieldElement {
 fn is_unit(reduced: &[MPoly]) -> bool {
     reduced.len() == 1
         && reduced[0].terms.len() == 1
-        && reduced[0].terms.keys().next().map(|m| m.iter().all(|&e| e == 0)) == Some(true)
+        && reduced[0]
+            .terms
+            .keys()
+            .next()
+            .map(|m| m.iter().all(|&e| e == 0))
+            == Some(true)
 }
 
 impl Inst {
@@ -344,13 +388,31 @@ impl Inst {
         let vx = vanishing(&fb.xs, 0, &p);
         let vy = vanishing(&fb.xs, 1, &p);
         let xs_fe = fb.xs.iter().map(|&x| fe(x, &p)).collect();
-        Some(Inst { curve, g, q, d, fb, p, a_fe, b_fe, vx, vy, xs_fe })
+        Some(Inst {
+            curve,
+            g,
+            q,
+            d,
+            fb,
+            p,
+            a_fe,
+            b_fe,
+            vx,
+            vy,
+            xs_fe,
+        })
     }
 
     /// Fail-closed: re-add the claimed summands and compare to `R`.
     fn verify(&self, r: Pt, rel: Rel) -> bool {
         let c = &self.curve;
-        let sgn = |i: usize, s: i8| if s < 0 { c.neg(self.fb.pts[i]) } else { self.fb.pts[i] };
+        let sgn = |i: usize, s: i8| {
+            if s < 0 {
+                c.neg(self.fb.pts[i])
+            } else {
+                self.fb.pts[i]
+            }
+        };
         match rel {
             Rel::One(i, s) => sgn(i, s) == r,
             Rel::Two(i, e, j, t) => c.add(Some(sgn(i, e)), Some(sgn(j, t))) == Some(r),
@@ -361,7 +423,11 @@ impl Inst {
     fn one_decomp(&self, r: Pt) -> Option<Rel> {
         let (xc, _) = self.curve.canonical(r);
         let i = self.fb.lookup(xc)?;
-        if self.fb.pts[i] == r { Some(Rel::One(i, 1)) } else { Some(Rel::One(i, -1)) }
+        if self.fb.pts[i] == r {
+            Some(Rel::One(i, 1))
+        } else {
+            Some(Rel::One(i, -1))
+        }
     }
 
     /// Given the x-pair from a Gröbner solve, fix signs by the group law.
@@ -380,16 +446,24 @@ impl Inst {
     /// Root extraction from a **lex** Gröbner basis: the univariate in `Y`
     /// has its roots in `x(F)`; back-substitute to get `X`.
     fn extract_from_lex(&self, lex: &[MPoly], r: Pt) -> Option<Rel> {
-        let uni_y: Vec<&MPoly> = lex.iter().filter(|g| g.terms.keys().all(|m| m[0] == 0)).collect();
+        let uni_y: Vec<&MPoly> = lex
+            .iter()
+            .filter(|g| g.terms.keys().all(|m| m[0] == 0))
+            .collect();
         if uni_y.is_empty() {
             return None;
         }
         for (j, yj) in self.xs_fe.iter().enumerate() {
-            if uni_y.iter().any(|g| !eval_mpoly(g, &[FieldElement::zero(self.p.clone()), yj.clone()]).is_zero()) {
+            if uni_y.iter().any(|g| {
+                !eval_mpoly(g, &[FieldElement::zero(self.p.clone()), yj.clone()]).is_zero()
+            }) {
                 continue;
             }
             for (i, xi) in self.xs_fe.iter().enumerate() {
-                if lex.iter().all(|g| eval_mpoly(g, &[xi.clone(), yj.clone()]).is_zero()) {
+                if lex
+                    .iter()
+                    .all(|g| eval_mpoly(g, &[xi.clone(), yj.clone()]).is_zero())
+                {
                     if let Some(rel) = self.signs_for_pair(r, i, j) {
                         return Some(rel);
                     }
@@ -401,7 +475,11 @@ impl Inst {
 
     fn ideal(&self, r: Pt) -> [MPoly; 3] {
         let xr = fe(self.curve.canonical(r).0, &self.p);
-        [s3_in_xy(&self.a_fe, &self.b_fe, &xr), self.vx.clone(), self.vy.clone()]
+        [
+            s3_in_xy(&self.a_fe, &self.b_fe, &xr),
+            self.vx.clone(),
+            self.vy.clone(),
+        ]
     }
 
     /// msolve input file for the decomposition ideal of `R`.
@@ -417,12 +495,20 @@ impl Inst {
                     .filter(|(_, c)| !c.is_zero())
                     .map(|(m, c)| {
                         let mut t = c.value.to_string();
-                        if m[0] > 0 { t.push_str(&format!("*X^{}", m[0])); }
-                        if m[1] > 0 { t.push_str(&format!("*Y^{}", m[1])); }
+                        if m[0] > 0 {
+                            t.push_str(&format!("*X^{}", m[0]));
+                        }
+                        if m[1] > 0 {
+                            t.push_str(&format!("*Y^{}", m[1]));
+                        }
                         t
                     })
                     .collect();
-                if terms.is_empty() { "0".into() } else { terms.join("+") }
+                if terms.is_empty() {
+                    "0".into()
+                } else {
+                    terms.join("+")
+                }
             })
             .collect();
         s.push_str(&body.join(",\n"));
@@ -434,7 +520,13 @@ impl Inst {
 // ── the three oracles ───────────────────────────────────────────────
 
 /// Algorithm 1: direct subtraction with one batched inversion.
-fn oracle_direct(inst: &Inst, r: Pt, d: &mut Vec<u64>, degen: &mut Vec<bool>, scratch: &mut Vec<u64>) -> Option<Rel> {
+fn oracle_direct(
+    inst: &Inst,
+    r: Pt,
+    d: &mut Vec<u64>,
+    degen: &mut Vec<bool>,
+    scratch: &mut Vec<u64>,
+) -> Option<Rel> {
     if let Some(rel) = inst.one_decomp(r) {
         return Some(rel);
     }
@@ -477,7 +569,11 @@ fn oracle_buchberger(inst: &Inst, r: Pt, decide_order: Ordering) -> Option<Rel> 
     if is_unit(&reduced) {
         return None;
     }
-    let lex = if decide_order == Ordering::Lex { reduced } else { reduce_basis(&buchberger(&ideal, Ordering::Lex), Ordering::Lex) };
+    let lex = if decide_order == Ordering::Lex {
+        reduced
+    } else {
+        reduce_basis(&buchberger(&ideal, Ordering::Lex), Ordering::Lex)
+    };
     inst.extract_from_lex(&lex, r)
 }
 
@@ -513,7 +609,16 @@ impl Msolve {
         let bin = std::env::var("MSOLVE").unwrap_or_else(|_| "msolve".into());
         let dir = std::env::temp_dir().join(format!("semaev_e2e_msolve_{}", std::process::id()));
         std::fs::create_dir_all(&dir).ok()?;
-        let mut m = Msolve { bin, dir, floor: Duration::ZERO, floor_std: Duration::ZERO, floor_n: 200, gross: Duration::ZERO, calls: 0, diffs: Vec::new() };
+        let mut m = Msolve {
+            bin,
+            dir,
+            floor: Duration::ZERO,
+            floor_std: Duration::ZERO,
+            floor_n: 200,
+            gross: Duration::ZERO,
+            calls: 0,
+            diffs: Vec::new(),
+        };
         let mut floors = Vec::new();
         for _ in 0..m.floor_n {
             let c0 = children_cpu();
@@ -521,7 +626,8 @@ impl Msolve {
             floors.push(children_cpu().saturating_sub(c0).as_secs_f64());
         }
         let mean = floors.iter().sum::<f64>() / floors.len() as f64;
-        let var = floors.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / (floors.len() - 1) as f64;
+        let var =
+            floors.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / (floors.len() - 1) as f64;
         m.floor = Duration::from_secs_f64(mean);
         m.floor_std = Duration::from_secs_f64(var.sqrt());
         Some(m)
@@ -534,8 +640,17 @@ impl Msolve {
     fn raw(&mut self, input: &str) -> Option<String> {
         let inp = self.dir.join("in.ms");
         let out = self.dir.join("out.ms");
-        std::fs::File::create(&inp).ok()?.write_all(input.as_bytes()).ok()?;
-        let st = Command::new(&self.bin).args(["-g", "2", "-f"]).arg(&inp).arg("-o").arg(&out).output().ok()?;
+        std::fs::File::create(&inp)
+            .ok()?
+            .write_all(input.as_bytes())
+            .ok()?;
+        let st = Command::new(&self.bin)
+            .args(["-g", "2", "-f"])
+            .arg(&inp)
+            .arg("-o")
+            .arg(&out)
+            .output()
+            .ok()?;
         if !st.status.success() {
             return None;
         }
@@ -608,7 +723,10 @@ fn oracle_msolve(inst: &Inst, r: Pt, ms: &mut Msolve, extract: &mut Duration) ->
     let (mut d, mut g, mut sc) = (Vec::new(), Vec::new(), Vec::new());
     let rel = oracle_direct(inst, r, &mut d, &mut g, &mut sc);
     *extract += t.elapsed();
-    assert!(rel.is_some(), "msolve found a non-unit ideal but direct subtraction found no pair");
+    assert!(
+        rel.is_some(),
+        "msolve found a non-unit ideal but direct subtraction found no pair"
+    );
     rel
 }
 
@@ -620,7 +738,11 @@ fn row_for(inst: &Inst, a: u64, b: u64, rel: Rel) -> (Vec<u64>, u64) {
     let k = inst.fb.len();
     let mut row = vec![0u64; k + 1];
     let add = |row: &mut Vec<u64>, i: usize, s: i8| {
-        row[i] = if s > 0 { (row[i] + 1) % n } else { (row[i] + n - 1) % n };
+        row[i] = if s > 0 {
+            (row[i] + 1) % n
+        } else {
+            (row[i] + n - 1) % n
+        };
     };
     match rel {
         Rel::One(i, s) => add(&mut row, i, s),
@@ -640,7 +762,9 @@ fn powmod(mut a: u64, mut e: u64, n: u64) -> u64 {
     let mut r = 1u64;
     a %= n;
     while e > 0 {
-        if e & 1 == 1 { r = mulmod(r, a, n); }
+        if e & 1 == 1 {
+            r = mulmod(r, a, n);
+        }
         a = mulmod(a, a, n);
         e >>= 1;
     }
@@ -650,14 +774,25 @@ fn powmod(mut a: u64, mut e: u64, n: u64) -> u64 {
 /// Gaussian elimination mod prime `n`; returns the solution if full rank.
 fn solve_mod(rows: &[(Vec<u64>, u64)], n: u64) -> Option<Vec<u64>> {
     let m = rows[0].0.len();
-    let mut a: Vec<Vec<u64>> = rows.iter().map(|(r, rhs)| { let mut v = r.clone(); v.push(*rhs); v }).collect();
+    let mut a: Vec<Vec<u64>> = rows
+        .iter()
+        .map(|(r, rhs)| {
+            let mut v = r.clone();
+            v.push(*rhs);
+            v
+        })
+        .collect();
     let mut piv_row = 0;
     let mut pivots = Vec::new();
     for col in 0..m {
-        let Some(p) = (piv_row..a.len()).find(|&i| a[i][col] != 0) else { continue };
+        let Some(p) = (piv_row..a.len()).find(|&i| a[i][col] != 0) else {
+            continue;
+        };
         a.swap(piv_row, p);
         let inv = powmod(a[piv_row][col], n - 2, n);
-        for v in a[piv_row].iter_mut() { *v = mulmod(*v, inv, n); }
+        for v in a[piv_row].iter_mut() {
+            *v = mulmod(*v, inv, n);
+        }
         for i in 0..a.len() {
             if i != piv_row && a[i][col] != 0 {
                 let f = a[i][col];
@@ -669,11 +804,17 @@ fn solve_mod(rows: &[(Vec<u64>, u64)], n: u64) -> Option<Vec<u64>> {
         }
         pivots.push(col);
         piv_row += 1;
-        if piv_row == a.len() { break; }
+        if piv_row == a.len() {
+            break;
+        }
     }
-    if pivots.len() < m { return None; }
+    if pivots.len() < m {
+        return None;
+    }
     let mut x = vec![0u64; m];
-    for (r, &c) in pivots.iter().enumerate() { x[c] = a[r][m]; }
+    for (r, &c) in pivots.iter().enumerate() {
+        x[c] = a[r][m];
+    }
     Some(x)
 }
 
@@ -685,7 +826,13 @@ struct E2eResult {
 }
 
 /// One complete DLP with the given oracle on a shared seeded target stream.
-fn run_e2e<F: FnMut(&Inst, Pt) -> Option<Rel>>(inst: &Inst, seed: u64, extra: usize, max_targets: u64, mut oracle: F) -> Option<E2eResult> {
+fn run_e2e<F: FnMut(&Inst, Pt) -> Option<Rel>>(
+    inst: &Inst,
+    seed: u64,
+    extra: usize,
+    max_targets: u64,
+    mut oracle: F,
+) -> Option<E2eResult> {
     let n = inst.curve.n;
     let k = inst.fb.len();
     let mut rng = StdRng::seed_from_u64(seed);
@@ -702,34 +849,70 @@ fn run_e2e<F: FnMut(&Inst, Pt) -> Option<Rel>>(inst: &Inst, seed: u64, extra: us
         while rows.len() < need && targets < max_targets {
             let a = rng.gen_range(1..n);
             let b = rng.gen_range(1..n);
-            let Some(r) = inst.curve.combine(inst.g, inst.q, a, b) else { continue };
+            let Some(r) = inst.curve.combine(inst.g, inst.q, a, b) else {
+                continue;
+            };
             targets += 1;
             let t = Instant::now();
             let rel = oracle(inst, r);
             t_oracle += t.elapsed();
             if let Some(rel) = rel {
-                assert!(inst.verify(r, rel), "oracle returned a relation that fails in the group");
+                assert!(
+                    inst.verify(r, rel),
+                    "oracle returned a relation that fails in the group"
+                );
                 rows.push(row_for(inst, a, b, rel));
             }
         }
         if rows.len() < need {
-            eprintln!("run_e2e: target budget exhausted with {} / {} relations", rows.len(), need);
+            eprintln!(
+                "run_e2e: target budget exhausted with {} / {} relations",
+                rows.len(),
+                need
+            );
             return None;
         }
         if let Some(x) = solve_mod(&rows, n) {
             let d = x[k];
             if inst.curve.mul(Some(inst.g), d) != Some(inst.q) {
-                eprintln!("run_e2e: full-rank solve gave d={d} which does not verify (expected {})", inst.d);
+                eprintln!(
+                    "run_e2e: full-rank solve gave d={d} which does not verify (expected {})",
+                    inst.d
+                );
                 return None;
             }
-            assert_eq!(d, inst.d, "recovered a wrong logarithm that nonetheless verified?!");
-            return Some(E2eResult { wall: t0.elapsed(), oracle: t_oracle, targets, relations: rows.len() });
+            assert_eq!(
+                d, inst.d,
+                "recovered a wrong logarithm that nonetheless verified?!"
+            );
+            return Some(E2eResult {
+                wall: t0.elapsed(),
+                oracle: t_oracle,
+                targets,
+                relations: rows.len(),
+            });
         }
         need = (need + 1).max(need * 5 / 4);
         if targets >= max_targets {
-            eprintln!("run_e2e: rank-deficient after {} relations over {} unknowns", rows.len(), k + 1);
+            eprintln!(
+                "run_e2e: rank-deficient after {} relations over {} unknowns",
+                rows.len(),
+                k + 1
+            );
             if let Ok(path) = std::env::var("E2E_DUMP_ROWS") {
-                let body: Vec<String> = rows.iter().map(|(r, rhs)| format!("{} {}", r.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(" "), rhs)).collect();
+                let body: Vec<String> = rows
+                    .iter()
+                    .map(|(r, rhs)| {
+                        format!(
+                            "{} {}",
+                            r.iter()
+                                .map(|v| v.to_string())
+                                .collect::<Vec<_>>()
+                                .join(" "),
+                            rhs
+                        )
+                    })
+                    .collect();
                 let _ = std::fs::write(&path, format!("{n}\n{}\n", body.join("\n")));
             }
             return None;
@@ -738,7 +921,12 @@ fn run_e2e<F: FnMut(&Inst, Pt) -> Option<Rel>>(inst: &Inst, seed: u64, extra: us
 }
 
 /// Sampled per-target oracle cost on `sample` targets from a seeded stream.
-fn sample_oracle<F: FnMut(&Inst, Pt) -> Option<Rel>>(inst: &Inst, seed: u64, sample: usize, mut oracle: F) -> Duration {
+fn sample_oracle<F: FnMut(&Inst, Pt) -> Option<Rel>>(
+    inst: &Inst,
+    seed: u64,
+    sample: usize,
+    mut oracle: F,
+) -> Duration {
     let n = inst.curve.n;
     let mut rng = StdRng::seed_from_u64(seed);
     let mut t_total = Duration::ZERO;
@@ -746,13 +934,18 @@ fn sample_oracle<F: FnMut(&Inst, Pt) -> Option<Rel>>(inst: &Inst, seed: u64, sam
     while got < sample {
         let a = rng.gen_range(1..n);
         let b = rng.gen_range(1..n);
-        let Some(r) = inst.curve.combine(inst.g, inst.q, a, b) else { continue };
+        let Some(r) = inst.curve.combine(inst.g, inst.q, a, b) else {
+            continue;
+        };
         got += 1;
         let t = Instant::now();
         let rel = oracle(inst, r);
         t_total += t.elapsed();
         if let Some(rel) = rel {
-            assert!(inst.verify(r, rel), "sampled oracle relation fails in the group");
+            assert!(
+                inst.verify(r, rel),
+                "sampled oracle relation fails in the group"
+            );
         }
     }
     t_total / sample as u32
@@ -797,8 +990,17 @@ fn report_baseline(b: &Baseline, root_wall: Duration) {
 
 fn prime_section(json: &mut Json) {
     println!("=== Prime a=−3 curves: complete DLP, root finding vs Buchberger vs msolve ===\n");
-    let bits_list = if std::env::var("E2E_ONLY_BEST").is_ok() { Vec::new() } else { env_list("E2E_PRIME_BITS", &[16, 20, 24]) };
-    let budget = Duration::from_secs(std::env::var("E2E_FULL_BUDGET_S").ok().and_then(|v| v.parse().ok()).unwrap_or(900));
+    let bits_list = if std::env::var("E2E_ONLY_BEST").is_ok() {
+        Vec::new()
+    } else {
+        env_list("E2E_PRIME_BITS", &[16, 20, 24])
+    };
+    let budget = Duration::from_secs(
+        std::env::var("E2E_FULL_BUDGET_S")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(900),
+    );
     let mut ms = Msolve::detect();
     match &ms {
         Some(m) => println!("msolve found; charged its own process CPU only (harness spawn/file I/O excluded). Each decide is paired with an adjacent trivial-ideal control run (order alternating) and the mean paired difference is what is charged. For scale: one msolve process on the trivial ideal costs {} child CPU (σ {}, {} up-front runs). A per-decide value is reported only if it clears 2 standard errors of the paired mean; otherwise the 2·SE bound is charged.", fmt_dur(m.floor), fmt_dur(m.floor_std), m.floor_n),
@@ -809,16 +1011,30 @@ fn prime_section(json: &mut Json) {
 
     for bits in bits_list {
         let fb_size = if bits <= 16 { 8 } else { 12 };
-        let Some(inst) = Inst::new(bits, fb_size, 0xd00d ^ bits as u64) else { continue };
+        let Some(inst) = Inst::new(bits, fb_size, 0xd00d ^ bits as u64) else {
+            continue;
+        };
         let n = inst.curve.n;
-        println!("-- {bits}-bit  p={}  n={}  |F|={}  d={} --", inst.curve.f.p, n, fb_size, inst.d);
+        println!(
+            "-- {bits}-bit  p={}  n={}  |F|={}  d={} --",
+            inst.curve.f.p, n, fb_size, inst.d
+        );
         let seed = 0x5eed_0000 | bits as u64;
         let extra = 4usize;
 
         // Root finding: always measured in full.
         let (mut dv, mut dg, mut sc) = (Vec::new(), Vec::new(), Vec::new());
-        let root = run_e2e(&inst, seed, extra, u64::MAX, |i, r| oracle_direct(i, r, &mut dv, &mut dg, &mut sc)).expect("root e2e");
-        println!("   root-finding : {:>10} measured  (oracle {}, {} targets, {} relations)", fmt_dur(root.wall), fmt_dur(root.oracle), root.targets, root.relations);
+        let root = run_e2e(&inst, seed, extra, u64::MAX, |i, r| {
+            oracle_direct(i, r, &mut dv, &mut dg, &mut sc)
+        })
+        .expect("root e2e");
+        println!(
+            "   root-finding : {:>10} measured  (oracle {}, {} targets, {} relations)",
+            fmt_dur(root.wall),
+            fmt_dur(root.oracle),
+            root.targets,
+            root.relations
+        );
 
         // Buchberger: pick its faster ordering on a 20-target sample (most favorable to F4).
         // `E2E_SKIP_BUCHBERGER=1` skips this in-process baseline (e.g. when a
@@ -828,16 +1044,43 @@ fn prime_section(json: &mut Json) {
             None
         } else {
             let (decide_order, per_buch) = {
-                let pg = sample_oracle(&inst, 0xca11, 20, |i, r| oracle_buchberger(i, r, Ordering::Grevlex));
-                let pl = sample_oracle(&inst, 0xca11, 20, |i, r| oracle_buchberger(i, r, Ordering::Lex));
-                if pl < pg { (Ordering::Lex, pl) } else { (Ordering::Grevlex, pg) }
+                let pg = sample_oracle(&inst, 0xca11, 20, |i, r| {
+                    oracle_buchberger(i, r, Ordering::Grevlex)
+                });
+                let pl = sample_oracle(&inst, 0xca11, 20, |i, r| {
+                    oracle_buchberger(i, r, Ordering::Lex)
+                });
+                if pl < pg {
+                    (Ordering::Lex, pl)
+                } else {
+                    (Ordering::Grevlex, pg)
+                }
             };
             let b = if per_buch.mul_f64(root.targets as f64) < budget {
-                let r = run_e2e(&inst, seed, extra, u64::MAX, |i, rr| oracle_buchberger(i, rr, decide_order)).expect("buchberger e2e");
-                Baseline { label: "Buchberger", wall: r.wall, measured: true, per_target: r.oracle / r.targets.max(1) as u32, targets: r.targets, resolvable: true }
+                let r = run_e2e(&inst, seed, extra, u64::MAX, |i, rr| {
+                    oracle_buchberger(i, rr, decide_order)
+                })
+                .expect("buchberger e2e");
+                Baseline {
+                    label: "Buchberger",
+                    wall: r.wall,
+                    measured: true,
+                    per_target: r.oracle / r.targets.max(1) as u32,
+                    targets: r.targets,
+                    resolvable: true,
+                }
             } else {
-                let per = sample_oracle(&inst, 0x5a3b1e, 100, |i, rr| oracle_buchberger(i, rr, decide_order));
-                Baseline { label: "Buchberger", wall: per.mul_f64(root.targets as f64), measured: false, per_target: per, targets: root.targets, resolvable: true }
+                let per = sample_oracle(&inst, 0x5a3b1e, 100, |i, rr| {
+                    oracle_buchberger(i, rr, decide_order)
+                });
+                Baseline {
+                    label: "Buchberger",
+                    wall: per.mul_f64(root.targets as f64),
+                    measured: false,
+                    per_target: per,
+                    targets: root.targets,
+                    resolvable: true,
+                }
             };
             println!("   (Buchberger decide ordering: {:?})", decide_order);
             report_baseline(&b, root.wall);
@@ -859,27 +1102,59 @@ fn prime_section(json: &mut Json) {
             let b = if per_gross.mul_f64(root.targets as f64) < budget {
                 m.reset();
                 let mut ex = Duration::ZERO;
-                let r = run_e2e(&inst, seed, extra, u64::MAX, |i, rr| oracle_msolve(i, rr, m, &mut ex)).expect("msolve e2e");
+                let r = run_e2e(&inst, seed, extra, u64::MAX, |i, rr| {
+                    oracle_msolve(i, rr, m, &mut ex)
+                })
+                .expect("msolve e2e");
                 let per_decide = m.net() / m.calls.max(1) as u32;
                 let se = m.se_per_call();
                 let resolvable = per_decide > se * 2;
-                let oracle_total = if resolvable { m.net() + ex } else { (se * 2) * m.calls as u32 + ex };
+                let oracle_total = if resolvable {
+                    m.net() + ex
+                } else {
+                    (se * 2) * m.calls as u32 + ex
+                };
                 let per_target = oracle_total / r.targets.max(1) as u32;
-                Baseline { label: "msolve (F4)", wall: (r.wall - r.oracle) + oracle_total, measured: true, per_target, targets: r.targets, resolvable }
+                Baseline {
+                    label: "msolve (F4)",
+                    wall: (r.wall - r.oracle) + oracle_total,
+                    measured: true,
+                    per_target,
+                    targets: r.targets,
+                    resolvable,
+                }
             } else {
                 m.reset();
                 let mut ex = Duration::ZERO;
                 // 400 targets (not 100): the paired difference has σ ≈ 1 ms per
                 // decide, so 100 samples would not resolve a ~1 ms F4 cost.
-                let _ = sample_oracle(&inst, 0x5a3b1e, 400, |i, rr| oracle_msolve(i, rr, m, &mut ex));
+                let _ = sample_oracle(&inst, 0x5a3b1e, 400, |i, rr| {
+                    oracle_msolve(i, rr, m, &mut ex)
+                });
                 let per_decide = m.net() / m.calls.max(1) as u32;
                 let se = m.se_per_call();
                 let resolvable = per_decide > se * 2;
-                let oracle_total = if resolvable { m.net() + ex } else { (se * 2) * m.calls as u32 + ex };
+                let oracle_total = if resolvable {
+                    m.net() + ex
+                } else {
+                    (se * 2) * m.calls as u32 + ex
+                };
                 let per = oracle_total / 400;
-                Baseline { label: "msolve (F4)", wall: pipeline + per.mul_f64(root.targets as f64), measured: false, per_target: per, targets: root.targets, resolvable }
+                Baseline {
+                    label: "msolve (F4)",
+                    wall: pipeline + per.mul_f64(root.targets as f64),
+                    measured: false,
+                    per_target: per,
+                    targets: root.targets,
+                    resolvable,
+                }
             };
-            println!("   (msolve: {} decides, net child CPU {} per decide, 2·SE {})", m.calls, fmt_dur(m.net() / m.calls.max(1) as u32), fmt_dur(m.se_per_call() * 2));
+            println!(
+                "   (msolve: {} decides, net child CPU {} per decide, 2·SE {})",
+                m.calls,
+                fmt_dur(m.net() / m.calls.max(1) as u32),
+                fmt_dur(m.se_per_call() * 2)
+            );
             report_baseline(&b, root.wall);
             msb = Some(b);
         }
@@ -908,7 +1183,10 @@ fn prime_section(json: &mut Json) {
     // finder's best is measured directly at large |F|.
     if let Some(m) = ms.as_mut() {
         println!("-- 16-bit: each method at its own best |F| (F4 total = composed, oracle only; root total = measured wall incl. target generation) --");
-        println!("   {:>5} {:>14} {:>14} {:>10} {:>14}", "|F|", "msolve/decide", "root/decide", "E[targets]", "msolve composed");
+        println!(
+            "   {:>5} {:>14} {:>14} {:>10} {:>14}",
+            "|F|", "msolve/decide", "root/decide", "E[targets]", "msolve composed"
+        );
         let mut best_f4: Option<(usize, Duration)> = None;
         // Bound variant: unresolvable rows are charged their 2·SE bound (an
         // upper bound on F4's cost there), so this minimum is an UPPER bound
@@ -916,20 +1194,38 @@ fn prime_section(json: &mut Json) {
         // on the speed-up ("at most").
         let mut best_f4_bound: Option<(usize, Duration)> = None;
         for &k in &[4usize, 6, 8, 12, 16, 24, 32, 64, 120] {
-            let Some(inst) = Inst::new(16, k, 0xd00d ^ 16) else { continue };
+            let Some(inst) = Inst::new(16, k, 0xd00d ^ 16) else {
+                continue;
+            };
             let n = inst.curve.n;
             m.reset();
             // `E2E_BEST_REPS_DIV=n` divides the per-|F| sample sizes (for loaded machines).
-            let div: usize = std::env::var("E2E_BEST_REPS_DIV").ok().and_then(|v| v.parse().ok()).unwrap_or(1).max(1);
-            let reps = (if k >= 120 { 40 } else if k >= 64 { 100 } else if k > 8 { 500 } else { 2000 }) / div;
+            let div: usize = std::env::var("E2E_BEST_REPS_DIV")
+                .ok()
+                .and_then(|v| v.parse().ok())
+                .unwrap_or(1)
+                .max(1);
+            let reps = (if k >= 120 {
+                40
+            } else if k >= 64 {
+                100
+            } else if k > 8 {
+                500
+            } else {
+                2000
+            }) / div;
             let reps = reps.max(10);
             let mut ex = Duration::ZERO;
-            let _ = sample_oracle(&inst, 0x9a1 + k as u64, reps, |i, r| oracle_msolve(i, r, m, &mut ex));
+            let _ = sample_oracle(&inst, 0x9a1 + k as u64, reps, |i, r| {
+                oracle_msolve(i, r, m, &mut ex)
+            });
             let per_m = (m.net() + ex) / m.calls.max(1) as u32;
             let se = m.se_per_call();
             let resolvable = per_m > se * 2;
             let (mut dv, mut dg, mut sc) = (Vec::new(), Vec::new(), Vec::new());
-            let per_r = sample_oracle(&inst, 0x9a1 + k as u64, reps, |i, r| oracle_direct(i, r, &mut dv, &mut dg, &mut sc));
+            let per_r = sample_oracle(&inst, 0x9a1 + k as u64, reps, |i, r| {
+                oracle_direct(i, r, &mut dv, &mut dg, &mut sc)
+            });
             // Expected targets: (k + 5) relations needed, P[decomposable] ≈ (2k(k−1) + 2k)/n.
             let p_dec = (2.0 * k as f64 * (k as f64 - 1.0) + 2.0 * k as f64) / n as f64;
             let exp_targets = ((k + 5) as f64 / p_dec).ceil() as u64;
@@ -937,23 +1233,49 @@ fn prime_section(json: &mut Json) {
             if resolvable && best_f4.map(|(_, c)| composed < c).unwrap_or(true) {
                 best_f4 = Some((k, composed));
             }
-            let composed_bound = if resolvable { composed } else { (se * 2).mul_f64(exp_targets as f64) };
-            if best_f4_bound.map(|(_, c)| composed_bound < c).unwrap_or(true) {
+            let composed_bound = if resolvable {
+                composed
+            } else {
+                (se * 2).mul_f64(exp_targets as f64)
+            };
+            if best_f4_bound
+                .map(|(_, c)| composed_bound < c)
+                .unwrap_or(true)
+            {
                 best_f4_bound = Some((k, composed_bound));
             }
             if resolvable {
-                println!("   {:>5} {:>14} {:>14} {:>10} {:>14}", k, fmt_dur(per_m), fmt_dur(per_r), exp_targets, fmt_dur(composed));
+                println!(
+                    "   {:>5} {:>14} {:>14} {:>10} {:>14}",
+                    k,
+                    fmt_dur(per_m),
+                    fmt_dur(per_r),
+                    exp_targets,
+                    fmt_dur(composed)
+                );
             } else {
-                println!("   {:>5} {:>14} {:>14} {:>10} {:>14}", k, format!("< {}", fmt_dur(se * 2)), fmt_dur(per_r), exp_targets, "(unresolvable)");
+                println!(
+                    "   {:>5} {:>14} {:>14} {:>10} {:>14}",
+                    k,
+                    format!("< {}", fmt_dur(se * 2)),
+                    fmt_dur(per_r),
+                    exp_targets,
+                    "(unresolvable)"
+                );
             }
             json.rows.push(format!(
                 "{{\"section\":\"best_fb_16bit\",\"fb\":{k},\"reps\":{reps},\"msolve_net_per_decide_s\":{:.6},\"msolve_se_s\":{:.6},\"msolve_resolvable\":{resolvable},\"root_per_decide_s\":{:.9},\"expected_targets\":{exp_targets},\"msolve_composed_s\":{:.6}}}",
                 per_m.as_secs_f64(), se.as_secs_f64(), per_r.as_secs_f64(), composed.as_secs_f64()
             ));
         }
-        if let (Some((kf, cf)), Some((kb, cb)), Some(inst)) = (best_f4, best_f4_bound, Inst::new(16, 120, 0xd00d ^ 16)) {
+        if let (Some((kf, cf)), Some((kb, cb)), Some(inst)) =
+            (best_f4, best_f4_bound, Inst::new(16, 120, 0xd00d ^ 16))
+        {
             let (mut dv, mut dg, mut sc) = (Vec::new(), Vec::new(), Vec::new());
-            let root = run_e2e(&inst, 0x5eed_0010, 4, u64::MAX, |i, r| oracle_direct(i, r, &mut dv, &mut dg, &mut sc)).expect("root e2e |F|=120");
+            let root = run_e2e(&inst, 0x5eed_0010, 4, u64::MAX, |i, r| {
+                oracle_direct(i, r, &mut dv, &mut dg, &mut sc)
+            })
+            .expect("root e2e |F|=120");
             println!(
                 "   F4 best (resolved rows): |F|={kf} → {} composed.  Root best: |F|=120 → {} measured ({} targets).  → {} at each method's own best",
                 fmt_dur(cf), fmt_dur(root.wall), root.targets, ratio(cf, root.wall)
@@ -969,16 +1291,28 @@ fn prime_section(json: &mut Json) {
         }
     }
     // Debug aid: `E2E_ROOT_FB=k` runs the root finder's complete 16-bit DLP at |F| = k.
-    if let Some(k) = std::env::var("E2E_ROOT_FB").ok().and_then(|v| v.parse::<usize>().ok()) {
+    if let Some(k) = std::env::var("E2E_ROOT_FB")
+        .ok()
+        .and_then(|v| v.parse::<usize>().ok())
+    {
         if let Some(inst) = Inst::new(16, k, 0xd00d ^ 16) {
             let (mut dv, mut dg, mut sc) = (Vec::new(), Vec::new(), Vec::new());
-            match run_e2e(&inst, 0x5eed_0010, 4, u64::MAX, |i, r| oracle_direct(i, r, &mut dv, &mut dg, &mut sc)) {
-                Some(r) => println!("   root |F|={k}: {} measured ({} targets, {} relations)", fmt_dur(r.wall), r.targets, r.relations),
+            match run_e2e(&inst, 0x5eed_0010, 4, u64::MAX, |i, r| {
+                oracle_direct(i, r, &mut dv, &mut dg, &mut sc)
+            }) {
+                Some(r) => println!(
+                    "   root |F|={k}: {} measured ({} targets, {} relations)",
+                    fmt_dur(r.wall),
+                    r.targets,
+                    r.relations
+                ),
                 None => println!("   root |F|={k}: FAILED"),
             }
         }
     }
-    if let Some(m) = ms { let _ = std::fs::remove_dir_all(&m.dir); }
+    if let Some(m) = ms {
+        let _ = std::fs::remove_dir_all(&m.dir);
+    }
     println!();
 }
 
@@ -990,11 +1324,14 @@ fn main() {
         binary_section(&mut json);
     }
     prime_section(&mut json);
-    println!("Every solve above recovered and verified the planted logarithm. Not a security claim.");
+    println!(
+        "Every solve above recovered and verified the planted logarithm. Not a security claim."
+    );
     if let Ok(dir) = std::env::var("BENCH_OUT") {
         std::fs::create_dir_all(&dir).expect("create BENCH_OUT");
         let path = format!("{dir}/results.json");
-        std::fs::write(&path, format!("[\n  {}\n]\n", json.rows.join(",\n  "))).expect("write results.json");
+        std::fs::write(&path, format!("[\n  {}\n]\n", json.rows.join(",\n  ")))
+            .expect("write results.json");
         println!("wrote {path}");
     }
 }

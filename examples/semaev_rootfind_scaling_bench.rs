@@ -121,10 +121,23 @@ fn prime_decompose(
     None
 }
 
-fn prime_verify(curve: &FastCurve, fb: &FastFactorBase, r: Pt, rel: (usize, i8, usize, i8)) -> bool {
+fn prime_verify(
+    curve: &FastCurve,
+    fb: &FastFactorBase,
+    r: Pt,
+    rel: (usize, i8, usize, i8),
+) -> bool {
     let (i, ei, j, ej) = rel;
-    let pi = if ei < 0 { curve.neg(fb.pts[i]) } else { fb.pts[i] };
-    let pj = if ej < 0 { curve.neg(fb.pts[j]) } else { fb.pts[j] };
+    let pi = if ei < 0 {
+        curve.neg(fb.pts[i])
+    } else {
+        fb.pts[i]
+    };
+    let pj = if ej < 0 {
+        curve.neg(fb.pts[j])
+    } else {
+        fb.pts[j]
+    };
     match curve.add(Some(pi), Some(pj)) {
         Some(sum) => curve.canonical(sum) == curve.canonical(r),
         None => false,
@@ -159,7 +172,10 @@ fn prime_native_section(json: &mut Json) {
             let Some(r) = curve.lift_x(x) else { continue };
             sampled += 1;
             if let Some(rel) = prime_decompose(&curve, &fb, r, &mut d, &mut degen, &mut scratch) {
-                assert!(prime_verify(&curve, &fb, r, rel), "native relation fails in-group");
+                assert!(
+                    prime_verify(&curve, &fb, r, rel),
+                    "native relation fails in-group"
+                );
                 got += 1;
             }
         }
@@ -173,10 +189,15 @@ fn prime_native_section(json: &mut Json) {
             if i == j {
                 continue;
             }
-            let Some(r) = curve.add(Some(fb.pts[i]), Some(fb.pts[j])) else { continue };
+            let Some(r) = curve.add(Some(fb.pts[i]), Some(fb.pts[j])) else {
+                continue;
+            };
             let rel = prime_decompose(&curve, &fb, r, &mut d, &mut degen, &mut scratch)
                 .expect("a constructed sum must decompose");
-            assert!(prime_verify(&curve, &fb, r, rel), "constructed relation fails in-group");
+            assert!(
+                prime_verify(&curve, &fb, r, rel),
+                "constructed relation fails in-group"
+            );
             verified += 1;
         }
         println!(
@@ -312,11 +333,16 @@ fn prime_biguint_section(json: &mut Json) {
         let xv = BigUint::from(rng.gen::<u128>() % p_u128 + 1);
         let xfe = fe(&xv, &p);
         let rhs = xfe.mul(&xfe).mul(&xfe).add(&a.mul(&xfe)).add(&b);
-        let Some(yv) = sqrt_mod_p(&rhs.value, &p) else { continue };
+        let Some(yv) = sqrt_mod_p(&rhs.value, &p) else {
+            continue;
+        };
         sampled += 1;
         let yr = fe(&yv, &p);
         if let Some(rel) = big_decompose(&p, &fb, &xmap, &xfe, &yr) {
-            assert!(big_verify(&fb, &a, &(xfe.clone(), yr.clone()), rel), "83-bit relation fails");
+            assert!(
+                big_verify(&fb, &a, &(xfe.clone(), yr.clone()), rel),
+                "83-bit relation fails"
+            );
             got += 1;
         }
     }
@@ -330,10 +356,15 @@ fn prime_biguint_section(json: &mut Json) {
         if i == j {
             continue;
         }
-        let Some(r) = big_point_add(&fb[i], &fb[j], &a) else { continue };
+        let Some(r) = big_point_add(&fb[i], &fb[j], &a) else {
+            continue;
+        };
         let rel =
             big_decompose(&p, &fb, &xmap, &r.0, &r.1).expect("a constructed sum must decompose");
-        assert!(big_verify(&fb, &a, &r, rel), "constructed 83-bit relation fails");
+        assert!(
+            big_verify(&fb, &a, &r, rel),
+            "constructed 83-bit relation fails"
+        );
         // Cross-check: Semaev S₃ vanishes on the found x-pair.
         let (ii, _, jj, _) = rel;
         let s = semaev_s3(&r.0, &fb[ii].0, &fb[jj].0, &a, &b);
@@ -395,14 +426,23 @@ fn binary_section(json: &mut Json) {
             "decompose disagrees with exhaustive S₄ search at xr={xr:#x}"
         );
         if let Some(w) = got {
-            assert_eq!(eval_f3(w[0], w[1], w[2], xr, &gf), 0, "witness does not satisfy S₄");
+            assert_eq!(
+                eval_f3(w[0], w[1], w[2], xr, &gf),
+                0,
+                "witness does not satisfy S₄"
+            );
         }
         anchor_ok += 1;
     }
-    println!("  correctness anchor (ℓ=6): decompose == exhaustive S₄ search on {anchor_ok}/200 targets.");
+    println!(
+        "  correctness anchor (ℓ=6): decompose == exhaustive S₄ search on {anchor_ok}/200 targets."
+    );
 
     // (b) rejection-cost scaling across ℓ (the dominant per-target cost).
-    println!("\n{:>4}  {:>8}  {:>10}  {:>14}", "ℓ", "|V|", "targets", "decomp/tgt");
+    println!(
+        "\n{:>4}  {:>8}  {:>10}  {:>14}",
+        "ℓ", "|V|", "targets", "decomp/tgt"
+    );
     for l in [8u32, 10, 11] {
         let targets = if l >= 11 { 8 } else { 40 };
         let mut t_total = Duration::ZERO;
@@ -413,7 +453,13 @@ fn binary_section(json: &mut Json) {
             t_total += t.elapsed();
         }
         let per = t_total / targets as u32;
-        println!("{:>4}  {:>8}  {:>10}  {:>14.2?}", l, 1u64 << l, targets, per);
+        println!(
+            "{:>4}  {:>8}  {:>10}  {:>14.2?}",
+            l,
+            1u64 << l,
+            targets,
+            per
+        );
         json.row(format!(
             "{{\"kind\":\"binary_f2_53\",\"ell\":{},\"subspace\":{},\"targets\":{},\"per_target_s\":{:.9}}}",
             l,
@@ -422,21 +468,37 @@ fn binary_section(json: &mut Json) {
             per.as_secs_f64()
         ));
     }
-    println!("  (subspace bounded on purpose: the Koblitz Frobenius ℓ = ord_2(53) = 52 ⇒ |V| = 2^52,");
+    println!(
+        "  (subspace bounded on purpose: the Koblitz Frobenius ℓ = ord_2(53) = 52 ⇒ |V| = 2^52,"
+    );
     println!("   which no index-calculus method can materialise — see the diagnosis below.)");
 }
 
 fn diagnosis() {
     println!("\n=== Diagnosis: the two walls at F_(2^83) and 2^83-scale primes ===\n");
-    println!("  native u64 width : Fp64 needs p < 2^62; PairSumTable / Gf2 pack x into u64 (n ≤ 63).");
-    println!("                     → 83-bit prime runs here only via BigUint (measured above, slower);");
-    println!("                       F_(2^83) exceeds the single-word binary field (Gf2 asserts n ≤ 63)");
-    println!("                       and the pair-table packing (n ≤ 62); a u128 field is the fix.");
+    println!(
+        "  native u64 width : Fp64 needs p < 2^62; PairSumTable / Gf2 pack x into u64 (n ≤ 63)."
+    );
+    println!(
+        "                     → 83-bit prime runs here only via BigUint (measured above, slower);"
+    );
+    println!(
+        "                       F_(2^83) exceeds the single-word binary field (Gf2 asserts n ≤ 63)"
+    );
+    println!(
+        "                       and the pair-table packing (n ≤ 62); a u128 field is the fix."
+    );
     println!("  Koblitz factor base (fundamental, affects F4 and root finding equally):");
-    println!("                     ℓ = ord_2(n):  n=53 → ℓ=52 (|V|=2^52),  n=83 → ℓ=82 (|V|=2^82).");
-    println!("                     The invariant factor base is exponential, so the *full attack* is");
+    println!(
+        "                     ℓ = ord_2(n):  n=53 → ℓ=52 (|V|=2^52),  n=83 → ℓ=82 (|V|=2^82)."
+    );
+    println!(
+        "                     The invariant factor base is exponential, so the *full attack* is"
+    );
     println!("                     infeasible at these n for ANY decomposition engine. The oracle");
-    println!("                     itself scales (shown above on a bounded subspace / factor base).");
+    println!(
+        "                     itself scales (shown above on a bounded subspace / factor base)."
+    );
 }
 
 fn main() {

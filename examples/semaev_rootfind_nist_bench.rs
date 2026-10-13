@@ -111,7 +111,12 @@ impl Curve {
         let p = BigUint::parse_bytes(n.p_hex.as_bytes(), 16).unwrap();
         let a = fe(&(&p - BigUint::from(3u32)), &p);
         let b = fe(&BigUint::parse_bytes(n.b_hex.as_bytes(), 16).unwrap(), &p);
-        Curve { name: n.name, p, a, b }
+        Curve {
+            name: n.name,
+            p,
+            a,
+            b,
+        }
     }
     fn bits(&self) -> u64 {
         self.p.bits()
@@ -168,7 +173,9 @@ fn batch_inverse(ds: &[FieldElement]) -> Vec<FieldElement> {
         acc = acc.mul(d);
         prefix.push(acc.clone());
     }
-    let mut inv = acc.inv().expect("product of non-zero elements is invertible");
+    let mut inv = acc
+        .inv()
+        .expect("product of non-zero elements is invertible");
     let mut out = vec![FieldElement::zero(ds[0].modulus.clone()); k];
     for i in (1..k).rev() {
         out[i] = inv.mul(&prefix[i - 1]);
@@ -182,7 +189,12 @@ fn batch_inverse(ds: &[FieldElement]) -> Vec<FieldElement> {
 /// each `F_i`, compute `x(R ∓ F_i)` and look it up in the factor base.
 /// This *is* the Semaev `S₃` root `x` of `S₃(x_R, x_i, x) = 0`, read
 /// off from the group law instead of from a polynomial system.
-fn big_decompose(fb: &[Pt], xmap: &HashMap<BigUint, usize>, xr: &FieldElement, yr: &FieldElement) -> Option<Rel> {
+fn big_decompose(
+    fb: &[Pt],
+    xmap: &HashMap<BigUint, usize>,
+    xr: &FieldElement,
+    yr: &FieldElement,
+) -> Option<Rel> {
     let mut idx = Vec::with_capacity(fb.len());
     let mut ds = Vec::with_capacity(fb.len());
     for (i, (xi, _)) in fb.iter().enumerate() {
@@ -294,7 +306,11 @@ fn p256_decompose(
             if let Some(&j) = xmap.get(&x3.to_bytes_be()) {
                 if j >= i {
                     let y3 = lam.mul(&xr.sub(&x3)).sub(yr);
-                    let tau = if bool::from(y3.ct_eq(&fb[j].1)) { 1i8 } else { -1 };
+                    let tau = if bool::from(y3.ct_eq(&fb[j].1)) {
+                        1i8
+                    } else {
+                        -1
+                    };
                     return Some((i, eps, j, tau));
                 }
             }
@@ -356,13 +372,21 @@ fn vanishing(fb: &[Pt], idx: usize, p: &BigUint) -> MPoly {
 fn is_unit_ideal(reduced: &[MPoly]) -> bool {
     reduced.len() == 1
         && reduced[0].terms.len() == 1
-        && reduced[0].terms.keys().next().map(|m| m.iter().all(|&e| e == 0)) == Some(true)
+        && reduced[0]
+            .terms
+            .keys()
+            .next()
+            .map(|m| m.iter().all(|&e| e == 0))
+            == Some(true)
 }
 
 // ── helpers ─────────────────────────────────────────────────────────
 
 fn env_usize(key: &str, default: usize) -> usize {
-    std::env::var(key).ok().and_then(|v| v.parse().ok()).unwrap_or(default)
+    std::env::var(key)
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(default)
 }
 
 fn fmt_dur(d: Duration) -> String {
@@ -410,7 +434,11 @@ fn main() {
     for n in NIST.iter() {
         let c = Curve::new(n);
         let mut rng = StdRng::seed_from_u64(0x5151_u64 ^ c.bits());
-        println!("=== {} ({} -bit prime, a = −3, FIPS 186-4 b) ===", c.name, c.bits());
+        println!(
+            "=== {} ({} -bit prime, a = −3, FIPS 186-4 b) ===",
+            c.name,
+            c.bits()
+        );
 
         // ── A. Head-to-head vs F4 ──────────────────────────────────
         let (fb, xmap) = c.factor_base(f4_fb);
@@ -453,19 +481,35 @@ fn main() {
             match rel {
                 Some(rel) => {
                     decomp += 1;
-                    assert!(big_verify(&fb, &c.a, r, rel), "{}: relation fails in the group", c.name);
+                    assert!(
+                        big_verify(&fb, &c.a, r, rel),
+                        "{}: relation fails in the group",
+                        c.name
+                    );
                     let (i, _, j, _) = rel;
                     let s = semaev_s3(&r.0, &fb[i].0, &fb[j].0, &c.a, &c.b);
                     assert!(s.is_zero(), "{}: S₃ must vanish on the found pair", c.name);
                     for poly in &reduced {
                         let v = eval_mpoly(poly, &[fb[i].0.clone(), fb[j].0.clone()]);
-                        assert!(v.is_zero(), "{}: Gröbner element must vanish at the known root", c.name);
+                        assert!(
+                            v.is_zero(),
+                            "{}: Gröbner element must vanish at the known root",
+                            c.name
+                        );
                     }
-                    assert!(!unit, "{}: F4 said {{1}} but a decomposition exists", c.name);
+                    assert!(
+                        !unit,
+                        "{}: F4 said {{1}} but a decomposition exists",
+                        c.name
+                    );
                 }
                 None => {
                     assert!(!constructed, "{}: constructed sum must decompose", c.name);
-                    assert!(unit, "{}: root-finder refuted but F4 did not return {{1}}", c.name);
+                    assert!(
+                        unit,
+                        "{}: root-finder refuted but F4 did not return {{1}}",
+                        c.name
+                    );
                     refuted += 1;
                 }
             }
@@ -493,12 +537,18 @@ fn main() {
 
         // ── B. Root-finder scaling on a bigger factor base ────────
         let (fb, xmap) = c.factor_base(scale_fb);
-        let randoms: Vec<Pt> = (0..scale_random).map(|_| c.random_point(&mut rng)).collect();
+        let randoms: Vec<Pt> = (0..scale_random)
+            .map(|_| c.random_point(&mut rng))
+            .collect();
         let t = Instant::now();
         let mut hits = 0usize;
         for r in &randoms {
             if let Some(rel) = big_decompose(&fb, &xmap, &r.0, &r.1) {
-                assert!(big_verify(&fb, &c.a, r, rel), "{}: random-target relation fails", c.name);
+                assert!(
+                    big_verify(&fb, &c.a, r, rel),
+                    "{}: random-target relation fails",
+                    c.name
+                );
                 hits += 1;
             }
         }
@@ -512,7 +562,11 @@ fn main() {
                 continue;
             }
             let neg_j = rng.gen_bool(0.5);
-            let fj = if neg_j { (fb[j].0.clone(), fb[j].1.neg()) } else { fb[j].clone() };
+            let fj = if neg_j {
+                (fb[j].0.clone(), fb[j].1.neg())
+            } else {
+                fb[j].clone()
+            };
             if let Some(r) = big_point_add(&fb[i], &fj, &c.a) {
                 controls.push(r);
             }
@@ -526,7 +580,11 @@ fn main() {
         let per_control = t.elapsed() / scale_controls as u32;
         let mut verified = 0usize;
         for (r, &rel) in controls.iter().zip(&rels) {
-            assert!(big_verify(&fb, &c.a, r, rel), "{}: control relation fails", c.name);
+            assert!(
+                big_verify(&fb, &c.a, r, rel),
+                "{}: control relation fails",
+                c.name
+            );
             let (i, _, j, _) = rel;
             assert!(semaev_s3(&r.0, &fb[i].0, &fb[j].0, &c.a, &c.b).is_zero());
             verified += 1;
@@ -547,34 +605,59 @@ fn main() {
         if c.name == "P-256" {
             let fb256: Vec<Pt256> = fb
                 .iter()
-                .map(|(x, y)| (P256FieldElement::from_biguint(&x.value), P256FieldElement::from_biguint(&y.value)))
+                .map(|(x, y)| {
+                    (
+                        P256FieldElement::from_biguint(&x.value),
+                        P256FieldElement::from_biguint(&y.value),
+                    )
+                })
                 .collect();
-            let xmap256: HashMap<[u8; 32], usize> =
-                fb256.iter().enumerate().map(|(i, (x, _))| (x.to_bytes_be(), i)).collect();
-            let to256 = |r: &Pt| (P256FieldElement::from_biguint(&r.0.value), P256FieldElement::from_biguint(&r.1.value));
+            let xmap256: HashMap<[u8; 32], usize> = fb256
+                .iter()
+                .enumerate()
+                .map(|(i, (x, _))| (x.to_bytes_be(), i))
+                .collect();
+            let to256 = |r: &Pt| {
+                (
+                    P256FieldElement::from_biguint(&r.0.value),
+                    P256FieldElement::from_biguint(&r.1.value),
+                )
+            };
 
             let randoms256: Vec<Pt256> = randoms.iter().map(to256).collect();
             let t = Instant::now();
             let mut hits256 = 0usize;
             for (k, r) in randoms256.iter().enumerate() {
                 if let Some(rel) = p256_decompose(&fb256, &xmap256, &r.0, &r.1) {
-                    assert!(big_verify(&fb, &c.a, &randoms[k], rel), "P-256 specialised relation fails");
+                    assert!(
+                        big_verify(&fb, &c.a, &randoms[k], rel),
+                        "P-256 specialised relation fails"
+                    );
                     hits256 += 1;
                 }
             }
             let per_reject256 = t.elapsed() / scale_random as u32;
-            assert_eq!(hits256, hits, "specialised and generic paths must agree on random targets");
+            assert_eq!(
+                hits256, hits,
+                "specialised and generic paths must agree on random targets"
+            );
 
             let controls256: Vec<Pt256> = controls.iter().map(to256).collect();
             let t = Instant::now();
             let rels256: Vec<Rel> = controls256
                 .iter()
-                .map(|r| p256_decompose(&fb256, &xmap256, &r.0, &r.1).expect("constructed sum must decompose"))
+                .map(|r| {
+                    p256_decompose(&fb256, &xmap256, &r.0, &r.1)
+                        .expect("constructed sum must decompose")
+                })
                 .collect();
             let per_control256 = t.elapsed() / scale_controls as u32;
             let mut verified256 = 0usize;
             for (k, &rel) in rels256.iter().enumerate() {
-                assert!(big_verify(&fb, &c.a, &controls[k], rel), "P-256 specialised control fails");
+                assert!(
+                    big_verify(&fb, &c.a, &controls[k], rel),
+                    "P-256 specialised control fails"
+                );
                 verified256 += 1;
             }
             println!(

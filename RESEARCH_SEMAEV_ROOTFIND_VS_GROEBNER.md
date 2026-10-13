@@ -43,8 +43,8 @@ Head to head on the **same** targets:
 
 | regime | instance | root finding | F4 / Gröbner | factor |
 |---|---|---:|---:|---:|
-| binary (Koblitz `K_0/F_{2^9}`, `|F|=55`, 254 targets, m=2) | per-decomposition | 0.73 ms | 279 ms (matrix-F4) | **383×** |
-| binary (`K_0/F_{2^13}`, `|F|=4005`, 256 targets, m=2) | per-decomposition | 2.5 ms | 3.9 s (matrix-F4) | **1535×** |
+| binary (Koblitz `icv1-f2m9-t5-81e744be`, `|F|=55`, 254 targets, m=2) | per-decomposition | 0.73 ms | 279 ms (matrix-F4) | **383×** |
+| binary (`icv1-f2m13-t181-515ee569`, `|F|=4005`, 256 targets, m=2) | per-decomposition | 2.5 ms | 3.9 s (matrix-F4) | **1535×** |
 | prime (16-bit `a=−3`, `|F|=6`, 40 targets, m=2) | per-decomposition | 30 µs | 1.05 s (`groebner_f4`) | **35592×** |
 | prime (20-bit, `|F|=6`) | per-decomposition | 33 µs | 1.15 s | 34602× |
 | prime (24-bit, `|F|=6`) | per-decomposition | 26 µs | 1.23 s | 46911× |
@@ -60,7 +60,7 @@ returned, and every prime non-decomposable target produced the unit ideal
 `PairSumTable::decompose` (one lookup for `m = 2`) versus `groebner_decompose`
 (Weil-restrict `S₃ = 0` to a Boolean system over the Frobenius-invariant
 subspace, build the Macaulay matrix, row-reduce at degree `D = 2, 3, 4` until
-the basis stabilises). Same `K_0` curves, the first 256 scalar multiples
+the basis stabilises). Same Koblitz curves (`icv1-f2m9-t5-81e744be`, `icv1-f2m13-t181-515ee569`), the first 256 scalar multiples
 `[k]G` as targets, `m = 2`.
 
 | n | \|F\| | targets | decomposable | root find | matrix-F4 | speed-up |
@@ -77,7 +77,7 @@ the gap *widens* as `n` grows.
 
 **End-to-end cross-check.** Running the whole DLP (`koblitz_index_calculus_dlp`)
 with `PairTable` and with `Groebner` recovers the *same* logarithm
-(`log = 53` on `K_0/F_{2^9}`). At `|F| = 55` the one-time pair-sum table
+(`log = 53` on `icv1-f2m9-t5-81e744be`). At `|F| = 55` the one-time pair-sum table
 build is not amortised inside a single small DLP, so the wall there is
 setup-dominated; the per-decomposition table above is the apples-to-apples
 oracle cost. Correctness, not speed, is the point of the end-to-end row.
