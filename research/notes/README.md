@@ -15,6 +15,7 @@ its old name still identify it.
 
 | note | subject |
 |:--|:--|
+| [`RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md`](ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md) | Proposed eight-workstream charter for an authorized audit of elliptic-curve private-key recovery: exact units, five-lane taxonomy, E0–E7 evidence, complete cost accounting, literature/incidents, cover-transfer closure, and independent governance. Planning artifact; no completion or attack claim |
 | [`RESEARCH_ECDLP_STATE_OF_THE_ART.md`](ecdlp-general/RESEARCH_ECDLP_STATE_OF_THE_ART.md) | The ECDLP: state of the art, 2025–2026 |
 | [`RESEARCH_TORSION_AUXILIARY_INPUTS.md`](ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md) | Auxiliary inputs (Cheon) and torsion points against rho and index calculus |
 | [`RESEARCH_SRS_CHEON_CENSUS.md`](ecdlp-general/RESEARCH_SRS_CHEON_CENSUS.md) | Cheon's attack on deployed powers-of-tau setups: EIP-4844, Sapling, Filecoin, Ignition, PPoT |

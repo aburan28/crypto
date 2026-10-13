@@ -1,9 +1,18 @@
 # ECDLP Attack Taxonomy & Applicability Matrix
 
-A comprehensive map of every known attack on elliptic-curve cryptography,
-cross-referenced with where each one is implemented in this repository.
-The matrix is calibrated to **what an attacker can actually do to a curve**
-— not speculative weaknesses.
+> **Status:** taxonomy seed and historical implementation view, not the
+> canonical completeness or evidence ledger. The proposed
+> [comprehensive audit plan](../research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md)
+> and its [non-authoritative machine mock](ecdlp-audit/ECDLP_AUDIT_PLAN.mock.json)
+> define the new identity, evidence, accounting, authorization, and governance
+> contract. Existing `✗/◐/◌/○` cells must be recertified before import; a
+> bypass is not automatically an ECDLP solution, and a blank or stale cell is
+> `unknown`, not safe.
+
+A historical map of attacks presently inventoried for elliptic-curve
+cryptography, cross-referenced with where each one is represented in this
+repository. Its cells are leads for recertification under the audit plan, not
+proof that the route inventory or implementation coverage is complete.
 
 ---
 

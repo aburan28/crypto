@@ -59,6 +59,14 @@ domain. No 2,091-command archived-binary batch receipt exists, so it is not a
 catalog-wide packaged artifact. Neither the catalog nor the assessment is a
 Jacobian index-calculus solver.
 
+The proposed
+[comprehensive private-key recovery audit](../../research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md)
+places this cover ledger inside a wider program without weakening its claim
+boundaries. Cover existence, arithmetic, subgroup transfer, destination
+solving, and measured advantage remain separately gated; the
+[planning mock](../ecdlp-audit/ECDLP_AUDIT_PLAN.mock.json) is explicitly
+non-authoritative.
+
 [IC curve records and cross-repo links](ic/README.md), including
 [typed links](ic/curve-links/README.md), retain the exact EC1 representations,
 optional trait statuses, and the factor-base/isogeny storage contract beside

@@ -686,6 +686,14 @@ attack is registered as a falsifiable [`Hypothesis`] with a theoretical complexi
 claim; the bench runs it at multiple problem sizes, fits the measured
 exponent by log-log regression, and prints a verdict.
 
+The proposed
+[comprehensive elliptic-curve private-key recovery audit](research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md)
+adds the cross-cutting control plane: exact audit units, a five-lane
+non-overlapping taxonomy, E0–E7 evidence gates, literature and incident
+coverage, common cost accounting, and independent governance. Its
+[machine-readable twin](docs/ecdlp-audit/ECDLP_AUDIT_PLAN.mock.json) is a
+non-authoritative planning mock and cannot promote a claim.
+
 Two scaling regimes are supported:
 
 - **Polynomial** (`time ∝ n^α`): default; ECDLP attacks, IC variants, twist enum.

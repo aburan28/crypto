@@ -1,0 +1,73 @@
+digraph ECDLPAuditProgram {
+  graph [
+    rankdir=LR,
+    bgcolor="#f8fafc",
+    pad="0.25",
+    nodesep="0.38",
+    ranksep="0.65",
+    fontname="DejaVu Sans",
+    labelloc="t",
+    label="Comprehensive elliptic-curve private-key recovery audit — proposed program",
+    fontsize=18
+  ];
+  node [
+    shape=box,
+    style="rounded,filled",
+    fontname="DejaVu Sans",
+    fontsize=10,
+    color="#334155",
+    penwidth=1.1,
+    margin="0.15,0.09"
+  ];
+  edge [
+    color="#64748b",
+    fontname="DejaVu Sans",
+    fontsize=8,
+    arrowsize=0.7
+  ];
+
+  M0 [label="M0\nScope + authorization +\nidentity/denominator contract", fillcolor="#dbeafe"];
+  WS1 [label="WS1  Present evidence gate\npackage • 2,091-input replay • CI/review\nPARTIAL", fillcolor="#fef3c7"];
+  WS2 [label="WS2  Cover-transfer gaps\ntwo-infinity • binary norm • subgroup certs • oracle\nPARTIAL", fillcolor="#fef3c7"];
+  WS3 [label="WS3  Master ledger\nexact units • revisions • frozen denominator\nNOT STARTED", fillcolor="#f1f5f9"];
+  WS4 [label="WS4  Evidence ladder\nE0–E7 • weakest-link • corrections\nNOT STARTED", fillcolor="#f1f5f9"];
+  WS5 [label="WS5  Taxonomy sweep\nA true DLP • B transfer • C parameters\nD bypass • E evidence/supply chain\nNOT STARTED", fillcolor="#f1f5f9"];
+  WS6 [label="WS6  Literature + incidents\nsearch protocol • primary corpus • comparators\nNOT STARTED", fillcolor="#f1f5f9"];
+  WS7 [label="WS7  Experimental accounting\ncold/online/amortized • failures • matched controls\nPARTIAL", fillcolor="#fef3c7"];
+  WS8 [label="WS8  Independent governance\nmath • implementation • replay • release\nNOT STARTED", fillcolor="#fae8ff", color="#86198f"];
+  M5 [label="M5\nBounded route-by-route audits", fillcolor="#dcfce7"];
+  M6 [label="M6\nIndependent replication", fillcolor="#dcfce7"];
+  M7 [label="M7\nDated comparative report\n(no absolute historical claim)", fillcolor="#dcfce7"];
+
+  M0 -> WS1;
+  M0 -> WS3;
+  WS3 -> WS4;
+  WS3 -> WS6;
+  WS3 -> WS7;
+  WS4 -> WS2;
+  WS1 -> WS2;
+  WS4 -> WS5;
+  WS6 -> WS5 [label="sources routes"];
+  WS4 -> WS7;
+  WS3 -> WS8;
+  WS4 -> WS8;
+  WS7 -> WS8;
+
+  WS1 -> M5;
+  WS2 -> M5;
+  WS5 -> M5;
+  WS6 -> M5;
+  WS7 -> M5;
+  WS8 -> M5 [color="#86198f", label="promotion gate"];
+  M5 -> M6;
+  M6 -> M7;
+
+  note [
+    shape=note,
+    label="Planning artifact only\nClassification ≠ support\nCover ≠ subgroup transfer\nTransfer ≠ solver\nStage gain ≠ end-to-end advantage",
+    fillcolor="#fee2e2",
+    color="#b91c1c",
+    fontsize=9
+  ];
+  note -> M7 [style=dashed, arrowhead=none, color="#b91c1c"];
+}

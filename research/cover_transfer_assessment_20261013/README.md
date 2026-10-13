@@ -509,6 +509,11 @@ pdfinfo cover_transfer_assessment_20261013.pdf
 
 # Open obligations
 
+These obligations feed WS1 and WS2 of the proposed
+[comprehensive elliptic-curve private-key recovery audit](../notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md).
+That program link does not change any status below and does not turn the cover
+assessment into a solver or advantage result.
+
 1. Implement and independently verify a binary arbitrary-class norm.
 2. Implement balanced/two-infinity odd-characteristic Jacobian arithmetic and
    induced maps over both prime and declared extension fields.
