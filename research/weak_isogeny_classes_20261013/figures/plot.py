@@ -25,7 +25,7 @@ def ghs(n_field):
 
 
 # 1. Coverage against the magic-number threshold for selected (N, n, l).
-picks = [(16, 4, 4), (20, 4, 5), (24, 4, 6), (18, 3, 6), (21, 3, 7), (24, 8, 3)]
+picks = [(16, 4, 4), (20, 4, 5), (24, 4, 6), (18, 6, 3), (21, 7, 3), (24, 8, 3)]
 fig, axes = plt.subplots(2, 3, figsize=(10, 6), sharey=True)
 for ax, (N, n, l) in zip(axes.flat, picks):
     rep = ghs(N)
@@ -33,8 +33,8 @@ for ax, (N, n, l) in zip(axes.flat, picks):
     th = [t for t in row["thresholds"] if t["max_m"] >= 2]
     M = [t["max_m"] for t in th]
     tot = th[0]["curves_total"]
-    ax.plot(M, [t["direct_weak_curves"] / tot for t in th], "o-", c=C["direct"], label="direct: m ≤ M")
-    ax.plot(M, [t["class_covered_curves"] / tot for t in th], "s-", c=C["class"], label="class (same trace) has m ≤ M")
+    ax.plot(M, [t["direct_weak_curves"] / tot for t in th], "o-", c=C["direct"], label="direct: 2 ≤ m ≤ M")
+    ax.plot(M, [t["class_covered_curves"] / tot for t in th], "s-", c=C["class"], label="class (same trace) has 2 ≤ m ≤ M")
     if th[0]["walk3_covered_curves"] is not None:
         ax.plot(M, [t["walk3_covered_curves"] / tot for t in th], "^-", c=C["walk"], label="joined by 3-isogeny/Frobenius walk")
     ax.set_yscale("log")
@@ -51,7 +51,7 @@ save(fig, "ghs_coverage_vs_threshold")
 # 2. Enlargement factor class/direct at the smallest non-subfield threshold
 #    m <= 3 (genus <= 4) for every (N, n) with n >= 3.
 fig, ax = plt.subplots(figsize=(7, 4))
-for n, mk in [(3, "o"), (4, "s"), (5, "D"), (6, "^"), (8, "v")]:
+for n, mk in [(4, "s"), (6, "^"), (8, "v")]:
     xs, ys, ws = [], [], []
     for N in [8, 9, 10, 12, 14, 15, 16, 18, 20, 21, 22, 24]:
         p = DATA / f"ghs_N{N}.json"
@@ -73,7 +73,7 @@ for n, mk in [(3, "o"), (4, "s"), (5, "D"), (6, "^"), (8, "v")]:
 ax.set_yscale("log")
 ax.set_xlabel("N (field F_2^N)")
 ax.set_ylabel("curves covered ÷ directly weak curves")
-ax.set_title("Enlargement of the GHS weak set at m ≤ 3 (genus ≤ 4)")
+ax.set_title("Enlargement of the GHS weak set at 2 ≤ m ≤ 3 (genus ≤ 4)\n(n = 3, 5 omitted: no b has m = 2, and m = 3 = n is every non-subfield curve)", fontsize=9)
 ax.grid(alpha=.3)
 ax.legend(fontsize=7, ncol=2)
 save(fig, "ghs_enlargement_m3")
@@ -100,9 +100,9 @@ ax.text(len(ps) - .5, 0.19, "Smith success 0.1857 (Hyp. 2–3)", ha="right", fon
 ax.set_xticks(list(x))
 ax.set_xticklabels([f"p={p}\n{r['curves']} curves\n{r['classes']} classes" for p, r in zip(ps, reps)])
 ax.set_ylabel("fraction of genus-3 models y² = f(x), deg f = 8")
-ax.set_ylim(0, .8)
+ax.set_ylim(0, .95)
 ax.set_title("Smith kernels: per curve vs per isogeny class (exhaustive)")
-ax.legend(fontsize=7, loc="upper left")
+ax.legend(fontsize=7, loc="upper center", ncol=2)
 save(fig, "smith_coverage")
 
 # 4. Pipeline diagram with status per edge.
