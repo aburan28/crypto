@@ -65,6 +65,7 @@
 pub mod fiber;
 pub mod linalg;
 pub mod plugins;
+pub mod prime_tower;
 pub mod residual;
 pub mod rootfind;
 pub mod shared_rank;

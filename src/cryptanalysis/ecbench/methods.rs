@@ -41,10 +41,11 @@ use crate::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, CompactOrbitScanBase, DescentAlgebraicOracle, FrobeniusMitmOracle,
     GlvOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase, SubtractOracle,
 };
+use crate::cryptanalysis::ic_framework::prime_tower::PrimeKummerBase;
+use crate::cryptanalysis::ic_framework::rootfind::{RootfindMitmOracle, RootfindPairsOracle};
 use crate::cryptanalysis::ic_framework::shared_rank::{
     run_shared_rank_targets, SharedRankSpec, SharedTargetSpec,
 };
-use crate::cryptanalysis::ic_framework::rootfind::{RootfindMitmOracle, RootfindPairsOracle};
 use crate::cryptanalysis::ic_framework::solvers::solver_by_name;
 use crate::cryptanalysis::ic_framework::stages::{
     DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, Targets,
@@ -1727,9 +1728,11 @@ fn solve_ic_prime(
     let (spec, fb_name, or_name) = pipeline_spec(m, seed)?;
     let abscissa = PrimeAbscissaBase { instance: inst };
     let orbit = GlvOrbitBase { instance: inst };
+    let kummer = PrimeKummerBase { instance: inst };
     let base: &dyn FactorBaseBuilder<_> = match fb_name.as_str() {
         "prime-abscissa" => &abscissa,
         "glv-orbit" => &orbit,
+        "prime-kummer" => &kummer,
         other => {
             return Err(format!(
                 "factor base `{other}` does not run on a prime curve"
@@ -2226,9 +2229,11 @@ pub fn dump_factor_base(
         Instance::Prime(i) => {
             let abscissa = PrimeAbscissaBase { instance: i };
             let orbit = GlvOrbitBase { instance: i };
+            let kummer = PrimeKummerBase { instance: i };
             let base: &dyn FactorBaseBuilder<_> = match name.as_str() {
                 "prime-abscissa" => &abscissa,
                 "glv-orbit" => &orbit,
+                "prime-kummer" => &kummer,
                 other => {
                     return Err(format!(
                         "factor base `{other}` does not run on a prime curve"
