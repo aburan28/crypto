@@ -798,6 +798,7 @@ pub struct QuarticSolve {
     pub eigen_ms: f64,
     pub total_ms: f64,
     pub outcome: String,
+    pub replay: ReplayOutcome,
 }
 
 impl QuarticSolve {
@@ -818,6 +819,8 @@ struct Echelon {
     rows: Vec<Vec<u16>>,
     pivot_row: Vec<u32>,
     zero_rows: usize,
+    /// Input rows that reduced to zero (or were zero), by index.
+    zero_ids: Vec<u32>,
 }
 
 /// Forward elimination by leading column.  Every unused row has zeros
@@ -832,10 +835,14 @@ fn echelon_by_lead(mut rows: Vec<Vec<u16>>, p: u32, muls: &mut u64, debug: bool)
     let ncols = rows.first().map_or(0, |r| r.len());
     let mut buckets: Vec<Vec<u32>> = vec![Vec::new(); ncols];
     let mut zero_rows = 0usize;
+    let mut zero_ids: Vec<u32> = Vec::new();
     for (r, row) in rows.iter().enumerate() {
         match row.iter().position(|&x| x != 0) {
             Some(c) => buckets[c].push(r as u32),
-            None => zero_rows += 1,
+            None => {
+                zero_rows += 1;
+                zero_ids.push(r as u32);
+            }
         }
     }
     let mut pivot_row = vec![u32::MAX; ncols];
@@ -881,7 +888,10 @@ fn echelon_by_lead(mut rows: Vec<Vec<u16>>, p: u32, muls: &mut u64, debug: bool)
             rows[r as usize] = row;
             match lead {
                 Some(l) => buckets[l].push(r),
-                None => zero_rows += 1,
+                None => {
+                    zero_rows += 1;
+                    zero_ids.push(r);
+                }
             }
         }
         rows[pr] = piv;
@@ -895,10 +905,12 @@ fn echelon_by_lead(mut rows: Vec<Vec<u16>>, p: u32, muls: &mut u64, debug: bool)
             );
         }
     }
+    zero_ids.sort_unstable();
     Echelon {
         rows,
         pivot_row,
         zero_rows,
+        zero_ids,
     }
 }
 
@@ -1012,6 +1024,113 @@ pub fn solve_system4(
     st: &mut QuarticSolve,
     debug: bool,
 ) -> Option<Vec<[u64; 4]>> {
+    solve_system4_traced(
+        comps,
+        equation_degree,
+        macaulay_degree,
+        p,
+        rng,
+        st,
+        debug,
+        None,
+        None,
+    )
+}
+
+/// The shape of one Macaulay solve, recorded on a first system and replayed
+/// on later systems with the same monomial support (F4Remake's idea, for a
+/// Macaulay matrix): the leading monomials after triangularisation, the
+/// number of rows built, the input rows that reduced to zero, and the number
+/// of pivots.  A replay builds only the rows that did not reduce to zero.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct ShapeTrace {
+    pub leads: Vec<Option<[u8; 4]>>,
+    pub rows_built: usize,
+    pub zero_ids: Vec<u32>,
+    pub pivots: usize,
+    pub dim: usize,
+}
+
+/// How a traced solve went.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize)]
+pub enum ReplayOutcome {
+    /// No trace was given: a full solve, recorded.
+    #[default]
+    Recorded,
+    /// The trace matched: zero rows were not built.
+    Replayed,
+    /// The trace did not match this system (leads, rows, pivots or
+    /// dimension differ): the full solve ran and its cost is in `st`.
+    FellBack,
+}
+
+/// [`solve_system4`] with a shape trace.  With `replay = Some(t)`, the rows
+/// `t` records as reducing to zero are not built; if the replayed echelon
+/// does not reach `t`'s pivots and dimension, or the leads or row count
+/// differ, the full solve runs instead (charged in `st` as well: a fallback
+/// is never free).  With `record = Some(out)`, the full solve's shape is
+/// written to `out`.
+#[allow(clippy::too_many_arguments)]
+pub fn solve_system4_traced(
+    comps: &[HashMap<[u8; 4], u64>],
+    equation_degree: u8,
+    macaulay_degree: u8,
+    p: u64,
+    rng: &mut StdRng,
+    st: &mut QuarticSolve,
+    debug: bool,
+    replay: Option<&ShapeTrace>,
+    record: Option<&mut ShapeTrace>,
+) -> Option<Vec<[u64; 4]>> {
+    let mut outcome = ReplayOutcome::Recorded;
+    if let Some(t) = replay {
+        match solve_system4_inner(
+            comps,
+            equation_degree,
+            macaulay_degree,
+            p,
+            rng,
+            st,
+            debug,
+            Some(t),
+            None,
+        ) {
+            Ok(sols) => {
+                st.replay = ReplayOutcome::Replayed;
+                return sols;
+            }
+            Err(()) => outcome = ReplayOutcome::FellBack,
+        }
+    }
+    let r = solve_system4_inner(
+        comps,
+        equation_degree,
+        macaulay_degree,
+        p,
+        rng,
+        st,
+        debug,
+        None,
+        record,
+    )
+    .unwrap_or(None);
+    st.replay = outcome;
+    r
+}
+
+/// The solve.  `Err(())` only from a replay whose shape did not match.
+#[allow(clippy::too_many_arguments)]
+fn solve_system4_inner(
+    comps: &[HashMap<[u8; 4], u64>],
+    equation_degree: u8,
+    macaulay_degree: u8,
+    p: u64,
+    rng: &mut StdRng,
+    st: &mut QuarticSolve,
+    debug: bool,
+    replay: Option<&ShapeTrace>,
+    record: Option<&mut ShapeTrace>,
+) -> Result<Option<Vec<[u64; 4]>>, ()> {
     assert!(p < 1 << 15, "rows are u16 and products must fit u32");
     let t0 = Instant::now();
     st.equation_degree = equation_degree;
@@ -1023,8 +1142,15 @@ pub fn solve_system4(
     let mut tri = 0u64;
     let (comps, leads) = triangularise_leads4(comps, p, &mut tri);
     st.triangularise_muls += tri;
+    if let Some(t) = replay {
+        if t.leads != leads {
+            return Err(());
+        }
+    }
     let divides = |lm: &[u8; 4], m: &[u8; 4]| (0..4).all(|k| lm[k] <= m[k]);
     let mut rows: Vec<Vec<u16>> = Vec::new();
+    let mut built = 0usize;
+    let mut skip_at = 0usize;
     for (i, comp) in comps.iter().enumerate() {
         for sh in &shifts {
             if leads
@@ -1034,6 +1160,14 @@ pub fn solve_system4(
             {
                 continue;
             }
+            let index = built;
+            built += 1;
+            if let Some(t) = replay {
+                if skip_at < t.zero_ids.len() && t.zero_ids[skip_at] as usize == index {
+                    skip_at += 1;
+                    continue;
+                }
+            }
             let mut row = vec![0u16; cols.len()];
             for (&e, &c) in comp {
                 let m = [e[0] + sh[0], e[1] + sh[1], e[2] + sh[2], e[3] + sh[3]];
@@ -1041,6 +1175,11 @@ pub fn solve_system4(
                 row[ci] = am(row[ci] as u64, c, p) as u16;
             }
             rows.push(row);
+        }
+    }
+    if let Some(t) = replay {
+        if t.rows_built != built {
+            return Err(());
         }
     }
     st.rows = rows.len();
@@ -1067,6 +1206,20 @@ pub fn solve_system4(
     let standard: Vec<usize> = (0..cols.len()).filter(|&c| is_std[c]).collect();
     let dim = standard.len();
     st.dim = dim;
+    if let Some(t) = replay {
+        if t.pivots != st.pivots || t.dim != dim {
+            return Err(());
+        }
+    }
+    if let Some(out) = record {
+        *out = ShapeTrace {
+            leads: leads.clone(),
+            rows_built: built,
+            zero_ids: ech.zero_ids.clone(),
+            pivots: st.pivots,
+            dim,
+        };
+    }
     let mut std_index = vec![u32::MAX; cols.len()];
     for (i, &c) in standard.iter().enumerate() {
         std_index[c] = i as u32;
@@ -1089,11 +1242,11 @@ pub fn solve_system4(
         find([0, 0, 0, 1]),
     ) else {
         st.outcome = "low-degree monomials missing".into();
-        return None;
+        return Ok(None);
     };
     if [c0, c1, c2, c3, c4].iter().any(|&c| !is_std[c]) {
         st.outcome = "1 or a variable is not standard".into();
-        return None;
+        return Ok(None);
     }
     let idx = [c0, c1, c2, c3, c4].map(|c| std_index[c] as usize);
     let t2 = Instant::now();
@@ -1131,7 +1284,7 @@ pub fn solve_system4(
     st.reached_pivots = nfs.reached;
     let Some(m_e1) = m_e1 else {
         st.outcome = "border unreachable at this degree".into();
-        return None;
+        return Ok(None);
     };
     if debug {
         eprintln!(
@@ -1205,7 +1358,7 @@ pub fn solve_system4(
     st.outcome = "solved".into();
     st.total_ms = t0.elapsed().as_secs_f64() * 1e3;
     st.close();
-    Some(out)
+    Ok(Some(out))
 }
 
 /// The multisets `{x₁, …, x₄} ⊂ F_p` whose elementary symmetric functions
