@@ -48,3 +48,17 @@ receipt from a host of another class, the checker fails a claim on exactly
 claims' status, not hidden.  Prediction: every claim's speed comparison
 shows index calculus slower than the strong rho (the ladder's reading),
 and every claim is otherwise well formed.
+
+## Amendment 1 (before the rerun)
+
+The first run of this round (kept in `superseded-pre-merge/`) used a
+binary built before `origin/main` was merged into this branch.  Its 16
+claims built, but every one lacked the `operation_accounting` and
+`record_class` stage fields: that binary's `ecbench claim build` did not
+write them.  Main's commit `2bcca4148` ("Emit truthful claim classification
+and native counter accounting") makes the builder write both.  A claim is
+built only by the binary that measured its session, so the round is rerun
+whole, unchanged in specs, seeds and arms, with the merged binary, and the
+claims rebuilt from the new sessions.  The first run's readings
+(`online_speedup` 0.097–0.392 at `n = 23`, 0.007–0.020 at `n = 31`; audits
+`OK`) were seen before this amendment; no decision rule changes.
