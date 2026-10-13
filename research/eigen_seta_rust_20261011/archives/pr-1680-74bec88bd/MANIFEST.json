@@ -1,0 +1,114 @@
+{
+  "schema": "eigen-seta.integration-archive/v1",
+  "source_pr": 1680,
+  "source_commit": "74bec88bdc6fb43724493d452d72df43ca3ea735",
+  "preserved_current_parent": "2e506d3472c4bf28aad15e7ddb3fae5a40220fbd",
+  "verification_source_commit": "d504af28e0a262cd97cdca0a58c8168e90ce6f60",
+  "filter_rate_source_commit": "72051ac67",
+  "files": [
+    {
+      "original_path": "RESEARCH_ENDRING_PKE_STRATEGY.md",
+      "archive_path": "research/eigen_seta_rust_20261011/archives/pr-1680-74bec88bd/RESEARCH_ENDRING_PKE_STRATEGY.md",
+      "git_blob": "7dbd32ec47572c05a8705edce75c76caf9568784",
+      "sha256": "c1776c2a58e3abac0e2d3dd82c0e36e264dbd079b5d237849b685920b881c97c",
+      "bytes": 30692,
+      "kind": "protected_original"
+    },
+    {
+      "original_path": "research/eigen_seta_prototype_20261011/README.md",
+      "archive_path": "research/eigen_seta_rust_20261011/archives/pr-1680-74bec88bd/research/eigen_seta_prototype_20261011/README.md",
+      "git_blob": "cff548953e25f759c49f49952ade323af90fdf48",
+      "sha256": "1f04737bc43b49a4856ab8fcf6f0e87d8ef0b18779ec1b7f02a783632b97d886",
+      "bytes": 5580,
+      "kind": "protected_original"
+    },
+    {
+      "original_path": "research/eigen_seta_rust_20261011/README.md",
+      "archive_path": "research/eigen_seta_rust_20261011/archives/pr-1680-74bec88bd/research/eigen_seta_rust_20261011/README.md",
+      "git_blob": "3756b8667591cc1883fb0ebb669b1c925c4793dd",
+      "sha256": "bb050deac73762774417fae284a7257541ff189a335bd0f3ab46ff6aa8299231",
+      "bytes": 7325,
+      "kind": "protected_original"
+    },
+    {
+      "original_path": "research/eigen_seta_rust_20261011/report.typ",
+      "archive_path": "research/eigen_seta_rust_20261011/archives/pr-1680-74bec88bd/research/eigen_seta_rust_20261011/report.typ",
+      "git_blob": "14287dfcb233694a7f933f438ab58f85139ec188",
+      "sha256": "eca28843de9d2d33259b8e17a5e1ea03169a275394fba77963b0716a963c826b",
+      "bytes": 5185,
+      "kind": "protected_original"
+    },
+    {
+      "original_path": "research/eigen_seta_rust_20261011/report.pdf",
+      "archive_path": "research/eigen_seta_rust_20261011/archives/pr-1680-74bec88bd/research/eigen_seta_rust_20261011/report.pdf",
+      "git_blob": "0908014c6cd6823db65ef93931ec26282fea22d9",
+      "sha256": "c79e50e345ce6125ff5bdc4b2bab5f716075099661ccdbfe386912a59c93e378",
+      "bytes": 110080,
+      "kind": "protected_original"
+    },
+    {
+      "original_path": "research/eigen_seta_rust_20261011/figures/kem_times.svg",
+      "archive_path": "research/eigen_seta_rust_20261011/archives/pr-1680-74bec88bd/research/eigen_seta_rust_20261011/figures/kem_times.svg",
+      "git_blob": "57b65fac67491df5fe3a601273272be99e943632",
+      "sha256": "308cd7e11c0b2a5101caea86b4b7df1e1b6a1344c54e44593b80c542f4dc65bb",
+      "bytes": 69955,
+      "kind": "original_figure"
+    },
+    {
+      "original_path": "research/eigen_seta_rust_20261011/figures/field_ops.svg",
+      "archive_path": "research/eigen_seta_rust_20261011/archives/pr-1680-74bec88bd/research/eigen_seta_rust_20261011/figures/field_ops.svg",
+      "git_blob": "2bebc857a29225337c9a8c18f8b98616db2da7f0",
+      "sha256": "d65a62b07621a2bda7b765eba9e713692461f9c071763ca28e626673fd006047",
+      "bytes": 74798,
+      "kind": "original_figure"
+    },
+    {
+      "original_path": "research/eigen_seta_rust_20261011/figures/ct_probe_verify.svg",
+      "archive_path": "research/eigen_seta_rust_20261011/archives/pr-1680-74bec88bd/research/eigen_seta_rust_20261011/figures/ct_probe_verify.svg",
+      "git_blob": "4c8ea9a10a207c282ed9a866b94cab126333df1b",
+      "sha256": "c8334502348445d0bfed39e0b205f6df9a8d6532838e4c4e1c754ad42d78eb87",
+      "bytes": 79017,
+      "kind": "original_figure"
+    },
+    {
+      "original_path": "research/eigen_seta_rust_20261011/figures/f_filter.svg",
+      "archive_path": "research/eigen_seta_rust_20261011/archives/pr-1680-74bec88bd/research/eigen_seta_rust_20261011/figures/f_filter.svg",
+      "git_blob": "16f561eeabf59c74abc26e027b0f9cdc82025b5c",
+      "sha256": "02511d0a879384638fa8fa54af88b82ce9d8a266326ac2328ea57354e29453f8",
+      "bytes": 50980,
+      "kind": "original_figure"
+    },
+    {
+      "original_path": "eigen_seta/tests/kat.rs",
+      "archive_path": "research/eigen_seta_rust_20261011/archives/pr-1680-74bec88bd/eigen_seta/tests/kat.rs",
+      "git_blob": "072a8ac87bf7d2b86b83d95d2e2dcd5b649cd608",
+      "sha256": "73a7c2507c8df7caab146a654f47cf0cf0459524a34baede9d1e293c399d7a41",
+      "bytes": 2227,
+      "kind": "original_test_or_example"
+    },
+    {
+      "original_path": "eigen_seta/tests/robustness.rs",
+      "archive_path": "research/eigen_seta_rust_20261011/archives/pr-1680-74bec88bd/eigen_seta/tests/robustness.rs",
+      "git_blob": "d39ab01d22d2acfc1dcaf09957c3da52dd7d960b",
+      "sha256": "b7f26882f9eb9864513d2bf9daf7b08e95a0d4d1d5bbc02c188b7104dc23b737",
+      "bytes": 5980,
+      "kind": "original_test_or_example"
+    },
+    {
+      "original_path": "eigen_seta/tests/common/testrng.rs",
+      "archive_path": "research/eigen_seta_rust_20261011/archives/pr-1680-74bec88bd/eigen_seta/tests/common/testrng.rs",
+      "git_blob": "e9821489a995f88c614eb36fdc99c45645cf89cb",
+      "sha256": "6e8ba43092c260f417a0a0e7f299722af1eb3d8d7bd9ea86c64ac770ad4c1a60",
+      "bytes": 936,
+      "kind": "original_test_or_example"
+    },
+    {
+      "original_path": "eigen_seta/examples/f_filter_rate.rs",
+      "archive_path": "research/eigen_seta_rust_20261011/archives/pr-1680-74bec88bd/eigen_seta/examples/f_filter_rate.rs",
+      "git_blob": "c742411d8981ea8f1ced0a4910ec9050b1e1026e",
+      "sha256": "e28ca360eebfe706932a3e0a433715afdfd2675e6a399775e004a8d2823c327c",
+      "bytes": 3325,
+      "kind": "original_test_or_example"
+    }
+  ]
+}

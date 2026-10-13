@@ -33,9 +33,9 @@ kernel family & field & on a device & otherwise \\
 ECC2K-130 client (Sections~\ref{sec:gpu}, \ref{sec:campaign}) & $\FF_{2^{131}}$, ONB & measured, audited & emulated, static \\
 F4 Gröbner elimination (sibling) & $\FF_2$ Macaulay matrices & measured (RTX 5090, H100) & emulated \\
 Macaulay reduced echelon & $\FF_p$, $p=2083$ & one scheduling run (RTX PRO 4500) & emulated, static \\
-secp256k1 rho, baby-step giant-step & $\FF_p$, 256-bit & never & emulated, static \\
+secp256k1 / Curve25519 rho, baby-step giant-step & $\FF_p$, two 256-bit primes & never & emulated, static \\
 secp256k1 kangaroo & $\FF_p$, 256-bit & never & emulated, static \\
-P-256 / P-384 arithmetic & $\FF_p$, 256- and 384-bit & never (one failed attempt) & host-verified; protocol pre-registered \\
+P-256 / P-384 field and rho walk & $\FF_p$, 256- and 384-bit & measured (RTX PRO 6000, 2026-10-12) & host-verified; protocol pre-registered \\
 ECC2K-95 kernel & $\FF_{2^{97}}$, polynomial basis & never & emulated, static \\
 Semaev $S_4$ sweep; FES & $\FF_{2^n}$; $\FF_2$ & never & host-timed; emulated \\
 sparse matrix--vector & $\ZZ/m$, $m<2^{63}$ & never & CPU-rechecked \\
@@ -51,9 +51,14 @@ GPU or a complete CUDA toolkit, and the device runs were planned for
 rented hardware that the campaign's account hold
 (Section~\ref{sec:campaign-state}) or missing credentials then kept
 out of reach.\art{gpu/ecc/README.md}\art{gpu/btcpuzzle/README.md}\art{gpu/ecc2k/README.md}\art{research/nist_gpu_arithmetic_20260926/ATTEMPT.md}\art{cryptanalysis:docs/GPU.md, ``How this is tested''}
-The numbers below are therefore of three kinds, and each is labelled:
-a static count, an emulated operation count or walk constant, or (in
-Section~\ref{sec:othergpu-f4}) a device measurement.
+The NIST row is the one that has since crossed the line: its first
+device run, on 2026-10-12, is reported in
+Section~\ref{sec:othergpu-nist}, together with the two bugs that no
+host emulation could have seen. The numbers below are therefore of
+three kinds, and each is labelled: a static count, an emulated
+operation count or walk constant, or (in
+Sections~\ref{sec:othergpu-nist} and~\ref{sec:othergpu-f4}) a device
+measurement.
 
 \subsection{256-bit prime-field arithmetic for secp256k1}
 \label{sec:othergpu-fp256}
@@ -69,6 +74,12 @@ it on the host. Points are Jacobian with the standard $a=0$ doubling
 ($2M+5S$) and mixed addition ($7M+4S$) formulas. The library is a
 throughput library, not a signing library, and is not
 constant-time.\art{gpu/ecc/fp256.cuh}\art{gpu/ecc/point.cuh}
+A second special-reduction path, added in October 2026, serves
+Curve25519 (Ed25519's prime-order group in short-Weierstrass form,
+$p=2^{255}-19$, folded with $2^{256}\equiv38$) through the same
+walk, baby-step giant-step and test suites; it is host-verified
+against the RFC~7748 constants and has not run on a
+device.\art{gpu/ecc/README.md}
 
 \begin{table}[t]
 \centering
@@ -237,7 +248,7 @@ The tool ships no real puzzle keys (no trustworthy offline source),
 does no address scanning, and has not solved any puzzle; the
 synthetic 20-, 28- and 32-bit registry entries are regression fixtures.
 
-\subsection{P-256 and P-384}
+\subsection{P-256 and P-384: the one that has since run}
 \label{sec:othergpu-nist}
 
 A separate library targets the NIST primes on the RTX~PRO~6000 with
@@ -251,10 +262,117 @@ checked against independent affine arithmetic, and its benchmark
 protocol was pre-registered: workloads, batch size, seed, sweep,
 three repeats and a $5\%$ threshold below which the simpler
 configuration wins by rule.\art{gpu/nist/README.md}\art{research/nist_gpu_arithmetic_20260926/PROTOCOL.md}
-The one device attempt is an infrastructure non-result: the cloud
-credentials were not exposed to the CI runner and the GPU steps were
-skipped. The attempt record says it ``must not be cited as
-performance evidence'', and it is not.\art{research/nist_gpu_arithmetic_20260926/ATTEMPT.md}
+The first device attempt (2026-09-26) was an infrastructure
+non-result: the cloud credentials were not exposed to the CI runner
+and the GPU steps were skipped. The attempt record says it ``must not
+be cited as performance evidence'', and it is
+not.\art{research/nist_gpu_arithmetic_20260926/ATTEMPT.md}
+
+\paragraph{The walk.} On top of the field layer sits an $r$-adding
+Pollard rho that matches the CPU solver described below: affine
+points with the one inversion per step batched across a thread's $W$
+walks, the negation-map fold (class size 2, since $j\ne0$ on these
+curves leaves $\pm1$ as the whole automorphism group), distinguished
+points at probability $2^{-24}$ per step, fruitless 2-cycle detection
+with escape by doubling, and a host driver that carries each walk's
+$(a,b)$ with $P=aG+bQ$ and solves the logarithm at the first useful
+collision. One body serves both primes. The device stepper with
+compile-time $W$ is cross-checked bit for bit against the generic
+stepper for $W\in\{2,4,8,16\}$, and the host test solves a planted
+logarithm end to end on a $2^{20}$-order toy curve, folded in
+$\sqrt2$ fewer steps than
+unfolded.\art{gpu/nist/nist_rho.cuh}\art{gpu/nist/test_rho.cpp}
+
+\paragraph{First device run (2026-10-12).} The kernel ran on one
+RTX~PRO~6000 Blackwell (188 SMs, CUDA 13.3, \texttt{sm\_120}) through
+Modal, after the CPU suites had passed in the same image. The first
+launch measured nothing, for a reason the host emulation could not
+have caught: the batched inversion was declared host-only, so
+\texttt{nvcc} warned, dropped the call from device code, and compiled
+the walk kernel to an empty body (four registers, no stack, zero
+distinguished points; the disassembly was \texttt{LDC R1; EXIT}). A
+second bug, an unguarded atomic on a null cycle counter, faulted on
+the first fruitless 2-cycle. Both are fixed and covered by tests.
+With them fixed, every cell's distinguished-point count matches the
+$2^{-24}$ rate within binomial noise ($11{,}969$ against $12{,}085$
+expected on the first P-256 run; $6{,}094$ and $5{,}966$ against
+$6{,}016$ in the best cells), which is the correctness evidence on
+hardware.\art{gpu/nist/RESULTS.md}
+
+\begin{table}[t]
+\centering
+\small
+\caption{NIST kernels on one RTX~PRO~6000 Blackwell (CUDA 13.3). Field
+  rows at 128 threads/block, one dependent multiplication chain;
+  ``PTX'' is the \texttt{mad.lo.cc}/\texttt{madc.hi.cc} carry-chain
+  build, ``control'' the portable product. Walk rows: the first
+  working measurement (128 threads, $W=8$) and the best cell of a
+  threads${}\times W$ sweep (256 threads, $W=16$, 8192 iterations per
+  cell). Class: engineering; the step count did not move.}
+\label{tab:nist-device}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+ & \multicolumn{2}{c}{P-256} & \multicolumn{2}{c}{P-384} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+field, per second & Montg. & Solinas & Montg. & Solinas \\
+\midrule
+multiplication, PTX (G/s) & 73.4 & 70.4 & 32.2 & 36.7 \\
+multiplication, control (G/s) & 54.9 & 61.2 & 20.3 & 30.7 \\
+point doubling, PTX (M/s) & 6084 & 6550 & 1712 & 1647 \\
+\midrule
+rho walk, G steps/s & \multicolumn{2}{c}{P-256} & \multicolumn{2}{c}{P-384} \\
+\midrule
+first working cell, control & \multicolumn{2}{c}{1.075} & \multicolumn{2}{c}{0.210} \\
+first working cell, PTX & \multicolumn{2}{c}{1.282} & \multicolumn{2}{c}{0.289} \\
+best sweep cell, PTX & \multicolumn{2}{c}{$\mathbf{1.340}$} & \multicolumn{2}{c}{$\mathbf{0.438}$} \\
+best to first & \multicolumn{2}{c}{$1.25\times$} & \multicolumn{2}{c}{$2.09\times$} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:nist-device} is the measurement. Between the first
+working control cell and the tuned PTX cell the walk went from
+$1.075$ to $1.340$~G steps/s on P-256 and from $0.210$ to $0.438$ on
+P-384; in the classes of Section~\ref{sec:intro} both are
+engineering, because the step count did not move and $S$ is flat.
+Two readings of the sweep: the compile-time $W$ unrolls the phase
+arrays into registers (P-256 uses 92--116 registers at $W\le8$ and
+180 at $W=16$; P-384 198--204, with stack growing to $2.5$~kB), and
+the gain from $W$ is flattening at 16 on P-256 but not yet on P-384,
+so $W=32$ and a register-cap sweep are the next rungs. The field rows
+are a first run at one block size, not the pre-registered
+three-repeat protocol, and the Montgomery-versus-Solinas question is
+left where the protocol leaves it: the two P-256 multiplications are
+within $5\%$, a tie by rule, and on P-384 the Solinas multiplication
+is $14\%$ faster while the Montgomery doubling is $4\%$ faster, with
+the repeats not yet filed.\art{gpu/nist/RESULTS.md}
+At $1.34$~G steps/s a P-256 collision would take about
+$2.3\cdot10^{30}$ seconds, so these are attack-layer throughput
+measurements on retired-practice targets and say nothing about the
+curves' security; the results file says the same.
+
+\paragraph{The CPU solver across all fifteen curves.} The GPU walk
+matches a host solver that takes any of the fifteen FIPS~186-4
+curves (P-192 to P-521, K-163 to K-571, B-163 to B-571), audits it
+for the structural precondition of each known attack (trace one,
+composite order, embedding degree at most 100, composite extension
+degree) and runs the branch the curve calls for:
+Smart--Semaev--Satoh--Araki, Pohlig--Hellman, interval baby-step
+giant-step and kangaroo, or whole-group rho. The audit certifies the
+absence of every precondition on all fifteen. The rho folds the
+negation map everywhere and the Frobenius on the Koblitz curves, the
+class of size $2m$ carried exactly through the eigenvalue $\lambda$
+of $\tau$ on the subgroup, which is the binary-curve cousin of the
+$\sigma$-class walk of Section~\ref{sec:walk}. Measured on one host:
+interval solves of width $2^{20}$ to $2^{32}$ on P-256, K-283 and
+B-409 in $43$~ms to $8.7$~s with the planted scalar recovered every
+time; Frobenius folding on toy Koblitz curves cutting additions by
+the predicted $\sqrt{2m}$ ($6.8\times$ at $m=23$, $9\times$ at
+$m=41$) at a cost of $m$ squarings per step; and the Smart attack
+breaking CM-constructed anomalous curves of 129, 257 and 522 bits in
+3, 10 and 33~ms. No full-width scalar is recovered on any NIST curve
+and none of the fifteen has a structural weakness; the documentation
+says both.\art{docs/ECDLP_NIST.md}
 
 \subsection{Binary fields beyond ECC2K-130}
 \label{sec:othergpu-binary}
@@ -408,7 +526,11 @@ representations. Second, every one of these libraries was taken to a
 verified, bit-identical, statically-accounted state without a device,
 and that state is worth exactly what Section~\ref{sec:floor} says a
 pre-tuning floor is worth: it bounds what a device could do, and it
-does not report what one did. The ECC2K-130 client is the only one of
-them that has been carried through to the measured side of that
-line, which is why it is the subject of this paper and the others
-are a section.
+does not report what one did. The ECC2K-130 client was carried
+through to the measured side of that line first, which is why it is
+the subject of this paper and the others are a section; the NIST
+walk followed on 2026-10-12, and its first run is the third lesson:
+a kernel that compiles to an empty body passes every host test and
+every static count, and only a device run, with its
+distinguished-point count checked against the expected rate, finds
+it out.

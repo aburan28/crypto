@@ -1,0 +1,15 @@
+$ python3 -B .github/scripts/test-pr-budgets.py -v
+Ran 14 tests in 0.009s
+OK
+
+$ python3 -B .github/scripts/check-pr-budgets.py
+Checked routine PR/merge-group budgets in 352 workflows: 0 violations
+
+$ python3 -B scripts/test_workflows_parse.py -v
+Ran 4 tests in 2.575s
+OK
+
+$ bash .github/scripts/run-actionlint.sh .github/workflows/{codeql,ecbench,release,rust-all-targets,rust-lint,workflows-parse}.yml
+exit status: 0
+
+Root follow-up: CI-scope fixtures passed 8/8 with network-enabled execution; actionlint passed over all 352 workflows. The earlier sandbox-only git-init EPERM is superseded.

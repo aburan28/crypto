@@ -1,0 +1,24 @@
+{
+  "created_at": "2026-10-11T00:00:00+00:00",
+  "funder": "aburan28/crypto:research/pdp_split_dreg_20261011",
+  "goal": "pdp_split_dreg_20261011: re-audit the matched-rho ecbench session ECBS1he23809badf5b",
+  "reward": 0,
+  "statement": "Replay objective, unfunded. Claim: the ecbench session research/pdp_split_dreg_20261011/sessions/rho-01 (spec ECS1h10c3ed7d3628: rho.signed_frobenius_strong and rho.signed_frobenius on Koblitz K_1/GF(2^11), K_0/GF(2^13), K_1/GF(2^17), K_1/GF(2^19), eight public one-target workloads, five rounds) audits OK with every deterministic run re-executed to identical counts: `ecbench verify --replay-all` reports ok, 384 records, 384 verified, and the listed file hashes. Reproduce from a checkout of github.com/aburan28/crypto on branch claude/pdp-split-dreg after `cargo build --release --bin ecbench`.",
+  "verifier": {
+    "kind": "replay",
+    "command": ["sh", "-c", "f=$(mktemp -u) && target/release/ecbench verify --dir research/pdp_split_dreg_20261011/sessions/rho-01 --replay-all --exit-code --out \"$f\" >/dev/null 2>&1 && cat \"$f\"; rm -f \"$f\""],
+    "cwd": ".",
+    "reproducible_fields": ["session_id", "session_status", "ok", "records", "verified_records", "files"],
+    "timeout_seconds": 1800
+  },
+  "artifact_schema": {
+    "type": "object",
+    "required": ["results"],
+    "properties": {
+      "results": {
+        "type": "object",
+        "description": "The audit receipt JSON the pinned command prints; every reproducible field must be present and equal."
+      }
+    }
+  }
+}

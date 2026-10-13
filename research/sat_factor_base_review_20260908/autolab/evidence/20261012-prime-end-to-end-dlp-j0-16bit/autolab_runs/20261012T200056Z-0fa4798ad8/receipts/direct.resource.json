@@ -1,0 +1,20 @@
+{
+  "children_cpu_system_ms": 21.66699999999999,
+  "children_cpu_user_ms": 946.6470000000003,
+  "children_peak_rss_bytes": 55508992,
+  "cold_start_wall_ms": 1299.571583,
+  "command": [
+    "/Volumes/SSD990/ic-auto7/target/release/examples/j0_known_answer_bits",
+    "16"
+  ],
+  "exit_code": 0,
+  "seed": 12805207906770652132,
+  "stdout_stable": false,
+  "timed_repeats": 3,
+  "whole_process_wall_ms": 1807.250791,
+  "whole_process_wall_samples_ms": [
+    1345.924375,
+    1807.250791,
+    2659.6357080000007
+  ]
+}

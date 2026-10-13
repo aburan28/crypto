@@ -1,0 +1,3796 @@
+{
+  "e4_gain": [
+    {
+      "base_size": 32,
+      "cols_ratio": 2.032258064516129,
+      "degree_ratio": 1.8888888888888888,
+      "ops_ratio": 4.263422917032613,
+      "subgroup_order": 2
+    },
+    {
+      "base_size": 32,
+      "cols_ratio": 4.2,
+      "degree_ratio": 3.4,
+      "ops_ratio": 19.642929401305906,
+      "subgroup_order": 4
+    },
+    {
+      "base_size": 64,
+      "cols_ratio": 2.015873015873016,
+      "degree_ratio": 1.9411764705882353,
+      "ops_ratio": 4.123532239236421,
+      "subgroup_order": 2
+    },
+    {
+      "base_size": 64,
+      "cols_ratio": 4.096774193548387,
+      "degree_ratio": 3.6666666666666665,
+      "ops_ratio": 17.58043203149015,
+      "subgroup_order": 4
+    }
+  ],
+  "e4_gap": [
+    {
+      "base_size": 32,
+      "crater_C4": null,
+      "crater_E2": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.573829,
+          "mean": 0.505689,
+          "min": 0.437549,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.601669,
+          "mean": 0.518247,
+          "min": 0.434825,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.805188,
+          "mean": 0.624099,
+          "min": 0.44300999999999996,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-11 2^8 22b h=12"
+    },
+    {
+      "base_size": 64,
+      "crater_C4": null,
+      "crater_E2": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.885921,
+          "mean": 1.7099205,
+          "min": 1.53392,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.4965689999999998,
+          "mean": 1.496414,
+          "min": 1.496259,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.8196709999999998,
+          "mean": 1.6618475,
+          "min": 1.504024,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-11 2^8 22b h=12"
+    },
+    {
+      "base_size": 32,
+      "crater_C4": null,
+      "crater_E2": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.734062,
+          "mean": 0.6109225,
+          "min": 0.48778299999999997,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.599332,
+          "mean": 0.559777,
+          "min": 0.520222,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.1937460000000002,
+          "mean": 0.9830245000000001,
+          "min": 0.772303,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-11 2^8 26b h=36"
+    },
+    {
+      "base_size": 64,
+      "crater_C4": null,
+      "crater_E2": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 3.16039,
+          "mean": 3.074675,
+          "min": 2.98896,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.794999,
+          "mean": 1.7032615,
+          "min": 1.611524,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 2.792975,
+          "mean": 2.5184045,
+          "min": 2.243834,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-11 2^8 26b h=36"
+    },
+    {
+      "base_size": 32,
+      "crater_C4": null,
+      "crater_E2": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7408.0,
+          "mean": 7408.0,
+          "min": 7408.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.610307,
+          "mean": 0.5118755,
+          "min": 0.41344400000000003,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.931999,
+          "mean": 0.75607,
+          "min": 0.5801409999999999,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.531589,
+          "mean": 0.5087189999999999,
+          "min": 0.485849,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-3 2^8 22b h=12"
+    },
+    {
+      "base_size": 64,
+      "crater_C4": null,
+      "crater_E2": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34152.0,
+          "mean": 34152.0,
+          "min": 34152.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.534601,
+          "mean": 1.5191850000000002,
+          "min": 1.5037690000000001,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.549649,
+          "mean": 1.5112524999999999,
+          "min": 1.472856,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 2.717065,
+          "mean": 2.5964089999999995,
+          "min": 2.4757529999999996,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-3 2^8 22b h=12"
+    },
+    {
+      "base_size": 32,
+      "crater_C4": null,
+      "crater_E2": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.617035,
+          "mean": 0.562508,
+          "min": 0.507981,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.700131,
+          "mean": 0.5955914999999999,
+          "min": 0.49105199999999993,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.479115,
+          "mean": 0.4508635,
+          "min": 0.422612,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-3 2^8 26b h=4"
+    },
+    {
+      "base_size": 64,
+      "crater_C4": null,
+      "crater_E2": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.811963,
+          "mean": 1.6561270000000001,
+          "min": 1.500291,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.75195,
+          "mean": 1.7175875,
+          "min": 1.683225,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.60151,
+          "mean": 1.5704224999999998,
+          "min": 1.539335,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-3 2^8 26b h=4"
+    },
+    {
+      "base_size": 32,
+      "crater_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.5756910000000001,
+          "mean": 0.5214300000000001,
+          "min": 0.467169,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "crater_E2": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.625857,
+          "mean": 0.578965,
+          "min": 0.532073,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.6383540000000001,
+          "mean": 0.5443605,
+          "min": 0.450367,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.472022,
+          "mean": 0.4539845,
+          "min": 0.43594700000000003,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-7 13^2 22b h=2704"
+    },
+    {
+      "base_size": 64,
+      "crater_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.527077,
+          "mean": 1.5208665,
+          "min": 1.514656,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "crater_E2": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 2.77298,
+          "mean": 2.5943435,
+          "min": 2.415707,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.606964,
+          "mean": 1.5293885,
+          "min": 1.451813,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.806038,
+          "mean": 1.7940625,
+          "min": 1.782087,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-7 13^2 22b h=2704"
+    },
+    {
+      "base_size": 32,
+      "crater_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.576763,
+          "mean": 0.5462015,
+          "min": 0.5156400000000001,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "crater_E2": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.736169,
+          "mean": 0.721887,
+          "min": 0.707605,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.94745,
+          "mean": 0.8514585,
+          "min": 0.755467,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.9800779999999999,
+          "mean": 0.800608,
+          "min": 0.6211380000000001,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-7 13^2 26b h=5408"
+    },
+    {
+      "base_size": 64,
+      "crater_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 2.1749709999999998,
+          "mean": 2.0763945,
+          "min": 1.977818,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "crater_E2": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.651376,
+          "mean": 1.6467425,
+          "min": 1.642109,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.7431079999999999,
+          "mean": 1.6593524999999998,
+          "min": 1.575597,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 2.4174729999999998,
+          "mean": 2.3638835,
+          "min": 2.310294,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-7 13^2 26b h=5408"
+    },
+    {
+      "base_size": 32,
+      "crater_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.924088,
+          "mean": 0.8331824999999999,
+          "min": 0.742277,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "crater_E2": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.755475,
+          "mean": 0.6683415,
+          "min": 0.5812080000000001,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.715492,
+          "mean": 0.6098595,
+          "min": 0.504227,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.7115630000000001,
+          "mean": 0.575952,
+          "min": 0.44034100000000004,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-7 3^6 22b h=72"
+    },
+    {
+      "base_size": 64,
+      "crater_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 2.48605,
+          "mean": 2.4596995,
+          "min": 2.433349,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "crater_E2": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 2.423882,
+          "mean": 2.2905144999999996,
+          "min": 2.1571469999999997,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.631777,
+          "mean": 1.5506734999999998,
+          "min": 1.4695699999999998,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.68875,
+          "mean": 1.644223,
+          "min": 1.599696,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-7 3^6 22b h=72"
+    },
+    {
+      "base_size": 32,
+      "crater_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.7838269999999999,
+          "mean": 0.783474,
+          "min": 0.7831210000000001,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "crater_E2": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.944348,
+          "mean": 0.7419235,
+          "min": 0.5394990000000001,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.621149,
+          "mean": 0.60261,
+          "min": 0.584071,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.369232,
+          "mean": 1.0361555,
+          "min": 0.703079,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-7 3^6 26b h=72"
+    },
+    {
+      "base_size": 64,
+      "crater_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 2.8070209999999998,
+          "mean": 2.7095,
+          "min": 2.611979,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "crater_E2": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 2.546786,
+          "mean": 2.3813775,
+          "min": 2.215969,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.541785,
+          "mean": 1.51925,
+          "min": 1.496715,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 2.837352,
+          "mean": 2.768404,
+          "min": 2.6994559999999996,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-7 3^6 26b h=72"
+    },
+    {
+      "base_size": 32,
+      "crater_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.5998969999999999,
+          "mean": 0.5058364999999999,
+          "min": 0.411776,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "crater_E2": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.5714929999999999,
+          "mean": 0.5428915,
+          "min": 0.51429,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.9483020000000001,
+          "mean": 0.7968745,
+          "min": 0.645447,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.837649,
+          "mean": 0.7229410000000001,
+          "min": 0.608233,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-7 5^4 22b h=200"
+    },
+    {
+      "base_size": 64,
+      "crater_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.624242,
+          "mean": 1.5518939999999999,
+          "min": 1.479546,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "crater_E2": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.587367,
+          "mean": 1.547315,
+          "min": 1.507263,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 2.341691,
+          "mean": 2.313595,
+          "min": 2.2854989999999997,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 2.630996,
+          "mean": 2.1286285,
+          "min": 1.626261,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-7 5^4 22b h=200"
+    },
+    {
+      "base_size": 32,
+      "crater_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.669864,
+          "mean": 0.5914355,
+          "min": 0.513007,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "crater_E2": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.5107039999999999,
+          "mean": 0.46430699999999997,
+          "min": 0.41791,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.716414,
+          "mean": 0.6002915,
+          "min": 0.484169,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.815836,
+          "mean": 0.6288785,
+          "min": 0.441921,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-7 5^4 26b h=200"
+    },
+    {
+      "base_size": 64,
+      "crater_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.684205,
+          "mean": 1.6262874999999999,
+          "min": 1.5683699999999998,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "crater_E2": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.5422630000000002,
+          "mean": 1.5256465000000001,
+          "min": 1.5090299999999999,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.6084,
+          "mean": 1.589757,
+          "min": 1.571114,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.8740700000000001,
+          "mean": 1.7192215000000002,
+          "min": 1.564373,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-7 5^4 26b h=200"
+    },
+    {
+      "base_size": 32,
+      "crater_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.606216,
+          "mean": 0.5474939999999999,
+          "min": 0.48877199999999993,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "crater_E2": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.535855,
+          "mean": 0.490584,
+          "min": 0.445313,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.497997,
+          "mean": 0.46910300000000005,
+          "min": 0.440209,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.686322,
+          "mean": 0.603859,
+          "min": 0.5213960000000001,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-7 7^3 22b h=784"
+    },
+    {
+      "base_size": 64,
+      "crater_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.477035,
+          "mean": 1.4625635,
+          "min": 1.448092,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "crater_E2": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.6747349999999999,
+          "mean": 1.58738,
+          "min": 1.5000250000000002,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.769484,
+          "mean": 1.662863,
+          "min": 1.556242,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.7632290000000002,
+          "mean": 1.7431710000000002,
+          "min": 1.7231130000000001,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-7 7^3 22b h=784"
+    },
+    {
+      "base_size": 32,
+      "crater_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.794153,
+          "mean": 0.6456394999999999,
+          "min": 0.49712599999999996,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "crater_E2": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.8507849999999999,
+          "mean": 0.849791,
+          "min": 0.848797,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.0136120000000002,
+          "mean": 0.871631,
+          "min": 0.72965,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7414.0,
+          "min": 7414.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 0.493868,
+          "mean": 0.46365599999999996,
+          "min": 0.433444,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-7 7^3 26b h=1568"
+    },
+    {
+      "base_size": 64,
+      "crater_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.672379,
+          "mean": 1.6615915,
+          "min": 1.6508040000000002,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "crater_E2": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 2.3358250000000003,
+          "mean": 1.95354,
+          "min": 1.5712549999999998,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 2.603705,
+          "mean": 2.585107,
+          "min": 2.566509,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "floor_iso_C4": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 2
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 2
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 2
+        },
+        "ms": {
+          "max": 1.601052,
+          "mean": 1.554533,
+          "min": 1.508014,
+          "n": 2
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 2
+        },
+        "systems": 2
+      },
+      "pair": "D=-7 7^3 26b h=1568"
+    }
+  ],
+  "e4_shape": [
+    {
+      "base_size": 32,
+      "shape": {
+        "base_degree": {
+          "max": 32.0,
+          "mean": 32.0,
+          "min": 32.0,
+          "n": 72
+        },
+        "field_ops": {
+          "max": 483561.0,
+          "mean": 483560.875,
+          "min": 483552.0,
+          "n": 72
+        },
+        "max_cols_to_solution": {
+          "max": 189.0,
+          "mean": 189.0,
+          "min": 189.0,
+          "n": 72
+        },
+        "ms": {
+          "max": 90.96699699999999,
+          "mean": 69.1284595,
+          "min": 52.737424999999995,
+          "n": 72
+        },
+        "solving_degree_max": {
+          "max": 34.0,
+          "mean": 34.0,
+          "min": 34.0,
+          "n": 72
+        },
+        "systems": 72
+      },
+      "subgroup_order": 1,
+      "target_kind": "planted"
+    },
+    {
+      "base_size": 32,
+      "shape": {
+        "base_degree": {
+          "max": 32.0,
+          "mean": 32.0,
+          "min": 32.0,
+          "n": 144
+        },
+        "field_ops": {
+          "max": 145630.0,
+          "mean": 145630.0,
+          "min": 145630.0,
+          "n": 144
+        },
+        "max_cols_to_solution": {
+          "max": 189.0,
+          "mean": 189.0,
+          "min": 189.0,
+          "n": 144
+        },
+        "ms": {
+          "max": 16.078213,
+          "mean": 6.954345055555556,
+          "min": 5.5108179999999996,
+          "n": 144
+        },
+        "solving_degree_max": {
+          "max": 34.0,
+          "mean": 34.0,
+          "min": 34.0,
+          "n": 144
+        },
+        "systems": 144
+      },
+      "subgroup_order": 1,
+      "target_kind": "random"
+    },
+    {
+      "base_size": 32,
+      "shape": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 72
+        },
+        "field_ops": {
+          "max": 81178.0,
+          "mean": 81178.0,
+          "min": 81178.0,
+          "n": 72
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 72
+        },
+        "ms": {
+          "max": 18.075287999999997,
+          "mean": 11.542437333333332,
+          "min": 7.656027,
+          "n": 72
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 72
+        },
+        "systems": 72
+      },
+      "subgroup_order": 2,
+      "target_kind": "planted"
+    },
+    {
+      "base_size": 32,
+      "shape": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 144
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34158.0,
+          "min": 34158.0,
+          "n": 144
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 144
+        },
+        "ms": {
+          "max": 3.198861,
+          "mean": 1.9612229027777777,
+          "min": 1.4579499999999999,
+          "n": 144
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 144
+        },
+        "systems": 144
+      },
+      "subgroup_order": 2,
+      "target_kind": "random"
+    },
+    {
+      "base_size": 32,
+      "shape": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 44
+        },
+        "field_ops": {
+          "max": 13929.0,
+          "mean": 13928.40909090909,
+          "min": 13903.0,
+          "n": 44
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 44
+        },
+        "ms": {
+          "max": 2.33313,
+          "mean": 1.4899550000000004,
+          "min": 1.183451,
+          "n": 44
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 44
+        },
+        "systems": 44
+      },
+      "subgroup_order": 4,
+      "target_kind": "planted"
+    },
+    {
+      "base_size": 32,
+      "shape": {
+        "base_degree": {
+          "max": 8.0,
+          "mean": 8.0,
+          "min": 8.0,
+          "n": 88
+        },
+        "field_ops": {
+          "max": 7414.0,
+          "mean": 7413.863636363636,
+          "min": 7408.0,
+          "n": 88
+        },
+        "max_cols_to_solution": {
+          "max": 45.0,
+          "mean": 45.0,
+          "min": 45.0,
+          "n": 88
+        },
+        "ms": {
+          "max": 1.369232,
+          "mean": 0.6330225795454546,
+          "min": 0.411776,
+          "n": 88
+        },
+        "solving_degree_max": {
+          "max": 10.0,
+          "mean": 10.0,
+          "min": 10.0,
+          "n": 88
+        },
+        "systems": 88
+      },
+      "subgroup_order": 4,
+      "target_kind": "random"
+    },
+    {
+      "base_size": 64,
+      "shape": {
+        "base_degree": {
+          "max": 64.0,
+          "mean": 64.0,
+          "min": 64.0,
+          "n": 72
+        },
+        "field_ops": {
+          "max": 3123354.0,
+          "mean": 3123353.9166666665,
+          "min": 3123348.0,
+          "n": 72
+        },
+        "max_cols_to_solution": {
+          "max": 381.0,
+          "mean": 381.0,
+          "min": 381.0,
+          "n": 72
+        },
+        "ms": {
+          "max": 664.935293,
+          "mean": 521.2490151527777,
+          "min": 427.64529,
+          "n": 72
+        },
+        "solving_degree_max": {
+          "max": 66.0,
+          "mean": 66.0,
+          "min": 66.0,
+          "n": 72
+        },
+        "systems": 72
+      },
+      "subgroup_order": 1,
+      "target_kind": "planted"
+    },
+    {
+      "base_size": 64,
+      "shape": {
+        "base_degree": {
+          "max": 64.0,
+          "mean": 64.0,
+          "min": 64.0,
+          "n": 144
+        },
+        "field_ops": {
+          "max": 600510.0,
+          "mean": 600510.0,
+          "min": 600510.0,
+          "n": 144
+        },
+        "max_cols_to_solution": {
+          "max": 381.0,
+          "mean": 381.0,
+          "min": 381.0,
+          "n": 144
+        },
+        "ms": {
+          "max": 49.230213,
+          "mean": 30.74304393055556,
+          "min": 23.344655999999997,
+          "n": 144
+        },
+        "solving_degree_max": {
+          "max": 66.0,
+          "mean": 66.0,
+          "min": 66.0,
+          "n": 144
+        },
+        "systems": 144
+      },
+      "subgroup_order": 1,
+      "target_kind": "random"
+    },
+    {
+      "base_size": 64,
+      "shape": {
+        "base_degree": {
+          "max": 32.0,
+          "mean": 32.0,
+          "min": 32.0,
+          "n": 72
+        },
+        "field_ops": {
+          "max": 483561.0,
+          "mean": 483561.0,
+          "min": 483561.0,
+          "n": 72
+        },
+        "max_cols_to_solution": {
+          "max": 189.0,
+          "mean": 189.0,
+          "min": 189.0,
+          "n": 72
+        },
+        "ms": {
+          "max": 113.70249,
+          "mean": 70.10614665277778,
+          "min": 52.363094,
+          "n": 72
+        },
+        "solving_degree_max": {
+          "max": 34.0,
+          "mean": 34.0,
+          "min": 34.0,
+          "n": 72
+        },
+        "systems": 72
+      },
+      "subgroup_order": 2,
+      "target_kind": "planted"
+    },
+    {
+      "base_size": 64,
+      "shape": {
+        "base_degree": {
+          "max": 32.0,
+          "mean": 32.0,
+          "min": 32.0,
+          "n": 144
+        },
+        "field_ops": {
+          "max": 145630.0,
+          "mean": 145630.0,
+          "min": 145630.0,
+          "n": 144
+        },
+        "max_cols_to_solution": {
+          "max": 189.0,
+          "mean": 189.0,
+          "min": 189.0,
+          "n": 144
+        },
+        "ms": {
+          "max": 11.666494,
+          "mean": 7.054121215277775,
+          "min": 5.519932,
+          "n": 144
+        },
+        "solving_degree_max": {
+          "max": 34.0,
+          "mean": 34.0,
+          "min": 34.0,
+          "n": 144
+        },
+        "systems": 144
+      },
+      "subgroup_order": 2,
+      "target_kind": "random"
+    },
+    {
+      "base_size": 64,
+      "shape": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 44
+        },
+        "field_ops": {
+          "max": 81178.0,
+          "mean": 81176.86363636363,
+          "min": 81128.0,
+          "n": 44
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 44
+        },
+        "ms": {
+          "max": 16.023128,
+          "mean": 10.78773084090909,
+          "min": 7.9117809999999995,
+          "n": 44
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 44
+        },
+        "systems": 44
+      },
+      "subgroup_order": 4,
+      "target_kind": "planted"
+    },
+    {
+      "base_size": 64,
+      "shape": {
+        "base_degree": {
+          "max": 16.0,
+          "mean": 16.0,
+          "min": 16.0,
+          "n": 88
+        },
+        "field_ops": {
+          "max": 34158.0,
+          "mean": 34157.86363636364,
+          "min": 34152.0,
+          "n": 88
+        },
+        "max_cols_to_solution": {
+          "max": 93.0,
+          "mean": 93.0,
+          "min": 93.0,
+          "n": 88
+        },
+        "ms": {
+          "max": 3.16039,
+          "mean": 1.896756284090909,
+          "min": 1.448092,
+          "n": 88
+        },
+        "solving_degree_max": {
+          "max": 18.0,
+          "mean": 18.0,
+          "min": 18.0,
+          "n": 88
+        },
+        "systems": 88
+      },
+      "subgroup_order": 4,
+      "target_kind": "random"
+    }
+  ],
+  "e4_two_rank": {
+    "D=-11 2^8 22b h=12|crater": 2,
+    "D=-11 2^8 22b h=12|floor": 1,
+    "D=-11 2^8 22b h=12|floor-iso": 1,
+    "D=-11 2^8 26b h=36|crater": 2,
+    "D=-11 2^8 26b h=36|floor": 1,
+    "D=-11 2^8 26b h=36|floor-iso": 1,
+    "D=-3 2^8 22b h=12|crater": 2,
+    "D=-3 2^8 22b h=12|floor": 1,
+    "D=-3 2^8 22b h=12|floor-iso": 1,
+    "D=-3 2^8 26b h=4|crater": 2,
+    "D=-3 2^8 26b h=4|floor": 1,
+    "D=-3 2^8 26b h=4|floor-iso": 1,
+    "D=-4 3^6 22b h=18|crater": 1,
+    "D=-4 3^6 22b h=18|floor": 1,
+    "D=-4 3^6 22b h=18|floor-iso": 1,
+    "D=-4 3^6 26b h=18|crater": 1,
+    "D=-4 3^6 26b h=18|floor": 1,
+    "D=-4 3^6 26b h=18|floor-iso": 1,
+    "D=-4 5^4 22b h=50|crater": 1,
+    "D=-4 5^4 22b h=50|floor": 1,
+    "D=-4 5^4 22b h=50|floor-iso": 1,
+    "D=-4 5^4 26b h=50|crater": 1,
+    "D=-4 5^4 26b h=50|floor": 1,
+    "D=-4 5^4 26b h=50|floor-iso": 1,
+    "D=-4 7^3 22b h=98|crater": 1,
+    "D=-4 7^3 22b h=98|floor": 1,
+    "D=-4 7^3 22b h=98|floor-iso": 1,
+    "D=-4 7^3 26b h=98|crater": 1,
+    "D=-4 7^3 26b h=98|floor": 1,
+    "D=-4 7^3 26b h=98|floor-iso": 1,
+    "D=-7 13^2 22b h=2704|crater": 2,
+    "D=-7 13^2 22b h=2704|floor": 1,
+    "D=-7 13^2 22b h=2704|floor-iso": 1,
+    "D=-7 13^2 26b h=5408|crater": 2,
+    "D=-7 13^2 26b h=5408|floor": 1,
+    "D=-7 13^2 26b h=5408|floor-iso": 1,
+    "D=-7 3^6 22b h=72|crater": 2,
+    "D=-7 3^6 22b h=72|floor": 1,
+    "D=-7 3^6 22b h=72|floor-iso": 1,
+    "D=-7 3^6 26b h=72|crater": 2,
+    "D=-7 3^6 26b h=72|floor": 1,
+    "D=-7 3^6 26b h=72|floor-iso": 1,
+    "D=-7 5^4 22b h=200|crater": 2,
+    "D=-7 5^4 22b h=200|floor": 1,
+    "D=-7 5^4 22b h=200|floor-iso": 1,
+    "D=-7 5^4 26b h=200|crater": 2,
+    "D=-7 5^4 26b h=200|floor": 1,
+    "D=-7 5^4 26b h=200|floor-iso": 1,
+    "D=-7 7^3 22b h=784|crater": 2,
+    "D=-7 7^3 22b h=784|floor": 1,
+    "D=-7 7^3 22b h=784|floor-iso": 1,
+    "D=-7 7^3 26b h=1568|crater": 2,
+    "D=-7 7^3 26b h=1568|floor": 1,
+    "D=-7 7^3 26b h=1568|floor-iso": 1,
+    "D=-8 11^2 22b h=2178|crater": 1,
+    "D=-8 11^2 22b h=2178|floor": 1,
+    "D=-8 11^2 22b h=2178|floor-iso": 1,
+    "D=-8 11^2 26b h=726|crater": 1,
+    "D=-8 11^2 26b h=726|floor": 1,
+    "D=-8 11^2 26b h=726|floor-iso": 1,
+    "D=-8 3^6 22b h=18|crater": 1,
+    "D=-8 3^6 22b h=18|floor": 1,
+    "D=-8 3^6 22b h=18|floor-iso": 1,
+    "D=-8 3^6 26b h=18|crater": 1,
+    "D=-8 3^6 26b h=18|floor": 1,
+    "D=-8 3^6 26b h=18|floor-iso": 1,
+    "D=-8 5^4 22b h=150|crater": 1,
+    "D=-8 5^4 22b h=150|floor": 1,
+    "D=-8 5^4 22b h=150|floor-iso": 1,
+    "D=-8 5^4 26b h=150|crater": 1,
+    "D=-8 5^4 26b h=150|floor": 1,
+    "D=-8 5^4 26b h=150|floor-iso": 1
+  },
+  "e5": {
+    "e5_combined_n17_t0": {
+      "f4-blind": {
+        "online_wall_s": {
+          "max": 1.78927194,
+          "mean": 1.3657905765,
+          "min": 0.942309213,
+          "n": 2
+        },
+        "runs": 2,
+        "s": {
+          "max": 5.7520648782742185,
+          "mean": 5.111183149421361,
+          "min": 4.4703014205685045,
+          "n": 2
+        },
+        "solver_ops": {
+          "max": 133408080.0,
+          "mean": 99240143.5,
+          "min": 65072207.0,
+          "n": 2
+        },
+        "solver_ops_over_blind": 1.0,
+        "solving_degree_max": 3,
+        "statuses": {
+          "verified": 2
+        },
+        "verified": 2
+      },
+      "f4-combined": {
+        "online_wall_s": {
+          "max": 613.201131849,
+          "mean": 468.8614051115,
+          "min": 324.521678374,
+          "n": 2
+        },
+        "runs": 2,
+        "s": {
+          "max": 7.022544655283842,
+          "mean": 6.477061603170994,
+          "min": 5.931578551058146,
+          "n": 2
+        },
+        "solver_ops": {
+          "max": 70613284746.0,
+          "mean": 51312922515.5,
+          "min": 32012560285.0,
+          "n": 2
+        },
+        "solver_ops_over_blind": 517.0581249260285,
+        "solving_degree_max": 4,
+        "statuses": {
+          "verified": 2
+        },
+        "verified": 2
+      },
+      "f4-lifts": {
+        "online_wall_s": {
+          "max": 1.654981016,
+          "mean": 1.458936513,
+          "min": 1.26289201,
+          "n": 2
+        },
+        "runs": 2,
+        "s": {
+          "max": 5.939873191436018,
+          "mean": 5.739119078556406,
+          "min": 5.538364965676796,
+          "n": 2
+        },
+        "solver_ops": {
+          "max": 106694797.0,
+          "mean": 105455417.5,
+          "min": 104216038.0,
+          "n": 2
+        },
+        "solver_ops_over_blind": 1.0626286276984274,
+        "solving_degree_max": 3,
+        "statuses": {
+          "verified": 2
+        },
+        "verified": 2
+      },
+      "rho-neg": {
+        "online_wall_s": {
+          "max": 0.002980478,
+          "mean": 0.0026556074999999997,
+          "min": 0.002330737,
+          "n": 2
+        },
+        "runs": 2,
+        "s": {
+          "max": 2.046079027274827,
+          "mean": 1.8410806514505362,
+          "min": 1.6360822756262454,
+          "n": 2
+        },
+        "solver_ops": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0,
+          "n": 0
+        },
+        "solver_ops_over_blind": null,
+        "solving_degree_max": 0,
+        "statuses": {
+          "verified": 2
+        },
+        "verified": 2
+      }
+    },
+    "e5_combined_n17_t1": {
+      "f4-blind": {
+        "online_wall_s": {
+          "max": 2.035749074,
+          "mean": 1.6656511964999998,
+          "min": 1.295553319,
+          "n": 2
+        },
+        "runs": 2,
+        "s": {
+          "max": 6.977952502676959,
+          "mean": 5.849481516073801,
+          "min": 4.721010529470645,
+          "n": 2
+        },
+        "solver_ops": {
+          "max": 164172136.0,
+          "mean": 124524790.0,
+          "min": 84877444.0,
+          "n": 2
+        },
+        "solver_ops_over_blind": 1.0,
+        "solving_degree_max": 3,
+        "statuses": {
+          "verified": 2
+        },
+        "verified": 2
+      },
+      "f4-combined": {
+        "online_wall_s": {
+          "max": 464.488581227,
+          "mean": 458.9785351535,
+          "min": 453.46848908,
+          "n": 2
+        },
+        "runs": 2,
+        "s": {
+          "max": 6.001731654387007,
+          "mean": 5.945940670887969,
+          "min": 5.890149687388931,
+          "n": 2
+        },
+        "solver_ops": {
+          "max": 38387092945.0,
+          "mean": 36620539100.5,
+          "min": 34853985256.0,
+          "n": 2
+        },
+        "solver_ops_over_blind": 294.0823196770699,
+        "solving_degree_max": 4,
+        "statuses": {
+          "verified": 2
+        },
+        "verified": 2
+      },
+      "f4-lifts": {
+        "online_wall_s": {
+          "max": 1.542202305,
+          "mean": 1.5368291885,
+          "min": 1.531456072,
+          "n": 2
+        },
+        "runs": 2,
+        "s": {
+          "max": 6.074820065031236,
+          "mean": 5.9981038000824105,
+          "min": 5.921387535133585,
+          "n": 2
+        },
+        "solver_ops": {
+          "max": 116831490.0,
+          "mean": 115688319.0,
+          "min": 114545148.0,
+          "n": 2
+        },
+        "solver_ops_over_blind": 0.9290384589285394,
+        "solving_degree_max": 3,
+        "statuses": {
+          "verified": 2
+        },
+        "verified": 2
+      },
+      "rho-neg": {
+        "online_wall_s": {
+          "max": 0.002689439,
+          "mean": 0.002252637,
+          "min": 0.001815835,
+          "n": 2
+        },
+        "runs": 2,
+        "s": {
+          "max": 1.71417689498788,
+          "mean": 1.6380346411102862,
+          "min": 1.5618923872326924,
+          "n": 2
+        },
+        "solver_ops": {
+          "max": 0.0,
+          "mean": 0.0,
+          "min": 0.0,
+          "n": 0
+        },
+        "solver_ops_over_blind": null,
+        "solving_degree_max": 0,
+        "statuses": {
+          "verified": 2
+        },
+        "verified": 2
+      }
+    }
+  }
+}

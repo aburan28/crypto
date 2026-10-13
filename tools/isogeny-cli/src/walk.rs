@@ -3,6 +3,14 @@ use crate::{catalog, provenance, replay, sha256_hex, standard_order, supervisor}
 use serde_json::{json, Value};
 use std::{collections::HashSet, fs, path::Path, time::Instant};
 
+// Each step remains sealed by exact replay before advancing. This bounds the
+// admitted request size, rather than changing the arithmetic or acceptance gate.
+const MAX_WALK_MAPS: u64 = 10_000;
+
+fn valid_count(count: u64) -> bool {
+    (1..=MAX_WALK_MAPS).contains(&count)
+}
+
 fn write(path: &Path, value: &Value) {
     let temp = path.with_extension("pending");
     fs::write(
@@ -44,10 +52,10 @@ pub fn run(
 ) -> Result<(Value, i32), String> {
     if !(1010..=1_000_000).contains(&ell)
         || crate::constructor::selection(name, ell).is_none()
-        || !(1..=1000).contains(&count)
+        || !valid_count(count)
         || timeout == 0
     {
-        return Err("walk needs P192/P224, a supported prime degree above 1009, count 1..1000, and positive timeout".into());
+        return Err("walk needs P192/P224, a supported prime degree above 1009, count 1..10000, and positive timeout".into());
     }
     if out.exists() {
         return Err("walk --out must be a fresh directory".into());
@@ -159,9 +167,10 @@ pub fn verify(out: &Path) -> Result<Value, String> {
     let requested = manifest["requested_maps"]
         .as_u64()
         .ok_or("missing requested count")?;
-    if !(1..=1000).contains(&requested) || steps.is_empty() || steps.len() as u64 > requested {
+    if !valid_count(requested) || steps.is_empty() || steps.len() as u64 > requested {
         return Err(
-            "walk replay requires a nonempty verified prefix within requested count 1..1000".into(),
+            "walk replay requires a nonempty verified prefix within requested count 1..10000"
+                .into(),
         );
     }
     assert_eq!(
@@ -219,4 +228,23 @@ pub fn verify(out: &Path) -> Result<Value, String> {
         "complete":manifest["status"]=="PASS" && maps.len() as u64==requested,
         "scope":"same-host independent implementation","walk_sha256":sha256_hex(&fs::read(out.join("walk.json")).unwrap())}),
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn large_walk_requests_have_matching_construction_and_replay_bounds() {
+        assert!(!valid_count(0));
+        for n in [1, 1000, 1050, MAX_WALK_MAPS] {
+            assert!(valid_count(n));
+        }
+        assert!(!valid_count(MAX_WALK_MAPS + 1));
+        let out =
+            std::env::temp_dir().join(format!("isogeny-count-rejection-{}", std::process::id()));
+        assert!(!out.exists());
+        assert!(run("p224", 1117, MAX_WALK_MAPS + 1, &out, 1800).is_err());
+        assert!(!out.exists(), "invalid request must not create artifacts");
+    }
 }

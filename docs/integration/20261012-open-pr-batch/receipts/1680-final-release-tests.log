@@ -1,0 +1,135 @@
+   Compiling version_check v0.9.5
+   Compiling libc v0.2.190
+   Compiling typenum v1.20.1
+   Compiling cfg-if v1.0.5
+   Compiling proc-macro2 v1.0.107
+   Compiling generic-array v0.14.7
+   Compiling unicode-ident v1.0.26
+   Compiling quote v1.0.47
+   Compiling autocfg v1.5.1
+   Compiling num-traits v0.2.19
+   Compiling syn v2.0.119
+   Compiling inout v0.1.4
+   Compiling cpufeatures v0.2.17
+   Compiling subtle v2.6.1
+   Compiling block-buffer v0.10.4
+   Compiling opaque-debug v0.3.1
+   Compiling keccak v0.1.6
+   Compiling getrandom v0.2.17
+   Compiling rand_core v0.6.4
+   Compiling crypto-common v0.1.7
+   Compiling universal-hash v0.5.1
+   Compiling digest v0.10.7
+   Compiling poly1305 v0.8.0
+   Compiling aead v0.5.2
+   Compiling num-integer v0.1.47
+   Compiling sha3 v0.10.9
+   Compiling num-bigint v0.4.8
+   Compiling zeroize_derive v1.5.0
+   Compiling zeroize v1.9.1
+   Compiling cipher v0.4.4
+   Compiling chacha20 v0.9.1
+   Compiling chacha20poly1305 v0.10.1
+   Compiling eigen_seta v0.1.0 (/workspace/crypto-integration/eigen_seta)
+    Finished `release` profile [optimized] target(s) in 6m 40s
+     Running unittests src/lib.rs (/tmp/1680-final-target/release/deps/eigen_seta-0d283e79cca863c9)
+
+running 2 tests
+test kem::tests::rejects_invalid_public_curves_and_basis ... ok
+test kem::tests::scalar_recovery_handles_minus_one_and_zero ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/chain.rs (/tmp/1680-final-target/release/deps/chain-ea785817a815065b)
+
+running 1 test
+test chain_matches_direct_endomorphism ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+
+     Running tests/chain_debug.rs (/tmp/1680-final-target/release/deps/chain_debug-44ccbdf939d873cd)
+
+running 1 test
+test chain_stepwise ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running tests/curve_debug.rs (/tmp/1680-final-target/release/deps/curve_debug-c20e2d55abea2ed8)
+
+running 1 test
+test debug_curves ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/field.rs (/tmp/1680-final-target/release/deps/field-897d5124873f99f2)
+
+running 5 tests
+test f1 ... ok
+test f2 ... ok
+test f3 ... ok
+test fl1 ... ok
+test fl5 has been running for over 60 seconds
+test fl5 ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 116.32s
+
+     Running tests/kani_unit.rs (/tmp/1680-final-target/release/deps/kani_unit-14788770cfa33f03)
+
+running 2 tests
+test jacobian_laws ... ok
+test sqrt_mod_prime_small_q_terminates ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/kat.rs (/tmp/1680-final-target/release/deps/kat-e1eea8529048a33c)
+
+running 3 tests
+test kat_l1 ... ignored
+test kat_toy16 ... ok
+test kat_toy32 ... ok
+
+test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 4.57s
+
+     Running tests/kem.rs (/tmp/1680-final-target/release/deps/kem-9f58e9b34ddf08a2)
+
+running 2 tests
+test kem_toy32 ... ignored
+test kem_toy16 ... ok
+
+test result: ok. 1 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 2.27s
+
+     Running tests/mont.rs (/tmp/1680-final-target/release/deps/mont-003a0ec0d96f90f5)
+
+running 1 test
+test montgomery_against_weierstrass ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/pairing.rs (/tmp/1680-final-target/release/deps/pairing-856c184142446dca)
+
+running 1 test
+test weil_bilinear_and_dlog ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/pke.rs (/tmp/1680-final-target/release/deps/pke-98ee988d3eae8e64)
+
+running 1 test
+test pke_round_trip_and_rejection ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.74s
+
+     Running tests/robustness.rs (/tmp/1680-final-target/release/deps/robustness-eb94c9d5672b4a6e)
+
+running 2 tests
+test encaps_terminates_on_adversarial_public_keys ... ok
+test decaps_never_panics_on_adversarial_ciphertexts ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.63s
+
+   Doc-tests eigen_seta
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

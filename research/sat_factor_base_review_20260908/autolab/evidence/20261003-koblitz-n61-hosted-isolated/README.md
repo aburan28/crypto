@@ -151,3 +151,22 @@ they expire.
 | `gha-37156127161-1` | `compact-orbit-n61-isolated-L4096` | 11287237024 | `sha256:83dd37be3ccbbd60…` | 2027-01-01 |
 | `gha-37159733133-1` | `compact-orbit-n61-isolated-L16384` | 11289103797 | `sha256:a42d32a3c2cf8505…` | 2027-01-01 |
 | `gha-37156392134-1` | `compact-orbit-n61-single-target-W256` | 11287912438 | `sha256:8cd7bc1b6a2b137f…` | 2027-01-01 |
+
+
+## L=65,536 attempt (2026-10-12) — runner saturation
+
+Timeout bump landed in PR #1736 (`timeout-minutes` 300→480 on the measure
+job). Confirmed YAML `workflow_dispatch` inputs: `targets`, `blocks`, `k`.
+
+Dispatched:
+
+| Actions run | Ref | Inputs | Outcome |
+|---|---|---|---|
+| [38288893010](https://github.com/aburan28/crypto/actions/runs/38288893010) | `main` (newest) | targets=65536, blocks=2, k=700 | left **live** — still queued/pending after ~15–20 min poll (no runner) |
+| [38285023608](https://github.com/aburan28/crypto/actions/runs/38285023608) | `main` @ `be456ef51` | targets=65536, blocks=2, k=700 | **cancelled** as superseded duplicate of 38288893010 |
+| [38283955374](https://github.com/aburan28/crypto/actions/runs/38283955374) | `cursor/ic-n61-l65536-hosted-20261012` | workflow_dispatch (sibling) | **cancelled** earlier (branch dispatch) |
+
+Repo Actions queue depth remained saturated (same class as #1621). No measure
+job completed; no receipts to archive yet. Fallthrough after n31: binary
+`l8_pairs_baseline` evidence in
+[`../20261012-binary-decomposition-l8-pairs-baseline/`](../20261012-binary-decomposition-l8-pairs-baseline/README.md).

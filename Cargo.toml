@@ -115,6 +115,9 @@ rho_debug = []
 # Field-operation counters in the CryptoPro-B field (`cryptopro_b_field::opcount`),
 # for the counting run of `cryptopro-b-chain-sweep`; timing builds leave it off.
 cryptopro-b-opcount = []
+# Field-operation counters in the one-word field of `semaev_decomp` (`semaev_decomp::opcount`),
+# for PS-0 of research/pdp_oracle_speedup_20261011; timing builds leave it off.
+pdp-opcount = []
 
 [lints.rust]
 # `hashclash_linked` is set by a downstream build script that links the

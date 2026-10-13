@@ -1,0 +1,925 @@
+{
+  "command": "eg --rounds 1 --targets 8 --only 1-15-2,0-15-2,1-17-2,0-23-2,1-23-2 --no-degrees --arms sym --out research/lit2026_w8_summation_models_20261011/reports/run-20261011T2131Z/raw/r3-orig.json",
+  "env": {
+    "KIC_F4_INHERIT": null,
+    "KIC_F4_MAX_DEGREE_ONLY": "0"
+  },
+  "git_head": "3c239129d2ccf26706d56b05304c1f35a7c44d7f",
+  "result": {
+    "cells": [
+      {
+        "a": 1,
+        "arms": [
+          {
+            "arm": "sym",
+            "degrees": [],
+            "key_set_digests": [
+              "32dc784d433258eb:2",
+              "cbf29ce484222325:0",
+              "9d79bb8d8847be41:2",
+              "eb52d7fda0c07f33:2",
+              "cbf29ce484222325:0",
+              "012cb228778fb1a3:2",
+              "cbf29ce484222325:0",
+              "cbf29ce484222325:0"
+            ],
+            "key_sets_identical_to_reference": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "median_ms": 19.660958,
+            "median_word_ops": 784639.0,
+            "poly": {
+              "f2_coefficients": true,
+              "per_var_degree": [
+                1,
+                1,
+                1,
+                1
+              ],
+              "terms": 5,
+              "total_degree": 3
+            },
+            "samples": [
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 19.660958,
+                  "oversize": 0,
+                  "reductions": 8,
+                  "roots": 2,
+                  "splits": 1,
+                  "word_ops": 1024648
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 11.0885,
+                  "oversize": 0,
+                  "reductions": 1,
+                  "roots": 0,
+                  "splits": 0,
+                  "word_ops": 728036
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 10.045084,
+                  "oversize": 0,
+                  "reductions": 7,
+                  "roots": 2,
+                  "splits": 1,
+                  "word_ops": 784639
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 282.916041,
+                  "oversize": 0,
+                  "reductions": 8,
+                  "roots": 2,
+                  "splits": 1,
+                  "word_ops": 860234
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 12.801333,
+                  "oversize": 0,
+                  "reductions": 1,
+                  "roots": 0,
+                  "splits": 0,
+                  "word_ops": 729927
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 121.462625,
+                  "oversize": 0,
+                  "reductions": 6,
+                  "roots": 2,
+                  "splits": 1,
+                  "word_ops": 1185595
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 141.557708,
+                  "oversize": 0,
+                  "reductions": 1,
+                  "roots": 0,
+                  "splits": 0,
+                  "word_ops": 723829
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 8.636875,
+                  "oversize": 0,
+                  "reductions": 1,
+                  "roots": 0,
+                  "splits": 0,
+                  "word_ops": 713476
+                }
+              ]
+            ],
+            "system": {
+              "boolean_degree": 2,
+              "distinct_monomials": 50,
+              "n_equations": 15,
+              "n_vars": 13,
+              "total_terms": 314
+            }
+          }
+        ],
+        "cell": "K1/F2^15 m=2",
+        "cofactor": "154",
+        "ell": 7,
+        "engine": "MatrixF4 { max_degree: 4 }",
+        "m": 2,
+        "n": 15,
+        "node_budget": 200000,
+        "quotient_b_double_prime": 1,
+        "roots_stable_across_rounds": true,
+        "rounds": 1,
+        "subgroup_order": "211",
+        "sym_verdict_matches_enumeration": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "targets": 8,
+        "truth_decomposable": [
+          true,
+          false,
+          true,
+          true,
+          false,
+          true,
+          false,
+          false
+        ],
+        "uptime_per_round": [
+          "15:04  up 14:43, 10 users, load averages: 161.39 163.25 144.41"
+        ]
+      },
+      {
+        "a": 0,
+        "arms": [
+          {
+            "arm": "sym",
+            "degrees": [],
+            "key_set_digests": [
+              "cbf29ce484222325:0",
+              "cbf29ce484222325:0",
+              "cbf29ce484222325:0",
+              "cbf29ce484222325:0",
+              "cbf29ce484222325:0",
+              "6fdbc78c7f35c0b3:2",
+              "cbf29ce484222325:0",
+              "cbf29ce484222325:0"
+            ],
+            "key_sets_identical_to_reference": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "median_ms": 38.352458,
+            "median_word_ops": 723720.0,
+            "poly": {
+              "f2_coefficients": true,
+              "per_var_degree": [
+                1,
+                1,
+                1,
+                1
+              ],
+              "terms": 5,
+              "total_degree": 3
+            },
+            "samples": [
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 38.352458,
+                  "oversize": 0,
+                  "reductions": 1,
+                  "roots": 0,
+                  "splits": 0,
+                  "word_ops": 724073
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 3.6968330000000003,
+                  "oversize": 0,
+                  "reductions": 1,
+                  "roots": 0,
+                  "splits": 0,
+                  "word_ops": 719654
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 111.186917,
+                  "oversize": 0,
+                  "reductions": 1,
+                  "roots": 0,
+                  "splits": 0,
+                  "word_ops": 724116
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 3.691084,
+                  "oversize": 0,
+                  "reductions": 1,
+                  "roots": 0,
+                  "splits": 0,
+                  "word_ops": 705130
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 46.599542,
+                  "oversize": 0,
+                  "reductions": 1,
+                  "roots": 0,
+                  "splits": 0,
+                  "word_ops": 719925
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 49.165416,
+                  "oversize": 0,
+                  "reductions": 6,
+                  "roots": 2,
+                  "splits": 1,
+                  "word_ops": 1196901
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 9.676832999999998,
+                  "oversize": 0,
+                  "reductions": 1,
+                  "roots": 0,
+                  "splits": 0,
+                  "word_ops": 721928
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 7.260875,
+                  "oversize": 0,
+                  "reductions": 1,
+                  "roots": 0,
+                  "splits": 0,
+                  "word_ops": 723720
+                }
+              ]
+            ],
+            "system": {
+              "boolean_degree": 2,
+              "distinct_monomials": 50,
+              "n_equations": 15,
+              "n_vars": 13,
+              "total_terms": 301
+            }
+          }
+        ],
+        "cell": "K0/F2^15 m=2",
+        "cofactor": "44",
+        "ell": 7,
+        "engine": "MatrixF4 { max_degree: 4 }",
+        "m": 2,
+        "n": 15,
+        "node_budget": 200000,
+        "quotient_b_double_prime": 1,
+        "roots_stable_across_rounds": true,
+        "rounds": 1,
+        "subgroup_order": "751",
+        "sym_verdict_matches_enumeration": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "targets": 8,
+        "truth_decomposable": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          true,
+          false,
+          false
+        ],
+        "uptime_per_round": [
+          "15:04  up 14:43, 10 users, load averages: 158.32 162.58 144.28"
+        ]
+      },
+      {
+        "a": 1,
+        "arms": [
+          {
+            "arm": "sym",
+            "degrees": [],
+            "key_set_digests": [
+              "cbf29ce484222325:0",
+              "cbf29ce484222325:0",
+              "cbf29ce484222325:0",
+              "cbf29ce484222325:0",
+              "cbf29ce484222325:0",
+              "67d10c9eb1595a57:4",
+              "cbf29ce484222325:0",
+              "cbf29ce484222325:0"
+            ],
+            "key_sets_identical_to_reference": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "median_ms": 1096.749666,
+            "median_word_ops": 20754573.0,
+            "poly": {
+              "f2_coefficients": true,
+              "per_var_degree": [
+                1,
+                1,
+                1,
+                1
+              ],
+              "terms": 5,
+              "total_degree": 3
+            },
+            "samples": [
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 1079.982291,
+                  "oversize": 0,
+                  "reductions": 3,
+                  "roots": 0,
+                  "splits": 1,
+                  "word_ops": 20557405
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 1143.1267910000001,
+                  "oversize": 0,
+                  "reductions": 3,
+                  "roots": 0,
+                  "splits": 1,
+                  "word_ops": 20771102
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 926.8234170000001,
+                  "oversize": 0,
+                  "reductions": 3,
+                  "roots": 0,
+                  "splits": 1,
+                  "word_ops": 20437409
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 888.8302500000001,
+                  "oversize": 0,
+                  "reductions": 3,
+                  "roots": 0,
+                  "splits": 1,
+                  "word_ops": 20589579
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 1096.749666,
+                  "oversize": 0,
+                  "reductions": 3,
+                  "roots": 0,
+                  "splits": 1,
+                  "word_ops": 20765444
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 1621.631,
+                  "oversize": 0,
+                  "reductions": 13,
+                  "roots": 4,
+                  "splits": 3,
+                  "word_ops": 25101946
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 1766.378792,
+                  "oversize": 0,
+                  "reductions": 3,
+                  "roots": 0,
+                  "splits": 1,
+                  "word_ops": 20709938
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 929.881208,
+                  "oversize": 0,
+                  "reductions": 3,
+                  "roots": 0,
+                  "splits": 1,
+                  "word_ops": 20754573
+                }
+              ]
+            ],
+            "system": {
+              "boolean_degree": 2,
+              "distinct_monomials": 82,
+              "n_equations": 17,
+              "n_vars": 17,
+              "total_terms": 674
+            }
+          }
+        ],
+        "cell": "K1/F2^17 m=2",
+        "cofactor": "2",
+        "ell": 9,
+        "engine": "MatrixF4 { max_degree: 4 }",
+        "m": 2,
+        "n": 17,
+        "node_budget": 200000,
+        "quotient_b_double_prime": 1,
+        "roots_stable_across_rounds": true,
+        "rounds": 1,
+        "subgroup_order": "65587",
+        "sym_verdict_matches_enumeration": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "targets": 8,
+        "truth_decomposable": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          true,
+          false,
+          false
+        ],
+        "uptime_per_round": [
+          "15:04  up 14:43, 10 users, load averages: 158.32 162.58 144.28"
+        ]
+      },
+      {
+        "a": 0,
+        "arms": [
+          {
+            "arm": "sym",
+            "degrees": [],
+            "key_set_digests": [
+              "25d18be00986b953:2",
+              "c5546bb1223bda9f:2",
+              "ae2d98a567b70c23:6",
+              "2c9dbf9ee0393205:4",
+              "cbf29ce484222325:0",
+              "cbf29ce484222325:0",
+              "cbf29ce484222325:0",
+              "cbf29ce484222325:0"
+            ],
+            "key_sets_identical_to_reference": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "median_ms": 30941.419667000002,
+            "median_word_ops": 1360925330.0,
+            "poly": {
+              "f2_coefficients": true,
+              "per_var_degree": [
+                1,
+                1,
+                1,
+                1
+              ],
+              "terms": 5,
+              "total_degree": 3
+            },
+            "samples": [
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 28186.860416,
+                  "oversize": 0,
+                  "reductions": 17,
+                  "roots": 2,
+                  "splits": 7,
+                  "word_ops": 1363674470
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 36067.358083,
+                  "oversize": 0,
+                  "reductions": 17,
+                  "roots": 2,
+                  "splits": 7,
+                  "word_ops": 1363269133
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 41032.340083,
+                  "oversize": 0,
+                  "reductions": 29,
+                  "roots": 6,
+                  "splits": 9,
+                  "word_ops": 1534600131
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 28126.48925,
+                  "oversize": 0,
+                  "reductions": 19,
+                  "roots": 4,
+                  "splits": 7,
+                  "word_ops": 1358674461
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 27363.414833,
+                  "oversize": 0,
+                  "reductions": 15,
+                  "roots": 0,
+                  "splits": 7,
+                  "word_ops": 1357391472
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 30941.419667000002,
+                  "oversize": 0,
+                  "reductions": 15,
+                  "roots": 0,
+                  "splits": 7,
+                  "word_ops": 1358224714
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 28976.252875,
+                  "oversize": 0,
+                  "reductions": 15,
+                  "roots": 0,
+                  "splits": 7,
+                  "word_ops": 1360925330
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 32231.721542000003,
+                  "oversize": 0,
+                  "reductions": 15,
+                  "roots": 0,
+                  "splits": 7,
+                  "word_ops": 1357378782
+                }
+              ]
+            ],
+            "system": {
+              "boolean_degree": 2,
+              "distinct_monomials": 145,
+              "n_equations": 23,
+              "n_vars": 23,
+              "total_terms": 1572
+            }
+          }
+        ],
+        "cell": "K0/F2^23 m=2",
+        "cofactor": "4",
+        "ell": 12,
+        "engine": "MatrixF4 { max_degree: 4 }",
+        "m": 2,
+        "n": 23,
+        "node_budget": 200000,
+        "quotient_b_double_prime": 1,
+        "roots_stable_across_rounds": true,
+        "rounds": 1,
+        "subgroup_order": "2095853",
+        "sym_verdict_matches_enumeration": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "targets": 8,
+        "truth_decomposable": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          false,
+          false
+        ],
+        "uptime_per_round": [
+          "15:05  up 14:43, 10 users, load averages: 156.05 161.95 144.27"
+        ]
+      },
+      {
+        "a": 1,
+        "arms": [
+          {
+            "arm": "sym",
+            "degrees": [],
+            "key_set_digests": [
+              "2986ddb3f55ee11f:2",
+              "cbf29ce484222325:0",
+              "d9c1eabc044bf6cb:2",
+              "cbf29ce484222325:0",
+              "903b2619313d9455:2",
+              "cbf29ce484222325:0",
+              "37335ef7ff77ce7d:2",
+              "e52d2b5ba85d4fa7:2"
+            ],
+            "key_sets_identical_to_reference": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "median_ms": 56239.569458,
+            "median_word_ops": 1360085525.0,
+            "poly": {
+              "f2_coefficients": true,
+              "per_var_degree": [
+                1,
+                1,
+                1,
+                1
+              ],
+              "terms": 5,
+              "total_degree": 3
+            },
+            "samples": [
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 31082.198833,
+                  "oversize": 0,
+                  "reductions": 17,
+                  "roots": 2,
+                  "splits": 7,
+                  "word_ops": 1360085525
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 29037.367708,
+                  "oversize": 0,
+                  "reductions": 15,
+                  "roots": 0,
+                  "splits": 7,
+                  "word_ops": 1357258349
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 28493.129166,
+                  "oversize": 0,
+                  "reductions": 17,
+                  "roots": 2,
+                  "splits": 7,
+                  "word_ops": 1355070204
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 115085.975,
+                  "oversize": 0,
+                  "reductions": 15,
+                  "roots": 0,
+                  "splits": 7,
+                  "word_ops": 1359452776
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 268707.17100000003,
+                  "oversize": 0,
+                  "reductions": 22,
+                  "roots": 2,
+                  "splits": 8,
+                  "word_ops": 1370212609
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 367988.159333,
+                  "oversize": 0,
+                  "reductions": 15,
+                  "roots": 0,
+                  "splits": 7,
+                  "word_ops": 1342035440
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 56239.569458,
+                  "oversize": 0,
+                  "reductions": 17,
+                  "roots": 2,
+                  "splits": 7,
+                  "word_ops": 1361847924
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 4,
+                  "ms": 22762.195708,
+                  "oversize": 0,
+                  "reductions": 17,
+                  "roots": 2,
+                  "splits": 7,
+                  "word_ops": 1360228924
+                }
+              ]
+            ],
+            "system": {
+              "boolean_degree": 2,
+              "distinct_monomials": 145,
+              "n_equations": 23,
+              "n_vars": 23,
+              "total_terms": 1541
+            }
+          }
+        ],
+        "cell": "K1/F2^23 m=2",
+        "cofactor": "2",
+        "ell": 12,
+        "engine": "MatrixF4 { max_degree: 4 }",
+        "m": 2,
+        "n": 23,
+        "node_budget": 200000,
+        "quotient_b_double_prime": 1,
+        "roots_stable_across_rounds": true,
+        "rounds": 1,
+        "subgroup_order": "4196903",
+        "sym_verdict_matches_enumeration": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "targets": 8,
+        "truth_decomposable": [
+          true,
+          false,
+          true,
+          false,
+          true,
+          false,
+          true,
+          true
+        ],
+        "uptime_per_round": [
+          "15:09  up 14:48, 10 users, load averages: 160.70 158.13 147.00"
+        ]
+      }
+    ],
+    "part": "eg"
+  },
+  "schema": "lit2026-w8-run/v1",
+  "started_unix": 1791756289
+}

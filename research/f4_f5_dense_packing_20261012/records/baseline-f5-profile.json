@@ -1,0 +1,511 @@
+{
+  "arms": [
+    {
+      "arm": "f4",
+      "calls": 33,
+      "ir": 280024703
+    },
+    {
+      "arm": "f5",
+      "calls": 33,
+      "ir": 247112580
+    },
+    {
+      "arm": "criterion",
+      "calls": 33,
+      "ir": 10174677
+    }
+  ],
+  "hotspots": [
+    {
+      "function": "crypto_lib::cryptanalysis::gf2_elim::clear_block",
+      "ir": 25931856
+    },
+    {
+      "function": "core::slice::sort::shared::smallsort::small_sort_network::<usize, <usize as core::cmp::PartialOrd>::lt>",
+      "ir": 19251021
+    },
+    {
+      "function": "<&mut core::iter::adapters::map::map_fold<&mut alloc::vec::Vec<u64>, u64, u64, crypto_lib::cryptanalysis::gf2_elim::clear_block::{closure#1}, <u64 as core::iter::traits::accum::Sum>::sum<core::iter::adapters::map::Map<core::iter::adapters::chain::Chain<core::slice::iter::IterMut<alloc::vec::Vec<u64>>, core::slice::iter::IterMut<alloc::vec::Vec<u64>>>, crypto_lib::cryptanalysis::gf2_elim::clear_block::{closure#1}>>::{closure#0}>::{closure#0} as core::ops::function::FnMut<(u64, &mut alloc::vec::Vec<u64>)>>::call_mut",
+      "ir": 18773655
+    },
+    {
+      "function": "crypto_lib::cryptanalysis::gf2_elim::xor_entries_avx2",
+      "ir": 17517006
+    },
+    {
+      "function": "<hashbrown::map::HashMap<u64, (), core::hash::BuildHasherDefault<crypto_lib::cryptanalysis::fx_hash::MaskHasher>>>::insert",
+      "ir": 17228814
+    },
+    {
+      "function": "crypto_lib::cryptanalysis::gf2_elim::eliminate_with",
+      "ir": 16853979
+    },
+    {
+      "function": "<core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u64>>, crypto_lib::cryptanalysis::koblitz_groebner::pack_rows::{closure#1}> as core::iter::traits::iterator::Iterator>::fold::<(), core::iter::traits::iterator::Iterator::for_each::call<alloc::vec::Vec<u64>, <alloc::vec::Vec<alloc::vec::Vec<u64>>>::extend_trusted<core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u64>>, crypto_lib::cryptanalysis::koblitz_groebner::pack_rows::{closure#1}>>::{closure#0}>::{closure#0}>",
+      "ir": 16609674
+    },
+    {
+      "function": "crypto_lib::cryptanalysis::koblitz_groebner::f5_rows_monos_with_f4_count",
+      "ir": 15828111
+    },
+    {
+      "function": "0x0000000000163280",
+      "ir": 12241831
+    },
+    {
+      "function": "crypto_lib::cryptanalysis::gf2_elim::clear_block::{closure#1}",
+      "ir": 12134883
+    },
+    {
+      "function": "crypto_lib::cryptanalysis::gf2_elim::xor_entries",
+      "ir": 11623875
+    },
+    {
+      "function": "crypto_lib::cryptanalysis::gf2_elim::clear_strip_avx2",
+      "ir": 9907968
+    },
+    {
+      "function": "crypto_lib::cryptanalysis::koblitz_groebner::echelon_f2_suffix_counted",
+      "ir": 7667898
+    },
+    {
+      "function": "0x00000000000a0fe0",
+      "ir": 6248801
+    },
+    {
+      "function": "<&crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#5} as core::ops::function::FnMut<(&alloc::vec::Vec<u64>,)>>::call_mut",
+      "ir": 3965157
+    },
+    {
+      "function": "crypto_lib::cryptanalysis::koblitz_groebner::macaulay_columns",
+      "ir": 3553125
+    },
+    {
+      "function": "<crypto_lib::cryptanalysis::matrix_f5_f2::PrefixEchelon>::pack_product",
+      "ir": 2400570
+    },
+    {
+      "function": "free",
+      "ir": 2326595
+    },
+    {
+      "function": "core::slice::sort::unstable::quicksort::quicksort::<u64, <u64 as core::cmp::PartialOrd>::lt>",
+      "ir": 2196987
+    },
+    {
+      "function": "core::slice::sort::shared::smallsort::small_sort_network::<u64, <[u64]>::sort_unstable_by_key<core::cmp::Reverse<u128>, crypto_lib::cryptanalysis::koblitz_groebner::macaulay_columns::{closure#0}>::{closure#0}>",
+      "ir": 2134062
+    }
+  ],
+  "merged_worker_profile": true,
+  "profile_arm": "f5",
+  "repeats": 3,
+  "run": "primary-a",
+  "self_cost_sum": 247112580,
+  "sources": [
+    {
+      "blake3": "e6eaac3f735415e58264dbcc9b8184f073356a2946de7dd5c06556421d7f30ee",
+      "path": "primary-a/records.jsonl"
+    },
+    {
+      "blake3": "b3133f940ba802ea9de5161f24a34ff8b7bbc755416a4468577c3d6a9dec6c82",
+      "path": "primary-a/callgrind.out.1"
+    },
+    {
+      "blake3": "421010b82e65613e79ce627451425ea500de07e24f73c0e4b826fe80f7e425a4",
+      "path": "primary-a/callgrind.out.10"
+    },
+    {
+      "blake3": "79c249f02cbaee2668703e48e11e6b32727febe15c5349374f11a97e6cf0c598",
+      "path": "primary-a/callgrind.out.11"
+    },
+    {
+      "blake3": "b4ddf7715daa6a3b28c7592ef6f93ccba16f231aa74ccd8526359fbbe6905a69",
+      "path": "primary-a/callgrind.out.12"
+    },
+    {
+      "blake3": "f104de69e299125ce93e2f8d9155b70fdf3c03e3042b31687aa5940e155779e3",
+      "path": "primary-a/callgrind.out.13"
+    },
+    {
+      "blake3": "77c148aa468ce36ffbabcef891b10c5e7c437c22d5d8a4bf952b166b63f4b48b",
+      "path": "primary-a/callgrind.out.14"
+    },
+    {
+      "blake3": "dec283bcec6453f903682da08ca190962b95cb40b09d49bebce9f4cff35e94db",
+      "path": "primary-a/callgrind.out.15"
+    },
+    {
+      "blake3": "d0c41eb0b0617bf0d3c13e929c1874f1dbb89f2e9b3a7b957de8ccde90017dba",
+      "path": "primary-a/callgrind.out.16"
+    },
+    {
+      "blake3": "f897411083f925df5c41545083a2d249bba4f2966230997c65f72463f9473dae",
+      "path": "primary-a/callgrind.out.17"
+    },
+    {
+      "blake3": "f2fa8bd7bf9e23a77d6466ef584576183bbddeb1b97186c0aeeec10345e17287",
+      "path": "primary-a/callgrind.out.18"
+    },
+    {
+      "blake3": "5421abddf31d422b55f27f319bd307f59a19b72779c1a6b1fa20089ead69edc4",
+      "path": "primary-a/callgrind.out.19"
+    },
+    {
+      "blake3": "bee35f234e3f3608f6d94a08eafdea10e1d7b33002aad82529fe48b850e49a09",
+      "path": "primary-a/callgrind.out.2"
+    },
+    {
+      "blake3": "1aaeae03b50a89b3933c065ee89d1e392a14188f41dfd2fe3ee3dfc22b980784",
+      "path": "primary-a/callgrind.out.20"
+    },
+    {
+      "blake3": "3a507264ce670627b959aa65eae654ffa50c5c6b67f9e7e03ddaaf6ed7477f0c",
+      "path": "primary-a/callgrind.out.21"
+    },
+    {
+      "blake3": "3384a695fd51f3999676fe60ffbc14ab6abea5198964d58dc264e67460744730",
+      "path": "primary-a/callgrind.out.22"
+    },
+    {
+      "blake3": "3a98cd3849ee354dea755e08428de9daf2249cb415fc39c1aedb047e9c785bef",
+      "path": "primary-a/callgrind.out.23"
+    },
+    {
+      "blake3": "737c2ed96c34ca4e62d80dfc3f8b85c0cba46270fc3c99ebfbe911a83d457211",
+      "path": "primary-a/callgrind.out.24"
+    },
+    {
+      "blake3": "9785359508023d0dc0bba48612393067730cc0d3a38530d387dcaa5810c65e91",
+      "path": "primary-a/callgrind.out.25"
+    },
+    {
+      "blake3": "9d42924982986bdb901c47a4d94050762a1e62642536d88200ef69fcd9eea871",
+      "path": "primary-a/callgrind.out.26"
+    },
+    {
+      "blake3": "4ca66e04f6cbacccf0ae8b05327bb03093c4bdc0396c09c852d8925e4716086f",
+      "path": "primary-a/callgrind.out.27"
+    },
+    {
+      "blake3": "c08dd38d6773df932865be4679d8802be98a0df11627c40528d4a3e381bfe4a0",
+      "path": "primary-a/callgrind.out.28"
+    },
+    {
+      "blake3": "f2c011a863b868b2feeb051ab2a60e5455e253d7dbf704218e14b6beef6142cd",
+      "path": "primary-a/callgrind.out.29"
+    },
+    {
+      "blake3": "a63c62953d23510187d3224d9df956577b79f125211bbd70850b8cc770ae6504",
+      "path": "primary-a/callgrind.out.3"
+    },
+    {
+      "blake3": "fd9a3e6c69674bae3d71eb8bb02c08287690bad7f15d397fcc83ca53362c77ee",
+      "path": "primary-a/callgrind.out.30"
+    },
+    {
+      "blake3": "79a14d6a26e6999b9e971bfb9552c04bcfd1950cd7dfd6185036aa5938f9f346",
+      "path": "primary-a/callgrind.out.31"
+    },
+    {
+      "blake3": "bece1c513c88a900871f9e9a3687308e857a757e78122afe5abeecd7c416f276",
+      "path": "primary-a/callgrind.out.32"
+    },
+    {
+      "blake3": "86687db034f5025ba75118eeaab09db78c177336ad70288f1edf7e1e4f5554bf",
+      "path": "primary-a/callgrind.out.33"
+    },
+    {
+      "blake3": "548041ae1e9f99b930d0ca8cecac7618e97e0bf13b155e644fc643b8ecb32fec",
+      "path": "primary-a/callgrind.out.34"
+    },
+    {
+      "blake3": "23b303408a5d5ce7dbecfa56ecf83afd668f51010b2b5f320d2dc3c409699bd4",
+      "path": "primary-a/callgrind.out.35"
+    },
+    {
+      "blake3": "cc4586c11a1040199e6c23db86c130d7774e659b272f33eb09afdad285c4cfa6",
+      "path": "primary-a/callgrind.out.36"
+    },
+    {
+      "blake3": "7401ab31a8a6efbc411aeda572b5bad2c10e46aa95f5fc72946cace1404d1fcc",
+      "path": "primary-a/callgrind.out.37"
+    },
+    {
+      "blake3": "37297558d1e4c62127c9f30e13dc5de0200b17a476b0896f49f3271b796750be",
+      "path": "primary-a/callgrind.out.38"
+    },
+    {
+      "blake3": "1c70cdb7aebf8e340710c852d748d2c8ba8890a9613948f0d4ac95ca25606658",
+      "path": "primary-a/callgrind.out.39"
+    },
+    {
+      "blake3": "1e4234df5c083951f0727e8f8ef60f4b6ab4a4745cd2ec91917cecd30dde8c0c",
+      "path": "primary-a/callgrind.out.4"
+    },
+    {
+      "blake3": "614bff0661392b01f595c2d0110bf57bd0e68fa8d16d04b2cece25a1959a653b",
+      "path": "primary-a/callgrind.out.40"
+    },
+    {
+      "blake3": "abf4d6dd08f784a9042ae4f126a77a3761015959d27120afe00a0a6e0f59b134",
+      "path": "primary-a/callgrind.out.41"
+    },
+    {
+      "blake3": "1a77e76955afeb587c8a1e21d9ebdd5683e763745cccd8376125769cacf110ea",
+      "path": "primary-a/callgrind.out.42"
+    },
+    {
+      "blake3": "7475468645a99f62ceb431deb912a78533acbf253ace9f11d828b86e8cdfa3b2",
+      "path": "primary-a/callgrind.out.43"
+    },
+    {
+      "blake3": "aedcf4b1e543bf009c5d19d30fd8f7af269162cd451b3f7587ee6feb78460e15",
+      "path": "primary-a/callgrind.out.44"
+    },
+    {
+      "blake3": "df97d8e2184680c0a0e3b30f8b8d97fa1fcba5f99deb4a95ca5201a0313b15f5",
+      "path": "primary-a/callgrind.out.45"
+    },
+    {
+      "blake3": "dded066cc1f2c5f87ac16f2af2a8b4d22bebf9af435ce8f70ed1a61d792a6890",
+      "path": "primary-a/callgrind.out.46"
+    },
+    {
+      "blake3": "0d0e392d59867090677397e8f938ef74540caa884ecaaee45c387316340e694d",
+      "path": "primary-a/callgrind.out.47"
+    },
+    {
+      "blake3": "8c52d5edf7eb5d9321b6ec63b47717bb9cd237e0f6d3a074798a21f0203b5420",
+      "path": "primary-a/callgrind.out.48"
+    },
+    {
+      "blake3": "8d23487b0c5eea930c7d2b04c9c5dd4734f9a8e281b5278174748e6a624beb70",
+      "path": "primary-a/callgrind.out.49"
+    },
+    {
+      "blake3": "91d8f8c3d29621e754ddc5ca0c112f15cec14266c4b023da4c683175f637b857",
+      "path": "primary-a/callgrind.out.5"
+    },
+    {
+      "blake3": "d2b8e7097d7876f161af79e880b1931b25e925a96feb9ccb41324b88afa7e7b3",
+      "path": "primary-a/callgrind.out.50"
+    },
+    {
+      "blake3": "1e4779d0eb408ae9daad4738d67c685e6c11423206d13f67f88840b60c23aa0d",
+      "path": "primary-a/callgrind.out.51"
+    },
+    {
+      "blake3": "5db62a052f7ae0e102d6efa5bb530a2d36c02207cc4ccaec01d6964bb2501fd5",
+      "path": "primary-a/callgrind.out.52"
+    },
+    {
+      "blake3": "2d136b30aea4c30c4a32f7cfd6dee7a8fe902f9fad48cb513b403bb6ea087d40",
+      "path": "primary-a/callgrind.out.53"
+    },
+    {
+      "blake3": "87b1ea2a56ae7bd66eed598809e7881f6a090d19ac2eddbe6bbf61c0d301d3e7",
+      "path": "primary-a/callgrind.out.54"
+    },
+    {
+      "blake3": "a1a8fd3e323a9d6448092f653ade6779516d86305ef67da6b430c3323d417763",
+      "path": "primary-a/callgrind.out.55"
+    },
+    {
+      "blake3": "42768b1ee73c5c0bd74c39b29ced4dc8aba681315b73c22837261e4ba11d4eaa",
+      "path": "primary-a/callgrind.out.56"
+    },
+    {
+      "blake3": "e244e6df586118c513139425b6692ae719542ef28245a1787a23021dc451bffd",
+      "path": "primary-a/callgrind.out.57"
+    },
+    {
+      "blake3": "10f4bcb0770154d862741c895a955ae72865ae3f4f224a9b1d32aca657e3c0bf",
+      "path": "primary-a/callgrind.out.58"
+    },
+    {
+      "blake3": "bb34db5149d8b27b26b3e237fd431f9c8d717b83bae1035ed3206be76d8d9873",
+      "path": "primary-a/callgrind.out.59"
+    },
+    {
+      "blake3": "69e4ab42ef5a6b33eeaf21c007997d026e34589d038c0e16dd8d962c4fad1fe8",
+      "path": "primary-a/callgrind.out.6"
+    },
+    {
+      "blake3": "919d9a67a6f4e3b8a42c2f3553b9cbb0ddf990bbb7adb5bdd53074692ac4cdd4",
+      "path": "primary-a/callgrind.out.60"
+    },
+    {
+      "blake3": "f3a5b4d91da8667ee2256b5e497d42ce44c94811089b4290f5e1502c2258e3ce",
+      "path": "primary-a/callgrind.out.61"
+    },
+    {
+      "blake3": "865080b90816ec01c3acf5b20f914df65bee5d9454ce9ecb84aababd318e1f88",
+      "path": "primary-a/callgrind.out.62"
+    },
+    {
+      "blake3": "36a4c35dd298a20503ad6888150bbece6c6e2fb25db83ed46f9ef74e70023f91",
+      "path": "primary-a/callgrind.out.63"
+    },
+    {
+      "blake3": "b80d5ff4e656fbe90b3d1490d461cfdf5762d79b415533a21866d69e6f0d2e64",
+      "path": "primary-a/callgrind.out.64"
+    },
+    {
+      "blake3": "5a6535aba89883092c4e777b473b3bdb02057b28cac0ce2f231b9c490cd5df2b",
+      "path": "primary-a/callgrind.out.65"
+    },
+    {
+      "blake3": "4ad439132ac4374fded8090affb1e5588f953001cf21527667955ff9cf5b7bc5",
+      "path": "primary-a/callgrind.out.66"
+    },
+    {
+      "blake3": "1d0b8cafee7256b8d7a710a6641d2262dab98b83912042effcdaa067dcca85b6",
+      "path": "primary-a/callgrind.out.67"
+    },
+    {
+      "blake3": "2289b554a43b90937567e1dbd60f1b43b874bf0653ddcfef9d3e1a4c72725788",
+      "path": "primary-a/callgrind.out.68"
+    },
+    {
+      "blake3": "656c69fb9b32fc3a9f4b1e141b4094cd28499547ca3016be519bf4895374877a",
+      "path": "primary-a/callgrind.out.69"
+    },
+    {
+      "blake3": "cb4c0fc30b22fcc873765064486f080a33872d3b4d28a0665d53160c2ab42a93",
+      "path": "primary-a/callgrind.out.7"
+    },
+    {
+      "blake3": "cfb83f87e40a32f07c58bf815e38efbdc655c5c4642870179a50edcd64d10618",
+      "path": "primary-a/callgrind.out.70"
+    },
+    {
+      "blake3": "ad7e7fb3ab84abeee9b64066b210c41b758ef5e779c99296e2cc05aab61ba3b1",
+      "path": "primary-a/callgrind.out.71"
+    },
+    {
+      "blake3": "82f25a6c5084d0838ef9b610f02fe75920e91e471c0e351427f3f3eff2f4a11e",
+      "path": "primary-a/callgrind.out.72"
+    },
+    {
+      "blake3": "258df207574b3269f4bf8a8e57cc936ad11e06884340321599b2ba1ebec0fbac",
+      "path": "primary-a/callgrind.out.73"
+    },
+    {
+      "blake3": "627532c0913f216b314981f21a50d1032e8439131132e30b4f33381ab664735c",
+      "path": "primary-a/callgrind.out.74"
+    },
+    {
+      "blake3": "c7d55436f0a4e5c981deca417cf58cd7fc35af78f907db62e889fd49966ce3a7",
+      "path": "primary-a/callgrind.out.75"
+    },
+    {
+      "blake3": "74c60c48cfdc0b480f3d086416a0bdc50b0c0d52354e0323eccf773805ae54b4",
+      "path": "primary-a/callgrind.out.76"
+    },
+    {
+      "blake3": "da29ec112852297355174c3454a18301b2df861905074ddc3ac509e6aa50a8ef",
+      "path": "primary-a/callgrind.out.77"
+    },
+    {
+      "blake3": "6c9e9ae9d93437d6d2fdf11def2cc76fc5a9070f42a2e1a4b4f9d2043dceb68c",
+      "path": "primary-a/callgrind.out.78"
+    },
+    {
+      "blake3": "00b1fbdfe2d5a0ca40211c8635afd08ecaacd144a7932989610164e522231578",
+      "path": "primary-a/callgrind.out.79"
+    },
+    {
+      "blake3": "ab8b686f89b006c2eeca489c583daf28d3afc091eb87823c6229b7ef69fba293",
+      "path": "primary-a/callgrind.out.8"
+    },
+    {
+      "blake3": "66c2bc122810cfe629415e7a62b417ff2f522f541954fc77189334619c0de2a5",
+      "path": "primary-a/callgrind.out.80"
+    },
+    {
+      "blake3": "adacc56d239e40174982d29ce98bc6b90b4efe64b165f744bcdac8f7165de07a",
+      "path": "primary-a/callgrind.out.81"
+    },
+    {
+      "blake3": "b21abcd064044855db8f81a4f01bdf8c688a959acf9a33f142a1c9a6f0b58bcc",
+      "path": "primary-a/callgrind.out.82"
+    },
+    {
+      "blake3": "43cad054f1039710fa7209d0093153dff3c2eb1be0add3f62fc6f8775a824f59",
+      "path": "primary-a/callgrind.out.83"
+    },
+    {
+      "blake3": "dc291d42e8031ceb34ac78c62f5292997303b4e8c5c79f8e63e08b93ffac58f3",
+      "path": "primary-a/callgrind.out.84"
+    },
+    {
+      "blake3": "eec62afae2efdb5be958264ff2e9993a6f5ec301ed3187f84ae2fcf221f3c451",
+      "path": "primary-a/callgrind.out.85"
+    },
+    {
+      "blake3": "eba53b78e5f5be9ed1d75875ea3b27df13e463ecf6043c5f5d5239c016577dbf",
+      "path": "primary-a/callgrind.out.86"
+    },
+    {
+      "blake3": "a28c4539cfdc69f5375e8c0cb6ab26db1c411b5c27c1f42e44b3cc5cf6fc2da4",
+      "path": "primary-a/callgrind.out.87"
+    },
+    {
+      "blake3": "9a6b9ad701f1abe47deca343f732c12cd91d1bfdbe04fe3b8b9cf71be41f761c",
+      "path": "primary-a/callgrind.out.88"
+    },
+    {
+      "blake3": "704522409ef45b94ef6615831c7e4ed90f0d0a8d15849a12e5bd8d00be46f559",
+      "path": "primary-a/callgrind.out.89"
+    },
+    {
+      "blake3": "af67d87c912ae18434745751482fa102d82375ae1d2ea5ec2d71213f9fb95210",
+      "path": "primary-a/callgrind.out.9"
+    },
+    {
+      "blake3": "a27db2218d392d4e2196a06d8a3d5d94023ec7308016acc9fcd7759358f6f632",
+      "path": "primary-a/callgrind.out.90"
+    },
+    {
+      "blake3": "6b008de14f597da77be7685ccb569ed2450cbd360fe1f34d3fcbf9421cfd8f62",
+      "path": "primary-a/callgrind.out.91"
+    },
+    {
+      "blake3": "e5907a94aa5dbb59e3639bcf9be7437bb695694981c31a40fedd7b1866e01c19",
+      "path": "primary-a/callgrind.out.92"
+    },
+    {
+      "blake3": "f9727b7e10012fdb4d8b64a459e549400e5c8eecf6b82e356ba102645aa0fb7c",
+      "path": "primary-a/callgrind.out.93"
+    },
+    {
+      "blake3": "91fd5a5ef0b75047f4a71f326d799872c63367662567b969e3a393e1d3c29320",
+      "path": "primary-a/callgrind.out.94"
+    },
+    {
+      "blake3": "ac80db58797f93319edd0a39f539950b6a4d3326498ea2d5d62d5769204dfe11",
+      "path": "primary-a/callgrind.out.95"
+    },
+    {
+      "blake3": "4ec76fb1c10b43a37465f1f75f75a500cc382f452f9fdd49dc50c0e463aebbcd",
+      "path": "primary-a/callgrind.out.96"
+    },
+    {
+      "blake3": "154f2bb0f785a01e5267178e6c0ec97f7b5211411741a191a127e17e9e4781fa",
+      "path": "primary-a/callgrind.out.97"
+    },
+    {
+      "blake3": "a48a51039da2c9c1246e4fdb5a0e59126a3860d591f807de7dc349817ab5e78b",
+      "path": "primary-a/callgrind.out.98"
+    },
+    {
+      "blake3": "3e3f079ee010848132e4fe57eabcce89793b09028dbedd2cec94cc87d2be59ec",
+      "path": "primary-a/callgrind.out.99"
+    }
+  ],
+  "standard_hash_self_ir": 0,
+  "standard_hash_self_percent": 0.0,
+  "systems": 11
+}

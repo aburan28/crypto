@@ -12,6 +12,13 @@ on:
     paths:
       - '.github/workflows/**'
       - 'scripts/test_workflows_parse.py'
+      - '.github/scripts/*ci-scope*'
+      - '.github/scripts/*frozen-workflow*'
+      - '.github/scripts/n53-historical-cargo-lock-view-v1.json'
+      - '.github/scripts/check-pr-budgets.py'
+      - '.github/scripts/test-pr-budgets.py'
+      - 'research/weak_curve_properties_lean_20261011/EVIDENCE_SHA256.tsv'
+      - 'research/weak_curve_conjectures_20261012/EVIDENCE_SHA256SUMS'
 # A newer push to the same pull request cancels this workflow's run for the older commit.
 # Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.
 concurrency:
@@ -26,8 +33,21 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/
+            /.github/scripts/
+            /scripts/test_workflows_parse.py
+            /research/weak_curve_properties_lean_20261011/EVIDENCE_SHA256.tsv
+            /research/weak_curve_conjectures_20261012/EVIDENCE_SHA256SUMS
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: pip install --quiet pyyaml
       - run: python3 -B scripts/test_workflows_parse.py -v
+      - run: node --test .github/scripts/test-ci-scope.mjs
+      - run: node --test .github/scripts/test-frozen-workflow-check.mjs
+      - run: python3 -B .github/scripts/test-pr-budgets.py -v
+      - run: python3 -B .github/scripts/check-pr-budgets.py

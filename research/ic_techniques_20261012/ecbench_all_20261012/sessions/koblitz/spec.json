@@ -1,0 +1,18 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "smoke: rho, BSGS and index calculus on icv1-f2m17-tm101-00378d4e",
+  "description": "Correctness and plumbing check on a Koblitz curve, where the signed-Frobenius walk (A = 2n) is the matched reference. Not a performance claim.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 1, "n": 17}],
+    "targets_per_curve": 2,
+    "target_seed": 20261002
+  },
+  "arms": [
+    {"name": "rho-frob", "role": "reference", "method": {"id": "rho.signed_frobenius"}},
+    {"name": "rho-neg", "role": "baseline", "method": {"id": "rho.negation"}},
+    {"name": "bsgs-neg", "role": "candidate", "method": {"id": "bsgs.negation"}},
+    {"name": "ic-frob", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-orbit:divisor=0;1", "oracle": "mitm-frobenius:m=2"}}}
+  ],
+  "measurement": {"rounds": 3, "warmup": 1, "order": "alternate", "seed": 1, "isolation_required": "L2", "timeout_seconds": 120}
+}

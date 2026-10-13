@@ -28,6 +28,13 @@
 - Current ladder frontiers: `RESEARCH_KOBLITZ_INDEX_CALCULUS.md`,
   `RESEARCH_ECC2K130_IC_FEASIBILITY.md`
 
+For small-prime or pinned GF(2^83) elliptic-curve surface searches, quartic
+subgroup transfers, genus-2+ Jacobian transfers, hyperelliptic covers, Mumford
+arithmetic, gluing or polarization candidates, or Frobenius compatibility
+checks, use
+[ecdlp-surfaces](.agents/skills/ecdlp-surfaces/SKILL.md) for tool selection,
+commands, and interpretation limits.
+
 ## Reading discipline
 
 `research/` is 4.5 GB in 52,000 files. Read what the current step needs:
@@ -90,6 +97,42 @@ rather than to produce attacks.  That makes the reporting rule below the
 most important convention here: without it, a thread can run for weeks,
 improve its own headline number by two orders of magnitude, and have
 established nothing.
+
+## Name the obstruction
+
+When substantial research, cryptanalysis, or audit work cannot meet a proof,
+implementation, experiment, or validation requirement, **name the specific
+problem**. Before repeating the same blocked approach or handing it off, create
+or update `problems/<descriptive-slug>.md` using
+[the problem template](problems/TEMPLATE.md), add it to
+[the problem index](problems/README.md), and link it from the affected work.
+
+- State exactly what is blocked, under which parameters and assumptions, and
+  why that gap prevents the requested conclusion. Track major or recurring
+  blockers, not every routine TODO.
+- Separate observed evidence, suspected explanations, missing implementations,
+  access/tool or assistance limits, resource limits, and proved mathematical
+  obstructions. Cite artifacts or proofs with their exact scope; mark unknowns
+  explicitly. A timeout or bounded failed search does not prove impossibility;
+  failure to find an attack does not establish security.
+- Say **what would unblock it**: the missing lemma, construction, verified map,
+  measurement, implementation, access, or resource, with checkable acceptance
+  criteria. Explain what satisfying those criteria would establish and what
+  would remain unresolved. "More research" is not an exit condition.
+- Give the next discriminating experiment or proof obligation, its controls
+  and execution limits where relevant, and how each possible outcome changes
+  the next action. Apply the existing experiment and budget rules.
+- Reuse an existing problem record for the same obstruction, including a
+  cross-repository link when appropriate. Update its evidence, next action,
+  and index row in the PR that changes the situation; preserve frozen evidence.
+  Resolve it only with linked evidence meeting its exit criteria. If another
+  record replaces it, mark it superseded and link the successor.
+
+Recording a problem keeps the original requirement visible; recording it alone
+does not resolve that requirement. It
+does not authorize abandoning requested work, weakening its acceptance criteria,
+or promoting a claim. Completing the template or merging its PR does not solve
+the underlying problem.
 
 ## Intermediate-cost and asymmetric-access hypotheses
 
@@ -188,6 +231,27 @@ unverified rules visibly separate from proved or measured ones. This visual
 record supplements the evidence, curve-identity, scoreboard, and PR rules
 below; it does not promote a hypothesis or replace a verified run.
 
+### Performance results also land in `benchmarks/`
+
+Every run or PR that measures how fast an algorithm runs or reports a speedup
+(an engine, kernel or solver timing, a before/after comparison of the same
+code, a comparison with an external system such as msolve, Singular or Magma)
+also copies its visual record into `benchmarks/`, in the same PR, always:
+
+- `benchmarks/<YYYYMMDD>-<slug>/` holds the report PDFs (run report and
+  results report), every graph as SVG, and a PNG render of every graph
+  (150 dpi, rendered from the same plotting source as the SVG).
+- `benchmarks/README.md` gets one row per entry, newest first: date, what was
+  measured, the headline values with their units and ratios as the report
+  states them, host and isolation level, and links to the study directory
+  and run report.
+- The study directory stays the source of truth (raw records, sources,
+  inputs); `benchmarks/` holds copies for browsing. Regenerate both from the
+  same source and never edit a copy alone. A later run adds a new entry and
+  leaves earlier ones as they are.
+
+`benchmarks/` is not `benches/`, which holds Cargo bench sources.
+
 ## Papers
 
 Manuscripts generated from this repository's results live under `papers/`,
@@ -221,6 +285,38 @@ and `aburan28/ml-cryptanalysis`:
   and the measurements still owed.
 - `make check` must pass (references and citations resolved, no LaTeX errors,
   no overfull boxes) before a PDF is recommitted.
+
+## Mathematical results should include Lean proofs
+
+**Standing owner instruction, 2026-10-11:** For every new or substantially
+revised mathematical result, include a faithful Lean 4 theorem and checked
+proof whenever formalization is feasible. Treat the formalization attempt as
+part of the requested work, and prioritize the central theorem and its
+dependencies. Keep the readable mathematical proof in the report.
+
+- Maintain a proof map from each report theorem, proposition, lemma or
+  corollary to its Lean declaration, exact hypotheses and verification status.
+  Match the mathematical statement, including quantifiers, exceptional cases
+  and field, curve, subgroup and endomorphism-order assumptions.
+- Pin the Lean toolchain and dependency revisions. Build the actual theorem
+  modules with `lake build` or an equivalent command, retain the command and
+  output, and inspect `#print axioms` for every reported theorem. Recheck the
+  compiled proofs with `lean4checker --fresh` when available.
+- A reported Lean proof must contain no `sorry`, `admit`, `sorryAx`, custom
+  axioms encoding the research claim, kernel-check bypasses or unverified
+  native evaluation. Record the standard Lean foundations used.
+- Prove the structural implications as well as the algebraic identities.
+  Conditional theorems must expose their assumptions and identify any missing
+  bridge to the actual mathematical objects. Do not present a weaker statement,
+  assumed conclusion, circular hypothesis or arithmetic certificate as a full
+  Lean proof of the report's theorem.
+- If the full formalization cannot be completed, preserve the original result
+  and its written proof, finish the feasible Lean lemmas, and record the
+  concrete missing definition, dependency, proof obligation or failed build.
+  Report partial formalization explicitly; keep the full theorem open.
+- Add reproducible proof checks to the relevant CI workflow where practical.
+  Preserve frozen evidence and attach formalization updates as versioned
+  additions rather than rewriting historical verification records.
 
 ## Implementation language: no Python
 

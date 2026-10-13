@@ -33,8 +33,10 @@
 //! **classical reference** here.
 
 use super::f2m::{F2mElement, IrreduciblePoly};
-use num_bigint::BigUint;
+use num_bigint::{BigInt, BigUint};
 use num_traits::{One, Zero};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex, OnceLock};
 
 /// A binary elliptic curve over `F_{2^m}`.
 #[derive(Clone, Debug)]
@@ -538,16 +540,163 @@ impl BinaryCurve {
     /// points from other equations. Protocols that process attacker-selected
     /// points must perform this check (or an equivalent, proved validation)
     /// before multiplying by a secret scalar.
+    ///
+    /// On curves where [`Self::has_fast_4e_subgroup_check`] holds
+    /// (`y² + xy = x³ + 1`, odd `m`, cofactor 4: sect233k1, sect239k1,
+    /// sect283k1, sect409k1, sect571k1) the `[n]P = O` check is replaced by
+    /// the closed-form [`Self::is_in_4e`] test, which costs one field
+    /// multiplication, a half-trace and three traces instead of a full
+    /// scalar multiplication.  Debug builds still run `[n]P = O` and assert
+    /// that both agree.  Every other curve takes the `[n]P = O` path.
+    ///
+    /// Not constant-time on either path: the inputs are public points.
     pub fn is_valid_public_point(&self, p: &BinaryPoint) -> bool {
         match p {
             BinaryPoint::Infinity => false,
             BinaryPoint::Affine { x, y } if x.m_value() != self.m || y.m_value() != self.m => false,
             BinaryPoint::Affine { .. } => {
+                if self.has_fast_4e_subgroup_check() {
+                    let fast = self.is_in_4e(p) == Some(true);
+                    debug_assert_eq!(
+                        fast,
+                        self.is_on_curve(p)
+                            && matches!(scalar_mul(self, p, &self.order), BinaryPoint::Infinity),
+                        "closed-form 4E test disagrees with [n]P = O"
+                    );
+                    return fast;
+                }
                 self.is_on_curve(p)
                     && matches!(scalar_mul(self, p, &self.order), BinaryPoint::Infinity)
             }
         }
     }
+
+    /// Whether this is the Koblitz curve `y² + xy = x³ + 1` over
+    /// `F_{2^m}` with `m` odd, the shape on which [`Self::is_in_4e`]
+    /// applies.
+    fn is_odd_degree_koblitz_a0(&self) -> bool {
+        self.m % 2 == 1
+            && self.irreducible.degree == self.m
+            && self.a.m_value() == self.m
+            && self.a.is_zero()
+            && self.b == F2mElement::one(self.m)
+    }
+
+    /// Whether [`Self::is_valid_public_point`] decides subgroup membership
+    /// with the closed-form [`Self::is_in_4e`] test instead of `[n]P = O`.
+    ///
+    /// True exactly when the curve is `y² + xy = x³ + 1` over `F_{2^m}`
+    /// with `m` odd, the declared cofactor is 4, and the declared subgroup
+    /// order equals the actual curve order divided by 4.  For odd `m` the
+    /// 2-Sylow subgroup of `E(F_{2^m})` is exactly `Z/4` (`(1, 0)` has
+    /// order 4 and `Tr(1) = 1`, so it has no half), so with
+    /// `#E = 4·n`, `n` odd, `4E` is the order-`n` subgroup.  The actual
+    /// order is computed from the Koblitz Frobenius trace recurrence and
+    /// cached per field degree.  Inconsistent declarations keep the
+    /// `[n]P = O` path.
+    pub fn has_fast_4e_subgroup_check(&self) -> bool {
+        self.is_odd_degree_koblitz_a0()
+            && self.cofactor == BigUint::from(4u32)
+            && self.order == *koblitz_a0_4e_order(self.m)
+    }
+
+    /// **Closed-form `4E` membership** on `y² + xy = x³ + 1` over
+    /// `F_{2^m}`, `m` odd:
+    ///
+    /// ```text
+    /// P ∈ 4E  ⇔  P = O,  or  [Tr(x) = 0  and  Tr(y) + Tr(x·H(x)) = 0]
+    /// ```
+    ///
+    /// where `Tr` is the absolute trace and `H` the half-trace
+    /// ([`F2mElement::trace`], [`F2mElement::half_trace`], both table
+    /// driven).  Returns `None` when the curve is not of that shape
+    /// (`a ≠ 0`, `b ≠ 1` or `m` even); otherwise `Some(membership)`.  A
+    /// point whose coordinates are not in `F_{2^m}` or that is not on the
+    /// curve is reported as `Some(false)`.
+    ///
+    /// *Derivation.* Doubling `Q = (u, v)`, `u ≠ 0`, gives
+    /// `λ = u + v/u`, `x = λ² + λ`, `y = u² + (λ + 1)·x`.  So `P = (x, y)`
+    /// is halvable iff `λ² + λ = x` is solvable, iff `Tr(x) = 0`, with
+    /// roots `H(x)` and `H(x) + 1` (the two halves `Q`, `Q + (0, 1)`).
+    /// A half has `u² = y + (λ + 1)·x`, so
+    /// `Tr(u) = Tr(y) + Tr(x·H(x))` when `Tr(x) = 0`, and the half is
+    /// itself halvable iff that is `0`.  The 2-torsion point `(0, 1)`
+    /// needs no special case: `Tr(0) = 0` and `Tr(1) = m mod 2 = 1`, so it
+    /// is rejected.  The order-4 points `(1, 0)`, `(1, 1)` fail
+    /// `Tr(x) = 0`.
+    ///
+    /// *Evidence.* Re-derived and checked in this repository against
+    /// `[#E/4]P = O` on every point for `m = 5, 7, …, 23` and on 10⁶
+    /// points each over ECC2K-130's field (`m = 131`) and on sect233k1
+    /// (`RESEARCH_ISOGENY_FIBERS_ECDLP.md` Prop. 14.2 and §17.2;
+    /// `research/isogeny_fibers_20261010/round4/16_2_fast_4e/`).
+    ///
+    /// *Prior art; no novelty is claimed.* The halvability criterion
+    /// `Tr(x) = Tr(a)` is classical (Knudsen 1999; the point-halving
+    /// literature), and halving-based validation of points on binary
+    /// curves with cofactor 2 or 4, avoiding a scalar multiplication, is
+    /// known: US Patent 7,257,709 / US 2004/0114760, "Method and apparatus
+    /// for performing validation of elliptic curve public keys";
+    /// B. King, "A point compression method for elliptic curves defined
+    /// over GF(2^n)", PKC 2004, LNCS 2947; P. Eagle, S. Galbraith,
+    /// J. Ong, "Point compression for Koblitz elliptic curves", IACR
+    /// ePrint 2009/086 (two-level halving for `#E = 4ℓ`).  The closed
+    /// form here only inlines the half's trace,
+    /// `Tr(u) = Tr(u²) = Tr(y) + Tr(x·H(x))`, so no square root or second
+    /// half-trace is needed.
+    ///
+    /// Not constant-time (table lookups indexed by the coordinates,
+    /// early exit on `Tr(x)`): intended for public points only.
+    pub fn is_in_4e(&self, p: &BinaryPoint) -> Option<bool> {
+        if !self.is_odd_degree_koblitz_a0() {
+            return None;
+        }
+        Some(match p {
+            BinaryPoint::Infinity => true,
+            BinaryPoint::Affine { x, y } => {
+                if x.m_value() != self.m || y.m_value() != self.m || !self.is_on_curve(p) {
+                    return Some(false);
+                }
+                let irr = &self.irreducible;
+                if x.trace(irr) != 0 {
+                    return Some(false);
+                }
+                let h = x
+                    .half_trace(irr)
+                    .expect("m is odd, so the half-trace exists");
+                // Tr is linear: Tr(y) + Tr(x·H(x)) = Tr(y + x·H(x)).
+                y.add(&x.mul(&h, irr)).trace(irr) == 0
+            }
+        })
+    }
+}
+
+/// The order of `4E` on `y² + xy = x³ + 1` over an odd-degree binary field.
+///
+/// Over `F_2`, `#E = 4`, so the Frobenius traces satisfy `t_0 = 2`,
+/// `t_1 = -1`, and `t_m = -t_{m-1} - 2t_{m-2}`.  Thus
+/// `#E(F_{2^m}) = 2^m + 1 - t_m`.  For odd `m` its 2-part is exactly 4.
+/// The cache depends only on the field degree, not its polynomial basis.
+fn koblitz_a0_4e_order(m: u32) -> Arc<BigUint> {
+    type Cache = Mutex<HashMap<u32, Arc<BigUint>>>;
+    static CACHE: OnceLock<Cache> = OnceLock::new();
+    let mut orders = CACHE
+        .get_or_init(|| Mutex::new(HashMap::new()))
+        .lock()
+        .unwrap_or_else(|e| e.into_inner());
+    orders
+        .entry(m)
+        .or_insert_with(|| {
+            let (mut previous, mut trace) = (BigInt::from(2u32), -BigInt::one());
+            for _ in 1..m {
+                let next = -&trace - (&previous << 1u32);
+                previous = trace;
+                trace = next;
+            }
+            let count = (BigInt::one() << m) + BigInt::one() - trace;
+            Arc::new(count.to_biguint().expect("positive Koblitz curve order") >> 2u32)
+        })
+        .clone()
 }
 
 /// Negation: `−(x, y) = (x, y + x)`.
@@ -982,6 +1131,329 @@ mod tests {
         };
 
         assert!(!curve.is_valid_public_point(&malformed));
+    }
+
+    // ── closed-form 4E test (`is_in_4e`) ──────────────────────────
+
+    /// `[order]P = O` on the curve: the reference the closed form replaces.
+    fn subgroup_by_scalar(curve: &BinaryCurve, p: &BinaryPoint) -> bool {
+        curve.is_on_curve(p) && matches!(scalar_mul(curve, p, &curve.order), BinaryPoint::Infinity)
+    }
+
+    /// `y² + xy = x³ + 1` over `F_2[z]/irr`, cofactor 4, the given order
+    /// and generator.
+    fn koblitz_a0(irr: IrreduciblePoly, order: BigUint, generator: BinaryPoint) -> BinaryCurve {
+        let m = irr.degree;
+        BinaryCurve {
+            m,
+            irreducible: irr,
+            a: F2mElement::zero(m),
+            b: F2mElement::one(m),
+            generator,
+            order,
+            cofactor: BigUint::from(4u32),
+        }
+    }
+
+    fn affine(x: F2mElement, y: F2mElement) -> BinaryPoint {
+        BinaryPoint::Affine { x, y }
+    }
+
+    /// A point with abscissa `x != 0` on `y² + xy = x³ + 1`, `m` odd, if
+    /// one exists: `y = w·x` with `w² + w = x + 1/x²`.
+    fn lift_x(curve: &BinaryCurve, x: &F2mElement, flip: bool) -> Option<BinaryPoint> {
+        let irr = &curve.irreducible;
+        let xi = x.flt_inverse(irr)?;
+        let c = x.add(&xi.square(irr));
+        if c.trace(irr) != 0 {
+            return None;
+        }
+        let w = c.half_trace(irr).expect("odd m");
+        let mut y = w.mul(x, irr);
+        if flip {
+            y = y.add(x);
+        }
+        let p = affine(x.clone(), y);
+        assert!(curve.is_on_curve(&p));
+        Some(p)
+    }
+
+    /// `T = (0, 1)` (order 2) and `P4 = (1, 0)` (order 4, `2·P4 = T`).
+    fn two_part_points(m: u32) -> (BinaryPoint, BinaryPoint) {
+        (
+            affine(F2mElement::zero(m), F2mElement::one(m)),
+            affine(F2mElement::one(m), F2mElement::zero(m)),
+        )
+    }
+
+    /// `#E(F_{2^n})` for `y² + xy = x³ + 1`: `2^n + 1 − s_n` with
+    /// `s_0 = 2, s_1 = −1, s_{k+1} = −s_k − 2·s_{k−1}`.
+    fn koblitz_a0_order(n: u32) -> u64 {
+        let (mut s0, mut s1) = (2i64, -1i64);
+        for _ in 1..n {
+            let s2 = -s1 - 2 * s0;
+            s0 = s1;
+            s1 = s2;
+        }
+        ((1i64 << n) + 1 - s1) as u64
+    }
+
+    /// Every point of `E(F_{2^n})`, n = 5, 7, 9, 11, 13: the closed form,
+    /// `is_valid_public_point` (fast path) and `[#E/4]P = O` agree, and
+    /// all four cosets of `4E` (read off from `[#E/4]P ∈ {O, P4, T, −P4}`)
+    /// are visited, each with `#E/4` points.
+    #[test]
+    fn is_in_4e_matches_scalar_check_on_every_point_small_odd_m() {
+        let fields = [
+            (5u32, vec![0u32, 2]),
+            (7, vec![0, 1]),
+            (9, vec![0, 4]),
+            (11, vec![0, 2]),
+            (13, vec![0, 1, 3, 4]),
+        ];
+        for (m, low) in fields {
+            let irr = IrreduciblePoly {
+                degree: m,
+                low_terms: low,
+            };
+            let n_e = koblitz_a0_order(m);
+            assert_eq!(n_e % 8, 4, "2-part of #E must be Z/4 for odd m");
+            let r = BigUint::from(n_e / 4);
+            let mut curve = koblitz_a0(irr, r.clone(), BinaryPoint::Infinity);
+            assert!(curve.has_fast_4e_subgroup_check());
+
+            let mut points = vec![BinaryPoint::Infinity, two_part_points(m).0];
+            for v in 1..(1u64 << m) {
+                let x = F2mElement::from_words(&[v], m);
+                if let Some(p) = lift_x(&curve, &x, false) {
+                    points.push(point_neg(&p));
+                    points.push(p);
+                }
+            }
+            assert_eq!(points.len() as u64, n_e, "point count, m = {m}");
+            curve.generator = points
+                .iter()
+                .find(|p| !matches!(p, BinaryPoint::Infinity) && subgroup_by_scalar(&curve, p))
+                .expect("4E has affine points")
+                .clone();
+
+            let (t, p4) = two_part_points(m);
+            let cosets = [BinaryPoint::Infinity, p4.clone(), t, point_neg(&p4)];
+            let mut per_coset = [0u64; 4];
+            for p in &points {
+                let rp = scalar_mul(&curve, p, &r);
+                let k = cosets
+                    .iter()
+                    .position(|c| *c == rp)
+                    .expect("[#E/4]P is 4-torsion");
+                per_coset[k] += 1;
+                let truth = k == 0;
+                assert_eq!(curve.is_in_4e(p), Some(truth), "m = {m}, P = {p:?}");
+                let affine_truth = truth && !matches!(p, BinaryPoint::Infinity);
+                assert_eq!(curve.is_valid_public_point(p), affine_truth, "m = {m}");
+            }
+            assert_eq!(per_coset, [n_e / 4; 4], "coset sizes, m = {m}");
+        }
+    }
+
+    /// Random points from each coset `Q, Q + T, Q + P4, Q − P4` (`Q = 4P`)
+    /// plus the uniform `P` itself, on the ECC2K-130 curve
+    /// (`F_2[z]/(z^131 + z^8 + z^3 + z^2 + 1)`) and sect233k1: the fast
+    /// path agrees with `[n]P = O` on every one.
+    #[test]
+    fn is_in_4e_matches_scalar_check_on_random_coset_points_ecc2k130_sect233k1() {
+        use rand::rngs::StdRng;
+        use rand::{Rng, SeedableRng};
+
+        let ecc2k130_order =
+            BigUint::parse_bytes(b"680564733841876926932320129493409985129", 10).unwrap();
+        let mut ecc2k130 = koblitz_a0(
+            IrreduciblePoly::deg_131(),
+            ecc2k130_order,
+            BinaryPoint::Infinity,
+        );
+        let mut rng = StdRng::seed_from_u64(0x4e_4e);
+        for (name, curve) in [("ECC2K-130", &mut ecc2k130)] {
+            loop {
+                let x = F2mElement::from_words(&[rng.gen(), rng.gen(), rng.gen()], curve.m);
+                if let Some(p) = lift_x(curve, &x, rng.gen()) {
+                    let g = point_double(curve, &point_double(curve, &p));
+                    if !matches!(g, BinaryPoint::Infinity) {
+                        curve.generator = g;
+                        break;
+                    }
+                }
+            }
+            assert!(subgroup_by_scalar(curve, &curve.generator), "{name}");
+        }
+        let sect233k1 = BinaryCurve::sect233k1();
+
+        for (name, curve) in [("ECC2K-130", &ecc2k130), ("sect233k1", &sect233k1)] {
+            assert!(curve.has_fast_4e_subgroup_check(), "{name}");
+            let m = curve.m;
+            let nw = m.div_ceil(64) as usize;
+            let (t, p4) = two_part_points(m);
+            let p4_neg = point_neg(&p4);
+            let mut per_coset = [0u32; 4];
+            let mut uniform_accepted = 0u32;
+            let mut sampled = 0u32;
+            while sampled < 40 {
+                let words: Vec<u64> = (0..nw).map(|_| rng.gen()).collect();
+                let x = F2mElement::from_words(&words, m);
+                let Some(p) = lift_x(curve, &x, rng.gen()) else {
+                    continue;
+                };
+                sampled += 1;
+                let truth = subgroup_by_scalar(curve, &p);
+                assert_eq!(curve.is_valid_public_point(&p), truth, "{name} uniform");
+                assert_eq!(curve.is_in_4e(&p), Some(truth), "{name} uniform");
+                uniform_accepted += truth as u32;
+
+                let q = point_double(curve, &point_double(curve, &p));
+                let coset_points = [
+                    q.clone(),
+                    point_add(curve, &q, &p4),
+                    point_add(curve, &q, &t),
+                    point_add(curve, &q, &p4_neg),
+                ];
+                for (k, c) in coset_points.iter().enumerate() {
+                    let truth = k == 0 && !matches!(c, BinaryPoint::Infinity);
+                    assert_eq!(subgroup_by_scalar(curve, c), k == 0, "{name} coset {k}");
+                    assert_eq!(curve.is_valid_public_point(c), truth, "{name} coset {k}");
+                    assert_eq!(curve.is_in_4e(c), Some(k == 0), "{name} coset {k}");
+                    per_coset[k] += 1;
+                }
+            }
+            assert_eq!(per_coset, [40; 4], "{name}");
+            // About a quarter of uniform points lie in 4E; both outcomes occur.
+            assert!(
+                uniform_accepted > 0 && uniform_accepted < 40,
+                "{name}: {uniform_accepted}/40 uniform points accepted"
+            );
+        }
+    }
+
+    /// The library's other odd-degree a = 0, cofactor-4 Koblitz curves take
+    /// the fast path, accept their generator and reject it shifted into the
+    /// three other cosets, in agreement with `[n]P = O`.
+    #[test]
+    fn is_in_4e_on_library_koblitz_cofactor4_generators() {
+        for (name, curve) in [
+            ("sect239k1", BinaryCurve::sect239k1()),
+            ("sect283k1", BinaryCurve::sect283k1()),
+            ("sect409k1", BinaryCurve::sect409k1()),
+            ("sect571k1", BinaryCurve::sect571k1()),
+        ] {
+            assert!(curve.has_fast_4e_subgroup_check(), "{name}");
+            let (t, p4) = two_part_points(curve.m);
+            let g = curve.generator.clone();
+            assert!(curve.is_valid_public_point(&g), "{name}");
+            assert!(subgroup_by_scalar(&curve, &g), "{name}");
+            for shift in [&p4, &t] {
+                let c = point_add(&curve, &g, shift);
+                assert!(!curve.is_valid_public_point(&c), "{name}");
+                assert_eq!(curve.is_in_4e(&c), Some(false), "{name}");
+            }
+        }
+    }
+
+    /// O, T = (0, 1), the order-4 points, off-curve and wrong-width points.
+    #[test]
+    fn is_in_4e_edge_cases() {
+        let curve = BinaryCurve::sect233k1();
+        let m = curve.m;
+        let (t, p4) = two_part_points(m);
+        assert!(curve.is_on_curve(&t) && curve.is_on_curve(&p4));
+
+        // O is in 4E, but is not a valid public point.
+        assert_eq!(curve.is_in_4e(&BinaryPoint::Infinity), Some(true));
+        assert!(!curve.is_valid_public_point(&BinaryPoint::Infinity));
+
+        // T = (0, 1): Tr(0) = 0 and Tr(1) = m mod 2 = 1, rejected.
+        assert_eq!(curve.is_in_4e(&t), Some(false));
+        assert!(!curve.is_valid_public_point(&t));
+        assert!(!subgroup_by_scalar(&curve, &t));
+
+        // (1, 0), (1, 1): order 4, Tr(1) = 1.
+        for p in [p4.clone(), point_neg(&p4)] {
+            assert_eq!(curve.is_in_4e(&p), Some(false));
+            assert!(!curve.is_valid_public_point(&p));
+        }
+
+        // Off the curve: the generator with y + 1.
+        let (gx, gy) = match &curve.generator {
+            BinaryPoint::Affine { x, y } => (x.clone(), y.clone()),
+            BinaryPoint::Infinity => unreachable!(),
+        };
+        let off = affine(gx.clone(), gy.add(&F2mElement::one(m)));
+        assert!(!curve.is_on_curve(&off));
+        assert_eq!(curve.is_in_4e(&off), Some(false));
+        assert!(!curve.is_valid_public_point(&off));
+
+        // Coordinates of the wrong width.
+        let wide = affine(
+            F2mElement::from_biguint(&gx.to_biguint(), m + 2),
+            F2mElement::from_biguint(&gy.to_biguint(), m + 2),
+        );
+        assert_eq!(curve.is_in_4e(&wide), Some(false));
+        assert!(!curve.is_valid_public_point(&wide));
+    }
+
+    /// A malformed declared order must not enable the fast path even when
+    /// the shape and cofactor match.  The point remains in 4E, but it is not
+    /// killed by the declared scalar, so public validation must reject it.
+    #[test]
+    fn inconsistent_declared_order_keeps_the_scalar_subgroup_check() {
+        let curve = BinaryCurve::sect233k1();
+        let generator = curve.generator.clone();
+        assert!(curve.has_fast_4e_subgroup_check());
+        assert_eq!(curve.is_in_4e(&generator), Some(true));
+        for order in [BigUint::one(), &curve.order + 2u32] {
+            let misdeclared = BinaryCurve {
+                order,
+                ..curve.clone()
+            };
+            assert_eq!(misdeclared.cofactor, BigUint::from(4u32));
+            assert!(!misdeclared.has_fast_4e_subgroup_check());
+            assert_eq!(misdeclared.is_in_4e(&generator), Some(true));
+            assert!(!subgroup_by_scalar(&misdeclared, &generator));
+            assert!(!misdeclared.is_valid_public_point(&generator));
+        }
+    }
+
+    /// Curves outside the preconditions keep the `[n]P = O` path.
+    #[test]
+    fn curves_outside_preconditions_take_the_scalar_path() {
+        // a = 1 (sect163k1, cofactor 2), random curves, even m.
+        for (name, curve) in [
+            ("sect163k1", BinaryCurve::sect163k1()),
+            ("sect233r1", BinaryCurve::sect233r1()),
+            ("sect113r1", BinaryCurve::sect113r1()),
+        ] {
+            assert!(!curve.has_fast_4e_subgroup_check(), "{name}");
+            assert_eq!(curve.is_in_4e(&curve.generator), None, "{name}");
+            assert!(curve.is_valid_public_point(&curve.generator), "{name}");
+        }
+        let even = BinaryCurve {
+            a: F2mElement::zero(8),
+            ..BinaryCurve::test_curve_f256()
+        };
+        assert!(!even.has_fast_4e_subgroup_check());
+        assert_eq!(even.is_in_4e(&BinaryPoint::Infinity), None);
+
+        // a = 0, b = 1, odd m, but declared cofactor 2: the closed form
+        // would still say G ∈ 4E; with a deliberately wrong order (n + 2)
+        // the [n]P = O path rejects G, which shows that path is taken.
+        let k233 = BinaryCurve::sect233k1();
+        let misdeclared = BinaryCurve {
+            cofactor: BigUint::from(2u32),
+            order: &k233.order + 2u32,
+            ..k233.clone()
+        };
+        assert!(!misdeclared.has_fast_4e_subgroup_check());
+        assert_eq!(misdeclared.is_in_4e(&misdeclared.generator), Some(true));
+        assert!(!misdeclared.is_valid_public_point(&misdeclared.generator));
+        assert!(k233.is_valid_public_point(&k233.generator));
     }
 
     /// `[n]·G = O` where `n` is the generator's order.  This is

@@ -1,0 +1,125 @@
+    Blocking waiting for file lock on package cache
+warning: unused import: `super::koblitz_fast_arith::FastBinaryCurve`
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:77:5
+   |
+77 | use super::koblitz_fast_arith::FastBinaryCurve;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unnecessary trailing semicolons
+    --> src/cryptanalysis/prime_fast.rs:1629:15
+     |
+1629 |             );;;;
+     |               ^^^ help: remove these semicolons
+     |
+     = note: `#[warn(redundant_semicolons)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `crate::cryptanalysis::binary_semaev::binary_semaev_s3`
+   --> src/cryptanalysis/semaev_sat.rs:105:5
+    |
+105 | use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:726:13
+    |
+726 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:727:13
+    |
+727 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:728:13
+    |
+728 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: unreachable pattern
+   --> src/cryptanalysis/koblitz_factor_base_search.rs:857:11
+    |
+842 |         FactorBaseSpec::StandardSubspace { dimension } => {
+    |         ---------------------------------------------- matches all the relevant values
+...
+857 |         | FactorBaseSpec::StandardSubspace { .. }
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+    |
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: unreachable pattern
+   --> src/cryptanalysis/koblitz_factor_base_search.rs:858:11
+    |
+851 |         FactorBaseSpec::CofactorProjected { .. } | FactorBaseSpec::SubgroupOrbits { .. } => None,
+    |         ---------------------------------------- matches all the relevant values
+...
+858 |         | FactorBaseSpec::CofactorProjected { .. }
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+
+warning: unreachable pattern
+   --> src/cryptanalysis/koblitz_factor_base_search.rs:859:11
+    |
+851 |         FactorBaseSpec::CofactorProjected { .. } | FactorBaseSpec::SubgroupOrbits { .. } => None,
+    |                                                    ------------------------------------- matches all the relevant values
+...
+859 |         | FactorBaseSpec::SubgroupOrbits { .. } => None,
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+
+warning: unused variable: `sums`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:3226:9
+     |
+3226 |     let sums = fast.batch_add(&pairs);
+     |         ^^^^ help: if this is intentional, prefix it with an underscore: `_sums`
+
+warning: unused variable: `projected`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:8870:10
+     |
+8870 |     let (projected, _) = project_by_frobenius_orbits_generic(kc, fb);
+     |          ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_projected`
+
+warning: unused variable: `a`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:9878:21
+     |
+9878 |                 let a = sample_relation_scalar(r, &mut rng);
+     |                     ^ help: if this is intentional, prefix it with an underscore: `_a`
+
+warning: unused variable: `b`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:9879:21
+     |
+9879 |                 let b = sample_relation_scalar(r, &mut rng);
+     |                     ^ help: if this is intentional, prefix it with an underscore: `_b`
+
+warning: static `ALL_FACTORS_MEMO` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:527:8
+    |
+527 | static ALL_FACTORS_MEMO: std::sync::OnceLock<std::sync::Mutex<HashMap<u32, Vec<u64>>>> =
+    |        ^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `memo_get` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:530:4
+    |
+530 | fn memo_get(
+    |    ^^^^^^^^
+
+warning: function `memo_put` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:541:4
+    |
+541 | fn memo_put(
+    |    ^^^^^^^^
+
+warning: `crypto` (lib test) generated 16 warnings (run `cargo fix --lib -p crypto --tests` to apply 9 suggestions)
+    Finished `release` profile [optimized] target(s) in 0.46s
+     Running unittests src/lib.rs (target/release/deps/crypto_lib-dc60caf0642b04d8)
+
+running 1 test
+test cryptanalysis::ic_framework::plugins::tests::compact_orbit_scan_matches_archived_n37_source42 ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4060 filtered out; finished in 0.06s
+

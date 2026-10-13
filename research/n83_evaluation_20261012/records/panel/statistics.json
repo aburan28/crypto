@@ -1,0 +1,139 @@
+{
+  "aa": {
+    "bootstrap_resamples": 20000,
+    "bootstrap_seed": 2026101283,
+    "confidence_scope": "seed/run variation on one frozen target and one host; no independent-target or host generalization",
+    "geometric_mean_paired_online_ratio": 0.9970361353576428,
+    "geometric_mean_paired_whole_process_ratio": 0.9860884666255835,
+    "insufficient_replication": false,
+    "median_paired_online_ratio": 1.0154194293674623,
+    "n": 5,
+    "paired_online_ratio_range": [
+      0.9482334060350551,
+      1.026892418587267
+    ],
+    "paired_percentile_bootstrap_95_ci": [
+      0.9679276938562813,
+      1.023496426645205
+    ],
+    "resampling_unit": "matched complete pair; arithmetic mean log-ratio then exponentiation",
+    "rows": [
+      {
+        "baseline_online_ms": 4780.65075,
+        "candidate_online_ms": 4708.055225,
+        "kind": "aa",
+        "online_ratio": 1.0154194293674623,
+        "pair_id": "AA1",
+        "whole_process_ratio": 1.0003277750903141
+      },
+      {
+        "baseline_online_ms": 4403.074679,
+        "candidate_online_ms": 4525.383312,
+        "kind": "aa",
+        "online_ratio": 0.9729727573185518,
+        "pair_id": "AA2",
+        "whole_process_ratio": 0.9583149430197501
+      },
+      {
+        "baseline_online_ms": 2453.041289,
+        "candidate_online_ms": 2586.959364,
+        "kind": "aa",
+        "online_ratio": 0.9482334060350551,
+        "pair_id": "AA3",
+        "whole_process_ratio": 0.9309970082812902
+      },
+      {
+        "baseline_online_ms": 6926.671323,
+        "candidate_online_ms": 6763.265487,
+        "kind": "aa",
+        "online_ratio": 1.0241607898306062,
+        "pair_id": "AA4",
+        "whole_process_ratio": 1.0281126547166246
+      },
+      {
+        "baseline_online_ms": 6107.876728,
+        "candidate_online_ms": 5947.922701,
+        "kind": "aa",
+        "online_ratio": 1.026892418587267,
+        "pair_id": "AA5",
+        "whole_process_ratio": 1.0161078779837298
+      }
+    ],
+    "whole_process_bootstrap_95_ci": [
+      0.9529247063133102,
+      1.0177021097427734
+    ]
+  },
+  "cold_cost": "Whole-process wall includes preparation plus online and launch/load; measured separately from producer online.",
+  "excluded_pairs": [],
+  "input_pair_count": 10,
+  "matched": {
+    "bootstrap_resamples": 20000,
+    "bootstrap_seed": 2026101284,
+    "confidence_scope": "seed/run variation on one frozen target and one host; no independent-target or host generalization",
+    "geometric_mean_paired_online_ratio": 0.7234164905897277,
+    "geometric_mean_paired_whole_process_ratio": 0.0045864286708825345,
+    "insufficient_replication": false,
+    "median_paired_online_ratio": 0.7015537066385578,
+    "n": 5,
+    "paired_online_ratio_range": [
+      0.3924088589061389,
+      1.0796079801934493
+    ],
+    "paired_percentile_bootstrap_95_ci": [
+      0.5312650134273007,
+      0.9654613523037259
+    ],
+    "resampling_unit": "matched complete pair; arithmetic mean log-ratio then exponentiation",
+    "rows": [
+      {
+        "baseline_online_ms": 4516.15997,
+        "candidate_online_ms": 6437.368839000001,
+        "kind": "matched",
+        "online_ratio": 0.7015537066385578,
+        "pair_id": "M1",
+        "whole_process_ratio": 0.004538251317711676
+      },
+      {
+        "baseline_online_ms": 4279.021477,
+        "candidate_online_ms": 6416.44639,
+        "kind": "matched",
+        "online_ratio": 0.6668833832491509,
+        "pair_id": "M2",
+        "whole_process_ratio": 0.004309863967249568
+      },
+      {
+        "baseline_online_ms": 2514.613847,
+        "candidate_online_ms": 6408.147497,
+        "kind": "matched",
+        "online_ratio": 0.3924088589061389,
+        "pair_id": "M3",
+        "whole_process_ratio": 0.0027261291157090798
+      },
+      {
+        "baseline_online_ms": 6698.575519,
+        "candidate_online_ms": 6204.636907,
+        "kind": "matched",
+        "online_ratio": 1.0796079801934493,
+        "pair_id": "M4",
+        "whole_process_ratio": 0.006029841924597768
+      },
+      {
+        "baseline_online_ms": 6176.824943,
+        "candidate_online_ms": 6179.295727000001,
+        "kind": "matched",
+        "online_ratio": 0.9996001511969713,
+        "pair_id": "M5",
+        "whole_process_ratio": 0.006312025794294855
+      }
+    ],
+    "whole_process_bootstrap_95_ci": [
+      0.0035017226930586713,
+      0.005801864546180601
+    ]
+  },
+  "pairs_sha256": "e1f1b019ed5f80a739b0acc9c2e7f971d8e3400f113b47700067b0a64f8c0215",
+  "primary_measurement_gate": "Requires matching resource envelopes, verified scalar/point semantic rows and complete producer online boundaries. Independent replay and a second host still required for promotion.",
+  "qualified_pair_count": 10,
+  "schema": "n83.paired-statistics/v1"
+}

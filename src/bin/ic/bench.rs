@@ -121,6 +121,17 @@ pub struct BenchArgs {
     /// the report.  Binary and Koblitz instances only.
     #[arg(long)]
     pub factor_base_out: Option<std::path::PathBuf>,
+    /// Large primes a `mitm-frobenius:m=3` partial relation may carry:
+    /// 0 (the classic oracle), 1 or 2.  Injected as the oracle's
+    /// `large_primes` parameter into every configuration that does not
+    /// set it; see `ic_framework::large_prime`.
+    #[arg(long)]
+    pub large_primes: Option<u32>,
+    /// Size of the large-prime domain `D` as a multiple of `|F|` in signed
+    /// points; injected as `lp_domain_factor` where the configuration
+    /// does not set it (the oracle's default is 10).
+    #[arg(long)]
+    pub lp_domain_factor: Option<f64>,
 }
 
 /// The factor base a configuration builds, frozen point by point: the
@@ -264,7 +275,10 @@ fn listing() -> Value {
                      "parameters": [{"name": "negation_folded", "means": "1 to halve the table's additions"},
                                     {"name": "m", "means": "summands, 2 or 3"}]},
                     {"name": "mitm-frobenius", "summands": "2 or 3", "regimes": ["koblitz"],
-                     "parameters": [{"name": "m", "means": "summands, 2 or 3"}]},
+                     "parameters": [{"name": "m", "means": "summands, 2 or 3"},
+                                    {"name": "large_primes", "means": "0, 1 or 2 residuals outside the base a partial relation may carry (m=3 only); --large-primes sets it for every configuration"},
+                                    {"name": "lp_domain_factor", "means": "the large-prime domain as a multiple of |F| in signed points (default 10); --lp-domain-factor sets it"},
+                                    {"name": "lp_raw_x_cap", "means": "raw-abscissa cap of the scan that materialises the domain"}]},
                     {"name": "descent-algebraic", "summands": "2 or 3", "regimes": ["char2", "koblitz"],
                      "parameters": [{"name": "m", "means": "summands, 2 (descends S3) or 3 (descends S4)"}],
                      "needs": "a subspace factor base (binary-subspace or koblitz-orbit) and --solver"},
@@ -756,7 +770,21 @@ fn spec_from(
         .cloned()
         .unwrap_or_else(|| defaults.targets.clone());
     let (fb_name, fb_params) = parse_plugin(&fb)?;
-    let (or_name, or_params) = parse_plugin(&or)?;
+    let (or_name, mut or_params) = parse_plugin(&or)?;
+    // The large-prime flags are defaults for the Frobenius table oracle;
+    // a configuration that names them itself wins.
+    if or_name == "mitm-frobenius" {
+        if let Some(lp) = defaults.large_primes {
+            if or_params.get("large_primes").is_none() {
+                or_params.set("large_primes", lp.to_string());
+            }
+        }
+        if let Some(c) = defaults.lp_domain_factor {
+            if or_params.get("lp_domain_factor").is_none() {
+                or_params.set("lp_domain_factor", c.to_string());
+            }
+        }
+    }
     Ok(PipelineSpec {
         factor_base: fb_name,
         factor_base_params: fb_params,

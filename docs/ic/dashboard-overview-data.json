@@ -3349,7 +3349,7 @@
       "scheduled": 216
     }
   ],
-  "historical_ledger_sha256": "2584af3ab1bc50cee7f3a4cda63a7efc5d3f5e7eb50a47c5cf843f70a2efebb0",
+  "historical_ledger_sha256": "a8369fc06069c0cf5721af1b06e07a6129fb5b93bb7066fe27ec6f09ed713b51",
   "historical_regime_summary_sha256": "3db51a80961cc2c457c9dadee8d3a1cbf9dc713a87647b230eb5496c0cc9eba0",
   "historical_overview_panels": [
     {
@@ -3366,15 +3366,35 @@
     },
     {
       "section_id": "isogeny-conductor-gap-20261011",
-      "sha256": "acc59533c1cc95fc4d94fa41378f518bcfb590a62c094a8c222e26545224de83"
+      "sha256": "2d0e7359fd4973dd62372943733eadd23fed1edeac337844b2b9eec5e7bcb266"
     },
     {
       "section_id": "isogeny-conductor-gap-round2-20261011",
       "sha256": "06618d18fef09fe098306e13af7e30af081937b3054dfd40477a44c62cacac61"
     },
     {
+      "section_id": "isogeny-conductor-gap-round3-20261011",
+      "sha256": "13b5e05d36c45e6469febee83a1c265736bc0816d5508488b70eb876ee3958aa"
+    },
+    {
+      "section_id": "conductor-gap-ic37-20261012",
+      "sha256": "f68e5073d1b8feb4ba088e3c02f9ecdf2b185758d97d74ba1ca5819965a2290e"
+    },
+    {
+      "section_id": "drastic-conductor-gap-20261012",
+      "sha256": "010582c80dd74ab2fd4a222070b5f07c14e8366e81aa33ff5a303b662b2ecb87"
+    },
+    {
+      "section_id": "drastic-conductor-gap-round2-20261012",
+      "sha256": "521626494d0cb8c3852e9c3a8383282690c6a81c14070aef28b5c9ed62a3b74d"
+    },
+    {
+      "section_id": "drastic-conductor-gap-round3-20261012",
+      "sha256": "b7e2dd5fafec18cd4c697debe246f9905d1e564ea1a62239e1ae2e13f8001802"
+    },
+    {
       "section_id": "lab-ecbench-all",
-      "sha256": "e631294b66a0b215889cb5047a4d97c1053f21052e7f69d5c875274c432db033"
+      "sha256": "b5aad9197a109670306d9715d7501461363a82972503b1c7428638c0aa2b357e"
     },
     {
       "section_id": "lab-pair-claw",
@@ -3382,16 +3402,12 @@
     },
     {
       "section_id": "lab-progress",
-      "sha256": "141be685193be44729e633f547ed30157e62cdf906bfc741c3a22961daf89da2",
-      "sha256": "8cb2f23da6e83884e95a22315073d16686624fe03a1a710ea9a849453266a554",
-      "sha256": "288a371bc1b6fb8bc3af6dbd32483586fbdf0072512d041eff914807077f573a"
+      "sha256": "d9662060e646fab4b8e97fc4e90ca4f75cc0a67fea8e2ef665d0fbd8306fab8d"
     },
     {
       "section_id": "lab-currency",
       "sha256": "1258aca960d4b3555ac96e2a8b4d32e51fe3cf4925df10d7e60c143fab1c986c"
     }
   ],
-  "progress_timeline_sha256": "5a1ee11bfa55b46f55aa944463bcdc78254c573ee26a18c5dad00ed0b39dfc29",
-  "progress_timeline_sha256": "34d3a4d187619e679d090221c1c62ffa5d971a83c1100e3e0e912eb08cfe8c5b",
-  "progress_timeline_sha256": "d30f6fb80ae936fb30c8a8c44c54848c654a2b0f05f49d62ba55be882aeece9e"
+  "progress_timeline_sha256": "b80af484e7629a66524043c35e66ee7b8a493fe00ad98cbff16facbc2e1ff9a5"
 }

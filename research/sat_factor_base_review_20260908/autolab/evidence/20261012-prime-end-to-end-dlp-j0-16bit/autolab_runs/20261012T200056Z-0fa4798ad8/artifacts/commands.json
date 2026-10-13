@@ -1,0 +1,18 @@
+{
+  "build": "cargo build --release --example j0_known_answer_bits",
+  "custom_example": "j0_known_answer_bits",
+  "direct": "/Volumes/SSD990/ic-auto7/target/release/examples/j0_known_answer_bits 16",
+  "direct_argv": [
+    "/Volumes/SSD990/ic-auto7/target/release/examples/j0_known_answer_bits",
+    "16"
+  ],
+  "direct_producer_fixture_count": 1,
+  "env": {},
+  "fixtures": 1,
+  "online_target_count": 1,
+  "precompute_fixtures": 0,
+  "rho": null,
+  "rho_argv": null,
+  "rho_producer_fixture_count": 0,
+  "stage": "end_to_end_dlp"
+}

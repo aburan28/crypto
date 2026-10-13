@@ -84,6 +84,9 @@ impl Hasher for MaskHasher {
 /// Monomial mask → value, hashed by [`MaskHasher`].
 pub(crate) type MaskMap<V> = HashMap<u64, V, BuildHasherDefault<MaskHasher>>;
 
+/// A monomial-mask set with the same high-bit mixing as [`MaskMap`].
+pub(crate) type MaskSet = HashSet<u64, BuildHasherDefault<MaskHasher>>;
+
 #[cfg(test)]
 mod tests {
     use super::*;

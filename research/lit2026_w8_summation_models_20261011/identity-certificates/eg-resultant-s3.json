@@ -1,0 +1,600 @@
+{
+  "id": "IDC1hc7b594938b50f160",
+  "independence": "issued by examples/lit2026_w8_summation_models.rs (cert); checked by cryptanalysis::identity_certificate::check replaying from the sealed id and seed",
+  "modulus": 2305843009213693951,
+  "points": 32,
+  "proof": null,
+  "schema": "identity.certificate/v1",
+  "seed": 1340137711700279298,
+  "statement": {
+    "degree_bound": 6,
+    "lhs": {
+      "args": [
+        {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "wR",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "w2",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "w1",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "w1",
+                      "op": "var"
+                    },
+                    {
+                      "args": "w2",
+                      "op": "var"
+                    },
+                    {
+                      "args": "wR",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                }
+              ],
+              "op": "add"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "wR",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "w2",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "w1",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "w1",
+                      "op": "var"
+                    },
+                    {
+                      "args": "w2",
+                      "op": "var"
+                    },
+                    {
+                      "args": "wR",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                }
+              ],
+              "op": "add"
+            }
+          ],
+          "op": "mul"
+        },
+        {
+          "args": {
+            "args": [
+              {
+                "args": [
+                  {
+                    "args": [
+                      {
+                        "args": 1,
+                        "op": "const"
+                      },
+                      {
+                        "args": "wR",
+                        "op": "var"
+                      }
+                    ],
+                    "op": "mul"
+                  },
+                  {
+                    "args": [
+                      {
+                        "args": 1,
+                        "op": "const"
+                      },
+                      {
+                        "args": "w2",
+                        "op": "var"
+                      }
+                    ],
+                    "op": "mul"
+                  },
+                  {
+                    "args": [
+                      {
+                        "args": 1,
+                        "op": "const"
+                      },
+                      {
+                        "args": "w1",
+                        "op": "var"
+                      }
+                    ],
+                    "op": "mul"
+                  },
+                  {
+                    "args": [
+                      {
+                        "args": 1,
+                        "op": "const"
+                      },
+                      {
+                        "args": "w1",
+                        "op": "var"
+                      },
+                      {
+                        "args": "w2",
+                        "op": "var"
+                      },
+                      {
+                        "args": "wR",
+                        "op": "var"
+                      }
+                    ],
+                    "op": "mul"
+                  }
+                ],
+                "op": "add"
+              },
+              {
+                "args": [
+                  {
+                    "args": [
+                      {
+                        "args": 1,
+                        "op": "const"
+                      }
+                    ],
+                    "op": "mul"
+                  }
+                ],
+                "op": "add"
+              }
+            ],
+            "op": "mul"
+          },
+          "op": "neg"
+        },
+        {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    }
+                  ],
+                  "op": "mul"
+                }
+              ],
+              "op": "add"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    }
+                  ],
+                  "op": "mul"
+                }
+              ],
+              "op": "add"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "wR",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "w2",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "w1",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                }
+              ],
+              "op": "add"
+            }
+          ],
+          "op": "mul"
+        }
+      ],
+      "op": "add"
+    },
+    "name": "Resultant in s of the FGHR symmetrised S_3 (Koblitz, b = 1) equals the Semaev S_3 of E/<T> in w = 1/X, mod 2",
+    "rhs": {
+      "args": [
+        {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": 1,
+                  "op": "const"
+                },
+                {
+                  "args": "wR",
+                  "op": "var"
+                },
+                {
+                  "args": "wR",
+                  "op": "var"
+                }
+              ],
+              "op": "mul"
+            },
+            {
+              "args": [
+                {
+                  "args": 1,
+                  "op": "const"
+                },
+                {
+                  "args": "w2",
+                  "op": "var"
+                },
+                {
+                  "args": "w2",
+                  "op": "var"
+                }
+              ],
+              "op": "mul"
+            },
+            {
+              "args": [
+                {
+                  "args": 1,
+                  "op": "const"
+                },
+                {
+                  "args": "w1",
+                  "op": "var"
+                },
+                {
+                  "args": "w2",
+                  "op": "var"
+                },
+                {
+                  "args": "wR",
+                  "op": "var"
+                }
+              ],
+              "op": "mul"
+            },
+            {
+              "args": [
+                {
+                  "args": 1,
+                  "op": "const"
+                },
+                {
+                  "args": "w1",
+                  "op": "var"
+                },
+                {
+                  "args": "w1",
+                  "op": "var"
+                }
+              ],
+              "op": "mul"
+            },
+            {
+              "args": [
+                {
+                  "args": 1,
+                  "op": "const"
+                },
+                {
+                  "args": "w1",
+                  "op": "var"
+                },
+                {
+                  "args": "w1",
+                  "op": "var"
+                },
+                {
+                  "args": "w2",
+                  "op": "var"
+                },
+                {
+                  "args": "w2",
+                  "op": "var"
+                },
+                {
+                  "args": "wR",
+                  "op": "var"
+                },
+                {
+                  "args": "wR",
+                  "op": "var"
+                }
+              ],
+              "op": "mul"
+            }
+          ],
+          "op": "add"
+        },
+        {
+          "args": [
+            {
+              "args": 2,
+              "op": "const"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "w2",
+                      "op": "var"
+                    },
+                    {
+                      "args": "wR",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "w1",
+                      "op": "var"
+                    },
+                    {
+                      "args": "wR",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "w1",
+                      "op": "var"
+                    },
+                    {
+                      "args": "w2",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": -1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "w1",
+                      "op": "var"
+                    },
+                    {
+                      "args": "w2",
+                      "op": "var"
+                    },
+                    {
+                      "args": "wR",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "w1",
+                      "op": "var"
+                    },
+                    {
+                      "args": "w2",
+                      "op": "var"
+                    },
+                    {
+                      "args": "wR",
+                      "op": "var"
+                    },
+                    {
+                      "args": "wR",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "w1",
+                      "op": "var"
+                    },
+                    {
+                      "args": "w2",
+                      "op": "var"
+                    },
+                    {
+                      "args": "w2",
+                      "op": "var"
+                    },
+                    {
+                      "args": "wR",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": [
+                    {
+                      "args": 1,
+                      "op": "const"
+                    },
+                    {
+                      "args": "w1",
+                      "op": "var"
+                    },
+                    {
+                      "args": "w1",
+                      "op": "var"
+                    },
+                    {
+                      "args": "w2",
+                      "op": "var"
+                    },
+                    {
+                      "args": "wR",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                }
+              ],
+              "op": "add"
+            }
+          ],
+          "op": "mul"
+        }
+      ],
+      "op": "add"
+    },
+    "source": "lit2026 W8 (Drylo, ePrint 2026/1299): examples/lit2026_w8_summation_models.rs eg_identity_statement; symmetrised terms from koblitz_symmetrised::symmetrised_terms, Semaev terms from plain_terms. Certified over Z as LHS = E + 2Q (the F_2 claim is its reduction mod 2).",
+    "variables": [
+      "w1",
+      "w2",
+      "wR"
+    ]
+  },
+  "value_digest": "deffdea5e13590b768790652135d63354c70d0767002b29665cd6b3fd4a3eddb"
+}

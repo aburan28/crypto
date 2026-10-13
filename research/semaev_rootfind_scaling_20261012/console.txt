@@ -1,0 +1,43 @@
+Root-finding decomposition — scaling to bigger curves.
+Public synthetic known-answer; every decomposition re-checked in the group.
+
+=== Prime, native u64 (Fp64): direct-subtraction 2-decomposition ===
+
+ bits   |F|  rand tgt  root-find/tgt    verified  ms total
+   40   120    0/2000        2.95µs     200/200       5.9
+   48   120    0/2000        3.87µs     200/200       7.7
+   56   120    0/2000        3.35µs     200/200       6.7
+   61   120    0/2000        8.82µs     200/200      17.6
+
+=== Prime, arbitrary precision (BigUint) at ~83 bits ===
+
+   bits   |F|    rand tgt   root-find/tgt    verified
+     83    80       0/200          5.99ms     100/100
+  p = 2^83 − 55 (largest prime < 2^83); every decomposition verified in-group.
+
+=== Binary F_(2^53): pairs-and-solve (root-finding) decomposition ===
+
+  correctness anchor (ℓ=6): decompose == exhaustive S₄ search on 200/200 targets.
+
+   ℓ       |V|     targets      decomp/tgt
+   8       256          40         38.08ms
+  10      1024          40        584.66ms
+  11      2048           8           2.48s
+  (subspace bounded on purpose: the Koblitz Frobenius ℓ = ord_2(53) = 52 ⇒ |V| = 2^52,
+   which no index-calculus method can materialise — see the diagnosis below.)
+
+=== Diagnosis: the two walls at F_(2^83) and 2^83-scale primes ===
+
+  native u64 width : Fp64 needs p < 2^62; PairSumTable / Gf2 pack x into u64 (n ≤ 63).
+                     → 83-bit prime runs here only via BigUint (measured above, slower);
+                       F_(2^83) exceeds the single-word binary field (Gf2 asserts n ≤ 63)
+                       and the pair-table packing (n ≤ 62); a u128 field is the fix.
+  Koblitz factor base (fundamental, affects F4 and root finding equally):
+                     ℓ = ord_2(n):  n=53 → ℓ=52 (|V|=2^52),  n=83 → ℓ=82 (|V|=2^82).
+                     The invariant factor base is exponential, so the *full attack* is
+                     infeasible at these n for ANY decomposition engine. The oracle
+                     itself scales (shown above on a bounded subspace / factor base).
+
+Wrote raw results to research/semaev_rootfind_scaling_20261012/results.json
+
+Every decomposition verified in-group; no security claim (see header).
