@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pdp_root_finder_ecbench_20261013/sessions/n13/comparisons/rho-strong__rho-strong-aa.json
+ops (ok): rho-strong-aa / rho-strong = 1.0000 [1.000, 1.000] (cluster) over 40 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.0157 [0.951, 1.165]
+| curve | log2 r | workloads | rho-strong-aa / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m13-t181-515ee569 | 10.97 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | rho-strong-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W1d5b9217f460 | icv1-f2m13-t181-515ee569 | 10.97 | 14.0458 | 14.0458 | 1.0000 |
+| W268b53a21c15 | icv1-f2m13-t181-515ee569 | 10.97 | 14.7608 | 14.7608 | 1.0000 |
+| W55ee9b215d63 | icv1-f2m13-t181-515ee569 | 10.97 | 14.0413 | 14.0413 | 1.0000 |
+| W689bed0ecc5c | icv1-f2m13-t181-515ee569 | 10.97 | 14.5016 | 14.5016 | 1.0000 |
+| Wb0d5fdb5f44c | icv1-f2m13-t181-515ee569 | 10.97 | 14.4837 | 14.4837 | 1.0000 |
+| Wcf0c3b0c08eb | icv1-f2m13-t181-515ee569 | 10.97 | 14.3407 | 14.3407 | 1.0000 |
+| Wf015eb7e6950 | icv1-f2m13-t181-515ee569 | 10.97 | 14.0324 | 14.0324 | 1.0000 |
+| Wf0e5b345f4a1 | icv1-f2m13-t181-515ee569 | 10.97 | 15.9763 | 15.9763 | 1.0000 |

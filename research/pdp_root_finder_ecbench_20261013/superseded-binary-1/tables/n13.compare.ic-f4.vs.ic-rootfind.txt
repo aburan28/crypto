@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pdp_root_finder_ecbench_20261013/sessions/n13/comparisons/ic-f4__ic-rootfind.json
+ops (ok): ic-rootfind / ic-f4 = 2.5599 [2.460, 2.658] (cluster) over 40 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 0.0030 [0.003, 0.003]
+| curve | log2 r | workloads | ic-rootfind / ic-f4 | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m13-t181-515ee569 | 10.97 | 8 | 2.5599 | [2.4604, 2.6577] | cluster |
+
+| workload | curve | log2 r | ic-f4 mean S | ic-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W1d5b9217f460 | icv1-f2m13-t181-515ee569 | 10.97 | 16.6692 | 44.0032 | 2.6398 |
+| W268b53a21c15 | icv1-f2m13-t181-515ee569 | 10.97 | 15.3367 | 41.2923 | 2.6924 |
+| W55ee9b215d63 | icv1-f2m13-t181-515ee569 | 10.97 | 16.4147 | 41.9727 | 2.5570 |
+| W689bed0ecc5c | icv1-f2m13-t181-515ee569 | 10.97 | 16.1315 | 41.5754 | 2.5773 |
+| Wb0d5fdb5f44c | icv1-f2m13-t181-515ee569 | 10.97 | 16.6531 | 42.0739 | 2.5265 |
+| Wcf0c3b0c08eb | icv1-f2m13-t181-515ee569 | 10.97 | 16.4232 | 42.3213 | 2.5769 |
+| Wf015eb7e6950 | icv1-f2m13-t181-515ee569 | 10.97 | 15.9981 | 40.7449 | 2.5469 |
+| Wf0e5b345f4a1 | icv1-f2m13-t181-515ee569 | 10.97 | 15.8192 | 37.3850 | 2.3633 |

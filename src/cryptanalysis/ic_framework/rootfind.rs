@@ -10,22 +10,24 @@
 //! - **`rootfind-mitm`** (`m = 3`): a pair table of `P_i + P_j`
 //!   (negation folded, the harness's [`PairTable`]) built once per run;
 //!   per target the `2A` points `R ∓ P_k`, one representative `P_k` an
-//!   abscissa, computed in one batch and probed in the table.  `m = 2`
-//!   probes `R` itself.
+//!   abscissa, computed in blocks of 32 abscissae and probed in the table,
+//!   stopping at the first hit.  `m = 2` probes `R` itself.
 //! - **`rootfind-pairs`** (`m = 3`): no table; the row points `U = R ∓ P_i`,
 //!   and for each row the candidates `U ∓ P_j` over the abscissae
 //!   `x_j ≥ x_i`, tested for membership in the base.  The enumeration
 //!   floor, kept as the memoryless control.
 //!
 //! **Charged:** every point addition, one each, through the ledger: the
-//! table build, the `2A` additions a target of `rootfind-mitm` (the same
-//! count `mitm:m=3` charges over the `2A` signed points), the probe's
-//! confirming addition on a key hit, and every candidate of
-//! `rootfind-pairs`.  **Counted, not charged:** table lookups and
-//! membership tests (`lookups`), and the batched field inversions
-//! (`inversions`: one per batch where the group batches, Montgomery's
-//! trick over the whole slice, [`PairedAdd`]).  The witness indices
-//! returned are exact: a probe re-adds the pair it found and a
+//! table build, the additions a target of `rootfind-mitm` (`2A` for a
+//! refutation, the count `mitm:m=3` charges over the `2A` signed points;
+//! at most a block more than `mitm` on a hit), the probe's confirming
+//! addition on a key hit, and every candidate of `rootfind-pairs`.
+//! **Counted, not charged:** table lookups and membership tests
+//! (`lookups`).  Where the group batches ([`PairedAdd`]: the binary
+//! group, through Montgomery's trick over a block) the additions are
+//! still charged one each: the shared inversion is how they are done,
+//! not work beside them, so the recorded cost is complete.  The witness
+//! indices returned are exact: a probe re-adds the pair it found and a
 //! membership test compares full point keys.
 //!
 //! The binary group batches through [`FastCurve::add_many`]; the prime
@@ -77,11 +79,17 @@ impl PairedAdd for BinaryGroup<'_> {
             return;
         }
         ops.adds += qs.len() as u64;
-        counters.inversions += 1;
+        let _ = counters;
         let mut scratch = BatchScratch::default();
         self.0.add_many(r, qs, out, &mut scratch);
     }
 }
+
+/// Abscissae a batch of `rootfind-mitm`: `R ∓ P_k` for a block are
+/// computed together, then probed, so a hit stops the scan within its
+/// block and a refutation costs the same `2A` additions however it is
+/// batched.
+const BLOCK: usize = 32;
 
 /// One signed representative an abscissa: the base point's index, the
 /// point, its negative, and whether the point is its own negative (the
@@ -124,10 +132,11 @@ fn row_points<G: PairedAdd>(
     counters: &mut OracleCounters,
     r: G::Elt,
     from: usize,
+    to: usize,
 ) -> Vec<(usize, G::Elt)> {
-    let mut minus = Vec::with_capacity(reps.point.len() - from);
-    g.add_many(ops, counters, r, &reps.negated[from..], &mut minus);
-    let plus_src: Vec<G::Elt> = (from..reps.point.len())
+    let mut minus = Vec::with_capacity(to - from);
+    g.add_many(ops, counters, r, &reps.negated[from..to], &mut minus);
+    let plus_src: Vec<G::Elt> = (from..to)
         .filter(|&k| !reps.self_negated[k])
         .map(|k| reps.point[k])
         .collect();
@@ -138,7 +147,7 @@ fn row_points<G: PairedAdd>(
         out.push((reps.index[k], s));
     }
     let mut it = plus.into_iter();
-    for k in from..reps.point.len() {
+    for k in from..to {
         if !reps.self_negated[k] {
             out.push((
                 fb.neg_index[reps.index[k]],
@@ -246,13 +255,19 @@ impl<G: PairedAdd> DecompositionOracle<G> for RootfindMitmOracle<G::Elt> {
                 .probe(g, fb, ops, &mut counters.lookups, point)
                 .map(|(j, l)| vec![j, l]);
         }
-        for (k, s) in row_points(g, reps, fb, ops, counters, point, 0) {
-            if g.is_identity(&s) {
-                continue;
+        let a = reps.index.len();
+        let mut from = 0;
+        while from < a {
+            let to = (from + BLOCK).min(a);
+            for (k, s) in row_points(g, reps, fb, ops, counters, point, from, to) {
+                if g.is_identity(&s) {
+                    continue;
+                }
+                if let Some((j, l)) = table.probe(g, fb, ops, &mut counters.lookups, s) {
+                    return Some(vec![k, j, l]);
+                }
             }
-            if let Some((j, l)) = table.probe(g, fb, ops, &mut counters.lookups, s) {
-                return Some(vec![k, j, l]);
-            }
+            from = to;
         }
         None
     }
@@ -323,7 +338,8 @@ impl<G: PairedAdd> DecompositionOracle<G> for RootfindPairsOracle<G::Elt> {
     ) -> Option<Vec<usize>> {
         let g = ctx.group;
         let reps = self.reps.as_ref()?;
-        let rows = row_points(g, reps, fb, ops, counters, point, 0);
+        let a = reps.index.len();
+        let rows = row_points(g, reps, fb, ops, counters, point, 0, a);
         // Row `i` pairs with the abscissae `x_j ≥ x_i`; the position of a
         // row point's abscissa among the representatives is recovered
         // from its index.
@@ -338,7 +354,7 @@ impl<G: PairedAdd> DecompositionOracle<G> for RootfindPairsOracle<G::Elt> {
                 continue;
             }
             let from = position[&si];
-            for (sj, c) in row_points(g, reps, fb, ops, counters, u, from) {
+            for (sj, c) in row_points(g, reps, fb, ops, counters, u, from, a) {
                 counters.lookups += 1;
                 if g.is_identity(&c) {
                     continue;
@@ -421,13 +437,13 @@ mod tests {
             name: inst.name.clone(),
             field_degree: Some(inst.n),
         };
-        let (_, params) = Params::parse_spec("binary-subspace:dimension=5").unwrap();
+        let (_, params) = Params::parse_spec("binary-subspace:dimension=6").unwrap();
         let mut ops = GroupOps::default();
         let fb = BinarySubspaceBase { instance: &inst }
             .build(&ctx, &params, &mut ops)
             .unwrap();
         let mut scratch = GroupOps::default();
-        let targets: Vec<_> = (1..=48u64)
+        let targets: Vec<_> = (1..=96u64)
             .map(|k| {
                 g.mul(
                     &mut scratch,
@@ -458,7 +474,7 @@ mod tests {
             .build(&ctx, &params, &mut ops)
             .unwrap();
         let mut scratch = GroupOps::default();
-        let targets: Vec<_> = (1..=48u64)
+        let targets: Vec<_> = (1..=96u64)
             .map(|k| {
                 inst.curve.mul(
                     &mut scratch,

@@ -397,25 +397,27 @@ refuses to run while a `KIC_*`, `F4_*` or `SOLVER_*` tuning override is set.
 decomposition oracles of `research/pdp_root_finder_20261012` as plug-ins
 (`ic_framework::rootfind`), on any base and both tracks. `rootfind-mitm`
 builds the negation-folded pair table once (`full_table=1` for every
-`i ≤ j` pair) and, per target, computes the `2A` points `R ∓ P_k` — one
-representative `P_k` an abscissa — in one batch and probes each;
+`i ≤ j` pair) and, per target, computes the points `R ∓ P_k` — one
+representative `P_k` an abscissa — in blocks of 32 abscissae, probes each
+and stops at the first hit;
 `rootfind-pairs` keeps no table and tests every candidate `U ∓ P_j` of
 every row point `U = R ∓ P_i` for membership in the base: the enumeration
 floor, the memoryless control.
 
-- **Charged:** every point addition, one each: the table build, the `2A`
-  additions a target (the count `mitm:m=3` charges over the `2A` signed
-  points, so the two table oracles are equal in `S` by construction), the
-  probe's confirming addition on a key hit, and every candidate of
-  `rootfind-pairs`.
+- **Charged:** every point addition, one each: the table build, the
+  additions a target (`2A` for a refutation, the count `mitm:m=3` charges
+  over the `2A` signed points; on a hit at most one block more than
+  `mitm`'s early exit), the probe's confirming addition on a key hit, and
+  every candidate of `rootfind-pairs`.  The cost is complete: on a binary
+  curve the group computes a block with one shared inversion
+  (`FastCurve::add_many`), which is how the charged additions are done,
+  not work beside them; on a prime curve the default path inverts once an
+  addition.
 - **Counted, not charged:** table lookups and membership tests
-  (`lookups`), and the batched field inversions (`inversions`, one per
-  batch: on a binary curve the group shares one inversion over the whole
-  slice through `FastCurve::add_many`; on a prime curve the default path
-  inverts once an addition).  What the new ids change against `mitm` is
-  therefore the arithmetic behind the same charged additions, which wall
-  time sees and `S` does not; and the memoryless three-summand arm, which
-  the harness had not had.
+  (`lookups`).  What the new ids change against `mitm` is therefore the
+  arithmetic behind the same charged additions, which wall time sees and
+  `S` does not; and the memoryless three-summand arm, which the harness
+  had not had.
 
 **Calibration.** The unit has been checked against theory in
 [`research/ecbench_calibration_20261002`](../../research/ecbench_calibration_20261002/README.md).
