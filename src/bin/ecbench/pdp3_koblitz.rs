@@ -97,8 +97,8 @@ use crypto_lib::binary_ecc::{BinaryCurve, F2mElement};
 
 use crypto_lib::cryptanalysis::ecbench::methods::BinaryPlugins;
 use crypto_lib::cryptanalysis::ic_boundary::{
-    koblitz_factor_base, lift_abscissae, BinaryGroup, BinaryInstance, ColumnFold, FactorBase,
-    GroupOps, OracleCounters,
+    koblitz_factor_base, lift_abscissae, BinaryGroup, BinaryInstance, ColumnFold, CountedGroup,
+    FactorBase, GroupOps, OracleCounters,
 };
 use crypto_lib::cryptanalysis::ic_framework::stages::{
     DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SolverCost, SolverTotals,
