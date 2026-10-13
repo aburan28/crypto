@@ -32,7 +32,8 @@ for entry in k2202_load75:2202:0:1 k2000_load75:2000:0:1 k1798_dense:1798:1:0; d
   date -u +%Y-%m-%dT%H:%M:%SZ > "$run_dir/started_utc.txt"
   set +e
   python3 "$study_dir/run_with_usage.py" --receipt "$run_dir/usage.json" --limit-seconds 900 -- \
-    env KIC_PACKED_ROOT_TABLE=1 KIC_PACKED_ROOT_TABLE_DENSE="$dense" KIC_PACKED_ROOT_TABLE_LOAD75="$load75" \
+    env -i PATH=/usr/bin:/bin:/opt/homebrew/bin KIC_PACKED_ROOT_TABLE=1 KIC_PACKED_ROOT_TABLE_DENSE="$dense" KIC_PACKED_ROOT_TABLE_LOAD75="$load75" \
+      KIC_ROOT_BLOOM=0 KIC_SPARSE_CANONICAL=0 \
       KIC_RANK_THREADS=12 KIC_TARGET_THREADS=1 KIC_DUMP_BASE="$run_dir/base_dump.jsonl" \
       "$producer" "construct:83:1:$columns" "$study_dir/targets.jsonl" 29 \
       "$run_dir/targets_result.jsonl" > "$run_dir/stdout.jsonl" 2> "$run_dir/stderr.log"

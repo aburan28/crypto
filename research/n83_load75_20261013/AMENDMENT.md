@@ -24,3 +24,5 @@ peak-RSS receipt per arm in `runs/panel/`. It retains the same 900-second cap,
 source/binary/input hashes and reverse arm order. The wrapper's preflight
 receipt is `usage_preflight.json`. The independent checker accepts only
 complete zero-exit rows and checks each panel resource receipt.
+The panel starts its producer with a clean environment containing the declared
+KIC flags, so optional Bloom and sparse-canonical paths are explicitly off.
