@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p24/comparisons/rho-neg__rho-neg-aa.json
+ops (ok): rho-neg-aa / rho-neg = 1.0000 [1.000, 1.000] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.0480 [1.000, 1.105]
+| curve | log2 r | workloads | rho-neg-aa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp24-t2705-27cbb01b | 23.38 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | rho-neg-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0287641ad93a | icv1-fp24-t2705-27cbb01b | 23.38 | 0.9948 | 0.9948 | 1.0000 |
+| W6eec974fe4d1 | icv1-fp24-t2705-27cbb01b | 23.38 | 1.0103 | 1.0103 | 1.0000 |
+| W92133e527902 | icv1-fp24-t2705-27cbb01b | 23.38 | 1.5583 | 1.5583 | 1.0000 |
+| Wa9bf5407587e | icv1-fp24-t2705-27cbb01b | 23.38 | 1.0308 | 1.0308 | 1.0000 |
+| Wc92b25cbd51e | icv1-fp24-t2705-27cbb01b | 23.38 | 0.9524 | 0.9524 | 1.0000 |
+| We4c95c8871a0 | icv1-fp24-t2705-27cbb01b | 23.38 | 0.9214 | 0.9214 | 1.0000 |
+| We9584cba4c14 | icv1-fp24-t2705-27cbb01b | 23.38 | 1.4504 | 1.4504 | 1.0000 |
+| Wf7e403c855fa | icv1-fp24-t2705-27cbb01b | 23.38 | 1.2454 | 1.2454 | 1.0000 |

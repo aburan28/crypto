@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p24/comparisons/ic-abscissa__ic-rootfind.json
+ops (ok): ic-rootfind / ic-abscissa = 1.0119 [0.989, 1.035] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.1739 [1.138, 1.245]
+| curve | log2 r | workloads | ic-rootfind / ic-abscissa | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp24-t2705-27cbb01b | 23.38 | 8 | 1.0119 | [0.9895, 1.0353] | cluster |
+
+| workload | curve | log2 r | ic-abscissa mean S | ic-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0287641ad93a | icv1-fp24-t2705-27cbb01b | 23.38 | 33.8540 | 33.0510 | 0.9763 |
+| W6eec974fe4d1 | icv1-fp24-t2705-27cbb01b | 23.38 | 33.3180 | 33.5836 | 1.0080 |
+| W92133e527902 | icv1-fp24-t2705-27cbb01b | 23.38 | 32.2614 | 33.8040 | 1.0478 |
+| Wa9bf5407587e | icv1-fp24-t2705-27cbb01b | 23.38 | 32.9406 | 33.9321 | 1.0301 |
+| Wc92b25cbd51e | icv1-fp24-t2705-27cbb01b | 23.38 | 33.8986 | 34.0198 | 1.0036 |
+| We4c95c8871a0 | icv1-fp24-t2705-27cbb01b | 23.38 | 33.3422 | 34.5460 | 1.0361 |
+| We9584cba4c14 | icv1-fp24-t2705-27cbb01b | 23.38 | 33.4122 | 32.8601 | 0.9835 |
+| Wf7e403c855fa | icv1-fp24-t2705-27cbb01b | 23.38 | 32.9616 | 33.3443 | 1.0116 |
