@@ -257,6 +257,7 @@ pub mod p256_isogeny_cover;
 pub mod p256_isogeny_task;
 pub mod p256_isogeny_walk;
 pub mod p256_structural;
+pub mod p256_trapdoor_round2;
 pub mod pc_degree_avg;
 pub mod pc_degree_harness;
 pub mod petit_quisquater;
