@@ -2339,7 +2339,7 @@ mod wide {
         let max_states = reps
             .len()
             .checked_mul(reps.len())
-            .and_then(|pairs| pairs.checked_mul(n as usize))
+            .and_then(|pairs| pairs.checked_mul(n))
             .expect("state capacity exceeds usize");
         let mut states83 = if packed_state83 {
             Vec::with_capacity(max_states)
