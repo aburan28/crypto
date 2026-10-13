@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" font-family="Helvetica, Arial, sans-serif" font-size="12">
+  <rect width="760" height="300" fill="#fcfcfb"/>
+  <text x="20" y="24" font-size="13" font-weight="bold" fill="#1a1a19">Branch points of the three conjugate double covers B, tau B, tau^2 B (schematic for the measured m, r)</text>
+  <g fill="#6b6a63"><text x="20" y="62">row = one cover; filled dot = branch point; columns = points of P^1</text></g>
+
+  <!-- type m=3 r=5 -->
+  <g transform="translate(20,80)">
+    <rect width="225" height="200" rx="6" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
+    <text x="12" y="22" font-weight="bold" fill="#1a1a19">genus 3, m = 3, r = 5</text>
+    <text x="12" y="40" fill="#6b6a63">hyperelliptic; seen only when 4 | #E(K)</text>
+    <g fill="#6b6a63" font-size="11"><text x="58" y="66">a</text><text x="88" y="66">b</text><text x="118" y="66">p</text><text x="143" y="66">tau p</text><text x="178" y="66">tau^2 p</text></g>
+    <g font-size="11" fill="#1a1a19"><text x="12" y="94">B</text><text x="12" y="124">tau B</text><text x="12" y="154">tau^2 B</text></g>
+    <g fill="#2a78d6"><circle cx="62" cy="90" r="6"/><circle cx="92" cy="90" r="6"/><circle cx="122" cy="90" r="6"/><circle cx="157" cy="90" r="6"/>
+      <circle cx="62" cy="120" r="6"/><circle cx="92" cy="120" r="6"/><circle cx="157" cy="120" r="6"/><circle cx="195" cy="120" r="6"/>
+      <circle cx="62" cy="150" r="6"/><circle cx="92" cy="150" r="6"/><circle cx="195" cy="150" r="6"/><circle cx="122" cy="150" r="6"/></g>
+    <text x="12" y="184" fill="#6b6a63">a configuration with these m, r</text>
+  </g>
+  <!-- type m=2 r=6 -->
+  <g transform="translate(267,80)">
+    <rect width="225" height="200" rx="6" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
+    <text x="12" y="22" font-weight="bold" fill="#1a1a19">genus 3, m = 2, r = 6</text>
+    <text x="12" y="40" fill="#6b6a63">seen only when 4 | #E(K)</text>
+    <g fill="#6b6a63" font-size="11"><text x="58" y="66">p</text><text x="80" y="66">tau p</text><text x="112" y="66">t^2 p</text><text x="150" y="66">s</text><text x="168" y="66">tau s</text><text x="196" y="66">t^2 s</text></g>
+    <g font-size="11" fill="#1a1a19"><text x="12" y="94">B</text><text x="12" y="124">tau B</text><text x="12" y="154">tau^2 B</text></g>
+    <g fill="#2a78d6"><circle cx="62" cy="90" r="6"/><circle cx="92" cy="90" r="6"/><circle cx="152" cy="90" r="6"/><circle cx="180" cy="90" r="6"/>
+      <circle cx="92" cy="120" r="6"/><circle cx="122" cy="120" r="6"/><circle cx="180" cy="120" r="6"/><circle cx="208" cy="120" r="6"/>
+      <circle cx="122" cy="150" r="6"/><circle cx="62" cy="150" r="6"/><circle cx="208" cy="150" r="6"/><circle cx="152" cy="150" r="6"/></g>
+    <text x="12" y="184" fill="#6b6a63">each point on exactly two covers</text>
+  </g>
+  <!-- odd order -->
+  <g transform="translate(514,80)">
+    <rect width="226" height="200" rx="6" fill="#ffffff" stroke="#eb6834" stroke-width="2"/>
+    <text x="12" y="22" font-weight="bold" fill="#1a1a19">genus 13, m = 3, r = 10</text>
+    <text x="12" y="40" fill="#6b6a63">every curve of odd order</text>
+    <g fill="#6b6a63" font-size="11"><text x="58" y="66">a</text><text x="84" y="66">orbit of a cubic root</text></g>
+    <g font-size="11" fill="#1a1a19"><text x="12" y="94">B</text><text x="12" y="124">tau B</text><text x="12" y="154">tau^2 B</text></g>
+    <g fill="#eb6834"><circle cx="62" cy="90" r="6"/><circle cx="88" cy="90" r="5"/><circle cx="136" cy="90" r="5"/><circle cx="184" cy="90" r="5"/>
+      <circle cx="62" cy="120" r="6"/><circle cx="104" cy="120" r="5"/><circle cx="152" cy="120" r="5"/><circle cx="200" cy="120" r="5"/>
+      <circle cx="62" cy="150" r="6"/><circle cx="120" cy="150" r="5"/><circle cx="168" cy="150" r="5"/><circle cx="216" cy="150" r="5"/></g>
+    <text x="12" y="184" fill="#6b6a63">one shared point, orbit of 9</text>
+  </g>
+</svg>
