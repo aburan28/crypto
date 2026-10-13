@@ -4,5 +4,5 @@ features    aes crc dotprod lse neon pmull sha2 sha3
 os          macos aarch64 25.6.0
 virtual     Some(false)
 binary      1e972df4d8e769629ad4fd4a023214b05ee513a2cfea6f3ef51f2ca9e61fe531
-commit      72deaa420ee67b9e33313202e98021e82bd942e9 (dirty: Some(false), source: runtime_worktree)
+commit      2245b7596f3fe04586c33b53a7cac97185fadba2 (dirty: Some(true), source: runtime_worktree)
 note        heterogeneous cores ["Performance", "Efficiency"]: no affinity control, runs earn L0
