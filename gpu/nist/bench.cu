@@ -68,12 +68,18 @@ template<class F> void bench(const char*name,int threads,int n,int iters){
  * its distinguished-point output counted.  W is capped at RHO_BENCH_W so the
  * per-thread den/scratch live in registers/local, not dynamic memory. */
 #define RHO_BENCH_W 8
-template<class C> __global__ void k_rho(rho_ctx<C> c,int iters){
+/* Compile-time W: the phase arrays unroll into registers; the switch picks
+ * the instantiation.  Anything outside {2,4,8,16} falls back to W=8. */
+template<class C,int Wc> __global__ void k_rho(rho_ctx<C> c,int iters){
  typedef typename C::Field F;
  uint32_t tid=blockIdx.x*blockDim.x+threadIdx.x; if(tid>=c.nthreads) return;
- typename F::elt den[RHO_BENCH_W],scratch[RHO_BENCH_W];
- for(int it=0;it<iters;it++) rho_batch_step<C>(c,tid,den,scratch);
+ typename F::elt den[Wc],scratch[Wc];
+ for(int it=0;it<iters;it++) rho_batch_step_w<C,Wc>(c,tid,den,scratch);
 }
+#define K_RHO_LAUNCH(C,Wc) do{ \
+ k_rho<C,Wc><<<blocks,threads>>>(c,4); CU(cudaGetLastError()); CU(cudaDeviceSynchronize()); \
+ Timer t; t.runStart(); k_rho<C,Wc><<<blocks,threads>>>(c,iters); CU(cudaGetLastError()); s=t.stop(); \
+}while(0)
 template<class C> __global__ void k_rho_seed(rho_ctx<C> c){
  uint32_t tid=blockIdx.x*blockDim.x+threadIdx.x; uint32_t nw=rho_nwalks(c);
  for(uint32_t w=0;w<c.walks_per_thread;w++){
@@ -95,52 +101,59 @@ template<class F> static nap<F> parse_pt(const char*xs,const char*ys){
 
 template<class C> static void rho_bench(const char*name,const nap<typename C::Field>&G,
                                         const nap<typename C::Field>&Q,int threads,int W,int iters){
- typedef typename C::Field F;
- if(W>RHO_BENCH_W)W=RHO_BENCH_W;
- int blocks=1; // tune below
- cudaDeviceProp p{}; CU(cudaGetDeviceProperties(&p,0));
- blocks=p.multiProcessorCount*16;
- uint32_t nthreads=(uint32_t)blocks*threads, nw=nthreads*W;
- rho_params prm{}; prm.r_bits=8; prm.dp_mask=(1u<<24)-1u; prm.fold=RHO_FOLD_NEG; prm.max_steps=1u<<28; prm.table_seed=7; prm.order_bits=F::N*32;
- uint32_t R=1u<<prm.r_bits;
- /* jump table on the host, then copy */
- std::vector<nap<F>> tbl(R);
- for(uint32_t j=0;j<R;j++){uint32_t cc[F::N],dd[F::N];rho_table_seed<F::N>(prm.table_seed,j,cc,dd,prm.order_bits);tbl[j]=C::double_scalar_mul(G,cc,Q,dd,prm.order_bits);}
- rho_ctx<C> c{}; c.nthreads=nthreads; c.walks_per_thread=(uint32_t)W; c.prm=prm; c.G=G; c.Q=Q; c.dp_cap=1u<<20;
- nap<F>*dtbl; CU(cudaMalloc(&dtbl,R*sizeof(nap<F>))); CU(cudaMemcpy(dtbl,tbl.data(),R*sizeof(nap<F>),cudaMemcpyHostToDevice)); c.table=dtbl;
- CU(cudaMalloc(&c.X,sizeof(uint32_t)*F::N*nw)); CU(cudaMalloc(&c.Y,sizeof(uint32_t)*F::N*nw));
- CU(cudaMalloc(&c.H,sizeof(uint32_t)*RHO_CYCLE_DEPTH*nw)); CU(cudaMalloc(&c.esc,sizeof(uint32_t)*nw));
- CU(cudaMalloc(&c.steps,sizeof(uint32_t)*nw)); CU(cudaMalloc(&c.restarts,sizeof(uint32_t)*nw));
- CU(cudaMalloc(&c.dp_out,sizeof(rho_dp<F>)*c.dp_cap)); CU(cudaMalloc(&c.dp_count,sizeof(uint32_t)));
- CU(cudaMemset(c.esc,0,sizeof(uint32_t)*nw)); CU(cudaMemset(c.dp_count,0,sizeof(uint32_t)));
- k_rho_seed<C><<<blocks,threads>>>(c); CU(cudaDeviceSynchronize());
- k_rho<C><<<blocks,threads>>>(c,4); CU(cudaDeviceSynchronize());   /* warm-up */
- Timer t; t.runStart(); k_rho<C><<<blocks,threads>>>(c,iters); double s=t.stop();
- uint32_t dps=0; CU(cudaMemcpy(&dps,c.dp_count,sizeof(uint32_t),cudaMemcpyDeviceToHost));
- double steps=(double)nw*iters;
- printf("%s rho: walks=%u threads/blk=%d blocks=%d  %.3f Gstep/s  (%u DPs, dp_bits=24)\n",
-        name,nw,threads,blocks,steps/s/1e9,dps);
- cudaFree(dtbl);cudaFree(c.X);cudaFree(c.Y);cudaFree(c.H);cudaFree(c.esc);cudaFree(c.steps);cudaFree(c.restarts);cudaFree(c.dp_out);cudaFree(c.dp_count);
+  typedef typename C::Field F;
+  int blocks=1; // tune below
+  cudaDeviceProp p{}; CU(cudaGetDeviceProperties(&p,0));
+  blocks=p.multiProcessorCount*16;
+  uint32_t nthreads=(uint32_t)blocks*threads, nw=nthreads*W;
+  rho_params prm{}; prm.r_bits=8; prm.dp_mask=(1u<<24)-1u; prm.fold=RHO_FOLD_NEG; prm.max_steps=1u<<28; prm.table_seed=7; prm.order_bits=F::N*32;
+  uint32_t R=1u<<prm.r_bits;
+  /* jump table on the host, then copy */
+  std::vector<nap<F>> tbl(R);
+  for(uint32_t j=0;j<R;j++){uint32_t cc[F::N],dd[F::N];rho_table_seed<F::N>(prm.table_seed,j,cc,dd,prm.order_bits);tbl[j]=C::double_scalar_mul(G,cc,Q,dd,prm.order_bits);}
+  rho_ctx<C> c{}; c.nthreads=nthreads; c.walks_per_thread=(uint32_t)W; c.prm=prm; c.G=G; c.Q=Q; c.dp_cap=1u<<20;
+  nap<F>*dtbl; CU(cudaMalloc(&dtbl,R*sizeof(nap<F>))); CU(cudaMemcpy(dtbl,tbl.data(),R*sizeof(nap<F>),cudaMemcpyHostToDevice)); c.table=dtbl;
+  CU(cudaMalloc(&c.X,sizeof(uint32_t)*F::N*nw)); CU(cudaMalloc(&c.Y,sizeof(uint32_t)*F::N*nw));
+  CU(cudaMalloc(&c.H,sizeof(uint32_t)*RHO_CYCLE_DEPTH*nw)); CU(cudaMalloc(&c.esc,sizeof(uint32_t)*nw));
+  CU(cudaMalloc(&c.steps,sizeof(uint32_t)*nw)); CU(cudaMalloc(&c.restarts,sizeof(uint32_t)*nw));
+  CU(cudaMalloc(&c.dp_out,sizeof(rho_dp<F>)*c.dp_cap)); CU(cudaMalloc(&c.dp_count,sizeof(uint32_t)));
+  CU(cudaMemset(c.esc,0,sizeof(uint32_t)*nw)); CU(cudaMemset(c.dp_count,0,sizeof(uint32_t)));
+  k_rho_seed<C><<<blocks,threads>>>(c); CU(cudaGetLastError()); CU(cudaDeviceSynchronize());
+  double s; int wc=W;
+  if(wc==2)      K_RHO_LAUNCH(C,2);
+  else if(wc==4) K_RHO_LAUNCH(C,4);
+  else if(wc==16)K_RHO_LAUNCH(C,16);
+  else           K_RHO_LAUNCH(C,8);
+  uint32_t dps=0; CU(cudaMemcpy(&dps,c.dp_count,sizeof(uint32_t),cudaMemcpyDeviceToHost));
+  double steps=(double)nw*iters;
+  printf("%s rho: walks=%u threads/blk=%d blocks=%d W=%d  %.3f Gstep/s  (%u DPs, dp_bits=24)\n",
+         name,nw,threads,blocks,W,steps/s/1e9,dps);
+  cudaFree(dtbl);cudaFree(c.X);cudaFree(c.Y);cudaFree(c.H);cudaFree(c.esc);cudaFree(c.steps);cudaFree(c.restarts);cudaFree(c.dp_out);cudaFree(c.dp_count);
 }
 
 int main(int argc,char**argv){
  int threads=argc>1?atoi(argv[1]):128,n=1<<20,iters=128;
+ int W=argc>3?atoi(argv[3]):RHO_BENCH_W;               /* argv[3]: walks/thread */
+ int rho_iters=argc>4?atoi(argv[4]):-1;                /* argv[4]: rho iterations */
+ int rho_only=argc>2&&argv[2][0]=='r';                 /* argv[2] "rho": skip field benches */
  cudaDeviceProp p{};CU(cudaGetDeviceProperties(&p,0));
  printf("GPU %s cc %d.%d SMs=%d regs/SM=%d NIST_PTX=%d\n",p.name,p.major,p.minor,p.multiProcessorCount,p.regsPerMultiprocessor,(int)NIST_PTX);
- bench<Fp256>("P-256 Montgomery",threads,n,iters);
- bench<Fp256Sol>("P-256 Solinas",threads,n,iters);
- bench<Fp384>("P-384 Montgomery",threads,n,iters/2);
- bench<Fp384Sol>("P-384 Solinas",threads,n,iters/2);
+ if(!rho_only){
+  bench<Fp256>("P-256 Montgomery",threads,n,iters);
+  bench<Fp256Sol>("P-256 Solinas",threads,n,iters);
+  bench<Fp384>("P-384 Montgomery",threads,n,iters/2);
+  bench<Fp384Sol>("P-384 Solinas",threads,n,iters/2);
+ }
  /* rho walk throughput on P-256 and P-384 (Q = [k]G for an arbitrary k). */
  nap<Fp256> G256=parse_pt<Fp256>(
   "0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296",
   "0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5");
  uint32_t k7[8]={7,0,0,0,0,0,0,0}; nap<Fp256> Q256=CurveP256::scalar_mul(G256,k7,8);
- rho_bench<CurveP256>("P-256",G256,Q256,threads,RHO_BENCH_W,1<<16);
+ rho_bench<CurveP256>("P-256",G256,Q256,threads,W,rho_iters>0?rho_iters:1<<16);
  nap<Fp384> G384=parse_pt<Fp384>(
   "0xaa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7",
   "0x3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f");
  uint32_t k7b[12]={7,0,0,0,0,0,0,0,0,0,0,0}; nap<Fp384> Q384=CurveP384::scalar_mul(G384,k7b,8);
- rho_bench<CurveP384>("P-384",G384,Q384,threads,RHO_BENCH_W,1<<15);
+ rho_bench<CurveP384>("P-384",G384,Q384,threads,W,rho_iters>0?rho_iters:1<<15);
  return 0;
 }
