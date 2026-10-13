@@ -284,9 +284,15 @@ mod tests {
         assert_eq!(
             rows,
             vec![
+                // b = 1 gives the row (1, 1); the a-rows (0, (σ−1)σ^i(a))
+                // carry a zero constant coordinate (MMT eq. (5)).  For
+                // n = 4 and 8 the element 1 lies in the span of the a-rows,
+                // which the pre-MMT definition (no constant coordinate)
+                // merged with sqrt(b) = 1 and counted once: it gave m = 3
+                // and m = 6 here.
                 (2, 2, BigUint::from(2u32), false),
-                (4, 3, BigUint::from(4u32), false),
-                (8, 6, BigUint::from(32u32), false),
+                (4, 4, BigUint::from(8u32), false),
+                (8, 7, BigUint::from(64u32), false),
             ]
         );
     }

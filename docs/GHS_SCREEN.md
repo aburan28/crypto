@@ -14,7 +14,10 @@ F_2 <= F_(2^l) <= F_(2^N)
 C/F_(2^l) -> E/F_(2^N)
 ```
 
-The report carries the Hess magic number, GHS type, exact descent genus, and
+The report carries the GHS magic number
+`m = dim_F2 Span{(1, sigma^i(sqrt b))}` (Maurer–Menezes–Teske 2002, eq. (5);
+before 2026-10-13 the constant coordinate was omitted, which understated `m` by
+one whenever `(x - 1)` does not divide `Ord_b`), GHS type, exact descent genus, and
 Artin--Schreier compositum degree for every row. Rows are sorted by increasing
 genus. The default genus bound of four is only a structural filter.
 

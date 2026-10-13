@@ -13,8 +13,8 @@
 //! 1. [`FieldTower`] — the field-extension lattice `F_2 ⊂ F_{2^l} ⊂
 //!    F_{2^N}` with the Frobenius `σ: x ↦ x^{2^l}` and subfield
 //!    membership tests.
-//! 2. [`magic_number`] — Hess's invariant `m = m_E(σ)`, the
-//!    `F_2`-dimension of the Galois-orbit span of `√b`.
+//! 2. [`magic_number`] — the GHS magic number
+//!    `m = dim_{F_2} span{(1, σ^i(√b))}` (MMT 2002, eq. (5)).
 //! 3. [`ghs_genus`] — the genus of the GHS hyperelliptic descent
 //!    curve, `g = 2^{m−1}` (or `2^{m−1} − 1` in the "type I" closed-
 //!    orbit case).
@@ -95,7 +95,7 @@
 //!
 //! ## Honest scope
 //!
-//! - The `√b` orbit-span definition of `m` is the *minimal* form,
+//! - [`magic_number`] is the `√b` form `dim span{(1, σ^i(√b))}`,
 //!   matching the cases Teske uses for the trapdoor.  Hess's full
 //!   theorem also folds in `{(σ−1)·σ^i(a)}`; we expose that in
 //!   [`magic_number_full`].  For the trapdoor we pick `a ∈ F_2`
@@ -232,14 +232,60 @@ pub fn f2_dim(elements: &[F2mElement], m: u32) -> u32 {
     rank as u32
 }
 
-/// Compute Hess's "magic number" `m_E(σ)` for the curve
+/// `F_2`-rank of `{(u_i, e_i)}` in `F_2 × F_{2^m}`, where `unit[i]` is the
+/// first coordinate `u_i` of row `i`.
+fn f2_dim_with_unit(elements: &[F2mElement], unit: &[bool], m: u32) -> u32 {
+    debug_assert_eq!(elements.len(), unit.len());
+    let n_words = (m + 1).div_ceil(64) as usize;
+    let mut rows: Vec<Vec<u64>> = elements
+        .iter()
+        .zip(unit)
+        .map(|(e, &u)| {
+            let mut row = vec![0u64; n_words];
+            for (i, w) in e.raw_bits().iter().enumerate() {
+                if i < n_words {
+                    row[i] = *w;
+                }
+            }
+            if u {
+                row[(m / 64) as usize] |= 1u64 << (m % 64);
+            }
+            row
+        })
+        .collect();
+    let mut rank = 0usize;
+    for col in 0..=m {
+        let w = (col / 64) as usize;
+        let b = col % 64;
+        let Some(p) = (rank..rows.len()).find(|&r| (rows[r][w] >> b) & 1 == 1) else {
+            continue;
+        };
+        rows.swap(rank, p);
+        for r in 0..rows.len() {
+            if r != rank && (rows[r][w] >> b) & 1 == 1 {
+                for i in 0..n_words {
+                    rows[r][i] ^= rows[rank][i];
+                }
+            }
+        }
+        rank += 1;
+        if rank >= rows.len() {
+            break;
+        }
+    }
+    rank as u32
+}
+
+/// Compute the GHS "magic number" `m(b)` for the curve
 /// `E: y² + x·y = x³ + a·x² + b` over the top of the [`FieldTower`].
 ///
-/// `m := dim_{F_2} span_{F_2} { σ^i(√b) : 0 ≤ i < n }`.
-///
-/// This is the simple `√b`-orbit form used by Teske; see
-/// [`magic_number_full`] for the version that also folds in
-/// `{(σ − 1)·σ^i(a)}`.
+/// `m := dim_{F_2} span_{F_2} { (1, σ^i(√b)) : 0 ≤ i < n }`
+/// (Gaudry–Hess–Smart Theorem 1 as stated by Maurer–Menezes–Teske,
+/// LMS JCM 5 (2002), eq. (5)).  The constant coordinate matters: by MMT
+/// Theorem 5(i), `m` exceeds the plain orbit dimension
+/// `dim span{σ^i(√b)}` by one exactly when `(x − 1)` does not divide
+/// `Ord_b(x)`.  Earlier revisions returned the plain orbit dimension and so
+/// understated `m` (and the descent genus) for those `b`.
 pub fn magic_number(tower: &FieldTower, _a: &F2mElement, b: &F2mElement) -> u32 {
     let sqrt_b = tower.sqrt(b);
     let mut orbit = Vec::with_capacity(tower.n as usize);
@@ -248,19 +294,21 @@ pub fn magic_number(tower: &FieldTower, _a: &F2mElement, b: &F2mElement) -> u32 
         orbit.push(cur.clone());
         cur = tower.frobenius(&cur);
     }
-    f2_dim(&orbit, tower.big_n)
+    f2_dim_with_unit(&orbit, &vec![true; orbit.len()], tower.big_n)
 }
 
-/// Full Hess magic number: include the contribution of `a`'s
-/// Galois-twist differences `(σ − 1)·σ^i(a)`.  For trapdoor
-/// constructions where `a ∈ F_2`, the additional generators are
-/// all zero and this agrees with [`magic_number`].
+/// Magic number with the `a`-contribution: the [`magic_number`] rows
+/// `(1, σ^i(√b))` together with `(0, (σ − 1)·σ^i(a))`.  For trapdoor
+/// constructions where `a ∈ F_2` the additional generators are all zero and
+/// this agrees with [`magic_number`].
 pub fn magic_number_full(tower: &FieldTower, a: &F2mElement, b: &F2mElement) -> u32 {
     let sqrt_b = tower.sqrt(b);
     let mut gens = Vec::with_capacity(2 * tower.n as usize);
+    let mut unit = Vec::with_capacity(2 * tower.n as usize);
     let mut cur_b = sqrt_b.clone();
     for _ in 0..tower.n {
         gens.push(cur_b.clone());
+        unit.push(true);
         cur_b = tower.frobenius(&cur_b);
     }
     // (σ - 1)·σ^i(a) = σ^{i+1}(a) + σ^i(a) (char 2)
@@ -268,9 +316,10 @@ pub fn magic_number_full(tower: &FieldTower, a: &F2mElement, b: &F2mElement) -> 
     for _ in 0..tower.n {
         let next_a = tower.frobenius(&cur_a);
         gens.push(cur_a.add(&next_a));
+        unit.push(false);
         cur_a = next_a;
     }
-    f2_dim(&gens, tower.big_n)
+    f2_dim_with_unit(&gens, &unit, tower.big_n)
 }
 
 /// GHS hyperelliptic-descent genus from the magic number.
