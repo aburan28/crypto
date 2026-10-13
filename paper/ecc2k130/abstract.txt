@@ -12,9 +12,11 @@ rate, not yet as a cost per solve), and a VHDL engine measured at
 $8.25$~G steps/s on one AWS F2 FPGA against a pre-board estimate of
 $5$--$12$. The repositories' other GPU arithmetic, for secp256k1,
 the NIST primes and ECC2K-95, is inventoried with its static
-instruction ledgers and emulated walk constants and the statement
-that, apart from F4 elimination on rented cards, none of it has yet
-run on a device. The walk constant is measured, not assumed:
+instruction ledgers and emulated walk constants; of it, F4
+elimination and the P-256/P-384 rho walk have run on rented cards
+(the walk at $1.34$ and $0.44$~G steps/s on one RTX~PRO~6000, a
+$1.25\times$ and $2.09\times$ engineering gain over its first working
+cells), and the rest has not. The walk constant is measured, not assumed:
 $2^{60.91}$--$2^{60.92}$ iterations for the campaign's $\sigma$-walk,
 so the 2009 budget stands. A carry-less-unit floor written before
 tuning rules out $28$~B/s on one GPU, and a pre-declared target of

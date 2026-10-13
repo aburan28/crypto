@@ -50,7 +50,9 @@ before its fleet was taken away.
   kernel, pair tables, polynomial-system solvers), with their
   instruction ledgers and emulated walk constants, and a plain
   statement of which of them have run on a device: the F4 elimination
-  kernels have, the rest have not (Section~\ref{sec:othergpu}).
+  kernels and the P-256/P-384 rho walk have ($1.34$ and $0.44$~G
+  steps/s on one RTX~PRO~6000), the rest have not
+  (Section~\ref{sec:othergpu}).
 \item A pipelined-Karatsuba FPGA engine measured at $8.25$~G steps/s
   on one AWS F2, within a pre-board estimate of $5$--$12$
   (Section~\ref{sec:fpga}).
