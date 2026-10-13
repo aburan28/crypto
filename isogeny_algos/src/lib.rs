@@ -7,6 +7,7 @@ pub mod adx_gen;
 pub mod api;
 pub mod bigint;
 pub mod binary;
+pub mod binary_volcano;
 pub mod curve;
 pub mod ext;
 pub mod field;
