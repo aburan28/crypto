@@ -1535,6 +1535,23 @@ mod wide {
         }
     }
 
+    /// Parse a `[x, y]` target line directly from decimal text: JSON
+    /// numbers beyond `u64` lose precision in `serde_json::Value`, so wide
+    /// coordinates are read from the raw line (integers or quoted strings).
+    fn parse_wide_pair_line(line: &str) -> [u128; 2] {
+        let inner = line.trim().trim_start_matches('[').trim_end_matches(']');
+        let mut words = inner.split(',');
+        let parse = |raw: &str| -> u128 {
+            raw.trim().trim_matches('"').parse().expect(
+                "wide field coordinate must be a decimal integer or string",
+            )
+        };
+        let x = parse(words.next().expect("wide point needs two coordinates"));
+        let y = parse(words.next().expect("wide point needs two coordinates"));
+        assert!(words.next().is_none(), "wide point must have two coordinates");
+        [x, y]
+    }
+
     fn decode_pair128(value: &Value) -> Option<[u128; 2]> {
         if value.is_null() {
             return None;
@@ -1917,9 +1934,7 @@ mod wide {
             .map(|line| {
                 let line = line.trim();
                 if line.starts_with('[') {
-                    let encoded: Value = serde_json::from_str(line)
-                        .expect("target point must be a JSON [x,y] array");
-                    let [x, y] = decode_pair128(&encoded).expect("target point must be affine");
+                    let [x, y] = parse_wide_pair_line(line);
                     TargetInput128::PublicPoint(Some((x, y)))
                 } else {
                     TargetInput128::KnownAnswerScalar(line.parse().unwrap())
