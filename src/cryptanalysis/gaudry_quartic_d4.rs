@@ -394,7 +394,16 @@ pub fn solve_d4(
         None,
         None,
     )
-    .ok()??;
+    .ok()?;
+    let Some(sols) = sols else {
+        if debug {
+            eprintln!(
+                "  unsolved: {} (dim {}, pivots {}, zero rows {})",
+                out.solve.outcome, out.solve.dim, out.solve.pivots, out.solve.zero_rows
+            );
+        }
+        return None;
+    };
     out.solve.equation_degree = 4;
     out.rational_solutions = sols.len();
     let mut found = BTreeSet::new();
