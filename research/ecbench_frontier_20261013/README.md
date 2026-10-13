@@ -225,6 +225,8 @@ Receipts are preserved under [`audits/`](audits/), including the failed one.
   `docs/index-calculus-scoreboard.html`, `docs/ic/progress-timeline.json`, and
   existing study graphs were checked and left unchanged because this synthesis
   adds no admitted measurement.
+- The generated index-calculus leaderboard carries this synthesis as its latest
+  accounting audit; its ranked curve rows remain unchanged.
 - Conductor preflight could not run in this environment: the `conductor`
   executable and `.conductor/WORKFLOW.md` were absent. Work was restricted to
   this new report, its benchmark copies, and the benchmark index.
