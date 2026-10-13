@@ -129,7 +129,7 @@ template<class M> struct NistField {
  }
  /* Montgomery's simultaneous inversion: one inv + 3(n-1) muls.  `scratch`
   * holds n slots.  No input may be zero (caller filters). */
- static void batch_inv(elt*x,int n,elt*scratch){
+ NF_HD static void batch_inv(elt*x,int n,elt*scratch){
   scratch[0]=x[0];
   for(int i=1;i<n;i++)scratch[i]=mul(scratch[i-1],x[i]);
   elt t=inv(scratch[n-1]);
