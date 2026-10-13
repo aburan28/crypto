@@ -857,4 +857,6 @@ It has no GPU contention sensor or admitted CPU/GPU interval yet. To make
 a GPU ECDLP method fully comparable, the CUDA driver must accept the
 frozen EC Bench workload and seed, emit exact phase counts and recovered
 answer, expose GPU device and contention telemetry, and pass independent
-answer replay under the same record contract.
+answer replay under the same record contract. The specific acceptance test
+and remaining device-validation gap are tracked in
+[the GPU matched-workload problem](../../problems/ecbench-gpu-matched-workload-contract.md).
