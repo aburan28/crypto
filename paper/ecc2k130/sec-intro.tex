@@ -37,8 +37,8 @@ Most of the levers transferred; their relative sizes did not.
 We tried to hold the work to the standard the first attempt's reports
 set, and in places to a stricter one: every rate is paired against an
 adjacent control on the same machine, every target was written down
-before we tuned toward it, and every claim has a footnote naming the
-file in the repository that backs it. None of this improves on the
+before we tuned toward it, and every claim cites the evidence record
+that backs it. None of this improves on the
 generic-group bound, and we do not pretend otherwise. What we report is
 the cost of one step on GPUs, CPUs and an FPGA; the number of steps,
 measured on small curves of the same family and extrapolated; and a
@@ -54,11 +54,19 @@ distinguished-point test and the restart path.
 \begin{itemize}[leftmargin=1.2em,itemsep=0.3em]
 \item A side-by-side account of ECC2K-130 rates on 2009--2010 hardware
   and on current GPUs, in one unit (Section~\ref{sec:history}).
+\item Background on the instructions this arithmetic relies on, from
+  Fermi's \texttt{PRMT} to the PTX~9.3 \texttt{clmad}, and on x86, Arm and
+  RISC-V from \texttt{PCLMULQDQ} to AVX-512, SVE2 and Zvbc
+  (Section~\ref{sec:isa}).
 \item A measured description of what current NVIDIA hardware changes
   for rho: the PTX~9.3 \texttt{clmad} instruction, its rate on three
   dies (from $1.69$ lanes per SM-clock on the RTX~PRO~6000 to $29.9$ on
   the H100), and why the same source change can win on one Blackwell
   part and lose on another (Section~\ref{sec:blackwell}).
+\item Diagrams of the kernel itself (thread layout, the step's data
+  flow, the carry-less product, the memory layout) and a breakdown of
+  where the speedup came from by kind of change. None of it changed the
+  algorithm (Section~\ref{sec:what-changed}).
 \item A GPU ledger of sixteen paired optimisation steps, taking one
   RTX~PRO~6000 from $0.85$ to $14.64$ billion iterations per second for
   the campaign build, with later $\sigma$-walk builds at $15.44$ and
@@ -88,6 +96,15 @@ distinguished-point test and the restart path.
   (Section~\ref{sec:campaign}); and structural alternatives priced in
   the same unit, none of which come close
   (Section~\ref{sec:alternatives}).
+\item CPU measurements by instruction set: AVX2, AVX-512's ternary
+  logic, NEON with \texttt{BSL} and \texttt{EOR3}, and a packed client on
+  the CPU's carry-less multiply at $2.9\times$ its software product
+  (Section~\ref{sec:cpu}).
+\item Upper bounds per platform: about $24$--$26$ billion iterations per
+  second for any one-addition walk on one RTX~PRO~6000, a $1.55\times$
+  logic cut for $30$ on a B200, $9.3$ for the F2 FPGA, and $4.6$--$12.2$ for
+  the NIST walk, with what each would mean for the cost of a solve
+  (Section~\ref{sec:bounds}).
 \item A list of open questions and next optimisations, each with what
   would settle it (Section~\ref{sec:open}).
 \end{itemize}
@@ -109,28 +126,27 @@ flat. \emph{Relabelling} lowers a headline while the total cost rises.
 Every row in this paper falls into one of the last three. The same
 rule, applied across Pollard rho, baby-step giant-step, kangaroo and
 prime-field index calculus, is the subject of a companion draft in the
-sibling library~\cite{ecdlppaper}, though this paper does not depend
+\texttt{cryptanalysis} repository~\cite{ecdlppaper}, though this paper does not depend
 on it. The mistake we tried hardest to avoid is quoting a rate without
 its paired control, its hardware and its launch geometry, and
 Sections~\ref{sec:ledger} and \ref{sec:campaign-interval} each record
 a case where an earlier draft in the repository made exactly that
 mistake.
 
-\paragraph{Availability.} Every number in the paper has a footnote
-naming the file it came from. The campaign lives in a public
-repository, \thisrepo\ (\url{https://github.com/aburan28/crypto}), and
-its files are cited by path from the repository root. A public sibling
-library, \sibling\ (\url{https://github.com/aburan28/cryptanalysis}),
-holds an independent C golden model of the same field, a digit-serial
-FPGA core without vendor timing, an import of the $20$~billion iterations/s GPU client
-with its own host re-walk, and the boundary ledger for index calculus;
-its paths carry the prefix \texttt{cryptanalysis:}. Two evidence
-records cited in Section~\ref{sec:alternatives} are in a third public
-repository, the research ledger
-(\url{https://github.com/aburan28/crypto-autoresearcher}), with the
-prefix \texttt{autoresearcher:}. Live campaign aggregates are published
-at \url{https://aburan28.github.io/crypto/status/}, and the snapshot
-this paper reports is committed next to the paper source.
+\paragraph{Availability.} Everything needed to read, check and rerun
+this work is in one companion repository,
+\texttt{rho-blackwell}~\cite{rhoblackwell}: the paper source, the
+ECC2K-130 GPU and CPU clients, the NIST P-256/P-384 rho kernel, the
+benchmark data behind every figure, and a Docker image that builds the
+client and starts walking ECC2K-130 by default
+(Appendix~\ref{app:repro}). Every measured number in the paper cites an
+evidence record, written [E$n$]; Appendix~\ref{app:evidence} lists the
+records, and the companion repository holds a copy of each under its
+number. The records were produced in three development repositories
+(\texttt{crypto}, \texttt{cryptanalysis} and the research ledger
+\texttt{crypto-autoresearcher}), and the appendix names which one each
+came from. Live campaign aggregates are published at
+\url{https://aburan28.github.io/crypto/status/}.
 
 \paragraph{What we do not claim.} We have not recovered a logarithm on
 the challenge curve, and we do not expect one from the corpus

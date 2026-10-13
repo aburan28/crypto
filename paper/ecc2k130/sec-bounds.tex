@@ -1,0 +1,95 @@
+\section{Upper bounds: how far can this go?}
+\label{sec:bounds}
+
+Everything in this paper is engineering against a fixed exponent, so the
+natural question is how much engineering is left. We answer it per
+platform with ceilings derived from measured pipe rates: each assumes the
+named unit runs at its full measured rate and that every other cost is
+zero. They are upper bounds, not forecasts. Figure~\ref{fig:bounds}
+draws them against today's measurements.
+
+\input{figures/fig-bounds}
+
+\subsection{One RTX~PRO~6000}
+\label{sec:bounds-6000}
+
+The ceiling for any walk that performs one affine addition per step is
+set by two pipes (Section~\ref{sec:floor}). On the carry-less unit,
+$28.9$ \texttt{CLMAD} per update at $1.65$ lanes per SM-clock caps the card
+at $24.7$--$26.1$ billion iterations per second with everything else
+free; on the logic pipe, the arithmetic alone already needs more slots
+than $28$ allows~\evcite{\evref{iterfn}, §1}. The roofline of the table
+walk's build puts its own speed of light between $22.7$ and $27.4$,
+depending on how fast \texttt{CLMAD} sustains in that kernel's
+instruction mix, and the logic pipe binds first, at
+$22.0$~\evcite{\evref{roofline}, §2 and §4}. For the $\sigma$-walk with its
+current carry-less arithmetic ($38.125$ \texttt{CLMAD} per update at two
+lanes), the same calculation gives about $24.0$ with every other cost
+free~\evcite{\evref{sparse}}.
+
+So the realistic headroom on one card is about $1.5\times$: from $15.88$
+for the best $\sigma$-walk to the low or middle twenties, and only by
+cutting integer work. Thirty is out of reach for any one-addition walk
+on this card; it would need integer work cut from about $1{,}320$ to $968$
+lane-instructions per update with the carry-less unit fully busy, which
+the note calls a two-card number~\evcite{\evref{roofline}, §5}. Two cards at
+today's rates already exceed it.
+
+\subsection{Other Blackwell parts}
+\label{sec:bounds-other}
+
+On the B200 the carry-less unit is so fast that its floor, $255$ billion
+iterations per second, is irrelevant; the logic pipe is the only
+ceiling. Thirty would need at most $618$ logic slots per update against
+$955$ after the sweep, a $1.55\times$ cut, and the candidate offloads
+(reduction, basis conversions and branch selection as carry-less
+operations) add up to roughly that, though none has been
+built~\evcite{\evref{twochains}, §6.2 and §6.5; \evref{autosweep}, §3.4}.
+The H100 would need at most $521$ slots for the same
+rate~\evcite{\evref{twochains}, §6.5}. On the power-capped RTX~PRO~4500,
+the bridge map's own arithmetic ceiling is $14.1$, measured with the
+rest of the map stripped out, so $15$ is not available on that map
+either~\evcite{\evref{bridge}}.
+
+\subsection{The FPGA}
+\label{sec:bounds-fpga}
+
+The F2 engine scales linearly with engine count and is bounded by block
+RAM, not logic. At $5.16$ clocks per step the projection is $8.8$ billion
+iterations per second at 136 engines and $9.3$ at 144 engines or at 128
+engines and 375~MHz; the 144-engine build failed placement and the
+375~MHz builds missed timing, so neither is met~\evcite{\evref{hdl}}.
+About $13\%$ above today's $8.25$ is all this part offers without a new
+design.
+
+\subsection{The NIST walk}
+\label{sec:bounds-nist}
+
+The prime-field walk has more room, because it is further from any
+ceiling. A step costs about $6 + 320/W$ field multiplications: three for
+the affine addition, three for Montgomery's trick, and a share of a
+Fermat inversion with a four-bit window (about 256 squarings and 64
+multiplications; our count). At the measured $73.4$ billion dependent
+multiplications per second on P-256, that caps the walk at about $4.6$
+billion iterations per second at $W=32$ and $12.2$ as $W$ grows without
+limit. The walk runs at $1.632$, the cost of about 45 multiplications per
+step against 16 counted, so roughly two thirds of each step is still
+outside the multiplier: selection, distinguished-point checks, loads and
+the serial latency of each thread's inversion. These bounds are ours,
+derived from the measured multiply rate, and that rate is itself a
+single dependent chain, so a throughput-bound multiplier would raise
+them~\evcite{\evref{nistres}}.
+
+\subsection{What the bounds mean for the challenge}
+\label{sec:bounds-cost}
+
+Cost per solve scales inversely with the rate. At the campaign's
+collection rate of $14.11$ billion iterations per second the expected
+$2^{60.9}$ iterations are $42{,}400$ RTX~PRO~6000 hours, about \$56k at the
+2026-09-11 spot price~\evcite{\evref{ops}}. If the $\sigma$-walk reached
+$24$ the same work would be about $24{,}900$ GPU-hours and \$33k, and at
+$26$, about $23{,}000$ GPU-hours and \$30k (our scaling of the measured
+figures). Even the ceiling leaves the solve a five-figure rental
+problem. No engineering in this paper or in the bounds above changes
+the $2^{60.9}$; only an algorithmic advance would, and
+Section~\ref{sec:alternatives} found none.

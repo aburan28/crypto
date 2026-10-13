@@ -43,35 +43,29 @@ TeX can open the paper.
 
 All rates are in billions of iterations per second on one device.
 
-- Abstract.
-- §1 Introduction: rho on Blackwell, contributions, the reporting rule,
-  availability, what is not claimed.
-- §2 Where 2009 left off: the 2009–2012 rates per platform (Core 2,
-  Cell, GTX 295, Spartan-3, ASIC estimate) in one unit, and the same
-  yardstick today (about 230× per GPU card, 74× per FPGA).
-- §3 The curve, the type-II optimal normal basis, the golden model,
-  ECC2K-95 as the end-to-end control.
-- §4 The walk: the σ-walk, the r-adding table walk, the x-only bridge
-  map, the measured walk constant, cost per solve.
-- §5 Field arithmetic: bitsliced and packed backends, LOP3 fusion,
-  bit-for-bit compatibility.
-- §6 What current NVIDIA hardware changes: PTX 9.3 `clmad` (sm_80+,
-  CUDA 13.3), its issue rate on the RTX PRO 6000, B200 and H100, why the
-  same change wins on one die and loses on another, the integer pipe.
-- §7 The GPU client: floor and roofline, acceptance rules, the
-  0.85 → 14.64 ledger, the table walk's arithmetic, σ-walk against table
-  walk (cycle rules v1/v2/v3), the RTX PRO 4500, twelve GPUs per card,
-  per SM and per dollar, every declined candidate.
-- §8 CPU clients.
-- §9 The same ladder on the NIST curves: P-256 1.075 → 1.632 (1.52×),
-  P-384 0.210 → 0.548 (2.61×), the fifteen-curve CPU solver.
-- §10 The other GPU kernels: evidence-class inventory.
-- §11 The FPGA engine. §12 The campaign. §13 Structural alternatives.
-- §14 Open questions and next optimisations: exact table-walk speed,
-  σ-walk integer slots, pipe and `clmad`-rate probes, other Blackwell
-  parts, the NIST walk, method.
-- §15 Related work. §16 Conclusion.
-- Appendix A: reproduction commands.
+- §1 Introduction. §2 Where 2009 left off: 2009–2012 rates against today.
+- §3 Curve, field, golden model. §4 The walk. §5 Field arithmetic (with
+  a figure of the packed carry-less product).
+- §6 Instruction sets that matter: NVIDIA (PRMT, SHF, LOP3, carry
+  chains, PTX 9.3 `clmad`), x86 (PCLMULQDQ, MULX/ADX, VPTERNLOGD, IFMA,
+  VPCLMULQDQ/GFNI, AVX10.2, APX), Arm (PMULL, EOR3, SVE2), RISC-V
+  (Zbc, Zvbc), with a timeline figure.
+- §7 What current NVIDIA hardware changes: `clmad` rates on three dies.
+- §8 The GPU client: floor and roofline, the ledger (staircase figure),
+  where the speedup came from, what changed and what did not (no
+  algorithmic change), kernel anatomy, step data flow and memory-layout
+  figures, σ-walk against table walk (cycle-rule figure), per-GPU charts.
+- §9 CPU clients and CPU instruction sets (with a per-ISA chart).
+- §10 NIST P-256/P-384. §11 Other GPU kernels. §12 FPGA. §13 Campaign.
+- §14 Structural alternatives. §15 Upper bounds per platform (figure).
+- §16 Open questions. §17 Related work. §18 Conclusion.
+- Appendix A: reproduction (companion repository and Docker image).
+- Appendix B: evidence records.
+
+Measured numbers cite evidence records [E*n*] (Appendix B) instead of
+file paths. `app-evidence.tex` lists them; the companion repository
+`rho-blackwell` holds a copy of each record under its number, and its
+`evidence/map.json` maps each record to the files it came from.
 
 Every number is footnoted to a repository artefact (`\art{path}`);
 paths prefixed `cryptanalysis:` are in the sibling library.
@@ -107,6 +101,20 @@ paths prefixed `cryptanalysis:` are in the sibling library.
   folding and Smart-attack results. Curve25519 added to the
   secp256k1 row. Abstract, introduction, conclusion and the
   evidence-class table updated to say which kernels have now run.
+- Draft 7: no file paths in the text: every footnoted path became a
+  numbered evidence record (88 records, Appendix B), with the companion
+  repository `rho-blackwell` holding copies and the Docker image that
+  starts the ECC2K-130 walk. New §6 on instruction sets (GPU and CPU),
+  §9 rewritten around CPU instruction sets (including the packed PMULL
+  client), §15 upper bounds, and a "what changed and what did not"
+  subsection. Thirteen new figures: history chart, ledger staircase,
+  speedup breakdown, kernel anatomy, step data flow, carry-less product,
+  memory layout, roofline, cycle rules, per-GPU throughput and per-dollar,
+  CPU per-ISA rates, instruction timeline, upper bounds. Corrections:
+  the Frobenius networks replaced repeated squarings (not basis
+  conversions); 385,024 workers run as four waves of the 96,256 that fit
+  at once. Consecutive citations now render separately, and long URLs
+  break.
 - Draft 6: refocused on rho on Blackwell and retitled. New §2 (2009–2012
   rates from Bailey et al., the INDOCRYPT 2010 GPU paper, the Cell
   papers and Niederhagen's thesis, against today's), new §6 on `clmad`

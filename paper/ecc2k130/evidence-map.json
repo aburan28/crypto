@@ -1,0 +1,821 @@
+{
+ "client": {
+  "id": "E1",
+  "title": "ECC2K-130 client reference: field, walk, validation and throughput",
+  "repository": "crypto",
+  "kind": "design and measurement notes",
+  "sources": [
+   "ecc2k130/README.md"
+  ]
+ },
+ "cmodel": {
+  "id": "E2",
+  "title": "Independent C golden model of $\\FF_{2^{131}}$ and the curve",
+  "repository": "cryptanalysis",
+  "kind": "source and tests",
+  "sources": [
+   "cryptanalysis:fpga/README.md",
+   "cryptanalysis:fpga/model/ecc2k130_test.c"
+  ]
+ },
+ "codegen": {
+  "id": "E3",
+  "title": "Field model and code generator for $\\FF_{2^{131}}$",
+  "repository": "crypto",
+  "kind": "source",
+  "sources": [
+   "ecc2k130/codegen/field.py",
+   "ecc2k130/codegen/gen.py"
+  ]
+ },
+ "hdl": {
+  "id": "E4",
+  "title": "FPGA engine: VHDL design, reference model and test vectors",
+  "repository": "crypto",
+  "kind": "design and source",
+  "sources": [
+   "hdl/ecc2k130/README.md",
+   "hdl/ecc2k130/ec2k_batch_pipe.vhd",
+   "hdl/ecc2k130/ec2k_walker.vhd",
+   "hdl/ecc2k130/ecc2k_ref.py",
+   "hdl/ecc2k130/gf2_dsp_leaf.vhd",
+   "hdl/ecc2k130/host/ecc2k130_fpga.cpp",
+   "hdl/ecc2k130/vectors_ecc2k130.txt"
+  ]
+ },
+ "ecc2k95": {
+  "id": "E5",
+  "title": "ECC2K-95 GPU kernel and Koblitz pair table",
+  "repository": "crypto",
+  "kind": "design notes and source",
+  "sources": [
+   "gpu/ecc2k/README.md",
+   "gpu/ecc2k/f2m.cuh",
+   "gpu/ecc2k/pairtable.cuh"
+  ]
+ },
+ "walkconst": {
+  "id": "E6",
+  "title": "Walk constants and fruitless-cycle analysis on toy Koblitz curves",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "ecc2k130/WALK-CONSTANT.md"
+  ]
+ },
+ "witness": {
+  "id": "E7",
+  "title": "Witness counters and their cost",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "ecc2k130/CAIRN-WITNESS.md"
+  ]
+ },
+ "ops": {
+  "id": "E8",
+  "title": "Campaign operations, configuration and planning numbers",
+  "repository": "crypto",
+  "kind": "operations notes",
+  "sources": [
+   "ecc2k130/aws/README.md",
+   "ecc2k130/aws/build.sh",
+   "ecc2k130/aws/campaign.json"
+  ]
+ },
+ "sigmafused": {
+  "id": "E9",
+  "title": "Fused single-pass $\\sigma$-walk",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/benchmarks/sigma-fused/RESULTS.md"
+  ]
+ },
+ "iterfn": {
+  "id": "E10",
+  "title": "Iteration functions compared: $\\sigma$-walk, table walk and their cost model",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "ecc2k130/ITERATION-FUNCTION.md"
+  ]
+ },
+ "bridge": {
+  "id": "E11",
+  "title": "$x$-only doubling-and-bridge map on the RTX PRO 4500",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/README.md"
+  ]
+ },
+ "maxiters": {
+  "id": "E12",
+  "title": "Iteration-guard study",
+  "repository": "crypto",
+  "kind": "analysis",
+  "sources": [
+   "ecc2k130/benchmarks/max-iters/README.md"
+  ]
+ },
+ "v3": {
+  "id": "E13",
+  "title": "Table-walk cycle escape, rule v3",
+  "repository": "crypto",
+  "kind": "design and measurement notes",
+  "sources": [
+   "ecc2k130/CYCLE-ESCAPE-V3.md"
+  ]
+ },
+ "packedsrc": {
+  "id": "E14",
+  "title": "Packed $\\FF_{2^{131}}$ arithmetic for CUDA",
+  "repository": "crypto",
+  "kind": "source",
+  "sources": [
+   "ecc2k130/include/packed131.h"
+  ]
+ },
+ "ceiling": {
+  "id": "E15",
+  "title": "Instruction-issue rates and the throughput ceiling",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "ecc2k130/THROUGHPUT-CEILING.md"
+  ]
+ },
+ "packed": {
+  "id": "E16",
+  "title": "Ledger: packed normal-basis backend and its audit",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/PACKED.md"
+  ]
+ },
+ "frobnet": {
+  "id": "E17",
+  "title": "Ledger: Frobenius permutation networks",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/FROBENIUS-NETWORK.md"
+  ]
+ },
+ "clmad": {
+  "id": "E18",
+  "title": "Ledger: native carry-less multiplication (\\texttt{clmad})",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/NATIVE-CARRYLESS.md"
+  ]
+ },
+ "roofline": {
+  "id": "E19",
+  "title": "Roofline of the table-walk build on the RTX PRO 6000",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "ecc2k130/ROOFLINE.md"
+  ]
+ },
+ "refsrc": {
+  "id": "E20",
+  "title": "Host reference implementation of the step",
+  "repository": "crypto",
+  "kind": "source",
+  "sources": [
+   "ecc2k130/include/ref.h"
+  ]
+ },
+ "ecc2k95clmad": {
+  "id": "E21",
+  "title": "ECC2K-95 kernel: \\texttt{clmad} port",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "ecc2k130/benchmarks/ecc2k-clmad/RESULTS.md"
+  ]
+ },
+ "ada": {
+  "id": "E22",
+  "title": "Ada L4 and L40S with and without \\texttt{clmad}",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "ecc2k130/ADA-L4-L40S.md"
+  ]
+ },
+ "t4": {
+  "id": "E23",
+  "title": "Turing T4 without \\texttt{clmad}",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "ecc2k130/T4-G4DN.md"
+  ]
+ },
+ "twochains": {
+  "id": "E24",
+  "title": "Two-chain kernel and \\texttt{CLMAD} rates on three dies",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "ecc2k130/TWO-CHAINS.md"
+  ]
+ },
+ "topclmad": {
+  "id": "E25",
+  "title": "Declined: top-bit correction on \\texttt{CLMAD}",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/TOP-CLMAD.md"
+  ]
+ },
+ "autosweep": {
+  "id": "E26",
+  "title": "Automatic single-knob sweep on the B200 and RTX PRO 6000",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "ecc2k130/AUTOSWEEP.md"
+  ]
+ },
+ "nativecand": {
+  "id": "E27",
+  "title": "Native-instruction candidates and the acceptance rule",
+  "repository": "crypto",
+  "kind": "protocol",
+  "sources": [
+   "ecc2k130/NATIVE-CANDIDATES.md"
+  ]
+ },
+ "sigmatable": {
+  "id": "E28",
+  "title": "$\\sigma$ step through shared-memory nibble tables",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/SIGMA-TABLE.md"
+  ]
+ },
+ "singleprod": {
+  "id": "E29",
+  "title": "Ledger: single polynomial product",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/SINGLE-PRODUCT.md"
+  ]
+ },
+ "dencache": {
+  "id": "E30",
+  "title": "Ledger: denominator cache",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/DENOMINATOR-CACHE.md"
+  ]
+ },
+ "polychain": {
+  "id": "E31",
+  "title": "Ledger: polynomial-basis batch chain",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/POLYNOMIAL-CHAIN.md"
+  ]
+ },
+ "pairedprod": {
+  "id": "E32",
+  "title": "Ledger: paired products",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/PAIRED-PRODUCTS.md"
+  ]
+ },
+ "polystate": {
+  "id": "E33",
+  "title": "Ledger: polynomial-basis state",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/POLYNOMIAL-STATE.md"
+  ]
+ },
+ "directred": {
+  "id": "E34",
+  "title": "Ledger: direct reduction",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/DIRECT-REDUCTION.md"
+  ]
+ },
+ "genprod": {
+  "id": "E35",
+  "title": "Ledger: generated straight-line product",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/GENERATED-PRODUCT.md"
+  ]
+ },
+ "tiles": {
+  "id": "E36",
+  "title": "Ledger: 256-worker tiles",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/TILED-STATE.md"
+  ]
+ },
+ "batch": {
+  "id": "E37",
+  "title": "Ledger: batch 16 with 385{,}024 workers",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/BATCH-TUNING.md"
+  ]
+ },
+ "wprefix": {
+  "id": "E38",
+  "title": "Ledger: weighted prefixes and paired Frobenius",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/WEIGHTED-PREFIX.md"
+  ]
+ },
+ "compact": {
+  "id": "E39",
+  "title": "Ledger: compact 17-byte state and batch screens",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/COMPACT-STATE.md"
+  ]
+ },
+ "sharedsigma": {
+  "id": "E40",
+  "title": "Ledger: shared-memory mask table",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/SHARED-SIGMA.md"
+  ]
+ },
+ "tablecmp": {
+  "id": "E41",
+  "title": "Table walk against $\\sigma$-walk: paired comparison data",
+  "repository": "crypto",
+  "kind": "dataset",
+  "sources": [
+   "ecc2k130/benchmarks/table-walk/comparison.json"
+  ]
+ },
+ "oneblock": {
+  "id": "E42",
+  "title": "One-block table-walk geometry (the 20.08 build)",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/ONE-BLOCK-GEOMETRY.md"
+  ]
+ },
+ "survey": {
+  "id": "E43",
+  "title": "Twelve-GPU survey on Modal",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "ecc2k130/benchmarks/modal-gpus/SURVEY.md"
+  ]
+ },
+ "tuning": {
+  "id": "E44",
+  "title": "Declined: stream-Karatsuba compile option",
+  "repository": "crypto",
+  "kind": "benchmark",
+  "sources": [
+   "ecc2k130/TUNING.md"
+  ]
+ },
+ "addcombine": {
+  "id": "E45",
+  "title": "Declined: integer add in the carry-less product",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/ADD-COMBINE.md"
+  ]
+ },
+ "lambda": {
+  "id": "E46",
+  "title": "Declined: $\\lambda$-projective coordinates, priced",
+  "repository": "crypto",
+  "kind": "analysis",
+  "sources": [
+   "ecc2k130/LAMBDA-PROJECTIVE.md"
+  ]
+ },
+ "hostsched": {
+  "id": "E47",
+  "title": "AVX-512 host scheduling pass",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "ecc2k130/HOST-SCHEDULE.md"
+  ]
+ },
+ "dpint": {
+  "id": "E48",
+  "title": "Distinguished-point interval calibration at cutoff 32",
+  "repository": "crypto",
+  "kind": "measurement report and raw counters",
+  "sources": [
+   "ecc2k130/benchmarks/dp-interval/README.md",
+   "ecc2k130/benchmarks/dp-interval/raw/worker-counters-2026-09-17.tsv"
+  ]
+ },
+ "nistres": {
+  "id": "E49",
+  "title": "NIST P-256/P-384 rho on the RTX PRO 6000: device results",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "gpu/nist/RESULTS.md"
+  ]
+ },
+ "nist": {
+  "id": "E50",
+  "title": "NIST P-256/P-384 GPU library: field, walk and tests",
+  "repository": "crypto",
+  "kind": "design notes and source",
+  "sources": [
+   "gpu/nist/README.md",
+   "gpu/nist/nist_curve.cuh",
+   "gpu/nist/nist_rho.cuh"
+  ]
+ },
+ "nistproto": {
+  "id": "E51",
+  "title": "Pre-registered NIST GPU arithmetic protocol",
+  "repository": "crypto",
+  "kind": "protocol",
+  "sources": [
+   "research/nist_gpu_arithmetic_20260926/PROTOCOL.md"
+  ]
+ },
+ "nistcpu": {
+  "id": "E52",
+  "title": "Fifteen-curve NIST ECDLP solver and audit",
+  "repository": "crypto",
+  "kind": "design and measurement notes",
+  "sources": [
+   "docs/ECDLP_NIST.md"
+  ]
+ },
+ "ecc": {
+  "id": "E53",
+  "title": "secp256k1 GPU library: field, walk, folds and baby-step giant-step",
+  "repository": "crypto",
+  "kind": "design notes and source",
+  "sources": [
+   "gpu/ecc/README.md",
+   "gpu/ecc/fp256.cuh",
+   "gpu/ecc/point.cuh",
+   "gpu/ecc/ptx_asm_check.py"
+  ]
+ },
+ "kangaroo": {
+  "id": "E54",
+  "title": "GPU kangaroo interval solver",
+  "repository": "crypto",
+  "kind": "design and measurement notes",
+  "sources": [
+   "gpu/btcpuzzle/README.md"
+  ]
+ },
+ "nistattempt": {
+  "id": "E55",
+  "title": "First NIST GPU attempt (infrastructure non-result)",
+  "repository": "crypto",
+  "kind": "record",
+  "sources": [
+   "research/nist_gpu_arithmetic_20260926/ATTEMPT.md"
+  ]
+ },
+ "prho64": {
+  "id": "E56",
+  "title": "64-bit prime-field GPU rho",
+  "repository": "cryptanalysis",
+  "kind": "design and measurement notes",
+  "sources": [
+   "cryptanalysis:docs/BENCHMARKS.md",
+   "cryptanalysis:docs/GPU.md"
+  ]
+ },
+ "eccopt": {
+  "id": "E57",
+  "title": "secp256k1 GPU arithmetic: Blackwell optimisation notes",
+  "repository": "crypto",
+  "kind": "analysis",
+  "sources": [
+   "gpu/ecc/OPTIMIZATION_BLACKWELL.md"
+  ]
+ },
+ "fes": {
+  "id": "E58",
+  "title": "Fast exhaustive search for quadratic Boolean systems",
+  "repository": "crypto",
+  "kind": "design notes",
+  "sources": [
+   "gpu/fes/README.md"
+  ]
+ },
+ "semaev": {
+  "id": "E59",
+  "title": "Semaev $S_4$ pairs-and-solve sweep",
+  "repository": "crypto",
+  "kind": "design and measurement notes",
+  "sources": [
+   "gpu/semaev/README.md"
+  ]
+ },
+ "macaulay": {
+  "id": "E60",
+  "title": "Batched Macaulay reduced-echelon solver",
+  "repository": "crypto",
+  "kind": "design notes",
+  "sources": [
+   "gpu/macaulay/README.md"
+  ]
+ },
+ "macaulaybench": {
+  "id": "E61",
+  "title": "Macaulay reduction pipeline on an RTX PRO 4500",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "gpu/macaulay/benchmarks/pipeline-20260914/RESULTS.md"
+  ]
+ },
+ "spmv": {
+  "id": "E62",
+  "title": "Sparse matrix--vector worker",
+  "repository": "crypto",
+  "kind": "design notes",
+  "sources": [
+   "gpu/spmv/README.md"
+  ]
+ },
+ "f4": {
+  "id": "E63",
+  "title": "F4 elimination on rented RTX 5090 and H100 GPUs",
+  "repository": "cryptanalysis",
+  "kind": "measurement reports",
+  "sources": [
+   "cryptanalysis:experiments/f4-gpu-panel-20261007/README.md",
+   "cryptanalysis:experiments/f4-gpu-query-20261008/README.md",
+   "cryptanalysis:experiments/f4-gpu-runpod-20261006/RESULT.md"
+  ]
+ },
+ "gpueff": {
+  "id": "E64",
+  "title": "GPU efficiency scorer and the packed-walk profile",
+  "repository": "cryptanalysis",
+  "kind": "tool and profile",
+  "sources": [
+   "cryptanalysis:gpueff/README.md",
+   "cryptanalysis:gpueff/profiles/ecc2k130-packed-walk.json"
+  ]
+ },
+ "fpgaest": {
+  "id": "E65",
+  "title": "FPGA pre-board estimate",
+  "repository": "crypto",
+  "kind": "analysis",
+  "sources": [
+   "ecc2k130/FPGA-CEILING.md"
+  ]
+ },
+ "f2": {
+  "id": "E66",
+  "title": "FPGA engine on AWS F2: builds and measurements",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "hdl/ecc2k130/aws/README.md"
+  ]
+ },
+ "audit": {
+  "id": "E67",
+  "title": "Campaign audit and live snapshot, 2026-09-25",
+  "repository": "crypto",
+  "kind": "audit report and dataset",
+  "sources": [
+   "research/ecc2k130_rho_audit_20260925/README.md",
+   "research/ecc2k130_rho_audit_20260925/live_status_20260925T050509Z.json"
+  ]
+ },
+ "quotes": {
+  "id": "E68",
+  "title": "Fleet price quotes, 2026-09-18",
+  "repository": "crypto",
+  "kind": "operations record",
+  "sources": [
+   "ecc2k130/aws/RESEARCH-CREDITS.md"
+  ]
+ },
+ "pro4500": {
+  "id": "E69",
+  "title": "RTX PRO 4500: rates and per-dollar break-even",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "ecc2k130/RTX-PRO4500.md"
+  ]
+ },
+ "goal28": {
+  "id": "E70",
+  "title": "The 28-billion goal: grid and occupancy screens",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "ecc2k130/GOAL28-RESULTS.md"
+  ]
+ },
+ "power": {
+  "id": "E71",
+  "title": "Power-bound model and updates per joule",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "ecc2k130/POWER-BOUND.md"
+  ]
+ },
+ "cert": {
+  "id": "E72",
+  "title": "Storage, seeds and certification protocol",
+  "repository": "crypto",
+  "kind": "protocol",
+  "sources": [
+   "ecc2k130/CERTIFICATION.md",
+   "ecc2k130/SEED-IDENTITY.md"
+  ]
+ },
+ "status": {
+  "id": "E73",
+  "title": "Public campaign dashboard",
+  "repository": "crypto",
+  "kind": "documentation",
+  "sources": [
+   "docs/ecc2k130-status/README.md",
+   "scripts/rho_status/README.md"
+  ]
+ },
+ "hold": {
+  "id": "E74",
+  "title": "Cloud account hold, 2026-09-18",
+  "repository": "crypto",
+  "kind": "operations record",
+  "sources": [
+   "ecc2k130/aws/ACCOUNT-HOLD.md"
+  ]
+ },
+ "feed": {
+  "id": "E75",
+  "title": "Published campaign feed, 2026-10-10",
+  "repository": "crypto",
+  "kind": "dataset",
+  "sources": [
+   "paper/ecc2k130/data/status_20261010T154157Z.json"
+  ]
+ },
+ "koblitzic": {
+  "id": "E76",
+  "title": "Index calculus on Koblitz curves: structural analysis",
+  "repository": "crypto",
+  "kind": "analysis",
+  "sources": [
+   "RESEARCH_KOBLITZ_INDEX_CALCULUS.md"
+  ]
+ },
+ "evfrob": {
+  "id": "E77",
+  "title": "Evidence record: Frobenius-stable factor bases at $n=131$",
+  "repository": "crypto-autoresearcher",
+  "kind": "evidence record",
+  "sources": [
+   "autoresearcher:ledger/evidence/EV-FROB-d336b0.yaml"
+  ]
+ },
+ "icfeas": {
+  "id": "E78",
+  "title": "Index-calculus feasibility for ECC2K-130",
+  "repository": "crypto",
+  "kind": "analysis",
+  "sources": [
+   "RESEARCH_ECC2K130_IC_FEASIBILITY.md"
+  ]
+ },
+ "icledger": {
+  "id": "E79",
+  "title": "Index-calculus boundary ledger",
+  "repository": "crypto",
+  "kind": "measurement ledger",
+  "sources": [
+   "docs/ic/BOUNDARY_TARGETS.md",
+   "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
+  ]
+ },
+ "pdp": {
+  "id": "E80",
+  "title": "Point decomposition against the rho budget",
+  "repository": "cryptanalysis",
+  "kind": "measurement report",
+  "sources": [
+   "cryptanalysis:experiments/pdp-scaling/README.md"
+  ]
+ },
+ "evicperf": {
+  "id": "E81",
+  "title": "Evidence record: Riemann--Roch oracle product law",
+  "repository": "crypto-autoresearcher",
+  "kind": "evidence record",
+  "sources": [
+   "autoresearcher:ledger/evidence/EV-ICPERF-10c5fc.yaml"
+  ]
+ },
+ "probelat": {
+  "id": "E82",
+  "title": "Cycle-probe latency and the routes to a faster exact rule",
+  "repository": "crypto",
+  "kind": "analysis",
+  "sources": [
+   "ecc2k130/CYCLE-PROBE-LATENCY.md"
+  ]
+ },
+ "sigmasq": {
+  "id": "E83",
+  "title": "$\\sigma$-walk shared-memory square table: compile and resource gate",
+  "repository": "crypto",
+  "kind": "gate record",
+  "sources": [
+   "ecc2k130/benchmarks/sigma-square-table/RESULTS.md"
+  ]
+ },
+ "g7native": {
+  "id": "E84",
+  "title": "Native-instruction candidates on the RTX PRO 4500",
+  "repository": "crypto",
+  "kind": "paired benchmark",
+  "sources": [
+   "ecc2k130/G7-NATIVE-RESULTS.md"
+  ]
+ },
+ "sparse": {
+  "id": "E85",
+  "title": "Sparse-basis and compound $\\sigma$ maps: modelled ceilings",
+  "repository": "crypto",
+  "kind": "analysis",
+  "sources": [
+   "ecc2k130/benchmarks/sparse-basis-compound/RESULTS.md"
+  ]
+ },
+ "cpupacked": {
+  "id": "E86",
+  "title": "Packed CPU client on PMULL/PCLMULQDQ and the Metal client",
+  "repository": "cryptanalysis",
+  "kind": "design and measurement notes",
+  "sources": [
+   "cryptanalysis:ecc2k130/README.md"
+  ]
+ },
+ "gfni": {
+  "id": "E87",
+  "title": "GFNI for basis changes: measured on small fields, priced for ECC2K-130",
+  "repository": "crypto",
+  "kind": "measurement report and analysis",
+  "sources": [
+   "research/ic_tool_program/explorations/R06-key-gfni-20261006/README.md",
+   "ecc2k130/CHEAPER-SELECTION.md"
+  ]
+ },
+ "smallclmul": {
+  "id": "E88",
+  "title": "Carry-less reduction in small binary fields (PCLMULQDQ)",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "docs/perf/RESULTS.md"
+  ]
+ }
+}

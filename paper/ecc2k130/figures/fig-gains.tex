@@ -1,0 +1,51 @@
+% Segment lengths are log10(factor) * \k cm, so widths multiply like the factors.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,lab/.style={font=\scriptsize,align=center}]
+\def\k{6.2}
+% Row 1: 2010 GTX 295 -> RTX PRO 6000, 228.75x = SM-clocks 6.05x x per-SM-clock 37.8x
+\pgfmathsetmacro{\p}{\k*log10(6.05)}
+\pgfmathsetmacro{\q}{\k*log10(228.75)}
+\node[anchor=south west,font=\small] at (0,2.62) {Against the 2010 GTX~295 card: $229\times$};
+\fill[inkS!40] (0,1.85) rectangle (\p,2.55);
+\fill[cA] (\p,1.85) rectangle (\q,2.55);
+\draw[white,line width=1pt] (\p,1.85)--(\p,2.55);
+\node[lab] at (\p/2,2.2) {chip: $6.1\times$ more\\SM-clocks per second};
+\node[lab,text=white] at ({(\p+\q)/2},2.2) {per SM-clock: $37.8\times$\\arithmetic, instructions and layout};
+% Row 2: ledger 0.852 -> 14.64, 17.17x
+\pgfmathsetmacro{\a}{\k*log10(6.337)}
+\pgfmathsetmacro{\b}{\a+\k*log10(1.523)}
+\pgfmathsetmacro{\c}{\b+\k*log10(1.255)}
+\pgfmathsetmacro{\d}{\c+\k*log10(1.224)}
+\pgfmathsetmacro{\e}{\k*log10(17.17)}
+\node[anchor=south west,font=\small] at (0,1.0) {The ledger, bitsliced control to audited build: $17.2\times$};
+\fill[cA] (0,0.25) rectangle (\a,0.95);
+\fill[cD] (\a,0.25) rectangle (\b,0.95);
+\fill[cC] (\b,0.25) rectangle (\c,0.95);
+\fill[cB] (\c,0.25) rectangle (\d,0.95);
+\fill[white] (\d,0.25) rectangle (\e,0.95);
+\fill[pattern=north east lines,pattern color=inkS!70] (\d,0.25) rectangle (\e,0.95);
+\draw[white,line width=1pt] (\a,0.25)--(\a,0.95) (\b,0.25)--(\b,0.95) (\c,0.25)--(\c,0.95) (\d,0.25)--(\d,0.95);
+\node[lab,text=white] at (\a/2,0.6) {representation and arithmetic $6.34\times$};
+% Key for the narrow segments, in bar order.
+\begin{scope}[shift={(0,-0.45)}]
+\fill[cD] (0,0) rectangle (0.3,0.2); \node[lab,anchor=west] at (0.35,0.1) {batch and geometry $1.52\times$};
+\fill[cC] (4.3,0) rectangle (4.6,0.2); \node[lab,anchor=west] at (4.65,0.1) {memory and layout $1.26\times$};
+\fill[cB] (8.5,0) rectangle (8.8,0.2); \node[lab,anchor=west] at (8.85,0.1) {native \texttt{clmad} $1.22\times$};
+\fill[pattern=north east lines,pattern color=inkS!70] (12.1,0) rectangle (12.4,0.2); \node[lab,anchor=west] at (12.45,0.1) {unattributed $1.16\times$};
+\end{scope}
+% log scale
+\draw[inkS] (0,-0.9) -- (\q,-0.9);
+\foreach \v in {1,2,5,10,20,50,100,200}
+  \draw[inkS] ({\k*log10(\v)},-0.85) -- ({\k*log10(\v)},-0.95) node[below,font=\scriptsize] {$\v\times$};
+\end{tikzpicture}
+\caption{Where the speedup came from, on a log scale so that segment
+  widths multiply. Top: against the 2010 GTX~295 card, about $6\times$ is a
+  bigger, faster chip and about $38\times$ is per-SM-clock work. Bottom: the
+  sixteen paired ledger steps grouped by kind (Figure~\ref{fig:ledger});
+  their gains multiply to $14.8\times$ against the $17.2\times$ from the
+  bitsliced control to the audited build, and the remaining $1.16\times$ is
+  steps taken outside the ledger (launch shape, a compiler upgrade) and
+  session-to-session drift. None of it changed the rho algorithm.}
+\label{fig:gains}
+\end{figure}

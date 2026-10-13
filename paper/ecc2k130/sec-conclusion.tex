@@ -47,6 +47,21 @@ normal-basis one. A P-256 step remains about nine times as expensive
 as an ECC2K-130 step on the same card, which is the carry-less unit's
 advantage in one number.
 
+\paragraph{The headroom is finite and measurable.} None of the speedup
+came from changing the algorithm: every step kept Bailey et al.'s walk
+and its distinguished points bit for bit, and the gains split into
+representation and arithmetic ($6.3\times$), batch and geometry
+($1.5\times$), memory layout ($1.3\times$) and the new instruction
+($1.2\times$). The same pipe measurements bound what is left. Any walk with
+one affine addition per step tops out at about $24$--$26$ billion
+iterations per second on one RTX~PRO~6000, so the best $\sigma$-walk has
+roughly $1.5\times$ to go, all of it in integer work; a B200 would need a
+$1.55\times$ cut in logic instructions to reach $30$; the F2 FPGA stops near
+$9.3$. On CPUs the instruction sets matter as much as on GPUs: three-input
+logic and wider words give $2.4$--$3\times$ to the bitsliced client, and a
+packed client on the CPU's own carry-less multiply runs $2.9\times$ faster
+than with a software product.
+
 \paragraph{The exponent did not move, and the campaign is a priced
 corpus.} The campaign's walk needs $2^{60.91}$--$2^{60.92}$ iterations,
 which agrees with the 2009 estimate. Index calculus on the curve costs

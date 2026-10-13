@@ -1,0 +1,27 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  xbar, bar width=8pt, bar shift=0pt,
+  width=0.62\textwidth, height=0.36\textwidth,
+  xmin=0, xmax=140, xtick={0,20,...,100},
+  xlabel={pipe busy at 20.08 billion iterations/s (\%)},
+  symbolic y coords={alu,clmad,issue,lsu,fma},
+  ytick={alu,clmad,issue,lsu,fma},
+  yticklabels={logic (ALU),\texttt{CLMAD},issue,load/store,FMA},
+  y dir=reverse, xmajorgrids,
+  nodes near coords, nodes near coords style={font=\scriptsize,anchor=west},
+  point meta=explicit symbolic,
+]
+\addplot[fill=cA,draw=none] coordinates {(91.2,alu) [91.2\% (ceiling 22.0)]};
+\addplot[fill=cB,draw=none] coordinates {(73.2,clmad) [73.2\% (ceiling 27.4)]};
+\addplot[fill=inkS!45,draw=none] coordinates {(58.7,issue) [58.7\%] (22.1,lsu) [22.1\%] (13.0,fma) [13.0\%]};
+\end{axis}
+\end{tikzpicture}
+\caption{The roofline of Table~\ref{tab:roofline} as a picture: the logic
+  pipe is the binding constraint for the table walk's arithmetic on the
+  RTX~PRO~6000, with the carry-less unit second; memory and the FMA pipe
+  are far from busy. In brackets, the rate at which each unit alone would
+  saturate, in billions of iterations per second.}
+\label{fig:roofline}
+\end{figure}

@@ -1,0 +1,53 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  font=\scriptsize,x=1cm,y=1cm,
+  box/.style={draw=inkS,rounded corners=2pt,fill=boxfill,align=center,inner sep=3pt},
+  hdr/.style={font=\footnotesize\bfseries,anchor=west},
+  arr/.style={-{Stealth[length=4pt]},inkS},
+]
+% ---- Row 1: grid and waves
+\node[hdr] at (0,7.3) {Grid: 1{,}504 blocks of 256 threads, run as four waves};
+\foreach \w in {0,1,2,3}{
+  \fill[cA!\the\numexpr 80-\w*15\relax] ({\w*3.45},6.5) rectangle ({\w*3.45+3.35},7.0);
+  \node[text=white] at ({\w*3.45+1.675},6.75) {wave \the\numexpr\w+1\relax: 376 blocks};
+}
+\node[anchor=west,text=inkS] at (0,6.2) {385{,}024 workers $=4\times$ the 96{,}256 that fit at once (188 SMs $\times$ 2 blocks $\times$ 256 threads)};
+% ---- Row 2 left: one SM
+\node[hdr] at (0,5.55) {One SM (of 188)};
+\draw[inkS,rounded corners=2pt] (0,2.55) rectangle (6.4,5.25);
+\node[box,minimum width=2.9cm] at (1.6,4.7) {block 0: 256 threads};
+\node[box,minimum width=2.9cm] at (4.8,4.7) {block 1: 256 threads};
+\node[box,fill=cC!25,minimum width=6.1cm] at (3.2,3.75) {shared: 1{,}792-byte $\sigma$ mask table per block};
+\node at (3.2,2.95) {16 warps per SM; 104 registers per thread, no spills};
+% ---- Row 2 right: one thread
+\node[hdr] at (7.0,5.55) {One thread = one worker = 16 walks};
+\foreach \s in {0,...,15}{
+  \pgfmathsetmacro{\xx}{7.0+mod(\s,8)*0.83}
+  \pgfmathsetmacro{\yy}{4.7-int(\s/8)*0.6}
+  \fill[cA!20] (\xx,\yy) rectangle ({\xx+0.78},{\yy+0.5});
+  \node[font=\scriptsize] at ({\xx+0.39},{\yy+0.25}) {\s};
+}
+\draw[decorate,decoration={brace,amplitude=4pt,mirror},inkS] (7.0,4.0) -- (13.6,4.0)
+  node[midway,below=5pt,align=center] {walks 0--15: one field inversion per step\\serves all 16 (Montgomery's trick)};
+% ---- Row 3: memory
+\node[hdr] at (0,2.0) {Where the state lives};
+\node[box,fill=cB!20,text width=4.1cm,anchor=north west,align=left] at (0,1.7)
+  {\textbf{registers}: running product and inverse; the current walk's $x,y,D,E,\lambda$; unreduced products};
+\node[box,fill=cC!25,text width=4.1cm,anchor=north west,align=left] at (4.6,1.7)
+  {\textbf{shared / constant}: $\sigma$ masks (1{,}792\,B); inverse-network masks; start-point tables};
+\node[box,fill=cD!25,text width=4.1cm,anchor=north west,align=left] at (9.2,1.7)
+  {\textbf{global}: $x$, $y$, prefix products and cached denominators, 17\,B per element in 256-worker tiles};
+\node[box,fill=inkS!12,text width=6.3cm,anchor=north west,align=left] at (0,0.15)
+  {\textbf{distinguished points}: \texttt{atomicAdd} into a device buffer, copied to the host between launches};
+\node[box,fill=white,text width=6.3cm,anchor=north west,align=left] at (7.0,0.15)
+  {\textbf{checkpoint}: 60 bytes per walk, about 370\,MB for the whole grid};
+\end{tikzpicture}
+\caption{Anatomy of the audited $\sigma$-walk kernel on the RTX~PRO~6000.
+  Each thread owns 16 walks that share one field inversion per step;
+  two 256-thread blocks fit per SM, and the 385{,}024-worker grid runs in
+  four waves. The 1{,}024-step loop runs inside the kernel; every step
+  streams each walk's compact state through global memory, and the
+  distinguished-point buffer is drained between launches.}
+\label{fig:kernel}
+\end{figure}

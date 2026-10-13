@@ -1,0 +1,117 @@
+\section{Instruction sets that matter for this arithmetic}
+\label{sec:isa}
+
+Pollard rho on these curves needs two kinds of arithmetic: products of
+binary polynomials (for $\FF_{2^{131}}$) and multi-word integer products
+with long carry chains (for the NIST primes). Both have gained dedicated
+instructions over the last fifteen years, on GPUs and CPUs alike.
+Table~\ref{tab:isa} and Figure~\ref{fig:isa} summarise the ones this
+paper uses or prices; the rest of this section says why each matters.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Instructions relevant to rho on $\FF_{2^{131}}$ and on prime
+  fields, with the first generation that has each. ``Use here'' says how
+  this paper's code uses it: in the measured clients, priced, or not
+  yet tried.}
+\label{tab:isa}
+\begin{tabular}{@{}p{0.2\textwidth}p{0.31\textwidth}p{0.2\textwidth}p{0.2\textwidth}@{}}
+\toprule
+instruction & what it does & first available & use here \\
+\midrule
+\multicolumn{4}{@{}l}{\emph{NVIDIA GPUs}} \\
+\texttt{PRMT}, \texttt{POPC}, \texttt{FLO} & byte permute; population count; find leading one & Fermi (2010) & every client \\
+\texttt{SHF} & funnel shift of a register pair & Kepler (2012--13) & every client \\
+\texttt{LOP3} & any 3-input Boolean function & Maxwell (2014) & every client \\
+\texttt{IADD3}, native \texttt{IMAD} & 3-input add; 32-bit multiply-add & Maxwell; Volta (2017) & NIST walk \\
+\texttt{mad.lo.cc}, \texttt{madc.hi.cc} & multiply-add with carry in/out (PTX) & all CUDA GPUs & NIST walk \\
+\texttt{clmad.lo}/\texttt{.hi} & $64{\times}64$ carry-less multiply-add (PTX 9.3) & CUDA 13.3 (2026), \texttt{sm\_80}+ & ECC2K-130 client \\
+\midrule
+\multicolumn{4}{@{}l}{\emph{x86 (Intel, AMD)}} \\
+\texttt{PCLMULQDQ} & $64{\times}64$ carry-less multiply & Westmere (2010) & packed CPU client \\
+\texttt{MULX}, \texttt{ADCX}/\texttt{ADOX} & flag-free multiply; two carry chains & Haswell (2013); Broadwell (2014) & not tried \\
+\texttt{VPTERNLOGD} & any 3-input Boolean function, 512-bit & Skylake-SP (2017) & bitsliced client \\
+\texttt{VPMADD52} (IFMA) & $52{\times}52$-bit multiply-add & Cannon Lake (2018) & not tried \\
+\texttt{VPCLMULQDQ}, GFNI & 4 carry-less products per 512 bits; GF($2^8$) affine & Ice Lake (2019); AMD Zen 4 (2022) & priced \\
+\midrule
+\multicolumn{4}{@{}l}{\emph{Arm}} \\
+\texttt{PMULL}/\texttt{PMULL2} & $64{\times}64$ carry-less multiply & Armv8.0 Crypto & packed CPU client \\
+\texttt{EOR3}, \texttt{BCAX} & 3-way XOR; AND-NOT then XOR & Armv8.2 SHA3 & bitsliced client \\
+SVE2 \texttt{PMULLB/T}, \texttt{EOR3} & vector carry-less and 3-input logic & Armv9.0 (SVE2-AES) & not tried \\
+\midrule
+\multicolumn{4}{@{}l}{\emph{RISC-V}} \\
+Zbc, Zvbc & scalar and vector carry-less multiply & ratified 2021, 2023 & not tried \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{NVIDIA GPUs.} The integer pipe has grown three instructions
+that a binary field uses on every step. \texttt{PRMT} and \texttt{POPC}
+date from Fermi, the funnel shift \texttt{SHF} from Kepler, and
+\texttt{LOP3}, which evaluates any Boolean function of three inputs from an
+8-bit truth table, from Maxwell~\cite{nvidia_binutils}. \texttt{LOP3}
+alone is worth $1.65\times$ on the bitsliced product
+(Section~\ref{sec:arith-bitsliced}). \texttt{POPC} still issues at a
+quarter of the logic rate on every current part, 16 per clock per SM, so
+each Hamming weight costs about four logic slots~\cite{nvidia_bpg134}.
+The prime-field side relies on PTX's carry-chain forms, which every CUDA
+GPU has; the extended-precision forms issue at half the rate of a plain
+multiply-add~\cite{nvidia_bpg134}.
+
+The change that matters most for ECC2K-130 is recent. PTX ISA~9.3,
+shipped with CUDA~13.3 in May 2026, added \texttt{clmad.lo} and
+\texttt{clmad.hi}: the low and high halves of a $64\times64$ carry-less
+product, XORed into an addend, for \texttt{sm\_80} and
+later~\cite{nvidia_ptx93}. NVIDIA describes it as accelerated in hardware
+since Ampere and reports GHASH at about 6.3~TB/s on a B200 and 1.3~TB/s
+on an RTX~5090~\cite{watson2026clmad}. NVIDIA documents neither its SASS
+mnemonic nor its issue rate, which is why we measured both
+(Section~\ref{sec:blackwell-rates}). Nsight attributes it to the FP64
+pipe, and it is slow exactly where FP64 is slow: about two lanes per
+SM-clock on the RTX~PRO~6000, ten to eighteen times that on the B200 and
+H100. That matters because
+NVIDIA's FP64 ratio varies by product rather than by generation: $2{:}1$
+against FP32 on the A100, H100 and B200, but $64{:}1$ on the GA10x and Ada
+consumer parts, on the RTX~PRO~6000 and on the
+B300~\cite{nvidia_ga102_wp,nvidia_ada_wp,nvidia_h100_wp,nvidia_rtx_blackwell_wp,aubrey2025blackwellultra}.
+
+Two other generational changes show up in our rates. From Ampere's GA10x
+parts onward each SM partition pairs 16 FP32-only lanes with 16 lanes that
+do FP32 or INT32, and Ada kept that split; the workstation Blackwell
+chips (\texttt{sm\_120}) unify them, so every lane can issue integer
+work~\cite{nvidia_ga102_wp,nvidia_ada_wp,nvidia_rtx_blackwell_wp}. That is
+consistent with the factor of two we measure per SM between Ada and
+\texttt{sm\_120} on this integer-bound walk (Section~\ref{sec:blackwell-logic}).
+Hopper's DPX instructions (fused add with min or max for dynamic
+programming), its tensor memory accelerator and Blackwell's
+\texttt{tcgen05} tensor-memory instructions do not help this walk; the
+products here have no operand shared across lanes, which tensor cores
+need (Section~\ref{sec:open-method}).
+
+\paragraph{x86.} Intel added \texttt{PCLMULQDQ} with Westmere in
+2010~\cite{gueron2014clmul}, \texttt{MULX} with Haswell and the dual carry
+chains \texttt{ADCX}/\texttt{ADOX} with Broadwell~\cite{ozturk2012adx},
+AVX-512 with its ternary-logic \texttt{VPTERNLOGD} in Skylake-SP, the
+52-bit integer multiply-add IFMA in Cannon Lake~\cite{gueron2016ifma}, and
+the 512-bit \texttt{VPCLMULQDQ} (four carry-less products per instruction)
+with GFNI in Ice Lake~\cite{intel_sdm_vol1,drucker2018vpclmulqdq}. AMD
+implemented AVX-512, including \texttt{VPCLMULQDQ} and GFNI, in Zen~4 on a
+256-bit datapath that issues each 512-bit operation in two halves, and
+Zen~5's server parts run it at full width~\cite{amd_58003,amd_epyc5_wp}.
+Intel's AVX10.2 makes 512-bit vectors universal and APX doubles the
+general-purpose registers to 32~\cite{intel_avx102,intel_apx}; both would
+help a register-starved bitsliced leaf (Section~\ref{sec:cpu-bitsliced}).
+
+\paragraph{Arm and RISC-V.} Armv8.0's optional Crypto extension has the
+$64\times64$ carry-less \texttt{PMULL}; the Armv8.2 SHA3 extension adds the
+three-input \texttt{EOR3} and \texttt{BCAX}; SVE2 brings vector forms of
+both, with 128-bit-result \texttt{PMULLB}/\texttt{PMULLT} in the SVE2-AES
+extension~\cite{arm_a64_2026}. Graviton2 (Neoverse N1) has PMULL but not
+SHA3, Graviton3 (V1) adds SHA3 and SVE, and Graviton4 (V2) has SVE2 with
+the 128-bit PMULL; Apple's M4 has SHA3 and SME but no non-streaming SVE.
+RISC-V ratified scalar carry-less multiply (Zbc) in 2021 and its vector
+form (Zvbc) in 2023~\cite{riscv_bitmanip,riscv_vcrypto}.
+
+\input{figures/fig-isa}
