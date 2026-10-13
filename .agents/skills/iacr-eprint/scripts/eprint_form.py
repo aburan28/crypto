@@ -160,6 +160,13 @@ def main():
             if not any(abs(w - W) < 3 and abs(h - H) < 3 for W, H in [(595.28, 841.89), (612, 792)]):
                 errors.append(f"page size {w}x{h} pt is neither A4 nor US Letter")
 
+    emails = re.findall(r"[\w.+-]+@[\w-]+\.[\w.-]+", " ".join(affil))
+    if emails and len(emails) == len(names):
+        author_cell = "; ".join(f"{n} <{e}>" for n, e in zip(names, emails))
+    else:
+        author_cell = "; ".join(names)
+        if not emails:
+            warnings.append("no email in the \\author block; the form needs at least one")
     (out / "eprint-abstract.txt").write_text(abstract + "\n")
     md = f"""# IACR ePrint submission: {title}
 
@@ -172,7 +179,7 @@ author must agree.
 | field | value |
 |---|---|
 | Title | {title} |
-| Authors (in order, UTF-8) | {"; ".join(names)} |
+| Authors (in order, UTF-8) | {author_cell} |
 | Affiliation / contact (on page 1) | {"; ".join(affil)} |
 | Abstract | paste `eprint-abstract.txt` ({len(abstract)} chars; `$…$` math renders with MathJax) |
 | Category | {a.category} |

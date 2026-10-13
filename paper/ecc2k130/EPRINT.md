@@ -9,8 +9,8 @@ author must agree.
 | field | value |
 |---|---|
 | Title | ECC2K-130 on Commodity Hardware: A Measured Frobenius-Class Pollard Rho Campaign |
-| Authors (in order, UTF-8) | Adam Buran; Kevin Nguyen |
-| Affiliation / contact (on page 1) | Isogeny Labs; adam@isogenylabs.io |
+| Authors (in order, UTF-8) | Adam Buran <adam@isogenylabs.io>; Kevin Nguyen <kevin@isogenylabs.io> |
+| Affiliation / contact (on page 1) | Isogeny Labs; adam@isogenylabs.io, kevin@isogenylabs.io |
 | Abstract | paste `eprint-abstract.txt` (2088 chars; `$…$` math renders with MathJax) |
 | Category | Attacks and cryptanalysis |
 | Keywords | ECC2K-130, Pollard rho, Koblitz curves, elliptic curve discrete logarithm, Certicom challenge, optimal normal basis, GPU, FPGA, binary fields, index calculus |
