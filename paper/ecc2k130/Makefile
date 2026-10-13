@@ -11,7 +11,7 @@
 TEX     := ecc2k130.tex
 PDF     := $(TEX:.tex=.pdf)
 SECTIONS := sec-intro.tex sec-curve.tex sec-walk.tex sec-arith.tex \
-            sec-gpu.tex sec-cpu.tex sec-othergpu.tex sec-fpga.tex sec-campaign.tex \
+            sec-gpu.tex sec-cpu.tex sec-nist.tex sec-othergpu.tex sec-fpga.tex sec-campaign.tex \
             sec-alternatives.tex sec-related.tex sec-conclusion.tex app-reproduction.tex
 BIB     := ecc2k130.bib
 AUX     := $(TEX:.tex=.aux) $(TEX:.tex=.log) $(TEX:.tex=.out) $(TEX:.tex=.toc) \

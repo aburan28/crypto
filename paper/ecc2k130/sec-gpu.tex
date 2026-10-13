@@ -1,28 +1,28 @@
 \section{The GPU client}
 \label{sec:gpu}
 
-The GPU question is a throughput question at a known exponent. The unit
-throughout is billions of complete scalar updates per second on one
-card, written B/s; a scalar update is one complete iteration of one
-walk, including its share of the batched inversion, the
-distinguished-point test and the restart path. The class of every row
-in this section is engineering: the walk is the same, the collision
-structure is the same, and the ratio to the generic-group floor does
-not move. What moves is the ratio to a second boundary, the carry-less
-unit of the GPU, derived in Section~\ref{sec:floor} before the kernel
-was tuned toward it.
+On the GPU the exponent is fixed, so the only question is throughput.
+Throughout this section the unit is billions of complete scalar
+updates per second on one card, written B/s. A scalar update is one
+complete iteration of one walk, including its share of the batched
+inversion, the distinguished-point test and the restart path. Every
+row here is engineering: the walk and its collision structure stay the
+same, and the ratio to the generic-group floor does not move. What
+does move is the ratio to a second boundary, the GPU's carry-less
+unit, which we derived in Section~\ref{sec:floor} before tuning the
+kernel toward it.
 
 \subsection{Two boundaries, written down first}
 \label{sec:floor}
 
 Any walk that keeps the rho collision structure performs one affine
 addition per iteration. With Montgomery's batched
-inversion~\cite{montgomery1987} across $W$ walks, an affine addition
-costs a fixed number of field products plus $1/W$ of an inversion. In
-the packed representation a $131\times131$ product is a two-way
-Karatsuba over $64\times64$ carry-less multiplies, six \texttt{CLMAD}
+inversion~\cite{montgomery1987} across $W$ walks, that addition costs
+a fixed number of field products plus $1/W$ of an inversion. In the
+packed representation a $131\times131$ product is a two-way Karatsuba
+over $64\times64$ carry-less multiplies, which is six \texttt{CLMAD}
 instructions. At batch $W=16$ the shipping kernel issues 77 products
-per 16 slots, $4.81$ per update. Table~\ref{tab:floor} prices one
+per 16 slots, or $4.81$ per update. Table~\ref{tab:floor} prices one
 update on the RTX~PRO~6000 (188 SMs).\art{ecc2k130/ITERATION-FUNCTION.md, §1}
 
 \begin{table}[t]
@@ -53,32 +53,34 @@ budget at $28$~B/s & $25.4$--$26.9$ & $959$--$1{,}013$ \\
 \end{tabular}
 \end{table}
 
-The two pipes are independent and each writes its own floor. On the
+The two pipes are independent, and each sets its own floor. On the
 carry-less unit, $28.9$ \texttt{CLMAD} at $1.65$ lanes per SM-clock is
-$17.5$ SM-clocks per update, a ceiling of $24.7$--$26.1$~B/s with every
-other cost free. On the logic pipe, about $1{,}090$ ALU slots already
-exceed the $959$--$1{,}013$ that $28$~B/s allows. At $90\%$ of either
-pipe the ceiling is $22.2$--$23.4$~B/s. The question the note was
-written to answer, whether a different iteration function could take
-one card from the audited $14.64$ to $28$~B/s, is therefore answered
-before any kernel is built: $28$~B/s is below the floor of any walk
-that performs one affine addition per iteration.
+$17.5$ SM-clocks per update, a ceiling of $24.7$--$26.1$~B/s even if
+everything else were free. On the logic pipe, about $1{,}090$ ALU slots
+already exceed the $959$--$1{,}013$ that $28$~B/s would allow. At $90\%$
+utilisation of either pipe the ceiling is $22.2$--$23.4$~B/s. The note
+was written to answer one question: could a different iteration
+function take one card from the audited $14.64$ to $28$~B/s? The
+answer came before any kernel was built. It cannot, because $28$~B/s
+is below the floor of any walk that performs one affine addition per
+iteration.
 
-The carry-less rate itself was revised upward as the kernels got
-closer to it. A kernel-mix measurement on the 6000 at $1.62$
-lane-\texttt{CLMAD}s per SM-clock priced the $20$~B/s table-walk kernel at $33.1$ \texttt{CLMAD}
-per update ($28.9$ products, $3.0$ inversion, $1.25$ normal-basis
-squarings) and wrote a floor of $22.3$~B/s.\art{ecc2k130/TWO-CHAINS.md, §1}
-A screened (not yet verified) three-limb Karatsuba arm then implied
-at least $1.654$ lane-\texttt{CLMAD}s per SM-clock, refuting that
-figure, and the roofline of the $20.078$~B/s build (Table~\ref{tab:roofline}) puts
-the carry-less speed of light at $27.4$~B/s with the unit $2.00$ lanes
-wide, while the logic pipe at $1{,}319.6$ lane-instructions per update
-is $91.2\%$ busy and binds first.\art{ecc2k130/ROOFLINE.md} Thirty B/s
-would need at most $30.3$ \texttt{CLMAD} and $968$ ALU slots per
-update, a $27\%$ cut in integer work the note calls ``a two-card
-number''. The $28$~B/s verdict survives the revision because it was
-never only a carry-less verdict.
+Our estimate of the carry-less rate went up as the kernels got closer
+to it. A kernel-mix measurement on the 6000 at $1.62$
+lane-\texttt{CLMAD}s per SM-clock priced the $20$~B/s table-walk kernel
+at $33.1$ \texttt{CLMAD} per update ($28.9$ products, $3.0$ inversion,
+$1.25$ normal-basis squarings) and gave a floor of
+$22.3$~B/s.\art{ecc2k130/TWO-CHAINS.md, §1} A screened (not yet
+verified) three-limb Karatsuba arm then implied at least $1.654$
+lane-\texttt{CLMAD}s per SM-clock, which refuted that figure. The
+roofline of the $20.078$~B/s build (Table~\ref{tab:roofline}) puts the
+carry-less speed of light at $27.4$~B/s with the unit $2.00$ lanes
+wide, while the logic pipe, at $1{,}319.6$ lane-instructions per
+update, is $91.2\%$ busy and runs out first.\art{ecc2k130/ROOFLINE.md}
+Thirty B/s would need at most $30.3$ \texttt{CLMAD} and $968$ ALU slots
+per update, a $27\%$ cut in integer work that the note calls ``a
+two-card number''. The $28$~B/s verdict survives the revision because
+it never rested on the carry-less unit alone.
 
 \begin{table}[t]
 \centering
@@ -101,51 +103,51 @@ FMA & 64 & $188.6$ & $154$ & $13.0\%$ \\
 \end{tabular}
 \end{table}
 
-The same note measures the carry-less unit across dies: $37.8$ logic
-slots per \texttt{CLMAD.lo} on the 6000, $3.78$ on the B200 and $2.00$
-on the H100, so on the data-centre parts the logic pipe binds by a
-wide margin and on the B200 the carry-less floor alone would be
-$255$~B/s.\art{ecc2k130/TWO-CHAINS.md, §6.1--6.2}
+The same note measures the carry-less unit on other dies: $37.8$
+logic slots per \texttt{CLMAD.lo} on the 6000, $3.78$ on the B200 and
+$2.00$ on the H100. On the data-centre parts, then, the logic pipe
+binds by a wide margin, and on the B200 the carry-less floor alone
+would be $255$~B/s.\art{ecc2k130/TWO-CHAINS.md, §6.1--6.2}
 
-The static accounting behind Table~\ref{tab:floor} was itself
-corrected once: an earlier SASS counter reported about $1{,}570$ ALU
-slots and $29$ \texttt{CLMAD} per update; the replacement counts
-$2{,}271$ ALU and $45$ \texttt{CLMAD} static, $2{,}324$ once
-\texttt{POPC} and \texttt{FLO} are priced at their measured
-quarter rate.\art{ecc2k130/ITERATION-FUNCTION.md, §3} The floor
-argument does not depend on which count is used; the budgets are
-below both.
+We had to correct the static accounting behind Table~\ref{tab:floor}
+once. An earlier SASS counter reported about $1{,}570$ ALU slots and
+$29$ \texttt{CLMAD} per update; its replacement counts $2{,}271$ ALU and
+$45$ \texttt{CLMAD} statically, or $2{,}324$ once \texttt{POPC} and
+\texttt{FLO} are priced at their measured quarter
+rate.\art{ecc2k130/ITERATION-FUNCTION.md, §3} The floor argument does
+not depend on which count is used, since the budgets are below both.
 
 \subsection{Acceptance rules}
 
-With two exceptions named in Section~\ref{sec:declined}, every rung
-in this section is a paired comparison on one GPU allocation,
-candidate and control interleaved, three to six repetitions each,
-with the candidate's ratio to the control reported per pair. A
-change is adopted only when it clears a rule declared before the run:
-at least $1\%$ on both the benchmark and the DP34 collection workload
-with every pair favouring the candidate, or, for the later table-walk
-work, a geometric-mean ratio at or above a stated threshold with every
-pair above a stated minimum.\art{ecc2k130/NATIVE-CANDIDATES.md}\art{ecc2k130/SIGMA-TABLE.md}
+With two exceptions named in Section~\ref{sec:declined}, every step
+in this section is a paired comparison on one GPU allocation: the
+candidate and control are interleaved, three to six repetitions each,
+and we report the candidate's ratio to the control for every pair. We
+adopt a change only if it clears a rule declared before the run. For
+most of the ledger that rule is a gain of at least $1\%$ on both the
+benchmark and the DP34 collection workload, with every pair favouring
+the candidate. For the later table-walk work it is a geometric-mean
+ratio at or above a stated threshold, with every pair above a stated
+minimum.\art{ecc2k130/NATIVE-CANDIDATES.md}\art{ecc2k130/SIGMA-TABLE.md}
 Every adopted kernel re-walks every device report on the host
 reference ($300$ of $300$ in the later notes) and recovers planted
-logarithms on $\mathrm{GF}(2^{41})$. A candidate that fails the rule is
-kept in the tree behind a flag and recorded with its ratio; the
-record of declined work is in Section~\ref{sec:declined}.
+logarithms on $\mathrm{GF}(2^{41})$. A candidate that fails the rule
+stays in the tree behind a flag, with its ratio on record;
+Section~\ref{sec:declined} collects them.
 
 \subsection{The packed-backend ledger: $0.85$ to $14.64$~B/s}
 \label{sec:ledger}
 
-The original client was bitsliced: 32 walks in the bit lanes of a
-word, every field operation a straight-line program of
-\texttt{LOP3} instructions (Section~\ref{sec:arith-bitsliced}). The
-audit of the packed replacement measured that control at
-$0.852294$~B/s on an RTX~PRO~6000.\art{ecc2k130/PACKED.md} Table~\ref{tab:ledger}
-is the lineage from there to the audited $14.637530$~B/s
-($14.106673$~B/s while collecting at weight 34), each rung the note's
-own paired comparison. The rungs are not a single chain of equal
-occupancy and equal compiler; where a note changed more than one
-thing the table says so.
+The original client was bitsliced, with 32 walks in the bit lanes of
+a word and every field operation a straight-line program of
+\texttt{LOP3} instructions (Section~\ref{sec:arith-bitsliced}). When
+we audited the packed replacement, that control measured
+$0.852294$~B/s on an RTX~PRO~6000.\art{ecc2k130/PACKED.md}
+Table~\ref{tab:ledger} traces the path from there to the audited
+$14.637530$~B/s ($14.106673$~B/s while collecting at weight 34). Each
+step is the corresponding note's own paired comparison. They do not
+form a single chain at constant occupancy and compiler, and where a
+note changed more than one thing at once, the table says so.
 
 \begin{table}[t]
 \centering
@@ -198,113 +200,117 @@ prefixes~\art{ecc2k130/WEIGHTED-PREFIX.md}; compact
 state~\art{ecc2k130/COMPACT-STATE.md}; shared
 masks~\art{ecc2k130/SHARED-SIGMA.md}.
 
-Three rungs carry most of the factor and each is a representation
-change rather than a tuning. The Frobenius permutation networks
-($+41\%$) replace the per-step basis conversions around $\sigma^j$
-with Bene\v{s} networks over the permuted normal basis, checked on
-$3{,}120$ GPU vectors and on $256$ basis vectors under all $131$ powers.
-Native carry-less multiplication ($+22\%$) replaces an emulated
-$32\times32$ carry-less product with the \texttt{clmad.lo}/\texttt{hi}
-instructions that CUDA~13.3 exposes on Blackwell; the same change later let the batch fall from 32 to 16 walks per
-inversion with $385{,}024$ workers resident ($+52\%$), at the same
-two-block occupancy and the same 122 registers per thread; the note
-suggests, but did not measure, a cache-capacity explanation (hot state
-falls from $245$ to $122$~MiB).\art{ecc2k130/BATCH-TUNING.md} The compounded remainder between the
-Frobenius-network confirmation ($5.81$~B/s) and the shipping walk
-($14.64$~B/s) is those two changes plus layout work; the table gives
-each its own pair, and no single ``remaining factor'' is quoted as a
-measurement.
+Three steps account for most of the factor, and each is a change of
+representation rather than a tuning knob. The Frobenius permutation
+networks ($+41\%$) replace the per-step basis conversions around
+$\sigma^j$ with Bene\v{s} networks over the permuted normal basis,
+checked on $3{,}120$ GPU vectors and on $256$ basis vectors under all
+$131$ powers. Native carry-less multiplication ($+22\%$) replaces an
+emulated $32\times32$ carry-less product with the
+\texttt{clmad.lo}/\texttt{hi} instructions that CUDA~13.3 exposes on
+Blackwell. That change in turn let the batch drop from 32 to 16 walks
+per inversion with $385{,}024$ workers resident ($+52\%$), at the same
+two-block occupancy and the same 122 registers per thread. The note
+suggests a cache-capacity explanation (the hot state shrinks from $245$
+to $122$~MiB) but did not measure it.\art{ecc2k130/BATCH-TUNING.md}
+Between the Frobenius-network confirmation ($5.81$~B/s) and the
+shipping walk ($14.64$~B/s), the gain is those two changes plus layout
+work. The table gives each its own pair, and we do not quote any single
+``remaining factor'' as if it had been measured.
 
-The $\sigma$-walk itself did not stop at $14.64$. A fused
-single-pass variant measured $15.436677$ against $15.015004$~B/s
-($1.028\times$, five pairs), and a $\sigma$ step through nibble tables
-in shared memory ($68{,}352$ bytes, $512\times1$ blocks) measured
-$15.884369$ against $15.513653$~B/s, paired median $1.023930$ with
-every pair at or above $1.0238$ and an A/A drift of $0.099\%$, clearing
-a pre-registered gate of geometric mean $\ge1.015$ and every pair
+The $\sigma$-walk did not stop at $14.64$. A fused single-pass variant
+measured $15.436677$ against $15.015004$~B/s ($1.028\times$, five
+pairs). A $\sigma$ step through nibble tables in shared memory
+($68{,}352$ bytes, $512\times1$ blocks) measured $15.884369$ against
+$15.513653$~B/s, a paired median of $1.023930$ with every pair at or
+above $1.0238$ and an A/A drift of $0.099\%$. That clears a
+pre-registered gate of geometric mean $\ge1.015$ with every pair
 $\ge1.005$.\art{ecc2k130/benchmarks/sigma-fused/RESULTS.md}\art{ecc2k130/SIGMA-TABLE.md}
-Those are the current $\sigma$-walk headlines; the campaign
-configuration of Section~\ref{sec:campaign} was frozen before them and
-still ships the audited $14.64$ build.
+These are the current $\sigma$-walk headlines. The campaign
+configuration of Section~\ref{sec:campaign} was frozen before they
+existed and still ships the audited $14.64$ build.
 
 \subsection{Beyond the shipping walk: the table walk and $20$~B/s}
 \label{sec:tablewalk}
 
 The $\sigma$-walk spends part of every step on $\sigma^j$ and the
 basis conversions around it. A redesigned $r$-adding table walk
-(Section~\ref{sec:walk-table}) removes both: the step adds a
+(Section~\ref{sec:walk-table}) removes both. Each step adds a
 precomputed table point $\pm\sigma^k(T_h)$ whose Frobenius power is a
-shared-memory lookup, and the static ALU count falls from $2{,}324$ to
+shared-memory lookup, and the static ALU count drops from $2{,}324$ to
 $1{,}831$ slots per update. On the same host and automatic geometry it
-measured $16.560337$~B/s against $14.412634$~B/s for the shipping
-walk ($+14.9\%$, six alternating repetitions, every paired ratio
-between $1.146$ and $1.169$); in the audited $385{,}024$-worker geometry
-$16.351936$ against $14.975448$ ($+9.2\%$). Three hundred of 300 device
-reports re-walked and 64 of 64 planted logarithms were recovered on $\mathrm{GF}(2^{41})$.\art{ecc2k130/ITERATION-FUNCTION.md, §6.2--6.3}\art{ecc2k130/benchmarks/table-walk/comparison.json}
+measured $16.560337$~B/s against $14.412634$~B/s for the shipping walk
+($+14.9\%$, six alternating repetitions, every paired ratio between
+$1.146$ and $1.169$). In the audited $385{,}024$-worker geometry it
+measured $16.351936$ against $14.975448$ ($+9.2\%$). All 300 device
+reports re-walked correctly, and all 64 planted logarithms were
+recovered on $\mathrm{GF}(2^{41})$.\art{ecc2k130/ITERATION-FUNCTION.md, §6.2--6.3}\art{ecc2k130/benchmarks/table-walk/comparison.json}
 
-The note had set $17.0$~B/s as its own target (§4.4) before the build. Both
-medians missed it, by $2.6\%$ and $3.8\%$, so by the rule declared
-there the table walk was declined as the campaign default and left
-available behind \texttt{WALK\_TABLE=1}. That is the acceptance rule
-working in the direction a rule exists for.
+Before the build, the note had set itself a target of $17.0$~B/s
+(§4.4). Both medians missed it, by $2.6\%$ and $3.8\%$, so under its
+own rule the table walk was not made the campaign default; it remains
+available behind \texttt{WALK\_TABLE=1}. This is the acceptance rule
+doing its job, even when the result is a real speedup that falls short
+of the bar we set.
 
-The table walk also changes the walk constant, and not in its favour
-as first built: Section~\ref{sec:walk-constant} measures its cycle
-trapping at dpWeight~32 and prices the as-built kernel at $4.85$--$6.26$
-times the $\sigma$-walk's cost per solve, with a revised cycle rule
-projected, not yet measured, at $0.81$--$0.86$. The throughput rows
-here are therefore rates, not costs per solve.
+As first built, the table walk also changes the walk constant for the
+worse. Section~\ref{sec:walk-constant} measures its cycle trapping at
+dpWeight~32 and prices the as-built kernel at $4.85$--$6.26$ times the
+$\sigma$-walk's cost per solve; a revised cycle rule is projected, but
+not yet measured, at $0.81$--$0.86$. The throughput rows here are
+therefore rates, not costs per solve.
 
-Under a different geometry the same walk goes further. A one-block
-layout (512 threads and one resident block per SM, which gives the
-block 64~KB of L1 instead of 28~KB), denominators rebuilt from the step tag instead of stored,
-inlined products and a pipelined selection pass took a $17.406$~B/s
-reference to $20.078$~B/s ($+15.3\%$, five samples in
-$20.077$--$20.080$), $0.73$ of the $27.4$~B/s carry-less speed of light
-($0.90$ of the since-refuted $22.3$); the geometry alone
-was $+9.4\%$, tag denominators $+1.5\%$, inlining $+2.3\%$. Collecting
-at weight 34 it holds $19.04$~B/s against $16.70$. Three hundred of 300
-reports re-walked and the distinguished-point count matched the
-reference's $472{,}776$.\art{ecc2k130/ONE-BLOCK-GEOMETRY.md} This is
-the \texttt{gpu-rtx-pro6000-20b} build. A cycle-escape revision of the
-table walk (rule v3, Section~\ref{sec:walk-cycles}) then rebuilt the
-kernel shape; its own ladder from $1.04$ to $5.10$~B/s is a different
-walk identity and is not comparable to the $20$~B/s rows.\art{ecc2k130/CYCLE-ESCAPE-V3.md}
+With a different geometry the same walk goes further. A one-block
+layout (512 threads and one resident block per SM, which gives each
+block 64~KB of L1 instead of 28~KB), denominators rebuilt from the step
+tag instead of stored, inlined products and a pipelined selection pass
+took a $17.406$~B/s reference to $20.078$~B/s ($+15.3\%$, five samples
+in $20.077$--$20.080$). That is $0.73$ of the $27.4$~B/s carry-less
+speed of light ($0.90$ of the since-refuted $22.3$). The geometry alone
+was worth $+9.4\%$, tag denominators $+1.5\%$ and inlining $+2.3\%$.
+Collecting at weight 34 it holds $19.04$~B/s against $16.70$. All 300
+reports re-walked correctly, and the distinguished-point count matched
+the reference's $472{,}776$.\art{ecc2k130/ONE-BLOCK-GEOMETRY.md} This is
+the \texttt{gpu-rtx-pro6000-20b} build. A later cycle-escape revision of
+the table walk (rule v3, Section~\ref{sec:walk-cycles}) rebuilt the
+kernel shape. Its own ladder, from $1.04$ to $5.10$~B/s, belongs to a
+different walk and cannot be compared with the $20$~B/s rows.\art{ecc2k130/CYCLE-ESCAPE-V3.md}
 
 \subsection{The second card: RTX~PRO~4500}
 \label{sec:g7}
 
 The campaign's second GPU family is the RTX~PRO~4500 (82 SMs, 165~W)
-in the AWS \texttt{g7.2xlarge}. Its ledger is separate because the
-power cap, not the pipe, binds: the shipping walk measures
-$5.107$~B/s here at $1.95$~GHz, within about $1\%$ of what the 6000's
-per-SM-clock rate predicts (Section~\ref{sec:campaign-goal28}), the
-card's own selected preset before the map change sat near $6.2$~B/s,
-and the larger split-batch candidates, for example, were slower
-because they raised memory activity and lowered the clock under the
-cap.\art{ecc2k130/ITERATION-FUNCTION.md, §6.3}\art{ecc2k130/README.md, ``larger split-batch experiment''}
-A pre-declared goal of $12$~B/s on this card
-(Section~\ref{sec:campaign-goal28}) was reached by a map change rather
-than a kernel change: the complete two-bridge $x$-only map of
-Section~\ref{sec:walk-bridge} measured $12.499203$~B/s median against
-$11.218437$~B/s for its matched modulus-32 control, a paired
+in the AWS \texttt{g7.2xlarge}. We keep its ledger separate because on
+this card the power cap binds, not the pipe. The shipping walk
+measures $5.107$~B/s here at $1.95$~GHz, within about $1\%$ of what the
+6000's per-SM-clock rate predicts (Section~\ref{sec:campaign-goal28}).
+The card's own best preset before the map change sat near $6.2$~B/s.
+Candidates such as the larger split batches were slower here because
+they raised memory activity, and the power cap answered by lowering
+the clock.\art{ecc2k130/ITERATION-FUNCTION.md, §6.3}\art{ecc2k130/README.md, ``larger split-batch experiment''}
+We had declared a goal of $12$~B/s for this card
+(Section~\ref{sec:campaign-goal28}), and it was reached by changing the
+map rather than the kernel. The complete two-bridge $x$-only map of
+Section~\ref{sec:walk-bridge} measured a median of $12.499203$~B/s
+against $11.218437$~B/s for its matched modulus-32 control, a paired
 geometric-mean ratio of $1.121079$ with $95\%$ interval
-$[1.105668,\,1.136704]$; a fresh three-run confirmation gave
+$[1.105668,\,1.136704]$. A fresh three-run confirmation gave
 $12.567029$, $12.457221$ and $12.366415$~B/s, and the production build
-$12.632704$~B/s over $2^{36}$ updates.\art{ecc2k130/README.md, ``ECC2K-130 and ECC2K-95''}\art{ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/README.md}
-Its DP34 collection rate on this card is unmeasured and the paper
-does not supply one.
+ran at $12.632704$~B/s over $2^{36}$ updates.\art{ecc2k130/README.md, ``ECC2K-130 and ECC2K-95''}\art{ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/README.md}
+We have not measured its DP34 collection rate on this card, so we do
+not give one.
 
 \subsection{Per-GPU survey}
 \label{sec:survey}
 
-The campaign default is the RTX~PRO~6000. Modal also rents T4, L4,
-A10, L40S, A100, H100, H200, B200 and B300.
-Table~\ref{tab:survey} is one packed walk, automatic workers, three
-valid \texttt{--bench} repeats, on twelve catalogue SKUs. No row beat
-the 6000. The walk is integer- and carry-less-bound, not
-tensor-core-bound, and LLM SKU rankings do not transfer: the B200 is
-$0.585\times$ the 6000 on this kernel and the H100 half.
+The campaign default is the RTX~PRO~6000, but Modal also rents T4,
+L4, A10, L40S, A100, H100, H200, B200 and B300.
+Table~\ref{tab:survey} runs one packed walk with automatic workers and
+three valid \texttt{--bench} repeats on twelve catalogue SKUs. Nothing
+beat the 6000. This walk is bound by integer and carry-less throughput,
+not by tensor cores, so the usual rankings of GPUs for machine-learning
+work do not carry over: on this kernel the B200 is $0.585\times$ the
+6000 and the H100 is half.
 \art{ecc2k130/benchmarks/modal-gpus/SURVEY.md}
 
 \begin{table}[t]
@@ -334,33 +340,33 @@ T4 (no \texttt{clmad}) & 0.541 & 0.036 & 3.30 \\
 \end{tabular}
 \end{table}
 
-On the B200 the table-walk build ($15.365$~B/s) was later lifted by
-an automatic sweep over twenty single-knob arms (launch geometry,
-product form, scheduling, memory residency) to $19.402$~B/s
-($1.2627$, every pair in $1.2623$--$1.2632$) with a combination of the
-fused pass, batch 32, three-limb Karatsuba and 512-thread blocks,
-adopted as \texttt{gpu-b200-19b}. The same sweep on the 6000 found a
-$640\times1$ arm at $19.993$ against $19.951$ with two of five pairs
-below one, and adopted nothing.\art{ecc2k130/AUTOSWEEP.md} The trades
-that flip sign with the die are the ones that move work from the
-logic pipe onto the carry-less unit: the top-bit correction on
-\texttt{CLMAD} costs $15\%$ on the 6000 and gains $13.4\%$ on the
-B200, and stacked with the normal-basis inversion and $\lambda^2$ on
-\texttt{CLMAD} it reaches $1.379\times$ ($15.372$~B/s) there, which is
-what the per-die \texttt{CLMAD} rates of Section~\ref{sec:floor}
-predict. A two-chain kernel that splits each warp's Montgomery chain
-in two lost on both dies ($0.826\times$ on the B200, $0.696\times$ on
-the 6000), a register-file effect rather than a unit-rate
-one.\art{ecc2k130/TWO-CHAINS.md, §5, §6.2 and §6.4}
+On the B200, an automatic sweep over twenty single-knob arms (launch
+geometry, product form, scheduling, memory residency) later lifted the
+table-walk build from $15.365$ to $19.402$~B/s ($1.2627$, every pair in
+$1.2623$--$1.2632$). The winning combination of the fused pass, batch
+32, three-limb Karatsuba and 512-thread blocks was adopted as
+\texttt{gpu-b200-19b}. The same sweep on the 6000 found a $640\times1$
+arm at $19.993$ against $19.951$, with two of five pairs below one, and
+adopted nothing.\art{ecc2k130/AUTOSWEEP.md} The trades that change sign
+from one die to the other are exactly those that move work from the
+logic pipe onto the carry-less unit. The top-bit correction on
+\texttt{CLMAD} costs $15\%$ on the 6000 but gains $13.4\%$ on the B200,
+and stacked there with the normal-basis inversion and $\lambda^2$ on
+\texttt{CLMAD} it reaches $1.379\times$ ($15.372$~B/s), just as the
+per-die \texttt{CLMAD} rates of Section~\ref{sec:floor} predict. A
+two-chain kernel that splits each warp's Montgomery chain in two lost
+on both dies ($0.826\times$ on the B200, $0.696\times$ on the 6000),
+which points to the register file rather than to any unit's
+rate.\art{ecc2k130/TWO-CHAINS.md, §5, §6.2 and §6.4}
 
 \subsection{What was declined}
 \label{sec:declined}
 
-Table~\ref{tab:declined} lists every GPU candidate that was built,
-measured against the rule, and not adopted. They are recorded so that
-a later thread which rediscovers one finds the measurement rather
-than the folklore. Each row passed its correctness gates; what failed
-was the rate.
+Table~\ref{tab:declined} lists every GPU candidate that we built,
+measured against the rule, and did not adopt. We record them so that
+anyone who has the same idea later finds a measurement rather than
+folklore. Every row passed its correctness checks; what fell short was
+the rate.
 
 \begin{table}[t]
 \centering
@@ -404,13 +410,14 @@ chains~\art{ecc2k130/TWO-CHAINS.md}; $\lambda$-projective~\art{ecc2k130/LAMBDA-P
 the 4500 rows~\art{ecc2k130/README.md, ``ECC2K-130 and ECC2K-95''}, each
 linking its \texttt{benchmarks/g7-*} directory.
 
-Two of the rows deserve a sentence. The $\lambda$-projective row was
-never built: pricing it in the unit of Table~\ref{tab:floor} gave
-$60.5$ \texttt{CLMAD} per update against $38.1$ for affine at batch 16,
-a ceiling of $11.8$--$12.5$~B/s below the $14.41$ already measured, so
-the pre-declared condition (a negative cost difference at $W=16$) was
-unsatisfiable and the build was not started. The top-\texttt{CLMAD} and stream-Karatsuba rows are the two
-comparisons in this section that were not interleaved on one
-allocation (the stream-Karatsuba pair also differs in source digest);
-both are reported with that caveat and neither would have cleared the
-rule regardless.
+Two rows need a word of explanation. The $\lambda$-projective
+candidate was never built. Priced in the unit of
+Table~\ref{tab:floor}, it came to $60.5$ \texttt{CLMAD} per update
+against $38.1$ for affine at batch 16, a ceiling of $11.8$--$12.5$~B/s,
+below the $14.41$ we had already measured. The condition we had
+declared for building it (a negative cost difference at $W=16$) could
+not be met, so we did not start. The top-\texttt{CLMAD} and
+stream-Karatsuba rows are the two comparisons in this section that
+were not interleaved on one allocation (the stream-Karatsuba pair also
+differs in source digest). We report both with that caveat; neither
+would have cleared the rule in any case.

@@ -59,4 +59,14 @@ not reach the budget.
 \paragraph{Measurement discipline.} The companion
 paper~\cite{ecdlppaper} states the boundary-unit-table-class rule and
 applies it across rho, baby-step giant-step, kangaroo and prime-field
-index calculus; this paper is its ECC2K-130 chapter at full length.
+index calculus; this paper is, in effect, its ECC2K-130 chapter at
+full length.
+
+\paragraph{Prime-field rho on GPUs.} Bos et al.'s 112-bit record on
+PlayStation~3 consoles~\cite{bos2012ps3} is the nearest completed
+prime-field computation in scale. Our NIST walk (Section~\ref{sec:nist})
+reuses the standard ingredients, an $r$-adding walk~\cite{teske2001},
+the negation map with fruitless-cycle handling~\cite{bls2011} and
+Montgomery's simultaneous inversion~\cite{montgomery1987}; what it adds
+is a measured account of which GPU optimisations from the binary
+campaign carry over to it.

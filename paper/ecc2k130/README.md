@@ -50,17 +50,22 @@ TeX can open the paper.
   rules, the 0.85→14.64 B/s ledger, the table walk at 20.08, the RTX
   PRO 4500, the twelve-SKU survey, every declined candidate.
 - §6 CPU clients.
-- §7 The other GPU kernels: an evidence-class inventory, 256-bit
+- §7 The same ladder on the NIST curves: the ECC2K-130 GPU optimisations
+  (carry handling, batch width, launch geometry, declined register caps)
+  applied to Pollard rho on P-256 and P-384 on the same RTX PRO 6000;
+  1.075 → 1.632 Gstep/s (1.52×) and 0.210 → 0.548 (2.61×), with a
+  W-sweep figure and a lever-by-lever table.
+- §8 The other GPU kernels: an evidence-class inventory, 256-bit
   secp256k1 arithmetic and its instruction ledger, rho with order-six
-  folding and baby-step giant-step, kangaroo, P-256/P-384, the ECC2K-95
-  kernel and pair table, the polynomial-system and linear-algebra
-  solvers, and the F4 elimination kernels that did run on a device.
-- §8 The FPGA engine: pre-board estimate, design, measured F2 images.
-- §9 The campaign: configuration, the 2^28.41 interval, fleet
+  folding and baby-step giant-step, kangaroo, the ECC2K-95 kernel and
+  pair table, the polynomial-system and linear-algebra solvers, and the
+  F4 elimination kernels that did run on a device.
+- §9 The FPGA engine: pre-board estimate, design, measured F2 images.
+- §10 The campaign: configuration, the 2^28.41 interval, fleet
   economics, storage and certification, state.
-- §10 Structural alternatives: index calculus on the Koblitz curve,
+- §11 Structural alternatives: index calculus on the Koblitz curve,
   point decomposition against the budget.
-- §11 Related work. §12 Conclusion.
+- §12 Related work. §13 Conclusion.
 - Appendix A: reproduction commands.
 
 Every number is footnoted to a repository artefact (`\art{path}`);
@@ -88,6 +93,17 @@ paths prefixed `cryptanalysis:` are in the sibling library.
   of that code has run on a device; the section quotes static
   instruction counts and emulated walk constants and says so.
 
+- Draft 4: a prose pass over every section for readability (first
+  person plural, shorter sentences, fewer stock phrases; every number,
+  footnote, table and label kept), and a new §7 on the NIST curves:
+  the `gpu/nist` rho walk's first device runs on the RTX PRO 6000
+  (`gpu/nist/RESULTS.md`), set against the ECC2K-130 levers they
+  borrow from. The P-256/P-384 row of the other-GPU inventory moves
+  from "never" to "measured", and the abstract, introduction,
+  related work, conclusion and reproduction appendix are updated to
+  match. Graph and report copies are in
+  `benchmarks/20261013-nist-gpu-rho-ladder/`.
+
 ## Known caveats carried into the text
 
 - The RTX PRO 6000 σ-walk headline has moved past the audited 14.64 B/s
@@ -110,5 +126,12 @@ paths prefixed `cryptanalysis:` are in the sibling library.
   `ptxas` 12.9) and host-emulation operation counts, not device rates;
   the `gpu/ecc` occupancy and stack tables predate the order-six fold
   and the cycle ring and are quoted as such.
+- The NIST round-2 rows (W=32, register caps; 1.632 / 0.548 Gstep/s,
+  1.52× / 2.61× cumulative) come from aburan28/crypto PR 1778, which
+  was open when Draft 4 was written; round 1 (1.340 / 0.438) is on
+  `main`. The NIST sweep cells are single runs, not interleaved
+  repeated pairs, and the paper says so in the table caption. A
+  Solinas-field walk has not been built; only the field benchmark
+  compares the two representations.
 - The author block is anonymized; `make deanonymize` with an `AUTHORS`
   file restores it.
