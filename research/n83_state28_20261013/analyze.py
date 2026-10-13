@@ -136,10 +136,13 @@ def verify_arm(study, phase, arm, answer):
         return {"arm": arm, "status": "INTERRUPTED_NO_EXIT_RECEIPT"}
     exit_status = int((root / "exit_status.txt").read_text().strip())
     usage = one_json(root / "usage.json")
-    if usage["exit_status"] != exit_status or usage["peak_rss_unit"] != "bytes":
+    # A shell reports a signalled child's negative return code modulo 256.
+    if usage["exit_status"] % 256 != exit_status or usage["peak_rss_unit"] != "bytes":
         raise ValueError(f"{arm}: direct-child usage mismatch")
     if exit_status:
-        return {"arm": arm, "status": "TIMEOUT" if exit_status == 124 else "FAILED",
+        status = ("TIMEOUT" if usage["timed_out"] and exit_status == 124 else
+                  "STOPPED_RESOURCE_GUARD" if usage["exit_status"] == -15 else "FAILED")
+        return {"arm": arm, "status": status,
                 "exit_status": exit_status, "usage": usage}
     summary = one_json(root / "stdout.jsonl")
     target = one_json(root / "targets_result.jsonl")
