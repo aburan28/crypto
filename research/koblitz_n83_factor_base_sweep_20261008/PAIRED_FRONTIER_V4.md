@@ -1,0 +1,20 @@
+# N83 cross-stream paired-base frontier
+
+The v4 design preserves every ordinal in the frozen [v3 paired frontier](PAIRED_FRONTIER_V3.md) and appends ordered base/pool recipes from *different* public-x streams on the same curve arm. A stream is one `(policy, seed, closure)` triple. There are 27 streams on each of two arms; each has the 11 frozen orbit-column sizes. Both base-to-pool orientations and smaller, equal, or larger nominal pool sizes are retained. The [generator](paired_frontier_v4.py) and [saved design](paired-frontier-v4.json) bind the exact v3 JSON (SHA-256 `f7b860c9a652154541c4e6cf7d52ad13bd5a7436a41d38855d206cde36d4b0ac`) and the [pilot source census](verification/cross-stream-pilot-import-source-20261013/census.json) (SHA-256 `d1a490e2e73552d96a5ee327e34367c5bb32fbc6f6d591eb9c0e5f029118a285`).
+
+The new pair count is `2 × 27 × 26 × 11 × 11 = 169,884`. Each pair crosses three residual-summand counts and 51,840 frozen solver settings, yielding **26,420,359,680** v4-suffix cases and **26,939,278,080** total ordinals including v3. An ordinal is decoded in constant space; the saved design stores 54 stream index tables and aggregate counts, not billions of rows. Exact dispositions sum to the entire suffix. Existing WDSat, Gray/FES, split, large-prime and symmetry settings remain crossed, with unavailable-adapter dispositions where the current worker cannot run them.
+
+The 169,884 pair recipes separate into 117,612 cross-closure pairs without a common implemented residual domain; 34,848 same-closure nonsigned pairs without an importer; 8,712 signed-Frobenius pairs on the other curve arm; 8,064 primary signed-Frobenius pairs lacking both exact pilot archives; and **648** primary signed-Frobenius pilot pairs with a source-only exact import gate. Of the 26.4 billion solver cases, only **2,592** reach the last source-availability disposition for that gate. That count is 648 archive pairs times the four currently worker-shaped `(summands, residual)` settings. The gate can verify an archive pair, but it has not run for these cross-stream pairs and does not implement their SAT relation search.
+
+Cross-stream archive overlap is unknown. Even where the nominal pool K exceeds the base K, the residual is the exact pool-minus-base *orbit set*, not `166 × (K_pool − K_base)` points. A source-addressable pair may have an empty residual. Accordingly all cross-stream point-multiset and uniform-hit fields are null until both archives replay and the exact difference passes validation. Different closures require an explicit common-domain construction before they can enter a relation experiment. Cross-arm pairs are incompatible curve inputs and are excluded. Same-stream nested cases remain in v3; its equal-size and reverse nested orientations have no nonempty residual suffix. The finite design also does not cover new field bases, generators, solver implementations or combined symmetry operations outside the declared axes.
+
+This extension is a search-space and source-availability inventory, not a runtime comparison. The existing K=600/K=2,048 and K=1,182/K=2,048 natural trials each exhausted a 5,000-conflict cap with zero models. No new archive was imported, no solver was launched, and no S3 object was read or written for v4. The conservative local experimental charge stays at **17,400 seconds**. A best total-runtime base remains unselected: useful relation yield, graph closure, rank, linear algebra, individual log and matched same-target rho still need independently replayed cold measurements.
+
+Reproduce the source-only design and focused controls with:
+
+```sh
+python3 research/koblitz_n83_factor_base_sweep_20261008/paired_frontier_v4.py --check
+python3 -m unittest discover -s research/koblitz_n83_factor_base_sweep_20261008 -p test_paired_frontier_v4.py -v
+```
+
+The first new ordinal is `518918400`; the final ordinal is `26939278079`. Use `--case ORDINAL` to inspect any case. The next empirical step is an approved, bounded replay of a selected pair's two exact S3 archives, independent overlap audit, and then a separately accounted known-answer solver-access control before natural relation trials.
