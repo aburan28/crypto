@@ -12,10 +12,14 @@ posted, **not cleared for either** until the items under "Before submission"
 are closed. Restore authors with `make deanonymize` after creating an
 `AUTHORS` file (see `../AUTHORS.example`).
 
-**Change class** (per `AGENTS.md`): *engineering*. Every ratio in the paper is
-a stage measurement of the per-target decomposition oracle, and the paper
-says so in the abstract, §6 and §7. It is not reported as an end-to-end
-speedup; the one end-to-end comparison at small size (§6.1) favours F4.
+**Change class** (per `AGENTS.md`): *engineering*. The per-target ratios in
+§6.1–6.4 are stage measurements of the decomposition oracle and are labelled
+as such. §6.5 measures complete discrete-log solves end to end (CPU time, the
+oracle swapped and everything else fixed, baseline at its best configuration,
+msolve as an external F4) and reports every row including the ones F4 wins:
+50–105× on prime curves against msolve, 122× on the one binary instance
+large enough to amortise the pair table, F4 faster on the three smaller binary
+instances. Composed (sampled × target count) rows are labelled COMPOSED.
 
 ## What it says
 
@@ -71,9 +75,14 @@ cd lean && lake exe cache get && lake build
 - No claim that the meet-in-the-middle ordering persists at large `m`: its
   cost is `Θ(|F|^{m−1})`; all measurements are at `m = 2` (binary table to
   `m ≤ 4`).
-- No claim against state-of-the-art F4/F5 implementations: the baselines are
-  this codebase's own, and where the Buchberger baseline capped its step
-  budget the ratios understate its cost.
+- The per-target baselines (§6.1–6.4) are this codebase's own; the end-to-end
+  section (§6.5) adds msolve, a state-of-the-art F4, and the prime ratio falls
+  from ~10⁴× (Buchberger) to ~10²× (msolve). The msolve numbers are the ones
+  to quote against F4. Where a baseline capped its step budget the ratios
+  understate its cost.
+- No claim that the end-to-end speed-up persists where a complete solve is
+  out of reach for every method (the NIST curves, large `m`); §6.5 covers
+  16–24-bit prime and `n ≤ 23` Koblitz instances only.
 
 ## Building
 
@@ -116,10 +125,9 @@ Owed, in order:
    owed is tying `slope`/`addX` to Mathlib's `WeierstrassCurve.Affine` group
    law by name rather than by the (identical) chord formulas, so the
    statement is literally about `R + F` in Mathlib's `Point` type.
-3. **Stronger F4 baseline.** Re-run §6.2 and §6.4 against an external
-   state-of-the-art F4/F5 (e.g. Magma or msolve) on the same ideal, so the
-   "not faster than Θ(|F|)" argument in §7 is backed by a measurement rather
-   than an argument.
+3. **Stronger F4 baseline** — partly done: §6.5 measures msolve end to end on
+   the prime instances (paired-control CPU accounting). Still owed: msolve on
+   the per-target NIST ideals of §6.4, and a Magma/Singular cross-check.
 4. **Per-curve fields for P-192/224/384/521.** §6.4-C is P-256 only; the
    other four run on generic arithmetic. Instantiate their Solinas fields and
    fill the column.

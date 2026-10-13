@@ -146,6 +146,8 @@ principal square root so it reproduces the committed rungs exactly).
   or the fixed sweep cost (prime) can dominate a *single* DLP, exactly as
   the prime-rho note's set-up caveat describes. The per-decomposition tables
   isolate the oracle cost, which is the quantity the Gröbner solve dominated.
+  §7 measures the end-to-end effect directly and shows F4 winning the three
+  smallest binary instances for exactly this reason.
 
 ## 5. Scaling to larger fields
 
@@ -286,7 +288,58 @@ every fail-closed check passing; the bench asserts this and exits non-zero
 otherwise. The claim is bounded exactly as stated at the top of this
 section.
 
-## 7. Reproduce
+## 7. End to end: complete DLP solves, baseline given every advantage
+
+Measured by `examples/semaev_rootfind_e2e_bench.rs`
+(`research/semaev_rootfind_e2e_20261012/`, see its `README.md` for which run
+each row comes from). A complete index-calculus solve of a planted log —
+factor base, (pair table), relation collection on a seeded target stream,
+linear algebra, `[d]G = Q` — with the oracle swapped and everything else
+fixed. **CPU time** (process + reaped children), not wall-clock. Every
+solve verified. The baseline gets its best configuration: matrix-F4 at its
+best `max_degree` (binary); Buchberger at its faster ordering and **msolve**
+(an external state-of-the-art F4) charged only its own process CPU via a
+paired trivial-ideal control (prime). Composed rows (sampled per-target ×
+measured target count) are labelled.
+
+**Binary Koblitz, single solve including the table build:**
+
+| n | \|F\| | log₂ r | root finding | table | matrix-F4 | single solve |
+|---:|---:|---:|---:|---:|---:|---|
+| 5 | 21 | 4 | 4.3 ms | 1.4 ms | 0.3 ms | **F4 faster** (0.06×) |
+| 9 | 55 | 7 | 3.9 ms | 1.5 ms | 1.7 ms | **F4 faster** (0.45×) |
+| 13 | 4005 | 11 | 298 ms | 260 ms | 14.2 ms | **F4 faster** (0.05×) |
+| 23 | 2025 | 21 | 90.8 ms | 89.2 ms | 11.1 s | **122×** |
+
+Why F4 wins three of four: at `n ≤ 13` the subgroup is tiny, a solve needs a
+few hundred decompositions, and matrix-F4 on those small descended systems
+costs tens of µs per target — less than building `C(|F|+1, 2)` pair sums
+that are then barely used. At `n = 23` F4 costs seconds and the 89 ms table
+pays for itself in the first solve.
+
+**Prime a = −3, all three oracles on the identical target stream:**
+
+| bits | \|F\| | targets | root finding | Buchberger | msolve (F4) | vs msolve |
+|---:|---:|---:|---:|---:|---:|---:|
+| 16 | 8 | 6,544 | 23.1 ms | 133 s (5767×) | 2.31 s | **100×** |
+| 20 | 12 | 75,683 | 416.1 ms | 6,614 s COMPOSED (15895×) | 43.77 s COMPOSED | **105×** |
+| 24 | 12 | 1,501,376 | 12.30 s | 134,492 s COMPOSED (10937×) | 619 s COMPOSED | **50×** |
+
+**Each method at its own best |F| (16-bit):** msolve's composed total is minimised at |F| = 16 (1.41 s); the root finder measured in full at |F| = 120 takes 6.9 ms (829 targets) → **205×** at each method's own best.
+
+Why end-to-end is two orders of magnitude below per-target: the root
+finder's solve is dominated by *generating* targets (a scalar multiplication
+each), not deciding them — at 16 bits the oracle is 16% of its
+total. Replacing a ms-scale Gröbner oracle with a µs one removes the oracle
+from the critical path; what remains sets the ratio. The per-target tables
+say how much faster the oracle got; this one says how much faster the solve
+got; the second is the smaller number, as it must be.
+
+Not measured end to end: `m = 3, 4`, the NIST curves, Buchberger beyond
+16 bits (composed). At those sizes a complete solve is out of reach for every
+method.
+
+## 8. Reproduce
 
 ```bash
 cargo run --release --example semaev_root_vs_groebner_bench
@@ -299,4 +352,9 @@ BENCH_OUT=research/semaev_rootfind_scaling_20261012 \
   cargo run --release --example semaev_rootfind_scaling_bench
 F4_CONSTRUCTED=5 F4_RANDOM=5 BENCH_OUT=research/semaev_rootfind_nist_20261012 \
   cargo run --release --example semaev_rootfind_nist_bench
+# end to end (needs msolve on PATH for the external-F4 column):
+BENCH_OUT=research/semaev_rootfind_e2e_20261012 \
+  cargo run --release --example semaev_rootfind_e2e_bench
+E2E_SKIP_BINARY=1 E2E_FULL_BUDGET_S=300 BENCH_OUT=research/semaev_rootfind_e2e_20261012/run2 \
+  cargo run --release --example semaev_rootfind_e2e_bench
 ```

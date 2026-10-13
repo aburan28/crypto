@@ -58,12 +58,20 @@ on small prime curves, and $3021$--$5802\times$ on the five NIST prime
 curves P-192, P-224, P-256, P-384 and P-521 with their standard
 parameters (versus Buchberger on the same decomposition ideal, in the
 same field). A dedicated P-256 field implementation gives a further
-$11$--$12\times$ over generic arbitrary-precision arithmetic.
+$11$--$12\times$ over generic arbitrary-precision arithmetic. End to
+end---complete discrete-log computations with the oracle swapped and
+everything else fixed, the baseline at its best configuration and
+msolve as an external F4---the picture is two orders of magnitude more
+modest and not one-sided: $50$--$105\times$ on prime curves, $122\times$ on
+the one binary instance large enough to amortize the pair table, and F4
+faster on the three smaller binary instances, where a single solve
+needs too few decompositions to pay for the table.
 
 We are explicit about what this does and does not change. The result is
 an improvement in the \emph{constant} of a subroutine---in the evidence
-vocabulary of the companion repository, a \emph{stage} measurement
-classed as \emph{engineering}, not an end-to-end speedup. It leaves the
+vocabulary of the companion repository, classed as \emph{engineering};
+the end-to-end speed-ups are real but bounded by the stages the oracle
+does not touch. It leaves the
 asymptotic cost of index calculus unchanged, does not alter the
 exponential size of the Frobenius-invariant factor base on Koblitz
 curves, does not make prime-field index calculus competitive with
@@ -467,10 +475,10 @@ codebase as the root finders so that field arithmetic, data structures
 and allocator are shared. Every number below is read from a committed
 artefact in the companion repository, named in the table caption with
 the repository prefix \code{crypto:} (\S\ref{sec:repro}). Per-target
-ratios are \emph{stage} measurements of the decomposition oracle; the
-only end-to-end rows are the complete discrete-log computations in
-\S\ref{sec:exp-binary} and \S\ref{sec:exp-prime-small}, each of which
-recovered a verified logarithm. Ratios are stable
+ratios in \S\ref{sec:exp-binary}--\S\ref{sec:exp-nist} are \emph{stage}
+measurements of the decomposition oracle; \S\ref{sec:exp-e2e} measures
+complete discrete-log computations, every one of which recovered and
+verified the planted logarithm. Ratios are stable
 to within about $2\times$ across runs; absolute times vary more on a
 shared machine, and we note the one place this is visible.
 
@@ -499,17 +507,13 @@ $K_0/\FF_{2^{13}}$ & 4005 & 256 & 9.9 $\mu$s  & 15.3 ms & $1535\times$ \\
 \end{tabular}
 \end{table}
 
-\paragraph{An honest end-to-end caveat.} On a complete discrete-log
-computation over $\FF_{2^9}$ with $\abs{\Fb} = 55$, the pair-table
-strategy took 23.3 ms and matrix-F4 took 4.1 ms. The reason is the
-one-time table build: with $\abs{\Fb} = 55$ only a few hundred
-decompositions are needed, too few to amortize $\binom{56}{2}$ point
-additions against a solver that is slow per target but needs no set-up.
-Both strategies recovered the same logarithm
-(artefact: same file, \code{kind=binary\_e2e}). The per-decomposition
+\paragraph{Per-target is not end-to-end.} The per-decomposition
 numbers in Table~\ref{tab:binary} isolate the oracle cost, which is the
-quantity the Gr\"obner solve dominated; the end-to-end run is a
-correctness cross-check, not a speed claim at that size.
+quantity the Gr\"obner solve dominated. They do not by themselves say
+what a complete discrete-log computation pays, because the pair table
+is built once and a small instance may not need enough decompositions
+to amortize it. \S\ref{sec:exp-e2e} measures that directly, and on the
+smallest binary instances F4 wins.
 
 \subsection{Small prime curves: direct subtraction versus Buchberger}
 \label{sec:exp-prime-small}
@@ -691,6 +695,171 @@ total time is below Buchberger's on every one of the five curves with
 all verification checks passing, and exits non-zero otherwise. It
 passed.
 
+\subsection{End to end: complete discrete-log computations}
+\label{sec:exp-e2e}
+
+The question a user actually asks is not how fast the oracle is per
+target but how long a complete discrete-log computation takes with one
+oracle versus the other. This section measures that, with the
+Gr\"obner baseline given every advantage we could give it, and reports
+every row---including the ones the baseline wins.
+
+\paragraph{Protocol.} Each row is a complete index-calculus solve of a
+planted logarithm $d$: factor base, (pair table), relation collection
+on a seeded target stream, linear algebra modulo the group order, and
+the group check $[d]G = Q$. The oracle is swapped and everything else
+is held fixed; the two oracles see the identical target stream.
+\emph{All times are CPU time} (user+system of the process and its
+reaped children, via \code{getrusage}), not wall-clock: the benchmark
+is single-threaded, the external solver runs as a child process, and
+CPU time is immune to the scheduling delay of a shared machine, which
+would otherwise inflate long solves far more than microsecond lookups
+and flatter the root finder.
+
+\paragraph{The baseline's advantages.}
+\begin{itemize}
+\item \emph{Binary.} Matrix-F4 at the best \code{max\_degree} found by
+  a per-$n$ sweep ($2$ was best at every $n$); root finding is charged
+  its one-time pair-table build inside every single-solve number.
+\item \emph{Prime.} Two Gr\"obner baselines on the identical ideal
+  \eqref{eq:ideal}: the codebase's Buchberger at whichever of
+  grevlex/lex decides faster on a calibration sample (lex, at every
+  size), and \textbf{msolve}~\cite{msolve2021}---a state-of-the-art F4
+  implementation---as an external process. msolve is charged only its
+  own process CPU: each decide is paired with an adjacent run on a
+  trivial ideal, alternating order, and the mean paired difference is
+  what is charged, so process start-up and file I/O are excluded. A
+  per-decide value is reported only when it clears two standard errors
+  of the paired mean; otherwise the $2\sigma$ bound is charged
+  (in the baseline's favour). On a hit, the witness is read off by
+  direct subtraction and that time is added to msolve's account; this
+  undercharges F4, since reading a solution off a basis it has already
+  computed is cheap next to computing it.
+\item \emph{Budget rule.} A baseline is measured in full when its
+  projected time is under the run's budget; otherwise it is
+  \emph{composed}---a sampled per-target cost on $100$ (Buchberger) or
+  $400$ (msolve) targets from the same stream, times the root finder's
+  measured target count---and is labelled \textsc{composed} wherever
+  it appears. Root finding is always measured in full.
+\end{itemize}
+
+\paragraph{Binary Koblitz curves.} Three seeds per strategy, same
+$Q$; Table~\ref{tab:e2e-binary}.
+
+\begin{table}[H]
+\centering
+\caption{Complete Koblitz DLP, $m=2$, CPU time, mean of three seeds.
+``single'' charges root finding for its table build; ``extra'' is the
+ratio for each additional solve against the same factor base (table
+already built). Every solve verified. Artefact:
+\art{crypto:research/semaev_rootfind_e2e_20261012/run1_results.json}
+(\code{section=binary\_e2e}).}
+\label{tab:e2e-binary}
+\begin{tabular}{@{}rrrrrrrl@{}}
+\toprule
+$n$ & $\abs{\Fb}$ & $\log_2 r$ & root finding & table build & matrix-F4 & single & extra \\
+\midrule
+ 5 & 21   & 4  & 4.3 ms   & 1.4 ms   & 0.3 ms  & F4 faster ($0.06\times$) & F4 faster \\
+ 9 & 55   & 7  & 3.9 ms   & 1.5 ms   & 1.7 ms  & F4 faster ($0.45\times$) & F4 faster ($0.7\times$) \\
+13 & 4005 & 11 & 298 ms   & 260 ms   & 14.2 ms & F4 faster ($0.05\times$) & F4 faster ($0.4\times$) \\
+23 & 2025 & 21 & 90.8 ms  & 89.2 ms  & 11.1 s  & $\mathbf{122\times}$ & $\gtrsim 10^3\times$\footnotemark \\
+\bottomrule
+\end{tabular}
+\end{table}
+\footnotetext{Root time net of the table is $\approx 1.6$ ms, at the
+resolution of the measurement; the ratio is correspondingly coarse.}
+
+\emph{Why F4 wins three of four.} At $n \le 13$ the subgroup is tiny
+($r < 2^{11}$), so a solve needs only a few hundred decompositions,
+and matrix-F4 at \code{max\_degree}~$2$ on these small Weil-descended
+systems costs tens of microseconds per target: the whole F4 solve is
+cheaper than building $\binom{\abs{\Fb}+1}{2}$ pair sums that are then
+barely used. At $n = 23$ the subgroup is $2^{21}$, the descended system
+is larger, F4 costs seconds per solve, and the table---built in
+$89$ ms---pays for itself in the first solve. The crossover is in the
+size of the instance, not in the oracle: for a factor base used across
+many solves the table is amortized and root finding wins at every $n$
+measured by the per-decomposition numbers of Table~\ref{tab:binary},
+but a single tiny solve is not that regime.
+
+\paragraph{Prime curves.} Table~\ref{tab:e2e-prime}. The $16$-bit row is
+measured in full against both baselines. The composed rows are
+labelled.
+
+\begin{table}[H]
+\centering
+\caption{Complete prime-curve DLP, $m=2$, CPU time; all three oracles
+on the identical seeded target stream. Every solve verified.
+Artefact:
+\art{crypto:research/semaev_rootfind_e2e_20261012/run2/results.json}
+(\code{section=prime\_e2e}).}
+\label{tab:e2e-prime}
+\begin{tabular}{@{}rrrrrrr@{}}
+\toprule
+bits & $\abs{\Fb}$ & targets & root finding & Buchberger & msolve (F4) & vs msolve \\
+\midrule
+16 & 8 & 6\,544 & 23.1 ms & 133 s ($5767\times$) & 2.31 s & $\mathbf{100\times}$ \\
+20 & 12 & 75\,683 & 416.1 ms & 6\,614 s \textsc{comp.} ($15895\times$) & 43.77 s \textsc{comp.} & $\mathbf{105\times}$ \\
+24 & 12 & 1\,501\,376 & 12.30 s & 134\,492 s \textsc{comp.} ($10937\times$) & 619 s \textsc{comp.} & $\mathbf{50\times}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Each method at its own best factor-base size.} Fixing
+$\abs{\Fb}$ across methods is itself a choice that can favour either
+side: F4's per-decide cost grows with $\abs{\Fb}$ (the vanishing
+polynomials have degree $\abs{\Fb}$) while the number of targets a
+solve needs falls as $\approx r/(2\abs{\Fb}^2)$, so F4 has a
+preferred $\abs{\Fb}$, and so does root finding. We therefore let each
+method pick its own. At $16$ bits
+(Table~\ref{tab:e2e-best}), msolve's composed total is minimised at
+$\abs{\Fb} = 16$ (1.41 s, composed); the root finder, measured in full at
+$\abs{\Fb} = 120$, takes 6.9 ms (829 targets). The ratio at each method's own
+best is $\mathbf{205\times}$.
+
+\begin{table}[H]
+\centering
+\caption{$16$-bit, msolve per decide (paired-control net CPU) versus
+root finding per decide as $\abs{\Fb}$ grows, and msolve's composed
+solve total. Artefact: same file, \code{section=best\_fb\_16bit},
+\code{best\_vs\_best\_16bit}.}
+\label{tab:e2e-best}
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+$\abs{\Fb}$ & msolve / decide & root / decide & expected targets & msolve total (composed) \\
+\midrule
+4 & 202.0 $\mu$s & 0.7 $\mu$s & 18\,407 & 3.71 s \\
+6 & 214.0 $\mu$s & 0.8 $\mu$s & 9\,999 & 2.14 s \\
+8 & 442.0 $\mu$s & 0.8 $\mu$s & 6\,647 & 2.94 s \\
+12 & 485.0 $\mu$s & 0.8 $\mu$s & 3\,864 & 1.87 s \\
+16 & 526.0 $\mu$s & 0.7 $\mu$s & 2\,685 & 1.41 s \\
+24 & 1.2 ms & 1.1 $\mu$s & 1\,648 & 1.91 s \\
+32 & 1.8 ms & 1.0 $\mu$s & 1\,183 & 2.16 s \\
+64 & 5.0 ms & 1.4 $\mu$s & 552 & 2.76 s \\
+120 & 18.0 ms & 6.4 $\mu$s & 285 & 5.13 s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\emph{Why the end-to-end ratio is two orders of magnitude below the
+per-target ratio.} The oracle is not the only cost in a solve. The
+root finder's relation collection is dominated by generating the
+targets themselves---a scalar multiplication per target---not by
+deciding them: at $16$ bits the oracle is 16\% of the
+root finder's total. Replacing a Gr\"obner oracle that costs
+milliseconds with one that costs a microsecond removes the oracle from
+the critical path, after which the ratio is set by what remains. The
+per-target numbers of \S\ref{sec:exp-prime-small}--\S\ref{sec:exp-nist}
+measure how much faster the oracle got; this section measures how much
+faster the solve got; and the second is the smaller number, as it
+must be.
+
+\paragraph{What was not measured.} Buchberger beyond $16$ bits and
+msolve beyond the fully-measured rows are composed, not timed end to
+end, and are marked as such. The $m = 3$ and $m = 4$ binary strategies
+and the NIST curves are not run end to end: at those sizes a complete
+solve is out of reach for every method (\S\ref{sec:boundary}).
+
 \section{What the Measurements Do and Do Not Show}
 \label{sec:boundary}
 
@@ -698,8 +867,11 @@ We state the boundary of the result in the same place as the result.
 
 \paragraph{It is a constant-factor improvement to a subroutine.} In the
 companion repository's classification of changes (advance, engineering,
-relabelling, accounting) this is \emph{engineering}: a stage diagnostic,
-not an end-to-end speedup. The
+relabelling, accounting) this is \emph{engineering}. The per-target
+ratios of \S\ref{sec:exp-binary}--\S\ref{sec:exp-nist} are stage
+diagnostics; the end-to-end ratios of \S\ref{sec:exp-e2e} are the
+speed-ups a user sees, and they are two orders of magnitude smaller
+because target generation and linear algebra remain. The
 number of decompositions index calculus must attempt is unchanged, and
 so is the probability that a random target decomposes. Over prime
 fields the cost remains on the order of $p/\abs{\Fb}$ group operations
@@ -740,15 +912,20 @@ the ordering persists at the large $m$ that asymptotic index-calculus
 analyses contemplate, and at those $m$ neither method is practical for
 the reasons above.
 
-\paragraph{The Gr\"obner baselines are the codebase's own.} The binary
-baseline is the codebase's matrix-F4 on the identical Weil-descended
-system; the prime baseline is its Buchberger on the identical ideal. A
-state-of-the-art F4/F5 implementation would be faster than our
-Buchberger by a large constant. It would not be faster than $\Theta(N)$
-field operations, because it has to compute a basis of an ideal whose
-generators already have degree $N$; and where our baseline capped its
-step budget the measured time is a lower bound, so the stated ratios
-understate rather than inflate its cost.
+\paragraph{The per-target Gr\"obner baselines are the codebase's own;
+the end-to-end ones are not only that.} In
+\S\ref{sec:exp-binary}--\S\ref{sec:exp-nist} the binary baseline is
+the codebase's matrix-F4 on the identical Weil-descended system and the
+prime baseline is its Buchberger on the identical ideal; a
+state-of-the-art F4 is faster than that Buchberger by a large constant,
+which is exactly what \S\ref{sec:exp-e2e} finds when it adds msolve:
+the prime ratio drops from $\sim\!10^4\times$ (Buchberger) to
+$\sim\!10^2\times$ (msolve). The msolve numbers are the ones to quote
+against F4. No implementation is faster than $\Theta(N)$ field
+operations on this ideal, since its generators already have degree
+$N$; and where a baseline capped its step budget the measured time is
+a lower bound, so the stated ratios understate rather than inflate its
+cost.
 
 \section{Related Work}
 \label{sec:related}
@@ -799,11 +976,17 @@ commit this paper was built from.
   \path{examples/semaev_rootfind_scaling_bench.rs}
   (\S\ref{sec:exp-scaling}) \\
   \path{examples/semaev_rootfind_nist_bench.rs}
-  (\S\ref{sec:exp-nist})
+  (\S\ref{sec:exp-nist}) \\
+  \path{examples/semaev_rootfind_e2e_bench.rs}
+  (\S\ref{sec:exp-e2e}; needs \code{msolve} on \code{PATH} for the
+  external-F4 column)
 \item[Raw evidence] (console transcripts and JSON). \hfill\\
   \path{research/semaev_root_vs_groebner_20261012/} \\
   \path{research/semaev_rootfind_scaling_20261012/} \\
-  \path{research/semaev_rootfind_nist_20261012/}
+  \path{research/semaev_rootfind_nist_20261012/} \\
+  \path{research/semaev_rootfind_e2e_20261012/} \\
+  \quad(\path{run1_*}: binary rows and Buchberger cells; \path{run2/}:
+  msolve cells with paired-control accounting; see its \path{README.md})
 \item[Research note] with the same tables.
   \path{RESEARCH_SEMAEV_ROOTFIND_VS_GROEBNER.md}.
 \item[Lean formalization] of Proposition~\ref{prop:s3roots}
@@ -820,6 +1003,9 @@ cargo run --release --example semaev_root_vs_groebner_bench
 cargo run --release --example semaev_rootfind_scaling_bench
 F4_CONSTRUCTED=5 F4_RANDOM=5 \
   cargo run --release --example semaev_rootfind_nist_bench
+cargo run --release --example semaev_rootfind_e2e_bench
+E2E_SKIP_BINARY=1 E2E_FULL_BUDGET_S=300 \
+  cargo run --release --example semaev_rootfind_e2e_bench
 \end{verbatim}
 The NIST benchmark exposes its knobs as environment variables
 (\code{F4\_FB}, \code{F4\_CONSTRUCTED}, \code{F4\_RANDOM},
@@ -836,7 +1022,11 @@ already parametrized by the group law. Replacing the solve with root
 finding---direct subtraction over prime fields, a pair-sum table over
 binary fields---is exact, complete, cheap to verify, and three to four
 orders of magnitude faster per target on every instance we measured,
-including the five NIST prime curves at their standard parameters. We
+including the five NIST prime curves at their standard parameters. End
+to end, against a state-of-the-art F4 given its best configuration,
+complete prime-curve solves run $50$--$105\times$ faster and the one binary
+instance large enough to amortize the pair table $122\times$; on the
+three smallest binary instances F4 is faster, and we say so. We
 have made it the default in our codebase and kept the Gr\"obner solvers
 as baselines. We have also tried to say clearly what this is not: it is
 a better constant in a subroutine, not a change to what index calculus
@@ -893,6 +1083,11 @@ Elliptic curve discrete logarithm problem over small degree extension fields.
 A.~Amadori, F.~Pintore, and M.~Sala.
 On the discrete logarithm problem for prime-field elliptic curves.
 \emph{Finite Fields and Their Applications}, 51:168--182, 2018.
+
+\bibitem{msolve2021}
+J.~Berthomieu, C.~Eder, and M.~Safey El Din.
+msolve: A library for solving polynomial systems.
+In \emph{ISSAC 2021}, pages 51--58. ACM, 2021.
 
 \bibitem{kostersyeo2015}
 M.~Kosters and S.~L.~Yeo.
