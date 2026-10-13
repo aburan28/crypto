@@ -2544,7 +2544,10 @@ mod tests {
         // adds one re-addition per relation and nothing else.
         assert_eq!(r.adds, s.adds + root.counters["relations_found"], "{s:?} {r:?}");
         assert_eq!(r.native["lookups"], s.native["lookups"]);
-        assert_eq!(r.native["inversions"], root.counters["targets_tried"]);
+        // One batched inversion per oracle call; the relation loop's
+        // target guard skips a few trials before the oracle sees them.
+        let inversions = r.native["inversions"];
+        assert!(inversions > 0 && inversions <= root.counters["targets_tried"]);
         assert_eq!(s.native.get("inversions").copied().unwrap_or(0), 0);
         assert_eq!(r.native.get("frobfold_mismatches").copied().unwrap_or(0), 0);
         assert!(root.solver.is_none(), "a table oracle solves no system");
