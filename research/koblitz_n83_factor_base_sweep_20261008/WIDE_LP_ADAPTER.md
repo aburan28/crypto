@@ -79,10 +79,11 @@ disjoint two-orbit domains and obtains one SAT-discovered one-residual point
 equation, then independently feeds it to the graph. It also checks an exact
 two-residual sign lift and graph feed, overlap rejection and fail-closed
 preflight caps. It now checks exact suffix extraction and rejects changed
-prefix points or suffix orbit labels. The two-residual SAT search has no positive regression or
-retained N83 yield measurement. These checks establish algebra and one
-small-curve producer
-path. They do not measure retained N83 partial-relation yield, rank gain,
+prefix points or suffix orbit labels. On that degree-7 known-answer source
+equation, the bounded SAT producer also discovers a two-residual candidate;
+the graph separately checks its group equation and accepts the row. This
+closes the missing positive producer-path regression for two residuals. These
+checks do not measure retained N83 partial-relation yield, rank gain,
 graph size, factor-base advantage or complete runtime.
 
 The next integration gate is a source-pinned retained-N83 producer run with

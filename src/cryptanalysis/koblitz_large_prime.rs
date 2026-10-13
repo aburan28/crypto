@@ -1228,12 +1228,20 @@ mod tests {
         graph
             .feed(PartialCandidate {
                 source_id: 4,
-                coef_a: double_a,
+                coef_a: double_a.clone(),
                 coef_b: BigUint::zero(),
                 small_point_indices: double_small,
                 residual_points: double_residual,
             })
             .unwrap();
+
+        let (candidate, stats) =
+            domains.search(5, &double_a, &BigUint::zero(), &target, 3, 2, bounded, true);
+        let candidate = candidate.unwrap_or_else(|| panic!("two-residual SAT search: {stats:?}"));
+        assert!(stats.models > 0);
+        assert_eq!(candidate.small_point_indices.len(), 3);
+        assert_eq!(candidate.residual_points.len(), 2);
+        graph.feed(candidate).unwrap();
     }
 
     #[test]
