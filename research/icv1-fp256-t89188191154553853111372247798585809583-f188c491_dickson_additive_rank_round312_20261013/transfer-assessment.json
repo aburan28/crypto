@@ -1,0 +1,56 @@
+{
+  "schema": "p256-dickson-additive-rank-transfer-assessment/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 312,
+  "skill_profile": "transfer",
+  "required_companion_resources_available": false,
+  "typed_correspondence_graph": [
+    "FB1h2f8621cda105 columns --[Dickson D_2 hierarchy]--> exact local sibling domains",
+    "local column pairs --[P_i +/- P_j]--> canonical P-256 atom outputs",
+    "equal atom or small-multiple outputs --[subtract sparse rows]--> homogeneous factor-base log relation",
+    "static relation matrix --[dual-modulus exact rank]--> reduced independent-log quotient",
+    "reduced quotient --[S17 relation collection and recovery]--> one-target DLP only if every complete cost is charged"
+  ],
+  "obligations": [
+    {
+      "evidence": "Native rebuild fixed 131458 columns on the registered prime-order P-256 subgroup.",
+      "name": "source and subgroup identity",
+      "scope": "Exact registered factor base and ICV1 curve.",
+      "status": "supported"
+    },
+    {
+      "evidence": "0 complete-scope relation rows, certified rank 0, 0 replay failures.",
+      "name": "Dickson-local non-scalar log transport",
+      "scope": "All minimal coalescence pairs through level 7, with six complete small-multiple tables.",
+      "status": "refuted in complete scope"
+    },
+    {
+      "evidence": "0 sampled relation rows receive no rank or projection credit.",
+      "name": "deeper hierarchy",
+      "scope": "Exactly 4,096 hash-selected pairs per level 8--18; not exhaustive.",
+      "status": "unknown"
+    },
+    {
+      "evidence": "Executable per-usable-relation projection is 2^148.080980 FME; complete cold S is unset.",
+      "name": "end-to-end advantage",
+      "scope": "Unchanged Round-19 S17 selector with certified static-rank credit only.",
+      "status": "refuted for the measured candidate"
+    }
+  ],
+  "controls": [
+    "Complete order-101 scalar reference compares every atom and multiplier representation pair.",
+    "Deterministic scalar-labelled P-256 control plants and replays low-weight identities.",
+    "Every actual reported relation is independently summed to the P-256 identity.",
+    "Ranks are recomputed in both row orders over 2^61-1 and the P-256 subgroup order."
+  ],
+  "cost_accounting": [
+    "Measured: hierarchy candidates, group operations, normalization field operations, materialized records, isolation telemetry, and artifact bytes.",
+    "Imported projection: Round-19 S17 success, per-relation FME, sparse algebra, and storage; not reclassified as measurement.",
+    "Deep sampled pairs are excluded from rank and all projected improvements.",
+    "Complete cold DLP cost remains unset because no qualifying relation/recovery pipeline completed."
+  ],
+  "exploration_boundary": "Exact for all pair atoms with minimal Dickson coalescence at levels 1--7, all atom collisions in that set, atom matches to [1,2,3,4,8,16] times every base column, and all collisions within those multiple tables. Levels 8--18 are sampled only.",
+  "weakest_open_obligation": "Supply a complete non-scalar static relation family outside the screened local domain, or a non-generic collector that lowers the unchanged 2^148.080980-FME usable-relation cost while retaining exact recovery.",
+  "narrowest_supported_finding": "The complete Dickson-local levels-1--7 and small-multiple screen found no nontrivial static log relation; the registered base retains all 131458 independent classes within this scope.",
+  "semantic_evidence_sha256": "26aba4beefd29ba382f98e8f3b439ef9a31bbc0dc651d5c63ce841617e7c5cc2"
+}
