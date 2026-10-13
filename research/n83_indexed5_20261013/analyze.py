@@ -196,11 +196,13 @@ def verify_arm(study, phase, arm, answer):
 
 
 def main():
-    if len(sys.argv) != 3 or sys.argv[2] not in ("control", "primary"):
-        raise SystemExit("usage: analyze.py STUDY_DIR control|primary")
+    if len(sys.argv) != 3 or sys.argv[2] not in ("control", "comparison", "primary"):
+        raise SystemExit("usage: analyze.py STUDY_DIR control|comparison|primary")
     study, phase = Path(sys.argv[1]), sys.argv[2]
     answer = one_json(study / "answer.jsonl")
-    arms = ("k512_indexed5",) if phase == "control" else ("k2500_indexed5",)
+    arm = {"control": "k512_indexed5", "comparison": "k1798_indexed5",
+           "primary": "k2500_indexed5"}[phase]
+    arms = (arm,)
     rows = [verify_arm(study, phase, arm, answer) for arm in arms]
     parity = None
     if phase == "control" and rows[0]["status"] == "PASS_INDEPENDENT_REPLAY":
@@ -213,6 +215,20 @@ def main():
         parity = all(rows[0][field] == prior_packed[field] for field in fields)
         if not parity:
             raise ValueError("indexed5/archived-packed first-witness parity failed")
+    if phase == "comparison" and rows[0]["status"] == "PASS_INDEPENDENT_REPLAY":
+        prior_dir = study / "../n83_dense_root_20261013/runs/primary/k1798_dense"
+        prior_summary = one_json(prior_dir / "stdout.jsonl")
+        prior_target = one_json(prior_dir / "targets_result.jsonl")
+        row = rows[0]
+        parity = (row["base_hash"] == prior_summary["base_hash"]
+                  and row["factor_base_points"] == prior_summary["factor_base_points"]
+                  and row["regular_states"] == prior_summary["regular_states"]
+                  and row["point_indices"] == prior_target["point_indices"]
+                  and row["x_codes"] == prior_target["x_codes"]
+                  and row["target_probes"] == prior_target["probes"]
+                  and row["recovered_scalar"] == prior_target["recovered_scalar"])
+        if not parity:
+            raise ValueError("indexed5/archived-K1798 first-witness parity failed")
     result = {"schema": "n83.indexed5-analysis/v1", "phase": phase, "arms": rows,
               "first_witness_parity": parity}
     print(json.dumps(result, sort_keys=True))
