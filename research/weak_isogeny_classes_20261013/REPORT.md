@@ -2,9 +2,8 @@
 
 Date: 2026-10-13. Run start (UTC): `20261013T0342Z`. Code: commit `f26274dda`
 (`src/cryptanalysis/ghs_class_coverage.rs`, `src/cryptanalysis/smith_kernel_coverage.rs`,
-`examples/weak_class_coverage.rs`). The binary was built from the working tree
-that commit records. The manifests' `git_head` field (`ee7d9ce1e`) is the
-parent, because the run started before the commit. Host: 4-vCPU Intel Xeon
+`examples/weak_class_coverage.rs`). The manifests' `git_head` (`ee7d9ce1e`) is read when
+the run ends. It is a data-only commit on top of `f26274dda`, so the code is identical. Host: 4-vCPU Intel Xeon
 @ 2.10 GHz cloud container, no isolation. Timings are incidental and not a
 performance claim. PDF: [`reports/run-20261013T0342Z/report.pdf`](reports/run-20261013T0342Z/report.pdf).
 
