@@ -1,0 +1,52 @@
+{
+  "format": "correspondence-assessment-v2",
+  "case_id": "known-frobenius-compatible-surface-filter",
+  "authority": "Necessary-condition fixture only; not a transfer certificate.",
+  "source": {
+    "object": "E/F_101 with Frobenius polynomial T^2+7T+101",
+    "subgroup": "unspecified"
+  },
+  "destination": {
+    "object": "candidate abelian-surface isogeny class",
+    "frobenius_polynomial": "(T^2+7T+101)^2",
+    "dimension": 2
+  },
+  "transformation": {"kind":"proposed homomorphism","formulas":null,"kernel":null},
+  "typed_path": {
+    "nodes": ["source elliptic isogeny class", "candidate degree-four Weil polynomial"],
+    "edges": ["necessary Frobenius-factor compatibility only"],
+    "weakest_open_obligation": "construct an actual surface and explicit subgroup map"
+  },
+  "algebraic_screen": {
+    "dimension": {"state":"supported","evidence":["frobenius-fixture"],"scope":"The supplied monic polynomial has degree four."},
+    "group_order": {"state":"unknown","evidence":[],"scope":"No target variety or exact subgroup order is supplied."},
+    "frobenius_or_weil_polynomial": {"state":"supported","evidence":["frobenius-fixture"],"scope":"Exact division, reciprocity, elliptic quotient shape, and Hasse bound pass."},
+    "field_of_definition": {"state":"unknown","evidence":[],"scope":"The polynomial is over q=101; a map over F_101 is not constructed."},
+    "riemann_hurwitz_or_different": {"state":"not_applicable","evidence":[],"scope":"No cover is asserted."},
+    "polarization_or_jacobian_locus": {"state":"unknown","evidence":[],"scope":"No polarization or Jacobian realization is supplied."}
+  },
+  "obligations": {
+    "existence": {"state":"unknown","evidence":[],"scope":"The fixture explicitly does not validate realization by a variety."},
+    "explicit_construction": {"state":"unknown","evidence":[],"scope":"No surface equations are supplied."},
+    "map_correctness": {"state":"unknown","evidence":[],"scope":"No homomorphism formulas are supplied."},
+    "subgroup_preservation": {"state":"unknown","evidence":[],"scope":"No source subgroup or kernel is supplied."},
+    "scalar_recovery": {"state":"unknown","evidence":[],"scope":"No recovery map is supplied."},
+    "destination_solver_applicability": {"state":"unknown","evidence":[],"scope":"There is no materialized destination object."},
+    "computational_advantage": {"state":"unknown","evidence":[],"scope":"No solver or cost model is supplied."},
+    "scaling_support": {"state":"unknown","evidence":[],"scope":"No scaling experiment exists."},
+    "novelty_within_boundary": {"state":"not_applicable","evidence":[],"scope":"This is a known necessary-condition control."}
+  },
+  "cost_comparison": {"accounting_complete":"unknown","modeled_or_measured":"unmeasured"},
+  "sources": [
+    {"id":"frobenius-fixture","uri":"tools/ecdlp-surfaces/examples/frobenius_result.json","revision":"3d4a891bd07000cf63935f5c876a22ff5e193315"}
+  ],
+  "open_obligations": ["Construct the variety.","Construct a base-field homomorphism.","Prove subgroup injectivity and scalar recovery."],
+  "verdicts": {
+    "valid_transfer":"unknown",
+    "algorithmically_relevant":"unknown",
+    "modeled_advantage":"unknown",
+    "measured_advantage":"unknown",
+    "novel_reduction_within_boundary":"not_applicable"
+  },
+  "official_status_change": "none"
+}

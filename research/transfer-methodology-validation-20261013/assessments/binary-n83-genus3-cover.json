@@ -1,0 +1,62 @@
+{
+  "format": "correspondence-assessment-v2",
+  "case_id": "known-binary-n83-genus3-cover-construction",
+  "authority": "Construction-level classification of an existing cover; no unexecuted Jacobian transfer is promoted.",
+  "source": {
+    "object": "E_a: y^2+xy=x^3+a*x^2+1 over pinned GF(2^83)",
+    "subgroup": "the public prime-order n=83 fixture subgroup"
+  },
+  "destination": {
+    "object": "J(C_a), C_a: v^2+u^2v=u^7+a*u^4+u",
+    "object_kind": "genus-3 hyperelliptic Jacobian",
+    "dimension": 3,
+    "genus": 3
+  },
+  "transformation": {
+    "kind": "degree-three cover plus proposed induced pullback",
+    "curve_map": "phi(u,v)=(u^3,u*v+1)",
+    "induced_group_map": "phi^*: E_a -> J(C_a)",
+    "degree": 3
+  },
+  "typed_path": {
+    "nodes": ["order-r subgroup of E_a", "C_a", "J(C_a)"],
+    "edges": ["verified curve map C_a->E_a", "unexecuted n=83 pullback E_a->J(C_a)"],
+    "weakest_open_obligation": "execute and verify the n=83 Jacobian pullbacks on P and Q"
+  },
+  "algebraic_screen": {
+    "dimension": {"state":"supported","evidence":["cover-audit"],"scope":"The constructed target curve has genus three, so its Jacobian has dimension three."},
+    "group_order": {"state":"unknown","evidence":[],"scope":"The exact n=83 image order was not replayed in the existing surface study."},
+    "frobenius_or_weil_polynomial": {"state":"unknown","evidence":[],"scope":"No exact target Jacobian polynomial is bound to this assessment."},
+    "field_of_definition": {"state":"supported","evidence":["cover-audit"],"scope":"The curve and degree-three map are constructed over the same binary field."},
+    "riemann_hurwitz_or_different": {"state":"supported","evidence":["cover-audit"],"scope":"The existing construction verifies the characteristic-two geometry and genus."},
+    "polarization_or_jacobian_locus": {"state":"supported","evidence":["cover-audit"],"scope":"An explicit smooth curve C_a is supplied, so J(C_a) is an actual Jacobian."}
+  },
+  "obligations": {
+    "existence": {"state":"supported","evidence":["cover-audit"],"scope":"The fixed ordinary-binary genus-three cover family is constructed."},
+    "explicit_construction": {"state":"supported","evidence":["cover-audit"],"scope":"Curve equation and degree-three curve map are explicit."},
+    "map_correctness": {"state":"unknown","evidence":[],"scope":"The hard gate concerns the induced subgroup map; the n=83 Jacobian pullback was not executed."},
+    "subgroup_preservation": {"state":"unknown","evidence":[],"scope":"gcd(3,r)=1 gives a conditional theorem once the exact subgroup and executable maps are bound, but the n=83 run is absent."},
+    "scalar_recovery": {"state":"unknown","evidence":[],"scope":"No n=83 pullback/pushforward recovery receipt exists."},
+    "destination_solver_applicability": {"state":"unknown","evidence":[],"scope":"No complete genus-three destination solver is attached to the transported subgroup."},
+    "computational_advantage": {"state":"unknown","evidence":[],"scope":"No complete cost model is supplied."},
+    "scaling_support": {"state":"unknown","evidence":[],"scope":"No end-to-end scaling run is supplied."},
+    "novelty_within_boundary": {"state":"not_applicable","evidence":[],"scope":"This assessment classifies an existing construction."}
+  },
+  "cost_comparison": {"accounting_complete":"unknown","modeled_or_measured":"unmeasured"},
+  "sources": [
+    {"id":"cover-audit","uri":"research/hyperelliptic_cover_infrastructure_20261006/README.md","revision":"3d4a891bd07000cf63935f5c876a22ff5e193315"}
+  ],
+  "open_obligations": [
+    "Execute pullback_point_class for the exact n=83 P and Q.",
+    "Check image order, composition, exceptional fibers, and source recovery.",
+    "Attach a destination solver and complete cost accounting."
+  ],
+  "verdicts": {
+    "valid_transfer":"unknown",
+    "algorithmically_relevant":"unknown",
+    "modeled_advantage":"unknown",
+    "measured_advantage":"unknown",
+    "novel_reduction_within_boundary":"not_applicable"
+  },
+  "official_status_change": "none"
+}

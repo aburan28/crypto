@@ -1,0 +1,60 @@
+{
+  "format": "correspondence-assessment-v2",
+  "case_id": "known-small-prime-quartic-transfer",
+  "authority": "Diagnostic replay of a public known-answer fixture; not a performance or novelty claim.",
+  "source": {
+    "object": "E/F_101: y^2=x^3+x+46",
+    "group": "E(F_101)",
+    "subgroup_order": "109",
+    "generator": "(2,37)",
+    "target": "(64,19)=37P"
+  },
+  "destination": {
+    "object": "quartic image of E in P^3",
+    "group_object": "the encoded elliptic-curve image, not an ambient quadric",
+    "dimension": 1
+  },
+  "transformation": {
+    "kind": "coordinate isomorphism",
+    "forward": "(x,y)->[1:x:y:x^2]; O->[0:0:0:1]",
+    "inverse": "[W:X:Y:Z]->(X/W,Y/W) for W!=0; otherwise O"
+  },
+  "typed_path": {
+    "nodes": ["<P> in E(F_101)", "encoded curve image"],
+    "edges": ["explicit coordinate isomorphism with transported group law"],
+    "weakest_open_obligation": "complete destination-cost comparison"
+  },
+  "algebraic_screen": {
+    "dimension": {"state":"supported","evidence":["small-transfer"],"scope":"The destination group remains the dimension-one curve image."},
+    "group_order": {"state":"supported","evidence":["small-transfer"],"scope":"The image of P has exact order 109."},
+    "frobenius_or_weil_polynomial": {"state":"not_applicable","evidence":[],"scope":"The route is a coordinate isomorphism, not a new isogeny-class proposal."},
+    "field_of_definition": {"state":"supported","evidence":["small-transfer"],"scope":"Forward and inverse formulas are over F_101."},
+    "riemann_hurwitz_or_different": {"state":"not_applicable","evidence":[],"scope":"No cover is asserted."},
+    "polarization_or_jacobian_locus": {"state":"not_applicable","evidence":[],"scope":"No higher-dimensional Jacobian realization is asserted."}
+  },
+  "obligations": {
+    "existence": {"state":"supported","evidence":["small-transfer"],"scope":"Committed public fixture."},
+    "explicit_construction": {"state":"supported","evidence":["small-transfer"],"scope":"Both formulas and exceptional origin are explicit."},
+    "map_correctness": {"state":"supported","evidence":["small-transfer","surface-readme"],"scope":"Round trips and transported law are checked on the declared curve image."},
+    "subgroup_preservation": {"state":"supported","evidence":["small-transfer"],"scope":"P has prime order 109, Q is in <P>, and image(P) has order 109."},
+    "scalar_recovery": {"state":"supported","evidence":["small-transfer"],"scope":"The inverse recovers the source points; the known-answer relation replays on E."},
+    "destination_solver_applicability": {"state":"supported","evidence":["surface-readme"],"scope":"Generic group algorithms apply through the transported elliptic group law; no faster solver is supplied."},
+    "computational_advantage": {"state":"unknown","evidence":[],"scope":"No complete cost comparison is recorded."},
+    "scaling_support": {"state":"unknown","evidence":[],"scope":"The fixture is a small-field correctness test."},
+    "novelty_within_boundary": {"state":"not_applicable","evidence":[],"scope":"This is a known coordinate representation control."}
+  },
+  "cost_comparison": {"accounting_complete":"unknown","modeled_or_measured":"unmeasured"},
+  "sources": [
+    {"id":"small-transfer","uri":"tools/ecdlp-surfaces/examples/transfer_certificate.json","revision":"3d4a891bd07000cf63935f5c876a22ff5e193315"},
+    {"id":"surface-readme","uri":"tools/ecdlp-surfaces/README.md","revision":"3d4a891bd07000cf63935f5c876a22ff5e193315"}
+  ],
+  "open_obligations": ["Complete destination-versus-source cost accounting if an advantage is proposed."],
+  "verdicts": {
+    "valid_transfer":"supported",
+    "algorithmically_relevant":"supported",
+    "modeled_advantage":"unknown",
+    "measured_advantage":"unknown",
+    "novel_reduction_within_boundary":"not_applicable"
+  },
+  "official_status_change": "none"
+}

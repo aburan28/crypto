@@ -1,0 +1,33 @@
+digraph transfer_validation {
+  graph [rankdir=TB, bgcolor="white", pad="0.2", nodesep="0.25", ranksep="0.35",
+         labelloc="t", fontsize=14, label="ECDLP transfer diagnostic: known-case outcomes"];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=12,
+        color="#334155", fillcolor="#f8fafc", margin="0.12,0.08"];
+  edge [fontname="DejaVu Sans", fontsize=10, color="#64748b"];
+
+  methodology [label="Typed path + exact subgroup\n4-state evidence obligations", fillcolor="#dbeafe"];
+  screens [label="Necessary screens\ndimension / order / Frobenius / field", fillcolor="#e0e7ff"];
+  transfer [label="Hard transfer gate\nmap + injectivity + recovery", fillcolor="#ede9fe"];
+  solver [label="Solver and complete cost\nthen scaling and novelty", fillcolor="#fae8ff"];
+
+  methodology -> screens -> transfer -> solver;
+
+  small [label="F_101 quartic image\nVALID TRANSFER: supported", fillcolor="#dcfce7"];
+  mixed [label="GF(2^83) E0 -> E0 x E1\nVALID TRANSFER: supported", fillcolor="#dcfce7"];
+  frob [label="compatible surface polynomial\nVALID TRANSFER: unknown", fillcolor="#fef3c7"];
+  cover [label="genus-3 cover C -> E\nVALID TRANSFER: unknown\n(n=83 pullback not replayed)", fillcolor="#fef3c7"];
+  opposite [label="E0 -> E1 x E1\nVALID TRANSFER: refuted", fillcolor="#fee2e2"];
+  lattice [label="Z/rZ -> Z^m\nVALID TRANSFER: refuted", fillcolor="#fee2e2"];
+
+  solver -> small [label="all transfer gates pass"];
+  solver -> mixed [label="all transfer gates pass"];
+  screens -> frob [label="necessary filter only"];
+  transfer -> cover [label="subgroup map remains open"];
+  screens -> opposite [label="order + Frobenius fail"];
+  transfer -> lattice [label="torsion gate fails"];
+
+  advantage [label="No case supports a modeled or\nmeasured computational advantage", shape=note,
+             color="#92400e", fillcolor="#fff7ed"];
+  small -> advantage [style=dashed];
+  mixed -> advantage [style=dashed];
+}

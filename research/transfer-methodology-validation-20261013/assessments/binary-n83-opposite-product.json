@@ -1,0 +1,48 @@
+{
+  "format": "correspondence-assessment-v2",
+  "case_id": "known-binary-n83-opposite-product-rejection",
+  "authority": "Known-false algebraic control from the public n=83 fixture.",
+  "source": {
+    "object": "E_0: y^2+xy=x^3+1 over GF(2^83)",
+    "subgroup_order": "2417851639230796216685689"
+  },
+  "destination": {"object":"E_1 x E_1 over the same GF(2^83)","dimension":2},
+  "transformation": {"kind":"proposed injective base-field homomorphism","formulas":null},
+  "typed_path": {
+    "nodes": ["order-r subgroup of E_0", "E_1 x E_1"],
+    "edges": ["refuted proposed injective homomorphism"],
+    "weakest_open_obligation": "none for this rejected destination"
+  },
+  "algebraic_screen": {
+    "dimension": {"state":"supported","evidence":["binary-a0"],"scope":"The destination product has dimension two."},
+    "group_order": {"state":"refuted","evidence":["binary-a0"],"scope":"The source prime r does not divide #E_1 and cannot divide #E_1^2."},
+    "frobenius_or_weil_polynomial": {"state":"refuted","evidence":["binary-a0"],"scope":"The source and E_1 Frobenius quadratics are coprime."},
+    "field_of_definition": {"state":"supported","evidence":["binary-a0"],"scope":"The comparison uses the same pinned base field."},
+    "riemann_hurwitz_or_different": {"state":"not_applicable","evidence":[],"scope":"No cover is asserted."},
+    "polarization_or_jacobian_locus": {"state":"not_applicable","evidence":[],"scope":"The order and Frobenius screens already refute the proposed subgroup transfer."}
+  },
+  "obligations": {
+    "existence": {"state":"supported","evidence":["binary-a0"],"scope":"E_1 x E_1 exists as an explicit product."},
+    "explicit_construction": {"state":"supported","evidence":["binary-a0"],"scope":"The rejected destination product is explicit."},
+    "map_correctness": {"state":"refuted","evidence":["binary-a0"],"scope":"No nonzero source isogeny factor exists in the destination over the base field."},
+    "subgroup_preservation": {"state":"refuted","evidence":["binary-a0"],"scope":"The destination group order has no source order-r subgroup."},
+    "scalar_recovery": {"state":"refuted","evidence":["binary-a0"],"scope":"There is no injective image from which to recover the scalar."},
+    "destination_solver_applicability": {"state":"not_applicable","evidence":[],"scope":"The transfer is rejected before a solver edge."},
+    "computational_advantage": {"state":"not_applicable","evidence":[],"scope":"The transfer is rejected."},
+    "scaling_support": {"state":"not_applicable","evidence":[],"scope":"The transfer is rejected."},
+    "novelty_within_boundary": {"state":"not_applicable","evidence":[],"scope":"This is a negative control."}
+  },
+  "cost_comparison": {"accounting_complete":"not_applicable","modeled_or_measured":"unmeasured"},
+  "sources": [
+    {"id":"binary-a0","uri":"tools/ecdlp-surfaces/examples/binary_n83_a0.json","revision":"3d4a891bd07000cf63935f5c876a22ff5e193315"}
+  ],
+  "open_obligations": [],
+  "verdicts": {
+    "valid_transfer":"refuted",
+    "algorithmically_relevant":"refuted",
+    "modeled_advantage":"not_applicable",
+    "measured_advantage":"not_applicable",
+    "novel_reduction_within_boundary":"not_applicable"
+  },
+  "official_status_change": "none"
+}

@@ -1,0 +1,58 @@
+{
+  "format": "correspondence-assessment-v2",
+  "case_id": "known-binary-n83-mixed-product-transfer",
+  "authority": "Public known-answer subgroup-transfer fixture; no destination speed claim.",
+  "source": {
+    "object": "E_0: y^2+xy=x^3+1 over GF(2^83)",
+    "field_polynomial": "z^83+z^45+z^2+z+1",
+    "subgroup_order": "2417851639230796216685689",
+    "target": "Q=37P"
+  },
+  "destination": {
+    "object": "E_0 x E_1 over the same GF(2^83)",
+    "group_object": "abelian surface with componentwise law",
+    "dimension": 2
+  },
+  "transformation": {
+    "kind": "factor inclusion",
+    "formula": "P -> (P,O)",
+    "recovery": "projection to the first factor"
+  },
+  "typed_path": {
+    "nodes": ["<P> in E_0(GF(2^83))", "E_0 x E_1"],
+    "edges": ["explicit inclusion into the first factor"],
+    "weakest_open_obligation": "a destination solver with complete cost advantage"
+  },
+  "algebraic_screen": {
+    "dimension": {"state":"supported","evidence":["binary-a0"],"scope":"The destination is the product of two elliptic curves."},
+    "group_order": {"state":"supported","evidence":["binary-a0"],"scope":"The first factor contains the exact order-r source subgroup."},
+    "frobenius_or_weil_polynomial": {"state":"supported","evidence":["binary-a0"],"scope":"The source Frobenius quadratic is a factor by construction."},
+    "field_of_definition": {"state":"supported","evidence":["binary-a0"],"scope":"Both factors and the inclusion are over the pinned GF(2^83) basis."},
+    "riemann_hurwitz_or_different": {"state":"not_applicable","evidence":[],"scope":"No cover is asserted."},
+    "polarization_or_jacobian_locus": {"state":"not_applicable","evidence":[],"scope":"The solver edge uses the product group; no Jacobian realization is claimed."}
+  },
+  "obligations": {
+    "existence": {"state":"supported","evidence":["binary-a0"],"scope":"Both elliptic factors and their product are explicit."},
+    "explicit_construction": {"state":"supported","evidence":["binary-a0"],"scope":"Product law, inclusion, and pinned field representation are explicit."},
+    "map_correctness": {"state":"supported","evidence":["binary-a0"],"scope":"Factor inclusion is a homomorphism for the componentwise law."},
+    "subgroup_preservation": {"state":"supported","evidence":["binary-a0"],"scope":"The image generator has the exact cited prime order r."},
+    "scalar_recovery": {"state":"supported","evidence":["binary-a0"],"scope":"Projection to E_0 recovers the source relation; Q=37P is checked."},
+    "destination_solver_applicability": {"state":"supported","evidence":["binary-a0"],"scope":"Generic group algorithms apply on the explicit product group; no faster solver is supplied."},
+    "computational_advantage": {"state":"unknown","evidence":[],"scope":"The fixture explicitly establishes no destination-solver advantage."},
+    "scaling_support": {"state":"unknown","evidence":[],"scope":"No end-to-end solver comparison is recorded."},
+    "novelty_within_boundary": {"state":"not_applicable","evidence":[],"scope":"Factor inclusion is a control, not a novelty candidate."}
+  },
+  "cost_comparison": {"accounting_complete":"unknown","modeled_or_measured":"unmeasured"},
+  "sources": [
+    {"id":"binary-a0","uri":"tools/ecdlp-surfaces/examples/binary_n83_a0.json","revision":"3d4a891bd07000cf63935f5c876a22ff5e193315"}
+  ],
+  "open_obligations": ["Name and validate a solver advantage on the image subgroup.","Account for all transfer, recovery, setup, memory, and verification costs."],
+  "verdicts": {
+    "valid_transfer":"supported",
+    "algorithmically_relevant":"supported",
+    "modeled_advantage":"unknown",
+    "measured_advantage":"unknown",
+    "novel_reduction_within_boundary":"not_applicable"
+  },
+  "official_status_change": "none"
+}

@@ -1,0 +1,80 @@
+{
+  "all_valid": true,
+  "assessments_checked": 6,
+  "format": "transfer-assessment-validation-summary-v1",
+  "results": [
+    {
+      "case_id": "known-binary-n83-genus3-cover-construction",
+      "errors": [],
+      "valid": true,
+      "verdicts": {
+        "algorithmically_relevant": "unknown",
+        "measured_advantage": "unknown",
+        "modeled_advantage": "unknown",
+        "novel_reduction_within_boundary": "not_applicable",
+        "valid_transfer": "unknown"
+      }
+    },
+    {
+      "case_id": "known-binary-n83-mixed-product-transfer",
+      "errors": [],
+      "valid": true,
+      "verdicts": {
+        "algorithmically_relevant": "supported",
+        "measured_advantage": "unknown",
+        "modeled_advantage": "unknown",
+        "novel_reduction_within_boundary": "not_applicable",
+        "valid_transfer": "supported"
+      }
+    },
+    {
+      "case_id": "known-binary-n83-opposite-product-rejection",
+      "errors": [],
+      "valid": true,
+      "verdicts": {
+        "algorithmically_relevant": "refuted",
+        "measured_advantage": "not_applicable",
+        "modeled_advantage": "not_applicable",
+        "novel_reduction_within_boundary": "not_applicable",
+        "valid_transfer": "refuted"
+      }
+    },
+    {
+      "case_id": "known-frobenius-compatible-surface-filter",
+      "errors": [],
+      "valid": true,
+      "verdicts": {
+        "algorithmically_relevant": "unknown",
+        "measured_advantage": "unknown",
+        "modeled_advantage": "unknown",
+        "novel_reduction_within_boundary": "not_applicable",
+        "valid_transfer": "unknown"
+      }
+    },
+    {
+      "case_id": "known-small-prime-quartic-transfer",
+      "errors": [],
+      "valid": true,
+      "verdicts": {
+        "algorithmically_relevant": "supported",
+        "measured_advantage": "unknown",
+        "modeled_advantage": "unknown",
+        "novel_reduction_within_boundary": "not_applicable",
+        "valid_transfer": "supported"
+      }
+    },
+    {
+      "case_id": "known-false-torsion-free-lattice-transfer",
+      "errors": [],
+      "valid": true,
+      "verdicts": {
+        "algorithmically_relevant": "refuted",
+        "measured_advantage": "not_applicable",
+        "modeled_advantage": "not_applicable",
+        "novel_reduction_within_boundary": "not_applicable",
+        "valid_transfer": "refuted"
+      }
+    }
+  ],
+  "validator": "0.1.0"
+}

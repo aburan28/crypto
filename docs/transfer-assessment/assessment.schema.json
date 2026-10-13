@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/aburan28/crypto/docs/transfer-assessment/assessment.schema.json",
+  "title": "ECDLP correspondence assessment v2",
+  "type": "object",
+  "required": [
+    "format", "case_id", "source", "destination", "transformation",
+    "typed_path", "algebraic_screen", "obligations", "cost_comparison",
+    "sources", "open_obligations", "verdicts", "official_status_change"
+  ],
+  "properties": {
+    "format": {"const": "correspondence-assessment-v2"},
+    "case_id": {"type": "string", "minLength": 1},
+    "authority": {"type": "string"},
+    "source": {"type": "object"},
+    "destination": {"type": "object"},
+    "transformation": {"type": "object"},
+    "typed_path": {"type": "object"},
+    "algebraic_screen": {"$ref": "#/$defs/screens"},
+    "obligations": {"$ref": "#/$defs/obligations"},
+    "cost_comparison": {
+      "type": "object",
+      "required": ["accounting_complete", "modeled_or_measured"],
+      "properties": {
+        "accounting_complete": {"$ref": "#/$defs/state"},
+        "modeled_or_measured": {"enum": ["unmeasured", "modeled", "measured"]}
+      }
+    },
+    "sources": {
+      "type": "array", "minItems": 1,
+      "items": {"type": "object", "required": ["id", "uri", "revision"]}
+    },
+    "open_obligations": {"type": "array", "items": {"type": "string"}},
+    "verdicts": {
+      "type": "object",
+      "required": [
+        "valid_transfer", "algorithmically_relevant", "modeled_advantage",
+        "measured_advantage", "novel_reduction_within_boundary"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "valid_transfer": {"$ref": "#/$defs/state"},
+        "algorithmically_relevant": {"$ref": "#/$defs/state"},
+        "modeled_advantage": {"$ref": "#/$defs/state"},
+        "measured_advantage": {"$ref": "#/$defs/state"},
+        "novel_reduction_within_boundary": {"$ref": "#/$defs/state"}
+      }
+    },
+    "official_status_change": {"const": "none"}
+  },
+  "$defs": {
+    "state": {"enum": ["unknown", "supported", "refuted", "not_applicable"]},
+    "state_record": {
+      "type": "object",
+      "required": ["state", "evidence", "scope"],
+      "additionalProperties": false,
+      "properties": {
+        "state": {"$ref": "#/$defs/state"},
+        "evidence": {"type": "array", "items": {"type": "string"}},
+        "scope": {"type": "string"}
+      }
+    },
+    "screens": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "dimension", "group_order", "frobenius_or_weil_polynomial",
+        "field_of_definition", "riemann_hurwitz_or_different",
+        "polarization_or_jacobian_locus"
+      ],
+      "properties": {
+        "dimension": {"$ref": "#/$defs/state_record"},
+        "group_order": {"$ref": "#/$defs/state_record"},
+        "frobenius_or_weil_polynomial": {"$ref": "#/$defs/state_record"},
+        "field_of_definition": {"$ref": "#/$defs/state_record"},
+        "riemann_hurwitz_or_different": {"$ref": "#/$defs/state_record"},
+        "polarization_or_jacobian_locus": {"$ref": "#/$defs/state_record"}
+      }
+    },
+    "obligations": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "existence", "explicit_construction", "map_correctness",
+        "subgroup_preservation", "scalar_recovery",
+        "destination_solver_applicability", "computational_advantage",
+        "scaling_support", "novelty_within_boundary"
+      ],
+      "properties": {
+        "existence": {"$ref": "#/$defs/state_record"},
+        "explicit_construction": {"$ref": "#/$defs/state_record"},
+        "map_correctness": {"$ref": "#/$defs/state_record"},
+        "subgroup_preservation": {"$ref": "#/$defs/state_record"},
+        "scalar_recovery": {"$ref": "#/$defs/state_record"},
+        "destination_solver_applicability": {"$ref": "#/$defs/state_record"},
+        "computational_advantage": {"$ref": "#/$defs/state_record"},
+        "scaling_support": {"$ref": "#/$defs/state_record"},
+        "novelty_within_boundary": {"$ref": "#/$defs/state_record"}
+      }
+    }
+  }
+}
