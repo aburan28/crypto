@@ -14,6 +14,13 @@ timing wrapper to `/usr/bin/time -p`, which has a successful local zero-exit
 preflight. The producer source/binary, public points, factor-base arms,
 order, 900-second cap, rank seed, thread counts, and target timing boundary
 are unchanged. The corrected primary rows go to write-once
-`runs/primary_v2/`; the secondary panel remains `runs/panel/`. The producer
-summary contains peak RSS and the target's exclusive online phases. Its
-independent checker accepts only complete zero-exit rows.
+`runs/primary_v2/`. The producer summary contains the target's exclusive
+online phases and allocated table bytes; `time -p` does not report peak RSS.
+This primary attempt therefore leaves its peak-memory field missing.
+
+Before starting the secondary panel, `run_panel_v3.sh` pins a checked
+direct-child wrapper (`run_with_usage.py`) and writes one kernel-reported
+peak-RSS receipt per arm in `runs/panel/`. It retains the same 900-second cap,
+source/binary/input hashes and reverse arm order. The wrapper's preflight
+receipt is `usage_preflight.json`. The independent checker accepts only
+complete zero-exit rows and checks each panel resource receipt.

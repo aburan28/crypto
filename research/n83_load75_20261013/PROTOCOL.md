@@ -57,5 +57,5 @@ arm in the results. Keep online wall times exploratory on this shared host.
 `run.sh` checks the source, binary and public-point hashes before every
 arm. Each run directory is write-once. Raw statuses remain immutable. The
 first outer timer failed after its producer run; [AMENDMENT.md](AMENDMENT.md)
-records the preserved failed attempt and the corrected `primary_v2` timer
-before any 75% arm result.
+records the preserved failed attempt, corrected `primary_v2` timer, and
+the peak-RSS wrapper frozen before the secondary panel.

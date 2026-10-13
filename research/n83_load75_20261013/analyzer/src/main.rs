@@ -153,6 +153,22 @@ fn verify_arm(
     {
         return Err(format!("{arm}: table mode or 8 GiB capacity mismatch").into());
     }
+    let peak_rss_bytes = if class == "panel" {
+        let usage: Value = serde_json::from_slice(&fs::read(dir.join("usage.json"))?)?;
+        let peak = usage["peak_rss"].as_u64().ok_or("missing child peak RSS")?;
+        if usage["schema"] != "n83.child-usage/v1"
+            || usage["exit_status"] != 0
+            || usage["timed_out"] != false
+            || usage["limit_seconds"] != 900
+            || usage["peak_rss_unit"] != "bytes"
+            || peak < 8 * 1024 * 1024 * 1024
+        {
+            return Err(format!("{arm}: invalid direct-child resource receipt").into());
+        }
+        Some(peak)
+    } else {
+        None
+    };
     let base_points = if class == "panel" {
         let dumps = read_jsonl(
             &study
@@ -263,7 +279,7 @@ fn verify_arm(
         "rank_ms": summary["timing_ms"]["rank_stage"],
         "linear_algebra_ms": summary["timing_ms"]["linear_algebra"],
         "process_total_ms": summary["timing_ms"]["process_total"],
-        "peak_rss_bytes": summary["peak_rss_bytes"],
+        "peak_rss_bytes": peak_rss_bytes,
     }))
 }
 
