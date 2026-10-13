@@ -2,6 +2,8 @@
 
 Status: local measurement complete and replayed; independent-host validation remains open under the [complete-cost calibration problem](../../problems/rootfinding-complete-cost-calibration.md). Source assessment is bounded to the supplied 13-page PDF and the matching paper branch; this report is not a research-state decision.
 
+Follow-on: the [2026-10-13 prime pair-table size trial](../ecbench_rootfinding_tuning_20261013/REPORT.md) compares 32 versus 64 abscissae on eight fresh public targets. It is a separate counted-cost configuration comparison; the frozen measurements below remain unchanged.
+
 ## Source binding
 
 The supplied [`rootfinding_decomposition.pdf`](source-paper.pdf) is frozen here as `source-paper.pdf` with SHA-256 `743d3d3e7e3aab6f980813c0944c1d2cbacc906e075e7283de0abc7b923b7c01`, identical to `papers/rootfinding-decomposition/rootfinding_decomposition.pdf` in `crypto` commit `5bb2f20edb` on `origin/feature/semaev-rootfind-nist-paper`. The paper source and end-to-end measurement program and results are present in that commit. Its `README.md` labels the manuscript a research draft and says the novelty audit and a stronger F4 cross-check remain due.
