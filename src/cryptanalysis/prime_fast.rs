@@ -1639,6 +1639,16 @@ mod tests {
                     gen.f.from_mont(gen.b)
                 ),
                 (fc.f.p, fc.n, fc.f.from_mont(fc.a), fc.f.from_mont(fc.b))
+            );
+            assert_eq!(
+                (
+                    gen.f.p,
+                    gen.n,
+                    gen.f.from_mont(gen.a),
+                    gen.f.from_mont(gen.b),
+                    x,
+                    y.min(gen.f.p - y),
+                ),
                 (
                     fc.f.p,
                     fc.n,
