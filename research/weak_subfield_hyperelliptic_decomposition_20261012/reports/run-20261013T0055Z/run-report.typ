@@ -14,6 +14,9 @@ Descriptive record of one run. Interpretation is in the study `README.md` / `REP
 
 #raw(read("../../results/run-20261013T0055Z.env.txt"), block: true)
 
+== Correction (added after review; PROTOCOL.md amendment 1)
+The JSONL of this run holds *six* E4x records: `all` already ran E4x, and the command ran it again, so lines 120-122 repeat lines 117-119. Three distinct E4x runs completed; the table below counts those three and the JSONL should be read with lines 120-122 dropped. This is an accounting correction; no value changed. The corrected run is `20261013T0404Z`.
+
 == Runs requested and completed
 #table(columns: 4, stroke: 0.4pt,
   [*Experiment*], [*Requested*], [*Completed*], [*Notes*],

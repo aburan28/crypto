@@ -1,12 +1,17 @@
-# The Bhati–Singh weak curves are subfield curves: the factor base never leaves `J_C0(F_q)`
+# The Bhati–Singh weak curves are subfield curves: the factor base never leaves `J_C0(F_{q^gcd(2,n)})`
 
 2026-10-12. Conductor T-2193. **Structural stage diagnostic on toy fields.**
 No speedup is claimed, no sub-rho claim, nothing about deployed curves.
-Protocol frozen before the first run: [PROTOCOL.md](PROTOCOL.md). Run
-`20261013T0055Z`: [records](results/run-20261013T0055Z.jsonl),
-[environment](results/run-20261013T0055Z.env.txt),
-[run report](reports/run-20261013T0055Z/run-report.pdf). This report as PDF:
-[REPORT.pdf](REPORT.pdf).
+Protocol frozen before the first run: [PROTOCOL.md](PROTOCOL.md), with dated
+amendments at its end. Run `20261013T0404Z` (the corrected run; reported
+here): [records](results/run-20261013T0404Z.jsonl),
+[environment](results/run-20261013T0404Z.env.txt),
+[ICV1 identities of the elliptic factors](results/run-20261013T0404Z.icv1.json),
+[run report](reports/run-20261013T0404Z/run-report.pdf). The first run
+`20261013T0055Z` is kept unedited ([records](results/run-20261013T0055Z.jsonl),
+[run report](reports/run-20261013T0055Z/run-report.pdf)); its E4x records
+appear twice (amendment 1) and its other 116 records are identical to this
+run's. This report as PDF: [REPORT.pdf](REPORT.pdf).
 
 ## Question
 
@@ -27,14 +32,20 @@ system solve. Two questions were put to it:
    `C0` is a curve over `F_q`. Proved below (Lemmas 1–2, Proposition 3),
    confirmed on the paper's own printed examples (E5) and on 15 toy weak
    curves (E1). Every prime factor of `|H|` is at most `(1+√q)^4`.
-2. **No.** The Kani pullback `E1(K) → J_C(K)` is executable and is a
-   homomorphism on every tested pair, but its image of prime order `ℓ`
-   meets `H` only in 0 (E4). Lines other than the weak one span the group
-   and give no free relations (E2); curves with several weak lines only
-   reach a `(1+√q)^4`-smooth part of the group (E3b).
+2. **No.** The Kani pullback `E1(K) → J_C(K)` is a homomorphism on every
+   tested pair, where the tested pairs are those that do not meet the
+   fibre `u = r²` on which `φ` is not implemented (so totality of `φ` is
+   not established), and its image of prime order `ℓ` meets `H` only in 0
+   (E4). Lines other than the weak one span the group and give no
+   candidates for free relations in 43 of 48 cases (E2); curves with
+   several weak lines only reach a `(1+√q)^4`-smooth part of the group
+   (E3b).
 
-The trade is exact on these inputs: a line gives free relations if and only
-if its span collapses.
+What the toy data show about the trade is a contrast, not an equivalence:
+on the one weak curve per field, the weak line has 882 to 12168 relation
+candidates and a collapsed span, while the 48 other lines have none on 43
+and 6 to 12 on 5, with spans of index at most 8 (constant `μ`, bounded
+search only; the 5 lines with candidates did not collapse).
 
 ![Mechanism](reports/mechanism.svg)
 
@@ -98,7 +109,7 @@ Lean: [lean/SubfieldCollapse.lean](lean/SubfieldCollapse.lean), toolchain
 | `φ : J_C0(F_{q^e}) → J_C(K)` exists and sends a rational point class to `(P) − (∞)` | none | **not formalized** (Jacobians of curves are not available without Mathlib; standard base change) |
 | `#J_C0(F_q) ≤ (1+√q)^4` (Weil) | none | **not formalized** |
 
-## Measurements (run 20261013T0055Z, all exact counts)
+## Measurements (run 20261013T0404Z, all exact counts)
 
 Tool: [weak_curve_lab.rs](weak_curve_lab.rs), dependency-free Rust, Cantor
 arithmetic on Mumford divisors over `F_{q^n}` by log tables; subgroups by
@@ -119,7 +130,9 @@ All ten published relation points are `F_q`-rational points of `C0`.
 
 ### E1: span of the factor base, weak against random
 
-Three weak curves and three random curves per field. `sub` is
+Three weak curves and three random curves per field. Both samplers draw
+every non-leading coefficient nonzero (amendment 2), so "random" below means
+"conditioned (nonzero-coefficient) random quintic". `sub` is
 `#J_C0(F_q)` for `n = 3` and `#J_C0(F_{q²})` for `n = 4`.
 
 | `(q, n)` | `#J(K)` (weak) | size of `H` (weak) | `sub` | largest prime of `#J(K)` | largest prime of size of `H` | `(1+√q)^4` | index of `H` on the 3 random curves |
@@ -132,11 +145,11 @@ Three weak curves and three random curves per field. `sub` is
 
 On all 15 weak curves `|H|` divides `sub`, every element of `H` has all
 its `C0`-model Mumford coordinates in `F_{q^e}`, and the paper's condition
-(16) holds (an `a` was found). On all 15 random curves condition (16) fails
+(16) holds (an `a` was found). On all 15 conditioned random curves condition (16) fails
 and `H` has index 1 to 13 in `J(K)`; the three cases above index 2 have a
 factor base of one point. P1 and P2 hold; the falsifier did not fire.
 
-![E1](reports/run-20261013T0055Z/e1_span_fraction.svg)
+![E1](reports/run-20261013T0404Z/e1_span_fraction.svg)
 
 ### E2: other factor-base lines on a weak curve
 
@@ -159,11 +172,12 @@ that for `n = 4` (derived: `λ ∈ F_q[t]`, and for even `n` also
 count is 0 on 43 and 6 to 12 on 5, which is one orbit under
 `(c, λ) → (e²c, ±eλ)`, `e ∈ F_q*`; all 48 span `J(K)` up to index 8.
 
-![E2](reports/run-20261013T0055Z/e2_lines.svg)
+![E2](reports/run-20261013T0404Z/e2_lines.svg)
 
 ### E3: exhaustive census of weak affine lines
 
-All `d · q^{n−1}` affine lines of each curve.
+All `d · q^{n−1}` affine lines of each curve (the sampler of the "random
+curve" column is the conditioned one of amendment 2).
 
 | `(q, n)` | lines | weak curve | random curve | `x⁵ + c` | `x⁵ + cx` |
 | --- | --- | --- | --- | --- | --- |
@@ -174,16 +188,22 @@ All `d · q^{n−1}` affine lines of each curve.
 | (7, 4) | 137200 | 2 | 0 | 0 | 0 |
 | (3, 4) | 1080 | 1 | 0 | 0 | 0 |
 
-A random curve has no weak line in any field. For `n = 3` every sampled
+The one conditioned random curve drawn per field has no weak line in any of
+the six fields (an observed sample of six curves, not a population
+statement). For `n = 3` every sampled
 `x⁵ + c` and `x⁵ + cx` is weak (derived: `gcd(5, d) = gcd(4, d) = 1`, so
 `β⁵ ∈ c·F_q*` is solvable). **Unexplained:** the (7, 4) weak curve has a
 second weak line that is not a scaling line; its span was not computed. A
 candidate explanation is an extra affine symmetry of that `g`; not checked.
 
-### E3b: all weak lines of automorphism-rich curves
+### E3b: all weak lines of automorphism-rich curves (post-hoc, supplementary)
 
-First random `c` for which at least one weak line exists (`tries` in the
-records).
+Post-hoc supplementary experiment, added under amendment 3: it censuses
+all weak affine lines, translations included, rather than the weak scaling
+lines the frozen table names. At (11, 5) and (13, 4) (`q^n > 3000`) the
+translation is restricted to the one value that clears the `x⁴`
+coefficient. First random `c` for which at least one weak line exists
+(`tries` in the records).
 
 | curve, `(q, n)` | weak lines | Frobenius forms | per-line size of `H` | union size of `H` | `#J(K)` | largest prime, union or per line | `(1+√q)^4` |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -209,7 +229,9 @@ infinity; `E1 : v² = u³ + au² + bu + c`, `E2 : v² = cu³ + bu² + au + 1`;
 `C = ` the twist `f(x) = β⁵ ψ0(x/β)`, `β = γ²`. The map
 `φ : E1(K) → J_C(K)` is the pullback along `(x, y) ↦ (x², y)`. E4 is the
 frozen selection (first `(a, b, r)`, which is `S = x⁶ − 1`); E4x requires
-`a, b ≥ 1` and was added after E4 was seen (supplementary).
+`a, b ≥ 1` and was added after E4 was seen (supplementary). `φ` is defined
+only off the fibre `u = r²` of `E1` (the fibre over the root `r` moved to
+infinity); the lab implements no formula there and skips such pairs.
 
 | run | `(q, n)` | `S` | `#J(K) = #E1(K)·#E2(K)` | `φ(P+Q) = φ(P)+φ(Q)` | `ℓ` | order of `φ(P)` | size of `H` | multiples of `φ(P)` in `H` |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -222,9 +244,37 @@ frozen selection (first `(a, b, r)`, which is `S = x⁶ − 1`); E4x requires
 
 `ℓ` is the largest prime factor of `#E1(K)`; pairs where a point maps to
 the excluded fibre `u = r²` were skipped, which is why two rows test 198
-or 199 pairs. The transfer is executable and injective on the `ℓ`-part,
-and the transferred instance lies outside the factor-base span in all six
-cases. P4 holds.
+or 199 pairs. `φ` is a homomorphism on the tested pairs; the test does not
+establish that it extends to a homomorphism on all of `E1(K)`. On the
+chosen point of order `ℓ`, `φ` is nonzero and has order `ℓ`, and the
+transferred instance lies outside the factor-base span in all six cases.
+P4's negative part holds on these inputs.
+
+The elliptic factors, by ICV1 identity (model over `K`, short Weierstrass
+form; `ICV1.md`; moved from the printed equations by an `F_q`-isomorphism,
+orders recounted independently in
+[results/run-20261013T0404Z.icv1.json](results/run-20261013T0404Z.icv1.json),
+which also holds the full ICV1 strings). The orders and the slugs are the
+join key to the E4/E4x records by `(exp, q, n)`; the records themselves are
+unchanged. These models are in `docs/curves/registry.json`; no EC1
+representation is registered because no subgroup generator of either factor
+is recorded in a form the registry can take (the lab stores `E1` points as
+internal log-table indices).
+
+| run | `(q, n)` | factor | `#E(K)` | ICV1 slug |
+| --- | --- | --- | --- | --- |
+| E4 | (7, 3) | `E1` | 364 | `icv1-fp3k3-tm20-bef51007` |
+| E4 | (7, 3) | `E2` | 324 | `icv1-fp3k3-t20-b3476bff` |
+| E4 | (11, 3) | `E1` | 1332 | `icv1-fp4k3-t0-92ab3c9d` |
+| E4 | (11, 3) | `E2` | 1332 | `icv1-fp4k3-t0-67d3d40c` |
+| E4 | (13, 3) | `E1` | 2268 | `icv1-fp4k3-tm70-d7518a94` |
+| E4 | (13, 3) | `E2` | 2268 | `icv1-fp4k3-tm70-cbe24c4e` |
+| E4x | (7, 3) | `E1` | 310 | `icv1-fp3k3-t34-0f6b94b1` |
+| E4x | (7, 3) | `E2` | 324 | `icv1-fp3k3-t20-d4c9c593` |
+| E4x | (11, 3) | `E1` | 1332 | `icv1-fp4k3-t0-f6684909` |
+| E4x | (11, 3) | `E2` | 1264 | `icv1-fp4k3-t68-e724d929` |
+| E4x | (13, 3) | `E1` | 2106 | `icv1-fp4k3-t92-c1554838` |
+| E4x | (13, 3) | `E2` | 2106 | `icv1-fp4k3-t92-b20414d0` |
 
 Traces of `π^n` reachable from an `F_q`-curve, against all integer traces
 in the Hasse interval over `K` (measured counts): 7 of 75 at (7, 3), 13 of
@@ -274,8 +324,9 @@ measured ECDLP rungs, and this study adds none. No timing was taken, so
 ## Reproduce
 
 ```sh
-rustc -O weak_curve_lab.rs && ./weak_curve_lab all && ./weak_curve_lab e4x
-python3 reports/plot.py results/run-20261013T0055Z.jsonl reports/run-20261013T0055Z   # layout only
+rustc --edition 2021 -O weak_curve_lab.rs && ./weak_curve_lab all && ./weak_curve_lab e4x
+python3 reports/plot.py results/run-20261013T0404Z.jsonl reports/run-20261013T0404Z   # layout only
+python3 reports/icv1_factors.py results/run-20261013T0404Z.jsonl results/run-20261013T0404Z.icv1.json
 cd lean && lake build
 cargo run --release --example identity_certificate_weak_twist
 ```

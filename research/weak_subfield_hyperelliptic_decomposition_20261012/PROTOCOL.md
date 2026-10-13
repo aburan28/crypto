@@ -92,3 +92,53 @@ variant of Section 6.
 
 Computation is in Rust (`weak_curve_lab.rs`, dependency-free, built with
 `rustc -O`). Python only plots recorded values.
+
+## Amendments (dated; the text above is the frozen protocol and is not edited)
+
+### Amendment 1, 2026-10-12: runner accounting and the corrected run
+
+Run `20261013T0055Z` used `./weak_curve_lab all && ./weak_curve_lab e4x`, but
+`all` already ran the supplementary E4x arm, so its JSONL holds six E4x
+records (lines 120-122 repeat lines 117-119 exactly) while its run report
+said three completed. That record is kept unedited and its run report
+carries a correction note. The tool now excludes `e4x` from `all`; the
+corrected run is `20261013T0404Z`, compared line by line with the first run
+in the README. E4x stays supplementary (added after E4 was seen). The build
+line is now `rustc --edition 2021 -O` (the Language section above says
+`rustc -O`). Classification: accounting correction; no measured value
+changes.
+
+### Amendment 2, 2026-10-12: the random-control and weak-curve samplers are conditioned
+
+P2 and the Frozen-inputs table say "random monic squarefree" `f`. The
+sampler in `weak_curve_lab.rs` (`rand_monic_quintic`) draws every
+non-leading coefficient nonzero, both for the random `f in K[x]` controls
+(E1, E3) and for the `g in F_q[x]` of the weak curves. The frozen records are
+not rerun. Claims about the control population are therefore scoped to
+"conditioned (nonzero-coefficient) random quintics"; they say nothing about
+quintics with a vanishing coefficient.
+
+### Amendment 3, 2026-10-12: E3b is a post-hoc supplementary experiment
+
+The Frozen-inputs table describes E3b as the union of "all weak scaling
+lines". `weak_curve_lab.rs` runs `census(..., false)`, the exhaustive affine
+census of E3, so translations are included; for `|K| > 3000` (the fields
+(11,5) and (13,4)) the translation is restricted to the single value that
+clears the `x^4` coefficient. E3b is labelled post-hoc and supplementary.
+
+### Amendment 4, 2026-10-12: wording of P4 and of the line comparison
+
+P4 says the pullback is "an executable homomorphism". The map `phi` is
+not implemented on the fibre `u = r^2` of `E1`, and the lab skips pairs that
+meet it. Read P4 as: `phi` is a homomorphism on the tested pairs that avoid
+that fibre; the test does not establish totality. P3's remark about lines
+that are not weak is read as the observed contrast in candidate counts on
+the tested lines (constant `mu`, bounded search), not as an equivalence.
+
+### Amendment 5, 2026-10-12: ICV1 names for the elliptic factors
+
+The elliptic factors `E1`, `E2` of E4/E4x are named by ICV1 slug in the
+README (AGENTS.md section 11). `reports/icv1_factors.py` computes them from
+the recorded `(a, b, c)`, `q`, `n`, modulus and orders, recounting each
+order independently; they are registered in `docs/curves/registry.json`
+(model identity only; no EC1 representation).

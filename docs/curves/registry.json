@@ -45525,6 +45525,150 @@
    ]
   },
   {
+   "slug": "icv1-fp3k3-t20-b3476bff",
+   "icv1": "ICV1:fpk-7-3-ef2d388c:20:324:0,0,0:unk:unk:r:b3476bff221d",
+   "family": "extension",
+   "params": {
+    "p": "7",
+    "k": 3,
+    "modulus": [
+     "3",
+     "0",
+     "0"
+    ],
+    "a": [
+     "0",
+     "0",
+     "0"
+    ],
+    "b": [
+     "1",
+     "0",
+     "0"
+    ]
+   },
+   "model_json": "{\"a\":[\"0\",\"0\",\"0\"],\"b\":[\"1\",\"0\",\"0\"],\"field\":\"fpk-7-3-ef2d388c\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"3\",\"0\",\"0\"],\"p\":\"7\",\"v\":\"1\"}",
+   "trace": 20,
+   "order": "324",
+   "j": "0,0,0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/weak_subfield_hyperelliptic_decomposition_20261012/results/run-20261013T0404Z.icv1.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp3k3-t20-d4c9c593",
+   "icv1": "ICV1:fpk-7-3-ef2d388c:20:324:2,0,0:unk:unk:r:d4c9c593052f",
+   "family": "extension",
+   "params": {
+    "p": "7",
+    "k": 3,
+    "modulus": [
+     "3",
+     "0",
+     "0"
+    ],
+    "a": [
+     "6",
+     "0",
+     "0"
+    ],
+    "b": [
+     "1",
+     "0",
+     "0"
+    ]
+   },
+   "model_json": "{\"a\":[\"6\",\"0\",\"0\"],\"b\":[\"1\",\"0\",\"0\"],\"field\":\"fpk-7-3-ef2d388c\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"3\",\"0\",\"0\"],\"p\":\"7\",\"v\":\"1\"}",
+   "trace": 20,
+   "order": "324",
+   "j": "2,0,0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/weak_subfield_hyperelliptic_decomposition_20261012/results/run-20261013T0404Z.icv1.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp3k3-t34-0f6b94b1",
+   "icv1": "ICV1:fpk-7-3-ef2d388c:34:310:4,0,0:unk:unk:r:0f6b94b12ca9",
+   "family": "extension",
+   "params": {
+    "p": "7",
+    "k": 3,
+    "modulus": [
+     "3",
+     "0",
+     "0"
+    ],
+    "a": [
+     "3",
+     "0",
+     "0"
+    ],
+    "b": [
+     "4",
+     "0",
+     "0"
+    ]
+   },
+   "model_json": "{\"a\":[\"3\",\"0\",\"0\"],\"b\":[\"4\",\"0\",\"0\"],\"field\":\"fpk-7-3-ef2d388c\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"3\",\"0\",\"0\"],\"p\":\"7\",\"v\":\"1\"}",
+   "trace": 34,
+   "order": "310",
+   "j": "4,0,0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/weak_subfield_hyperelliptic_decomposition_20261012/results/run-20261013T0404Z.icv1.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp3k3-tm20-bef51007",
+   "icv1": "ICV1:fpk-7-3-ef2d388c:-20:364:0,0,0:unk:unk:r:bef51007a25c",
+   "family": "extension",
+   "params": {
+    "p": "7",
+    "k": 3,
+    "modulus": [
+     "3",
+     "0",
+     "0"
+    ],
+    "a": [
+     "0",
+     "0",
+     "0"
+    ],
+    "b": [
+     "6",
+     "0",
+     "0"
+    ]
+   },
+   "model_json": "{\"a\":[\"0\",\"0\",\"0\"],\"b\":[\"6\",\"0\",\"0\"],\"field\":\"fpk-7-3-ef2d388c\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"3\",\"0\",\"0\"],\"p\":\"7\",\"v\":\"1\"}",
+   "trace": -20,
+   "order": "364",
+   "j": "0,0,0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/weak_subfield_hyperelliptic_decomposition_20261012/results/run-20261013T0404Z.icv1.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "aliases": [],
    "end": "unk",
    "family": "extension",
@@ -63239,6 +63383,150 @@
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
+   "slug": "icv1-fp4k3-t0-67d3d40c",
+   "icv1": "ICV1:fpk-11-3-b4fefce6:0:1332:0,0,0:unk:unk:r:67d3d40c1a01",
+   "family": "extension",
+   "params": {
+    "p": "11",
+    "k": 3,
+    "modulus": [
+     "4",
+     "1",
+     "0"
+    ],
+    "a": [
+     "0",
+     "0",
+     "0"
+    ],
+    "b": [
+     "1",
+     "0",
+     "0"
+    ]
+   },
+   "model_json": "{\"a\":[\"0\",\"0\",\"0\"],\"b\":[\"1\",\"0\",\"0\"],\"field\":\"fpk-11-3-b4fefce6\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"4\",\"1\",\"0\"],\"p\":\"11\",\"v\":\"1\"}",
+   "trace": 0,
+   "order": "1332",
+   "j": "0,0,0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/weak_subfield_hyperelliptic_decomposition_20261012/results/run-20261013T0404Z.icv1.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp4k3-t0-92ab3c9d",
+   "icv1": "ICV1:fpk-11-3-b4fefce6:0:1332:0,0,0:unk:unk:r:92ab3c9d8eaf",
+   "family": "extension",
+   "params": {
+    "p": "11",
+    "k": 3,
+    "modulus": [
+     "4",
+     "1",
+     "0"
+    ],
+    "a": [
+     "0",
+     "0",
+     "0"
+    ],
+    "b": [
+     "10",
+     "0",
+     "0"
+    ]
+   },
+   "model_json": "{\"a\":[\"0\",\"0\",\"0\"],\"b\":[\"10\",\"0\",\"0\"],\"field\":\"fpk-11-3-b4fefce6\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"4\",\"1\",\"0\"],\"p\":\"11\",\"v\":\"1\"}",
+   "trace": 0,
+   "order": "1332",
+   "j": "0,0,0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/weak_subfield_hyperelliptic_decomposition_20261012/results/run-20261013T0404Z.icv1.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp4k3-t0-f6684909",
+   "icv1": "ICV1:fpk-11-3-b4fefce6:0:1332:1,0,0:unk:unk:r:f66849093f23",
+   "family": "extension",
+   "params": {
+    "p": "11",
+    "k": 3,
+    "modulus": [
+     "4",
+     "1",
+     "0"
+    ],
+    "a": [
+     "8",
+     "0",
+     "0"
+    ],
+    "b": [
+     "0",
+     "0",
+     "0"
+    ]
+   },
+   "model_json": "{\"a\":[\"8\",\"0\",\"0\"],\"b\":[\"0\",\"0\",\"0\"],\"field\":\"fpk-11-3-b4fefce6\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"4\",\"1\",\"0\"],\"p\":\"11\",\"v\":\"1\"}",
+   "trace": 0,
+   "order": "1332",
+   "j": "1,0,0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/weak_subfield_hyperelliptic_decomposition_20261012/results/run-20261013T0404Z.icv1.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp4k3-t68-e724d929",
+   "icv1": "ICV1:fpk-11-3-b4fefce6:68:1264:2,0,0:unk:unk:r:e724d929aee6",
+   "family": "extension",
+   "params": {
+    "p": "11",
+    "k": 3,
+    "modulus": [
+     "4",
+     "1",
+     "0"
+    ],
+    "a": [
+     "4",
+     "0",
+     "0"
+    ],
+    "b": [
+     "6",
+     "0",
+     "0"
+    ]
+   },
+   "model_json": "{\"a\":[\"4\",\"0\",\"0\"],\"b\":[\"6\",\"0\",\"0\"],\"field\":\"fpk-11-3-b4fefce6\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"4\",\"1\",\"0\"],\"p\":\"11\",\"v\":\"1\"}",
+   "trace": 68,
+   "order": "1264",
+   "j": "2,0,0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/weak_subfield_hyperelliptic_decomposition_20261012/results/run-20261013T0404Z.icv1.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "aliases": [],
    "end": "unk",
    "family": "extension",
@@ -63507,6 +63795,150 @@
    ],
    "standard_names": [],
    "trace": "-18181270",
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp4k3-t92-b20414d0",
+   "icv1": "ICV1:fpk-13-3-6620ba01:92:2106:7,0,0:unk:unk:r:b20414d08e49",
+   "family": "extension",
+   "params": {
+    "p": "13",
+    "k": 3,
+    "modulus": [
+     "2",
+     "0",
+     "0"
+    ],
+    "a": [
+     "1",
+     "0",
+     "0"
+    ],
+    "b": [
+     "12",
+     "0",
+     "0"
+    ]
+   },
+   "model_json": "{\"a\":[\"1\",\"0\",\"0\"],\"b\":[\"12\",\"0\",\"0\"],\"field\":\"fpk-13-3-6620ba01\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"2\",\"0\",\"0\"],\"p\":\"13\",\"v\":\"1\"}",
+   "trace": 92,
+   "order": "2106",
+   "j": "7,0,0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/weak_subfield_hyperelliptic_decomposition_20261012/results/run-20261013T0404Z.icv1.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp4k3-t92-c1554838",
+   "icv1": "ICV1:fpk-13-3-6620ba01:92:2106:10,0,0:unk:unk:r:c15548381e38",
+   "family": "extension",
+   "params": {
+    "p": "13",
+    "k": 3,
+    "modulus": [
+     "2",
+     "0",
+     "0"
+    ],
+    "a": [
+     "5",
+     "0",
+     "0"
+    ],
+    "b": [
+     "3",
+     "0",
+     "0"
+    ]
+   },
+   "model_json": "{\"a\":[\"5\",\"0\",\"0\"],\"b\":[\"3\",\"0\",\"0\"],\"field\":\"fpk-13-3-6620ba01\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"2\",\"0\",\"0\"],\"p\":\"13\",\"v\":\"1\"}",
+   "trace": 92,
+   "order": "2106",
+   "j": "10,0,0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/weak_subfield_hyperelliptic_decomposition_20261012/results/run-20261013T0404Z.icv1.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp4k3-tm70-cbe24c4e",
+   "icv1": "ICV1:fpk-13-3-6620ba01:-70:2268:0,0,0:unk:unk:r:cbe24c4eb685",
+   "family": "extension",
+   "params": {
+    "p": "13",
+    "k": 3,
+    "modulus": [
+     "2",
+     "0",
+     "0"
+    ],
+    "a": [
+     "0",
+     "0",
+     "0"
+    ],
+    "b": [
+     "1",
+     "0",
+     "0"
+    ]
+   },
+   "model_json": "{\"a\":[\"0\",\"0\",\"0\"],\"b\":[\"1\",\"0\",\"0\"],\"field\":\"fpk-13-3-6620ba01\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"2\",\"0\",\"0\"],\"p\":\"13\",\"v\":\"1\"}",
+   "trace": -70,
+   "order": "2268",
+   "j": "0,0,0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/weak_subfield_hyperelliptic_decomposition_20261012/results/run-20261013T0404Z.icv1.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp4k3-tm70-d7518a94",
+   "icv1": "ICV1:fpk-13-3-6620ba01:-70:2268:0,0,0:unk:unk:r:d7518a940faf",
+   "family": "extension",
+   "params": {
+    "p": "13",
+    "k": 3,
+    "modulus": [
+     "2",
+     "0",
+     "0"
+    ],
+    "a": [
+     "0",
+     "0",
+     "0"
+    ],
+    "b": [
+     "12",
+     "0",
+     "0"
+    ]
+   },
+   "model_json": "{\"a\":[\"0\",\"0\",\"0\"],\"b\":[\"12\",\"0\",\"0\"],\"field\":\"fpk-13-3-6620ba01\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"2\",\"0\",\"0\"],\"p\":\"13\",\"v\":\"1\"}",
+   "trace": -70,
+   "order": "2268",
+   "j": "0,0,0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/weak_subfield_hyperelliptic_decomposition_20261012/results/run-20261013T0404Z.icv1.json"
+   ],
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },

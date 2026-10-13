@@ -24,7 +24,13 @@ fn pow(base: &str, e: usize) -> Expr {
 fn statement() -> IdentityStatement {
     let g = |k: usize| Expr::var(&format!("g{k}"));
     // lhs: (beta t)^5 + sum_k (g_k beta^(5-k)) (beta t)^k
-    let bt = |k: usize| Expr::product((0..k).map(|_| Expr::times(Expr::var("beta"), Expr::var("t"))).collect());
+    let bt = |k: usize| {
+        Expr::product(
+            (0..k)
+                .map(|_| Expr::times(Expr::var("beta"), Expr::var("t")))
+                .collect(),
+        )
+    };
     let mut lhs = vec![bt(5)];
     let mut inner = vec![pow("t", 5)];
     for k in 0..5 {
@@ -58,5 +64,8 @@ fn main() {
         Verdict::Accept { .. } => {}
         other => panic!("self-check failed: {other:?}"),
     }
-    println!("{}", serde_json::to_string_pretty(&cert).expect("serialises"));
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&cert).expect("serialises")
+    );
 }

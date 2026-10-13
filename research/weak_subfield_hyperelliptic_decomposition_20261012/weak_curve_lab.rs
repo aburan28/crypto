@@ -429,6 +429,8 @@ fn e5() {
 }
 
 fn main() { let arg = std::env::args().nth(1).unwrap_or("all".into());
-    let run = |n: &str| arg == "all" || arg == n;
+    // `all` covers the frozen experiments only; the supplementary E4x arm runs only when named ("e4x"),
+    // so `all && e4x` records it once (run 20261013T0055Z ran it twice: see PROTOCOL.md amendment 1).
+    let run = |n: &str| (arg == "all" && n != "e4x") || arg == n;
     if run("e5") { e5(); } if run("e1") { e1(); } if run("e2") { e2(); } if run("e3") { e3(); } if run("e3b") { e3b(); } if run("e4") { e4(0, "E4"); } if run("e4x") { e4(1, "E4x"); }
 }
