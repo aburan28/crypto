@@ -108743,6 +108743,116 @@
    "trace": "80369948951667839190628429049567884210",
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp20-tm728-d215a2a1",
+   "icv1": "ICV1:fp-946177:-728:946906:503689:unk:unk:r:d215a2a139a7",
+   "family": "prime",
+   "params": {
+    "p": "946177",
+    "a": "304973",
+    "b": "530845"
+   },
+   "model_json": "{\"a\":\"304973\",\"b\":\"530845\",\"field\":\"fp-946177\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"946177\",\"v\":\"1\"}",
+   "trace": -728,
+   "order": "946906",
+   "j": "503689",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/pkm_tower_ecbench_20261013/specs/SPEC-p20.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp22-tm2947-e15fed69",
+   "icv1": "ICV1:fp-2387969:-2947:2390917:1200559:unk:unk:r:e15fed6973bc",
+   "family": "prime",
+   "params": {
+    "p": "2387969",
+    "a": "1427047",
+    "b": "558169"
+   },
+   "model_json": "{\"a\":\"1427047\",\"b\":\"558169\",\"field\":\"fp-2387969\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"2387969\",\"v\":\"1\"}",
+   "trace": -2947,
+   "order": "2390917",
+   "j": "1200559",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/pkm_tower_ecbench_20261013/specs/SPEC-p22.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp24-t2705-27cbb01b",
+   "icv1": "ICV1:fp-10940417:2705:10937713:10457630:unk:unk:r:27cbb01b4058",
+   "family": "prime",
+   "params": {
+    "p": "10940417",
+    "a": "10128206",
+    "b": "867458"
+   },
+   "model_json": "{\"a\":\"10128206\",\"b\":\"867458\",\"field\":\"fp-10940417\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"10940417\",\"v\":\"1\"}",
+   "trace": 2705,
+   "order": "10937713",
+   "j": "10457630",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/pkm_tower_ecbench_20261013/specs/SPEC-p24.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp26-t2838-8e779ca8",
+   "icv1": "ICV1:fp-40857601:2838:40854764:31379448:unk:unk:r:8e779ca8b118",
+   "family": "prime",
+   "params": {
+    "p": "40857601",
+    "a": "8702713",
+    "b": "9617118"
+   },
+   "model_json": "{\"a\":\"8702713\",\"b\":\"9617118\",\"field\":\"fp-40857601\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"40857601\",\"v\":\"1\"}",
+   "trace": 2838,
+   "order": "40854764",
+   "j": "31379448",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/pkm_tower_ecbench_20261013/specs/SPEC-p26.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp28-t4155-50f492b1",
+   "icv1": "ICV1:fp-231657473:4155:231653319:64717639:unk:unk:r:50f492b1756c",
+   "family": "prime",
+   "params": {
+    "p": "231657473",
+    "a": "95419558",
+    "b": "159693275"
+   },
+   "model_json": "{\"a\":\"95419558\",\"b\":\"159693275\",\"field\":\"fp-231657473\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"231657473\",\"v\":\"1\"}",
+   "trace": 4155,
+   "order": "231653319",
+   "j": "64717639",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/pkm_tower_ecbench_20261013/specs/SPEC-p28.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   }
  ]
 }
