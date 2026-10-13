@@ -102,6 +102,18 @@ Ranked by expected gain; none is measured here.
    bit of the ONB `y`. Bit-identical values, no map change. Estimate: 30–45%
    of the probe critical path, i.e. a modest rate gain while the structure of
    §2 remains.
+
+   The packed implementation now takes this representation path.
+   `TwCyclePoint` stores both coordinates in polynomial form,
+   `TwCycleOps::next` uses the polynomial inverse/multiply/square chain, and
+   only the selector-facing x coordinate is converted back to normal basis.
+   The shared square table is used when the full RTX PRO 6000 recipe enables
+   it. The host table probe passed all four layouts, including the full-recipe
+   arithmetic flags (`INV_POLY=2`, reduced normal conversion, square table,
+   direct reduction and generated products), with zero
+   phase/pivot/sign/tag/addend mismatches. This is a correctness and
+   instruction-path change only; no new GPU throughput claim is made until
+   the committed full recipe is re-screened.
 3. **Exact v3 early termination.** Track the formal sum of the probe's table
    addends in `⊕_h Z[τ]/(τ²+τ+2)` and abort when the remaining steps cannot
    cancel it; equivalent to the exact return test unless a non-trivial

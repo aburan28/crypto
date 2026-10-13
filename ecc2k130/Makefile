@@ -22,6 +22,8 @@
 #   PACKED_ONB_INV  ONB two-product multiply inside inv131 (default 0)
 #   PACKED_FROM_REDUCED  5-word inverse of toPolynomial131 (default 0)
 #   PACKED_SIGMA_TABLE  fused-walk Frobenius steps from shared nibble tables (default 0)
+#   ordinary sigma table  exact polynomial-coordinate table in the
+#                       witness-carrying ordinary sigma walk (default 0)
 #   PACKED_CLMUL_FLAT  issue 128-bit Karatsuba as 3x lo then 3x hi clmad
 #   PACKED_PAIR_CLMUL  twelve-clmad interleaved pair product (default 0)
 #   PACKED_ALU_SQR  ONB sqr131 on the logic pipe instead of clmad (default 0)
@@ -667,6 +669,21 @@ test-table-walk-host:
 	./build/test-table-walk-host-nibble-popc
 	./build/test-table-walk-host-bytes-popc
 
+# The full RTX PRO 6000 redesign arithmetic path on the same host/reference
+# probe. Keep this separate from the broad layout test: the polynomial cold
+# probe is intentionally expensive on a CPU, while this small fixture catches
+# basis, square-table and reduced-conversion regressions before a GPU launch.
+TABLE_REDESIGN_PROBE_POINTS ?= 64
+test-table-walk-host-redesign:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_BRANCHES=8 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_PHASE_POPC=0 -DECC_CYCLE_FAST2=1 \
+	    -DECC_PACKED_INV_POLY=2 -DECC_PACKED_SQUARE_TABLE=1 -DECC_PACKED_FROM_REDUCED=1 \
+	    -DECC_PACKED_ALU_SQUARE=1 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 \
+	    -DECC_PACKED_INLINE_POLY=3 -Wno-unknown-pragmas -Wno-unused-function \
+	    -DECC_TABLE_PROBE_POINTS=$(TABLE_REDESIGN_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-redesign
+	./build/test-table-walk-host-redesign
+.PHONY: test-table-walk-host-redesign
+
 # Host static price of twPhase byte-table vs popc planes (CHEAPER-SELECTION.md).
 test-phase-cost:
 	mkdir -p build
@@ -824,13 +841,26 @@ PRO6000_SIGMA_TABLE_KNOBS = $(PRO6000_SIGMA_FUSED_KNOBS) THREADS=512 MINBLOCKS=1
 gpu-rtx-pro6000-sigma-table:
 	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_TABLE_KNOBS)
 
+# Same-walk DP32 candidate: retain the ordinary witness-carrying sigma walk,
+# but evaluate I+sigma^j directly from the exact polynomial-coordinate nibble
+# table. Keep this separate until device replay and DP corpus identity qualify
+# it for the production campaign.
+PRO6000_DP32_SIGMA_TABLE_KNOBS = BATCH=16 THREADS=512 MINBLOCKS=1 \
+	PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
+	PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
+	PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
+	PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
+	PACKED_INLINE_POLY=3 PACKED_SIGMA_TABLE=1 SIGMA_FUSED=0 WITNESS=1 WALK_TABLE=0
+gpu-rtx-pro6000-dp32-sigma-table:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_DP32_SIGMA_TABLE_KNOBS)
+
 # Headline protocol (A/A panel, five A/B pairs, 64 launches) for the table
 # against the fused preset; benchmark-only, receipts in benchmarks/sigma-table/.
 bench-rtx-pro6000-sigma-table:
 	$(MODAL) run --detach modal_job.py --job benchmarks/sigma-table/gpujob-headline.sh \
 	    --out $(TABLE_BENCH_OUT)
 TABLE_BENCH_OUT ?= /tmp/ecc2k-sigma-table-benchmark
-.PHONY: gpu-rtx-pro6000-sigma-table bench-rtx-pro6000-sigma-table
+.PHONY: gpu-rtx-pro6000-sigma-table gpu-rtx-pro6000-dp32-sigma-table gpu-rtx-pro6000-iteration-redesign bench-rtx-pro6000-sigma-table
 
 # Matched replay, A/A noise and five-pair confirmation; benchmark-only.
 bench-rtx-pro6000-sigma-fused:
@@ -865,6 +895,16 @@ PRO6000_20B_KNOBS = BATCH=16 THREADS=512 MINBLOCKS=1 \
 gpu-rtx-pro6000-20b: PACKED_ALU_SQUARE = 1
 gpu-rtx-pro6000-20b:
 	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS)
+
+# Major iteration-function redesign from ITERATION-FUNCTION.md: replace the
+# per-step sigma/Frobenius path with the class-covariant r-adding table walk.
+# This is the fully tuned v3 RTX PRO 6000 recipe, with a separate v3
+# walk/corpus. It is intentionally never a campaign default or a drop-in
+# DP32 worker.
+PRO6000_ITERATION_REDESIGN_KNOBS = $(PRO6000_20B_KNOBS)
+gpu-rtx-pro6000-iteration-redesign: PACKED_ALU_SQUARE = 1
+gpu-rtx-pro6000-iteration-redesign:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_ITERATION_REDESIGN_KNOBS)
 
 # The same knob set with overrides appended: on a make command line the last
 # assignment of a variable wins, so every knob and the geometry are reachable

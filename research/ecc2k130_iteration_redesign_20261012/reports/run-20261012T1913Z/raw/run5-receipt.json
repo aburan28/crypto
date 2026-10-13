@@ -1,0 +1,19 @@
+{
+  "provider": "runpod",
+  "gpu_type": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "gpu_uuid": "GPU-9bec5f94-e960-0420-0acd-3884ffa019dd",
+  "gpu_driver": "595.91.07",
+  "cuda_toolkit": "13.3.73",
+  "source_revision": "779a4044e73148758302ff1c997654b25f53d4f3",
+  "source_archive_sha256": "29333d25965a84b598d557fa3a7bea14e3f2ac51e8f9ea6a2d555a3b0bc62d4a",
+  "started_at": "2026-10-12T18:53:18Z",
+  "finished_at": "2026-10-12T19:07:38Z",
+  "exit_code": 0,
+  "outcome": "arithmetic, table-walk replay and v3 verification passed",
+  "verification_reports": 300,
+  "verification_dp_capacity": 262144,
+  "verification_steps": 16,
+  "verification_launches": 6,
+  "benchmark_launches": 32,
+  "benchmark_repeats": 3
+}
