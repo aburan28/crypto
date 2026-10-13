@@ -703,15 +703,30 @@ impl FactorBaseBuilder<Curve4> for YLineBase<'_> {
     fn name(&self) -> &str {
         "fghr-y-line"
     }
-    fn describe(&self, _params: &Params) -> String {
-        "FGHR's Y-line: Y(P) ∈ F_p, columns {±P, ±(P + T)}".into()
+    fn describe(&self, params: &Params) -> String {
+        if params.u64_or("zero", 0).unwrap_or(0) == 1 {
+            "FGHR's Y-line: Y(P) ∈ F_p, columns {±P, ±(P + T)}, and {±P₀} for Y(P₀) = 0".into()
+        } else {
+            "FGHR's Y-line: Y(P) ∈ F_p, columns {±P, ±(P + T)}".into()
+        }
+    }
+    fn parameters(&self) -> &[(&str, &str)] {
+        &[(
+            "zero",
+            "1: also the point with Y = 0 (order 4, P₀ + T = −P₀), its own column; default 0, the base without it",
+        )]
     }
     fn build(
         &self,
         _ctx: &InstanceCtx<Curve4>,
-        _params: &Params,
+        params: &Params,
         ops: &mut GroupOps,
     ) -> Result<FactorBase<Pt4>, String> {
+        let zero = match params.u64_or("zero", 0)? {
+            0 => false,
+            1 => true,
+            v => return Err(format!("fghr-y-line: zero is 0 or 1, not {v}")),
+        };
         let d = self.curve;
         let inst = &d.inst;
         let c = &inst.curve;
@@ -746,11 +761,39 @@ impl FactorBaseBuilder<Curve4> for YLineBase<'_> {
             }
             columns += 1;
         }
+        // Y = 0: P₀ + T = −P₀ (Y(P + T) = −Y(P)), so 2P₀ = T, P₀ has order
+        // 4, 4 | h and [h]P₀ = O.  Its column's logarithm is 0; a relation
+        // through it is exact with the summand in the row or out of it.
+        if zero {
+            let x = inst.x_of_y(&c.f.from_fp(0));
+            lifts += 1;
+            if let Some(pt) = c.lift_x(&x, &mut rng) {
+                let pt = if c.key(&pt) & 1 == 1 {
+                    pt
+                } else {
+                    Curve4::neg(c, &pt)
+                };
+                let pt_t = CountedGroup::add(c, ops, pt, t);
+                if pt_t != Curve4::neg(c, &pt) {
+                    return Err("the point with Y = 0 is not of order 4".into());
+                }
+                for (q, coef) in [(pt, 1), (Curve4::neg(c, &pt), d.r - 1)] {
+                    points.push(q);
+                    col_of.push(columns);
+                    coef_of.push(coef);
+                }
+                columns += 1;
+            }
+        }
         if columns == 0 {
             return Err("no Y in F_p carries a point".into());
         }
         let mut fb = FactorBase::from_column_map(
-            format!("FGHR Y-line over F_{p}^4, {columns} columns {{±P, ±(P + T)}}"),
+            if zero {
+                format!("FGHR Y-line over F_{p}^4 with Y = 0, {columns} columns {{±P, ±(P + T)}}")
+            } else {
+                format!("FGHR Y-line over F_{p}^4, {columns} columns {{±P, ±(P + T)}}")
+            },
             points,
             col_of,
             coef_of,
@@ -950,6 +993,43 @@ mod tests {
             id.icv1,
             "ICV1:fpk-29-4-9dbb234a:-926:708208:5,20,2,25:unk:unk:r:7bc5b3595444"
         );
+    }
+
+    #[test]
+    fn the_y_zero_column_is_order_four_and_optional() {
+        let d = find_d4_curve(29, 1, 16).unwrap();
+        let c = &d.inst.curve;
+        let ctx = InstanceCtx {
+            group: c,
+            generator: d.generator,
+            target: d.generator,
+            r: d.r,
+            cofactor: d.cofactor,
+            group_order: d.group_order,
+            name: "test".into(),
+            field_degree: None,
+        };
+        let base = YLineBase { curve: &d };
+        let build = |spec: &str| {
+            let (_, params) = Params::parse_spec(spec).unwrap();
+            base.build(&ctx, &params, &mut GroupOps::default()).unwrap()
+        };
+        let plain = build("fghr-y-line");
+        let zero = build("fghr-y-line:zero=1");
+        // The spec the committed session used keeps its base.
+        assert_eq!(plain.points, build("fghr-y-line:zero=0").points);
+        assert_eq!(zero.columns, plain.columns + 1);
+        assert_eq!(&zero.points[..plain.points.len()], &plain.points[..]);
+        let p0 = zero.points[plain.points.len()];
+        assert!(inst_y_is_zero(&d, &p0));
+        let mut ops = GroupOps::default();
+        let four = CountedGroup::mul(c, &mut ops, p0, 4);
+        assert!(four.inf && !CountedGroup::mul(c, &mut ops, p0, 2).inf);
+        assert!(CountedGroup::mul(c, &mut ops, p0, d.cofactor).inf);
+    }
+
+    fn inst_y_is_zero(d: &D4Curve, q: &Pt4) -> bool {
+        d.inst.y_of_x(&q.x).is_zero()
     }
 
     #[test]

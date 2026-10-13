@@ -56,3 +56,31 @@ priced, and the model's inputs checked against an end-to-end count, not a
 speed-up.  Class: **engineering**.  A miss on E3 by more than 10× either
 way means §11.16's projection of this method needs correcting before it
 is quoted.
+
+## Amendment 1 (registered 2026-10-13, after the first session, before the second)
+
+The first session (`sessions/k4-p29/`) lost 3 of its 11 decompositions
+(`lift_failures`) to a summand outside the base.  `fghr-y-line` left out
+`Y = 0`; that point `P₀` has `P₀ + T = −P₀`, so it has order 4, `4 | h`, and
+`[h]P₀ = O`: a column whose logarithm is 0, exact in every row.
+`fghr-y-line:zero=1` adds it (the plain spec string builds the base the
+first session used, unchanged; a unit test pins this).
+
+Measured before this run, by exact enumeration
+(`examples/gaudry_quartic_d4.rs --find 16 --hit-rate`, six target streams
+on this curve, `raw/hit_rate_zero.jsonl`): of 24,000 uniform targets, 136
+decompose over the base with `Y = 0` and 96 without it — 1.42×, or 29 % ±
+8 % of hits needing the point.
+
+**Second session** (`specs/SPEC-k4-p29-zero.json`): the same workload,
+target and seeds; arms `rho.negation` and `ic.pipeline` with
+`fghr-y-line:zero=1`.
+
+**Predictions.**  Z1: every run verifies, audit identical, and
+`lift_failures = 0`.  Z2: the IC arm needs fewer trials than the first
+session's 633; expected about `633 / 1.42 ≈ 450`, with one target's
+spread (eight relations, about ±35 %) putting 290–610 in range, and one
+extra column possibly costing one more relation.  Z3: `S_IC` falls in
+proportion to the trials, about `5·10⁸`.  One target cannot separate a
+1.4× gain from noise; the rate measurement above is the precise figure,
+this run the check that the pipeline uses the point.

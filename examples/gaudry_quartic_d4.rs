@@ -183,6 +183,10 @@ fn main() {
         let xbase = factor_base(&inst.curve, &mut rng);
         let mut trng = StdRng::seed_from_u64(seed ^ 0x417);
         let (mut hy, mut hx, mut dy, mut dx) = (0usize, 0usize, 0usize, 0usize);
+        // Targets whose only decompositions use the Y = 0 point: what a base
+        // without it loses.
+        let (mut hy_nz, mut dy_z) = (0usize, 0usize);
+        let zero_lifts = base.iter().any(|(y, _)| *y == 0);
         for _ in 0..hit_rate {
             let r = loop {
                 let x = inst.curve.f.random(&mut trng);
@@ -190,7 +194,10 @@ fn main() {
                     break pt;
                 }
             };
-            let ny = mitm_y_decompositions(&inst.curve, &base, &r).len();
+            let ys = mitm_y_decompositions(&inst.curve, &base, &r);
+            let ny = ys.len();
+            hy_nz += usize::from(ys.iter().any(|q| !q.contains(&0)));
+            dy_z += ys.iter().filter(|q| q.contains(&0)).count();
             let nx = mitm_decompositions(&inst.curve, &xbase, &r).len();
             hy += usize::from(ny > 0);
             hx += usize::from(nx > 0);
@@ -202,6 +209,8 @@ fn main() {
             "y_base_values": base.len(), "x_base_values": xbase.len(),
             "y_hit_targets": hy, "x_hit_targets": hx,
             "y_decompositions": dy, "x_decompositions": dx,
+            "y_zero_lifts": zero_lifts, "y_hit_targets_without_zero": hy_nz,
+            "y_decompositions_through_zero": dy_z,
         });
         println!("{line}");
         if let Some(path) = &out {
