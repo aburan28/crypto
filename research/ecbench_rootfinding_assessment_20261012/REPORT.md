@@ -1,6 +1,6 @@
 # Root-finding point decomposition: source assessment and ecbench measurement
 
-Status: local measurement complete and replayed; independent-host validation remains open. Source assessment is bounded to the supplied 13-page PDF and the matching paper branch; this report is not a research-state decision.
+Status: local measurement complete and replayed; independent-host validation remains open under the [complete-cost calibration problem](../../problems/rootfinding-complete-cost-calibration.md). Source assessment is bounded to the supplied 13-page PDF and the matching paper branch; this report is not a research-state decision.
 
 ## Source binding
 
