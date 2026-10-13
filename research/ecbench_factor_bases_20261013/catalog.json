@@ -1,0 +1,182 @@
+{
+  "schema": "ecbench.factor_base_catalog/v1",
+  "date": "2026-10-13",
+  "protocol": "docs/ecbench/FACTOR_BASE_PROTOCOL.md",
+  "commit": "0f0db951ad",
+  "entries": [
+    {
+      "id": "k17-orbit",
+      "curve": {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 17
+      },
+      "plug_in": "koblitz-orbit:divisor=0;1",
+      "oracle": "mitm-frobenius:m=2",
+      "fb_id": "FB1hdd4118e0e739",
+      "slug": "icv1-f2m17-tm101-00378d4e",
+      "store": "store:factor-bases/icv1-f2m17-tm101-00378d4e/FB1hdd4118e0e739.json",
+      "git": "dumps/FB1hdd4118e0e739.json",
+      "columns": 14,
+      "points": 443,
+      "bytes": 41914
+    },
+    {
+      "id": "k17-subspace",
+      "curve": {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 17
+      },
+      "plug_in": "binary-subspace:dimension=4",
+      "oracle": "mitm:m=2",
+      "fb_id": "FB1h70021407fcc7",
+      "slug": "icv1-f2m17-tm101-00378d4e",
+      "store": "store:factor-bases/icv1-f2m17-tm101-00378d4e/FB1h70021407fcc7.json",
+      "git": "dumps/FB1h70021407fcc7.json",
+      "columns": 5,
+      "points": 10,
+      "bytes": 1985,
+      "oracle_note": "mitm-frobenius requires a Frobenius-folded base; plain mitm for subspace/standard"
+    },
+    {
+      "id": "k17-compact",
+      "curve": {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 17
+      },
+      "plug_in": "compact-orbit-scan:columns=8,raw_x_cap=5000",
+      "oracle": "mitm-frobenius:m=2",
+      "fb_id": "FB1h585d0da5e4b8",
+      "slug": "icv1-f2m17-tm101-00378d4e",
+      "store": "store:factor-bases/icv1-f2m17-tm101-00378d4e/FB1h585d0da5e4b8.json",
+      "git": "dumps/FB1h585d0da5e4b8.json",
+      "columns": 8,
+      "points": 272,
+      "bytes": 26124
+    },
+    {
+      "id": "k17-std",
+      "curve": {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 17
+      },
+      "plug_in": "koblitz-standard-subspace:dimension=4",
+      "oracle": "mitm:m=2",
+      "fb_id": "FB1h554bcb8d6c56",
+      "slug": "icv1-f2m17-tm101-00378d4e",
+      "store": "store:factor-bases/icv1-f2m17-tm101-00378d4e/FB1h554bcb8d6c56.json",
+      "git": "dumps/FB1h554bcb8d6c56.json",
+      "columns": 6,
+      "points": 11,
+      "bytes": 2094,
+      "oracle_note": "mitm-frobenius requires a Frobenius-folded base; plain mitm for subspace/standard"
+    },
+    {
+      "id": "k23-orbit",
+      "curve": {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 23
+      },
+      "plug_in": "koblitz-orbit:divisor=0;1",
+      "oracle": "mitm-frobenius:m=2",
+      "fb_id": "FB1h852163645cdd",
+      "slug": "icv1-f2m23-t5197-69e76b73",
+      "store": "store:factor-bases/icv1-f2m23-t5197-69e76b73/FB1h852163645cdd.json",
+      "git": null,
+      "columns": 94,
+      "points": 4235,
+      "bytes": 411349,
+      "git_note": "411 KiB > 256 KiB threshold; store only"
+    },
+    {
+      "id": "k23-compact",
+      "curve": {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 23
+      },
+      "plug_in": "compact-orbit-scan:columns=10,raw_x_cap=10000",
+      "oracle": "mitm-frobenius:m=2",
+      "fb_id": "FB1hd02c2c67699c",
+      "slug": "icv1-f2m23-t5197-69e76b73",
+      "store": "store:factor-bases/icv1-f2m23-t5197-69e76b73/FB1hd02c2c67699c.json",
+      "git": "dumps/FB1hd02c2c67699c.json",
+      "columns": 10,
+      "points": 460,
+      "bytes": 45321
+    },
+    {
+      "id": "k23-cyc-w1",
+      "curve": {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 23
+      },
+      "plug_in": "cyclotomic:w=1",
+      "oracle": "mitm-frobenius:m=2",
+      "fb_id": "FB1h089756e11c3b",
+      "slug": "icv1-f2m23-tm5197-1f85e9e1",
+      "store": "store:factor-bases/icv1-f2m23-tm5197-1f85e9e1/FB1h089756e11c3b.json",
+      "git": "dumps/FB1h089756e11c3b.json",
+      "columns": 1,
+      "points": 46,
+      "bytes": 5587
+    },
+    {
+      "id": "k11-cyc-w1",
+      "curve": {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 11
+      },
+      "plug_in": "cyclotomic:w=1",
+      "oracle": "mitm-frobenius:m=2",
+      "fb_id": "FB1h5862f57f8b31",
+      "slug": "icv1-f2m11-t67-05f5aa36",
+      "store": "store:factor-bases/icv1-f2m11-t67-05f5aa36/FB1h5862f57f8b31.json",
+      "git": "dumps/FB1h5862f57f8b31.json",
+      "columns": 1,
+      "points": 22,
+      "bytes": 3051
+    },
+    {
+      "id": "p20-abscissa",
+      "curve": {
+        "kind": "prime_search",
+        "bits": 20,
+        "seed": 59297
+      },
+      "plug_in": "prime-abscissa:size=32",
+      "oracle": "mitm:negation_folded=1",
+      "fb_id": "FB1h4b3725c0aa92",
+      "slug": "icv1-fp20-t727-cd198a38",
+      "store": "store:factor-bases/icv1-fp20-t727-cd198a38/FB1h4b3725c0aa92.json",
+      "git": "dumps/FB1h4b3725c0aa92.json",
+      "columns": 32,
+      "points": 64,
+      "bytes": 6804
+    },
+    {
+      "id": "p20-glv",
+      "curve": {
+        "kind": "prime_search",
+        "bits": 20,
+        "seed": 59297
+      },
+      "plug_in": "glv-orbit:size=16",
+      "oracle": "mitm:negation_folded=1",
+      "fb_id": "FB1h81b0d90efecd",
+      "slug": "icv1-fp20-t727-cd198a38",
+      "store": "store:factor-bases/icv1-fp20-t727-cd198a38/FB1h81b0d90efecd.json",
+      "git": "dumps/FB1h81b0d90efecd.json",
+      "columns": 16,
+      "points": 32,
+      "bytes": 3992
+    }
+  ],
+  "note": "fb_id check 48/48; store verify --remote 10/10"
+}

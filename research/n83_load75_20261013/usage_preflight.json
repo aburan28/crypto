@@ -1,0 +1,1 @@
+{"command": ["python3", "-c", "a=bytearray(12*1024*1024); print(len(a))"], "exit_status": 0, "involuntary_context_switches": 71, "limit_seconds": 5, "major_faults": 0, "peak_rss": 29704192, "peak_rss_unit": "bytes", "schema": "n83.child-usage/v1", "system_cpu_seconds": 0.009308, "timed_out": false, "user_cpu_seconds": 0.016925, "wall_seconds": 0.045562250015791506}
