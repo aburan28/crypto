@@ -85,3 +85,50 @@ existence bound), `n ≠ 3`, characteristic 2 and 3.
 ## Language
 
 Rust (`cover_census.rs`, dependency-free, `rustc -O`). Python only plots.
+
+## Amendment 2026-10-13 (post-run; adds references and status, changes no frozen input)
+
+**Preregistration status.** The text above was written before the first run
+but is a version-controlled file, not an externally timestamped
+registration: the first run (`20261013T0305Z`) recorded the Rust source hash
+but not this file's hash, and the protocol and the run land in the same pull
+request. It is therefore *protocol-versioned at commit*, not independently
+preregistered. Run `20261013T0403Z` records the sha256 of this file in its
+`env.txt`; that hash covers this amendment too, and the amendment adds no
+prediction, frozen input or measure.
+
+**References for the exponents quoted under Question** (published
+asymptotics, none measured here):
+
+- Rho on `E(K)`, `#E(K) ≈ q³`, cost `Θ(√#E(K)) = q^{3/2}`: J. M. Pollard,
+  "Monte Carlo methods for index computation (mod p)", Math. Comp. 32
+  (1978) 918–924, [doi:10.2307/2006496](https://doi.org/10.2307/2006496).
+- Genus-`g` Jacobians over `F_q`, `Õ(q^{2−2/g})` (so `q^{4/3}` at `g = 3`,
+  `q^{3/2}` at `g = 4`): C. Diem, "On the discrete logarithm problem in
+  class groups of curves", Math. Comp. 80 (2011) 443–475,
+  [doi:10.1090/S0025-5718-2010-02281-1](https://doi.org/10.1090/S0025-5718-2010-02281-1)
+  (main theorem, every fixed `g ≥ 2`); for hyperelliptic curves earlier,
+  with the double-large-prime variation: P. Gaudry, E. Thomé,
+  N. Thériault, C. Diem, Math. Comp. 76 (2007) 475–492,
+  [doi:10.1090/S0025-5718-06-01900-4](https://doi.org/10.1090/S0025-5718-06-01900-4).
+- Plane quartics (non-hyperelliptic genus 3), `Õ(q)`: this is a
+  *heuristic* running time, not a theorem. C. Diem and E. Thomé, "Index
+  calculus in class groups of non-hyperelliptic curves of genus three",
+  J. Cryptology 21 (2008) 593–611,
+  [doi:10.1007/s00145-007-9014-6](https://doi.org/10.1007/s00145-007-9014-6);
+  general degree `d`, `Õ(q^{2−2/(d−2)})`, `d = 4` giving `q`, heuristic:
+  C. Diem, "Index calculus in class groups of plane curves of small
+  degree", [IACR ePrint 2005/119](https://eprint.iacr.org/2005/119)
+  (a proven variant for plane models with a totally split line is in
+  Diem's Leipzig preprint "On the discrete logarithm problem for plane
+  curves").
+- The covering construction counted here: P. Gaudry, F. Hess, N. P. Smart,
+  "Constructive and destructive facets of Weil descent on elliptic
+  curves", J. Cryptology 15 (2002) 19–46; odd characteristic: C. Diem,
+  "The GHS attack in odd characteristic", J. Ramanujan Math. Soc. 18
+  (2003) 1–32. (The genus formula and branch-set counting above are this
+  protocol's own Riemann–Hurwitz derivation, not quoted from these.)
+
+Titles, venues and exponents were checked on 2026-10-13 against publisher
+and ePrint records; page ranges for Pollard, Gaudry–Hess–Smart and the
+Diem odd-characteristic paper are from memory and not re-checked.

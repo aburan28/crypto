@@ -124,6 +124,13 @@ fn maxprime(mut n: u64) -> u64 { let mut best = 1; let mut p = 2; while p * p <=
 fn types_json(r: &Res) -> String { let mut v: Vec<_> = r.types.iter().collect(); v.sort();
     format!("[{}]", v.iter().map(|((m, rr, h), c)| format!("{{\"m\":{},\"r\":{},\"hyperelliptic\":{},\"structures\":{}}}", m, rr, match h { 1 => "true", 0 => "false", _ => "null" }, c)).collect::<Vec<_>>().join(",")) }
 fn hist_json(h: &HashMap<u32, u64>) -> String { let mut v: Vec<_> = h.iter().collect(); v.sort(); format!("{{{}}}", v.iter().map(|(g, c)| format!("\"{}\":{}", g, c)).collect::<Vec<_>>().join(",")) }
+// mod-4 group of #E(K): 0 = odd, 1 = 2 mod 4, 2 = 0 mod 4; aggregates are computed here, not in the plotting script
+fn m4(n: u64) -> u8 { if n % 2 == 1 { 0 } else if n % 4 == 2 { 1 } else { 2 } }
+fn m4_emit(q: u32, h4: &HashMap<(&str, u8), HashMap<u32, u64>>) {
+    let names = ["odd", "2mod4", "0mod4"]; let mut keys: Vec<_> = h4.keys().cloned().collect(); keys.sort();
+    for (scope, g) in keys { let hh = &h4[&(scope, g)]; let n: u64 = hh.values().sum(); let g3 = *hh.get(&3).unwrap_or(&0);
+        println!("{{\"rec\":\"mod4\",\"q\":{},\"scope\":\"{}\",\"order_mod4\":\"{}\",\"curves\":{},\"genus3\":{},\"genus3_fraction\":{:.6},\"curves_by_min_genus\":{}}}", q, scope, names[g as usize], n, g3, g3 as f64 / n as f64, hist_json(hh)); }
+}
 fn par_census(f: &Fld, curves: &[(u32, u32)], cos: &[Mat], threads: usize) -> Vec<Res> {
     let mut out: Vec<Res> = vec![Res::default(); curves.len()];
     std::thread::scope(|sc| { let hs: Vec<_> = (0..threads).map(|t| sc.spawn(move || { let mut v = vec![]; for i in (t..curves.len()).step_by(threads) { v.push((i, census(f, curves[i].0, curves[i].1, cos))); } v })).collect();
@@ -147,20 +154,22 @@ fn main() {
             let id = reps.len() as u32; reps.push((a, b)); for u in 1..f.size { let (a2, b2) = (f.mul(a, f.pow(u, 4)), f.mul(b, f.pow(u, 6))); class[a2 as usize * sz + b2 as usize] = id; } } }
         let res = par_census(&f, &reps, &cos, threads); let ords: Vec<u64> = reps.iter().map(|&(a, b)| order(&f, a, b)).collect();
         let mut cmin: HashMap<u64, u32> = HashMap::new(); for i in 0..reps.len() { let e = cmin.entry(ords[i]).or_insert(99); *e = (*e).min(res[i].min_g); }
-        let mut h: HashMap<(&str, u64), HashMap<u32, u64>> = HashMap::new();
+        let mut h: HashMap<(&str, u64), HashMap<u32, u64>> = HashMap::new(); let mut h4: HashMap<(&str, u8), HashMap<u32, u64>> = HashMap::new();
         for i in 0..reps.len() { let (a, b) = reps[i]; let mut g2 = res[i].min_g; for (a2, b2) in neighbours(&f, a, b) { g2 = g2.min(res[class[a2 as usize * sz + b2 as usize] as usize].min_g); }
             let gc = cmin[&ords[i]]; emit(a, b, ords[i], &res[i], g2, Some(gc), "class");
-            for (k, g) in [("self", res[i].min_g), ("2isog", g2), ("class", gc)] { *h.entry((k, ords[i] % 2)).or_default().entry(g).or_insert(0) += 1; } }
+            for (k, g) in [("self", res[i].min_g), ("2isog", g2), ("class", gc)] { *h.entry((k, ords[i] % 2)).or_default().entry(g).or_insert(0) += 1; *h4.entry((k, m4(ords[i]))).or_default().entry(g).or_insert(0) += 1; } }
         for ((k, par), hh) in { let mut v: Vec<_> = h.into_iter().collect(); v.sort_by_key(|x| x.0); v } { println!("{{\"rec\":\"summary\",\"q\":{},\"scope\":\"{}\",\"order_parity\":\"{}\",\"curves_by_min_genus\":{}}}", q, k, if par == 0 { "even" } else { "odd" }, hist_json(&hh)); }
+        m4_emit(q, &h4);
         println!("{{\"rec\":\"totals\",\"q\":{},\"classes\":{},\"isogeny_classes\":{},\"mismatches\":{}}}", q, reps.len(), cmin.len(), res.iter().map(|r| r.mismatch).sum::<u64>());
     } else {
         let mut r = Rng::new(q as u64); let mut picks = vec![]; while picks.len() < sample { let (a, b) = (r.below(f.size), r.below(f.size)); if nonsingular(&f, a, b) { picks.push((a, b)); } }
         let mut all = picks.clone(); let nb: Vec<Vec<(u32, u32)>> = picks.iter().map(|&(a, b)| neighbours(&f, a, b)).collect(); for v in &nb { all.extend(v.iter().cloned()); }
-        let res = par_census(&f, &all, &cos, threads); let mut k = picks.len(); let mut h: HashMap<(&str, u64), HashMap<u32, u64>> = HashMap::new(); let mut mm = 0;
+        let res = par_census(&f, &all, &cos, threads); let mut k = picks.len(); let mut h: HashMap<(&str, u64), HashMap<u32, u64>> = HashMap::new(); let mut h4: HashMap<(&str, u8), HashMap<u32, u64>> = HashMap::new(); let mut mm = 0;
         for i in 0..picks.len() { let (a, b) = picks[i]; let n = order(&f, a, b); let mut g2 = res[i].min_g; for _ in &nb[i] { g2 = g2.min(res[k].min_g); mm += res[k].mismatch; k += 1; } mm += res[i].mismatch;
             emit(a, b, n, &res[i], g2, None, "sample");
-            for (key, g) in [("self", res[i].min_g), ("2isog", g2)] { *h.entry((key, n % 2)).or_default().entry(g).or_insert(0) += 1; } }
+            for (key, g) in [("self", res[i].min_g), ("2isog", g2)] { *h.entry((key, n % 2)).or_default().entry(g).or_insert(0) += 1; *h4.entry((key, m4(n))).or_default().entry(g).or_insert(0) += 1; } }
         for ((k, par), hh) in { let mut v: Vec<_> = h.into_iter().collect(); v.sort_by_key(|x| x.0); v } { println!("{{\"rec\":\"summary\",\"q\":{},\"scope\":\"{}\",\"order_parity\":\"{}\",\"curves_by_min_genus\":{}}}", q, k, if par == 0 { "even" } else { "odd" }, hist_json(&hh)); }
-        println!("{{\"rec\":\"totals\",\"q\":{},\"sampled\":{},\"mismatches\":{}}}", q, picks.len(), mm);
+        m4_emit(q, &h4); let nbm = all.len() - picks.len();
+        println!("{{\"rec\":\"totals\",\"q\":{},\"sampled\":{},\"neighbor_models\":{},\"models_total\":{},\"structures_per_model\":{},\"mismatches\":{}}}", q, picks.len(), nbm, all.len(), cos.len(), mm);
     }
 }

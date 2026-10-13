@@ -3,11 +3,20 @@
 2026-10-12. Conductor T-2261. **Structural stage diagnostic on toy fields.**
 It counts covers by Riemann–Hurwitz genus. No curve over `F_q` is
 constructed, no transfer map is evaluated, no discrete logarithm is solved,
-and no speedup is claimed. Protocol frozen before the first run:
-[PROTOCOL.md](PROTOCOL.md). Run `20261013T0305Z`:
-[records](results/run-20261013T0305Z.jsonl),
+and no speedup is claimed. Protocol written before the first run:
+[PROTOCOL.md](PROTOCOL.md) (protocol-versioned at commit, not independently
+preregistered; the 2026-10-13 amendment adds references and this status).
+Current run `20261013T0403Z`:
+[records](results/run-20261013T0403Z.jsonl),
+[environment](results/run-20261013T0403Z.env.txt) (carries the sha256 of the
+source and of PROTOCOL.md),
+[run report](reports/run-20261013T0403Z/run-report.pdf). It re-ran the same
+deterministic tool after the tool gained aggregate `mod4` records and a
+neighbor-model count; the per-curve records are identical to the earlier run
+`20261013T0305Z` ([records](results/run-20261013T0305Z.jsonl),
 [environment](results/run-20261013T0305Z.env.txt),
-[run report](reports/run-20261013T0305Z/run-report.pdf). This report as
+[run report](reports/run-20261013T0305Z/run-report.pdf)), which is kept
+unchanged as superseded evidence. This report as
 PDF: [REPORT.pdf](REPORT.pdf). Follows
 `research/weak_subfield_hyperelliptic_decomposition_20261012/` (PR #1757),
 which showed that same-field higher-genus representations do not help.
@@ -30,19 +39,36 @@ With one exception the minimal genus over the isogeny class follows
 | 2 mod 4 | 5 (one exception: 9) | measured: 5 on 234 of 236 curves at q = 5, 7, 9 on the other two (one class at q = 5); never 3 |
 | 0 mod 4 | 3 | measured, 390 of 390 curves at q = 5, 7 |
 
-Genus 3 is the only value below the rho exponent (PROTOCOL.md), so on
-these fields a cover that could matter exists exactly for the classes
-with `4 | #E(K)`, and a curve of prime order, or of order twice an odd
-number, has none. The "2 mod 4" and "0 mod 4" rows are observations on
-`q ∈ {5, 7}` (and a sample at `q = 11`), not theorems.
+Genus 3 is the only value below the rho exponent, `q^{3/2}` (Pollard 1978),
+because index calculus on a genus-`g` Jacobian costs `Õ(q^{2−2/g})`
+(Diem, Math. Comp. 80 (2011), a theorem for each fixed `g ≥ 2`), which is
+`q^{4/3}` at `g = 3` and `q^{3/2}` at `g = 4`. The special `~q` figure for
+non-hyperelliptic genus 3 (plane quartics) is a heuristic of Diem–Thomé,
+J. Cryptology 21 (2008), not a theorem. Full references with DOIs:
+PROTOCOL.md, 2026-10-13 amendment.
 
-![Genus-3 fraction](reports/run-20261013T0305Z/genus3_fraction.svg)
+So on the exhaustively censused fields `q = 5, 7` a genus-3 cover exists
+over the isogeny class exactly for the classes with `4 | #E(K)` (390 of
+390 such curves have one; none of the 316 odd-order and 236 order-2-mod-4 curves does), and a curve of prime order, or of order twice an odd
+number, has none. At `q = 11` only a sample of 120 curves was run and class
+minima were not computed: all 37 odd and 34 "2 mod 4" sampled curves
+stay at genus at least 5, but of 49 sampled curves with `4 | #E(K)`, 48
+reach genus 3 within one 2-isogeny and **one does not** (its minimum within
+one step is 5; whether a longer isogeny path reaches 3 was not computed).
+The "exactly" is therefore a statement about `q = 5, 7`; at `q = 11` it is
+a sample with one exception. None of the rows is a theorem except the odd
+row.
+
+![Genus-3 fraction](reports/run-20261013T0403Z/genus3_fraction.svg)
 
 ## Measurements (run 20261013T0305Z, exact counts)
 
 Tool: [cover_census.rs](cover_census.rs). For each curve it runs through
 every cocycle `A` (the tool found exactly `(Q³−Q)/(q³−q)` of them in each
-field: 16275, 120099, 1786323). The genus formula agreed with the sum of
+field: 16275, 120099, 1786323). The q = 11 arm computed 120 primary models plus 127 neighbor
+models (the `K`-rational 2-isogenous neighbours of the sampled curves,
+`totals` record: `neighbor_models` = 127, `models_total` = 247), each over
+all 1786323 structures. The genus formula agreed with the sum of
 the genera of the quadratic subcovers on every structure where it was
 checked (genus at most 5, or at the running minimum): 0 mismatches.
 
@@ -113,7 +139,8 @@ No identity certificate: the report claims no polynomial identity.
 - **Prime-order curves over a cubic extension have no small cover of this
   kind**, and no isogeny changes that. The route needs cofactor at least 4.
 - **For `4 | #E(K)` a genus-3 cover is one 2-isogeny away** on 438 of 439
-  curves examined (104 + 286 + 48); the remaining `q = 11` curve was not
+  curves examined (104 at q = 5 and 286 at q = 7, exhaustive; 48 of the 49
+sampled at q = 11); the remaining `q = 11` curve was not
   followed further.
 - **Not established:** that the genus-3 curve has a model over `F_q` with
   the map `E(K) → Jac(C)(F_q)` injective on the odd part (standard for
@@ -141,7 +168,7 @@ entry).
 ## Reproduce
 
 ```sh
-rustc -O cover_census.rs && ./cover_census 5 && ./cover_census 7 && ./cover_census 11 120
-python3 reports/plot.py results/run-20261013T0305Z.jsonl reports/run-20261013T0305Z   # layout only
+rustc --edition 2021 -O cover_census.rs && ./cover_census 5 && ./cover_census 7 && ./cover_census 11 120
+python3 reports/plot.py results/run-20261013T0403Z.jsonl reports/run-20261013T0403Z   # renders recorded `mod4` values only
 cd lean && lake build
 ```
