@@ -1,0 +1,37 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "rootfind improve: selected |F|/m/window vs inherited-F4 and strong rho on public E_0 n=13",
+  "description": "Head-to-head after the dimension/window select smoke. Candidate arms are the selected rootfind configurations (filled by the improve loop into this committed spec once cycle-1 chooses them). Inherited-F4 m=3 on d=5 is the favorable-but-honest Groebner wall baseline (complete rootfind S must not be divided by F4's lower-bound S). Strong signed-Frobenius rho is the reference. Public synthetic targets; classification engineering; no security claim; multi-target amortization is secondary analysis only.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 13}],
+    "targets_per_curve": 8,
+    "target_seed": 202610131101,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "rho-frob", "role": "baseline", "method": {"id": "rho.signed_frobenius"}},
+    {"name": "ic-f4-m3-d5", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192",
+      "max_trials": "200000"}}},
+    {"name": "ic-rootfind-m2-d5", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind",
+      "max_trials": "200000"}}},
+    {"name": "ic-rootfind-m2-selected", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=4",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind",
+      "max_trials": "200000"}}},
+    {"name": "ic-rootfind-window-m3-d5", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=3,engine=rootfind-window",
+      "max_trials": "200000"}}},
+    {"name": "ic-rootfind-m3-d5", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=3,engine=rootfind",
+      "max_trials": "200000"}}},
+    {"name": "rho-strong-aa", "role": "control", "method": {"id": "rho.signed_frobenius_strong"}}
+  ],
+  "measurement": {"rounds": 3, "warmup": 1, "order": "alternate", "seed": 202610131102, "isolation_required": "L2", "timeout_seconds": 1800}
+}
