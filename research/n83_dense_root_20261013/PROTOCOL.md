@@ -52,6 +52,14 @@ The paired rho control uses the previously selected
 worker is `examples/n83_rho_optimization_eval.rs`; configuration is pinned
 in `rho_config.json`. The 60-second cap preserves a censored result if it
 does not finish; it cannot be interpreted as a solved baseline.
+The worker source SHA-256 is
+`fb14072f4fa5d08e18d8b79130b6d58a220adae0f76369cc9be949691c83eaa0`,
+configuration SHA-256 is
+`cf76ebb5372acfc1355b88374f875980be66cdffba1a82cb6e4c2f28bcfa723b`,
+and release binary SHA-256 is
+`90557e0c14f9fb652bb4a90c8c0a5719eeeefae26bf0f236f34a18ffa42f516c`.
+`run_rho.sh` checks these frozen identities before starting the point-only
+worker; `rho_build.log` retains the build output.
 
 After the primary comparison, the 64-point panel compares target probes and
 phase times on the same public points. It is secondary, with reused prepared
