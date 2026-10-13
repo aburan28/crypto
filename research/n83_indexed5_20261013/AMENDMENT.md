@@ -17,6 +17,9 @@ addition to the synthetic collision and token-boundary tests.
 | Raw test log | `example_tests_v2.log`, SHA-256 `a8d645364c9f7081857dc1548062e4089b94c318fabc93f10269b190b51a9536` |
 | Source formatting | `rustfmt --check examples/koblitz_orbit_dlp_fast.rs` passed |
 
+After rebasing onto `fa1a6a6ee6` (which contains the merged 28-byte state
+implementation), the complete example suite passed: 15 tests, 0 failures.
+
 The first frozen full-pipeline K512 control used the earlier source and binary
 hashes in `PROTOCOL.md`. It reached its 900-second cap with exit 124, peak RSS
 844,267,520 bytes and no summary, base dump, or target row. The independent

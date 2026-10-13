@@ -39,7 +39,10 @@ resource stop or timeout remains a censored row.
 
 ## Frozen code and limits
 
-- Indexed-slot source commit: `3da76633c4661f9bc43fa23d662c7a8adb57e0a1`.
+- Indexed-slot source commit at the first run: `3da76633c4661f9bc43fa23d662c7a8adb57e0a1`.
+  After rebasing this study onto the merged mainline, its equivalent source
+  commit is `9c2fabbcddd2527dece881592e91894788853ea2`; the content SHA
+  below is the run binding.
 - Producer source SHA-256:
   `42f21942e5e85874dfe9017f720697ab07f4cb0546a5c7d27e448a5a61fc448b`.
 - Producer release binary SHA-256:
