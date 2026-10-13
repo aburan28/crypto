@@ -4,8 +4,8 @@ set -eu
 study_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 repo_dir=$(CDPATH= cd -- "$study_dir/../.." && pwd)
 producer=${1:?pass compiled release producer binary}
-phase=${2:?primary or panel}
-case "$phase" in primary|panel) ;; *) echo "invalid phase" >&2; exit 2;; esac
+phase=${2:?primary_v2 or panel}
+case "$phase" in primary_v2|panel) ;; *) echo "invalid phase" >&2; exit 2;; esac
 
 expected_source=d4bf0f34d9d57eb26ed795a610be4baa469b3835455d69ff902ef46a20036fdd
 expected_binary=fc4b62da8e5dc7980c3e2a27e774166d594b5661641833252e8ec8ae6894fa40
@@ -17,7 +17,7 @@ points_hash=$(shasum -a 256 "$study_dir/targets.jsonl" | awk '{print $1}')
 [ "$binary_hash" = "$expected_binary" ] || { echo "binary hash mismatch" >&2; exit 2; }
 [ "$points_hash" = "$expected_points" ] || { echo "points hash mismatch" >&2; exit 2; }
 
-if [ "$phase" = primary ]; then
+if [ "$phase" = primary_v2 ]; then
   input=$study_dir/primary_target.jsonl
   [ "$(shasum -a 256 "$input" | awk '{print $1}')" = "$(head -1 "$study_dir/targets.jsonl" | shasum -a 256 | awk '{print $1}')" ] || exit 2
   arms='k1798_dense:1798:1:0 k2000_load75:2000:0:1 k2202_load75:2202:0:1'
@@ -41,13 +41,13 @@ for entry in $arms; do
   date -u +%Y-%m-%dT%H:%M:%SZ > "$run_dir/started_utc.txt"
   set +e
   if [ "$phase" = panel ]; then
-    /usr/bin/time -l /opt/homebrew/bin/timeout 900 \
+    /usr/bin/time -p /opt/homebrew/bin/timeout 900 \
       env KIC_PACKED_ROOT_TABLE=1 KIC_PACKED_ROOT_TABLE_DENSE="$dense" KIC_PACKED_ROOT_TABLE_LOAD75="$load75" \
       KIC_RANK_THREADS=12 KIC_TARGET_THREADS=1 KIC_DUMP_BASE="$run_dir/base_dump.jsonl" \
       "$producer" "construct:83:1:$columns" "$input" 29 "$run_dir/targets_result.jsonl" \
       > "$run_dir/stdout.jsonl" 2> "$run_dir/stderr.log"
   else
-    /usr/bin/time -l /opt/homebrew/bin/timeout 900 \
+    /usr/bin/time -p /opt/homebrew/bin/timeout 900 \
       env KIC_PACKED_ROOT_TABLE=1 KIC_PACKED_ROOT_TABLE_DENSE="$dense" KIC_PACKED_ROOT_TABLE_LOAD75="$load75" \
       KIC_RANK_THREADS=12 KIC_TARGET_THREADS=1 \
       "$producer" "construct:83:1:$columns" "$input" 29 "$run_dir/targets_result.jsonl" \

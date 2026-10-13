@@ -1,5 +1,5 @@
 //! Independent generic-curve replay and accounting for 75% root-table runs.
-//! Usage: n83-load75-analyzer <study-dir> <primary|panel>
+//! Usage: n83-load75-analyzer <study-dir> <primary_v2|panel>
 
 use std::collections::HashSet;
 use std::fs;
@@ -375,9 +375,14 @@ fn rho_comparison(
 }
 
 fn prior_k1798_parity(study: &Path, class: &str) -> Result<Value, Box<dyn std::error::Error>> {
+    let old_class = if class == "primary_v2" {
+        "primary"
+    } else {
+        class
+    };
     let old_dir = study
         .join("../n83_dense_root_20261013/runs")
-        .join(class)
+        .join(old_class)
         .join("k1798_dense");
     let new_dir = study.join("runs").join(class).join("k1798_dense");
     let old_summary = read_jsonl(&old_dir.join("stdout.jsonl"))?;
@@ -420,12 +425,12 @@ fn prior_k1798_parity(study: &Path, class: &str) -> Result<Value, Box<dyn std::e
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() != 3 || !["primary", "panel"].contains(&args[2].as_str()) {
-        return Err("usage: n83-load75-analyzer <study-dir> <primary|panel>".into());
+    if args.len() != 3 || !["primary_v2", "panel"].contains(&args[2].as_str()) {
+        return Err("usage: n83-load75-analyzer <study-dir> <primary_v2|panel>".into());
     }
     let study = Path::new(&args[1]);
     let answers = read_jsonl(&study.join("answers.jsonl"))?;
-    let selected_answers = if args[2] == "primary" {
+    let selected_answers = if args[2] == "primary_v2" {
         &answers[..1]
     } else {
         &answers[..]
@@ -457,7 +462,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     } else {
         Vec::new()
     };
-    let rho = if args[2] == "primary" {
+    let rho = if args[2] == "primary_v2" {
         rho_comparison(study, &answers[0], &arms)?
     } else {
         Value::Null
