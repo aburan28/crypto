@@ -60,7 +60,8 @@ def merge(catalog, imported):
             models.setdefault(alias.lower(), set()).add(row['slug'])
     for row in catalog['curves']:
         row['aliases'] = sorted([a for a in row['aliases'] if len(models[a.lower()]) == 1], key=str.lower)
-    catalog['standards_source'] = 'docs/curves/standards/registry.json'
+    # The canonical registry builder owns envelope metadata.  Source and
+    # standards provenance are retained on each imported model above.
     return catalog
 
 
