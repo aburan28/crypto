@@ -100,7 +100,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "9e420a7f2e69a1d72a2590899e6bffb8b3d45eff0f197c5c898ee66c1219e872"
+   "sha256": "5c95bdce54ee3da67303044d70d7cae7a0972df3074e04c04d306f2ef9c52484"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -14638,6 +14638,34 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp40-t252-1353f62b",
+   "family": "prime",
+   "field": "GF(p), p = 1033961567797",
+   "coefficients": "a = 368584293439, b = 328570663304",
+   "order_bits": 40,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp40-t252-9ccd690e",
+   "family": "prime",
+   "field": "GF(p), p = 1033961567797",
+   "coefficients": "a = 175699121631, b = 0",
+   "order_bits": 40,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp41-tm9-003f1c29",
    "family": "prime",
    "field": "GF(p), p = 1227894548593",
@@ -14825,6 +14853,34 @@
    "field": "GF(p), p = 44457329933693",
    "coefficients": "a = 9628813676156, b = 21238319095335",
    "order_bits": 46,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp47-tm809-3c558326",
+   "family": "prime",
+   "field": "GF(p), p = 78575552703623",
+   "coefficients": "a = 22618963350742, b = 22354001984084",
+   "order_bits": 47,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp47-tm809-568d1619",
+   "family": "prime",
+   "field": "GF(p), p = 78575552703623",
+   "coefficients": "a = 5973580030097, b = 30174237587939",
+   "order_bits": 47,
    "standard": [],
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
