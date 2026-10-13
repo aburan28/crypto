@@ -1445,6 +1445,21 @@ mod wide {
             (key.wrapping_mul(0x9E37_79B9_7F4A_7C15_9E37_79B9_7F4A_7C15) >> self.shift) as usize
         }
 
+        fn layout_receipt(&self) -> (&'static str, usize, usize) {
+            match &self.slots {
+                RootSlots128::Wide(slots) => (
+                    "wide_u128_u64",
+                    std::mem::size_of::<(u128, u64)>(),
+                    slots.len() * std::mem::size_of::<(u128, u64)>(),
+                ),
+                RootSlots128::Packed(slots) => (
+                    "packed_u128",
+                    std::mem::size_of::<u128>(),
+                    slots.len() * std::mem::size_of::<u128>(),
+                ),
+            }
+        }
+
         fn insert_if_absent(&mut self, key: u128, value: u64) {
             let mask = match &self.slots {
                 RootSlots128::Wide(slots) => slots.len() - 1,
@@ -1570,6 +1585,15 @@ mod wide {
             assert_eq!(std::mem::size_of::<u128>(), 16);
             let mut wide = RootTable128::with_capacity(8192, 83, 900, false);
             let mut packed = RootTable128::with_capacity(8192, 83, 900, true);
+            assert_eq!(
+                wide.layout_receipt(),
+                (
+                    "wide_u128_u64",
+                    std::mem::size_of::<(u128, u64)>(),
+                    16384 * std::mem::size_of::<(u128, u64)>()
+                )
+            );
+            assert_eq!(packed.layout_receipt(), ("packed_u128", 16, 1 << 18));
             wide.bloom = None;
             packed.bloom = None;
             for i in 0..8192u64 {
@@ -2505,6 +2529,8 @@ mod wide {
         let mut sorted = target_query_ms.clone();
         sorted.sort_by(|x, y| x.partial_cmp(y).unwrap());
         let median = sorted.get(sorted.len() / 2).copied();
+        let (root_table_layout, root_table_slot_bytes, root_table_allocated_bytes) =
+            index.table.layout_receipt();
         let summary = json!({
             "kind":"compact_orbit_dlp_summary",
             "schema_version":"1.0",
@@ -2516,6 +2542,9 @@ mod wide {
             "factor_base_points":base.points.len(),
             "regular_states":index.states.len(),
             "root_table_entries":index.table.len,
+            "root_table_layout":root_table_layout,
+            "root_table_slot_bytes":root_table_slot_bytes,
+            "root_table_allocated_bytes":root_table_allocated_bytes,
             "root_bloom_enabled":index.table.bloom.is_some(),
             "root_bloom_bytes":index.table.bloom.as_ref().map_or(0, RootBloom::bytes),
             "sparse_canonical_enabled":basis.sparse_canonical,
