@@ -37,6 +37,10 @@ spec.json ──ecbench run──► session/                ──ecbench verif
 11. [Adding a method, a curve family or a factor base](#11-adding-a-method-a-curve-family-or-a-factor-base)
 12. [Limits](#12-limits)
 
+Factor bases (build with `ecbench fb`, publish to Git/`store:`, run
+`ic.pipeline` with a matching plug-in string):
+[FACTOR_BASE_PROTOCOL.md](FACTOR_BASE_PROTOCOL.md).
+
 ## 1. Quick start
 
 Rolling `main` release archives ship `ecbench` beside `ic` for Linux (glibc

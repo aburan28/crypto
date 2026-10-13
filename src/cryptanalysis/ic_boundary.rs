@@ -1444,6 +1444,119 @@ impl RhoClasses<PrimeCurve> for CubicClasses {
     }
 }
 
+/// `{±ι^i(P)}` on a `j = 1728` curve `y² = x³ + ax` over `F_p` with
+/// `p ≡ 1 (mod 4)` (`A = 4`): the orbit of the rational order-4
+/// automorphism `ι: (x, y) ↦ (−x, iy)` — `i` a square root of `−1` in
+/// `F_p` — which already contains negation (`ι² = −1`).  `ι` acts on
+/// the order-`r` subgroup as `[κ]` for a square root `κ` of `−1`
+/// mod `r` (it exists exactly when `r ≡ 1 (mod 4)`); `κ` is kept only
+/// when `[κ]G = ι(G)` holds, verified with two counted scalar
+/// multiplications on the caller's ledger.  The one `i`-rotation a
+/// canonicalisation performs is a counted field multiplication.
+pub struct QuarticClasses {
+    r: u64,
+    iota: u64,
+    kappa: u64,
+}
+
+impl QuarticClasses {
+    /// The test-visible primitive fourth root of `−1` in `F_p`.
+    pub fn iota_for_test(&self) -> u64 {
+        self.iota
+    }
+    /// The test-visible square root of `−1` mod `r`.
+    pub fn kappa_for_test(&self) -> u64 {
+        self.kappa
+    }
+    /// The four classes of a `j = 1728` prime instance, or `None` when
+    /// the curve, field or subgroup lacks the structure: `b ≠ 0`,
+    /// `p ≢ 1 (mod 4)`, `4 ∤ r − 1`, or `ι` fixes the subgroup.
+    pub fn new(
+        g: &PrimeCurve,
+        generator: PrimePoint,
+        r: u64,
+        ops: &mut GroupOps,
+    ) -> Option<Self> {
+        if g.b != 0 || g.a == 0 || g.p < 5 || g.p % 4 != 1 || r % 4 != 1 {
+            return None;
+        }
+        let p = g.p;
+        let iota = g.sqrt(submod(0, 1, p))?;
+        if iota <= 1 || mulmod(iota, iota, p) != submod(0, 1, p) {
+            return None;
+        }
+        // kappa: a square root of -1 mod r whose multiple of the generator
+        // is iota(generator). (-1/r) = 1 when r = 1 (mod 4).
+        let kappa = PrimeCurve { p: r, a: 0, b: 0 }.sqrt(submod(0, 1, r))?;
+        if kappa <= 1 || kappa >= r {
+            return None;
+        }
+        let iota_g = if generator.infinity {
+            generator
+        } else {
+            PrimePoint::affine(submod(0, generator.x, p), mulmod(iota, generator.y, p))
+        };
+        if !g.is_on_curve(iota_g) || iota_g == generator {
+            return None;
+        }
+        // The action is [kappa] or [-kappa]; exactly one of the two
+        // square roots of -1 mod r names it.
+        let scaled = g.mul(ops, generator, kappa);
+        if scaled == iota_g {
+            Some(Self { r, iota, kappa })
+        } else if g.neg(scaled) == iota_g {
+            Some(Self {
+                r,
+                iota,
+                kappa: submod(0, kappa, r),
+            })
+        } else {
+            None
+        }
+    }
+}
+
+impl RhoClasses<PrimeCurve> for QuarticClasses {
+    fn automorphisms(&self) -> u32 {
+        4
+    }
+    fn canon(&self, g: &PrimeCurve, ops: &mut GroupOps, p: PrimePoint) -> (PrimePoint, u64) {
+        if p.infinity {
+            return (p, 1);
+        }
+        let (a, b, c) = (g.p, self.iota, self.r);
+        // The four orbit points: P, iota(P) = (-x, iy), -P, -iota(P).
+        // The one rotation is counted field work.
+        let rot = PrimePoint::affine(submod(0, p.x, a), mulmod(b, p.y, a));
+        ops.field_ops.muls += 1;
+        let mut best = p;
+        let mut best_key = g.key(&p);
+        let mut best_mu = 1u64;
+        let neg = g.neg(p);
+        let neg_key = g.key(&neg);
+        if neg_key < best_key {
+            best = neg;
+            best_key = neg_key;
+            best_mu = submod(0, 1, c);
+        }
+        for (pt, mu) in [
+            (rot, self.kappa),
+            (g.neg(rot), submod(0, self.kappa, c)),
+        ] {
+            let k = g.key(&pt);
+            if k < best_key {
+                best = pt;
+                best_key = k;
+                best_mu = mu;
+            }
+        }
+        (best, best_mu)
+    }
+    fn method(&self) -> &'static str {
+        "quartic-automorphism r-adding walk on {±i^i(P)}: look-ahead, short-cycle escape by doubling, distinguished points, stride starts"
+    }
+}
+
 /// `{±φ^t(P)}` on a Koblitz curve (`A = 2n`): the conjugate whose
 /// abscissa has the least normal-basis rotation ([`FrobeniusCanon`]),
 /// with `x` and `y` carried there by table ([`FrobeniusPowers`]), then
@@ -7920,6 +8033,57 @@ mod tests {
             );
             assert_eq!(res.recovered, Some(k));
             assert_eq!(res.automorphisms, 6);
+        }
+    }
+
+    /// The four-class canonicalisation of a j = 1728 curve: the orbit of
+    /// iota collapses to one representative whose multiplier really maps
+    /// the point to it, and rho.quartic solves planted instances.
+    #[test]
+    fn quartic_classes_name_the_class_and_solve() {
+        // p = 10037 (10037 = 1 mod 4), y^2 = x^3 + 8x: order 9946 = 2 * 4973
+        // (4973 = 1 mod 4), a j = 1728 curve with the full four classes.
+        let curve = PrimeCurve { p: 10037, a: 8, b: 0 };
+        assert_eq!(curve.point_count(), 9946);
+        let r = 4973u64;
+        // a generator of the order-r subgroup: twice a full-order point
+        let full = PrimePoint::affine(1, 10034);
+        let mut ops = GroupOps::default();
+        let g = curve.double(&mut ops, full);
+        assert!(!g.infinity);
+        let classes = QuarticClasses::new(&curve, g, r, &mut ops)
+            .expect("the j = 1728 curve over p = 10037 has the four classes");
+        let mut rng = StdRng::seed_from_u64(23);
+        for _ in 0..64 {
+            let k = rng.gen_range(1..r);
+            let p = curve.mul(&mut ops, g, k);
+            let (rep, mu) = classes.canon(&curve, &mut ops, p);
+            assert_eq!(rep, curve.mul(&mut ops, g, mulmod(k, mu, r)), "k = {k}");
+            let iota_p = PrimePoint::affine(
+                submod(0, p.x, curve.p),
+                mulmod(classes.iota_for_test(), p.y, curve.p),
+            );
+            for q in [iota_p, curve.neg(iota_p)] {
+                let (rep2, _) = classes.canon(&curve, &mut ops, q);
+                assert_eq!(rep2, rep, "k = {k}");
+            }
+        }
+        let mut rng = StdRng::seed_from_u64(2026);
+        for _ in 0..8 {
+            let k = rng.gen_range(1..r);
+            let target = curve.mul(&mut ops, g, k);
+            let res = rho_walk_with(
+                &curve,
+                &classes,
+                g,
+                target,
+                r,
+                k,
+                1 << 24,
+                RhoWalk::negation(),
+            );
+            assert_eq!(res.recovered, Some(k));
+            assert_eq!(res.automorphisms, 4);
         }
     }
 

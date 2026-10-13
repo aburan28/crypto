@@ -160,6 +160,20 @@ reproduces the bytes with `crypto store pull sha256:<digest>`.
 * **No database.** An RDS-backed catalogue of artifacts (and of run yields)
   is the next step; the index here is its source of truth until then.
 
+## Factor bases
+
+Index-calculus factor-base dumps use the namespace above and the build /
+publish / run flow in
+[`docs/ecbench/FACTOR_BASE_PROTOCOL.md`](../ecbench/FACTOR_BASE_PROTOCOL.md).
+Short form:
+
+```bash
+ecbench fb --curve '…' --factor-base 'koblitz-orbit:divisor=0;1' --out fb.json
+ecbench store push fb.json --name factor-bases/<icv1-slug>/<FB1-id>.json \
+  --description '…' --provenance 'ecbench fb … (commit …)'
+# then run ic.pipeline with the same plug-in string; join on fb_id
+```
+
 ## Related
 
 * `src/cryptanalysis/isogeny_walk/store.rs`: the run-level publisher for walk
@@ -168,3 +182,4 @@ reproduces the bytes with `crypto store pull sha256:<digest>`.
 * `ecc2k130/aws/`: the ECC2K-130 campaign's own bucket and tooling.
 * `taskq/`: workers need the `aws` CLI (or a `file://` remote on a shared
   volume) to resolve `store:` references.
+* Factor-base protocol: [`docs/ecbench/FACTOR_BASE_PROTOCOL.md`](../ecbench/FACTOR_BASE_PROTOCOL.md).

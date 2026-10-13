@@ -1,0 +1,29 @@
+{
+  "allocation": null,
+  "budget": {
+    "maximum_minutes": 165,
+    "maximum_total_usd": 5
+  },
+  "credential_status": {
+    "aws_sts_identity_verified": true,
+    "runpod_api_key_available": false
+  },
+  "provider": "aws",
+  "request": {
+    "availability_zone": "us-east-1b",
+    "image_architecture": "arm64",
+    "instance_type": "g5g.metal",
+    "market": "spot",
+    "maximum_hourly_price_usd": "0.50",
+    "observed_spot_hourly_price_usd": "0.453000",
+    "requested_hard_stop_minutes_after_boot": 140,
+    "ssh_ingress": "owner_public_ipv4_32_only"
+  },
+  "status": "ALLOCATION_REJECTED_BEFORE_INSTANCE",
+  "provider_error_code": "Blocked",
+  "provider_error_summary": "Account currently blocked and not recognized as valid",
+  "dry_run": "DryRunOperation: request would have succeeded",
+  "temporary_security_group_deleted": true,
+  "tier0_receipt": null,
+  "tier1_receipt": null
+}
