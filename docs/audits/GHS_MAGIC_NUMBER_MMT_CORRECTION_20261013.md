@@ -112,12 +112,51 @@ Every `n = 2`, `m = 2` row moves from genus 1 / `not_carried` to genus 2 /
 `boundary` (11 rows: c2pnb176w1, c2pnb208w1, c2pnb272w1, c2pnb304w1,
 c2pnb368w1 and six toy-field registry curves).
 
-Caveat on c2pnb272w1 (not changed here): the screen brackets `Tr(a) = 1`,
-`n` even, as "`m` or `m + 1`" and marks both rows heuristic.  Under MMT Lemma 6
-`a` does not change `m`; it decides applicability, condition (8): `n` odd or
-`Tr_{K/k}(b) ≠ 0`.  For c2pnb272w1 and c2pnb304w1 at `l = 2`,
-`Tr_{K/k}(b) ≠ 0` (independent check), so MMT gives `m = 8` exactly.  Replacing
-the bracket by condition (8) is a separate modelling change.
+### Lemma 6 replaces the `Tr(a)` bracket (same PR, later commit)
+
+The screen used to bracket `Tr(a) = 1` with `n` even as "`m` or `m + 1`",
+price both as `heuristic`, and mark disagreeing pairs `unresolved`.  Under MMT
+Lemma 6, `a` does not change `m`; it decides whether the descent exists.
+Condition (8): `n` odd, or `Tr(a) = 0`, or `Tr_{K/k}(b) ≠ 0`.
+
+Why (8) is needed: if `n` is even and `Σ σ^i(√b) = 0`, the sum of all `n`
+Artin–Schreier conjugates of `z² + z = x + a + b/x²` reduces to the constant
+`Tr_{K/k}(a)`.  Its `℘`-root `h₀` lies in `F_{q²}`, and lies in `k = F_q`
+exactly when `Tr_K(a) = 0`.  When `Tr_K(a) = 1`, `σ(h₀) = h₀ + 1`, so every
+lift of `σ` to the compositum flips an odd number of the `z_i` and has order
+`2n`.  There is then no Weil descent to `k`.
+
+The screen now emits one `exact_invariant` row per tower with
+`trace_a`, `relative_trace_b_zero` and `mmt_condition_8`.  A row where (8)
+fails gets transport `descent_obstructed`, which counts as not carried.
+`Tr(a)` is an isogeny invariant, so for such towers the isogeny-extension
+rows count only targets satisfying (8).  Those have `(x − 1)^{2^e}` in the
+annihilator and magic number exactly `d`.  The `unresolved` class and
+`summary.unresolved` are removed (schema `jacobian-transfers/2`).
+
+New test `mmt_condition_8_matches_the_relative_trace_of_b` runs exhaustively
+over `F_{2^12}` on all six towers.  It compares the condition against
+`Σ b^{q^i}` computed directly and checks the kernel size `q^{n−1} − 1`.  It
+also checks that the magic number and type agree for `Tr(a) = 0` and `1`.
+
+Effect on the regenerated file (2091 curves): two verdicts change, nothing
+else changes class.
+
+| curve | was | now |
+|---|---|---|
+| c2pnb176w1 | unresolved (`m = 8` lower-bound row, +23.64) | formula_advantage: same row, now exact, `m = 8`, genus 128 over `GF(4)`, +23.64 |
+| c2pnb304w1 | unresolved (`m = 9` upper-bound row, +57.56) | formula_marginal: GHS to `GF(2^76)`, `m = 4`, genus 8, +2.00; its `GF(4)` row (`m = 8`, genus 128, 256 bits) cannot carry the 288-bit subgroup |
+
+c2pnb272w1 keeps formula_advantage at +72.20; its `GF(4)` row is now exact
+rather than a heuristic lower bound.  All three curves satisfy (8) on every
+tower.  The isogeny-extension rows these three curves had are gone: each
+target they priced would have been obstructed, and every row was
+`not_carried` or `boundary`.  In the registry, (8) fails only on one 18-bit
+curve (`icv1-f2m18-t999-40751283`, `b ∈ F_2`) at `l = 9, 3, 1`.  Those rows
+were already `degenerate` / `not_carried`.
+
+These are formula-level prices on exact invariants, not attacks: the cover
+is not constructed and the map's action on the subgroup is not verified.
 
 The regenerated JSON and `docs/curves/JACOBIAN_TRANSFERS.md` table also pick
 up drift that was already present on `main` (`jacobian_transfers check`
@@ -162,8 +201,8 @@ still fails there.
 
 ## Not settled here
 
-- MMT Lemma 6 applicability (`Tr_{K/F_2}(a) = 1`) is not checked by
-  `audit_curve`.
+- MMT Lemma 6 condition (8) is checked by `jacobian_transfer` but not by
+  `ec_trapdoor::audit_curve` or the other `magic_number` callers.
 - Conductor: `conductor check` could not run in the authoring session (no
   control-plane endpoint or login available in that container); no scope
   reservation was taken.

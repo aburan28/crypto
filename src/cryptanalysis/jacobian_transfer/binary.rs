@@ -34,13 +34,21 @@ pub struct GhsMagic {
     /// `dim_F2 Span{(1, σ^i(√b)) : 0 <= i < n}`, `σ` the `2^l`-Frobenius.
     pub magic_b: u32,
     /// `Tr_(F_(2^N)/F_2)(a)`.  `a` matters only modulo `{α² + α}`, i.e.
-    /// through this trace: `E_(a,b) ≅ E_(a',b)` when the traces agree.
+    /// through this trace: `E_(a,b) ≅ E_(a',b)` when the traces agree.  It
+    /// never changes the magic number; it decides whether the descent exists
+    /// ([`GhsMagic::descent_exists`]).
     pub trace_a: u32,
-    /// Whether the reduced `a` may add one generator: its trace is 1 and
-    /// `n` is even, so `a` cannot be taken in `F_2`.
-    pub a_may_add_one: bool,
-    /// `magic_b`.  When `a_may_add_one`, the GHS value is `magic_b` or
-    /// `magic_b + 1` and the screen prices both.
+    /// `Tr_(F_(2^N)/F_(2^l))(b) = 0`, equivalently `Σ σ^i(√b) = 0`.
+    pub relative_trace_b_zero: bool,
+    /// MMT Lemma 6, condition (8): `n` is odd, or `Tr(a) = 0`, or
+    /// `Tr_(F_(2^N)/F_(2^l))(b) ≠ 0`.  When it fails (`n` even, `Tr(a) = 1`,
+    /// `Σ σ^i(√b) = 0`) the sum of all `n` Artin–Schreier conjugates of
+    /// `z² + z = x + a + b/x²` reduces to the constant `Tr_(K/k)(a)`, whose
+    /// root lies in `F_(2^(2l))` but not `F_(2^l)`.  Every lift of `σ` to the
+    /// compositum then flips an odd number of the `z_i` and has order `2n`,
+    /// so there is no Weil descent of this cover to `F_(2^l)`.
+    pub descent_exists: bool,
+    /// `magic_b`: the MMT magic number does not depend on `a`.
     pub magic: u32,
     /// The `σ`-orbit length of `√b`.
     pub orbit_length: u32,
@@ -86,7 +94,9 @@ pub fn ghs_magic(
     let mut rows = Vec::with_capacity(n_rel as usize);
     let mut plain_rows = Vec::with_capacity(n_rel as usize);
     let mut cur = gamma.clone();
+    let mut relative_trace = F2mElement::zero(n_total);
     for _ in 0..n_rel {
+        relative_trace = relative_trace.add(&cur);
         rows.push((cur.to_biguint() << 1u32) | BigUint::from(1u32));
         plain_rows.push(cur.to_biguint());
         cur = cur.square_k_times(l, irr);
@@ -100,7 +110,8 @@ pub fn ghs_magic(
         trace = trace.add(&acc);
     }
     let trace_a = u32::from(!trace.is_zero());
-    let a_may_add_one = trace_a == 1 && n_rel.is_multiple_of(2);
+    let relative_trace_b_zero = relative_trace.is_zero();
+    let descent_exists = !n_rel.is_multiple_of(2) || trace_a == 0 || !relative_trace_b_zero;
     let mut orbit_length = n_rel;
     for d in 1..=n_rel {
         if n_rel.is_multiple_of(d) && gamma.square_k_times(d * l, irr) == gamma {
@@ -111,7 +122,8 @@ pub fn ghs_magic(
     GhsMagic {
         magic_b,
         trace_a,
-        a_may_add_one,
+        relative_trace_b_zero,
+        descent_exists,
         magic: magic_b,
         orbit_length,
         type_i: plain != 0 && magic_b == plain + 1,
@@ -154,15 +166,27 @@ pub fn cyclotomic_factor_degrees(n: u32) -> Vec<(u32, u32)> {
 /// `log2` of the number of monic divisors of `x^n - 1` over `F_2` of each
 /// degree `0..=n`, `None` where there is none.
 pub fn log2_divisor_counts(n: u32) -> Vec<Option<f64>> {
+    log2_divisor_counts_by(n, false)
+}
+
+/// As [`log2_divisor_counts`], restricted to divisors that contain the full
+/// power of `x - 1` in `x^n - 1` when `full_unit_factor` is set.
+pub fn log2_divisor_counts_by(n: u32, full_unit_factor: bool) -> Vec<Option<f64>> {
     let mut counts: Vec<f64> = vec![0.0; n as usize + 1];
     counts[0] = 1.0;
     for (degree, mult) in cyclotomic_factor_degrees(n) {
         let mut next = vec![0.0; n as usize + 1];
+        // `x - 1` is the only factor of degree 1.
+        let least = if full_unit_factor && degree == 1 {
+            mult
+        } else {
+            0
+        };
         for (deg, &c) in counts.iter().enumerate() {
             if c == 0.0 {
                 continue;
             }
-            for copies in 0..=mult {
+            for copies in least..=mult {
                 let d = deg + (copies * degree) as usize;
                 if d > n as usize {
                     break;
@@ -183,9 +207,11 @@ pub fn log2_divisor_counts(n: u32) -> Vec<Option<f64>> {
 #[derive(Clone, Debug, PartialEq)]
 pub struct IsogenyExtensionEstimate {
     /// Annihilator degree `d` of `sqrt(b')` aimed at; the magic number of such a
-    /// curve is at most `d + 1`.
+    /// curve is at most `d + 1`, and exactly `d` when `(x - 1)` divides the
+    /// annihilator (MMT Theorem 5(i)).
     pub annihilator_degree: u32,
-    /// Magic number bound `d + 1` used for the genus.
+    /// Magic number bound used for the genus: `d + 1`, or `d` when the
+    /// candidates are restricted to annihilators divisible by `x - 1`.
     pub magic_bound: u32,
     /// `log2` of the number of `b'` over the top field whose `sqrt(b')` has
     /// annihilator of degree exactly `d` for this tower (an upper bound:
@@ -202,6 +228,13 @@ pub struct IsogenyExtensionEstimate {
 /// Isogeny-extension estimates for one tower, for every achievable
 /// annihilator degree `d` below `direct_magic` (a curve already reaching the
 /// direct magic number gains nothing from a neighbour with the same one).
+///
+/// `Tr(a)` is an isogeny invariant (it fixes `#E mod 4`), so when it is 1
+/// and `n` is even a target `b'` admits the descent only if
+/// `Tr_(K/k)(b') ≠ 0` (MMT Lemma 6, see [`GhsMagic::descent_exists`]),
+/// i.e. only if the annihilator of `√b'` contains the full power of `x - 1`
+/// in `x^n - 1`.  `descent_needs_full_unit_factor` restricts the count to
+/// those `b'`.
 pub fn isogeny_extension_estimates(
     model: &CostModel,
     n_total: u32,
@@ -209,17 +242,19 @@ pub fn isogeny_extension_estimates(
     n_rel: u32,
     direct_magic: u32,
     log2_abs_disc: f64,
+    descent_needs_full_unit_factor: bool,
 ) -> Vec<IsogenyExtensionEstimate> {
-    let counts = log2_divisor_counts(n_rel);
+    let counts = log2_divisor_counts_by(n_rel, descent_needs_full_unit_factor);
+    let extra = u32::from(!descent_needs_full_unit_factor);
     let log2_class_size = 0.5 * log2_abs_disc - std::f64::consts::PI.log2();
     let log2_all_curves = f64::from(n_total) + 1.0;
     let step = model.log2_field_mult(f64::from(n_total)) + f64::from(n_total).log2();
     let mut out = Vec::new();
-    for d in 1..n_rel.min(direct_magic.saturating_sub(1)) + 1 {
+    for d in 1..n_rel.min(direct_magic.saturating_sub(extra)) + 1 {
         let Some(log2_divisors) = counts.get(d as usize).copied().flatten() else {
             continue;
         };
-        if d + 1 >= direct_magic {
+        if d + extra >= direct_magic {
             break;
         }
         let log2_candidate_curves = log2_divisors + f64::from(l) * f64::from(d);
@@ -227,7 +262,7 @@ pub fn isogeny_extension_estimates(
         let log2_search_cost = (log2_all_curves - log2_candidate_curves).max(0.0) + step;
         out.push(IsogenyExtensionEstimate {
             annihilator_degree: d,
-            magic_bound: d + 1,
+            magic_bound: d + extra,
             log2_candidate_curves,
             log2_expected_isogenous,
             log2_search_cost,
@@ -293,12 +328,79 @@ mod tests {
         assert!((c[31].unwrap()).abs() < 1e-12);
     }
 
+    /// Exhaustive over `F_(2^12)`: MMT condition (8) against the relative
+    /// trace of `b` computed directly as `Σ b^(q^i)`, the kernel size
+    /// `q^(n-1) - 1` of that trace on `K*`, and a magic number that does not
+    /// depend on `a`.
+    #[test]
+    fn mmt_condition_8_matches_the_relative_trace_of_b() {
+        let irr = IrreduciblePoly {
+            degree: 12,
+            low_terms: vec![0, 3],
+        };
+        let el = |v: u32| F2mElement::from_biguint(&BigUint::from(v), 12);
+        let a0 = el(0);
+        let a1 = (1u32..)
+            .map(el)
+            .find(|a| ghs_magic(12, 12, &irr, a, &el(1)).trace_a == 1)
+            .unwrap();
+        for l in [1u32, 2, 3, 4, 6, 12] {
+            let n = 12 / l;
+            let mut kernel = 0u32;
+            for v in 1u32..4096 {
+                let b = el(v);
+                let mut rel = F2mElement::zero(12);
+                let mut c = b.clone();
+                for _ in 0..n {
+                    rel = rel.add(&c);
+                    c = c.square_k_times(l, &irr);
+                }
+                let (g0, g1) = (
+                    ghs_magic(12, l, &irr, &a0, &b),
+                    ghs_magic(12, l, &irr, &a1, &b),
+                );
+                assert_eq!((g0.trace_a, g1.trace_a), (0, 1));
+                assert_eq!(g1.relative_trace_b_zero, rel.is_zero(), "l = {l}, b = {v}");
+                assert!(g0.descent_exists);
+                assert_eq!(
+                    g1.descent_exists,
+                    n % 2 == 1 || !rel.is_zero(),
+                    "l = {l}, b = {v}"
+                );
+                assert_eq!((g0.magic_b, g0.type_i), (g1.magic_b, g1.type_i));
+                kernel += u32::from(rel.is_zero());
+            }
+            assert_eq!(kernel, (1 << (12 - l)) - 1, "l = {l}");
+        }
+    }
+
+    #[test]
+    fn full_unit_factor_counts_divisors_of_the_cofactor() {
+        // x^6 - 1 = (x + 1)^2 (x^2 + x + 1)^2: requiring (x + 1)^2 leaves the
+        // divisors of (x^2 + x + 1)^2 shifted by 2, one each in degrees 2, 4, 6.
+        let c = log2_divisor_counts_by(6, true);
+        assert_eq!(
+            c.iter().map(Option::is_some).collect::<Vec<_>>(),
+            [false, false, true, false, true, false, true]
+        );
+        assert!(c.iter().flatten().all(|v| v.abs() < 1e-12));
+        // The isogeny-extension targets then have magic number exactly d.
+        let model = CostModel::default();
+        let rows = isogeny_extension_estimates(&model, 12, 2, 6, 7, 12.0, true);
+        assert_eq!(
+            rows.iter()
+                .map(|r| (r.annihilator_degree, r.magic_bound))
+                .collect::<Vec<_>>(),
+            [(2, 2), (4, 4), (6, 6)]
+        );
+    }
+
     #[test]
     fn isogeny_extension_for_oakley_group_three_is_hopeless_at_small_magic() {
         // N = 155, l = 5, n = 31: curves with annihilator degree 5 number
         // 6 * 2^25, the class has about 2^76 members, 2^156 curves in all.
         let model = CostModel::default();
-        let rows = isogeny_extension_estimates(&model, 155, 5, 31, 26, 155.0);
+        let rows = isogeny_extension_estimates(&model, 155, 5, 31, 26, 155.0, false);
         let d5 = rows.iter().find(|r| r.annihilator_degree == 5).unwrap();
         assert!((d5.log2_candidate_curves - (6f64.log2() + 25.0)).abs() < 1e-9);
         assert!(d5.log2_expected_isogenous < -40.0);
@@ -309,9 +411,11 @@ mod tests {
     #[test]
     fn no_extension_rows_when_direct_magic_is_already_minimal() {
         let model = CostModel::default();
-        assert!(isogeny_extension_estimates(&model, 155, 31, 5, 5, 155.0)
-            .iter()
-            .all(|r| r.magic_bound < 5));
-        assert!(isogeny_extension_estimates(&model, 163, 1, 163, 1, 163.0).is_empty());
+        assert!(
+            isogeny_extension_estimates(&model, 155, 31, 5, 5, 155.0, false)
+                .iter()
+                .all(|r| r.magic_bound < 5)
+        );
+        assert!(isogeny_extension_estimates(&model, 163, 1, 163, 1, 163.0, false).is_empty());
     }
 }

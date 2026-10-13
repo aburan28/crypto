@@ -72,7 +72,15 @@ stripped.
    term `q^(12/7) = 2^157.7` sits below rho's `2^176`; ratio +10.1 bits.
    The magic numbers and genera are exact on these curves; everything else
    in the row is a formula.
-4. **Three unresolved X9.62 w1 curves.**  For c2pnb176w1, c2pnb272w1 and
+4. **Three unresolved X9.62 w1 curves.**  *(Correction 2026-10-13: under
+   MMT Lemma 6, `a` does not change the magic number; it decides whether the
+   descent exists, and all three curves satisfy condition (8) on every tower.
+   So `m = 8` is exact, genus 128 over GF(4).  Now c2pnb176w1 is
+   formula_advantage at +23.6, c2pnb272w1 formula_advantage at +72.2, and
+   c2pnb304w1 formula_marginal via `GF(2^76)` at +2.0, because its `GF(4)`
+   Jacobian cannot carry the subgroup.  See
+   [`docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md`](../../docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md).
+   The text below is the 2026-10-10 reading.)*  For c2pnb176w1, c2pnb272w1 and
    c2pnb304w1, `Tr(a) = 1` with `n` even over GF(4), so the GHS magic number
    is 8 or 9.  For c2pnb176w1 the lower bound (genus 127) gives +23.9 bits
    and the upper (genus 256) does not beat rho.  For the other two only the

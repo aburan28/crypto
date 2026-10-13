@@ -40,9 +40,8 @@ told from a constant.  The classes are:
 |:--|:--|
 | `formula_advantage` | the literature's complexity formulas, with the stated constants, put the route at least `advantage_margin_bits` (8) below rho **and** the Jacobian can carry the subgroup.  A lead with named open obligations; not a speedup, a measurement or a security claim. |
 | `formula_marginal` | the formulas place the route below rho by less than the margin: the exponents favour it and the constants decide, so the row is as strong as the model's constants.  Read `exponent_ratio_log2` beside `ratio_log2`. |
-| `unresolved` | the two bounds of an invariant the screen could not pin down disagree: one beats rho, the other does not.  Today this happens only for the GHS magic number when `Tr(a) = 1` and `n` is even (below).  The verdict waits on computing that invariant. |
 | `boundary` | the formulas themselves place the route at or above rho.  No constant-factor engineering on the route can cross rho, so the row is a boundary in the sense of `AGENTS.md` §1. |
-| `not_carried` | the destination cannot contain the subgroup (`too_small`) or is `E` itself over a subfield (`degenerate`): the route solves a different problem. |
+| `not_carried` | the destination cannot contain the subgroup (`too_small`), is `E` itself over a subfield (`degenerate`), or does not exist over the subfield (`descent_obstructed`, MMT Lemma 6 below): the route solves a different problem. |
 
 Each route also carries an `evidence` level: `exact_invariant` (the geometry
 was computed on this curve; only the solver cost is a formula),
@@ -70,16 +69,30 @@ end-to-end experiment under the `AGENTS.md` boundary/table/ratio rules.
 | `GF(p^k)` | `cover_descent` to a genus-`k` cover over `GF(p)` | whether `#E` is even (a rational 2-torsion point, the usual precondition at `k = 3`) | solver at `g = k` |
 
 **The magic number and `a`.**  `E_(a,b) ≅ E_(a′,b)` whenever `a + a′` is of
-the form `α² + α`, so `a` enters only through its absolute trace.  When the
-trace is 0, or `n` is odd, `a` reduces into `F_2` and the magic number is
-exactly the `b`-only span above, which is what
-`research/cover_route_prime_binary_20261008/ghs_magic.rs` computed.  When the
-trace is 1 and `n` is even, the reduced `a` can add one generator, so the
-screen emits two rows for that tower, at `m_b` and `m_b + 1`, both
-`heuristic`, and marks the pair `unresolved` when they disagree.  The
-repository's `ec_trapdoor::audit_curve` adds Frobenius differences of the
-unreduced `a` and can report a larger number; each row records it as
-`audit_curve_magic_number` and is not priced with it.
+the form `α² + α`, so `a` enters only through its absolute trace, and it
+never changes the magic number: `m = dim Span{(1, σ^i(√b))}` depends on `b`
+alone (Maurer–Menezes–Teske, LMS J. Comput. Math. 5 (2002), eq. (5)).  What
+`a` decides is whether the descent exists.  MMT Lemma 6, condition (8): the
+cover descends to `F_(2^l)` when `n` is odd, or `Tr(a) = 0`, or
+`Tr_(F_(2^N)/F_(2^l))(b) ≠ 0`.  When all three fail, the sum of the `n`
+Artin–Schreier conjugates of `z² + z = x + a + b/x²` is the constant
+`Tr_(K/k)(a)`, whose root lies in `F_(2^(2l))` but not in `F_(2^l)`.  Every
+lift of the `2^l`-Frobenius then has order `2n`, and there is no descent.
+Each GHS row records `trace_a`, `relative_trace_b_zero` and
+`mmt_condition_8`.  A row where (8) fails has transport
+`descent_obstructed`.  Because `Tr(a)` is an isogeny invariant (it fixes
+`#E mod 4`), the isogeny-extension rows for such a tower count only targets
+`b′` that satisfy (8): their annihilator contains the full power of `x − 1`
+in `x^n − 1`, and their magic number is then exactly the annihilator degree.
+
+Before 2026-10-13 the screen read `Tr(a) = 1` with `n` even as "`m_b` or
+`m_b + 1`", priced both as `heuristic`, and had an `unresolved` class for
+pairs that disagreed.  Both are gone (schema `jacobian-transfers/2`).
+c2pnb176w1, c2pnb272w1 and c2pnb304w1 have `Tr(a) = 1` but satisfy (8) on
+every tower, so their `m = 8` rows over `GF(4)` are exact.  The only
+registry curve where (8) fails is an 18-bit test curve with `b ∈ F_2`.
+`ec_trapdoor::audit_curve` does not check (8).  Each row records the value
+it reports as `audit_curve_magic_number`; the row is not priced with it.
 
 Routes the scan does **not** enumerate, and why: Hess's generalised
 Artin–Schreier covers beyond the classical GHS family (needs a per-curve
@@ -135,8 +148,7 @@ Two readings are safe and the rest are not:
   and every prime-degree binary curve in the registry, agreeing with
   `research/cover_route_prime_binary_20261008/`.
 - A **`formula_advantage` or `formula_marginal` verdict is a lead**, with the
-  route's `evidence` level saying how much of it is established; an
-  **`unresolved`** verdict names the invariant that decides it.  See
+  route's `evidence` level saying how much of it is established.  See
   [`research/jacobian_transfer_scan_20261010/`](../../research/jacobian_transfer_scan_20261010/README.md)
   for the curves in each class and what each still needs.
 
@@ -161,7 +173,7 @@ with a standard name and every `formula_advantage` curve, by best ratio.
 | `icv1-fp26k10-tm23391476680031304544585401221006757490-1b55c3a1` | GF(p^10), p 25 bits | 245 | 138.0 | descent to a genus-10 cover C/GF(p) of E/GF(p^10) | 10 | 64.9 | +70.5 | +73.2 | formula_advantage |
 | `icv1-fp26k10-tm23391476680031304544585401221006757490-5845eec1` | GF(p^10), p 25 bits | 245 | 138.0 | descent to a genus-10 cover C/GF(p) of E/GF(p^10) | 10 | 64.9 | +70.5 | +73.2 | formula_advantage |
 | `icv1-fp26k10-tm62080723100837726956418734376197467850-72c0f518` | GF(p^10), p 25 bits | 244 | 137.7 | descent to a genus-10 cover C/GF(p) of E/GF(p^10) | 10 | 64.9 | +70.1 | +72.8 | formula_advantage |
-| c2pnb272w1 (`icv1-f2m272-t114182707820475866940422329614334265958971-985955bd`) | GF(2^272) | 256 | 144.0 | GHS descent to Jac(C)/GF(2^2), N = 136 * 2 [m = 8, lower bound] | 128 | 71.8 | +69.9 | +72.2 | formula_advantage |
+| c2pnb272w1 (`icv1-f2m272-t114182707820475866940422329614334265958971-985955bd`) | GF(2^272) | 256 | 144.0 | GHS descent to Jac(C)/GF(2^2), N = 136 * 2 | 128 | 71.8 | +69.9 | +72.2 | formula_advantage |
 | `icv1-fp26k10-tm44376523108115940962396854318476866610-2780795b` | GF(p^10), p 25 bits | 242 | 136.9 | descent to a genus-10 cover C/GF(p) of E/GF(p^10) | 10 | 64.9 | +69.4 | +72.0 | formula_advantage |
 | `icv1-fp26k10-t2439386156342642962478460612049088174-5f59f259` | GF(p^10), p 25 bits | 242 | 136.6 | descent to a genus-10 cover C/GF(p) of E/GF(p^10) | 10 | 64.9 | +69.0 | +71.7 | formula_advantage |
 | `icv1-fp26k10-t102490002118977056284346461846815228554-aee07929` | GF(p^10), p 25 bits | 239 | 135.1 | descent to a genus-10 cover C/GF(p) of E/GF(p^10) | 10 | 64.9 | +67.6 | +70.3 | formula_advantage |
@@ -220,7 +232,6 @@ with a standard name and every `formula_advantage` curve, by best ratio.
 | `icv1-fp26k10-tm31458788285083906078882665100305584874-305d57ef` | GF(p^10), p 25 bits | 215 | 123.1 | descent to a genus-10 cover C/GF(p) of E/GF(p^10) | 10 | 64.7 | +55.5 | +58.4 | formula_advantage |
 | `icv1-fp18k14-tm4408213846726974963031874993567538022-bab278c1` | GF(p^14), p 18 bits | 225 | 128.5 | descent to a genus-14 cover C/GF(p) of E/GF(p^14) | 14 | 70.9 | +59.3 | +57.6 | formula_advantage |
 | `icv1-fp18k14-tm4408213846726974963031874993567538022-f1c11b32` | GF(p^14), p 18 bits | 225 | 128.5 | descent to a genus-14 cover C/GF(p) of E/GF(p^14) | 14 | 70.9 | +59.3 | +57.6 | formula_advantage |
-| c2pnb304w1 (`icv1-f2m304-tm1949050066876782037155448244017940336576672053-02fbe089`) | GF(2^304) | 288 | 160.2 | GHS descent to Jac(C)/GF(2^2), N = 152 * 2 [m = 9, upper bound] | 256 | 102.7 | +58.0 | +57.6 | unresolved |
 | `icv1-fp26k10-tm64925002786579003838591849202979361542-241e4558` | GF(p^10), p 25 bits | 211 | 121.1 | descent to a genus-10 cover C/GF(p) of E/GF(p^10) | 10 | 64.7 | +53.5 | +56.4 | formula_advantage |
 | `icv1-fp26k10-tm64925002786579003838591849202979361542-5f5a6524` | GF(p^10), p 25 bits | 211 | 121.1 | descent to a genus-10 cover C/GF(p) of E/GF(p^10) | 10 | 64.7 | +53.5 | +56.4 | formula_advantage |
 | `icv1-fp26k10-tm40313231050982035305768123134681538134-424c1654` | GF(p^10), p 25 bits | 209 | 120.3 | descent to a genus-10 cover C/GF(p) of E/GF(p^10) | 10 | 64.7 | +52.8 | +55.6 | formula_advantage |
@@ -755,7 +766,7 @@ with a standard name and every `formula_advantage` curve, by best ratio.
 | `icv1-fp36k6-tm115876558483567622403462425082082-3fca665b` | GF(p^6), p 36 bits | 180 | 105.6 | descent to a genus-6 cover C/GF(p) of E/GF(p^6) | 6 | 81.9 | +30.2 | +23.8 | formula_advantage |
 | `icv1-fp40k6-t783481071997334004792008993315150290-d5fe4ea4` | GF(p^6), p 40 bits | 194 | 112.5 | descent to a genus-6 cover C/GF(p) of E/GF(p^6) | 6 | 88.8 | +30.2 | +23.8 | formula_advantage |
 | `icv1-fp32k6-t26895410567024103251795854646-5e67e877` | GF(p^6), p 32 bits | 167 | 98.6 | descent to a genus-6 cover C/GF(p) of E/GF(p^6) | 6 | 74.9 | +30.1 | +23.7 | formula_advantage |
-| c2pnb176w1 (`icv1-f2m176-t38161931374797611715595947-5639a6d4`) | GF(2^176) | 160 | 95.0 | GHS descent to Jac(C)/GF(2^2), N = 88 * 2 [m = 8, lower bound] | 128 | 71.3 | +21.9 | +23.6 | unresolved |
+| c2pnb176w1 (`icv1-f2m176-t38161931374797611715595947-5639a6d4`) | GF(2^176) | 160 | 95.0 | GHS descent to Jac(C)/GF(2^2), N = 88 * 2 | 128 | 71.3 | +21.9 | +23.6 | formula_advantage |
 | `icv1-fp36k6-t457754664664390214216967658012570-0a4faca1` | GF(p^6), p 36 bits | 180 | 105.4 | descent to a genus-6 cover C/GF(p) of E/GF(p^6) | 6 | 81.9 | +30.0 | +23.6 | formula_advantage |
 | `icv1-fp36k6-t457754664664390214216967658012570-2dad9111` | GF(p^6), p 36 bits | 180 | 105.4 | descent to a genus-6 cover C/GF(p) of E/GF(p^6) | 6 | 81.9 | +30.0 | +23.6 | formula_advantage |
 | `icv1-fp34k6-tm5054121035902274520965406734810-545d6854` | GF(p^6), p 34 bits | 173 | 101.9 | descent to a genus-6 cover C/GF(p) of E/GF(p^6) | 6 | 78.4 | +30.0 | +23.6 | formula_advantage |
@@ -1039,6 +1050,7 @@ with a standard name and every `formula_advantage` curve, by best ratio.
 | `icv1-fp40k6-t980612957738896330886104157610531838-a518ee72` | GF(p^6), p 40 bits | 150 | 90.9 | descent to a genus-6 cover C/GF(p) of E/GF(p^6) | 6 | 88.8 | +8.5 | +2.1 | formula_marginal |
 | `icv1-fp9k14-t68020905055396130-6186a592` | GF(p^14), p 8 bits | 66 | 47.1 | descent to a genus-14 cover C/GF(p) of E/GF(p^14) | 14 | 45.0 | +1.1 | +2.1 | formula_marginal |
 | `icv1-fp9k14-t68020905055396130-7892b472` | GF(p^14), p 8 bits | 66 | 47.1 | descent to a genus-14 cover C/GF(p) of E/GF(p^14) | 14 | 45.0 | +1.1 | +2.1 | formula_marginal |
+| c2pnb304w1 (`icv1-f2m304-tm1949050066876782037155448244017940336576672053-02fbe089`) | GF(2^304) | 288 | 160.2 | GHS descent to Jac(C)/GF(2^76), N = 4 * 76 | 8 | 158.2 | +11.0 | +2.0 | formula_marginal |
 | `icv1-fp20k10-t59042768925321275869891218278-aa019e6d` | GF(p^10), p 19 bits | 86 | 58.3 | descent to a genus-10 cover C/GF(p) of E/GF(p^10) | 10 | 56.7 | +2.3 | +1.6 | formula_marginal |
 | `icv1-fp36k6-tm478755799246825535986385953954326-ee602399` | GF(p^6), p 36 bits | 135 | 83.1 | descent to a genus-6 cover C/GF(p) of E/GF(p^6) | 6 | 81.9 | +7.6 | +1.2 | formula_marginal |
 | `icv1-fp4k14-tm18181270-5a46b567` | GF(p^14), p 4 bits | 41 | 32.5 | descent to a genus-14 cover C/GF(p) of E/GF(p^14) | 14 | 31.4 | -0.9 | +1.2 | formula_marginal |
