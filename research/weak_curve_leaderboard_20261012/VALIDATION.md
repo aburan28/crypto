@@ -1,5 +1,39 @@
 # Validation record
 
+## Curve-level hyperelliptic detection properties, 12 October 2026
+
+- `python3 build_decomposition_properties.py --check` and
+  `python3 validate_decomposition_properties.py` passed. The deterministic
+  export binds 922 unique atlas IDs to eleven property families. It imports
+  917 `verified_over_declared_field` cover certificates from
+  `docs/curves/covers.json` by exact ICV1 identity, slug and full model hash.
+  The other five prime-field records have separately labeled formula replays:
+  the exporter checks the substituted sextic identity, squarefreeness, and
+  source nonsingularity. The copied site JSON is byte-identical. Current
+  property counts include 14 cubic and ten quadratic positive genus-three
+  model labels, 247 cubic necessary-screen survivors, 49 curves with exact
+  GHS invariant records, 37 size-admissible high-genus projections and 103
+  same-field formula-cost rows. Divisor relations, Jacobian factorization,
+  explicit subgroup transport and complete measured route cost remain
+  individually recorded as open fields rather than inferred from geometry.
+- `python3 validate_attack_map.py` passed with 23 criteria, 36 method checks,
+  1,092 graph nodes and 232 directed certified maps. The isogeny graph
+  builder `--check` retained 922 atlas nodes and 676 classes. Python bytecode
+  compilation of both new scripts, `node --check` on the updated `app.js`,
+  an HTML parser check of 51 unique atlas IDs and four guide IDs with all
+  local assets present, and `git diff --check` passed. No new mathematical
+  theorem is asserted by the property join; the structural Lean bridge
+  remains described in [PROOF_MAP.md](PROOF_MAP.md).
+- The Sites source helper pushed commit
+  `3cff28af0e42580cf0862f53b14cf0da5d205177`, packaged
+  `/Volumes/SSD990/llm/tmp/weakcurves-static-v16.tar.gz`, saved version 16
+  (`appgprj_6acd13c887f0819194ae65d7f61c7b33~appgver_7c4a88ba0fd08191bba85a0aedcc2f12`),
+  and deployed it publicly as `appgdep_6acd87c44c8c81919dd585c440ff0a37`.
+  Sites returned `succeeded` at <https://weakcurves.aburan28.chatgpt.site>;
+  the existing public audience was preserved. The live
+  `decomposition_properties.json` matched the research artifact byte for
+  byte. Browser pointer-interaction QA was unavailable.
+
 ## Hyperelliptic decomposition routes, 12 October 2026
 
 - The [method sheet](HYPERELLIPTIC_DECOMPOSITION.md) separates divisor

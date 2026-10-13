@@ -9,6 +9,49 @@ Jacobian solvers by formula. The missing per-model records are divisor
 relations, explicit Jacobian factor maps, subgroup images and complete costs.
 The [WAM1 attack map](attack_map.json) gives these separate research checks.
 
+## Per-curve detection properties
+
+The machine-readable [property index](decomposition_properties.json) now binds
+eleven hyperelliptic checks to every one of the 922 exact atlas identities.
+Run `python3 build_decomposition_properties.py --check` to replay its joins,
+and `python3 validate_decomposition_properties.py` for an independent
+cross-source audit. The site exposes the same states through its
+**Hyperelliptic property** and **Property state** filters; opening a curve
+shows its complete check list and cover polynomial/map coefficients.
+
+| Property | Recorded evidence | Result in this snapshot |
+| --- | --- | --- |
+| Same-field hyperelliptic cover | Exact ICV1 identity, full model hash, checker certificate or formula replay, field, genus, degree and polynomial map | 917 source-checker certificates; five formula replays |
+| Odd-field cubic and quadratic genus-three branches | Exact model label and necessary screen, retaining exclusions and unclassified survivors | 14 cubic and ten quadratic positive labels; 247 large cubic screen survivors remain unclassified |
+| Binary GHS lower-field route | Exact magic number when available, base/relative degrees, projected genus and transport-size screen | 49 curves with exact-invariant route records; cover construction and subgroup map open |
+| Divisor factor-base and large-prime relations | Frozen base, natural-query yield, partial-relation graph, rank and target descent fields | Measurement fields present and null for every curve |
+| High-genus smoothness | Size-admissible exact-invariant genus projection and smoothness-measurement field | 37 genus projections; instance smoothness open |
+| Jacobian factors and elliptic quotient | Destination-field Weil polynomial, factorization, explicit projection and complement dimension | Cover geometry supplies the dimension screen; factorization and projection open |
+| Subgroup transport and route cost | Selected order, numerical degree gcd where known, generator/target images, kernel, formula class and measured total | Numerical gcd is a screen; images, kernel and complete measured cost open |
+
+The 917 certificates are imported from
+[`docs/curves/covers.json`](../../docs/curves/covers.json) by exact slug,
+ICV1 identity and full model SHA-256. That checker has already replayed the
+polynomial identity, nonsingularity, genus and degree. The three small
+prime-field examples and two pairing records are outside that source
+registry. For these five, the builder instantiates the documented
+`H: v²=F(u²+c)` construction, checks the resulting polynomial identity and
+squarefreeness over the source prime field, and marks the row
+`formula_replayed`; source primality and curve parameters remain the declared
+inputs. The source cover report and transfer cost report were built at
+different registry revisions, so the join checks each imported model hash
+rather than asserting equality of the whole registry digests.
+
+An exact same-field cover is common in this catalog and does not identify a
+smaller-field route. The `positive_model_label` state refers only to its
+specified cubic or quadratic branch. `necessary_screen_passed` does not
+assert a cover, while `excluded_by_screen` excludes that recorded branch,
+not every possible hyperelliptic construction. Formula costs and projected
+genera stay distinct from constructed lower-field covers and measured divisor
+relations. The [proof map](PROOF_MAP.md) continues to list the Lean bridge
+from cover geometry to Jacobian maps as open; this property index adds no
+new structural theorem.
+
 ## Decompose divisors for index calculus
 
 For a hyperelliptic Jacobian, represent a reduced divisor in the declared

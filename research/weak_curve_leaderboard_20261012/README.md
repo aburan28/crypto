@@ -38,6 +38,18 @@ unassessed research queue: they create no curve-level WID1 finding. The
 [validator](validate_attack_map.py) checks ID uniqueness, source fields,
 source/site byte parity and certified graph edge consistency.
 
+The [decomposition property index](decomposition_properties.json) makes eleven
+hyperelliptic checks filterable for all 922 atlas curves. It binds 917 exact
+same-field cover certificates by ICV1 identity and full model hash, and
+replays the explicit prime-field formula for the remaining five models under
+their source field assumptions. The cubic and quadratic genus-three screens,
+binary GHS invariants, projected genera, divisor relation measurements,
+Jacobian factorization, selected-subgroup transport and complete-cost gates
+have separate states. Open or excluded branch states remain visible; the
+same-field cover is a geometry property, not a weakness finding. The
+[property validator](validate_decomposition_properties.py) audits the source
+joins, status counts and site copy.
+
 The default leaderboard contains 29 finding rows: two prime-field models
 meeting a published DLP criterion, 24 exact small-field covering-model
 signals, one embedding-degree candidate, and two Oakley GHS invariant
@@ -61,6 +73,8 @@ python3 build_isogeny_graph.py --check
 node --check ../../website/weakcurves/dist/graph.js
 node --check ../../website/weakcurves/dist/attack-map.js
 python3 validate_attack_map.py
+python3 build_decomposition_properties.py --check
+python3 validate_decomposition_properties.py
 ```
 
 The Rust exporter reopens both frozen SQLite inputs and the JSON
@@ -69,7 +83,8 @@ the three prime-field models, and emits stable JSON with no time- or
 host-dependent fields. The graph builder binds the snapshot to verified
 P-192/P-224 walk records and their receipt. Copy `snapshot.json`,
 `criteria.json`, `attack_map.json`, `isogeny_graph.json`, and
-`IDENTIFIERS.md` into `../../website/weakcurves/dist/` when they change.
+`decomposition_properties.json`, and `IDENTIFIERS.md` into
+`../../website/weakcurves/dist/` when they change.
 The site is static and reads the JSON files in the browser.
 
 The [report](REPORT.md) gives the ranking contract, Oakley source checks,

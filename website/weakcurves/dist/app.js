@@ -7,12 +7,15 @@ const fieldFilter = $('#field-filter');
 const evidenceFilter = $('#evidence-filter');
 const criterionFilter = $('#criterion-filter');
 const checkFilter = $('#check-filter');
+const propertyFilter = $('#property-filter');
+const propertyState = $('#property-state');
 const more = $('#more');
 const tabs = [...document.querySelectorAll('[data-tab]')];
 let snapshot = null;
 let graphData = null;
 let graphNodes = new Map();
 let criteriaById = new Map();
+let decomposition = null;
 let tab = 'signals';
 let shown = 50;
 
@@ -53,6 +56,57 @@ function labelFor(record) {
 
 function fieldFor(record) {
   return record.degree === 1 ? `F${record.p}` : `F(${record.p}^${record.degree})`;
+}
+
+const propertyLabels = {
+  verified_geometry:'Checked cover certificate',formula_replayed:'Formula replay',
+  positive_model_label:'Positive model label',necessary_screen_passed:'Necessary screen passed',
+  no_recorded_model:'No recorded model',excluded_by_screen:'Excluded by branch screen',
+  outside_recorded_domain:'Outside recorded domain',exact_invariant:'Exact GHS invariant',
+  heuristic_projection:'Heuristic projection',genus_projection_only:'Genus projection only',
+  cover_geometry_only:'Cover geometry only',weil_polynomial_open:'Weil polynomial open',
+  formula_only:'Formula cost only',unmeasured:'Unmeasured',unverified:'Unverified',
+  unassessed:'Unassessed'
+};
+
+function propertyBadge(status) {
+  if (status==='verified_geometry' || status==='positive_model_label') return 'geometry';
+  if (['formula_replayed','necessary_screen_passed','exact_invariant','heuristic_projection',
+    'genus_projection_only','cover_geometry_only','formula_only'].includes(status)) return 'candidate';
+  return 'open';
+}
+
+function propertyDescription(key, value) {
+  const state=propertyLabels[value.status]||value.status;
+  if (key==='same_field_cover') return `${state}; genus ${value.genus}, degree ${value.degree} over the source field; ${value.certificate.construction}. Subfield descent: ${value.subfield_descent}.`;
+  if (key==='cubic_cover' || key==='quadratic_cover') return `${state}; model label ${value.label||'—'}; screen ${value.screen||'—'}.`;
+  if (key==='ghs_descent') return `${state}; ${value.routes.length} recorded routes${value.routes.length?': '+value.routes.map(r=>`base degree ${r.base_degree}, relative degree ${r.relative_degree}, m=${r.magic_number||'?'}, genus ${r.genus_projection}, ${r.transport_screen}, ${r.formula_class}`).join(' | '):'.'}`;
+  if (key==='hyperelliptic_high_genus') return `${state}; ${value.candidate_routes.length} size-admissible exact-invariant genus projections. Smoothness measurements: open.`;
+  if (key==='elliptic_quotient_prym') return `${state}; elliptic factor dimension 1, complement dimension ${value.complement_dimension}; explicit Jacobian projection open.`;
+  if (key==='subgroup_transport') return `${state}; selected order ${value.selected_order||'not fixed'}; gcd(degree, selected order) ${value.gcd_degree_selected_order??'open'}; generator, target and kernel images open.`;
+  if (key==='route_cost') return `${state}; same-field formula class ${value.same_field_formula_class||'not calculated'}; complete measured cost open.`;
+  return `${state}; ${decomposition.definitions[key].test}`;
+}
+
+function renderPropertyDetails(record, dialog) {
+  dialog.querySelector('.property-details')?.remove();
+  const values=decomposition.records[record.id];
+  if (!values) return;
+  const details=document.createElement('details');details.className='property-details';
+  const summary=document.createElement('summary');summary.textContent='Hyperelliptic properties · all 11 checks';details.append(summary);
+  const dl=document.createElement('dl');
+  for (const [key,definition] of Object.entries(decomposition.definitions)) {
+    const dt=document.createElement('dt');dt.textContent=definition.label;
+    const dd=document.createElement('dd');dd.textContent=propertyDescription(key,values[key]);
+    dl.append(dt,dd);
+  }
+  details.append(dl);
+  const certificate=document.createElement('details');certificate.className='cover-certificate';
+  const certificateLabel=document.createElement('summary');certificateLabel.textContent='Exact cover polynomial and map coefficients';certificate.append(certificateLabel);
+  const pre=document.createElement('pre');pre.textContent=JSON.stringify(values.same_field_cover.certificate,null,2);certificate.append(pre);
+  details.append(certificate);
+  const link=document.createElement('a');link.href='decomposition_properties.json';link.textContent='Download all curve properties ↗';link.className='source-ref';details.append(link);
+  dialog.append(details);
 }
 
 function openRecord(record) {
@@ -96,6 +150,8 @@ function openRecord(record) {
   if (record.source_note) facts.push(['Source note',record.source_note]);
   if (record.source) facts.push(['Source',record.source]);
   if (record.findings?.length) facts.push(['Weakness IDs',record.findings.map(f=>f.id).join(' · ')]);
+  const property=decomposition.records[record.id];
+  if (property) facts.push(['Hyperelliptic cover',`${propertyLabels[property.same_field_cover.status]} · genus ${property.same_field_cover.genus} · degree ${property.same_field_cover.degree}`]);
   const node = graphNodes.get(record.id);
   if (node) facts.push(['Isogeny class',`${node.class_id} · ${node.class_size} indexed model${node.class_size===1?'':'s'}`]);
   const dl = $('#dialog-facts');
@@ -124,6 +180,14 @@ function openRecord(record) {
     $('#dialog-grade').className=`badge ${styles[selectedCheck.status]}`;
     $('#dialog-explain').textContent=selectedCheck.detail;
   }
+  if (propertyFilter.value!=='all') {
+    const selectedProperty=decomposition.records[record.id]?.[propertyFilter.value];
+    if (selectedProperty) {
+      $('#dialog-grade').textContent=propertyLabels[selectedProperty.status]||selectedProperty.status;
+      $('#dialog-grade').className=`badge ${propertyBadge(selectedProperty.status)}`;
+      $('#dialog-explain').textContent=propertyDescription(propertyFilter.value,selectedProperty);
+    }
+  }
   const oldEvidence=dialog.querySelector('.finding-evidence');
   if(oldEvidence)oldEvidence.remove();
   const evidence=document.createElement('div');evidence.className='finding-evidence';
@@ -144,16 +208,18 @@ function openRecord(record) {
     evidence.append(a);
   }
   dialog.append(evidence);
+  renderPropertyDetails(record,dialog);
   dialog.showModal();
 }
 
 function filteredCurves() {
   let rows = curveRecords();
-  if (tab === 'signals' && criterionFilter.value === 'all' && checkFilter.value === 'all') rows = rows.filter(r => kind[r.signal].rank <= 2);
+  if (tab === 'signals' && criterionFilter.value === 'all' && checkFilter.value === 'all' && propertyFilter.value === 'all') rows = rows.filter(r => kind[r.signal].rank <= 2);
   const q = search.value.trim().toLowerCase();
   if (q) rows = rows.filter(r => [r.id,r.slug,r.legacy_id,labelFor(r),fieldFor(r),kind[r.signal].label,r.trace,
     ...(r.aliases||[]),...(r.findings||[]).flatMap(f=>[f.id,f.mechanism,f.criterion_id]),
-    ...Object.keys(graphNodes.get(r.id)?.checks||{})]
+    ...Object.keys(graphNodes.get(r.id)?.checks||{}),
+    ...Object.entries(decomposition.records[r.id]||{}).flatMap(([key,value])=>[key,value?.status])]
     .some(x => String(x||'').toLowerCase().includes(q)));
   const field = fieldFilter.value;
   if (field === 'prime') rows = rows.filter(r => r.degree === 1);
@@ -168,6 +234,10 @@ function filteredCurves() {
   if (criterion !== 'all' || stage !== 'all') rows = rows.filter(r => {
     const checks = graphNodes.get(r.id)?.checks||{};
     return Object.entries(checks).some(([id,check]) => (criterion==='all'||criterion===id) && (stage==='all'||stage===check.status));
+  });
+  if (propertyFilter.value !== 'all') rows=rows.filter(r=>{
+    const value=decomposition.records[r.id]?.[propertyFilter.value];
+    return value && (propertyState.value==='all'||value.status===propertyState.value);
   });
   return rows;
 }
@@ -187,12 +257,13 @@ function renderCurves() {
     name.append(button);const small=document.createElement('small');small.textContent=r.id;name.append(small);
     textCell(row,fieldFor(r),'mono');
     const selected=criterionFilter.value, check=graphNodes.get(r.id)?.checks?.[selected];
-    textCell(row,selected==='all'?kind[r.signal].label:`${criteriaById.get(selected)?.name||selected} · ${check?.status||'—'}`);
+    const property=propertyFilter.value==='all'?null:decomposition.records[r.id]?.[propertyFilter.value];
+    textCell(row,property?`${decomposition.definitions[propertyFilter.value].label} · ${propertyLabels[property.status]||property.status}`:selected==='all'?kind[r.signal].label:`${criteriaById.get(selected)?.name||selected} · ${check?.status||'—'}`);
     textCell(row,r.findings?.map(f=>f.id).join(' · ')||'—','mono');
     const grade=textCell(row,'');const badge=document.createElement('span');
     const stageStyle={condition:'verified',geometry:'geometry',map:'geometry',candidate:'candidate',screen:'candidate'};
-    badge.className=`badge ${check?stageStyle[check.status]:kind[r.signal].badge}`;
-    badge.textContent=check?{condition:'Exact condition',geometry:'Covering geometry',map:'Verified map',candidate:'Candidate',screen:'Structural screen'}[check.status]:kind[r.signal].grade;
+    badge.className=`badge ${property?propertyBadge(property.status):check?stageStyle[check.status]:kind[r.signal].badge}`;
+    badge.textContent=property?propertyLabels[property.status]||property.status:check?{condition:'Exact condition',geometry:'Covering geometry',map:'Verified map',candidate:'Candidate',screen:'Structural screen'}[check.status]:kind[r.signal].grade;
     grade.append(badge);
     textCell(row,String(r.trace),'mono');textCell(row,String(r.order),'mono');
     tbody.append(row);
@@ -239,11 +310,12 @@ function render() {
   if (!snapshot) return;
   $('#model-controls').style.display=['families','protocols'].includes(tab)?'none':'flex';
   $('#criterion-controls').style.display=['families','protocols'].includes(tab)?'none':'flex';
+  $('#property-controls').style.display=['families','protocols'].includes(tab)?'none':'flex';
   if (tab==='families') renderCases();else if(tab==='protocols') renderProtocols();else renderCurves();
 }
 
 function setTab(next) {
-  tab=next;shown=50;search.value='';fieldFilter.value='all';evidenceFilter.value='all';criterionFilter.value='all';checkFilter.value='all';
+  tab=next;shown=50;search.value='';fieldFilter.value='all';evidenceFilter.value='all';criterionFilter.value='all';checkFilter.value='all';propertyFilter.value='all';propertyState.value='all';
   tabs.forEach(t=>{const active=t.dataset.tab===next;t.classList.toggle('active',active);t.setAttribute('aria-selected',String(active));});
   render();
 }
@@ -276,6 +348,24 @@ function renderCriteria(criteria) {
   });
 }
 
+function renderPropertyFilters() {
+  for (const [key,definition] of Object.entries(decomposition.definitions)) {
+    const option=document.createElement('option');option.value=key;
+    option.textContent=definition.label;propertyFilter.append(option);
+  }
+  updatePropertyStates();
+}
+
+function updatePropertyStates() {
+  propertyState.replaceChildren();
+  const option=document.createElement('option');option.value='all';option.textContent='Any recorded state';propertyState.append(option);
+  const selected=propertyFilter.value;
+  for (const [state,count] of Object.entries(decomposition.counts[selected]||{})) {
+    const item=document.createElement('option');item.value=state;
+    item.textContent=`${propertyLabels[state]||state} (${count})`;propertyState.append(item);
+  }
+}
+
 function initDialog() {
   const dialog=document.createElement('dialog');dialog.id='record-dialog';dialog.innerHTML='<div class="dialog-head"><div><p class="eyebrow">Curve evidence</p><h2 id="dialog-title"></h2></div><button type="button" class="close-dialog" aria-label="Close details">×</button></div><span id="dialog-grade"></span><p id="dialog-explain"></p><dl id="dialog-facts"></dl>';
   document.body.append(dialog);
@@ -283,9 +373,9 @@ function initDialog() {
   dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
 }
 
-Promise.all([fetch('snapshot.json').then(r=>{if(!r.ok)throw Error('snapshot unavailable');return r.json()}),fetch('criteria.json').then(r=>{if(!r.ok)throw Error('criteria unavailable');return r.json()}),fetch('isogeny_graph.json').then(r=>{if(!r.ok)throw Error('isogeny graph unavailable');return r.json()})])
-  .then(([data,criteria,graph])=>{
-    snapshot=data;graphData=graph;graphNodes=new Map(graph.nodes.map(n=>[n.id,n]));initDialog();renderCriteria(criteria);
+Promise.all([fetch('snapshot.json').then(r=>{if(!r.ok)throw Error('snapshot unavailable');return r.json()}),fetch('criteria.json').then(r=>{if(!r.ok)throw Error('criteria unavailable');return r.json()}),fetch('isogeny_graph.json').then(r=>{if(!r.ok)throw Error('isogeny graph unavailable');return r.json()}),fetch('decomposition_properties.json').then(r=>{if(!r.ok)throw Error('decomposition properties unavailable');return r.json()})])
+  .then(([data,criteria,graph,properties])=>{
+    snapshot=data;graphData=graph;decomposition=properties;graphNodes=new Map(graph.nodes.map(n=>[n.id,n]));initDialog();renderCriteria(criteria);renderPropertyFilters();
     $('#stat-models').textContent=data.counts.exact_models.toLocaleString();
     $('#stat-covers').textContent=data.counts.exact_covering_models.toLocaleString();
     $('#stat-cases').textContent=data.counts.published_cases.toLocaleString();
@@ -301,5 +391,7 @@ Promise.all([fetch('snapshot.json').then(r=>{if(!r.ok)throw Error('snapshot unav
 
 tabs.forEach(t=>t.addEventListener('click',()=>setTab(t.dataset.tab)));
 [search,fieldFilter,evidenceFilter,criterionFilter,checkFilter].forEach(el=>el.addEventListener('input',()=>{shown=50;render()}));
+propertyFilter.addEventListener('change',()=>{shown=50;updatePropertyStates();render()});
+propertyState.addEventListener('change',()=>{shown=50;render()});
 criterionFilter.addEventListener('change',()=>{if(criterionFilter.value==='sidh_auxiliary_torsion')setTab('protocols')});
 more.addEventListener('click',()=>{shown+=50;render()});
