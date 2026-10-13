@@ -100,6 +100,8 @@ template<class F> static nap<F> parse_pt(const char*xs,const char*ys){
 template<class C> static void rho_bench(const char*name,const nap<typename C::Field>&G,
                                         const nap<typename C::Field>&Q,int threads,int W,int iters){
   typedef typename C::Field F;
+  /* Kernel switch only instantiates {2,4,8,16}; snap before alloc, seed, and the step count. */
+  if(W!=2&&W!=4&&W!=8&&W!=16)W=RHO_BENCH_W;
   int blocks=1; // tune below
   cudaDeviceProp p{}; CU(cudaGetDeviceProperties(&p,0));
   blocks=p.multiProcessorCount*16;
