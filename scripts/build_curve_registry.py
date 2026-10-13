@@ -595,26 +595,6 @@ def harvest_programme_extensions(reg: Registry) -> None:
     add_extension_doc(reg, B2_C050)
 
 
-WEAK_SUBFIELD_FACTORS = ("research/weak_subfield_hyperelliptic_decomposition_20261012/"
-                         "results/run-20261013T0404Z.icv1.json")
-
-
-def harvest_weak_subfield_factors(reg: Registry) -> None:
-    """The elliptic factors E1, E2 of the weak-subfield E4/E4x records (model identity only:
-    the study measures their orders over K, not a subgroup generator, so no EC1 representation)."""
-    path = REPO / WEAK_SUBFIELD_FACTORS
-    if not path.exists():
-        return
-    for rec in json.loads(path.read_text()):
-        s = rec["short"]
-        ident = cid.extension_id(s["p"], s["k"], s["modulus_low"], s["a"], s["b"], rec["order_K"])
-        assert ident["slug"] == rec["slug"], rec
-        reg.add(ident, "extension", {"p": str(s["p"]), "k": s["k"],
-                                     "modulus": [str(x) for x in s["modulus_low"]],
-                                     "a": [str(x) for x in s["a"]], "b": [str(x) for x in s["b"]]},
-                WEAK_SUBFIELD_FACTORS)
-
-
 def harvest_standards(reg: Registry) -> None:
     for a, n in DESIGNATED_KOBLITZ:
         add_koblitz(reg, a, n, STANDARD_MODULI[n][1])
@@ -718,7 +698,6 @@ def build() -> tuple[dict, list[str], list[str]]:
     harvest_text_koblitz(reg)
     harvest_native_standards(reg)
     harvest_programme_extensions(reg)
-    harvest_weak_subfield_factors(reg)
     carry_forward(reg)
     ambiguous = sorted(f"{reg.alias_text[k]!r} -> {len(v)} models"
                        for k, v in reg.alias_models.items() if len(v) > 1)

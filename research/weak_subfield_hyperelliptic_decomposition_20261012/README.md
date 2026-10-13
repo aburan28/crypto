@@ -256,25 +256,28 @@ orders recounted independently in
 [results/run-20261013T0404Z.icv1.json](results/run-20261013T0404Z.icv1.json),
 which also holds the full ICV1 strings). The orders and the slugs are the
 join key to the E4/E4x records by `(exp, q, n)`; the records themselves are
-unchanged. These models are in `docs/curves/registry.json`; no EC1
-representation is registered because no subgroup generator of either factor
-is recorded in a form the registry can take (the lab stores `E1` points as
+unchanged. In-repo registration in `docs/curves/registry.json` is
+deferred (it regenerates the covers and browser artefacts and needs
+coordination); the slugs are computed and verified by
+`reports/icv1_factors.py` only, so `check_curve_names.py` does not yet
+find them in the registry. No EC1 representation exists because the lab
+records no subgroup generator in coordinates (it stores `E1` points as
 internal log-table indices).
 
-| run | `(q, n)` | factor | `#E(K)` | ICV1 slug |
+| run | `(q, n)` | factor | `#E(K)` | ICV1 slug (prefix `icv1-` omitted until registered) |
 | --- | --- | --- | --- | --- |
-| E4 | (7, 3) | `E1` | 364 | `icv1-fp3k3-tm20-bef51007` |
-| E4 | (7, 3) | `E2` | 324 | `icv1-fp3k3-t20-b3476bff` |
-| E4 | (11, 3) | `E1` | 1332 | `icv1-fp4k3-t0-92ab3c9d` |
-| E4 | (11, 3) | `E2` | 1332 | `icv1-fp4k3-t0-67d3d40c` |
-| E4 | (13, 3) | `E1` | 2268 | `icv1-fp4k3-tm70-d7518a94` |
-| E4 | (13, 3) | `E2` | 2268 | `icv1-fp4k3-tm70-cbe24c4e` |
-| E4x | (7, 3) | `E1` | 310 | `icv1-fp3k3-t34-0f6b94b1` |
-| E4x | (7, 3) | `E2` | 324 | `icv1-fp3k3-t20-d4c9c593` |
-| E4x | (11, 3) | `E1` | 1332 | `icv1-fp4k3-t0-f6684909` |
-| E4x | (11, 3) | `E2` | 1264 | `icv1-fp4k3-t68-e724d929` |
-| E4x | (13, 3) | `E1` | 2106 | `icv1-fp4k3-t92-c1554838` |
-| E4x | (13, 3) | `E2` | 2106 | `icv1-fp4k3-t92-b20414d0` |
+| E4 | (7, 3) | `E1` | 364 | `fp3k3-tm20-bef51007` |
+| E4 | (7, 3) | `E2` | 324 | `fp3k3-t20-b3476bff` |
+| E4 | (11, 3) | `E1` | 1332 | `fp4k3-t0-92ab3c9d` |
+| E4 | (11, 3) | `E2` | 1332 | `fp4k3-t0-67d3d40c` |
+| E4 | (13, 3) | `E1` | 2268 | `fp4k3-tm70-d7518a94` |
+| E4 | (13, 3) | `E2` | 2268 | `fp4k3-tm70-cbe24c4e` |
+| E4x | (7, 3) | `E1` | 310 | `fp3k3-t34-0f6b94b1` |
+| E4x | (7, 3) | `E2` | 324 | `fp3k3-t20-d4c9c593` |
+| E4x | (11, 3) | `E1` | 1332 | `fp4k3-t0-f6684909` |
+| E4x | (11, 3) | `E2` | 1264 | `fp4k3-t68-e724d929` |
+| E4x | (13, 3) | `E1` | 2106 | `fp4k3-t92-c1554838` |
+| E4x | (13, 3) | `E2` | 2106 | `fp4k3-t92-b20414d0` |
 
 Traces of `π^n` reachable from an `F_q`-curve, against all integer traces
 in the Hasse interval over `K` (measured counts): 7 of 75 at (7, 3), 13 of

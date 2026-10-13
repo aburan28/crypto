@@ -140,5 +140,5 @@ the tested lines (constant `mu`, bounded search), not as an equivalence.
 The elliptic factors `E1`, `E2` of E4/E4x are named by ICV1 slug in the
 README (AGENTS.md section 11). `reports/icv1_factors.py` computes them from
 the recorded `(a, b, c)`, `q`, `n`, modulus and orders, recounting each
-order independently; they are registered in `docs/curves/registry.json`
-(model identity only; no EC1 representation).
+order independently. They are not registered in `docs/curves/registry.json`
+in this change (deferred); the sidecar JSON is the record.
