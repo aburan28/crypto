@@ -1541,7 +1541,7 @@ impl<G: CountedGroup> crate::cryptanalysis::ic_boundary::RhoClasses<G>
     fn automorphisms(&self) -> u32 {
         self.group_order
     }
-    fn canon(&self, g: &G, p: G::Elt) -> (G::Elt, u64) {
+    fn canon(&self, g: &G, _ops: &mut GroupOps, p: G::Elt) -> (G::Elt, u64) {
         let orbit = match self.orbit(g, p) {
             Ok(o) => o,
             Err(_) => return (p, 1),

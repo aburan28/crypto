@@ -1,0 +1,55 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg-aa",
+      "role": "control"
+    }
+  ],
+  "description": "Round 1 read a 95%-level 0.5286 rho floor/crater quotient on this pair with 8 workloads; 32 fresh independent targets re-measure it. No isogeny, no transport. Counts are primary.",
+  "label": "Drastic gap round 2 replication: d43-ell1016839, 32 fresh targets",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261012,
+    "timeout_seconds": 900,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 4729156221582,
+        "b": 3152770814388,
+        "group_order": 11115086689631,
+        "gx": 1,
+        "gy": 6844591373632,
+        "kind": "prime_explicit",
+        "p": 11115086689471,
+        "r": 11115086689631
+      },
+      {
+        "a": 6423849957476,
+        "b": 3759381915468,
+        "group_order": 11115086689631,
+        "gx": 0,
+        "gy": 4764558193602,
+        "kind": "prime_explicit",
+        "p": 11115086689471,
+        "r": 11115086689631
+      }
+    ],
+    "target_seed": 2026101203,
+    "targets_per_curve": 32
+  }
+}
