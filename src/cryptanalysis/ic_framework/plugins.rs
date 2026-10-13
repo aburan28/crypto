@@ -32,6 +32,7 @@
 //! | `mitm` | 2 or 3 | a pair table probed once per target, or once per `R − P` |
 //! | `mitm-frobenius` | 2 or 3 | the same on a Frobenius-folded table (Koblitz) |
 //! | `mitm-frobenius-counted` | 2 or 3 | the same table and probe, with native table setup counters |
+//! | `rootfind-subtract` | 2 or 3 | prime curves: `prime_fast`'s direct-subtraction root finding, every `x(R ∓ F_i)` of a target from one Montgomery batched inversion, then a lookup (`m = 2`) or a probe of the negation-folded pair table (`m = 3`) |
 //!
 //! The pair table is where memory buys time, and `mitm`'s
 //! `negation_folded` parameter halves the additions that build it.
@@ -64,6 +65,7 @@ use crate::cryptanalysis::koblitz_symmetrised::{
     symmetrised_groebner_decompose, SymmetrisedFactorBase,
 };
 use crate::cryptanalysis::pq_descent_symbolic::{descend, max_n_prime, SymbolicDescent};
+use crate::cryptanalysis::prime_fast::{Fp64, MAX_BITS as PRIME_FAST_MAX_BITS};
 
 // ── Factor bases ───────────────────────────────────────────────────
 
@@ -1069,6 +1071,258 @@ impl<G: CountedGroup> DecompositionOracle<G> for MitmOracle {
     ) -> Option<Vec<usize>> {
         let table = self.table.as_ref()?;
         decompose_mitm(ctx.group, fb, table, self.m, ops, counters, point)
+    }
+}
+
+/// One abscissa of the base as the root-finding sweep sees it: both
+/// coordinates of its positive representative in Montgomery form, and the
+/// indices of `P` and `−P` in the run's base.
+#[derive(Clone, Copy, Debug)]
+struct SweepRep {
+    x: u64,
+    y: u64,
+    plus: usize,
+    minus: usize,
+}
+
+/// Direct-subtraction root finding on a prime curve: the decomposition
+/// oracle of `prime_fast::collect_relations`
+/// (`RESEARCH_SEMAEV_ROOTFIND_VS_GROEBNER.md` §2), inside `ic.pipeline`.
+///
+/// The Semaev `S₃` root in the third variable is literally `x(R ∓ F_i)`,
+/// so a two-summand sweep over the base needs no summation polynomial,
+/// no Gröbner basis and no square root: the `x_R − x_i` of every
+/// abscissa are inverted together by Montgomery's trick (one field
+/// inversion a target), `λ` for `R − F_i` and `R + F_i` share that
+/// inverse, and each resulting point is looked up in the base (`m = 2`)
+/// or probed against the negation-folded pair table (`m = 3`).
+///
+/// It is the `subtract` oracle's search — the same `2·|F_x|` candidate
+/// points a target, found in the same order — on `prime_fast`'s
+/// arithmetic.  It is charged exactly as `subtract` is: one group addition
+/// per candidate point, so the two arms read the same `S` and differ in
+/// the constant the unit does not see (one batched inversion against
+/// `2·|F_x|`), which the record keeps as `inversions` (counted, priced
+/// only where the curve has a pinned ratio) and as wall time.  Every hit
+/// is re-added in the group on the ledger before it is returned.
+pub struct RootfindSubtractOracle<'i> {
+    m: u32,
+    instance: &'i PrimeInstance,
+    field: Option<Fp64>,
+    reps: Vec<SweepRep>,
+    table: Option<PairTable>,
+    diffs: Vec<u64>,
+    degenerate: Vec<bool>,
+    scratch: Vec<u64>,
+    /// Hits whose summands did not re-add to the target in the group.
+    /// Must stay zero.
+    pub mismatches: u64,
+}
+
+impl<'i> RootfindSubtractOracle<'i> {
+    pub fn new(m: u32, instance: &'i PrimeInstance) -> Self {
+        Self {
+            m,
+            instance,
+            field: None,
+            reps: Vec::new(),
+            table: None,
+            diffs: Vec::new(),
+            degenerate: Vec::new(),
+            scratch: Vec::new(),
+            mismatches: 0,
+        }
+    }
+}
+
+impl DecompositionOracle<PrimeCurve> for RootfindSubtractOracle<'_> {
+    fn name(&self) -> &str {
+        "rootfind-subtract"
+    }
+
+    fn summands(&self) -> u32 {
+        self.m
+    }
+
+    fn describe(&self, _params: &Params) -> String {
+        match self.m {
+            2 => "every x(R ∓ F_i) from one Montgomery batched inversion, each looked up in the \
+                  base (prime_fast's direct-subtraction root finding)"
+                .into(),
+            _ => "every R ∓ F_i from one Montgomery batched inversion, each probed against the \
+                  negation-folded pair table (prime_fast's direct-subtraction root finding)"
+                .into(),
+        }
+    }
+
+    fn parameters(&self) -> &[(&str, &str)] {
+        &[("m", "summands, 2 or 3; 3 builds the negation-folded pair table")]
+    }
+
+    fn prepare(
+        &mut self,
+        ctx: &InstanceCtx<PrimeCurve>,
+        fb: &FactorBase<PrimePoint>,
+        params: &Params,
+        ops: &mut GroupOps,
+    ) -> Result<(), String> {
+        if !(2..=3).contains(&self.m) {
+            return Err(format!("rootfind-subtract takes m = 2 or 3, got {}", self.m));
+        }
+        for key in params.0.keys() {
+            if key != "m" {
+                return Err(format!(
+                    "rootfind-subtract reads only `m`; `{key}` would change the method's identity \
+                     without changing the search"
+                ));
+            }
+        }
+        let p = self.instance.curve.p;
+        if p != ctx.group.p {
+            return Err("rootfind-subtract was built for another curve".into());
+        }
+        if p < 5 || p & 1 == 0 || p >= (1u64 << PRIME_FAST_MAX_BITS) {
+            return Err(format!(
+                "rootfind-subtract needs an odd prime 3 < p < 2^{PRIME_FAST_MAX_BITS}"
+            ));
+        }
+        let f = Fp64::new(p);
+        let mut reps = Vec::with_capacity(fb.abscissa_list.len());
+        for x in &fb.abscissa_list {
+            let idx = fb
+                .x_index
+                .get(x)
+                .ok_or("every listed abscissa is indexed")?;
+            let plus = *idx.first().ok_or("an abscissa with no point")?;
+            let minus = idx.get(1).copied().unwrap_or(plus);
+            let pt = fb.points[plus];
+            if pt.infinity || pt.x != *x {
+                return Err("the base's abscissa index does not match its points".into());
+            }
+            reps.push(SweepRep {
+                x: f.to_mont(pt.x),
+                y: f.to_mont(pt.y),
+                plus,
+                minus,
+            });
+        }
+        self.diffs = vec![0; reps.len()];
+        self.degenerate = vec![false; reps.len()];
+        self.reps = reps;
+        self.field = Some(f);
+        if self.m == 3 {
+            let table = PairTable::build_negation_folded(ctx.group, fb);
+            ops.merge(table.build_ops);
+            self.table = Some(table);
+        }
+        Ok(())
+    }
+
+    fn decompose(
+        &mut self,
+        ctx: &InstanceCtx<PrimeCurve>,
+        fb: &FactorBase<PrimePoint>,
+        ops: &mut GroupOps,
+        counters: &mut OracleCounters,
+        point: PrimePoint,
+    ) -> Option<Vec<usize>> {
+        let f = self.field?;
+        if point.infinity {
+            return None;
+        }
+        let g = ctx.group;
+        let xr = f.to_mont(point.x);
+        let yr = f.to_mont(point.y);
+        ops.field_ops.muls += 2;
+        // One inversion for the whole sweep: `(x_R − x_i)⁻¹` for every
+        // abscissa.  An abscissa equal to `x_R` means `R = ±F_i`; that
+        // row is taken on the ledger below, exactly as `subtract` takes
+        // it, so the two oracles examine the same candidates in the same
+        // order whatever the target.
+        let k = self.reps.len();
+        for (i, rep) in self.reps.iter().enumerate() {
+            let d = f.sub(xr, rep.x);
+            self.degenerate[i] = d == 0;
+            self.diffs[i] = if d == 0 { f.one } else { d };
+        }
+        f.batch_inv(&mut self.diffs, &mut self.scratch);
+        counters.inversions += 1;
+        ops.field_ops.invs += 1;
+        ops.field_ops.muls += 3 * k as u64;
+        for i in 0..k {
+            let rep = self.reps[i];
+            if self.degenerate[i] {
+                for summand in [rep.plus, rep.minus] {
+                    let t = g.add(ops, point, g.neg(fb.points[summand]));
+                    if let Some(found) = self.lookup(ctx, fb, ops, counters, point, summand, t) {
+                        return Some(found);
+                    }
+                }
+                continue;
+            }
+            let inv = self.diffs[i];
+            // `T = R − ε·F_i`: ε = +1 adds `−F_i = (x_i, −y_i)`, so
+            // `λ = (−y_i − y_R)/(x_i − x_R) = (y_R + y_i)/(x_R − x_i)`;
+            // ε = −1 adds `F_i`, `λ = (y_R − y_i)/(x_R − x_i)`.  Each `T`
+            // is one group addition's result and is charged as one; its
+            // field work (two multiplications, one squaring, two
+            // conversions out of Montgomery form counted as
+            // multiplications) is tallied beside the ledger's.
+            let lam_minus = f.mul(f.add(yr, rep.y), inv);
+            let lam_plus = f.mul(f.sub(yr, rep.y), inv);
+            for (summand, lam) in [(rep.plus, lam_minus), (rep.minus, lam_plus)] {
+                let x3 = f.sub(f.sub(f.sqr(lam), xr), rep.x);
+                let y3 = f.sub(f.mul(lam, f.sub(xr, x3)), yr);
+                ops.adds += 1;
+                ops.field_ops.muls += 4;
+                ops.field_ops.sqrs += 1;
+                let t = PrimePoint::affine(f.from_mont(x3), f.from_mont(y3));
+                if let Some(found) = self.lookup(ctx, fb, ops, counters, point, summand, t) {
+                    return Some(found);
+                }
+            }
+        }
+        None
+    }
+}
+
+impl RootfindSubtractOracle<'_> {
+    /// Is `t = R − F_summand` a base point (`m = 2`), or a pair sum
+    /// (`m = 3`)?  A hit is re-added in the group before it is returned.
+    fn lookup(
+        &mut self,
+        ctx: &InstanceCtx<PrimeCurve>,
+        fb: &FactorBase<PrimePoint>,
+        ops: &mut GroupOps,
+        counters: &mut OracleCounters,
+        point: PrimePoint,
+        summand: usize,
+        t: PrimePoint,
+    ) -> Option<Vec<usize>> {
+        let g = ctx.group;
+        if g.is_identity(&t) {
+            counters.lookups += 1;
+            return None;
+        }
+        match self.m {
+            2 => {
+                counters.lookups += 1;
+                let j = fb.index_of_key(g.key(&t))?;
+                // Fail closed: `F_summand + T` must be `R` in the group,
+                // on the ledger.
+                if g.add(ops, fb.points[summand], fb.points[j]) == point {
+                    return Some(vec![summand, j]);
+                }
+                self.mismatches += 1;
+                counters.frobfold_mismatches += 1;
+                None
+            }
+            _ => {
+                let table = self.table.as_ref()?;
+                let (j, k) = table.probe(g, fb, ops, &mut counters.lookups, t)?;
+                Some(vec![summand, j, k])
+            }
+        }
     }
 }
 
