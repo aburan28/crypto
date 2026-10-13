@@ -20,8 +20,14 @@ same barrier from the factor-base side).
 > `m = 130`, genus `2^129`: GHS reaches genus `1`, `2^130 − 1` or `2^130`.  The
 > gap to the window becomes 121.77 bits (not 120.77) and the §3.1 floor about
 > `2^69.19×` rho (not `2^68.19×`); the verdict is unchanged.  The §7 `N = 130`
-> counterfactual changes (least admissible genus at `l = 1` is 255, not 128)
-> and its cost is not recomputed.  Details:
+> counterfactual changes: the least admissible genus at `l = 1` is 255 (type I,
+> `m = 9`), not 128, and priced with the §5 model it costs `2^55.60` against rho
+> `2^60.31` (−4.71 bits, not `2^36.41` and −23.9): still below rho in that model,
+> but no longer by more than the §8 unit conversion.  The `l ≥ 2` rows of the
+> §7 table also used the wrong factorisation (over `F_{2^l}`, not `F_2`).
+> Recomputation:
+> [`research/ghs_counterfactual_n130_20261013/`](../../ghs_counterfactual_n130_20261013/README.md).
+> Details:
 > [`docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md`](../../../docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md).
 
 > **Correction, 2026-10-06 (accounting).**  This note said the genus *any*

@@ -75,14 +75,37 @@ Interpretation is labelled; every number is from the code in this PR.
   operations, about `2^69.19×` the `2^60.81` rho reference (was `2^68.19×`).
   Interpretation: the GHS route for ECC2K-130 is closed by one more bit than
   stated; the verdict does not change.
-- **§7 counterfactual (`N = 130`) changes and is not recomputed here.**  With
-  MMT values, the least admissible `(m, genus)` for `l · g ≥ N − 2` is
-  `l = 1`: `(9, 255)` (was `(8, 128)`); `l = 2`: `(13, 4095)` (was
-  `(7, 64)`); `l = 13`: `(5, 15)` (was `(5, 16)`); `l = 26`: `(5, 15)` (was
-  `(4, 8)`).  The row "genus 128, cost `2^36.41`, breaks: yes" therefore
-  does not stand as written; the cost at genus 255 under the note's §5 model
-  has not been computed, so whether the counterfactual still "breaks" is
-  **open**.
+- **§7 counterfactual (`N = 130`), recomputed** in
+  [`research/ghs_counterfactual_n130_20261013/`](../../research/ghs_counterfactual_n130_20261013/README.md)
+  (native `curve_construction::counterfactual`, the note's cost model and
+  admissibility rule unchanged; checked against the legacy Python pricer).
+  The least admissible `(m, genus)` for `l · g ≥ N − 2`:
+
+  | `l` | was | now | cost was → now |
+  |---:|---|---|---|
+  | 1 | `(8, 128)` | `(9, type I, 255)` | `2^36.41` → **`2^55.60`** (rho `2^60.31`) |
+  | 2 | `(7, 64)` | `(13, I, 4095)` | `2^299.93` → `2^43242.05` † |
+  | 13 | `(5, 16)` | `(5, I, 15)` | `2^68.63` → `2^64.52` † |
+  | 26 | `(4, 8)` | `(5, I, 15)` | `2^60.80` → `2^88.78` † |
+
+  († fixed-genus model, pessimistic for large `g`.)  At `l = 1` the row still
+  prices below rho in the note's model, but by **4.71 bits, not 23.91**.  The
+  note's own §8 estimate of the cost unit (one relation trial is *perhaps*
+  `2^7` curve additions) is larger than that margin; the earlier margin
+  absorbed it.  Read that as: the "breaks: yes" entry survives the
+  magic-number fix only inside the unconverted model.  A concrete `b` with
+  `m = 9`, type I, genus 255 and condition (8) satisfied exists over `F_{2^130}`
+  (constructed and checked); no curve with the subgroup in its Jacobian, and no
+  transfer map, is constructed.
+- **A second, independent error in the §7 table.**  Its `l ≥ 2` rows took the
+  available magic numbers from the factorisation of `x^n − 1` over `F_{2^l}`
+  (`achievable_dims(n, 1 << l)`); the magic number is an `F_2`-dimension, so the
+  factorisation is over `F_2` at every `l`.  Exhaustive scans of `F_{2^12}` at
+  `(n, l) = (6, 2), (4, 3), (3, 4), (2, 6)` find the `F_2` set (the `F_q` set
+  would allow `m = 2` at `n = 3, l = 4`; no `b` has it).  This changes the `l = 2`
+  and `l = 26` rows (and `l = 5, 10`, which the note's table omitted) in
+  addition to the `+1` and the type; it does not touch `l = 1`.  The legacy
+  script and its frozen JSON are not rewritten.
 
 Frozen artefacts that record the old values are not rewritten:
 `experiments/ecc2k130_hyperelliptic_cover_boundary.json`
