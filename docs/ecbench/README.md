@@ -36,6 +36,7 @@ spec.json ──ecbench run──► session/                ──ecbench verif
 10. [The database](#10-the-database)
 11. [Adding a method, a curve family or a factor base](#11-adding-a-method-a-curve-family-or-a-factor-base)
 12. [Limits](#12-limits)
+13. [GPU stage runner](#13-gpu-stage-runner)
 
 Factor bases (build with `ecbench fb`, publish to Git/`store:`, run
 `ic.pipeline` with a matching plug-in string):
@@ -284,6 +285,21 @@ a bare label.
 
 A spec's `isolation_required` (default L2) is the level a **wall-clock**
 figure needs to be admitted. Operation counts never need one.
+
+`ecbench compare` also reports a **measurement quality score** from 0 to
+100. This is an operational rubric, not a probability that the result is
+correct and not a confidence interval. For each measured pair, an
+unverified result gets zero points; a verified pair gets the lower of its
+two isolation levels: L0=0, L1=40, L2=75, L3=90. The average is taken
+over every paired attempt. Quality admission requires at least L2, even
+if a diagnostic spec requests L0 or L1. A further 10 points are earned
+only when an L2-or-higher A/A control has a 95% interval containing 1 and
+wholly inside `[0.9, 1.1]`. The comparison records the level counts, verified and
+admitted pair counts, 95th percentile foreign CPU busy fraction, 95th
+percentile run-queue delay, and whether telemetry was missing. The
+thresholds in the L0–L3 gate still decide whether wall time is admitted.
+The separate bootstrap 95% interval measures sampling uncertainty over
+the stated targets and seeds; a high quality score does not narrow it.
 
 What hosts earn, as recorded so far:
 
@@ -811,3 +827,34 @@ Stated so that nothing here is read as more than it is:
 - **One thread.** Parallel collision search is out of scope until a
   multi-thread run can be graded (a parallel change must be measured at
   one thread and at many, AGENTS.md §10).
+
+## 13. GPU stage runner
+
+`ecbench gpu-stage` runs the repository's existing CUDA ECC driver
+(`gpu/ecc/bench`) with a device self-test before a bounded benchmark. Build
+the CUDA binary on a GPU host with `make -C gpu/ecc bench`, then run, for
+example:
+
+```bash
+ecbench gpu-stage --binary gpu/ecc/bench --out /tmp/ecbench-gpu-rho-1 \
+  --mode rho --timeout-seconds 600 -- --iters 256 --fold 2
+```
+
+The command creates a new output directory and writes `selftest.stdout`,
+`selftest.stderr`, `benchmark.stdout`, `benchmark.stderr`, and
+`gpu-stage.json`, plus a private byte copy of the binary. The receipt binds
+the binary SHA-256, `CUDA_VISIBLE_DEVICES`, exact argument
+vector, exit code, timeout, timestamps, and output hashes. A failed device
+self-test prevents the benchmark. The directory is never overwritten.
+`--solve` is excluded from this stage command so a large-group solver does
+not run indefinitely under a throughput request.
+
+This entry point runs real CUDA code, but its current fixed curves and
+targets do not share `ecbench run`'s workload identity or independently
+replayed answer and operation ledger. The stage receipt therefore stays
+separate from `records.jsonl`, `ecbench compare`, and the L0–L3 CPU score.
+It has no GPU contention sensor or admitted CPU/GPU interval yet. To make
+a GPU ECDLP method fully comparable, the CUDA driver must accept the
+frozen EC Bench workload and seed, emit exact phase counts and recovered
+answer, expose GPU device and contention telemetry, and pass independent
+answer replay under the same record contract.

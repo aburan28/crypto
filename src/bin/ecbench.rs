@@ -21,6 +21,7 @@
 //! ecbench challenge seal --draft C.json --out C.json    validate and seal a challenge
 //! ecbench challenge spec --challenge C --candidate '{"id":"..."}' --epoch N --out spec.json
 //! ecbench challenge verdict --challenge C --dir D --epoch N --replay-all --out V.json
+//! ecbench gpu-stage --binary gpu/ecc/bench --out D --mode rho -- --iters 256
 //! ```
 //!
 //! Bounds, frontiers and challenges are `docs/bounds/README.md`.
@@ -39,8 +40,8 @@ use std::process::ExitCode;
 use clap::{Parser, Subcommand};
 
 use crypto_lib::cryptanalysis::ecbench::{
-    audit, bounds, callgrind, canonical, challenge, claim, compare, db, frontier, host, isolab,
-    isolation, methods, record, resources, runner, signals, spec, stats, workload,
+    audit, bounds, callgrind, canonical, challenge, claim, compare, db, frontier, gpu, host,
+    isolab, isolation, methods, record, resources, runner, signals, spec, stats, workload,
 };
 
 #[derive(Parser)]
@@ -58,6 +59,24 @@ struct Cli {
 enum Cmd {
     /// Push, pull and index large files (factor bases, tables) in the object store.
     Store(crypto_lib::store::cli::StoreArgs),
+    /// Run the existing CUDA ECC binary as a separately labelled GPU stage.
+    GpuStage {
+        /// A built gpu/ecc/bench CUDA binary.
+        #[arg(long)]
+        binary: PathBuf,
+        /// A new directory for exact outputs and the receipt.
+        #[arg(long)]
+        out: PathBuf,
+        /// field, mul, rho or bsgs.
+        #[arg(long)]
+        mode: String,
+        /// Watchdog limit for each command, including the device self-test.
+        #[arg(long, default_value_t = 600)]
+        timeout_seconds: u64,
+        /// Options forwarded to the CUDA binary after `--`.
+        #[arg(last = true)]
+        gpu_args: Vec<String>,
+    },
     /// List every method with its parameters.
     Methods {
         #[arg(long)]
@@ -826,6 +845,26 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 return Ok(ExitCode::from(1));
             }
         }
+        Cmd::GpuStage {
+            binary,
+            out,
+            mode,
+            timeout_seconds,
+            gpu_args,
+        } => {
+            let receipt = gpu::run(&gpu::GpuOptions {
+                binary,
+                out: out.clone(),
+                mode,
+                args: gpu_args,
+                timeout_seconds,
+            })?;
+            print_json(&receipt)?;
+            if receipt.status != "stage_completed" {
+                eprintln!("GPU stage {}: see {}", receipt.status, out.display());
+                return Ok(ExitCode::from(1));
+            }
+        }
         Cmd::Compare {
             dir,
             a,
@@ -852,6 +891,21 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 print_json(&c)?;
             } else {
                 println!("{}", c.verdict);
+                if let Some(q) = &c.quality {
+                    println!(
+                        "measurement quality: {} / 100; paired attempts {}, verified {}, admitted {}; levels {:?}; p95 foreign busy {}%, p95 run queue {}%",
+                        q.score.map(|n| n.to_string()).unwrap_or_else(|| "unavailable".into()),
+                        q.paired_attempts,
+                        q.verified_pairs,
+                        q.admitted_pairs,
+                        q.levels,
+                        q.p95_foreign_busy_percent.map(|n| format!("{n:.2}")).unwrap_or_else(|| "unknown".into()),
+                        q.p95_run_queue_percent.map(|n| format!("{n:.2}")).unwrap_or_else(|| "unknown".into()),
+                    );
+                    if !q.notes.is_empty() {
+                        println!("quality notes: {}", q.notes.join("; "));
+                    }
+                }
                 let o = |v: Option<f64>| v.map(|x| format!("{x:.4}")).unwrap_or_else(|| "–".into());
                 let ci = |v: Option<(f64, f64)>| {
                     v.map(|(l, h)| format!("[{l:.4}, {h:.4}]"))
