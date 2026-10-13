@@ -104,7 +104,7 @@ def render_markdown() -> None:
            f" `docs/curves/traits.json` SHA-256 `{data['catalog']['traits_sha256']}`."
            f" `docs/curves/covers.json` SHA-256 `{data['catalog']['covers_sha256']}`;"
            f" `docs/curves/jacobian-transfers.json` SHA-256"
-           f" `{data['catalog']['transfers_sha256']}`. The full source sections,"
+           f" `{data['catalog']['transfers_sha256']}`. The source section pointers,"
            " curve identities, primary parameter checks, catalog traits, cover records,"
            " and transfer screening records are in `inventory.json`.",
            "- **Snapshot alignment:** `covers.json` is pinned to the current registry."
