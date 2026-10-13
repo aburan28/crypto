@@ -16,8 +16,12 @@
 //! ```text
 //! # generic planted systems of degree d (the §11.17 scaling panel's family)
 //! cargo run --release --example gaudry_quartic_replay -- --generic 3,4,5,6 --systems 5 --json OUT.jsonl
-//! # the S₅ systems of real residuals (degree 8; about 30 min a solve)
+//! # the S₅ systems of real residuals (degree 8; about 3 min a solve)
 //! cargo run --release --example gaudry_quartic_replay -- --s5 --p 269 --seed 1 --systems 3 --json OUT.jsonl
+//! # Magma scripts of the same systems instead (no replay): each times
+//! # Magma's GroebnerBasis (F4) and Variety and checks Magma's solutions
+//! # against ours, written into the script
+//! cargo run --release --example gaudry_quartic_replay -- --generic 3,4,5,6 --systems 1 --export-magma DIR
 //! ```
 
 use std::collections::HashMap;
@@ -26,8 +30,8 @@ use std::fs::OpenOptions;
 use std::io::Write;
 
 use crypto_lib::cryptanalysis::gaudry_quartic::{
-    generate_instance4, solve_system4_traced, QuarticSolve, ReplayOutcome, ShapeTrace,
-    SymmetrisedS5,
+    generate_instance4, solve_system4, solve_system4_traced, QuarticSolve, ReplayOutcome,
+    ShapeTrace, SymmetrisedS5,
 };
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -87,6 +91,93 @@ fn generic_system(d: u8, p: u64, rng: &mut StdRng) -> (Vec<HashMap<[u8; 4], u64>
         })
         .collect();
     (comps, root)
+}
+
+/// A Magma script for one system: `GroebnerBasis` (F4, Magma's default
+/// over a prime field) and `Variety`, timed with `Cputime`, and Magma's
+/// rational solutions compared with ours.  One `RESULT` line, for the
+/// ingest step.
+fn magma_script(
+    name: &str,
+    p: u64,
+    comps: &[HashMap<[u8; 4], u64>],
+    ours: &[[u64; 4]],
+    ours_muls: u64,
+    ours_ms: f64,
+) -> String {
+    let mut out = String::new();
+    out.push_str(&format!(
+        "// {name}: four equations in e1..e4 over GF({p}); written by\n\
+         // examples/gaudry_quartic_replay.rs --export-magma.  Ours: {} rational\n\
+         // solutions, {ours_muls} F_p multiplications, {ours_ms:.0} ms (gaudry_quartic::solve_system4).\n\
+         K := GF({p});\nP<e1,e2,e3,e4> := PolynomialRing(K, 4, \"grevlex\");\nF := [P |\n",
+        ours.len()
+    ));
+    let polys: Vec<String> = comps
+        .iter()
+        .map(|c| {
+            let mut terms: Vec<(&[u8; 4], &u64)> = c.iter().filter(|(_, &v)| v != 0).collect();
+            terms.sort();
+            let ts: Vec<String> = terms
+                .iter()
+                .map(|(m, &v)| {
+                    let mut t = v.to_string();
+                    for (i, &k) in m.iter().enumerate() {
+                        if k == 1 {
+                            t.push_str(&format!("*e{}", i + 1));
+                        } else if k > 1 {
+                            t.push_str(&format!("*e{}^{k}", i + 1));
+                        }
+                    }
+                    t
+                })
+                .collect();
+            format!("  {}", ts.join(" + "))
+        })
+        .collect();
+    out.push_str(&polys.join(",\n"));
+    out.push_str("\n];\nI := ideal<P | F>;\n");
+    let ours_set: Vec<String> = ours
+        .iter()
+        .map(|e| format!("[K| {}, {}, {}, {}]", e[0], e[1], e[2], e[3]))
+        .collect();
+    out.push_str(&format!("ours := {{ {} }};\n", ours_set.join(", ")));
+    out.push_str(&format!(
+        "t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);\n\
+         printf \"RESULT-GB name={name} p={p} magma_gb_s=%o basis_len=%o dim=%o\\n\", tg, #G, Dimension(I);\n\
+         t1 := Cputime(); V := Variety(I); tv := Cputime(t1);\n\
+         theirs := {{ [K| v[1], v[2], v[3], v[4]] : v in V }};\n\
+         printf \"RESULT-VAR name={name} magma_variety_s=%o magma_solutions=%o ours_solutions={} agree=%o\\n\", \
+         tv, #theirs, theirs eq ours;\n",
+        ours.len()
+    ));
+    out
+}
+
+fn export_magma(
+    dir: &str,
+    name: &str,
+    comps: &[HashMap<[u8; 4], u64>],
+    d: u8,
+    macaulay: u8,
+    p: u64,
+    seed: u64,
+) {
+    let mut st = QuarticSolve::default();
+    let mut rng = StdRng::seed_from_u64(seed);
+    let sols = solve_system4(comps, d, macaulay, p, &mut rng, &mut st, false).unwrap_or_default();
+    let script = magma_script(name, p, comps, &sols, st.total_muls, st.total_ms);
+    std::fs::create_dir_all(dir).expect("create --export-magma dir");
+    let path = format!("{dir}/{name}.magma");
+    std::fs::write(&path, &script).expect("write magma script");
+    println!(
+        "{{\"name\":\"{name}\",\"p\":{p},\"equation_degree\":{d},\"ours_solutions\":{},\"ours_total_muls\":{},\"ours_total_ms\":{:.1},\"ours_dim\":{},\"script_bytes\":{}}}",
+        sols.len(),
+        st.total_muls,
+        st.total_ms,
+        st.dim,
+        script.len()
+    );
 }
 
 fn emit(out: &Option<String>, row: &Row) {
@@ -194,6 +285,7 @@ fn main() {
     let mut seed = 1u64;
     let mut systems = 5usize;
     let mut out: Option<String> = None;
+    let mut export: Option<String> = None;
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -221,6 +313,10 @@ fn main() {
                 i += 1;
                 out = Some(args[i].clone());
             }
+            "--export-magma" => {
+                i += 1;
+                export = Some(args[i].clone());
+            }
             other => panic!("unknown argument {other}"),
         }
         i += 1;
@@ -230,6 +326,12 @@ fn main() {
         let mut trace = None;
         for k in 0..systems {
             let (comps, root) = generic_system(d, 269, &mut rng);
+            if let Some(dir) = &export {
+                let name = format!("generic_d{d}_s{k}");
+                export_magma(dir, &name, &comps, d, 4 * (d - 1) + 1, 269, seed + k as u64);
+                let _ = root;
+                continue;
+            }
             run_pair(
                 "generic",
                 d,
@@ -258,6 +360,11 @@ fn main() {
                 }
             };
             let comps = pre.weil_restrict(&curve.f, &r.x);
+            if let Some(dir) = &export {
+                let name = format!("s5_p{p}_seed{seed}_s{k}");
+                export_magma(dir, &name, &comps[..], 8, 29, p, seed + k as u64);
+                continue;
+            }
             run_pair(
                 "s5",
                 8,
