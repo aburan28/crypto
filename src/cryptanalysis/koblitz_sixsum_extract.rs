@@ -19,6 +19,11 @@
 //!   unordered pair of abscissa states `(s₁, s₂)` solve the quartic
 //!   `S₄(x_R, x_{s₁}, x_{s₂}, X) = 0` over `F_{2^n}` (a real degree-4
 //!   root-finding, [`s4_roots`]) and look its roots up in the table;
+//! - **kernel B3, "two-S₃ chain"** ([`Kernel::S4ChainStrided`]): visit the
+//!   same diagonal pair order as B2, but lift `s₁`, form `R ± s₁`, and solve
+//!   the two quadratics `S₃(x(R ± s₁), x_{s₂}, X) = 0`; their root union is
+//!   checked against B2's quartic in the tests and preserves the de-clustered
+//!   six-sum search without a general quartic root finder;
 //! - **kernel C, the 5-sum control** ([`Kernel::FiveSumControl`]): `R − P_e`
 //!   for every base point, then the 4-sum probe;
 //! - and the **4-sum baseline** itself ([`Kernel::FourSum`]).
@@ -100,6 +105,11 @@ pub enum Kernel {
     /// a de-clustered order.  Six points.  Possible only because the
     /// quartic needs abscissae alone (no `R − s₁` point addition).
     S4Strided,
+    /// Kernel B3: the same diagonal pair order as [`Kernel::S4Strided`],
+    /// with the quartic roots obtained as the union of two `S₃` root pairs
+    /// after forming `R + s₁` and `R - s₁`.  This prices the concrete
+    /// "quartic under twelve quadratics" break-even question directly.
+    S4ChainStrided,
     /// Kernel C: `R − P_e` for every base point, then the 4-sum probe.
     /// Five points.
     FiveSumControl,
@@ -112,8 +122,13 @@ impl Kernel {
             "a" | "iterate" | "iterate_table" | "6a" => Ok(Self::IterateTable),
             "b" | "s4" | "s4_per_probe" | "6b" => Ok(Self::S4PerProbe),
             "b2" | "bs" | "s4_strided" | "strided" | "6b2" => Ok(Self::S4Strided),
+            "b3" | "chain" | "s4_chain_strided" | "chain_strided" | "6b3" => {
+                Ok(Self::S4ChainStrided)
+            }
             "c" | "5" | "5sum" | "five" | "control" => Ok(Self::FiveSumControl),
-            other => Err(format!("unknown kernel `{other}` (4sum | a | b | b2 | c)")),
+            other => Err(format!(
+                "unknown kernel `{other}` (4sum | a | b | b2 | b3 | c)"
+            )),
         }
     }
 
@@ -123,6 +138,7 @@ impl Kernel {
             Self::IterateTable => "6sum_a_iterate_table",
             Self::S4PerProbe => "6sum_b_s4_per_probe",
             Self::S4Strided => "6sum_b2_s4_strided",
+            Self::S4ChainStrided => "6sum_b3_s3_chain_strided",
             Self::FiveSumControl => "5sum_c_control",
         }
     }
@@ -131,7 +147,7 @@ impl Kernel {
     pub fn arity(self) -> usize {
         match self {
             Self::FourSum => 4,
-            Self::IterateTable | Self::S4PerProbe | Self::S4Strided => 6,
+            Self::IterateTable | Self::S4PerProbe | Self::S4Strided | Self::S4ChainStrided => 6,
             Self::FiveSumControl => 5,
         }
     }
@@ -773,16 +789,39 @@ impl SixSumTable {
                     end
                 }
             }
-            Kernel::S4PerProbe => {
-                self.probe_s4_pairs(inst, fb, target, start, false, budget, ctr, &mut |idx, c| {
-                    accept(idx, c, &mut out)
-                })
-            }
-            Kernel::S4Strided => {
-                self.probe_s4_pairs(inst, fb, target, start, true, budget, ctr, &mut |idx, c| {
-                    accept(idx, c, &mut out)
-                })
-            }
+            Kernel::S4PerProbe => self.probe_s4_pairs(
+                inst,
+                fb,
+                target,
+                start,
+                false,
+                false,
+                budget,
+                ctr,
+                &mut |idx, c| accept(idx, c, &mut out),
+            ),
+            Kernel::S4Strided => self.probe_s4_pairs(
+                inst,
+                fb,
+                target,
+                start,
+                true,
+                false,
+                budget,
+                ctr,
+                &mut |idx, c| accept(idx, c, &mut out),
+            ),
+            Kernel::S4ChainStrided => self.probe_s4_pairs(
+                inst,
+                fb,
+                target,
+                start,
+                true,
+                true,
+                budget,
+                ctr,
+                &mut |idx, c| accept(idx, c, &mut out),
+            ),
         };
         match end {
             ScanEnd::Complete => ctr.complete_scans += 1,
@@ -802,7 +841,10 @@ impl SixSumTable {
     /// `total × total` square visited as `idx = start + k·(total + 1)
     /// mod total²`, i.e. `(i, j) → (i + 1, j + 1)`, cells with `j < i`
     /// skipped without a solve; `total + 1` is coprime to `total²`, so a
-    /// complete walk visits every pair once.
+    /// complete walk visits every pair once.  With `s3_chain = true`, the
+    /// same cells and root lookups are used, but the root set is obtained by
+    /// forming `R ± s₁` and solving two `S₃` quadratics instead of solving
+    /// the `S₄` quartic.
     #[allow(clippy::too_many_arguments)]
     fn probe_s4_pairs(
         &self,
@@ -811,6 +853,7 @@ impl SixSumTable {
         target: FastPoint,
         start: u64,
         strided: bool,
+        s3_chain: bool,
         budget: &Budget,
         ctr: &mut ProbeCounters,
         sink: &mut dyn FnMut(&[usize], &mut ProbeCounters) -> bool,
@@ -824,20 +867,36 @@ impl SixSumTable {
         let mut roots: Vec<u64> = Vec::with_capacity(4);
         // One quartic for the pair `(i, j)`; `Some(false)` stops.
         let solve_pair = |i: usize,
-                              j: usize,
-                              roots: &mut Vec<u64>,
-                              ctr: &mut ProbeCounters,
-                              sink: &mut dyn FnMut(&[usize], &mut ProbeCounters) -> bool|
+                          j: usize,
+                          roots: &mut Vec<u64>,
+                          ctr: &mut ProbeCounters,
+                          sink: &mut dyn FnMut(&[usize], &mut ProbeCounters) -> bool|
          -> bool {
             let (e1, t1) = (i / n, i % n);
             let (e2, t2) = (j / n, j % n);
-            let x1 = self.x_of(e1, t1);
             let x2 = self.x_of(e2, t2);
-            ctr.s4_solves += 1;
             ctr.outer_probes += 1;
-            let quartic = s4_in_x4(gf, self.b, target.x, x1, x2);
             roots.clear();
-            s4_roots_split(gf, &quartic, roots);
+            if s3_chain {
+                let (s1, _) = self.state_point(inst, fb, e1, t1, ctr);
+                ctr.point_adds += 2;
+                let plus = inst.fast.add(target, s1);
+                let minus = inst.fast.add(target, inst.fast.neg(s1));
+                for intermediate in [plus, minus] {
+                    if intermediate.infinity {
+                        continue;
+                    }
+                    ctr.s3_solves += 1;
+                    if let Some(pair) = s3_x_roots(gf, self.b, intermediate.x, x2) {
+                        roots.extend(pair);
+                    }
+                }
+            } else {
+                let x1 = self.x_of(e1, t1);
+                ctr.s4_solves += 1;
+                let quartic = s4_in_x4(gf, self.b, target.x, x1, x2);
+                s4_roots_split(gf, &quartic, roots);
+            }
             roots.sort_unstable();
             roots.dedup();
             for &root in roots.iter() {
@@ -1397,7 +1456,7 @@ fn split_with_powers(gf: &Gf2, g: &[u64], powers: &[Vec<u64>], from: u32, roots:
 
 /// The kernels as a framework [`DecompositionOracle`]: `prepare` builds
 /// the table, `decompose` returns the first verified relation's indices
-/// (early abort).  Parameters: `kernel=4sum|a|b|c`.
+/// (early abort).  Parameters: `kernel=4sum|a|b|b2|b3|c`.
 pub struct SixSumOracle<'i> {
     pub kernel: Kernel,
     pub instance: &'i BinaryInstance,
@@ -1450,7 +1509,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for SixSumOracle<'_> {
     fn parameters(&self) -> &[(&str, &str)] {
         &[(
             "kernel",
-            "4sum | a (iterate table) | b (S4 per probe, row order) | b2 (S4 per probe, diagonal stride) | c (5-sum control)",
+            "4sum | a (iterate table) | b (S4 per probe, row order) | b2 (S4 per probe, diagonal stride) | b3 (two-S3 chain, diagonal stride) | c (5-sum control)",
         )]
     }
 
@@ -1633,6 +1692,18 @@ mod tests {
             s4_roots_split(gf, &q, &mut split);
             split.sort_unstable();
             assert_eq!(split, want, "k = {k}: roots are x(R ± s1 ± s2)");
+            let mut chain = Vec::new();
+            for intermediate in [inst.fast.add(r, s1), inst.fast.add(r, inst.fast.neg(s1))] {
+                if intermediate.infinity {
+                    continue;
+                }
+                if let Some(pair) = s3_x_roots(gf, inst.b, intermediate.x, s2.x) {
+                    chain.extend(pair);
+                }
+            }
+            chain.sort_unstable();
+            chain.dedup();
+            assert_eq!(chain, want, "k = {k}: two-S3 chain roots");
             let mut general = Vec::new();
             s4_roots(gf, &q, &mut general);
             general.sort_unstable();
@@ -1735,24 +1806,62 @@ mod tests {
         assert_eq!(rels.len(), 1);
         assert_eq!(rels[0].arity, 6);
         assert_eq!(sum_of(&inst, &fb, &rels[0].indices), r6);
-        assert_eq!(rels[0].indices, planted, "kernel B2 recovers the planted six points");
+        assert_eq!(
+            rels[0].indices, planted,
+            "kernel B2 recovers the planted six points"
+        );
         // Started five diagonal steps before the cell (s2, s3), the walk
         // reaches it on its sixth quartic.
         let j3 = (11 % table.len() as u64) * 41 + 30;
         assert!(j3 > j2 + 5);
         let before = ctr.s4_solves;
         let start_cell = (j2 - 5) * a_states + (j3 - 5);
-        let (rels, end) =
-            table.extract(&inst, &fb, r6, Kernel::S4Strided, start_cell, &budget, &mut ctr);
+        let (rels, end) = table.extract(
+            &inst,
+            &fb,
+            r6,
+            Kernel::S4Strided,
+            start_cell,
+            &budget,
+            &mut ctr,
+        );
         assert_eq!(end, ScanEnd::FirstHit, "kernel B2 along the diagonal");
         assert_eq!(ctr.s4_solves - before, 6, "six quartics along the diagonal");
         assert_eq!(rels.len(), 1);
         assert_eq!(sum_of(&inst, &fb, &rels[0].indices), r6);
         assert_eq!(rels[0].indices, planted);
 
+        // Kernel B3 visits the identical diagonal cells but replaces each
+        // quartic by the two S3 chains through R + s1 and R - s1.
+        let s3_before = ctr.s3_solves;
+        let s4_before = ctr.s4_solves;
+        let (rels, end) = table.extract(
+            &inst,
+            &fb,
+            r6,
+            Kernel::S4ChainStrided,
+            j2,
+            &budget,
+            &mut ctr,
+        );
+        assert_eq!(end, ScanEnd::FirstHit, "kernel B3");
+        assert_eq!(
+            ctr.s3_solves - s3_before,
+            2,
+            "two S3 solves for one pair cell"
+        );
+        assert_eq!(ctr.s4_solves, s4_before, "kernel B3 performs no S4 solve");
+        assert_eq!(rels.len(), 1);
+        assert_eq!(sum_of(&inst, &fb, &rels[0].indices), r6);
+        assert_eq!(
+            rels[0].indices, planted,
+            "kernel B3 recovers the planted six points"
+        );
+
         // Kernel C: R = P_0 + s2 + s3.
         let r5 = inst.fast.add(fb.points[0], r4);
-        let (rels, end) = table.extract(&inst, &fb, r5, Kernel::FiveSumControl, 0, &budget, &mut ctr);
+        let (rels, end) =
+            table.extract(&inst, &fb, r5, Kernel::FiveSumControl, 0, &budget, &mut ctr);
         assert_eq!(end, ScanEnd::FirstHit, "kernel C");
         assert_eq!(rels.len(), 1);
         assert_eq!(rels[0].arity, 5);
@@ -1832,15 +1941,55 @@ mod tests {
             max_s4_solves: ctr.s4_solves + 20_000,
             ..Budget::default()
         };
-        let (rels, _) = table.extract(&inst, &fb, target, Kernel::S4PerProbe, 3, &budgeted, &mut ctr);
-        assert!(rels.is_empty(), "kernel B found a relation outside the lattice");
+        let (rels, _) = table.extract(
+            &inst,
+            &fb,
+            target,
+            Kernel::S4PerProbe,
+            3,
+            &budgeted,
+            &mut ctr,
+        );
+        assert!(
+            rels.is_empty(),
+            "kernel B found a relation outside the lattice"
+        );
         let budgeted = Budget {
             early_abort: false,
             max_s4_solves: ctr.s4_solves + 20_000,
             ..Budget::default()
         };
-        let (rels, _) = table.extract(&inst, &fb, target, Kernel::S4Strided, 3, &budgeted, &mut ctr);
-        assert!(rels.is_empty(), "kernel B2 found a relation outside the lattice");
+        let (rels, _) = table.extract(
+            &inst,
+            &fb,
+            target,
+            Kernel::S4Strided,
+            3,
+            &budgeted,
+            &mut ctr,
+        );
+        assert!(
+            rels.is_empty(),
+            "kernel B2 found a relation outside the lattice"
+        );
+        let budgeted = Budget {
+            early_abort: false,
+            max_s3_solves: ctr.s3_solves + 40_000,
+            ..Budget::default()
+        };
+        let (rels, _) = table.extract(
+            &inst,
+            &fb,
+            target,
+            Kernel::S4ChainStrided,
+            3,
+            &budgeted,
+            &mut ctr,
+        );
+        assert!(
+            rels.is_empty(),
+            "kernel B3 found a relation outside the lattice"
+        );
         assert_eq!(ctr.verified_relations, 0);
         assert_eq!(ctr.verification_rejects, 0);
 
@@ -1892,10 +2041,17 @@ mod tests {
         let mut rng = StdRng::seed_from_u64(5);
         let mut ctr = ProbeCounters::default();
         let budget = Budget::default();
-        let mut found = [0u32; 2];
+        let mut found = [0u32; 3];
         for k in 0..6u64 {
             let target = inst.fast.mul_u64(inst.generator, rng.gen_range(1..inst.r));
-            for (slot, kernel) in [Kernel::FourSum, Kernel::IterateTable].into_iter().enumerate() {
+            for (slot, kernel) in [
+                Kernel::FourSum,
+                Kernel::IterateTable,
+                Kernel::S4ChainStrided,
+            ]
+            .into_iter()
+            .enumerate()
+            {
                 let (rels, _) = table.extract(&inst, &fb, target, kernel, k, &budget, &mut ctr);
                 for rel in &rels {
                     assert_eq!(sum_of(&inst, &fb, &rel.indices), target);
@@ -1906,6 +2062,7 @@ mod tests {
         }
         assert!(found[0] > 0, "4-sum found nothing at a saturated rung");
         assert!(found[1] > 0, "kernel A found nothing at a saturated rung");
+        assert!(found[2] > 0, "kernel B3 found nothing at a saturated rung");
         assert_eq!(ctr.verification_rejects, 0);
     }
 }

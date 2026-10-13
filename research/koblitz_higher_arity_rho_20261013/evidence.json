@@ -1,0 +1,26 @@
+{
+  "schema": "koblitz-higher-arity-rho-evidence/v1",
+  "date_utc": "2026-10-13",
+  "baseline_revision": "759978250c1ce53d7b87bd8a1c2304781fcc4fc4",
+  "curve": "icv1-f2m41-tm2308219-7f48b14a",
+  "subgroup_order": 549756390943,
+  "session_id": "ECBS1h4f09e1612522",
+  "session_records_sha256": "8247ab71b378125e532f700b96fe1c30dd53c219e4bdf93a163800f6b3ce5b9c",
+  "audit_receipt_sha256": "767cf32c4d96d4a2720cbb38e6fbea98e9e018a97c0a628faf16e435ec8a7307",
+  "audit": {"ok": true, "records": 20, "verified": 20, "measured_replays": 15, "reproduced": 15},
+  "isolation": {"session_level": "L0", "required_level": "L2", "reason": ["PSI cpu unavailable", "PSI memory unavailable"]},
+  "rho": {"mean_s": 0.13800894018817605, "interval": [0.088, 0.202], "theory_floor_s": 0.13840539283493047, "mean_over_floor": 0.9971355693688378},
+  "arms": {
+    "ic_4sum": {"mean_s": 5.524124438314714, "ratio_to_rho": 40.027294107052306, "sqrt_solves_unpriced": 77136383},
+    "ic_b2_quartic": {"mean_s": 0.7608643482316128, "ratio_to_rho": 5.513152605868645, "s4_pairs_unpriced": 5109566},
+    "ic_b3_chain": {"mean_s": 7.6521280645704755, "ratio_to_rho": 55.446611314721714, "sqrt_solves_unpriced": 10219132},
+    "b3_over_b2": {"counted_ratio": 10.057151557114501, "descriptive_wall_median_ratio": 0.15031590840592143}
+  },
+  "isolated_relation": {
+    "pair_cells_each": 78041,
+    "b2": {"s4_solves": 78041, "extraction_wall_s": 0.8756, "process_wall_s": 0.9112711829998261},
+    "b3": {"s3_solves": 156082, "point_adds": 234129, "extraction_wall_s": 0.136004672, "process_wall_s": 0.18383312600053614}
+  },
+  "wide_gate": {"attempted_surface": "ecbench fb", "n": 83, "admitted": false, "error": "no factor-base plug-in runs on a wide (n > 62) curve yet"},
+  "claim": "B3 is a verified constant-factor root-finding improvement, not a scalable ECDLP speedup; the unchanged pair-cell count and three charged point additions per cell leave the full n=41 pipeline 55.447x matched rho before unpriced work."
+}

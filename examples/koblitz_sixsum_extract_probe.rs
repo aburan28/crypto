@@ -8,7 +8,7 @@
 //!
 //! ```text
 //! cargo run --release --example koblitz_sixsum_extract_probe -- \
-//!     --n=23,31,41 --a=0 --columns=5,10,20 --kernels=4sum,a,b,b2,c \
+//!     --n=23,31,41 --a=0 --columns=5,10,20 --kernels=4sum,a,b,b2,b3,c \
 //!     --relations=32 --seed=20261012 --max-targets=4096 \
 //!     --max-s3=400000000 --max-s4=50000000 --cell-wall-s=300
 //! ```
@@ -71,6 +71,7 @@ fn parse_args() -> Args {
             Kernel::IterateTable,
             Kernel::S4PerProbe,
             Kernel::S4Strided,
+            Kernel::S4ChainStrided,
             Kernel::FiveSumControl,
         ],
         relations: 32,
@@ -112,7 +113,7 @@ fn parse_args() -> Args {
             "keep-relations" => args.keep_relations = value.parse().expect("keep-relations"),
             "help" | "h" => {
                 eprintln!(
-                    "--n=23,31,41 --a=0 --columns=5,10,20 --kernels=4sum,a,b,b2,c --relations=32 --seed=S --max-targets=N --max-s3=N --max-s4=N --cell-wall-s=S --early-abort=1 --raw-x-cap=N --keep-relations=N"
+                    "--n=23,31,41 --a=0 --columns=5,10,20 --kernels=4sum,a,b,b2,b3,c --relations=32 --seed=S --max-targets=N --max-s3=N --max-s4=N --cell-wall-s=S --early-abort=1 --raw-x-cap=N --keep-relations=N"
                 );
                 std::process::exit(0);
             }
@@ -454,10 +455,22 @@ fn main() {
                         rel_per_target,
                         rf / (8.0 * abs_states),
                     ),
+                    // The same de-clustered pair order as B2, with two
+                    // S3 solves per pair cell instead of one S4 solve.
+                    Kernel::S4ChainStrided => (
+                        rf / (8.0 * abs_states),
+                        abs_states * abs_states,
+                        rel_per_target,
+                        rf / (4.0 * abs_states),
+                    ),
                 };
                 let structural_targets = 1.0 / (1.0 - (-rel_per_target).exp());
                 let sparse = scan_solves / unit_lambda;
-                let mu = if kernel == Kernel::S4Strided { 45.0 } else { 6.0 };
+                let mu = if matches!(kernel, Kernel::S4Strided | Kernel::S4ChainStrided) {
+                    45.0
+                } else {
+                    6.0
+                };
                 let interp = scan_solves
                     * ((-unit_lambda).exp() / (1.0 - (-unit_lambda).exp())
                         + 1.0 / (mu * unit_lambda + 1.0));

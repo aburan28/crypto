@@ -38,7 +38,12 @@ COVER_LINKS = "docs/curves/cover-links.yaml"
 STANDARDS_COVERAGE = "docs/curves/standards/coverage.json"
 LEADERBOARD = "docs/ic/leaderboard.json"
 TOURNAMENT_RUNS = "research/ic_candidate_tournament_20260915/runs"
-ECBENCH_SESSIONS_GLOBS = ("research/ecbench_*/sessions/*", "research/isogeny_conductor_gap_*/sessions/*", "research/fiber_ic_scaling_*/sessions/*")
+ECBENCH_SESSIONS_GLOBS = (
+    "research/ecbench_*/sessions/*",
+    "research/isogeny_conductor_gap_*/sessions/*",
+    "research/fiber_ic_scaling_*/sessions/*",
+    "research/koblitz_higher_arity_rho_*/sessions/*",
+)
 IC1_SCAN_GLOBS = (
     "docs/ic/**/*.json",
     "docs/ic/**/*.md",
@@ -67,6 +72,7 @@ VOCABULARY = {
         {"name": "matrix-f4", "where": "ic_run (hybrid kinds matrix-f4, matrix-f5, inherited-f4)", "what": "Boolean Macaulay matrices to a fixed degree, propagation and splitting (koblitz_groebner MatrixF4)."},
         {"name": "pair_table / pair_or_triple", "where": "tournament candidate configs", "what": "Pair (or pair-then-triple) sum table decomposition in the tournament's native solver; the incumbent's oracle."},
         {"name": "semaev_s3_roots, semaev_s4_pairs_and_solve", "where": "ledger runs (docs/ic/runs)", "what": "Third and fourth summation polynomials solved by root finding; historical ladder variants."},
+        {"name": "sixsum-extract", "where": "ic.pipeline (ecbench binary plug-in)", "what": "Frobenius pair-table extraction with 4-sum, quartic-strided B2, or two-S3-chain B3 kernels; every returned relation is re-added before it counts."},
     ],
     "solvers": [
         {"name": "buchberger-f2", "what": "Gröbner basis over F2 by Buchberger's algorithm."},

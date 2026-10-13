@@ -195,6 +195,17 @@ The four n37 arms (strong signed-Frobenius rho, K8, K16 and an identical K16 con
 | `icv1-f2m53-tm56619371-dac20a85` | 44.26 | ic-k16-control | 0/80 | — | — | — | A/A control |
 | `icv1-f2m53-tm56619371-dac20a85` | 44.26 | K16 / K8 | — | — | — | — | unknown (0 verified pairs) |
 
+## n41 higher-arity extraction and matched rho, outside tables A–C
+
+One public target, three paired measured rounds, L0. B2 and B3 use the same pair-cell stream and verified the same relations; B3 replaces each S4 solve with two S3 chains but charges three point additions per cell. All IC figures are lower bounds because named native work is unpriced. Read the [study](../../research/koblitz_higher_arity_rho_20261013/README.md).
+
+| arm | mean cold S (lower bound) | ratio to strong rho |
+|:--|--:|--:|
+| strong rho | 0.138 | 1.000 |
+| B2 quartic | 0.761 | 5.513 |
+| 4-sum | 5.524 | 40.027 |
+| B3 two-S3 chain | 7.652 | 55.447 |
+
 ## Large-prime conductor-gap counted diagnostics
 
 Copied from native analysis: eight independent one-target workloads per fixed curve; no transported targets. Counted S has unpriced native work. These observations do not enter tables A–C or change a full-cost ranking.
@@ -228,6 +239,7 @@ Copied from native analysis: eight independent one-target workloads per fixed cu
 - `research/f4_f5_f6_cross_family_20261011/ANALYSIS.json` — sha256 `143247c6b81d3539…`
 - `research/ecbench_n41_n53_shared_rank_20261005/DECISION.json` — sha256 `fe55908f837840ee…`
 - `research/ecbench_conductor_gap_20261012/analysis.json` — sha256 `0ff9b20fd773ea67…`
+- `research/koblitz_higher_arity_rho_20261013/evidence.json` — sha256 `7d44f251436968db…`
 - `docs/curves/registry.json` — sha256 `5c95bdce54ee3da6…`
 - `docs/curves/ic/curves.schema.json` — sha256 `42cd9793dd299384…`
 - `docs/curves/ic/curves.yaml` — sha256 `566ed698a961aae8…`

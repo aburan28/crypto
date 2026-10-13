@@ -464,9 +464,36 @@ enum DbCmd {
     },
 }
 
+fn sixsum_oracle<'i>(
+    name: &str,
+    _summands: u32,
+    instance: &'i crypto_lib::cryptanalysis::ic_boundary::BinaryInstance,
+) -> Option<
+    Box<
+        dyn crypto_lib::cryptanalysis::ic_framework::stages::DecompositionOracle<
+                crypto_lib::cryptanalysis::ic_boundary::BinaryGroup<'i>,
+            > + 'i,
+    >,
+> {
+    (name == "sixsum-extract").then(|| {
+        Box::new(
+            crypto_lib::cryptanalysis::koblitz_sixsum_extract::SixSumOracle::new(
+                crypto_lib::cryptanalysis::koblitz_sixsum_extract::Kernel::FourSum,
+                instance,
+            ),
+        )
+            as Box<
+                dyn crypto_lib::cryptanalysis::ic_framework::stages::DecompositionOracle<
+                        crypto_lib::cryptanalysis::ic_boundary::BinaryGroup<'i>,
+                    > + 'i,
+            >
+    })
+}
+
 /// Every plug-in this binary links: `pdp3_koblitz`'s, then
 /// `pdp_split_oracle`'s (the `pdp-split` oracle and the `koblitz-closure`
-/// base).  Names do not overlap, so the order only fixes lookup.
+/// base), then the higher-arity pair-table oracle.  Names do not overlap,
+/// so the order only fixes lookup.
 fn binary_plugins() -> crypto_lib::cryptanalysis::ecbench::methods::BinaryPlugins {
     crypto_lib::cryptanalysis::ecbench::methods::BinaryPlugins {
         base: |name, instance| {
@@ -476,6 +503,7 @@ fn binary_plugins() -> crypto_lib::cryptanalysis::ecbench::methods::BinaryPlugin
         oracle: |name, summands, instance| {
             (pdp3_koblitz::plugins().oracle)(name, summands, instance)
                 .or_else(|| pdp_split_oracle::oracle(name, summands, instance))
+                .or_else(|| sixsum_oracle(name, summands, instance))
         },
     }
 }

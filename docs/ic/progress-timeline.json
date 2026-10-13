@@ -1,6 +1,6 @@
 {
   "schema_version": "ic-progress-timeline/1",
-  "updated": "2026-10-12",
+  "updated": "2026-10-13",
   "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
   "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
   "series": [
@@ -340,6 +340,17 @@
           "class": "accounting",
           "anchor": "#conductor-gap-ic37-20261012",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_20261012/README.md"
+        },
+        {
+          "date": "2026-10-13",
+          "value": 5.513152605868645,
+          "reference": "matched",
+          "unit": "counted GAE lower-bound diagnostic",
+          "label": "Higher-arity n41 session: B2 quartic best counted IC arm; B3 chain = 55.447x rho",
+          "detail": "One public point, three paired measured rounds. B2 and B3 generated the same 58 relations over the same 5,109,566 pair cells. B2/rho is 5.513 [3.624, 10.044] with S4 unpriced; B3/rho is 55.447 [36.385, 101.618] after charging three point additions per cell, with S3 and lookups still unpriced. All 20 executions verified and all 15 measured runs replayed exactly. B3 is 6.44x faster than B2 in a separate one-relation wall probe, an engineering improvement that does not lower counted ECDLP cost.",
+          "class": "engineering",
+          "anchor": "#koblitz-higher-arity-20261013",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/koblitz_higher_arity_rho_20261013/README.md"
         }
       ]
     },

@@ -764,6 +764,17 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <tr><td>A/A control (reference repeated)</td><td class="n">1.000</td><td class="n">1.000</td><td class="n">1.000</td><td class="n">1.000</td></tr>
 </tbody></table></div>
 <p class="dash-footnote">The orbit base has no invariant subspace on <code>icv1-f2m19-t797-b6cf2467</code> and <code>icv1-f2m29-tm40309-30c52b96</code> (192 error records, kept). A preregistered follow-up ran those two curves with the <code>binary-subspace</code> base: dimension 8 verifies everywhere at 37.0&times; (n = 19) and 103.5&times; (n = 29) the reference under MITM, 204&times; and 8 081&times; under <code>subtract</code>; dimension 6 solves n = 19 at 6.98&times; and exhausts its 10<sup>6</sup>-trial budget on every n = 29 target. Read the Koblitz column with care: at r &le; 2<sup>21</sup> the strong reference&rsquo;s fixed setup is three to four times its search, so it sits above the lean walk and every BSGS, and every IC ratio against it is flattering by 1.4&ndash;4.3&times;. Host: 4-vCPU Intel Xeon VM, Linux x86-64; counts stand at every isolation level, wall time admitted only on the L2 pairs and descriptive at these sizes. Three complete sessions, 3 136 of 3 392 executions verified, the rest errors or exhaustions with their own status; 36 of 36 audit replays identical. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_all_candidates_20261003/README.md">Protocols, sessions, audit receipts, tables, saved comparisons and the scored predictions</a>. Class: none (AGENTS.md &sect;3); nothing here is a method change, and the best-of table above is unchanged by it. <strong>Yield ledger:</strong> what each of these runs yielded on its target (relations per trial, lookups per relation, matrix rank, and the decomposition solver&rsquo;s own statistics for the algebraic arms) is the <a href="../browser/#yield">Yield view of the lab browser</a>, fed by every committed <code>ecbench</code> session including the <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_yield_sweep_20261004/README.md">4 October yield sweep</a>, which ran every subspace base, oracle and solver on the same Koblitz targets. A yield is a stage diagnostic and never a speed.</p>
+<div id="koblitz-higher-arity-20261013">
+<h3>Higher-arity Koblitz extraction follow-up · 13 October 2026 <span class="chip">engineering</span></h3>
+<p>The two-S3-chain B3 kernel preserves B2&rsquo;s stride-ordered six-sum relation stream and is 6.44&times; faster in a same-cell isolated extraction probe, but its three charged point additions per unchanged pair cell make the full counted pipeline 55.447&times; matched strong rho.</p>
+<div class="scroll"><table><caption>Registered <code>icv1-f2m41-tm2308219-7f48b14a</code>, one public point, three paired measured rounds. Mean cold S is a lower bound; named native work is unpriced.</caption><thead><tr><th>arm</th><th>mean S</th><th>IC / rho</th><th>unpriced relation work</th></tr></thead><tbody>
+<tr><td>strong rho</td><td class="n">0.1380</td><td class="n">1.000</td><td>canonicalization, hashes, table operations</td></tr>
+<tr class="ic-row"><td>B2 quartic</td><td class="n">0.7609</td><td class="n">5.513</td><td>5,109,566 S4 pairs</td></tr>
+<tr class="ic-row"><td>4-sum</td><td class="n">5.5241</td><td class="n">40.027</td><td>77,136,383 S3 solves</td></tr>
+<tr class="ic-row"><td>B3 two-S3 chain</td><td class="n">7.6521</td><td class="n">55.447</td><td>10,219,132 S3 solves</td></tr>
+</tbody></table></div>
+<p>All 20 executions verified and all 15 measured deterministic runs replayed exactly. B2 and B3 found the same 58 relations over the same 5,109,566 pair cells; B3 charged 15,328,698 additional point additions. The session earned L0 because PSI telemetry was unavailable, so its wall comparisons are descriptive. The n = 83 gate is blocked because no wide-field factor-base/IC pipeline exists. <a href="https://github.com/aburan28/crypto/blob/main/research/koblitz_higher_arity_rho_20261013/README.md">Report, visual, PDF, protocol and evidence</a>.</p>
+</div>
 <h3>Binary GHS curve panel: exact model and subgroup differences</h3>
 <p>On 9 October 2026 a separate native <code>ecbench</code> session compared five registered binary-curve models at field degrees 13 and 15. Each cell below is eight independently verified one-target runs, cold and counted in <code>S = group-addition equivalents / &radic;r</code>. All 80 records passed exact replay. The generic matched reference is <code>rho.negation</code> on every model; <code>bsgs.negation</code> is a memory tradeoff with hash work unpriced. Mac isolation was L0, so these are counted diagnostics, not wall-time speedups. An earlier four-size Koblitz panel preserved 13 signed-Frobenius rho exhaustions alongside 107 verified records; it is excluded from this complete-reference table.</p>
 <div class="dash-detail-body" style="padding:0"><table>
@@ -870,12 +881,13 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <tr><td>2026-10-07</td><td>Weak elliptic class: cover and decomposition on E(F_p^6)</td><td>Isogeny walk stage from a non-weak start eight moves from a weak curve, p = 1,009 (subgroup 2^57.9)</td><td class="n">0.0002&times;</td><td>stage</td><td><span class="chip">accounting</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md">source</a> (&sect;17)</td></tr>
 <tr><td>2026-10-12</td><td>Elliptic curve, cold counted-work diagnostics with unpriced native work</td><td>Large-prime conductor-gap IC, ell = 8209, fixed floor, eight one-target workloads</td><td class="n">19.7311&times; <small>bounded count diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ic37-20261012">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_20261012/README.md">source</a></td></tr>
 <tr><td>2026-10-12</td><td>Elliptic curve, cold counted-work diagnostics with unpriced native work</td><td>Large-prime conductor-gap IC, ell = 131101, fixed floor, eight one-target workloads</td><td class="n">45.0827&times; <small>bounded count diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ic37-20261012">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_20261012/README.md">source</a></td></tr>
+<tr><td>2026-10-13</td><td>Elliptic curve, cold counted-work diagnostics with unpriced native work</td><td>Higher-arity n41 session: B2 quartic best counted IC arm; B3 chain = 55.447&times; rho</td><td class="n">5.5132&times; <small>B2 lower bound; B3 55.447&times;</small></td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#koblitz-higher-arity-20261013">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/koblitz_higher_arity_rho_20261013/README.md">source</a></td></tr>
 </tbody></table></div></details>
 <noscript><div class="dash-detail-body"><p>The chart needs JavaScript; the table above lists every plotted point.</p></div></noscript>
 <p class="dash-footnote">What would move the heavy series below the line for good: a cold, one-target, every-phase-priced <code>S</code> below a matched rho&rsquo;s at growing size (AGENTS.md &sect;2, &sect;8). The nearest measured approaches are 1.36&times; (round 0025) and 1.314&times; in CPU time (n41). The exponent story is in the <a href="#boundary-ledger">boundary ledger</a>: no fitted exponent on an elliptic curve sits below rho&rsquo;s one half; the cover route&rsquo;s ratio falls with size but on a weak class.</p>
 <script type="application/json" id="progress-data">{
   "schema_version": "ic-progress-timeline/1",
-  "updated": "2026-10-12",
+  "updated": "2026-10-13",
   "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
   "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
   "series": [
@@ -1215,6 +1227,17 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           "class": "accounting",
           "anchor": "#conductor-gap-ic37-20261012",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_20261012/README.md"
+        },
+        {
+          "date": "2026-10-13",
+          "value": 5.513152605868645,
+          "reference": "matched",
+          "unit": "counted GAE lower-bound diagnostic",
+          "label": "Higher-arity n41 session: B2 quartic best counted IC arm; B3 chain = 55.447x rho",
+          "detail": "One public point, three paired measured rounds. B2 and B3 generated the same 58 relations over the same 5,109,566 pair cells. B2/rho is 5.513 [3.624, 10.044] with S4 unpriced; B3/rho is 55.447 [36.385, 101.618] after charging three point additions per cell, with S3 and lookups still unpriced. All 20 executions verified and all 15 measured runs replayed exactly. B3 is 6.44x faster than B2 in a separate one-relation wall probe, an engineering improvement that does not lower counted ECDLP cost.",
+          "class": "engineering",
+          "anchor": "#koblitz-higher-arity-20261013",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/koblitz_higher_arity_rho_20261013/README.md"
         }
       ]
     },
