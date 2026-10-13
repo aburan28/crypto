@@ -66,9 +66,12 @@ deanonymize: $(TEX)
 	@python3 -c 'import re; \
 tex = open("$(TEX)").read(); \
 authors = open("AUTHORS").read().strip(); \
-tex = re.sub(r"\\author\{Anonymous\}\s*\\date\{\}", authors + "\n", tex, count=1); \
+pa = re.search(r"^%\s*pdfauthor\s*=\s*(.+)$$", authors, re.M); \
+authors = re.sub(r"^%.*\n?", "", authors, flags=re.M).strip(); \
+tex = re.sub(r"\\author\{Anonymous\}\s*\\date\{\}", lambda _: authors + "\n", tex, count=1); \
+tex = tex.replace("pdfauthor={Anonymous}", "pdfauthor={" + pa.group(1).strip() + "}") if pa else tex; \
 open("$(TEX)", "w").write(tex); \
-print("De-anonymized $(TEX); backup saved as $(TEX).anon-backup")'
+print("De-anonymized $(TEX); backup saved as $(TEX).anon-backup" + ("" if pa else "; pdfauthor left as Anonymous (add a %pdfauthor= line to AUTHORS)"))'
 
 check: $(PDF)
 	@echo "Checking $(PDF)..."

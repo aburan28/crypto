@@ -27,7 +27,7 @@ sudo apt-get install texlive-latex-extra texlive-science texlive-fonts-recommend
 make           # PDF (pdflatex + bibtex + two more passes)
 make check     # unresolved refs, overfull boxes, page count
 make arxiv     # arxiv-submission.tar.gz
-make eprint    # eprint-submission.zip
+make eprint    # eprint-submission.zip; the form, fields and rules are in EPRINT.md
 make deanonymize
 make clean
 ```
@@ -90,12 +90,21 @@ paths prefixed `cryptanalysis:` are in the sibling library.
   kernels), written from their READMEs, optimisation notes and
   experiment records, with an evidence-class table up front. Apart
   from the F4 elimination kernels and one Macaulay scheduling run, none
-  of that code has run on a device; the section quotes static
+    of that code has run on a device; the section quotes static
   instruction counts and emulated walk constants and says so.
 
-- Draft 4: a prose pass over every section for readability (first
+- Draft 4: the NIST subsection rewritten after the P-256/P-384 rho
+  kernel's first device run (2026-10-12, RTX PRO 6000 via Modal):
+  the two first-run bugs, the distinguished-point correctness check,
+  the field and walk table (1.340 / 0.438 G steps/s, 1.25x / 2.09x
+  over the first working cells, classed as engineering), and the
+  fifteen-curve CPU solver's audit and measured interval, Frobenius
+  folding and Smart-attack results. Curve25519 added to the
+  secp256k1 row. Abstract, introduction, conclusion and the
+  evidence-class table updated to say which kernels have now run.
+- Draft 5: a prose pass over every section for readability (first
   person plural, shorter sentences, fewer stock phrases; every number,
-  footnote, table and label kept), and a new §7 on the NIST curves:
+  footnote, table and label kept), and a new §7 on the NIST curves (replacing the Draft 4 NIST subsection of §8):
   the `gpu/nist` rho walk's first device runs on the RTX PRO 6000
   (`gpu/nist/RESULTS.md`), set against the ECC2K-130 levers they
   borrow from. The P-256/P-384 row of the other-GPU inventory moves
@@ -123,7 +132,10 @@ paths prefixed `cryptanalysis:` are in the sibling library.
 - Whether the storage bucket's copy of `campaign.json` had its iteration
   guard raised to 2^32 before the fleet stopped is not recorded.
 - The other-GPU section's numbers are static PTX counts (clang,
-  `ptxas` 12.9) and host-emulation operation counts, not device rates;
+  `ptxas` 12.9) and host-emulation operation counts, not device rates,
+  except the NIST table (`gpu/nist/RESULTS.md`), a first device run at
+  one block size that has not yet been through the pre-registered
+  three-repeat protocol;
   the `gpu/ecc` occupancy and stack tables predate the order-six fold
   and the cycle ring and are quoted as such.
 - The NIST round-2 rows (W=32, register caps; 1.632 / 0.548 Gstep/s,

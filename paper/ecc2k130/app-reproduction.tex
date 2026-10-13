@@ -30,6 +30,7 @@ directory each note links.
 \paragraph{NIST P-256 / P-384 rho (Section~\ref{sec:nist}).}
 {\small\begin{verbatim}
 make -C gpu/nist test        # field vs Boost, walk, W-stepper cross-check
+cargo test --release --lib cryptanalysis::ecdlp_nist   # fifteen-curve CPU solver
 cd gpu/nist && make bench ARCH=sm_120 NIST_PTX=1
 ./bench 256 rho 16 8192      # threads, W, iterations (round 1 best cell)
 ./bench 256 rho 32 8192      # round 2 best cell; W=32 needs PR 1778

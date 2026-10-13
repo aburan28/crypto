@@ -33,9 +33,9 @@ kernel family & field & on a device & otherwise \\
 ECC2K-130 client (Sections~\ref{sec:gpu}, \ref{sec:campaign}) & $\FF_{2^{131}}$, ONB & measured, audited & emulated, static \\
 F4 Gröbner elimination (sibling) & $\FF_2$ Macaulay matrices & measured (RTX 5090, H100) & emulated \\
 Macaulay reduced echelon & $\FF_p$, $p=2083$ & one scheduling run (RTX PRO 4500) & emulated, static \\
-secp256k1 rho, baby-step giant-step & $\FF_p$, 256-bit & never & emulated, static \\
+secp256k1 / Curve25519 rho, baby-step giant-step & $\FF_p$, two 256-bit primes & never & emulated, static \\
 secp256k1 kangaroo & $\FF_p$, 256-bit & never & emulated, static \\
-P-256 / P-384 field and rho walk (Section~\ref{sec:nist}) & $\FF_p$, 256- and 384-bit & measured (RTX PRO 6000) & host-verified; protocol pre-registered \\
+P-256 / P-384 field and rho walk (Section~\ref{sec:nist}) & $\FF_p$, 256- and 384-bit & measured (RTX PRO 6000, 2026-10-12) & host-verified; protocol pre-registered \\
 ECC2K-95 kernel & $\FF_{2^{97}}$, polynomial basis & never & emulated, static \\
 Semaev $S_4$ sweep; FES & $\FF_{2^n}$; $\FF_2$ & never & host-timed; emulated \\
 sparse matrix--vector & $\ZZ/m$, $m<2^{63}$ & never & CPU-rechecked \\
@@ -70,6 +70,12 @@ it on the host. Points are Jacobian with the standard $a=0$ doubling
 ($2M+5S$) and mixed addition ($7M+4S$) formulas. The library is a
 throughput library, not a signing library, and is not
 constant-time.\art{gpu/ecc/fp256.cuh}\art{gpu/ecc/point.cuh}
+A second special-reduction path, added in October 2026, serves
+Curve25519 (Ed25519's prime-order group in short-Weierstrass form,
+$p=2^{255}-19$, folded with $2^{256}\equiv38$) through the same
+walk, baby-step giant-step and test suites; it is host-verified
+against the RFC~7748 constants and has not run on a
+device.\art{gpu/ecc/README.md}
 
 \begin{table}[t]
 \centering
@@ -238,7 +244,7 @@ The tool ships no real puzzle keys (no trustworthy offline source),
 does no address scanning, and has not solved any puzzle; the
 synthetic 20-, 28- and 32-bit registry entries are regression fixtures.
 
-\subsection{P-256 and P-384}
+\subsection{P-256 and P-384: the one that has since run}
 \label{sec:othergpu-nist}
 
 The NIST library has graduated from this inventory: it now has device

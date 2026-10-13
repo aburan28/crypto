@@ -1,0 +1,45 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "factor-base suite: Koblitz n=23 a=0 compact-orbit-scan vs signed-Frobenius rho",
+  "description": "compact-orbit-scan and cyclotomic:w=1 on K_0/K_1 style a=0/a=1 rungs. Cyclotomic uses a=1 (usable subgroup). Not a performance claim.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 23
+      }
+    ],
+    "targets_per_curve": 2,
+    "target_seed": 20261013
+  },
+  "arms": [
+    {
+      "name": "rho-frob",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius"
+      }
+    },
+    {
+      "name": "ic-k23-compact",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "compact-orbit-scan:columns=10,raw_x_cap=10000",
+          "oracle": "mitm-frobenius:m=2",
+          "max_trials": "200000"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 2,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 13,
+    "isolation_required": "L0",
+    "timeout_seconds": 180
+  }
+}

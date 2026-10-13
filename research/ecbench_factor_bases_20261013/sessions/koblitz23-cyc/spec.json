@@ -1,0 +1,45 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "factor-base suite: Koblitz n=23 a=1 cyclotomic:w=1 vs signed-Frobenius rho",
+  "description": "A2 cyclotomic-sparse base (w=1) on the a=1 rung where subgroup points exist.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 23
+      }
+    ],
+    "targets_per_curve": 2,
+    "target_seed": 20261013
+  },
+  "arms": [
+    {
+      "name": "rho-frob",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius"
+      }
+    },
+    {
+      "name": "ic-k23-cyc-w1",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "cyclotomic:w=1",
+          "oracle": "mitm-frobenius:m=2",
+          "max_trials": "200000"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 2,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 13,
+    "isolation_required": "L0",
+    "timeout_seconds": 180
+  }
+}
