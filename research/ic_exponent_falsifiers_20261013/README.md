@@ -25,6 +25,10 @@ multiplication in `F_p^*`, where the exponent sum is fixed by the target.
 ## Result
 
 Raw: [`raw/c4_exponent_sum_p20_t8.json`](raw/c4_exponent_sum_p20_t8.json).
+Report: [`REPORT.pdf`](REPORT.pdf) (source `REPORT.typ`); figure
+`figures/c4_class_share.svg` (`figures/plot.py` lays out the raw JSON).
+
+![largest class share per k](figures/c4_class_share.svg)
 
 | `k` | uniform `1/2^k` | curve decompositions | null, same sample size | positive control |
 |--:|--:|--:|--:|--:|
