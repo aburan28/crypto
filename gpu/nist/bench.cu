@@ -71,10 +71,8 @@ template<class F> void bench(const char*name,int threads,int n,int iters){
 /* Compile-time W: the phase arrays unroll into registers; the switch picks
  * the instantiation.  Anything outside {2,4,8,16} falls back to W=8. */
 template<class C,int Wc> __global__ void k_rho(rho_ctx<C> c,int iters){
- typedef typename C::Field F;
  uint32_t tid=blockIdx.x*blockDim.x+threadIdx.x; if(tid>=c.nthreads) return;
- typename F::elt den[Wc],scratch[Wc];
- for(int it=0;it<iters;it++) rho_batch_step_w<C,Wc>(c,tid,den,scratch);
+ for(int it=0;it<iters;it++) rho_batch_step_w<C,Wc>(c,tid);
 }
 #define K_RHO_LAUNCH(C,Wc) do{ \
  k_rho<C,Wc><<<blocks,threads>>>(c,4); CU(cudaGetLastError()); CU(cudaDeviceSynchronize()); \
@@ -123,6 +121,7 @@ template<class C> static void rho_bench(const char*name,const nap<typename C::Fi
   if(wc==2)      K_RHO_LAUNCH(C,2);
   else if(wc==4) K_RHO_LAUNCH(C,4);
   else if(wc==16)K_RHO_LAUNCH(C,16);
+  else if(wc==32)K_RHO_LAUNCH(C,32);
   else           K_RHO_LAUNCH(C,8);
   uint32_t dps=0; CU(cudaMemcpy(&dps,c.dp_count,sizeof(uint32_t),cudaMemcpyDeviceToHost));
   double steps=(double)nw*iters;
