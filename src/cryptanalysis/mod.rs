@@ -127,8 +127,10 @@ pub mod curve_catalog;
 pub mod curve_construction;
 pub mod curve_id;
 pub mod curve_traits;
+pub mod cyclotomic_factor_base;
 pub mod degree_reduction;
 pub mod degree_reduction_anf;
+pub mod delta_method;
 pub mod descent_algebraic;
 pub mod descent_expansion;
 pub mod descent_lowgamma;
@@ -218,6 +220,7 @@ pub mod koblitz_large_prime;
 pub mod koblitz_pdp_phase_a;
 pub mod koblitz_relation_solver;
 pub mod koblitz_rotated_chain;
+pub mod koblitz_sixsum_extract;
 pub mod koblitz_sparse_la;
 pub mod koblitz_strong_rho;
 pub mod koblitz_sym_s4;
@@ -402,8 +405,9 @@ pub use koblitz_index_calculus::{
 pub use koblitz_sparse_la::{
     block_lanczos_solve, block_wiedemann_kernel, filter_relations, solve_sparse_system,
     BlockLanczosOptions, BlockLanczosReport, BlockWiedemannOptions, BlockWiedemannReport,
-    CsrMatrix, FilterOptions, FilterReport, FilteredSystem, SparseCoreSolver, SparseRow,
-    SparseSolveOptions, SparseSolveOutcome, SparseSolveReport, SpmvBackend, SpmvOptions,
+    CsrMatrix, FilterOptions, FilterReport, FilteredSystem, ModWord, SparseCoreSolver,
+    SparseRow, SparseRows, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
+    SpmvBackend, SpmvOptions, Wide, WideModulus, WordWidth, U128, U192, U256,
 };
 pub use lattice::{bkz_reduce, lll_reduce};
 pub use legacy_curve_attacks::{

@@ -1,0 +1,1772 @@
+{
+  "args": {
+    "a": 1,
+    "budget_secs": 600,
+    "cell_timeout_secs": 130,
+    "degrees": [
+      17
+    ],
+    "delta_max": 4,
+    "delta_min": -2,
+    "engine": "inherited",
+    "factor_base": "standard polynomial-basis subspace <1, z, …, z^(ℓ−1)>, every rational point above it",
+    "node_budget": 4096,
+    "oracle": "koblitz_index_calculus::groebner_decompose (chained S3 Weil descent, m·ℓ + (m−2)·n unknowns)",
+    "seed": 20261012,
+    "summands": [
+      2,
+      3
+    ],
+    "targets": 32
+  },
+  "cells": [
+    {
+      "a": 1,
+      "base_points": 125,
+      "decomposed": 1,
+      "delta": 3,
+      "ell": 7,
+      "group_order": "131174",
+      "m": 2,
+      "max_degree_built": 3,
+      "mean_splits": 0.0625,
+      "mean_wall_ms": 0.22429428125,
+      "mean_word_xors": 23599.15625,
+      "measured_fraction": 0.03125,
+      "median_wall_ms": 0.206583,
+      "n": 17,
+      "n_vars": 14,
+      "net_ms_per_relation": 7.177417,
+      "net_word_xors_per_relation": 755173.0,
+      "predicted_delta_factor": 0.125,
+      "predicted_fraction": 0.05781939394858637,
+      "records": [
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 16245,
+          "splits": 0,
+          "wall_ms": 0.4855,
+          "word_xors": 24052
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 259,
+          "splits": 0,
+          "wall_ms": 0.232833,
+          "word_xors": 23176
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 53584,
+          "splits": 0,
+          "wall_ms": 0.208125,
+          "word_xors": 23775
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 41026,
+          "splits": 0,
+          "wall_ms": 0.219375,
+          "word_xors": 25321
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 3,
+          "scalar": 49377,
+          "splits": 1,
+          "wall_ms": 0.25462500000000005,
+          "word_xors": 25038
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 32858,
+          "splits": 0,
+          "wall_ms": 0.21325,
+          "word_xors": 24776
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 3892,
+          "splits": 0,
+          "wall_ms": 0.19975,
+          "word_xors": 24905
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 27745,
+          "splits": 0,
+          "wall_ms": 0.270083,
+          "word_xors": 23263
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 2,
+          "scalar": 31155,
+          "splits": 0,
+          "wall_ms": 0.261708,
+          "word_xors": 21279
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 983,
+          "splits": 0,
+          "wall_ms": 0.185541,
+          "word_xors": 23286
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 2,
+          "reductions": 1,
+          "scalar": 52161,
+          "splits": 0,
+          "wall_ms": 0.012875,
+          "word_xors": 62
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 33733,
+          "splits": 0,
+          "wall_ms": 0.247125,
+          "word_xors": 23084
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 32722,
+          "splits": 0,
+          "wall_ms": 0.206583,
+          "word_xors": 24005
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 28405,
+          "splits": 0,
+          "wall_ms": 0.19425,
+          "word_xors": 24075
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 1242,
+          "splits": 0,
+          "wall_ms": 0.182917,
+          "word_xors": 23478
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 2,
+          "scalar": 62549,
+          "splits": 0,
+          "wall_ms": 0.272875,
+          "word_xors": 23486
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 62591,
+          "splits": 0,
+          "wall_ms": 0.210375,
+          "word_xors": 24586
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 18391,
+          "splits": 0,
+          "wall_ms": 0.188917,
+          "word_xors": 24132
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 30263,
+          "splits": 0,
+          "wall_ms": 0.205625,
+          "word_xors": 24320
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 2,
+          "scalar": 62930,
+          "splits": 0,
+          "wall_ms": 0.207875,
+          "word_xors": 23946
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 2,
+          "scalar": 4334,
+          "splits": 0,
+          "wall_ms": 0.255292,
+          "word_xors": 22491
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 390,
+          "splits": 0,
+          "wall_ms": 0.192,
+          "word_xors": 24003
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 41001,
+          "splits": 0,
+          "wall_ms": 0.188042,
+          "word_xors": 23632
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 33233,
+          "splits": 0,
+          "wall_ms": 0.219542,
+          "word_xors": 25047
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 13253,
+          "splits": 0,
+          "wall_ms": 0.197875,
+          "word_xors": 24776
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 4,
+          "scalar": 53408,
+          "splits": 1,
+          "wall_ms": 0.467708,
+          "word_xors": 37267
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 16828,
+          "splits": 0,
+          "wall_ms": 0.199,
+          "word_xors": 24159
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 52765,
+          "splits": 0,
+          "wall_ms": 0.198709,
+          "word_xors": 23191
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 13934,
+          "splits": 0,
+          "wall_ms": 0.198625,
+          "word_xors": 24551
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 47972,
+          "splits": 0,
+          "wall_ms": 0.197667,
+          "word_xors": 25114
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 32721,
+          "splits": 0,
+          "wall_ms": 0.203208,
+          "word_xors": 23444
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 1,
+          "scalar": 55240,
+          "splits": 0,
+          "wall_ms": 0.199542,
+          "word_xors": 23453
+        }
+      ],
+      "split_free": false,
+      "subgroup_order": "65587",
+      "targets_measured": 32,
+      "targets_requested": 32,
+      "truncated": false
+    },
+    {
+      "a": 1,
+      "base_points": 241,
+      "decomposed": 6,
+      "delta": 1,
+      "ell": 8,
+      "group_order": "131174",
+      "m": 2,
+      "max_degree_built": 3,
+      "mean_splits": 3.0625,
+      "mean_wall_ms": 0.5399649687500001,
+      "mean_word_xors": 68267.59375,
+      "measured_fraction": 0.1875,
+      "median_wall_ms": 0.526042,
+      "n": 17,
+      "n_vars": 16,
+      "net_ms_per_relation": 2.879813166666667,
+      "net_word_xors_per_relation": 364093.8333333333,
+      "predicted_delta_factor": 0.5,
+      "predicted_fraction": 0.19859524484649704,
+      "records": [
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 16245,
+          "splits": 3,
+          "wall_ms": 0.901084,
+          "word_xors": 67068
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 15,
+          "scalar": 259,
+          "splits": 3,
+          "wall_ms": 0.658334,
+          "word_xors": 71606
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 7,
+          "scalar": 53584,
+          "splits": 2,
+          "wall_ms": 0.70925,
+          "word_xors": 72485
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 14,
+          "scalar": 41026,
+          "splits": 5,
+          "wall_ms": 0.541625,
+          "word_xors": 69349
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 4,
+          "scalar": 49377,
+          "splits": 1,
+          "wall_ms": 0.371792,
+          "word_xors": 59939
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 13,
+          "scalar": 32858,
+          "splits": 3,
+          "wall_ms": 0.528042,
+          "word_xors": 69080
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 9,
+          "scalar": 3892,
+          "splits": 3,
+          "wall_ms": 0.6162500000000001,
+          "word_xors": 74775
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 10,
+          "scalar": 27745,
+          "splits": 3,
+          "wall_ms": 0.495041,
+          "word_xors": 67117
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 10,
+          "scalar": 31155,
+          "splits": 3,
+          "wall_ms": 0.396292,
+          "word_xors": 60274
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 13,
+          "scalar": 983,
+          "splits": 3,
+          "wall_ms": 0.545875,
+          "word_xors": 64569
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 10,
+          "scalar": 52161,
+          "splits": 3,
+          "wall_ms": 0.505625,
+          "word_xors": 70012
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 10,
+          "scalar": 33733,
+          "splits": 3,
+          "wall_ms": 0.598584,
+          "word_xors": 68933
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 14,
+          "scalar": 32722,
+          "splits": 3,
+          "wall_ms": 0.5061669999999999,
+          "word_xors": 67424
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 28405,
+          "splits": 3,
+          "wall_ms": 0.552291,
+          "word_xors": 70284
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 12,
+          "scalar": 1242,
+          "splits": 3,
+          "wall_ms": 0.505167,
+          "word_xors": 65796
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 7,
+          "scalar": 62549,
+          "splits": 2,
+          "wall_ms": 0.5647920000000001,
+          "word_xors": 67533
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 6,
+          "scalar": 62591,
+          "splits": 2,
+          "wall_ms": 0.447542,
+          "word_xors": 68977
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 14,
+          "scalar": 18391,
+          "splits": 3,
+          "wall_ms": 0.496125,
+          "word_xors": 66671
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 6,
+          "scalar": 30263,
+          "splits": 2,
+          "wall_ms": 0.5745,
+          "word_xors": 71334
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 13,
+          "scalar": 62930,
+          "splits": 3,
+          "wall_ms": 0.5019170000000001,
+          "word_xors": 67601
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 16,
+          "scalar": 4334,
+          "splits": 6,
+          "wall_ms": 0.5545,
+          "word_xors": 67641
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 390,
+          "splits": 4,
+          "wall_ms": 0.447625,
+          "word_xors": 66085
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 41001,
+          "splits": 3,
+          "wall_ms": 0.483167,
+          "word_xors": 66787
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 33233,
+          "splits": 4,
+          "wall_ms": 0.542125,
+          "word_xors": 70250
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 13,
+          "scalar": 13253,
+          "splits": 3,
+          "wall_ms": 0.523958,
+          "word_xors": 69409
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 5,
+          "scalar": 53408,
+          "splits": 2,
+          "wall_ms": 0.526042,
+          "word_xors": 67461
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 13,
+          "scalar": 16828,
+          "splits": 3,
+          "wall_ms": 0.531042,
+          "word_xors": 68322
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 10,
+          "scalar": 52765,
+          "splits": 3,
+          "wall_ms": 0.735542,
+          "word_xors": 81514
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 9,
+          "scalar": 13934,
+          "splits": 3,
+          "wall_ms": 0.475167,
+          "word_xors": 67899
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 47972,
+          "splits": 4,
+          "wall_ms": 0.491708,
+          "word_xors": 68183
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 9,
+          "scalar": 32721,
+          "splits": 3,
+          "wall_ms": 0.479333,
+          "word_xors": 65428
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 12,
+          "scalar": 55240,
+          "splits": 4,
+          "wall_ms": 0.472375,
+          "word_xors": 64757
+        }
+      ],
+      "split_free": false,
+      "subgroup_order": "65587",
+      "targets_measured": 32,
+      "targets_requested": 32,
+      "truncated": false
+    },
+    {
+      "a": 1,
+      "base_points": 501,
+      "decomposed": 22,
+      "delta": -1,
+      "ell": 9,
+      "group_order": "131174",
+      "m": 2,
+      "max_degree_built": 3,
+      "mean_splits": 13.0625,
+      "mean_wall_ms": 17.812907625,
+      "mean_word_xors": 122498.5,
+      "measured_fraction": 0.6875,
+      "median_wall_ms": 1.4692500000000002,
+      "n": 17,
+      "n_vars": 18,
+      "net_ms_per_relation": 25.90968381818182,
+      "net_word_xors_per_relation": 178179.63636363635,
+      "predicted_delta_factor": 2.0,
+      "predicted_fraction": 0.6158600303575679,
+      "records": [
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 55,
+          "scalar": 16245,
+          "splits": 22,
+          "wall_ms": 1.956833,
+          "word_xors": 140228
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 14,
+          "scalar": 259,
+          "splits": 7,
+          "wall_ms": 0.846791,
+          "word_xors": 100975
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 16,
+          "scalar": 53584,
+          "splits": 7,
+          "wall_ms": 0.853583,
+          "word_xors": 105173
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 26,
+          "scalar": 41026,
+          "splits": 10,
+          "wall_ms": 1.089167,
+          "word_xors": 121426
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 29,
+          "scalar": 49377,
+          "splits": 10,
+          "wall_ms": 24.378542,
+          "word_xors": 115961
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 50,
+          "scalar": 32858,
+          "splits": 17,
+          "wall_ms": 1.711625,
+          "word_xors": 154354
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 17,
+          "scalar": 3892,
+          "splits": 8,
+          "wall_ms": 0.907375,
+          "word_xors": 113477
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 10,
+          "scalar": 27745,
+          "splits": 4,
+          "wall_ms": 0.6935,
+          "word_xors": 100398
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 64,
+          "scalar": 31155,
+          "splits": 29,
+          "wall_ms": 1.5682090000000002,
+          "word_xors": 138059
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 10,
+          "scalar": 983,
+          "splits": 5,
+          "wall_ms": 0.676334,
+          "word_xors": 97788
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 34,
+          "scalar": 52161,
+          "splits": 14,
+          "wall_ms": 1.962417,
+          "word_xors": 135251
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 60,
+          "scalar": 33733,
+          "splits": 22,
+          "wall_ms": 1.52775,
+          "word_xors": 139303
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 15,
+          "scalar": 32722,
+          "splits": 7,
+          "wall_ms": 75.593166,
+          "word_xors": 105765
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 14,
+          "scalar": 28405,
+          "splits": 7,
+          "wall_ms": 2.781,
+          "word_xors": 106630
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 53,
+          "scalar": 1242,
+          "splits": 20,
+          "wall_ms": 1.451542,
+          "word_xors": 136859
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 10,
+          "scalar": 62549,
+          "splits": 5,
+          "wall_ms": 0.7068340000000001,
+          "word_xors": 99789
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 47,
+          "scalar": 62591,
+          "splits": 16,
+          "wall_ms": 1.4692500000000002,
+          "word_xors": 143926
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 29,
+          "scalar": 18391,
+          "splits": 11,
+          "wall_ms": 1.1195000000000002,
+          "word_xors": 122715
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 7,
+          "scalar": 30263,
+          "splits": 5,
+          "wall_ms": 0.670208,
+          "word_xors": 97283
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 55,
+          "scalar": 62930,
+          "splits": 21,
+          "wall_ms": 65.795375,
+          "word_xors": 136196
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 12,
+          "scalar": 4334,
+          "splits": 5,
+          "wall_ms": 0.721917,
+          "word_xors": 100702
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 59,
+          "scalar": 390,
+          "splits": 27,
+          "wall_ms": 95.810167,
+          "word_xors": 136516
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 30,
+          "scalar": 41001,
+          "splits": 14,
+          "wall_ms": 1.134042,
+          "word_xors": 119470
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 50,
+          "scalar": 33233,
+          "splits": 18,
+          "wall_ms": 1.651167,
+          "word_xors": 150669
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 61,
+          "scalar": 13253,
+          "splits": 20,
+          "wall_ms": 1.673875,
+          "word_xors": 149674
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 7,
+          "scalar": 53408,
+          "splits": 4,
+          "wall_ms": 0.68675,
+          "word_xors": 97631
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 37,
+          "scalar": 16828,
+          "splits": 13,
+          "wall_ms": 1.3394590000000002,
+          "word_xors": 131558
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 24,
+          "scalar": 52765,
+          "splits": 11,
+          "wall_ms": 1.026333,
+          "word_xors": 113456
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 19,
+          "scalar": 13934,
+          "splits": 8,
+          "wall_ms": 0.88925,
+          "word_xors": 110180
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 54,
+          "scalar": 47972,
+          "splits": 21,
+          "wall_ms": 264.00858300000004,
+          "word_xors": 136893
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 23,
+          "scalar": 32721,
+          "splits": 10,
+          "wall_ms": 4.522958,
+          "word_xors": 113904
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 52,
+          "scalar": 55240,
+          "splits": 20,
+          "wall_ms": 8.789541999999999,
+          "word_xors": 147743
+        }
+      ],
+      "split_free": false,
+      "subgroup_order": "65587",
+      "targets_measured": 32,
+      "targets_requested": 32,
+      "truncated": false
+    },
+    {
+      "a": 1,
+      "base_points": 29,
+      "decomposed": 1,
+      "delta": 2,
+      "ell": 5,
+      "group_order": "131174",
+      "m": 3,
+      "max_degree_built": 3,
+      "mean_splits": 30.21875,
+      "mean_wall_ms": 124.98832165625001,
+      "mean_word_xors": 918895.59375,
+      "measured_fraction": 0.03125,
+      "median_wall_ms": 123.953708,
+      "n": 17,
+      "n_vars": 32,
+      "net_ms_per_relation": 3999.6262930000003,
+      "net_word_xors_per_relation": 29404659.0,
+      "predicted_delta_factor": 0.25,
+      "predicted_fraction": 0.030512892342335562,
+      "records": [
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 75,
+          "scalar": 16245,
+          "splits": 31,
+          "wall_ms": 8.281583,
+          "word_xors": 948614
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 75,
+          "scalar": 259,
+          "splits": 31,
+          "wall_ms": 304.581167,
+          "word_xors": 944610
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 74,
+          "scalar": 53584,
+          "splits": 30,
+          "wall_ms": 343.89933299999996,
+          "word_xors": 1009094
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 41026,
+          "splits": 31,
+          "wall_ms": 28.062125,
+          "word_xors": 978742
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 49377,
+          "splits": 31,
+          "wall_ms": 328.99225,
+          "word_xors": 940837
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 32858,
+          "splits": 31,
+          "wall_ms": 194.435334,
+          "word_xors": 972300
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 3892,
+          "splits": 31,
+          "wall_ms": 271.057292,
+          "word_xors": 946144
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 27745,
+          "splits": 31,
+          "wall_ms": 16.391541,
+          "word_xors": 980144
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 31155,
+          "splits": 31,
+          "wall_ms": 158.691292,
+          "word_xors": 850613
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 983,
+          "splits": 31,
+          "wall_ms": 11.838916,
+          "word_xors": 942042
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 52161,
+          "splits": 31,
+          "wall_ms": 125.44391699999998,
+          "word_xors": 884524
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 33733,
+          "splits": 31,
+          "wall_ms": 148.571292,
+          "word_xors": 716086
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 75,
+          "scalar": 32722,
+          "splits": 31,
+          "wall_ms": 109.278833,
+          "word_xors": 913898
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 28405,
+          "splits": 31,
+          "wall_ms": 24.408167,
+          "word_xors": 953630
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 1242,
+          "splits": 31,
+          "wall_ms": 7.988874999999999,
+          "word_xors": 901734
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 75,
+          "scalar": 62549,
+          "splits": 31,
+          "wall_ms": 197.980916,
+          "word_xors": 960405
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 75,
+          "scalar": 62591,
+          "splits": 31,
+          "wall_ms": 7.586291999999999,
+          "word_xors": 957540
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 18391,
+          "splits": 31,
+          "wall_ms": 359.496166,
+          "word_xors": 976251
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 30263,
+          "splits": 31,
+          "wall_ms": 146.096791,
+          "word_xors": 954088
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 62930,
+          "splits": 31,
+          "wall_ms": 161.902334,
+          "word_xors": 901535
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 4334,
+          "splits": 31,
+          "wall_ms": 8.579666999999999,
+          "word_xors": 917778
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 390,
+          "splits": 31,
+          "wall_ms": 123.953708,
+          "word_xors": 1004165
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 41001,
+          "splits": 31,
+          "wall_ms": 7.519457999999999,
+          "word_xors": 918389
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 75,
+          "scalar": 33233,
+          "splits": 31,
+          "wall_ms": 239.048167,
+          "word_xors": 957966
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 13253,
+          "splits": 31,
+          "wall_ms": 114.086333,
+          "word_xors": 966994
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 75,
+          "scalar": 53408,
+          "splits": 31,
+          "wall_ms": 41.705834,
+          "word_xors": 904181
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 16828,
+          "splits": 31,
+          "wall_ms": 208.504417,
+          "word_xors": 1001076
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 52765,
+          "splits": 31,
+          "wall_ms": 7.338166999999999,
+          "word_xors": 900592
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 16,
+          "scalar": 13934,
+          "splits": 7,
+          "wall_ms": 2.726667,
+          "word_xors": 420211
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 47972,
+          "splits": 31,
+          "wall_ms": 7.903459,
+          "word_xors": 952449
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 32721,
+          "splits": 31,
+          "wall_ms": 256.103375,
+          "word_xors": 906852
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 75,
+          "scalar": 55240,
+          "splits": 31,
+          "wall_ms": 27.172625,
+          "word_xors": 921175
+        }
+      ],
+      "split_free": false,
+      "subgroup_order": "65587",
+      "targets_measured": 32,
+      "targets_requested": 32,
+      "truncated": false
+    },
+    {
+      "a": 1,
+      "base_points": 63,
+      "decomposed": 8,
+      "delta": -1,
+      "ell": 6,
+      "group_order": "131174",
+      "m": 3,
+      "max_degree_built": 3,
+      "mean_splits": 55.15625,
+      "mean_wall_ms": 217.30278512500004,
+      "mean_word_xors": 1681164.25,
+      "measured_fraction": 0.25,
+      "median_wall_ms": 210.860875,
+      "n": 17,
+      "n_vars": 35,
+      "net_ms_per_relation": 869.2111405000002,
+      "net_word_xors_per_relation": 6724657.0,
+      "predicted_delta_factor": 2.0,
+      "predicted_fraction": 0.2721817843360349,
+      "records": [
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 53,
+          "scalar": 16245,
+          "splits": 22,
+          "wall_ms": 13.68525,
+          "word_xors": 919321
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 162,
+          "scalar": 259,
+          "splits": 68,
+          "wall_ms": 171.43466700000002,
+          "word_xors": 1992835
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 163,
+          "scalar": 53584,
+          "splits": 68,
+          "wall_ms": 457.178833,
+          "word_xors": 2033814
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 163,
+          "scalar": 41026,
+          "splits": 68,
+          "wall_ms": 191.779583,
+          "word_xors": 2046423
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 162,
+          "scalar": 49377,
+          "splits": 68,
+          "wall_ms": 18.182625,
+          "word_xors": 2071380
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 161,
+          "scalar": 32858,
+          "splits": 68,
+          "wall_ms": 618.897541,
+          "word_xors": 1927343
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 9,
+          "scalar": 3892,
+          "splits": 6,
+          "wall_ms": 2.5353749999999997,
+          "word_xors": 365066
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 163,
+          "scalar": 27745,
+          "splits": 68,
+          "wall_ms": 111.993333,
+          "word_xors": 2095196
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 162,
+          "scalar": 31155,
+          "splits": 68,
+          "wall_ms": 391.623834,
+          "word_xors": 1944370
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 163,
+          "scalar": 983,
+          "splits": 68,
+          "wall_ms": 187.68925,
+          "word_xors": 2040508
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 163,
+          "scalar": 52161,
+          "splits": 68,
+          "wall_ms": 396.974667,
+          "word_xors": 1942426
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 163,
+          "scalar": 33733,
+          "splits": 68,
+          "wall_ms": 231.203792,
+          "word_xors": 1796603
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 59,
+          "scalar": 32722,
+          "splits": 26,
+          "wall_ms": 179.255166,
+          "word_xors": 922983
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 29,
+          "scalar": 28405,
+          "splits": 13,
+          "wall_ms": 16.81775,
+          "word_xors": 624400
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 163,
+          "scalar": 1242,
+          "splits": 68,
+          "wall_ms": 242.6425,
+          "word_xors": 1980385
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 161,
+          "scalar": 62549,
+          "splits": 68,
+          "wall_ms": 303.875584,
+          "word_xors": 2015014
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 162,
+          "scalar": 62591,
+          "splits": 68,
+          "wall_ms": 238.123167,
+          "word_xors": 2042460
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 162,
+          "scalar": 18391,
+          "splits": 68,
+          "wall_ms": 276.709542,
+          "word_xors": 2022008
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 163,
+          "scalar": 30263,
+          "splits": 68,
+          "wall_ms": 575.695792,
+          "word_xors": 2045271
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 59,
+          "scalar": 62930,
+          "splits": 26,
+          "wall_ms": 14.478583,
+          "word_xors": 901410
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 162,
+          "scalar": 4334,
+          "splits": 68,
+          "wall_ms": 18.160541,
+          "word_xors": 2049573
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 160,
+          "scalar": 390,
+          "splits": 68,
+          "wall_ms": 449.66125,
+          "word_xors": 1998771
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 30,
+          "scalar": 41001,
+          "splits": 13,
+          "wall_ms": 33.195792000000004,
+          "word_xors": 631060
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 161,
+          "scalar": 33233,
+          "splits": 68,
+          "wall_ms": 17.858166,
+          "word_xors": 2041462
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 163,
+          "scalar": 13253,
+          "splits": 68,
+          "wall_ms": 541.089042,
+          "word_xors": 2126366
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 161,
+          "scalar": 53408,
+          "splits": 68,
+          "wall_ms": 297.260333,
+          "word_xors": 1982189
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 163,
+          "scalar": 16828,
+          "splits": 68,
+          "wall_ms": 256.002958,
+          "word_xors": 1965607
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 163,
+          "scalar": 52765,
+          "splits": 68,
+          "wall_ms": 210.860875,
+          "word_xors": 2027700
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 13934,
+          "splits": 7,
+          "wall_ms": 2.335833,
+          "word_xors": 442203
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 163,
+          "scalar": 47972,
+          "splits": 68,
+          "wall_ms": 233.998333,
+          "word_xors": 2013649
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 46,
+          "scalar": 32721,
+          "splits": 20,
+          "wall_ms": 124.734333,
+          "word_xors": 840119
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 162,
+          "scalar": 55240,
+          "splits": 68,
+          "wall_ms": 127.75483400000002,
+          "word_xors": 1949341
+        }
+      ],
+      "split_free": false,
+      "subgroup_order": "65587",
+      "targets_measured": 32,
+      "targets_requested": 32,
+      "truncated": false
+    }
+  ],
+  "generated_utc": "unix:1791849737",
+  "host": {
+    "arch": "aarch64",
+    "os": "macos"
+  },
+  "lead": "Shantz–Teske delta method, net cost per relation",
+  "skipped": [],
+  "wall_ms": 11673.380041
+}

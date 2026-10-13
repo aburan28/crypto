@@ -13,6 +13,7 @@
 //! | `binary-subspace` | binary, Koblitz | points whose abscissa lies in an `F_2`-subspace |
 //! | `koblitz-orbit` | Koblitz | the same, each signed Frobenius orbit folded onto one column |
 //! | `compact-orbit-scan` | Koblitz | deterministic raw-abscissa scan, subgroup projection and signed Frobenius closure |
+//! | `cyclotomic` | Koblitz, `2n+1` prime | the γ-weight-`w` abscissae `Σ_{k∈S} γ^k` (lead A2), projected and folded like `compact-orbit-scan` |
 //! | `glv-orbit` | prime | the closure of the smallest abscissae under the curve's automorphism group, each orbit folded onto one column (`j = 0`: 6 points a column, `j = 1728`: 4, generic: 2) |
 //! | `gls-line` | GLS over `F_{p²}` | the `ψ`-stable line `x ∈ u·s·F_p`, each `⟨−1, ψ⟩`-orbit folded onto one column (4 points a column) |
 //!
@@ -40,6 +41,7 @@ use std::time::{Duration, Instant};
 
 use num_traits::ToPrimitive;
 
+use super::large_prime::{LargePrimeCollector, LargePrimeConfig};
 use super::stages::{
     BooleanSystem, DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SolverCost,
     SolverTotals, SolverVerdict, SystemShape, SystemSolver,
@@ -50,6 +52,7 @@ use crate::cryptanalysis::ic_boundary::{
     binary_subspace_factor_base, decompose_mitm, decompose_mitm_frobenius, koblitz_factor_base,
     prime_factor_base, BinaryGroup, BinaryInstance, ColumnFold, CountedGroup, FactorBase,
     FrobeniusPairTable, GroupOps, OracleCounters, PairTable, PrimeCurve, PrimeInstance, PrimePoint,
+    Relation,
 };
 use crate::cryptanalysis::koblitz_factor_base_search::subspace_is_trace_zero;
 use crate::cryptanalysis::koblitz_fast::FastPoint;
@@ -708,6 +711,154 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for CompactOrbitScanBase<'_> {
     }
 }
 
+/// **The cyclotomic-sparse base** (lead A2): abscissae `x = Σ_{k∈S} γ^k`
+/// with `|S| = w`, `γ` a primitive `(2n+1)`-th root of unity — the second
+/// Frobenius-stable family at prime `n`, with a polynomial membership
+/// description (`cyclotomic_factor_base`).  Each abscissa's rational
+/// points are projected into the subgroup by the cofactor and the
+/// projected signed Frobenius orbits are folded onto one column each
+/// with weights `±λ^t`, exactly as `compact-orbit-scan` does for raw
+/// abscissae.  Needs `2n + 1` prime with `ord_{2n+1}(2) = n`
+/// (`n ∈ {11, 23, 35, 39, …}` in the single-word range).
+pub struct CyclotomicBase<'i> {
+    pub instance: &'i BinaryInstance,
+}
+
+impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for CyclotomicBase<'_> {
+    fn name(&self) -> &str {
+        "cyclotomic"
+    }
+
+    fn describe(&self, params: &Params) -> String {
+        format!(
+            "projected signed Frobenius orbits of the gamma-weight-{} abscissae (gamma a primitive (2n+1)-th root of unity)",
+            params.get("w").unwrap_or("?")
+        )
+    }
+
+    fn parameters(&self) -> &[(&str, &str)] {
+        &[
+            (
+                "w",
+                "gamma-weight of the abscissae: x = sum of w distinct powers of gamma; the set has C(2n+1, w) elements",
+            ),
+            (
+                "columns",
+                "optional cap on the number of distinct projected signed orbits, in canonical abscissa order; 0 or absent takes them all",
+            ),
+        ]
+    }
+
+    fn build(
+        &self,
+        ctx: &InstanceCtx<BinaryGroup<'a>>,
+        params: &Params,
+        ops: &mut GroupOps,
+    ) -> Result<FactorBase<FastPoint>, String> {
+        use crate::cryptanalysis::cyclotomic_factor_base::CyclotomicField;
+        let inst = self.instance;
+        let kc = inst
+            .koblitz
+            .as_ref()
+            .ok_or("cyclotomic requires a Koblitz curve")?;
+        if ctx.r != inst.r || ctx.cofactor != inst.cofactor || ctx.field_degree != Some(inst.n) {
+            return Err("cyclotomic context does not match its binary instance".into());
+        }
+        let w = usize::try_from(params.u64("w")?).map_err(|_| "w does not fit in usize")?;
+        let column_cap = match params.get("columns") {
+            None => 0usize,
+            Some(_) => usize::try_from(params.u64("columns")?)
+                .map_err(|_| "columns does not fit in usize")?,
+        };
+        if inst.n == 0 || inst.n >= 64 || inst.n.is_multiple_of(2) {
+            return Err("cyclotomic requires an odd degree < 64".into());
+        }
+        let field = CyclotomicField::new(&inst.irreducible, inst.n)?;
+        let abscissae = field.gamma_weight_set(w)?;
+        let lambda = kc
+            .lambda
+            .to_u64()
+            .ok_or("Frobenius eigenvalue does not fit in u64")?;
+        let g = ctx.group;
+        let mut seen = HashSet::new();
+        let mut points = Vec::new();
+        let mut col_of = Vec::new();
+        let mut coef_of = Vec::new();
+        let (mut lifts, mut projected, mut frobenius_maps) = (0u64, 0u64, 0u64);
+        'outer: for x in &abscissae {
+            let raw_x = x.raw_bits().first().copied().unwrap_or(0);
+            for point in inst.points_with_x(raw_x) {
+                lifts += 1;
+                let seed = g.mul(ops, point, ctx.cofactor);
+                if g.is_identity(&seed) {
+                    continue;
+                }
+                projected += 1;
+                let mut xk = seed.x;
+                let mut key = xk;
+                for _ in 1..inst.n {
+                    xk = inst.gf.sqr(xk);
+                    key = key.min(xk);
+                }
+                if !seen.insert(key) {
+                    continue;
+                }
+                if !g.is_identity(&g.mul(ops, seed, ctx.r)) {
+                    return Err(format!("projected point from x {raw_x} has wrong order"));
+                }
+                let column = seen.len() - 1;
+                let mut member = seed;
+                let mut coefficient = 1u64;
+                for _ in 0..inst.n {
+                    if !inst.fast.is_on_curve(member) {
+                        return Err(format!("Frobenius image from x {raw_x} is off curve"));
+                    }
+                    points.push(member);
+                    col_of.push(column);
+                    coef_of.push(coefficient);
+                    points.push(g.neg(member));
+                    col_of.push(column);
+                    coef_of.push((ctx.r - coefficient) % ctx.r);
+                    member = inst.fast.frobenius_k(member, 1);
+                    frobenius_maps += 1;
+                    coefficient = ((coefficient as u128 * lambda as u128) % ctx.r as u128) as u64;
+                }
+                if member != seed || coefficient != 1 {
+                    return Err(format!("Frobenius orbit from x {raw_x} is not closed"));
+                }
+                if column_cap > 0 && seen.len() == column_cap {
+                    break 'outer;
+                }
+            }
+        }
+        let columns = seen.len();
+        if columns == 0 {
+            return Err(format!(
+                "no gamma-weight-{w} abscissa carries a subgroup point on {}",
+                inst.name
+            ));
+        }
+        let mut fb = FactorBase::from_column_map(
+            format!(
+                "{columns} projected signed Frobenius orbits of the {} gamma-weight-{w} abscissae",
+                abscissae.len()
+            ),
+            points,
+            col_of,
+            coef_of,
+            columns,
+            |p| p.pack(),
+            |p| inst.fast.neg(*p).pack(),
+            |p| p.x,
+        )?;
+        fb.cost.count("abscissae_enumerated_uncharged", abscissae.len() as u64);
+        fb.cost.count("point_lifts_uncharged", lifts);
+        fb.cost.count("cofactor_projected_points", projected);
+        fb.cost.count("frobenius_maps", frobenius_maps);
+        Ok(fb)
+    }
+}
+
 /// The prime-field analogue of `koblitz-orbit`: the `size` smallest
 /// abscissae, closed under the curve's automorphism group and folded
 /// one orbit to a column.  `group` picks the group (`auto` takes what
@@ -923,10 +1074,18 @@ impl<G: CountedGroup> DecompositionOracle<G> for MitmOracle {
 
 /// Meet in the middle on a table folded by the signed Frobenius: the
 /// same probe over a table `2n` times smaller.
+///
+/// With `large_primes=1` or `2` (and `m=3`) the oracle runs the same
+/// probe loop through the large-prime collector
+/// ([`LargePrimeCollector`]), which keeps partial relations whose
+/// residual lies in a bounded domain `D` of `lp_domain_factor · |F|`
+/// signed points and returns the complete relations they merge into;
+/// see `ic_framework::large_prime`.
 pub struct FrobeniusMitmOracle<'i> {
     m: u32,
     instance: &'i BinaryInstance,
     table: Option<FrobeniusPairTable>,
+    large: Option<LargePrimeCollector<'i>>,
     count_setup: bool,
 }
 
@@ -936,6 +1095,7 @@ impl<'i> FrobeniusMitmOracle<'i> {
             m,
             instance,
             table: None,
+            large: None,
             count_setup: false,
         }
     }
@@ -945,8 +1105,19 @@ impl<'i> FrobeniusMitmOracle<'i> {
             m,
             instance,
             table: None,
+            large: None,
             count_setup: true,
         }
+    }
+
+    /// The large-prime collector of this run, when `large_primes` is set.
+    pub fn large_prime_collector(&self) -> Option<&LargePrimeCollector<'i>> {
+        self.large.as_ref()
+    }
+
+    /// The first error the collector's exact eliminator returned, if any.
+    pub fn large_prime_error(&self) -> Option<&str> {
+        self.large.as_ref().and_then(|lp| lp.last_error())
     }
 }
 
@@ -963,17 +1134,57 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for FrobeniusMitmOracle<'_> {
         self.m
     }
 
-    fn describe(&self, _params: &Params) -> String {
-        "a pair table folded by the signed Frobenius, one entry per orbit".into()
+    fn describe(&self, params: &Params) -> String {
+        match LargePrimeConfig::from_params(params) {
+            Ok(Some(config)) => format!(
+                "a pair table folded by the signed Frobenius, one entry per orbit, plus a large-prime collector with up to {} residuals in a domain of {} × |F| signed points",
+                config.large_primes, config.domain_factor
+            ),
+            _ => "a pair table folded by the signed Frobenius, one entry per orbit".into(),
+        }
+    }
+
+    fn parameters(&self) -> &[(&str, &str)] {
+        &[
+            ("m", "summands, 2 or 3"),
+            (
+                "large_primes",
+                "0 (default), 1 or 2 residual points outside the base a partial relation may carry; needs m=3",
+            ),
+            (
+                "lp_domain_factor",
+                "size of the large-prime domain D as a multiple of |F| in signed points (default 10); D is the next projected signed Frobenius orbits of the raw-x scan after the base's",
+            ),
+            (
+                "lp_raw_x_cap",
+                "inclusive raw-abscissa cap of the scan that materialises D (default 2^40)",
+            ),
+        ]
     }
 
     fn prepare(
         &mut self,
-        _ctx: &InstanceCtx<BinaryGroup<'a>>,
+        ctx: &InstanceCtx<BinaryGroup<'a>>,
         fb: &FactorBase<FastPoint>,
-        _params: &Params,
+        params: &Params,
         ops: &mut GroupOps,
     ) -> Result<(), String> {
+        if let Some(config) = LargePrimeConfig::from_params(params)? {
+            if self.m != 3 {
+                return Err("large_primes needs the three-summand probe loop (m=3)".into());
+            }
+            // The collector builds the classic table itself (its direct
+            // path is the plain probe) and the large table beside it.
+            self.large = Some(LargePrimeCollector::new(
+                self.instance,
+                ctx,
+                fb,
+                config,
+                ops,
+            )?);
+            self.table = None;
+            return Ok(());
+        }
         let table = FrobeniusPairTable::build(self.instance, fb)
             .ok_or("this instance has no Koblitz structure to fold by")?;
         ops.merge(table.build_ops);
@@ -983,6 +1194,9 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for FrobeniusMitmOracle<'_> {
 
     fn setup_native(&self) -> BTreeMap<String, u64> {
         let mut counts = BTreeMap::new();
+        if let Some(lp) = &self.large {
+            counts.extend(lp.setup_counters());
+        }
         if self.count_setup {
             if let Some(table) = &self.table {
                 counts.insert("canonicalisations".into(), table.build_canonicalisations);
@@ -1005,6 +1219,32 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for FrobeniusMitmOracle<'_> {
     ) -> Option<Vec<usize>> {
         let table = self.table.as_ref()?;
         decompose_mitm_frobenius(ctx.group, fb, table, self.m, ops, counters, point)
+    }
+
+    fn decompose_relations(
+        &mut self,
+        ctx: &InstanceCtx<BinaryGroup<'a>>,
+        fb: &FactorBase<FastPoint>,
+        ops: &mut GroupOps,
+        counters: &mut OracleCounters,
+        point: FastPoint,
+        a: u64,
+        b: u64,
+    ) -> Vec<Relation> {
+        match self.large.as_mut() {
+            Some(lp) => lp.decompose(ctx, fb, ops, counters, point, a, b),
+            None => match self.decompose(ctx, fb, ops, counters, point) {
+                Some(summands) => vec![Relation::Summands(summands)],
+                None => Vec::new(),
+            },
+        }
+    }
+
+    fn relation_counters(&self) -> BTreeMap<String, u64> {
+        self.large
+            .as_ref()
+            .map(|lp| lp.relation_counters())
+            .unwrap_or_default()
     }
 }
 
