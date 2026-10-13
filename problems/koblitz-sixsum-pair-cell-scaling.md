@@ -23,6 +23,7 @@ registered n=83 gate before any ECC2K-130 transfer discussion.
 ## Evidence and uncertainty
 
 - **Observed:** [session ECBS1h4f09e1612522](../research/koblitz_higher_arity_rho_20261013/sessions/n41-local-l0/session.json) verified all 20 executions and [replayed](../research/koblitz_higher_arity_rho_20261013/sessions/n41-local-l0/audit-replay-all.json) all 15 measured runs. B3 and B2 found the same 58 relations and visited the same 5,109,566 pair cells. B3 charged 15,328,698 additional point additions and measured `S=7.652`, `55.447x` rho's `S=0.138`; S3/lookups remain unpriced. An isolated same-cell probe did make B3 extraction 6.44x faster than B2.
+- **Observed end-to-end wall diagnostic:** [session ECBS1hb77d7527b579](../research/koblitz_higher_arity_rho_20261013/sessions/n41-e2e-wall-l0-1/session.json) verified 24/24 executions and [replayed](../research/koblitz_higher_arity_rho_20261013/sessions/n41-e2e-wall-l0-1/audit-replay-all.json) all 20 measured runs. Over five measured rounds, B3 averaged 3.137 s cold solve versus B2's 22.536 s and strong rho's 13.005 ms. Relation extraction consumed 3.105 s (98.981%) of B3 and 22.504 s (99.858%) of B2. Both kernels visited 10,128,845 cells for the same 98 relations: 2,025,769 cells per solve and 103,355.6 cells per relation. The host earned L0, so the wall values are descriptive.
 - **Derived or proved:** on this implementation and workload, replacing S4 by the two-S3 chain changes constant-factor field work but not pair-cell count; charging three additions per visited cell explains the counted regression. No asymptotic lower bound is proved.
 - **Suspected explanation:** useful progress requires sharing the constructed `R +/- s1` points across cells/targets or changing the collision/relation representation so materially fewer cells are visited. This is a design hypothesis, not an established construction.
 - **Missing capability:** `ecbench fb` reports `no factor-base plug-in runs on a wide (n > 62) curve yet`; `ic.pipeline` has no wide dispatcher, so B3 cannot run at n=83.
@@ -51,4 +52,9 @@ transfer and independent replication obligations.
 2026-10-13: opened after the two-S3-chain implementation and audited matched-rho
 session. The earlier broad blocker is narrowed to unchanged pair-cell work plus
 the missing wide IC path. Unresolved.
+
+2026-10-13: five-round cold end-to-end timing localized 98.98% of B3 solve wall
+to relation extraction and reproduced the unchanged pair-cell count. The
+evidence strengthens the empirical localization but does not resolve the
+blocker or establish an admitted wall ratio.
 

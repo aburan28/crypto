@@ -1,0 +1,79 @@
+{
+  "schema": "koblitz.e2e_timing/v1",
+  "session_id": "ECBS1hb77d7527b579",
+  "spec_id": "ECS1hc7fc552628ee",
+  "workload_id": "W2d6c43bf8940",
+  "curve": "icv1-f2m41-tm2308219-7f48b14a",
+  "isolation": "L0",
+  "measured_runs_per_arm": 5,
+  "arms": [
+    {
+      "arm": "rho-strong",
+      "label": "strong rho",
+      "mean_solve_seconds": 0.0130053884,
+      "median_solve_seconds": 0.011904261,
+      "min_solve_seconds": 0.010353719,
+      "max_solve_seconds": 0.017548736,
+      "mean_process_seconds": 0.0340533006,
+      "mean_online_seconds": 0.010320223
+    },
+    {
+      "arm": "ic-b3-chain",
+      "label": "B3 two-S3 chain",
+      "mean_solve_seconds": 3.1373804042,
+      "median_solve_seconds": 3.126485885,
+      "min_solve_seconds": 2.460766067,
+      "max_solve_seconds": 3.933317904,
+      "mean_process_seconds": 3.1851792922,
+      "mean_online_seconds": 3.1060130022,
+      "phase_mean_seconds": {
+        "factor base": 0.0005936632,
+        "oracle setup": 0.0285233,
+        "relations": 3.105422994,
+        "linear algebra": 0.0003657256,
+        "verification": 0.000014551
+      },
+      "relation_share_of_solve": 0.9898139829785324
+    },
+    {
+      "arm": "ic-b2-quartic",
+      "label": "B2 quartic",
+      "mean_solve_seconds": 22.536314974,
+      "median_solve_seconds": 22.282719867,
+      "min_solve_seconds": 17.603965913,
+      "max_solve_seconds": 27.906239481,
+      "mean_process_seconds": 22.5880236272,
+      "mean_online_seconds": 22.5051739708,
+      "phase_mean_seconds": {
+        "factor base": 0.000615604,
+        "oracle setup": 0.027690576,
+        "relations": 22.5042370036,
+        "linear algebra": 0.0007524338,
+        "verification": 0.000014874
+      },
+      "relation_share_of_solve": 0.998576609776842
+    }
+  ],
+  "derived": {
+    "solve_ratio_b3_over_b2": 0.13921443713488985,
+    "solve_ratio_b3_over_rho": 241.23696330361037,
+    "solve_ratio_b2_over_rho": 1732.8444396170437,
+    "process_ratio_b3_over_rho": 93.53511219408787,
+    "relation_ratio_b3_over_b2": 0.1379928141311001,
+    "paired_median_solve_ratio_b3_over_b2": 0.13978475527396916,
+    "paired_median_solve_ratio_b3_over_rho": 279.8947
+  },
+  "relation_counters": {
+    "verified_relations_each_kernel": 98,
+    "trials_each_kernel": 98,
+    "pair_cells_each_kernel": 10128845,
+    "pair_cells_per_solve": 2025769,
+    "pair_cells_per_verified_relation": 103355.5612244898,
+    "lookups_each_kernel": 40515237,
+    "b2_s4_solves": 10128845,
+    "b3_s3_solves": 20257690,
+    "b2_relation_microseconds_per_cell": 11.10898478730793,
+    "b3_relation_microseconds_per_cell": 1.532960072940202
+  },
+  "source": "../../sessions/n41-e2e-wall-l0-1/resources.json"
+}

@@ -69,13 +69,44 @@ ratio is `0.150x`: cheaper field root finding, more charged group work.
 
 ## Current blocker
 
+### End-to-end elapsed-time follow-up
+
+A second frozen session, `ECBS1hb77d7527b579`, ran the complete cold pipeline
+for five measured rounds on the same public n=41 target. All 24 executions
+verified and exact replay reproduced all 20 measured deterministic runs. The
+host again earned L0 because CPU and memory PSI telemetry were unavailable, so
+these elapsed times are descriptive.
+
+| arm | cold solve mean | process mean | online mean | dominant phase |
+|---|---:|---:|---:|---|
+| strong rho | 13.005 ms | 34.053 ms | 10.320 ms | rho solve |
+| B3 two-S3 chain | 3.137 s | 3.185 s | 3.106 s | relations: 3.105 s (98.981%) |
+| B2 quartic | 22.536 s | 22.588 s | 22.505 s | relations: 22.504 s (99.858%) |
+
+B3 uses `0.1392x` B2's cold solve wall (`7.183x` less), but still uses
+`241.237x` rho's cold solve wall on the ratio of recorded sums. The apparently
+conflicting counted and elapsed-time results measure different work: B3 charges
+three group additions per unchanged pair cell, while B2's S4 and B3's S3 field
+root work remain unpriced in `S`. Thus B3 is `10.121x` B2 in counted `S` yet
+`7.183x` faster in descriptive wall time.
+
+The phase records localize the implementation bottleneck. Across the five
+measured runs, both kernels produced the same 98 relations from the same
+10,128,845 pair cells and 40,515,237 lookups. That is 2,025,769 cells per cold
+solve and 103,355.6 cells per accepted relation. B3 reduces processing from
+11.109 us to 1.533 us per cell, but it does not reduce the number of cells.
+
+The complete run report, graph and raw links are in
+[`reports/run-20261013T2207Z`](reports/run-20261013T2207Z/).
+
 The blocker is now narrower than “make S4 faster.” The extraction shape still
-enumerates about 88,096 pair cells per accepted relation at this rung. Replacing
-one quartic with two S3 solves makes each cell faster in wall time, but adding
-three group operations per cell overwhelms rho before the unpriced S3 and
-lookup work is included. A scalable candidate must reduce the number of cells
-or amortize point construction across many cells/targets; another constant-
-factor root-finder substitution on the same scan will not close the gap.
+enumerates about 88,096 pair cells per accepted relation in the first session
+and 103,355.6 in the five-round follow-up. Replacing one quartic with two S3
+solves makes each cell faster in wall time, but adding three group operations
+per cell overwhelms rho before the unpriced S3 and lookup work is included. A
+scalable candidate must reduce the number of cells or amortize point
+construction across many cells/targets; another constant-factor root-finder
+substitution on the same scan will not close the gap.
 
 The required n=83 confidence gate cannot run in the native pipeline yet.
 `ecbench fb` fails closed with:

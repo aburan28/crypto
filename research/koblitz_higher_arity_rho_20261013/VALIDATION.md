@@ -40,3 +40,25 @@ changing the Rust AST or measured path.
    sandbox. The committed PNG was rendered from the equivalent TeX chart
    source, and the two-page report PDF was visually inspected after rendering.
 
+## End-to-end timing follow-up
+
+| Gate | Command/surface | Outcome |
+|---|---|---|
+| Frozen plan | `ecbench plan --spec E2E_SPEC.json` | spec `ECS1hc7fc552628ee`; 24 executions on registered workload `W2d6c43bf8940` |
+| Strict isolation attempt | `ecbench run --wait --cpus auto` | refused before execution because CPU and memory PSI were unavailable; exact stderr preserved in `records/e2e-l2-refusal.stderr.txt` |
+| Diagnostic session | session `ECBS1hb77d7527b579`, explicit `--allow-busy` | 24/24 executions verified; all measured runs L0 |
+| Exact audit | `ecbench verify --replay-all` | 20/20 measured deterministic replays identical; zero problems; receipt `46f230bbd9d91d8b79745a3701d547ace0f434bf2daa4232291c4d95034ffcfd` |
+| Full release library | `cargo test --release --lib` | 4,059 passed, 0 failed, 114 ignored |
+| Lab browser | `python3 scripts/build_lab_browser.py --check` | current after adding the new session |
+| Leaderboard | `python3 scripts/build_ic_leaderboard.py --check` | current |
+| Site invariants | `python3 scripts/site/test_build.py` | 48 passed |
+| JSON and plot source | `jq empty ...`; `python3 -m py_compile .../plot.py` | passed |
+| Benchmark copies | byte comparisons of PDF, SVG and PNG | identical to the study sources |
+| Patch hygiene | `git diff --check` | clean |
+
+The first site validation in the resumed sparse checkout could not see tracked
+browser inputs. After the generator's declared scan paths were materialized,
+the browser was regenerated without dropping historical identities and all 48
+site tests passed. The final two-page follow-up PDF was rendered and visually
+inspected page by page; labels, identifiers, tables and limits are legible.
+
