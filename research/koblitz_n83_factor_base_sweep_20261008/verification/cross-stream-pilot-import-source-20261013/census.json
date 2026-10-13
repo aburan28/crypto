@@ -1,0 +1,212 @@
+{
+  "archive_import_executed": false,
+  "ordered_cross_stream_pairs": 648,
+  "other_arm_rows_excluded": 27,
+  "pilot_manifest_sha256": "5bd862987844f709e03beeab9fd265e3d2024011bcadcb82f5af9c72018df6a6",
+  "primary_objects": [
+    {
+      "columns": 64,
+      "compressed_blake3": "8208e5e9e378c8e65a621fffec6ce49b0f6adcfc846b61fdbf1e05d0eda9cfa9",
+      "policy": "public_x_gray_prefix",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/8208e5e9e378c8e65a621fffec6ce49b0f6adcfc846b61fdbf1e05d0eda9cfa9.jsonl.gz",
+      "seed": 2026100801
+    },
+    {
+      "columns": 256,
+      "compressed_blake3": "8dd0c4692b9cc8c5ac38cf38dbb81224cb84c6acc0308a62bbf9c0edbfc719d3",
+      "policy": "public_x_gray_prefix",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/8dd0c4692b9cc8c5ac38cf38dbb81224cb84c6acc0308a62bbf9c0edbfc719d3.jsonl.gz",
+      "seed": 2026100801
+    },
+    {
+      "columns": 600,
+      "compressed_blake3": "966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47",
+      "policy": "public_x_gray_prefix",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47.jsonl.gz",
+      "seed": 2026100801
+    },
+    {
+      "columns": 64,
+      "compressed_blake3": "696827db1f96dfdd3a11f35d0552efbb12280fec8ebbefcae9409fc5f9d46046",
+      "policy": "public_x_gray_prefix",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/696827db1f96dfdd3a11f35d0552efbb12280fec8ebbefcae9409fc5f9d46046.jsonl.gz",
+      "seed": 2026100802
+    },
+    {
+      "columns": 256,
+      "compressed_blake3": "1340d5f8ad072b0a36a357f58849635a50de79f13318a26fde0ceceffdffcf69",
+      "policy": "public_x_gray_prefix",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/1340d5f8ad072b0a36a357f58849635a50de79f13318a26fde0ceceffdffcf69.jsonl.gz",
+      "seed": 2026100802
+    },
+    {
+      "columns": 600,
+      "compressed_blake3": "6102d118c386b616e57f9f9f60a8261e190409290d6c446052f008a9d279cea5",
+      "policy": "public_x_gray_prefix",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/6102d118c386b616e57f9f9f60a8261e190409290d6c446052f008a9d279cea5.jsonl.gz",
+      "seed": 2026100802
+    },
+    {
+      "columns": 64,
+      "compressed_blake3": "8ec78c573a3e135004e877f374a26a464f019b891d158063a7f18c582542b9e7",
+      "policy": "public_x_gray_prefix",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/8ec78c573a3e135004e877f374a26a464f019b891d158063a7f18c582542b9e7.jsonl.gz",
+      "seed": 2026100803
+    },
+    {
+      "columns": 256,
+      "compressed_blake3": "c5c52c2a2feb2abc42968df2777270bf8ca55a7d4e734d48f3a7aaff99addebd",
+      "policy": "public_x_gray_prefix",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/c5c52c2a2feb2abc42968df2777270bf8ca55a7d4e734d48f3a7aaff99addebd.jsonl.gz",
+      "seed": 2026100803
+    },
+    {
+      "columns": 600,
+      "compressed_blake3": "9f8355a558a4a6f73c51de4a309c261fd2f47ea69d65d82795f7b598ed51efcf",
+      "policy": "public_x_gray_prefix",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/9f8355a558a4a6f73c51de4a309c261fd2f47ea69d65d82795f7b598ed51efcf.jsonl.gz",
+      "seed": 2026100803
+    },
+    {
+      "columns": 64,
+      "compressed_blake3": "1d0a6695564972f61db13c62c60a300da0cfa7bcd9b363c2e553a34345fae176",
+      "policy": "public_x_hash",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/1d0a6695564972f61db13c62c60a300da0cfa7bcd9b363c2e553a34345fae176.jsonl.gz",
+      "seed": 2026100801
+    },
+    {
+      "columns": 256,
+      "compressed_blake3": "0b06b75e26cff57a62c28c2502c85f3fc3f1a5027e5620d90969ecae0947b045",
+      "policy": "public_x_hash",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/0b06b75e26cff57a62c28c2502c85f3fc3f1a5027e5620d90969ecae0947b045.jsonl.gz",
+      "seed": 2026100801
+    },
+    {
+      "columns": 600,
+      "compressed_blake3": "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e",
+      "policy": "public_x_hash",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e.jsonl.gz",
+      "seed": 2026100801
+    },
+    {
+      "columns": 64,
+      "compressed_blake3": "8ecebd133f402a226e25248561e4f32ec3ee25293b7bc01232eb6c378f8be975",
+      "policy": "public_x_hash",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/8ecebd133f402a226e25248561e4f32ec3ee25293b7bc01232eb6c378f8be975.jsonl.gz",
+      "seed": 2026100802
+    },
+    {
+      "columns": 256,
+      "compressed_blake3": "9cda8e35acd428a71c91d04f55499ef1c6708dc1e684bd2e0bfcb740c96d1fb8",
+      "policy": "public_x_hash",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/9cda8e35acd428a71c91d04f55499ef1c6708dc1e684bd2e0bfcb740c96d1fb8.jsonl.gz",
+      "seed": 2026100802
+    },
+    {
+      "columns": 600,
+      "compressed_blake3": "86e42e891fce80cbbb6705cb4b24648d43cb5383854a53195e785b58e662a7e5",
+      "policy": "public_x_hash",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/86e42e891fce80cbbb6705cb4b24648d43cb5383854a53195e785b58e662a7e5.jsonl.gz",
+      "seed": 2026100802
+    },
+    {
+      "columns": 64,
+      "compressed_blake3": "0f312bc5c887b6fb4b552bd3861a5d27a34b2daa7442dc7ab97fec3dc775ae69",
+      "policy": "public_x_hash",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/0f312bc5c887b6fb4b552bd3861a5d27a34b2daa7442dc7ab97fec3dc775ae69.jsonl.gz",
+      "seed": 2026100803
+    },
+    {
+      "columns": 256,
+      "compressed_blake3": "fbf59fc700d0c80bec66ce2af90f9da0ee387bf48ac2267e8754e1431c5390b3",
+      "policy": "public_x_hash",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/fbf59fc700d0c80bec66ce2af90f9da0ee387bf48ac2267e8754e1431c5390b3.jsonl.gz",
+      "seed": 2026100803
+    },
+    {
+      "columns": 600,
+      "compressed_blake3": "e3714607e928a7d5597bbfe9f4864888ab3046840fb22784516854506101b3fb",
+      "policy": "public_x_hash",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/e3714607e928a7d5597bbfe9f4864888ab3046840fb22784516854506101b3fb.jsonl.gz",
+      "seed": 2026100803
+    },
+    {
+      "columns": 64,
+      "compressed_blake3": "dbe658b62d852c1511fdd6eca134d414600f873b84aeda77a75c06e67130139f",
+      "policy": "public_x_sequential",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/dbe658b62d852c1511fdd6eca134d414600f873b84aeda77a75c06e67130139f.jsonl.gz",
+      "seed": 2026100801
+    },
+    {
+      "columns": 256,
+      "compressed_blake3": "9924a0c8520c15aab23a837e1b2e9aa4134ed3039de6a41f9d474b8000a825c2",
+      "policy": "public_x_sequential",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/9924a0c8520c15aab23a837e1b2e9aa4134ed3039de6a41f9d474b8000a825c2.jsonl.gz",
+      "seed": 2026100801
+    },
+    {
+      "columns": 600,
+      "compressed_blake3": "e5600aa76a88246a4c3f73fce83ba73479e79c34e88d6205fffdb91ce09e0a99",
+      "policy": "public_x_sequential",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/e5600aa76a88246a4c3f73fce83ba73479e79c34e88d6205fffdb91ce09e0a99.jsonl.gz",
+      "seed": 2026100801
+    },
+    {
+      "columns": 64,
+      "compressed_blake3": "156ee3ac73c68d72443e41c77b12016af16561627d8cfdd78187e21a311b8727",
+      "policy": "public_x_sequential",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/156ee3ac73c68d72443e41c77b12016af16561627d8cfdd78187e21a311b8727.jsonl.gz",
+      "seed": 2026100802
+    },
+    {
+      "columns": 256,
+      "compressed_blake3": "77ea50c6bfdec27946dbcce7e734e391255021bfc0c787f950a3c450815c5593",
+      "policy": "public_x_sequential",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/77ea50c6bfdec27946dbcce7e734e391255021bfc0c787f950a3c450815c5593.jsonl.gz",
+      "seed": 2026100802
+    },
+    {
+      "columns": 600,
+      "compressed_blake3": "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+      "policy": "public_x_sequential",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0.jsonl.gz",
+      "seed": 2026100802
+    },
+    {
+      "columns": 64,
+      "compressed_blake3": "7b9eeddb516d4058d12dfd1ca8ded4b4c1086e5be3bb13b7d56542610587a4a1",
+      "policy": "public_x_sequential",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/7b9eeddb516d4058d12dfd1ca8ded4b4c1086e5be3bb13b7d56542610587a4a1.jsonl.gz",
+      "seed": 2026100803
+    },
+    {
+      "columns": 256,
+      "compressed_blake3": "64b8bf78ba68cb2787348f19bba6434ea90c0473f3509d3a2bcaa992d903bb02",
+      "policy": "public_x_sequential",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/64b8bf78ba68cb2787348f19bba6434ea90c0473f3509d3a2bcaa992d903bb02.jsonl.gz",
+      "seed": 2026100803
+    },
+    {
+      "columns": 600,
+      "compressed_blake3": "7e75c868c4086da4812b9293d1bd80fe1427bdeecb86ef6873a6d9ba1607aeea",
+      "policy": "public_x_sequential",
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects/7e75c868c4086da4812b9293d1bd80fe1427bdeecb86ef6873a6d9ba1607aeea.jsonl.gz",
+      "seed": 2026100803
+    }
+  ],
+  "primary_rows": 27,
+  "schema": "n83.cross-stream-pilot-source-census/v1",
+  "selected_best_total_runtime": null,
+  "size_relation_counts": {
+    "small_eq_pool": 216,
+    "small_gt_pool": 216,
+    "small_lt_pool": 216
+  },
+  "solver_search_executed": false,
+  "status": "source_addressable_unmeasured",
+  "stream_difference_counts": {
+    "policy_and_seed": 324,
+    "policy_only": 162,
+    "seed_only": 162
+  }
+}

@@ -46,6 +46,8 @@ PRIOR_SEARCH_AUDIT = f"research/{STUDY}/verification/mixed-orbit-search-15000-20
 PRIOR_SEARCH_AUDIT_SHA256 = "32420a62bb6ccf8f9df7f03dea9040e518606740968110dc8c0ac47cb50cafd5"
 PRIOR_IMPORT_RECEIPT = f"research/{STUDY}/verification/k600-mixed-orbit-worker-source-20261012/import-receipts.json"
 PRIOR_IMPORT_RECEIPT_SHA256 = "9d1d8336ba3941ee03b37d67e4da8a447f2abe0c2613090f098d83ed4b936de0"
+FROZEN_IMPORT_WORKER_COMMIT = "f3d27f68b68cda907e0668042ac7fa13ae6b579d"
+FROZEN_IMPORT_WORKER_PATH = "examples/koblitz_n83_mixed_orbit_worker.rs"
 SOURCE_PATHS = (
     "examples/koblitz_n83_mixed_orbit_worker.rs",
     "src/cryptanalysis/koblitz_large_prime.rs",
@@ -138,6 +140,14 @@ def source_hashes(checkout: Path) -> dict[str, str]:
     return {relative: sha256_file(checkout / relative) for relative in SOURCE_PATHS}
 
 
+def frozen_import_worker_source_sha256() -> str:
+    blob = subprocess.run(
+        ["git", "show", f"{FROZEN_IMPORT_WORKER_COMMIT}:{FROZEN_IMPORT_WORKER_PATH}"],
+        cwd=ROOT, capture_output=True, check=True,
+    ).stdout
+    return hashlib.sha256(blob).hexdigest()
+
+
 def prior_import_evidence_error(checkout: Path) -> str | None:
     search_path = checkout / PRIOR_SEARCH_AUDIT
     import_path = checkout / PRIOR_IMPORT_RECEIPT
@@ -160,10 +170,10 @@ def prior_import_evidence_error(checkout: Path) -> str | None:
     variants = imported.get("variants") if isinstance(imported, dict) else None
     variant = variants.get("k600") if isinstance(variants, dict) else None
     try:
-        source_sha256 = sha256_file(checkout / "examples/koblitz_n83_mixed_orbit_worker.rs")
+        source_sha256 = frozen_import_worker_source_sha256()
         manifest_sha256 = sha256_file(checkout / SMALL_MANIFEST)
-    except OSError:
-        return "prior K600 source or manifest missing"
+    except (OSError, subprocess.CalledProcessError):
+        return "prior K600 frozen source or manifest missing"
     if (not isinstance(variant, dict)
             or imported.get("schema") != "n83.mixed-orbit-import-receipt/v1"
             or imported.get("worker_source_sha256") != source_sha256

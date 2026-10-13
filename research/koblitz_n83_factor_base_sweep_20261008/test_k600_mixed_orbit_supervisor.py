@@ -97,6 +97,20 @@ class MixedOrbitSupervisorTests(unittest.TestCase):
 
     def test_prior_search_and_import_receipts_are_exact_and_charged(self):
         self.assertIsNone(gate.prior_import_evidence_error(gate.ROOT))
+        imported_receipt = json.loads((gate.ROOT / gate.PRIOR_IMPORT_RECEIPT).read_text())
+        self.assertEqual(gate.frozen_import_worker_source_sha256(),
+                         imported_receipt["worker_source_sha256"])
+        with patch.object(gate, "frozen_import_worker_source_sha256", return_value="0" * 64):
+            self.assertIn("disposition", gate.prior_import_evidence_error(gate.ROOT))
+        real_sha256 = gate.sha256_file
+
+        def changed_current_worker(candidate):
+            if Path(candidate) == gate.ROOT / gate.FROZEN_IMPORT_WORKER_PATH:
+                return "0" * 64
+            return real_sha256(candidate)
+
+        with patch.object(gate, "sha256_file", side_effect=changed_current_worker):
+            self.assertIsNone(gate.prior_import_evidence_error(gate.ROOT))
         with tempfile.TemporaryDirectory(prefix="n83-mixed-prior-") as folder:
             root = Path(folder)
             path = root / gate.PRIOR_SEARCH_AUDIT
@@ -117,8 +131,6 @@ class MixedOrbitSupervisorTests(unittest.TestCase):
                 candidate = Path(candidate)
                 if candidate == receipt:
                     return gate.PRIOR_IMPORT_RECEIPT_SHA256
-                if candidate == root / "examples/koblitz_n83_mixed_orbit_worker.rs":
-                    return imported["worker_source_sha256"]
                 if candidate == root / gate.SMALL_MANIFEST:
                     return imported["variants"]["k600"]["small_manifest_sha256"]
                 return real_sha256(candidate)

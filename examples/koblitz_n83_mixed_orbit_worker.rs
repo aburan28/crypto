@@ -12,8 +12,8 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_explicit_frobenius_point_factor_base, ChainS3Limits, FrobeniusFactorBase, KoblitzCurve,
 };
 use crypto_lib::cryptanalysis::koblitz_large_prime::{
-    build_exact_residual_suffix_factor_base, FeedOutcome, LargePrimeLimits, MixedOrbitDomains,
-    WideLargePrimeEliminator,
+    build_exact_residual_difference_factor_base, build_exact_residual_suffix_factor_base,
+    FeedOutcome, LargePrimeLimits, MixedOrbitDomains, WideLargePrimeEliminator,
 };
 use flate2::read::GzDecoder;
 use num_bigint::BigUint;
@@ -186,6 +186,75 @@ fn bound_archive(
     Ok((row.clone(), plain))
 }
 
+fn pinned_pilot_row(manifest: &[u8], object_hash: &str) -> Result<Value> {
+    if manifest != SMALL_600_MANIFEST
+        || object_hash.len() != 64
+        || !object_hash
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+    {
+        return Err("pinned pilot manifest or object hash mismatch".into());
+    }
+    let header: Value = serde_json::from_slice(manifest)?;
+    let rows = header["bases"].as_array().ok_or("pilot manifest bases")?;
+    if header["schema"] != "n83.factor-base-panel/v1"
+        || header["status"] != "completed_factor_base_panel"
+        || header["study"] != STUDY
+        || header["completed_base_count"] != 54
+        || header["expected_base_count"] != 54
+        || rows.len() != 54
+    {
+        return Err("pilot manifest panel binding".into());
+    }
+    let selected: Vec<_> = rows
+        .iter()
+        .filter(|row| row["compressed_blake3"] == object_hash)
+        .collect();
+    if selected.len() != 1 {
+        return Err("pilot object is not unique in pinned manifest".into());
+    }
+    let row = selected[0];
+    let columns = row["columns"].as_u64().ok_or("pilot columns")?;
+    let policy = row["policy"].as_str().ok_or("pilot policy")?;
+    let seed = row["seed"].as_u64().ok_or("pilot seed")?;
+    let object = format!("objects/{object_hash}.jsonl.gz");
+    if row["a"] != 0
+        || ![64, 256, 600].contains(&columns)
+        || ![
+            "public_x_sequential",
+            "public_x_hash",
+            "public_x_gray_prefix",
+        ]
+        .contains(&policy)
+        || !(2026100801..=2026100803).contains(&seed)
+        || row["points"].as_u64() != Some(columns * 166)
+        || row["object"] != object
+        || row["s3_uri"] != format!("{PILOT_PREFIX}{object}")
+    {
+        return Err("pilot row is outside the primary signed-orbit panel".into());
+    }
+    Ok(row.clone())
+}
+
+fn bound_pilot_archive(
+    object_hash: &str,
+    manifest: &[u8],
+    compressed: &[u8],
+) -> Result<(Value, Vec<u8>)> {
+    let row = pinned_pilot_row(manifest, object_hash)?;
+    if blake3::hash(compressed).to_hex().as_str() != object_hash
+        || row["bytes"].as_u64() != Some(compressed.len() as u64)
+    {
+        return Err("pilot compressed object mismatch".into());
+    }
+    let mut plain = Vec::new();
+    GzDecoder::new(compressed).read_to_end(&mut plain)?;
+    if blake3::hash(&plain).to_hex().as_str() != row["plain_blake3"].as_str().ok_or("plain hash")? {
+        return Err("pilot plain object hash mismatch".into());
+    }
+    Ok((row, plain))
+}
+
 fn decode_base(row: &Value, plain: &[u8], curve: &KoblitzCurve) -> Result<FrobeniusFactorBase> {
     let text = std::str::from_utf8(plain)?;
     let mut lines = text.lines();
@@ -306,6 +375,17 @@ fn import(
 ) -> Result<FrobeniusFactorBase> {
     let (row, plain) = bound_archive(spec, &fs::read(manifest)?, &fs::read(object)?)?;
     decode_base(&row, &plain, curve)
+}
+
+fn import_pilot(
+    object_hash: &str,
+    manifest: &Path,
+    object: &Path,
+    curve: &KoblitzCurve,
+) -> Result<(Value, FrobeniusFactorBase)> {
+    let (row, plain) = bound_pilot_archive(object_hash, &fs::read(manifest)?, &fs::read(object)?)?;
+    let base = decode_base(&row, &plain, curve)?;
+    Ok((row, base))
 }
 
 fn import_pair(
@@ -787,6 +867,48 @@ fn main() -> Result<()> {
             }));
             Ok(())
         }
+        Some("verify-cross-pilot") if args.len() == 7 => {
+            let curve = KoblitzCurve::known_n83_k0().ok_or("pinned Koblitz curve")?;
+            if curve.label() != CURVE || curve.cofactor != BigUint::from(4u8) {
+                return Err("curve identity mismatch".into());
+            }
+            let (small_row, small) = import_pilot(
+                &args[1],
+                Path::new(&args[2]),
+                Path::new(&args[3]),
+                &curve,
+            )?;
+            let (pool_row, pool) = import_pilot(
+                &args[4],
+                Path::new(&args[5]),
+                Path::new(&args[6]),
+                &curve,
+            )?;
+            if small_row["policy"] == pool_row["policy"]
+                && small_row["seed"] == pool_row["seed"]
+            {
+                return Err("cross-stream verification requires distinct policy or seed".into());
+            }
+            let residual =
+                build_exact_residual_difference_factor_base(&curve, &small, &pool)?;
+            let shared_orbits = pool.signed_orbits.len() - residual.signed_orbits.len();
+            println!("{}", json!({
+                "schema":"n83.cross-stream-pilot-import/v1", "status":"PASS",
+                "curve_slug":curve.label(),
+                "small_object_blake3":args[1], "small_policy":small_row["policy"],
+                "small_seed":small_row["seed"], "small_columns":small_row["columns"],
+                "small_points":small.points.len(),
+                "pool_object_blake3":args[4], "pool_policy":pool_row["policy"],
+                "pool_seed":pool_row["seed"], "pool_columns":pool_row["columns"],
+                "pool_points":pool.points.len(),
+                "shared_signed_orbits":shared_orbits,
+                "small_only_signed_orbits":small.signed_orbits.len() - shared_orbits,
+                "residual_signed_orbits":residual.signed_orbits.len(),
+                "residual_points":residual.points.len(),
+                "solver_search_executed":false
+            }));
+            Ok(())
+        }
         Some("run") => run(&args, &SMALL),
         Some("run-alt") => run(&args, &SMALL_600),
         Some("verify-control") if args.len() == 6 => {
@@ -798,7 +920,7 @@ fn main() -> Result<()> {
             Ok(())
         }
         Some("control-run") => control_run(&args),
-        _ => Err("usage: verify|verify-alt SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT | verify-control SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT FIXTURE | run|run-alt SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT CORPUS BUDGET_SECONDS MAX_TRIALS CONFLICT_BUDGET MAX_MODELS SMALL_SUMMANDS RESIDUAL_SUMMANDS OUTPUT_DIR | control-run SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT FIXTURE BUDGET_SECONDS CONFLICT_BUDGET MAX_MODELS OUTPUT_DIR".into()),
+        _ => Err("usage: verify|verify-alt SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT | verify-cross-pilot SMALL_HASH SMALL_MANIFEST SMALL_OBJECT POOL_HASH POOL_MANIFEST POOL_OBJECT | verify-control SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT FIXTURE | run|run-alt SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT CORPUS BUDGET_SECONDS MAX_TRIALS CONFLICT_BUDGET MAX_MODELS SMALL_SUMMANDS RESIDUAL_SUMMANDS OUTPUT_DIR | control-run SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT FIXTURE BUDGET_SECONDS CONFLICT_BUDGET MAX_MODELS OUTPUT_DIR".into()),
     }
 }
 
@@ -822,6 +944,27 @@ mod tests {
         assert!(bound_archive(&SMALL_600, SMALL_MANIFEST, b"").is_err());
         assert!(bound_archive(&SMALL_600, SMALL_600_MANIFEST, b"changed archive").is_err());
         assert!(bound_archive(&ENVELOPE, ENVELOPE_MANIFEST, b"changed archive").is_err());
+    }
+
+    #[test]
+    fn pinned_pilot_selection_accepts_exactly_primary_arm_rows() {
+        let panel: Value = serde_json::from_slice(SMALL_600_MANIFEST).unwrap();
+        let mut accepted = 0;
+        for row in panel["bases"].as_array().unwrap() {
+            let hash = row["compressed_blake3"].as_str().unwrap();
+            let selected = pinned_pilot_row(SMALL_600_MANIFEST, hash);
+            if row["a"] == 0 {
+                assert_eq!(selected.unwrap(), *row);
+                accepted += 1;
+            } else {
+                assert!(selected.is_err());
+            }
+        }
+        assert_eq!(accepted, 27);
+        let first = panel["bases"][0]["compressed_blake3"].as_str().unwrap();
+        assert!(pinned_pilot_row(b"changed manifest", first).is_err());
+        assert!(pinned_pilot_row(SMALL_600_MANIFEST, "0").is_err());
+        assert!(bound_pilot_archive(first, SMALL_600_MANIFEST, b"changed archive").is_err());
     }
 
     #[test]
