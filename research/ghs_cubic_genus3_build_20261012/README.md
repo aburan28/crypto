@@ -6,7 +6,11 @@ solved, no index calculus is run, and no speedup is claimed. Protocol
 frozen before the first run: [PROTOCOL.md](PROTOCOL.md). Run
 `20261013T0320Z`: [records](results/run-20261013T0320Z.jsonl),
 [environment](results/run-20261013T0320Z.env.txt),
-[run report](reports/run-20261013T0320Z/run-report.pdf). This report as
+[run report](reports/run-20261013T0320Z/run-report.pdf). Addendum run
+`20261013T0347Z` (the order-332 class at q = 7, see below):
+[records](results/run-20261013T0347Z.jsonl),
+[environment](results/run-20261013T0347Z.env.txt),
+[run report](reports/run-20261013T0347Z/run-report.pdf). This report as
 PDF: [REPORT.pdf](REPORT.pdf). Follows
 `research/ghs_cubic_cover_census_20261012/` (PR #1759), which counted
 these covers by genus without building them.
@@ -20,7 +24,9 @@ transfer of points an explicit `F_q`-rational object?
 
 ## Result
 
-Yes on all nine cases built (`q ∈ {5, 7, 11}`, `#E0(K) = 4ℓ`). For each:
+Yes on all eleven cases built (`q ∈ {5, 7, 11}`, `#E0(K) = 4ℓ`; nine in
+the first run, the two of the order-332 class at q = 7 in the addendum).
+For each:
 
 - the curve is a **smooth plane quartic with coefficients in `F_q`**, so
   it is not hyperelliptic;
@@ -87,14 +93,26 @@ nine cases.
 | 7 | 7, 129 | 2 | 356 = 4·89 | −12 | yes | yes | 8, 50, 380 | 8, 50, 380 | 356 |
 | 11 | 11, 130 | 0 | 1348 = 4·337 | −16 | yes | yes | 12, 122, 1380 | 12, 122, 1380 | 1348 |
 | 11 | 11, 172 | 2 | 1324 = 4·331 | 8 | yes | yes | 12, 122, 1308 | 12, 122, 1308 | 1324 |
+| 7† | 49, 8 | 0 | 332 = 4·83 | 12 | yes | yes | 8, 50, 308 | 8, 50, 308 | 332 |
+| 7† | 49, 9 | 0 | 332 = 4·83 | 12 | yes | yes | 8, 50, 308 | 8, 50, 308 | 332 |
+
+† Addendum run `20261013T0347Z`: the second `4ℓ` isogeny class at `q = 7`
+(`#E0(K) = 332`, trace `+12`, the sign opposite to the 356 class's `−12`).
+The frozen first-in-index rule of the first run reached only the 356 class.
+Exhausting the parametrization `u = t² + bt + c`, this class has exactly
+two irreducible-`u` representatives satisfying the genus-3 conditions and
+**no split-`u` representative** (65432 candidates examined). The order-356
+run was not exhaustive, so this is not a multiplicity comparison between
+the two classes.
 
 Example, `q = 7`, `u` index (7, 110), over `F_7`:
 
     W2⁴ + W1²W2² + 6W1³W2 + 6W1⁴ + 4W0W2³ + W0W1W2² + 4W0W1²W2 + 4W0W1³
       + W0²W2² + 4W0²W1W2 + 5W0²W1² + 6W0³W2 + 6W0⁴ = 0
 
-All nine quartics are in the records (`quartic_Fq`, entries
-`[i, j, k, coefficient]` for `W0^i W1^j W2^k`).
+All eleven quartics are in the records (`quartic_Fq`, entries
+`[i, j, k, coefficient]` for `W0^i W1^j W2^k`; the two order-332 quartics
+are in the addendum run's records).
 
 Transfer divisors (P4). For each `P = (t0, y0) ∈ E0(K)` with `u·u'(t0)` a
 non-zero square, the two points of `C` over `P` and their two Frobenius
@@ -108,13 +126,18 @@ images each:
 | 7 | 7, 110 / 118 / 129 | 1092 each | 1092 | 1092 | 1092 | 168 each |
 | 11 | 11, 130 | 4128 | 4128 | 4128 | 4128 | 658 |
 | 11 | 11, 172 | 3876 | 3876 | 3876 | 3876 | 672 |
+| 7† | 49, 8 / 49, 9 | 912 each | 912 | 912 | 912 | 178 each |
+
+† Addendum run `20261013T0347Z` (order-332 class).
 
 The untested points are those where `u·u'(t0)` is not a square: their
 two preimages are conjugate over `F_{q⁶}` and need a field the tool does
 not build.
 
-![Orders](reports/run-20261013T0320Z/orders.svg)
+![Orders](reports/run-20261013T0347Z/orders_all11.svg)
 
+All eleven cases (nine from the first run, two order-332 from the
+addendum); the run-20261013T0320Z report keeps the nine-case graph.
 P1, P2, P3 and P4 hold on every case; no falsifier fired.
 
 ## Scope and limits
@@ -123,8 +146,10 @@ P1, P2, P3 and P4 hold on every case; no falsifier fired.
   any discrete logarithm, any relation collection. These need class
   arithmetic on the quartic; see the problem record.
 - **Selection.** The frozen rule takes the first cases in index order.
-  All five `q = 7` cases landed in one isogeny class (`#E0(K) = 356`);
-  the other `4ℓ` class at `q = 7` seen in the census (332) was not built.
+  All five `q = 7` cases of the first run landed in one isogeny class
+  (`#E0(K) = 356`); the other `4ℓ` class at `q = 7` (332) was built in the
+  addendum run after a target-order argument was added to the tool (the
+  argument defaults to off, so the first run reproduces byte for byte).
   Most candidates were skipped as linearly dependent (2394 of 2443 at
   `q = 7`) because `b ∈ F_q` comes first in index order.
 - **One construction.** Only the `m = 2, r = 6` type. The hyperelliptic
@@ -151,6 +176,13 @@ entry).
 
 ```sh
 rustc --edition 2021 -O genus3_build.rs && ./genus3_build 5 1 1 && ./genus3_build 7 3 2 && ./genus3_build 11 1 1
+./genus3_build 7 3 2 332                 # addendum: the order-332 class at q = 7
 python3 reports/plot.py results/run-20261013T0320Z.jsonl reports/run-20261013T0320Z   # layout only
+cat results/run-20261013T0320Z.jsonl results/run-20261013T0347Z.jsonl > results/all11.jsonl
+python3 reports/plot.py results/all11.jsonl reports/run-20261013T0347Z   # then orders.* renamed to orders_all11.*
 cd lean && lake build
 ```
+
+The fourth argument to `genus3_build` is an optional target order (0 or
+absent keeps the original first-in-index rule); `./genus3_build 7 3 2`
+reproduces the q = 7 records of run `20261013T0320Z` byte for byte.

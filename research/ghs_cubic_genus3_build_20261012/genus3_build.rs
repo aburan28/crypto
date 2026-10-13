@@ -70,12 +70,13 @@ fn count_proj(f: &Fld, a: &T) -> u64 { let mut c = 0u64; // points of the plane 
 fn normalize(f: &Fld, p: [u32; 3]) -> [u32; 3] { let l = *p.iter().find(|&&x| x != 0).expect("zero point"); let li = f.inv(l); [f.mul(p[0], li), f.mul(p[1], li), f.mul(p[2], li)] }
 fn is_prime(n: u64) -> bool { if n < 2 { return false; } let mut p = 2; while p * p <= n { if n % p == 0 { return false; } p += 1; } true }
 
-fn build(f: &Fld, u: &Q2, kind: &str) -> Option<String> {
+fn build(f: &Fld, u: &Q2, kind: &str, target: u64) -> Option<String> {
     let (u1, u2) = (conj(f, u), conj(f, &conj(f, u)));
     // E0 : y^2 = u u'' ; order from the quartic model (two points at infinity)
     let f0 = |t| f.mul(ev(f, u, t), ev(f, &u2, t)); let f1 = |t| f.mul(ev(f, u, t), ev(f, &u1, t));
     let mut ord = 2u64; for t in 0..f.size { let v = f0(t); ord += if v == 0 { 1 } else if f.is_sq(v) { 2 } else { 0 }; }
     if ord % 4 != 0 || !is_prime(ord / 4) { return None; }
+    if target != 0 && ord != target { return None; } // target == 0 keeps the original "any 4*prime" rule
     let rinv = inv3(f, &[*u, u1, u2])?; // rows R_0, R_1, R_2 with (1, t, t^2) = R (u, u', u'')
     let sq = |k: (u8, u8, u8)| -> T { [(k, 1u32)].into_iter().collect() };
     let w = [sq((0, 0, 2)), sq((2, 0, 0)), sq((0, 2, 0))]; // (u : u' : u'') = (Z^2 : X^2 : Y^2)
@@ -123,13 +124,15 @@ fn build(f: &Fld, u: &Q2, kind: &str) -> Option<String> {
 }
 
 fn main() { let a: Vec<String> = std::env::args().collect(); let q: u32 = a[1].parse().unwrap(); let want = [a[2].parse::<usize>().unwrap(), a[3].parse::<usize>().unwrap()];
+    // optional 4th argument: target order. 0 (or absent) keeps the original "first 4*prime cases in index order" rule.
+    let target: u64 = a.get(4).map(|s| s.parse().unwrap()).unwrap_or(0);
     let f = Fld::build(q, 3); let mut got = [0usize; 2]; let (mut tried, mut dependent) = (0u64, 0u64);
     'o: for bi in 0..f.size { for ci in 0..f.size { let u: Q2 = [f.el_of[ci as usize], f.el_of[bi as usize], 1]; let (u1, u2) = (conj(&f, &u), conj(&f, &conj(&f, &u)));
         let disc = f.sub(f.mul(u[1], u[1]), f.mul(f.int(4), u[0])); if disc == 0 { continue; }
         if resultant_zero(&f, &u, &u1) || resultant_zero(&f, &u, &u2) || resultant_zero(&f, &u1, &u2) { continue; }
         let k = if f.is_sq(disc) { 0 } else { 1 }; if got[k] >= want[k] { continue; }
         tried += 1; if det3(&f, &[u, u1, u2]) == 0 { dependent += 1; continue; }
-        if let Some(s) = build(&f, &u, if k == 0 { "split" } else { "irreducible" }) { println!("{}", s); got[k] += 1; }
+        if let Some(s) = build(&f, &u, if k == 0 { "split" } else { "irreducible" }, target) { println!("{}", s); got[k] += 1; }
         if got[0] >= want[0] && got[1] >= want[1] { break 'o; } } }
     println!("{{\"rec\":\"search\",\"q\":{},\"candidates_examined\":{},\"linearly_dependent_skipped\":{},\"split_found\":{},\"irreducible_found\":{}}}", q, tried, dependent, got[0], got[1]);
 }
