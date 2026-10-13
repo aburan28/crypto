@@ -250,7 +250,7 @@ cat results/run-20261013T0320Z.jsonl results/run-20261013T0347Z.jsonl > results/
 python3 reports/plot.py results/all11.jsonl reports/run-20261013T0347Z   # then orders.* renamed to orders_all11.*
 cd lean && lake build
 python3 reports/e0_icv1.py                 # from the repository root: results/e0_icv1.json
-cargo run --example identity_certificate_ghs_cubic_genus3 -- research/ghs_cubic_genus3_build_20261012/certificates
+cargo run --example identity_certificate_ghs_cubic_genus3 -- third_cover > research/ghs_cubic_genus3_build_20261012/certificates/third_cover.json   # likewise cycle_closes
 ```
 
 The fourth argument to `genus3_build` is an optional target order (0 or

@@ -3,7 +3,8 @@
 //! `DescentCycle.cycle_closes`.
 //!
 //! ```sh
-//! cargo run --example identity_certificate_ghs_cubic_genus3 -- research/ghs_cubic_genus3_build_20261012/certificates
+//! cargo run --example identity_certificate_ghs_cubic_genus3 -- third_cover > research/ghs_cubic_genus3_build_20261012/certificates/third_cover.json
+//! cargo run --example identity_certificate_ghs_cubic_genus3 -- cycle_closes > research/ghs_cubic_genus3_build_20261012/certificates/cycle_closes.json
 //! ```
 //!
 //! The Lean lemmas derive the conclusion from the hypotheses `y0^2 = u u''`,
@@ -26,7 +27,7 @@ fn sub(a: Expr, b: Expr) -> Expr {
 }
 
 fn main() {
-    let dir = std::env::args().nth(1).expect("output directory");
+    let which = std::env::args().nth(1).expect("third_cover or cycle_closes");
     let vars: Vec<String> = ["u", "u1", "u2", "y0", "y1", "y2"].iter().map(|s| s.to_string()).collect();
     let (u, u1, u2, y0, y1, y2) = (v("u"), v("u1"), v("u2"), v("y0"), v("y1"), v("y2"));
     let uy2 = Mul(vec![u.clone(), y2.clone()]);
@@ -70,7 +71,10 @@ fn main() {
             sha256: lean_sha.clone(),
         })
     };
-    for (file, stmt, seed) in [("third_cover.json", third, 0x6753_0000_0000_0001u64), ("cycle_closes.json", cycle, 0x6753_0000_0000_0002u64)] {
+    for (file, stmt, seed) in [("third_cover", third, 0x6753_0000_0000_0001u64), ("cycle_closes", cycle, 0x6753_0000_0000_0002u64)] {
+        if file != which {
+            continue;
+        }
         let cert = issue(
             stmt,
             seed,
@@ -84,8 +88,6 @@ fn main() {
             Verdict::Accept { .. } => {}
             other => panic!("self-check failed: {other:?}"),
         }
-        std::fs::create_dir_all(&dir).unwrap();
-        std::fs::write(format!("{dir}/{file}"), serde_json::to_string_pretty(&cert).unwrap() + "\n").unwrap();
-        println!("{file}: {}", cert.id);
+        println!("{}", serde_json::to_string_pretty(&cert).expect("serialises"));
     }
 }
