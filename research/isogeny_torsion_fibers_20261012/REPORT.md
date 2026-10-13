@@ -6,8 +6,21 @@ no algorithmic performance result. The protocols are [PROTOCOL.md](PROTOCOL.md)
 and [MAP_PROTOCOL.md](MAP_PROTOCOL.md). The [run report](reports/run-20261012T1947Z/README.md)
 records commands, outputs and validation. The [diagram](fiber.svg),
 [census graph](census.svg), and [PDF](report.pdf) accompany this result.
-The [local validation receipt](validation/README.md) records the unresolved
-full release-library test gate separately from the study checks.
+The [original local validation receipt](validation/README.md) records the
+release-library gap as it stood for this first control; the later
+[paired-round validation](paired_round/validation/README.md) records a
+complete controlled full-suite pass on the same source tree.
+
+**Follow-on, 2026-10-12:** The [paired same-target round](paired_round/REPORT.md)
+now executes explicit transport, source and destination relation
+collection, linear recovery, target descent, verification, and matched
+negation rho on 16 public targets. It has 48 verified arm records and a
+separate native arithmetic checker. Its group-operation comparison is a
+diagnostic; both destination models are also base-field isomorphic to
+their sources, so an isomorphism-only relation arm is the next mechanism
+control. Full native-work pricing, six-class rho, scaling and
+independent-host replay remain open. The sections below document this
+earlier structural control and retain its original run scope.
 
 ## Question and exact setting
 

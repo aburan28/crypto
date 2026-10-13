@@ -1,0 +1,11 @@
+ℹ [2/5] Replayed FiberCofactor
+info: FiberCofactor.lean:21:0: 'FiberCofactor.rationalKernelOrderDvdCofactor' depends on axioms: [propext, Quot.sound]
+info: FiberCofactor.lean:22:0: 'FiberCofactor.degreeThreeNotDvdCofactorOne' depends on axioms: [propext]
+ℹ [4/5] Built CubicAutomorphism (4.9s)
+info: CubicAutomorphism.lean:33:0: 'CubicAutomorphism.zeta13' does not depend on any axioms
+info: CubicAutomorphism.lean:34:0: 'CubicAutomorphism.zeta199' does not depend on any axioms
+info: CubicAutomorphism.lean:35:0: 'CubicAutomorphism.scaling13' does not depend on any axioms
+info: CubicAutomorphism.lean:36:0: 'CubicAutomorphism.scaling199' does not depend on any axioms
+info: CubicAutomorphism.lean:37:0: 'CubicAutomorphism.cubicPreservesEquation' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CubicAutomorphism.lean:38:0: 'CubicAutomorphism.scalingPreservesEquation' depends on axioms: [propext, Classical.choice, Quot.sound]
+Build completed successfully (5 jobs).

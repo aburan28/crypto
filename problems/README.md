@@ -12,8 +12,8 @@ Keep resolved and superseded records in the index.
 | Problem | Status | What it blocks | What would unblock it |
 | --- | --- | --- | --- |
 | [N83 recorded-query sampler contract](n83-recorded-query-sampler-contract-mismatch.md) | open | green whole-library validation on the pinned baseline | traced and versioned query law, point checks and passing regression |
-| [Non-rational isogeny fiber DLP cost](nonrational-isogeny-fiber-dlp-cost-gap.md) | open | complete same-target speed comparison after non-rational-kernel transfer | native complete solver, matched rho, full accounting and independent replay |
-| [Release library validation on shared host](release-library-validation-shared-host-20261012.md) | open | complete local release-library gate for the fiber study | full run on final head with controlled load and failure diagnosis if needed |
+| [Non-rational isogeny fiber DLP cost](nonrational-isogeny-fiber-dlp-cost-gap.md) | open; 48 verified bounded arm records | distinguish degree-three transport from base-field isomorphism, then admit cold-cost and scaling comparison | first run the scaling-isomorphism relation arm and six-class rho on the same targets; then price all native phases on growing pairs and replay independently |
+| [Release library validation on shared host](release-library-validation-shared-host-20261012.md) | resolved locally; controlled full run passed 4,009 tests | passing release-library gate for the fiber study | complete two-thread, loopback-accessible run passed; preserve the earlier sandboxed 13-failure receipt and recheck only if source or CI changes |
 
 ## Add or update a problem
 

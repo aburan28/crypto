@@ -10717,6 +10717,112 @@
    ]
   },
   {
+   "slug": "icv1-fp4-tm5-90163552",
+   "icv1": "ICV1:fp-13:-5:19:0:unk:unk:r:9016355208a1",
+   "family": "prime",
+   "params": {
+    "p": "13",
+    "a": "0",
+    "b": "11"
+   },
+   "model_json": "{\"a\":\"0\",\"b\":\"11\",\"field\":\"fp-13\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"13\",\"v\":\"1\"}",
+   "trace": -5,
+   "order": "19",
+   "j": "0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/isogeny_torsion_fibers_20261012/paired_round/curves.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P4Cfph47e4fecd7461",
+     "curve_uid": "urn:ec-record:1:sha256:47e4fecd7461e662c1bf2854d0a49700a485b014b291c603c9936887303c68bf",
+     "field_sha256": "c226b0eefb4d854ef1560e87597eb53f2702fdf5db054c5c3b06000dbb42997a",
+     "field": {
+      "characteristic": 13,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       0,
+       11
+      ],
+      "subgroup_order": "19",
+      "cofactor": 1,
+      "generator": [
+       "0x9",
+       "0x5"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/isogeny_torsion_fibers_20261012/paired_round/curves.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp4-tm5-c277dce2",
+   "icv1": "ICV1:fp-13:-5:19:0:unk:unk:r:c277dce209a7",
+   "family": "prime",
+   "params": {
+    "p": "13",
+    "a": "0",
+    "b": "2"
+   },
+   "model_json": "{\"a\":\"0\",\"b\":\"2\",\"field\":\"fp-13\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"13\",\"v\":\"1\"}",
+   "trace": -5,
+   "order": "19",
+   "j": "0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/isogeny_torsion_fibers_20261012/paired_round/curves.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P4Cfph7c32fa042bde",
+     "curve_uid": "urn:ec-record:1:sha256:7c32fa042bdeb8a2323fcdf4ef16179e7e76d5f175e94927ade253604d151c2b",
+     "field_sha256": "c226b0eefb4d854ef1560e87597eb53f2702fdf5db054c5c3b06000dbb42997a",
+     "field": {
+      "characteristic": 13,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       0,
+       2
+      ],
+      "subgroup_order": "19",
+      "cofactor": 1,
+      "generator": [
+       "0x1",
+       "0x4"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/isogeny_torsion_fibers_20261012/paired_round/curves.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-fp6-tm7-fc20da94",
    "icv1": "ICV1:fp-59:-7:67:52:unk:unk:r:fc20da944826",
    "family": "prime",
@@ -10739,6 +10845,112 @@
    ],
    "representations": [],
    "ec1_unresolved": "roster_prime_instance(8) builds no instance on this roster curve"
+  },
+  {
+   "slug": "icv1-fp8-tm11-7caf6b43",
+   "icv1": "ICV1:fp-199:-11:211:0:unk:unk:r:7caf6b4364e5",
+   "family": "prime",
+   "params": {
+    "p": "199",
+    "a": "0",
+    "b": "3"
+   },
+   "model_json": "{\"a\":\"0\",\"b\":\"3\",\"field\":\"fp-199\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"199\",\"v\":\"1\"}",
+   "trace": -11,
+   "order": "211",
+   "j": "0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/isogeny_torsion_fibers_20261012/paired_round/curves.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P8Cfphdcceff26a483",
+     "curve_uid": "urn:ec-record:1:sha256:dcceff26a483cfcebacaf4525c55af90e1f93854d97b23bcdadc86e632f8c630",
+     "field_sha256": "509f3cf23cfc0ee2a442d0391452dd3cbac45d66d02ee3c54da6167f72d4706c",
+     "field": {
+      "characteristic": 199,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       0,
+       3
+      ],
+      "subgroup_order": "211",
+      "cofactor": 1,
+      "generator": [
+       "0x1",
+       "0x2"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/isogeny_torsion_fibers_20261012/paired_round/curves.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp8-tm11-c0dfd129",
+   "icv1": "ICV1:fp-199:-11:211:0:unk:unk:r:c0dfd1298c23",
+   "family": "prime",
+   "params": {
+    "p": "199",
+    "a": "0",
+    "b": "118"
+   },
+   "model_json": "{\"a\":\"0\",\"b\":\"118\",\"field\":\"fp-199\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"199\",\"v\":\"1\"}",
+   "trace": -11,
+   "order": "211",
+   "j": "0",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/isogeny_torsion_fibers_20261012/paired_round/curves.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P8Cfphb11d1e6192b3",
+     "curve_uid": "urn:ec-record:1:sha256:b11d1e6192b3feb6496950ad72b5a25a8cbf7bc246fb774d4c2197ea59e89489",
+     "field_sha256": "509f3cf23cfc0ee2a442d0391452dd3cbac45d66d02ee3c54da6167f72d4706c",
+     "field": {
+      "characteristic": 199,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       0,
+       118
+      ],
+      "subgroup_order": "211",
+      "cofactor": 1,
+      "generator": [
+       "0xd",
+       "0x99"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/isogeny_torsion_fibers_20261012/paired_round/curves.json"
+     ]
+    }
+   ]
   },
   {
    "slug": "icv1-fp10-t5-192cb216",

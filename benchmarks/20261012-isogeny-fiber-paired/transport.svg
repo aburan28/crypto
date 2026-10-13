@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="390" viewBox="0 0 1000 390">
+ <rect width="1000" height="390" fill="#fff"/>
+ <style>text{font-family:Arial,sans-serif;fill:#172033}.head{font-size:22px;font-weight:bold}.label{font-size:16px}.small{font-size:13px}.mapnote{font-size:11px}.box{fill:#f5f8fc;stroke:#53789a;stroke-width:2}.arrow{stroke:#334155;stroke-width:2;fill:none;marker-end:url(#arrow)}.pending{stroke:#b45309;stroke-width:2;stroke-dasharray:6 4;fill:none;marker-end:url(#pending)}</style>
+ <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#334155"/></marker><marker id="pending" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#b45309"/></marker></defs>
+ <text x="26" y="34" class="head">Same source target: measured isogeny and pending isomorphism control</text>
+ <text x="26" y="64" class="label">F₁₃ · r = 19</text>
+ <rect class="box" x="25" y="82" width="380" height="76" rx="9"/>
+ <text x="40" y="109" class="label">icv1-fp4-tm5-c277dce2</text>
+ <text x="40" y="137" class="small">E: y² = x³ + 2 · EC1P4Cfph7c32fa042bde</text>
+ <path class="arrow" d="M405 107H575"/>
+ <text x="424" y="95" class="mapnote">degree 3 · measured φ</text>
+ <path class="pending" d="M405 133H575"/>
+ <text x="420" y="151" class="mapnote">degree 1 · ψ₂ · pending solve</text>
+ <rect class="box" x="575" y="82" width="400" height="76" rx="9"/>
+ <text x="590" y="109" class="label">icv1-fp4-tm5-90163552</text>
+ <text x="590" y="137" class="small">E′: y² = x³ + 11 · EC1P4Cfph47e4fecd7461</text>
+ <text x="26" y="196" class="label">F₁₉₉ · r = 211</text>
+ <rect class="box" x="25" y="214" width="380" height="76" rx="9"/>
+ <text x="40" y="241" class="label">icv1-fp8-tm11-7caf6b43</text>
+ <text x="40" y="269" class="small">E: y² = x³ + 3 · EC1P8Cfphdcceff26a483</text>
+ <path class="arrow" d="M405 239H575"/>
+ <text x="424" y="227" class="mapnote">degree 3 · measured φ</text>
+ <path class="pending" d="M405 265H575"/>
+ <text x="420" y="283" class="mapnote">degree 1 · ψ₁₄ · pending solve</text>
+ <rect class="box" x="575" y="214" width="400" height="76" rx="9"/>
+ <text x="590" y="241" class="label">icv1-fp8-tm11-c0dfd129</text>
+ <text x="590" y="269" class="small">E′: y² = x³ + 118 · EC1P8Cfphb11d1e6192b3</text>
+ <text x="26" y="333" class="small">For each of 8 public Q per pair: source relations and rho use (G,Q); measured destination relations use (φ(G),φ(Q)).</text>
+ <text x="26" y="357" class="small">The scaling maps ψᵤ are verified isomorphisms. Their destination relation-solver arm has not been run.</text>
+</svg>

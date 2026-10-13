@@ -1,0 +1,17 @@
+{
+  "schema": "isogeny_fiber_paired_curves/v1",
+  "pairs": [
+    {
+      "degree": 3,
+      "kernel_rational_order": 1,
+      "source": {"p": 13, "a": 0, "b": 2, "group_order": 19, "subgroup_order": 19, "cofactor": 1, "generator": [1, 4]},
+      "destination": {"p": 13, "a": 0, "b": 11, "group_order": 19, "subgroup_order": 19, "cofactor": 1, "generator": [9, 5]}
+    },
+    {
+      "degree": 3,
+      "kernel_rational_order": 1,
+      "source": {"p": 199, "a": 0, "b": 3, "group_order": 211, "subgroup_order": 211, "cofactor": 1, "generator": [1, 2]},
+      "destination": {"p": 199, "a": 0, "b": 118, "group_order": 211, "subgroup_order": 211, "cofactor": 1, "generator": [13, 153]}
+    }
+  ]
+}
