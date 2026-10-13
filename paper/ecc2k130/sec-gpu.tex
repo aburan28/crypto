@@ -207,8 +207,8 @@ $\sigma^j$ with Bene\v{s} networks over the permuted normal basis,
 checked on $3{,}120$ GPU vectors and on $256$ basis vectors under all
 $131$ powers. Native carry-less multiplication ($+22\%$) replaces an
 emulated $32\times32$ carry-less product with the
-\texttt{clmad.lo}/\texttt{hi} instructions that CUDA~13.3 exposes on
-Blackwell. That change in turn let the batch drop from 32 to 16 walks
+\texttt{clmad.lo}/\texttt{hi} instructions that CUDA~13.3 exposes
+(Section~\ref{sec:blackwell-clmad}). That change in turn let the batch drop from 32 to 16 walks
 per inversion with $385{,}024$ workers resident ($+52\%$), at the same
 two-block occupancy and the same 122 registers per thread. The note
 suggests a cache-capacity explanation (the hot state shrinks from $245$
@@ -271,10 +271,51 @@ was worth $+9.4\%$, tag denominators $+1.5\%$ and inlining $+2.3\%$.
 Collecting at weight 34 it holds $19.04$~billion iterations/s against $16.70$. All 300
 reports re-walked correctly, and the distinguished-point count matched
 the reference's $472{,}776$.\art{ecc2k130/ONE-BLOCK-GEOMETRY.md} This is
-the \texttt{gpu-rtx-pro6000-20b} build. A later cycle-escape revision of
-the table walk (rule v3, Section~\ref{sec:walk-cycles}) rebuilt the
-kernel shape. Its own ladder, from $1.04$ to $5.10$~billion iterations/s, belongs to a
-different walk and cannot be compared with the $20$~billion iterations/s rows.\art{ecc2k130/CYCLE-ESCAPE-V3.md}
+the \texttt{gpu-rtx-pro6000-20b} build, and it ran cycle rule v2.
+
+\subsection{The $\sigma$-walk against the table walk}
+\label{sec:sigma-vs-table}
+
+Readers who skim the tables will see $20.08$ next to $15.88$ and
+conclude that the table walk is the faster walk on Blackwell. Today
+it is not, and the reason is correctness rather than arithmetic.
+
+The table walk adds a precomputed point instead of a Frobenius image
+of itself, which removes the basis conversions around $\sigma^j$ and
+makes each step cheaper. The price is fruitless cycles: short loops
+in which a trail returns to a class it has already visited and makes
+no progress (Section~\ref{sec:walk-table}). The $\sigma$-walk has none
+at all. Every table-walk rule is a way of noticing such a loop and
+leaving it, and the rules have had three versions:
+\begin{itemize}[leftmargin=1.2em,itemsep=0.2em]
+\item \emph{v1}, as first built, let some cycle patterns through.
+  The kernel ran at $16.56$~billion iterations/s on the RTX~PRO~6000
+  and $5.55$ on the RTX~PRO~4500, but at campaign trail lengths it is
+  modelled to trap about half of all trails, so its cost per solve is
+  $4.85$--$6.26$ times the $\sigma$-walk's.
+\item \emph{v2} closed those patterns, and the one-block build ran it
+  at $20.08$ on the RTX~PRO~6000; the B200 sweep reached $19.40$ on a
+  rule older than v3. A review then found that v2's exit from a cycle
+  depended on the history a trail arrived with. Two trails entering
+  the same cycle from different directions could leave it by different
+  edges, which undermines the collision structure that rho relies on.
+\item \emph{v3} fixes that. On a hint it follows at most eight raw
+  steps, confirms an exact cycle, and leaves at one anchor chosen from
+  the cycle itself, so every trail entering a cycle leaves it the same
+  way. The probe sits on the critical path, and the exact v3 kernel
+  currently runs at $5.10$~billion iterations/s on the RTX~PRO~6000.\art{ecc2k130/CYCLE-ESCAPE-V3.md}\art{ecc2k130/README.md, ``The earlier 20.078 B/s table result''}
+\end{itemize}
+
+So the honest summary is this. The $\sigma$-walk is the fastest
+\emph{correct} walk we have on Blackwell, at $15.88$~billion iterations/s
+on one RTX~PRO~6000 and $14.64$ in the audited campaign build. The table
+walk is the faster \emph{arithmetic}: its v2 rate shows what the step
+costs without the cycle probe, and that is the target for a faster
+exact rule. Even a fast exact table walk only pays if its cost per
+solve, which also depends on its walk constant, beats the
+$\sigma$-walk's; under v2 that was projected at $0.81$--$0.86\times$ and has
+never been measured. Section~\ref{sec:open-table} lists the routes we
+see.
 
 \subsection{The second card: RTX~PRO~4500}
 \label{sec:g7}
@@ -300,45 +341,65 @@ ran at $12.632704$~billion iterations/s over $2^{36}$ updates.\art{ecc2k130/READ
 We have not measured its DP34 collection rate on this card, so we do
 not give one.
 
-\subsection{Per-GPU survey}
+\subsection{Performance across GPUs}
 \label{sec:survey}
 
-The campaign default is the RTX~PRO~6000, but Modal also rents T4,
-L4, A10, L40S, A100, H100, H200, B200 and B300.
-Table~\ref{tab:survey} runs one packed walk with automatic workers and
-three valid \texttt{--bench} repeats on twelve catalogue SKUs. Nothing
-beat the 6000. This walk is bound by integer and carry-less throughput,
-not by tensor cores, so the usual rankings of GPUs for machine-learning
-work do not carry over: on this kernel the B200 is $0.585\times$ the
-6000 and the H100 is half.
-\art{ecc2k130/benchmarks/modal-gpus/SURVEY.md}
+Table~\ref{tab:survey} puts every part we measured side by side, with
+the $\sigma$-walk and the table walk in separate columns. The
+$\sigma$-walk column is one survey run of the same packed preset on
+each Modal SKU (automatic workers, three valid \texttt{--bench}
+repeats, unpaired); the next column gives the best paired result on
+that part, where one exists. The table-walk rates were all measured
+under cycle rules older than the current v3, for the reason given in
+Section~\ref{sec:sigma-vs-table}.\art{ecc2k130/benchmarks/modal-gpus/SURVEY.md}\art{ecc2k130/README.md, ``Table-walk correctness update''}
 
 \begin{table}[t]
 \centering
-\small
-\caption{Modal GPU survey, automatic workers, packed recipe. Unit:
-  billion complete iterations/s. The last column is trillions of
-  iterations per dollar at Modal list price. Class: engineering.}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Rates in billions of iterations per second on one GPU.
+  ``$\sigma$ survey'': the shipping packed preset, one unpaired Modal
+  survey run (the RTX~PRO~4500 row is its AWS measurement). ``Best
+  paired'': the best paired result on that part. ``Table, pre-v3'':
+  table-walk rates under cycle rules v1 or v2, which are superseded
+  (Section~\ref{sec:sigma-vs-table}); the exact v3 table walk measures
+  $5.10$ on the RTX~PRO~6000. ``M/SM'': million iterations per second per SM, our quotient of the
+  survey rate by the SM count. ``T/\$'': trillions of iterations per dollar at
+  Modal list price, 2026-09-19.}
 \label{tab:survey}
-\begin{tabular}{@{}lrrr@{}}
+\begin{tabular}{@{}llrrlrrr@{}}
 \toprule
-GPU & billion it/s & / 6000 & it/\$ (T) \\
+GPU & arch. & SMs & $\sigma$ survey & best paired & table (pre-v3) & M/SM & T/\$ \\
 \midrule
-RTX PRO 6000, $385$k workers & 15.116 & 1.000 & 17.95 \\
-RTX PRO 6000, automatic & 14.470 & 0.957 & 17.19 \\
-B200 & 8.840 & 0.585 & 5.09 \\
-L40S & 8.696 & 0.575 & 16.04 \\
-H200 & 7.632 & 0.505 & 6.05 \\
-B300 & 7.575 & 0.501 & 3.84 \\
-H100 & 7.540 & 0.499 & 6.87 \\
-A100-80GB & 4.632 & 0.306 & 6.67 \\
-A100-40GB & 4.618 & 0.305 & 7.92 \\
-L4 & 2.561 & 0.169 & 11.54 \\
-A10 & 2.423 & 0.160 & 7.92 \\
-T4 (no \texttt{clmad}) & 0.541 & 0.036 & 3.30 \\
+RTX PRO 6000 & Blackwell \texttt{sm\_120} & 188 & 15.116 & 15.884 ($\sigma$, nibble table) & 20.078 (v2) & 80.4 & 17.95 \\
+RTX PRO 4500 & Blackwell \texttt{sm\_120} & 82 & 5.107 & 12.499 ($x$-only bridge) & 5.552 (v1) & --- & --- \\
+B200 & Blackwell \texttt{sm\_100} & 148 & 8.840 & --- & 19.402 & 59.7 & 5.09 \\
+B300 & Blackwell \texttt{sm\_103} & 148 & 7.575 & --- & --- & 51.2 & 3.84 \\
+H200 & Hopper \texttt{sm\_90} & 132 & 7.632 & --- & --- & 57.8 & 6.05 \\
+H100 & Hopper \texttt{sm\_90} & 132 & 7.540 & --- & --- & 57.1 & 6.87 \\
+L40S & Ada \texttt{sm\_89} & 142 & 8.696 & --- & --- & 61.2 & 16.04 \\
+L4 & Ada \texttt{sm\_89} & 58 & 2.561 & --- & --- & 44.2 & 11.54 \\
+A100-80GB & Ampere \texttt{sm\_80} & 108 & 4.632 & --- & --- & 42.9 & 6.67 \\
+A100-40GB & Ampere \texttt{sm\_80} & 108 & 4.618 & --- & --- & 42.8 & 7.92 \\
+A10 & Ampere \texttt{sm\_86} & 72 & 2.423 & --- & --- & 33.7 & 7.92 \\
+T4 (no \texttt{clmad}) & Turing \texttt{sm\_75} & 40 & 0.541 & --- & --- & 13.5 & 3.30 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+Three things stand out. First, nothing beats the RTX~PRO~6000 on this
+walk, per card, per SM or per dollar. It has the most SMs, a high
+clock and Blackwell's unified integer lanes, and the walk is bound by
+integer logic and the carry-less unit rather than by memory or tensor
+cores, so the usual rankings of GPUs for machine-learning work do not
+carry over: the B200 runs the $\sigma$-walk at $0.585\times$ the 6000 and
+the H100 at half. Second, per SM, the Blackwell workstation die leads
+the data-centre parts even though its carry-less unit is the slowest
+in the table (Section~\ref{sec:blackwell-rates}), because the shipping
+walk was tuned for exactly that balance. Third, the data-centre dies
+reward a different kernel. With a table walk tuned for its fast
+carry-less unit the B200 reaches $19.40$, more than twice its
+$\sigma$-walk rate.
 
 On the B200, an automatic sweep over twenty single-knob arms (launch
 geometry, product form, scheduling, memory residency) later lifted the

@@ -13,69 +13,82 @@ it~\cite{bailey2009,bailey2009sharcs,bos2010cell,fan2010fpga}, and
 estimated the work at $2^{60.9}$ iterations. That attack was never
 completed.
 
-This paper describes a second attempt, built from scratch on hardware
-that did not exist in 2009. We tried to hold it to the standard the
-first attempt's reports set, and in places to a stricter one: every
-rate is paired against an adjacent control on the same machine, every
-target was written down before we tuned toward it, and every claim
-has a footnote naming the file in the repository that backs it. None
-of this improves on the generic-group bound, and we do not pretend
-otherwise. What we can report is the cost of one step, measured on
-GPUs, CPUs and an FPGA; the number of steps, measured on small curves
-of the same family and extrapolated; and a campaign that has walked
-$2^{56.7}$ of the $2^{60.9}$ iterations, most of it before its cloud
-fleet was taken away.
+This paper is about what Pollard rho costs on the current generation
+of NVIDIA hardware, and ECC2K-130 is the yardstick. In 2009 the
+fastest GPU in the consortium's plan had no carry-less multiplier and
+a binary-field product had to be built bit by bit from AND and XOR
+(Section~\ref{sec:history}). Today CUDA~13.3 exposes a carry-less
+multiply-add, \texttt{clmad}, in PTX; on this walk a Blackwell SM retires
+integer logic at about twice an Ada SM's per-clock rate; and three-input logic, funnel
+shifts and byte permutes all issue at full rate. We rebuilt the
+ECC2K-130 attack from scratch around that hardware and measured, step
+by step, how far each change moves the rate. On one RTX~PRO~6000
+Blackwell the campaign's walk runs at $14.64$ billion iterations per
+second in its audited build and $15.88$ in the best later build, about
+$600$ times what one 2009 GPU achieved
+(Section~\ref{sec:history-compare}).
 
-Along the way it became clear that most of what made the GPU client
-fast was not specific to binary fields. So we also carried the same
-optimisations over to Pollard rho on NIST P-256 and P-384, on the same
-card, to see which of them transfer.
+We also wanted to know which of those gains belong to binary fields
+and which belong to rho on GPUs in general. So we carried the same
+optimisations to Pollard rho on NIST P-256 and P-384, on the same card.
+Most of the levers transferred; their relative sizes did not.
+
+We tried to hold the work to the standard the first attempt's reports
+set, and in places to a stricter one: every rate is paired against an
+adjacent control on the same machine, every target was written down
+before we tuned toward it, and every claim has a footnote naming the
+file in the repository that backs it. None of this improves on the
+generic-group bound, and we do not pretend otherwise. What we report is
+the cost of one step on GPUs, CPUs and an FPGA; the number of steps,
+measured on small curves of the same family and extrapolated; and a
+campaign that has walked $2^{56.7}$ of the $2^{60.9}$ iterations, most of
+it before its cloud fleet was taken away.
+
+All rates in this paper are in billions of iterations per second on
+one device unless a row says otherwise. An iteration is one complete
+step of one walk, including its share of the batched inversion, the
+distinguished-point test and the restart path.
 
 \paragraph{Contributions.}
 \begin{itemize}[leftmargin=1.2em,itemsep=0.3em]
-\item A code generator that builds every field routine from one
-  symmetric-vector model of $\FF_{2^{131}}$ and checks each routine
-  before emitting it. On top of it sit a bitsliced backend at every word
-  width from 64 to 512 lanes, a packed CUDA backend that uses the GPU's
-  native carry-less products, and a VHDL engine, all of which write
-  bit-for-bit compatible records (Sections~\ref{sec:curve} and
-  \ref{sec:arith}).
-\item Three iteration functions on the $\langle\sigma,-1\rangle$
-  classes, with walk constants measured on small Koblitz curves and
-  extrapolated. The campaign's walk needs $2^{60.91}$--$2^{60.92}$
-  iterations. The table walk's fruitless cycles are measured, priced
-  and repaired (Section~\ref{sec:walk}).
+\item A side-by-side account of ECC2K-130 rates on 2009--2010 hardware
+  and on current GPUs, in one unit (Section~\ref{sec:history}).
+\item A measured description of what current NVIDIA hardware changes
+  for rho: the PTX~9.3 \texttt{clmad} instruction, its rate on three
+  dies (from $1.69$ lanes per SM-clock on the RTX~PRO~6000 to $29.9$ on
+  the H100), and why the same source change can win on one Blackwell
+  part and lose on another (Section~\ref{sec:blackwell}).
 \item A GPU ledger of sixteen paired optimisation steps, taking one
-  RTX~PRO~6000 from $0.85$ to $14.64$~billion iterations/s for the campaign build, with
-  later builds of the same walk at $15.44$ and $15.88$ and a table walk
-  at $20.08$~billion iterations/s (a rate whose cost per solve is not yet measured). We
-  add a twelve-GPU survey, a roofline, a floor derived from the
-  carry-less unit before tuning that rules out $28$~billion iterations/s on one card,
-  and every candidate we built and rejected, with its ratio
-  (Section~\ref{sec:gpu}).
-\item The same optimisation ladder applied to Pollard rho on NIST P-256
-  and P-384 on the same RTX~PRO~6000: $1.52\times$ and $2.61\times$ over the
-  first working build, to $1.632$ and $0.548$~billion iterations/s, with an account of
-  which levers carried over and how their sizes changed
+  RTX~PRO~6000 from $0.85$ to $14.64$ billion iterations per second for
+  the campaign build, with later $\sigma$-walk builds at $15.44$ and
+  $15.88$, a roofline, a floor derived from the carry-less unit before
+  tuning that rules out $28$ on one card, and every candidate we built
+  and rejected (Section~\ref{sec:gpu}).
+\item A clear separation of the $\sigma$-walk from the table walk. The
+  table walk's $20.08$ was measured under a cycle rule later found to
+  exit cycles inconsistently; the exact rule runs at $5.10$ today, so
+  the $\sigma$-walk is the fastest correct walk we have
+  (Section~\ref{sec:sigma-vs-table}).
+\item Measurements on twelve GPUs from Turing to Blackwell, per card,
+  per SM and per dollar (Section~\ref{sec:survey}).
+\item The same ladder applied to Pollard rho on NIST P-256 and P-384 on
+  the RTX~PRO~6000: $1.52\times$ and $2.61\times$ over the first working
+  build, to $1.632$ and $0.548$ billion iterations per second
   (Section~\ref{sec:nist}).
-\item An inventory of the other GPU arithmetic in the repositories,
-  prime-field (secp256k1 rho with order-six folding, baby-step
-  giant-step, kangaroo) and binary-field (the ECC2K-95 kernel, pair
-  tables, polynomial-system solvers), with their instruction ledgers,
-  emulated walk constants and an honest statement of which have run on
-  a device (Section~\ref{sec:othergpu}).
-\item A pipelined-Karatsuba FPGA engine measured at $8.25$~billion iterations/s on
-  one AWS F2, inside a pre-board estimate of $5$--$12$
-  (Section~\ref{sec:fpga}).
-\item The campaign itself: its configuration, the calibration of the
-  distinguished-point interval (including the retraction of a wrong
-  one), the storage and replay protocol, fleet economics, and its state
-  at $486$~M points and $2^{56.68}$ iterations
-  (Section~\ref{sec:campaign}).
-\item Structural alternatives priced in the same unit, none of which
-  come close: index calculus on the Koblitz curve at $10^7$ times the
-  cost of rho, and point decomposition $35$--$51$ bits short of its
-  budget (Section~\ref{sec:alternatives}).
+\item Supporting work: a code generator that builds every field routine
+  from one checked model of $\FF_{2^{131}}$
+  (Sections~\ref{sec:curve} and \ref{sec:arith}); walk constants
+  measured rather than assumed, $2^{60.91}$--$2^{60.92}$ iterations for
+  the campaign's walk (Section~\ref{sec:walk}); bitsliced CPU clients
+  (Section~\ref{sec:cpu}); an inventory of the repositories' other GPU
+  kernels (Section~\ref{sec:othergpu}); an FPGA engine at $8.25$ billion
+  iterations per second on one AWS F2 (Section~\ref{sec:fpga}); the
+  campaign at $486$~M points and $2^{56.68}$ iterations
+  (Section~\ref{sec:campaign}); and structural alternatives priced in
+  the same unit, none of which come close
+  (Section~\ref{sec:alternatives}).
+\item A list of open questions and next optimisations, each with what
+  would settle it (Section~\ref{sec:open}).
 \end{itemize}
 
 \paragraph{How we report numbers.} One rule from the repository
@@ -123,8 +136,10 @@ the challenge curve, and we do not expect one from the corpus
 collected so far; collection is currently paused. We quote no rate for
 hardware we did not measure. The L40S collection rate, the RTX~PRO~4500
 collection rate under the bridge map and the G7e instance family are
-unmeasured, and we say so where they come up. Projections, such as the
-$7.2$--$7.4$~billion iterations/s fused build on the 4500, the table walk's
+unmeasured, and we say so where they come up. The table walk's
+$20.08$ and $19.40$ were measured under superseded cycle rules and are
+rates for the arithmetic, not for a correct walk. Projections, such as
+the $7.2$--$7.4$~billion iterations/s fused build on the 4500, the table walk's
 $0.81$--$0.86$ relative cost per solve, and the 136- and 144-engine F2
 images, are labelled as projections wherever they appear. The NIST
 rates in Section~\ref{sec:nist} are throughput on a walk that will not

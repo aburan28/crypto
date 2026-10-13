@@ -11,12 +11,12 @@ GPUs'.
 \centering
 \small
 \caption{Bitsliced CPU client, $\mathrm{GF}(2^{131})$, one core, median
-  of five. Speedups are against the g++ 64-lane build on the same host. The 2009 qhasm implementation of Bailey et al.\ reached
+  of five; M it/s is million iterations per second. Speedups are against the g++ 64-lane build on the same host. The 2009 qhasm implementation of Bailey et al.\ reached
   $533$ cycles per iteration on a Core~2 with 128-bit vectors.}
 \label{tab:cpu}
 \begin{tabular}{@{}llrrl@{}}
 \toprule
-host & word & lanes & million it/s & note \\
+host & word & lanes & M it/s & note \\
 \midrule
 Xeon 2.1~GHz & \texttt{uint64\_t} & 64 & 4.42 & 475 cycles/iteration \\
 Xeon 2.1~GHz & AVX2 & 256 & 10.7 & 196 cycles/iteration \\
