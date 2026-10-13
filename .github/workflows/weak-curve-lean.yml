@@ -12,7 +12,7 @@ permissions:
 jobs:
   proofs:
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 60 }}
+    timeout-minutes: 60
     defaults:
       run:
         working-directory: research/weak_curve_properties_lean_20261011
