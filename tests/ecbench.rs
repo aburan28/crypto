@@ -641,7 +641,6 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
         .unwrap()
         .starts_with("IC1N17Ckb1fb442PDP2mitmfrobeniusRCwalkLAincrementalgaussTDjointISO0h"));
     assert_eq!(claim["target_count"], 1);
-    assert_eq!(claim["timing_class"], "single_target_online");
     assert_eq!(claim["timing_class"], "single_target_online_wall");
     assert_eq!(claim["ic_online_ms"], claim["ic_online_wall_ms"]);
     assert_eq!(claim["ic_target_hash"], claim["rho_target_hash"]);
@@ -660,10 +659,19 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
             "ic_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
             "rho_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
             "isolation_levels.ic L0 is below required L2",
-            "isolation_levels.rho L0 is below required L2"
+            "isolation_levels.rho L0 is below required L2",
+            "record_class must be verified_answer_controlled_wall for a primary wall claim"
         ])
     );
-    assert_eq!(c["missing_stage_fields"], serde_json::json!([]));
+    // Without an independent replay the certificates stay null, so they are
+    // exactly the missing stage fields.
+    assert_eq!(
+        c["missing_stage_fields"],
+        serde_json::json!([
+            "ic_replay_certificate_sha256",
+            "rho_replay_certificate_sha256"
+        ])
+    );
     assert_eq!(c["missing_global_provenance"], serde_json::json!([]));
 
     // A replay on the session's own host class is not independent.
@@ -723,6 +731,9 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
         serde_json::from_str(&std::fs::read_to_string(&claim_path).unwrap()).unwrap();
     simulated_l2["isolation_levels"]["ic"] = Value::from("L2");
     simulated_l2["isolation_levels"]["rho"] = Value::from("L2");
+    // The record class is stamped from the measured levels, so the simulated
+    // levels need the matching class for the primary wall claim.
+    simulated_l2["record_class"] = Value::from("verified_answer_controlled_wall");
     let simulated_path = dir.join("simulated-l2.json");
     std::fs::write(
         &simulated_path,
