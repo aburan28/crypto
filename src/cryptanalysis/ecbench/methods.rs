@@ -44,6 +44,7 @@ use crate::cryptanalysis::ic_framework::plugins::{
 use crate::cryptanalysis::ic_framework::shared_rank::{
     run_shared_rank_targets, SharedRankSpec, SharedTargetSpec,
 };
+use crate::cryptanalysis::ic_framework::rootfind::{RootfindMitmOracle, RootfindPairsOracle};
 use crate::cryptanalysis::ic_framework::solvers::solver_by_name;
 use crate::cryptanalysis::ic_framework::stages::{
     DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, Targets,
@@ -1739,10 +1740,14 @@ fn solve_ic_prime(
     let mut subtract = SubtractOracle;
     let mut mitm = MitmOracle::new(ms);
     let mut mitm_fiber = FiberMitmOracle::new(ms);
+    let mut rootfind_mitm = RootfindMitmOracle::new(ms);
+    let mut rootfind_pairs = RootfindPairsOracle::new(ms);
     let oracle: &mut dyn DecompositionOracle<_> = match or_name.as_str() {
         "subtract" => &mut subtract,
         "mitm" => &mut mitm,
         "mitm-fiber" => &mut mitm_fiber,
+        "rootfind-mitm" => &mut rootfind_mitm,
+        "rootfind-pairs" => &mut rootfind_pairs,
         other => return Err(format!("oracle `{other}` does not run on a prime curve")),
     };
     let ctx = InstanceCtx {
@@ -1848,6 +1853,8 @@ fn solve_ic_binary(
     let mut frob_counted = FrobeniusMitmOracle::new_counted(ms, inst);
     let mut mitm_fiber = FiberMitmOracle::new(ms);
     let mut frob_fiber = FiberFrobeniusMitmOracle::new(ms, inst);
+    let mut rootfind_mitm = RootfindMitmOracle::new(ms);
+    let mut rootfind_pairs = RootfindPairsOracle::new(ms);
     let mut descent_fiber = match or_name.as_str() {
         "descent-algebraic-fiber" => {
             let name = spec
@@ -1892,6 +1899,8 @@ fn solve_ic_binary(
         "mitm-frobenius-counted" => &mut frob_counted,
         "mitm-fiber" => &mut mitm_fiber,
         "mitm-frobenius-fiber" => &mut frob_fiber,
+        "rootfind-mitm" => &mut rootfind_mitm,
+        "rootfind-pairs" => &mut rootfind_pairs,
         "descent-algebraic" => algebraic.as_mut().expect("built above"),
         "descent-algebraic-fiber" => descent_fiber.as_mut().expect("built above"),
         other => match plugin_oracle.as_deref_mut() {

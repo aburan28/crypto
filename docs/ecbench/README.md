@@ -393,6 +393,30 @@ frozen-source replays rebuild it against pre-F6 snapshots of
 evaluations, and the tournament admits no root build script. It also
 refuses to run while a `KIC_*`, `F4_*` or `SOLVER_*` tuning override is set.
 
+`rootfind-mitm:m=3` and `rootfind-pairs:m=3` are the root-finding
+decomposition oracles of `research/pdp_root_finder_20261012` as plug-ins
+(`ic_framework::rootfind`), on any base and both tracks. `rootfind-mitm`
+builds the negation-folded pair table once (`full_table=1` for every
+`i ≤ j` pair) and, per target, computes the `2A` points `R ∓ P_k` — one
+representative `P_k` an abscissa — in one batch and probes each;
+`rootfind-pairs` keeps no table and tests every candidate `U ∓ P_j` of
+every row point `U = R ∓ P_i` for membership in the base: the enumeration
+floor, the memoryless control.
+
+- **Charged:** every point addition, one each: the table build, the `2A`
+  additions a target (the count `mitm:m=3` charges over the `2A` signed
+  points, so the two table oracles are equal in `S` by construction), the
+  probe's confirming addition on a key hit, and every candidate of
+  `rootfind-pairs`.
+- **Counted, not charged:** table lookups and membership tests
+  (`lookups`), and the batched field inversions (`inversions`, one per
+  batch: on a binary curve the group shares one inversion over the whole
+  slice through `FastCurve::add_many`; on a prime curve the default path
+  inverts once an addition).  What the new ids change against `mitm` is
+  therefore the arithmetic behind the same charged additions, which wall
+  time sees and `S` does not; and the memoryless three-summand arm, which
+  the harness had not had.
+
 **Calibration.** The unit has been checked against theory in
 [`research/ecbench_calibration_20261002`](../../research/ecbench_calibration_20261002/README.md).
 Over 2 384 verified runs, preregistered and replayed, every generic
