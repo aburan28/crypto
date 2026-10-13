@@ -710,6 +710,29 @@
         "schema_version": "hyperelliptic-model/v1"
       }
     },
+    "urn:hc-model:1:sha256:02ea2461b26d77fa4b56af6c14ac51c5529b3c0207f38fd325b5f3ae3b075f45": {
+      "cover_id": "HC1G2h02ea2461b26d",
+      "cover_uid": "urn:hc-model:1:sha256:02ea2461b26d77fa4b56af6c14ac51c5529b3c0207f38fd325b5f3ae3b075f45",
+      "record": {
+        "f": [
+          "0x28e87bd5e0",
+          "0x0",
+          "0x28e87bd5e2",
+          "0x0",
+          "0x3",
+          "0x0",
+          "0x1"
+        ],
+        "field": {
+          "label": "fp-1033961567797",
+          "p": "1033961567797"
+        },
+        "form": "v^2+h(u)*v=f(u)",
+        "genus": 2,
+        "h": [],
+        "schema_version": "hyperelliptic-model/v1"
+      }
+    },
     "urn:hc-model:1:sha256:02f0732f8d93054603f0dd96e675dac201f062e79dfd9143c8419de99021b246": {
       "cover_id": "HC1G2h02f0732f8d93",
       "cover_uid": "urn:hc-model:1:sha256:02f0732f8d93054603f0dd96e675dac201f062e79dfd9143c8419de99021b246",
@@ -13501,6 +13524,29 @@
         "schema_version": "hyperelliptic-model/v1"
       }
     },
+    "urn:hc-model:1:sha256:354cff95eb1745a50901d53db889fb08ce1f8d863fd677d1f2986bdd0606a880": {
+      "cover_id": "HC1G2h354cff95eb17",
+      "cover_uid": "urn:hc-model:1:sha256:354cff95eb1745a50901d53db889fb08ce1f8d863fd677d1f2986bdd0606a880",
+      "record": {
+        "f": [
+          "0x1454b258fa54",
+          "0x0",
+          "0x1492634694d6",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "field": {
+          "label": "fp-78575552703623",
+          "p": "78575552703623"
+        },
+        "form": "v^2+h(u)*v=f(u)",
+        "genus": 2,
+        "h": [],
+        "schema_version": "hyperelliptic-model/v1"
+      }
+    },
     "urn:hc-model:1:sha256:354d3dda23aa7f298e975177fc2196febdbaf6e301404c49e853711971cd1aa2": {
       "cover_id": "HC1G3h354d3dda23aa",
       "cover_uid": "urn:hc-model:1:sha256:354d3dda23aa7f298e975177fc2196febdbaf6e301404c49e853711971cd1aa2",
@@ -15606,6 +15652,29 @@
         "field": {
           "label": "fp-19643936473787",
           "p": "19643936473787"
+        },
+        "form": "v^2+h(u)*v=f(u)",
+        "genus": 2,
+        "h": [],
+        "schema_version": "hyperelliptic-model/v1"
+      }
+    },
+    "urn:hc-model:1:sha256:3ee15c22bfbdca536631a89740c1cba5fbea2c9858c08204020eddc06ec9c064": {
+      "cover_id": "HC1G2h3ee15c22bfbd",
+      "cover_uid": "urn:hc-model:1:sha256:3ee15c22bfbdca536631a89740c1cba5fbea2c9858c08204020eddc06ec9c064",
+      "record": {
+        "f": [
+          "0x4c80567188",
+          "0x0",
+          "0x55d155fc3f",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "field": {
+          "label": "fp-1033961567797",
+          "p": "1033961567797"
         },
         "form": "v^2+h(u)*v=f(u)",
         "genus": 2,
@@ -45648,6 +45717,29 @@
           "0x0",
           "0x1"
         ],
+        "schema_version": "hyperelliptic-model/v1"
+      }
+    },
+    "urn:hc-model:1:sha256:c24c1b5bb22853eee83539c36ca91d5a5bdaeff0068e2115de7facd54655dd2b": {
+      "cover_id": "HC1G2hc24c1b5bb228",
+      "cover_uid": "urn:hc-model:1:sha256:c24c1b5bb22853eee83539c36ca91d5a5bdaeff0068e2115de7facd54655dd2b",
+      "record": {
+        "f": [
+          "0x1b717cb679e3",
+          "0x0",
+          "0x56ed51da091",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "field": {
+          "label": "fp-78575552703623",
+          "p": "78575552703623"
+        },
+        "form": "v^2+h(u)*v=f(u)",
+        "genus": 2,
+        "h": [],
         "schema_version": "hyperelliptic-model/v1"
       }
     },
@@ -84940,6 +85032,44 @@
     {
       "cover_links": [
         {
+          "cover_uid": "urn:hc-model:1:sha256:3ee15c22bfbdca536631a89740c1cba5fbea2c9858c08204020eddc06ec9c064",
+          "direction": "H -> E",
+          "map_uid": "urn:curve-cover-map:1:sha256:e05cd88a4dc67642eee1d86ecca87ea22592e9f89d425acf310ea3f19c8f043a"
+        }
+      ],
+      "icv1_identity": {
+        "full": "ICV1:fp-1033961567797:252:1033961567546:392896418933:unk:unk:r:1353f62ba045",
+        "slug": "icv1-fp40-t252-1353f62b"
+      },
+      "model_json": "{\"a\":\"368584293439\",\"b\":\"328570663304\",\"field\":\"fp-1033961567797\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1033961567797\",\"v\":\"1\"}",
+      "model_sha256": "1353f62ba045de91d5737321ba1517e5d396356542188203f77e49564d296c6a",
+      "representations": [],
+      "standard_names": [],
+      "standards_provenance": null,
+      "status": "verified_over_declared_field"
+    },
+    {
+      "cover_links": [
+        {
+          "cover_uid": "urn:hc-model:1:sha256:02ea2461b26d77fa4b56af6c14ac51c5529b3c0207f38fd325b5f3ae3b075f45",
+          "direction": "H -> E",
+          "map_uid": "urn:curve-cover-map:1:sha256:e535bd68c9a7c2c74253733a6e42ef218c6ef3bfc468af12cc729596df622f2f"
+        }
+      ],
+      "icv1_identity": {
+        "full": "ICV1:fp-1033961567797:252:1033961567546:1728:unk:unk:r:9ccd690e8df5",
+        "slug": "icv1-fp40-t252-9ccd690e"
+      },
+      "model_json": "{\"a\":\"175699121631\",\"b\":\"0\",\"field\":\"fp-1033961567797\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1033961567797\",\"v\":\"1\"}",
+      "model_sha256": "9ccd690e8df51d23fe1ffedb0d43e540d15e0ec3a2ff32c71babef01d377d7b2",
+      "representations": [],
+      "standard_names": [],
+      "standards_provenance": null,
+      "status": "verified_over_declared_field"
+    },
+    {
+      "cover_links": [
+        {
           "cover_uid": "urn:hc-model:1:sha256:a1b1af719c125bc3c9e4f9b489093cfaf6b22cc5d61d9a91d7d5bdffbab176c6",
           "direction": "H -> E",
           "map_uid": "urn:curve-cover-map:1:sha256:aa76231de041abf0a81439fff57f1681cf04b612973328dc7fd491eb77204169"
@@ -85198,6 +85328,44 @@
       },
       "model_json": "{\"a\":\"9628813676156\",\"b\":\"21238319095335\",\"field\":\"fp-44457329933693\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"44457329933693\",\"v\":\"1\"}",
       "model_sha256": "82fe87112f5195e478c3da59f7e9de00857b4da93e81a0cd873066e539f2da75",
+      "representations": [],
+      "standard_names": [],
+      "standards_provenance": null,
+      "status": "verified_over_declared_field"
+    },
+    {
+      "cover_links": [
+        {
+          "cover_uid": "urn:hc-model:1:sha256:354cff95eb1745a50901d53db889fb08ce1f8d863fd677d1f2986bdd0606a880",
+          "direction": "H -> E",
+          "map_uid": "urn:curve-cover-map:1:sha256:28dc2c6d8931d111725cb0353efbdc991a817a273794bd9e1ddf1169a0bfe9ae"
+        }
+      ],
+      "icv1_identity": {
+        "full": "ICV1:fp-78575552703623:-809:78575552704433:58233993534819:unk:unk:r:3c5583268bfe",
+        "slug": "icv1-fp47-tm809-3c558326"
+      },
+      "model_json": "{\"a\":\"22618963350742\",\"b\":\"22354001984084\",\"field\":\"fp-78575552703623\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"78575552703623\",\"v\":\"1\"}",
+      "model_sha256": "3c5583268bfe498e84cbce50467993810b65d8042df98025e3f489f3ffc40f6d",
+      "representations": [],
+      "standard_names": [],
+      "standards_provenance": null,
+      "status": "verified_over_declared_field"
+    },
+    {
+      "cover_links": [
+        {
+          "cover_uid": "urn:hc-model:1:sha256:c24c1b5bb22853eee83539c36ca91d5a5bdaeff0068e2115de7facd54655dd2b",
+          "direction": "H -> E",
+          "map_uid": "urn:curve-cover-map:1:sha256:1fdbed73c0cb3556488af98993162262a1f43f8e69733453624e29ff43ea0476"
+        }
+      ],
+      "icv1_identity": {
+        "full": "ICV1:fp-78575552703623:-809:78575552704433:78575551818887:unk:unk:r:568d16198b39",
+        "slug": "icv1-fp47-tm809-568d1619"
+      },
+      "model_json": "{\"a\":\"5973580030097\",\"b\":\"30174237587939\",\"field\":\"fp-78575552703623\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"78575552703623\",\"v\":\"1\"}",
+      "model_sha256": "568d16198b394ce07df49b92ee54b59af9bf6612d8a08f94378d72285d3b30c5",
       "representations": [],
       "standard_names": [],
       "standards_provenance": null,
@@ -133988,6 +134156,32 @@
       },
       "verification_status": "verified_over_declared_field"
     },
+    "urn:curve-cover-map:1:sha256:1fdbed73c0cb3556488af98993162262a1f43f8e69733453624e29ff43ea0476": {
+      "field_check": "20_fixed_base_probable_prime_screen; primality remains an input assumption",
+      "map_id": "CV1D2h1fdbed73c0cb",
+      "map_uid": "urn:curve-cover-map:1:sha256:1fdbed73c0cb3556488af98993162262a1f43f8e69733453624e29ff43ea0476",
+      "proof_refs": [
+        "docs/curves/COVERS.md"
+      ],
+      "record": {
+        "degree": 2,
+        "schema_version": "curve-cover-map/v1",
+        "source_cover_uid": "urn:hc-model:1:sha256:c24c1b5bb22853eee83539c36ca91d5a5bdaeff0068e2115de7facd54655dd2b",
+        "target_model_json": "{\"a\":\"5973580030097\",\"b\":\"30174237587939\",\"field\":\"fp-78575552703623\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"78575552703623\",\"v\":\"1\"}",
+        "target_model_map": null,
+        "target_model_sha256": "568d16198b394ce07df49b92ee54b59af9bf6612d8a08f94378d72285d3b30c5",
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "verification_status": "verified_over_declared_field"
+    },
     "urn:curve-cover-map:1:sha256:1fe5c68bb21590db4deb7db863f6666c0e5fc13e5da3f469b44ad96731114c3f": {
       "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
       "map_id": "CV1D2h1fe5c68bb215",
@@ -135850,6 +136044,32 @@
         "target_model_json": "{\"a\":[\"127508\",\"251231\",\"66857\",\"212957\",\"16199\",\"213537\",\"118432\",\"121130\",\"71052\",\"48516\",\"168491\",\"81360\",\"94963\",\"115041\"],\"b\":[\"9213\",\"174283\",\"205901\",\"174944\",\"259370\",\"74684\",\"8731\",\"8389\",\"56109\",\"258614\",\"107551\",\"21114\",\"161296\",\"86910\"],\"field\":\"fpk-262139-14-db16df2f\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"14\",\"modulus\":[\"2029\",\"3776\",\"6053\",\"4148\",\"1316\",\"261511\",\"261804\",\"935\",\"929\",\"85\",\"261951\",\"262088\",\"18\",\"9\"],\"p\":\"262139\",\"v\":\"1\"}",
         "target_model_map": null,
         "target_model_sha256": "eb82016147023328829b715ba05a8ac31fc58b70af095ef52353bc532608ecd5",
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "verification_status": "verified_over_declared_field"
+    },
+    "urn:curve-cover-map:1:sha256:28dc2c6d8931d111725cb0353efbdc991a817a273794bd9e1ddf1169a0bfe9ae": {
+      "field_check": "20_fixed_base_probable_prime_screen; primality remains an input assumption",
+      "map_id": "CV1D2h28dc2c6d8931",
+      "map_uid": "urn:curve-cover-map:1:sha256:28dc2c6d8931d111725cb0353efbdc991a817a273794bd9e1ddf1169a0bfe9ae",
+      "proof_refs": [
+        "docs/curves/COVERS.md"
+      ],
+      "record": {
+        "degree": 2,
+        "schema_version": "curve-cover-map/v1",
+        "source_cover_uid": "urn:hc-model:1:sha256:354cff95eb1745a50901d53db889fb08ce1f8d863fd677d1f2986bdd0606a880",
+        "target_model_json": "{\"a\":\"22618963350742\",\"b\":\"22354001984084\",\"field\":\"fp-78575552703623\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"78575552703623\",\"v\":\"1\"}",
+        "target_model_map": null,
+        "target_model_sha256": "3c5583268bfe498e84cbce50467993810b65d8042df98025e3f489f3ffc40f6d",
         "x": [
           "0x0",
           "0x0",
@@ -175762,6 +175982,32 @@
       },
       "verification_status": "verified_over_declared_field"
     },
+    "urn:curve-cover-map:1:sha256:e05cd88a4dc67642eee1d86ecca87ea22592e9f89d425acf310ea3f19c8f043a": {
+      "field_check": "20_fixed_base_probable_prime_screen; primality remains an input assumption",
+      "map_id": "CV1D2he05cd88a4dc6",
+      "map_uid": "urn:curve-cover-map:1:sha256:e05cd88a4dc67642eee1d86ecca87ea22592e9f89d425acf310ea3f19c8f043a",
+      "proof_refs": [
+        "docs/curves/COVERS.md"
+      ],
+      "record": {
+        "degree": 2,
+        "schema_version": "curve-cover-map/v1",
+        "source_cover_uid": "urn:hc-model:1:sha256:3ee15c22bfbdca536631a89740c1cba5fbea2c9858c08204020eddc06ec9c064",
+        "target_model_json": "{\"a\":\"368584293439\",\"b\":\"328570663304\",\"field\":\"fp-1033961567797\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1033961567797\",\"v\":\"1\"}",
+        "target_model_map": null,
+        "target_model_sha256": "1353f62ba045de91d5737321ba1517e5d396356542188203f77e49564d296c6a",
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "verification_status": "verified_over_declared_field"
+    },
     "urn:curve-cover-map:1:sha256:e076c94ca2f26def2d74748fc59dee37c44f2b1925ffa93cddb97ec3fa55ac97": {
       "field_check": "irreducibility_proved_by_Rabin",
       "map_id": "CV1D3he076c94ca2f2",
@@ -177016,6 +177262,32 @@
         "target_model_sha256": "4f485d1689885a4775fec3795b4897c793622bf76f5f889edab2b41d696d9139",
         "x": [
           "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "verification_status": "verified_over_declared_field"
+    },
+    "urn:curve-cover-map:1:sha256:e535bd68c9a7c2c74253733a6e42ef218c6ef3bfc468af12cc729596df622f2f": {
+      "field_check": "20_fixed_base_probable_prime_screen; primality remains an input assumption",
+      "map_id": "CV1D2he535bd68c9a7",
+      "map_uid": "urn:curve-cover-map:1:sha256:e535bd68c9a7c2c74253733a6e42ef218c6ef3bfc468af12cc729596df622f2f",
+      "proof_refs": [
+        "docs/curves/COVERS.md"
+      ],
+      "record": {
+        "degree": 2,
+        "schema_version": "curve-cover-map/v1",
+        "source_cover_uid": "urn:hc-model:1:sha256:02ea2461b26d77fa4b56af6c14ac51c5529b3c0207f38fd325b5f3ae3b075f45",
+        "target_model_json": "{\"a\":\"175699121631\",\"b\":\"0\",\"field\":\"fp-1033961567797\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1033961567797\",\"v\":\"1\"}",
+        "target_model_map": null,
+        "target_model_sha256": "9ccd690e8df51d23fe1ffedb0d43e540d15e0ec3a2ff32c71babef01d377d7b2",
+        "x": [
+          "0x1",
           "0x0",
           "0x1"
         ],
@@ -182999,6 +183271,6 @@
       "verification_status": "verified_over_declared_field"
     }
   },
-  "registry_sha256": "9e420a7f2e69a1d72a2590899e6bffb8b3d45eff0f197c5c898ee66c1219e872",
+  "registry_sha256": "5c95bdce54ee3da67303044d70d7cae7a0972df3074e04c04d306f2ef9c52484",
   "schema_version": "curve-cover-graph/v1"
 }
