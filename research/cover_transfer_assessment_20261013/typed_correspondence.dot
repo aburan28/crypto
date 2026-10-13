@@ -1,0 +1,72 @@
+digraph cover_transfer_assessment {
+  graph [
+    rankdir=LR,
+    bgcolor="white",
+    pad="0.25",
+    nodesep="0.45",
+    ranksep="0.75",
+    fontname="Helvetica",
+    fontsize=18,
+    labelloc="t",
+    label="Exact curve-cover transfer assessment (2026-10-13)"
+  ];
+  node [shape=box, style="rounded,filled", fillcolor="white", color="#34495e", fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9, color="#34495e", arrowsize=0.8];
+
+  subgraph cluster_binary {
+    label="Binary exact record: supported geometry and bounded transfer";
+    color="#27ae60";
+    penwidth=2;
+    style="rounded";
+
+    e2 [label="E / F(2^7)\ny^2 + xy = x^3 + 1\nEC1N7Ce0hb6d297a2ca08", fillcolor="#eafaf1"];
+    h2 [label="H / F(2^7), genus 3\nv^2 + u^2 v = u^7 + u\none rational infinity", fillcolor="#eafaf1"];
+    p2 [label="Pic^0(E)(F(2^7))\nrational point classes", fillcolor="#eafaf1"];
+    j2 [label="Jac(H)(F(2^7))\nchecked one-infinity Mumford arithmetic", fillcolor="#eafaf1"];
+    typed [label="typed pullback fibers\ninfinity / exceptional / generic", fillcolor="#eafaf1"];
+    arbitrary [label="arbitrary reduced Jac(H) class", fillcolor="#fdedec"];
+    g29 [label="<G>, order 29\nG=(0x26,0x5)", fillcolor="#eafaf1"];
+    img29 [label="<phi*(G)>, order 29\ntrivial kernel intersection", fillcolor="#eafaf1"];
+
+    h2 -> e2 [label="phi(u,v)=(u^3,uv+1)\ndegree 3: SUPPORTED", color="#1e8449", penwidth=2];
+    e2 -> p2 [label="E(K) ~= Pic^0(E)(K)", color="#1e8449"];
+    p2 -> typed [label="phi*: point-class construction\nSUPPORTED; independent\nadditivity oracle UNKNOWN", color="#d68910", style="dashed", penwidth=2];
+    typed -> j2 [label="checked reduced divisor", color="#1e8449"];
+    typed -> p2 [label="typed phi* then phi_* = [3]\nSUPPORTED on typed domain", color="#1e8449", penwidth=2];
+    arbitrary -> p2 [label="general phi_* / norm\nREFUTED as implementation claim", color="#c0392b", style="dashed", penwidth=2];
+    g29 -> img29 [label="phi*: SUPPORTED", color="#1e8449", penwidth=2];
+    img29 -> g29 [label="[3^-1 mod 29]=[10]\nafter typed pushforward", color="#1e8449"];
+  }
+
+  subgraph cluster_prime {
+    label="Prime exact record: geometry only";
+    color="#d68910";
+    penwidth=2;
+    style="rounded";
+
+    ep [label="E / F_827\ny^2 = x^3 + x + 15\nEC1P10Cfphcf15d87ab724", fillcolor="#fef9e7"];
+    hp [label="H / F_827, genus 2\nv^2 = u^6 + u^2 + 15\ntwo rational infinities", fillcolor="#fef9e7"];
+    pp [label="Pic^0(E)(F_827)", fillcolor="#fef9e7"];
+    jp [label="Jac(H)(F_827)\nbalanced two-infinity model required", fillcolor="#f2f3f4"];
+
+    hp -> ep [label="phi(u,v)=(u^2,v)\ndegree 2: SUPPORTED", color="#1e8449", penwidth=2];
+    ep -> pp [label="E(K) ~= Pic^0(E)(K)", color="#1e8449"];
+    hp -> jp [label="current one-infinity arithmetic\ndoes not accept this source: REFUTED", color="#c0392b", style="dashed", penwidth=2];
+    pp -> jp [label="phi*: UNKNOWN", color="#7f8c8d", style="dotted", penwidth=2];
+    jp -> pp [label="phi_* / norm: UNKNOWN", color="#7f8c8d", style="dotted", penwidth=2];
+  }
+
+  unassessed [
+    label="Current catalog remainder\n2,089 map rows unassessed here\n662 other EC1 representations\ntransfer status: UNKNOWN",
+    shape=note,
+    fillcolor="#f2f3f4",
+    color="#7f8c8d"
+  ];
+
+  legend [
+    label="Status key\nSUPPORTED = green solid\nUNKNOWN = gray dotted / orange dashed\nREFUTED implementation claim = red dashed\nNo edge implies no claim",
+    shape=note,
+    fillcolor="#f8f9f9",
+    color="#566573"
+  ];
+}

@@ -1,0 +1,947 @@
+{
+  "schema_version": "cover-transfer-assessments/v1",
+  "status_vocabulary": [
+    "unknown",
+    "supported",
+    "refuted",
+    "not_applicable"
+  ],
+  "assessment_date": "2026-10-13",
+  "catalog_commit": "6600c7c6c0cfbb6a9e4e596bf8c5cfa292fb269e",
+  "source_artifacts": [
+    {
+      "path": "docs/curves/registry.json",
+      "sha256": "9e420a7f2e69a1d72a2590899e6bffb8b3d45eff0f197c5c898ee66c1219e872",
+      "role": "exact ICV1/EC1 input registry",
+      "freshness": {
+        "status": "supported",
+        "scope": "catalog commit 6600c7c6c0cfbb6a9e4e596bf8c5cfa292fb269e",
+        "rationale": "The digest was recomputed from the exact current-main file.",
+        "evidence_refs": [
+          "docs/curves/registry.json"
+        ]
+      }
+    },
+    {
+      "path": "docs/curves/covers.json",
+      "sha256": "baac4c80f89e3cd9c8ef14421b600cce98c9a642b54ed1f182e8dcc8a2928324",
+      "role": "generated curve-level geometry catalog",
+      "freshness": {
+        "status": "supported",
+        "scope": "2,091 current geometry rows",
+        "rationale": "The file binds the current registry digest and reports 2,091 verified-over-declared-field rows.",
+        "evidence_refs": [
+          "docs/curves/covers.json",
+          "docs/curves/COVERS.md"
+        ]
+      }
+    },
+    {
+      "path": "docs/curves/cover-links.yaml",
+      "sha256": "a662b4458eab6d6c10fc7a51b74c0d2c7f6de3a9f817ea981ee898ada8f8e145",
+      "role": "content-addressed ICV1/EC1/HC1/CV1 graph",
+      "freshness": {
+        "status": "supported",
+        "scope": "2,091 map links and 2,089 unique cover objects",
+        "rationale": "The JSON-compatible YAML graph resolves both assessed maps to current cover and map UIDs.",
+        "evidence_refs": [
+          "docs/curves/cover-links.yaml",
+          "docs/curves/cover-links.schema.json"
+        ]
+      }
+    },
+    {
+      "path": "docs/curves/jacobian-transfers.json",
+      "sha256": "aec6338011158c8c1aaddb829d4e90fb96eebc43cd4027d1067979bba3e6ca40",
+      "role": "formula-screen inventory; not a transfer certificate",
+      "freshness": {
+        "status": "refuted",
+        "scope": "claim that this file is current for the 2,091-card registry",
+        "rationale": "It pins registry digest f8297bb8..., contains 321 curves and 1,156 routes, and omits 1,770 current slugs. Its routes are modeled screens without cover/map/curve UID joins or per-subgroup certificates.",
+        "evidence_refs": [
+          "docs/curves/jacobian-transfers.json",
+          "docs/curves/JACOBIAN_TRANSFERS.md"
+        ]
+      }
+    },
+    {
+      "path": "docs/curves/JACOBIAN_TRANSFERS.md",
+      "sha256": "f02e22b952b5d2c74fe88293d04b21c244467a927a56a4b6188a11c0e5be557d",
+      "role": "documentation boundary for the stale formula-screen inventory",
+      "freshness": {
+        "status": "refuted",
+        "scope": "claim that this formula-screen document certifies current cover transfers",
+        "rationale": "The pinned document describes modeled routes rather than HC1/CV1-linked induced-map and subgroup certificates.",
+        "evidence_refs": [
+          "docs/curves/JACOBIAN_TRANSFERS.md"
+        ]
+      }
+    },
+    {
+      "path": "research/hyperelliptic_cover_infrastructure_20261006/evidence.json",
+      "sha256": "b5860beae57838245146c5183aa1a96a5c2bf78f2f1b7c669fb401cc8439dff6",
+      "role": "immutable detailed evidence for the two assessed exact records",
+      "freshness": {
+        "status": "unknown",
+        "scope": "full applicability of the 2026-10-06 replay to the current implementation revision",
+        "rationale": "The exact model identities and the pinned cover_transfer.rs, binary hyperelliptic.rs, and prime curve.rs hashes still match. The checker and standalone CLI have since changed, including added extension-field support. Current HC1/CV1 joins are checked separately; the historical replay is not represented as a fresh current-source execution.",
+        "evidence_refs": [
+          "research/hyperelliptic_cover_infrastructure_20261006/evidence.json",
+          "research/hyperelliptic_cover_infrastructure_20261006/README.md"
+        ]
+      }
+    },
+    {
+      "path": "research/hyperelliptic_cover_infrastructure_20261006/README.md",
+      "sha256": "0726f5774585f7b3d41101de5819db26adafca06457f81828c861cf6b058a304",
+      "role": "immutable narrative and solver-acceptance boundary for the detailed audit",
+      "freshness": {
+        "status": "supported",
+        "scope": "the exact historical report cited by this assessment",
+        "rationale": "The digest preserves the report language that distinguishes bounded infrastructure from a full Jacobian index-calculus solver.",
+        "evidence_refs": [
+          "research/hyperelliptic_cover_infrastructure_20261006/README.md"
+        ]
+      }
+    },
+    {
+      "path": "src/binary_ecc/cover_transfer.rs",
+      "sha256": "67b94112f70becf100ccc2cc7e0b3bc057e5663a4019b63fe966de9e62fd5069",
+      "role": "current bounded binary pullback, pushforward, composition, and subgroup implementation",
+      "freshness": {
+        "status": "supported",
+        "scope": "the exact current source used for binary transfer claims",
+        "rationale": "The verifier pins this file so later API or test changes force reassessment rather than inheriting historical evidence silently.",
+        "evidence_refs": [
+          "src/binary_ecc/cover_transfer.rs"
+        ]
+      }
+    },
+    {
+      "path": "src/binary_ecc/hyperelliptic.rs",
+      "sha256": "09ce8a689aa8e190f51c871f9e94467271ea731b9629f69d322ae716de507c5c",
+      "role": "current checked one-infinity binary Jacobian implementation",
+      "freshness": {
+        "status": "supported",
+        "scope": "the exact current source used for binary Jacobian claims",
+        "rationale": "The current file digest matches the core arithmetic source pinned by the detailed October 6 evidence.",
+        "evidence_refs": [
+          "src/binary_ecc/hyperelliptic.rs"
+        ]
+      }
+    },
+    {
+      "path": "src/prime_hyperelliptic/curve.rs",
+      "sha256": "7a769bfb7abfe92ce06da7c02340f2a2426827d8066ebef510375149b8c3d5ad",
+      "role": "current odd-prime one-infinity Jacobian model boundary",
+      "freshness": {
+        "status": "supported",
+        "scope": "the exact current source establishing incompatibility with the assessed even sextic",
+        "rationale": "The pinned model contract requires degree 2g+1 and one rational infinity; it does not implement the balanced two-infinity case.",
+        "evidence_refs": [
+          "src/prime_hyperelliptic/curve.rs"
+        ]
+      }
+    },
+    {
+      "path": "src/bin/curve_cover_check/checker.rs",
+      "sha256": "b4e8391ec7dfc2cf853a67882d38028f13398429a79d3cc16ad9272f8c1d6101",
+      "role": "current catalog cover constructor and geometry verifier",
+      "freshness": {
+        "status": "supported",
+        "scope": "the exact current source that emits the assessed HC1/CV1 geometry rows",
+        "rationale": "This current digest is pinned separately because the checker evolved after the October 6 replay.",
+        "evidence_refs": [
+          "src/bin/curve_cover_check/checker.rs"
+        ]
+      }
+    },
+    {
+      "path": "src/bin/hyperelliptic_cover.rs",
+      "sha256": "b5113fce18225750f53c9fa6de83e17867bf1c82d0827aad4ff43ee14b0783e9",
+      "role": "current standalone construction, verification, arithmetic, and export CLI",
+      "freshness": {
+        "status": "supported",
+        "scope": "the exact current CLI source; published descendant execution is recorded separately",
+        "rationale": "The source hash prevents the release replay from being presented as evidence for an unreviewed later CLI body.",
+        "evidence_refs": [
+          "src/bin/hyperelliptic_cover.rs"
+        ]
+      }
+    },
+    {
+      "path": "docs/curves/COVERS.md",
+      "sha256": "a34b170ec1da19682ebdcf63677cec0470a30bf59bf6d36a3bcfa80457ee95de",
+      "role": "current catalog geometry contract and proof boundary",
+      "freshness": {
+        "status": "supported",
+        "scope": "the exact documentation revision cited by current geometry claims",
+        "rationale": "The digest binds claims to the documented construction and verification boundary.",
+        "evidence_refs": [
+          "docs/curves/COVERS.md"
+        ]
+      }
+    },
+    {
+      "path": "docs/curves/HYPERELLIPTIC_INFRASTRUCTURE.md",
+      "sha256": "25400731ba58601d07e577f0ff8d043c57e2715390c7150e082be704200d9440",
+      "role": "current standalone CLI and supported-model documentation",
+      "freshness": {
+        "status": "supported",
+        "scope": "the exact documentation revision linked from this assessment",
+        "rationale": "The digest binds the current command and infinity-configuration boundaries.",
+        "evidence_refs": [
+          "docs/curves/HYPERELLIPTIC_INFRASTRUCTURE.md"
+        ]
+      }
+    },
+    {
+      "path": "docs/curves/cover-links.schema.json",
+      "sha256": "2e43492bbc16f7ea99c982275885f04fd26e93598f13e4ddf31ae19e8c4b489e",
+      "role": "HC1/CV1 graph schema contract",
+      "freshness": {
+        "status": "supported",
+        "scope": "the exact schema revision used by the current content-addressed graph",
+        "rationale": "The digest binds the graph evidence to the schema cited by the catalog source artifact.",
+        "evidence_refs": [
+          "docs/curves/cover-links.schema.json"
+        ]
+      }
+    }
+  ],
+  "coverage": {
+    "catalog_maps": 2091,
+    "unique_cover_models": 2089,
+    "geometry_verified_maps": 2091,
+    "ec1_representations": 664,
+    "cover_rows_subgroup_not_tested": 2091,
+    "ec1_subgroups_not_tested": 664,
+    "assessed_maps": 2,
+    "unassessed_maps": 2089,
+    "assessed_subgroups": 2,
+    "scope_note": "This sidecar crosswalks the two exact evidence records requested for audit. Geometry status for all catalog rows is counted but not silently upgraded to transfer status. Missing transfer records remain unknown, not negative results."
+  },
+  "map_assessments": [
+    {
+      "assessment_id": "map.binary_f2m7_degree3",
+      "icv1_slug": "icv1-f2m7-t13-616700dd",
+      "model_sha256": "616700ddc6fe573b005e3eda71414a83ce40b069edaf6105b8dccf5d1692a48c",
+      "cover_uid": "urn:hc-model:1:sha256:2530bd70db895c112d66c1775146eddba3abce3587853f83f82d3e10cb84d28c",
+      "map_uid": "urn:curve-cover-map:1:sha256:0dc60016b03df7d55ee829880508251fe8261c92a241b76a78987eeaa9787a03",
+      "construction": "binary_cubic_pullback_v1: E/K y^2+xy=x^3+1; H/K v^2+u^2v=u^7+u; phi(u,v)=(u^3,u*v+1)",
+      "degree": 3,
+      "field_relationship": "same_field",
+      "typed_objects": [
+        {
+          "id": "EC1N7Ce0hb6d297a2ca08",
+          "type": "elliptic_curve",
+          "field": "F_2[z]/(z^7+z+1)",
+          "dimension_or_genus": 1,
+          "representation": "binary Weierstrass y^2+xy=x^3+1"
+        },
+        {
+          "id": "HC1G3h2530bd70db89",
+          "type": "hyperelliptic_curve",
+          "field": "F_2[z]/(z^7+z+1)",
+          "dimension_or_genus": 3,
+          "representation": "v^2+u^2v=u^7+u with one rational infinity"
+        },
+        {
+          "id": "jac.binary_cubic_pullback.f2m7",
+          "type": "jacobian",
+          "field": "F_2[z]/(z^7+z+1)",
+          "dimension_or_genus": 3,
+          "representation": "checked reduced Mumford divisors for a one-infinity binary model"
+        }
+      ],
+      "claims": [
+        {
+          "claim": "cover_existence",
+          "assessment": {
+            "status": "supported",
+            "scope": "the exact displayed genus-three source over the declared field",
+            "rationale": "The native constructor emits the source and the current graph resolves its content UID.",
+            "evidence_refs": [
+              "docs/curves/cover-links.yaml#icv1-f2m7-t13-616700dd",
+              "research/hyperelliptic_cover_infrastructure_20261006/evidence.json#icv1-f2m7-t13-616700dd"
+            ]
+          }
+        },
+        {
+          "claim": "explicit_construction",
+          "assessment": {
+            "status": "supported",
+            "scope": "ordinary binary targets y^2+xy=x^3+a*x^2+b with exact validated polynomial-basis fields and b nonzero",
+            "rationale": "The fixed cubic-pullback family constructs f, h, and the coordinate map over the target field.",
+            "evidence_refs": [
+              "src/binary_ecc/cover_transfer.rs",
+              "docs/curves/HYPERELLIPTIC_INFRASTRUCTURE.md"
+            ]
+          }
+        },
+        {
+          "claim": "curve_map_correctness",
+          "assessment": {
+            "status": "supported",
+            "scope": "smoothness, genus three, exact defining-equation identity, degree three, separability, infinity, and exceptional point for this family",
+            "rationale": "The verifier replays the polynomial identity and fixed-family geometry, including degree-three ramification at infinity and the exceptional point.",
+            "evidence_refs": [
+              "src/binary_ecc/cover_transfer.rs",
+              "research/hyperelliptic_cover_infrastructure_20261006/evidence.json#icv1-f2m7-t13-616700dd"
+            ]
+          }
+        },
+        {
+          "claim": "jacobian_arithmetic",
+          "assessment": {
+            "status": "supported",
+            "scope": "canonical reduced one-infinity Mumford divisors for the binary source family",
+            "rationale": "Checked validity, reduction, equality, negation, addition, and scalar multiplication include exhaustive F8 controls and nontrivial shared-support branches.",
+            "evidence_refs": [
+              "src/binary_ecc/hyperelliptic.rs",
+              "research/hyperelliptic_cover_infrastructure_20261006/evidence.json#icv1-f2m7-t13-616700dd"
+            ]
+          }
+        },
+        {
+          "claim": "pullback_point_classes",
+          "assessment": {
+            "status": "supported",
+            "scope": "rational elliptic point classes [P]-[O], including infinity and the exceptional two-torsion fiber",
+            "rationale": "The implementation constructs and validates reduced Mumford representatives for the typed point-class domain.",
+            "evidence_refs": [
+              "src/binary_ecc/cover_transfer.rs",
+              "research/hyperelliptic_cover_infrastructure_20261006/evidence.json#map.binary_pullback.f2m7"
+            ]
+          }
+        },
+        {
+          "claim": "independent_pullback_homomorphism_oracle",
+          "assessment": {
+            "status": "unknown",
+            "scope": "independent additivity replay for the exact F_2^7 record",
+            "rationale": "Internal construction and composition checks are present, but no independent CAS or separately implemented divisor-map oracle was run.",
+            "evidence_refs": []
+          }
+        },
+        {
+          "claim": "pushforward_point_divisors",
+          "assessment": {
+            "status": "supported",
+            "scope": "single rational source-point divisors and the implementation's own typed pullback witnesses",
+            "rationale": "The direct point map and formal ramification-aware fiber sums are implemented only for the stated typed domain.",
+            "evidence_refs": [
+              "src/binary_ecc/cover_transfer.rs",
+              "research/hyperelliptic_cover_infrastructure_20261006/evidence.json#map.binary_pushforward.f2m7"
+            ]
+          }
+        },
+        {
+          "claim": "arbitrary_jacobian_pushforward",
+          "assessment": {
+            "status": "refuted",
+            "scope": "claim that the current implementation accepts and norms an arbitrary reduced class in Jac(H)",
+            "rationale": "The public entry point deliberately returns Unsupported(ArbitraryJacobianPushforward). This refutes an implementation claim, not mathematical existence of a norm.",
+            "evidence_refs": [
+              "src/binary_ecc/cover_transfer.rs#pushforward_arbitrary_jacobian_class",
+              "research/hyperelliptic_cover_infrastructure_20261006/evidence.json#arbitrary_pushforward_unsupported"
+            ]
+          }
+        },
+        {
+          "claim": "composition_on_typed_domain",
+          "assessment": {
+            "status": "supported",
+            "scope": "phi_* phi^* = [3] on rational elliptic point classes represented by the implementation's typed fibers",
+            "rationale": "The test suite exhausts rational target points for all 56 ordinary F8 models, including infinity and the exceptional point.",
+            "evidence_refs": [
+              "src/binary_ecc/cover_transfer.rs#pull_push_composition_certificate",
+              "research/hyperelliptic_cover_infrastructure_20261006/evidence.json#composition"
+            ]
+          }
+        },
+        {
+          "claim": "field_extension_or_descent",
+          "assessment": {
+            "status": "not_applicable",
+            "scope": "this same-field construction",
+            "rationale": "The source, target, and map are all defined over the exact target field; the field relationship has degree one.",
+            "evidence_refs": []
+          }
+        },
+        {
+          "claim": "computational_advantage",
+          "assessment": {
+            "status": "unknown",
+            "scope": "end-to-end discrete-log cost relative to a matched generic baseline",
+            "rationale": "No complete Jacobian relation solver, calibrated transfer cost, target decomposition, or matched total-runtime experiment exists.",
+            "evidence_refs": []
+          }
+        }
+      ],
+      "full_transfer_pipeline": {
+        "status": "refuted",
+        "scope": "claim that the current implementation provides a general Jac(H)-to-E norm and an end-to-end logarithm transfer",
+        "rationale": "Only point-divisor and typed-fiber pushforward domains exist; arbitrary Jacobian pushforward is an explicit negative control and no solver is present.",
+        "evidence_refs": [
+          "src/binary_ecc/cover_transfer.rs#pushforward_arbitrary_jacobian_class",
+          "research/hyperelliptic_cover_infrastructure_20261006/README.md#full-jacobian-index-calculus-solver-acceptance-specification"
+        ]
+      },
+      "boundary": "Supported as a same-field genus-three cover with checked one-infinity arithmetic and bounded rational-point-class transfer. Not supported as a general Jacobian norm, a catalog-wide subgroup certificate, or a key-recovery solver."
+    },
+    {
+      "assessment_id": "map.prime_fp827_degree2",
+      "icv1_slug": "icv1-fp10-t5-192cb216",
+      "model_sha256": "192cb216d592d1a2e502bebb1e4154f5d89ed9893de389c2dd0c2b89de94b4e4",
+      "cover_uid": "urn:hc-model:1:sha256:9985829083364f51c643cdf27023049e63c9dafbb734ffa87f2c5caf187ca59f",
+      "map_uid": "urn:curve-cover-map:1:sha256:5768ce11909c0f56d84f05e70d71dfb6a46fb175b6f9cc0ed727eec14aef9c8e",
+      "construction": "prime_quadratic_pullback_v1: E/F_827 y^2=x^3+x+15; H/F_827 v^2=u^6+u^2+15; phi(u,v)=(u^2,v)",
+      "degree": 2,
+      "field_relationship": "same_field",
+      "typed_objects": [
+        {
+          "id": "EC1P10Cfphcf15d87ab724",
+          "type": "elliptic_curve",
+          "field": "F_827",
+          "dimension_or_genus": 1,
+          "representation": "short Weierstrass y^2=x^3+x+15"
+        },
+        {
+          "id": "HC1G2h998582908336",
+          "type": "hyperelliptic_curve",
+          "field": "F_827",
+          "dimension_or_genus": 2,
+          "representation": "v^2=u^6+u^2+15 with two rational infinity points"
+        },
+        {
+          "id": "jac.prime_quadratic_pullback.fp827",
+          "type": "jacobian",
+          "field": "F_827",
+          "dimension_or_genus": 2,
+          "representation": "balanced two-infinity divisor representation required but not implemented"
+        }
+      ],
+      "claims": [
+        {
+          "claim": "cover_existence",
+          "assessment": {
+            "status": "supported",
+            "scope": "the exact displayed genus-two source over F_827",
+            "rationale": "The explicit sextic and degree-two map are present in the current content-addressed cover graph.",
+            "evidence_refs": [
+              "docs/curves/cover-links.yaml#icv1-fp10-t5-192cb216",
+              "research/hyperelliptic_cover_infrastructure_20261006/evidence.json#icv1-fp10-t5-192cb216"
+            ]
+          }
+        },
+        {
+          "claim": "explicit_construction",
+          "assessment": {
+            "status": "supported",
+            "scope": "the prime quadratic-pullback family over supported odd declared prime fields",
+            "rationale": "The constructor chooses a bounded shift, builds F(u^2+c), and emits the degree-two coordinate map.",
+            "evidence_refs": [
+              "src/bin/curve_cover_check/checker.rs",
+              "docs/curves/COVERS.md"
+            ]
+          }
+        },
+        {
+          "claim": "curve_map_correctness",
+          "assessment": {
+            "status": "supported",
+            "scope": "squarefree monic sextic, genus two, exact substitution, separable degree two, and both rational infinity points for this exact record",
+            "rationale": "The checker and detailed evidence replay the fixed-family geometry and show both source infinities map to the elliptic identity.",
+            "evidence_refs": [
+              "src/bin/curve_cover_check/checker.rs",
+              "research/hyperelliptic_cover_infrastructure_20261006/evidence.json#icv1-fp10-t5-192cb216"
+            ]
+          }
+        },
+        {
+          "claim": "jacobian_arithmetic_for_cover",
+          "assessment": {
+            "status": "refuted",
+            "scope": "claim that the current odd-prime one-infinity implementation accepts this even sextic with two rational infinity points",
+            "rationale": "The implemented prime model requires monic degree 2g+1 and one rational infinity; this source has degree 2g+2 and two rational infinities.",
+            "evidence_refs": [
+              "src/prime_hyperelliptic/curve.rs",
+              "docs/curves/HYPERELLIPTIC_INFRASTRUCTURE.md#separate-odd-prime-one-infinity-arithmetic"
+            ]
+          }
+        },
+        {
+          "claim": "pullback",
+          "assessment": {
+            "status": "unknown",
+            "scope": "divisor-class pullback for the prime degree-two cover",
+            "rationale": "No balanced two-infinity representation or induced-map implementation is present.",
+            "evidence_refs": []
+          }
+        },
+        {
+          "claim": "pushforward",
+          "assessment": {
+            "status": "unknown",
+            "scope": "divisor-class norm from the prime source Jacobian",
+            "rationale": "No compatible source Jacobian arithmetic or norm implementation is present.",
+            "evidence_refs": []
+          }
+        },
+        {
+          "claim": "composition",
+          "assessment": {
+            "status": "unknown",
+            "scope": "phi_* phi^* = [2] on Pic^0(E)",
+            "rationale": "The mathematical identity is expected for a finite separable map, but it has not been implemented or independently replayed for this record.",
+            "evidence_refs": []
+          }
+        },
+        {
+          "claim": "field_extension_or_descent",
+          "assessment": {
+            "status": "not_applicable",
+            "scope": "this same-field construction",
+            "rationale": "The source, target, and map are all defined over F_827.",
+            "evidence_refs": []
+          }
+        },
+        {
+          "claim": "subgroup_transfer",
+          "assessment": {
+            "status": "unknown",
+            "scope": "the exact order-823 EC1 subgroup",
+            "rationale": "No kernel, image-order, or recovery certificate exists for this cover and subgroup.",
+            "evidence_refs": []
+          }
+        },
+        {
+          "claim": "computational_advantage",
+          "assessment": {
+            "status": "unknown",
+            "scope": "end-to-end discrete-log cost relative to a matched generic baseline",
+            "rationale": "Cover geometry alone supplies no solver or cost advantage.",
+            "evidence_refs": []
+          }
+        }
+      ],
+      "full_transfer_pipeline": {
+        "status": "refuted",
+        "scope": "claim that the current implementation provides arithmetic and induced maps for this two-infinity source",
+        "rationale": "The source is structurally outside the one-infinity prime Jacobian implementation and no balanced substitute is present.",
+        "evidence_refs": [
+          "src/prime_hyperelliptic/curve.rs",
+          "research/hyperelliptic_cover_infrastructure_20261006/evidence.json#icv1-fp10-t5-192cb216"
+        ]
+      },
+      "boundary": "Supported as explicit same-field genus-two cover geometry only. Its balanced/two-infinity Jacobian, induced maps, subgroup preservation, and computational advantage remain unimplemented or unknown."
+    }
+  ],
+  "subgroup_assessments": [
+    {
+      "assessment_id": "subgroup.binary_f2m7_order29",
+      "map_uid": "urn:curve-cover-map:1:sha256:0dc60016b03df7d55ee829880508251fe8261c92a241b76a78987eeaa9787a03",
+      "ec1": "EC1N7Ce0hb6d297a2ca08",
+      "curve_uid": "urn:ec-record:1:sha256:b6d297a2ca085e9d7b8a6858df7421083e12e740c89b1647660b413e00ed02ff",
+      "subgroup_order": "29",
+      "generator": [
+        "0x26",
+        "0x5"
+      ],
+      "claims": [
+        {
+          "claim": "exact_source_order",
+          "assessment": {
+            "status": "supported",
+            "scope": "the subgroup generated by the exact EC1 point",
+            "rationale": "The fixture checks G is nonidentity and [29]G=O; primality of 29 proves exact order.",
+            "evidence_refs": [
+              "src/binary_ecc/cover_transfer.rs#subgroup_status_and_arbitrary_pushforward_boundary",
+              "research/hyperelliptic_cover_infrastructure_20261006/evidence.json#subgroup_transfer"
+            ]
+          }
+        },
+        {
+          "claim": "kernel_intersection",
+          "assessment": {
+            "status": "supported",
+            "scope": "the order-29 subgroup intersected with ker(phi^*)",
+            "rationale": "The image is nonidentity, [29] annihilates it, and gcd(3,29)=1 with typed composition, so the intersection is trivial.",
+            "evidence_refs": [
+              "src/binary_ecc/cover_transfer.rs#subgroup_status_and_arbitrary_pushforward_boundary"
+            ]
+          }
+        },
+        {
+          "claim": "image_order",
+          "assessment": {
+            "status": "supported",
+            "scope": "the checked pullback image of the exact generator",
+            "rationale": "The image is nonidentity and killed by the prime 29, hence has order 29.",
+            "evidence_refs": [
+              "src/binary_ecc/cover_transfer.rs#subgroup_status_and_arbitrary_pushforward_boundary"
+            ]
+          }
+        },
+        {
+          "claim": "degree_inverse_recovery",
+          "assessment": {
+            "status": "supported",
+            "scope": "recovery after the implementation's typed pull-push composition witness",
+            "rationale": "The fixture checks 3 inverse equals 10 modulo 29 and [10](phi_*phi^*G)=G.",
+            "evidence_refs": [
+              "src/binary_ecc/cover_transfer.rs#subgroup_status_and_arbitrary_pushforward_boundary"
+            ]
+          }
+        },
+        {
+          "claim": "recovery_from_arbitrary_jacobian_result",
+          "assessment": {
+            "status": "unknown",
+            "scope": "operational recovery from an arbitrary class produced by a Jacobian algorithm",
+            "rationale": "There is no general norm, Jacobian relation solver, or target decomposition to produce and recover such a result.",
+            "evidence_refs": []
+          }
+        }
+      ],
+      "boundary": "The certificate is exact for one order-29 subgroup and the typed point-class transfer domain. It does not generalize to other EC1 representations or arbitrary Jacobian classes."
+    },
+    {
+      "assessment_id": "subgroup.prime_fp827_order823",
+      "map_uid": "urn:curve-cover-map:1:sha256:5768ce11909c0f56d84f05e70d71dfb6a46fb175b6f9cc0ed727eec14aef9c8e",
+      "ec1": "EC1P10Cfphcf15d87ab724",
+      "curve_uid": "urn:ec-record:1:sha256:cf15d87ab724c8d1fc74d88af320937e4c1cc7e706d4e0e8a0d11734831342a3",
+      "subgroup_order": "823",
+      "generator": [
+        "0x2",
+        "0x336"
+      ],
+      "claims": [
+        {
+          "claim": "subgroup_identity",
+          "assessment": {
+            "status": "supported",
+            "scope": "the exact EC1 preimage joined to the ICV1 model",
+            "rationale": "The current content-addressed graph records the full EC1 curve UID, generator, order, and cofactor one.",
+            "evidence_refs": [
+              "docs/curves/cover-links.yaml#EC1P10Cfphcf15d87ab724"
+            ]
+          }
+        },
+        {
+          "claim": "kernel_intersection",
+          "assessment": {
+            "status": "unknown",
+            "scope": "the order-823 subgroup intersected with ker(phi^*)",
+            "rationale": "No prime-cover pullback or kernel certificate is implemented.",
+            "evidence_refs": []
+          }
+        },
+        {
+          "claim": "image_order",
+          "assessment": {
+            "status": "unknown",
+            "scope": "the image of the exact generator in the source Jacobian",
+            "rationale": "No compatible source Jacobian or pullback image exists in the implementation.",
+            "evidence_refs": []
+          }
+        },
+        {
+          "claim": "degree_inverse_recovery",
+          "assessment": {
+            "status": "unknown",
+            "scope": "recovery through a degree-two pull-push composition",
+            "rationale": "No induced maps or composition certificate have been implemented for the two-infinity source.",
+            "evidence_refs": []
+          }
+        }
+      ],
+      "boundary": "The exact subgroup identity is cataloged, but no transfer-preservation claim follows from cover geometry alone."
+    }
+  ],
+  "global_cost_accounting": [
+    {
+      "phase": "cover_construction",
+      "status": "unknown",
+      "value": null,
+      "unit": null,
+      "source_refs": [],
+      "note": "Executable constructors exist, but no calibrated operation count or timing is claimed."
+    },
+    {
+      "phase": "failed_construction_searches",
+      "status": "unknown",
+      "value": null,
+      "unit": "attempts",
+      "source_refs": [],
+      "note": "The fixed families do not establish catalog-wide search accounting."
+    },
+    {
+      "phase": "duplicate_candidates",
+      "status": "unknown",
+      "value": null,
+      "unit": "candidates",
+      "source_refs": [],
+      "note": "No deduplication cost ledger was produced for this assessment."
+    },
+    {
+      "phase": "geometry_verification",
+      "status": "unknown",
+      "value": null,
+      "unit": null,
+      "source_refs": [],
+      "note": "Verification is replayable but uncalibrated."
+    },
+    {
+      "phase": "jacobian_arithmetic",
+      "status": "unknown",
+      "value": null,
+      "unit": null,
+      "source_refs": [],
+      "note": "Correctness receipts are not converted into performance measurements."
+    },
+    {
+      "phase": "pullback_and_pushforward",
+      "status": "unknown",
+      "value": null,
+      "unit": null,
+      "source_refs": [],
+      "note": "The bounded binary formulas are implemented, but measured conversion cost is absent."
+    },
+    {
+      "phase": "subgroup_recovery",
+      "status": "unknown",
+      "value": null,
+      "unit": null,
+      "source_refs": [],
+      "note": "The order-29 correctness witness is not a calibrated recovery benchmark."
+    },
+    {
+      "phase": "reusable_preprocessing",
+      "status": "unknown",
+      "value": null,
+      "unit": null,
+      "source_refs": [],
+      "note": "No reusable-preprocessing boundary or amortization count is measured."
+    },
+    {
+      "phase": "peak_memory",
+      "status": "unknown",
+      "value": null,
+      "unit": "bytes",
+      "source_refs": [],
+      "note": "Peak memory was not measured."
+    },
+    {
+      "phase": "total_runtime",
+      "status": "unknown",
+      "value": null,
+      "unit": "milliseconds",
+      "source_refs": [],
+      "note": "No end-to-end transfer or solver run exists."
+    },
+    {
+      "phase": "matched_generic_baseline",
+      "status": "unknown",
+      "value": null,
+      "unit": null,
+      "source_refs": [],
+      "note": "No matched Pollard-rho or same-target baseline was run."
+    },
+    {
+      "phase": "jacobian_relations_linear_algebra_target_decomposition",
+      "status": "not_applicable",
+      "value": null,
+      "unit": null,
+      "source_refs": [],
+      "note": "These phases belong to the explicitly separate full Jacobian index-calculus solver, which was not implemented or run."
+    },
+    {
+      "phase": "end_to_end_speedup",
+      "status": "unknown",
+      "value": null,
+      "unit": "ratio",
+      "source_refs": [],
+      "note": "Cover existence and bounded transfer do not establish a computational advantage."
+    }
+  ],
+  "controls": [
+    {
+      "control": "identity",
+      "assessment": {
+        "status": "supported",
+        "scope": "the two assessed ICV1 models and EC1 representations",
+        "rationale": "Model, curve, cover, and map hashes were resolved against the exact current registry and graph.",
+        "evidence_refs": [
+          "docs/curves/registry.json",
+          "docs/curves/cover-links.yaml"
+        ]
+      },
+      "command": "sha256sum docs/curves/registry.json docs/curves/covers.json docs/curves/cover-links.yaml"
+    },
+    {
+      "control": "geometry",
+      "assessment": {
+        "status": "supported",
+        "scope": "the two fixed families and exact assessed records",
+        "rationale": "Native certificates cover smoothness, genus, defining identity, degree, separability, and infinity behavior.",
+        "evidence_refs": [
+          "src/bin/curve_cover_check/checker.rs",
+          "src/binary_ecc/cover_transfer.rs"
+        ]
+      },
+      "command": "cargo test --bin curve_cover_check"
+    },
+    {
+      "control": "arithmetic_internal",
+      "assessment": {
+        "status": "supported",
+        "scope": "one-infinity prime and binary test fixtures at the pinned implementation revision",
+        "rationale": "The retained tests cover canonicality, closure, inverses, scalar multiplication, exceptional divisors, and shared support.",
+        "evidence_refs": [
+          "research/hyperelliptic_cover_infrastructure_20261006/evidence.json"
+        ]
+      },
+      "command": "cargo test --lib hyperelliptic"
+    },
+    {
+      "control": "arithmetic_independent_oracle",
+      "assessment": {
+        "status": "unknown",
+        "scope": "independent CAS or separately implemented divisor-class comparison",
+        "rationale": "The exhaustive small-field check is internal and reuses the implementation under assessment.",
+        "evidence_refs": []
+      },
+      "command": null
+    },
+    {
+      "control": "transported_data",
+      "assessment": {
+        "status": "supported",
+        "scope": "binary rational target points and typed fiber witnesses only",
+        "rationale": "The composition test includes infinity, exceptional, and generic points across all 56 ordinary F8 models.",
+        "evidence_refs": [
+          "src/binary_ecc/cover_transfer.rs#exhaustive_f8_models_points_maps_and_compositions"
+        ]
+      },
+      "command": "cargo test --lib binary_ecc::cover_transfer::tests::exhaustive_f8_models_points_maps_and_compositions"
+    },
+    {
+      "control": "coordinate_isomorphism",
+      "assessment": {
+        "status": "unknown",
+        "scope": "commutation of cover and divisor maps under an independently specified coordinate change",
+        "rationale": "No such paired control is recorded.",
+        "evidence_refs": []
+      },
+      "command": null
+    },
+    {
+      "control": "subgroup",
+      "assessment": {
+        "status": "supported",
+        "scope": "only EC1N7Ce0hb6d297a2ca08 and its order-29 subgroup",
+        "rationale": "Exact source order, nonidentity image, image order, trivial kernel intersection, and degree-inverse recovery are replayed.",
+        "evidence_refs": [
+          "src/binary_ecc/cover_transfer.rs#subgroup_status_and_arbitrary_pushforward_boundary"
+        ]
+      },
+      "command": "cargo test --lib binary_ecc::cover_transfer::tests::subgroup_status_and_arbitrary_pushforward_boundary"
+    },
+    {
+      "control": "negative",
+      "assessment": {
+        "status": "supported",
+        "scope": "malformed models, tampered certificates, unsupported prime infinity model, and arbitrary binary Jacobian pushforward",
+        "rationale": "Structured unsupported and invalid-input paths are retained instead of being converted to nonexistence claims.",
+        "evidence_refs": [
+          "src/bin/hyperelliptic_cover.rs",
+          "src/prime_hyperelliptic/curve.rs",
+          "src/binary_ecc/cover_transfer.rs"
+        ]
+      },
+      "command": "cargo test --lib --bin hyperelliptic-cover --bin curve_cover_check"
+    },
+    {
+      "control": "cross_repository",
+      "assessment": {
+        "status": "supported",
+        "scope": "the bounded source set merged by cryptanalysis PR 377 at eadd838a628b5b166a90c15972d7f34dc198b65f",
+        "rationale": "A hash-pinned receipt preserves the merge commit, parity-manifest digest, no-diff path set, and successful native parity replay against this crypto checkout. It is content evidence, not a fresh exact-tip CI result.",
+        "evidence_refs": [
+          "research/cover_transfer_assessment_20261013/release_replay.txt#Cross-repository parity receipt"
+        ]
+      },
+      "command": null
+    },
+    {
+      "control": "paired_performance",
+      "assessment": {
+        "status": "not_applicable",
+        "scope": "this correctness-only assessment",
+        "rationale": "No performance or speedup experiment was conducted.",
+        "evidence_refs": []
+      },
+      "command": null
+    }
+  ],
+  "exploration_boundary": [
+    "No search for production targets, private keys, or discrete logarithms was performed.",
+    "Only the two exact records already present in the 2026-10-06 evidence envelope were crosswalked to current HC1/CV1 identifiers.",
+    "The 2,089 remaining current map rows and 662 other EC1 representations have no assessment record here and remain unknown for transfer purposes.",
+    "A bounded constructor failure or missing sidecar record is not evidence that no cover or transfer exists.",
+    "Formula-screen outputs in jacobian-transfers.json were not promoted to executable or measured claims.",
+    "The full Jacobian index-calculus solver, relation collection, linear algebra, and target decomposition remain a separate deliverable."
+  ],
+  "open_obligations": [
+    {
+      "id": "general_binary_norm",
+      "description": "Implement and independently verify pushforward/norm on arbitrary binary Jacobian classes.",
+      "status": "unknown"
+    },
+    {
+      "id": "independent_map_oracle",
+      "description": "Replay pullback additivity and composition with an independent CAS or separately implemented divisor-class oracle.",
+      "status": "unknown"
+    },
+    {
+      "id": "prime_balanced_jacobian",
+      "description": "Implement balanced two-infinity prime Jacobian arithmetic and induced maps for the degree-two family.",
+      "status": "unknown"
+    },
+    {
+      "id": "catalog_subgroup_certificates",
+      "description": "Issue exact kernel, image-order, and recovery certificates for each claimed EC1 subgroup instead of inferring them from cover existence.",
+      "status": "unknown"
+    },
+    {
+      "id": "coordinate_controls",
+      "description": "Add coordinate-isomorphism commutation controls for maps and divisor representations.",
+      "status": "unknown"
+    },
+    {
+      "id": "refresh_formula_inventory",
+      "description": "Regenerate jacobian-transfers.json against the current registry and preserve modeled formulas separately from transfer certificates.",
+      "status": "unknown"
+    },
+    {
+      "id": "catalog_wide_assessment",
+      "description": "Assess the other 2,089 current map rows and 662 other EC1 representations without treating absent evidence as refutation.",
+      "status": "unknown"
+    },
+    {
+      "id": "full_solver",
+      "description": "If pursued separately, require genuine Jacobian relations, verified linear algebra and target decomposition, independent output checks, and complete preprocessing/failure/duplicate/memory/runtime accounting.",
+      "status": "unknown"
+    }
+  ],
+  "report": {
+    "markdown": "research/cover_transfer_assessment_20261013/README.md",
+    "pdf": "research/cover_transfer_assessment_20261013/cover_transfer_assessment_20261013.pdf",
+    "graph_source": "research/cover_transfer_assessment_20261013/typed_correspondence.dot",
+    "graph_svg": "research/cover_transfer_assessment_20261013/typed_correspondence.svg",
+    "graph_png": "research/cover_transfer_assessment_20261013/typed_correspondence.png",
+    "release_receipt": "research/cover_transfer_assessment_20261013/release_replay.txt"
+  }
+}

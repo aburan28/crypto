@@ -1,0 +1,137 @@
+Standalone release replay receipt
+=================================
+
+Replay date (UTC): 2026-10-13
+Release tag: v0.1.0-main.1371
+Tag commit: bbd330a9d8e9bb59346bb9f5f45416851d2af3db
+Asset: crypto-v0.1.0-main.1371-x86_64-unknown-linux-gnu.tar.gz
+Asset URL: https://github.com/aburan28/crypto/releases/download/v0.1.0-main.1371/crypto-v0.1.0-main.1371-x86_64-unknown-linux-gnu.tar.gz
+Published SHA256SUMS URL: https://github.com/aburan28/crypto/releases/download/v0.1.0-main.1371/SHA256SUMS
+Asset SHA-256: 77e69e60a68ada60c7b5fe13503e326f50fce4594b96340eca402041e60dcb2d
+Host: Linux x86_64
+
+The downloaded SHA matched the asset's line in the published SHA256SUMS file.
+After extraction the archive contained:
+
+  hyperelliptic-cover
+  docs/curves/registry.json
+  docs/curves/covers.json
+  docs/curves/cover-links.yaml
+
+Commands were run from the extracted archive root. Each JSON input below is
+one UTF-8 line terminated by LF and was piped to --input -.
+
+construct input (SHA-256 0f5d65f0082601ad1c0c45e6ccf0c07427906c19986626f560b470781b24a583):
+
+{"a":"0x0","b":"0x1","field":"f2m-7-e1a6f45a","form":"y^2+xy=x^3+a*x^2+b","modulus":"0x83","v":"1"}
+
+Command:
+
+  ./hyperelliptic-cover construct --input -
+
+Result: exit 0; command=construct; status=ok.
+Complete stdout SHA-256:
+8f76605ad6fc76e1c32e62c15829c079e24639bba1a17bd1e0935f7e2329cba5
+
+verify input (SHA-256 1a7630a9ca42258922311fbd40f9cd0085c35096b3f9d93a726f41f9faf8a670):
+
+{"model":{"a":"0x0","b":"0x1","field":"f2m-7-e1a6f45a","form":"y^2+xy=x^3+a*x^2+b","modulus":"0x83","v":"1"},"certificate":{"construction":"binary_cubic_pullback_v1","degree":3,"f":["0x0","0x1","0x0","0x0","0x0","0x0","0x0","0x1"],"genus":3,"h":["0x0","0x0","0x1"],"x":["0x0","0x0","0x0","0x1"],"y_0":["0x1"],"y_v":["0x0","0x1"]}}
+
+Command:
+
+  ./hyperelliptic-cover verify --input -
+
+Result: exit 0; command=verify; status=ok.
+Complete stdout SHA-256:
+9b98aeb8467877b8947bf1e1c8949b501cf756f2400384dffcae46b2e74c2392
+
+arithmetic input (SHA-256 bdbf33af29b97662f6043bf68075bd3d6eecfdf45d0155ff1ea62c2b19f60600):
+
+{"schema":"hyperelliptic-jacobian-operation/v1","model":{"a":"0x0","b":"0x1","field":"f2m-7-e1a6f45a","form":"y^2+xy=x^3+a*x^2+b","modulus":"0x83","v":"1"},"operation":"identity"}
+
+Command:
+
+  ./hyperelliptic-cover arithmetic --input -
+
+Result: exit 0; command=arithmetic; status=ok; returned divisor u=[0x1], v=[].
+Complete stdout SHA-256:
+d504eb4f9b078cfc8e51674da49c15124847e7b4a9f42ec0c6169a77189b53d7
+
+Catalog command:
+
+  ./hyperelliptic-cover catalog-export \
+    --registry docs/curves/registry.json \
+    --output catalog-rebuilt.json
+
+Result: exit 0; 592 verified, 0 unsupported, 0 invalid_input.
+Rebuilt output SHA-256:
+6184cf0572218951bc32439e2547a7dba9dceb3f0a4c58737428a1da3384ef49
+Bundled covers.json SHA-256:
+8320f706566aa28aef64cb19eb15d12455b54082ca1e0b672e20459f6b0714b2
+
+The two catalog files differ only in generated_by and the export-only
+producer_source_sha256 field. After deleting those provenance fields and
+canonicalizing with jq -S, both streams had SHA-256:
+
+12a78b024e60293c48ae72b8c9729683d2ba7103101f371aacad6b26c26a165e
+
+This receipt proves only that this published descendant artifact is runnable
+and reproduces its bundled catalog mathematics. It is not a current-main CI
+receipt, a general Jacobian norm, or an index-calculus solver result.
+
+Cross-repository parity receipt
+===============================
+
+Replay date (UTC): 2026-10-13
+Repository: https://github.com/aburan28/cryptanalysis
+Pull request: https://github.com/aburan28/cryptanalysis/pull/377
+Merge commit: eadd838a628b5b166a90c15972d7f34dc198b65f
+Merged feature commit: bcfc110
+Checked local commit: 721b0006ded2d55b67c46d0708804bc6c0153ba3
+Crypto implementation commit recorded by the manifest:
+3b8664a466efd56121509cd77866a07e3cb55741
+
+The following relevant paths have no byte-level diff between the merge commit
+and the checked local commit:
+
+  experiments/hyperelliptic-cover-infrastructure
+  suite/src/bin/hyperelliptic_source_parity.rs
+  suite/src/binary_ecc
+  suite/src/prime_hyperelliptic
+  suite/Cargo.toml
+
+The source-parity manifest read directly from the merge commit has SHA-256:
+
+9ab7cc8dd314050c56e334af6a116a28648a53fa0281867cebf1f9c79b9b8e3e
+
+The mirror README read directly from the merge commit has SHA-256:
+
+0b80b95c32b978ba703692cb3217d752cc7480d73acf8cf0cfe2057c7e7abb07
+
+Command executed against the checked cryptanalysis tree and this crypto
+assessment checkout:
+
+  cargo run --locked --manifest-path suite/Cargo.toml \
+    --bin hyperelliptic-source-parity -- \
+    --crypto-root /workspace/crypto-transfer-assessment
+
+Result: exit 0.
+Complete verifier stdout:
+
+  hyperelliptic mirror manifest and crypto source: verified
+
+The manifest records exact parity for the two binary implementation files and
+the prime curve implementation used by this assessment:
+
+  src/binary_ecc/hyperelliptic.rs
+  09ce8a689aa8e190f51c871f9e94467271ea731b9629f69d322ae716de507c5c
+
+  src/binary_ecc/cover_transfer.rs
+  67b94112f70becf100ccc2cc7e0b3bc057e5663a4019b63fe966de9e62fd5069
+
+  src/prime_hyperelliptic/curve.rs
+  7a769bfb7abfe92ce06da7c02340f2a2426827d8066ebef510375149b8c3d5ad
+
+This is a merge-content and local native-parity receipt. It is not evidence
+that cryptanalysis Actions are fresh at its current exact tip, and it does not
+expand the bounded mathematical domains of those source files.

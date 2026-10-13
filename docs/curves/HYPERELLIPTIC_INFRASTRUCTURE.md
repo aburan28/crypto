@@ -343,6 +343,17 @@ Its F2^7 record binds all of the following:
 - content hashes and local test receipts; and
 - a structured refutation of arbitrary-class pushforward support.
 
+That envelope is an immutable October 6 snapshot. The current-catalog
+crosswalk is the additive
+[`cover-transfer-assessments.json`](cover-transfer-assessments.json), with
+structural contract
+[`cover-transfer-assessment.schema.json`](cover-transfer-assessment.schema.json)
+and a dated
+[transfer report](../../research/cover_transfer_assessment_20261013/README.md).
+It assesses two exact maps, leaves the other current maps explicitly
+unassessed, and does not change the geometry semantics of `covers.json` or
+`cover-links.yaml`.
+
 The same envelope records the prime F827 cover as an explicit verified
 construction while marking use of one-infinity arithmetic on its even sextic
 as `refuted`. The original PR #1383 artifact contains 115 rows (28 prime and

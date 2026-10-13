@@ -7,7 +7,9 @@ on:
       - 'src/bin/curve_standards/**'
       - 'src/bin/curve_cover_check.rs'
       - 'src/bin/curve_cover_check/**'
+      - 'src/bin/hyperelliptic_cover.rs'
       - 'src/binary_ecc/**'
+      - 'src/prime_hyperelliptic/**'
       - 'src/cryptanalysis/ecc2k130_guard.rs'
       - 'src/hash/sha256.rs'
       - 'src/utils/**'
@@ -17,6 +19,9 @@ on:
       - 'scripts/test_cover_catalog.py'
       - 'scripts/update_curve_standards.py'
       - 'scripts/build_curve_registry.py'
+      - 'research/cover_transfer_assessment_20261013/**'
+      - 'research/hyperelliptic_cover_infrastructure_20261006/evidence.json'
+      - 'research/hyperelliptic_cover_infrastructure_20261006/README.md'
       - '.github/workflows/curve-covers.yml'
   push:
     branches: [main]
@@ -26,7 +31,9 @@ on:
       - 'src/bin/curve_standards/**'
       - 'src/bin/curve_cover_check.rs'
       - 'src/bin/curve_cover_check/**'
+      - 'src/bin/hyperelliptic_cover.rs'
       - 'src/binary_ecc/**'
+      - 'src/prime_hyperelliptic/**'
       - 'src/cryptanalysis/ecc2k130_guard.rs'
       - 'src/hash/sha256.rs'
       - 'src/utils/**'
@@ -36,6 +43,9 @@ on:
       - 'scripts/test_cover_catalog.py'
       - 'scripts/update_curve_standards.py'
       - 'scripts/build_curve_registry.py'
+      - 'research/cover_transfer_assessment_20261013/**'
+      - 'research/hyperelliptic_cover_infrastructure_20261006/evidence.json'
+      - 'research/hyperelliptic_cover_infrastructure_20261006/README.md'
       - '.github/workflows/curve-covers.yml'
   workflow_dispatch:
 permissions:
@@ -49,7 +59,7 @@ concurrency:
 jobs:
   certificates:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
@@ -57,8 +67,32 @@ jobs:
           toolchain: '1.98'
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --bin curve_cover_check --bin curve_standards
+      - name: Cover, Jacobian, transfer, and CLI controls
+        run: |
+          cargo test --lib hyperelliptic
+          cargo test --lib binary_ecc::cover_transfer::tests
+          cargo test --bin hyperelliptic-cover
       - run: cargo run --bin curve_standards -- --check
       - run: python3 scripts/update_curve_standards.py --check
       - run: cargo run --bin curve_cover_check -- --check
       - run: python3 scripts/test_cover_catalog.py
       - run: python3 scripts/build_lab_browser.py --check
+
+  transfer-assessment:
+    name: Cover transfer assessment
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install the pinned Draft 2020-12 validator
+        run: python -m pip install jsonschema==4.23.0
+      - name: Validate the assessment schema
+        run: python -m jsonschema -i docs/curves/cover-transfer-assessments.json docs/curves/cover-transfer-assessment.schema.json
+      - name: Verify typed map, subgroup, and evidence bindings
+        run: node research/cover_transfer_assessment_20261013/verify_assessment.mjs

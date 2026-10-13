@@ -42,6 +42,14 @@ commands; the one-infinity arithmetic boundary; bounded binary transfer; and
 the additive evidence schema. In particular, the prime even-sextic cover does
 not use the odd-degree one-infinity Jacobian implementation.
 
+The current [cover-transfer assessment](cover-transfer-assessments.json),
+validated by its [additive schema](cover-transfer-assessment.schema.json),
+crosswalks two exact HC1/CV1 maps and EC1 subgroups without promoting the
+rest of the geometry catalog to transfer evidence. Its
+[source-linked report](../../research/cover_transfer_assessment_20261013/README.md)
+records the typed graph, costs, controls, exploration boundary, and open
+obligations.
+
 [IC curve records and cross-repo links](ic/README.md), including
 [typed links](ic/curve-links/README.md), retain the exact EC1 representations,
 optional trait statuses, and the factor-base/isogeny storage contract beside
