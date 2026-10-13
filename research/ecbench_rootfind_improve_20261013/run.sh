@@ -34,11 +34,15 @@ case "$MODE" in
   select)
     run_one select "$ROOT/docs/ecbench/specs/smoke-koblitz-rootfind-select.json"
     ;;
+  window-d4)
+    run_one window-d4 "$ROOT/docs/ecbench/specs/smoke-koblitz-rootfind-window-d4.json"
+    ;;
   claim)
     run_one claim-n13 "$ROOT/docs/ecbench/specs/claim-koblitz-rootfind-improve-n13.json"
     ;;
   all)
     run_one select "$ROOT/docs/ecbench/specs/smoke-koblitz-rootfind-select.json"
+    run_one window-d4 "$ROOT/docs/ecbench/specs/smoke-koblitz-rootfind-window-d4.json"
     run_one claim-n13 "$ROOT/docs/ecbench/specs/claim-koblitz-rootfind-improve-n13.json"
     ;;
   *)
