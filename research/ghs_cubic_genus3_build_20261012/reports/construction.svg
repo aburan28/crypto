@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" font-family="Helvetica, Arial, sans-serif" font-size="12">
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#6b6a63"/></marker></defs>
+  <rect width="760" height="300" fill="#fcfcfb"/>
+  <text x="20" y="24" font-size="13" font-weight="bold" fill="#1a1a19">From E0 over K = F_q^3 to a plane quartic over F_q (built and checked in run 20261013T0320Z)</text>
+
+  <rect x="20" y="48" width="210" height="84" rx="6" fill="#ffffff" stroke="#eb6834" stroke-width="2"/>
+  <text x="32" y="68" font-weight="bold" fill="#1a1a19">E0 over K, order 4 ell</text>
+  <text x="32" y="88" fill="#1a1a19">y0^2 = u u''</text>
+  <text x="32" y="106" fill="#6b6a63">conjugates: y1^2 = u u'</text>
+  <text x="32" y="122" fill="#6b6a63">y2^2 = u' u'',  y2 = y0 y1 / u</text>
+
+  <rect x="275" y="48" width="210" height="84" rx="6" fill="#ffffff" stroke="#6b6a63"/>
+  <text x="287" y="68" font-weight="bold" fill="#1a1a19">C over K, genus 3</text>
+  <text x="287" y="88" fill="#1a1a19">function field K(t, y0, y1)</text>
+  <text x="287" y="106" fill="#6b6a63">X = 1/y0, Y = 1/y1, Z = 1/y2</text>
+  <text x="287" y="122" fill="#6b6a63">quartic in X^2, Y^2, Z^2</text>
+
+  <rect x="530" y="48" width="210" height="84" rx="6" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
+  <text x="542" y="68" font-weight="bold" fill="#1a1a19">C over F_q, smooth quartic</text>
+  <text x="542" y="88" fill="#1a1a19">W_j = trace(w_j X)</text>
+  <text x="542" y="106" fill="#6b6a63">coefficients in F_q (P1)</text>
+  <text x="542" y="122" fill="#6b6a63">L = 1 - t T^3 + q^3 T^6 (P3)</text>
+
+  <line x1="230" y1="90" x2="271" y2="90" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="485" y1="90" x2="526" y2="90" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="250" y="150" text-anchor="middle" fill="#6b6a63">compositum</text>
+  <text x="506" y="150" text-anchor="middle" fill="#6b6a63">descent by</text>
+  <text x="506" y="165" text-anchor="middle" fill="#6b6a63">y0 -> y1 -> y2</text>
+
+  <rect x="20" y="190" width="720" height="92" rx="6" fill="#ffffff" stroke="#6b6a63"/>
+  <text x="32" y="210" font-weight="bold" fill="#1a1a19">Transfer of a point P = (t0, y0) of E0(K)</text>
+  <text x="32" y="232" fill="#1a1a19">pull back: 2 points of C over t0, then add their two Frobenius images: 6 points, an F_q-rational divisor (P4, measured)</text>
+  <text x="32" y="252" fill="#1a1a19">push forward to E0 gives 2P, so the kernel lies in E0[2] (derived, not measured)</text>
+  <text x="32" y="272" fill="#6b6a63">not done: adding or comparing divisor classes on the quartic (problems/plane-quartic-jacobian-class-arithmetic-missing.md)</text>
+</svg>
