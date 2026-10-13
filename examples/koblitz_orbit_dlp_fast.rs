@@ -1663,6 +1663,7 @@ mod wide {
         table: RootTable128,
         shifted: Vec<Vec<u128>>,
         dense_table: bool,
+        load75_table: bool,
         root_table_request_entries: usize,
     }
 
@@ -1903,11 +1904,23 @@ mod wide {
         }
         let packed = std::env::var("KIC_PACKED_ROOT_TABLE").as_deref() == Ok("1");
         let dense_table = std::env::var("KIC_PACKED_ROOT_TABLE_DENSE").as_deref() == Ok("1");
+        let load75_table = std::env::var("KIC_PACKED_ROOT_TABLE_LOAD75").as_deref() == Ok("1");
         assert!(
-            !dense_table || packed,
+            !(dense_table || load75_table) || packed,
             "dense root table requires packed slots"
         );
-        let root_table_request_entries = if dense_table {
+        assert!(
+            !(dense_table && load75_table),
+            "select one dense root table request rule"
+        );
+        let root_table_request_entries = if load75_table {
+            states
+                .len()
+                .checked_mul(2)
+                .and_then(|n| n.checked_add(2))
+                .expect("root table request exceeds usize")
+                / 3
+        } else if dense_table {
             states.len()
         } else {
             states.len() * 2
@@ -1928,6 +1941,7 @@ mod wide {
             table,
             shifted,
             dense_table,
+            load75_table,
             root_table_request_entries,
         }
     }
@@ -2582,6 +2596,7 @@ mod wide {
             "regular_states":index.states.len(),
             "root_table_entries":index.table.len,
             "root_table_dense_enabled":index.dense_table,
+            "root_table_load75_enabled":index.load75_table,
             "root_table_request_entries":index.root_table_request_entries,
             "root_table_layout":root_table_layout,
             "root_table_slot_bytes":root_table_slot_bytes,
