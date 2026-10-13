@@ -15,10 +15,10 @@ use num_bigint::BigUint;
 use num_traits::Zero;
 
 /// The GHS descent data for one factorisation `N = n * l`, as the
-/// repository's `ec_trapdoor::audit_curve` reports it.  Its magic number
-/// adds the Frobenius differences of `a` as generators without reducing `a`
-/// modulo `{α² + α}`, so it can exceed the GHS value; the screen records it
-/// beside [`ghs_magic`] and prices with the latter.
+/// repository's `ec_trapdoor::audit_curve` reports it.  Since 2026-10-13
+/// its magic number is the MMT value and equals [`ghs_magic`]'s `magic_b`;
+/// before that it added the Frobenius differences of `a` as generators and
+/// could exceed it.
 pub fn ghs_rows(
     n_total: u32,
     irr: &IrreduciblePoly,
@@ -42,8 +42,12 @@ pub struct GhsMagic {
     /// `magic_b`.  When `a_may_add_one`, the GHS value is `magic_b` or
     /// `magic_b + 1` and the screen prices both.
     pub magic: u32,
-    /// The `σ`-orbit length of `√b`; type I (genus `2^(m-1) - 1`) when it equals `magic`.
+    /// The `σ`-orbit length of `√b`.
     pub orbit_length: u32,
+    /// `(x - 1)` does not divide the `σ`-annihilator of `√b`, i.e. `magic_b`
+    /// exceeds the plain orbit dimension by one (MMT Theorem 5(i)): the
+    /// GHS genus is `2^(m-1) - 1` (type I) rather than `2^(m-1)`.
+    pub type_i: bool,
 }
 
 fn f2_rank(mut rows: Vec<BigUint>) -> u32 {
@@ -80,12 +84,15 @@ pub fn ghs_magic(
     let n_rel = n_total / l;
     let gamma = b.square_k_times(n_total - 1, irr);
     let mut rows = Vec::with_capacity(n_rel as usize);
+    let mut plain_rows = Vec::with_capacity(n_rel as usize);
     let mut cur = gamma.clone();
     for _ in 0..n_rel {
         rows.push((cur.to_biguint() << 1u32) | BigUint::from(1u32));
+        plain_rows.push(cur.to_biguint());
         cur = cur.square_k_times(l, irr);
     }
     let magic_b = f2_rank(rows);
+    let plain = f2_rank(plain_rows);
     let mut trace = a.clone();
     let mut acc = a.clone();
     for _ in 1..n_total {
@@ -107,6 +114,7 @@ pub fn ghs_magic(
         a_may_add_one,
         magic: magic_b,
         orbit_length,
+        type_i: plain != 0 && magic_b == plain + 1,
     }
 }
 

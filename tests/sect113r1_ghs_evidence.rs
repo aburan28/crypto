@@ -179,8 +179,12 @@ fn preserved_outputs_match_hashes_and_recompute_exactly() {
     assert_eq!(manifest["protocol"]["a"], format!("0x{CURVE_A}"));
     assert_eq!(manifest["protocol"]["genus_bound"], "64");
 
+    // The preserved outputs (frozen, hash-pinned) record type I and genus
+    // 2^112 - 1 from the pre-2026-10-13 orbit-length type rule.  The live
+    // recomputation below uses the MMT rule: the plain orbit of sqrt(b) has
+    // rank 113, so Ord_b = x^113 - 1, (x - 1) | Ord_b, type II, genus 2^112.
+    // The magic number (113) and the out-of-bound verdict are unchanged.
     let expected_genus = BigUint::one() << 112usize;
-    let expected_genus = expected_genus - BigUint::one();
     let expected_cover_degree = BigUint::one() << 113usize;
     let executions = manifest["executions"]
         .as_array()
@@ -232,7 +236,7 @@ fn preserved_outputs_match_hashes_and_recompute_exactly() {
         assert_eq!(row.relative_degree, 113);
         assert_eq!(row.base_degree, 1);
         assert_eq!(row.magic_number, 113);
-        assert!(row.type_i);
+        assert!(!row.type_i);
         assert_eq!(row.genus, expected_genus);
         assert_eq!(row.cover_degree, expected_cover_degree);
         assert!(!row.within_genus_bound);

@@ -9,7 +9,9 @@ use crypto_lib::binary_ecc::{F2mElement, IrreduciblePoly};
 use crypto_lib::cryptanalysis::binary_isogeny::{
     j_invariant, l_isogenous_neighbours, phi_l_mod2_in_x,
 };
-use crypto_lib::cryptanalysis::ec_trapdoor::{audit_curve, magic_number_full, FieldTower};
+use crypto_lib::cryptanalysis::ec_trapdoor::{
+    audit_curve, magic_number_full, plain_orbit_dim, FieldTower,
+};
 use crypto_lib::cryptanalysis::ec_trapdoor::{DescentRow, TrapdoorCurve};
 use crypto_lib::cryptanalysis::ghs_descent::{descend_m2_abstract, ECurve, Pt};
 use crypto_lib::cryptanalysis::ghs_full_attack::{format_report, run_full_attack, AttackOptions};
@@ -161,20 +163,21 @@ E(F_{{2^3}}) — a much smaller group, where ECDLP is trivially solvable.
         println!("\n  - descent ran but did not recover d (trace killed P)");
     }
 
-    // ── Scenario B: m=2 trapdoor (structural demo) ────────────────
-    banner("Scenario B: m = 2 trapdoor on F_{2^6} = F_{(2^2)^3}");
+    // ── Scenario B: 3-cycle trapdoor (structural demo) ────────────────
+    banner("Scenario B: 3-cycle trapdoor on F_{2^6} = F_{(2^2)^3}");
     println!(
         "
-Pick a curve with magic m = 2 — the smallest 'genuine descent' case.
-We use the factorisation (n=3, l=2) of F_{{2^6}} rather than (n=4, l=2):
-at n=4 the σ-action on V_E(σ) can only have order dividing 4, never 3,
-so type II (β_2 = β_0 + β_1, requiring σ of order 3 on V) is impossible
-there. With n=3, type II IS possible, and the descended curve has
-genus 2 — the favourable Hess regime.
+Pick a curve whose plain √b orbit spans two dimensions with
+β_2 = β_0 + β_1 (σ of order 3 on V), on the factorisation (n=3, l=2)
+of F_{{2^6}}.  The relation β_0 + β_1 + β_2 = 0 has odd weight, so the
+GHS magic number of Maurer–Menezes–Teske, dim span{{(1, β_i)}}, is 3
+and the descended curve is type I with genus 2^2 − 1 = 3.  (Before
+2026-10-13 this demo called it m = 2, genus 2; over this tower the MMT
+magic number is 1 or 3, never 2.)
 
-The m=2 abstract descent below produces the σ-fixed Artin-Schreier
+The abstract descent below produces the σ-fixed Artin-Schreier
 generators of the descended function field; converting them to a
-single canonical y² + h(x)y = f(x) genus-2 equation is the next step
+single canonical y² + h(x)y = f(x) equation is the next step
 (not implemented here — see DescentM2Abstract::smooth_model_status).
 "
     );
@@ -189,7 +192,7 @@ single canonical y² + h(x)y = f(x) genus-2 equation is the next step
     // but not necessary). For (N=6, n=3, l=2) with m=2 that demands
     // 4 | 6 which fails, so we search directly: enumerate b ∈ F_{2^6},
     // compute its magic via FieldTower, and accept the first
-    // (m=2, type-II) hit.
+    // plain-orbit-dimension-2 hit, preferring the 3-cycle.
     let tower_b = FieldTower::new(big_n_b, n_b, l_b, irr_b.clone());
     let a_b = F2mElement::one(big_n_b);
     let mut found: Option<(TrapdoorCurve, _)> = None;
@@ -198,8 +201,7 @@ single canonical y² + h(x)y = f(x) genus-2 equation is the next step
         if b_elt.is_zero() {
             continue;
         }
-        let m = magic_number_full(&tower_b, &a_b, &b_elt);
-        if m != 2 {
+        if plain_orbit_dim(&tower_b, &b_elt) != 2 {
             continue;
         }
         let sqrt_b = tower_b.sqrt(&b_elt);
@@ -215,7 +217,7 @@ single canonical y² + h(x)y = f(x) genus-2 equation is the next step
             full_audit: None,
         };
         if let Some(d2) = descend_m2_abstract(&tc) {
-            if d2.is_type_ii {
+            if d2.three_cycle {
                 found = Some((tc, d2));
                 break;
             }
@@ -227,7 +229,7 @@ single canonical y² + h(x)y = f(x) genus-2 equation is the next step
     match found {
         Some((tc_b, d2)) => {
             println!(
-                "  Found magic-2 trapdoor: E/F_{{2^{}}} with (n={}, l={})",
+                "  Found 3-cycle trapdoor: E/F_{{2^{}}} with (n={}, l={})",
                 big_n_b, n_b, l_b
             );
             println!(
@@ -237,18 +239,21 @@ single canonical y² + h(x)y = f(x) genus-2 equation is the next step
             );
             let tower_b = FieldTower::new(big_n_b, n_b, l_b, irr_b.clone());
             let m = magic_number_full(&tower_b, &tc_b.a, &tc_b.b);
-            println!("    magic_m = {} (verified)", m);
+            println!(
+                "    MMT magic_m = {} (abstract descent says {}, genus {})",
+                m, d2.magic, d2.genus
+            );
             println!(
                 "    β_0 = {:?}, β_1 = {:?}, β_2 = {:?}",
                 d2.beta_0.to_biguint(),
                 d2.beta_1.to_biguint(),
                 d2.beta_2.to_biguint()
             );
-            println!("    type II (β_2 = β_0 + β_1): {}", d2.is_type_ii);
+            println!("    3-cycle (β_2 = β_0 + β_1): {}", d2.three_cycle);
             println!("    σ-fixed AS generator w_0 satisfies w_0² + w_0 = x + a");
             println!("    status: {}", d2.smooth_model_status());
         }
-        None => println!("  no magic-2 trapdoor found in the search budget"),
+        None => println!("  no 3-cycle trapdoor found in the search budget"),
     }
 
     // ── Scenario C: Φ_l(X, j) magic spectrum ─────────────────────

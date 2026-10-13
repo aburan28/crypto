@@ -12,6 +12,18 @@ shift, swept on the ANSI X9.62 composite-degree curves, where the shift is only 
 hypothetical), `research/notes/index-calculus/RESEARCH_QUASI_SUBFIELD.md` (the
 same barrier from the factor-base side).
 
+> **Correction, 2026-10-13 (magic number definition).**  §3 used the plain
+> orbit dimension `dim span{√b, √b², …}` as the GHS magic number.  The GHS
+> value (Maurer–Menezes–Teske 2002, eq. (5), Theorem 5(i)) is
+> `dim span{(1, σ^i(√b))}`, one larger when `(x − 1) ∤ Ord_b`.  Over `F_2^131`
+> the trace-zero branch is therefore `m = 131`, type I, genus `2^130 − 1`, not
+> `m = 130`, genus `2^129`: GHS reaches genus `1`, `2^130 − 1` or `2^130`.  The
+> gap to the window becomes 121.77 bits (not 120.77) and the §3.1 floor about
+> `2^69.19×` rho (not `2^68.19×`); the verdict is unchanged.  The §7 `N = 130`
+> counterfactual changes (least admissible genus at `l = 1` is 255, not 128)
+> and its cost is not recomputed.  Details:
+> [`docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md`](../../../docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md).
+
 > **Correction, 2026-10-06 (accounting).**  This note said the genus *any*
 > construction reaches over `F_2` is 1, `2^129` or `2^130`, that the window and
 > "the constructions" miss by `2^120.77`, and that "every construction is

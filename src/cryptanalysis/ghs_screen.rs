@@ -265,7 +265,10 @@ mod tests {
     }
 
     #[test]
-    fn folds_a_contribution_into_each_rows_genus() {
+    fn a_does_not_change_the_magic_number() {
+        // MMT eq. (5): m depends on b only.  With b = 1 every tower has
+        // m = 1 and genus 1, whatever a is.  (Before 2026-10-13 the audit
+        // added (σ - 1)σ^i(a) as generators and reported m = 2, 3, 6 here.)
         let mut input = aes_curve(1);
         input.a = BigUint::from(2u32);
         let report = screen_curve(&input, &BigUint::from(4u32)).unwrap();
@@ -284,9 +287,9 @@ mod tests {
         assert_eq!(
             rows,
             vec![
-                (2, 2, BigUint::from(2u32), false),
-                (4, 3, BigUint::from(4u32), false),
-                (8, 6, BigUint::from(32u32), false),
+                (2, 1, BigUint::from(1u32), false),
+                (4, 1, BigUint::from(1u32), false),
+                (8, 1, BigUint::from(1u32), false),
             ]
         );
     }

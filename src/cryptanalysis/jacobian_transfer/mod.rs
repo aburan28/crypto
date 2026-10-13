@@ -589,7 +589,7 @@ fn binary_routes(rb: &RouteBuilder, c: &RegistryCurve, n_total: u32, irr: &Irred
         };
         let mut row = DescentRow::default();
         for (m, bound) in variants {
-            let type_i = magic.orbit_length == m;
+            let type_i = magic.type_i;
             let genus = crate::cryptanalysis::ec_trapdoor::ghs_genus_for_type(m, type_i);
             row = DescentRow { n: audit.n, l, magic_m: m, genus, type_i };
             let log2_genus = log2_biguint(&row.genus).max(0.0);
@@ -1024,11 +1024,13 @@ mod tests {
             .iter()
             .find(|x| x.kind == "ghs_weil_descent" && x.invariants["base_degree"] == 31)
             .unwrap();
-        // Type I: genus 2^4 - 1.
-        assert_eq!(g16.destination.genus, "15");
+        // Tr_{K/k}(b) != 0, so (x - 1) | Ord_b: type II, genus 2^4 = 16
+        // (MMT Theorem 5(i)).  Before 2026-10-13 the orbit-length type rule
+        // reported type I, genus 15.
+        assert_eq!(g16.destination.genus, "16");
         assert_eq!(g16.transport, Transport::SizeAdmits);
-        // Genus 15 over GF(2^31): relation collection 15! * 2^31 = 2^71.25
-        // against rho's 2^76 leaves an exponent ratio near 4.75 bits, which the
+        // Genus 16 over GF(2^31): relation collection 16! * 2^31 = 2^75.25
+        // against rho's 2^76 leaves an exponent ratio near 0.75 bits, which the
         // genus constants (10 g^2 per Jacobian operation) consume.
         assert!(g16.cost.ratio_log2 < cost::CostModel::default().advantage_margin_bits);
         assert_ne!(g16.class, RouteClass::FormulaAdvantage);
@@ -1064,7 +1066,9 @@ mod tests {
             .collect::<Vec<_>>();
         assert_eq!(g7.len(), 1);
         assert_eq!(g7[0].evidence, Evidence::ExactInvariant);
-        assert_eq!(g7[0].destination.genus, "7");
+        // n = 4: x^4 - 1 = (x - 1)^4, so every curve is type II and m = 4
+        // gives genus 8 (7 under the pre-2026-10-13 orbit-length rule).
+        assert_eq!(g7[0].destination.genus, "8");
     }
 
     #[test]
