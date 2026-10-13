@@ -63,10 +63,10 @@ that a third party can check a report with one scalar multiplication
 $[\mu]R_0$, 196 point operations, instead of re-walking the
 $2^{25.27}$ steps that a weight-34 report represents, an asymmetry of
 about $2^{17.7}$. On the bitsliced CPU walk this costs $6.0\%$, the
-median of three paired rounds ($40.026$ to $37.762$~M~it/s, a $5.7\%$
+median of three paired rounds ($40.026$ to $37.762$~million iterations/s, a $5.7\%$
 drop in rate, against $33.8\%$ predicted; an earlier revision measured
 $4.2\%$ on a pre-merge tree). On the packed GPU walk the rate fell
-$34.7\%$, from $14.003$ to $9.150$~B/s. That figure is stated in the
+$34.7\%$, from $14.003$ to $9.150$~billion iterations/s. That figure is stated in the
 note, but only the job script is frozen under
 \texttt{benchmarks/witness-cost/}. Either way it is far above the
 $2\%$ the note had set as its threshold for abandoning a 16-bit
@@ -74,7 +74,7 @@ counter layout that was never built, so the campaign builds pin
 \texttt{WITNESS=0} and the record stays at 32
 bytes.\art{ecc2k130/CAIRN-WITNESS.md}\art{ecc2k130/aws/build.sh}
 A later fused kernel narrows the packed cost ($9.347867$ to
-$11.800903$~B/s in witness-carrying mode) but does not close
+$11.800903$~billion iterations/s in witness-carrying mode) but does not close
 it.\art{ecc2k130/benchmarks/sigma-fused/RESULTS.md}
 
 \subsection{The $r$-adding table walk}
@@ -210,7 +210,7 @@ campaign after which switching no longer pays, is $15$--$22\%$. That
 projection is untested: the note declares the paired rate measurement
 for the v2 kernel that would test it, and it has not been
 run.\art{ecc2k130/WALK-CONSTANT.md, §11} So the campaign still walks
-the $\sigma$-map, and the $20$~B/s table-walk rows in
+the $\sigma$-map, and the $20$~billion iterations/s table-walk rows in
 Section~\ref{sec:tablewalk} are rates, not costs per solve.
 
 Rule v2 itself refused all $19{,}200$ $\tau$-cycles in a dedicated

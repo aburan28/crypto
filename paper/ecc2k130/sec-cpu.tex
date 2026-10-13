@@ -16,7 +16,7 @@ GPUs'.
 \label{tab:cpu}
 \begin{tabular}{@{}llrrl@{}}
 \toprule
-host & word & lanes & M it/s & note \\
+host & word & lanes & million it/s & note \\
 \midrule
 Xeon 2.1~GHz & \texttt{uint64\_t} & 64 & 4.42 & 475 cycles/iteration \\
 Xeon 2.1~GHz & AVX2 & 256 & 10.7 & 196 cycles/iteration \\
@@ -25,7 +25,7 @@ M4 Pro, g++ 16.1 & NEON & 128 & 11.342 & $2.19\times$ over 64 lanes (5.185) \\
 M4 Pro, Apple clang 17 & NEON & 128 & 15.673 & $3.02\times$ over g++/64 \\
 Graviton3 (V1, SHA3), clang & NEON & 128 & 6.214 & $2.38\times$ over g++/64 \\
 Graviton2 (N1, no SHA3), clang & NEON & 128 & 4.220 & $2.09\times$ over g++/64 \\
-Modal container, 4 threads & AVX-512 & 512 & 12.4 & 49.4~M it/s on 4 threads \\
+Modal container, 4 threads & AVX-512 & 512 & 12.4 & 49.4~million iterations/s on 4 threads \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -51,7 +51,7 @@ picks a \texttt{+sha3} spelling under both compilers, and the
 resulting binary dies with \texttt{SIGILL} on its $8{,}907$
 \texttt{eor3} instructions.\art{ecc2k130/README.md, ``Word width''}
 
-In the fleet, a CPU worker at $2.3$~B/s (the self-reported median of
+In the fleet, a CPU worker at $2.3$~billion iterations/s (the self-reported median of
 the twelve CPU slots on 2026-09-17) was worth about a sixth of an
 RTX~PRO~6000. On Modal, a 32-thread (16-core) sidecar running beside a
 GPU adds about $25\%$ to the container's cost for $2.7\%$ more

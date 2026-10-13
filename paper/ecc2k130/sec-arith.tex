@@ -63,9 +63,9 @@ The Hamming-weight tree is 268 instructions against 654 bit
 operations, because a full adder is two \texttt{LOP3}s. The whole
 bitsliced iteration comes to about $60{,}000$ instructions per 32
 walks on $\mathrm{GF}(2^{131})$, as a static count. On the GPU that is
-the $0.85$~B/s control of Section~\ref{sec:ledger}. For comparison,
+the $0.85$~billion iterations/s control of Section~\ref{sec:ledger}. For comparison,
 the instruction-count ceiling of the later packed kernel on the
-RTX~PRO~6000 is $17.6$~B/s ($27.1$~T lane-operations/s over about
+RTX~PRO~6000 is $17.6$~billion iterations/s ($27.1$~T lane-operations/s over about
 $1{,}540$ lane-operations per update, a different
 count).\art{ecc2k130/THROUGHPUT-CEILING.md}
 
@@ -94,7 +94,7 @@ slots.\art{ecc2k130/ITERATION-FUNCTION.md, §1 and §3} The count that
 matters is \texttt{CLMAD}s, and Section~\ref{sec:floor} prices it.
 The reduction \texttt{reducePolynomial131} alone is $440.6$
 lane-instructions per update, $29\%$ of the integer work of the
-$20$~B/s build.\art{ecc2k130/ROOFLINE.md}
+$20$~billion iterations/s build.\art{ecc2k130/ROOFLINE.md}
 
 \subsection{Both at once, and bit-for-bit}
 \label{sec:arith-compat}

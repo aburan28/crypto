@@ -62,6 +62,29 @@ class function, and an end-to-end logarithm on a toy curve of order
 about $2^{20}$, where the folded walk needs the expected $\sqrt2$
 fewer steps than the unfolded one.\art{gpu/nist/README.md, ``Correctness''}
 
+\paragraph{The CPU solver across all fifteen curves.} The GPU walk has a CPU
+counterpart: a host solver that takes any of the fifteen FIPS~186-4
+curves (P-192 to P-521, K-163 to K-571, B-163 to B-571), audits it
+for the structural precondition of each known attack (trace one,
+composite order, embedding degree at most 100, composite extension
+degree), and runs the branch the curve calls for:
+Smart--Semaev--Satoh--Araki, Pohlig--Hellman, interval baby-step
+giant-step and kangaroo, or whole-group rho. The audit certifies the
+absence of every precondition on all fifteen. The rho folds the
+negation map everywhere and the Frobenius on the Koblitz curves, the
+class of size $2m$ carried exactly through the eigenvalue $\lambda$
+of $\tau$ on the subgroup, which is the binary-curve cousin of the
+$\sigma$-class walk of Section~\ref{sec:walk}. On one host we measured
+interval solves of width $2^{20}$ to $2^{32}$ on P-256, K-283 and
+B-409 in $43$~ms to $8.7$~s with the planted scalar recovered every
+time; Frobenius folding on toy Koblitz curves cutting additions by
+the predicted $\sqrt{2m}$ ($6.8\times$ at $m=23$, $9\times$ at
+$m=41$) at a cost of $m$ squarings per step; and the Smart attack
+breaking CM-constructed anomalous curves of 129, 257 and 522 bits in
+3, 10 and 33~ms. No full-width scalar has been recovered on any NIST curve, and
+none of the fifteen has a structural weakness; the documentation says
+both.\art{docs/ECDLP_NIST.md}
+
 \subsection{Getting a first honest number}
 \label{sec:nist-first}
 
@@ -96,7 +119,7 @@ against the generic one, for every batch width that was compiled.
 
 Table~\ref{tab:nist-ladder} lines the NIST rungs up against the
 ECC2K-130 rungs they borrow from. The starting point is the portable
-build at 128 threads per block and $W=8$: $1.075$~G~steps/s on P-256
+build at 128 threads per block and $W=8$: $1.075$~billion iterations/s on P-256
 and $0.210$ on P-384, both on one RTX~PRO~6000 Blackwell (188 SMs,
 CUDA~13.3, \texttt{sm\_120}).
 
@@ -104,7 +127,7 @@ CUDA~13.3, \texttt{sm\_120}).
 \centering
 \small
 \caption{ECC2K-130 levers applied to the NIST P-256 and P-384 rho walk
-  on one RTX~PRO~6000. Rates are G~steps/s. Each NIST ratio compares
+  on one RTX~PRO~6000. Rates are in billions of iterations per second. Each NIST ratio compares
   adjacent cells of the same sweep; the cells are single runs, not the
   interleaved repeated pairs of Section~\ref{sec:gpu}. Rows marked
   $^\ast$ come from the round-2 sweep, which at the time of writing is
@@ -136,17 +159,20 @@ and Section~\ref{sec:othergpu-fp256} already showed that the
 product rows and the sparse reduction with explicit
 \texttt{mad.lo.cc}/\texttt{madc.hi.cc} chains lifted the walk by
 $1.19\times$ on P-256 and $1.38\times$ on P-384 at the same launch
-shape ($1.282$ and $0.289$~G~steps/s). The larger gain on P-384 is what
+shape ($1.282$ and $0.289$~billion iterations/s). The larger gain on P-384 is what
 one would expect from twelve limbs instead of eight: there are more
 carries per product to save. At the field level the same change took
-a dependent Montgomery multiply from $54.9$ to $73.4$~G/s on P-256 and
-from $20.3$ to $32.2$~G/s on P-384. The Solinas competitor did not
-settle the representation question on its own: with PTX it was slightly
-slower than Montgomery on P-256 ($70.4$~G/s) and faster on P-384
-($36.7$), while its P-384 point doubling was slower ($1{,}647$ against
-$1{,}712$~M/s).\art{gpu/nist/RESULTS.md, ``Field arithmetic''} The walk
-is built on the Montgomery field for both curves; a Solinas walk has
-not been compiled or measured.\art{gpu/nist/nist_curve.cuh}
+a dependent Montgomery multiply from $54.9$ to $73.4$~billion multiplications/s on P-256 and
+from $20.3$ to $32.2$~billion multiplications/s on P-384. Under the pre-registered protocol the Solinas competitor did not
+win either. On P-256 the two multiplications are within $5\%$ ($70.4$
+against $73.4$~billion multiplications/s), a tie that the protocol
+awards to the simpler configuration. On P-384 the Solinas
+multiplication is $14\%$ faster ($36.7$ against $32.2$) but the
+Montgomery doubling is $4\%$ faster ($1{,}712$ against $1{,}647$~million
+doublings/s). These field rows are a first run at one block size, not
+the protocol's three repeats, so the question stays
+open.\art{gpu/nist/RESULTS.md, ``Field arithmetic''} The walk is built
+on the Montgomery field for both curves; a Solinas walk has not been compiled or measured.\art{gpu/nist/nist_curve.cuh}
 
 \paragraph{Batch width.} This is where the two fields differ most,
 and the reason is the inversion. On ECC2K-130 the batch went
@@ -161,7 +187,7 @@ $W=16$ on P-256, and from $0.096$ to $0.438$ on P-384
 (Figure~\ref{fig:nist-w}).\art{gpu/nist/RESULTS.md, ``Rho walk''} A
 second round passed the inversion's scratch arrays by reference and
 compiled a $W=32$ instance. That cell reached $1.632$ and
-$0.548$~G~steps/s, $1.22\times$ and $1.31\times$ over $W=16$ at the
+$0.548$~billion iterations/s, $1.22\times$ and $1.31\times$ over $W=16$ at the
 same geometry.\art{gpu/nist/RESULTS.md, round 2 (aburan28/crypto pull request 1778)}
 We cannot cleanly split that gain between the larger batch and the
 by-reference inversion, because round 1 never compiled $W=32$. What we
@@ -192,7 +218,7 @@ occupancy bought with spilled state has not paid on either field.
   width=0.82\textwidth,
   height=0.42\textwidth,
   xlabel={walks per thread $W$ (one shared inversion)},
-  ylabel={G steps/s},
+  ylabel={billion iterations/s},
   xmode=log, log basis x=2,
   xtick={2,4,8,16,32},
   xticklabels={2,4,8,16,32},
@@ -245,7 +271,7 @@ spacing was to measure it.
 
 The comparison also puts the two walks on one scale. On the same card
 the ECC2K-130 campaign build runs $14.64$ billion complete iterations
-per second and the best P-256 walk $1.63$ billion steps, a factor of
+per second and the best P-256 walk $1.63$ billion iterations, a factor of
 about nine. A 131-bit binary product is six \texttt{CLMAD}
 instructions; a 256-bit prime product is two hundred or so
 carry-chained integer instructions (Table~\ref{tab:fp256}). That

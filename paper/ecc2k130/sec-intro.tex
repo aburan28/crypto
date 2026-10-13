@@ -46,16 +46,16 @@ card, to see which of them transfer.
   iterations. The table walk's fruitless cycles are measured, priced
   and repaired (Section~\ref{sec:walk}).
 \item A GPU ledger of sixteen paired optimisation steps, taking one
-  RTX~PRO~6000 from $0.85$ to $14.64$~B/s for the campaign build, with
+  RTX~PRO~6000 from $0.85$ to $14.64$~billion iterations/s for the campaign build, with
   later builds of the same walk at $15.44$ and $15.88$ and a table walk
-  at $20.08$~B/s (a rate whose cost per solve is not yet measured). We
+  at $20.08$~billion iterations/s (a rate whose cost per solve is not yet measured). We
   add a twelve-GPU survey, a roofline, a floor derived from the
-  carry-less unit before tuning that rules out $28$~B/s on one card,
+  carry-less unit before tuning that rules out $28$~billion iterations/s on one card,
   and every candidate we built and rejected, with its ratio
   (Section~\ref{sec:gpu}).
 \item The same optimisation ladder applied to Pollard rho on NIST P-256
   and P-384 on the same RTX~PRO~6000: $1.52\times$ and $2.61\times$ over the
-  first working build, to $1.632$ and $0.548$~G~steps/s, with an account of
+  first working build, to $1.632$ and $0.548$~billion iterations/s, with an account of
   which levers carried over and how their sizes changed
   (Section~\ref{sec:nist}).
 \item An inventory of the other GPU arithmetic in the repositories,
@@ -64,7 +64,7 @@ card, to see which of them transfer.
   tables, polynomial-system solvers), with their instruction ledgers,
   emulated walk constants and an honest statement of which have run on
   a device (Section~\ref{sec:othergpu}).
-\item A pipelined-Karatsuba FPGA engine measured at $8.25$~G steps/s on
+\item A pipelined-Karatsuba FPGA engine measured at $8.25$~billion iterations/s on
   one AWS F2, inside a pre-board estimate of $5$--$12$
   (Section~\ref{sec:fpga}).
 \item The campaign itself: its configuration, the calibration of the
@@ -108,7 +108,7 @@ repository, \thisrepo\ (\url{https://github.com/aburan28/crypto}), and
 its files are cited by path from the repository root. A public sibling
 library, \sibling\ (\url{https://github.com/aburan28/cryptanalysis}),
 holds an independent C golden model of the same field, a digit-serial
-FPGA core without vendor timing, an import of the $20$~B/s GPU client
+FPGA core without vendor timing, an import of the $20$~billion iterations/s GPU client
 with its own host re-walk, and the boundary ledger for index calculus;
 its paths carry the prefix \texttt{cryptanalysis:}. Two evidence
 records cited in Section~\ref{sec:alternatives} are in a third public
@@ -124,7 +124,7 @@ collected so far; collection is currently paused. We quote no rate for
 hardware we did not measure. The L40S collection rate, the RTX~PRO~4500
 collection rate under the bridge map and the G7e instance family are
 unmeasured, and we say so where they come up. Projections, such as the
-$7.2$--$7.4$~B/s fused build on the 4500, the table walk's
+$7.2$--$7.4$~billion iterations/s fused build on the 4500, the table walk's
 $0.81$--$0.86$ relative cost per solve, and the 136- and 144-engine F2
 images, are labelled as projections wherever they appear. The NIST
 rates in Section~\ref{sec:nist} are throughput on a walk that will not

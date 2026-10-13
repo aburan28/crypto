@@ -18,16 +18,16 @@ $14.64$ billion complete iterations per second on the campaign's
 $\sigma$-walk; later $\sigma$-walk builds reached $15.88$, and a table
 walk reached $20.08$, as a rate. The roofline of that build has the
 logic pipe $91\%$ busy and the carry-less unit $73\%$. For any walk that
-performs one affine addition per step, $28$~B/s on one card is out of
-reach on both pipes, and $30$ needs two cards. Our own $17.0$~B/s
-target, declared in advance, rejected a $16.56$~B/s result, which is
+performs one affine addition per step, $28$~billion iterations/s on one card is out of
+reach on both pipes, and $30$ needs two cards. Our own $17.0$~billion iterations/s
+target, declared in advance, rejected a $16.56$~billion iterations/s result, which is
 exactly what a declared target is for.
 
 The same ladder carried over to prime fields better than we expected,
 though not in the same proportions. On NIST P-256 and P-384, on the
 same card, explicit carry chains, a wider shared inversion and the
 same refusal of register-cap trades took the rho walk from $1.075$ to
-$1.632$~G steps/s and from $0.210$ to $0.548$, gains of $1.52\times$ and
+$1.632$~billion iterations/s and from $0.210$ to $0.548$, gains of $1.52\times$ and
 $2.61\times$. The batch width, a modest knob on the binary walk, was
 the biggest lever on the prime one, because a Fermat inversion is so
 much more expensive there. The rest of the GPU arithmetic in the
@@ -41,7 +41,7 @@ with the 2009 estimate to its own precision. The table walk's cheaper
 constant was paid back several times over by fruitless cycles until
 the cycle rule was fixed, and its projected $0.81$--$0.86$ relative
 cost per solve still awaits the paired run that would confirm it. An
-FPGA engine built from the same model measured $8.25$~G steps/s on one
+FPGA engine built from the same model measured $8.25$~billion iterations/s on one
 F2, against a pre-board central estimate of $8$, and is level with the
 GPU on cost per solve.
 
