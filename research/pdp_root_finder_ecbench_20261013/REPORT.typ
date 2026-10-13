@@ -53,7 +53,7 @@ Index calculus with PKM's base costs 29–141× rho with the negation map, growi
 
 == Claims
 
-On the binary ladder's subspace base every `vs_rho` claim build was refused: the IC1 identity names a base by its sign-and-Frobenius orbits and that base has more columns than orbits. On a Frobenius-orbit base all 16 claims build and are checked. Every claim shows index calculus slower than the strong rho on its target (online speedup 0.097–0.392 at $n = 23$, 0.007–0.020 at $n = 31$). Every claim fails the checker on independent validation (no replay receipt from a second hardware class is available in this container) and on two stage fields the claim schema requires and `ecbench claim build` does not write (`operation_accounting`, `record_class`), a builder gap independent of this measurement; nine runs held L1 instead of L2.
+On the binary ladder's subspace base every `vs_rho` claim build was refused: the IC1 identity names a base by its sign-and-Frobenius orbits and that base has more columns than orbits. On a Frobenius-orbit base, rerun with the binary that includes main's claim-builder fix, all 16 claims build with `operation_accounting` and `record_class` and are checked. Every claim shows index calculus slower than the strong rho on its target (online speedup 0.132–0.232 at $n = 23$, 0.005–0.017 at $n = 31$). Every claim fails the checker on independent validation (no replay receipt from a second hardware class is available in this container); 11 are classed exploratory because a run of the pair held L1 instead of L2.
 
 == Decision
 

@@ -37,9 +37,10 @@ and every replay audit is `OK` with every replay identical.
 - **Claims:** on the ladder's subspace base the IC1 identity refused
   every claim (more columns than signed Frobenius orbits); rerun on a
   Frobenius-orbit base (`claim_round/`), all 16 claims build and check.
-  They fail the checker on independent validation (no receipt from a second
-  host class) and on two schema fields the builder does not write, and
-  every one shows index calculus slower than the strong rho.
+  With the merged builder every claim carries `operation_accounting` and
+  `record_class`; they fail the checker only on independent validation (no
+  receipt from a second host class) and, on 11, on runs that held L1.
+  Every one shows index calculus slower than the strong rho.
 
 ## 1. What was measured
 
@@ -160,31 +161,30 @@ The same oracle on `koblitz-orbit` (columns = signed Frobenius orbits; the
 only sizes with a usable invariant subspace are `n = 23`, `divisor=1`, 2,025
 points in 45 columns, and `n = 31`, `divisor=2;3`, 869 points in 15
 columns), eight public targets a size, three rounds, audits `OK` (96 and 96
-replays identical).  **16 of 16 claims built**, each checked by `ecbench
-claim check`:
+replays identical).  The round was run twice: the first run's binary
+predated main's claim-builder fix and wrote neither `operation_accounting`
+nor `record_class` (kept in `claim_round/superseded-pre-merge/`, Amendment 1);
+the rerun, with the merged binary, is the one reported.  **16 of 16 claims
+built and checked**, each carrying both fields:
 
-| `n` | `S`: `rootfind` ÷ strong rho | wall: ÷ strong rho (admitted) | `rootfind` ÷ `mitm`, `S` / wall | claims' `online_speedup` (IC online window against rho's) |
-|--:|--:|--:|--:|--:|
-| 23 | 643 [613, 674] | 1,489 | 1.002 / 1.01 | 0.097–0.392 |
-| 31 | 212 [194, 229] | 0.42 | 1.002 / 0.70 | 0.007–0.020 |
+| `n` | `S`: `rootfind` ÷ strong rho | `rootfind` ÷ `mitm`, `S` | claims' `online_speedup` | `record_class` |
+|--:|--:|--:|--:|:--|
+| 23 | 643 [613, 674] | 1.002 | 0.132–0.232 | controlled wall 2, exploratory 6 |
+| 31 | 212 [194, 229] | 1.002 | 0.005–0.017 | controlled wall 3, exploratory 5 |
 
-Every claim fails the checker, and the reasons are listed in each claim's
-log (`claim_round/claims/*.log`):
+The checker's remaining verdicts, per claim (`claim_round/claims/*.log`):
 
 - `independent_validation` and the two replay certificates, on all 16: the
   checker requires a `verify --replay-all` receipt from a host of another
-  hardware class, which this container cannot supply.  This is the
-  expected, documented status of a claim built on one host.
-- `operation_accounting` and `record_class` missing, on all 16: the claim
-  schema (`docs/ic/boundary_targets.json`) requires these stage fields and
-  `ecbench claim build` does not write them, for any method.  A builder gap
-  in the harness, independent of this measurement.
-- Isolation L1 below the spec's L2 on 5 IC and 4 rho runs (hypervisor
-  steal on the run CPU).
+  hardware class, which this container cannot supply.  The documented
+  status of a claim built on one host.
+- `record_class` exploratory on 11, because at least one of the pair's runs
+  held L1 rather than L2 (hypervisor steal on the run CPU: 10 IC and 2 rho
+  runs); the builder classifies truthfully and the checker requires a
+  controlled wall record for a primary claim.
 
 Every claim's speed comparison shows index calculus slower than the
-strong rho on its target (`online_speedup` below 1 on all 16), as the
-ladder predicted.
+strong rho on its target (`online_speedup` below 1 on all 16).
 
 ## 5. Environment, isolation and audit
 
