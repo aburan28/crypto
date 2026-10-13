@@ -45,6 +45,14 @@ exclusive online phases. The primary comparison is per-target online time
 only when scalar replay passes. A completed same-point rho is required before
 an IC/rho speedup can be evaluated. Absolute startup and setup stay separate.
 
+The paired rho control uses the previously selected
+`fold-L64-DP6-E0` strong-rho policy from
+`research/n83_evaluation_20261012/optimization/README.md`, seed
+`2026101301`, one OS thread, and a 60-second process cap. Its point-only
+worker is `examples/n83_rho_optimization_eval.rs`; configuration is pinned
+in `rho_config.json`. The 60-second cap preserves a censored result if it
+does not finish; it cannot be interpreted as a solved baseline.
+
 After the primary comparison, the 64-point panel compares target probes and
 phase times on the same public points. It is secondary, with reused prepared
 logs inside each arm; no panel mean replaces the one-target result. Selection
