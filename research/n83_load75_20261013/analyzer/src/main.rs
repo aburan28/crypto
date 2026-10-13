@@ -374,6 +374,50 @@ fn rho_comparison(
     }))
 }
 
+fn prior_k1798_parity(study: &Path, class: &str) -> Result<Value, Box<dyn std::error::Error>> {
+    let old_dir = study
+        .join("../n83_dense_root_20261013/runs")
+        .join(class)
+        .join("k1798_dense");
+    let new_dir = study.join("runs").join(class).join("k1798_dense");
+    let old_summary = read_jsonl(&old_dir.join("stdout.jsonl"))?;
+    let new_summary = read_jsonl(&new_dir.join("stdout.jsonl"))?;
+    if old_summary.len() != 1 || new_summary.len() != 1 {
+        return Err("K1798 parity summaries missing".into());
+    }
+    for field in [
+        "base_hash",
+        "factor_base_points",
+        "orbit_columns",
+        "regular_states",
+        "root_table_entries",
+        "root_table_allocated_bytes",
+    ] {
+        if old_summary[0][field] != new_summary[0][field] {
+            return Err(format!("K1798 summary parity mismatch: {field}").into());
+        }
+    }
+    let old_rows = read_jsonl(&old_dir.join("targets_result.jsonl"))?;
+    let new_rows = read_jsonl(&new_dir.join("targets_result.jsonl"))?;
+    if old_rows.len() != new_rows.len() {
+        return Err("K1798 parity target count mismatch".into());
+    }
+    for (i, (old, new)) in old_rows.iter().zip(&new_rows).enumerate() {
+        for field in [
+            "target",
+            "x_codes",
+            "point_indices",
+            "probes",
+            "recovered_scalar",
+        ] {
+            if old[field] != new[field] {
+                return Err(format!("K1798 first-witness parity mismatch at {i}/{field}").into());
+            }
+        }
+    }
+    Ok(json!({"status":"PASS_FIRST_WITNESS_PARITY", "targets":new_rows.len()}))
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
     if args.len() != 3 || !["primary", "panel"].contains(&args[2].as_str()) {
@@ -418,6 +462,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     } else {
         Value::Null
     };
+    let k1798_prior_parity = if arms[0]["status"] == "PASS_INDEPENDENT_REPLAY" {
+        prior_k1798_parity(study, &args[2])?
+    } else {
+        json!({"status":"CENSORED_BY_ARM_EXIT"})
+    };
     let selected_by_mean_probes = if args[2] == "panel" {
         arms.iter()
             .filter(|arm| arm["status"] == "PASS_INDEPENDENT_REPLAY")
@@ -434,7 +483,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
     println!(
         "{}",
-        json!({"schema":"n83.load75-analysis/v1", "class":args[2], "arms":arms, "probe_comparisons":comparisons, "rho_same_point":rho, "selected_by_mean_probes":selected_by_mean_probes})
+        json!({"schema":"n83.load75-analysis/v1", "class":args[2], "arms":arms, "probe_comparisons":comparisons, "rho_same_point":rho, "k1798_prior_parity":k1798_prior_parity, "selected_by_mean_probes":selected_by_mean_probes})
     );
     Ok(())
 }
