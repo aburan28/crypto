@@ -1651,6 +1651,7 @@ mod wide {
         }
     }
 
+    #[derive(Clone, Copy)]
     struct State128 {
         left: u16,
         right: u16,
@@ -1658,8 +1659,129 @@ mod wide {
         normal_roots: [u128; 2],
     }
 
+    #[derive(Clone, Copy)]
+    struct State83 {
+        left: u16,
+        right: u16,
+        relative: u16,
+        root0: [u8; 11],
+        root1: [u8; 11],
+    }
+
+    impl State83 {
+        fn encode_root(root: u128) -> [u8; 11] {
+            assert!(root < (1u128 << 83), "packed state root exceeds F_2^83");
+            let bytes = root.to_le_bytes();
+            let mut packed = [0u8; 11];
+            packed.copy_from_slice(&bytes[..11]);
+            packed
+        }
+
+        fn decode_root(packed: [u8; 11]) -> u128 {
+            let mut bytes = [0u8; 16];
+            bytes[..11].copy_from_slice(&packed);
+            u128::from_le_bytes(bytes)
+        }
+
+        fn from_wide(state: State128) -> Self {
+            Self {
+                left: state.left,
+                right: state.right,
+                relative: state.relative,
+                root0: Self::encode_root(state.normal_roots[0]),
+                root1: Self::encode_root(state.normal_roots[1]),
+            }
+        }
+
+        fn to_wide(self) -> State128 {
+            State128 {
+                left: self.left,
+                right: self.right,
+                relative: self.relative,
+                normal_roots: [Self::decode_root(self.root0), Self::decode_root(self.root1)],
+            }
+        }
+    }
+
+    enum StateStore128 {
+        Wide(Vec<State128>),
+        Packed83(Vec<State83>),
+    }
+
+    impl StateStore128 {
+        fn len(&self) -> usize {
+            match self {
+                Self::Wide(states) => states.len(),
+                Self::Packed83(states) => states.len(),
+            }
+        }
+
+        fn get(&self, index: usize) -> State128 {
+            match self {
+                Self::Wide(states) => states[index],
+                Self::Packed83(states) => states[index].to_wide(),
+            }
+        }
+
+        fn layout_receipt(&self) -> (&'static str, usize, usize) {
+            match self {
+                Self::Wide(states) => (
+                    "wide_u128_roots",
+                    std::mem::size_of::<State128>(),
+                    states.capacity() * std::mem::size_of::<State128>(),
+                ),
+                Self::Packed83(states) => (
+                    "packed83_11byte_roots",
+                    std::mem::size_of::<State83>(),
+                    states.capacity() * std::mem::size_of::<State83>(),
+                ),
+            }
+        }
+    }
+
+    #[cfg(test)]
+    mod state83_tests {
+        use super::{State128, State83, StateStore128};
+
+        #[test]
+        fn packed_state_preserves_both_83_bit_roots_and_order() {
+            assert_eq!(std::mem::size_of::<State128>(), 48);
+            assert_eq!(std::mem::size_of::<State83>(), 28);
+            let roots = [
+                0,
+                1,
+                (1u128 << 64) - 1,
+                1u128 << 64,
+                (1u128 << 82) + 0x1234_5678_9ABC_DEF0,
+                (1u128 << 83) - 1,
+            ];
+            let mut stored = Vec::new();
+            for pair in roots.chunks_exact(2) {
+                let wide = State128 {
+                    left: 7,
+                    right: 13,
+                    relative: 29,
+                    normal_roots: [pair[0], pair[1]],
+                };
+                let packed = State83::from_wide(wide);
+                let restored = packed.to_wide();
+                assert_eq!(restored.left, wide.left);
+                assert_eq!(restored.right, wide.right);
+                assert_eq!(restored.relative, wide.relative);
+                assert_eq!(restored.normal_roots, wide.normal_roots);
+                stored.push(packed);
+            }
+            let store = StateStore128::Packed83(stored);
+            assert_eq!(store.len(), roots.len() / 2);
+            assert_eq!(store.layout_receipt().0, "packed83_11byte_roots");
+            for (i, pair) in roots.chunks_exact(2).enumerate() {
+                assert_eq!(store.get(i).normal_roots, [pair[0], pair[1]]);
+            }
+        }
+    }
+
     struct Index128 {
-        states: Vec<State128>,
+        states: StateStore128,
         table: RootTable128,
         shifted: Vec<Vec<u128>>,
         dense_table: bool,
@@ -1753,7 +1875,7 @@ mod wide {
                     let mut probes = 0u64;
                     let mut scan = StateScan128::new(n_u32);
                     for offset in 0..length {
-                        let state = &index.states[(state_lo + offset) % n_states];
+                        let state = index.states.get((state_lo + offset) % n_states);
                         if let Some(relation) = scan_state128(
                             gf,
                             fast,
@@ -1763,7 +1885,7 @@ mod wide {
                             base,
                             target,
                             target_x,
-                            state,
+                            &state,
                             &mut scan,
                             &mut probes,
                             &mut relation_check_ns,
@@ -1882,14 +2004,26 @@ mod wide {
                 row
             })
             .collect();
-        let mut states = Vec::new();
+        let packed_state83 = std::env::var("KIC_STATE28").as_deref() == Ok("1");
+        assert!(!packed_state83 || gf.n == 83, "28-byte states require N83");
+        let max_states = reps
+            .len()
+            .checked_mul(reps.len())
+            .and_then(|pairs| pairs.checked_mul(n as usize))
+            .expect("state capacity exceeds usize");
+        let mut states83 = if packed_state83 {
+            Vec::with_capacity(max_states)
+        } else {
+            Vec::new()
+        };
+        let mut states_wide = Vec::new();
         for left in 0..reps.len() {
             for right in 0..reps.len() {
                 for relative in 0..n {
                     if let Some(roots) =
                         solver.roots(gf, basis, shifted[left][0], shifted[right][relative])
                     {
-                        states.push(State128 {
+                        let state = State128 {
                             left: left as u16,
                             right: right as u16,
                             relative: relative as u16,
@@ -1897,11 +2031,21 @@ mod wide {
                                 basis.to_normal.apply(roots[0]),
                                 basis.to_normal.apply(roots[1]),
                             ],
-                        });
+                        };
+                        if packed_state83 {
+                            states83.push(State83::from_wide(state));
+                        } else {
+                            states_wide.push(state);
+                        }
                     }
                 }
             }
         }
+        let states = if packed_state83 {
+            StateStore128::Packed83(states83)
+        } else {
+            StateStore128::Wide(states_wide)
+        };
         let packed = std::env::var("KIC_PACKED_ROOT_TABLE").as_deref() == Ok("1");
         let dense_table = std::env::var("KIC_PACKED_ROOT_TABLE_DENSE").as_deref() == Ok("1");
         let load75_table = std::env::var("KIC_PACKED_ROOT_TABLE_LOAD75").as_deref() == Ok("1");
@@ -1927,7 +2071,8 @@ mod wide {
         };
         let mut table =
             RootTable128::with_capacity(root_table_request_entries, gf.n, reps.len(), packed);
-        for state in &states {
+        for state_index in 0..states.len() {
+            let state = states.get(state_index);
             for &root in &state.normal_roots {
                 let (canonical, shift) = basis.canonical_selected(root);
                 table.insert_if_absent(
@@ -2081,7 +2226,8 @@ mod wide {
         let mut probes = 0u64;
         let mut scan = StateScan128::new(gf.n);
         let start = start % index.states.len().max(1);
-        for state in index.states[start..].iter().chain(&index.states[..start]) {
+        for offset in 0..index.states.len() {
+            let state = index.states.get((start + offset) % index.states.len());
             if let Some(relation) = scan_state128(
                 gf,
                 fast,
@@ -2091,7 +2237,7 @@ mod wide {
                 base,
                 target,
                 target_x,
-                state,
+                &state,
                 &mut scan,
                 &mut probes,
                 relation_check_ns,
@@ -2584,6 +2730,8 @@ mod wide {
         let median = sorted.get(sorted.len() / 2).copied();
         let (root_table_layout, root_table_slot_bytes, root_table_allocated_bytes) =
             index.table.layout_receipt();
+        let (root_state_layout, root_state_slot_bytes, root_state_allocated_bytes) =
+            index.states.layout_receipt();
         let summary = json!({
             "kind":"compact_orbit_dlp_summary",
             "schema_version":"1.0",
@@ -2594,6 +2742,9 @@ mod wide {
             "orbit_columns":base.columns,
             "factor_base_points":base.points.len(),
             "regular_states":index.states.len(),
+            "root_state_layout":root_state_layout,
+            "root_state_slot_bytes":root_state_slot_bytes,
+            "root_state_allocated_bytes":root_state_allocated_bytes,
             "root_table_entries":index.table.len,
             "root_table_dense_enabled":index.dense_table,
             "root_table_load75_enabled":index.load75_table,
