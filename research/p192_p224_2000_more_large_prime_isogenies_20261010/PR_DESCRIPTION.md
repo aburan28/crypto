@@ -1,4 +1,4 @@
-This PR ships the standalone `isogeny` search/replay binary through the pinned ReleaseMe workflow, preserves 100 independently verified large-prime maps and the 449-model catalogue, and starts the requested campaign for **at least 2000 additional maps**. The new campaign is running; its final result and canonical model registration remain open.
+This follows merged PR #1606 and extends the standalone `isogeny` binary for the requested campaign of **at least 2000 additional P192/P224 maps**. It raises the walk request bound and adds native accounting, exact replay controls, source/binary archives and durable recovery evidence. The complete campaign result and canonical model registration remain open.
 
 Two fresh 1050-step walks use P192 degree 2341 and P224 degree 1117. The first 50 maps per class reproduce the preceding campaign and are excluded from additional yield. The native accounting utility compares source ICV1, prime degree and canonical monic kernel coefficients, so differing receipt metadata cannot count an old map again. A later archival check rejects alternate coefficient encodings and unreduced values.
 
@@ -15,8 +15,10 @@ Validation for this extension:
 - A saved two-step chain exactly replays under a 1050-step request while reporting `complete: false`.
 - Modified source/model and mapped generator with recomputed hashes, and an empty chain, are rejected. Positive replay passes.
 - The archived standalone binary runs outside the checkout and passes complete two-map P384/19 construction and independent replay; these control maps do not count toward the campaign.
-- The new root release-library gate is running. The prior merged-tree gate passed 3815 tests with 110 existing ignored tests.
+- The required root release-library gate passed 3815 tests, with 0 failures and 110 existing ignored tests, in 2847.54 seconds. Its durable receipt is retained in the October 12 recovery evidence.
 
 The earlier 100-map raw evidence, report and canonical-at-run audit remain frozen. The 449-model inventory covers the pinned standards sources with explicit operation capabilities and unresolved adapters; the IC performance ledger is unchanged. Timings are operational shared-host measurements, with constructor/replay/invocation costs separate and repeated prefix costs retained.
 
-The preceding PR head passed all four dedicated isogeny release-build profiles. Other hosted checks failed, including historical copied lockfiles rejected by `--locked`, a canonical mirror HTTP 404, and a formatting diagnostic. Current-head CI must be checked after this push. ReleaseMe publication remains gated on merge and successful release jobs. Final new-map archival, canonical registry/graph updates and the 2000-map acceptance check remain outstanding.
+The durable October 11 run stopped on storage exhaustion after sealing 153 additional maps: 95 P192 and 58 P224. These certificates survive. The October 12 continuation uses recovered SSD capacity and fresh output, with union-based deduplication across attempts; repeated prefix work does not inflate yield. See RECOVERY_20261012.md. The original scratch-loss observation and initial zero-yield report remain historical records.
+
+PR #1606 is merged. The latest published release checked has no isogeny-named asset, so the committed standalone archive provides the verified local runtime. Current-head CI and subsequent ReleaseMe publication remain separate gates. Final new-map archival, canonical registry/graph updates and the 2000-map acceptance check remain outstanding.
