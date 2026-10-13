@@ -1,0 +1,227 @@
+{
+  "resamples": 20000,
+  "results": [
+    {
+      "aa": {
+        "mismatches": [],
+        "pairs": 128
+      },
+      "best_method_paired": {
+        "ci95": [
+          1.4744955082174342,
+          2.338160150415629
+        ],
+        "ci99": [
+          1.3698154089309784,
+          2.5003236988052002
+        ],
+        "method": "paired per-index log quotient, joint bootstrap over indices",
+        "pairs": 64,
+        "quotient": 1.8590519866002624,
+        "resamples": 20000,
+        "seed": 20261012
+      },
+      "ell": 1016839,
+      "family": "d3",
+      "prediction": "sqrt(3) = 1.7321",
+      "same_method_independent": {
+        "ci99": [
+          0.8264906157653263,
+          1.3301229602212776
+        ],
+        "method": "independent-workload bootstrap (the prior rounds' law)",
+        "quotient": 1.0476548252615394
+      },
+      "same_method_paired": {
+        "ci95": [
+          0.8494026066655309,
+          1.3681859588109997
+        ],
+        "ci99": [
+          0.7828847460744651,
+          1.4718802861370381
+        ],
+        "method": "paired per-index log quotient, joint bootstrap over indices",
+        "pairs": 64,
+        "quotient": 1.0814356921626556,
+        "resamples": 20000,
+        "seed": 20261012
+      },
+      "within_crater_paired": {
+        "ci95": [
+          1.422089382603522,
+          2.0922187863231576
+        ],
+        "ci99": [
+          1.339093055132761,
+          2.2373581702356917
+        ],
+        "method": "paired per-index log quotient, joint bootstrap over indices",
+        "pairs": 64,
+        "quotient": 1.7190592099679354,
+        "resamples": 20000,
+        "seed": 20261012
+      }
+    },
+    {
+      "aa": {
+        "mismatches": [],
+        "pairs": 128
+      },
+      "best_method_paired": {
+        "ci95": [
+          1.5088985246588849,
+          2.4383770009547368
+        ],
+        "ci99": [
+          1.3982113695852934,
+          2.613422531133872
+        ],
+        "method": "paired per-index log quotient, joint bootstrap over indices",
+        "pairs": 64,
+        "quotient": 1.9164142166037788,
+        "resamples": 20000,
+        "seed": 20261012
+      },
+      "ell": 2033609,
+      "family": "d3",
+      "prediction": "sqrt(3) = 1.7321",
+      "same_method_independent": {
+        "ci99": [
+          0.7562539730240772,
+          1.2074603069809264
+        ],
+        "method": "independent-workload bootstrap (the prior rounds' law)",
+        "quotient": 0.9566685849475506
+      },
+      "same_method_paired": {
+        "ci95": [
+          0.7447192831553449,
+          1.1650928091207744
+        ],
+        "ci99": [
+          0.6963194178910437,
+          1.240970095315539
+        ],
+        "method": "paired per-index log quotient, joint bootstrap over indices",
+        "pairs": 64,
+        "quotient": 0.9315400203193138,
+        "resamples": 20000,
+        "seed": 20261012
+      },
+      "within_crater_paired": {
+        "ci95": [
+          1.6532392510254124,
+          2.5420853950577373
+        ],
+        "ci99": [
+          1.539190575526407,
+          2.705685763730358
+        ],
+        "method": "paired per-index log quotient, joint bootstrap over indices",
+        "pairs": 64,
+        "quotient": 2.057253767741367,
+        "resamples": 20000,
+        "seed": 20261012
+      }
+    },
+    {
+      "aa": {
+        "mismatches": [],
+        "pairs": 64
+      },
+      "best_method_paired": {
+        "ci95": [
+          0.8144564941671667,
+          1.6809930547392768
+        ],
+        "ci99": [
+          0.7455647018731346,
+          1.9595916320944389
+        ],
+        "method": "paired per-index log quotient, joint bootstrap over indices",
+        "pairs": 32,
+        "quotient": 1.1364769401542423,
+        "resamples": 20000,
+        "seed": 20261012
+      },
+      "ell": 1016839,
+      "family": "d4",
+      "prediction": "sqrt(2) = 1.4142",
+      "same_method_independent": {
+        "ci99": [
+          0.6998833908588772,
+          1.4079363873530812
+        ],
+        "method": "independent-workload bootstrap (the prior rounds' law)",
+        "quotient": 1.0094488998809108
+      },
+      "same_method_paired": {
+        "ci95": [
+          0.7096427285785234,
+          1.2719676596122529
+        ],
+        "ci99": [
+          0.6584688040048671,
+          1.4088398734776875
+        ],
+        "method": "paired per-index log quotient, joint bootstrap over indices",
+        "pairs": 32,
+        "quotient": 0.9425383555913761,
+        "resamples": 20000,
+        "seed": 20261012
+      },
+      "within_crater_paired": {
+        "ci95": [
+          0.8181779160571638,
+          1.7833483406995765
+        ],
+        "ci99": [
+          0.7151026270612303,
+          2.0371302727127496
+        ],
+        "method": "paired per-index log quotient, joint bootstrap over indices",
+        "pairs": 32,
+        "quotient": 1.2057620078932316,
+        "resamples": 20000,
+        "seed": 20261012
+      }
+    },
+    {
+      "aa": {
+        "mismatches": [],
+        "pairs": 64
+      },
+      "ell": 4067213,
+      "family": "d19",
+      "prediction": "1 (the generic theorem at a 30x gap)",
+      "same_method_independent": {
+        "ci99": [
+          0.6769669376551352,
+          1.4328770142303866
+        ],
+        "method": "independent-workload bootstrap (the prior rounds' law)",
+        "quotient": 0.993982297611834
+      },
+      "same_method_paired": {
+        "ci95": [
+          0.7194965957988674,
+          1.464006069583066
+        ],
+        "ci99": [
+          0.646066787882888,
+          1.6384706806276224
+        ],
+        "method": "paired per-index log quotient, joint bootstrap over indices",
+        "pairs": 32,
+        "quotient": 1.0155486886053617,
+        "resamples": 20000,
+        "seed": 20261012
+      }
+    }
+  ],
+  "schema": "drastic-prime-conductor-gap-round3-analysis/v1",
+  "seed": 20261012,
+  "status": "paired count diagnostics; frozen rules in PROTOCOL.md",
+  "target_law": "uniform_scalar_sha256_shared_v1"
+}

@@ -2,11 +2,51 @@
  "convention": "docs/curve-identities.md, tools/curve_identity.py",
  "source": {
   "records": "curve_records.json",
-  "records_file_sha256": "24973cdbb59e83a5258a96cbf36ee2cfbfb980eb33803110f2821ba3b3bc962a",
+  "records_file_sha256": "cb69d201eebe3543494b5111b90967e41f95eaa1427b4ad19665a578eee95a13",
   "producer": "examples/koblitz_curve_records.rs"
  },
  "candidate_uid": null,
  "curves": [
+  {
+   "label": "K_0/GF(2^41)",
+   "a": 0,
+   "n": 41,
+   "model": "E_0: y^2 + xy = x^3 + 1 (the ECC2K-130 family)",
+   "proper_intermediate_subfields_over_gf2": [],
+   "curve_id": "EC1N41Ce0he09550ab560a",
+   "curve_sha256": "e09550ab560a9bb6de7981f4b47c48235d8553626dc43dbe92bf73262a95a8e1",
+   "curve_uid": "urn:ec-record:1:sha256:e09550ab560a9bb6de7981f4b47c48235d8553626dc43dbe92bf73262a95a8e1",
+   "field_sha256": "6088ab65b30eb5d27570c93b58101a030bf2e6fe9d834bc88f9aa1c4f9ea79fa",
+   "field": {
+    "characteristic": 2,
+    "degree": 41,
+    "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant",
+    "modulus_exponents": [
+     41,
+     3,
+     0
+    ],
+    "representation": "polynomial"
+   },
+   "curve": {
+    "coefficients": [
+     1,
+     0,
+     0,
+     0,
+     1
+    ],
+    "cofactor": 4,
+    "generator": [
+     "0x1deeba21c88",
+     "0x17ccbb7d40e"
+    ],
+    "model": "binary Weierstrass",
+    "subgroup_order": "549756390943",
+    "target_group": "prime-order subgroup"
+   },
+   "group_order": "2199025563772"
+  },
   {
    "label": "K_1/GF(2^47)",
    "a": 1,
@@ -46,6 +86,48 @@
     "target_group": "prime-order subgroup"
    },
    "group_order": "140737465650286"
+  },
+  {
+   "label": "K_0/GF(2^53)",
+   "a": 0,
+   "n": 53,
+   "model": "E_0: y^2 + xy = x^3 + 1 (the ECC2K-130 family)",
+   "proper_intermediate_subfields_over_gf2": [],
+   "curve_id": "EC1N53Ce0hb097de99be9a",
+   "curve_sha256": "b097de99be9a3af970966707e65d24bf63302ba5324f05b714f916a680651ae6",
+   "curve_uid": "urn:ec-record:1:sha256:b097de99be9a3af970966707e65d24bf63302ba5324f05b714f916a680651ae6",
+   "field_sha256": "a711d9f8792b5279d415b65610d0af141ca23d26766e652048533125c0c99020",
+   "field": {
+    "characteristic": 2,
+    "degree": 53,
+    "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant",
+    "modulus_exponents": [
+     53,
+     6,
+     2,
+     1,
+     0
+    ],
+    "representation": "polynomial"
+   },
+   "curve": {
+    "coefficients": [
+     1,
+     0,
+     0,
+     0,
+     1
+    ],
+    "cofactor": 428,
+    "generator": [
+     "0xb447205ea953",
+     "0x1c2c3312123e9e"
+    ],
+    "model": "binary Weierstrass",
+    "subgroup_order": "21044858204113",
+    "target_group": "prime-order subgroup"
+   },
+   "group_order": "9007199311360364"
   },
   {
    "label": "K_0/GF(2^57)",
@@ -89,88 +171,6 @@
     "target_group": "prime-order subgroup"
    },
    "group_order": "144115188823166908"
-  },
-  {
-   "label": "K_0/GF(2^41)",
-   "a": 0,
-   "n": 41,
-   "model": "E_0: y^2 + xy = x^3 + 1 (the ECC2K-130 family)",
-   "proper_intermediate_subfields_over_gf2": [],
-   "curve_id": "EC1N41Ce0he09550ab560a",
-   "curve_sha256": "e09550ab560a9bb6de7981f4b47c48235d8553626dc43dbe92bf73262a95a8e1",
-   "curve_uid": "urn:ec-record:1:sha256:e09550ab560a9bb6de7981f4b47c48235d8553626dc43dbe92bf73262a95a8e1",
-   "field_sha256": "6088ab65b30eb5d27570c93b58101a030bf2e6fe9d834bc88f9aa1c4f9ea79fa",
-   "field": {
-    "characteristic": 2,
-    "degree": 41,
-    "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant",
-    "modulus_exponents": [
-     41,
-     3,
-     0
-    ],
-    "representation": "polynomial"
-   },
-   "curve": {
-    "coefficients": [
-     1,
-     0,
-     0,
-     0,
-     1
-    ],
-    "cofactor": 4,
-    "generator": [
-     "0x1deeba21c88",
-     "0x17ccbb7d40e"
-    ],
-    "model": "binary Weierstrass",
-    "subgroup_order": "549756390943",
-    "target_group": "prime-order subgroup"
-   },
-   "group_order": "2199025563772"
-  },
-  {
-   "label": "K_0/GF(2^53)",
-   "a": 0,
-   "n": 53,
-   "model": "E_0: y^2 + xy = x^3 + 1 (the ECC2K-130 family)",
-   "proper_intermediate_subfields_over_gf2": [],
-   "curve_id": "EC1N53Ce0hb097de99be9a",
-   "curve_sha256": "b097de99be9a3af970966707e65d24bf63302ba5324f05b714f916a680651ae6",
-   "curve_uid": "urn:ec-record:1:sha256:b097de99be9a3af970966707e65d24bf63302ba5324f05b714f916a680651ae6",
-   "field_sha256": "a711d9f8792b5279d415b65610d0af141ca23d26766e652048533125c0c99020",
-   "field": {
-    "characteristic": 2,
-    "degree": 53,
-    "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant",
-    "modulus_exponents": [
-     53,
-     6,
-     2,
-     1,
-     0
-    ],
-    "representation": "polynomial"
-   },
-   "curve": {
-    "coefficients": [
-     1,
-     0,
-     0,
-     0,
-     1
-    ],
-    "cofactor": 428,
-    "generator": [
-     "0xb447205ea953",
-     "0x1c2c3312123e9e"
-    ],
-    "model": "binary Weierstrass",
-    "subgroup_order": "21044858204113",
-    "target_group": "prime-order subgroup"
-   },
-   "group_order": "9007199311360364"
   },
   {
    "label": "K_1/GF(2^59)",
@@ -255,6 +255,90 @@
     "target_group": "prime-order subgroup"
    },
    "group_order": "2305843009055095052"
+  },
+  {
+   "label": "K_0/GF(2^71)",
+   "a": 0,
+   "n": 71,
+   "model": "E_0: y^2 + xy = x^3 + 1 (the ECC2K-130 family)",
+   "proper_intermediate_subfields_over_gf2": [],
+   "curve_id": "EC1N71Ce0hac1355ef3db6",
+   "curve_sha256": "ac1355ef3db6e4a4ddcffb7c98dc7b22a53f806e23e08a6e82415b5e2b3df897",
+   "curve_uid": "urn:ec-record:1:sha256:ac1355ef3db6e4a4ddcffb7c98dc7b22a53f806e23e08a6e82415b5e2b3df897",
+   "field_sha256": "54fccbfca0ae2e3e2f4865cc5789b9e138bfb96ba89629682519c2be80353858",
+   "field": {
+    "characteristic": 2,
+    "degree": 71,
+    "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant",
+    "modulus_exponents": [
+     71,
+     5,
+     3,
+     1,
+     0
+    ],
+    "representation": "polynomial"
+   },
+   "curve": {
+    "coefficients": [
+     1,
+     0,
+     0,
+     0,
+     1
+    ],
+    "cofactor": 428276,
+    "generator": [
+     "0x1907df26d8ab0a9b66",
+     "0x17f0e34088b4f1dc4f"
+    ],
+    "model": "binary Weierstrass",
+    "subgroup_order": "5513228015079457",
+    "target_group": "prime-order subgroup"
+   },
+   "group_order": "2361183241386169526132"
+  },
+  {
+   "label": "K_1/GF(2^83)",
+   "a": 1,
+   "n": 83,
+   "model": "E_1: y^2 + xy = x^3 + x^2 + 1 (not the ECC2K-130 family)",
+   "proper_intermediate_subfields_over_gf2": [],
+   "curve_id": "EC1N83Ce1h35c7ced6b497",
+   "curve_sha256": "35c7ced6b497231fbc82fe24db596fd55379a87356962dad47a7dc774388ce9d",
+   "curve_uid": "urn:ec-record:1:sha256:35c7ced6b497231fbc82fe24db596fd55379a87356962dad47a7dc774388ce9d",
+   "field_sha256": "ad8dd02f82f1738e511a756c2198675e77193bb8d4e498ec41d57b82a2c4bde6",
+   "field": {
+    "characteristic": 2,
+    "degree": 83,
+    "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant",
+    "modulus_exponents": [
+     83,
+     7,
+     4,
+     2,
+     0
+    ],
+    "representation": "polynomial"
+   },
+   "curve": {
+    "coefficients": [
+     1,
+     1,
+     0,
+     0,
+     1
+    ],
+    "cofactor": 1128547018,
+    "generator": [
+     "0x5789eebc7f493ecfe93af",
+     "0x755ed5c31e037ed90b549"
+    ],
+    "model": "binary Weierstrass",
+    "subgroup_order": "8569786107849059",
+    "target_group": "prime-order subgroup"
+   },
+   "group_order": "9671406556910881928556062"
   }
  ]
 }

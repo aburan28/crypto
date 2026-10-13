@@ -2,7 +2,7 @@
 
 2026-10-12. Conductor **T-2280**. Dependency-free solver: `rustc --edition 2021 -O quartic_ic.rs`.
 
-Frozen protocol: [PROTOCOL.md](PROTOCOL.md) (do not edit in this PR).
+Frozen protocol: [PROTOCOL.md](PROTOCOL.md) (do not edit in this PR). This directory began as the plan-only PR on main (no solver, no run); this README now records the smoke runs that execute the toy-scalar part of that plan.
 
 ## What ran
 

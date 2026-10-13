@@ -1,11 +1,11 @@
 \section{Structural alternatives, measured}
 \label{sec:alternatives}
 
-Every row above is engineering against a fixed exponent. Three
-threads asked whether the exponent could move for this curve, in the
-same accounting, and each is reported here with its measurement
-because a later reader who rediscovers the idea should find the
-number rather than the folklore. None changed the campaign.
+Everything above is engineering against a fixed exponent. Three
+lines of work asked, in the same accounting, whether the exponent
+itself could move for this curve. We report each with its measurement,
+so that anyone who has the same idea later finds a number instead of
+folklore. None of them changed the campaign.
 
 \subsection{Index calculus on the Koblitz curve}
 \label{sec:alt-ic}
@@ -86,8 +86,9 @@ $10^{12}$ & $4.0\cdot10^{10}$ & $4.0\cdot10^{22}$ & $6.8\cdot10^{8}$ \\
 \end{tabular}
 \end{table}
 
-The verdict is in the unit of the rest of the paper. Rho at $2^{60.9}$ iterations on one RTX~PRO~6000 is about five
-GPU-years at the campaign's $14.11$~B/s. Four-summand index calculus
+Put in the same unit as the rest of the paper, the verdict is
+clear. Rho at $2^{60.9}$ iterations on one RTX~PRO~6000 is about five
+GPU-years at the campaign's $14.11$~billion iterations/s. Four-summand index calculus
 has total work about $r/(n^2K)$ probes: at $K=10^9$ that is
 $4\cdot10^{25}$, some $2\cdot10^7$ times rho's iteration count with one
 probe counted as one step (uncalibrated), and the base at which the precompute alone equals
@@ -101,7 +102,7 @@ probes than one rho solve takes steps on every rung, again
 uncalibrated.
 Beating rho on total work needs a relation-shape change (five- or
 six-summand relations, whose per-point yield scales as $B^5/(120r)$),
-not engineering, and that oracle is unmeasured.\art{RESEARCH_ECC2K130_IC_FEASIBILITY.md, §3--4}
+not engineering, and that oracle is unmeasured.\art{RESEARCH_ECC2K130_IC_FEASIBILITY.md, section 3--4}
 In this repository's boundary ledger the Koblitz rows at a 39-bit
 subgroup run from $S=\text{ops}/\sqrt r=58.8$ ($300\times$
 signed-Frobenius rho) for the plain three-summand meet-in-the-middle
@@ -140,9 +141,9 @@ oracle itself), where no measured oracle comes close.\art{autoresearcher:ledger/
 
 \subsection{What the negatives say}
 
-Each alternative was carried to a measurement and each landed above
-rho by a margin that is a change of exponent, not of constant. The
-honest summary for ECC2K-130 is that the generic-group floor,
-$\sqrt{\pi\ell/(2\cdot262)}$ class-walk steps, is still the number
-the campaign is walking toward, and that the only lever that has
-moved in this work is the cost of one step.
+We carried each alternative through to a measurement, and each
+landed above rho by a margin that is a matter of exponent, not
+constant. For ECC2K-130 the honest summary is that the generic-group
+floor, $\sqrt{\pi\ell/(2\cdot262)}$ class-walk steps, is still what
+the campaign is walking toward, and the only thing this work has
+managed to move is the cost of one step.

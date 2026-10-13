@@ -1,0 +1,17 @@
+{
+  "status": "PASS_CONDITIONAL_NUMERIC_BOUND",
+  "command": "(cd research/n83_dense_root_20261013 && lean Load75Capacity.lean)",
+  "exit_code": 0,
+  "toolchain": "leanprover/lean4:v4.34.1",
+  "toolchain_revision": "5045d0056413266e57c625dcd7c365b10e377c52",
+  "source_sha256": "e45c9cb8b3c90818d34b4fb7659a7693c9531fb90f775b069602639d334535a0",
+  "output_sha256": "fd2cfaecf4db81041219cd3591a2340d085ad938d581c777525ea503ddaff7f6",
+  "declared_theorems": 2,
+  "axioms": {
+    "k2202_request_fits_eight_gib": ["propext"],
+    "k2203_maximum_crosses_eight_gib": []
+  },
+  "standard_foundations": ["Lean propext for Nat.div_le_div_right"],
+  "implementation_status": "proposed_request_rule_not_implemented_or_measured",
+  "lean4checker_fresh": "unavailable"
+}

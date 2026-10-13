@@ -1,0 +1,30 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "smoke: the root-finding decomposition engine beside inherited F4 on icv1-f2m13-t181-515ee569",
+  "description": "Correctness and plumbing check of pdp3-koblitz:engine=rootfind (the pair-sum table of DecompositionStrategy::PairTable, RESEARCH_SEMAEV_ROOTFIND_VS_GROEBNER.md) against #1333's inherited-F4 Groebner engine on the same koblitz-standard-subspace base, at m = 2 and m = 3, with the strong signed-Frobenius rho as the reference, the plain signed-Frobenius rho as the operations baseline, and the framework's generic pair table (mitm:m=2) as the accounting control for the root finder. Both exact engines issue the same queries on one seed; the root finder's S is a complete count, the Groebner arms' S a lower bound (word XORs counted, not charged). Not a performance claim.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 13}],
+    "targets_per_curve": 2,
+    "target_seed": 20261012
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "rho-frob", "role": "baseline", "method": {"id": "rho.signed_frobenius"}},
+    {"name": "ic-f4-m3", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192"}}},
+    {"name": "ic-rootfind-m3", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=3,engine=rootfind"}}},
+    {"name": "ic-f4-m2", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=2,engine=inherited-f4,degree=3,node_budget=8192"}}},
+    {"name": "ic-rootfind-m2", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind"}}},
+    {"name": "ic-mitm-m2", "role": "control", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "mitm:m=2"}}}
+  ],
+  "measurement": {"rounds": 2, "warmup": 1, "order": "alternate", "seed": 1, "isolation_required": "L2", "timeout_seconds": 300}
+}

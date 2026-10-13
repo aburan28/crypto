@@ -1,0 +1,81 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "factor-base suite: Koblitz n=17 families vs signed-Frobenius rho",
+  "description": "Operation-count smoke across koblitz-orbit, binary-subspace, compact-orbit-scan, koblitz-standard-subspace. Not a performance claim. Catalog: research/ecbench_factor_bases_20261013/catalog.json.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 17
+      }
+    ],
+    "targets_per_curve": 2,
+    "target_seed": 20261013
+  },
+  "arms": [
+    {
+      "name": "rho-frob",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius"
+      }
+    },
+    {
+      "name": "ic-k17-orbit",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-orbit:divisor=0;1",
+          "oracle": "mitm-frobenius:m=2",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-k17-subspace",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=4",
+          "oracle": "mitm:m=2",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-k17-compact",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "compact-orbit-scan:columns=8,raw_x_cap=5000",
+          "oracle": "mitm-frobenius:m=2",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-k17-std",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=4",
+          "oracle": "mitm:m=2",
+          "max_trials": "200000"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 2,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 13,
+    "isolation_required": "L0",
+    "timeout_seconds": 180
+  }
+}
