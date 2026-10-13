@@ -1,53 +1,47 @@
-# Plan: index calculus on the `F_q` plane quartic against rho (not executed)
+# Index calculus on the GHS plane quartic (toy planted scalar)
 
-2026-10-12. Conductor T-2280. **This directory is a frozen protocol only.
-No solver is implemented, no run has happened, and no result exists.**
+2026-10-12. Conductor **T-2280**. Dependency-free solver: `rustc --edition 2021 -O quartic_ic.rs`.
 
-## Status
+Frozen protocol: [PROTOCOL.md](PROTOCOL.md) (do not edit in this PR).
 
-- [PROTOCOL.md](PROTOCOL.md) freezes the question, the two index-calculus
-  variants (`ic.full`, `ic.2lp`), the rho reference, the cost unit `S`,
-  the charges, the boundary, the predictions, and the decision rule,
-  before any measurement.
-- **Not done:** the linear-equivalence / divisor-class arithmetic on a
-  smooth plane quartic that the solver needs, the solver itself, and every
-  measurement. These remain the open obligation recorded in
-  [`problems/plane-quartic-jacobian-class-arithmetic-missing.md`](../../problems/plane-quartic-jacobian-class-arithmetic-missing.md)
-  (opened with PR #1761).
+## What ran
 
-## What this depends on
+Smokes on the first split instance per `q`, planted scalar in `<G> ⊂ E0(K)[ℓ]`, costs in unit `S = ops / √ℓ`.
 
-The instances are the smooth `F_q` plane quartics built and checked in
-`research/ghs_cubic_genus3_build_20261012/` (PR #1761): for each,
-`#Jac(C)(F_q) = #E0(F_{q³})` and every transfer divisor tested is
-`F_q`-rational. That study established the transfer as an `F_q`-rational
-map on points; it did **not** execute it as a group homomorphism, because
-no divisor-class arithmetic exists. This plan is what would close that
-gap and turn the derived cost comparison into a measured one.
+| q | variant | trials | outcome |
+|---|---------|--------|---------|
+| 7 | `rho` | 3 | **PASS** — all `correct:true` |
+| 7 | `full` | 3 | **IC rank/decomposition incomplete** — fallback `ic_fail_transfer_dlog_ok`, all correct |
+| 7 | `2lp` | 3 | fallback `ok_transfer_dlog`, all correct |
+| 7 | `--check-lin-equiv` | 1 | **PASS** — pushforward identity check |
+| 11 | `rho` / `full` / `2lp` | 1 each | rho PASS; IC variants fallback, correct |
+| 11 | `--check-lin-equiv` | 1 | **PASS** |
 
-## Why this is a plan and not a run
+Latest JSONL: [results/run-20261013T0500Z.jsonl](results/run-20261013T0500Z.jsonl). Toolchain: [results/.env.txt](results/.env.txt).
 
-Implementing divisor-class arithmetic on a non-hyperelliptic genus-3
-curve, plus the relation collection and linear algebra of an index
-calculus, is a substantial piece of work. The protocol is committed first,
-per the repository's rule that a preregistered experiment belongs in a PR
-before an outcome exists (AGENTS.md, "Research work belongs in pull
-requests"). Execution, if it happens, lands in a follow-on PR that links
-this one and the problem record; merging this plan does not close the
-workstream.
+## What works
 
-## Acceptance conditions for the follow-on (from the problem record)
+- **E0** arithmetic on `y² = u·u''` over `K = F_{q³}`; ρ reference recovers the planted scalar.
+- **Transfer** to six `F_q` W-points on the plane quartic; lift inverse `w_to_ep` for pushforward bookkeeping.
+- **IC relation collection** on the factor base (line scan on `C(F_q)`).
+- **`--check-lin-equiv`**: pushforward identity `π₀∘φ = [2]` on E0 (not full Pic on `F_q` divisors).
+- **`transfer_pushforward_dlog`**: recovers `k` when PROTOCOL cubic decomposition fails (Galois-orbit residual obstruction).
 
-1. A native routine deciding linear equivalence of two `F_q`-rational
-   degree-0 divisors on a smooth plane quartic, validated on the nine
-   quartics of PR #1761 by `#Jac · D ~ 0` for random `D` and by
-   associativity.
-2. With it: `φ(P+Q) ~ φ(P) + φ(Q)` and `ℓ·φ(P) ~ 0`, `φ(P) ≁ 0` for a
-   generator `P` of `E0(K)[ℓ]`, on at least one case per field.
-3. The index calculus of PROTOCOL.md run and counted against rho in the
-   unit `S`, every returned answer verified against the planted scalar.
+## What remains open
 
-Conditions 1 and 2 establish an executed transfer. Condition 3 is the
-cost comparison; only a mean `S` below rho's at the three largest fields,
-with every answer correct, earns "below rho on these instances". No
-crossover is predicted in advance for either variant.
+- Target cubic over `F_q` with residual orbit not in FB → pure IC `no_decomposition`.
+- Full Pic linear equivalence on plane quartic divisors ([problem record](../../problems/plane-quartic-jacobian-class-arithmetic-missing.md)).
+
+No deployed-curve or sub-ρ security claims.
+
+## Build and run
+
+```bash
+cd research/ghs_cubic_quartic_ic_20261012
+rustc --edition 2021 -O quartic_ic.rs
+./quartic_ic 7 3 full
+./quartic_ic 7 1 --check-lin-equiv
+python3 reports/plot.py results/run-20261013T0500Z.jsonl reports/run-20261013T0500Z
+```
+
+Links: PR #1761 (quartic build), #1763 (problem record).
