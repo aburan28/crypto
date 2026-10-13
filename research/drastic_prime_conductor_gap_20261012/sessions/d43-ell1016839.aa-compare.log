@@ -1,0 +1,25 @@
+saved research/drastic_prime_conductor_gap_20261012/sessions/d43-ell1016839/comparisons/rho-neg__rho-neg-aa.json
+ops (ok): rho-neg-aa / rho-neg = 1.0000 [1.000, 1.000] (cluster) over 16 pairs on 16 workloads, 2 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 1.1516, not a result: 16 of 16 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | rho-neg-aa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp44-tm159-0b4f7698 | 43.34 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+| icv1-fp44-tm159-8117e199 | 43.34 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | rho-neg-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0025b933232a | icv1-fp44-tm159-0b4f7698 | 43.34 | 0.1530 | 0.1530 | 1.0000 |
+| W1f781980db76 | icv1-fp44-tm159-8117e199 | 43.34 | 1.1976 | 1.1976 | 1.0000 |
+| W3fc4c8a1d51a | icv1-fp44-tm159-8117e199 | 43.34 | 1.5299 | 1.5299 | 1.0000 |
+| W67d5e8c98656 | icv1-fp44-tm159-0b4f7698 | 43.34 | 0.7073 | 0.7073 | 1.0000 |
+| W72b03c7c6f7d | icv1-fp44-tm159-8117e199 | 43.34 | 0.3580 | 0.3580 | 1.0000 |
+| W868357e8d84a | icv1-fp44-tm159-0b4f7698 | 43.34 | 0.7089 | 0.7089 | 1.0000 |
+| Wa75d02fd07cd | icv1-fp44-tm159-8117e199 | 43.34 | 0.8413 | 0.8413 | 1.0000 |
+| Wad872fe4954c | icv1-fp44-tm159-0b4f7698 | 43.34 | 0.8211 | 0.8211 | 1.0000 |
+| Wb75fd1ece1fc | icv1-fp44-tm159-8117e199 | 43.34 | 1.2709 | 1.2709 | 1.0000 |
+| Wbdfaee58713b | icv1-fp44-tm159-0b4f7698 | 43.34 | 0.7842 | 0.7842 | 1.0000 |
+| Wc03069a9382f | icv1-fp44-tm159-8117e199 | 43.34 | 1.1276 | 1.1276 | 1.0000 |
+| Wc5436a5cbab5 | icv1-fp44-tm159-8117e199 | 43.34 | 0.1774 | 0.1774 | 1.0000 |
+| Wcb24c2ccc6a8 | icv1-fp44-tm159-0b4f7698 | 43.34 | 0.4519 | 0.4519 | 1.0000 |
+| Wd531719f892f | icv1-fp44-tm159-0b4f7698 | 43.34 | 0.1763 | 0.1763 | 1.0000 |
+| Wd683411f0f7c | icv1-fp44-tm159-0b4f7698 | 43.34 | 0.2101 | 0.2101 | 1.0000 |
+| We4cfee3c8414 | icv1-fp44-tm159-8117e199 | 43.34 | 1.0888 | 1.0888 | 1.0000 |

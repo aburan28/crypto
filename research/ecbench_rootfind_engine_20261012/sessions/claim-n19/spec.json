@@ -1,0 +1,33 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "vs_rho shape: root-finding vs inherited-F4 decomposition on public targets, E_0 m=19, d=7",
+  "description": "The second size of the root-finding vs inherited-F4 head-to-head (see claim-koblitz-rootfind-n13.json): the E_0 m=19 curve with the d=7 standard-subspace base the F6-IC ladder used there, eight public one-target workloads, three rounds. Same arms, same accounting caveat: the root finder's S is a complete count, the Groebner arms' S a lower bound. A constant-factor engineering comparison of the decomposition step on synthetic known-answer curves; no security claim.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 19}],
+    "targets_per_curve": 8,
+    "target_seed": 202610121901,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "rho-frob", "role": "baseline", "method": {"id": "rho.signed_frobenius"}},
+    {"name": "ic-f4-m3", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=7",
+      "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192",
+      "max_trials": "200000"}}},
+    {"name": "ic-rootfind-m3", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=7",
+      "oracle": "pdp3-koblitz:m=3,engine=rootfind",
+      "max_trials": "200000"}}},
+    {"name": "ic-f4-m2", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=7",
+      "oracle": "pdp3-koblitz:m=2,engine=inherited-f4,degree=3,node_budget=8192",
+      "max_trials": "200000"}}},
+    {"name": "ic-rootfind-m2", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=7",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind",
+      "max_trials": "200000"}}},
+    {"name": "rho-strong-aa", "role": "control", "method": {"id": "rho.signed_frobenius_strong"}}
+  ],
+  "measurement": {"rounds": 3, "warmup": 1, "order": "alternate", "seed": 202610121902, "isolation_required": "L2", "timeout_seconds": 1800}
+}

@@ -1,0 +1,70 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg-aa",
+      "role": "control"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=2048",
+          "linalg": "structured-gauss",
+          "max_trials": "100000000",
+          "oracle": "mitm:m=2,negation_folded=1",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "ic-mitm",
+      "role": "candidate"
+    }
+  ],
+  "description": "Fresh certified CM pair from the drastic-gap search; independent one-target workloads on each curve, target law hashes the curve model. No isogeny walk; no cross-curve transport. Counts are primary.",
+  "label": "Drastic prime conductor gap: D=-19, ell=508433, 41-bit field",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261012,
+    "timeout_seconds": 3600,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 1113003830593,
+        "b": 1151300736593,
+        "group_order": 1227894548603,
+        "gx": 0,
+        "gy": 593681883763,
+        "kind": "prime_explicit",
+        "p": 1227894548593,
+        "r": 1227894548603
+      },
+      {
+        "a": 548938419925,
+        "b": 376752027987,
+        "group_order": 1227894548603,
+        "gx": 2,
+        "gy": 341969488223,
+        "kind": "prime_explicit",
+        "p": 1227894548593,
+        "r": 1227894548603
+      }
+    ],
+    "target_seed": 2026101201,
+    "targets_per_curve": 8
+  }
+}

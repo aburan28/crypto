@@ -111,7 +111,7 @@ fn main() {
         // (b) the canonical walk's canonicalisation.
         let t = Instant::now();
         for i in 0..CANONS {
-            let (rep, mu) = classes.canon(&bg, pts[i & 4095]);
+            let (rep, mu) = classes.canon(&bg, &mut GroupOps::default(), pts[i & 4095]);
             sink ^= rep.x ^ rep.y ^ mu;
         }
         canon_units.push(t.elapsed().as_secs_f64() * 1e9 / CANONS as f64 / add_ns);

@@ -419,6 +419,49 @@ floor, the memoryless control.
   `S` does not; and the memoryless three-summand arm, which the harness
   had not had.
 
+**The root-finding decomposition engine.**
+`RESEARCH_SEMAEV_ROOTFIND_VS_GROEBNER.md` replaces the Gröbner solve of the
+decomposition step by root finding, and two oracle ids run it here on the
+bases the Gröbner arms use, so the engines meet on one query stream
+(`research/ecbench_rootfind_engine_20261012/`):
+
+- `pdp3-koblitz:m=2|3,engine=rootfind` on `koblitz-standard-subspace` is
+  `DecompositionStrategy::PairTable`, the strategy `koblitz_index_calculus_dlp`
+  runs by default: the base's pair sums `P_i + P_j` tabulated once
+  (`PairSumTable::build_full_within`, the summand-storing tier), a target
+  decomposed by one table probe (`m = 2`) or one per `R − P_k` (`m = 3`).
+  It takes no `degree` and no `node_budget` and refuses them. **Charged:**
+  the table's `|F|(|F|+1)/2` pair additions, counted from the base's size
+  because the batched builder carries no ledger (`|F|` of them doublings);
+  for `m = 3` every `R − P_k` on the ledger until the first hit; and the
+  re-addition of every hit in the group before it is returned.
+  **Counted, not charged:** one `lookup` per probe (priced only where the
+  curve has a pinned ratio, like every table oracle's) and the table's
+  entry count in `oracle_setup`. The record has no `solver` block.
+- `rootfind-subtract:m=2|3` on a prime curve is `prime_fast`'s
+  direct-subtraction root finding: the Semaev `S₃` root in the third
+  variable is `x(R ∓ F_i)`, so every candidate of a target comes from one
+  Montgomery batched inversion over the base's abscissae, each looked up
+  in the base (`m = 2`) or probed against the negation-folded pair table
+  (`m = 3`). It is `subtract`'s search, candidate for candidate in the same
+  order, so the two arms issue the same queries and find the same
+  relations; it is charged as `subtract` is (one addition per candidate
+  point) plus one re-addition per hit, so their `S` differ by one addition
+  per relation and nothing else. The difference the unit does not see, one
+  inversion a target against `2|F_x|`, is in the `inversions` counter, the
+  record's field-operation tally and wall time.
+
+Read a root-finding arm against a Gröbner arm on the resource vector and on
+wall time: the root finder's `S` is a complete count of group additions,
+while a Gröbner arm's `S` is a lower bound (its word XORs are counted and
+not charged), and the ratio of a complete count to a lower bound is not a
+speedup. Against `mitm`, whose generic pair table does the same search in
+the framework's own arithmetic, it is an *engineering* comparison in the
+sense of AGENTS.md §3: the same work in a faster constant. `ecbench` has no
+prime-curve Gröbner oracle (the note's Buchberger baseline terminates only
+at `|F| = 6`, too small for a DLP), so the prime side is compared with the
+existing `subtract` and `mitm` oracles.
+
 **Calibration.** The unit has been checked against theory in
 [`research/ecbench_calibration_20261002`](../../research/ecbench_calibration_20261002/README.md).
 Over 2 384 verified runs, preregistered and replayed, every generic

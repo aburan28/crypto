@@ -873,9 +873,11 @@ pub fn matrix_f5_f2_with_form_timed(
     let t = Instant::now();
     report.criterion_word_ops = criterion.word_ops();
     report.criterion_rows = criterion.lower_level_rows().0;
+    // Count every nonempty F4 row and build criterion survivors in the
+    // same traversal. Set KIC_F5_FUSED_BUILD=0 for the legacy two-pass control.
     static FUSED_BUILD: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     let fused_build =
-        *FUSED_BUILD.get_or_init(|| std::env::var("KIC_F5_FUSED_BUILD").as_deref() == Ok("1"));
+        *FUSED_BUILD.get_or_init(|| std::env::var("KIC_F5_FUSED_BUILD").as_deref() != Ok("0"));
     static DIRECT_PACK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     let direct_pack =
         *DIRECT_PACK.get_or_init(|| std::env::var("KIC_F5_DIRECT_PACK").as_deref() == Ok("1"));

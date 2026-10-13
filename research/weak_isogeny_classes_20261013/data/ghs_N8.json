@@ -1,0 +1,216 @@
+{
+  "big_n": 8,
+  "modulus_hex": "0x11b",
+  "curves_total": 510,
+  "classes_total": 32,
+  "walk3_built": true,
+  "walk3_edges": 508,
+  "factorisations": [
+    {
+      "big_n": 8,
+      "n": 2,
+      "l": 4,
+      "magic_histogram_a0": [
+        0,
+        15,
+        240
+      ],
+      "plain_undercount_b": 0,
+      "subfield_curves": 30,
+      "twist_failing_condition8": 15,
+      "thresholds": [
+        {
+          "max_m": 2,
+          "curves_total": 510,
+          "classes_total": 32,
+          "direct_weak_curves": 480,
+          "classes_with_weak_member": 30,
+          "class_covered_curves": 500,
+          "walk3_covered_curves": 488,
+          "walk3_distance_histogram": [
+            480,
+            8
+          ],
+          "median_log2_sqrt_weak_class_size": 2.0
+        }
+      ]
+    },
+    {
+      "big_n": 8,
+      "n": 4,
+      "l": 2,
+      "magic_histogram_a0": [
+        0,
+        3,
+        12,
+        48,
+        192
+      ],
+      "plain_undercount_b": 0,
+      "subfield_curves": 6,
+      "twist_failing_condition8": 63,
+      "thresholds": [
+        {
+          "max_m": 2,
+          "curves_total": 510,
+          "classes_total": 32,
+          "direct_weak_curves": 12,
+          "classes_with_weak_member": 3,
+          "class_covered_curves": 45,
+          "walk3_covered_curves": 29,
+          "walk3_distance_histogram": [
+            12,
+            17
+          ],
+          "median_log2_sqrt_weak_class_size": 2.1609640474436813
+        },
+        {
+          "max_m": 3,
+          "curves_total": 510,
+          "classes_total": 32,
+          "direct_weak_curves": 60,
+          "classes_with_weak_member": 7,
+          "class_covered_curves": 109,
+          "walk3_covered_curves": 93,
+          "walk3_distance_histogram": [
+            60,
+            33
+          ],
+          "median_log2_sqrt_weak_class_size": 2.0
+        },
+        {
+          "max_m": 4,
+          "curves_total": 510,
+          "classes_total": 32,
+          "direct_weak_curves": 444,
+          "classes_with_weak_member": 30,
+          "class_covered_curves": 485,
+          "walk3_covered_curves": 465,
+          "walk3_distance_histogram": [
+            444,
+            21
+          ],
+          "median_log2_sqrt_weak_class_size": 2.0
+        }
+      ]
+    },
+    {
+      "big_n": 8,
+      "n": 8,
+      "l": 1,
+      "magic_histogram_a0": [
+        0,
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        128
+      ],
+      "plain_undercount_b": 0,
+      "subfield_curves": 2,
+      "twist_failing_condition8": 127,
+      "thresholds": [
+        {
+          "max_m": 2,
+          "curves_total": 510,
+          "classes_total": 32,
+          "direct_weak_curves": 2,
+          "classes_with_weak_member": 1,
+          "class_covered_curves": 18,
+          "walk3_covered_curves": 2,
+          "walk3_distance_histogram": [
+            2
+          ],
+          "median_log2_sqrt_weak_class_size": 2.084962500721156
+        },
+        {
+          "max_m": 3,
+          "curves_total": 510,
+          "classes_total": 32,
+          "direct_weak_curves": 6,
+          "classes_with_weak_member": 2,
+          "class_covered_curves": 23,
+          "walk3_covered_curves": 7,
+          "walk3_distance_histogram": [
+            6,
+            1
+          ],
+          "median_log2_sqrt_weak_class_size": 2.084962500721156
+        },
+        {
+          "max_m": 4,
+          "curves_total": 510,
+          "classes_total": 32,
+          "direct_weak_curves": 14,
+          "classes_with_weak_member": 4,
+          "class_covered_curves": 63,
+          "walk3_covered_curves": 31,
+          "walk3_distance_histogram": [
+            14,
+            17
+          ],
+          "median_log2_sqrt_weak_class_size": 2.1609640474436813
+        },
+        {
+          "max_m": 5,
+          "curves_total": 510,
+          "classes_total": 32,
+          "direct_weak_curves": 30,
+          "classes_with_weak_member": 5,
+          "class_covered_curves": 79,
+          "walk3_covered_curves": 55,
+          "walk3_distance_histogram": [
+            30,
+            25
+          ],
+          "median_log2_sqrt_weak_class_size": 2.084962500721156
+        },
+        {
+          "max_m": 6,
+          "curves_total": 510,
+          "classes_total": 32,
+          "direct_weak_curves": 62,
+          "classes_with_weak_member": 8,
+          "class_covered_curves": 127,
+          "walk3_covered_curves": 95,
+          "walk3_distance_histogram": [
+            62,
+            33
+          ],
+          "median_log2_sqrt_weak_class_size": 2.0
+        },
+        {
+          "max_m": 7,
+          "curves_total": 510,
+          "classes_total": 32,
+          "direct_weak_curves": 126,
+          "classes_with_weak_member": 8,
+          "class_covered_curves": 127,
+          "walk3_covered_curves": 127,
+          "walk3_distance_histogram": [
+            126,
+            1
+          ],
+          "median_log2_sqrt_weak_class_size": 2.0
+        },
+        {
+          "max_m": 8,
+          "curves_total": 510,
+          "classes_total": 32,
+          "direct_weak_curves": 382,
+          "classes_with_weak_member": 24,
+          "class_covered_curves": 383,
+          "walk3_covered_curves": 383,
+          "walk3_distance_histogram": [
+            382,
+            1
+          ],
+          "median_log2_sqrt_weak_class_size": 2.0
+        }
+      ]
+    }
+  ]
+}

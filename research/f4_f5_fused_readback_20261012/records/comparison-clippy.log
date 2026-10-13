@@ -1,0 +1,37 @@
+error[E0282]: type annotations needed
+   --> examples/f4_f5_hash_compare.rs:596:48
+    |
+596 |                     .try_fold(0u64, |sum, row| Ok(sum + number(row, field)?))
+    |                                                ^^ cannot infer type of the type parameter `E` declared on the enum `Result`
+    |
+help: consider specifying the generic arguments
+    |
+596 |                     .try_fold(0u64, |sum, row| Ok::<u64, E>(sum + number(row, field)?))
+    |                                                  ++++++++++
+
+error[E0283]: type annotations needed
+   --> examples/f4_f5_hash_compare.rs:596:48
+    |
+596 |                     .try_fold(0u64, |sum, row| Ok(sum + number(row, field)?))
+    |                                                ^^                         - type must be known at this point
+    |                                                |
+    |                                                cannot infer type of the type parameter `E` declared on the enum `Result`
+    |
+    = note: multiple `impl`s satisfying `_: std::convert::From<std::string::String>` found in the following crates: `alloc`, `serde_json`, `std`:
+            - impl std::convert::From<std::string::String> for serde_json::Value;
+            - impl std::convert::From<std::string::String> for std::boxed::Box<str>;
+            - impl std::convert::From<std::string::String> for std::ffi::OsString;
+            - impl std::convert::From<std::string::String> for std::path::PathBuf;
+            - impl std::convert::From<std::string::String> for std::rc::Rc<str>;
+            - impl std::convert::From<std::string::String> for std::sync::Arc<str>;
+            - impl std::convert::From<std::string::String> for std::thread::thread::thread_name_string::ThreadNameString;
+            - impl std::convert::From<std::string::String> for std::vec::Vec<u8>;
+help: consider specifying the generic arguments
+    |
+596 |                     .try_fold(0u64, |sum, row| Ok::<u64, E>(sum + number(row, field)?))
+    |                                                  ++++++++++
+
+error: aborting due to 2 previous errors
+
+Some errors have detailed explanations: E0282, E0283.
+For more information about an error, try `rustc --explain E0282`.

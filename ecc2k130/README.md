@@ -1554,6 +1554,11 @@ what the instrument is for: finding where the curve bends, if it does.
   (`aws/campaign.json`). Remaining single-GPU work is closing the last tenth
   against the CLMAD floor, not proving that the client walks — see
   [ONE-BLOCK-GEOMETRY.md](ONE-BLOCK-GEOMETRY.md) and [TWO-CHAINS.md](TWO-CHAINS.md).
+
+* The opt-in `gpu-rtx-pro6000-iteration-redesign` target now selects the full
+  tuned v3 recipe. Its RunPod screen, including the minimal-arm regression and
+  correctness receipts, is recorded in
+  [`research/ecc2k130_iteration_redesign_20261012`](../research/ecc2k130_iteration_redesign_20261012/).
 * The multiplier is optimal only within the Karatsuba family. Toom-3 over
   GF(2), which is where Bernstein's 11961-bit-operation chain comes from, is not
   implemented; a search over balanced and unbalanced Karatsuba splits and the

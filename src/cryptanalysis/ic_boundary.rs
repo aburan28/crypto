@@ -1272,8 +1272,10 @@ pub trait RhoClasses<G: CountedGroup> {
     /// `A` of the floor `√(πr/2A)`.
     fn automorphisms(&self) -> u32;
     /// The representative of `p`'s class and `μ` with `rep = [μ]p`
-    /// (mod `r`); `μ = 1` when `p` is its own representative.
-    fn canon(&self, g: &G, p: G::Elt) -> (G::Elt, u64);
+    /// (mod `r`); `μ = 1` when `p` is its own representative.  A class
+    /// whose canonicalisation costs field work (the cubic rotations)
+    /// tallies it into `ops`; negation and table look-ups stay free.
+    fn canon(&self, g: &G, ops: &mut GroupOps, p: G::Elt) -> (G::Elt, u64);
     /// Points only: no canonicalisation is performed or counted.
     fn trivial(&self) -> bool {
         false
@@ -1289,7 +1291,7 @@ impl<G: CountedGroup> RhoClasses<G> for PointClasses {
     fn automorphisms(&self) -> u32 {
         1
     }
-    fn canon(&self, _g: &G, p: G::Elt) -> (G::Elt, u64) {
+    fn canon(&self, _g: &G, _ops: &mut GroupOps, p: G::Elt) -> (G::Elt, u64) {
         (p, 1)
     }
     fn trivial(&self) -> bool {
@@ -1309,7 +1311,7 @@ impl<G: CountedGroup> RhoClasses<G> for NegationClasses {
     fn automorphisms(&self) -> u32 {
         2
     }
-    fn canon(&self, g: &G, p: G::Elt) -> (G::Elt, u64) {
+    fn canon(&self, g: &G, _ops: &mut GroupOps, p: G::Elt) -> (G::Elt, u64) {
         let n = g.neg(p);
         if g.key(&n) < g.key(&p) {
             (n, self.r - 1)
@@ -1319,6 +1321,126 @@ impl<G: CountedGroup> RhoClasses<G> for NegationClasses {
     }
     fn method(&self) -> &'static str {
         "negation-map r-adding walk: look-ahead, short-cycle escape by doubling, distinguished points, stride starts"
+    }
+}
+
+/// `{±ζ₃^i(P)}` on a `j = 0` curve `y² = x³ + b` over `F_p` with
+/// `p ≡ 1 (mod 3)` (`A = 6`): the orbit of the rational order-3
+/// automorphism `ζ₃: (x, y) ↦ (ωx, y)` — `ω` a primitive cube root of
+/// unity in `F_p` — together with negation.  `ζ₃` acts on the
+/// order-`r` subgroup as `[κ]` for a primitive cube root `κ` of `1`
+/// mod `r` (it exists exactly when `3 | r − 1`, and the action is
+/// nontrivial exactly when `ζ₃(G) ≠ G`); `κ` is found by solving
+/// `κ² + κ + 1 ≡ 0 (mod r)` and kept only when `[κ]G = ζ₃(G)` holds,
+/// with the two verification scalar multiplications counted on the
+/// caller's ledger.  The two `ω`-rotations a canonicalisation
+/// performs are field multiplications and are tallied into `ops`
+/// exactly like the group law's.
+pub struct CubicClasses {
+    r: u64,
+    omega: u64,
+    kappa: u64,
+}
+
+impl CubicClasses {
+    /// The primitive cube root of unity in `F_p` (test visibility).
+    pub fn omega_for_test(&self) -> u64 {
+        self.omega
+    }
+    /// The primitive cube root of `1` mod `r` (test visibility).
+    pub fn kappa_for_test(&self) -> u64 {
+        self.kappa
+    }
+    /// The six classes of a `j = 0` prime instance, or `None` when the
+    /// curve, the field or the subgroup lacks the structure: `a ≠ 0`,
+    /// `p ≢ 1 (mod 3)`, `3 ∤ r − 1`, or `ζ₃` fixes the subgroup.
+    pub fn new(
+        g: &PrimeCurve,
+        generator: PrimePoint,
+        r: u64,
+        ops: &mut GroupOps,
+    ) -> Option<Self> {
+        if g.a != 0 || g.b == 0 || g.p < 7 || g.p % 3 != 1 || r % 3 != 1 {
+            return None;
+        }
+        let p = g.p;
+        // omega: a root of x^2 + x + 1 = 0 mod p, primitive (the other is
+        // omega^2); (-3/p) = 1 when p = 1 (mod 3) for prime p > 3.
+        let s = g.sqrt(submod(0, 3, p))?;
+        let omega = mulmod(addmod(submod(0, 1, p), s, p), invmod(2, p)?, p);
+        if omega <= 1 || addmod(mulmod(omega, omega, p), omega, p) != submod(0, 1, p) {
+            return None;
+        }
+        // kappa: the root of x^2 + x + 1 = 0 mod r whose multiple of the
+        // generator is zeta(generator). (-3/r) = 1 when r = 1 (mod 3).
+        let sr = PrimeCurve { p: r, a: 0, b: 0 }.sqrt(submod(0, 3, r))?;
+        let kappa1 = mulmod(addmod(submod(0, 1, r), sr, r), invmod(2, r)?, r);
+        // the roots sum to -1 mod r
+        let kappa2 = submod(0, addmod(1, kappa1, r), r);
+        for kappa in [kappa1, kappa2] {
+            if kappa <= 1 || kappa >= r {
+                continue;
+            }
+            let zeta_g = if generator.infinity {
+                generator
+            } else {
+                PrimePoint::affine(mulmod(omega, generator.x, p), generator.y)
+            };
+            if !g.is_on_curve(zeta_g) || zeta_g == generator {
+                continue;
+            }
+            let scaled = g.mul(ops, generator, kappa);
+            if scaled == zeta_g {
+                return Some(Self { r, omega, kappa });
+            }
+        }
+        None
+    }
+}
+
+impl RhoClasses<PrimeCurve> for CubicClasses {
+    fn automorphisms(&self) -> u32 {
+        6
+    }
+    fn canon(&self, g: &PrimeCurve, ops: &mut GroupOps, p: PrimePoint) -> (PrimePoint, u64) {
+        if p.infinity {
+            return (p, 1);
+        }
+        let (a, b, c) = (g.p, self.omega, self.r);
+        // The six orbit points and their multipliers 1, kappa, kappa^2
+        // and their negatives.  The two rotations are counted field work.
+        let x2 = mulmod(b, p.x, a);
+        let x3 = mulmod(b, x2, a);
+        ops.field_ops.muls += 2;
+        let mut best = p;
+        let mut best_key = g.key(&p);
+        let mut best_mu = 1u64;
+        let kappa_sq = mulmod(self.kappa, self.kappa, c);
+        let mut consider = |pt: PrimePoint, mu: u64, best: &mut PrimePoint, best_key: &mut u64, best_mu: &mut u64| {
+            let k = g.key(&pt);
+            if k < *best_key {
+                *best = pt;
+                *best_key = k;
+                *best_mu = mu;
+            }
+        };
+        consider(PrimePoint::affine(x2, p.y), self.kappa, &mut best, &mut best_key, &mut best_mu);
+        consider(PrimePoint::affine(x3, p.y), kappa_sq, &mut best, &mut best_key, &mut best_mu);
+        let neg = g.neg(p);
+        let neg_key = g.key(&neg);
+        if neg_key < best_key {
+            best = neg;
+            best_key = neg_key;
+            best_mu = submod(0, 1, c);
+        }
+        let neg2 = g.neg(PrimePoint::affine(x2, p.y));
+        consider(neg2, submod(0, self.kappa, c), &mut best, &mut best_key, &mut best_mu);
+        let neg3 = g.neg(PrimePoint::affine(x3, p.y));
+        consider(neg3, submod(0, kappa_sq, c), &mut best, &mut best_key, &mut best_mu);
+        (best, best_mu)
+    }
+    fn method(&self) -> &'static str {
+        "cubic-automorphism r-adding walk on {±ζ₃^i(P)}: look-ahead, short-cycle escape by doubling, distinguished points, stride starts"
     }
 }
 
@@ -1403,7 +1525,7 @@ impl RhoClasses<BinaryGroup<'_>> for SignedFrobeniusClasses {
     fn automorphisms(&self) -> u32 {
         2 * self.n
     }
-    fn canon(&self, _g: &BinaryGroup<'_>, p: FastPoint) -> (FastPoint, u64) {
+    fn canon(&self, _g: &BinaryGroup<'_>, _ops: &mut GroupOps, p: FastPoint) -> (FastPoint, u64) {
         if p.infinity {
             return (p, 1);
         }
@@ -1423,6 +1545,7 @@ impl RhoClasses<BinaryGroup<'_>> for SignedFrobeniusClasses {
 fn rho_canon<G: CountedGroup, C: RhoClasses<G>>(
     g: &G,
     classes: &C,
+    ops: &mut GroupOps,
     p: G::Elt,
     a: u64,
     b: u64,
@@ -1433,7 +1556,7 @@ fn rho_canon<G: CountedGroup, C: RhoClasses<G>>(
         return (p, a, b, false);
     }
     *canonicalisations += 1;
-    let (rep, mu) = classes.canon(g, p);
+    let (rep, mu) = classes.canon(g, ops, p);
     if mu == 1 {
         (rep, a, b, false)
     } else {
@@ -1647,6 +1770,7 @@ impl<'a, G: CountedGroup, C: RhoClasses<G>> TunedWalker<'a, G, C> {
         let (mut x, mut a, mut b, _) = rho_canon(
             g,
             self.classes,
+            ops,
             start,
             a,
             b,
@@ -1667,6 +1791,7 @@ impl<'a, G: CountedGroup, C: RhoClasses<G>> TunedWalker<'a, G, C> {
                 let (y, ya, yb, flipped) = rho_canon(
                     g,
                     self.classes,
+                    ops,
                     sum,
                     addmod(a, aj, r),
                     addmod(b, bj, r),
@@ -1722,6 +1847,7 @@ impl<'a, G: CountedGroup, C: RhoClasses<G>> TunedWalker<'a, G, C> {
                     let (e, ea, eb, _) = rho_canon(
                         g,
                         self.classes,
+                        ops,
                         d2,
                         addmod(ma, ma, r),
                         addmod(mb, mb, r),
@@ -4369,6 +4495,20 @@ impl FrobeniusPairTable {
     /// `None` when the base is not closed under the Frobenius, has more
     /// than `2^26` points, or the field yields no normal basis.
     pub fn build(inst: &BinaryInstance, fb: &FactorBase<FastPoint>) -> Option<Self> {
+        Self::build_filtered(inst, fb, |_, _| true)
+    }
+
+    /// [`build`](Self::build) over the pairs `keep(rep, j)` admits, where
+    /// `rep` is an orbit representative's base index and `j` the other
+    /// member's.  The large-prime collector uses this to leave the
+    /// large×large pairs of an envelope base out of a single-large-prime
+    /// table; with `keep` always true the table, its counters and its
+    /// entry order are exactly those of `build`.
+    pub fn build_filtered(
+        inst: &BinaryInstance,
+        fb: &FactorBase<FastPoint>,
+        keep: impl Fn(usize, usize) -> bool,
+    ) -> Option<Self> {
         let start = Instant::now();
         let g = BinaryGroup(&inst.fast);
         let n = inst.n as usize;
@@ -4416,7 +4556,7 @@ impl FrobeniusPairTable {
         let mut map: FastMap<(u32, u32)> = fast_map(f * f / (4 * n) + 1);
         for (orbit, &rep) in rep_of_orbit.iter().enumerate() {
             for j in 0..f {
-                if (orbit_of[j] as usize) < orbit {
+                if (orbit_of[j] as usize) < orbit || !keep(rep, j) {
                     continue;
                 }
                 let u = g.add(&mut ops, fb.points[rep], fb.points[j]);
@@ -4476,6 +4616,14 @@ impl FrobeniusPairTable {
             ctr.frobfold_mismatches += 1;
             None
         }
+    }
+
+    /// The canonical (least normal-basis rotation) name of an abscissa:
+    /// the same for every member of a signed Frobenius orbit, so a set of
+    /// orbits is a set of these keys.  Costs one canonicalisation, which
+    /// the caller counts.
+    pub fn orbit_key(&self, x: u64) -> u64 {
+        self.canon.canon(x)
     }
 
     pub fn calibrate_lookup(&self, samples: u64) -> f64 {
@@ -5060,6 +5208,28 @@ pub fn collect_and_solve_with<G: CountedGroup, L: RelationSolver + ?Sized>(
     )
 }
 
+/// What an oracle hands the relation loop for one target.
+///
+/// The classic oracle answers with the indices of signed base points
+/// whose sum is the target; the loop writes the row from the base's
+/// `coef_of` and the trial's own `(a, b)`.  A large-prime collector
+/// (`ic_framework::large_prime`) instead returns rows it merged from
+/// several trials' partial relations, with explicit column coefficients
+/// and the merged `(a, b)`; those rows have already been checked as
+/// group equations, and the loop treats them exactly like a classic row
+/// once they arrive.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Relation {
+    /// Indices into the base: `target = Σ points[i]`.
+    Summands(Vec<usize>),
+    /// `h·a + h·b·d = Σ coef · x_col` over the listed columns.
+    Row {
+        columns: Vec<(usize, u64)>,
+        a: u64,
+        b: u64,
+    },
+}
+
 /// The shared relation loop with an explicit completion rule. The
 /// `TargetPinned` wrapper above preserves historical run semantics.
 #[allow(clippy::too_many_arguments)]
@@ -5077,6 +5247,48 @@ pub fn collect_and_solve_with_completion<G: CountedGroup, L: RelationSolver + ?S
     matrix: &mut L,
     completion: CompletionRule,
     mut oracle: impl FnMut(&mut GroupOps, &mut OracleCounters, G::Elt) -> Option<Vec<usize>>,
+) -> PipelineOutcome {
+    collect_and_solve_relations(
+        g,
+        generator,
+        target,
+        r,
+        h,
+        fb,
+        seed,
+        max_trials,
+        targets,
+        pool_mode,
+        matrix,
+        completion,
+        |ops, ctr, point, _a, _b| match oracle(ops, ctr, point) {
+            Some(summands) => vec![Relation::Summands(summands)],
+            None => Vec::new(),
+        },
+    )
+}
+
+/// [`collect_and_solve_with_completion`] for an oracle that may answer a
+/// target with several relations, some of them merged rows with their
+/// own `(a, b)` (see [`Relation`]).  The oracle receives the target's
+/// coefficients so a collector can store a partial relation against
+/// them; nothing else differs, and the classic wrapper above produces
+/// bit-identical counters.
+#[allow(clippy::too_many_arguments)]
+pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
+    g: &G,
+    generator: G::Elt,
+    target: G::Elt,
+    r: u64,
+    h: u64,
+    fb: &FactorBase<G::Elt>,
+    seed: u64,
+    max_trials: u64,
+    targets: TargetSource,
+    pool_mode: RestartPool,
+    matrix: &mut L,
+    completion: CompletionRule,
+    mut oracle: impl FnMut(&mut GroupOps, &mut OracleCounters, G::Elt, u64, u64) -> Vec<Relation>,
 ) -> PipelineOutcome {
     let mut rng = StdRng::seed_from_u64(seed ^ 0x5245_4C41_5449_4F4E);
     let mut rel = PhaseCost::default();
@@ -5279,75 +5491,101 @@ pub fn collect_and_solve_with_completion<G: CountedGroup, L: RelationSolver + ?S
             }
         }
         measurement::mark(measurement::Phase::TargetPdp);
-        let Some(summands) = oracle(&mut rel.group_ops, &mut ctr, point) else {
+        let relations = oracle(&mut rel.group_ops, &mut ctr, point, a, b);
+        if relations.is_empty() {
             continue;
-        };
-        found += 1;
+        }
         // The relation enters the target's elimination: in this classic
         // form every relation carries the target, so the solve is the
         // target's descent.
         measurement::mark(measurement::Phase::TargetDescent);
         let la_start = Instant::now();
-        let mut row = vec![0u64; cols];
-        for &i in &summands {
-            let c = fb.col_of[i];
-            row[c] = addmod(row[c], fb.coef_of[i], r);
-        }
-        // How many columns the row touches: with orbit columns a sum of
-        // two points of one signed orbit is a single-column row, and two
-        // of those on one column pin the logarithm by themselves.
-        let support = row[..d_col].iter().filter(|&&c| c != 0).count();
-        match support {
-            1 => single_column_rows += 1,
-            2 => two_column_rows += 1,
-            _ => {}
-        }
-        let repeated = column_parts
-            .insert(column_part_key(&row[..d_col]), ())
-            .is_some();
-        if repeated {
-            repeated_column_rows += 1;
-        }
-        // h·a + h·b·d = Σ coef·x  ⇒  Σ coef·x − h·b·d = h·a
-        row[d_col] = submod(0, mulmod(h_mod, b, r), r);
-        let rhs = mulmod(h_mod, a, r);
-        match matrix.add_row(row, rhs) {
-            RowStatus::Inconsistent => {
+        let mut stop = false;
+        let mut la_timed = false;
+        for relation in relations {
+            found += 1;
+            let mut row = vec![0u64; cols];
+            let (ra, rb) = match relation {
+                Relation::Summands(summands) => {
+                    for &i in &summands {
+                        let c = fb.col_of[i];
+                        row[c] = addmod(row[c], fb.coef_of[i], r);
+                    }
+                    (a, b)
+                }
+                Relation::Row { columns, a, b } => {
+                    for &(c, coef) in &columns {
+                        row[c] = addmod(row[c], coef % r, r);
+                    }
+                    (a, b)
+                }
+            };
+            // How many columns the row touches: with orbit columns a sum of
+            // two points of one signed orbit is a single-column row, and two
+            // of those on one column pin the logarithm by themselves.
+            let support = row[..d_col].iter().filter(|&&c| c != 0).count();
+            match support {
+                1 => single_column_rows += 1,
+                2 => two_column_rows += 1,
+                _ => {}
+            }
+            let repeated = column_parts
+                .insert(column_part_key(&row[..d_col]), ())
+                .is_some();
+            if repeated {
+                repeated_column_rows += 1;
+            }
+            // h·a + h·b·d = Σ coef·x  ⇒  Σ coef·x − h·b·d = h·a
+            row[d_col] = submod(0, mulmod(h_mod, rb, r), r);
+            let rhs = mulmod(h_mod, ra, r);
+            match matrix.add_row(row, rhs) {
+                RowStatus::Inconsistent => {
+                    la.count("inconsistent", 1);
+                    stop = true;
+                    break;
+                }
+                RowStatus::Dependent => {}
+                RowStatus::Independent => {}
+            }
+            let pinned = matrix.pinned(d_col);
+            if completion == CompletionRule::FullRank
+                && first_target_pin.is_none()
+                && pinned.is_some()
+            {
+                first_target_pin = Some((matrix.rank() as u64, trials, found));
+            }
+            if completion == CompletionRule::FullRank && matrix.rank() == cols && pinned.is_none()
+            {
+                la.count("full_rank_unpinned", 1);
+                stop = true;
+                break;
+            }
+            if let Some(d) = pinned
+                .filter(|_| completion == CompletionRule::TargetPinned || matrix.rank() == cols)
+            {
+                pinned_by_repeated_row = repeated;
                 la_ns += la_start.elapsed().as_nanos() as u64;
-                la.count("inconsistent", 1);
+                la_timed = true;
+                measurement::mark(measurement::Phase::RecoveryCheck);
+                let v_start = Instant::now();
+                let check = g.mul(&mut ver.group_ops, generator, d);
+                ver.wall_ns = v_start.elapsed().as_nanos() as u64;
+                if check == target {
+                    recovered = Some(d);
+                    verified = true;
+                } else {
+                    ver.count("verification_failures", 1);
+                }
+                stop = true;
                 break;
             }
-            RowStatus::Dependent => {}
-            RowStatus::Independent => {}
         }
-        let pinned = matrix.pinned(d_col);
-        if completion == CompletionRule::FullRank && first_target_pin.is_none() && pinned.is_some()
-        {
-            first_target_pin = Some((matrix.rank() as u64, trials, found));
-        }
-        if completion == CompletionRule::FullRank && matrix.rank() == cols && pinned.is_none() {
+        if !la_timed {
             la_ns += la_start.elapsed().as_nanos() as u64;
-            la.count("full_rank_unpinned", 1);
+        }
+        if stop {
             break;
         }
-        if let Some(d) =
-            pinned.filter(|_| completion == CompletionRule::TargetPinned || matrix.rank() == cols)
-        {
-            pinned_by_repeated_row = repeated;
-            la_ns += la_start.elapsed().as_nanos() as u64;
-            measurement::mark(measurement::Phase::RecoveryCheck);
-            let v_start = Instant::now();
-            let check = g.mul(&mut ver.group_ops, generator, d);
-            ver.wall_ns = v_start.elapsed().as_nanos() as u64;
-            if check == target {
-                recovered = Some(d);
-                verified = true;
-                break;
-            }
-            ver.count("verification_failures", 1);
-            break;
-        }
-        la_ns += la_start.elapsed().as_nanos() as u64;
     }
     rel.wall_ns = rel_start.elapsed().as_nanos() as u64 - la_ns - ver.wall_ns;
     rel.count("trials", trials);
@@ -7629,6 +7867,62 @@ mod tests {
     /// `{±φ^t(P)}` and the multiplier that reaches it: `rep = [μ]P` on the
     /// subgroup, and every conjugate names the same representative.
     #[test]
+    /// The six-class canonicalisation of a j = 0 curve: the orbit of
+    /// zeta_3 and negation collapses to one representative whose
+    /// multiplier really maps the point to it, and rho.cubic solves a
+    /// planted instance in about the A = 6 floor.
+    #[test]
+    fn cubic_classes_name_the_class_and_solve() {
+        // p = 65539 (65539 = 1 mod 3), y^2 = x^3 + 11: order 65287
+        // (65287 = 1 mod 3), a j = 0 curve with the full six classes.
+        let curve = PrimeCurve {
+            p: 65539,
+            a: 0,
+            b: 11,
+        };
+        assert_eq!(curve.point_count(), 65287);
+        let g = PrimePoint::affine(2, 35708);
+        let r = 65287u64;
+        let mut ops = GroupOps::default();
+        let classes = CubicClasses::new(&curve, g, r, &mut ops)
+            .expect("the j = 0 curve over p = 65539 has the six classes");
+        // every point of the subgroup canonicalises to the representative
+        // its multiplier really maps it to, and the zeta orbit collapses
+        let mut rng = StdRng::seed_from_u64(19);
+        for _ in 0..64 {
+            let k = rng.gen_range(1..r);
+            let p = curve.mul(&mut ops, g, k);
+            let (rep, mu) = classes.canon(&curve, &mut ops, p);
+            assert_eq!(rep, curve.mul(&mut ops, g, mulmod(k, mu, r)), "k = {k}");
+            let zeta_p = PrimePoint::affine(
+                mulmod(classes.omega_for_test(), p.x, curve.p),
+                p.y,
+            );
+            for q in [zeta_p, curve.neg(zeta_p)] {
+                let (rep2, _) = classes.canon(&curve, &mut ops, q);
+                assert_eq!(rep2, rep, "k = {k}");
+            }
+        }
+        // rho over the six classes solves planted targets and reports A = 6
+        let mut rng = StdRng::seed_from_u64(2026);
+        for _ in 0..8 {
+            let k = rng.gen_range(1..r);
+            let target = curve.mul(&mut ops, g, k);
+            let res = rho_walk_with(
+                &curve,
+                &classes,
+                g,
+                target,
+                r,
+                k,
+                1 << 26,
+                RhoWalk::negation(),
+            );
+            assert_eq!(res.recovered, Some(k));
+            assert_eq!(res.automorphisms, 6);
+        }
+    }
+
     fn signed_frobenius_classes_name_the_class_and_its_multiplier() {
         let inst = koblitz_instance_best(23).expect("a Koblitz curve at n = 23");
         let classes = SignedFrobeniusClasses::new(&inst).expect("Koblitz classes");
@@ -7638,7 +7932,7 @@ mod tests {
         for _ in 0..64 {
             let d = rng.gen_range(1..inst.r);
             let p = bg.mul(&mut ops, inst.generator, d);
-            let (rep, mu) = classes.canon(&bg, p);
+            let (rep, mu) = classes.canon(&bg, &mut ops, p);
             assert_eq!(
                 rep,
                 bg.mul(&mut ops, inst.generator, mulmod(d, mu, inst.r)),
@@ -7647,7 +7941,7 @@ mod tests {
             for s in [1u32, 5, inst.n - 1] {
                 let conj = inst.fast.frobenius_k(p, s);
                 for q in [conj, bg.neg(conj)] {
-                    assert_eq!(classes.canon(&bg, q).0, rep, "d = {d}, s = {s}");
+                    assert_eq!(classes.canon(&bg, &mut ops, q).0, rep, "d = {d}, s = {s}");
                 }
             }
         }
@@ -7878,11 +8172,20 @@ mod tests {
         let mut canons = 0u64;
         for k in 1..200u64 {
             let p = inst.curve.mul(&mut ops, g, k);
-            let (c1, a1, _, _) =
-                rho_canon(&inst.curve, &NegationClasses { r }, p, k, 0, r, &mut canons);
+            let (c1, a1, _, _) = rho_canon(
+                &inst.curve,
+                &NegationClasses { r },
+                &mut ops,
+                p,
+                k,
+                0,
+                r,
+                &mut canons,
+            );
             let (c2, a2, _, _) = rho_canon(
                 &inst.curve,
                 &NegationClasses { r },
+                &mut ops,
                 inst.curve.neg(p),
                 r - k,
                 0,

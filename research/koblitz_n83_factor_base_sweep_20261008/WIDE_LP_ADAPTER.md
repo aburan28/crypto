@@ -91,3 +91,23 @@ unsuccessful searches and partials, retain every source equation, and pass
 independent graph and group replay. It must then measure graph filtering,
 matrix rank, sparse linear algebra and one complete cold target run against
 matched rho. The matrix bridge above is not a retained-N83 rank measurement.
+
+`examples/koblitz_n83_mixed_orbit_worker.rs` is the source entry point for
+that first producer gate. Its `verify` mode takes the two frozen local S3
+object files and their pinned manifests; it checks compressed and plain
+hashes, curve/subgroup and source-projection identities, every signed orbit
+row, the independent point-set hashes, generic orbit reconstruction, and the
+exact K=1,182 prefix of the K=2,048 envelope. The objects are supplied as
+files by the supervisor; the worker does not fetch S3 content. Its `run` mode
+additionally takes the matched, hash-pinned public fixture-zero corpus, a hard wall budget, trial,
+conflict and model caps, summand counts, and a fresh output directory. It
+requires a 4 GiB zero-swap Linux cgroup, records each deterministic public
+source equation and any partial, and feeds accepted partials to the exact
+large-prime graph. A cap before the first SAT pattern stops the run rather
+than repeating an identical failed preflight. Results separate invalid
+models, preflight caps, search caps, graph caps and completed bounded search.
+The external supervisor must retain its launch, timeout, source and cgroup
+receipts and charge all import, failed-search and artifact time. This worker
+has only source tests at present: no retained N83 `verify` or `run` invocation
+is part of its validation. Graph rows and stage counts cannot select a
+minimum-runtime base without the remaining full-pipeline measurements.

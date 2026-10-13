@@ -1,0 +1,1 @@
+timeout -k 5 1200 cargo test --locked --release --example f4_f5_hash_compare --example f4_f5_row_build_bench -j2 

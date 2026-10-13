@@ -455,7 +455,7 @@ pub fn decompose_by_e3(
                 kernel.push(combo);
             } else {
                 pivots.push((v, combo));
-                pivots.sort_unstable_by(|a, b| b.0.cmp(&a.0));
+                pivots.sort_unstable_by_key(|a| std::cmp::Reverse(a.0));
             }
         }
         let mut r = rhs;
@@ -534,7 +534,7 @@ pub fn decompose_pair_linear(
             kernel.push(combo);
         } else {
             pivots.push((v, combo));
-            pivots.sort_unstable_by(|a, b| b.0.cmp(&a.0));
+            pivots.sort_unstable_by_key(|a| std::cmp::Reverse(a.0));
         }
     }
     let (mut r, mut sol) = (b, 0u64);

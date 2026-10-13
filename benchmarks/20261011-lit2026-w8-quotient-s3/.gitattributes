@@ -1,0 +1,4 @@
+# Preserve copied scientific SVG bytes, including plotting whitespace.
+*.pdf binary
+*.png binary
+*.svg -whitespace

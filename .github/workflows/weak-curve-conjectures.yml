@@ -4,29 +4,19 @@ on:
     paths:
       - 'research/weak_curve_conjectures_20261012/**'
       - 'research/iso1_weak_classes_20261007/two_branch_20261009/p*_classes.csv'
-      - 'src/hash/sha256.rs'
       - '.github/workflows/weak-curve-conjectures.yml'
   workflow_dispatch:
 permissions:
   contents: read
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   evidence:
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 60 }}
+    timeout-minutes: 60
     defaults:
       run:
         working-directory: research/weak_curve_conjectures_20261012
     steps:
       - uses: actions/checkout@v4
-        with:
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            /research/weak_curve_conjectures_20261012/
-            /research/iso1_weak_classes_20261007/two_branch_20261009/p*_classes.csv
-            /src/hash/sha256.rs
       - uses: dtolnay/rust-toolchain@stable
       - name: Verify frozen evidence and replay the fixed censuses
         run: |

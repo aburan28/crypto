@@ -1,0 +1,12 @@
+[package]
+name = "additional-prime-isogeny-campaign"
+version = "0.1.0"
+edition = "2021"
+[workspace]
+[[bin]]
+name = "isogeny-campaign"
+path = "campaign.rs"
+[dependencies]
+serde_json = { version = "1.0", features = ["arbitrary_precision"] }
+[dev-dependencies]
+hex = "0.4"

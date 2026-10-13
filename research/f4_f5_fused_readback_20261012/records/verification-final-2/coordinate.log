@@ -1,0 +1,103 @@
+   Compiling crypto v0.1.0 (/workspace/crypto)
+warning: unused import: `ToPrimitive`
+  --> src/cryptanalysis/curve_traits/mod.rs:50:31
+   |
+50 | use num_traits::{One, Signed, ToPrimitive, Zero};
+   |                               ^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `super::koblitz_fast_arith::FastBinaryCurve`
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:77:5
+   |
+77 | use super::koblitz_fast_arith::FastBinaryCurve;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unnecessary trailing semicolons
+    --> src/cryptanalysis/prime_fast.rs:1629:15
+     |
+1629 |             );;;;
+     |               ^^^ help: remove these semicolons
+     |
+     = note: `#[warn(redundant_semicolons)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `crate::cryptanalysis::binary_semaev::binary_semaev_s3`
+   --> src/cryptanalysis/semaev_sat.rs:105:5
+    |
+105 | use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:727:13
+    |
+727 |         let current = LegacyFloatFixture {
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:733:13
+    |
+733 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:734:13
+    |
+734 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:735:13
+    |
+735 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: unused variable: `sums`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:3226:9
+     |
+3226 |     let sums = fast.batch_add(&pairs);
+     |         ^^^^ help: if this is intentional, prefix it with an underscore: `_sums`
+
+warning: unused variable: `projected`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:8891:10
+     |
+8891 |     let (projected, _) = project_by_frobenius_orbits_generic(kc, fb);
+     |          ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_projected`
+
+warning: static `ALL_FACTORS_MEMO` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:527:8
+    |
+527 | static ALL_FACTORS_MEMO: std::sync::OnceLock<std::sync::Mutex<HashMap<u32, Vec<u64>>>> =
+    |        ^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `memo_get` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:530:4
+    |
+530 | fn memo_get(
+    |    ^^^^^^^^
+
+warning: function `memo_put` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:541:4
+    |
+541 | fn memo_put(
+    |    ^^^^^^^^
+
+warning: `crypto` (lib test) generated 13 warnings (run `cargo fix --lib -p crypto --tests` to apply 9 suggestions)
+    Finished `release` profile [optimized] target(s) in 5m 17s
+     Running unittests src/lib.rs (target/release/deps/crypto_lib-dc60caf0642b04d8)
+
+running 8 tests
+test cryptanalysis::curve_traits::tests::coordinate_models_keep_exact_fields_and_order_checks_without_certificates ... ok
+test cryptanalysis::curve_traits::tests::ecc2k_130_conductor_is_exact ... ok
+test cryptanalysis::curve_traits::tests::a_small_koblitz_curve ... ok
+test cryptanalysis::curve_traits::tests::every_registry_entry_parses_with_its_order_identity ... ok
+test cryptanalysis::curve_traits::tests::extension_registry_preserves_field_and_subgroup_records ... ok
+test cryptanalysis::curve_traits::tests::the_gf2_18_twist_groups_with_koblitz_by_cm_not_by_descent ... ok
+test cryptanalysis::curve_traits::tests::registered_montgomery_and_edwards_generators_certify ... ok
+test cryptanalysis::curve_traits::tests::endomorphism_rings_from_contained_orders ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 4099 filtered out; finished in 0.35s
+

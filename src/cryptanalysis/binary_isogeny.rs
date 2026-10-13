@@ -96,6 +96,16 @@ fn phi_l_coeffs_mod2(phi: &ModularPolynomial) -> HashMap<(u32, u32), u8> {
     out
 }
 
+/// Monomials `(X-degree, Y-degree)` of `Φ_l(X, Y) mod 2` (both halves of the
+/// symmetric table), sorted, for callers that evaluate `Φ_l` in their own
+/// field representation.  `None` when `Φ_l` is not tabled.
+pub fn phi_l_mod2_monomials(l: u32) -> Option<Vec<(u32, u32)>> {
+    let phi = modular_polynomial_lookup(l)?;
+    let mut out: Vec<(u32, u32)> = phi_l_coeffs_mod2(&phi).into_keys().collect();
+    out.sort_unstable();
+    Some(out)
+}
+
 /// Build `Φ_l(X, Y = j) ∈ F_{2^m}[X]` from the integer-coefficient
 /// modular polynomial.  Each retained term contributes `Y^j` powers,
 /// evaluated at the field element `j_val`.
