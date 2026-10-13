@@ -9,7 +9,7 @@ import json, os, glob
 
 here = os.path.dirname(os.path.abspath(__file__))
 ours = {}
-for f in ("ours_k4.jsonl", "ours_pkm.jsonl"):
+for f in ("ours_k4.jsonl", "ours_pkm.jsonl", "ours_d4.jsonl"):
     for l in open(os.path.join(here, f)):
         r = json.loads(l)
         ours[r["name"]] = r.get("ours_total_ms", r.get("ours_ms"))
@@ -34,7 +34,9 @@ heavy = {}
 for p in scripts:
     name = os.path.basename(p)[:-6]
     body = open(p).read()
-    if ours.get(name, 1e12) >= 5000:
+    # Heavy cells, and the D₄ system (added after the first 14 bundles were
+    # published, so it gets its own and leaves those byte for byte as they were).
+    if ours.get(name, 1e12) >= 5000 or name.startswith("d4_"):
         heavy.setdefault(cell(name), []).append((name, body))
         continue
     if cur and size + len(body) > LIMIT:
@@ -43,7 +45,11 @@ for p in scripts:
 if cur:
     bundles.append(cur)
 for c, members in heavy.items():
-    bundles.append(members)
+    if not c.startswith("d4_"):
+        bundles.append(members)
+for c, members in heavy.items():
+    if c.startswith("d4_"):
+        bundles.append(members)
 index = []
 for i, b in enumerate(bundles, 1):
     head = f"// bundle {i:02d} of {len(bundles)}: " + ", ".join(n for n, _ in b) + "\n"

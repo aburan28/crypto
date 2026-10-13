@@ -1310,6 +1310,31 @@ pub fn solve_system4(
     )
 }
 
+/// [`solve_system4`] in `N` unknowns, each equation shifted by its own
+/// degree: the `D₄` system's solve, for callers outside the crate.
+pub fn solve_system_n<const N: usize>(
+    comps: &[HashMap<[u8; N], u64>],
+    equation_degree: u8,
+    macaulay_degree: u8,
+    p: u64,
+    rng: &mut StdRng,
+    st: &mut QuarticSolve,
+) -> Option<Vec<[u64; N]>> {
+    solve_system_n_inner::<N>(
+        comps,
+        equation_degree,
+        macaulay_degree,
+        p,
+        rng,
+        st,
+        false,
+        None,
+        None,
+    )
+    .ok()
+    .flatten()
+}
+
 /// The shape of one Macaulay solve, recorded on a first system and replayed
 /// on later systems with the same monomial support (F4Remake's idea, for a
 /// Macaulay matrix): the leading monomials after triangularisation, the
