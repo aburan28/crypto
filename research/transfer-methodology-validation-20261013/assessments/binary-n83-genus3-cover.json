@@ -1,5 +1,5 @@
 {
-  "format": "correspondence-assessment-v2",
+  "format": "correspondence-assessment-v3",
   "case_id": "known-binary-n83-genus3-cover-construction",
   "authority": "Construction-level classification of an existing cover; no unexecuted Jacobian transfer is promoted.",
   "source": {
@@ -42,7 +42,22 @@
     "scaling_support": {"state":"unknown","evidence":[],"scope":"No end-to-end scaling run is supplied."},
     "novelty_within_boundary": {"state":"not_applicable","evidence":[],"scope":"This assessment classifies an existing construction."}
   },
+  "solver_assessment": {
+    "name": null,
+    "family": "none",
+    "implementation": null,
+    "applicability": {"state":"unknown","evidence":[],"scope":"No exact genus-three destination solver has been selected for this image subgroup."},
+    "image_subgroup_access": {"state":"unknown","evidence":[],"scope":"The n=83 Jacobian pullback has not been executed, so solver access to the image is untested."},
+    "relation_or_search_compatibility": {"state":"unknown","evidence":[],"scope":"No factor base, relation rule, generic walk, or solver adapter is bound to this candidate."},
+    "individual_log_and_recovery": {"state":"unknown","evidence":[],"scope":"No destination individual-log and source-recovery pipeline has been run."}
+  },
   "cost_comparison": {"accounting_complete":"unknown","modeled_or_measured":"unmeasured"},
+  "advantage_measurement": {
+    "claim_scope":"unmeasured","basis":"unmeasured","unit":null,"target_count":1,
+    "source_reference":null,"destination_generic_control":null,"destination_candidate":null,
+    "net_speedup":null,"net_speedup_ci95":null,"verified_pairs":0,"scaling_sizes":0,
+    "replay_receipts":[],"unpriced_work":[],"resource_envelope":null,"evidence":[]
+  },
   "sources": [
     {"id":"cover-audit","uri":"research/hyperelliptic_cover_infrastructure_20261006/README.md","revision":"3d4a891bd07000cf63935f5c876a22ff5e193315"}
   ],

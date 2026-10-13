@@ -1,5 +1,5 @@
 {
-  "format": "correspondence-assessment-v2",
+  "format": "correspondence-assessment-v3",
   "case_id": "known-binary-n83-opposite-product-rejection",
   "authority": "Known-false algebraic control from the public n=83 fixture.",
   "source": {
@@ -32,7 +32,22 @@
     "scaling_support": {"state":"not_applicable","evidence":[],"scope":"The transfer is rejected."},
     "novelty_within_boundary": {"state":"not_applicable","evidence":[],"scope":"This is a negative control."}
   },
+  "solver_assessment": {
+    "name": null,
+    "family": "none",
+    "implementation": null,
+    "applicability": {"state":"not_applicable","evidence":[],"scope":"The subgroup transfer is refuted before solver selection."},
+    "image_subgroup_access": {"state":"not_applicable","evidence":[],"scope":"No order-r image subgroup exists in the proposed destination."},
+    "relation_or_search_compatibility": {"state":"not_applicable","evidence":[],"scope":"No solver is assessed for a rejected destination."},
+    "individual_log_and_recovery": {"state":"not_applicable","evidence":[],"scope":"There is no image scalar to recover."}
+  },
   "cost_comparison": {"accounting_complete":"not_applicable","modeled_or_measured":"unmeasured"},
+  "advantage_measurement": {
+    "claim_scope":"unmeasured","basis":"unmeasured","unit":null,"target_count":1,
+    "source_reference":null,"destination_generic_control":null,"destination_candidate":null,
+    "net_speedup":null,"net_speedup_ci95":null,"verified_pairs":0,"scaling_sizes":0,
+    "replay_receipts":[],"unpriced_work":[],"resource_envelope":null,"evidence":[]
+  },
   "sources": [
     {"id":"binary-a0","uri":"tools/ecdlp-surfaces/examples/binary_n83_a0.json","revision":"3d4a891bd07000cf63935f5c876a22ff5e193315"}
   ],

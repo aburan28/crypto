@@ -1,5 +1,5 @@
 {
-  "format": "correspondence-assessment-v2",
+  "format": "correspondence-assessment-v3",
   "case_id": "known-small-prime-quartic-transfer",
   "authority": "Diagnostic replay of a public known-answer fixture; not a performance or novelty claim.",
   "source": {
@@ -43,7 +43,22 @@
     "scaling_support": {"state":"unknown","evidence":[],"scope":"The fixture is a small-field correctness test."},
     "novelty_within_boundary": {"state":"not_applicable","evidence":[],"scope":"This is a known coordinate representation control."}
   },
+  "solver_assessment": {
+    "name": "Pollard rho on the transported elliptic-curve image",
+    "family": "generic_group",
+    "implementation": "transported group law described by the surface fixture",
+    "applicability": {"state":"supported","evidence":["surface-readme"],"scope":"Pollard rho applies to the explicit cyclic order-109 image subgroup."},
+    "image_subgroup_access": {"state":"supported","evidence":["small-transfer"],"scope":"The checked coordinate isomorphism maps P and Q into the encoded curve image."},
+    "relation_or_search_compatibility": {"state":"supported","evidence":["small-transfer","surface-readme"],"scope":"The transported elliptic group law supplies generic walk operations on the image."},
+    "individual_log_and_recovery": {"state":"supported","evidence":["small-transfer"],"scope":"The solver scalar is unchanged and the inverse map permits independent source replay."}
+  },
   "cost_comparison": {"accounting_complete":"unknown","modeled_or_measured":"unmeasured"},
+  "advantage_measurement": {
+    "claim_scope":"unmeasured","basis":"unmeasured","unit":null,"target_count":1,
+    "source_reference":null,"destination_generic_control":null,"destination_candidate":null,
+    "net_speedup":null,"net_speedup_ci95":null,"verified_pairs":0,"scaling_sizes":0,
+    "replay_receipts":[],"unpriced_work":[],"resource_envelope":null,"evidence":[]
+  },
   "sources": [
     {"id":"small-transfer","uri":"tools/ecdlp-surfaces/examples/transfer_certificate.json","revision":"3d4a891bd07000cf63935f5c876a22ff5e193315"},
     {"id":"surface-readme","uri":"tools/ecdlp-surfaces/README.md","revision":"3d4a891bd07000cf63935f5c876a22ff5e193315"}

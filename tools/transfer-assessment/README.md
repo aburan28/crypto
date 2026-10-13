@@ -2,8 +2,30 @@
 
 This dependency-light Rust tool checks the fail-closed, machine-readable core
 of [`docs/transfer-assessment/METHODOLOGY.md`](../../docs/transfer-assessment/METHODOLOGY.md).
-It validates the four-state vocabulary, evidence bindings, cumulative verdict
-gates, complete-cost promotion gate, and diagnostic-only status boundary.
+It also implements the solver and net-cost gates in
+[`MEASUREMENT.md`](../../docs/transfer-assessment/MEASUREMENT.md). It validates
+the four-state vocabulary, evidence bindings, cumulative verdict gates, named
+solver applicability, three-arm cost records, nine-phase totals, net-ratio
+arithmetic, measured-evidence promotion gates, and diagnostic-only status
+boundary.
+
+The v3 record deliberately separates:
+
+- `solver_assessment`: the named solver, exact image-subgroup access, search
+  or relation compatibility, and individual-log/recovery interface; and
+- `advantage_measurement`: source reference, destination generic control, and
+  complete destination candidate, in one unit and one cold one-target scope.
+
+Start a new assessment from
+[`assessment-template.json`](../../docs/transfer-assessment/assessment-template.json)
+and replace every placeholder before citing it as evidence.
+
+`modeled_advantage=supported` is rejected for stage-only or amortized records,
+unpriced work, missing arms, incomplete phase sums, a mismatched ratio, or a
+ratio no greater than one. `measured_advantage=supported` additionally needs
+measured arms, at least five verified pairs, four sizes, a replay receipt, and
+a 95% net-speedup interval whose lower endpoint exceeds one. These are
+consistency gates; the validator does not authenticate a cited receipt.
 
 ```sh
 cargo test --release --locked --manifest-path tools/transfer-assessment/Cargo.toml

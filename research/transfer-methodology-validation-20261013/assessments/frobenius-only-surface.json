@@ -1,5 +1,5 @@
 {
-  "format": "correspondence-assessment-v2",
+  "format": "correspondence-assessment-v3",
   "case_id": "known-frobenius-compatible-surface-filter",
   "authority": "Necessary-condition fixture only; not a transfer certificate.",
   "source": {
@@ -36,7 +36,22 @@
     "scaling_support": {"state":"unknown","evidence":[],"scope":"No scaling experiment exists."},
     "novelty_within_boundary": {"state":"not_applicable","evidence":[],"scope":"This is a known necessary-condition control."}
   },
+  "solver_assessment": {
+    "name": null,
+    "family": "none",
+    "implementation": null,
+    "applicability": {"state":"unknown","evidence":[],"scope":"A Weil polynomial does not identify a materialized destination or a solver."},
+    "image_subgroup_access": {"state":"unknown","evidence":[],"scope":"No variety, subgroup image, or map has been constructed."},
+    "relation_or_search_compatibility": {"state":"unknown","evidence":[],"scope":"No destination arithmetic or relation/search interface exists."},
+    "individual_log_and_recovery": {"state":"unknown","evidence":[],"scope":"No destination output or source recovery map exists."}
+  },
   "cost_comparison": {"accounting_complete":"unknown","modeled_or_measured":"unmeasured"},
+  "advantage_measurement": {
+    "claim_scope":"unmeasured","basis":"unmeasured","unit":null,"target_count":1,
+    "source_reference":null,"destination_generic_control":null,"destination_candidate":null,
+    "net_speedup":null,"net_speedup_ci95":null,"verified_pairs":0,"scaling_sizes":0,
+    "replay_receipts":[],"unpriced_work":[],"resource_envelope":null,"evidence":[]
+  },
   "sources": [
     {"id":"frobenius-fixture","uri":"tools/ecdlp-surfaces/examples/frobenius_result.json","revision":"3d4a891bd07000cf63935f5c876a22ff5e193315"}
   ],

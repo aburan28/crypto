@@ -1,5 +1,5 @@
 {
-  "format": "correspondence-assessment-v2",
+  "format": "correspondence-assessment-v3",
   "case_id": "known-false-torsion-free-lattice-transfer",
   "authority": "Algebraic type-checking control; finite lattice quotients and relation lattices remain separate candidates.",
   "source": {"object":"cyclic elliptic subgroup S=<P>","order":"prime r"},
@@ -29,7 +29,22 @@
     "scaling_support": {"state":"not_applicable","evidence":[],"scope":"The proposed transfer is rejected."},
     "novelty_within_boundary": {"state":"not_applicable","evidence":[],"scope":"This is a known-false control."}
   },
+  "solver_assessment": {
+    "name": null,
+    "family": "none",
+    "implementation": null,
+    "applicability": {"state":"not_applicable","evidence":[],"scope":"The torsion-free destination cannot carry the subgroup."},
+    "image_subgroup_access": {"state":"not_applicable","evidence":[],"scope":"The proposed homomorphism has zero image."},
+    "relation_or_search_compatibility": {"state":"not_applicable","evidence":[],"scope":"No typed finite quotient or relation lattice is supplied."},
+    "individual_log_and_recovery": {"state":"not_applicable","evidence":[],"scope":"The zero image contains no recoverable scalar."}
+  },
   "cost_comparison": {"accounting_complete":"not_applicable","modeled_or_measured":"unmeasured"},
+  "advantage_measurement": {
+    "claim_scope":"unmeasured","basis":"unmeasured","unit":null,"target_count":1,
+    "source_reference":null,"destination_generic_control":null,"destination_candidate":null,
+    "net_speedup":null,"net_speedup_ci95":null,"verified_pairs":0,"scaling_sizes":0,
+    "replay_receipts":[],"unpriced_work":[],"resource_envelope":null,"evidence":[]
+  },
   "sources": [
     {"id":"methodology","uri":"docs/transfer-assessment/METHODOLOGY.md#5-representation-specific-rejection-tests","revision":"this-change"}
   ],

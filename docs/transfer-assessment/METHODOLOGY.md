@@ -116,6 +116,14 @@ If a cited solver costs `q^(alpha+o(1))`, define `kappa=log_q(r)` and use
 actual subgroup and strongest baseline; equality leaves constants, memory,
 setup, and success probability unresolved.
 
+Record the named solver and its image-subgroup interface under
+`solver_assessment`. A family label such as “index calculus” is insufficient:
+bind the factor base or search space, relation/decomposition rule, linear
+algebra, individual-log procedure, implementation revision, recovery
+interface, and working field. Use the three-arm and nine-phase protocol in
+[`MEASUREMENT.md`](MEASUREMENT.md) to distinguish a destination-only stage
+improvement from a net transfer advantage.
+
 ## 5. Representation-specific rejection tests
 
 - **Restriction of scalars:** require a second solver-useful edge. If
@@ -154,7 +162,32 @@ destination; transported versus destination-reselected data; and null or
 known-false structural controls. Toy arithmetic validates formulas, not
 scaling or a cryptographic advantage.
 
-## 7. Novelty boundary
+The primary comparison has three arms: the strongest direct source solver,
+the same generic solver on the destination image, and the specialized
+destination solver with the full route charged. The admissible net ratio is
+`source_reference_total / destination_candidate_total`. Store cold
+one-target evidence in `advantage_measurement`; keep stage-only, online, and
+amortized ratios explicitly secondary. The validator checks phase totals,
+unpriced work, ratio arithmetic, replay evidence, confidence bounds, and
+scaling-size requirements before an advantage verdict can be supported.
+
+## 7. Workflow and skill routing
+
+Use `transfer` to type and audit any proposed change of algebraic object. Use
+the repository's `ecdlp-surfaces` skill for its supported surface, binary,
+cover, Jacobian, gluing, polarization, or Frobenius tools. Use
+`curve-algebra` when CM, Frobenius, automorphisms, GLV/GLS, or endomorphism
+actions determine the candidate or baseline. Once an executable subgroup map
+and named destination solver exist, use `ecbench-measure` for the matched
+cross-method experiment and `ecbench-bounds` to challenge an established
+frontier. Apply `report-evidence` to every implementation or run and
+`research-visuals` to every substantive search, run, or result PR.
+
+The detailed trigger and handoff table is in
+[`MEASUREMENT.md`](MEASUREMENT.md#which-repository-skill-to-use). Tool
+selection does not relax a mathematical or evidence gate.
+
+## 8. Novelty boundary
 
 Fingerprint `(fields, Weil polynomials, dimensions, map type, degree, kernel,
 polarization, target model, solver)`. Check twists, field automorphisms,
@@ -166,9 +199,10 @@ review supports more.
 ## Required output
 
 Return the typed graph and exact identities; obligation table with state,
-evidence, and scope; preservation and recovery certificate; solver and full
-cost tables; controls and exploration boundary; narrowest verdict; limitations;
-and one checkable next obligation. The native validator in
+evidence, and scope; preservation and recovery certificate; named solver
+assessment; three-arm, nine-phase cost table; controls and exploration
+boundary; narrowest verdict; limitations; and one checkable next obligation.
+The native validator in
 [`tools/transfer-assessment`](../../tools/transfer-assessment/README.md) checks
 the machine-readable gates. It validates consistency, not the truth of a
 citation and not a performance, novelty, or security claim.

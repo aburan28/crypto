@@ -4,8 +4,18 @@
   "format": "transfer-assessment-validation-summary-v1",
   "results": [
     {
+      "advantage_measurement": {
+        "basis": "unmeasured",
+        "claim_scope": "unmeasured",
+        "net_speedup": null
+      },
+      "assessment_format": "correspondence-assessment-v3",
       "case_id": "known-binary-n83-genus3-cover-construction",
       "errors": [],
+      "solver": {
+        "family": "none",
+        "name": null
+      },
       "valid": true,
       "verdicts": {
         "algorithmically_relevant": "unknown",
@@ -16,8 +26,18 @@
       }
     },
     {
+      "advantage_measurement": {
+        "basis": "unmeasured",
+        "claim_scope": "unmeasured",
+        "net_speedup": null
+      },
+      "assessment_format": "correspondence-assessment-v3",
       "case_id": "known-binary-n83-mixed-product-transfer",
       "errors": [],
+      "solver": {
+        "family": "generic_group",
+        "name": "Pollard rho on the transported product subgroup"
+      },
       "valid": true,
       "verdicts": {
         "algorithmically_relevant": "supported",
@@ -28,8 +48,18 @@
       }
     },
     {
+      "advantage_measurement": {
+        "basis": "unmeasured",
+        "claim_scope": "unmeasured",
+        "net_speedup": null
+      },
+      "assessment_format": "correspondence-assessment-v3",
       "case_id": "known-binary-n83-opposite-product-rejection",
       "errors": [],
+      "solver": {
+        "family": "none",
+        "name": null
+      },
       "valid": true,
       "verdicts": {
         "algorithmically_relevant": "refuted",
@@ -40,8 +70,18 @@
       }
     },
     {
+      "advantage_measurement": {
+        "basis": "unmeasured",
+        "claim_scope": "unmeasured",
+        "net_speedup": null
+      },
+      "assessment_format": "correspondence-assessment-v3",
       "case_id": "known-frobenius-compatible-surface-filter",
       "errors": [],
+      "solver": {
+        "family": "none",
+        "name": null
+      },
       "valid": true,
       "verdicts": {
         "algorithmically_relevant": "unknown",
@@ -52,8 +92,18 @@
       }
     },
     {
+      "advantage_measurement": {
+        "basis": "unmeasured",
+        "claim_scope": "unmeasured",
+        "net_speedup": null
+      },
+      "assessment_format": "correspondence-assessment-v3",
       "case_id": "known-small-prime-quartic-transfer",
       "errors": [],
+      "solver": {
+        "family": "generic_group",
+        "name": "Pollard rho on the transported elliptic-curve image"
+      },
       "valid": true,
       "verdicts": {
         "algorithmically_relevant": "supported",
@@ -64,8 +114,18 @@
       }
     },
     {
+      "advantage_measurement": {
+        "basis": "unmeasured",
+        "claim_scope": "unmeasured",
+        "net_speedup": null
+      },
+      "assessment_format": "correspondence-assessment-v3",
       "case_id": "known-false-torsion-free-lattice-transfer",
       "errors": [],
+      "solver": {
+        "family": "none",
+        "name": null
+      },
       "valid": true,
       "verdicts": {
         "algorithmically_relevant": "refuted",
@@ -76,5 +136,5 @@
       }
     }
   ],
-  "validator": "0.1.0"
+  "validator": "0.2.0"
 }
