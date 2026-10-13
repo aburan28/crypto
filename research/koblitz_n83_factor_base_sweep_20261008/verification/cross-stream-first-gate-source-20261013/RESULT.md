@@ -34,6 +34,31 @@ resource cap, import failure, invalid model, and unfinished search are distinct
 statuses. This gate does not collect enough relations or linear algebra to
 rank complete index-calculus runtime.
 
-The source-only controls are in `test_supervisor.py`. A retained run, if
-launched, must be audited from its durable raw output before any result is
-promoted in this file or the boundary ledger.
+The source-only controls are in `test_supervisor.py`. The retained run used
+source commit `0764901992591c39566d720ae812c54cdc09ab75` and kept its
+raw output at
+`/Volumes/SSD990/crypto/worktrees/.n83-cross-stream-first-gate-20261013/run-0764901992`.
+The independent `audit.py` replay accepted the complete raw receipt set; its
+hash inventory and verdict are frozen in `audit.json`. Both objects remain in
+the specified S3 factor-base prefix under `a0/objects/<BLAKE3>.jsonl.gz`.
+
+| Measured field | First cross-stream gate |
+| --- | ---: |
+| Shared signed orbits | 0 |
+| Base / residual signed orbits | 600 / 600 |
+| Base / residual points | 99,600 / 99,600 |
+| Source capacity variables / domain clauses / XOR rows | 97,080 / 269,830 / 4,980 |
+| Observed build / verify / search stage wall, seconds | 194.192 / 3.717 / 275.429 |
+| Observed supervisor wall, seconds | 486.233 |
+| Search process wall / import, seconds | 274.522 / 3.281 |
+| Search memory cgroup peak, bytes | 369,958,912 |
+| Search conflicts / models / solver calls | 5,000 / 0 / 1 |
+| Solver status | `UNKNOWN_search_cap` |
+| Conservative additional / cumulative charge, seconds | 2,400 / 19,800 |
+
+The first of eight possible sign patterns reached its 5,000-conflict cap.
+This is a censored search observation: it supplies neither a zero-yield
+estimate nor a refutation of the relation equation. The run produced no graph
+rows, rank, or complete index-calculus runtime, so the boundary ledger and
+selected-best field remain unchanged. No additional retained search is
+authorized by this grant.
