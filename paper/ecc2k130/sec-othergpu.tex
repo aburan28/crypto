@@ -108,27 +108,27 @@ seven assembly blocks are checked by an interpreter against the
 portable path on $20{,}000$ random and boundary inputs each, and that
 check is mutation-tested; it does not cover register allocation or
 device semantics, which is why \texttt{FP\_PTX} is off by
-default.\art{gpu/ecc/OPTIMIZATION_BLACKWELL.md, §2}\art{gpu/ecc/ptx_asm_check.py}
+default.\art{gpu/ecc/OPTIMIZATION_BLACKWELL.md, section 2}\art{gpu/ecc/ptx_asm_check.py}
 
 In the unit of Section~\ref{sec:arith}, a secp256k1 inversion is 270
 multiplications (255 squarings and 15 multiplications along the
 libsecp256k1 addition chain), a rho step with batch $W$ is $6+270/W$
 multiplications ($3$ for the affine addition, $3$ for Montgomery's
 trick), $7+270/W$ with the $j=0$ fold: $39.8$ at $W=8$, $14.4$ at
-$W=32$, $8.1$ at $W=128$, against 276 unbatched.\art{gpu/ecc/OPTIMIZATION_BLACKWELL.md, §1}
+$W=32$, $8.1$ at $W=128$, against 276 unbatched.\art{gpu/ecc/OPTIMIZATION_BLACKWELL.md, section 1}
 Three things were tried and declined on the static count: a
 dedicated squaring routine ($-2.7\%$ portable, $+23.5\%$ on the PTX
 path; reverted), lazy reduction to $[0,2^{256})$ (worth about $10\%$
 of a multiply, but it breaks the canonical form that equality, the
 distinguished-point test, the cycle hash and the fold comparison rely
 on), and Karatsuba (judged to lose on a carry-bound multiply). Tensor
-cores were considered and not reached for.\art{gpu/ecc/OPTIMIZATION_BLACKWELL.md, §2 and §4.4}
+cores were considered and not reached for.\art{gpu/ecc/OPTIMIZATION_BLACKWELL.md, section 2 and section 4.4}
 Marking the inversion and ladder routines \texttt{\_\_noinline\_\_}
 and replacing two 16-entry tables by a small double-scalar ladder
 took the walk kernel's stack from $4{,}664$ to $1{,}616$~B (the
 low-memory variant from $4{,}008$ to $792$~B) and the compile from
 over ten minutes to 46~s, the same code-size lesson as
-Section~\ref{sec:arith-bitsliced}.\art{gpu/ecc/OPTIMIZATION_BLACKWELL.md, §3}
+Section~\ref{sec:arith-bitsliced}.\art{gpu/ecc/OPTIMIZATION_BLACKWELL.md, section 3}
 
 \subsection{Rho with automorphism folding, and baby-step giant-step}
 \label{sec:othergpu-rho}

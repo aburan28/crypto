@@ -23,7 +23,7 @@ packed representation a $131\times131$ product is a two-way Karatsuba
 over $64\times64$ carry-less multiplies, which is six \texttt{CLMAD}
 instructions. At batch $W=16$ the shipping kernel issues 77 products
 per 16 slots, or $4.81$ per update. Table~\ref{tab:floor} prices one
-update on the RTX~PRO~6000 (188 SMs).\art{ecc2k130/ITERATION-FUNCTION.md, §1}
+update on the RTX~PRO~6000 (188 SMs).\art{ecc2k130/ITERATION-FUNCTION.md, section 1}
 
 \begin{table}[t]
 \centering
@@ -70,7 +70,7 @@ to it. A kernel-mix measurement on the 6000 at $1.62$
 lane-\texttt{CLMAD}s per SM-clock priced the $20$~billion iterations/s table-walk kernel
 at $33.1$ \texttt{CLMAD} per update ($28.9$ products, $3.0$ inversion,
 $1.25$ normal-basis squarings) and gave a floor of
-$22.3$~billion iterations/s.\art{ecc2k130/TWO-CHAINS.md, §1} A screened (not yet
+$22.3$~billion iterations/s.\art{ecc2k130/TWO-CHAINS.md, section 1} A screened (not yet
 verified) three-limb Karatsuba arm then implied at least $1.654$
 lane-\texttt{CLMAD}s per SM-clock, which refuted that figure. The
 roofline of the $20.078$~billion iterations/s build (Table~\ref{tab:roofline}) puts the
@@ -107,14 +107,14 @@ The same note measures the carry-less unit on other dies: $37.8$
 logic slots per \texttt{CLMAD.lo} on the 6000, $3.78$ on the B200 and
 $2.00$ on the H100. On the data-centre parts, then, the logic pipe
 binds by a wide margin, and on the B200 the carry-less floor alone
-would be $255$~billion iterations/s.\art{ecc2k130/TWO-CHAINS.md, §6.1--6.2}
+would be $255$~billion iterations/s.\art{ecc2k130/TWO-CHAINS.md, section 6.1--6.2}
 
 We had to correct the static accounting behind Table~\ref{tab:floor}
 once. An earlier SASS counter reported about $1{,}570$ ALU slots and
 $29$ \texttt{CLMAD} per update; its replacement counts $2{,}271$ ALU and
 $45$ \texttt{CLMAD} statically, or $2{,}324$ once \texttt{POPC} and
 \texttt{FLO} are priced at their measured quarter
-rate.\art{ecc2k130/ITERATION-FUNCTION.md, §3} The floor argument does
+rate.\art{ecc2k130/ITERATION-FUNCTION.md, section 3} The floor argument does
 not depend on which count is used, since the budgets are below both.
 
 \subsection{Acceptance rules}
@@ -230,8 +230,13 @@ These are the current $\sigma$-walk headlines. The campaign
 configuration of Section~\ref{sec:campaign} was frozen before they
 existed and still ships the audited $14.64$ build.
 
-\subsection{Beyond the shipping walk: the table walk and $20$~billion iterations/s}
+\subsection{Beyond the shipping walk: the table walk's arithmetic}
 \label{sec:tablewalk}
+
+This subsection measures how cheap the table walk's step can be made.
+Every rate in it predates the exact cycle rule v3, so it describes the
+arithmetic rather than a walk we would run today;
+Section~\ref{sec:sigma-vs-table} explains why.
 
 The $\sigma$-walk spends part of every step on $\sigma^j$ and the
 basis conversions around it. A redesigned $r$-adding table walk
@@ -244,7 +249,7 @@ measured $16.560337$~billion iterations/s against $14.412634$~billion iterations
 $1.146$ and $1.169$). In the audited $385{,}024$-worker geometry it
 measured $16.351936$ against $14.975448$ ($+9.2\%$). All 300 device
 reports re-walked correctly, and all 64 planted logarithms were
-recovered on $\mathrm{GF}(2^{41})$.\art{ecc2k130/ITERATION-FUNCTION.md, §6.2--6.3}\art{ecc2k130/benchmarks/table-walk/comparison.json}
+recovered on $\mathrm{GF}(2^{41})$.\art{ecc2k130/ITERATION-FUNCTION.md, section 6.2--6.3}\art{ecc2k130/benchmarks/table-walk/comparison.json}
 
 Before the build, the note had set itself a target of $17.0$~billion iterations/s
 (§4.4). Both medians missed it, by $2.6\%$ and $3.8\%$, so under its
@@ -328,7 +333,7 @@ measures $5.107$~billion iterations/s here at $1.95$~GHz, within about $1\%$ of 
 The card's own best preset before the map change sat near $6.2$~billion iterations/s.
 Candidates such as the larger split batches were slower here because
 they raised memory activity, and the power cap answered by lowering
-the clock.\art{ecc2k130/ITERATION-FUNCTION.md, §6.3}\art{ecc2k130/README.md, ``larger split-batch experiment''}
+the clock.\art{ecc2k130/ITERATION-FUNCTION.md, section 6.3}\art{ecc2k130/README.md, ``larger split-batch experiment''}
 We had declared a goal of $12$~billion iterations/s for this card
 (Section~\ref{sec:campaign-goal28}), and it was reached by changing the
 map rather than the kernel. The complete two-bridge $x$-only map of
@@ -398,7 +403,8 @@ the data-centre parts even though its carry-less unit is the slowest
 in the table (Section~\ref{sec:blackwell-rates}), because the shipping
 walk was tuned for exactly that balance. Third, the data-centre dies
 reward a different kernel. With a table walk tuned for its fast
-carry-less unit the B200 reaches $19.40$, more than twice its
+carry-less unit the B200 reaches $19.40$ (under a pre-v3 cycle rule),
+more than twice its
 $\sigma$-walk rate.
 
 On the B200, an automatic sweep over twenty single-knob arms (launch
@@ -418,7 +424,7 @@ per-die \texttt{CLMAD} rates of Section~\ref{sec:floor} predict. A
 two-chain kernel that splits each warp's Montgomery chain in two lost
 on both dies ($0.826\times$ on the B200, $0.696\times$ on the 6000),
 which points to the register file rather than to any unit's
-rate.\art{ecc2k130/TWO-CHAINS.md, §5, §6.2 and §6.4}
+rate.\art{ecc2k130/TWO-CHAINS.md, section 5, section 6.2 and section 6.4}
 
 \subsection{What was declined}
 \label{sec:declined}

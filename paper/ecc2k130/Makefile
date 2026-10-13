@@ -10,7 +10,7 @@
 
 TEX     := ecc2k130.tex
 PDF     := $(TEX:.tex=.pdf)
-SECTIONS := sec-intro.tex sec-curve.tex sec-walk.tex sec-arith.tex \
+SECTIONS := sec-intro.tex sec-history.tex sec-curve.tex sec-walk.tex sec-arith.tex \
             sec-blackwell.tex sec-gpu.tex sec-cpu.tex sec-nist.tex sec-othergpu.tex sec-fpga.tex sec-campaign.tex \
             sec-alternatives.tex sec-open.tex sec-related.tex sec-conclusion.tex app-reproduction.tex
 BIB     := ecc2k130.bib

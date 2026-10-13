@@ -13,7 +13,7 @@
 \maketitle
 
 \paragraph{What this is.} A copy, for browsing, of the measurements behind
-Section~7 of the ECC2K-130 paper (\path{paper/ecc2k130/}). The source of
+Section~9 of the ECC2K-130 paper (\path{paper/ecc2k130/}). The source of
 truth is \path{gpu/nist/RESULTS.md} (round 1 on \texttt{main}) and its
 round-2 update in aburan28/crypto pull request 1778 (open at the time of
 writing). This report computes nothing new: every value below is copied
@@ -61,7 +61,7 @@ register caps 96/128/160 (PR 1778) & 256 thr., $W=32$ & 1.589--1.595 & 0.447--0.
 best cell, cumulative & PTX, 256 thr., $W=32$ & \textbf{1.632 (1.52$\times$)} & \textbf{0.548 (2.61$\times$)} \\
 \bottomrule
 \end{tabular}
-\caption{Rates in Gstep/s. Class: engineering; the step count is unchanged
+\caption{Rates in billions of iterations per second. Class: engineering; the step count is unchanged
   and $S=\text{steps}/\sqrt n$ is flat.}
 \end{table}
 
@@ -69,7 +69,7 @@ best cell, cumulative & PTX, 256 thr., $W=32$ & \textbf{1.632 (1.52$\times$)} & 
 pairs, so no interval is available for any ratio. The round-2 gain cannot
 be split between the larger batch and the by-reference inversion because
 round 1 never compiled $W=32$; at $W\le16$ the two rounds agree within
-noise. A Solinas-field walk was not built. At $1.63$~Gstep/s a P-256
+noise. A Solinas-field walk was not built. At $1.63$ billion iterations/s a P-256
 collision needs about $1.9\cdot10^{30}$~s: these are throughput
 measurements, not a statement about the security of the NIST curves.
 

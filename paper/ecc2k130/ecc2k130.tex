@@ -20,7 +20,7 @@
 \usepackage{url}
 
 \hypersetup{
-  pdftitle={ECC2K-130 on Commodity Hardware: A Measured Frobenius-Class Pollard Rho Campaign},
+  pdftitle={Pollard Rho on NVIDIA Blackwell: ECC2K-130, Carry-less Multiplication and the NIST Curves},
   pdfauthor={Anonymous},
   colorlinks=true,
   linkcolor=blue!50!black,
@@ -46,10 +46,12 @@
 % Footnote a number to a repository artefact. Paths without a repo prefix
 % are in this repository; paths prefixed cryptanalysis: are in the sibling
 % library and paths prefixed autoresearcher: in the research-ledger repository.
-\newcommand{\art}[1]{\footnote{\texttt{\detokenize{#1}}.}}
+\makeatletter
+\newcommand{\art}[1]{\footnote{\texttt{\detokenize{#1}}.}\@ifnextchar\art{\textsuperscript{,}}{}}
+\makeatother
 
-\title{ECC2K-130 on Commodity Hardware:\\
-       A Measured Frobenius-Class Pollard Rho Campaign}
+\title{Pollard Rho on NVIDIA Blackwell:\\
+       ECC2K-130, Carry-less Multiplication and the NIST Curves}
 % Anonymized for double-blind submission.  Author block restored
 % for camera-ready / preprint release; see README.md.
 \author{Anonymous}
@@ -67,6 +69,7 @@
 \clearpage
 
 \input{sec-intro}
+\input{sec-history}
 \input{sec-curve}
 \input{sec-walk}
 \input{sec-arith}

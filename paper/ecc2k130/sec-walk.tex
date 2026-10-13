@@ -11,7 +11,7 @@ the orbits of that group needs $\sqrt{262}\approx16.2$ times fewer
 steps~\cite{wienerzuccherato1998,glv2000,duursma1999}. With
 $N=(\ell-1)/262$ classes, the expected number of classes visited
 before a collision is $\sqrt{\pi N/2}$, which here is
-$2^{60.809}$.\art{ecc2k130/WALK-CONSTANT.md, §1} Every walk in this
+$2^{60.809}$.\art{ecc2k130/WALK-CONSTANT.md, section 1} Every walk in this
 paper is a map on those classes. They differ in how they respect the
 class action and in what each step costs.
 
@@ -54,7 +54,7 @@ the solver matches the two endpoints up to Frobenius and negation and
 solves for $k$ modulo $\ell$.\art{ecc2k130/README.md, ``Distinguished points and restarts''}
 The $\sigma$-walk has no fruitless cycles: no product
 $\prod_j(1+s^j)^{n_j}$ equals $\pm s^a$, so a trail can never come back
-to its own class.\art{ecc2k130/WALK-CONSTANT.md, §5}
+to its own class.\art{ecc2k130/WALK-CONSTANT.md, section 5}
 
 The client can optionally carry the eight branch counters as it goes
 (\texttt{WITNESS=1}). Because $\mu$ is a commuting product, that is
@@ -94,7 +94,7 @@ shared memory ($37.7$~KB, or $48.5$~KB per block with the selection
 tables). Since $k$ shifts by one under $\sigma$ and $\varepsilon$ flips
 under negation, the walk descends to classes. Each step is one affine
 addition with a table operand whose Frobenius power is a lookup
-rather than a conversion.\art{ecc2k130/ITERATION-FUNCTION.md, §4 and §6.1}
+rather than a conversion.\art{ecc2k130/ITERATION-FUNCTION.md, section 4 and section 6.1}
 
 Unlike the $\sigma$-walk, an adding walk on classes does have
 fruitless cycles~\cite{bls2011}. Two kinds show up here: four-step
@@ -103,15 +103,15 @@ relation coming from $\tau^2+\tau+2=0$, and six-step pairwise patterns.
 The first cycle rule let 24 four-step and 4 six-step patterns through.
 Observed against predicted counts were $1{,}145$ against $1{,}312$
 ($0.87\pm0.03$) for the $\tau$-relation class and 126 against 166 for
-the pairwise class.\art{ecc2k130/WALK-CONSTANT.md, §5} At the
+the pairwise class.\art{ecc2k130/WALK-CONSTANT.md, section 5} At the
 campaign's trail length of $2^{28.41}$ steps, a model built on those
 measured rates predicts that the cycles trap $53.7\%$ of trails, a
 loss of $7.1$--$8.6\times$ with the $2^{30}$ iteration
-guard.\art{ecc2k130/WALK-CONSTANT.md, §6} A revised rule (v2) brings
+guard.\art{ecc2k130/WALK-CONSTANT.md, section 6} A revised rule (v2) brings
 residual trapping down to $2.0\cdot10^{-5}$ of trails, at a
 $1.0048\times$ iteration cost from merge parting. A third revision (v3,
 Section~\ref{sec:walk-cycles}) replaces the history-dependent exits
-with a raw-cycle anchor.\art{ecc2k130/WALK-CONSTANT.md, §11.1}
+with a raw-cycle anchor.\art{ecc2k130/WALK-CONSTANT.md, section 11.1}
 
 \subsection{The $x$-only doubling-and-bridge map}
 \label{sec:walk-bridge}
@@ -142,7 +142,7 @@ non-random map differs from the random-mapping $\sqrt{\pi N/2}$ by a
 constant $c$. We measure $c$ as iterations divided by a random
 mapping's iterations on the class set, on small Koblitz curves of the
 same family. The device walk and a host emulation are measured
-separately, with an $r$-adding control using 256 branches alongside.\art{ecc2k130/WALK-CONSTANT.md, §4}
+separately, with an $r$-adding control using 256 branches alongside.\art{ecc2k130/WALK-CONSTANT.md, section 4}
 
 \begin{table}[t]
 \centering
@@ -185,7 +185,7 @@ iterations. Under the original $2^{30}$ restart guard it would be a
 further $1.185\times$ ($2^{61.15}$--$2^{61.17}$): a guard at three trail
 lengths cuts the longest $4.9\%$ of trails and so throws away $15.6\%$
 of the steps (again a model on the measured rates). Bailey et al.'s
-$2^{60.9}$ holds up.\art{ecc2k130/WALK-CONSTANT.md, §6} The guard has
+$2^{60.9}$ holds up.\art{ecc2k130/WALK-CONSTANT.md, section 6} The guard has
 since been raised to $2^{32}$, twelve trail lengths at weight 32,
 which discards only $0.007\%$ of steps ($1.00007\times$).\art{ecc2k130/benchmarks/max-iters/README.md}
 
@@ -194,7 +194,7 @@ and 64 planted logarithms, the $\sigma$-walk needed
 $164{,}200\pm9{,}900$ iterations per solve and the table walk
 $157{,}800\pm7{,}500$, a ratio of $0.96\pm0.07$. The bare prediction is
 $102{,}600$; the difference is roughly $1.5\times$ of harness overhead
-from the distinguished-point tail.\art{ecc2k130/ITERATION-FUNCTION.md, §6.2}
+from the distinguished-point tail.\art{ecc2k130/ITERATION-FUNCTION.md, section 6.2}
 
 \subsection{Cost per solve, not rate}
 \label{sec:walk-cycles}
@@ -209,7 +209,7 @@ $0.81$--$0.86\times$, and the switch deadline, the fraction of the
 campaign after which switching no longer pays, is $15$--$22\%$. That
 projection is untested: the note declares the paired rate measurement
 for the v2 kernel that would test it, and it has not been
-run.\art{ecc2k130/WALK-CONSTANT.md, §11} So the campaign still walks
+run.\art{ecc2k130/WALK-CONSTANT.md, section 11} So the campaign still walks
 the $\sigma$-map, and the $20$~billion iterations/s table-walk rows in
 Section~\ref{sec:tablewalk} are rates, not costs per solve.
 
@@ -217,7 +217,7 @@ Rule v2 itself refused all $19{,}200$ $\tau$-cycles in a dedicated
 test, passed a $4{,}096$-point host probe without a mismatch, solved
 $8/8$ planted logarithms, and its scatter check against the predicted
 cycle counts gives $\chi^2=8.79$ on 15 degrees of freedom (the v1 rule
-gives $23.30$).\art{ecc2k130/WALK-CONSTANT.md, §11.1 and §11.6.1} Rule
+gives $23.30$).\art{ecc2k130/WALK-CONSTANT.md, section 11.1 and section 11.6.1} Rule
 v3 then replaced the history-dependent exits with a raw-cycle probe of
 at most eight steps and a least-key anchor exit. It is checked by
 regression tests on a raw two-cycle found on the challenge curve and

@@ -8,7 +8,7 @@ here = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".")
 rows = [r for r in csv.DictReader(l for l in open(here / "data.csv") if not l.startswith("#"))]
 
 fig, axes = plt.subplots(1, 2, figsize=(10, 4), sharex=True)
-for ax, key, title in ((axes[0], "P256_Gstep_s", "P-256"), (axes[1], "P384_Gstep_s", "P-384")):
+for ax, key, title in ((axes[0], "P256_billion_it_s", "P-256"), (axes[1], "P384_billion_it_s", "P-384")):
     for th, mk in (("64", "^"), ("128", "s"), ("256", "o")):
         pts = sorted((int(r["W"]), float(r[key])) for r in rows
                      if r["round"] == "1" and r["threads"] == th)
@@ -23,7 +23,7 @@ for ax, key, title in ((axes[0], "P256_Gstep_s", "P-256"), (axes[1], "P384_Gstep
     ax.set_xticks([2, 4, 8, 16, 32], ["2", "4", "8", "16", "32"])
     ax.set_title(f"{title} Pollard rho, RTX PRO 6000")
     ax.set_xlabel("walks per thread W (one shared inversion)")
-    ax.set_ylabel("Gstep/s (one cell, 8,192 iterations)")
+    ax.set_ylabel("billion iterations/s (one cell, 8,192 iterations)")
     ax.grid(alpha=0.3)
 axes[0].legend(fontsize=7, loc="lower right")
 fig.suptitle("gpu/nist rho walk: batch width x launch geometry, PTX build, unrestricted registers", fontsize=10)

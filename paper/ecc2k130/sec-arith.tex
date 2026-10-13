@@ -77,7 +77,7 @@ per thread and multiplies with carry-less
 instructions.\art{ecc2k130/PACKED.md} Coordinates live in
 $\FF_2[c]/(m)$ with $c=\gamma_1$, so a 131-bit product is a Karatsuba
 over carry-less multiplies (six \texttt{CLMAD}) followed by a
-reduction.\art{ecc2k130/ITERATION-FUNCTION.md, §1} The normal basis,
+reduction.\art{ecc2k130/ITERATION-FUNCTION.md, section 1} The normal basis,
 where the weight, branch selection and distinguished-point test live,
 is reached through the same Bernstein--Lange conversions, implemented
 as shift-and-mask networks and, for the Frobenius powers, as
@@ -93,7 +93,7 @@ very different rates across parts.\art{ecc2k130/NATIVE-CARRYLESS.md}
 The natural unit of account changes with the representation. In the
 packed kernel the shipping walk issues $4.81$ products per update at
 batch 16 and about $2{,}324$ static ALU
-slots.\art{ecc2k130/ITERATION-FUNCTION.md, §1 and §3} The count that
+slots.\art{ecc2k130/ITERATION-FUNCTION.md, section 1 and section 3} The count that
 matters is \texttt{CLMAD}s, and Section~\ref{sec:floor} prices it.
 The reduction \texttt{reducePolynomial131} alone is $440.6$
 lane-instructions per update, $29\%$ of the integer work of the

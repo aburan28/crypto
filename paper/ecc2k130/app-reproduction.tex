@@ -14,12 +14,12 @@ python3 ecc2k130/examples/rho_toy.py   # the walk on GF(2^23)
 \end{verbatim}}
 
 \paragraph{GPU rates (RTX PRO 6000 unless noted).}
-{\small\begin{verbatim}
+{\footnotesize\begin{verbatim}
 make -C ecc2k130 bench-rtx-pro6000   # audited sigma preset, 14.64 billion it/s
 make -C ecc2k130 audit-rtx-pro6000   # same, with DP34 collection
-make -C ecc2k130 gpu-rtx-pro6000-20b   # one-block table walk, 20.08 billion it/s
-make -C ecc2k130 gpu-rtx-pro6000-sigma-fused      # 15.44 billion it/s
-make -C ecc2k130 gpu-b200-19b   # B200 autosweep arm, 19.40 billion it/s
+make -C ecc2k130 gpu-rtx-pro6000-20b   # table walk, rule v2, 20.08 billion it/s
+make -C ecc2k130 gpu-rtx-pro6000-sigma-fused   # 15.44 billion it/s
+make -C ecc2k130 gpu-b200-19b   # B200 table walk, pre-v3 rule, 19.40 billion it/s
 make -C ecc2k130 bench-local-packed   # RTX PRO 4500 bridge map, 12.50 billion it/s
 python3 ecc2k130/benchmark_instance.py   # concurrent-instance accounting
 \end{verbatim}}
