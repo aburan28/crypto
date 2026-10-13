@@ -4778,6 +4778,34 @@ mod wide_tests {
         }
     }
 
+    /// CPU seconds this process has used over all its threads: on a
+    /// loaded shared host wall time overstates the work, so each
+    /// measurement reports both.
+    fn cpu_seconds() -> f64 {
+        #[cfg(unix)]
+        // SAFETY: clock_gettime writes into the zeroed timespec.
+        unsafe {
+            let mut ts: libc::timespec = std::mem::zeroed();
+            libc::clock_gettime(libc::CLOCK_PROCESS_CPUTIME_ID, &mut ts);
+            ts.tv_sec as f64 + ts.tv_nsec as f64 * 1e-9
+        }
+        #[cfg(not(unix))]
+        f64::NAN
+    }
+
+    /// The host's one-minute load average (`NaN` where unavailable).
+    fn load_average() -> f64 {
+        #[cfg(unix)]
+        // SAFETY: getloadavg writes at most one f64 into the array.
+        unsafe {
+            let mut avg = [0f64; 1];
+            if libc::getloadavg(avg.as_mut_ptr(), 1) == 1 {
+                return avg[0];
+            }
+        }
+        f64::NAN
+    }
+
     fn bench<W: ModWord>(s: &str, width: &str, columns: usize, solvers: &str) {
         let m = modulus::<W>(s);
         let bits = W::modulus_to_biguint(&m).bits();
@@ -4796,11 +4824,14 @@ mod wide_tests {
                 let a = a.clone().with_spmv(SpmvOptions { backend, shards: 0 });
                 a.mul_block(&v, lanes, &mut y);
                 let reps = (2_000_000_000usize / (nnz * lanes).max(1)).clamp(3, 200);
+                let load = load_average();
+                let cpu_begin = cpu_seconds();
                 let begin = std::time::Instant::now();
                 for _ in 0..reps {
                     a.mul_block(&v, lanes, &mut y);
                 }
                 let secs = begin.elapsed().as_secs_f64() / reps as f64;
+                let cpu = (cpu_seconds() - cpu_begin) / reps as f64;
                 // Verified against the per-entry reference.
                 let mut reference = vec![W::zero(); rows_n * lanes];
                 for i in 0..rows_n {
@@ -4808,8 +4839,9 @@ mod wide_tests {
                 }
                 assert_eq!(y, reference, "SpMV mismatch");
                 println!(
-                    "BENCH_JSON {{\"kind\":\"spmv\",\"width\":\"{width}\",\"modulus_bits\":{bits},\"columns\":{columns},\"rows\":{rows_n},\"nnz\":{nnz},\"lanes\":{lanes},\"backend\":\"{backend:?}\",\"threads\":{threads},\"reps\":{reps},\"seconds_per_product\":{secs:.9},\"ns_per_nnz_lane\":{:.3},\"verified\":true}}",
-                    secs * 1e9 / (nnz * lanes) as f64
+                    "BENCH_JSON {{\"kind\":\"spmv\",\"width\":\"{width}\",\"modulus_bits\":{bits},\"columns\":{columns},\"rows\":{rows_n},\"nnz\":{nnz},\"lanes\":{lanes},\"backend\":\"{backend:?}\",\"threads\":{threads},\"reps\":{reps},\"seconds_per_product\":{secs:.9},\"ns_per_nnz_lane\":{:.3},\"cpu_seconds_per_product\":{cpu:.9},\"cpu_ns_per_nnz_lane\":{:.3},\"load_average\":{load:.1},\"verified\":true}}",
+                    secs * 1e9 / (nnz * lanes) as f64,
+                    cpu * 1e9 / (nnz * lanes) as f64
                 );
             }
         }
@@ -4823,9 +4855,12 @@ mod wide_tests {
                 solver,
                 ..SparseSolveOptions::default()
             };
+            let load = load_average();
+            let cpu_begin = cpu_seconds();
             let begin = std::time::Instant::now();
             let (outcome, report) = solve_sparse_system(&rows, columns, m, &opts);
             let secs = begin.elapsed().as_secs_f64();
+            let cpu = cpu_seconds() - cpu_begin;
             let verified = matches!(&outcome, SparseSolveOutcome::Solved(sol) if *sol == x);
             let core_products = report
                 .wiedemann
@@ -4834,7 +4869,7 @@ mod wide_tests {
                 .or_else(|| report.lanczos.as_ref().map(|l| l.sparse_products * l.block_size))
                 .unwrap_or(0);
             println!(
-                "BENCH_JSON {{\"kind\":\"solve\",\"width\":\"{width}\",\"modulus_bits\":{bits},\"columns\":{columns},\"rows\":{rows_n},\"nnz\":{nnz},\"solver\":\"{solver:?}\",\"threads\":{threads},\"seconds\":{secs:.3},\"verified\":{verified},\"core_dimension\":{},\"core_nonzeros\":{},\"attempts\":{},\"core_lane_products\":{core_products},\"report\":{}}}",
+                "BENCH_JSON {{\"kind\":\"solve\",\"width\":\"{width}\",\"modulus_bits\":{bits},\"columns\":{columns},\"rows\":{rows_n},\"nnz\":{nnz},\"solver\":\"{solver:?}\",\"threads\":{threads},\"seconds\":{secs:.3},\"cpu_seconds\":{cpu:.3},\"load_average\":{load:.1},\"verified\":{verified},\"core_dimension\":{},\"core_nonzeros\":{},\"attempts\":{},\"core_lane_products\":{core_products},\"report\":{}}}",
                 report.core_dimension,
                 report.core_nonzeros,
                 report.attempts,
