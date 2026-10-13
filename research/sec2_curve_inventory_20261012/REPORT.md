@@ -24,43 +24,45 @@ Inventory every named curve in SEC 2 v2.0 (2010), retain SEC 2 v1.0 (2000) entri
 
 ### Curve-by-curve index
 
+The published base point has order `n`, and the whole curve group has order `#E(Fq) = h × n`. `h` is the cofactor. The table gives the bit length of `n`; its exact value and the generator coordinates are in `inventory.json`.
+
 `F/F` in the last column means the bounded scan established failure of the SEC 1 recommendation for both `n−1` and `n+1`; `?` means undetermined. All exact integers, small-prime splitting, volcano depths, generator coordinates, seed bytes, and status-bearing trait objects are in `inventory.json`.
 
-| Curve | SEC 2 | Field | h | CM | End(E) | Subfield | Embedding | Twist | n−1/n+1 |
-| --- | --- | ---: | ---: | --- | --- | --- | --- | --- | --- |
-| `secp112r1` | 2000 only | Fp/112 | 1 | probable | probable | n/a | probable | proved | F/? |
-| `secp112r2` | 2000 only | Fp/112 | 4 | probable | bounded | n/a | probable | proved | F/? |
-| `secp128r1` | 2000 only | Fp/128 | 1 | bounded | unknown | n/a | k>1000 | proved | F/F |
-| `secp128r2` | 2000 only | Fp/128 | 4 | probable | bounded | n/a | probable | probable | F/F |
-| `secp160k1` | 2000 only | Fp/160 | 1 | -3 (proved) | proved | n/a | k>1000 | probable | F/F |
-| `secp160r1` | 2000 only | Fp/160 | 1 | probable | probable | n/a | probable | probable | ?/F |
-| `secp160r2` | 2000 only | Fp/160 | 1 | probable | probable | n/a | k>1000 | probable | F/F |
-| `secp192k1` | 2010 | Fp/192 | 1 | -3 (proved) | proved | n/a | probable | probable | F/F |
-| `secp192r1` | 2010 | Fp/192 | 1 | probable | probable | n/a | k>1000 | unknown | F/? |
-| `secp224k1` | 2010 | Fp/224 | 1 | -3 (proved) | proved | n/a | probable | unknown | ?/F |
-| `secp224r1` | 2010 | Fp/224 | 1 | probable | bounded | n/a | probable | unknown | F/? |
-| `secp256k1` | 2010 | Fp/256 | 1 | -3 (probable) | probable | n/a | k>1000 | probable | F/F |
-| `secp256r1` | 2010 | Fp/256 | 1 | bounded | unknown | n/a | k>1000 | probable | F/F |
-| `secp384r1` | 2010 | Fp/384 | 1 | bounded | unknown | n/a | k>1000 | probable | ?/F |
-| `secp521r1` | 2010 | Fp/521 | 1 | bounded | unknown | n/a | k>1000 | probable | ?/? |
-| `sect113r1` | 2000 only | F2m/113 | 2 | proved | proved | full | probable | proved | F/F |
-| `sect113r2` | 2000 only | F2m/113 | 2 | probable | probable | full | probable | proved | F/F |
-| `sect131r1` | 2000 only | F2m/131 | 2 | probable | probable | full | probable | probable | F/? |
-| `sect131r2` | 2000 only | F2m/131 | 2 | probable | probable | full | probable | probable | ?/F |
-| `sect163k1` | 2010 | F2m/163 | 2 | -7 (proved) | proved | 2^1 | k>1000 | unknown | F/F |
-| `sect163r1` | 2010 | F2m/163 | 2 | bounded | unknown | full | k>1000 | unknown | F/F |
-| `sect163r2` | 2010 | F2m/163 | 2 | bounded | unknown | full | probable | probable | F/? |
-| `sect193r1` | 2000 only | F2m/193 | 2 | probable | probable | full | k>1000 | unknown | F/F |
-| `sect193r2` | 2000 only | F2m/193 | 2 | probable | probable | full | k>1000 | unknown | ?/? |
-| `sect233k1` | 2010 | F2m/233 | 4 | -7 (proved) | proved | 2^1 | probable | unknown | F/F |
-| `sect233r1` | 2010 | F2m/233 | 2 | bounded | unknown | full | probable | unknown | F/? |
-| `sect239k1` | 2010 | F2m/239 | 4 | -7 (proved) | proved | 2^1 | k>1000 | unknown | F/? |
-| `sect283k1` | 2010 | F2m/283 | 4 | -7 (probable) | probable | 2^1 | k>1000 | probable | F/? |
-| `sect283r1` | 2010 | F2m/283 | 2 | bounded | unknown | full | k>1000 | unknown | F/? |
-| `sect409k1` | 2010 | F2m/409 | 4 | -7 (proved) | proved | 2^1 | k>1000 | unknown | F/F |
-| `sect409r1` | 2010 | F2m/409 | 2 | bounded | unknown | full | k>1000 | unknown | ?/? |
-| `sect571k1` | 2010 | F2m/571 | 4 | -7 (probable) | probable | 2^1 | k>1000 | unknown | F/F |
-| `sect571r1` | 2010 | F2m/571 | 2 | bounded | unknown | full | k>1000 | unknown | ?/? |
+| Curve | SEC 2 | Field | n bits | h | CM | End(E) | Subfield | Embedding | Twist | n−1/n+1 |
+| --- | --- | ---: | ---: | ---: | --- | --- | --- | --- | --- | --- |
+| `secp112r1` | 2000 only | Fp/112 | 112 | 1 | probable | probable | n/a | probable | proved | F/? |
+| `secp112r2` | 2000 only | Fp/112 | 110 | 4 | probable | bounded | n/a | probable | proved | F/? |
+| `secp128r1` | 2000 only | Fp/128 | 128 | 1 | bounded | unknown | n/a | k>1000 | proved | F/F |
+| `secp128r2` | 2000 only | Fp/128 | 126 | 4 | probable | bounded | n/a | probable | probable | F/F |
+| `secp160k1` | 2000 only | Fp/160 | 161 | 1 | -3 (proved) | proved | n/a | k>1000 | probable | F/F |
+| `secp160r1` | 2000 only | Fp/160 | 161 | 1 | probable | probable | n/a | probable | probable | ?/F |
+| `secp160r2` | 2000 only | Fp/160 | 161 | 1 | probable | probable | n/a | k>1000 | probable | F/F |
+| `secp192k1` | 2010 | Fp/192 | 192 | 1 | -3 (proved) | proved | n/a | probable | probable | F/F |
+| `secp192r1` | 2010 | Fp/192 | 192 | 1 | probable | probable | n/a | k>1000 | unknown | F/? |
+| `secp224k1` | 2010 | Fp/224 | 225 | 1 | -3 (proved) | proved | n/a | probable | unknown | ?/F |
+| `secp224r1` | 2010 | Fp/224 | 224 | 1 | probable | bounded | n/a | probable | unknown | F/? |
+| `secp256k1` | 2010 | Fp/256 | 256 | 1 | -3 (probable) | probable | n/a | k>1000 | probable | F/F |
+| `secp256r1` | 2010 | Fp/256 | 256 | 1 | bounded | unknown | n/a | k>1000 | probable | F/F |
+| `secp384r1` | 2010 | Fp/384 | 384 | 1 | bounded | unknown | n/a | k>1000 | probable | ?/F |
+| `secp521r1` | 2010 | Fp/521 | 521 | 1 | bounded | unknown | n/a | k>1000 | probable | ?/? |
+| `sect113r1` | 2000 only | F2m/113 | 113 | 2 | proved | proved | full | probable | proved | F/F |
+| `sect113r2` | 2000 only | F2m/113 | 113 | 2 | probable | probable | full | probable | proved | F/F |
+| `sect131r1` | 2000 only | F2m/131 | 131 | 2 | probable | probable | full | probable | probable | F/? |
+| `sect131r2` | 2000 only | F2m/131 | 131 | 2 | probable | probable | full | probable | probable | ?/F |
+| `sect163k1` | 2010 | F2m/163 | 163 | 2 | -7 (proved) | proved | 2^1 | k>1000 | unknown | F/F |
+| `sect163r1` | 2010 | F2m/163 | 162 | 2 | bounded | unknown | full | k>1000 | unknown | F/F |
+| `sect163r2` | 2010 | F2m/163 | 163 | 2 | bounded | unknown | full | probable | probable | F/? |
+| `sect193r1` | 2000 only | F2m/193 | 193 | 2 | probable | probable | full | k>1000 | unknown | F/F |
+| `sect193r2` | 2000 only | F2m/193 | 193 | 2 | probable | probable | full | k>1000 | unknown | ?/? |
+| `sect233k1` | 2010 | F2m/233 | 232 | 4 | -7 (proved) | proved | 2^1 | probable | unknown | F/F |
+| `sect233r1` | 2010 | F2m/233 | 233 | 2 | bounded | unknown | full | probable | unknown | F/? |
+| `sect239k1` | 2010 | F2m/239 | 238 | 4 | -7 (proved) | proved | 2^1 | k>1000 | unknown | F/? |
+| `sect283k1` | 2010 | F2m/283 | 281 | 4 | -7 (probable) | probable | 2^1 | k>1000 | probable | F/? |
+| `sect283r1` | 2010 | F2m/283 | 282 | 2 | bounded | unknown | full | k>1000 | unknown | F/? |
+| `sect409k1` | 2010 | F2m/409 | 407 | 4 | -7 (proved) | proved | 2^1 | k>1000 | unknown | F/F |
+| `sect409r1` | 2010 | F2m/409 | 409 | 2 | bounded | unknown | full | k>1000 | unknown | ?/? |
+| `sect571k1` | 2010 | F2m/571 | 570 | 4 | -7 (probable) | probable | 2^1 | k>1000 | unknown | F/F |
+| `sect571r1` | 2010 | F2m/571 | 570 | 2 | bounded | unknown | full | k>1000 | unknown | ?/? |
 
 ## Interpretation and limits
 

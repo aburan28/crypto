@@ -10,7 +10,7 @@ The 2000 edition lists 33 curves. The 2010 edition retains 20 of them; 13 are hi
 
 #pagebreak()
 == Curve index
-Full exact identities, seeds, small-prime splitting, conductors, embedding and twist records, cover and transfer screening, and all status fields are in `inventory.json`. F in the last column means the SEC 1 advisory bound fails; ? means the bounded n±1 check was inconclusive.
+Each published base point has order n, and the full curve has order h × n. Full exact identities, generators, n values, seeds, small-prime splitting, conductors, embedding and twist records, cover and transfer screening, and all status fields are in `inventory.json`. F in the last column means the SEC 1 advisory bound fails; ? means the bounded n±1 check was inconclusive.
 
 #set text(size: 7.3pt)
 #table(columns: (1.3fr, 0.8fr, 0.8fr, 0.5fr, 0.9fr, 0.8fr, 0.9fr), inset: 3pt, stroke: 0.35pt + rgb("dddddd"),

@@ -147,16 +147,20 @@ def render_markdown() -> None:
            " failure of this advisory condition alone cannot account for the 193-bit omission.", "",
            "![Field size by curve and edition](sizes.svg)", "",
            "### Curve-by-curve index", "",
+           "The published base point has order `n`, and the whole curve group has"
+           " order `#E(Fq) = h × n`. `h` is the cofactor. The table gives the bit length"
+           " of `n`; its exact value and the generator coordinates are in `inventory.json`.", "",
            "`F/F` in the last column means the bounded scan established failure of"
            " the SEC 1 recommendation for both `n−1` and `n+1`; `?` means undetermined."
            " All exact integers, small-prime splitting, volcano depths, generator coordinates,"
            " seed bytes, and status-bearing trait objects are in `inventory.json`.", "",
-           "| Curve | SEC 2 | Field | h | CM | End(E) | Subfield | Embedding | Twist | n−1/n+1 |",
-           "| --- | --- | ---: | ---: | --- | --- | --- | --- | --- | --- |"]
+           "| Curve | SEC 2 | Field | n bits | h | CM | End(E) | Subfield | Embedding | Twist | n−1/n+1 |",
+           "| --- | --- | ---: | ---: | ---: | --- | --- | --- | --- | --- | --- |"]
     for r in rows:
         t = r["traits"]
         out.append("| " + " | ".join([f"`{r['name']}`", "2010" if current(r) else "2000 only",
-                                  field(r), t["subgroup"]["cofactor"], cell(r, "cm"),
+                                  field(r), str(t["subgroup"]["bits"]),
+                                  t["subgroup"]["cofactor"], cell(r, "cm"),
                                   t["endomorphism"]["status"], cell(r, "subfield"),
                                   cell(r, "embedding"), t["twist"]["status"],
                                   cell(r, "cheon")]) + " |")
@@ -212,8 +216,10 @@ def render_typst() -> None:
         '',
         '#pagebreak()',
         '== Curve index',
-        'Full exact identities, seeds, small-prime splitting, conductors, embedding and twist '
-        'records, cover and transfer screening, and all status fields are in `inventory.json`. '
+        'Each published base point has order n, and the full curve has order h × n. '
+        'Full exact identities, generators, n values, seeds, small-prime splitting, conductors, '
+        'embedding and twist records, cover and transfer screening, and all status fields '
+        'are in `inventory.json`. '
         'F in the last column means the SEC 1 advisory bound fails; ? means the bounded '
         'n±1 check was inconclusive.',
         '',
