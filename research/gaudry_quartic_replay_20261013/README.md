@@ -61,15 +61,29 @@ the right rational torsion and the invariant rewriting of `S₅`; the
 `research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md`).
 It is the next step this programme should take.
 
-Not yet run: the replay on the real `S₅` systems (`--s5`, about an hour a
-pair at `p = 269` and 3.4 GB a matrix), deferred until the ecbench ladder
-in `../pdp_root_finder_ecbench_20261013/` has finished, since it would
-compete with its timed runs.
+## Result on the real `S₅` systems (`d = 8`, `p = 269`, 3 systems)
+
+Raw: [`raw/s5_p269.jsonl`](raw/s5_p269.jsonl) and `raw/s5_p269.log`, with
+the solver of commit `029309579` (the same arithmetic and counts, 6× faster
+in wall: [`../gaudry_quartic_speed_20261013/`](../gaudry_quartic_speed_20261013/README.md)).
+
+| system | full `F_p` muls (`C₄`) | replay ÷ full (muls) | replay ÷ full (wall) | zero rows skipped | rational eigenvalues | solutions agree |
+|--:|--:|--:|--:|--:|--:|:--|
+| 0 | `1.2129·10¹²` | 0.930 | 0.81 | 4,956 of 41,780 | 1 | yes |
+| 1 | `1.2269·10¹²` | 0.931 | 1.05 | 4,956 of 41,780 | 2 | yes |
+| 2 | `1.2130·10¹²` | 0.930 | 0.85 | 4,956 of 41,780 | 1 | yes |
+
+Every replay matched its trace (36,824 pivots, quotient dimension 4,096).
+System 1's full count is §11.17's `C₄ = 1.227·10¹²` to four digits.  The
+replay removes 14.5 % of the elimination (`5.82 → 4.98·10¹¹`) and nothing
+else (normal forms `5.46·10¹¹`, characteristic polynomial `7.06·10¹⁰` are
+untouched), so **`C₄` falls 7.0 %**, on the trend the generic panel
+predicted.  The decision stands: record-and-replay is not the 10× lever.
 
 ## Reproduction
 
 ```sh
 cargo build --release --example gaudry_quartic_replay
 target/release/examples/gaudry_quartic_replay --generic 3,4,5 --systems 4 --json OUT.jsonl
-target/release/examples/gaudry_quartic_replay --s5 --p 269 --seed 1 --systems 3 --json OUT.jsonl
+target/release/examples/gaudry_quartic_replay --s5 --p 269 --seed 1 --systems 3 --json OUT.jsonl   # about 18 min
 ```

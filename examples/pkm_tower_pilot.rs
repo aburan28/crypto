@@ -39,6 +39,14 @@
 //! `f4_fp`) and `research/pkm_tower_round2_20260925/` (round 2,
 //! `f4_fp_tower`).
 //!
+//! `--export-magma-rows ROWS.jsonl[,…] --export-dir DIR` measures nothing: it
+//! rebuilds the Kummer `tower` system of every committed row (from the row's
+//! `p`, curve, `g`, `m`, `t` and `x_r`, through the same `system` the row
+//! was measured on) and writes it as a Magma script that times
+//! `GroebnerBasis` (F4, Magma's default over a prime field) and reports
+//! whether the ideal is the unit ideal, which the row's `inconsistent` must
+//! match (`research/magma_f4_comparison_20261013/`).
+//!
 //! ```bash
 //! cargo run --release --example pkm_tower_pilot -- --out pilot.jsonl
 //! cargo run --release --example pkm_tower_pilot -- --kinds kummer --max-t 6 --budget 30
@@ -1677,7 +1685,126 @@ fn dump_basis(basis: &[Poly], cell: &Cell, k: u32) {
     }
 }
 
+/// `--export-magma-rows`: one Magma script per distinct committed Kummer
+/// `tower` row, and one JSON line per script with the row's own F4 result.
+fn export_magma_rows(files: &[String], dir: &str) {
+    std::fs::create_dir_all(dir).expect("create --export-dir");
+    let mut seen = std::collections::BTreeSet::new();
+    for path in files {
+        let text = std::fs::read_to_string(path).expect("read a rows file");
+        for line in text.lines().filter(|l| !l.trim().is_empty()) {
+            let r: Value = serde_json::from_str(line).expect("a JSON row");
+            if r["kind"] != "kummer" || r["control"] != "tower" {
+                continue;
+            }
+            let u = |k: &str| r[k].as_u64().unwrap_or_else(|| panic!("{path}: no {k}"));
+            let (p, m, t, x_r) = (u("p"), u("m") as usize, u("t") as usize, u("x_r"));
+            let (ca, cb) = (
+                r["curve"]["a"].as_u64().unwrap(),
+                r["curve"]["b"].as_u64().unwrap(),
+            );
+            let g = r["tower"]["g"].as_u64().expect("tower.g");
+            if !seen.insert((p, m, t, x_r, g, ca, cb)) {
+                continue;
+            }
+            let tower = Tower {
+                kind: Kind::Kummer,
+                t,
+                v: Vec::new(),
+                scale: g,
+                steps: vec![Step::Square; t],
+                c: 1,
+                info: r["tower"].clone(),
+            };
+            let curve = PrimeCurve { p, a: ca, b: cb };
+            let target = Target {
+                planted: false,
+                x_r,
+                solution: None,
+                xs: Vec::new(),
+            };
+            let mut rng = StdRng::seed_from_u64(0);
+            let (eqs, n, _, _) = system(Control::Tower, &tower, &curve, m, &target, 1, &mut rng);
+            let name = format!("pkm_kummer_p{p}_m{m}_t{t}_x{x_r}");
+            let mut names: Vec<String> = Vec::new();
+            for i in 0..m {
+                for j in 0..t {
+                    names.push(format!("y{i}_{j}"));
+                }
+            }
+            for k in 0..m.saturating_sub(2) {
+                names.push(format!("u{k}"));
+            }
+            assert_eq!(names.len(), n);
+            let mut out = format!(
+                "// {name}: PKM's Kummer tower system (m = {m}, t = {t}, N = {}, {n} unknowns, {} equations)\n\
+                 // from {path}; written by examples/pkm_tower_pilot.rs --export-magma-rows.\n\
+                 // Ours (that row): engine {}, {} ms, inconsistent = {}, timed out = {}.\n\
+                 K := GF({p});\nP := PolynomialRing(K, {n}, \"grevlex\");\nAssignNames(~P, [{}]);\nF := [P |\n",
+                m * t,
+                eqs.len(),
+                r["engine"].as_str().unwrap_or("f4_fp"),
+                r["ms"],
+                r["inconsistent"],
+                r["timed_out"],
+                names.iter().map(|s| format!("\"{s}\"")).collect::<Vec<_>>().join(", ")
+            );
+            let polys: Vec<String> = eqs
+                .iter()
+                .map(|f| {
+                    let ts: Vec<String> = f
+                        .terms
+                        .iter()
+                        .map(|(e, c)| {
+                            let mut t = c.to_string();
+                            for (i, &k) in e.iter().enumerate() {
+                                if k == 1 {
+                                    t.push_str(&format!("*P.{}", i + 1));
+                                } else if k > 1 {
+                                    t.push_str(&format!("*P.{}^{k}", i + 1));
+                                }
+                            }
+                            t
+                        })
+                        .collect();
+                    format!("  {}", ts.join(" + "))
+                })
+                .collect();
+            out.push_str(&polys.join(",\n"));
+            out.push_str(&format!(
+                "\n];\nI := ideal<P | F>;\n\
+                 t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);\n\
+                 unit := G eq [P | 1];\n\
+                 printf \"RESULT-GB name={name} p={p} magma_gb_s=%o basis_len=%o unit=%o ours_inconsistent={}\\n\", tg, #G, unit;\n\
+                 if not unit and Dimension(I) eq 0 then\n\
+                 \x20 t1 := Cputime(); V := Variety(I); printf \"RESULT-VAR name={name} magma_variety_s=%o magma_solutions=%o\\n\", Cputime(t1), #V;\n\
+                 end if;\n",
+                r["inconsistent"]
+            ));
+            let file = format!("{dir}/{name}.magma");
+            std::fs::write(&file, &out).expect("write a Magma script");
+            println!(
+                "{}",
+                json!({"name": name, "row_file": path, "p": p, "m": m, "t": t, "N": m * t, "x_r": x_r,
+                       "ours_engine": r["engine"], "ours_ms": r["ms"], "ours_muladds": r["muladds"],
+                       "ours_inconsistent": r["inconsistent"], "ours_timed_out": r["timed_out"],
+                       "script_bytes": out.len()})
+            );
+        }
+    }
+}
+
 fn main() {
+    let argv: Vec<String> = std::env::args().collect();
+    if let Some(i) = argv.iter().position(|x| x == "--export-magma-rows") {
+        let files: Vec<String> = argv[i + 1].split(',').map(String::from).collect();
+        let j = argv
+            .iter()
+            .position(|x| x == "--export-dir")
+            .expect("--export-dir");
+        export_magma_rows(&files, &argv[j + 1]);
+        return;
+    }
     let a = parse_args();
     let started = Instant::now();
     let mut sink = Sink {
