@@ -27,7 +27,7 @@ sudo apt-get install texlive-latex-extra texlive-science texlive-fonts-recommend
 make           # PDF (pdflatex + bibtex + two more passes)
 make check     # unresolved refs, overfull boxes, page count
 make arxiv     # arxiv-submission.tar.gz
-make eprint    # eprint-submission.zip
+make eprint    # eprint-submission.zip; the form, fields and rules are in EPRINT.md
 make deanonymize
 make clean
 ```
