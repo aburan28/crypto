@@ -29,9 +29,7 @@ use rand::Rng;
 use rayon::prelude::*;
 use serde::Serialize;
 
-use super::gaudry_cubic::{
-    am, charpoly_mod_p, eigenvectors_mod_p, mm, sm, split_eigenspace, PolyRing, UPoly,
-};
+use super::gaudry_cubic::{am, mm, sm, split_eigenspace, PolyRing, UPoly};
 use super::residual_walk::{inv_mod, pow_mod};
 
 // ── F_{p⁴} = F_p[t] / (t⁴ − c) ───────────────────────────────────────────
@@ -747,6 +745,7 @@ fn axpy_const<const P: u32>(row: &mut [u16], piv: &[u16], f: u32) {
     }
 }
 
+#[inline(always)]
 fn axpy_dyn(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
     let nf = p - f;
     for (r, &v) in row.iter_mut().zip(piv) {
@@ -754,12 +753,196 @@ fn axpy_dyn(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
     }
 }
 
-fn axpy(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
+#[inline(always)]
+fn axpy_portable(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
     match p {
         269 => axpy_const::<269>(row, piv, f),
         257 => axpy_const::<257>(row, piv, f),
         _ => axpy_dyn(row, piv, f, p),
     }
+}
+
+/// The same loop compiled for wider vectors, chosen at run time: the
+/// release build targets baseline x86-64, where the multiply and the
+/// constant remainder barely vectorise.  Integer arithmetic, so the result
+/// is the same whichever runs.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx512f,avx512bw,avx512vl,avx2")]
+unsafe fn axpy_avx512(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
+    axpy_portable(row, piv, f, p)
+}
+
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx2")]
+unsafe fn axpy_avx2(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
+    axpy_portable(row, piv, f, p)
+}
+
+#[inline]
+fn axpy(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
+    #[cfg(target_arch = "x86_64")]
+    {
+        if is_x86_feature_detected!("avx512bw") && is_x86_feature_detected!("avx512vl") {
+            // SAFETY: the features were detected on this CPU.
+            return unsafe { axpy_avx512(row, piv, f, p) };
+        }
+        if is_x86_feature_detected!("avx2") {
+            // SAFETY: as above.
+            return unsafe { axpy_avx2(row, piv, f, p) };
+        }
+    }
+    axpy_portable(row, piv, f, p)
+}
+
+// ── Dense kernels on u16 rows ─────────────────────────────────────────────
+//
+// The quotient-side routines (characteristic polynomial, eigenvectors) do
+// exactly the operations of `gaudry_cubic`'s `charpoly_mod_p` and
+// `eigenvectors_mod_p`, charge the same count and return the same values;
+// they run on `u16` rows with the vectorised `axpy` and in parallel over
+// rows instead of through `u128` remainders one entry at a time.
+
+/// As `gaudry_cubic::rref_mod_p`, on `u16` rows, rows eliminated in parallel.
+fn rref_u16(m: &mut [Vec<u16>], p: u32, muls: &mut u64) -> Vec<usize> {
+    let rows = m.len();
+    let cols = if rows > 0 { m[0].len() } else { 0 };
+    let mut pivots = Vec::new();
+    let mut r = 0;
+    for c in 0..cols {
+        if r >= rows {
+            break;
+        }
+        let Some(pr) = (r..rows).find(|&i| m[i][c] != 0) else {
+            continue;
+        };
+        m.swap(r, pr);
+        let inv = inv_mod(m[r][c] as u64, p as u64) as u32;
+        for v in &mut m[r][c..] {
+            *v = ((*v as u32 * inv) % p) as u16;
+        }
+        *muls += (cols - c) as u64;
+        let pivot = m[r].clone();
+        let hit = m
+            .par_iter_mut()
+            .enumerate()
+            .filter(|(i, row)| *i != r && row[c] != 0)
+            .map(|(_, row)| {
+                let f = row[c] as u32;
+                axpy(&mut row[c..], &pivot[c..], f, p);
+            })
+            .count();
+        *muls += (hit * (cols - c)) as u64;
+        pivots.push(c);
+        r += 1;
+    }
+    pivots
+}
+
+/// As `gaudry_cubic::charpoly_mod_p`.  The Hessenberg step at column `j`
+/// is a similarity by `I + Σ fᵢ E_{i,j+1}`, whose elementary factors
+/// commute (their products vanish), so its row operations can all run
+/// before its column operations: the same matrix as the interleaved order.
+fn charpoly_u16(a: &[Vec<u64>], p: u32, muls: &mut u64) -> UPoly {
+    let n = a.len();
+    let mut h: Vec<Vec<u16>> = a
+        .iter()
+        .map(|r| r.iter().map(|&v| v as u16).collect())
+        .collect();
+    for j in 0..n.saturating_sub(2) {
+        let Some(piv) = ((j + 1)..n).find(|&i| h[i][j] != 0) else {
+            continue;
+        };
+        if piv != j + 1 {
+            h.swap(piv, j + 1);
+            for row in h.iter_mut() {
+                row.swap(piv, j + 1);
+            }
+        }
+        let inv = inv_mod(h[j + 1][j] as u64, p as u64) as u32;
+        let fs: Vec<(usize, u32)> = ((j + 2)..n)
+            .filter(|&i| h[i][j] != 0)
+            .map(|i| (i, (h[i][j] as u32 * inv) % p))
+            .collect();
+        if fs.is_empty() {
+            continue;
+        }
+        *muls += 2 * (n * fs.len()) as u64;
+        let mut fv = vec![0u32; n];
+        for &(i, f) in &fs {
+            fv[i] = f;
+        }
+        // row_i −= fᵢ · row_{j+1}
+        let pivot = h[j + 1].clone();
+        h.par_iter_mut().enumerate().for_each(|(i, row)| {
+            if fv[i] != 0 {
+                axpy(row, &pivot, fv[i], p);
+            }
+        });
+        // col_{j+1} += Σ fᵢ · col_i
+        h.par_iter_mut().for_each(|row| {
+            let s: u64 = fs.iter().map(|&(i, f)| f as u64 * row[i] as u64).sum();
+            row[j + 1] = ((row[j + 1] as u64 + s) % p as u64) as u16;
+        });
+    }
+    // p_0 = 1; p_k(x) = (x − h[k-1][k-1]) p_{k-1}
+    //                   − Σ_{i=1}^{k-1} h[i-1][k-1] (Π_{m=i}^{k-1} h[m][m-1]) p_{i-1},
+    // charged as `PolyRing` charges its product and scalings.
+    let pp = p as u64;
+    let mut polys: Vec<Vec<u32>> = vec![vec![1]];
+    let mut acc: Vec<u64> = Vec::with_capacity(n);
+    for k in 1..=n {
+        let prev = &polys[k - 1];
+        let hk = (pp - h[k - 1][k - 1] as u64) % pp;
+        let mut pk = vec![0u32; k + 1];
+        for t in 0..=k {
+            let hi = if t >= 1 { prev[t - 1] as u64 } else { 0 };
+            let lo = if t < k { hk * prev[t] as u64 } else { 0 };
+            pk[t] = ((hi + lo) % pp) as u32;
+        }
+        *muls += 2 * k as u64;
+        acc.clear();
+        acc.resize(k, 0);
+        let mut prod = 1u64;
+        for i in (1..k).rev() {
+            prod = prod * h[i][i - 1] as u64 % pp;
+            let coef = h[i - 1][k - 1] as u64 * prod % pp;
+            if coef != 0 {
+                for (s, &q) in acc.iter_mut().zip(&polys[i - 1]) {
+                    *s += coef * q as u64;
+                }
+                *muls += i as u64;
+            }
+        }
+        for (v, &s) in pk.iter_mut().zip(&acc) {
+            *v = ((*v as u64 + pp - s % pp) % pp) as u32;
+        }
+        polys.push(pk);
+    }
+    UPoly(polys.pop().unwrap().into_iter().map(u64::from).collect())
+}
+
+/// As `gaudry_cubic::eigenvectors_mod_p`: a kernel basis of `m − λI`.
+fn eigenvectors_u16(m: &[Vec<u16>], lambda: u64, p: u32, muls: &mut u64) -> Vec<Vec<u64>> {
+    let n = m.len();
+    let mut a: Vec<Vec<u16>> = m.to_vec();
+    for (i, row) in a.iter_mut().enumerate() {
+        row[i] = ((row[i] as u64 + p as u64 - lambda) % p as u64) as u16;
+    }
+    let pivots = rref_u16(&mut a, p, muls);
+    let mut is_piv = vec![false; n];
+    for &c in &pivots {
+        is_piv[c] = true;
+    }
+    let mut basis = Vec::new();
+    for fc in (0..n).filter(|&c| !is_piv[c]) {
+        let mut v = vec![0u64; n];
+        v[fc] = 1;
+        for (r, &pc) in pivots.iter().enumerate() {
+            v[pc] = (p as u64 - a[r][fc] as u64) % p as u64;
+        }
+        basis.push(v);
+    }
+    basis
 }
 
 // ── The solve ─────────────────────────────────────────────────────────────
@@ -957,27 +1140,59 @@ impl<'a> NormalForms4<'a> {
             }
         }
         need.sort_unstable_by(|a, b| b.cmp(a));
+        // Right to left in blocks: within a block, the terms on columns
+        // already resolved are summed in parallel; the terms on columns of
+        // the block itself are added afterwards, right to left.  The same
+        // products as one column at a time, so the same vectors and count.
+        const BLOCK: usize = 128;
         let p = self.p;
-        for c in need {
-            let row = &self.ech.rows[self.ech.pivot_row[c] as usize];
-            let mut v = vec![0u16; self.dim];
-            for j in (c + 1)..ncols {
-                let a = row[j] as u32;
-                if a == 0 {
-                    continue;
-                }
-                if self.is_std[j] {
-                    let i = self.std_index[j] as usize;
-                    v[i] = ((v[i] as u32 + p - a) % p) as u16;
-                } else {
-                    let (w, nnz) = self.memo[j].as_ref().expect("computed right to left");
+        let mut in_block = vec![false; ncols];
+        for block in need.chunks(BLOCK) {
+            for &c in block {
+                in_block[c] = true;
+            }
+            let this = &*self;
+            let in_block_ref = &in_block;
+            let partial: Vec<(Vec<u16>, u64, Vec<(usize, u32)>)> = block
+                .par_iter()
+                .map(|&c| {
+                    let row = &this.ech.rows[this.ech.pivot_row[c] as usize];
+                    let mut v = vec![0u16; this.dim];
+                    let mut m = 0u64;
+                    let mut later = Vec::new();
+                    for j in (c + 1)..ncols {
+                        let a = row[j] as u32;
+                        if a == 0 {
+                            continue;
+                        }
+                        if this.is_std[j] {
+                            let i = this.std_index[j] as usize;
+                            v[i] = ((v[i] as u32 + p - a) % p) as u16;
+                        } else if in_block_ref[j] {
+                            later.push((j, a));
+                        } else {
+                            let (w, nnz) = this.memo[j].as_ref().expect("computed right to left");
+                            axpy(&mut v, w, a, p);
+                            m += *nnz;
+                        }
+                    }
+                    (v, m, later)
+                })
+                .collect();
+            for (&c, (mut v, m, later)) in block.iter().zip(partial) {
+                *muls += m;
+                for (j, a) in later {
+                    let (w, nnz) = self.memo[j].as_ref().expect("earlier in the block");
                     axpy(&mut v, w, a, p);
                     *muls += *nnz;
                 }
+                let nnz = v.iter().filter(|&&x| x != 0).count() as u64;
+                self.memo[c] = Some((v, nnz));
+                self.reached += 1;
             }
-            let nnz = v.iter().filter(|&&x| x != 0).count() as u64;
-            self.memo[c] = Some((v, nnz));
-            self.reached += 1;
+            for &c in block {
+                in_block[c] = false;
+            }
         }
         Ok(())
     }
@@ -1296,7 +1511,7 @@ fn solve_system4_inner(
     }
     let t3 = Instant::now();
     let mut cp_muls = 0u64;
-    let cp = charpoly_mod_p(&m_e1, p, &mut cp_muls);
+    let cp = charpoly_u16(&m_e1, p as u32, &mut cp_muls);
     st.charpoly_muls += cp_muls;
     st.charpoly_ms = t3.elapsed().as_secs_f64() * 1e3;
     let t4 = Instant::now();
@@ -1304,10 +1519,10 @@ fn solve_system4_inner(
     let lambdas = ring.roots(&cp, rng);
     st.roots_muls += ring.muls.get();
     st.rational_eigenvalues = lambdas.len();
-    let mut mt = vec![vec![0u64; dim]; dim];
+    let mut mt = vec![vec![0u16; dim]; dim];
     for i in 0..dim {
         for j in 0..dim {
-            mt[j][i] = m_e1[i][j];
+            mt[j][i] = m_e1[i][j] as u16;
         }
     }
     drop(m_e1);
@@ -1315,7 +1530,7 @@ fn solve_system4_inner(
     let mut out = Vec::new();
     for lam in lambdas {
         let mut ev = 0u64;
-        let mut ker = eigenvectors_mod_p(&mt, lam, p, &mut ev);
+        let mut ker = eigenvectors_u16(&mt, lam, p as u32, &mut ev);
         if ker.len() > 1 {
             st.degenerate_eigenspaces += 1;
             for k in 0..3 {
@@ -1915,6 +2130,55 @@ pub fn run_k4_la(p: u64, seed: u64, rho_runs: usize) -> K4LaReport {
 mod tests {
     use super::*;
     use rand::SeedableRng;
+
+    #[test]
+    fn u16_kernels_match_the_reference_routines() {
+        use super::super::gaudry_cubic::{charpoly_mod_p, eigenvectors_mod_p};
+        let mut rng = StdRng::seed_from_u64(7);
+        for (p, n, zeros) in [
+            (269u64, 40usize, 0.0),
+            (269, 33, 0.6),
+            (257, 25, 0.9),
+            (13, 30, 0.3),
+        ] {
+            let mut m: Vec<Vec<u64>> = (0..n)
+                .map(|_| {
+                    (0..n)
+                        .map(|_| {
+                            if rng.gen::<f64>() < zeros {
+                                0
+                            } else {
+                                rng.gen_range(0..p)
+                            }
+                        })
+                        .collect()
+                })
+                .collect();
+            // A planted eigenvalue with a two-dimensional eigenspace.
+            for row in m.iter_mut().take(2) {
+                row.iter_mut().for_each(|v| *v = 0);
+            }
+            m[0][0] = 5 % p;
+            m[1][1] = 5 % p;
+            let (mut c_ref, mut c_new) = (0u64, 0u64);
+            let cp_ref = charpoly_mod_p(&m, p, &mut c_ref);
+            let cp_new = charpoly_u16(&m, p as u32, &mut c_new);
+            assert_eq!(cp_ref.0, cp_new.0, "p {p} n {n}");
+            assert_eq!(c_ref, c_new, "charpoly count, p {p} n {n}");
+            let m16: Vec<Vec<u16>> = m
+                .iter()
+                .map(|r| r.iter().map(|&v| v as u16).collect())
+                .collect();
+            for lam in [5 % p, 0, 1] {
+                let (mut e_ref, mut e_new) = (0u64, 0u64);
+                assert_eq!(
+                    eigenvectors_mod_p(&m, lam, p, &mut e_ref),
+                    eigenvectors_u16(&m16, lam, p as u32, &mut e_new)
+                );
+                assert_eq!(e_ref, e_new, "eigenvector count, p {p} n {n} λ {lam}");
+            }
+        }
+    }
 
     #[test]
     fn fp4_is_a_field() {
