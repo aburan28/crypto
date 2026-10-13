@@ -157,6 +157,8 @@ were already `degenerate` / `not_carried`.
 
 These are formula-level prices on exact invariants, not attacks: the cover
 is not constructed and the map's action on the subgroup is not verified.
+Graphs, the before/after table and a PDF are in
+[`research/jacobian_transfer_lemma6_20261013/`](../../research/jacobian_transfer_lemma6_20261013/README.md).
 
 The regenerated JSON and `docs/curves/JACOBIAN_TRANSFERS.md` table also pick
 up drift that was already present on `main` (`jacobian_transfers check`

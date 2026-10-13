@@ -79,8 +79,11 @@ stripped.
    formula_advantage at +23.6, c2pnb272w1 formula_advantage at +72.2, and
    c2pnb304w1 formula_marginal via `GF(2^76)` at +2.0, because its `GF(4)`
    Jacobian cannot carry the subgroup.  See
-   [`docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md`](../../docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md).
-   The text below is the 2026-10-10 reading.)*  For c2pnb176w1, c2pnb272w1 and
+   [`docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md`](../../docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md)
+   and the results report with graphs and PDF,
+   [`research/jacobian_transfer_lemma6_20261013/`](../jacobian_transfer_lemma6_20261013/README.md).
+   This directory's chart and PDF stay the 2026-10-10 snapshot.  The text
+   below is the 2026-10-10 reading.)*  For c2pnb176w1, c2pnb272w1 and
    c2pnb304w1, `Tr(a) = 1` with `n` even over GF(4), so the GHS magic number
    is 8 or 9.  For c2pnb176w1 the lower bound (genus 127) gives +23.9 bits
    and the upper (genus 256) does not beat rho.  For the other two only the
