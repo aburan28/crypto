@@ -32,7 +32,7 @@ use crate::cryptanalysis::ecbench_large_prime::{
 use crate::cryptanalysis::ic_boundary::{
     price_phase, rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup,
     BinaryInstance, Calibration, CountedGroup, CubicClasses, FieldOps, GroupOps, NegationClasses,
-    PhaseCost, PointClasses, PrimeInstance, PrimePoint, RhoResult, RhoWalk,
+    PhaseCost, PointClasses, PrimeInstance, PrimePoint, QuarticClasses, RhoResult, RhoWalk,
 };
 use crate::cryptanalysis::ic_framework::fiber::{
     FiberDescentOracle, FiberFrobeniusMitmOracle, FiberMitmOracle,
@@ -168,6 +168,14 @@ pub fn registry() -> &'static [MethodDecl] {
             family: "rho",
             summary: "tuned walk on {±ζ₃^i(P)} (A = 6), the rational order-3 automorphism of a j = 0 curve with p ≡ 1 (mod 3) and 3 | r − 1; Wiener–Zuccherato look-ahead and cycle escape; refuses any curve without the structure",
             entry: "ic_boundary::CubicClasses with RhoWalk::negation()",
+            applies: Applies::Any,
+            params: RHO_PARAMS,
+        },
+        MethodDecl {
+            id: "rho.quartic",
+            family: "rho",
+            summary: "tuned walk on {±ι^i(P)} (A = 4), the rational order-4 automorphism of a j = 1728 curve with p ≡ 1 (mod 4) and 4 | r − 1; Wiener–Zuccherato look-ahead and cycle escape; refuses any curve without the structure",
+            entry: "ic_boundary::QuarticClasses with RhoWalk::negation()",
             applies: Applies::Any,
             params: RHO_PARAMS,
         },
@@ -429,6 +437,7 @@ pub fn expected_s(id: &str, a_available: u32) -> Option<f64> {
         "rho.frozen_reference" | "rho.plain" => Some((PI / 2.0).sqrt()),
         "rho.negation" => Some((PI / 4.0).sqrt()),
         "rho.cubic" => Some((PI / 12.0).sqrt()),
+        "rho.quartic" => Some((PI / 8.0).sqrt()),
         "rho.signed_frobenius"
         | "rho.signed_frobenius_strong"
         | "rho.signed_frobenius_strong_escape" => {
@@ -1020,6 +1029,32 @@ fn solve_inner(
             measurement::end_online();
             // A Koblitz walk does not count its field operations: unknown.
             Ok(rho_report(res, t.elapsed().as_nanos() as u64, None))
+        }
+        (Instance::Prime(i), _) if m.id == "rho.quartic" => {
+            let t = Instant::now();
+            measurement::begin_online(Phase::RhoSolve);
+            let mut setup = GroupOps::default();
+            let classes =
+                QuarticClasses::new(&i.curve, i.generator_point(), i.r, &mut setup).ok_or(
+                    format!(
+                        "`rho.quartic` needs a j = 1728 curve over p ≡ 1 (mod 4) with 4 | r − 1 and a nontrivial ι on the subgroup; {} lacks the structure",
+                        curve.slug
+                    ),
+                )?;
+            let mut res = rho_walk_with(
+                &i.curve,
+                &classes,
+                i.generator_point(),
+                PrimePoint::affine(tx, ty),
+                i.r,
+                seed,
+                rho_cap(i.r, param_u64(m, "cap_multiple")? as f64),
+                RhoWalk::negation(),
+            );
+            res.group_ops.merge(setup);
+            measurement::end_online();
+            let f = FieldOps::total(&[res.group_ops]);
+            Ok(rho_report(res, t.elapsed().as_nanos() as u64, Some(f)))
         }
         (Instance::Prime(i), _) if m.id == "rho.cubic" => {
             let t = Instant::now();
