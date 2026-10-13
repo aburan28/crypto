@@ -1,72 +1,64 @@
+// cover-transfer-assessments/v2; catalog_maps=2091; unique_cover_models=2089; geometry_verified_maps=2091; ec1_representations=664; assessed_maps=2091; unassessed_maps=0; assessed_subgroups=664; unassessed_subgroups=0
 digraph cover_transfer_assessment {
   graph [
-    rankdir=LR,
+    rankdir=TB,
     bgcolor="white",
-    pad="0.25",
-    nodesep="0.45",
-    ranksep="0.75",
+    pad="0.12",
+    nodesep="0.20",
+    ranksep="0.26",
     fontname="Helvetica",
-    fontsize=18,
+    fontsize=15,
     labelloc="t",
-    label="Exact curve-cover transfer assessment (2026-10-13)"
+    label="Catalog-wide profile assessment (2026-10-13)"
   ];
-  node [shape=box, style="rounded,filled", fillcolor="white", color="#34495e", fontname="Helvetica", fontsize=10];
-  edge [fontname="Helvetica", fontsize=9, color="#34495e", arrowsize=0.8];
+  node [shape=box, style="rounded,filled", fillcolor="white", color="#34495e", fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=9, color="#34495e", arrowsize=0.7];
 
-  subgraph cluster_binary {
-    label="Binary exact record: supported geometry and bounded transfer";
-    color="#27ae60";
-    penwidth=2;
-    style="rounded";
+  catalog [
+    label="Exact current catalog\n2,091 map rows / 2,089 cover models / 664 EC1 representations\nall rows classified; classification is not blanket support",
+    fillcolor="#eaf2f8",
+    color="#2471a3",
+    penwidth=2
+  ];
 
-    e2 [label="E / F(2^7)\ny^2 + xy = x^3 + 1\nEC1N7Ce0hb6d297a2ca08", fillcolor="#eafaf1"];
-    h2 [label="H / F(2^7), genus 3\nv^2 + u^2 v = u^7 + u\none rational infinity", fillcolor="#eafaf1"];
-    p2 [label="Pic^0(E)(F(2^7))\nrational point classes", fillcolor="#eafaf1"];
-    j2 [label="Jac(H)(F(2^7))\nchecked one-infinity Mumford arithmetic", fillcolor="#eafaf1"];
-    typed [label="typed pullback fibers\ninfinity / exceptional / generic", fillcolor="#eafaf1"];
-    arbitrary [label="arbitrary reduced Jac(H) class", fillcolor="#fdedec"];
-    g29 [label="<G>, order 29\nG=(0x26,0x5)", fillcolor="#eafaf1"];
-    img29 [label="<phi*(G)>, order 29\ntrivial kernel intersection", fillcolor="#eafaf1"];
+  maps [
+    shape=plain,
+    label=<
+      <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#5dade2">
+        <TR><TD COLSPAN="3" BGCOLOR="#eaf2f8"><B>Map assessments: 2,091 / 2,091 exact rows</B></TD></TR>
+        <TR><TD><B>Profile</B></TD><TD BGCOLOR="#eafaf1"><B>SUPPORTED</B></TD><TD BGCOLOR="#f8f9f9"><B>Explicit boundary</B></TD></TR>
+        <TR><TD>160 binary<BR/>g3, degree 3</TD><TD BGCOLOR="#eafaf1">construction + geometry<BR/>one-infinity Jacobian<BR/>typed point-class pull/push</TD><TD BGCOLOR="#f8f9f9">all-element oracle: UNKNOWN<BR/>arbitrary Jac(H) norm:<BR/><FONT COLOR="#c0392b">REFUTED as current API</FONT></TD></TR>
+        <TR><TD>577 odd prime<BR/>direct</TD><TD BGCOLOR="#eafaf1">construction<BR/>+ geometry</TD><TD BGCOLOR="#f8f9f9">two-infinity maps: UNKNOWN<BR/><FONT COLOR="#c0392b">one-infinity use: REFUTED</FONT></TD></TR>
+        <TR><TD>30 odd prime<BR/>normalized</TD><TD BGCOLOR="#eafaf1">construction + geometry<BR/>degree-one normalization</TD><TD BGCOLOR="#f8f9f9">coordinate commutation<BR/>+ balanced maps: UNKNOWN</TD></TR>
+        <TR><TD>1,324 GF(p^k)</TD><TD BGCOLOR="#eafaf1">same-declared-field<BR/>construction + geometry</TD><TD BGCOLOR="#f8f9f9">proper-subfield descent<BR/>+ balanced maps: UNKNOWN</TD></TR>
+      </TABLE>
+    >
+  ];
 
-    h2 -> e2 [label="phi(u,v)=(u^3,uv+1)\ndegree 3: SUPPORTED", color="#1e8449", penwidth=2];
-    e2 -> p2 [label="E(K) ~= Pic^0(E)(K)", color="#1e8449"];
-    p2 -> typed [label="phi*: point-class construction\nSUPPORTED; independent\nadditivity oracle UNKNOWN", color="#d68910", style="dashed", penwidth=2];
-    typed -> j2 [label="checked reduced divisor", color="#1e8449"];
-    typed -> p2 [label="typed phi* then phi_* = [3]\nSUPPORTED on typed domain", color="#1e8449", penwidth=2];
-    arbitrary -> p2 [label="general phi_* / norm\nREFUTED as implementation claim", color="#c0392b", style="dashed", penwidth=2];
-    g29 -> img29 [label="phi*: SUPPORTED", color="#1e8449", penwidth=2];
-    img29 -> g29 [label="[3^-1 mod 29]=[10]\nafter typed pushforward", color="#1e8449"];
-  }
-
-  subgraph cluster_prime {
-    label="Prime exact record: geometry only";
-    color="#d68910";
-    penwidth=2;
-    style="rounded";
-
-    ep [label="E / F_827\ny^2 = x^3 + x + 15\nEC1P10Cfphcf15d87ab724", fillcolor="#fef9e7"];
-    hp [label="H / F_827, genus 2\nv^2 = u^6 + u^2 + 15\ntwo rational infinities", fillcolor="#fef9e7"];
-    pp [label="Pic^0(E)(F_827)", fillcolor="#fef9e7"];
-    jp [label="Jac(H)(F_827)\nbalanced two-infinity model required", fillcolor="#f2f3f4"];
-
-    hp -> ep [label="phi(u,v)=(u^2,v)\ndegree 2: SUPPORTED", color="#1e8449", penwidth=2];
-    ep -> pp [label="E(K) ~= Pic^0(E)(K)", color="#1e8449"];
-    hp -> jp [label="current one-infinity arithmetic\ndoes not accept this source: REFUTED", color="#c0392b", style="dashed", penwidth=2];
-    pp -> jp [label="phi*: UNKNOWN", color="#7f8c8d", style="dotted", penwidth=2];
-    jp -> pp [label="phi_* / norm: UNKNOWN", color="#7f8c8d", style="dotted", penwidth=2];
-  }
-
-  unassessed [
-    label="Current catalog remainder\n2,089 map rows unassessed here\n662 other EC1 representations\ntransfer status: UNKNOWN",
-    shape=note,
-    fillcolor="#f2f3f4",
-    color="#7f8c8d"
+  subgroups [
+    shape=plain,
+    label=<
+      <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#af7ac5">
+        <TR><TD COLSPAN="3" BGCOLOR="#f4ecf7"><B>Subgroup assessments: 664 / 664 exact EC1 / curve / map triples</B></TD></TR>
+        <TR><TD><B>Profile</B></TD><TD BGCOLOR="#eafaf1"><B>SUPPORTED</B></TD><TD BGCOLOR="#fef9e7"><B>UNKNOWN unless overlaid</B></TD></TR>
+        <TR><TD>134 binary</TD><TD BGCOLOR="#eafaf1">identity, gcd(3,r), G on E, [r]G=O<BR/>pullback, annihilation, composition,<BR/>degree-inverse recovery of tested G</TD><TD BGCOLOR="#fef9e7">exact ord(G)=r; additivity;<BR/>all-element injectivity; image order;<BR/>arbitrary-result recovery</TD></TR>
+        <TR><TD>exact binary<BR/>overlay</TD><TD BGCOLOR="#eafaf1">icv1-f2m7-t13-616700dd<BR/>generator + image order 29</TD><TD>only that EC1/map triple</TD></TR>
+        <TR><TD>530 odd</TD><TD BGCOLOR="#eafaf1">identity + gcd(2,r)</TD><TD BGCOLOR="#fef9e7">generator/order evidence;<BR/>every induced-map claim</TD></TR>
+        <TR><TD>exact odd<BR/>overlay</TD><TD BGCOLOR="#eafaf1">icv1-fp10-t5-192cb216<BR/>map geometry + order-823 identity</TD><TD BGCOLOR="#fef9e7">no subgroup preservation follows</TD></TR>
+      </TABLE>
+    >
   ];
 
   legend [
-    label="Status key\nSUPPORTED = green solid\nUNKNOWN = gray dotted / orange dashed\nREFUTED implementation claim = red dashed\nNo edge implies no claim",
-    shape=note,
-    fillcolor="#f8f9f9",
-    color="#566573"
+    shape=plain,
+    label=<
+      <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#566573">
+        <TR><TD BGCOLOR="#eafaf1">SUPPORTED on labeled domain</TD><TD BGCOLOR="#fef9e7">UNKNOWN / conditional</TD><TD BGCOLOR="#fdedec">REFUTED implementation claim</TD><TD BGCOLOR="#f8f9f9">MIXED: inline labels govern</TD></TR>
+      </TABLE>
+    >
   ];
+
+  catalog -> maps [color="#2471a3"];
+  maps -> subgroups [color="#7d3c98"];
+  subgroups -> legend [style="invis", weight=80];
 }

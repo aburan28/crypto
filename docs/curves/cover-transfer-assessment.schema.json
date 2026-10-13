@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/aburan28/crypto/blob/main/docs/curves/cover-transfer-assessment.schema.json",
-  "title": "Curve-cover transfer assessment sidecar",
-  "description": "Hash-pinned assessments of exact curve-cover maps and exact EC1 subgroups. Geometry, induced maps, subgroup preservation, and computational advantage are separate claims. Schema validity is structural only.",
+  "title": "Curve-cover transfer assessment ledger",
+  "description": "Hash-pinned assessments of every exact curve-cover map and linked EC1 subgroup. Profiles and result templates compress repeated claims; memberships bind those claims to exact content-addressed identities, while typed bindings link each target, cover, declared field, Jacobian context, and map without implying arithmetic support. Schema validity is structural only, so the repository verifier must also check references, counts, content digests, coverage, and effective claims.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -11,18 +11,23 @@
     "assessment_date",
     "catalog_commit",
     "source_artifacts",
+    "claim_contract",
+    "result_templates",
+    "profiles",
+    "memberships",
+    "typed_bindings",
+    "exact_overlays",
     "coverage",
-    "map_assessments",
-    "subgroup_assessments",
     "global_cost_accounting",
     "controls",
     "exploration_boundary",
     "open_obligations",
-    "report"
+    "report",
+    "migration"
   ],
   "properties": {
     "schema_version": {
-      "const": "cover-transfer-assessments/v1"
+      "const": "cover-transfer-assessments/v2"
     },
     "status_vocabulary": {
       "const": [
@@ -46,20 +51,43 @@
         "$ref": "#/$defs/artifactPin"
       }
     },
+    "claim_contract": {
+      "$ref": "#/$defs/claimContract"
+    },
+    "result_templates": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/resultTemplate"
+      }
+    },
+    "profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/profile"
+      }
+    },
+    "memberships": {
+      "$ref": "#/$defs/memberships"
+    },
+    "typed_bindings": {
+      "$ref": "#/$defs/typedBindings"
+    },
+    "exact_overlays": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/exactOverlay"
+      }
+    },
     "coverage": {
       "$ref": "#/$defs/coverage"
-    },
-    "map_assessments": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/mapAssessment"
-      }
-    },
-    "subgroup_assessments": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/subgroupAssessment"
-      }
     },
     "global_cost_accounting": {
       "type": "array",
@@ -79,69 +107,29 @@
       "type": "array",
       "minItems": 1,
       "items": {
-        "type": "string",
-        "minLength": 1
-      }
+        "$ref": "#/$defs/nonemptyString"
+      },
+      "uniqueItems": true
     },
     "open_obligations": {
       "type": "array",
       "minItems": 1,
       "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "id",
-          "description",
-          "status"
-        ],
-        "properties": {
-          "id": {
-            "$ref": "#/$defs/id"
-          },
-          "description": {
-            "type": "string",
-            "minLength": 1
-          },
-          "status": {
-            "const": "unknown"
-          }
-        }
+        "$ref": "#/$defs/openObligation"
       }
     },
     "report": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "markdown",
-        "pdf",
-        "graph_source",
-        "graph_svg",
-        "graph_png",
-        "release_receipt"
-      ],
-      "properties": {
-        "markdown": {
-          "$ref": "#/$defs/path"
-        },
-        "pdf": {
-          "$ref": "#/$defs/path"
-        },
-        "graph_source": {
-          "$ref": "#/$defs/path"
-        },
-        "graph_svg": {
-          "$ref": "#/$defs/path"
-        },
-        "graph_png": {
-          "$ref": "#/$defs/path"
-        },
-        "release_receipt": {
-          "$ref": "#/$defs/path"
-        }
-      }
+      "$ref": "#/$defs/report"
+    },
+    "migration": {
+      "$ref": "#/$defs/migration"
     }
   },
   "$defs": {
+    "nonemptyString": {
+      "type": "string",
+      "minLength": 1
+    },
     "sha256": {
       "type": "string",
       "pattern": "^[0-9a-f]{64}$"
@@ -152,11 +140,11 @@
     },
     "path": {
       "type": "string",
-      "pattern": "^(?!.*\\.\\.)(?!.*//)(docs|research|src|tests)/[A-Za-z0-9._/-]+$"
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*//)[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$"
     },
     "id": {
       "type": "string",
-      "pattern": "^[a-z][a-z0-9_.-]{1,95}$"
+      "pattern": "^[a-z][a-z0-9_.-]{0,127}$"
     },
     "status": {
       "enum": [
@@ -168,9 +156,58 @@
     },
     "evidenceRef": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "maxLength": 1024
     },
-    "assessment": {
+    "mapUid": {
+      "type": "string",
+      "pattern": "^urn:curve-cover-map:1:sha256:[0-9a-f]{64}$"
+    },
+    "coverUid": {
+      "type": "string",
+      "pattern": "^urn:hc-model:1:sha256:[0-9a-f]{64}$"
+    },
+    "declaredFieldUid": {
+      "type": "string",
+      "pattern": "^urn:declared-field:1:sha256:[0-9a-f]{64}$"
+    },
+    "jacobianContextUid": {
+      "type": "string",
+      "pattern": "^urn:jacobian-context:1:sha256:[0-9a-f]{64}$"
+    },
+    "modelSha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "icv1Slug": {
+      "type": "string",
+      "pattern": "^icv1-[a-z0-9-]+-[0-9a-f]{8}$"
+    },
+    "curveUid": {
+      "type": "string",
+      "pattern": "^urn:ec-record:1:sha256:[0-9a-f]{64}$"
+    },
+    "ec1": {
+      "type": "string",
+      "pattern": "^EC1(?:N[0-9]+|P[0-9]+|Q[0-9]+D[0-9]+)C[a-z][a-z0-9]*h[0-9a-f]{12,64}$"
+    },
+    "subgroupTriple": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/ec1"
+        },
+        {
+          "$ref": "#/$defs/curveUid"
+        },
+        {
+          "$ref": "#/$defs/mapUid"
+        }
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "resultTemplate": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -184,12 +221,10 @@
           "$ref": "#/$defs/status"
         },
         "scope": {
-          "type": "string",
-          "minLength": 1
+          "$ref": "#/$defs/nonemptyString"
         },
         "rationale": {
-          "type": "string",
-          "minLength": 1
+          "$ref": "#/$defs/nonemptyString"
         },
         "evidence_refs": {
           "type": "array",
@@ -197,9 +232,29 @@
             "$ref": "#/$defs/evidenceRef"
           },
           "uniqueItems": true
+        },
+        "obligation_id": {
+          "$ref": "#/$defs/id"
         }
       },
       "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "unknown"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "obligation_id"
+            ]
+          }
+        },
         {
           "if": {
             "properties": {
@@ -219,6 +274,28 @@
               "evidence_refs": {
                 "minItems": 1
               }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "supported",
+                  "not_applicable"
+                ]
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "not": {
+              "required": [
+                "obligation_id"
+              ]
             }
           }
         }
@@ -241,13 +318,502 @@
           "$ref": "#/$defs/sha256"
         },
         "role": {
-          "type": "string",
-          "minLength": 1
+          "$ref": "#/$defs/nonemptyString"
         },
         "freshness": {
-          "$ref": "#/$defs/assessment"
+          "$ref": "#/$defs/resultTemplate"
         }
       }
+    },
+    "claimContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "map",
+        "subgroup"
+      ],
+      "properties": {
+        "map": {
+          "$ref": "#/$defs/claimDescriptions"
+        },
+        "subgroup": {
+          "$ref": "#/$defs/claimDescriptions"
+        }
+      }
+    },
+    "claimDescriptions": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/nonemptyString"
+      }
+    },
+    "claimTemplateBindings": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/id"
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "predicate_id",
+        "hypotheses",
+        "claims",
+        "boundary"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "map_base",
+            "subgroup_base"
+          ]
+        },
+        "predicate_id": {
+          "$ref": "#/$defs/id"
+        },
+        "hypotheses": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonemptyString"
+          },
+          "uniqueItems": true
+        },
+        "claims": {
+          "$ref": "#/$defs/claimTemplateBindings"
+        },
+        "full_transfer_pipeline": {
+          "$ref": "#/$defs/id"
+        },
+        "boundary": {
+          "$ref": "#/$defs/nonemptyString"
+        }
+      }
+    },
+    "memberships": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "map_base",
+        "subgroup_base"
+      ],
+      "properties": {
+        "map_base": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/mapMembershipGroup"
+          }
+        },
+        "subgroup_base": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/subgroupMembershipGroup"
+          }
+        }
+      }
+    },
+    "typedBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fields",
+        "jacobians",
+        "maps"
+      ],
+      "properties": {
+        "fields": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "$ref": "#/$defs/declaredFieldUid"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/declaredFieldBinding"
+          }
+        },
+        "jacobians": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "$ref": "#/$defs/jacobianContextUid"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/jacobianContextBinding"
+          }
+        },
+        "maps": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "$ref": "#/$defs/mapUid"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/typedMapBinding"
+          }
+        }
+      }
+    },
+    "declaredFieldBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field_uid",
+        "record",
+        "characteristic",
+        "extension_degree",
+        "representation"
+      ],
+      "properties": {
+        "field_uid": {
+          "$ref": "#/$defs/declaredFieldUid"
+        },
+        "record": {
+          "$ref": "#/$defs/declaredFieldRecord"
+        },
+        "characteristic": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "extension_degree": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "representation": {
+          "enum": [
+            "prime",
+            "odd_polynomial_extension",
+            "binary_polynomial_extension"
+          ]
+        }
+      }
+    },
+    "declaredFieldRecord": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "p"
+          ],
+          "properties": {
+            "label": {
+              "type": "string",
+              "pattern": "^fp-[1-9][0-9]*$"
+            },
+            "p": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "p",
+            "modulus"
+          ],
+          "properties": {
+            "label": {
+              "type": "string",
+              "pattern": "^fpk-[1-9][0-9]*-[1-9][0-9]*-[0-9a-f]{8}$"
+            },
+            "p": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            },
+            "modulus": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9]+$"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "modulus"
+          ],
+          "properties": {
+            "label": {
+              "type": "string",
+              "pattern": "^f2m-[1-9][0-9]*-[0-9a-f]{8}$"
+            },
+            "modulus": {
+              "type": "string",
+              "pattern": "^0x[0-9a-f]+$"
+            }
+          }
+        }
+      ]
+    },
+    "jacobianContextBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "jacobian_uid",
+        "record"
+      ],
+      "properties": {
+        "jacobian_uid": {
+          "$ref": "#/$defs/jacobianContextUid"
+        },
+        "record": {
+          "$ref": "#/$defs/jacobianContextRecord"
+        }
+      }
+    },
+    "jacobianContextRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "source_cover_uid",
+        "declared_field_uid",
+        "dimension",
+        "object",
+        "infinity_configuration"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "jacobian-context/v1"
+        },
+        "source_cover_uid": {
+          "$ref": "#/$defs/coverUid"
+        },
+        "declared_field_uid": {
+          "$ref": "#/$defs/declaredFieldUid"
+        },
+        "dimension": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "object": {
+          "const": "Picard_degree_zero"
+        },
+        "infinity_configuration": {
+          "enum": [
+            "one_rational_point",
+            "two_rational_points"
+          ]
+        }
+      }
+    },
+    "typedMapBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "map_uid",
+        "target_icv1_slug",
+        "target_model_sha256",
+        "source_cover_uid",
+        "source_jacobian_uid",
+        "field_relationship"
+      ],
+      "properties": {
+        "map_uid": {
+          "$ref": "#/$defs/mapUid"
+        },
+        "target_icv1_slug": {
+          "$ref": "#/$defs/icv1Slug"
+        },
+        "target_model_sha256": {
+          "$ref": "#/$defs/modelSha256"
+        },
+        "source_cover_uid": {
+          "$ref": "#/$defs/coverUid"
+        },
+        "source_jacobian_uid": {
+          "$ref": "#/$defs/jacobianContextUid"
+        },
+        "field_relationship": {
+          "$ref": "#/$defs/sameFieldRelationship"
+        }
+      }
+    },
+    "sameFieldRelationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "source_field_uid",
+        "target_field_uid",
+        "degree"
+      ],
+      "properties": {
+        "kind": {
+          "const": "same_declared_field_identity"
+        },
+        "source_field_uid": {
+          "$ref": "#/$defs/declaredFieldUid"
+        },
+        "target_field_uid": {
+          "$ref": "#/$defs/declaredFieldUid"
+        },
+        "degree": {
+          "const": 1
+        }
+      }
+    },
+    "mapMembershipGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile_id",
+        "count",
+        "members_sha256",
+        "members"
+      ],
+      "properties": {
+        "profile_id": {
+          "$ref": "#/$defs/id"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "members_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "members": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/mapUid"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "subgroupMembershipGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile_id",
+        "count",
+        "members_sha256",
+        "members"
+      ],
+      "properties": {
+        "profile_id": {
+          "$ref": "#/$defs/id"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "members_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "members": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/subgroupTriple"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "exactOverlay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "overlay_id",
+        "kind",
+        "target",
+        "claim_overrides",
+        "evidence_additions",
+        "boundary"
+      ],
+      "properties": {
+        "overlay_id": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "enum": [
+            "map",
+            "subgroup"
+          ]
+        },
+        "target": {},
+        "claim_overrides": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/id"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "evidence_additions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidenceRef"
+          },
+          "uniqueItems": true
+        },
+        "boundary": {
+          "$ref": "#/$defs/nonemptyString"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "kind": {
+              "const": "map"
+            },
+            "target": {
+              "$ref": "#/$defs/mapUid"
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "subgroup"
+            },
+            "target": {
+              "$ref": "#/$defs/subgroupTriple"
+            }
+          }
+        }
+      ],
+      "anyOf": [
+        {
+          "properties": {
+            "claim_overrides": {
+              "minProperties": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "evidence_additions": {
+              "minItems": 1
+            }
+          }
+        }
+      ]
     },
     "coverage": {
       "type": "object",
@@ -257,248 +823,61 @@
         "unique_cover_models",
         "geometry_verified_maps",
         "ec1_representations",
-        "cover_rows_subgroup_not_tested",
-        "ec1_subgroups_not_tested",
         "assessed_maps",
         "unassessed_maps",
         "assessed_subgroups",
+        "unassessed_subgroups",
+        "map_membership_entries",
+        "subgroup_membership_entries",
+        "map_profiles",
+        "subgroup_profiles",
         "scope_note"
       ],
       "properties": {
         "catalog_maps": {
-          "type": "integer",
-          "minimum": 0
+          "$ref": "#/$defs/nonnegativeInteger"
         },
         "unique_cover_models": {
-          "type": "integer",
-          "minimum": 0
+          "$ref": "#/$defs/nonnegativeInteger"
         },
         "geometry_verified_maps": {
-          "type": "integer",
-          "minimum": 0
+          "$ref": "#/$defs/nonnegativeInteger"
         },
         "ec1_representations": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "cover_rows_subgroup_not_tested": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "ec1_subgroups_not_tested": {
-          "type": "integer",
-          "minimum": 0
+          "$ref": "#/$defs/nonnegativeInteger"
         },
         "assessed_maps": {
-          "type": "integer",
-          "minimum": 0
+          "$ref": "#/$defs/nonnegativeInteger"
         },
         "unassessed_maps": {
-          "type": "integer",
-          "minimum": 0
+          "$ref": "#/$defs/nonnegativeInteger"
         },
         "assessed_subgroups": {
-          "type": "integer",
-          "minimum": 0
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "unassessed_subgroups": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "map_membership_entries": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "subgroup_membership_entries": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "map_profiles": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "subgroup_profiles": {
+          "$ref": "#/$defs/nonnegativeInteger"
         },
         "scope_note": {
-          "type": "string",
-          "minLength": 1
+          "$ref": "#/$defs/nonemptyString"
         }
       }
     },
-    "typedObject": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "id",
-        "type",
-        "field",
-        "dimension_or_genus",
-        "representation"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "type": {
-          "enum": [
-            "elliptic_curve",
-            "hyperelliptic_curve",
-            "jacobian",
-            "picard_group",
-            "subgroup"
-          ]
-        },
-        "field": {
-          "type": "string",
-          "minLength": 1
-        },
-        "dimension_or_genus": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "representation": {
-          "type": "string",
-          "minLength": 1
-        }
-      }
-    },
-    "mapAssessment": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "assessment_id",
-        "icv1_slug",
-        "model_sha256",
-        "cover_uid",
-        "map_uid",
-        "construction",
-        "degree",
-        "field_relationship",
-        "typed_objects",
-        "claims",
-        "full_transfer_pipeline",
-        "boundary"
-      ],
-      "properties": {
-        "assessment_id": {
-          "$ref": "#/$defs/id"
-        },
-        "icv1_slug": {
-          "type": "string",
-          "pattern": "^icv1-[a-z0-9-]+$"
-        },
-        "model_sha256": {
-          "$ref": "#/$defs/sha256"
-        },
-        "cover_uid": {
-          "type": "string",
-          "pattern": "^urn:hc-model:1:sha256:[0-9a-f]{64}$"
-        },
-        "map_uid": {
-          "type": "string",
-          "pattern": "^urn:curve-cover-map:1:sha256:[0-9a-f]{64}$"
-        },
-        "construction": {
-          "type": "string",
-          "minLength": 1
-        },
-        "degree": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "field_relationship": {
-          "enum": [
-            "same_field",
-            "extension",
-            "restriction_of_scalars"
-          ]
-        },
-        "typed_objects": {
-          "type": "array",
-          "minItems": 2,
-          "items": {
-            "$ref": "#/$defs/typedObject"
-          }
-        },
-        "claims": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "claim",
-              "assessment"
-            ],
-            "properties": {
-              "claim": {
-                "$ref": "#/$defs/id"
-              },
-              "assessment": {
-                "$ref": "#/$defs/assessment"
-              }
-            }
-          }
-        },
-        "full_transfer_pipeline": {
-          "$ref": "#/$defs/assessment"
-        },
-        "boundary": {
-          "type": "string",
-          "minLength": 1
-        }
-      }
-    },
-    "subgroupAssessment": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "assessment_id",
-        "map_uid",
-        "ec1",
-        "curve_uid",
-        "subgroup_order",
-        "generator",
-        "claims",
-        "boundary"
-      ],
-      "properties": {
-        "assessment_id": {
-          "$ref": "#/$defs/id"
-        },
-        "map_uid": {
-          "type": "string",
-          "pattern": "^urn:curve-cover-map:1:sha256:[0-9a-f]{64}$"
-        },
-        "ec1": {
-          "type": "string",
-          "pattern": "^EC1.+$"
-        },
-        "curve_uid": {
-          "type": "string",
-          "pattern": "^urn:ec-record:1:sha256:[0-9a-f]{64}$"
-        },
-        "subgroup_order": {
-          "type": "string",
-          "pattern": "^[1-9][0-9]*$"
-        },
-        "generator": {
-          "type": "array",
-          "minItems": 2,
-          "maxItems": 2,
-          "items": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "claims": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "claim",
-              "assessment"
-            ],
-            "properties": {
-              "claim": {
-                "$ref": "#/$defs/id"
-              },
-              "assessment": {
-                "$ref": "#/$defs/assessment"
-              }
-            }
-          }
-        },
-        "boundary": {
-          "type": "string",
-          "minLength": 1
-        }
-      }
+    "nonnegativeInteger": {
+      "type": "integer",
+      "minimum": 0
     },
     "cost": {
       "type": "object",
@@ -543,8 +922,7 @@
           "uniqueItems": true
         },
         "note": {
-          "type": "string",
-          "minLength": 1
+          "$ref": "#/$defs/nonemptyString"
         }
       },
       "allOf": [
@@ -569,6 +947,34 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "measured",
+                  "modeled"
+                ]
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "$ref": "#/$defs/nonemptyString"
+              },
+              "source_refs": {
+                "minItems": 1
+              }
+            }
+          }
         }
       ]
     },
@@ -585,13 +991,102 @@
           "$ref": "#/$defs/id"
         },
         "assessment": {
-          "$ref": "#/$defs/assessment"
+          "$ref": "#/$defs/resultTemplate"
         },
         "command": {
           "type": [
             "string",
             "null"
           ]
+        }
+      }
+    },
+    "openObligation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "description",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "description": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "status": {
+          "const": "unknown"
+        }
+      }
+    },
+    "report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "markdown",
+        "pdf",
+        "graph_source",
+        "graph_svg",
+        "graph_png",
+        "context_graph_source",
+        "context_graph_svg",
+        "context_graph_png",
+        "release_receipt"
+      ],
+      "properties": {
+        "markdown": {
+          "$ref": "#/$defs/path"
+        },
+        "pdf": {
+          "$ref": "#/$defs/path"
+        },
+        "graph_source": {
+          "$ref": "#/$defs/path"
+        },
+        "graph_svg": {
+          "$ref": "#/$defs/path"
+        },
+        "graph_png": {
+          "$ref": "#/$defs/path"
+        },
+        "context_graph_source": {
+          "$ref": "#/$defs/path"
+        },
+        "context_graph_svg": {
+          "$ref": "#/$defs/path"
+        },
+        "context_graph_png": {
+          "$ref": "#/$defs/path"
+        },
+        "release_receipt": {
+          "$ref": "#/$defs/path"
+        }
+      }
+    },
+    "migration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from_schema",
+        "summary",
+        "compatibility_notes"
+      ],
+      "properties": {
+        "from_schema": {
+          "const": "cover-transfer-assessments/v1"
+        },
+        "summary": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "compatibility_notes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonemptyString"
+          },
+          "uniqueItems": true
         }
       }
     }

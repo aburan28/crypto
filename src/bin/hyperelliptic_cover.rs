@@ -74,7 +74,7 @@ enum Command {
     },
     /// Rebuild the deterministic cover catalog from the exact model registry.
     CatalogExport {
-        /// Exact EC1/ICV1 registry JSON (required; release archives do not bundle it).
+        /// Exact EC1/ICV1 registry JSON (required explicitly; it is not embedded in the executable).
         #[arg(long)]
         registry: PathBuf,
         /// Catalog path; omit to write the complete catalog to stdout.
@@ -173,6 +173,16 @@ fn response(command: &str, status: &str, body: Value) -> Value {
     })
 }
 
+fn catalog_producer_source_digest() -> String {
+    let producer_sources = [
+        include_str!("curve_cover_check/checker.rs"),
+        include_str!("curve_cover_check/models.rs"),
+        include_str!("hyperelliptic_cover.rs"),
+    ]
+    .concat();
+    checker::digest(producer_sources.as_bytes())
+}
+
 fn model_error(command: &str, error: checker::ModelError) -> (Value, i32) {
     match error {
         checker::ModelError::Unsupported(reason) => (
@@ -195,9 +205,17 @@ fn strict_model(value: &Value) -> Result<checker::Model, checker::ModelError> {
         checker::ModelError::Invalid("elliptic model must be a JSON object".into())
     })?;
     let allowed: &[&str] = match value.get("form").and_then(Value::as_str) {
+        Some("y^2=x^3+a*x+b") if value.get("k").is_some() => {
+            &["v", "form", "p", "k", "modulus", "field", "a", "b"]
+        }
         Some("y^2=x^3+a*x+b") => &["v", "form", "p", "field", "a", "b"],
         Some("y^2+xy=x^3+a*x^2+b") => &["v", "form", "modulus", "field", "a", "b"],
-        _ => &["v", "form", "p", "modulus", "field", "a", "b"],
+        Some("B*y^2=x^3+A*x^2+x") => &["v", "form", "p", "field", "A", "B"],
+        Some("a*x^2+y^2=1+d*x^2*y^2") => &["v", "form", "p", "field", "a", "d"],
+        Some("x^2+y^2=c^2*(1+d*x^2*y^2)") => &["v", "form", "p", "field", "c", "d"],
+        _ => &[
+            "v", "form", "p", "k", "modulus", "field", "a", "b", "A", "B", "c", "d",
+        ],
     };
     if let Some(unexpected) = object.keys().find(|name| !allowed.contains(&name.as_str())) {
         return Err(checker::ModelError::Invalid(format!(
@@ -796,13 +814,7 @@ fn execute(command: Command) -> (Value, i32, Option<PathBuf>) {
             Ok(bytes) => match checker::catalog(&bytes) {
                 Ok(mut catalog) => {
                     catalog["generated_by"] = json!("hyperelliptic-cover catalog-export");
-                    let producer_sources = [
-                        include_str!("curve_cover_check/checker.rs"),
-                        include_str!("hyperelliptic_cover.rs"),
-                    ]
-                    .concat();
-                    catalog["producer_source_sha256"] =
-                        json!(checker::digest(producer_sources.as_bytes()));
+                    catalog["producer_source_sha256"] = json!(catalog_producer_source_digest());
                     (catalog, 0, output)
                 }
                 Err(reason) => (
@@ -851,6 +863,12 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crypto_lib::binary_ecc::{
+        curve::scalar_mul as binary_scalar_mul, BinaryCurve, BinaryPoint, SubgroupTransferStatus,
+    };
+
+    const CURRENT_REGISTRY: &str = include_str!("../../docs/curves/registry.json");
+    const CURRENT_COVER_GRAPH: &str = include_str!("../../docs/curves/cover-links.yaml");
 
     fn binary_model() -> Value {
         let modulus = BigUint::from(0xbu32);
@@ -881,6 +899,20 @@ mod tests {
     }
 
     #[test]
+    fn catalog_producer_digest_covers_checker_models_and_wrapper() {
+        let expected = checker::digest(
+            [
+                include_str!("curve_cover_check/checker.rs"),
+                include_str!("curve_cover_check/models.rs"),
+                include_str!("hyperelliptic_cover.rs"),
+            ]
+            .concat()
+            .as_bytes(),
+        );
+        assert_eq!(catalog_producer_source_digest(), expected);
+    }
+
+    #[test]
     fn construction_rejects_unknown_model_fields() {
         let mut model = binary_model();
         model
@@ -890,6 +922,151 @@ mod tests {
         let (answer, code) = construct(model);
         assert_eq!(code, 3);
         assert_eq!(answer["status"], "invalid_input");
+    }
+
+    #[test]
+    fn every_current_catalog_model_reaches_the_standalone_constructor() {
+        let registry: Value = serde_json::from_str(CURRENT_REGISTRY).expect("current registry");
+        let rows = registry["curves"].as_array().expect("registry curve array");
+        assert_eq!(rows.len(), 2091);
+        for row in rows {
+            let slug = row["slug"].as_str().expect("catalog slug");
+            let model: Value = serde_json::from_str(
+                row["model_json"]
+                    .as_str()
+                    .expect("catalog model_json string"),
+            )
+            .expect("catalog model JSON");
+            let (answer, code) = construct(model);
+            assert_eq!(code, 0, "standalone construction rejected {slug}: {answer}");
+            assert_eq!(answer["status"], "ok", "unexpected status for {slug}");
+        }
+    }
+
+    #[test]
+    fn every_binary_ec1_generator_has_checked_typed_transfer_hypotheses() {
+        let graph: Value = serde_json::from_str(CURRENT_COVER_GRAPH).expect("current cover graph");
+        let curves = graph["curves"].as_array().expect("graph curve array");
+        let mut checked = 0usize;
+        for row in curves {
+            let model_value: Value =
+                serde_json::from_str(row["model_json"].as_str().expect("model_json"))
+                    .expect("model JSON");
+            if model_value["form"] != "y^2+xy=x^3+a*x^2+b" {
+                continue;
+            }
+            let model = match strict_model(&model_value) {
+                Ok(model) => model,
+                Err(_) => panic!("catalog binary model failed strict parsing"),
+            };
+            let checker::Field::Binary(irreducible) = &model.field else {
+                panic!("binary form did not produce a binary field");
+            };
+            let cover = OrdinaryBinaryCover::new(
+                irreducible.degree,
+                irreducible.clone(),
+                F2mElement::from_biguint(&model.a, irreducible.degree),
+                F2mElement::from_biguint(&model.b, irreducible.degree),
+            )
+            .expect("checked catalog cover");
+
+            for representation in row["representations"]
+                .as_array()
+                .expect("representation array")
+            {
+                let ec1 = representation["ec1"].as_str().expect("EC1 alias");
+                let generator = representation["curve"]["generator"]
+                    .as_array()
+                    .filter(|coordinates| coordinates.len() == 2)
+                    .expect("binary generator pair");
+                let generator_x = parse_number(generator[0].as_str().expect("binary generator x"))
+                    .expect("parsed x");
+                let generator_y = parse_number(generator[1].as_str().expect("binary generator y"))
+                    .expect("parsed y");
+                assert!(
+                    generator_x.bits() <= irreducible.degree as u64,
+                    "{ec1}: generator x is not canonical for the declared field"
+                );
+                assert!(
+                    generator_y.bits() <= irreducible.degree as u64,
+                    "{ec1}: generator y is not canonical for the declared field"
+                );
+                let point = BinaryPoint::Affine {
+                    x: F2mElement::from_biguint(&generator_x, irreducible.degree),
+                    y: F2mElement::from_biguint(&generator_y, irreducible.degree),
+                };
+                let order = parse_number(
+                    representation["curve"]["subgroup_order"]
+                        .as_str()
+                        .expect("decimal subgroup order"),
+                )
+                .expect("positive subgroup order");
+                let cofactor = BigUint::from(
+                    representation["curve"]["cofactor"]
+                        .as_u64()
+                        .expect("small cofactor"),
+                );
+                let target = BinaryCurve {
+                    m: irreducible.degree,
+                    irreducible: irreducible.clone(),
+                    a: F2mElement::from_biguint(&model.a, irreducible.degree),
+                    b: F2mElement::from_biguint(&model.b, irreducible.degree),
+                    generator: point.clone(),
+                    order: order.clone(),
+                    cofactor,
+                };
+
+                assert!(target.is_on_curve(&point), "{ec1}: generator is off curve");
+                assert_eq!(
+                    binary_scalar_mul(&target, &point, &order),
+                    BinaryPoint::Infinity,
+                    "{ec1}: declared order does not annihilate generator"
+                );
+                let pullback = cover.pullback_point_class(&point).expect("typed pullback");
+                assert!(
+                    !pullback.is_identity(),
+                    "{ec1}: nonidentity generator had identity pullback"
+                );
+                assert!(
+                    pullback
+                        .scalar_mul(&order, cover.source_curve())
+                        .is_identity(),
+                    "{ec1}: catalog order did not annihilate pullback image"
+                );
+                let composition = cover
+                    .pull_push_composition_certificate(&point)
+                    .expect("typed composition");
+                assert_eq!(
+                    composition.pullback, pullback,
+                    "{ec1}: composition certificate used a different pullback witness"
+                );
+                assert!(
+                    composition.identity_holds,
+                    "{ec1}: typed composition failed"
+                );
+                let status = cover
+                    .subgroup_transfer_status(&order)
+                    .expect("conditional subgroup status");
+                let SubgroupTransferStatus::InjectiveIfExactSubgroupOrder {
+                    degree_inverse_mod_order,
+                    ..
+                } = status
+                else {
+                    panic!("{ec1}: declared order is not coprime to degree three");
+                };
+                assert_eq!(
+                    binary_scalar_mul(
+                        &target,
+                        &composition.formal_pushforward,
+                        &degree_inverse_mod_order,
+                    ),
+                    point,
+                    "{ec1}: degree-inverse recovery failed"
+                );
+                checked += 1;
+            }
+        }
+        assert_eq!(checked, 134);
     }
 
     #[test]
@@ -912,6 +1089,52 @@ mod tests {
         assert_eq!(
             answer["result"]["arithmetic_status"],
             "unsupported_infinity_configuration"
+        );
+    }
+
+    #[test]
+    fn extension_cover_reaches_verified_construction_and_structured_arithmetic_boundary() {
+        let label_hash = checker::digest(b"fpk-modulus:5:2,0");
+        let model = json!({
+            "v":"1", "form":"y^2=x^3+a*x+b", "p":"5", "k":"2",
+            "modulus":["2", "0"],
+            "field":format!("fpk-5-2-{}", &label_hash[..8]),
+            "a":["1", "0"], "b":["1", "0"]
+        });
+        let (constructed, construct_code) = construct(model.clone());
+        assert_eq!(construct_code, 0, "{constructed}");
+        assert_eq!(constructed["status"], "ok");
+
+        let request = ArithmeticRequest {
+            schema: ARITHMETIC_SCHEMA.into(),
+            model: Some(model),
+            odd_curve: None,
+            operation: ArithmeticOperation::Identity,
+            left: None,
+            right: None,
+            scalar: None,
+        };
+        let (answer, code) = arithmetic(request);
+        assert_eq!(code, 2, "{answer}");
+        assert_eq!(answer["status"], "unsupported");
+        assert_eq!(
+            answer["result"]["arithmetic_status"],
+            "unsupported_infinity_configuration"
+        );
+    }
+
+    #[test]
+    fn normalized_montgomery_cover_reaches_verified_construction() {
+        let model = json!({
+            "v":"1", "form":"B*y^2=x^3+A*x^2+x", "p":"11",
+            "field":"fp-11", "A":"3", "B":"1"
+        });
+        let (answer, code) = construct(model);
+        assert_eq!(code, 0, "{answer}");
+        assert_eq!(answer["status"], "ok");
+        assert_eq!(
+            answer["result"]["certificate"]["target_model_map"]["status"],
+            "verified_algebraic_identity"
         );
     }
 

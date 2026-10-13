@@ -79,6 +79,52 @@ This receipt proves only that this published descendant artifact is runnable
 and reproduces its bundled catalog mathematics. It is not a current-main CI
 receipt, a general Jacobian norm, or an index-calculus solver result.
 
+Current-catalog compatibility boundary
+======================================
+
+The successful 592-row catalog-export above concerns the registry bundled in
+v0.1.0-main.1371. It must not be extrapolated to the current 2,091-row
+registry.
+
+The current catalog is partitioned into these exact standalone-constructor
+input profiles:
+
+  160 binary ordinary models
+  577 direct short-Weierstrass prime-field models
+  30 normalized prime-field Montgomery/Edwards models
+  1,324 short-Weierstrass odd extension-field models
+  2,091 total
+
+Comparison of the pinned v0.1.0-main.1371 source allowlist with those current
+input forms classifies the first two profiles, 737 models total, inside its
+syntactic constructor domain and the other two, 1,354 models total, outside
+it. The outside population is exactly 30 normalized models plus 1,324
+extension-field models. This 737/1,354 result is a static
+source/applicability inference; no exact batch harness or receipt in this
+record ran all 2,091 current inputs against the archived executable. It does
+not invalidate the artifact's direct replay against its own bundled data, and
+it is not evidence that any outside-domain cover fails to exist.
+
+The current source repairs the strict model allowlist for the normalized and
+extension-field forms. The catalog-wide source test is:
+
+  docker exec crypto-cover-validation-20261013 \
+    cargo test --release --locked --bin hyperelliptic-cover -- \
+    --test-threads=1
+
+It sends every current registry model through the standalone constructor and
+requires an ok result. A complete local Rust 1.90.0 container run of the
+hyperelliptic-cover test binary exited 0 and reported:
+
+  test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+
+That result supports current source-level construction for all 2,091 model
+forms. No standalone artifact containing the repair has yet been pinned and
+replayed here, so catalog-wide packaged-binary support remains an open
+obligation. Constructor acceptance also does not establish a general
+Jacobian norm, subgroup preservation, a destination solver, or computational
+advantage.
+
 Cross-repository parity receipt
 ===============================
 
@@ -131,6 +177,17 @@ the prime curve implementation used by this assessment:
 
   src/prime_hyperelliptic/curve.rs
   7a769bfb7abfe92ce06da7c02340f2a2426827d8066ebef510375149b8c3d5ad
+
+The parity manifest has exactly seven records: five byte-exact core files
+(the two binary implementations plus prime curve, Fp2, and module sources),
+one binary-module rustdoc adapter, and one selected-domain prime-polynomial
+binding. It does not cover the standalone hyperelliptic-cover CLI, Cargo
+manifests or lockfile, registries and generated cover catalogs, this v2
+schema/ledger/builder/verifier, CI or release workflows, or any packaged
+executable. The checker syntax-validates the manifest's recorded crypto
+implementation commit, but does not compare that string to the live crypto
+checkout HEAD; this run therefore establishes only the seven recorded source
+bindings.
 
 This is a merge-content and local native-parity receipt. It is not evidence
 that cryptanalysis Actions are fresh at its current exact tip, and it does not

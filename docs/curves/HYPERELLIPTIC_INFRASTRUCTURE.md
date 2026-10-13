@@ -36,14 +36,29 @@ are:
 ./hyperelliptic-cover catalog-export --registry REGISTRY.json [--output covers.json]
 ```
 
+The catalog-wide assessment distinguishes current source from the executable
+that has actually been published. Current-source tests accept all 2,091 catalog
+map inputs (2,089 distinct cover models). The pinned
+`v0.1.0-main.1371` source allowlist and the current model-profile partition
+imply a 737-row syntactic support boundary: 160 binary and 577 direct
+prime-field inputs are within that allowlist, while 1,324 odd-characteristic
+extension-field and 30 normalized-target inputs are outside it. That
+737/1,354 split is a static source/applicability classification, not a direct
+2,091-command replay of the published executable. The artifact was directly
+replayed only against its own bundled 592-row registry. A new release and
+direct replay of all 2,091 current commands remain open obligations.
+
 For the first three commands, `--input -` reads standard input. Omitting
 `--output` writes JSON to standard output. Successful `catalog-export` writes
 the existing deterministic `curve-covers/v1` catalog shape; it does not
-silently claim enriched Jacobian or transfer evidence. `--registry` is
-required: release archives contain the executable, not a registry or catalog.
-All input paths, including the catalog registry, are capped at 32 MiB. A
-larger file or standard-input stream returns `invalid_input` rather than being
-partially parsed.
+silently claim enriched Jacobian or transfer evidence. `--registry` is always
+required because the executable does not embed a registry. The repository's
+release workflow stages `docs/curves/registry.json`, `covers.json`, and
+`cover-links.yaml` beside the executables, and the pinned published archive
+replay confirmed those files were present. Callers may use that bundled
+registry or supply another explicit path. All input paths, including the
+catalog registry, are capped at 32 MiB. A larger file or standard-input stream
+returns `invalid_input` rather than being partially parsed.
 
 Command response status and process exit status are distinct and stable:
 
@@ -344,15 +359,45 @@ Its F2^7 record binds all of the following:
 - a structured refutation of arbitrary-class pushforward support.
 
 That envelope is an immutable October 6 snapshot. The current-catalog
-crosswalk is the additive
+crosswalk is the generated v2
 [`cover-transfer-assessments.json`](cover-transfer-assessments.json), with
 structural contract
 [`cover-transfer-assessment.schema.json`](cover-transfer-assessment.schema.json)
 and a dated
 [transfer report](../../research/cover_transfer_assessment_20261013/README.md).
-It assesses two exact maps, leaves the other current maps explicitly
-unassessed, and does not change the geometry semantics of `covers.json` or
+It classifies all 2,091 map rows, representing 2,089 distinct cover models, and
+all 664 exact EC1 representations. Its map profiles contain 160 binary cubic
+covers, 577 direct prime-field quadratic covers, 30 normalized-target
+prime-field covers, and 1,324 odd-characteristic extension-field covers. Its
+subgroup profiles contain 134 binary and 530 odd-characteristic
+representations. “Assessed” means that every declared claim has an explicit
+status; it does not mean that every capability is supported.
+
+The binary profile has checked one-infinity Jacobian arithmetic and a bounded
+typed transfer domain. The odd-characteristic covers are even-degree sextics
+with two rational infinity points, so their balanced Jacobian arithmetic and
+induced maps remain unavailable. Numeric exact-order evidence also remains
+open catalog-wide except for the order-29 overlay. All computational-advantage
+and end-to-end solver costs remain unknown. The assessment does not change the
+geometry semantics or browser status fields in `covers.json` and
 `cover-links.yaml`.
+
+Regenerate and check the assessment deterministically with:
+
+```text
+node scripts/build_cover_transfer_assessments.mjs --write
+node scripts/build_cover_transfer_assessments.mjs --check
+python -m jsonschema -i docs/curves/cover-transfer-assessments.json \
+  docs/curves/cover-transfer-assessment.schema.json
+node research/cover_transfer_assessment_20261013/verify_assessment.mjs
+```
+
+The verifier replays membership partitions, claim/evidence bindings, source
+pins, and all 2,091 cover formulas. The accompanying Lean package formalizes
+only the conditional group-theoretic injectivity step under an already-proved
+push-pull identity, exact finite subgroup cardinality, and coprimality. It does
+not construct the maps or certify catalog subgroup orders. A full Jacobian
+index-calculus solver remains a separate deliverable.
 
 The same envelope records the prime F827 cover as an explicit verified
 construction while marking use of one-infinity arithmetic on its even sextic
@@ -378,10 +423,12 @@ domain boundary.
 
 The exported catalog identifies its wrapper with
 `generated_by = "hyperelliptic-cover catalog-export"`. Its
-`producer_source_sha256` is SHA-256 of the exact UTF-8 checker source followed
-immediately by the exact UTF-8 `hyperelliptic-cover` wrapper source, in that
-order. For the documented feature snapshot it is
-`3927efaddd7e7e966bb284affc56ac22a823f98f498017509e266b603b244e37`.
-Thus changing either producer changes the provenance digest. Both
+`producer_source_sha256` is SHA-256 of the exact UTF-8 checker source, model
+normalization source, and `hyperelliptic-cover` wrapper source concatenated in
+that order. For the current source it is
+`104a469ac66aa3a0fe69f9768e600af1866a8d2f56cf1edfb0187c0ecd155cc7`.
+Thus changing any of the three producer inputs changes the provenance digest.
+Both
 `hyperelliptic-cover catalog-export` and `curve_cover_check` require callers
-to supply an external registry; packaged executables do not embed one.
+to supply a registry path; the release archive bundles one, but neither
+executable embeds it.
