@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'research/weak_curve_database_20261012/**'
+      - 'research/p192_extension_cover_20261012/**'
       - 'docs/curves/weak-families/catalog.json'
       - 'docs/curves/weak-families/models.json'
       - 'docs/curves/weak-families/properties.json'
@@ -57,3 +58,25 @@ jobs:
           leanchecker-args: '--fresh --verbose WeakCurveDatabase'
       - name: Audit transitive axioms
         run: lake env lean AxiomAudit.lean
+  p192-lean-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: research/p192_extension_cover_20261012/lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build P-192 norm theorem and replay in a fresh kernel
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/p192_extension_cover_20261012/lean
+          auto-config: false
+          use-mathlib-cache: true
+          build: true
+          build-args: 'CrossRatio'
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: '--fresh --verbose CrossRatio'
+      - name: Audit P-192 theorem axioms
+        run: lake env lean CrossRatio.lean
