@@ -50,6 +50,7 @@ SOURCES = (
     f"research/{STUDY}/verification/mixed-orbit-known-witness-source-20261012/known_witness.py",
     f"research/{STUDY}/verification/mixed-orbit-known-witness-source-20261012/control_supervisor.py",
     f"research/{STUDY}/verification/mixed-orbit-control-reuse-19800-20261013/reuse_control_supervisor.py",
+    f"research/{STUDY}/verification/mixed-orbit-control-reuse-19800-20261013/audit.py",
 )
 
 

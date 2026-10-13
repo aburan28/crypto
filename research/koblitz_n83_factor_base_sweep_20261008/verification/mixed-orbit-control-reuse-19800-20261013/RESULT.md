@@ -39,9 +39,22 @@ an output directory. A separate fresh user approval reference and fresh
 output path are mandatory. No authorization record has been issued for this
 gate.
 
-The three focused source-only tests passed: they reject the stale v5 grant
-before launch, reject changed K600 or cross-stream audit bytes, and check the
-21,000-second prospective ledger. `--help` and Python compilation also pass.
-No container, archive import, or SAT search was launched here. The current
-conservative ledger remains 19,800 seconds and the selected base remains
-undetermined.
+The separate `audit.py` is now included among the frozen supervisor inputs.
+It independently checks Git source blobs, authorization and archive hashes,
+the exact offline Docker commands and cleanup, worker counters, the complete
+1,200-second conservative charge, and any candidate against both archived
+point domains and a Python group sum. It records raw-file SHA-256s and uses
+`UNVALIDATED` for incomplete or inconsistent receipts. A conflict cap remains
+`VALIDATED_CENSORED`, while only a group-replayed solver candidate can receive
+`VALIDATED_CONTROL_ACCESS`; neither status is a natural-yield or runtime win.
+The auditor exits successfully only for that verified control-access result;
+censored and failed results still retain their raw hashes and explicit status.
+The auditor has not yet processed a retained control run.
+
+Seven focused source-only tests passed. They reject the stale v5 grant before
+launch, changed prior audit bytes, a changed conflict counter, network access,
+and a success claim without archive/group replay; the constructed fixture
+also replays in the independent Python group arithmetic. `--help` and Python
+compilation pass. No container, archive import, or SAT search was launched
+here. The current conservative ledger remains 19,800 seconds and the
+selected base remains undetermined.
