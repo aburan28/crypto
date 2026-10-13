@@ -297,6 +297,7 @@ const retainedPanels = [
   ['conductor-gap-ic37-20261012','Large-prime conductor gap: IC measured at ell = 131101 · 12 October 2026'],
   ['drastic-conductor-gap-20261012','Drastic prime conductor gaps: ECDLP on both ends · 12 October 2026'],
   ['drastic-conductor-gap-round2-20261012','Drastic prime conductor gap round 2: the j = 0 crater · 12 October 2026'],
+  ['drastic-conductor-gap-round3-20261012','Drastic prime conductor gap round 3: paired targets · 12 October 2026'],
   ['lab-ecbench-all','Cross-method evidence · every measured candidate'],
   ['lab-pair-claw','Pair claw of cryptanalysis#175 · same-target strong rho'],
   ['lab-progress','Research progress over time · separate regimes and references'],

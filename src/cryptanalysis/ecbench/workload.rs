@@ -587,12 +587,23 @@ pub enum TargetKind {
     /// `Q = [k]G` for a derived `k`, kept to check the answer against.
     #[default]
     Planted,
+    /// The same `k` on every curve of one order: the derivation hashes
+    /// `[r, target_seed, index]` only, so a paired comparison can
+    /// divide the same planted scalar's cost on two isogenous curves
+    /// (their `r` is equal) and resample targets jointly.  A paired
+    /// quotient is a different statistic from the independent-target
+    /// law, not a replacement for it.
+    PlantedShared,
     /// `Q` hashed to the subgroup; the answer is checked by `[d]G = Q`.
     Public,
 }
 
 impl TargetKind {
     pub fn is_planted(&self) -> bool {
+        matches!(self, TargetKind::Planted | TargetKind::PlantedShared)
+    }
+    /// Only the default kind stays unserialised.
+    pub fn is_plain_planted(&self) -> bool {
         *self == TargetKind::Planted
     }
 }
@@ -601,6 +612,18 @@ impl TargetKind {
 /// inputs, hashed as decimal strings, with a 128-bit draw.  A one-word
 /// order keeps [`TARGET_LAW`], so every existing workload is unchanged.
 pub const TARGET_LAW_WIDE: &str = "uniform_scalar_sha256_v2";
+
+/// The paired planted-scalar law: `k` derives from `[r, target_seed,
+/// index]` alone — no curve model — so every curve of the same subgroup
+/// order draws the same scalar list.  One-word orders only (the paired
+/// comparisons this serves run on one-word instances).
+pub const SHARED_TARGET_LAW: &str = "uniform_scalar_sha256_shared_v1";
+
+/// `k ∈ [1, r−1]` for target `index` under `target_seed`, the same on
+/// every curve of subgroup order `r`.
+pub fn shared_planted_scalar(r: u64, target_seed: u64, index: u64) -> u128 {
+    u128::from(1 + derive_u64(SHARED_TARGET_LAW, &[r, target_seed, index]) % (r - 1))
+}
 
 /// `k ∈ [1, r−1]` for target `index` under `target_seed`.
 pub fn planted_scalar(curve: &CurveFacts, target_seed: u64, index: u64) -> u128 {
@@ -692,6 +715,15 @@ impl Workload {
                 };
                 (law, q, Some(k), None)
             }
+            TargetKind::PlantedShared => {
+                let r = u64::try_from(curve.r)
+                    .map_err(|_| "planted_shared targets need a one-word subgroup order")?;
+                let k = shared_planted_scalar(r, target_seed, index);
+                let q = inst
+                    .mul_generator_hex(k)
+                    .ok_or("the planted scalar gave the identity; the subgroup order is wrong")?;
+                (SHARED_TARGET_LAW, q, Some(k), None)
+            }
             TargetKind::Public => {
                 // With r | h the r-torsion can be Z/r × Z/r, and a cleared
                 // point need not lie in <G>.
@@ -734,6 +766,8 @@ impl Workload {
     pub fn kind(&self) -> TargetKind {
         if self.target_law == PUBLIC_TARGET_LAW || self.target_law == PUBLIC_TARGET_LAW_WIDE {
             TargetKind::Public
+        } else if self.target_law == SHARED_TARGET_LAW {
+            TargetKind::PlantedShared
         } else {
             TargetKind::Planted
         }

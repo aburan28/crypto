@@ -1,0 +1,11 @@
+[package]
+name = "n83-load75-analyzer"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+crypto = { path = "../../.." }
+num-bigint = "0.4"
+serde_json = "1"
