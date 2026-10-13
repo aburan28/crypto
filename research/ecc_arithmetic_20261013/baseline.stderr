@@ -1,0 +1,78 @@
+     Locking 4 packages to latest Rust 1.93.1 compatible versions
+      Adding num-bigint v0.4.8 (available: v0.5.1)
+   Compiling autocfg v1.5.1
+   Compiling num-traits v0.2.19
+   Compiling num-integer v0.1.47
+   Compiling num-bigint v0.4.8
+   Compiling ecc-arithmetic-panel v0.1.0 (/Volumes/SSD990-2/crypto/wt/codex-ecc-arithmetic-20261013/research/ecc_arithmetic_20261013)
+warning[E0133]: call to unsafe function `f2m::clmul64_hw` is unsafe and requires unsafe block
+    --> src/../../../src/binary_ecc/f2m.rs:1011:28
+     |
+1011 |             let (lo, hi) = clmul64_hw(ai, bj);
+     |                            ^^^^^^^^^^^^^^^^^^ call to unsafe function
+     |
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+note: an unsafe function restricts its caller, but its body is safe by default
+    --> src/../../../src/binary_ecc/f2m.rs:1008:1
+     |
+1008 | unsafe fn mul_words_hw(a: &[u64], b: &[u64], out: &mut [u64]) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = note: `#[warn(unsafe_op_in_unsafe_fn)]` (part of `#[warn(rust_2024_compatibility)]`) on by default
+
+warning[E0133]: call to unsafe function `f2m::fold_words_clmul_hw::place` is unsafe and requires unsafe block
+    --> src/../../../src/binary_ecc/f2m.rs:1122:17
+     |
+1122 |                 place(value, 64 * i - m, w, r);
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1144 |     fold_words_clmul_body!(value, m, r)
+     |     ----------------------------------- in this macro invocation
+     |
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+note: an unsafe function restricts its caller, but its body is safe by default
+    --> src/../../../src/binary_ecc/f2m.rs:1143:1
+     |
+1143 | unsafe fn fold_words_clmul_hw(value: &mut [u64], m: usize, r: u64) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = note: this warning originates in the macro `fold_words_clmul_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `f2m::fold_words_clmul_hw::place` is unsafe and requires unsafe block
+    --> src/../../../src/binary_ecc/f2m.rs:1129:17
+     |
+1129 |                 place(value, 0, w, r);
+     |                 ^^^^^^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1144 |     fold_words_clmul_body!(value, m, r)
+     |     ----------------------------------- in this macro invocation
+     |
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+     = note: this warning originates in the macro `fold_words_clmul_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `f2m::clmul64_hw` is unsafe and requires unsafe block
+    --> src/../../../src/binary_ecc/f2m.rs:1101:28
+     |
+1101 |             let (lo, hi) = clmul64_hw(w, r);
+     |                            ^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1144 |     fold_words_clmul_body!(value, m, r)
+     |     ----------------------------------- in this macro invocation
+     |
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+note: an unsafe function restricts its caller, but its body is safe by default
+    --> src/../../../src/binary_ecc/f2m.rs:1100:9
+     |
+1100 |         unsafe fn place(v: &mut [u64], pos: usize, w: u64, r: u64) {
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+1144 |     fold_words_clmul_body!(value, m, r)
+     |     ----------------------------------- in this macro invocation
+     = note: this warning originates in the macro `fold_words_clmul_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+For more information about this error, try `rustc --explain E0133`.
+warning: `ecc-arithmetic-panel` (bin "ecc-arithmetic-panel") generated 4 warnings (run `cargo fix --bin "ecc-arithmetic-panel" -p ecc-arithmetic-panel` to apply 3 suggestions)
+    Finished `release` profile [optimized] target(s) in 22.20s
+     Running `/private/tmp/ecc_arith_thin_target/release/ecc-arithmetic-panel 200000 5`
