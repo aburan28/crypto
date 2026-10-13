@@ -208,7 +208,7 @@
 | kummer | 3221225473 | 2 | 7 | 14 | 4 | 0 | 6.516e8 | 461.7 | 5.5 | subtract2 | 287 | 1257 | 2.270e6 |
 | kummer | 3221225473 | 2 | 8 | 16 | 2 | 0 | 6.178e9 | 2776.6 | 5 | subtract2 | 617 | 3476 | 1.001e7 |
 
-## Binary Gröbner references on K₁/GF(2^23), ℓ = 8, m = 3
+## Binary Gröbner references on icv1-f2m23-tm5197-1f85e9e1, ℓ = 8, m = 3
 
 - inherited F4 (`f6_ic_probe`, default decomposition oracle): 8 targets, median 4.101e7 word XORs and 231.5 ms per target.
 - split-dreg F4 (unsplit S₄, g = 0): no solve row (see the run's stderr: killed or budget).
