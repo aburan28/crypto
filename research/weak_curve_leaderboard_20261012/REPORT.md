@@ -162,12 +162,18 @@ depth screen cannot serve as a sufficient classifier even there.
 Third, the atlas now distinguishes three additional routes. Direct
 [extension-field decomposition](https://eprint.iacr.org/2010/157) works on
 the elliptic group itself; [cover-and-decomposition](https://eprint.iacr.org/2011/020)
-combines a covering with a destination relation method; and a
+combines a lower-field cover, norm–pullback subgroup transfer, and a
+destination relation method; and a
 [cubic Jacobian isogeny](https://arxiv.org/abs/2012.07173) can transfer a
 prime-order group without a literal covering map. Their published methods
 are present as criteria. Exact atlas joins and complete selected-subgroup
 measurements remain open; the repository's separate Joux–Vitse replay is
 tracked in the coverage audit.
+The [per-curve decomposition index](decomposition_properties.json) now
+screens both sextic intermediate-field towers and the quadratic sieve
+separately. The [published 149-bit case](published_cover_cases.json) retains
+the source's exact tower, selected order, factor base and phase reports as a
+published campaign outside the 922 local atlas identities.
 The [coverage audit](COVERAGE_AUDIT.md) maps these methods, the 36
 prime-degree cases, and same-field hyperelliptic covers to their distinct
 construction and measurement gates.

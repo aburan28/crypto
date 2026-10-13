@@ -66,13 +66,15 @@ const propertyLabels = {
   heuristic_projection:'Heuristic projection',genus_projection_only:'Genus projection only',
   cover_geometry_only:'Cover geometry only',weil_polynomial_open:'Weil polynomial open',
   formula_only:'Formula cost only',unmeasured:'Unmeasured',unverified:'Unverified',
-  unassessed:'Unassessed'
+  unassessed:'Unassessed',cubic_model_label:'Cubic model label',
+  tower_screen_only:'Field tower screen only',outside_screened_towers:'Outside screened towers'
 };
 
 function propertyBadge(status) {
   if (status==='verified_geometry' || status==='positive_model_label') return 'geometry';
   if (['formula_replayed','necessary_screen_passed','exact_invariant','heuristic_projection',
-    'genus_projection_only','cover_geometry_only','formula_only'].includes(status)) return 'candidate';
+    'genus_projection_only','cover_geometry_only','formula_only','cubic_model_label',
+    'tower_screen_only'].includes(status)) return 'candidate';
   return 'open';
 }
 
@@ -81,6 +83,8 @@ function propertyDescription(key, value) {
   if (key==='same_field_cover') return `${state}; genus ${value.genus}, degree ${value.degree} over the source field; ${value.certificate.construction}. Subfield descent: ${value.subfield_descent}.`;
   if (key==='cubic_cover' || key==='quadratic_cover') return `${state}; model label ${value.label||'—'}; screen ${value.screen||'—'}.`;
   if (key==='ghs_descent') return `${state}; ${value.routes.length} recorded routes${value.routes.length?': '+value.routes.map(r=>`base degree ${r.base_degree}, relative degree ${r.relative_degree}, m=${r.magic_number||'?'}, genus ${r.genus_projection}, ${r.transport_screen}, ${r.formula_class}`).join(' | '):'.'}`;
+  if (key==='jv_intermediate_field_cover') return `${state}; ${value.towers.length?value.towers.map(r=>`H/F(p^${r.intermediate_degree}), relative degree ${r.relative_degree}, genus ${r.destination_genus}: ${r.model_status}`).join(' | '):'no sextic tower screened'}. Lower-field cover and norm–pullback subgroup kernel: open.`;
+  if (key==='jv_quadratic_sieve') return `${state}; ${value.intermediate_degree===2?'H/F(p²), eight-point relations; saturated ideal, natural sieve yield, rank and descent open':'requires an assessed odd-characteristic quadratic intermediate field'}.`;
   if (key==='hyperelliptic_high_genus') return `${state}; ${value.candidate_routes.length} size-admissible exact-invariant genus projections. Smoothness measurements: open.`;
   if (key==='elliptic_quotient_prym') return `${state}; elliptic factor dimension 1, complement dimension ${value.complement_dimension}; explicit Jacobian projection open.`;
   if (key==='subgroup_transport') return `${state}; selected order ${value.selected_order||'not fixed'}; gcd(degree, selected order) ${value.gcd_degree_selected_order??'open'}; generator, target and kernel images open.`;
@@ -93,7 +97,7 @@ function renderPropertyDetails(record, dialog) {
   const values=decomposition.records[record.id];
   if (!values) return;
   const details=document.createElement('details');details.className='property-details';
-  const summary=document.createElement('summary');summary.textContent='Hyperelliptic properties · all 11 checks';details.append(summary);
+  const summary=document.createElement('summary');summary.textContent=`Hyperelliptic properties · all ${Object.keys(decomposition.definitions).length} checks`;details.append(summary);
   const dl=document.createElement('dl');
   for (const [key,definition] of Object.entries(decomposition.definitions)) {
     const dt=document.createElement('dt');dt.textContent=definition.label;

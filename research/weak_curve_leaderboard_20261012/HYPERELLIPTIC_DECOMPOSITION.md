@@ -12,7 +12,7 @@ The [WAM1 attack map](attack_map.json) gives these separate research checks.
 ## Per-curve detection properties
 
 The machine-readable [property index](decomposition_properties.json) now binds
-eleven hyperelliptic checks to every one of the 922 exact atlas identities.
+thirteen hyperelliptic checks to every one of the 922 exact atlas identities.
 Run `python3 build_decomposition_properties.py --check` to replay its joins,
 and `python3 validate_decomposition_properties.py` for an independent
 cross-source audit. The site exposes the same states through its
@@ -24,6 +24,8 @@ shows its complete check list and cover polynomial/map coefficients.
 | Same-field hyperelliptic cover | Exact ICV1 identity, full model hash, checker certificate or formula replay, field, genus, degree and polynomial map | 917 source-checker certificates; five formula replays |
 | Odd-field cubic and quadratic genus-three branches | Exact model label and necessary screen, retaining exclusions and unclassified survivors | 14 cubic and ten quadratic positive labels; 247 large cubic screen survivors remain unclassified |
 | Binary GHS lower-field route | Exact magic number when available, base/relative degrees, projected genus and transport-size screen | 49 curves with exact-invariant route records; cover construction and subgroup map open |
+| Joux–Vitse intermediate-field cover | Separate `F_(p^6)/F_(p²)/F_p` genus-three and `F_(p^6)/F_(p³)/F_p` genus-two screens, with lower-field map and norm–pullback kernel fields | Cubic model labels seed the first branch; the Scholten genus-two branch and every subgroup transfer remain open |
+| Joux–Vitse quadratic sieve | Odd-characteristic `H/F_(p²)` branch, saturated bihomogeneous ideal, eight-point relations, independent rank and descent | Model and tower screens indexed; sieve and relation measurements open |
 | Divisor factor-base and large-prime relations | Frozen base, natural-query yield, partial-relation graph, rank and target descent fields | Measurement fields present and null for every curve |
 | High-genus smoothness | Size-admissible exact-invariant genus projection and smoothness-measurement field | 37 genus projections; instance smoothness open |
 | Jacobian factors and elliptic quotient | Destination-field Weil polynomial, factorization, explicit projection and complement dimension | Cover geometry supplies the dimension screen; factorization and projection open |
@@ -51,6 +53,40 @@ genera stay distinct from constructed lower-field covers and measured divisor
 relations. The [proof map](PROOF_MAP.md) continues to list the Lean bridge
 from cover geometry to Jacobian maps as open; this property index adds no
 new structural theorem.
+
+## Joux–Vitse intermediate-field cover and sieve
+
+[Joux and Vitse](https://eprint.iacr.org/2011/020) start with a tower
+`F_(p^(nd))/F_(p^n)/F_p`, a small-genus hyperelliptic `H/F_(p^n)`, and a
+cover `π:H→E` defined over `F_(p^(nd))`. The map used on a selected subgroup
+`G⊂E(F_(p^(nd)))` is `N_(F_(p^(nd))/F_(p^n)) ◦ π*`. Its kernel must intersect
+`G` trivially. They choose factor-base points on `H(F_(p^n))` with abscissae in
+`F_p`; a Nagao decomposition uses `ng` such points, while their zero-sum
+relation variant uses `ng+2`. For `n=2` in odd characteristic, the latter has a
+bihomogeneous quadratic system. Saturating away the `μ=0` component prevents
+trivial inverse-pair relations; sieving quadratic fibers yields full relations
+when `2g+2` distinct roots occur, or partial relations under a specified
+large-prime policy.
+
+| Tower | Destination | Relation length | Indexed evidence |
+| --- | --- | ---: | --- |
+| `F_(p^6)/F_(p²)/F_p` | Hyperelliptic genus three over `F_(p²)` | Eight for the zero-sum variant | Cubic source-model label and necessary screen; lower-field `H`, map, kernel and sieve remain separate checks |
+| `F_(p^6)/F_(p³)/F_p` | Hyperelliptic genus two over `F_(p³)` | Eight for the zero-sum variant | Scholten-form construction is unassessed in this atlas; the `n=2` quadratic sieve does not apply |
+
+The atlas's existing `quadratic_cover` property describes a different
+genus-three local model and must not be read as a certificate for the
+`F_(p³)` genus-two branch. Its 917 same-field cover certificates also do
+not instantiate either lower-field destination.
+
+The [published case record](published_cover_cases.json) transcribes the
+paper's Section 6 example: `p=33,554,467`, `F_(p²)=F_p[t]/(t²−2)`,
+`F_(p^6)=F_(p²)[θ]/(θ³−t)`, a 149-bit selected prime factor, a genus-three
+destination and a 16,775,441-point factor base. The paper reports a 62-hour
+relation phase on 1,024 cores, structured elimination and 28.5 days of
+iterative linear algebra on 64 cores, followed by six individual logarithms.
+The record is labeled `published_original_campaign` and has no local atlas
+curve ID or independent replay. Its curve and timing data remain
+source-attributed rather than a measurement of an indexed atlas row.
 
 ## Decompose divisors for index calculus
 

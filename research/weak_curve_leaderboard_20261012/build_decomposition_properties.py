@@ -125,6 +125,8 @@ DEFINITIONS = {
     "cubic_cover": {"label": "Odd-field cubic genus-three branch", "test": "Exact model label and necessary conductor-depth screen in the recorded cubic domain."},
     "quadratic_cover": {"label": "Odd-field quadratic genus-three branch", "test": "Exact model label and necessary model conditions in the recorded quadratic domain."},
     "ghs_descent": {"label": "Binary GHS lower-field route", "test": "Magic number, projected genus, base-field degree and transport-size screen; a cover equation and subgroup map remain separate."},
+    "jv_intermediate_field_cover": {"label": "Joux–Vitse lower-field cover", "test": "For F_(p^6), inspect both H/F_(p²) genus-three and H/F_(p³) genus-two branches; construct the actual lower-field H and test norm–pullback on the selected subgroup."},
+    "jv_quadratic_sieve": {"label": "Joux–Vitse quadratic sieve", "test": "For the odd-characteristic H/F_(p²) branch, verify the bihomogeneous saturated ideal, root sieve, full and partial relation yield, rank and target descent."},
     "hyperelliptic_divisor_decomposition": {"label": "Divisor factor-base decomposition", "test": "Destination H, divisor encoding, frozen factor base, natural full-relation yield, rank, final linear algebra and target descent."},
     "hyperelliptic_large_prime": {"label": "Large-prime divisor relations", "test": "Partial-relation yield, verified recombination graph, rank, final linear algebra and target descent."},
     "hyperelliptic_high_genus": {"label": "High-genus smoothness route", "test": "Exact destination genus and field, factor-base degree bound, natural-query smoothness and complete cost."},
@@ -187,6 +189,11 @@ def build():
                                    if route["kind"] == "same_field_cover"), None) if transfer else None
         selected_order = row.get("generator_order") or row.get("r")
         candidate_order = transfer["subgroup"]["order"] if transfer else None
+        sextic_odd = row["degree"] == 6 and int(row["p"]) % 2 == 1
+        cubic_label = branch(row, "cubic", "cubic_screen") if sextic_odd else None
+        jv_tower_status = ("cubic_model_label" if cubic_label and
+                           cubic_label["status"] == "positive_model_label" else
+                           "tower_screen_only" if sextic_odd else "outside_screened_towers")
         records[identity] = {
             "field": {"characteristic": row["p"], "degree": row["degree"],
                       "bits": row["bits"]},
@@ -195,6 +202,26 @@ def build():
             "quadratic_cover": branch(row, "quadratic", "quadratic_screen"),
             "ghs_descent": {"status": ghs_status, "routes": routes,
                             "constructed_cover": None},
+            "jv_intermediate_field_cover": {
+                "status": jv_tower_status,
+                "towers": ([{"intermediate_degree": 2, "relative_degree": 3,
+                             "destination_genus": 3, "geometry": "hyperelliptic",
+                             "model_status": cubic_label["status"],
+                             "model_screen": cubic_label["screen"]},
+                            {"intermediate_degree": 3, "relative_degree": 2,
+                             "destination_genus": 2, "geometry": "hyperelliptic",
+                             "model_status": "unassessed_scholten"}] if sextic_odd else []),
+                "lower_field_cover": None, "norm_pullback_kernel": None,
+                "selected_subgroup_image": None},
+            "jv_quadratic_sieve": {
+                "status": ("cubic_model_label" if jv_tower_status == "cubic_model_label"
+                           else "tower_screen_only" if sextic_odd
+                           else "outside_screened_towers"),
+                "intermediate_degree": 2 if sextic_odd else None,
+                "relation_length": 8 if sextic_odd else None,
+                "saturated_ideal": None, "nontrivial_full_relations": None,
+                "partial_relations": None, "independent_rank": None,
+                "target_descent": None},
             "hyperelliptic_divisor_decomposition": {
                 "status": "unmeasured", "factor_base_digest": None,
                 "natural_queries": None, "full_relations": None,

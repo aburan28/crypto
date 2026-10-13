@@ -122,11 +122,11 @@
   {
     "id": "cover_and_decomposition",
     "name": "Cover-and-decomposition index calculus",
-    "method": "Partial covering with decomposition on the destination",
-    "domain": "Elliptic curves over composite-degree odd-characteristic extensions, especially F_(p^6)",
-    "recognition": "Construct the exact cover or correspondence and the decomposition factor base for the selected group; compare the full relation pipeline with the source-group reference.",
-    "witness": "Destination curve and genus, explicit subgroup transport, verified relation yield and rank, target descent, and charged construction and solver costs.",
-    "construction": "Apply the published Joux–Vitse cover-and-decomposition method to a specified extension-field model and subgroup.",
+    "method": "Intermediate-field cover followed by Jacobian decomposition",
+    "domain": "Selected subgroup G of E/F_(p^(nd)) over a composite-degree tower F_(p^(nd))/F_(p^n)/F_p; sextic branches n=2,d=3 or n=3,d=2",
+    "recognition": "Construct H/F_(p^n) and a cover H→E over F_(p^(nd)); certify that norm after pullback is injective on G. A same-field cover alone does not establish this route.",
+    "witness": "Exact tower, lower-field H and map, selected-subgroup kernel, F_p-abscissa factor base, verified natural relations and rank, final linear algebra, target descent, and complete cost.",
+    "construction": "For F_(p^6), test the H/F_(p²) genus-three and H/F_(p³) genus-two branches separately; use the bihomogeneous quadratic sieve only for the odd-characteristic n=2 hyperelliptic branch.",
     "status": "published_method_and_separate_local_replays_not_joined_to_atlas",
     "source": "Joux–Vitse (2012)",
     "url": "https://eprint.iacr.org/2011/020"

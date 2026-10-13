@@ -25,6 +25,8 @@ def main() -> None:
         "hyperelliptic_high_genus",
         "jacobian_isogeny_decomposition",
         "elliptic_quotient_prym",
+        "jv_intermediate_field_cover",
+        "jv_quadratic_sieve",
     }
     assert decomposition_ids <= set(ids), "hyperelliptic decomposition gate missing"
     for item in attack["items"]:

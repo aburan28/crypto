@@ -1,5 +1,36 @@
 # Validation record
 
+## Joux–Vitse intermediate-field route, 13 October 2026
+
+- The source-linked `2011/020` method now has separate WAM1 checks for the
+  intermediate-field cover and the odd-characteristic quadratic sieve. The
+  indexed criterion specifies the norm–pullback subgroup kernel and both
+  sextic towers. The 922 curve identities each carry 13 property records:
+  14 cubic model labels, 647 additional sextic tower screens, and 261 records
+  outside these screened towers. Every lower-field cover, subgroup transport,
+  saturated sieve ideal, natural relation rank and target descent remains an
+  explicit open field. The genus-two `F_(p³)` Scholten branch is unassessed.
+- The [published case record](published_cover_cases.json) preserves the
+  paper's `p=33,554,467` field tower, alpha coefficients, 149-bit selected
+  prime, factor-base size and source-reported phase measurements. The
+  validator checks its field-size and order arithmetic, coefficient bounds,
+  and byte-identical site copy. It has no local atlas identity or independent
+  replay.
+- `python3 build_decomposition_properties.py --check`,
+  `python3 validate_decomposition_properties.py`,
+  `python3 validate_attack_map.py`, and `node --check
+  website/weakcurves/dist/app.js` passed. The attack map has 23 indexed
+  criteria and 38 research checks. This addition classifies a published
+  method and records observations; it introduces no new mathematical theorem
+  requiring a separate Lean declaration.
+- The Sites source helper pushed commit
+  `51711fc6688c43011704a108d8d7a9cca43b74a4` and packaged
+  `/Volumes/SSD990/llm/tmp/weakcurves-static-v17.tar.gz`. Sites saved
+  version 17 and returned `succeeded` for public deployment
+  `appgdep_6acd8bcceafc81919c217e1d1f686abe` at
+  <https://weakcurves.aburan28.chatgpt.site>. The existing public audience
+  was preserved.
+
 ## Curve-level hyperelliptic detection properties, 12 October 2026
 
 - `python3 build_decomposition_properties.py --check` and

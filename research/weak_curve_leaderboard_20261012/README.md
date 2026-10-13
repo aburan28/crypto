@@ -38,17 +38,21 @@ unassessed research queue: they create no curve-level WID1 finding. The
 [validator](validate_attack_map.py) checks ID uniqueness, source fields,
 source/site byte parity and certified graph edge consistency.
 
-The [decomposition property index](decomposition_properties.json) makes eleven
+The [decomposition property index](decomposition_properties.json) makes thirteen
 hyperelliptic checks filterable for all 922 atlas curves. It binds 917 exact
 same-field cover certificates by ICV1 identity and full model hash, and
 replays the explicit prime-field formula for the remaining five models under
 their source field assumptions. The cubic and quadratic genus-three screens,
-binary GHS invariants, projected genera, divisor relation measurements,
+binary GHS invariants, Joux–Vitse intermediate-field and quadratic-sieve
+screens, projected genera, divisor relation measurements,
 Jacobian factorization, selected-subgroup transport and complete-cost gates
 have separate states. Open or excluded branch states remain visible; the
 same-field cover is a geometry property, not a weakness finding. The
 [property validator](validate_decomposition_properties.py) audits the source
 joins, status counts and site copy.
+The paper's exact 149-bit worked example is separately preserved as a
+[source-attributed case](published_cover_cases.json), with no atlas identity
+or local replay assigned to it.
 
 The default leaderboard contains 29 finding rows: two prime-field models
 meeting a published DLP criterion, 24 exact small-field covering-model
