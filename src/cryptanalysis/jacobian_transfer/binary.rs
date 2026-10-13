@@ -334,6 +334,7 @@ mod tests {
     /// depend on `a`.
     #[test]
     fn mmt_condition_8_matches_the_relative_trace_of_b() {
+        use crate::cryptanalysis::ec_trapdoor::{mmt_condition_8, FieldTower};
         let irr = IrreduciblePoly {
             degree: 12,
             low_terms: vec![0, 3],
@@ -367,6 +368,12 @@ mod tests {
                     n % 2 == 1 || !rel.is_zero(),
                     "l = {l}, b = {v}"
                 );
+                // ec_trapdoor's independent implementation agrees.
+                if n >= 2 {
+                    let tower = FieldTower::new(12, n, l, irr.clone());
+                    assert_eq!(mmt_condition_8(&tower, &a0, &b), g0.descent_exists);
+                    assert_eq!(mmt_condition_8(&tower, &a1, &b), g1.descent_exists);
+                }
                 assert_eq!((g0.magic_b, g0.type_i), (g1.magic_b, g1.type_i));
                 kernel += u32::from(rel.is_zero());
             }

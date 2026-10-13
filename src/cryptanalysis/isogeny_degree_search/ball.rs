@@ -71,7 +71,7 @@
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::binary_isogeny::{j_invariant, l_isogenous_neighbours};
-use crate::cryptanalysis::ec_trapdoor::{magic_number_full, FieldTower};
+use crate::cryptanalysis::ec_trapdoor::{magic_number_full, mmt_condition_8, FieldTower};
 use crate::cryptanalysis::ghs_descent::ECurve;
 use num_bigint::BigInt;
 use num_traits::One;
@@ -387,6 +387,10 @@ pub struct BallScreen {
     pub subfield_degree: Option<u32>,
     /// GHS magic number over `F_{2^131}/F_2`.
     pub magic: u32,
+    /// MMT Lemma 6 condition (8): whether the GHS cover descends to the
+    /// base field.  Always `true` for an odd relative degree such as
+    /// `n = 131`.
+    pub descends: bool,
 }
 
 /// One node of the ball.
@@ -426,11 +430,12 @@ impl BallReport {
             .collect()
     }
 
-    /// Nodes whose GHS magic number lands in the tractable window.
+    /// Nodes whose GHS magic number lands in the tractable window and
+    /// whose cover descends (MMT Lemma 6 condition (8)).
     pub fn ghs_hits(&self, lo: u32, hi: u32) -> Vec<&BallNode> {
         self.nodes
             .iter()
-            .filter(|nd| nd.screen.magic >= lo && nd.screen.magic <= hi)
+            .filter(|nd| nd.screen.descends && nd.screen.magic >= lo && nd.screen.magic <= hi)
             .collect()
     }
 
@@ -449,6 +454,7 @@ impl BallReport {
 pub fn screen(curve: &ECurve, tower: &FieldTower) -> BallScreen {
     let j = j_invariant(curve);
     let magic = magic_number_full(tower, &curve.a, &curve.b);
+    let descends = mmt_condition_8(tower, &curve.a, &curve.b);
     let subfield_degree = (1..curve.m)
         .filter(|d| curve.m.is_multiple_of(*d))
         .find(|d| tower.is_in_subfield(&j, *d));
@@ -463,6 +469,7 @@ pub fn screen(curve: &ECurve, tower: &FieldTower) -> BallScreen {
         b_weight,
         subfield_degree,
         magic,
+        descends,
     }
 }
 

@@ -14325,8 +14325,104 @@
       },
       "reference_log2": 15.65,
       "verdict": "boundary",
-      "best_route": 1,
+      "best_route": 3,
       "routes": [
+        {
+          "kind": "ghs_weil_descent",
+          "label": "GHS descent to Jac(C)/GF(2^6), N = 3 * 6",
+          "evidence": "exact_invariant",
+          "invariants": {
+            "audit_curve_magic_number": 1,
+            "base_degree": 6,
+            "cover_degree_log2": 1,
+            "magic_number": 1,
+            "mmt_condition_8": true,
+            "relative_degree": 3,
+            "relative_trace_b_zero": false,
+            "trace_a": 1,
+            "type_i": false
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "1",
+            "log2_genus": 0.0,
+            "field_bits": 6.0,
+            "log2_order": 6.0
+          },
+          "transport": "degenerate",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 9.931,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 13.138,
+              "log2_leading": 5.893,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  13.138
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 13.286,
+            "ratio_log2": 2.364,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "not_carried",
+          "notes": [
+            "GHS Weil descent: magic number dim Span{(1, σ^i(√b))} and genus as in research/cover_route_prime_binary_20261008/ghs_magic.rs (Hess); the cover C/GF(2^l) is not constructed here",
+            "sqrt(b) lies in the subfield: E is defined over GF(2^l) and the descent is the trace map onto E(GF(2^l)), which cannot carry the subgroup"
+          ]
+        },
+        {
+          "kind": "ghs_weil_descent",
+          "label": "GHS descent to Jac(C)/GF(2^2), N = 9 * 2",
+          "evidence": "exact_invariant",
+          "invariants": {
+            "audit_curve_magic_number": 1,
+            "base_degree": 2,
+            "cover_degree_log2": 1,
+            "magic_number": 1,
+            "mmt_condition_8": true,
+            "relative_degree": 9,
+            "relative_trace_b_zero": false,
+            "trace_a": 1,
+            "type_i": false
+          },
+          "destination": {
+            "object": "Jac(C)",
+            "genus": "1",
+            "log2_genus": 0.0,
+            "field_bits": 2.0,
+            "log2_order": 2.0
+          },
+          "transport": "degenerate",
+          "cost": {
+            "log2_search": null,
+            "log2_transfer": 9.931,
+            "destination": {
+              "solver": "rho_on_jacobian",
+              "log2_cost": 10.626,
+              "log2_leading": 5.893,
+              "considered": [
+                [
+                  "rho_on_jacobian",
+                  10.626
+                ]
+              ],
+              "enge_gaudry_hypothesis_holds": false
+            },
+            "log2_total": 11.32,
+            "ratio_log2": 4.33,
+            "exponent_ratio_log2": 0.0
+          },
+          "class": "not_carried",
+          "notes": [
+            "GHS Weil descent: magic number dim Span{(1, σ^i(√b))} and genus as in research/cover_route_prime_binary_20261008/ghs_magic.rs (Hess); the cover C/GF(2^l) is not constructed here",
+            "sqrt(b) lies in the subfield: E is defined over GF(2^l) and the descent is the trace map onto E(GF(2^l)), which cannot carry the subgroup"
+          ]
+        },
         {
           "kind": "ghs_weil_descent",
           "label": "GHS descent to Jac(C)/GF(2^9), N = 2 * 9",
@@ -14431,54 +14527,6 @@
           "notes": [
             "heuristic: counts curves whose sqrt(b') has a small Frobenius annihilator and assumes isogeny classes are random of size sqrt(|t^2-4q|)/pi; no isogenous curve is exhibited",
             "at least one such isogenous curve is expected; the search cost prices a random walk in the class until one is hit"
-          ]
-        },
-        {
-          "kind": "ghs_weil_descent",
-          "label": "GHS descent to Jac(C)/GF(2^6), N = 3 * 6",
-          "evidence": "exact_invariant",
-          "invariants": {
-            "audit_curve_magic_number": 1,
-            "base_degree": 6,
-            "cover_degree_log2": 1,
-            "magic_number": 1,
-            "mmt_condition_8": true,
-            "relative_degree": 3,
-            "relative_trace_b_zero": false,
-            "trace_a": 1,
-            "type_i": false
-          },
-          "destination": {
-            "object": "Jac(C)",
-            "genus": "1",
-            "log2_genus": 0.0,
-            "field_bits": 6.0,
-            "log2_order": 6.0
-          },
-          "transport": "degenerate",
-          "cost": {
-            "log2_search": null,
-            "log2_transfer": 9.931,
-            "destination": {
-              "solver": "rho_on_jacobian",
-              "log2_cost": 13.138,
-              "log2_leading": 5.893,
-              "considered": [
-                [
-                  "rho_on_jacobian",
-                  13.138
-                ]
-              ],
-              "enge_gaudry_hypothesis_holds": false
-            },
-            "log2_total": 13.286,
-            "ratio_log2": 2.364,
-            "exponent_ratio_log2": 0.0
-          },
-          "class": "not_carried",
-          "notes": [
-            "GHS Weil descent: magic number dim Span{(1, σ^i(√b))} and genus as in research/cover_route_prime_binary_20261008/ghs_magic.rs (Hess); the cover C/GF(2^l) is not constructed here",
-            "sqrt(b) lies in the subfield: E is defined over GF(2^l) and the descent is the trace map onto E(GF(2^l)), which cannot carry the subgroup"
           ]
         },
         {
@@ -14643,54 +14691,6 @@
           "notes": [
             "heuristic: counts curves whose sqrt(b') has a small Frobenius annihilator and assumes isogeny classes are random of size sqrt(|t^2-4q|)/pi; no isogenous curve is exhibited",
             "at least one such isogenous curve is expected; the search cost prices a random walk in the class until one is hit"
-          ]
-        },
-        {
-          "kind": "ghs_weil_descent",
-          "label": "GHS descent to Jac(C)/GF(2^2), N = 9 * 2",
-          "evidence": "exact_invariant",
-          "invariants": {
-            "audit_curve_magic_number": 1,
-            "base_degree": 2,
-            "cover_degree_log2": 1,
-            "magic_number": 1,
-            "mmt_condition_8": true,
-            "relative_degree": 9,
-            "relative_trace_b_zero": false,
-            "trace_a": 1,
-            "type_i": false
-          },
-          "destination": {
-            "object": "Jac(C)",
-            "genus": "1",
-            "log2_genus": 0.0,
-            "field_bits": 2.0,
-            "log2_order": 2.0
-          },
-          "transport": "degenerate",
-          "cost": {
-            "log2_search": null,
-            "log2_transfer": 9.931,
-            "destination": {
-              "solver": "rho_on_jacobian",
-              "log2_cost": 10.626,
-              "log2_leading": 5.893,
-              "considered": [
-                [
-                  "rho_on_jacobian",
-                  10.626
-                ]
-              ],
-              "enge_gaudry_hypothesis_holds": false
-            },
-            "log2_total": 11.32,
-            "ratio_log2": 4.33,
-            "exponent_ratio_log2": 0.0
-          },
-          "class": "not_carried",
-          "notes": [
-            "GHS Weil descent: magic number dim Span{(1, σ^i(√b))} and genus as in research/cover_route_prime_binary_20261008/ghs_magic.rs (Hess); the cover C/GF(2^l) is not constructed here",
-            "sqrt(b) lies in the subfield: E is defined over GF(2^l) and the descent is the trace map onto E(GF(2^l)), which cannot carry the subgroup"
           ]
         },
         {

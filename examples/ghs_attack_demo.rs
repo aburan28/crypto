@@ -10,7 +10,7 @@ use crypto_lib::cryptanalysis::binary_isogeny::{
     j_invariant, l_isogenous_neighbours, phi_l_mod2_in_x,
 };
 use crypto_lib::cryptanalysis::ec_trapdoor::{
-    audit_curve, magic_number_full, plain_orbit_dim, FieldTower,
+    audit_curve, magic_number_full, mmt_condition_8, plain_orbit_dim, FieldTower,
 };
 use crypto_lib::cryptanalysis::ec_trapdoor::{DescentRow, TrapdoorCurve};
 use crypto_lib::cryptanalysis::ghs_descent::{descend_m2_abstract, ECurve, Pt};
@@ -90,11 +90,11 @@ E(F_{{2^3}}) — a much smaller group, where ECDLP is trivially solvable.
     println!("  b ∈ F_{{2^3}}: {}", tower.is_in_subfield(&b, l));
     let aud = audit_curve(big_n, &irr, &a, &b);
     println!("  Auditor table:");
-    println!("    (n, l)    magic_m  genus  type_I");
+    println!("    (n, l)    magic_m  genus  type_I  descends");
     for row in &aud {
         println!(
-            "    ({:>2}, {:>2})       {}      {:>3}  {}",
-            row.n, row.l, row.magic_m, row.genus, row.type_i
+            "    ({:>2}, {:>2})       {}      {:>3}  {:<6}  {}",
+            row.n, row.l, row.magic_m, row.genus, row.type_i, row.descends
         );
     }
 
@@ -287,11 +287,12 @@ infeasible to find).
         for nb in &nbs {
             let m_nb = magic_number_full(&tower, &nb.a, &nb.b);
             println!(
-                "    j' = {:?}, a' = {:?}, b' = {:?}, magic = {}",
+                "    j' = {:?}, a' = {:?}, b' = {:?}, magic = {}, descends = {}",
                 j_invariant(nb).to_biguint(),
                 nb.a.to_biguint(),
                 nb.b.to_biguint(),
-                m_nb
+                m_nb,
+                mmt_condition_8(&tower, &nb.a, &nb.b)
             );
         }
     }

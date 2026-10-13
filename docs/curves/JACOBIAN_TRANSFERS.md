@@ -91,8 +91,10 @@ pairs that disagreed.  Both are gone (schema `jacobian-transfers/2`).
 c2pnb176w1, c2pnb272w1 and c2pnb304w1 have `Tr(a) = 1` but satisfy (8) on
 every tower, so their `m = 8` rows over `GF(4)` are exact.  The only
 registry curve where (8) fails is an 18-bit test curve with `b ∈ F_2`.
-`ec_trapdoor::audit_curve` does not check (8).  Each row records the value
-it reports as `audit_curve_magic_number`; the row is not priced with it.
+`ec_trapdoor::mmt_condition_8` is the same check, and `audit_curve` records
+it in `DescentRow::descends`.  Each row records the magic number
+`audit_curve` reports as `audit_curve_magic_number`; the row is not priced
+with it.
 
 Routes the scan does **not** enumerate, and why: Hess's generalised
 Artin–Schreier covers beyond the classical GHS family (needs a per-curve

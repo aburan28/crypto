@@ -585,6 +585,7 @@ fn binary_routes(rb: &RouteBuilder, c: &RegistryCurve, n_total: u32, irr: &Irred
             magic_m: m,
             genus,
             type_i: magic.type_i,
+            descends: magic.descent_exists,
         };
         let log2_genus = log2_biguint(&row.genus).max(0.0);
         let transport = if !magic.descent_exists {

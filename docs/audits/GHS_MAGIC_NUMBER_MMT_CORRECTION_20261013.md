@@ -199,10 +199,38 @@ still fails there.
 - `teske161_select` already used the MMT rank of pairs and the trace-zero ⇔
   genus 7 rule; unchanged.
 
-## Not settled here
+### Lemma 6 in `ec_trapdoor` and its callers (same PR, later commit)
 
-- MMT Lemma 6 condition (8) is checked by `jacobian_transfer` but not by
-  `ec_trapdoor::audit_curve` or the other `magic_number` callers.
-- Conductor: `conductor check` could not run in the authoring session (no
-  control-plane endpoint or login available in that container); no scope
-  reservation was taken.
+- `ec_trapdoor::mmt_condition_8` (with `absolute_trace` and
+  `relative_trace`) is the shared check.  `audit_curve` records it in
+  `DescentRow::descends` and lists descending rows first.
+- `construct_trapdoor_curve` keeps `a = 1`, which always satisfies (8):
+  `Tr(1) = N mod 2`, and an even `n` forces an even `N`.  Its row records
+  `descends`, and a debug assertion guards the invariant.
+- `ghs_screen` reports `mmt_condition_8` per tower (schema
+  `ghs-screen/v2`) and never counts an obstructed tower as within the
+  bound.  `binary_isogeny::walk_to_magic` only stops on a curve whose
+  cover descends.  `isogeny_degree_search::ball::ghs_hits` requires it
+  (always true at `n = 131`, which is odd).  `ghs_full_attack` records it
+  per neighbour, and `examples/ghs_attack_demo` prints it.
+- New tests: `mmt_condition_8_counts_n12` (exhaustive over `F_{2^12}`, five
+  towers: with `Tr(a) = 1` exactly `q^{n−1} − 1` failures for even `n`, none
+  for odd `n`; none with `Tr(a) = 0`), `audit_curve_puts_descending_towers_first`
+  and `trapdoor_curves_satisfy_condition_8`.  The `jacobian_transfer`
+  exhaustive test also checks its own implementation against
+  `ec_trapdoor::mmt_condition_8`.
+- Effect on `jacobian-transfers.json`: only the 18-bit curve where (8)
+  fails lists its routes in a different order.  No route, cost or verdict
+  changes.
+- The frozen `docs/ghs-transport-evidence/*-screen.json` and the sect113r1
+  three-node addendum keep schema `ghs-screen/v1`.  sect113r1 has `N = 113`
+  prime, so `n = 113` is odd and (8) holds; its live recompute is unchanged.
+
+## Conductor
+
+The authoring session for the MMT correction had no control plane, so no
+scope reservation was taken.  The Lemma 6 follow-up started the in-container
+control plane (`conductor up` on the image's Postgres 16, as
+`.claude/hooks/session-start.sh` does).  `conductor check` for its scope was
+clear, and it filed and claimed task T-1.  That control plane sees only
+this container.

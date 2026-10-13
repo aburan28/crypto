@@ -58,7 +58,9 @@ use crate::binary_ecc::{F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::binary_isogeny::{
     j_invariant, l_isogenous_neighbours, walk_to_magic, WalkOptions, WalkResult,
 };
-use crate::cryptanalysis::ec_trapdoor::{magic_number_full, FieldTower, TrapdoorCurve};
+use crate::cryptanalysis::ec_trapdoor::{
+    magic_number_full, mmt_condition_8, FieldTower, TrapdoorCurve,
+};
 use crate::cryptanalysis::ghs_descent::{
     brute_force_ecdlp, descend_m1, descend_m2_abstract, ECurve, Pt,
 };
@@ -121,6 +123,9 @@ pub struct NeighbourReport {
     pub isogeny_degree: u32,
     pub j_prime: F2mElement,
     pub magic: u32,
+    /// MMT Lemma 6 condition (8): whether this neighbour's GHS cover
+    /// descends to the base field.
+    pub descends: bool,
 }
 
 /// Run the full pipeline.  Given:
@@ -146,6 +151,7 @@ pub fn run_full_attack(tc: &TrapdoorCurve, p: &Pt, q: &Pt, opts: &AttackOptions)
                 isogeny_degree: l,
                 j_prime: j_invariant(&nb),
                 magic: m_nb,
+                descends: mmt_condition_8(&tower, &nb.a, &nb.b),
             });
         }
     }

@@ -319,6 +319,44 @@ pub fn ghs_type_i(tower: &FieldTower, b: &F2mElement) -> bool {
     plain != 0 && mmt == plain + 1
 }
 
+/// Absolute trace `Tr_{K/F_2}(x)` as a bit.
+pub fn absolute_trace(tower: &FieldTower, x: &F2mElement) -> bool {
+    let mut acc = x.clone();
+    let mut cur = x.clone();
+    for _ in 1..tower.big_n {
+        cur = cur.square(&tower.irr);
+        acc = acc.add(&cur);
+    }
+    !acc.is_zero()
+}
+
+/// Relative trace `Tr_{K/k}(x) = Σ_{0 ≤ i < n} σ^i(x)`.
+pub fn relative_trace(tower: &FieldTower, x: &F2mElement) -> F2mElement {
+    let mut acc = F2mElement::zero(tower.big_n);
+    let mut cur = x.clone();
+    for _ in 0..tower.n {
+        acc = acc.add(&cur);
+        cur = tower.frobenius(&cur);
+    }
+    acc
+}
+
+/// MMT Lemma 6, condition (8): the GHS cover of `E: y² + xy = x³ + ax² + b`
+/// descends to `k` when `n` is odd, or `Tr_{K/F_2}(a) = 0`, or
+/// `Tr_{K/k}(b) ≠ 0`.
+///
+/// When all three fail, the sum of the `n` Artin–Schreier conjugates of
+/// `z² + z = x + a + b/x²` is `≡` the constant `Tr_{K/k}(a)` modulo `℘(K(x))`.
+/// Its `℘`-root `h₀` lies in `F_{q²}` and lies in `k = F_q` exactly when
+/// `Tr_{K/F_2}(a) = 0`.  Otherwise `σ(h₀) = h₀ + 1`, so every lift of `σ` to
+/// the compositum flips an odd number of the `z_i` and has order `2n`: there
+/// is no Weil descent of the cover to `k`, whatever [`magic_number`] says.
+/// `Tr_{K/F_2}(a)` is an isogeny invariant (it fixes `#E mod 4`), so the
+/// condition can fail for a whole isogeny class at once.
+pub fn mmt_condition_8(tower: &FieldTower, a: &F2mElement, b: &F2mElement) -> bool {
+    tower.n % 2 == 1 || !absolute_trace(tower, a) || !relative_trace(tower, b).is_zero()
+}
+
 /// `(plain, mmt)`: the ranks of `{σ^i(√b)}` and of `{(1, σ^i(√b))}`.  The
 /// pairs are encoded by setting bit `big_n` (the `F_2` coordinate) on each
 /// orbit element.  `mmt` is forced to `0` when `b = 0`.
@@ -387,8 +425,9 @@ pub fn ghs_genus_with_type(tower: &FieldTower, b: &F2mElement) -> (BigUint, bool
 
 /// **Auditor view** of a curve `E/F_{2^N}`: try every non-trivial
 /// factorisation `N = n·l` and report the descent magic number /
-/// genus for each.  Returns the rows sorted by `(genus, l)` ascending
-/// (smaller-genus attacks first).
+/// genus for each, with MMT Lemma 6 condition (8) in
+/// [`DescentRow::descends`].  Rows that descend come first, then by
+/// `(genus, l)` ascending (smaller-genus attacks first).
 pub fn audit_curve(
     big_n: u32,
     big_irr: &IrreduciblePoly,
@@ -413,11 +452,18 @@ pub fn audit_curve(
             magic_m: m,
             genus: g,
             type_i,
+            descends: mmt_condition_8(&tower, a, b),
         });
     }
-    // Sort: smallest genus first (most threatening descent); ties
-    // broken by larger l (more "work" in the descent curve field).
-    rows.sort_by(|x, y| x.genus.cmp(&y.genus).then(y.l.cmp(&x.l)));
+    // Sort: rows that descend (MMT condition (8)) first, then smallest
+    // genus (most threatening descent); ties broken by larger l (more "work"
+    // in the descent curve field).
+    rows.sort_by(|x, y| {
+        y.descends
+            .cmp(&x.descends)
+            .then(x.genus.cmp(&y.genus))
+            .then(y.l.cmp(&x.l))
+    });
     rows
 }
 
@@ -434,6 +480,10 @@ pub struct DescentRow {
     pub genus: BigUint,
     /// Type I, `(x − 1) ∤ Ord_b` (genus `2^{m−1} − 1`)?
     pub type_i: bool,
+    /// MMT Lemma 6 condition (8) ([`mmt_condition_8`]): whether the cover
+    /// descends to `F_{2^l}` at all.  When `false`, `magic_m` and `genus`
+    /// describe the cover over `K` only and the row is no attack.
+    pub descends: bool,
 }
 
 /// **Trapdoor constructor**: given a target factorisation `N = n·l`
@@ -445,8 +495,10 @@ pub struct DescentRow {
 /// `2^{m_target−1}`).
 ///
 /// Returns the curve coefficients `(a, b)` and the resulting
-/// audit row.  We fix `a = 1` (so the `a`-contribution to the
-/// magic number vanishes).
+/// audit row.  We fix `a = 1`.  `a` does not change the magic number, and
+/// `a = 1` always satisfies MMT Lemma 6 condition (8)
+/// ([`mmt_condition_8`]): `Tr_{K/F_2}(1) = N mod 2`, and an even `n` makes
+/// `N` even, so the trace is 0 whenever condition (8) could fail.
 ///
 /// **Returns `None`** if the search budget is exhausted; this is
 /// rare for small `N` but can happen for highly constrained towers.
@@ -515,6 +567,8 @@ pub fn construct_trapdoor_curve(
             continue;
         }
         // Build the audit row for the target factorisation.
+        let descends = mmt_condition_8(&tower, &a, &b);
+        debug_assert!(descends, "Tr(1) = N mod 2 is 0 whenever n is even");
         let m = magic_number_full(&tower, &a, &b);
         let (genus, type_i) = ghs_genus_with_type(&tower, &b);
         debug_assert_eq!(m, m_target);
@@ -533,6 +587,7 @@ pub fn construct_trapdoor_curve(
                 magic_m: m,
                 genus,
                 type_i,
+                descends,
             },
             full_audit: None,
         });
@@ -744,16 +799,6 @@ mod tests {
     }
 
     /// `Tr_{K/k}(x) = Σ_{i<n} σ^i(x)`.
-    fn rel_trace(tower: &FieldTower, x: &F2mElement) -> F2mElement {
-        let mut acc = F2mElement::zero(tower.big_n);
-        let mut cur = x.clone();
-        for _ in 0..tower.n {
-            acc = acc.add(&cur);
-            cur = tower.frobenius(&cur);
-        }
-        acc
-    }
-
     /// MMT Theorem 5(i) over `N = 12`: for `n = 3`,
     /// `x^3 − 1 = (x − 1)(x^2 + x + 1)` gives `m = 1` on `k*` and `m = 3`
     /// elsewhere (`m = 2` is not attained); for `n = 2`, `m = 1` on `k*`
@@ -788,7 +833,7 @@ mod tests {
             let b = F2mElement::from_biguint(&BigUint::from(v), 12);
             let mmt = magic_number(&tower, &F2mElement::zero(12), &b);
             let plain = plain_orbit_dim(&tower, &b);
-            let expect_extra = rel_trace(&tower, &b).is_zero() && !tower.is_in_subfield(&b, 4);
+            let expect_extra = relative_trace(&tower, &b).is_zero() && !tower.is_in_subfield(&b, 4);
             assert_eq!(mmt, plain + u32::from(expect_extra), "v = {v}");
             assert_eq!(ghs_type_i(&tower, &b), expect_extra, "v = {v}");
             assert_eq!(magic_number_full(&tower, &a, &b), mmt, "v = {v}");
@@ -816,7 +861,7 @@ mod tests {
             let (g, type_i) = ghs_genus_with_type(&tower, &b);
             let m = magic_number(&tower, &F2mElement::zero(10), &b);
             let in_k = tower.is_in_subfield(&b, 2);
-            let tr0 = rel_trace(&tower, &b).is_zero();
+            let tr0 = relative_trace(&tower, &b).is_zero();
             let class = if in_k {
                 "k"
             } else if tr0 {
@@ -838,4 +883,72 @@ mod tests {
             ]
         );
     }
+
+    /// MMT Lemma 6 condition (8), exhaustive over `F_{2^12}`: with `Tr(a) = 1`
+    /// it fails on exactly the `q^{n−1} − 1` nonzero `b` of relative trace
+    /// zero when `n` is even, and never when `n` is odd; with `Tr(a) = 0` it
+    /// always holds.
+    #[test]
+    fn mmt_condition_8_counts_n12() {
+        let irr = f4096_irr();
+        let el = |v: u64| F2mElement::from_biguint(&BigUint::from(v), 12);
+        let any = FieldTower::new(12, 2, 6, irr.clone());
+        let a1 = (1u64..).map(el).find(|a| absolute_trace(&any, a)).unwrap();
+        let a0 = F2mElement::zero(12);
+        for (n, l) in [(2u32, 6u32), (3, 4), (4, 3), (6, 2), (12, 1)] {
+            let tower = FieldTower::new(12, n, l, irr.clone());
+            let fails = (1u64..4096)
+                .filter(|&v| !mmt_condition_8(&tower, &a1, &el(v)))
+                .count();
+            let expect = if n % 2 == 1 { 0 } else { (1usize << (12 - l)) - 1 };
+            assert_eq!(fails, expect, "n = {n}");
+            assert!((1u64..4096).all(|v| mmt_condition_8(&tower, &a0, &el(v))));
+        }
+    }
+
+    /// `audit_curve` lists towers whose cover descends first: with
+    /// `Tr(a) = 1` and `b = 1` every even-`n` tower of `F_{2^12}` is
+    /// obstructed, and the only one left is `n = 3`, `l = 4`.
+    #[test]
+    fn audit_curve_puts_descending_towers_first() {
+        let irr = f4096_irr();
+        let any = FieldTower::new(12, 2, 6, irr.clone());
+        let a1 = (1u64..)
+            .map(|v| F2mElement::from_biguint(&BigUint::from(v), 12))
+            .find(|a| absolute_trace(&any, a))
+            .unwrap();
+        let rows = audit_curve(12, &irr, &a1, &F2mElement::one(12));
+        assert_eq!(
+            rows.iter().map(|r| (r.n, r.descends)).collect::<Vec<_>>(),
+            vec![(3, true), (2, false), (4, false), (6, false), (12, false)]
+        );
+    }
+
+    /// The trapdoor constructor's `a = 1` never violates condition (8): an
+    /// even `n` forces an even `N`, so `Tr(1) = N mod 2 = 0`.  Checked at
+    /// `N = 12`, `n = 4`, `m = 2` (where `n / m` is even and `Tr_{K/k}(b)`
+    /// vanishes) and `N = 10`, `n = 2`, `m = 1`.
+    #[test]
+    fn trapdoor_curves_satisfy_condition_8() {
+        for (big_n, n, l, m, irr) in [
+            (12u32, 4u32, 3u32, 2u32, f4096_irr()),
+            (
+                10,
+                2,
+                5,
+                1,
+                IrreduciblePoly {
+                    degree: 10,
+                    low_terms: vec![0, 3],
+                },
+            ),
+        ] {
+            let tc = construct_trapdoor_curve(big_n, n, l, m, &irr, 4096).expect("trapdoor curve");
+            let tower = FieldTower::new(big_n, n, l, irr.clone());
+            assert!(tc.row.descends);
+            assert!(mmt_condition_8(&tower, &tc.a, &tc.b));
+            assert_eq!(tc.row.magic_m, m);
+        }
+    }
+
 }
