@@ -77,4 +77,6 @@ node research/ecbench_rootfinding_tuning_20261013/render_chart.mjs
 The frozen protocol said `ecbench audit`; the binary used for this run exposes
 the same replay operation as `ecbench verify`. The command above is the actual
 one. No canonical frontier graph was changed: this L0 local session has
-unpriced native work and no independent-host replay.
+unpriced native work and no independent-host replay. The [validation record](VALIDATION.md)
+retains the full-suite failures and the passing focused reruns; it does not
+represent the full suite as clean.
