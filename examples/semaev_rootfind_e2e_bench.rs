@@ -659,7 +659,7 @@ impl Msolve {
     /// `Some(true)` = unit ideal (refuted), `Some(false)` = non-empty variety.
     fn decide(&mut self, input: &str) -> Option<bool> {
         // Paired: decide and trivial control adjacent, order alternating.
-        let (real, ctrl) = if self.calls % 2 == 0 {
+        let (real, ctrl) = if self.calls.is_multiple_of(2) {
             let c0 = children_cpu();
             let out = self.raw(input)?;
             let c1 = children_cpu();

@@ -5577,8 +5577,7 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
             {
                 first_target_pin = Some((matrix.rank() as u64, trials, found));
             }
-            if completion == CompletionRule::FullRank && matrix.rank() == cols && pinned.is_none()
-            {
+            if completion == CompletionRule::FullRank && matrix.rank() == cols && pinned.is_none() {
                 la.count("full_rank_unpinned", 1);
                 stop = true;
                 break;
