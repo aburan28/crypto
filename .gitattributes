@@ -74,3 +74,15 @@ ecc2k130/benchmarks/sigma-fused/shared-scratch/results/** -whitespace
 # Preserve manifest-hashed qualified F5 discovery receipts byte for byte.
 research/boolean_f5_graded_batch_20261002/qualified_discovery_01/cpuinfo.txt whitespace=-blank-at-eof
 research/boolean_f5_graded_batch_20261002/qualified_discovery_01/test.stdout whitespace=-blank-at-eof
+
+# N83 dense-root benchmark media and immutable raw archives.
+benchmarks/20261013-n83-dense-root/*.pdf binary
+benchmarks/20261013-n83-dense-root/*.png binary
+benchmarks/20261013-n83-dense-root/*.svg -diff -whitespace
+research/n83_dense_root_20261013/*.pdf binary
+research/n83_dense_root_20261013/reports/**/*.pdf binary
+research/n83_dense_root_20261013/reports/**/*.png binary
+research/n83_dense_root_20261013/reports/**/*.svg -diff -whitespace
+research/n83_dense_root_20261013/runs/panel/*/base_dump.jsonl -diff -whitespace
+research/n83_dense_root_20261013/final_fmt.log -diff -whitespace
+research/n83_dense_root_20261013/final_*_tests.log whitespace=-blank-at-eof

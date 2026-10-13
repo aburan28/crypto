@@ -1625,6 +1625,30 @@ mod wide {
             }
             assert_eq!(packed.len, wide.len);
         }
+
+        #[test]
+        fn denser_packed_slots_preserve_first_witness_and_exact_lookup() {
+            let mut dense = RootTable128::with_capacity(512, 83, 900, true);
+            let mut regular = RootTable128::with_capacity(1024, 83, 900, true);
+            assert_eq!(dense.layout_receipt(), ("packed_u128", 16, 1 << 14));
+            assert_eq!(regular.layout_receipt(), ("packed_u128", 16, 1 << 15));
+            dense.bloom = None;
+            regular.bloom = None;
+            for i in 0..768u64 {
+                let key = ((i as u128) << 16) | (mix_root_bloom(i) as u128 & 0xffff);
+                dense.insert_if_absent(key, i + 1);
+                regular.insert_if_absent(key, i + 1);
+                dense.insert_if_absent(key, 0);
+                regular.insert_if_absent(key, 0);
+            }
+            for i in 0..2048u64 {
+                let key = ((i as u128) << 16) | (mix_root_bloom(i) as u128 & 0xffff);
+                assert_eq!(dense.get(key), regular.get(key));
+                assert_eq!(dense.get(key), (i < 768).then_some(i + 1));
+            }
+            assert_eq!(dense.len, 768);
+            assert_eq!(regular.len, 768);
+        }
     }
 
     struct State128 {
@@ -1638,6 +1662,8 @@ mod wide {
         states: Vec<State128>,
         table: RootTable128,
         shifted: Vec<Vec<u128>>,
+        dense_table: bool,
+        root_table_request_entries: usize,
     }
 
     struct Relation128 {
@@ -1876,7 +1902,18 @@ mod wide {
             }
         }
         let packed = std::env::var("KIC_PACKED_ROOT_TABLE").as_deref() == Ok("1");
-        let mut table = RootTable128::with_capacity(states.len() * 2, gf.n, reps.len(), packed);
+        let dense_table = std::env::var("KIC_PACKED_ROOT_TABLE_DENSE").as_deref() == Ok("1");
+        assert!(
+            !dense_table || packed,
+            "dense root table requires packed slots"
+        );
+        let root_table_request_entries = if dense_table {
+            states.len()
+        } else {
+            states.len() * 2
+        };
+        let mut table =
+            RootTable128::with_capacity(root_table_request_entries, gf.n, reps.len(), packed);
         for state in &states {
             for &root in &state.normal_roots {
                 let (canonical, shift) = basis.canonical_selected(root);
@@ -1890,6 +1927,8 @@ mod wide {
             states,
             table,
             shifted,
+            dense_table,
+            root_table_request_entries,
         }
     }
 
@@ -2542,6 +2581,8 @@ mod wide {
             "factor_base_points":base.points.len(),
             "regular_states":index.states.len(),
             "root_table_entries":index.table.len,
+            "root_table_dense_enabled":index.dense_table,
+            "root_table_request_entries":index.root_table_request_entries,
             "root_table_layout":root_table_layout,
             "root_table_slot_bytes":root_table_slot_bytes,
             "root_table_allocated_bytes":root_table_allocated_bytes,
