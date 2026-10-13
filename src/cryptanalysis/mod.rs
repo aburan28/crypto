@@ -400,8 +400,9 @@ pub use koblitz_index_calculus::{
 pub use koblitz_sparse_la::{
     block_lanczos_solve, block_wiedemann_kernel, filter_relations, solve_sparse_system,
     BlockLanczosOptions, BlockLanczosReport, BlockWiedemannOptions, BlockWiedemannReport,
-    CsrMatrix, FilterOptions, FilterReport, FilteredSystem, SparseCoreSolver, SparseRow,
-    SparseSolveOptions, SparseSolveOutcome, SparseSolveReport, SpmvBackend, SpmvOptions,
+    CsrMatrix, FilterOptions, FilterReport, FilteredSystem, ModWord, SparseCoreSolver,
+    SparseRow, SparseRows, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
+    SpmvBackend, SpmvOptions, Wide, WideModulus, WordWidth, U128, U192, U256,
 };
 pub use lattice::{bkz_reduce, lll_reduce};
 pub use legacy_curve_attacks::{
