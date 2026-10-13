@@ -96,7 +96,7 @@ the values above; `curve_construction::legacy::ghs_census` now reports
 ### 2. `docs/curves/jacobian-transfers.json` (regenerated)
 
 `jacobian_transfer::binary::ghs_magic` already used the MMT magic number; only
-its type rule was wrong.  Comparing a build of `main` (ecb69d15) with this
+its type rule was wrong.  Comparing a build of `main` at ecb69d15 with this
 branch on the same registry and `--budget 200000`: 0 magic numbers change,
 252 GHS rows change genus, 16 rows change class, and 4 curve verdicts change.
 These are formula-level prices from the frozen cost model, not attack results.
@@ -152,6 +152,11 @@ still fails there.
   `screen` and the `ghs_attack_demo` example call `magic_number_full` and now
   get MMT values.  Over the `(N, n, l) = (6, 3, 2)` demo tower `m ∈ {1, 3}`;
   the demo's "m = 2" curve is `m = 3`, genus 3.
+- `ghs_class_coverage` (merged to `main` while this change was in
+  progress): its `plain_matches_ec_trapdoor` test now compares `magic_plain`
+  with `ec_trapdoor::plain_orbit_dim` and `magic_mmt` with
+  `ec_trapdoor::magic_number`.  Its committed coverage data already used the
+  MMT value and is unaffected.
 - `teske161_select` already used the MMT rank of pairs and the trace-zero ⇔
   genus 7 rule; unchanged.
 
@@ -159,10 +164,6 @@ still fails there.
 
 - MMT Lemma 6 applicability (`Tr_{K/F_2}(a) = 1`) is not checked by
   `audit_curve`.
-- The `ghs_class_coverage` module on branch
-  `claude/isogeny-walks-genus3-d4c9g1` asserts in `plain_matches_ec_trapdoor`
-  that `ec_trapdoor::magic_number` equals its `magic_plain`; after this change
-  that test must compare against `ec_trapdoor::plain_orbit_dim` instead.
 - Conductor: `conductor check` could not run in the authoring session (no
   control-plane endpoint or login available in that container); no scope
   reservation was taken.
