@@ -120,6 +120,7 @@ use crate::cryptanalysis::koblitz_index_calculus::{
     saturate_factor_base_two_torsion, FrobeniusFactorBase, KoblitzCurve, KoblitzSignedRhoOptions,
     ProjectedFactorBase,
 };
+use crate::cryptanalysis::prime_fast::Fp64;
 use crate::cryptanalysis::research_bench::{bench_curves, linear_fit};
 use crate::cryptanalysis::residual_walk::is_prime_u64;
 use crate::cryptanalysis::semaev_decomp::{Gf2, SubspaceOracle};
@@ -4520,6 +4521,90 @@ impl PairTable {
             build_ops: ops,
             build_wall_ns: start.elapsed().as_nanos() as u64,
         }
+    }
+
+    /// Prime-field version of the same folded table. A row shares one
+    /// inversion across its doubling and all later abscissae; each signed
+    /// pair uses the same inverse. Only the sum's x coordinate is needed
+    /// for the key. The exact point is re-added by `probe` on a hit.
+    pub fn build_negation_folded_prime_batch(
+        g: &PrimeCurve,
+        fb: &FactorBase<PrimePoint>,
+    ) -> Result<Self, String> {
+        if g.p < 5 || g.p & 1 == 0 || g.p >= (1u64 << crate::cryptanalysis::prime_fast::MAX_BITS) {
+            return Err("batched prime table requires odd 3 < p < 2^62".into());
+        }
+        let start = Instant::now();
+        let f = Fp64::new(g.p);
+        let groups: Vec<&Vec<usize>> = fb
+            .abscissa_list
+            .iter()
+            .map(|x| fb.x_index.get(x).expect("every listed abscissa is indexed"))
+            .collect();
+        let a = groups.len();
+        let mut ops = GroupOps::default();
+        let mut map: FastMap<(u32, u32)> = fast_map(a * a + 1);
+        let pts: Vec<(u64, u64)> = fb
+            .points
+            .iter()
+            .map(|pt| (f.to_mont(pt.x), f.to_mont(pt.y)))
+            .collect();
+        ops.field_ops.muls += 2 * pts.len() as u64;
+        let am = f.to_mont(g.a);
+        ops.field_ops.muls += 1;
+        let mut denominators = Vec::with_capacity(a);
+        let mut scratch = Vec::with_capacity(a);
+        for ai in 0..a {
+            let i = groups[ai][0];
+            let (xi, yi) = pts[i];
+            if yi == 0 {
+                return Err("batched prime table does not accept a 2-torsion base point".into());
+            }
+            denominators.clear();
+            denominators.push(f.add(yi, yi));
+            for group in groups.iter().skip(ai + 1) {
+                let d = f.sub(pts[group[0]].0, xi);
+                if d == 0 {
+                    return Err("batched prime table requires distinct abscissae".into());
+                }
+                denominators.push(d);
+            }
+            let k = denominators.len();
+            f.batch_inv(&mut denominators, &mut scratch);
+            ops.field_ops.invs += 1;
+            // batch_inv performs k prefix products, 2k backward products,
+            // and one Montgomery conversion in its inverse.
+            ops.field_ops.muls += 3 * k as u64 + 1;
+            for (offset, group) in groups.iter().skip(ai).enumerate() {
+                for &j in group.iter() {
+                    // Preserve the generic table's abstract group-operation
+                    // charge, including the zero-work P + (-P) case.
+                    ops.adds += 1;
+                    if offset == 0 && j != i {
+                        continue;
+                    }
+                    let lambda = if offset == 0 {
+                        let x2 = f.sqr(xi);
+                        ops.field_ops.sqrs += 1;
+                        f.mul(f.add(f.add(x2, x2), f.add(x2, am)), denominators[0])
+                    } else {
+                        f.mul(f.sub(pts[j].1, yi), denominators[offset])
+                    };
+                    let x_sum = f.sub(f.sub(f.sqr(lambda), xi), pts[j].0);
+                    let x = f.from_mont(x_sum);
+                    ops.field_ops.muls += 2;
+                    ops.field_ops.sqrs += 1;
+                    map.entry(x + 1).or_insert((i as u32, j as u32));
+                }
+            }
+        }
+        Ok(Self {
+            kind: "negation_folded_prime_batch",
+            entries: map.len() as u64,
+            map,
+            build_ops: ops,
+            build_wall_ns: start.elapsed().as_nanos() as u64,
+        })
     }
 
     pub fn cost(&self) -> TableCost {
@@ -9151,6 +9236,21 @@ mod tests {
                 assert_eq!(s, q);
             }
         }
+    }
+
+    #[test]
+    fn prime_batch_table_matches_scalar_table_and_reduces_inversions() {
+        let inst = roster_prime_instance(14).unwrap();
+        let curve = &inst.curve;
+        let fb = prime_factor_base(&inst, 24);
+        let scalar = PairTable::build_negation_folded(curve, &fb);
+        let batch = PairTable::build_negation_folded_prime_batch(curve, &fb).unwrap();
+        assert_eq!(batch.map, scalar.map, "every x key keeps the same witness");
+        assert_eq!(batch.entries, scalar.entries);
+        assert_eq!(batch.build_ops.adds, scalar.build_ops.adds);
+        assert_eq!(batch.build_ops.doubles, scalar.build_ops.doubles);
+        assert_eq!(batch.build_ops.field_ops.invs, fb.abscissae as u64);
+        assert!(batch.build_ops.field_ops.invs < scalar.build_ops.field_ops.invs);
     }
 
     #[test]
