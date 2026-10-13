@@ -1,4 +1,6 @@
-# Validation receipt before the current-main merge
+# Validation receipts
+
+## Frozen run and pre-merge source
 
 The frozen spec was accepted by `target/release/ecbench plan` and expanded
 to 128 executions on eight registered public workloads. The session was
@@ -39,6 +41,36 @@ catalog PDF/SVG/PNG copies were byte-compared with the study originals.
 `git diff --check` passed. All measured wall records are L0; no wall-time
 claim was admitted.
 
-The branch will merge `origin/main` before PR delivery. That integration
-requires a separate check on the merged revision; this receipt binds the
-pre-merge source and is not silently reused as a post-merge test result.
+This receipt binds the pre-merge source and is not reused as a post-merge
+test result.
+
+## Merged-source integration
+
+The branch merged `origin/main` at
+`46f3365bbdc728173ef14ecfcc38480dd0eb1a0f`. The required
+`cargo test --release --lib` on that merged revision exited 101 after
+906.70 seconds of test execution: **4,041 passed, 13 failed, 114
+ignored**. The [raw log](full-lib-test-after-merge.log) has SHA-256
+`39acfa9240a051014e80afaddb5c733bc6894f03602365bf78cadf98c0d78c06`.
+The new batch-table equivalence test and the prime
+`rootfind_subtract_follows_subtract_query_stream_on_a_prime_curve` test
+both passed in this suite.
+
+Nine failures were `cryptanalysis::pollard_collab` socket/listener tests:
+the raw errors report `PermissionDenied: Operation not permitted` under
+the default sandbox. The focused command
+`cargo test --release --lib cryptanalysis::pollard_collab:: -- --test-threads=1`
+with local loopback access passed **37/37**. Its [raw log](pollard-loopback-after-merge.log)
+has SHA-256
+`22e2958d840c8b97f3708c486f5499fa0ffa13b7bdd244e3ef12bf00d4cb398b`.
+
+Four failures were `cryptanalysis::jv_cover` solver tests in the
+parallel whole-suite run. The raw failures include solver timeout
+conditions under load. The focused serial command
+`cargo test --release --lib cryptanalysis::jv_cover:: -- --test-threads=1`
+passed **14/14**, with one ignored, including all four failed cases. Its
+[raw log](jv-cover-after-merge.log) has SHA-256
+`eb70418c03cab6ed86f40c2d8d1a3b5ba8edc099648f1e75b9d3a86a5128d3a5`.
+These reruns classify the observed failures under different execution
+conditions; there is no clean whole-suite pass receipt on the merged
+source.
