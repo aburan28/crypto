@@ -1686,8 +1686,101 @@ mod wide {
 
     #[cfg(test)]
     mod root_bloom_table_tests {
-        use super::{PackedRootLayout, RootBloom, RootSlots128, RootTable128};
+        use super::{
+            Gf2_128, NormalBasis128, PackedRootLayout, RootBloom, RootSlots128, RootTable128,
+            S3Solver128, State128, State83, StateStore128,
+        };
         use crate::mix_root_bloom;
+        use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse_wide;
+
+        #[test]
+        fn indexed_five_byte_slots_match_real_n83_s3_roots() {
+            let polynomial = find_irreducible_sparse_wide(83).unwrap();
+            assert_eq!(polynomial.low_terms, [0, 2, 4, 7]);
+            let gf = Gf2_128::new(&polynomial);
+            let basis = NormalBasis128::new(&gf);
+            let solver = S3Solver128::new(&gf, 1);
+            // Exact x coordinates of the first six archived K512 base representatives.
+            let reps = [
+                8342699431223747237330307u128,
+                1922428771273471083037496,
+                8050843414474538827389079,
+                3206891573540907568398899,
+                2445342385696756367155238,
+                5959927424489161220022208,
+            ];
+            let shifted: Vec<Vec<u128>> = reps
+                .iter()
+                .map(|&x| {
+                    let mut orbit = Vec::with_capacity(83);
+                    let mut current = x;
+                    for _ in 0..83 {
+                        orbit.push(current);
+                        current = gf.sqr(current);
+                    }
+                    orbit
+                })
+                .collect();
+            let mut packed_states = Vec::new();
+            for left in 0..reps.len() {
+                for right in 0..reps.len() {
+                    for relative in 0..83usize {
+                        if let Some(roots) =
+                            solver.roots(&gf, &basis, shifted[left][0], shifted[right][relative])
+                        {
+                            packed_states.push(State83::from_wide(State128 {
+                                left: left as u16,
+                                right: right as u16,
+                                relative: relative as u16,
+                                normal_roots: [
+                                    basis.to_normal.apply(roots[0]),
+                                    basis.to_normal.apply(roots[1]),
+                                ],
+                            }));
+                        }
+                    }
+                }
+            }
+            let states = StateStore128::Packed83(packed_states);
+            assert!(states.len() > 100);
+            let mut packed = RootTable128::with_capacity(states.len() * 2, 83, reps.len(), true);
+            let mut indexed = RootTable128::with_capacity_indexed83(states.len() * 2);
+            packed.bloom = None;
+            indexed.bloom = None;
+            let mut inserted_keys = Vec::new();
+            for index in 0..states.len() {
+                let state = states.get(index);
+                for (selector, &root) in state.normal_roots.iter().enumerate() {
+                    let (key, shift) = basis.canonical_selected(root);
+                    inserted_keys.push(key);
+                    packed.insert_if_absent(
+                        key,
+                        super::pack(state.left, state.right, state.relative, shift),
+                    );
+                    indexed.insert_indexed83(key, index, selector, |state_index, root_selector| {
+                        basis
+                            .canonical_selected(states.root_at(state_index, root_selector))
+                            .0
+                    });
+                }
+            }
+            assert_eq!(indexed.len, packed.len);
+            for key in inserted_keys {
+                assert_eq!(
+                    indexed.get_with_context(key, &states, &basis),
+                    packed.get(key)
+                );
+            }
+            for probe in 1..2048u128 {
+                let key = basis
+                    .canonical_selected(probe.wrapping_mul(0x2545_F491_4F6C_DD1D) & basis.mask)
+                    .0;
+                assert_eq!(
+                    indexed.get_with_context(key, &states, &basis),
+                    packed.get(key)
+                );
+            }
+        }
 
         #[test]
         fn indexed_five_byte_slots_preserve_exact_first_witness() {
