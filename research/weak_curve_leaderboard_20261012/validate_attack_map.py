@@ -19,6 +19,14 @@ def main() -> None:
     ids = [entry["id"] for entry in criteria] + [entry["id"] for entry in attack["items"]]
     assert len(ids) == len(set(ids)), "attack and criterion IDs must be distinct"
     assert len(attack["items"]) >= 30, "the expansion index lost entries"
+    decomposition_ids = {
+        "hyperelliptic_divisor_decomposition",
+        "hyperelliptic_large_prime",
+        "hyperelliptic_high_genus",
+        "jacobian_isogeny_decomposition",
+        "elliptic_quotient_prym",
+    }
+    assert decomposition_ids <= set(ids), "hyperelliptic decomposition gate missing"
     for item in attack["items"]:
         for field in ("id", "name", "family", "scope", "requires", "test", "source", "url"):
             assert isinstance(item.get(field), str) and item[field].strip(), (item["id"], field)

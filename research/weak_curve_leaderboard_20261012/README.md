@@ -28,11 +28,12 @@ classes and displaying 232 certified directed maps. Its criterion checks
 power the site's vulnerability filters; check stages distinguish exact
 conditions, geometry, explicit maps, candidates and structural screens.
 
-The [WAM1 attack map](attack_map.json) adds 31 source-linked research checks
-to the 23 existing criteria, giving the website 54 searchable checks across
+The [WAM1 attack map](attack_map.json) adds 36 source-linked research checks
+to the 23 existing criteria, giving the website 59 searchable checks across
 curve structure, selected subgroups, auxiliary inputs, pairings, index calculus,
-endomorphisms, implementations and isogeny protocols. Each WAM1 row states an
-input prerequisite and a concrete evidence gate. These 31 rows are an
+hyperelliptic divisor and Jacobian decomposition, endomorphisms,
+implementations and isogeny protocols. Each WAM1 row states an
+input prerequisite and a concrete evidence gate. These 36 rows are an
 unassessed research queue: they create no curve-level WID1 finding. The
 [validator](validate_attack_map.py) checks ID uniqueness, source fields,
 source/site byte parity and certified graph edge consistency.
@@ -76,7 +77,10 @@ exact example certificates, mechanism recognition gates, and next research
 steps. The [WID1 specification](IDENTIFIERS.md) defines the weakness marker.
 The [coverage audit](COVERAGE_AUDIT.md) maps prime-degree extensions,
 hyperelliptic covers, and other Jacobian routes to their exact open witnesses.
-It also records missing twist/input, auxiliary-input, trace-zero, pairing-cost,
+The [hyperelliptic decomposition guide](HYPERELLIPTIC_DECOMPOSITION.md)
+separates divisor relations from isogeny factorization and the elliptic/Prym
+split induced by a cover. The coverage audit also records missing twist/input,
+auxiliary-input, trace-zero, pairing-cost,
 endomorphism, prime-field decomposition, and implementation-context checks.
 The [proof map](PROOF_MAP.md)
 specifies the Lean boundary. [VALIDATION.md](VALIDATION.md) records the build,

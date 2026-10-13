@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08101d">
+  <meta name="description" content="Evidence gates for divisor decomposition, large-prime index calculus, and isogeny decomposition of hyperelliptic Jacobians.">
+  <title>Hyperelliptic decomposition — WeakCurves</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar"><a class="brand" href="index.html#top" aria-label="WeakCurves home"><span class="brand-mark" aria-hidden="true">w<span>·</span>c</span><span>WeakCurves<span class="brand-dot">.</span></span></a><nav aria-label="Main navigation"><a href="index.html#atlas">Atlas</a><a href="index.html#graph">Isogeny graph</a><a href="index.html#attack-map">Attack map</a><a href="index.html#coverage">Coverage</a></nav><span class="site-state"><span class="state-dot"></span> Research preview</span></header>
+  <main id="main" class="guide-page shell">
+    <p class="eyebrow">Method sheet / Index calculus and covers</p>
+    <h1>Decomposing a hyperelliptic Jacobian</h1>
+    <p class="guide-lede">Two computations often share the word <em>decomposition</em>. One writes divisor classes as sums of small factor-base classes for index calculus. The other splits the Jacobian, up to isogeny, into lower-dimensional factors. A cover map can connect an elliptic DLP to either route, but it has its own field and subgroup checks.</p>
+    <div class="guide-steps" aria-label="Three computations"><a href="#cover"><strong>01</strong><span>Transfer through a cover</span></a><a href="#divisors"><strong>02</strong><span>Decompose divisors</span></a><a href="#factors"><strong>03</strong><span>Project to factors</span></a></div>
+
+    <section id="cover" class="guide-section"><p class="eyebrow">01 / Cover and subgroup</p><h2>Fix the group being attacked</h2>
+      <p>For an elliptic source group, construct an exact map <code>φ: H → E</code> and record the field over which it is defined. Pullback and norm induce maps between <code>E</code> and <code>Jac(H)</code> with <code>φ_* φ^* = [deg φ]</code>. If the map degree is coprime to the chosen prime subgroup order, pullback is injective there. Otherwise check its kernel on that subgroup directly.</p>
+      <p>A discrete logarithm posed directly in <code>Jac(H)</code> starts at the next step. The existing same-field genus-two cover certificates already imply an elliptic quotient related to the source curve; that quotient alone does not identify a cheaper solver. A lower-field model that covers an elliptic curve only after field extension may have no corresponding elliptic factor over the lower field.</p>
+    </section>
+
+    <section id="divisors" class="guide-section"><p class="eyebrow">02 / Divisor relations</p><h2>Build and solve an index calculus system</h2>
+      <p>Represent reduced divisor classes in the declared curve and field model, using Mumford data where applicable. Freeze a factor base of small-degree prime divisors. Count how often independently sampled classes decompose over that base, verify each relation, and measure new linear rank. A large-prime variant keeps partial relations and recombines them through a collision graph.</p>
+      <p>Carry the computation through final sparse linear algebra and a previously unseen target’s descent. Report query law, all attempts including failures, full and partial relation yield, rank, memory, phase costs, and scalar replay. The published small-genus decomposition and double-large-prime methods are distinct choices; high-genus smoothness changes the cost regime.</p>
+      <p class="guide-sources">Research: <a href="https://eprint.iacr.org/2014/815">Sarkar–Singh divisor decomposition ↗</a><a href="https://eprint.iacr.org/2004/153">Gaudry–Thomé–Thériault–Diem large primes ↗</a><a href="https://doi.org/10.1090/S0025-5718-01-01363-1">Enge high-genus algorithm ↗</a></p>
+    </section>
+
+    <section id="factors" class="guide-section"><p class="eyebrow">03 / Jacobian factors</p><h2>Screen a split, then construct the projection</h2>
+      <p>Compute the exact Weil polynomial over the intended destination field. A factorization is a structural screen. To use a lower-dimensional factor, construct the isogeny and projections, record their degrees and kernels, and check the chosen generator and target images. If the factor appears only after scalar extension, price the route over that extension.</p>
+      <p>For a genus-two curve with a suitable elliptic subcover, its Jacobian splits up to isogeny as two elliptic factors. For a genus-three elliptic quotient, the complementary factor has dimension two and needs its own split or solver test. Report the actual subgroup image and total transfer-plus-solve cost before assigning an attack finding.</p>
+      <p class="guide-sources">Research: <a href="https://arxiv.org/abs/1209.3187">Genus-two elliptic covers ↗</a><a href="https://arxiv.org/abs/1409.8510">L-polynomial decomposition ↗</a></p>
+    </section>
+
+    <section class="guide-section guide-evidence"><p class="eyebrow">Promotion record</p><h2>What the leaderboard can say</h2>
+      <div class="guide-evidence-grid"><div><strong>Geometry</strong><p>Exact curve, cover equation, genus, field and verified map.</p></div><div><strong>Structural candidate</strong><p>Exact Weil polynomial and factor screen, with projection still to construct.</p></div><div><strong>Measured route</strong><p>Certified subgroup transport, natural-query relations, complete costs and independent target replay.</p></div></div>
+      <p>These are separate evidence states. The five corresponding methods appear as source-linked checks in the <a href="index.html#attack-map">attack map</a>. The <a href="https://github.com/aburan28/crypto/blob/codex/weak-curves-leaderboard-20261012/research/weak_curve_leaderboard_20261012/HYPERELLIPTIC_DECOMPOSITION.md">research method sheet ↗</a> records the full per-model measurement fields and proof boundary.</p>
+    </section>
+    <a class="button ghost guide-back" href="index.html#coverage">← Return to coverage map</a>
+  </main>
+</body>
+</html>

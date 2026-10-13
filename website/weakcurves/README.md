@@ -5,7 +5,9 @@ This is the static source for the evidence-graded WeakCurves atlas.
 snapshot, criteria registry, WAM1 attack map, and isogeny graph originate in
 [`research/weak_curve_leaderboard_20261012`](../../research/weak_curve_leaderboard_20261012/).
 The two copies of each JSON file and the WID1 specification must remain
-byte-identical.
+byte-identical. The site also has a readable
+[`hyperelliptic-decomposition.html`](dist/hyperelliptic-decomposition.html)
+version of the [research method sheet](../../research/weak_curve_leaderboard_20261012/HYPERELLIPTIC_DECOMPOSITION.md).
 
 The hosted Site is registered by `.openai/hosting.json` and currently
 deploys at [weakcurves.aburan28.chatgpt.site](https://weakcurves.aburan28.chatgpt.site).

@@ -1,5 +1,37 @@
 # Validation record
 
+## Hyperelliptic decomposition routes, 12 October 2026
+
+- The [method sheet](HYPERELLIPTIC_DECOMPOSITION.md) separates divisor
+  decomposition for Jacobian index calculus from splitting a Jacobian up to
+  isogeny. It records a third, distinct cover-transfer gate and the field of
+  definition, selected-subgroup image, and complete-cost conditions. Primary
+  method sources checked: [Sarkar–Singh](https://eprint.iacr.org/2014/815),
+  [Gaudry–Thomé–Thériault–Diem](https://eprint.iacr.org/2004/153),
+  [Enge](https://doi.org/10.1090/S0025-5718-01-01363-1),
+  [Shaska](https://arxiv.org/abs/1209.3187), and
+  [Ahmadi–McGuire–Rojas-León](https://arxiv.org/abs/1409.8510).
+- `python3 validate_attack_map.py` passed with 23 indexed criteria and 36
+  research checks, five of them new hyperelliptic gates. The total searchable
+  checks are 59; the existing 29 findings and 922-model atlas are unchanged.
+  `python3 build_isogeny_graph.py --check` passed with 1,092 graph nodes, 676
+  classes and 232 explicit directed maps. `node --check` passed for all three
+  site JavaScript files. An HTML parser found 48 unique IDs on the atlas page
+  and four unique IDs on the new method page, with every local asset link
+  resolving; `git diff --check` passed. The guide indexes published results;
+  the existing [Lean proof map](PROOF_MAP.md) retains the formalization status
+  of transfer implications.
+- The Sites source helper pushed commit
+  `8441d4b8d530981507bfa2ae554493157d8a5277`, packaged
+  `/Volumes/SSD990/llm/tmp/weakcurves-static-v15.tar.gz`, saved version 15
+  (`appgprj_6acd13c887f0819194ae65d7f61c7b33~appgver_18a4fc856218819186bf6848b26c774d`),
+  and deployed publicly as `appgdep_6acd7e0c8ebc819186deb3723ff02a6e`.
+  The deployment returned `succeeded` at
+  <https://weakcurves.aburan28.chatgpt.site>. The public audience was
+  preserved. Live `attack_map.json` matched the source byte-for-byte, and
+  the new `hyperelliptic-decomposition.html` served the expected sections.
+  Browser pointer-interaction QA was unavailable.
+
 ## WAM1 attack map and focused graph, 12 October 2026
 
 - `python3 validate_attack_map.py` passed: 23 distinct indexed criteria plus

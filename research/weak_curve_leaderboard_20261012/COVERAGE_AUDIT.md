@@ -16,6 +16,8 @@ and claim scope are checked.
 | Classical binary GHS | Oakley Groups 3 and 4 have exact tower magic-number candidates and separate WID1 markers | Construct the claimed smaller-field curve and map, then check the chosen prime-order subgroup and solver cost. |
 | Generalized GHS and isogeny extension | The [transfer registry](../../docs/curves/JACOBIAN_TRANSFERS.md) has isogeny-extension formula rows; it explicitly does not enumerate Hess's generalized Artin–Schreier covers | Search exact representatives and function fields rather than treating formula counts as constructed maps. |
 | Same-field hyperelliptic covers | [COVERS.md](../../docs/curves/COVERS.md) gives verified degree-two genus-two covers in odd characteristic and degree-three genus-three covers for ordinary binary models; the transfer registry contains 312 `same_field_cover` route rows | Surface these geometric facts on curve pages, with field-of-definition and cost boundaries. A same-field cover by itself does not produce a smaller-field attack or a WID1 weakness finding. |
+| Hyperelliptic divisor decomposition | [Sarkar–Singh](https://eprint.iacr.org/2014/815), [Gaudry–Thomé–Thériault–Diem](https://eprint.iacr.org/2004/153), and the transfer registry's small/high-genus cost models give distinct relation methods | Fix an exact destination `H`, selected subgroup, factor base, natural-query divisor law, large-prime policy, relation rank, final linear algebra and target descent. See [decomposition guide](HYPERELLIPTIC_DECOMPOSITION.md). |
+| Jacobian isogeny decomposition | A cover `H→E` supplies an elliptic quotient; [genus-two elliptic-cover work](https://arxiv.org/abs/1209.3187) describes the product isogeny under its hypotheses | Factor the exact Weil polynomial, construct projection maps and check the selected subgroup's image and kernel. The existing elliptic quotient alone does not make a same-field cover advantageous. |
 
 The present source-locked exact-model corpus has 661 degree-six, 77
 degree-ten, and 76 degree-fourteen odd-characteristic extension models. The
@@ -69,10 +71,10 @@ unproved or unmeasured bridge for each.
 
 ## Attack families and assessment layers still missing
 
-The [WAM1 attack map](attack_map.json) now makes 31 of the research checks
+The [WAM1 attack map](attack_map.json) now makes 36 of the research checks
 below searchable, with their input prerequisites, assessment test, and primary
 source. It contains method records, not positive findings for the 922 atlas
-models. Together with the 23 current criteria, the site exposes 54 checks;
+models. Together with the 23 current criteria, the site exposes 59 checks;
 the next data step is to attach actual twist orders, accepted-input traces,
 auxiliary-point inventories, pairing witnesses and implementation receipts to
 specific model/protocol records. The [validator](validate_attack_map.py)

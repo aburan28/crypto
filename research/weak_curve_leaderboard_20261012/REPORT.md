@@ -9,7 +9,7 @@ curves (101 standards-provenance curves, two challenge curves, and two
 source-pinned pairing variants), 36
 published odd-characteristic parameter cases, three exact prime-field
 examples and twenty-three criterion entries. The WAM1 research queue adds
-31 input- and witness-specific checks, giving the site 54 searchable attack
+36 input- and witness-specific checks, giving the site 59 searchable attack
 checks in total. Each evaluated finding has a
 [WID1 identifier](IDENTIFIERS.md) distinct from its curve identity.
 
@@ -116,7 +116,7 @@ independent `ellgroup` result is `[10,10]`.
 ## Mechanism map
 
 The [WAM1 attack map](attack_map.json) extends the existing criteria with
-31 source-linked checks. Its entries state the required auxiliary inputs or
+36 source-linked checks. Its entries state the required auxiliary inputs or
 implementation behavior and the exact test needed to assess a curve or
 protocol. They remain `unassessed_on_indexed_models` and add no WID1 result.
 The site filters these checks by family and assessment state, while the curve
@@ -127,6 +127,14 @@ separately. It now filters explicit edges by degree, focuses one class, and
 highlights a selected node's incident maps with degree labels. The source
 graph remains 1,092 nodes in 676 classes with 232 certified directed maps;
 the viewer does not infer missing maps from class peers.
+
+The [hyperelliptic decomposition guide](HYPERELLIPTIC_DECOMPOSITION.md)
+separates divisor factor-base decomposition, partial-relation recombination,
+high-genus smoothness, Jacobian isogeny factorization, and the elliptic
+quotient/Prym complement of a cover. The cover checker already constructs
+same-field `H→E` maps for supported elliptic models. The genus-two source
+factor is expected; the exact factor maps, selected-subgroup projections and
+costed divisor relation pipeline are the further assessment gates.
 
 The [machine-readable registry](criteria.json) specifies domain, recognition,
 required witness, construction and primary source for twenty-three criteria. The
