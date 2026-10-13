@@ -39,7 +39,8 @@ use crate::cryptanalysis::ic_framework::fiber::{
 };
 use crate::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, CompactOrbitScanBase, DescentAlgebraicOracle, FrobeniusMitmOracle,
-    GlvOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase, SubtractOracle,
+    GlvOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase, RootfindSubtractOracle,
+    SubtractOracle,
 };
 use crate::cryptanalysis::ic_framework::shared_rank::{
     run_shared_rank_targets, SharedRankSpec, SharedTargetSpec,
@@ -297,7 +298,7 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "oracle",
                     default: None,
-                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; the cofactor-fiber-aware mitm-fiber:fiber=closed|lifts|blind, mitm-frobenius-fiber:fiber=closed|lifts|blind and descent-algebraic-fiber:fiber=combined|lifts|blind (ic_framework::fiber); or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N on koblitz-standard-subspace",
+                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; rootfind-subtract:m=2|3 (prime curves: prime_fast's direct-subtraction root finding, one batched inversion a target); the cofactor-fiber-aware mitm-fiber:fiber=closed|lifts|blind, mitm-frobenius-fiber:fiber=closed|lifts|blind and descent-algebraic-fiber:fiber=combined|lifts|blind (ic_framework::fiber); or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N and pdp3-koblitz:m=2|3,engine=rootfind (the pair-sum table of DecompositionStrategy::PairTable) on koblitz-standard-subspace",
                 },
                 ParamDecl {
                     name: "solver",
@@ -1773,10 +1774,12 @@ fn solve_ic_prime(
     let mut subtract = SubtractOracle;
     let mut mitm = MitmOracle::new(ms);
     let mut mitm_fiber = FiberMitmOracle::new(ms);
+    let mut rootfind = RootfindSubtractOracle::new(ms, inst);
     let oracle: &mut dyn DecompositionOracle<_> = match or_name.as_str() {
         "subtract" => &mut subtract,
         "mitm" => &mut mitm,
         "mitm-fiber" => &mut mitm_fiber,
+        "rootfind-subtract" => &mut rootfind,
         other => return Err(format!("oracle `{other}` does not run on a prime curve")),
     };
     let ctx = InstanceCtx {
@@ -2486,6 +2489,98 @@ mod tests {
         assert!(rep.field_ops.is_none(), "unknown is not zero");
         let v = serde_json::to_value(&rep).unwrap();
         assert!(v.get("field_ops").is_none(), "absent, not null");
+    }
+
+    /// `rootfind-subtract` is `subtract`'s search on `prime_fast`'s
+    /// arithmetic: the same candidates in the same order, so the two arms
+    /// issue the same queries and find the same relations on one seed,
+    /// with one batched inversion a target instead of one per candidate.
+    /// Its hits are re-added on the ledger (one addition each), which is
+    /// the only charge the two differ by.
+    #[test]
+    fn rootfind_subtract_follows_subtract_query_stream_on_a_prime_curve() {
+        use crate::cryptanalysis::ecbench::workload::CurveSpec;
+        let spec = CurveSpec::PrimeSearch {
+            bits: 20,
+            seed: 59297,
+        };
+        let inst = spec.build().unwrap();
+        let facts = inst.facts(&spec);
+        let Instance::Prime(prime) = &inst else {
+            unreachable!()
+        };
+        let mut scratch = GroupOps::default();
+        let target = prime.curve.mul(&mut scratch, prime.generator_point(), 4099);
+        let coords = [format!("0x{:x}", target.x), format!("0x{:x}", target.y)];
+        let run = |oracle: &str| {
+            let m = resolve(&MethodSpec {
+                id: "ic.pipeline".into(),
+                params: [
+                    ("factor_base".to_string(), "prime-abscissa:size=32".to_string()),
+                    ("oracle".to_string(), oracle.to_string()),
+                ]
+                .into_iter()
+                .collect(),
+            })
+            .unwrap();
+            solve(&m, &inst, &facts, &coords, 11).unwrap()
+        };
+        let sub = run("subtract");
+        let root = run("rootfind-subtract:m=2");
+        assert_eq!(sub.recovered, Some(4099 % u128::from(prime.r)));
+        assert_eq!(root.recovered, sub.recovered);
+        for key in ["targets_tried", "relations_found", "matrix_rank"] {
+            assert_eq!(sub.counters[key], root.counters[key], "{key}");
+        }
+        let relations = |r: &SolveReport| {
+            r.phases
+                .iter()
+                .find(|p| p.name == "relations")
+                .cloned()
+                .expect("a relations phase")
+        };
+        let (s, r) = (relations(&sub), relations(&root));
+        // The same candidate points, each one addition; the root finder
+        // adds one re-addition per relation and nothing else.
+        assert_eq!(r.adds, s.adds + root.counters["relations_found"], "{s:?} {r:?}");
+        assert_eq!(r.native["lookups"], s.native["lookups"]);
+        assert_eq!(r.native["inversions"], root.counters["targets_tried"]);
+        assert_eq!(s.native.get("inversions").copied().unwrap_or(0), 0);
+        assert_eq!(r.native.get("frobfold_mismatches").copied().unwrap_or(0), 0);
+        assert!(root.solver.is_none(), "a table oracle solves no system");
+        assert!(root.deterministic);
+
+        // A knob the engine does not read is refused, as is a summand
+        // count it does not take.
+        for bad in ["rootfind-subtract:m=2,negation_folded=1", "rootfind-subtract:m=4"] {
+            let m = resolve(&MethodSpec {
+                id: "ic.pipeline".into(),
+                params: [
+                    ("factor_base".to_string(), "prime-abscissa:size=32".to_string()),
+                    ("oracle".to_string(), bad.to_string()),
+                ]
+                .into_iter()
+                .collect(),
+            })
+            .unwrap();
+            assert!(solve(&m, &inst, &facts, &coords, 11).is_err(), "{bad}");
+        }
+        let m = resolve(&MethodSpec {
+            id: "ic.pipeline".into(),
+            params: [
+                ("factor_base".to_string(), "prime-abscissa:size=32".to_string()),
+                ("oracle".to_string(), "rootfind-subtract:m=3".to_string()),
+            ]
+            .into_iter()
+            .collect(),
+        })
+        .unwrap();
+        let three = solve(&m, &inst, &facts, &coords, 11).unwrap();
+        assert_eq!(three.recovered, sub.recovered);
+        assert!(three
+            .phases
+            .iter()
+            .any(|p| p.name == "oracle_setup" && p.adds > 0));
     }
 
     #[test]
