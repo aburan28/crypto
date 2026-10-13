@@ -15,7 +15,7 @@ Index calculus on `E_0: y² + xy = x³ + 1` over `F_{2^n}`, `n = 13, 19, 23,
 31, 37`, run end to end in ecbench with the new root-finding oracle
 `rootfind-mitm` and, as baselines, the inherited-F4 Gröbner oracle (`n ≤ 23`)
 and the harness's own `mitm` table oracle, against the strong rho on the same
-eight public targets per size.  All 1,248 measured runs verified `[d]G = Q`
+eight public targets per size.  All 1,248 runs (992 measured, 256 warm-ups) verified `[d]G = Q`
 and every replay audit is `OK` with every replay identical.
 
 - **Against F4, inside the same pipeline:** the root-finder makes a whole
@@ -34,10 +34,12 @@ and every replay audit is `OK` with every replay identical.
   61, 3,053 and 25,116 at `n = 13, 19, 23, 31, 37`.  The jump at `n = 31` is
   mostly the curve's cofactor (1,492): index calculus pays for the whole
   group, rho only for the prime subgroup.  No exponent moves.
-- **Claims:** a `vs_rho` claim report could not be built for any workload:
-  the IC1 identity names a base by its sign-and-Frobenius orbits and the
-  standard subspace base has more columns than orbits (17 against 13 at
-  `n = 13`).  The refusals are recorded in `claims/`.
+- **Claims:** on the ladder's subspace base the IC1 identity refused
+  every claim (more columns than signed Frobenius orbits); rerun on a
+  Frobenius-orbit base (`claim_round/`), all 16 claims build and check.
+  They fail the checker on independent validation (no receipt from a second
+  host class) and on two schema fields the builder does not write, and
+  every one shows index calculus slower than the strong rho.
 
 ## 1. What was measured
 
@@ -146,15 +148,43 @@ by arm and size, with the floor), [`figures/phase_split.svg`](figures/phase_spli
 
 ## 4. Claims
 
-`ecbench claim build --ic ic-rootfind --rho rho-strong` was run for every
-workload of every size (40).  Every build was refused before the checker:
-the claim's IC1 candidate identity names a factor base by its
-sign-and-Frobenius orbits, and the standard subspace base folds by
-negation, so it has more columns than orbits (17 against 13 at `n = 13`, 70
-against 61, 138 against 127, 527 against 462, 2,012 against 1,983).  The
-logs are in `claims/`; `claims/SUMMARY.txt` lists them.  A claim-eligible
-round needs a Frobenius-orbit base (`koblitz-orbit`).  The database SQL of
-every session is in `db/` (sessions only).
+**On the ladder's base, refused.**  `ecbench claim build --ic ic-rootfind
+--rho rho-strong` was run for all 40 workloads and every build was refused
+before the checker: the claim's IC1 candidate identity names a factor base
+by its sign-and-Frobenius orbits, and the standard subspace base has more
+columns than orbits (17 against 13 at `n = 13`, 70/61, 138/127, 527/462,
+2,012/1,983).  Logs in `claims/`.
+
+**On a Frobenius-orbit base, built: [`claim_round/`](claim_round/PROTOCOL.md).**
+The same oracle on `koblitz-orbit` (columns = signed Frobenius orbits; the
+only sizes with a usable invariant subspace are `n = 23`, `divisor=1`, 2,025
+points in 45 columns, and `n = 31`, `divisor=2;3`, 869 points in 15
+columns), eight public targets a size, three rounds, audits `OK` (96 and 96
+replays identical).  **16 of 16 claims built**, each checked by `ecbench
+claim check`:
+
+| `n` | `S`: `rootfind` ÷ strong rho | wall: ÷ strong rho (admitted) | `rootfind` ÷ `mitm`, `S` / wall | claims' `online_speedup` (IC online window against rho's) |
+|--:|--:|--:|--:|--:|
+| 23 | 643 [613, 674] | 1,489 | 1.002 / 1.01 | 0.097–0.392 |
+| 31 | 212 [194, 229] | 0.42 | 1.002 / 0.70 | 0.007–0.020 |
+
+Every claim fails the checker, and the reasons are listed in each claim's
+log (`claim_round/claims/*.log`):
+
+- `independent_validation` and the two replay certificates, on all 16: the
+  checker requires a `verify --replay-all` receipt from a host of another
+  hardware class, which this container cannot supply.  This is the
+  expected, documented status of a claim built on one host.
+- `operation_accounting` and `record_class` missing, on all 16: the claim
+  schema (`docs/ic/boundary_targets.json`) requires these stage fields and
+  `ecbench claim build` does not write them, for any method.  A builder gap
+  in the harness, independent of this measurement.
+- Isolation L1 below the spec's L2 on 5 IC and 4 rho runs (hypervisor
+  steal on the run CPU).
+
+Every claim's speed comparison shows index calculus slower than the
+strong rho on its target (`online_speedup` below 1 on all 16), as the
+ladder predicted.
 
 ## 5. Environment, isolation and audit
 
