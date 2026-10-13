@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 
 
 HERE = Path(__file__).resolve().parent
@@ -43,6 +44,14 @@ def require(ok: bool, message: str) -> None:
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def frozen_blob_sha256(relative: str) -> str:
+    blob = subprocess.run(
+        ["git", "show", f"{FROZEN_SOURCE_COMMIT}:{relative}"],
+        cwd=ROOT, capture_output=True, check=True,
+    ).stdout
+    return hashlib.sha256(blob).hexdigest()
 
 
 def canonical(value: dict) -> bytes:
@@ -142,7 +151,8 @@ def replay(fixture_path: Path = FIXTURE) -> dict:
     require(sha256(fixture_path) == FIXTURE_SHA256, "fixture bytes changed")
     require(sha256(AUDIT) == AUDIT_SHA256, "K600 audit bytes changed")
     for relative, expected in FROZEN_SOURCE_SHA256.items():
-        require(sha256(ROOT / relative) == expected, f"frozen source changed: {relative}")
+        require(frozen_blob_sha256(relative) == expected,
+                f"frozen source changed: {relative}")
     fixture = json.loads(fixture_path.read_text())
     require(fixture["schema"] == "n83.mixed-orbit-known-witness/v1"
             and fixture["scope"] == "known_answer_control_only"

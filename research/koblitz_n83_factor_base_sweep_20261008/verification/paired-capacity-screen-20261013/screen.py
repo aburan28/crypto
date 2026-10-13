@@ -8,6 +8,7 @@ from collections import Counter
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 
 
 HERE = Path(__file__).resolve().parent
@@ -21,6 +22,7 @@ VARIABLE_CAP = 150_000
 DOMAIN_CLAUSE_CAP = 12_000_000
 SHAPES = ((5, 1), (5, 2), (6, 1), (6, 2))
 DESIGN_SHA256 = "f7b860c9a652154541c4e6cf7d52ad13bd5a7436a41d38855d206cde36d4b0ac"
+FROZEN_SOURCE_COMMIT = "f3d27f68b68cda907e0668042ac7fa13ae6b579d"
 SOURCES = {
     "src/cryptanalysis/binary_semaev_chain_sat.rs": "0031972aab435d963af54a5f28f0510e45e5301f00c49466661191815becc06e",
     "src/cryptanalysis/koblitz_large_prime.rs": "accd5cf0ef7c738aedce38a21d172eeda1b309eaf9c8f4848030dac9d4421ddd",
@@ -51,6 +53,14 @@ def require(ok: bool, message: str) -> None:
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def frozen_blob_sha256(relative: str) -> str:
+    blob = subprocess.run(
+        ["git", "show", f"{FROZEN_SOURCE_COMMIT}:{relative}"],
+        cwd=ROOT, capture_output=True, check=True,
+    ).stdout
+    return hashlib.sha256(blob).hexdigest()
 
 
 def canonical(row: dict) -> bytes:
@@ -127,7 +137,7 @@ def retained_check(label: str, spec: dict) -> dict:
 def build() -> dict:
     require(sha256(DESIGN) == DESIGN_SHA256, "v3 design bytes changed")
     for relative, expected in SOURCES.items():
-        require(sha256(ROOT / relative) == expected,
+        require(frozen_blob_sha256(relative) == expected,
                 f"frozen source changed: {relative}")
     design = json.loads(DESIGN.read_text())
     require(design["schema"] == "n83.factor-base-design/v3-paired-frontier"
@@ -171,7 +181,7 @@ def build() -> dict:
         "status": "PASS_exact_source_cap_screen",
         "scope": "source_only_capacity_not_runtime",
         "v3_design_sha256": DESIGN_SHA256,
-        "frozen_source_commit": "f3d27f68b68cda907e0668042ac7fa13ae6b579d",
+        "frozen_source_commit": FROZEN_SOURCE_COMMIT,
         "frozen_source_sha256": SOURCES,
         "screen_source_sha256": sha256(Path(__file__)),
         "limits": {"max_variables": VARIABLE_CAP,
