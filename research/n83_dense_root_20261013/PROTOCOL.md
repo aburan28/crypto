@@ -60,6 +60,10 @@ among the four arms is by lowest mean target probes over complete verified
 panel rows under the common resource envelope. Exploratory Mac wall times
 cannot establish a controlled CPU speedup. Any table-layout improvement is a
 stage result unless the full one-target paired criterion is met.
+The secondary panel runs the four arms in reverse order. Its first K1500 dense
+and last K1271 regular runs dump their full point-defined bases; the other
+arms must match the corresponding base hash. The source and input hash checks,
+900-second cap, rank seed and thread counts are identical to primary.
 
 ## Frozen source and environment
 
