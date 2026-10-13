@@ -662,16 +662,16 @@ impl SymmetrisedS5 {
 
 // ── Monomials in four variables ───────────────────────────────────────────
 
-fn deg4(m: &[u8; 4]) -> u16 {
+fn deg4<const N: usize>(m: &[u8; N]) -> u16 {
     m.iter().map(|&x| x as u16).sum()
 }
 
-fn grevlex_cmp4(a: &[u8; 4], b: &[u8; 4]) -> std::cmp::Ordering {
+fn grevlex_cmp4<const N: usize>(a: &[u8; N], b: &[u8; N]) -> std::cmp::Ordering {
     let (da, db) = (deg4(a), deg4(b));
     if da != db {
         return da.cmp(&db);
     }
-    for i in (0..4).rev() {
+    for i in (0..N).rev() {
         if a[i] != b[i] {
             return b[i].cmp(&a[i]);
         }
@@ -679,14 +679,33 @@ fn grevlex_cmp4(a: &[u8; 4], b: &[u8; 4]) -> std::cmp::Ordering {
     std::cmp::Ordering::Equal
 }
 
-/// Monomials of total degree `≤ d` in four variables, grevlex descending.
-fn monomials4_desc(d: u8) -> Vec<[u8; 4]> {
-    let mut v = exponents4(d);
+/// Monomials of total degree `≤ d` in `N` variables (any order).
+fn exponents_n<const N: usize>(d: u8) -> Vec<[u8; N]> {
+    let mut out = Vec::new();
+    let mut cur = [0u8; N];
+    fn rec<const N: usize>(i: usize, left: u8, cur: &mut [u8; N], out: &mut Vec<[u8; N]>) {
+        if i == N {
+            out.push(*cur);
+            return;
+        }
+        for k in 0..=left {
+            cur[i] = k;
+            rec(i + 1, left - k, cur, out);
+        }
+        cur[i] = 0;
+    }
+    rec(0, d, &mut cur, &mut out);
+    out
+}
+
+/// Monomials of total degree `≤ d` in `N` variables, grevlex descending.
+fn monomials4_desc<const N: usize>(d: u8) -> Vec<[u8; N]> {
+    let mut v = exponents_n::<N>(d);
     v.sort_by(|x, y| grevlex_cmp4(y, x));
     v
 }
 
-fn leading_monomial4(f: &HashMap<[u8; 4], u64>) -> Option<[u8; 4]> {
+fn leading_monomial4<const N: usize>(f: &HashMap<[u8; N], u64>) -> Option<[u8; N]> {
     f.iter()
         .filter(|(_, &c)| c != 0)
         .map(|(m, _)| *m)
@@ -694,12 +713,12 @@ fn leading_monomial4(f: &HashMap<[u8; 4], u64>) -> Option<[u8; 4]> {
 }
 
 /// As `gaudry_cubic`'s `triangularise_leads`, for four components.
-fn triangularise_leads4(
-    comps: &[HashMap<[u8; 4], u64>],
+fn triangularise_leads4<const N: usize>(
+    comps: &[HashMap<[u8; N], u64>],
     p: u64,
     muls: &mut u64,
-) -> (Vec<HashMap<[u8; 4], u64>>, Vec<Option<[u8; 4]>>) {
-    let mut fs: Vec<HashMap<[u8; 4], u64>> = comps.to_vec();
+) -> (Vec<HashMap<[u8; N], u64>>, Vec<Option<[u8; N]>>) {
+    let mut fs: Vec<HashMap<[u8; N], u64>> = comps.to_vec();
     for _round in 0..16 {
         fs.sort_by(|a, b| match (leading_monomial4(a), leading_monomial4(b)) {
             (Some(x), Some(y)) => grevlex_cmp4(&y, &x),
@@ -985,6 +1004,11 @@ pub struct QuarticSolve {
 }
 
 impl QuarticSolve {
+    /// Sum the phases into `total_muls` (for solves built outside this
+    /// module).
+    pub fn close_public(&mut self) {
+        self.close();
+    }
     fn close(&mut self) {
         self.total_muls = self.weil_muls
             + self.triangularise_muls
@@ -1209,11 +1233,16 @@ impl<'a> NormalForms4<'a> {
     }
 }
 
-fn eval4(comp: &HashMap<[u8; 4], u64>, e: &[u64; 4], p: u64, muls: &mut u64) -> u64 {
+fn eval4<const N: usize>(
+    comp: &HashMap<[u8; N], u64>,
+    e: &[u64; N],
+    p: u64,
+    muls: &mut u64,
+) -> u64 {
     let mut acc = 0u64;
     for (m, &c) in comp {
         let mut t = c;
-        for k in 0..4 {
+        for k in 0..N {
             for _ in 0..m[k] {
                 t = mm(t, e[k], p);
                 *muls += 1;
@@ -1259,7 +1288,7 @@ pub fn solve_system4(
 /// of pivots.  A replay builds only the rows that did not reduce to zero.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct ShapeTrace {
-    pub leads: Vec<Option<[u8; 4]>>,
+    pub leads: Vec<Option<Vec<u8>>>,
     pub rows_built: usize,
     pub zero_ids: Vec<u32>,
     pub pivots: usize,
@@ -1346,28 +1375,77 @@ fn solve_system4_inner(
     replay: Option<&ShapeTrace>,
     record: Option<&mut ShapeTrace>,
 ) -> Result<Option<Vec<[u64; 4]>>, ()> {
+    solve_system_n_inner::<4>(
+        comps,
+        equation_degree,
+        macaulay_degree,
+        p,
+        rng,
+        st,
+        debug,
+        replay,
+        record,
+    )
+}
+
+/// The solve in `N` unknowns.  `equation_degree > 0`: every equation is
+/// shifted as one of that degree (the `k = 4` systems); `0`: each equation
+/// by its own total degree after triangularisation.  `Err(())` only from a
+/// replay whose shape did not match.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn solve_system_n_inner<const N: usize>(
+    comps: &[HashMap<[u8; N], u64>],
+    equation_degree: u8,
+    macaulay_degree: u8,
+    p: u64,
+    rng: &mut StdRng,
+    st: &mut QuarticSolve,
+    debug: bool,
+    replay: Option<&ShapeTrace>,
+    record: Option<&mut ShapeTrace>,
+) -> Result<Option<Vec<[u64; N]>>, ()> {
     assert!(p < 1 << 15, "rows are u16 and products must fit u32");
     let t0 = Instant::now();
     st.equation_degree = equation_degree;
     st.macaulay_degree = macaulay_degree;
     let cols = monomials4_desc(macaulay_degree);
-    let col_index: HashMap<[u8; 4], usize> =
+    let col_index: HashMap<[u8; N], usize> =
         cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
-    let shifts = monomials4_desc(macaulay_degree - equation_degree);
     let mut tri = 0u64;
     let (comps, leads) = triangularise_leads4(comps, p, &mut tri);
     st.triangularise_muls += tri;
+    let leads_v: Vec<Option<Vec<u8>>> = leads.iter().map(|l| l.map(|m| m.to_vec())).collect();
     if let Some(t) = replay {
-        if t.leads != leads {
+        if t.leads != leads_v {
             return Err(());
         }
     }
-    let divides = |lm: &[u8; 4], m: &[u8; 4]| (0..4).all(|k| lm[k] <= m[k]);
+    let mut shifts_by: HashMap<u8, Vec<[u8; N]>> = HashMap::new();
+    let degree_of = |c: &HashMap<[u8; N], u64>| -> u8 {
+        if equation_degree > 0 {
+            equation_degree
+        } else {
+            c.iter()
+                .filter(|(_, &v)| v != 0)
+                .map(|(m, _)| deg4(m) as u8)
+                .max()
+                .unwrap_or(0)
+        }
+    };
+    let divides = |lm: &[u8; N], m: &[u8; N]| (0..N).all(|k| lm[k] <= m[k]);
     let mut rows: Vec<Vec<u16>> = Vec::new();
     let mut built = 0usize;
     let mut skip_at = 0usize;
     for (i, comp) in comps.iter().enumerate() {
-        for sh in &shifts {
+        let dg = degree_of(comp);
+        if dg > macaulay_degree {
+            st.outcome = "an equation above the Macaulay degree".into();
+            return Ok(None);
+        }
+        let shifts = shifts_by
+            .entry(dg)
+            .or_insert_with(|| monomials4_desc::<N>(macaulay_degree - dg));
+        for sh in shifts.iter() {
             if leads
                 .iter()
                 .take(i)
@@ -1385,7 +1463,7 @@ fn solve_system4_inner(
             }
             let mut row = vec![0u16; cols.len()];
             for (&e, &c) in comp {
-                let m = [e[0] + sh[0], e[1] + sh[1], e[2] + sh[2], e[3] + sh[3]];
+                let m: [u8; N] = core::array::from_fn(|k| e[k] + sh[k]);
                 let ci = col_index[&m];
                 row[ci] = am(row[ci] as u64, c, p) as u16;
             }
@@ -1428,7 +1506,7 @@ fn solve_system4_inner(
     }
     if let Some(out) = record {
         *out = ShapeTrace {
-            leads: leads.clone(),
+            leads: leads_v.clone(),
             rows_built: built,
             zero_ids: ech.zero_ids.clone(),
             pivots: st.pivots,
@@ -1448,22 +1526,23 @@ fn solve_system4_inner(
             st.echelon_ms / 1e3
         );
     }
-    let find = |m: [u8; 4]| col_index.get(&m).copied();
-    let (Some(c0), Some(c1), Some(c2), Some(c3), Some(c4)) = (
-        find([0, 0, 0, 0]),
-        find([1, 0, 0, 0]),
-        find([0, 1, 0, 0]),
-        find([0, 0, 1, 0]),
-        find([0, 0, 0, 1]),
-    ) else {
-        st.outcome = "low-degree monomials missing".into();
-        return Ok(None);
-    };
-    if [c0, c1, c2, c3, c4].iter().any(|&c| !is_std[c]) {
+    // Columns of 1 and of each unknown.
+    let mut low: Vec<usize> = Vec::with_capacity(N + 1);
+    for v in 0..=N {
+        let m: [u8; N] = core::array::from_fn(|k| u8::from(v > 0 && k == v - 1));
+        match col_index.get(&m) {
+            Some(&c) => low.push(c),
+            None => {
+                st.outcome = "low-degree monomials missing".into();
+                return Ok(None);
+            }
+        }
+    }
+    if low.iter().any(|&c| !is_std[c]) {
         st.outcome = "1 or a variable is not standard".into();
         return Ok(None);
     }
-    let idx = [c0, c1, c2, c3, c4].map(|c| std_index[c] as usize);
+    let idx: Vec<usize> = low.iter().map(|&c| std_index[c] as usize).collect();
     let t2 = Instant::now();
     let mut nfs = NormalForms4 {
         ech: &ech,
@@ -1526,14 +1605,14 @@ fn solve_system4_inner(
         }
     }
     drop(m_e1);
-    let mut others: [Option<Vec<Vec<u64>>>; 3] = [None, None, None];
+    let mut others: Vec<Option<Vec<Vec<u64>>>> = vec![None; N - 1];
     let mut out = Vec::new();
     for lam in lambdas {
         let mut ev = 0u64;
         let mut ker = eigenvectors_u16(&mt, lam, p as u32, &mut ev);
         if ker.len() > 1 {
             st.degenerate_eigenspaces += 1;
-            for k in 0..3 {
+            for k in 0..N - 1 {
                 if ker.len() <= 1 {
                     break;
                 }
@@ -1554,7 +1633,7 @@ fn solve_system4_inner(
                 continue;
             }
             let inv = inv_mod(w[idx[0]], p);
-            let e: [u64; 4] = core::array::from_fn(|k| mm(w[idx[k + 1]], inv, p));
+            let e: [u64; N] = core::array::from_fn(|k| mm(w[idx[k + 1]], inv, p));
             if e[0] != lam {
                 continue;
             }
@@ -1578,7 +1657,12 @@ fn solve_system4_inner(
 
 /// The multisets `{x₁, …, x₄} ⊂ F_p` whose elementary symmetric functions
 /// are `e` — the roots of `T⁴ − e₁T³ + e₂T² − e₃T + e₄`, when it splits.
-fn split_quartic(e: &[u64; 4], p: u64, rng: &mut StdRng, muls: &mut u64) -> Option<[u64; 4]> {
+pub(crate) fn split_quartic(
+    e: &[u64; 4],
+    p: u64,
+    rng: &mut StdRng,
+    muls: &mut u64,
+) -> Option<[u64; 4]> {
     let ring = PolyRing::new(p);
     let f = UPoly(vec![e[3], (p - e[2]) % p, e[1], (p - e[0]) % p, 1]);
     let roots = ring.roots(&f, rng);
