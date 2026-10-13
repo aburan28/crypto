@@ -5,9 +5,10 @@
   nonexistence claim
 - **Affected work:** [fiber report](../RESEARCH_ISOGENY_FIBERS_ECDLP.md),
   [2026-10-12 correction and bounded control](../research/isogeny_torsion_fibers_20261012/REPORT.md),
-  [same-target paired round](../research/isogeny_torsion_fibers_20261012/paired_round/REPORT.md)
+  [same-target paired round](../research/isogeny_torsion_fibers_20261012/paired_round/REPORT.md),
+  [2026-10-13 isomorphism and six-class controls](../research/isogeny_torsion_fibers_20261012/paired_round/iso_control_20261013/REPORT.md)
 - **Next action owner:** unassigned
-- **Last updated:** 2026-10-12
+- **Last updated:** 2026-10-13
 
 ## Problem
 
@@ -18,14 +19,15 @@ matched source-target negation rho and verifies every answer. A fully
 priced, isolated, independently replayed cold-cost comparison showing
 whether the transport helps ECDLP is still missing. The pairs have orders
 19 and 211; extrapolation from them is not an acceptance criterion.
-Both curves admit a rational order-three automorphism, so a six-class
-rho control is also needed to compare against the full available
-automorphism boundary. This is a reference implementation gap, not an
-obstruction to the isogeny construction.
+Both curves admit a rational order-three automorphism. A fixed six-class
+rho control has now been executed and independently checked, but its
+small-order restarts do not calibrate the best available reference.
 Both destination models are also isomorphic to the sources over the
 base field: `ψ_u(x,y)=(u²x,u³y)` with `u=2` at `p=13` and `u=14` at
-`p=199`. Without an isomorphism-only solver arm, the recorded relation
-yield difference cannot be assigned specifically to the degree-three map.
+`p=199`. The completed isomorphism-only solver arm showed a similar
+destination relation workload at order 211. This does not assign the
+recorded difference specifically to the degree-three map; a base-field
+non-isomorphic pair and broader controls are still missing.
 
 ## Evidence and uncertainty
 
@@ -51,12 +53,24 @@ yield difference cannot be assigned specifically to the degree-three map.
 - **Interpretation:** the fixed pair-table relation collector used fewer
   trials after transport at order 211 (44.875 versus 61.50 on average).
   That is a coordinate-solver observation on these exact workloads.
+- **Observed in the follow-on:** [raw-v3.tsv](../research/isogeny_torsion_fibers_20261012/paired_round/iso_control_20261013/raw-v3.tsv)
+  has 80/80 verified arm records on the same 16 source targets. The
+  [independent native checker](../research/isogeny_torsion_fibers_20261012/paired_round/iso_control_20261013/independent_v3.log)
+  checked frozen targets, both destination images, all answers, phase
+  sums, and six-class orbit multipliers. V1/v2 cap failures remain in
+  [the report](../research/isogeny_torsion_fibers_20261012/paired_round/iso_control_20261013/REPORT.md).
+  At order 211, degree-three and scaling-isomorphism destination arms
+  used 359 and 358 relation trials and 4,871 and 5,046 counted group
+  operations across eight targets. Six-class rho used 737 versus 690
+  for negation rho in the same group-operation unit; at order 19 it
+  required three charged restarts. V3 replay is byte-identical on the
+  same host. These observations are bounded and do not price all native work.
 - **Missing capability:** a native ecbench or equivalently audited paired
   session that prices map evaluation, factor-base lifts, table lookups,
   modular algebra and memory in a common unit, at growing sizes and with
-  independent-host replay, plus an isomorphism-only destination relation
-  arm and a six-class rho arm. The current runner
-  counts these activities but has no pinned conversion for all of them.
+  independent-host replay. A base-field non-isomorphic pair is needed to
+  test a degree-three-specific relation effect. The current runner counts
+  these activities but has no pinned conversion for all of them.
 - **What this evidence does not establish:** an admitted end-to-end speed
   ratio, an asymptotic improvement, or a result for deployed curves or
   other fields.
@@ -66,32 +80,40 @@ yield difference cannot be assigned specifically to the degree-three map.
 - [x] Freeze and execute public same-target source/codomain pairs with
   explicit maps, model/field/subgroup identities, native relation solves,
   equal stop caps, and a matched rho arm, for the bounded control.
+- [x] Execute scaling-isomorphism relations and a charged six-class rho
+  control on the same frozen targets, with complete relation recovery,
+  failure preservation, independent arithmetic verification, and
+  byte-identical same-host replay. See the [follow-on](../research/isogeny_torsion_fibers_20261012/paired_round/iso_control_20261013/REPORT.md).
 - [ ] Obtain verified logs for both solver arms, full phase accounting,
   **priced** native work, failed-attempt records, and independent-host replay;
-  compare the degree-three arm with the cheaper scaling-isomorphism arm,
-  compare both negation and six-class rho, then report a cold-cost ratio
+  compare the degree-three arm with a scaling-isomorphism arm and a
+  base-field non-isomorphic pair, calibrate both negation and six-class
+  rho, then report a cold-cost ratio
   and interval in the repository's counted unit at at least four growing
-  sizes. The bounded round has verified logs,
-  phase counts and retained failed record versions, but does not meet the
-  full pricing and replay gate.
+  sizes. The bounded rounds have verified logs, phase counts and retained
+  failed record versions, but do not meet the full pricing and replay gate.
 
 Meeting these conditions would settle only the measured pair and workload.
 It would not prove a general exponent change or a result for another curve.
 
 ## Next discriminating step
 
-- **Immediate mechanism control:** execute the [preregistered
-  scaling-isomorphism test](../research/isogeny_torsion_fibers_20261012/paired_round/NEXT_TEST_PROTOCOL.md)
-  on the same 16 source targets, with `u=2` and
-  `u=14`, both explicit map evaluations, equal relation inputs/seeds/caps,
-  rank, recovery and scalar verification. Compare with the degree-three
-  arm before attributing any yield difference to that map.
-- **Reference control:** preregister six-class rho on the same
-  16 frozen source targets, with explicit orbit and coefficient
-  canonicalization, charged setup/table work, and independent scalar
-  verification against the three v4 arms. This tests whether using the
-  full rational automorphism group further changes the measured reference;
-  it does not itself settle full native costs or scaling.
+- **Completed mechanism control:** the [preregistered scaling-isomorphism
+  test](../research/isogeny_torsion_fibers_20261012/paired_round/iso_control_20261013/REPORT.md)
+  ran on the same 16 source targets with equal relation inputs/seeds/caps,
+  rank, recovery, scalar verification, and both explicit maps. The two
+  destination arms had similar order-211 relation yields, but their
+  deterministic trajectories and total operation counts were not equal.
+- **Completed bounded reference control:** the same follow-on ran a
+  charged six-class rho arm with explicit orbit and coefficient
+  canonicalization, verified all 16 scalars in v3, and preserved v1/v2
+  cap failures. Stronger tuning and larger-order calibration remain open.
+- **Next mechanism test:** preregister and construct at least one exact
+  base-field non-isomorphic source/destination pair with an explicit
+  verified map and prime-order target subgroup. Check complete relation
+  solves, recovery, and both rho controls on paired public targets; this
+  tests whether the present coordinate result persists when degree-one
+  transport to the same model is unavailable.
 - **Action:** extend native ecbench with a paired target transport path or
   an equivalently audited counted runner; preregister at least four
   increasing prime-order subgroup isogeny pairs, eight or more public

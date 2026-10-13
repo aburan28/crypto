@@ -159,3 +159,30 @@ No new DLP cost or isogeny-class edge was certified for the canonical
 scoreboard or curve registry. `docs/index-calculus-scoreboard.html`,
 `docs/ic-current-state.html`, and `docs/curves/` were checked and left
 unchanged for that reason.
+
+## 2026-10-13 follow-on: isomorphism-only and six-class controls
+
+The earlier mechanism table and next-step paragraph above describe the
+state before this follow-on. The [new result report](paired_round/iso_control_20261013/REPORT.md),
+[run PDFs](paired_round/iso_control_20261013/reports/run-20261013T1634Z/README.md),
+and [raw v3 records](paired_round/iso_control_20261013/raw-v3.tsv) now provide
+complete relation solves after the public scaling isomorphism, alongside
+fresh degree-three, source, negation-rho, and six-class-rho arms on the same
+16 frozen source targets. An independent native checker verified all 80
+answers and the orbit/multiplier action; v1/v2 six-class cap failures are
+retained separately.
+
+At order 211, the degree-three and isomorphism destination arms used 359
+and 358 relation trials and 4,871 and 5,046 counted group operations over
+the same eight targets. The isomorphism/degree-three ratio is 1.035927 in
+that diagnostic unit. At order 19, the respective operation totals were
+563 and 691. The fixed six-class rho control verified every target in v3,
+with three charged restarts at order 19; it is not a calibrated best-rho
+claim. Both destination curves are base-field isomorphic to their sources,
+so these data still cannot isolate a degree-three-specific effect. The
+next mechanism test needs a base-field non-isomorphic pair; an admitted
+performance comparison additionally needs growing sizes, complete native
+pricing, and independent-host replay. The [problem record](../../problems/nonrational-isogeny-fiber-dlp-cost-gap.md)
+tracks the remaining work. The canonical scoreboard graphs were checked
+and left unchanged because this is a bounded counted-operation diagnostic,
+not a new complete-cost or scaling finding.

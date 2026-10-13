@@ -1,0 +1,6 @@
+map_check p=13 b=2 target_b=11 order=19 homomorphism_pairs=361 generator=(1, 4) image_generator=(9, 5) status=pass
+workload_failed p=13 index=4 source=verified destination=verified iso=verified rho=true six=false values=Some(10)/Some(10)/Some(10)/Some(10)/None
+workload_failed p=13 index=5 source=verified destination=verified iso=verified rho=true six=false values=Some(12)/Some(12)/Some(12)/Some(12)/None
+workload_failed p=13 index=6 source=verified destination=verified iso=verified rho=true six=false values=Some(1)/Some(1)/Some(1)/Some(1)/None
+map_check p=199 b=3 target_b=118 order=211 homomorphism_pairs=44521 generator=(1, 2) image_generator=(13, 153) status=pass
+workloads=16 arms=80 failed_workloads=3
