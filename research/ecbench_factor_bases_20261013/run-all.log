@@ -1,0 +1,248 @@
+=== run koblitz17 ===
+ecbench: no CPU topology on this OS; running with --cpus none (every run is recorded at L0, operation counts unaffected)
+   1/30 rho-frob       icv1-f2m17-tm101-00378d4e Wc7be7b5ab2ea  verified S=0.828 L0
+   2/30 ic-k17-orbit   icv1-f2m17-tm101-00378d4e Wc7be7b5ab2ea  verified S=17.069 L0
+   3/30 ic-k17-subspace icv1-f2m17-tm101-00378d4e Wc7be7b5ab2ea     error S=- L0
+   4/30 ic-k17-compact icv1-f2m17-tm101-00378d4e Wc7be7b5ab2ea  verified S=9.072 L0
+   5/30 ic-k17-std     icv1-f2m17-tm101-00378d4e Wc7be7b5ab2ea     error S=- L0
+   6/30 rho-frob       icv1-f2m17-tm101-00378d4e W35cbcf25e8aa  verified S=0.683 L0
+   7/30 ic-k17-orbit   icv1-f2m17-tm101-00378d4e W35cbcf25e8aa  verified S=17.133 L0
+   8/30 ic-k17-subspace icv1-f2m17-tm101-00378d4e W35cbcf25e8aa     error S=- L0
+   9/30 ic-k17-compact icv1-f2m17-tm101-00378d4e W35cbcf25e8aa  verified S=9.090 L0
+  10/30 ic-k17-std     icv1-f2m17-tm101-00378d4e W35cbcf25e8aa     error S=- L0
+  11/30 ic-k17-std     icv1-f2m17-tm101-00378d4e Wc7be7b5ab2ea     error S=- L0
+  12/30 ic-k17-compact icv1-f2m17-tm101-00378d4e Wc7be7b5ab2ea  verified S=9.155 L0
+  13/30 ic-k17-subspace icv1-f2m17-tm101-00378d4e Wc7be7b5ab2ea     error S=- L0
+  14/30 ic-k17-orbit   icv1-f2m17-tm101-00378d4e Wc7be7b5ab2ea  verified S=17.077 L0
+  15/30 rho-frob       icv1-f2m17-tm101-00378d4e Wc7be7b5ab2ea  verified S=1.105 L0
+  16/30 ic-k17-std     icv1-f2m17-tm101-00378d4e W35cbcf25e8aa     error S=- L0
+  17/30 ic-k17-compact icv1-f2m17-tm101-00378d4e W35cbcf25e8aa  verified S=9.119 L0
+  18/30 ic-k17-subspace icv1-f2m17-tm101-00378d4e W35cbcf25e8aa     error S=- L0
+  19/30 ic-k17-orbit   icv1-f2m17-tm101-00378d4e W35cbcf25e8aa  verified S=17.184 L0
+  20/30 rho-frob       icv1-f2m17-tm101-00378d4e W35cbcf25e8aa  verified S=0.882 L0
+  21/30 rho-frob       icv1-f2m17-tm101-00378d4e Wc7be7b5ab2ea  verified S=0.840 L0
+  22/30 ic-k17-orbit   icv1-f2m17-tm101-00378d4e Wc7be7b5ab2ea  verified S=17.037 L0
+  23/30 ic-k17-subspace icv1-f2m17-tm101-00378d4e Wc7be7b5ab2ea     error S=- L0
+  24/30 ic-k17-compact icv1-f2m17-tm101-00378d4e Wc7be7b5ab2ea  verified S=9.112 L0
+  25/30 ic-k17-std     icv1-f2m17-tm101-00378d4e Wc7be7b5ab2ea     error S=- L0
+  26/30 rho-frob       icv1-f2m17-tm101-00378d4e W35cbcf25e8aa  verified S=0.824 L0
+  27/30 ic-k17-orbit   icv1-f2m17-tm101-00378d4e W35cbcf25e8aa  verified S=17.026 L0
+  28/30 ic-k17-subspace icv1-f2m17-tm101-00378d4e W35cbcf25e8aa     error S=- L0
+  29/30 ic-k17-compact icv1-f2m17-tm101-00378d4e W35cbcf25e8aa  verified S=9.070 L0
+  30/30 ic-k17-std     icv1-f2m17-tm101-00378d4e W35cbcf25e8aa     error S=- L0
+session ECBS1hbcf4863ff837 complete -> /Volumes/SSD990/crypto/worktrees/low-hw-dor-20261012/research/ecbench_factor_bases_20261013/sessions/koblitz17 (30 records: {"error": 12, "verified": 18})
+receipt sha256 d3fa23ebf0119c4b85f7d0986c638465a534e9586623e2d46ef6a3b80c21a57c
+{
+  "schema": "ecbench.audit/v1",
+  "session_id": "ECBS1hbcf4863ff837",
+  "session_status": "complete",
+  "ok": true,
+  "problems": [],
+  "checks": {
+    "arms": true,
+    "env_class": true,
+    "executions": true,
+    "host_hash": true,
+    "plan_hash": true,
+    "record_count": true,
+    "records": true,
+    "records_hash": true,
+    "replays": true,
+    "session_complete": true,
+    "spec_id": true,
+    "workloads": true
+  },
+  "records": 30,
+  "verified_records": 18,
+  "regraded": true,
+  "replays": [
+    {
+      "seq": 11,
+      "record_id": "ECR1hd83a0263a431",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 13,
+      "record_id": "ECR1h6fdc6f13acd0",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 16,
+      "record_id": "ECR1hd9fccc6a2556",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 18,
+      "record_id": "ECR1hc74fe4f9cecb",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 20,
+      "record_id": "ECR1hb042823d56a4",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 21,
+      "record_id": "ECR1h95c6c3b9d9df",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 25,
+      "record_id": "ECR1hbd9371fb2a34",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 26,
+      "record_id": "ECR1h2b970c328937",
+      "reproduced": true,
+      "detail": "identical"
+    }
+  ],
+  "files": {
+    "host.json": "a86e338afd37d49ce9090d3e1b5e6e0a43c341452c6809ad7627d2b9fa2d9c2d",
+    "plan.json": "b2c53fc1def96d3173c8f9734f18d7c256fa7d68c5d658d65e54ef3877079487",
+    "records.jsonl": "01c97ca02494b122301953c206bb1a5c73a253f81ad35df980016aa2b9b79ce5",
+    "session.json": "ed2aa33a0558e487198dd44a7a8ec6b3363cf337c778a70aad474135fe315cec",
+    "spec.json": "b3d158025a16d62b2c90acac0ee108814ff20f22e419a0a0d65f9b04535c1a10"
+  },
+  "auditor_binary_sha256": "fa6778a792c06162b0c63ff1f3e63c7ae43a383bb8fd3f27d388f3401e3026b9",
+  "auditor_env_class_id": "ECBENV2h59034d4cd61b",
+  "auditor_hardware_class_id": "ECBHW1h7d1934655eee",
+  "audited_unix_ms": 1791910755120
+}
+audit OK: 30 records, 18 verified, 8 replays reproduced, 0 problems
+| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | levels |
+|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---|
+| ECBS1hbcf4863ff837 | rho-frob | rho.signed_frobenius | icv1-f2m17-tm101-00378d4e | 16.00 | 4/4 | 0.913 | [0.832, 1.039] | 0.215 | 4.246 | 4.246 | 1.000 | yes | L0×4 |
+| ECBS1hbcf4863ff837 | ic-k17-orbit | ic.pipeline | icv1-f2m17-tm101-00378d4e | 16.00 | 4/4 | 17.081 | [17.032, 17.145] | – | – | 79.469 | 18.714 | no | L0×4 |
+| ECBS1hbcf4863ff837 | ic-k17-subspace | ic.pipeline | icv1-f2m17-tm101-00378d4e | 16.00 | 0/4 | – | – | – | – | – | – | no | L0×4 |
+| ECBS1hbcf4863ff837 | ic-k17-compact | ic.pipeline | icv1-f2m17-tm101-00378d4e | 16.00 | 4/4 | 9.114 | [9.083, 9.144] | – | – | 42.402 | 9.985 | yes | L0×4 |
+| ECBS1hbcf4863ff837 | ic-k17-std | ic.pipeline | icv1-f2m17-tm101-00378d4e | 16.00 | 0/4 | – | – | – | – | – | – | no | L0×4 |
+=== run koblitz23 ===
+ecbench: no CPU topology on this OS; running with --cpus none (every run is recorded at L0, operation counts unaffected)
+   1/12 rho-frob       icv1-f2m23-t5197-69e76b73 Wcfcbe6c754bc  verified S=0.400 L0
+   2/12 ic-k23-compact icv1-f2m23-t5197-69e76b73 Wcfcbe6c754bc  verified S=3.049 L0
+   3/12 rho-frob       icv1-f2m23-t5197-69e76b73 Wce31ee60218e  verified S=0.267 L0
+   4/12 ic-k23-compact icv1-f2m23-t5197-69e76b73 Wce31ee60218e  verified S=3.009 L0
+   5/12 ic-k23-compact icv1-f2m23-t5197-69e76b73 Wcfcbe6c754bc  verified S=3.073 L0
+   6/12 rho-frob       icv1-f2m23-t5197-69e76b73 Wcfcbe6c754bc  verified S=0.347 L0
+   7/12 ic-k23-compact icv1-f2m23-t5197-69e76b73 Wce31ee60218e  verified S=2.952 L0
+   8/12 rho-frob       icv1-f2m23-t5197-69e76b73 Wce31ee60218e  verified S=0.334 L0
+   9/12 rho-frob       icv1-f2m23-t5197-69e76b73 Wcfcbe6c754bc  verified S=0.212 L0
+  10/12 ic-k23-compact icv1-f2m23-t5197-69e76b73 Wcfcbe6c754bc  verified S=2.954 L0
+  11/12 rho-frob       icv1-f2m23-t5197-69e76b73 Wce31ee60218e  verified S=0.539 L0
+  12/12 ic-k23-compact icv1-f2m23-t5197-69e76b73 Wce31ee60218e  verified S=3.003 L0
+session ECBS1hf6084fb4147f complete -> /Volumes/SSD990/crypto/worktrees/low-hw-dor-20261012/research/ecbench_factor_bases_20261013/sessions/koblitz23 (12 records: {"verified": 12})
+receipt sha256 915e817ed9f6c6969b56f86ac8a26cbe3f35fd9e87f829f16580826e3450bf66
+{
+  "schema": "ecbench.audit/v1",
+  "session_id": "ECBS1hf6084fb4147f",
+  "session_status": "complete",
+  "ok": true,
+  "problems": [],
+  "checks": {
+    "arms": true,
+    "env_class": true,
+    "executions": true,
+    "host_hash": true,
+    "plan_hash": true,
+    "record_count": true,
+    "records": true,
+    "records_hash": true,
+    "replays": true,
+    "session_complete": true,
+    "spec_id": true,
+    "workloads": true
+  },
+  "records": 12,
+  "verified_records": 12,
+  "regraded": true,
+  "replays": [
+    {
+      "seq": 4,
+      "record_id": "ECR1h08de25e22c95",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 5,
+      "record_id": "ECR1hc0f06a2fcdea",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 6,
+      "record_id": "ECR1hf85304d73c62",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 7,
+      "record_id": "ECR1h3e8a60260065",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 8,
+      "record_id": "ECR1hae32f26876af",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 9,
+      "record_id": "ECR1h162f34281d82",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 10,
+      "record_id": "ECR1h2882fd6181a0",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 11,
+      "record_id": "ECR1h28c399cc37df",
+      "reproduced": true,
+      "detail": "identical"
+    }
+  ],
+  "files": {
+    "host.json": "45917f6792648a4d267bce48c50c93e44329a8f47911c17cdd2f267de92d66ce",
+    "plan.json": "b5a9a3ca19a43d85798f075ec0326d5fa68a379b052c2a45a9724849d96c02b2",
+    "records.jsonl": "6225ebafeddd26d152abe958345312c0aa3f952b441158e172d136283180dd71",
+    "session.json": "fe0b2cd824cce1c0f552ffab4fb0dc4c300f3c19d846ac43e1065ea8d1532868",
+    "spec.json": "180ed3a6b9573833385b9e09cc66df1a8b32d95d35b84de6f16247b050d7c26f"
+  },
+  "auditor_binary_sha256": "fa6778a792c06162b0c63ff1f3e63c7ae43a383bb8fd3f27d388f3401e3026b9",
+  "auditor_env_class_id": "ECBENV2h59034d4cd61b",
+  "auditor_hardware_class_id": "ECBHW1h7d1934655eee",
+  "audited_unix_ms": 1791910757289
+}
+audit OK: 12 records, 12 verified, 8 replays reproduced, 0 problems
+| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | levels |
+|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---|
+| ECBS1hf6084fb4147f | rho-frob | rho.signed_frobenius | icv1-f2m23-t5197-69e76b73 | 21.00 | 4/4 | 0.358 | [0.246, 0.488] | 0.185 | 1.939 | 1.939 | 1.000 | yes | L0×4 |
+| ECBS1hf6084fb4147f | ic-k23-compact | ic.pipeline | icv1-f2m23-t5197-69e76b73 | 21.00 | 4/4 | 2.996 | [2.953, 3.043] | – | – | 16.210 | 8.360 | yes | L0×4 |
+=== run koblitz23-cyc ===
+ecbench: no CPU topology on this OS; running with --cpus none (every run is recorded at L0, operation counts unaffected)
+   1/12 rho-frob       icv1-f2m23-tm5197-1f85e9e1 W9073030b43b5  verified S=0.272 L0
+   2/12 ic-k23-cyc-w1  icv1-f2m23-tm5197-1f85e9e1 W9073030b43b5  verified S=12.190 L0
+   3/12 rho-frob       icv1-f2m23-tm5197-1f85e9e1 W0bf1dd79030b  verified S=0.422 L0
+   4/12 ic-k23-cyc-w1  icv1-f2m23-tm5197-1f85e9e1 W0bf1dd79030b  verified S=11.758 L0
+   5/12 ic-k23-cyc-w1  icv1-f2m23-tm5197-1f85e9e1 W9073030b43b5  verified S=3.416 L0
+   6/12 rho-frob       icv1-f2m23-tm5197-1f85e9e1 W9073030b43b5  verified S=0.287 L0
+   7/12 ic-k23-cyc-w1  icv1-f2m23-tm5197-1f85e9e1 W0bf1dd79030b  verified S=1.012 L0
+   8/12 rho-frob       icv1-f2m23-tm5197-1f85e9e1 W0bf1dd79030b  verified S=0.384 L0
+   9/12 rho-frob       icv1-f2m23-tm5197-1f85e9e1 W9073030b43b5  verified S=0.355 L0
+  10/12 ic-k23-cyc-w1  icv1-f2m23-tm5197-1f85e9e1 W9073030b43b5  verified S=4.587 L0
+  11/12 rho-frob       icv1-f2m23-tm5197-1f85e9e1 W0bf1dd79030b  verified S=0.354 L0
+  12/12 ic-k23-cyc-w1  icv1-f2m23-tm5197-1f85e9e1 W0bf1dd79030b  verified S=4.692 L0
+session ECBS1h747727859b9e complete -> /Volumes/SSD990/crypto/worktrees/low-hw-dor-20261012/research/ecbench_factor_bases_20261013/sessions/koblitz23-cyc (12 records: {"verified": 12})
