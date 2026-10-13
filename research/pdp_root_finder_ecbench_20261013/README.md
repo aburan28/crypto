@@ -7,11 +7,37 @@ the first size, the ladder restarted).  Oracles: `ic_framework::rootfind`
 (`rootfind-mitm`, `rootfind-pairs`), the plug-in form of the oracles of
 [`../pdp_root_finder_20261012/`](../pdp_root_finder_20261012/README.md)
 (PR #1752).  Run report: [`reports/`](reports/).  Digest: `REPORT.pdf`.
-**Class: RESULT-CLASS.**
+**Class: engineering.**
 
 ## 0. Summary
 
-RESULT-SUMMARY
+Index calculus on `E_0: y² + xy = x³ + 1` over `F_{2^n}`, `n = 13, 19, 23,
+31, 37`, run end to end in ecbench with the new root-finding oracle
+`rootfind-mitm` and, as baselines, the inherited-F4 Gröbner oracle (`n ≤ 23`)
+and the harness's own `mitm` table oracle, against the strong rho on the same
+eight public targets per size.  All 1,248 measured runs verified `[d]G = Q`
+and every replay audit is `OK` with every replay identical.
+
+- **Against F4, inside the same pipeline:** the root-finder makes a whole
+  solve 350× faster in wall time at `n = 13` (admitted), about 2,500× at
+  `n = 19` and about 10,000× at `n = 23` (descriptive: the F4 runs are too
+  long to hold L2).  In `S`, F4's arm reads lower (`ic-rootfind / ic-f4` =
+  2.56, 9.59, 29.9) because its Gröbner work is counted and not charged:
+  its `S` is a lower bound and that ratio is not a speedup in either
+  direction.
+- **Against the harness's `mitm` oracle:** the same charged additions to
+  within 0.1–26 % (1.26× at `n = 13` falling to 1.0008× at `n = 37`, the
+  block of 32 overshooting on hits at small bases) and 5–72 % less wall time
+  (admitted at `n = 13…31`: 0.95, 0.70, 0.43, 0.28).
+- **Against rho:** index calculus with any oracle costs more than the
+  strong rho on every size, and the gap grows: `S_IC / S_rho` = 2.9, 15,
+  61, 3,053 and 25,116 at `n = 13, 19, 23, 31, 37`.  The jump at `n = 31` is
+  mostly the curve's cofactor (1,492): index calculus pays for the whole
+  group, rho only for the prime subgroup.  No exponent moves.
+- **Claims:** a `vs_rho` claim report could not be built for any workload:
+  the IC1 identity names a base by its sign-and-Frobenius orbits and the
+  standard subspace base has more columns than orbits (17 against 13 at
+  `n = 13`).  The refusals are recorded in `claims/`.
 
 ## 1. What was measured
 
@@ -52,19 +78,98 @@ three-summand arm the harness had not had.
 
 ## 2. Results
 
-RESULT-TABLES
+Paired totals ratios from `ecbench compare` (`Σ S_B / Σ S_A` over
+(workload, round) pairs, 95 % cluster-bootstrap intervals; `tables/` holds
+every comparison and per-workload rows).  Wall ratios are the harness's
+admitted medians where both runs held L2, otherwise marked descriptive.
+
+**Mean `S` per arm** (`ecbench table`; floor `√(π/4n)`):
+
+| `n` | floor | strong rho | rho (signed Frobenius) | IC + F4 (lower bound) | IC + `mitm` | IC + `rootfind-mitm` | IC + `rootfind-pairs` |
+|--:|--:|--:|--:|--:|--:|--:|--:|
+| 13 | 0.246 | 14.52 | 1.88 | 16.18 | 32.80 | 41.42 | 300.8 |
+| 19 | 0.203 | 3.154 | 0.752 | 4.933 | 39.89 | 47.30 | 1,886 |
+| 23 | 0.185 | 1.140 | 0.457 | 2.323 | 66.31 | 69.44 | 7,648 |
+| 31 | 0.159 | 1.18 | 0.37 | — | 3,599 | 3,608 | `1.8·10⁶` |
+| 37 | 0.146 | 0.240 | 0.194 | — | 6,012 | 6,016 | — |
+
+**`ic-rootfind` against each reference:**
+
+| `n` | ÷ strong rho, `S` | ÷ strong rho, wall | ÷ F4, `S` (F4 a lower bound) | ÷ F4, wall | ÷ `mitm`, `S` | ÷ `mitm`, wall |
+|--:|--:|--:|--:|--:|--:|--:|
+| 13 | 2.85 [2.64, 3.04] | 4.18 [4.05, 4.72] | 2.56 [2.46, 2.66] | **0.0029** [0.003, 0.003] | 1.263 [1.239, 1.288] | 0.953 [0.932, 0.993] |
+| 19 | 15.0 [14.3, 15.7] | 11.6 [10.9, 12.3] | 9.59 [9.29, 9.92] | 0.0004 (descriptive) | 1.186 [1.170, 1.202] | 0.697 [0.680, 0.733] |
+| 23 | 60.9 [56.1, 66.0] | 34.5 [31.8, 36.7] | 29.9 [28.8, 30.9] | 0.0001 (descriptive) | 1.047 [1.043, 1.052] | 0.427 [0.418, 0.451] |
+| 31 | 3,053 [2,505, 3,596] | 2.33 [1.99, 2.61] | — | — | 1.003 [1.002, 1.003] | 0.278 [0.265, 0.297] |
+| 37 | 25,116 [20,793, 30,546] | 19,125 (descriptive) | — | — | 1.0008 [1.001, 1.001] | 0.312 (descriptive) |
+
+The A/A control (`rho-strong-aa` against `rho-strong`) is 1.000 in `S` on
+every size, and 0.97–1.05 in admitted wall: the wall noise floor.  At `n = 31`
+the strong rho's wall time is dominated by its fixed set-up (160 ms a run
+against 0.5 ms for the plain signed-Frobenius rho), which is why the wall
+ratio there (2.33) and the `S` ratio (3,053) disagree; `S` is the metric.
+
+**Where the index-calculus cost sits** (`rootfind-mitm`, verified runs,
+means): the relations phase is 71–94 % of `S`, the oracle set-up (pair
+table) 6–29 %, factor base and linear algebra under 2 %.  Trials per run
+grow from 30 to 4,064 while the hit rate falls from 0.51 to 0.085 at
+`n = 31` (cofactor 1,492):
+
+| `n` | base points | columns | trials | relations | hit rate | cofactor |
+|--:|--:|--:|--:|--:|--:|--:|
+| 13 | 33 | 17 | 30 | 15 | 0.51 | 4 |
+| 19 | 139 | 70 | 112 | 65 | 0.58 | 4 |
+| 23 | 275 | 138 | 373 | 129 | 0.35 | 4 |
+| 31 | 1,053 | 527 | 4,064 | 345 | 0.085 | 1,492 |
+
+Figures: [`figures/s_by_size.svg`](figures/s_by_size.svg) (every run's `S`
+by arm and size, with the floor), [`figures/phase_split.svg`](figures/phase_split.svg)
+(the IC arms' phases), [`figures/wall_by_size.svg`](figures/wall_by_size.svg).
 
 ## 3. Decision
 
-RESULT-DECISION
+- Audits: `OK` on all five sizes, every replay identical (280, 280, 168,
+  144, 120 replays).
+- P1 (`rootfind-mitm` equal to `mitm` in `S`): **failed at small sizes,
+  held at large ones** — 1.26× at `n = 13`, 1.0008× at `n = 37`.  The block
+  of 32 abscissae overshoots on a hit when the whole base is one or two
+  blocks; the scope note's lever L5 removes it.
+- P2 (wall below F4 by at least 100× at `n = 23`): **held**, about
+  10,000× (descriptive, F4 runs below L2); 350× admitted at `n = 13`.
+- P3 (every IC arm above rho, `S_IC/S_rho` not falling with `n`): **held**
+  on every size and arm.
+- P4 (`rootfind-pairs` far above every other arm): **held** (21× to
+  `1.5·10⁶`× rho).
+- Class (AGENTS.md §3): **engineering.**  The root-finder replaces the
+  Gröbner oracle at thousands of times less wall time and leaves the
+  index calculus's exponent where it was, above rho's and widening.
 
 ## 4. Claims
 
-RESULT-CLAIMS
+`ecbench claim build --ic ic-rootfind --rho rho-strong` was run for every
+workload of every size (40).  Every build was refused before the checker:
+the claim's IC1 candidate identity names a factor base by its
+sign-and-Frobenius orbits, and the standard subspace base folds by
+negation, so it has more columns than orbits (17 against 13 at `n = 13`, 70
+against 61, 138 against 127, 527 against 462, 2,012 against 1,983).  The
+logs are in `claims/`; `claims/SUMMARY.txt` lists them.  A claim-eligible
+round needs a Frobenius-orbit base (`koblitz-orbit`).  The database SQL of
+every session is in `db/` (sessions only).
 
 ## 5. Environment, isolation and audit
 
-RESULT-ENV
+Claude Code cloud container: Intel Xeon @ 2.10 GHz, 4 vCPU, L3 260 MiB,
+15 GiB RAM, kernel 6.18.44, rustc 1.97.0; `ecbench run --cpus auto` (CPU 3
+reserved, threads evicted), one thread.  Isolation earned per run is in each
+table's last column: most runs L2, the rest L1 (hypervisor steal on the run
+CPU); every wall ratio above is marked admitted or descriptive as the
+harness graded it.  Binary `ee160be86a9edb6f…` (all five sessions; built
+from commit `27d54f19e`, Amendment 1's oracle).  The first binary's sessions
+are in `superseded-binary-1/`; the first `n = 37` session was interrupted at
+114 of 160 runs when its runner reached a 2-hour limit and is kept in
+`sessions/n37-interrupted-01/` (no table uses it).  Conductor's control
+plane was unreachable (no Docker or Postgres in the container): no task
+card.
 
 ## 6. Reproduction
 
