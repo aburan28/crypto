@@ -954,6 +954,121 @@ fn pdp3_binary_runs_every_engine_on_a_generic_binary_curve() {
     assert!(ok, "replay: {err}");
 }
 
+#[test]
+fn pdp3_koblitz_rootfind_engine_follows_f4_query_stream_without_a_solver() {
+    // The root-finding engine (`DecompositionStrategy::PairTable`) beside
+    // inherited F4 on the E_0 m = 13 curve, both at m = 2 and m = 3 on one
+    // base and seed: every run verifies; the exact engines issue the same
+    // queries and find the same relations; the root finder's record has no
+    // solver block and no word-XOR unit, its set-up phase charges the
+    // table's |F|(|F|+1)/2 pair additions, and its S is a complete count
+    // where F4's is a lower bound.  A Groebner bound handed to the root
+    // finder is refused as an error record, never ignored.
+    let dir = scratch("pdp3-rootfind");
+    let arm = |name: &str, oracle: &str| {
+        format!(
+            r#"{{"name": "{name}", "role": "candidate", "method": {{"id": "ic.pipeline", "params": {{
+              "factor_base": "koblitz-standard-subspace:dimension=5",
+              "oracle": "{oracle}"}}}}}}"#
+        )
+    };
+    let spec = format!(
+        r#"{{
+      "schema": "ecbench.spec/v1",
+      "label": "pdp3-koblitz rootfind test",
+      "workloads": {{"curves": [{{"kind": "koblitz", "a": 0, "n": 13}}],
+                    "targets_per_curve": 2, "target_seed": 7, "target_kind": "public"}},
+      "arms": [{}, {}, {}, {}, {}],
+      "measurement": {{"rounds": 1, "warmup": 0, "seed": 5, "isolation_required": "L0", "timeout_seconds": 300}}
+    }}"#,
+        arm(
+            "f4-m3",
+            "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192"
+        ),
+        arm("root-m3", "pdp3-koblitz:m=3,engine=rootfind"),
+        arm(
+            "f4-m2",
+            "pdp3-koblitz:m=2,engine=inherited-f4,degree=3,node_budget=8192"
+        ),
+        arm("root-m2", "pdp3-koblitz:m=2,engine=rootfind"),
+        arm("root-bad", "pdp3-koblitz:m=2,engine=rootfind,degree=3"),
+    );
+    std::fs::write(dir.join("spec.json"), spec).unwrap();
+    let out = dir.join("s");
+    let (ok, err) = run_spec(&dir, &out, &[]);
+    assert!(ok, "{err}");
+    let text = std::fs::read_to_string(out.join("records.jsonl")).unwrap();
+    let mut by_workload: std::collections::BTreeMap<String, std::collections::BTreeMap<String, Value>> =
+        Default::default();
+    for line in text.lines() {
+        let r: Value = serde_json::from_str(line).unwrap();
+        let arm = r["arm"].as_str().unwrap().to_string();
+        if arm == "root-bad" {
+            assert_eq!(r["outcome"]["status"], "error", "{line}");
+            let reason = r["outcome"]["error"].as_str().unwrap_or_default();
+            assert!(reason.contains("no Groebner search"), "{line}");
+        } else {
+            assert_eq!(r["outcome"]["status"], "verified", "{line}");
+        }
+        if arm.starts_with("root") {
+            assert!(r["solver"].is_null(), "a table oracle has no solver block: {line}");
+            assert!(
+                !r["cost"]["unpriced"].to_string().contains("word_XORs"),
+                "{line}"
+            );
+        } else {
+            assert_eq!(r["cost"]["lower_bound"], true, "{line}");
+            assert!(r["solver"]["ops"].as_u64().unwrap() > 0, "{line}");
+        }
+        let w = r["workload"]["workload_id"].as_str().unwrap().to_string();
+        by_workload.entry(w).or_default().insert(arm, r);
+    }
+    assert_eq!(by_workload.len(), 2);
+    for (w, arms) in &by_workload {
+        assert_eq!(arms.len(), 5, "{w}");
+        for (f4, root) in [("f4-m3", "root-m3"), ("f4-m2", "root-m2")] {
+            for key in ["targets_tried", "relations_found", "matrix_rank"] {
+                assert_eq!(
+                    arms[f4]["counters"][key], arms[root]["counters"][key],
+                    "{w}: {f4} and {root} diverged at {key}"
+                );
+            }
+            let setup = arms[root]["phases"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|p| p["name"] == "oracle_setup")
+                .expect("an oracle_setup phase")
+                .clone();
+            let points = arms[root]["factor_base"]["signed_points"].as_u64().unwrap();
+            assert_eq!(setup["adds"].as_u64().unwrap(), points * (points - 1) / 2, "{w}");
+            assert_eq!(setup["doubles"].as_u64().unwrap(), points, "{w}");
+            assert!(setup["native"]["pair_table_entries"].as_u64().unwrap() > 0, "{w}");
+            let relations = arms[root]["phases"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|p| p["name"] == "relations")
+                .unwrap()
+                .clone();
+            assert_eq!(
+                relations["native"]["frobfold_mismatches"].as_u64().unwrap_or(0),
+                0,
+                "{w}"
+            );
+            assert!(relations["native"]["lookups"].as_u64().unwrap() > 0, "{w}");
+        }
+    }
+    let (ok, _, err) = ecbench(&[
+        "verify",
+        "--dir",
+        out.to_str().unwrap(),
+        "--replay-all",
+        "--exit-code",
+    ]);
+    assert!(ok, "replay: {err}");
+}
+
 const BOUNDS_SPEC: &str = r#"{
   "schema": "ecbench.spec/v1",
   "label": "bounds integration test: four sizes",

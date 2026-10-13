@@ -1,0 +1,44 @@
+End-to-end DLP: root-finding vs F4 decomposition (baseline given every advantage)
+All times are CPU time (process + reaped children, getrusage), not wall-clock.
+
+=== Prime a=−3 curves: complete DLP, root finding vs Buchberger vs msolve ===
+
+msolve found; charged its own process CPU only (harness spawn/file I/O excluded). Each decide is paired with an adjacent trivial-ideal control run (order alternating) and the mean paired difference is what is charged. For scale: one msolve process on the trivial ideal costs 5.96 ms child CPU (σ 1.33 ms, 200 up-front runs). A per-decide value is reported only if it clears 2 standard errors of the paired mean; otherwise the 2·SE bound is charged.
+A baseline is measured in full when its projected wall is under 300.00 s (E2E_FULL_BUDGET_S); otherwise it is COMPOSED
+from a sampled per-target cost (100 targets for Buchberger, 400 for msolve) × the root finder's measured target count on the same stream.
+
+-- 16-bit  p=65519  n=65447  |F|=8  d=13054 --
+   root-finding :   23.12 ms measured  (oracle 3.70 ms, 6544 targets, 13 relations)
+   Buchberger   : skipped (E2E_SKIP_BUCHBERGER)
+   (msolve: 6543 decides, net child CPU 343.3 µs per decide, 2·SE 37.1 µs)
+   msolve (F4)  :     2.31 s measured  (343.2 µs per target × 6544 targets)   → 100× vs root
+
+-- 20-bit  p=1048571  n=1048189  |F|=12  d=630282 --
+   root-finding :  416.08 ms measured  (oracle 55.53 ms, 75683 targets, 26 relations)
+   Buchberger   : skipped (E2E_SKIP_BUCHBERGER)
+   (msolve: 400 decides, net child CPU 573.6 µs per decide, 2·SE 144.3 µs)
+   msolve (F4)  :    43.77 s COMPOSED  (573.6 µs per target × 75683 targets)   → 105× vs root
+
+-- 24-bit  p=16777199  n=16782299  |F|=12  d=13800328 --
+   root-finding :    12.30 s measured  (oracle 1.30 s, 1501376 targets, 21 relations)
+   Buchberger   : skipped (E2E_SKIP_BUCHBERGER)
+   (msolve: 400 decides, net child CPU 405.0 µs per decide, 2·SE 161.8 µs)
+   msolve (F4)  :   619.08 s COMPOSED  (405.0 µs per target × 1501376 targets)   → 50× vs root
+
+-- 16-bit: each method at its own best |F| (F4 total = composed, oracle only; root total = measured wall incl. target generation) --
+     |F|  msolve/decide    root/decide E[targets] msolve composed
+       4       201.5 µs         0.7 µs      18407         3.71 s
+       6       213.8 µs         0.8 µs       9999         2.14 s
+       8       441.7 µs         0.8 µs       6647         2.94 s
+      12       485.1 µs         0.8 µs       3864         1.87 s
+      16       525.5 µs         0.7 µs       2685         1.41 s
+      24        1.16 ms         1.1 µs       1648         1.91 s
+      32        1.83 ms         1.0 µs       1183         2.16 s
+      64        4.99 ms         1.4 µs        552         2.76 s
+     120       17.98 ms         6.4 µs        285         5.13 s
+   F4 best (resolved rows): |F|=16 → 1.41 s composed.  Root best: |F|=120 → 6.90 ms measured (829 targets).  → 205× at each method's own best
+   F4 best (unresolved rows charged their 2·SE bound, an upper bound on F4's cost): |F|=16 → 1.41 s composed  → speed-up is at most 205×
+
+Every solve above recovered and verified the planted logarithm. Not a security claim.
+wrote research/semaev_rootfind_e2e_20261012/run2/results.json
+EXIT=0
