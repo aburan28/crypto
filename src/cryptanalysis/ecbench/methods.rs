@@ -2530,7 +2530,10 @@ mod tests {
             let m = resolve(&MethodSpec {
                 id: "ic.pipeline".into(),
                 params: [
-                    ("factor_base".to_string(), "prime-abscissa:size=32".to_string()),
+                    (
+                        "factor_base".to_string(),
+                        "prime-abscissa:size=32".to_string(),
+                    ),
                     ("oracle".to_string(), oracle.to_string()),
                 ]
                 .into_iter()
@@ -2556,7 +2559,11 @@ mod tests {
         let (s, r) = (relations(&sub), relations(&root));
         // The same candidate points, each one addition; the root finder
         // adds one re-addition per relation and nothing else.
-        assert_eq!(r.adds, s.adds + root.counters["relations_found"], "{s:?} {r:?}");
+        assert_eq!(
+            r.adds,
+            s.adds + root.counters["relations_found"],
+            "{s:?} {r:?}"
+        );
         assert_eq!(r.native["lookups"], s.native["lookups"]);
         // One batched inversion per oracle call; the relation loop's
         // target guard skips a few trials before the oracle sees them.
@@ -2569,11 +2576,17 @@ mod tests {
 
         // A knob the engine does not read is refused, as is a summand
         // count it does not take.
-        for bad in ["rootfind-subtract:m=2,negation_folded=1", "rootfind-subtract:m=4"] {
+        for bad in [
+            "rootfind-subtract:m=2,negation_folded=1",
+            "rootfind-subtract:m=4",
+        ] {
             let m = resolve(&MethodSpec {
                 id: "ic.pipeline".into(),
                 params: [
-                    ("factor_base".to_string(), "prime-abscissa:size=32".to_string()),
+                    (
+                        "factor_base".to_string(),
+                        "prime-abscissa:size=32".to_string(),
+                    ),
                     ("oracle".to_string(), bad.to_string()),
                 ]
                 .into_iter()
@@ -2585,7 +2598,10 @@ mod tests {
         let m = resolve(&MethodSpec {
             id: "ic.pipeline".into(),
             params: [
-                ("factor_base".to_string(), "prime-abscissa:size=32".to_string()),
+                (
+                    "factor_base".to_string(),
+                    "prime-abscissa:size=32".to_string(),
+                ),
                 ("oracle".to_string(), "rootfind-subtract:m=3".to_string()),
             ]
             .into_iter()
