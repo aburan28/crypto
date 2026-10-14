@@ -2,6 +2,17 @@
 
 Date preregistered: 2026-10-14
 
+## Preregistration clarification (before runner execution)
+
+The second bullet of the `ecbench` gate below is narrower than its original
+wording "if it has nonzero rank."  A merely nonzero Walsh rank is not a new
+parity-eligible DLP method: it must first reduce the exact free-relation-oracle
+lower bound to `S <= 1.3`.  Therefore the scaled `ecbench` candidate is
+eligible only when both conditions hold: the certified promotion rank is
+nonzero **and** the updated free-oracle bound is at most rho.  This correction
+is registered before committing or executing the runner and is fail-closed;
+it cannot turn a failed result into a promotion.
+
 ## Question and boundary
 
 Test whether the complete depth-18 Dickson trace fibre underlying
@@ -115,8 +126,9 @@ promotion rule:
 - If the complete Walsh family has zero certified rank, there is no new DLP
   method to benchmark.  Record `ecbench candidate = ineligible`, preserve the
   exact P-256 result, and do not disguise a stage screen as an ecbench solve.
-- If it has nonzero rank, first implement a word-size Dickson--Walsh analogue
-  as a new, replayable `ic.pipeline` candidate, freeze at least four registered
+- If it has nonzero certified rank **and** the updated free-oracle lower bound
+  is `S <= 1.3`, first implement a word-size Dickson--Walsh analogue as a new,
+  replayable `ic.pipeline` candidate, freeze at least four registered
   prime-curve sizes, and run matched `rho.negation`, unmodified IC, candidate,
   and A/A arms through `ecbench`; every recovered scalar must replay.
 - No scaled ecbench result transfers to P-256 automatically.  It supplies an
