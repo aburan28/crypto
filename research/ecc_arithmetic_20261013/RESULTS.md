@@ -6,6 +6,8 @@ portfolio in [PLAN.md](PLAN.md). The exact run, controls and raw observations
 are in the [run report](reports/run-20261013T1837Z/report.md), with
 [architecture choices](ARCHITECTURE.md) and the
 [open obstruction](../../problems/ecc-arithmetic-platform-measurement.md).
+The subsequent x86-64 Modal panels have a separate
+[report](reports/modal-20261013/REPORT.md) and [PDF](reports/modal-20261013/REPORT.pdf).
 
 ## Implementation
 
@@ -21,7 +23,8 @@ change does not establish a constant-time secret-scalar path.
 The modified public multiply passed 17 focused release tests, including
 bitwise reference equivalence, boundary fields, reduction and inversion. An
 x86-64 Linux cross-check of the frozen baseline and candidate compiled with
-Rust 1.98.0; it did not execute on Intel hardware. The full release library
+Rust 1.98.0; that local check did not execute the target code. The later
+Modal panels executed the same sources on x86-64. The full release library
 suite compiled and ran in the sandbox: 4,044 passed, nine unrelated local-socket
 tests failed with `Operation not permitted`, and 114 were ignored. The
 collaboration test group, including all nine, then passed 37/37 with loopback
@@ -41,15 +44,23 @@ no admitted speedup or regression from these timings.
 
 ![Every final paired round](paired_mac_final.svg)
 
-No Intel or GPU job completed. A sandboxed Modal attempt could not connect;
-automatic approval review rejected the network-enabled retry because it
-would export the source bundle to Modal without specific authorization.
-The user can approve that exact source export after reviewing the bundle, or
-an already-authorized worker can be used. The broader prime curves,
+After explicit user authorization for the frozen seven-file export, the
+first Modal launcher reached an x86-64 worker but failed its test build on
+a wrong remote source path. Its failed receipt is retained. A corrected,
+separately hashed launcher completed two ephemeral x86-64 worker runs:
+34 tests passed per run, with 24 AB/BA pairs per field and matching checksums
+in all 384 arm rows. The runs reported PCLMULQDQ but no CPU model or
+reserved-core receipt. Absolute median times shifted substantially between
+workers, including the unchanged four-limb control. These are descriptive
+field timings; they do not pass the controlled wall-time gate or establish
+a worldwide rank. See the [Modal report](reports/modal-20261013/REPORT.md),
+[all rows](modal_paired.csv), and [two-run graph](modal_paired.svg).
+
+The broader prime curves,
 Curve25519/Ed25519, Koblitz scalar path, Metal and CUDA/HIP kernels remain
 unimplemented or unmeasured as listed in [PLAN.md](PLAN.md).
 
 The ECC2K boundary scoreboard and ecbench comparisons were checked at base
-commit `11459b07f` and receive no updated performance claim, because only
-a noisy field subroutine panel completed. The study-local graph is the visual
-record of this measured scope.
+commit `11459b07f` and receive no updated performance claim, because the
+completed work is limited to a field subroutine with no qualified wall-time
+comparison. The study-local Mac and Modal graphs are the visual records.

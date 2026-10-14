@@ -19,7 +19,7 @@ secret-scalar path.
 
 The modified public multiply passed 17 focused release tests with reference
 equivalence and boundary fields. Both frozen sources compiled for x86-64 Linux
-with Rust 1.98.0; no Intel runtime measurement was made. The full release
+with Rust 1.98.0; the later Modal panels executed them on x86-64. The full release
 library suite ran in the sandbox: 4,044 passed, nine local-socket tests failed
 with permission denied, and 114 were ignored. The collaboration group then
 passed 37/37 with loopback access. A complete loopback-enabled rerun was
@@ -37,8 +37,12 @@ controlled comparison gate.
 
 #image("paired_mac_final.svg", width: 100%)
 
-No Intel or GPU job completed. The sandboxed Modal attempt could not connect;
-automatic approval review rejected its network-enabled source-upload retry
-without specific export authorization. NIST primes, Curve25519, Ed25519,
-Koblitz scalar recoding, Metal and CUDA/HIP remain open. The ECC2K boundary
-and ecbench claim charts were checked but receive no new performance row.
+After user authorization, two ephemeral Modal x86-64 workers completed the
+same frozen-source field panel: 34 tests passed per run, 24 AB/BA pairs per
+field, and 384 matching arm rows in total. The first launcher failed at a
+remote source path and its receipt remains. The completed workers reported
+PCLMULQDQ but no CPU model or reserved-core receipt; absolute times changed
+markedly between them, including the unchanged control. The dedicated Modal
+report and graph are in research/ecc_arithmetic_20261013/reports/modal-20261013/.
+No controlled wall-time or worldwide claim follows. NIST primes, Curve25519,
+Ed25519, Koblitz scalar recoding, Metal and CUDA/HIP remain open.

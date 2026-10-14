@@ -147,6 +147,7 @@ implementation's speed.
    synchronization, verification, batch size and end-to-end latency. Include a
    same-host CPU arm and a no-op launch/transfer control.
 
-The present Mac panel failed step 3 because of host contention. The Modal
-attempt cannot proceed until source-export authorization is resolved, and
-there is no Intel, Metal, CUDA or ROCm result in this study.
+The Mac panel failed step 3 because of host contention. After source-export
+authorization, two Modal x86-64 field panels completed, but the workers
+reported no CPU model, isolation, or A/A control and do not qualify a
+wall-time comparison. There is no Metal, CUDA or ROCm result in this study.
