@@ -12,6 +12,11 @@ Admitted cold `S` for a rootfind IC arm ≤ best F4 IC arm on the same
 panel (claim-n13 baseline: F4 m=3/d=5 mean S **16.322**). Stretch toward
 strong rho (~14.3).
 
+**Status after cycle-6 (claim-n13-v2):** admitted cold S for
+`compact-orbit-scan:columns=2` + `mitm-frobenius-counted:m=2` is
+**15.552** ≤ F4 **16.749**. Both remain lower bounds; complete-S
+negfold on standard-subspace does not reach F4.
+
 ## Starting gap (improve claim-n13)
 
 | arm | mean S | note |
