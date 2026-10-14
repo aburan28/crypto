@@ -61,7 +61,7 @@ enum Cmd {
     Rank {
         #[arg(long, default_value_t = 25)]
         top: usize,
-        /// Only curves with this verdict (`formula_advantage`, `formula_marginal`, `unresolved`, `boundary`, `not_carried`).
+        /// Only curves with this verdict (`formula_advantage`, `formula_marginal`, `boundary`, `not_carried`).
         #[arg(long)]
         class: Option<String>,
         #[arg(long, default_value = OUT)]
@@ -288,13 +288,8 @@ fn run(cli: Cli) -> Result<bool, String> {
                 .iter()
                 .filter(|c| c.verdict == RouteClass::FormulaMarginal)
                 .count();
-            let unresolved = file
-                .curves
-                .iter()
-                .filter(|c| c.verdict == RouteClass::Unresolved)
-                .count();
             eprintln!(
-                "{} curves, {adv} with a formula advantage, {marginal} marginal, {unresolved} unresolved",
+                "{} curves, {adv} with a formula advantage, {marginal} marginal",
                 file.curves.len()
             );
             Ok(true)

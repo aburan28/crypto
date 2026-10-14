@@ -1,0 +1,11 @@
+claim /home/user/crypto/research/pdp_root_finder_ecbench_20261013/claim_round/claims/n31-W45a83de82ef9.json sha256 6b33e81633f52a82bead59cd5b9412e4d16ab262ee9bdfa031693d496c2ac152
+descriptive only, not admissible: the runs earned L2 and L1, below the spec's L2
+vs_rho check: 8 problem(s)
+  - missing field ic_replay_certificate_sha256
+  - missing field rho_replay_certificate_sha256
+  - missing field operation_accounting
+  - missing field record_class
+  - independent_validation must be true
+  - ic_replay_certificate_sha256 must be a full lowercase SHA-256 digest
+  - rho_replay_certificate_sha256 must be a full lowercase SHA-256 digest
+  - isolation_levels.rho L1 is below required L2

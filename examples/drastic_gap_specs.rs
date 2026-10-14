@@ -3,7 +3,6 @@
 //! the ic-mitm arm (the prior round's exact configuration) only on the
 //! smallest-ell pairs where the 3600 s budget can hold.
 use serde_json::{json, Value};
-use std::path::Path;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -24,7 +23,7 @@ fn main() {
     let doc: Value =
         serde_json::from_slice(&std::fs::read(&pairs_path).unwrap()).expect("pairs json");
     let mut written = Vec::new();
-    for (i, pair) in doc["pairs"].as_array().unwrap().iter().enumerate() {
+    for pair in doc["pairs"].as_array().unwrap().iter() {
         let d = pair["d"].as_u64().unwrap();
         let ell = pair["ell"].as_u64().unwrap();
         let label = format!("d{}-ell{}", d, ell);

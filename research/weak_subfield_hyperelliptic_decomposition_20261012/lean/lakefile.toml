@@ -1,0 +1,7 @@
+name = "subfield_collapse"
+version = "0.1.0"
+defaultTargets = ["SubfieldCollapse"]
+
+[[lean_lib]]
+name = "SubfieldCollapse"
+roots = ["SubfieldCollapse"]

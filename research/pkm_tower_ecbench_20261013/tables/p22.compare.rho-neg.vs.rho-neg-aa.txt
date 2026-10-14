@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p22/comparisons/rho-neg__rho-neg-aa.json
+ops (ok): rho-neg-aa / rho-neg = 1.0000 [1.000, 1.000] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.0612 [1.016, 1.074]
+| curve | log2 r | workloads | rho-neg-aa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp22-tm2947-e15fed69 | 21.19 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | rho-neg-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W15abd5c646fe | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.1831 | 1.1831 | 1.0000 |
+| W251e2c6702e6 | icv1-fp22-tm2947-e15fed69 | 21.19 | 0.7916 | 0.7916 | 1.0000 |
+| W922bdcc0958f | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.0522 | 1.0522 | 1.0000 |
+| Wc8ca24deff43 | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.1714 | 1.1714 | 1.0000 |
+| Wce40999900d8 | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.5185 | 1.5185 | 1.0000 |
+| Wd5ac0a1d62c6 | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.2512 | 1.2512 | 1.0000 |
+| We4aba132c214 | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.2163 | 1.2163 | 1.0000 |
+| Wf0150ebb311b | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.4948 | 1.4948 | 1.0000 |
