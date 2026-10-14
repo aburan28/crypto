@@ -39,8 +39,8 @@ use crate::cryptanalysis::ic_framework::fiber::{
 };
 use crate::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, CompactOrbitScanBase, CyclotomicBase, DescentAlgebraicOracle,
-    FrobeniusMitmOracle, GlvOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase,
-    RootfindSubtractOracle, SubtractOracle,
+    FrobeniusMitmOracle, GlvOrbitBase, KoblitzOrbitBase, MitmOracle, OnbWeightBase,
+    PrimeAbscissaBase, RootfindSubtractOracle, SubtractOracle,
 };
 use crate::cryptanalysis::ic_framework::shared_rank::{
     run_shared_rank_targets, SharedRankSpec, SharedTargetSpec,
@@ -301,7 +301,7 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "factor_base",
                     default: None,
-                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M, cyclotomic:w=W[,columns=N], koblitz-standard-subspace:dimension=D",
+                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M, cyclotomic:w=W[,columns=N], onb-weight:w=W[,columns=N], koblitz-standard-subspace:dimension=D",
                 },
                 ParamDecl {
                     name: "oracle",
@@ -1900,12 +1900,14 @@ fn solve_ic_binary(
     let orbit = KoblitzOrbitBase { instance: inst };
     let compact = CompactOrbitScanBase { instance: inst };
     let cyclotomic = CyclotomicBase { instance: inst };
+    let onb_weight = OnbWeightBase { instance: inst };
     let plugin_base = binary_plugins().and_then(|p| (p.base)(fb_name.as_str(), inst));
     let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name.as_str() {
         "binary-subspace" => &subspace,
         "koblitz-orbit" => &orbit,
         "compact-orbit-scan" => &compact,
         "cyclotomic" => &cyclotomic,
+        "onb-weight" => &onb_weight,
         other => match plugin_base.as_deref() {
             Some(b) => b,
             None => {
@@ -2333,12 +2335,14 @@ pub fn dump_factor_base(
             let orbit = KoblitzOrbitBase { instance: i };
             let compact = CompactOrbitScanBase { instance: i };
             let cyclotomic = CyclotomicBase { instance: i };
+            let onb_weight = OnbWeightBase { instance: i };
             let plugin_base = binary_plugins().and_then(|p| (p.base)(name.as_str(), i));
             let base: &dyn FactorBaseBuilder<BinaryGroup> = match name.as_str() {
                 "binary-subspace" => &subspace,
                 "koblitz-orbit" => &orbit,
                 "compact-orbit-scan" => &compact,
                 "cyclotomic" => &cyclotomic,
+                "onb-weight" => &onb_weight,
                 other => match plugin_base.as_deref() {
                     Some(b) => b,
                     None => {

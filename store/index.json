@@ -81,6 +81,24 @@
       ],
       "provenance": "ecbench fb --curve '{\"kind\":\"koblitz\",\"a\":1,\"n\":23}' --factor-base 'cyclotomic:w=1' (commit 0f0db951ad)"
     },
+    "factor-bases/icv1-f2m23-tm5197-1f85e9e1/FB1h190e12c73911.json": {
+      "sha256": "ed9a5869390a7a965f1f241e3ae7f94e72f902774805fbc4369704c26551ef09",
+      "bytes": 5586,
+      "description": "ecbench dump of onb-weight on icv1-f2m23-tm5197-1f85e9e1",
+      "provenance": "ecbench fb (FBM1 production 20261013)"
+    },
+    "factor-bases/icv1-f2m23-tm5197-1f85e9e1/FB1ha5d7f603afe2.json": {
+      "sha256": "48c4d496e41cc30540d08561a1a86c9af61830a02e4e3605055af847cf3e5f2f",
+      "bytes": 18898,
+      "description": "ecbench dump of onb-weight on icv1-f2m23-tm5197-1f85e9e1",
+      "provenance": "ecbench fb (FBM1 production 20261013)"
+    },
+    "factor-bases/icv1-f2m23-tm5197-1f85e9e1/FB1hc9acff86c891.json": {
+      "sha256": "acb73f1f6261b0bc0661cebe80aed176908076be428ac824eab7eb5e808ef20f",
+      "bytes": 5608,
+      "description": "ecbench dump of onb-weight:w=1,columns=8",
+      "provenance": "ecbench fb onb-weight FBM1 production"
+    },
     "factor-bases/icv1-fp20-t727-cd198a38/FB1h4b3725c0aa92.json": {
       "sha256": "4e3787c54b9eed6a7c13b9aa4e97b7a4b91073bb1e21599f1619dc7332b838c0",
       "bytes": 6804,
