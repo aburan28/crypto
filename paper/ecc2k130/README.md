@@ -7,9 +7,8 @@ GPUs from Turing to Blackwell, the same optimisations on NIST P-256 and
 P-384, and the 2009–2012 rates for comparison. The campaign it reports
 is documented in [`../../ecc2k130/`](../../ecc2k130/),
 [`../../hdl/ecc2k130/`](../../hdl/ecc2k130/) and the research notes this
-repository holds, with the structural alternatives priced in
-[`../../RESEARCH_ECC2K130_IC_FEASIBILITY.md`](../../RESEARCH_ECC2K130_IC_FEASIBILITY.md)
-and the sibling library [aburan28/cryptanalysis](https://github.com/aburan28/cryptanalysis).
+repository holds, with the sibling library
+[aburan28/cryptanalysis](https://github.com/aburan28/cryptanalysis).
 
 **Status**: research draft, anonymized for double-blind review. Restore
 real authors via `make deanonymize` after creating an `AUTHORS` file
@@ -56,12 +55,13 @@ All rates are in billions of iterations per second on one device.
   memory-layout figures, table walk vs. σ-walk (cycle-rule figure),
   GPU comparison.
 - §9 CPU (with a per-ISA chart).
-- §10 NIST curves. §11 Other GPU kernels. §12 FPGA. §13 Campaign.
-- §14 Alternatives to rho. §15 Upper bounds (figure).
-- §16 Time to solve: expected time and cost for every measured device at
+- §10 NIST curves. §11 Other GPU kernels (rho, BSGS and kangaroo
+  arithmetic only). §12 FPGA. §13 Campaign.
+- §14 Upper bounds (figure).
+- §15 Time to solve: expected time and cost for every measured device at
   one, 100 and 1,000 devices, variance, the cutoff-32 detection delay,
   the campaign corpus credit, a fleet-size figure, and the NIST curves.
-- §17 Open problems. §18 Related work. §19 Conclusion.
+- §16 Open problems. §17 Related work. §18 Conclusion.
 - Appendix A: reproduction (companion repository and Docker image).
 - Appendix B: evidence records.
 
@@ -142,6 +142,15 @@ GPU; the paper says so in its availability paragraph and Appendix A.
   not read counters) and a "Use of AI" paragraph in the introduction;
   evidence records E90 (THROUGHPUT-29B, Nsight counters) and E91 (probes
   and SASS cost tools).
+  Scope narrowed to GPU speedups of Pollard rho: the index-calculus
+  section (structural alternatives), the F4, Macaulay, Semaev-sweep,
+  pair-table and sparse linear-algebra kernels, and the index-calculus
+  related work are removed, with their twelve evidence records; the
+  M4 Pro rows, the packed-client M4 measurements and the Metal result are
+  removed from §9. Added: the 2026-10-12 two-card σ-walk screen (15.99 /
+  15.76, 31.75 together) and the CPU strong-rho canonicalisation result
+  (0.802× instructions, unmerged branch). Evidence records renumbered
+  E1–E80.
   Section and subsection headings shortened to terse labels (for example
   "NIST curves", "FPGA", "Table walk vs. σ-walk", "Walk constant"), with the remaining rhetorical questions
   and informal phrases in the text replaced.
@@ -181,10 +190,6 @@ GPU; the paper says so in its availability paragraph and Appendix A.
   collection rate and the G7e family are unmeasured.
 - The packed-walk witness cost (34.7%) is stated in `CAIRN-WITNESS.md`
   but only the job script is frozen under `benchmarks/witness-cost/`.
-- The IC feasibility note's fitted constant `C` has three readings in
-  the source; the paper carries the values recomputed from the exact
-  subgroup orders (0.33, 1.51, 1.27) and says the extrapolation uses
-  `C = 1`.
 - Whether the storage bucket's copy of `campaign.json` had its iteration
   guard raised to 2^32 before the fleet stopped is not recorded.
 - The other-GPU section's numbers are static PTX counts (clang,

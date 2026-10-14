@@ -4,9 +4,8 @@
 The ECC2K-130 client is one of several GPU arithmetic libraries in
 the two repositories. The others target the 256-bit prime field of
 secp256k1 (a Koblitz curve in the SEC sense, with $j=0$ and the
-order-3 endomorphism), the NIST primes, the polynomial-basis field of
-ECC2K-95, and the linear algebra and polynomial-system solvers that
-index calculus needs. They follow the same discipline as the
+order-3 endomorphism), the NIST primes and the polynomial-basis field of
+ECC2K-95. They follow the same discipline as the
 ECC2K-130 client: a Python or Rust oracle, a host emulation of the
 identical device source, bit-identical steppers, planted logarithms,
 and static instruction accounting from the assembler. What most of
@@ -31,14 +30,10 @@ them apart.
 kernel family & field & on a device & otherwise \\
 \midrule
 ECC2K-130 client (Sections~\ref{sec:gpu}, \ref{sec:campaign}) & $\FF_{2^{131}}$, ONB & measured, audited & emulated, static \\
-F4 Gröbner elimination (\texttt{cryptanalysis}) & $\FF_2$ Macaulay matrices & measured (RTX 5090, H100) & emulated \\
-Macaulay reduced echelon & $\FF_p$, $p=2083$ & one scheduling run (RTX PRO 4500) & emulated, static \\
 secp256k1 / Curve25519 rho, baby-step giant-step & $\FF_p$, two 256-bit primes & never & emulated, static \\
 secp256k1 kangaroo & $\FF_p$, 256-bit & never & emulated, static \\
 P-256 / P-384 field and rho walk (Section~\ref{sec:nist}) & $\FF_p$, 256- and 384-bit & measured (RTX PRO 6000, 2026-10-12) & host-verified; protocol pre-registered \\
 ECC2K-95 kernel & $\FF_{2^{97}}$, polynomial basis & never & emulated, static \\
-Semaev $S_4$ sweep; FES & $\FF_{2^n}$; $\FF_2$ & never & host-timed; emulated \\
-sparse matrix--vector & $\ZZ/m$, $m<2^{63}$ & never & CPU-rechecked \\
 64-bit prime-field rho (\texttt{cryptanalysis}) & $\FF_p$, $p<2^{64}$ & never & emulated, static \\
 \bottomrule
 \end{tabular}
@@ -52,9 +47,8 @@ hardware that the campaign's account hold
 (Section~\ref{sec:campaign-state}) or missing credentials then put out
 of reach. The NIST kernels were in the same position until they
 finally ran, which is the subject of Section~\ref{sec:nist}~\evcite{\evref{ecc}; \evref{kangaroo}; \evref{ecc2k95}; \evref{nistattempt}; \evref{prho64}, ``How this is tested''}.
-The numbers below are therefore of three kinds, and we label each
-one: a static count, an emulated operation count or walk constant, or
-(in Section~\ref{sec:othergpu-f4}) a device measurement.
+The numbers below are therefore of two kinds, and we label each one: a
+static count, or an emulated operation count or walk constant.
 
 \subsection{secp256k1}
 \label{sec:othergpu-fp256}
@@ -302,84 +296,13 @@ from $2.1$--$2.7$~s to $1.02$--$1.05$~s across the rewrite at the same
 $191{,}840$ steps, which the README itself files as engineering with
 $S$ flat.
 
-\paragraph{The pair table.} For Koblitz index calculus the same
-directory builds the meet-in-the-middle table of all $P_i+P_j$ over a
-factor base, one thread per row with the row's denominators
-batch-inverted, folded to signed Frobenius orbits by the least cyclic
-rotation of $x$ in a normal basis (one representative times an
-orbit-sorted suffix, $2n$ times fewer sums). Stored words shrink
-$43.4\times$ at $n=23$ ($6{,}256$ against $271{,}216$) and $77.2\times$ at
-$n=41$ ($11{,}152$ against $861{,}328$). Verification runs each emulated
-thread on its own CPU thread, requires identical tables at several
-thread counts and chunkings, round-trips every stored pair and
-$19{,}999$ generator multiples into the Rust table, keeps a control
-that must lose pairs, and runs under ThreadSanitizer with a
-deliberately racy control that must be reported; the bug that
-motivated all this (the base size passed as the field degree) fails
-960 of $1{,}176$ keys when restored~\evcite{\evref{ecc2k95}, ``The $|F|^2$ pair table''; \evref{ecc2k95}}.
-The fold does not reach $n=97$ (limited to $n\le62$) and the device
-round trip is planned, not run.
+\subsection{64-bit prime-field rho}
+\label{sec:othergpu-prho64}
 
-\paragraph{Polynomial systems.} Two more kernels serve the
-decomposition step of Section~\ref{sec:alt-ic}. A Gray-code fast
-exhaustive search over quadratic Boolean systems (one thread per
-sub-cube, $n\le40$, $\le64$ equations, shards checked against brute
-force) exists alongside the production Rust path and has not run on a
-device~\evcite{\evref{fes}}. A Semaev $S_4$ pairs-and-solve sweep
-(fix $X_1,X_2$, reduce the quartic in $X_3$ against the linearised
-polynomial of the factor-base subspace, $O(l)$ field operations per
-pair instead of $2^l$) has a \texttt{clmad} path and a software
-fallback, is tested against exhaustive triple enumeration, and on
-one host core went from $5.07$ to $0.44$~ms per $2^l$-row sweep at
-$n=21$. Its README's conclusion is the one that matters: relation
-collection stays $\Theta(2^n)$ with any oracle polynomial in the base,
-``the oracle got roughly a thousand times faster and the attack's
-exponent did not move''; a GPU is another constant. The same README
-records and retracts an earlier claim that NVIDIA has no carry-less
-multiply~\evcite{\evref{semaev}}.
-
-\paragraph{Linear algebra.} A batched dense reduced-echelon solver
-over $\FF_p$ ($p=2083$, $226\times286$ matrices of rank 222) serves the
-$E(\FF_{p^3})$ index calculus whose Macaulay step is $57\%$ of each
-solve. One archived pipeline experiment did run on an RTX~PRO~4500:
-64 matrices per invocation, 36 runs, $2{,}340$ matrices verified
-against the serial reduction, device reduction about $0.045$~s per
-batch inside a $0.32$~s cold invocation dominated by setup, and a
-two-slot overlap $5.1\%$ faster on held-out seeds, which the record
-declines to call a speedup for want of an exclusive host and an
-interval. Its own conclusion is that a GPU changes the crossover with
-rho ``by not a single bit''; it would only enable larger
-$p$~\evcite{\evref{macaulay}; \evref{macaulaybench}}.
-(The directory README's statement that no kernel has run on a GPU
-predates that experiment.) A sparse matrix--vector worker modulo any
-$m<2^{63}$ is correctness-first, every product rechecked on the CPU,
-with no rate~\evcite{\evref{spmv}}.
-
-\subsection{F4 elimination}
-\label{sec:othergpu-f4}
-
-The \texttt{cryptanalysis} library's F4 Gröbner-basis path for Weil-descent systems
-is the one piece of index-calculus arithmetic with device
-measurements. On a rented RTX~5090 (\texttt{sm\_120}, 32~GB) the
-degree-6 Macaulay matrices are built and eliminated 25 to 75 times
-faster than on the Xeon host; the $168{,}363\times188{,}203$ matrix
-went from $426$~s to $5.7$~s, the degree-of-regularity sweep from
-$18.8$ to $8.2$~s, and the batched per-node decider was correct on
-the device and $4.4\times$ slower than the host's default
-engine~\evcite{\evref{f4}}.
-On an H100 a tiled update to the elimination kernel was kept at
-$1.11$--$1.49\times$ and a merged-basis panel reverted at
-$1.5$--$5.3\times$ slower; the largest matrix fell from $4{,}781$ to
-$3{,}586$~ms~\evcite{\evref{f4}}.
-The records call these what they are, stage diagnostics of one oracle
-matrix, not an ECDLP cost, and a later crossover harness keeps its
-qualified speedup null until a matched device-and-host resource
-receipt exists~\evcite{\evref{f4}}.
-
-The \texttt{cryptanalysis} library's own 64-bit prime-field CUDA rho (one limb, Montgomery
+The \texttt{cryptanalysis} library's 64-bit prime-field CUDA rho (one limb, Montgomery
 with $R=2^{64}$, eight walks per thread sharing a Fermat inversion so
 that a step is 18 multiplications instead of 99) is in the same
-state as the kernels above: $77{,}000$ device-arithmetic assertions
+state as most kernels above: $77{,}000$ device-arithmetic assertions
 against the host library, whole-solver emulation on four groups, a
 cubin for \texttt{sm\_70} through \texttt{sm\_90} with 64--72 registers
 and no spills, and no execution on a device; its emulator rows sit at

@@ -26,8 +26,6 @@ host & word & lanes & M it/s & note \\
 Xeon 2.1~GHz & \texttt{uint64\_t} & 64 & 4.42 & 475 cycles/iteration \\
 Xeon 2.1~GHz & AVX2 & 256 & 10.7 & 196 cycles/iteration \\
 Xeon 2.1~GHz & AVX-512 & 512 & 12.6 & 167 cycles/it.; 4 threads 40~M \\
-M4 Pro, g++ 16.1 & NEON & 128 & 11.342 & $2.19\times$ over 64 lanes (5.185) \\
-M4 Pro, Apple clang 17 & NEON & 128 & 15.673 & $3.02\times$ over g++/64 \\
 Graviton3 (V1, SHA3), clang & NEON & 128 & 6.214 & $2.38\times$ over g++/64 \\
 Graviton2 (N1, no SHA3), clang & NEON & 128 & 4.220 & $2.09\times$ over g++/64 \\
 Modal container, 4 threads & AVX-512 & 512 & 12.4 & 49.4~M on 4 threads \\
@@ -44,11 +42,10 @@ CPU's vector extensions in two ways: wider words carry more walks per
 instruction, and three-input logic fuses the XOR that follows every AND.
 On x86 the step from 64-bit words to AVX2 is $2.4\times$ and AVX-512 adds
 another $1.18\times$; AVX-512's \texttt{vpternlogd} is the CPU counterpart
-of the GPU's \texttt{LOP3}. On Arm the gain splits cleanly. On the
-M4~Pro the 128-bit NEON word with \texttt{BSL} alone is worth $1.76\times$
-and \texttt{EOR3}, from the SHA3 extension, a further $1.24\times$; a core
-without \texttt{FEAT\_SHA3} (Graviton2) still gets $1.81\times$ from the
-wider word and \texttt{BSL}. On this code the compiler matters as much as
+of the GPU's \texttt{LOP3}. On Arm, a core without \texttt{FEAT\_SHA3}
+(Graviton2) gets $1.81\times$ from the 128-bit NEON word and \texttt{BSL},
+and a Graviton3, whose SHA3 extension adds the three-input \texttt{EOR3},
+reaches $2.38\times$ its 64-bit build. On this code the compiler matters as much as
 the instruction set: gcc emits $9{,}372$ instructions for the multiply
 leaf, $59\%$ of them loads and stores of spilled temporaries, where clang
 emits $1{,}902$ plus five outlined calls. We enable the SHA3 path only when
@@ -78,21 +75,31 @@ for a single walk~\evcite{\evref{hostsched}, §7}. A packed client is the
 other design, the CPU twin of the GPU client: one walk per lane of
 64-bit limbs, the product on the carry-less multiplier. The
 \texttt{cryptanalysis} repository has one, using PMULL on Arm and
-PCLMULQDQ on x86. On one M4~Pro core it runs an iteration in $53.5$~ns,
-$18.6$ million iterations per second, against $153$~ns with the software
-product in the same engine, a $2.9\times$ gain from the instruction; all
-14 cores give $139$--$159$ million. It walks the table walk, not the
-campaign's $\sigma$-walk, and has not been measured on x86 at
-all~\evcite{\evref{cpupacked}}. On the same M4~Pro the integrated GPU, through
-Metal and a software product, reaches $389$--$390$ million.
+PCLMULQDQ on x86. It walks the table walk, not the campaign's
+$\sigma$-walk, and has no measurement on the hosts reported
+here~\evcite{\evref{cpupacked}}.
 
 Two other CPU instructions were priced or measured on smaller binary
 fields. GFNI's affine transform (\texttt{vgf2p8affineqb}) speeds up a
 basis change $3$--$5\times$ for fields up to $2^{63}$ in the repository's
-index-calculus code, but for ECC2K-130's bitsliced conversions it was
+small-field code, but for ECC2K-130's bitsliced conversions it was
 priced as a loss, since it acts on bytes inside a register where the
 bitsliced maps act on whole words~\evcite{\evref{gfni}}. PCLMULQDQ made a
 41-bit Koblitz rho $1.76\times$ faster end to end~\evcite{\evref{smallclmul}}.
+
+The reference CPU rho of the repository's measurement harness, which
+walks Frobenius classes on small Koblitz curves, was also tuned after
+profiling. Canonicalising a point to its signed Frobenius class had
+taken $54\%$ of a solve's instructions. Applying each normal-basis map
+to both coordinates in one table pass, specialising the byte shapes of
+the registered curves and sharing one modular reduction between the
+two walk coefficients cut a complete solve on a 61-bit curve from
+$1.995\cdot10^9$ to $1.601\cdot10^9$ instructions under Callgrind
+($0.802\times$), against a pre-registered gate of $0.85$. Across 240
+matched pairs on 48 targets the walks, recovered logarithms and every
+counter were unchanged. This is an instruction count, not a rate: the
+wall-time comparison could not run on a host with the required
+isolation, and the change is not yet merged~\evcite{\evref{rhoopt}}.
 
 \subsection{Prime fields}
 \label{sec:cpu-prime}

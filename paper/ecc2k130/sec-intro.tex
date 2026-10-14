@@ -91,14 +91,11 @@ distinguished-point test and the restart path.
   the campaign's walk (Section~\ref{sec:walk}); bitsliced CPU clients
   (Section~\ref{sec:cpu}); an inventory of the repositories' other GPU
   kernels (Section~\ref{sec:othergpu}); an FPGA engine at $8.25$ billion
-  iterations per second on one AWS F2 (Section~\ref{sec:fpga}); the
+  iterations per second on one AWS F2 (Section~\ref{sec:fpga}); and the
   campaign at $486$~M points and $2^{56.68}$ iterations
-  (Section~\ref{sec:campaign}); and structural alternatives priced in
-  the same unit, none of which come close
-  (Section~\ref{sec:alternatives}).
+  (Section~\ref{sec:campaign}).
 \item CPU measurements by instruction set: AVX2, AVX-512's ternary
-  logic, NEON with \texttt{BSL} and \texttt{EOR3}, and a packed client on
-  the CPU's carry-less multiply at $2.9\times$ its software product
+  logic, and NEON with \texttt{BSL} and \texttt{EOR3}
   (Section~\ref{sec:cpu}).
 \item Upper bounds per platform: about $24$--$26$ billion iterations per
   second for any one-addition walk on one RTX~PRO~6000, a $1.55\times$
@@ -131,8 +128,8 @@ change by what moved. An \emph{advance} lowers the ratio to the floor.
 flat. \emph{Relabelling} lowers a headline while the total cost rises.
 \emph{Accounting} changes a number without changing the algorithm.
 Every row in this paper falls into one of the last three. The same
-rule, applied across Pollard rho, baby-step giant-step, kangaroo and
-prime-field index calculus, is the subject of a companion draft in the
+rule, applied across Pollard rho, baby-step giant-step and kangaroo,
+is the subject of a companion draft in the
 \texttt{cryptanalysis} repository~\cite{ecdlppaper}, though this paper does not depend
 on it. The mistake we tried hardest to avoid is quoting a rate without
 its paired control, its hardware and its launch geometry, and

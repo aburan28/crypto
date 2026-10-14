@@ -155,8 +155,8 @@ The CPU side has had the least attention and has the clearest
 untested levers.
 \begin{itemize}[leftmargin=1.2em,itemsep=0.2em]
 \item \emph{A packed $\sigma$-walk on x86 with VPCLMULQDQ.} The packed
-  client's carry-less path is measured only with PMULL on an M4~Pro and
-  only for the table walk. AVX-512's \texttt{vpclmulqdq} does four
+  client's carry-less path has no measurement on x86 and walks only the
+  table walk. AVX-512's \texttt{vpclmulqdq} does four
   $64\times64$ products per instruction, and AMD's Zen~5 and Intel's
   current server cores run AVX-512 at full width; nobody has measured
   either~\evcite{\evref{cpupacked}}.

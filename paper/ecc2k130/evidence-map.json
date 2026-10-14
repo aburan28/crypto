@@ -531,64 +531,8 @@
    "gpu/ecc/OPTIMIZATION_BLACKWELL.md"
   ]
  },
- "fes": {
-  "id": "E58",
-  "title": "Fast exhaustive search for quadratic Boolean systems",
-  "repository": "crypto",
-  "kind": "design notes",
-  "sources": [
-   "gpu/fes/README.md"
-  ]
- },
- "semaev": {
-  "id": "E59",
-  "title": "Semaev $S_4$ pairs-and-solve sweep",
-  "repository": "crypto",
-  "kind": "design and measurement notes",
-  "sources": [
-   "gpu/semaev/README.md"
-  ]
- },
- "macaulay": {
-  "id": "E60",
-  "title": "Batched Macaulay reduced-echelon solver",
-  "repository": "crypto",
-  "kind": "design notes",
-  "sources": [
-   "gpu/macaulay/README.md"
-  ]
- },
- "macaulaybench": {
-  "id": "E61",
-  "title": "Macaulay reduction pipeline on an RTX PRO 4500",
-  "repository": "crypto",
-  "kind": "measurement report",
-  "sources": [
-   "gpu/macaulay/benchmarks/pipeline-20260914/RESULTS.md"
-  ]
- },
- "spmv": {
-  "id": "E62",
-  "title": "Sparse matrix--vector worker",
-  "repository": "crypto",
-  "kind": "design notes",
-  "sources": [
-   "gpu/spmv/README.md"
-  ]
- },
- "f4": {
-  "id": "E63",
-  "title": "F4 elimination on rented RTX 5090 and H100 GPUs",
-  "repository": "cryptanalysis",
-  "kind": "measurement reports",
-  "sources": [
-   "cryptanalysis:experiments/f4-gpu-panel-20261007/README.md",
-   "cryptanalysis:experiments/f4-gpu-query-20261008/README.md",
-   "cryptanalysis:experiments/f4-gpu-runpod-20261006/RESULT.md"
-  ]
- },
  "gpueff": {
-  "id": "E64",
+  "id": "E58",
   "title": "GPU efficiency scorer and the packed-walk profile",
   "repository": "cryptanalysis",
   "kind": "tool and profile",
@@ -598,7 +542,7 @@
   ]
  },
  "fpgaest": {
-  "id": "E65",
+  "id": "E59",
   "title": "FPGA pre-board estimate",
   "repository": "crypto",
   "kind": "analysis",
@@ -607,7 +551,7 @@
   ]
  },
  "f2": {
-  "id": "E66",
+  "id": "E60",
   "title": "FPGA engine on AWS F2: builds and measurements",
   "repository": "crypto",
   "kind": "measurement report",
@@ -616,7 +560,7 @@
   ]
  },
  "audit": {
-  "id": "E67",
+  "id": "E61",
   "title": "Campaign audit and live snapshot, 2026-09-25",
   "repository": "crypto",
   "kind": "audit report and dataset",
@@ -626,7 +570,7 @@
   ]
  },
  "quotes": {
-  "id": "E68",
+  "id": "E62",
   "title": "Fleet price quotes, 2026-09-18",
   "repository": "crypto",
   "kind": "operations record",
@@ -635,7 +579,7 @@
   ]
  },
  "pro4500": {
-  "id": "E69",
+  "id": "E63",
   "title": "RTX PRO 4500: rates and per-dollar break-even",
   "repository": "crypto",
   "kind": "measurement report",
@@ -644,7 +588,7 @@
   ]
  },
  "goal28": {
-  "id": "E70",
+  "id": "E64",
   "title": "The 28-billion goal: grid and occupancy screens",
   "repository": "crypto",
   "kind": "measurement report",
@@ -653,7 +597,7 @@
   ]
  },
  "power": {
-  "id": "E71",
+  "id": "E65",
   "title": "Power-bound model and updates per joule",
   "repository": "crypto",
   "kind": "measurement report",
@@ -662,7 +606,7 @@
   ]
  },
  "cert": {
-  "id": "E72",
+  "id": "E66",
   "title": "Storage, seeds and certification protocol",
   "repository": "crypto",
   "kind": "protocol",
@@ -672,7 +616,7 @@
   ]
  },
  "status": {
-  "id": "E73",
+  "id": "E67",
   "title": "Public campaign dashboard",
   "repository": "crypto",
   "kind": "documentation",
@@ -682,7 +626,7 @@
   ]
  },
  "hold": {
-  "id": "E74",
+  "id": "E68",
   "title": "Cloud account hold, 2026-09-18",
   "repository": "crypto",
   "kind": "operations record",
@@ -691,7 +635,7 @@
   ]
  },
  "feed": {
-  "id": "E75",
+  "id": "E69",
   "title": "Published campaign feed, 2026-10-10",
   "repository": "crypto",
   "kind": "dataset",
@@ -699,63 +643,8 @@
    "paper/ecc2k130/data/status_20261010T154157Z.json"
   ]
  },
- "koblitzic": {
-  "id": "E76",
-  "title": "Index calculus on Koblitz curves: structural analysis",
-  "repository": "crypto",
-  "kind": "analysis",
-  "sources": [
-   "RESEARCH_KOBLITZ_INDEX_CALCULUS.md"
-  ]
- },
- "evfrob": {
-  "id": "E77",
-  "title": "Evidence record: Frobenius-stable factor bases at $n=131$",
-  "repository": "crypto-autoresearcher",
-  "kind": "evidence record",
-  "sources": [
-   "autoresearcher:ledger/evidence/EV-FROB-d336b0.yaml"
-  ]
- },
- "icfeas": {
-  "id": "E78",
-  "title": "Index-calculus feasibility for ECC2K-130",
-  "repository": "crypto",
-  "kind": "analysis",
-  "sources": [
-   "RESEARCH_ECC2K130_IC_FEASIBILITY.md"
-  ]
- },
- "icledger": {
-  "id": "E79",
-  "title": "Index-calculus boundary ledger",
-  "repository": "crypto",
-  "kind": "measurement ledger",
-  "sources": [
-   "docs/ic/BOUNDARY_TARGETS.md",
-   "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
-  ]
- },
- "pdp": {
-  "id": "E80",
-  "title": "Point decomposition against the rho budget",
-  "repository": "cryptanalysis",
-  "kind": "measurement report",
-  "sources": [
-   "cryptanalysis:experiments/pdp-scaling/README.md"
-  ]
- },
- "evicperf": {
-  "id": "E81",
-  "title": "Evidence record: Riemann--Roch oracle product law",
-  "repository": "crypto-autoresearcher",
-  "kind": "evidence record",
-  "sources": [
-   "autoresearcher:ledger/evidence/EV-ICPERF-10c5fc.yaml"
-  ]
- },
  "probelat": {
-  "id": "E82",
+  "id": "E70",
   "title": "Cycle-probe latency and the routes to a faster exact rule",
   "repository": "crypto",
   "kind": "analysis",
@@ -764,7 +653,7 @@
   ]
  },
  "sigmasq": {
-  "id": "E83",
+  "id": "E71",
   "title": "$\\sigma$-walk shared-memory square table: compile and resource gate",
   "repository": "crypto",
   "kind": "gate record",
@@ -773,7 +662,7 @@
   ]
  },
  "g7native": {
-  "id": "E84",
+  "id": "E72",
   "title": "Native-instruction candidates on the RTX PRO 4500",
   "repository": "crypto",
   "kind": "paired benchmark",
@@ -782,7 +671,7 @@
   ]
  },
  "sparse": {
-  "id": "E85",
+  "id": "E73",
   "title": "Sparse-basis and compound $\\sigma$ maps: modelled ceilings",
   "repository": "crypto",
   "kind": "analysis",
@@ -791,8 +680,8 @@
   ]
  },
  "cpupacked": {
-  "id": "E86",
-  "title": "Packed CPU client on PMULL/PCLMULQDQ and the Metal client",
+  "id": "E74",
+  "title": "Packed CPU client on PMULL/PCLMULQDQ",
   "repository": "cryptanalysis",
   "kind": "design and measurement notes",
   "sources": [
@@ -800,7 +689,7 @@
   ]
  },
  "gfni": {
-  "id": "E87",
+  "id": "E75",
   "title": "GFNI for basis changes: measured on small fields, priced for ECC2K-130",
   "repository": "crypto",
   "kind": "measurement report and analysis",
@@ -810,7 +699,7 @@
   ]
  },
  "smallclmul": {
-  "id": "E88",
+  "id": "E76",
   "title": "Carry-less reduction in small binary fields (PCLMULQDQ)",
   "repository": "crypto",
   "kind": "measurement report",
@@ -819,7 +708,7 @@
   ]
  },
  "redesign": {
-  "id": "E89",
+  "id": "E77",
   "title": "Iteration-function redesign screens, 2026-10-12: the tuned v3 table walk and a two-card sigma-walk aggregate",
   "repository": "crypto",
   "kind": "screen reports",
@@ -829,7 +718,7 @@
   ]
  },
  "tp29": {
-  "id": "E90",
+  "id": "E78",
   "title": "Throughput rounds toward 29 billion iterations/s on the RTX PRO 6000, with Nsight Compute counters",
   "repository": "crypto",
   "kind": "design and measurement notes",
@@ -839,7 +728,7 @@
   ]
  },
  "probes": {
-  "id": "E91",
+  "id": "E79",
   "title": "Instruction-rate probes and static SASS cost tools",
   "repository": "crypto",
   "kind": "microbenchmarks and tools",
@@ -848,6 +737,15 @@
    "ecc2k130/benchmarks/hardware-limits/probe.cu",
    "ecc2k130/kernel_cost.py",
    "ecc2k130/kernel_attribution.py"
+  ]
+ },
+ "rhoopt": {
+  "id": "E80",
+  "title": "Strong-rho canonicalisation on small Koblitz curves: instruction-count result (unmerged branch codex/ecbench-rho-optimized-20261014)",
+  "repository": "crypto",
+  "kind": "measurement report",
+  "sources": [
+   "research/ecbench_rho_optimized_20261014/README.md@codex/ecbench-rho-optimized-20261014"
   ]
  }
 }
