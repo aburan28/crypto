@@ -1,10 +1,10 @@
 """Lay out recorded values from raw/*.jsonl as SVG + 150 dpi PNG.
 
-Layout only (AGENTS.md "Implementation language"): every number plotted is
-read from the run records; medians and min-max over seeds are the only
-arithmetic, and summary.json records them for the report.
+Layout only (AGENTS.md "Implementation language"): every plotted number is
+read from the run records; medians, min-max over seeds and per-seed ratios
+are the only arithmetic, and summary.json records them for the report.
 """
-import json, statistics, sys, pathlib
+import json, statistics, pathlib
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -13,49 +13,63 @@ here = pathlib.Path(__file__).resolve().parent.parent
 raw = here / "raw"
 figs = here / "figures"
 figs.mkdir(exist_ok=True)
+plt.rcParams.update({"font.size": 9, "axes.edgecolor": "#8a8984",
+                     "axes.labelcolor": "#0b0b0b", "xtick.color": "#52514e",
+                     "ytick.color": "#52514e", "svg.fonttype": "none"})
 
 def load(name):
     p = raw / name
-    if not p.exists():
-        return []
-    return [json.loads(l) for l in p.read_text().splitlines() if l.strip()]
+    return [json.loads(l) for l in p.read_text().splitlines() if l.strip()] if p.exists() else []
 
-grid = load("grid.jsonl")
-amend = load("grid_amend1.jsonl")
-e2e = load("e2e.jsonl")
+grid, a1, a2, e2e = load("grid.jsonl"), load("grid_amend1.jsonl"), load("grid_amend2.jsonl"), load("e2e.jsonl")
 
-SERIES = {  # arm -> (label, color slot, marker)
-    "igauss": ("IncrementalGauss (dense, ecbench default)", "#e34948", "v"),
-    "sgauss": ("StructuredGauss (sparse RREF)", "#eda100", "^"),
-    "core-bw": ("ours: block Wiedemann, unmerged core", "#2a78d6", "o"),
-    "cado-bwc": ("CADO bwc, same unmerged core", "#eb6834", "s"),
-    "full-bw": ("ours: filter+merge + block Wiedemann", "#1baf7a", "D"),
-    "full-bl": ("ours: filter+merge + block Lanczos", "#6250d6", "P"),
-    "full-bw-pos": ("ours: filter+merge + BW (+1 coeffs)", "#008300", "d"),
-    "cado-full": ("CADO purge+merge-dl+bwc (+1 coeffs)", "#e87ba4", "X"),
+# The grid driver kept the bench's own arm name; the A/A repeat is the second
+# `core-bw` record for (main, D, seed 1). Relabel it so it never enters a median.
+seen = set()
+for r in grid:
+    if r.get("pass") == "main" and r.get("arm") == "core-bw" and r.get("seed") == 1:
+        k = r["cols"]
+        if k in seen:
+            r["arm"] = "core-bw-aa"
+        seen.add(k)
+
+# Fixed categorical order (reference palette, light mode); marker shapes carry
+# identity too, and every chart has a legend.
+C = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948"]
+SERIES = {
+    "igauss": ("IncrementalGauss: dense, rows fed one by one (ecbench default)", C[7], "v"),
+    "sgauss": ("StructuredGauss: sparse RREF", C[3], "^"),
+    "full-bw": ("ours: filter + merge + block Wiedemann", C[0], "o"),
+    "full-bl": ("ours: filter + merge + block Lanczos", C[6], "P"),
+    "core-bw": ("ours: block Wiedemann on unmerged core", C[2], "D"),
+    "cado-bwc": ("CADO bwc on the same unmerged core", C[1], "s"),
+    "full-bw-pos": ("ours, default merge (8, 32)", C[0], "o"),
+    "full-bw-m32r100": ("ours, merge (32, 100)", C[2], "D"),
+    "full-bw-m128r200": ("ours, merge (128, 200)", C[6], "P"),
+    "cado-full-fb": ("CADO purge + merge-dl + replay-dl + bwc", C[1], "s"),
 }
+summary = {}
 
-def cells(rows, arm, key="solve_s", weight=3, pass_=None, threads=None):
+def cells(rows, arm, key="solve_s", pass_=None):
     by = {}
     for r in rows:
-        if r.get("arm") != arm or r.get("failed") or not r.get("verified"):
+        if r.get("arm") != arm or r.get("failed") or r.get("verified") is not True:
             continue
-        if r.get("weight", 3) != weight:
+        if r.get("weight", 3) != 3 or (pass_ and r.get("pass") != pass_):
             continue
-        if pass_ and r.get("pass") != pass_:
-            continue
-        if threads is not None and r.get("threads_requested", 4) != threads:
-            continue
-        by.setdefault(r["cols"], []).append(r[key])
+        v = r[key] if not callable(key) else key(r)
+        by.setdefault(r["cols"], []).append(v)
     return {d: (statistics.median(v), min(v), max(v), len(v)) for d, v in sorted(by.items())}
 
-def style(ax, title, ylabel):
+def style(ax, title, ylabel, ylog=True):
     ax.set_xscale("log", base=2)
-    ax.set_yscale("log")
-    ax.set_xlabel("factor-base columns D (m = 3 summands per relation)")
+    if ylog:
+        ax.set_yscale("log")
+    ax.set_xlabel("factor-base columns D (synthetic, m = 3 summands per relation)")
     ax.set_ylabel(ylabel)
-    ax.set_title(title, loc="left", fontsize=11)
+    ax.set_title(title, loc="left", fontsize=10, color="#0b0b0b")
     ax.grid(True, which="major", color="#e4e3df", linewidth=0.6)
+    ax.set_axisbelow(True)
     for s in ("top", "right"):
         ax.spines[s].set_visible(False)
 
@@ -64,112 +78,103 @@ def save(fig, name):
     fig.savefig(figs / f"{name}.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
-summary = {}
-
-def plot_lines(ax, rows, arms, pass_=None, threads=None):
+def lines(ax, rows, arms, tag, pass_=None, key="solve_s"):
     for arm in arms:
-        c = cells(rows, arm, pass_=pass_, threads=threads)
+        c = cells(rows, arm, key=key, pass_=pass_)
         if not c:
             continue
         label, color, marker = SERIES[arm]
         xs = list(c)
         med = [c[d][0] for d in xs]
-        lo = [c[d][0] - c[d][1] for d in xs]
-        hi = [c[d][2] - c[d][0] for d in xs]
-        ax.errorbar(xs, med, yerr=[lo, hi], color=color, marker=marker, markersize=6,
-                    linewidth=2, capsize=2, label=label)
-        summary.setdefault(f"{arm}|{pass_ or 'all'}|t{threads or 4}", {})
-        summary[f"{arm}|{pass_ or 'all'}|t{threads or 4}"] = {
-            str(d): {"median_s": v[0], "min_s": v[1], "max_s": v[2], "n": v[3]} for d, v in c.items()}
+        ax.errorbar(xs, med, yerr=[[c[d][0] - c[d][1] for d in xs], [c[d][2] - c[d][0] for d in xs]],
+                    color=color, marker=marker, markersize=6, linewidth=2, capsize=2, label=label,
+                    markeredgecolor="#fcfcfb", markeredgewidth=1)
+        summary[f"{tag}|{arm}"] = {str(d): {"median": v[0], "min": v[1], "max": v[2], "n": v[3]} for d, v in c.items()}
 
-# 1. Every solver, wall time against D (four threads).
-fig, ax = plt.subplots(figsize=(9, 5.5))
-plot_lines(ax, grid, ["igauss", "sgauss", "core-bw", "cado-bwc", "full-bw", "full-bl"], pass_="main")
-plot_lines(ax, amend, ["full-bw-pos", "cado-full"])
-style(ax, "Linear-algebra solve, wall time (median of 3 seeds, bars min-max; 4 threads)", "wall seconds")
-ax.legend(fontsize=8, frameon=False, loc="upper left")
+# 1. Every solver on the frozen grid (±1 coefficients, four threads).
+fig, ax = plt.subplots(figsize=(8.5, 5))
+lines(ax, grid, ["igauss", "sgauss", "core-bw", "cado-bwc", "full-bw", "full-bl"], "main_solve_s", pass_="main")
+ax.annotate("1,800 s timeout: both unmerged-core arms at D = 2^18", (262144, 1800), color="#52514e",
+            fontsize=7, ha="right", va="bottom", xytext=(0, 3), textcoords="offset points")
+ax.axhline(1800, color="#c3c2b7", linewidth=0.8, linestyle=":")
+style(ax, "Solve wall time against D: median of 3 seeds, bars min-max, 4 threads", "wall seconds (log)")
+ax.legend(fontsize=7.5, frameon=False, loc="upper left")
 save(fig, "solve_time_vs_D")
 
-# 2. Engine parity on the identical unmerged core, 4 and 1 threads.
-fig, ax = plt.subplots(figsize=(9, 4.5))
-for t, ls in ((4, "-"), (1, "--")):
-    pass_ = "main" if t == 4 else "onethread"
-    a = {}
-    b = {}
+# 2. Engine against engine on the identical unmerged core, per-seed ratio.
+fig, ax = plt.subplots(figsize=(8.5, 4))
+for t, pass_, color, marker in ((4, "main", C[0], "o"), (1, "onethread", C[1], "s")):
+    a, b = {}, {}
     for r in grid:
-        if r.get("pass") != pass_ or r.get("failed") or not r.get("verified"):
+        if r.get("pass") != pass_ or r.get("failed") or r.get("verified") is not True or r.get("weight", 3) != 3:
             continue
-        key = (r["cols"], r["seed"])
-        if r["arm"] == "core-bw":
-            a[key] = r["solve_s"]
-        elif r["arm"] == "cado-bwc":
-            b[key] = r["solve_s"]
+        (a if r["arm"] == "core-bw" else b if r["arm"] == "cado-bwc" else {})[(r["cols"], r["seed"])] = r["solve_s"]
     ratios = {}
     for k in a:
         if k in b:
             ratios.setdefault(k[0], []).append(b[k] / a[k])
-    if not ratios:
-        continue
     xs = sorted(ratios)
     med = [statistics.median(ratios[d]) for d in xs]
-    ax.errorbar(xs, med, yerr=[[m - min(ratios[d]) for m, d in zip(med, xs)],
-                               [max(ratios[d]) - m for m, d in zip(med, xs)]],
-                color="#2a78d6" if t == 4 else "#eb6834", marker="o" if t == 4 else "s",
-                linestyle=ls, linewidth=2, capsize=2, label=f"{t} thread{'s' if t > 1 else ''}")
-    summary[f"ratio_cado_over_ours_core_t{t}"] = {str(d): {"median": statistics.median(ratios[d]),
-        "min": min(ratios[d]), "max": max(ratios[d]), "n": len(ratios[d])} for d in xs}
+    ax.errorbar(xs, med, yerr=[[m - min(ratios[d]) for m, d in zip(med, xs)], [max(ratios[d]) - m for m, d in zip(med, xs)]],
+                color=color, marker=marker, linewidth=2, capsize=2, label=f"{t} thread{'s' if t > 1 else ''} (CADO thr={'2x2' if t > 1 else '1x1'})",
+                markeredgecolor="#fcfcfb", markeredgewidth=1)
+    summary[f"ratio_cado_bwc_over_core_bw_t{t}"] = {str(d): {"median": statistics.median(ratios[d]), "min": min(ratios[d]), "max": max(ratios[d]), "n": len(ratios[d])} for d in xs}
 ax.axhline(1, color="#8a8984", linewidth=1)
-style(ax, "CADO bwc / ours (block Wiedemann), same unmerged core: >1 means ours is faster", "time ratio")
+style(ax, "CADO bwc time / our block Wiedemann time, same matrix and rhs (above 1: ours faster)", "ratio (log)")
 ax.legend(fontsize=8, frameon=False)
 save(fig, "engine_ratio")
 
-# 3. Core size after filtering.
-fig, ax = plt.subplots(figsize=(9, 4.5))
-for arm, key, rows, label, color, marker in (
-    ("core-bw", "core_cols", grid, "unmerged core (singleton + clique only)", "#2a78d6", "o"),
-    ("full-bw", None, grid, "ours: after merge (core_dimension)", "#1baf7a", "D"),
-    ("cado-full", "small_dim", amend, "CADO merge-dl (+1 coeffs)", "#e87ba4", "X"),
-    ("full-bw-pos", None, amend, "ours: after merge (+1 coeffs)", "#008300", "d"),
-):
-    by = {}
-    for r in rows:
-        if r.get("arm") != arm or r.get("failed") or r.get("weight", 3) != 3:
-            continue
-        if rows is grid and r.get("pass") != "main":
-            continue
-        v = r[key] if key else r["report"]["core_dimension"]
-        by.setdefault(r["cols"], []).append(v)
-    if by:
-        xs = sorted(by)
-        ax.plot(xs, [statistics.median(by[d]) for d in xs], color=color, marker=marker,
-                linewidth=2, label=label)
-        summary[f"core_dim|{arm}"] = {str(d): statistics.median(by[d]) for d in xs}
-ax.plot([1024, 262144], [1024, 262144], color="#8a8984", linewidth=1, linestyle=":", label="D (no filtering)")
-style(ax, "Matrix handed to the Krylov solver (median over seeds)", "core dimension")
-ax.legend(fontsize=8, frameon=False)
+# 3. Pipeline against pipeline (+1 coefficients, amendments 1-2).
+fig, ax = plt.subplots(figsize=(8.5, 4.5))
+lines(ax, a1, ["full-bw-pos"], "pipeline_solve_s")
+lines(ax, a2, ["full-bw-m32r100", "full-bw-m128r200", "cado-full-fb"], "pipeline_solve_s")
+style(ax, "Whole linear-algebra pipeline, filter to verified logs (+1 coefficients, 4 threads)", "wall seconds (log)")
+ax.legend(fontsize=8, frameon=False, loc="upper left")
+save(fig, "pipeline_time")
+
+# 4. What each filter hands its Krylov solver.
+fig, ax = plt.subplots(figsize=(8.5, 4.5))
+core = lambda r: r.get("small_dim") or r["report"]["core_dimension"]
+for rows, arm in ((a1, "full-bw-pos"), (a2, "full-bw-m32r100"), (a2, "full-bw-m128r200"), (a2, "cado-full-fb")):
+    c = cells(rows, arm, key=core)
+    label, color, marker = SERIES[arm]
+    xs = list(c)
+    ax.plot(xs, [c[d][0] for d in xs], color=color, marker=marker, linewidth=2, label=label,
+            markeredgecolor="#fcfcfb", markeredgewidth=1)
+    summary[f"core_dim|{arm}"] = {str(d): c[d][0] for d in xs}
+ax.plot([1024, 262144], [1024, 262144], color="#8a8984", linewidth=1, linestyle=":", label="D itself (no filtering)")
+style(ax, "Matrix dimension after filtering and merging (median of 3 seeds)", "core dimension (log)")
+ax.legend(fontsize=8, frameon=False, loc="upper left")
 save(fig, "core_dimension")
 
-# 4. End-to-end ic logs: collection against linear algebra.
+# 5. Real ic logs: linear algebra against everything else (derived).
 if e2e:
-    fig, ax = plt.subplots(figsize=(9, 4.5))
-    labels, col, la = [], [], []
-    for r in e2e:
-        if r.get("failed"):
+    rows = [r for r in e2e if not r.get("failed") and r.get("verified")]
+    labels, other, la = [], [], []
+    for r in rows:
+        if r["seed"] != 1:
             continue
-        labels.append(r["label"])
-        col.append(r["collection_seconds"])
-        la.append(r["linear_algebra_seconds"])
-    y = range(len(labels))
-    ax.barh(y, col, color="#2a78d6", label="relation collection", height=0.6)
-    ax.barh(y, la, left=col, color="#eb6834", label="linear algebra", height=0.6)
-    ax.set_yticks(list(y), labels, fontsize=7)
+        mode = r["linear_algebra"] + ("" if r["linear_algebra"] == "dense" else f" {'BW' if 'wiedemann' in r['sparse_solver'] else 'BL'}")
+        labels.append(f"{r['label']} ({r['columns']} cols), {mode}")
+        other.append(r["other_seconds_derived"] * 1e3)
+        la.append(r["linear_algebra_seconds"] * 1e3)
+    fig, ax = plt.subplots(figsize=(8.5, 4.2))
+    y = list(range(len(labels)))
+    ax.barh([v - 0.2 for v in y], other, height=0.38, color=C[0], label="collection + certification (derived: elapsed − LA)")
+    ax.barh([v + 0.2 for v in y], la, height=0.38, color=C[1], label="linear algebra (report's linear_algebra.seconds)")
+    ax.set_yticks(y, labels, fontsize=7)
+    ax.invert_yaxis()
     ax.set_xscale("log")
-    ax.set_xlabel("wall seconds (log)")
-    ax.set_title("ic logs end to end: where the precompute time goes", loc="left", fontsize=11)
-    ax.legend(fontsize=8, frameon=False)
+    ax.set_xlabel("milliseconds (log), seed 1")
+    ax.set_title("ic logs end to end on Koblitz curves: the linear algebra is 0.2–2% of the precompute", loc="left", fontsize=10)
+    ax.grid(True, axis="x", color="#e4e3df", linewidth=0.6)
+    ax.set_axisbelow(True)
     for s in ("top", "right"):
         ax.spines[s].set_visible(False)
+    ax.legend(fontsize=7.5, frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.14), ncol=2)
     save(fig, "e2e_split")
+    summary["e2e"] = [{k: r[k] for k in ("label", "linear_algebra", "sparse_solver", "seed", "columns", "relations",
+                       "elapsed_seconds", "linear_algebra_seconds", "other_seconds_derived")} for r in rows]
 
 (here / "summary.json").write_text(json.dumps(summary, indent=1, sort_keys=True))
 print("figures:", sorted(p.name for p in figs.iterdir()))

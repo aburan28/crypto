@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # End to end (PROTOCOL.md question 3): real `ic logs` precomputes, reading
-# collection_seconds and linear_algebra_seconds from the report.
+# elapsed_seconds and linear_algebra.seconds from the report (relation
+# collection + certification = their difference, labelled derived).
 # usage: e2e.sh  (writes raw/e2e.jsonl)
 set -uo pipefail
 here=$(cd "$(dirname "$0")/.." && pwd)
@@ -35,11 +36,13 @@ run() { # label degree summands curve_a la sparse_solver seed [fb]
   else
     echo "$rep" | jq -c --arg label "$label" --arg la "$la" --arg ss "$ss" --argjson seed "$seed" --argjson el "$el" \
       --argjson n "$n" --argjson m "$m" \
-      '(.. | objects | select(has("linear_algebra_seconds"))) as $r
-       | {label:$label, degree:$n, summands:$m, linear_algebra:$la, sparse_solver:$ss, seed:$seed,
-          columns:$r.columns, relations:$r.relations, trials:$r.trials, verified:$r.verified,
-          collection_seconds:$r.collection_seconds, linear_algebra_seconds:$r.linear_algebra_seconds,
-          solve_attempts:$r.solve_attempts, core_dimension:($r.sparse_report.core_dimension // null),
+      '{label:$label, degree:$n, summands:$m, linear_algebra:$la, sparse_solver:$ss, seed:$seed,
+          columns:.counts.columns, relations:.counts.relations, trials:.counts.trials,
+          verified:.verified, status:.status, elapsed_seconds:.elapsed_seconds,
+          linear_algebra_seconds:.linear_algebra.seconds, la_attempts:.linear_algebra.attempts,
+          core_dimension:(.linear_algebra.sparse.core_dimension // null),
+          other_seconds_derived:(.elapsed_seconds - .linear_algebra.seconds),
+          cpu_seconds:.resources.cpu_seconds, peak_rss_bytes:.resources.peak_rss_bytes,
           process_elapsed_s:$el}' | head -1 >> "$out"
   fi
   echo "e2e $label $la/$ss seed=$seed rc=$rc ${el}s" >&2
