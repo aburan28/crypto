@@ -84,8 +84,10 @@ pub fn solve_linear<F: Field>(f: &F, mut m: Vec<Vec<F::E>>, mut b: Vec<F::E>) ->
             m[col][c] = f.mul(m[col][c], inv);
         }
         b[col] = f.mul(b[col], inv);
-        for r in 0..n {
-            if r != col && !f.is_zero(m[r][col]) {
+        // Rows above this pivot are needed only during back substitution.
+        // Forward elimination avoids repeatedly updating the solved prefix.
+        for r in col + 1..n {
+            if !f.is_zero(m[r][col]) {
                 let fct = m[r][col];
                 for c in col..n {
                     let t = f.mul(fct, m[col][c]);
@@ -94,6 +96,11 @@ pub fn solve_linear<F: Field>(f: &F, mut m: Vec<Vec<F::E>>, mut b: Vec<F::E>) ->
                 let t = f.mul(fct, b[col]);
                 b[r] = f.sub(b[r], t);
             }
+        }
+    }
+    for row in (0..n).rev() {
+        for col in row + 1..n {
+            b[row] = f.sub(b[row], f.mul(m[row][col], b[col]));
         }
     }
     Some(b)
