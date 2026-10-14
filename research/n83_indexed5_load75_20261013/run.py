@@ -23,7 +23,7 @@ POINT = STUDY / "primary_target.jsonl"
 ANSWER = STUDY / "answer.jsonl"
 RHO_CONFIG = ROOT / "research/n83_dense_root_20261013/rho_config.json"
 EXPECTED = {
-    SOURCE: "c97ec7d8caef4c2a93b82378c5961a05d874e754f3873de64e7bcf2afcfd8e21",
+    SOURCE: "80e54cba2327bceece22901163bcf32e84c096acc1af795fd4b5d02f0542e287",
     LOCK: "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
     POINT: "21c8dfc7d488909e5c4a42c839fcc01bdefa9821c11ba001626a1d15697240e8",
     ANSWER: "651eb7d0ef08a1655036746311b19b6989e340ca4752b6d675606055e59c12a1",

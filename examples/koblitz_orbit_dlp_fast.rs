@@ -1801,15 +1801,13 @@ mod wide {
             ];
             let full = build_index128_with_symmetry(&gf, &basis, &solver, &reps, false, false);
             let quotient = build_index128_with_symmetry(&gf, &basis, &solver, &reps, true, false);
-            let dense_quotient =
-                build_index128_with_symmetry(&gf, &basis, &solver, &reps, true, true);
             assert!(quotient.states.len() < full.states.len());
             assert_eq!(quotient.table.len, full.table.len);
-            assert_eq!(dense_quotient.table.len, quotient.table.len);
-            assert!(dense_quotient.table.layout_receipt().2 < quotient.table.layout_receipt().2);
             let mut full_indexed = RootTable128::with_capacity_indexed83(full.states.len() * 2);
             let mut quotient_indexed =
                 RootTable128::with_capacity_indexed83(quotient.states.len() * 2);
+            let mut dense_quotient_indexed =
+                RootTable128::with_capacity_indexed83((quotient.states.len() * 2 + 2) / 3);
             for (states, table) in [
                 (&full.states, &mut full_indexed),
                 (&quotient.states, &mut quotient_indexed),
@@ -1832,6 +1830,28 @@ mod wide {
                 }
             }
             assert_eq!(quotient_indexed.len, full_indexed.len);
+            for index in 0..quotient.states.len() {
+                let state = quotient.states.get(index);
+                for (selector, root) in state.normal_roots.into_iter().enumerate() {
+                    let key = basis.canonical_selected(root).0;
+                    dense_quotient_indexed.insert_indexed83(
+                        key,
+                        index,
+                        selector,
+                        |state_index, root_selector| {
+                            basis
+                                .canonical_selected(
+                                    quotient.states.root_at(state_index, root_selector),
+                                )
+                                .0
+                        },
+                    );
+                }
+            }
+            assert_eq!(dense_quotient_indexed.len, quotient_indexed.len);
+            assert!(
+                dense_quotient_indexed.layout_receipt().2 < quotient_indexed.layout_receipt().2
+            );
             for index in 0..full.states.len() {
                 let state = full.states.get(index);
                 for root in state.normal_roots {
@@ -1844,12 +1864,8 @@ mod wide {
                         "first witness differs for key {key}",
                     );
                     assert_eq!(
-                        dense_quotient
-                            .table
-                            .get_with_context(key, &dense_quotient.states, &basis),
-                        quotient
-                            .table
-                            .get_with_context(key, &quotient.states, &basis),
+                        dense_quotient_indexed.get_with_context(key, &quotient.states, &basis),
+                        quotient_indexed.get_with_context(key, &quotient.states, &basis),
                         "dense five-byte first witness differs for key {key}",
                     );
                     assert_eq!(
@@ -1858,6 +1874,16 @@ mod wide {
                         "five-byte first witness differs for key {key}",
                     );
                 }
+            }
+            for probe in 1..2048u128 {
+                let key = basis
+                    .canonical_selected(probe.wrapping_mul(0x2545_F491_4F6C_DD1D) & basis.mask)
+                    .0;
+                assert_eq!(
+                    dense_quotient_indexed.get_with_context(key, &quotient.states, &basis),
+                    quotient_indexed.get_with_context(key, &quotient.states, &basis),
+                    "dense five-byte probe differs for key {key}",
+                );
             }
         }
 

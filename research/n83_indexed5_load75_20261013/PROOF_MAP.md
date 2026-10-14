@@ -17,6 +17,7 @@ states in the same source order as the regular request.
 The arithmetic declarations build with Lean 4.34.1 and `#print axioms` reports
 no axioms. `lean4checker --fresh` was unavailable on the development host.
 The same-field source test compares every canonical key and first witness
-for a six-representative N83 index at both table densities. A larger exact
+for a six-representative N83 index at both table densities, plus 2,047
+additional lookup probes. A larger exact
 run must establish root-key count, target relation, scalar, allocation, RSS,
 and timing. The 13-GiB bound covers only state and slot array payloads.

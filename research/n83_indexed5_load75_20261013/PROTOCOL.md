@@ -17,7 +17,7 @@ cost within one 16-GB cloud instance.
   The worker receives only the point. The answer sidecar SHA-256 is
   `651eb7d0ef08a1655036746311b19b6989e340ca4752b6d675606055e59c12a1`.
 - Producer source: `examples/koblitz_orbit_dlp_fast.rs`, SHA-256
-  `c97ec7d8caef4c2a93b82378c5961a05d874e754f3873de64e7bcf2afcfd8e21`.
+  `80e54cba2327bceece22901163bcf32e84c096acc1af795fd4b5d02f0542e287`.
   `Cargo.lock` SHA-256 is
   `ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90`.
 - Shared flags: symmetric S3 state quotient, exact five-byte root index,
