@@ -150,54 +150,7 @@
     "contended": false,
     "exit_status": 0
    }
-  ],
-  "ic_online_interval": {
-   "included_stages": [
-    "target_query",
-    "target_PDP",
-    "target_relation_check",
-    "target_descent",
-    "target_recovery_check"
-   ],
-   "start_event": "first target-dependent operation after reusable setup: the descent's first query",
-   "stop_event": "the descent returns a logarithm it has checked as [d]G = Q on the single-word ladder"
-  },
-  "rho_online_interval": {
-   "included_stages": [
-    "walk",
-    "collision",
-    "recovery_check"
-   ],
-   "start_event": "first target-dependent operation after reusable setup: lifting the target for the walk",
-   "stop_event": "the walk returns a logarithm it has checked as [d]G = Q on the single-word ladder"
-  },
-  "rho_online_phase_ms": {
-   "walk_and_collision_ms": 18.888921,
-   "recovery_check_ms": 0.01
-  },
-  "operation_accounting": {
-   "boundary": "IC probes and rho walk steps retain their native units; these counter bags are not an online common-unit operation ledger",
-   "calibrated_operation_ratio": null,
-   "calibration_status": "unknown",
-   "common_operation_unit": null,
-   "counter_scope": "whole_measured_record",
-   "ic": {
-    "cost_is_lower_bound": false,
-    "native_counters": {},
-    "record_id": "frozen-k0n41-T01-R1",
-    "unpriced_work": []
-   },
-   "rho": {
-    "cost_is_lower_bound": true,
-    "native_counters": {},
-    "record_id": "frozen-k0n41-T01-R1-rho",
-    "unpriced_work": [
-     "partition_hashes",
-     "canonicalisations"
-    ]
-   }
-  },
-  "record_class": "verified_answer_controlled_wall"
+  ]
  },
  "validation": {
   "schema_version": 2,
@@ -222,18 +175,6 @@
    "rho_online_wall_ms",
    "online_speedup",
    "ic_online_phase_ms",
-   "rho_online_phase_ms",
-   "ic_online_interval",
-   "rho_online_interval",
-   "candidate_id",
-   "candidate_manifest_sha256",
-   "workload_id",
-   "workload_manifest_sha256",
-   "run_id",
-   "ic_target_hash",
-   "rho_target_hash",
-   "ic_online_wall_ms",
-   "rho_online_wall_ms",
    "online_interval",
    "same_resource_envelope",
    "independent_validation",
@@ -241,9 +182,6 @@
    "rho_replay_certificate_sha256",
    "ic_resource_envelope",
    "rho_resource_envelope",
-   "rho_policy",
-   "operation_accounting",
-   "record_class",
    "ic_scalar_verified",
    "rho_scalar_verified",
    "rho_policy",
