@@ -1,4 +1,4 @@
-\section{Open problems and future work}
+\section{Open problems}
 \label{sec:open}
 
 This section collects what we would try next, and what would settle
@@ -7,7 +7,7 @@ proposed them; we quote those as estimates, not results. None of them
 moves the exponent. What they could move is the constant, and on
 Blackwell the constant is still being found.
 
-\subsection{A fast exact table walk}
+\subsection{Table walk}
 \label{sec:open-table}
 
 The biggest open question is whether a correct table walk can be made
@@ -44,7 +44,7 @@ critical path, and several ideas attack it:
   exists~\evcite{\evref{walkconst}, §11.1 and §11.5}.
 \end{itemize}
 
-\subsection{Remaining $\sigma$-walk optimisations}
+\subsection{$\sigma$-walk}
 \label{sec:open-sigma}
 
 The $\sigma$-walk is at $15.88$~billion iterations/s on one RTX~PRO~6000,
@@ -67,7 +67,7 @@ Open items:
   run~\evcite{\evref{bridge}}.
 \end{itemize}
 
-\subsection{Blackwell pipeline behaviour}
+\subsection{Blackwell pipes}
 \label{sec:open-pipes}
 
 Three questions about the hardware itself would sharpen every estimate
@@ -93,7 +93,7 @@ above.
   estimates with measurements~\evcite{\evref{goal28}, ``Nsight findings''}.
 \end{itemize}
 
-\subsection{Data-centre parts}
+\subsection{Data-centre GPUs}
 \label{sec:open-gpus}
 
 Kernel tuning does not transfer between dies. The B200's three winning
@@ -120,7 +120,7 @@ pair, and a single run would confirm or break the
 model~\evcite{\evref{power}, §4--5}. Multi-GPU instances are not
 implemented: one process drives one device.
 
-\subsection{NIST walk}
+\subsection{NIST curves}
 \label{sec:open-nist}
 
 The prime-field walk has had two rounds of tuning, so its open

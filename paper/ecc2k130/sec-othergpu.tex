@@ -15,7 +15,7 @@ which is which, because a static instruction count and a measured
 rate are different kinds of evidence, and the rest of the paper keeps
 them apart.
 
-\subsection{Implementation status}
+\subsection{Status}
 \label{sec:othergpu-status}
 
 \begin{table}[t]
@@ -56,7 +56,7 @@ The numbers below are therefore of three kinds, and we label each
 one: a static count, an emulated operation count or walk constant, or
 (in Section~\ref{sec:othergpu-f4}) a device measurement.
 
-\subsection{256-bit prime-field arithmetic for secp256k1}
+\subsection{secp256k1}
 \label{sec:othergpu-fp256}
 
 The field layer holds an element in eight 32-bit limbs, because the
@@ -130,7 +130,7 @@ low-memory variant from $4{,}008$ to $792$~B) and the compile from
 over ten minutes to 46~s, the same code-size lesson as
 Section~\ref{sec:arith-bitsliced}~\evcite{\evref{eccopt}, §3}.
 
-\subsection{Automorphism folding and baby-step giant-step}
+\subsection{Automorphism folding and BSGS}
 \label{sec:othergpu-rho}
 
 The rho walk is $r$-adding on the low bits of $x$, with distinguished
@@ -210,7 +210,7 @@ The emulation itself runs at about $380$~k steps/s per core, a
 figure that says nothing about a device and is quoted only so that
 no one mistakes it for one.
 
-\subsection{Pollard kangaroo for interval discrete logarithms}
+\subsection{Kangaroo}
 \label{sec:othergpu-kangaroo}
 
 The interval solver reuses the verified field and point code for
@@ -244,7 +244,7 @@ The tool ships no real puzzle keys (no trustworthy offline source),
 does no address scanning, and has not solved any puzzle; the
 synthetic 20-, 28- and 32-bit registry entries are regression fixtures.
 
-\subsection{P-256 and P-384}
+\subsection{NIST curves}
 \label{sec:othergpu-nist}
 
 The NIST library has graduated from this inventory: it now has device
@@ -256,7 +256,7 @@ runner and the GPU steps were skipped. The attempt record says it
 ``must not be cited as performance evidence'', and we do not cite
 it~\evcite{\evref{nistattempt}}.
 
-\subsection{Binary fields beyond ECC2K-130}
+\subsection{Other binary fields}
 \label{sec:othergpu-binary}
 
 \paragraph{The ECC2K-95 kernel.} Section~\ref{sec:ecc2k95} used this
@@ -355,7 +355,7 @@ predates that experiment.) A sparse matrix--vector worker modulo any
 $m<2^{63}$ is correctness-first, every product rechecked on the CPU,
 with no rate~\evcite{\evref{spmv}}.
 
-\subsection{F4 elimination on cloud GPUs}
+\subsection{F4 elimination}
 \label{sec:othergpu-f4}
 
 The \texttt{cryptanalysis} library's F4 Gröbner-basis path for Weil-descent systems

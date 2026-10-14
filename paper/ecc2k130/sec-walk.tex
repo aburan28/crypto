@@ -1,4 +1,4 @@
-\section{Iteration functions}
+\section{Walks}
 \label{sec:walk}
 
 Pollard's rho~\cite{pollard1978}, in the parallel collision-search
@@ -15,7 +15,7 @@ $2^{60.809}$~\evcite{\evref{walkconst}, §1}. Every walk in this
 paper is a map on those classes. They differ in how they respect the
 class action and in what each step costs.
 
-\subsection{The $\sigma$-walk}
+\subsection{$\sigma$-walk}
 \label{sec:walk-sigma}
 
 The campaign uses the map of Bailey et al.~\cite{bailey2009}:
@@ -77,7 +77,7 @@ A later fused kernel narrows the packed cost ($9.347867$ to
 $11.800903$~billion iterations/s in witness-carrying mode) but does not close
 it~\evcite{\evref{sigmafused}}.
 
-\subsection{The $r$-adding table walk}
+\subsection{Table walk}
 \label{sec:walk-table}
 
 On a GPU, the $\sigma$-walk pays for $\sigma^j$ in the basis
@@ -113,7 +113,7 @@ $1.0048\times$ iteration cost from merge parting. A third revision (v3,
 Section~\ref{sec:walk-cycles}) replaces the history-dependent exits
 with a raw-cycle anchor~\evcite{\evref{walkconst}, §11.1}.
 
-\subsection{An $x$-only doubling-and-bridge map}
+\subsection{Bridge map}
 \label{sec:walk-bridge}
 
 On the power-capped RTX~PRO~4500 a third map turns out to pay. Its
@@ -133,7 +133,7 @@ throughput gain (Section~\ref{sec:g7}) is not given back in extra
 iterations. The map also passes an independent $2{,}048$-point affine
 checkpoint~\evcite{\evref{bridge}}.
 
-\subsection{Measured walk constants}
+\subsection{Walk constant}
 \label{sec:walk-constant}
 
 Throughput is only half of what determines how long a solve takes.
@@ -196,7 +196,7 @@ $157{,}800\pm7{,}500$, a ratio of $0.96\pm0.07$. The bare prediction is
 $102{,}600$; the difference is roughly $1.5\times$ of harness overhead
 from the distinguished-point tail~\evcite{\evref{iterfn}, §6.2}.
 
-\subsection{Cost per solution}
+\subsection{Cost per solve}
 \label{sec:walk-cycles}
 
 Put rate and constant together and the table walk looks very

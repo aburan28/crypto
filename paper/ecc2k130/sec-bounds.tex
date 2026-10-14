@@ -1,4 +1,4 @@
-\section{Performance upper bounds}
+\section{Upper bounds}
 \label{sec:bounds}
 
 Everything in this paper is engineering against a fixed exponent, so the
@@ -35,7 +35,7 @@ lane-instructions per update with the carry-less unit fully busy, which
 the note calls a two-card number~\evcite{\evref{roofline}, §5}. Two cards at
 today's rates already exceed it.
 
-\subsection{Data-centre parts and the RTX~PRO~4500}
+\subsection{Other GPUs}
 \label{sec:bounds-other}
 
 On the B200 the carry-less unit is so fast that its floor, $255$ billion
@@ -62,7 +62,7 @@ engines and 375~MHz; the 144-engine build failed placement and the
 About $13\%$ above today's $8.25$ is all this part offers without a new
 design.
 
-\subsection{NIST walk}
+\subsection{NIST curves}
 \label{sec:bounds-nist}
 
 The prime-field walk has more room, because it is further from any
@@ -80,7 +80,7 @@ derived from the measured multiply rate, and that rate is itself a
 single dependent chain, so a throughput-bound multiplier would raise
 them~\evcite{\evref{nistres}}.
 
-\subsection{Implications for solution cost}
+\subsection{Cost per solve}
 \label{sec:bounds-cost}
 
 Cost per solve scales inversely with the rate. At the campaign's

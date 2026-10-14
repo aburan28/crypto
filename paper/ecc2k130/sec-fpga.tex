@@ -1,4 +1,4 @@
-\section{FPGA implementation}
+\section{FPGA}
 \label{sec:fpga}
 
 In some ways this field suits an FPGA better than a GPU. The GPU has
@@ -7,7 +7,7 @@ carry-less multipliers, and $\sigma^k$ is just wiring. We designed a
 VHDL engine for the AWS F2 (Xilinx VU47P), estimated its rate before
 any board time, and then measured it.
 
-\subsection{Pre-implementation estimate}
+\subsection{Estimate}
 \label{sec:fpga-estimate}
 
 Before synthesis, we mapped the client's own straight-line multiplier
@@ -112,7 +112,7 @@ report's id, step count and point against the reference trajectory
 (64 distinguished points from 797 steps in $19{,}194$
 clocks)~\evcite{\evref{hdl}; \evref{hdl}}.
 
-\subsection{Measurements on AWS F2}
+\subsection{AWS F2 results}
 \label{sec:fpga-measured}
 
 \begin{table}[t]
@@ -192,7 +192,7 @@ FFs, 12 RAMB36, 4 URAM and 66 DSPs; the 96-engine image used $62\%$ of
 the LUTs and $81\%$ of the block RAM, and block RAM, not logic, is
 what bounds the engine count on this part~\evcite{\evref{hdl}}.
 
-\subsection{Comparison with GPUs}
+\subsection{FPGA vs.\ GPU}
 \label{sec:fpga-vs-gpu}
 
 At the prices observed on 2026-09-11, an F2 instance at $\$1.980$

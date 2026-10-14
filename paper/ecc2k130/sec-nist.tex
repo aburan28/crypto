@@ -1,4 +1,4 @@
-\section{Application to NIST P-256 and P-384}
+\section{NIST curves}
 \label{sec:nist}
 
 Most of what made the ECC2K-130 client fast has nothing to do with
@@ -21,7 +21,7 @@ same curve at every rung, with one step per counted step, so
 $S=\text{steps}/\sqrt n$ does not move; only the cost of a step
 does~\evcite{\evref{nistres}}.
 
-\subsection{Walk and field arithmetic}
+\subsection{Walk and field}
 \label{sec:nist-walk}
 
 The library holds a P-256 element in eight 32-bit limbs and a P-384
@@ -85,7 +85,7 @@ breaking CM-constructed anomalous curves of 129, 257 and 522 bits in
 none of the fifteen has a structural weakness; the documentation says
 both~\evcite{\evref{nistcpu}}.
 
-\subsection{Baseline measurement}
+\subsection{Baseline}
 \label{sec:nist-first}
 
 The kernel had been written and verified entirely on hosts without a
@@ -114,7 +114,7 @@ the best cell~\evcite{\evref{nistres}, ``Correctness evidence on hardware''}.
 The CPU suite also checks the specialised steppers below bit for bit
 against the generic one, for every batch width that was compiled.
 
-\subsection{Optimisation steps}
+\subsection{Optimisations}
 \label{sec:nist-rungs}
 
 Table~\ref{tab:nist-ladder} lines the NIST rungs up against the
