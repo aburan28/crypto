@@ -540,11 +540,16 @@ fn linear_algebra<F: Field>(
                 mat[row][i] = vp[i][t + i - ell];
             }
         }
-        for i in 0..ell - 1 {
+    }
+    // Each V~ V^i is independent of the matrix row. Build it once and
+    // scatter its coefficients down the corresponding denominator column.
+    // Keeping only this product avoids an additional O(ell^2) cache.
+    for i in 0..ell - 1 {
+        let prod = series::mul(f, &vt, &vp[i], n);
+        for t in 1..=unk {
             // - d_i V~ Z^{l-1-i} V^i
-            let prod = series::mul(f, &vt, &vp[i], n);
             if t + 1 + i >= ell {
-                mat[row][ell + i] = f.neg(prod[t + 1 + i - ell]);
+                mat[t - 1][ell + i] = f.neg(prod[t + 1 + i - ell]);
             }
         }
     }
