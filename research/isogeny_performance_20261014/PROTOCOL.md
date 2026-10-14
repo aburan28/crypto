@@ -9,7 +9,7 @@ baseline on several CPU types, and iteratively improve its speed. The previous
 | Inventory every implementation | `INVENTORY.md`, linked modules, input/output boundaries and existing benchmark groups |
 | Freeze baseline before optimization | Clean source SHA, retained executable, compiler, host, command and exact input/output hashes |
 | Several physical CPU types | Native hosted x86-64, Linux ARM64, Apple ARM64 and Intel macOS; detected models, no inference from runner labels; unavailable measurements stay open |
-| Iterative optimization | Separate hoisting and batch-inversion rungs, exact map equality, all eight BMSS methods measured, rejection ledger |
+| Iterative optimization | Separate hoisting, batch-inversion and forward-elimination rungs, exact map equality, all eight BMSS methods measured, rejection ledger |
 | Comparable runs | Five A/A rounds followed by five interleaved A/B rounds on identical fixtures; raw samples retained |
 | Qualified wall speedup | Reserved core, exclusive lock, pre/post other-process CPU accounting, pressure and interference checks; shared-host timings excluded |
 | Correctness | Independent Kohel kernel/map comparison, native and counted implementations agree, four public point transports per case, all existing algorithm tests |
@@ -32,7 +32,11 @@ original native field backend. Never convert a multiplication-count reduction
 into a whole-search speedup. The native tool currently labels all timing
 samples unreserved and unqualified. macOS has no Linux affinity/PSI facility;
 this stage records counts without wall samples there. The isolation requirement
-remains open until a native reserving wrapper is supplied and validated.
+is implemented using the repository's native `isolated_bench` through a
+standalone Cargo front door. `isogeny-perf campaign` accepts timing qualification
+only from a native `isolated-bench/1` run receipt with child exit zero and no
+contention. Linux execution of that adapter remains to be verified by the
+processor matrix; macOS uses repeated counts without wall samples.
 
 The broad legacy harness covers kernel construction, modular-polynomial and
 division-polynomial finding, path search, class-group and higher-dimensional

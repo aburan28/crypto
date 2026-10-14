@@ -24,5 +24,29 @@
    measurements are consequently not promoted; operation counts and exact
    outputs can still be audited while shared jobs run.
 
-No processor-specific optimization has been rejected or accepted yet.
-Optimization rungs below will keep regressions alongside improvements.
+6. A launch rejected a revision argument with the wrong length before writing
+   a run. A subsequent 192-bit fixture launch panicked because it used four
+   Montgomery limbs; the backend requires three. Those stderr files and the
+   header-only interrupted receipt remain in `evidence/baseline/`. The corrected
+   fresh run uses the minimum limb width and has all 96 cases plus its PASS exit.
+7. Root and standalone test builds initially lacked compile-time fixtures in
+   the sparse checkout. The failed logs are retained. Only the referenced
+   tracked fixtures were materialized before fresh validation runs.
+8. The local actionlint version does not recognize the current GitHub
+   `macos-15-intel` label. The label is listed in GitHub's runner reference;
+   no other workflow issue was reported by that invocation. This remains a
+   tooling-version limitation until validation with a current label catalogue.
+9. The report helper initially linked a library with the wrong compiler.
+   Cargo was invoked through `rustup run 1.98 cargo`, but Cargo's compiler
+   fingerprint and the retained `.rlib` show Homebrew rustc **1.93.1** on PATH.
+   The helper uses that compiler, and the actual compiler receipt is retained.
+   Formatting and Clippy invocations used their rustup toolchain drivers.
+10. An attempt to transfer the Conductor claim used `task release`, which
+   cancelled T-2829; this server would not reopen a cancelled task. T-2834
+   transparently replaces it. Its lease is now attached to this task's real
+   registered root-validation process and maintained by that process.
+
+The first hoisting rung has 96 exact output matches. Its 224-bit/degree-101
+linear-algebra case has 273,659,435 versus 5,639,435 multiplication calls
+(48.526 quotient). Wall time remains unqualified. Later rungs retain any
+increase in multiplication calls beside reduced inversion counts.
