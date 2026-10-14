@@ -13,6 +13,7 @@
 //! | `binary-subspace` | binary, Koblitz | points whose abscissa lies in an `F_2`-subspace |
 //! | `koblitz-orbit` | Koblitz | the same, each signed Frobenius orbit folded onto one column |
 //! | `compact-orbit-scan` | Koblitz | deterministic raw-abscissa scan, subgroup projection and signed Frobenius closure |
+//! | `known-log-orbit` | Koblitz | deterministic generator-multiple scan and signed Frobenius closure, retaining exact representative logs |
 //! | `glv-orbit` | prime | the closure of the smallest abscissae under the curve's automorphism group, each orbit folded onto one column (`j = 0`: 6 points a column, `j = 1728`: 4, generic: 2) |
 //! | `gls-line` | GLS over `F_{p²}` | the `ψ`-stable line `x ∈ u·s·F_p`, each `⟨−1, ψ⟩`-orbit folded onto one column (4 points a column) |
 //!
@@ -39,6 +40,8 @@ use std::collections::{BTreeMap, HashSet};
 use std::time::{Duration, Instant};
 
 use num_traits::ToPrimitive;
+use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
 
 use super::stages::{
     BooleanSystem, DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SolverCost,
@@ -218,6 +221,241 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzOrbitBase<'_> {
 /// retained on the base as priced counters or explicit lower-bound gaps.
 pub struct CompactOrbitScanBase<'i> {
     pub instance: &'i BinaryInstance,
+}
+
+/// A signed-Frobenius base whose representative logarithms are known by
+/// construction.  Starting at `G`, the builder walks `[s]G` in increasing
+/// scalar order and retains the first representative from each distinct
+/// signed-Frobenius orbit.  This is deliberately separate from
+/// [`CompactOrbitScanBase`]: it tests whether exact logarithm transport can
+/// remove relation collection, and makes no claim that the selected points
+/// also satisfy an unrelated geometric factor-base predicate.
+pub struct KnownLogOrbitBase<'i> {
+    pub instance: &'i BinaryInstance,
+}
+
+impl KnownLogOrbitBase<'_> {
+    /// Build the materialised orbit base and return one exact logarithm per
+    /// column.  `column_logs[c]` is the log of the first point of column `c`;
+    /// `FactorBase::coef_of` transports it to every signed orbit member.
+    pub fn build_with_logs<'a>(
+        &self,
+        ctx: &InstanceCtx<BinaryGroup<'a>>,
+        params: &Params,
+        ops: &mut GroupOps,
+    ) -> Result<(FactorBase<FastPoint>, Vec<u64>), String> {
+        let inst = self.instance;
+        let kc = inst
+            .koblitz
+            .as_ref()
+            .ok_or("known-log-orbit requires a Koblitz curve")?;
+        if ctx.r != inst.r || ctx.cofactor != inst.cofactor || ctx.field_degree != Some(inst.n) {
+            return Err("known-log-orbit context does not match its binary instance".into());
+        }
+        let columns =
+            usize::try_from(params.u64("columns")?).map_err(|_| "columns does not fit usize")?;
+        let scalar_cap = params.u64("scalar_cap")?;
+        let schedule = params.get("schedule").unwrap_or("sequential");
+        if schedule != "sequential" && schedule != "hash" {
+            return Err(format!(
+                "known-log-orbit schedule `{schedule}` is not sequential or hash"
+            ));
+        }
+        let schedule_seed = if schedule == "hash" {
+            params.u64("seed")?
+        } else {
+            0
+        };
+        if columns == 0 || scalar_cap == 0 || inst.n == 0 || inst.n >= 64 {
+            return Err(
+                "known-log-orbit requires positive columns and scalar cap and degree < 64".into(),
+            );
+        }
+        let orbit_size = (inst.n as usize)
+            .checked_mul(2)
+            .ok_or("orbit size overflows usize")?;
+        let capacity = columns
+            .checked_mul(orbit_size)
+            .ok_or("factor base size overflows usize")?;
+        let lambda = kc
+            .lambda
+            .to_u64()
+            .ok_or("Frobenius eigenvalue does not fit in u64")?;
+        let g = ctx.group;
+        // One charged global certificate is enough: Frobenius is a group
+        // endomorphism, so pi(G)=[lambda]G implies
+        // pi([s]G)=[s*lambda]G for every scanned representative.
+        if g.mul(ops, ctx.generator, lambda) != inst.fast.frobenius_k(ctx.generator, 1) {
+            return Err("Frobenius eigenvalue check failed on the generator".into());
+        }
+
+        let mut seen = HashSet::new();
+        let mut points = Vec::with_capacity(capacity);
+        let mut col_of = Vec::with_capacity(capacity);
+        let mut coef_of = Vec::with_capacity(capacity);
+        let mut column_logs = Vec::with_capacity(columns);
+        let mut seed = g.identity();
+        let mut scanned = 0u64;
+        let mut key_squares = 0u64;
+        let mut frobenius_maps = 1u64;
+        let mut equation_checks = 0u64;
+        let draw_cap = if schedule == "sequential" {
+            scalar_cap.min(ctx.r.saturating_sub(1))
+        } else {
+            scalar_cap
+        };
+        let mut rng = StdRng::seed_from_u64(schedule_seed ^ 0x4b4e_4f57_4e4c_4f47);
+        for draw in 1..=draw_cap {
+            let scalar = if schedule == "sequential" {
+                seed = g.add(ops, seed, ctx.generator);
+                draw
+            } else {
+                let scalar = rng.gen_range(1..ctx.r);
+                seed = g.mul(ops, ctx.generator, scalar);
+                scalar
+            };
+            scanned += 1;
+            if g.is_identity(&seed) {
+                continue;
+            }
+            let mut x = seed.x;
+            let mut key = x;
+            for _ in 1..inst.n {
+                x = inst.gf.sqr(x);
+                key = key.min(x);
+                key_squares += 1;
+            }
+            if !seen.insert(key) {
+                continue;
+            }
+            equation_checks += 1;
+            if !inst.fast.is_on_curve(seed) {
+                return Err(format!("generator multiple [{scalar}]G is off curve"));
+            }
+            let column = column_logs.len();
+            column_logs.push(scalar % ctx.r);
+            let mut member = seed;
+            let mut coefficient = 1u64;
+            for _ in 0..inst.n {
+                equation_checks += 1;
+                if !inst.fast.is_on_curve(member) {
+                    return Err(format!("Frobenius image in column {column} is off curve"));
+                }
+                points.push(member);
+                col_of.push(column);
+                coef_of.push(coefficient);
+                points.push(g.neg(member));
+                col_of.push(column);
+                coef_of.push((ctx.r - coefficient) % ctx.r);
+                member = inst.fast.frobenius_k(member, 1);
+                frobenius_maps += 1;
+                coefficient = ((coefficient as u128 * lambda as u128) % ctx.r as u128) as u64;
+            }
+            if member != seed || coefficient != 1 {
+                return Err(format!("Frobenius orbit in column {column} is not closed"));
+            }
+            if column_logs.len() == columns {
+                break;
+            }
+        }
+        if column_logs.len() != columns {
+            return Err(format!(
+                "scalar cap {scalar_cap} exhausted after {scanned} multiples with {} of {columns} orbits",
+                column_logs.len()
+            ));
+        }
+        let description = if schedule == "sequential" {
+            format!(
+                "first {columns} signed Frobenius orbits from increasing known multiples [s]G, s <= {scalar_cap}"
+            )
+        } else {
+            format!(
+                "first {columns} distinct signed Frobenius orbits from deterministic hash-selected known multiples [s]G, draw cap {scalar_cap}, seed {schedule_seed}"
+            )
+        };
+        let mut fb = FactorBase::from_column_map(
+            description,
+            points,
+            col_of,
+            coef_of,
+            columns,
+            |p| p.pack(),
+            |p| inst.fast.neg(*p).pack(),
+            |p| p.x,
+        )?;
+        fb.cost.count("scalars_scanned_uncharged", scanned);
+        if schedule == "hash" {
+            fb.cost.count("hash_scalar_draws_uncharged", scanned);
+        }
+        fb.cost
+            .count("known_column_logs_uncharged", column_logs.len() as u64);
+        fb.cost
+            .count("curve_equation_checks_uncharged", equation_checks);
+        fb.cost
+            .count("min_key_field_squares_uncharged", key_squares);
+        fb.cost.count("frobenius_maps", frobenius_maps);
+        fb.cost.count(
+            "point_negations_uncharged",
+            columns as u64 * inst.n as u64 + fb.points.len() as u64,
+        );
+        fb.cost
+            .count("factor_point_inserts_uncharged", fb.points.len() as u64);
+        fb.cost.count(
+            "factor_base_vec_bytes_floor_uncharged",
+            (fb.points.len() * std::mem::size_of::<FastPoint>()
+                + fb.col_of.len() * std::mem::size_of::<usize>()
+                + fb.coef_of.len() * std::mem::size_of::<u64>()
+                + fb.neg_index.len() * std::mem::size_of::<usize>()
+                + column_logs.len() * std::mem::size_of::<u64>()) as u64,
+        );
+        Ok((fb, column_logs))
+    }
+}
+
+impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KnownLogOrbitBase<'_> {
+    fn name(&self) -> &str {
+        "known-log-orbit"
+    }
+
+    fn describe(&self, params: &Params) -> String {
+        if params.get("schedule") == Some("hash") {
+            format!(
+                "the first {} distinct signed Frobenius orbits from hash-selected known multiples [s]G in at most {} draws",
+                params.get("columns").unwrap_or("?"),
+                params.get("scalar_cap").unwrap_or("?")
+            )
+        } else {
+            format!(
+                "the first {} distinct signed Frobenius orbits from known multiples [s]G with s <= {}",
+                params.get("columns").unwrap_or("?"),
+                params.get("scalar_cap").unwrap_or("?")
+            )
+        }
+    }
+
+    fn parameters(&self) -> &[(&str, &str)] {
+        &[
+            ("columns", "number of distinct signed Frobenius orbits"),
+            ("scalar_cap", "inclusive cap for the increasing scalar scan"),
+            (
+                "schedule",
+                "sequential (default) or deterministic hash draws",
+            ),
+            (
+                "seed",
+                "hash schedule seed; required only for schedule=hash",
+            ),
+        ]
+    }
+
+    fn build(
+        &self,
+        ctx: &InstanceCtx<BinaryGroup<'a>>,
+        params: &Params,
+        ops: &mut GroupOps,
+    ) -> Result<FactorBase<FastPoint>, String> {
+        self.build_with_logs(ctx, params, ops).map(|(fb, _)| fb)
+    }
 }
 
 impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for CompactOrbitScanBase<'_> {
