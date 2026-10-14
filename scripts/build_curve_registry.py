@@ -674,7 +674,19 @@ def carry_forward(reg: Registry) -> None:
     curve is gone, and the slug that replaced it must still resolve."""
     if not OUT.exists():
         return
+    # Deprecated erroneous extraction labels (prime-model-corrections.json)
+    # are retained as provenance in that file only; carrying them forward
+    # would resurrect the wrong models, e.g. after a merge of a stale
+    # registry.json.
+    try:
+        corrections = json.loads(
+            (REPO / "docs/curves/sources/prime-model-corrections.json").read_text())["corrections"]
+        deprecated = {c["deprecated_extraction_slug"] for c in corrections}
+    except (OSError, ValueError, KeyError):
+        deprecated = set()
     for e in json.loads(OUT.read_text())["curves"]:
+        if e["slug"] in deprecated:
+            continue
         key = hashlib.sha256(e["model_json"].encode("ascii")).hexdigest()
         if key in reg.curves:
             for a in e["aliases"]:

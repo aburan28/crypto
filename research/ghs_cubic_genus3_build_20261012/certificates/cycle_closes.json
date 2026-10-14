@@ -1,0 +1,160 @@
+{
+  "schema": "identity.certificate/v1",
+  "id": "IDC1h14765be340922acc",
+  "statement": {
+    "name": "descent cycle closes: u y1 y2 - u u1 y0 as a combination of two cover relations",
+    "source": "research/ghs_cubic_genus3_build_20261012 (README construction step 2); Lean DescentCycle.cycle_closes",
+    "variables": [
+      "u",
+      "u1",
+      "u2",
+      "y0",
+      "y1",
+      "y2"
+    ],
+    "degree_bound": 3,
+    "lhs": {
+      "op": "add",
+      "args": [
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "args": "u"
+            },
+            {
+              "op": "var",
+              "args": "y1"
+            },
+            {
+              "op": "var",
+              "args": "y2"
+            }
+          ]
+        },
+        {
+          "op": "neg",
+          "args": {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "u"
+              },
+              {
+                "op": "var",
+                "args": "u1"
+              },
+              {
+                "op": "var",
+                "args": "y0"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "rhs": {
+      "op": "add",
+      "args": [
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "args": "y1"
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "u"
+                    },
+                    {
+                      "op": "var",
+                      "args": "y2"
+                    }
+                  ]
+                },
+                {
+                  "op": "neg",
+                  "args": {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "y0"
+                      },
+                      {
+                        "op": "var",
+                        "args": "y1"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "args": "y0"
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "y1"
+                    },
+                    {
+                      "op": "var",
+                      "args": "y1"
+                    }
+                  ]
+                },
+                {
+                  "op": "neg",
+                  "args": {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "u"
+                      },
+                      {
+                        "op": "var",
+                        "args": "u1"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "modulus": 2305843009213693951,
+  "points": 32,
+  "seed": 7445294608973561858,
+  "value_digest": "902068b9306215d4412d1b333b7efd5d2935a1c4c0276ebb7f59592885efebc4",
+  "independence": "issued by examples/identity_certificate_ghs_cubic_genus3.rs; checked by cryptanalysis::identity_certificate::check replaying from the sealed id and seed. The proof pointer is the Lean file whose lemma derives the same conclusion from the hypotheses; the checker records it and does not run Lean.",
+  "proof": {
+    "kind": "lean4",
+    "path": "research/ghs_cubic_genus3_build_20261012/lean/DescentCycle.lean",
+    "sha256": "18e0e9f0fed5cbb48f114405005d93e5a7ba27e151a64b879e343b1123a19ea0"
+  }
+}

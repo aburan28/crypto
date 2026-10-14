@@ -19,9 +19,7 @@ pub fn markdown_table(file: &TransferFile) -> String {
             !c.standard_names.is_empty()
                 || matches!(
                     c.verdict,
-                    RouteClass::FormulaAdvantage
-                        | RouteClass::FormulaMarginal
-                        | RouteClass::Unresolved
+                    RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal
                 )
         })
         .collect();
@@ -199,7 +197,7 @@ pub fn svg_chart(file: &TransferFile) -> String {
     for (xv, yv, family, slug, class) in &pts {
         let r = if matches!(
             class,
-            RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal | RouteClass::Unresolved
+            RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal
         ) {
             6.0
         } else {
@@ -210,7 +208,7 @@ pub fn svg_chart(file: &TransferFile) -> String {
             sx(*xv),
             sy(*yv),
             colour(family),
-            match class { RouteClass::FormulaAdvantage => "black", RouteClass::FormulaMarginal => "#555", RouteClass::Unresolved => "#e6a700", _ => "none" }
+            match class { RouteClass::FormulaAdvantage => "black", RouteClass::FormulaMarginal => "#555", _ => "none" }
         ));
     }
     // Label the advantage points.
@@ -218,7 +216,7 @@ pub fn svg_chart(file: &TransferFile) -> String {
     for (xv, yv, _, slug, class) in &pts {
         if matches!(
             class,
-            RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal | RouteClass::Unresolved
+            RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal
         ) {
             s.push_str(&format!(
                 "<text x=\"{:.1}\" y=\"{:.1}\" font-size=\"11\">{slug}</text>\n",
@@ -238,7 +236,7 @@ pub fn svg_chart(file: &TransferFile) -> String {
         ly += 16.0;
     }
     s.push_str(&format!(
-        "<text x=\"{}\" y=\"{}\" font-size=\"11\" fill=\"#333\">{} curves; large rimmed points: formula_advantage (black), formula_marginal (grey), unresolved (amber; plotted at the favourable bound); every value is a formula under the frozen cost model, not a measurement</text>\n",
+        "<text x=\"{}\" y=\"{}\" font-size=\"11\" fill=\"#333\">{} curves; large rimmed points: formula_advantage (black), formula_marginal (grey); every value is a formula under the frozen cost model, not a measurement</text>\n",
         ml, h - 36.0, pts.len()
     ));
     s.push_str("</svg>\n");
@@ -295,7 +293,6 @@ pub fn tikz_chart(file: &TransferFile) -> String {
         let (r, draw) = match class {
             RouteClass::FormulaAdvantage => ("4pt", "draw=black,"),
             RouteClass::FormulaMarginal => ("4pt", "draw=gray,"),
-            RouteClass::Unresolved => ("4pt", "draw=orange,"),
             _ => ("1.8pt", ""),
         };
         let rgb = colour(family).trim_start_matches('#');
@@ -311,7 +308,7 @@ pub fn tikz_chart(file: &TransferFile) -> String {
         ));
         if matches!(
             class,
-            RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal | RouteClass::Unresolved
+            RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal
         ) {
             s.push_str(&format!(
                 "\\node[right,font=\\tiny] at ({:.2},{:.2}) {{\\texttt{{{}}}}};\n",

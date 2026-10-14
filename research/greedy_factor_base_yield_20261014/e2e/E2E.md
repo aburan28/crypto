@@ -32,11 +32,11 @@ rule is later improved.
 
 ### K₀/2¹³ (`r = 2003`, exhaustive targets)
 
-`ic search --degree 13 --curve-a 0 --family greedy --union-min-seed 3 --union-max-seed 4 --exhaustive-cap 70000 --validate-top 2 --holdout 2 --no-saturate --spec-out k0n13.json`
+`ic search --degree 13 --curve-a 0 --family greedy --union-min-seed 3 --union-max-seed 4 --exhaustive-cap 70000 --validate-top 2 --holdout 2 --no-saturate --spec-out icv1-f2m13-t181-515ee569.json`
 
 - selected: `pruned` over `explicit_orbits`, 3 columns, 78 points, coverage 0.896, expected trials 6.7
 - validated on 2 holdout fixtures each (known-answer solves), median process time 0.011 s
-- `ic run --factor-base k0n13.json --solver pair-table --known-log 777`: recovered 777, verified,
+- `ic run --factor-base icv1-f2m13-t181-515ee569.json --solver pair-table --known-log 777`: recovered 777, verified,
   3 columns, 78 points, 3 relations, 4 trials, 0.010 s
 - the legacy `--factor-index 0` base on the same target: 77 columns, 4005 points, 16 trials, 0.34 s.
   That base is a weak baseline, so this gap is not the greedy's effect; the controlled

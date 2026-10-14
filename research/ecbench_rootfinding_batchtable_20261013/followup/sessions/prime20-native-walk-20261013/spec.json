@@ -1,0 +1,18 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Prime relation walk native addition at B48",
+  "description": "Exact paired one-lane guarded walk stream and cost comparison on fresh public targets.",
+  "workloads": {
+    "curves": [{"kind": "prime_search", "bits": 20, "seed": 59297}],
+    "target_kind": "public",
+    "targets_per_curve": 8,
+    "target_seed": 20261018
+  },
+  "arms": [
+    {"name": "rho-neg", "role": "reference", "method": {"id": "rho.negation"}},
+    {"name": "b48-walk", "role": "baseline", "method": {"id": "ic.pipeline", "params": {"factor_base": "prime-abscissa:size=48", "oracle": "mitm-prime-batch:m=2", "targets": "walk", "linalg": "incremental-gauss", "max_trials": "5000000"}}},
+    {"name": "b48-native", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "prime-abscissa:size=48", "oracle": "mitm-prime-batch:m=2", "targets": "walk-prime-fast", "linalg": "incremental-gauss", "max_trials": "5000000"}}},
+    {"name": "rho-neg-aa", "role": "control", "method": {"id": "rho.negation"}}
+  ],
+  "measurement": {"rounds": 3, "warmup": 1, "order": "alternate", "seed": 20261018, "isolation_required": "L2", "timeout_seconds": 120}
+}

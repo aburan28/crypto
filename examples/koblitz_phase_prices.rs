@@ -32,9 +32,18 @@ const ADDS: usize = 2_000_000;
 const MULMADS: usize = 20_000_000;
 
 fn main() {
-    let degree: u32 = std::env::args().nth(1).and_then(|s| s.parse().ok()).unwrap_or(53);
-    let points: usize = std::env::args().nth(2).and_then(|s| s.parse().ok()).unwrap_or(15000);
-    let seed: u64 = std::env::args().nth(3).and_then(|s| s.parse().ok()).unwrap_or(1);
+    let degree: u32 = std::env::args()
+        .nth(1)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(53);
+    let points: usize = std::env::args()
+        .nth(2)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(15000);
+    let seed: u64 = std::env::args()
+        .nth(3)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(1);
     let kc = KoblitzCurve::new(0, degree).expect("curve");
     let fc = FastCurve::new(&kc.curve).expect("fast curve");
     let r = kc.subgroup_order.to_u64_digits()[0];
@@ -43,7 +52,9 @@ fn main() {
     // the slice, which is how the walk and the table build both add.
     let g = fc.lift(kc.generator());
     let seedfb = build_subgroup_orbit_factor_base(&kc, seed, 64).expect("seed base");
-    let batch: Vec<FastPoint> = (0..1024).map(|i| fc.lift(&seedfb.points[i % seedfb.points.len()])).collect();
+    let batch: Vec<FastPoint> = (0..1024)
+        .map(|i| fc.lift(&seedfb.points[i % seedfb.points.len()]))
+        .collect();
     let mut scratch = BatchScratch::default();
     let mut out: Vec<FastPoint> = Vec::with_capacity(batch.len());
     let rounds = ADDS / batch.len();
@@ -59,8 +70,8 @@ fn main() {
 
     // Selection, timed and counted together on the same call.
     let t = Instant::now();
-    let (fb, cost) = build_subgroup_orbit_factor_base_with_cost(&kc, seed, points)
-        .expect("selection");
+    let (fb, cost) =
+        build_subgroup_orbit_factor_base_with_cost(&kc, seed, points).expect("selection");
     let select_s = t.elapsed().as_secs_f64();
     let draws = cost.abscissae_drawn.max(1);
     let select_ns_per_draw = select_s * 1e9 / draws as f64;
@@ -71,11 +82,17 @@ fn main() {
     );
     println!("  abscissae drawn        {:>12}", cost.abscissae_drawn);
     println!("  lifts found            {:>12}", cost.lifts_found);
-    println!("  cofactor multiplies    {:>12}", cost.cofactor_multiplications);
+    println!(
+        "  cofactor multiplies    {:>12}",
+        cost.cofactor_multiplications
+    );
     println!("  frobenius squarings    {:>12}", cost.frobenius_squarings);
     println!("  rebuilds               {:>12}", cost.rebuilds);
     println!("  ns a draw              {select_ns_per_draw:>12.1}");
-    println!("  adds a draw            {:>12.2}", select_ns_per_draw / add_ns);
+    println!(
+        "  adds a draw            {:>12.2}",
+        select_ns_per_draw / add_ns
+    );
     println!(
         "  SELECTION TOTAL        {:>12.0} group additions",
         draws as f64 * select_ns_per_draw / add_ns

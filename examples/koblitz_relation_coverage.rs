@@ -48,7 +48,10 @@ fn powmod(mut a: u64, mut e: u64, m: u64) -> u64 {
 
 impl Rank {
     fn new(r: u64, cols: usize) -> Self {
-        Self { r, rows: vec![None; cols] }
+        Self {
+            r,
+            rows: vec![None; cols],
+        }
     }
 
     /// Insert a row; returns true when it raised the rank.
@@ -100,10 +103,19 @@ fn main() {
     let r = kc.subgroup_order.to_u64_digits()[0];
     let fb = build_subgroup_orbit_factor_base(&kc, seed, points).expect("factor base");
     let cols = fb.signed_orbits.len();
-    println!("base {} points, {} columns, r = 2^{:.1}", fb.points.len(), cols, (r as f64).log2());
+    println!(
+        "base {} points, {} columns, r = 2^{:.1}",
+        fb.points.len(),
+        cols,
+        (r as f64).log2()
+    );
 
     // lambda^k mod r, for every rotation a signed orbit can carry.
-    let lam = (&kc.lambda % BigUint::from(r)).to_u64_digits().first().copied().unwrap_or(0);
+    let lam = (&kc.lambda % BigUint::from(r))
+        .to_u64_digits()
+        .first()
+        .copied()
+        .unwrap_or(0);
     let mut lampow = vec![1u64; 2 * degree as usize + 1];
     for k in 1..lampow.len() {
         lampow[k] = mulmod(lampow[k - 1], lam, r);
@@ -182,7 +194,11 @@ fn main() {
         let (seen_n, rank_n) = curve[m - 1];
         println!(
             "{m:>9}   {seen_n:>15}   {rank_n:>4}{}",
-            if seen_n == cols && rank_n < cols { "   <- covered, not yet full rank" } else { "" }
+            if seen_n == cols && rank_n < cols {
+                "   <- covered, not yet full rank"
+            } else {
+                ""
+            }
         );
     }
     // What the columns without a pivot look like at the moment the row
@@ -204,7 +220,11 @@ fn main() {
                     let (c, k, neg) = fb.signed_orbit_of[i];
                     mult[c] += 1;
                     let coeff = lampow[k as usize % lampow.len()];
-                    row[c] = if neg { (row[c] + r - coeff) % r } else { (row[c] + coeff) % r };
+                    row[c] = if neg {
+                        (row[c] + r - coeff) % r
+                    } else {
+                        (row[c] + coeff) % r
+                    };
                 }
                 rank2.insert(row);
                 n += 1;
@@ -213,8 +233,7 @@ fn main() {
                 }
             }
         }
-        let pivotless: Vec<usize> =
-            (0..cols).filter(|&c| !rank2.has_pivot(c)).collect();
+        let pivotless: Vec<usize> = (0..cols).filter(|&c| !rank2.has_pivot(c)).collect();
         let mut hist = std::collections::BTreeMap::new();
         for &m in &mult {
             *hist.entry(m).or_insert(0usize) += 1;
@@ -241,9 +260,16 @@ fn main() {
     if let (Some(c), Some(k)) = (covered_at, ranked_at) {
         println!(
             "\ncoverage is the binding constraint: {}",
-            if c >= k { "yes" } else { "no -- rank lags coverage" }
+            if c >= k {
+                "yes"
+            } else {
+                "no -- rank lags coverage"
+            }
         );
-        println!("coupon-collector tail = {} relations ({:.0}% of the run)",
-                 c.max(k), 100.0 * c.max(k) as f64 / total as f64);
+        println!(
+            "coupon-collector tail = {} relations ({:.0}% of the run)",
+            c.max(k),
+            100.0 * c.max(k) as f64 / total as f64
+        );
     }
 }

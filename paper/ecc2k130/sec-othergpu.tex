@@ -1,4 +1,4 @@
-\section{The other GPU kernels: prime fields and binary fields beyond ECC2K-130}
+\section{Other GPU kernels}
 \label{sec:othergpu}
 
 The ECC2K-130 client is one of several GPU arithmetic libraries in
@@ -15,7 +15,7 @@ which is which, because a static instruction count and a measured
 rate are different kinds of evidence, and the rest of the paper keeps
 them apart.
 
-\subsection{What has and has not run on a GPU}
+\subsection{Status}
 \label{sec:othergpu-status}
 
 \begin{table}[t]
@@ -31,7 +31,7 @@ them apart.
 kernel family & field & on a device & otherwise \\
 \midrule
 ECC2K-130 client (Sections~\ref{sec:gpu}, \ref{sec:campaign}) & $\FF_{2^{131}}$, ONB & measured, audited & emulated, static \\
-F4 Gröbner elimination (sibling) & $\FF_2$ Macaulay matrices & measured (RTX 5090, H100) & emulated \\
+F4 Gröbner elimination (\texttt{cryptanalysis}) & $\FF_2$ Macaulay matrices & measured (RTX 5090, H100) & emulated \\
 Macaulay reduced echelon & $\FF_p$, $p=2083$ & one scheduling run (RTX PRO 4500) & emulated, static \\
 secp256k1 / Curve25519 rho, baby-step giant-step & $\FF_p$, two 256-bit primes & never & emulated, static \\
 secp256k1 kangaroo & $\FF_p$, 256-bit & never & emulated, static \\
@@ -39,7 +39,7 @@ P-256 / P-384 field and rho walk (Section~\ref{sec:nist}) & $\FF_p$, 256- and 38
 ECC2K-95 kernel & $\FF_{2^{97}}$, polynomial basis & never & emulated, static \\
 Semaev $S_4$ sweep; FES & $\FF_{2^n}$; $\FF_2$ & never & host-timed; emulated \\
 sparse matrix--vector & $\ZZ/m$, $m<2^{63}$ & never & CPU-rechecked \\
-64-bit prime-field rho (sibling) & $\FF_p$, $p<2^{64}$ & never & emulated, static \\
+64-bit prime-field rho (\texttt{cryptanalysis}) & $\FF_p$, $p<2^{64}$ & never & emulated, static \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -51,12 +51,12 @@ no complete CUDA toolkit, and the device runs were planned for rented
 hardware that the campaign's account hold
 (Section~\ref{sec:campaign-state}) or missing credentials then put out
 of reach. The NIST kernels were in the same position until they
-finally ran, which is the subject of Section~\ref{sec:nist}.\art{gpu/ecc/README.md}\art{gpu/btcpuzzle/README.md}\art{gpu/ecc2k/README.md}\art{research/nist_gpu_arithmetic_20260926/ATTEMPT.md}\art{cryptanalysis:docs/GPU.md, ``How this is tested''}
+finally ran, which is the subject of Section~\ref{sec:nist}~\evcite{\evref{ecc}; \evref{kangaroo}; \evref{ecc2k95}; \evref{nistattempt}; \evref{prho64}, ``How this is tested''}.
 The numbers below are therefore of three kinds, and we label each
 one: a static count, an emulated operation count or walk constant, or
 (in Section~\ref{sec:othergpu-f4}) a device measurement.
 
-\subsection{256-bit prime-field arithmetic for secp256k1}
+\subsection{secp256k1}
 \label{sec:othergpu-fp256}
 
 The field layer holds an element in eight 32-bit limbs, because the
@@ -69,13 +69,13 @@ Montgomery CIOS path is used, and the scalar ring modulo $n$ reuses
 it on the host. Points are Jacobian with the standard $a=0$ doubling
 ($2M+5S$) and mixed addition ($7M+4S$) formulas. The library is a
 throughput library, not a signing library, and is not
-constant-time.\art{gpu/ecc/fp256.cuh}\art{gpu/ecc/point.cuh}
+constant-time~\evcite{\evref{ecc}; \evref{ecc}}.
 A second special-reduction path, added in October 2026, serves
 Curve25519 (Ed25519's prime-order group in short-Weierstrass form,
 $p=2^{255}-19$, folded with $2^{256}\equiv38$) through the same
 walk, baby-step giant-step and test suites; it is host-verified
 against the RFC~7748 constants and has not run on a
-device.\art{gpu/ecc/README.md}
+device~\evcite{\evref{ecc}}.
 
 \begin{table}[t]
 \centering
@@ -108,29 +108,29 @@ seven assembly blocks are checked by an interpreter against the
 portable path on $20{,}000$ random and boundary inputs each, and that
 check is mutation-tested; it does not cover register allocation or
 device semantics, which is why \texttt{FP\_PTX} is off by
-default.\art{gpu/ecc/OPTIMIZATION_BLACKWELL.md, section 2}\art{gpu/ecc/ptx_asm_check.py}
+default~\evcite{\evref{eccopt}, §2; \evref{ecc}}.
 
 In the unit of Section~\ref{sec:arith}, a secp256k1 inversion is 270
 multiplications (255 squarings and 15 multiplications along the
 libsecp256k1 addition chain), a rho step with batch $W$ is $6+270/W$
 multiplications ($3$ for the affine addition, $3$ for Montgomery's
 trick), $7+270/W$ with the $j=0$ fold: $39.8$ at $W=8$, $14.4$ at
-$W=32$, $8.1$ at $W=128$, against 276 unbatched.\art{gpu/ecc/OPTIMIZATION_BLACKWELL.md, section 1}
+$W=32$, $8.1$ at $W=128$, against 276 unbatched~\evcite{\evref{eccopt}, §1}.
 Three things were tried and declined on the static count: a
 dedicated squaring routine ($-2.7\%$ portable, $+23.5\%$ on the PTX
 path; reverted), lazy reduction to $[0,2^{256})$ (worth about $10\%$
 of a multiply, but it breaks the canonical form that equality, the
 distinguished-point test, the cycle hash and the fold comparison rely
 on), and Karatsuba (judged to lose on a carry-bound multiply). Tensor
-cores were considered and not reached for.\art{gpu/ecc/OPTIMIZATION_BLACKWELL.md, section 2 and section 4.4}
+cores were considered and not reached for~\evcite{\evref{eccopt}, §2 and §4.4}.
 Marking the inversion and ladder routines \texttt{\_\_noinline\_\_}
 and replacing two 16-entry tables by a small double-scalar ladder
 took the walk kernel's stack from $4{,}664$ to $1{,}616$~B (the
 low-memory variant from $4{,}008$ to $792$~B) and the compile from
 over ten minutes to 46~s, the same code-size lesson as
-Section~\ref{sec:arith-bitsliced}.\art{gpu/ecc/OPTIMIZATION_BLACKWELL.md, section 3}
+Section~\ref{sec:arith-bitsliced}~\evcite{\evref{eccopt}, §3}.
 
-\subsection{Rho with automorphism folding, and baby-step giant-step}
+\subsection{Automorphism folding and BSGS}
 \label{sec:othergpu-rho}
 
 The rho walk is $r$-adding on the low bits of $x$, with distinguished
@@ -146,7 +146,7 @@ multiplying $(a,b)$ by $(-1)^{\text{neg}}\lambda^k$ at each step. Fruitless
 cycles of length 2 to 6 are detected with a five-deep ring and escaped
 by doubling the member with the smallest hash; their measured rates
 at $R=8$ agree with the prediction to about
-$10\%$.\art{gpu/ecc/README.md, ``The walk''}
+$10\%$~\evcite{\evref{ecc}, ``The walk''}.
 
 On a 36-bit $j=0$ toy curve in host emulation (8 solves per fold, 16
 walks, $R=256$, period $2^7$), the mean steps were $305{,}740$,
@@ -159,7 +159,7 @@ The three steppers (batched, low-memory, one-inversion-per-walk) are
 bit-identical over hundreds of iterations with the same
 distinguished-point multiset, and every point replays on the host to
 $aP+bQ$, which is what proves the $\lambda$ bookkeeping on secp256k1
-itself.\art{gpu/ecc/README.md, ``How this is tested''}
+itself~\evcite{\evref{ecc}, ``How this is tested''}.
 
 Baby-step giant-step on the same arithmetic keeps an $x$-keyed table
 of 16-byte entries in lock-free open addressing (one 64-bit
@@ -171,7 +171,7 @@ babies and $2m-1$ giants, the Galbraith--Wang--Zhang row at $1.00\sqrt w$
 expected against the textbook $1.41\sqrt w$. A $2^{66}$-wide interval
 is $2^{32}$ entries and 64~GB, the top of one 80~GB device; beyond
 that the method is out of memory, not out of
-time.\art{gpu/ecc/README.md, ``Baby-step giant-step''}
+time~\evcite{\evref{ecc}, ``Baby-step giant-step''}.
 Table~\ref{tab:bsgs} is the measured cost on a 40-bit toy curve, in
 emulation, every phase charged.
 
@@ -205,12 +205,12 @@ the batched stepper is engineering, the layouts are the published
 ones, and nothing moves the ratio to the generic floor. A Rust port of
 the same baby-step giant-step on the CPU runs at $37$--$49$~M
 steps/s on four threads at $S=1.03$ cold and $0.55$ amortised, $6$--$11\times$
-the big-integer implementation it replaced.\art{gpu/ecc/README.md, ``Cost, measured''}
+the big-integer implementation it replaced~\evcite{\evref{ecc}, ``Cost, measured''}.
 The emulation itself runs at about $380$~k steps/s per core, a
 figure that says nothing about a device and is quoted only so that
 no one mistakes it for one.
 
-\subsection{Pollard kangaroo for the interval problem}
+\subsection{Kangaroo}
 \label{sec:othergpu-kangaroo}
 
 The interval solver reuses the verified field and point code for
@@ -222,7 +222,7 @@ bank-conflict-free), and the target centred at $Q'=Q-(a+w/2)G$. The
 invariant that makes it testable is that after every step a tame
 kangaroo at distance $d$ is at $dG$ and a wild one at $Q'+dG$, which
 pins the jump table, the distance accumulator and the point
-arithmetic together.\art{gpu/btcpuzzle/README.md, ``How the walk works''}
+arithmetic together~\evcite{\evref{kangaroo}, ``How the walk works''}.
 
 Its measured constant is the useful number. In emulation on a $2^{31}$
 interval with 120 trials per configuration, steps are $C\sqrt w$ with
@@ -235,16 +235,16 @@ rerun at 120 trials the best cell and the default were within half a
 standard error. The defaults sit on a flat optimum and the sweep was
 noise, which is recorded so that it is not rediscovered. Restarting
 at a distinguished point or not was likewise within
-noise.\art{gpu/btcpuzzle/README.md, ``Measured cost''} A multi-device
+noise~\evcite{\evref{kangaroo}, ``Measured cost''}. A multi-device
 split (one host thread per device, disjoint even index bases so herd
 parity stays global, one host table) is tested by reproducing the
 combined herd exactly from two contexts and recovering a 28-bit key
-across them; multi-machine is not done.\art{gpu/btcpuzzle/README.md, ``Multi-GPU''}
+across them; multi-machine is not done~\evcite{\evref{kangaroo}, ``Multi-GPU''}.
 The tool ships no real puzzle keys (no trustworthy offline source),
 does no address scanning, and has not solved any puzzle; the
 synthetic 20-, 28- and 32-bit registry entries are regression fixtures.
 
-\subsection{P-256 and P-384: the one that has since run}
+\subsection{NIST curves}
 \label{sec:othergpu-nist}
 
 The NIST library has graduated from this inventory: it now has device
@@ -254,9 +254,9 @@ here. The library's first device attempt was an infrastructure
 non-result, because the cloud credentials were not exposed to the CI
 runner and the GPU steps were skipped. The attempt record says it
 ``must not be cited as performance evidence'', and we do not cite
-it.\art{research/nist_gpu_arithmetic_20260926/ATTEMPT.md}
+it~\evcite{\evref{nistattempt}}.
 
-\subsection{Binary fields beyond ECC2K-130}
+\subsection{Other binary fields}
 \label{sec:othergpu-binary}
 
 \paragraph{The ECC2K-95 kernel.} Section~\ref{sec:ecc2k95} used this
@@ -276,7 +276,7 @@ multiplication, down from 405, with the six software leaves 96 of the
 304; the native \texttt{clmad} that gave the ECC2K-130 client $+22\%$
 would do the same product in six instructions and is not yet ported
 because the pip-wheel toolchain stops at \texttt{ptxas}
-12.9.\art{gpu/ecc2k/README.md, ``What the field arithmetic actually costs''}\art{gpu/ecc2k/f2m.cuh}
+12.9~\evcite{\evref{ecc2k95}, ``What the field arithmetic actually costs''; \evref{ecc2k95}}.
 
 Per step the cost model is one inversion split $W$ ways plus two
 multiplications, one squaring and the three multiplications of
@@ -290,13 +290,13 @@ squaring instructions at $k=48$ to 296 and the step to $3{,}083$
 ($-19\%$), and $W=4$ with tables beats $W=8$ without at 656 against
 $1{,}048$ bytes of local memory. The table traffic, 400 words per
 inversion, is unmeasured, and the tables are off by
-default.\art{gpu/ecc2k/README.md, ``$\tau^k$ is not $k$ squarings''}
+default~\evcite{\evref{ecc2k95}, ``$\tau^k$ is not $k$ squarings''}.
 The low-memory stepper at $W=8$ compiles to 128 registers and 464~B
 of stack with four blocks per SM, 512 threads per SM on
 \texttt{sm\_90}, \texttt{sm\_100} and \texttt{sm\_120}; the
 prime-field walk of Section~\ref{sec:othergpu-fp256} needs 226
 registers and 792~B at 256 threads per SM, so the binary walk gets
-$1.5$--$2\times$ the occupancy before either has run.\art{gpu/ecc2k/README.md, ``Occupancy''}
+$1.5$--$2\times$ the occupancy before either has run~\evcite{\evref{ecc2k95}, ``Occupancy''}.
 A 40-bit end-to-end test of eight logarithms on one CPU core fell
 from $2.1$--$2.7$~s to $1.02$--$1.05$~s across the rewrite at the same
 $191{,}840$ steps, which the README itself files as engineering with
@@ -316,7 +316,7 @@ $19{,}999$ generator multiples into the Rust table, keeps a control
 that must lose pairs, and runs under ThreadSanitizer with a
 deliberately racy control that must be reported; the bug that
 motivated all this (the base size passed as the field degree) fails
-960 of $1{,}176$ keys when restored.\art{gpu/ecc2k/README.md, ``The $|F|^2$ pair table''}\art{gpu/ecc2k/pairtable.cuh}
+960 of $1{,}176$ keys when restored~\evcite{\evref{ecc2k95}, ``The $|F|^2$ pair table''; \evref{ecc2k95}}.
 The fold does not reach $n=97$ (limited to $n\le62$) and the device
 round trip is planned, not run.
 
@@ -325,7 +325,7 @@ decomposition step of Section~\ref{sec:alt-ic}. A Gray-code fast
 exhaustive search over quadratic Boolean systems (one thread per
 sub-cube, $n\le40$, $\le64$ equations, shards checked against brute
 force) exists alongside the production Rust path and has not run on a
-device.\art{gpu/fes/README.md} A Semaev $S_4$ pairs-and-solve sweep
+device~\evcite{\evref{fes}}. A Semaev $S_4$ pairs-and-solve sweep
 (fix $X_1,X_2$, reduce the quartic in $X_3$ against the linearised
 polynomial of the factor-base subspace, $O(l)$ field operations per
 pair instead of $2^l$) has a \texttt{clmad} path and a software
@@ -336,7 +336,7 @@ collection stays $\Theta(2^n)$ with any oracle polynomial in the base,
 ``the oracle got roughly a thousand times faster and the attack's
 exponent did not move''; a GPU is another constant. The same README
 records and retracts an earlier claim that NVIDIA has no carry-less
-multiply.\art{gpu/semaev/README.md}
+multiply~\evcite{\evref{semaev}}.
 
 \paragraph{Linear algebra.} A batched dense reduced-echelon solver
 over $\FF_p$ ($p=2083$, $226\times286$ matrices of rank 222) serves the
@@ -349,16 +349,16 @@ two-slot overlap $5.1\%$ faster on held-out seeds, which the record
 declines to call a speedup for want of an exclusive host and an
 interval. Its own conclusion is that a GPU changes the crossover with
 rho ``by not a single bit''; it would only enable larger
-$p$.\art{gpu/macaulay/README.md}\art{gpu/macaulay/benchmarks/pipeline-20260914/RESULTS.md}
+$p$~\evcite{\evref{macaulay}; \evref{macaulaybench}}.
 (The directory README's statement that no kernel has run on a GPU
 predates that experiment.) A sparse matrix--vector worker modulo any
 $m<2^{63}$ is correctness-first, every product rechecked on the CPU,
-with no rate.\art{gpu/spmv/README.md}
+with no rate~\evcite{\evref{spmv}}.
 
-\subsection{What did run: F4 elimination on rented GPUs}
+\subsection{F4 elimination}
 \label{sec:othergpu-f4}
 
-The sibling library's F4 Gröbner-basis path for Weil-descent systems
+The \texttt{cryptanalysis} library's F4 Gröbner-basis path for Weil-descent systems
 is the one piece of index-calculus arithmetic with device
 measurements. On a rented RTX~5090 (\texttt{sm\_120}, 32~GB) the
 degree-6 Macaulay matrices are built and eliminated 25 to 75 times
@@ -366,17 +366,17 @@ faster than on the Xeon host; the $168{,}363\times188{,}203$ matrix
 went from $426$~s to $5.7$~s, the degree-of-regularity sweep from
 $18.8$ to $8.2$~s, and the batched per-node decider was correct on
 the device and $4.4\times$ slower than the host's default
-engine.\art{cryptanalysis:experiments/f4-gpu-runpod-20261006/RESULT.md}
+engine~\evcite{\evref{f4}}.
 On an H100 a tiled update to the elimination kernel was kept at
 $1.11$--$1.49\times$ and a merged-basis panel reverted at
 $1.5$--$5.3\times$ slower; the largest matrix fell from $4{,}781$ to
-$3{,}586$~ms.\art{cryptanalysis:experiments/f4-gpu-panel-20261007/README.md}
+$3{,}586$~ms~\evcite{\evref{f4}}.
 The records call these what they are, stage diagnostics of one oracle
 matrix, not an ECDLP cost, and a later crossover harness keeps its
 qualified speedup null until a matched device-and-host resource
-receipt exists.\art{cryptanalysis:experiments/f4-gpu-query-20261008/README.md}
+receipt exists~\evcite{\evref{f4}}.
 
-The sibling's own 64-bit prime-field CUDA rho (one limb, Montgomery
+The \texttt{cryptanalysis} library's own 64-bit prime-field CUDA rho (one limb, Montgomery
 with $R=2^{64}$, eight walks per thread sharing a Fermat inversion so
 that a step is 18 multiplications instead of 99) is in the same
 state as the kernels above: $77{,}000$ device-arithmetic assertions
@@ -384,7 +384,7 @@ against the host library, whole-solver emulation on four groups, a
 cubin for \texttt{sm\_70} through \texttt{sm\_90} with 64--72 registers
 and no spills, and no execution on a device; its emulator rows sit at
 $S\approx1.3$--$2.6$ alongside the CPU rho and show only that $S$ does
-not grow with the walk count.\art{cryptanalysis:docs/GPU.md}\art{cryptanalysis:docs/BENCHMARKS.md, ``GPU rho kernel''}
+not grow with the walk count~\evcite{\evref{prho64}; \evref{prho64}, ``GPU rho kernel''}.
 Its efficiency scorer, built for the ECC2K-130 walk, is the one place
 the two threads meet: charging the packed walk's $4{,}328$
 lane-instructions per iteration to the measured dual-issue rate of
@@ -392,9 +392,9 @@ the RTX~PRO~6000 ($78.3$ per SM-clock, 188 SMs, $2{,}307$~MHz) gives
 an attainable $7.85$~billion iterations/s per card against an audited $6.905$ for that
 build, $88\%$ of the issue roof, and the same method on the wide
 multiply reproduces the ``31~billion iterations/s if the walk did nothing else''
-of the earlier ceiling note.\art{cryptanalysis:gpueff/README.md}\art{cryptanalysis:gpueff/profiles/ecc2k130-packed-walk.json}
+of the earlier ceiling note~\evcite{\evref{gpueff}; \evref{gpueff}}.
 
-\subsection{What the inventory says}
+\subsection{Summary}
 
 Two lessons hold across the fields. The first is that, on this
 hardware, the carry-less unit is the whole difference between the
