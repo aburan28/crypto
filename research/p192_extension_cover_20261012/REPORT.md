@@ -1,9 +1,11 @@
 # Exact extension-cover screen for standard NIST P-192
 
 **Continuation:** The [three-branch follow-up](BRANCH_CONTINUATION.md) proves
-that the nonsplit-quadratic direct genus-3 branch is excluded as well, and
-constructs verified nonhyperelliptic genus-3 and Scholten genus-2 controls.
-The original screen and receipts below remain the baseline for that result.
+that the nonsplit-quadratic direct genus-3 branch is excluded as well,
+constructs a descended Type I nonhyperelliptic genus-3 cover and a
+nonfixed-coefficient Scholten genus-2 descent, and verifies same-field
+genus-3 and genus-2 controls. The original screen and
+receipts below remain the baseline for those results.
 
 **Result.** For standard P-192 viewed over \(\mathbf F_{p^6}\), every Legendre
 cross-ratio of its nonzero 2-torsion has norm \(-1\) to \(\mathbf F_{p^2}\).
@@ -13,9 +15,10 @@ construction of Joux and Vitse. A separate, exact genus-2 cover
 \(H:v^2=(u^2)^3+a u^2+b\), \((u,v)\mapsto(u^2,v)\), does preserve the P-192
 prime-order subgroup, but is already defined over \(\mathbf F_p\). The
 subsequent [branch continuation](BRANCH_CONTINUATION.md) excludes the direct
-quadratic-root genus-3 family and constructs two further subgroup-preserving
-covers. The genuinely descended nonhyperelliptic and Scholten routes and
-their relation pipelines remain open.
+quadratic-root genus-3 family, constructs the nonhyperelliptic Type I descent,
+and verifies two further subgroup-preserving controls. It also constructs a
+nonfixed-coefficient Scholten descent. Both descended Jacobian relation
+pipelines remain open.
 
 ## Instance and exact receipts
 
@@ -147,11 +150,12 @@ measured speed ratio or a lower bound on every cover method. See
 decomposition method and base choice.
 
 The [branch continuation](BRANCH_CONTINUATION.md) resolves the direct
-quadratic-root test and verifies a Scholten-form genus-2 cover over
-\(\mathbf F_{p^3}\). The next construction gate is a nontrivially descended
-cover with an explicit conorm-norm image. Its usable factor base, relation
-yield, rank, final linear algebra, target descent, and matched single-target
-rho reference remain **unknown** for the P-192 instance.
+quadratic-root test, constructs a Type I genus-3 cover and a nonfixed
+Scholten genus-2 cover over their lower fields, and verifies the earlier
+same-field controls. The next gate is an explicit Jacobian divisor image and
+conorm-norm replay on each descended cover. Their subgroup-usable factor bases,
+relation yields, ranks, final linear algebra, target descent, and matched single-target rho reference
+remain **unknown** for the P-192 instance.
 
 ## Reproduction
 

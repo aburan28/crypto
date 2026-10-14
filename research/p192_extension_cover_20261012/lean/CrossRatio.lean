@@ -53,6 +53,16 @@ theorem scholten_palindromic_identity {K : Type*} [CommRing K]
             ring
     _ = _ := by rw [hroot, hscale]; ring
 
+/-- The coefficient-swapped Scholten cubic is the reciprocal of the
+    original cubic. The field involution and genus-two descent are separate
+    geometric obligations in the report. -/
+theorem scholten_reciprocal_identity {K : Type*} [Field K]
+    (A B c t : K) (ht : t ≠ 0) :
+    A * t ^ 3 + B * c * t ^ 2 + B * c ^ 2 * t + A =
+      t ^ 3 * (A * (t⁻¹) ^ 3 + B * c ^ 2 * (t⁻¹) ^ 2 + B * c * t⁻¹ + A) := by
+  field_simp [ht]
+  ring
+
 /-- Algebraic verification of the degree-two projection from the plane
     quartic to the original elliptic cubic. -/
 theorem quartic_projection_identity {K : Type*} [CommRing K]
@@ -98,6 +108,35 @@ theorem projected_target_scalar {K : Type*} [Field K]
     x = (c * (x + k)) / c - k := by field_simp [hc]; ring
     _ = (l₁ + l₂ + l₃) / c - k := by rw [h]
 
+/-- An odd Frobenius power paired with its conjugate is a square. The
+    finite-field bridge supplies the Frobenius-distributivity hypothesis
+    in `type_i_subfield_rhs_square`. -/
+theorem odd_power_pair_square {K : Type*} [CommRing K] (u : K) (n : ℕ) :
+    u * u ^ (2 * n + 1) = (u ^ (n + 1)) ^ 2 := by
+  calc
+    u * u ^ (2 * n + 1) = u ^ ((2 * n + 1) + 1) := by rw [pow_succ]; ring
+    _ = u ^ ((n + 1) * 2) := by congr 1; omega
+    _ = (u ^ (n + 1)) ^ 2 := by rw [pow_mul]
+
+/-- For an odd Frobenius power q, every subfield x-coordinate on the
+    Type I quartic has a square right-hand side once Frobenius fixes x. -/
+theorem type_i_subfield_rhs_square {K : Type*} [CommRing K]
+    (x a b : K) (n : ℕ)
+    (hconj : (x - a ^ (2 * n + 1)) * (x - b ^ (2 * n + 1)) =
+      ((x - a) * (x - b)) ^ (2 * n + 1)) :
+    (x - a) * (x - a ^ (2 * n + 1)) *
+      (x - b) * (x - b ^ (2 * n + 1)) =
+      (((x - a) * (x - b)) ^ (n + 1)) ^ 2 := by
+  calc
+    (x - a) * (x - a ^ (2 * n + 1)) *
+        (x - b) * (x - b ^ (2 * n + 1)) =
+        ((x - a) * (x - b)) *
+          ((x - a ^ (2 * n + 1)) * (x - b ^ (2 * n + 1))) := by ring
+    _ = ((x - a) * (x - b)) *
+          (((x - a) * (x - b)) ^ (2 * n + 1)) := by rw [hconj]
+    _ = (((x - a) * (x - b)) ^ (n + 1)) ^ 2 :=
+      odd_power_pair_square ((x - a) * (x - b)) n
+
 end P192ExtensionCover
 
 #print axioms P192ExtensionCover.cyclic_cross_ratio_product
@@ -105,6 +144,9 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.pullback_injective_of_push_pull_two
 #print axioms P192ExtensionCover.legendre_j_difference_factor
 #print axioms P192ExtensionCover.scholten_palindromic_identity
+#print axioms P192ExtensionCover.scholten_reciprocal_identity
 #print axioms P192ExtensionCover.quartic_projection_identity
 #print axioms P192ExtensionCover.projected_three_point_relation
 #print axioms P192ExtensionCover.projected_target_scalar
+#print axioms P192ExtensionCover.odd_power_pair_square
+#print axioms P192ExtensionCover.type_i_subfield_rhs_square
