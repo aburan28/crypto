@@ -199,7 +199,7 @@ for n, ks, _ in plan:
     for K in ks:
         e = rung.get(f"ic_K{K}")
         if e:
-            ax.plot(e["advice_bytes"] / 2**20, e["online_ms"]["mean"], "s", color=c, markersize=10,
+            ax.plot(e["advice_bytes"] / 2**20, e["online_ms"]["mean"], "D" if K == 360 else "s", color=c, markersize=10,
                     markeredgecolor="black", label=f"n={n} IC K={K}")
     r = rung.get("plain_strong_rho")
     if r:
@@ -225,13 +225,14 @@ if cen:
         ax.annotate(f"n={d['n']} K={d['K']}", (d["expected_pairs_uniform"], max(d["verified_nontrivial"], 0.5)),
                     fontsize=7, xytext=(4, 4), textcoords="offset points")
         ax.plot(d["leads_prediction_n4K4_over_r"], max(d["verified_nontrivial"], 0.5), "x", color=c, alpha=0.5)
+        ax.plot(d["expected_pairs_uniform"], max(d["rank_mod_r"], 0.5), "^", color=c, alpha=0.8)
     lim = [0.5, max(max(d["leads_prediction_n4K4_over_r"] for d in cen), 200) * 1.5]
     ax.plot(lim, lim, "k--", lw=1, label="measured = predicted")
     ax.axhline(100, color="red", lw=1, ls=":", label="kill line: 100 relations at n=61")
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlabel("predicted pairs (o: uniform M^2 n / r; x: leads note n^4K^4/r)")
-    ax.set_ylabel("verified non-trivial free relations")
+    ax.set_ylabel("verified non-trivial collisions (o, x); rank mod r (^)")
     ax.set_title("E-3 free-relation census")
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(fontsize=7)

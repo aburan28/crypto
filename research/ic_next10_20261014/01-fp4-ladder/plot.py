@@ -63,7 +63,7 @@ for arm, label, c in ARMS:
     for ax, key, fk in ((axs[0], "rel_gae", "relation_phase"), (axs[1], "la_gae", "linear_algebra")):
         xs, ys = pts(arm, key)
         f = S["fits"][arm][fk]
-        ax.scatter(xs, ys, s=16, color=c, label=f"{arm}: #E^{f['slope']/4*4:.3f}")
+        ax.scatter(xs, ys, s=16, color=c, label=f"{arm}: slope {f['slope']:.3f} per log₂#E")
         lx, ly = line(f, min(xs), max(xs))
         ax.plot(lx, ly, color=c, lw=1)
 rx = [r["log2_E"] for r in S["rows"]]

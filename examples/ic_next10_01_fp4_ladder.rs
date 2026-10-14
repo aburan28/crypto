@@ -45,10 +45,6 @@ const C4_S4: f64 = 1.213e12;
 /// (mid of 2.535–2.552·10¹⁰); replaced by the in-situ control when given.
 const C4_D4_COMMITTED: f64 = 2.54e10;
 
-fn mulm(a: u64, b: u64, n: u64) -> u64 {
-    ((a as u128 * b as u128) % n as u128) as u64
-}
-
 fn fp(x: &E4) -> u64 {
     mix64(x.0[0] ^ mix64(x.0[1] ^ mix64(x.0[2] ^ mix64(x.0[3] ^ 0x5eed))))
 }
@@ -779,33 +775,93 @@ fn analyze(args: &[String]) {
     let x: Vec<f64> = rho_cost.iter().map(|c| c.0).collect();
     fits.insert("rho".into(), json!({"cost": fit(&x, &rho_cost.iter().map(|c| c.1).collect::<Vec<_>>(), &mut rng)}));
     fits.insert("rho-neg".into(), json!({"cost": fit(&x, &rho_cost.iter().map(|c| c.2).collect::<Vec<_>>(), &mut rng)}));
-    // Extrapolated handover (labelled as such): ratio(E) = R(E) + L(E),
-    // each term its fitted power law; first log2 E in [41, 400] with ratio ≤ 1.
-    let mut handover = serde_json::Map::new();
-    for name in ["plain", "d4", "dlp"] {
-        let Some(f) = fits.get(name) else { continue };
-        let rn = fits["rho-neg"]["cost"].clone();
-        let term = |k: &str, e: f64| -> f64 {
-            let b = f[k]["slope"].as_f64().unwrap();
-            let a = f[k]["intercept_log2"].as_f64().unwrap();
-            2f64.powf(a + b * e)
+    // Extrapolated handover (labelled as such).  Rho is taken at its
+    // large-size S (rows with log2 r ≥ 34, where the walk's set-up is
+    // under 10 %), times √r = √(#E / h); each IC phase is its own fitted
+    // power law in #E.  First log2 #E in [41, 600] with IC ≤ rho.
+    let big: Vec<f64> = table
+        .iter()
+        .filter(|t| t["log2_r"].as_f64().unwrap() >= 34.0)
+        .map(|t| t["rho_neg_S"].as_f64().unwrap())
+        .collect();
+    let (rho_inf, rho_inf_sd) = mean_sd(&big);
+    let h = rows.first().map(|r| r["cofactor"].as_f64().unwrap()).unwrap_or(4.0);
+    let rho_c = |e: f64| rho_inf * 2f64.powf((e - h.log2()) / 2.0);
+    let term = |name: &str, k: &str, e: f64| -> f64 {
+        let f = &fits[name][k];
+        2f64.powf(f["intercept_log2"].as_f64().unwrap() + f["slope"].as_f64().unwrap() * e)
+    };
+    // Plain and D₄: the linear algebra is N² ∝ √#E, so it enters as its
+    // large-size ratio to rho (r_LA); the DLP arm's has its own exponent.
+    let la_large = |name: &str| -> f64 {
+        let v: Vec<f64> = table
+            .iter()
+            .filter(|t| t["log2_r"].as_f64().unwrap() >= 34.0)
+            .filter_map(|t| t["arms"][name]["la_ratio_vs_rho_neg"].as_f64())
+            .collect();
+        mean_sd(&v).0
+    };
+    let total = |name: &str, e: f64| {
+        let la = if name == "dlp" {
+            term(name, "linear_algebra", e)
+        } else {
+            la_large(name) * rho_c(e)
         };
-        let rho_c = |e: f64| 2f64.powf(rn["intercept_log2"].as_f64().unwrap() + rn["slope"].as_f64().unwrap() * e);
-        let mut found = Value::Null;
+        term(name, "relation_phase", e) + la
+    };
+    let first = |pred: &dyn Fn(f64) -> bool| -> Value {
         let mut e = 41.0;
-        while e <= 400.0 {
-            if term("relation_phase", e) + term("linear_algebra", e) <= rho_c(e) {
-                found = json!(e);
-                break;
+        while e <= 600.0 {
+            if pred(e) {
+                return json!((e * 10.0).round() / 10.0);
             }
             e += 0.1;
         }
-        let la_share_at = |e: f64| term("linear_algebra", e) / (term("relation_phase", e) + term("linear_algebra", e));
-        handover.insert(name.into(), json!({"log2_E_extrapolated": found,
-            "ratio_at_2^160": (term("relation_phase", 160.0) + term("linear_algebra", 160.0)) / rho_c(160.0),
-            "ratio_at_2^256": (term("relation_phase", 256.0) + term("linear_algebra", 256.0)) / rho_c(256.0),
-            "la_share_at_2^160": la_share_at(160.0)}));
+        Value::Null
+    };
+    let mut handover = serde_json::Map::new();
+    for name in ["plain", "d4", "dlp"] {
+        if !fits.contains_key(name) {
+            continue;
+        }
+        handover.insert(name.into(), json!({
+            "log2_E_ic_below_rho_neg": first(&|e| total(name, e) <= rho_c(e)),
+            "ratio_at_2^128": total(name, 128.0) / rho_c(128.0),
+            "ratio_at_2^160": total(name, 160.0) / rho_c(160.0),
+            "ratio_at_2^256": total(name, 256.0) / rho_c(256.0),
+            "la_share_at_2^160": 1.0 - term(name, "relation_phase", 160.0) / total(name, 160.0),
+            "la_ratio_large_sizes": la_large(name),
+        }));
     }
+    // Sensitivity: the relation phase anchored at the largest size's mean
+    // and carried at the theoretical exponent (1/4; 3/8 for DLP) instead
+    // of the fitted one.
+    let emax = table.iter().map(|t| t["log2_E"].as_f64().unwrap()).fold(0.0, f64::max);
+    let anchored = |name: &str, e: f64| -> f64 {
+        let v: Vec<f64> = table
+            .iter()
+            .filter(|t| (t["log2_E"].as_f64().unwrap() - emax).abs() < 0.5)
+            .filter_map(|t| t["arms"][name]["rel_gae"].as_f64())
+            .collect();
+        let a = if name == "dlp" { 0.375 } else { 0.25 };
+        let rel = mean_sd(&v).0 * 2f64.powf(a * (e - emax));
+        let la = if name == "dlp" {
+            term(name, "linear_algebra", e)
+        } else {
+            la_large(name) * rho_c(e)
+        };
+        rel + la
+    };
+    for name in ["plain", "d4", "dlp"] {
+        if let Some(Value::Object(m)) = handover.get_mut(name) {
+            m.insert("anchored_theory_exponent_log2_E_below_rho_neg".into(), first(&|e| anchored(name, e) <= rho_c(e)));
+        }
+    }
+    if fits.contains_key("plain") && fits.contains_key("dlp") {
+        handover.insert("dlp_below_plain".into(), json!({
+            "log2_E": first(&|e| total("dlp", e) <= total("plain", e))}));
+    }
+    handover.insert("rho_neg_S_large".into(), json!({"mean": rho_inf, "sd": rho_inf_sd, "n": big.len(), "cofactor": h}));
     let summary = json!({"rows": table, "fits": fits, "null_control_identical": null_ok,
         "every_logarithm_verified": all_verified, "extrapolated_handover": handover,
         "note": "fits: OLS of log2(quantity) on log2 #E over curves, 95% bootstrap over curves (2000); handover is an extrapolation of the fitted power laws, not a measurement"});

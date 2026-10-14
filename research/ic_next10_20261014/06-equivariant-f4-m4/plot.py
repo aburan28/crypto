@@ -18,7 +18,7 @@ def load(name):
     return [json.loads(l) for l in open(p)] if os.path.exists(p) else []
 
 
-f4 = [r for r in load("c2_calibration.jsonl") + load("m_main.jsonl") + load("m_main_b.jsonl")
+f4 = [r for r in load("c2_calibration.jsonl") + load("m_main.jsonl") + load("m_main_b.jsonl") + load("m_main_c.jsonl")
       if "export" in r and r["export"].get("solutions", 1) <= 0 and r.get("gb_is_one")]
 cells = {}
 for r in f4:

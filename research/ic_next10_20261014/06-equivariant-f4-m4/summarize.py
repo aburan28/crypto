@@ -14,7 +14,7 @@ XL = {(4, 4, 1): "5 5 5 5", (4, 5, 1): "5 5 5 5", (4, 6, 1): "5 5 5 5", (4, 5, 2
       (4, 9, 3): "≥7 ≥7 ≥7 ≥7", (4, 10, 3): "≥7 ≥7 ≥7 ≥7",
       (3, 9, 3): "6 6 6 6 (other draws)", (3, 13, 4): "6 6 6 6", (3, 10, 5): "7 7 7 7",
       (3, 15, 5): "≥7 ≥7 ≥7 ≥7"}
-rows = load("c2_calibration.jsonl") + load("m_main.jsonl") + load("m_main_b.jsonl")
+rows = load("c2_calibration.jsonl") + load("m_main.jsonl") + load("m_main_b.jsonl") + load("m_main_c.jsonl") + load("e_sat.jsonl")
 cells = {}
 sat = []
 for r in rows:
@@ -32,7 +32,12 @@ for k in sorted(cells, key=lambda k: (-k[0], k[2], k[1])):
     m, n, ell = k
     e = rs[0]["export"]
     ok = all(r["exit"] == 0 for r in rs)
-    ds = " ".join(str(r["d_f4"]) if r["exit"] == 0 else f"≥{r['d_f4']} ({r['exit']})" for r in rs)
+    def one_draw(r):
+        if r["exit"] == 0:
+            return str(r["d_f4"])
+        why = "3 GB cap hit" if r["exit"] == -11 else str(r["exit"])
+        return f"unresolved: {why} in a degree-{r['d_f4']} round"
+    ds = "; ".join(one_draw(r) for r in rs)
     one = "yes" if all(r.get("gb_is_one") for r in rs) else "NO"
     secs = [r["secs"] for r in rs]
     mem = [r["peak_rss_kb"] / 1024 for r in rs]
@@ -51,3 +56,11 @@ for r in load("d_random.jsonl"):
     print(f"- {r['label']}: max F4 degree reached {r['d_f4']} ({'finished' if r['exit'] == 0 else r['exit']} at "
           f"{r['secs']:.0f} s), largest matrix {r['max_matrix'][0]:,} × {r['max_matrix'][1]:,}, "
           f"peak {r['peak_rss_kb']/1024:.0f} MB")
+print()
+print("Secondary (deviation): draws with no exact count, the GB deciding (solving degree of the full GB):")
+for r in load("n_nocount.jsonl"):
+    e = r["export"]
+    st = "finished" if r["exit"] == 0 else ("3 GB cap hit" if r["exit"] == -11 else str(r["exit"]))
+    print(f"- m={e['m']} (n={e['n']}, ℓ={e['ell']}) N={e['n_vars']} draw {e['draw']}: {st}, GB [1]? {r.get('gb_is_one')}, "
+          f"GB length {r.get('gb_len')}, max F4 degree {r['d_f4']}, {r['secs']:.0f} s wall, {r['peak_rss_kb']/1024:.0f} MB, "
+          f"largest matrix {r['max_matrix'][0]:,} × {r['max_matrix'][1]:,}")

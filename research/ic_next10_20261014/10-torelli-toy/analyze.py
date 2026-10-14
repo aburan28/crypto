@@ -4,22 +4,45 @@ import os, sys, json, math, csv
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from collections import defaultdict
 from lpoly import targets, charpoly_from_counts, divides, dim, is_weil_valid
-import sympy as sp
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "data")
 T = targets()
-X = sp.symbols("x")
 
 
 def c_codim(G, d):
     return d * G - d * (d - 1) // 2
 
 
+FCACHE = {}
+
+
+def gp_factor_all(polys):
+    """Factor many integer polynomials over Z with PARI/GP in one batch."""
+    import subprocess, tempfile
+    polys = [P for P in dict.fromkeys(polys) if P not in FCACHE]
+    if not polys:
+        return
+    with tempfile.NamedTemporaryFile("w", suffix=".gp", delete=False) as fh:
+        fh.write("default(parisizemax, 400000000);\n")
+        for j, P in enumerate(polys):
+            fh.write("v=%s;F=factor(Pol(v));print(\"@%d \",vector(#F~,i,[Vec(F[i,1]),F[i,2]]));\n" % (list(P), j))
+        name = fh.name
+    out = subprocess.run(["gp", "-q", "-f", "-s", "64M", name], input="", capture_output=True,
+                         text=True, check=True).stdout
+    recs = {}
+    for chunk in out.split("@")[1:]:
+        j, body = chunk.split(" ", 1)
+        recs[int(j)] = body.replace("\n", "").replace(" ", "")
+    assert len(recs) == len(polys), (len(recs), len(polys))
+    for j, P in enumerate(polys):
+        fl = eval(recs[j])
+        FCACHE[P] = [(tuple(f), e) for f, e in fl]
+    os.unlink(name)
+
+
 def factor_dims(P):
-    poly = sp.Poly(list(P), X)
-    _, fl = sp.factor_list(poly.as_expr())
-    return [(tuple(int(c) for c in sp.Poly(f, X).all_coeffs()), e) for f, e in fl]
+    return FCACHE[P]
 
 
 def load_arm(name):
@@ -34,6 +57,7 @@ def analyse_hist(arm, G, hist, mass_per_model, label, extra_note=""):
     carriers = defaultdict(int)
     fac_mass = defaultdict(float)  # (dim, factor) -> mass of curves having it
     total_models = sum(hist.values())
+    gp_factor_all([P for P in (charpoly_from_counts(list(N)) for N in hist) if P])
     for N, w in hist.items():
         P = charpoly_from_counts(list(N))
         if P is None or not is_weil_valid(P, G):
@@ -105,7 +129,7 @@ def main():
                     hits[h] += 1
         for nm, t in T.items():
             dd = dim(t)
-            if dd > 5 or nm.startswith("A3"):
+            if dd > 5 or nm.startswith(("A3", "W3")):
                 continue
             nsamp = nb7 if nm.startswith("B7") else n1
             mass_per_net = d["total_nets"] / d["gl5_order"] / nsamp

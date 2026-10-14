@@ -61,4 +61,39 @@ deg     sel   pairs        mat          density            new data         time
   6     417    5570    9317 x 14275       1.18%      275 new     142 zero         5.62 | 0.46         
   6     699    7283    9707 x 14023       2.40%      452 new     247 zero        25.28 | 1.95         
   6    2374   11256   17006 x 19574       3.03%     1551 new     836 zero       264.30 | 16.96        
-  6    7440   21563   26025 x 21665       4.83%
+  6    7440   21563   26025 x 21665       4.83%     3130 new    4360 zero       939.35 | 91.72        
+------------------------------------------------------------------------------------------------------
+reduce final basis        1 x 1         100.00%        1 new       0 zeroTime for rational param:       1240.66 (elapsed) sec / 111.55 sec (cpu)
+
+------------------------------------------------------------------------------------
+msolve overall time        1240.70 sec (elapsed) / 111.55 sec (cpu)
+------------------------------------------------------------------------------------
+         0.08 | 0.00         
+------------------------------------------------------------------------------------------------------
+
+---------------- TIMINGS ---------------
+overall(elapsed)     1240.53 sec
+overall(cpu)          111.53 sec
+select                 18.36 sec   1.5%
+symbolic prep.          7.65 sec   0.6%
+update                120.95 sec   9.8%
+convert                 1.84 sec   0.1%
+linear algebra       1091.26 sec  88.0%
+reduce gb               0.00 sec   0.0%
+-----------------------------------------
+
+---------- COMPUTATIONAL DATA -----------
+size of basis                     1
+#terms in basis                   1
+#pairs reduced                12754
+#GM criterion              18580382
+#redundant elements            6100
+#rows reduced                 25657
+#zero reductions               6742
+max. matrix data              26025 x 21665 (4.826%)
+max. symbolic hash table size  2^15
+max. basis hash table size     2^17
+-----------------------------------------
+
+Grobner basis has a single element
+No solution

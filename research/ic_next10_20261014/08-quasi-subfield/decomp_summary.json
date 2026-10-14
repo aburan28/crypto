@@ -1,0 +1,422 @@
+[
+ {
+  "n": 7,
+  "k": 4,
+  "base": "g=0x17",
+  "yield_": 0.6555,
+  "ci": [
+   0.6343929505202464,
+   0.676010825905994
+  ],
+  "mean_decomps": 2.488,
+  "refute_degrees": [
+   3,
+   3,
+   3,
+   3,
+   3,
+   3
+  ],
+  "steps": [
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R"
+  ],
+  "median_word_xors": 8007
+ },
+ {
+  "n": 7,
+  "k": 4,
+  "base": "random=1",
+  "yield_": 0.5415,
+  "ci": [
+   0.5196033826641852,
+   0.5632374965749721
+  ],
+  "mean_decomps": 1.4015,
+  "refute_degrees": [
+   3,
+   3,
+   3,
+   3,
+   3,
+   3
+  ],
+  "steps": [
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R"
+  ],
+  "median_word_xors": 9948
+ },
+ {
+  "n": 7,
+  "k": 4,
+  "base": "random=2",
+  "yield_": 0.7495,
+  "ci": [
+   0.7300436091555302,
+   0.767999749161814
+  ],
+  "mean_decomps": 2.3885,
+  "refute_degrees": [
+   3,
+   3,
+   3,
+   3,
+   3,
+   3
+  ],
+  "steps": [
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R"
+  ],
+  "median_word_xors": 8398
+ },
+ {
+  "n": 7,
+  "k": 4,
+  "base": "random=3",
+  "yield_": 0.685,
+  "ci": [
+   0.6643034592211275,
+   0.7049872072666828
+  ],
+  "mean_decomps": 2.339,
+  "refute_degrees": [
+   3,
+   3,
+   3,
+   3,
+   3,
+   3
+  ],
+  "steps": [
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R"
+  ],
+  "median_word_xors": 8508
+ },
+ {
+  "n": 7,
+  "k": 4,
+  "base": "random=4",
+  "yield_": 0.5995,
+  "ci": [
+   0.577853808248406,
+   0.6207646853490919
+  ],
+  "mean_decomps": 1.79,
+  "refute_degrees": [
+   3,
+   3,
+   3,
+   3,
+   3,
+   3
+  ],
+  "steps": [
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R",
+   "d2:noR d3:R"
+  ],
+  "median_word_xors": 10045
+ },
+ {
+  "n": 17,
+  "k": 9,
+  "base": "g=0x279",
+  "yield_": 0.591,
+  "ci": [
+   0.5692980207325052,
+   0.6123530638642013
+  ],
+  "mean_decomps": 1.819,
+  "refute_degrees": [
+   4,
+   4,
+   4,
+   4,
+   4,
+   4
+  ],
+  "steps": [
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R"
+  ],
+  "median_word_xors": 79818733
+ },
+ {
+  "n": 17,
+  "k": 9,
+  "base": "random=1",
+  "yield_": 0.629,
+  "ci": [
+   0.6075999660602796,
+   0.6499054175987882
+  ],
+  "mean_decomps": 1.95,
+  "refute_degrees": [
+   4,
+   4,
+   4,
+   4,
+   4,
+   4
+  ],
+  "steps": [
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R"
+  ],
+  "median_word_xors": 83337439
+ },
+ {
+  "n": 17,
+  "k": 9,
+  "base": "random=2",
+  "yield_": 0.659,
+  "ci": [
+   0.6379369108801384,
+   0.6794534457228986
+  ],
+  "mean_decomps": 2.1635,
+  "refute_degrees": [
+   4,
+   4,
+   4,
+   4,
+   4,
+   4
+  ],
+  "steps": [
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R"
+  ],
+  "median_word_xors": 82677685
+ },
+ {
+  "n": 17,
+  "k": 9,
+  "base": "random=3",
+  "yield_": 0.622,
+  "ci": [
+   0.6005340668731788,
+   0.6429981564322961
+  ],
+  "mean_decomps": 1.9685,
+  "refute_degrees": [
+   4,
+   4,
+   4,
+   4,
+   4,
+   4
+  ],
+  "steps": [
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R"
+  ],
+  "median_word_xors": 83138055
+ },
+ {
+  "n": 17,
+  "k": 9,
+  "base": "random=4",
+  "yield_": 0.644,
+  "ci": [
+   0.6227572409672177,
+   0.6646906291638346
+  ],
+  "mean_decomps": 2.095,
+  "refute_degrees": [
+   4,
+   4,
+   4,
+   4,
+   4,
+   4
+  ],
+  "steps": [
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R"
+  ],
+  "median_word_xors": 82926880
+ },
+ {
+  "n": 18,
+  "k": 9,
+  "base": "g=0x201",
+  "yield_": 0.505,
+  "ci": [
+   0.4830990562067211,
+   0.5268817726172738
+  ],
+  "mean_decomps": 4.575,
+  "refute_degrees": [
+   2,
+   2,
+   2,
+   2,
+   2,
+   2
+  ],
+  "steps": [
+   "d2:R",
+   "d2:R",
+   "d2:R",
+   "d2:R",
+   "d2:R",
+   "d2:R"
+  ],
+  "median_word_xors": 226
+ },
+ {
+  "n": 18,
+  "k": 9,
+  "base": "random=1",
+  "yield_": 0.3615,
+  "ci": [
+   0.3407280477377898,
+   0.3828029938375523
+  ],
+  "mean_decomps": 0.895,
+  "refute_degrees": [
+   4,
+   4,
+   4,
+   4,
+   4,
+   4
+  ],
+  "steps": [
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R"
+  ],
+  "median_word_xors": 74369632
+ },
+ {
+  "n": 18,
+  "k": 9,
+  "base": "random=2",
+  "yield_": 0.3975,
+  "ci": [
+   0.3762681052349805,
+   0.4191249038731247
+  ],
+  "mean_decomps": 1.027,
+  "refute_degrees": [
+   4,
+   4,
+   4,
+   4,
+   4,
+   4
+  ],
+  "steps": [
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R"
+  ],
+  "median_word_xors": 75761868
+ },
+ {
+  "n": 18,
+  "k": 9,
+  "base": "random=3",
+  "yield_": 0.4255,
+  "ci": [
+   0.4039942844969919,
+   0.4472913660254845
+  ],
+  "mean_decomps": 1.094,
+  "refute_degrees": [
+   4,
+   4,
+   4,
+   4,
+   4,
+   4
+  ],
+  "steps": [
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R"
+  ],
+  "median_word_xors": 74647619
+ },
+ {
+  "n": 18,
+  "k": 9,
+  "base": "random=4",
+  "yield_": 0.3575,
+  "ci": [
+   0.33678689460600203,
+   0.3787594839101441
+  ],
+  "mean_decomps": 0.8965,
+  "refute_degrees": [
+   4,
+   4,
+   4,
+   4,
+   4,
+   4
+  ],
+  "steps": [
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R",
+   "d2:noR d3:noR d4:R"
+  ],
+  "median_word_xors": 74630482
+ }
+]

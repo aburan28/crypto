@@ -16,6 +16,9 @@ ROOT = os.path.abspath(os.path.join(HERE, "../../.."))
 EXPORT = os.path.join(ROOT, "target/release/examples/ic_next10_06_chain_export")
 WORK = os.path.join(HERE, "runs", "work")
 CAP = "3000000000"
+# MSOLVE_EXTRA, e.g. "-u 1": rebuild the hash table every step (memory only;
+# the computation and its degrees are unchanged).
+EXTRA = os.environ.get("MSOLVE_EXTRA", "").split()
 TIMEOUT = int(os.environ.get("F4_TIMEOUT", "2700"))
 ROUND = re.compile(r"^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+) x (\d+)\s")
 
@@ -27,7 +30,7 @@ def run_msolve(ms, tag):
     t0 = time.time()
     with open(log, "w") as lf:
         p = subprocess.Popen(["prlimit", "--as=" + CAP, "--", "nice", "msolve", "-t", "1",
-                              "-g", "2", "-v", "2", "-f", ms, "-o", out],
+                              "-g", "2", "-v", "2"] + EXTRA + ["-f", ms, "-o", out],
                              stdout=lf, stderr=subprocess.STDOUT, env=env)
         while True:
             pid, status, ru = os.wait4(p.pid, os.WNOHANG)
@@ -96,6 +99,7 @@ def main():
             rec = {"job": job, "export": json.loads(p.stdout.strip()),
                    "export_secs": round(time.time() - t0, 3)}
         rec.update(run_msolve(ms, tag))
+        rec["msolve_extra"] = " ".join(EXTRA)
         if parts[0] != "rand":
             os.remove(ms)  # reproducible from the exporter; keeps raw data small
         line = json.dumps(rec)

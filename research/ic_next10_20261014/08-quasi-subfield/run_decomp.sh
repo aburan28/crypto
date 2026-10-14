@@ -2,7 +2,7 @@
 # Arm D: QSP / structured subspace bases vs 4 random subspaces, same instrument.
 set -u
 cd "$(dirname "$0")/../../.."
-B=target/release/examples/ic_next10_08_qsf_decomp
+B=${QSF_DECOMP_BIN:-target/release/examples/ic_next10_08_qsf_decomp}
 OUT=research/ic_next10_20261014/08-quasi-subfield
 export RAYON_NUM_THREADS=1 OMP_NUM_THREADS=1 F4_F2_MAX_ROWS=60000 F4_F2_MAX_COLS=120000
 run() { # file n k base yield refute dmax seed

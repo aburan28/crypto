@@ -80,13 +80,13 @@ for key, lab, col, mk in series:
         A = np.vstack([np.ones_like(L), -1 / L, 1 / L ** 2]).T
         coef = np.linalg.lstsq(A, D, rcond=None)[0]
         extrap[key] = {"ells": L.tolist(), "delta_inf_fit": float(coef[0])}
-for a, lab, col in ((1 / 6, "1/6", C["single"]), (0.177886, "pair box ℓ→∞ 0.1779", C["pair"]),
-                    (0.182015, "triple box ℓ→∞ 0.1820", C["triple"]), (0.25, "ceiling 1/4", C["ceil"])):
+for a, lab, col, dy in ((1 / 6, "1/6 (single, ℓ→∞)", C["single"], -0.004), (0.177886, "pair, box ℓ→∞: 0.1779", C["pair"], -0.003),
+                    (0.182015, "triple, box ℓ→∞: 0.1820", C["triple"], 0.003), (0.25, "ceiling 1/4", C["ceil"], 0.003)):
     ax.axhline(a, color=col, ls=":", lw=1)
-    ax.text(12.3, a, lab, fontsize=7, va="center", color=col)
+    ax.text(12.4, a + dy, lab, fontsize=7, va="center", color=col)
 ax.set_xlabel("multiplicity ℓ")
 ax.set_ylabel("exact optimum δ_ℓ (down-closed M, p → ∞)")
-ax.set_xlim(0.5, 14.5)
+ax.set_xlim(0.5, 16.5)
 ax.legend(fontsize=8, frameon=False, loc="lower right")
 ax.set_title("S₃ systems: exact closure optimum per ℓ (Rust min-cut, exact rationals)", fontsize=10)
 save(fig, "finite_ell")

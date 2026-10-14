@@ -7,7 +7,7 @@ field characteristic             2
 homogeneous input?               0
 signature-based computation      0
 monomial order                 DRL
-basis hash table resetting     OFF
+basis hash table resetting       1
 linear algebra option            2
 initial hash table size     131072 (2^17)
 max pair selection             ALL
@@ -34,15 +34,18 @@ deg     sel   pairs        mat          density            new data         time
 ------------------------------------------------------------------------------------------------------
   2      10      85      13 x 70         53.96%       10 new       0 zero         0.00 | 0.00         
   2       3     125      15 x 64         10.73%        2 new       1 zero         0.00 | 0.00         
-  3      79     139     518 x 2083        1.48%       71 new       8 zero         0.08 | 0.01         
-  3     110     499     657 x 934         2.77%      107 new       3 zero         0.07 | 0.02         
-  4    1749    2217   11466 x 27461       0.16%      541 new    1208 zero         2.91 | 0.61         
+  3      79     139     518 x 2083        1.48%       71 new       8 zero         0.03 | 0.01         
+  3     110     499     657 x 934         2.77%      107 new       3 zero         0.05 | 0.02         
+  4    1749    2217   11466 x 27461       0.16%      541 new    1208 zero         1.11 | 0.62         
   2      58    2445     208 x 163         5.32%        0 new      58 zero         0.00 | 0.00         
-  3    1327    2387    4139 x 3604        0.44%       25 new    1315 zero         0.20 | 0.05         
-  4    1226    1702   64945 x 96862       0.06%      634 new     592 zero        13.47 | 3.21         
-  2      13    8360     143 x 170         4.49%        0 new      13 zero         0.04 | 0.00         
-  3     244    8347    3687 x 5401        0.94%       76 new     168 zero         1.02 | 0.26         
-  4    5067    9799   83217 x 109107      0.10%     2073 new    3042 zero       108.94 | 26.05        
-  3     115   27107    3947 x 5447        1.64%      103 new      12 zero         5.44 | 1.32         
-  3     226   23627    4013 x 7536        1.30%      194 new      33 zero         9.02 | 2.34         
-  4   13030   25169   92364 x 102107      0.21%     3127 new    9993 zero
+  3    1327    2387    4139 x 3604        0.44%       25 new    1315 zero         0.12 | 0.05         
+  4    1226    1702   64945 x 96862       0.06%      634 new     592 zero         5.61 | 3.09         
+  2      13    8360     143 x 170         4.49%        0 new      13 zero         0.01 | 0.00         
+  3     244    8347    3687 x 5401        0.94%       76 new     168 zero         0.50 | 0.25         
+  4    5067    9799   83217 x 109107      0.10%     2073 new    3042 zero        44.77 | 23.63        
+  3     115   27107    3947 x 5447        1.64%      103 new      12 zero         2.63 | 1.33         
+  3     226   23627    4013 x 7536        1.30%      194 new      33 zero         3.54 | 2.03         
+  4   13030   25169   92364 x 102107      0.21%     3127 new    9993 zero       240.63 | 95.40        
+  3    4463   26895   11004 x 8161        1.18%      136 new    4371 zero         9.49 | 4.18         
+  4   21521   22312   99648 x 80167       0.24%     1992 new   19577 zeroEnlarging exponent vector for hash table failed
+for esz = 16777216, segmentation fault will follow.
