@@ -433,6 +433,16 @@ fn e1_step(s: &Inst, arm: &str, w: W) -> (W, u64) {
         "base" => (s.wadd(w, s.tab[i], false), 1),
         "pm_coin" => (s.wadd(w, s.tab[i], mix(w.p.x ^ s.keys[3]) & 1 == 1), 1),
         "pm_score" => (best(&[s.wadd(w, s.tab[i], false), s.wadd(w, s.tab[i], true)]), 1),
+        "pm_split" => {
+            // + and - on different table entries: no symmetric candidate pair
+            let j = s.idx(w.p.x, 1, r);
+            (best(&[s.wadd(w, s.tab[i], false), s.wadd(w, s.tab[j], true)]), 2)
+        }
+        "mm_score" => {
+            // both candidates subtract: P-R_i, P-R_j
+            let j = s.idx(w.p.x, 1, r);
+            (best(&[s.wadd(w, s.tab[i], true), s.wadd(w, s.tab[j], true)]), 2)
+        }
         "two_score" => {
             let j = s.idx(w.p.x, 1, r);
             (best(&[s.wadd(w, s.tab[i], false), s.wadd(w, s.tab[j], false)]), 2)
@@ -1041,7 +1051,7 @@ fn predicted(exp: &str, arm: &str) -> Option<f64> {
     let (exp, arm) = if exp.starts_with("e1") { ("e1", arm.strip_prefix("sel_").unwrap_or(arm)) } else { (exp, arm) };
     let k2 = |k: f64| (k * k / (2.0 * k - 1.0)).sqrt();
     match (exp, arm) {
-        ("e1", "pm_score") | ("e1", "two_score") | ("rf", "k2") => Some(k2(2.0)),
+        ("e1", "pm_score") | ("e1", "two_score") | ("e1", "pm_split") | ("e1", "mm_score") | ("rf", "k2") => Some(k2(2.0)),
         ("e1", "best4_score") | ("rf", "k4") => Some(k2(4.0)),
         ("e1", "pm_coin") | ("e2", "lazy_dp") | ("e2", "pair_table") => Some(1.0),
         ("e2", "lazy_index") => Some(std::f64::consts::FRAC_1_SQRT_2),

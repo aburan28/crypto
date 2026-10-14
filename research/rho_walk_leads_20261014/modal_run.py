@@ -41,6 +41,10 @@ def shards(cmd, bits, trials, per, extra=()):
 
 PLANS = {
     "smoke": lambda: shards("e1", 24, 64, 32),
+    "split": lambda: (
+        shards("e1", 36, 2000, 125, ("--arms", "base,pm_score,pm_split,mm_score"))
+        + shards("e1dp", 36, 1000, 125, ("--arms", "sel_base,sel_pm_score,sel_pm_split"))
+    ),
     "full": lambda: (
         shards("e1", 32, 2000, 250)
         + shards("e1", 36, 2000, 125)

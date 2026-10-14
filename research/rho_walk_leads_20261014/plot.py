@@ -28,10 +28,15 @@ LABEL = {
     ("e4", "neg_hashrule"): "negation map, rule per point",
     ("e4", "neg_epoch"): "negation map, rule per epoch",
 }
-REF = {"e1": "plain r-adding walk", "rf": "random function", "e2": "canonical DP walk", "e4": "no negation map"}
+for k, v in list(LABEL.items()):
+    if k[0] == "e1":
+        LABEL[("e1dp", "sel_" + k[1])] = v
+        LABEL[("e1shift", k[1])] = v
+REF = {"e1": "plain r-adding walk, doubling escape", "e1shift": "plain r-adding walk, shift escape",
+       "e1dp": "plain walk, distinguished points, 64 walks", "rf": "random function", "e2": "canonical DP walk", "e4": "no negation map"}
 
-panels = [("e1", 32), ("e1", 36), ("rf", 36), ("e2", 36), ("e4", 36)]
-fig, axes = plt.subplots(len(panels), 1, figsize=(7.2, 9.6), sharex=True)
+panels = [("e1", 36), ("e1", 40), ("e1shift", 36), ("e1dp", 36), ("rf", 36), ("e2", 36), ("e4", 36)]
+fig, axes = plt.subplots(len(panels), 1, figsize=(7.2, 12.5), sharex=True)
 for ax, (exp, bits) in zip(axes, panels):
     sel = [r for r in rows if r.get("of") == exp and r["bits"] == bits and "speedup_ref_over_arm" in r]
     for y, r in enumerate(sel):
@@ -56,7 +61,8 @@ opmodel = {"base": 6.0, "pm_score": 8.0, "best4": 15.0}  # M-equivalents with S 
 xs = range(len(arms))
 for k, bits in enumerate(sorted({r["bits"] for r in bench})):
     vals = [next((r["cost_ratio_vs_base"] for r in bench if r["bits"] == bits and r["arm"] == a), None) for a in arms]
-    ax.bar([x + 0.25 * k - 0.25 for x in xs], vals, width=0.25, label=f"measured ns ratio, {bits}-bit p")
+    name = {64: "62-bit p (1 limb)", 256: "P-256 p (4 limbs)"}[bits]
+    ax.bar([x + 0.25 * k - 0.25 for x in xs], vals, width=0.25, label=f"measured, {name}")
 ax.bar([x + 0.25 for x in xs], [opmodel[a] / opmodel["base"] for a in arms], width=0.25, label="op-count model (S = M)", color="#999")
 ax.set_xticks(list(xs), ["plain step", "best of P±R", "best of P±R_i, P±R_j"])
 ax.set_ylabel("cost per step / plain step")
