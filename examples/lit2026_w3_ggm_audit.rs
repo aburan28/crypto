@@ -157,7 +157,10 @@ fn load(root: &Path, rel: &str) -> Value {
 fn load_jsonl_first(root: &Path, rel: &str) -> Value {
     let p = root.join(rel);
     let s = fs::read_to_string(&p).unwrap_or_else(|e| panic!("{}: {e}", p.display()));
-    let line = s.lines().find(|l| !l.trim().is_empty()).expect("empty jsonl");
+    let line = s
+        .lines()
+        .find(|l| !l.trim().is_empty())
+        .expect("empty jsonl");
     serde_json::from_str(line).unwrap()
 }
 
@@ -171,9 +174,15 @@ fn num(v: &Value) -> Option<f64> {
 
 /// `(r, cofactor)` of a registered slug, from `docs/curves/registry.json`.
 fn registry_order(reg: &Value, slug: &str) -> Option<(f64, f64)> {
-    let c = reg["curves"].as_array()?.iter().find(|c| c["slug"] == slug)?;
+    let c = reg["curves"]
+        .as_array()?
+        .iter()
+        .find(|c| c["slug"] == slug)?;
     let cur = &c["representations"][0]["curve"];
-    Some((num(&cur["subgroup_order"])?, num(&cur["cofactor"]).unwrap_or(1.0)))
+    Some((
+        num(&cur["subgroup_order"])?,
+        num(&cur["cofactor"]).unwrap_or(1.0),
+    ))
 }
 
 fn parse_m(variant: &str) -> Option<u32> {
@@ -188,11 +197,17 @@ fn parse_m(variant: &str) -> Option<u32> {
 fn parse_n(name: &str) -> Option<u32> {
     // "K_0 / GF(2^41)" or "icv1-f2m41-..."
     if let Some(i) = name.find("2^") {
-        let t: String = name[i + 2..].chars().take_while(|c| c.is_ascii_digit()).collect();
+        let t: String = name[i + 2..]
+            .chars()
+            .take_while(|c| c.is_ascii_digit())
+            .collect();
         return t.parse().ok();
     }
     if let Some(i) = name.find("f2m") {
-        let t: String = name[i + 3..].chars().take_while(|c| c.is_ascii_digit()).collect();
+        let t: String = name[i + 3..]
+            .chars()
+            .take_while(|c| c.is_ascii_digit())
+            .collect();
         return t.parse().ok();
     }
     None
@@ -391,51 +406,179 @@ fn table(root: &Path) -> Value {
     }
     let bt_path = "docs/ic/boundary_targets.json";
     let rungs = [
-        Rung { n: 37, slug: "icv1-f2m37-tm534059-32aad96b",
-            b_src: ("experiments/koblitz-n37-single-target-20261004/ic_summary.jsonl", "/factor_base_points"),
-            target_probes: ("experiments/koblitz-n37-single-target-20261004/ic_targets.jsonl", "/probes"),
-            rank_probes: ("experiments/koblitz-n37-single-target-20261004/ic_summary.jsonl", "/rank_probes_mean"),
-            k_cols: ("experiments/koblitz-n37-single-target-20261004/ic_summary.jsonl", "/orbit_columns"),
-            log2_rec: None, jsonl: true },
-        Rung { n: 41, slug: "icv1-f2m41-tm2308219-7f48b14a",
-            b_src: ("experiments/koblitz-n41-n53-single-target-20261004/runs/n41/r1/ic_summary.jsonl", "/factor_base_points"),
-            target_probes: ("experiments/koblitz-n41-n53-single-target-20261004/runs/n41/r1/ic_targets.jsonl", "/probes"),
-            rank_probes: ("experiments/koblitz-n41-n53-single-target-20261004/runs/n41/r1/ic_summary.jsonl", "/rank_probes_mean"),
-            k_cols: ("experiments/koblitz-n41-n53-single-target-20261004/runs/n41/r1/ic_summary.jsonl", "/orbit_columns"),
-            log2_rec: None, jsonl: true },
-        Rung { n: 53, slug: "icv1-f2m53-tm56619371-dac20a85",
-            b_src: ("experiments/koblitz-n41-n53-single-target-20261004/runs/n53/r1/ic_summary.jsonl", "/factor_base_points"),
-            target_probes: ("experiments/koblitz-n41-n53-single-target-20261004/runs/n53/r1/ic_targets.jsonl", "/probes"),
-            rank_probes: ("experiments/koblitz-n41-n53-single-target-20261004/runs/n53/r1/ic_summary.jsonl", "/rank_probes_mean"),
-            k_cols: ("experiments/koblitz-n41-n53-single-target-20261004/runs/n53/r1/ic_summary.jsonl", "/orbit_columns"),
-            log2_rec: None, jsonl: true },
-        Rung { n: 61, slug: "icv1-f2m61-t158598901-ab42b6c5",
-            b_src: (bt_path, "/regimes/koblitz/records/vs_rho/history/2/metrics/factor_base_points"),
-            target_probes: ("experiments/koblitz-single-target-n61-20260925/claim_report_vs_rho.json", "/operation_accounting/ic_online_operations"),
-            rank_probes: ("experiments/koblitz-single-target-n61-20260925/claim_report_vs_rho.json", "/operation_accounting/ic_rank_probes_mean_pooled"),
-            k_cols: (bt_path, "/regimes/koblitz/records/vs_rho/history/2/metrics/orbit_columns"),
-            log2_rec: Some((bt_path, "/regimes/koblitz/records/vs_rho/history/2/metrics/subgroup_log2_order")), jsonl: false },
-        Rung { n: 71, slug: "icv1-f2m71-t48653080717-2cafaea3",
-            b_src: (bt_path, "/regimes/koblitz/records/vs_rho/history/1/metrics/factor_base_points"),
-            target_probes: ("experiments/koblitz-single-target-n71-20261002/claim_report_vs_rho.json", "/operation_accounting/ic_online_operations"),
-            rank_probes: ("experiments/koblitz-single-target-n71-20261002/claim_report_vs_rho.json", "/operation_accounting/ic_rank_probes_mean_pooled"),
-            k_cols: (bt_path, "/regimes/koblitz/records/vs_rho/history/1/metrics/orbit_columns"),
-            log2_rec: Some((bt_path, "/regimes/koblitz/records/vs_rho/history/1/metrics/subgroup_log2_order")), jsonl: false },
-        Rung { n: 73, slug: "icv1-f2m73-tm184271214331-9d25cc67",
-            b_src: (bt_path, "/regimes/koblitz/records/vs_rho/history/0/metrics/factor_base_points"),
-            target_probes: ("experiments/koblitz-single-target-n73-20261003/claim_report_vs_rho.json", "/operation_accounting/ic_online_operations"),
-            rank_probes: ("experiments/koblitz-single-target-n73-20261003/claim_report_vs_rho.json", "/operation_accounting/ic_rank_probes_mean_pooled"),
-            k_cols: (bt_path, "/regimes/koblitz/records/vs_rho/history/0/metrics/orbit_columns"),
-            log2_rec: Some((bt_path, "/regimes/koblitz/records/vs_rho/history/0/metrics/subgroup_log2_order")), jsonl: false },
-        Rung { n: 83, slug: "icv1-f2m83-t6151469093347-cdcc5432",
-            b_src: (bt_path, "/regimes/koblitz/records/vs_rho/current/metrics/factor_base_points"),
-            target_probes: ("experiments/koblitz-single-target-n83-20261006/claim_report_vs_rho.json", "/operation_accounting/ic_online_operations"),
-            rank_probes: ("experiments/koblitz-single-target-n83-20261006/claim_report_vs_rho.json", "/operation_accounting/ic_rank_probes_mean_pooled"),
-            k_cols: (bt_path, "/regimes/koblitz/records/vs_rho/current/metrics/orbit_columns"),
-            log2_rec: Some((bt_path, "/regimes/koblitz/records/vs_rho/current/metrics/subgroup_log2_order")), jsonl: false },
+        Rung {
+            n: 37,
+            slug: "icv1-f2m37-tm534059-32aad96b",
+            b_src: (
+                "experiments/koblitz-n37-single-target-20261004/ic_summary.jsonl",
+                "/factor_base_points",
+            ),
+            target_probes: (
+                "experiments/koblitz-n37-single-target-20261004/ic_targets.jsonl",
+                "/probes",
+            ),
+            rank_probes: (
+                "experiments/koblitz-n37-single-target-20261004/ic_summary.jsonl",
+                "/rank_probes_mean",
+            ),
+            k_cols: (
+                "experiments/koblitz-n37-single-target-20261004/ic_summary.jsonl",
+                "/orbit_columns",
+            ),
+            log2_rec: None,
+            jsonl: true,
+        },
+        Rung {
+            n: 41,
+            slug: "icv1-f2m41-tm2308219-7f48b14a",
+            b_src: (
+                "experiments/koblitz-n41-n53-single-target-20261004/runs/n41/r1/ic_summary.jsonl",
+                "/factor_base_points",
+            ),
+            target_probes: (
+                "experiments/koblitz-n41-n53-single-target-20261004/runs/n41/r1/ic_targets.jsonl",
+                "/probes",
+            ),
+            rank_probes: (
+                "experiments/koblitz-n41-n53-single-target-20261004/runs/n41/r1/ic_summary.jsonl",
+                "/rank_probes_mean",
+            ),
+            k_cols: (
+                "experiments/koblitz-n41-n53-single-target-20261004/runs/n41/r1/ic_summary.jsonl",
+                "/orbit_columns",
+            ),
+            log2_rec: None,
+            jsonl: true,
+        },
+        Rung {
+            n: 53,
+            slug: "icv1-f2m53-tm56619371-dac20a85",
+            b_src: (
+                "experiments/koblitz-n41-n53-single-target-20261004/runs/n53/r1/ic_summary.jsonl",
+                "/factor_base_points",
+            ),
+            target_probes: (
+                "experiments/koblitz-n41-n53-single-target-20261004/runs/n53/r1/ic_targets.jsonl",
+                "/probes",
+            ),
+            rank_probes: (
+                "experiments/koblitz-n41-n53-single-target-20261004/runs/n53/r1/ic_summary.jsonl",
+                "/rank_probes_mean",
+            ),
+            k_cols: (
+                "experiments/koblitz-n41-n53-single-target-20261004/runs/n53/r1/ic_summary.jsonl",
+                "/orbit_columns",
+            ),
+            log2_rec: None,
+            jsonl: true,
+        },
+        Rung {
+            n: 61,
+            slug: "icv1-f2m61-t158598901-ab42b6c5",
+            b_src: (
+                bt_path,
+                "/regimes/koblitz/records/vs_rho/history/2/metrics/factor_base_points",
+            ),
+            target_probes: (
+                "experiments/koblitz-single-target-n61-20260925/claim_report_vs_rho.json",
+                "/operation_accounting/ic_online_operations",
+            ),
+            rank_probes: (
+                "experiments/koblitz-single-target-n61-20260925/claim_report_vs_rho.json",
+                "/operation_accounting/ic_rank_probes_mean_pooled",
+            ),
+            k_cols: (
+                bt_path,
+                "/regimes/koblitz/records/vs_rho/history/2/metrics/orbit_columns",
+            ),
+            log2_rec: Some((
+                bt_path,
+                "/regimes/koblitz/records/vs_rho/history/2/metrics/subgroup_log2_order",
+            )),
+            jsonl: false,
+        },
+        Rung {
+            n: 71,
+            slug: "icv1-f2m71-t48653080717-2cafaea3",
+            b_src: (
+                bt_path,
+                "/regimes/koblitz/records/vs_rho/history/1/metrics/factor_base_points",
+            ),
+            target_probes: (
+                "experiments/koblitz-single-target-n71-20261002/claim_report_vs_rho.json",
+                "/operation_accounting/ic_online_operations",
+            ),
+            rank_probes: (
+                "experiments/koblitz-single-target-n71-20261002/claim_report_vs_rho.json",
+                "/operation_accounting/ic_rank_probes_mean_pooled",
+            ),
+            k_cols: (
+                bt_path,
+                "/regimes/koblitz/records/vs_rho/history/1/metrics/orbit_columns",
+            ),
+            log2_rec: Some((
+                bt_path,
+                "/regimes/koblitz/records/vs_rho/history/1/metrics/subgroup_log2_order",
+            )),
+            jsonl: false,
+        },
+        Rung {
+            n: 73,
+            slug: "icv1-f2m73-tm184271214331-9d25cc67",
+            b_src: (
+                bt_path,
+                "/regimes/koblitz/records/vs_rho/history/0/metrics/factor_base_points",
+            ),
+            target_probes: (
+                "experiments/koblitz-single-target-n73-20261003/claim_report_vs_rho.json",
+                "/operation_accounting/ic_online_operations",
+            ),
+            rank_probes: (
+                "experiments/koblitz-single-target-n73-20261003/claim_report_vs_rho.json",
+                "/operation_accounting/ic_rank_probes_mean_pooled",
+            ),
+            k_cols: (
+                bt_path,
+                "/regimes/koblitz/records/vs_rho/history/0/metrics/orbit_columns",
+            ),
+            log2_rec: Some((
+                bt_path,
+                "/regimes/koblitz/records/vs_rho/history/0/metrics/subgroup_log2_order",
+            )),
+            jsonl: false,
+        },
+        Rung {
+            n: 83,
+            slug: "icv1-f2m83-t6151469093347-cdcc5432",
+            b_src: (
+                bt_path,
+                "/regimes/koblitz/records/vs_rho/current/metrics/factor_base_points",
+            ),
+            target_probes: (
+                "experiments/koblitz-single-target-n83-20261006/claim_report_vs_rho.json",
+                "/operation_accounting/ic_online_operations",
+            ),
+            rank_probes: (
+                "experiments/koblitz-single-target-n83-20261006/claim_report_vs_rho.json",
+                "/operation_accounting/ic_rank_probes_mean_pooled",
+            ),
+            k_cols: (
+                bt_path,
+                "/regimes/koblitz/records/vs_rho/current/metrics/orbit_columns",
+            ),
+            log2_rec: Some((
+                bt_path,
+                "/regimes/koblitz/records/vs_rho/current/metrics/subgroup_log2_order",
+            )),
+            jsonl: false,
+        },
     ];
     let get = |(file, ptr): (&str, &str), jsonl: bool| -> f64 {
-        let v = if jsonl && file.ends_with(".jsonl") { load_jsonl_first(root, file) } else { load(root, file) };
+        let v = if jsonl && file.ends_with(".jsonl") {
+            load_jsonl_first(root, file)
+        } else {
+            load(root, file)
+        };
         num(v.pointer(ptr).unwrap_or_else(|| panic!("{file} {ptr}"))).unwrap()
     };
     for g in &rungs {
@@ -456,18 +599,25 @@ fn table(root: &Path) -> Value {
         if let Some(src) = g.log2_rec {
             let rec = get(src, false);
             if (rec - r.log2()).abs() > LOG2_TOLERANCE {
-                checks.push(json!({"check": "log2_r", "where": format!("{} {}", src.0, src.1),
-                    "recorded": rec, "from_registry_r": r.log2(), "slug": g.slug}));
+                checks.push(
+                    json!({"check": "log2_r", "where": format!("{} {}", src.0, src.1),
+                    "recorded": rec, "from_registry_r": r.log2(), "slug": g.slug}),
+                );
             }
         }
         // Excluded precompute in the ledger against its own components.
         if let Some(src) = g.log2_rec {
             let ledger = load(root, src.0);
-            let ptr = src.1.replace("/subgroup_log2_order", "/ic_precomputation_ms_excluded_from_online");
+            let ptr = src.1.replace(
+                "/subgroup_log2_order",
+                "/ic_precomputation_ms_excluded_from_online",
+            );
             let claim = load(root, g.target_probes.0);
             if let (Some(ex), Some(d)) = (
                 ledger.pointer(&ptr).and_then(num),
-                claim.get("ic_precompute_detail").or_else(|| claim.get("precompute_detail")),
+                claim
+                    .get("ic_precompute_detail")
+                    .or_else(|| claim.get("precompute_detail")),
             ) {
                 let part = |k: &str| d.get(k).and_then(num);
                 let rank_max = d
@@ -485,16 +635,25 @@ fn table(root: &Path) -> Value {
                 let sum_known: f64 = comps.iter().filter_map(|c| c.1).sum();
                 // The subset of recorded components whose sum is closest to
                 // the recorded figure says what the figure contains.
-                let known: Vec<(&str, f64)> = comps.iter().filter_map(|(k, v)| v.map(|v| (*k, v))).collect();
+                let known: Vec<(&str, f64)> = comps
+                    .iter()
+                    .filter_map(|(k, v)| v.map(|v| (*k, v)))
+                    .collect();
                 let mut best = (f64::INFINITY, 0usize);
                 for mask in 1..(1usize << known.len()) {
-                    let s: f64 = (0..known.len()).filter(|i| mask >> i & 1 == 1).map(|i| known[i].1).sum();
+                    let s: f64 = (0..known.len())
+                        .filter(|i| mask >> i & 1 == 1)
+                        .map(|i| known[i].1)
+                        .sum();
                     let rel = (s - ex).abs() / ex;
                     if rel < best.0 {
                         best = (rel, mask);
                     }
                 }
-                let matched: Vec<&str> = (0..known.len()).filter(|i| best.1 >> i & 1 == 1).map(|i| known[i].0).collect();
+                let matched: Vec<&str> = (0..known.len())
+                    .filter(|i| best.1 >> i & 1 == 1)
+                    .map(|i| known[i].0)
+                    .collect();
                 let includes_rank = matched.contains(&"rank_stage");
                 let includes_index = index.map(|_| matched.contains(&"index_build"));
                 if !includes_rank || includes_index == Some(false) {
@@ -510,7 +669,10 @@ fn table(root: &Path) -> Value {
             }
         }
         let total_probes = rp * k + tp;
-        for (what, val) in [("target_probes_online", tp), ("rank_plus_target_probes", total_probes)] {
+        for (what, val) in [
+            ("target_probes_online", tp),
+            ("rank_plus_target_probes", total_probes),
+        ] {
             let mut v = row(
                 format!("compact-n{}/{what}", g.n),
                 "koblitz_compact_orbit",
@@ -537,7 +699,8 @@ fn table(root: &Path) -> Value {
             let s_entries = k * k * g.n as f64;
             v["advice_entries_k2n"] = json!(s_entries);
             v["ck_adaptive_t_floor"] = json!(ck_adaptive_t(r / a, s_entries));
-            v["log2_s_t2_minus_log2_r_over_a"] = json!((s_entries * val * val).log2() - (r / a).log2());
+            v["log2_s_t2_minus_log2_r_over_a"] =
+                json!((s_entries * val * val).log2() - (r / a).log2());
             // Non-adaptive line (Dinur–Keller–Marmor, in entries): S·T vs r/A.
             v["s_t_over_r_over_a"] = json!(s_entries * val / (r / a));
             if what == "target_probes_online" {
@@ -628,7 +791,12 @@ fn slope_with_ci(by_k: &[(usize, Vec<f64>)], seed: u64) -> (f64, f64, f64) {
     for _ in 0..2000 {
         let res: Vec<(usize, Vec<f64>)> = by_k
             .iter()
-            .map(|(k, v)| (*k, (0..v.len()).map(|_| v[rng.gen_range(0..v.len())]).collect()))
+            .map(|(k, v)| {
+                (
+                    *k,
+                    (0..v.len()).map(|_| v[rng.gen_range(0..v.len())]).collect(),
+                )
+            })
             .collect();
         boots.push(point(&res));
     }
@@ -642,7 +810,14 @@ fn law_slope(ks: &[usize]) -> f64 {
     ols(&x, &y).0
 }
 
-fn summarize(curve: &str, r: f64, a: f64, by_k: Vec<(usize, Vec<f64>)>, seed: u64, source: &str) -> Value {
+fn summarize(
+    curve: &str,
+    r: f64,
+    a: f64,
+    by_k: Vec<(usize, Vec<f64>)>,
+    seed: u64,
+    source: &str,
+) -> Value {
     let ks: Vec<usize> = by_k.iter().map(|(k, _)| *k).collect();
     let (s, lo, hi) = slope_with_ci(&by_k, seed);
     let per_k: Vec<Value> = by_k
@@ -656,7 +831,10 @@ fn summarize(curve: &str, r: f64, a: f64, by_k: Vec<(usize, Vec<f64>)>, seed: u6
                 "batch_law": batch_law(*k)})
         })
         .collect();
-    let k1 = by_k.iter().find(|(k, _)| *k == 1).map(|(_, v)| v.iter().sum::<f64>() / v.len() as f64);
+    let k1 = by_k
+        .iter()
+        .find(|(k, _)| *k == 1)
+        .map(|(_, v)| v.iter().sum::<f64>() / v.len() as f64);
     let per_k: Vec<Value> = per_k
         .into_iter()
         .map(|mut p| {
@@ -687,11 +865,23 @@ fn fit(root: &Path) -> Value {
                 .iter()
                 .map(|s| {
                     let k = s["k"].as_u64().unwrap() as usize;
-                    let g: Vec<f64> = s["runs"].as_array().unwrap().iter().map(|x| num(&x["gae"]).unwrap()).collect();
+                    let g: Vec<f64> = s["runs"]
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .map(|x| num(&x["gae"]).unwrap())
+                        .collect();
                     (k, g)
                 })
                 .collect();
-            out.push(summarize(c["instance"].as_str().unwrap(), r, a, by_k, 0x5733, &rel));
+            out.push(summarize(
+                c["instance"].as_str().unwrap(),
+                r,
+                a,
+                by_k,
+                0x5733,
+                &rel,
+            ));
         }
     }
     json!({"schema": "lit2026-w3-multitarget-fit/v1", "unit": "group-addition equivalents (gae) per batch, whole batch",
@@ -746,17 +936,41 @@ fn measure(batches: usize, prime_bits: u32) -> Value {
             let planted: Vec<u64> = (0..k).map(|_| rng.gen_range(1..r)).collect();
             let mut ops = GroupOps::default();
             let targets: Vec<_> = planted.iter().map(|&d| g.mul(&mut ops, gen, d)).collect();
-            let res = rho_batch_with(&g, &NegationClasses { r }, gen, &targets, r, derive(seed, &[2, k as u64, b as u64]),
-                rho_cap(r, 64.0), RhoWalk::negation());
-            let ok = res.per_target.iter().zip(&planted).all(|(t, &d)| t.verified && t.recovered == Some(d));
+            let res = rho_batch_with(
+                &g,
+                &NegationClasses { r },
+                gen,
+                &targets,
+                r,
+                derive(seed, &[2, k as u64, b as u64]),
+                rho_cap(r, 64.0),
+                RhoWalk::negation(),
+            );
+            let ok = res
+                .per_target
+                .iter()
+                .zip(&planted)
+                .all(|(t, &d)| t.verified && t.recovered == Some(d));
             all_ok &= ok;
             tot.push(res.gae);
-            runs_out.push(json!({"k": k, "batch": b, "gae": res.gae, "all_verified": ok,
-                "solved_on_an_earlier_trail": res.counters.get("solved_on_an_earlier_trail")}));
+            runs_out.push(
+                json!({"k": k, "batch": b, "gae": res.gae, "all_verified": ok,
+                "solved_on_an_earlier_trail": res.counters.get("solved_on_an_earlier_trail")}),
+            );
         }
         by_k.push((k, tot));
     }
-    let mut s = summarize(&format!("prime-floor q={} N={} (ell={}, t={})", gp.q, gp.n, gp.ell, gp.t), r as f64, 2.0, by_k, 0x5734, "fresh: rho_batch_with, NegationClasses, RhoWalk::negation");
+    let mut s = summarize(
+        &format!(
+            "prime-floor q={} N={} (ell={}, t={})",
+            gp.q, gp.n, gp.ell, gp.t
+        ),
+        r as f64,
+        2.0,
+        by_k,
+        0x5734,
+        "fresh: rho_batch_with, NegationClasses, RhoWalk::negation",
+    );
     s["all_verified"] = json!(all_ok);
     s["curve_params"] = json!({"p": g.p, "a": g.a, "b": g.b, "order": inst.group_order, "cofactor": inst.cofactor, "generator": inst.generator});
     s["runs"] = json!(runs_out);
@@ -775,17 +989,35 @@ fn measure(batches: usize, prime_bits: u32) -> Value {
             let mut rng = StdRng::seed_from_u64(derive(seed, &[3, k as u64, b as u64]));
             let planted: Vec<u64> = (0..k).map(|_| rng.gen_range(1..r)).collect();
             let mut ops = GroupOps::default();
-            let targets: Vec<_> = planted.iter().map(|&d| bg.mul(&mut ops, kin.generator, d)).collect();
-            let res = signed_frobenius_rho_batch(&kin, &targets, derive(seed, &[4, k as u64, b as u64])).unwrap();
-            let ok = res.per_target.iter().zip(&planted).all(|(t, &d)| t.verified && t.recovered == Some(d));
+            let targets: Vec<_> = planted
+                .iter()
+                .map(|&d| bg.mul(&mut ops, kin.generator, d))
+                .collect();
+            let res =
+                signed_frobenius_rho_batch(&kin, &targets, derive(seed, &[4, k as u64, b as u64]))
+                    .unwrap();
+            let ok = res
+                .per_target
+                .iter()
+                .zip(&planted)
+                .all(|(t, &d)| t.verified && t.recovered == Some(d));
             all_ok &= ok;
             tot.push(res.gae);
-            runs_out.push(json!({"k": k, "batch": b, "gae": res.gae, "all_verified": ok,
-                "solved_on_an_earlier_trail": res.counters.get("solved_on_an_earlier_trail")}));
+            runs_out.push(
+                json!({"k": k, "batch": b, "gae": res.gae, "all_verified": ok,
+                "solved_on_an_earlier_trail": res.counters.get("solved_on_an_earlier_trail")}),
+            );
         }
         by_k.push((k, tot));
     }
-    let mut s = summarize(&kin.name, r as f64, 82.0, by_k, 0x5735, "fresh: signed_frobenius_rho_batch");
+    let mut s = summarize(
+        &kin.name,
+        r as f64,
+        82.0,
+        by_k,
+        0x5735,
+        "fresh: signed_frobenius_rho_batch",
+    );
     s["all_verified"] = json!(all_ok);
     s["runs"] = json!(runs_out);
     curves.push(s);
@@ -826,16 +1058,45 @@ fn report(t: &Value, fit: &Value, meas: &Value) -> String {
     fams.dedup();
     for fam in fams {
         let rs: Vec<&Value> = rows.iter().filter(|r| r["family"] == fam).collect();
-        let nv: Vec<&&Value> = rs.iter().filter(|r| f(&r["delta_counting_upper"]) < 1.0).collect();
-        let minr = rs.iter().map(|r| f(&r["ratio_measured_over_theta"])).fold(f64::INFINITY, f64::min);
-        let minnv = nv.iter().map(|r| f(&r["ratio_measured_over_theta"])).fold(f64::INFINITY, f64::min);
-        let minsq = rs.iter().map(|r| f(&r["measured"]) / f(&r["sqrt_r_over_aut"])).fold(f64::INFINITY, f64::min);
+        let nv: Vec<&&Value> = rs
+            .iter()
+            .filter(|r| f(&r["delta_counting_upper"]) < 1.0)
+            .collect();
+        let minr = rs
+            .iter()
+            .map(|r| f(&r["ratio_measured_over_theta"]))
+            .fold(f64::INFINITY, f64::min);
+        let minnv = nv
+            .iter()
+            .map(|r| f(&r["ratio_measured_over_theta"]))
+            .fold(f64::INFINITY, f64::min);
+        let minsq = rs
+            .iter()
+            .map(|r| f(&r["measured"]) / f(&r["sqrt_r_over_aut"]))
+            .fold(f64::INFINITY, f64::min);
         let below = rs
             .iter()
-            .filter(|r| r["flags"].as_array().unwrap().iter().any(|x| x.as_str().unwrap().starts_with("below")))
+            .filter(|r| {
+                r["flags"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .any(|x| x.as_str().unwrap().starts_with("below"))
+            })
             .count();
-        let unit = if rs[0]["measured_is_group_ops"] == true { "" } else { " (probes, not group ops)" };
-        s.push_str(&format!("| {fam}{unit} | {} | {} | {} | {} | {} | {below} |\n", rs.len(), nv.len(), sig(minr), sig(minnv), sig(minsq)));
+        let unit = if rs[0]["measured_is_group_ops"] == true {
+            ""
+        } else {
+            " (probes, not group ops)"
+        };
+        s.push_str(&format!(
+            "| {fam}{unit} | {} | {} | {} | {} | {} | {below} |\n",
+            rs.len(),
+            nv.len(),
+            sig(minr),
+            sig(minnv),
+            sig(minsq)
+        ));
     }
     s.push_str("\n### Rows with δ_upper < 1 (the bound is not vacuous)\n\n| configuration | log2 r | A | m | abs F | δ measured | δ upper (count) | 1/δ | √(r/A) | bound | Thm 3.2, ε=½ | measured (GAE) | measured/bound | flags |\n|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|\n");
     for r in rows.iter().filter(|r| f(&r["delta_counting_upper"]) < 1.0) {
@@ -854,11 +1115,20 @@ fn report(t: &Value, fit: &Value, meas: &Value) -> String {
             sig(f(&r["bound_explicit_eps_half"])),
             sig(f(&r["measured"])),
             sig(f(&r["ratio_measured_over_theta"])),
-            r["flags"].as_array().unwrap().iter().map(|x| x.as_str().unwrap()).collect::<Vec<_>>().join(", ")
+            r["flags"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|x| x.as_str().unwrap())
+                .collect::<Vec<_>>()
+                .join(", ")
         ));
     }
     s.push_str("\n### Compact-orbit ladder (4-sum relations; probes are S3 solve + root-table lookup, not group operations)\n\n| rung | log2 r | A | B = abs F | K | δ upper | measured | probes | probes / √(r/A) | S = K²n | log2(S·T²) − log2(r/A) | S·T/(r/A) | frozen / rank mean | P(T ≤ frozen) if exponential |\n|:--|--:|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|\n");
-    for r in rows.iter().filter(|r| r["family"] == "koblitz_compact_orbit") {
+    for r in rows
+        .iter()
+        .filter(|r| r["family"] == "koblitz_compact_orbit")
+    {
         let id = r["id"].as_str().unwrap();
         let (rung, what) = id.split_once('/').unwrap();
         s.push_str(&format!(
@@ -881,7 +1151,13 @@ fn report(t: &Value, fit: &Value, meas: &Value) -> String {
     let parts: Vec<String> = rows
         .iter()
         .filter(|r| r["id"].as_str().unwrap().ends_with("target_probes_online"))
-        .map(|r| format!("{} {}", r["id"].as_str().unwrap().split('/').next().unwrap(), sig(f(&r["s_t_over_r_over_a_at_rank_mean"]))))
+        .map(|r| {
+            format!(
+                "{} {}",
+                r["id"].as_str().unwrap().split('/').next().unwrap(),
+                sig(f(&r["s_t_over_r_over_a_at_rank_mean"]))
+            )
+        })
         .collect();
     s.push_str(&parts.join(", "));
     s.push_str(".\n\n### Multiplier closure (non-adaptive table arm)\n\n| arm | r | A | pairs | canonical entries | mean first-hit probes T | pairs·T/r | canonical·T/(r/A) | logs | target |\n|:--|--:|--:|--:|--:|--:|--:|--:|:--|:--|\n");
@@ -903,7 +1179,12 @@ fn report(t: &Value, fit: &Value, meas: &Value) -> String {
     s.push_str("\n### Record checks\n\n");
     for c in t["record_checks"].as_array().unwrap() {
         if c["check"] == "log2_r" {
-            s.push_str(&format!("- `{}`: recorded log2 r = {}, log2 of the exact r = {:.4}\n", c["where"].as_str().unwrap(), c["recorded"], f(&c["from_registry_r"])));
+            s.push_str(&format!(
+                "- `{}`: recorded log2 r = {}, log2 of the exact r = {:.4}\n",
+                c["where"].as_str().unwrap(),
+                c["recorded"],
+                f(&c["from_registry_r"])
+            ));
         } else {
             s.push_str(&format!(
                 "- `{}` (n = {}): recorded excluded precompute {} ms; the rung's own components are {} (base load / index build / rank stage / linear algebra, ms); includes rank stage: {}; includes index build: {}\n",
@@ -921,12 +1202,19 @@ fn report(t: &Value, fit: &Value, meas: &Value) -> String {
                 c["curve"].as_str().unwrap(),
                 f(&c["log2_r"]),
                 f(&c["aut"]),
-                c["ks"].as_array().unwrap().iter().map(|k| k.as_u64().unwrap()).collect::<Vec<_>>(),
+                c["ks"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|k| k.as_u64().unwrap())
+                    .collect::<Vec<_>>(),
                 f(&c["slope"]),
                 f(&ci[0]),
                 f(&ci[1]),
                 f(&c["kuhn_struik_law_slope_same_ks"]),
-                c.get("all_verified").map(|v| v.to_string()).unwrap_or_else(|| "true (ledger §19.3)".into())
+                c.get("all_verified")
+                    .map(|v| v.to_string())
+                    .unwrap_or_else(|| "true (ledger §19.3)".into())
             ));
         }
     }
@@ -953,7 +1241,9 @@ fn report(t: &Value, fit: &Value, meas: &Value) -> String {
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.get(1).map(String::as_str) == Some("report") {
-        let rd = |i: usize| -> Value { serde_json::from_str(&fs::read_to_string(&args[i]).unwrap()).unwrap() };
+        let rd = |i: usize| -> Value {
+            serde_json::from_str(&fs::read_to_string(&args[i]).unwrap()).unwrap()
+        };
         print!("{}", report(&rd(2), &rd(3), &rd(4)));
         return;
     }
@@ -1014,8 +1304,19 @@ mod tests {
         assert_eq!(rows.len(), 208);
         // No configuration's recorded cost sits below its bound.
         for r in rows {
-            let flags: Vec<&str> = r["flags"].as_array().unwrap().iter().map(|x| x.as_str().unwrap()).collect();
-            assert!(!flags.iter().any(|f| f.starts_with("below") || f.contains("SIGNIFICANT")), "{}", r["id"]);
+            let flags: Vec<&str> = r["flags"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|x| x.as_str().unwrap())
+                .collect();
+            assert!(
+                !flags
+                    .iter()
+                    .any(|f| f.starts_with("below") || f.contains("SIGNIFICANT")),
+                "{}",
+                r["id"]
+            );
         }
         // The one recorded log2 r that disagrees with the exact order (n61).
         let checks = t["record_checks"].as_array().unwrap();
@@ -1035,8 +1336,10 @@ mod tests {
 
     #[test]
     fn slope_of_exact_square_root_is_half() {
-        let by_k: Vec<(usize, Vec<f64>)> =
-            [1usize, 2, 4, 8, 16].iter().map(|&k| (k, vec![1000.0 * (k as f64).sqrt(); 3])).collect();
+        let by_k: Vec<(usize, Vec<f64>)> = [1usize, 2, 4, 8, 16]
+            .iter()
+            .map(|&k| (k, vec![1000.0 * (k as f64).sqrt(); 3]))
+            .collect();
         let (s, lo, hi) = slope_with_ci(&by_k, 1);
         assert!((s - 0.5).abs() < 1e-12 && (lo - 0.5).abs() < 1e-12 && (hi - 0.5).abs() < 1e-12);
         assert!((batch_law(1) - 1.0).abs() < 1e-15);

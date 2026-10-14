@@ -29,9 +29,18 @@ const ADDS: usize = 2_000_000;
 const SECONDS: f64 = 2.0;
 
 fn main() {
-    let degree: u32 = std::env::args().nth(1).and_then(|s| s.parse().ok()).unwrap_or(41);
-    let points: usize = std::env::args().nth(2).and_then(|s| s.parse().ok()).unwrap_or(15300);
-    let window: usize = std::env::args().nth(3).and_then(|s| s.parse().ok()).unwrap_or(256);
+    let degree: u32 = std::env::args()
+        .nth(1)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(41);
+    let points: usize = std::env::args()
+        .nth(2)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(15300);
+    let window: usize = std::env::args()
+        .nth(3)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(256);
     let kc = KoblitzCurve::new(0, degree).expect("curve");
     let fb = build_subgroup_orbit_factor_base(&kc, 1, points).expect("factor base");
     let fc = FastCurve::new(&kc.curve).expect("fast curve");
@@ -74,7 +83,10 @@ fn main() {
         swept += window;
     }
     let swept_ns = start.elapsed().as_secs_f64() * 1e9 / swept as f64;
-    println!("\nswept window: {swept_ns:.1} ns a summand = {:.2} adds", swept_ns / add_ns);
+    println!(
+        "\nswept window: {swept_ns:.1} ns a summand = {:.2} adds",
+        swept_ns / add_ns
+    );
 
     println!(
         "\n{:>8} {:>8} {:>9} {:>9} {:>9} {:>9}",
@@ -109,12 +121,7 @@ fn main() {
             targets += 1;
             t = fc.add(t, stride);
             let off = (targets * 7919) % idxs.len();
-            table.decompose_fast_scan(
-                t,
-                3,
-                Scan::Indices(&doubled[off..off + w]),
-                &mut scratch,
-            );
+            table.decompose_fast_scan(t, 3, Scan::Indices(&doubled[off..off + w]), &mut scratch);
             scanned += w;
         }
         let ns = start.elapsed().as_secs_f64() * 1e9 / scanned as f64;

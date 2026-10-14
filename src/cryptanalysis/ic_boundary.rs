@@ -1420,11 +1420,11 @@ impl RhoClasses<PrimeCurve> for CubicClasses {
         let mut best_key = g.key(&p);
         let mut best_mu = 1u64;
         let kappa_sq = mulmod(self.kappa, self.kappa, c);
-        let mut consider = |pt: PrimePoint,
-                            mu: u64,
-                            best: &mut PrimePoint,
-                            best_key: &mut u64,
-                            best_mu: &mut u64| {
+        let consider = |pt: PrimePoint,
+                        mu: u64,
+                        best: &mut PrimePoint,
+                        best_key: &mut u64,
+                        best_mu: &mut u64| {
             let k = g.key(&pt);
             if k < *best_key {
                 *best = pt;
@@ -8176,10 +8176,6 @@ mod tests {
         assert!(stalled.counters["walks_capped"] > 0, "{stalled:?}");
     }
 
-    /// The signed-Frobenius classes name one representative per class
-    /// `{±φ^t(P)}` and the multiplier that reaches it: `rep = [μ]P` on the
-    /// subgroup, and every conjugate names the same representative.
-    #[test]
     /// The six-class canonicalisation of a j = 0 curve: the orbit of
     /// zeta_3 and negation collapses to one representative whose
     /// multiplier really maps the point to it, and rho.cubic solves a
@@ -8288,6 +8284,9 @@ mod tests {
         }
     }
 
+    /// The signed-Frobenius classes name one representative per class
+    /// `{±φ^t(P)}` and the multiplier that reaches it: `rep = [μ]P` on the
+    /// subgroup, and every conjugate names the same representative.
     #[test]
     fn signed_frobenius_classes_name_the_class_and_its_multiplier() {
         let inst = koblitz_instance_best(23).expect("a Koblitz curve at n = 23");

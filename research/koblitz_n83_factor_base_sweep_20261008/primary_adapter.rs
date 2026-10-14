@@ -5,8 +5,8 @@
 
 use super::{
     compact_cold, curve, frozen_v2_source_commit, general, load_object, parse_point, point_json,
-    point_set_hash, v2_design_hash, v2_row_is_declared, words, write_new_json,
-    Result, PREFIX, SEEDS, STUDY, V2_SIZES, V2_SUBDIR,
+    point_set_hash, v2_design_hash, v2_row_is_declared, words, write_new_json, Result, PREFIX,
+    SEEDS, STUDY, V2_SIZES, V2_SUBDIR,
 };
 use crypto_lib::binary_ecc::curve::point_neg;
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
@@ -17,7 +17,7 @@ use crypto_lib::cryptanalysis::binary_semaev_chain_sat::{
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_explicit_frobenius_point_factor_base, build_union_s4_encoding,
     koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count, point_key,
-    DecompositionStrategy, FrobeniusFactorBase, ChainS3Limits, KoblitzCurve, KoblitzIcOptions,
+    ChainS3Limits, DecompositionStrategy, FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions,
     SatDecompositionOptions,
 };
 use num_bigint::BigUint;
@@ -54,9 +54,8 @@ fn process_usage() -> Value {
         let mut usage = std::mem::MaybeUninit::<libc::rusage>::uninit();
         if unsafe { libc::getrusage(libc::RUSAGE_SELF, usage.as_mut_ptr()) } == 0 {
             let usage = unsafe { usage.assume_init() };
-            let seconds = |value: libc::timeval| {
-                value.tv_sec as f64 + value.tv_usec as f64 / 1_000_000.0
-            };
+            let seconds =
+                |value: libc::timeval| value.tv_sec as f64 + value.tv_usec as f64 / 1_000_000.0;
             let multiplier = if cfg!(target_os = "macos") { 1 } else { 1024 };
             return json!({
                 "cpu_seconds":seconds(usage.ru_utime)+seconds(usage.ru_stime),
@@ -221,7 +220,12 @@ fn load_panel_selected(
     policy: &str,
     seed: u64,
 ) -> Result<(PrimaryBase, Value, String)> {
-    if !["public_x_sequential", "public_x_hash", "public_x_gray_prefix"].contains(&policy)
+    if ![
+        "public_x_sequential",
+        "public_x_hash",
+        "public_x_gray_prefix",
+    ]
+    .contains(&policy)
         || !SEEDS.contains(&seed)
     {
         return Err("primary base policy or seed outside frozen panel".into());
@@ -251,10 +255,20 @@ fn load_panel_selected(
     };
     if !panel_shape_valid
         || manifest["study"] != STUDY
-        || replay["schema"] != if v2 { "n83.factor-base-replay/v2-size-frontier" } else { "n83.factor-base-replay/v1" }
+        || replay["schema"]
+            != if v2 {
+                "n83.factor-base-replay/v2-size-frontier"
+            } else {
+                "n83.factor-base-replay/v1"
+            }
         || replay["status"] != "PASS"
         || replay["panel_manifest_blake3"] != manifest_hash
-        || storage["schema"] != if v2 { "n83.factor-base-storage/v2-size-frontier" } else { "n83.factor-base-storage/v1" }
+        || storage["schema"]
+            != if v2 {
+                "n83.factor-base-storage/v2-size-frontier"
+            } else {
+                "n83.factor-base-storage/v1"
+            }
         || storage["status"] != "PASS"
         || storage["manifest_blake3"] != manifest_hash
         || storage["bucket"] != "crypto-autoresearcher"
@@ -277,15 +291,24 @@ fn load_panel_selected(
         return Err("ambiguous primary base selection".into());
     }
     let expected_uri = if v2 {
-        format!("{storage_prefix}/a0/{}", row["object"].as_str().ok_or("object path")?)
+        format!(
+            "{storage_prefix}/a0/{}",
+            row["object"].as_str().ok_or("object path")?
+        )
     } else {
-        format!("{PREFIX}/{STUDY}/a0/{}", row["object"].as_str().ok_or("object path")?)
+        format!(
+            "{PREFIX}/{STUDY}/a0/{}",
+            row["object"].as_str().ok_or("object path")?
+        )
     };
     if row["s3_uri"] != expected_uri {
         return Err("selected base S3 destination mismatch".into());
     }
     let checks = replay["checks"].as_array().ok_or("replay checks")?;
-    let matching: Vec<_> = checks.iter().filter(|check| check["object"] == row["object"]).collect();
+    let matching: Vec<_> = checks
+        .iter()
+        .filter(|check| check["object"] == row["object"])
+        .collect();
     if matching.len() != 1
         || matching[0]["status"] != "PASS"
         || matching[0]["points_checked"].as_u64() != Some(166 * columns as u64)
@@ -295,7 +318,11 @@ fn load_panel_selected(
     }
     let stored = storage["objects"].as_array().ok_or("storage object rows")?;
     if stored.len() != expected_count
-        || stored.iter().filter(|item| item["s3_uri"] == row["s3_uri"]).count() != 1
+        || stored
+            .iter()
+            .filter(|item| item["s3_uri"] == row["s3_uri"])
+            .count()
+            != 1
         || !stored.iter().any(|item| {
             item["s3_uri"] == row["s3_uri"]
                 && item["compressed_blake3"] == row["compressed_blake3"]
@@ -428,8 +455,7 @@ fn checked_primary_probe_source(root: &Path) -> Result<()> {
 fn frozen_primary_probe_source() -> Result<(String, &'static str)> {
     if let Some(path) = std::env::var_os("ICV1_FROZEN_SOURCE_DIR") {
         let root = std::path::PathBuf::from(path);
-        let attestation: Value =
-            serde_json::from_slice(&fs::read(root.join("attestation.json"))?)?;
+        let attestation: Value = serde_json::from_slice(&fs::read(root.join("attestation.json"))?)?;
         let commit = attestation["source_commit"]
             .as_str()
             .ok_or("source snapshot lacks a commit")?;
@@ -454,25 +480,47 @@ fn frozen_primary_probe_source() -> Result<(String, &'static str)> {
 /// the Linux worker. The worker compares the snapshot to its compiled bytes.
 fn frozen_chain_source() -> Result<(String, &'static str)> {
     let files: [(&str, &[u8]); 5] = [
-        ("examples/koblitz_n83_factor_base_export.rs", include_bytes!("../../examples/koblitz_n83_factor_base_export.rs")),
-        ("research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs", include_bytes!("primary_adapter.rs")),
-        ("src/cryptanalysis/binary_semaev_chain_sat.rs", include_bytes!("../../src/cryptanalysis/binary_semaev_chain_sat.rs")),
-        ("src/cryptanalysis/koblitz_index_calculus.rs", include_bytes!("../../src/cryptanalysis/koblitz_index_calculus.rs")),
-        ("research/koblitz_n83_factor_base_sweep_20261008/size-frontier-v2.json", include_bytes!("size-frontier-v2.json")),
+        (
+            "examples/koblitz_n83_factor_base_export.rs",
+            include_bytes!("../../examples/koblitz_n83_factor_base_export.rs"),
+        ),
+        (
+            "research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs",
+            include_bytes!("primary_adapter.rs"),
+        ),
+        (
+            "src/cryptanalysis/binary_semaev_chain_sat.rs",
+            include_bytes!("../../src/cryptanalysis/binary_semaev_chain_sat.rs"),
+        ),
+        (
+            "src/cryptanalysis/koblitz_index_calculus.rs",
+            include_bytes!("../../src/cryptanalysis/koblitz_index_calculus.rs"),
+        ),
+        (
+            "research/koblitz_n83_factor_base_sweep_20261008/size-frontier-v2.json",
+            include_bytes!("size-frontier-v2.json"),
+        ),
     ];
     let (root, commit, mode) = if let Some(path) = std::env::var_os("ICV1_FROZEN_SOURCE_DIR") {
         let root = std::path::PathBuf::from(path);
         let attestation: Value = serde_json::from_slice(&fs::read(root.join("attestation.json"))?)?;
-        let commit = attestation["source_commit"].as_str().ok_or("chain source snapshot lacks a commit")?;
+        let commit = attestation["source_commit"]
+            .as_str()
+            .ok_or("chain source snapshot lacks a commit")?;
         if attestation["schema"] != "n83.chain-s3-source-attestation/v1"
             || attestation["status_clean"] != true
             || commit.len() != 40
-            || !commit.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+            || !commit.bytes().all(|byte| byte.is_ascii_hexdigit())
+        {
             return Err("invalid chained-S3 source attestation".into());
         }
         (root, commit.to_owned(), "supervised_snapshot")
     } else {
-        (std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")), frozen_v2_source_commit()?, "clean_checkout")
+        (
+            std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")),
+            frozen_v2_source_commit()?,
+            "clean_checkout",
+        )
     };
     for (path, compiled) in files {
         if blake3::hash(&fs::read(root.join(path))?) != blake3::hash(compiled) {
@@ -487,16 +535,26 @@ fn frozen_chain_source() -> Result<(String, &'static str)> {
 /// A hard cgroup memory cap is mandatory here; the caller supplies the wall cap.
 #[allow(clippy::too_many_arguments)]
 pub(super) fn chain_capacity_cli(
-    root: &Path, columns: usize, policy: &str, seed: u64, m: usize,
-    identity_mask: u32, max_variables: u32, max_domain_clauses: usize,
-    memory_mib: u64, output: &Path, frobenius_orbits: bool,
+    root: &Path,
+    columns: usize,
+    policy: &str,
+    seed: u64,
+    m: usize,
+    identity_mask: u32,
+    max_variables: u32,
+    max_domain_clauses: usize,
+    memory_mib: u64,
+    output: &Path,
+    frobenius_orbits: bool,
     order_first_pair: bool,
 ) -> Result<Value> {
     if !([64, 256, 600].contains(&columns) || V2_SIZES.contains(&columns))
         || !(5..=6).contains(&m)
         || identity_mask >= (1u32 << (m - 2))
-        || max_variables == 0 || max_domain_clauses == 0
-        || (order_first_pair && !frobenius_orbits) {
+        || max_variables == 0
+        || max_domain_clauses == 0
+        || (order_first_pair && !frobenius_orbits)
+    {
         return Err("chained-S3 capacity parameters outside supported domain".into());
     }
     let memory_limit_bytes = checked_cgroup_memory_limit(memory_mib)?;
@@ -506,29 +564,46 @@ pub(super) fn chain_capacity_cli(
     let base_import_ms = start.elapsed().as_secs_f64() * 1000.0;
     let (target, corpus_hash) = public_target(root, &base.curve)?;
     let target_validation_ms = start.elapsed().as_secs_f64() * 1000.0 - base_import_ms;
-    let mut codes: Vec<BigUint> = base.factor_base.subspace.iter().map(F2mElement::to_biguint).collect();
+    let mut codes: Vec<BigUint> = base
+        .factor_base
+        .subspace
+        .iter()
+        .map(F2mElement::to_biguint)
+        .collect();
     codes.sort_unstable();
     codes.dedup();
     if codes.len() != 83 * columns {
-        return Err("primary coordinate domain does not contain 83 distinct x values per column".into());
+        return Err(
+            "primary coordinate domain does not contain 83 distinct x values per column".into(),
+        );
     }
     let representatives: Vec<BigUint> = if frobenius_orbits {
-        base.factor_base.signed_orbits.iter().map(|orbit| {
-            match orbit.first().and_then(|&index| base.factor_base.points.get(index)) {
-                Some(BinaryPoint::Affine { x, .. }) => Ok(x.to_biguint()),
-                _ => Err("replayed primary orbit lacks an affine representative".into()),
-            }
-        }).collect::<Result<_>>()?
+        base.factor_base
+            .signed_orbits
+            .iter()
+            .map(|orbit| {
+                match orbit
+                    .first()
+                    .and_then(|&index| base.factor_base.points.get(index))
+                {
+                    Some(BinaryPoint::Affine { x, .. }) => Ok(x.to_biguint()),
+                    _ => Err("replayed primary orbit lacks an affine representative".into()),
+                }
+            })
+            .collect::<Result<_>>()?
     } else {
         Vec::new()
     };
     let orbit_size = if frobenius_orbits {
         if representatives.len() != columns
-            || representatives.iter().collect::<HashSet<_>>().len() != columns {
+            || representatives.iter().collect::<HashSet<_>>().len() != columns
+        {
             return Err("primary orbit domain lacks distinct representatives".into());
         }
-        Some(frobenius_orbit_domain_size(83, m, representatives.len())
-            .ok_or("invalid Frobenius-orbit domain")?)
+        Some(
+            frobenius_orbit_domain_size(83, m, representatives.len())
+                .ok_or("invalid Frobenius-orbit domain")?,
+        )
     } else {
         None
     };
@@ -549,28 +624,44 @@ pub(super) fn chain_capacity_cli(
     } else if required_domain_clauses > max_domain_clauses {
         "UNKNOWN_domain_clause_cap"
     } else {
-        let target_x = match &target { BinaryPoint::Affine { x, .. } => Some(x), BinaryPoint::Infinity => None };
+        let target_x = match &target {
+            BinaryPoint::Affine { x, .. } => Some(x),
+            BinaryPoint::Infinity => None,
+        };
         let mut built = ChainedS3Encoding::build(
-            m, &base.curve.curve.irreducible, &base.curve.curve.b,
-            target_x, identity_mask, max_variables,
-        ).map_err(|_| "chained-S3 model build failed after preflight")?;
+            m,
+            &base.curve.curve.irreducible,
+            &base.curve.curve.b,
+            target_x,
+            identity_mask,
+            max_variables,
+        )
+        .map_err(|_| "chained-S3 model build failed after preflight")?;
         if frobenius_orbits {
-            built.constrain_frobenius_orbit_summands(
-                &representatives, max_variables, max_domain_clauses,
-            ).map_err(|_| "chained-S3 orbit-domain install failed after preflight")?;
+            built
+                .constrain_frobenius_orbit_summands(
+                    &representatives,
+                    max_variables,
+                    max_domain_clauses,
+                )
+                .map_err(|_| "chained-S3 orbit-domain install failed after preflight")?;
         } else {
-            built.constrain_summands(&codes, max_domain_clauses)
+            built
+                .constrain_summands(&codes, max_domain_clauses)
                 .map_err(|_| "chained-S3 finite-domain install failed after preflight")?;
         }
         if order_first_pair {
-            built.order_first_pair(max_variables)
+            built
+                .order_first_pair(max_variables)
                 .map_err(|_| "chained-S3 first-pair order failed after preflight")?;
         }
         enc = Some(built);
         "PASS_model_construction_only"
     };
     let model_construction_ms = model_start.elapsed().as_secs_f64() * 1000.0;
-    let cgroup_peak_bytes: u64 = fs::read_to_string("/sys/fs/cgroup/memory.peak")?.trim().parse()?;
+    let cgroup_peak_bytes: u64 = fs::read_to_string("/sys/fs/cgroup/memory.peak")?
+        .trim()
+        .parse()?;
     let mut receipt = json!({
         "schema":"n83.chain-s3-capacity-worker/v1", "study":STUDY, "status":status,
         "curve_a":0, "fixture":0, "orbit_columns":columns, "policy":policy, "seed":seed,
@@ -604,8 +695,15 @@ pub(super) fn chain_capacity_cli(
         "rank_stage_executed":false, "total_index_calculus_runtime_ms":Value::Null,
         "selected_best_total_runtime":Value::Null
     });
-    receipt.as_object_mut().ok_or("invalid chained-S3 receipt")?
-        .extend(measurements.as_object().ok_or("invalid chained-S3 measurements")?.clone());
+    receipt
+        .as_object_mut()
+        .ok_or("invalid chained-S3 receipt")?
+        .extend(
+            measurements
+                .as_object()
+                .ok_or("invalid chained-S3 measurements")?
+                .clone(),
+        );
     write_new_json(output, &receipt)?;
     Ok(receipt)
 }
@@ -877,7 +975,16 @@ pub(super) fn run_cli(
     budget_seconds: u64,
     run_dir: &Path,
 ) -> Result<Value> {
-    run_with_config(root, columns, m, strategy_name, max_trials, budget_seconds, run_dir, None)
+    run_with_config(
+        root,
+        columns,
+        m,
+        strategy_name,
+        max_trials,
+        budget_seconds,
+        run_dir,
+        None,
+    )
 }
 
 struct ChainRunConfig<'a> {
@@ -894,32 +1001,59 @@ struct ChainRunConfig<'a> {
 /// hard-memory cgroup. The outer supervisor owns the separate wall deadline.
 #[allow(clippy::too_many_arguments)]
 pub(super) fn run_chain_cli(
-    root: &Path, fixture_root: &Path, columns: usize, policy: &str, seed: u64, m: usize,
-    max_trials: usize, limits: ChainS3Limits, budget_seconds: u64,
-    memory_mib: u64, run_dir: &Path, frobenius_orbits: bool,
+    root: &Path,
+    fixture_root: &Path,
+    columns: usize,
+    policy: &str,
+    seed: u64,
+    m: usize,
+    max_trials: usize,
+    limits: ChainS3Limits,
+    budget_seconds: u64,
+    memory_mib: u64,
+    run_dir: &Path,
+    frobenius_orbits: bool,
     order_first_pair: bool,
 ) -> Result<Value> {
     if ![64, 256, 600].contains(&columns) && !V2_SIZES.contains(&columns)
         || !fixture_root.join("probe-corpus.json").is_file()
         || !fixture_root.join("probe-validation.json").is_file()
-        || !["public_x_sequential", "public_x_hash", "public_x_gray_prefix"].contains(&policy)
+        || ![
+            "public_x_sequential",
+            "public_x_hash",
+            "public_x_gray_prefix",
+        ]
+        .contains(&policy)
         || !SEEDS.contains(&seed)
         || !(5..=6).contains(&m)
         || max_trials > 1000
-        || limits.max_variables == 0 || limits.max_variables > i32::MAX as u32
-        || limits.max_domain_clauses == 0 || limits.max_domain_clauses > i32::MAX as usize
-        || limits.max_models == 0 || limits.max_models > 1_000_000
-        || limits.conflict_budget == 0 || limits.conflict_budget > 10_000_000_000
-        || budget_seconds == 0 || budget_seconds > 7200
-        || memory_mib < 128 || memory_mib > 65536
+        || limits.max_variables == 0
+        || limits.max_variables > i32::MAX as u32
+        || limits.max_domain_clauses == 0
+        || limits.max_domain_clauses > i32::MAX as usize
+        || limits.max_models == 0
+        || limits.max_models > 1_000_000
+        || limits.conflict_budget == 0
+        || limits.conflict_budget > 10_000_000_000
+        || budget_seconds == 0
+        || budget_seconds > 7200
+        || memory_mib < 128
+        || memory_mib > 65536
         || (order_first_pair && !frobenius_orbits)
     {
-        return Err("primary chained-S3 search caps or base selection outside supported domain".into());
+        return Err(
+            "primary chained-S3 search caps or base selection outside supported domain".into(),
+        );
     }
     let memory_limit_bytes = checked_cgroup_memory_limit(memory_mib)?;
     let (source_commit, source_attestation_mode) = frozen_chain_source()?;
     let config = ChainRunConfig {
-        policy, seed, fixture_root, limits, memory_limit_bytes, source_commit,
+        policy,
+        seed,
+        fixture_root,
+        limits,
+        memory_limit_bytes,
+        source_commit,
         source_attestation_mode,
     };
     let strategy = match (frobenius_orbits, order_first_pair) {
@@ -928,28 +1062,49 @@ pub(super) fn run_chain_cli(
         (true, true) => "ordered-orbit-chain-s3",
         (false, true) => unreachable!("checked above"),
     };
-    run_with_config(root, columns, m, strategy, max_trials, budget_seconds, run_dir, Some(&config))
+    run_with_config(
+        root,
+        columns,
+        m,
+        strategy,
+        max_trials,
+        budget_seconds,
+        run_dir,
+        Some(&config),
+    )
 }
 
 #[allow(clippy::too_many_arguments)]
 fn run_with_config(
-    root: &Path, columns: usize, m: usize, strategy_name: &str,
-    max_trials: usize, budget_seconds: u64, run_dir: &Path,
+    root: &Path,
+    columns: usize,
+    m: usize,
+    strategy_name: &str,
+    max_trials: usize,
+    budget_seconds: u64,
+    run_dir: &Path,
     chain: Option<&ChainRunConfig<'_>>,
 ) -> Result<Value> {
-    if ![64, 256, 600].contains(&columns)
-        && !(chain.is_some() && V2_SIZES.contains(&columns))
-        || !(2..=6).contains(&m) {
+    if ![64, 256, 600].contains(&columns) && !(chain.is_some() && V2_SIZES.contains(&columns))
+        || !(2..=6).contains(&m)
+    {
         return Err("unsupported primary K or summand count".into());
     }
     let strategy = match strategy_name {
         "enumerate" => DecompositionStrategy::Enumerate,
-        "sat-m3" => return Err("primary SAT S4 model replay and resource-capacity gate is incomplete for F2^83".into()),
+        "sat-m3" => {
+            return Err(
+                "primary SAT S4 model replay and resource-capacity gate is incomplete for F2^83"
+                    .into(),
+            )
+        }
         "chain-s3" if chain.is_some() && (5..=6).contains(&m) => DecompositionStrategy::ChainedS3,
-        "orbit-chain-s3" if chain.is_some() && (5..=6).contains(&m) =>
-            DecompositionStrategy::ChainedS3FrobeniusOrbit,
-        "ordered-orbit-chain-s3" if chain.is_some() && (5..=6).contains(&m) =>
-            DecompositionStrategy::ChainedS3FrobeniusOrbitOrdered,
+        "orbit-chain-s3" if chain.is_some() && (5..=6).contains(&m) => {
+            DecompositionStrategy::ChainedS3FrobeniusOrbit
+        }
+        "ordered-orbit-chain-s3" if chain.is_some() && (5..=6).contains(&m) => {
+            DecompositionStrategy::ChainedS3FrobeniusOrbitOrdered
+        }
         _ => return Err("unsupported or unguarded primary strategy".into()),
     };
     if budget_seconds == 0 || budget_seconds > 86_400 {
@@ -1061,13 +1216,18 @@ fn run_with_config(
     let candidate_valid = match &report.log {
         Some(candidate) => {
             base.curve.mul(base.curve.generator(), candidate) == target
-                && candidate_matches_validation(fixture_root, &corpus_hash, candidate).unwrap_or(false)
+                && candidate_matches_validation(fixture_root, &corpus_hash, candidate)
+                    .unwrap_or(false)
         }
         None => false,
     };
     let post_solver_validation_ms = verification_start.elapsed().as_secs_f64() * 1000.0;
     let memory_cgroup_peak_bytes = if chain.is_some() {
-        Some(fs::read_to_string("/sys/fs/cgroup/memory.peak")?.trim().parse::<u64>()?)
+        Some(
+            fs::read_to_string("/sys/fs/cgroup/memory.peak")?
+                .trim()
+                .parse::<u64>()?,
+        )
     } else {
         None
     };
@@ -1114,32 +1274,50 @@ fn run_with_config(
         "m_cofactor_admissible":report.m_cofactor_admissible,
         "direct_relations_skipped":report.direct_relations_skipped
     });
-    let attempt_records: Vec<_> = report.attempt_records.iter().map(|attempt| json!({
-        "trial":attempt.trial,
-        "a":attempt.coefficient_a.to_string(),
-        "b":attempt.coefficient_b.to_string(),
-        "target":point_json(words(&attempt.target)),
-        "disposition":format!("{:?}",attempt.disposition),
-        "decomposition_indices":attempt.decomposition_indices,
-        "solver_calls":attempt.solver_calls,
-        "models":attempt.models,
-        "conflicts":attempt.conflicts,
-        "implied_rows":attempt.implied_rows
-    })).collect();
-    let relation_matrix: Vec<_> = report.relation_matrix.iter().map(|relation| json!({
-        "a":relation.coef_a.to_string(),
-        "b":relation.coef_b.to_string(),
-        "summands":relation.summands,
-        "summand_negated":relation.summand_negated,
-        "row":relation.row.iter().map(ToString::to_string).collect::<Vec<_>>()
-    })).collect();
-    let rank_history: Vec<_> = report.rank_history.iter().map(|rank| json!({
-        "rows":rank.rows,
-        "columns":rank.columns,
-        "rank":rank.rank,
-        "candidate_produced":rank.candidate_produced,
-        "candidate_verified":rank.candidate_verified
-    })).collect();
+    let attempt_records: Vec<_> = report
+        .attempt_records
+        .iter()
+        .map(|attempt| {
+            json!({
+                "trial":attempt.trial,
+                "a":attempt.coefficient_a.to_string(),
+                "b":attempt.coefficient_b.to_string(),
+                "target":point_json(words(&attempt.target)),
+                "disposition":format!("{:?}",attempt.disposition),
+                "decomposition_indices":attempt.decomposition_indices,
+                "solver_calls":attempt.solver_calls,
+                "models":attempt.models,
+                "conflicts":attempt.conflicts,
+                "implied_rows":attempt.implied_rows
+            })
+        })
+        .collect();
+    let relation_matrix: Vec<_> = report
+        .relation_matrix
+        .iter()
+        .map(|relation| {
+            json!({
+                "a":relation.coef_a.to_string(),
+                "b":relation.coef_b.to_string(),
+                "summands":relation.summands,
+                "summand_negated":relation.summand_negated,
+                "row":relation.row.iter().map(ToString::to_string).collect::<Vec<_>>()
+            })
+        })
+        .collect();
+    let rank_history: Vec<_> = report
+        .rank_history
+        .iter()
+        .map(|rank| {
+            json!({
+                "rows":rank.rows,
+                "columns":rank.columns,
+                "rank":rank.rank,
+                "candidate_produced":rank.candidate_produced,
+                "candidate_verified":rank.candidate_verified
+            })
+        })
+        .collect();
     let summary = json!({
         "schema":"n83.primary-cold-result/v1", "study":STUDY,
         "status":status, "curve_a":0, "fixture":0,
@@ -1199,7 +1377,10 @@ mod tests {
 
     #[test]
     fn supervised_source_snapshot_rejects_a_changed_compiled_file() {
-        let nonce = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
         let snapshot = std::env::temp_dir().join(format!("n83-probe-source-{nonce}"));
         let checkout = Path::new(env!("CARGO_MANIFEST_DIR"));
         for relative in [
@@ -1264,9 +1445,7 @@ mod tests {
         );
         assert_eq!(relation[1], kc.lambda);
         assert!(relation.iter().any(|coefficient| coefficient.bits() > 64));
-        assert!(
-            checked_primary_relation_row(kc, fb, &[usize::MAX, 2, 165, 168], &target).is_err()
-        );
+        assert!(checked_primary_relation_row(kc, fb, &[usize::MAX, 2, 165, 168], &target).is_err());
         assert!(checked_primary_relation_row(kc, fb, &indices, &point_neg(&target)).is_err());
         let mut bad_labels = fb.clone();
         bad_labels.signed_orbit_of[2] = (1, 1, false);
@@ -1441,11 +1620,26 @@ mod tests {
         for orbit_domain in [false, true] {
             let invalid_caps = root.join(format!("invalid-chain-caps-{orbit_domain}"));
             let error = run_chain_cli(
-                &root, &root, 64, "public_x_hash", SEEDS[0], 5, 1,
-                ChainS3Limits { max_variables: 0, max_domain_clauses: 1,
-                    max_models: 1, conflict_budget: 1 },
-                1, 256, &invalid_caps, orbit_domain, false,
-            ).unwrap_err();
+                &root,
+                &root,
+                64,
+                "public_x_hash",
+                SEEDS[0],
+                5,
+                1,
+                ChainS3Limits {
+                    max_variables: 0,
+                    max_domain_clauses: 1,
+                    max_models: 1,
+                    conflict_budget: 1,
+                },
+                1,
+                256,
+                &invalid_caps,
+                orbit_domain,
+                false,
+            )
+            .unwrap_err();
             assert!(error.to_string().contains("outside supported domain"));
             assert!(!invalid_caps.exists());
         }
@@ -1454,7 +1648,10 @@ mod tests {
 
     #[test]
     fn v2_primary_selection_requires_replay_and_s3_receipts_before_object_import() {
-        let suffix = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+        let suffix = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
         let root = std::env::temp_dir().join(format!("n83-v2-import-gate-{suffix}"));
         fs::create_dir(&root).unwrap();
         let digest = "a".repeat(64);
@@ -1472,13 +1669,18 @@ mod tests {
         });
         write_new_json(&root.join("manifest.json"), &manifest).unwrap();
         let manifest_hash = blake3::hash(&fs::read(root.join("manifest.json")).unwrap())
-            .to_hex().to_string();
-        write_new_json(&root.join("replay.json"), &json!({
-            "schema":"n83.factor-base-replay/v2-size-frontier", "status":"PASS",
-            "panel_manifest_blake3":manifest_hash,
-            "checks":[{"object":object,"points_checked":166*1182,
-                "representatives_checked":1182,"status":"PASS"}],
-        })).unwrap();
+            .to_hex()
+            .to_string();
+        write_new_json(
+            &root.join("replay.json"),
+            &json!({
+                "schema":"n83.factor-base-replay/v2-size-frontier", "status":"PASS",
+                "panel_manifest_blake3":manifest_hash,
+                "checks":[{"object":object,"points_checked":166*1182,
+                    "representatives_checked":1182,"status":"PASS"}],
+            }),
+        )
+        .unwrap();
         let storage = json!({
             "schema":"n83.factor-base-storage/v2-size-frontier", "status":"PASS",
             "bucket":"crypto-autoresearcher",
@@ -1488,12 +1690,20 @@ mod tests {
                 "downloaded_hash_matches":true}],
         });
         write_new_json(&root.join("upload-receipt.json"), &storage).unwrap();
-        let error = load_panel_selected(&root, 1182, "public_x_hash", SEEDS[0]).err().unwrap();
+        let error = load_panel_selected(&root, 1182, "public_x_hash", SEEDS[0])
+            .err()
+            .unwrap();
         assert!(error.to_string().contains("No such file"), "{error}");
         let mut bad = storage;
         bad["objects"][0]["downloaded_hash_matches"] = json!(false);
-        fs::write(root.join("upload-receipt.json"), serde_json::to_vec(&bad).unwrap()).unwrap();
-        let error = load_panel_selected(&root, 1182, "public_x_hash", SEEDS[0]).err().unwrap();
+        fs::write(
+            root.join("upload-receipt.json"),
+            serde_json::to_vec(&bad).unwrap(),
+        )
+        .unwrap();
+        let error = load_panel_selected(&root, 1182, "public_x_hash", SEEDS[0])
+            .err()
+            .unwrap();
         assert!(error.to_string().contains("S3 round-trip"), "{error}");
         fs::remove_dir_all(root).unwrap();
     }
