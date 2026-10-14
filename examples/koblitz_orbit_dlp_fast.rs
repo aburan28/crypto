@@ -2016,6 +2016,8 @@ mod wide {
                 RootTable128::with_capacity_indexed83(quotient.states.len() * 2);
             let mut single_root_four =
                 RootTable128::with_capacity_indexed83_four(quotient.states.len() * 2);
+            let mut two_root_four =
+                RootTable128::with_capacity_indexed83_four(quotient.states.len() * 2);
             for (states, table) in [
                 (&full.states, &mut full_indexed),
                 (&quotient.states, &mut quotient_indexed),
@@ -2085,10 +2087,23 @@ mod wide {
                                 .0
                         },
                     );
+                    two_root_four.insert_indexed83(
+                        key,
+                        index,
+                        selector,
+                        |prior_index, prior_selector| {
+                            basis
+                                .canonical_selected(
+                                    root_only21.root_at(prior_index, prior_selector),
+                                )
+                                .0
+                        },
+                    );
                 }
             }
             assert_eq!(single_root_indexed.len, quotient_indexed.len);
             assert_eq!(single_root_four.len, quotient_indexed.len);
+            assert_eq!(two_root_four.len, quotient_indexed.len);
             assert!(
                 dense_quotient_indexed.layout_receipt().2 < quotient_indexed.layout_receipt().2
             );
@@ -2133,6 +2148,11 @@ mod wide {
                         quotient_indexed.get_with_context(key, &quotient.states, &basis),
                         "four-byte first witness differs for key {key}",
                     );
+                    assert_eq!(
+                        two_root_four.get_with_context(key, &root_only21, &basis),
+                        quotient_indexed.get_with_context(key, &quotient.states, &basis),
+                        "four-byte 21-byte-state first witness differs for key {key}",
+                    );
                 }
             }
             for probe in 1..2048u128 {
@@ -2163,6 +2183,11 @@ mod wide {
                     single_root_four.get_with_context(key, &root_only11, &basis),
                     quotient_indexed.get_with_context(key, &quotient.states, &basis),
                     "four-byte probe differs for key {key}",
+                );
+                assert_eq!(
+                    two_root_four.get_with_context(key, &root_only21, &basis),
+                    quotient_indexed.get_with_context(key, &quotient.states, &basis),
+                    "four-byte 21-byte-state probe differs for key {key}",
                 );
             }
         }
@@ -2860,6 +2885,7 @@ mod wide {
         indexed4_table: bool,
         indexed5_load75: bool,
         indexed5_fixed30: bool,
+        indexed4_fixed30: bool,
         indexed4_fixed31: bool,
         root_table_request_entries: usize,
     }
@@ -3102,7 +3128,12 @@ mod wide {
         let root_only21 = std::env::var("KIC_ROOT_ONLY21").as_deref() == Ok("1");
         let root_only11 = std::env::var("KIC_ROOT_ONLY11").as_deref() == Ok("1");
         let indexed4_table = std::env::var("KIC_INDEXED_ROOT4").as_deref() == Ok("1");
+        let indexed4_fixed30 = std::env::var("KIC_INDEXED4_FIXED30").as_deref() == Ok("1");
         let indexed4_fixed31 = std::env::var("KIC_INDEXED4_FIXED31").as_deref() == Ok("1");
+        assert!(
+            !(indexed4_fixed30 && indexed4_fixed31),
+            "select one four-byte root table capacity"
+        );
         assert!(
             (packed_state83 as u8
                 + packed_state26 as u8
@@ -3290,8 +3321,10 @@ mod wide {
         let indexed5_table = std::env::var("KIC_INDEXED_ROOT5").as_deref() == Ok("1");
         let indexed5_fixed30 = std::env::var("KIC_INDEXED5_FIXED30").as_deref() == Ok("1");
         assert!(
-            !indexed4_table || (root_only11 && !indexed5_table && indexed4_fixed31),
-            "four-byte root slots require one-root states and fixed31 request"
+            !indexed4_table
+                || (!indexed5_table
+                    && ((root_only11 && indexed4_fixed31) || (root_only21 && indexed4_fixed30))),
+            "four-byte root slots require one-root/fixed31 or 21-byte/fixed30 states"
         );
         assert!(
             !(dense_table || load75_table) || packed,
@@ -3337,11 +3370,22 @@ mod wide {
                 "fixed 2^31 four-byte table cannot encode all state roots"
             );
         }
+        if indexed4_fixed30 {
+            assert!(
+                indexed4_table
+                    && root_only21
+                    && max_states < (1usize << 29)
+                    && max_states.checked_mul(2).unwrap() < (1usize << 30),
+                "fixed 2^30 four-byte table cannot encode all state roots"
+            );
+        }
         // The symmetric quotient retains almost two distinct canonical root
         // keys per state.  Requesting 4*S/3 therefore targets at most 75%
         // occupancy after the constructor doubles the request.
         let root_table_request_entries = if indexed4_fixed31 {
             1usize << 30
+        } else if indexed4_fixed30 {
+            1usize << 29
         } else if indexed5_fixed30 {
             1usize << 29
         } else if indexed5_load75 {
@@ -3411,6 +3455,7 @@ mod wide {
             indexed4_table,
             indexed5_load75,
             indexed5_fixed30,
+            indexed4_fixed30,
             indexed4_fixed31,
             root_table_request_entries,
         }
@@ -4121,6 +4166,7 @@ mod wide {
         summary["indexed5_load75_enabled"] = json!(index.indexed5_load75);
         summary["indexed5_fixed30_enabled"] = json!(index.indexed5_fixed30);
         summary["indexed4_fixed31_enabled"] = json!(index.indexed4_fixed31);
+        summary["indexed4_fixed30_enabled"] = json!(index.indexed4_fixed30);
         summary["root_only11_enabled"] =
             json!(matches!(&index.states, StateStore128::RootOnly11 { .. }));
         println!("{summary}");
