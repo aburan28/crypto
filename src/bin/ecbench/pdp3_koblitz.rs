@@ -51,6 +51,14 @@
 //! query-stream identity with `rootfind` or with inherited-F4.  The
 //! table build charge is unchanged; only the per-target scan shortens.
 //!
+//! `pdp3-koblitz:m=2|3,engine=rootfind-negfold` builds the ledgered
+//! [`PairTable::build_negation_folded`] instead of the full
+//! [`PairSumTable`]: about `|F|²/4` group additions rather than
+//! `|F|(|F|+1)/2`, with the same sign-recovering probe as `mitm`'s
+//! `negation_folded=1`.  Completeness is unchanged; cold `S` drops by the
+//! saved set-up.  `rootfind-window-negfold` is the windowed `m = 3` scan
+//! on that half table.
+//!
 //! ## The base
 //!
 //! `koblitz-standard-subspace:dimension=d` is
@@ -106,8 +114,8 @@ use crypto_lib::binary_ecc::{BinaryCurve, F2mElement};
 
 use crypto_lib::cryptanalysis::ecbench::methods::BinaryPlugins;
 use crypto_lib::cryptanalysis::ic_boundary::{
-    koblitz_factor_base, lift_abscissae, BinaryGroup, BinaryInstance, ColumnFold, CountedGroup,
-    FactorBase, GroupOps, OracleCounters,
+    decompose_mitm, koblitz_factor_base, lift_abscissae, BinaryGroup, BinaryInstance, ColumnFold,
+    CountedGroup, FactorBase, GroupOps, OracleCounters, PairTable,
 };
 use crypto_lib::cryptanalysis::ic_framework::stages::{
     DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SolverCost, SolverTotals,
@@ -329,6 +337,11 @@ pub enum Pdp3Engine {
     /// cyclic window of length `⌈|F|/3⌉` (see
     /// [`PairSumTable::decompose_fast_window`]).  Refuses `m ≠ 3`.
     RootfindWindow,
+    /// Root finding on [`PairTable::build_negation_folded`]: about half
+    /// the set-up additions of [`Self::Rootfind`], sign-recovering probe.
+    RootfindNegfold,
+    /// Windowed `m = 3` scan on the negation-folded [`PairTable`].
+    RootfindWindowNegfold,
 }
 
 impl Pdp3Engine {
@@ -340,9 +353,11 @@ impl Pdp3Engine {
             "matrix-f5" => Ok(Self::MatrixF5),
             "rootfind" => Ok(Self::Rootfind),
             "rootfind-window" => Ok(Self::RootfindWindow),
+            "rootfind-negfold" => Ok(Self::RootfindNegfold),
+            "rootfind-window-negfold" => Ok(Self::RootfindWindowNegfold),
             other => Err(format!(
                 "unknown engine `{other}`; try inherited-f4, f6-ic, matrix-f4, matrix-f5, \
-                 rootfind or rootfind-window"
+                 rootfind, rootfind-window, rootfind-negfold or rootfind-window-negfold"
             )),
         }
     }
@@ -355,17 +370,36 @@ impl Pdp3Engine {
             Self::MatrixF5 => "matrix-f5",
             Self::Rootfind => "rootfind",
             Self::RootfindWindow => "rootfind-window",
+            Self::RootfindNegfold => "rootfind-negfold",
+            Self::RootfindWindowNegfold => "rootfind-window-negfold",
         }
     }
 
     /// Whether the engine solves an algebraic system at all.
     pub fn is_groebner(self) -> bool {
-        !matches!(self, Self::Rootfind | Self::RootfindWindow)
+        !self.is_rootfind()
     }
 
-    /// Whether the engine builds and probes a [`PairSumTable`].
+    /// Whether the engine builds and probes a pair-sum table (full or
+    /// negation-folded).
     pub fn is_rootfind(self) -> bool {
-        matches!(self, Self::Rootfind | Self::RootfindWindow)
+        matches!(
+            self,
+            Self::Rootfind
+                | Self::RootfindWindow
+                | Self::RootfindNegfold
+                | Self::RootfindWindowNegfold
+        )
+    }
+
+    /// Whether set-up uses [`PairTable::build_negation_folded`].
+    pub fn is_negfold(self) -> bool {
+        matches!(self, Self::RootfindNegfold | Self::RootfindWindowNegfold)
+    }
+
+    /// Whether the `m = 3` third-summand scan is windowed.
+    pub fn is_window(self) -> bool {
+        matches!(self, Self::RootfindWindow | Self::RootfindWindowNegfold)
     }
 
     /// The reduction engine at each node of the splitting tree, or
@@ -375,7 +409,10 @@ impl Pdp3Engine {
             Self::InheritedF4 | Self::F6Ic => Some(SolverEngine::InheritedF4 { max_degree }),
             Self::MatrixF4 => Some(SolverEngine::MatrixF4 { max_degree }),
             Self::MatrixF5 => Some(SolverEngine::MatrixF5 { max_degree }),
-            Self::Rootfind | Self::RootfindWindow => None,
+            Self::Rootfind
+            | Self::RootfindWindow
+            | Self::RootfindNegfold
+            | Self::RootfindWindowNegfold => None,
         }
     }
 }
@@ -432,8 +469,10 @@ fn stats_extra(s: &SolveStats) -> BTreeMap<String, u64> {
 }
 
 /// `pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N`,
-/// `pdp3-koblitz:m=2|3,engine=rootfind`, or
-/// `pdp3-koblitz:m=3,engine=rootfind-window`.
+/// `pdp3-koblitz:m=2|3,engine=rootfind`,
+/// `pdp3-koblitz:m=3,engine=rootfind-window`,
+/// `pdp3-koblitz:m=2|3,engine=rootfind-negfold`, or
+/// `pdp3-koblitz:m=3,engine=rootfind-window-negfold`.
 pub struct Pdp3KoblitzOracle<'i> {
     name: &'static str,
     summands: u32,
@@ -446,11 +485,13 @@ pub struct Pdp3KoblitzOracle<'i> {
     st: Option<FieldStructure>,
     shape: Option<SystemShape>,
     totals: SolverTotals,
-    /// The root-finding engine's table; `None` under a Groebner engine.
+    /// Full [`PairSumTable`] under `rootfind` / `rootfind-window`.
     pair: Option<PairSumTable>,
+    /// Negation-folded [`PairTable`] under `*-negfold` engines.
+    pair_neg: Option<PairTable>,
     /// Base size the table was built on; `0` under a Groebner engine.
     pair_table_points: usize,
-    /// Third-summand window for `RootfindWindow`; `0` under other engines.
+    /// Third-summand window for windowed engines; `0` otherwise.
     scan_window_len: usize,
     /// Witnesses the solver returned that did not re-lift through the
     /// framework's sign resolution.  Must stay zero.
@@ -476,6 +517,7 @@ impl<'i> Pdp3KoblitzOracle<'i> {
             shape: None,
             totals: SolverTotals::default(),
             pair: None,
+            pair_neg: None,
             pair_table_points: 0,
             scan_window_len: 0,
             unliftable: 0,
@@ -491,7 +533,7 @@ impl<'i> Pdp3KoblitzOracle<'i> {
 
     /// The root-finding decomposition: one table probe for `m = 2`, one
     /// per `R − P_k` for `m = 3` (full base, or the cyclic window under
-    /// `RootfindWindow`), every hit re-added in the group on the ledger
+    /// a windowed engine), every hit re-added in the group on the ledger
     /// before it is returned.
     fn decompose_rootfind<'a>(
         &mut self,
@@ -501,6 +543,9 @@ impl<'i> Pdp3KoblitzOracle<'i> {
         counters: &mut OracleCounters,
         point: FastPoint,
     ) -> Option<Vec<usize>> {
+        if self.engine.is_negfold() {
+            return self.decompose_rootfind_negfold(ctx, fb, ops, counters, point);
+        }
         let table = self.pair.as_ref()?;
         let g = ctx.group;
         let mut pairs: Vec<(u32, u32)> = Vec::new();
@@ -523,14 +568,13 @@ impl<'i> Pdp3KoblitzOracle<'i> {
                 if n == 0 {
                     return None;
                 }
-                let (start, len) = match self.engine {
-                    Pdp3Engine::RootfindWindow => {
-                        let len = self.scan_window_len.max(1).min(n);
-                        // Deterministic in the target: the same public
-                        // point always opens the window at the same index.
-                        ((point.x as usize) % n, len)
-                    }
-                    _ => (0, n),
+                let (start, len) = if self.engine.is_window() {
+                    let len = self.scan_window_len.max(1).min(n);
+                    // Deterministic in the target: the same public
+                    // point always opens the window at the same index.
+                    ((point.x as usize) % n, len)
+                } else {
+                    (0, n)
                 };
                 for t in 0..len {
                     let k = (start + t) % n;
@@ -555,6 +599,43 @@ impl<'i> Pdp3KoblitzOracle<'i> {
             }
             _ => None,
         }
+    }
+
+    /// Negation-folded [`PairTable`] path: same probe as `mitm` with
+    /// `negation_folded=1`, optionally windowed for `m = 3`.
+    fn decompose_rootfind_negfold<'a>(
+        &mut self,
+        ctx: &InstanceCtx<BinaryGroup<'a>>,
+        fb: &FactorBase<FastPoint>,
+        ops: &mut GroupOps,
+        counters: &mut OracleCounters,
+        point: FastPoint,
+    ) -> Option<Vec<usize>> {
+        let table = self.pair_neg.as_ref()?;
+        let g = ctx.group;
+        if !self.engine.is_window() {
+            return decompose_mitm(g, fb, table, self.summands, ops, counters, point);
+        }
+        // Windowed m = 3 on the half table.
+        let n = fb.points.len();
+        if n == 0 || self.summands != 3 {
+            return None;
+        }
+        let len = self.scan_window_len.max(1).min(n);
+        let start = (point.x as usize) % n;
+        for t in 0..len {
+            let k = (start + t) % n;
+            let rest = g.add(ops, point, g.neg(fb.points[k]));
+            if g.is_identity(&rest) {
+                continue;
+            }
+            if let Some((i, j)) = table.probe(g, fb, ops, &mut counters.lookups, rest) {
+                let mut found = vec![i, j, k];
+                found.sort_unstable();
+                return Some(found);
+            }
+        }
+        None
     }
 }
 
@@ -581,6 +662,17 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
                  search",
                 self.summands
             ),
+            Some("rootfind-negfold") => format!(
+                "root finding over the standard subspace on PairTable::build_negation_folded \
+                 (~|F|²/4 set-up adds); probed once per target (m = 2) or once per R − P_k \
+                 (m = {}); no Groebner search",
+                self.summands
+            ),
+            Some("rootfind-window-negfold") => format!(
+                "root finding with negation-folded PairTable and cyclic third-summand window \
+                 of length ⌈|F|/3⌉; m = {}; no Groebner search",
+                self.summands
+            ),
             _ => format!(
                 "Weil-descend S_{} over the standard subspace and solve with #1333's {} \
                  (Macaulay cap {}, {} reduction calls)",
@@ -596,24 +688,25 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
         &[
             (
                 "m",
-                "summands; #1333 ran 3 (Semaev S4); rootfind takes 2 or 3; rootfind-window \
-                 takes 3 only",
+                "summands; #1333 ran 3 (Semaev S4); rootfind and rootfind-negfold take 2 or 3; \
+                 window engines take 3 only",
             ),
             (
                 "engine",
-                "inherited-f4 (the control), f6-ic, matrix-f4, matrix-f5, rootfind (the \
-                 pair-sum table of DecompositionStrategy::PairTable; no Groebner search), \
-                 or rootfind-window (same table, m = 3 cyclic ⌈|F|/3⌉ third-summand window)",
+                "inherited-f4 (the control), f6-ic, matrix-f4, matrix-f5, rootfind (full \
+                 PairSumTable), rootfind-window (m = 3 cyclic ⌈|F|/3⌉ window), \
+                 rootfind-negfold (PairTable negation fold, ~half set-up), or \
+                 rootfind-window-negfold (window + negation fold)",
             ),
             (
                 "degree",
-                "highest Macaulay degree built before splitting; refused under rootfind \
-                 and rootfind-window",
+                "highest Macaulay degree built before splitting; refused under every \
+                 rootfind* engine",
             ),
             (
                 "node_budget",
                 "reduction calls before a solve gives up; exhaustion is a failed query; \
-                 refused under rootfind and rootfind-window",
+                 refused under every rootfind* engine",
             ),
             (
                 "dimension",
@@ -624,7 +717,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
 
     fn prepare(
         &mut self,
-        _ctx: &InstanceCtx<BinaryGroup<'a>>,
+        ctx: &InstanceCtx<BinaryGroup<'a>>,
         fb: &FactorBase<FastPoint>,
         params: &Params,
         ops: &mut GroupOps,
@@ -648,7 +741,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
         // Parameters that change the search have no default.
         let engine = params.get("engine").ok_or(
             "missing parameter `engine`; try inherited-f4, f6-ic, matrix-f4, matrix-f5, \
-             rootfind or rootfind-window",
+             rootfind, rootfind-window, rootfind-negfold or rootfind-window-negfold",
         )?;
         self.engine = Pdp3Engine::parse(engine)?;
         let mut max_degree = 0u32;
@@ -674,6 +767,8 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
                 .map_err(|_| format!("node_budget `{budget}` is not a number"))?;
             self.scan_window_len = 0;
             self.pair_table_points = 0;
+            self.pair = None;
+            self.pair_neg = None;
         } else {
             // A root-finding engine has no Groebner search to bound.  A
             // bound it ignored would be a parameter in the method's
@@ -686,9 +781,10 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
                     ));
                 }
             }
-            if self.engine == Pdp3Engine::RootfindWindow && self.summands != 3 {
+            if self.engine.is_window() && self.summands != 3 {
                 return Err(format!(
-                    "engine=rootfind-window takes m = 3 (a third-summand window), got {}",
+                    "engine={} takes m = 3 (a third-summand window), got {}",
+                    self.engine.name(),
                     self.summands
                 ));
             }
@@ -728,43 +824,59 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
             ));
         }
         if self.engine.is_rootfind() {
-            // The table of every `P_i + P_j`, in the summand-storing tier
-            // so a hit is read, never recovered by a scan.  Its additions
-            // are charged to the oracle set-up phase from the base's size.
-            let table = PairSumTable::build_full_within(
-                kc,
-                &frob,
-                PairSumTable::DEFAULT_BYTE_BUDGET,
-            )
-            .ok_or_else(|| {
-                format!(
-                    "the pair-sum table of {} points does not fit the {} GiB budget or the field \
-                     is too wide to pack a point into a word",
-                    frob.points.len(),
-                    PairSumTable::DEFAULT_BYTE_BUDGET >> 30
-                )
-            })?;
-            // The table's own lift must agree with the run's, point for
-            // point, or a probe key would name the wrong entry.  The
-            // group re-addition of every hit would catch a disagreement
-            // too; this catches it before any target is spent.
-            for (i, p) in frob.points.iter().enumerate() {
-                if table.curve().lift(p) != fb.points[i] {
-                    return Err(
-                        "the pair-sum table lifts a base point differently from the run".into(),
-                    );
-                }
-            }
-            let (adds, doubles) = pair_table_build_ops(frob.points.len());
-            ops.adds += adds;
-            ops.doubles += doubles;
             self.pair_table_points = frob.points.len();
-            self.scan_window_len = if self.engine == Pdp3Engine::RootfindWindow {
+            self.scan_window_len = if self.engine.is_window() {
                 rootfind_window_len(frob.points.len())
             } else {
                 0
             };
-            self.pair = Some(table);
+            if self.engine.is_negfold() {
+                // Ledgered half-table: same construction as mitm with
+                // negation_folded=1.  Actual GroupOps from the build are
+                // merged (not estimated from |F|).
+                if fb.abscissa_list.is_empty() {
+                    return Err(
+                        "engine=rootfind-negfold needs a factor base with abscissa grouping".into(),
+                    );
+                }
+                let table = PairTable::build_negation_folded(ctx.group, fb);
+                ops.merge(table.build_ops);
+                self.pair_neg = Some(table);
+                self.pair = None;
+            } else {
+                // The table of every `P_i + P_j`, in the summand-storing tier
+                // so a hit is read, never recovered by a scan.  Its additions
+                // are charged to the oracle set-up phase from the base's size.
+                let table = PairSumTable::build_full_within(
+                    kc,
+                    &frob,
+                    PairSumTable::DEFAULT_BYTE_BUDGET,
+                )
+                .ok_or_else(|| {
+                    format!(
+                        "the pair-sum table of {} points does not fit the {} GiB budget or the field \
+                         is too wide to pack a point into a word",
+                        frob.points.len(),
+                        PairSumTable::DEFAULT_BYTE_BUDGET >> 30
+                    )
+                })?;
+                // The table's own lift must agree with the run's, point for
+                // point, or a probe key would name the wrong entry.  The
+                // group re-addition of every hit would catch a disagreement
+                // too; this catches it before any target is spent.
+                for (i, p) in frob.points.iter().enumerate() {
+                    if table.curve().lift(p) != fb.points[i] {
+                        return Err(
+                            "the pair-sum table lifts a base point differently from the run".into(),
+                        );
+                    }
+                }
+                let (adds, doubles) = pair_table_build_ops(frob.points.len());
+                ops.adds += adds;
+                ops.doubles += doubles;
+                self.pair = Some(table);
+                self.pair_neg = None;
+            }
             self.frob = Some(frob);
             self.shape = None;
             self.st = None;
@@ -864,6 +976,15 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
         let mut counts = BTreeMap::new();
         if let Some(table) = &self.pair {
             counts.insert("pair_table_entries".into(), table.len() as u64);
+            counts.insert("pair_table_kind".into(), 0); // full PairSumTable
+        }
+        if let Some(table) = &self.pair_neg {
+            counts.insert("pair_table_entries".into(), table.entries);
+            counts.insert("pair_table_kind".into(), 1); // negation_folded PairTable
+            counts.insert(
+                "pair_table_build_adds".into(),
+                table.build_ops.adds + table.build_ops.doubles,
+            );
         }
         if self.pair_table_points > 0 {
             counts.insert("pair_table_points".into(), self.pair_table_points as u64);
