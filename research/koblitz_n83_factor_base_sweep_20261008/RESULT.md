@@ -1,15 +1,24 @@
 # Degree-83 factor-base sweep: observed evidence
 
-A [source-only stage-marked successor](verification/known-witness-stage-preflight-20261014/RESULT.md)
-now emits flushed receipts around full-domain construction and SAT entry for
-the ordered witness. Its marker-only self-test and fail-closed trace checker
-pass; the actual N83 solver path was not run, so the local ledger stays at
-22,200 seconds and the complete-runtime base remains unselected.
+The [bounded native known-witness stage control](verification/known-witness-stage-native-900-20261014/RESULT.md)
+reached the SAT solver, emitted all nine ordered markers and returned a
+worker-verified model after 787 conflicts. Its copied raw receipts passed
+independent trace and fixture-algebra replay. This establishes satisfiability
+of that fixed public-witness encoding, while natural relation yield, useful
+rank, complete cold runtime and the best factor base remain unmeasured. The
+conservative local N83 charge is now **23,100 seconds**. The observed
+329.129-second process wall time was recorded on a saturated host and is not
+an isolated throughput comparison.
+
+The earlier [source-only stage-marked successor](verification/known-witness-stage-preflight-20261014/RESULT.md)
+introduced flushed receipts around full-domain construction and SAT entry.
+Its marker-only self-test and fail-closed trace checker passed before the
+above full-domain run.
 
 The [native stage-launch preflight](verification/known-witness-stage-launch-preflight-20261014/RESULT.md)
-now preserves a complete marker-only launch, child-exit and process-group
-cleanup receipt behind a watchdog. The full-domain path requires a separate
-authorization record and was not run; this adds no N83 search charge.
+preserved a marker-only launch, child-exit and process-group cleanup receipt
+behind a watchdog. Its then-gated full-domain path was used only after the
+separate authorization recorded above.
 
 An [exact uniform-query support screen](verification/pilot-pair-support-screen-20261014/RESULT.md)
 uses the archived overlap of all 648 ordered primary pilot pairs. Every one
@@ -32,8 +41,8 @@ and the algebraically replayed witness in the first all-affine pattern. Its
 840-second external watchdog exited 124 with empty solver output, so native
 construction and solver entry are unconfirmed. The audit classifies
 this as a censored encoding-control result, with neither a SAT model nor an
-UNSAT certificate. The conservative cumulative local N83 charge is now
-22,200 seconds; this run supplies no natural yield, rank, or complete-runtime
+UNSAT certificate. The conservative cumulative local N83 charge was then
+22,200 seconds; that earlier run supplied no natural yield, rank, or complete-runtime
 factor-base comparison.
 
 The [source-only replay of the v7 known witness](verification/known-witness-first-pattern-replay-20261014/RESULT.md) verifies affine partial sums, the exact target group sum, and four zero S3 residuals. The fixture's first two small-domain points violate the worker's unsigned first-pair order as listed; swapping them preserves the target and S3 chain and satisfies that order. The native worker tries the resulting all-affine identity pattern first; its 5,000-conflict `UNKNOWN_search_cap` is therefore a censored solver observation, not an algebraic obstruction. The replay does not test CNF satisfiability, natural yield, or complete runtime, and it charges no additional N83 search time.
