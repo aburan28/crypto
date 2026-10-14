@@ -133,6 +133,7 @@ enum IndexMode {
     Projected,
     Chi,
     Isogeny,
+    Isomorphism,
 }
 
 fn orbit_key(curve: &Curve, p: Point) -> Option<[u64; 2]> {
@@ -156,6 +157,7 @@ struct ProjectedOracle {
     setup_transforms: u64,
     pair_count: u64,
     false_candidates: u64,
+    iso_u: Option<u64>,
 }
 
 impl ProjectedOracle {
@@ -169,6 +171,7 @@ impl ProjectedOracle {
             setup_transforms: 0,
             pair_count: 0,
             false_candidates: 0,
+            iso_u: None,
         }
     }
 }
@@ -179,6 +182,7 @@ impl DecompositionOracle<Curve> for ProjectedOracle {
             IndexMode::Projected => "projected-pair",
             IndexMode::Chi => "chi-orbit-index",
             IndexMode::Isogeny => "isogeny-projected-pair",
+            IndexMode::Isomorphism => "isomorphism-projected-pair",
         }
     }
     fn summands(&self) -> u32 {
@@ -189,6 +193,7 @@ impl DecompositionOracle<Curve> for ProjectedOracle {
             IndexMode::Projected=>"pair sums after exact cofactor projection".into(),
             IndexMode::Chi=>"pair sums indexed by the chi Mobius orbit, with exact projected-point check; this is not a polynomial-system oracle".into(),
             IndexMode::Isogeny=>"source pair sums mapped by the explicit degree-three isogeny after cofactor projection".into(),
+            IndexMode::Isomorphism=>"source pair sums mapped by a public base-field scaling isomorphism after cofactor projection".into(),
         }
     }
     fn prepare(
@@ -215,19 +220,30 @@ impl DecompositionOracle<Curve> for ProjectedOracle {
             vals.push(*p);
             vals.push(src.neg(*p));
         }
-        if let IndexMode::Isogeny = self.mode {
+        if let IndexMode::Isogeny | IndexMode::Isomorphism = self.mode {
+            let iso_u = if let IndexMode::Isomorphism = self.mode {
+                let u = iso_u(f.p);
+                self.iso_u = Some(u);
+                Some(u)
+            } else {
+                None
+            };
             vals = vals
                 .into_iter()
                 .map(|p| {
                     self.setup_transforms += 1;
-                    phi(src, p)
+                    if let Some(u) = iso_u {
+                        iso_scale(src, u, p)
+                    } else {
+                        phi(src, p)
+                    }
                 })
                 .collect();
         }
         for i in 0..vals.len() {
             for j in i..vals.len() {
                 let sum = match self.mode {
-                    IndexMode::Isogeny => dst.add(ops, vals[i], vals[j]),
+                    IndexMode::Isogeny | IndexMode::Isomorphism => dst.add(ops, vals[i], vals[j]),
                     _ => src.add(ops, vals[i], vals[j]),
                 };
                 if sum.infinity {
@@ -235,7 +251,7 @@ impl DecompositionOracle<Curve> for ProjectedOracle {
                 }
                 self.pair_count += 1;
                 let key = match self.mode {
-                    IndexMode::Isogeny => dst.key(&sum),
+                    IndexMode::Isogeny | IndexMode::Isomorphism => dst.key(&sum),
                     _ => src.key(&sum),
                 };
                 match self.mode {
@@ -282,6 +298,20 @@ impl DecompositionOracle<Curve> for ProjectedOracle {
                     b: f.from_fp(f.p - 27),
                 };
                 dst.key(&phi(src, hpoint))
+            }
+            IndexMode::Isomorphism => {
+                counters.canonicalisations += 1;
+                let f = &src.f;
+                let dst = Curve {
+                    f: *f,
+                    a: f.zero(),
+                    b: f.from_fp(f.p - 27),
+                };
+                dst.key(&iso_scale(
+                    src,
+                    self.iso_u.expect("isomorphism prepared"),
+                    hpoint,
+                ))
             }
         };
         counters.lookups += 1;
@@ -538,6 +568,9 @@ fn transform_calibration(curve: &Curve, point: Point, mode: IndexMode) -> f64 {
             IndexMode::Isogeny => {
                 std::hint::black_box(phi(curve, point));
             }
+            IndexMode::Isomorphism => {
+                std::hint::black_box(iso_scale(curve, iso_u(curve.f.p), point));
+            }
             IndexMode::Projected => {}
         }
     }
@@ -572,7 +605,7 @@ fn six_class_endomorphism(
     )
 }
 
-fn solve(path: &str) {
+fn solve(path: &str, include_iso: bool) {
     let fixtures = std::fs::read_to_string(path).expect("fixture JSONL");
     for (index, line) in fixtures.lines().enumerate() {
         let v: serde_json::Value = serde_json::from_str(line).unwrap();
@@ -630,6 +663,9 @@ fn solve(path: &str) {
                 "rho-negation-aa",
                 "rho-six-class",
             ];
+            if include_iso {
+                arm_names.insert(4, "isomorphism-projected-pair");
+            }
             if round % 2 == 1 {
                 arm_names.reverse();
             }
@@ -669,6 +705,7 @@ fn solve(path: &str) {
                             let mode = match arm {
                                 "projected-pair" => IndexMode::Projected,
                                 "chi-orbit-index" => IndexMode::Chi,
+                                "isomorphism-projected-pair" => IndexMode::Isomorphism,
                                 _ => IndexMode::Isogeny,
                             };
                             c.ns_per_canon = Some(transform_calibration(&curve, g, mode));
@@ -698,6 +735,7 @@ fn solve(path: &str) {
                                 let mode = match arm {
                                     "projected-pair" => IndexMode::Projected,
                                     "chi-orbit-index" => IndexMode::Chi,
+                                    "isomorphism-projected-pair" => IndexMode::Isomorphism,
                                     _ => IndexMode::Isogeny,
                                 };
                                 let mut oracle = ProjectedOracle::new(mode, projected);
@@ -1359,6 +1397,12 @@ fn verify_independent(run_path: &str, fixture_path: &str) {
     );
 }
 
+fn iso_u(p: u64) -> u64 {
+    (1..p)
+        .find(|u| ((*u as u128 * *u as u128) % p as u128) as u64 == p - 3)
+        .expect("no base-field scaling isomorphism")
+}
+
 fn iso_scale(curve: &Curve, u: u64, point: Point) -> Point {
     if point.infinity {
         return curve.identity();
@@ -1387,9 +1431,7 @@ fn iso_check(path: &str) {
             a: f.zero(),
             b: f.from_fp(p - 27),
         };
-        let u = (1..p)
-            .find(|u| ((*u as u128 * *u as u128) % p as u128) as u64 == p - 3)
-            .expect("no base-field scaling isomorphism");
+        let u = iso_u(p);
         let u2 = (u as u128 * u as u128 % p as u128) as u64;
         let u3 = (u2 as u128 * u as u128 % p as u128) as u64;
         let u6 = (u3 as u128 * u3 as u128 % p as u128) as u64;
@@ -1539,7 +1581,8 @@ fn main() {
     match std::env::args().nth(1).as_deref() {
         Some("screen") => screen(),
         Some("freeze") => freeze(),
-        Some("solve") => solve(&std::env::args().nth(2).expect("fixture path")),
+        Some("solve") => solve(&std::env::args().nth(2).expect("fixture path"), false),
+        Some("solve-v4") => solve(&std::env::args().nth(2).expect("fixture path"), true),
         Some("verify") => verify(
             &std::env::args().nth(2).expect("records path"),
             &std::env::args().nth(3).expect("fixture path"),
