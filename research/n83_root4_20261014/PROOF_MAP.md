@@ -23,7 +23,7 @@ inequalities use no axioms.
 
 The checked decode arithmetic is a model of the slot bit layout. The source
 uses `u32` bit shifts and masks, and compares the full canonical root after
-the one-bit fingerprint. Rust tests compare the four-byte table with the
+the two-bit fingerprint. Rust tests compare the four-byte table with the
 existing exact five-byte table on complete small indexes and probes.
 The missing Lean bridge is a formal model of the Rust table transitions,
 the source's canonical-root function, and the GF(2^83) representation.
