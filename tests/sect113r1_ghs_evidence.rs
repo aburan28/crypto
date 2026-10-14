@@ -75,6 +75,19 @@ fn parse_hex(value: &str) -> BigUint {
     BigUint::parse_bytes(value.as_bytes(), 16).expect("valid frozen hexadecimal integer")
 }
 
+/// `git cat-file`-style read of `spec` (`<commit>:<path>` or
+/// `<rev>^{commit}`) from the repository, `None` when git or the object is
+/// unavailable.
+fn git_show(spec: &str) -> Option<Vec<u8>> {
+    let out = std::process::Command::new("git")
+        .arg("-C")
+        .arg(root())
+        .args(["cat-file", "-p", spec])
+        .output()
+        .ok()?;
+    out.status.success().then_some(out.stdout)
+}
+
 fn sha256_hex(bytes: &[u8]) -> String {
     hex::encode(sha256(bytes))
 }
@@ -161,14 +174,28 @@ fn preserved_outputs_match_hashes_and_recompute_exactly() {
         "NOT_CERTIFIED_MAGIC_NUMBER_UNCOMPUTED"
     );
 
+    // The manifest pins the producer's sources as they were at
+    // PRODUCER_COMMIT.  Later commits may change those files (the MMT
+    // correction changed ghs_screen.rs and ec_trapdoor.rs), so the pins are
+    // checked against the blobs of that commit, not the working tree.  A
+    // shallow clone without the commit cannot check them and says so.
+    let producer_commit_present = git_show(&format!("{PRODUCER_COMMIT}^{{commit}}")).is_some();
     for source in manifest["producer"]["source_files"]
         .as_array()
         .expect("source-files array")
     {
         let path = source["path"].as_str().expect("source path string");
         let expected = source["sha256"].as_str().expect("source hash string");
-        let bytes = fs::read(root().join(path)).expect("read producer source");
-        assert_eq!(sha256_hex(&bytes), expected, "producer source {path}");
+        if producer_commit_present {
+            let bytes = git_show(&format!("{PRODUCER_COMMIT}:{path}"))
+                .unwrap_or_else(|| panic!("{path} missing at producer commit"));
+            assert_eq!(sha256_hex(&bytes), expected, "producer source {path}");
+        } else {
+            eprintln!(
+                "producer commit {PRODUCER_COMMIT} is not in this clone (shallow checkout?): \
+                 {path} provenance not checked; fetch the commit to check it"
+            );
+        }
     }
 
     assert_eq!(manifest["protocol"]["absolute_degree"], 113);
@@ -179,8 +206,12 @@ fn preserved_outputs_match_hashes_and_recompute_exactly() {
     assert_eq!(manifest["protocol"]["a"], format!("0x{CURVE_A}"));
     assert_eq!(manifest["protocol"]["genus_bound"], "64");
 
+    // The preserved outputs (frozen, hash-pinned) record type I and genus
+    // 2^112 - 1 from the pre-2026-10-13 orbit-length type rule.  The live
+    // recomputation below uses the MMT rule: the plain orbit of sqrt(b) has
+    // rank 113, so Ord_b = x^113 - 1, (x - 1) | Ord_b, type II, genus 2^112.
+    // The magic number (113) and the out-of-bound verdict are unchanged.
     let expected_genus = BigUint::one() << 112usize;
-    let expected_genus = expected_genus - BigUint::one();
     let expected_cover_degree = BigUint::one() << 113usize;
     let executions = manifest["executions"]
         .as_array()
@@ -232,7 +263,9 @@ fn preserved_outputs_match_hashes_and_recompute_exactly() {
         assert_eq!(row.relative_degree, 113);
         assert_eq!(row.base_degree, 1);
         assert_eq!(row.magic_number, 113);
-        assert!(row.type_i);
+        assert!(!row.type_i);
+        // N = 113 is prime, so n = 113 is odd: MMT condition (8) holds.
+        assert!(row.descends);
         assert_eq!(row.genus, expected_genus);
         assert_eq!(row.cover_degree, expected_cover_degree);
         assert!(!row.within_genus_bound);
