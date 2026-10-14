@@ -1,0 +1,15 @@
+   Compiling crypto v0.1.0 (/workspace/repos/crypto)
+    Finished `release` profile [optimized] target(s) in 2m 53s
+     Running unittests examples/n83_rho_speed_eval.rs (/workspace/n83_evaluation/build/release/examples/n83_rho_speed_eval-82f2779a1093a679)
+
+running 7 tests
+test tests::delegated_inverse_and_scalar_conversions_match_reference ... ok
+test tests::public_input_refuses_scalar_sidecars_multiple_points_and_noncanonical_words ... ok
+test tests::strict_configs_accept_exact_grid_and_reject_other_input ... ok
+test tests::uniform_samplers_and_one_shot_ranges_consume_identical_u64_rng_streams ... ok
+test tests::upper_product_matches_biguint_on_limb_edges_and_random_words ... ok
+test tests::reciprocal_reduction_and_addition_are_exact_with_one_correction_at_all_widths ... ok
+test tests::exact_n83_full_solve_jumps_trajectory_counters_and_charges_match_reference ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.67s
+

@@ -148,5 +148,14 @@ unchanged. MANIFEST.sha256 binds the final artifacts; the file-provenance receip
 binds the original recorded sources, binaries, commands, inputs and outputs.
 The additional native descriptive module passes five tests. The pinned Lean
 build, axiom check and fresh kernel replay pass locally; the new CI workflow
-reproduces those checks on future changes. Remote CI was not run or monitored
-by the authoring session.
+reproduces those checks on future changes. These are local validation results;
+remote CI and landing status belong to the follow-up PR.
+
+Delivery resumed on Oct14 and integrated main275beb93f at2ea7fd320. The final
+integrated release library passes4089 tests with117 ignored; the worker passes
+all seven tests. [Integration receipts](checks/integrated_20261014/README.md)
+and [delivery provenance](DELIVERY_PROVENANCE.md) separate this validation from
+the unchanged Oct12 measurements. Byte-for-byte measured source copies are in
+[the archive](archives/measured_sources/README.md). The [70-page comprehensive
+PDF](reports/run-20261012T1543Z/unified_curve_basis_report_faster_rho.pdf) and its
+historical60-page input are now durable repository artifacts too.

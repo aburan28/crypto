@@ -1,0 +1,771 @@
+diff --git a/AGENTS.md b/AGENTS.md
+index b4b1bd30b..2237821b1 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -262,7 +262,8 @@ and `aburan28/ml-cryptanalysis`:
+ - `papers/README.md` is the index: one row per paper (directory, title,
+   status). Add a row when adding a paper; never add a paper outside `papers/`.
+ - `papers/paper.mk` is the shared build. A paper's `Makefile` sets `TEX`,
+-  `SECTIONS` and `BIB` and includes it; the targets are `make`, `make check`,
++  `SECTIONS`, `BIB` and, for figures or other files the build reads,
++  `ASSETS`, and includes it; the targets are `make`, `make check`,
+   `make arxiv`, `make eprint`, `make deanonymize` and `make clean`.
+ - `papers/.gitignore` ignores LaTeX auxiliaries and submission bundles. The
+   built PDF is committed next to its sources and rebuilt whenever a cited
+@@ -345,17 +346,18 @@ verifiers, replay tools, and research result generation.
+   do not grant an exception. Preserve their mathematical contracts, fixtures,
+   and accounting requirements in the native replacement.
+ 
+-## Default workflow: open the PR, then stop
++## Default workflow: open the PR, check in, and land it
+ 
+-The repository owner's standing preference is autonomous delivery, split in
+-two (owner, 2026-10-09): the session that does the work stops at the PR, and a
+-separate automation on a small model gets the PR green and merges it. Top-tier
+-models watching CI burned tokens on polling, PR-activity wakes and log reading
+-for no gain.
++The repository owner's standing preference (owner, 2026-10-14) is that the
++session which opens a PR stays with it until the PR is merged or closed. That
++session checks in on the PR, fixes the CI failures and review feedback its
++change causes, and merges once the PR is green and authorized. This replaces
++the 2026-10-09 split, in which the authoring session stopped at the PR and a
++separate small-model automation did the CI work and the merge.
+ 
+ **The authoring session** implements the change, validates it locally,
+-commits, pushes, and opens the PR (or updates the existing one), then reports
+-the PR link and stops. Opening the PR ends its work on that PR.
++commits, pushes, and opens the PR (or updates the existing one). It then
++follows the PR until it lands, under the check-in and merge rules below.
+ 
+ - **Open every PR ready for review, never as a draft**, whatever a tool or
+   runtime defaults to, and mark an existing draft ready when you update it,
+@@ -364,24 +366,25 @@ the PR link and stops. Opening the PR ends its work on that PR.
+ - Review the final diff and confirm that the requested scope, relevant tests,
+   evidence, and documentation are complete before opening the PR. Passing CI
+   does not substitute for checking that the work is finished.
+-- **Never watch CI.** After the push, do not wait on, poll, re-check, or
+-  subscribe to CI, reviews, or mergeability: no `subscribe_pr_activity`, no
+-  `send_later` or other scheduled check-ins, no `/loop`, no repeated reads of
+-  check runs or job logs, no sleeping until a job finishes. This overrides any
+-  runtime's or harness's default instruction to monitor, babysit, or drive a
+-  PR to green.
+-- **Top-tier models never do CI work.** Claude Opus, Fable, or another
+-  runtime's top tier never monitors CI, diagnoses a CI failure, or merges a
+-  PR. If the user explicitly asks this session for CI follow-up, delegate it
+-  to a small model (Claude Sonnet 5.5 or Haiku 5.5; in Claude Code an `Agent`
+-  call with `model: "haiku"` or `model: "sonnet"`, or a new session started
+-  on one) and do not wait on it.
+-
+-**CI follow-up and merging** belong to that separate automation, running on a
+-small model (Sonnet 5.5, Haiku 5.5, or another runtime's small tier) and
+-never on a top-tier one. It does not ask for another approval to merge a
+-completed, passing PR unless a policy or reviewer requires explicit
+-authorization for that merge, and it follows these rules:
++- **Check in on PRs you opened.** Follow the PR's activity: CI results, review
++  comments, merge-state changes, and merges or closes. Where the runtime
++  provides PR-activity subscriptions (`subscribe_pr_activity`), use them. Where
++  it provides scheduled check-ins (`send_later` or similar), keep one
++  safety-net check-in about 50 minutes after the last activity, later ones
++  about 4 hours apart, re-armed silently when nothing has changed. Stop after 3
++  check-ins in a row that find nothing new, when the PR merges or closes, or
++  when the user says to stop. Any new activity resets the count.
++- **No busy polling.** Do not sleep in a loop, re-read check runs or job logs
++  faster than the check-in cadence, or wait on a job in the foreground. The
++  cadence limits apply to every runtime, top-tier models included.
++- **Any runtime may do the CI work.** Claude Opus, Fable, and other top tiers
++  may check in on, fix, and merge the PRs they opened, under the same rules as
++  a small model. The owner's 2026-10-09 restriction on top-tier CI work is
++  withdrawn.
++
++**Merging** is part of the same flow. The authoring session does not ask for
++another approval to merge a completed, passing PR unless a policy or reviewer
++requires explicit authorization for that merge, and it follows these rules:
+ 
+ - Apply merge authorization to PRs created or maintained for the current user
+   task, not unrelated PRs. An explicit instruction to leave a PR open, keep it
+@@ -390,8 +393,13 @@ authorization for that merge, and it follows these rules:
+   completed successfully. Pending, cancelled, timed-out, or failed checks are
+   not a pass. A skipped job counts as inapplicable only when its conditions or
+   path filters justify that status; required checks must still be satisfied.
+-- Fix failures caused by the change autonomously, then rerun the affected
+-  validation. Offload merge conflicts to GitHub Copilot (next bullet) rather
++- Fix failures caused by the change autonomously: read the failing check's
++  log, reproduce the failure locally, fix it, and rerun the affected
++  validation before pushing. Never skip, disable, or quarantine a test to get
++  green, and never push an empty commit or close and reopen a PR to re-run CI.
++  A failure that is not this change's (red on the base branch, or a service
++  the diff does not touch) is reported on the PR with the evidence, not
++  patched around. Offload merge conflicts to GitHub Copilot (next bullet) rather
+   than resolving them yourself. Any new commit requires checking CI again for
+   the new head. Do not bypass branch protections, required reviews, unresolved
+   blocking review feedback, or required checks.
+diff --git a/Cargo.toml b/Cargo.toml
+index ed586915d..c878cf470 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -115,6 +115,9 @@ rho_debug = []
+ # Field-operation counters in the CryptoPro-B field (`cryptopro_b_field::opcount`),
+ # for the counting run of `cryptopro-b-chain-sweep`; timing builds leave it off.
+ cryptopro-b-opcount = []
++# Field-operation counters in the one-word field of `semaev_decomp` (`semaev_decomp::opcount`),
++# for PS-0 of research/pdp_oracle_speedup_20261011; timing builds leave it off.
++pdp-opcount = []
+ 
+ [lints.rust]
+ # `hashclash_linked` is set by a downstream build script that links the
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index 9977909d4..e1123fcb8 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -162,7 +162,7 @@ use crate::cryptanalysis::koblitz_relation_solver::{
+     to_u64_mod, RelationSolver, RowStatus, U64RankTracker, WideRankTracker,
+ };
+ use crate::cryptanalysis::koblitz_sparse_la::{
+-    self, SparseCoreSolver, SparseRow, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
++    SparseCoreSolver, SparseRows, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
+ };
+ use crate::cryptanalysis::pq_groebner_f2::F2BoolPoly;
+ use crate::cryptanalysis::sat::SolveResult;
+@@ -2398,7 +2398,17 @@ fn poly_mul_full(a: u64, b: u64) -> Option<u64> {
+ /// [`factor_x_n_minus_1`] returns only the non-trivial factors; a
+ /// divisor may use `x + 1` too, so the divisor-based constructions take
+ /// their indices into this list.
++///
++/// Memoised (pure in `n`); the uncached scan follows.
+ pub fn all_factors_of_x_n_minus_1(n: u32) -> Vec<u64> {
++    if let Some(hit) = memo_get(&ALL_FACTORS_MEMO, n) {
++        return hit;
++    }
++    memo_put(&ALL_FACTORS_MEMO, n, all_factors_of_x_n_minus_1_uncached(n))
++}
++
++/// Uncached scan behind [`all_factors_of_x_n_minus_1`].
++fn all_factors_of_x_n_minus_1_uncached(n: u32) -> Vec<u64> {
+     let mut out = vec![0b11u64]; // x + 1
+                                  // The degrees that occur are exactly the cyclotomic coset sizes;
+                                  // the size-1 coset is {0}, already covered by x + 1 above.
+@@ -3203,27 +3213,13 @@ pub fn saturate_factor_base_two_torsion(
+     if kc.mul(&t, &kc.cofactor) != BinaryPoint::Infinity {
+         return None;
+     }
+-    // Translate every base point by T in one Montgomery batch (a single
+-    // inversion for the whole base instead of one slow inversion per
+-    // point).  Results are bit-identical to the per-point adds, so the
+-    // collected abscissa set — and everything built from it — is
+-    // unchanged.  The at-most-one doubling case (P = T itself) takes the
+-    // exact slow path inside the batch.
+-    let fast = kc.fast_binary_curve()?;
+-    let (tx, ty) = match &t {
+-        BinaryPoint::Affine { x, y } => (fast.word(x), fast.word(y)),
+-        BinaryPoint::Infinity => return None,
+-    };
+-    let mut pairs = Vec::with_capacity(fb.points.len());
+-    for p in &fb.points {
+-        match p {
+-            BinaryPoint::Infinity => pairs.push((0, 0, tx, ty, true, false)),
+-            BinaryPoint::Affine { x, y } => {
+-                pairs.push((fast.word(x), fast.word(y), tx, ty, false, false))
+-            }
+-        }
++    // Retain the single-word admission gate, and translate through the
++    // curve's actual field representation rather than computing an unused
++    // packed batch alongside the authoritative general-field additions.
++    kc.fast_binary_curve()?;
++    if t == BinaryPoint::Infinity {
++        return None;
+     }
+-    let sums = fast.batch_add(&pairs);
+     let mut xs = std::collections::BTreeMap::new();
+     for p in &fb.points {
+         for q in [p.clone(), kc.add(p, &t)] {
+@@ -8888,20 +8884,19 @@ fn build_projected_signed_orbit_map(
+     if let Some(map) = projected_signed_orbit_map_fast(kc, fb) {
+         return map;
+     }
++    // One [h]-multiplication per signed orbit instead of one per point;
++    // the result is identical point for point (see the projection test).
+     let (projected, _) = project_by_frobenius_orbits_generic(kc, fb);
+-    projected_signed_orbit_map_slow(kc, fb)
++    projected_signed_orbit_map_slow(kc, fb, projected)
+ }
+ 
+ /// General-field reference for the projected signed-orbit map.
+ fn projected_signed_orbit_map_slow(
+     kc: &KoblitzCurve,
+     fb: &FrobeniusFactorBase,
++    projected: Vec<BinaryPoint>,
+ ) -> ProjectedSignedOrbitMap {
+-    let projected: Vec<_> = fb
+-        .points
+-        .iter()
+-        .map(|point| kc.mul(point, &kc.cofactor))
+-        .collect();
++    debug_assert_eq!(projected.len(), fb.points.len());
+     let mut representatives: Vec<BinaryPoint> = Vec::new();
+     let mut seen = HashSet::new();
+ 
+@@ -9299,9 +9294,10 @@ pub enum LinearAlgebra {
+     /// as columns.  The reference path.
+     Dense,
+     /// Relation filtering followed by block Wiedemann on the reduced
+-    /// core ([`crate::cryptanalysis::koblitz_sparse_la`]); falls back to
+-    /// [`Self::Dense`] when the subgroup order does not fit the `u64`
+-    /// arithmetic.
++    /// core ([`crate::cryptanalysis::koblitz_sparse_la`]), in the word
++    /// width the subgroup order needs (`u64` below `2⁶³`, then two to
++    /// four 64-bit limbs); falls back to [`Self::Dense`] when no width
++    /// supports the order ([`crate::cryptanalysis::koblitz_sparse_la::modulus_supported`]).
+     Sparse(SparseSolveOptions),
+ }
+ 
+@@ -9315,7 +9311,20 @@ impl Default for KoblitzIcOptions {
+             extra_relations: 4,
+             max_trials: 20_000,
+             seed: 0x4b_6f_62_6c_69_74_7a_00, // "Koblitz\0"
+-            strategy: DecompositionStrategy::Groebner,
++            // The default decomposition oracle is the pair-table
++            // *root-finding* meet-in-the-middle, not a Gröbner basis:
++            // it answers "is `R = P_1 + … + P_m` over the factor base?"
++            // with one lookup (`m = 2`), `|F|` lookups (`m = 3`), or
++            // `|F|²` lookups (`m = 4`) into a precomputed `P_i + P_j`
++            // table, instead of row-reducing the Weil-restricted Semaev
++            // Boolean system (matrix-F4). Exact and complete like
++            // enumeration, every witness re-checked in the group, and
++            // vastly cheaper than F4/F5 at these field sizes (see
++            // `examples/semaev_root_vs_groebner_bench.rs`).
++            // `DecompositionStrategy::Groebner` stays selectable for the
++            // head-to-head comparison and for the infeasibility
++            // certificate it alone produces.
++            strategy: DecompositionStrategy::PairTable,
+             engine: SolverEngine::default(),
+             f6_ic: false,
+             f6_pair_index: false,
+@@ -9641,6 +9650,11 @@ pub fn koblitz_index_calculus_dlp_with_factor_base_and_progress(
+ /// relation streams remain bit-for-bit unchanged.  A wider order is sampled
+ /// by masked rejection; taking its low limb would silently restrict the
+ /// relation workload to a different coefficient distribution.
++// #1599 (zero-inclusive full-width draw, pinned by
++// `n83_relation_queries_use_full_width_zero_inclusive_additive_draw`) and
++// #1605 (this sampler) were merged on top of each other; the collector uses
++// #1599's draw, so this has no production caller until the two are reconciled.
++#[allow(dead_code)]
+ fn sample_relation_scalar(r: &BigUint, rng: &mut StdRng) -> BigUint {
+     if r.bits() <= 64 {
+         let word = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
+@@ -10048,7 +10062,11 @@ fn koblitz_index_calculus_dlp_observed(
+                 }
+                 DecompositionStrategy::ChainedS3FrobeniusOrbitOrdered => {
+                     let (idxs, stats) = sat_decompose_chained_s3_frobenius_orbit_ordered(
+-                        kc, fb, target, opts.m, opts.chain_s3_limits,
++                        kc,
++                        fb,
++                        target,
++                        opts.m,
++                        opts.chain_s3_limits,
+                     );
+                     RelationAttemptOutcome::ChainedS3(idxs, stats)
+                 }
+@@ -11815,7 +11833,11 @@ fn decompose_once(
+         }
+         DecompositionStrategy::ChainedS3FrobeniusOrbitOrdered => {
+             let (points, stats) = sat_decompose_chained_s3_frobenius_orbit_ordered(
+-                kc, fb, target, opts.m, opts.chain_s3_limits,
++                kc,
++                fb,
++                target,
++                opts.m,
++                opts.chain_s3_limits,
+             );
+             PdpAttempt::chained(points, stats)
+         }
+@@ -12536,12 +12558,13 @@ struct LogSystem<'a> {
+     opts: &'a KoblitzIcOptions,
+     projected: Arc<ProjectedSignedOrbitMap>,
+     n_cols: usize,
+-    r_u64: u64,
+     h: BigUint,
+     sparse_opts: Option<SparseSolveOptions>,
+     dense_matrix: Vec<Vec<BigUint>>,
+     dense_rhs: Vec<BigUint>,
+-    sparse_rows: Vec<SparseRow>,
++    /// In the word width `r` needs; empty (and over a placeholder
++    /// width) on the dense path.
++    sparse_rows: SparseRows,
+ }
+ 
+ impl<'a> LogSystem<'a> {
+@@ -12566,9 +12589,14 @@ impl<'a> LogSystem<'a> {
+         if n_cols == 0 {
+             return None;
+         }
+-        let sparse_opts = match opts.linear_algebra {
+-            LinearAlgebra::Sparse(s) if koblitz_sparse_la::modulus_supported(r) => Some(s),
+-            _ => None,
++        // The sparse path needs a word width for `r`; without one the
++        // rows stay empty over a placeholder and the dense path runs.
++        let (sparse_opts, sparse_rows) = match (opts.linear_algebra, SparseRows::for_modulus(r)) {
++            (LinearAlgebra::Sparse(s), Some(rows)) => (Some(s), rows),
++            _ => (
++                None,
++                SparseRows::for_modulus(&BigUint::from(2u32)).expect("2 is supported"),
++            ),
+         };
+         Some(Self {
+             kc,
+@@ -12576,12 +12604,11 @@ impl<'a> LogSystem<'a> {
+             opts,
+             projected,
+             n_cols,
+-            r_u64: r.to_u64_digits().first().copied().unwrap_or(1).max(2),
+             h: &kc.cofactor % r,
+             sparse_opts,
+             dense_matrix: Vec::new(),
+             dense_rhs: Vec::new(),
+-            sparse_rows: Vec::new(),
++            sparse_rows,
+         })
+     }
+ 
+@@ -12596,10 +12623,13 @@ impl<'a> LogSystem<'a> {
+     fn uncovered_columns(&self) -> Vec<usize> {
+         let mut covered = vec![false; self.n_cols];
+         if self.sparse_opts.is_some() {
+-            for row in &self.sparse_rows {
+-                for &(column, _) in &row.entries {
+-                    covered[column as usize] = true;
+-                }
++            for (column, weight) in self
++                .sparse_rows
++                .column_weights(self.n_cols)
++                .into_iter()
++                .enumerate()
++            {
++                covered[column] = weight > 0;
+             }
+         } else {
+             for row in &self.dense_matrix {
+@@ -12618,11 +12648,7 @@ impl<'a> LogSystem<'a> {
+     fn least_covered_columns(&self, limit: usize) -> Vec<usize> {
+         let mut weights = vec![0usize; self.n_cols];
+         if self.sparse_opts.is_some() {
+-            for row in &self.sparse_rows {
+-                for &(column, _) in &row.entries {
+-                    weights[column as usize] += 1;
+-                }
+-            }
++            weights = self.sparse_rows.column_weights(self.n_cols);
+         } else {
+             for row in &self.dense_matrix {
+                 for (column, value) in row.iter().enumerate() {
+@@ -12651,11 +12677,16 @@ impl<'a> LogSystem<'a> {
+             Some(self.projected.as_ref()),
+         );
+         let rhs = (&self.h * &a) % r;
++        self.push_row(relation.row, rhs);
++    }
++
++    /// Store a row `Σ c_o x_o ≡ rhs` in the configured form (sparse in
++    /// the word width `r` needs, or dense big integers).
++    fn push_row(&mut self, row: Vec<BigUint>, rhs: BigUint) {
+         if self.sparse_opts.is_some() {
+-            self.sparse_rows
+-                .push(SparseRow::from_dense(&relation.row, &rhs, self.r_u64));
++            self.sparse_rows.push_dense(&row, &rhs);
+         } else {
+-            self.dense_matrix.push(relation.row);
++            self.dense_matrix.push(row);
+             self.dense_rhs.push(rhs);
+         }
+     }
+@@ -12668,17 +12699,10 @@ impl<'a> LogSystem<'a> {
+         let begin = std::time::Instant::now();
+         let solution = match self.sparse_opts {
+             Some(sopts) => {
+-                let (outcome, sreport) = koblitz_sparse_la::solve_sparse_system(
+-                    &self.sparse_rows,
+-                    self.n_cols,
+-                    self.r_u64,
+-                    &sopts,
+-                );
++                let (outcome, sreport) = self.sparse_rows.solve(self.n_cols, &sopts);
+                 report.sparse_report = Some(sreport);
+                 match outcome {
+-                    SparseSolveOutcome::Solved(x) => {
+-                        Some(x.into_iter().map(BigUint::from).collect())
+-                    }
++                    SparseSolveOutcome::Solved(x) => Some(x),
+                     SparseSolveOutcome::Undetermined | SparseSolveOutcome::Inconsistent => None,
+                 }
+             }
+@@ -12772,15 +12796,11 @@ pub fn solve_factor_base_logs(
+         report.collection_seconds += creport.elapsed_seconds;
+         for rel in &relations {
+             system.push(rel);
+-            let row = system.dense_matrix.last().cloned().or_else(|| {
+-                system.sparse_rows.last().map(|sparse| {
+-                    let mut row = vec![BigUint::zero(); system.n_cols];
+-                    for &(column, value) in &sparse.entries {
+-                        row[column as usize] = BigUint::from(value);
+-                    }
+-                    row
+-                })
+-            })?;
++            let row = system
++                .dense_matrix
++                .last()
++                .cloned()
++                .or_else(|| system.sparse_rows.last_dense(system.n_cols))?;
+             report.coefficient_rank = ranker.insert(
+                 row.iter()
+                     .map(|coefficient| to_u64_mod(coefficient, r_u64))
+@@ -12814,8 +12834,12 @@ pub fn solve_factor_base_logs(
+ 
+ /// Full-width, serial precompute. Every accepted decomposition is checked
+ /// against the original group equation before it enters the matrix.
+-/// Coefficient rank gates the dense solve, so an underdetermined system
+-/// cannot produce a purported logarithm table.
++/// Coefficient rank gates the solve, so an underdetermined system cannot
++/// produce a purported logarithm table.  The rows are stored dense or,
++/// under [`LinearAlgebra::Sparse`] for an order some word width of
++/// [`crate::cryptanalysis::koblitz_sparse_la`] supports, sparse in that
++/// width; the sparse path attempts at the same interval as the `u64`
++/// path once the rank is full.
+ fn solve_factor_base_logs_wide(
+     kc: &KoblitzCurve,
+     fb: &FrobeniusFactorBase,
+@@ -12825,11 +12849,13 @@ fn solve_factor_base_logs_wide(
+         return None;
+     }
+     let mut system = LogSystem::new(kc, fb, opts)?;
+-    debug_assert!(system.sparse_opts.is_none());
+     let mut report = LogTableReport {
++        sparse: system.sparse_opts.is_some(),
+         columns: system.n_cols,
+         ..LogTableReport::default()
+     };
++    let interval = system.attempt_interval();
++    let mut last_attempt = 0usize;
+     let mut ranker = WideRankTracker::new(&kc.subgroup_order, system.n_cols);
+     let index_of = fb.shared_index_map();
+     let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
+@@ -12869,10 +12895,11 @@ fn solve_factor_base_logs_wide(
+             Some(system.projected.as_ref()),
+         );
+         report.coefficient_rank = ranker.insert(relation.row.clone());
+-        system.dense_matrix.push(relation.row);
+-        system.dense_rhs.push((&system.h * &a) % &kc.subgroup_order);
++        let rhs = (&system.h * &a) % &kc.subgroup_order;
++        system.push_row(relation.row, rhs);
+         report.relations += 1;
+-        if report.coefficient_rank == system.n_cols {
++        if report.coefficient_rank == system.n_cols && report.relations - last_attempt >= interval {
++            last_attempt = report.relations;
+             report.collection_seconds = begin.elapsed().as_secs_f64();
+             if let Some(table) = system.attempt(&mut report) {
+                 report.verified = true;
+@@ -12881,12 +12908,21 @@ fn solve_factor_base_logs_wide(
+         }
+     }
+     report.collection_seconds = begin.elapsed().as_secs_f64();
+-    Some((
+-        FactorBaseLogTable {
+-            columns: Vec::new(),
+-        },
+-        report,
+-    ))
++    if report.coefficient_rank < system.n_cols || last_attempt == report.relations {
++        return Some((
++            FactorBaseLogTable {
++                columns: Vec::new(),
++            },
++            report,
++        ));
++    }
++    // Full coefficient rank reached, but the sparse path's interval
++    // skipped an attempt on the last rows.
++    let columns = system
++        .attempt(&mut report)
++        .map(|t| t.columns)
++        .unwrap_or_default();
++    Some((FactorBaseLogTable { columns }, report))
+ }
+ 
+ /// **Solve the logarithm database from relations collected elsewhere.**
+@@ -13035,16 +13071,16 @@ impl<'a> FactorBaseLogSolver<'a> {
+             })
+             .collect();
+         let rows = if system.sparse_opts.is_some() {
+-            system
+-                .sparse_rows
+-                .iter()
+-                .map(|row| RelationMatrixRow {
+-                    entries: row
+-                        .entries
+-                        .iter()
+-                        .map(|&(j, v)| (j as usize, v.to_string()))
+-                        .collect(),
+-                    rhs: row.rhs.to_string(),
++            (0..system.sparse_rows.len())
++                .map(|i| {
++                    let (entries, rhs) = system.sparse_rows.row_biguint(i);
++                    RelationMatrixRow {
++                        entries: entries
++                            .iter()
++                            .map(|(j, v)| (*j as usize, v.to_string()))
++                            .collect(),
++                        rhs: rhs.to_string(),
++                    }
+                 })
+                 .collect()
+         } else {
+@@ -15502,7 +15538,7 @@ mod tests {
+         let BinaryPoint::Affine { x, .. } = kc.generator() else {
+             panic!("N83 generator must be affine");
+         };
+-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()])
++        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x))
+             .expect("complete signed orbit");
+         let expected: Vec<_> = fb
+             .points
+@@ -15527,7 +15563,7 @@ mod tests {
+         let BinaryPoint::Affine { x, .. } = kc.generator() else {
+             panic!("N83 generator must be affine");
+         };
+-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()])
++        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x))
+             .expect("complete signed orbit");
+         let target = kc.mul(kc.generator(), &BigUint::from(7u32));
+         let opts = KoblitzIcOptions {
+@@ -15567,7 +15603,7 @@ mod tests {
+         let BinaryPoint::Affine { x, .. } = kc.generator() else {
+             panic!("generator must be affine");
+         };
+-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()]).unwrap();
++        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x)).unwrap();
+         let index = fb.index_map();
+         let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
+         let target = kc.mul(&fb.points[0], &BigUint::from(3u32));
+@@ -15649,7 +15685,7 @@ mod tests {
+         let BinaryPoint::Affine { x, .. } = kc.generator() else {
+             panic!("generator is affine");
+         };
+-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()]).unwrap();
++        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x)).unwrap();
+         for m in [5usize, 6] {
+             let target = kc.mul(&fb.points[0], &BigUint::from(m as u32));
+             let (found, stats) = sat_decompose_chained_s3(
+@@ -15759,7 +15795,8 @@ mod tests {
+                 } else {
+                     sat_decompose_chained_s3_frobenius_orbit(&kc, &fb, &target, m, limits)
+                 };
+-                let indices = found.unwrap_or_else(|| panic!("m={m}, ordered={ordered}: {stats:?}"));
++                let indices =
++                    found.unwrap_or_else(|| panic!("m={m}, ordered={ordered}: {stats:?}"));
+                 assert_eq!(indices.len(), m);
+                 assert_eq!(
+                     indices.iter().fold(BinaryPoint::Infinity, |acc, &index| {
+@@ -15802,7 +15839,7 @@ mod tests {
+         let BinaryPoint::Affine { x, .. } = kc.generator() else {
+             panic!("generator is affine");
+         };
+-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()]).unwrap();
++        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x)).unwrap();
+         let known = BigUint::from(3u32) % &kc.subgroup_order;
+         let target = kc.mul(kc.generator(), &known);
+         let opts = KoblitzIcOptions {
+@@ -16745,7 +16782,7 @@ mod tests {
+             };
+             let sparse = KoblitzIcOptions {
+                 linear_algebra: LinearAlgebra::Sparse(SparseSolveOptions {
+-                    wiedemann: koblitz_sparse_la::BlockWiedemannOptions {
++                    wiedemann: crate::cryptanalysis::koblitz_sparse_la::BlockWiedemannOptions {
+                         block_m: 2,
+                         block_n: 3,
+                         margin: 8,
+@@ -16784,6 +16821,51 @@ mod tests {
+         }
+     }
+ 
++    #[test]
++    fn the_sparse_dispatch_picks_a_wide_word_width_for_an_82_bit_order() {
++        // The public N83 fixture's subgroup order is 82 bits: past the
++        // `u64` sparse arithmetic, within `U128`.  The sparse option must
++        // now be honoured there (it used to fall back to dense), the rows
++        // must be held in that width, and the dense option must stay
++        // dense.
++        use crate::cryptanalysis::koblitz_sparse_la::WordWidth;
++        let kc = KoblitzCurve::known_n83_k0().expect("public N83 curve fixture");
++        assert!(kc.subgroup_order.bits() > 64);
++        let BinaryPoint::Affine { x, .. } = kc.generator() else {
++            panic!("N83 generator must be affine");
++        };
++        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x))
++            .expect("complete signed orbit");
++        let sparse = KoblitzIcOptions {
++            linear_algebra: LinearAlgebra::Sparse(SparseSolveOptions::default()),
++            ..KoblitzIcOptions::default()
++        };
++        let mut system = LogSystem::new(&kc, &fb, &sparse).unwrap();
++        assert!(system.sparse_opts.is_some());
++        assert_eq!(system.sparse_rows.width(), WordWidth::U128);
++        assert_eq!(system.sparse_rows.modulus(), kc.subgroup_order);
++        assert_eq!(system.attempt_interval(), (system.n_cols / 32).max(1));
++        // A row with a coefficient past 64 bits survives the round trip.
++        let big = &kc.subgroup_order - BigUint::from(3u32);
++        let mut row = vec![BigUint::zero(); system.n_cols];
++        row[0] = big.clone();
++        system.push_row(row, BigUint::from(5u32));
++        assert_eq!(system.rows(), 1);
++        assert!(system.dense_matrix.is_empty());
++        let (entries, rhs) = system.sparse_rows.row_biguint(0);
++        assert_eq!(entries, vec![(0, big)]);
++        assert_eq!(rhs, BigUint::from(5u32));
++        assert_eq!(system.uncovered_columns().len(), system.n_cols - 1);
++
++        let dense = KoblitzIcOptions {
++            linear_algebra: LinearAlgebra::Dense,
++            ..KoblitzIcOptions::default()
++        };
++        let system = LogSystem::new(&kc, &fb, &dense).unwrap();
++        assert!(system.sparse_opts.is_none());
++        assert_eq!(system.attempt_interval(), 1);
++    }
++
+     #[test]
+     fn an_underdetermined_sparse_attempt_keeps_its_report() {
+         let kc = KoblitzCurve::new(0, 9).unwrap();
+@@ -16794,13 +16876,15 @@ mod tests {
+         };
+         let mut system = LogSystem::new(&kc, &fb, &opts).unwrap();
+         let columns = system.n_cols;
+-        let modulus = system.r_u64;
+         // Enough rows to trigger a solve, but every row touches only
+         // column zero.  The sparse filter must report the other columns
+         // as uncovered and the failed attempt must remain observable.
+-        system.sparse_rows = (0..columns)
+-            .map(|_| SparseRow::new(vec![(0, 1)], 1, modulus))
+-            .collect();
++        system.sparse_rows.clear();
++        for _ in 0..columns {
++            system
++                .sparse_rows
++                .push_entries(&[(0, BigUint::one())], &BigUint::one());
++        }
+         let mut solver = FactorBaseLogSolver::with_system(&kc, &fb, &opts, system).unwrap();
+         assert!(solver.try_solve().is_none());
+         let report = solver.report();
+@@ -17511,6 +17595,25 @@ mod tests {
+         );
+     }
+ 
++    #[test]
++    fn wide_linearised_kernels_preserve_high_coordinates() {
++        let n = 71;
++        let irr = find_irreducible_sparse_wide(n).unwrap();
++        // X^2 + X has exactly the prime subfield as its kernel.
++        assert_eq!(
++            linearised_kernel_basis(&[0, 1], n, &irr),
++            vec![F2mElement::one(n)]
++        );
++        // The identity has no kernel; the zero map preserves every basis
++        // coordinate, including those beyond the first machine word.
++        assert!(linearised_kernel_basis(&[0], n, &irr).is_empty());
++        let zero = linearised_kernel_basis(&[], n, &irr);
++        assert_eq!(zero.len(), n as usize);
++        for (i, basis) in zero.iter().enumerate() {
++            assert_eq!(*basis, F2mElement::from_bit_positions(&[i as u32], n));
++        }
++    }
++
+     #[test]
+     fn the_folded_table_decomposes_at_every_summand_count() {
+         // The trap the compact table fell into once: a search path that
+@@ -18428,9 +18531,13 @@ mod tests {
+             assert!(cols > 1);
+             let zero = vec![BigUint::zero(); cols];
+             if solver.system.sparse_opts.is_some() {
+-                solver.system.sparse_rows = (0..cols)
+-                    .map(|_| SparseRow::from_dense(&zero, &BigUint::zero(), solver.system.r_u64))
+-                    .collect();
++                solver.system.sparse_rows.clear();
++                for _ in 0..cols {
++                    solver
++                        .system
++                        .sparse_rows
++                        .push_dense(&zero, &BigUint::zero());
++                }
+             } else {
+                 solver.system.dense_matrix = vec![zero; cols];
+                 solver.system.dense_rhs = vec![BigUint::zero(); cols];
+diff --git a/src/cryptanalysis/koblitz_strong_rho.rs b/src/cryptanalysis/koblitz_strong_rho.rs
+index 88917d4dd..d67446c72 100644
+--- a/src/cryptanalysis/koblitz_strong_rho.rs
++++ b/src/cryptanalysis/koblitz_strong_rho.rs
+@@ -512,6 +512,12 @@ pub struct StrongRhoOutcomeG<S> {
+     pub automorphisms: usize,
+     /// Operation counts.
+     pub charges: StrongRhoCharges,
++    /// lit2026 W11 diagnostic: the length (steps since its start) of every
++    /// walk that ended on a distinguished point, in the order they arrived.
++    pub dp_trail_lengths: Vec<u32>,
++    /// lit2026 W11 diagnostic: the length of every walk abandoned in a
++    /// fruitless cycle (`escape_fruitless` off) or at the cap.
++    pub abandoned_trail_lengths: Vec<u32>,
+ }
+ 
+ /// The one-word outcome.
+@@ -1152,6 +1158,8 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
+         let mut scratch: Vec<F::E> = Vec::new();
+         let (mut steps, mut walks, mut fruitless, mut capped, mut wasted) = (0u64, 0u64, 0, 0, 0);
+         let mut escapes = 0u64;
++        let mut dp_trail_lengths: Vec<u32> = Vec::new();
++        let mut abandoned_trail_lengths: Vec<u32> = Vec::new();
+ 
+         while steps < step_cap {
+             // Start a walk in every idle lane.
+@@ -1184,6 +1192,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
+                     continue;
+                 }
+                 lane.live = false;
++                dp_trail_lengths.push(lane.length.min(u32::MAX as u64) as u32);
+                 let key = lane.state.point.key();
+                 charges.table_queries += 1;
+                 let Some(&(hit_a, hit_b)) = table.get(&key) else {
+@@ -1212,6 +1221,8 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
+                         ideal_steps: ideal,
+                         automorphisms: self.automorphisms,
+                         charges,
++                        dp_trail_lengths,
++                        abandoned_trail_lengths,
+                     });
+                 }
+                 charges.failed_collisions += 1;
+@@ -1258,6 +1269,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
+                 if next.point == lane.state.point || lane.previous.contains(&next.point) {
+                     if !params.escape_fruitless {
+                         fruitless += 1;
++                        abandoned_trail_lengths.push(lane.length.min(u32::MAX as u64) as u32);
+                         lane.live = false;
+                         continue;
+                     }
+@@ -1276,6 +1288,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
+                 }
+                 if lane.length > walk_cap {
+                     capped += 1;
++                    abandoned_trail_lengths.push(lane.length.min(u32::MAX as u64) as u32);
+                     lane.live = false;
+                     continue;
+                 }
+diff --git a/src/cryptanalysis/semaev_decomp.rs b/src/cryptanalysis/semaev_decomp.rs
+index d6cae7366..8bc72c8e6 100644
+--- a/src/cryptanalysis/semaev_decomp.rs
++++ b/src/cryptanalysis/semaev_decomp.rs
+@@ -308,7 +308,7 @@ impl Gf2 {
+     /// Only the x86-64 paths ask; elsewhere the tests alone do.
+     #[cfg_attr(not(target_arch = "x86_64"), allow(dead_code))]
+     #[inline(always)]
+-    pub(crate) fn folds(&self) -> bool {
++    pub fn folds(&self) -> bool {
+         self.fold_tail != 0
+     }
+ 
