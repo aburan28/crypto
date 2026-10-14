@@ -2,8 +2,8 @@
 
 The retained N83 S3 state is the 11-byte first root from the preceding
 experiment. This candidate changes only its open-addressing root slots:
-each four-byte word stores a nonzero 30-bit state ordinal, one root selector,
-and one fingerprint bit. Empty is zero. A fingerprint match is followed by
+each four-byte word stores a nonzero 29-bit state ordinal, one root selector,
+and two fingerprint bits. Empty is zero. A fingerprint match is followed by
 reconstruction and comparison of the full canonical 83-bit root, so table
 lookup remains exact and retains the first inserted witness. The table has
 `2^31` slots and an 8-GiB payload. The lower occupancy may reduce target
@@ -11,7 +11,7 @@ lookup time even though each slot carries a shorter fingerprint.
 
 The exact symmetric state count is
 `S(K)=83*K*(K-1)/2+42*K`. At K3550, `S=523,005,525`, so the complete
-two-root upper bound fits `2^31` slots and all ordinals fit 30 bits.
+two-root upper bound fits `2^31` slots and all ordinals fit 29 bits.
 The 11-byte state plus four-byte table payload is below 14 GiB. This is a
 payload bound; the observed process peak and 14-GiB guard decide admission.
 `RootFour.lean` checks the bound and slot encode/decode arithmetic.

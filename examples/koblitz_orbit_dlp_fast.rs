@@ -1491,22 +1491,22 @@ mod wide {
             fingerprint: u64,
         ) -> u32 {
             assert!(
-                state_index + 1 < 1 << 30,
-                "four-byte root state id exceeds 30 bits"
+                state_index + 1 < 1 << 29,
+                "four-byte root state id exceeds 29 bits"
             );
             assert!(root_selector < 2);
-            (((fingerprint & 1) as u32) << 31)
+            (((fingerprint & 3) as u32) << 30)
                 | (((state_index + 1) as u32) << 1)
                 | root_selector as u32
         }
 
         #[inline(always)]
         fn indexed83_four_decode(word: u32) -> (usize, usize, u64) {
-            let token = word & ((1 << 31) - 1);
+            let token = word & ((1 << 30) - 1);
             (
                 ((token >> 1) - 1) as usize,
                 (token & 1) as usize,
-                (word >> 31) as u64,
+                (word >> 30) as u64,
             )
         }
 
@@ -1597,7 +1597,7 @@ mod wide {
                     }
                     let (old_state, old_root, old_fingerprint) =
                         Self::indexed83_four_decode(existing);
-                    if old_fingerprint == (fingerprint & 1) && key_of(old_state, old_root) == key {
+                    if old_fingerprint == (fingerprint & 3) && key_of(old_state, old_root) == key {
                         return;
                     }
                     slot = (slot + 1) & mask;
@@ -1647,7 +1647,7 @@ mod wide {
             }
             if let RootSlots128::Indexed83Four(slots) = &self.slots {
                 let mask = slots.len() - 1;
-                let fingerprint = Self::indexed83_fingerprint(key) & 1;
+                let fingerprint = Self::indexed83_fingerprint(key) & 3;
                 let mut slot = self.slot(key);
                 loop {
                     let existing = slots[slot];
@@ -2170,10 +2170,10 @@ mod wide {
         #[test]
         fn indexed_four_byte_slots_preserve_exact_first_witness() {
             assert_eq!(std::mem::size_of::<u32>(), 4);
-            let boundary = RootTable128::indexed83_four_encode((1 << 30) - 2, 1, 1);
+            let boundary = RootTable128::indexed83_four_encode((1 << 29) - 2, 1, 3);
             assert_eq!(
                 RootTable128::indexed83_four_decode(boundary),
-                ((1 << 30) - 2, 1, 1)
+                ((1 << 29) - 2, 1, 3)
             );
             let mut table = RootTable128::with_capacity_indexed83_four(64);
             table.bloom = None;
@@ -3332,7 +3332,7 @@ mod wide {
         if indexed4_fixed31 {
             assert!(
                 indexed4_table
-                    && max_states < (1usize << 30)
+                    && max_states < (1usize << 29)
                     && max_states.checked_mul(2).unwrap() < (1usize << 31),
                 "fixed 2^31 four-byte table cannot encode all state roots"
             );

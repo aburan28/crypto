@@ -9,12 +9,12 @@ inequalities use no axioms.
 | Result | Lean declaration | Exact assumptions | Status |
 | --- | --- | --- | --- |
 | Selector bit survives encoding | `decode_selector` | Natural state and fingerprint, selector less than two | Checked |
-| State ordinal survives encoding | `decode_state` | `state+1 < 2^30`, selector less than two | Checked |
-| Fingerprint bit survives encoding | `decode_fingerprint` | `state+1 < 2^30`, selector less than two | Checked |
+| State ordinal survives encoding | `decode_state` | `state+1 < 2^29`, selector less than two | Checked |
+| Fingerprint bits survive encoding | `decode_fingerprint` | `state+1 < 2^29`, selector less than two | Checked |
 | Encoded occupied word differs from empty | `encode_nonzero` | Natural state, selector and fingerprint | Checked |
-| Encoded word fits 32 bits | `encode_fits_u32` | `state+1 < 2^30`, selector and fingerprint each less than two | Checked |
+| Encoded word fits 32 bits | `encode_fits_u32` | `state+1 < 2^29`, selector less than two and fingerprint less than four | Checked |
 | K3550 complete two-root bound fits `2^31` slots | `k3550_complete_key_bound_fits_fixed_slots` | `stateBound` as defined | Checked |
-| K3550 state IDs fit 30 bits | `k3550_state_id_fits_30_bits` | `stateBound` as defined | Checked |
+| K3550 state IDs fit 29 bits | `k3550_state_id_fits_29_bits` | `stateBound` as defined | Checked |
 | K3550 arrays have payload below 14 GiB | `k3550_one_root_and_slot_payload_below_14_gibibytes` | 11 bytes per state and four bytes per slot | Checked |
 | Full root-key equality preserves exact lookup and first witness | Open | Rust open-addressing insertion order and GF(2^83) canonical-root reconstruction | Formalization partial |
 
