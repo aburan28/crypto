@@ -19,13 +19,13 @@ The [candidate manifest](../n83_factor_base_100_results_20261014/candidate_K2940
 fixes the exact base digest, quotient rule, decomposition, source and stage
 configuration.
 
-| Fresh public point | IC/rho order | IC online ms | Rho online ms | Rho / IC | IC setup s | IC peak GiB |
-| ---: | --- | ---: | ---: | ---: | ---: | ---: |
-| 1 | IC, rho | 16.968549 | 3567.668962 | 210.251858 | 521.811 | 12.718 |
-| 2 | rho, IC | 16.519472 | 1292.000018 | 78.210733 | 479.534 | 12.717 |
-| 3 | IC, rho | 18.677175 | 5513.018825 | 295.174127 | 477.263 | 12.718 |
-| 4 | rho, IC | 89.561193 | 1307.512005 | 14.599091 | 470.477 | 12.719 |
-| 5 | IC, rho | 11.600030 | 2965.326394 | 255.630925 | 466.600 | 12.718 |
+| Fresh public point | IC/rho order | IC online ms | Rho online ms | Rho / IC | Base/index setup s | Rank stage s | IC peak GiB |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | IC, rho | 16.968549 | 3567.668962 | 210.251858 | 521.811 | 52.095 | 12.718 |
+| 2 | rho, IC | 16.519472 | 1292.000018 | 78.210733 | 479.534 | 47.636 | 12.717 |
+| 3 | IC, rho | 18.677175 | 5513.018825 | 295.174127 | 477.263 | 47.435 | 12.718 |
+| 4 | rho, IC | 89.561193 | 1307.512005 | 14.599091 | 470.477 | 47.290 | 12.719 |
+| 5 | IC, rho | 11.600030 | 2965.326394 | 255.630925 | 466.600 | 47.199 | 12.718 |
 
 Each row has its own canonical one-target `workload_id` and `run_id` in
 [workloads.json](workloads.json) and [measurements.json](measurements.json).
@@ -40,8 +40,15 @@ one strong-rho process on that same point. The IC clock began with
 target-dependent query work after reusable setup and ended after recovery
 verification; rho used its matching target-dependent interval. The
 exclusive IC target phases and process costs are in the run rows and raw
-receipts. Setup ranged from 466.600 to 521.811 seconds and is reported
-separately from the online interval.
+receipts. The producer's `setup_total` covers base and index preparation
+(466.600–521.811 seconds); its separate rank stage took 47.199–52.095
+seconds and final linear algebra took 25.575–25.731 milliseconds. Each
+rank stage made 2,940 attempts, verified 2,940 rank-increasing relations,
+and reached rank 2,940. The producer's internal `process_total` was
+513.837–573.949 seconds; externally measured child-process wall time was
+514.356–575.378 seconds, including process startup and output serialization.
+These preparation and process intervals are reported separately from
+target-online time.
 
 The Tier 1 runner exposed an Intel Xeon Platinum 8370C, four selected CPUs,
 and 16,372,432 KiB host-reported memory. Affinity succeeded. All ten child
