@@ -1,0 +1,2 @@
+cargo test --release --lib -- --skip jv_cover: ok. 4038 passed; 0 failed; 113 ignored (446.56s)
+cargo test --release --test ecbench pdp3_koblitz_rootfind: 2 passed

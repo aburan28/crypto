@@ -1,0 +1,15 @@
+$ lake build   (toolchain leanprover/lean4:v4.34.1, 2026-10-14T00:47Z)
+ℹ [2/3] Built HyperGenus3 (4.5s)
+info: HyperGenus3.lean:128:0: 'HyperGenus3.r_eq_five' depends on axioms: [propext]
+info: HyperGenus3.lean:129:0: 'HyperGenus3.m_eq_three' depends on axioms: [propext]
+info: HyperGenus3.lean:130:0: 'HyperGenus3.genus_sum' depends on axioms: [propext]
+info: HyperGenus3.lean:131:0: 'HyperGenus3.hyperelliptic_subspace' depends on axioms: [propext]
+info: HyperGenus3.lean:132:0: 'HyperGenus3.triple_is_ab' depends on axioms: [propext]
+info: HyperGenus3.lean:133:0: 'HyperGenus3.etale_subcover' depends on axioms: [propext]
+info: HyperGenus3.lean:134:0: 'HyperGenus3.tau_order_three' does not depend on any axioms
+info: HyperGenus3.lean:135:0: 'HyperGenus3.descent_cycle' does not depend on any axioms
+info: HyperGenus3.lean:136:0: 'HyperGenus3.conic_coeffs' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: HyperGenus3.lean:137:0: 'HyperGenus3.conic_model' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: HyperGenus3.lean:138:0: 'HyperGenus3.product_of_conjugates' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: HyperGenus3.lean:139:0: 'HyperGenus3.hyperelliptic_equation' depends on axioms: [propext, Classical.choice, Quot.sound]
+Build completed successfully (3 jobs).

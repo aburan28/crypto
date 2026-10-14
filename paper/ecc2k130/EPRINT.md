@@ -28,7 +28,7 @@ make eprint                      # eprint-submission.zip (PDF + sources)
 
 | field | value |
 |---|---|
-| Title | `Pollard Rho on NVIDIA Blackwell: ECC2K-130, Carry-less Multiplication and the NIST Curves` |
+| Title | `Accelerating Pollard Rho with GPU Field Arithmetic: ECC2K-130 on NVIDIA Blackwell` |
 | Authors | as in `AUTHORS`, in paper order; at least one email; ORCID optional |
 | Abstract | paste `eprint-abstract.txt` (UTF-8 with `$…$` math only; MathJax renders it; `\emph`, `\cite`, HTML are rejected) |
 | Category | **Attacks and cryptanalysis** (alternative: Implementation) |
