@@ -279,6 +279,8 @@ jobs:
           filter: blob:none
           sparse-checkout-cone-mode: false
           sparse-checkout: |
+            /.gitignore
+            /.gitattributes
             /tools/isogeny-cli/
             /isogeny_algos/
             /docs/curves/registry.json
