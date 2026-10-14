@@ -542,6 +542,9 @@ pub enum Targets {
     /// every step and relations come from collisions of the residuals;
     /// the oracle is not consulted.  See `ic_framework::residual`.
     Residual,
+    /// `R ← R + S` for one drawn `S = [s]G + [t]Q`: one addition per
+    /// target, with no jump table to set up.  See `TargetSource::Stride`.
+    Stride,
 }
 
 impl Targets {
@@ -557,6 +560,7 @@ impl Targets {
             Targets::WalkPrimeBatch8 => "walk-prime-batch-8",
             Targets::WalkPrimeBatch16 => "walk-prime-batch-16",
             Targets::Residual => "residual",
+            Targets::Stride => "stride",
         }
     }
 
@@ -572,8 +576,9 @@ impl Targets {
             "walk-prime-batch-8" => Ok(Targets::WalkPrimeBatch8),
             "walk-prime-batch-16" => Ok(Targets::WalkPrimeBatch16),
             "residual" => Ok(Targets::Residual),
+            "stride" => Ok(Targets::Stride),
             other => Err(format!(
-                "unknown target source `{other}`; try random, walk, walk-prime-fast, walk-prime-serial-4/8/16, walk-prime-batch-4/8/16 or residual"
+                "unknown target source `{other}`; try random, walk, walk-prime-fast, walk-prime-serial-4/8/16, walk-prime-batch-4/8/16, residual or stride"
             )),
         }
     }

@@ -5515,6 +5515,13 @@ pub enum TargetSource {
     /// every segment and no guard, so segments merge as rho's walks do.
     /// For the diagnostic of §10.2 only.
     WalkSharedJumps,
+    /// A stride `R ← R + S` from `R₀ = [a]G + [b]Q`, with one
+    /// `S = [s]G + [t]Q` drawn for the run: one addition per target and
+    /// four scalar multiplications of set-up, where the walk spends two
+    /// on each of its sixteen jumps and pooled restarts.  `R₀ + [k]S`
+    /// repeats only once `k` reaches `r`, so the guard restarts it (a
+    /// fresh `R₀`, the same `S`) only after `r` steps or at the identity.
+    Stride,
 }
 
 impl TargetSource {
@@ -5527,6 +5534,7 @@ impl TargetSource {
             TargetSource::WalkPrimeLanes { batched: false, .. } => "walk_prime_lanes_serial",
             TargetSource::WalkPrimeLanes { batched: true, .. } => "walk_prime_lanes_batch",
             TargetSource::WalkSharedJumps => "walk_shared_jumps",
+            TargetSource::Stride => "stride",
         }
     }
     pub fn is_walk(&self) -> bool {
@@ -5557,6 +5565,7 @@ impl TargetSource {
                 | TargetSource::Walk
                 | TargetSource::WalkPrimeFast
                 | TargetSource::WalkPrimeLanes { .. }
+                | TargetSource::Stride
         )
     }
 }
@@ -5902,6 +5911,14 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
             .expect("prime lanes required")
     });
     let (mut lane_rounds, mut lane_prepared) = (0u64, 0u64);
+    let (mut stride, mut stride_steps, mut stride_restarts) =
+        ((g.identity(), 0u64, 0u64), 0u64, 0u64);
+    if targets == TargetSource::Stride {
+        // A stride at the identity would present one point forever.
+        while g.is_identity(&stride.0) {
+            stride = draw_jumps(g, generator, target, r, &mut rng, &mut rel.group_ops, 1)[0];
+        }
+    }
     if targets.is_walk() {
         jumps = draw_jumps(
             g,
@@ -6083,6 +6100,29 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                 }
                 (walk_point, wa, wb, None)
             }
+            TargetSource::Stride => {
+                if walk_fresh {
+                    wa = rng.gen_range(1..r);
+                    wb = rng.gen_range(1..r);
+                    let ag = g.mul(&mut rel.group_ops, generator, wa);
+                    let bq = g.mul(&mut rel.group_ops, target, wb);
+                    walk_point = g.add(&mut rel.group_ops, ag, bq);
+                    walk_fresh = false;
+                    stride_restarts += 1;
+                } else {
+                    let (sp, sa, sb) = stride;
+                    walk_point = g.add(&mut rel.group_ops, walk_point, sp);
+                    wa = addmod(wa, sa, r);
+                    wb = addmod(wb, sb, r);
+                    stride_steps += 1;
+                }
+                if g.is_identity(&walk_point) {
+                    walk_fresh = true;
+                    direct_skipped += 1;
+                    continue;
+                }
+                (walk_point, wa, wb, None)
+            }
             TargetSource::WalkPrimeLanes { .. } => {
                 let (lane, point, a, b) = lane_queue.pop_front().expect("nonempty lane round");
                 (point, a, b, Some(lane))
@@ -6215,6 +6255,10 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
     rel.count("direct_relations_skipped", direct_skipped);
     rel.count("repeated_targets_skipped", repeats_skipped);
     rel.count("target_guard_probes", guard_probes);
+    if targets == TargetSource::Stride {
+        rel.count("stride_steps", stride_steps);
+        rel.count("stride_restarts", stride_restarts);
+    }
     if targets.is_walk() {
         rel.count("walk_jumps", walk_jumps + pool.len() as u64);
         rel.count("walk_pool_offsets", pool.len() as u64);
