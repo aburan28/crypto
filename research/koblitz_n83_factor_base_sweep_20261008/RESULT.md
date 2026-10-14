@@ -6,6 +6,11 @@ the ordered witness. Its marker-only self-test and fail-closed trace checker
 pass; the actual N83 solver path was not run, so the local ledger stays at
 22,200 seconds and the complete-runtime base remains unselected.
 
+The [native stage-launch preflight](verification/known-witness-stage-launch-preflight-20261014/RESULT.md)
+now preserves a complete marker-only launch, child-exit and process-group
+cleanup receipt behind a watchdog. The full-domain path requires a separate
+authorization record and was not run; this adds no N83 search charge.
+
 An [exact uniform-query support screen](verification/pilot-pair-support-screen-20261014/RESULT.md)
 uses the archived overlap of all 648 ordered primary pilot pairs. Every one
 of the 558 pairs admitted by the current residual-domain minimum has a
