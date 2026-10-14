@@ -58,7 +58,11 @@ All rates are in billions of iterations per second on one device.
 - §9 CPU clients and CPU instruction sets (with a per-ISA chart).
 - §10 NIST P-256/P-384. §11 Other GPU kernels. §12 FPGA. §13 Campaign.
 - §14 Structural alternatives. §15 Upper bounds per platform (figure).
-- §16 Open questions. §17 Related work. §18 Conclusion.
+- §16 How long a solve takes: expected time and cost for every measured
+  device at one, 100 and 1,000 devices, rho's spread, the cutoff-32
+  detection delay, the campaign corpus credit, a fleet-size figure, and
+  P-256/P-384 on the same footing.
+- §17 Open questions. §18 Related work. §19 Conclusion.
 - Appendix A: reproduction (companion repository and Docker image).
 - Appendix B: evidence records.
 
@@ -115,6 +119,17 @@ GPU; the paper says so in its availability paragraph and Appendix A.
   conversions); 385,024 workers run as four waves of the 96,256 that fit
   at once. Consecutive citations now render separately, and long URLs
   break.
+- Draft 8: new §16, the time to a solve. A table gives expected
+  device-years, calendar days at 100 and 1,000 devices, and list-price
+  cost for every measured rate (eleven GPUs, the RTX PRO 4500 bridge
+  map, the F2 FPGA, one CPU core, the RTX PRO 6000 ceiling and the 2010
+  GTX 295). The model adds rho's spread (median 0.94x, 90% 1.71x of the
+  expected work), the detection delay at cutoff 32 (about 1.6 days on an
+  RTX PRO 6000, whatever the fleet size) and the campaign corpus credit
+  (0.949 of the work remains). A fleet-size figure is new. The NIST
+  subsection puts P-256 at about 6e21 card-years. That corrects the
+  earlier "about 1e30 seconds" to 1.9e29 here and in the NIST benchmark
+  report. Abstract, introduction and conclusion updated.
 - Draft 6: refocused on rho on Blackwell and retitled. New §2 (2009–2012
   rates from Bailey et al., the INDOCRYPT 2010 GPU paper, the Cell
   papers and Niederhagen's thesis, against today's), new §6 on `clmad`

@@ -24,7 +24,11 @@ optimisations to Pollard rho on NIST P-256 and P-384 on the same card
 gives $1.52\times$ and $2.61\times$, to $1.632$ and $0.548$ billion iterations
 per second; the levers transfer, but their relative sizes do not. Upper bounds
 derived from measured pipe rates put any one-addition walk on one
-RTX~PRO~6000 at about $24$--$26$ billion iterations per second. The
+RTX~PRO~6000 at about $24$--$26$ billion iterations per second. In
+calendar terms, a fleet of five RTX~PRO~6000s expects to solve
+ECC2K-130 in a year, 56 in a month and a thousand in about three days,
+where the 2010 kernel needed over a thousand cards for a one-year solve;
+at the same rates P-256 remains about $6\cdot10^{21}$ card-years away. The
 walk constant is measured rather than assumed, at $2^{60.91}$--$2^{60.92}$
 iterations, and a floor derived from the carry-less unit before tuning
 rules out $28$ billion iterations per second on one card. We also report

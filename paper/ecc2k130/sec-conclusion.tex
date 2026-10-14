@@ -15,6 +15,15 @@ three representation changes did most of the work: Frobenius
 permutation networks, the native carry-less product, and the smaller
 batch that the native product made possible.
 
+\paragraph{A solve is now a fleet-sizing decision.} At $15.88$ billion
+iterations per second, five RTX~PRO~6000s expect to find the collision
+in about a year, 56 in a month, 290 in a week, and a thousand in about
+three days, half of them spent waiting for the last trail to reach a
+distinguished point at cutoff 32. The work costs about \$114k at list
+price and \$38k--\$56k on the spot quotes we saw, whatever the fleet
+size. The same rates leave P-256 about $6\cdot10^{21}$ card-years away
+(Section~\ref{sec:solvetime}).
+
 \paragraph{\texttt{clmad} matters, and so does which die it runs on.}
 PTX~9.3 gives every part from \texttt{sm\_80} onward a carry-less
 multiply, but not at the same rate. On the RTX~PRO~6000 it issues at

@@ -1,7 +1,7 @@
 # Paper figures, 2026-10-14
 
-SVG and 150-dpi PNG copies of the thirteen figures in the ECC2K-130 Blackwell
-paper (`paper/ecc2k130/`, Draft 7), plus `figures.pdf` with all of them, one per
+SVG and 150-dpi PNG copies of the fourteen figures in the ECC2K-130 Blackwell
+paper (`paper/ecc2k130/`, Draft 8), plus `figures.pdf` with all of them, one per
 page. The figure sources are `paper/ecc2k130/figures/*.tex`; regenerate this
 directory with `make -C paper/ecc2k130 figures-export`. Every value plotted is a
 recorded measurement or a quantity derived from one in the paper, with its
@@ -22,3 +22,8 @@ evidence record cited there; nothing here is a new measurement.
 | `fig-cpu` | CPU rates per core by instruction set | §9 |
 | `fig-isa` | timeline of the instructions this arithmetic uses, GPU and CPU | §6 |
 | `fig-bounds` | measured rates against derived ceilings per platform | §15 |
+| `fig-solvetime` | expected days to an ECC2K-130 collision against fleet size, per device, with the cutoff-32 detection delay and the 2010 GTX 295 | §16 |
+
+`solvetime.py` is the arithmetic behind §16's table and figure (expected
+work, rho's spread, the cutoff-32 detection delay, list-price cost, and the
+NIST expected work); `python3 solvetime.py` prints every value used.
