@@ -339,11 +339,14 @@ fn sample_gpu(binary: &Path) -> GpuSample {
         String::from_utf8(o.stdout).map_err(|e| e.to_string())
     };
     let gpu = query("--query-gpu=index,uuid,clocks.current.sm,clocks.current.memory,utilization.gpu,utilization.memory,pcie.link.gen.current,pcie.link.width.current,memory.used,memory.total");
+    // The in-run SM clock check must cover this query, not later PCIe or
+    // process-list queries that may finish after the solve has started.
+    let completed = unix_ms();
     let pcie = query("--query-gpu=pcie.rx_util,pcie.tx_util");
     let processes = query("--query-compute-apps=pid,gpu_uuid");
     GpuSample {
         unix_ms: started,
-        completed_unix_ms: unix_ms(),
+        completed_unix_ms: completed,
         gpu_csv: gpu.as_ref().ok().cloned(),
         pcie_traffic_csv: pcie.as_ref().ok().cloned(),
         pcie_error: pcie.as_ref().err().cloned(),
@@ -967,6 +970,27 @@ mod tests {
             blockers,
             vec!["PCIe traffic counters unavailable: field unsupported".to_string()]
         );
+    }
+
+    #[test]
+    fn gpu_clock_sample_ends_before_later_queries() {
+        let root = std::env::temp_dir().join(format!(
+            "ecbench-gpu-sample-time-test-{}-{}",
+            std::process::id(),
+            unix_ms()
+        ));
+        std::fs::create_dir(&root).unwrap();
+        let telemetry = root.join("telemetry.sh");
+        std::fs::write(
+            &telemetry,
+            "#!/bin/sh\ncase \"$1\" in\n  --query-gpu=index*) echo '0, GPU-test, 1500, 5000, 0, 0, 4, 16, 100, 1000';;\n  --query-gpu=pcie*) sleep 1; echo '1, 1';;\n  *) echo 'No running processes found';;\nesac\n",
+        )
+        .unwrap();
+        std::fs::set_permissions(&telemetry, std::fs::Permissions::from_mode(0o700)).unwrap();
+        let sample = sample_gpu(&telemetry);
+        assert!(unix_ms().saturating_sub(sample.completed_unix_ms) >= 700);
+        assert!(sample.error.is_none());
+        std::fs::remove_dir_all(root).unwrap();
     }
 
     #[test]
