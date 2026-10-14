@@ -39,7 +39,8 @@ fn numbers(value: &Value, count: usize) -> Result<Vec<BigUint>> {
 fn pin_block(enc: &mut ChainedS3Encoding, block: usize, value: &BigUint, n: usize) {
     for bit in 0..n {
         let wire = (block * n + bit + 1) as i32;
-        enc.solver.add_clause(vec![if value.bit(bit as u64) { wire } else { -wire }]);
+        enc.solver
+            .add_clause(vec![if value.bit(bit as u64) { wire } else { -wire }]);
     }
 }
 
@@ -75,21 +76,38 @@ fn run(path: &str, conflicts: u64) -> Result<Value> {
         return Err("target x differs".into());
     }
     let partial_xs = numbers(&input["partial_xs"], 3)?;
-    let small = input["small_reps"].as_array().ok_or("small representatives")?;
-    let residual = input["residual_reps"].as_array().ok_or("residual representatives")?;
+    let small = input["small_reps"]
+        .as_array()
+        .ok_or("small representatives")?;
+    let residual = input["residual_reps"]
+        .as_array()
+        .ok_or("residual representatives")?;
     if small.len() != 1182 || residual.len() != 866 {
         return Err("factor-base orbit count differs".into());
     }
     let small: Vec<BigUint> = small.iter().map(decimal).collect::<Result<_>>()?;
     let residual: Vec<BigUint> = residual.iter().map(decimal).collect::<Result<_>>()?;
-    let domains = vec![small.clone(), small.clone(), small, residual.clone(), residual];
+    let domains = vec![
+        small.clone(),
+        small.clone(),
+        small,
+        residual.clone(),
+        residual,
+    ];
     let curve = KoblitzCurve::known_n83_k0().ok_or("pinned N83 curve")?;
     let target = F2mElement::from_biguint(&target_x, 83);
     let started = Instant::now();
     let mut enc = ChainedS3Encoding::build(
-        5, &curve.curve.irreducible, &curve.curve.b, Some(&target), 0, 150_000,
-    ).map_err(|error| format!("circuit build: {error:?}"))?;
-    let size = enc.constrain_frobenius_orbit_domains(&domains, 150_000, 12_000_000)
+        5,
+        &curve.curve.irreducible,
+        &curve.curve.b,
+        Some(&target),
+        0,
+        150_000,
+    )
+    .map_err(|error| format!("circuit build: {error:?}"))?;
+    let size = enc
+        .constrain_frobenius_orbit_domains(&domains, 150_000, 12_000_000)
         .map_err(|error| format!("domain build: {error:?}"))?;
     if size.clauses != 465_738 {
         return Err("domain clause count differs from v7 worker".into());
@@ -111,7 +129,12 @@ fn run(path: &str, conflicts: u64) -> Result<Value> {
     enc.solver.conflict_budget = conflicts;
     let outcome = enc.solver.solve();
     let model_verified = if outcome == SolveResult::Sat {
-        enc.verify_model() && enc.decode_summands().iter().zip(&xs).all(|(a, b)| a.to_biguint() == *b)
+        enc.verify_model()
+            && enc
+                .decode_summands()
+                .iter()
+                .zip(&xs)
+                .all(|(a, b)| a.to_biguint() == *b)
     } else {
         false
     };
@@ -145,6 +168,9 @@ fn main() -> Result<()> {
     if args.len() != 3 {
         return Err("usage: koblitz_n83_fixed_witness_control DOMAINS_JSON CONFLICT_CAP".into());
     }
-    println!("{}", serde_json::to_string(&run(&args[1], args[2].parse()?)?)?);
+    println!(
+        "{}",
+        serde_json::to_string(&run(&args[1], args[2].parse()?)?)?
+    );
     Ok(())
 }

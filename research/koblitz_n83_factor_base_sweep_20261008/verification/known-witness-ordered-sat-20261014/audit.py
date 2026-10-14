@@ -17,6 +17,7 @@ BINARY_SHA256 = "64ce185bfb1a4db69dcc576fb0749108b56e804efd57f14da561f07d41f5175
 REPLAY_SHA256 = "1155f9fbad9ff6b0b6d17200fd15880e0a7612a9db2647fa50a3ef5d148f2579"
 S3_AUDIT_SHA256 = "589d1c2d8577d596624e75df1ea15dfa09b52d61d4b1081eb2e01093331da843"
 SOURCE_RELATIVE = "examples/koblitz_n83_fixed_witness_control.rs"
+RUN_SOURCE = HERE / "worker_source.rs"
 
 
 def require(condition, message):
@@ -29,12 +30,16 @@ def digest(path):
 
 
 def check():
-    source = ROOT / SOURCE_RELATIVE
-    require(digest(source) == SOURCE_SHA256, "control source changed")
+    require(digest(RUN_SOURCE) == SOURCE_SHA256, "archived control source changed")
     committed = subprocess.run(["git", "show", f"{SOURCE_COMMIT}:{SOURCE_RELATIVE}"],
                                cwd=ROOT, check=True, capture_output=True).stdout
-    require(hashlib.sha256(committed).hexdigest() == SOURCE_SHA256,
+    require(hashlib.sha256(committed).hexdigest() == SOURCE_SHA256
+            and committed == RUN_SOURCE.read_bytes(),
             "control source Git blob differs")
+    formatted = subprocess.run(["rustfmt", "--emit", "stdout", str(RUN_SOURCE)],
+                               cwd=ROOT, check=True, capture_output=True).stdout
+    require(formatted.split(b"\n", 2)[2] == (ROOT / SOURCE_RELATIVE).read_bytes(),
+            "current example differs beyond formatting")
     require(digest(HERE / "domains.json") == DOMAINS_SHA256, "prepared domains changed")
     require(digest(HERE / "worker") == BINARY_SHA256, "archived native worker changed")
     domains = json.loads((HERE / "domains.json").read_text())
@@ -106,6 +111,9 @@ def check():
             disposition = "PRODUCER_FAILURE"
     else:
         require(not raw_out, "timed out solver produced unexpected stdout")
+        require(exit_record["status"] == "UNKNOWN_wall_cap" if exit_record["exit_code"] == 124
+                else exit_record["status"] == "UNKNOWN_resource_cap",
+                "censored exit status differs")
         disposition = "VALIDATED_CENSORED"
     return {
         "schema": "n83.fixed-witness-control-audit/v1",

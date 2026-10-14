@@ -14,6 +14,9 @@ independently streamed and hashed every retained object.
 The release probe source is frozen at commit
 `55d5ed6771ad53ff6dcfe6e537ac3ec4598984bb`; its SHA-256 is
 `06730771fda845339fdd14908ded0e259e0294ebc37d62af39e5444bc6079088`.
+The exact run source is retained as [worker_source.rs](worker_source.rs).
+The current example is its `rustfmt` rendering; the auditor checks that
+equivalence against the original Git blob.
 The exact native arm64 [worker](worker) has SHA-256
 `64ce185bfb1a4db69dcc576fb0749108b56e804efd57f14da561f07d41f51752`.
 Its source requires the same 465,738 domain clauses as the prior v7 control
