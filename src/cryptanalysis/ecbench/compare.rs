@@ -138,6 +138,23 @@ pub struct WallResult {
     pub outside_noise: Option<bool>,
 }
 
+/// Operational measurement quality. The score is a fixed rubric, not a
+/// probability or a substitute for the bootstrap interval or wall gate.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct MeasurementQuality {
+    pub score: Option<u8>,
+    pub rubric: String,
+    pub paired_attempts: u64,
+    pub verified_pairs: u64,
+    pub admitted_pairs: u64,
+    pub levels: BTreeMap<String, u64>,
+    /// The 95th percentile over verified runs with observable contention.
+    pub p95_foreign_busy_percent: Option<f64>,
+    pub p95_run_queue_percent: Option<f64>,
+    pub contention_observed_runs: u64,
+    pub notes: Vec<String>,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Comparison {
     pub schema: String,
@@ -148,6 +165,10 @@ pub struct Comparison {
     pub curves: Vec<CurveRatio>,
     pub ops: OpsResult,
     pub wall: WallResult,
+    /// Added after the original v1 comparison files; historical files
+    /// deserialize without it and keep their original meaning.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quality: Option<MeasurementQuality>,
     pub verdict: String,
 }
 
@@ -390,6 +411,15 @@ pub fn compare(
         .map(|s| s.measurement.isolation_required)
         .unwrap_or(Level::L2);
     let wall = wall_compare(&ra, a_arm, b_arm, same_session, required, resamples, seed);
+    let quality = measurement_quality(
+        &ra,
+        a_arm,
+        b_arm,
+        same_session,
+        required,
+        &wall,
+        sa.ticks_per_second,
+    );
 
     let fmt_ci = |c: Option<(f64, f64)>| {
         c.map(|(l, h)| format!(" [{l:.3}, {h:.3}]"))
@@ -446,8 +476,117 @@ pub fn compare(
         curves,
         ops,
         wall,
+        quality: Some(quality),
         verdict,
     })
+}
+
+fn level_points(level: Level) -> u8 {
+    match level {
+        Level::L0 => 0,
+        Level::L1 => 40,
+        Level::L2 => 75,
+        Level::L3 => 90,
+    }
+}
+
+fn measurement_quality(
+    recs: &[Record],
+    a: &str,
+    b: &str,
+    same_session: bool,
+    required: Level,
+    wall: &WallResult,
+    hz: u64,
+) -> MeasurementQuality {
+    let mut q = MeasurementQuality {
+        score: None,
+        rubric: "average paired isolation points (L0=0, L1=40, L2=75, L3=90); +10 only for an L2-or-higher A/A 95% interval containing 1 within [0.9,1.1]".into(),
+        paired_attempts: 0,
+        verified_pairs: 0,
+        admitted_pairs: 0,
+        levels: BTreeMap::new(),
+        p95_foreign_busy_percent: None,
+        p95_run_queue_percent: None,
+        contention_observed_runs: 0,
+        notes: Vec::new(),
+    };
+    if !same_session {
+        q.notes
+            .push("different sessions: no shared host window for a fidelity score".into());
+        return q;
+    }
+    let mut by: BTreeMap<(String, u32), (Option<&Record>, Option<&Record>)> = BTreeMap::new();
+    for r in recs.iter().filter(|r| !r.warmup) {
+        let key = (r.workload.workload_id.clone(), r.round);
+        if r.arm == a {
+            by.entry(key).or_default().0 = Some(r);
+        } else if r.arm == b {
+            by.entry(key).or_default().1 = Some(r);
+        }
+    }
+    let mut points = 0u64;
+    let mut foreign = Vec::new();
+    let mut delay = Vec::new();
+    for (_, (ra, rb)) in by {
+        let (Some(ra), Some(rb)) = (ra, rb) else {
+            continue;
+        };
+        q.paired_attempts += 1;
+        if !ra.counts() || !rb.counts() {
+            *q.levels.entry("unverified".into()).or_insert(0) += 1;
+            continue;
+        }
+        q.verified_pairs += 1;
+        let level = ra.isolation.level.min(rb.isolation.level);
+        *q.levels.entry(level.name().into()).or_insert(0) += 1;
+        points += level_points(level) as u64;
+        if level >= required.max(Level::L2) {
+            q.admitted_pairs += 1;
+        }
+        for r in [ra, rb] {
+            let mut foreign_seen = false;
+            let mut delay_seen = false;
+            let wall_s = r.time.process_wall_ns as f64 / 1e9;
+            if hz > 0 && wall_s > 0.0 {
+                if let Some(ticks) = r.isolation.foreign_busy_ticks {
+                    foreign.push(100.0 * (ticks.max(0) as f64 / hz as f64) / wall_s);
+                    foreign_seen = true;
+                }
+            }
+            if let (Some(s), Some(w)) = (r.time.schedstat_solve, r.time.solve_wall_ns) {
+                if w > 0 {
+                    delay.push(100.0 * s.run_delay_ns as f64 / w as f64);
+                    delay_seen = true;
+                }
+            }
+            if foreign_seen && delay_seen {
+                q.contention_observed_runs += 1;
+            }
+        }
+    }
+    q.p95_foreign_busy_percent = crate::cryptanalysis::ecbench::stats::quantile(&foreign, 0.95);
+    q.p95_run_queue_percent = crate::cryptanalysis::ecbench::stats::quantile(&delay, 0.95);
+    if q.paired_attempts > 0 {
+        let calibrated = required >= Level::L2
+            && matches!(wall.aa_ci95, Some((lo, hi)) if lo >= 0.9 && lo <= 1.0 && hi >= 1.0 && hi <= 1.1);
+        q.score = Some(
+            ((points / q.paired_attempts) as u8).saturating_add(if calibrated { 10 } else { 0 }),
+        );
+        if required < Level::L2 {
+            q.notes
+                .push("A/A bonus unavailable: the spec permits wall runs below L2".into());
+        } else if wall.aa_ci95.is_none() {
+            q.notes
+                .push("no admitted A/A interval; calibration bonus unavailable".into());
+        }
+        if q.contention_observed_runs < q.verified_pairs * 2 {
+            q.notes.push("contention telemetry is incomplete".into());
+        }
+    } else {
+        q.notes.push("no paired attempts".into());
+    }
+    q
 }
 
 /// Per-pair wall ratios `B / A` over (workload, round) where both
