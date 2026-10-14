@@ -4,7 +4,9 @@
 - **Kind:** empirical bottleneck (Mac contention and unnamed, unisolated Modal CPU); implementation gap (remaining prime, point, Ed25519, Metal, CUDA and HIP paths); access limit (new X25519 Modal source bundle)
 - **Affected work:** [ECC arithmetic plan](../research/ecc_arithmetic_20261013/PLAN.md), [architecture map](../research/ecc_arithmetic_20261013/ARCHITECTURE.md), [Apple M4 Pro run report](../research/ecc_arithmetic_20261013/reports/run-20261013T1837Z/report.md), [Modal x86-64 report](../research/ecc_arithmetic_20261013/reports/modal-20261013/REPORT.md), [X25519 validation](../research/ecc_arithmetic_20261013/x25519_validation/README.md), [P-521 validation](../research/ecc_arithmetic_20261013/p521_validation/README.md)
 - **Next action owner:** ECC arithmetic implementation and measurement lane
-- **Last updated:** 2026-10-13
+- **Last updated:** 2026-10-14
+
+Delivery of the implemented slice also depends on the distinct [PR merge-gate problem](ecc-arithmetic-pr-merge-gates.md). Clearing that gate would not qualify the performance claims in this record.
 
 ## Problem
 

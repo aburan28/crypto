@@ -12,6 +12,7 @@ Keep resolved and superseded records in the index.
 | Problem | Status | What it blocks | What would unblock it |
 | --- | --- | --- | --- |
 | [ECC arithmetic cross-platform performance](ecc-arithmetic-platform-measurement.md) | open | controlled multi-platform and worldwide arithmetic comparisons | identified isolated ARM/x86 hosts with A/A controls, validated backend implementations and matched comparators; new X25519 Modal bundle awaits explicit source-export approval |
+| [ECC arithmetic PR merge gates](ecc-arithmetic-pr-merge-gates.md) | investigating | delivery of ECC arithmetic PR #1798 with a passing current-head check suite | resolve the recorded registry, evidence, lint and workflow failures; obtain final-head review and checks before a merge commit |
 | [EC Bench GPU matched workload and validation](ecbench-gpu-matched-workload-contract.md) | open | admitted CPU/GPU comparison of the same ECDLP workload | frozen CUDA input/output, exact costs, independent answer replay and GPU contention controls |
 | [N83 recorded-query sampler contract](n83-recorded-query-sampler-contract-mismatch.md) | open | green whole-library validation on the pinned baseline | traced and versioned query law, point checks and passing regression |
 | [GHS → Smith characteristic mismatch](ghs-to-smith-pipeline-characteristic-mismatch.md) | open | the GHS → Smith → Diem pipeline | a char-2 hyperelliptic→quartic isogeny, or an odd-char descent onto genus-3 hyperelliptic curves |
