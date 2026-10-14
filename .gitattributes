@@ -86,3 +86,12 @@ research/n83_dense_root_20261013/reports/**/*.svg -diff -whitespace
 research/n83_dense_root_20261013/runs/panel/*/base_dump.jsonl -diff -whitespace
 research/n83_dense_root_20261013/final_fmt.log -diff -whitespace
 research/n83_dense_root_20261013/final_*_tests.log whitespace=-blank-at-eof
+
+# ECBench frontier synthesis media.
+benchmarks/20261013-ecbench-frontier/*.pdf binary
+benchmarks/20261013-ecbench-frontier/*.png binary
+benchmarks/20261013-ecbench-frontier/*.svg -diff -whitespace
+research/ecbench_frontier_20261013/*.pdf binary
+research/ecbench_frontier_20261013/reports/**/*.pdf binary
+research/ecbench_frontier_20261013/reports/**/*.png binary
+research/ecbench_frontier_20261013/reports/**/*.svg -diff -whitespace
