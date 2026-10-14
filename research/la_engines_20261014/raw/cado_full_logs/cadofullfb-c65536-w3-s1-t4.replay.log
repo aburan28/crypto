@@ -1,0 +1,28 @@
+# (692ecb7) /home/user/ext/cado-nfs/build/filter/replay-dl -purged /tmp/cb/cado-full.b5SRvg/purged -his /tmp/cb/cado-full.b5SRvg/history -out /tmp/cb/cado-full.b5SRvg/small.bin -index /tmp/cb/cado-full.b5SRvg/small.index -ideals /tmp/cb/cado-full.b5SRvg/small.ideal
+# Compiled with gcc 13.3.0
+# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+Sparse matrix has 8489 rows and 65536 cols
+# Output matrices will be written in binary format
+antebuffer set to /home/user/ext/cado-nfs/build/utils/antebuffer
+Reading sparse matrix from /tmp/cb/cado-full.b5SRvg/purged
+# Read 1024 relations in 0.0s -- inf MB/s -- inf rels/s
+# Read 2048 relations in 0.0s -- inf MB/s -- inf rels/s
+# Read 4096 relations in 0.0s -- inf MB/s -- inf rels/s
+# Read 8192 relations in 0.0s -- inf MB/s -- inf rels/s
+# Done: Read 8489 relations in 0.0s -- inf MB/s -- inf rels/s
+The biggest index appearing in a relation is 65536
+Reading row additions
+# Read 1024 row additions in 0.0s -- inf lines/s
+# Read 2048 row additions in 0.0s -- inf lines/s
+# Read 4096 row additions in 0.0s -- inf lines/s
+# Read 8192 row additions in 0.0s -- inf lines/s
+# Read 16384 row additions in 0.0s -- inf lines/s
+# Done: Read 22667 row additions in 0.0s -- 1269422.0 lines/s
+Renumbering columns (including sorting w.r.t. weight)
+Sorting 905 columns by decreasing weight
+Sparse submatrix: nrows=905 ncols=905
+Writing sparse representation to /tmp/cb/cado-full.b5SRvg/small.bin
+# Writing matrix took 0.0s
+# Weight of the sparse submatrix: 50225
+Total usage: time 0s (cpu), 0s (wct) ; memory 89MiB, peak 156MiB
