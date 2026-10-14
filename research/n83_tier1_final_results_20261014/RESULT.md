@@ -77,6 +77,12 @@ invocation reproduced the same rows without changes. The raw artifact is
 retained by GitHub for 14 days and the downloaded ZIP plus replay log are in
 `/private/tmp/n83-final-38538483710` on this host.
 
+An automatic branch rerun after main acquired the four-byte producer
+([run 38582925768](https://github.com/aburan28/crypto/actions/runs/38582925768))
+stopped at the frozen-source preflight. Its failed receipt is preserved. The
+versioned workflow now uses manual dispatch and checks out the measured
+`04e6a33...` source commit explicitly for a repeat allocation.
+
 The later 100-point secondary panel selected K2940/root22 as its descriptive
 mean minimum under the same 14 GiB guard. Its separate five-point reserve
 fixture is the next validation of that changed candidate; this K3240 result
