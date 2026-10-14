@@ -1,0 +1,5 @@
+'N83RootPair.root_pair_roundtrip' depends on axioms: [propext, Quot.sound]
+'N83RootPair.root_pair_fits_21_bytes' depends on axioms: [propext, Quot.sound]
+'N83RootPair.k3240_root_keys_fit_fixed_2pow30_slots' does not depend on any axioms
+'N83RootPair.k3240_state_id_fits_29_bits' does not depend on any axioms
+'N83RootPair.k3240_payload_below_13point6_gibibytes' does not depend on any axioms

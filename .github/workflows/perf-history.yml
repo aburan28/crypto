@@ -207,7 +207,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check out the history branch
-        if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
         uses: actions/checkout@v4
         with:
           ref: ${{ env.HISTORY_BRANCH }}
