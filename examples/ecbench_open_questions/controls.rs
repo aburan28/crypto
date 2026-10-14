@@ -353,6 +353,46 @@ fn covers() -> Result<Value, String> {
                 ),
                 inst.name,
             )
+        } else if a == 1 {
+            // E1 at degree83 has a composite #E/2; use the exact catalogued
+            // prime subgroup, never silently assert cofactor two.
+            let catalog: Value =
+                serde_json::from_str(include_str!("../../docs/curves/registry.json"))
+                    .map_err(err)?;
+            let row = catalog["curves"]
+                .as_array()
+                .ok_or("missing catalog curves")?
+                .iter()
+                .find(|c| {
+                    c["family"] == "koblitz"
+                        && c["params"]["n"] == 83
+                        && c["params"]["a"] == 1
+                        && c["representations"]
+                            .as_array()
+                            .is_some_and(|r| !r.is_empty())
+                })
+                .ok_or("missing exact E1 degree83 subgroup representation")?;
+            let rep = &row["representations"][0]["curve"];
+            let parse = |s: &Value, radix| {
+                BigUint::parse_bytes(
+                    s.as_str()
+                        .ok_or("expected integer string")?
+                        .trim_start_matches("0x")
+                        .as_bytes(),
+                    radix,
+                )
+                .ok_or("invalid integer".to_string())
+            };
+            (
+                registry_koblitz_modulus(a, n).ok_or("missing E1 modulus")?,
+                parse(&rep["subgroup_order"], 10)?,
+                BigUint::from(rep["cofactor"].as_u64().ok_or("missing cofactor")?),
+                (
+                    parse(&rep["generator"][0], 16)?,
+                    parse(&rep["generator"][1], 16)?,
+                ),
+                row["slug"].as_str().ok_or("missing slug")?.to_string(),
+            )
         } else {
             let irr = registry_koblitz_modulus(a, n).ok_or("unregistered wide cover")?;
             let inst = WideKoblitz::new(a, &irr)?;
@@ -478,9 +518,16 @@ pub fn run() -> Result<Value, String> {
         module.push(json!({"n":n,"cyclotomic_coset_sizes":cyclotomic_cosets(n).map(|c|c.iter().map(Vec::len).collect::<Vec<_>>()),
             "stable_subspace_dimensions":stable_subspace_dimensions(n)}));
     }
-    let out = json!({"schema":"ecbench-ten-questions-controls/v1",
-        "quasi_subfield":quasi()?,"nonlinear_bases":nonlinear()?,"degree_profiles":degree_profiles()?,
-        "qubo":qubo_control()?,"covers":covers()?,"isogeny":isogeny_controls()?,
+    // A failure in one prerequisite must not discard earlier or unrelated
+    // evidence. Preserve the complete stage outcome instead of returning early.
+    let stage = |result: Result<Value, String>| match result {
+        Ok(data) => json!({"status":"completed","data":data}),
+        Err(error) => json!({"status":"error","error":error}),
+    };
+    let out = json!({"schema":"ecbench-ten-questions-controls/v2",
+        "protocol":"CONTROLS-AMENDMENT-v2.md",
+        "quasi_subfield":stage(quasi()),"nonlinear_bases":stage(nonlinear()),"degree_profiles":stage(degree_profiles()),
+        "qubo":stage(qubo_control()),"covers":stage(covers()),"isogeny":stage(isogeny_controls()),
         "frobenius_module":module,"new_mathematical_theorem_claimed":false});
     Ok(out)
 }
