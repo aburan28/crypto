@@ -14,7 +14,7 @@ decision and a revision password by email. Two of its rules bind this paper:
 ## 1. Restore the author block and rebuild
 
 ```sh
-cd paper/ecc2k130
+cd paper/rho-blackwell
 cp AUTHORS.example AUTHORS      # fill in names, affiliation, email;
                                  # keep the %pdfauthor= line (PDF metadata)
 make deanonymize                 # rewrites \author{...} and pdfauthor; keeps a .anon-backup
@@ -28,13 +28,13 @@ make eprint                      # eprint-submission.zip (PDF + sources)
 
 | field | value |
 |---|---|
-| Title | `Accelerating Pollard Rho with GPU Field Arithmetic: ECC2K-130 on NVIDIA Blackwell` |
+| Title | `Accelerating Pollard Rho with GPU Field Arithmetic on NVIDIA Blackwell` |
 | Authors | as in `AUTHORS`, in paper order; at least one email; ORCID optional |
 | Abstract | paste `eprint-abstract.txt` (UTF-8 with `$…$` math only; MathJax renders it; `\emph`, `\cite`, HTML are rejected) |
 | Category | **Attacks and cryptanalysis** (alternative: Implementation) |
 | Keywords | `ECC2K-130, Pollard rho, Blackwell, GPU, carry-less multiplication, Koblitz curves, NIST P-256, elliptic curve discrete logarithm, Certicom challenge, optimal normal basis, FPGA, binary fields` |
 | Publication info | Published nowhere else (the repositories are not a publication) |
-| Content | `ecc2k130.pdf` from step 1 (A4 or US Letter; author emails on page 1) |
+| Content | `rho-blackwell.pdf` from step 1 (A4 or US Letter; author emails on page 1) |
 | Additional notes | optional, public; leave empty for a first version |
 | License | **CC BY** unless a venue agreement says otherwise |
 | Confirmation | tick after reading the acceptance, license and withdrawal conditions |

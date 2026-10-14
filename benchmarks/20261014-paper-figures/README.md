@@ -1,9 +1,9 @@
 # Paper figures, 2026-10-14
 
 SVG and 150-dpi PNG copies of the fourteen figures in the ECC2K-130 Blackwell
-paper (`paper/ecc2k130/`, Draft 8), plus `figures.pdf` with all of them, one per
-page. The figure sources are `paper/ecc2k130/figures/*.tex`; regenerate this
-directory with `make -C paper/ecc2k130 figures-export`. Every value plotted is a
+paper (`paper/rho-blackwell/`, Draft 8), plus `figures.pdf` with all of them, one per
+page. The figure sources are `paper/rho-blackwell/figures/*.tex`; regenerate this
+directory with `make -C paper/rho-blackwell figures-export`. Every value plotted is a
 recorded measurement or a quantity derived from one in the paper, with its
 evidence record cited there; nothing here is a new measurement.
 

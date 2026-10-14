@@ -1,4 +1,4 @@
-# Makefile for the ECC2K-130 campaign paper.
+# Makefile for the Pollard rho on Blackwell paper.
 #
 # Targets:
 #   make             — build PDF (pdflatex + bibtex + two more passes)
@@ -8,12 +8,12 @@
 #   make deanonymize — restore author block from AUTHORS
 #   make clean       — remove build artefacts (keeps the committed PDF)
 
-TEX     := ecc2k130.tex
+TEX     := rho-blackwell.tex
 PDF     := $(TEX:.tex=.pdf)
 SECTIONS := sec-intro.tex sec-history.tex sec-curve.tex sec-walk.tex sec-arith.tex \
             sec-isa.tex sec-blackwell.tex sec-gpu.tex sec-cpu.tex sec-nist.tex sec-othergpu.tex sec-fpga.tex sec-campaign.tex \
             sec-bounds.tex sec-solvetime.tex sec-open.tex sec-related.tex sec-conclusion.tex app-reproduction.tex app-evidence.tex
-BIB     := ecc2k130.bib
+BIB     := rho-blackwell.bib
 AUX     := $(TEX:.tex=.aux) $(TEX:.tex=.log) $(TEX:.tex=.out) $(TEX:.tex=.toc) \
            $(TEX:.tex=.bbl) $(TEX:.tex=.blg) $(TEX:.tex=.lof) $(TEX:.tex=.lot)
 ARXIV_TARBALL := arxiv-submission.tar.gz

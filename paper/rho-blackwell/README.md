@@ -1,6 +1,6 @@
-# Accelerating Pollard Rho with GPU Field Arithmetic: ECC2K-130 on NVIDIA Blackwell
+# Accelerating Pollard Rho with GPU Field Arithmetic on NVIDIA Blackwell
 
-`ecc2k130.tex` is a paper-quality LaTeX account of Pollard rho on
+`rho-blackwell.tex` is a paper-quality LaTeX account of Pollard rho on
 current NVIDIA hardware, with ECC2K-130 as the yardstick: the
 optimisation ledger, the PTX `clmad` instruction across dies, twelve
 GPUs from Turing to Blackwell, the same optimisations on NIST P-256 and
@@ -35,7 +35,7 @@ make deanonymize
 make clean
 ```
 
-Output: `ecc2k130.pdf`. A built copy is committed so a reader without
+Output: `rho-blackwell.pdf`. A built copy is committed so a reader without
 TeX can open the paper.
 
 ## Contents
@@ -151,6 +151,8 @@ GPU; the paper says so in its availability paragraph and Appendix A.
   15.76, 31.75 together) and the CPU strong-rho canonicalisation result
   (0.802× instructions, unmerged branch). Evidence records renumbered
   E1–E80.
+  Renamed: folder, source and PDF are now `paper/rho-blackwell/`,
+  `rho-blackwell.tex` and `rho-blackwell.pdf`; the title is now "Accelerating Pollard Rho with GPU Field Arithmetic on NVIDIA Blackwell".
   Section and subsection headings shortened to terse labels (for example
   "NIST curves", "FPGA", "Table walk vs. σ-walk", "Walk constant"), with the remaining rhetorical questions
   and informal phrases in the text replaced.

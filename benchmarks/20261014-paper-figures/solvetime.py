@@ -1,4 +1,4 @@
-# Arithmetic behind paper/ecc2k130 Section 16 (Table "solvetime"): expected work 2^60.9,
+# Arithmetic behind paper/rho-blackwell Section 16 (Table "solvetime"): expected work 2^60.9,
 # rho spread exp(-pi c^2/4), cutoff-32 detection delay, Modal list cost from the
 # survey's iterations per dollar, and the NIST P-256/P-384 expected work sqrt(pi n/4).
 # Rates are the recorded ones quoted in the paper; nothing is measured here.
