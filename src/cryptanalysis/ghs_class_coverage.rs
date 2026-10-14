@@ -25,8 +25,9 @@
 //!   `sigma = x -> x^(2^l)`.  The leading `1` matters: it adds one to the
 //!   plain orbit dimension exactly when `(x - 1)` does not divide `Ord_b`
 //!   (MMT Theorem 5(i)).  [`crate::cryptanalysis::ec_trapdoor::magic_number`]
-//!   uses the plain orbit dimension; [`tests::plain_orbit_undercounts`]
-//!   records the difference.
+//!   uses this definition since 2026-10-13; its earlier plain orbit
+//!   dimension is [`crate::cryptanalysis::ec_trapdoor::plain_orbit_dim`], and
+//!   [`tests::plain_orbit_undercounts`] records the difference.
 //! * Applicability to the twist `Tr_{K/F2}(a) = 1`: MMT Lemma 6, condition
 //!   (8): `n` odd, or `j_0 = 2^e`.  With `P(x) = (x^n - 1)/(x - 1)`,
 //!   `j_0 = 2^e` iff `P(sigma) b != 0`, and `P(sigma) b = Tr_{K/k}(b)`, so
@@ -134,9 +135,9 @@ fn prime_factors(mut v: u64) -> Vec<u64> {
     let mut out = Vec::new();
     let mut p = 2u64;
     while p * p <= v {
-        if v.is_multiple_of(p) {
+        if v % p == 0 {
             out.push(p);
-            while v.is_multiple_of(p) {
+            while v % p == 0 {
                 v /= p;
             }
         }
@@ -200,14 +201,7 @@ impl Gf2Log {
         for i in 0..q1 as usize {
             exp[q1 as usize + i] = exp[i];
         }
-        let mut f = Gf2Log {
-            n,
-            modulus,
-            q1: q1u,
-            exp,
-            log,
-            tr_mask: 0,
-        };
+        let mut f = Gf2Log { n, modulus, q1: q1u, exp, log, tr_mask: 0 };
         let mut mask = 0u32;
         for i in 0..n {
             if f.trace_slow(1 << i) == 1 {
@@ -355,7 +349,8 @@ pub fn magic_mmt(f: &Gf2Log, b: u32, l: u32) -> u32 {
 }
 
 /// Plain orbit dimension `dim Span{sqrt(sigma^i b)}` (the repository's older
-/// `ec_trapdoor::magic_number` definition).
+/// pre-2026-10-13 `ec_trapdoor::magic_number` definition, now
+/// `ec_trapdoor::plain_orbit_dim`).
 pub fn magic_plain(f: &Gf2Log, b: u32, l: u32) -> u32 {
     let n = f.n / l;
     let s = f.sqrt(b);
@@ -482,11 +477,7 @@ pub fn roots(f: &Gf2Log, poly: &[u32]) -> Vec<u32> {
     }
     r[1] ^= 1;
     ptrim(&mut r);
-    let h = if r.is_empty() {
-        pgcd(f, &g, &[])
-    } else {
-        pgcd(f, &g, &r)
-    };
+    let h = if r.is_empty() { pgcd(f, &g, &[]) } else { pgcd(f, &g, &r) };
     let mut out = Vec::new();
     split_roots(f, h, &mut out, 1);
     out.sort_unstable();
@@ -671,15 +662,11 @@ pub fn field_report(big_n: u32, build_walk: bool) -> FieldReport {
     }
     let classes_total = class_size.iter().filter(|&&c| c > 0).count() as u64;
     let curves_total = 2 * (q as u64 - 1);
-    let graph = if build_walk {
-        Some(build_walk3(&f, &t))
-    } else {
-        None
-    };
+    let graph = if build_walk { Some(build_walk3(&f, &t)) } else { None };
 
     let mut factorisations = Vec::new();
     for n in 2..=big_n {
-        if !big_n.is_multiple_of(n) {
+        if big_n % n != 0 {
             continue;
         }
         let l = big_n / n;
@@ -719,20 +706,13 @@ pub fn field_report(big_n: u32, build_walk: bool) -> FieldReport {
                 }
             }
             let classes_weak = weak_class.iter().filter(|&&w| w).count() as u64;
-            let class_cov: u64 = (0..width)
-                .filter(|&i| weak_class[i])
-                .map(|i| class_size[i])
-                .sum();
+            let class_cov: u64 = (0..width).filter(|&i| weak_class[i]).map(|i| class_size[i]).sum();
             let mut sizes: Vec<f64> = (0..width)
                 .filter(|&i| weak_class[i])
                 .map(|i| (class_size[i] as f64).log2() / 2.0)
                 .collect();
             sizes.sort_by(|a, b| a.partial_cmp(b).unwrap());
-            let median = if sizes.is_empty() {
-                None
-            } else {
-                Some(sizes[sizes.len() / 2])
-            };
+            let median = if sizes.is_empty() { None } else { Some(sizes[sizes.len() / 2]) };
             let (walk_cov, walk_hist) = if let Some(g) = &graph {
                 let mut weak = vec![false; 2 * q];
                 for b in 1..q {
@@ -853,8 +833,8 @@ mod tests {
     #[test]
     fn plain_matches_ec_trapdoor() {
         use crate::binary_ecc::{F2mElement, IrreduciblePoly};
-        use crate::cryptanalysis::ec_trapdoor::{magic_number, FieldTower};
         use num_bigint::BigUint;
+        use crate::cryptanalysis::ec_trapdoor::{magic_number, plain_orbit_dim, FieldTower};
         let f = Gf2Log::new(12);
         let irr = IrreduciblePoly {
             degree: 12,
@@ -863,8 +843,9 @@ mod tests {
         let tower = FieldTower::new(12, 3, 4, irr);
         for b in (1..f.size() as u32).step_by(97) {
             let be = F2mElement::from_biguint(&BigUint::from(b), 12);
-            let old = magic_number(&tower, &F2mElement::zero(12), &be);
-            assert_eq!(old, magic_plain(&f, b, 4), "b={b}");
+            assert_eq!(plain_orbit_dim(&tower, &be), magic_plain(&f, b, 4), "b={b}");
+            let mmt = magic_number(&tower, &F2mElement::zero(12), &be);
+            assert_eq!(mmt, magic_mmt(&f, b, 4), "b={b}");
         }
     }
 
@@ -876,18 +857,10 @@ mod tests {
         assert!(g.edges > 0);
         for b in 1..f.size() as u32 {
             for fam in 0..2u32 {
-                let tv = if fam == 0 {
-                    t[b as usize]
-                } else {
-                    -t[b as usize]
-                };
+                let tv = if fam == 0 { t[b as usize] } else { -t[b as usize] };
                 for &u in &g.adj3[(2 * b + fam) as usize] {
                     let (bu, fu) = (u / 2, u % 2);
-                    let tu = if fu == 0 {
-                        t[bu as usize]
-                    } else {
-                        -t[bu as usize]
-                    };
+                    let tu = if fu == 0 { t[bu as usize] } else { -t[bu as usize] };
                     assert_eq!(tu, tv, "3-isogeny preserves the trace");
                 }
             }

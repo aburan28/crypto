@@ -1,0 +1,158 @@
+==> cycle2
+   1/36 rho-strong     icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=13.603 L0
+   2/36 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=16.461 L0
+   3/36 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=27.909 L0
+   4/36 ic-win-neg-d2  icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=32.167 L0
+   5/36 ic-win-neg-d3  icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=29.071 L0
+   6/36 ic-win-neg-d4  icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=29.521 L0
+   7/36 rho-strong     icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=14.318 L0
+   8/36 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=14.943 L0
+   9/36 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=21.581 L0
+  10/36 ic-win-neg-d2  icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=25.088 L0
+  11/36 ic-win-neg-d3  icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=25.105 L0
+  12/36 ic-win-neg-d4  icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=25.444 L0
+  13/36 ic-win-neg-d4  icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=25.638 L0
+  14/36 ic-win-neg-d3  icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=26.732 L0
+  15/36 ic-win-neg-d2  icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=29.309 L0
+  16/36 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=20.405 L0
+  17/36 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=16.049 L0
+  18/36 rho-strong     icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=13.603 L0
+  19/36 ic-win-neg-d4  icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=25.343 L0
+  20/36 ic-win-neg-d3  icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=25.918 L0
+  21/36 ic-win-neg-d2  icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=28.197 L0
+  22/36 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=22.468 L0
+  23/36 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=17.886 L0
+  24/36 rho-strong     icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=15.838 L0
+  25/36 rho-strong     icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=13.603 L0
+  26/36 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=16.867 L0
+  27/36 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=21.607 L0
+  28/36 ic-win-neg-d2  icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=30.311 L0
+  29/36 ic-win-neg-d3  icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=27.456 L0
+  30/36 ic-win-neg-d4  icv1-f2m13-t181-515ee569 Wc3d71b36a998  verified S=26.896 L0
+  31/36 rho-strong     icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=14.318 L0
+  32/36 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=12.854 L0
+  33/36 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=25.443 L0
+  34/36 ic-win-neg-d2  icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=22.019 L0
+  35/36 ic-win-neg-d3  icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=25.767 L0
+  36/36 ic-win-neg-d4  icv1-f2m13-t181-515ee569 W47dbee1d5f2f  verified S=24.641 L0
+session ECBS1hd0002abcd05a complete -> /Volumes/SSD990/wt-ecbench-rootfind-improve/research/ecbench_rootfind_parity_20261013/sessions/cycle2 (36 records: {"verified": 36})
+receipt sha256 8ec4b18589bbc3f4fadb171b43bd314ec8191f1d7f4d878cf7bb9ed14332779a
+{
+  "schema": "ecbench.audit/v1",
+  "session_id": "ECBS1hd0002abcd05a",
+  "session_status": "complete",
+  "ok": true,
+  "problems": [],
+  "checks": {
+    "arms": true,
+    "env_class": true,
+    "executions": true,
+    "host_hash": true,
+    "plan_hash": true,
+    "record_count": true,
+    "records": true,
+    "records_hash": true,
+    "replays": true,
+    "session_complete": true,
+    "spec_id": true,
+    "workloads": true
+  },
+  "records": 36,
+  "verified_records": 36,
+  "regraded": true,
+  "replays": [
+    {
+      "seq": 12,
+      "record_id": "ECR1h3a382788770c",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 15,
+      "record_id": "ECR1h43fcfbd7a223",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 18,
+      "record_id": "ECR1he89b78a4fd09",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 21,
+      "record_id": "ECR1hde0ef8e9a247",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 24,
+      "record_id": "ECR1hd755103c982a",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 27,
+      "record_id": "ECR1h62cd8a275eff",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 30,
+      "record_id": "ECR1h170a4e567fd5",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 33,
+      "record_id": "ECR1h9644fdc05f6e",
+      "reproduced": true,
+      "detail": "identical"
+    }
+  ],
+  "files": {
+    "host.json": "0efef95b6e339ba00edcb1ca27c4a188a3e44bd173eccd9e0d8c347b5d6f76cf",
+    "plan.json": "c92148a0281cb7990c5c09c311dc0f21a5f4541c12cd2081c57a9ef10851fabc",
+    "records.jsonl": "e371913fba5326ac7ee221137e9f37f32326ebf2c7c45c762a1db11f4b99e22f",
+    "session.json": "2821c5761852a4544044f9e60cc90ccda6f0b6dbcece95e00321a1194f65fe72",
+    "spec.json": "a7a445b621e903e3bbdd261aa1868c692d9466cd50411b5f0ebe027903ba6fc9"
+  },
+  "auditor_binary_sha256": "1622e3fa8e638031c8406b651a8e2e596573189bd2c78aa8b83d5e979fa372dc",
+  "auditor_env_class_id": "ECBENV2h59034d4cd61b",
+  "auditor_hardware_class_id": "ECBHW1h7d1934655eee",
+  "audited_unix_ms": 1791939355357
+}
+audit OK: 36 records, 36 verified, 8 replays reproduced, 0 problems
+| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | levels |
+|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---|
+| ECBS1hd0002abcd05a | rho-strong | rho.signed_frobenius_strong | icv1-f2m13-t181-515ee569 | 10.97 | 4/4 | 14.341 | [13.603, 15.458] | 0.246 | 58.344 | 58.344 | 1.000 | yes | L0×4 |
+| ECBS1hd0002abcd05a | ic-f4-m3-d5 | ic.pipeline | icv1-f2m13-t181-515ee569 | 10.97 | 4/4 | 15.914 | [14.112, 17.377] | – | – | 64.745 | 1.110 | yes | L0×4 |
+| ECBS1hd0002abcd05a | ic-negfold-m2-d5 | ic.pipeline | icv1-f2m13-t181-515ee569 | 10.97 | 4/4 | 22.481 | [20.705, 24.699] | – | – | 91.460 | 1.568 | no | L0×4 |
+| ECBS1hd0002abcd05a | ic-win-neg-d2 | ic.pipeline | icv1-f2m13-t181-515ee569 | 10.97 | 4/4 | 27.459 | [23.563, 30.061] | – | – | 111.715 | 1.915 | no | L0×4 |
+| ECBS1hd0002abcd05a | ic-win-neg-d3 | ic.pipeline | icv1-f2m13-t181-515ee569 | 10.97 | 4/4 | 26.468 | [25.804, 27.275] | – | – | 107.684 | 1.846 | no | L0×4 |
+| ECBS1hd0002abcd05a | ic-win-neg-d4 | ic.pipeline | icv1-f2m13-t181-515ee569 | 10.97 | 4/4 | 25.629 | [24.816, 26.582] | – | – | 104.271 | 1.787 | no | L0×4 |
+ops (ok): ic-negfold-m2-d5 / ic-f4-m3-d5 = 1.4126 [1.263, 1.750] (cluster) over 4 pairs on 2 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 0.0013, not a result: 4 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-negfold-m2-d5 / ic-f4-m3-d5 | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m13-t181-515ee569 | 10.97 | 2 | 1.4126 | [1.2634, 1.7502] | cluster |
+
+| workload | curve | log2 r | ic-f4-m3-d5 mean S | ic-negfold-m2-d5 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W47dbee1d5f2f | icv1-f2m13-t181-515ee569 | 10.97 | 15.3699 | 23.9552 | 1.5586 |
+| Wc3d71b36a998 | icv1-f2m13-t181-515ee569 | 10.97 | 16.4580 | 21.0058 | 1.2763 |
+ops (ok): ic-win-neg-d2 / ic-negfold-m2-d5 = 1.2215 [0.954, 1.428] (cluster) over 4 pairs on 2 workloads, 1 curve(s); wall: descriptive (median 0.7217, not a result: 4 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-win-neg-d2 / ic-negfold-m2-d5 | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m13-t181-515ee569 | 10.97 | 2 | 1.2215 | [0.9540, 1.4276] | cluster |
+
+| workload | curve | log2 r | ic-negfold-m2-d5 mean S | ic-win-neg-d2 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W47dbee1d5f2f | icv1-f2m13-t181-515ee569 | 10.97 | 23.9552 | 25.1079 | 1.0481 |
+| Wc3d71b36a998 | icv1-f2m13-t181-515ee569 | 10.97 | 21.0058 | 29.8102 | 1.4191 |
+arm                                 coldS     amS@1     amS@8    amS@64   wall_ms
+ic-f4-m3-d5                        15.843    15.843    15.768    15.758    351.54
+ic-negfold-m2-d5                   23.235    23.235    17.197    16.442      0.43
+ic-win-neg-d2                      27.849    27.849    21.810    21.055      0.31
+ic-win-neg-d3                      26.675    26.675    20.636    19.881      0.60
+ic-win-neg-d4                      26.247    26.247    20.208    19.454      0.29
+rho-strong                         14.214     0.000     0.000     0.000      0.13

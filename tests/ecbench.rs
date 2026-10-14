@@ -142,6 +142,14 @@ fn a_session_runs_verifies_compares_and_loads() {
     let c: Value = serde_json::from_str(&stdout).unwrap();
     assert_eq!(c["ops"]["status"], "ok");
     assert!(c["ops"]["ci95"].is_array());
+    assert_eq!(
+        c["quality"]["score"], 0,
+        "L0 measurements have no CPU isolation credit"
+    );
+    assert_eq!(c["quality"]["paired_attempts"], 8);
+    assert_eq!(c["quality"]["verified_pairs"], 8);
+    assert_eq!(c["quality"]["admitted_pairs"], 0);
+    assert_eq!(c["quality"]["levels"]["L0"], 8);
 
     // The resource vector includes every measured attempt, excludes the
     // warm-ups, and preserves native work in its original units.
@@ -258,6 +266,8 @@ fn run_spec(dir: &Path, out: &Path, extra: &[&str]) -> (bool, String) {
 
 #[test]
 fn counted_ic_sat_replays_with_different_solver_wall_times() {
+    // This checks counted work and replay, not a wall-time bound. Give the
+    // SAT fixture room on contended CI hosts while retaining a watchdog.
     let dir = scratch("counted-sat");
     let spec = dir.join("spec.json");
     std::fs::write(
@@ -271,7 +281,7 @@ fn counted_ic_sat_replays_with_different_solver_wall_times() {
     {"name":"sat-cnf","role":"candidate","method":{"id":"ic.pipeline_counted","params":{"factor_base":"koblitz-orbit:divisor=0;1","oracle":"descent-algebraic:m=2","solver":"sat-cdcl:sat_conflict_budget=20000,sat_xor_encoding=cnf","max_trials":"20000"}}},
     {"name":"sat-xor","role":"candidate","method":{"id":"ic.pipeline_counted","params":{"factor_base":"koblitz-orbit:divisor=0;1","oracle":"descent-algebraic:m=2","solver":"sat-cdcl:sat_conflict_budget=20000,sat_xor_encoding=native","max_trials":"20000"}}}
   ],
-  "measurement":{"rounds":1,"warmup":0,"seed":9123401,"isolation_required":"L0","timeout_seconds":60}
+  "measurement":{"rounds":1,"warmup":0,"seed":9123401,"isolation_required":"L0","timeout_seconds":300}
 }"#,
     )
     .unwrap();
@@ -663,7 +673,13 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
             "record_class must be verified_answer_controlled_wall for a primary wall claim"
         ])
     );
-    assert_eq!(c["missing_stage_fields"], serde_json::json!([]));
+    assert_eq!(
+        c["missing_stage_fields"],
+        serde_json::json!([
+            "ic_replay_certificate_sha256",
+            "rho_replay_certificate_sha256"
+        ])
+    );
     assert_eq!(c["missing_global_provenance"], serde_json::json!([]));
 
     // A replay on the session's own host class is not independent.
@@ -988,8 +1004,10 @@ fn pdp3_koblitz_rootfind_engine_follows_f4_query_stream_without_a_solver() {
     let (ok, err) = run_spec(&dir, &out, &[]);
     assert!(ok, "{err}");
     let text = std::fs::read_to_string(out.join("records.jsonl")).unwrap();
-    let mut by_workload: std::collections::BTreeMap<String, std::collections::BTreeMap<String, Value>> =
-        Default::default();
+    let mut by_workload: std::collections::BTreeMap<
+        String,
+        std::collections::BTreeMap<String, Value>,
+    > = Default::default();
     for line in text.lines() {
         let r: Value = serde_json::from_str(line).unwrap();
         let arm = r["arm"].as_str().unwrap().to_string();
@@ -1001,7 +1019,10 @@ fn pdp3_koblitz_rootfind_engine_follows_f4_query_stream_without_a_solver() {
             assert_eq!(r["outcome"]["status"], "verified", "{line}");
         }
         if arm.starts_with("root") {
-            assert!(r["solver"].is_null(), "a table oracle has no solver block: {line}");
+            assert!(
+                r["solver"].is_null(),
+                "a table oracle has no solver block: {line}"
+            );
             assert!(
                 !r["cost"]["unpriced"].to_string().contains("word_XORs"),
                 "{line}"
@@ -1031,9 +1052,16 @@ fn pdp3_koblitz_rootfind_engine_follows_f4_query_stream_without_a_solver() {
                 .expect("an oracle_setup phase")
                 .clone();
             let points = arms[root]["factor_base"]["signed_points"].as_u64().unwrap();
-            assert_eq!(setup["adds"].as_u64().unwrap(), points * (points - 1) / 2, "{w}");
+            assert_eq!(
+                setup["adds"].as_u64().unwrap(),
+                points * (points - 1) / 2,
+                "{w}"
+            );
             assert_eq!(setup["doubles"].as_u64().unwrap(), points, "{w}");
-            assert!(setup["native"]["pair_table_entries"].as_u64().unwrap() > 0, "{w}");
+            assert!(
+                setup["native"]["pair_table_entries"].as_u64().unwrap() > 0,
+                "{w}"
+            );
             let relations = arms[root]["phases"]
                 .as_array()
                 .unwrap()
@@ -1042,12 +1070,141 @@ fn pdp3_koblitz_rootfind_engine_follows_f4_query_stream_without_a_solver() {
                 .unwrap()
                 .clone();
             assert_eq!(
-                relations["native"]["frobfold_mismatches"].as_u64().unwrap_or(0),
+                relations["native"]["frobfold_mismatches"]
+                    .as_u64()
+                    .unwrap_or(0),
                 0,
                 "{w}"
             );
             assert!(relations["native"]["lookups"].as_u64().unwrap() > 0, "{w}");
         }
+    }
+    let (ok, _, err) = ecbench(&[
+        "verify",
+        "--dir",
+        out.to_str().unwrap(),
+        "--replay-all",
+        "--exit-code",
+    ]);
+    assert!(ok, "replay: {err}");
+}
+
+#[test]
+fn pdp3_koblitz_rootfind_window_shortens_m3_scan_and_records_window_len() {
+    // engine=rootfind-window keeps the pair-table set-up charge but scans
+    // only ⌈|F|/3⌉ third summands a target.  It must verify, refuse m ≠ 3
+    // and Groebner bounds, expose scan_window_len, and match the full
+    // scan's set-up GAE.  End-to-end lookups may rise when the thinner
+    // yield needs more trials; that trade is measured in the improve-loop
+    // sessions, not asserted here.
+    let dir = scratch("pdp3-rootfind-window");
+    let arm = |name: &str, oracle: &str| {
+        format!(
+            r#"{{"name": "{name}", "role": "candidate", "method": {{"id": "ic.pipeline", "params": {{
+              "factor_base": "koblitz-standard-subspace:dimension=5",
+              "oracle": "{oracle}"}}}}}}"#
+        )
+    };
+    let spec = format!(
+        r#"{{
+      "schema": "ecbench.spec/v1",
+      "label": "pdp3-koblitz rootfind-window test",
+      "workloads": {{"curves": [{{"kind": "koblitz", "a": 0, "n": 13}}],
+                    "targets_per_curve": 2, "target_seed": 7, "target_kind": "public"}},
+      "arms": [{}, {}, {}, {}],
+      "measurement": {{"rounds": 1, "warmup": 0, "seed": 5, "isolation_required": "L0", "timeout_seconds": 300}}
+    }}"#,
+        arm("root-full", "pdp3-koblitz:m=3,engine=rootfind"),
+        arm("root-win", "pdp3-koblitz:m=3,engine=rootfind-window"),
+        arm("root-win-m2", "pdp3-koblitz:m=2,engine=rootfind-window"),
+        arm(
+            "root-win-bad",
+            "pdp3-koblitz:m=3,engine=rootfind-window,degree=3"
+        ),
+    );
+    std::fs::write(dir.join("spec.json"), spec).unwrap();
+    let out = dir.join("s");
+    let (ok, err) = run_spec(&dir, &out, &[]);
+    assert!(ok, "{err}");
+    let text = std::fs::read_to_string(out.join("records.jsonl")).unwrap();
+    let mut by_workload: std::collections::BTreeMap<String, std::collections::BTreeMap<String, Value>> =
+        Default::default();
+    for line in text.lines() {
+        let r: Value = serde_json::from_str(line).unwrap();
+        let arm = r["arm"].as_str().unwrap().to_string();
+        match arm.as_str() {
+            "root-win-m2" => {
+                assert_eq!(r["outcome"]["status"], "error", "{line}");
+                assert!(
+                    r["outcome"]["error"]
+                        .as_str()
+                        .unwrap_or_default()
+                        .contains("m = 3"),
+                    "{line}"
+                );
+            }
+            "root-win-bad" => {
+                assert_eq!(r["outcome"]["status"], "error", "{line}");
+                assert!(
+                    r["outcome"]["error"]
+                        .as_str()
+                        .unwrap_or_default()
+                        .contains("no Groebner search"),
+                    "{line}"
+                );
+            }
+            _ => {
+                assert_eq!(r["outcome"]["status"], "verified", "{line}");
+                assert!(r["solver"].is_null(), "{line}");
+                assert_eq!(r["cost"]["lower_bound"], false, "{line}");
+            }
+        }
+        let w = r["workload"]["workload_id"].as_str().unwrap().to_string();
+        by_workload.entry(w).or_default().insert(arm, r);
+    }
+    assert_eq!(by_workload.len(), 2);
+    for (w, arms) in &by_workload {
+        let points = arms["root-win"]["factor_base"]["signed_points"]
+            .as_u64()
+            .unwrap();
+        let expect_window = points.div_ceil(3).max(1);
+        let setup = arms["root-win"]["phases"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|p| p["name"] == "oracle_setup")
+            .unwrap()
+            .clone();
+        assert_eq!(
+            setup["native"]["scan_window_len"].as_u64().unwrap(),
+            expect_window,
+            "{w}"
+        );
+        assert_eq!(
+            setup["native"]["pair_table_points"].as_u64().unwrap(),
+            points,
+            "{w}"
+        );
+        let full_setup = arms["root-full"]["phases"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|p| p["name"] == "oracle_setup")
+            .unwrap()
+            .clone();
+        assert_eq!(setup["gae"], full_setup["gae"], "{w}: same table build charge");
+        assert_eq!(setup["adds"], full_setup["adds"], "{w}");
+        assert!(
+            arms["root-full"]["phases"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|p| p["name"] == "oracle_setup")
+                .unwrap()["native"]
+                .get("scan_window_len")
+                .is_none(),
+            "{w}: full rootfind has no scan window"
+        );
     }
     let (ok, _, err) = ecbench(&[
         "verify",

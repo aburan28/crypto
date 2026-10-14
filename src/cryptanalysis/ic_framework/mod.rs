@@ -254,6 +254,15 @@ pub struct RunReport {
     pub exhausted: bool,
 }
 
+/// Whether `op_unit` is the dense Macaulay word-XOR unit that
+/// `ns_per_word_xor` prices.  Bare `word XORs` (pricing tests) and the
+/// inherited-F4 / pdp3 qualifier
+/// `word XORs (elimination, specialisation and linear elimination only)`
+/// both count; `vector XORs` / `word operations (…)` do not.
+fn is_word_xor_op_unit(op_unit: &str) -> bool {
+    op_unit == "word XORs" || op_unit.starts_with("word XORs (")
+}
+
 /// Certify the solved logarithm of one nonzero-coefficient point in each
 /// factor-base column. A relation uses `coef_of[i] * x_col` for point `P_i`;
 /// after cofactor projection its full-point identity must be
@@ -449,21 +458,28 @@ pub fn run_pipeline<G: CountedGroup>(
         // calibration measures one), and a freshly generated curve has
         // no table entry.  A count priced at the measured ratio is still
         // `measured`, with that ratio recorded as `ns_per_op`.
-        let (gae, priced_by, ns_per_op) = match (t.op_unit.as_str(), calib.ns_per_word_xor) {
-            ("word XORs", Some(ns)) if calib.ns_per_add > 0.0 => (
-                t.ops as f64 * ns / calib.ns_per_add,
-                if calib.is_pinned("ns_per_word_xor") {
-                    "pinned"
-                } else {
-                    "measured"
-                },
-                Some(ns),
-            ),
-            _ if calib.ns_per_add > 0.0 => {
-                (t.wall_ns as f64 / calib.ns_per_add, "measured", wall_per_op)
-            }
-            _ => (0.0, "unpriced", wall_per_op),
-        };
+        // Inherited-F4 / pdp3 report
+        // `word XORs (elimination, specialisation and linear elimination only)`;
+        // the pricing test uses the bare unit `word XORs`.  Both are the
+        // dense Macaulay row-XOR unit §5 priced — match by prefix so a
+        // pinned `ns_per_word_xor` reaches admitted S (exact equality
+        // left F4 permanently unpriced beside a calibrated ratio).
+        let (gae, priced_by, ns_per_op) =
+            match (is_word_xor_op_unit(&t.op_unit), calib.ns_per_word_xor) {
+                (true, Some(ns)) if calib.ns_per_add > 0.0 => (
+                    t.ops as f64 * ns / calib.ns_per_add,
+                    if calib.is_pinned("ns_per_word_xor") {
+                        "pinned"
+                    } else {
+                        "measured"
+                    },
+                    Some(ns),
+                ),
+                _ if calib.ns_per_add > 0.0 => {
+                    (t.wall_ns as f64 / calib.ns_per_add, "measured", wall_per_op)
+                }
+                _ => (0.0, "unpriced", wall_per_op),
+            };
         rel.count("solver_calls", t.calls);
         rel.count("solver_ops", t.ops);
         rel.count("solver_budget_exceeded", t.budget_exceeded);
@@ -992,6 +1008,23 @@ mod tests {
         assert_eq!(p.ops, s.ops, "the same run does the same work");
         assert!((p.gae - s.gae).abs() < 1e-6);
         assert!(measured.verified && pinned.verified);
+    }
+
+    /// Inherited-F4's qualified op_unit must take the same pinned path as
+    /// the bare unit — otherwise a calibrated `ns_per_word_xor` never
+    /// reaches admitted S and F4 stays a permanent lower bound.
+    #[test]
+    fn inherited_f4_word_xor_unit_is_priced_when_pinned() {
+        assert!(super::is_word_xor_op_unit("word XORs"));
+        assert!(super::is_word_xor_op_unit(
+            "word XORs (elimination, specialisation and linear elimination only)"
+        ));
+        assert!(super::is_word_xor_op_unit("word XORs (elimination only)"));
+        assert!(!super::is_word_xor_op_unit("vector XORs (Gray-code steps, 4 lanes of 32 bits)"));
+        assert!(!super::is_word_xor_op_unit(
+            "word operations (partial: extraction, transform and filter; per-point solves in solve_row_ops)"
+        ));
+        assert!(!super::is_word_xor_op_unit("monomial operations"));
     }
 
     /// **Two oracles that solve the same decomposition problem must agree

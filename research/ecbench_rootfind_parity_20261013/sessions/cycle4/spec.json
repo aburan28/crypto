@@ -1,0 +1,43 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "rootfind parity cycle-4: Frobenius-folded mitm / subtract vs negfold and F4 on E_0 n=13",
+  "description": "Hypothesis: koblitz-orbit + mitm-frobenius (and counted) cuts cold set-up below negation-folded PairTable on standard-subspace; subtract m=2 has zero oracle_setup. Compare to ic-negfold-m2-d5 and ic-f4-m3-d5. Public synthetic; L0 ops OK; engineering; no security claim; amortization secondary.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 13}],
+    "targets_per_curve": 2,
+    "target_seed": 202610131801,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "ic-f4-m3-d5", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192",
+      "max_trials": "200000"}}},
+    {"name": "ic-negfold-m2-d5", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+      "max_trials": "200000"}}},
+    {"name": "ic-frob-orbit-m2", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-orbit:divisor=0;1",
+      "oracle": "mitm-frobenius:m=2",
+      "max_trials": "200000"}}},
+    {"name": "ic-frob-counted-m2", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-orbit:divisor=0;1",
+      "oracle": "mitm-frobenius-counted:m=2",
+      "max_trials": "200000"}}},
+    {"name": "ic-frob-orbit-m3", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-orbit:divisor=0;1",
+      "oracle": "mitm-frobenius:m=3",
+      "max_trials": "200000"}}},
+    {"name": "ic-subtract-m2-d5", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "subtract",
+      "max_trials": "200000"}}},
+    {"name": "ic-mitm-neg-m2-d5", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "mitm:m=2,negation_folded=1",
+      "max_trials": "200000"}}}
+  ],
+  "measurement": {"rounds": 2, "warmup": 1, "order": "alternate", "seed": 202610131802, "isolation_required": "L0", "timeout_seconds": 900}
+}
