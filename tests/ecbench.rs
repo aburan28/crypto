@@ -864,9 +864,10 @@ fn pdp3_koblitz_f4_and_f6_verify_on_one_query_stream() {
     for line in text.lines() {
         let r: Value = serde_json::from_str(line).unwrap();
         assert_eq!(r["outcome"]["status"], "verified", "{line}");
-        assert_eq!(r["cost"]["lower_bound"], true, "{line}");
-        let unpriced = r["cost"]["unpriced"].to_string();
-        assert!(unpriced.contains("word_XORs"), "{unpriced}");
+        // The F4 word XORs are priced at the calibrated ratio since
+        // c8b1594f6, so the cost is no longer a lower bound.
+        assert_eq!(r["cost"]["lower_bound"], false, "{line}");
+        assert_eq!(r["cost"]["unpriced"], serde_json::json!([]), "{line}");
         let extra = &r["solver"]["extra"];
         let geometry = extra["geometric_group_additions"].as_u64().unwrap();
         assert_eq!(extra["geometric_fallbacks"], 0, "{line}");
@@ -1028,7 +1029,7 @@ fn pdp3_koblitz_rootfind_engine_follows_f4_query_stream_without_a_solver() {
                 "{line}"
             );
         } else {
-            assert_eq!(r["cost"]["lower_bound"], true, "{line}");
+            assert_eq!(r["cost"]["lower_bound"], false, "{line}");
             assert!(r["solver"]["ops"].as_u64().unwrap() > 0, "{line}");
         }
         let w = r["workload"]["workload_id"].as_str().unwrap().to_string();
@@ -1127,8 +1128,10 @@ fn pdp3_koblitz_rootfind_window_shortens_m3_scan_and_records_window_len() {
     let (ok, err) = run_spec(&dir, &out, &[]);
     assert!(ok, "{err}");
     let text = std::fs::read_to_string(out.join("records.jsonl")).unwrap();
-    let mut by_workload: std::collections::BTreeMap<String, std::collections::BTreeMap<String, Value>> =
-        Default::default();
+    let mut by_workload: std::collections::BTreeMap<
+        String,
+        std::collections::BTreeMap<String, Value>,
+    > = Default::default();
     for line in text.lines() {
         let r: Value = serde_json::from_str(line).unwrap();
         let arm = r["arm"].as_str().unwrap().to_string();
@@ -1192,7 +1195,10 @@ fn pdp3_koblitz_rootfind_window_shortens_m3_scan_and_records_window_len() {
             .find(|p| p["name"] == "oracle_setup")
             .unwrap()
             .clone();
-        assert_eq!(setup["gae"], full_setup["gae"], "{w}: same table build charge");
+        assert_eq!(
+            setup["gae"], full_setup["gae"],
+            "{w}: same table build charge"
+        );
         assert_eq!(setup["adds"], full_setup["adds"], "{w}");
         assert!(
             arms["root-full"]["phases"]
