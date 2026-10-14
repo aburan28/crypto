@@ -4,6 +4,7 @@ use crypto_lib::cryptanalysis::ic_boundary::{
     CountedGroup, FieldOps, GroupOps, IncrementalGauss, PairTable, PrimePoint, RestartPool,
     RowStatus, TargetSource,
 };
+use serde::Deserialize;
 use serde_json::{json, Value};
 
 const PREFIX: usize = 8_192;
@@ -23,6 +24,40 @@ const TARGETS: [(u64, u64, u64); 8] = [
     (0x48082, 0x296dd, 12176717737306572033),
 ];
 
+#[derive(Deserialize)]
+struct PublicInput {
+    source: String,
+    curve_slug: String,
+    subgroup_r: u64,
+    targets: Vec<PublicTarget>,
+}
+
+#[derive(Deserialize)]
+struct PublicTarget {
+    target_index: usize,
+    x: String,
+    y: String,
+    algorithm_seed: u64,
+}
+
+fn input_targets() -> (Vec<(u64, u64, u64)>, String) {
+    let Ok(path) = std::env::var("ROOTFIND_PREFIX_INPUT") else {
+        return (TARGETS.to_vec(), "coverage-holdout measured round 1".into());
+    };
+    let raw = std::fs::read_to_string(&path).expect("fresh input file exists");
+    let input: PublicInput = serde_json::from_str(&raw).expect("fresh input schema parses");
+    assert_eq!(input.curve_slug, "icv1-fp20-t727-cd198a38");
+    assert_eq!(input.subgroup_r, 562427);
+    assert_eq!(input.targets.len(), 8);
+    let mut result = Vec::new();
+    for (index, target) in input.targets.into_iter().enumerate() {
+        assert_eq!(target.target_index, index);
+        let parse_hex = |value: &str| u64::from_str_radix(value.trim_start_matches("0x"), 16).unwrap();
+        result.push((parse_hex(&target.x), parse_hex(&target.y), target.algorithm_seed));
+    }
+    (result, input.source)
+}
+
 fn plus_mod(left: u64, right: u64, modulus: u64) -> u64 {
     ((left as u128 + right as u128) % modulus as u128) as u64
 }
@@ -35,8 +70,9 @@ fn fixed_public_prefix_gives_equal_probe_budgets_for_three_bases() {
     let generator = inst.generator_point();
     let stream_base = prime_factor_base_strided(&inst, 48, 1);
     let mut targets_json = Vec::<Value>::new();
+    let (targets, target_source) = input_targets();
 
-    for (target_index, (x, y, seed)) in TARGETS.into_iter().enumerate() {
+    for (target_index, (x, y, seed)) in targets.into_iter().enumerate() {
         let target = PrimePoint::affine(x, y);
         assert!(curve.is_on_curve(target));
         let mut collector_matrix = IncrementalGauss::new(stream_base.columns + 1, inst.r);
@@ -138,7 +174,7 @@ fn fixed_public_prefix_gives_equal_probe_budgets_for_three_bases() {
             "prefix_surviving_probes": PREFIX,
             "trial_cap": TRIAL_CAP,
             "lane_width": 8,
-            "target_source": "coverage-holdout measured round 1",
+            "target_source": target_source,
             "targets": targets_json,
         })
     );
