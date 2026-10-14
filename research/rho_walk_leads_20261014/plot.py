@@ -1,5 +1,8 @@
-"""Lay out recorded values as SVG graphs. Reads summary.jsonl (written by
-`rho_walk_leads summary`); computes nothing beyond placing those numbers."""
+"""Lay out recorded values as SVG/PNG graphs. Reads the summary.jsonl files
+written by `rho_walk_leads summary`; places those numbers and computes nothing.
+
+    python plot.py runs/<main> runs/<split> runs/<batch> reports
+"""
 import json
 import pathlib
 import sys
@@ -9,64 +12,90 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-run = pathlib.Path(sys.argv[1])
-rows = [json.loads(l) for l in (run / "summary.jsonl").read_text().splitlines() if l.strip()]
-plt.rcParams.update({"font.size": 9, "svg.fonttype": "none"})
+main_run, split_run, batch_run, out = map(pathlib.Path, sys.argv[1:5])
+out.mkdir(parents=True, exist_ok=True)
+
+
+def load(d):
+    return [json.loads(l) for l in (d / "summary.jsonl").read_text().splitlines() if l.strip()]
+
+
+rows, split, batch = load(main_run), load(split_run), load(batch_run)
+plt.rcParams.update({"font.size": 8.5, "svg.fonttype": "none"})
+BLUE, RED, GREY, ORANGE = "#2f6db5", "#c0392b", "#888888", "#d68910"
 
 LABEL = {
-    ("e1", "pm_coin"): "P±R, sign by hash of P (control)",
-    ("e1", "pm_score"): "best of P+R, P−R",
-    ("e1", "two_score"): "best of P+R_i, P+R_j",
-    ("e1", "best4_score"): "best of P±R_i, P±R_j",
-    ("rf", "k2"): "random function, best of 2",
-    ("rf", "k4"): "random function, best of 4",
-    ("e2", "lazy_dp"): "DP test on lazy x",
-    ("e2", "lazy_index"): "table index on lazy x",
-    ("e2", "pair_table"): "pair table R_i+R_j",
-    ("e2", "shared_index"): "index shared across walks",
-    ("e4", "neg_canon"): "negation map, fixed rule",
-    ("e4", "neg_hashrule"): "negation map, rule per point",
-    ("e4", "neg_epoch"): "negation map, rule per epoch",
+    "pm_coin": "P±R, sign from hash of P (control)",
+    "pm_score": "best of P+R, P−R",
+    "pm_split": "best of P+R_i, P−R_j (split control)",
+    "mm_score": "best of P−R_i, P−R_j",
+    "two_score": "best of P+R_i, P+R_j",
+    "best4_score": "best of P±R_i, P±R_j",
+    "k2": "random function, best of 2",
+    "k4": "random function, best of 4",
+    "lazy_dp": "DP test on lazy x",
+    "lazy_index": "table index on lazy x",
+    "pair_table": "pair table R_i+R_j, one addition",
+    "shared_index": "index shared across walks (lower bound)",
+    "neg_canon": "negation map, fixed rule",
+    "neg_hashrule": "negation map, rule per point",
+    "neg_epoch": "negation map, rule per epoch",
 }
-for k, v in list(LABEL.items()):
-    if k[0] == "e1":
-        LABEL[("e1dp", "sel_" + k[1])] = v
-        LABEL[("e1shift", k[1])] = v
-REF = {"e1": "plain r-adding walk, doubling escape", "e1shift": "plain r-adding walk, shift escape",
-       "e1dp": "plain walk, distinguished points, 64 walks", "rf": "random function", "e2": "canonical DP walk", "e4": "no negation map"}
-
-panels = [("e1", 36), ("e1", 40), ("e1shift", 36), ("e1dp", 36), ("rf", 36), ("e2", 36), ("e4", 36)]
-fig, axes = plt.subplots(len(panels), 1, figsize=(7.2, 12.5), sharex=True)
-for ax, (exp, bits) in zip(axes, panels):
-    sel = [r for r in rows if r.get("of") == exp and r["bits"] == bits and "speedup_ref_over_arm" in r]
+PANELS = [
+    ("e1", 36, rows, "Lead 1, one walk, all points stored, doubling escape (ref: plain walk)"),
+    ("e1", 36, split, "Lead 1, split-sign control, same setup (separate run)"),
+    ("e1shift", 36, rows, "Lead 1, one walk, shift escape (ref: plain walk)"),
+    ("e1dp", 36, rows, "Lead 1, distinguished points, 64 walks (ref: plain walk)"),
+    ("rf", 36, rows, "Positive control: abstract random function (ref: best of 1)"),
+    ("e2", 36, rows, "Leads 2 and 3, distinguished points, 64 walks (ref: canonical)"),
+    ("e4", 36, rows, "Lead 4, distinguished points, 64 walks, r = 1024 (ref: no negation)"),
+]
+heights = [len([r for r in src if r.get("of") == e and r["bits"] == b and "speedup_ref_over_arm" in r]) for e, b, src, _ in PANELS]
+fig, axes = plt.subplots(len(PANELS), 1, figsize=(7.4, 1.0 + 0.36 * sum(heights) + 0.45 * len(PANELS)),
+                         sharex=True, gridspec_kw={"height_ratios": heights})
+for ax, (exp, bits, src, title) in zip(axes, PANELS):
+    sel = [r for r in src if r.get("of") == exp and r["bits"] == bits and "speedup_ref_over_arm" in r]
     for y, r in enumerate(sel):
         lo, hi = r["ci95"]
         v = r["speedup_ref_over_arm"]
-        ax.errorbar(v, y, xerr=[[v - lo], [hi - v]], fmt="o", color="#2f6db5", ms=4, capsize=2)
+        ax.errorbar(v, y, xerr=[[v - lo], [hi - v]], fmt="o", color=BLUE, ms=3.5, capsize=2, lw=1)
         if "predicted" in r:
-            ax.plot(r["predicted"], y, marker="|", color="#c0392b", ms=12, mew=2)
-    ax.set_yticks(range(len(sel)), [f'{LABEL.get((exp, r["arm"]), r["arm"])} (n={r["paired_n"]})' for r in sel])
-    ax.axvline(1.0, color="#888", lw=0.8)
-    ax.set_title(f"{exp}, N ≈ 2^{bits}: reference = {REF[exp]}", loc="left", fontsize=9)
+            ax.plot(r["predicted"], y, marker="|", color=RED, ms=11, mew=2)
+    ax.set_yticks(range(len(sel)), [f'{LABEL.get(r["arm"].removeprefix("sel_"), r["arm"])}  n={r["paired_n"]}' for r in sel])
+    ax.set_ylim(-0.6, len(sel) - 0.4)
+    ax.axvline(1.0, color=GREY, lw=0.8)
+    ax.set_title(title, loc="left", fontsize=8.5)
     ax.set_xscale("log")
-axes[-1].set_xlabel("steps speedup, reference mean / arm mean (paired, 95% bootstrap); red tick = derived prediction")
+    ax.set_xticks([0.07, 0.1, 0.2, 0.5, 0.7, 1, 1.15, 1.41, 2], ["0.07", "0.1", "0.2", "0.5", "0.7", "1", "1.15", "1.41", "2"])
+axes[-1].set_xlabel("steps speedup = reference mean / arm mean, paired by trial, 95% bootstrap\n"
+                    "blue: measured; red tick: derived prediction; N ≈ 2^36")
 fig.tight_layout()
-fig.savefig(run / "speedups.svg")
+for ext in ("svg", "png"):
+    fig.savefig(out / f"speedups.{ext}", dpi=160)
 
-# cost side: measured ns per batched step and the derived op counts
-bench = [r for r in rows if r.get("of") == "bench"]
-fig, ax = plt.subplots(figsize=(7.2, 2.6))
-arms = ["base", "pm_score", "best4"]
-opmodel = {"base": 6.0, "pm_score": 8.0, "best4": 15.0}  # M-equivalents with S = M (README §Cost model)
-xs = range(len(arms))
-for k, bits in enumerate(sorted({r["bits"] for r in bench})):
-    vals = [next((r["cost_ratio_vs_base"] for r in bench if r["bits"] == bits and r["arm"] == a), None) for a in arms]
-    name = {64: "62-bit p (1 limb)", 256: "P-256 p (4 limbs)"}[bits]
-    ax.bar([x + 0.25 * k - 0.25 for x in xs], vals, width=0.25, label=f"measured, {name}")
-ax.bar([x + 0.25 for x in xs], [opmodel[a] / opmodel["base"] for a in arms], width=0.25, label="op-count model (S = M)", color="#999")
-ax.set_xticks(list(xs), ["plain step", "best of P±R", "best of P±R_i, P±R_j"])
-ax.set_ylabel("cost per step / plain step")
-ax.legend(fontsize=7, frameon=False)
+# cost against batch size
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(7.4, 2.9))
+for bits, name, col in ((256, "P-256 (4 limbs)", BLUE), (64, "2^62−57 (1 limb)", ORANGE)):
+    pts = sorted((r["batch_walks"], r["cost_ratio_vs_base"]) for r in batch if r["bits"] == bits and r["arm"] == "pm_score")
+    a1.plot([m for m, _ in pts], [c for _, c in pts], "o-", color=col, ms=3.5, label=name)
+    for arm, ls in (("base", "-"), ("pm_score", "--")):
+        q = sorted((r["batch_walks"], r["median_ns_per_step"]) for r in batch if r["bits"] == bits and r["arm"] == arm)
+        a2.plot([m for m, _ in q], [v for _, v in q], ls, marker="o", ms=3, color=col,
+                label=f'{name}, {"plain step" if arm == "base" else "best of P±R"}')
+a1.axhline(1.1547, color=RED, lw=1, ls=":")
+a1.text(9, 1.1547 + 0.006, "break-even = predicted steps speedup 1.155", color=RED, fontsize=7)
+a1.set_xscale("log", base=2)
+a1.set_xlabel("walks per batched inversion")
+a1.set_ylabel("ns per step, best of P±R / plain")
+a1.legend(fontsize=7, frameon=False, loc="lower right")
+a1.set_title("Cost ratio (median of 21 reps)", loc="left", fontsize=8.5)
+a2.set_xscale("log", base=2)
+a2.set_yscale("log")
+a2.set_xlabel("walks per batched inversion")
+a2.set_ylabel("ns per step (median)")
+a2.legend(fontsize=6, frameon=False)
+a2.set_title("Absolute cost per step", loc="left", fontsize=8.5)
 fig.tight_layout()
-fig.savefig(run / "cost.svg")
-print("wrote", run / "speedups.svg", run / "cost.svg")
+for ext in ("svg", "png"):
+    fig.savefig(out / f"cost_vs_batch.{ext}", dpi=160)
+print("wrote graphs to", out)

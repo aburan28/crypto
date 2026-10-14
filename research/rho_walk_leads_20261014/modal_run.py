@@ -45,6 +45,10 @@ PLANS = {
         shards("e1", 36, 2000, 125, ("--arms", "base,pm_score,pm_split,mm_score"))
         + shards("e1dp", 36, 1000, 125, ("--arms", "sel_base,sel_pm_score,sel_pm_split"))
     ),
+    "batch": lambda: [
+        (f"bench-m{m}", ["bench", "--walks", str(m), "--steps", str(4000 * 1024 // m), "--reps", "21", "--arms", "base,pm_score"])
+        for m in (8, 16, 32, 64, 128, 1024)
+    ],
     "full": lambda: (
         shards("e1", 32, 2000, 250)
         + shards("e1", 36, 2000, 125)
