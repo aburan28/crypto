@@ -15,9 +15,9 @@
 //!
 //! Usage: <base_header.jsonl | construct:<n>:<a>:<columns>> <out.jsonl>
 
+use crypto_lib::cryptanalysis::koblitz_fast_arith::s3_x_roots_128;
 use crypto_lib::cryptanalysis::koblitz_fast_arith::FastBinaryCurve128;
 use crypto_lib::cryptanalysis::koblitz_fast_arith::FastPoint128;
-use crypto_lib::cryptanalysis::koblitz_fast_arith::s3_x_roots_128;
 use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
 use crypto_lib::cryptanalysis::semaev_decomp::Gf2_128;
 use num_bigint::BigUint;
@@ -284,7 +284,12 @@ fn construct_base128(
     b: u128,
     columns: usize,
     r: u64,
-) -> (Vec<FastPoint128>, Vec<(usize, u64)>, Vec<Option<[u128; 2]>>, u64) {
+) -> (
+    Vec<FastPoint128>,
+    Vec<(usize, u64)>,
+    Vec<Option<[u128; 2]>>,
+    u64,
+) {
     let gf = &fast.gf;
     let n = fast.n as usize;
     let lambda = curve.lambda.to_u64().unwrap();
@@ -463,15 +468,16 @@ fn main() {
         "usage: <base_header.jsonl | construct:<n>:<a>:<columns>> <out.jsonl>"
     );
     let process_started = Instant::now();
-    let constructed: Option<(u32, u8, usize)> = arguments[1].strip_prefix("construct:").map(|spec| {
-        let parts: Vec<&str> = spec.split(':').collect();
-        assert_eq!(parts.len(), 3, "construct:<n>:<a>:<columns>");
-        (
-            parts[0].parse().unwrap(),
-            parts[1].parse().unwrap(),
-            parts[2].parse().unwrap(),
-        )
-    });
+    let constructed: Option<(u32, u8, usize)> =
+        arguments[1].strip_prefix("construct:").map(|spec| {
+            let parts: Vec<&str> = spec.split(':').collect();
+            assert_eq!(parts.len(), 3, "construct:<n>:<a>:<columns>");
+            (
+                parts[0].parse().unwrap(),
+                parts[1].parse().unwrap(),
+                parts[2].parse().unwrap(),
+            )
+        });
     let header: Value = match constructed {
         Some((n, a, _)) => json!({"n": n, "a": a}),
         None => {
@@ -563,7 +569,10 @@ fn main() {
             gf.sqr(x)
         );
         let y = (((low as u128) << 64) | high as u128) & basis.mask;
-        assert_eq!(solver.roots(&gf, &basis, x, y), s3_x_roots_128(&gf, b, x, y));
+        assert_eq!(
+            solver.roots(&gf, &basis, x, y),
+            s3_x_roots_128(&gf, b, x, y)
+        );
     }
 
     // State scan: identical triple set to `build_index128`, both roots kept.
@@ -650,16 +659,26 @@ fn main() {
                     let second = &run[y];
                     let s1 = states[first.state as usize];
                     let s2 = states[second.state as usize];
-                    let same_pair = (s1.left == s2.left && s1.right == s2.right && s1.relative == s2.relative)
-                        || (s1.left == s2.right
-                            && s1.right == s2.left
-                            && (s1.relative as usize + s2.relative as usize).is_multiple_of(n_usize));
+                    let same_pair =
+                        (s1.left == s2.left && s1.right == s2.right && s1.relative == s2.relative)
+                            || (s1.left == s2.right
+                                && s1.right == s2.left
+                                && (s1.relative as usize + s2.relative as usize)
+                                    .is_multiple_of(n_usize));
                     if same_pair {
                         continue;
                     }
                     collision_pairs += 1;
                     match verify_collision(
-                        &fast, &shifted, &base, r, n, s1, first.rotation, s2, second.rotation,
+                        &fast,
+                        &shifted,
+                        &base,
+                        r,
+                        n,
+                        s1,
+                        first.rotation,
+                        s2,
+                        second.rotation,
                     ) {
                         Verified::NonTrivial(row) => {
                             candidate_pairs += 1;

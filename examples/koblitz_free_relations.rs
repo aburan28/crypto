@@ -205,7 +205,9 @@ impl S3Solver {
         let p = gf.mul(left, right);
         let ps = self.square.apply(p);
         if a == 0 || ps == 0 {
-            return crypto_lib::cryptanalysis::koblitz_fast_arith::s3_x_roots(gf, self.b, left, right);
+            return crypto_lib::cryptanalysis::koblitz_fast_arith::s3_x_roots(
+                gf, self.b, left, right,
+            );
         }
         let inv_combined = invert(gf, basis, gf.mul(a, ps));
         let q = gf.mul(p, gf.mul(ps, inv_combined));
@@ -289,7 +291,12 @@ fn construct_base(
     b: u64,
     columns: usize,
     r: u64,
-) -> (Vec<FastPoint>, Vec<(usize, u64)>, Vec<Option<[u64; 2]>>, u64) {
+) -> (
+    Vec<FastPoint>,
+    Vec<(usize, u64)>,
+    Vec<Option<[u64; 2]>>,
+    u64,
+) {
     let gf = &fast.gf;
     let n = fast.n as usize;
     let lambda = curve.lambda.to_u64().unwrap();
@@ -386,15 +393,16 @@ fn main() {
         "usage: <base_header.jsonl | construct:<n>:<a>:<columns>> <out.jsonl>"
     );
     let process_started = Instant::now();
-    let constructed: Option<(u32, u8, usize)> = arguments[1].strip_prefix("construct:").map(|spec| {
-        let parts: Vec<&str> = spec.split(':').collect();
-        assert_eq!(parts.len(), 3, "construct:<n>:<a>:<columns>");
-        (
-            parts[0].parse().unwrap(),
-            parts[1].parse().unwrap(),
-            parts[2].parse().unwrap(),
-        )
-    });
+    let constructed: Option<(u32, u8, usize)> =
+        arguments[1].strip_prefix("construct:").map(|spec| {
+            let parts: Vec<&str> = spec.split(':').collect();
+            assert_eq!(parts.len(), 3, "construct:<n>:<a>:<columns>");
+            (
+                parts[0].parse().unwrap(),
+                parts[1].parse().unwrap(),
+                parts[2].parse().unwrap(),
+            )
+        });
     let header: Value = match constructed {
         Some((n, a, _)) => json!({"n": n, "a": a}),
         None => {
@@ -490,7 +498,8 @@ fn main() {
     for left in 0..reps.len() {
         for right in 0..reps.len() {
             for relative in 0..n_usize {
-                if let Some(roots) = solver.roots(&gf, &basis, shifted[left][0], shifted[right][relative])
+                if let Some(roots) =
+                    solver.roots(&gf, &basis, shifted[left][0], shifted[right][relative])
                 {
                     let state = State {
                         left: left as u16,
@@ -557,26 +566,32 @@ fn main() {
                     let s2 = states[second.state as usize];
                     // Trivial: same state, or the transposed pair with the
                     // mirrored relative shift (identical point pair).
-                    let same_pair = (s1.left == s2.left && s1.right == s2.right && s1.relative == s2.relative)
-                        || (s1.left == s2.right
-                            && s1.right == s2.left
-                            && (s1.relative as usize + s2.relative as usize).is_multiple_of(n_usize));
+                    let same_pair =
+                        (s1.left == s2.left && s1.right == s2.right && s1.relative == s2.relative)
+                            || (s1.left == s2.right
+                                && s1.right == s2.left
+                                && (s1.relative as usize + s2.relative as usize)
+                                    .is_multiple_of(n_usize));
                     if same_pair {
                         continue;
                     }
                     collision_pairs += 1;
                     match verify_collision(
-                        &fast, &shifted, &base, r, n, s1, first.rotation, s2, second.rotation,
+                        &fast,
+                        &shifted,
+                        &base,
+                        r,
+                        n,
+                        s1,
+                        first.rotation,
+                        s2,
+                        second.rotation,
                     ) {
                         Verified::NonTrivial(row) => {
                             candidate_pairs += 1;
                             if let Some(dump) = rows_dump.as_mut() {
-                                writeln!(
-                                    dump,
-                                    "{}",
-                                    json!({"kind":"free_relation_row","row":row})
-                                )
-                                .unwrap();
+                                writeln!(dump, "{}", json!({"kind":"free_relation_row","row":row}))
+                                    .unwrap();
                             }
                             if echelon.insert(row.clone()) {
                                 rank_gain_rows += 1;
