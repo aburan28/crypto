@@ -123,7 +123,7 @@ const IC_COUNTED_PARAMS: &[ParamDecl] = &[
     ParamDecl {
         name: "targets",
         default: Some("walk"),
-        help: "random or walk",
+        help: "random, walk, or walk-prime-fast on single-word prime curves",
     },
     ParamDecl {
         name: "max_trials",
@@ -323,7 +323,7 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "targets",
                     default: Some("walk"),
-                    help: "random ([a]G+[b]Q per trial) or walk (one addition per trial)",
+                    help: "random ([a]G+[b]Q per trial), walk, or walk-prime-fast (same guarded stream using native Montgomery additions on prime curves)",
                 },
                 ParamDecl {
                     name: "max_trials",

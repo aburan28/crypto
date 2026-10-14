@@ -355,7 +355,11 @@ pub fn run_pipeline<G: CountedGroup>(
     let source = match spec.targets {
         Targets::Random => TargetSource::Random,
         Targets::Walk | Targets::Residual => TargetSource::Walk,
+        Targets::WalkPrimeFast => TargetSource::WalkPrimeFast,
     };
+    if spec.targets == Targets::WalkPrimeFast && ctx.group.native_walk_adder().is_none() {
+        return Err("walk-prime-fast requires a prime curve with p < 2^62".into());
+    }
     measurement::begin_online(measurement::Phase::TargetQuery);
     let checked_full_rank = linalg_name == "incremental-gauss-full-rank-checked";
     let completion = if linalg_name == "incremental-gauss-full-rank" || checked_full_rank {

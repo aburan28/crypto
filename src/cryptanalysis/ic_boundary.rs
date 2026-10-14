@@ -120,7 +120,7 @@ use crate::cryptanalysis::koblitz_index_calculus::{
     saturate_factor_base_two_torsion, FrobeniusFactorBase, KoblitzCurve, KoblitzSignedRhoOptions,
     ProjectedFactorBase,
 };
-use crate::cryptanalysis::prime_fast::Fp64;
+use crate::cryptanalysis::prime_fast::{FastCurve as FastPrimeCurve, Fp64, Pt as FastPrimePoint};
 use crate::cryptanalysis::research_bench::{bench_curves, linear_fit};
 use crate::cryptanalysis::residual_walk::is_prime_u64;
 use crate::cryptanalysis::semaev_decomp::{Gf2, SubspaceOracle};
@@ -971,6 +971,14 @@ pub trait CountedGroup {
     fn neg(&self, p: Self::Elt) -> Self::Elt;
     /// A key that identifies the element (both walks must agree on it).
     fn key(&self, p: &Self::Elt) -> u64;
+    /// An opt-in addition path for the relation walk.  The closure lives for
+    /// one solve, so an implementation may retain native field state between
+    /// steps.  Other group operations keep their established accounting.
+    fn native_walk_adder(
+        &self,
+    ) -> Option<Box<dyn FnMut(&mut GroupOps, Self::Elt, Self::Elt) -> Self::Elt + '_>> {
+        None
+    }
     /// Whether `add` and `double` tally the field operations behind them
     /// into the ledger's `field_ops`.  `false` by default, and then the
     /// tally stays at zero and means *unknown*, never "no field work":
@@ -3526,6 +3534,70 @@ impl CountedGroup for PrimeCurve {
             ((p.x + 1) << 1) | u64::from(p.y > self.p - p.y)
         }
     }
+    fn native_walk_adder(
+        &self,
+    ) -> Option<Box<dyn FnMut(&mut GroupOps, PrimePoint, PrimePoint) -> PrimePoint + '_>> {
+        if self.p >= (1u64 << crate::cryptanalysis::prime_fast::MAX_BITS) {
+            return None;
+        }
+        let fast = FastPrimeCurve::new("relation-walk", self.p, self.a, self.b, 1);
+        let mut last: Option<(PrimePoint, Option<FastPrimePoint>)> = None;
+        let mut jumps: Vec<(PrimePoint, Option<FastPrimePoint>)> = Vec::new();
+        Some(Box::new(move |ops, p, q| {
+            let fp = if let Some((prior, native)) = last {
+                if prior == p {
+                    native
+                } else if p.infinity {
+                    None
+                } else {
+                    ops.field_ops.muls += 2; // canonical -> Montgomery
+                    Some(fast.point(p.x, p.y))
+                }
+            } else if p.infinity {
+                None
+            } else {
+                ops.field_ops.muls += 2;
+                Some(fast.point(p.x, p.y))
+            };
+            let fq = if let Some((_, native)) = jumps.iter().find(|(point, _)| *point == q) {
+                *native
+            } else {
+                let native = if q.infinity {
+                    None
+                } else {
+                    ops.field_ops.muls += 2;
+                    Some(fast.point(q.x, q.y))
+                };
+                jumps.push((q, native));
+                native
+            };
+            ops.adds += 1;
+            if !p.infinity && !q.infinity {
+                if p.x == q.x {
+                    if p.y == q.y && p.y != 0 {
+                        // FastCurve::double: 2M + 2S + 1I.
+                        ops.field_ops.muls += 2;
+                        ops.field_ops.sqrs += 2;
+                        ops.field_ops.invs += 1;
+                    }
+                } else {
+                    ops.field_ops.muls += 2;
+                    ops.field_ops.sqrs += 1;
+                    ops.field_ops.invs += 1;
+                }
+            }
+            let native = fast.add(fp, fq);
+            let out = match native {
+                Some(pt) => {
+                    let (x, y) = fast.canonical(pt);
+                    PrimePoint::affine(x, y)
+                }
+                None => PrimePoint::INFINITY,
+            };
+            last = Some((out, native));
+            out
+        }))
+    }
 }
 
 /// A prime-field instance: curve, prime-order subgroup, generator.
@@ -5235,6 +5307,9 @@ pub enum TargetSource {
     /// selects, so every segment has its own step function at no group
     /// cost; the guard below forces the restart.
     Walk,
+    /// The same guarded walk and coefficient stream as `Walk`, with
+    /// Montgomery prime-field additions for jumps and pooled restarts.
+    WalkPrimeFast,
     /// The walk as the Round-2 ladder first ran it: one jump table for
     /// every segment and no guard, so segments merge as rho's walks do.
     /// For the diagnostic of §10.2 only.
@@ -5247,11 +5322,12 @@ impl TargetSource {
             TargetSource::Random => "random",
             TargetSource::RandomUnguarded => "random_unguarded",
             TargetSource::Walk => "walk",
+            TargetSource::WalkPrimeFast => "walk_prime_fast",
             TargetSource::WalkSharedJumps => "walk_shared_jumps",
         }
     }
     pub fn is_walk(&self) -> bool {
-        matches!(self, TargetSource::Walk | TargetSource::WalkSharedJumps)
+        matches!(self, TargetSource::Walk | TargetSource::WalkPrimeFast | TargetSource::WalkSharedJumps)
     }
     /// **Whether a target the run has already decomposed is skipped.**
     ///
@@ -5266,7 +5342,7 @@ impl TargetSource {
     /// search nothing.  The guard is one hash insert per target, counted
     /// and priced as a lookup.
     pub fn is_guarded(&self) -> bool {
-        matches!(self, TargetSource::Random | TargetSource::Walk)
+        matches!(self, TargetSource::Random | TargetSource::Walk | TargetSource::WalkPrimeFast)
     }
 }
 
@@ -5566,6 +5642,12 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
     let mut pool_taken = 0u64;
     let mut jump_perm: Vec<usize> = (0..jump_count).collect();
     let mut walk_point = g.identity();
+    let mut native_walk = if targets == TargetSource::WalkPrimeFast {
+        Some(g.native_walk_adder().expect("native prime walk required"))
+    } else {
+        None
+    };
+    let mut native_walk_calls = 0u64;
     let (mut wa, mut wb) = (0u64, 0u64);
     let mut walk_fresh = true;
     let segment_cap = ((r as f64).sqrt() * 4.0) as u64 + 65_536;
@@ -5617,7 +5699,7 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                 }
                 (point, a, b)
             }
-            TargetSource::Walk | TargetSource::WalkSharedJumps => {
+            TargetSource::Walk | TargetSource::WalkPrimeFast | TargetSource::WalkSharedJumps => {
                 if walk_fresh || segment_steps >= segment_cap {
                     if walk_restarts == 0 || shared_jumps {
                         // The first segment, and every segment of the
@@ -5646,7 +5728,12 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                             pool.push(off);
                         }
                         let (op, oa, ob) = pool[idx];
-                        walk_point = g.add(&mut rel.group_ops, walk_point, op);
+                        walk_point = if let Some(add) = native_walk.as_mut() {
+                            native_walk_calls += 1;
+                            add(&mut rel.group_ops, walk_point, op)
+                        } else {
+                            g.add(&mut rel.group_ops, walk_point, op)
+                        };
                         wa = addmod(wa, oa, r);
                         wb = addmod(wb, ob, r);
                         // A fresh index map for the segment: Fisher–Yates
@@ -5662,7 +5749,12 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                     let hsh = mix(g.key(&walk_point));
                     let j = jump_perm[((hsh >> 24) as usize) % jump_count];
                     let (jp, aj, bj) = jumps[j];
-                    walk_point = g.add(&mut rel.group_ops, walk_point, jp);
+                    walk_point = if let Some(add) = native_walk.as_mut() {
+                        native_walk_calls += 1;
+                        add(&mut rel.group_ops, walk_point, jp)
+                    } else {
+                        g.add(&mut rel.group_ops, walk_point, jp)
+                    };
                     wa = addmod(wa, aj, r);
                     wb = addmod(wb, bj, r);
                     walk_steps += 1;
@@ -5807,6 +5899,9 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
         rel.count("walk_pool_restarts", pool_taken);
         rel.count("walk_steps", walk_steps);
         rel.count("walk_restarts", walk_restarts);
+        if targets == TargetSource::WalkPrimeFast {
+            rel.count("native_walk_calls", native_walk_calls);
+        }
     }
     la.wall_ns = la_ns;
     let (work, work_unit) = matrix.work();
@@ -9251,6 +9346,76 @@ mod tests {
         assert_eq!(batch.build_ops.doubles, scalar.build_ops.doubles);
         assert_eq!(batch.build_ops.field_ops.invs, fb.abscissae as u64);
         assert!(batch.build_ops.field_ops.invs < scalar.build_ops.field_ops.invs);
+    }
+
+    #[test]
+    fn native_prime_walk_preserves_point_and_coefficient_stream() {
+        let inst = roster_prime_instance(14).unwrap();
+        let curve = &inst.curve;
+        let g = inst.generator_point();
+        let mut setup = GroupOps::default();
+        let q = curve.mul(&mut setup, g, 1337 % inst.r);
+        let mut rng = StdRng::seed_from_u64(20261018);
+        let jumps: Vec<(PrimePoint, u64, u64)> = (0..16)
+            .map(|_| {
+                let a = rng.gen_range(1..inst.r);
+                let b = rng.gen_range(1..inst.r);
+                let ag = curve.mul(&mut setup, g, a);
+                let bq = curve.mul(&mut setup, q, b);
+                (curve.add(&mut setup, ag, bq), a, b)
+            })
+            .collect();
+        let mut fast_add = curve.native_walk_adder().unwrap();
+        let mut ordinary_ops = GroupOps::default();
+        let mut native_ops = GroupOps::default();
+        let mut ordinary = g;
+        let mut native = g;
+        let (mut oa, mut ob) = (1u64, 0u64);
+        let (mut na, mut nb) = (1u64, 0u64);
+        for step in 0..4096 {
+            if step > 0 && step % 97 == 0 {
+                let a = rng.gen_range(1..inst.r);
+                let b = rng.gen_range(1..inst.r);
+                let ag = curve.mul(&mut setup, g, a);
+                let bq = curve.mul(&mut setup, q, b);
+                ordinary = curve.add(&mut setup, ag, bq);
+                native = ordinary;
+                (oa, ob) = (a, b);
+                (na, nb) = (a, b);
+            }
+            let j = ((mix(curve.key(&ordinary)) >> 24) as usize) % jumps.len();
+            let (jump, aj, bj) = jumps[j];
+            ordinary = curve.add(&mut ordinary_ops, ordinary, jump);
+            native = fast_add(&mut native_ops, native, jump);
+            oa = addmod(oa, aj, inst.r);
+            ob = addmod(ob, bj, inst.r);
+            na = addmod(na, aj, inst.r);
+            nb = addmod(nb, bj, inst.r);
+            assert_eq!((native, na, nb), (ordinary, oa, ob), "step {step}");
+        }
+        assert_eq!(native_ops.adds, ordinary_ops.adds);
+        let neg = curve.neg(g);
+        assert_eq!(fast_add(&mut native_ops, g, neg), PrimePoint::INFINITY);
+        assert_eq!(fast_add(&mut native_ops, g, g), curve.add(&mut ordinary_ops, g, g));
+    }
+
+    #[test]
+    #[ignore]
+    fn profile_prime_pair_table_occupancy_for_pinned_sweep() {
+        let inst = prime_instance_for(20, 59297);
+        for size in [40usize, 48, 64, 80] {
+            let base = prime_factor_base(&inst, size);
+            let table = PairTable::build_negation_folded_prime_batch(&inst.curve, &base).unwrap();
+            println!(
+                "size={size} abscissae={} signed_points={} columns={} pair_keys={} table_adds={} table_inversions={}",
+                base.abscissae,
+                base.points.len(),
+                base.columns,
+                table.entries,
+                table.build_ops.adds,
+                table.build_ops.field_ops.invs
+            );
+        }
     }
 
     #[test]

@@ -526,6 +526,9 @@ pub enum Targets {
     /// An r-adding walk: one group addition per trial, with the guard
     /// that no target is presented twice.
     Walk,
+    /// The same guarded walk with native Montgomery additions on supported
+    /// single-word prime curves.
+    WalkPrimeFast,
     /// Residual matching (lead L3): the walk subtracts a base point at
     /// every step and relations come from collisions of the residuals;
     /// the oracle is not consulted.  See `ic_framework::residual`.
@@ -537,6 +540,7 @@ impl Targets {
         match self {
             Targets::Random => "random",
             Targets::Walk => "walk",
+            Targets::WalkPrimeFast => "walk-prime-fast",
             Targets::Residual => "residual",
         }
     }
@@ -545,9 +549,10 @@ impl Targets {
         match s {
             "random" => Ok(Targets::Random),
             "walk" => Ok(Targets::Walk),
+            "walk-prime-fast" => Ok(Targets::WalkPrimeFast),
             "residual" => Ok(Targets::Residual),
             other => Err(format!(
-                "unknown target source `{other}`; try random, walk or residual"
+                "unknown target source `{other}`; try random, walk, walk-prime-fast or residual"
             )),
         }
     }
