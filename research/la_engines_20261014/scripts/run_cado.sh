@@ -13,7 +13,7 @@ trap 'rm -rf "$dir"' EXIT
 "$CADO/linalg/bwc/mf_scan2" --withcoeffs "$dir/matrix.bin" > "$dir/scan.log" 2>&1
 start=$(date +%s.%N)
 "$CADO/linalg/bwc/bwc.pl" :complete prime=$P matrix="$dir/matrix.bin" \
-  rhs="$dir/rhs.bin" nrhs=1 nullspace=right mpi=1x1 thr="$thr" m="$bm" n="$bn" \
+  rhs="$dir/rhs.txt" nullspace=right mpi=1x1 thr="$thr" m="$bm" n="$bn" \
   wdir="$dir/wdir" > "$dir/bwc.log" 2>&1 || { tail -30 "$dir/bwc.log" >&2; exit 1; }
 end=$(date +%s.%N)
 sol=$(ls "$dir"/wdir/K.sols* | head -1)
@@ -22,7 +22,8 @@ mkdir -p "$out"
 tag="cado-c${cols}-w${weight}-s${seed}-t${thr}-m${bm}n${bn}"
 cp "$dir/bwc.log" "$out/$tag.bwc.log"
 jq -c --argjson e "$(cat "$dir/export.json")" --argjson c "$(cat "$dir/check.json")" \
+  --argjson steps "$(grep -oE 'Timings for [a-z_]+: \(wct\) [0-9.]+' "$dir/bwc.log" | awk '{gsub(":","",$3); t[$3]+=$5} END{printf "{"; s=""; for(k in t){printf "%s\"%s\":%s", s, k, t[k]; s=","} printf "}"}')" \
   --arg thr "$thr" --arg wall "$(awk -v a="$start" -v b="$end" 'BEGIN{print b-a}')" --arg bm "$bm" --arg bn "$bn" \
   -n '{arm:"cado-bwc", cols:$e.cols, weight:$e.weight, seed:$e.seed, core_dim:$e.core_dim,
        core_nonzeros:$e.core_nonzeros, thr:$thr, block_m:($bm|tonumber), block_n:($bn|tonumber),
-       solve_s:($wall|tonumber), verified:$c.verified, rows_ok:$c.rows_ok}'
+       solve_s:($wall|tonumber), steps_wct:$steps, verified:$c.verified, rows_ok:$c.rows_ok}'

@@ -16,7 +16,7 @@
 //!
 //! `export-core` writes the singleton- and clique-filtered, *unmerged*,
 //! square core (coefficients stay ±1/±2) in the CADO-NFS `bwc` binary format
-//! (`matrix.bin`, `rhs.bin`), so CADO's block Wiedemann runs on exactly the
+//! (`matrix.bin`, `rhs.txt`), so CADO's block Wiedemann runs on exactly the
 //! matrix `core-bw` sees.  `check-cado` verifies a CADO solution file
 //! against that core and against the planted logarithms.
 //!
@@ -29,9 +29,9 @@
 //! cargo run --release --example la_engine_bench -- check-cado --cols 16384 --weight 3 --dir /tmp/c --sol /tmp/c/wdir/K.sols0-1.0
 //! ```
 
-use crypto::cryptanalysis::ic_framework::linalg::matrix_by_name;
-use crypto::cryptanalysis::ic_boundary::{RelationSolver, RowStatus};
-use crypto::cryptanalysis::{
+use crypto_lib::cryptanalysis::ic_framework::linalg::matrix_by_name;
+use crypto_lib::cryptanalysis::ic_boundary::RowStatus;
+use crypto_lib::cryptanalysis::{
     filter_relations, solve_sparse_system, FilterOptions, SparseCoreSolver, SparseRow,
     SparseSolveOptions, SparseSolveOutcome,
 };
@@ -273,7 +273,7 @@ fn u32le(w: &mut impl Write, v: u32) {
 }
 
 /// CADO `bwc` GF(p) input: per row `len`, then `len` × (`col`, `i32 coeff`),
-/// all 32-bit little endian; rhs as `ceil(bits(p)/32)` LE words per row.
+/// all 32-bit little endian; rhs as ASCII (below).
 fn export_core(p: &Params, dir: &str) -> serde_json::Value {
     std::fs::create_dir_all(dir).unwrap();
     let sys = generate(p);
@@ -291,10 +291,12 @@ fn export_core(p: &Params, dir: &str) -> serde_json::Value {
         }
     }
     drop(w);
-    let mut w = std::io::BufWriter::new(std::fs::File::create(format!("{dir}/rhs.bin")).unwrap());
+    // `bwc.pl` takes the right-hand side as ASCII: `rows nrhs p`, then one
+    // decimal residue per row.
+    let mut w = std::io::BufWriter::new(std::fs::File::create(format!("{dir}/rhs.txt")).unwrap());
+    writeln!(w, "{} 1 {}", core.len(), p.p).unwrap();
     for r in &core {
-        u32le(&mut w, r.rhs as u32);
-        u32le(&mut w, (r.rhs >> 32) as u32);
+        writeln!(w, "{}", r.rhs).unwrap();
     }
     drop(w);
     let nnz: usize = core.iter().map(|r| r.entries.len()).sum();
