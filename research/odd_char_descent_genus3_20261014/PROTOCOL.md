@@ -69,3 +69,16 @@ reported, never silently re-run.
 
 **What does not count.** Changing the ranges after seeing results, or
 dropping an instance or arm that fails a check.
+
+## Amendment 2026-10-14 (after run `20261014T1758Z`, before run 2)
+
+The coordinating session asked a follow-up question: do the sources
+support a genus-`k` cover over `F_p` for `k = 6, 10, 14`, and what genus
+lower bound do they give? The frozen tool already wrote `min_genus.csv`,
+the smallest genus over period-`n` types for `n <= 14`, but that table had
+no completeness check for `n > 8`. Run 2 adds one column, `check_total_q5`.
+It is the same check as item 2, at `q = 5`, for `n = 1..14`, and a `FAIL`
+counts as a failed check. Nothing else changed: no range, metric or
+instance. Each run now writes to its own `results/run-<stamp>/` directory.
+Run 1 is kept there unchanged. Its other files must be byte-identical to
+run 2's, which is checked by `cmp`.

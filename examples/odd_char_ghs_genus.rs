@@ -1075,7 +1075,8 @@ const PRIMES: [u64; 9] = [5, 7, 11, 13, 17, 19, 23, 29, 31];
 /// when `F_q(j(E)) = F_{q^n}`), and whether any type at all has `g = n`.
 fn min_genus_table(nmax: u32) -> String {
     let mut csv = String::from(
-        "n,types,min_genus_period_n,m_r_at_min,types_at_min,any_type_genus_eq_n,generic_genus\n",
+        "n,types,min_genus_period_n,m_r_at_min,types_at_min,any_type_genus_eq_n,generic_genus,\
+         check_total_q5\n",
     );
     for n in 1..=nmax {
         let ts = types(n);
@@ -1090,12 +1091,19 @@ fn min_genus_table(nmax: u32) -> String {
         let n_at_min = per_n.iter().filter(|a| a.genus == gmin).count();
         let mr: Vec<String> = at_min.iter().map(|(m, r)| format!("m{m}r{r}")).collect();
         let any_eq = an.iter().any(|a| a.genus == n as i64);
+        // Completeness at q = 5: the type counts must add up to 5^{4n} − 5^{2n}.
+        let total = ts
+            .iter()
+            .fold(Big::from_u64(0), |acc, ty| acc.add(&count_type(5, ty)));
+        let q2 = Big::pow_small(5, 2 * n);
+        let ok = total == q2.mul(&q2).sub(&q2);
         writeln!(
             csv,
-            "{n},{},{gmin},{},{n_at_min},{any_eq},{}",
+            "{n},{},{gmin},{},{n_at_min},{any_eq},{},{}",
             ts.len(),
             mr.join(" "),
-            (n as i64 - 1) * (1i64 << n) + 1
+            (n as i64 - 1) * (1i64 << n) + 1,
+            if ok { "ok" } else { "FAIL" }
         )
         .unwrap();
     }
@@ -1156,7 +1164,11 @@ fn main() {
         writeln!(csv, "{n},{per},{g},{m},{r},{c},{hy}").unwrap();
     }
     fs::write(out.join("genus_by_n.csv"), csv).unwrap();
-    fs::write(out.join("min_genus.csv"), min_genus_table(NMAX_MIN)).unwrap();
+    let min_table = min_genus_table(NMAX_MIN);
+    if min_table.contains("FAIL") {
+        failures += 1;
+    }
+    fs::write(out.join("min_genus.csv"), min_table).unwrap();
 
     // counts: exact branch-set counts per (q, n).
     let mut csv = String::from(
