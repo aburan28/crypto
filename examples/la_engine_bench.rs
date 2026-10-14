@@ -63,6 +63,10 @@ struct Params {
     /// random stream as `unit`, so the column pattern is identical.
     positive: bool,
     block: usize,
+    /// `--merge-max-weight` / `--max-row-weight`: override the filter's merge
+    /// thresholds (defaults 8 and 32) for the `full-*` arms.
+    merge_max_weight: Option<usize>,
+    max_row_weight: Option<usize>,
 }
 
 struct System {
@@ -161,6 +165,12 @@ fn sparse_opts(p: &Params, solver: SparseCoreSolver, filter: bool) -> SparseSolv
     o.wiedemann.block_m = p.block;
     o.wiedemann.block_n = p.block;
     o.lanczos.block_size = p.block;
+    if let Some(w) = p.merge_max_weight {
+        o.filter.merge_max_weight = w;
+    }
+    if let Some(w) = p.max_row_weight {
+        o.filter.max_row_weight = w;
+    }
     if !filter {
         o.filter = FilterOptions {
             remove_duplicates: false,
@@ -186,6 +196,7 @@ fn run_ours(p: &Params, arm: &str) -> serde_json::Value {
         "arm": arm, "cols": p.cols, "weight": p.weight, "excess": p.excess,
         "seed": p.seed, "modulus": p.p.to_string(), "coeffs": coeffs_name(p),
         "block": p.block, "threads": threads(),
+        "merge_max_weight": p.merge_max_weight, "max_row_weight": p.max_row_weight,
         "rows": sys.rows.len(), "rows_to_cover": sys.rows_to_cover, "nonzeros": nnz,
         "generate_s": gen_s,
     });
@@ -518,6 +529,8 @@ fn main() {
         wide: get("--coeffs").as_deref() == Some("wide"),
         positive: get("--coeffs").as_deref() == Some("positive"),
         block: num("--block", 4) as usize,
+        merge_max_weight: get("--merge-max-weight").map(|v| v.parse().unwrap()),
+        max_row_weight: get("--max-row-weight").map(|v| v.parse().unwrap()),
     };
     let v = match cmd.as_str() {
         "ours" => run_ours(&p, &get("--arm").expect("--arm")),
