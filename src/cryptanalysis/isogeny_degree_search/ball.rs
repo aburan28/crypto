@@ -11,31 +11,35 @@
 //! | screen | what it would buy | what the walk finds |
 //! |---|---|---|
 //! | `j ∈ F_{2^d}`, `d ⊊ 131` | the subfield/Koblitz factor base, `D*` 3.53 → 2.04 | only at the start point, and only because `131` is prime |
-//! | GHS magic number `2 ≤ m ≤ 6` | Weil descent to a tractable genus | unreachable for *any* `b`: see [`achievable_magic_numbers`] |
+//! | GHS magic number `2 ≤ m ≤ 6` | Weil descent to a tractable genus | unreachable for *any* `b`: see [`achievable_magic_numbers`] (`{1, 131}`) |
 //! | sparse `b` | smaller constant vector, nothing structural | the walk finds dense `b`, and sparsity is not a lever anyway |
 //!
 //! ## Why the magic-number screen is decided before the walk starts
 //!
-//! The GHS magic number of `E_{a,b}` over `F_{2^N}/F_2` is
-//! `dim_{F_2} ⟨√b, √b², √b⁴, …⟩` — the dimension of the smallest
-//! **Frobenius-invariant** `F_2`-subspace containing `√b`.  Those
-//! subspaces are the `F_2[x]/(x^N − 1)`-submodules of `F_{2^N}`, so
-//! their dimensions are exactly the **degrees of the divisors of
-//! `x^N − 1` over `F_2`**, i.e. the subset sums of the cyclotomic coset
-//! sizes.
+//! Write `Ord_b ∈ F_2[x]` for the Frobenius annihilator of `√b`.  The
+//! smallest Frobenius-invariant `F_2`-subspace containing `√b` has
+//! dimension `deg Ord_b`, and those dimensions are exactly the **degrees
+//! of the divisors of `x^N − 1` over `F_2`**
+//! ([`frobenius_subspace_dimensions`]).  The GHS magic number of
+//! `E_{a,b}` over `F_{2^N}/F_2` (Maurer–Menezes–Teske 2002, eq. (5)) is
+//! `dim_{F_2} span{(1, √b^{2^i})}` `= deg Ord_b + c`, with `c = 1` when
+//! `(x − 1) ∤ Ord_b` (MMT Theorem 5(i)) ([`achievable_magic_numbers`]).
 //!
 //! For `N = 131`: `131` is prime and `ord_{131}(2) = 130`, so `x^131 − 1`
 //! factors as `(x + 1) · f` with `f` irreducible of degree `130`.  The
-//! attainable dimensions are therefore
+//! subspace dimensions are `{0, 1, 130, 131}`; the magic numbers of
+//! nonzero `b` are
 //!
 //! ```text
-//!     {0, 1, 130, 131}
+//!     {1, 131}      (Ord_b = x + 1: m = 1;  Ord_b = f: m = 130 + 1;  Ord_b = x^131 − 1: m = 131)
 //! ```
 //!
 //! and the useful GHS window `2 ≤ m ≤ 6` is **empty** — not for
 //! ECC2K-130, not for any curve over `F_{2^131}`, isogenous or not.
-//! [`achievable_magic_numbers`] computes this for any `N`, and
-//! [`ghs_window_is_empty`] states the `131` case as a predicate.
+//! [`ghs_window_is_empty`] states the `131` case as a predicate.  (Until
+//! 2026-10-13 this module listed `{0, 1, 130, 131}` as the magic numbers;
+//! that is the subspace-dimension set, and `130` is not a magic number.
+//! The window conclusion is unchanged.)
 //!
 //! That is a statement about all `2^131` curves over the field, derived
 //! rather than sampled, so it covers the part of the isogeny class no
@@ -48,12 +52,13 @@
 //! direction: it builds a factor base from the roots of a
 //! quasi-subfield polynomial, which exist exactly where a
 //! Frobenius-stable `F_2`-subspace does — i.e. exactly at the divisor
-//! degrees of `t^n − 1`.  That is the **same** set
-//! [`achievable_magic_numbers`] computes, so one calculation settles
-//! both questions at `n = 131`:
+//! degrees of `t^n − 1`, the set [`frobenius_subspace_dimensions`]
+//! computes.  The same factorisation of `t^131 − 1` settles both
+//! questions at `n = 131`:
 //!
 //! ```text
-//!     attainable dimensions over F_{2^131}  =  {0, 1, 130, 131}
+//!     subspace dimensions over F_{2^131}  =  {0, 1, 130, 131}
+//!     GHS magic numbers over F_{2^131}    =  {1, 131}
 //!       → GHS window 2..=6            empty
 //!       → n0 = 1    the subfield F_2, a factor base of 2 elements
 //!       → n0 = 130  the trace hyperplane, a factor base of half the field
@@ -66,7 +71,7 @@
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::binary_isogeny::{j_invariant, l_isogenous_neighbours};
-use crate::cryptanalysis::ec_trapdoor::{magic_number_full, FieldTower};
+use crate::cryptanalysis::ec_trapdoor::{magic_number_full, mmt_condition_8, FieldTower};
 use crate::cryptanalysis::ghs_descent::ECurve;
 use num_bigint::BigInt;
 use num_traits::One;
@@ -143,16 +148,15 @@ pub fn cyclotomic_coset_sizes(n: u32) -> Vec<u32> {
     sizes
 }
 
-/// **Every GHS magic number attainable over `F_{2^n}`**, for any choice
-/// of curve parameter `b` whatsoever.
-///
-/// The magic number is the dimension of the smallest Frobenius-invariant
-/// `F_2`-subspace containing `√b`.  Those subspaces are the divisors of
-/// `x^n − 1`, so the attainable dimensions are the subset sums of
-/// [`cyclotomic_coset_sizes`].
+/// **Every dimension of a Frobenius-invariant `F_2`-subspace of
+/// `F_{2^n}`**: the degrees of the divisors of `x^n − 1`, i.e. the subset
+/// sums of [`cyclotomic_coset_sizes`].  This is the set of plain orbit
+/// dimensions `deg Ord_b`, and the set a quasi-subfield factor base can
+/// use.  It is not the set of GHS magic numbers; see
+/// [`achievable_magic_numbers`].
 ///
 /// For `n = 131` this returns `[0, 1, 130, 131]`.
-pub fn achievable_magic_numbers(n: u32) -> Vec<u32> {
+pub fn frobenius_subspace_dimensions(n: u32) -> Vec<u32> {
     let sizes = cyclotomic_coset_sizes(n);
     let mut reach = vec![false; n as usize + 1];
     reach[0] = true;
@@ -164,6 +168,56 @@ pub fn achievable_magic_numbers(n: u32) -> Vec<u32> {
         }
     }
     (0..=n).filter(|d| reach[*d as usize]).collect()
+}
+
+/// **Every GHS magic number attainable over `F_{2^n}`** relative to
+/// `F_2`, over all nonzero `b`.
+///
+/// MMT (2002) eq. (5) and Theorem 5(i): `m(b) = deg Ord_b + c`, with
+/// `c = 1` when `(x − 1) ∤ Ord_b`.  Writing `n = 2^v·n'` (`n'` odd),
+/// `Ord_b = (x − 1)^e · D` with `0 ≤ e ≤ 2^v` and `D` a divisor of
+/// `(x^{n'} − 1)^{2^v}` prime to `x − 1`, the attainable values are
+/// `deg D + max(e, 1)` over `(e, D) ≠ (0, 1)`, i.e.
+/// `{deg D + e : 1 ≤ e ≤ 2^v}`.
+///
+/// For `n = 131` this returns `[1, 131]`: `Tr(b) = 0`, `b ≠ 1` has
+/// `Ord_b` of degree 130 prime to `x − 1`, so `m = 131`, not `130`.
+pub fn achievable_magic_numbers(n: u32) -> Vec<u32> {
+    let mut odd = n;
+    let mut mult = 1u32;
+    while odd.is_multiple_of(2) {
+        odd /= 2;
+        mult *= 2;
+    }
+    // Coset sizes other than the coset {0} (the factor x − 1).
+    let mut sizes = cyclotomic_coset_sizes(n);
+    for _ in 0..mult {
+        let k = sizes
+            .iter()
+            .position(|s| *s == 1)
+            .expect("x - 1 divides x^n - 1");
+        sizes.remove(k);
+    }
+    let mut reach = vec![false; n as usize + 1];
+    reach[0] = true;
+    for s in sizes {
+        for d in (0..=n as usize).rev() {
+            if reach[d] && d + s as usize <= n as usize {
+                reach[d + s as usize] = true;
+            }
+        }
+    }
+    let mut out = vec![false; n as usize + 1];
+    for d in 0..=n as usize {
+        if reach[d] {
+            for e in 1..=mult as usize {
+                if d + e <= n as usize {
+                    out[d + e] = true;
+                }
+            }
+        }
+    }
+    (0..=n).filter(|m| out[*m as usize]).collect()
 }
 
 /// Is the useful GHS window `lo ..= hi` empty over `F_{2^n}` — i.e. can
@@ -333,6 +387,10 @@ pub struct BallScreen {
     pub subfield_degree: Option<u32>,
     /// GHS magic number over `F_{2^131}/F_2`.
     pub magic: u32,
+    /// MMT Lemma 6 condition (8): whether the GHS cover descends to the
+    /// base field.  Always `true` for an odd relative degree such as
+    /// `n = 131`.
+    pub descends: bool,
 }
 
 /// One node of the ball.
@@ -372,11 +430,12 @@ impl BallReport {
             .collect()
     }
 
-    /// Nodes whose GHS magic number lands in the tractable window.
+    /// Nodes whose GHS magic number lands in the tractable window and
+    /// whose cover descends (MMT Lemma 6 condition (8)).
     pub fn ghs_hits(&self, lo: u32, hi: u32) -> Vec<&BallNode> {
         self.nodes
             .iter()
-            .filter(|nd| nd.screen.magic >= lo && nd.screen.magic <= hi)
+            .filter(|nd| nd.screen.descends && nd.screen.magic >= lo && nd.screen.magic <= hi)
             .collect()
     }
 
@@ -395,6 +454,7 @@ impl BallReport {
 pub fn screen(curve: &ECurve, tower: &FieldTower) -> BallScreen {
     let j = j_invariant(curve);
     let magic = magic_number_full(tower, &curve.a, &curve.b);
+    let descends = mmt_condition_8(tower, &curve.a, &curve.b);
     let subfield_degree = (1..curve.m)
         .filter(|d| curve.m.is_multiple_of(*d))
         .find(|d| tower.is_in_subfield(&j, *d));
@@ -409,6 +469,7 @@ pub fn screen(curve: &ECurve, tower: &FieldTower) -> BallScreen {
         b_weight,
         subfield_degree,
         magic,
+        descends,
     }
 }
 
@@ -502,12 +563,15 @@ mod tests {
         assert_eq!(z.square_k_times(131, &irr), z, "x^{{2^131}} ≡ x (mod f)");
     }
 
-    /// `x^131 − 1 = (x+1)·f` with `deg f = 130`, so the GHS magic number
-    /// over `F_{2^131}` can only ever be `0, 1, 130` or `131`.
+    /// `x^131 − 1 = (x+1)·f` with `deg f = 130`, so Frobenius-invariant
+    /// subspaces of `F_{2^131}` have dimension `0, 1, 130` or `131`, and
+    /// the MMT magic number of a nonzero `b` is `1` or `131`.
     #[test]
     fn ecc2k130_ghs_window_is_empty() {
         assert_eq!(cyclotomic_coset_sizes(131), vec![1, 130]);
-        assert_eq!(achievable_magic_numbers(131), vec![0, 1, 130, 131]);
+        assert_eq!(frobenius_subspace_dimensions(131), vec![0, 1, 130, 131]);
+        // MMT eq. (5): Tr(b) = 0, b != 1 gives m = 130 + 1 = 131.
+        assert_eq!(achievable_magic_numbers(131), vec![1, 131]);
         assert!(ghs_window_is_empty(131, 2, 6));
         // The contrast: a composite degree has room for a GHS window,
         // which is why the window question is open for c2pnb176w1 (not
@@ -524,7 +588,7 @@ mod tests {
     /// field), neither of which is a usable factor base.
     #[test]
     fn no_usable_quasi_subfield_dimension_over_f2_131() {
-        let dims = achievable_magic_numbers(131);
+        let dims = frobenius_subspace_dimensions(131);
         let usable: Vec<u32> = dims
             .iter()
             .copied()
@@ -542,6 +606,33 @@ mod tests {
         let mut sizes: Vec<u32> = cosets.iter().map(|c| c.len() as u32).collect();
         sizes.sort_unstable();
         assert_eq!(sizes, cyclotomic_coset_sizes(131));
+    }
+
+    /// [`achievable_magic_numbers`] agrees with an exhaustive
+    /// [`magic_number`] over `F_{2^12}/F_2` (`12 = 4·3`, so both the
+    /// repeated factor `(x − 1)^4` and the odd part are exercised) and
+    /// over `F_{2^10}/F_2`.
+    #[test]
+    fn achievable_magic_numbers_match_exhaustive_mmt() {
+        use crate::cryptanalysis::ec_trapdoor::magic_number;
+        use num_bigint::BigUint;
+        for (n, low) in [(12u32, vec![0u32, 3]), (10, vec![0, 3])] {
+            let irr = IrreduciblePoly {
+                degree: n,
+                low_terms: low,
+            };
+            let tower = FieldTower::new(n, n, 1, irr);
+            let mut seen = std::collections::BTreeSet::new();
+            for v in 1u64..(1 << n) {
+                let b = F2mElement::from_biguint(&BigUint::from(v), n);
+                seen.insert(magic_number(&tower, &F2mElement::zero(n), &b));
+            }
+            assert_eq!(
+                seen.into_iter().collect::<Vec<_>>(),
+                achievable_magic_numbers(n),
+                "n = {n}"
+            );
+        }
     }
 
     /// ECC2K-130 itself screens as the subfield curve (`j = 1 ∈ F_2`)

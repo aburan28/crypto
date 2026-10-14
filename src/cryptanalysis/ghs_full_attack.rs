@@ -58,7 +58,9 @@ use crate::binary_ecc::{F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::binary_isogeny::{
     j_invariant, l_isogenous_neighbours, walk_to_magic, WalkOptions, WalkResult,
 };
-use crate::cryptanalysis::ec_trapdoor::{magic_number_full, FieldTower, TrapdoorCurve};
+use crate::cryptanalysis::ec_trapdoor::{
+    magic_number_full, mmt_condition_8, FieldTower, TrapdoorCurve,
+};
 use crate::cryptanalysis::ghs_descent::{
     brute_force_ecdlp, descend_m1, descend_m2_abstract, ECurve, Pt,
 };
@@ -121,6 +123,9 @@ pub struct NeighbourReport {
     pub isogeny_degree: u32,
     pub j_prime: F2mElement,
     pub magic: u32,
+    /// MMT Lemma 6 condition (8): whether this neighbour's GHS cover
+    /// descends to the base field.
+    pub descends: bool,
 }
 
 /// Run the full pipeline.  Given:
@@ -146,6 +151,7 @@ pub fn run_full_attack(tc: &TrapdoorCurve, p: &Pt, q: &Pt, opts: &AttackOptions)
                 isogeny_degree: l,
                 j_prime: j_invariant(&nb),
                 magic: m_nb,
+                descends: mmt_condition_8(&tower, &nb.a, &nb.b),
             });
         }
     }
@@ -247,8 +253,9 @@ pub fn run_full_attack(tc: &TrapdoorCurve, p: &Pt, q: &Pt, opts: &AttackOptions)
                 }
             }
         }
-        2 => {
-            // m=2: abstract construction only.
+        2 | 3 => {
+            // Plain orbit dimension 2 (MMT m = 2 two-cycle, or m = 3
+            // three-cycle): abstract construction only.
             let tc_for_descent = TrapdoorCurve {
                 big_n: tc.big_n,
                 n: tc.n,
@@ -260,16 +267,13 @@ pub fn run_full_attack(tc: &TrapdoorCurve, p: &Pt, q: &Pt, opts: &AttackOptions)
                 row: tc.row.clone(),
                 full_audit: None,
             };
-            if let Some(d2) = descend_m2_abstract(&tc_for_descent) {
-                m2_status = Some(d2.smooth_model_status());
-            }
+            m2_status = Some(match descend_m2_abstract(&tc_for_descent) {
+                Some(d2) => d2.smooth_model_status(),
+                None => MAGIC_GE3_STATUS,
+            });
         }
         _ => {
-            m2_status = Some(
-                "magic >= 3: descended hyperelliptic curve has genus >= 4. \
-                 Construction follows the same recipe as m=2 with a larger \
-                 F_2-basis, still unimplemented in this module.",
-            );
+            m2_status = Some(MAGIC_GE3_STATUS);
         }
     }
 
@@ -284,6 +288,10 @@ pub fn run_full_attack(tc: &TrapdoorCurve, p: &Pt, q: &Pt, opts: &AttackOptions)
         neighbour_magics,
     }
 }
+
+const MAGIC_GE3_STATUS: &str = "MMT magic >= 3 outside the 3-cycle case: descended \
+     hyperelliptic curve has genus >= 3 (2^(m-1) - 1 or 2^(m-1)). Construction is \
+     unimplemented in this module.";
 
 /// Pretty-print an [`AttackReport`].
 pub fn format_report(r: &AttackReport, irr: &IrreduciblePoly) -> String {

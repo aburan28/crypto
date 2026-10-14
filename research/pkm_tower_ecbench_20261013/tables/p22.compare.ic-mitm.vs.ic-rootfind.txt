@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p22/comparisons/ic-mitm__ic-rootfind.json
+ops (ok): ic-rootfind / ic-mitm = 1.1379 [1.133, 1.142] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.1330 [1.110, 1.158]
+| curve | log2 r | workloads | ic-rootfind / ic-mitm | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp22-tm2947-e15fed69 | 21.19 | 8 | 1.1379 | [1.1333, 1.1418] | cluster |
+
+| workload | curve | log2 r | ic-mitm mean S | ic-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W15abd5c646fe | icv1-fp22-tm2947-e15fed69 | 21.19 | 44.8715 | 50.6718 | 1.1293 |
+| W251e2c6702e6 | icv1-fp22-tm2947-e15fed69 | 21.19 | 44.5641 | 50.8011 | 1.1400 |
+| W922bdcc0958f | icv1-fp22-tm2947-e15fed69 | 21.19 | 44.6891 | 50.7056 | 1.1346 |
+| Wc8ca24deff43 | icv1-fp22-tm2947-e15fed69 | 21.19 | 44.4574 | 50.4795 | 1.1355 |
+| Wce40999900d8 | icv1-fp22-tm2947-e15fed69 | 21.19 | 44.5617 | 50.7054 | 1.1379 |
+| Wd5ac0a1d62c6 | icv1-fp22-tm2947-e15fed69 | 21.19 | 44.4973 | 50.6937 | 1.1393 |
+| We4aba132c214 | icv1-fp22-tm2947-e15fed69 | 21.19 | 44.7256 | 51.1471 | 1.1436 |
+| Wf0150ebb311b | icv1-fp22-tm2947-e15fed69 | 21.19 | 44.3559 | 50.6931 | 1.1429 |

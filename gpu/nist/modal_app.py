@@ -86,6 +86,33 @@ def sweep_rho(reps:int=1):
   for k,v in best.items(): print(k,v)
   return {"rows":rows}
 @app.function(image=image,gpu=GPU,timeout=4*3600)
+def sweep_rho2():
+  """Round 2: register-resident batch inversion, W up to 32, maxrregcount.
+  Cells: (threads, W, maxreg)."""
+  import re
+  results=[]
+  for maxreg in (0,96,128,160):
+    rc,log=build(1,maxreg)
+    if rc: raise RuntimeError(f"build maxreg={maxreg} failed")
+    regs=re.findall(r"Compiling entry function '(\S*k_rhoI\S*)'.*?Used (\d+) registers.*?(\d+) bytes cumulative stack",log,re.S)
+    print("maxreg",maxreg,"k_rho:",regs)
+    cells=[(128,8),(128,16),(128,32),(256,16),(256,32)] if maxreg==0 else [(256,32),(256,16),(128,32)]
+    for th,W in cells:
+      rc,out=sh(f"./bench {th} rho {W} 8192")
+      if rc: print("FAILED",maxreg,th,W,out[-400:]); continue
+      print(out.strip())
+      for curve,r,thr,blk,ww,gstep,dps in re.findall(
+        r"^(P-(?:256|384)) rho: walks=(\d+) threads/blk=(\d+) blocks=(\d+) W=(\d+)\s+([0-9.]+) Gstep/s\s+\((\d+) DPs",out,re.M):
+        results.append({"maxreg":maxreg,"threads":th,"W":W,"curve":curve,"Gstep_s":float(gstep),"DPs":int(dps),
+                        "expected_DPs":int(r)*8192/2**24})
+  print("\n=== best per curve ===")
+  best={}
+  for r_ in results:
+    k=r_["curve"]
+    if k not in best or r_["Gstep_s"]>best[k]["Gstep_s"]: best[k]=r_
+  for k,v in best.items(): print(k,v)
+  return {"rows":results}
+@app.function(image=image,gpu=GPU,timeout=4*3600)
 def tune(repeats:int=3):
  rows=[]
  rc,info=sh("nvidia-smi --query-gpu=name,compute_cap,clocks.max.sm,memory.total,memory.used,power.limit --format=csv,noheader")

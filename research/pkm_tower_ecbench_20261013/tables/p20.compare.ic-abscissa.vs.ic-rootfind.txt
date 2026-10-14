@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p20/comparisons/ic-abscissa__ic-rootfind.json
+ops (ok): ic-rootfind / ic-abscissa = 1.0060 [0.982, 1.032] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.1539 [1.121, 1.215]
+| curve | log2 r | workloads | ic-rootfind / ic-abscissa | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp20-tm728-d215a2a1 | 18.85 | 8 | 1.0060 | [0.9818, 1.0325] | cluster |
+
+| workload | curve | log2 r | ic-abscissa mean S | ic-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0ef65828562c | icv1-fp20-tm728-d215a2a1 | 18.85 | 39.3453 | 38.8453 | 0.9873 |
+| W34d518f1ba63 | icv1-fp20-tm728-d215a2a1 | 18.85 | 39.0837 | 41.0428 | 1.0501 |
+| W54526e0ea435 | icv1-fp20-tm728-d215a2a1 | 18.85 | 38.2611 | 38.5353 | 1.0072 |
+| W5fa0ccd7cb0f | icv1-fp20-tm728-d215a2a1 | 18.85 | 38.3633 | 39.0033 | 1.0167 |
+| W62af93136693 | icv1-fp20-tm728-d215a2a1 | 18.85 | 38.2718 | 39.4727 | 1.0314 |
+| W91cf98663c8e | icv1-fp20-tm728-d215a2a1 | 18.85 | 39.8268 | 38.4108 | 0.9644 |
+| W957cbe00e31d | icv1-fp20-tm728-d215a2a1 | 18.85 | 39.8835 | 38.9398 | 0.9763 |
+| Wd141cbfa0a83 | icv1-fp20-tm728-d215a2a1 | 18.85 | 39.1127 | 39.7866 | 1.0172 |
