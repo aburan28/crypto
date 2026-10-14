@@ -1,0 +1,16 @@
+saved research/pdp_root_finder_ecbench_20261013/sessions/n23/comparisons/rho-strong__rho-strong-aa.json
+ops (ok): rho-strong-aa / rho-strong = 1.0000 [1.000, 1.000] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 0.9846 [0.968, 1.031]
+| curve | log2 r | workloads | rho-strong-aa / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m23-t5197-69e76b73 | 21.00 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | rho-strong-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W153f13bcf471 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1674 | 1.1674 | 1.0000 |
+| W2baf373849dd | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.0355 | 1.0355 | 1.0000 |
+| W530f63a2316a | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1235 | 1.1235 | 1.0000 |
+| W6306444be024 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1753 | 1.1753 | 1.0000 |
+| W7b5deb6e8b25 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.0127 | 1.0127 | 1.0000 |
+| W937d3e5afad4 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.0945 | 1.0945 | 1.0000 |
+| Wd9f090cd6360 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.2858 | 1.2858 | 1.0000 |
+| Wee97446a4f05 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.2264 | 1.2264 | 1.0000 |

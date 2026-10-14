@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p24/comparisons/rho-neg__ic-rootfind-pairs.json
+ops (ok): ic-rootfind-pairs / rho-neg = 3391.8321 [2691.285, 4338.640] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 2173.8236, not a result: 23 of 24 pairs did not reach L2; 1 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-rootfind-pairs / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp24-t2705-27cbb01b | 23.38 | 8 | 3391.8321 | [2691.2848, 4338.6400] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-rootfind-pairs mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0287641ad93a | icv1-fp24-t2705-27cbb01b | 23.38 | 0.9948 | 3804.2620 | 3824.1752 |
+| W6eec974fe4d1 | icv1-fp24-t2705-27cbb01b | 23.38 | 1.0103 | 3835.0743 | 3795.9217 |
+| W92133e527902 | icv1-fp24-t2705-27cbb01b | 23.38 | 1.5583 | 3821.4442 | 2452.3048 |
+| Wa9bf5407587e | icv1-fp24-t2705-27cbb01b | 23.38 | 1.0308 | 4089.5424 | 3967.4456 |
+| Wc92b25cbd51e | icv1-fp24-t2705-27cbb01b | 23.38 | 0.9524 | 3967.1106 | 4165.5560 |
+| We4c95c8871a0 | icv1-fp24-t2705-27cbb01b | 23.38 | 0.9214 | 4003.1819 | 4344.5883 |
+| We9584cba4c14 | icv1-fp24-t2705-27cbb01b | 23.38 | 1.4504 | 3646.7466 | 2514.3707 |
+| Wf7e403c855fa | icv1-fp24-t2705-27cbb01b | 23.38 | 1.2454 | 3914.3173 | 3143.1322 |

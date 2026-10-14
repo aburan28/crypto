@@ -73,15 +73,59 @@ W=16 at 180; P-384 198–204 registers; stack 688–2576 bytes growing with W.
 changing the algorithm.** From the first working measurement (control
 build, threads=128, W=8) to the tuned cell (PTX, threads=256, W=16):
 P-256 1.075 → 1.340 Gstep/s (**1.25×**) and P-384 0.210 → 0.438 Gstep/s
-(**2.09×**). Step count is unchanged; S = steps/√n is flat. Next rungs:
-W=32 (trend is flattening but unmeasured), maxrregcount sweep, and moving
-`mode/jj` fully into registers for P-384's 204-register instantiation.
+(**2.09×**). Step count is unchanged; S = steps/√n is flat.
 
-End-to-end scale (practicality note, not a claim): at 1.34 Gstep/s a
-P-256 collision needs ~√(π·2^256/4)/1.34e9 s ≈ 2.3e30 s, so these rates are
+## Round 2: register-resident inversion, W=32, maxrregcount
+
+`rho_batch_step_w` now passes the den/scratch arrays of the batched
+inversion by reference (`F::batch_inv_w<Wc>`, unrolled; `test_rho` checks
+it against `batch_inv` on 2000 random inputs per W), and `k_rho<C,Wc>`
+gained a W=32 instantiation. Swept threads × W unrestricted, then
+maxrregcount 96/128/160 (PTX build, 8192 iters per cell):
+
+| threads | W | P-256 Gstep/s | P-384 Gstep/s |
+|---:|---:|---:|---:|
+| 128 | 8 | 1.212 | 0.279 |
+| 128 | 16 | 1.310 | 0.408 |
+| 128 | 32 | 1.603 | 0.538 |
+| 256 | 16 | 1.339 | 0.417 |
+| 256 | 32 | **1.632** | **0.548** |
+| 256, maxreg=96 | 32 | 1.589 | 0.447 |
+| 256, maxreg=96 | 16 | 1.601 | 0.448 |
+| 128, maxreg=128 | 32 | 1.438 | 0.418 |
+| 256, maxreg=128 | 32 | 1.595 | 0.455 |
+| 256, maxreg=160 | 32 | 1.595 | 0.455 |
+
+Every register cap loses to the unrestricted build (96/128/160 trade spill
+for occupancy and come out behind), so the 255-register W=32 instantiation
+is the keeper. DPs match the 2^-24 rate in every cell (best cell: 12,154
+observed / 12,096 expected).
+
+**Attribution is honest but not separated**: round 1 never ran W=32, so the
+round-2 gain cannot be cleanly split between the larger batch and the
+reference-passed inversion. What is separated: at fixed W ≤ 16 the two
+rounds agree within noise (128thr W=16: 1.306/0.434 round 1 vs
+1.310/0.408 round 2), and every maxreg cap regresses. The W=32 cell wins
+on both curves.
+
+Cumulative from the first working measurement (control, threads=128,
+W=8) to the current best (PTX, threads=256, W=32, unrestricted):
+P-256 1.075 → 1.632 Gstep/s (**1.52×**) and P-384 0.210 → 0.548 Gstep/s
+(**2.61×**). Still engineering: the walk computes the same function on the
+same curves, one step per counted step, S flat.
+
+Next rungs: W=64 (the 255-register ceiling now binds: W=32 sits at it for
+both curves, so W=64 will spill and probably regress — worth one cell to
+confirm), in-walk reseeding off the critical path, and a second walk per
+step from the same table read.
+
+End-to-end scale (practicality note, not a claim): at 1.63 Gstep/s a
+P-256 collision needs ~√(π·2^256/4)/1.63e9 s ≈ 1.9e30 s, so these rates are
 attack-layer throughput measurements on retired-practice targets, not a
 statement about NIST curves being weak.
 
 Runs (Modal): first device run ap-cn0g0oMWh2SBtpWS5RrCEf (empty-kernel
-discovery), control build ap-…/validate, PTX build ap-39mdjitYFxkMRHk6pFdd2P,
-sweep ap-o766pq9fqlurbzSYcqZoe6.
+discovery), control build (validate), PTX build ap-39mdjitYFxkMRHk6pFdd2P,
+round-1 sweep ap-o766pq9fqlurbzSYcqZoe6, round-2 sweep
+ap-0KNqNM8D1J4YQn5z67Ucc0 (timed out at Modal's 4 h during the last
+maxreg=160 cells; all cells reported above completed normally).
