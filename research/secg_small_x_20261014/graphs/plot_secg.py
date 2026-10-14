@@ -47,10 +47,17 @@ ax1.set_xticks(list(xs))
 ax1.set_xticklabels(order, rotation=70, ha="right", fontsize=8)
 ax1.set_ylabel("$\\log_2$ trials")
 ax1.set_title("$B+1$ relations from two-point sums, $B=4096$ (bars) against rho (dashes)")
-ax1.bar([], [], color="#1f5fa8", label="binary field")
-ax1.bar([], [], color="#b45f06", label="prime field")
 ax1.grid(alpha=0.25, axis="y")
-ax1.legend(loc="upper left")
+handles, _ = ax1.get_legend_handles_labels()
+handles += [
+    plt.Rectangle((0, 0), 1, 1, color="#1f5fa8", alpha=0.85),
+    plt.Rectangle((0, 0), 1, 1, color="#b45f06", alpha=0.85),
+]
+ax1.legend(
+    handles,
+    ["rho, $\\log_2\\sqrt{n}$", "binary field", "prime field"],
+    loc="upper left",
+)
 
 # Method check on toy binary curves: Monte Carlo rate against the exact count.
 toy = runs("toyb*.json")

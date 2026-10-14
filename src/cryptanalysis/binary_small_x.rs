@@ -290,7 +290,7 @@ impl Gf2m {
     /// A root `w` of `w² + w = c` for odd `m` and `Tr(c) = 0`, by the
     /// half-trace; `None` otherwise.
     pub fn solve_quadratic(&self, c: &Elem) -> Option<Elem> {
-        if self.m % 2 == 0 || self.trace(c) != 0 {
+        if self.m.is_multiple_of(2) || self.trace(c) != 0 {
             return None;
         }
         let mut t = *c;
@@ -784,7 +784,7 @@ pub fn toy_curve(degree: u32, seed: u64) -> Result<BinCurve, String> {
                 points += 2;
             }
         }
-        if points % 2 == 0 && is_prime(points / 2) && points / 2 > 7 {
+        if points.is_multiple_of(2) && is_prime(points / 2) && points / 2 > 7 {
             let n = points / 2;
             return Ok(BinCurve {
                 name: format!("toy y²+xy=x³+x²+b over F_2^{degree}, #E = 2·{n}"),
@@ -802,7 +802,7 @@ fn is_prime(n: u64) -> bool {
     }
     let mut d = 2;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             return false;
         }
         d += 1;
