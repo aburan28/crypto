@@ -1,12 +1,13 @@
 \section{The campaign}
 \label{sec:campaign}
 
-$2^{60.9}$ iterations is about five years of single-GPU time at the
-campaign's collection rate, so the campaign is collection, not a
-solve: a corpus of distinguished points, each
-re-walkable from its seed, grown by whatever hardware is cheapest at
-the time and merged on arrival. This section records its
-configuration, its calibration, its storage protocol and its state.
+At the campaign's collection rate, $2^{60.9}$ iterations is about
+five years on a single GPU. The campaign is therefore not a single
+solve but a collection effort: a corpus of distinguished points, each
+re-walkable from its seed, grown on whatever hardware is cheapest at
+the time and merged as it arrives. This section covers its
+configuration, its calibration, its storage protocol and where it
+stands now.
 
 \subsection{Configuration}
 
@@ -35,7 +36,7 @@ At weight 34 the expected corpus is $2^{35.6}$ records, about $1.7$~TB,
 one per $2^{25.27}$ iterations; at weight 32 one report per $2^{28.41}$
 iterations, $2^{3.14}=8.8\times$ rarer, so about $2^{32.5}$ records and
 $0.19$~TB at the expected work, about 40 points/s, $3.4$~M points/day
-and $0.11$~GB/day from a GPU collecting at $14.11$~B/s. The price of a
+and $0.11$~GB/day from a GPU collecting at $14.11$~billion iterations/s. The price of a
 rarer point is the work left in flight when a collision lands: $43$
 GPU-hours per GPU at weight 32 ($6.16$~M walks times $2^{28.41}$
 steps), $13\%$ of the expected work at 128 GPUs and more than the
@@ -43,8 +44,8 @@ whole expected work at $1{,}024$, against $4.9$ GPU-hours per GPU at
 weight 34. The campaign's fleet size never approached the range where
 that trade reverses.
 
-The interval itself was measured twice, and the first measurement
-was wrong. A fleet-wide ratio of $7.93\cdot10^{15}$ checkpointed
+We measured the interval twice, and the first measurement was
+wrong. A fleet-wide ratio of $7.93\cdot10^{15}$ checkpointed
 iterations to $31.6$~M uploaded points on 2026-09-15 had been quoted
 as $2^{27.9}$ iterations per point. Neither counter was clean: the
 checkpoint sum multiplied every slot's per-walk base by the Blackwell
@@ -57,9 +58,9 @@ across 132 workers (Table~\ref{tab:cutoff}).\art{ecc2k130/benchmarks/dp-interval
 The result, $2^{28.41}=3.56\cdot10^8$, is the same on every hardware
 family to $0.04$ in the exponent, and sits $2^{0.60}$ below the naive
 binomial $P(\HW\le32)=2^{-29.01}$, as Bailey et al.'s $2^{25.27}$ sits
-$2^{0.57}$ below the binomial at weight 34. The correction is
-classified as accounting: the walk did not change, the number did,
-and the earlier figure is retired rather than averaged.
+$2^{0.57}$ below the binomial at weight 34. We classify the
+correction as accounting: the walk did not change, only the number
+did, and we retire the earlier figure rather than averaging it in.
 
 \begin{table}[t]
 \centering
@@ -71,7 +72,7 @@ and the earlier figure is retired rather than averaged.
 \label{tab:cutoff}
 \begin{tabular}{@{}lrrrrr@{}}
 \toprule
-family & workers & iterations & points & it/point & median B/s \\
+family & workers & iterations & points & it/point & median billion it/s \\
 \midrule
 RTX PRO 6000 (\texttt{g7e}) & 38 & $5.606\cdot10^{15}$ & $15{,}724{,}672$ & $2^{28.41}$ & 14.66 \\
 L40S (\texttt{g6e}) & 34 & $2.723\cdot10^{15}$ & $7{,}643{,}600$ & $2^{28.41}$ & 7.47 \\
@@ -86,45 +87,45 @@ all & 132 & $1.169\cdot10^{16}$ & $32{,}794{,}655$ & $\mathbf{2^{28.41}}$ & $\ap
 \subsection{Fleet economics}
 \label{sec:campaign-goal28}
 
-Cost is a property of the work, not of the fleet size: at the
+The total cost depends on the work, not on the size of the fleet: at the
 2026-09-11 spot price of $\$1.31$ per RTX~PRO~6000 hour the expected
 $42{,}400$ GPU-hours are about $\$56$k whether 8 GPUs take 221 days or
 512 take $3.4$; on demand the figure is $\$142$k--$\$175$k.\art{ecc2k130/aws/README.md}
-What the fleet size buys is the collision-in-flight loss above and the
-calendar. The campaign ran mixed families because iterations per
+What fleet size changes is the calendar, and the in-flight loss
+described above. The campaign ran mixed families because iterations per
 dollar, not iterations per card, is the objective: on 2026-09-18 the best-value quote was an L4 in \texttt{eu-north-1}
 at $56\cdot10^{12}$ iterations per dollar against $38\cdot10^{12}$ for the
 RTX~PRO~6000 and $28\cdot10^{12}$ for the RTX~PRO~4500, and at that
 quote a full reference walk costs about
 $\$38$k.\art{ecc2k130/aws/RESEARCH-CREDITS.md} The per-SKU rates
-behind those ratios are measured, not list: L40S $8.84$~B/s with
+behind those ratios are measured, not list: L40S $8.84$~billion iterations/s with
 \texttt{clmad}, L4 $2.49$, T4 $0.53$ without it.\art{ecc2k130/ADA-L4-L40S.md}\art{ecc2k130/T4-G4DN.md}
 
-The RTX~PRO~4500 is the instructive case. Its measured $5.107$~B/s on
+The RTX~PRO~4500 is the most instructive case. Its measured $5.107$~billion iterations/s on
 the shipping walk is exactly what the 6000's rate predicts from SM
 count and clock ($14.64\times82/188\times1.95/2.44=5.10$), and at that rate the 6000 wins per dollar by $1.2$--$1.3\times$; the
-break-even against the 6000's shipping rate is $6.2$--$6.6$~B/s in the
+break-even against the 6000's shipping rate is $6.2$--$6.6$~billion iterations/s in the
 two cheapest regions and $8.8$ in the third, figures the note says
 must be redone with both cards on their best
 builds.\art{ecc2k130/RTX-PRO4500.md} That
-is why a $12$~B/s goal was set for the card and why the $x$-only
+is why a $12$~billion iterations/s goal was set for the card and why the $x$-only
 bridge map of Section~\ref{sec:walk-bridge} was pursued there rather
 than on the 6000: a power-capped die rewards fewer instructions per
-step more than a pipe-bound one does. The separate goal of $28$~B/s on
+step more than a pipe-bound one does. The separate goal of $28$~billion iterations/s on
 one 6000 was priced below the pipe (Section~\ref{sec:floor}) and its
 grid and occupancy screens, run on an RTX~PRO~4500 because no 6000
 could be allocated, found nothing faster than the shipping
 configuration.\art{ecc2k130/GOAL28-RESULTS.md}
 
-A power survey closes the loop: on the 6000 the $20$~B/s build drew
+A power survey closes the loop: on the 6000 the $20$~billion iterations/s build drew
 $583$~W for $34.4$~M updates per joule and a fused-pass variant
 $544$~W for $37.0$~M/J in the same session, $1.072\times$ per joule in
 five paired repetitions against a $1.03$ target; per joule, not per
 second, is the figure that transfers to a $165$~W card, and the model,
-calibrated on the 4500's $5.107$ and $5.552$~B/s receipts (ratio error
-$+2.6\%$), predicts $7.2$--$7.4$~B/s for the fused build
-there.\art{ecc2k130/POWER-BOUND.md} That prediction is owed a
-measurement; the bridge map arrived first.
+calibrated on the 4500's $5.107$ and $5.552$~billion iterations/s receipts (ratio error
+$+2.6\%$), predicts $7.2$--$7.4$~billion iterations/s for the fused build
+there.\art{ecc2k130/POWER-BOUND.md} That prediction still
+needs a measurement; the bridge map got there first.
 
 \subsection{Storage, seeds and certification}
 \label{sec:campaign-storage}
@@ -196,7 +197,7 @@ feed of 2026-10-10, by which time the last point had landed
 (2026-10-07) and no slot was walking; the sustained peak and the
 mean trail length in the caption are from the
 audit.\art{research/ecc2k130_rho_audit_20260925/live_status_20260925T050509Z.json}\art{paper/ecc2k130/data/status_20261010T154157Z.json}\art{research/ecc2k130_rho_audit_20260925/README.md}
-No collision is the expected state: $2^{56.68}$ iterations is $5.4\%$
+Having no collision yet is exactly what we should expect: $2^{56.68}$ iterations is $5.4\%$
 of $2^{60.9}$, and the probability of no collision after a fraction
 $c$ of the expected work is about $\exp(-\pi c^2/4)$, here $0.998$.
 Collection is paused, not finished: every slot's checkpoint and the
@@ -211,7 +212,7 @@ walks from the checkpoint.
   because the corpus still holds weight-34 records from the first two
   slots; the mean length of walks that ended by 2026-09-25 is
   $2^{28.34}$. Sustained production peaked at about $842{,}000$ points
-  per hour on 2026-09-23, about $83$~B it/s.}
+  per hour on 2026-09-23, about $83$~billion iterations/s.}
 \label{tab:state}
 \begin{tabular}{@{}lrr@{}}
 \toprule
@@ -224,7 +225,7 @@ collisions & 0 & 0 \\
 duplicate re-reports dropped & $9{,}953{,}494$ & $14{,}153{,}833$ \\
 slots / walking / off-weight & 195 / 2 / 7 & 227 / 0 / 7 \\
 points in the last 24~h & $741{,}048$ & 0 \\
-walk rate over the last hour & $3.65$~B it/s & 0 \\
+walk rate over the last hour & $3.65$~billion iterations/s & 0 \\
 last point stored & --- & 2026-10-07 14:41 \\
 \bottomrule
 \end{tabular}

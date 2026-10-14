@@ -35,19 +35,98 @@ function copyCurrent(cwd, view, file) {
   }
 }
 
-export function withFrozenWorkflow({ cwd = process.cwd(), workflow, revision, manifest, roots = [], command }) {
-  workflow = relative(workflow);
-  manifest = relative(manifest);
-  roots = roots.map(relative);
+function regularBytes(root, file, label) {
+  const target = path.join(root, file);
+  const info = lstatSync(target);
+  if (!info.isFile() || info.isSymbolicLink()) throw new Error(`${label} is not a regular file: ${file}`);
+  return readFileSync(target);
+}
+
+function ensureCommit(cwd, revision) {
   if (!/^[0-9a-f]{40,64}$/.test(revision ?? '')) throw new Error('expected an immutable Git revision');
-  if (!Array.isArray(command) || !command.length || command.some(arg => typeof arg !== 'string')) {
-    throw new Error('expected a command and argument array');
-  }
   try {
     execFileSync('git', ['cat-file', '-e', `${revision}^{commit}`], { cwd, stdio: ['ignore', 'pipe', 'pipe'] });
   } catch {
     execFileSync('git', ['fetch', '--filter=blob:none', '--no-tags', '--depth=1', 'origin', revision],
       { cwd, stdio: ['ignore', 'pipe', 'pipe'] });
+  }
+}
+
+function applyPinnedInputView({ cwd, view, manifest }) {
+  manifest = relative(manifest);
+  const configBytes = regularBytes(cwd, manifest, 'pinned-input manifest');
+  const config = JSON.parse(configBytes.toString('utf8'));
+  if (config.schema !== 'frozen-input-view/v1' || !Array.isArray(config.inputs) || !config.inputs.length) {
+    throw new Error('invalid pinned-input manifest schema');
+  }
+  const overlays = [];
+  for (const item of config.inputs) {
+    const target = relative(item.target);
+    const revision = item.revision;
+    const sourcePath = relative(item.source_path);
+    const originalManifest = relative(item.original_manifest);
+    const sourceKey = item.original_source_key;
+    const expected = item.sha256;
+    if (typeof sourceKey !== 'string' || !/^[0-9a-f]{64}$/.test(expected ?? '')
+        || !/^[0-9a-f]{64}$/.test(item.original_manifest_sha256 ?? '')) {
+      throw new Error(`invalid pinned-input digests: ${target}`);
+    }
+    const originalBytes = regularBytes(cwd, originalManifest, 'original freeze manifest');
+    if (sha(originalBytes) !== item.original_manifest_sha256) {
+      throw new Error(`original freeze manifest changed: ${originalManifest}`);
+    }
+    const viewOriginalBytes = regularBytes(view, originalManifest, 'view original freeze manifest');
+    if (!viewOriginalBytes.equals(originalBytes)) throw new Error(`view changed original freeze manifest: ${originalManifest}`);
+    const frozen = JSON.parse(originalBytes.toString('utf8'));
+    if (frozen.source_sha256?.[sourceKey] !== expected) {
+      throw new Error(`pinned input does not match original frozen source: ${sourceKey}`);
+    }
+    const live = regularBytes(cwd, target, 'live pinned-input target');
+    const currentSources = {};
+    if (!Array.isArray(item.current_equal) || !item.current_equal.some(pair =>
+      Array.isArray(pair) && pair.length === 2 && pair.includes(target))) {
+      throw new Error(`pinned input lacks a current-source equality check: ${target}`);
+    }
+    for (const pair of item.current_equal) {
+      if (!Array.isArray(pair) || pair.length !== 2) throw new Error(`invalid current-source pair: ${target}`);
+      const [left, right] = pair.map(relative);
+      if (left === right || pair.filter(name => relative(name) === target).length !== 1) {
+        throw new Error(`invalid current-source equality pair: ${target}`);
+      }
+      const leftBytes = regularBytes(cwd, left, 'current source');
+      const rightBytes = regularBytes(cwd, right, 'current source');
+      currentSources[left] = sha(leftBytes);
+      currentSources[right] = sha(rightBytes);
+      if (!leftBytes.equals(rightBytes)) throw new Error(`current source inputs differ: ${left} != ${right}`);
+    }
+    ensureCommit(cwd, revision);
+    const historical = execFileSync('git', ['show', `${revision}:${sourcePath}`],
+      { cwd, maxBuffer: 16 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] });
+    if (sha(historical) !== expected) throw new Error(`pinned Git source hash mismatch: ${sourcePath}`);
+    const viewTarget = path.join(view, target);
+    if (!existsSync(viewTarget) || !regularBytes(view, target, 'view pinned-input target').equals(live)) {
+      throw new Error(`current source view missing or changed before overlay: ${target}`);
+    }
+    writeFileSync(viewTarget, historical);
+    if (!regularBytes(view, target, 'overlaid pinned-input target').equals(historical)) {
+      throw new Error(`historical input overlay failed: ${target}`);
+    }
+    overlays.push({ target, revision, source_path: sourcePath, sha256: expected,
+      original_manifest: originalManifest, original_manifest_sha256: item.original_manifest_sha256,
+      original_source_key: sourceKey, live_target_sha256: sha(live), current_sources: currentSources,
+      view_sha256: sha(historical) });
+  }
+  return overlays;
+}
+
+export function withFrozenWorkflow({ cwd = process.cwd(), workflow, revision, manifest, inputViewManifest,
+  roots = [], command }) {
+  workflow = relative(workflow);
+  manifest = relative(manifest);
+  roots = roots.map(relative);
+  ensureCommit(cwd, revision);
+  if (!Array.isArray(command) || !command.length || command.some(arg => typeof arg !== 'string')) {
+    throw new Error('expected a command and argument array');
   }
   const fromGit = file => execFileSync('git', ['show', `${revision}:${file}`],
     { cwd, maxBuffer: 16 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] });
@@ -75,6 +154,8 @@ export function withFrozenWorkflow({ cwd = process.cwd(), workflow, revision, ma
     for (const { file, digest } of ownInputs) {
       if (sha(readFileSync(path.join(view, file))) !== digest) throw new Error(`frozen input drift: ${file}`);
     }
+    const pinnedInputViews = inputViewManifest
+      ? applyPinnedInputView({ cwd, view, manifest: inputViewManifest }) : [];
     // Original preflights retain their Git ancestry assertions, against the
     // current checkout's unchanged object database; no historical code checkout.
     const gitPath = path.join(cwd, '.git');
@@ -82,7 +163,8 @@ export function withFrozenWorkflow({ cwd = process.cwd(), workflow, revision, ma
     symlinkSync(gitPath, path.join(view, '.git'));
     console.log('FROZEN_WORKFLOW_METADATA_VIEW ' + JSON.stringify({ workflow, revision,
       live_workflow_sha256: liveWorkflowSha, view_workflow_sha256: sha(workflowBytes),
-      scope: 'only workflow scheduling metadata substituted; current source/evidence copied unchanged; original replay workflow digest refers to this view' }));
+      pinned_input_views: pinnedInputViews,
+      scope: 'workflow metadata and explicitly pinned historical inputs are substituted in an isolated view; current checkout and evidence remain unchanged' }));
     // The enclosing workflow's existing job budget governs the validator.
     const result = spawnSync(command[0], command.slice(1), { cwd: view, stdio: 'inherit',
       env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' } });
@@ -100,11 +182,12 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   try {
     while (args.length && args[0] !== '--') {
       const flag = args.shift();
-      if (!['--workflow', '--revision', '--manifest', '--root'].includes(flag) || !args.length) {
+      if (!['--workflow', '--revision', '--manifest', '--input-view-manifest', '--root'].includes(flag) || !args.length) {
         throw new Error(`unknown or incomplete argument: ${flag}`);
       }
       const value = args.shift();
       if (flag === '--root') options.roots.push(value);
+      else if (flag === '--input-view-manifest') options.inputViewManifest = value;
       else options[flag.slice(2)] = value;
     }
     if (args.shift() !== '--') throw new Error('expected -- before the validator command');

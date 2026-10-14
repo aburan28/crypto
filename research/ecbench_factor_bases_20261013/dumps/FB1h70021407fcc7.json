@@ -1,0 +1,100 @@
+{
+  "schema": "ecbench.factor_base_dump/v1",
+  "curve": {
+    "slug": "icv1-f2m17-tm101-00378d4e",
+    "icv1": "ICV1:f2m-17-237ceae1:-101:131174:0x1:-7:unk:r:00378d4e488b",
+    "family": "koblitz",
+    "construction": "KoblitzCurve::new(1, 17)",
+    "field_degree": 17,
+    "field_bits": null,
+    "group_order": 131174,
+    "r": 65587,
+    "cofactor": 2,
+    "generator": [
+      "0xaaad",
+      "0x5b2b"
+    ],
+    "automorphisms_available": 34,
+    "registered": true,
+    "ec1": "EC1N17Ce1hdfbf24105ef5",
+    "curve_uid": "urn:ec-record:1:sha256:dfbf24105ef5c3f3743c8d5c0917e98d601a89714ebcf54c1d886b722329161d"
+  },
+  "factor_base": {
+    "fb_id": "FB1h70021407fcc7",
+    "fb_sha256": "70021407fcc7901d5d4c9869626149a9617b52eebb61da6291b21f931660d7ca",
+    "family": "binary-subspace",
+    "params": {
+      "dimension": "4"
+    },
+    "description": "subspace of dimension 4",
+    "signed_points": 10,
+    "abscissae": 5,
+    "columns": 5,
+    "dimension": 4,
+    "points_sha256": "c5c86c3f9086a6368e8ac5ba3a156993359c4cefbf0ca2ea732b7a155aba3a52"
+  },
+  "build_adds": 0,
+  "build_doubles": 0,
+  "points": [
+    {
+      "x": "0x3",
+      "y": "0x17588",
+      "col": 0,
+      "coef": 1
+    },
+    {
+      "x": "0x3",
+      "y": "0x1758b",
+      "col": 0,
+      "coef": 65586
+    },
+    {
+      "x": "0x5",
+      "y": "0x19e9a",
+      "col": 1,
+      "coef": 1
+    },
+    {
+      "x": "0x5",
+      "y": "0x19e9f",
+      "col": 1,
+      "coef": 65586
+    },
+    {
+      "x": "0x8",
+      "y": "0xa609",
+      "col": 2,
+      "coef": 1
+    },
+    {
+      "x": "0x8",
+      "y": "0xa601",
+      "col": 2,
+      "coef": 65586
+    },
+    {
+      "x": "0xb",
+      "y": "0x132ed",
+      "col": 3,
+      "coef": 1
+    },
+    {
+      "x": "0xb",
+      "y": "0x132e6",
+      "col": 3,
+      "coef": 65586
+    },
+    {
+      "x": "0xd",
+      "y": "0x9947",
+      "col": 4,
+      "coef": 1
+    },
+    {
+      "x": "0xd",
+      "y": "0x994a",
+      "col": 4,
+      "coef": 65586
+    }
+  ]
+}

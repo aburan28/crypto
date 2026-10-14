@@ -33,8 +33,10 @@
 //! **classical reference** here.
 
 use super::f2m::{F2mElement, IrreduciblePoly};
-use num_bigint::BigUint;
+use num_bigint::{BigInt, BigUint};
 use num_traits::{One, Zero};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex, OnceLock};
 
 /// A binary elliptic curve over `F_{2^m}`.
 #[derive(Clone, Debug)]
@@ -584,14 +586,18 @@ impl BinaryCurve {
     /// with the closed-form [`Self::is_in_4e`] test instead of `[n]P = O`.
     ///
     /// True exactly when the curve is `y² + xy = x³ + 1` over `F_{2^m}`
-    /// with `m` odd and the declared cofactor is 4.  For odd `m` the
+    /// with `m` odd, the declared cofactor is 4, and the declared subgroup
+    /// order equals the actual curve order divided by 4.  For odd `m` the
     /// 2-Sylow subgroup of `E(F_{2^m})` is exactly `Z/4` (`(1, 0)` has
     /// order 4 and `Tr(1) = 1`, so it has no half), so with
-    /// `#E = 4·n`, `n` odd, `4E` is the order-`n` subgroup.  This relies
-    /// on the declared `order` and `cofactor` being correct, as the
-    /// `[n]P = O` check does.
+    /// `#E = 4·n`, `n` odd, `4E` is the order-`n` subgroup.  The actual
+    /// order is computed from the Koblitz Frobenius trace recurrence and
+    /// cached per field degree.  Inconsistent declarations keep the
+    /// `[n]P = O` path.
     pub fn has_fast_4e_subgroup_check(&self) -> bool {
-        self.is_odd_degree_koblitz_a0() && self.cofactor == BigUint::from(4u32)
+        self.is_odd_degree_koblitz_a0()
+            && self.cofactor == BigUint::from(4u32)
+            && self.order == *koblitz_a0_4e_order(self.m)
     }
 
     /// **Closed-form `4E` membership** on `y² + xy = x³ + 1` over
@@ -663,6 +669,34 @@ impl BinaryCurve {
             }
         })
     }
+}
+
+/// The order of `4E` on `y² + xy = x³ + 1` over an odd-degree binary field.
+///
+/// Over `F_2`, `#E = 4`, so the Frobenius traces satisfy `t_0 = 2`,
+/// `t_1 = -1`, and `t_m = -t_{m-1} - 2t_{m-2}`.  Thus
+/// `#E(F_{2^m}) = 2^m + 1 - t_m`.  For odd `m` its 2-part is exactly 4.
+/// The cache depends only on the field degree, not its polynomial basis.
+fn koblitz_a0_4e_order(m: u32) -> Arc<BigUint> {
+    type Cache = Mutex<HashMap<u32, Arc<BigUint>>>;
+    static CACHE: OnceLock<Cache> = OnceLock::new();
+    let mut orders = CACHE
+        .get_or_init(|| Mutex::new(HashMap::new()))
+        .lock()
+        .unwrap_or_else(|e| e.into_inner());
+    orders
+        .entry(m)
+        .or_insert_with(|| {
+            let (mut previous, mut trace) = (BigInt::from(2u32), -BigInt::one());
+            for _ in 1..m {
+                let next = -&trace - (&previous << 1u32);
+                previous = trace;
+                trace = next;
+            }
+            let count = (BigInt::one() << m) + BigInt::one() - trace;
+            Arc::new(count.to_biguint().expect("positive Koblitz curve order") >> 2u32)
+        })
+        .clone()
 }
 
 /// Negation: `−(x, y) = (x, y + x)`.
@@ -1363,6 +1397,28 @@ mod tests {
         );
         assert_eq!(curve.is_in_4e(&wide), Some(false));
         assert!(!curve.is_valid_public_point(&wide));
+    }
+
+    /// A malformed declared order must not enable the fast path even when
+    /// the shape and cofactor match.  The point remains in 4E, but it is not
+    /// killed by the declared scalar, so public validation must reject it.
+    #[test]
+    fn inconsistent_declared_order_keeps_the_scalar_subgroup_check() {
+        let curve = BinaryCurve::sect233k1();
+        let generator = curve.generator.clone();
+        assert!(curve.has_fast_4e_subgroup_check());
+        assert_eq!(curve.is_in_4e(&generator), Some(true));
+        for order in [BigUint::one(), &curve.order + 2u32] {
+            let misdeclared = BinaryCurve {
+                order,
+                ..curve.clone()
+            };
+            assert_eq!(misdeclared.cofactor, BigUint::from(4u32));
+            assert!(!misdeclared.has_fast_4e_subgroup_check());
+            assert_eq!(misdeclared.is_in_4e(&generator), Some(true));
+            assert!(!subgroup_by_scalar(&misdeclared, &generator));
+            assert!(!misdeclared.is_valid_public_point(&generator));
+        }
     }
 
     /// Curves outside the preconditions keep the `[n]P = O` path.

@@ -400,6 +400,12 @@ fn run_binary_analogue(
         let mut mitm = MitmOracle::new(m);
         let mut frob =
             crate::cryptanalysis::ic_framework::plugins::FrobeniusMitmOracle::new(m, inst);
+        // The higher-arity extraction kernels; `kernel=4sum|a|b|c` is read
+        // from the oracle parameters in `prepare`.
+        let mut sixsum = crate::cryptanalysis::koblitz_sixsum_extract::SixSumOracle::new(
+            crate::cryptanalysis::koblitz_sixsum_extract::Kernel::FourSum,
+            inst,
+        );
         let mut algebraic = match spec.oracle.as_str() {
             "descent-algebraic" => {
                 let raw = spec.solver.as_deref().ok_or(
@@ -422,6 +428,7 @@ fn run_binary_analogue(
             "subtract" => &mut subtract,
             "mitm" => &mut mitm,
             "mitm-frobenius" => &mut frob,
+            "sixsum-extract" => &mut sixsum,
             "descent-algebraic" => algebraic.as_mut().expect("built above"),
             other => return Err(format!("oracle `{other}` is not available here")),
         };

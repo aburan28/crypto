@@ -1,0 +1,76 @@
+packed kernel: 126 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed theoretical occupancy: 33.3% (1 blocks/SM, 512 threads/block, 188 SMs); grid 752 blocks
+packed launch bounds: 512 threads, 1 min blocks
+packed sigma table: 1 (68352 dynamic shared bytes)
+packed driver reserved shared bytes/block: 1024, device 0
+packed denominator cache: 1
+packed last-slot cache mode: 0
+packed multiply by value: 1
+packed Frobenius network: 3
+packed partial Frobenius routing mask: 0
+packed Frobenius stage order: 0
+packed byte-select Frobenius: 0
+packed seven-stage conversion: 0
+packed polynomial chain: 1
+packed polynomial state: 1
+packed unrolled inversion: 1
+packed paired products: 1
+packed pair ilp: 0
+packed pair clmul: 0
+packed clmul flat: 0
+packed top hoist: 0
+packed onb inv: 0
+packed from reduced: 0
+packed inline polynomial: 3
+packed slot unroll: 1
+packed chains: 1
+packed slot prefetch: 0
+packed slot pipeline: 0
+packed sigma fused: 0
+packed sigma fused late y: 0
+packed sigma fused shared slots: 0
+packed witness: 1
+packed L2 persist: 0
+packed direct reduction: 1
+packed add combine: 0
+packed generated product: 1
+packed native carryless multiply: 1
+packed native full product: 0
+packed native reduction: 0
+packed fused sigma: 0
+packed inline mask: 0
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed x-only 2/3 walk: 0
+packed sparse sigma^3 bridge: 0
+packed sigma^1 common path: 0
+packed sparse bridge modulus 72: 0
+packed skip empty bridge phase: 0
+packed arithmetic-only diagnostic: 0
+packed polynomial-bit selector: 0
+packed polynomial-bit Hamming DP convert: 1
+packed state tile: 256
+packed block inverse: 0
+packed physical slots/thread: 16; logical workers/block: 512
+packed native carryless square: 0
+packed three-limb Karatsuba: 0
+packed top clmad: 0
+packed add combine: 0
+packed alu square: 0
+packed alu onb square: 0
+packed square table: 0
+packed sigma square table: 0, 0 shared bytes
+packed polynomial inversion: 0
+packed profile ranges: 0
+packed table GPU-wide hints: 0
+packed hint scheduling: table fused 0, pipe select 0, chain first 0, inline polynomial 3, phase profile 0, cycle profile 0
+packed table walk: 0 (0 branches, 0 shared bytes)
+backend cuda-packed131: 385024 threads x 16 slots x 1 lanes = 6160384 walks, dp weight 0, 1024 steps per launch
+       2.0 s    9249.314 M it/s  18924699648 iterations         0 dp         0 stored         0 dropped
+       4.1 s    9250.338 M it/s  37849399296 iterations         0 dp         0 stored         0 dropped
+       6.1 s    9253.284 M it/s  56774098944 iterations         0 dp         0 stored         0 dropped
+       8.2 s    9253.704 M it/s  75698798592 iterations         0 dp         0 stored         0 dropped
+      10.2 s    9252.505 M it/s  94623498240 iterations         0 dp         0 stored         0 dropped
+      10.9 s    9252.178 M it/s  100931731456 iterations         0 dp         0 stored         0 dropped
+  finished: 9252.145 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)

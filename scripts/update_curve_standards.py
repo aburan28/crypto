@@ -60,7 +60,9 @@ def merge(catalog, imported):
             models.setdefault(alias.lower(), set()).add(row['slug'])
     for row in catalog['curves']:
         row['aliases'] = sorted([a for a in row['aliases'] if len(models[a.lower()]) == 1], key=str.lower)
-    catalog['standards_source'] = 'docs/curves/standards/registry.json'
+    # Each imported row already records the standards registry in `sources`.
+    # Keep root metadata byte-stable when the join itself is a no-op: cover,
+    # trait and transfer certificates bind the complete registry digest.
     return catalog
 
 

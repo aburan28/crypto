@@ -1,0 +1,330 @@
+{
+  "failures": [
+    {
+      "d": 19,
+      "ell": 1016839,
+      "k": 20,
+      "reason": "neither twist of the j(O_K) model has order N (crater trace mismatch)",
+      "t": -353
+    },
+    {
+      "d": 19,
+      "ell": 2033609,
+      "k": 21,
+      "reason": "neither twist of the j(O_K) model has order N (crater trace mismatch)",
+      "t": -15
+    },
+    {
+      "d": 19,
+      "ell": 2033609,
+      "k": 21,
+      "reason": "no random order-N curve with j != j(O_K) within the 900 s scan (16833795 trials)",
+      "t": 17
+    },
+    {
+      "d": 43,
+      "ell": 508433,
+      "k": 19,
+      "reason": "neither twist of the j(O_K) model has order N (crater trace mismatch)",
+      "t": -3
+    },
+    {
+      "d": 43,
+      "ell": 508433,
+      "k": 19,
+      "reason": "neither twist of the j(O_K) model has order N (crater trace mismatch)",
+      "t": 5
+    },
+    {
+      "d": 43,
+      "ell": 508433,
+      "k": 19,
+      "reason": "neither twist of the j(O_K) model has order N (crater trace mismatch)",
+      "t": -37
+    },
+    {
+      "d": 43,
+      "ell": 2033609,
+      "k": 21,
+      "reason": "no random order-N curve with j != j(O_K) within the 900 s scan (14351440 trials)",
+      "t": -365
+    },
+    {
+      "d": 43,
+      "ell": 2033609,
+      "k": 21,
+      "reason": "no random order-N curve with j != j(O_K) within the 900 s scan (14547187 trials)",
+      "t": 367
+    }
+  ],
+  "frozen_before": "research/drastic_prime_conductor_gap_20261012/PROTOCOL.md",
+  "pairs": [
+    {
+      "bits": 41,
+      "certificate": {
+        "crater_end": "End = O_K: j = j(O_K) and h(D)=1 (class number one)",
+        "floor_end": "f_E = 508433: j != j(O_K), f_E | f_pi = ell, f_E != 1",
+        "frobenius_discriminant": "t^2-4q = -19*508433^2",
+        "orders_verified": "64 random points per model: [N]P = O for the accepted twist and the floor (N prime)",
+        "sage_used": false
+      },
+      "crater": {
+        "a": 1113003830593,
+        "b": 1151300736593,
+        "group_order": 1227894548603,
+        "gx": 0,
+        "gy": 593681883763,
+        "kind": "prime_explicit",
+        "p": 1227894548593,
+        "r": 1227894548603
+      },
+      "crater_twist": 0,
+      "d": 19,
+      "ell": 508433,
+      "ells_tried": 1,
+      "floor": {
+        "a": 548938419925,
+        "b": 376752027987,
+        "group_order": 1227894548603,
+        "gx": 2,
+        "gy": 341969488223,
+        "kind": "prime_explicit",
+        "p": 1227894548593,
+        "r": 1227894548603
+      },
+      "floor_scan_seconds": 121.609011417,
+      "floor_trials": 1696752,
+      "group_order": 1227894548603,
+      "j_crater": 1227893663857,
+      "j_floor": 36753177624,
+      "k": 19,
+      "p": 1227894548593,
+      "search_seconds": 121.610463958,
+      "t": -9,
+      "t_candidates_tried": 8
+    },
+    {
+      "bits": 43,
+      "certificate": {
+        "crater_end": "End = O_K: j = j(O_K) and h(D)=1 (class number one)",
+        "floor_end": "f_E = 1016839: j != j(O_K), f_E | f_pi = ell, f_E != 1",
+        "frobenius_discriminant": "t^2-4q = -19*1016839^2",
+        "orders_verified": "64 random points per model: [N]P = O for the accepted twist and the floor (N prime)",
+        "sage_used": false
+      },
+      "crater": {
+        "a": 1148846176168,
+        "b": 4040109052866,
+        "group_order": 4911317402777,
+        "gx": 0,
+        "gy": 2301188759550,
+        "kind": "prime_explicit",
+        "p": 4911317403131,
+        "r": 4911317402777
+      },
+      "crater_twist": 0,
+      "d": 19,
+      "ell": 1016839,
+      "ells_tried": 1,
+      "floor": {
+        "a": 152184063678,
+        "b": 1314292746236,
+        "group_order": 4911317402777,
+        "gx": 0,
+        "gy": 1510626276264,
+        "kind": "prime_explicit",
+        "p": 4911317403131,
+        "r": 4911317402777
+      },
+      "floor_scan_seconds": 97.49048725,
+      "floor_trials": 2184174,
+      "group_order": 4911317402777,
+      "j_crater": 4911316518395,
+      "j_floor": 1081910743656,
+      "k": 20,
+      "p": 4911317403131,
+      "search_seconds": 97.492410542,
+      "t": 355,
+      "t_candidates_tried": 353
+    },
+    {
+      "bits": 45,
+      "certificate": {
+        "crater_end": "End = O_K: j = j(O_K) and h(D)=1 (class number one)",
+        "floor_end": "f_E = 2033609: j != j(O_K), f_E | f_pi = ell, f_E != 1",
+        "frobenius_discriminant": "t^2-4q = -19*2033609^2",
+        "orders_verified": "64 random points per model: [N]P = O for the accepted twist and the floor (N prime)",
+        "sage_used": false
+      },
+      "crater": {
+        "a": 5973594717172,
+        "b": 17078354127306,
+        "group_order": 19643936474191,
+        "gx": 0,
+        "gy": 4788392258563,
+        "kind": "prime_explicit",
+        "p": 19643936473787,
+        "r": 19643936474191
+      },
+      "crater_twist": 0,
+      "d": 19,
+      "ell": 2033609,
+      "ells_tried": 1,
+      "floor": {
+        "a": 6295276987202,
+        "b": 8317447383351,
+        "group_order": 19643936474191,
+        "gx": 0,
+        "gy": 8621111635047,
+        "kind": "prime_explicit",
+        "p": 19643936473787,
+        "r": 19643936474191
+      },
+      "floor_scan_seconds": 169.463540167,
+      "floor_trials": 3600137,
+      "group_order": 19643936474191,
+      "j_crater": 19643935589051,
+      "j_floor": 2578896676995,
+      "k": 21,
+      "p": 19643936473787,
+      "search_seconds": 1069.466587875,
+      "t": -403,
+      "t_candidates_tried": 402
+    },
+    {
+      "bits": 42,
+      "certificate": {
+        "crater_end": "End = O_K: j = j(O_K) and h(D)=1 (class number one)",
+        "floor_end": "f_E = 508433: j != j(O_K), f_E | f_pi = ell, f_E != 1",
+        "frobenius_discriminant": "t^2-4q = -43*508433^2",
+        "orders_verified": "64 random points per model: [N]P = O for the accepted twist and the floor (N prime)",
+        "sage_used": false
+      },
+      "crater": {
+        "a": 412212785876,
+        "b": 651497890045,
+        "group_order": 2778919241849,
+        "gx": 1,
+        "gy": 2714532877902,
+        "kind": "prime_explicit",
+        "p": 2778919241887,
+        "r": 2778919241849
+      },
+      "crater_twist": 1,
+      "d": 43,
+      "ell": 508433,
+      "ells_tried": 1,
+      "floor": {
+        "a": 1025051174594,
+        "b": 2064555458561,
+        "group_order": 2778919241849,
+        "gx": 3,
+        "gy": 552291169923,
+        "kind": "prime_explicit",
+        "p": 2778919241887,
+        "r": 2778919241849
+      },
+      "floor_scan_seconds": 115.122127333,
+      "floor_trials": 2495941,
+      "group_order": 2778919241849,
+      "j_crater": 2778034505887,
+      "j_floor": 745425051090,
+      "k": 19,
+      "p": 2778919241887,
+      "search_seconds": 115.123609459,
+      "t": 39,
+      "t_candidates_tried": 37
+    },
+    {
+      "bits": 44,
+      "certificate": {
+        "crater_end": "End = O_K: j = j(O_K) and h(D)=1 (class number one)",
+        "floor_end": "f_E = 1016839: j != j(O_K), f_E | f_pi = ell, f_E != 1",
+        "frobenius_discriminant": "t^2-4q = -43*1016839^2",
+        "orders_verified": "64 random points per model: [N]P = O for the accepted twist and the floor (N prime)",
+        "sage_used": false
+      },
+      "crater": {
+        "a": 4729156221582,
+        "b": 3152770814388,
+        "group_order": 11115086689631,
+        "gx": 1,
+        "gy": 6844591373632,
+        "kind": "prime_explicit",
+        "p": 11115086689471,
+        "r": 11115086689631
+      },
+      "crater_twist": 0,
+      "d": 43,
+      "ell": 1016839,
+      "ells_tried": 1,
+      "floor": {
+        "a": 6423849957476,
+        "b": 3759381915468,
+        "group_order": 11115086689631,
+        "gx": 0,
+        "gy": 4764558193602,
+        "kind": "prime_explicit",
+        "p": 11115086689471,
+        "r": 11115086689631
+      },
+      "floor_scan_seconds": 265.202213084,
+      "floor_trials": 4921723,
+      "group_order": 11115086689631,
+      "j_crater": 11114201953471,
+      "j_floor": 8834785015828,
+      "k": 20,
+      "p": 11115086689471,
+      "search_seconds": 265.204316208,
+      "t": -159,
+      "t_candidates_tried": 158
+    },
+    {
+      "bits": 46,
+      "certificate": {
+        "crater_end": "End = O_K: j = j(O_K) and h(D)=1 (class number one)",
+        "floor_end": "f_E = 2033609: j != j(O_K), f_E | f_pi = ell, f_E != 1",
+        "frobenius_discriminant": "t^2-4q = -43*2033609^2",
+        "orders_verified": "64 random points per model: [N]P = O for the accepted twist and the floor (N prime)",
+        "sage_used": false
+      },
+      "crater": {
+        "a": 9628813676156,
+        "b": 21238319095335,
+        "group_order": 44457329934361,
+        "gx": 1,
+        "gy": 39701117931673,
+        "kind": "prime_explicit",
+        "p": 44457329933693,
+        "r": 44457329934361
+      },
+      "crater_twist": 0,
+      "d": 43,
+      "ell": 2033609,
+      "ells_tried": 1,
+      "floor": {
+        "a": 25643121330242,
+        "b": 10496271268403,
+        "group_order": 44457329934361,
+        "gx": 1,
+        "gy": 20078116696333,
+        "kind": "prime_explicit",
+        "p": 44457329933693,
+        "r": 44457329934361
+      },
+      "floor_scan_seconds": 316.115248792,
+      "floor_trials": 6166734,
+      "group_order": 44457329934361,
+      "j_crater": 44456445197693,
+      "j_floor": 34739863040311,
+      "k": 21,
+      "p": 44457329933693,
+      "search_seconds": 2116.122769375,
+      "t": -667,
+      "t_candidates_tried": 666
+    }
+  ],
+  "schema": "drastic-prime-conductor-gap-pairs/v1",
+  "seed_note": "deterministic xorshift seeded 0x6472617374696321; floors use it in scan order",
+  "total_seconds": 3785.020173083
+}

@@ -159,8 +159,8 @@ spikes and are recorded in `raw/biext_k2.jsonl` without a claim.
 
 ### (d) Distinguished-point statistics (`koblitz_strong_rho`, signed Frobenius)
 
-Strong reference parameters (32 lanes, fruitless walks abandoned), `K₀/F_{2^53}`
-(`r` = 21044858204113, 64 solves per row) and `K₀/F_{2^61}` (`r` = 162888033982417,
+Strong reference parameters (32 lanes, fruitless walks abandoned), `icv1-f2m53-tm56619371-dac20a85`
+(`r` = 21044858204113, 64 solves per row) and `icv1-f2m61-t158598901-ab42b6c5` (`r` = 162888033982417,
 32 solves per row); all logarithms verified.
 
 | curve | dp | steps | DPs | hits/step ÷ θ | mean trail / geometric | mean trail / competing-risk | abandon hazard /step | KS geo | KS c-r | KS 95% | steps / ideal |

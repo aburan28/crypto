@@ -1,0 +1,112 @@
+warning: unused import: `ToPrimitive`
+  --> src/cryptanalysis/curve_traits/mod.rs:50:31
+   |
+50 | use num_traits::{One, Signed, ToPrimitive, Zero};
+   |                               ^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `super::koblitz_fast_arith::FastBinaryCurve`
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:77:5
+   |
+77 | use super::koblitz_fast_arith::FastBinaryCurve;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unnecessary trailing semicolons
+    --> src/cryptanalysis/prime_fast.rs:1629:15
+     |
+1629 |             );;;;
+     |               ^^^ help: remove these semicolons
+     |
+     = note: `#[warn(redundant_semicolons)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `crate::cryptanalysis::binary_semaev::binary_semaev_s3`
+   --> src/cryptanalysis/semaev_sat.rs:105:5
+    |
+105 | use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:727:13
+    |
+727 |         let current = LegacyFloatFixture {
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:733:13
+    |
+733 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:734:13
+    |
+734 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:735:13
+    |
+735 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: unused variable: `sums`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:3226:9
+     |
+3226 |     let sums = fast.batch_add(&pairs);
+     |         ^^^^ help: if this is intentional, prefix it with an underscore: `_sums`
+
+warning: unused variable: `projected`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:8891:10
+     |
+8891 |     let (projected, _) = project_by_frobenius_orbits_generic(kc, fb);
+     |          ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_projected`
+
+warning: static `ALL_FACTORS_MEMO` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:527:8
+    |
+527 | static ALL_FACTORS_MEMO: std::sync::OnceLock<std::sync::Mutex<HashMap<u32, Vec<u64>>>> =
+    |        ^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `memo_get` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:530:4
+    |
+530 | fn memo_get(
+    |    ^^^^^^^^
+
+warning: function `memo_put` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:541:4
+    |
+541 | fn memo_put(
+    |    ^^^^^^^^
+
+warning: `crypto` (lib test) generated 13 warnings (run `cargo fix --lib -p crypto --tests` to apply 9 suggestions)
+    Finished `release` profile [optimized] target(s) in 0.06s
+     Running unittests src/lib.rs (target/release/deps/crypto_lib-dc60caf0642b04d8)
+
+running 18 tests
+test cryptanalysis::matrix_f5_f2::tests::criterion_cursor_reduces_across_prefix_and_temporary_pivot_words ... ok
+test cryptanalysis::matrix_f5_f2::tests::certified_original_rows_preserve_independent_rows_and_exact_fallback ... ok
+test cryptanalysis::matrix_f5_f2::tests::avx512_unpack_matches_scalar_for_sparse_dense_and_partial_words ... ok
+test cryptanalysis::matrix_f5_f2::tests::direct_criterion_pack_preserves_cancelled_missing_columns ... ok
+test cryptanalysis::matrix_f5_f2::tests::criterion_prunes_nothing_for_quadratics_at_degree_three ... ok
+test cryptanalysis::matrix_f5_f2::tests::direct_packed_f5_build_matches_sorted_builder_and_falls_back_on_sparse_columns ... ok
+test cryptanalysis::matrix_f5_f2::tests::direct_scalar_unpack_matches_push_path ... ok
+test cryptanalysis::matrix_f5_f2::tests::direct_criterion_products_match_boolean_multiplication ... ok
+test cryptanalysis::matrix_f5_f2::tests::criterion_pruning_and_row_spaces_survive_high_bit_embedding ... ok
+test cryptanalysis::matrix_f5_f2::tests::frobenius_criterion_prunes_the_leading_monomial_multiple ... ok
+test cryptanalysis::matrix_f5_f2::tests::fused_row_build_matches_two_pass_rows_and_full_count ... ok
+test cryptanalysis::matrix_f5_f2::tests::koszul_criterion_prunes_leading_monomials_of_earlier_generators ... ok
+test cryptanalysis::matrix_f5_f2::tests::naive_f2_criterion_is_unsound_in_the_boolean_ring ... ok
+test cryptanalysis::matrix_f5_f2::tests::sampled_column_certificate_is_exact_and_falls_back ... ok
+test cryptanalysis::matrix_f5_f2::tests::support_split_certificate_handles_projection_across_words ... ok
+test cryptanalysis::matrix_f5_f2::tests::support_split_certificate_is_exact_and_falls_back ... ok
+test cryptanalysis::matrix_f5_f2::tests::echelon_option_preserves_the_f5_row_space ... ok
+test cryptanalysis::matrix_f5_f2::tests::f5_rows_span_the_f4_row_space_on_random_systems ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 4089 filtered out; finished in 0.06s
+

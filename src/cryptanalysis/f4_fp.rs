@@ -22,7 +22,8 @@
 //! echelon form of only what is left, on the columns no reducer leads —
 //! the same rows the whole matrix's echelon form would give, from a much
 //! smaller dense block.  Rows run in parallel once a step is large enough
-//! to repay the dispatch.  The product criterion prunes pairs;
+//! to repay the dispatch. Gebauer–Möller criteria B, M and F supplement
+//! the product criterion when pruning pairs;
 //! polynomials whose leading monomial becomes divisible by a new one are
 //! dropped.
 //!
@@ -38,8 +39,9 @@
 //! ## Honest scope
 //!
 //! Small primes (`p < 2³²`), a few unknowns, degrees in the tens: the
-//! residual matrices are dense.  No Gebauer–Möller chain criterion, no F5
-//! signatures, no sugar; this is the plain algorithm, written so that
+//! residual matrices are dense. Gebauer–Möller pruning is enabled by
+//! default (`F4_FP_GM=0` retains the product criterion alone). There are
+//! no F5 signatures or sugar selection; this module was written so that
 //! the descent systems of the coordinate thread can be timed at `m = 3`.
 
 use std::collections::{BTreeMap, HashSet};
@@ -908,7 +910,7 @@ impl Packed {
             .enumerate()
             .map(|(id, &m)| (self.grevlex_key(m), id as u32))
             .collect();
-        order.sort_unstable_by(|a, b| b.0.cmp(&a.0));
+        order.sort_unstable_by_key(|a| std::cmp::Reverse(a.0));
         let mut col_of_id = vec![0u32; order.len()];
         for (col, &(_, id)) in order.iter().enumerate() {
             col_of_id[id as usize] = col as u32;

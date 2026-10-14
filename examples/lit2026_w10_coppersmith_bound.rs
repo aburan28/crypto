@@ -224,7 +224,9 @@ fn inv_vandermonde(f: Fp, n: usize) -> Vec<Vec<u64>> {
         })
         .collect();
     for col in 0..n {
-        let piv = (col..n).find(|&r| a[r][col] != 0).expect("vandermonde singular");
+        let piv = (col..n)
+            .find(|&r| a[r][col] != 0)
+            .expect("vandermonde singular");
         a.swap(piv, col);
         let inv = f.inv(a[col][col]);
         for c in 0..2 * n {
@@ -245,7 +247,11 @@ fn inv_vandermonde(f: Fp, n: usize) -> Vec<Vec<u64>> {
 
 fn apply_mat(f: Fp, m: &[Vec<u64>], v: &[u64]) -> Vec<u64> {
     m.iter()
-        .map(|row| row.iter().zip(v).fold(0u64, |acc, (&x, &y)| f.add(acc, f.mul(x, y))))
+        .map(|row| {
+            row.iter()
+                .zip(v)
+                .fold(0u64, |acc, (&x, &y)| f.add(acc, f.mul(x, y)))
+        })
         .collect()
 }
 
@@ -284,7 +290,10 @@ impl Dense {
         acc
     }
     fn support(&self) -> Vec<Vec<u8>> {
-        (0..self.c.len()).filter(|&i| self.c[i] != 0).map(|i| self.exps(i)).collect()
+        (0..self.c.len())
+            .filter(|&i| self.c[i] != 0)
+            .map(|i| self.exps(i))
+            .collect()
     }
     fn to_sparse(&self) -> BTreeMap<Vec<u8>, u64> {
         (0..self.c.len())
@@ -314,7 +323,7 @@ fn interpolate(f: Fp, m: usize, deg: usize, g: &dyn Fn(&[u64]) -> u64) -> Dense 
         let stride = n.pow(axis as u32);
         let mut out = vals.clone();
         for idx in 0..total {
-            if (idx / stride) % n != 0 {
+            if !(idx / stride).is_multiple_of(n) {
                 continue;
             }
             let line: Vec<u64> = (0..n).map(|k| vals[idx + k * stride]).collect();
@@ -374,12 +383,7 @@ fn symmetric_reduce(f: Fp, m: usize, poly: &Sparse) -> Result<Sparse, String> {
     let mut memo: HashMap<Vec<u8>, Sparse> = HashMap::new();
     let one: Sparse = BTreeMap::from([(vec![0u8; m], 1u64)]);
     memo.insert(vec![0u8; m], one);
-    fn epow(
-        f: Fp,
-        g: &[u8],
-        es: &[Sparse],
-        memo: &mut HashMap<Vec<u8>, Sparse>,
-    ) -> Sparse {
+    fn epow(f: Fp, g: &[u8], es: &[Sparse], memo: &mut HashMap<Vec<u8>, Sparse>) -> Sparse {
         if let Some(v) = memo.get(g) {
             return v.clone();
         }
@@ -461,7 +465,15 @@ impl Dinic {
             rev[iv as usize] = iu;
         }
         // store rev in head (reuse a vector name to keep the struct small)
-        Dinic { n, head: rev, to, cap, level: vec![0; n], it: vec![0; n], start }
+        Dinic {
+            n,
+            head: rev,
+            to,
+            cap,
+            level: vec![0; n],
+            it: vec![0; n],
+            start,
+        }
     }
 
     fn bfs(&mut self, s: usize, t: usize) -> bool {
@@ -724,7 +736,9 @@ impl BoxSpec {
         }
         let mut map: BTreeMap<(bool, i64, i64), Vec<usize>> = BTreeMap::new();
         for i in 0..self.m {
-            map.entry((self.top[i], self.cnum[i], self.enm[i])).or_default().push(i);
+            map.entry((self.top[i], self.cnum[i], self.enm[i]))
+                .or_default()
+                .push(i);
         }
         map.into_values().collect()
     }
@@ -775,7 +789,13 @@ impl BoxSpec {
             }
         }
         let valid = |b: &[i64], r: i64| -> bool {
-            (0..self.m).all(|i| if self.top[i] { b[i] - r >= 0 } else { b[i] + r <= self.l })
+            (0..self.m).all(|i| {
+                if self.top[i] {
+                    b[i] - r >= 0
+                } else {
+                    b[i] + r <= self.l
+                }
+            })
         };
         let mut index: HashMap<u64, u32> = HashMap::new();
         let mut nodes: Vec<(usize, i64)> = Vec::new();
@@ -808,7 +828,11 @@ impl BoxSpec {
                 cl.cc[id] = o * (0..self.m).map(|i| self.cnum[i] * b[i]).sum::<i64>();
                 cl.ce[id] = o * (0..self.m).map(|i| self.enm[i] * b[i]).sum::<i64>();
                 // charging bound with c = the all-d corner
-                let j = (0..self.m).map(|i| b[i] / self.d).min().unwrap().min(self.ell);
+                let j = (0..self.m)
+                    .map(|i| b[i] / self.d)
+                    .min()
+                    .unwrap()
+                    .min(self.ell);
                 cl.charge_cap[id] = o * j;
             } else {
                 if r % self.d == 0 {
@@ -854,8 +878,12 @@ struct GenSpec {
 impl GenSpec {
     fn build(&self) -> Closure {
         let m = self.a.len();
-        let mn: Vec<i64> = (0..m).map(|i| self.supp.iter().map(|s| s[i]).min().unwrap()).collect();
-        let mx: Vec<i64> = (0..m).map(|i| self.supp.iter().map(|s| s[i]).max().unwrap()).collect();
+        let mn: Vec<i64> = (0..m)
+            .map(|i| self.supp.iter().map(|s| s[i]).min().unwrap())
+            .collect();
+        let mx: Vec<i64> = (0..m)
+            .map(|i| self.supp.iter().map(|s| s[i]).max().unwrap())
+            .collect();
         let valid = |b: &[i64], j: i64| -> bool {
             (0..m).all(|i| {
                 b[i] + j * (mn[i] - self.a[i]) >= 0
@@ -1079,7 +1107,10 @@ fn part_known(max_ell: i64, out: &mut Vec<Value>) {
     println!("| m | d | ℓ=1 | ℓ=2 | ℓ=3 | ℓ=10 | ℓ=10⁴ | 2/(m(m+1)d) |");
     println!("|---:|---:|---:|---:|---:|---:|---:|---:|");
     for (m, d) in [(2u32, 2u64), (3, 4), (4, 8)] {
-        let v: Vec<f64> = [1u64, 2, 3, 10, 10_000].iter().map(|&l| jm_basic(m, d, l)).collect();
+        let v: Vec<f64> = [1u64, 2, 3, 10, 10_000]
+            .iter()
+            .map(|&l| jm_basic(m, d, l))
+            .collect();
         let lim = 2.0 / (m as f64 * (m as f64 + 1.0) * d as f64);
         println!(
             "| {m} | {d} | {:.5} | {:.5} | {:.5} | {:.5} | {:.5} | {:.5} |",
@@ -1113,14 +1144,14 @@ fn is_prime(n: u64) -> bool {
         return false;
     }
     for q in [2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
-        if n % q == 0 {
+        if n.is_multiple_of(q) {
             return n == q;
         }
     }
     let f = Fp { p: n };
     let mut d = n - 1;
     let mut s = 0;
-    while d % 2 == 0 {
+    while d.is_multiple_of(2) {
         d /= 2;
         s += 1;
     }
@@ -1161,7 +1192,7 @@ fn sqrt_mod(f: Fp, a: u64) -> Option<u64> {
     while f.pow(z, (p - 1) / 2) != p - 1 {
         z += 1;
     }
-    let (mut m, mut c, mut t, mut r) = (s, f.pow(z, q), f.pow(a, q), f.pow(a, (q + 1) / 2));
+    let (mut m, mut c, mut t, mut r) = (s, f.pow(z, q), f.pow(a, q), f.pow(a, q.div_ceil(2)));
     while t != 1 {
         let mut i = 0;
         let mut tt = t;
@@ -1203,7 +1234,8 @@ fn pt_add(w: &Weier, p1: Option<(u64, u64)>, p2: Option<(u64, u64)>) -> Option<(
 fn random_point(w: &Weier, rng: &mut StdRng, bound: u64) -> (u64, u64) {
     loop {
         let x = rng.gen_range(1..=bound.min(w.f.p - 1));
-        let rhs = w.f.add(w.f.add(w.f.mul(w.f.mul(x, x), x), w.f.mul(w.a, x)), w.b);
+        let rhs =
+            w.f.add(w.f.add(w.f.mul(w.f.mul(x, x), x), w.f.mul(w.a, x)), w.b);
         if let Some(y) = sqrt_mod(w.f, rhs) {
             let y = if rng.gen_bool(0.5) { y } else { w.f.neg(y) };
             return (x, y);
@@ -1257,10 +1289,15 @@ fn analyse_support(m: usize, out: &mut Vec<Value>) -> SupportInfo {
     let mut planted_ok = 0;
     for _ in 0..4 {
         // decompose z: pick P1..P_{m−1}, set P_m = R − ΣP_i where R has x = z
-        let ry = sqrt_mod(w.f, w.f.add(w.f.add(w.f.mul(w.f.mul(z, z), z), w.f.mul(w.a, z)), w.b))
-            .unwrap();
+        let ry = sqrt_mod(
+            w.f,
+            w.f.add(w.f.add(w.f.mul(w.f.mul(z, z), z), w.f.mul(w.a, z)), w.b),
+        )
+        .unwrap();
         let rpt = (z, ry);
-        let pts: Vec<(u64, u64)> = (0..m - 1).map(|_| random_point(&w, &mut rng, p - 1)).collect();
+        let pts: Vec<(u64, u64)> = (0..m - 1)
+            .map(|_| random_point(&w, &mut rng, p - 1))
+            .collect();
         let mut acc = Some(rpt);
         for &q in &pts {
             acc = pt_add(&w, acc, Some((q.0, w.f.neg(q.1))));
@@ -1282,11 +1319,17 @@ fn analyse_support(m: usize, out: &mut Vec<Value>) -> SupportInfo {
     });
     let corners_present = (0u32..(1 << m))
         .filter(|mask| {
-            let e: Vec<u8> = (0..m).map(|i| if (mask >> i) & 1 == 1 { deg as u8 } else { 0 }).collect();
+            let e: Vec<u8> = (0..m)
+                .map(|i| if (mask >> i) & 1 == 1 { deg as u8 } else { 0 })
+                .collect();
             sp.contains_key(&e)
         })
         .count();
-    let max_total = support.iter().map(|e| e.iter().map(|&x| x as usize).sum::<usize>()).max().unwrap();
+    let max_total = support
+        .iter()
+        .map(|e| e.iter().map(|&x| x as usize).sum::<usize>())
+        .max()
+        .unwrap();
     let units_present = (0..m).all(|i| {
         let mut e = vec![0u8; m];
         e[i] = 1;
@@ -1299,10 +1342,17 @@ fn analyse_support(m: usize, out: &mut Vec<Value>) -> SupportInfo {
     let e_support: Vec<Vec<u8>> = g.keys().cloned().collect();
     let e_wdeg = e_support
         .iter()
-        .map(|e| e.iter().enumerate().map(|(i, &x)| (i + 1) * x as usize).sum::<usize>())
+        .map(|e| {
+            e.iter()
+                .enumerate()
+                .map(|(i, &x)| (i + 1) * x as usize)
+                .sum::<usize>()
+        })
         .max()
         .unwrap();
-    let e_maxdeg: Vec<u8> = (0..m).map(|i| e_support.iter().map(|e| e[i]).max().unwrap()).collect();
+    let e_maxdeg: Vec<u8> = (0..m)
+        .map(|i| e_support.iter().map(|e| e[i]).max().unwrap())
+        .collect();
     println!(
         "| S{} | {} | {}^{} = {} | {} | {}/{} | {} | {} | {} | {}/8 | {}/8 | {}/4 | {} | {:?} | {} | {:.0} / {:.0} |",
         m + 1,
@@ -1330,7 +1380,12 @@ fn analyse_support(m: usize, out: &mut Vec<Value>) -> SupportInfo {
         "max_total_degree":max_total,"symmetric":symmetric,"has_1_and_units":units_present,
         "offgrid_agree_of_8":offgrid_ok,"semaev_vanishes_of_8":vanish_ok,"interpolant_vanishes_at_planted_of_4":planted_ok,
         "e_support_size":e_support.len(),"e_max_degree":e_maxdeg,"e_weighted_degree":e_wdeg}));
-    SupportInfo { m, dense, support, e_support }
+    SupportInfo {
+        m,
+        dense,
+        support,
+        e_support,
+    }
 }
 
 fn part_families(out: &mut Vec<Value>) {
@@ -1392,7 +1447,17 @@ fn part_closure(max_ell: i64, infos: &[SupportInfo], out: &mut Vec<Value>) {
         }
         for s in classes {
             let top: Vec<bool> = (0..m).map(|i| i < s).collect();
-            let spec = BoxSpec { m, d, ell, l, top, cnum: vec![1; m], enm: vec![0; m], den: 1, symmetric: true };
+            let spec = BoxSpec {
+                m,
+                d,
+                ell,
+                l,
+                top,
+                cnum: vec![1; m],
+                enm: vec![0; m],
+                den: 1,
+                symmetric: true,
+            };
             let t0 = Instant::now();
             let cl = spec.build();
             let r = cl.dinkelbach().unwrap();
@@ -1418,15 +1483,24 @@ fn part_closure(max_ell: i64, infos: &[SupportInfo], out: &mut Vec<Value>) {
     println!("|:--|---:|---:|:--|---:|---:|---:|---:|---:|");
     for info in infos {
         let m = info.m;
-        let supp: Vec<Vec<i64>> = info.e_support.iter().map(|e| e.iter().map(|&x| x as i64).collect()).collect();
-        let mx: Vec<i64> = (0..m).map(|i| supp.iter().map(|s| s[i]).max().unwrap()).collect();
+        let supp: Vec<Vec<i64>> = info
+            .e_support
+            .iter()
+            .map(|e| e.iter().map(|&x| x as i64).collect())
+            .collect();
+        let mx: Vec<i64> = (0..m)
+            .map(|i| supp.iter().map(|s| s[i]).max().unwrap())
+            .collect();
         // vertices via random directions (any unique maximiser is a vertex)
         let mut rng = StdRng::seed_from_u64(0xE5 + m as u64);
         let mut verts: Vec<Vec<i64>> = Vec::new();
         for _ in 0..64 {
             let wv: Vec<f64> = (0..m).map(|_| rng.gen_range(-1.0..1.0)).collect();
             let score = |s: &Vec<i64>| s.iter().zip(&wv).map(|(&a, &b)| a as f64 * b).sum::<f64>();
-            let best = supp.iter().max_by(|a, b| score(a).partial_cmp(&score(b)).unwrap()).unwrap();
+            let best = supp
+                .iter()
+                .max_by(|a, b| score(a).partial_cmp(&score(b)).unwrap())
+                .unwrap();
             if !verts.contains(best) {
                 verts.push(best.clone());
             }
@@ -1462,7 +1536,7 @@ fn part_closure(max_ell: i64, infos: &[SupportInfo], out: &mut Vec<Value>) {
                 nodes = nodes.max(cl.pos.len());
                 edges = edges.max(cl.edges.len());
                 if let Some(r) = cl.dinkelbach() {
-                    if best.as_ref().map_or(true, |b| r.delta > b.0.delta) {
+                    if best.as_ref().is_none_or(|b| r.delta > b.0.delta) {
                         best = Some((r, a.clone()));
                     }
                 }
@@ -1471,12 +1545,23 @@ fn part_closure(max_ell: i64, infos: &[SupportInfo], out: &mut Vec<Value>) {
             if let Some((r, a)) = best {
                 println!(
                     "| S{} | {ell} | {} | {:?} | {:.6} | {} | {} | {} | {:.0} |",
-                    m + 1, verts.len(), a, r.delta, r.dim, nodes, edges, ms
+                    m + 1,
+                    verts.len(),
+                    a,
+                    r.delta,
+                    r.dim,
+                    nodes,
+                    edges,
+                    ms
                 );
                 out.push(json!({"part":"closure","encoding":"e","poly":format!("S{}",m+1),"m":m,"ell":ell,
                     "vertices":verts.len(),"best_vertex":a,"delta":r.delta,"delta_rational":rat(&r),"dim":r.dim,"ms":ms}));
             } else {
-                println!("| S{} | {ell} | {} | – | skipped (box > 3e6 nodes) | | | | |", m + 1, verts.len());
+                println!(
+                    "| S{} | {ell} | {} | – | skipped (box > 3e6 nodes) | | | | |",
+                    m + 1,
+                    verts.len()
+                );
                 out.push(json!({"part":"closure","encoding":"e","poly":format!("S{}",m+1),"m":m,"ell":ell,"skipped":true}));
             }
         }
@@ -1495,7 +1580,11 @@ fn lattice_trial(
     rng: &mut StdRng,
 ) -> Option<(usize, bool, usize, f64)> {
     let f = Fp { p: curve.f.p };
-    let w = Weier { f, a: curve.f.from_mont(curve.a), b: curve.f.from_mont(curve.b) };
+    let w = Weier {
+        f,
+        a: curve.f.from_mont(curve.a),
+        b: curve.f.from_mont(curve.b),
+    };
     let d = 1i64 << (m - 1);
     let pts: Vec<(u64, u64)> = (0..m).map(|_| random_point(&w, rng, bound)).collect();
     let mut r = None;
@@ -1506,7 +1595,9 @@ fn lattice_trial(
     let root: Vec<BigInt> = pts.iter().map(|q| BigInt::from(q.0)).collect();
     let poly = s_with_target(&w, m, z);
     // normalise so the corner coefficient is 1
-    let corner_idx: usize = (0..m).map(|i| (d as usize) * (d as usize + 1).pow(i as u32)).sum();
+    let corner_idx: usize = (0..m)
+        .map(|i| (d as usize) * (d as usize + 1).pow(i as u32))
+        .sum();
     let lc = poly.c[corner_idx];
     if lc == 0 {
         return None;
@@ -1580,7 +1671,11 @@ fn lattice_trial(
     let t0 = Instant::now();
     // f64 Gram–Schmidt is documented sound to ~30 dimensions; use the
     // high-precision variant above that.
-    let reduced = if dim <= 30 { lll_reduce(&mut basis, 0.99) } else { lll_reduce_hp(&mut basis, 0.99) };
+    let reduced = if dim <= 30 {
+        lll_reduce(&mut basis, 0.99)
+    } else {
+        lll_reduce_hp(&mut basis, 0.99)
+    };
     if reduced.is_err() {
         return None;
     }
@@ -1634,15 +1729,27 @@ fn part_lattice(out: &mut Vec<Value>) {
     println!("| poly | ℓ | dim | δ | B | ≥m vanishing / trials | HG on first m rows | mean vanishing rows | ms per LLL |");
     println!("|:--|---:|---:|---:|---:|---:|---:|---:|---:|");
     let cells: Vec<(usize, i64, Vec<f64>, usize)> = vec![
-        (2, 1, vec![0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.20], 8),
-        (2, 2, vec![0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.20], 8),
+        (
+            2,
+            1,
+            vec![0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.20],
+            8,
+        ),
+        (
+            2,
+            2,
+            vec![0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.20],
+            8,
+        ),
         (3, 1, vec![0.035, 0.05, 0.065, 0.08, 0.10, 0.125], 6),
     ];
     for (m, ell, deltas, trials) in cells {
         let mut zero_streak = 0;
         for &delta in &deltas {
             let bound = ((curve.f.p as f64).powf(delta)).floor().max(2.0) as u64;
-            let mut rng = StdRng::seed_from_u64(0x10_0000 + (m as u64) * 1000 + ell as u64 * 100 + (delta * 1000.0) as u64);
+            let mut rng = StdRng::seed_from_u64(
+                0x10_0000 + (m as u64) * 1000 + ell as u64 * 100 + (delta * 1000.0) as u64,
+            );
             let (mut succ, mut hg, mut vsum, mut done, mut dim, mut ms) = (0, 0, 0, 0, 0, 0f64);
             for _ in 0..trials {
                 if let Some((v, h, dd, t)) = lattice_trial(&curve, m, ell, bound, &mut rng) {
@@ -1682,7 +1789,12 @@ fn part_lattice(out: &mut Vec<Value>) {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let get = |k: &str| args.iter().position(|a| a == k).and_then(|i| args.get(i + 1)).cloned();
+    let get = |k: &str| {
+        args.iter()
+            .position(|a| a == k)
+            .and_then(|i| args.get(i + 1))
+            .cloned()
+    };
     let part = get("--part").unwrap_or_else(|| "all".into());
     let max_ell: i64 = get("--max-ell").and_then(|s| s.parse().ok()).unwrap_or(3);
     let mut out: Vec<Value> = Vec::new();
@@ -1702,7 +1814,10 @@ fn main() {
         }
         for info in &infos {
             let deg = 1usize << (info.m - 1);
-            assert!(info.support.iter().all(|e| e.iter().all(|&x| x as usize <= deg)));
+            assert!(info
+                .support
+                .iter()
+                .all(|e| e.iter().all(|&x| x as usize <= deg)));
             let _ = &info.dense;
         }
         println!();
@@ -1718,9 +1833,12 @@ fn main() {
     }
     println!("total wall {:.1} s", t0.elapsed().as_secs_f64());
     if let Some(path) = get("--json") {
-        std::fs::write(&path, serde_json::to_string_pretty(&json!({
+        std::fs::write(
+            &path,
+            serde_json::to_string_pretty(&json!({
             "schema":"lit2026-w10-coppersmith/v1","part":part,"max_ell":max_ell,"records":out}))
-        .unwrap())
+            .unwrap(),
+        )
         .unwrap();
         eprintln!("wrote {path}");
     }
@@ -1746,7 +1864,11 @@ mod tests {
                 };
                 let r = spec.build().dinkelbach().unwrap();
                 let classic = ell as f64 / (d * ell + d - 1) as f64;
-                assert!(r.delta >= classic - 1e-12, "d={d} ell={ell}: {} < {classic}", r.delta);
+                assert!(
+                    r.delta >= classic - 1e-12,
+                    "d={d} ell={ell}: {} < {classic}",
+                    r.delta
+                );
                 assert!(r.delta < 1.0 / d as f64);
                 assert!(r.delta >= last - 1e-12);
                 last = r.delta;
@@ -1796,17 +1918,44 @@ mod tests {
                 .build()
                 .dinkelbach()
                 .unwrap();
-                let bs = BoxSpec { symmetric: true, ..BoxSpec { m: 2, d: 2, ell, l, top: top.clone(), cnum: vec![1, 1], enm: vec![0, 0], den: 1, symmetric: false } }
-                    .build()
-                    .dinkelbach()
-                    .unwrap();
+                let bs = BoxSpec {
+                    symmetric: true,
+                    ..BoxSpec {
+                        m: 2,
+                        d: 2,
+                        ell,
+                        l,
+                        top: top.clone(),
+                        cnum: vec![1, 1],
+                        enm: vec![0, 0],
+                        den: 1,
+                        symmetric: false,
+                    }
+                }
+                .build()
+                .dinkelbach()
+                .unwrap();
                 let a: Vec<i64> = top.iter().map(|&t| if t { 2 } else { 0 }).collect();
-                let supp: Vec<Vec<i64>> = (0..3).flat_map(|i| (0..3).map(move |j| vec![i, j])).collect();
-                let g = GenSpec { supp, a, ell, l: vec![l, l], cnum: vec![1, 1], enm: vec![0, 0], den: 1 }
-                    .build()
-                    .dinkelbach()
-                    .unwrap();
-                assert_eq!((b.delta_num, b.delta_den), (g.delta_num, g.delta_den), "ell={ell} top={top:?}");
+                let supp: Vec<Vec<i64>> = (0..3)
+                    .flat_map(|i| (0..3).map(move |j| vec![i, j]))
+                    .collect();
+                let g = GenSpec {
+                    supp,
+                    a,
+                    ell,
+                    l: vec![l, l],
+                    cnum: vec![1, 1],
+                    enm: vec![0, 0],
+                    den: 1,
+                }
+                .build()
+                .dinkelbach()
+                .unwrap();
+                assert_eq!(
+                    (b.delta_num, b.delta_den),
+                    (g.delta_num, g.delta_den),
+                    "ell={ell} top={top:?}"
+                );
                 if top[0] == top[1] {
                     assert_eq!((bs.delta_num, bs.delta_den), (b.delta_num, b.delta_den));
                 }

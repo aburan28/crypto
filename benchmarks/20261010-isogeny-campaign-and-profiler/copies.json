@@ -1,0 +1,121 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-10",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/p192_p224_hundred_large_prime_isogenies_20261010",
+  "run": null,
+  "files": [
+    {
+      "source": "research/isogeny_catalogue_setup_20261009/COMMAND_SETUP.svg",
+      "copy": "visuals/research/isogeny_catalogue_setup_20261009/COMMAND_SETUP.svg",
+      "sha256": "0950a3c09935680d0ec4691bd541d459814818944da11a5bc0bc99a89af7b3b2",
+      "bytes": 2787
+    },
+    {
+      "source": "research/isogeny_catalogue_setup_20261009/REPORT.pdf",
+      "copy": "visuals/research/isogeny_catalogue_setup_20261009/REPORT.pdf",
+      "sha256": "aced232c543c7af3803c7777a9002b75f96b1ad081cd4f54fde37a65e4b20471",
+      "bytes": 6756
+    },
+    {
+      "source": "research/isogeny_coverage_optimization_20261009/COVERAGE.svg",
+      "copy": "visuals/research/isogeny_coverage_optimization_20261009/COVERAGE.svg",
+      "sha256": "cf2d6d496dcf92d671821f29a91792680cb4e26dc606041bfdb4d21c10d3580b",
+      "bytes": 2324
+    },
+    {
+      "source": "research/isogeny_coverage_optimization_20261009/REPORT.pdf",
+      "copy": "visuals/research/isogeny_coverage_optimization_20261009/REPORT.pdf",
+      "sha256": "9ea96867155698cd5939003c372dea4e78015dad8dac3c9baba24931c6375b85",
+      "bytes": 8984
+    },
+    {
+      "source": "research/p192_p224_hundred_large_prime_isogenies_20261010/REPORT.pdf",
+      "copy": "visuals/research/p192_p224_hundred_large_prime_isogenies_20261010/REPORT.pdf",
+      "sha256": "0dfdd12b941c2ac7b85f2a7fa8bf7a692601bd0b1072cad6d7a11c92a25bd490",
+      "bytes": 12784
+    },
+    {
+      "source": "research/p192_p224_hundred_large_prime_isogenies_20261010/SEARCH.svg",
+      "copy": "visuals/research/p192_p224_hundred_large_prime_isogenies_20261010/SEARCH.svg",
+      "sha256": "f036479f3084cf0f9cf7b5f6247ea8159e12efde8937f6225543d66e84938c95",
+      "bytes": 3150
+    },
+    {
+      "source": "research/p192_p224_large_degree_isogenies_20261008/SEARCH.pdf",
+      "copy": "visuals/research/p192_p224_large_degree_isogenies_20261008/SEARCH.pdf",
+      "sha256": "74588d68c59286cd1b8e8cc347d8a01ade22c113838e1d4c615f024a62422bf2",
+      "bytes": 119730
+    },
+    {
+      "source": "research/p192_p224_large_degree_isogenies_20261008/SEARCH.svg",
+      "copy": "visuals/research/p192_p224_large_degree_isogenies_20261008/SEARCH.svg",
+      "sha256": "b3182030a40d018f920bc0103fceae4d50130f4aa342d6afabaa5ecf9ce9ebc3",
+      "bytes": 74583
+    },
+    {
+      "source": "research/p192_p224_large_degree_isogenies_20261009/SEARCH.pdf",
+      "copy": "visuals/research/p192_p224_large_degree_isogenies_20261009/SEARCH.pdf",
+      "sha256": "9522b6922cb6a2af2faece8add857d94b8eb91b8bee547cd6b3972718c292755",
+      "bytes": 12262
+    },
+    {
+      "source": "research/p192_p224_large_degree_isogenies_20261009/SEARCH.svg",
+      "copy": "visuals/research/p192_p224_large_degree_isogenies_20261009/SEARCH.svg",
+      "sha256": "a7392a2af5d00a753a688fe884bf518535c1114b51c2a2943cfb0f1b882f8f56",
+      "bytes": 4798
+    }
+  ],
+  "pngs": [
+    {
+      "source": "visuals/research/isogeny_catalogue_setup_20261009/COMMAND_SETUP.svg",
+      "copy": "visuals/research/isogeny_catalogue_setup_20261009/COMMAND_SETUP.png",
+      "dpi": 150,
+      "width": 1100,
+      "height": 760,
+      "sha256": "353f3e3f3f9e6d3e39c0eb5cceade2d478fd75310418e7dcf77f2fe73c3ffb35",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/isogeny_coverage_optimization_20261009/COVERAGE.svg",
+      "copy": "visuals/research/isogeny_coverage_optimization_20261009/COVERAGE.png",
+      "dpi": 150,
+      "width": 1100,
+      "height": 760,
+      "sha256": "920fbfd11f92c70f638f7d0e2beccd47c438f91f26ae1e91d2bb4b6b12232d74",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/p192_p224_hundred_large_prime_isogenies_20261010/SEARCH.svg",
+      "copy": "visuals/research/p192_p224_hundred_large_prime_isogenies_20261010/SEARCH.png",
+      "dpi": 150,
+      "width": 1100,
+      "height": 760,
+      "sha256": "d826d23a5402002a7926a8101520151c80e7998a0b15a47f103beaec66b8f8a4",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/p192_p224_large_degree_isogenies_20261008/SEARCH.svg",
+      "copy": "visuals/research/p192_p224_large_degree_isogenies_20261008/SEARCH.png",
+      "dpi": 150,
+      "width": 1100,
+      "height": 760,
+      "sha256": "3428f7563294bd795484766753a06708c3019daf753ecf45a1f365f45e43ebc7",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/p192_p224_large_degree_isogenies_20261009/SEARCH.svg",
+      "copy": "visuals/research/p192_p224_large_degree_isogenies_20261009/SEARCH.png",
+      "dpi": 150,
+      "width": 1100,
+      "height": 760,
+      "sha256": "874490878b59c05a288cd20a5f8eb30b4945313f7f00fdb1edc231a26bdeab94",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    }
+  ],
+  "verbatim_source_report": {
+    "source": "research/p192_p224_hundred_large_prime_isogenies_20261010/RESULTS.md",
+    "copy": "SOURCE_REPORT.md",
+    "sha256": "b694ea1b885d65dc5f287fe321584a5ed48c792cfc07b9bb2d14d5f72f11e7a8"
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-11",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/eigen_seta_rust_20261011",
+  "run": "run-20261011T1955Z-verify",
+  "files": [
+    {
+      "source": "research/eigen_seta_rust_20261011/reports/run-20261011T1955Z-verify/ct_probe.svg",
+      "copy": "visuals/research/eigen_seta_rust_20261011/reports/run-20261011T1955Z-verify/ct_probe.svg",
+      "sha256": "c8334502348445d0bfed39e0b205f6df9a8d6532838e4c4e1c754ad42d78eb87",
+      "bytes": 79017
+    },
+    {
+      "source": "research/eigen_seta_rust_20261011/reports/run-20261011T1955Z-verify/f_filter.svg",
+      "copy": "visuals/research/eigen_seta_rust_20261011/reports/run-20261011T1955Z-verify/f_filter.svg",
+      "sha256": "02511d0a879384638fa8fa54af88b82ce9d8a266326ac2328ea57354e29453f8",
+      "bytes": 50980
+    },
+    {
+      "source": "research/eigen_seta_rust_20261011/reports/run-20261011T1955Z-verify/report.pdf",
+      "copy": "visuals/research/eigen_seta_rust_20261011/reports/run-20261011T1955Z-verify/report.pdf",
+      "sha256": "be85f1dc83c5c606046342892e8a741f21a449edd07c770080df5b907ec1844f",
+      "bytes": 111519
+    },
+    {
+      "source": "research/eigen_seta_rust_20261011/report.pdf",
+      "copy": "visuals/research/eigen_seta_rust_20261011/report.pdf",
+      "sha256": "950efcce37fccc7e07b24aa2353f9e1cf4bc4ff446456a40f09cd6679e250202",
+      "bytes": 114077
+    },
+    {
+      "source": "research/eigen_seta_rust_20261011/archives/pr-1680-74bec88bd/research/eigen_seta_rust_20261011/report.pdf",
+      "copy": "visuals/research/eigen_seta_rust_20261011/archives/pr-1680-74bec88bd/research/eigen_seta_rust_20261011/report.pdf",
+      "sha256": "c79e50e345ce6125ff5bdc4b2bab5f716075099661ccdbfe386912a59c93e378",
+      "bytes": 110080
+    }
+  ],
+  "pngs": [
+    {
+      "source": "visuals/research/eigen_seta_rust_20261011/reports/run-20261011T1955Z-verify/ct_probe.svg",
+      "copy": "visuals/research/eigen_seta_rust_20261011/reports/run-20261011T1955Z-verify/ct_probe.png",
+      "dpi": 150,
+      "width": 1200,
+      "height": 750,
+      "sha256": "23e27e15f4aa716d8a0d574d2ffb667abb628ce457aec5405aafee46e2541b77",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/eigen_seta_rust_20261011/reports/run-20261011T1955Z-verify/f_filter.svg",
+      "copy": "visuals/research/eigen_seta_rust_20261011/reports/run-20261011T1955Z-verify/f_filter.png",
+      "dpi": 150,
+      "width": 900,
+      "height": 510,
+      "sha256": "122c7d59bc2b4248fb11554d725cfcf87f37177fda531ed0901242a18ee4f432",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    }
+  ],
+  "verbatim_source_report": {
+    "source": "research/eigen_seta_rust_20261011/reports/run-20261011T1955Z-verify/README.md",
+    "copy": "SOURCE_REPORT.md",
+    "sha256": "d326ae4db3bf6ff460d0fbfb528ff80a64f66077247ce356bab917d5e8c5ceaf"
+  }
+}

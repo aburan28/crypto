@@ -787,6 +787,44 @@ pub fn attach_independent(
     )
 }
 
+const EXPLORATORY_WALL_RECORD: &str = "verified_answer_exploratory_wall";
+const CONTROLLED_WALL_RECORD: &str = "verified_answer_controlled_wall";
+
+/// Classification of the sealed measurements, not a caller's relabeling of
+/// the report. Independent replay and the other claim gates remain separate.
+fn measured_wall_record_class(ic: &Record, rho: &Record, required: Level) -> &'static str {
+    let required = required.max(Level::L2);
+    if ic.isolation.level >= required && rho.isolation.level >= required {
+        CONTROLLED_WALL_RECORD
+    } else {
+        EXPLORATORY_WALL_RECORD
+    }
+}
+
+/// Native counters have method-specific units and cover the whole measured
+/// record, including reusable preparation. They cannot supply a calibrated
+/// online operation ratio or total-work S without an additional common ledger.
+fn native_operation_accounting(ic: &Record, rho: &Record) -> Value {
+    let arm = |record: &Record| {
+        json!({
+            "record_id": record.record_id,
+            "native_counters": record.counters,
+            "cost_is_lower_bound": record.cost.lower_bound,
+            "unpriced_work": record.cost.unpriced,
+        })
+    };
+    json!({
+        "counter_scope": "whole_measured_record",
+        "ic": arm(ic),
+        "rho": arm(rho),
+        "common_operation_unit": null,
+        "calibrated_operation_ratio": null,
+        "total_work_S": null,
+        "calibration_status": "unknown",
+        "boundary": "IC probes and rho walk steps retain their native units; these counter bags are not an online common-unit operation ledger",
+    })
+}
+
 fn build_from_session(
     dir: &Path,
     ic_arm: &str,
@@ -1018,8 +1056,12 @@ fn build_from_session(
     put("target_count", json!(1));
     put("ic_target_hash", json!(target_hash));
     put("rho_target_hash", json!(target_hash));
-    put("timing_class", json!("single_target_online"));
     put("timing_class", json!("single_target_online_wall"));
+    put(
+        "record_class",
+        json!(measured_wall_record_class(ic, rho, required)),
+    );
+    put("operation_accounting", native_operation_accounting(ic, rho));
     put("ic_cost", json!(ic_ms));
     put("rho_cost", json!(rho_ms));
     put("cost_unit", json!("ms per one public target, online wall"));
@@ -1478,7 +1520,7 @@ pub fn check_vs_rho(report: &Value) -> Result<Value, String> {
         .is_some_and(|e| e.contains(&Value::String("single_target_online_wall".into())))
         || get("timing_class").and_then(Value::as_str) != Some("single_target_online_wall")
     {
-        err("timing_class must be single_target_online".into());
+        err("timing_class must be single_target_online_wall".into());
     }
     for key in [
         "same_resource_envelope",
@@ -1540,6 +1582,69 @@ pub fn check_vs_rho(report: &Value) -> Result<Value, String> {
                         required.name()
                     )),
                     None => err(format!("isolation_levels.{arm} must be L0, L1, L2 or L3")),
+                }
+            }
+        }
+    }
+    if get("record_class").and_then(Value::as_str) != Some(CONTROLLED_WALL_RECORD) {
+        err("record_class must be verified_answer_controlled_wall for a primary wall claim".into());
+    }
+    match get("operation_accounting").and_then(Value::as_object) {
+        None => err("operation_accounting must retain a native-counter ledger object".into()),
+        Some(accounting) => {
+            if accounting.get("counter_scope").and_then(Value::as_str)
+                != Some("whole_measured_record")
+            {
+                err("operation_accounting.counter_scope must be whole_measured_record".into());
+            }
+            for arm in ["ic", "rho"] {
+                let prefix = format!("operation_accounting.{arm}");
+                let Some(ledger) = accounting.get(arm).and_then(Value::as_object) else {
+                    err(format!(
+                        "{prefix} must retain a native-counter ledger object"
+                    ));
+                    continue;
+                };
+                if ledger
+                    .get("native_counters")
+                    .and_then(Value::as_object)
+                    .is_none_or(|counters| {
+                        counters.is_empty()
+                            || counters
+                                .iter()
+                                .any(|(key, value)| key.trim().is_empty() || !value.is_u64())
+                    })
+                {
+                    err(format!(
+                        "{prefix}.native_counters must be a nonempty object of native u64 counters"
+                    ));
+                }
+                let record_id = text(ledger.get("record_id"));
+                if record_id.is_none() {
+                    err(format!("{prefix}.record_id must be a nonempty string"));
+                }
+                if let Some(expected) = text(get("ecbench_records").and_then(|r| r.get(arm))) {
+                    if record_id != Some(expected) {
+                        err(format!(
+                            "{prefix}.record_id must match ecbench_records.{arm}"
+                        ));
+                    }
+                }
+                if ledger
+                    .get("cost_is_lower_bound")
+                    .and_then(Value::as_bool)
+                    .is_none()
+                {
+                    err(format!("{prefix}.cost_is_lower_bound must be a bool"));
+                }
+                if ledger
+                    .get("unpriced_work")
+                    .and_then(Value::as_array)
+                    .is_none_or(|work| work.iter().any(|item| text(Some(item)).is_none()))
+                {
+                    err(format!(
+                        "{prefix}.unpriced_work must be an array of nonempty strings"
+                    ));
                 }
             }
         }
@@ -1729,6 +1834,88 @@ pub fn check_problems(check: &Value) -> Vec<String> {
 mod tests {
     use super::*;
     use crate::cryptanalysis::ic_boundary::koblitz_instance;
+
+    fn recorded_counter_pair() -> (Record, Record) {
+        let records: Vec<Record> = include_str!(
+            "../../../research/ecbench_n41_n53_shared_rank_20261005/sessions/mac-l0/records.jsonl"
+        )
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+        let ic = records.iter().find(|r| r.method.family == "ic").unwrap();
+        let rho = records
+            .iter()
+            .find(|r| r.method.id.starts_with("rho."))
+            .unwrap();
+        (ic.clone(), rho.clone())
+    }
+
+    #[test]
+    fn native_counter_ledgers_keep_recorded_units_and_unknown_calibration() {
+        let (ic, rho) = recorded_counter_pair();
+        let accounting = native_operation_accounting(&ic, &rho);
+        assert_eq!(accounting["counter_scope"], "whole_measured_record");
+        assert_eq!(accounting["ic"]["native_counters"], json!(ic.counters));
+        assert_eq!(accounting["rho"]["native_counters"], json!(rho.counters));
+        assert_ne!(
+            accounting["ic"]["native_counters"],
+            accounting["rho"]["native_counters"]
+        );
+        for (arm, record) in [("ic", &ic), ("rho", &rho)] {
+            assert_eq!(accounting[arm]["record_id"], record.record_id);
+            assert_eq!(
+                accounting[arm]["cost_is_lower_bound"],
+                record.cost.lower_bound
+            );
+            assert_eq!(
+                accounting[arm]["unpriced_work"],
+                json!(record.cost.unpriced)
+            );
+        }
+        assert_eq!(accounting["calibration_status"], "unknown");
+        for key in [
+            "common_operation_unit",
+            "calibrated_operation_ratio",
+            "total_work_S",
+        ] {
+            assert!(accounting[key].is_null(), "{key} must remain unknown");
+        }
+    }
+
+    #[test]
+    fn wall_record_class_requires_both_recorded_levels_and_the_l2_floor() {
+        let (mut ic, mut rho) = recorded_counter_pair();
+        assert_eq!(ic.isolation.level, Level::L0);
+        assert_eq!(rho.isolation.level, Level::L0);
+        assert_eq!(
+            measured_wall_record_class(&ic, &rho, Level::L0),
+            EXPLORATORY_WALL_RECORD
+        );
+
+        // Synthetic copies check the policy only. The exporter obtains
+        // its levels from the audited sealed records, never report labels.
+        ic.isolation.level = Level::L2;
+        rho.isolation.level = Level::L1;
+        assert_eq!(
+            measured_wall_record_class(&ic, &rho, Level::L0),
+            EXPLORATORY_WALL_RECORD
+        );
+        rho.isolation.level = Level::L2;
+        assert_eq!(
+            measured_wall_record_class(&ic, &rho, Level::L0),
+            CONTROLLED_WALL_RECORD
+        );
+        assert_eq!(
+            measured_wall_record_class(&ic, &rho, Level::L3),
+            EXPLORATORY_WALL_RECORD
+        );
+        ic.isolation.level = Level::L3;
+        rho.isolation.level = Level::L3;
+        assert_eq!(
+            measured_wall_record_class(&ic, &rho, Level::L3),
+            CONTROLLED_WALL_RECORD
+        );
+    }
 
     #[test]
     fn compiler_change_on_one_machine_cannot_supply_independence() {

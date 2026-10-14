@@ -1,0 +1,27 @@
+# Recorded values from gpu/nist/RESULTS.md (round 1 on main; round 2 from aburan28/crypto PR 1778).
+# One RTX PRO 6000 Blackwell Server Edition, CUDA 13.3, sm_120, via Modal. Unit: billion iterations per second. 8192 iterations per cell.
+round,build,threads,W,maxreg,P256_billion_it_s,P384_billion_it_s
+first,portable,128,8,0,1.075,0.210
+first,ptx,128,8,0,1.282,0.289
+1,ptx,64,2,0,0.454,0.091
+1,ptx,64,4,0,0.772,0.162
+1,ptx,64,8,0,1.194,0.265
+1,ptx,64,16,0,1.271,0.410
+1,ptx,128,2,0,0.464,0.095
+1,ptx,128,4,0,0.786,0.169
+1,ptx,128,8,0,1.217,0.279
+1,ptx,128,16,0,1.306,0.434
+1,ptx,256,2,0,0.466,0.096
+1,ptx,256,4,0,0.812,0.171
+1,ptx,256,8,0,1.24,0.32
+1,ptx,256,16,0,1.340,0.438
+2,ptx,128,8,0,1.212,0.279
+2,ptx,128,16,0,1.310,0.408
+2,ptx,128,32,0,1.603,0.538
+2,ptx,256,16,0,1.339,0.417
+2,ptx,256,32,0,1.632,0.548
+2,ptx,256,32,96,1.589,0.447
+2,ptx,256,16,96,1.601,0.448
+2,ptx,128,32,128,1.438,0.418
+2,ptx,256,32,128,1.595,0.455
+2,ptx,256,32,160,1.595,0.455

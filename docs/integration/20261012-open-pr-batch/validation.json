@@ -1,0 +1,361 @@
+{
+  "schema": "integration-validation/v1",
+  "scope": "37 eligible PR heads captured at 2026-10-12T02:31:34Z",
+  "status": "local validation passed; GitHub checks, required reviews, guarded main merge and live Pages verification pending",
+  "heads": "heads.json",
+  "changes": [
+    "Preserve source-head ancestry in one integration branch, including stacked PRs",
+    "Keep owner-retained draft #1690 outside the batch",
+    "Keep retired campaigns manual-only and scope active CI by consumed inputs",
+    "Publish status every ten minutes without cancelling an admitted publisher",
+    "Retain exact sealed Lean workflow bytes through two hash-bound budget exceptions",
+    "Preserve Eigen-Seta historical manuscripts and evidence with explicit provenance",
+    "Repair subgroup-order validation, combined refutation tracing and exact float replay",
+    "Use archived complete native frozen build trees instead of mixed live inputs",
+    "Regenerate catalogue and browser metadata without changing recorded measurements"
+  ],
+  "passed": {
+    "source_head_ancestry": {
+      "included": 37,
+      "missing": 0
+    },
+    "ci_scope": {
+      "passed": 8
+    },
+    "ci_budget_policy": {
+      "passed": 14,
+      "workflows": 352,
+      "violations": 0
+    },
+    "workflow_yaml": {
+      "passed": 4
+    },
+    "actionlint": {
+      "version": "1.7.12",
+      "status": "pass"
+    },
+    "rho_status": {
+      "passed": 70,
+      "skipped": 8,
+      "skip_reason": "Postgres integration service unavailable"
+    },
+    "site_javascript": {
+      "passed": 2
+    },
+    "eigen_seta": {
+      "rust": "1.99.0",
+      "format": "pass",
+      "clippy_all_targets": "pass",
+      "default_tests": 20,
+      "ignored_tests": 2,
+      "l1_kem": "pass",
+      "l1_pke": "pass"
+    },
+    "lean_weak_curve_properties": {
+      "seal_files": 77,
+      "build_jobs": 1638,
+      "fresh_kernel_replay": "pass",
+      "audited_declarations": 71
+    },
+    "lean_weak_curve_conjectures": {
+      "census_rows": 87486,
+      "union_zeros": 2074,
+      "strip_counterexamples": 1184,
+      "native_tests": 3,
+      "exact_replay": "pass",
+      "build": "pass",
+      "fresh_kernel_replay": "pass",
+      "audited_public_theorems": 3
+    },
+    "ecdlp_surfaces": {
+      "release_tests": 13,
+      "format": "pass",
+      "clippy": "pass",
+      "exact_example_replays": 3,
+      "invalid_controls": "pass"
+    },
+    "surface_certificates": {
+      "release_tests": 3,
+      "format": "pass",
+      "clippy": "pass",
+      "exact_fixture_replays": 4
+    },
+    "groebner_history": {
+      "format": "pass",
+      "clippy": "pass",
+      "tests": 19,
+      "command": "cargo test --locked --offline",
+      "profile": "debug"
+    },
+    "hundred_map_frozen_audit": {
+      "bindings": 891,
+      "distinct_maps": 100,
+      "status": "pass"
+    },
+    "exact_native_decision_replay": {
+      "sha256": "1521ba98667186096cf3846f504a46edab4bd8e0db3752e4984e7f06d5b03598",
+      "comparison": "byte-identical"
+    },
+    "frozen_native_materializer": {
+      "release_tests": 12,
+      "s3_pins": 25,
+      "swap_pins": 21,
+      "base_files_each": 521,
+      "s3_build": "pass",
+      "s3_example_tests": 3,
+      "swap_build": "pass",
+      "swap_exhaustive_tests": 1
+    },
+    "root_all_targets_final": {
+      "status": "pass",
+      "command": "cargo check --workspace --all-targets --locked --offline",
+      "source_commit": "2bcca4148ee1298c7bfbb504a3186ab5c40d5eab",
+      "elapsed": "1m55s",
+      "receipt": "receipts/integration-final-2bcc-all-targets.log",
+      "receipt_sha256": "1f03cc9a012edd0aca95356486eadaf28f0861868d4b9793193dcff95d0a9dba"
+    },
+    "maintained_rustfmt": {
+      "files": 89,
+      "failures": 0,
+      "source_commit": "2bcca4148ee1298c7bfbb504a3186ab5c40d5eab",
+      "receipt": "receipts/integration-final-2bcc-maintained-fmt.log"
+    },
+    "maintained_clippy": {
+      "status": "pass",
+      "warnings_policy": "-D warnings",
+      "receipt": "receipts/integration-final-2bcc-maintained-clippy.log",
+      "command": "CARGO_BUILD_JOBS=2 CARGO_NET_OFFLINE=true bash scripts/clippy-maintained.sh",
+      "source_commit": "2bcca4148ee1298c7bfbb504a3186ab5c40d5eab",
+      "elapsed": "1m31s",
+      "receipt_sha256": "0adf338a6ba9a3cfc1044646ad0043c88f51b1b394625bd76b131a8cdb90900e",
+      "scope": "Maintained library, binaries, tests, benches, and the script-selected examples; -D warnings; offline enforced by CARGO_NET_OFFLINE.",
+      "expanded_argv_receipt": "receipts/integration-final-2bcc-clippy-argv.json",
+      "example_selectors": 353
+    },
+    "cd_attack_clippy": {
+      "status": "pass",
+      "warnings_policy": "-D warnings"
+    },
+    "catalogue": {
+      "models": 2073,
+      "unchanged_other_models": 2071,
+      "normalized_agm_models": 2,
+      "native_adapter_tests": 4,
+      "metadata_tests": 3,
+      "native_traits_check": "pass",
+      "alias_targets": 5112,
+      "sessions_preserved": 62,
+      "yields_preserved": 9354
+    },
+    "standalone_isogeny_cli": {
+      "passed": 70,
+      "clippy_all_targets": "pass"
+    },
+    "standalone_isogeny_algorithms": {
+      "full_tests_before_test_only_cast_fix": 129,
+      "existing_ignored": 1,
+      "affected_tests_after_cast_fix": 2,
+      "clippy": "pass"
+    },
+    "site_python": {
+      "passed": 48
+    },
+    "cover_catalogue": {
+      "passed": 3
+    },
+    "archived_curve_name_controls": {
+      "passed": 3,
+      "global_retired_names": 0,
+      "global_unregistered_models": 0
+    },
+    "performance_visual_copies": {
+      "index_entries": 37,
+      "new_exact_pdf_svg_copies": 183,
+      "new_png_150dpi": 101,
+      "latest_hash_study": "benchmarks/20261012-f4-f5-native-hashing",
+      "final_copies_verified": "Seven late-main PDF/SVG additions pinned to31088bfce; prior176 unchanged"
+    },
+    "obsolete_queued_qa_cleanup": {
+      "canceled": 192,
+      "cancel_api_failures": 0,
+      "receipt": "queue-cleanup.json",
+      "observed_at": "2026-10-12T03:45:55Z",
+      "remaining_queued_at_observation": 618,
+      "remaining_in_progress_at_observation": 3
+    },
+    "current_main_reconciliation": {
+      "base": "eb70862e4c69b63146508c96c153b4106caa045e",
+      "commit": "8880bf0c7e286f7aa770adca192627537b2fcd75",
+      "library_compiler_inputs_unchanged": 666,
+      "source_inputs_changed": 0,
+      "frozen_research_entries_preserved": 54,
+      "research_view_pages": 3,
+      "status_updated": "W5 #1714 actually merged"
+    },
+    "frozen_workflow_metadata_adapter": {
+      "fixture_tests": 16,
+      "rotated_freeze_historical_negative_current_controls": "pass",
+      "rotated_negative_tests": 4,
+      "n53_workflow_freeze": "pass",
+      "n53_historical_preflight_targets": 512,
+      "n53_negative_tests": 4,
+      "n53_archived_group_rank_replay": "pass",
+      "n53_archive_files": 23,
+      "n53_archive_sha256": "325a5cb9242d9279faf398fcbb1afb7d2a6ad8c5df1af562199d32154c8fe74a",
+      "n53_live_root_nested_lock_coherence": "pass",
+      "historical_live_separation": "Versioned manifest injects original frozen lock only into isolated historical view; original freezes and live locks unchanged",
+      "receipt": "workflow-reconciliation.json"
+    },
+    "final_proof_seals_and_source_equivalence": {
+      "status": "pass",
+      "observed_source_commit": "9479a6730e6318dd3998575a3272c1d3540c4c93",
+      "packages": 5,
+      "receipts": 129,
+      "receipt": "proof-validation.json"
+    },
+    "root_release_library_before_late_main_F5_hash": {
+      "command": "CARGO_BUILD_JOBS=1 cargo test --release --lib --locked --offline -- --test-threads=2",
+      "rust": "1.98.0",
+      "passed": 4008,
+      "failed": 0,
+      "ignored": 113,
+      "filtered": 0,
+      "compile_elapsed": "14m04s",
+      "test_elapsed_seconds": 494.94,
+      "receipt": "receipts/integration-final-release-lib.log",
+      "receipt_sha256": "cd13d23b6078d2b4e1582f39b462464a3b7f969698ffc4d3ffc6b7acd8cc7158",
+      "source_commit_at_execution": "253458d78a7e8acc023e45f5d3af772dd5539752",
+      "fixture_input_receipt": "receipts/integration-final-after-fixture-fix-source-receipt.json",
+      "identical_final_compiler_inputs": 666,
+      "compiler_input_receipt": "receipts/integration-final-library-compiler-inputs.json",
+      "delivered_source_commit": "8880bf0c7e286f7aa770adca192627537b2fcd75"
+    },
+    "six_changed_example_harnesses_before_late_F5_update": {
+      "passed": 63,
+      "failed": 0,
+      "ignored": 0,
+      "receipt": "receipts/integration-final-six-example-results.json",
+      "source_commit": "8880bf0c7e286f7aa770adca192627537b2fcd75"
+    },
+    "late_main_base_reconciliation": {
+      "base": "31088bfce9d9cc86fb55a655b064b5472db263ae",
+      "commit": "9479a6730e6318dd3998575a3272c1d3540c4c93",
+      "captured_source_prs_landed_separately": 9,
+      "new_library_tests": 1,
+      "new_hash_comparison_tests": 5,
+      "library_inputs_changed_since_prior_full_suite": [
+        "src/cryptanalysis/fx_hash.rs",
+        "src/cryptanalysis/matrix_f5_f2.rs"
+      ],
+      "new_frozen_hash_study_files": 991,
+      "new_frozen_hash_study_tree": "e00b12589743ceeb250255f81aa204027e738980",
+      "both_planning_versions_preserved": "research/f4_f5_history_20261012/archives/pr-1677-baa6242188/MANIFEST.json"
+    },
+    "metadata_after_final_base_reconciliation": {
+      "status": "pass",
+      "checks": 8,
+      "source_commit": "9479a6730e6318dd3998575a3272c1d3540c4c93",
+      "registry_models": 2073,
+      "aliases": 5112,
+      "sessions": 62,
+      "yields": 9354,
+      "retired_names": 0,
+      "unregistered_models": 0,
+      "browser_leaderboard_panel_freshness": "pass",
+      "receipt": "metadata-final.json"
+    },
+    "root_release_library_before_claim_metadata_fix": {
+      "passed": 4009,
+      "failed": 0,
+      "ignored": 113,
+      "filtered": 0,
+      "test_elapsed_seconds": 490.69,
+      "combined_compile": "15m45s",
+      "source_commit": "9479a6730e6318dd3998575a3272c1d3540c4c93",
+      "receipt": "receipts/integration-final-9479-release-library-ecbench-hash.log",
+      "input_receipt": "receipts/integration-final-9479-library-compiler-inputs.json"
+    },
+    "final_release_command": {
+      "command": "CARGO_BUILD_JOBS=2 cargo test --release --lib --test ecbench --example f4_f5_hash_compare --example f4_f5_row_build_bench --locked --offline -- --test-threads=2",
+      "source_commit": "2bcca4148ee1298c7bfbb504a3186ab5c40d5eab",
+      "rust": "1.98.0",
+      "exit_code": 0,
+      "compile_elapsed": "15m30s",
+      "library": {
+        "passed": 4011,
+        "failed": 0,
+        "ignored": 113,
+        "filtered": 0,
+        "elapsed_seconds": 546.42
+      },
+      "ecbench": {
+        "passed": 15,
+        "failed": 0,
+        "ignored": 0,
+        "filtered": 0,
+        "elapsed_seconds": 152.93
+      },
+      "f4_f5_hash_compare": {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "filtered": 0,
+        "elapsed_seconds": 0.0
+      },
+      "f4_f5_row_build_bench": {
+        "tests": 0,
+        "failed": 0,
+        "elapsed_seconds": 0.0,
+        "scope": "Compilation and harness execution only; no performance measurement"
+      },
+      "receipt": "receipts/integration-final-2bcc-release-library-ecbench-hash.log",
+      "receipt_sha256": "91f0cdb875aa9ab91392e2ad05ba58c79cfd19ba947045156cabfeb6270d903d",
+      "compiler_input_receipt": "receipts/integration-final-2bcc-library-compiler-inputs.json"
+    },
+    "final_compiler_input_equivalence": {
+      "files": 666,
+      "mismatches": 0,
+      "source_commit": "2bcca4148ee1298c7bfbb504a3186ab5c40d5eab",
+      "selected_target_and_build_metadata_match": true,
+      "receipt": "receipts/integration-final-2bcc-results.json"
+    }
+  },
+  "pending": [
+    "GitHub checks, required reviews and guarded main merge",
+    "Successful Pages deployment and public status freshness after merge"
+  ],
+  "limits": [
+    "These are integration correctness and reproduction checks; they are not new performance measurements",
+    "Scientific records, historical seals and archived decisions are preserved",
+    "Partial or open research requirements remain as recorded in their source reports",
+    "Initial concurrent release compilation exhausted the 16 GiB memory cap; superseded builds were stopped and heavy builds serialized",
+    "The initial complete release suite passed4006 tests with113 existing ignored and failed one stale supported-model fixture. Its raw log is preserved. Correcting that fixture produced4008 passes with zero failures before the later F5 and claim-metadata changes; the final source suite is recorded separately.",
+    "The first ecbench batch passed14 tests and failed one contradictory timing-class assertion. Removing the obsolete assertion exposed two genuinely missing claim metadata fields; the audited-record builder and primary-claim ledger checks were repaired. Both failed runs are preserved, and the complete final-source ecbench suite passes15 tests with zero failures.",
+    "The n53 historical PR custody check passes with its exact released lock. The optional labeled outcome retains its original current-source guard and remains blocked by live producer/source drift; no measurement was run."
+  ],
+  "claim_metadata_repair": {
+    "source_commit": "2bcca4148ee1298c7bfbb504a3186ab5c40d5eab",
+    "status": "committed and validated; full release, strict Clippy, all-target check and maintained fmt pass",
+    "required_fields": [
+      "record_class",
+      "operation_accounting"
+    ],
+    "classification": "derived from audited measured records with immutable L2 minimum",
+    "native_counters": "whole-record IC and rho ledgers retained separately with record IDs and unpriced/lower-bound flags",
+    "unknowns": [
+      "common_operation_unit",
+      "calibrated_operation_ratio",
+      "total_work_S"
+    ],
+    "negative_controls": [
+      "L0 report relabeled as L2",
+      "junk ledger object",
+      "empty native counter bag",
+      "mismatched record ID"
+    ],
+    "frozen_reports_changed": 0
+  },
+  "final_source_commit": "2bcca4148ee1298c7bfbb504a3186ab5c40d5eab",
+  "final_runtime_and_static_receipt": "receipts/integration-final-2bcc-results.json",
+  "final_receipt_sha256": "9dd58f8784503552ccb37882edb5481d6afd0aff5c95357a675f0a811221844e"
+}

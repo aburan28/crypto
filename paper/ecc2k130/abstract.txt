@@ -1,29 +1,33 @@
-ECC2K-130 is the Certicom Koblitz challenge $y^2+xy=x^3+1$ over
-$\FF_{2^{131}}$, open since 1997, with an expected cost of $2^{60.9}$
-iterations of a Frobenius-class Pollard rho. This paper reports a
-measured campaign against it on commodity hardware: a type-II
-optimal-normal-basis field with one generated golden model, two
-iteration functions and a third for power-capped parts, a bitsliced
-CPU client, a packed CUDA client whose campaign build runs at $14.64$
-billion complete iterations per second on one RTX~PRO~6000, reached by
-sixteen paired rungs from a $0.85$ bitsliced control (a later
-$\sigma$-walk build measures $15.88$, and a table walk $20.08$ as a
-rate, not yet as a cost per solve), and a VHDL engine measured at
-$8.25$~G steps/s on one AWS F2 FPGA against a pre-board estimate of
-$5$--$12$. The repositories' other GPU arithmetic, for secp256k1,
-the NIST primes and ECC2K-95, is inventoried with its static
-instruction ledgers and emulated walk constants and the statement
-that, apart from F4 elimination on rented cards, none of it has yet
-run on a device. The walk constant is measured, not assumed:
-$2^{60.91}$--$2^{60.92}$ iterations for the campaign's $\sigma$-walk,
-so the 2009 budget stands. A carry-less-unit floor written before
-tuning rules out $28$~B/s on one GPU, and a pre-declared target of
-$17.0$~B/s declined a $16.56$~B/s table walk. The campaign at cutoff 32,
-one report per $2^{28.41}$ iterations, has stored $486$ million points
-and $2^{56.68}$ iterations, $5.4\%$ of the expected work, with no
-collision; its fleet was reclaimed on 2026-09-18 and collection has
-been paused since 2026-10-07. Index calculus on the curve, priced in the same
-unit, sits $10^7$ times above rho at the challenge size and the best
-measured point decomposition is $35$--$51$ bits short of its budget.
-Every number is footnoted to a repository artefact; nothing here is
-an advance on the generic-group floor, and the paper says so.
+We measure what Pollard rho costs on the current generation of NVIDIA
+hardware, using the Certicom challenge ECC2K-130 as the yardstick.
+ECC2K-130 is the Koblitz curve $y^2+xy=x^3+1$ over $\FF_{2^{131}}$, open
+since 1997, with an expected cost of $2^{60.9}$ iterations of a
+Frobenius-class rho. In 2010 the best published GPU kernel ran at
+$0.064$ billion iterations per second on a GTX~295 card. Rebuilt around
+the carry-less multiply that CUDA~13.3 exposes in PTX (\texttt{clmad}),
+three-input logic and a packed normal-basis representation, the same
+walk now runs at $14.64$ billion iterations per second on one
+RTX~PRO~6000 Blackwell in its audited campaign build and $15.88$ in the
+best later build, about $230$ times the 2010 card, so the whole budget is
+about five GPU-years. We trace that gain through sixteen paired
+optimisation steps and measure \texttt{clmad} on three dies: its issue
+rate per SM-clock differs by up to $18\times$ between the workstation and
+data-centre parts, so the same change can win on one Blackwell part and
+lose on another. We report twelve GPUs, Turing to Blackwell, per card,
+per SM and per dollar. We separate the $\sigma$-walk from the table walk:
+the table walk's $20.08$ was measured under a cycle rule later found to
+leave cycles inconsistently, the exact rule runs at $5.10$ today, and the
+$\sigma$-walk is the fastest correct walk we have. Applying the same
+optimisations to Pollard rho on NIST P-256 and P-384 on the same card
+gives $1.52\times$ and $2.61\times$, to $1.632$ and $0.548$ billion iterations
+per second; the levers transfer, but their relative sizes do not. The
+walk constant is measured rather than assumed, at $2^{60.91}$--$2^{60.92}$
+iterations, and a floor derived from the carry-less unit before tuning
+rules out $28$ billion iterations per second on one card. We also report
+an FPGA engine at $8.25$ billion iterations per second on one AWS F2; a
+campaign that stored $486$ million distinguished points and $2^{56.68}$
+iterations ($5.4\%$ of the expected work) before its fleet was reclaimed;
+structural alternatives that land far above rho; and the open questions
+we would pursue next. Every number is footnoted to a file in a public
+repository. None of this improves on the generic-group bound, and we do
+not claim that it does.
