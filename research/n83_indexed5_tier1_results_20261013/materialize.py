@@ -64,7 +64,12 @@ def candidate(k, summary, dump, dump_path, field, curve):
     points = dump["factor_base_point_coordinates"]
     if (len(points) != 166 * k or summary["factor_base_points"] != len(points)
             or summary["orbit_columns"] != k
-            or summary["base_hash"] != dump["base_hash"]):
+            or summary["rank"] != k
+            or summary["base_hash"] != dump["base_hash"]
+            or summary["root_table_layout"] != "indexed83_5byte_exact"
+            or summary["root_table_slot_bytes"] != 5
+            or summary["root_state_layout"] != "packed83_11byte_roots"
+            or summary["root_state_slot_bytes"] != 28):
         raise ValueError(f"K{k}: base identity mismatch")
     ordered = sorted(points, key=lambda item: (int(item[0]), int(item[1])))
     record = {
