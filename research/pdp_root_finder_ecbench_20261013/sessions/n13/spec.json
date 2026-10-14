@@ -1,0 +1,106 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "root-finding oracles vs F4 vs strong rho, E_0 n=13, d=5",
+  "description": "Preregistered size-ladder round (PROTOCOL.md): index calculus on the standard subspace base of dimension 5 of E_0 over F_2^13 with the root-finding oracles rootfind-mitm and rootfind-pairs, the harness's mitm:m=3 table oracle and the inherited-F4 pdp3-koblitz oracle, against the strong signed-Frobenius rho on eight public one-target workloads. IC S with the F4 oracle is a counted lower bound (Boolean reductions uncharged); the table and root-finding oracles' S is complete.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 13
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 202610130013,
+    "target_kind": "public"
+  },
+  "arms": [
+    {
+      "name": "rho-strong",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {
+          "lanes": "32",
+          "dp_bits": "4",
+          "step_cap_factor": "2000"
+        }
+      }
+    },
+    {
+      "name": "rho",
+      "role": "baseline",
+      "method": {
+        "id": "rho.signed_frobenius"
+      }
+    },
+    {
+      "name": "ic-f4",
+      "role": "baseline",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=5",
+          "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-mitm",
+      "role": "baseline",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=5",
+          "oracle": "mitm:m=3,negation_folded=1",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-rootfind",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=5",
+          "oracle": "rootfind-mitm:m=3",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-rootfind-pairs",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=5",
+          "oracle": "rootfind-pairs:m=3",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "rho-strong-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {
+          "lanes": "32",
+          "dp_bits": "4",
+          "step_cap_factor": "2000"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 5,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 202610131013,
+    "isolation_required": "L2",
+    "timeout_seconds": 3600
+  }
+}

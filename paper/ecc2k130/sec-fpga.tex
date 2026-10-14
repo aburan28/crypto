@@ -1,17 +1,17 @@
 \section{The FPGA engine}
 \label{sec:fpga}
 
-The field is a better fit for an FPGA than for a GPU: the GPU has one
-narrow carry-less unit per SM, while the FPGA is nothing but
-carry-less multipliers, and $\sigma^k$ is wiring. A VHDL engine for
-the AWS F2 (Xilinx VU47P) was designed, estimated before any board
-time, and then measured.
+In some ways this field suits an FPGA better than a GPU. The GPU has
+one narrow carry-less unit per SM, while an FPGA can be filled with
+carry-less multipliers, and $\sigma^k$ is just wiring. We designed a
+VHDL engine for the AWS F2 (Xilinx VU47P), estimated its rate before
+any board time, and then measured it.
 
 \subsection{Estimate before the board}
 \label{sec:fpga-estimate}
 
-Before synthesis, the client's own straight-line multiplier was
-mapped to LUT6s (about $5{,}563$ at 32 levels, known to be about $40\%$
+Before synthesis, we mapped the client's own straight-line multiplier
+to LUT6s (about $5{,}563$ at 32 levels, known to be about $40\%$
 high for ignoring dual-output packing) and calibrated against the
 $3{,}071$ and $3{,}620$ LUTs that Bernstein et al.\ report for
 $\mathrm{GF}(2^{113})$ and $\mathrm{GF}(2^{127})$
@@ -20,10 +20,10 @@ $m=131$. With multipliers at $79\%$ of a core and $5.33$ multipliers
 per core, a core is $25.5$~KLUT at literature packing or $37.5$~KLUT
 with the repository's unpacked circuit; $18\%$ shell overhead on
 $1{,}303{,}680$ CLB LUTs at $70$--$80\%$ utilisation gives 29--34 or
-20--23 cores at an estimated $250$--$350$~MHz. The estimate was
-$5$--$12$~B iterations/s per VU47P, central $8$~B/s: slower per chip
-than the $14.1$~B/s GPU, about level on cost per solve, and $2$--$5\times$
-better per watt.\art{ecc2k130/FPGA-CEILING.md}
+20--23 cores at an estimated $250$--$350$~MHz. The estimate came to
+$5$--$12$~billion iterations/s per VU47P, with a central value of $8$~billion iterations/s:
+slower per chip than the $14.1$~billion iterations/s GPU, roughly level on cost per
+solve, and $2$--$5\times$ better per watt.\art{ecc2k130/FPGA-CEILING.md}
 
 \subsection{Design}
 \label{sec:fpga-design}
@@ -126,7 +126,7 @@ clocks).\art{hdl/ecc2k130/ecc2k_ref.py}\art{hdl/ecc2k130/vectors_ecc2k130.txt}
 \label{tab:fpga-images}
 \begin{tabular}{@{}rrlrrr@{}}
 \toprule
-engines & MHz & geometry & routed WNS (ns) & M steps/s & clk/step \\
+engines & MHz & geometry & routed WNS (ns) & million it/s & clk/step \\
 \midrule
 48 & 333.3 & $16\times16$, tree in BRAM & $+0.022$ & $3{,}010.7$ & 5.31 \\
 64 & 333.3 & same & $+0.040$ & $4{,}013.7$ & 5.32 \\
@@ -139,20 +139,20 @@ engines & MHz & geometry & routed WNS (ns) & M steps/s & clk/step \\
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:fpga-images} is every image that was built, placed,
-loaded and timed, and Figure~\ref{fig:fpga} draws it.\art{hdl/ecc2k130/aws/README.md}
+Table~\ref{tab:fpga-images} lists every image we built, placed,
+loaded and timed, and Figure~\ref{fig:fpga} plots them.\art{hdl/ecc2k130/aws/README.md}
 The 48-engine run read back its geometry (48 engines of 512 walks,
 weight 34, $333.3$~MHz), seeded $24{,}576$ walks over AXI-Lite in
-$7.3$~s, held $3{,}010$~M steps/s from ten seconds on, and completed
-$103$~G iterations in a 40~s run; simulation had predicted $5.29$
+$7.3$~s, held $3{,}010$~million iterations/s from ten seconds on, and completed
+$103$ billion iterations in a 40~s run; simulation had predicted $5.29$
 clocks per step against the measured $5.31$. The promoted 128-engine
-image holds $8.25$~G steps/s. Linear scaling with engine count is the
-prediction of a design that shares nothing between engines except the
-host port, and the measured images sit on it. Builds that missed
+image holds $8.25$~billion iterations/s. A design whose engines share nothing but
+the host port should scale linearly with engine count, and the
+measured images sit on that line. Builds that missed
 timing (128 engines at 375~MHz, 112 at 400) and the 144-engine build
 that failed block-RAM placement ($3{,}744$ RAMB18 sites needed against
-$3{,}576$) are recorded alongside; the projection at $5.16$ clocks per step is $8.8$~G at 136 engines
-and $9.3$~G at 144 or at 128 engines and 375~MHz, neither yet met (128
+$3{,}576$) are recorded alongside; the projection at $5.16$ clocks per step is $8.8$~billion iterations/s at 136 engines
+and $9.3$ at 144 or at 128 engines and 375~MHz, neither yet met (128
 at 375~MHz routed at $-0.21$~ns; 144 failed
 placement).\art{hdl/ecc2k130/README.md}
 
@@ -163,7 +163,7 @@ placement).\art{hdl/ecc2k130/README.md}
   width=0.82\textwidth,
   height=0.42\textwidth,
   xlabel={engines},
-  ylabel={G steps/s},
+  ylabel={billion iterations/s},
   xmin=40, xmax=136,
   ymin=0, ymax=9.5,
   grid=major,
@@ -180,9 +180,10 @@ placement).\art{hdl/ecc2k130/README.md}
 \end{axis}
 \end{tikzpicture}
 \caption{ECC2K-130 FPGA engine on AWS F2. The 128-engine image at
-  $333$~MHz is $8.25$~G steps/s; the pre-board estimate was
-  $5$--$12$~G with a central $8$~G. The measurement landed on the
-  central estimate and is a device number, not the estimate reprised.}
+  $333$~MHz is $8.25$~billion iterations/s; the pre-board estimate was
+  $5$--$12$ billion iterations/s with a central $8$. The measurement landed on the
+  central estimate; it is a device measurement, not the estimate
+  restated.}
 \label{fig:fpga}
 \end{figure}
 
@@ -197,14 +198,14 @@ what bounds the engine count on this part.\art{hdl/ecc2k130/README.md}
 At the prices observed on 2026-09-11, an F2 instance at $\$1.980$
 on demand or $\$0.709$ spot against an RTX~PRO~6000 at $\$4.14$ and
 $\$1.31$ per GPU-hour, the expected $2^{60.9}$ iterations cost about $72{,}400$
-F2-hours at the measured $8.25$~G/s, roughly $\$51$k spot, against
-$42{,}400$ GPU-hours and $\$56$k spot at the campaign's $14.11$~B/s
+F2-hours at the measured $8.25$~billion iterations/s, roughly $\$51$k spot, against
+$42{,}400$ GPU-hours and $\$56$k spot at the campaign's $14.11$~billion iterations/s
 collection rate.\footnote{Derived here from the measured rate and the
 prices recorded in \texttt{ecc2k130/FPGA-CEILING.md}; the note's own
-table priced the hypothetical $8$~B/s image at $\$53$k spot.} The
-two platforms are therefore level on cost per solve within the noise
-of spot pricing, and the FPGA is about $2$--$5\times$ better per watt
-on the note's estimated envelopes ($75$--$150$~W against a $600$~W
-board). FPGA workers speak the same client contract as the GPUs and
-write the same records, so a collision between an FPGA trail and a
-GPU trail is an ordinary merge.
+table priced the hypothetical $8$~billion iterations/s image at $\$53$k spot.} So
+the two platforms are level on cost per solve, within the noise of spot
+pricing, and the FPGA is about $2$--$5\times$ better per watt on the
+note's estimated power envelopes ($75$--$150$~W against a $600$~W
+board). FPGA workers follow the same client contract as the GPUs and
+write the same records, so a collision between an FPGA trail and a GPU
+trail is merged like any other.

@@ -13,11 +13,11 @@
 //! 1. [`FieldTower`] — the field-extension lattice `F_2 ⊂ F_{2^l} ⊂
 //!    F_{2^N}` with the Frobenius `σ: x ↦ x^{2^l}` and subfield
 //!    membership tests.
-//! 2. [`magic_number`] — the GHS magic number
-//!    `m = dim_{F_2} span{(1, σ^i(√b))}` (MMT 2002, eq. (5)).
+//! 2. [`magic_number`] — the GHS magic number `m(b) = dim_{F_2}
+//!    span{(1, σ^i(√b))}` of Maurer–Menezes–Teske (2002), eq. (5).
 //! 3. [`ghs_genus`] — the genus of the GHS hyperelliptic descent
-//!    curve, `g = 2^{m−1}` (or `2^{m−1} − 1` in the "type I" closed-
-//!    orbit case).
+//!    curve, `g = 2^{m−1}`, or `2^{m−1} − 1` in the type-I case
+//!    `(x − 1) ∤ Ord_b` ([`ghs_type_i`]).
 //! 4. [`audit_curve`] — the **public auditor view**: for every
 //!    factorisation `N = n_i · l_i`, compute the magic number and
 //!    GHS-attack genus, returning the minimum.
@@ -30,7 +30,7 @@
 //! the Jacobian arithmetic provided by
 //! [`crate::binary_ecc::hyperelliptic`].
 //!
-//! ## The Hess "magic number" — what it is and why it matters
+//! ## The GHS magic number — what it is and why it matters
 //!
 //! Let `K = F_{2^N}`, `k = F_{2^l}` with `N = n·l`, and
 //! `σ ∈ Gal(K/k)` the Frobenius `x ↦ x^{2^l}` (order `n` on `K`).
@@ -42,25 +42,33 @@
 //! ```text
 //!     t² + t = x + a + (√b)/x
 //! ```
-//! Apply `σ` to get the conjugate functions `σ^i(√b)/x` and take
-//! the compositum.  The resulting Artin–Schreier extension is
-//! determined by the `F_2`-vector subspace
+//! Apply `σ` to get the conjugate functions `x + σ^i(a) + σ^i(√b)/x`
+//! and take the compositum.  It is determined by their `F_2`-span modulo
+//! `℘(K(x)) = {h² + h}`.  The constants `σ^i(a) − a` have absolute trace
+//! zero, so they lie in `℘(K)` and drop out; a relation
+//! `Σ c_i σ^i(f) ∈ ℘(K(x))` needs `Σ c_i = 0` (the `x` term) and
+//! `Σ c_i σ^i(√b) = 0` (the `1/x` term).  The dimension of the span is
+//! therefore (Maurer–Menezes–Teske, LMS J. Comput. Math. 5 (2002), eq. (5))
 //! ```text
-//!     V_E(σ) := span_{F_2} { σ^i(√b) : i = 0, …, n−1 } ⊂ K
+//!     m(b) := dim_{F_2} span_{F_2} { (1, σ^i(√b)) : i = 0, …, n−1 } ⊂ F_2 × K
 //! ```
-//! modulo Artin–Schreier coboundaries.  The compositum descends
-//! to a hyperelliptic curve `C/k` whose **genus** is determined by
+//! Write `Ord_b ∈ F_2[x]` for the `σ`-annihilator of `√b`.  MMT Theorem
+//! 5(i): `m(b) = deg Ord_b + c`, with `c = 1` when `(x − 1) ∤ Ord_b` and
+//! `c = 0` otherwise.  The plain orbit dimension `deg Ord_b`
+//! ([`plain_orbit_dim`], this module's definition before 2026-10-13) is
+//! one too small in the `c = 1` case.
+//!
+//! The genus of the compositum is the number of its quadratic subfields
+//! `w² + w = u` of genus one, i.e. of the `(1, β)` in the span with
+//! `β ≠ 0`:
 //! ```text
-//!     m := dim_{F_2} V_E(σ)
+//!     g(C) = 2^{m−1}      when (x − 1) | Ord_b   (type II)
+//!     g(C) = 2^{m−1} − 1  when (x − 1) ∤ Ord_b   (type I: (1, 0) is in the span)
 //! ```
-//! via the GHS formula
-//! ```text
-//!     g(C) = 2^{m−1}      (generic / "type II")
-//!     g(C) = 2^{m−1} − 1  (when σ acts with order exactly m on V)
-//! ```
-//! (Hess, "Generalising the GHS attack on the elliptic curve discrete
-//! logarithm problem," LMS J. Comp. Math. 7 (2004); Galbraith–
-//! Hess–Smart 2002 for the original GHS setting.)
+//! (Galbraith–Hess–Smart 2002; Hess, LMS J. Comp. Math. 7 (2004).)  For
+//! `n` odd, type I is exactly `Tr_{K/k}(b) = 0` with `b ∉ k`.  Whether GHS
+//! applies at all when `Tr_{K/F_2}(a) = 1` is MMT Lemma 6, condition (8)
+//! (`n` odd, or `Tr_{K/k}(b) ≠ 0`); this module does not check it.
 //!
 //! **For an attacker, small `m` is fatal:** the descent transports
 //! ECDLP on `E(K)` (size `~ q^n`) to HCDLP on `Jac(C)(k)` (size
@@ -69,7 +77,8 @@
 //!
 //! **For the trapdoor:** Teske picks `b` with `√b ∈ F_{2^{m·l}} \
 //! F_{2^l}` for a small target `m`.  Then `σ` has orbit-size `m` on
-//! `√b`, so `dim V_E(σ) = m` and genus is small.  An attacker
+//! `√b`; when that orbit is `F_2`-independent, `Ord_b = x^m − 1`, so the
+//! magic number is `m` and the genus `2^{m−1}` is small.  An attacker
 //! observing `E` over `K` cannot tell *which* factorisation
 //! `N = n_i · l_i` is the "right" one without computing the magic
 //! number for every divisor of `N` — and for highly composite `N`,
@@ -87,22 +96,22 @@
 //! Trapdoor analysis:
 //! - [`f2_dim`] — `F_2`-rank of a list of elements of `K` via
 //!   Gaussian elimination on packed bit-vectors.
-//! - [`magic_number`].
-//! - [`ghs_genus`].
+//! - [`magic_number`], [`ghs_type_i`], [`plain_orbit_dim`].
+//! - [`ghs_genus`], [`ghs_genus_with_type`].
 //! - [`audit_curve`] — exhaustive over every factorisation of `N`.
 //! - [`construct_trapdoor_curve`] — search loop producing `(a, b)`
 //!   for a chosen genus target on a chosen factorisation.
 //!
 //! ## Honest scope
 //!
-//! - [`magic_number`] is the `√b` form `dim span{(1, σ^i(√b))}`,
-//!   matching the cases Teske uses for the trapdoor.  Hess's full
-//!   theorem also folds in `{(σ−1)·σ^i(a)}`; we expose that in
-//!   [`magic_number_full`].  For the trapdoor we pick `a ∈ F_2`
-//!   (so the `a`-contribution is `0`) and the simple form suffices.
-//! - The genus split `2^{m−1}` vs `2^{m−1} − 1` is the
-//!   standard GHS dichotomy; in practice [`ghs_genus`] returns
-//!   `2^{m−1}` and a `type_i_genus` boolean is reported separately.
+//! - `m` depends on `b` only; [`magic_number_full`] takes `a` for API
+//!   compatibility and equals [`magic_number`].  Its pre-2026-10-13 value,
+//!   which added `(σ − 1)·σ^i(a)` as generators, is
+//!   [`legacy_orbit_dim_with_a`].
+//! - [`ghs_genus`] returns `2^{m−1}`; [`ghs_genus_with_type`] and
+//!   [`audit_curve`] apply the type-I correction.
+//! - The applicability condition for `Tr_{K/F_2}(a) = 1` (MMT Lemma 6)
+//!   and the descent itself are not checked here.
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
 use num_bigint::BigUint;
@@ -232,104 +241,147 @@ pub fn f2_dim(elements: &[F2mElement], m: u32) -> u32 {
     rank as u32
 }
 
-/// `F_2`-rank of `{(u_i, e_i)}` in `F_2 × F_{2^m}`, where `unit[i]` is the
-/// first coordinate `u_i` of row `i`.
-fn f2_dim_with_unit(elements: &[F2mElement], unit: &[bool], m: u32) -> u32 {
-    debug_assert_eq!(elements.len(), unit.len());
-    let n_words = (m + 1).div_ceil(64) as usize;
-    let mut rows: Vec<Vec<u64>> = elements
-        .iter()
-        .zip(unit)
-        .map(|(e, &u)| {
-            let mut row = vec![0u64; n_words];
-            for (i, w) in e.raw_bits().iter().enumerate() {
-                if i < n_words {
-                    row[i] = *w;
-                }
-            }
-            if u {
-                row[(m / 64) as usize] |= 1u64 << (m % 64);
-            }
-            row
-        })
-        .collect();
-    let mut rank = 0usize;
-    for col in 0..=m {
-        let w = (col / 64) as usize;
-        let b = col % 64;
-        let Some(p) = (rank..rows.len()).find(|&r| (rows[r][w] >> b) & 1 == 1) else {
-            continue;
-        };
-        rows.swap(rank, p);
-        for r in 0..rows.len() {
-            if r != rank && (rows[r][w] >> b) & 1 == 1 {
-                for i in 0..n_words {
-                    rows[r][i] ^= rows[rank][i];
-                }
-            }
-        }
-        rank += 1;
-        if rank >= rows.len() {
-            break;
-        }
-    }
-    rank as u32
-}
-
-/// Compute the GHS "magic number" `m(b)` for the curve
-/// `E: y² + x·y = x³ + a·x² + b` over the top of the [`FieldTower`].
+/// `F_2`-dimension of the plain Frobenius orbit `span{σ^i(√b) : 0 ≤ i < n}`.
 ///
-/// `m := dim_{F_2} span_{F_2} { (1, σ^i(√b)) : 0 ≤ i < n }`
-/// (Gaudry–Hess–Smart Theorem 1 as stated by Maurer–Menezes–Teske,
-/// LMS JCM 5 (2002), eq. (5)).  The constant coordinate matters: by MMT
-/// Theorem 5(i), `m` exceeds the plain orbit dimension
-/// `dim span{σ^i(√b)}` by one exactly when `(x − 1)` does not divide
-/// `Ord_b(x)`.  Earlier revisions returned the plain orbit dimension and so
-/// understated `m` (and the descent genus) for those `b`.
-pub fn magic_number(tower: &FieldTower, _a: &F2mElement, b: &F2mElement) -> u32 {
-    let sqrt_b = tower.sqrt(b);
-    let mut orbit = Vec::with_capacity(tower.n as usize);
-    let mut cur = sqrt_b.clone();
-    for _ in 0..tower.n {
-        orbit.push(cur.clone());
-        cur = tower.frobenius(&cur);
-    }
-    f2_dim_with_unit(&orbit, &vec![true; orbit.len()], tower.big_n)
+/// This is `deg Ord_b`, where `Ord_b ∈ F_2[x]` is the `σ`-annihilator of
+/// `√b` (Maurer–Menezes–Teske's notation).  It is **not** the GHS magic
+/// number: it omits the leading `1` of MMT eq. (5) and is one too small
+/// exactly when `(x − 1) ∤ Ord_b`.  Until 2026-10-13 this was the body of
+/// [`magic_number`]; it is kept under this name so older reports that
+/// recorded it can be reproduced.
+pub fn plain_orbit_dim(tower: &FieldTower, b: &F2mElement) -> u32 {
+    f2_dim(&sqrt_b_orbit(tower, b), tower.big_n)
 }
 
-/// Magic number with the `a`-contribution: the [`magic_number`] rows
-/// `(1, σ^i(√b))` together with `(0, (σ − 1)·σ^i(a))`.  For trapdoor
-/// constructions where `a ∈ F_2` the additional generators are all zero and
-/// this agrees with [`magic_number`].
-pub fn magic_number_full(tower: &FieldTower, a: &F2mElement, b: &F2mElement) -> u32 {
-    let sqrt_b = tower.sqrt(b);
-    let mut gens = Vec::with_capacity(2 * tower.n as usize);
-    let mut unit = Vec::with_capacity(2 * tower.n as usize);
-    let mut cur_b = sqrt_b.clone();
-    for _ in 0..tower.n {
-        gens.push(cur_b.clone());
-        unit.push(true);
-        cur_b = tower.frobenius(&cur_b);
-    }
+/// The value the pre-2026-10-13 [`magic_number_full`] returned: the plain
+/// `√b` orbit plus the constants `(σ − 1)·σ^i(a)`, ranked in one space.
+///
+/// Those constants are always in `℘(K) = {α² + α}` (their absolute trace is
+/// zero), so they never change the Artin–Schreier compositum; adding them to
+/// the `√b` coefficients mixes the constant and `1/x` coefficients of the
+/// Artin–Schreier functions.  Kept only to reproduce older reports.
+pub fn legacy_orbit_dim_with_a(tower: &FieldTower, a: &F2mElement, b: &F2mElement) -> u32 {
+    let mut gens = sqrt_b_orbit(tower, b);
     // (σ - 1)·σ^i(a) = σ^{i+1}(a) + σ^i(a) (char 2)
     let mut cur_a = a.clone();
     for _ in 0..tower.n {
         let next_a = tower.frobenius(&cur_a);
         gens.push(cur_a.add(&next_a));
-        unit.push(false);
         cur_a = next_a;
     }
-    f2_dim_with_unit(&gens, &unit, tower.big_n)
+    f2_dim(&gens, tower.big_n)
+}
+
+fn sqrt_b_orbit(tower: &FieldTower, b: &F2mElement) -> Vec<F2mElement> {
+    let mut orbit = Vec::with_capacity(tower.n as usize);
+    let mut cur = tower.sqrt(b);
+    for _ in 0..tower.n {
+        orbit.push(cur.clone());
+        cur = tower.frobenius(&cur);
+    }
+    orbit
+}
+
+/// The GHS magic number of `E: y² + x·y = x³ + a·x² + b` relative to the
+/// [`FieldTower`] (Maurer–Menezes–Teske, LMS J. Comput. Math. 5 (2002),
+/// eq. (5)):
+///
+/// `m(b) := dim_{F_2} span_{F_2} { (1, σ^i(√b)) : 0 ≤ i < n } ⊂ F_2 × K`.
+///
+/// By MMT Theorem 5(i), `m(b) = deg Ord_b + c` with `c = 1` when
+/// `(x − 1) ∤ Ord_b` and `c = 0` otherwise, i.e. [`plain_orbit_dim`] plus
+/// [`ghs_type_i`].  The value depends on `b` only; `a` enters the GHS
+/// attack through its applicability (MMT Lemma 6), not through `m`.
+///
+/// `b = 0` (not a curve) returns `0`.
+pub fn magic_number(tower: &FieldTower, _a: &F2mElement, b: &F2mElement) -> u32 {
+    mmt_ranks(tower, b).1
+}
+
+/// The GHS magic number with the curve's `a` passed through.  Equal to
+/// [`magic_number`]: the Artin–Schreier functions are
+/// `x + σ^i(a) + σ^i(√b)/x`, and their constant parts differ by elements of
+/// `℘(K)`, so `a` does not change the compositum or `m`.  (Before
+/// 2026-10-13 this added `(σ − 1)·σ^i(a)` as generators; that value is
+/// [`legacy_orbit_dim_with_a`].)
+pub fn magic_number_full(tower: &FieldTower, a: &F2mElement, b: &F2mElement) -> u32 {
+    magic_number(tower, a, b)
+}
+
+/// Whether `(x − 1) ∤ Ord_b`, i.e. whether some odd-size subset of the
+/// `σ`-orbit of `√b` sums to zero, i.e. whether `(1, 0)` lies in the MMT
+/// span.  This is MMT Theorem 5(i)'s `c = 1` case, and it is exactly the
+/// GHS genus-`2^{m−1} − 1` ("type I") case: the genus of the compositum is
+/// the number of `(1, β)` in the span with `β ≠ 0`, which is `2^{m−1}`
+/// less one when `(1, 0)` is present.  `b = 0` returns `false`.
+pub fn ghs_type_i(tower: &FieldTower, b: &F2mElement) -> bool {
+    let (plain, mmt) = mmt_ranks(tower, b);
+    plain != 0 && mmt == plain + 1
+}
+
+/// Absolute trace `Tr_{K/F_2}(x)` as a bit.
+pub fn absolute_trace(tower: &FieldTower, x: &F2mElement) -> bool {
+    let mut acc = x.clone();
+    let mut cur = x.clone();
+    for _ in 1..tower.big_n {
+        cur = cur.square(&tower.irr);
+        acc = acc.add(&cur);
+    }
+    !acc.is_zero()
+}
+
+/// Relative trace `Tr_{K/k}(x) = Σ_{0 ≤ i < n} σ^i(x)`.
+pub fn relative_trace(tower: &FieldTower, x: &F2mElement) -> F2mElement {
+    let mut acc = F2mElement::zero(tower.big_n);
+    let mut cur = x.clone();
+    for _ in 0..tower.n {
+        acc = acc.add(&cur);
+        cur = tower.frobenius(&cur);
+    }
+    acc
+}
+
+/// MMT Lemma 6, condition (8): the GHS cover of `E: y² + xy = x³ + ax² + b`
+/// descends to `k` when `n` is odd, or `Tr_{K/F_2}(a) = 0`, or
+/// `Tr_{K/k}(b) ≠ 0`.
+///
+/// When all three fail, the sum of the `n` Artin–Schreier conjugates of
+/// `z² + z = x + a + b/x²` is `≡` the constant `Tr_{K/k}(a)` modulo `℘(K(x))`.
+/// Its `℘`-root `h₀` lies in `F_{q²}` and lies in `k = F_q` exactly when
+/// `Tr_{K/F_2}(a) = 0`.  Otherwise `σ(h₀) = h₀ + 1`, so every lift of `σ` to
+/// the compositum flips an odd number of the `z_i` and has order `2n`: there
+/// is no Weil descent of the cover to `k`, whatever [`magic_number`] says.
+/// `Tr_{K/F_2}(a)` is an isogeny invariant (it fixes `#E mod 4`), so the
+/// condition can fail for a whole isogeny class at once.
+pub fn mmt_condition_8(tower: &FieldTower, a: &F2mElement, b: &F2mElement) -> bool {
+    tower.n % 2 == 1 || !absolute_trace(tower, a) || !relative_trace(tower, b).is_zero()
+}
+
+/// `(plain, mmt)`: the ranks of `{σ^i(√b)}` and of `{(1, σ^i(√b))}`.  The
+/// pairs are encoded by setting bit `big_n` (the `F_2` coordinate) on each
+/// orbit element.  `mmt` is forced to `0` when `b = 0`.
+fn mmt_ranks(tower: &FieldTower, b: &F2mElement) -> (u32, u32) {
+    let orbit = sqrt_b_orbit(tower, b);
+    let plain = f2_dim(&orbit, tower.big_n);
+    if plain == 0 {
+        return (0, 0);
+    }
+    let lifted: Vec<F2mElement> = orbit
+        .iter()
+        .map(|e| {
+            let mut v = e.to_biguint();
+            v.set_bit(u64::from(tower.big_n), true);
+            F2mElement::from_biguint(&v, tower.big_n + 1)
+        })
+        .collect();
+    (plain, f2_dim(&lifted, tower.big_n + 1))
 }
 
 /// GHS hyperelliptic-descent genus from the magic number.
 ///
-/// Standard formula (Hess Theorem 4.1): `g = 2^{m−1}` in the
-/// "generic" / type-II case.  When `σ` acts on `V_E(σ)` with order
-/// exactly `m` and the orbit closes, the genus drops by one to
-/// `2^{m−1} − 1` (type I).  Distinguishing the two requires
-/// checking whether `σ^m(√b) = √b` (orbit length divides `m`); see
-/// [`ghs_genus_with_type`] for the refined version.
+/// `g = 2^{m−1}` in the type-II case `(x − 1) | Ord_b`; the type-I case
+/// `(x − 1) ∤ Ord_b` has `2^{m−1} − 1` (see [`ghs_type_i`] and
+/// [`ghs_genus_with_type`]).
 pub fn ghs_genus(magic_m: u32) -> BigUint {
     if magic_m == 0 {
         BigUint::zero()
@@ -354,26 +406,28 @@ pub fn ghs_genus_for_type(magic_m: u32, type_i: bool) -> BigUint {
     }
 }
 
-/// Return `(genus, is_type_i)`.  Type I (genus `2^{m−1} − 1`)
-/// occurs when the `σ`-orbit of `√b` has length exactly `m`
-/// (closed orbit, no `F_2`-linear surprises), which is the *most
-/// favourable* trapdoor case.
+/// Return `(genus, is_type_i)` for the MMT [`magic_number`] `m`.  Type I
+/// (genus `2^{m−1} − 1`) is `(x − 1) ∤ Ord_b` ([`ghs_type_i`]); otherwise
+/// the genus is `2^{m−1}`.
+///
+/// Before 2026-10-13 this paired the plain orbit dimension with the test
+/// "orbit length == m", which inverts the type in both directions (for
+/// `n` prime and `√b` of full orbit it reported `2^{n−1} − 1` where the
+/// genus is `2^{n−1}`, and `2^{n−2}` where it is `2^{n−1} − 1`).
 pub fn ghs_genus_with_type(tower: &FieldTower, b: &F2mElement) -> (BigUint, bool) {
-    let m = magic_number(tower, &F2mElement::zero(tower.big_n), b);
+    let (plain, m) = mmt_ranks(tower, b);
     if m == 0 {
         return (BigUint::zero(), false);
     }
-    let sqrt_b = tower.sqrt(b);
-    let orbit_len = tower.frobenius_orbit_length(&sqrt_b);
-    let type_i = orbit_len == m;
-    let g = ghs_genus_for_type(m, type_i);
-    (g, type_i)
+    let type_i = m == plain + 1;
+    (ghs_genus_for_type(m, type_i), type_i)
 }
 
 /// **Auditor view** of a curve `E/F_{2^N}`: try every non-trivial
 /// factorisation `N = n·l` and report the descent magic number /
-/// genus for each.  Returns the rows sorted by `(genus, l)` ascending
-/// (smaller-genus attacks first).
+/// genus for each, with MMT Lemma 6 condition (8) in
+/// [`DescentRow::descends`].  Rows that descend come first, then by
+/// `(genus, l)` ascending (smaller-genus attacks first).
 pub fn audit_curve(
     big_n: u32,
     big_irr: &IrreduciblePoly,
@@ -391,24 +445,25 @@ pub fn audit_curve(
         }
         let tower = FieldTower::new(big_n, n, l, big_irr.clone());
         let m = magic_number_full(&tower, a, b);
-        // The full audit magic number may include generators contributed by
-        // `a`, whereas `ghs_genus_with_type` intentionally exposes the
-        // historical b-only helper.  Derive the type from b's orbit, then
-        // apply it to the same full magic number stored in this row.
-        let sqrt_b = tower.sqrt(b);
-        let type_i = tower.frobenius_orbit_length(&sqrt_b) == m;
-        let g = ghs_genus_for_type(m, type_i);
+        let (g, type_i) = ghs_genus_with_type(&tower, b);
         rows.push(DescentRow {
             n,
             l,
             magic_m: m,
             genus: g,
             type_i,
+            descends: mmt_condition_8(&tower, a, b),
         });
     }
-    // Sort: smallest genus first (most threatening descent); ties
-    // broken by larger l (more "work" in the descent curve field).
-    rows.sort_by(|x, y| x.genus.cmp(&y.genus).then(y.l.cmp(&x.l)));
+    // Sort: rows that descend (MMT condition (8)) first, then smallest
+    // genus (most threatening descent); ties broken by larger l (more "work"
+    // in the descent curve field).
+    rows.sort_by(|x, y| {
+        y.descends
+            .cmp(&x.descends)
+            .then(x.genus.cmp(&y.genus))
+            .then(y.l.cmp(&x.l))
+    });
     rows
 }
 
@@ -419,23 +474,31 @@ pub struct DescentRow {
     pub n: u32,
     /// `[k : F_2]`.
     pub l: u32,
-    /// Hess magic number `m_E(σ)` for this factorisation.
+    /// MMT magic number `dim span{(1, σ^i(√b))}` for this factorisation.
     pub magic_m: u32,
     /// GHS genus `2^{m−1}` or `2^{m−1} − 1`.
     pub genus: BigUint,
-    /// Type-I (closed σ-orbit on `√b`)?
+    /// Type I, `(x − 1) ∤ Ord_b` (genus `2^{m−1} − 1`)?
     pub type_i: bool,
+    /// MMT Lemma 6 condition (8) ([`mmt_condition_8`]): whether the cover
+    /// descends to `F_{2^l}` at all.  When `false`, `magic_m` and `genus`
+    /// describe the cover over `K` only and the row is no attack.
+    pub descends: bool,
 }
 
 /// **Trapdoor constructor**: given a target factorisation `N = n·l`
 /// and a target magic number `m_target` (small ⇒ small descent
-/// genus), search for `b ∈ F_{2^N}` with `√b ∈ F_{2^{m_target·l}}
-/// \ F_{2^{(m_target−1)·l}}` so the σ-orbit has length exactly
-/// `m_target`.
+/// genus), search for `b ∈ F_{2^N}` with `√b ∈ F_{2^{m_target·l}}`
+/// whose σ-orbit has length exactly `m_target` and is `F_2`-independent.
+/// Then `Ord_b = x^{m_target} − 1`, which `(x − 1)` divides, so the MMT
+/// magic number is `m_target` and the curve is type II (genus
+/// `2^{m_target−1}`).
 ///
 /// Returns the curve coefficients `(a, b)` and the resulting
-/// audit row.  We fix `a = 1` (so the `a`-contribution to the
-/// magic number vanishes).
+/// audit row.  We fix `a = 1`.  `a` does not change the magic number, and
+/// `a = 1` always satisfies MMT Lemma 6 condition (8)
+/// ([`mmt_condition_8`]): `Tr_{K/F_2}(1) = N mod 2`, and an even `n` makes
+/// `N` even, so the trace is 0 whenever condition (8) could fail.
 ///
 /// **Returns `None`** if the search budget is exhausted; this is
 /// rare for small `N` but can happen for highly constrained towers.
@@ -504,6 +567,8 @@ pub fn construct_trapdoor_curve(
             continue;
         }
         // Build the audit row for the target factorisation.
+        let descends = mmt_condition_8(&tower, &a, &b);
+        debug_assert!(descends, "Tr(1) = N mod 2 is 0 whenever n is even");
         let m = magic_number_full(&tower, &a, &b);
         let (genus, type_i) = ghs_genus_with_type(&tower, &b);
         debug_assert_eq!(m, m_target);
@@ -522,6 +587,7 @@ pub fn construct_trapdoor_curve(
                 magic_m: m,
                 genus,
                 type_i,
+                descends,
             },
             full_audit: None,
         });
@@ -723,4 +789,166 @@ mod tests {
             assert_eq!(r.magic_m, 1, "{:?}", r);
         }
     }
+
+    /// `F_{2^12}` with `z^12 + z^3 + 1`.
+    fn f4096_irr() -> IrreduciblePoly {
+        IrreduciblePoly {
+            degree: 12,
+            low_terms: vec![0, 3],
+        }
+    }
+
+    /// `Tr_{K/k}(x) = Σ_{i<n} σ^i(x)`.
+    /// MMT Theorem 5(i) over `N = 12`: for `n = 3`,
+    /// `x^3 − 1 = (x − 1)(x^2 + x + 1)` gives `m = 1` on `k*` and `m = 3`
+    /// elsewhere (`m = 2` is not attained); for `n = 2`, `m = 1` on `k*`
+    /// and `m = 2` elsewhere.
+    #[test]
+    fn mmt_theorem5_counts_n12() {
+        let irr = f4096_irr();
+        for (n, l, expect) in [
+            (3u32, 4u32, vec![0u64, 15, 0, 4096 - 16]),
+            (2, 6, vec![0, 63, 4096 - 64]),
+        ] {
+            let tower = FieldTower::new(12, n, l, irr.clone());
+            let mut h = vec![0u64; n as usize + 1];
+            for v in 1u64..4096 {
+                let b = F2mElement::from_biguint(&BigUint::from(v), 12);
+                h[magic_number(&tower, &F2mElement::zero(12), &b) as usize] += 1;
+            }
+            assert_eq!(h, expect, "n = {n}");
+        }
+    }
+
+    /// The plain orbit dimension is one short exactly on the `b ∉ k` with
+    /// `Tr_{K/k}(b) = 0` (`N = 12`, `n = 3`), and those are exactly the
+    /// type-I curves.  `magic_number_full` ignores `a`.
+    #[test]
+    fn plain_orbit_undercounts_on_relative_trace_zero() {
+        let irr = f4096_irr();
+        let tower = FieldTower::new(12, 3, 4, irr);
+        let a = F2mElement::from_biguint(&BigUint::from(0b1011_0110_0101u32), 12);
+        let mut extra = 0;
+        for v in 1u64..4096 {
+            let b = F2mElement::from_biguint(&BigUint::from(v), 12);
+            let mmt = magic_number(&tower, &F2mElement::zero(12), &b);
+            let plain = plain_orbit_dim(&tower, &b);
+            let expect_extra = relative_trace(&tower, &b).is_zero() && !tower.is_in_subfield(&b, 4);
+            assert_eq!(mmt, plain + u32::from(expect_extra), "v = {v}");
+            assert_eq!(ghs_type_i(&tower, &b), expect_extra, "v = {v}");
+            assert_eq!(magic_number_full(&tower, &a, &b), mmt, "v = {v}");
+            extra += u32::from(expect_extra);
+        }
+        // Tr_{K/k} is onto k with kernel of size q^2 = 256, less the
+        // 16 elements of k (which have Tr = 3b = b, so only b = 0).
+        assert_eq!(extra, 256 - 1);
+    }
+
+    /// `n = 5` (`N = 10`, `l = 2`): `x^5 − 1 = (x − 1)(x^4 + x^3 + x^2 + x + 1)`.
+    /// Generic `b` has `m = 5`, genus `16`; `b ∉ k` with `Tr_{K/k}(b) = 0` has
+    /// `m = 5`, genus `15` (the 15/16 dichotomy of the `F_{2^155}`, `n = 5`
+    /// GHS literature).  The old orbit-length rule gave 15 and 8.
+    #[test]
+    fn genus_type_n5() {
+        let irr = IrreduciblePoly {
+            degree: 10,
+            low_terms: vec![0, 3],
+        };
+        let tower = FieldTower::new(10, 5, 2, irr);
+        let mut seen = std::collections::BTreeMap::new();
+        for v in 1u64..1024 {
+            let b = F2mElement::from_biguint(&BigUint::from(v), 10);
+            let (g, type_i) = ghs_genus_with_type(&tower, &b);
+            let m = magic_number(&tower, &F2mElement::zero(10), &b);
+            let in_k = tower.is_in_subfield(&b, 2);
+            let tr0 = relative_trace(&tower, &b).is_zero();
+            let class = if in_k {
+                "k"
+            } else if tr0 {
+                "tr0"
+            } else {
+                "generic"
+            };
+            *seen
+                .entry((class, m, g.to_string(), type_i))
+                .or_insert(0u32) += 1;
+        }
+        let got: Vec<_> = seen.into_iter().collect();
+        assert_eq!(
+            got,
+            vec![
+                (("generic", 5, "16".to_string(), false), 1023 - 3 - 255),
+                (("k", 1, "1".to_string(), false), 3),
+                (("tr0", 5, "15".to_string(), true), 255),
+            ]
+        );
+    }
+
+    /// MMT Lemma 6 condition (8), exhaustive over `F_{2^12}`: with `Tr(a) = 1`
+    /// it fails on exactly the `q^{n−1} − 1` nonzero `b` of relative trace
+    /// zero when `n` is even, and never when `n` is odd; with `Tr(a) = 0` it
+    /// always holds.
+    #[test]
+    fn mmt_condition_8_counts_n12() {
+        let irr = f4096_irr();
+        let el = |v: u64| F2mElement::from_biguint(&BigUint::from(v), 12);
+        let any = FieldTower::new(12, 2, 6, irr.clone());
+        let a1 = (1u64..).map(el).find(|a| absolute_trace(&any, a)).unwrap();
+        let a0 = F2mElement::zero(12);
+        for (n, l) in [(2u32, 6u32), (3, 4), (4, 3), (6, 2), (12, 1)] {
+            let tower = FieldTower::new(12, n, l, irr.clone());
+            let fails = (1u64..4096)
+                .filter(|&v| !mmt_condition_8(&tower, &a1, &el(v)))
+                .count();
+            let expect = if n % 2 == 1 { 0 } else { (1usize << (12 - l)) - 1 };
+            assert_eq!(fails, expect, "n = {n}");
+            assert!((1u64..4096).all(|v| mmt_condition_8(&tower, &a0, &el(v))));
+        }
+    }
+
+    /// `audit_curve` lists towers whose cover descends first: with
+    /// `Tr(a) = 1` and `b = 1` every even-`n` tower of `F_{2^12}` is
+    /// obstructed, and the only one left is `n = 3`, `l = 4`.
+    #[test]
+    fn audit_curve_puts_descending_towers_first() {
+        let irr = f4096_irr();
+        let any = FieldTower::new(12, 2, 6, irr.clone());
+        let a1 = (1u64..)
+            .map(|v| F2mElement::from_biguint(&BigUint::from(v), 12))
+            .find(|a| absolute_trace(&any, a))
+            .unwrap();
+        let rows = audit_curve(12, &irr, &a1, &F2mElement::one(12));
+        assert_eq!(
+            rows.iter().map(|r| (r.n, r.descends)).collect::<Vec<_>>(),
+            vec![(3, true), (2, false), (4, false), (6, false), (12, false)]
+        );
+    }
+
+    /// The trapdoor constructor's `a = 1` never violates condition (8): an
+    /// even `n` forces an even `N`, so `Tr(1) = N mod 2 = 0`.  Checked at
+    /// `N = 12`, `n = 4`, `m = 2` (where `n / m` is even and `Tr_{K/k}(b)`
+    /// vanishes) and `N = 10`, `n = 2`, `m = 1`.
+    #[test]
+    fn trapdoor_curves_satisfy_condition_8() {
+        for (big_n, n, l, m, irr) in [
+            (12u32, 4u32, 3u32, 2u32, f4096_irr()),
+            (
+                10,
+                2,
+                5,
+                1,
+                IrreduciblePoly {
+                    degree: 10,
+                    low_terms: vec![0, 3],
+                },
+            ),
+        ] {
+            let tc = construct_trapdoor_curve(big_n, n, l, m, &irr, 4096).expect("trapdoor curve");
+            let tower = FieldTower::new(big_n, n, l, irr.clone());
+            assert!(tc.row.descends);
+            assert!(mmt_condition_8(&tower, &tc.a, &tc.b));
+            assert_eq!(tc.row.magic_m, m);
+        }
+    }
+
 }

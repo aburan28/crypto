@@ -30,10 +30,11 @@ follow from those counts plus a cited theorem. **Interpretation** is labelled.
   `sigma = x -> x^(2^l)`. The repository's older `ec_trapdoor::magic_number`
   uses `dim Span{sqrt(b_i)}`. That is one smaller exactly when `(x - 1)` does not
   divide `Ord_b` (MMT Theorem 5(i)), and the test `plain_orbit_undercounts`
-  pins the difference. The legacy function was left unchanged in this
-  study's PR (#1764). *Update 2026-10-13:* it now uses the MMT definition
-  (follow-up PR); see `ec_trapdoor::magic_number`. The study's own numbers
-  never used it and are unaffected.
+  pins the difference. The legacy function is left unchanged in this PR; a
+  separate task is suggested for fixing it. *Update 2026-10-13:* fixed;
+  `ec_trapdoor::magic_number` now returns the MMT value and the plain orbit
+  dimension is `ec_trapdoor::plain_orbit_dim` (see
+  `docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md`).
 - **Twist** (`Tr a = 1`): admitted only under MMT Lemma 6 condition (8), `n`
   odd or `j_0 = 2^e`, which is equivalent to `n` odd or `Tr_{K/k}(b) != 0`. A twist
   failing (8) is counted as not covered (conservative).

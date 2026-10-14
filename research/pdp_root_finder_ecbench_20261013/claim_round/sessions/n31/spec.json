@@ -1,0 +1,75 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "claim round: rootfind-mitm on the Frobenius-orbit base vs strong rho, E_0 n=31",
+  "description": "Claim round (PROTOCOL.md): ic.pipeline with koblitz-orbit:divisor=2;3 (columns are signed Frobenius orbits, so the IC1 identity can name the base) and rootfind-mitm:m=3, the mitm:m=3 table oracle as baseline, against the strong signed-Frobenius rho on eight public one-target workloads; a vs_rho claim is built per workload.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 31
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 202610134031,
+    "target_kind": "public"
+  },
+  "arms": [
+    {
+      "name": "rho-strong",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {
+          "lanes": "32",
+          "dp_bits": "4",
+          "step_cap_factor": "2000"
+        }
+      }
+    },
+    {
+      "name": "ic-mitm",
+      "role": "baseline",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-orbit:divisor=2;3",
+          "oracle": "mitm:m=3,negation_folded=1",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-rootfind",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-orbit:divisor=2;3",
+          "oracle": "rootfind-mitm:m=3",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "rho-strong-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {
+          "lanes": "32",
+          "dp_bits": "4",
+          "step_cap_factor": "2000"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 3,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 202610135031,
+    "isolation_required": "L2",
+    "timeout_seconds": 3600
+  }
+}

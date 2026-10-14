@@ -14,12 +14,15 @@ F_2 <= F_(2^l) <= F_(2^N)
 C/F_(2^l) -> E/F_(2^N)
 ```
 
-The report carries the GHS magic number
-`m = dim_F2 Span{(1, sigma^i(sqrt b))}` (Maurer–Menezes–Teske 2002, eq. (5);
-before 2026-10-13 the constant coordinate was omitted, which understated `m` by
-one whenever `(x - 1)` does not divide `Ord_b`), GHS type, exact descent genus, and
-Artin--Schreier compositum degree for every row. Rows are sorted by increasing
-genus. The default genus bound of four is only a structural filter.
+The report carries the Hess magic number, GHS type, exact descent genus,
+Artin--Schreier compositum degree and MMT Lemma 6 condition (8) for every row.
+Condition (8) (`mmt_condition_8`) says whether the cover descends to
+`F_(2^l)` at all: it holds when `n` is odd, or `Tr(a) = 0`, or
+`Tr_(F_(2^N)/F_(2^l))(b) != 0`. When it fails the magic number and genus
+describe the cover over `F_(2^N)` only, and the row is never counted as
+within the genus bound. Rows whose cover descends come first, each group
+sorted by increasing genus. The default genus bound of four is only a
+structural filter.
 
 ## Usage
 
@@ -35,7 +38,9 @@ cargo run --bin ghs_screen -- \
   --genus-bound 4
 ```
 
-Use `--output report.json` for a file. Output uses schema `ghs-screen/v1` and
+Use `--output report.json` for a file. Output uses schema `ghs-screen/v2`
+(since 2026-10-13: v1 had no `mmt_condition_8` field and counted every row
+within the bound as a candidate) and
 stores genus and cover degree as decimal strings so consumers in languages
 without arbitrary-width JSON integers cannot silently truncate them.
 

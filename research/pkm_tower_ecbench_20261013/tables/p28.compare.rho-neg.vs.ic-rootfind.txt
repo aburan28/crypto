@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p28/comparisons/rho-neg__ic-rootfind.json
+ops (ok): ic-rootfind / rho-neg = 140.6189 [113.032, 182.282] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 178.5506 [153.148, 265.894]
+| curve | log2 r | workloads | ic-rootfind / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp28-t4155-50f492b1 | 26.20 | 8 | 140.6189 | [113.0323, 182.2820] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W2ccd8c58d746 | icv1-fp28-t4155-50f492b1 | 26.20 | 1.2162 | 131.6468 | 108.2429 |
+| W312e2a60696a | icv1-fp28-t4155-50f492b1 | 26.20 | 0.7815 | 130.8147 | 167.3971 |
+| W3a315d086353 | icv1-fp28-t4155-50f492b1 | 26.20 | 0.6040 | 131.6150 | 217.9016 |
+| W4f89d827f0f8 | icv1-fp28-t4155-50f492b1 | 26.20 | 1.2174 | 132.4168 | 108.7675 |
+| W6cf3601f38d4 | icv1-fp28-t4155-50f492b1 | 26.20 | 0.7835 | 132.2884 | 168.8404 |
+| W7ae405a02d41 | icv1-fp28-t4155-50f492b1 | 26.20 | 0.8464 | 131.3848 | 155.2339 |
+| Waae34cb814ba | icv1-fp28-t4155-50f492b1 | 26.20 | 1.3115 | 131.5265 | 100.2897 |
+| Wdea0d01c7e18 | icv1-fp28-t4155-50f492b1 | 26.20 | 0.7265 | 131.1155 | 180.4761 |

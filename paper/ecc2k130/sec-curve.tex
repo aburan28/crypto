@@ -5,40 +5,40 @@ ECC2K-130 is the Certicom challenge~\cite{certicom1997}
 \[
   E:\ y^2 + xy = x^3 + 1 \qquad\text{over }\FF_{2^{131}},
 \]
-a Koblitz curve~\cite{koblitz1992} defined over $\FF_2$, with group
-order $4\cdot\ell$,
+a Koblitz curve~\cite{koblitz1992} defined over $\FF_2$, whose group
+order is $4\cdot\ell$ with
 \[
   \ell = 680564733841876926932320129493409985129,
 \]
 a 129-bit prime.\art{ecc2k130/README.md, ``The problems''} The
-challenge asks for $k$ with $Q=[k]P$ for published $P$ and $Q$ of
-order $\ell$. It has been open since 1997; the 2009 consortium
-estimate of the work is $2^{60.9}$ iterations of a
+challenge gives points $P$ and $Q$ of order $\ell$ and asks for $k$
+with $Q=[k]P$. It has been open since 1997. The 2009 consortium
+estimated the work at $2^{60.9}$ iterations of a
 Frobenius-equivariant walk~\cite{bailey2009}, and
-Section~\ref{sec:walk-constant} measures this paper's walk at
-$2^{60.91}$--$2^{60.92}$ on completed trails.
+Section~\ref{sec:walk-constant} measures our walk at
+$2^{60.91}$--$2^{60.92}$.
 
-The curve is identified rather than trusted. $E(\FF_2)$ has four
-points, so the Frobenius trace is $t=-1$ and the Koblitz recursion
+We did not take the curve on trust. $E(\FF_2)$ has four points, so
+the Frobenius trace is $t=-1$, and the Koblitz recursion
 $s_m = t\,s_{m-1} - 2 s_{m-2}$ gives $\#E(\FF_{2^{131}}) = 2^{131}+1-s_{131}
 = 4\ell$. The sibling library's test suite checks the two facts that
-make this \emph{this} curve, on random points multiplied by the
+pin down \emph{this} curve, on random points multiplied by the
 cofactor: $\sigma^2+\sigma+2=0$, where $\sigma(x,y)=(x^2,y^2)$ is the
 Frobenius, and $\ell\cdot
 R=\mathcal{O}$.\art{cryptanalysis:fpga/README.md}\art{cryptanalysis:fpga/model/ecc2k130_test.c}
-The published challenge point converts out of the normal basis back
-to Certicom's polynomial-basis hex, \texttt{05 1C99BFA6 F18DE467
+Converting the published challenge point out of the normal basis gives
+back Certicom's polynomial-basis hex, \texttt{05 1C99BFA6 F18DE467
 C80C23B9 8C7994AA}.\art{ecc2k130/README.md, ``Validation''}
 
 \subsection{A type-II optimal normal basis}
 \label{sec:onb}
 
-$2\cdot131+1=263$ is prime and $2$ has order $131$ modulo $263$, so
-$\FF_{2^{131}}$ has a type-II optimal normal basis. With $\zeta$ a
-primitive $263$rd root of unity the basis is
-$\gamma_i = \zeta^i + \zeta^{-i}$, $i=1,\ldots,131$, and an element is a
-131-bit vector. Every design in this paper, on every platform, is
-built on three consequences.\art{ecc2k130/README.md, ``Field representation''}
+Because $2\cdot131+1=263$ is prime and $2$ has order $131$ modulo
+$263$, $\FF_{2^{131}}$ has a type-II optimal normal basis. Taking
+$\zeta$ to be a primitive $263$rd root of unity, the basis is
+$\gamma_i = \zeta^i + \zeta^{-i}$ for $i=1,\ldots,131$, and an element
+is a 131-bit vector. Every design in this paper, on every platform,
+leans on three consequences of that choice.\art{ecc2k130/README.md, ``Field representation''}
 
 \begin{center}
 \small
@@ -49,17 +49,17 @@ fact & consequence \\
 $\gamma_i\gamma_j = \gamma_{i+j} + \gamma_{i-j}$
   (indices folded by $\gamma_{263-k}=\gamma_k$, $\gamma_0=0$)
   & a product is a cyclic convolution of two symmetric 263-bit
-    vectors, or, after a Bernstein--Lange change of basis, a
+    vectors or, after a Bernstein--Lange change of basis, a
     polynomial product with no reduction step \\
 $\gamma_i^2 = \gamma_{2i \bmod 263}$
-  & squaring is the index permutation $i\mapsto\mathrm{fold}(2i)$:
-    free when loops are unrolled, wiring on an FPGA, so every
-    Frobenius power $\sigma^k$ costs nothing \\
+  & squaring is the index permutation $i\mapsto\mathrm{fold}(2i)$,
+    which is free in unrolled code and just wiring on an FPGA, so
+    every Frobenius power $\sigma^k$ costs nothing \\
 the Hamming weight of the vector is invariant under $\sigma$ and under
   negation $-(x,y)=(x,x+y)$
-  & the iteration's branch selector and the distinguished-point
-    predicate are functions on $\langle\sigma,-1\rangle$-classes that
-    read the vector the hardware already holds \\
+  & the iteration's branch selector and the distinguished-point test
+    are functions on $\langle\sigma,-1\rangle$-classes that read the
+    vector the hardware already holds \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -67,70 +67,71 @@ the Hamming weight of the vector is invariant under $\sigma$ and under
 \subsection{The golden model}
 \label{sec:golden}
 
-None of this is taken on trust. The code generator models the field
-as the symmetric vectors over $\ZZ/263\ZZ$ modulo the all-ones vector,
-with multiplication as cyclic convolution: a complete and obviously
-correct model of $\FF_{2^{131}}$, and the one every generated routine is checked against on 64 random
-inputs before it is written out.\art{ecc2k130/codegen/field.py}\art{ecc2k130/codegen/gen.py} The bitsliced multiply, square,
-inverse, $\sigma^7$ and Hamming weight are differentially tested
-against a reference implementation that shares no code with them;
-the iteration function is checked to commute with Frobenius and with
-negation; the collision solver recovers a planted logarithm; the
-distinguished-point comparison is checked exhaustively over all
-weights and cutoffs. \texttt{make test} runs 52 such checks across
+The code generator models the field as symmetric vectors over
+$\ZZ/263\ZZ$ modulo the all-ones vector, with multiplication as
+cyclic convolution. That model is complete and obviously correct, and
+every generated routine is checked against it on 64 random inputs
+before it is written out.\art{ecc2k130/codegen/field.py}\art{ecc2k130/codegen/gen.py}
+The bitsliced multiply, square, inverse, $\sigma^7$ and Hamming weight
+are also tested differentially against a reference implementation
+that shares no code with them. We check that the iteration function
+commutes with Frobenius and with negation, that the collision solver
+recovers a planted logarithm, and that the distinguished-point
+comparison is right for every weight and cutoff. In all,
+\texttt{make test} runs 52 such checks across
 $\mathrm{GF}(2^{23})$, $\mathrm{GF}(2^{41})$, $\mathrm{GF}(2^{83})$ and
 $\mathrm{GF}(2^{131})$.\art{ecc2k130/README.md, ``Validation''}
 
 The same model is the oracle for every other platform. The VHDL
-engine's reference script imports it directly and proves the
+engine's reference script imports it directly and uses it to prove the
 basis-change maps, the multiplier route, $\sigma^j$, the inversion
-chain and a full step before emitting test vectors
+chain and a full step before it emits test vectors
 (Section~\ref{sec:fpga}).\art{hdl/ecc2k130/ecc2k_ref.py} The sibling
-library's independent C model of the same field and curve
-(\texttt{cryptanalysis:fpga/model/ecc2k130.c}) was built separately
-and re-walks every GPU report that library imports; agreement between
-the two models on the same records is equality of 131-bit vectors in
-the same permuted basis, not equivalence up to a basis
-change~\cite{ecdlppaper}.
+library's C model of the same field and curve
+(\texttt{cryptanalysis:fpga/model/ecc2k130.c}) was written separately
+and re-walks every GPU report that library imports. When the two
+models agree on a record, they agree on the exact 131-bit vector in
+the same permuted basis, not merely up to a change of
+basis~\cite{ecdlppaper}.
 
-Longer runs check the reporting path rather than the algebra. On
+Longer runs exercise the reporting path rather than the algebra. On
 $\mathrm{GF}(2^{83})$, $12.6$~M iterations produced 172 distinguished
-points, within $30\%$ of the predicted rate, and 60 of them were
-recomputed from their seeds by the reference with no mismatch,
-including walks that had been restarted. On the challenge curve
-itself, with the cutoff loosened from 34 to 50 so that points appear,
-$3.1$~M iterations produced $12{,}368$ reports, 25 of which were
-recomputed and matched exactly.\art{ecc2k130/README.md, ``Validation''}
+points, within $30\%$ of the predicted rate, and the reference
+recomputed 60 of them from their seeds without a mismatch, including
+walks that had been restarted. On the challenge curve itself, with the
+cutoff loosened from 34 to 50 so that points actually appear, $3.1$~M
+iterations produced $12{,}368$ reports, and the 25 we recomputed all
+matched exactly.\art{ecc2k130/README.md, ``Validation''}
 
 \subsection{ECC2K-95 as the end-to-end control}
 \label{sec:ecc2k95}
 
 ECC2K-95 is the retired Certicom challenge on the same curve equation
-over $\FF_{2^{97}} = \FF_2[t]/(t^{97}+t^6+1)$, group order $4\ell$ with
-$\ell = 39614081257132074233778707191$ a 95-bit prime, solved by
-Harley and collaborators in 1998~\cite{harley1998}. $2\cdot97+1=195$ is
-composite, so there is no type-II optimal normal basis; the client
-runs a polynomial-basis backend with the orbit-invariant weight taken
-through one generated linear map into a normal basis, which is the
-arrangement Harley's own client used.\art{ecc2k130/README.md, ``ECC2K-130 and ECC2K-95''}
+over $\FF_{2^{97}} = \FF_2[t]/(t^{97}+t^6+1)$, with group order $4\ell$
+for the 95-bit prime $\ell = 39614081257132074233778707191$. Harley and
+collaborators solved it in 1998~\cite{harley1998}. Since $2\cdot97+1=195$
+is composite there is no type-II optimal normal basis, so the client
+runs a polynomial-basis backend and computes the orbit-invariant
+weight through one generated linear map into a normal basis, which is
+how Harley's own client did it.\art{ecc2k130/README.md, ``ECC2K-130 and ECC2K-95''}
 
-The parameters were recovered from Harley's surviving client source
-and the generator refuses to emit the curve unless both points lie on
-it, both have order $\ell$, and the published answer
+We recovered the parameters from Harley's surviving client source.
+The generator refuses to emit the curve unless both points lie on it,
+both have order $\ell$, and the published answer
 \[
   k = 37837308472231540269443981458
 \]
-satisfies $[k]P=Q$. Expected work is about $2^{44}$ iterations;
-Harley's group measured $2.16\cdot10^{13}$ against the
-$1.79\cdot10^{13}$ this walk predicts from
+satisfies $[k]P=Q$. The expected work is about $2^{44}$ iterations.
+Harley's group measured $2.16\cdot10^{13}$, against the
+$1.79\cdot10^{13}$ that this walk predicts from
 $\sqrt{\pi\ell/(4m)}$.\art{ecc2k130/README.md, ``The problems''} Per
-iteration the polynomial-basis field is about $1.9\times$ cheaper
-than $\mathrm{GF}(2^{131})$ in the normal basis (about $32{,}000$
-against $60{,}000$ bitsliced instructions), so ECC2K-95 is a
-few GPU-hours where ECC2K-130 is GPU-centuries: a real end-to-end
-test of the whole pipeline at a scale that completes.
-\art{ecc2k130/README.md, ``ECC2K-95''} The repository's separate
-ECC2K-95 CUDA kernel has run only through CPU emulation, where it
-recovers 21-bit and 40-bit toy logarithms at $0.94\times$ and
-$1.32\times$ its own prediction, and is not a throughput
-claim.\art{gpu/ecc2k/README.md}
+iteration the polynomial-basis field is about $1.9\times$ cheaper than
+$\mathrm{GF}(2^{131})$ in the normal basis (roughly $32{,}000$ against
+$60{,}000$ bitsliced instructions). That makes ECC2K-95 a job of a few
+GPU-hours where ECC2K-130 takes GPU-centuries, which is exactly what an
+end-to-end test of the whole pipeline needs: the same machinery at a
+scale that finishes.\art{ecc2k130/README.md, ``ECC2K-95''} The
+repository's separate ECC2K-95 CUDA kernel has so far run only under
+CPU emulation, where it recovers 21-bit and 40-bit toy logarithms at
+$0.94\times$ and $1.32\times$ its own prediction; we do not use it for
+any throughput claim.\art{gpu/ecc2k/README.md}
