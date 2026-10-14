@@ -212,6 +212,30 @@ pub fn registry() -> &'static [MethodDecl] {
             ],
         },
         MethodDecl {
+            id: "rho.signed_frobenius_strong_legacy",
+            family: "rho",
+            summary: "the literal pre-2026-10-14 implementation of the strong single-target reference, retained only as a trajectory-identical within-binary performance control",
+            entry: "koblitz_strong_rho::StrongRho::solve_legacy",
+            applies: Applies::KoblitzOnly,
+            params: &[
+                ParamDecl {
+                    name: "lanes",
+                    default: Some("32"),
+                    help: "walks advanced in lockstep (batch-inversion width); the reference measured 32",
+                },
+                ParamDecl {
+                    name: "dp_bits",
+                    default: Some("4"),
+                    help: "distinguished-point bits; the reference measured 4",
+                },
+                ParamDecl {
+                    name: "step_cap_factor",
+                    default: Some("2000"),
+                    help: "give up after this multiple of the ideal step count",
+                },
+            ],
+        },
+        MethodDecl {
             id: "rho.signed_frobenius_strong_escape",
             family: "rho",
             summary: "the strong reference with fruitless cycles escaped by doubling instead of abandoned: identical walks until a cycle, so long distinguished-point walks (the large dp_bits a table at m = 83 needs) survive; A = 2n, Koblitz curves only",
@@ -928,7 +952,9 @@ fn solve_wide(
     seed: u64,
 ) -> Result<SolveReport, String> {
     match m.id.as_str() {
-        "rho.signed_frobenius_strong" | "rho.signed_frobenius_strong_escape" => {
+        "rho.signed_frobenius_strong"
+        | "rho.signed_frobenius_strong_legacy"
+        | "rho.signed_frobenius_strong_escape" => {
             solve_strong_wide(m, wi, tx, ty, seed)
         }
         "claw.pair_table" => solve_claw_wide(m, wi, tx, ty, seed),
@@ -1011,6 +1037,7 @@ fn solve_inner(
         }
         (Instance::Binary(i), _)
             if m.id == "rho.signed_frobenius_strong"
+                || m.id == "rho.signed_frobenius_strong_legacy"
                 || m.id == "rho.signed_frobenius_strong_escape" =>
         {
             solve_strong(m, i, FastPoint::affine(tx, ty), seed)
@@ -1468,7 +1495,11 @@ fn strong_run<F: RhoField, S: RhoScalar>(
         measurement::callgrind_dump(b"ecbench_before_online\0");
     }
     measurement::begin_online(Phase::RhoSolve);
-    let outcome = rho.solve(q, &jumps, &mut start_rng, &params, charges);
+    let outcome = if m.id == "rho.signed_frobenius_strong_legacy" {
+        rho.solve_legacy(q, &jumps, &mut start_rng, &params, charges)
+    } else {
+        rho.solve(q, &jumps, &mut start_rng, &params, charges)
+    };
     measurement::end_online();
     if profile_online {
         measurement::callgrind_dump(b"ecbench_online\0");
@@ -2555,7 +2586,10 @@ mod tests {
             let m = resolve(&MethodSpec {
                 id: "ic.pipeline".into(),
                 params: [
-                    ("factor_base".to_string(), "prime-abscissa:size=32".to_string()),
+                    (
+                        "factor_base".to_string(),
+                        "prime-abscissa:size=32".to_string(),
+                    ),
                     ("oracle".to_string(), oracle.to_string()),
                 ]
                 .into_iter()
@@ -2581,7 +2615,11 @@ mod tests {
         let (s, r) = (relations(&sub), relations(&root));
         // The same candidate points, each one addition; the root finder
         // adds one re-addition per relation and nothing else.
-        assert_eq!(r.adds, s.adds + root.counters["relations_found"], "{s:?} {r:?}");
+        assert_eq!(
+            r.adds,
+            s.adds + root.counters["relations_found"],
+            "{s:?} {r:?}"
+        );
         assert_eq!(r.native["lookups"], s.native["lookups"]);
         // One batched inversion per oracle call; the relation loop's
         // target guard skips a few trials before the oracle sees them.
@@ -2594,11 +2632,17 @@ mod tests {
 
         // A knob the engine does not read is refused, as is a summand
         // count it does not take.
-        for bad in ["rootfind-subtract:m=2,negation_folded=1", "rootfind-subtract:m=4"] {
+        for bad in [
+            "rootfind-subtract:m=2,negation_folded=1",
+            "rootfind-subtract:m=4",
+        ] {
             let m = resolve(&MethodSpec {
                 id: "ic.pipeline".into(),
                 params: [
-                    ("factor_base".to_string(), "prime-abscissa:size=32".to_string()),
+                    (
+                        "factor_base".to_string(),
+                        "prime-abscissa:size=32".to_string(),
+                    ),
                     ("oracle".to_string(), bad.to_string()),
                 ]
                 .into_iter()
@@ -2610,7 +2654,10 @@ mod tests {
         let m = resolve(&MethodSpec {
             id: "ic.pipeline".into(),
             params: [
-                ("factor_base".to_string(), "prime-abscissa:size=32".to_string()),
+                (
+                    "factor_base".to_string(),
+                    "prime-abscissa:size=32".to_string(),
+                ),
                 ("oracle".to_string(), "rootfind-subtract:m=3".to_string()),
             ]
             .into_iter()

@@ -190,6 +190,7 @@ pub trait RhoScalar:
     fn bit(self, i: u32) -> bool;
     fn mul_ctx(m: Self) -> Self::MulCtx;
     fn mul_in(ctx: &Self::MulCtx, a: Self, b: Self) -> Self;
+    fn mul_pair_in(ctx: &Self::MulCtx, a: Self, b: Self, multiplier: Self) -> (Self, Self);
     fn mul_mod(a: Self, b: Self, m: Self) -> Self;
     fn add_mod(a: Self, b: Self, m: Self) -> Self;
     fn sub_mod(a: Self, b: Self, m: Self) -> Self;
@@ -230,6 +231,10 @@ impl RhoScalar for u64 {
     #[inline(always)]
     fn mul_in(ctx: &MulMod, a: Self, b: Self) -> Self {
         ctx.mul(a, b)
+    }
+    #[inline(always)]
+    fn mul_pair_in(ctx: &MulMod, a: Self, b: Self, multiplier: Self) -> (Self, Self) {
+        ctx.mul_pair(a, b, multiplier)
     }
     fn mul_mod(a: Self, b: Self, m: Self) -> Self {
         mul_mod(a, b, m)
@@ -324,6 +329,13 @@ impl RhoScalar for u128 {
     #[inline(always)]
     fn mul_in(m: &u128, a: Self, b: Self) -> Self {
         mul_mod_u128(a, b, *m)
+    }
+    #[inline(always)]
+    fn mul_pair_in(m: &u128, a: Self, b: Self, multiplier: Self) -> (Self, Self) {
+        (
+            mul_mod_u128(a, multiplier, *m),
+            mul_mod_u128(b, multiplier, *m),
+        )
     }
     fn mul_mod(a: Self, b: Self, m: Self) -> Self {
         mul_mod_u128(a % m, b % m, m)
@@ -561,6 +573,40 @@ impl<E: FieldWord> Linear<E> {
         }
         acc
     }
+
+    /// Apply one linear map to two independent words in a single table walk.
+    /// Canonicalization always transforms `(x, y)` together; sharing the loop
+    /// halves its bounds, pointer and chunk-index work without changing a
+    /// lookup, table byte or output bit.
+    #[inline(always)]
+    fn apply_pair(&self, a: E, b: E) -> (E, E) {
+        // Every one-word Koblitz frontier curve has six, seven or eight byte
+        // chunks.  Spell those fixed shapes out so the hot path has constant
+        // shifts and table offsets, with no loop counter, dynamic shift, or
+        // bounds branch.  Other field widths retain the compact generic path.
+        macro_rules! fixed {
+            ($($i:literal),+ $(,)?) => {{
+                (
+                    E::default() $(^ self.tables[$i][a.byte($i as u32)])+,
+                    E::default() $(^ self.tables[$i][b.byte($i as u32)])+,
+                )
+            }};
+        }
+        match self.tables.len() {
+            6 => fixed!(0, 1, 2, 3, 4, 5),
+            7 => fixed!(0, 1, 2, 3, 4, 5, 6),
+            8 => fixed!(0, 1, 2, 3, 4, 5, 6, 7),
+            _ => {
+                let mut aa = E::default();
+                let mut bb = E::default();
+                for (chunk, table) in self.tables.iter().enumerate() {
+                    aa = aa ^ table[a.byte(chunk as u32)];
+                    bb = bb ^ table[b.byte(chunk as u32)];
+                }
+                (aa, bb)
+            }
+        }
+    }
 }
 
 /// Invert the `n × n` matrix over F2 whose columns are `columns`; `None` when
@@ -728,6 +774,45 @@ impl MulMod {
         } else {
             r
         }) as u64
+    }
+
+    /// Multiply two residues by the same residue.  Canonicalization applies
+    /// one orbit multiplier to both walk coefficients; one dispatch and one
+    /// floating conversion of that multiplier are enough for both exact
+    /// reductions.
+    #[inline(always)]
+    fn mul_pair(&self, a: u64, b: u64, multiplier: u64) -> (u64, u64) {
+        debug_assert!(a < self.m && b < self.m && multiplier < self.m);
+        if !self.fast {
+            return (
+                ((a as u128 * multiplier as u128) % self.m as u128) as u64,
+                ((b as u128 * multiplier as u128) % self.m as u128) as u64,
+            );
+        }
+        // `fast` proves every operand and the quotient are in `[0, 2^50)`.
+        // Going through `i64` therefore preserves the unsigned value exactly
+        // while compiling to the scalar signed conversion instructions; a
+        // general `u64 as f64` / `f64 as u64` must emit saturation branches
+        // for the half of u64 that this path can never receive.
+        let multiplier_f64 = multiplier as i64 as f64;
+        let reduce = |value: u64| {
+            let estimate = (value as i64 as f64) * multiplier_f64 * self.inv;
+            // SAFETY: the range proof above makes `estimate` finite,
+            // non-negative and smaller than 2^50, hence representable by i64.
+            let q = unsafe { estimate.to_int_unchecked::<i64>() as u64 };
+            let r = value
+                .wrapping_mul(multiplier)
+                .wrapping_sub(q.wrapping_mul(self.m)) as i64;
+            let m = self.m as i64;
+            (if r < 0 {
+                r + m
+            } else if r >= m {
+                r - m
+            } else {
+                r
+            }) as u64
+        };
+        (reduce(a), reduce(b))
     }
 }
 
@@ -1057,9 +1142,12 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
         choice
     }
 
-    /// Canonical representative of the signed-Frobenius orbit of the state's
-    /// point, with `a, b` multiplied by the orbit multiplier `±λ^k`.
-    pub fn canonicalize(&self, state: WalkStateG<F::E, S>) -> WalkStateG<F::E, S> {
+    /// Literal pre-optimization canonicalization retained as the within-binary
+    /// performance control.  It is deliberately separate from
+    /// [`Self::canonicalize`]: committed benchmark evidence can compare the
+    /// optimized implementation with these exact operations while requiring
+    /// identical points, coefficients, walks and charges.
+    fn canonicalize_legacy(&self, state: WalkStateG<F::E, S>) -> WalkStateG<F::E, S> {
         let RawPointG::Affine { x, y } = state.point else {
             return state;
         };
@@ -1092,6 +1180,51 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
         }
     }
 
+    /// Canonical representative of the signed-Frobenius orbit of the state's
+    /// point, with `a, b` multiplied by the orbit multiplier `±λ^k`.
+    pub fn canonicalize(&self, state: WalkStateG<F::E, S>) -> WalkStateG<F::E, S> {
+        let RawPointG::Affine { x, y } = state.point else {
+            return state;
+        };
+        let nb = &self.nb;
+        let (xc, yc) = nb.to_normal.apply_pair(x, y);
+        let (best, best_k, tie) = nb.least_rotation(xc);
+        let (k, negated) = if tie {
+            self.choice_exhaustive(xc, yc)
+        } else {
+            let yk = nb.rotate(yc, best_k);
+            (best_k, (yk ^ best) < yk)
+        };
+        let xk = nb.rotate(xc, k);
+        let yk = nb.rotate(yc, k);
+        let yk = if negated { yk ^ xk } else { yk };
+        let lam = self.lam_pow[k as usize];
+        let multiplier = if negated {
+            S::sub_mod(S::zero(), lam, self.modulus)
+        } else {
+            lam
+        };
+        let (a, b) = S::mul_pair_in(&self.mm, state.a, state.b, multiplier);
+        let (x, y) = nb.to_poly.apply_pair(xk, yk);
+        WalkStateG {
+            point: RawPointG::Affine { x, y },
+            a,
+            b,
+        }
+    }
+
+    #[inline(always)]
+    fn canonicalize_walk<const LEGACY: bool>(
+        &self,
+        state: WalkStateG<F::E, S>,
+    ) -> WalkStateG<F::E, S> {
+        if LEGACY {
+            self.canonicalize_legacy(state)
+        } else {
+            self.canonicalize(state)
+        }
+    }
+
     /// The jump table drawn from `jump_seed` (`s` uniform in `[1, r)`, `s·G ≠ O`).
     pub fn jumps(&self, jump_seed: u64, charges: &mut StrongRhoCharges) -> Vec<JumpG<F::E, S>> {
         let mut rng = StdRng::seed_from_u64(jump_seed);
@@ -1113,6 +1246,31 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
     /// `stride ∈ [1, r)` and `cursor ∈ [0, r)` from `start_rng` and then step
     /// `c·G + Q` by `stride·G`. Returns `None` when the step cap is reached.
     pub fn solve(
+        &self,
+        q: RawPointG<F::E>,
+        jumps: &[JumpG<F::E, S>],
+        start_rng: &mut StdRng,
+        params: &StrongRhoParams,
+        charges: StrongRhoCharges,
+    ) -> Option<StrongRhoOutcomeG<S>> {
+        self.solve_impl::<false>(q, jumps, start_rng, params, charges)
+    }
+
+    /// The same walk through the literal pre-optimization canonicalization.
+    /// This exists only as a reproducible performance baseline; it must remain
+    /// trajectory- and count-identical to [`Self::solve`].
+    pub fn solve_legacy(
+        &self,
+        q: RawPointG<F::E>,
+        jumps: &[JumpG<F::E, S>],
+        start_rng: &mut StdRng,
+        params: &StrongRhoParams,
+        charges: StrongRhoCharges,
+    ) -> Option<StrongRhoOutcomeG<S>> {
+        self.solve_impl::<true>(q, jumps, start_rng, params, charges)
+    }
+
+    fn solve_impl<const LEGACY: bool>(
         &self,
         q: RawPointG<F::E>,
         jumps: &[JumpG<F::E, S>],
@@ -1175,7 +1333,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
                         continue;
                     }
                     charges.canonicalizations += 1;
-                    lane.state = self.canonicalize(WalkStateG {
+                    lane.state = self.canonicalize_walk::<LEGACY>(WalkStateG {
                         point: start,
                         a: start_a,
                         b: S::one(),
@@ -1259,7 +1417,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
                 };
                 charges.group_additions += 1;
                 charges.canonicalizations += 1;
-                let next = self.canonicalize(WalkStateG {
+                let next = self.canonicalize_walk::<LEGACY>(WalkStateG {
                     point: sum,
                     a: S::add_mod(lane.state.a, jump.a, modulus),
                     b: lane.state.b,
@@ -1278,7 +1436,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
                     escapes += 1;
                     charges.group_additions += 1;
                     charges.canonicalizations += 1;
-                    lane.state = self.canonicalize(WalkStateG {
+                    lane.state = self.canonicalize_walk::<LEGACY>(WalkStateG {
                         point: self.add(next.point, next.point),
                         a: S::add_mod(next.a, next.a, modulus),
                         b: S::add_mod(next.b, next.b, modulus),
@@ -1431,8 +1589,17 @@ mod tests {
         for m in [3u64, 1 << 20, (1 << 49) + 1, (1 << 50) - 3, (1 << 57) + 13] {
             let mm = MulMod::new(m);
             for _ in 0..20_000 {
-                let (a, b) = (rng.gen_range(0..m), rng.gen_range(0..m));
+                let (a, b, multiplier) = (
+                    rng.gen_range(0..m),
+                    rng.gen_range(0..m),
+                    rng.gen_range(0..m),
+                );
                 assert_eq!(mm.mul(a, b), mul_mod(a, b, m), "m={m}");
+                assert_eq!(
+                    mm.mul_pair(a, b, multiplier),
+                    (mm.mul(a, multiplier), mm.mul(b, multiplier)),
+                    "paired m={m}"
+                );
             }
             assert_eq!(mm.mul(m - 1, m - 1), mul_mod(m - 1, m - 1, m));
         }
@@ -1455,7 +1622,15 @@ mod tests {
                 if p == RawPoint::Infinity {
                     continue;
                 }
-                let canon = rho.canonicalize(WalkState { point: p, a, b });
+                let state = WalkState { point: p, a, b };
+                let canon = rho.canonicalize(state);
+                let legacy = rho.canonicalize_legacy(state);
+                assert_eq!(
+                    (canon.point, canon.a, canon.b),
+                    (legacy.point, legacy.a, legacy.b),
+                    "optimized and legacy canonicalization differ at n={}",
+                    curve.n
+                );
                 let expected = rho.add(
                     rho.scalar_mul(rho.generator(), canon.a),
                     rho.scalar_mul(q, canon.b),
@@ -1506,6 +1681,75 @@ mod tests {
                     assert_eq!(out.scalar, d, "n={} lanes={lanes} seed={seed}", curve.n);
                     assert!(out.walk_steps > 0 && out.table_entries > 0);
                 }
+            }
+        }
+    }
+
+    /// The retained legacy arm is a performance control, not a different
+    /// algorithm: it must visit the same trails and return the same accounting
+    /// as the optimized arm for an identical target, jump table and RNG.
+    #[test]
+    fn optimized_and_legacy_solvers_follow_the_same_trajectory() {
+        for curve in curves().into_iter().filter(|c| (13..=31).contains(&c.n)) {
+            let rho = StrongRho::new(&curve);
+            for seed in 0..3u64 {
+                let mut charges = StrongRhoCharges::default();
+                let jumps = rho.jumps(seed ^ 0x5eed, &mut charges);
+                let d = StdRng::seed_from_u64(seed ^ 0xcafe).gen_range(1..rho.modulus());
+                let q = rho.scalar_mul(rho.generator(), d);
+                let params = StrongRhoParams::default();
+                let optimized = rho
+                    .solve(
+                        q,
+                        &jumps,
+                        &mut StdRng::seed_from_u64(seed),
+                        &params,
+                        charges,
+                    )
+                    .expect("optimized solve");
+                let legacy = rho
+                    .solve_legacy(
+                        q,
+                        &jumps,
+                        &mut StdRng::seed_from_u64(seed),
+                        &params,
+                        charges,
+                    )
+                    .expect("legacy solve");
+                assert_eq!(optimized.scalar, d);
+                assert_eq!(legacy.scalar, d);
+                assert_eq!(
+                    (
+                        optimized.walk_steps,
+                        optimized.walks,
+                        optimized.fruitless,
+                        optimized.escapes,
+                        optimized.capped,
+                        optimized.wasted_merges,
+                        optimized.table_entries,
+                        optimized.ideal_steps.to_bits(),
+                        optimized.automorphisms,
+                        optimized.charges,
+                        &optimized.dp_trail_lengths,
+                        &optimized.abandoned_trail_lengths,
+                    ),
+                    (
+                        legacy.walk_steps,
+                        legacy.walks,
+                        legacy.fruitless,
+                        legacy.escapes,
+                        legacy.capped,
+                        legacy.wasted_merges,
+                        legacy.table_entries,
+                        legacy.ideal_steps.to_bits(),
+                        legacy.automorphisms,
+                        legacy.charges,
+                        &legacy.dp_trail_lengths,
+                        &legacy.abandoned_trail_lengths,
+                    ),
+                    "n={} seed={seed}",
+                    curve.n
+                );
             }
         }
     }
