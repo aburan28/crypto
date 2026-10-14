@@ -2,17 +2,16 @@
 \section{Reproduction}
 \label{app:repro}
 
-The companion repository~\cite{rhoblackwell} will carry the ECC2K-130
-client (CUDA and CPU), the NIST P-256/P-384 rho kernel, the paper source,
-the benchmark data behind every figure, the evidence records of
-Appendix~\ref{app:evidence}, and a Docker image.
+The companion repository~\cite{rhoblackwell}, \url{https://github.com/aburan28/rho-blackwell}, carries the
+ECC2K-130 client (CUDA and CPU), the NIST P-256/P-384 rho kernel, the
+paper source, the benchmark data behind every figure, the evidence
+records of Appendix~\ref{app:evidence}, and a Dockerfile.
 
-\paragraph{Status.} The repository is assembled but not yet public. The
-CPU client, its validation suite, a planted-logarithm solve and every
-mode of the image's entry point have been run from its copy of the
-source; the Docker image itself has not yet been built, and its GPU modes
-have not been run. The commands below describe the intended workflow and
-will be checked before the repository is published.
+\paragraph{Status.} The CPU client, its validation suite, a
+planted-logarithm solve and every mode of the image's entry point have
+been run from the repository's copy of the source; the Docker image
+itself has not yet been built, and its GPU modes have not been run. The
+commands below describe the intended workflow.
 
 \paragraph{Docker.} The image compiles the client with CUDA~13.3 for
 Ampere, Ada, Hopper and both Blackwell families, with the audited
@@ -50,6 +49,7 @@ README lists the targets for each measured build, including the fused
 and nibble-table $\sigma$-walks and the B200 and RTX~PRO~4500 presets.
 
 \paragraph{Checking a number.} Every measured number cites an evidence
-record [E$n$]. Each record in the companion repository will hold the
-notes, data or source that report the measurement, so a reader can check
-a number without the development history.
+record [E$n$]. The repository's \texttt{evidence/} directory holds each
+record under its number, with the notes, data or source that report the
+measurement, so a reader can check a number without the development
+history; \texttt{evidence/map.json} names the original file of each.

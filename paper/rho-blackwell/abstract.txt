@@ -1,42 +1,41 @@
-We measure what Pollard rho costs on the current generation of NVIDIA
-hardware, using the Certicom challenge ECC2K-130 as the yardstick.
-ECC2K-130 is the Koblitz curve $y^2+xy=x^3+1$ over $\FF_{2^{131}}$, open
-since 1997, with an expected cost of $2^{60.9}$ iterations of a
-Frobenius-class rho. In 2010 the best published GPU kernel ran at
-$0.064$ billion iterations per second on a GTX~295 card. Rebuilt around
-the carry-less multiply that CUDA~13.3 exposes in PTX (\texttt{clmad}),
-three-input logic and a packed normal-basis representation, the same
-walk now runs at $14.64$ billion iterations per second on one
-RTX~PRO~6000 Blackwell in its audited campaign build and $15.88$ in the
-best later build, about $230$ times the 2010 card, so the whole budget is
-about five GPU-years. We trace that gain through sixteen paired
-optimisation steps and measure \texttt{clmad} on three dies: its issue
-rate per SM-clock differs by up to $18\times$ between the workstation and
-data-centre parts, so the same change can win on one Blackwell part and
-lose on another. We report twelve GPUs, Turing to Blackwell, per card,
-per SM and per dollar, show the kernel and where its speedup came from
-(none of it from changing the algorithm), and set the work against the
-instruction sets that made it possible on GPUs and CPUs. We separate the $\sigma$-walk from the table walk:
-the table walk's $20.08$ was measured under a cycle rule later found to
-leave cycles inconsistently, the exact rule runs at $8.24$ today, and the
-$\sigma$-walk is the fastest correct walk we have. Applying the same
-optimisations to Pollard rho on NIST P-256 and P-384 on the same card
-gives $1.52\times$ and $2.61\times$, to $1.632$ and $0.548$ billion iterations
-per second; the levers transfer, but their relative sizes do not. Upper bounds
-derived from measured pipe rates put any one-addition walk on one
-RTX~PRO~6000 at about $24$--$26$ billion iterations per second. In
-calendar terms, a fleet of five RTX~PRO~6000s expects to solve
-ECC2K-130 in a year, 56 in a month and a thousand in about three days,
-where the 2010 kernel needed over a thousand cards for a one-year solve;
-at the same rates P-256 remains about $6\cdot10^{21}$ card-years away. The
-walk constant is measured rather than assumed, at $2^{60.91}$--$2^{60.92}$
-iterations, and a floor derived from the carry-less unit before tuning
-rules out $28$ billion iterations per second on one card. We also report
-an FPGA engine at $8.25$ billion iterations per second on one AWS F2; a
-campaign that stored $486$ million distinguished points and $2^{56.68}$
-iterations ($5.4\%$ of the expected work) before its fleet was reclaimed;
-and the open questions
-we would pursue next. Every number cites an evidence record; the code, data
-and a Docker image that starts the ECC2K-130 walk are being prepared for
-release with the paper. None of this improves on the generic-group bound, and we do
-not claim that it does.
+We show how far Pollard rho can be accelerated on current NVIDIA GPUs by
+rebuilding its field arithmetic around the hardware, with the Certicom
+challenge ECC2K-130, the Koblitz curve $y^2+xy=x^3+1$ over
+$\FF_{2^{131}}$ with an expected cost of $2^{60.9}$ iterations, as the
+benchmark. None of the speedup comes from changing the algorithm. It
+comes from a packed normal-basis representation in which every
+Frobenius power is a permutation network instead of a chain of
+squarings; from the carry-less multiply that CUDA~13.3 exposes in PTX
+(\texttt{clmad}), which forms a 131-bit product in six instructions;
+from three-input logic instructions for everything around it; and from
+a batch size, launch geometry and compact tiled state chosen by
+measurement against the pipes they load. Across sixteen paired steps,
+each held to a rule written down before it ran, these take one
+RTX~PRO~6000 Blackwell from a $0.85$ billion iterations per second
+bitsliced control to $14.64$ in the audited campaign build, a
+$17.2\times$ gain (representation and arithmetic $6.3\times$, geometry
+$1.5\times$, memory layout $1.3\times$, \texttt{clmad} $1.2\times$), and a
+later build reaches $15.88$. That is about $230$ times the best published
+2010 GPU kernel per card and puts the whole challenge under five
+GPU-years: five cards expect a solution within a year, a thousand in
+about three days. The gains depend on the die. \texttt{clmad} issues ten
+to eighteen times faster per SM-clock on the data-centre parts than on
+the workstation part, so the same change can win on one Blackwell part
+and lose on another; we report twelve GPUs from Turing to Blackwell per
+card, per SM and per dollar, and the CPU instruction sets that play the
+same role. Upper bounds derived from measured pipe rates leave about
+$1.5\times$ of headroom on one RTX~PRO~6000, at $24$--$26$ billion
+iterations per second for any walk with one addition per step. The same
+levers applied to Pollard rho on NIST P-256 and P-384 on the same card
+give $1.52\times$ and $2.61\times$, to $1.632$ and $0.548$ billion
+iterations per second, which still leaves P-256 about $6\cdot10^{21}$
+card-years away. We also separate the $\sigma$-walk from a table walk
+whose $20.08$ was measured under a cycle rule later found unsound (the
+exact rule runs at $8.24$), measure the walk constant at
+$2^{60.91}$--$2^{60.92}$ iterations, and report an FPGA engine at $8.25$
+billion iterations per second on one AWS F2 and a campaign that walked
+$2^{56.68}$ iterations, $5.4\%$ of the expected work. Every number cites
+an evidence record; the code, data, evidence and a Dockerfile whose
+image starts the ECC2K-130 walk are at
+https://github.com/aburan28/rho-blackwell. None of this improves on the
+generic-group bound, and we do not claim that it does.

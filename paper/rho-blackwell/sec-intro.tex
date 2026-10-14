@@ -137,21 +137,21 @@ Sections~\ref{sec:ledger} and \ref{sec:campaign-interval} each record
 a case where an earlier draft in the repository made exactly that
 mistake.
 
-\paragraph{Availability.} We are preparing one companion repository,
-\texttt{rho-blackwell}~\cite{rhoblackwell}, to hold everything needed to
-read, check and rerun this work: the paper source, the ECC2K-130 GPU and
-CPU clients, the NIST P-256/P-384 rho kernel, the benchmark data behind
-every figure, a copy of every evidence record, and a Docker image that
-builds the client and starts walking ECC2K-130 by default
-(Appendix~\ref{app:repro}). At the time of writing it is not yet public,
-and the Docker image has not yet been built and run on a GPU; until it is,
-the records are available in the development repositories below. Every
-measured number in the paper cites an evidence record, written [E$n$], and
-Appendix~\ref{app:evidence} lists them. The records were produced in three development repositories
-(\texttt{crypto}, \texttt{cryptanalysis} and the research ledger
-\texttt{crypto-autoresearcher}), and the appendix names which one each
-came from. Live campaign aggregates are published at
-\url{https://aburan28.github.io/crypto/status/}.
+\paragraph{Availability.} Everything needed to read, check and rerun
+this work is in one public repository, \texttt{rho-blackwell}~\cite{rhoblackwell},
+\url{https://github.com/aburan28/rho-blackwell}: the paper source, the ECC2K-130 GPU and CPU clients, the
+NIST P-256/P-384 rho kernel, the benchmark data behind every figure, a
+copy of every evidence record, and a Dockerfile for an image that builds
+the client and starts walking ECC2K-130 by default
+(Appendix~\ref{app:repro}). The image has not yet been built and run on
+a GPU. Every measured number in the paper cites an evidence record,
+written [E$n$]; Appendix~\ref{app:evidence} lists them, and the
+repository holds a copy of each under its number. The records were
+produced in three development repositories (\texttt{crypto},
+\texttt{cryptanalysis} and the research ledger
+\texttt{crypto-autoresearcher}); the repository's evidence map names the
+original file of each, and the campaign's published status snapshots are
+among them~\evcite{\evref{feed}}.
 
 \paragraph{Use of AI.} Much of the engineering behind this paper was
 carried out with AI coding agents (Claude Code, OpenAI Codex and Cursor)
