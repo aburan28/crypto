@@ -1,0 +1,40 @@
+{
+  "schema": "n83-final-delivery-review/v1",
+  "status": "PASS",
+  "reviewed_head": "0b401aee43237106fd68f730b50af8ab9b87671e",
+  "feature_baseline": "c62555b7a1746490dba707589d791669a20bb0d0",
+  "manifest_checks": {
+    "report_artifacts": {"entries": 46, "exit_status": 0, "log": "report_manifest.log"},
+    "benchmark_copy": {"entries": 23, "exit_status": 0, "log": "benchmark_manifest.log"},
+    "frozen_sources": {"entries": 12, "exit_status": 0, "log": "frozen_sources.log"},
+    "proof_and_ci_evidence": {"entries": 20, "exit_status": 0, "log": "proof_evidence.log"},
+    "additional_pdf_copies": {"entries": 2, "exit_status": 0, "log": "additional_delivery.log"}
+  },
+  "accepted_pdf_sha256": {
+    "addendum": "ceed3b30b7ee40c68d3854f865f72fa9dabb28b73f73437c421673cbb93796b4",
+    "comprehensive": "856edd55dd4172374f0f60b23e8605230ce7e63ee41d025c2bc7e9e6d0a8fb0c",
+    "unchanged_prior_60_pages": "dadcf85f2addc4bf870f82cf5a659db2e0dde721b08ee8a08353c8fc53ae33a6"
+  },
+  "four_theorem_receipt_sha256": "6506b95651eed8fdb73b7dd0abb767135e54b8983706a7cce9111b74a3a8a0c0",
+  "scope_review": {
+    "staged_paths": 77,
+    "complete_feature_changed_paths": 1271,
+    "out_of_scope_paths": 0,
+    "historical_evidence_paths_changed": 0,
+    "staged_scope": "staged_scope.tsv",
+    "feature_scope": "feature_scope.txt",
+    "allowlist": [
+      "research/n83_speed_20261012/",
+      "examples/n83_rho_speed_eval.rs",
+      ".github/workflows/n83-scalar-arithmetic-lean.yml",
+      "benchmarks/20261012-n83-exact-scalar-rho/",
+      "benchmarks/README.md"
+    ],
+    "snapshot_precedes_staging_this_receipt_and_final_packaging_metadata": true
+  },
+  "existing_ci_local_validation_records": "PASS",
+  "remote_ci_execution_or_monitoring": false,
+  "reran_measurements_tests_or_proofs": false,
+  "conductor_preflight": {"exit_status": 127, "status": "UNAVAILABLE_COMMAND_NOT_FOUND"},
+  "reviewed_inputs": "reviewed_inputs.sha256"
+}

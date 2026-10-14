@@ -1,0 +1,1294 @@
+{
+  "arms": {
+    "current": {
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "reference",
+        "step_cap_factor": 2000
+      },
+      "metrics": {
+        "cpu_total_s": {
+          "arithmetic_mean": 2.9835184,
+          "maximum": 4.637376,
+          "median": 2.832119,
+          "minimum": 1.148203,
+          "n": 15,
+          "raw_values_in_run_order": [
+            1.4901600000000002,
+            2.832119,
+            2.190404,
+            4.637376,
+            4.589046,
+            3.732683,
+            3.525679,
+            2.15,
+            4.029707,
+            1.148203,
+            2.283628,
+            1.49897,
+            2.725166,
+            3.352593,
+            4.567042
+          ],
+          "unit": "seconds"
+        },
+        "elapsed_process_wall_s": {
+          "arithmetic_mean": 2.987007664533334,
+          "maximum": 4.638998617,
+          "median": 2.833963098,
+          "minimum": 1.152991396,
+          "n": 15,
+          "raw_values_in_run_order": [
+            1.49307291,
+            2.833963098,
+            2.194317608,
+            4.638998617,
+            4.591935983,
+            3.734424848,
+            3.528888037,
+            2.154344852,
+            4.033394086,
+            1.152991396,
+            2.290007754,
+            1.501968253,
+            2.729404311,
+            3.356200678,
+            4.571202537
+          ],
+          "unit": "seconds"
+        },
+        "peak_rss_bytes": {
+          "arithmetic_mean": 31251387.733333334,
+          "maximum": 55554048.0,
+          "median": 29925376.0,
+          "minimum": 11444224.0,
+          "n": 15,
+          "raw_values_in_run_order": [
+            17092608.0,
+            29925376.0,
+            29917184.0,
+            55468032.0,
+            55484416.0,
+            29995008.0,
+            29990912.0,
+            17022976.0,
+            29925376.0,
+            11444224.0,
+            29802496.0,
+            17207296.0,
+            29945856.0,
+            29995008.0,
+            55554048.0
+          ],
+          "unit": "bytes"
+        },
+        "producer_online_ms": {
+          "arithmetic_mean": 2755.6661214,
+          "maximum": 4404.50514,
+          "median": 2623.328229,
+          "minimum": 903.997718,
+          "n": 15,
+          "raw_values_in_run_order": [
+            1273.897905,
+            2623.328229,
+            1975.825953,
+            4404.50514,
+            4349.690735,
+            3514.093199,
+            3288.664618,
+            1919.054321,
+            3802.904922,
+            903.997718,
+            2032.468526,
+            1284.668601,
+            2516.101526,
+            3117.052357,
+            4328.738071
+          ],
+          "unit": "milliseconds"
+        },
+        "producer_preparation_ms": {
+          "arithmetic_mean": 210.7834666,
+          "maximum": 229.930731,
+          "median": 211.901901,
+          "minimum": 192.818374,
+          "n": 15,
+          "raw_values_in_run_order": [
+            199.241989,
+            193.731294,
+            198.75979,
+            216.511396,
+            223.590867,
+            202.53467,
+            221.652734,
+            211.901901,
+            210.653002,
+            223.185076,
+            229.930731,
+            196.982295,
+            192.818374,
+            217.939649,
+            222.318231
+          ],
+          "unit": "milliseconds"
+        },
+        "walk_steps": {
+          "arithmetic_mean": 9804601.2,
+          "maximum": 15070276.0,
+          "median": 10163939.0,
+          "minimum": 2848569.0,
+          "n": 15,
+          "raw_values_in_run_order": [
+            4817205.0,
+            10163939.0,
+            7603084.0,
+            14518786.0,
+            14796989.0,
+            12780134.0,
+            11934610.0,
+            6715140.0,
+            13406900.0,
+            2848569.0,
+            7265014.0,
+            4802861.0,
+            9021266.0,
+            11324245.0,
+            15070276.0
+          ],
+          "unit": "uncalibrated rho walk steps"
+        }
+      }
+    },
+    "selected": {
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 256,
+        "scalar_kernel": "reference",
+        "step_cap_factor": 2000
+      },
+      "metrics": {
+        "cpu_total_s": {
+          "arithmetic_mean": 2.7778257333333327,
+          "maximum": 4.218342000000001,
+          "median": 2.845559,
+          "minimum": 0.961201,
+          "n": 15,
+          "raw_values_in_run_order": [
+            1.413689,
+            2.845559,
+            2.115973,
+            3.873566,
+            4.218342000000001,
+            3.715636,
+            3.223568,
+            1.887263,
+            3.902682,
+            0.961201,
+            2.123731,
+            1.499097,
+            2.561398,
+            3.116279,
+            4.209402000000001
+          ],
+          "unit": "seconds"
+        },
+        "elapsed_process_wall_s": {
+          "arithmetic_mean": 2.7805452334000003,
+          "maximum": 4.221321543,
+          "median": 2.850071739,
+          "minimum": 0.963512532,
+          "n": 15,
+          "raw_values_in_run_order": [
+            1.417214712,
+            2.850071739,
+            2.118903421,
+            3.874468396,
+            4.221321543,
+            3.716998166,
+            3.225827319,
+            1.888357316,
+            3.908533028,
+            0.963512532,
+            2.126394759,
+            1.499932635,
+            2.56323657,
+            3.119801828,
+            4.213604537
+          ],
+          "unit": "seconds"
+        },
+        "peak_rss_bytes": {
+          "arithmetic_mean": 31363072.0,
+          "maximum": 55676928.0,
+          "median": 29986816.0,
+          "minimum": 11575296.0,
+          "n": 15,
+          "raw_values_in_run_order": [
+            17276928.0,
+            29958144.0,
+            29986816.0,
+            55607296.0,
+            55611392.0,
+            29986816.0,
+            30044160.0,
+            17334272.0,
+            30056448.0,
+            11575296.0,
+            30052352.0,
+            17285120.0,
+            29949952.0,
+            30044160.0,
+            55676928.0
+          ],
+          "unit": "bytes"
+        },
+        "producer_online_ms": {
+          "arithmetic_mean": 2551.759881866666,
+          "maximum": 4008.541672,
+          "median": 2627.938242,
+          "minimum": 739.790285,
+          "n": 15,
+          "raw_values_in_run_order": [
+            1194.911193,
+            2627.938242,
+            1883.890004,
+            3646.100013,
+            4008.541672,
+            3460.605122,
+            3013.483245,
+            1677.960949,
+            3671.220682,
+            739.790285,
+            1884.872244,
+            1269.216473,
+            2327.97553,
+            2880.277536,
+            3989.615038
+          ],
+          "unit": "milliseconds"
+        },
+        "producer_preparation_ms": {
+          "arithmetic_mean": 208.71215519999998,
+          "maximum": 232.825992,
+          "median": 211.085606,
+          "minimum": 189.154761,
+          "n": 15,
+          "raw_values_in_run_order": [
+            202.710094,
+            202.720103,
+            213.661133,
+            211.085606,
+            189.154761,
+            232.825992,
+            195.485328,
+            193.323355,
+            214.223017,
+            201.018963,
+            221.118913,
+            214.285146,
+            217.841963,
+            219.073793,
+            202.154161
+          ],
+          "unit": "milliseconds"
+        },
+        "walk_steps": {
+          "arithmetic_mean": 9815672.8,
+          "maximum": 15083495.0,
+          "median": 10227227.0,
+          "minimum": 2855245.0,
+          "n": 15,
+          "raw_values_in_run_order": [
+            4827922.0,
+            10227227.0,
+            7601396.0,
+            14514811.0,
+            14787085.0,
+            12807811.0,
+            11925410.0,
+            6727939.0,
+            13416591.0,
+            2855245.0,
+            7269245.0,
+            4811412.0,
+            9054621.0,
+            11324882.0,
+            15083495.0
+          ],
+          "unit": "uncalibrated rho walk steps"
+        }
+      }
+    }
+  },
+  "draws_per_target_arm": 3,
+  "missing_value_policy": "All six metrics must be finite and positive on all thirty verified rows. No missing values, failed draws, zero imputation, omission or replacement. Descriptions include every held-out draw.",
+  "observed_rows": 30,
+  "observed_targets": 5,
+  "paired_current_over_selected_process_wall": {
+    "all15_pairs": [
+      {
+        "current_over_selected_process_wall_ratio": 1.0535262563658738,
+        "current_process_wall_s": 1.49307291,
+        "seed": 202610126241,
+        "selected_process_wall_s": 1.417214712,
+        "target_id": "holdout_1"
+      },
+      {
+        "current_over_selected_process_wall_ratio": 0.9943479875332358,
+        "current_process_wall_s": 2.833963098,
+        "seed": 202610126242,
+        "selected_process_wall_s": 2.850071739,
+        "target_id": "holdout_1"
+      },
+      {
+        "current_over_selected_process_wall_ratio": 1.0355911393849224,
+        "current_process_wall_s": 2.194317608,
+        "seed": 202610126243,
+        "selected_process_wall_s": 2.118903421,
+        "target_id": "holdout_1"
+      },
+      {
+        "current_over_selected_process_wall_ratio": 1.1973251922223191,
+        "current_process_wall_s": 4.638998617,
+        "seed": 202610126244,
+        "selected_process_wall_s": 3.874468396,
+        "target_id": "holdout_2"
+      },
+      {
+        "current_over_selected_process_wall_ratio": 1.08779583270897,
+        "current_process_wall_s": 4.591935983,
+        "seed": 202610126245,
+        "selected_process_wall_s": 4.221321543,
+        "target_id": "holdout_2"
+      },
+      {
+        "current_over_selected_process_wall_ratio": 1.004688375194641,
+        "current_process_wall_s": 3.734424848,
+        "seed": 202610126246,
+        "selected_process_wall_s": 3.716998166,
+        "target_id": "holdout_2"
+      },
+      {
+        "current_over_selected_process_wall_ratio": 1.0939482148393327,
+        "current_process_wall_s": 3.528888037,
+        "seed": 202610126247,
+        "selected_process_wall_s": 3.225827319,
+        "target_id": "holdout_3"
+      },
+      {
+        "current_over_selected_process_wall_ratio": 1.1408565708122582,
+        "current_process_wall_s": 2.154344852,
+        "seed": 202610126248,
+        "selected_process_wall_s": 1.888357316,
+        "target_id": "holdout_3"
+      },
+      {
+        "current_over_selected_process_wall_ratio": 1.031945759983482,
+        "current_process_wall_s": 4.033394086,
+        "seed": 202610126249,
+        "selected_process_wall_s": 3.908533028,
+        "target_id": "holdout_3"
+      },
+      {
+        "current_over_selected_process_wall_ratio": 1.1966542807769105,
+        "current_process_wall_s": 1.152991396,
+        "seed": 202610126250,
+        "selected_process_wall_s": 0.963512532,
+        "target_id": "holdout_4"
+      },
+      {
+        "current_over_selected_process_wall_ratio": 1.0769438479414535,
+        "current_process_wall_s": 2.290007754,
+        "seed": 202610126251,
+        "selected_process_wall_s": 2.126394759,
+        "target_id": "holdout_4"
+      },
+      {
+        "current_over_selected_process_wall_ratio": 1.001357139615807,
+        "current_process_wall_s": 1.501968253,
+        "seed": 202610126252,
+        "selected_process_wall_s": 1.499932635,
+        "target_id": "holdout_4"
+      },
+      {
+        "current_over_selected_process_wall_ratio": 1.0648273136177986,
+        "current_process_wall_s": 2.729404311,
+        "seed": 202610126253,
+        "selected_process_wall_s": 2.56323657,
+        "target_id": "holdout_5"
+      },
+      {
+        "current_over_selected_process_wall_ratio": 1.0757736750707487,
+        "current_process_wall_s": 3.356200678,
+        "seed": 202610126254,
+        "selected_process_wall_s": 3.119801828,
+        "target_id": "holdout_5"
+      },
+      {
+        "current_over_selected_process_wall_ratio": 1.0848674802914946,
+        "current_process_wall_s": 4.571202537,
+        "seed": 202610126255,
+        "selected_process_wall_s": 4.213604537,
+        "target_id": "holdout_5"
+      }
+    ],
+    "confidence_interval": null,
+    "descriptive_summary": {
+      "arithmetic_mean": 1.0760299377572835,
+      "maximum": 1.1973251922223191,
+      "median": 1.0757736750707487,
+      "minimum": 0.9943479875332358,
+      "n": 15
+    },
+    "estimand": "Distribution of fifteen matched launch ratios; descriptive only, distinct from frozen five-target ratio estimand"
+  },
+  "per_target": [
+    {
+      "arms": {
+        "current": {
+          "cpu_total_s": {
+            "arithmetic_mean": 2.1708943333333335,
+            "maximum": 2.832119,
+            "median": 2.190404,
+            "minimum": 1.4901600000000002,
+            "n": 3,
+            "raw_values_in_run_order": [
+              1.4901600000000002,
+              2.832119,
+              2.190404
+            ],
+            "unit": "seconds"
+          },
+          "elapsed_process_wall_s": {
+            "arithmetic_mean": 2.1737845386666668,
+            "maximum": 2.833963098,
+            "median": 2.194317608,
+            "minimum": 1.49307291,
+            "n": 3,
+            "raw_values_in_run_order": [
+              1.49307291,
+              2.833963098,
+              2.194317608
+            ],
+            "unit": "seconds"
+          },
+          "peak_rss_bytes": {
+            "arithmetic_mean": 25645056.0,
+            "maximum": 29925376.0,
+            "median": 29917184.0,
+            "minimum": 17092608.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              17092608.0,
+              29925376.0,
+              29917184.0
+            ],
+            "unit": "bytes"
+          },
+          "producer_online_ms": {
+            "arithmetic_mean": 1957.684029,
+            "maximum": 2623.328229,
+            "median": 1975.825953,
+            "minimum": 1273.897905,
+            "n": 3,
+            "raw_values_in_run_order": [
+              1273.897905,
+              2623.328229,
+              1975.825953
+            ],
+            "unit": "milliseconds"
+          },
+          "producer_preparation_ms": {
+            "arithmetic_mean": 197.24435766666667,
+            "maximum": 199.241989,
+            "median": 198.75979,
+            "minimum": 193.731294,
+            "n": 3,
+            "raw_values_in_run_order": [
+              199.241989,
+              193.731294,
+              198.75979
+            ],
+            "unit": "milliseconds"
+          },
+          "walk_steps": {
+            "arithmetic_mean": 7528076.0,
+            "maximum": 10163939.0,
+            "median": 7603084.0,
+            "minimum": 4817205.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              4817205.0,
+              10163939.0,
+              7603084.0
+            ],
+            "unit": "uncalibrated rho walk steps"
+          }
+        },
+        "selected": {
+          "cpu_total_s": {
+            "arithmetic_mean": 2.1250736666666667,
+            "maximum": 2.845559,
+            "median": 2.115973,
+            "minimum": 1.413689,
+            "n": 3,
+            "raw_values_in_run_order": [
+              1.413689,
+              2.845559,
+              2.115973
+            ],
+            "unit": "seconds"
+          },
+          "elapsed_process_wall_s": {
+            "arithmetic_mean": 2.128729957333334,
+            "maximum": 2.850071739,
+            "median": 2.118903421,
+            "minimum": 1.417214712,
+            "n": 3,
+            "raw_values_in_run_order": [
+              1.417214712,
+              2.850071739,
+              2.118903421
+            ],
+            "unit": "seconds"
+          },
+          "peak_rss_bytes": {
+            "arithmetic_mean": 25740629.333333332,
+            "maximum": 29986816.0,
+            "median": 29958144.0,
+            "minimum": 17276928.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              17276928.0,
+              29958144.0,
+              29986816.0
+            ],
+            "unit": "bytes"
+          },
+          "producer_online_ms": {
+            "arithmetic_mean": 1902.2464796666666,
+            "maximum": 2627.938242,
+            "median": 1883.890004,
+            "minimum": 1194.911193,
+            "n": 3,
+            "raw_values_in_run_order": [
+              1194.911193,
+              2627.938242,
+              1883.890004
+            ],
+            "unit": "milliseconds"
+          },
+          "producer_preparation_ms": {
+            "arithmetic_mean": 206.36377666666667,
+            "maximum": 213.661133,
+            "median": 202.720103,
+            "minimum": 202.710094,
+            "n": 3,
+            "raw_values_in_run_order": [
+              202.710094,
+              202.720103,
+              213.661133
+            ],
+            "unit": "milliseconds"
+          },
+          "walk_steps": {
+            "arithmetic_mean": 7552181.666666667,
+            "maximum": 10227227.0,
+            "median": 7601396.0,
+            "minimum": 4827922.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              4827922.0,
+              10227227.0,
+              7601396.0
+            ],
+            "unit": "uncalibrated rho walk steps"
+          }
+        }
+      },
+      "target_id": "holdout_1"
+    },
+    {
+      "arms": {
+        "current": {
+          "cpu_total_s": {
+            "arithmetic_mean": 4.319701666666666,
+            "maximum": 4.637376,
+            "median": 4.589046,
+            "minimum": 3.732683,
+            "n": 3,
+            "raw_values_in_run_order": [
+              4.637376,
+              4.589046,
+              3.732683
+            ],
+            "unit": "seconds"
+          },
+          "elapsed_process_wall_s": {
+            "arithmetic_mean": 4.321786482666667,
+            "maximum": 4.638998617,
+            "median": 4.591935983,
+            "minimum": 3.734424848,
+            "n": 3,
+            "raw_values_in_run_order": [
+              4.638998617,
+              4.591935983,
+              3.734424848
+            ],
+            "unit": "seconds"
+          },
+          "peak_rss_bytes": {
+            "arithmetic_mean": 46982485.333333336,
+            "maximum": 55484416.0,
+            "median": 55468032.0,
+            "minimum": 29995008.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              55468032.0,
+              55484416.0,
+              29995008.0
+            ],
+            "unit": "bytes"
+          },
+          "producer_online_ms": {
+            "arithmetic_mean": 4089.4296913333333,
+            "maximum": 4404.50514,
+            "median": 4349.690735,
+            "minimum": 3514.093199,
+            "n": 3,
+            "raw_values_in_run_order": [
+              4404.50514,
+              4349.690735,
+              3514.093199
+            ],
+            "unit": "milliseconds"
+          },
+          "producer_preparation_ms": {
+            "arithmetic_mean": 214.212311,
+            "maximum": 223.590867,
+            "median": 216.511396,
+            "minimum": 202.53467,
+            "n": 3,
+            "raw_values_in_run_order": [
+              216.511396,
+              223.590867,
+              202.53467
+            ],
+            "unit": "milliseconds"
+          },
+          "walk_steps": {
+            "arithmetic_mean": 14031969.666666666,
+            "maximum": 14796989.0,
+            "median": 14518786.0,
+            "minimum": 12780134.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              14518786.0,
+              14796989.0,
+              12780134.0
+            ],
+            "unit": "uncalibrated rho walk steps"
+          }
+        },
+        "selected": {
+          "cpu_total_s": {
+            "arithmetic_mean": 3.935848,
+            "maximum": 4.218342000000001,
+            "median": 3.873566,
+            "minimum": 3.715636,
+            "n": 3,
+            "raw_values_in_run_order": [
+              3.873566,
+              4.218342000000001,
+              3.715636
+            ],
+            "unit": "seconds"
+          },
+          "elapsed_process_wall_s": {
+            "arithmetic_mean": 3.937596035,
+            "maximum": 4.221321543,
+            "median": 3.874468396,
+            "minimum": 3.716998166,
+            "n": 3,
+            "raw_values_in_run_order": [
+              3.874468396,
+              4.221321543,
+              3.716998166
+            ],
+            "unit": "seconds"
+          },
+          "peak_rss_bytes": {
+            "arithmetic_mean": 47068501.333333336,
+            "maximum": 55611392.0,
+            "median": 55607296.0,
+            "minimum": 29986816.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              55607296.0,
+              55611392.0,
+              29986816.0
+            ],
+            "unit": "bytes"
+          },
+          "producer_online_ms": {
+            "arithmetic_mean": 3705.082269,
+            "maximum": 4008.541672,
+            "median": 3646.100013,
+            "minimum": 3460.605122,
+            "n": 3,
+            "raw_values_in_run_order": [
+              3646.100013,
+              4008.541672,
+              3460.605122
+            ],
+            "unit": "milliseconds"
+          },
+          "producer_preparation_ms": {
+            "arithmetic_mean": 211.02211966666667,
+            "maximum": 232.825992,
+            "median": 211.085606,
+            "minimum": 189.154761,
+            "n": 3,
+            "raw_values_in_run_order": [
+              211.085606,
+              189.154761,
+              232.825992
+            ],
+            "unit": "milliseconds"
+          },
+          "walk_steps": {
+            "arithmetic_mean": 14036569.0,
+            "maximum": 14787085.0,
+            "median": 14514811.0,
+            "minimum": 12807811.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              14514811.0,
+              14787085.0,
+              12807811.0
+            ],
+            "unit": "uncalibrated rho walk steps"
+          }
+        }
+      },
+      "target_id": "holdout_2"
+    },
+    {
+      "arms": {
+        "current": {
+          "cpu_total_s": {
+            "arithmetic_mean": 3.2351286666666668,
+            "maximum": 4.029707,
+            "median": 3.525679,
+            "minimum": 2.15,
+            "n": 3,
+            "raw_values_in_run_order": [
+              3.525679,
+              2.15,
+              4.029707
+            ],
+            "unit": "seconds"
+          },
+          "elapsed_process_wall_s": {
+            "arithmetic_mean": 3.2388756583333334,
+            "maximum": 4.033394086,
+            "median": 3.528888037,
+            "minimum": 2.154344852,
+            "n": 3,
+            "raw_values_in_run_order": [
+              3.528888037,
+              2.154344852,
+              4.033394086
+            ],
+            "unit": "seconds"
+          },
+          "peak_rss_bytes": {
+            "arithmetic_mean": 25646421.333333332,
+            "maximum": 29990912.0,
+            "median": 29925376.0,
+            "minimum": 17022976.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              29990912.0,
+              17022976.0,
+              29925376.0
+            ],
+            "unit": "bytes"
+          },
+          "producer_online_ms": {
+            "arithmetic_mean": 3003.541287,
+            "maximum": 3802.904922,
+            "median": 3288.664618,
+            "minimum": 1919.054321,
+            "n": 3,
+            "raw_values_in_run_order": [
+              3288.664618,
+              1919.054321,
+              3802.904922
+            ],
+            "unit": "milliseconds"
+          },
+          "producer_preparation_ms": {
+            "arithmetic_mean": 214.73587899999998,
+            "maximum": 221.652734,
+            "median": 211.901901,
+            "minimum": 210.653002,
+            "n": 3,
+            "raw_values_in_run_order": [
+              221.652734,
+              211.901901,
+              210.653002
+            ],
+            "unit": "milliseconds"
+          },
+          "walk_steps": {
+            "arithmetic_mean": 10685550.0,
+            "maximum": 13406900.0,
+            "median": 11934610.0,
+            "minimum": 6715140.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              11934610.0,
+              6715140.0,
+              13406900.0
+            ],
+            "unit": "uncalibrated rho walk steps"
+          }
+        },
+        "selected": {
+          "cpu_total_s": {
+            "arithmetic_mean": 3.004504333333333,
+            "maximum": 3.902682,
+            "median": 3.223568,
+            "minimum": 1.887263,
+            "n": 3,
+            "raw_values_in_run_order": [
+              3.223568,
+              1.887263,
+              3.902682
+            ],
+            "unit": "seconds"
+          },
+          "elapsed_process_wall_s": {
+            "arithmetic_mean": 3.007572554333333,
+            "maximum": 3.908533028,
+            "median": 3.225827319,
+            "minimum": 1.888357316,
+            "n": 3,
+            "raw_values_in_run_order": [
+              3.225827319,
+              1.888357316,
+              3.908533028
+            ],
+            "unit": "seconds"
+          },
+          "peak_rss_bytes": {
+            "arithmetic_mean": 25811626.666666668,
+            "maximum": 30056448.0,
+            "median": 30044160.0,
+            "minimum": 17334272.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              30044160.0,
+              17334272.0,
+              30056448.0
+            ],
+            "unit": "bytes"
+          },
+          "producer_online_ms": {
+            "arithmetic_mean": 2787.554958666666,
+            "maximum": 3671.220682,
+            "median": 3013.483245,
+            "minimum": 1677.960949,
+            "n": 3,
+            "raw_values_in_run_order": [
+              3013.483245,
+              1677.960949,
+              3671.220682
+            ],
+            "unit": "milliseconds"
+          },
+          "producer_preparation_ms": {
+            "arithmetic_mean": 201.01056666666668,
+            "maximum": 214.223017,
+            "median": 195.485328,
+            "minimum": 193.323355,
+            "n": 3,
+            "raw_values_in_run_order": [
+              195.485328,
+              193.323355,
+              214.223017
+            ],
+            "unit": "milliseconds"
+          },
+          "walk_steps": {
+            "arithmetic_mean": 10689980.0,
+            "maximum": 13416591.0,
+            "median": 11925410.0,
+            "minimum": 6727939.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              11925410.0,
+              6727939.0,
+              13416591.0
+            ],
+            "unit": "uncalibrated rho walk steps"
+          }
+        }
+      },
+      "target_id": "holdout_3"
+    },
+    {
+      "arms": {
+        "current": {
+          "cpu_total_s": {
+            "arithmetic_mean": 1.6436003333333336,
+            "maximum": 2.283628,
+            "median": 1.49897,
+            "minimum": 1.148203,
+            "n": 3,
+            "raw_values_in_run_order": [
+              1.148203,
+              2.283628,
+              1.49897
+            ],
+            "unit": "seconds"
+          },
+          "elapsed_process_wall_s": {
+            "arithmetic_mean": 1.6483224676666666,
+            "maximum": 2.290007754,
+            "median": 1.501968253,
+            "minimum": 1.152991396,
+            "n": 3,
+            "raw_values_in_run_order": [
+              1.152991396,
+              2.290007754,
+              1.501968253
+            ],
+            "unit": "seconds"
+          },
+          "peak_rss_bytes": {
+            "arithmetic_mean": 19484672.0,
+            "maximum": 29802496.0,
+            "median": 17207296.0,
+            "minimum": 11444224.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              11444224.0,
+              29802496.0,
+              17207296.0
+            ],
+            "unit": "bytes"
+          },
+          "producer_online_ms": {
+            "arithmetic_mean": 1407.0449483333334,
+            "maximum": 2032.468526,
+            "median": 1284.668601,
+            "minimum": 903.997718,
+            "n": 3,
+            "raw_values_in_run_order": [
+              903.997718,
+              2032.468526,
+              1284.668601
+            ],
+            "unit": "milliseconds"
+          },
+          "producer_preparation_ms": {
+            "arithmetic_mean": 216.69936733333336,
+            "maximum": 229.930731,
+            "median": 223.185076,
+            "minimum": 196.982295,
+            "n": 3,
+            "raw_values_in_run_order": [
+              223.185076,
+              229.930731,
+              196.982295
+            ],
+            "unit": "milliseconds"
+          },
+          "walk_steps": {
+            "arithmetic_mean": 4972148.0,
+            "maximum": 7265014.0,
+            "median": 4802861.0,
+            "minimum": 2848569.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              2848569.0,
+              7265014.0,
+              4802861.0
+            ],
+            "unit": "uncalibrated rho walk steps"
+          }
+        },
+        "selected": {
+          "cpu_total_s": {
+            "arithmetic_mean": 1.5280096666666665,
+            "maximum": 2.123731,
+            "median": 1.499097,
+            "minimum": 0.961201,
+            "n": 3,
+            "raw_values_in_run_order": [
+              0.961201,
+              2.123731,
+              1.499097
+            ],
+            "unit": "seconds"
+          },
+          "elapsed_process_wall_s": {
+            "arithmetic_mean": 1.5299466419999999,
+            "maximum": 2.126394759,
+            "median": 1.499932635,
+            "minimum": 0.963512532,
+            "n": 3,
+            "raw_values_in_run_order": [
+              0.963512532,
+              2.126394759,
+              1.499932635
+            ],
+            "unit": "seconds"
+          },
+          "peak_rss_bytes": {
+            "arithmetic_mean": 19637589.333333332,
+            "maximum": 30052352.0,
+            "median": 17285120.0,
+            "minimum": 11575296.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              11575296.0,
+              30052352.0,
+              17285120.0
+            ],
+            "unit": "bytes"
+          },
+          "producer_online_ms": {
+            "arithmetic_mean": 1297.9596673333333,
+            "maximum": 1884.872244,
+            "median": 1269.216473,
+            "minimum": 739.790285,
+            "n": 3,
+            "raw_values_in_run_order": [
+              739.790285,
+              1884.872244,
+              1269.216473
+            ],
+            "unit": "milliseconds"
+          },
+          "producer_preparation_ms": {
+            "arithmetic_mean": 212.1410073333333,
+            "maximum": 221.118913,
+            "median": 214.285146,
+            "minimum": 201.018963,
+            "n": 3,
+            "raw_values_in_run_order": [
+              201.018963,
+              221.118913,
+              214.285146
+            ],
+            "unit": "milliseconds"
+          },
+          "walk_steps": {
+            "arithmetic_mean": 4978634.0,
+            "maximum": 7269245.0,
+            "median": 4811412.0,
+            "minimum": 2855245.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              2855245.0,
+              7269245.0,
+              4811412.0
+            ],
+            "unit": "uncalibrated rho walk steps"
+          }
+        }
+      },
+      "target_id": "holdout_4"
+    },
+    {
+      "arms": {
+        "current": {
+          "cpu_total_s": {
+            "arithmetic_mean": 3.5482670000000005,
+            "maximum": 4.567042,
+            "median": 3.352593,
+            "minimum": 2.725166,
+            "n": 3,
+            "raw_values_in_run_order": [
+              2.725166,
+              3.352593,
+              4.567042
+            ],
+            "unit": "seconds"
+          },
+          "elapsed_process_wall_s": {
+            "arithmetic_mean": 3.552269175333333,
+            "maximum": 4.571202537,
+            "median": 3.356200678,
+            "minimum": 2.729404311,
+            "n": 3,
+            "raw_values_in_run_order": [
+              2.729404311,
+              3.356200678,
+              4.571202537
+            ],
+            "unit": "seconds"
+          },
+          "peak_rss_bytes": {
+            "arithmetic_mean": 38498304.0,
+            "maximum": 55554048.0,
+            "median": 29995008.0,
+            "minimum": 29945856.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              29945856.0,
+              29995008.0,
+              55554048.0
+            ],
+            "unit": "bytes"
+          },
+          "producer_online_ms": {
+            "arithmetic_mean": 3320.630651333333,
+            "maximum": 4328.738071,
+            "median": 3117.052357,
+            "minimum": 2516.101526,
+            "n": 3,
+            "raw_values_in_run_order": [
+              2516.101526,
+              3117.052357,
+              4328.738071
+            ],
+            "unit": "milliseconds"
+          },
+          "producer_preparation_ms": {
+            "arithmetic_mean": 211.02541799999997,
+            "maximum": 222.318231,
+            "median": 217.939649,
+            "minimum": 192.818374,
+            "n": 3,
+            "raw_values_in_run_order": [
+              192.818374,
+              217.939649,
+              222.318231
+            ],
+            "unit": "milliseconds"
+          },
+          "walk_steps": {
+            "arithmetic_mean": 11805262.333333334,
+            "maximum": 15070276.0,
+            "median": 11324245.0,
+            "minimum": 9021266.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              9021266.0,
+              11324245.0,
+              15070276.0
+            ],
+            "unit": "uncalibrated rho walk steps"
+          }
+        },
+        "selected": {
+          "cpu_total_s": {
+            "arithmetic_mean": 3.295693,
+            "maximum": 4.209402000000001,
+            "median": 3.116279,
+            "minimum": 2.561398,
+            "n": 3,
+            "raw_values_in_run_order": [
+              2.561398,
+              3.116279,
+              4.209402000000001
+            ],
+            "unit": "seconds"
+          },
+          "elapsed_process_wall_s": {
+            "arithmetic_mean": 3.298880978333333,
+            "maximum": 4.213604537,
+            "median": 3.119801828,
+            "minimum": 2.56323657,
+            "n": 3,
+            "raw_values_in_run_order": [
+              2.56323657,
+              3.119801828,
+              4.213604537
+            ],
+            "unit": "seconds"
+          },
+          "peak_rss_bytes": {
+            "arithmetic_mean": 38557013.333333336,
+            "maximum": 55676928.0,
+            "median": 30044160.0,
+            "minimum": 29949952.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              29949952.0,
+              30044160.0,
+              55676928.0
+            ],
+            "unit": "bytes"
+          },
+          "producer_online_ms": {
+            "arithmetic_mean": 3065.956034666667,
+            "maximum": 3989.615038,
+            "median": 2880.277536,
+            "minimum": 2327.97553,
+            "n": 3,
+            "raw_values_in_run_order": [
+              2327.97553,
+              2880.277536,
+              3989.615038
+            ],
+            "unit": "milliseconds"
+          },
+          "producer_preparation_ms": {
+            "arithmetic_mean": 213.0233056666667,
+            "maximum": 219.073793,
+            "median": 217.841963,
+            "minimum": 202.154161,
+            "n": 3,
+            "raw_values_in_run_order": [
+              217.841963,
+              219.073793,
+              202.154161
+            ],
+            "unit": "milliseconds"
+          },
+          "walk_steps": {
+            "arithmetic_mean": 11820999.333333334,
+            "maximum": 15083495.0,
+            "median": 11324882.0,
+            "minimum": 9054621.0,
+            "n": 3,
+            "raw_values_in_run_order": [
+              9054621.0,
+              11324882.0,
+              15083495.0
+            ],
+            "unit": "uncalibrated rho walk steps"
+          }
+        }
+      },
+      "target_id": "holdout_5"
+    }
+  ],
+  "provenance": {
+    "command": [
+      "/workspace/n83_speed/analysis/build/release/n83-speed-descriptive",
+      "/workspace/repos/crypto/research/n83_speed_20261012/records/panel/holdout/records.jsonl",
+      "/workspace/repos/crypto/research/n83_speed_20261012/analysis/descriptive_summary.json"
+    ],
+    "compiled_cargo_lock_sha256": "0ae407c994a7a72b6d6a490f7ea86ef4b1e91842f1a07dbc0de2e817132b588c",
+    "compiled_cargo_manifest_sha256": "dfe724d356f6344e918e2a49c53068fcdc435a900997c9136814943b24bd6716",
+    "compiled_source_sha256": "8bbc821c6cd1ca81f545f1ce5f093e5e7adfe3ad32d5a9e0d67531052c372b29",
+    "executable": "/workspace/n83_speed/analysis/build/release/n83-speed-descriptive",
+    "executable_sha256": "ab546e25264167eff1ef5a4b660071ec8c805f2cc0cca93345672a5b76afd8d6",
+    "input_file": "/workspace/repos/crypto/research/n83_speed_20261012/records/panel/holdout/records.jsonl",
+    "input_sha256": "fe91f053f20cb38d741f8c684e8508aa1105d0e787033bdc7166e43c4b3ecfc3"
+  },
+  "schema": "n83.speed-descriptive-summary/v1",
+  "scope": "Post-run descriptive supplement for the frozen thirty-row holdout. Fifteen paired launches are descriptive repeated draws, not fifteen independent target clusters. Frozen primary statistics and target-cluster bootstrap remain unchanged. No new experiment or confidence interval.",
+  "status": "ALL30_VERIFIED_COMPLETE_PANEL"
+}

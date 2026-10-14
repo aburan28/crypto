@@ -1,0 +1,56 @@
+{
+  "schema": "n83-exact-scalar-report-visual-review/v1",
+  "status": "PASS",
+  "research_results_computed_by_renderer": false,
+  "addendum": {
+    "path": "n83_faster_rho_evaluation.pdf",
+    "sha256": "ceed3b30b7ee40c68d3854f865f72fa9dabb28b73f73437c421673cbb93796b4",
+    "pages": 10,
+    "clickable_links": 56,
+    "all_pages_read": true
+  },
+  "combined": {
+    "path": "/workspace/report_output/unified_curve_basis_report_faster_rho.pdf",
+    "sha256": "856edd55dd4172374f0f60b23e8605230ce7e63ee41d025c2bc7e9e6d0a8fb0c",
+    "pages": 70,
+    "historical_pages": 60,
+    "historical_text_preserved": true,
+    "historical_pixels_preserved_at_72dpi": true,
+    "independent_pixels_preserved_at_144dpi": true
+  },
+  "figures_reviewed": [
+    "campaign_flow",
+    "arithmetic_scores",
+    "aa_noise",
+    "policy_scores",
+    "holdout_cases",
+    "holdout_intervals"
+  ],
+  "checks": {
+    "page_bounds_violations": 0,
+    "replacement_or_missing_font_glyphs": 0,
+    "native_values_and_ratio_directions_checked": true,
+    "pooled_median_ordering_disclosed": true,
+    "all30seed_costs_retained": true,
+    "all9policy_scores_retained": true,
+    "unselected_barrett_result_retained": true,
+    "arithmetic_proof_x_zero_case_corrected": true,
+    "scalar_monomorphization_scope_corrected": true,
+    "legend_clear_of_data_points": true,
+    "internal_walk_caps_distinguished_from_process_failures": true,
+    "source_links_present": true
+  },
+  "independent_review": {
+    "report": "../../checks/pdf_qa/REVIEW.md",
+    "receipt": "../../checks/pdf_qa/qa.json",
+    "status": "PASS",
+    "all10_pages_read": true,
+    "all60_historical_page_text_and_144dpi_pixels_identical": true
+  },
+  "render_attempts": {
+    "initial_diagram_arrow_error": "Corrected explicit document geometry; no research records changed.",
+    "orphan_source_note_pages": "Corrected table padding and figure layout; final document has ten pages.",
+    "reported_transport_issue": "Parent reported a transient 503 from an image backend. It did not affect PDF generation or the successful independent visual and 144 dpi preservation checks."
+  },
+  "limits": "Document/layout QA is distinct from native arithmetic and solver replay, host admission, or independent timing reproduction."
+}

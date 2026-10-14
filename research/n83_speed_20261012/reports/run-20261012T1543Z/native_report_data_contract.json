@@ -1,0 +1,154 @@
+{
+  "contract_status": "COMPLETED_NATIVE_INPUT_BINDING_FOR_LAYOUT_NOT_NEW_EVIDENCE",
+  "purpose": "Select and format native recorded outputs; never estimate research results in Python.",
+  "campaign": {
+    "run_id": "run-20261012T1543Z",
+    "started_utc": "2026-10-12T15:43Z",
+    "protocol_path_and_sha256": {
+      "path": "../../provenance/protocol.json",
+      "sha256": "f5aa7d7fe2e58ddcfb8177dcc9d9907f4c5aeb859cadea983448b872b1f05d7c"
+    },
+    "source_commit_and_executable_hashes": {
+      "freeze_commit": "adddc3555d3355f5d5d83fbf45cc6793cb6ada8f",
+      "worker_sha256": "997f6102564cd0ebc72ee46e17e834f3d5970ed129c86d9c56b9274d5405a2ec",
+      "runner_sha256": "ad281db71f035d1e02a4dabbf023b3c2d77e23a99509d4d390b8fca3e8627227"
+    },
+    "completed_disposition": "139_COMPLETED_VERIFIED_NATIVE_REPLAY_PASS",
+    "required_launches": 139,
+    "all_attempts_retained": true
+  },
+  "inputs": {
+    "statistics.json": {
+      "source": "../../records/panel/statistics.json",
+      "sha256": "7b78ad629c80b60f26ad208e9d57fde63c3885e90b662342c6797212b327f5dd"
+    },
+    "arithmetic_selection.json": {
+      "source": "../../records/panel/arithmetic/selection.json",
+      "sha256": "83ee67c011b36a693d8a3928922f134dc212f4f16d9d604d267f9bec22a07999"
+    },
+    "policy_selection.json": {
+      "source": "../../records/panel/policy/selection.json",
+      "sha256": "3239632fce8d252b53d55391a62d2bc06622c58f38b121f41ea726fd34c6e59c"
+    },
+    "noise_summary.json": {
+      "source": "../../records/panel/aa/noise_summary.json",
+      "sha256": "58c8e7180175656aa0ef2582981187a7a6ba0e2cf4fe4caae126bfc9b5856221"
+    },
+    "final_receipt.json": {
+      "source": "../../verification/final_receipt.json",
+      "sha256": "539751e5dc58c0390b2d36df52e016d674eac51c61d770ffb5ffb6e2597e9988"
+    },
+    "file_provenance_receipt.json": {
+      "source": "../../verification/file_provenance_receipt.json",
+      "sha256": "8511411695b7de2a2fd693b64122c42a75dc89bf5b9b694ea8c60af710eb5bd1"
+    },
+    "fixture_replay_receipt.json": {
+      "source": "../../verification/fixture_replay_receipt.json",
+      "sha256": "7e8919532fd8332d56f749835e13570502b17db791ff045eb3be12e9381f20be"
+    },
+    "host_context.json": {
+      "source": "../../provenance/host_context.json",
+      "sha256": "4d181172bd4daa0877dea78145530ae44310c3f68e298a4e08305da2ee97d9ad"
+    },
+    "arithmetic_verification_receipt.json": {
+      "source": "../../audit/verification_receipt.json",
+      "sha256": "6506b95651eed8fdb73b7dd0abb767135e54b8983706a7cce9111b74a3a8a0c0"
+    },
+    "cpp_check.json": {
+      "source": "../../audit/cpp_check.json",
+      "sha256": "b5004e1a0d28a0e7a72d21e61fd897ec4f19ab88f75e96875b020b0f88e02b52"
+    },
+    "certificate_check.json": {
+      "source": "../../audit/certificate_check.json",
+      "sha256": "b8f2291f57f952c19d479c98098930e722686756112519d2787fec0608d0e4ff"
+    },
+    "descriptive_summary.json": {
+      "source": "../../analysis/descriptive_summary.json",
+      "sha256": "e7380f8bce51854750f3d5442fc5ce06a9f19b8531b7d24360970923e983fb64",
+      "scope": "Native pooled arm and paired-seed medians/minima; no new interval. Primary frozen statistics unchanged."
+    }
+  },
+  "selection": {
+    "current_control": {
+      "backend": "fold",
+      "scalar_kernel": "reference",
+      "lanes": 64,
+      "dp_bits": 6,
+      "escape_fruitless": false,
+      "step_cap_factor": 2000
+    },
+    "arithmetic_cases_per_candidate": 9,
+    "policy_cases_per_candidate": 9,
+    "policy_grid": {
+      "lanes": [
+        64,
+        128,
+        256
+      ],
+      "dp_bits": [
+        6,
+        8,
+        10
+      ],
+      "escape_fruitless": [
+        false
+      ]
+    },
+    "objective": "Native arithmetic mean whole-process cost among all-nine verified, uncapped eligible candidates; default preference within two percent. Arithmetic additionally requires recorded semantic matches.",
+    "all_losing_policies_and_failures": "Keep every native score and row; no Python selection or eligibility recomputation.",
+    "selected_native_configuration": {
+      "backend": "fold",
+      "dp_bits": 6,
+      "escape_fruitless": false,
+      "lanes": 256,
+      "scalar_kernel": "reference",
+      "step_cap_factor": 2000
+    }
+  },
+  "figures": {
+    "campaign_flow": "A/A10, arithmetic18, policy81, holdout30; frozen selections before holdout; no new IC run.",
+    "arithmetic_scores": "All recorded native candidate means; diagnostic and training-only.",
+    "aa_noise": "All five recorded A/A wall ratios, native median and min/max; no computed interval.",
+    "policy_scores": "All nine native policy whole-process means, eligibility, frozen selected id.",
+    "holdout_cases": "Each native target three-seed mean and all individual process times for current and selected arms.",
+    "holdout_intervals": "Native primary and secondary ratios and intervals; direction current/selected explicitly labeled."
+  },
+  "admission": {
+    "whole_process_comparison": "All30holdout complete/verified uncensored; four stage reservations uncontended. Conditional one-host five-target runtime estimate; A/A lower-edge caveat retained.",
+    "counter_equivalence": "Exported answers, counters, policy and charges only; no full step trace.",
+    "independent_replay_cost": {
+      "wall_s": 0.886574336,
+      "user_s": 0.833018,
+      "system_s": 0.051324,
+      "peak_rss_kib": 109188,
+      "inside_solver_intervals": false
+    },
+    "calibrated_operation_equivalent_S": null,
+    "L2_admission": null,
+    "independent_host_replay": null,
+    "new_IC_rho_ratio": null,
+    "internal_capped_walks": "Per-lane capped-walk restarts remain in raw outcome counters/charges and whole-process/online costs. Zero process/global-cap failures does not mean zero internal restarts."
+  },
+  "missing_value_policy": "Keep native nulls and failures; withhold unsupported ratios and intervals. Do not fabricate or pool historical timing denominators.",
+  "validation": {
+    "release_library": {
+      "passed": 3992,
+      "failed": 0,
+      "ignored": 112,
+      "log": "../../checks/full_lib_prebench.log"
+    },
+    "worker": {
+      "passed": 7,
+      "log": "../../checks/new_worker_release_tests.log"
+    },
+    "native_runner": {
+      "passed": 22,
+      "log": "../../checks/native_runner/test.log"
+    },
+    "lean": {
+      "checked_declarations": 4,
+      "status": "PASS_WITH_EXPLICIT_MACHINE_BRIDGES",
+      "source": "../../audit/verification_receipt.json"
+    }
+  }
+}

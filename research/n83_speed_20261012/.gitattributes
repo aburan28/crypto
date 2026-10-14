@@ -1,6 +1,7 @@
 checks/** -whitespace
 records/** -whitespace
 reports/**/*.log -whitespace
+reports/**/*.svg -whitespace
 audit/*.log -whitespace
 audit/*.stdout -whitespace
 audit/*.stderr -whitespace
