@@ -4,7 +4,8 @@
 combinatorial screen frozen in [PROTOCOL.md](PROTOCOL.md), following the
 [four-size cold solve](../full_cost_20261013/REPORT.md). The [raw TSV](raw-v1.tsv),
 [native source](screen.rs), [run log](run-v1.log), and [run receipt](RUN.md)
-are retained. [The graph](graph-support.svg) displays the exact support
+are retained. The [artifact manifest](ARTIFACTS.sha256) hashes the study
+records. [The graph](graph-support.svg) displays the exact support
 counts; [the PDF](report.pdf) embeds it.
 
 An independently frozen [follow-on protocol](EQUIVARIANT_PROTOCOL.md)
