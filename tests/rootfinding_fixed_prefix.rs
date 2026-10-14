@@ -1,8 +1,8 @@
 //! Frozen equal-probe coverage control; see the study's FIXED_PREFIX_PROTOCOL.md.
 use crypto_lib::cryptanalysis::ic_boundary::{
     collect_and_solve_relations, find_prime_order_curve, prime_factor_base_strided, CompletionRule,
-    CountedGroup, FieldOps, GroupOps, IncrementalGauss, PairTable, PrimePoint, RestartPool,
-    RowStatus, TargetSource,
+    FieldOps, GroupOps, IncrementalGauss, PairTable, PrimePoint, RestartPool, RowStatus,
+    TargetSource,
 };
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -52,8 +52,13 @@ fn input_targets() -> (Vec<(u64, u64, u64)>, String) {
     let mut result = Vec::new();
     for (index, target) in input.targets.into_iter().enumerate() {
         assert_eq!(target.target_index, index);
-        let parse_hex = |value: &str| u64::from_str_radix(value.trim_start_matches("0x"), 16).unwrap();
-        result.push((parse_hex(&target.x), parse_hex(&target.y), target.algorithm_seed));
+        let parse_hex =
+            |value: &str| u64::from_str_radix(value.trim_start_matches("0x"), 16).unwrap();
+        result.push((
+            parse_hex(&target.x),
+            parse_hex(&target.y),
+            target.algorithm_seed,
+        ));
     }
     (result, input.source)
 }
@@ -146,7 +151,8 @@ fn fixed_public_prefix_gives_equal_probe_budgets_for_three_bases() {
             }
             assert_eq!(lookups as usize, PREFIX);
             let structural_bytes_floor = fb.points.len() * std::mem::size_of::<PrimePoint>()
-                + table.entries as usize * (std::mem::size_of::<u64>() + 2 * std::mem::size_of::<u32>());
+                + table.entries as usize
+                    * (std::mem::size_of::<u64>() + 2 * std::mem::size_of::<u32>());
             arms.push(json!({
                 "stride": stride,
                 "unique_pair_keys": table.entries,
