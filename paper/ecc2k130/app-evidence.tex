@@ -1,0 +1,105 @@
+\section{Evidence records}
+\label{app:evidence}
+
+Every measured number in this paper cites one of the records below as
+[E$n$], optionally with a section of that record. Each record is a
+measurement report, dataset, protocol or source file kept in a public
+repository named after its title. The companion repository being
+prepared for this paper (Appendix~\ref{app:repro}) will hold a copy of
+every record under its number.
+
+{\small
+\begin{description}[leftmargin=2.6em,labelwidth=2.2em,itemsep=0.1em,font=\normalfont]
+\item[\evlabel{client}{E1}] ECC2K-130 client reference: field, walk, validation and throughput. \emph{design and measurement notes}; crypto.
+\item[\evlabel{cmodel}{E2}] Independent C golden model of $\FF_{2^{131}}$ and the curve. \emph{source and tests}; cryptanalysis.
+\item[\evlabel{codegen}{E3}] Field model and code generator for $\FF_{2^{131}}$. \emph{source}; crypto.
+\item[\evlabel{hdl}{E4}] FPGA engine: VHDL design, reference model and test vectors. \emph{design and source}; crypto.
+\item[\evlabel{ecc2k95}{E5}] ECC2K-95 GPU kernel and Koblitz pair table. \emph{design notes and source}; crypto.
+\item[\evlabel{walkconst}{E6}] Walk constants and fruitless-cycle analysis on toy Koblitz curves. \emph{measurement report}; crypto.
+\item[\evlabel{witness}{E7}] Witness counters and their cost. \emph{measurement report}; crypto.
+\item[\evlabel{ops}{E8}] Campaign operations, configuration and planning numbers. \emph{operations notes}; crypto.
+\item[\evlabel{sigmafused}{E9}] Fused single-pass $\sigma$-walk. \emph{paired benchmark}; crypto.
+\item[\evlabel{iterfn}{E10}] Iteration functions compared: $\sigma$-walk, table walk and their cost model. \emph{measurement report}; crypto.
+\item[\evlabel{bridge}{E11}] $x$-only doubling-and-bridge map on the RTX PRO 4500. \emph{paired benchmark}; crypto.
+\item[\evlabel{maxiters}{E12}] Iteration-guard study. \emph{analysis}; crypto.
+\item[\evlabel{v3}{E13}] Table-walk cycle escape, rule v3. \emph{design and measurement notes}; crypto.
+\item[\evlabel{packedsrc}{E14}] Packed $\FF_{2^{131}}$ arithmetic for CUDA. \emph{source}; crypto.
+\item[\evlabel{ceiling}{E15}] Instruction-issue rates and the throughput ceiling. \emph{measurement report}; crypto.
+\item[\evlabel{packed}{E16}] Ledger: packed normal-basis backend and its audit. \emph{paired benchmark}; crypto.
+\item[\evlabel{frobnet}{E17}] Ledger: Frobenius permutation networks. \emph{paired benchmark}; crypto.
+\item[\evlabel{clmad}{E18}] Ledger: native carry-less multiplication (\texttt{clmad}). \emph{paired benchmark}; crypto.
+\item[\evlabel{roofline}{E19}] Roofline of the table-walk build on the RTX PRO 6000. \emph{measurement report}; crypto.
+\item[\evlabel{refsrc}{E20}] Host reference implementation of the step. \emph{source}; crypto.
+\item[\evlabel{ecc2k95clmad}{E21}] ECC2K-95 kernel: \texttt{clmad} port. \emph{measurement report}; crypto.
+\item[\evlabel{ada}{E22}] Ada L4 and L40S with and without \texttt{clmad}. \emph{measurement report}; crypto.
+\item[\evlabel{t4}{E23}] Turing T4 without \texttt{clmad}. \emph{measurement report}; crypto.
+\item[\evlabel{twochains}{E24}] Two-chain kernel and \texttt{CLMAD} rates on three dies. \emph{measurement report}; crypto.
+\item[\evlabel{topclmad}{E25}] Declined: top-bit correction on \texttt{CLMAD}. \emph{paired benchmark}; crypto.
+\item[\evlabel{autosweep}{E26}] Automatic single-knob sweep on the B200 and RTX PRO 6000. \emph{measurement report}; crypto.
+\item[\evlabel{nativecand}{E27}] Native-instruction candidates and the acceptance rule. \emph{protocol}; crypto.
+\item[\evlabel{sigmatable}{E28}] $\sigma$ step through shared-memory nibble tables. \emph{paired benchmark}; crypto.
+\item[\evlabel{singleprod}{E29}] Ledger: single polynomial product. \emph{paired benchmark}; crypto.
+\item[\evlabel{dencache}{E30}] Ledger: denominator cache. \emph{paired benchmark}; crypto.
+\item[\evlabel{polychain}{E31}] Ledger: polynomial-basis batch chain. \emph{paired benchmark}; crypto.
+\item[\evlabel{pairedprod}{E32}] Ledger: paired products. \emph{paired benchmark}; crypto.
+\item[\evlabel{polystate}{E33}] Ledger: polynomial-basis state. \emph{paired benchmark}; crypto.
+\item[\evlabel{directred}{E34}] Ledger: direct reduction. \emph{paired benchmark}; crypto.
+\item[\evlabel{genprod}{E35}] Ledger: generated straight-line product. \emph{paired benchmark}; crypto.
+\item[\evlabel{tiles}{E36}] Ledger: 256-worker tiles. \emph{paired benchmark}; crypto.
+\item[\evlabel{batch}{E37}] Ledger: batch 16 with 385{,}024 workers. \emph{paired benchmark}; crypto.
+\item[\evlabel{wprefix}{E38}] Ledger: weighted prefixes and paired Frobenius. \emph{paired benchmark}; crypto.
+\item[\evlabel{compact}{E39}] Ledger: compact 17-byte state and batch screens. \emph{paired benchmark}; crypto.
+\item[\evlabel{sharedsigma}{E40}] Ledger: shared-memory mask table. \emph{paired benchmark}; crypto.
+\item[\evlabel{tablecmp}{E41}] Table walk against $\sigma$-walk: paired comparison data. \emph{dataset}; crypto.
+\item[\evlabel{oneblock}{E42}] One-block table-walk geometry (the 20.08 build). \emph{paired benchmark}; crypto.
+\item[\evlabel{survey}{E43}] Eleven-GPU survey on Modal. \emph{measurement report}; crypto.
+\item[\evlabel{tuning}{E44}] Declined: stream-Karatsuba compile option. \emph{benchmark}; crypto.
+\item[\evlabel{addcombine}{E45}] Declined: integer add in the carry-less product. \emph{paired benchmark}; crypto.
+\item[\evlabel{lambda}{E46}] Declined: $\lambda$-projective coordinates, priced. \emph{analysis}; crypto.
+\item[\evlabel{hostsched}{E47}] AVX-512 host scheduling pass. \emph{measurement report}; crypto.
+\item[\evlabel{dpint}{E48}] Distinguished-point interval calibration at cutoff 32. \emph{measurement report and raw counters}; crypto.
+\item[\evlabel{nistres}{E49}] NIST P-256/P-384 rho on the RTX PRO 6000: device results, rounds 1 and 2 (round 2: the $W=32$ and register-cap cells, merged in pull request 1778). \emph{measurement report}; crypto.
+\item[\evlabel{nist}{E50}] NIST P-256/P-384 GPU library: field, walk and tests. \emph{design notes and source}; crypto.
+\item[\evlabel{nistproto}{E51}] Pre-registered NIST GPU arithmetic protocol. \emph{protocol}; crypto.
+\item[\evlabel{nistcpu}{E52}] Fifteen-curve NIST ECDLP solver and audit. \emph{design and measurement notes}; crypto.
+\item[\evlabel{ecc}{E53}] secp256k1 GPU library: field, walk, folds and baby-step giant-step. \emph{design notes and source}; crypto.
+\item[\evlabel{kangaroo}{E54}] GPU kangaroo interval solver. \emph{design and measurement notes}; crypto.
+\item[\evlabel{nistattempt}{E55}] First NIST GPU attempt (infrastructure non-result). \emph{record}; crypto.
+\item[\evlabel{prho64}{E56}] 64-bit prime-field GPU rho. \emph{design and measurement notes}; cryptanalysis.
+\item[\evlabel{eccopt}{E57}] secp256k1 GPU arithmetic: Blackwell optimisation notes. \emph{analysis}; crypto.
+\item[\evlabel{fes}{E58}] Fast exhaustive search for quadratic Boolean systems. \emph{design notes}; crypto.
+\item[\evlabel{semaev}{E59}] Semaev $S_4$ pairs-and-solve sweep. \emph{design and measurement notes}; crypto.
+\item[\evlabel{macaulay}{E60}] Batched Macaulay reduced-echelon solver. \emph{design notes}; crypto.
+\item[\evlabel{macaulaybench}{E61}] Macaulay reduction pipeline on an RTX PRO 4500. \emph{measurement report}; crypto.
+\item[\evlabel{spmv}{E62}] Sparse matrix--vector worker. \emph{design notes}; crypto.
+\item[\evlabel{f4}{E63}] F4 elimination on rented RTX 5090 and H100 GPUs. \emph{measurement reports}; cryptanalysis.
+\item[\evlabel{gpueff}{E64}] GPU efficiency scorer and the packed-walk profile. \emph{tool and profile}; cryptanalysis.
+\item[\evlabel{fpgaest}{E65}] FPGA pre-board estimate. \emph{analysis}; crypto.
+\item[\evlabel{f2}{E66}] FPGA engine on AWS F2: builds and measurements. \emph{measurement report}; crypto.
+\item[\evlabel{audit}{E67}] Campaign audit and live snapshot, 2026-09-25. \emph{audit report and dataset}; crypto.
+\item[\evlabel{quotes}{E68}] Fleet price quotes, 2026-09-18. \emph{operations record}; crypto.
+\item[\evlabel{pro4500}{E69}] RTX PRO 4500: rates and per-dollar break-even. \emph{measurement report}; crypto.
+\item[\evlabel{goal28}{E70}] The 28-billion goal: grid and occupancy screens. \emph{measurement report}; crypto.
+\item[\evlabel{power}{E71}] Power-bound model and updates per joule. \emph{measurement report}; crypto.
+\item[\evlabel{cert}{E72}] Storage, seeds and certification protocol. \emph{protocol}; crypto.
+\item[\evlabel{status}{E73}] Public campaign dashboard. \emph{documentation}; crypto.
+\item[\evlabel{hold}{E74}] Cloud account hold, 2026-09-18. \emph{operations record}; crypto.
+\item[\evlabel{feed}{E75}] Published campaign feed, 2026-10-10. \emph{dataset}; crypto.
+\item[\evlabel{koblitzic}{E76}] Index calculus on Koblitz curves: structural analysis. \emph{analysis}; crypto.
+\item[\evlabel{evfrob}{E77}] Evidence record: Frobenius-stable factor bases at $n=131$. \emph{evidence record}; crypto-autoresearcher.
+\item[\evlabel{icfeas}{E78}] Index-calculus feasibility for ECC2K-130. \emph{analysis}; crypto.
+\item[\evlabel{icledger}{E79}] Index-calculus boundary ledger. \emph{measurement ledger}; crypto.
+\item[\evlabel{pdp}{E80}] Point decomposition against the rho budget. \emph{measurement report}; cryptanalysis.
+\item[\evlabel{evicperf}{E81}] Evidence record: Riemann--Roch oracle product law. \emph{evidence record}; crypto-autoresearcher.
+\item[\evlabel{probelat}{E82}] Cycle-probe latency and the routes to a faster exact rule. \emph{analysis}; crypto.
+\item[\evlabel{sigmasq}{E83}] $\sigma$-walk shared-memory square table: compile and resource gate. \emph{gate record}; crypto.
+\item[\evlabel{g7native}{E84}] Native-instruction candidates on the RTX PRO 4500. \emph{paired benchmark}; crypto.
+\item[\evlabel{sparse}{E85}] Sparse-basis and compound $\sigma$ maps: modelled ceilings. \emph{analysis}; crypto.
+\item[\evlabel{cpupacked}{E86}] Packed CPU client on PMULL/PCLMULQDQ and the Metal client. \emph{design and measurement notes}; cryptanalysis.
+\item[\evlabel{gfni}{E87}] GFNI for basis changes: measured on small fields, priced for ECC2K-130. \emph{measurement report and analysis}; crypto.
+\item[\evlabel{smallclmul}{E88}] Carry-less reduction in small binary fields (PCLMULQDQ). \emph{measurement report}; crypto.
+\item[\evlabel{redesign}{E89}] Iteration-function redesign screens, 2026-10-12: the tuned v3 table walk and a two-card $\sigma$-walk aggregate. \emph{screen reports}; crypto.
+\item[\evlabel{tp29}{E90}] Throughput rounds toward 29 billion iterations/s on the RTX PRO 6000, with Nsight Compute counters. \emph{design and measurement notes}; crypto.
+\item[\evlabel{probes}{E91}] Instruction-rate probes and static SASS cost tools. \emph{microbenchmarks and tools}; crypto.
+\end{description}
+}

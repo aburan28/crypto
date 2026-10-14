@@ -19,6 +19,7 @@ type Result<T> = std::result::Result<T, Box<dyn Error>>;
 const OBJECT_BLAKE3: &str = "aea278aff2d79a592d5164d7437ddde8f8e9377fa481058dfc16afa176a31389";
 const SET_BLAKE3: &str = "db3e7f25877c75dfd6f53db46447972ce6a44434cb7ea1e53e450d21af0fe79c";
 const CURVE: &str = "icv1-f2m83-tm6151469093347-debefd74";
+#[cfg(target_os = "linux")]
 const LIMIT: u64 = 4 * 1024 * 1024 * 1024;
 const SOURCE: &[u8] = include_bytes!("koblitz_n83_structured_orbit_capacity.rs");
 

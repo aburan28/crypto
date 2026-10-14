@@ -1,0 +1,41 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Fresh public targets for fixed-prefix B48 coverage confirmation",
+  "description": "Workload generation only: target_seed 20261025; one ordinary B48 batch-8 arm fixes eight unseen public target points and algorithm seeds for the predeclared 4096-probe rank comparison.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "prime_search",
+        "bits": 20,
+        "seed": 59297
+      }
+    ],
+    "target_kind": "public",
+    "targets_per_curve": 8,
+    "target_seed": 20261025
+  },
+  "arms": [
+    {
+      "name": "b48-stride-1",
+      "role": "baseline",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=48",
+          "oracle": "mitm-prime-batch:m=2",
+          "targets": "walk-prime-batch-8",
+          "linalg": "incremental-gauss",
+          "max_trials": "5000000"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 20261025,
+    "isolation_required": "L2",
+    "timeout_seconds": 120
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Prime pair-table batch inversion at 64 abscissae",
+  "description": "Matched cold single-target table-construction comparison with identical relation search and exact verification.",
+  "workloads": {
+    "curves": [{"kind": "prime_search", "bits": 20, "seed": 59297}],
+    "target_kind": "public",
+    "targets_per_curve": 8,
+    "target_seed": 20261015
+  },
+  "arms": [
+    {"name": "rho-neg", "role": "reference", "method": {"id": "rho.negation"}},
+    {"name": "pair-scalar", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "prime-abscissa:size=64", "oracle": "mitm:m=2,negation_folded=1", "linalg": "incremental-gauss-full-rank-checked", "max_trials": "5000000"}}},
+    {"name": "pair-batch", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "prime-abscissa:size=64", "oracle": "mitm-prime-batch:m=2", "linalg": "incremental-gauss-full-rank-checked", "max_trials": "5000000"}}},
+    {"name": "rho-neg-aa", "role": "control", "method": {"id": "rho.negation"}}
+  ],
+  "measurement": {"rounds": 3, "warmup": 1, "order": "alternate", "seed": 20261015, "isolation_required": "L2", "timeout_seconds": 120}
+}

@@ -36,6 +36,7 @@ for extra in (REPO / "research/ic_candidate_tournament_20260915", REPO / "tools"
         sys.path.insert(0, str(extra))
 import identity  # noqa: E402
 import oracle  # noqa: E402
+import oracle_u128  # noqa: E402  (same checker, degree bound widened to the u128 rungs n = 71, 83)
 from curve_identity import candidate_identity  # noqa: E402
 
 PHASE_FIELDS = {
@@ -49,7 +50,9 @@ CURVE_FIELDS = ("degree", "curve_a", "subgroup_order", "irreducible", "group_ord
                 "generator", "lambda")
 
 _curves: dict[str, oracle.Curve] = {}
-_OracleCurve = oracle.Curve
+# oracle.py is pinned by sha256 in frozen records and stays untouched; the
+# widened checker is a separate module with identical arithmetic.
+_OracleCurve = oracle_u128.Curve
 
 
 def cached_curve(fixture: dict[str, Any]) -> oracle.Curve:
