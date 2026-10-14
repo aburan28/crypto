@@ -78,10 +78,20 @@ struct CurveRow {
     f4_targets: usize,
 }
 
-fn measure_curve(label: &str, n: u32, irr: &IrreduciblePoly, a: &F2mElement, b: &F2mElement, l: u32, seed: u64) -> CurveRow {
+fn measure_curve(
+    label: &str,
+    n: u32,
+    irr: &IrreduciblePoly,
+    a: &F2mElement,
+    b: &F2mElement,
+    l: u32,
+    seed: u64,
+) -> CurveRow {
     let curve = arith_curve(n, irr, a, b);
     // Factor base: x in V = span(1, z, ..., z^{l-1}) that lie on the curve.
-    let basis: Vec<F2mElement> = (0..l).map(|k| F2mElement::from_bit_positions(&[k], n)).collect();
+    let basis: Vec<F2mElement> = (0..l)
+        .map(|k| F2mElement::from_bit_positions(&[k], n))
+        .collect();
     let mut fb: Vec<BinaryPoint> = Vec::new();
     for v in 0..(1u64 << l) {
         let x = elem_from_bits(v, n);
@@ -103,7 +113,11 @@ fn measure_curve(label: &str, n: u32, irr: &IrreduciblePoly, a: &F2mElement, b: 
     let mut rng = StdRng::seed_from_u64(seed);
     let x3 = elem_from_bits(rng.gen_range(1..(1u64 << n)), n);
     let ffd = measure_one(n, irr, b, &x3, 4);
-    let rank_profile: Vec<(u32, u64, u64)> = ffd.per_degree.iter().map(|m| (m.degree, m.rank, m.rank_generic)).collect();
+    let rank_profile: Vec<(u32, u64, u64)> = ffd
+        .per_degree
+        .iter()
+        .map(|m| (m.degree, m.rank, m.rank_generic))
+        .collect();
     // F4 decomposition cost with the subspace factor base, m = 2.
     let st = FieldStructure::new(n, irr);
     let opts = SolveOptions::default();
@@ -117,7 +131,9 @@ fn measure_curve(label: &str, n: u32, irr: &IrreduciblePoly, a: &F2mElement, b: 
         let i = rng.gen_range(0..fb.len());
         let j = rng.gen_range(0..fb.len());
         let r = point_add(&curve, &fb[i], &fb[j]);
-        let BinaryPoint::Affine { x: xr, .. } = r else { continue };
+        let BinaryPoint::Affine { x: xr, .. } = r else {
+            continue;
+        };
         if let Some(sys) = build_decomposition_system(&basis, &xr, b, 2, &st) {
             let t0 = Instant::now();
             let (sols, stats) = solve_boolean_system(&sys.equations, sys.n_vars, &opts);
@@ -185,7 +201,9 @@ fn main() {
     let mut out = Vec::new();
     println!("# Isogenous curves and the point-decomposition problem (binary toy sizes)\n");
     for &n in &ns {
-        let Some(irr) = find_irreducible(n) else { continue };
+        let Some(irr) = find_irreducible(n) else {
+            continue;
+        };
         let l = n / 2;
         let one = F2mElement::one(n);
         let zero = F2mElement::zero(n);
@@ -196,24 +214,42 @@ fn main() {
             }
             None => one.clone(),
         };
-        let base_label = if base_seed.is_some() { "random-b base" } else { "K_0 (base)" };
+        let base_label = if base_seed.is_some() {
+            "random-b base"
+        } else {
+            "K_0 (base)"
+        };
         let base = ECurve::new(n, irr.clone(), zero.clone(), base_b.clone());
-        let mut curves: Vec<(String, F2mElement, F2mElement)> = vec![(base_label.into(), zero.clone(), base_b.clone())];
+        let mut curves: Vec<(String, F2mElement, F2mElement)> =
+            vec![(base_label.into(), zero.clone(), base_b.clone())];
         for &ell in &ells {
             for (k, nb) in l_isogenous_neighbours(&base, ell).into_iter().enumerate() {
                 // `l_isogenous_neighbours` returns both a-choices per neighbouring j; only the
                 // one with the same trace as the base is isogenous, the other is its twist.
                 let same_a = nb.a == base.a;
-                let kind = if bits_of(&nb.b) == bits_of(&base.b) && same_a { "self (dual isogeny)" } else if same_a { "isogenous" } else { "twist of neighbour" };
+                let kind = if bits_of(&nb.b) == bits_of(&base.b) && same_a {
+                    "self (dual isogeny)"
+                } else if same_a {
+                    "isogenous"
+                } else {
+                    "twist of neighbour"
+                };
                 curves.push((format!("{ell}-{kind} #{k}"), nb.a.clone(), nb.b.clone()));
             }
         }
-        println!("## n = {n}, factor base V = span(1..z^{}) (2^{l} x-values), 2-decomposition\n", l - 1);
+        println!(
+            "## n = {n}, factor base V = span(1..z^{}) (2^{l} x-values), 2-decomposition\n",
+            l - 1
+        );
         println!("| curve | a | b | Frobenius-symmetric | \\|F\\| | 2-sum yield | FFD | Macaulay rank (deg 2/3/4) vs generic | F4 ms decomposable | F4 ms random | F4 found | mean reductions |");
         println!("|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|");
         for (k, (label, a, b)) in curves.iter().enumerate() {
             let row = measure_curve(label, n, &irr, a, b, l, 1000 + k as u64);
-            let prof: Vec<String> = row.rank_profile.iter().map(|(d, r, g)| format!("d{d}: {r}/{g}")).collect();
+            let prof: Vec<String> = row
+                .rank_profile
+                .iter()
+                .map(|(d, r, g)| format!("d{d}: {r}/{g}"))
+                .collect();
             println!(
                 "| {} | {:#x} | {:#x} | {} | {} | {:.4} | {} | {} | {:.1} | {:.1} | {}/{} | {:.1} |",
                 row.label,
@@ -238,7 +274,11 @@ fn main() {
         println!();
     }
     if let Some(p) = json_path {
-        std::fs::write(&p, serde_json::to_string_pretty(&json!({"results": out})).unwrap()).unwrap();
+        std::fs::write(
+            &p,
+            serde_json::to_string_pretty(&json!({"results": out})).unwrap(),
+        )
+        .unwrap();
         println!("JSON written to {p}");
     }
 }

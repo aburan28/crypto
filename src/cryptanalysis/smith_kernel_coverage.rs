@@ -78,7 +78,7 @@ fn poly_mulmod_fp(a: &[u32], b: &[u32], modulus: &[u32], p: u32) -> Vec<u32> {
 
 impl Fpk {
     pub fn new(p: u32, k: u32) -> Self {
-        assert!(k >= 1 && k <= 3);
+        assert!((1..=3).contains(&k));
         // Monic modulus of degree k with no root in F_p (irreducible for k <= 3).
         let modulus: Vec<u32> = if k == 1 {
             vec![0, 1]
@@ -102,11 +102,13 @@ impl Fpk {
             found.expect("irreducible exists")
         };
         let size = p.pow(k) as usize;
-        let digits = |idx: usize| -> Vec<u32> {
-            (0..k).map(|i| (idx as u32 / p.pow(i)) % p).collect()
-        };
+        let digits =
+            |idx: usize| -> Vec<u32> { (0..k).map(|i| (idx as u32 / p.pow(i)) % p).collect() };
         let index = |d: &[u32]| -> usize {
-            d.iter().enumerate().map(|(i, &c)| (c * p.pow(i as u32)) as usize).sum()
+            d.iter()
+                .enumerate()
+                .map(|(i, &c)| (c * p.pow(i as u32)) as usize)
+                .sum()
         };
         let mut mul = vec![0u16; size * size];
         for a in 0..size {
@@ -127,7 +129,13 @@ impl Fpk {
         for a in 0..size {
             is_square[mul[a * size + a] as usize] = true;
         }
-        Fpk { p, k, size, mul, is_square }
+        Fpk {
+            p,
+            k,
+            size,
+            mul,
+            is_square,
+        }
     }
 
     /// Quadratic character sum `sum_x chi(f(x))` for monic `f` given by its
@@ -244,7 +252,12 @@ fn pdiv(a: &[u32], m: &[u32], p: u32) -> Vec<u32> {
 /// Cycle type (sorted factor degrees) of Frobenius on the roots of the
 /// squarefree polynomial `f`; `None` if `f` is not squarefree.
 pub fn cycle_type(f: &[u32], p: u32) -> Option<Vec<u32>> {
-    let deriv: Vec<u32> = f.iter().enumerate().skip(1).map(|(i, &c)| (i as u32 % p) * c % p).collect();
+    let deriv: Vec<u32> = f
+        .iter()
+        .enumerate()
+        .skip(1)
+        .map(|(i, &c)| (i as u32 % p) * c % p)
+        .collect();
     if pgcd(f, &deriv, p).len() != 1 {
         return None;
     }
@@ -302,7 +315,10 @@ fn canon(mask: u8) -> u8 {
 }
 
 fn j2_elements() -> Vec<u8> {
-    (0u16..128).map(|m| m as u8).filter(|m| m.count_ones() % 2 == 0).collect()
+    (0u16..128)
+        .map(|m| m as u8)
+        .filter(|m| m.count_ones() % 2 == 0)
+        .collect()
 }
 
 fn pairing(a: u8, b: u8) -> u32 {
@@ -322,9 +338,8 @@ pub fn lagrangians() -> Vec<([u8; 7], bool)> {
                     continue;
                 }
                 let mut span = [0u8; 7];
-                let mut n = 0;
                 let mut ok = true;
-                for s in 1u8..8 {
+                for (n, s) in (1u8..8).enumerate() {
                     let mut v = 0u8;
                     if s & 1 != 0 {
                         v ^= a;
@@ -341,7 +356,6 @@ pub fn lagrangians() -> Vec<([u8; 7], bool)> {
                         break;
                     }
                     span[n] = v;
-                    n += 1;
                 }
                 if !ok {
                     continue;
@@ -395,7 +409,9 @@ pub fn stable_kernels(perm: &[usize; 8], lags: &[([u8; 7], bool)]) -> (u32, u32)
     let mut pair = 0;
     let mut any = 0;
     for (set, pair_like) in lags {
-        let stable = set.iter().all(|&v| set.binary_search(&permute_mask(perm, v)).is_ok());
+        let stable = set
+            .iter()
+            .all(|&v| set.binary_search(&permute_mask(perm, v)).is_ok());
         if stable {
             any += 1;
             if *pair_like {
@@ -413,14 +429,18 @@ pub fn has_stable_matching(ct: &[u32]) -> bool {
     for &c in ct {
         *counts.entry(c).or_default() += 1;
     }
-    counts.iter().all(|(&len, &cnt)| len % 2 == 0 || cnt % 2 == 0)
+    counts
+        .iter()
+        .all(|(&len, &cnt)| len % 2 == 0 || cnt % 2 == 0)
 }
 
 /// Characteristic polynomial over F_2 (bitmask, bit i = T^i) of the action
 /// of `perm` on `J[2]` (dimension 6).
 pub fn charpoly_j2(perm: &[usize; 8]) -> u32 {
     // Basis: {i, i+1} for i = 0..5.
-    let basis: Vec<u8> = (0..6).map(|i| canon((1u8 << i) | (1u8 << (i + 1)))).collect();
+    let basis: Vec<u8> = (0..6)
+        .map(|i| canon((1u8 << i) | (1u8 << (i + 1))))
+        .collect();
     let mut coords: HashMap<u8, u8> = HashMap::new();
     for s in 0u8..64 {
         let mut v = 0u8;
@@ -470,8 +490,9 @@ fn det_f2x(a: &[Vec<u32>]) -> u32 {
         if a[0][j] == 0 {
             continue;
         }
-        let minor: Vec<Vec<u32>> =
-            (1..n).map(|i| (0..n).filter(|&c| c != j).map(|c| a[i][c]).collect()).collect();
+        let minor: Vec<Vec<u32>> = (1..n)
+            .map(|i| (0..n).filter(|&c| c != j).map(|c| a[i][c]).collect())
+            .collect();
         d ^= clmul(a[0][j], det_f2x(&minor));
     }
     d
@@ -481,7 +502,10 @@ fn det_f2x(a: &[Vec<u32>]) -> u32 {
 /// reduced mod 2, as a bitmask.
 pub fn chi_mod2(a1: i64, a2: i64, a3: i64, p: i64) -> u32 {
     let coeffs = [p * p * p, p * p * a1, p * a2, a3, a2, a1, 1];
-    coeffs.iter().enumerate().fold(0, |acc, (i, &c)| acc | (((c.rem_euclid(2)) as u32) << i))
+    coeffs
+        .iter()
+        .enumerate()
+        .fold(0, |acc, (i, &c)| acc | (((c.rem_euclid(2)) as u32) << i))
 }
 
 /// Necessary condition for a Frobenius-stable Lagrangian: `chi mod 2 = g g*`.
@@ -627,10 +651,13 @@ struct CurveRec {
 }
 
 pub fn prime_report(p: u32, cheb: &ChebotarevReport) -> PrimeReport {
-    assert!(p % 2 == 1 && p >= 3 && p % 2 == 1 && 8 % p != 0);
+    assert!(p % 2 == 1 && p >= 3 && 8 % p != 0);
     let fields = [Fpk::new(p, 1), Fpk::new(p, 2), Fpk::new(p, 3)];
-    let by_type: HashMap<Vec<u32>, &ChebotarevRow> =
-        cheb.rows.iter().map(|r| (r.cycle_type.clone(), r)).collect();
+    let by_type: HashMap<Vec<u32>, &ChebotarevRow> = cheb
+        .rows
+        .iter()
+        .map(|r| (r.cycle_type.clone(), r))
+        .collect();
     let total = (p as u64).pow(7);
     let pi = p as i64;
     let recs: Vec<(CurveRec, Vec<u32>, bool)> = (0..total)
@@ -657,7 +684,11 @@ pub fn prime_report(p: u32, cheb: &ChebotarevReport) -> PrimeReport {
             let chi = chi_mod2(a1, a2, a3, pi);
             let mismatch = chi != row.charpoly_mod2;
             Some((
-                CurveRec { key: (a1, a2, a3), pair: row.stable_pair_kernels > 0, any: row.stable_lagrangians > 0 },
+                CurveRec {
+                    key: (a1, a2, a3),
+                    pair: row.stable_pair_kernels > 0,
+                    any: row.stable_lagrangians > 0,
+                },
                 ct,
                 mismatch,
             ))
@@ -669,7 +700,11 @@ pub fn prime_report(p: u32, cheb: &ChebotarevReport) -> PrimeReport {
     let mut direct_pair = 0u64;
     let mut direct_any = 0u64;
     for (r, ct, mm) in &recs {
-        let name = ct.iter().map(|d| d.to_string()).collect::<Vec<_>>().join("+");
+        let name = ct
+            .iter()
+            .map(|d| d.to_string())
+            .collect::<Vec<_>>()
+            .join("+");
         *cycle_type_counts.entry(name).or_default() += 2;
         if *mm {
             mismatches += 2;
@@ -767,13 +802,26 @@ mod tests {
         // and eq. (12): sum_T P(T) (1 - (3/4)^{#S(H)}) ~ 0.1857.
         let rep = chebotarev_report();
         let table: &[(&[u32], u32)] = &[
-            (&[8], 1), (&[2, 6], 1), (&[1, 1, 6], 1), (&[1, 1, 2, 4], 1),
-            (&[2, 2, 4], 3), (&[1, 1, 1, 1, 4], 3), (&[2, 3, 3], 3), (&[1, 1, 3, 3], 3),
-            (&[4, 4], 5), (&[1, 1, 2, 2, 2], 7), (&[1, 1, 1, 1, 2, 2], 9),
-            (&[1, 1, 1, 1, 1, 1, 2], 15), (&[2, 2, 2, 2], 25), (&[1; 8], 105),
+            (&[8], 1),
+            (&[2, 6], 1),
+            (&[1, 1, 6], 1),
+            (&[1, 1, 2, 4], 1),
+            (&[2, 2, 4], 3),
+            (&[1, 1, 1, 1, 4], 3),
+            (&[2, 3, 3], 3),
+            (&[1, 1, 3, 3], 3),
+            (&[4, 4], 5),
+            (&[1, 1, 2, 2, 2], 7),
+            (&[1, 1, 1, 1, 2, 2], 9),
+            (&[1, 1, 1, 1, 1, 1, 2], 15),
+            (&[2, 2, 2, 2], 25),
+            (&[1; 8], 105),
         ];
         for r in &rep.rows {
-            let want = table.iter().find(|(ct, _)| *ct == r.cycle_type.as_slice()).map_or(0, |t| t.1);
+            let want = table
+                .iter()
+                .find(|(ct, _)| *ct == r.cycle_type.as_slice())
+                .map_or(0, |t| t.1);
             assert_eq!(r.stable_pair_kernels, want, "{:?}", r.cycle_type);
         }
         let smith: f64 = rep
