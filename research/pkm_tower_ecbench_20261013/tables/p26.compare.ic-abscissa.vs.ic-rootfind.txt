@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p26/comparisons/ic-abscissa__ic-rootfind.json
+ops (ok): ic-rootfind / ic-abscissa = 1.0053 [0.994, 1.020] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.1503 [1.120, 1.169]
+| curve | log2 r | workloads | ic-rootfind / ic-abscissa | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp26-t2838-8e779ca8 | 23.28 | 8 | 1.0053 | [0.9942, 1.0197] | cluster |
+
+| workload | curve | log2 r | ic-abscissa mean S | ic-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W20d829c87466 | icv1-fp26-t2838-8e779ca8 | 23.28 | 94.0369 | 95.8310 | 1.0191 |
+| W459edf43e5a7 | icv1-fp26-t2838-8e779ca8 | 23.28 | 94.8738 | 94.5892 | 0.9970 |
+| W57379abdf921 | icv1-fp26-t2838-8e779ca8 | 23.28 | 96.4948 | 97.0831 | 1.0061 |
+| W7243e01194eb | icv1-fp26-t2838-8e779ca8 | 23.28 | 94.9455 | 97.6515 | 1.0285 |
+| W8e64c636e70a | icv1-fp26-t2838-8e779ca8 | 23.28 | 96.0770 | 95.6242 | 0.9953 |
+| Wba2d4897c8cd | icv1-fp26-t2838-8e779ca8 | 23.28 | 95.6986 | 97.1332 | 1.0150 |
+| Wda47d0f7e67b | icv1-fp26-t2838-8e779ca8 | 23.28 | 97.6873 | 96.0379 | 0.9831 |
+| Wfb330cc2db9c | icv1-fp26-t2838-8e779ca8 | 23.28 | 96.6942 | 96.6282 | 0.9993 |
