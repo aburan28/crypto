@@ -24,6 +24,20 @@ malformed order, changed input identity, and a claimed UNSAT encoding result.
 No N83 solver search, natural relation collection, rank, or target logarithm
 was performed, and the conservative local ledger remains **22,200 seconds**.
 
+The required `cargo test --release --lib --offline -- --test-threads=2`
+rerun started at 00:09:42 PDT under host load above 200. It reported 4,114
+tests, but progressed slowly; after 112 seconds it was deliberately sent
+SIGTERM, giving exit 143. The [raw compressed log](library-release-interrupted.log.gz)
+contains 67 terminal test-result lines, no reported test failure, and no final
+suite summary; the [machine receipt](library-release-interrupted.json) pins the
+log digest and classifies the exit. This is an **interrupted validation
+attempt**, not a full-suite pass. The earlier complete release-library pass at
+`bbbf03e94782` is documented
+in the [ordered-control validation](../known-witness-ordered-sat-20261014/VALIDATION.md);
+the only subsequent library-source change was a focused test assertion,
+which passed separately. This successor changes an example and its auditor,
+not library source.
+
 Reproduce from the repository root:
 
 ```sh
