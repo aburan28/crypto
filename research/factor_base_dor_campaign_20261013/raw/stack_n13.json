@@ -1,0 +1,48 @@
+{
+  "schema": "factor-base-stacking-v1",
+  "field_degree": 13,
+  "window_dim": 4,
+  "weights": [
+    1,
+    2
+  ],
+  "seed": 1,
+  "rows": [
+    {
+      "scheme": "win_sym",
+      "base_abscissae": 6,
+      "unknowns": 6,
+      "pairs_per_target": 21,
+      "coverage": 0.003784641679892565,
+      "trials": 1849.5806451612902,
+      "enumeration_work": 38841.1935483871
+    },
+    {
+      "scheme": "win_break",
+      "base_abscissae": 6,
+      "unknowns": 6,
+      "pairs_per_target": 36,
+      "coverage": 0.008545965083628372,
+      "trials": 819.1,
+      "enumeration_work": 29487.6
+    },
+    {
+      "scheme": "wt_sym",
+      "base_abscissae": 39,
+      "unknowns": 3,
+      "pairs_per_target": 780,
+      "coverage": 0.16188499572701745,
+      "trials": 24.708898944193063,
+      "enumeration_work": 19272.941176470587
+    },
+    {
+      "scheme": "wt_break",
+      "base_abscissae": 39,
+      "unknowns": 3,
+      "pairs_per_target": 338,
+      "coverage": 0.082529605664754,
+      "trials": 48.467455621301774,
+      "enumeration_work": 16382.0
+    }
+  ]
+}

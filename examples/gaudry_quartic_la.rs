@@ -26,7 +26,10 @@ fn main() {
         match args[i].as_str() {
             "--sizes" => {
                 i += 1;
-                sizes = args[i].split(',').map(|v| v.parse().expect("--sizes")).collect();
+                sizes = args[i]
+                    .split(',')
+                    .map(|v| v.parse().expect("--sizes"))
+                    .collect();
             }
             "--seeds" => {
                 i += 1;

@@ -1,0 +1,124 @@
+==> cycle1
+   1/24 rho-strong     icv1-f2m13-t181-515ee569 Wcd61f3fb5fa4  verified S=14.341 L0
+   2/24 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 Wcd61f3fb5fa4  verified S=258.946 L0
+   3/24 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 Wcd61f3fb5fa4  verified S=26.380 L0
+   4/24 ic-c2-frob-counted-m2 icv1-f2m13-t181-515ee569 Wcd61f3fb5fa4  verified S=15.488 L0
+   5/24 rho-strong     icv1-f2m13-t181-515ee569 W4faf05f5402d  verified S=13.603 L0
+   6/24 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 W4faf05f5402d  verified S=352.617 L0
+   7/24 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 W4faf05f5402d  verified S=20.882 L0
+   8/24 ic-c2-frob-counted-m2 icv1-f2m13-t181-515ee569 W4faf05f5402d  verified S=16.126 L0
+   9/24 ic-c2-frob-counted-m2 icv1-f2m13-t181-515ee569 Wcd61f3fb5fa4  verified S=15.641 L0
+  10/24 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 Wcd61f3fb5fa4  verified S=23.856 L0
+  11/24 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 Wcd61f3fb5fa4  verified S=572.024 L0
+  12/24 rho-strong     icv1-f2m13-t181-515ee569 Wcd61f3fb5fa4  verified S=13.603 L0
+  13/24 ic-c2-frob-counted-m2 icv1-f2m13-t181-515ee569 W4faf05f5402d  verified S=15.674 L0
+  14/24 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 W4faf05f5402d  verified S=20.052 L0
+  15/24 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 W4faf05f5402d  verified S=630.562 L0
+  16/24 rho-strong     icv1-f2m13-t181-515ee569 W4faf05f5402d  verified S=13.603 L0
+  17/24 rho-strong     icv1-f2m13-t181-515ee569 Wcd61f3fb5fa4  verified S=15.033 L0
+  18/24 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 Wcd61f3fb5fa4  verified S=420.408 L0
+  19/24 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 Wcd61f3fb5fa4  verified S=25.718 L0
+  20/24 ic-c2-frob-counted-m2 icv1-f2m13-t181-515ee569 Wcd61f3fb5fa4  verified S=15.153 L0
+  21/24 rho-strong     icv1-f2m13-t181-515ee569 W4faf05f5402d  verified S=13.603 L0
+  22/24 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 W4faf05f5402d  verified S=539.836 L0
+  23/24 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 W4faf05f5402d  verified S=19.286 L0
+  24/24 ic-c2-frob-counted-m2 icv1-f2m13-t181-515ee569 W4faf05f5402d  verified S=15.582 L0
+session ECBS1haab050283f6e complete -> /Volumes/SSD990/wt-ecbench-rootfind-improve/research/ecbench_rootfind_faster_20261014/sessions/cycle1 (24 records: {"verified": 24})
+receipt sha256 9fc30ad033e78617fb538411959c2d6bfcf21781223247770d02036ec4808f9c
+{
+  "schema": "ecbench.audit/v1",
+  "session_id": "ECBS1haab050283f6e",
+  "session_status": "complete",
+  "ok": true,
+  "problems": [],
+  "checks": {
+    "arms": true,
+    "env_class": true,
+    "executions": true,
+    "host_hash": true,
+    "plan_hash": true,
+    "record_count": true,
+    "records": true,
+    "records_hash": true,
+    "replays": true,
+    "session_complete": true,
+    "spec_id": true,
+    "workloads": true
+  },
+  "records": 24,
+  "verified_records": 24,
+  "regraded": true,
+  "replays": [
+    {
+      "seq": 8,
+      "record_id": "ECR1h18401692b540",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 10,
+      "record_id": "ECR1h2b278f4ef96b",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 12,
+      "record_id": "ECR1h373482416c0c",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 14,
+      "record_id": "ECR1h6e8eb00ffc4a",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 16,
+      "record_id": "ECR1h95dab7278a63",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 18,
+      "record_id": "ECR1hb6a1d89c21c0",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 20,
+      "record_id": "ECR1h3b8ffdecad47",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 22,
+      "record_id": "ECR1h8c50a96e4ba1",
+      "reproduced": true,
+      "detail": "identical"
+    }
+  ],
+  "files": {
+    "host.json": "161716ea1915058812e713d65d85869cf16ddb029d91e6ea874b97c3dfc67a20",
+    "plan.json": "9c569256f6905de27c9b20ed8a84d9997c96ba39b07a26248ca809dc71462240",
+    "records.jsonl": "c03c2da7625673011c9a2f179ef7e0282d9bc7c9b7c90d6f325d2045379e74ee",
+    "session.json": "9d55bca1364f48082cf27c3699ffafd1566a31d8168e7c7ba1ca76595818a16e",
+    "spec.json": "ad746e4dc65f9fe0b26bdc3ca9bf304bc9b0c60ca463024e82b9111109556fb1"
+  },
+  "auditor_binary_sha256": "27fd2653b706b6e82e8da1c39a8c26c8f686e3f6e4831953b85eb9798610b76c",
+  "auditor_env_class_id": "ECBENV2h59034d4cd61b",
+  "auditor_hardware_class_id": "ECBHW1h7d1934655eee",
+  "audited_unix_ms": 1791949129242
+}
+audit OK: 24 records, 24 verified, 8 replays reproduced, 0 problems
+| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | med wall ms | levels |
+|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---:|---|
+| ECBS1haab050283f6e | rho-strong | rho.signed_frobenius_strong | icv1-f2m13-t181-515ee569 | 10.97 | 4/4 | 13.961 | [13.603, 14.676] | 0.246 | 56.799 | 56.799 | 1.000 | yes | 0.073 | L0×4 |
+| ECBS1haab050283f6e | ic-f4-m3-d5 | ic.pipeline | icv1-f2m13-t181-515ee569 | 10.97 | 4/4 | 540.708 | [458.312, 607.880] | – | – | 2199.830 | 38.730 | no | 224.530 | L0×4 |
+| ECBS1haab050283f6e | ic-negfold-m2-d5 | ic.pipeline | icv1-f2m13-t181-515ee569 | 10.97 | 4/4 | 22.228 | [19.478, 25.252] | – | – | 90.433 | 1.592 | no | 0.244 | L0×4 |
+| ECBS1haab050283f6e | ic-c2-frob-counted-m2 | ic.pipeline | icv1-f2m13-t181-515ee569 | 10.97 | 4/4 | 15.513 | [15.275, 15.657] | – | – | 63.112 | 1.111 | yes | 0.284 | L0×4 |
+arm                                 coldS     amS@1     amS@8    amS@64   wall_ms
+ic-c2-frob-counted-m2              15.611    15.611    11.695    11.205      0.24
+ic-f4-m3-d5                       462.399   462.399   462.323   462.314    180.85
+ic-negfold-m2-d5                   22.696    22.696    16.657    15.902      0.29
+rho-strong                         13.965     0.000     0.000     0.000      0.10

@@ -1,4 +1,4 @@
-\section{Where 2009 left off}
+\section{History}
 \label{sec:history}
 
 The 2009 attack is the baseline every number in this paper should be
@@ -55,7 +55,9 @@ work, since we could not obtain the primary text. The 85-ASIC count
 comes from the project's status page, which Bailey et al.'s ``less than
 100 dedicated ASICs'' matches.
 
-\subsection{The same yardstick today}
+\input{figures/fig-history}
+
+\subsection{Comparison with today}
 \label{sec:history-compare}
 
 Table~\ref{tab:history-compare} sets the best 2009--2012 figure for
@@ -95,8 +97,8 @@ $1.24$~GHz is about $6\times$ more SM-clocks per second. The rest, roughly
 $38\times$ per SM-clock, is the arithmetic: a native carry-less product
 instead of a bitsliced one, three-input logic, a packed representation
 with the Frobenius as a permutation network, and a batch shape tuned
-against measured pipe rates. Sections~\ref{sec:arith}
-through~\ref{sec:gpu} take that factor apart step by step.
+against measured pipe rates. Figure~\ref{fig:gains} splits that factor, and Sections~\ref{sec:arith}
+through~\ref{sec:gpu} take it apart step by step.
 
 The FPGA gain is smaller, about $74\times$ from a 2010 Spartan-3 to a
 current VU47P, and on cost per solve the F2 is level with the GPU

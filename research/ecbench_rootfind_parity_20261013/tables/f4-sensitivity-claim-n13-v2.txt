@@ -1,0 +1,10 @@
+# F4 XOR sensitivity (secondary): ns_per_word_xor=0.002304 from koblitz/K_0 / GF(2^13); ns_per_add=1
+arm                                 coldS    S+xor     xorGAE
+ic-c2-frob-counted-m2              15.569   15.569        0.0
+ic-c2-frob-m2                      14.353   14.353        0.0
+ic-c3-frob-counted-m2              18.654   18.654        0.0
+ic-f4-m3-d5                        16.644  420.743    18085.4
+ic-negfold-m2-d5                   23.284   23.284        0.0
+rho-frob                            1.960    1.960        0.0
+rho-strong                         14.349   14.349        0.0
+rho-strong-aa                      14.349   14.349        0.0

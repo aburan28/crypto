@@ -1,0 +1,646 @@
+{
+ "what": "short Weierstrass model y^2 = x^3 + A x + B over GF(q)[t]/(t^3 + c2 t^2 + c1 t + c0) of E0 (K-isomorphic to y0^2 = F0(x) via the root r0); order recounted by scripts/curve_id.py",
+ "registered_in_docs_curves_registry": false,
+ "curves": [
+  {
+   "run": "run-20261014T0029Z",
+   "q": 5,
+   "arm": "split",
+   "Q": [
+    0,
+    1
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    1,
+    1,
+    0
+   ],
+   "A": [
+    4,
+    0,
+    4
+   ],
+   "B": [
+    1,
+    2,
+    1
+   ],
+   "order": 124,
+   "icv1": "ICV1:fpk-5-3-504c410d:2:124:2,3,4:unk:unk:r:bb337b4a3ee4",
+   "slug": "icv1-fp3k3-t2-bb337b4a"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 5,
+   "arm": "split",
+   "Q": [
+    1,
+    2
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    1,
+    1,
+    0
+   ],
+   "A": [
+    4,
+    0,
+    0
+   ],
+   "B": [
+    4,
+    1,
+    3
+   ],
+   "order": 124,
+   "icv1": "ICV1:fpk-5-3-504c410d:2:124:2,0,4:unk:unk:r:b9afdfd18528",
+   "slug": "icv1-fp3k3-t2-b9afdfd1"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 5,
+   "arm": "conjugate",
+   "Q": [
+    0,
+    3
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    1,
+    1,
+    0
+   ],
+   "A": [
+    4,
+    0,
+    4
+   ],
+   "B": [
+    2,
+    0,
+    2
+   ],
+   "order": 124,
+   "icv1": "ICV1:fpk-5-3-504c410d:2:124:0,2,1:unk:unk:r:d6d33bbeb85d",
+   "slug": "icv1-fp3k3-t2-d6d33bbe"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 5,
+   "arm": "conjugate",
+   "Q": [
+    2,
+    4
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    1,
+    1,
+    0
+   ],
+   "A": [
+    1,
+    1,
+    4
+   ],
+   "B": [
+    3,
+    3,
+    4
+   ],
+   "order": 124,
+   "icv1": "ICV1:fpk-5-3-504c410d:2:124:3,3,3:unk:unk:r:bbdbcefad3dd",
+   "slug": "icv1-fp3k3-t2-bbdbcefa"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 5,
+   "arm": "split",
+   "Q": [
+    1,
+    2
+   ],
+   "p_census": [
+    1,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    1,
+    1,
+    0
+   ],
+   "A": [
+    4,
+    0,
+    4
+   ],
+   "B": [
+    1,
+    2,
+    1
+   ],
+   "order": 124,
+   "icv1": "ICV1:fpk-5-3-504c410d:2:124:2,3,4:unk:unk:r:bb337b4a3ee4",
+   "slug": "icv1-fp3k3-t2-bb337b4a"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 7,
+   "arm": "split",
+   "Q": [
+    0,
+    1
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    3,
+    0,
+    0
+   ],
+   "A": [
+    1,
+    4,
+    6
+   ],
+   "B": [
+    3,
+    5,
+    4
+   ],
+   "order": 328,
+   "icv1": "ICV1:fpk-7-3-ef2d388c:16:328:1,1,3:unk:unk:r:fe3afdc88eb5",
+   "slug": "icv1-fp3k3-t16-fe3afdc8"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 7,
+   "arm": "split",
+   "Q": [
+    0,
+    2
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    3,
+    0,
+    0
+   ],
+   "A": [
+    2,
+    4,
+    3
+   ],
+   "B": [
+    3,
+    6,
+    1
+   ],
+   "order": 328,
+   "icv1": "ICV1:fpk-7-3-ef2d388c:16:328:1,4,6:unk:unk:r:e36e0d347062",
+   "slug": "icv1-fp3k3-t16-e36e0d34"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 7,
+   "arm": "split",
+   "Q": [
+    0,
+    4
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    3,
+    0,
+    0
+   ],
+   "A": [
+    4,
+    4,
+    5
+   ],
+   "B": [
+    3,
+    3,
+    2
+   ],
+   "order": 328,
+   "icv1": "ICV1:fpk-7-3-ef2d388c:16:328:1,2,5:unk:unk:r:0503f8daafed",
+   "slug": "icv1-fp3k3-t16-0503f8da"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 7,
+   "arm": "split",
+   "Q": [
+    1,
+    5
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    3,
+    0,
+    0
+   ],
+   "A": [
+    0,
+    6,
+    2
+   ],
+   "B": [
+    5,
+    1,
+    6
+   ],
+   "order": 328,
+   "icv1": "ICV1:fpk-7-3-ef2d388c:16:328:6,1,6:unk:unk:r:95fa4afb5fad",
+   "slug": "icv1-fp3k3-t16-95fa4afb"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 7,
+   "arm": "conjugate",
+   "Q": [
+    0,
+    1
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    3,
+    0,
+    0
+   ],
+   "A": [
+    2,
+    4,
+    2
+   ],
+   "B": [
+    1,
+    5,
+    5
+   ],
+   "order": 368,
+   "icv1": "ICV1:fpk-7-3-ef2d388c:-24:368:4,5,5:unk:unk:r:2d4b97ce4fe6",
+   "slug": "icv1-fp3k3-tm24-2d4b97ce"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 7,
+   "arm": "conjugate",
+   "Q": [
+    0,
+    2
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    3,
+    0,
+    0
+   ],
+   "A": [
+    1,
+    4,
+    4
+   ],
+   "B": [
+    1,
+    3,
+    6
+   ],
+   "order": 368,
+   "icv1": "ICV1:fpk-7-3-ef2d388c:-24:368:4,3,6:unk:unk:r:4493a315a16e",
+   "slug": "icv1-fp3k3-tm24-4493a315"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 11,
+   "arm": "split",
+   "Q": [
+    1,
+    5
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    4,
+    1,
+    0
+   ],
+   "A": [
+    9,
+    8,
+    10
+   ],
+   "B": [
+    4,
+    0,
+    8
+   ],
+   "order": 1336,
+   "icv1": "ICV1:fpk-11-3-b4fefce6:-4:1336:0,0,2:unk:unk:r:384adc510a64",
+   "slug": "icv1-fp4k3-tm4-384adc51"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 11,
+   "arm": "split",
+   "Q": [
+    2,
+    8
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    4,
+    1,
+    0
+   ],
+   "A": [
+    10,
+    7,
+    7
+   ],
+   "B": [
+    1,
+    6,
+    7
+   ],
+   "order": 1336,
+   "icv1": "ICV1:fpk-11-3-b4fefce6:-4:1336:5,8,4:unk:unk:r:fbd472a2580c",
+   "slug": "icv1-fp4k3-tm4-fbd472a2"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 11,
+   "arm": "split",
+   "Q": [
+    4,
+    10
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    4,
+    1,
+    0
+   ],
+   "A": [
+    3,
+    4,
+    6
+   ],
+   "B": [
+    3,
+    7,
+    4
+   ],
+   "order": 1384,
+   "icv1": "ICV1:fpk-11-3-b4fefce6:-52:1384:7,10,1:unk:unk:r:86b2642aa24e",
+   "slug": "icv1-fp4k3-tm52-86b2642a"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 11,
+   "arm": "conjugate",
+   "Q": [
+    1,
+    1
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    4,
+    1,
+    0
+   ],
+   "A": [
+    5,
+    3,
+    9
+   ],
+   "B": [
+    10,
+    1,
+    2
+   ],
+   "order": 1336,
+   "icv1": "ICV1:fpk-11-3-b4fefce6:-4:1336:9,8,6:unk:unk:r:4acc52c37714",
+   "slug": "icv1-fp4k3-tm4-4acc52c3"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 11,
+   "arm": "conjugate",
+   "Q": [
+    2,
+    10
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    4,
+    1,
+    0
+   ],
+   "A": [
+    3,
+    10,
+    8
+   ],
+   "B": [
+    6,
+    10,
+    9
+   ],
+   "order": 1304,
+   "icv1": "ICV1:fpk-11-3-b4fefce6:28:1304:9,10,0:unk:unk:r:a475e7aab87d",
+   "slug": "icv1-fp4k3-t28-a475e7aa"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 13,
+   "arm": "split",
+   "Q": [
+    0,
+    1
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    2,
+    0,
+    0
+   ],
+   "A": [
+    5,
+    6,
+    2
+   ],
+   "B": [
+    7,
+    3,
+    8
+   ],
+   "order": 2188,
+   "icv1": "ICV1:fpk-13-3-6620ba01:10:2188:6,2,5:unk:unk:r:6923a24756c4",
+   "slug": "icv1-fp4k3-t10-6923a247"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 13,
+   "arm": "split",
+   "Q": [
+    0,
+    3
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    2,
+    0,
+    0
+   ],
+   "A": [
+    2,
+    6,
+    5
+   ],
+   "B": [
+    7,
+    1,
+    11
+   ],
+   "order": 2188,
+   "icv1": "ICV1:fpk-13-3-6620ba01:10:2188:6,5,2:unk:unk:r:df94294e6738",
+   "slug": "icv1-fp4k3-t10-df94294e"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 13,
+   "arm": "conjugate",
+   "Q": [
+    2,
+    6
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    2,
+    0,
+    0
+   ],
+   "A": [
+    4,
+    3,
+    7
+   ],
+   "B": [
+    9,
+    2,
+    1
+   ],
+   "order": 2264,
+   "icv1": "ICV1:fpk-13-3-6620ba01:-66:2264:1,0,7:unk:unk:r:8df47b25ce2d",
+   "slug": "icv1-fp4k3-tm66-8df47b25"
+  },
+  {
+   "run": "run-20261014T0029Z",
+   "q": 13,
+   "arm": "conjugate",
+   "Q": [
+    4,
+    9
+   ],
+   "p_census": [
+    0,
+    1,
+    0
+   ],
+   "field_modulus_low_coefficients": [
+    2,
+    0,
+    0
+   ],
+   "A": [
+    5,
+    10,
+    11
+   ],
+   "B": [
+    5,
+    12,
+    10
+   ],
+   "order": 2164,
+   "icv1": "ICV1:fpk-13-3-6620ba01:34:2164:4,8,4:unk:unk:r:463613f546d0",
+   "slug": "icv1-fp4k3-t34-463613f5"
+  }
+ ]
+}
