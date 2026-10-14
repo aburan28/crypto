@@ -1909,8 +1909,17 @@ fn solve_ic_fp4(
         ));
     }
     let base = YLineBase { curve: inst };
-    let macaulay = spec.oracle_params.u64("macaulay")? as u8;
+    let macaulay = spec.oracle_params.u64("macaulay")?;
+    let macaulay = u8::try_from(macaulay)
+        .ok()
+        .filter(|&d| d >= 2)
+        .ok_or_else(|| format!("gaudry-d4: macaulay is a degree from 2 to 255, not {macaulay}"))?;
     let mut oracle = D4Oracle::new(inst, macaulay, seed);
+    oracle.charge_unsolved = match spec.oracle_params.u64_or("charge_unsolved", 0)? {
+        0 => false,
+        1 => true,
+        v => return Err(format!("gaudry-d4: charge_unsolved is 0 or 1, not {v}")),
+    };
     let c = &inst.inst.curve;
     let ctx = InstanceCtx {
         group: c,

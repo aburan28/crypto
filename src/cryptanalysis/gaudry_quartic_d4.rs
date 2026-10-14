@@ -386,6 +386,20 @@ pub fn solve_d4(
     rng: &mut StdRng,
     debug: bool,
 ) -> Option<D4Solve> {
+    solve_d4_or_cost(inst, pre, r, macaulay, rng, debug).ok()
+}
+
+/// [`solve_d4`], with a system the degree-`macaulay` matrix does not solve
+/// (a degenerate one) returned as `Err` carrying what the attempt cost,
+/// phases summed into `total_muls`: work done whether or not it solved.
+pub fn solve_d4_or_cost(
+    inst: &D4Instance,
+    pre: &SymmetrisedD4,
+    r: &Pt4,
+    macaulay: u8,
+    rng: &mut StdRng,
+    debug: bool,
+) -> Result<D4Solve, QuarticSolve> {
     let f = &inst.curve.f;
     let p = f.p;
     let mut out = D4Solve::default();
@@ -404,7 +418,8 @@ pub fn solve_d4(
         None,
         None,
     )
-    .ok()?;
+    .ok()
+    .flatten();
     let Some(sols) = sols else {
         if debug {
             eprintln!(
@@ -412,7 +427,8 @@ pub fn solve_d4(
                 out.solve.outcome, out.solve.dim, out.solve.pivots, out.solve.zero_rows
             );
         }
-        return None;
+        out.solve.close_public();
+        return Err(out.solve);
     };
     out.solve.equation_degree = 4;
     out.rational_solutions = sols.len();
@@ -466,7 +482,7 @@ pub fn solve_d4(
     }
     out.decompositions = found.into_iter().collect();
     out.solve.close_public();
-    Some(out)
+    Ok(out)
 }
 
 /// Every set of four distinct base points `{P_i, P_j, P_k, P_l}` with
@@ -816,6 +832,12 @@ pub struct D4Oracle<'a> {
     pub curve: &'a D4Curve,
     pub macaulay: u8,
     pub seed: u64,
+    /// Charge the work of a system the matrix did not solve
+    /// (`charge_unsolved=1`).  Off by default: the first sessions
+    /// (`research/gaudry_quartic_d4_ecbench_20261013`) were recorded
+    /// without it, and their replays must keep their counts; their `S`
+    /// is understated by those attempts, which the study reports.
+    pub charge_unsolved: bool,
     pre: Option<SymmetrisedD4>,
     totals: SolverTotals,
     per_add: u64,
@@ -827,6 +849,7 @@ impl<'a> D4Oracle<'a> {
             curve,
             macaulay,
             seed,
+            charge_unsolved: false,
             pre: None,
             totals: SolverTotals {
                 solver: "d4-macaulay".into(),
@@ -894,7 +917,7 @@ impl DecompositionOracle<Curve4> for D4Oracle<'_> {
             StdRng::seed_from_u64(self.seed ^ self.totals.calls.wrapping_mul(0x9e37_79b9));
         let adds_before = c.ops();
         let t = std::time::Instant::now();
-        let sol = solve_d4(
+        let sol = solve_d4_or_cost(
             &self.curve.inst,
             pre,
             &point,
@@ -907,13 +930,24 @@ impl DecompositionOracle<Curve4> for D4Oracle<'_> {
         ops.adds += c.ops() - adds_before;
         self.totals.calls += 1;
         self.totals.shape = Some(Self::shape());
-        let Some(sol) = sol else {
-            *self
-                .totals
-                .extra
-                .entry("degenerate_systems".into())
-                .or_insert(0) += 1;
-            return None;
+        let sol = match sol {
+            Ok(sol) => sol,
+            Err(cost) => {
+                *self
+                    .totals
+                    .extra
+                    .entry("degenerate_systems".into())
+                    .or_insert(0) += 1;
+                if self.charge_unsolved {
+                    self.totals.ops += cost.total_muls;
+                    *self
+                        .totals
+                        .extra
+                        .entry("degenerate_fp_muls".into())
+                        .or_insert(0) += cost.total_muls;
+                }
+                return None;
+            }
         };
         self.totals.ops += sol.solve.total_muls;
         for (k, v) in [

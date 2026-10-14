@@ -28,6 +28,7 @@ use crate::cryptanalysis::ic_boundary::{
 };
 use crate::cryptanalysis::koblitz_strong_rho::{RawPointG, WideStrongRho};
 use crate::cryptanalysis::koblitz_wide::WideKoblitz;
+use crate::cryptanalysis::residual_walk::is_prime_u64;
 
 /// How to build the curve.  Each variant is a constructor the repository
 /// already has, so the registry's `generator_call` names the same curve.
@@ -78,7 +79,7 @@ pub enum CurveSpec {
     /// `gaudry_quartic_d4::find_d4_curve(p, seed, max_cofactor)`: a curve
     /// over `F_{p⁴} = F_p[t]/(t⁴ − c)` with a rational 2-torsion point
     /// `T = (x₀, 0)`, `f'(x₀)` a square in `F_p`, `#E = h·r`, `r` prime,
-    /// `h ≤ max_cofactor` (even), `p ≡ 1 (mod 4)`, `p < 2^15`.  A point is
+    /// `h ≤ max_cofactor` (even), `p` a prime `≡ 1 (mod 4)` up to 1021.  A point is
     /// written as two packed words `x₀ + p x₁ + p² x₂ + p³ x₃`.
     Fp4Torsion {
         p: u64,
@@ -203,9 +204,10 @@ impl CurveSpec {
                 seed,
                 max_cofactor,
             } => {
-                if p % 4 != 1 || !(5..1 << 15).contains(&p) {
+                // The order search walks the Hasse window of 4p² + 1 points.
+                if p % 4 != 1 || !(5..=1021).contains(&p) || !is_prime_u64(p) {
                     return Err(format!(
-                        "fp4_torsion takes p ≡ 1 (mod 4) below 2^15, not {p}"
+                        "fp4_torsion takes a prime p ≡ 1 (mod 4) from 5 to 1021, not {p}"
                     ));
                 }
                 find_d4_curve(p, seed, max_cofactor).map(|c| Instance::Fp4(Box::new(c)))

@@ -21,7 +21,8 @@ registered), one target:
 **Index calculus costs 6.7·10⁸× rho here**, within 2× of §11.16's model
 with the measured inputs (`1.3·10⁹`) and inside the registered range.
 `S` is a count: the oracle's `F_p` multiplications priced at the curve's 97
-per addition (`priced_by = counted`), no wall-priced term, not a lower bound.
+per addition (`priced_by = counted`), no wall-priced term.  It omits the
+work of the 9 degenerate systems (under 1.4 %, below).
 
 | phase | group-addition equivalents | share |
 |:--|--:|--:|
@@ -38,7 +39,11 @@ timing; `S` does not depend on it).
 ## Predictions (PROTOCOL.md)
 
 - E1 (verified; audit replays identical): **held**, 3 of 3.
-- E2 (600–4,000 trials): **held**, 633.
+- E2 (600–4,000 trials): **held**, 633.  The rate the range was derived
+  from did not: the protocol assumed 0.003–0.008 decompositions a trial
+  (uniform targets), and the walk's subgroup targets decomposed at 11 in
+  633 (0.017; 8 in 633 kept as relations).  The trial range held because
+  the method needed fewer relations than assumed; the stated rate missed.
 - E3 (`S_IC` in `[3·10⁸, 10¹⁰]`, ratio in `[10⁸, 10¹⁰]`, model `1.3·10⁹`):
   **held**, `7.17·10⁸`, ratio `6.7·10⁸`.
 - E4 (relations ≥ 99 % of `S`): **held**.
@@ -50,8 +55,14 @@ timing; `S` does not depend on it).
   which `fghr-y-line` leaves out (its `T`-translate is its negative, so
   `[h]P = O` and it contributes nothing to a row).  Dropping such a summand
   instead of the relation would have saved about a quarter of the trials.
-- **Degenerate systems.** 9 of 631 (1.4 %) did not close at degree 14,
-  as in the `p = 269` measurement (1 in 20); a trial is discarded.
+- **Degenerate systems, and an accounting gap.** 9 of 631 (1.4 %) did not
+  close at degree 14, as in the `p = 269` measurement (1 in 20); a trial is
+  discarded.  The oracle as recorded charged nothing for those nine
+  attempts, so **`S` is understated** by their cost: at most nine solves'
+  worth, `≤ 9 · 2.32·10¹⁰` of `1.46·10¹³` `F_p` multiplications, under
+  1.4 %.  `gaudry-d4:…,charge_unsolved=1` charges them; it is off by
+  default so this session's replays keep their counts (found in review on
+  #1792).
 - **Isolation.** The two-hour IC run graded L1, the rho runs L2.
 
 ## Scope
