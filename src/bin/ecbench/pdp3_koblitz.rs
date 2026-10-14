@@ -421,10 +421,15 @@ impl Pdp3Engine {
 /// at least one when the base is non-empty.  Matches the yield/cost
 /// trade recorded on [`PairSumTable::decompose_fast_window`].
 pub fn rootfind_window_len(points: usize) -> usize {
-    if points == 0 {
+    rootfind_window_len_div(points, 3)
+}
+
+/// Window length `⌈n/div⌉` for a configurable divisor (`div ≥ 1`).
+pub fn rootfind_window_len_div(points: usize, div: usize) -> usize {
+    if points == 0 || div == 0 {
         0
     } else {
-        points.div_ceil(3).max(1)
+        points.div_ceil(div).max(1)
     }
 }
 
@@ -493,6 +498,9 @@ pub struct Pdp3KoblitzOracle<'i> {
     pair_table_points: usize,
     /// Third-summand window for windowed engines; `0` otherwise.
     scan_window_len: usize,
+    /// Divisor for `⌈|F|/div⌉` under `rootfind-window-negfold`; `3` for
+    /// the fixed `rootfind-window` engine; `0` otherwise.
+    window_div: usize,
     /// Witnesses the solver returned that did not re-lift through the
     /// framework's sign resolution.  Must stay zero.
     pub unliftable: u64,
@@ -520,6 +528,7 @@ impl<'i> Pdp3KoblitzOracle<'i> {
             pair_neg: None,
             pair_table_points: 0,
             scan_window_len: 0,
+            window_div: 0,
             unliftable: 0,
             table_mismatches: 0,
         }
@@ -670,7 +679,8 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
             ),
             Some("rootfind-window-negfold") => format!(
                 "root finding with negation-folded PairTable and cyclic third-summand window \
-                 of length ⌈|F|/3⌉; m = {}; no Groebner search",
+                 of length ⌈|F|/window_div⌉ (div={}); m = {}; no Groebner search",
+                params.get("window_div").unwrap_or("?"),
                 self.summands
             ),
             _ => format!(
@@ -711,6 +721,11 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
             (
                 "dimension",
                 "the base's; copied from koblitz-standard-subspace when omitted",
+            ),
+            (
+                "window_div",
+                "required under rootfind-window-negfold: window length ⌈|F|/div⌉; \
+                 refused under other engines (rootfind-window stays fixed at div=3)",
             ),
         ]
     }
@@ -766,6 +781,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
                 .parse()
                 .map_err(|_| format!("node_budget `{budget}` is not a number"))?;
             self.scan_window_len = 0;
+            self.window_div = 0;
             self.pair_table_points = 0;
             self.pair = None;
             self.pair_neg = None;
@@ -787,6 +803,36 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
                     self.engine.name(),
                     self.summands
                 ));
+            }
+            // window_div changes the search; required under
+            // rootfind-window-negfold, refused elsewhere (the fixed
+            // rootfind-window engine keeps div=3 with no parameter).
+            match self.engine {
+                Pdp3Engine::RootfindWindowNegfold => {
+                    let raw = params.get("window_div").ok_or(
+                        "engine=rootfind-window-negfold requires window_div (try 2, 3 or 4)",
+                    )?;
+                    let div: usize = raw
+                        .parse()
+                        .map_err(|_| format!("window_div `{raw}` is not a number"))?;
+                    if !(2..=8).contains(&div) {
+                        return Err(format!("window_div must be 2..=8, got {div}"));
+                    }
+                    self.window_div = div;
+                }
+                _ => {
+                    if params.get("window_div").is_some() {
+                        return Err(format!(
+                            "engine={} does not take window_div (only rootfind-window-negfold)",
+                            self.engine.name()
+                        ));
+                    }
+                    self.window_div = if self.engine == Pdp3Engine::RootfindWindow {
+                        3
+                    } else {
+                        0
+                    };
+                }
             }
         }
         let dimension = fb
@@ -825,10 +871,10 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
         }
         if self.engine.is_rootfind() {
             self.pair_table_points = frob.points.len();
-            self.scan_window_len = if self.engine.is_window() {
-                rootfind_window_len(frob.points.len())
-            } else {
-                0
+            self.scan_window_len = match (self.engine.is_window(), self.window_div) {
+                (true, 3) => rootfind_window_len(frob.points.len()),
+                (true, div) if div > 0 => rootfind_window_len_div(frob.points.len(), div),
+                _ => 0,
             };
             if self.engine.is_negfold() {
                 // Ledgered half-table: same construction as mitm with
@@ -991,6 +1037,9 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
         }
         if self.scan_window_len > 0 {
             counts.insert("scan_window_len".into(), self.scan_window_len as u64);
+        }
+        if self.window_div > 0 {
+            counts.insert("window_div".into(), self.window_div as u64);
         }
         counts
     }

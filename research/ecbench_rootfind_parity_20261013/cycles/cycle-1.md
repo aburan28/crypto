@@ -37,9 +37,4 @@ cold win is set-up (561 → 305).
 ## Next (cycle 2)
 
 Parameterize `window_div` on `rootfind-window-negfold` and smoke-sweep
-�
-
-## Next (cycle 2)
-
-Parameterize `window_div` on `rootfind-window-negfold` and smoke-sweep
 ⌈|F|/2⌉, ⌈|F|/3⌉, ⌈|F|/4⌉ to hunt a cold-S win over m=2 negfold.

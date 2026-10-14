@@ -18,13 +18,31 @@ run_one() {
   python3 "$HERE/analyze_resources.py" --records "$out/records.jsonl" | tee "$HERE/tables/amortized-$name.txt"
 }
 
+run_cycle2() {
+  local name=cycle2
+  local spec="$ROOT/docs/ecbench/specs/smoke-koblitz-rootfind-window-div.json"
+  local out="$HERE/sessions/cycle2"
+  echo "==> $name"
+  rm -rf "$out"
+  # shellcheck disable=SC2086
+  nice -n 19 "$ECBENCH" run --wait --spec "$spec" --out "$out" $CPUS
+  nice -n 19 "$ECBENCH" verify --dir "$out" --replay 8 --out "$HERE/audits/audit-$name.json"
+  nice -n 19 "$ECBENCH" table --dir "$out" | tee "$HERE/tables/table-$name.md"
+  nice -n 19 "$ECBENCH" compare --dir "$out" --a ic-f4-m3-d5 --b ic-negfold-m2-d5 --save 2>/dev/null || true
+  nice -n 19 "$ECBENCH" compare --dir "$out" --a ic-negfold-m2-d5 --b ic-win-neg-d2 --save 2>/dev/null || true
+  python3 "$HERE/analyze_resources.py" --records "$out/records.jsonl" | tee "$HERE/tables/amortized-$name.txt"
+}
+
 case "${1:-all}" in
   cycle1)
     run_one cycle1 "$ROOT/docs/ecbench/specs/smoke-koblitz-rootfind-negfold.json" \
       "$HERE/sessions/cycle1"
     ;;
+  cycle2)
+    run_cycle2
+    ;;
   *)
-    echo "usage: $0 cycle1|..."
+    echo "usage: $0 cycle1|cycle2|..."
     exit 1
     ;;
 esac
