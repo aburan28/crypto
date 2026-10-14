@@ -42,6 +42,13 @@ commands; the one-infinity arithmetic boundary; bounded binary transfer; and
 the additive evidence schema. In particular, the prime even-sextic cover does
 not use the odd-degree one-infinity Jacobian implementation.
 
+For the exact polynomial-basis F8 genus-three fixture with `a=1`, `b=3`, the
+[machine-readable order certificate](fixed-f8-genus3-order-certificate.json)
+and its [implementation-separated native replay](../../src/bin/ecdlp_audit/fixed_f8_order.rs)
+derive `#Jac(H)(GF(8))=486` from exhaustive extension point counts. This is an
+order certificate only, not an independent check of the divisor arithmetic or
+transfer map.
+
 The current [cover-transfer assessment](cover-transfer-assessments.json),
 validated by its [v2 schema](cover-transfer-assessment.schema.json), classifies
 all 2,091 HC1/CV1 map rows (2,089 distinct cover models) and all 664 linked EC1

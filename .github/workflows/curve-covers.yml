@@ -2,6 +2,7 @@ name: Curve cover certificates
 on:
   pull_request:
     paths:
+      - '.gitattributes'
       - 'Cargo.toml'
       - 'Cargo.lock'
       - 'src/lib.rs'
@@ -10,6 +11,8 @@ on:
       - 'src/bin/curve_cover_check.rs'
       - 'src/bin/curve_cover_check/**'
       - 'src/bin/hyperelliptic_cover.rs'
+      - 'src/bin/ecdlp_audit.rs'
+      - 'src/bin/ecdlp_audit/**'
       - 'src/binary_ecc/**'
       - 'src/prime_hyperelliptic/**'
       - 'src/cryptanalysis/ecc2k130_guard.rs'
@@ -18,6 +21,9 @@ on:
       - 'src/hash/sha256.rs'
       - 'src/utils/**'
       - 'docs/curves/**'
+      - 'docs/ecdlp-audit/**'
+      - 'docs/ECDLP_ATTACK_MATRIX.md'
+      - 'docs/ic/boundary_targets.json'
       - 'docs/browser/**'
       - 'scripts/build_lab_browser.py'
       - 'scripts/test_cover_catalog.py'
@@ -25,6 +31,9 @@ on:
       - 'scripts/build_curve_registry.py'
       - 'scripts/build_cover_transfer_assessments.mjs'
       - 'research/cover_transfer_assessment_20261013/**'
+      - 'research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md'
+      - 'research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.pdf'
+      - 'problems/catalog-cover-subgroup-certificates-incomplete.md'
       - 'research/hyperelliptic_cover_infrastructure_20261006/evidence.json'
       - 'research/hyperelliptic_cover_infrastructure_20261006/README.md'
       - '.github/workflows/curve-covers.yml'
@@ -32,6 +41,7 @@ on:
   push:
     branches: [main]
     paths:
+      - '.gitattributes'
       - 'Cargo.toml'
       - 'Cargo.lock'
       - 'src/lib.rs'
@@ -40,6 +50,8 @@ on:
       - 'src/bin/curve_cover_check.rs'
       - 'src/bin/curve_cover_check/**'
       - 'src/bin/hyperelliptic_cover.rs'
+      - 'src/bin/ecdlp_audit.rs'
+      - 'src/bin/ecdlp_audit/**'
       - 'src/binary_ecc/**'
       - 'src/prime_hyperelliptic/**'
       - 'src/cryptanalysis/ecc2k130_guard.rs'
@@ -48,6 +60,9 @@ on:
       - 'src/hash/sha256.rs'
       - 'src/utils/**'
       - 'docs/curves/**'
+      - 'docs/ecdlp-audit/**'
+      - 'docs/ECDLP_ATTACK_MATRIX.md'
+      - 'docs/ic/boundary_targets.json'
       - 'docs/browser/**'
       - 'scripts/build_lab_browser.py'
       - 'scripts/test_cover_catalog.py'
@@ -55,6 +70,9 @@ on:
       - 'scripts/build_curve_registry.py'
       - 'scripts/build_cover_transfer_assessments.mjs'
       - 'research/cover_transfer_assessment_20261013/**'
+      - 'research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md'
+      - 'research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.pdf'
+      - 'problems/catalog-cover-subgroup-certificates-incomplete.md'
       - 'research/hyperelliptic_cover_infrastructure_20261006/evidence.json'
       - 'research/hyperelliptic_cover_infrastructure_20261006/README.md'
       - '.github/workflows/curve-covers.yml'
@@ -74,6 +92,9 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          # verify-plan replays three immutable historical Git blobs.
+          fetch-depth: 0
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: '1.98'
@@ -84,6 +105,15 @@ jobs:
           cargo test --lib hyperelliptic
           cargo test --lib binary_ecc::cover_transfer::tests
           cargo test --bin hyperelliptic-cover
+      - name: Replay the native audit plan and fixed-F8 order certificate
+        run: |
+          cargo test --bin ecdlp-audit
+          cargo run --bin ecdlp-audit -- verify-plan \
+            --input docs/ecdlp-audit/ECDLP_AUDIT_PLAN.mock.json \
+            --repo-root .
+          cargo run --bin ecdlp-audit -- verify-fixed-f8-order \
+            --input docs/curves/fixed-f8-genus3-order-certificate.json \
+            --repo-root .
       - run: cargo run --bin curve_standards -- --check
       - run: python3 scripts/update_curve_standards.py --check
       - run: cargo run --bin curve_cover_check -- --check

@@ -1,0 +1,45 @@
+digraph execution_boundary {
+  graph [
+    bgcolor="white",
+    fontname="Helvetica",
+    label="ECDLP audit execution boundary — 2026-10-14",
+    labelloc="t",
+    nodesep="0.35",
+    rankdir="TB",
+    ranksep="0.65"
+  ];
+  node [fontname="Helvetica", fontsize="10", margin="0.12,0.08", shape="box", style="rounded,filled"];
+  edge [color="#52606d", fontname="Helvetica", fontsize="9"];
+
+  covers [fillcolor="#d7f5df", label="Source-level covers\n2,091 / 2,091 records\nconstruction + verification"];
+  package [fillcolor="#fff1c7", label="Packaged replay\npublished receipt: 592 rows\ncurrent 2,091-row replay open"];
+  binary [fillcolor="#d7f5df", label="Binary Jacobian arithmetic\none-infinity, bounded F8\n486-class fixture"];
+  order_cert [fillcolor="#d7f5df", label="Implementation-separated F8 order cert\nN1,N2,N3 = 6,104,558\nP(1) = 486; cardinality only"];
+  odd [fillcolor="#d7f5df", label="Odd cover construction\neven sextic, genus 2\n1,931 records"];
+  norm [fillcolor="#fff1c7", label="Exact F8 arbitrary-class norm\n486 / 486 classes • 236,196 pairs\nnative norm test; separate order check only\nno norm oracle"];
+  general_norm [fillcolor="#ffd9d9", label="Catalog-general binary norm\nother fields/models + independent oracle\nopen"];
+  balanced [fillcolor="#ffd9d9", label="Balanced two-infinity\nodd sextic arithmetic/maps\nopen"];
+  subgroup [fillcolor="#ffd9d9", label="Exact subgroup/image\ncertificates per binding\nopen"];
+  oracle [fillcolor="#ffd9d9", label="Independent divisor-class\nand transfer oracle\nopen"];
+  ledger [fillcolor="#dbeafe", label="Native audit verifier\n45 tests + plan replay pass\nplan remains non-authoritative"];
+  drafts [fillcolor="#fff1c7", label="WS3–WS8 contracts\ndraft schemas + fixtures\nno promotion authority"];
+  conclusion [fillcolor="#e8eaed", shape="note", label="Current admissible conclusion\nExplicit covers have source-level evidence.\nA separate implementation certifies fixed-F8 order 486;\nits all-class norm is locally checked.\nA catalog-wide Jacobian transfer or\nECDLP advantage is not established."];
+
+  covers -> package [label="release identity"];
+  covers -> binary [label="160 binary"];
+  covers -> odd [label="1,931 odd"];
+  order_cert -> norm [label="cardinality only"];
+  binary -> norm [label="bounded implementation"];
+  norm -> general_norm [label="generalize + independently check"];
+  odd -> balanced [label="required model"];
+  general_norm -> subgroup [label="catalog image evidence"];
+  balanced -> subgroup [label="image evidence"];
+  oracle -> norm [label="independent check still needed", style="dashed"];
+  oracle -> general_norm [label="independent check", style="dashed"];
+  oracle -> balanced [label="independent check", style="dashed"];
+  ledger -> drafts [label="plan/path checks only"];
+  package -> conclusion [style="dashed"];
+  subgroup -> conclusion [style="dashed"];
+  oracle -> conclusion [style="dashed"];
+  drafts -> conclusion [label="governance boundary", style="dashed"];
+}

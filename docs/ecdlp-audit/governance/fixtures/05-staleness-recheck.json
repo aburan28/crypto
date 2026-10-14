@@ -1,0 +1,119 @@
+{
+  "schema_version": "ecdlp-audit.governance/v1-draft",
+  "record_kind": "workflow_fixture",
+  "record_id": "gov.fixture.staleness.revision-change",
+  "status": "draft",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "self_promotion_allowed": false,
+  "synthetic_only": true,
+  "created_at": "2026-10-14T00:00:00Z",
+  "source_plan": "research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md#workstream-8--add-independent-governance",
+  "draft_notice": "This drill models revision-bound evidence becoming stale and cannot alter an authoritative assessment.",
+  "fixture": {
+    "fixture_version": "ws8-workflow-fixture/v1-draft",
+    "scenario_kind": "staleness",
+    "synthetic_scope": {
+      "fixture_only": true,
+      "public_synthetic": true,
+      "contains_real_target": false,
+      "contains_secret": false,
+      "operational_execution": false,
+      "scientific_evidence": false
+    },
+    "subject": {
+      "subject_id": "synthetic.claim.stale-revision",
+      "description": "Synthetic E6 claim whose implementation revision changed after replay.",
+      "claim_status_before": "supported",
+      "maturity_before": "E6",
+      "authoritative_state_before": "unchanged_fixture_baseline"
+    },
+    "request": {
+      "transition_kind": "staleness_recheck",
+      "requested_by": "author",
+      "author_identity": "synthetic:actor:author-a",
+      "source_assessment_id": "synthetic.assessment.staleness.base",
+      "proposed_assessment_id": "synthetic.assessment.staleness.proposed",
+      "review_binding": {
+        "aggregate_revision_digest": "sha256:5959595959595959595959595959595959595959595959595959595959595959",
+        "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+      },
+      "exact_revisions": [
+        {"component": "source_assessment", "revision_digest": "sha256:1515151515151515151515151515151515151515151515151515151515151515"},
+        {"component": "evidence_bundle", "revision_digest": "sha256:2626262626262626262626262626262626262626262626262626262626262626"},
+        {"component": "implementation", "revision_digest": "sha256:3737373737373737373737373737373737373737373737373737373737373737"},
+        {"component": "evidence_profile", "revision_digest": "sha256:4848484848484848484848484848484848484848484848484848484848484848"},
+        {"component": "proposed_aggregate", "revision_digest": "sha256:5959595959595959595959595959595959595959595959595959595959595959"},
+        {"component": "governance_schema", "revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777"},
+        {"component": "dependency_lock", "revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}
+      ],
+      "conditional_roles_invoked": [],
+      "evidence_receipt_ids": ["synthetic.receipt.staleness.revision-event", "synthetic.receipt.staleness.recompute"],
+      "requested_claim_status": "unknown",
+      "requested_maturity": "E4",
+      "justification": "The E5 replay and E6 accounting receipts bind an older synthetic implementation revision and cannot remain fresh."
+    },
+    "assignments": [
+      {"role": "author", "actor_id": "synthetic:actor:author-a", "relationship_to_author": "same_person", "contributed_to_subject": true, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "evidence_replay_reviewer", "actor_id": "synthetic:actor:replay-d", "relationship_to_author": "external", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true},
+      {"role": "release_approver", "actor_id": "synthetic:actor:release-f", "relationship_to_author": "different_team", "contributed_to_subject": false, "conflict_disclosed": false, "conflict_description": null, "eligible": true}
+    ],
+    "decisions": [
+      {"role": "evidence_replay_reviewer", "actor_id": "synthetic:actor:replay-d", "review_binding": {"aggregate_revision_digest": "sha256:5959595959595959595959595959595959595959595959595959595959595959", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "The old E5 and E6 receipts do not cover the new synthetic implementation revision.", "evidence_receipt_ids": ["synthetic.receipt.staleness.recompute"], "decided_at": "2026-10-14T04:00:00Z"},
+      {"role": "release_approver", "actor_id": "synthetic:actor:release-f", "review_binding": {"aggregate_revision_digest": "sha256:5959595959595959595959595959595959595959595959595959595959595959", "governance_schema_revision_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "dependency_revision_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}, "decision": "approve", "rationale": "An authoritative system would append a stale-marker assessment and require replay before restoration.", "evidence_receipt_ids": ["synthetic.receipt.staleness.release"], "decided_at": "2026-10-14T04:01:00Z"}
+    ],
+    "preflight_checks": [
+      {"check": "schema", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.staleness.schema", "rationale": "The staleness event is structurally valid."},
+      {"check": "identity", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.staleness.identity", "rationale": "The affected assessment and revised implementation resolve exactly."},
+      {"check": "revision_binding", "checker": "machine", "result": "fail", "receipt_id": "synthetic.receipt.staleness.revision-event", "rationale": "The old replay binds a superseded synthetic implementation digest."},
+      {"check": "evidence_profile", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.staleness.recompute", "rationale": "Removing stale E5-E6 support leaves a contiguous E0-E4 prefix."},
+      {"check": "staleness", "checker": "machine", "result": "fail", "receipt_id": "synthetic.receipt.staleness.revision-event", "rationale": "Revision-bound E5 and E6 gates are stale until replayed."},
+      {"check": "conflicts", "checker": "reviewer", "result": "pass", "receipt_id": "synthetic.receipt.staleness.conflicts", "rationale": "The modeled actors are distinct and conflict-free."},
+      {"check": "history", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.staleness.history", "rationale": "The stale-marker assessment would append without rewriting prior evidence."},
+      {"check": "required_roles", "checker": "machine", "result": "pass", "receipt_id": "synthetic.receipt.staleness.roles", "rationale": "Replay and release decisions are present."}
+    ],
+    "event": {
+      "event_kind": "identity_revision_changed",
+      "detected_at": "2026-10-14T03:50:00Z",
+      "evidence_receipt_id": "synthetic.receipt.staleness.revision-event",
+      "description": "The synthetic implementation revision changes after the prior replay receipt."
+    },
+    "staleness": {
+      "staleness_class": "revision_bound",
+      "trigger": "implementation revision digest no longer matches the reviewed revision",
+      "last_checked_at": "2026-10-13T00:00:00Z",
+      "recheck_due_at": "2026-10-14T03:50:00Z",
+      "gate_fresh": false,
+      "contiguous_maturity_recomputed": true
+    },
+    "history_snapshot": {
+      "prior_record_ids": ["synthetic.assessment.staleness.base"],
+      "prior_record_digests": ["sha256:1515151515151515151515151515151515151515151515151515151515151515"],
+      "append_only": true,
+      "records_deleted": false,
+      "records_rewritten": false
+    },
+    "identity_checks": {
+      "author_not_reviewer": true,
+      "required_roles_distinct": true,
+      "release_approver_not_author": true,
+      "conflicts_clear": true,
+      "every_decision_matches_requested_aggregate": true,
+      "every_decision_matches_governance_schema": true,
+      "every_decision_matches_dependency_revision": true,
+      "no_self_promotion_effect": true,
+      "draft_cannot_promote": true
+    },
+    "expected_outcome": {
+      "workflow_disposition": "would_mark_stale_and_recompute",
+      "state_effect": "none_draft_only",
+      "authoritative_status_after": "unchanged",
+      "simulated_claim_status_after": "unknown",
+      "simulated_maturity_after": "E4",
+      "history_effect": "would_append_assessment",
+      "reasons": ["Revision-bound replay no longer covers the current synthetic implementation.", "Stale gates do not support promotion or continued reliance.", "Restoration requires a new exact-revision replay and full governed review."]
+    },
+    "semantic_validator_required": true
+  }
+}

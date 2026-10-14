@@ -3,7 +3,11 @@
 **Experiment:** `scripts/ecc2k130_hyperelliptic_cover_boundary.py` (legacy Python, written before the
 repository's no-Python rule; its numbers are replayed natively by `ecc2k130_curve_construction`,
 which agrees to 0.0048 on every value this note cites)
-**Frozen artefact:** `experiments/ecc2k130_hyperelliptic_cover_boundary.json`
+**Historical frozen artefact:** `experiments/ecc2k130_hyperelliptic_cover_boundary.json`.
+Its categorical GHS statement and exact-power genus fields are superseded by
+[`ECC2K130_HYPERELLIPTIC_CORRECTION.json`](ECC2K130_HYPERELLIPTIC_CORRECTION.json),
+which binds the original blob and content hash. Preserve the old artifact as a
+historical record; do not cite those superseded fields as current claims.
 **Related:** `research/notes/ecc2k130/RESEARCH_ECC2K130_EXTENSION.md` (the same arithmetic fact in the
 field register; this note is the genus register), `research/notes/cm-isogeny/RESEARCH_MESTRE_HOWE.md` and
 `research/notes/cm-isogeny/RESEARCH_SECP256K1_CM.md` §8 (the genus-2 gluing machinery, applied to a prime
@@ -15,7 +19,10 @@ same barrier from the factor-base side).
 > **Correction, 2026-10-06 (accounting).**  This note said the genus *any*
 > construction reaches over `F_2` is 1, `2^129` or `2^130`, that the window and
 > "the constructions" miss by `2^120.77`, and that "every construction is
-> closed".  The trichotomy is a theorem about **GHS/Hess descent** and stands.
+> closed". The corrected statement is about the **ordinary GHS/Hess model**:
+> its magic numbers are 1, 130, or 131, and the two large genus branches are
+> `{2^129−1, 2^129}` and `{2^130−1, 2^130}`. Later bare powers of two are only
+> branch-size proxies. The generalisation does not stand.
 > The generalisation does not: the Klein quartic is a non-GHS construction at
 > `n = 3`, and the reduction of the modular curve `X_H(3²·7²·263²)` carries `A`
 > explicitly at genus `508,799,809 ≈ 2^28.92`, `2^20.69` above the window.
@@ -49,8 +56,8 @@ lives.**
 - Over `F_2` — the only proper subfield, because 131 is prime — a transfer would
   be *cheap*, and this is the interesting half.  The genus that would pay sits
   in the window **[130, between 290 and 300]** (§5).  The genus GHS/Hess descent
-  reaches is **1, 2^129 or 2^130** and nothing else, for every elliptic curve over
-  `F_2^131`, because `2` is a primitive root mod `131` (§3).  The window and GHS
+  reaches in the ordinary model is **1, 2^129−1 or 2^129, or 2^130−1 or
+  2^130**, because `2` is a primitive root mod `131` (§3). The window and GHS
   descent miss each other by `2^120.77` (§5) — not every construction does (see
   the correction above).
 - ECC2K-130 sits at the degenerate end of that trichotomy, genus 1, where the
@@ -155,7 +162,7 @@ the machinery `research/notes/cm-isogeny/RESEARCH_MESTRE_HOWE.md` documents for 
 and an `ℓ ≥ 3` gluing partner is needed.)  Either way the result lives over
 `F_2^131` and lands on the `2^70.19×` row above.
 
-## 3. Boundary C — over `F_2`, GHS/Hess descent reaches genus 1, 2^129 or 2^130, and nothing else
+## 3. Boundary C — over `F_2`, the ordinary GHS/Hess model reaches genus 1 or the 2^129/2^130 branches
 
 Weil descent to `F_2` is the GHS construction: the compositum of the Frobenius
 conjugates of the Artin-Schreier extension defining `E` gives a hyperelliptic
@@ -176,14 +183,14 @@ a divisor of `t^131 − 1` over `F_2`.  **2 is a primitive root mod 131**
 t^131 − 1 = (t − 1) · Φ_131(t),   Φ_131 irreducible of degree 130,
 ```
 
-and the only available dimensions are `0, 1, 130, 131`.  Hence for **every**
-elliptic curve over `F_2^131`:
+and the only available dimensions are `0, 1, 130, 131`. Hence for every
+**ordinary curve in the GHS model used here** (not supersingular models):
 
 | `Tr(b)` | `b` | magic number `m` | descended genus | census over 400 random `b` |
 |---|---|---:|---:|---:|
 | — | `b ∈ F_2` | 1 | `1` | the challenge curve, `b = 1` |
-| 0 | `b ∉ F_2` | 130 | `2^129` | 194 |
-| 1 | any | 131 | `2^130` | 206 |
+| 0 | `b ∉ F_2` | 130 | `2^129 − 1` or `2^129` | 194 |
+| 1 | any | 131 | `2^130 − 1` or `2^130` | 206 |
 
 Computed with explicit `F_2^131` arithmetic modulo `x^131 + x^13 + x² + x + 1`;
 the script asserts `m ∈ {1, 130, 131}` and the exact `Tr(b)` correspondence on
@@ -201,15 +208,17 @@ operations on the `N·2^(v+15)` model of Menezes–Teske 2005, our arithmetic) a
 the authors judge finding such a curve infeasible.  Neither Menezes–Teske paper
 mentions `c2pnb176w1`, and `research/ghs-c2pnb/ghs_poc.py` only sweeps
 hypothetical `m′`.  Here the walk has nowhere to land: the
-trichotomy is a statement about the *field*, not about one curve, so every
-curve in every isogeny class over `F_2^131` has magic number 1, 130 or 131.
+magic-number trichotomy is a statement about the *field*, not about one curve,
+so every ordinary curve in the GHS model, across its isogeny classes over
+`F_2^131`, has magic number 1, 130, or 131.
 
 ### 3.1 The large branch is priced by its own description length
 
-A genus-`2^129` curve over `F_2` needs `2^129` bits to write one divisor down, so
-any attack that reaches it costs at least `2^129` operations — `2^68.19×` the rho
-reference, before the algorithm starts.  No constant, no complexity model, and no
-improvement to index calculus touches that.
+A curve on the magic-130 branch has genus `2^129−1` or `2^129` over `F_2`, so
+writing one divisor already takes on the order of `2^129` bits. Any attack that
+reaches it therefore has a description-length floor of about `2^129`
+operations—about `2^68.19×` the rho reference—before the algorithm starts. No
+constant or improvement to index calculus changes that boundary.
 
 ### 3.2 The small branch is the zero map
 
@@ -232,7 +241,7 @@ reason the c2pnb curves need an isogeny shift before GHS says anything.
 Two floors, one weak and unconditional, one sharp and structural.
 
 **Weil.**  `#Jac_C(F_2) ≤ (1 + √2)^(2g)`, and the image of `⟨G⟩` has order
-`r = 2^129`, so `g ≥ 51`.
+`r ≈ 2^129`, so `g ≥ 51`.
 
 **Simplicity.**  The Weil restriction splits along `t^131 − 1 = (t−1)Φ_131(t)`:
 
@@ -295,7 +304,7 @@ smoothness heuristic.
 
 ```
 window that would pay : genus 130 … between 290 and 300
-genus GHS descent reaches : 1, 2^129, 2^130
+ordinary GHS branch sizes : 1, {2^129−1, 2^129}, {2^130−1, 2^130}
 gap, in log2 of genus :  129 − 8.23 = 120.77
 best explicit construction (modular curve, 2026-10-06) : 2^28.92, gap 20.69
 ```
@@ -336,7 +345,8 @@ Three things are true about it, and none of them is a proof either way.
    carries `A` — at genus `2^28.92` (correction above).
 
 So the honest verdict is not "impossible", it is: *every known construction
-lands outside the window* — GHS at `2^129`, the modular curve at `2^28.92`,
+lands outside the window* — the first large GHS branch at approximately
+`2^129`, the modular curve at `2^28.92`,
 cyclic covers of genus ≤ 1 curves at ≥ 1300 — and the residual is not a search
 anyone can run at genus 130.  Its next round is
 `research/notes/ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md`.
@@ -354,7 +364,7 @@ factors over every subfield, so small magic numbers exist, and the descent to
 | 130 | 2 | 65 | `0,1,2,3,4,5,6,7,…` | 7 | 64 | `2^299.93` † | `2^60.31` | no † |
 | 130 | 13 | 10 | `0,1,2,4,5,6,8,9,10` | 5 | 16 | `2^68.63` † | `2^60.31` | no |
 | 130 | 26 | 5 | `0,1,2,3,4,5` | 4 | 8 | `2^60.80` † | `2^60.31` | no |
-| **131** | 1 | 131 | `0,1,130,131` | **130** | **`2^129`** | `≥ 2^129` | `2^60.81` | no |
+| **131** | 1 | 131 | `0,1,130,131` | **130** | **`2^129−1` or `2^129`** | `≥ 2^129−1` | `2^60.81` | no |
 
 † rows with `l ≥ 2` are priced with the fixed-genus model `g!·q^(2−2/g)`, which is
 the wrong regime once `g` is large relative to `log q` — they are pessimistic, not
@@ -364,7 +374,8 @@ large-genus model as §5, in the same unit.
 The "least admissible" column is the whole story: a transfer has to reach a group
 of at least `2^(N−2)` elements, so `l · 2^(m−1) ≥ N − 2`, and the question is
 only whether a magic number that large is *available*.  At `N = 130` the answer is
-8; at `N = 131` it is 130, and `2^129` is not a genus.
+8; at `N = 131` it is 130, and either genus on the approximately `2^129`
+branch is far outside the useful window.
 
 **131 being prime is not one obstacle among several here either.  It is the
 obstacle, and it acts on the genus exactly as it acts on the field.**

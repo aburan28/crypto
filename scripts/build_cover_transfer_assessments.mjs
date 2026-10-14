@@ -128,7 +128,13 @@ const obligations = [
   {
     id: "general_binary_norm",
     description:
-      "Implement and independently verify pushforward/norm on arbitrary binary Jacobian classes.",
+      "Implement and independently verify a catalog-applicable pushforward/norm on arbitrary binary Jacobian classes; the separate exact fixed-GF(8) fixture is not a catalog row and does not close this obligation.",
+    status: "unknown",
+  },
+  {
+    id: "current_fixed_f8_cryptanalysis_mirror",
+    description:
+      "Mirror or integrate the exact fixed-GF(8) arbitrary-class norm into cryptanalysis and attach a current-source parity, test, and CI receipt.",
     status: "unknown",
   },
   {
@@ -264,9 +270,9 @@ const resultTemplates = {
   "map.binary-arbitrary-pushforward.refuted": {
     status: "refuted",
     scope:
-      "Claim that the current implementation accepts and norms an arbitrary reduced class in Jac(H).",
+      "Claim that the current implementation accepts and norms an arbitrary reduced class in Jac(H) for any of the 160 catalog binary covers.",
     rationale:
-      "The public entry point deliberately returns Unsupported(ArbitraryJacobianPushforward); this refutes an implementation claim, not mathematical existence of a norm.",
+      "The public entry point supports one exact fixed-GF(8) fixture, which is not a catalog row, and returns Unsupported(ArbitraryJacobianPushforward) for the catalog profiles. This refutes a catalog implementation claim, not mathematical existence of a norm.",
     evidence_refs: [
       "src/binary_ecc/cover_transfer.rs#pushforward_arbitrary_jacobian_class",
     ],
@@ -357,7 +363,7 @@ const resultTemplates = {
     scope:
       "End-to-end discrete-log cost relative to a matched generic baseline.",
     rationale:
-      "No complete Jacobian relation solver, calibrated transfer cost, target decomposition, or matched total-runtime experiment exists.",
+      "No solver is integrated with these catalog cover sources, and no calibrated transfer cost, target decomposition, or matched total-runtime experiment exists. The separate bounded odd-prime one-infinity relation/linear-algebra/recovery library is outside this path.",
     evidence_refs: [],
     obligation_id: "full_solver",
   },
@@ -366,7 +372,7 @@ const resultTemplates = {
     scope:
       "Claim that the binary implementation provides a general Jac(H)-to-E norm and end-to-end logarithm transfer.",
     rationale:
-      "Only point-divisor and typed-fiber pushforward domains exist; arbitrary Jacobian pushforward is an explicit negative control and no solver is present.",
+      "Catalog rows expose only point-divisor and typed-fiber pushforward domains; the separate exact fixed-GF(8) arbitrary-class fixture does not generalize to them, and no solver consumes these catalog-cover classes.",
     evidence_refs: [
       "src/binary_ecc/cover_transfer.rs#pushforward_arbitrary_jacobian_class",
       "research/hyperelliptic_cover_infrastructure_20261006/README.md",
@@ -530,7 +536,7 @@ const resultTemplates = {
     scope:
       "Operational recovery from an arbitrary class produced by a Jacobian algorithm.",
     rationale:
-      "There is no general norm, Jacobian relation solver, or target decomposition producing such a result.",
+      "There is no catalog-general norm or solver connected to these cover sources that produces such a result. The separate bounded odd-prime one-infinity solver library is outside this transfer path.",
     evidence_refs: [],
     obligation_id: "full_solver",
   },
@@ -941,12 +947,38 @@ async function buildSourceArtifacts() {
       ),
     ),
     sourceArtifact(
-      "src/binary_ecc/cover_transfer.rs",
-      "bounded binary pullback, pushforward, and composition implementation",
+      "docs/curves/fixed-f8-genus3-order-certificate.json",
+      "exact fixed-GF(8) Jacobian-order certificate; not a transfer certificate",
       freshness(
         "supported",
-        "the binary cubic profile's typed point-class domain",
-        "The digest pins the exact current transfer API and explicit arbitrary-Jacobian negative boundary.",
+        "only #Jac(H)(GF(8))=486 for the stated non-catalog polynomial-basis fixture",
+        "The certificate records extension point counts and zeta reconstruction; it does not certify divisor arithmetic, the cover map, or any catalog row.",
+        [
+          "docs/curves/fixed-f8-genus3-order-certificate.json",
+          "src/bin/ecdlp_audit/fixed_f8_order.rs",
+        ],
+      ),
+    ),
+    sourceArtifact(
+      "src/bin/ecdlp_audit/fixed_f8_order.rs",
+      "implementation-separated fixed-GF(8) point-count and zeta replay",
+      freshness(
+        "supported",
+        "only the fixed certificate's extension counts and Jacobian cardinality",
+        "The native verifier independently enumerates the public curve equation without importing production curve, Jacobian, or transfer arithmetic.",
+        [
+          "src/bin/ecdlp_audit/fixed_f8_order.rs",
+          "docs/curves/fixed-f8-genus3-order-certificate.json",
+        ],
+      ),
+    ),
+    sourceArtifact(
+      "src/binary_ecc/cover_transfer.rs",
+      "bounded binary pullback, pushforward, composition, and exact fixed-GF(8) arbitrary-class norm implementation",
+      freshness(
+        "supported",
+        "the binary cubic profile's typed point-class domain and the separate non-catalog fixed-GF(8), a=1, b=3, d=7 all-class fixture",
+        "The digest pins the exact current transfer API, the positive 486-class fixed-fixture norm, and the structured arbitrary-Jacobian unsupported boundary for every other field/model. The fixture target has order 6 with six fibers of size 81, so degree 3 is not coprime to the full target order and no full-group injectivity claim follows.",
         ["src/binary_ecc/cover_transfer.rs"],
       ),
     ),
@@ -1447,7 +1479,7 @@ async function buildLedger() {
         unit: null,
         source_refs: [],
         note:
-          "These phases belong to the explicitly separate full Jacobian index-calculus solver, which was not implemented or run.",
+          "No solver was integrated with or run on the assessed covers. The separate bounded odd-prime one-infinity relation/linear-algebra/recovery library is outside this cost record and does not satisfy the full-solver acceptance gate.",
       },
     ]),
     controls: [
@@ -1541,12 +1573,26 @@ async function buildLedger() {
         control: "cross_repository_core_parity",
         assessment: freshness(
           "supported",
-          "the seven bindings listed by the cryptanalysis hyperelliptic source-parity manifest",
-          "The offline parity replay verified the five byte-exact core files, one binary-module rustdoc adapter, and one selected-domain polynomial binding. It excludes the standalone CLI, Cargo metadata, catalogs, this assessment, workflows, packages, and live-HEAD binding.",
+          "the seven historical bindings listed by the cryptanalysis hyperelliptic source-parity manifest",
+          "The offline parity replay verified five byte-exact core files, one binary-module rustdoc adapter, and one selected-domain polynomial binding at its pinned snapshot. Its cover_transfer.rs digest predates the fixed-GF(8) arbitrary-class norm. It excludes that current change, the standalone CLI, Cargo metadata, catalogs, this assessment, workflows, packages, and live-HEAD binding.",
           ["research/cover_transfer_assessment_20261013/release_replay.txt"],
         ),
         command:
           "cargo run --locked --manifest-path suite/Cargo.toml --bin hyperelliptic-source-parity -- --crypto-root /workspace/crypto-transfer-assessment",
+      },
+      {
+        control: "current_fixed_f8_cross_repository_parity",
+        assessment: freshness(
+          "unknown",
+          "current cryptanalysis mirror or integration of the exact fixed-GF(8) arbitrary-class norm",
+          "The retained parity receipt binds the earlier cover_transfer.rs digest 67b94112f70becf100ccc2cc7e0b3bc057e5663a4019b63fe966de9e62fd5069, not the current crypto source digest 6e801f14abf087b2a6610aa320faf602d176ac764f5eee8e9d88611cdacfa896. No current-tip cryptanalysis mirror receipt is attached.",
+          [
+            "src/binary_ecc/cover_transfer.rs",
+            "research/cover_transfer_assessment_20261013/release_replay.txt",
+          ],
+          "current_fixed_f8_cryptanalysis_mirror",
+        ),
+        command: null,
       },
       {
         control: "coordinate_controls",
@@ -1573,11 +1619,11 @@ async function buildLedger() {
     exploration_boundary: [
       "No search for production targets, private keys, or discrete logarithms was performed.",
       "All 2,091 map rows and all 664 linked EC1 representations are classified, but unknown remains unknown and refuted implementation support is not a mathematical nonexistence claim.",
-      "The 160 binary maps have bounded typed point-class operations; arbitrary source-Jacobian norm remains unsupported.",
+      "The 160 catalog binary maps have bounded typed point-class operations; arbitrary source-Jacobian norm remains unsupported for those rows. The exact fixed-GF(8) fixture is outside this catalog population.",
       "The 1,931 odd-characteristic maps have verified cover geometry but no compatible balanced/two-infinity Jacobian transfer implementation.",
       "Generator checks and [r]G=O do not by themselves prove that every catalog integer r is the exact source order.",
       "Formula-screen outputs in jacobian-transfers.json were not promoted to executable or measured claims.",
-      "The full Jacobian index-calculus solver, relation collection, linear algebra, and target decomposition remain a separate deliverable.",
+      "A full cover-integrated Jacobian index-calculus solver, relation collection, linear algebra, and target decomposition remain a separate deliverable. The bounded odd-prime one-infinity solver library is outside these catalog-cover paths.",
     ],
     open_obligations: obligations,
     report: {

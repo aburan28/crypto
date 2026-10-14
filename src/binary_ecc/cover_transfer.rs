@@ -22,8 +22,10 @@
 //!
 //! The implementation constructs and validates the equations, maps rational
 //! points, constructs `phi^*([P]-[O])` in reduced Mumford form, and pushes a
-//! rational point divisor `[Q]-[infinity]` forward.  It does **not** implement
-//! pushforward of an arbitrary Jacobian class and contains no discrete-log
+//! rational point divisor `[Q]-[infinity]` forward.  A complete arbitrary-class
+//! pushforward is also available for the exact exhaustive `GF(8)` fixture
+//! `a=1`, `b=3`, using a checked 486-class presentation; every other model
+//! remains explicitly unsupported.  This module contains no discrete-log
 //! solver or performance claim.
 
 use super::{
@@ -32,8 +34,9 @@ use super::{
 };
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fmt;
+use std::sync::OnceLock;
 
 /// Construction and transfer failures.  Unsupported operations are distinct
 /// from invalid mathematical input.
@@ -49,6 +52,11 @@ pub enum CoverTransferError {
     PointNotOnTarget,
     PointNotOnCover,
     InvalidSubgroupOrder,
+    DivisorPolynomialTooLong {
+        polynomial: &'static str,
+        maximum_coefficients: usize,
+        actual_coefficients: usize,
+    },
     CertificateFailure(&'static str),
     Hyperelliptic(HyperellipticError),
     Unsupported(UnsupportedCoverOperation),
@@ -67,6 +75,14 @@ impl fmt::Display for CoverTransferError {
             Self::PointNotOnTarget => write!(f, "point is not on the target elliptic curve"),
             Self::PointNotOnCover => write!(f, "point is not on the source cover"),
             Self::InvalidSubgroupOrder => write!(f, "subgroup order must be positive"),
+            Self::DivisorPolynomialTooLong {
+                polynomial,
+                maximum_coefficients,
+                actual_coefficients,
+            } => write!(
+                f,
+                "fixed-fixture divisor polynomial {polynomial} has {actual_coefficients} coefficients, maximum {maximum_coefficients}"
+            ),
             Self::CertificateFailure(reason) => write!(f, "cover certificate failed: {reason}"),
             Self::Hyperelliptic(error) => write!(f, "hyperelliptic validation failed: {error}"),
             Self::Unsupported(op) => write!(f, "unsupported cover operation: {op}"),
@@ -92,9 +108,9 @@ impl From<HyperellipticError> for CoverTransferError {
 /// Operations intentionally outside the certified implementation boundary.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum UnsupportedCoverOperation {
-    /// Computing the norm/pushforward of a general Mumford divisor requires
-    /// polynomial resultants (including non-split support), which this module
-    /// does not yet implement.
+    /// The exhaustive arbitrary-class implementation is certified only for
+    /// one fixed `GF(8)` fixture.  Other models still require a general
+    /// polynomial norm/resultant implementation, including non-split support.
     ArbitraryJacobianPushforward,
 }
 
@@ -191,6 +207,16 @@ pub struct OrdinaryBinaryCover {
     source: HyperellipticCurve,
     certificate: BinaryCoverCertificate,
 }
+
+type FixedF8DivisorKey = (Vec<BigUint>, Vec<BigUint>);
+
+#[derive(Clone, Debug)]
+struct FixedF8NormTable {
+    images: HashMap<FixedF8DivisorKey, BinaryPoint>,
+}
+
+static FIXED_F8_NORM_TABLE: OnceLock<Result<FixedF8NormTable, CoverTransferError>> =
+    OnceLock::new();
 
 impl OrdinaryBinaryCover {
     /// Construct and validate the fixed ordinary-binary cover family.
@@ -704,15 +730,195 @@ impl OrdinaryBinaryCover {
         })
     }
 
-    /// Explicitly unsupported until a general polynomial norm/resultant
-    /// implementation is independently verified.
+    /// Push an arbitrary reduced Jacobian class to the target elliptic curve.
+    ///
+    /// This operation is deliberately bounded to the exact exhaustive fixture
+    ///
+    /// ```text
+    /// GF(8) = GF(2)[z]/(z^3+z+1),  a=1, b=3,
+    /// H: v^2+u^2*v=u^7+u^4+7u.
+    /// ```
+    ///
+    /// Its 486 rational Jacobian classes have the unique presentation
+    /// `i*A+j*B`, `0<=i<9`, `0<=j<54`, where
+    /// `A=[(2,3)-infinity]` and `B=[(3,1)-infinity]`.  The cached table is
+    /// constructed with the checked Jacobian law and assigns each class the
+    /// corresponding sum of the two directly mapped rational point classes.
+    /// This handles non-split support in this finite fixture without claiming
+    /// a general resultant implementation.  Every other cover returns a
+    /// structured unsupported result.
     pub fn pushforward_arbitrary_jacobian_class(
         &self,
-        _divisor: &MumfordDivisor,
+        divisor: &MumfordDivisor,
     ) -> Result<BinaryPoint, CoverTransferError> {
-        Err(CoverTransferError::Unsupported(
-            UnsupportedCoverOperation::ArbitraryJacobianPushforward,
-        ))
+        if !self.is_fixed_f8_norm_fixture() {
+            return Err(CoverTransferError::Unsupported(
+                UnsupportedCoverOperation::ArbitraryJacobianPushforward,
+            ));
+        }
+        // A reduced genus-three Mumford representative has deg(u) <= 3 and
+        // deg(v) < deg(u), hence at most four and three coefficients.  Check
+        // the public vector lengths before the full curve/divisor validation,
+        // whose canonicality and field-width checks otherwise scan every
+        // supplied coefficient.
+        if divisor.u.coeffs.len() > 4 {
+            return Err(CoverTransferError::DivisorPolynomialTooLong {
+                polynomial: "u",
+                maximum_coefficients: 4,
+                actual_coefficients: divisor.u.coeffs.len(),
+            });
+        }
+        if divisor.v.coeffs.len() > 3 {
+            return Err(CoverTransferError::DivisorPolynomialTooLong {
+                polynomial: "v",
+                maximum_coefficients: 3,
+                actual_coefficients: divisor.v.coeffs.len(),
+            });
+        }
+        divisor.validate(&self.source)?;
+        let table = FIXED_F8_NORM_TABLE
+            .get_or_init(|| self.build_fixed_f8_norm_table())
+            .as_ref()
+            .map_err(Clone::clone)?;
+        table
+            .images
+            .get(&fixed_f8_divisor_key(divisor))
+            .cloned()
+            .ok_or(CoverTransferError::CertificateFailure(
+                "validated fixed-fixture divisor is absent from the 486-class norm table",
+            ))
+    }
+
+    fn is_fixed_f8_norm_fixture(&self) -> bool {
+        self.m == 3
+            && self.irreducible.degree == 3
+            && self.irreducible.low_terms.as_slice() == [0u32, 1u32]
+            && self.a == F2mElement::one(3)
+            && self.b == F2mElement::from_biguint(&BigUint::from(3u32), 3)
+            && self.d == F2mElement::from_biguint(&BigUint::from(7u32), 3)
+    }
+
+    fn build_fixed_f8_norm_table(&self) -> Result<FixedF8NormTable, CoverTransferError> {
+        if !self.is_fixed_f8_norm_fixture() {
+            return Err(CoverTransferError::Unsupported(
+                UnsupportedCoverOperation::ArbitraryJacobianPushforward,
+            ));
+        }
+        self.verify_certificate()?;
+
+        let a_u = F2mElement::from_biguint(&BigUint::from(2u32), 3);
+        let a_v = F2mElement::from_biguint(&BigUint::from(3u32), 3);
+        let b_u = F2mElement::from_biguint(&BigUint::from(3u32), 3);
+        let b_v = F2mElement::one(3);
+        let a = MumfordDivisor::try_from_point(&self.source, &a_u, &a_v)?;
+        let b = MumfordDivisor::try_from_point(&self.source, &b_u, &b_v)?;
+        let a_point = BinaryCoverPoint::Affine { u: a_u, v: a_v };
+        let b_point = BinaryCoverPoint::Affine { u: b_u, v: b_v };
+        let image_a = self.pushforward_rational_point_divisor(&a_point)?;
+        let image_b = self.pushforward_rational_point_divisor(&b_point)?;
+        let expected_image_a = BinaryPoint::Affine {
+            x: F2mElement::from_biguint(&BigUint::from(3u32), 3),
+            y: F2mElement::one(3),
+        };
+        let expected_image_b = BinaryPoint::Affine {
+            x: F2mElement::from_biguint(&BigUint::from(4u32), 3),
+            y: F2mElement::from_biguint(&BigUint::from(4u32), 3),
+        };
+
+        if !a
+            .try_scalar_mul(&BigUint::from(27u32), &self.source)?
+            .is_identity()
+            || a.try_scalar_mul(&BigUint::from(9u32), &self.source)?
+                .is_identity()
+        {
+            return Err(CoverTransferError::CertificateFailure(
+                "fixed F8 norm generator A does not have order 27",
+            ));
+        }
+        if !b
+            .try_scalar_mul(&BigUint::from(54u32), &self.source)?
+            .is_identity()
+            || b.try_scalar_mul(&BigUint::from(27u32), &self.source)?
+                .is_identity()
+            || b.try_scalar_mul(&BigUint::from(18u32), &self.source)?
+                .is_identity()
+        {
+            return Err(CoverTransferError::CertificateFailure(
+                "fixed F8 norm generator B does not have order 54",
+            ));
+        }
+        if a.try_scalar_mul(&BigUint::from(9u32), &self.source)?
+            != b.try_scalar_mul(&BigUint::from(18u32), &self.source)?
+        {
+            return Err(CoverTransferError::CertificateFailure(
+                "fixed F8 norm generators do not satisfy 9A=18B",
+            ));
+        }
+        if image_a != expected_image_a
+            || image_b != expected_image_b
+            || image_a != self.target_scalar_mul_small(&image_b, 2)?
+            || self.target_scalar_mul_small(&image_b, 6)? != BinaryPoint::Infinity
+            || self.target_scalar_mul_small(&image_b, 3)? == BinaryPoint::Infinity
+            || self.target_scalar_mul_small(&image_b, 2)? == BinaryPoint::Infinity
+        {
+            return Err(CoverTransferError::CertificateFailure(
+                "fixed F8 point images do not satisfy phi(A)=2Q with Q of order six",
+            ));
+        }
+
+        let a_multiples = self.fixed_f8_jacobian_multiples(&a, 9)?;
+        let b_multiples = self.fixed_f8_jacobian_multiples(&b, 54)?;
+        let image_a_multiples = self.fixed_f8_target_multiples(&image_a, 9)?;
+        let image_b_multiples = self.fixed_f8_target_multiples(&image_b, 54)?;
+        let mut images = HashMap::with_capacity(486);
+        for (a_multiple, image_a_multiple) in a_multiples.iter().zip(image_a_multiples.iter()) {
+            for (b_multiple, image_b_multiple) in b_multiples.iter().zip(image_b_multiples.iter()) {
+                let divisor = a_multiple.try_add(b_multiple, &self.source)?;
+                let image = self.target_add(image_a_multiple, image_b_multiple)?;
+                let key = fixed_f8_divisor_key(&divisor);
+                if let Some(previous) = images.insert(key, image.clone()) {
+                    if previous != image {
+                        return Err(CoverTransferError::CertificateFailure(
+                            "fixed F8 norm presentation assigns inconsistent images",
+                        ));
+                    }
+                }
+            }
+        }
+        if images.len() != 486 {
+            return Err(CoverTransferError::CertificateFailure(
+                "fixed F8 norm presentation does not contain 486 unique classes",
+            ));
+        }
+        Ok(FixedF8NormTable { images })
+    }
+
+    fn fixed_f8_jacobian_multiples(
+        &self,
+        base: &MumfordDivisor,
+        count: usize,
+    ) -> Result<Vec<MumfordDivisor>, CoverTransferError> {
+        let mut multiples = Vec::with_capacity(count);
+        let mut current = MumfordDivisor::identity(self.m);
+        for _ in 0..count {
+            multiples.push(current.clone());
+            current = current.try_add(base, &self.source)?;
+        }
+        Ok(multiples)
+    }
+
+    fn fixed_f8_target_multiples(
+        &self,
+        base: &BinaryPoint,
+        count: usize,
+    ) -> Result<Vec<BinaryPoint>, CoverTransferError> {
+        let mut multiples = Vec::with_capacity(count);
+        let mut current = BinaryPoint::Infinity;
+        for _ in 0..count {
+            multiples.push(current.clone());
+            current = self.target_add(&current, base)?;
+        }
+        Ok(multiples)
     }
 
     fn target_scalar_mul_small(
@@ -793,6 +999,23 @@ impl OrdinaryBinaryCover {
         }
         Ok(result)
     }
+}
+
+fn fixed_f8_divisor_key(divisor: &MumfordDivisor) -> FixedF8DivisorKey {
+    (
+        divisor
+            .u
+            .coeffs
+            .iter()
+            .map(F2mElement::to_biguint)
+            .collect(),
+        divisor
+            .v
+            .coeffs
+            .iter()
+            .map(F2mElement::to_biguint)
+            .collect(),
+    )
 }
 
 fn check_width(
@@ -947,6 +1170,60 @@ mod tests {
 
     fn cover(a: u32, b: u32) -> OrdinaryBinaryCover {
         OrdinaryBinaryCover::new(3, f8_modulus(), elt(a), elt(b)).unwrap()
+    }
+
+    fn coefficients_from_code(mut code: usize, length: usize) -> Vec<F2mElement> {
+        (0..length)
+            .map(|_| {
+                let coefficient = elt((code % 8) as u32);
+                code /= 8;
+                coefficient
+            })
+            .collect()
+    }
+
+    fn all_fixed_f8_reduced_divisors(curve: &HyperellipticCurve) -> Vec<MumfordDivisor> {
+        let mut divisors = vec![MumfordDivisor::identity(3)];
+        for u_degree in 1..=3usize {
+            let coefficient_vectors = 8usize.pow(u_degree as u32);
+            for u_code in 0..coefficient_vectors {
+                let mut u_coefficients = coefficients_from_code(u_code, u_degree);
+                u_coefficients.push(F2mElement::one(3));
+                let u = F2mPoly::from_coeffs(u_coefficients, 3);
+                for v_code in 0..coefficient_vectors {
+                    let v = F2mPoly::from_coeffs(coefficients_from_code(v_code, u_degree), 3);
+                    // These loops already enforce monic U and
+                    // deg(V)<deg(U)<=3.  Check the remaining Mumford
+                    // invariant directly so exhaustive enumeration does not
+                    // revalidate the fixed field for all 266,304 candidates.
+                    let equation = v
+                        .mul(&v, &curve.irr)
+                        .add(&curve.h.mul(&v, &curve.irr))
+                        .add(&curve.f);
+                    let (_quotient, remainder) = equation.divrem(&u, &curve.irr);
+                    if remainder.is_zero() {
+                        divisors.push(MumfordDivisor { u: u.clone(), v });
+                    }
+                }
+            }
+        }
+        divisors
+    }
+
+    fn target_point(x: u32, y: u32) -> BinaryPoint {
+        BinaryPoint::Affine {
+            x: elt(x),
+            y: elt(y),
+        }
+    }
+
+    fn checked_divisor(curve: &HyperellipticCurve, u: &[u32], v: &[u32]) -> MumfordDivisor {
+        MumfordDivisor::try_new(
+            curve,
+            F2mPoly::from_coeffs(u.iter().copied().map(elt).collect(), 3),
+            F2mPoly::from_coeffs(v.iter().copied().map(elt).collect(), 3),
+        )
+        .unwrap()
     }
 
     #[test]
@@ -1195,6 +1472,266 @@ mod tests {
                 .target_scalar_mul_small(&composition.formal_pushforward, 10)
                 .unwrap(),
             generator
+        );
+    }
+
+    #[test]
+    fn fixed_f8_arbitrary_pushforward_is_complete_and_homomorphic() {
+        let c = cover(1, 3);
+        let divisors = all_fixed_f8_reduced_divisors(c.source_curve());
+        let divisor_keys: HashSet<_> = divisors.iter().map(fixed_f8_divisor_key).collect();
+        let mut degree_counts = [0usize; 4];
+        for divisor in &divisors {
+            divisor.validate(c.source_curve()).unwrap();
+            degree_counts[divisor.u.degree().unwrap()] += 1;
+        }
+        assert_eq!(degree_counts, [1, 5, 56, 424]);
+        assert_eq!(divisors.len(), 486);
+        assert_eq!(divisor_keys.len(), 486);
+
+        let identity = MumfordDivisor::identity(3);
+        assert_eq!(
+            c.pushforward_arbitrary_jacobian_class(&identity).unwrap(),
+            BinaryPoint::Infinity
+        );
+        let table = FIXED_F8_NORM_TABLE.get().unwrap().as_ref().unwrap();
+        assert_eq!(table.images.len(), 486);
+        assert_eq!(
+            table.images.keys().cloned().collect::<HashSet<_>>(),
+            divisor_keys
+        );
+
+        let q = target_point(4, 4);
+        let target_group = c.fixed_f8_target_multiples(&q, 6).unwrap();
+        assert_eq!(target_group.len(), 6);
+        assert_eq!(
+            c.target_scalar_mul_small(&q, 6).unwrap(),
+            BinaryPoint::Infinity
+        );
+        let mut fiber_sizes = [0usize; 6];
+        let mut images = Vec::with_capacity(divisors.len());
+        for divisor in &divisors {
+            let image = c.pushforward_arbitrary_jacobian_class(divisor).unwrap();
+            assert!(c.target_is_on_curve(&image));
+            let image_index = target_group
+                .iter()
+                .position(|candidate| candidate == &image)
+                .expect("fixed-fixture norm image lies in the six-element target");
+            fiber_sizes[image_index] += 1;
+
+            let inverse = divisor.try_neg(c.source_curve()).unwrap();
+            let inverse_image = c.pushforward_arbitrary_jacobian_class(&inverse).unwrap();
+            assert_eq!(
+                c.target_add(&image, &inverse_image).unwrap(),
+                BinaryPoint::Infinity
+            );
+            images.push(image);
+        }
+        assert_eq!(fiber_sizes, [81; 6]);
+
+        for (left_index, left) in divisors.iter().enumerate() {
+            for (right_index, right) in divisors.iter().enumerate() {
+                let sum = left.try_add(right, c.source_curve()).unwrap();
+                let actual = c.pushforward_arbitrary_jacobian_class(&sum).unwrap();
+                let expected = c
+                    .target_add(&images[left_index], &images[right_index])
+                    .unwrap();
+                assert_eq!(
+                    actual, expected,
+                    "norm homomorphism failed for ordered pair ({left_index},{right_index})"
+                );
+            }
+        }
+
+        let mut rational_source_points = vec![BinaryCoverPoint::Infinity];
+        for u in 0..8 {
+            for v in 0..8 {
+                let point = BinaryCoverPoint::Affine {
+                    u: elt(u),
+                    v: elt(v),
+                };
+                if c.source_is_on_curve(&point) {
+                    rational_source_points.push(point);
+                }
+            }
+        }
+        assert_eq!(rational_source_points.len(), 6);
+        for point in rational_source_points {
+            let divisor = match &point {
+                BinaryCoverPoint::Infinity => MumfordDivisor::identity(3),
+                BinaryCoverPoint::Affine { u, v } => {
+                    MumfordDivisor::try_from_point(c.source_curve(), u, v).unwrap()
+                }
+            };
+            assert_eq!(
+                c.pushforward_arbitrary_jacobian_class(&divisor).unwrap(),
+                c.pushforward_rational_point_divisor(&point).unwrap()
+            );
+        }
+
+        let mut target_points = vec![BinaryPoint::Infinity];
+        for x in 0..8 {
+            for y in 0..8 {
+                let point = target_point(x, y);
+                if c.target_is_on_curve(&point) {
+                    target_points.push(point);
+                }
+            }
+        }
+        assert_eq!(target_points.len(), 6);
+        for point in target_points {
+            let pullback = c.pullback_point_class(&point).unwrap();
+            assert_eq!(
+                c.pushforward_arbitrary_jacobian_class(&pullback).unwrap(),
+                c.target_scalar_mul_small(&point, 3).unwrap()
+            );
+        }
+
+        assert_eq!(
+            c.pushforward_arbitrary_jacobian_class(&checked_divisor(
+                c.source_curve(),
+                &[0, 1],
+                &[],
+            ))
+            .unwrap(),
+            target_point(0, 7)
+        );
+        assert_eq!(
+            c.pushforward_arbitrary_jacobian_class(&checked_divisor(
+                c.source_curve(),
+                &[4, 0, 1],
+                &[2, 5],
+            ))
+            .unwrap(),
+            target_point(3, 2)
+        );
+        assert_eq!(
+            c.pushforward_arbitrary_jacobian_class(&checked_divisor(
+                c.source_curve(),
+                &[1, 1, 1],
+                &[3, 2],
+            ))
+            .unwrap(),
+            BinaryPoint::Infinity
+        );
+        assert_eq!(
+            c.pushforward_arbitrary_jacobian_class(&checked_divisor(
+                c.source_curve(),
+                &[6, 1, 0, 1],
+                &[6, 7, 6],
+            ))
+            .unwrap(),
+            target_point(4, 0)
+        );
+    }
+
+    #[test]
+    fn arbitrary_pushforward_rejects_malformed_and_unsupported_inputs() {
+        let c = cover(1, 3);
+        let identity = MumfordDivisor::identity(3);
+        let zero_u = MumfordDivisor {
+            u: F2mPoly::zero(3),
+            v: F2mPoly::zero(3),
+        };
+        assert_eq!(
+            c.pushforward_arbitrary_jacobian_class(&zero_u),
+            Err(CoverTransferError::Hyperelliptic(
+                HyperellipticError::ZeroDivisorPolynomial
+            ))
+        );
+        let non_monic = MumfordDivisor {
+            u: F2mPoly::constant(elt(2)),
+            v: F2mPoly::zero(3),
+        };
+        assert_eq!(
+            c.pushforward_arbitrary_jacobian_class(&non_monic),
+            Err(CoverTransferError::Hyperelliptic(
+                HyperellipticError::NonMonicDivisorPolynomial
+            ))
+        );
+        let wrong_width = MumfordDivisor::identity(2);
+        assert!(matches!(
+            c.pushforward_arbitrary_jacobian_class(&wrong_width),
+            Err(CoverTransferError::Hyperelliptic(
+                HyperellipticError::PolynomialFieldMismatch { .. }
+            ))
+        ));
+        let wrong_equation = MumfordDivisor {
+            u: F2mPoly::from_coeffs(vec![elt(1), elt(1)], 3),
+            v: F2mPoly::zero(3),
+        };
+        assert_eq!(
+            c.pushforward_arbitrary_jacobian_class(&wrong_equation),
+            Err(CoverTransferError::Hyperelliptic(
+                HyperellipticError::DivisorEquationNotDivisible
+            ))
+        );
+
+        for a in 0..8 {
+            for b in 1..8 {
+                if (a, b) == (1, 3) {
+                    continue;
+                }
+                assert_eq!(
+                    cover(a, b).pushforward_arbitrary_jacobian_class(&identity),
+                    Err(CoverTransferError::Unsupported(
+                        UnsupportedCoverOperation::ArbitraryJacobianPushforward
+                    )),
+                    "model a={a}, b={b} must remain outside the bounded fixture"
+                );
+            }
+        }
+        let other_basis = OrdinaryBinaryCover::new(
+            3,
+            IrreduciblePoly {
+                degree: 3,
+                low_terms: vec![0, 2],
+            },
+            elt(1),
+            elt(3),
+        )
+        .unwrap();
+        assert_eq!(
+            other_basis.pushforward_arbitrary_jacobian_class(&identity),
+            Err(CoverTransferError::Unsupported(
+                UnsupportedCoverOperation::ArbitraryJacobianPushforward
+            ))
+        );
+    }
+
+    #[test]
+    fn arbitrary_pushforward_rejects_oversized_polynomials_before_validation() {
+        let c = cover(1, 3);
+        let oversized_u = MumfordDivisor {
+            u: F2mPoly {
+                m: 2,
+                coeffs: vec![F2mElement::one(2); 5],
+            },
+            v: F2mPoly::zero(3),
+        };
+        assert_eq!(
+            c.pushforward_arbitrary_jacobian_class(&oversized_u),
+            Err(CoverTransferError::DivisorPolynomialTooLong {
+                polynomial: "u",
+                maximum_coefficients: 4,
+                actual_coefficients: 5,
+            })
+        );
+
+        let oversized_v = MumfordDivisor {
+            u: F2mPoly::one(3),
+            v: F2mPoly {
+                m: 2,
+                coeffs: vec![F2mElement::one(2); 4],
+            },
+        };
+        assert_eq!(
+            c.pushforward_arbitrary_jacobian_class(&oversized_v),
+            Err(CoverTransferError::DivisorPolynomialTooLong {
+                polynomial: "v",
+                maximum_coefficients: 3,
+                actual_coefficients: 4,
+            })
         );
     }
 }

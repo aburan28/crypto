@@ -63,7 +63,7 @@
     },
     {
       "path": "scripts/build_cover_transfer_assessments.mjs",
-      "sha256": "09df5af853c5478028b7acdad82e38918b0c0243d4073acbd0f9e60c1d90648c",
+      "sha256": "6b1d08927e319ab3737c9ff2ea2cdaffc50aea6347cfdadf461316af8f9cd522",
       "role": "deterministic catalog-wide ledger generator",
       "freshness": {
         "status": "supported",
@@ -128,7 +128,7 @@
     },
     {
       "path": "src/bin/hyperelliptic_cover.rs",
-      "sha256": "d626f9e5c31430448e44bf37d617634536babb96258fb24502a86dfd3470ae0a",
+      "sha256": "40dc338ce4779a7618a681740c6ebc07a17ee380132f6229cf26b90c1114e428",
       "role": "standalone CLI and native binary subgroup batch certificate",
       "freshness": {
         "status": "supported",
@@ -140,13 +140,41 @@
       }
     },
     {
-      "path": "src/binary_ecc/cover_transfer.rs",
-      "sha256": "67b94112f70becf100ccc2cc7e0b3bc057e5663a4019b63fe966de9e62fd5069",
-      "role": "bounded binary pullback, pushforward, and composition implementation",
+      "path": "docs/curves/fixed-f8-genus3-order-certificate.json",
+      "sha256": "fc83eab0e52757913623213703112835a2ba5c2d6caf03e9ef519a6be96f8e38",
+      "role": "exact fixed-GF(8) Jacobian-order certificate; not a transfer certificate",
       "freshness": {
         "status": "supported",
-        "scope": "the binary cubic profile's typed point-class domain",
-        "rationale": "The digest pins the exact current transfer API and explicit arbitrary-Jacobian negative boundary.",
+        "scope": "only #Jac(H)(GF(8))=486 for the stated non-catalog polynomial-basis fixture",
+        "rationale": "The certificate records extension point counts and zeta reconstruction; it does not certify divisor arithmetic, the cover map, or any catalog row.",
+        "evidence_refs": [
+          "docs/curves/fixed-f8-genus3-order-certificate.json",
+          "src/bin/ecdlp_audit/fixed_f8_order.rs"
+        ]
+      }
+    },
+    {
+      "path": "src/bin/ecdlp_audit/fixed_f8_order.rs",
+      "sha256": "f6051990491e8775676bbd842adb9b39bf95ee544974faeeb9c061c424729980",
+      "role": "implementation-separated fixed-GF(8) point-count and zeta replay",
+      "freshness": {
+        "status": "supported",
+        "scope": "only the fixed certificate's extension counts and Jacobian cardinality",
+        "rationale": "The native verifier independently enumerates the public curve equation without importing production curve, Jacobian, or transfer arithmetic.",
+        "evidence_refs": [
+          "src/bin/ecdlp_audit/fixed_f8_order.rs",
+          "docs/curves/fixed-f8-genus3-order-certificate.json"
+        ]
+      }
+    },
+    {
+      "path": "src/binary_ecc/cover_transfer.rs",
+      "sha256": "6e801f14abf087b2a6610aa320faf602d176ac764f5eee8e9d88611cdacfa896",
+      "role": "bounded binary pullback, pushforward, composition, and exact fixed-GF(8) arbitrary-class norm implementation",
+      "freshness": {
+        "status": "supported",
+        "scope": "the binary cubic profile's typed point-class domain and the separate non-catalog fixed-GF(8), a=1, b=3, d=7 all-class fixture",
+        "rationale": "The digest pins the exact current transfer API, the positive 486-class fixed-fixture norm, and the structured arbitrary-Jacobian unsupported boundary for every other field/model. The fixture target has order 6 with six fibers of size 81, so degree 3 is not coprime to the full target order and no full-group injectivity claim follows.",
         "evidence_refs": [
           "src/binary_ecc/cover_transfer.rs"
         ]
@@ -180,7 +208,7 @@
     },
     {
       "path": "Cargo.toml",
-      "sha256": "49b5f9478f133f905d5388d8c609d097830d69fe912c46dbc95b387b5d14a3de",
+      "sha256": "72ed7dff4b38c32bb53f58f8b44a51daf819813ce3e183aa34d9e86e9e425d79",
       "role": "exact implementation-version dependency: Cargo.toml",
       "freshness": {
         "status": "supported",
@@ -206,7 +234,7 @@
     },
     {
       "path": ".github/workflows/curve-covers.yml",
-      "sha256": "40f1efbede88b5f35352ac040b294d7bc4e3e5a480bade1517d310b0843e3962",
+      "sha256": "706190a40b847c3a943ec048a74e45752204344b96a2d7ae181b1e648d175358",
       "role": "exact implementation-version dependency: .github/workflows/curve-covers.yml",
       "freshness": {
         "status": "supported",
@@ -219,7 +247,7 @@
     },
     {
       "path": ".github/workflows/release.yml",
-      "sha256": "7c5efe2e5651334d42a848022d326857f786cadaab6c8b99fdff895bcd93a159",
+      "sha256": "0da341d9e036ad4696f18324163666a06ff5bbcfdfb497f3c1723b5a87f5bfbd",
       "role": "exact implementation-version dependency: .github/workflows/release.yml",
       "freshness": {
         "status": "supported",
@@ -430,7 +458,7 @@
     },
     {
       "path": "docs/curves/JACOBIAN_TRANSFERS.md",
-      "sha256": "f02e22b952b5d2c74fe88293d04b21c244467a927a56a4b6188a11c0e5be557d",
+      "sha256": "b7ca1c6bc2a250bdbef8893d124daaeec64da3e58a43dcbb558665a0776d95df",
       "role": "legacy formula-screen documentation pinned for the stale-inventory finding",
       "freshness": {
         "status": "supported",
@@ -456,7 +484,7 @@
     },
     {
       "path": "docs/curves/HYPERELLIPTIC_INFRASTRUCTURE.md",
-      "sha256": "19b5d3e7cc164138999ec9faeb30e77d731720cb03541587d22b66095f09b40c",
+      "sha256": "dae768fb14320e7502b8b85c1af8e0d972c8204545683044f0f4269badbff84b",
       "role": "standalone CLI and supported-model documentation",
       "freshness": {
         "status": "supported",
@@ -508,7 +536,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/verify_assessment.mjs",
-      "sha256": "d6220c4ef962b9d593cd361b898a4a7aec3abe7b427364e9dd2e311bad38c693",
+      "sha256": "09f4af92b4db999052e3096b824238ae002d587367125c24459ee67b04816720",
       "role": "independent catalog-wide assessment verifier",
       "freshness": {
         "status": "supported",
@@ -521,7 +549,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/README.md",
-      "sha256": "0e498686716de24a317a255cff0a9e54c156db44591085080141e8324ca463ee",
+      "sha256": "3b17ebad8b3b500caa3e17d9d0558d4d09bc035cec9f11b87daf5ed08f1cbcb0",
       "role": "source-linked catalog-wide assessment report",
       "freshness": {
         "status": "supported",
@@ -547,7 +575,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/typed_correspondence.dot",
-      "sha256": "dd3fbff9b64b74020e26ebf441e521edcc6a31655fa205cbe12121d50617a7ac",
+      "sha256": "f96ff888ad9408dce17004ecfa6e24ec4d33d72561c96f0ff3756030fabe7609",
       "role": "assessment diagram source",
       "freshness": {
         "status": "supported",
@@ -560,7 +588,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/typed_correspondence.svg",
-      "sha256": "015c6589b66cba7faaf77a62cf40f414c18e5777d5f018b47a553e71f15f9dcb",
+      "sha256": "86096aa2e2f0b89b634f41dfe12b83e58d4f19526d93f51ef4487a4a164c82d3",
       "role": "rendered assessment diagram in SVG format",
       "freshness": {
         "status": "supported",
@@ -573,7 +601,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/typed_correspondence.png",
-      "sha256": "edfeca96cc514c9f05816f8c30a049dc09e319a8d3a46f197dcfa3f215a4db36",
+      "sha256": "430838b2c52990055cd3a56d3a897f8ca76de926d21d8277f1103c5492693841",
       "role": "rendered assessment diagram in PNG format",
       "freshness": {
         "status": "supported",
@@ -586,7 +614,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/typed_transfer_context.dot",
-      "sha256": "cc59d5d2a59fd9321a4cc6fbe98eeb65db8b4e40c65491ef664abbc66240742c",
+      "sha256": "fe78287e18cebf00719674f96ead7487307a4a9370888df9159b5587db24f7a0",
       "role": "typed transfer-context diagram source",
       "freshness": {
         "status": "supported",
@@ -599,7 +627,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/typed_transfer_context.svg",
-      "sha256": "cbad0736c5f018fa816ff3ef985e0b7d196b0944c61ffe0e83b2a9708ced4327",
+      "sha256": "8e271b5b0a4ee7ba6f0ba58d6121647344a18d05fdde2a1a18046103a1ed6a83",
       "role": "rendered typed transfer-context diagram in SVG format",
       "freshness": {
         "status": "supported",
@@ -612,7 +640,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/typed_transfer_context.png",
-      "sha256": "473b218365f9bb2db129dd83ff967c6a5cde41238647026400c0ca152a0e11d8",
+      "sha256": "b9d80e00aa949946fa880b692462fcaef55d528f354448df46bd9502ebd7108b",
       "role": "rendered typed transfer-context diagram in PNG format",
       "freshness": {
         "status": "supported",
@@ -625,7 +653,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/cover_transfer_assessment_20261013.pdf",
-      "sha256": "8eadc8251d3a7c016c390ebcd1fc96693cbda7c92d3544bf83570dc1c02f048a",
+      "sha256": "9fbd6fe6b0477f36ba6d140f658ee250f33750651f7de7a319a6f98b34b33f17",
       "role": "rendered catalog-wide assessment PDF",
       "freshness": {
         "status": "supported",
@@ -735,8 +763,8 @@
     },
     "map.binary-arbitrary-pushforward.refuted": {
       "status": "refuted",
-      "scope": "Claim that the current implementation accepts and norms an arbitrary reduced class in Jac(H).",
-      "rationale": "The public entry point deliberately returns Unsupported(ArbitraryJacobianPushforward); this refutes an implementation claim, not mathematical existence of a norm.",
+      "scope": "Claim that the current implementation accepts and norms an arbitrary reduced class in Jac(H) for any of the 160 catalog binary covers.",
+      "rationale": "The public entry point supports one exact fixed-GF(8) fixture, which is not a catalog row, and returns Unsupported(ArbitraryJacobianPushforward) for the catalog profiles. This refutes a catalog implementation claim, not mathematical existence of a norm.",
       "evidence_refs": [
         "src/binary_ecc/cover_transfer.rs#pushforward_arbitrary_jacobian_class"
       ],
@@ -811,14 +839,14 @@
     "map.advantage.unknown": {
       "status": "unknown",
       "scope": "End-to-end discrete-log cost relative to a matched generic baseline.",
-      "rationale": "No complete Jacobian relation solver, calibrated transfer cost, target decomposition, or matched total-runtime experiment exists.",
+      "rationale": "No solver is integrated with these catalog cover sources, and no calibrated transfer cost, target decomposition, or matched total-runtime experiment exists. The separate bounded odd-prime one-infinity relation/linear-algebra/recovery library is outside this path.",
       "evidence_refs": [],
       "obligation_id": "full_solver"
     },
     "map.binary-pipeline.refuted": {
       "status": "refuted",
       "scope": "Claim that the binary implementation provides a general Jac(H)-to-E norm and end-to-end logarithm transfer.",
-      "rationale": "Only point-divisor and typed-fiber pushforward domains exist; arbitrary Jacobian pushforward is an explicit negative control and no solver is present.",
+      "rationale": "Catalog rows expose only point-divisor and typed-fiber pushforward domains; the separate exact fixed-GF(8) arbitrary-class fixture does not generalize to them, and no solver consumes these catalog-cover classes.",
       "evidence_refs": [
         "src/binary_ecc/cover_transfer.rs#pushforward_arbitrary_jacobian_class",
         "research/hyperelliptic_cover_infrastructure_20261006/README.md"
@@ -952,7 +980,7 @@
     "subgroup.arbitrary-recovery.unknown": {
       "status": "unknown",
       "scope": "Operational recovery from an arbitrary class produced by a Jacobian algorithm.",
-      "rationale": "There is no general norm, Jacobian relation solver, or target decomposition producing such a result.",
+      "rationale": "There is no catalog-general norm or solver connected to these cover sources that produces such a result. The separate bounded odd-prime one-infinity solver library is outside this transfer path.",
       "evidence_refs": [],
       "obligation_id": "full_solver"
     },
@@ -60412,7 +60440,7 @@
       "value": null,
       "unit": null,
       "source_refs": [],
-      "note": "These phases belong to the explicitly separate full Jacobian index-calculus solver, which was not implemented or run."
+      "note": "No solver was integrated with or run on the assessed covers. The separate bounded odd-prime one-infinity relation/linear-algebra/recovery library is outside this cost record and does not satisfy the full-solver acceptance gate."
     }
   ],
   "controls": [
@@ -60511,13 +60539,27 @@
       "control": "cross_repository_core_parity",
       "assessment": {
         "status": "supported",
-        "scope": "the seven bindings listed by the cryptanalysis hyperelliptic source-parity manifest",
-        "rationale": "The offline parity replay verified the five byte-exact core files, one binary-module rustdoc adapter, and one selected-domain polynomial binding. It excludes the standalone CLI, Cargo metadata, catalogs, this assessment, workflows, packages, and live-HEAD binding.",
+        "scope": "the seven historical bindings listed by the cryptanalysis hyperelliptic source-parity manifest",
+        "rationale": "The offline parity replay verified five byte-exact core files, one binary-module rustdoc adapter, and one selected-domain polynomial binding at its pinned snapshot. Its cover_transfer.rs digest predates the fixed-GF(8) arbitrary-class norm. It excludes that current change, the standalone CLI, Cargo metadata, catalogs, this assessment, workflows, packages, and live-HEAD binding.",
         "evidence_refs": [
           "research/cover_transfer_assessment_20261013/release_replay.txt"
         ]
       },
       "command": "cargo run --locked --manifest-path suite/Cargo.toml --bin hyperelliptic-source-parity -- --crypto-root /workspace/crypto-transfer-assessment"
+    },
+    {
+      "control": "current_fixed_f8_cross_repository_parity",
+      "assessment": {
+        "status": "unknown",
+        "scope": "current cryptanalysis mirror or integration of the exact fixed-GF(8) arbitrary-class norm",
+        "rationale": "The retained parity receipt binds the earlier cover_transfer.rs digest 67b94112f70becf100ccc2cc7e0b3bc057e5663a4019b63fe966de9e62fd5069, not the current crypto source digest 6e801f14abf087b2a6610aa320faf602d176ac764f5eee8e9d88611cdacfa896. No current-tip cryptanalysis mirror receipt is attached.",
+        "evidence_refs": [
+          "src/binary_ecc/cover_transfer.rs",
+          "research/cover_transfer_assessment_20261013/release_replay.txt"
+        ],
+        "obligation_id": "current_fixed_f8_cryptanalysis_mirror"
+      },
+      "command": null
     },
     {
       "control": "coordinate_controls",
@@ -60544,16 +60586,21 @@
   "exploration_boundary": [
     "No search for production targets, private keys, or discrete logarithms was performed.",
     "All 2,091 map rows and all 664 linked EC1 representations are classified, but unknown remains unknown and refuted implementation support is not a mathematical nonexistence claim.",
-    "The 160 binary maps have bounded typed point-class operations; arbitrary source-Jacobian norm remains unsupported.",
+    "The 160 catalog binary maps have bounded typed point-class operations; arbitrary source-Jacobian norm remains unsupported for those rows. The exact fixed-GF(8) fixture is outside this catalog population.",
     "The 1,931 odd-characteristic maps have verified cover geometry but no compatible balanced/two-infinity Jacobian transfer implementation.",
     "Generator checks and [r]G=O do not by themselves prove that every catalog integer r is the exact source order.",
     "Formula-screen outputs in jacobian-transfers.json were not promoted to executable or measured claims.",
-    "The full Jacobian index-calculus solver, relation collection, linear algebra, and target decomposition remain a separate deliverable."
+    "A full cover-integrated Jacobian index-calculus solver, relation collection, linear algebra, and target decomposition remain a separate deliverable. The bounded odd-prime one-infinity solver library is outside these catalog-cover paths."
   ],
   "open_obligations": [
     {
       "id": "general_binary_norm",
-      "description": "Implement and independently verify pushforward/norm on arbitrary binary Jacobian classes.",
+      "description": "Implement and independently verify a catalog-applicable pushforward/norm on arbitrary binary Jacobian classes; the separate exact fixed-GF(8) fixture is not a catalog row and does not close this obligation.",
+      "status": "unknown"
+    },
+    {
+      "id": "current_fixed_f8_cryptanalysis_mirror",
+      "description": "Mirror or integrate the exact fixed-GF(8) arbitrary-class norm into cryptanalysis and attach a current-source parity, test, and CI receipt.",
       "status": "unknown"
     },
     {

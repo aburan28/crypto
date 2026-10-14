@@ -1,0 +1,462 @@
+{
+  "$schema": "../../ws5-routes.schema.json",
+  "schema_version": "ecdlp-ws5-routes/v0-draft",
+  "document_type": "coverage_matrix",
+  "record_state": "draft_non_authoritative",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "historical_completeness_claim": false,
+  "title": "Incomplete WS5 coverage-matrix seed with a frozen mock denominator",
+  "as_of": "2026-10-14",
+  "vocabulary_mappings": {
+    "authorization_scope": {
+      "local_value": "public_synthetic_only",
+      "plan_reference": "docs/ecdlp-audit/ECDLP_AUDIT_PLAN.mock.json#/vocabularies/authorization_tiers",
+      "shared_vocabulary": false,
+      "passive_public_plan_tier": "T0",
+      "public_fixture_semantics": "public_or_locally_generated_synthetic_known_answer_only",
+      "executable_fixture_rule": "explicit_T1_receipt_required_for_local_executable_fixture"
+    },
+    "cost_state": {
+      "local_value": "unmeasured",
+      "plan_reference": "docs/ecdlp-audit/ECDLP_AUDIT_PLAN.mock.json#/vocabularies/cost_status",
+      "shared_vocabulary": false,
+      "plan_projection": "unknown",
+      "lifecycle_state": "pre_measurement",
+      "numeric_fields": "all_null"
+    }
+  },
+  "population": {
+    "population_id": "population.mock.ws5-seed-v0",
+    "frozen_for": "schema_and_semantic_fixture_only",
+    "universal_denominator": false,
+    "route_registry_path": "docs/ecdlp-audit/routes/route-registry.seed.json",
+    "population_digest_contract": {
+      "hash": "SHA-256",
+      "serialization": "compact_json",
+      "object_key_order": "lexicographic",
+      "string_encoding": "raw_UTF-8",
+      "ascii_escape": false,
+      "trailing_lf": false
+    },
+    "population_preimage": {
+      "route_registry_schema_version": "ecdlp-ws5-routes/v0-draft",
+      "route_ids": [
+        "route.a.pollard-rho-lambda",
+        "route.b.curve-cover",
+        "route.c.seed-filtering-provenance",
+        "route.d.nonce-reuse-bias-hnp",
+        "route.e.release-binary-toolchain"
+      ],
+      "asset_ids": [
+        "asset.mock.algebraic-instance-v1",
+        "asset.mock.signing-stack-v1"
+      ]
+    },
+    "population_digest_sha256": "sha256:ac991aaa95a8331e8f4995dce7660b696e0bc2abed91ea01c0db395326e10fa0"
+  },
+  "assets": [
+    {
+      "id": "asset.mock.algebraic-instance-v1",
+      "asset_kind": "synthetic_algebraic_instance",
+      "canonical_identity": "urn:ecdlp-audit:mock:asset:algebraic-instance-v1",
+      "fixture_class": "schema_only_public_synthetic",
+      "scope": "A non-executable schema fixture standing for one exact public known-answer group instance; no deployable curve parameters or secret are included."
+    },
+    {
+      "id": "asset.mock.signing-stack-v1",
+      "asset_kind": "synthetic_signing_stack",
+      "canonical_identity": "urn:ecdlp-audit:mock:asset:signing-stack-v1",
+      "fixture_class": "schema_only_public_synthetic",
+      "scope": "A non-executable schema fixture standing for a versioned synthetic signing implementation, release bundle, and public known-answer transcript."
+    }
+  ],
+  "cells": [
+    {
+      "cell_id": "cell.mock.a-rho.algebraic-v1",
+      "route_id": "route.a.pollard-rho-lambda",
+      "asset_id": "asset.mock.algebraic-instance-v1",
+      "prerequisites": [
+        "Exact cyclic subgroup, generator, target, order, representation, workload, and resource envelope are frozen.",
+        "A public known-answer secret is available only for output verification."
+      ],
+      "threat_model": {
+        "actor": "Auditor operating only on a bounded public synthetic fixture.",
+        "capabilities": ["Evaluate public group operations", "Run a bounded generic walk"],
+        "access": ["Public synthetic group instance", "Public known-answer verification record"],
+        "success_condition": "Recover and independently verify the planted scalar within the preregistered bound."
+      },
+      "authorization": {
+        "fixture_class": "public_synthetic",
+        "allowed_operations": ["schema_validation", "bounded_non_key_recovery_replay"],
+        "production_targets": false
+      },
+      "applicability_status": "unknown",
+      "claim_status": "unknown",
+      "status_reason": "This record defines required fields only; it carries no exact executable instance, run, or evidence receipt.",
+      "evidence_refs": [],
+      "controls": [
+        "Matched known-answer generic-method control on the identical frozen subgroup and target.",
+        "Independent scalar replay against the public generator."
+      ],
+      "costs": {
+        "status": "unmeasured",
+        "accounting_receipt_ref": null,
+        "cold_cost": null,
+        "online_cost": null,
+        "amortized_cost": null,
+        "memory_peak": null
+      },
+      "open_obligations": ["Instantiate an exact permitted workload and attach native run, failure, verification, and accounting receipts."]
+    },
+    {
+      "cell_id": "cell.mock.a-rho.signing-v1",
+      "route_id": "route.a.pollard-rho-lambda",
+      "asset_id": "asset.mock.signing-stack-v1",
+      "prerequisites": [
+        "Resolve the signing stack public-key representation to one exact group, subgroup, generator, and target.",
+        "Separate an unrestricted source-group DLP workload from protocol-side information."
+      ],
+      "threat_model": {
+        "actor": "Auditor with the synthetic stack's public key and no private implementation observations.",
+        "capabilities": ["Evaluate public group operations", "Run a bounded generic walk"],
+        "access": ["Synthetic public key", "Versioned public fixture metadata"],
+        "success_condition": "Solve and verify only the separately frozen public known-answer DLP."
+      },
+      "authorization": {
+        "fixture_class": "public_synthetic",
+        "allowed_operations": ["schema_validation", "bounded_non_key_recovery_replay"],
+        "production_targets": false
+      },
+      "applicability_status": "unknown",
+      "claim_status": "unknown",
+      "status_reason": "The schema-only asset omits the exact curve and subgroup identity needed for an applicability decision.",
+      "evidence_refs": [],
+      "controls": [
+        "Compare against the identical public group instance without signer transcripts.",
+        "Reject any result whose success depends on nonce or implementation leakage as a lane-A result."
+      ],
+      "costs": {
+        "status": "unmeasured",
+        "accounting_receipt_ref": null,
+        "cold_cost": null,
+        "online_cost": null,
+        "amortized_cost": null,
+        "memory_peak": null
+      },
+      "open_obligations": ["Add exact public group identity and a bounded known-answer workload before executing or classifying the route."]
+    },
+    {
+      "cell_id": "cell.mock.b-cover.algebraic-v1",
+      "route_id": "route.b.curve-cover",
+      "asset_id": "asset.mock.algebraic-instance-v1",
+      "prerequisites": [
+        "An exact target elliptic-curve model, field, subgroup, and generator are identified.",
+        "A theorem family with checked base-field, genus, separability, and constructivity hypotheses applies."
+      ],
+      "threat_model": {
+        "actor": "Auditor assessing a supplied public mathematical transfer on a bounded synthetic fixture.",
+        "capabilities": ["Verify finite-field identities", "Evaluate supplied cover and transfer formulas"],
+        "access": ["Public synthetic algebraic instance", "Supplied source curve and map certificate"],
+        "success_condition": "Verify construction, subgroup transport, destination reasoning, and source recovery without inferring solver advantage from existence alone."
+      },
+      "authorization": {
+        "fixture_class": "public_synthetic",
+        "allowed_operations": ["schema_validation", "bounded_non_key_recovery_replay"],
+        "production_targets": false
+      },
+      "applicability_status": "unknown",
+      "claim_status": "unknown",
+      "status_reason": "No exact curve identity, theorem citation, construction, or transfer certificate is attached to this schema fixture.",
+      "evidence_refs": [],
+      "controls": [
+        "Independently check smoothness, genus, defining-equation identity, separability, and behavior at infinity.",
+        "Use coordinate-isomorphism and failed-map negative controls.",
+        "Keep destination solver advantage and recovery as separate obligations."
+      ],
+      "costs": {
+        "status": "unmeasured",
+        "accounting_receipt_ref": null,
+        "cold_cost": null,
+        "online_cost": null,
+        "amortized_cost": null,
+        "memory_peak": null
+      },
+      "open_obligations": ["Attach primary-source hypotheses, exact construction, map certificates, subgroup proof, destination solver, recovery, and complete cost receipt."]
+    },
+    {
+      "cell_id": "cell.mock.b-cover.signing-v1",
+      "route_id": "route.b.curve-cover",
+      "asset_id": "asset.mock.signing-stack-v1",
+      "prerequisites": [
+        "Resolve the stack's public-key model and subgroup to an exact mathematical identity.",
+        "Supply a cover and induced transfer maps defined over the required field."
+      ],
+      "threat_model": {
+        "actor": "Auditor evaluating a supplied transfer independently of any protocol leakage.",
+        "capabilities": ["Verify algebraic maps", "Run bounded public synthetic arithmetic checks"],
+        "access": ["Synthetic public key identity", "Supplied mathematical certificates"],
+        "success_condition": "Establish the exact scoped transfer and recovery path; a cover alone is not success."
+      },
+      "authorization": {
+        "fixture_class": "public_synthetic",
+        "allowed_operations": ["schema_validation", "bounded_non_key_recovery_replay"],
+        "production_targets": false
+      },
+      "applicability_status": "unknown",
+      "claim_status": "unknown",
+      "status_reason": "The fixture does not bind the signing stack to a curve identity or provide a cover construction.",
+      "evidence_refs": [],
+      "controls": [
+        "Compare the mathematical transfer with and without signer transcripts to exclude protocol leakage.",
+        "Reject a norm projection or genus-three plane-quartic experiment as evidence of a hyperelliptic construction unless all required objects are present."
+      ],
+      "costs": {
+        "status": "unmeasured",
+        "accounting_receipt_ref": null,
+        "cold_cost": null,
+        "online_cost": null,
+        "amortized_cost": null,
+        "memory_peak": null
+      },
+      "open_obligations": ["Resolve exact identities and complete construction, transfer, solver, recovery, and accounting gates."]
+    },
+    {
+      "cell_id": "cell.mock.c-seed.algebraic-v1",
+      "route_id": "route.c.seed-filtering-provenance",
+      "asset_id": "asset.mock.algebraic-instance-v1",
+      "prerequisites": [
+        "Primary sources define a generation procedure, seed, rejection criteria, and the exact resulting algebraic identity.",
+        "The audited choice set and all known filtering steps are reproducible."
+      ],
+      "threat_model": {
+        "actor": "Auditor reconstructing only public parameter-generation evidence.",
+        "capabilities": ["Replay published generation procedures", "Compare declared and observed filtering"],
+        "access": ["Public primary sources", "Public synthetic parameter fixture"],
+        "success_condition": "Determine the scoped provenance status without inferring malicious selection or an exploitation mechanism."
+      },
+      "authorization": {
+        "fixture_class": "public_synthetic",
+        "allowed_operations": ["schema_validation", "bounded_non_key_recovery_replay"],
+        "production_targets": false
+      },
+      "applicability_status": "unknown",
+      "claim_status": "unknown",
+      "status_reason": "The schema-only asset has no generation source, seed, transcript, or exact parameter identity.",
+      "evidence_refs": [],
+      "controls": [
+        "Replay a transparent synthetic generation procedure with the same published choice rules.",
+        "Search for cheaper equivalent explanations before recording a retained-witness hypothesis."
+      ],
+      "costs": {
+        "status": "unmeasured",
+        "accounting_receipt_ref": null,
+        "cold_cost": null,
+        "online_cost": null,
+        "amortized_cost": null,
+        "memory_peak": null
+      },
+      "open_obligations": ["Attach primary-source records, a canonical identity crosswalk, generation replay, choice analysis, and independent review."]
+    },
+    {
+      "cell_id": "cell.mock.c-seed.signing-v1",
+      "route_id": "route.c.seed-filtering-provenance",
+      "asset_id": "asset.mock.signing-stack-v1",
+      "prerequisites": [
+        "Identify every parameter-selection layer used by the exact stack revision.",
+        "Distinguish standard parameters, local key-generation randomness, and negotiation choices."
+      ],
+      "threat_model": {
+        "actor": "Auditor with public release records and synthetic generation transcripts.",
+        "capabilities": ["Rebuild parameter selection", "Compare public transcripts and binary configuration"],
+        "access": ["Synthetic release bundle", "Public generation documentation"],
+        "success_condition": "Classify exact provenance gaps while leaving exploitation and intent unclaimed."
+      },
+      "authorization": {
+        "fixture_class": "public_synthetic",
+        "allowed_operations": ["schema_validation", "bounded_non_key_recovery_replay"],
+        "production_targets": false
+      },
+      "applicability_status": "unknown",
+      "claim_status": "unknown",
+      "status_reason": "No real or synthetic generation transcript is included in the schema fixture.",
+      "evidence_refs": [],
+      "controls": [
+        "Use a transparent synthetic build whose parameter selection is fully reproducible.",
+        "Treat a missing transcript as unknown rather than evidence of a trapdoor."
+      ],
+      "costs": {
+        "status": "unmeasured",
+        "accounting_receipt_ref": null,
+        "cold_cost": null,
+        "online_cost": null,
+        "amortized_cost": null,
+        "memory_peak": null
+      },
+      "open_obligations": ["Bind sources, configuration, binaries, parameters, and generation transcripts before classifying provenance."]
+    },
+    {
+      "cell_id": "cell.mock.d-nonce.algebraic-v1",
+      "route_id": "route.d.nonce-reuse-bias-hnp",
+      "asset_id": "asset.mock.algebraic-instance-v1",
+      "prerequisites": [
+        "A signature protocol, versioned implementation, synthetic secret, and nonce-observation model exist.",
+        "The route's success is kept separate from solving the standalone public group DLP."
+      ],
+      "threat_model": {
+        "actor": "Auditor with only the standalone synthetic algebraic instance unless a separate protocol fixture is supplied.",
+        "capabilities": ["Inspect public synthetic records", "Validate a supplied nonce-failure transcript"],
+        "access": ["Schema-only algebraic identity"],
+        "success_condition": "Classify protocol applicability; no nonce-based recovery is attempted without an authorized synthetic protocol fixture."
+      },
+      "authorization": {
+        "fixture_class": "public_synthetic",
+        "allowed_operations": ["schema_validation"],
+        "production_targets": false
+      },
+      "applicability_status": "unknown",
+      "claim_status": "unknown",
+      "status_reason": "A bare algebraic instance does not establish the presence or absence of a signing nonce interface.",
+      "evidence_refs": [],
+      "controls": [
+        "Require a protocol-bearing fixture before any reproduction.",
+        "Verify that a lane-D result is never counted as a lane-A source-group solution."
+      ],
+      "costs": {
+        "status": "unmeasured",
+        "accounting_receipt_ref": null,
+        "cold_cost": null,
+        "online_cost": null,
+        "amortized_cost": null,
+        "memory_peak": null
+      },
+      "open_obligations": ["Supply or explicitly rule out an exact synthetic signing protocol before resolving applicability."]
+    },
+    {
+      "cell_id": "cell.mock.d-nonce.signing-v1",
+      "route_id": "route.d.nonce-reuse-bias-hnp",
+      "asset_id": "asset.mock.signing-stack-v1",
+      "prerequisites": [
+        "The synthetic stack emits authorized known-answer transcripts under a specified nonce-generation model.",
+        "Version, sample count, leakage distribution, and recovery verification are frozen."
+      ],
+      "threat_model": {
+        "actor": "Auditor with public synthetic signatures and no access beyond the preregistered leakage model.",
+        "capabilities": ["Analyze bounded synthetic signature transcripts", "Verify a recovered planted secret"],
+        "access": ["Public known-answer signatures", "Versioned synthetic implementation fixture"],
+        "success_condition": "Reproduce and verify only the stipulated synthetic nonce-failure effect with complete query and cost accounting."
+      },
+      "authorization": {
+        "fixture_class": "public_synthetic",
+        "allowed_operations": ["schema_validation", "bounded_non_key_recovery_replay"],
+        "production_targets": false
+      },
+      "applicability_status": "unknown",
+      "claim_status": "unknown",
+      "status_reason": "The schema fixture describes no nonce behavior, transcript, implementation revision, or evidence receipt.",
+      "evidence_refs": [],
+      "controls": [
+        "Matched uniform-nonce negative control on the identical synthetic stack.",
+        "Patched implementation control and independent scalar verification.",
+        "Record failed attempts and duplicate or unusable samples."
+      ],
+      "costs": {
+        "status": "unmeasured",
+        "accounting_receipt_ref": null,
+        "cold_cost": null,
+        "online_cost": null,
+        "amortized_cost": null,
+        "memory_peak": null
+      },
+      "open_obligations": ["Provide bounded known-answer transcripts, exact nonce model, controls, mitigation check, and complete cost receipt."]
+    },
+    {
+      "cell_id": "cell.mock.e-release.algebraic-v1",
+      "route_id": "route.e.release-binary-toolchain",
+      "asset_id": "asset.mock.algebraic-instance-v1",
+      "prerequisites": [
+        "Every producer and verifier artifact has a pinned source revision, toolchain, build command, and digest.",
+        "The mathematical identity encoded by each artifact is independently resolved."
+      ],
+      "threat_model": {
+        "actor": "Independent auditor checking evidence integrity without assuming compromise.",
+        "capabilities": ["Rebuild public source", "Compare content digests and semantic identities"],
+        "access": ["Public synthetic source and build manifest", "Public schema fixture"],
+        "success_condition": "Determine whether exact source, binary, toolchain, identity, and verification records agree."
+      },
+      "authorization": {
+        "fixture_class": "public_synthetic",
+        "allowed_operations": ["schema_validation", "bounded_non_key_recovery_replay"],
+        "production_targets": false
+      },
+      "applicability_status": "unknown",
+      "claim_status": "unknown",
+      "status_reason": "The schema-only algebraic asset has no producer, build, binary, or verification artifact.",
+      "evidence_refs": [],
+      "controls": [
+        "Reproducible rebuild from pinned public source on a second toolchain where supported.",
+        "Semantic identity check independent of filename or display name."
+      ],
+      "costs": {
+        "status": "unmeasured",
+        "accounting_receipt_ref": null,
+        "cold_cost": null,
+        "online_cost": null,
+        "amortized_cost": null,
+        "memory_peak": null
+      },
+      "open_obligations": ["Attach artifact manifests, digests, producer revisions, rebuild receipts, identity checks, and correction lineage."]
+    },
+    {
+      "cell_id": "cell.mock.e-release.signing-v1",
+      "route_id": "route.e.release-binary-toolchain",
+      "asset_id": "asset.mock.signing-stack-v1",
+      "prerequisites": [
+        "Source, dependency lock, toolchain, build flags, binary, package, and verifier identities are pinned.",
+        "An independent rebuild and semantic known-answer test are specified."
+      ],
+      "threat_model": {
+        "actor": "Independent auditor checking a synthetic release pipeline and not presuming malicious intent.",
+        "capabilities": ["Rebuild a public synthetic release", "Inspect manifests and compare digests"],
+        "access": ["Synthetic source release", "Synthetic binary bundle", "Public build metadata"],
+        "success_condition": "Establish exact agreement or a scoped mismatch with additive evidence and independent replay."
+      },
+      "authorization": {
+        "fixture_class": "public_synthetic",
+        "allowed_operations": ["schema_validation", "bounded_non_key_recovery_replay"],
+        "production_targets": false
+      },
+      "applicability_status": "unknown",
+      "claim_status": "unknown",
+      "status_reason": "No actual release bundle, digest manifest, source revision, or rebuild receipt is attached.",
+      "evidence_refs": [],
+      "controls": [
+        "Independent rebuild on a second supported environment.",
+        "Known-answer functional test plus exact binary and metadata digest comparison.",
+        "Negative fixture with a deliberate source-binary mismatch."
+      ],
+      "costs": {
+        "status": "unmeasured",
+        "accounting_receipt_ref": null,
+        "cold_cost": null,
+        "online_cost": null,
+        "amortized_cost": null,
+        "memory_peak": null
+      },
+      "open_obligations": ["Provide source and release manifests, reproducible-build procedure, replay receipts, mismatch controls, and correction history."]
+    }
+  ],
+  "coverage": {
+    "expected_cells": 10,
+    "actual_cells": 10,
+    "blank_cells": 0,
+    "zero_blank_cells_recorded": true,
+    "scope_note": "Zero blanks applies only to the Cartesian product of five selected seed routes and two schema-only mock assets named in population_preimage; it is not a completeness percentage or a universal denominator."
+  },
+  "non_claims": [
+    "The mock population is intentionally incomplete and does not represent all routes, assets, curves, protocols, implementations, or adversary models.",
+    "Every cell remains unknown and unmeasured; field completeness is not scientific resolution.",
+    "No cell authorizes production-target testing or operational key recovery.",
+    "Zero blank cells in this fixture does not discharge WS5-G1 or WS5-G2."
+  ]
+}

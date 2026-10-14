@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/aburan28/crypto/blob/main/docs/ecdlp-audit/ecdlp-audit-plan.schema.json",
   "title": "ECDLP audit program planning record",
-  "description": "Strict schema for the non-authoritative eight-workstream planning mock. Schema validity is structural; verify_plan.py also checks identities, metrics, dependency acyclicity, and fail-closed status rules.",
+  "description": "Strict schema for the non-authoritative eight-workstream planning mock. Schema validity is structural; the native ecdlp-audit verifier also checks identities, metrics, dependency acyclicity, path confinement, source and deliverable hashes, and fail-closed status rules.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -32,7 +32,8 @@
     "record_state": {"const": "mock_non_authoritative"},
     "plan_uid": {
       "type": "string",
-      "pattern": "^urn:ecdlp-audit-plan:1:sha256:[0-9a-f]{64}$"
+      "pattern": "^urn:ecdlp-audit-plan:1:sha256:[0-9a-f]{64}$",
+      "description": "SHA-256 of canonical compact sorted raw-UTF-8 JSON for the complete record with only top-level plan_uid removed; no trailing newline."
     },
     "title": {"type": "string", "minLength": 1},
     "as_of": {"type": "string", "format": "date"},
@@ -110,7 +111,7 @@
       ],
       "properties": {
         "objective": {"type": "string", "minLength": 1},
-        "claim_boundary": {"type": "string", "minLength": 1},
+        "claim_boundary": {"const": "This is a planning mock, not an authoritative ledger, attack result, completion claim, authorization instrument, or full Jacobian index-calculus solver."},
         "execution_fixture_classes": {
           "type": "array",
           "minItems": 1,
@@ -156,12 +157,60 @@
       "required": ["id", "path", "role", "revision", "sha256", "status"],
       "properties": {
         "id": {"type": "string", "pattern": "^source\\.[a-z0-9._-]+$"},
-        "path": {"type": "string", "minLength": 1},
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Repository-relative path; for a pinned source it is resolved inside the named commit, not against mutable worktree bytes."
+        },
         "role": {"type": "string", "minLength": 1},
-        "revision": {"type": ["string", "null"]},
-        "sha256": {"$ref": "#/$defs/sha256"},
+        "revision": {
+          "type": ["string", "null"],
+          "description": "Exact commit object for pinned provenance; null for current-worktree and planned sources."
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256",
+          "description": "For pinned provenance, SHA-256 of the raw Git blob at revision:path; for current-worktree provenance, SHA-256 of the raw path bytes."
+        },
         "status": {"enum": ["pinned", "current_worktree", "planned"]}
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"status": {"const": "pinned"}},
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+              "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"status": {"const": "current_worktree"}},
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "revision": {"type": "null"},
+              "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"status": {"const": "planned"}},
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "revision": {"type": "null"},
+              "sha256": {"type": "null"}
+            }
+          }
+        }
+      ]
     },
     "vocabularies": {
       "type": "object",
@@ -232,12 +281,19 @@
     "deliverable": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "kind", "description", "path", "status", "acceptance_gate_ids"],
+      "required": ["id", "kind", "description", "path", "artifact_sha256", "status", "acceptance_gate_ids"],
       "properties": {
         "id": {"type": "string", "pattern": "^WS[1-8]-D[0-9]+$"},
         "kind": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
         "description": {"type": "string", "minLength": 1},
-        "path": {"type": ["string", "null"]},
+        "path": {
+          "type": ["string", "null"],
+          "description": "Exact repository-relative path for this fixed mock deliverable, or null when no artifact exists."
+        },
+        "artifact_sha256": {
+          "$ref": "#/$defs/sha256",
+          "description": "SHA-256 of the exact raw file bytes at path; byte identity is not semantic validation."
+        },
         "status": {"$ref": "#/$defs/requirementStatus"},
         "acceptance_gate_ids": {
           "type": "array",
@@ -245,7 +301,56 @@
           "uniqueItems": true,
           "items": {"type": "string", "pattern": "^WS[1-8]-G[0-9]+$"}
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {"enum": ["partial", "implemented_unverified", "verified_complete"]}
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "path": {"type": "string", "minLength": 1},
+              "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"status": {"const": "not_attempted"}},
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "path": {"type": "null"},
+              "artifact_sha256": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"path": {"type": "string"}},
+            "required": ["path"]
+          },
+          "then": {
+            "properties": {
+              "path": {"type": "string", "minLength": 1},
+              "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"artifact_sha256": {"type": "string"}},
+            "required": ["artifact_sha256"]
+          },
+          "then": {
+            "properties": {"path": {"type": "string", "minLength": 1}}
+          }
+        }
+      ]
     },
     "acceptanceGate": {
       "type": "object",
@@ -274,15 +379,22 @@
       },
       "allOf": [
         {
-          "if": {"properties": {"claim_status": {"enum": ["supported", "refuted"]}}},
+          "if": {
+            "type": "object",
+            "properties": {"claim_status": {"enum": ["supported", "refuted"]}}
+          },
           "then": {
-            "properties": {"evidence_refs": {"minItems": 1}},
-            "required": ["rationale"]
+            "type": "object",
+            "properties": {"evidence_refs": {"type": "array", "minItems": 1}}
           }
         },
         {
-          "if": {"properties": {"claim_status": {"const": "unknown"}}},
+          "if": {
+            "type": "object",
+            "properties": {"claim_status": {"const": "unknown"}}
+          },
           "then": {
+            "type": "object",
             "properties": {"obligation_id": {"type": "string", "minLength": 1}}
           }
         }
@@ -529,13 +641,14 @@
     "report": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["plan_path", "pdf_path", "diagram_path", "validator_path", "claim_boundary"],
+      "required": ["record_path", "plan_path", "pdf_path", "diagram_path", "validator_path", "claim_boundary"],
       "properties": {
+        "record_path": {"type": "string", "minLength": 1},
         "plan_path": {"type": "string", "minLength": 1},
         "pdf_path": {"type": "string", "minLength": 1},
         "diagram_path": {"type": "string", "minLength": 1},
         "validator_path": {"type": "string", "minLength": 1},
-        "claim_boundary": {"type": "string", "minLength": 1}
+        "claim_boundary": {"const": "The mock verifies the planning contract only. It cannot promote an attack, safety, completeness, arithmetic, transfer, solver, performance, or historical-superlative claim."}
       }
     }
   }

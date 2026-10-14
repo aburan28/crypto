@@ -225,6 +225,17 @@ fn strict_model(value: &Value) -> Result<checker::Model, checker::ModelError> {
     checker::model(value)
 }
 
+fn is_fixed_f8_arbitrary_pushforward_fixture(model: &checker::Model) -> bool {
+    matches!(
+        &model.field,
+        checker::Field::Binary(irreducible)
+            if irreducible.degree == 3
+                && irreducible.low_terms.as_slice() == [0u32, 1u32]
+                && model.a == BigUint::from(1u32)
+                && model.b == BigUint::from(3u32)
+    )
+}
+
 fn proof_receipt(model: &checker::Model) -> Result<Value, String> {
     match &model.field {
         checker::Field::Prime(_) => Ok(json!({
@@ -262,6 +273,12 @@ fn proof_receipt(model: &checker::Model) -> Result<Value, String> {
             "subgroup_transfer": "unknown",
         })),
         checker::Field::Binary(irreducible) => {
+            let arbitrary_jacobian_pushforward = if is_fixed_f8_arbitrary_pushforward_fixture(model)
+            {
+                "implemented_in_library_only_for_exact_fixed_f8_fixture"
+            } else {
+                "unsupported"
+            };
             let cover = OrdinaryBinaryCover::new(
                 irreducible.degree,
                 irreducible.clone(),
@@ -293,7 +310,8 @@ fn proof_receipt(model: &checker::Model) -> Result<Value, String> {
                 "pullback": "implemented_for_rational_target_point_classes",
                 "pushforward": "implemented_for_rational_source_point_divisors_and_typed_pullback_witnesses",
                 "composition": "verified_phi_push_phi_pull_equals_multiplication_by_3_on_typed_rational_point_class_domain",
-                "arbitrary_jacobian_pushforward": "unsupported",
+                "arbitrary_jacobian_pushforward": arbitrary_jacobian_pushforward,
+                "cli_transfer_subcommand": "not_exposed",
                 "subgroup_transfer": "conditional_on_an_independently_verified_exact_subgroup_order_coprime_to_3; this command does not accept or verify an order",
             }))
         }
@@ -883,6 +901,12 @@ mod tests {
         })
     }
 
+    fn fixed_f8_arbitrary_pushforward_model() -> Value {
+        let mut model = binary_model();
+        model["b"] = json!("3");
+        model
+    }
+
     #[test]
     fn construction_has_separate_verified_claims() {
         let (answer, code) = construct(binary_model());
@@ -895,6 +919,36 @@ mod tests {
         assert_eq!(
             answer["result"]["verification"]["jacobian_arithmetic"],
             "implemented_checked_one_infinity_model"
+        );
+    }
+
+    #[test]
+    fn exact_fixed_f8_receipt_marks_arbitrary_pushforward_as_library_only() {
+        let (answer, code) = construct(fixed_f8_arbitrary_pushforward_model());
+        assert_eq!(code, 0, "{answer}");
+        assert_eq!(answer["status"], "ok");
+        assert_eq!(
+            answer["result"]["verification"]["arbitrary_jacobian_pushforward"],
+            "implemented_in_library_only_for_exact_fixed_f8_fixture"
+        );
+        assert_eq!(
+            answer["result"]["verification"]["cli_transfer_subcommand"],
+            "not_exposed"
+        );
+    }
+
+    #[test]
+    fn non_fixture_binary_receipt_keeps_arbitrary_pushforward_unsupported() {
+        let (answer, code) = construct(binary_model());
+        assert_eq!(code, 0, "{answer}");
+        assert_eq!(answer["status"], "ok");
+        assert_eq!(
+            answer["result"]["verification"]["arbitrary_jacobian_pushforward"],
+            "unsupported"
+        );
+        assert_eq!(
+            answer["result"]["verification"]["cli_transfer_subcommand"],
+            "not_exposed"
         );
     }
 

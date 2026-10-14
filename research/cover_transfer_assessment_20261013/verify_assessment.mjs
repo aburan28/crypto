@@ -1014,17 +1014,21 @@ const expectedControlStatuses = {
   odd_degree2_transfer: ["refuted", null],
   published_artifact: ["refuted", "catalog_wide_packaged_binary"],
   cross_repository_core_parity: ["supported", null],
+  current_fixed_f8_cross_repository_parity: [
+    "unknown",
+    "current_fixed_f8_cryptanalysis_mirror",
+  ],
   coordinate_controls: ["unknown", "coordinate_controls"],
   paired_performance: ["not_applicable", null],
 };
 const expectedSemanticDigests = {
   claim_contract: "36a2bb9524810994c02633462e71ae08ac88da6fbb520df72e66e05150628634",
-  result_templates: "859aadde4e0a8789f9f2123c87f364ab30d58f8848a6c6485f61210365fbae8a",
+  result_templates: "74d48723d80213cef7032b499e2d36a051ebed3c23e03bfce5819ad80f5edb7c",
   profiles: "807800e78066e8c3b0caa6634072a585cf4ae924a40b13817d9ca7a3c0aa3710",
-  controls: "4582bc8e8d630f63ce57adab7be7d5d4f9b7eb42721893c35e7d9fb05a29f21e",
-  open_obligations: "c969ca9a1d31bfc124088a2b2829aaaf1d9fc631310efb5046fcc8e81b4e2881",
+  controls: "e8132b566cbe2d241030a60c1de2ae53e7655a3a5e2d45d42e8500f4660750fb",
+  open_obligations: "94252a8f25872fc8a4f1bc754e3902980707529fa14286e4e64652b0c3b44702",
   global_cost_accounting:
-    "710750753c30c05f1036187863de11724572636571b01424775c745bd662ccda",
+    "b3b77a401d4dd76cabfc9a65d5a738fcfb977fd1a3abc2db3733c41820304619",
 };
 const expectedCostStatuses = {
   cover_construction: "unknown",
@@ -1050,12 +1054,14 @@ const requiredSourceArtifactPaths = [
   "docs/curves/covers.json",
   "docs/curves/cover-links.yaml",
   "docs/curves/cover-transfer-assessment.schema.json",
+  "docs/curves/fixed-f8-genus3-order-certificate.json",
   "scripts/build_cover_transfer_assessments.mjs",
   "src/bin/curve_cover_check/checker.rs",
   "src/bin/curve_cover_check/models.rs",
   "src/bin/curve_cover_check/links.rs",
   "src/bin/curve_cover_check.rs",
   "src/bin/hyperelliptic_cover.rs",
+  "src/bin/ecdlp_audit/fixed_f8_order.rs",
   "src/lib.rs",
   "src/binary_ecc/mod.rs",
   "src/binary_ecc/f2m.rs",

@@ -36,7 +36,7 @@ digraph typed_transfer_context {
         <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#566573">
           <TR><TD BGCOLOR="#eafaf1">binary rational point-class pullback and<BR/>typed-fiber/point-divisor pushforward: SUPPORTED</TD></TR>
           <TR><TD BGCOLOR="#fef9e7">odd two-infinity induced maps: UNKNOWN</TD></TR>
-          <TR><TD BGCOLOR="#fdedec">arbitrary Jac(H) norm: REFUTED as current API,<BR/>not as mathematical nonexistence</TD></TR>
+          <TR><TD BGCOLOR="#fdedec">catalog arbitrary Jac(H) norm: REFUTED as current API;<BR/>fixed GF(8) fixture is outside catalog;<BR/>not a mathematical nonexistence claim</TD></TR>
         </TABLE>
       >
     ];
@@ -59,7 +59,7 @@ digraph typed_transfer_context {
     color="#566573"
   ];
   solver [
-    label="Separate solver deliverable: UNKNOWN / not run\nno genuine Jacobian relations, target decomposition, matched baseline,\nmemory accounting, total runtime, or computational-advantage evidence",
+    label="Catalog-cover solver deliverable: UNKNOWN / not run\nno solver relations or target decomposition for these cover sources\ntiny odd one-infinity library is outside this path\nno matched baseline, memory, runtime, or advantage evidence",
     fillcolor="#f2f3f4",
     color="#7f8c8d"
   ];

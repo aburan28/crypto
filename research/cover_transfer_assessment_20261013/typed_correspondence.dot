@@ -27,7 +27,7 @@ digraph cover_transfer_assessment {
       <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#5dade2">
         <TR><TD COLSPAN="3" BGCOLOR="#eaf2f8"><B>Map assessments: 2,091 / 2,091 exact rows</B></TD></TR>
         <TR><TD><B>Profile</B></TD><TD BGCOLOR="#eafaf1"><B>SUPPORTED</B></TD><TD BGCOLOR="#f8f9f9"><B>Explicit boundary</B></TD></TR>
-        <TR><TD>160 binary<BR/>g3, degree 3</TD><TD BGCOLOR="#eafaf1">construction + geometry<BR/>one-infinity Jacobian<BR/>typed point-class pull/push</TD><TD BGCOLOR="#f8f9f9">all-element oracle: UNKNOWN<BR/>arbitrary Jac(H) norm:<BR/><FONT COLOR="#c0392b">REFUTED as current API</FONT></TD></TR>
+        <TR><TD>160 binary<BR/>g3, degree 3</TD><TD BGCOLOR="#eafaf1">construction + geometry<BR/>one-infinity Jacobian<BR/>typed point-class pull/push</TD><TD BGCOLOR="#f8f9f9">all-element oracle: UNKNOWN<BR/>catalog arbitrary Jac(H) norm:<BR/><FONT COLOR="#c0392b">REFUTED as current API</FONT><BR/>fixed GF(8) fixture is outside catalog</TD></TR>
         <TR><TD>577 odd prime<BR/>direct</TD><TD BGCOLOR="#eafaf1">construction<BR/>+ geometry</TD><TD BGCOLOR="#f8f9f9">two-infinity maps: UNKNOWN<BR/><FONT COLOR="#c0392b">one-infinity use: REFUTED</FONT></TD></TR>
         <TR><TD>30 odd prime<BR/>normalized</TD><TD BGCOLOR="#eafaf1">construction + geometry<BR/>degree-one normalization</TD><TD BGCOLOR="#f8f9f9">coordinate commutation<BR/>+ balanced maps: UNKNOWN</TD></TR>
         <TR><TD>1,324 GF(p^k)</TD><TD BGCOLOR="#eafaf1">same-declared-field<BR/>construction + geometry</TD><TD BGCOLOR="#f8f9f9">proper-subfield descent<BR/>+ balanced maps: UNKNOWN</TD></TR>

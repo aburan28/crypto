@@ -28,11 +28,18 @@ const isogenyEmbeddedInputs = new Set([
 ]);
 const prose = /\.(md|rst|txt|pdf|svg|png|jpg|jpeg|gif)$/i;
 const control = /^\.github\/scripts\/.*ci-scope.*$/;
+// These trees are copied into every Rust release archive. Documentation is
+// normally compilation-neutral, but package payload changes (and attributes
+// that govern their byte identity) must exercise cross-platform staging and
+// the installed-tree smoke path before merge.
+const rustReleasePayload = /^docs\/(?:curves|ecdlp-audit)\//;
+const rustReleaseRootPayload = /^(?:README\.md|LICENSE(?:\.md)?)$/;
 
 export function classify(files, embedded = new Set(), cargoSources = new Set()) {
   const result = Object.fromEntries(scopes.map(key => [key, false]));
   for (const file of files) {
     if (control.test(file)) return Object.fromEntries(scopes.map(key => [key, true]));
+    const releaseAttributes = file === '.gitattributes';
     const root = /\.rs$/.test(file) && maintained.test(file) || frozenExamples.test(file) || cargoSources.has(file) || rustConfig.test(file) || embedded.has(file);
     result.rust_root ||= root || file === 'scripts/clippy-maintained.sh';
     result.rust_cd ||= /^cd_attack\/(src|tests|examples|benches)\//.test(file) && !prose.test(file)
@@ -41,16 +48,17 @@ export function classify(files, embedded = new Set(), cargoSources = new Set()) 
     result.rust_fmt ||= /\.rs$/.test(file) && (maintained.test(file) || /^cd_attack\//.test(file) || file === 'build.rs');
     result.release_rust ||= /^src\//.test(file) && !prose.test(file) || rustConfig.test(file)
       || file === 'tests/fixtures/ecbench_manifest_small.json'
-      || /^docs\/curves\//.test(file) || embedded.has(file)
+      || rustReleasePayload.test(file) || rustReleaseRootPayload.test(file)
+      || releaseAttributes || embedded.has(file)
       || isogenyCliRust.test(file) || isogenyAlgosInputs.test(file)
       || isogenyEmbeddedInputs.has(file);
     // Both Makefile targets compile src/main.cu against include/ and the
     // committed generated headers; research benchmark sources are separate.
     const client = file === 'ecc2k130/src/main.cu' || file === 'ecc2k130/Makefile'
       || /^ecc2k130\/(include|generated)\/.*\.(h|hpp|cuh|inc)$/.test(file);
-    result.release_native ||= client
+    result.release_native ||= client || releaseAttributes || file === 'ecc2k130/README.md'
       || /^gpu\/(ecc|ecc2k|semaev|macaulay|btcpuzzle)\//.test(file) && !prose.test(file);
-    result.release_cuda ||= client;
+    result.release_cuda ||= client || releaseAttributes;
     result.ecbench_replay ||= root
       || /^docs\/(ecbench|bounds)\//.test(file) && !prose.test(file)
       || /^research\/(ecbench_[^/]+|ghs_curve_comparison_20261009)\//.test(file) && (!prose.test(file) || file.includes('/sessions/'))

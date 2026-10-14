@@ -21,15 +21,18 @@ rho's `2^60.81`.  **Can such a curve be produced?**  Four routes were tried.
 **Bottom line.  No construction reaches the window, but the picture is not the
 one the hyperelliptic note drew, and that note's strongest claim was wrong.**
 
-- **The correction first.**  The earlier note said the genus any construction
-  reaches over `F_2` is 1, `2^129` or `2^130`.  That holds for **GHS/Hess
-  descent** and for nothing else.  The Klein quartic is a classical non-GHS
+- **The correction first.** The earlier note said the genus any construction
+  reaches over `F_2` is 1, `2^129`, or `2^130`. The corrected statement is for
+  the **ordinary GHS/Hess model**: its two large branches are
+  `{2^129−1,2^129}` and `{2^130−1,2^130}`. It applies to no other construction.
+  The Klein quartic is a classical non-GHS
   counterexample at `n = 3`: GHS assigns it magic number 1, yet its Jacobian is
   `Res_{F_8/F_2}(E_1)` (point counts over `F_{2^k}`, `k ≤ 8`, all match).
 - **Route 1, lifting to characteristic 0, produces an explicit curve.**  The
   reduction mod 2 of the modular curve `X_H(3²·7²·263²)` carries `A`
   (Eichler–Shimura gives exactly `A`'s Weil numbers).  Its genus is
-  **508,799,809 ≈ 2^28.92**, a hundred bits of genus below GHS's `2^129` but still
+  **508,799,809 ≈ 2^28.92**, a hundred bits of genus below the approximately
+  `2^129` GHS branch but still
   `2^20.7` above the window, and index calculus on it is astronomically above
   rho.  At `n = 3` the same construction *is* the Klein quartic, `X_H(49)`.
 - **Route 2, cyclic covers, is closed below genus 1300.**  Every geometrically
@@ -64,11 +67,11 @@ file: 20 values, max |diff| `0.0048`, every exact field equal):
 | rho reference on `⟨G⟩` (`⟨−1⟩ × ⟨π⟩`, 262 automorphisms) | `2^60.8090`, `S = 0.0774` |
 | genus-130 curve with `Jac ~ A`, exact zeta-function model | `2^37.17` (`b = 17`, `|FB| = 2^14.01`) |
 | window where index calculus over `F_2` beats rho | genus 130 … between 290 and 300 |
-| previous best construction carrying `⟨G⟩` | GHS: `2^129` |
+| previous best construction carrying `⟨G⟩` | GHS branch-size proxy: `≈2^129` |
 
 **Falsification target** (protocol): a curve `C/F_2` of genus ≤ 300 with
 `P_A | P_C` and a polynomial-time correspondence — **not met**.  A construction
-below `2^129` counts as a boundary refinement, not an attack — **met** by route 1.
+below the `≈2^129` GHS branch counts as a boundary refinement, not an attack — **met** by route 1.
 
 ## 1. The table
 
@@ -82,7 +85,7 @@ extrapolation; on the calibrated range it *overestimates* the exact model by
 |:--:|---|---:|---|---:|---:|
 | — | **target**: genus-130 curve with `Jac ~ A` (hypothetical) | 130 | by definition; existence unknown | 37.17 | **2^−23.64** |
 | 0 | GHS/Hess, ECC2K-130 itself (magic 1) | 0 or 1 | **no** — the transfer is the zero map on `⟨G⟩` | — | — |
-| 0 | GHS/Hess, any curve over `F_2^131` (magic 130/131) | `2^129`, `2^130` | not established | ≥ 129 (floor) | 2^+68.19 |
+| 0 | GHS/Hess, ordinary model over `F_2^131` (magic 130/131) | `2^129−1` or `2^129`; `2^130−1` or `2^130` | not established | ≈129 (floor) | ≈2^+68.19 |
 | 1 | **modular curve `X_H(30,503,529)` mod 2** | **508,799,809 = 2^28.92** | **yes** (Eichler–Shimura) | ≈ 169,981 (extrap.) | 2^+169,920 |
 | 2 | cyclic degree-131 cover of any curve of genus ≤ 1 | ≥ 1300 | necessary bound | ≥ 148.92 | 2^+88.11 |
 | 2 | — with `F_2`-rational group (Klein mechanism, `d = 1`) | ≥ 8451 | necessary bound | ≈ 459.9 (extrap.) | 2^+399.1 |
@@ -188,7 +191,8 @@ unconditional range at `n = 131` is `[508,799,809, 509,348,929]`.
 Two readings:
 
 - **The construction is explicit, and it is not small.**  It replaces "no curve
-  is known below genus `2^129`" with an explicit curve at `2^28.92`.  The
+  is known below the approximately `2^129` GHS branch" with an explicit curve
+  at `2^28.92`. The
   correspondence is too — the Hecke projector onto `f ⊗ χ` and the modular
   parametrisation — though nobody has an algorithm that evaluates it at this
   level.
@@ -282,9 +286,10 @@ no curve has no such structure.
 ## 7. Correction to the hyperelliptic note (accounting)
 
 `RESEARCH_ECC2K130_HYPERELLIPTIC.md` said the genus any construction reaches over
-`F_2` is 1, `2^129` or `2^130`, that the window and "the constructions" miss by
-`2^120.77`, and that "every construction is closed".  The trichotomy is a
-theorem about GHS/Hess descent and stands.  The rest overreached:
+`F_2` is 1, `2^129`, or `2^130`, that the window and "the constructions" miss by
+`2^120.77`, and that "every construction is closed". The corrected GHS/Hess
+statement is scoped to the ordinary model, with large branches
+`{2^129−1,2^129}` and `{2^130−1,2^130}`. The rest overreached:
 
 - the Klein quartic is a non-GHS construction at `n = 3`;
 - the modular curve carries `A` at genus `2^28.92`, so the gap from the window

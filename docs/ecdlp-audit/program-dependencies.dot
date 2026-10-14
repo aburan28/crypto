@@ -1,13 +1,13 @@
 digraph ECDLPAuditProgram {
   graph [
-    rankdir=LR,
+    rankdir=TB,
     bgcolor="#f8fafc",
     pad="0.25",
     nodesep="0.38",
     ranksep="0.65",
     fontname="DejaVu Sans",
     labelloc="t",
-    label="Comprehensive elliptic-curve private-key recovery audit — proposed program",
+    label="Comprehensive elliptic-curve private-key recovery audit — first execution checkpoint",
     fontsize=18
   ];
   node [
@@ -26,18 +26,18 @@ digraph ECDLPAuditProgram {
     arrowsize=0.7
   ];
 
-  M0 [label="M0\nScope + authorization +\nidentity/denominator contract", fillcolor="#dbeafe"];
+  M0 [label="M0\nScope + authorization +\nidentity/denominator contract\nPARTIAL — denominator unfrozen", fillcolor="#fef3c7"];
   WS1 [label="WS1  Present evidence gate\npackage • 2,091-input replay • CI/review\nPARTIAL", fillcolor="#fef3c7"];
   WS2 [label="WS2  Cover-transfer gaps\ntwo-infinity • binary norm • subgroup certs • oracle\nPARTIAL", fillcolor="#fef3c7"];
-  WS3 [label="WS3  Master ledger\nexact units • revisions • frozen denominator\nNOT STARTED", fillcolor="#f1f5f9"];
-  WS4 [label="WS4  Evidence ladder\nE0–E7 • weakest-link • corrections\nNOT STARTED", fillcolor="#f1f5f9"];
-  WS5 [label="WS5  Taxonomy sweep\nA true DLP • B transfer • C parameters\nD bypass • E evidence/supply chain\nNOT STARTED", fillcolor="#f1f5f9"];
-  WS6 [label="WS6  Literature + incidents\nsearch protocol • primary corpus • comparators\nNOT STARTED", fillcolor="#f1f5f9"];
-  WS7 [label="WS7  Experimental accounting\ncold/online/amortized • failures • matched controls\nPARTIAL", fillcolor="#fef3c7"];
-  WS8 [label="WS8  Independent governance\nmath • implementation • replay • release\nNOT STARTED", fillcolor="#fae8ff", color="#86198f"];
-  M5 [label="M5\nBounded route-by-route audits", fillcolor="#dcfce7"];
-  M6 [label="M6\nIndependent replication", fillcolor="#dcfce7"];
-  M7 [label="M7\nDated comparative report\n(no absolute historical claim)", fillcolor="#dcfce7"];
+  WS3 [label="WS3  Master ledger\nidentity audit • native plan verifier\nPARTIAL — ledger/denominator open", fillcolor="#fef3c7"];
+  WS4 [label="WS4  Evidence ladder\nE0–E7 profiles • transition fixtures\nPARTIAL DRAFT — engine/review open", fillcolor="#fef3c7"];
+  WS5 [label="WS5  Taxonomy sweep\n43 candidate families • mock matrix\nPARTIAL DRAFT — denominator open", fillcolor="#fef3c7"];
+  WS6 [label="WS6  Literature + incidents\nprotocol • pointer seed • no searches run\nPARTIAL DRAFT — corpus unfrozen", fillcolor="#fef3c7"];
+  WS7 [label="WS7  Experimental accounting\nsynthetic receipts • negative controls\nPARTIAL DRAFT — native replay open", fillcolor="#fef3c7"];
+  WS8 [label="WS8  Independent governance\npolicy • roles • workflow drills\nPARTIAL DRAFT — not approved", fillcolor="#fae8ff", color="#86198f"];
+  M5 [label="M5\nBounded route-by-route audits\nPLANNED", fillcolor="#e2e8f0"];
+  M6 [label="M6\nIndependent replication\nPLANNED", fillcolor="#e2e8f0"];
+  M7 [label="M7\nDated comparative report\nPLANNED — no absolute historical claim", fillcolor="#e2e8f0"];
 
   M0 -> WS1;
   M0 -> WS3;
@@ -58,13 +58,21 @@ digraph ECDLPAuditProgram {
   WS5 -> M5;
   WS6 -> M5;
   WS7 -> M5;
-  WS8 -> M5 [color="#86198f", label="promotion gate"];
+  WS8 -> M5 [color="#86198f", label="planned promotion gate", style=dashed];
+  governance_scope [
+    shape=note,
+    label="Planned governs edges\nWS8 -> WS1, WS2, WS5, WS6\nnot active approval",
+    fillcolor="#fae8ff",
+    color="#86198f",
+    fontsize=9
+  ];
+  WS8 -> governance_scope [color="#86198f", style=dashed, arrowhead=none];
   M5 -> M6;
   M6 -> M7;
 
   note [
     shape=note,
-    label="Planning artifact only\nClassification ≠ support\nCover ≠ subgroup transfer\nTransfer ≠ solver\nStage gain ≠ end-to-end advantage",
+    label="Non-authoritative checkpoint\nAll 20 required gates remain open\nClassification ≠ support\nCover ≠ subgroup transfer\nTransfer ≠ solver\nStage gain ≠ end-to-end advantage",
     fillcolor="#fee2e2",
     color="#b91c1c",
     fontsize=9

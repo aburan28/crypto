@@ -1,0 +1,86 @@
+{
+  "$schema": "../ws4-evidence.schema.json",
+  "schema_version": "ecdlp-ws4-evidence/v0-draft",
+  "record_kind": "evidence_transition_fixture",
+  "record_state": "draft_non_authoritative",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "registry_ref": "../evidence-profile-registry.draft.json",
+  "fixture_id": "fixture.promotion.skipped_level_rejected",
+  "title": "Non-adjacent E1 to E3 promotion rejected",
+  "scenario_kind": "promotion",
+  "profile_id": "profile.B.mathematical_transfer",
+  "claim_kind": "cost_advantage",
+  "purpose": "Golden negative case proving that an E3 construction reproduction cannot bypass an unsatisfied E2 applicability gate.",
+  "before": {
+    "assessment_id": "assessment.transfer.002.r1",
+    "revision": 1,
+    "supersedes": null,
+    "claim_status": "unknown",
+    "derived_maturity": "E1",
+    "evaluated_at": "2026-10-14T09:00:00Z",
+    "history_count": 1,
+    "identity_binding": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "blocking_gates": [
+      {
+        "gate_id": "G.B.E2.transfer_applicability",
+        "level": "E2",
+        "outcome": "unknown",
+        "freshness": "fresh",
+        "rationale": "No independently checked applicability and invariant record is bound to the subject revision.",
+        "evidence_refs": []
+      }
+    ],
+    "component_maturities": [
+      {"component_id": "source_curve_identity", "required": true, "maturity": "E1", "status": "present"},
+      {"component_id": "transfer_construction", "required": true, "maturity": "E1", "status": "present"},
+      {"component_id": "destination_arithmetic", "required": true, "maturity": "E1", "status": "present"},
+      {"component_id": "transfer_maps", "required": true, "maturity": "E1", "status": "present"},
+      {"component_id": "destination_solver", "required": true, "maturity": "E1", "status": "present"}
+    ],
+    "evidence_revision_refs": ["fixture-evidence:transfer-002:r1"]
+  },
+  "event": {
+    "event_id": "event.promotion.transfer.002.r2",
+    "event_type": "promotion_request",
+    "occurred_at": "2026-10-14T10:05:00Z",
+    "requested_maturity": "E3",
+    "gate_changes": [
+      {
+        "gate_id": "G.B.E3.construction_reproduction",
+        "level": "E3",
+        "before_outcome": "unknown",
+        "before_freshness": "fresh",
+        "after_outcome": "supported",
+        "after_freshness": "fresh",
+        "evidence_refs": ["fixture-evidence:transfer-002:construction-reproduction"]
+      }
+    ],
+    "component_maturities_after": [
+      {"component_id": "source_curve_identity", "required": true, "maturity": "E3", "status": "present"},
+      {"component_id": "transfer_construction", "required": true, "maturity": "E1", "status": "present"},
+      {"component_id": "destination_arithmetic", "required": true, "maturity": "E3", "status": "present"},
+      {"component_id": "transfer_maps", "required": true, "maturity": "E3", "status": "present"},
+      {"component_id": "destination_solver", "required": true, "maturity": "E3", "status": "present"}
+    ],
+    "correction": null,
+    "reviewer_decision": "approved",
+    "reviewer_role": "mathematical",
+    "review_receipt_refs": ["fixture-review:transfer-002:r2"]
+  },
+  "expected": {
+    "decision": "reject",
+    "resulting_maturity": "E1",
+    "reason_codes": ["skipped_maturity_level", "required_gate_unsatisfied"],
+    "weakest_component_ids": ["transfer_construction"],
+    "history_count_after": 1,
+    "new_assessment_id": null,
+    "prior_assessment_preserved": true,
+    "claim_status_derived_from_maturity": false,
+    "required_actions": ["Support the exact E2 applicability and invariant gate before requesting an adjacent promotion."]
+  },
+  "notes": [
+    "A higher-level certificate cannot repair a gap in the contiguous prefix.",
+    "The well-formed fixture is expected to be rejected semantically, not by JSON parsing."
+  ]
+}

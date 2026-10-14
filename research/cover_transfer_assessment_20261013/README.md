@@ -32,8 +32,11 @@ The main results are:
 - all 1,931 odd-characteristic covers have verified genus-two geometry, but
   their even sextics have two rational infinity points and are outside the
   current one-infinity odd-characteristic Jacobian implementation;
-- the binary arbitrary-class Jacobian norm is explicitly unsupported, and the
-  odd-characteristic induced maps remain unimplemented and unknown; and
+- arbitrary-class Jacobian pushforward remains unsupported for all 160
+  catalog binary maps; a separate exact fixed-`GF(8)` fixture now implements
+  the full 486-class operation, but it is not a catalog row and has no
+  independent divisor-map oracle; the odd-characteristic induced maps remain
+  unimplemented and unknown; and
 - no complete Jacobian relation solver, measured transfer advantage, or key
   recovery result is part of this assessment.
 
@@ -48,6 +51,40 @@ It uses only `supported`, `refuted`, `unknown`, and `not_applicable`.
 never turns a missing implementation or failed bounded search into a theorem
 of nonexistence.
 
+## 2026-10-14 bounded fixed-GF(8) addendum
+
+The library now accepts every valid reduced class for one exact synthetic
+fixture: `GF(8)` in the polynomial basis `z^3+z+1`, target coefficients
+`a=1`, `b=3`, and cover parameter `d=7`. Exhaustive native tests cover all
+486 classes and all 236,196 ordered pairs, including nonsplit, shared-support,
+exceptional, and malformed cases. A separately implemented point-count replay
+certifies only the source-Jacobian cardinality `486`; it is not an independent
+divisor-arithmetic or norm-map oracle.
+
+This fixture is a mechanics and homomorphism test, not an injective full-group
+ECDLP transfer. The target has order 6, the six norm fibers each contain 81
+Jacobian classes, and `gcd(3,6)=3`; the generic degree-coprime subgroup
+criterion therefore does not certify injectivity on the full target group.
+
+The standalone `construct`/`verify` receipt labels this exact model as a
+library build that contains the fixed-fixture capability, but that invocation
+replays only the geometry certificate. It does not initialize or execute the
+486-class norm and is not a per-invocation transfer proof. The standalone CLI
+still exposes no transfer subcommand; the exhaustive norm evidence is the
+native Rust test receipt described below.
+
+None of the 160 catalog binary rows is over `GF(8)`, so their generated
+arbitrary-pushforward status remains `refuted` as an implementation claim.
+This addendum narrows the report's earlier universal wording; it does not
+promote a catalog row, subgroup-transfer claim, solver, or advantage result.
+
+The existing `CoverTransfer.lean` package proves only the conditional abstract
+group lemma described below. It does not formalize this fixture's finite-field
+or curve model, the checked `N1`–`N3` counts and zeta-to-Jacobian-order bridge,
+the 486-class divisor presentation, or the norm homomorphism. Those are
+concrete open formalization obligations; no Lean proof receipt is claimed for
+the fixed-`GF(8)` order or all-class transfer results.
+
 # Original requirements and evidence status
 
 | Requested item | Status | Evidence boundary |
@@ -57,11 +94,11 @@ of nonexistence.
 | Separate supported input models | implemented with explicit boundaries | binary and odd-characteristic constructors are separate; unsupported infinity configurations return a structured result |
 | Constructive covers | supported for the two fixed catalog families | all 2,091 formulas are explicit and replayed; this is not a theorem-complete Xarles constructor |
 | Genuine Jacobian arithmetic | partial | binary one-infinity sources are supported; all 1,931 odd two-infinity catalog sources remain outside the current backend |
-| Pullback, pushforward, and subgroup transfer | partial | bounded binary point-class domains and 134 generator checks only; arbitrary binary norm and all odd induced maps remain open |
-| EC1/ICV1 catalog evidence | implemented | exact memberships, typed object bindings, hashes, statuses, and four narrow overlays; classification is not support |
+| Pullback, pushforward, and subgroup transfer | partial | bounded binary point-class domains and 134 generator checks; exhaustive arbitrary-class pushforward exists only for the non-catalog exact fixed-`GF(8)` fixture; catalog-general binary norm and all odd induced maps remain open |
+| EC1/ICV1 catalog evidence | partial | exact memberships, typed object bindings, hashes, statuses, and four narrow overlays cover the 2,091 catalog geometry rows; the positive fixed-GF(8) source/target/Jacobian/map fixture is non-catalog and has no EC1/ICV1/HC1/CV1 export or transfer-certificate binding |
 | Standalone executable | source verified; packaged scope incomplete | current-source tests cover 2,091 inputs; the published artifact was replayed on its bundled 592-row registry, not on all current inputs |
 | Validation and shipping | partial | deterministic checks and native tests exist; independent divisor-class replay, local Lean kernel receipt, fresh package, and final CI gates remain open |
-| Full Jacobian index-calculus solver | separate and not delivered | no genuine Jacobian relation collection, target decomposition, matched cost record, or end-to-end result |
+| Full Jacobian index-calculus solver | separate and not delivered | no cover-integrated or catalog-supported solver/run for these binary and even-sextic sources; the existing tiny odd-prime one-infinity relation/linear-algebra/recovery library is outside this assessment and is not a general solver |
 
 # Population and profile coverage
 
@@ -184,6 +221,10 @@ characteristic different from 2 and 3. It gives a hyperelliptic curve
 \(H/K\) of genus at most five with two independent \(K\)-defined maps to the
 elliptic curve; it does not require first extending the base field.
 
+“Independent maps” is the paper's algebraic independence condition on those
+two maps. It does not mean independent software implementations, independent
+computational routes, subgroup preservation, or an ECDLP speedup.
+
 For \(j\ne0,1728\), the paper displays a genus-five construction with two
 degree-three maps. Degree three together with characteristic different from
 three makes those displayed generic maps separable. Separability is not a
@@ -264,10 +305,11 @@ and exhaustive small-field fixtures.
   typed pullback witnesses; and
 - `phi_* phi^* = [3]` on that typed point-class domain.
 
-It deliberately does **not** implement a norm on an arbitrary reduced class
-of `Jac(H)`. The public negative-control path returns
-`Unsupported(ArbitraryJacobianPushforward)`. That refutes a claim about the
-current API, not the mathematical existence of the norm. This is tracked in
+For the exact fixed-`GF(8)` fixture described in the addendum, the library now
+implements arbitrary-class pushforward and exhaustively checks its group-law
+behavior. For every catalog binary profile, the same entry point still returns
+`Unsupported(ArbitraryJacobianPushforward)`. That refutes a catalog-support
+claim, not the mathematical existence of a norm. This boundary is tracked in
 [`binary-cover-arbitrary-jacobian-norm-missing.md`](../../problems/binary-cover-arbitrary-jacobian-norm-missing.md).
 
 ## The 134 binary subgroup checks
@@ -376,31 +418,39 @@ preserved in
 [`release_replay.txt`](release_replay.txt).
 
 The generated curve browser remains deliberately unchanged. Its 2,091 cards
-report geometry as `verified_over_declared_field`, retain
-`subgroup_transfer: not_tested`, and keep DLP advantage null. The v2 sidecar
-does not silently turn those geometry cards into transfer badges.
+use this geometry status:
 
-The current offline cryptanalysis parity rerun reported
+```text
+verified_over_declared_field
+```
+
+They retain `subgroup_transfer: not_tested` and keep DLP advantage null. The
+v2 sidecar does not silently turn those geometry cards into transfer badges.
+
+The retained offline cryptanalysis parity rerun reported
 `hyperelliptic mirror manifest and crypto source: verified` for exactly seven
-manifest records. This establishes byte-level parity only for the listed core
-files. It excludes the standalone CLI, Cargo configuration, catalogs, schema,
-assessment ledger, workflows, and package artifacts, and it does not check the
-manifest's recorded commit against the checkout's actual `HEAD`. It therefore
-does not establish that the present standalone CLI allowlist repair has been
-packaged or mirrored at a new exact tip.
+manifest records at its pinned snapshot. Its `cover_transfer.rs` digest is
+`67b94112…`, which predates the current `6e801f14…` source containing the exact
+fixed-`GF(8)` arbitrary-class norm. The receipt also excludes the standalone
+CLI, Cargo configuration, catalogs, schema, assessment ledger, workflows, and
+package artifacts, and it does not check the manifest's recorded commit against
+the checkout's actual `HEAD`. It therefore establishes historical parity for
+those seven bindings, not a current cryptanalysis mirror or integration of the
+new norm or CLI changes.
 
 # Validation controls
 
 | Control | Status | Scope and limit |
 |---|---|---|
 | Exact identity joins | `supported` | all 2,091 map UIDs and 664 EC1/curve/map triples; identity alone claims no arithmetic |
-| Cover geometry | `supported` | all 2,091 fixed-family rows; equations, smoothness, genus, degree, separability, and infinity behavior |
+| Cover geometry | `supported` | all 2,091 fixed-family rows; equations, smoothness, genus, degree, separability, and infinity behavior, conditional on the declared odd base-prime assumptions described above |
 | Internal Jacobian arithmetic | `supported` on stated models | binary and separate odd-prime one-infinity fixtures; not the 1,931 odd two-infinity cover sources |
 | Independent arithmetic/map oracle | `unknown` | no separate CAS or independently implemented divisor-class replay across the catalog |
 | Binary catalog generators | `supported` on tested generators | all 134 triples pass the listed membership, annihilation, pullback, composition, and inverse-degree checks; no subgroup-wide promotion |
 | Odd cover/backend compatibility | `refuted` as a current implementation claim | the one-infinity backend cannot accept the 1,931 even-sextic sources; mathematical induced maps remain `unknown` |
 | Published artifact on all current inputs | `refuted` as evidence claim | only its bundled 592 rows were directly replayed; 737/1,354 is a static allowlist classification, not a 2,091-command receipt |
-| Cross-repository core parity | `supported` on manifest-listed scope | offline rerun verified exactly seven core-file records; CLI, Cargo, catalogs, schema, ledger, workflows, packages, and actual-HEAD binding are excluded |
+| Historical cross-repository core parity | `supported` on the pinned receipt snapshot | offline rerun verified exactly seven bindings; CLI, Cargo, catalogs, schema, ledger, workflows, packages, and actual-HEAD binding are excluded |
+| Current fixed-F8 norm mirror | `unknown` | retained parity binds old `cover_transfer.rs` digest `67b94112…`, not current `6e801f14…`; no current-tip cryptanalysis mirror receipt is attached |
 | Coordinate commutation and proper-subfield descent | `unknown` | normalization geometry is checked, but induced-divisor commutation and descent are not |
 | Paired performance | `not_applicable` | no performance or speedup experiment was conducted |
 
@@ -420,14 +470,17 @@ therefore null; correctness-test elapsed time is not an algorithmic cost.
 | Peak memory and total runtime | `unknown` | null | not measured end to end |
 | Matched generic baseline | `unknown` | null | not run |
 | End-to-end speedup | `unknown` | null | numerator and denominator absent |
-| Relations, linear algebra, target decomposition | `not_applicable` | null | separate solver not implemented or run |
+| Relations, linear algebra, target decomposition | `not_applicable` | null | no solver was integrated with or run on the assessed covers; the separate tiny odd-prime one-infinity library is outside this cost record |
 
 The full Jacobian index-calculus solver remains a separate deliverable. Its
 acceptance gate must require genuine Jacobian relations, verified linear
 algebra and target decomposition, independently checked outputs, explicit
 parameter limits, and complete accounting for preprocessing, failed searches,
 duplicates, memory, and total runtime. Elliptic norm projection is not that
-solver.
+solver. The repository does contain a bounded odd-prime, one-infinity
+relation/linear-algebra/recovery library for tiny enumerable domains; it does
+not consume the assessed binary or even-sextic catalog covers and does not
+satisfy this full-solver acceptance gate.
 
 # Visual summary
 
@@ -480,7 +533,7 @@ cargo test --release --locked --bin hyperelliptic-cover \
 ```
 
 The complete standalone-binary suite was run in the pinned Rust 1.90.0
-container and reported 11 passed, 0 failed. Rebuild and audit the Lean package
+container and reported 13 passed, 0 failed. Rebuild and audit the Lean package
 when sufficient cache space is available:
 
 ```sh
@@ -514,7 +567,9 @@ These obligations feed WS1 and WS2 of the proposed
 That program link does not change any status below and does not turn the cover
 assessment into a solver or advantage result.
 
-1. Implement and independently verify a binary arbitrary-class norm.
+1. Generalize arbitrary-class binary pushforward beyond the exact fixed-`GF(8)`
+   fixture to the catalog-supported field/model population and verify it with
+   an independent divisor-class oracle.
 2. Implement balanced/two-infinity odd-characteristic Jacobian arithmetic and
    induced maps over both prime and declared extension fields.
 3. Add proof-grade exact-order evidence and map-bound certificates wherever a

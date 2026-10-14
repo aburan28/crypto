@@ -1,0 +1,105 @@
+{
+  "$schema": "../../ws5-routes.schema.json",
+  "schema_version": "ecdlp-ws5-routes/v0-draft",
+  "document_type": "route_registry",
+  "record_state": "draft_non_authoritative",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "historical_completeness_claim": false,
+  "title": "Invalid fixture: hybrid edge relation is not in the typed vocabulary",
+  "as_of": "2026-10-14",
+  "scope": {
+    "fixture_class": "public_synthetic_and_schema_only",
+    "production_targets": false,
+    "purpose": "Exercise rejection of an untyped hybrid edge.",
+    "boundary": "Negative schema fixture only."
+  },
+  "vocabulary_mappings": {
+    "authorization_scope": {
+      "local_value": "public_synthetic_only",
+      "plan_reference": "docs/ecdlp-audit/ECDLP_AUDIT_PLAN.mock.json#/vocabularies/authorization_tiers",
+      "shared_vocabulary": false,
+      "passive_public_plan_tier": "T0",
+      "public_fixture_semantics": "public_or_locally_generated_synthetic_known_answer_only",
+      "executable_fixture_rule": "explicit_T1_receipt_required_for_local_executable_fixture"
+    },
+    "cost_state": {
+      "local_value": "unmeasured",
+      "plan_reference": "docs/ecdlp-audit/ECDLP_AUDIT_PLAN.mock.json#/vocabularies/cost_status",
+      "shared_vocabulary": false,
+      "plan_projection": "unknown",
+      "lifecycle_state": "pre_measurement",
+      "numeric_fields": "all_null"
+    }
+  },
+  "counting_policy": {
+    "lane_assignment": "first_matching_rule_A_through_E",
+    "property_mechanism_split": "lane_C_property_links_to_separate_lane_A_or_B_mechanism",
+    "bypass_dlp_split": "lane_D_key_recovery_does_not_count_as_source_ECDLP_solution",
+    "composed_route_unit": "one_composed_route_not_each_component",
+    "weakest_link_rule": "inherit_weakest_required_component"
+  },
+  "lanes": [
+    {
+      "id": "A",
+      "title": "A",
+      "decision_rule": "Source-group solution.",
+      "evidence_profile": {"id": "profile.A.native_dlp", "lane": "A", "registry_path": "docs/ecdlp-audit/evidence/evidence-profile-registry.draft.json", "registry_schema_version": "ecdlp-ws4-evidence/v0-draft"},
+      "route_families": [
+        {"id": "route.a.pollard-rho-lambda", "lane": "A", "title": "A route", "scope": "Negative fixture seed.", "ecdlp_relation": "solves_source_dlp", "evidence_profile_id": "profile.A.native_dlp", "registry_status": "seed_candidate", "claim_status": "unknown", "authorization_tier": "public_synthetic_only", "evidence_refs": [], "open_obligations": ["Reject invalid edge."]}
+      ]
+    },
+    {
+      "id": "B",
+      "title": "B",
+      "decision_rule": "Mathematical transfer.",
+      "evidence_profile": {"id": "profile.B.mathematical_transfer", "lane": "B", "registry_path": "docs/ecdlp-audit/evidence/evidence-profile-registry.draft.json", "registry_schema_version": "ecdlp-ws4-evidence/v0-draft"},
+      "route_families": [
+        {"id": "route.b.curve-cover", "lane": "B", "title": "B route", "scope": "Negative fixture seed.", "ecdlp_relation": "transports_and_recovers", "evidence_profile_id": "profile.B.mathematical_transfer", "registry_status": "seed_candidate", "claim_status": "unknown", "authorization_tier": "public_synthetic_only", "evidence_refs": [], "open_obligations": ["Reject invalid edge."]}
+      ]
+    },
+    {
+      "id": "C",
+      "title": "C",
+      "decision_rule": "Parameter property.",
+      "evidence_profile": {"id": "profile.C.parameter_provenance", "lane": "C", "registry_path": "docs/ecdlp-audit/evidence/evidence-profile-registry.draft.json", "registry_schema_version": "ecdlp-ws4-evidence/v0-draft"},
+      "route_families": [
+        {"id": "route.c.seed-filtering-provenance", "lane": "C", "title": "C route", "scope": "Negative fixture seed.", "ecdlp_relation": "property_only", "evidence_profile_id": "profile.C.parameter_provenance", "registry_status": "seed_candidate", "claim_status": "unknown", "authorization_tier": "public_synthetic_only", "evidence_refs": [], "open_obligations": ["Reject invalid edge."]}
+      ]
+    },
+    {
+      "id": "D",
+      "title": "D",
+      "decision_rule": "Protocol bypass.",
+      "evidence_profile": {"id": "profile.D.protocol_implementation_bypass", "lane": "D", "registry_path": "docs/ecdlp-audit/evidence/evidence-profile-registry.draft.json", "registry_schema_version": "ecdlp-ws4-evidence/v0-draft"},
+      "route_families": [
+        {"id": "route.d.nonce-reuse-bias-hnp", "lane": "D", "title": "D route", "scope": "Negative fixture seed.", "ecdlp_relation": "bypasses_source_dlp", "evidence_profile_id": "profile.D.protocol_implementation_bypass", "registry_status": "seed_candidate", "claim_status": "unknown", "authorization_tier": "public_synthetic_only", "evidence_refs": [], "open_obligations": ["Reject invalid edge."]}
+      ]
+    },
+    {
+      "id": "E",
+      "title": "E",
+      "decision_rule": "Evidence integrity.",
+      "evidence_profile": {"id": "profile.E.evidence_supply_chain", "lane": "E", "registry_path": "docs/ecdlp-audit/evidence/evidence-profile-registry.draft.json", "registry_schema_version": "ecdlp-ws4-evidence/v0-draft"},
+      "route_families": [
+        {"id": "route.e.release-binary-toolchain", "lane": "E", "title": "E route", "scope": "Negative fixture seed.", "ecdlp_relation": "evidence_integrity", "evidence_profile_id": "profile.E.evidence_supply_chain", "registry_status": "seed_candidate", "claim_status": "unknown", "authorization_tier": "public_synthetic_only", "evidence_refs": [], "open_obligations": ["Reject invalid edge."]}
+      ]
+    }
+  ],
+  "hybrid_edges": [
+    {
+      "id": "edge.hybrid.invalid-untyped",
+      "from_route_id": "route.c.seed-filtering-provenance",
+      "to_route_id": "route.b.curve-cover",
+      "edge_type": "implies_success",
+      "component_role": "prerequisite",
+      "required": true,
+      "claim_status": "unknown",
+      "evidence_refs": [],
+      "anti_double_counting": "count_once_as_composed_route",
+      "open_obligation": "The validator must reject the relation before interpreting it."
+    }
+  ],
+  "open_obligations": ["Reject invalid edge."],
+  "non_claims": ["This invalid document is not evidence."]
+}
