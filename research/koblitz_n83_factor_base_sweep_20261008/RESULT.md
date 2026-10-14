@@ -13,6 +13,14 @@ nonvacuous five-summand single-query hit ceiling; the largest 3+2 ceiling is
 below 0.338. This bounds a fresh uniform nonidentity query, not the frozen
 public target or observed solver yield, and it adds no N83 search charge.
 
+A [conditional relation-query floor](verification/pilot-pair-rank-floor-20261014/RESULT.md)
+extends those exact counts to a stated goal of as many independent rows as
+small-base orbit columns. For fresh uniform nonidentity queries in one fixed
+five-summand 3+2 shape, even the most favorable retained K600 pair needs at
+least 889 queries before the counting bound permits a 50% chance of 600
+decompositions. This necessary floor is not an observed rank or a wall-time
+bound, and it does not apply to the frozen public target.
+
 The [ordered fixed-witness SAT control](verification/known-witness-ordered-sat-20261014/RESULT.md)
 was configured with full K1182 plus residual-K2048 signed-Frobenius domains
 and the algebraically replayed witness in the first all-affine pattern. Its

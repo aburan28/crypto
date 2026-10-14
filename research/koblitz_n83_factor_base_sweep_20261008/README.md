@@ -13,6 +13,13 @@ fresh uniform nonidentity target; the largest 3+2 ceiling is below 0.338.
 These are distribution-specific counting bounds, not observed yield or a
 complete-runtime ranking. The screen used no further N83 search allocation.
 
+The [conditional query-floor extension](verification/pilot-pair-rank-floor-20261014/RESULT.md)
+shows that an ideal exhaustive five-summand 3+2 oracle still needs at least
+889 uniformly distributed queries before the counting upper bound allows a
+50% chance of 600 decompositions for any retained K600 pair. It assumes a
+specific full-rank row goal and does not turn a query count into a measured
+cold runtime or cover the frozen target.
+
 ## Matched retained-base extension, 2026-10-11
 
 The [K=1,182 versus K=2,048 matched search gate](verification/matched-k1182-k2048-900s-20261011/RESULT.md) used the same public point, source-matched Linux worker, five-summand orbit-domain search and 5,000-conflict cap for each S3-backed factor base. Both runs returned `UNKNOWN_solver_cap` with zero models, zero relations and rank zero. The complete point-row prefix and compressed object hashes were rechecked. The full additional 900 seconds were charged, bringing the cumulative conservative local charge at that round to **11,700 of 11,700 seconds**. Neither one-trial wall time ranks the bases by complete cold runtime; no minimum-runtime base is selected. Earlier dated budget paragraphs below describe their frozen rounds.
