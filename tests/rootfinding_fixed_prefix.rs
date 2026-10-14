@@ -1,6 +1,6 @@
 //! Frozen equal-probe coverage control; see the study's FIXED_PREFIX_PROTOCOL.md.
 use crypto_lib::cryptanalysis::ic_boundary::{
-    collect_and_solve_relations, prime_factor_base_strided, prime_instance_for, CompletionRule,
+    collect_and_solve_relations, find_prime_order_curve, prime_factor_base_strided, CompletionRule,
     CountedGroup, FieldOps, GroupOps, IncrementalGauss, PairTable, PrimePoint, RestartPool,
     RowStatus, TargetSource,
 };
@@ -29,7 +29,7 @@ fn plus_mod(left: u64, right: u64, modulus: u64) -> u64 {
 
 #[test]
 fn fixed_public_prefix_gives_equal_probe_budgets_for_three_bases() {
-    let inst = prime_instance_for(20, 59297);
+    let inst = find_prime_order_curve(20, 59297);
     assert_eq!(inst.r, 562427);
     let curve = &inst.curve;
     let generator = inst.generator_point();
