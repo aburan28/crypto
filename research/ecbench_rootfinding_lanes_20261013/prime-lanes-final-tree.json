@@ -1,0 +1,13 @@
+{
+  "schema": "rootfinding.lane_test_receipt/v1",
+  "source_commit": "431d0b3167027092443705e21d363489b2637a22",
+  "command": "cargo test --offline --locked --release --lib prime_lane_collector_has_identical_serial_and_batched_streams -- --test-threads=1",
+  "test_binary": "target/release/deps/crypto_lib-e89b2f0dbc9b5389",
+  "test_binary_sha256": "c4946ac108fe3318b8ab668417e326e9896494a770dcdab05f385247bfef5023",
+  "result": "passed",
+  "raw_log_file": "prime-lanes-final-tree.log.gz",
+  "raw_log_sha256": "0b243d2878514921b2af4643846151f2cdca7243e5739d93ea30408948942148",
+  "passed": 1,
+  "failed": 0,
+  "filtered_out": 4199
+}
