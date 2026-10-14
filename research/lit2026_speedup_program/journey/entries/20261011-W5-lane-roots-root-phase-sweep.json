@@ -1,0 +1,22 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W5",
+  "slug": "lane-batched-roots-sweep",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1714",
+  "papers": ["arXiv 2607.06372"],
+  "kind": "negative",
+  "workload": {
+    "id": "inherited-f4-root-phase-lanes-k2-64",
+    "description": "f4_lane_probe lanes: degree-3 support-local roots of targets [1]G..[k]G, k = 2..64, sequential against bit-sliced together, on icv1-f2m17-tm101-00378d4e dim 6, icv1-f2m23-tm5197-1f85e9e1 dim 7, icv1-f2m23-t5197-69e76b73 dim 8, icv1-f2m31-tm90707-c95f16f5 dim 9 (prime-order subgroups of KoblitzCurve::new), m = 3, 5 repetitions",
+    "curve_ids": ["icv1-f2m17-tm101-00378d4e", "icv1-f2m23-tm5197-1f85e9e1", "icv1-f2m23-t5197-69e76b73", "icv1-f2m31-tm90707-c95f16f5"]
+  },
+  "metric": "root elimination: lane 64-bit word equivalents / sequential root stage units",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 5,
+  "arms": [],
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w5_lane_batched_f4_20261011/reports/run-20261011T2225Z/report.pdf",
+  "note": "Lane roots cost 16-162x the sequential echelon root's stage units (11-101x the RREF root's), 2.5-33x its CPU and 1.2-25x its wall time for k = 2..64; lanes share their pivot row in 3-14 % of pivot columns. Every lane spans its sequential root's row space."
+}

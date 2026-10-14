@@ -42,7 +42,7 @@ use std::time::Duration;
 use serde::Serialize;
 
 use crate::cryptanalysis::ic_boundary::{
-    CountedGroup, FactorBase, GroupOps, OracleCounters, RowStatus,
+    CountedGroup, FactorBase, GroupOps, OracleCounters, Relation, RowStatus,
 };
 use crate::cryptanalysis::pq_groebner_f2::F2BoolPoly;
 
@@ -239,6 +239,41 @@ pub trait DecompositionOracle<G: CountedGroup> {
         counters: &mut OracleCounters,
         point: G::Elt,
     ) -> Option<Vec<usize>>;
+
+    /// **The large-prime seam.**  Decompose `point = [a]G + [b]Q`, or
+    /// store what partially decomposed and hand back whatever complete
+    /// relations the stored partials now merge into.  The default is
+    /// [`decompose`] wrapped as one [`Relation::Summands`], so an
+    /// oracle without large primes behaves exactly as before; the
+    /// Frobenius pair-table oracle overrides it when `large_primes` is
+    /// set (`ic_framework::large_prime`).  Every merged row returned
+    /// here must already hold as a group equation.
+    ///
+    /// [`decompose`]: DecompositionOracle::decompose
+    #[allow(clippy::too_many_arguments)]
+    fn decompose_relations(
+        &mut self,
+        ctx: &InstanceCtx<G>,
+        fb: &FactorBase<G::Elt>,
+        ops: &mut GroupOps,
+        counters: &mut OracleCounters,
+        point: G::Elt,
+        _a: u64,
+        _b: u64,
+    ) -> Vec<Relation> {
+        match self.decompose(ctx, fb, ops, counters, point) {
+            Some(summands) => vec![Relation::Summands(summands)],
+            None => Vec::new(),
+        }
+    }
+
+    /// Native counters the oracle accumulated over the relation phase
+    /// beyond [`OracleCounters`], folded into the relation phase's
+    /// counters by name.  The large-prime collector reports its partials,
+    /// merges and verification work here.
+    fn relation_counters(&self) -> BTreeMap<String, u64> {
+        BTreeMap::new()
+    }
 
     /// The algebraic system the last [`decompose`] built, when it built
     /// one.  Table oracles return `None` and their degree columns stay

@@ -70,6 +70,7 @@ SOURCES = {
     "f6_ecbench_ladder": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
     "f4_f5_f6_cross_family": "research/f4_f5_f6_cross_family_20261011/ANALYSIS.json",
     "n41_n53_counted": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
+    "conductor_gap_counts": "research/ecbench_conductor_gap_20261012/analysis.json",
     "registry": "docs/curves/registry.json",
     "curves_schema": "docs/curves/ic/curves.schema.json",
     "curves_yaml": "docs/curves/ic/curves.yaml",
@@ -899,6 +900,9 @@ def build() -> dict:
                  "factor_base_link_status", "no_curves_yaml_record")}
             for c in roster(names, measured)],
         "n41_n53_counted_diagnostic": n41_n53_diagnostic,
+        # Native analysis computes these observations; this view only copies
+        # and renders them, outside the fully priced rankings.
+        "conductor_gap_count_diagnostic": load(SOURCES["conductor_gap_counts"]),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
     }
 
@@ -1157,6 +1161,15 @@ def markdown(doc: dict) -> str:
                      f"{qmd(q) if q else ('reference' if a['arm'] == 'rho-strong' else 'A/A control')} |")
         L.append(f"| `{c['curve']}` | {c['log2_r']:.2f} | K16 / K8 | — | — | — | — | {qmd(c['k16_over_k8'])} |")
     L.append("")
+    L += ["## Large-prime conductor-gap counted diagnostics", "",
+          "Copied from native analysis: eight independent one-target workloads per fixed curve; "
+          "no transported targets. Counted S has unpriced native work. These observations do "
+          "not enter tables A–C or change a full-cost ranking.", "",
+          "| ell | IC floor/crater | 99% interval |", "|---:|---:|---|"]
+    for session in doc["conductor_gap_count_diagnostic"]["sessions"]:
+        observed = session["arms"]["ic-mitm"]["cross_curve"]
+        L.append(f"| {session['ell']} | {observed['ratio_floor_over_crater']:.6f} | "
+                 f"{observed['ci99'][0]:.6f} to {observed['ci99'][1]:.6f} |")
     L += ["", "## Sources", ""]
     for k, v in doc["sources"].items():
         L.append(f"- `{v['path']}` — sha256 `{v['sha256'][:16]}…`")
@@ -1721,6 +1734,18 @@ def page(doc: dict, standalone: bool) -> str:
                      f'<td>{"✓" if c["on_board"] else ""}</td></tr>')
         P.append('</tbody></table></div></details>')
     P.append('</section>')
+
+    # Native observations are rendered without recomputing a comparison.
+    P.append('<section id="conductor-gap-counts"><h2>Large-prime conductor-gap counted diagnostics</h2>'
+             '<p>Eight independent one-target workloads per fixed curve, no transported targets. '
+             'Counted S leaves native work unpriced. These observations remain outside tables A–C '
+             'and the full-cost rankings.</p><table><thead><tr><th>ell</th><th>IC floor/crater</th>'
+             '<th>99% interval</th></tr></thead><tbody>')
+    for session in doc["conductor_gap_count_diagnostic"]["sessions"]:
+        observed = session["arms"]["ic-mitm"]["cross_curve"]
+        P.append(f'<tr><td>{session["ell"]}</td><td>{observed["ratio_floor_over_crater"]:.6f}</td>'
+                 f'<td>{observed["ci99"][0]:.6f} to {observed["ci99"][1]:.6f}</td></tr>')
+    P.append('</tbody></table>' + gh(SOURCES["conductor_gap_counts"], 'Native analysis and source records') + '</section>')
 
     # Footer.
     P.append('<footer><p><strong>What this is not.</strong> A view of frozen measurements, class accounting: no row '

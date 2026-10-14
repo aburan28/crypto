@@ -1,0 +1,25 @@
+saved research/drastic_prime_conductor_gap_20261012/sessions/d19-ell2033609/comparisons/rho-neg__rho-neg-aa.json
+ops (ok): rho-neg-aa / rho-neg = 1.0000 [1.000, 1.000] (cluster) over 16 pairs on 16 workloads, 2 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 1.0253, not a result: 16 of 16 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | rho-neg-aa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp45-tm403-3bb5b4de | 44.16 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+| icv1-fp45-tm403-f3233fbe | 44.16 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | rho-neg-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0841a1a67464 | icv1-fp45-tm403-3bb5b4de | 44.16 | 0.9465 | 0.9465 | 1.0000 |
+| W1659bd8b5f05 | icv1-fp45-tm403-f3233fbe | 44.16 | 1.0073 | 1.0073 | 1.0000 |
+| W237acc74179b | icv1-fp45-tm403-f3233fbe | 44.16 | 0.5978 | 0.5978 | 1.0000 |
+| W2777dc6788b9 | icv1-fp45-tm403-3bb5b4de | 44.16 | 0.1654 | 0.1654 | 1.0000 |
+| W44fcd8648315 | icv1-fp45-tm403-3bb5b4de | 44.16 | 0.9432 | 0.9432 | 1.0000 |
+| W4cf80ccd0a66 | icv1-fp45-tm403-f3233fbe | 44.16 | 0.7987 | 0.7987 | 1.0000 |
+| W600e5ac5a3a6 | icv1-fp45-tm403-f3233fbe | 44.16 | 0.9624 | 0.9624 | 1.0000 |
+| W765ea53e07db | icv1-fp45-tm403-3bb5b4de | 44.16 | 1.1621 | 1.1621 | 1.0000 |
+| W7fec528ea222 | icv1-fp45-tm403-3bb5b4de | 44.16 | 0.3338 | 0.3338 | 1.0000 |
+| Wa6d85ac81f3b | icv1-fp45-tm403-f3233fbe | 44.16 | 1.7107 | 1.7107 | 1.0000 |
+| Wb6bf9a106378 | icv1-fp45-tm403-3bb5b4de | 44.16 | 0.1175 | 0.1175 | 1.0000 |
+| Wc31a4e41032b | icv1-fp45-tm403-f3233fbe | 44.16 | 0.5292 | 0.5292 | 1.0000 |
+| Wd3ba831c3761 | icv1-fp45-tm403-3bb5b4de | 44.16 | 0.6527 | 0.6527 | 1.0000 |
+| Webce68d140a1 | icv1-fp45-tm403-f3233fbe | 44.16 | 0.9816 | 0.9816 | 1.0000 |
+| Wef0b156ee064 | icv1-fp45-tm403-f3233fbe | 44.16 | 0.4428 | 0.4428 | 1.0000 |
+| Wf913ef91293b | icv1-fp45-tm403-3bb5b4de | 44.16 | 1.1165 | 1.1165 | 1.0000 |

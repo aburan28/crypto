@@ -1,0 +1,10 @@
+
+running 5 tests
+test tests::frozen_keys_include_every_seed_holdout_arm_and_repetition ... ok
+test tests::profile_parser_rejects_missing_zero_and_partial_thread_counts ... ok
+test tests::self_costs_exclude_inclusive_call_edges_and_resolve_late_names ... ok
+test tests::wrapped_incremental_summary_does_not_replace_the_file_totals ... ok
+test tests::instruction_gate_requires_noise_control_and_reports_regressions ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

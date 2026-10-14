@@ -1619,18 +1619,6 @@ mod tests {
             let (gen, gg) = find_a3_curve(bits, 3).unwrap();
             // Preserve the frozen generator's identity. Square-root implementations
             // can select its negative, a different representation of the same model.
-            let found = gen.canonical(gg);
-            let frozen = fc.canonical(g);
-            assert_eq!(
-                (gen.f.p, gen.n, gen.f.from_mont(gen.b), found.0),
-                (fc.f.p, fc.n, fc.f.from_mont(fc.b), frozen.0),
-            );
-            assert!(
-                found.1 == frozen.1 || found.1 == (fc.f.p - frozen.1) % fc.f.p,
-                "generated point must match the frozen generator up to sign"
-            );;;;;
-            let (x, y) = gen.canonical(gg);
-            let (expected_x, expected_y) = fc.canonical(g);
             assert_eq!(
                 (
                     gen.f.p,
@@ -1639,25 +1627,6 @@ mod tests {
                     gen.f.from_mont(gen.b)
                 ),
                 (fc.f.p, fc.n, fc.f.from_mont(fc.a), fc.f.from_mont(fc.b))
-            );
-            assert_eq!(
-                (
-                    gen.f.p,
-                    gen.n,
-                    gen.f.from_mont(gen.a),
-                    gen.f.from_mont(gen.b),
-                    x,
-                    y.min(gen.f.p - y),
-                ),
-                (
-                    fc.f.p,
-                    fc.n,
-                    fc.f.from_mont(fc.a),
-                    fc.f.from_mont(fc.b),
-                    expected_x,
-                    expected_y.min(fc.f.p - expected_y),
-                ),
-                "bits={bits}"
             );
             let (x, y) = gen.canonical(gg);
             let (expected_x, expected_y) = fc.canonical(g);

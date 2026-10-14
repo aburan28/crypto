@@ -5,8 +5,10 @@
 //! an exact coefficient modulo the subgroup order. Pivot reduction preserves
 //! the coefficients of the original public target and generator. A completed
 //! row is checked again as a group equation before it can enter linear
-//! algebra. This module does not discover partial relations or time a DLP.
+//! algebra. Bounded chained-S3 discovery uses disjoint, exact Frobenius
+//! domains and checks every accepted point equation in the curve group.
 
+use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use num_bigint::BigUint;
@@ -14,8 +16,15 @@ use num_traits::{One, Zero};
 
 use crate::binary_ecc::curve::point_neg;
 use crate::binary_ecc::{BinaryPoint, F2mElement};
+use crate::cryptanalysis::binary_semaev_chain_sat::{
+    frobenius_orbit_domain_size, ChainBuildError, ChainedS3Encoding,
+};
 use crate::cryptanalysis::ec_index_calculus::gaussian_eliminate_mod_n_particular;
-use crate::cryptanalysis::koblitz_index_calculus::{point_key, FrobeniusFactorBase, KoblitzCurve};
+use crate::cryptanalysis::koblitz_index_calculus::{
+    build_explicit_frobenius_point_factor_base, point_key, points_with_x, ChainS3Limits,
+    ChainS3Stats, FrobeniusFactorBase, KoblitzCurve,
+};
+use crate::cryptanalysis::sat::SolveResult;
 use crate::utils::mod_inverse;
 
 type PointKey = (BigUint, BigUint);
@@ -29,6 +38,441 @@ pub struct PartialCandidate {
     pub coef_b: BigUint,
     pub small_point_indices: Vec<usize>,
     pub residual_points: Vec<BinaryPoint>,
+}
+
+/// Two disjoint exact x-domains for small points and residual points.
+/// Construction is performed once per pair of bases, outside timed queries.
+pub struct MixedOrbitDomains<'a> {
+    curve: &'a KoblitzCurve,
+    small: &'a FrobeniusFactorBase,
+    small_reps: Vec<BigUint>,
+    residual_reps: Vec<BigUint>,
+    small_xs: BTreeSet<BigUint>,
+    residual_xs: BTreeSet<BigUint>,
+    small_index: HashMap<PointKey, usize>,
+    residual_index: HashMap<PointKey, usize>,
+}
+
+/// Materialise the residual signed-orbit suffix of two replayed, ordered bases.
+///
+/// The smaller point record and both of its orbit maps must be exact prefixes
+/// of the envelope. Rebuilding the suffix independently checks its closure and
+/// labels before it can be used as the second domain of `MixedOrbitDomains`.
+/// This does not infer partial-relation yield from the sizes of the two bases.
+pub fn build_exact_residual_suffix_factor_base(
+    curve: &KoblitzCurve,
+    small: &FrobeniusFactorBase,
+    envelope: &FrobeniusFactorBase,
+) -> Result<FrobeniusFactorBase, &'static str> {
+    let prefix_points = small.points.len();
+    let prefix_orbits = small.orbits.len();
+    let prefix_signed = small.signed_orbits.len();
+    if prefix_points == 0
+        || envelope.points.len() <= prefix_points
+        || envelope.orbits.len() <= prefix_orbits
+        || envelope.signed_orbits.len() <= prefix_signed
+        || small.orbit_of.len() != prefix_points
+        || small.signed_orbit_of.len() != prefix_points
+        || envelope.orbit_of.len() != envelope.points.len()
+        || envelope.signed_orbit_of.len() != envelope.points.len()
+        || envelope.points.get(..prefix_points) != Some(small.points.as_slice())
+        || envelope.orbits.get(..prefix_orbits) != Some(small.orbits.as_slice())
+        || envelope.signed_orbits.get(..prefix_signed) != Some(small.signed_orbits.as_slice())
+        || envelope.orbit_of.get(..prefix_points) != Some(small.orbit_of.as_slice())
+        || envelope.signed_orbit_of.get(..prefix_points) != Some(small.signed_orbit_of.as_slice())
+    {
+        return Err("smaller factor base is not an exact orbit-labelled prefix");
+    }
+    let residual = build_explicit_frobenius_point_factor_base(
+        curve,
+        envelope.points[prefix_points..].to_vec(),
+    )
+    .ok_or("residual suffix is not a complete signed-Frobenius base")?;
+    if residual.orbits.len() + prefix_orbits != envelope.orbits.len()
+        || residual.signed_orbits.len() + prefix_signed != envelope.signed_orbits.len()
+        || residual
+            .orbits
+            .iter()
+            .zip(&envelope.orbits[prefix_orbits..])
+            .any(|(local, full)| {
+                local.len() != full.len()
+                    || local
+                        .iter()
+                        .zip(full)
+                        .any(|(&index, &full_index)| index + prefix_points != full_index)
+            })
+        || residual
+            .signed_orbits
+            .iter()
+            .zip(&envelope.signed_orbits[prefix_signed..])
+            .any(|(local, full)| {
+                local.len() != full.len()
+                    || local
+                        .iter()
+                        .zip(full)
+                        .any(|(&index, &full_index)| index + prefix_points != full_index)
+            })
+        || residual
+            .orbit_of
+            .iter()
+            .zip(&envelope.orbit_of[prefix_points..])
+            .any(|(&(orbit, phase), &(full_orbit, full_phase))| {
+                orbit + prefix_orbits != full_orbit || phase != full_phase
+            })
+        || residual
+            .signed_orbit_of
+            .iter()
+            .zip(&envelope.signed_orbit_of[prefix_points..])
+            .any(
+                |(&(orbit, phase, negated), &(full_orbit, full_phase, full_negated))| {
+                    orbit + prefix_signed != full_orbit
+                        || phase != full_phase
+                        || negated != full_negated
+                },
+            )
+    {
+        return Err("residual suffix orbit labels differ from the envelope");
+    }
+    MixedOrbitDomains::new(curve, small, &residual)?;
+    Ok(residual)
+}
+
+impl<'a> MixedOrbitDomains<'a> {
+    fn checked_domain(
+        curve: &KoblitzCurve,
+        base: &FrobeniusFactorBase,
+    ) -> Result<(Vec<BigUint>, BTreeSet<BigUint>, HashMap<PointKey, usize>), &'static str> {
+        if !base.uses_ambient_basis()
+            || base.ell != curve.n
+            || base.subspace_basis.len() != curve.n as usize
+            || base.subspace_basis.iter().enumerate().any(|(bit, basis)| {
+                *basis != F2mElement::from_bit_positions(&[bit as u32], curve.n)
+            })
+            || base.signed_orbit_of.len() != base.points.len()
+        {
+            return Err("mixed orbit search requires an ambient signed-orbit base");
+        }
+        let xs: BTreeSet<BigUint> = base
+            .points
+            .iter()
+            .filter_map(|point| match point {
+                BinaryPoint::Affine { x, .. } => Some(x.to_biguint()),
+                BinaryPoint::Infinity => None,
+            })
+            .collect();
+        let mut reps = Vec::with_capacity(base.signed_orbits.len());
+        let mut closure = BTreeSet::new();
+        for orbit in &base.signed_orbits {
+            let Some(BinaryPoint::Affine { x, .. }) =
+                orbit.first().and_then(|&index| base.points.get(index))
+            else {
+                return Err("invalid signed-orbit representative");
+            };
+            reps.push(x.to_biguint());
+            let mut phase_x = x.clone();
+            for _ in 0..curve.n {
+                closure.insert(phase_x.to_biguint());
+                phase_x = phase_x.square_k_times(1, &curve.curve.irreducible);
+            }
+        }
+        reps.sort_unstable();
+        reps.dedup();
+        if reps.len() < 2 || reps.len() != base.signed_orbits.len() || closure != xs {
+            return Err("signed-orbit representatives do not describe the exact x-domain");
+        }
+        let index = base.index_map();
+        if index.len() != base.points.len() {
+            return Err("duplicate point in mixed orbit base");
+        }
+        Ok((reps, xs, index))
+    }
+
+    pub fn new(
+        curve: &'a KoblitzCurve,
+        small: &'a FrobeniusFactorBase,
+        residual: &'a FrobeniusFactorBase,
+    ) -> Result<Self, &'static str> {
+        if curve.k != 1
+            || !curve.frobenius_is_endomorphism
+            || curve
+                .lambda
+                .modpow(&BigUint::from(curve.n), &curve.subgroup_order)
+                != BigUint::one()
+        {
+            return Err("mixed orbit search requires Koblitz subgroup Frobenius");
+        }
+        let (small_reps, small_xs, small_index) = Self::checked_domain(curve, small)?;
+        let (residual_reps, residual_xs, residual_index) = Self::checked_domain(curve, residual)?;
+        if !small_xs.is_disjoint(&residual_xs) {
+            return Err("small and residual x-domains overlap");
+        }
+        Ok(Self {
+            curve,
+            small,
+            small_reps,
+            residual_reps,
+            small_xs,
+            residual_xs,
+            small_index,
+            residual_index,
+        })
+    }
+
+    fn lift(
+        &self,
+        xs: &[F2mElement],
+        small_summands: usize,
+        target: &BinaryPoint,
+    ) -> Option<(Vec<usize>, Vec<BinaryPoint>)> {
+        fn walk(
+            domains: &MixedOrbitDomains<'_>,
+            xs: &[F2mElement],
+            small_summands: usize,
+            depth: usize,
+            sum: &BinaryPoint,
+            small: &mut Vec<usize>,
+            residual: &mut Vec<BinaryPoint>,
+            target: &BinaryPoint,
+        ) -> bool {
+            if depth == xs.len() {
+                return sum == target
+                    && small.iter().all(|&index| {
+                        domains.small.points.get(index).is_some_and(|point| {
+                            domains.curve.mul(point, &domains.curve.subgroup_order)
+                                == BinaryPoint::Infinity
+                        })
+                    })
+                    && residual.iter().all(|point| {
+                        domains.curve.mul(point, &domains.curve.subgroup_order)
+                            == BinaryPoint::Infinity
+                    });
+            }
+            let index = if depth < small_summands {
+                &domains.small_index
+            } else {
+                &domains.residual_index
+            };
+            for point in points_with_x(&domains.curve.curve, &xs[depth]) {
+                let Some(&point_index) = index.get(&point_key(&point)) else {
+                    continue;
+                };
+                let next = domains.curve.add(sum, &point);
+                if depth < small_summands {
+                    small.push(point_index);
+                } else {
+                    residual.push(point.clone());
+                }
+                if walk(
+                    domains,
+                    xs,
+                    small_summands,
+                    depth + 1,
+                    &next,
+                    small,
+                    residual,
+                    target,
+                ) {
+                    return true;
+                }
+                if depth < small_summands {
+                    small.pop();
+                } else {
+                    residual.pop();
+                }
+            }
+            false
+        }
+        let mut small = Vec::with_capacity(small_summands);
+        let mut residual = Vec::with_capacity(xs.len() - small_summands);
+        walk(
+            self,
+            xs,
+            small_summands,
+            0,
+            &BinaryPoint::Infinity,
+            &mut small,
+            &mut residual,
+            target,
+        )
+        .then_some((small, residual))
+    }
+
+    /// Search one public source equation with either one or two residual
+    /// summands. `exhausted` means a cap or invalid model; `refuted` means
+    /// every identity pattern completed UNSAT after exact group lifting.
+    pub fn search(
+        &self,
+        source_id: u64,
+        coef_a: &BigUint,
+        coef_b: &BigUint,
+        public_target: &BinaryPoint,
+        small_summands: usize,
+        residual_summands: usize,
+        limits: ChainS3Limits,
+        order_first_pair: bool,
+    ) -> (Option<PartialCandidate>, ChainS3Stats) {
+        let mut stats = ChainS3Stats::default();
+        let Some(m) = small_summands.checked_add(residual_summands) else {
+            stats.exhausted = true;
+            return (None, stats);
+        };
+        if !(5..=6).contains(&m)
+            || small_summands < 3
+            || !(1..=2).contains(&residual_summands)
+            || limits.max_models == 0
+            || limits.conflict_budget == 0
+            || !self.curve.curve.is_on_curve(public_target)
+            || self.curve.mul(public_target, &self.curve.subgroup_order) != BinaryPoint::Infinity
+        {
+            stats.exhausted = true;
+            return (None, stats);
+        }
+        let small_size =
+            frobenius_orbit_domain_size(self.curve.n, small_summands, self.small_reps.len());
+        let residual_size =
+            frobenius_orbit_domain_size(self.curve.n, residual_summands, self.residual_reps.len());
+        let Some(domain_clauses) = small_size
+            .zip(residual_size)
+            .and_then(|(small, residual)| small.clauses.checked_add(residual.clauses))
+        else {
+            stats.exhausted = true;
+            return (None, stats);
+        };
+        if domain_clauses > limits.max_domain_clauses {
+            stats.exhausted = true;
+            return (None, stats);
+        }
+        stats.domain_clauses = domain_clauses;
+        let modulus = &self.curve.subgroup_order;
+        let a = coef_a % modulus;
+        let b = coef_b % modulus;
+        let target = self.curve.add(
+            &self.curve.mul(self.curve.generator(), &a),
+            &self.curve.mul(public_target, &b),
+        );
+        let target_x = match &target {
+            BinaryPoint::Affine { x, .. } => Some(x),
+            BinaryPoint::Infinity => None,
+        };
+        let domains: Vec<Vec<BigUint>> = (0..m)
+            .map(|position| {
+                if position < small_summands {
+                    self.small_reps.clone()
+                } else {
+                    self.residual_reps.clone()
+                }
+            })
+            .collect();
+        for identity_mask in 0..(1u32 << (m - 2)) {
+            if stats.conflicts >= limits.conflict_budget {
+                stats.exhausted = true;
+                return (None, stats);
+            }
+            let mut enc = match ChainedS3Encoding::build(
+                m,
+                &self.curve.curve.irreducible,
+                &self.curve.curve.b,
+                target_x,
+                identity_mask,
+                limits.max_variables,
+            ) {
+                Ok(enc) => enc,
+                Err(
+                    ChainBuildError::VariableCap { .. }
+                    | ChainBuildError::DomainClauseCap { .. }
+                    | ChainBuildError::Unsupported,
+                ) => {
+                    stats.exhausted = true;
+                    return (None, stats);
+                }
+            };
+            if enc
+                .constrain_frobenius_orbit_domains(
+                    &domains,
+                    limits.max_variables,
+                    limits.max_domain_clauses,
+                )
+                .map(|size| size.clauses)
+                != Ok(domain_clauses)
+                || (order_first_pair && enc.order_first_pair(limits.max_variables).is_err())
+            {
+                stats.exhausted = true;
+                return (None, stats);
+            }
+            stats.patterns_attempted += 1;
+            stats.peak_variables = stats.peak_variables.max(enc.solver.n_vars());
+            stats.peak_clauses = stats.peak_clauses.max(enc.solver.n_clauses());
+            stats.peak_xors = stats.peak_xors.max(enc.solver.n_xors());
+            let earlier_conflicts = stats.conflicts;
+            enc.solver.conflict_budget = limits.conflict_budget - earlier_conflicts;
+            loop {
+                stats.solver_calls += 1;
+                let outcome = enc.solver.solve();
+                stats.conflicts = earlier_conflicts.saturating_add(enc.solver.conflicts());
+                match outcome {
+                    SolveResult::Unsat => {
+                        stats.patterns_refuted += 1;
+                        break;
+                    }
+                    SolveResult::Unknown => {
+                        stats.exhausted = true;
+                        return (None, stats);
+                    }
+                    SolveResult::Sat => {
+                        let xs = enc.decode_summands();
+                        stats.models += 1;
+                        if !enc.verify_model()
+                            || xs.iter().enumerate().any(|(position, x)| {
+                                let allowed = if position < small_summands {
+                                    &self.small_xs
+                                } else {
+                                    &self.residual_xs
+                                };
+                                !allowed.contains(&x.to_biguint())
+                            })
+                        {
+                            stats.invalid_models += 1;
+                            stats.exhausted = true;
+                            return (None, stats);
+                        }
+                        if let Some((small_point_indices, residual_points)) =
+                            self.lift(&xs, small_summands, &target)
+                        {
+                            return (
+                                Some(PartialCandidate {
+                                    source_id,
+                                    coef_a: a,
+                                    coef_b: b,
+                                    small_point_indices,
+                                    residual_points,
+                                }),
+                                stats,
+                            );
+                        }
+                        stats.group_rejected_models += 1;
+                        if stats.models >= limits.max_models {
+                            stats.exhausted = true;
+                            return (None, stats);
+                        }
+                        let model = enc.solver.model();
+                        enc.solver.reset_search();
+                        let block: Vec<i32> = (0..m * self.curve.n as usize)
+                            .map(|i| {
+                                if model[i] {
+                                    -((i + 1) as i32)
+                                } else {
+                                    (i + 1) as i32
+                                }
+                            })
+                            .collect();
+                        enc.solver.add_clause(block);
+                    }
+                }
+            }
+        }
+        stats.refuted = true;
+        (None, stats)
+    }
 }
 
 /// Bounds on the graph rather than silent truncations of its algebra.
@@ -252,7 +696,7 @@ impl Reducer {
 /// separate gates.
 pub struct WideLargePrimeEliminator<'a> {
     curve: &'a KoblitzCurve,
-    base: &'a FrobeniusFactorBase,
+    base: Cow<'a, FrobeniusFactorBase>,
     target: BinaryPoint,
     base_index: HashMap<PointKey, usize>,
     reducer: Reducer,
@@ -264,6 +708,37 @@ impl<'a> WideLargePrimeEliminator<'a> {
     pub fn new(
         curve: &'a KoblitzCurve,
         base: &'a FrobeniusFactorBase,
+        target: BinaryPoint,
+        limits: LargePrimeLimits,
+    ) -> Result<Self, &'static str> {
+        Self::with_base(curve, Cow::Borrowed(base), target, limits)
+    }
+
+    /// [`new`](Self::new) over a base the eliminator owns, for a caller
+    /// that builds the signed-orbit base and the eliminator together
+    /// (the framework's large-prime collector).
+    pub fn new_owned(
+        curve: &'a KoblitzCurve,
+        base: FrobeniusFactorBase,
+        target: BinaryPoint,
+        limits: LargePrimeLimits,
+    ) -> Result<Self, &'static str> {
+        Self::with_base(curve, Cow::Owned(base), target, limits)
+    }
+
+    /// The signed-orbit base rows are written over.
+    pub fn base(&self) -> &FrobeniusFactorBase {
+        &self.base
+    }
+
+    /// The public target `Q` every row's `coef_b` multiplies.
+    pub fn target(&self) -> &BinaryPoint {
+        &self.target
+    }
+
+    fn with_base(
+        curve: &'a KoblitzCurve,
+        base: Cow<'a, FrobeniusFactorBase>,
         target: BinaryPoint,
         limits: LargePrimeLimits,
     ) -> Result<Self, &'static str> {
@@ -290,11 +765,12 @@ impl<'a> WideLargePrimeEliminator<'a> {
                 return Err("signed orbit representative is outside the subgroup");
             }
         }
+        let base_index = base.index_map();
         Ok(Self {
             curve,
             base,
             target,
-            base_index: base.index_map(),
+            base_index,
             reducer: Reducer::new(modulus.clone(), limits)?,
             seen_sources: BTreeSet::new(),
             stats: LargePrimeStats::default(),
@@ -582,6 +1058,149 @@ mod tests {
     }
 
     #[test]
+    fn mixed_orbit_domains_lift_disjoint_partial_and_fail_closed_on_caps() {
+        let curve = KoblitzCurve::new(1, 7).unwrap();
+        let mut selected: Vec<(u32, F2mElement)> = Vec::new();
+        let mut seen = BTreeSet::new();
+        for scalar in 1..200u32 {
+            let BinaryPoint::Affine { x, .. } =
+                curve.mul(curve.generator(), &BigUint::from(scalar))
+            else {
+                continue;
+            };
+            let mut phase_x = x.clone();
+            let mut orbit = Vec::new();
+            for _ in 0..curve.n {
+                orbit.push(phase_x.to_biguint());
+                phase_x = curve.frobenius_x(&phase_x);
+            }
+            let key = orbit.into_iter().min().unwrap();
+            if seen.insert(key) {
+                selected.push((scalar, x));
+            }
+            if selected.len() == 4 {
+                break;
+            }
+        }
+        assert_eq!(selected.len(), 4);
+        let small = build_explicit_frobenius_orbit_factor_base(
+            &curve,
+            &[selected[0].1.clone(), selected[1].1.clone()],
+        )
+        .unwrap();
+        let residual = build_explicit_frobenius_orbit_factor_base(
+            &curve,
+            &[selected[2].1.clone(), selected[3].1.clone()],
+        )
+        .unwrap();
+        let envelope = build_explicit_frobenius_point_factor_base(
+            &curve,
+            small
+                .points
+                .iter()
+                .chain(&residual.points)
+                .cloned()
+                .collect(),
+        )
+        .unwrap();
+        let extracted = build_exact_residual_suffix_factor_base(&curve, &small, &envelope).unwrap();
+        assert_eq!(extracted.points, residual.points);
+        assert_eq!(extracted.signed_orbits, residual.signed_orbits);
+        let mut changed_prefix = envelope.clone();
+        changed_prefix.points.swap(0, small.points.len());
+        assert!(build_exact_residual_suffix_factor_base(&curve, &small, &changed_prefix).is_err());
+        let mut changed_suffix_label = envelope.clone();
+        changed_suffix_label.signed_orbit_of[small.points.len()].0 = 0;
+        assert!(
+            build_exact_residual_suffix_factor_base(&curve, &small, &changed_suffix_label).is_err()
+        );
+        let domains = MixedOrbitDomains::new(&curve, &small, &residual).unwrap();
+        let target = curve.mul(curve.generator(), &BigUint::from(17u32));
+        let xs = vec![
+            selected[0].1.clone(),
+            selected[1].1.clone(),
+            selected[0].1.clone(),
+            selected[1].1.clone(),
+            selected[2].1.clone(),
+        ];
+        let a = BigUint::from(selected[0].0 * 2 + selected[1].0 * 2 + selected[2].0);
+        let sum = curve.mul(curve.generator(), &a);
+        let (small_indices, residual_points) = domains.lift(&xs, 4, &sum).unwrap();
+        assert_eq!(small_indices.len(), 4);
+        assert_eq!(residual_points.len(), 1);
+        let mut graph = WideLargePrimeEliminator::new(
+            &curve,
+            &small,
+            target.clone(),
+            LargePrimeLimits::default(),
+        )
+        .unwrap();
+        assert!(matches!(
+            graph
+                .feed(PartialCandidate {
+                    source_id: 1,
+                    coef_a: a.clone(),
+                    coef_b: BigUint::zero(),
+                    small_point_indices: small_indices,
+                    residual_points,
+                })
+                .unwrap(),
+            FeedOutcome::PivotStored { .. }
+        ));
+        assert!(MixedOrbitDomains::new(&curve, &small, &small).is_err());
+        let capped = ChainS3Limits {
+            max_variables: 1,
+            max_domain_clauses: 1,
+            max_models: 1,
+            conflict_budget: 1,
+        };
+        let (candidate, stats) =
+            domains.search(2, &a, &BigUint::zero(), &target, 4, 1, capped, true);
+        assert!(candidate.is_none());
+        assert!(stats.exhausted);
+        assert!(!stats.refuted);
+        assert_eq!(stats.patterns_attempted, 0);
+
+        let bounded = ChainS3Limits {
+            max_variables: 20_000,
+            max_domain_clauses: 20_000,
+            max_models: 100,
+            conflict_budget: 100_000,
+        };
+        let (candidate, stats) =
+            domains.search(3, &a, &BigUint::zero(), &target, 4, 1, bounded, true);
+        assert!(candidate.is_some(), "bounded SAT search: {stats:?}");
+        assert!(stats.models > 0);
+        assert!(matches!(
+            graph.feed(candidate.unwrap()).unwrap(),
+            FeedOutcome::PivotStored { .. }
+        ));
+
+        let double_a =
+            BigUint::from(selected[0].0 * 2 + selected[1].0 + selected[2].0 + selected[3].0);
+        let double_xs = vec![
+            selected[0].1.clone(),
+            selected[1].1.clone(),
+            selected[0].1.clone(),
+            selected[2].1.clone(),
+            selected[3].1.clone(),
+        ];
+        let double_sum = curve.mul(curve.generator(), &double_a);
+        let (double_small, double_residual) = domains.lift(&double_xs, 3, &double_sum).unwrap();
+        assert_eq!(double_small.len(), 3);
+        assert_eq!(double_residual.len(), 2);
+        graph
+            .feed(PartialCandidate {
+                source_id: 4,
+                coef_a: double_a,
+                coef_b: BigUint::zero(),
+                small_point_indices: double_small,
+                residual_points: double_residual,
+            })
+            .unwrap();
+    }
+
+    #[test]
     fn full_width_double_large_prime_cycle_has_exact_source_coefficients() {
         let modulus: BigUint = (BigUint::one() << 81usize) - BigUint::one();
         let mut reducer = Reducer::new(modulus.clone(), LargePrimeLimits::default()).unwrap();
@@ -663,7 +1282,8 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = curve.generator() else {
             panic!("generator is affine");
         };
-        let base = build_explicit_frobenius_orbit_factor_base(&curve, &[x.clone()]).unwrap();
+        let base =
+            build_explicit_frobenius_orbit_factor_base(&curve, std::slice::from_ref(x)).unwrap();
         let target = curve.mul(curve.generator(), &BigUint::from(17u32));
         let mut graph =
             WideLargePrimeEliminator::new(&curve, &base, target, LargePrimeLimits::default())
@@ -724,7 +1344,7 @@ mod tests {
         );
         assert_eq!(base.unknowns(), 1);
         assert!(graph
-            .solve_completed_full_rank(&[full.clone()])
+            .solve_completed_full_rank(std::slice::from_ref(&full))
             .unwrap()
             .is_none());
         let FeedOutcome::Full(direct) = graph

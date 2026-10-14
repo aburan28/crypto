@@ -490,11 +490,13 @@ pub(super) fn chain_capacity_cli(
     root: &Path, columns: usize, policy: &str, seed: u64, m: usize,
     identity_mask: u32, max_variables: u32, max_domain_clauses: usize,
     memory_mib: u64, output: &Path, frobenius_orbits: bool,
+    order_first_pair: bool,
 ) -> Result<Value> {
     if !([64, 256, 600].contains(&columns) || V2_SIZES.contains(&columns))
         || !(5..=6).contains(&m)
         || identity_mask >= (1u32 << (m - 2))
-        || max_variables == 0 || max_domain_clauses == 0 {
+        || max_variables == 0 || max_domain_clauses == 0
+        || (order_first_pair && !frobenius_orbits) {
         return Err("chained-S3 capacity parameters outside supported domain".into());
     }
     let memory_limit_bytes = checked_cgroup_memory_limit(memory_mib)?;
@@ -533,6 +535,7 @@ pub(super) fn chain_capacity_cli(
     let required_variables = chain_s3_max_variables(83, m)
         .ok_or("unsupported chained-S3 arity")?
         .checked_add(orbit_size.map_or(0, |size| size.variables))
+        .and_then(|value| value.checked_add(if order_first_pair { 82 } else { 0 }))
         .ok_or("chained-S3 variable count overflow")?;
     let required_domain_clauses = if let Some(size) = orbit_size {
         size.clauses
@@ -559,6 +562,10 @@ pub(super) fn chain_capacity_cli(
             built.constrain_summands(&codes, max_domain_clauses)
                 .map_err(|_| "chained-S3 finite-domain install failed after preflight")?;
         }
+        if order_first_pair {
+            built.order_first_pair(max_variables)
+                .map_err(|_| "chained-S3 first-pair order failed after preflight")?;
+        }
         enc = Some(built);
         "PASS_model_construction_only"
     };
@@ -568,7 +575,8 @@ pub(super) fn chain_capacity_cli(
         "schema":"n83.chain-s3-capacity-worker/v1", "study":STUDY, "status":status,
         "curve_a":0, "fixture":0, "orbit_columns":columns, "policy":policy, "seed":seed,
         "summands":m, "identity_mask":identity_mask, "object":row["object"],
-        "domain_encoding":if frobenius_orbits { "frobenius_orbit_phase" } else { "coordinate_trie" },
+        "domain_encoding":if order_first_pair { "frobenius_orbit_phase_ordered_first_pair" }
+            else if frobenius_orbits { "frobenius_orbit_phase" } else { "coordinate_trie" },
         "domain_representatives":if frobenius_orbits { Some(representatives.len()) } else { None },
         "point_set_blake3":row["point_set_blake3"], "panel_manifest_blake3":manifest_hash,
         "public_corpus_canonical_json_blake3":corpus_hash,
@@ -889,6 +897,7 @@ pub(super) fn run_chain_cli(
     root: &Path, fixture_root: &Path, columns: usize, policy: &str, seed: u64, m: usize,
     max_trials: usize, limits: ChainS3Limits, budget_seconds: u64,
     memory_mib: u64, run_dir: &Path, frobenius_orbits: bool,
+    order_first_pair: bool,
 ) -> Result<Value> {
     if ![64, 256, 600].contains(&columns) && !V2_SIZES.contains(&columns)
         || !fixture_root.join("probe-corpus.json").is_file()
@@ -903,6 +912,7 @@ pub(super) fn run_chain_cli(
         || limits.conflict_budget == 0 || limits.conflict_budget > 10_000_000_000
         || budget_seconds == 0 || budget_seconds > 7200
         || memory_mib < 128 || memory_mib > 65536
+        || (order_first_pair && !frobenius_orbits)
     {
         return Err("primary chained-S3 search caps or base selection outside supported domain".into());
     }
@@ -912,7 +922,12 @@ pub(super) fn run_chain_cli(
         policy, seed, fixture_root, limits, memory_limit_bytes, source_commit,
         source_attestation_mode,
     };
-    let strategy = if frobenius_orbits { "orbit-chain-s3" } else { "chain-s3" };
+    let strategy = match (frobenius_orbits, order_first_pair) {
+        (false, false) => "chain-s3",
+        (true, false) => "orbit-chain-s3",
+        (true, true) => "ordered-orbit-chain-s3",
+        (false, true) => unreachable!("checked above"),
+    };
     run_with_config(root, columns, m, strategy, max_trials, budget_seconds, run_dir, Some(&config))
 }
 
@@ -933,6 +948,8 @@ fn run_with_config(
         "chain-s3" if chain.is_some() && (5..=6).contains(&m) => DecompositionStrategy::ChainedS3,
         "orbit-chain-s3" if chain.is_some() && (5..=6).contains(&m) =>
             DecompositionStrategy::ChainedS3FrobeniusOrbit,
+        "ordered-orbit-chain-s3" if chain.is_some() && (5..=6).contains(&m) =>
+            DecompositionStrategy::ChainedS3FrobeniusOrbitOrdered,
         _ => return Err("unsupported or unguarded primary strategy".into()),
     };
     if budget_seconds == 0 || budget_seconds > 86_400 {
@@ -1427,7 +1444,7 @@ mod tests {
                 &root, &root, 64, "public_x_hash", SEEDS[0], 5, 1,
                 ChainS3Limits { max_variables: 0, max_domain_clauses: 1,
                     max_models: 1, conflict_budget: 1 },
-                1, 256, &invalid_caps, orbit_domain,
+                1, 256, &invalid_caps, orbit_domain, false,
             ).unwrap_err();
             assert!(error.to_string().contains("outside supported domain"));
             assert!(!invalid_caps.exists());

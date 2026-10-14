@@ -3,6 +3,12 @@ name: Compact-orbit n61 isolated batch panel
 on:
   pull_request:
     paths:
+      - 'tools/isolated_bench.py'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - '.github/workflows/compact-orbit-n61-isolated.yml'
       - 'research/sat_factor_base_review_20260908/autolab/**'
   workflow_dispatch:
@@ -23,10 +29,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   validate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -59,6 +69,7 @@ jobs:
             tools/curve_identity.py
             tools/isolated_bench.py
             .github/workflows/compact-orbit-n61-isolated.yml
+      - uses: Swatinem/rust-cache@v2
       - name: Harness tests and panel guards
         run: |
           cd research/sat_factor_base_review_20260908/autolab
@@ -72,7 +83,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     needs: validate
     runs-on: ubuntu-24.04
-    timeout-minutes: 300
+    timeout-minutes: 480
     steps:
       - uses: actions/checkout@v4
         with:
@@ -101,6 +112,7 @@ jobs:
             tools/curve_identity.py
             tools/isolated_bench.py
             .github/workflows/compact-orbit-n61-isolated.yml
+      - uses: Swatinem/rust-cache@v2
       - run: cargo build --release --locked --example koblitz_orbit_dlp_fast --example koblitz_rho_batch_ks_v2_n61
       - name: Run the panel through the autolab on a reserved core
         id: run

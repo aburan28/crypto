@@ -1,0 +1,63 @@
+icv1-fp16-t295-8d3c3165 r=53117 log2r=15.70 n'=14 ℓ=42 ℓ'=21 d_auto=3 eq4(d_auto)=1.0000 ds=[3]
+  zm d=3 t0 ops=669313 covered=97152 verified=true 125ms by="signature_collision"
+  zm d=3 t1 ops=313540 covered=null verified=true 2ms by="dense_zero_entry"
+  zm d=3 t2 ops=492018 covered=44528 verified=true 9ms by="signature_collision"
+  zm d=3 t3 ops=830364 covered=145728 verified=true 83ms by="signature_collision"
+  zm d=3 t4 ops=486265 covered=42504 verified=true 8ms by="signature_collision"
+  zm d=3 t5 ops=520459 covered=52624 verified=true 9ms by="signature_collision"
+  zm d=3 t6 ops=607461 covered=78936 verified=true 10ms by="signature_collision"
+  zm d=3 t7 ops=586336 covered=72864 verified=true 7ms by="signature_collision"
+icv1-fp18-tm337-d28d5e09 r=212437 log2r=17.70 n'=16 ℓ=48 ℓ'=24 d_auto=3 eq4(d_auto)=1.0000 ds=[3]
+  zm d=3 t0 ops=2741436 covered=663975 verified=true 219ms by="signature_collision"
+  zm d=3 t1 ops=1329491 covered=234000 verified=true 24ms by="signature_collision"
+  zm d=3 t2 ops=1636951 covered=327600 verified=true 122ms by="signature_collision"
+  zm d=3 t3 ops=1166158 covered=184275 verified=true 28ms by="signature_collision"
+  zm d=3 t4 ops=2203889 covered=500175 verified=true 263ms by="signature_collision"
+  zm d=3 t5 ops=759761 covered=61425 verified=true 5ms by="signature_collision"
+  zm d=3 t6 ops=1772427 covered=368550 verified=true 182ms by="signature_collision"
+  zm d=3 t7 ops=673885 covered=35100 verified=true 12ms by="signature_collision"
+icv1-fp20-t727-cd198a38 r=562427 log2r=19.10 n'=18 ℓ=54 ℓ'=27 d_auto=3 eq4(d_auto)=1.0000 ds=[3]
+  zm d=3 t0 ops=1072355 covered=64960 verified=true 33ms by="signature_collision"
+  zm d=3 t1 ops=2367406 covered=462840 verified=true 230ms by="signature_collision"
+  zm d=3 t2 ops=2712018 covered=568400 verified=true 203ms by="signature_collision"
+  zm d=3 t3 ops=2341226 covered=454720 verified=true 337ms by="signature_collision"
+  zm d=3 t4 ops=4137319 covered=1006880 verified=true 436ms by="signature_collision"
+  zm d=3 t5 ops=914577 covered=16240 verified=true 7ms by="signature_collision"
+  zm d=3 t6 ops=6303986 covered=1672720 verified=true 870ms by="signature_collision"
+  zm d=3 t7 ops=3385360 covered=775460 verified=true 293ms by="signature_collision"
+icv1-fp22-tm1385-475dcb5f r=2435809 log2r=21.22 n'=20 ℓ=60 ℓ'=30 d_auto=3 eq4(d_auto)=0.9999 ds=[3]
+  zm d=3 t0 ops=10463732 covered=2848032 verified=true 1689ms by="signature_collision"
+  zm d=3 t1 ops=21322702 covered=6214384 verified=true 4006ms by="signature_collision"
+  zm d=3 t2 ops=9317429 covered=2493392 verified=true 1634ms by="signature_collision"
+  zm d=3 t3 ops=17026314 covered=4883120 verified=true 2869ms by="signature_collision"
+  zm d=3 t4 ops=8737129 covered=2313344 verified=true 1685ms by="signature_collision"
+  zm d=3 t5 ops=3826961 covered=791120 verified=true 616ms by="signature_collision"
+  zm d=3 t6 ops=1415575 covered=43648 verified=true 7ms by="signature_collision"
+  zm d=3 t7 ops=2012780 covered=229152 verified=true 103ms by="signature_collision"
+icv1-fp24-t1059-6df599df r=16482251 log2r=23.97 n'=22 ℓ=66 ℓ'=33 d_auto=3 eq4(d_auto)=0.9059 ds=[3]
+  zm d=3 t0 ops=26341841 covered=7654080 verified=true 5363ms by="signature_collision"
+  zm d=3 t1 ops=58163209 covered=17585820 verified=true 12466ms by="signature_collision"
+  zm d=3 t2 ops=31720207 covered=9331980 verified=true 7997ms by="signature_collision"
+  zm d=3 t3 ops=16393893 covered=4548180 verified=true 3059ms by="signature_collision"
+  zm d=3 t4 ops=6922620 covered=1592220 verified=true 2177ms by="signature_collision"
+  zm d=3 t5 ops=9095381 covered=2270520 verified=true 2497ms by="signature_collision"
+  zm d=3 t6 ops=16850141 covered=4690980 verified=true 4190ms by="signature_collision"
+  zm d=3 t7 ops=34785488 covered=10288740 verified=true 8252ms by="signature_collision"
+icv1-fp26-tm1775-7e8fb6df r=42653927 log2r=25.35 n'=24 ℓ=72 ℓ'=36 d_auto=4 eq4(d_auto)=1.0000 ds=[4]
+  zm d=4 t0 ops=428262202 covered=144122030 verified=true 163033ms by="signature_collision"
+  zm d=4 t1 ops=107390736 covered=35550710 verified=true 48698ms by="signature_collision"
+  zm d=4 t2 ops=599197109 covered=201971900 verified=true 174097ms by="signature_collision"
+  zm d=4 t3 ops=382631808 covered=128677120 verified=true 54558ms by="signature_collision"
+  zm d=4 t4 ops=543767816 covered=183236950 verified=true 140685ms by="signature_collision"
+  zm d=4 t5 ops=105035497 covered=34728200 verified=true 19448ms by="signature_collision"
+  zm d=4 t6 ops=7756099 covered=1827800 verified=true 859ms by="signature_collision"
+  zm d=4 t7 ops=158443971 covered=52823420 verified=true 27040ms by="signature_collision"
+wrote scaling.json
+fit rho.negation: slope 0.377 t-CI [0.350,0.404] boot-CI [0.350,0.404] n=192
+fit zero_minor.guess_determine(d=3): slope 0.631 t-CI [0.528,0.734] boot-CI [0.542,0.717] n=40
+fit zero_minor.guess_determine(d=3) [d-subsets covered]: slope 0.761 t-CI [0.568,0.955] boot-CI [0.638,0.885] n=39
+fit zero_minor.guess_determine(d=3) [search phases only]: slope 0.745 t-CI [0.562,0.928] boot-CI [0.626,0.866] n=39
+fit zero_minor.guess_determine(d=4): slope 1.000 t-CI [-541873100485679.812,541873100485681.812] boot-CI [-1.500,1.125] n=8
+fit zero_minor.guess_determine(d=4) [d-subsets covered]: slope 0.500 t-CI [-584389488513435.125,584389488513436.125] boot-CI [-1.000,1.625] n=8
+fit zero_minor.guess_determine(d=4) [search phases only]: slope 0.750 t-CI [-586603070102664.250,586603070102665.750] boot-CI [-1.000,0.875] n=8
+EXIT 0

@@ -1,0 +1,13 @@
+Working directory: /workspace/crypto-integration/docs/ecdlp-surfaces/certificates
+source /workspace/integration-env.sh
+export CARGO_BUILD_JOBS=2
+export CARGO_TARGET_DIR=/tmp/crypto-surfaces-validation-target
+nice -n 10 cargo fmt --all -- --check
+nice -n 10 cargo test --release --locked --offline
+nice -n 10 cargo clippy --locked --offline --all-targets -- -D warnings
+nice -n 10 cargo run --release --locked --offline -- /tmp/crypto-surface-certificates-validation/fixtures
+
+Byte-for-byte compare every generated fixture to the corresponding existing
+../evidence/{embedding_identity,quadric_determinant,identity_replay,curve_record}.json.
+Fixtures are retained under /tmp; frozen evidence is not overwritten.
+This is same-host native replay, not independent-host evidence or a new Lean proof.

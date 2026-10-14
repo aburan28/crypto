@@ -1,0 +1,4 @@
+# Preserve byte-exact terminal receipts, including their trailing blank lines.
+receipts/*.log whitespace=-blank-at-eof
+receipts/*.stdout whitespace=-blank-at-eof
+receipts/*.stderr whitespace=-blank-at-eof

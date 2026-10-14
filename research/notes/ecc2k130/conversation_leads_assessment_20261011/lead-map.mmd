@@ -1,0 +1,12 @@
+flowchart LR
+    A[Public point and fixed curve] --> B[Factor base and index setup]
+    B --> C[Ordinary relation search]
+    C --> D[Useful rank and factor logs]
+    D --> E[Target decomposition]
+    E --> F[Verified scalar]
+    R[Same-point automorphism-aware rho] --> F
+    L1[Compact orbit and fixed-useful base] --> B
+    L2[Higher-arity target-coupled join] --> C
+    L3[Early-prunable SAT / F4 / F5] --> C
+    L4[Cover or isogeny with explicit map] --> A
+    L5[Hardware and multi-target reuse] --> B

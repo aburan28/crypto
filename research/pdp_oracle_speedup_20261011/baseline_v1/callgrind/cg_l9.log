@@ -1,0 +1,12 @@
+==11687== Callgrind, a call-graph generating cache profiler
+==11687== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==11687== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==11687== Command: /tmp/ps0_bin/pdp_speedup_A one --l 9 --corpus research/pdp_oracle_speedup_20261011/baseline_v1/corpus/corpus_l9.txt
+==11687== 
+==11687== For interactive control, run 'callgrind_control -h'.
+l=9 pairs=131328 found=false
+==11687== 
+==11687== Events    : Ir
+==11687== Collected : 337453547
+==11687== 
+==11687== I   refs:      337,453,547

@@ -1,0 +1,70 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Large-prime conductor-gap IC follow-up: ell=8209, 29-bit field",
+  "description": "Replication using the first archived floor and the crater only; fresh independent one-target workloads, no explicit isogeny or cross-curve target transport. Counts primary, wall descriptive.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "prime_explicit",
+        "p": 320092037,
+        "a": 254576120,
+        "b": 276414759,
+        "group_order": 320091991,
+        "r": 320091991,
+        "gx": 1,
+        "gy": 23879176
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 320092037,
+        "a": 101186781,
+        "b": 57596093,
+        "group_order": 320091991,
+        "r": 320091991,
+        "gx": 0,
+        "gy": 112219098
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 2026101201
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "rho-neg-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-mitm",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=256",
+          "oracle": "mitm:m=2,negation_folded=1",
+          "linalg": "structured-gauss",
+          "targets": "walk",
+          "max_trials": "100000000",
+          "solver_budget_seconds": "0"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 20261012,
+    "isolation_required": "L2",
+    "timeout_seconds": 1200
+  }
+}

@@ -1,0 +1,8 @@
+Captured output excerpt; command used the workflow's complete pinned-root list and original freeze/preflight/tests/optional-archive commands.
+FROZEN_WORKFLOW_METADATA_VIEW {"workflow":".github/workflows/n53-target-cyclic-rank.yml","revision":"aa0cee7bd1769222e5706e61b64478d5aad6d573","live_workflow_sha256":"ed39fd465726a8aa63d384dfc5cf66a0dd0a09cfdc8bebc34ebb4e0852fcc56b","view_workflow_sha256":"45c881555bcc8ff6f34098ec909773b4aff3b3a7e4ea3cd8207415e28ad5a53b","scope":"only workflow scheduling metadata substituted; current source/evidence copied unchanged; original replay workflow digest refers to this view"}
+REPLAY_AND_ORIGINAL_FREEZE_PASS
+Traceback (most recent call last):
+  ...
+AssertionError: source hash drift: cargo_lock
+exit status: 1
+Known pre-existing blocker; no new n53 scientific result asserted.

@@ -1,0 +1,39 @@
+warning: unused import: `crate::cryptanalysis::binary_semaev::binary_semaev_s3`
+   --> src/cryptanalysis/semaev_sat.rs:105:5
+    |
+105 | use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `projected`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:8804:10
+     |
+8804 |     let (projected, _) = project_by_frobenius_orbits_generic(kc, fb);
+     |          ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_projected`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `crypto` (lib test) generated 2 warnings (run `cargo fix --lib -p crypto --tests` to apply 2 suggestions)
+    Finished `release` profile [optimized] target(s) in 0.07s
+     Running unittests src/lib.rs (target/release/deps/crypto_lib-dc60caf0642b04d8)
+
+running 15 tests
+test cryptanalysis::jv_cover::tests::charpoly_satisfies_cayley_hamilton_and_has_the_right_roots ... ok
+test cryptanalysis::jv_cover::tests::cover_map_lands_on_the_curve ... ok
+test cryptanalysis::jv_cover::tests::distinguished_point_rho_finds_the_planted_logarithm ... ok
+test cryptanalysis::jv_cover::tests::instance_transfers_the_dlp ... ok
+test cryptanalysis::jv_cover::tests::jacobian_group_law ... ok
+test cryptanalysis::jv_cover::tests::jacobian_scalar_beyond_u128 ... ok
+test cryptanalysis::jv_cover::tests::nagao_finds_planted_six_sums_and_agrees_with_the_oracle ... ok
+test cryptanalysis::jv_cover::tests::polynomial_gcd_and_division ... ok
+test cryptanalysis::jv_cover::tests::replayed_f4_agrees_with_the_full_solver_and_the_oracle ... ok
+test cryptanalysis::jv_cover::tests::solver_is_exact_on_1500_planted_sums_at_p61 ... ignored
+test cryptanalysis::jv_cover::tests::stopped_f4_agrees_with_the_full_solver_and_the_oracle ... ok
+test cryptanalysis::jv_cover::tests::the_solver_loses_no_rational_solution_at_small_p ... ok
+test cryptanalysis::jv_cover::tests::tower_arithmetic ... ok
+test cryptanalysis::jv_cover::tests::tower_field_and_curve_scalars_beyond_u64 ... ok
+test cryptanalysis::jv_cover::tests::transfer_is_a_homomorphism_into_the_jacobian_over_fq ... ok
+
+test result: ok. 14 passed; 0 failed; 1 ignored; 0 measured; 4000 filtered out; finished in 18.54s
+

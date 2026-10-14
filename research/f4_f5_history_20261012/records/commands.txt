@@ -1,0 +1,21 @@
+Native preparation and validation (Rust 1.99.0, standalone locked package):
+cargo test --locked --offline --manifest-path tools/groebner-history/Cargo.toml --target-dir /workspace/scratch/groebner-history-target
+cargo clippy --locked --offline --manifest-path tools/groebner-history/Cargo.toml --target-dir /workspace/scratch/groebner-history-target --all-targets -- -D warnings
+cargo build --locked --offline --release --manifest-path tools/groebner-history/Cargo.toml --target-dir /workspace/scratch/groebner-history-target
+/workspace/scratch/groebner-history-target/release/groebner-history prepare --history research/f4_f5_history_20261012/records/history --groups docs/perf/groebner-groups.json --allocation-index docs/perf/f4-f5-allocation-history.json --root . --out /workspace/scratch/f4-f5-history-plot-data.json
+
+Rendering only (Matplotlib 3.10.8, Typst 0.15.0):
+/tmp/f4-f5-report-venv/bin/python scripts/perf/render_groebner_history.py --data /workspace/scratch/f4-f5-history-plot-data.json --out research/f4_f5_history_20261012/reports/run-20261012T0009Z
+/tmp/f4-f5-report-venv/bin/python scripts/perf/render_groebner_history.py --data /workspace/scratch/f4-f5-history-plot-data.json --out /workspace/scratch/groebner-history-render-recheck
+cmp each generated file against the second output directory
+pdftoppm -scale-to 1600 -png each.pdf /workspace/scratch/groebner-pdf-inspection/name
+
+Repository verification (no library changes):
+timeout --signal=TERM --kill-after=10s 1200s env RAYON_NUM_THREADS=1 cargo test --locked --release --lib -- --test-threads=3
+cargo test --locked --release --lib cryptanalysis::pollard_collab -- --test-threads=3
+cargo test --locked --release --lib cryptanalysis::jv_cover::tests -- --test-threads=1
+cargo test --locked --release --lib -- --list
+
+Original history imports: GitHub contents API, decoded bytes; git hash-object and wc -c checked against import-manifest.json.
+Workflow YAML checked with PyYAML (configuration parsing only).
+No new timing or allocation benchmark was run by this task.

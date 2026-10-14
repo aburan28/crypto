@@ -1,0 +1,552 @@
+{
+  "schema": "identity.certificate/v1",
+  "id": "IDC1h81f0f7e9f3a5f2da",
+  "statement": {
+    "name": "weak-twist normal form: f(beta t) = beta^5 g(t)",
+    "source": "research/weak_subfield_hyperelliptic_decomposition_20261012/README.md, Lemma 1; Bhati-Singh, A new perspective on the decomposition in the Jacobian of small genus hyperelliptic curve, Eq. (11) and (16)",
+    "variables": [
+      "beta",
+      "t",
+      "g0",
+      "g1",
+      "g2",
+      "g3",
+      "g4"
+    ],
+    "degree_bound": 10,
+    "lhs": {
+      "op": "add",
+      "args": [
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "beta"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "beta"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "beta"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "beta"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "beta"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "args": "g0"
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "beta"
+                },
+                {
+                  "op": "var",
+                  "args": "beta"
+                },
+                {
+                  "op": "var",
+                  "args": "beta"
+                },
+                {
+                  "op": "var",
+                  "args": "beta"
+                },
+                {
+                  "op": "var",
+                  "args": "beta"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": []
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "args": "g1"
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "beta"
+                },
+                {
+                  "op": "var",
+                  "args": "beta"
+                },
+                {
+                  "op": "var",
+                  "args": "beta"
+                },
+                {
+                  "op": "var",
+                  "args": "beta"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "beta"
+                    },
+                    {
+                      "op": "var",
+                      "args": "t"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "args": "g2"
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "beta"
+                },
+                {
+                  "op": "var",
+                  "args": "beta"
+                },
+                {
+                  "op": "var",
+                  "args": "beta"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "beta"
+                    },
+                    {
+                      "op": "var",
+                      "args": "t"
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "beta"
+                    },
+                    {
+                      "op": "var",
+                      "args": "t"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "args": "g3"
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "beta"
+                },
+                {
+                  "op": "var",
+                  "args": "beta"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "beta"
+                    },
+                    {
+                      "op": "var",
+                      "args": "t"
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "beta"
+                    },
+                    {
+                      "op": "var",
+                      "args": "t"
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "beta"
+                    },
+                    {
+                      "op": "var",
+                      "args": "t"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "args": "g4"
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "beta"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "beta"
+                    },
+                    {
+                      "op": "var",
+                      "args": "t"
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "beta"
+                    },
+                    {
+                      "op": "var",
+                      "args": "t"
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "beta"
+                    },
+                    {
+                      "op": "var",
+                      "args": "t"
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "beta"
+                    },
+                    {
+                      "op": "var",
+                      "args": "t"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "rhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "args": "beta"
+            },
+            {
+              "op": "var",
+              "args": "beta"
+            },
+            {
+              "op": "var",
+              "args": "beta"
+            },
+            {
+              "op": "var",
+              "args": "beta"
+            },
+            {
+              "op": "var",
+              "args": "beta"
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "g0"
+                },
+                {
+                  "op": "mul",
+                  "args": []
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "g1"
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "t"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "g2"
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "t"
+                    },
+                    {
+                      "op": "var",
+                      "args": "t"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "g3"
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "t"
+                    },
+                    {
+                      "op": "var",
+                      "args": "t"
+                    },
+                    {
+                      "op": "var",
+                      "args": "t"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "g4"
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "t"
+                    },
+                    {
+                      "op": "var",
+                      "args": "t"
+                    },
+                    {
+                      "op": "var",
+                      "args": "t"
+                    },
+                    {
+                      "op": "var",
+                      "args": "t"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "modulus": 2305843009213693951,
+  "points": 32,
+  "seed": 2316556727824163219,
+  "value_digest": "2328c7a77cb997dd84f61af63edfb5db61f1b227c768d9c210f2aefc116e4180",
+  "independence": "issued by examples/identity_certificate_weak_twist.rs; checked by cryptanalysis::identity_certificate::check replaying from the sealed id and seed",
+  "proof": null
+}

@@ -1,0 +1,85 @@
+{
+  "schema": "weak_curve.theorem_registry/v1",
+  "theorems": [
+    {
+      "id": "WCT1:hasse-order", "name": "Trace and curve order",
+      "exact_statement": "For an elliptic curve E over F_Q with Frobenius trace t, #E(F_Q)=Q+1-t and |t|<=2 sqrt(Q).",
+      "hypotheses": "E is nonsingular and defined over the finite field F_Q.",
+      "result_status": "published", "lean_declaration": null, "lean_status": "open_full_formalization",
+      "open_bridge": "Formal finite-field elliptic curve, Frobenius, point count and Hasse bound.",
+      "source_ids": ["sec1"]
+    },
+    {
+      "id": "WCT1:anomalous", "name": "Trace-one anomalous criterion",
+      "exact_statement": "For E/F_p, #E(F_p)=p if and only if t=1. The published p-adic reduction applies under its specified lifting hypotheses.",
+      "hypotheses": "p prime, E/F_p nonsingular; the reduction's lifting and subgroup hypotheses are additional.",
+      "result_status": "published", "lean_declaration": null, "lean_status": "open_full_formalization",
+      "open_bridge": "Formal p-adic lift and Smart reduction; the trace equivalence alone does not formalize the reduction.",
+      "source_ids": ["smart"]
+    },
+    {
+      "id": "WCT1:ph", "name": "Prime-power decomposition of a selected cyclic group",
+      "exact_statement": "If a selected cyclic group has certified order r=product_i l_i^e_i with pairwise coprime factors, its DLP reduces to the corresponding prime-power DLPs and CRT recombination.",
+      "hypotheses": "The selected group is cyclic, its order and factorization are certified, and the target belongs to it.",
+      "result_status": "published", "lean_declaration": null, "lean_status": "open_full_formalization",
+      "open_bridge": "Formal cyclic-group DLP equivalence and CRT reconstruction with a chosen generator.",
+      "source_ids": ["ph"]
+    },
+    {
+      "id": "WCT1:pairing", "name": "Pairing transfer criterion",
+      "exact_statement": "For a suitable nondegenerate pairing on the selected prime-order r-subgroup, the ECDLP maps to a multiplicative DLP in the minimal field containing the relevant r-th roots of unity.",
+      "hypotheses": "r is prime to the characteristic; the pairing and auxiliary point satisfy the published nondegeneracy and subgroup hypotheses.",
+      "result_status": "published", "lean_declaration": null, "lean_status": "open_full_formalization",
+      "open_bridge": "Formal Weil/Tate pairing, its nondegeneracy and the explicit injective subgroup map.",
+      "source_ids": ["mov", "freeman2006"]
+    },
+    {
+      "id": "WCT1:torus-cocycle", "name": "Cubic Hilbert-90 forward identity",
+      "exact_statement": "Let L/K be a cyclic cubic field extension with generator sigma and alpha in L^x. If lambda=sigma(alpha)/alpha, then lambda sigma(lambda) sigma^2(lambda)=1. For finite K=F_q, this is lambda^(q^2+q+1)=1.",
+      "hypotheses": "L/K cyclic of degree three; alpha nonzero; the finite-field exponent corollary uses sigma(x)=x^q.",
+      "result_status": "proved_algebraic_identity", "lean_declaration": "WeakCurveDatabase.cubic_cocycle_norm_one; WeakCurveDatabase.cubic_cocycle_power", "lean_status": "built_and_axiom_audited",
+      "open_bridge": "The Lean declarations prove the automorphism norm identity and q-power consequence under explicit sigma(x)=x^q and sigma^3(alpha)=alpha hypotheses. Instantiating the exact finite-field tower and the Hilbert-90 converse remain separate obligations.",
+      "source_ids": ["mc", "iso1"]
+    },
+    {
+      "id": "WCT1:torus-fourth-power", "name": "Fourth power in the odd cubic torus",
+      "exact_statement": "Let G be a monoid, p an odd natural number and q=p^2. If x in G satisfies x^(q^2+q+1)=1, then x=y^4 for y=x^((q^2+q+2)/4).",
+      "hypotheses": "p is odd; the exact torus exponent equation holds in G. The genus-three and finite-field instantiations are separate results.",
+      "result_status": "checked_lean", "lean_declaration": "WeakCurveDatabase.fourth_power_of_order_three_mod_four; WeakCurveDatabase.odd_square_mod_four; WeakCurveDatabase.cubic_torus_fourth_power; WeakCurveDatabase.cubic_torus_fourth_power_prime_square", "lean_status": "built_axiom_audited_fresh_replay",
+      "open_bridge": null,
+      "source_ids": ["iso1", "mc"]
+    },
+    {
+      "id": "WCT1:cubic-depth", "name": "Cubic branch conductor-depth obstruction",
+      "exact_statement": "For the stated p>3 cubic norm-one genus-three branch over F_(p^6), ordinary Frobenius classes supporting a branch representative have v_2(f_pi)>=2 for both allowed twist signs.",
+      "hypotheses": "The exact branch model, nonsingularity, ordinary trace, allowed twists, rational 2-isogeny and endomorphism-order hypotheses in the ISO-1 report.",
+      "result_status": "proved_in_parent_report", "lean_declaration": null, "lean_status": "partial_parent_pr_1710",
+      "open_bridge": "Full elliptic-curve torsion, isogeny, endomorphism-order and twist-descent formalization; parent PR #1710 proves several structural prerequisites only.",
+      "source_ids": ["iso1", "mc"]
+    },
+    {
+      "id": "WCT1:two-branch-support", "name": "Exact two-branch class support on the declared ordinary domain",
+      "exact_statement": "Within the p>3, degree-six, t congruent 2 mod 4 ordinary domain and the stated CM exceptions, each hyperelliptic branch has the exact torus/selected-order intersection criterion recorded by ISO-1.",
+      "hypotheses": "The exact two branch models, D_K<-4 in the generic criterion, exceptional-unit handling in the finite oracle, and certified CM support inputs.",
+      "result_status": "proved_in_parent_report", "lean_declaration": null, "lean_status": "partial_parent_pr_1710",
+      "open_bridge": "Full CM order realizability and elliptic isogeny-class geometry; branch labels come from independently checked native/PARI certificates.",
+      "source_ids": ["iso1", "mc"]
+    },
+    {
+      "id": "WCT1:count-partition", "name": "Two-branch finite inclusion-exclusion",
+      "exact_statement": "For any finite list of two Boolean branch flags, cubic_count+quadratic_count=union_count+both_count, and union_count+zero_count=population_count.",
+      "hypotheses": "A finite list of Boolean flags; repeated rows count repeatedly.",
+      "result_status": "checked_lean", "lean_declaration": "CensusCounting.inclusion_exclusion; CensusCounting.union_zero_partition", "lean_status": "checked_parent_main",
+      "open_bridge": "This establishes aggregation semantics only; it does not certify imported geometric labels.",
+      "source_ids": ["iso1"]
+    },
+    {
+      "id": "WCT1:dimension", "name": "Dimension guard for full Weil restriction transfer",
+      "exact_statement": "If an abelian variety of dimension g admits a surjective homomorphism onto Res_(F_(q^n)/F_q)(E), then g>=n.",
+      "hypotheses": "E is an elliptic curve over F_(q^n); the map is a surjective homomorphism of abelian varieties over F_q.",
+      "result_status": "standard_dimension_consequence", "lean_declaration": null, "lean_status": "open_full_formalization",
+      "open_bridge": "Formal Weil restriction as an abelian variety and dimension monotonicity of surjective morphisms.",
+      "source_ids": ["mc", "tian2020"]
+    }
+  ]
+}

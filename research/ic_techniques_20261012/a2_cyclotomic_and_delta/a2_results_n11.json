@@ -1,0 +1,4507 @@
+{
+  "args": {
+    "cell_timeout_secs": 90,
+    "macaulay_extra": 1,
+    "node_budget": 1024,
+    "seed": 20261012,
+    "solver_engine": "inherited",
+    "solver_engine_note": "Boolean F4 ladder from the system degree (max_degree 3 is the floor; a degree-d system builds degree d), splitting on the engine's rule when the algebra stalls",
+    "targets": 16,
+    "wdsat_timeout_secs": 20,
+    "witness_cap_per_target": 256,
+    "yield_targets": 32
+  },
+  "census": [
+    {
+      "a": 1,
+      "abscissae": 23,
+      "abscissae_with_points": 22,
+      "build_ms": 10.89475,
+      "family": {
+        "family": "cyclotomic",
+        "w": 1
+      },
+      "frobenius_stable": true,
+      "n": 11,
+      "orbits": 4,
+      "p": 23,
+      "points": 44,
+      "points_in_subgroup": 22,
+      "predicted_abscissae": 23,
+      "projected_columns": 11,
+      "projected_points": 22,
+      "retained_orbits": null,
+      "signed_orbits": 2
+    },
+    {
+      "a": 1,
+      "abscissae": 22,
+      "abscissae_with_points": 22,
+      "build_ms": 57.566292,
+      "family": {
+        "family": "onb_weight",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 11,
+      "orbits": 4,
+      "p": 23,
+      "points": 44,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 55,
+      "projected_columns": 22,
+      "projected_points": 44,
+      "retained_orbits": 2,
+      "signed_orbits": 2
+    },
+    {
+      "a": 1,
+      "abscissae": 253,
+      "abscissae_with_points": 110,
+      "build_ms": 37.835167000000006,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 11,
+      "orbits": 20,
+      "p": 23,
+      "points": 220,
+      "points_in_subgroup": 154,
+      "predicted_abscissae": 253,
+      "projected_columns": 110,
+      "projected_points": 220,
+      "retained_orbits": null,
+      "signed_orbits": 10
+    },
+    {
+      "a": 1,
+      "abscissae": 110,
+      "abscissae_with_points": 110,
+      "build_ms": 37.31275,
+      "family": {
+        "family": "onb_weight",
+        "w": 4
+      },
+      "frobenius_stable": true,
+      "n": 11,
+      "orbits": 20,
+      "p": 23,
+      "points": 220,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 330,
+      "projected_columns": 110,
+      "projected_points": 220,
+      "retained_orbits": 10,
+      "signed_orbits": 10
+    },
+    {
+      "a": 1,
+      "abscissae": 1771,
+      "abscissae_with_points": 858,
+      "build_ms": 17.691625,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "frobenius_stable": true,
+      "n": 11,
+      "orbits": 156,
+      "p": 23,
+      "points": 1716,
+      "points_in_subgroup": 814,
+      "predicted_abscissae": 1771,
+      "projected_columns": 484,
+      "projected_points": 968,
+      "retained_orbits": null,
+      "signed_orbits": 78
+    },
+    {
+      "a": 0,
+      "abscissae": 47,
+      "abscissae_with_points": 1,
+      "build_ms": 23.673917,
+      "family": {
+        "family": "cyclotomic",
+        "w": 1
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 2,
+      "p": 47,
+      "points": 2,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 47,
+      "projected_columns": 0,
+      "projected_points": 0,
+      "retained_orbits": null,
+      "signed_orbits": 1
+    },
+    {
+      "a": 0,
+      "abscissae": 23,
+      "abscissae_with_points": 23,
+      "build_ms": 45.981167000000006,
+      "family": {
+        "family": "onb_weight",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 2,
+      "p": 47,
+      "points": 46,
+      "points_in_subgroup": 46,
+      "predicted_abscissae": 253,
+      "projected_columns": 23,
+      "projected_points": 46,
+      "retained_orbits": 1,
+      "signed_orbits": 1
+    },
+    {
+      "a": 0,
+      "abscissae": 1081,
+      "abscissae_with_points": 391,
+      "build_ms": 59.197375,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 34,
+      "p": 47,
+      "points": 782,
+      "points_in_subgroup": 184,
+      "predicted_abscissae": 1081,
+      "projected_columns": 391,
+      "projected_points": 782,
+      "retained_orbits": null,
+      "signed_orbits": 17
+    },
+    {
+      "a": 0,
+      "abscissae": 391,
+      "abscissae_with_points": 391,
+      "build_ms": 51.642666,
+      "family": {
+        "family": "onb_weight",
+        "w": 3
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 34,
+      "p": 47,
+      "points": 782,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 1771,
+      "projected_columns": 391,
+      "projected_points": 782,
+      "retained_orbits": 17,
+      "signed_orbits": 17
+    },
+    {
+      "a": 0,
+      "abscissae": 16215,
+      "abscissae_with_points": 8441,
+      "build_ms": 2126.873042,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 734,
+      "p": 47,
+      "points": 16882,
+      "points_in_subgroup": 4554,
+      "predicted_abscissae": 16215,
+      "projected_columns": 8441,
+      "projected_points": 16882,
+      "retained_orbits": null,
+      "signed_orbits": 367
+    },
+    {
+      "a": 0,
+      "abscissae": 8441,
+      "abscissae_with_points": 8441,
+      "build_ms": 4504.943541000001,
+      "family": {
+        "family": "onb_weight",
+        "w": 5
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 734,
+      "p": 47,
+      "points": 16882,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 33649,
+      "projected_columns": 8418,
+      "projected_points": 16836,
+      "retained_orbits": 367,
+      "signed_orbits": 367
+    },
+    {
+      "a": 1,
+      "abscissae": 47,
+      "abscissae_with_points": 46,
+      "build_ms": 22.991417,
+      "family": {
+        "family": "cyclotomic",
+        "w": 1
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 4,
+      "p": 47,
+      "points": 92,
+      "points_in_subgroup": 46,
+      "predicted_abscissae": 47,
+      "projected_columns": 23,
+      "projected_points": 46,
+      "retained_orbits": null,
+      "signed_orbits": 2
+    },
+    {
+      "a": 1,
+      "abscissae": 46,
+      "abscissae_with_points": 46,
+      "build_ms": 207.5675,
+      "family": {
+        "family": "onb_weight",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 4,
+      "p": 47,
+      "points": 92,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 253,
+      "projected_columns": 46,
+      "projected_points": 92,
+      "retained_orbits": 2,
+      "signed_orbits": 2
+    },
+    {
+      "a": 1,
+      "abscissae": 1081,
+      "abscissae_with_points": 690,
+      "build_ms": 8.660791,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 60,
+      "p": 47,
+      "points": 1380,
+      "points_in_subgroup": 782,
+      "predicted_abscissae": 1081,
+      "projected_columns": 690,
+      "projected_points": 1380,
+      "retained_orbits": null,
+      "signed_orbits": 30
+    },
+    {
+      "a": 1,
+      "abscissae": 690,
+      "abscissae_with_points": 690,
+      "build_ms": 117.52558400000001,
+      "family": {
+        "family": "onb_weight",
+        "w": 3
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 60,
+      "p": 47,
+      "points": 1380,
+      "points_in_subgroup": 1380,
+      "predicted_abscissae": 1771,
+      "projected_columns": 690,
+      "projected_points": 1380,
+      "retained_orbits": 30,
+      "signed_orbits": 30
+    },
+    {
+      "a": 1,
+      "abscissae": 16215,
+      "abscissae_with_points": 7774,
+      "build_ms": 1150.241,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 676,
+      "p": 47,
+      "points": 15548,
+      "points_in_subgroup": 8418,
+      "predicted_abscissae": 16215,
+      "projected_columns": 7774,
+      "projected_points": 15548,
+      "retained_orbits": null,
+      "signed_orbits": 338
+    },
+    {
+      "a": 1,
+      "abscissae": 7774,
+      "abscissae_with_points": 7774,
+      "build_ms": 4811.241583,
+      "family": {
+        "family": "onb_weight",
+        "w": 5
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 676,
+      "p": 47,
+      "points": 15548,
+      "points_in_subgroup": 15548,
+      "predicted_abscissae": 33649,
+      "projected_columns": 7774,
+      "projected_points": 15548,
+      "retained_orbits": 338,
+      "signed_orbits": 338
+    }
+  ],
+  "generated_utc": "unix:1791850585",
+  "host": {
+    "arch": "aarch64",
+    "os": "macos"
+  },
+  "lead": "A2 cyclotomic-sparse Frobenius-stable factor bases",
+  "matched_pairs": [
+    {
+      "a": 1,
+      "cyclotomic_columns": 2,
+      "n": 11,
+      "onb": {
+        "a": 1,
+        "abscissae": 22,
+        "abscissae_with_points": 22,
+        "build_ms": 57.566292,
+        "family": {
+          "family": "onb_weight",
+          "w": 2
+        },
+        "frobenius_stable": true,
+        "n": 11,
+        "orbits": 4,
+        "p": 23,
+        "points": 44,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 55,
+        "projected_columns": 22,
+        "projected_points": 44,
+        "retained_orbits": 2,
+        "signed_orbits": 2
+      },
+      "w": 1
+    },
+    {
+      "a": 1,
+      "cyclotomic_columns": 10,
+      "n": 11,
+      "onb": {
+        "a": 1,
+        "abscissae": 110,
+        "abscissae_with_points": 110,
+        "build_ms": 37.31275,
+        "family": {
+          "family": "onb_weight",
+          "w": 4
+        },
+        "frobenius_stable": true,
+        "n": 11,
+        "orbits": 20,
+        "p": 23,
+        "points": 220,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 330,
+        "projected_columns": 110,
+        "projected_points": 220,
+        "retained_orbits": 10,
+        "signed_orbits": 10
+      },
+      "w": 2
+    },
+    {
+      "a": 0,
+      "cyclotomic_columns": 1,
+      "n": 23,
+      "onb": {
+        "a": 0,
+        "abscissae": 23,
+        "abscissae_with_points": 23,
+        "build_ms": 45.981167000000006,
+        "family": {
+          "family": "onb_weight",
+          "w": 2
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 2,
+        "p": 47,
+        "points": 46,
+        "points_in_subgroup": 46,
+        "predicted_abscissae": 253,
+        "projected_columns": 23,
+        "projected_points": 46,
+        "retained_orbits": 1,
+        "signed_orbits": 1
+      },
+      "w": 1
+    },
+    {
+      "a": 0,
+      "cyclotomic_columns": 17,
+      "n": 23,
+      "onb": {
+        "a": 0,
+        "abscissae": 391,
+        "abscissae_with_points": 391,
+        "build_ms": 51.642666,
+        "family": {
+          "family": "onb_weight",
+          "w": 3
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 34,
+        "p": 47,
+        "points": 782,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 1771,
+        "projected_columns": 391,
+        "projected_points": 782,
+        "retained_orbits": 17,
+        "signed_orbits": 17
+      },
+      "w": 2
+    },
+    {
+      "a": 0,
+      "cyclotomic_columns": 367,
+      "n": 23,
+      "onb": {
+        "a": 0,
+        "abscissae": 8441,
+        "abscissae_with_points": 8441,
+        "build_ms": 4504.943541000001,
+        "family": {
+          "family": "onb_weight",
+          "w": 5
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 734,
+        "p": 47,
+        "points": 16882,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 33649,
+        "projected_columns": 8418,
+        "projected_points": 16836,
+        "retained_orbits": 367,
+        "signed_orbits": 367
+      },
+      "w": 3
+    },
+    {
+      "a": 1,
+      "cyclotomic_columns": 2,
+      "n": 23,
+      "onb": {
+        "a": 1,
+        "abscissae": 46,
+        "abscissae_with_points": 46,
+        "build_ms": 207.5675,
+        "family": {
+          "family": "onb_weight",
+          "w": 2
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 4,
+        "p": 47,
+        "points": 92,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 253,
+        "projected_columns": 46,
+        "projected_points": 92,
+        "retained_orbits": 2,
+        "signed_orbits": 2
+      },
+      "w": 1
+    },
+    {
+      "a": 1,
+      "cyclotomic_columns": 30,
+      "n": 23,
+      "onb": {
+        "a": 1,
+        "abscissae": 690,
+        "abscissae_with_points": 690,
+        "build_ms": 117.52558400000001,
+        "family": {
+          "family": "onb_weight",
+          "w": 3
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 60,
+        "p": 47,
+        "points": 1380,
+        "points_in_subgroup": 1380,
+        "predicted_abscissae": 1771,
+        "projected_columns": 690,
+        "projected_points": 1380,
+        "retained_orbits": 30,
+        "signed_orbits": 30
+      },
+      "w": 2
+    },
+    {
+      "a": 1,
+      "cyclotomic_columns": 338,
+      "n": 23,
+      "onb": {
+        "a": 1,
+        "abscissae": 7774,
+        "abscissae_with_points": 7774,
+        "build_ms": 4811.241583,
+        "family": {
+          "family": "onb_weight",
+          "w": 5
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 676,
+        "p": 47,
+        "points": 15548,
+        "points_in_subgroup": 15548,
+        "predicted_abscissae": 33649,
+        "projected_columns": 7774,
+        "projected_points": 15548,
+        "retained_orbits": 338,
+        "signed_orbits": 338
+      },
+      "w": 3
+    }
+  ],
+  "solver_cells": [
+    {
+      "census": {
+        "a": 1,
+        "abscissae": 23,
+        "abscissae_with_points": 22,
+        "build_ms": 10.378208,
+        "family": {
+          "family": "cyclotomic",
+          "w": 1
+        },
+        "frobenius_stable": true,
+        "n": 11,
+        "orbits": 4,
+        "p": 23,
+        "points": 44,
+        "points_in_subgroup": 22,
+        "predicted_abscissae": 23,
+        "projected_columns": 11,
+        "projected_points": 22,
+        "retained_orbits": null,
+        "signed_orbits": 2
+      },
+      "encoding": {
+        "encoding": "cyclotomic_unity",
+        "w": 1
+      },
+      "lines": [
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 33,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 4,
+            "f4_ms": 739.797458,
+            "f4_reductions": 259,
+            "f4_splits": 130,
+            "f4_word_xors": 57495576,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 596.1335,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 4,
+            "target_index": 0
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 274.27641600000004
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 33,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 4,
+            "f4_ms": 703.0645410000001,
+            "f4_reductions": 258,
+            "f4_splits": 130,
+            "f4_word_xors": 58497612,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 564.3976250000001,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 4,
+            "target_index": 1
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 13.128167
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 33,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 4,
+            "f4_ms": 958.001875,
+            "f4_reductions": 257,
+            "f4_splits": 130,
+            "f4_word_xors": 61105391,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 416.666542,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 4,
+            "target_index": 2
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 23.09975
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 33,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 4,
+            "f4_ms": 853.81575,
+            "f4_reductions": 258,
+            "f4_splits": 130,
+            "f4_word_xors": 59495705,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 440.281792,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 4,
+            "target_index": 3
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 24.517333999999998
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 33,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 4,
+            "f4_ms": 661.7576670000001,
+            "f4_reductions": 258,
+            "f4_splits": 130,
+            "f4_word_xors": 58058142,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 422.268125,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 4,
+            "target_index": 4
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 19.115875000000003
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 33,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 4,
+            "f4_ms": 939.913,
+            "f4_reductions": 259,
+            "f4_splits": 130,
+            "f4_word_xors": 59594891,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 753.0007079999999,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 4,
+            "target_index": 5
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 16.861958
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 33,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 4,
+            "f4_ms": 771.623333,
+            "f4_reductions": 258,
+            "f4_splits": 130,
+            "f4_word_xors": 55024283,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 702.994083,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 4,
+            "target_index": 6
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 74.93925
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 4,
+            "equations": 33,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 4,
+            "f4_ms": 846.39725,
+            "f4_reductions": 258,
+            "f4_splits": 130,
+            "f4_word_xors": 59101964,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 735.691417,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 4,
+            "target_index": 7
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 32.107499999999995
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 33,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 4,
+            "f4_ms": 789.2594160000001,
+            "f4_reductions": 258,
+            "f4_splits": 130,
+            "f4_word_xors": 58702622,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 585.1082909999999,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 4,
+            "target_index": 8
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 69.81216699999999
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 4,
+            "equations": 33,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 4,
+            "f4_ms": 1039.0117910000001,
+            "f4_reductions": 257,
+            "f4_splits": 130,
+            "f4_word_xors": 59820258,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 719.4675000000001,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 4,
+            "target_index": 9
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 23.277292000000003
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 33,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 4,
+            "f4_ms": 794.996209,
+            "f4_reductions": 258,
+            "f4_splits": 130,
+            "f4_word_xors": 59712848,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 579.014416,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 4,
+            "target_index": 10
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 22.593458000000002
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 33,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 4,
+            "f4_ms": 505.113291,
+            "f4_reductions": 258,
+            "f4_splits": 130,
+            "f4_word_xors": 59294412,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 617.069834,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 4,
+            "target_index": 11
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 16.609333
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 33,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 4,
+            "f4_ms": 668.470334,
+            "f4_reductions": 258,
+            "f4_splits": 130,
+            "f4_word_xors": 59166393,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 432.9345,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 4,
+            "target_index": 12
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 19.015292
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 33,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 4,
+            "f4_ms": 587.2817500000001,
+            "f4_reductions": 258,
+            "f4_splits": 130,
+            "f4_word_xors": 60889282,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 346.496584,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 4,
+            "target_index": 13
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 11.446125
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 4,
+            "equations": 33,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 4,
+            "f4_ms": 621.004291,
+            "f4_reductions": 258,
+            "f4_splits": 130,
+            "f4_word_xors": 55564837,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 459.986084,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 4,
+            "target_index": 14
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 16.319542
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 33,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 4,
+            "f4_ms": 593.823167,
+            "f4_reductions": 258,
+            "f4_splits": 130,
+            "f4_word_xors": 60882201,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 333.407042,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 4,
+            "target_index": 15
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 25.6475
+          }
+        }
+      ],
+      "spec": {
+        "a": 1,
+        "arm": "cyclotomic",
+        "engine": "inherited",
+        "m": 2,
+        "macaulay_extra": 1,
+        "n": 11,
+        "node_budget": 1024,
+        "seed": 20261012,
+        "targets": 16,
+        "w": 1,
+        "wdsat_binary": "/Volumes/SSD990/llm/tmp/a2-wdsat-build-86920/wdsat_solver",
+        "wdsat_timeout_secs": 20
+      },
+      "summary": {
+        "boolean_roots_total": 12,
+        "equations": 33,
+        "f4_exhausted": 0,
+        "f4_max_degree_built": 4,
+        "f4_mean_ms": 754.5831951875,
+        "f4_mean_splits": 130.0,
+        "f4_mean_word_xors": 58900401.0625,
+        "f4_median_ms": 771.623333,
+        "lifted_decompositions": 3,
+        "macaulay_degree_reached_max": 4,
+        "macaulay_mean_ms": 544.0573776875,
+        "macaulay_solving_degree_max": null,
+        "macaulay_solving_degree_min": null,
+        "macaulay_solving_degree_resolved": 0,
+        "n_vars": 22,
+        "system_degree": 4,
+        "targets": 16,
+        "wdsat_lifted": 0,
+        "wdsat_mean_ms": 42.67293493750002,
+        "wdsat_models_valid": 0,
+        "wdsat_runs": 16,
+        "wdsat_verdicts": {
+          "model": 16
+        }
+      },
+      "timed_out": false,
+      "unsupported": 0,
+      "wall_ms": 21591.682375
+    },
+    {
+      "census": {
+        "a": 1,
+        "abscissae": 22,
+        "abscissae_with_points": 22,
+        "build_ms": 30.699875000000002,
+        "family": {
+          "family": "onb_weight",
+          "w": 2
+        },
+        "frobenius_stable": true,
+        "n": 11,
+        "orbits": 4,
+        "p": 23,
+        "points": 44,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 55,
+        "projected_columns": 22,
+        "projected_points": 44,
+        "retained_orbits": 2,
+        "signed_orbits": 2
+      },
+      "encoding": {
+        "encoding": "onb_weight",
+        "w": 2
+      },
+      "lines": [
+        {
+          "measurement": {
+            "boolean_roots": 2,
+            "equations": 343,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4.135042,
+            "f4_reductions": 57,
+            "f4_splits": 49,
+            "f4_word_xors": 499624,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 577.507292,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 3,
+            "target_index": 0
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 70.33275
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 13,
+            "equations": 343,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 8.900625,
+            "f4_reductions": 63,
+            "f4_splits": 49,
+            "f4_word_xors": 527308,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 588.932458,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 3,
+            "target_index": 1
+          },
+          "wdsat": {
+            "lifted": true,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 24.761333
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 343,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4.756,
+            "f4_reductions": 57,
+            "f4_splits": 49,
+            "f4_word_xors": 488286,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 409.6775,
+            "macaulay_solving_degree": 4,
+            "n_vars": 22,
+            "system_degree": 3,
+            "target_index": 2
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unsat",
+            "wall_ms": 66.07000000000001
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 4,
+            "equations": 343,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 7.025250000000001,
+            "f4_reductions": 57,
+            "f4_splits": 47,
+            "f4_word_xors": 509739,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 528.721541,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 3,
+            "target_index": 3
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 16.126208
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 6,
+            "equations": 343,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 6.1610830000000005,
+            "f4_reductions": 56,
+            "f4_splits": 47,
+            "f4_word_xors": 491155,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 465.608375,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 3,
+            "target_index": 4
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 32.398875000000004
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 4,
+            "equations": 343,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4.202083,
+            "f4_reductions": 61,
+            "f4_splits": 45,
+            "f4_word_xors": 519670,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 489.002625,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 3,
+            "target_index": 5
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 14.232334
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 2,
+            "equations": 343,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4.0595,
+            "f4_reductions": 58,
+            "f4_splits": 47,
+            "f4_word_xors": 503102,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 483.110834,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 3,
+            "target_index": 6
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 14.018917
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 12,
+            "equations": 343,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4.156542,
+            "f4_reductions": 58,
+            "f4_splits": 50,
+            "f4_word_xors": 514165,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 481.57725,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 3,
+            "target_index": 7
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 24.249458
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 343,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 15.685749999999999,
+            "f4_reductions": 58,
+            "f4_splits": 46,
+            "f4_word_xors": 520155,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 515.83825,
+            "macaulay_solving_degree": 4,
+            "n_vars": 22,
+            "system_degree": 3,
+            "target_index": 8
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unsat",
+            "wall_ms": 15.181208
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 2,
+            "equations": 343,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 7.423042000000001,
+            "f4_reductions": 59,
+            "f4_splits": 46,
+            "f4_word_xors": 489710,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 529.7119580000001,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 3,
+            "target_index": 9
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 20.589167
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 13,
+            "equations": 343,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4.255208,
+            "f4_reductions": 64,
+            "f4_splits": 50,
+            "f4_word_xors": 523115,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 448.530125,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 3,
+            "target_index": 10
+          },
+          "wdsat": {
+            "lifted": true,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 13.752666999999999
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 8,
+            "equations": 343,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4.9975000000000005,
+            "f4_reductions": 58,
+            "f4_splits": 50,
+            "f4_word_xors": 504989,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 396.747041,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 3,
+            "target_index": 11
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 17.696582999999997
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 4,
+            "equations": 343,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 6.70575,
+            "f4_reductions": 55,
+            "f4_splits": 48,
+            "f4_word_xors": 502460,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 573.634667,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 3,
+            "target_index": 12
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 19.63275
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 4,
+            "equations": 343,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 7.549667,
+            "f4_reductions": 60,
+            "f4_splits": 48,
+            "f4_word_xors": 503417,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 865.275625,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 3,
+            "target_index": 13
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 15.909125
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 343,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 15.408083,
+            "f4_reductions": 56,
+            "f4_splits": 47,
+            "f4_word_xors": 509417,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 425.384875,
+            "macaulay_solving_degree": 4,
+            "n_vars": 22,
+            "system_degree": 3,
+            "target_index": 14
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unsat",
+            "wall_ms": 26.51775
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 4,
+            "equations": 343,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 11.957916,
+            "f4_reductions": 57,
+            "f4_splits": 48,
+            "f4_word_xors": 497898,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 4,
+            "macaulay_ms": 538.239541,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 3,
+            "target_index": 15
+          },
+          "wdsat": {
+            "lifted": true,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 27.16775
+          }
+        }
+      ],
+      "spec": {
+        "a": 1,
+        "arm": "onb_matched",
+        "engine": "inherited",
+        "m": 2,
+        "macaulay_extra": 1,
+        "n": 11,
+        "node_budget": 1024,
+        "seed": 20261012,
+        "targets": 16,
+        "w": 1,
+        "wdsat_binary": "/Volumes/SSD990/llm/tmp/a2-wdsat-build-86920/wdsat_solver",
+        "wdsat_timeout_secs": 20
+      },
+      "summary": {
+        "boolean_roots_total": 78,
+        "equations": 343,
+        "f4_exhausted": 0,
+        "f4_max_degree_built": 3,
+        "f4_mean_ms": 7.3361900625,
+        "f4_mean_splits": 47.875,
+        "f4_mean_word_xors": 506513.125,
+        "f4_median_ms": 6.70575,
+        "lifted_decompositions": 8,
+        "macaulay_degree_reached_max": 4,
+        "macaulay_mean_ms": 519.8437473125,
+        "macaulay_solving_degree_max": 4,
+        "macaulay_solving_degree_min": 4,
+        "macaulay_solving_degree_resolved": 3,
+        "n_vars": 22,
+        "system_degree": 3,
+        "targets": 16,
+        "wdsat_lifted": 3,
+        "wdsat_mean_ms": 26.164804687499995,
+        "wdsat_models_valid": 13,
+        "wdsat_runs": 16,
+        "wdsat_verdicts": {
+          "model": 13,
+          "unsat": 3
+        }
+      },
+      "timed_out": false,
+      "unsupported": 0,
+      "wall_ms": 8965.669875
+    },
+    {
+      "census": {
+        "a": 1,
+        "abscissae": 253,
+        "abscissae_with_points": 110,
+        "build_ms": 2.6744999999999997,
+        "family": {
+          "family": "cyclotomic",
+          "w": 2
+        },
+        "frobenius_stable": true,
+        "n": 11,
+        "orbits": 20,
+        "p": 23,
+        "points": 220,
+        "points_in_subgroup": 154,
+        "predicted_abscissae": 253,
+        "projected_columns": 110,
+        "projected_points": 220,
+        "retained_orbits": null,
+        "signed_orbits": 10
+      },
+      "encoding": {
+        "encoding": "cyclotomic_unity",
+        "w": 2
+      },
+      "lines": [
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 8299.515375,
+            "f4_reductions": 1024,
+            "f4_splits": 537,
+            "f4_word_xors": 841781871,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 34.880292,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 0
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 47.134707999999996
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 7300.800208,
+            "f4_reductions": 1024,
+            "f4_splits": 539,
+            "f4_word_xors": 856056465,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 79.367959,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 1
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 105.744542
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 4,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 7332.6731660000005,
+            "f4_reductions": 1024,
+            "f4_splits": 537,
+            "f4_word_xors": 877368667,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 27.050417,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 2
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 93.105833
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 7490.613292,
+            "f4_reductions": 1024,
+            "f4_splits": 541,
+            "f4_word_xors": 799631030,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 29.971166,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 3
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 183.491958
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 2,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 6744.073917,
+            "f4_reductions": 1024,
+            "f4_splits": 534,
+            "f4_word_xors": 788878649,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 66.66037499999999,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 4
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 28.454875
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 6467.520708,
+            "f4_reductions": 1024,
+            "f4_splits": 541,
+            "f4_word_xors": 826300858,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 20.676042,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 5
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 50.96425
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 6831.489833,
+            "f4_reductions": 1024,
+            "f4_splits": 541,
+            "f4_word_xors": 778919898,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 36.313458,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 6
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 31.588583000000003
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 7372.704084000001,
+            "f4_reductions": 1024,
+            "f4_splits": 537,
+            "f4_word_xors": 857323201,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 26.093459,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 7
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 52.81775
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 6831.528958,
+            "f4_reductions": 1024,
+            "f4_splits": 516,
+            "f4_word_xors": 845208661,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 59.733957999999994,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 8
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 25.116708000000003
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 7260.207834,
+            "f4_reductions": 1024,
+            "f4_splits": 539,
+            "f4_word_xors": 849260758,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 30.616208,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 9
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 24.748791999999998
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 7474.7325,
+            "f4_reductions": 1024,
+            "f4_splits": 537,
+            "f4_word_xors": 786486702,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 26.362875000000003,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 10
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 29.791999999999998
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 7114.293124999999,
+            "f4_reductions": 1024,
+            "f4_splits": 531,
+            "f4_word_xors": 825974417,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 30.685792,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 11
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 19.756916
+          }
+        }
+      ],
+      "spec": {
+        "a": 1,
+        "arm": "cyclotomic",
+        "engine": "inherited",
+        "m": 2,
+        "macaulay_extra": 1,
+        "n": 11,
+        "node_budget": 1024,
+        "seed": 20261012,
+        "targets": 16,
+        "w": 2,
+        "wdsat_binary": "/Volumes/SSD990/llm/tmp/a2-wdsat-build-86920/wdsat_solver",
+        "wdsat_timeout_secs": 20
+      },
+      "summary": {
+        "boolean_roots_total": 6,
+        "equations": 55,
+        "f4_exhausted": 12,
+        "f4_max_degree_built": 4,
+        "f4_mean_ms": 7210.012749999999,
+        "f4_mean_splits": 535.8333333333334,
+        "f4_mean_word_xors": 827765931.4166666,
+        "f4_median_ms": 7300.800208,
+        "lifted_decompositions": 1,
+        "macaulay_degree_reached_max": 0,
+        "macaulay_mean_ms": 39.03433341666667,
+        "macaulay_solving_degree_max": null,
+        "macaulay_solving_degree_min": null,
+        "macaulay_solving_degree_resolved": 0,
+        "n_vars": 44,
+        "system_degree": 4,
+        "targets": 12,
+        "wdsat_lifted": 0,
+        "wdsat_mean_ms": 57.72640958333334,
+        "wdsat_models_valid": 0,
+        "wdsat_runs": 12,
+        "wdsat_verdicts": {
+          "model": 12
+        }
+      },
+      "timed_out": true,
+      "unsupported": 0,
+      "wall_ms": 90123.57820799999
+    },
+    {
+      "census": {
+        "a": 1,
+        "abscissae": 110,
+        "abscissae_with_points": 110,
+        "build_ms": 68.21924999999999,
+        "family": {
+          "family": "onb_weight",
+          "w": 4
+        },
+        "frobenius_stable": true,
+        "n": 11,
+        "orbits": 20,
+        "p": 23,
+        "points": 220,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 330,
+        "projected_columns": 110,
+        "projected_points": 220,
+        "retained_orbits": 10,
+        "signed_orbits": 10
+      },
+      "encoding": {
+        "encoding": "onb_weight",
+        "w": 4
+      },
+      "lines": [
+        {
+          "measurement": {
+            "boolean_roots": 64,
+            "equations": 937,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 5,
+            "f4_ms": 8714.891166,
+            "f4_reductions": 139,
+            "f4_splits": 71,
+            "f4_word_xors": 2464704532,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 13.82525,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 5,
+            "target_index": 0
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 36.891042
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 64,
+            "equations": 937,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 5,
+            "f4_ms": 18477.592042,
+            "f4_reductions": 168,
+            "f4_splits": 75,
+            "f4_word_xors": 4110430059,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 8.352125000000001,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 5,
+            "target_index": 1
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 29.031542
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 64,
+            "equations": 937,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 5,
+            "f4_ms": 10474.719958,
+            "f4_reductions": 161,
+            "f4_splits": 71,
+            "f4_word_xors": 2636991277,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 16.88175,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 5,
+            "target_index": 2
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 28.227167
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 64,
+            "equations": 937,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 5,
+            "f4_ms": 11624.877208000002,
+            "f4_reductions": 159,
+            "f4_splits": 72,
+            "f4_word_xors": 3039855442,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 12.9,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 5,
+            "target_index": 3
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "model",
+            "wall_ms": 27.31575
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 64,
+            "equations": 937,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 5,
+            "f4_ms": 11799.051667,
+            "f4_reductions": 146,
+            "f4_splits": 71,
+            "f4_word_xors": 2835688411,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 16.056875,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 5,
+            "target_index": 4
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 23.102167
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 64,
+            "equations": 937,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 5,
+            "f4_ms": 8815.138584,
+            "f4_reductions": 147,
+            "f4_splits": 71,
+            "f4_word_xors": 2689150528,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 16.573166999999998,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 5,
+            "target_index": 5
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 22.541292000000002
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 64,
+            "equations": 937,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 5,
+            "f4_ms": 6338.560208,
+            "f4_reductions": 137,
+            "f4_splits": 69,
+            "f4_word_xors": 2541771628,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 11.352958,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 5,
+            "target_index": 6
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 22.466959000000003
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 64,
+            "equations": 937,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 5,
+            "f4_ms": 8778.836708,
+            "f4_reductions": 144,
+            "f4_splits": 69,
+            "f4_word_xors": 2508552293,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 10.178417,
+            "macaulay_solving_degree": null,
+            "n_vars": 22,
+            "system_degree": 5,
+            "target_index": 7
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": true,
+            "verdict": "model",
+            "wall_ms": 18.722625
+          }
+        }
+      ],
+      "spec": {
+        "a": 1,
+        "arm": "onb_matched",
+        "engine": "inherited",
+        "m": 2,
+        "macaulay_extra": 1,
+        "n": 11,
+        "node_budget": 1024,
+        "seed": 20261012,
+        "targets": 16,
+        "w": 2,
+        "wdsat_binary": "/Volumes/SSD990/llm/tmp/a2-wdsat-build-86920/wdsat_solver",
+        "wdsat_timeout_secs": 20
+      },
+      "summary": {
+        "boolean_roots_total": 512,
+        "equations": 937,
+        "f4_exhausted": 0,
+        "f4_max_degree_built": 5,
+        "f4_mean_ms": 10627.958442625,
+        "f4_mean_splits": 71.125,
+        "f4_mean_word_xors": 2853393021.25,
+        "f4_median_ms": 10474.719958,
+        "lifted_decompositions": 8,
+        "macaulay_degree_reached_max": 0,
+        "macaulay_mean_ms": 13.26506775,
+        "macaulay_solving_degree_max": null,
+        "macaulay_solving_degree_min": null,
+        "macaulay_solving_degree_resolved": 0,
+        "n_vars": 22,
+        "system_degree": 5,
+        "targets": 8,
+        "wdsat_lifted": 0,
+        "wdsat_mean_ms": 26.037318000000003,
+        "wdsat_models_valid": 5,
+        "wdsat_runs": 8,
+        "wdsat_verdicts": {
+          "model": 8
+        }
+      },
+      "timed_out": true,
+      "unsupported": 0,
+      "wall_ms": 90037.376459
+    },
+    {
+      "census": {
+        "a": 1,
+        "abscissae": 23,
+        "abscissae_with_points": 22,
+        "build_ms": 1.5547499999999999,
+        "family": {
+          "family": "cyclotomic",
+          "w": 1
+        },
+        "frobenius_stable": true,
+        "n": 11,
+        "orbits": 4,
+        "p": 23,
+        "points": 44,
+        "points_in_subgroup": 22,
+        "predicted_abscissae": 23,
+        "projected_columns": 11,
+        "projected_points": 22,
+        "retained_orbits": null,
+        "signed_orbits": 2
+      },
+      "encoding": {
+        "encoding": "cyclotomic_unity",
+        "w": 1
+      },
+      "lines": [
+        {
+          "measurement": {
+            "boolean_roots": 4,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 2726.2979170000003,
+            "f4_reductions": 1024,
+            "f4_splits": 520,
+            "f4_word_xors": 293145426,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 12.571875,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 0
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 29.127584000000002
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 4,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 3217.5164170000003,
+            "f4_reductions": 1024,
+            "f4_splits": 530,
+            "f4_word_xors": 355740949,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 9.363833999999999,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 1
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 16.370417000000003
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 4,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 3338.5200409999998,
+            "f4_reductions": 1024,
+            "f4_splits": 534,
+            "f4_word_xors": 346771875,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 12.911125,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 2
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 15.354375
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 8,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 2947.6487909999996,
+            "f4_reductions": 1024,
+            "f4_splits": 531,
+            "f4_word_xors": 331642024,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 8.375833,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 3
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 40.540042
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 2912.8454169999995,
+            "f4_reductions": 1024,
+            "f4_splits": 524,
+            "f4_word_xors": 301280871,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 7.553708,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 4
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 21.289625
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 4,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 3087.904,
+            "f4_reductions": 1024,
+            "f4_splits": 533,
+            "f4_word_xors": 346654199,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 10.1145,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 5
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 23.1875
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 4,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 3333.667458,
+            "f4_reductions": 1024,
+            "f4_splits": 538,
+            "f4_word_xors": 347051585,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 12.888917,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 6
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 16.584708
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 3549.189875,
+            "f4_reductions": 1024,
+            "f4_splits": 527,
+            "f4_word_xors": 327043874,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 12.358709000000001,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 7
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 16.135792
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 3734.388916,
+            "f4_reductions": 1024,
+            "f4_splits": 529,
+            "f4_word_xors": 318328591,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 6.977791,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 8
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 15.477375
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 2504.978541,
+            "f4_reductions": 1024,
+            "f4_splits": 521,
+            "f4_word_xors": 279291355,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 7.281041999999999,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 9
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 14.864792
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 4,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 2379.921167,
+            "f4_reductions": 1024,
+            "f4_splits": 522,
+            "f4_word_xors": 285781109,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 10.698333000000002,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 10
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 18.055583
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 8,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 2259.5250419999998,
+            "f4_reductions": 1024,
+            "f4_splits": 532,
+            "f4_word_xors": 345509213,
+            "lifted_decomposition": true,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 6.58025,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 11
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 15.346333
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 3007.21375,
+            "f4_reductions": 1024,
+            "f4_splits": 530,
+            "f4_word_xors": 331532981,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 8.577042,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 12
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 16.073334000000003
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 1862.940208,
+            "f4_reductions": 1024,
+            "f4_splits": 519,
+            "f4_word_xors": 283212324,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 8.674167,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 13
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 16.589708
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 2413.63425,
+            "f4_reductions": 1024,
+            "f4_splits": 534,
+            "f4_word_xors": 326550650,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 11.170791,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 14
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 19.114292000000003
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 55,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 4,
+            "f4_ms": 2460.440375,
+            "f4_reductions": 1024,
+            "f4_splits": 529,
+            "f4_word_xors": 331685231,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 0,
+            "macaulay_ms": 5.773917,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 4,
+            "target_index": 15
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 25.659167
+          }
+        }
+      ],
+      "spec": {
+        "a": 1,
+        "arm": "cyclotomic",
+        "engine": "inherited",
+        "m": 3,
+        "macaulay_extra": 1,
+        "n": 11,
+        "node_budget": 1024,
+        "seed": 20261012,
+        "targets": 16,
+        "w": 1,
+        "wdsat_binary": "/Volumes/SSD990/llm/tmp/a2-wdsat-build-86920/wdsat_solver",
+        "wdsat_timeout_secs": 20
+      },
+      "summary": {
+        "boolean_roots_total": 40,
+        "equations": 55,
+        "f4_exhausted": 16,
+        "f4_max_degree_built": 4,
+        "f4_mean_ms": 2858.5395103125,
+        "f4_mean_splits": 528.3125,
+        "f4_mean_word_xors": 321951391.0625,
+        "f4_median_ms": 2947.6487909999996,
+        "lifted_decompositions": 8,
+        "macaulay_degree_reached_max": 0,
+        "macaulay_mean_ms": 9.491989625000002,
+        "macaulay_solving_degree_max": null,
+        "macaulay_solving_degree_min": null,
+        "macaulay_solving_degree_resolved": 0,
+        "n_vars": 44,
+        "system_degree": 4,
+        "targets": 16,
+        "wdsat_lifted": 0,
+        "wdsat_mean_ms": 19.9856641875,
+        "wdsat_models_valid": 0,
+        "wdsat_runs": 16,
+        "wdsat_verdicts": {
+          "unknown": 16
+        }
+      },
+      "timed_out": false,
+      "unsupported": 0,
+      "wall_ms": 46346.077166999996
+    },
+    {
+      "census": {
+        "a": 1,
+        "abscissae": 22,
+        "abscissae_with_points": 22,
+        "build_ms": 3.769833,
+        "family": {
+          "family": "onb_weight",
+          "w": 2
+        },
+        "frobenius_stable": true,
+        "n": 11,
+        "orbits": 4,
+        "p": 23,
+        "points": 44,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 55,
+        "projected_columns": 22,
+        "projected_points": 44,
+        "retained_orbits": 2,
+        "signed_orbits": 2
+      },
+      "encoding": {
+        "encoding": "onb_weight",
+        "w": 2
+      },
+      "lines": [
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 520,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 3,
+            "f4_ms": 240.450375,
+            "f4_reductions": 1024,
+            "f4_splits": 480,
+            "f4_word_xors": 29035024,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 6.8115,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 3,
+            "target_index": 0
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 21.706
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 520,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 3,
+            "f4_ms": 235.967791,
+            "f4_reductions": 1024,
+            "f4_splits": 479,
+            "f4_word_xors": 26706673,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 4.461084,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 3,
+            "target_index": 1
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 26.887042
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 520,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 3,
+            "f4_ms": 264.386917,
+            "f4_reductions": 1024,
+            "f4_splits": 477,
+            "f4_word_xors": 28017041,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 11.116708,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 3,
+            "target_index": 2
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 18.706625000000003
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 520,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 3,
+            "f4_ms": 228.60304200000002,
+            "f4_reductions": 1024,
+            "f4_splits": 480,
+            "f4_word_xors": 29412292,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 4.837,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 3,
+            "target_index": 3
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 37.291083
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 520,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 3,
+            "f4_ms": 285.629833,
+            "f4_reductions": 1024,
+            "f4_splits": 475,
+            "f4_word_xors": 27384912,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 5.447125,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 3,
+            "target_index": 4
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 22.137166999999998
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 520,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 3,
+            "f4_ms": 231.538833,
+            "f4_reductions": 1024,
+            "f4_splits": 502,
+            "f4_word_xors": 25014463,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 6.597167,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 3,
+            "target_index": 5
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 22.518459
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 520,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 3,
+            "f4_ms": 231.82845799999998,
+            "f4_reductions": 1024,
+            "f4_splits": 472,
+            "f4_word_xors": 30651018,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 8.560334,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 3,
+            "target_index": 6
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 15.922665999999998
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 520,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 3,
+            "f4_ms": 185.56858400000002,
+            "f4_reductions": 1024,
+            "f4_splits": 475,
+            "f4_word_xors": 28954320,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 6.871042,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 3,
+            "target_index": 7
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 17.605165999999997
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 520,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 3,
+            "f4_ms": 223.15354200000002,
+            "f4_reductions": 1024,
+            "f4_splits": 469,
+            "f4_word_xors": 28574225,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 10.232375,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 3,
+            "target_index": 8
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 19.798375
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 520,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 3,
+            "f4_ms": 243.589708,
+            "f4_reductions": 1024,
+            "f4_splits": 473,
+            "f4_word_xors": 28432934,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 9.065833000000001,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 3,
+            "target_index": 9
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 20.920250000000003
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 520,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 3,
+            "f4_ms": 189.566291,
+            "f4_reductions": 1024,
+            "f4_splits": 482,
+            "f4_word_xors": 27586919,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 4.4746250000000005,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 3,
+            "target_index": 10
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 30.210583999999997
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 520,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 3,
+            "f4_ms": 394.46254200000004,
+            "f4_reductions": 1024,
+            "f4_splits": 475,
+            "f4_word_xors": 27515904,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 13.176625000000001,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 3,
+            "target_index": 11
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 15.108082999999999
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 520,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 3,
+            "f4_ms": 215.107709,
+            "f4_reductions": 1024,
+            "f4_splits": 474,
+            "f4_word_xors": 28437353,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 5.747625,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 3,
+            "target_index": 12
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 14.764125
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 520,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 3,
+            "f4_ms": 245.03941700000001,
+            "f4_reductions": 1024,
+            "f4_splits": 475,
+            "f4_word_xors": 30296118,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 4.045583000000001,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 3,
+            "target_index": 13
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 21.179042
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 520,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 3,
+            "f4_ms": 248.6205,
+            "f4_reductions": 1024,
+            "f4_splits": 472,
+            "f4_word_xors": 29198850,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 6.662000000000001,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 3,
+            "target_index": 14
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 36.244291999999994
+          }
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 520,
+            "f4_exhausted": true,
+            "f4_max_degree_built": 3,
+            "f4_ms": 425.58075,
+            "f4_reductions": 1024,
+            "f4_splits": 469,
+            "f4_word_xors": 27993352,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 4.235541,
+            "macaulay_solving_degree": null,
+            "n_vars": 44,
+            "system_degree": 3,
+            "target_index": 15
+          },
+          "wdsat": {
+            "lifted": false,
+            "model_valid": false,
+            "verdict": "unknown",
+            "wall_ms": 20.301790999999998
+          }
+        }
+      ],
+      "spec": {
+        "a": 1,
+        "arm": "onb_matched",
+        "engine": "inherited",
+        "m": 3,
+        "macaulay_extra": 1,
+        "n": 11,
+        "node_budget": 1024,
+        "seed": 20261012,
+        "targets": 16,
+        "w": 1,
+        "wdsat_binary": "/Volumes/SSD990/llm/tmp/a2-wdsat-build-86920/wdsat_solver",
+        "wdsat_timeout_secs": 20
+      },
+      "summary": {
+        "boolean_roots_total": 0,
+        "equations": 520,
+        "f4_exhausted": 16,
+        "f4_max_degree_built": 3,
+        "f4_mean_ms": 255.56839325,
+        "f4_mean_splits": 476.8125,
+        "f4_mean_word_xors": 28325712.375,
+        "f4_median_ms": 240.450375,
+        "lifted_decompositions": 0,
+        "macaulay_degree_reached_max": 3,
+        "macaulay_mean_ms": 7.0213854375,
+        "macaulay_solving_degree_max": null,
+        "macaulay_solving_degree_min": null,
+        "macaulay_solving_degree_resolved": 0,
+        "n_vars": 44,
+        "system_degree": 3,
+        "targets": 16,
+        "wdsat_lifted": 0,
+        "wdsat_mean_ms": 22.581296874999996,
+        "wdsat_models_valid": 0,
+        "wdsat_runs": 16,
+        "wdsat_verdicts": {
+          "unknown": 16
+        }
+      },
+      "timed_out": false,
+      "unsupported": 0,
+      "wall_ms": 4680.488334
+    }
+  ],
+  "wall_ms": 860261.598541,
+  "wdsat": {
+    "binary": "/Volumes/SSD990/llm/tmp/a2-wdsat-build-86920/wdsat_solver",
+    "cells": [
+      {
+        "cell": "K1/n11/w1/m2/cyclotomic",
+        "need": {
+          "equations": 33,
+          "max_degree": 4,
+          "max_terms": 292,
+          "n_vars": 22,
+          "nonlinear_monomials": 1221,
+          "total_terms": 6986
+        },
+        "static_bytes_alone": 23490216,
+        "xor_atoms": 6983
+      },
+      {
+        "cell": "K1/n11/w1/m2/onb_matched",
+        "need": {
+          "equations": 343,
+          "max_degree": 3,
+          "max_terms": 82,
+          "n_vars": 22,
+          "nonlinear_monomials": 561,
+          "total_terms": 1228
+        },
+        "static_bytes_alone": 6410192,
+        "xor_atoms": 1225
+      },
+      {
+        "cell": "K1/n11/w2/m2/cyclotomic",
+        "need": {
+          "equations": 55,
+          "max_degree": 4,
+          "max_terms": 380,
+          "n_vars": 44,
+          "nonlinear_monomials": 2684,
+          "total_terms": 15669
+        },
+        "static_bytes_alone": 114033136,
+        "xor_atoms": 15664
+      },
+      {
+        "cell": "K1/n11/w2/m2/onb_matched",
+        "need": {
+          "equations": 937,
+          "max_degree": 5,
+          "max_terms": 331,
+          "n_vars": 22,
+          "nonlinear_monomials": 1705,
+          "total_terms": 2372
+        },
+        "static_bytes_alone": 44489984,
+        "xor_atoms": 2369
+      },
+      {
+        "cell": "K1/n11/w1/m3/cyclotomic",
+        "need": {
+          "equations": 55,
+          "max_degree": 4,
+          "max_terms": 358,
+          "n_vars": 44,
+          "nonlinear_monomials": 3465,
+          "total_terms": 13276
+        },
+        "static_bytes_alone": 168039616,
+        "xor_atoms": 13271
+      },
+      {
+        "cell": "K1/n11/w1/m3/onb_matched",
+        "need": {
+          "equations": 520,
+          "max_degree": 3,
+          "max_terms": 853,
+          "n_vars": 44,
+          "nonlinear_monomials": 2475,
+          "total_terms": 10312
+        },
+        "static_bytes_alone": 138377392,
+        "xor_atoms": 10307
+      }
+    ],
+    "config_h": "#define __XG_ENHANCED__\n#ifdef __XG_ENHANCED__\n#define __MAX_ANF_ID__ 45\n#define __MAX_DEGREE__ 6\n#endif\n#define __MAX_ID__ 4439\n#define __MAX_BUFFER_SIZE__ 142103\n#define __MAX_EQ__ 26050\n#define __MAX_EQ_SIZE__ 7\n#define __MAX_XEQ__ 1001\n#define __MAX_XEQ_SIZE__ 1130\n",
+    "covered_cells": [
+      "K1/n11/w1/m2/onb_matched",
+      "K1/n11/w1/m2/cyclotomic",
+      "K1/n11/w2/m2/onb_matched",
+      "K1/n11/w2/m2/cyclotomic",
+      "K1/n11/w1/m3/onb_matched",
+      "K1/n11/w1/m3/cyclotomic"
+    ],
+    "over_capacity_cells": [],
+    "source": "/private/tmp/wdsat-q1458/src",
+    "static_bytes": 231753728,
+    "status": "built"
+  },
+  "yields": [
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 1.179333,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 11.0,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 14.9375,
+        "targets": 32,
+        "unknowns": 10,
+        "witnesses": 478
+      },
+      "columns": 10,
+      "coverage_per_column": 0.1,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "m": 2,
+      "n": 11,
+      "points": 220,
+      "projected": false,
+      "table_ms": 25.878292000000002,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 599.949875,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 11.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 256.0,
+        "targets": 32,
+        "unknowns": 10,
+        "witnesses": 8192
+      },
+      "columns": 10,
+      "coverage_per_column": 0.1,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "m": 3,
+      "n": 11,
+      "points": 220,
+      "projected": false,
+      "table_ms": 25.878292000000002,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 0.246875,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 111.0,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 24.65625,
+        "targets": 32,
+        "unknowns": 110,
+        "witnesses": 789
+      },
+      "columns": 110,
+      "coverage_per_column": 0.00909090909090909,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "m": 2,
+      "n": 11,
+      "points": 220,
+      "projected": true,
+      "table_ms": 19.060000000000002,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 397.44016700000003,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 111.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 256.0,
+        "targets": 32,
+        "unknowns": 110,
+        "witnesses": 8192
+      },
+      "columns": 110,
+      "coverage_per_column": 0.00909090909090909,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "m": 3,
+      "n": 11,
+      "points": 220,
+      "projected": true,
+      "table_ms": 19.060000000000002,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 1.2492919999999998,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 11.0,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 24.0,
+        "targets": 32,
+        "unknowns": 10,
+        "witnesses": 768
+      },
+      "columns": 10,
+      "coverage_per_column": 0.1,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "onb_weight",
+        "w": 4
+      },
+      "m": 2,
+      "n": 11,
+      "points": 220,
+      "projected": false,
+      "table_ms": 18.775582999999997,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 0.14550000000000002,
+        "coverage": 0.0,
+        "covered": 0,
+        "exhaustive": false,
+        "expected_trials": null,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 0.0,
+        "targets": 32,
+        "unknowns": 10,
+        "witnesses": 0
+      },
+      "columns": 10,
+      "coverage_per_column": 0.0,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "onb_weight",
+        "w": 4
+      },
+      "m": 3,
+      "n": 11,
+      "points": 220,
+      "projected": false,
+      "table_ms": 18.775582999999997,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 0.294417,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 111.0,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 23.96875,
+        "targets": 32,
+        "unknowns": 110,
+        "witnesses": 767
+      },
+      "columns": 110,
+      "coverage_per_column": 0.00909090909090909,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "onb_weight",
+        "w": 4
+      },
+      "m": 2,
+      "n": 11,
+      "points": 220,
+      "projected": true,
+      "table_ms": 9.393083,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 210.507583,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 111.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 256.0,
+        "targets": 32,
+        "unknowns": 110,
+        "witnesses": 8192
+      },
+      "columns": 110,
+      "coverage_per_column": 0.00909090909090909,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "onb_weight",
+        "w": 4
+      },
+      "m": 3,
+      "n": 11,
+      "points": 220,
+      "projected": true,
+      "table_ms": 9.393083,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 5.91125,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 79.0,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 256.0,
+        "targets": 32,
+        "unknowns": 78,
+        "witnesses": 8192
+      },
+      "columns": 78,
+      "coverage_per_column": 0.01282051282051282,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "m": 2,
+      "n": 11,
+      "points": 1716,
+      "projected": false,
+      "table_ms": 195.028459,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 2207.5829169999997,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 79.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 256.0,
+        "targets": 32,
+        "unknowns": 78,
+        "witnesses": 8192
+      },
+      "columns": 78,
+      "coverage_per_column": 0.01282051282051282,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "m": 3,
+      "n": 11,
+      "points": 1716,
+      "projected": false,
+      "table_ms": 195.028459,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 0.81675,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 485.0,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 256.0,
+        "targets": 32,
+        "unknowns": 484,
+        "witnesses": 8192
+      },
+      "columns": 484,
+      "coverage_per_column": 0.002066115702479339,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "m": 2,
+      "n": 11,
+      "points": 968,
+      "projected": true,
+      "table_ms": 94.593416,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 1357.151875,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 485.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 256.0,
+        "targets": 32,
+        "unknowns": 484,
+        "witnesses": 8192
+      },
+      "columns": 484,
+      "coverage_per_column": 0.002066115702479339,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "m": 3,
+      "n": 11,
+      "points": 968,
+      "projected": true,
+      "table_ms": 94.593416,
+      "table_tier": "compact"
+    },
+    {
+      "a": 0,
+      "census": {
+        "census_ms": 0.092333,
+        "coverage": 0.09375,
+        "covered": 3,
+        "exhaustive": false,
+        "expected_trials": 192.0,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 0.09375,
+        "targets": 32,
+        "unknowns": 17,
+        "witnesses": 3
+      },
+      "columns": 17,
+      "coverage_per_column": 0.0055147058823529415,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "m": 2,
+      "n": 23,
+      "points": 782,
+      "projected": false,
+      "table_ms": 105.120834,
+      "table_tier": "compact"
+    },
+    {
+      "a": 0,
+      "census": {
+        "census_ms": 14.639,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 18.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 9.0625,
+        "targets": 32,
+        "unknowns": 17,
+        "witnesses": 290
+      },
+      "columns": 17,
+      "coverage_per_column": 0.058823529411764705,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "m": 3,
+      "n": 23,
+      "points": 782,
+      "projected": false,
+      "table_ms": 105.120834,
+      "table_tier": "compact"
+    },
+    {
+      "a": 0,
+      "census": {
+        "census_ms": 0.08349999999999999,
+        "coverage": 0.09375,
+        "covered": 3,
+        "exhaustive": false,
+        "expected_trials": 4181.333333333333,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 0.09375,
+        "targets": 32,
+        "unknowns": 391,
+        "witnesses": 3
+      },
+      "columns": 391,
+      "coverage_per_column": 0.00023976982097186701,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "m": 2,
+      "n": 23,
+      "points": 782,
+      "projected": true,
+      "table_ms": 64.831791,
+      "table_tier": "compact"
+    },
+    {
+      "a": 0,
+      "census": {
+        "census_ms": 665.596042,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 392.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 39.6875,
+        "targets": 32,
+        "unknowns": 391,
+        "witnesses": 1270
+      },
+      "columns": 391,
+      "coverage_per_column": 0.0025575447570332483,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "m": 3,
+      "n": 23,
+      "points": 782,
+      "projected": true,
+      "table_ms": 64.831791,
+      "table_tier": "compact"
+    },
+    {
+      "a": 0,
+      "census": {
+        "census_ms": 0.127291,
+        "coverage": 0.15625,
+        "covered": 5,
+        "exhaustive": false,
+        "expected_trials": 115.2,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 0.15625,
+        "targets": 32,
+        "unknowns": 17,
+        "witnesses": 5
+      },
+      "columns": 17,
+      "coverage_per_column": 0.009191176470588236,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "onb_weight",
+        "w": 3
+      },
+      "m": 2,
+      "n": 23,
+      "points": 782,
+      "projected": false,
+      "table_ms": 94.755667,
+      "table_tier": "compact"
+    },
+    {
+      "a": 0,
+      "census": {
+        "census_ms": 2.134042,
+        "coverage": 0.0,
+        "covered": 0,
+        "exhaustive": false,
+        "expected_trials": null,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 0.0,
+        "targets": 32,
+        "unknowns": 17,
+        "witnesses": 0
+      },
+      "columns": 17,
+      "coverage_per_column": 0.0,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "onb_weight",
+        "w": 3
+      },
+      "m": 3,
+      "n": 23,
+      "points": 782,
+      "projected": false,
+      "table_ms": 94.755667,
+      "table_tier": "compact"
+    },
+    {
+      "a": 0,
+      "census": {
+        "census_ms": 0.135958,
+        "coverage": 0.15625,
+        "covered": 5,
+        "exhaustive": false,
+        "expected_trials": 2508.8,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 0.15625,
+        "targets": 32,
+        "unknowns": 391,
+        "witnesses": 5
+      },
+      "columns": 391,
+      "coverage_per_column": 0.000399616368286445,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "onb_weight",
+        "w": 3
+      },
+      "m": 2,
+      "n": 23,
+      "points": 782,
+      "projected": true,
+      "table_ms": 66.328291,
+      "table_tier": "compact"
+    },
+    {
+      "a": 0,
+      "census": {
+        "census_ms": 606.283541,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 392.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 39.03125,
+        "targets": 32,
+        "unknowns": 391,
+        "witnesses": 1249
+      },
+      "columns": 391,
+      "coverage_per_column": 0.0025575447570332483,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "onb_weight",
+        "w": 3
+      },
+      "m": 3,
+      "n": 23,
+      "points": 782,
+      "projected": true,
+      "table_ms": 66.328291,
+      "table_tier": "compact"
+    },
+    {
+      "a": 0,
+      "census": {
+        "census_ms": 138.840208,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 368.0,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 16.8125,
+        "targets": 32,
+        "unknowns": 367,
+        "witnesses": 538
+      },
+      "columns": 367,
+      "coverage_per_column": 0.0027247956403269754,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "m": 2,
+      "n": 23,
+      "points": 16882,
+      "projected": false,
+      "table_ms": 14520.964375,
+      "table_tier": "compact"
+    },
+    {
+      "a": 0,
+      "census": {
+        "census_ms": 176083.557584,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 368.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 256.0,
+        "targets": 32,
+        "unknowns": 367,
+        "witnesses": 8192
+      },
+      "columns": 367,
+      "coverage_per_column": 0.0027247956403269754,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "m": 3,
+      "n": 23,
+      "points": 16882,
+      "projected": false,
+      "table_ms": 14520.964375,
+      "table_tier": "compact"
+    },
+    {
+      "a": 0,
+      "census": {
+        "census_ms": 9.724791,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 8442.0,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 67.125,
+        "targets": 32,
+        "unknowns": 8441,
+        "witnesses": 2148
+      },
+      "columns": 8441,
+      "coverage_per_column": 0.00011846937566639024,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "m": 2,
+      "n": 23,
+      "points": 16882,
+      "projected": true,
+      "table_ms": 5984.075583,
+      "table_tier": "compact"
+    },
+    {
+      "a": 0,
+      "census": {
+        "census_ms": 46903.012833,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 8442.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 256.0,
+        "targets": 32,
+        "unknowns": 8441,
+        "witnesses": 8192
+      },
+      "columns": 8441,
+      "coverage_per_column": 0.00011846937566639024,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "m": 3,
+      "n": 23,
+      "points": 16882,
+      "projected": true,
+      "table_ms": 5984.075583,
+      "table_tier": "compact"
+    },
+    {
+      "a": 0,
+      "census": {
+        "census_ms": 24.661458,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 368.0,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 35.6875,
+        "targets": 32,
+        "unknowns": 367,
+        "witnesses": 1142
+      },
+      "columns": 367,
+      "coverage_per_column": 0.0027247956403269754,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "onb_weight",
+        "w": 5
+      },
+      "m": 2,
+      "n": 23,
+      "points": 16882,
+      "projected": false,
+      "table_ms": 3424.457458,
+      "table_tier": "compact"
+    },
+    {
+      "a": 0,
+      "census": {
+        "census_ms": 25.572000000000003,
+        "coverage": 0.0,
+        "covered": 0,
+        "exhaustive": false,
+        "expected_trials": null,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 0.0,
+        "targets": 32,
+        "unknowns": 367,
+        "witnesses": 0
+      },
+      "columns": 367,
+      "coverage_per_column": 0.0,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "onb_weight",
+        "w": 5
+      },
+      "m": 3,
+      "n": 23,
+      "points": 16882,
+      "projected": false,
+      "table_ms": 3424.457458,
+      "table_tier": "compact"
+    },
+    {
+      "a": 0,
+      "census": {
+        "census_ms": 17.277125,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 8419.0,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 65.75,
+        "targets": 32,
+        "unknowns": 8418,
+        "witnesses": 2104
+      },
+      "columns": 8418,
+      "coverage_per_column": 0.00011879306248515087,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "onb_weight",
+        "w": 5
+      },
+      "m": 2,
+      "n": 23,
+      "points": 16836,
+      "projected": true,
+      "table_ms": 3261.759375,
+      "table_tier": "compact"
+    },
+    {
+      "a": 0,
+      "census": {
+        "census_ms": 33062.511584,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 8419.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 256.0,
+        "targets": 32,
+        "unknowns": 8418,
+        "witnesses": 8192
+      },
+      "columns": 8418,
+      "coverage_per_column": 0.00011879306248515087,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "onb_weight",
+        "w": 5
+      },
+      "m": 3,
+      "n": 23,
+      "points": 16836,
+      "projected": true,
+      "table_ms": 3261.759375,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 0.116416,
+        "coverage": 0.0625,
+        "covered": 2,
+        "exhaustive": false,
+        "expected_trials": 496.0,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 0.0625,
+        "targets": 32,
+        "unknowns": 30,
+        "witnesses": 2
+      },
+      "columns": 30,
+      "coverage_per_column": 0.0020833333333333333,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "m": 2,
+      "n": 23,
+      "points": 1380,
+      "projected": false,
+      "table_ms": 67.578833,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 225.897333,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 31.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 53.0625,
+        "targets": 32,
+        "unknowns": 30,
+        "witnesses": 1698
+      },
+      "columns": 30,
+      "coverage_per_column": 0.03333333333333333,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "m": 3,
+      "n": 23,
+      "points": 1380,
+      "projected": false,
+      "table_ms": 67.578833,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 0.544958,
+        "coverage": 0.28125,
+        "covered": 9,
+        "exhaustive": false,
+        "expected_trials": 2456.8888888888887,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 0.375,
+        "targets": 32,
+        "unknowns": 690,
+        "witnesses": 12
+      },
+      "columns": 690,
+      "coverage_per_column": 0.0004076086956521739,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "m": 2,
+      "n": 23,
+      "points": 1380,
+      "projected": true,
+      "table_ms": 47.854875,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 429.035917,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 691.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 103.0,
+        "targets": 32,
+        "unknowns": 690,
+        "witnesses": 3296
+      },
+      "columns": 690,
+      "coverage_per_column": 0.0014492753623188406,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "m": 3,
+      "n": 23,
+      "points": 1380,
+      "projected": true,
+      "table_ms": 47.854875,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 0.202959,
+        "coverage": 0.21875,
+        "covered": 7,
+        "exhaustive": false,
+        "expected_trials": 141.71428571428572,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 0.25,
+        "targets": 32,
+        "unknowns": 30,
+        "witnesses": 8
+      },
+      "columns": 30,
+      "coverage_per_column": 0.007291666666666667,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "onb_weight",
+        "w": 3
+      },
+      "m": 2,
+      "n": 23,
+      "points": 1380,
+      "projected": false,
+      "table_ms": 58.723625,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 485.158042,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 31.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 103.375,
+        "targets": 32,
+        "unknowns": 30,
+        "witnesses": 3308
+      },
+      "columns": 30,
+      "coverage_per_column": 0.03333333333333333,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "onb_weight",
+        "w": 3
+      },
+      "m": 3,
+      "n": 23,
+      "points": 1380,
+      "projected": false,
+      "table_ms": 58.723625,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 0.35525,
+        "coverage": 0.375,
+        "covered": 12,
+        "exhaustive": false,
+        "expected_trials": 1842.6666666666667,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 0.40625,
+        "targets": 32,
+        "unknowns": 690,
+        "witnesses": 13
+      },
+      "columns": 690,
+      "coverage_per_column": 0.0005434782608695652,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "onb_weight",
+        "w": 3
+      },
+      "m": 2,
+      "n": 23,
+      "points": 1380,
+      "projected": true,
+      "table_ms": 82.35320899999999,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 508.146125,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 691.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 100.28125,
+        "targets": 32,
+        "unknowns": 690,
+        "witnesses": 3209
+      },
+      "columns": 690,
+      "coverage_per_column": 0.0014492753623188406,
+      "cyclotomic_w": 2,
+      "family": {
+        "family": "onb_weight",
+        "w": 3
+      },
+      "m": 3,
+      "n": 23,
+      "points": 1380,
+      "projected": true,
+      "table_ms": 82.35320899999999,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 19.888416,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 339.0,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 14.09375,
+        "targets": 32,
+        "unknowns": 338,
+        "witnesses": 451
+      },
+      "columns": 338,
+      "coverage_per_column": 0.0029585798816568047,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "m": 2,
+      "n": 23,
+      "points": 15548,
+      "projected": false,
+      "table_ms": 3400.239708,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 53438.093582999994,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 339.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 256.0,
+        "targets": 32,
+        "unknowns": 338,
+        "witnesses": 8192
+      },
+      "columns": 338,
+      "coverage_per_column": 0.0029585798816568047,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "m": 3,
+      "n": 23,
+      "points": 15548,
+      "projected": false,
+      "table_ms": 3400.239708,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 12.424292,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 7775.0,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 29.09375,
+        "targets": 32,
+        "unknowns": 7774,
+        "witnesses": 931
+      },
+      "columns": 7774,
+      "coverage_per_column": 0.00012863390789812196,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "m": 2,
+      "n": 23,
+      "points": 15548,
+      "projected": true,
+      "table_ms": 3237.6152500000003,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 90607.348042,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 7775.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 256.0,
+        "targets": 32,
+        "unknowns": 7774,
+        "witnesses": 8192
+      },
+      "columns": 7774,
+      "coverage_per_column": 0.00012863390789812196,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "m": 3,
+      "n": 23,
+      "points": 15548,
+      "projected": true,
+      "table_ms": 3237.6152500000003,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 155.44025,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 339.0,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 27.40625,
+        "targets": 32,
+        "unknowns": 338,
+        "witnesses": 877
+      },
+      "columns": 338,
+      "coverage_per_column": 0.0029585798816568047,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "onb_weight",
+        "w": 5
+      },
+      "m": 2,
+      "n": 23,
+      "points": 15548,
+      "projected": false,
+      "table_ms": 8310.753459000001,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 86414.16466699999,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 339.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 256.0,
+        "targets": 32,
+        "unknowns": 338,
+        "witnesses": 8192
+      },
+      "columns": 338,
+      "coverage_per_column": 0.0029585798816568047,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "onb_weight",
+        "w": 5
+      },
+      "m": 3,
+      "n": 23,
+      "points": 15548,
+      "projected": false,
+      "table_ms": 8310.753459000001,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 15.994584,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 7775.0,
+        "extra_relations": 0,
+        "m": 2,
+        "mean_witnesses": 27.8125,
+        "targets": 32,
+        "unknowns": 7774,
+        "witnesses": 890
+      },
+      "columns": 7774,
+      "coverage_per_column": 0.00012863390789812196,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "onb_weight",
+        "w": 5
+      },
+      "m": 2,
+      "n": 23,
+      "points": 15548,
+      "projected": true,
+      "table_ms": 4397.431250000001,
+      "table_tier": "compact"
+    },
+    {
+      "a": 1,
+      "census": {
+        "census_ms": 39820.462542,
+        "coverage": 1.0,
+        "covered": 32,
+        "exhaustive": false,
+        "expected_trials": 7775.0,
+        "extra_relations": 0,
+        "m": 3,
+        "mean_witnesses": 256.0,
+        "targets": 32,
+        "unknowns": 7774,
+        "witnesses": 8192
+      },
+      "columns": 7774,
+      "coverage_per_column": 0.00012863390789812196,
+      "cyclotomic_w": 3,
+      "family": {
+        "family": "onb_weight",
+        "w": 5
+      },
+      "m": 3,
+      "n": 23,
+      "points": 15548,
+      "projected": true,
+      "table_ms": 4397.431250000001,
+      "table_tier": "compact"
+    }
+  ]
+}

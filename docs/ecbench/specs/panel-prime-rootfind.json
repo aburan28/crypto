@@ -1,0 +1,28 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "panel: the direct-subtraction root-finding oracle beside subtract and mitm on four prime-order curves",
+  "description": "The prime side of the root-finding engine comparison on the curves, targets and seeds of research/ecbench_all_candidates_20261003/spec-prime.json, so the subtract and mitm rows reproduce that session's: rootfind-subtract (prime_fast's batched direct subtraction, RESEARCH_SEMAEV_ROOTFIND_VS_GROEBNER.md §2) at m = 2 follows subtract's search candidate for candidate and is charged as subtract is (plus one re-addition per hit), so its S reads the same and the difference is in the constant the unit does not see (one batched inversion a target, kept as the `inversions` counter and the field-operation tally) and in wall time; rootfind-subtract at m = 3 adds the negation-folded pair table. ecbench has no prime-curve Groebner oracle, so the Groebner baseline of the note is not on this panel. A constant-factor engineering comparison on synthetic known-answer curves; no security claim.",
+  "workloads": {
+    "curves": [
+      {"kind": "prime_search", "bits": 18, "seed": 59297},
+      {"kind": "prime_search", "bits": 20, "seed": 59297},
+      {"kind": "prime_search", "bits": 22, "seed": 59297},
+      {"kind": "prime_search", "bits": 24, "seed": 59297}
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 20261003
+  },
+  "arms": [
+    {"name": "rho-neg", "role": "reference", "method": {"id": "rho.negation"}},
+    {"name": "ic-subtract", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "prime-abscissa:size=32", "oracle": "subtract"}}},
+    {"name": "ic-mitm", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "prime-abscissa:size=32", "oracle": "mitm:negation_folded=1"}}},
+    {"name": "ic-rootfind-m2", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "prime-abscissa:size=32", "oracle": "rootfind-subtract:m=2"}}},
+    {"name": "ic-rootfind-m3", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "prime-abscissa:size=32", "oracle": "rootfind-subtract:m=3"}}},
+    {"name": "rho-neg-aa", "role": "control", "method": {"id": "rho.negation"}}
+  ],
+  "measurement": {"rounds": 3, "warmup": 1, "order": "alternate", "seed": 20261003, "isolation_required": "L2", "timeout_seconds": 300}
+}

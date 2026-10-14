@@ -1,0 +1,3766 @@
+{
+  "timing": {
+    "k0n23": {
+      "f4": {
+        "cand1": {
+          "counters": {
+            "geo_refute": 0,
+            "hits": 0,
+            "reductions": 2796,
+            "splits": 1192,
+            "word_xors": 158321408
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 7039.063,
+          "median_ms": 2543.141,
+          "min_ms": 1554.911,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              698,
+              298,
+              299
+            ],
+            [
+              2,
+              false,
+              false,
+              699,
+              298,
+              299
+            ],
+            [
+              3,
+              false,
+              false,
+              700,
+              298,
+              299
+            ],
+            [
+              4,
+              false,
+              false,
+              699,
+              298,
+              299
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 3.4576872822178415,
+            "median": 1.7988170261353498,
+            "min": 0.551879845371465,
+            "per_round": [
+              3.4576872822178415,
+              0.7957465089641786,
+              1.7988170261353498,
+              2.1472529442921173,
+              0.551879845371465
+            ]
+          },
+          "ratio_prev_over_this": {
+            "max": 3.5456101741811894,
+            "median": 1.948034932254732,
+            "min": 0.7923823292780101,
+            "per_round": [
+              3.5456101741811894,
+              0.7923823292780101,
+              1.948034932254732,
+              2.0556335649498,
+              1.0420014709344128
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            1796.233,
+            1554.911,
+            2725.504,
+            2543.141,
+            7039.063
+          ],
+          "word_xors_ratio_orig_over_this": 1.0012087247228119,
+          "word_xors_ratio_prev_over_this": 1.0012087247228119
+        },
+        "cand2": {
+          "counters": {
+            "geo_refute": 0,
+            "hits": 0,
+            "reductions": 2796,
+            "splits": 1192,
+            "word_xors": 158846162
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 8124.836,
+          "median_ms": 3711.971,
+          "min_ms": 1417.409,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              698,
+              298,
+              299
+            ],
+            [
+              2,
+              false,
+              false,
+              699,
+              298,
+              299
+            ],
+            [
+              3,
+              false,
+              false,
+              700,
+              298,
+              299
+            ],
+            [
+              4,
+              false,
+              false,
+              699,
+              298,
+              299
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 2.4739696635274537,
+            "median": 1.0465375402986716,
+            "min": 0.6721079662407955,
+            "per_round": [
+              1.3699550995811707,
+              0.8729414022346408,
+              2.4739696635274537,
+              0.6721079662407955,
+              1.0465375402986716
+            ]
+          },
+          "ratio_prev_over_this": {
+            "max": 2.6791937455940764,
+            "median": 1.4047906426433105,
+            "min": 0.6434303412401186,
+            "per_round": [
+              1.4047906426433105,
+              0.869250865487661,
+              2.6791937455940764,
+              0.6434303412401186,
+              1.975962096686639
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            4533.588,
+            1417.409,
+            1981.707,
+            8124.836,
+            3711.971
+          ],
+          "word_xors_ratio_orig_over_this": 0.9979011957493817,
+          "word_xors_ratio_prev_over_this": 0.9979011957493817
+        },
+        "orig": {
+          "counters": {
+            "geo_refute": 0,
+            "hits": 0,
+            "reductions": 2796,
+            "splits": 1192,
+            "word_xors": 158512775
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 6210.812,
+          "median_ms": 4902.683,
+          "min_ms": 1237.315,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              698,
+              298,
+              299
+            ],
+            [
+              2,
+              false,
+              false,
+              699,
+              298,
+              299
+            ],
+            [
+              3,
+              false,
+              false,
+              700,
+              298,
+              299
+            ],
+            [
+              4,
+              false,
+              false,
+              699,
+              298,
+              299
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_prev_over_this": {
+            "max": 1.8880948084506541,
+            "median": 1.0254282370807553,
+            "min": 0.9573318180394805,
+            "per_round": [
+              1.0254282370807553,
+              0.9957722972727236,
+              1.082953354316402,
+              0.9573318180394805,
+              1.8880948084506541
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            6210.812,
+            1237.315,
+            4902.683,
+            5460.767,
+            3884.717
+          ],
+          "word_xors_ratio_prev_over_this": 1.0
+        },
+        "prev": {
+          "counters": {
+            "geo_refute": 0,
+            "hits": 0,
+            "reductions": 2796,
+            "splits": 1192,
+            "word_xors": 158512775
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 7334.714,
+          "median_ms": 5309.377,
+          "min_ms": 1232.084,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              698,
+              298,
+              299
+            ],
+            [
+              2,
+              false,
+              false,
+              699,
+              298,
+              299
+            ],
+            [
+              3,
+              false,
+              false,
+              700,
+              298,
+              299
+            ],
+            [
+              4,
+              false,
+              false,
+              699,
+              298,
+              299
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 1.0445698984996652,
+            "median": 0.9752023241010548,
+            "min": 0.5296344206468037,
+            "per_round": [
+              0.9752023241010548,
+              1.0042456520821632,
+              0.9234008057819212,
+              1.0445698984996652,
+              0.5296344206468037
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            6368.742,
+            1232.084,
+            5309.377,
+            5227.766,
+            7334.714
+          ],
+          "word_xors_ratio_orig_over_this": 1.0
+        }
+      },
+      "f6p": {
+        "cand1": {
+          "counters": {
+            "geo_refute": 640,
+            "hits": 0,
+            "reductions": 1045,
+            "splits": 636,
+            "word_xors": 124951833
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 5156.153,
+          "median_ms": 1617.268,
+          "min_ms": 1013.001,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              261,
+              159,
+              0
+            ],
+            [
+              2,
+              false,
+              false,
+              261,
+              159,
+              0
+            ],
+            [
+              3,
+              false,
+              false,
+              262,
+              159,
+              0
+            ],
+            [
+              4,
+              false,
+              false,
+              261,
+              159,
+              0
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 3.5546662933619197,
+            "median": 1.8030426426035118,
+            "min": 0.4690931397885206,
+            "per_round": [
+              0.5792841182236209,
+              1.8030426426035118,
+              3.5546662933619197,
+              2.6616973810153914,
+              0.4690931397885206
+            ]
+          },
+          "ratio_prev_over_this": {
+            "max": 5.697735337800846,
+            "median": 1.761359279970914,
+            "min": 0.5695187865837185,
+            "per_round": [
+              1.9082737485366892,
+              1.106153893234064,
+              5.697735337800846,
+              1.761359279970914,
+              0.5695187865837185
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            3286.213,
+            1013.001,
+            1042.937,
+            1617.268,
+            5156.153
+          ],
+          "word_xors_ratio_orig_over_this": 0.9999837377335633,
+          "word_xors_ratio_prev_over_this": 0.9999837377335633
+        },
+        "cand2": {
+          "counters": {
+            "geo_refute": 640,
+            "hits": 0,
+            "reductions": 1045,
+            "splits": 636,
+            "word_xors": 125135729
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 8833.373,
+          "median_ms": 2412.289,
+          "min_ms": 1021.636,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              261,
+              159,
+              0
+            ],
+            [
+              2,
+              false,
+              false,
+              261,
+              159,
+              0
+            ],
+            [
+              3,
+              false,
+              false,
+              262,
+              159,
+              0
+            ],
+            [
+              4,
+              false,
+              false,
+              261,
+              159,
+              0
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 2.434159450778318,
+            "median": 1.0026642744712593,
+            "min": 0.48731984939388384,
+            "per_round": [
+              0.5766463864390556,
+              1.7878030922951031,
+              2.434159450778318,
+              0.48731984939388384,
+              1.0026642744712593
+            ]
+          },
+          "ratio_prev_over_this": {
+            "max": 3.901687296622255,
+            "median": 1.2173193178760917,
+            "min": 0.3224804386727471,
+            "per_round": [
+              1.899584550677093,
+              1.0968045370366746,
+              3.901687296622255,
+              0.3224804386727471,
+              1.2173193178760917
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            3301.245,
+            1021.636,
+            1523.028,
+            8833.373,
+            2412.289
+          ],
+          "word_xors_ratio_orig_over_this": 0.9985141893407598,
+          "word_xors_ratio_prev_over_this": 0.9985141893407598
+        },
+        "orig": {
+          "counters": {
+            "geo_refute": 640,
+            "hits": 0,
+            "reductions": 1045,
+            "splits": 636,
+            "word_xors": 124949801
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 4304.678,
+          "median_ms": 2418.716,
+          "min_ms": 1826.484,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              261,
+              159,
+              0
+            ],
+            [
+              2,
+              false,
+              false,
+              261,
+              159,
+              0
+            ],
+            [
+              3,
+              false,
+              false,
+              262,
+              159,
+              0
+            ],
+            [
+              4,
+              false,
+              false,
+              261,
+              159,
+              0
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_prev_over_this": {
+            "max": 3.2941931057741147,
+            "median": 1.214084663102241,
+            "min": 0.6134929186349293,
+            "per_round": [
+              3.2941931057741147,
+              0.6134929186349293,
+              1.6028889542855123,
+              0.6617428760060567,
+              1.214084663102241
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            1903.651,
+            1826.484,
+            3707.293,
+            4304.678,
+            2418.716
+          ],
+          "word_xors_ratio_prev_over_this": 1.0
+        },
+        "prev": {
+          "counters": {
+            "geo_refute": 640,
+            "hits": 0,
+            "reductions": 1045,
+            "splits": 636,
+            "word_xors": 124949801
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 6270.994,
+          "median_ms": 2936.526,
+          "min_ms": 1120.535,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              261,
+              159,
+              0
+            ],
+            [
+              2,
+              false,
+              false,
+              261,
+              159,
+              0
+            ],
+            [
+              3,
+              false,
+              false,
+              262,
+              159,
+              0
+            ],
+            [
+              4,
+              false,
+              false,
+              261,
+              159,
+              0
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 1.6300106645486305,
+            "median": 0.8236657873963997,
+            "min": 0.3035644747866128,
+            "per_round": [
+              0.3035644747866128,
+              1.6300106645486305,
+              0.6238735361712877,
+              1.511160960334762,
+              0.8236657873963997
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            6270.994,
+            1120.535,
+            5942.379,
+            2848.59,
+            2936.526
+          ],
+          "word_xors_ratio_orig_over_this": 1.0
+        }
+      }
+    },
+    "k0n31": {
+      "f4": {
+        "cand1": {
+          "counters": {
+            "geo_refute": 0,
+            "hits": 0,
+            "reductions": 1410,
+            "splits": 602,
+            "word_xors": 281350163
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 11884.451,
+          "median_ms": 6215.27,
+          "min_ms": 1762.17,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              1410,
+              602,
+              603
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 3.8127382715629023,
+            "median": 1.0464577906947514,
+            "min": 0.28040023143092596,
+            "per_round": [
+              0.28040023143092596,
+              3.8127382715629023,
+              1.0464577906947514,
+              1.3299505894353745,
+              0.4908613784515583
+            ]
+          },
+          "ratio_prev_over_this": {
+            "max": 3.4876049262398268,
+            "median": 1.2102742641175368,
+            "min": 0.34447868058861114,
+            "per_round": [
+              1.9651257768267172,
+              1.2102742641175368,
+              3.4876049262398268,
+              1.2042620835458475,
+              0.34447868058861114
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            7413.011,
+            1762.17,
+            2585.745,
+            6215.27,
+            11884.451
+          ],
+          "word_xors_ratio_orig_over_this": 1.0008276625736308,
+          "word_xors_ratio_prev_over_this": 1.0008276625736308
+        },
+        "cand2": {
+          "counters": {
+            "geo_refute": 0,
+            "hits": 0,
+            "reductions": 1410,
+            "splits": 602,
+            "word_xors": 281787203
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 11144.083,
+          "median_ms": 3432.999,
+          "min_ms": 2046.737,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              1410,
+              602,
+              603
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 3.2826362155958484,
+            "median": 0.9160365375579067,
+            "min": 0.5234722318561339,
+            "per_round": [
+              0.6054793491055489,
+              3.2826362155958484,
+              0.9160365375579067,
+              0.943593208002664,
+              0.5234722318561339
+            ]
+          },
+          "ratio_prev_over_this": {
+            "max": 4.243374087787384,
+            "median": 1.042004419717824,
+            "min": 0.36736445699480164,
+            "per_round": [
+              4.243374087787384,
+              1.042004419717824,
+              3.0529406626917983,
+              0.8544178495920097,
+              0.36736445699480164
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            3432.999,
+            2046.737,
+            2953.892,
+            8760.133,
+            11144.083
+          ],
+          "word_xors_ratio_orig_over_this": 0.9992754213185473,
+          "word_xors_ratio_prev_over_this": 0.9992754213185473
+        },
+        "orig": {
+          "counters": {
+            "geo_refute": 0,
+            "hits": 0,
+            "reductions": 1410,
+            "splits": 602,
+            "word_xors": 281583026
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 8266.002,
+          "median_ms": 5833.618,
+          "min_ms": 2078.61,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              1410,
+              602,
+              603
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_prev_over_this": {
+            "max": 7.008288712168227,
+            "median": 0.905493853013827,
+            "min": 0.3174291487942669,
+            "per_round": [
+              7.008288712168227,
+              0.3174291487942669,
+              3.3327717154500602,
+              0.905493853013827,
+              0.7017840386531994
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            2078.61,
+            6718.693,
+            2705.873,
+            8266.002,
+            5833.618
+          ],
+          "word_xors_ratio_prev_over_this": 1.0
+        },
+        "prev": {
+          "counters": {
+            "geo_refute": 0,
+            "hits": 0,
+            "reductions": 1410,
+            "splits": 602,
+            "word_xors": 281583026
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 14567.499,
+          "median_ms": 7484.814,
+          "min_ms": 2132.709,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              1410,
+              602,
+              603
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 3.1503093014565047,
+            "median": 1.1043697278248998,
+            "min": 0.14268818552862095,
+            "per_round": [
+              0.14268818552862095,
+              3.1503093014565047,
+              0.30005055412712517,
+              1.1043697278248998,
+              1.4249397890540654
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            14567.499,
+            2132.709,
+            9018.057,
+            7484.814,
+            4093.94
+          ],
+          "word_xors_ratio_orig_over_this": 1.0
+        }
+      },
+      "f6p": {
+        "cand1": {
+          "counters": {
+            "geo_refute": 324,
+            "hits": 0,
+            "reductions": 528,
+            "splits": 323,
+            "word_xors": 278238729
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 11981.909,
+          "median_ms": 3963.574,
+          "min_ms": 1773.588,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              528,
+              323,
+              0
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 4.929139687458418,
+            "median": 1.3392748458472001,
+            "min": 0.2885851512362852,
+            "per_round": [
+              0.2885851512362852,
+              4.929139687458418,
+              1.3392748458472001,
+              1.9633139181960522,
+              0.8079328594466875
+            ]
+          },
+          "ratio_prev_over_this": {
+            "max": 3.465049578280715,
+            "median": 1.1754201429054407,
+            "min": 0.7279416827485503,
+            "per_round": [
+              1.1754201429054407,
+              1.0463292489574807,
+              3.465049578280715,
+              1.2428886151740828,
+              0.7279416827485503
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            6595.97,
+            1773.588,
+            2393.891,
+            3963.574,
+            11981.909
+          ],
+          "word_xors_ratio_orig_over_this": 0.999996064530614,
+          "word_xors_ratio_prev_over_this": 0.999996064530614
+        },
+        "cand2": {
+          "counters": {
+            "geo_refute": 324,
+            "hits": 0,
+            "reductions": 528,
+            "splits": 323,
+            "word_xors": 278409768
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 7005.464,
+          "median_ms": 4847.641,
+          "min_ms": 1825.628,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              528,
+              323,
+              0
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 4.675034452074318,
+            "median": 1.3818610730138645,
+            "min": 0.5718066241989597,
+            "per_round": [
+              1.0426543633204575,
+              4.675034452074318,
+              0.5718066241989597,
+              1.6052632610376882,
+              1.3818610730138645
+            ]
+          },
+          "ratio_prev_over_this": {
+            "max": 4.246777547233062,
+            "median": 1.2450468662746679,
+            "min": 0.9923892600437757,
+            "per_round": [
+              4.246777547233062,
+              0.9923892600437757,
+              1.4794112710937737,
+              1.0162223233939973,
+              1.2450468662746679
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            1825.628,
+            1869.989,
+            5606.927,
+            4847.641,
+            7005.464
+          ],
+          "word_xors_ratio_orig_over_this": 0.9993817242791567,
+          "word_xors_ratio_prev_over_this": 0.9993817242791567
+        },
+        "orig": {
+          "counters": {
+            "geo_refute": 324,
+            "hits": 0,
+            "reductions": 528,
+            "splits": 323,
+            "word_xors": 278237634
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 9680.578,
+          "median_ms": 7781.74,
+          "min_ms": 1903.499,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              528,
+              323,
+              0
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_prev_over_this": {
+            "max": 4.073044430283389,
+            "median": 0.900992791959323,
+            "min": 0.21227421321001208,
+            "per_round": [
+              4.073044430283389,
+              0.21227421321001208,
+              2.5872580143090715,
+              0.6330564886516383,
+              0.900992791959323
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            1903.499,
+            8742.263,
+            3206.078,
+            7781.74,
+            9680.578
+          ],
+          "word_xors_ratio_prev_over_this": 1.0
+        },
+        "prev": {
+          "counters": {
+            "geo_refute": 324,
+            "hits": 0,
+            "reductions": 528,
+            "splits": 323,
+            "word_xors": 278237634
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 8722.131,
+          "median_ms": 7753.036,
+          "min_ms": 1855.757,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              528,
+              323,
+              0
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 4.710887794037689,
+            "median": 1.1098867925739708,
+            "min": 0.2455165950474111,
+            "per_round": [
+              0.2455165950474111,
+              4.710887794037689,
+              0.38650957672926584,
+              1.5796378647503055,
+              1.1098867925739708
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            7753.036,
+            1855.757,
+            8294.951,
+            4926.281,
+            8722.131
+          ],
+          "word_xors_ratio_orig_over_this": 1.0
+        }
+      }
+    },
+    "k1n17": {
+      "f4": {
+        "cand1": {
+          "counters": {
+            "geo_refute": 0,
+            "hits": 1,
+            "reductions": 1201,
+            "splits": 504,
+            "word_xors": 14959088
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 641.174,
+          "median_ms": 314.004,
+          "min_ms": 185.928,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              162,
+              68,
+              69
+            ],
+            [
+              2,
+              false,
+              false,
+              163,
+              68,
+              69
+            ],
+            [
+              3,
+              true,
+              false,
+              65,
+              28,
+              25
+            ],
+            [
+              4,
+              false,
+              false,
+              161,
+              68,
+              69
+            ],
+            [
+              5,
+              false,
+              false,
+              162,
+              68,
+              69
+            ],
+            [
+              6,
+              false,
+              false,
+              163,
+              68,
+              69
+            ],
+            [
+              7,
+              false,
+              false,
+              163,
+              68,
+              69
+            ],
+            [
+              8,
+              false,
+              false,
+              162,
+              68,
+              69
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 2.39639622425192,
+            "median": 1.2013891240307453,
+            "min": 0.5349646507857884,
+            "per_round": [
+              1.2013891240307453,
+              1.244885116819414,
+              0.5349646507857884,
+              2.39639622425192,
+              0.7188282743841765
+            ]
+          },
+          "ratio_prev_over_this": {
+            "max": 1.2333664539305231,
+            "median": 0.8003151757669635,
+            "min": 0.5681314123184235,
+            "per_round": [
+              0.5681314123184235,
+              0.8003151757669635,
+              0.6500274688161392,
+              1.2333664539305231,
+              1.1811973036960326
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            236.264,
+            185.928,
+            555.175,
+            314.004,
+            641.174
+          ],
+          "word_xors_ratio_orig_over_this": 1.0037789736914442,
+          "word_xors_ratio_prev_over_this": 1.0037789736914442
+        },
+        "cand2": {
+          "counters": {
+            "geo_refute": 0,
+            "hits": 1,
+            "reductions": 1201,
+            "splits": 504,
+            "word_xors": 15058684
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 336.72,
+          "median_ms": 256.267,
+          "min_ms": 167.171,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              162,
+              68,
+              69
+            ],
+            [
+              2,
+              false,
+              false,
+              163,
+              68,
+              69
+            ],
+            [
+              3,
+              true,
+              false,
+              65,
+              28,
+              25
+            ],
+            [
+              4,
+              false,
+              false,
+              161,
+              68,
+              69
+            ],
+            [
+              5,
+              false,
+              false,
+              162,
+              68,
+              69
+            ],
+            [
+              6,
+              false,
+              false,
+              163,
+              68,
+              69
+            ],
+            [
+              7,
+              false,
+              false,
+              163,
+              68,
+              69
+            ],
+            [
+              8,
+              false,
+              false,
+              162,
+              68,
+              69
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 2.2347291518175334,
+            "median": 1.4392278218944095,
+            "min": 1.1589436017903203,
+            "per_round": [
+              1.6979320575937216,
+              1.1619486041596594,
+              1.1589436017903203,
+              2.2347291518175334,
+              1.4392278218944095
+            ]
+          },
+          "ratio_prev_over_this": {
+            "max": 2.364976564232115,
+            "median": 1.1501603706343548,
+            "min": 0.7469967218710937,
+            "per_round": [
+              0.802944290576715,
+              0.7469967218710937,
+              1.4082148696476722,
+              1.1501603706343548,
+              2.364976564232115
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            167.171,
+            199.199,
+            256.267,
+            336.72,
+            320.237
+          ],
+          "word_xors_ratio_orig_over_this": 0.9971401219389423,
+          "word_xors_ratio_prev_over_this": 0.9971401219389423
+        },
+        "orig": {
+          "counters": {
+            "geo_refute": 0,
+            "hits": 1,
+            "reductions": 1201,
+            "splits": 504,
+            "word_xors": 15015618
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 752.478,
+          "median_ms": 296.999,
+          "min_ms": 231.459,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              162,
+              68,
+              69
+            ],
+            [
+              2,
+              false,
+              false,
+              163,
+              68,
+              69
+            ],
+            [
+              3,
+              true,
+              false,
+              65,
+              28,
+              25
+            ],
+            [
+              4,
+              false,
+              false,
+              161,
+              68,
+              69
+            ],
+            [
+              5,
+              false,
+              false,
+              162,
+              68,
+              69
+            ],
+            [
+              6,
+              false,
+              false,
+              163,
+              68,
+              69
+            ],
+            [
+              7,
+              false,
+              false,
+              163,
+              68,
+              69
+            ],
+            [
+              8,
+              false,
+              false,
+              162,
+              68,
+              69
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_prev_over_this": {
+            "max": 1.643225991225748,
+            "median": 0.6428827567733377,
+            "min": 0.472895418274058,
+            "per_round": [
+              0.472895418274058,
+              0.6428827567733377,
+              1.215084899275755,
+              0.5146755121079952,
+              1.643225991225748
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            283.845,
+            231.459,
+            296.999,
+            752.478,
+            460.894
+          ],
+          "word_xors_ratio_prev_over_this": 1.0
+        },
+        "prev": {
+          "counters": {
+            "geo_refute": 0,
+            "hits": 1,
+            "reductions": 1201,
+            "splits": 504,
+            "word_xors": 15015618
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 757.353,
+          "median_ms": 360.879,
+          "min_ms": 134.229,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              162,
+              68,
+              69
+            ],
+            [
+              2,
+              false,
+              false,
+              163,
+              68,
+              69
+            ],
+            [
+              3,
+              true,
+              false,
+              65,
+              28,
+              25
+            ],
+            [
+              4,
+              false,
+              false,
+              161,
+              68,
+              69
+            ],
+            [
+              5,
+              false,
+              false,
+              162,
+              68,
+              69
+            ],
+            [
+              6,
+              false,
+              false,
+              163,
+              68,
+              69
+            ],
+            [
+              7,
+              false,
+              false,
+              163,
+              68,
+              69
+            ],
+            [
+              8,
+              false,
+              false,
+              162,
+              68,
+              69
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 2.1146324564736383,
+            "median": 1.5554935786721864,
+            "min": 0.608559020694445,
+            "per_round": [
+              2.1146324564736383,
+              1.5554935786721864,
+              0.82298776044048,
+              1.9429717879994421,
+              0.608559020694445
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            134.229,
+            148.801,
+            360.879,
+            387.282,
+            757.353
+          ],
+          "word_xors_ratio_orig_over_this": 1.0
+        }
+      },
+      "f6p": {
+        "cand1": {
+          "counters": {
+            "geo_refute": 280,
+            "hits": 1,
+            "reductions": 463,
+            "splits": 275,
+            "word_xors": 12636832
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 242.112,
+          "median_ms": 153.327,
+          "min_ms": 112.951,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              62,
+              37,
+              0
+            ],
+            [
+              2,
+              false,
+              false,
+              63,
+              37,
+              0
+            ],
+            [
+              3,
+              true,
+              false,
+              27,
+              16,
+              0
+            ],
+            [
+              4,
+              false,
+              false,
+              61,
+              37,
+              0
+            ],
+            [
+              5,
+              false,
+              false,
+              62,
+              37,
+              0
+            ],
+            [
+              6,
+              false,
+              false,
+              63,
+              37,
+              0
+            ],
+            [
+              7,
+              false,
+              false,
+              63,
+              37,
+              0
+            ],
+            [
+              8,
+              false,
+              false,
+              62,
+              37,
+              0
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 3.2278050362641384,
+            "median": 1.834597211208036,
+            "min": 0.8400259787632507,
+            "per_round": [
+              1.172931055847959,
+              2.4484333914706378,
+              0.8400259787632507,
+              3.2278050362641384,
+              1.834597211208036
+            ]
+          },
+          "ratio_prev_over_this": {
+            "max": 1.8505199815056346,
+            "median": 0.9805048206744518,
+            "min": 0.4177020360410856,
+            "per_round": [
+              0.7952741526280434,
+              0.9805048206744518,
+              0.4177020360410856,
+              1.8505199815056346,
+              1.4675728588421888
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            153.327,
+            112.951,
+            224.799,
+            144.909,
+            242.112
+          ],
+          "word_xors_ratio_orig_over_this": 0.9999273552105464,
+          "word_xors_ratio_prev_over_this": 0.9999273552105464
+        },
+        "cand2": {
+          "counters": {
+            "geo_refute": 280,
+            "hits": 1,
+            "reductions": 463,
+            "splits": 275,
+            "word_xors": 12665650
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 261.315,
+          "median_ms": 149.065,
+          "min_ms": 117.205,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              62,
+              37,
+              0
+            ],
+            [
+              2,
+              false,
+              false,
+              63,
+              37,
+              0
+            ],
+            [
+              3,
+              true,
+              false,
+              27,
+              16,
+              0
+            ],
+            [
+              4,
+              false,
+              false,
+              61,
+              37,
+              0
+            ],
+            [
+              5,
+              false,
+              false,
+              62,
+              37,
+              0
+            ],
+            [
+              6,
+              false,
+              false,
+              63,
+              37,
+              0
+            ],
+            [
+              7,
+              false,
+              false,
+              63,
+              37,
+              0
+            ],
+            [
+              8,
+              false,
+              false,
+              62,
+              37,
+              0
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 3.1378123637339415,
+            "median": 1.9200888765929487,
+            "min": 0.7226412567208158,
+            "per_round": [
+              1.5344225928927948,
+              1.9524925692419568,
+              0.7226412567208158,
+              3.1378123637339415,
+              1.9200888765929487
+            ]
+          },
+          "ratio_prev_over_this": {
+            "max": 1.7989266427397443,
+            "median": 1.040373704193507,
+            "min": 0.3593326062415093,
+            "per_round": [
+              1.040373704193507,
+              0.7818993088159502,
+              0.3593326062415093,
+              1.7989266427397443,
+              1.535961302370619
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            117.205,
+            141.641,
+            261.315,
+            149.065,
+            231.332
+          ],
+          "word_xors_ratio_orig_over_this": 0.9976522326134071,
+          "word_xors_ratio_prev_over_this": 0.9976522326134071
+        },
+        "orig": {
+          "counters": {
+            "geo_refute": 280,
+            "hits": 1,
+            "reductions": 463,
+            "splits": 275,
+            "word_xors": 12635914
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 467.738,
+          "median_ms": 276.553,
+          "min_ms": 179.842,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              62,
+              37,
+              0
+            ],
+            [
+              2,
+              false,
+              false,
+              63,
+              37,
+              0
+            ],
+            [
+              3,
+              true,
+              false,
+              27,
+              16,
+              0
+            ],
+            [
+              4,
+              false,
+              false,
+              61,
+              37,
+              0
+            ],
+            [
+              5,
+              false,
+              false,
+              62,
+              37,
+              0
+            ],
+            [
+              6,
+              false,
+              false,
+              63,
+              37,
+              0
+            ],
+            [
+              7,
+              false,
+              false,
+              63,
+              37,
+              0
+            ],
+            [
+              8,
+              false,
+              false,
+              62,
+              37,
+              0
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_prev_over_this": {
+            "max": 0.799942815718023,
+            "median": 0.5733059960918292,
+            "min": 0.40046211756878425,
+            "per_round": [
+              0.6780229312396436,
+              0.40046211756878425,
+              0.4972489501527773,
+              0.5733059960918292,
+              0.799942815718023
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            179.842,
+            276.553,
+            188.837,
+            467.738,
+            444.178
+          ],
+          "word_xors_ratio_prev_over_this": 1.0
+        },
+        "prev": {
+          "counters": {
+            "geo_refute": 280,
+            "hits": 1,
+            "reductions": 463,
+            "splits": 275,
+            "word_xors": 12635914
+          },
+          "counters_identical_across_rounds": true,
+          "max_ms": 355.317,
+          "median_ms": 121.937,
+          "min_ms": 93.899,
+          "per_target": [
+            [
+              1,
+              false,
+              false,
+              62,
+              37,
+              0
+            ],
+            [
+              2,
+              false,
+              false,
+              63,
+              37,
+              0
+            ],
+            [
+              3,
+              true,
+              false,
+              27,
+              16,
+              0
+            ],
+            [
+              4,
+              false,
+              false,
+              61,
+              37,
+              0
+            ],
+            [
+              5,
+              false,
+              false,
+              62,
+              37,
+              0
+            ],
+            [
+              6,
+              false,
+              false,
+              63,
+              37,
+              0
+            ],
+            [
+              7,
+              false,
+              false,
+              63,
+              37,
+              0
+            ],
+            [
+              8,
+              false,
+              false,
+              62,
+              37,
+              0
+            ]
+          ],
+          "per_target_identical_across_rounds": true,
+          "ratio_orig_over_this": {
+            "max": 2.4971150981047234,
+            "median": 1.7442692154223087,
+            "min": 1.2500893568278466,
+            "per_round": [
+              1.4748763705848102,
+              2.4971150981047234,
+              2.011065080565288,
+              1.7442692154223087,
+              1.2500893568278466
+            ]
+          },
+          "rounds": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "total_ms": [
+            121.937,
+            110.749,
+            93.899,
+            268.157,
+            355.317
+          ],
+          "word_xors_ratio_orig_over_this": 1.0
+        }
+      }
+    }
+  },
+  "traces": {
+    "trace_k0n23_dim8_mode0": {
+      "f4": {
+        "attempts": 4,
+        "early_abort_probes": 0,
+        "early_abort_refutations": 0,
+        "early_abort_word_ops": 0,
+        "eliminated": 5506,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          409,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 409,
+        "geo_refute": 0,
+        "hits": 0,
+        "infeasible": 1196,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 1196,
+        "nodes_split": 1192,
+        "propagations": 6554,
+        "reductions": 2796,
+        "reductions_fresh": 556,
+        "reductions_inherited": 2240,
+        "refuted_at_degree2_share": 0.35564853556485354,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          3,
+          1,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          422,
+          769,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 4,
+        "refuted_inherited": 1191,
+        "refuted_linear": 1,
+        "refuted_oracle": 0,
+        "refuted_share_of_node_word_ops": 0.20346512134432068,
+        "root_first_refutation_degree": [
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 1192,
+        "stalled_fresh": 552,
+        "stalled_from_scratch": 1192,
+        "stalled_inherited": 640,
+        "witnesses": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 32251821,
+        "word_ops_split_nodes": 126260954
+      },
+      "f6p": {
+        "attempts": 4,
+        "early_abort_probes": 0,
+        "early_abort_refutations": 0,
+        "early_abort_word_ops": 0,
+        "eliminated": 0,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          409,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 409,
+        "geo_refute": 640,
+        "hits": 0,
+        "infeasible": 0,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 640,
+        "nodes_split": 636,
+        "propagations": 4050,
+        "reductions": 1045,
+        "reductions_fresh": 4,
+        "reductions_inherited": 1041,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 0,
+        "refuted_inherited": 0,
+        "refuted_linear": 0,
+        "refuted_oracle": 640,
+        "refuted_share_of_node_word_ops": 0.7008182990223409,
+        "root_first_refutation_degree": [
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 636,
+        "stalled_fresh": 4,
+        "stalled_from_scratch": 636,
+        "stalled_inherited": 632,
+        "witnesses": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 87567107,
+        "word_ops_split_nodes": 37382694
+      }
+    },
+    "trace_k0n23_dim8_mode1": {
+      "f4": {
+        "attempts": 4,
+        "early_abort_probes": 556,
+        "early_abort_refutations": 3,
+        "early_abort_word_ops": 2907,
+        "eliminated": 5506,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          409,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 409,
+        "geo_refute": 0,
+        "hits": 0,
+        "infeasible": 1196,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 1196,
+        "nodes_split": 1192,
+        "propagations": 6554,
+        "reductions": 2796,
+        "reductions_fresh": 556,
+        "reductions_inherited": 2240,
+        "refuted_at_degree2_share": 0.35564853556485354,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          3,
+          1,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          422,
+          769,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 4,
+        "refuted_inherited": 1191,
+        "refuted_linear": 1,
+        "refuted_oracle": 0,
+        "refuted_share_of_node_word_ops": 0.2024894952930181,
+        "root_first_refutation_degree": [
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 1192,
+        "stalled_fresh": 552,
+        "stalled_from_scratch": 1192,
+        "stalled_inherited": 640,
+        "witnesses": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 32058422,
+        "word_ops_split_nodes": 126262986
+      },
+      "f6p": {
+        "attempts": 4,
+        "early_abort_probes": 4,
+        "early_abort_refutations": 0,
+        "early_abort_word_ops": 2032,
+        "eliminated": 0,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          409,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 409,
+        "geo_refute": 640,
+        "hits": 0,
+        "infeasible": 0,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 640,
+        "nodes_split": 636,
+        "propagations": 4050,
+        "reductions": 1045,
+        "reductions_fresh": 4,
+        "reductions_inherited": 1041,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 0,
+        "refuted_inherited": 0,
+        "refuted_linear": 0,
+        "refuted_oracle": 640,
+        "refuted_share_of_node_word_ops": 0.7008069021284385,
+        "root_first_refutation_degree": [
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 636,
+        "stalled_fresh": 4,
+        "stalled_from_scratch": 636,
+        "stalled_inherited": 632,
+        "witnesses": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 87567107,
+        "word_ops_split_nodes": 37384726
+      }
+    },
+    "trace_k0n23_dim8_mode2": {
+      "f4": {
+        "attempts": 4,
+        "early_abort_probes": 2111,
+        "early_abort_refutations": 422,
+        "early_abort_word_ops": 451416,
+        "eliminated": 5506,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          409,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 409,
+        "geo_refute": 0,
+        "hits": 0,
+        "infeasible": 1196,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 1196,
+        "nodes_split": 1192,
+        "propagations": 6554,
+        "reductions": 2796,
+        "reductions_fresh": 556,
+        "reductions_inherited": 2240,
+        "refuted_at_degree2_share": 0.35564853556485354,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          3,
+          1,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          422,
+          769,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 4,
+        "refuted_inherited": 1191,
+        "refuted_linear": 1,
+        "refuted_oracle": 0,
+        "refuted_share_of_node_word_ops": 0.20395360890117067,
+        "root_first_refutation_degree": [
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 1192,
+        "stalled_fresh": 552,
+        "stalled_from_scratch": 1192,
+        "stalled_inherited": 640,
+        "witnesses": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 32397248,
+        "word_ops_split_nodes": 126448914
+      },
+      "f6p": {
+        "attempts": 4,
+        "early_abort_probes": 912,
+        "early_abort_refutations": 0,
+        "early_abort_word_ops": 185928,
+        "eliminated": 0,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          409,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 409,
+        "geo_refute": 640,
+        "hits": 0,
+        "infeasible": 0,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 640,
+        "nodes_split": 636,
+        "propagations": 4050,
+        "reductions": 1045,
+        "reductions_fresh": 4,
+        "reductions_inherited": 1041,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 0,
+        "refuted_inherited": 0,
+        "refuted_linear": 0,
+        "refuted_oracle": 640,
+        "refuted_share_of_node_word_ops": 0.7000611871610226,
+        "root_first_refutation_degree": [
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 636,
+        "stalled_fresh": 4,
+        "stalled_from_scratch": 636,
+        "stalled_inherited": 632,
+        "witnesses": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 87602667,
+        "word_ops_split_nodes": 37533062
+      }
+    },
+    "trace_k0n31_dim9_mode0": {
+      "f4": {
+        "attempts": 1,
+        "early_abort_probes": 0,
+        "early_abort_refutations": 0,
+        "early_abort_word_ops": 0,
+        "eliminated": 3994,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          205,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 205,
+        "geo_refute": 0,
+        "hits": 0,
+        "infeasible": 603,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 603,
+        "nodes_split": 602,
+        "propagations": 4190,
+        "reductions": 1410,
+        "reductions_fresh": 279,
+        "reductions_inherited": 1131,
+        "refuted_at_degree2_share": 0.8888888888888888,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          534,
+          67,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 2,
+        "refuted_inherited": 601,
+        "refuted_linear": 0,
+        "refuted_oracle": 0,
+        "refuted_share_of_node_word_ops": 0.007602262218746097,
+        "root_first_refutation_degree": [
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 602,
+        "stalled_fresh": 277,
+        "stalled_from_scratch": 602,
+        "stalled_inherited": 325,
+        "witnesses": [
+          null
+        ],
+        "word_ops_refuted_nodes": 2140668,
+        "word_ops_split_nodes": 279442358
+      },
+      "f6p": {
+        "attempts": 1,
+        "early_abort_probes": 0,
+        "early_abort_refutations": 0,
+        "early_abort_word_ops": 0,
+        "eliminated": 0,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          205,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 205,
+        "geo_refute": 324,
+        "hits": 0,
+        "infeasible": 0,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 324,
+        "nodes_split": 323,
+        "propagations": 2460,
+        "reductions": 528,
+        "reductions_fresh": 1,
+        "reductions_inherited": 527,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 0,
+        "refuted_inherited": 0,
+        "refuted_linear": 0,
+        "refuted_oracle": 324,
+        "refuted_share_of_node_word_ops": 0.7071605237988762,
+        "root_first_refutation_degree": [
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 323,
+        "stalled_fresh": 1,
+        "stalled_from_scratch": 323,
+        "stalled_inherited": 322,
+        "witnesses": [
+          null
+        ],
+        "word_ops_refuted_nodes": 196758671,
+        "word_ops_split_nodes": 81478963
+      }
+    },
+    "trace_k0n31_dim9_mode1": {
+      "f4": {
+        "attempts": 1,
+        "early_abort_probes": 279,
+        "early_abort_refutations": 2,
+        "early_abort_word_ops": 1729,
+        "eliminated": 3994,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          205,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 205,
+        "geo_refute": 0,
+        "hits": 0,
+        "infeasible": 603,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 603,
+        "nodes_split": 602,
+        "propagations": 4190,
+        "reductions": 1410,
+        "reductions_fresh": 279,
+        "reductions_inherited": 1131,
+        "refuted_at_degree2_share": 0.8888888888888888,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          534,
+          67,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 2,
+        "refuted_inherited": 601,
+        "refuted_linear": 0,
+        "refuted_oracle": 0,
+        "refuted_share_of_node_word_ops": 0.0067769998057545106,
+        "root_first_refutation_degree": [
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 602,
+        "stalled_fresh": 277,
+        "stalled_from_scratch": 602,
+        "stalled_inherited": 325,
+        "witnesses": [
+          null
+        ],
+        "word_ops_refuted_nodes": 1906710,
+        "word_ops_split_nodes": 279443453
+      },
+      "f6p": {
+        "attempts": 1,
+        "early_abort_probes": 1,
+        "early_abort_refutations": 0,
+        "early_abort_word_ops": 1095,
+        "eliminated": 0,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          205,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 205,
+        "geo_refute": 324,
+        "hits": 0,
+        "infeasible": 0,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 324,
+        "nodes_split": 323,
+        "propagations": 2460,
+        "reductions": 528,
+        "reductions_fresh": 1,
+        "reductions_inherited": 527,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 0,
+        "refuted_inherited": 0,
+        "refuted_linear": 0,
+        "refuted_oracle": 324,
+        "refuted_share_of_node_word_ops": 0.7071577407902837,
+        "root_first_refutation_degree": [
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 323,
+        "stalled_fresh": 1,
+        "stalled_from_scratch": 323,
+        "stalled_inherited": 322,
+        "witnesses": [
+          null
+        ],
+        "word_ops_refuted_nodes": 196758671,
+        "word_ops_split_nodes": 81480058
+      }
+    },
+    "trace_k0n31_dim9_mode2": {
+      "f4": {
+        "attempts": 1,
+        "early_abort_probes": 1061,
+        "early_abort_refutations": 534,
+        "early_abort_word_ops": 394623,
+        "eliminated": 3994,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          205,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 205,
+        "geo_refute": 0,
+        "hits": 0,
+        "infeasible": 603,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 603,
+        "nodes_split": 602,
+        "propagations": 4190,
+        "reductions": 1410,
+        "reductions_fresh": 279,
+        "reductions_inherited": 1131,
+        "refuted_at_degree2_share": 0.8888888888888888,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          534,
+          67,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 2,
+        "refuted_inherited": 601,
+        "refuted_linear": 0,
+        "refuted_oracle": 0,
+        "refuted_share_of_node_word_ops": 0.007705804156053176,
+        "root_first_refutation_degree": [
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 602,
+        "stalled_fresh": 277,
+        "stalled_from_scratch": 602,
+        "stalled_inherited": 325,
+        "witnesses": [
+          null
+        ],
+        "word_ops_refuted_nodes": 2171397,
+        "word_ops_split_nodes": 279615806
+      },
+      "f6p": {
+        "attempts": 1,
+        "early_abort_probes": 457,
+        "early_abort_refutations": 0,
+        "early_abort_word_ops": 172134,
+        "eliminated": 0,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          205,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 205,
+        "geo_refute": 324,
+        "hits": 0,
+        "infeasible": 0,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 324,
+        "nodes_split": 323,
+        "propagations": 2460,
+        "reductions": 528,
+        "reductions_fresh": 1,
+        "reductions_inherited": 527,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 0,
+        "refuted_inherited": 0,
+        "refuted_linear": 0,
+        "refuted_oracle": 324,
+        "refuted_share_of_node_word_ops": 0.7068294960110738,
+        "root_first_refutation_degree": [
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 323,
+        "stalled_fresh": 1,
+        "stalled_from_scratch": 323,
+        "stalled_inherited": 322,
+        "witnesses": [
+          null
+        ],
+        "word_ops_refuted_nodes": 196788236,
+        "word_ops_split_nodes": 81621532
+      }
+    },
+    "trace_k1n17_dim6_mode0": {
+      "f4": {
+        "attempts": 8,
+        "early_abort_probes": 0,
+        "early_abort_refutations": 0,
+        "early_abort_word_ops": 0,
+        "eliminated": 1602,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          189,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 189,
+        "geo_refute": 0,
+        "hits": 1,
+        "infeasible": 508,
+        "leaves_checked": 1,
+        "leaves_solutions": 1,
+        "nodes_refuted": 508,
+        "nodes_split": 504,
+        "propagations": 2274,
+        "reductions": 1201,
+        "reductions_fresh": 255,
+        "reductions_inherited": 946,
+        "refuted_at_degree2_share": 0.39960629921259844,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          10,
+          8,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          193,
+          297,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 18,
+        "refuted_inherited": 490,
+        "refuted_linear": 0,
+        "refuted_oracle": 0,
+        "refuted_share_of_node_word_ops": 0.17290696926360274,
+        "root_first_refutation_degree": [
+          8,
+          0,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 504,
+        "stalled_fresh": 237,
+        "stalled_from_scratch": 504,
+        "stalled_inherited": 267,
+        "witnesses": [
+          null,
+          null,
+          [
+            21,
+            48,
+            57
+          ],
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 2596305,
+        "word_ops_split_nodes": 12419313
+      },
+      "f6p": {
+        "attempts": 8,
+        "early_abort_probes": 0,
+        "early_abort_refutations": 0,
+        "early_abort_word_ops": 0,
+        "eliminated": 0,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          188,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 188,
+        "geo_refute": 280,
+        "hits": 1,
+        "infeasible": 0,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 280,
+        "nodes_split": 275,
+        "propagations": 1644,
+        "reductions": 463,
+        "reductions_fresh": 8,
+        "reductions_inherited": 455,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 0,
+        "refuted_inherited": 0,
+        "refuted_linear": 0,
+        "refuted_oracle": 280,
+        "refuted_share_of_node_word_ops": 0.665522015899184,
+        "root_first_refutation_degree": [
+          8,
+          0,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 275,
+        "stalled_fresh": 8,
+        "stalled_from_scratch": 275,
+        "stalled_inherited": 267,
+        "witnesses": [
+          null,
+          null,
+          [
+            21,
+            48,
+            57
+          ],
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 8374957,
+        "word_ops_split_nodes": 4209085
+      }
+    },
+    "trace_k1n17_dim6_mode1": {
+      "f4": {
+        "attempts": 8,
+        "early_abort_probes": 254,
+        "early_abort_refutations": 10,
+        "early_abort_word_ops": 1782,
+        "eliminated": 1602,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          189,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 189,
+        "geo_refute": 0,
+        "hits": 1,
+        "infeasible": 508,
+        "leaves_checked": 1,
+        "leaves_solutions": 1,
+        "nodes_refuted": 508,
+        "nodes_split": 504,
+        "propagations": 2274,
+        "reductions": 1201,
+        "reductions_fresh": 255,
+        "reductions_inherited": 946,
+        "refuted_at_degree2_share": 0.39960629921259844,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          10,
+          8,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          193,
+          297,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 18,
+        "refuted_inherited": 490,
+        "refuted_linear": 0,
+        "refuted_oracle": 0,
+        "refuted_share_of_node_word_ops": 0.16972003908259647,
+        "root_first_refutation_degree": [
+          8,
+          0,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 504,
+        "stalled_fresh": 237,
+        "stalled_from_scratch": 504,
+        "stalled_inherited": 267,
+        "witnesses": [
+          null,
+          null,
+          [
+            21,
+            48,
+            57
+          ],
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 2538857,
+        "word_ops_split_nodes": 12420231
+      },
+      "f6p": {
+        "attempts": 8,
+        "early_abort_probes": 8,
+        "early_abort_refutations": 0,
+        "early_abort_word_ops": 918,
+        "eliminated": 0,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          188,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 188,
+        "geo_refute": 280,
+        "hits": 1,
+        "infeasible": 0,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 280,
+        "nodes_split": 275,
+        "propagations": 1644,
+        "reductions": 463,
+        "reductions_fresh": 8,
+        "reductions_inherited": 455,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 0,
+        "refuted_inherited": 0,
+        "refuted_linear": 0,
+        "refuted_oracle": 280,
+        "refuted_share_of_node_word_ops": 0.6654734699196502,
+        "root_first_refutation_degree": [
+          8,
+          0,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 275,
+        "stalled_fresh": 8,
+        "stalled_from_scratch": 275,
+        "stalled_inherited": 267,
+        "witnesses": [
+          null,
+          null,
+          [
+            21,
+            48,
+            57
+          ],
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 8374957,
+        "word_ops_split_nodes": 4210003
+      }
+    },
+    "trace_k1n17_dim6_mode2": {
+      "f4": {
+        "attempts": 8,
+        "early_abort_probes": 908,
+        "early_abort_refutations": 193,
+        "early_abort_word_ops": 61151,
+        "eliminated": 1602,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          189,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 189,
+        "geo_refute": 0,
+        "hits": 1,
+        "infeasible": 508,
+        "leaves_checked": 1,
+        "leaves_solutions": 1,
+        "nodes_refuted": 508,
+        "nodes_split": 504,
+        "propagations": 2274,
+        "reductions": 1201,
+        "reductions_fresh": 255,
+        "reductions_inherited": 946,
+        "refuted_at_degree2_share": 0.39960629921259844,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          10,
+          8,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          193,
+          297,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 18,
+        "refuted_inherited": 490,
+        "refuted_linear": 0,
+        "refuted_oracle": 0,
+        "refuted_share_of_node_word_ops": 0.17332437548991664,
+        "root_first_refutation_degree": [
+          8,
+          0,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 504,
+        "stalled_fresh": 237,
+        "stalled_from_scratch": 504,
+        "stalled_inherited": 267,
+        "witnesses": [
+          null,
+          null,
+          [
+            21,
+            48,
+            57
+          ],
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 2610037,
+        "word_ops_split_nodes": 12448647
+      },
+      "f6p": {
+        "attempts": 8,
+        "early_abort_probes": 417,
+        "early_abort_refutations": 0,
+        "early_abort_word_ops": 29736,
+        "eliminated": 0,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          188,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 188,
+        "geo_refute": 280,
+        "hits": 1,
+        "infeasible": 0,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 280,
+        "nodes_split": 275,
+        "propagations": 1644,
+        "reductions": 463,
+        "reductions_fresh": 8,
+        "reductions_inherited": 455,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 0,
+        "refuted_inherited": 0,
+        "refuted_linear": 0,
+        "refuted_oracle": 280,
+        "refuted_share_of_node_word_ops": 0.6646292547437452,
+        "root_first_refutation_degree": [
+          8,
+          0,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 275,
+        "stalled_fresh": 8,
+        "stalled_from_scratch": 275,
+        "stalled_inherited": 267,
+        "witnesses": [
+          null,
+          null,
+          [
+            21,
+            48,
+            57
+          ],
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 8383444,
+        "word_ops_split_nodes": 4230271
+      }
+    },
+    "trace_k1n23_dim7_mode0": {
+      "f4": {
+        "attempts": 4,
+        "early_abort_probes": 0,
+        "early_abort_refutations": 0,
+        "early_abort_word_ops": 0,
+        "eliminated": 2097,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          178,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 178,
+        "geo_refute": 0,
+        "hits": 0,
+        "infeasible": 504,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 504,
+        "nodes_split": 500,
+        "propagations": 2722,
+        "reductions": 1180,
+        "reductions_fresh": 222,
+        "reductions_inherited": 958,
+        "refuted_at_degree2_share": 0.7709163346613546,
+        "refuted_constant": 1,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          6,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          381,
+          115,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 6,
+        "refuted_inherited": 496,
+        "refuted_linear": 1,
+        "refuted_oracle": 0,
+        "refuted_share_of_node_word_ops": 0.037697535332546536,
+        "root_first_refutation_degree": [
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 500,
+        "stalled_fresh": 216,
+        "stalled_from_scratch": 500,
+        "stalled_inherited": 284,
+        "witnesses": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 2008268,
+        "word_ops_split_nodes": 51264923
+      },
+      "f6p": {
+        "attempts": 4,
+        "early_abort_probes": 0,
+        "early_abort_refutations": 0,
+        "early_abort_word_ops": 0,
+        "eliminated": 0,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          178,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 178,
+        "geo_refute": 276,
+        "hits": 0,
+        "infeasible": 0,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 276,
+        "nodes_split": 272,
+        "propagations": 2033,
+        "reductions": 450,
+        "reductions_fresh": 4,
+        "reductions_inherited": 446,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 0,
+        "refuted_inherited": 0,
+        "refuted_linear": 0,
+        "refuted_oracle": 276,
+        "refuted_share_of_node_word_ops": 0.7398848304994105,
+        "root_first_refutation_degree": [
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 272,
+        "stalled_fresh": 4,
+        "stalled_from_scratch": 272,
+        "stalled_inherited": 268,
+        "witnesses": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 38413661,
+        "word_ops_split_nodes": 13504772
+      }
+    },
+    "trace_k1n23_dim7_mode1": {
+      "f4": {
+        "attempts": 4,
+        "early_abort_probes": 222,
+        "early_abort_refutations": 6,
+        "early_abort_word_ops": 1777,
+        "eliminated": 2097,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          178,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 178,
+        "geo_refute": 0,
+        "hits": 0,
+        "infeasible": 504,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 504,
+        "nodes_split": 500,
+        "propagations": 2722,
+        "reductions": 1180,
+        "reductions_fresh": 222,
+        "reductions_inherited": 958,
+        "refuted_at_degree2_share": 0.7709163346613546,
+        "refuted_constant": 1,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          6,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          381,
+          115,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 6,
+        "refuted_inherited": 496,
+        "refuted_linear": 1,
+        "refuted_oracle": 0,
+        "refuted_share_of_node_word_ops": 0.03528927907656236,
+        "root_first_refutation_degree": [
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 500,
+        "stalled_fresh": 216,
+        "stalled_from_scratch": 500,
+        "stalled_inherited": 284,
+        "witnesses": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 1875329,
+        "word_ops_split_nodes": 51266278
+      },
+      "f6p": {
+        "attempts": 4,
+        "early_abort_probes": 4,
+        "early_abort_refutations": 0,
+        "early_abort_word_ops": 1353,
+        "eliminated": 0,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          178,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 178,
+        "geo_refute": 276,
+        "hits": 0,
+        "infeasible": 0,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 276,
+        "nodes_split": 272,
+        "propagations": 2033,
+        "reductions": 450,
+        "reductions_fresh": 4,
+        "reductions_inherited": 446,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 0,
+        "refuted_inherited": 0,
+        "refuted_linear": 0,
+        "refuted_oracle": 276,
+        "refuted_share_of_node_word_ops": 0.7398655495228736,
+        "root_first_refutation_degree": [
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 272,
+        "stalled_fresh": 4,
+        "stalled_from_scratch": 272,
+        "stalled_inherited": 268,
+        "witnesses": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 38413661,
+        "word_ops_split_nodes": 13506125
+      }
+    },
+    "trace_k1n23_dim7_mode2": {
+      "f4": {
+        "attempts": 4,
+        "early_abort_probes": 924,
+        "early_abort_refutations": 381,
+        "early_abort_word_ops": 136461,
+        "eliminated": 2097,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          178,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 178,
+        "geo_refute": 0,
+        "hits": 0,
+        "infeasible": 504,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 504,
+        "nodes_split": 500,
+        "propagations": 2722,
+        "reductions": 1180,
+        "reductions_fresh": 222,
+        "reductions_inherited": 958,
+        "refuted_at_degree2_share": 0.7709163346613546,
+        "refuted_constant": 1,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          6,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          381,
+          115,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 6,
+        "refuted_inherited": 496,
+        "refuted_linear": 1,
+        "refuted_oracle": 0,
+        "refuted_share_of_node_word_ops": 0.03779286085416939,
+        "root_first_refutation_degree": [
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 500,
+        "stalled_fresh": 216,
+        "stalled_from_scratch": 500,
+        "stalled_inherited": 284,
+        "witnesses": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 2016628,
+        "word_ops_split_nodes": 51343397
+      },
+      "f6p": {
+        "attempts": 4,
+        "early_abort_probes": 412,
+        "early_abort_refutations": 0,
+        "early_abort_word_ops": 75317,
+        "eliminated": 0,
+        "engine_refutes_scratch_does_not": 0,
+        "forced_first_degree": [
+          0,
+          0,
+          0,
+          178,
+          0
+        ],
+        "forced_fresh": 0,
+        "forced_inherited": 178,
+        "geo_refute": 276,
+        "hits": 0,
+        "infeasible": 0,
+        "leaves_checked": 0,
+        "leaves_solutions": 0,
+        "nodes_refuted": 276,
+        "nodes_split": 272,
+        "propagations": 2033,
+        "reductions": 450,
+        "reductions_fresh": 4,
+        "reductions_inherited": 446,
+        "refuted_constant": 0,
+        "refuted_first_degree_fresh": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_first_degree_inherited": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "refuted_forced_conflict": 0,
+        "refuted_fresh": 0,
+        "refuted_inherited": 0,
+        "refuted_linear": 0,
+        "refuted_oracle": 276,
+        "refuted_share_of_node_word_ops": 0.7391253179468686,
+        "root_first_refutation_degree": [
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        "scratch_refutes_engine_does_not": 0,
+        "splits": 272,
+        "stalled_fresh": 4,
+        "stalled_from_scratch": 272,
+        "stalled_inherited": 268,
+        "witnesses": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "word_ops_refuted_nodes": 38429897,
+        "word_ops_split_nodes": 13563853
+      }
+    }
+  }
+}

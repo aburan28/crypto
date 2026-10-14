@@ -1,0 +1,29 @@
+{
+  "command": [
+    "./target/release/examples/weak_class_coverage",
+    "--out",
+    "research/weak_isogeny_classes_20261013/data",
+    "--smith",
+    "3,5,7,11"
+  ],
+  "git_head": "ee7d9ce1e084d9b7d20a251a6f802348bc8570bc",
+  "threads": 4,
+  "timings": [
+    {
+      "run": "smith_p3",
+      "seconds": 0.009588215
+    },
+    {
+      "run": "smith_p5",
+      "seconds": 0.424793694
+    },
+    {
+      "run": "smith_p7",
+      "seconds": 6.417158665
+    },
+    {
+      "run": "smith_p11",
+      "seconds": 573.039146885
+    }
+  ]
+}

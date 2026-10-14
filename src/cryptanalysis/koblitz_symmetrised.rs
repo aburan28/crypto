@@ -2878,21 +2878,6 @@ mod gate_tests {
             assert!(e.ns_per_step.is_finite() && e.ns_per_step > 0.0, "{e:?}");
             assert!(e.gae_per_step.is_finite() && e.gae_per_step > 0.0, "{e:?}");
         }
-        // These ratios divide independent wall-clock calibrations. Contention
-        // can move them across any positive threshold without changing the
-        // exact gate verdicts or operation counts checked above.
-        assert!(b.gae_per_word_xor.is_finite() && b.gae_per_word_xor >= 0.0);
-        assert!(b
-            .enumeration
-            .iter()
-            .all(|e| e.gae_per_step.is_finite() && e.gae_per_step >= 0.0));
-        assert!(b.gae_per_word_xor.is_finite() && b.gae_per_word_xor > 0.0);
-        assert!(b.enumeration.iter().all(|e| {
-            e.ns_per_step.is_finite()
-                && e.ns_per_step > 0.0
-                && e.gae_per_step.is_finite()
-                && e.gae_per_step > 0.0
-        }));
     }
 }
 

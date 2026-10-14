@@ -1,0 +1,810 @@
+{
+  "schema": "factor-base-dor-results-v1",
+  "date": "2026-10-12",
+  "evidence_scope": "synthetic toy binary fields only; no deployed-curve security claim",
+  "observable": "D* = Macaulay refutation (solving) degree on non-decomposable targets, S_3, 2 summands",
+  "curve": "Koblitz y^2 + xy = x^3 + 1 over F_2^n",
+  "producer": "sage/factor_base_dor.sage",
+  "validation": "--selftest passed: descended zero set == brute-force decomposition; no satisfiable target derives 1",
+  "single_seed_48_targets": {
+    "7-d3": [
+      {
+        "structure": "frobenius",
+        "d_star_mean": 2.257142857142857,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 35
+      },
+      {
+        "structure": "standard",
+        "d_star_mean": 2.764705882352941,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 34
+      },
+      {
+        "structure": "random",
+        "d_star_mean": 2.9166666666666665,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 36
+      }
+    ],
+    "8-d4": [
+      {
+        "structure": "standard",
+        "d_star_mean": 2.121212121212121,
+        "d_star_min": 2,
+        "d_star_max": 4,
+        "unsat_targets": 33
+      },
+      {
+        "structure": "subfield",
+        "d_star_mean": 2.25,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 40
+      },
+      {
+        "structure": "frobenius",
+        "d_star_mean": 2.25,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 40
+      },
+      {
+        "structure": "random",
+        "d_star_mean": 3.6,
+        "d_star_min": 3,
+        "d_star_max": 4,
+        "unsat_targets": 30
+      }
+    ],
+    "9-d3": [
+      {
+        "structure": "subfield",
+        "d_star_mean": 2.0,
+        "d_star_min": 2,
+        "d_star_max": 2,
+        "unsat_targets": 47
+      },
+      {
+        "structure": "frobenius",
+        "d_star_mean": 2.0,
+        "d_star_min": 2,
+        "d_star_max": 2,
+        "unsat_targets": 47
+      },
+      {
+        "structure": "standard",
+        "d_star_mean": 2.4318181818181817,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 44
+      },
+      {
+        "structure": "random",
+        "d_star_mean": 2.511111111111111,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 45
+      }
+    ],
+    "11-d3": [
+      {
+        "structure": "standard",
+        "d_star_mean": 2.1041666666666665,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 48
+      },
+      {
+        "structure": "random",
+        "d_star_mean": 2.1041666666666665,
+        "d_star_min": 2,
+        "d_star_max": 3,
+        "unsat_targets": 48
+      }
+    ]
+  },
+  "n7_dim3_all_targets_seeds_1_6": {
+    "summary": {
+      "frobenius": {
+        "mean": 2.335,
+        "min": 2.3043,
+        "max": 2.3962,
+        "runs": 6
+      },
+      "random": {
+        "mean": 2.8134,
+        "min": 2.3299,
+        "max": 2.9368,
+        "runs": 6
+      },
+      "standard": {
+        "mean": 2.7391,
+        "min": 2.7391,
+        "max": 2.7391,
+        "runs": 6
+      }
+    },
+    "note": "n=7 has exactly two Frobenius-stable 3-dim subspaces, neither a subfield; the six frobenius runs cover those two. Random seed 6 reached 2.330.",
+    "runs": [
+      {
+        "seed": 1,
+        "structure": "frobenius",
+        "d_star_mean": 2.3043,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 1,
+        "structure": "random",
+        "d_star_mean": 2.9368,
+        "unsat_targets": 95,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 1,
+        "structure": "standard",
+        "d_star_mean": 2.7391,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 2,
+        "structure": "frobenius",
+        "d_star_mean": 2.3043,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 2,
+        "structure": "random",
+        "d_star_mean": 2.9184,
+        "unsat_targets": 98,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 2,
+        "structure": "standard",
+        "d_star_mean": 2.7391,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 3,
+        "structure": "frobenius",
+        "d_star_mean": 2.3043,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 3,
+        "structure": "random",
+        "d_star_mean": 2.9271,
+        "unsat_targets": 96,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 3,
+        "structure": "standard",
+        "d_star_mean": 2.7391,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 4,
+        "structure": "frobenius",
+        "d_star_mean": 2.3043,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 4,
+        "structure": "random",
+        "d_star_mean": 2.8526,
+        "unsat_targets": 95,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 4,
+        "structure": "standard",
+        "d_star_mean": 2.7391,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 5,
+        "structure": "frobenius",
+        "d_star_mean": 2.3962,
+        "unsat_targets": 106,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 5,
+        "structure": "random",
+        "d_star_mean": 2.9158,
+        "unsat_targets": 95,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 5,
+        "structure": "standard",
+        "d_star_mean": 2.7391,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 6,
+        "structure": "frobenius",
+        "d_star_mean": 2.3962,
+        "unsat_targets": 106,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 6,
+        "structure": "random",
+        "d_star_mean": 2.3299,
+        "unsat_targets": 97,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 6,
+        "structure": "standard",
+        "d_star_mean": 2.7391,
+        "unsat_targets": 92,
+        "censored_above_dmax": 0
+      }
+    ]
+  },
+  "n11_dim5_critical_ratio_seeds_1_3": {
+    "summary": {
+      "standard": {
+        "mean": 3.2416,
+        "min": 3.2308,
+        "max": 3.2571,
+        "runs": 3
+      },
+      "random": {
+        "mean": 3.9116,
+        "min": 3.8684,
+        "max": 3.9474,
+        "runs": 3
+      }
+    },
+    "note": "x^11-1 factors [1,10] like x^131-1 [1,130]: no subfield, no small Frobenius-stable subspace. standard = span{1..z^4}.",
+    "runs": [
+      {
+        "seed": 1,
+        "structure": "standard",
+        "d_star_mean": 3.2368,
+        "unsat_targets": 38,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 1,
+        "structure": "random",
+        "d_star_mean": 3.8684,
+        "unsat_targets": 38,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 2,
+        "structure": "standard",
+        "d_star_mean": 3.2571,
+        "unsat_targets": 35,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 2,
+        "structure": "random",
+        "d_star_mean": 3.9189,
+        "unsat_targets": 37,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 3,
+        "structure": "standard",
+        "d_star_mean": 3.2308,
+        "unsat_targets": 39,
+        "censored_above_dmax": 0
+      },
+      {
+        "seed": 3,
+        "structure": "random",
+        "d_star_mean": 3.9474,
+        "unsat_targets": 38,
+        "censored_above_dmax": 0
+      }
+    ]
+  },
+  "structural_fact_ecc2k130": "ord_131(2)=130 so x^131-1 = (x+1)*(irreducible deg 130); 131 is prime so there is no proper subfield. The only Frobenius-stable F_2-SUBSPACE dimensions are 0,1,130,131, so the subfield and frobenius structures here do not exist at 131. Frobenius-invariant factor BASES (sets) do exist: the weight-2 ONB base (14 orbits) and Couveignes-Lercier sets (Galbraith-Granger-Merz-Petit, SAC 2020, ePrint 2020/1315). Their saving is ~n fewer relations and ~n^2 smaller linear algebra, not a lower D*.",
+  "reproduce": [
+    "sage factor_base_dor.sage --field 8 --dim 4 --selftest 8",
+    "sage factor_base_dor.sage --field 7 --dim 3 --targets 127 --seed S --structures frobenius,random,standard   # S=1..6",
+    "sage factor_base_dor.sage --field 11 --dim 5 --targets 48 --seed S --structures standard,random   # S=1..3",
+    "sage factor_base_dor.sage --field 11 --dim 5 --targets 160 --seed S --structures nb_window,nb_break   # S=1..5",
+    "sage factor_base_dor.sage --field 9 --dim 4 --targets 200 --seed S --structures nb_window,nb_break   # S=1..5",
+    "sage factor_base_dor.sage --summands 3 --field 9 --dim 2 --selftest 3",
+    "sage factor_base_dor.sage --summands 3 --field 11 --dim 3 --targets 400 --dstar-sample 0 --structures nb_window,nb_break --seed S",
+    "sage factor_base_dor.sage --frobenius-windows --field 131 --dim 4 --summands 3",
+    "sage factor_base_dor.sage --stacking 1,2 --field 11 --dim 4",
+    "sage factor_base_dor.sage --stacking 2,3 --field 13 --dim 5",
+    "sage factor_base_dor.sage --field 9 --dim 2 --symmetric-s4 --selftest 12",
+    "sage factor_base_dor.sage --field 9 --dim 3 --symmetric-s4 --dmax 4 --targets 16 --dstar-sample 6 --seed 2",
+    "sage factor_base_dor.sage --field 9 --dim 2 --symmetric-s4 --dmax 5 --targets 24 --dstar-sample 8 --seed 2",
+    "sage factor_base_dor.sage --field 15 --dim 3 --symmetric-s4 --dmax 4 --targets 16 --dstar-sample 6 --seed 2",
+    "sage factor_base_dor.sage --field 9 --structures standard --summands 2 --delta-sweep=-1,1,3 --dmax 5 --targets 24 --seed 2",
+    "sage factor_base_dor.sage --field 8 --structures random --summands 2 --delta-sweep=-2,0,2 --dmax 5 --targets 24 --seed 2"
+  ],
+  "symmetry_breaking_ggmp_3_1": {
+    "note": "nb_break: P1 in V1 = <theta^(2^j) : j < dim>, P2 in V2 = pi^dim(V1). Expected probability gain m! = 2. D* is measured on non-decomposable targets only; nb_break leaves fewer of them, which may bias the D* comparison.",
+    "results": {
+      "n9_dim4": {
+        "targets": 200,
+        "normal_elements": 5,
+        "probability_ratio_break_over_window": {
+          "mean": 1.952,
+          "min": 1.471,
+          "max": 2.529
+        },
+        "d_star_delta_break_minus_window": 0.741,
+        "nb_window": [
+          {
+            "seed": 1,
+            "decomposable_fraction": 0.22,
+            "d_star_mean": 3.0321,
+            "unsat_targets": 156,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 2,
+            "decomposable_fraction": 0.255,
+            "d_star_mean": 3.0403,
+            "unsat_targets": 149,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 3,
+            "decomposable_fraction": 0.265,
+            "d_star_mean": 3.0476,
+            "unsat_targets": 147,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 4,
+            "decomposable_fraction": 0.17,
+            "d_star_mean": 3.0602,
+            "unsat_targets": 166,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 5,
+            "decomposable_fraction": 0.18,
+            "d_star_mean": 3.0488,
+            "unsat_targets": 164,
+            "censored_above_dmax": 0
+          }
+        ],
+        "nb_break": [
+          {
+            "seed": 1,
+            "decomposable_fraction": 0.41,
+            "d_star_mean": 3.9831,
+            "unsat_targets": 118,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 2,
+            "decomposable_fraction": 0.375,
+            "d_star_mean": 3.888,
+            "unsat_targets": 125,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 3,
+            "decomposable_fraction": 0.495,
+            "d_star_mean": 3.6337,
+            "unsat_targets": 101,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 4,
+            "decomposable_fraction": 0.43,
+            "d_star_mean": 3.5789,
+            "unsat_targets": 114,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 5,
+            "decomposable_fraction": 0.365,
+            "d_star_mean": 3.8504,
+            "unsat_targets": 127,
+            "censored_above_dmax": 0
+          }
+        ]
+      },
+      "n11_dim5": {
+        "targets": 160,
+        "normal_elements": 5,
+        "probability_ratio_break_over_window": {
+          "mean": 1.753,
+          "min": 1.333,
+          "max": 2.5
+        },
+        "d_star_delta_break_minus_window": 0.039,
+        "nb_window": [
+          {
+            "seed": 1,
+            "decomposable_fraction": 0.25,
+            "d_star_mean": 3.9833,
+            "unsat_targets": 120,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 2,
+            "decomposable_fraction": 0.2437,
+            "d_star_mean": 3.9669,
+            "unsat_targets": 121,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 3,
+            "decomposable_fraction": 0.1625,
+            "d_star_mean": 3.9552,
+            "unsat_targets": 134,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 4,
+            "decomposable_fraction": 0.2625,
+            "d_star_mean": 3.9492,
+            "unsat_targets": 118,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 5,
+            "decomposable_fraction": 0.225,
+            "d_star_mean": 3.9516,
+            "unsat_targets": 124,
+            "censored_above_dmax": 0
+          }
+        ],
+        "nb_break": [
+          {
+            "seed": 1,
+            "decomposable_fraction": 0.4125,
+            "d_star_mean": 4.0,
+            "unsat_targets": 94,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 2,
+            "decomposable_fraction": 0.4,
+            "d_star_mean": 4.0,
+            "unsat_targets": 96,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 3,
+            "decomposable_fraction": 0.4062,
+            "d_star_mean": 4.0,
+            "unsat_targets": 95,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 4,
+            "decomposable_fraction": 0.35,
+            "d_star_mean": 4.0,
+            "unsat_targets": 104,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 5,
+            "decomposable_fraction": 0.3688,
+            "d_star_mean": 4.0,
+            "unsat_targets": 101,
+            "censored_above_dmax": 0
+          }
+        ]
+      }
+    }
+  },
+  "symmetric_function_degree": {
+    "note": "Binary Koblitz summation polynomial with the target fixed, rewritten in elementary symmetric variables of the summands (FGHR).",
+    "S3_m2": {
+      "raw_total_degree": 4,
+      "symmetrised_degree": 2
+    },
+    "S4_m3": {
+      "raw_total_degree": 12,
+      "symmetrised_degree": 4
+    },
+    "status": "polynomial degree only; descended D* with a symmetric factor-base encoding is not yet measured"
+  },
+  "summands_3": {
+    "note": "m=3 uses the chained Semaev system (two S_3 with a full-field intermediate U). Observations: (1) symmetry breaking (nb_break, GGMP 3.1) raises the decomposable fraction toward 3!=6 at 131-shape; (2) the chained refutation degree D* is structure-independent (=5 across subfield/standard/random at n=8 dim2 and n=9 dim2), because the full-field intermediate U dilutes the factor base structure. The special-subspace degree drop (HKY) lives in the DIRECT symmetric S_4 encoding, not in chaining, and that encoding needs more variables than the dense Macaulay instrument handles. The m=2 direct results already show the special-subspace effect (subfield/standard below random).",
+    "symmetry_breaking_probability": {
+      "n9_dim2": {
+        "targets": 511,
+        "seeds": 5,
+        "nb_window_decomposable_mean": 0.0356,
+        "nb_break_decomposable_mean": 0.1339,
+        "probability_ratio_mean": 3.831,
+        "probability_ratio_range": [
+          3.419,
+          4.0
+        ],
+        "expected_m_factorial": 6
+      },
+      "n11_dim3": {
+        "targets": 400,
+        "seeds": 3,
+        "nb_window_decomposable_mean": 0.0617,
+        "nb_break_decomposable_mean": 0.305,
+        "probability_ratio_mean": 5.365,
+        "probability_ratio_range": [
+          4.242,
+          6.818
+        ],
+        "expected_m_factorial": 6
+      }
+    },
+    "chained_d_star_structure_independent": {
+      "n8_dim2": {
+        "subfield": 5,
+        "standard": 5,
+        "random": 5
+      },
+      "n9_dim2": {
+        "standard": 5,
+        "random": 5,
+        "nb_window": 5,
+        "nb_break": 5
+      }
+    }
+  },
+  "frobenius_window_stacking": {
+    "claim": "The symmetry-breaking windows V_i = <theta^(2^j)> (consecutive normal-basis blocks) satisfy pi^dim(V_i) = V_(i+1) and are disjoint. This is the GGMP section 3.1 mechanism: a summand from F_i = pi^((i-1)dim)(F_1) folds into F_1 as [lambda^((i-1)dim)]P', giving the m! saving with |F_1| unknowns. It needs only a normal basis, so it holds at n = 131.",
+    "verified": {
+      "n11_dim3_m3": true,
+      "n131_dim4_m3": true,
+      "n131_dim2_m3": true
+    },
+    "reproduce": "sage factor_base_dor.sage --frobenius-windows --field 131 --dim 4 --summands 3",
+    "does_not_give": "The n-fold invariance saving. A window is not Frobenius-invariant, and on the prime subgroup Frobenius acts as lambda, so the Frobenius images of a relation are scalar multiples of it. GGMP Theorems 3.4/3.5 need each factor base to be Frobenius-invariant; at n = 131 the only invariant bases are non-linear sets (ONB weight classes, Couveignes-Lercier)."
+  },
+  "stacking_weight_classes": {
+    "question": "Can the n-fold Frobenius-invariance saving and the m! symmetry-breaking saving stack where no invariant linear subspace exists (x^n-1 = (x+1)(irreducible), as at n = 131)?",
+    "construction": "W_w = {x : normal-basis Hamming weight w}. Frobenius rotates normal-basis coordinates, so each W_w is invariant and orbits are rotation classes. Distinct weights give disjoint invariant classes, so P1 in W_a, P2 in W_b breaks symmetry while keeping the orbit saving.",
+    "metric": "trials = (unknowns + 1) / coverage (relation collection); enumeration_work = trials * pairs_per_target (enumeration-oracle proxy)",
+    "findings": [
+      "Invariance saving is exactly n-fold in unknowns: n=11 44 abscissae -> 4 orbits; n=13 169 -> 13. Trials fall about 10-20x versus normal-basis windows.",
+      "Breaking symmetry across distinct weight classes keeps the n-fold saving, halves coverage, and cuts pairs per target 2.7-3.9x; enumeration work falls 1.2x (n=11) to 1.9x (n=13) versus the symmetric scheme over the same union.",
+      "Against windows, total enumeration work depends on base size: the weight-class base is larger, and at n=13 the windows need less raw work."
+    ],
+    "caveats": "Toy fields; m = 2; coverage over target abscissae without the cofactor/subgroup split; pairs_per_target is an enumeration proxy. Weight-class membership is a cardinality constraint, so it cannot be Weil-descended linearly for a Groebner oracle; per-trial SAT cost is not measured.",
+    "results": {
+      "n11": {
+        "window_dim": 4,
+        "weights": [
+          1,
+          2
+        ],
+        "rows": [
+          {
+            "scheme": "win_sym",
+            "base_abscissae": 10,
+            "unknowns": 10,
+            "pairs_per_target": 55,
+            "coverage": 0.043,
+            "trials": 255.875,
+            "enumeration_work": 14073.125
+          },
+          {
+            "scheme": "win_break",
+            "base_abscissae": 10,
+            "unknowns": 10,
+            "pairs_per_target": 100,
+            "coverage": 0.0923,
+            "trials": 119.1376,
+            "enumeration_work": 11913.7566
+          },
+          {
+            "scheme": "wt_sym",
+            "base_abscissae": 44,
+            "unknowns": 4,
+            "pairs_per_target": 990,
+            "coverage": 0.4245,
+            "trials": 11.7779,
+            "enumeration_work": 11660.1266
+          },
+          {
+            "scheme": "wt_break",
+            "base_abscissae": 44,
+            "unknowns": 4,
+            "pairs_per_target": 363,
+            "coverage": 0.1935,
+            "trials": 25.846,
+            "enumeration_work": 9382.0833
+          }
+        ]
+      },
+      "n13": {
+        "window_dim": 5,
+        "weights": [
+          2,
+          3
+        ],
+        "rows": [
+          {
+            "scheme": "win_sym",
+            "base_abscissae": 14,
+            "unknowns": 14,
+            "pairs_per_target": 105,
+            "coverage": 0.0226,
+            "trials": 664.1351,
+            "enumeration_work": 69734.1892
+          },
+          {
+            "scheme": "win_break",
+            "base_abscissae": 14,
+            "unknowns": 14,
+            "pairs_per_target": 196,
+            "coverage": 0.0464,
+            "trials": 323.3289,
+            "enumeration_work": 63372.4737
+          },
+          {
+            "scheme": "wt_sym",
+            "base_abscissae": 169,
+            "unknowns": 13,
+            "pairs_per_target": 14365,
+            "coverage": 0.4841,
+            "trials": 28.9216,
+            "enumeration_work": 415458.2623
+          },
+          {
+            "scheme": "wt_break",
+            "base_abscissae": 169,
+            "unknowns": 13,
+            "pairs_per_target": 3718,
+            "coverage": 0.2397,
+            "trials": 58.4177,
+            "enumeration_work": 217197.1126
+          }
+        ]
+      }
+    }
+  },
+  "symmetric_s4_direct": {
+    "note": "m=3 through the symmetrised S_4 in e1,e2,e3 (Galbraith-Gebregiyorgis special subspaces; formula from koblitz_sym_s4.rs, checked against Res_T(S_3,S_3) on 200 random points and 40 true 3-sums). Unknowns 6l-3 for the geometric/standard window (W dims l, 2l-1, 3l-2), l+dim(V.V)+dim(V.V.V) for a random V, 3l for a subfield. Boolean satisfiability labelled exactly by PolyBoRi; 'spurious' = Boolean-satisfiable targets with no point decomposition over V. Findings: (1) with 6l-3 > n the system is underdetermined and NEVER unsatisfiable (n=9 l=3: bool-unsat 0.000 on all four structures), so without GG's membership constraints the refutation degree is undefined and solving means enumerating 2^(6l-3-n) spurious e-triples; (2) at the determined cell n=9 l=2 (9 vars) D*=4 for geometric, standard and random alike (the W-spaces coincide at l=2); (3) at n=15 l=3 the geometric/standard systems (15 vars) refute only above dmax=4 (D*>=5, 6/6 and 4/4 censored), no better than the chained S_3 system's structure-independent D*=5, while the multiplicatively closed subfield base ([3,3,3], 9 vars) refutes at D*=3 with zero spurious solutions but zero coverage at this size; the random V (19 vars) is never unsatisfiable. Verdict: the special subspace buys variables (15 vs 24 for the chain at n=15), not degree; the degree lever at m=3 remains the multiplicatively closed base, as at m=2.",
+    "n9_dim3": {
+      "targets": 16,
+      "dmax": 4,
+      "boolean_unsat_fraction": {
+        "geometric": 0.0,
+        "standard": 0.0,
+        "subfield": 0.0,
+        "random": 0.0
+      },
+      "nvars": {
+        "geometric": 15,
+        "standard": 15,
+        "subfield": 9,
+        "random": 18
+      },
+      "chain_nvars": 18
+    },
+    "n9_dim2": {
+      "targets": 24,
+      "dmax": 5,
+      "nvars": 9,
+      "d_star": {
+        "geometric": 4.0,
+        "standard": 4.0,
+        "random": 4.0
+      },
+      "unsat_targets": {
+        "geometric": 7,
+        "standard": 8,
+        "random": 7
+      },
+      "spurious": {
+        "geometric": 14,
+        "standard": 15,
+        "random": 14
+      }
+    },
+    "n15_dim3": {
+      "targets": 16,
+      "dmax": 4,
+      "nvars": {
+        "geometric": 15,
+        "standard": 15,
+        "subfield": 9,
+        "random": 19
+      },
+      "chain_nvars": 24,
+      "d_star": {
+        "geometric": ">4 (6/6 censored)",
+        "standard": ">4 (4/4 censored)",
+        "subfield": 3.0,
+        "random": "never unsat"
+      },
+      "spurious": {
+        "geometric": 7,
+        "standard": 12,
+        "subfield": 0,
+        "random": 13
+      },
+      "point_decomposable_fraction": {
+        "geometric": 0.062,
+        "standard": 0.0,
+        "subfield": 0.0,
+        "random": 0.188
+      }
+    }
+  },
+  "shantz_teske_delta": {
+    "note": "Shantz-Teske delta method: m*dim = n - delta. Positive delta over-determines the descended S_3 system; the decomposable fraction falls by about 2^-delta and D* falls by about one degree. 'work_per_relation_proxy' = mean Macaulay rows x cols at D* divided by the decomposable fraction; it ignores that a smaller base also needs fewer relations, so it understates the gain. Toy sizes; the direction agrees with Shantz-Teske 2013.",
+    "m2_n9_standard": [
+      {
+        "delta": -1,
+        "dim": 5,
+        "nvars": 10,
+        "d_star_mean": 4.0,
+        "decomposable_fraction": 0.625,
+        "work_per_relation_proxy": 311000.0
+      },
+      {
+        "delta": 1,
+        "dim": 4,
+        "nvars": 8,
+        "d_star_mean": 2.83,
+        "decomposable_fraction": 0.25,
+        "work_per_relation_proxy": 23800.0
+      },
+      {
+        "delta": 3,
+        "dim": 3,
+        "nvars": 6,
+        "d_star_mean": 2.25,
+        "decomposable_fraction": 0.0,
+        "work_per_relation_proxy": null
+      }
+    ],
+    "m2_n8_random": [
+      {
+        "delta": -2,
+        "dim": 5,
+        "nvars": 10,
+        "d_star_mean": 4.0,
+        "decomposable_fraction": 0.875,
+        "ratio_to_delta0": 3.0,
+        "predicted": 4.0,
+        "work_per_relation_proxy": 198000.0
+      },
+      {
+        "delta": 0,
+        "dim": 4,
+        "nvars": 8,
+        "d_star_mean": 3.71,
+        "decomposable_fraction": 0.292,
+        "work_per_relation_proxy": 112000.0
+      },
+      {
+        "delta": 2,
+        "dim": 3,
+        "nvars": 6,
+        "d_star_mean": 2.62,
+        "decomposable_fraction": 0.125,
+        "ratio_to_delta0": 0.43,
+        "predicted": 0.25,
+        "work_per_relation_proxy": 10900.0
+      }
+    ],
+    "reading": "delta=+1..+2 cuts the per-relation Macaulay work proxy 10-13x at n=8,9 (m=2); delta=+3 at n=9 leaves no decomposable target in 24, i.e. the yield side dominates once 2^-delta reaches the base's coverage."
+  }
+}

@@ -1,0 +1,62 @@
+   Compiling crypto v0.1.0 (/workspace/crypto-integration)
+warning: function `canonical_signed_point` is never used
+   --> examples/koblitz_rank_fixture/shared.rs:652:4
+    |
+652 | fn canonical_signed_point(
+    |    ^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `batch_target_minus_base` is never used
+   --> examples/koblitz_rank_fixture/shared.rs:777:4
+    |
+777 | fn batch_target_minus_base(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `frobenius_key_images` is never used
+    --> examples/koblitz_rank_fixture/shared.rs:1303:4
+     |
+1303 | fn frobenius_key_images(
+     |    ^^^^^^^^^^^^^^^^^^^^
+
+warning: `crypto` (example "koblitz_rank_fixture" test) generated 3 warnings
+    Finished `release` profile [optimized] target(s) in 10m 05s
+     Running tests/ecbench.rs (target/release/deps/ecbench-c9c71e2d865073af)
+
+running 15 tests
+test a_factor_base_dump_carries_its_points ... ok
+test a_public_target_session_yields_a_checked_vs_rho_claim ... FAILED
+test a_resealed_hand_edited_figure_is_caught ... ok
+test a_candidate_session_compares_against_a_baseline_session ... ok
+test bad_specs_are_refused_before_anything_runs ... ok
+test a_session_runs_verifies_compares_and_loads ... ok
+test bounds_a_frontier_and_challenge_verdicts_round_trip ... ok
+test field_operations_are_counted_bounded_and_judged ... ok
+test online_windows_split_into_exclusive_claim_phases ... ok
+test counted_ic_sat_replays_with_different_solver_wall_times ... ok
+test pdp3_koblitz_f4_and_f6_verify_on_one_query_stream ... ok
+test pdp_split_verifies_on_standard_and_closure_bases ... ok
+test the_database_refuses_a_slug_with_another_identity ... ok
+session ECBS1h41ad60070399 complete -> /tmp/ecbench-test-92442-race/s (48 records: {"verified": 48})
+ecbench: /tmp/ecbench-test-92442-race/s exists; a session never overwrites another
+test two_sessions_queued_for_one_directory_cannot_both_write_it ... ok
+test pdp3_binary_runs_every_engine_on_a_generic_binary_curve has been running for over 60 seconds
+test pdp3_binary_runs_every_engine_on_a_generic_binary_curve ... ok
+
+failures:
+
+---- a_public_target_session_yields_a_checked_vs_rho_claim stdout ----
+
+thread 'a_public_target_session_yields_a_checked_vs_rho_claim' (92455) panicked at tests/ecbench.rs:644:5:
+assertion `left == right` failed
+  left: String("single_target_online_wall")
+ right: "single_target_online"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_public_target_session_yields_a_checked_vs_rho_claim
+
+test result: FAILED. 14 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 147.26s
+
+error: test failed, to rerun pass `--test ecbench`

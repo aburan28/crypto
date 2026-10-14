@@ -1,0 +1,710 @@
+{
+  "schema": "crypto.integration-proof-validation/v1",
+  "recorded_at_utc": "2026-10-12T04:17:40.467Z",
+  "delivery_tree_observed": "9479a6730e6318dd3998575a3272c1d3540c4c93",
+  "status": "passed",
+  "environment": {
+    "lean": "4.34.1",
+    "lean_commit": "5045d0056413266e57c625dcd7c365b10e377c52",
+    "lake": "5.0.0-src+5045d00",
+    "mathlib_revision_for_pr1710": "d13f23b723b8a846827a245b89c10fc7d3f11612",
+    "pr1716_dependencies": "Lean core and Std; no Mathlib package dependency",
+    "rustc_version_captured_for_pr1710_native_check": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+    "other_rust_commands": "source /workspace/integration-env.sh; CARGO_HOME=/workspace/crypto-cargo; RUSTUP_HOME=/workspace/crypto-rustup; PATH=/workspace/crypto-cargo/bin:$PATH",
+    "independent_package_build_jobs": 2,
+    "surface_target_directory": "/tmp/crypto-surfaces-validation-target",
+    "groebner_target_directory": "/tmp/crypto-groebner-validation-target",
+    "lean_home": "/workspace/lean-validation-tooling/elan",
+    "proxy_and_tls": "Inherited runtime proxy and CA settings preserved; TLS verification enabled.",
+    "conductor": "Attempted conductor check for this delivery metadata; executable and .conductor/WORKFLOW.md unavailable. Root delegated this exact documentation/receipt scope."
+  },
+  "all_completed_check_exit_statuses_zero": true,
+  "checked_source_objects_unchanged_at_delivery": true,
+  "components": [
+    {
+      "id": "weak_curve_properties",
+      "source_pr": 1710,
+      "checked_revision": "82a70c81a3083d06adae24a9e2c002449fb99f61",
+      "source_objects": [
+        {
+          "path": "research/weak_curve_properties_lean_20261011",
+          "checked_git_object": "43a71bd41dfa812890339c2932766747ba5a0793",
+          "delivery_git_object": "43a71bd41dfa812890339c2932766747ba5a0793",
+          "unchanged": true
+        }
+      ],
+      "counts": {
+        "seal_files": 77,
+        "build_jobs": 1638,
+        "explicit_public_theorems": 48,
+        "audited_declarations": 71
+      },
+      "checks": [
+        {
+          "name": "proof-check-build",
+          "command": "rustc --edition=2021 proof_check.rs -o /tmp/crypto-lean-integration-validation/proof-check",
+          "working_directory": "research/weak_curve_properties_lean_20261011",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1710-proof-check-build.stdout",
+            "receipts/proof-1710-proof-check-build.stderr",
+            "receipts/proof-1710-proof-check-build.exit"
+          ]
+        },
+        {
+          "name": "proof-check",
+          "command": "/tmp/crypto-lean-integration-validation/proof-check --check",
+          "working_directory": "research/weak_curve_properties_lean_20261011",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1710-proof-check.stdout",
+            "receipts/proof-1710-proof-check.stderr",
+            "receipts/proof-1710-proof-check.exit"
+          ]
+        },
+        {
+          "name": "build",
+          "command": "lake build",
+          "working_directory": "research/weak_curve_properties_lean_20261011",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1710-build.stdout",
+            "receipts/proof-1710-build.stderr",
+            "receipts/proof-1710-build.exit"
+          ]
+        },
+        {
+          "name": "kernel",
+          "command": "lake env leanchecker --fresh --verbose WeakCurveProperties",
+          "working_directory": "research/weak_curve_properties_lean_20261011",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1710-kernel.stdout",
+            "receipts/proof-1710-kernel.stderr",
+            "receipts/proof-1710-kernel.exit"
+          ]
+        },
+        {
+          "name": "axiom-audit",
+          "command": "lake env lean AxiomAudit.lean",
+          "working_directory": "research/weak_curve_properties_lean_20261011",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1710-axiom-audit.stdout",
+            "receipts/proof-1710-axiom-audit.stderr",
+            "receipts/proof-1710-axiom-audit.exit"
+          ]
+        },
+        {
+          "name": "proof-check-final",
+          "command": "/tmp/crypto-lean-integration-validation/proof-check --check",
+          "working_directory": "research/weak_curve_properties_lean_20261011",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1710-proof-check-final.stdout",
+            "receipts/proof-1710-proof-check-final.stderr",
+            "receipts/proof-1710-proof-check-final.exit"
+          ]
+        }
+      ],
+      "command_and_environment_receipts": [
+        "receipts/proof-1710-COMMANDS.txt",
+        "receipts/proof-1710-revision",
+        "receipts/proof-1710-lean.version",
+        "receipts/proof-1710-lake.version",
+        "receipts/proof-1710-rustc.version"
+      ],
+      "preserved_repository_evidence": [
+        "research/weak_curve_properties_lean_20261011/PROOF_MAP.md",
+        "research/weak_curve_properties_lean_20261011/VALIDATION.md",
+        "research/weak_curve_properties_lean_20261011/EVIDENCE_SHA256.tsv"
+      ],
+      "limits": [
+        "The complete ordinary-curve conductor proposition remains partially formalized; the recorded CM-order and geometric/algebraic bridges remain explicit obligations."
+      ],
+      "audited_foundations": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "frozen_inventory_input": {
+        "path": "docs/curves/weak-families/models.json",
+        "sha256": "9738f6bd6c016732f88e4e7979ac09e9aa6fd16eba96220ec8781c0017b6055e"
+      },
+      "historical_workflow_seal": {
+        "path": ".github/workflows/weak-curve-lean.yml",
+        "sha256": "6b6898086ca73664b910487d379787a5dcd94fc0d6f2d980dcd79820970f1e11",
+        "expected_sha256": "6b6898086ca73664b910487d379787a5dcd94fc0d6f2d980dcd79820970f1e11",
+        "unchanged": true,
+        "timeout_minutes_preserved": 60
+      }
+    },
+    {
+      "id": "weak_curve_conjectures",
+      "source_pr": 1716,
+      "checked_revision": "a9351a464a54549d7b53353be61f043075375479",
+      "source_objects": [
+        {
+          "path": "research/weak_curve_conjectures_20261012",
+          "checked_git_object": "81328307b4c94640e5811e3cf601ff992725fe6b",
+          "delivery_git_object": "81328307b4c94640e5811e3cf601ff992725fe6b",
+          "unchanged": true
+        }
+      ],
+      "counts": {
+        "native_tests": 3,
+        "census_inputs": 7,
+        "census_rows": 87486,
+        "union_zero_rows": 2074,
+        "boundary_strip_counterexamples": 1184,
+        "build_jobs": 3,
+        "audited_public_theorems": 3
+      },
+      "checks": [
+        {
+          "name": "seal",
+          "command": "sha256sum -c EVIDENCE_SHA256SUMS",
+          "working_directory": "research/weak_curve_conjectures_20261012",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1716-seal.stdout",
+            "receipts/proof-1716-seal.stderr",
+            "receipts/proof-1716-seal.exit"
+          ]
+        },
+        {
+          "name": "ledger",
+          "command": "jq -e -f validate.jq conjectures.json",
+          "working_directory": "research/weak_curve_conjectures_20261012",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1716-ledger.stdout",
+            "receipts/proof-1716-ledger.stderr",
+            "receipts/proof-1716-ledger.exit"
+          ]
+        },
+        {
+          "name": "review-compile",
+          "command": "rustc --edition=2021 review.rs -o /tmp/crypto-weak-conjectures-validation/review",
+          "working_directory": "research/weak_curve_conjectures_20261012",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1716-review-compile.stdout",
+            "receipts/proof-1716-review-compile.stderr",
+            "receipts/proof-1716-review-compile.exit"
+          ]
+        },
+        {
+          "name": "tests-compile",
+          "command": "rustc --edition=2021 --test review.rs -o /tmp/crypto-weak-conjectures-validation/review-tests",
+          "working_directory": "research/weak_curve_conjectures_20261012",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1716-tests-compile.stdout",
+            "receipts/proof-1716-tests-compile.stderr",
+            "receipts/proof-1716-tests-compile.exit"
+          ]
+        },
+        {
+          "name": "tests",
+          "command": "/tmp/crypto-weak-conjectures-validation/review-tests",
+          "working_directory": "research/weak_curve_conjectures_20261012",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1716-tests.stdout",
+            "receipts/proof-1716-tests.stderr",
+            "receipts/proof-1716-tests.exit"
+          ]
+        },
+        {
+          "name": "review",
+          "command": "/tmp/crypto-weak-conjectures-validation/review",
+          "working_directory": "/tmp/crypto-weak-conjectures-validation/replay/weak_curve_conjectures_20261012",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1716-review.stdout",
+            "receipts/proof-1716-review.stderr",
+            "receipts/proof-1716-review.exit"
+          ]
+        },
+        {
+          "name": "compare-REVIEW.tsv",
+          "command": "cmp REVIEW.tsv /workspace/crypto-integration/research/weak_curve_conjectures_20261012/REVIEW.tsv",
+          "working_directory": "/tmp/crypto-weak-conjectures-validation/replay/weak_curve_conjectures_20261012",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1716-compare-REVIEW.tsv.stdout",
+            "receipts/proof-1716-compare-REVIEW.tsv.stderr",
+            "receipts/proof-1716-compare-REVIEW.tsv.exit"
+          ]
+        },
+        {
+          "name": "compare-FALSIFIERS.tsv",
+          "command": "cmp FALSIFIERS.tsv /workspace/crypto-integration/research/weak_curve_conjectures_20261012/FALSIFIERS.tsv",
+          "working_directory": "/tmp/crypto-weak-conjectures-validation/replay/weak_curve_conjectures_20261012",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1716-compare-FALSIFIERS.tsv.stdout",
+            "receipts/proof-1716-compare-FALSIFIERS.tsv.stderr",
+            "receipts/proof-1716-compare-FALSIFIERS.tsv.exit"
+          ]
+        },
+        {
+          "name": "compare-INPUTS_SHA256.tsv",
+          "command": "cmp INPUTS_SHA256.tsv /workspace/crypto-integration/research/weak_curve_conjectures_20261012/INPUTS_SHA256.tsv",
+          "working_directory": "/tmp/crypto-weak-conjectures-validation/replay/weak_curve_conjectures_20261012",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1716-compare-INPUTS_SHA256.tsv.stdout",
+            "receipts/proof-1716-compare-INPUTS_SHA256.tsv.stderr",
+            "receipts/proof-1716-compare-INPUTS_SHA256.tsv.exit"
+          ]
+        },
+        {
+          "name": "independent-hashes-compare",
+          "command": "sha256sum each fixed CSV; format hash/path TSV; cmp INPUTS_SHA256.tsv independent-input-hashes.tsv",
+          "working_directory": "/tmp/crypto-weak-conjectures-validation/replay/weak_curve_conjectures_20261012",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1716-independent-hashes-compare.stdout",
+            "receipts/proof-1716-independent-hashes-compare.stderr",
+            "receipts/proof-1716-independent-hashes-compare.exit"
+          ]
+        },
+        {
+          "name": "build",
+          "command": "lake build",
+          "working_directory": "research/weak_curve_conjectures_20261012",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1716-build.stdout",
+            "receipts/proof-1716-build.stderr",
+            "receipts/proof-1716-build.exit"
+          ]
+        },
+        {
+          "name": "kernel",
+          "command": "lake env leanchecker --fresh --verbose CensusCounting",
+          "working_directory": "research/weak_curve_conjectures_20261012",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1716-kernel.stdout",
+            "receipts/proof-1716-kernel.stderr",
+            "receipts/proof-1716-kernel.exit"
+          ]
+        },
+        {
+          "name": "axiom-audit",
+          "command": "lake env lean AxiomAudit.lean",
+          "working_directory": "research/weak_curve_conjectures_20261012",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1716-axiom-audit.stdout",
+            "receipts/proof-1716-axiom-audit.stderr",
+            "receipts/proof-1716-axiom-audit.exit"
+          ]
+        },
+        {
+          "name": "seal-final",
+          "command": "sha256sum -c EVIDENCE_SHA256SUMS",
+          "working_directory": "research/weak_curve_conjectures_20261012",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-1716-seal-final.stdout",
+            "receipts/proof-1716-seal-final.stderr",
+            "receipts/proof-1716-seal-final.exit"
+          ]
+        }
+      ],
+      "command_and_environment_receipts": [
+        "receipts/proof-1716-COMMANDS.txt",
+        "receipts/proof-1716-revision",
+        "receipts/proof-1716-lean.version",
+        "receipts/proof-1716-lake.version",
+        "receipts/proof-1716-independent-input-hashes.tsv"
+      ],
+      "preserved_repository_evidence": [
+        "research/weak_curve_conjectures_20261012/PROOF_MAP.md",
+        "research/weak_curve_conjectures_20261012/VALIDATION.md",
+        "research/weak_curve_conjectures_20261012/EVIDENCE_SHA256SUMS",
+        "research/weak_curve_conjectures_20261012/INPUTS_SHA256.tsv",
+        "research/weak_curve_conjectures_20261012/REVIEW.tsv",
+        "research/weak_curve_conjectures_20261012/FALSIFIERS.tsv"
+      ],
+      "limits": [
+        "Counting theorems prove aggregation semantics; imported geometric labels retain parent evidence and seven research hypotheses remain open.",
+        "Standalone test compilation emitted one retained dead-field warning; compilation and all three controls passed."
+      ],
+      "audited_foundations": [
+        "propext",
+        "Quot.sound"
+      ],
+      "frozen_census_inputs": [
+        {
+          "path": "research/iso1_weak_classes_20261007/two_branch_20261009/p7_classes.csv",
+          "sha256": "ad6fcfe4422fa6961523f287ca3b56e5f1eb16976c157d89bb0dbfb3938dc595"
+        },
+        {
+          "path": "research/iso1_weak_classes_20261007/two_branch_20261009/p11_classes.csv",
+          "sha256": "74b3e0d11b49932eba294bf372dceb2f5fb9e1706de30b8ae0f92a92ab1daa16"
+        },
+        {
+          "path": "research/iso1_weak_classes_20261007/two_branch_20261009/p13_classes.csv",
+          "sha256": "446c10760b31641e53baeb448ae9cff02e66fe3e00388c51e37c54d62d43c8cd"
+        },
+        {
+          "path": "research/iso1_weak_classes_20261007/two_branch_20261009/p17_classes.csv",
+          "sha256": "ff7d9ae2a9aeb77573cda598df3c8ab95e2226b9cd92bb31b9f8b8faafe4b9f5"
+        },
+        {
+          "path": "research/iso1_weak_classes_20261007/two_branch_20261009/p19_classes.csv",
+          "sha256": "dee7cc82c5733bfb7d1d5e5aea2eaa51237e2c143e066a9c763a10c07bb7a1cc"
+        },
+        {
+          "path": "research/iso1_weak_classes_20261007/two_branch_20261009/p29_classes.csv",
+          "sha256": "2db1540071e25e5c5c65017236126f0bb741e5f0ff64340a82ade90c65b2e5db"
+        },
+        {
+          "path": "research/iso1_weak_classes_20261007/two_branch_20261009/p37_classes.csv",
+          "sha256": "017bf8a5a910bd4d0be0e8f274515c8e90959cc290d434730d67949be611a663"
+        }
+      ],
+      "preserved_counterexample": {
+        "prime": 7,
+        "signed_traces": [
+          -22,
+          22
+        ],
+        "boundary_gap": 664,
+        "proposed_limit": 448
+      },
+      "historical_workflow_seal": {
+        "path": ".github/workflows/weak-curve-conjectures.yml",
+        "sha256": "9143053691c37f6b8513a3f2162b4b903c58c3221cedc1eaa60aa816e150f872",
+        "expected_sha256": "9143053691c37f6b8513a3f2162b4b903c58c3221cedc1eaa60aa816e150f872",
+        "unchanged": true,
+        "timeout_minutes_preserved": 60
+      }
+    },
+    {
+      "id": "ecdlp_surfaces",
+      "checked_revision": "2e506d3472c4bf28aad15e7ddb3fae5a40220fbd",
+      "source_objects": [
+        {
+          "path": "tools/ecdlp-surfaces",
+          "checked_git_object": "2e1779c02c3ed9bbbc0c0466e94b72a3a0e0c5be",
+          "delivery_git_object": "2e1779c02c3ed9bbbc0c0466e94b72a3a0e0c5be",
+          "unchanged": true
+        }
+      ],
+      "counts": {
+        "release_math_tests": 13,
+        "exact_example_replays": 3,
+        "rejection_controls": 2
+      },
+      "checks": [
+        {
+          "name": "check",
+          "command": "nice -n 10 bash tools/ecdlp-surfaces/check.sh",
+          "working_directory": ".",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/surface-tools-check.stdout",
+            "receipts/surface-tools-check.stderr",
+            "receipts/surface-tools-check.exit"
+          ]
+        }
+      ],
+      "command_and_environment_receipts": [
+        "receipts/surface-tools-COMMANDS.txt",
+        "receipts/surface-tools-revision"
+      ],
+      "preserved_repository_evidence": [
+        "tools/ecdlp-surfaces/README.md",
+        "tools/ecdlp-surfaces/check.sh",
+        "tools/ecdlp-surfaces/examples/surface_candidates.json",
+        "tools/ecdlp-surfaces/examples/transfer_certificate.json",
+        "tools/ecdlp-surfaces/examples/frobenius_result.json"
+      ],
+      "limits": [
+        "Public known-answer small-field controls; no new cryptanalytic result, independent-host evidence or performance measurement."
+      ],
+      "script_coverage": [
+        "cargo fmt --all -- --check",
+        "cargo test --release --offline",
+        "cargo clippy --offline --all-targets -- -D warnings",
+        "cargo build --release --offline --bins",
+        "Three fresh default-fixture byte comparisons",
+        "Wrong scalar 38 rejected",
+        "Composite modulus 15 rejected"
+      ]
+    },
+    {
+      "id": "surface_certificates",
+      "checked_revision": "9ea8235e0a16f3905d3834c7b8a1042fa7b2da73",
+      "source_objects": [
+        {
+          "path": "docs/ecdlp-surfaces/certificates",
+          "checked_git_object": "19abf604983dd5210d724a839f3496eb3b9dba32",
+          "delivery_git_object": "19abf604983dd5210d724a839f3496eb3b9dba32",
+          "unchanged": true
+        },
+        {
+          "path": "tools/ecdlp-surfaces",
+          "checked_git_object": "2e1779c02c3ed9bbbc0c0466e94b72a3a0e0c5be",
+          "delivery_git_object": "2e1779c02c3ed9bbbc0c0466e94b72a3a0e0c5be",
+          "unchanged": true
+        }
+      ],
+      "counts": {
+        "release_tests": 3,
+        "exact_fixture_replays": 4
+      },
+      "checks": [
+        {
+          "name": "fmt",
+          "command": "nice -n 10 cargo fmt --all -- --check",
+          "working_directory": "docs/ecdlp-surfaces/certificates",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/surface-certificates-fmt.stdout",
+            "receipts/surface-certificates-fmt.stderr",
+            "receipts/surface-certificates-fmt.exit"
+          ]
+        },
+        {
+          "name": "test",
+          "command": "nice -n 10 cargo test --release --locked --offline",
+          "working_directory": "docs/ecdlp-surfaces/certificates",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/surface-certificates-test.stdout",
+            "receipts/surface-certificates-test.stderr",
+            "receipts/surface-certificates-test.exit"
+          ]
+        },
+        {
+          "name": "clippy",
+          "command": "nice -n 10 cargo clippy --locked --offline --all-targets -- -D warnings",
+          "working_directory": "docs/ecdlp-surfaces/certificates",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/surface-certificates-clippy.stdout",
+            "receipts/surface-certificates-clippy.stderr",
+            "receipts/surface-certificates-clippy.exit"
+          ]
+        },
+        {
+          "name": "generate",
+          "command": "nice -n 10 cargo run --release --locked --offline -- /tmp/crypto-surface-certificates-validation/fixtures",
+          "working_directory": "docs/ecdlp-surfaces/certificates",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/surface-certificates-generate.stdout",
+            "receipts/surface-certificates-generate.stderr",
+            "receipts/surface-certificates-generate.exit"
+          ]
+        },
+        {
+          "name": "compare-embedding_identity",
+          "command": "cmp ../evidence/embedding_identity.json /tmp/crypto-surface-certificates-validation/fixtures/embedding_identity.json",
+          "working_directory": "docs/ecdlp-surfaces/certificates",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/surface-certificates-compare-embedding_identity.stdout",
+            "receipts/surface-certificates-compare-embedding_identity.stderr",
+            "receipts/surface-certificates-compare-embedding_identity.exit"
+          ]
+        },
+        {
+          "name": "compare-quadric_determinant",
+          "command": "cmp ../evidence/quadric_determinant.json /tmp/crypto-surface-certificates-validation/fixtures/quadric_determinant.json",
+          "working_directory": "docs/ecdlp-surfaces/certificates",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/surface-certificates-compare-quadric_determinant.stdout",
+            "receipts/surface-certificates-compare-quadric_determinant.stderr",
+            "receipts/surface-certificates-compare-quadric_determinant.exit"
+          ]
+        },
+        {
+          "name": "compare-identity_replay",
+          "command": "cmp ../evidence/identity_replay.json /tmp/crypto-surface-certificates-validation/fixtures/identity_replay.json",
+          "working_directory": "docs/ecdlp-surfaces/certificates",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/surface-certificates-compare-identity_replay.stdout",
+            "receipts/surface-certificates-compare-identity_replay.stderr",
+            "receipts/surface-certificates-compare-identity_replay.exit"
+          ]
+        },
+        {
+          "name": "compare-curve_record",
+          "command": "cmp ../evidence/curve_record.json /tmp/crypto-surface-certificates-validation/fixtures/curve_record.json",
+          "working_directory": "docs/ecdlp-surfaces/certificates",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/surface-certificates-compare-curve_record.stdout",
+            "receipts/surface-certificates-compare-curve_record.stderr",
+            "receipts/surface-certificates-compare-curve_record.exit"
+          ]
+        }
+      ],
+      "command_and_environment_receipts": [
+        "receipts/surface-certificates-COMMANDS.txt",
+        "receipts/surface-certificates-revision"
+      ],
+      "preserved_repository_evidence": [
+        "docs/ecdlp-surfaces/certificates/README.md",
+        "docs/ecdlp-surfaces/evidence/embedding_identity.json",
+        "docs/ecdlp-surfaces/evidence/quadric_determinant.json",
+        "docs/ecdlp-surfaces/evidence/identity_replay.json",
+        "docs/ecdlp-surfaces/evidence/curve_record.json"
+      ],
+      "limits": [
+        "Same-host native replay of existing identity certificates; no second-host replay or new Lean geometry proof."
+      ]
+    },
+    {
+      "id": "groebner_history",
+      "checked_revision": "2e506d3472c4bf28aad15e7ddb3fae5a40220fbd",
+      "source_objects": [
+        {
+          "path": "tools/groebner-history",
+          "checked_git_object": "903ca28d21bcc20f8e566302804c79291706706d",
+          "delivery_git_object": "903ca28d21bcc20f8e566302804c79291706706d",
+          "unchanged": true
+        },
+        {
+          "path": "src/hash/sha256.rs",
+          "checked_git_object": "9566e3de448e21ff98811cfc4c6992ff3448962e",
+          "delivery_git_object": "9566e3de448e21ff98811cfc4c6992ff3448962e",
+          "unchanged": true
+        }
+      ],
+      "counts": {
+        "debug_profile_tests": 19
+      },
+      "checks": [
+        {
+          "name": "fmt",
+          "command": "nice -n 10 cargo fmt --manifest-path tools/groebner-history/Cargo.toml --all -- --check",
+          "working_directory": ".",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/groebner-history-fmt.stdout",
+            "receipts/groebner-history-fmt.stderr",
+            "receipts/groebner-history-fmt.exit"
+          ]
+        },
+        {
+          "name": "test",
+          "command": "nice -n 10 cargo test --locked --offline --manifest-path tools/groebner-history/Cargo.toml",
+          "working_directory": ".",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/groebner-history-test.stdout",
+            "receipts/groebner-history-test.stderr",
+            "receipts/groebner-history-test.exit"
+          ]
+        },
+        {
+          "name": "clippy",
+          "command": "nice -n 10 cargo clippy --locked --offline --manifest-path tools/groebner-history/Cargo.toml --all-targets -- -D warnings",
+          "working_directory": ".",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/groebner-history-clippy.stdout",
+            "receipts/groebner-history-clippy.stderr",
+            "receipts/groebner-history-clippy.exit"
+          ]
+        }
+      ],
+      "command_and_environment_receipts": [
+        "receipts/groebner-history-COMMANDS.txt",
+        "receipts/groebner-history-revision"
+      ],
+      "preserved_repository_evidence": [
+        "tools/groebner-history/README.md"
+      ],
+      "limits": [
+        "Tests used the debug test profile, not release. No benchmark, plot preparation or rendering was run."
+      ]
+    }
+  ],
+  "final_delivery_seal_recheck": {
+    "observed_revision": "9479a6730e6318dd3998575a3272c1d3540c4c93",
+    "checks": [
+      {
+        "name": "weak-curve-properties",
+        "working_directory": "research/weak_curve_properties_lean_20261011",
+        "command": "/tmp/crypto-lean-integration-validation/proof-check --check",
+        "exit_status": 0,
+        "receipts": [
+          "receipts/proof-delivery-9479a6730-weak-curve-properties.stdout",
+          "receipts/proof-delivery-9479a6730-weak-curve-properties.stderr",
+          "receipts/proof-delivery-9479a6730-weak-curve-properties.exit"
+        ]
+      },
+      {
+        "name": "weak-curve-conjectures",
+        "working_directory": "research/weak_curve_conjectures_20261012",
+        "command": "sha256sum -c EVIDENCE_SHA256SUMS",
+        "exit_status": 0,
+        "receipts": [
+          "receipts/proof-delivery-9479a6730-weak-curve-conjectures.stdout",
+          "receipts/proof-delivery-9479a6730-weak-curve-conjectures.stderr",
+          "receipts/proof-delivery-9479a6730-weak-curve-conjectures.exit"
+        ]
+      }
+    ],
+    "command_receipt": "receipts/proof-delivery-9479a6730-COMMANDS.txt",
+    "source_object_receipt": "receipts/proof-delivery-9479a6730-git-objects.tsv",
+    "revision_receipt": "receipts/proof-delivery-9479a6730-revision"
+  },
+  "limits": [
+    "Completed builds, tests and kernel replays are attributed to their captured input revisions. Only historical seal verification was repeated for delivery; full suites were not rerun after unrelated merges.",
+    "Source-equivalence checks compare tracked Git objects. Ignored .lake artifacts and isolated /tmp build targets are excluded.",
+    "These are local integration correctness and reproduction checks, not new performance measurements or hosted-CI results. Hosted cold runtime is unmeasured.",
+    "No tracked proof, workflow, historical receipt, seal, frozen census row or existing result was rewritten.",
+    "Per-command Rust versions were not separately captured for the surface/certificate/history checks; their exact command environments and compiler diagnostics are retained.",
+    "Initial metadata packaging encountered Node spawnSync(git) EPERM; final packaging used separately shell-captured read-only Git objects. This did not affect any proof/package gate."
+  ],
+  "receipt_manifest": {
+    "path": "receipts/proof-validation-RECEIPT_SHA256SUMS",
+    "sha256": "5e78e381e1da4d49998e9bf5e11e39bc02cc186fd3b9a131b0fe596774174f88",
+    "receipts": 129
+  },
+  "delivery_seal_recheck_history": [
+    {
+      "observed_revision": "8880bf0c7e286f7aa770adca192627537b2fcd75",
+      "checks": [
+        {
+          "name": "weak-curve-properties",
+          "working_directory": "research/weak_curve_properties_lean_20261011",
+          "command": "/tmp/crypto-lean-integration-validation/proof-check --check",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-delivery-weak-curve-properties.stdout",
+            "receipts/proof-delivery-weak-curve-properties.stderr",
+            "receipts/proof-delivery-weak-curve-properties.exit"
+          ]
+        },
+        {
+          "name": "weak-curve-conjectures",
+          "working_directory": "research/weak_curve_conjectures_20261012",
+          "command": "sha256sum -c EVIDENCE_SHA256SUMS",
+          "exit_status": 0,
+          "receipts": [
+            "receipts/proof-delivery-weak-curve-conjectures.stdout",
+            "receipts/proof-delivery-weak-curve-conjectures.stderr",
+            "receipts/proof-delivery-weak-curve-conjectures.exit"
+          ]
+        }
+      ],
+      "command_receipt": "receipts/proof-delivery-COMMANDS.txt",
+      "source_object_receipt": "receipts/proof-delivery-git-objects.tsv"
+    }
+  ],
+  "updated_at_utc": "2026-10-12T04:42:12.780Z"
+}

@@ -1,0 +1,13 @@
+# Frozen execution records
+
+`panel/` is a byte-preserving copy of the completed native panel. It contains 22 finalized children: two excluded warmups, ten strong/strong A/A children and ten children in five strong/IC matched pairs. All completed with verified producer answers. The standalone replay verified all 22 answers and all six IC point witnesses; it did not independently reproduce timings or the absent rank/log transcript.
+
+The authoritative **executed** binary/protocol binding is `frozen_panel_inputs.sha256`, corroborated by each child's `started.json` and `execution.json`. Its four inputs were checked unchanged after the panel. `frozen_before_execution.sha256` is an earlier preparation snapshot, before final source formatting and the final executable/protocol-path freeze. Preserve it as preparation history; do not use its old worker/protocol hashes as the executed identity.
+
+The source baseline is Git commit `a8194d616ed8c04489ec46177d369f1b1670360a`. The retained IC executable was built from that baseline. The strong adapter was compiled after the isolated two-line discarded-RNG-draw repair described in the study README; that collector is called by neither measured solver. The exact compiled runner source is retained under `../evidence/source/`; the delivery runner differs through formatting and a portable test-fixture path only. Source and artifact hashes are consolidated in the study manifest.
+
+Frozen JSON paths describe the original execution workspace. Copying records into the repository does not rewrite these fields or their digests. To regenerate analysis elsewhere, create a separate path-relocated pair file and retain its mapping to the original pairs; never overwrite a frozen record. A fresh execution uses a new protocol identity with local paths, as the runner README explains.
+
+`host_cli_raw.txt` is the original plaintext environment-command output. Its `binary` field identifies the environment-reporting ecbench command, not either measured worker. `isolation_conditions.jsonl` contains the native reservation and all periodic observations: exit status 0, zero contended samples. This is diagnostic isolation evidence, not a sealed ecbench L2 or independent physical-host promotion.
+
+Whole-process wall is measured before spawn through observed `wait4` exit. The runner polls every 100 ms, so wall includes exit-observation and scheduling delays. Child CPU and producer timers remain separate. Original factor-base selection/construction, OS cache flushing, independent audit execution and calibrated common-operation S were not measured as solver stages.
