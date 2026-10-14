@@ -65,7 +65,7 @@ also carry a sealed `fbm_id` (`check_fbm_ids.py`).
 
 ```bash
 ./target/release/ecbench fbm \
-  --curve '{"kind":"koblitz","a":0,"n":23}' \
+  --curve '{"kind":"koblitz","a":1,"n":23}' \
   --factor-base 'onb-weight:w=1' \
   --oracle 'mitm-frobenius:m=2'
 python3 research/ecbench_factor_bases_20261013/join_sage_dor.py dor.json --out joined.json
