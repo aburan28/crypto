@@ -4,6 +4,7 @@ import Mathlib.Data.Finset.Card
 import Mathlib.Data.Finset.Fin
 import Mathlib.Data.Finset.Prod
 import Mathlib.Data.Fintype.Basic
+import Mathlib.GroupTheory.OrderOfElement
 
 /-!
 The algebraic core of the P-192 Legendre obstruction.  If Frobenius cycles
@@ -183,6 +184,30 @@ theorem conorm_nonzero_torsion_of_push_pull_two
       _ = 0 := map_zero push
   · exact conorm_preserves_torsion pull r D hrD
 
+set_option linter.style.haveILetI false
+
+/-- For a prime-order source point, the nonzero conorm has that exact
+    additive order. This specializes the preceding degree-two argument. -/
+theorem conorm_exact_prime_order_of_push_pull_two
+    {A B : Type*} [AddCommGroup A] [AddCommGroup B]
+    (pull : A →+ B) (push : B →+ A) (r : ℕ) (D : A)
+    (hpushpull : ∀ x, push (pull x) = x + x)
+    (hr : r.Prime) (hrD : r • D = 0) (hdouble : D + D ≠ 0) :
+    addOrderOf (pull D) = r := by
+  haveI : Fact r.Prime := ⟨hr⟩
+  have hne : pull D ≠ 0 := by
+    intro hzero
+    apply hdouble
+    calc
+      D + D = push (pull D) := (hpushpull D).symm
+      _ = push 0 := by rw [hzero]
+      _ = 0 := map_zero push
+  have hmul : r • pull D = 0 := by
+    simpa only [map_nsmul, map_zero] using congrArg pull hrD
+  exact addOrderOf_eq_prime hmul hne
+
+set_option linter.style.haveILetI true
+
 /-- Clearing the denominator in the quartic-to-cubic Möbius coordinate
     change. The exact P-192 coefficients and square twist are checked by
     the generator-map Sage receipt. -/
@@ -235,6 +260,7 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.involution_norm_torsion
 #print axioms P192ExtensionCover.conorm_preserves_torsion
 #print axioms P192ExtensionCover.conorm_nonzero_torsion_of_push_pull_two
+#print axioms P192ExtensionCover.conorm_exact_prime_order_of_push_pull_two
 #print axioms P192ExtensionCover.mobius_quartic_clear
 #print axioms P192ExtensionCover.canonicalTriples16_card
 #print axioms P192ExtensionCover.three_sum_support_bound
