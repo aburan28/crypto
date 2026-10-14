@@ -167,7 +167,10 @@ unseen target**, cold, with every phase charged, verified.
     reference (`rho.signed_frobenius_strong`), whose jump table `[a]G` is
     target-independent, the window starts at the first walk start
     `[c]G + Q`. The stages it includes are `walk`, `collision` and
-    `recovery_check`.
+    `recovery_check`. `rho.signed_frobenius_strong_legacy` retains the
+    literal pre-2026-10-14 canonicalization only as a trajectory-identical
+    implementation control; it has the same boundary and accounting and is
+    not a second mathematical reference.
 - **Verified, by someone else.** No solver receives the planted scalar.
   The runner checks `[k]G = Q` and `k = planted` in its own process, and
   `ecbench verify` checks it again from the files. A run that does not
@@ -317,6 +320,7 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 |---|---|---|
 | `rho.*` | jump-table set-up, walk starts, every step, cycle escapes, look-ahead additions, internal verification | canonicalisations (negation, signed Frobenius), Frobenius maps |
 | `rho.signed_frobenius_strong` | group additions exactly; each scalar multiplication (jump table, walk start stride, candidate checks) at `1.5·log₂ r` additions, `ic_boundary::signed_frobenius_rho`'s convention | canonicalisations, partition hashes, distinguished-point table queries and inserts |
+| `rho.signed_frobenius_strong_legacy` | identical to `rho.signed_frobenius_strong`; comparison-only implementation control | identical to `rho.signed_frobenius_strong` |
 | `bsgs.*` | baby steps, the giant stride, giant steps | table inserts and lookups |
 | `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
 | `claw.pair_table` | the known-log base's seed scalar multiplications, every table addition `P_i + F_b`, both query additions `Q − (F_k + F_l)`, the addition that rebuilds a hit's table sum; phases `base`, `table`, `search`, `recover` | Frobenius maps, canonicalisations, table inserts and probes |
@@ -329,6 +333,14 @@ retain their exact parameter and accounting contract. It removes solver wall
 pricing from the reported group-addition equivalents. Solver conflicts and
 other work without a pinned conversion stay visible as unpriced counters;
 the recorded `S` is therefore a lower bound on the complete pipeline cost.
+
+The standing strong-rho implementation applies paired normal-basis maps and
+paired coefficient reductions during signed-Frobenius canonicalization. The
+[2026-10-14 optimization study](../../research/ecbench_rho_optimized_20261014/README.md)
+records identical trajectories and counts over 240 matched pairs and a
+complete-solve Callgrind ratio of 0.802155 against the same-binary legacy
+path. That is implementation evidence in `callgrind.Ir`; it does not change
+the generic-group floor or turn uncharged canonicalization into charged GAE.
 
 `ic.pipeline` defaults to `linalg=incremental-gauss`, which stops when the
 target scalar is pinned; the factor-base logs can still be underdetermined.
