@@ -510,14 +510,19 @@ struct RefT {
     // SIGMA_SIGN=1: bit 4 of the weight.  SIGMA_SIGN=2: the parity of
     // popcount(x AND sigma^j(x)) in normal coordinates, which sigma only
     // permutes, so it is class-invariant and nearly independent of the weight.
-    static bool minusOf(const Elem &x, int hw) {
+    static bool minusOf(const Elem &x, int hw) { return minusOfJ(x, hw, jOf(hw)); }
+    // The same rule for a step whose j was chosen some other way (the hashed
+    // branches of walkconstant.cpp).
+    static bool minusOfJ(const Elem &x, int hw, int j) {
 #if ECC_SIGMA_SIGN == 2
-        const Elem a = nbCoords(x), b = nbCoords(sigma(x, jOf(hw)));
+        (void)hw;
+        const Elem a = nbCoords(x), b = nbCoords(sigma(x, j));
         int c = 0;
         for (int l = 0; l < NL; ++l) c += __builtin_popcountll(a.v[l] & b.v[l]);
         return c & 1;
 #else
         (void)x;
+        (void)j;
         return ECC_SIGMA_SIGN && ((hw >> ECC_SIGMA_SIGN_BIT) & 1);
 #endif
     }

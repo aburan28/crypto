@@ -9,6 +9,7 @@ built in this tree (Ubuntu 24.04 to match), uploaded, and hashed in the receipt.
 """
 import hashlib
 import json
+import os
 import pathlib
 import subprocess
 import time
@@ -26,7 +27,7 @@ if modal.is_local():
 app = modal.App("ecc2k130-best-of-two-device-wc")
 
 CELLS = [(23, 8, 200000), (41, 16, 4000)]
-DISTS = ["native", "ecc2k130"]
+DISTS = os.environ.get("DISTS", "native,ecc2k130").split(",")
 
 
 @app.function(image=image, cpu=CPU, memory=32768, timeout=6 * 60 * 60)
