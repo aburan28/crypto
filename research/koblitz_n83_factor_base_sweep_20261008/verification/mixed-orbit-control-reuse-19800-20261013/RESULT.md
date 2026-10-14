@@ -1,60 +1,48 @@
-# Known-answer solver-access control after the 19,800-second ledger: source only
+# Known-answer solver-access control after the 19,800-second ledger
 
-The first cross-stream K600/K600 natural-target call imported two disjoint
-signed-Frobenius bases, then reached the 5,000-conflict cap on its first sign
-pattern without a model. The earlier nested K600/K2048 and K1182/K2048 calls
-also reached their caps. These observations leave the solver's access to the
-known five-point witness unanswered. The prepared control uses the pinned
-K1182/K2048 fixture and the previously built Linux worker to test that
-specific solver-access question; it is not a measurement of natural relation
-yield or complete index-calculus runtime.
+The authorized v7 control imported the retained K1182/K2048 bases and passed
+the read-only fixture verification. Its single known-answer SAT call then
+exhausted 5,000 conflicts on the first sign pattern in 471.165 seconds of
+worker wall time. It returned zero models and no candidate. The independent
+auditor classified the result `VALIDATED_CENSORED` (`UNKNOWN_search_cap`),
+not a refutation of the known five-point witness. This control measures solver
+access to that witness only; it supplies no natural relation yield, rank,
+verified column logarithms, or complete index-calculus runtime.
 
-The historical [17,400-second control gate](../mixed-orbit-control-reuse-17400-20261012/RESULT.md)
-is preserved unchanged. This new `reuse_control_supervisor.py` requires
-authorization schema `n83.additional-local-budget/v7`, purpose
-`one_known_witness_control_reuse_k600_worker_after_cross_stream`,
-`prior_total_charged_seconds="19800"`, and the exact hashes of both the
-K600/K2048 audit and the [cross-stream audit](../cross-stream-first-gate-source-20261013/audit.json).
-The new audit SHA-256 is
-`dfc96f11e4a399a42559847dd39e94b753f37911a54d806e0e54e830e7735478`.
-The K600-built Linux ELF remains pinned at SHA-256
-`26dcb2b49388fcb89853eabbda01db71d148620cd465bd5458099e0606dcf606`.
-The supervisor checks the historical K600 17,400-second audit and the newer
-2,400-second cross-stream charge separately; it cannot mistake the older
-build receipt for evidence of the current cumulative ledger.
+The [retained evidence](evidence-01/run/audit.json) contains the authorization,
+frozen input inventory, raw verify and control outputs, Docker command and
+container states, budget, and independent audit with SHA-256s of every run
+file. The supervisor ran from clean source commit
+`bc9c162d1e3efaaded0e5f9c07d215302eecdf83` and reused the Linux ELF at
+SHA-256 `26dcb2b49388fcb89853eabbda01db71d148620cd465bd5458099e0606dcf606`.
+The pinned image ID was
+`sha256:7c4ae649a84014c467d79319bbf17ce2632ae8b8be123ac2fb2ea5be46823f31`.
+Both retained S3 archive downloads matched their compressed SHA-256s before
+launch; the K1182 and K2048 objects were 5,956,114 and 10,313,647 bytes.
+The container had one CPU, 4 GiB, zero swap, no network, read-only inputs,
+and an 840-second worker watchdog. Its measured cgroup peak was 442,339,328
+bytes; base import took 7.143 seconds. The SAT model had 101,636 peak
+variables, 714,072 peak clauses, 4,980 peak XORs, and 465,738 domain clauses.
+The supervisor wall time was 486.084 seconds; both containers exited cleanly
+and their cleanup was verified.
 
-Read-only S3 HEAD checks found the K1182 object at 5,956,114 compressed bytes
-and the K2048 object at 10,313,647 bytes, matching their committed manifests.
-The second object's ETag is multipart, so HEAD metadata is only an availability
-and length check; a future launch must download both objects and match their
-pinned compressed SHA-256 values before import.
+The user approved up to 1,200 additional local seconds after the audited
+19,800-second ledger and permitted a Docker Desktop restart. Docker's API was
+unavailable before launch; it restarted successfully and the exact pinned
+image identity was rechecked. The frozen authorization is preserved in
+`evidence-01/authorization.json`. The conservative full charge is 120 seconds
+for verification, 900 for the one search, and 180 for cleanup and audit:
+**1,200 seconds**, bringing the cumulative local ledger to **21,000 seconds**
+with zero remaining under this approval. Measured wall time is separately
+reported above and does not reduce the conservative charge. The historical
+[17,400-second control gate](../mixed-orbit-control-reuse-17400-20261012/RESULT.md)
+and the [cross-stream audit](../cross-stream-first-gate-source-20261013/audit.json)
+remain unchanged. The v7 supervisor pins both prior audit hashes separately.
 
-The proposed additional conservative charge is 1,200 local seconds: 120 for
-read-only `verify-control`, 900 for one `control-run` SAT call, and 180 for
-cleanup and audit. A fully launched run would bring the ledger to 21,000
-seconds. The worker watchdog is 840 seconds, with one CPU, 4 GiB, zero swap,
-read-only inputs and no network. Both retained S3 archives, the fixture,
-binary, source and prior audit hashes must match before the supervisor creates
-an output directory. A separate fresh user approval reference and fresh
-output path are mandatory. No authorization record has been issued for this
-gate.
-
-The separate `audit.py` is now included among the frozen supervisor inputs.
-It independently checks Git source blobs, authorization and archive hashes,
-the exact offline Docker commands and cleanup, worker counters, the complete
-1,200-second conservative charge, and any candidate against both archived
-point domains and a Python group sum. It records raw-file SHA-256s and uses
-`UNVALIDATED` for incomplete or inconsistent receipts. A conflict cap remains
-`VALIDATED_CENSORED`, while only a group-replayed solver candidate can receive
-`VALIDATED_CONTROL_ACCESS`; neither status is a natural-yield or runtime win.
-The auditor exits successfully only for that verified control-access result;
-censored and failed results still retain their raw hashes and explicit status.
-The auditor has not yet processed a retained control run.
-
-Seven focused source-only tests passed. They reject the stale v5 grant before
-launch, changed prior audit bytes, a changed conflict counter, network access,
-and a success claim without archive/group replay; the constructed fixture
-also replays in the independent Python group arithmetic. `--help` and Python
-compilation pass. No container, archive import, or SAT search was launched
-here. The current conservative ledger remains 19,800 seconds and the
-selected base remains undetermined.
+`audit.py` checks the Git source blobs, authorization and compressed archive
+hashes, offline Docker command, cleanup, worker counters, budget and any
+candidate against the archived point domains and a Python group sum. It exits
+with code 1 for this valid but censored result; its audit JSON is the evidence
+classification. The source-only focused tests passed before the run. No
+factor-base winner is selected: complete, matched one-target cold runs and
+independent replay remain necessary for a total-runtime comparison.
