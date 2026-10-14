@@ -11,6 +11,7 @@ export const scopes = ['rust_root', 'rust_cd', 'rust_fmt', 'release_rust',
   'javascript', 'python', 'rust'];
 
 const maintained = /^(src|tests|examples|benches)\//;
+const sharedAnalysis = /^crates\/crypto-analysis-core\//;
 const frozenExamples = /^experiments\/koblitz-s3-pair-query-20261007-v4\/(baseline|candidate)\.rs$/;
 const rustConfig = /^(Cargo\.(toml|lock)|build\.rs|rust-toolchain(\.toml)?|rustfmt\.toml|clippy\.toml|\.cargo\/.*)$/;
 // The release packages this independent crate and its path dependency. These
@@ -34,7 +35,7 @@ export function classify(files, embedded = new Set(), cargoSources = new Set()) 
   for (const file of files) {
     if (control.test(file)) return Object.fromEntries(scopes.map(key => [key, true]));
     const root = /\.rs$/.test(file) && maintained.test(file) || frozenExamples.test(file) || cargoSources.has(file) || rustConfig.test(file) || embedded.has(file);
-    result.rust_root ||= root || file === 'scripts/clippy-maintained.sh';
+    result.rust_root ||= root || sharedAnalysis.test(file) || file === 'scripts/clippy-maintained.sh';
     result.rust_cd ||= /^cd_attack\/(src|tests|examples|benches)\//.test(file) && !prose.test(file)
       || /^cd_attack\/(Cargo\.(toml|lock)|build\.rs|rust-toolchain(\.toml)?|\.cargo\/.*)$/.test(file)
       || /^rust-toolchain(\.toml)?$|^\.cargo\//.test(file);
