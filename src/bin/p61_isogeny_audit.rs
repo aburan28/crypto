@@ -20,10 +20,17 @@ use flate2::read::GzDecoder;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::json;
 
-const LEDGER_SCHEMA: &str = "ec-hardness/p61-class-ledger/v1";
-const AUDIT_SCHEMA: &str = "ec-hardness/p61-class-uniqueness-audit/v1";
+const LEDGER_SCHEMA_V1: &str = "ec-hardness/p61-class-ledger/v1";
+const LEDGER_SCHEMA_V2: &str = "ec-hardness/p61-class-ledger/v2";
+const AUDIT_SCHEMA: &str = "ec-hardness/p61-class-uniqueness-audit/v2";
+const PREFLIGHT_SCHEMA: &str = "ec-hardness/p61-class-preflight/v1";
+const CERTIFICATION_SCHEMA: &str = "ec-hardness/p61-class-number-certification/v1";
 const INDEX_MAGIC: &[u8; 8] = b"P61JIDX1";
 const FIELD_P: u64 = 2_305_843_009_213_693_951;
+const ROOT_ID: &str = "p61-i0025";
+const TRACE: i64 = -704_859_453;
+const FUNDAMENTAL_DISCRIMINANT: i64 = -8_726_545_188_371_316_595;
+const EXPECTED_CYCLIC_FACTORS: [u64; 2] = [179_047_152, 2];
 const MAX_DUPLICATE_EXAMPLES: usize = 32;
 
 #[derive(Debug, Parser)]
@@ -43,6 +50,9 @@ enum Command {
         verification_receipts_dir: PathBuf,
         #[arg(long)]
         class_number_receipt: PathBuf,
+        /// Dedicated flag-0 PARI certificate that upgrades the provisional receipt.
+        #[arg(long)]
+        class_number_certification_receipt: Option<PathBuf>,
         #[arg(long)]
         class_certification_state: String,
         #[arg(long)]
@@ -92,6 +102,10 @@ struct Ledger {
     source_commit: String,
     class_number_receipt: PathBuf,
     class_number_receipt_digest: FileDigest,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    class_number_certification_receipt: Option<PathBuf>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    class_number_certification_receipt_digest: Option<FileDigest>,
     class_certification_state: String,
     x_start: u64,
     x_end: u64,
@@ -170,6 +184,8 @@ struct AuditReceipt {
     ledger_builder_source_commit: String,
     source_commit: String,
     class_number_receipt_sha256: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    class_number_certification_receipt_sha256: Option<String>,
     class_certification_state: String,
     ledger: PathBuf,
     ledger_digest: FileDigest,
@@ -281,6 +297,170 @@ fn ensure_digest(path: &Path, expected: &FileDigest, what: &str) -> Result<FileD
     Ok(actual)
 }
 
+fn json_integer(value: &serde_json::Value, pointer: &str) -> Result<i128, String> {
+    let field = value
+        .pointer(pointer)
+        .ok_or_else(|| format!("receipt lacks {pointer}"))?;
+    if let Some(number) = field.as_i64() {
+        return Ok(i128::from(number));
+    }
+    if let Some(number) = field.as_u64() {
+        return Ok(i128::from(number));
+    }
+    if let Some(number) = field.as_str() {
+        return number
+            .parse::<i128>()
+            .map_err(|error| format!("receipt {pointer} is not an integer: {error}"));
+    }
+    Err(format!("receipt {pointer} is not an integer"))
+}
+
+fn json_u64_array(value: &serde_json::Value, pointer: &str) -> Result<Vec<u64>, String> {
+    value
+        .pointer(pointer)
+        .and_then(|field| field.as_array())
+        .ok_or_else(|| format!("receipt lacks array {pointer}"))?
+        .iter()
+        .map(|field| {
+            field
+                .as_u64()
+                .ok_or_else(|| format!("receipt {pointer} contains a non-u64 value"))
+        })
+        .collect()
+}
+
+fn validate_preflight_receipt(value: &serde_json::Value) -> Result<(), String> {
+    if value.pointer("/schema").and_then(|field| field.as_str()) != Some(PREFLIGHT_SCHEMA)
+        || value.pointer("/status").and_then(|field| field.as_str()) != Some("blocked")
+        || value
+            .pointer("/selection/root_id")
+            .and_then(|field| field.as_str())
+            != Some(ROOT_ID)
+        || value
+            .pointer("/selection/class_number_status")
+            .and_then(|field| field.as_str())
+            != Some("conditional_grh")
+        || json_integer(value, "/selection/expected_vertices")?
+            != i128::from(EXPECTED_CLASS_VERTICES)
+        || json_u64_array(value, "/selection/generator_primes")? != [5, 13, 37, 59]
+    {
+        return Err(
+            "class-number preflight receipt does not match the frozen provisional selection".into(),
+        );
+    }
+    let selected = value
+        .pointer("/roots")
+        .and_then(|field| field.as_array())
+        .and_then(|roots| {
+            roots.iter().find(|root| {
+                root.pointer("/root_id").and_then(|field| field.as_str()) == Some(ROOT_ID)
+            })
+        })
+        .ok_or("class-number preflight receipt lacks the selected root")?;
+    if json_integer(selected, "/curve/p")? != i128::from(FIELD_P)
+        || json_integer(selected, "/curve/trace")? != i128::from(TRACE)
+        || json_integer(selected, "/frobenius/D_K")? != i128::from(FUNDAMENTAL_DISCRIMINANT)
+        || json_integer(selected, "/frobenius/f_pi")? != 1
+        || json_integer(selected, "/maximal_order_class_group/class_number")?
+            != i128::from(EXPECTED_CLASS_VERTICES)
+        || json_u64_array(selected, "/maximal_order_class_group/cyclic_factors")?
+            != EXPECTED_CYCLIC_FACTORS
+    {
+        return Err("selected arithmetic in the class-number preflight receipt differs".into());
+    }
+    Ok(())
+}
+
+fn validate_certification_receipt(
+    value: &serde_json::Value,
+    preflight_sha256: &str,
+) -> Result<(), String> {
+    if value.pointer("/schema").and_then(|field| field.as_str()) != Some(CERTIFICATION_SCHEMA)
+        || value.pointer("/status").and_then(|field| field.as_str()) != Some("certified")
+        || value
+            .pointer("/scope/root_id")
+            .and_then(|field| field.as_str())
+            != Some(ROOT_ID)
+        || json_integer(value, "/scope/p")? != i128::from(FIELD_P)
+        || json_integer(value, "/scope/trace")? != i128::from(TRACE)
+        || json_integer(value, "/scope/fundamental_discriminant")?
+            != i128::from(FUNDAMENTAL_DISCRIMINANT)
+        || json_integer(value, "/scope/class_number")? != i128::from(EXPECTED_CLASS_VERTICES)
+        || json_u64_array(value, "/scope/cyclic_factors")? != EXPECTED_CYCLIC_FACTORS
+    {
+        return Err("class-number certification scope differs from the frozen p61 class".into());
+    }
+    if value
+        .pointer("/input/preflight_receipt_sha256")
+        .and_then(|field| field.as_str())
+        != Some(preflight_sha256)
+        || value
+            .pointer("/input/preflight_recorded_status")
+            .and_then(|field| field.as_str())
+            != Some("conditional_grh")
+    {
+        return Err("class-number certificate is not bound to the provisional receipt".into());
+    }
+    if json_integer(value, "/computation/nfdisc")? != i128::from(FUNDAMENTAL_DISCRIMINANT)
+        || json_integer(value, "/computation/qfbclassno")? != i128::from(EXPECTED_CLASS_VERTICES)
+        || json_integer(value, "/computation/quadclassunit_class_number")?
+            != i128::from(EXPECTED_CLASS_VERTICES)
+        || json_integer(value, "/computation/bnfinit_class_number")?
+            != i128::from(EXPECTED_CLASS_VERTICES)
+        || json_u64_array(value, "/computation/quadclassunit_cyclic_factors")?
+            != EXPECTED_CYCLIC_FACTORS
+        || json_u64_array(value, "/computation/bnfinit_cyclic_factors")? != EXPECTED_CYCLIC_FACTORS
+        || json_integer(value, "/computation/certification/pari_flag")? != 0
+        || json_integer(value, "/computation/certification/result")? != 1
+        || value
+            .pointer("/computation/certification/status")
+            .and_then(|field| field.as_str())
+            != Some("unconditional")
+    {
+        return Err(
+            "class-number certification computation is not an admitted flag-0 proof".into(),
+        );
+    }
+    let runner_commit = value
+        .pointer("/source/runner_source_commit")
+        .and_then(|field| field.as_str())
+        .ok_or("class-number certificate lacks its runner commit")?;
+    let runner_sha256 = value
+        .pointer("/source/runner_sha256")
+        .and_then(|field| field.as_str())
+        .ok_or("class-number certificate lacks its runner digest")?;
+    if !is_lower_hex(runner_commit, 40) || !is_lower_hex(runner_sha256, 64) {
+        return Err("class-number certificate source identity is malformed".into());
+    }
+    Ok(())
+}
+
+fn validate_class_number_evidence(
+    preflight_receipt: &Path,
+    certification_receipt: Option<&Path>,
+    declared_state: &str,
+) -> Result<(FileDigest, Option<FileDigest>), String> {
+    let preflight_digest = digest_file(preflight_receipt)?;
+    let preflight_value: serde_json::Value = read_json(preflight_receipt)?;
+    validate_preflight_receipt(&preflight_value)?;
+    match (declared_state, certification_receipt) {
+        ("conditional_grh", None) => Ok((preflight_digest, None)),
+        ("conditional_grh", Some(_)) => {
+            Err("a supplied class-number certificate must be declared unconditional".into())
+        }
+        ("unconditional", Some(path)) => {
+            let certification_digest = digest_file(path)?;
+            let certification_value: serde_json::Value = read_json(path)?;
+            validate_certification_receipt(&certification_value, &preflight_digest.sha256)?;
+            Ok((preflight_digest, Some(certification_digest)))
+        }
+        ("unconditional", None) => {
+            Err("unconditional class state requires a dedicated certification receipt".into())
+        }
+        (state, _) => Err(format!("unsupported class certification state {state}")),
+    }
+}
+
 fn validate_generation_envelope(path: &Path, envelope: &GenerationEnvelope) -> Result<(), String> {
     if envelope.status != "pass"
         || envelope.receipt.status != "pass"
@@ -336,34 +516,20 @@ fn build_ledger(
     generation_dir: &Path,
     verification_dir: &Path,
     class_number_receipt: &Path,
+    class_number_certification_receipt: Option<&Path>,
     class_certification_state: String,
     auditor_source_commit: String,
     output: &Path,
 ) -> Result<(), String> {
-    if class_certification_state.trim().is_empty() {
-        return Err("class certification state must be explicit".into());
-    }
     if !is_lower_hex(&auditor_source_commit, 40) {
         return Err("auditor source commit must be 40 lowercase hexadecimal digits".into());
     }
-    let class_number_receipt_digest = digest_file(class_number_receipt)?;
-    let class_number_value: serde_json::Value = read_json(class_number_receipt)?;
-    let recorded_certification_state = class_number_value
-        .pointer("/selection/class_number_status")
-        .and_then(|value| value.as_str())
-        .ok_or("class-number receipt lacks selection.class_number_status")?;
-    let recorded_vertices = class_number_value
-        .pointer("/selection/expected_vertices")
-        .and_then(|value| value.as_u64())
-        .ok_or("class-number receipt lacks selection.expected_vertices")?;
-    if recorded_certification_state != class_certification_state
-        || recorded_vertices != EXPECTED_CLASS_VERTICES
-    {
-        return Err(format!(
-            "declared class certification state or vertex count differs from {}",
-            class_number_receipt.display()
-        ));
-    }
+    let (class_number_receipt_digest, class_number_certification_receipt_digest) =
+        validate_class_number_evidence(
+            class_number_receipt,
+            class_number_certification_receipt,
+            &class_certification_state,
+        )?;
     let verification_paths = json_files(verification_dir)?;
     let mut verifications = HashMap::new();
     for path in verification_paths {
@@ -481,12 +647,15 @@ fn build_ledger(
         next_x = entry.x_end;
     }
     let ledger = Ledger {
-        schema: LEDGER_SCHEMA.into(),
+        schema: LEDGER_SCHEMA_V2.into(),
         status: "sealed".into(),
         builder_source_commit: auditor_source_commit,
         source_commit: source_commit.ok_or("missing source commit")?,
         class_number_receipt: class_number_receipt.to_path_buf(),
         class_number_receipt_digest,
+        class_number_certification_receipt: class_number_certification_receipt
+            .map(Path::to_path_buf),
+        class_number_certification_receipt_digest,
         class_certification_state,
         x_start,
         x_end: next_x,
@@ -1053,7 +1222,7 @@ fn audit_ledger(
     let started = Instant::now();
     let ledger_digest = digest_file(ledger_path)?;
     let ledger: Ledger = read_json(ledger_path)?;
-    if ledger.schema != LEDGER_SCHEMA
+    if (ledger.schema != LEDGER_SCHEMA_V1 && ledger.schema != LEDGER_SCHEMA_V2)
         || ledger.status != "sealed"
         || ledger.entries.is_empty()
         || !is_lower_hex(&ledger.builder_source_commit, 40)
@@ -1062,6 +1231,17 @@ fn audit_ledger(
         || ledger.expected_complete_class_vertices != EXPECTED_CLASS_VERTICES
     {
         return Err("ledger header is malformed or does not target the frozen p61 class".into());
+    }
+    let (observed_preflight_digest, observed_certification_digest) =
+        validate_class_number_evidence(
+            &ledger.class_number_receipt,
+            ledger.class_number_certification_receipt.as_deref(),
+            &ledger.class_certification_state,
+        )?;
+    if observed_preflight_digest != ledger.class_number_receipt_digest
+        || observed_certification_digest != ledger.class_number_certification_receipt_digest
+    {
+        return Err("ledger class-number evidence digests differ".into());
     }
     ensure_digest(
         &ledger.class_number_receipt,
@@ -1103,7 +1283,10 @@ fn audit_ledger(
         && total_records == EXPECTED_CLASS_VERTICES;
     let status = if merge.duplicate_records > 0 {
         "duplicate_j_invariants"
-    } else if complete_class_coverage && ledger.class_certification_state == "unconditional" {
+    } else if complete_class_coverage
+        && ledger.class_certification_state == "unconditional"
+        && ledger.class_number_certification_receipt_digest.is_some()
+    {
         "complete_class_pass"
     } else if complete_class_coverage {
         "full_data_pass_certificate_blocked"
@@ -1117,6 +1300,9 @@ fn audit_ledger(
         ledger_builder_source_commit: ledger.builder_source_commit,
         source_commit: ledger.source_commit,
         class_number_receipt_sha256: ledger.class_number_receipt_digest.sha256,
+        class_number_certification_receipt_sha256: ledger
+            .class_number_certification_receipt_digest
+            .map(|digest| digest.sha256),
         class_certification_state: ledger.class_certification_state,
         ledger: ledger_path.to_path_buf(),
         ledger_digest,
@@ -1166,6 +1352,7 @@ fn run() -> Result<(), String> {
             generation_receipts_dir,
             verification_receipts_dir,
             class_number_receipt,
+            class_number_certification_receipt,
             class_certification_state,
             auditor_source_commit,
             output,
@@ -1173,6 +1360,7 @@ fn run() -> Result<(), String> {
             &generation_receipts_dir,
             &verification_receipts_dir,
             &class_number_receipt,
+            class_number_certification_receipt.as_deref(),
             class_certification_state,
             auditor_source_commit,
             &output,
@@ -1205,6 +1393,63 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn certification_fixture(preflight_sha256: &str) -> serde_json::Value {
+        json!({
+            "schema": CERTIFICATION_SCHEMA,
+            "status": "certified",
+            "scope": {
+                "root_id": ROOT_ID,
+                "p": FIELD_P.to_string(),
+                "trace": TRACE,
+                "fundamental_discriminant": FUNDAMENTAL_DISCRIMINANT.to_string(),
+                "class_number": EXPECTED_CLASS_VERTICES,
+                "cyclic_factors": EXPECTED_CYCLIC_FACTORS,
+            },
+            "input": {
+                "preflight_receipt_sha256": preflight_sha256,
+                "preflight_recorded_status": "conditional_grh",
+            },
+            "source": {
+                "runner_source_commit": "1".repeat(40),
+                "runner_sha256": "2".repeat(64),
+            },
+            "computation": {
+                "nfdisc": FUNDAMENTAL_DISCRIMINANT.to_string(),
+                "qfbclassno": EXPECTED_CLASS_VERTICES,
+                "quadclassunit_class_number": EXPECTED_CLASS_VERTICES,
+                "quadclassunit_cyclic_factors": EXPECTED_CYCLIC_FACTORS,
+                "bnfinit_class_number": EXPECTED_CLASS_VERTICES,
+                "bnfinit_cyclic_factors": EXPECTED_CYCLIC_FACTORS,
+                "certification": {
+                    "pari_flag": 0,
+                    "result": 1,
+                    "status": "unconditional",
+                },
+            },
+        })
+    }
+
+    #[test]
+    fn admits_only_exact_flag_zero_class_certificate() {
+        let preflight_sha256 = "a".repeat(64);
+        let receipt = certification_fixture(&preflight_sha256);
+        validate_certification_receipt(&receipt, &preflight_sha256).unwrap();
+
+        let mut quotient_only = receipt.clone();
+        quotient_only["computation"]["certification"]["pari_flag"] = json!(1);
+        assert!(validate_certification_receipt(&quotient_only, &preflight_sha256).is_err());
+
+        let mut false_result = receipt;
+        false_result["computation"]["certification"]["result"] = json!(0);
+        assert!(validate_certification_receipt(&false_result, &preflight_sha256).is_err());
+    }
+
+    #[test]
+    fn certificate_must_bind_the_segment_preflight_digest() {
+        let receipt = certification_fixture(&"a".repeat(64));
+        assert!(validate_certification_receipt(&receipt, &"b".repeat(64)).is_err());
+    }
 
     #[test]
     fn j_parser_is_canonical_and_strict() {
