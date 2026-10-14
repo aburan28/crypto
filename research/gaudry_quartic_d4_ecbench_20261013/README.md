@@ -9,8 +9,8 @@ reproduced, 0 problems**).  Report: [`REPORT.pdf`](REPORT.pdf).
 ## Result
 
 The whole method, every phase charged, recovers the planted logarithm on
-`E(F_{29⁴})`, `#E = 708,208 = 16 · 44,263` (`icv1-fp5k4-tm926-7bc5b359`,
-registered), one target:
+`E(F_{29⁴})`, `#E = 708,208 = 16 · 44,263` (its ICV1 id is in
+`sessions/k4-p29/plan.json`; the curve is not in the current registry), one target:
 
 | arm | method | S | isolation |
 |:--|:--|--:|:--|
