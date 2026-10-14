@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PARENT = ROOT / "research/n83_root4_20261014/run.py"
 HOLDOUT = ROOT / "research/n83_root4_fixed30_20261014/targets.jsonl"
 HOLDOUT_SHA256 = "35e34151dcc1ad6048939560adf28fc7c1b1017833fe005a656c3f4e2bc07de8"
-SOURCE_SHA256 = "68f9b22972ee09511e15ae74a998ba74b82e74eed36e3014bd0460c918b6cdcb"
+SOURCE_SHA256 = "6b22a065d95d5481342c1b1cc37dc9479200dd4f0832bcd53ae6ce4b8c9312d5"
 ARMS = ((2940, "root4f30", 1200), (2940, "root22", 1200),
         (3200, "root4f30", 1200), (3200, "root21", 1200),
         (3300, "root4f30", 1200), (3300, "root11", 1200))

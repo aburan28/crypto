@@ -13,8 +13,13 @@ five-byte table with the same first witness.
 
 Six arms use the same curve, rank seed 29, four rank threads, one target
 thread, and one fresh process per arm under a 14-GiB observed RSS guard.
-Each child has a 1,200-second cap. The IC source SHA-256 is
-`68f9b22972ee09511e15ae74a998ba74b82e74eed36e3014bd0460c918b6cdcb`.
+Each child has a 1,200-second cap. The corrected second execution uses IC
+source SHA-256
+`6b22a065d95d5481342c1b1cc37dc9479200dd4f0832bcd53ae6ce4b8c9312d5`.
+The first execution used source SHA-256
+`68f9b22972ee09511e15ae74a998ba74b82e74eed36e3014bd0460c918b6cdcb`;
+its failed direct-state insertion and passing controls are retained in
+[the first-run receipt](../n83_root4_fixed30_results_20261014/FIRST_RUN.md).
 The common 1,000 public points are the previously frozen refinement fixture
 from commit `b1a4131558b3121ed562ca830abce972aa1dc580`, SHA-256
 `35e34151dcc1ad6048939560adf28fc7c1b1017833fe005a656c3f4e2bc07de8`;

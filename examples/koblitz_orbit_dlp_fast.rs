@@ -3418,7 +3418,10 @@ mod wide {
         };
         if !root_only11 {
             for state_index in 0..states.len() {
-                if indexed5_table {
+                if matches!(
+                    &table.slots,
+                    RootSlots128::Indexed83(_) | RootSlots128::Indexed83Four(_)
+                ) {
                     for root_selector in 0..2 {
                         let canonical = basis
                             .canonical_selected(states.root_at(state_index, root_selector))
