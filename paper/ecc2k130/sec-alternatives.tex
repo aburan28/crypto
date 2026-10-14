@@ -1,13 +1,13 @@
-\section{Structural alternatives, measured}
+\section{Alternatives to rho}
 \label{sec:alternatives}
 
-Every row above is engineering against a fixed exponent. Three
-threads asked whether the exponent could move for this curve, in the
-same accounting, and each is reported here with its measurement
-because a later reader who rediscovers the idea should find the
-number rather than the folklore. None changed the campaign.
+Everything above is engineering against a fixed exponent. Three
+lines of work asked, in the same accounting, whether the exponent
+itself could move for this curve. We report each with its measurement,
+so that anyone who has the same idea later finds a number instead of
+folklore. None of them changed the campaign.
 
-\subsection{Index calculus on the Koblitz curve}
+\subsection{Index calculus}
 \label{sec:alt-ic}
 
 Index calculus on $E(\FF_{2^n})$ decomposes a random point into $m$
@@ -24,10 +24,10 @@ exactly two factors and the only stable subspaces have dimension
 $0,1,130,131$. The usual subspace construction is empty at exactly the interesting
 sizes; forced onto the 130-dimensional subspace, the orbit trick is a
 net loss of $57$--$96$ bits for
-$m\in\{2,\ldots,5\}$.\art{RESEARCH_KOBLITZ_INDEX_CALCULUS.md}\art{autoresearcher:ledger/evidence/EV-FROB-d336b0.yaml}
+$m\in\{2,\ldots,5\}$~\evcite{\evref{koblitzic}; \evref{evfrob}}.
 The Couveignes--Lercier elliptic-period alternative needs an auxiliary
 curve over $\FF_2$ with $n\mid\#E'(\FF_2)$, and Hasse gives at most
-5.\art{RESEARCH_KOBLITZ_INDEX_CALCULUS.md} What survives is a
+5~\evcite{\evref{koblitzic}}. What survives is a
 weight-bounded base $\{R:\HW(x_R)\le w\}$ in the normal basis, which
 is Frobenius-stable for every $n$, is the predicate the walk already
 computes, and is not a low-degree algebraic condition, so only a
@@ -39,7 +39,7 @@ decomposition as a CNF whose multiplications cost the generated
 Karatsuba circuit's gates ($15{,}588$ at $n=131$ against $2.2$ million for the definition). With $k=3$, $w=3$ and CryptoMiniSat the median solve is $0.11$~s at
 $n=9$ and $2.64$~s at $n=11$; at $n=23$ no instance finished, one
 running 25 minutes without returning: roughly $2^{2.3}$ per field bit
-over that range, from three points.\art{ecc2k130/README.md, ``Index calculus: SAT point decomposition''}
+over that range, from three points~\evcite{\evref{client}, ``Index calculus: SAT point decomposition''}.
 
 \paragraph{The compact-orbit ladder.} A separate line of work solves rungs of the same curve family ($a=0$,
 the ECC2K-130 equation) with a four-summand decomposition, at $n=41$
@@ -47,7 +47,7 @@ and $53$ over 85- and 220-column bases and at $n=61,71,73$ over a
 600-column base, fully charged, and fits the rank cost. Table~\ref{tab:ic-rungs}
 is the measured cost and its extrapolation to $n=131$ under the fit
 $\text{probes/relation}\approx C\,r/(n^2K^2)$ with
-$C=1$.\art{RESEARCH_ECC2K130_IC_FEASIBILITY.md} The fitted $C$ ($0.33$ at $n=61$, $1.51$ at $n=71$, $1.27$ at $n=73$,
+$C=1$~\evcite{\evref{icfeas}}. The fitted $C$ ($0.33$ at $n=61$, $1.51$ at $n=71$, $1.27$ at $n=73$,
 recomputed here from the exact subgroup orders) disagrees with the
 structural model's $0.25$ by a factor of $1.3$ to $6$, and the note
 records the gap as open; the extrapolation uses $C=1$, between the
@@ -86,8 +86,9 @@ $10^{12}$ & $4.0\cdot10^{10}$ & $4.0\cdot10^{22}$ & $6.8\cdot10^{8}$ \\
 \end{tabular}
 \end{table}
 
-The verdict is in the unit of the rest of the paper. Rho at $2^{60.9}$ iterations on one RTX~PRO~6000 is about five
-GPU-years at the campaign's $14.11$~B/s. Four-summand index calculus
+Put in the same unit as the rest of the paper, the verdict is
+clear. Rho at $2^{60.9}$ iterations on one RTX~PRO~6000 is about five
+GPU-years at the campaign's $14.11$~billion iterations/s. Four-summand index calculus
 has total work about $r/(n^2K)$ probes: at $K=10^9$ that is
 $4\cdot10^{25}$, some $2\cdot10^7$ times rho's iteration count with one
 probe counted as one step (uncalibrated), and the base at which the precompute alone equals
@@ -101,22 +102,22 @@ probes than one rho solve takes steps on every rung, again
 uncalibrated.
 Beating rho on total work needs a relation-shape change (five- or
 six-summand relations, whose per-point yield scales as $B^5/(120r)$),
-not engineering, and that oracle is unmeasured.\art{RESEARCH_ECC2K130_IC_FEASIBILITY.md, §3--4}
+not engineering, and that oracle is unmeasured~\evcite{\evref{icfeas}, §3--4}.
 In this repository's boundary ledger the Koblitz rows at a 39-bit
 subgroup run from $S=\text{ops}/\sqrt r=58.8$ ($300\times$
 signed-Frobenius rho) for the plain three-summand meet-in-the-middle
 oracle down to $5.12$ ($26\times$; $5.92$ and $30\times$ on
 re-measurement) for a balanced two-summand base; the secondary
 complete-CPU panel on disjoint public points at $n=37,41,53$ has rho
-ahead in every cell.\art{research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md}\art{docs/ic/BOUNDARY_TARGETS.md}
+ahead in every cell~\evcite{\evref{icledger}; \evref{icledger}}.
 
-\subsection{Point decomposition against the per-call budget}
+\subsection{Point decomposition}
 \label{sec:alt-pdp}
 
-The sibling library prices the same question from the other end:
-given rho's $2^{60.81}$ orbit-walk iterations, how fast must one
-$m$-summand decomposition be for index calculus to fit inside that
-budget, and how fast is the best one measured? With a base of
+The \texttt{cryptanalysis} library prices the same question from the other end:
+given rho's $2^{60.81}$ orbit-walk iterations, it derives the speed an
+$m$-summand decomposition must reach for index calculus to fit inside
+that budget, and compares it with the best measured decomposition. With a base of
 $2^\ell$ points, $m=4$ at $\ell=29$ needs $2^{48.6}$ decompositions and
 $2^{60.0}$ of linear algebra, leaving $2^{12}$ rho-iterations per
 decomposition; $m=5$ at $\ell=28$ leaves $2^{33}$; $m=6$ at $\ell=24$
@@ -130,19 +131,19 @@ WDSat at about $2^{3}$, the exhaustive-search exponent. An attack needs a decomp
 times faster than meet-in-the-middle at $\ell\approx25$--$30$, which is
 the obstruction that stops Wagner's $k$-tree from applying to elliptic
 curves; the trace-homomorphism clause that halves UNSAT conflicts is a
-constant, not an exponent.\art{cryptanalysis:experiments/pdp-scaling/README.md}
+constant, not an exponent~\evcite{\evref{pdp}}.
 A Riemann--Roch (Nagao) oracle on the real curve was measured at
 factor-base dimensions 4--8 and its derived product law
 ($\text{relations}\times\text{targets}\times\text{oracle}=m\cdot2^{131}$)
 leaves even a free oracle above rho at $m=3$ ($2^{68.6}$) and below it
 only from $m=4$ ($2^{56.4}$, leaving $2^{4.4}$ of headroom for the
-oracle itself), where no measured oracle comes close.\art{autoresearcher:ledger/evidence/EV-ICPERF-10c5fc.yaml}
+oracle itself), where no measured oracle comes close~\evcite{\evref{evicperf}}.
 
-\subsection{What the negatives say}
+\subsection{Discussion}
 
-Each alternative was carried to a measurement and each landed above
-rho by a margin that is a change of exponent, not of constant. The
-honest summary for ECC2K-130 is that the generic-group floor,
-$\sqrt{\pi\ell/(2\cdot262)}$ class-walk steps, is still the number
-the campaign is walking toward, and that the only lever that has
-moved in this work is the cost of one step.
+We carried each alternative through to a measurement, and each
+landed above rho by a margin that is a matter of exponent, not
+constant. For ECC2K-130 the honest summary is that the generic-group
+floor, $\sqrt{\pi\ell/(2\cdot262)}$ class-walk steps, is still what
+the campaign is walking toward, and the only thing this work has
+managed to move is the cost of one step.

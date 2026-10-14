@@ -1,0 +1,94 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "pdp_split_slots_20261012 Part A, n=13",
+  "description": "Preregistered (PROTOCOL.md Part A): pdp-split on the standard subspace vs its Frobenius closure with tau-slots, against matched rho. IC S is a counted lower bound (F4 word XORs uncharged).",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 13
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 202610121101,
+    "target_kind": "public"
+  },
+  "arms": [
+    {
+      "name": "rho-strong",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {
+          "lanes": "32",
+          "dp_bits": "4",
+          "step_cap_factor": "2000"
+        }
+      }
+    },
+    {
+      "name": "rho-frob",
+      "role": "baseline",
+      "method": {
+        "id": "rho.signed_frobenius"
+      }
+    },
+    {
+      "name": "std-unsplit-g4",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=4",
+          "oracle": "pdp-split:m=3,plan=3,guess=4,slots=one,max_free=24",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "clo-unsplit-g4",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-closure:dimension=4",
+          "oracle": "pdp-split:m=3,plan=3,guess=4,slots=all,max_free=24",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "std-chain-g4",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=4",
+          "oracle": "pdp-split:m=3,plan=2+1,guess=4,slots=one,max_free=24",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "clo-chain-g4",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-closure:dimension=4",
+          "oracle": "pdp-split:m=3,plan=2+1,guess=4,slots=all,max_free=24",
+          "max_trials": "200000"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 202610121102,
+    "isolation_required": "L0",
+    "timeout_seconds": 7200
+  }
+}

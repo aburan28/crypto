@@ -1,0 +1,1 @@
+timeout -k 5 1200 target/release/deps/crypto_lib-dc60caf0642b04d8 cryptanalysis::pollard_collab --test-threads=3 (network-enabled sandbox)

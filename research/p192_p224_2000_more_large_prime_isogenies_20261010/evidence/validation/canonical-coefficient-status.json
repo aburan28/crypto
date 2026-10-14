@@ -1,0 +1,39 @@
+{
+  "audit_scope": "linked hashes and exact-replay receipts; algebraic replay occurs in the walk executable",
+  "counts": [
+    {
+      "additional_maps": 0,
+      "child_exit_pass": false,
+      "construction_elapsed_ms_operational_only": 106628,
+      "construction_status": "IN_PROGRESS",
+      "curve": "p192",
+      "ell": 2341,
+      "independent_replay_elapsed_ms": 1013785,
+      "prior_duplicates": 16,
+      "requested_steps": 1050,
+      "summed_invocation_elapsed_ms": 1121352,
+      "verified_steps": 16
+    },
+    {
+      "additional_maps": 0,
+      "child_exit_pass": false,
+      "construction_elapsed_ms_operational_only": 179075,
+      "construction_status": "IN_PROGRESS",
+      "curve": "p224",
+      "ell": 1117,
+      "independent_replay_elapsed_ms": 936271,
+      "prior_duplicates": 46,
+      "requested_steps": 1050,
+      "summed_invocation_elapsed_ms": 1118266,
+      "verified_steps": 46
+    }
+  ],
+  "degree_coverage": "PARTIAL",
+  "distinct_prime_degrees": 2,
+  "integrity_audit": "PASS",
+  "remaining_additional_maps": 2000,
+  "requested_additional_maps": 2000,
+  "schema": "additional-prime-maps/v1",
+  "status": "IN_PROGRESS",
+  "verified_additional_maps": 0
+}

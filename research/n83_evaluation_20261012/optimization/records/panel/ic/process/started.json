@@ -1,0 +1,44 @@
+{
+  "argv": [
+    "/workspace/n83_evaluation/frozen_binaries/ic_baseline_a8194d61",
+    "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+    "/workspace/n83_optimization/fixtures/holdout_5_targets.jsonl",
+    "29",
+    "/workspace/n83_optimization/panel/ic/process/targets.jsonl"
+  ],
+  "argv_existing_file_sha256": {
+    "/workspace/n83_optimization/fixtures/holdout_5_targets.jsonl": "b96672b4d75df4b90a337c1e471d54dc147edbf236ef8d0054adb716d2314871",
+    "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl": "0d290b14a350db6271c9a49f0cd6ba246edd8c9bc6754387ad1ceebf08ec0c09"
+  },
+  "arm": "ic_batch",
+  "binary_sha256": "983f28400b7852fc6628ba97d3ea83b2ab9e32d9944658c7eea831ee89a4abf2",
+  "cwd": "/workspace/repos/crypto",
+  "environment": {
+    "KIC_RANK_THREADS": "1",
+    "KIC_RHO_THREADS": "1",
+    "KIC_TARGET_THREADS": "1",
+    "KIC_THREADS": "1",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 1800.0
+  },
+  "schema": "n83.process-start/v1",
+  "started_epoch_ms": 1791783502259,
+  "target_file": "/workspace/n83_optimization/fixtures/holdout_5_targets.jsonl",
+  "target_sha256": "b96672b4d75df4b90a337c1e471d54dc147edbf236ef8d0054adb716d2314871"
+}

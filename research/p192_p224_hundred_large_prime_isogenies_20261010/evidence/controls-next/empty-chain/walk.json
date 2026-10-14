@@ -1,0 +1,25 @@
+{
+  "curve": "p224",
+  "degree_coverage": "PARTIAL",
+  "ell": 1117,
+  "executable_sha256": "9b5cf668a79e6188fba99f8c5982d80366996fdac7b142a61cad6b7c8ec71d16",
+  "protocol_sha256": "721102ac3cc6282e05920f5c3b67da55a398c7f5eb8654f5c8051594b64a4a02",
+  "requested_maps": 0,
+  "resource_envelope": {
+    "construction_rss_limit_bytes": 8589934592,
+    "construction_timeout_seconds": 1800,
+    "walk_concurrency": 1
+  },
+  "schema": "isogeny-prime-walk/v1",
+  "status": "PASS",
+  "steps": [],
+  "timeout_seconds": 1800,
+  "tool": {
+    "git_commit": "49a280dc60972c9d16b2205b4652cc6c5d87284e",
+    "git_dirty": "false",
+    "name": "isogeny",
+    "standards_sha256": "4b6a02bdfe2db4e39b6e295a396a9a8a41a14edc09bfab7942cdfe37e38929c4",
+    "version": "0.1.0"
+  },
+  "verified_maps": 0
+}

@@ -896,7 +896,6 @@ fn main() {
             let w = all_cols.len().div_ceil(64);
             let mut rows: Vec<Vec<u64>> = Vec::with_capacity(total_rows);
             for p in &eqs {
-            for p in eqs.iter() {
                 let pdeg = p.iter().map(mask_deg).max().unwrap_or(0);
                 if pdeg > degree {
                     continue;

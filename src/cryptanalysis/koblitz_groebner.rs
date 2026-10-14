@@ -1215,7 +1215,7 @@ pub fn matrix_f4_f2_blocked(
     for row in matrix.iter().take(rank) {
         let monos = row_monos(row, &cols);
         if !monos.is_empty() {
-            out.push(F2BoolPoly::from_monos(monos, n_vars_out));
+            out.push(poly_from_column_order(monos, n_vars_out));
         }
     }
     Some((out, word_ops))
@@ -1242,6 +1242,16 @@ fn row_monos(row: &[u64], cols: &[u64]) -> Vec<F2BoolMono> {
         }
     }
     monos
+}
+
+/// Adopt terms read from unique, descending Macaulay columns. Set-bit
+/// readback preserves that order, so sorting and cancelling again would
+/// only copy the terms into another allocation.
+fn poly_from_column_order(terms: Vec<F2BoolMono>, n_vars: usize) -> F2BoolPoly {
+    debug_assert!(terms
+        .windows(2)
+        .all(|pair| cmp_mono(pair[0], pair[1]).is_gt()));
+    F2BoolPoly { terms, n_vars }
 }
 
 // ── Matrix-F4 over the Boolean ring ────────────────────────────────
@@ -1577,7 +1587,7 @@ fn matrix_f4_f2_counted_impl(
                     monos.push(F2BoolMono::from_mask(cols[column]));
                 }
             }
-            let poly = F2BoolPoly::from_monos(monos, n_vars_out);
+            let poly = poly_from_column_order(monos, n_vars_out);
             if is_constant_one(&poly) || forced_assignment(&poly).is_some() {
                 out.push(poly);
             }
@@ -1602,7 +1612,7 @@ fn matrix_f4_f2_counted_impl(
                     }
                 }
                 if monos.len() <= 2 {
-                    let poly = F2BoolPoly::from_monos(monos, n_vars_out);
+                    let poly = poly_from_column_order(monos, n_vars_out);
                     if is_constant_one(&poly) || forced_assignment(&poly).is_some() {
                         out.push(poly);
                     }
@@ -1610,7 +1620,7 @@ fn matrix_f4_f2_counted_impl(
             } else {
                 let monos = row_monos(row, &cols);
                 if !monos.is_empty() {
-                    out.push(F2BoolPoly::from_monos(monos, n_vars_out));
+                    out.push(poly_from_column_order(monos, n_vars_out));
                 }
             }
         }
@@ -2108,13 +2118,33 @@ pub(crate) fn f5_rows_monos_with_mask(
 
 /// Pack monomial rows as bit-rows over `cols` (descending monomial order).
 pub(crate) fn pack_rows(rows_monos: &[Vec<u64>], cols: &[u64]) -> Vec<Vec<u64>> {
+    let words = cols.len().div_ceil(64).max(1);
+    if std::env::var("KIC_F4_HASH_COLUMN_INDEX").as_deref() != Ok("1") {
+        if let Some(index) = F4ColumnIndex::dense_table(cols) {
+            return pack_rows_with_lookup(rows_monos, words, |monomial| {
+                let mask = usize::try_from(*monomial).expect("monomial exceeds dense column range");
+                let column = index[mask];
+                assert_ne!(column, u16::MAX, "monomial missing from column layout");
+                usize::from(column)
+            });
+        }
+    }
     let index: crate::cryptanalysis::fx_hash::MaskMap<usize> =
         cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
-    let words = cols.len().div_ceil(64).max(1);
+    pack_rows_with_lookup(rows_monos, words, |monomial| index[monomial])
+}
+
+// Choose the representation before packing. Separate monomorphisations avoid
+// an enum branch for every term on the sparse/high-bit hash fallback.
+fn pack_rows_with_lookup(
+    rows_monos: &[Vec<u64>],
+    words: usize,
+    lookup: impl Fn(&u64) -> usize + Sync,
+) -> Vec<Vec<u64>> {
     let pack = |monos: &Vec<u64>| {
         let mut row = vec![0u64; words];
         for m in monos {
-            let c = index[m];
+            let c = lookup(m);
             row[c / 64] |= 1u64 << (c % 64);
         }
         row
@@ -2450,7 +2480,6 @@ fn visit_macaulay_rows_counted<const COUNT_PRUNED: bool>(
     let mut full_count = 0usize;
     let mut schedules: Vec<Option<std::rc::Rc<[u64]>>> = vec![None; degree as usize + 1];
     let mut all: Vec<u64> = Vec::new();
-    let mut row: Vec<u64> = Vec::new();
     for (i, p) in polys.iter().enumerate() {
         let pdeg = p
             .terms
@@ -2480,22 +2509,25 @@ fn visit_macaulay_rows_counted<const COUNT_PRUNED: bool>(
             all.clear();
             all.extend(p.terms.iter().map(|t| t.mask | mult));
             all.sort_unstable();
-            row.clear();
             let mut i = 0;
+            let mut kept = 0;
             while i < all.len() {
                 let mut j = i;
                 while j < all.len() && all[j] == all[i] {
                     j += 1;
                 }
                 if (j - i) % 2 == 1 {
-                    row.push(all[i]);
+                    // The write cursor never passes the unread suffix.
+                    all[kept] = all[i];
+                    kept += 1;
                 }
                 i = j;
             }
-            if !row.is_empty() {
+            all.truncate(kept);
+            if !all.is_empty() {
                 full_count += 1;
                 if !pruned {
-                    visit(&row);
+                    visit(&all);
                     selected_count += 1;
                 }
             }
@@ -2516,10 +2548,27 @@ fn visit_macaulay_rows_counted<const COUNT_PRUNED: bool>(
 /// what makes "leading column index ≥ the degree-≤1 boundary" equivalent
 /// to "this row is a linear consequence".
 pub(crate) fn macaulay_columns(rows_monos: &[Vec<u64>]) -> Option<Vec<u64>> {
-    let mut cols: Vec<u64> = rows_monos.iter().flatten().copied().collect();
-    cols.sort_unstable();
-    cols.dedup();
-    if cols.len() > max_f4_cols() {
+    let cap = max_f4_cols();
+    let mut cols: Vec<u64> = if rows_monos.len() <= 1 {
+        // A single row has no repeated support across rows to eliminate.
+        let mut cols: Vec<u64> = rows_monos.iter().flatten().copied().collect();
+        cols.sort_unstable();
+        cols.dedup();
+        cols
+    } else {
+        // Retain each column once rather than sorting the entire matrix's
+        // nonzeros. The mask hasher also handles support in high variables.
+        let mut seen: crate::cryptanalysis::fx_hash::MaskMap<()> = Default::default();
+        for row in rows_monos {
+            for &mask in row {
+                if seen.insert(mask, ()).is_none() && seen.len() > cap {
+                    return None;
+                }
+            }
+        }
+        seen.into_keys().collect()
+    };
+    if cols.len() > cap {
         return None;
     }
     // `mono_key` orders exactly as `cmp_mono`; the masks are distinct
@@ -2937,7 +2986,7 @@ fn pack_rows_with_layout(
     for monos in rows_monos {
         let mut row = vec![0u64; words];
         for monomial in monos {
-            let &column = layout.index.get(monomial)?;
+            let column = layout.index.get(monomial)?;
             row[column / 64] |= 1 << (column % 64);
             if let Some(seen) = &mut seen {
                 seen[column] = true;
@@ -2972,7 +3021,7 @@ fn pack_rows_flat_with_layout(
     for (row_index, monos) in rows_monos.iter().enumerate() {
         let row = &mut data[row_index * words..(row_index + 1) * words];
         for monomial in monos {
-            let &column = layout.index.get(monomial)?;
+            let column = layout.index.get(monomial)?;
             row[column / 64] |= 1 << (column % 64);
             if let Some(seen) = &mut seen {
                 seen[column] = true;
@@ -3062,7 +3111,7 @@ fn pack_polynomials_flat_fused(
             data.resize(start + words, 0);
             let row = &mut data[start..start + words];
             for monomial in &product[..write] {
-                let &column = layout.index.get(monomial)?;
+                let column = layout.index.get(monomial)?;
                 row[column / 64] |= 1 << (column % 64);
                 seen[column] = true;
             }
@@ -3127,7 +3176,7 @@ fn pack_polynomials_nested_fused<const DIRECT: bool>(
                 let mut row = vec![0u64; words];
                 for term in &polynomial.terms {
                     let monomial = term.mask | multiplier;
-                    let &column = layout.index.get(&monomial)?;
+                    let column = layout.index.get(&monomial)?;
                     row[column / 64] ^= 1 << (column % 64);
                 }
                 if row.iter().all(|&word| word == 0) {
@@ -3170,7 +3219,7 @@ fn pack_polynomials_nested_fused<const DIRECT: bool>(
             }
             let mut row = vec![0u64; words];
             for monomial in &product[..write] {
-                let &column = layout.index.get(monomial)?;
+                let column = layout.index.get(monomial)?;
                 row[column / 64] |= 1 << (column % 64);
                 seen[column] = true;
             }
@@ -3462,6 +3511,12 @@ impl F4ColumnLayout {
                     .map(|(column, &monomial)| (monomial, column))
                     .collect(),
             )
+        } else if let Some(dense) = (std::env::var("KIC_F4_HASH_COLUMN_INDEX").as_deref()
+            != Ok("1"))
+        .then(|| F4ColumnIndex::dense(&columns))
+        .flatten()
+        {
+            dense
         } else {
             let mut index = FastColumnMap::with_capacity_and_hasher(
                 columns.len(),
@@ -3473,7 +3528,7 @@ impl F4ColumnLayout {
                     .enumerate()
                     .map(|(column, &monomial)| (monomial, column)),
             );
-            F4ColumnIndex::Fast(index)
+            F4ColumnIndex::Fast(F4FastColumnIndex::Hashed(index))
         };
         Self { columns, index }
     }
@@ -3481,14 +3536,54 @@ impl F4ColumnLayout {
 
 enum F4ColumnIndex {
     Standard(std::collections::HashMap<u64, usize>),
-    Fast(FastColumnMap),
+    Fast(F4FastColumnIndex),
+}
+
+// Nest the fast representations so the outer enum retains the original
+// hash-only metadata size, including on high-bit fallback layouts.
+enum F4FastColumnIndex {
+    Hashed(FastColumnMap),
+    Dense(Vec<u16>),
 }
 
 impl F4ColumnIndex {
-    fn get(&self, monomial: &u64) -> Option<&usize> {
+    /// Direct lookup only when it uses at most the entry bytes the hash
+    /// map must store, excluding its spare buckets and control bytes.
+    /// High-bit or sparse ranges fall back before allocating a table.
+    fn dense(columns: &[u64]) -> Option<Self> {
+        Self::dense_table(columns).map(|index| Self::Fast(F4FastColumnIndex::Dense(index)))
+    }
+
+    fn dense_table(columns: &[u64]) -> Option<Vec<u16>> {
+        if columns.len() > u16::MAX as usize {
+            return None;
+        }
+        let slots = usize::try_from(columns.iter().copied().max()?)
+            .ok()?
+            .checked_add(1)?;
+        let bytes = slots.checked_mul(std::mem::size_of::<u16>())?;
+        let hash_entry_bytes = columns
+            .len()
+            .checked_mul(std::mem::size_of::<(u64, usize)>())?;
+        if bytes > hash_entry_bytes {
+            return None;
+        }
+        let mut index = vec![u16::MAX; slots];
+        for (column, &monomial) in columns.iter().enumerate() {
+            index[monomial as usize] = column as u16;
+        }
+        Some(index)
+    }
+
+    fn get(&self, monomial: &u64) -> Option<usize> {
         match self {
-            Self::Standard(index) => index.get(monomial),
-            Self::Fast(index) => index.get(monomial),
+            Self::Standard(index) => index.get(monomial).copied(),
+            Self::Fast(F4FastColumnIndex::Hashed(index)) => index.get(monomial).copied(),
+            Self::Fast(F4FastColumnIndex::Dense(index)) => index
+                .get(usize::try_from(*monomial).ok()?)
+                .copied()
+                .filter(|&column| column != u16::MAX)
+                .map(usize::from),
         }
     }
 }
@@ -4963,7 +5058,6 @@ pub struct SolveStats {
     pub propagations: usize,
     /// Splitting decisions made.
     pub splits: usize,
-    /// Split nodes that deferred an F4 reduction.
     /// Number of algebraically reduced nodes closed by direct enumeration of
     /// the remaining small Boolean cube.
     #[serde(default)]
@@ -5346,6 +5440,215 @@ fn closure_rounds() -> u32 {
     })
 }
 
+thread_local! {
+    /// Root bases built ahead by [`prebuild_inherited_roots_lanes`], each
+    /// with the system, degree and multiplier policy it was built for.
+    static LANE_ROOTS: std::cell::RefCell<Vec<(Vec<F2BoolPoly>, u32, bool, ReducedBasis, InheritCost)>> =
+        const { std::cell::RefCell::new(Vec::new()) };
+}
+
+/// Take the root basis built ahead for exactly this system, if any.
+fn take_lane_root(
+    system: &[F2BoolPoly],
+    degree: u32,
+    support_local: bool,
+) -> Option<(ReducedBasis, InheritCost)> {
+    LANE_ROOTS.with(|roots| {
+        let mut roots = roots.borrow_mut();
+        if roots.is_empty() {
+            return None;
+        }
+        let i = roots.iter().position(|(s, d, local, _, _)| {
+            *d == degree && *local == support_local && s == system
+        })?;
+        let (_, _, _, basis, cost) = roots.swap_remove(i);
+        Some((basis, cost))
+    })
+}
+
+/// Root bases built ahead and not yet consumed on this thread.
+pub fn lane_roots_pending() -> usize {
+    LANE_ROOTS.with(|roots| roots.borrow().len())
+}
+
+/// Drop every root basis built ahead on this thread.
+pub fn clear_lane_roots() {
+    LANE_ROOTS.with(|roots| roots.borrow_mut().clear());
+}
+
+/// `KIC_F4_LANES=k`: how many decomposition roots a caller builds together
+/// with [`prebuild_inherited_roots_lanes`] (`1`, the default, builds each
+/// on its own).  Read once; capped at 64.
+pub fn f4_lanes() -> usize {
+    static LANES: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
+    *LANES.get_or_init(|| {
+        std::env::var("KIC_F4_LANES")
+            .ok()
+            .and_then(|v| v.parse::<usize>().ok())
+            .unwrap_or(1)
+            .clamp(1, 64)
+    })
+}
+
+/// **Lane-batched root replay** (lit2026 W5).  Build the inherited-F4 root
+/// bases of up to 64 solves at once with
+/// [`ReducedBasis::from_systems_lanes`] and keep them for the solves, whose
+/// first from-scratch build of an identical system at the same degree takes
+/// its basis instead of building one ([`take_lane_root`]).  `systems` are
+/// the equations each solve is handed.  A system the root would not reduce
+/// as it stands — one holding `1`, a linear generator the solver eliminates
+/// first, or a degree ladder of more than one rung — gets no basis and its
+/// solve builds as before; so does any lane the batch could not hold.
+///
+/// Exact: a lane's basis is the reduced row echelon form of its own root
+/// Macaulay row space, which is what the from-scratch root computes under
+/// `KIC_F4_INHERIT_ROOT=rref` and spans the same space as the default
+/// echelon root, so every refutation, forced variable, split and root is
+/// the same.  Returns the batch's [`crate::cryptanalysis::inherited_f4::LaneStats`]
+/// and how many lanes got a basis.
+pub fn prebuild_inherited_roots_lanes(
+    systems: &[Vec<F2BoolPoly>],
+    n_vars: usize,
+    engine: SolverEngine,
+) -> (crate::cryptanalysis::inherited_f4::LaneStats, usize) {
+    let engine = engine.effective();
+    let none = (crate::cryptanalysis::inherited_f4::LaneStats::default(), 0);
+    if !matches!(engine, SolverEngine::InheritedF4 { .. }) || closure_rounds() != 0 {
+        return none;
+    }
+    let policy = InheritPolicy::resolve(engine);
+    let mut eligible: Vec<(usize, Vec<F2BoolPoly>, u32)> = Vec::new();
+    for (i, s) in systems.iter().enumerate() {
+        let system: Vec<F2BoolPoly> = s.iter().filter(|p| !p.is_zero()).cloned().collect();
+        if system.is_empty()
+            || system.iter().any(is_constant_one)
+            || (policy.linear_elimination && system.iter().any(is_linear_generator))
+        {
+            continue;
+        }
+        let Some(ladder) = engine.degree_ladder(system_degree(&system), n_vars) else {
+            continue;
+        };
+        if ladder.start() != ladder.end() {
+            continue;
+        }
+        eligible.push((i, system, *ladder.end()));
+    }
+    let mut total = crate::cryptanalysis::inherited_f4::LaneStats::default();
+    let mut placed = 0usize;
+    let mut degrees: Vec<u32> = eligible.iter().map(|e| e.2).collect();
+    degrees.sort_unstable();
+    degrees.dedup();
+    for d in degrees {
+        let group: Vec<&(usize, Vec<F2BoolPoly>, u32)> =
+            eligible.iter().filter(|e| e.2 == d).collect();
+        let slices: Vec<&[F2BoolPoly]> = group.iter().map(|e| e.1.as_slice()).collect();
+        let (bases, stats) =
+            ReducedBasis::from_systems_lanes(&slices, n_vars, d, policy.support_local);
+        total.lanes += stats.lanes;
+        total.lane_bits = total.lane_bits.max(stats.lane_bits);
+        total.rows += stats.rows;
+        total.columns += stats.columns;
+        total.pivot_columns += stats.pivot_columns;
+        total.pivot_passes += stats.pivot_passes;
+        total.shared_columns += stats.shared_columns;
+        total.lane_word_ops += stats.lane_word_ops;
+        total.word_equivalent += stats.word_equivalent;
+        total.oversize |= stats.oversize;
+        LANE_ROOTS.with(|roots| {
+            let mut roots = roots.borrow_mut();
+            for (e, basis) in group.iter().zip(bases) {
+                if let Some((basis, cost)) = basis {
+                    roots.push((e.1.clone(), d, policy.support_local, basis, cost));
+                    placed += 1;
+                }
+            }
+        });
+    }
+    (total, placed)
+}
+
+/// `KIC_F6_GATE_FIRST=1`: when a node's reduction forces variables, assign
+/// them and ask the node oracle (the F6-IC geometry gate) **before**
+/// specialising the node's bases by them, instead of after.  The oracle
+/// reads only the assignment and the defined variables, so it decides the
+/// same way either way; a refuted node then never pays for the
+/// specialisations, and a continuing one specialises exactly as before
+/// and is not asked again.  Every verdict, root, counter of the solve and
+/// call of the oracle is unchanged; only the stage unit drops.  Off by
+/// default; [`set_gate_first`] overrides it on the calling thread.
+fn gate_first() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    if let Some(v) = GATE_FIRST_OVERRIDE.with(|c| c.get()) {
+        return v;
+    }
+    *ENABLED.get_or_init(|| std::env::var("KIC_F6_GATE_FIRST").as_deref() == Ok("1"))
+}
+
+thread_local! {
+    static GATE_FIRST_OVERRIDE: std::cell::Cell<Option<bool>> = const { std::cell::Cell::new(None) };
+    /// Nodes the gate refuted before their forced variables were
+    /// specialised in, and the specialisations so skipped.
+    static GATE_FIRST_SKIPS: std::cell::Cell<(u64, u64)> = const { std::cell::Cell::new((0, 0)) };
+    /// Per-node trace for the lane lockstep diagnostic.
+    static NODE_TRACE: std::cell::RefCell<Option<Vec<NodeTraceEvent>>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+/// Override `KIC_F6_GATE_FIRST` on this thread (`None` restores it).
+pub fn set_gate_first(enabled: Option<bool>) {
+    GATE_FIRST_OVERRIDE.with(|c| c.set(enabled));
+}
+
+/// `(nodes, specialisations)` the gate-first order skipped on this thread.
+pub fn gate_first_skips_thread() -> (u64, u64) {
+    GATE_FIRST_SKIPS.with(|c| c.get())
+}
+
+/// One reduction of the splitting tree, as the lane lockstep diagnostic
+/// sees it: which variables were assigned (or eliminated) and to what, and
+/// the thread's stage-unit total when the node reduced.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct NodeTraceEvent {
+    pub assigned: u64,
+    pub values: u64,
+    pub word_ops: u64,
+}
+
+/// Start (`true`) or stop recording [`NodeTraceEvent`]s on this thread.
+pub fn set_node_trace(enabled: bool) {
+    NODE_TRACE.with(|t| *t.borrow_mut() = enabled.then(Vec::new));
+}
+
+/// Take the events recorded so far, leaving the trace on and empty.
+pub fn take_node_trace() -> Vec<NodeTraceEvent> {
+    NODE_TRACE.with(|t| {
+        t.borrow_mut()
+            .as_mut()
+            .map(std::mem::take)
+            .unwrap_or_default()
+    })
+}
+
+fn note_node(assignment: &[Option<bool>]) {
+    NODE_TRACE.with(|t| {
+        if let Some(events) = t.borrow_mut().as_mut() {
+            let (mut assigned, mut values) = (0u64, 0u64);
+            for (v, a) in assignment.iter().enumerate() {
+                if let Some(x) = a {
+                    assigned |= 1u64 << v;
+                    values |= u64::from(*x) << v;
+                }
+            }
+            events.push(NodeTraceEvent {
+                assigned,
+                values,
+                word_ops: f4_word_ops_thread(),
+            });
+        }
+    });
+}
+
 /// The inherited engine's reduction: read the decisive rows off the node's
 /// bases, building a basis from scratch only for a degree no ancestor has
 /// reached.  Mirrors `reduce_system_uncached`'s ladder, decisiveness test
@@ -5393,8 +5696,21 @@ fn reduce_inherited(
                         .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                 }
                 let rounds = if d == top { closure_rounds() } else { 0 };
-                let built =
-                    ReducedBasis::from_system_closed_with(system, n_vars, d, rounds, support_local);
+                let prebuilt = if rounds == 0 {
+                    take_lane_root(system, d, support_local)
+                } else {
+                    None
+                };
+                let built = match prebuilt {
+                    Some(root) => Some(root),
+                    None => ReducedBasis::from_system_closed_with(
+                        system,
+                        n_vars,
+                        d,
+                        rounds,
+                        support_local,
+                    ),
+                };
                 if profile {
                     inherited_basis_counters::ROOT_NS.fetch_add(
                         started.elapsed().as_nanos() as u64,
@@ -5894,6 +6210,7 @@ fn solve_rec(
                 }
             }
         }
+        note_node(&assignment);
         let reduced = if inherit {
             reduce_inherited(
                 &system,
@@ -5918,6 +6235,57 @@ fn solve_rec(
         let forced: Vec<(u32, bool)> = reduced.iter().filter_map(forced_assignment).collect();
         if forced.is_empty() {
             break;
+        }
+        if inherit && gate_first() {
+            // Assign first, in the same order and with the same checks;
+            // then ask the gate, and specialise only if it continues.
+            let mut fresh: Vec<(u32, bool)> = Vec::with_capacity(forced.len());
+            for (v, val) in forced {
+                match assignment[v as usize] {
+                    Some(existing) if existing != val => {
+                        stats.infeasible_branches += 1;
+                        return;
+                    }
+                    Some(_) => {}
+                    None => {
+                        stats.propagations += 1;
+                        assignment[v as usize] = Some(val);
+                        fresh.push((v, val));
+                    }
+                }
+            }
+            if stats.reductions >= opts.node_budget {
+                stats.exhausted = true;
+                return;
+            }
+            let defined_mask = defined
+                .iter()
+                .fold(0u64, |mask, &(v, _, _)| mask | (1u64 << v));
+            match node_oracle(&assignment, defined_mask) {
+                NodeOracleDecision::Continue => oracle_decided = true,
+                NodeOracleDecision::Refute => {
+                    GATE_FIRST_SKIPS.with(|c| {
+                        let (n, s) = c.get();
+                        c.set((n + 1, s + fresh.len() as u64));
+                    });
+                    stats.geometric_refutations += 1;
+                    return;
+                }
+                NodeOracleDecision::Witness => {
+                    stats.geometric_witnesses += 1;
+                    *stop = true;
+                    return;
+                }
+            }
+            for (v, val) in fresh {
+                let substituted: Vec<F2BoolPoly> = system
+                    .iter()
+                    .map(|p| substitute_in_solve(p, v, val, canonical))
+                    .collect();
+                (bases, system) = bases.specialise_owned(v, val, substituted, policy);
+                drop_zeros(&mut system);
+            }
+            continue;
         }
         for (v, val) in forced {
             match assignment[v as usize] {
@@ -6295,6 +6663,253 @@ mod tests {
     use crate::binary_ecc::BinaryCurve;
     use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
     use crate::cryptanalysis::koblitz_index_calculus::{find_irreducible, KoblitzCurve};
+
+    #[test]
+    fn macaulay_products_preserve_boolean_cancellation_and_row_order() {
+        let n_vars = 5;
+        let degree = 4;
+        let mask = all_variable_mask(n_vars);
+        let polys = [
+            F2BoolPoly::zero(n_vars),
+            F2BoolPoly::one(n_vars),
+            F2BoolPoly::from_monos(
+                [0, 1, 2, 3, 4, 5, 7, 16]
+                    .into_iter()
+                    .map(F2BoolMono::from_mask)
+                    .collect(),
+                n_vars,
+            ),
+        ];
+        let mut expected = Vec::new();
+        for p in &polys {
+            let pdeg = p.terms.iter().map(|t| t.degree()).max().unwrap_or(0);
+            for multiplier in monomials_up_to_mask(mask, degree - pdeg) {
+                let product = p.mul_mono(F2BoolMono::from_mask(multiplier));
+                if !product.is_zero() {
+                    let mut row: Vec<u64> = product.terms.iter().map(|t| t.mask).collect();
+                    row.sort_unstable();
+                    expected.push(row);
+                }
+            }
+        }
+        assert_eq!(
+            macaulay_rows_monos_with_mask(&polys, n_vars, degree, mask, None).unwrap(),
+            expected
+        );
+    }
+
+    #[test]
+    fn macaulay_columns_deduplicate_high_bit_support_in_monomial_order() {
+        let a = 1u64 << 61;
+        let b = 1u64 << 63;
+        let rows = vec![vec![b, a | b, 0], vec![a, b, a | b], vec![b, 0]];
+        assert_eq!(macaulay_columns(&rows), Some(vec![a | b, a, b, 0]));
+        assert_eq!(macaulay_columns(&[vec![b, b, 0]]), Some(vec![b, 0]));
+        assert_eq!(macaulay_columns(&[]), Some(Vec::new()));
+    }
+
+    #[test]
+    fn packed_rows_match_column_positions_for_dense_sparse_and_parallel_inputs() {
+        // Reconstruct each bit from its column position, without lookup tables.
+        let reference = |rows: &[Vec<u64>], columns: &[u64]| -> Vec<Vec<u64>> {
+            rows.iter()
+                .map(|row| {
+                    let mut packed = vec![0; columns.len().div_ceil(64).max(1)];
+                    for (column, mask) in columns.iter().enumerate() {
+                        if row.contains(mask) {
+                            packed[column / 64] |= 1 << (column % 64);
+                        }
+                    }
+                    packed
+                })
+                .collect()
+        };
+        for columns in [
+            Vec::new(),
+            vec![0],
+            (0..137).map(|i| (i * 13) % 256).collect(),
+            vec![1 << 63, 0, 1 << 52, (1 << 63) | (1 << 52)],
+            vec![0, 1 << 20],
+            (0..u16::MAX as u64).collect(),
+            (0..=u16::MAX as u64).collect(),
+        ] {
+            let rows = vec![
+                Vec::new(),
+                columns.iter().copied().step_by(31).collect(),
+                columns
+                    .iter()
+                    .enumerate()
+                    .filter(|(i, _)| matches!(i % 128, 0 | 63 | 64 | 127))
+                    .flat_map(|(_, &mask)| [mask, mask])
+                    .collect(),
+                columns.iter().copied().rev().take(3).collect(),
+            ];
+            assert_eq!(pack_rows(&rows, &columns), reference(&rows, &columns));
+        }
+
+        // Wide rows cross the Rayon threshold without hundreds of thousands
+        // of small row allocations in this correctness test.
+        let columns: Vec<u64> = (0..u16::MAX as u64).collect();
+        let template = vec![columns[0], columns[63], columns[64], columns[65534]];
+        let words = columns.len().div_ceil(64);
+        let rows = vec![template.clone(); M4RI_PARALLEL_WORDS / words + 1];
+        let expected = reference(&[template], &columns).pop().unwrap();
+        assert!(pack_rows(&rows, &columns)
+            .iter()
+            .all(|row| *row == expected));
+        let index: crate::cryptanalysis::fx_hash::MaskMap<usize> = columns
+            .iter()
+            .enumerate()
+            .map(|(column, &mask)| (mask, column))
+            .collect();
+        assert!(pack_rows_with_lookup(&rows, words, |mask| index[mask])
+            .iter()
+            .all(|row| *row == expected));
+    }
+
+    #[test]
+    fn dense_column_lookup_matches_a_map_and_preserves_missing_masks() {
+        #[allow(dead_code)]
+        enum OriginalHashIndex {
+            Standard(std::collections::HashMap<u64, usize>),
+            Fast(FastColumnMap),
+        }
+        assert!(
+            std::mem::size_of::<F4ColumnIndex>() <= std::mem::size_of::<OriginalHashIndex>(),
+            "index metadata must not enlarge heap-resident fallback layouts"
+        );
+        let columns = [9, 0, 1, 7, 3, 5, 8];
+        let reference: std::collections::HashMap<_, _> = columns
+            .iter()
+            .enumerate()
+            .map(|(column, &mask)| (mask, column))
+            .collect();
+        let dense = F4ColumnIndex::dense(&columns).unwrap();
+        for mask in (0..32).chain([1 << 63, u64::MAX]) {
+            assert_eq!(dense.get(&mask), reference.get(&mask).copied());
+        }
+        assert!(F4ColumnIndex::dense(&[]).is_none());
+        assert!(F4ColumnIndex::dense(&[0, 1 << 20]).is_none());
+        assert!(F4ColumnIndex::dense(&[0, 1 << 63]).is_none());
+        assert!(F4ColumnIndex::dense(&[u64::MAX]).is_none());
+
+        // The largest encodable index is one below the missing sentinel.
+        let columns: Vec<_> = (0..u16::MAX as u64).collect();
+        let dense = F4ColumnIndex::dense(&columns).unwrap();
+        assert_eq!(dense.get(&(u16::MAX as u64 - 1)), Some(65534));
+        assert_eq!(dense.get(&(u16::MAX as u64)), None);
+        let too_many: Vec<_> = (0..=u16::MAX as u64).collect();
+        assert!(F4ColumnIndex::dense(&too_many).is_none());
+    }
+
+    #[test]
+    fn packed_readback_preserves_canonical_order_across_words_and_padding() {
+        let support = [0, 2, 7, 18, 52, 60, 63];
+        let mut cols: Vec<u64> = (0..128u64)
+            .map(|subset| {
+                support.iter().enumerate().fold(0, |mask, (i, bit)| {
+                    mask | if subset & (1 << i) != 0 { 1 << bit } else { 0 }
+                })
+            })
+            .collect();
+        cols.sort_unstable_by(|&a, &b| {
+            cmp_mono(F2BoolMono::from_mask(b), F2BoolMono::from_mask(a))
+        });
+        cols.truncate(117);
+        // Include boundary columns 63/64/116, padding from column 117,
+        // an extra padding word, empty rows and every valid column.
+        for row in [
+            [0, 0, 0],
+            [0, 0, u64::MAX],
+            [1 << 63, (1 << 52) | (1 << 53) | 1, u64::MAX],
+            [u64::MAX, u64::MAX, u64::MAX],
+            [0xaaaa_5555_aaaa_5555, 0x5555_aaaa_5555_aaaa, 0],
+        ] {
+            let expected = F2BoolPoly::from_monos(
+                cols.iter()
+                    .enumerate()
+                    .filter(|(i, _)| row[i / 64] & (1 << (i % 64)) != 0)
+                    .map(|(_, &mask)| F2BoolMono::from_mask(mask))
+                    .collect(),
+                64,
+            );
+            let actual = poly_from_column_order(row_monos(&row, &cols), 64);
+            assert_eq!(actual, expected);
+            assert!(actual
+                .terms
+                .windows(2)
+                .all(|pair| cmp_mono(pair[0], pair[1]).is_gt()));
+        }
+    }
+
+    #[test]
+    fn fused_f5_count_matches_polynomial_products_at_every_cap_boundary() {
+        let n_vars = 6;
+        let mask = all_variable_mask(n_vars);
+        let from_masks = |masks: &[u64]| {
+            F2BoolPoly::from_monos(
+                masks.iter().copied().map(F2BoolMono::from_mask).collect(),
+                64,
+            )
+        };
+        let polys = [
+            F2BoolPoly::zero(64),
+            from_masks(&[1, 3]), // Multiplication by x_1 cancels this row.
+            from_masks(&[3, 4, 0]),
+            from_masks(&[(1 << 63) | 4, 1 << 52, 0]),
+            F2BoolPoly::one(64),
+        ];
+        for degree in 0..=4 {
+            let criterion = F5Criterion::new(&polys, n_vars, degree, mask);
+            let mut full = 0;
+            let mut expected = Vec::new();
+            for (i, polynomial) in polys.iter().enumerate() {
+                let polynomial_degree = polynomial
+                    .terms
+                    .iter()
+                    .map(|term| term.degree())
+                    .max()
+                    .unwrap_or(0);
+                // Enumerate the whole small Boolean multiplier universe
+                // independently of the builder's cached row schedules.
+                for multiplier in 0..=mask {
+                    if polynomial_degree + multiplier.count_ones() > degree {
+                        continue;
+                    }
+                    let product = polynomial.mul_mono(F2BoolMono::from_mask(multiplier));
+                    if product.is_zero() {
+                        continue;
+                    }
+                    full += 1;
+                    if !criterion.prunes(i, multiplier) {
+                        let mut row: Vec<_> = product.terms.iter().map(|term| term.mask).collect();
+                        row.sort_unstable();
+                        expected.push(row);
+                    }
+                }
+            }
+            expected.sort_unstable();
+            for cap in 0..=full + 1 {
+                let mut rows = Vec::new();
+                let result = visit_macaulay_rows_counted::<true>(
+                    &polys,
+                    n_vars,
+                    degree,
+                    mask,
+                    Some(&criterion),
+                    cap,
+                    |row| rows.push(row.to_vec()),
+                );
+                if cap < full {
+                    assert!(result.is_none(), "degree {degree}, cap {cap}, full {full}");
+                } else {
+                    assert_eq!(result, Some((expected.len(), full)));
+                    rows.sort_unstable();
+                    assert_eq!(rows, expected, "degree {degree}, cap {cap}");
+                }
+            }
+        }
+    }
 
     #[test]
     fn fused_f5_count_applies_the_full_f4_row_cap() {
@@ -8639,4 +9254,179 @@ mod reference_equivalence_tests {
             }
         }
     }
+}
+
+/// Collected on the calling thread while [`set_refutation_degree_trace`] is
+/// on; read and cleared with [`refutation_degree_trace_take`].  Every field
+/// counts nodes (attempts, for `root_first_refutation_degree`) and is
+/// exact.  The `*_first_degree` fields are a diagnostic the trace pays for:
+/// at every inherited-engine reduction the node's own system is also
+/// reduced from scratch, with the engine's multiplier policy, at degree 2
+/// and, unless that refutes, at the engine's top degree; the node is filed
+/// under the first degree whose row space holds `1` (refuted) or, failing
+/// that, a forced variable (forced), else as stalled.  The trace changes no
+/// decision of the solver.
+#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize)]
+pub struct RefutationDegreeTrace {
+    /// Inherited-engine reductions whose top basis was built from scratch
+    /// at this node (the root, or a node whose linear elimination dropped
+    /// its parent's bases), and those whose top basis was specialised from
+    /// the parent's.
+    pub reductions_fresh: u64,
+    pub reductions_inherited: u64,
+    /// The engine's own verdict at those reductions: `1` in the row space,
+    /// a forced variable and no `1`, or neither (the solver splits).
+    pub refuted_fresh: u64,
+    pub refuted_inherited: u64,
+    pub forced_fresh: u64,
+    pub forced_inherited: u64,
+    pub stalled_fresh: u64,
+    pub stalled_inherited: u64,
+    /// Diagnostic, indexed by degree (0 … 4): first degree of the node's
+    /// own from-scratch Macaulay space holding `1`, split by whether the
+    /// engine's basis at the node was fresh or inherited.
+    pub refuted_first_degree_fresh: [u64; 5],
+    pub refuted_first_degree_inherited: [u64; 5],
+    /// Diagnostic: the same for a forced variable, at nodes no degree up
+    /// to the top refutes; and the nodes neither decides.
+    pub forced_first_degree: [u64; 5],
+    pub stalled_from_scratch: u64,
+    /// Diagnostic: the from-scratch top-degree space refutes a node the
+    /// engine's basis did not, or the reverse (the inherited basis is a
+    /// documented subspace of it under the production policy).
+    pub scratch_refutes_engine_does_not: u64,
+    pub engine_refutes_scratch_does_not: u64,
+    /// Nodes refuted before any Macaulay matrix: the substituted system
+    /// holds `1` (degree 0), or linear elimination found a contradiction
+    /// (degree 1).
+    pub refuted_constant: u64,
+    pub refuted_linear: u64,
+    /// A forced value read off a reduction or an elimination contradicts
+    /// the assignment.
+    pub refuted_forced_conflict: u64,
+    /// Nodes the IC node oracle refuted.
+    pub refuted_oracle: u64,
+    /// Fully assigned points checked against the input, and how many were
+    /// solutions (each is certified by evaluation, degree 1).
+    pub leaves_checked: u64,
+    pub leaves_solutions: u64,
+    /// Early abort ([`early_abort_mode`]): degree-2 probes run, how many
+    /// refuted their node, and the probes' word operations (charged to the
+    /// stage unit like any reduction).
+    pub early_abort_probes: u64,
+    pub early_abort_refutations: u64,
+    pub early_abort_word_ops: u64,
+    /// Attempt-level diagnostic, once per inherited-engine solve: index `d`
+    /// in 2 … 4 counts root systems whose degree-`d` support-local Macaulay
+    /// space is the first to hold `1`; index 0 counts roots no degree ≤ 4
+    /// refutes; index 1 roots whose matrix exceeded the size caps before a
+    /// refutation.
+    pub root_first_refutation_degree: [u64; 5],
+    /// Where the stage unit goes: nodes that end refuted (any cause) and
+    /// nodes that end in a split, with the word operations each class spent
+    /// from node entry to its end (children excluded; with the trace on,
+    /// the trace's own from-scratch reductions are not charged).
+    pub nodes_refuted: u64,
+    pub word_ops_refuted_nodes: u64,
+    pub nodes_split: u64,
+    pub word_ops_split_nodes: u64,
+}
+
+thread_local! {
+    static REFUTATION_TRACE: std::cell::RefCell<Option<RefutationDegreeTrace>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+/// Turn the refutation-degree trace on or off on this thread (off drops it).
+pub fn set_refutation_degree_trace(enabled: bool) {
+    REFUTATION_TRACE.with(|t| *t.borrow_mut() = enabled.then(RefutationDegreeTrace::default));
+}
+
+/// The trace collected on this thread since the last take, leaving it
+/// running and cleared; `None` when the trace is off.
+pub fn refutation_degree_trace_take() -> Option<RefutationDegreeTrace> {
+    REFUTATION_TRACE.with(|t| t.borrow_mut().as_mut().map(std::mem::take))
+}
+
+// KNOWN GAP (needs the W4 author): the engine call sites of these helpers (and
+// of the early-abort probes) were added in acd95f18f (lit2026 W4) and dropped
+// by the merge ca6c5d42e into the W4 branch, which took main's rewritten solver
+// (#1714). Until they are re-wired, f4_refutation_degree_probe emits an empty
+// trace. The allow is only to keep clippy -D warnings green, not a retirement.
+#[allow(dead_code)]
+fn trace_on() -> bool {
+    REFUTATION_TRACE.with(|t| t.borrow().is_some())
+}
+
+/// Charge the stage-unit word operations a node spent since `w0` (its
+/// entry, children excluded) to the refuted or the split nodes.
+#[allow(dead_code)]
+fn trace_cost(w0: Option<u64>, refuted: bool) {
+    let Some(w0) = w0 else { return };
+    let spent = f4_word_ops_thread().wrapping_sub(w0);
+    trace(|t| {
+        if refuted {
+            t.nodes_refuted += 1;
+            t.word_ops_refuted_nodes += spent;
+        } else {
+            t.nodes_split += 1;
+            t.word_ops_split_nodes += spent;
+        }
+    });
+}
+
+#[allow(dead_code)]
+fn trace(f: impl FnOnce(&mut RefutationDegreeTrace)) {
+    REFUTATION_TRACE.with(|t| {
+        if let Some(trace) = t.borrow_mut().as_mut() {
+            f(trace);
+        }
+    });
+}
+
+/// Early abort at the refutation degree (lit2026 W4), `KIC_F4_EARLY_ABORT`,
+/// read once per process:
+///
+/// - `0` or unset: off, the engine as it was.
+/// - `1`: before a node builds its top-degree basis from scratch, and only
+///   when its ladder skips degree 2 (wide systems run the top degree
+///   alone), reduce the node's degree-2 Macaulay space with the same
+///   multiplier policy; if it holds `1`, the node is refuted without the
+///   top-degree build.  Exact and tree-preserving: the degree-2 rows are
+///   rows of the degree-`D` matrix under either policy, so the top build
+///   refutes the same node; a probe that does not refute is dropped and
+///   the build runs as before.
+/// - `2`: a child about to specialise its parent's bases, whose first act
+///   would be that reduction, first reduces its own degree-2 Macaulay
+///   space; `1` there refutes it without the specialisation, and the probe
+///   is counted as the node's reduction.  Exact (`1` in a sub-ideal is `1`
+///   in the ideal).  The tree is the same wherever the inherited top basis
+///   refutes every node the degree-2 space does; the inherited basis is a
+///   documented subspace of the from-scratch one, so where it does not, the
+///   tree only loses refuted subtrees
+///   (`RefutationDegreeTrace::scratch_refutes_engine_does_not`).
+/// - `3`: both.
+///
+/// [`set_early_abort_mode`] overrides the environment on the calling thread.
+pub fn early_abort_mode() -> u8 {
+    if let Some(mode) = EARLY_ABORT_OVERRIDE.with(|m| m.get()) {
+        return mode;
+    }
+    static MODE: std::sync::OnceLock<u8> = std::sync::OnceLock::new();
+    *MODE.get_or_init(|| {
+        std::env::var("KIC_F4_EARLY_ABORT")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(0)
+    })
+}
+
+thread_local! {
+    static EARLY_ABORT_OVERRIDE: std::cell::Cell<Option<u8>> = const { std::cell::Cell::new(None) };
+}
+
+/// Set (`Some`) or clear (`None`) this thread's override of
+/// `KIC_F4_EARLY_ABORT`; a same-binary control for tests and harnesses.
+pub fn set_early_abort_mode(mode: Option<u8>) {
+    EARLY_ABORT_OVERRIDE.with(|m| m.set(mode));
 }

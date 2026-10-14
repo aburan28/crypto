@@ -399,6 +399,31 @@ fn icprog_reproduces_s23s_claims_and_analysis_byte_for_byte() {
     ] {
         std::fs::copy(root().join(f), scratch.join(f)).unwrap();
     }
+    // The frozen §23 claims were checked against the vs_rho schema as it
+    // stood then, which each claim records as `required_stage_fields`. The
+    // ledger has since grown that list (phase times, intervals, operation
+    // accounting, a record class), and the current checker rejects the
+    // frozen claims for exactly those fields. Reproduce §23 against its own
+    // schema by putting the recorded list back into the scratch ledger.
+    {
+        let claim: serde_json::Value = serde_json::from_str(
+            &std::fs::read_to_string(s23.join("claims/k0n41/T01-R1.claim.json")).unwrap(),
+        )
+        .unwrap();
+        let recorded = claim["validation"]["required_stage_fields"].clone();
+        assert!(recorded.is_array(), "the claim records its schema");
+        let path = scratch.join("docs/ic/boundary_targets.json");
+        let text = std::fs::read_to_string(&path).unwrap();
+        let start = text.find("\"vs_rho\": {").expect("vs_rho schema");
+        let open = start
+            + text[start..]
+                .find("\"required\": [")
+                .expect("required list");
+        let open = open + "\"required\": ".len();
+        let close = open + text[open..].find(']').expect("end of required") + 1;
+        let rewritten = format!("{}{}{}", &text[..open], recorded, &text[close..]);
+        std::fs::write(&path, rewritten).unwrap();
+    }
     let rule = |step: &str| {
         let out = Command::new(env!("CARGO_BIN_EXE_icprog"))
             .args(["rule", step, "--root"])

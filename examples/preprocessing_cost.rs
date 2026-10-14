@@ -157,7 +157,10 @@ fn measure(n: u32, ell: usize, m: usize) -> Option<Row> {
 
     let payload = serde_json::to_string(&template).ok()?;
     let bytes = payload.len();
-    let key = format!("ic:v3:index-calculus:preprocessing:fingerprint:{}", "0".repeat(64));
+    let key = format!(
+        "ic:v3:index-calculus:preprocessing:fingerprint:{}",
+        "0".repeat(64)
+    );
     let stored = serde_json::to_vec(&Envelope {
         key: key.clone(),
         payload: payload.clone(),
@@ -339,8 +342,16 @@ fn main() {
     );
     println!(
         "{:>4} {:>4} {:>3} {:>7} {:>9} {:>10}  {:>22} {:>12} {:>22} {:>12}",
-        "n", "ell", "m", "n_vars", "payload", "stored", "build", "encode",
-        "decode (a HIT pays)", "instantiate"
+        "n",
+        "ell",
+        "m",
+        "n_vars",
+        "payload",
+        "stored",
+        "build",
+        "encode",
+        "decode (a HIT pays)",
+        "instantiate"
     );
     for r in &rows {
         println!(
@@ -376,14 +387,27 @@ fn main() {
             "{:>4} {:>4} {:>3} {:>10}  {:>12} {:>12} {:>12}   {:>16}",
             "n", "ell", "m", "payload", "miss", "local hit", "redis hit", "redis hit / build"
         );
-        for &(n, ell, m) in &[(9u32, 9usize, 3usize), (31, 11, 3), (41, 7, 3), (53, 3, 3), (61, 1, 3)] {
+        for &(n, ell, m) in &[
+            (9u32, 9usize, 3usize),
+            (31, 11, 3),
+            (41, 7, 3),
+            (53, 3, 3),
+            (61, 1, 3),
+        ] {
             let built = rows.iter().find(|r| r.n == n && r.ell == ell && r.m == m);
             match redis_round_trip(n, ell, m, &url) {
                 Some((miss, local, remote, bytes)) => println!(
                     "{:>4} {:>4} {:>3} {:>10}  {:>12.1} {:>12.1} {:>12.1}   {:>15.2}x",
-                    n, ell, m, bytes,
-                    us(miss), us(local), us(remote),
-                    built.map(|r| remote as f64 / r.build_ns.0.max(1) as f64).unwrap_or(f64::NAN),
+                    n,
+                    ell,
+                    m,
+                    bytes,
+                    us(miss),
+                    us(local),
+                    us(remote),
+                    built
+                        .map(|r| remote as f64 / r.build_ns.0.max(1) as f64)
+                        .unwrap_or(f64::NAN),
                 ),
                 None => println!("{n:>4} {ell:>4} {m:>3}  not served from Redis; not reported"),
             }

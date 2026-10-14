@@ -1,0 +1,22 @@
+{
+  "cold_or_warm": "one_fresh_process_with_empty_index_and_logs; one_target_online_after_reusable_preparation",
+  "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+  "input_law": {
+    "digest": "blake3",
+    "domain": "n83-dense-root-held-out-20261013-v1",
+    "fixture_index": 0,
+    "generator": "generic_curve_scalar_multiplication",
+    "scalar_rule": "1+low_u64_le(blake3(domain||u32_le(index)))%(r-1)",
+    "source_sha256": "e4d74b8b35709c0e9f85b15af2aec13c289a945cf87b833fc32dfcd9a5f08d70"
+  },
+  "public_targets": [
+    [
+      "6156598173116761880680889",
+      "2569387936113339852934176"
+    ]
+  ],
+  "schema_version": 1,
+  "target_count": 1,
+  "target_sha256": "21c8dfc7d488909e5c4a42c839fcc01bdefa9821c11ba001626a1d15697240e8",
+  "workload_id": "64d976711e0e"
+}

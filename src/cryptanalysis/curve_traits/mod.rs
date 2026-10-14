@@ -106,6 +106,9 @@ pub enum Model {
     },
     /// `y² = x³ + ax + b` over `GF(p)`.
     Prime { p: BigUint, a: BigUint, b: BigUint },
+    /// A recognized catalogue model whose coordinate arithmetic is unavailable.
+    /// Retain its exact field so order/trace identities can still be checked.
+    Other { p: BigUint, degree: u32 },
     /// Short Weierstrass model over `GF(p^k)`, in the registered polynomial basis.
     Extension {
         p: BigUint,
@@ -124,6 +127,7 @@ impl Model {
         match self {
             Model::Binary { n, .. } => BigUint::one() << *n,
             Model::Prime { p, .. } => p.clone(),
+            Model::Other { p, degree } => p.pow(*degree),
             Model::Extension { q, .. } => q.clone(),
         }
     }
@@ -133,6 +137,7 @@ impl Model {
         match self {
             Model::Binary { n, .. } => u64::from(*n),
             Model::Prime { p, .. } => p.bits(),
+            Model::Other { .. } => self.q().bits(),
             Model::Extension { q, .. } => q.bits(),
         }
     }
@@ -465,6 +470,7 @@ fn parse_representation(rep: &Value, model: &Model, map: &CoordinateMap) -> Opti
                 return None;
             }
         }
+        Model::Other { .. } => return None,
         Model::Extension { p, k, modulus, .. } => {
             if field["degree"].as_u64()? != u64::from(*k)
                 || value_uint(&field["characteristic"])? != *p
@@ -501,6 +507,7 @@ fn parse_representation(rep: &Value, model: &Model, map: &CoordinateMap) -> Opti
             extension_coordinates(gen.first()?, *k, p)?,
             extension_coordinates(gen.get(1)?, *k, p)?,
         ),
+        Model::Other { .. } => return None,
     };
     Some(Representation {
         generator,
@@ -1003,7 +1010,7 @@ pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
     let q = c.model.q();
     let characteristic = match &c.model {
         Model::Binary { .. } => BigUint::from(2u8),
-        Model::Prime { p, .. } | Model::Extension { p, .. } => p.clone(),
+        Model::Prime { p, .. } | Model::Other { p, .. } | Model::Extension { p, .. } => p.clone(),
     };
     let (status, method) =
         certify::check_order(&c.model, &c.order, &c.representations).map_err(ctx)?;
@@ -1023,13 +1030,14 @@ pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
         field: FieldInfo {
             kind: match c.model {
                 Model::Binary { .. } => "binary",
-                Model::Prime { .. } => "prime",
+                Model::Prime { .. } | Model::Other { .. } => "prime",
                 Model::Extension { .. } => "extension",
             }
             .into(),
             degree: match &c.model {
                 Model::Binary { n, .. } => *n,
                 Model::Prime { .. } => 1,
+                Model::Other { degree, .. } => *degree,
                 Model::Extension { k, .. } => *k,
             },
             size_bits: c.model.size_bits(),
@@ -1277,6 +1285,34 @@ impl TraitFile {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn coordinate_models_keep_exact_fields_and_available_order_certificates() {
+        use super::*;
+        let (montgomery, _) = parse_model(
+            r#"{"field":"fp-101","form":"B*y^2=x^3+A*x^2+x","p":"101","A":"3","B":"1"}"#,
+        )
+        .unwrap();
+        assert_eq!(montgomery.q(), BigUint::from(101u64));
+        // The prime-field Montgomery adapter now supports exact counting;
+        // field size and curve order are distinct quantities.
+        assert_eq!(
+            certify::check_order(&montgomery, &BigUint::from(96u64), &[]).unwrap(),
+            (Status::Proved, "exhaustive point count")
+        );
+        assert!(certify::check_order(&montgomery, &BigUint::from(101u64), &[]).is_err());
+
+        let (extension, _) = parse_model(
+            r#"{"field":"fpk-37-2-example","form":"y^2=x^3+a*x+b","p":"37","k":"2","modulus":["2","0"],"a":["1","0"],"b":["1","0"]}"#,
+        )
+        .unwrap();
+        assert_eq!(extension.q(), BigUint::from(1369u64));
+        assert_eq!(
+            certify::check_order(&extension, &BigUint::from(1369u64), &[])
+                .unwrap()
+                .0,
+            Status::NotEvaluated
+        );
+    }
     use super::*;
 
     const REGISTRY: &str = include_str!("../../../docs/curves/registry.json");

@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "purpose": "Preserve original PR1677 roadmap planning/validation artifacts byte-exact while adopting its later coherent planning/status refresh from main. Historical records/validation.json stays unchanged. No measurements rerun or certification implied.",
+  "source_pins": {
+    "captured_pr": "baa624218809b821400cfe33155c6bacb542e9a8",
+    "pre_merge_integration": "8880bf0c7e286f7aa770adca192627537b2fcd75",
+    "incoming_main": "31088bfce9d9cc86fb55a655b064b5472db263ae",
+    "merge_preview_tree": "1cfc8a7e660e662e0cd9286f9d97709088155acc"
+  },
+  "files": [
+    {
+      "repository_path": "research/f4_f5_history_20261012/NEXT_STEPS.md",
+      "original": {
+        "source_revision": "baa624218809b821400cfe33155c6bacb542e9a8",
+        "source_path": "research/f4_f5_history_20261012/NEXT_STEPS.md",
+        "git_blob": "35d87600bcf6374691d10e174edcd7342c1e3c96",
+        "sha256": "666b835d8d137b4ace39698034a0a3d42030b523ad49a2c5d1755b0dc838e1c3",
+        "bytes": 7216
+      },
+      "original_matches_pre_merge_integration": true,
+      "archive_relative_path": "archives/pr-1677-baa6242188/research/f4_f5_history_20261012/NEXT_STEPS.md",
+      "incoming_canonical": {
+        "source_revision": "31088bfce9d9cc86fb55a655b064b5472db263ae",
+        "source_path": "research/f4_f5_history_20261012/NEXT_STEPS.md",
+        "git_blob": "a051c2c75b2e7bef4de05f36e37e075ce5e1b8fa",
+        "sha256": "5aba391f46879ac1102f1b574ad2617b06241603c7ff5a8419927d703114b3db",
+        "bytes": 8237
+      },
+      "incoming_proposal_relative_path": "proposals/incoming-planning/research/f4_f5_history_20261012/NEXT_STEPS.md"
+    },
+    {
+      "repository_path": "research/f4_f5_history_20261012/next-steps.pdf",
+      "original": {
+        "source_revision": "baa624218809b821400cfe33155c6bacb542e9a8",
+        "source_path": "research/f4_f5_history_20261012/next-steps.pdf",
+        "git_blob": "0387a801ed630fa08aff2a287f2d34791709ab3b",
+        "sha256": "c09a1753fdf9d9af9caebcef48c87e3ba15434007a7f3eb94966b4fdf1a2c3e1",
+        "bytes": 55199
+      },
+      "original_matches_pre_merge_integration": true,
+      "archive_relative_path": "archives/pr-1677-baa6242188/research/f4_f5_history_20261012/next-steps.pdf",
+      "incoming_canonical": {
+        "source_revision": "31088bfce9d9cc86fb55a655b064b5472db263ae",
+        "source_path": "research/f4_f5_history_20261012/next-steps.pdf",
+        "git_blob": "df2bfbae688e35ad54b0ba799a6be04330d3d2af",
+        "sha256": "2ce7eb49b71ef823a25481f47af4503d7903407e051b1eae3a952c6e33093eb3",
+        "bytes": 56478
+      },
+      "incoming_proposal_relative_path": "proposals/incoming-planning/research/f4_f5_history_20261012/next-steps.pdf"
+    },
+    {
+      "repository_path": "research/f4_f5_history_20261012/next-steps.svg",
+      "original": {
+        "source_revision": "baa624218809b821400cfe33155c6bacb542e9a8",
+        "source_path": "research/f4_f5_history_20261012/next-steps.svg",
+        "git_blob": "d77adb2f748e65389057f761ace7e0f9065b0401",
+        "sha256": "313a5bffcd90d4c55685d1de54cbb56da2c21f1b7e5798156e9a6d547759e8f8",
+        "bytes": 3762
+      },
+      "original_matches_pre_merge_integration": true,
+      "archive_relative_path": "archives/pr-1677-baa6242188/research/f4_f5_history_20261012/next-steps.svg",
+      "incoming_canonical": {
+        "source_revision": "31088bfce9d9cc86fb55a655b064b5472db263ae",
+        "source_path": "research/f4_f5_history_20261012/next-steps.svg",
+        "git_blob": "d4940573dd5f89b546f7cd229da5127d8335204c",
+        "sha256": "4686116c610f1f1dd7ee2e3995fac5cc6098f1e51b7ef66d58def12885b7e7c6",
+        "bytes": 3785
+      },
+      "incoming_proposal_relative_path": "proposals/incoming-planning/research/f4_f5_history_20261012/next-steps.svg"
+    },
+    {
+      "repository_path": "research/f4_f5_history_20261012/next-steps.typ",
+      "original": {
+        "source_revision": "baa624218809b821400cfe33155c6bacb542e9a8",
+        "source_path": "research/f4_f5_history_20261012/next-steps.typ",
+        "git_blob": "45a1e875bf9f2f0e6a83d7edc2a40fa6c332df5e",
+        "sha256": "f6470b738a5afab38f52cb919d8121e13aa08a5fe8454308bf3364b25f447b3a",
+        "bytes": 3285
+      },
+      "original_matches_pre_merge_integration": true,
+      "archive_relative_path": "archives/pr-1677-baa6242188/research/f4_f5_history_20261012/next-steps.typ",
+      "incoming_canonical": {
+        "source_revision": "31088bfce9d9cc86fb55a655b064b5472db263ae",
+        "source_path": "research/f4_f5_history_20261012/next-steps.typ",
+        "git_blob": "20eac104bd8b45e908ac1a425a8362f22de6fbd7",
+        "sha256": "79dfe448608ac1726bc587be1d76f9f88bc3ac4008d3e4ac8f66ede9fb00e19b",
+        "bytes": 3449
+      },
+      "incoming_proposal_relative_path": "proposals/incoming-planning/research/f4_f5_history_20261012/next-steps.typ"
+    },
+    {
+      "repository_path": "research/f4_f5_history_20261012/records/next-steps-validation.md",
+      "original": {
+        "source_revision": "baa624218809b821400cfe33155c6bacb542e9a8",
+        "source_path": "research/f4_f5_history_20261012/records/next-steps-validation.md",
+        "git_blob": "ae289a5909030e1fed25657d3bc14ef21a443e1b",
+        "sha256": "0653403a702546ed0ee2991d9e9de756c1181c860a633944c84c9803ac52b9e3",
+        "bytes": 1709
+      },
+      "original_matches_pre_merge_integration": true,
+      "archive_relative_path": "archives/pr-1677-baa6242188/research/f4_f5_history_20261012/records/next-steps-validation.md",
+      "incoming_canonical": {
+        "source_revision": "31088bfce9d9cc86fb55a655b064b5472db263ae",
+        "source_path": "research/f4_f5_history_20261012/records/next-steps-validation.md",
+        "git_blob": "ca1602a20db58eef27f3c574874802eb30ae5393",
+        "sha256": "601aa537d9e33d4e05dda8122f15128c2e5bd2f806eb7dc080a625ce125ea8cd",
+        "bytes": 2188
+      },
+      "incoming_proposal_relative_path": "proposals/incoming-planning/research/f4_f5_history_20261012/records/next-steps-validation.md"
+    }
+  ]
+}

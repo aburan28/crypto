@@ -1,0 +1,277 @@
+{
+  "scope": "Performance-copy coverage only; inclusion of PR heads is recorded in heads.json",
+  "entries": [
+    {
+      "number": 1718,
+      "head": "42043860adef855cbe8cb6b06d916da904c9fd1d",
+      "title": "Frozen-tree replay: restore the unpinned source from the base commit (seven workflows build again)",
+      "status": "excluded",
+      "reason": "CI/workflow/proof/documentation/repair change; no imported performance measurement or speedup result."
+    },
+    {
+      "number": 1717,
+      "head": "3f5b08ff77c00078948b2642cecaf963955c955b",
+      "title": "f4_fp: Gebauer\u2013M\u00f6ller, matrix interreduction, packed monomials \u2014 15\u201354\u00d7 faster, level with msolve",
+      "status": "covered",
+      "reason": "existing FpF4 benchmark"
+    },
+    {
+      "number": 1716,
+      "head": "7096ad8906cdb6bfc46875600ea7e18b333f5a24",
+      "title": "Catalogue weak-curve conjectures and preserve census counterexamples",
+      "status": "excluded",
+      "reason": "CI/workflow/proof/documentation/repair change; no imported performance measurement or speedup result."
+    },
+    {
+      "number": 1715,
+      "head": "ab5b97a6993024b56f04db5398f451419b9b98a8",
+      "title": "Name research obstructions and track what would unblock them",
+      "status": "excluded",
+      "reason": "CI/workflow/proof/documentation/repair change; no imported performance measurement or speedup result."
+    },
+    {
+      "number": 1714,
+      "head": "73437f5969eebde01e58de374e05b26f4cf719be",
+      "title": "lit2026 W5: gate-first F6-IC order (1.57\u20131.78x stage unit), lane-batched F4 roots (negative), F4 cost-model check",
+      "status": "covered",
+      "reason": "existing W5"
+    },
+    {
+      "number": 1713,
+      "head": "b5ec11c62d1e1c2ac941e41083ddad71ea22f46b",
+      "title": "lit2026 W12: zero-minor ECDLP method (arXiv 2607.09814) measured against rho.negation (negative); Hu ePrint 2025/015 blocked",
+      "status": "covered",
+      "reason": "existing W12"
+    },
+    {
+      "number": 1712,
+      "head": "8e0006eb152352a5336aa5e271eeb6d39b55eeca",
+      "title": "lit2026 W8: summation-polynomial model checks (E/G quotient, Wu model, Frobenius aux, convolution split)",
+      "status": "covered",
+      "reason": "existing W8"
+    },
+    {
+      "number": 1711,
+      "head": "1936c16e15a198fdde5dfefec8501e56f551ef7f",
+      "title": "Repair #1601 merge residue that broke cargo check --all-targets",
+      "status": "excluded",
+      "reason": "CI/workflow/proof/documentation/repair change; no imported performance measurement or speedup result."
+    },
+    {
+      "number": 1710,
+      "head": "038cad83dc146bbcf88504e82dec12b9a7fdb6f0",
+      "title": "Prove finite-field twist descent in Lean and require faithful research proofs",
+      "status": "excluded",
+      "reason": "CI/workflow/proof/documentation/repair change; no imported performance measurement or speedup result."
+    },
+    {
+      "number": 1709,
+      "head": "26233e4b77f046e4fbd237b93df9117dcd0e6e35",
+      "title": "pdp_split_dreg: split and hybrid PDP systems vs matched rho (stage diagnostic)",
+      "status": "covered",
+      "reason": "split/hybrid PDP"
+    },
+    {
+      "number": 1708,
+      "head": "615381ba5c5fa89236a228cd75338d636fa81903",
+      "title": "Add separate DP32 and DP34 status tabs",
+      "status": "excluded",
+      "reason": "CI/workflow/proof/documentation/repair change; no imported performance measurement or speedup result."
+    },
+    {
+      "number": 1707,
+      "head": "eff5cc69d662e43974fa42b9fdfa94c596788f5f",
+      "title": "Scope CI by consumed inputs and bound routine PR checks",
+      "status": "excluded",
+      "reason": "CI/workflow/proof/documentation/repair change; no imported performance measurement or speedup result."
+    },
+    {
+      "number": 1705,
+      "head": "8f7f796d694fd41b4db81b25c1aff3632d012c65",
+      "title": "Add Rust elliptic-curve surface tools and agent skill",
+      "status": "excluded",
+      "reason": "Surface/certificate counts and correctness tooling; no algorithm timing/cost comparison."
+    },
+    {
+      "number": 1704,
+      "head": "893a55ec44f2be52565fe65f8644ba22fea7efd5",
+      "title": "Controlled re-test of the NIST cyclotomic/heights note; controlled-experiment skill",
+      "status": "excluded",
+      "reason": "Statistical control/census; wall time is explicitly not a result. 2804/8966 s are budgets at different N, not algorithm performance."
+    },
+    {
+      "number": 1703,
+      "head": "fb6d9b4a91881d0efacb217552bb7d93b1082d75",
+      "title": "Semi-regular law round 1: the m = 3 degree follows the generic law for S\u2084, not for the RR norm form",
+      "status": "covered",
+      "reason": "semiregular solver cost"
+    },
+    {
+      "number": 1702,
+      "head": "dc52183d90681d87efa04657c8b5732f188694bc",
+      "title": "PS-2: scalar group-law kernel, gate count and hashed program (stacked on #1694)",
+      "status": "covered",
+      "reason": "existing PS2"
+    },
+    {
+      "number": 1701,
+      "head": "477974444abe1a516fba7557cd313a25317fda42",
+      "title": "Repair main's clippy and two examples broken by #1601's squash merge",
+      "status": "excluded",
+      "reason": "CI/workflow/proof/documentation/repair change; no imported performance measurement or speedup result."
+    },
+    {
+      "number": 1700,
+      "head": "aa57d121c4adbd001dde02227f2dcbba9a288b85",
+      "title": "Repair main's CI again: merge residue from #1599/#1601, clippy 1.98, curve names",
+      "status": "excluded",
+      "reason": "CI/workflow/proof/documentation/repair change; no imported performance measurement or speedup result."
+    },
+    {
+      "number": 1699,
+      "head": "56876cbb2ed372e911a7a2047f18cd1aeb02a1ff",
+      "title": "isogeny_eval: counted F_p, Karatsuba trees, x-only Montgomery, V\u00e9lu, \u221a\u00e9lu, and \u2113\u2208{2,3} isogenies with certified duals",
+      "status": "covered",
+      "reason": "historical vertical-margin antecedent; new library timing not remeasured"
+    },
+    {
+      "number": 1698,
+      "head": "641c108ac01361de52bf509b4083127a7483c903",
+      "title": "Isogeny-loop GLV round 2: erratum, class-group-free bound, moderate-D GLV-GLS lattices",
+      "status": "covered",
+      "reason": "GLV lattice/model and two timing hosts"
+    },
+    {
+      "number": 1697,
+      "head": "add1c7828136f72565750ddf6d0f6eb80da85d82",
+      "title": "binary_ecc: closed-form 4E subgroup check for a = 0 Koblitz curves",
+      "status": "covered",
+      "reason": "historical fast4E antecedent; new library timing not remeasured"
+    },
+    {
+      "number": 1696,
+      "head": "ba6708f803a262abfc796e092065ca8f03af0938",
+      "title": "Add cryptanalysis::genus2_fp: u64 genus-2 Jacobian toolkit over F_p",
+      "status": "excluded",
+      "reason": "Library toolkit port; reported unit-test elapsed time is validation, no performance measurement."
+    },
+    {
+      "number": 1694,
+      "head": "aa64be6e09463c75c237ac1492859fb5b6c012e8",
+      "title": "PS-1: bit-degree, group-law root test, exactness theorem and gate counts (stacked on #1693)",
+      "status": "covered",
+      "reason": "existing PS1"
+    },
+    {
+      "number": 1693,
+      "head": "b9255179c8469f1e977e28e9e93c414c323d2184",
+      "title": "PS-0: baseline, host manifest and verdict corpus for the PDP oracle speedup program",
+      "status": "covered",
+      "reason": "existing PS0"
+    },
+    {
+      "number": 1692,
+      "head": "44ae2225e265c3474f9386e86b939b1aedbd59b7",
+      "title": "lit2026 W11: co-Z/paired BSGS kernels, binary x-only isogeny evaluation, k=2 cubical pairing, DP and challenge-ladder diagnostics",
+      "status": "covered",
+      "reason": "existing W11"
+    },
+    {
+      "number": 1691,
+      "head": "929c9c3d9fb3accea3533c13ced9ef1f28e200be",
+      "title": "lit2026 W10: prime-field S5 Coppersmith reach is 1/80 (ceiling 1/32) vs 1/5 needed \u2014 negative",
+      "status": "excluded",
+      "reason": "Native README explicitly says no speed or IC/rho result; structural Coppersmith/lattice reach only."
+    },
+    {
+      "number": 1687,
+      "head": "963713295446ab35b6e2a1dd2f221c5864f9f8ea",
+      "title": "lit2026 W4: refutation-degree trace and early-abort switches for inherited F4 (no-change / negative)",
+      "status": "covered",
+      "reason": "existing W4"
+    },
+    {
+      "number": 1685,
+      "head": "715bb7b10492a56d56920e0d8edef66580e1588a",
+      "title": "Fiber-aware index calculus against rho across sizes: the gap grows as #E^(1/6)",
+      "status": "covered",
+      "reason": "fiber scaling"
+    },
+    {
+      "number": 1682,
+      "head": "3981a371a9e2941405530316d1616ab42da89ad2",
+      "title": "Koblitz IC: m = 3 solvers (symmetric S4, e3, PinX3) + m = 3 curve-vs-presentation at n = 19 and 31",
+      "status": "covered",
+      "reason": "three m3/presentation cohorts"
+    },
+    {
+      "number": 1680,
+      "head": "74bec88bdc6fb43724493d452d72df43ca3ea735",
+      "title": "Eigen-S\u00e9ta v2: Rust KEM with constant-time decapsulation (verified at L1), hardening, specification paper",
+      "status": "covered",
+      "reason": "eight Eigen cohorts"
+    },
+    {
+      "number": 1678,
+      "head": "440c0e1636476a23dc8d75333a4a1003c322e8b0",
+      "title": "Isogeny fibers note \u00a716: ranked open directions",
+      "status": "excluded",
+      "reason": "CI/workflow/proof/documentation/repair change; no imported performance measurement or speedup result."
+    },
+    {
+      "number": 1677,
+      "head": "baa624218809b821400cfe33155c6bacb542e9a8",
+      "title": "Reduce Boolean F4/F5 allocations and add separate history plots",
+      "status": "covered",
+      "reason": "allocation and history"
+    },
+    {
+      "number": 1676,
+      "head": "6540efa0c7f632da804aa238a5ffcd33cdecdb18",
+      "title": "Performance results also land in benchmarks/ (PDFs, SVG graphs, PNG renders)",
+      "status": "excluded",
+      "reason": "CI/workflow/proof/documentation/repair change; no imported performance measurement or speedup result."
+    },
+    {
+      "number": 1675,
+      "head": "7a43ae6945b8eff2f843204222cc960dedc3db96",
+      "title": "Gr\u00f6bner engines vs msolve, Singular, PolyBoRi; Magma scripts for the same systems",
+      "status": "covered",
+      "reason": "existing CAS benchmark"
+    },
+    {
+      "number": 1673,
+      "head": "bcf6497c50acd35db9f6741b2b0b873ee5a16a07",
+      "title": "Conductor-gap round 3: two-torsion summation polynomials, combined descent audited, CodeQL rename",
+      "status": "covered",
+      "reason": "conductor round3"
+    },
+    {
+      "number": 1670,
+      "head": "bb5c5ea36b18ef48ac3feed42e9a576d4a9d21db",
+      "title": "Conductor-gap follow-up: cross-reference the ECC2K-130 conductor-gap study",
+      "status": "excluded",
+      "reason": "CI/workflow/proof/documentation/repair change; no imported performance measurement or speedup result."
+    },
+    {
+      "number": 1606,
+      "head": "eef6c0498bcaca052ee1b3ff11ca708bff9b2907",
+      "title": "Ship isogeny binary, 100 large-prime maps and 449-model catalogue",
+      "status": "covered",
+      "reason": "isogeny campaign/profiler"
+    }
+  ],
+  "base_reconciliation_additions": [
+    {
+      "source_pr": 1677,
+      "main_commit": "31088bfce9d9cc86fb55a655b064b5472db263ae",
+      "study": "research/f4_f5_hash_20261012",
+      "study_tree": "e00b12589743ceeb250255f81aa204027e738980",
+      "entry": "benchmarks/20261012-f4-f5-native-hashing",
+      "exact_pdf_svg_copies": 7,
+      "png_150dpi": 3,
+      "performance_units": "Callgrind instruction counts and tracked live allocation; runtime and RSS unmeasured"
+    }
+  ],
+  "final_index_entries": 37
+}

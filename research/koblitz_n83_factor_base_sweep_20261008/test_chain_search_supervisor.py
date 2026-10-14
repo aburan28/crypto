@@ -191,6 +191,11 @@ class ChainSearchGuardTests(unittest.TestCase):
         self.assertIsNone(guard.receipt_error(worker, worker_config, orbit_config))
         worker_config["strategy"] = "chain-s3"
         self.assertIn("strategy", guard.receipt_error(worker, worker_config, orbit_config))
+        ordered_config = dict(config, domain_encoding="frobenius_orbit_phase_ordered_first_pair")
+        worker_config, worker = receipts(ordered_config, "UNKNOWN_solver_cap")
+        self.assertIsNone(guard.receipt_error(worker, worker_config, ordered_config))
+        worker_config["strategy"] = "orbit-chain-s3"
+        self.assertIn("strategy", guard.receipt_error(worker, worker_config, ordered_config))
 
     def test_relation_replay_checks_phase_sign_and_canonical_residue(self):
         self.assertEqual((guard.PRIMARY_FROBENIUS_LAMBDA**2 +
@@ -326,16 +331,20 @@ class ChainSearchGuardTests(unittest.TestCase):
                 "orbit_worker_cap": "UNKNOWN_wall_cap",
                 "orbit_bad_cap": "PRODUCER_FAILURE_worker_exit",
                 "orbit_bad_strategy": "PRODUCER_FAILURE_worker_receipt",
+                "ordered_preflight": "PREFLIGHT_ONLY",
+                "ordered_bad_strategy": "PRODUCER_FAILURE_worker_receipt",
                 "input_changed": "PRODUCER_FAILURE_frozen_input_changed",
                 "object_changed": "PRODUCER_FAILURE_frozen_input_changed",
             }
             for mode, status in expected.items():
                 with self.subTest(mode=mode):
                     output = root / mode
-                    columns = 2048 if mode.startswith("orbit_") else 64
-                    max_variables = 150000 if mode.startswith("orbit_") else 100000
-                    max_domain_clauses = 1000000 if mode.startswith("orbit_") else 300000
-                    memory_mib = 4096 if mode.startswith("orbit_") else 256
+                    orbit_mode = mode.startswith(("orbit_", "ordered_"))
+                    ordered_mode = mode.startswith("ordered_")
+                    columns = 2048 if orbit_mode else 64
+                    max_variables = 150000 if orbit_mode else 100000
+                    max_domain_clauses = 1000000 if orbit_mode else 300000
+                    memory_mib = 4096 if orbit_mode else 256
 
                     def fake_run(command, **_kwargs):
                         if command[:3] == ["docker", "image", "inspect"]:
@@ -358,17 +367,18 @@ class ChainSearchGuardTests(unittest.TestCase):
 
                     def fake_popen(command, **_kwargs):
                         config = json.loads((output / "config.json").read_text())
-                        orbit = mode.startswith("orbit_")
+                        orbit = orbit_mode
                         self.assertIn("--network", command)
                         self.assertEqual(command[command.index("--network") + 1], "none")
                         self.assertEqual(command[command.index("--memory-swap") + 1], f"{memory_mib}m")
-                        selected = "primary-orbit-chain-cold" if orbit else "primary-chain-cold"
+                        selected = ("primary-ordered-orbit-chain-cold" if ordered_mode else
+                                    "primary-orbit-chain-cold" if orbit else "primary-chain-cold")
                         self.assertEqual(command[-16:-14], ["/worker", selected])
                         if mode not in ("timeout", "resource"):
                             worker_config, worker = receipts(config)
                             if mode == "malformed":
                                 worker["report"]["sat_invalid_models"] = 1
-                            if mode == "orbit_bad_strategy":
+                            if mode in ("orbit_bad_strategy", "ordered_bad_strategy"):
                                 worker_config["strategy"] = "chain-s3"
                             run_dir = output / "run"
                             run_dir.mkdir()
@@ -398,7 +408,7 @@ class ChainSearchGuardTests(unittest.TestCase):
                             panel, fixtures, columns, "public_x_hash", guard.SEEDS[0], 5,
                             0, max_variables, max_domain_clauses, 1, 1000, 1.0, memory_mib,
                             binary, output, checkout=checkout,
-                            orbit_domain=mode.startswith("orbit_"),
+                            orbit_domain=orbit_mode, ordered_first_pair=ordered_mode,
                         )
                     self.assertEqual(outer["status"], status)
                     self.assertEqual(json.loads((output / "outer.json").read_text())["status"], status)

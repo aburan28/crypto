@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p20/comparisons/rho-neg__ic-rootfind-pairs.json
+ops (ok): ic-rootfind-pairs / rho-neg = 1318.8482 [1067.229, 1676.659] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 460.7287 [413.107, 494.637]
+| curve | log2 r | workloads | ic-rootfind-pairs / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp20-tm728-d215a2a1 | 18.85 | 8 | 1318.8482 | [1067.2294, 1676.6592] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-rootfind-pairs mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0ef65828562c | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.5754 | 1527.7311 | 969.7417 |
+| W34d518f1ba63 | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.0217 | 1673.2579 | 1637.7440 |
+| W54526e0ea435 | icv1-fp20-tm728-d215a2a1 | 18.85 | 0.9878 | 1478.9218 | 1497.2271 |
+| W5fa0ccd7cb0f | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.2663 | 1483.0453 | 1171.1393 |
+| W62af93136693 | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.0992 | 1567.9818 | 1426.4817 |
+| W91cf98663c8e | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.1704 | 1316.0757 | 1124.4590 |
+| W957cbe00e31d | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.1912 | 1505.4400 | 1263.7601 |
+| Wd141cbfa0a83 | icv1-fp20-tm728-d215a2a1 | 18.85 | 0.9195 | 1622.4871 | 1764.5938 |

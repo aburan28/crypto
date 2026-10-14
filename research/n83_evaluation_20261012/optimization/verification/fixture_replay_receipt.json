@@ -1,0 +1,27 @@
+{
+  "kind":"native_n83_optimization_fixture_and_answer_verification",
+  "status":"PASS_FIXTURES_ONLY",
+  "scope":"Independent arithmetic fixture/answer replay; no performance claim",
+  "curve_slug":"icv1-f2m83-t6151469093347-9eba6cd5",
+  "field_modulus_low_terms":[0,2,4,7],
+  "fixture_generation_reproduced":true,
+  "training_fixtures_verified":3,
+  "holdout_fixtures_verified":5,
+  "all_fixture_subgroup_and_scalar_replays":true,
+  "all_fixture_signed_orbit_exclusions":true,
+  "retained_base_points_and_labels_verified":99600,
+  "fixture_manifest_sha256":"c93edc32a77411443229191e2db4cc3eeb7e99976b7f79a8a753ba103bce9909",
+  "validation_sidecar_sha256":"b1ff974062ca721f500b322c7aad31546206741361e77512a79bca68f5b315b9",
+  "strong_rows":0,
+  "IC_target_rows":0,
+  "independent_answer_replays":0,
+  "IC_four_point_witnesses":0,
+  "invalid_rows":0,
+  "rows":[
+
+  ],
+  "process_dispositions":[
+
+  ],
+  "still_unverified":["Full600-row rank/factor-log transcript","Independent timing/operation reproduction","Second-host/isolation promotion gates"]
+}

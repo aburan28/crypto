@@ -50,6 +50,54 @@ noise and a trend or an area index is the signal.  The wall column is one
 reading on the recording host and is informational.  Recording a snapshot
 takes about fifteen minutes of callgrind on four cores.
 
+### Separate F4/F5 groups
+
+The [separate algorithm reports](https://github.com/aburan28/crypto/blob/perf-history/docs/perf/groebner/REPORT.md)
+retain F4 and F5 as separate series for the shared Boolean matrix-step and
+solver workloads, with instruction and diagnostic-runtime graphs. Complete-call
+allocation and F5 criterion allocation have separate groups. Every group has a
+PDF, and a combined PDF, SVGs, editable sources and native plot data are saved
+together. The history workflow regenerates them when it records a revision.
+
+The [frozen initial rendering](../../research/f4_f5_history_20261012/REPORT.md)
+retains seven imported historical snapshots and the native allocation audit.
+The [group registry](groebner-groups.json) and
+[allocation history index](f4-f5-allocation-history.json) define the inputs;
+[the native tool](../../tools/groebner-history/README.md) validates the raw
+records before rendering. Historical CI timings are diagnostic, and the
+recorded profiler scope has incomplete worker coverage. Lines break when the
+fingerprint, host, compiler, harness or profiler changes. These displays make
+no new runtime-speedup or complete-DLP claim.
+
+The [native F5 hashing follow-up](../../research/f4_f5_hash_20261012/REPORT.md)
+adds its own fixed eleven-system instruction-history and peak-live-allocation
+groups, with SVGs, group PDFs and a combined PDF. Five paired A/B/A′ rounds
+record 3.71% fewer complete-F5 instructions and 45.14% fewer criterion
+instructions; F4 is neutral. Its merged-worker profiler contract, native
+controls and live-byte intervals stay separate from earlier CI diagnostics.
+Runtime and process RSS remain unmeasured.
+
+The [native F4 indexing/F5 construction follow-up](../../research/f4_f5_fused_readback_20261012/REPORT.md)
+records 5.28% fewer complete-F4 instructions and 11.02% fewer complete-F5
+instructions on the same eleven-system suite. It adds paired instruction-history,
+allocation-request and peak-live-byte graphs, inspected PDFs and both rejected
+attempts. No final memory metric regresses. Three standalone criterion cases
+use more instructions: the original all-arm gate fails, while the explicitly
+clarified complete-call gate passes. The report retains that gate-scope change
+and every case verdict. Historical and current matched pairs are disconnected
+across intervening unrelated merges; no runtime, RSS or solver-speed claim is
+made.
+
+The [native F5 packing enhancement](../../research/f4_f5_dense_packing_20261012/REPORT.md)
+measures 3.95% fewer complete-F5 instructions and 2.03% fewer requested
+allocation bytes against the preceding candidate. F4 is neutral, exact outputs
+and accounting match, and no primary or paired memory metric regresses.
+Its gate was fixed for this F5-specific change before measurement. One standalone
+criterion case uses 15.45% more instructions and is retained as a diagnostic.
+The report adds a third matched history segment, per-case instruction intervals,
+requested-byte plots, group PDFs and benchmark-index copies. These instruction
+results do not establish elapsed-time, RSS or full-solver gains.
+
 ## What it measures, and what it does not
 
 `examples/perfbench` is a registry of **kernels**: each runs a fixed,

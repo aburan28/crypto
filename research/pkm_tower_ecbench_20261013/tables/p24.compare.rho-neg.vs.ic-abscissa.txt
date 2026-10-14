@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p24/comparisons/rho-neg__ic-abscissa.json
+ops (ok): ic-abscissa / rho-neg = 29.0264 [23.396, 36.914] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 20.5135 [15.959, 24.530]
+| curve | log2 r | workloads | ic-abscissa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp24-t2705-27cbb01b | 23.38 | 8 | 29.0264 | [23.3963, 36.9135] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-abscissa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0287641ad93a | icv1-fp24-t2705-27cbb01b | 23.38 | 0.9948 | 33.8540 | 34.0312 |
+| W6eec974fe4d1 | icv1-fp24-t2705-27cbb01b | 23.38 | 1.0103 | 33.3180 | 32.9779 |
+| W92133e527902 | icv1-fp24-t2705-27cbb01b | 23.38 | 1.5583 | 32.2614 | 20.7029 |
+| Wa9bf5407587e | icv1-fp24-t2705-27cbb01b | 23.38 | 1.0308 | 32.9406 | 31.9572 |
+| Wc92b25cbd51e | icv1-fp24-t2705-27cbb01b | 23.38 | 0.9524 | 33.8986 | 35.5943 |
+| We4c95c8871a0 | icv1-fp24-t2705-27cbb01b | 23.38 | 0.9214 | 33.3422 | 36.1857 |
+| We9584cba4c14 | icv1-fp24-t2705-27cbb01b | 23.38 | 1.4504 | 33.4122 | 23.0372 |
+| Wf7e403c855fa | icv1-fp24-t2705-27cbb01b | 23.38 | 1.2454 | 32.9616 | 26.4676 |

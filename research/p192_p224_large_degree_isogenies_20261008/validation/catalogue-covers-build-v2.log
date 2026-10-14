@@ -1,0 +1,20 @@
+     Locking 1 package to latest compatible version
+      Adding hex v0.4.3
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.26
+   Compiling quote v1.0.47
+   Compiling serde v1.0.229
+   Compiling hex v0.4.3
+   Compiling syn v3.0.6
+   Compiling serde_derive v1.0.229
+   Compiling p192-p224-large-degree-replay v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008/research/p192_p224_large_degree_isogenies_20261008)
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `getrandom`
+   --> ../../src/cryptanalysis/ecc2k130_guard.rs:957:5
+    |
+957 |     getrandom::getrandom(&mut buf).map_err(|e| format!("OS CSPRNG unavailable: {e}"))?;
+    |     ^^^^^^^^^ use of unresolved module or unlinked crate `getrandom`
+    |
+    = help: if you wanted to use a crate named `getrandom`, use `cargo add getrandom` to add it to your `Cargo.toml`
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `p192-p224-large-degree-replay` (bin "catalogue-covers") due to 1 previous error

@@ -716,7 +716,7 @@ fn edge_json(e: &BinaryEdge) -> Value {
 }
 
 /// Verify `#E′ = #E` and lift the carried abscissa to a point of order `r`.
-fn certify_binary_vertex(
+fn check_binary_vertex_rank(
     inst: &BinaryInstance,
     a6: u64,
     x: u64,
@@ -784,7 +784,7 @@ fn koblitz_ladder(a: u8, n: u32, seed: u64) -> Result<Value, String> {
             let last = step + 1 == e;
             let (edge, at_floor) =
                 descend_binary(&inst, &ext, ell, &order_m, a6, x, &prev, Some(last), seed)?;
-            let g = certify_binary_vertex(&inst, edge.a6_to, edge.x_image, 25, &mut rng)?;
+            let g = check_binary_vertex_rank(&inst, edge.a6_to, edge.x_image, 25, &mut rng)?;
             prev.push(edge.a6_to);
             a6 = edge.a6_to;
             x = edge.x_image;
@@ -905,7 +905,7 @@ fn binary_random_pair(
             if !at_floor {
                 return Err("descent did not reach the floor".into());
             }
-            let g = certify_binary_vertex(&inst, edge.a6_to, edge.x_image, 25, &mut rng)?;
+            let g = check_binary_vertex_rank(&inst, edge.a6_to, edge.x_image, 25, &mut rng)?;
             let floor_spec = binary_explicit_json(
                 n,
                 &inst.irreducible,
@@ -970,7 +970,7 @@ fn binary_random_pair(
             ) {
                 return Err("ascended vertex is not of rank 2".into());
             }
-            let g = certify_binary_vertex(&inst, a6p, xi, 25, &mut rng)?;
+            let g = check_binary_vertex_rank(&inst, a6p, xi, 25, &mut rng)?;
             let crater_spec = binary_explicit_json(
                 n,
                 &inst.irreducible,

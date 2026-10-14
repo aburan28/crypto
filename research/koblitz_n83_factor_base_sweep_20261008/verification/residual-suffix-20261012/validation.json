@@ -1,0 +1,45 @@
+{
+  "checks": {
+    "focused": {
+      "compressed_sha256": "27f430f72921494c85df4f141d70b86fa14ea30af1264d2125826ca6e0d69370",
+      "log": "focused.log.gz",
+      "plain_bytes": 4611,
+      "plain_sha256": "9d9e5bd55c78788192e1b5b2e6b283161030cc3ee101635c8b29aa6946c152f5"
+    },
+    "release_library": {
+      "compressed_sha256": "275501874b15a62537cb1fea6823fcc0f1425652929a99dfbec9b1413df851d9",
+      "log": "release_library.log.gz",
+      "plain_bytes": 344012,
+      "plain_sha256": "e9a6467c942678412fe56469bcbe5492a27dffb7a074c98da5ff678b9580ccdb"
+    },
+    "study_python": {
+      "compressed_sha256": "3a3e2d1ce56244119a2e36de9a1be77a7fba94585dfac272f3678da64abe0698",
+      "log": "study_python.log.gz",
+      "plain_bytes": 98,
+      "plain_sha256": "6c6dd4b34d77105685105a2f93e986e9ecdde439441421e27dcbe5d70823a160"
+    }
+  },
+  "complete_runtime": null,
+  "relation_yield": null,
+  "results": {
+    "diff_check": "PASS",
+    "focused_large_prime": {
+      "failed": 0,
+      "passed": 4
+    },
+    "release_library": {
+      "failed": 0,
+      "ignored": 113,
+      "passed": 4000
+    },
+    "study_python": {
+      "failed": 0,
+      "passed": 39
+    },
+    "touched_rustfmt": "PASS"
+  },
+  "retained_n83_experiment_executed": false,
+  "schema": "n83.residual-suffix-source-validation/v1",
+  "source_file_sha256": "accd5cf0ef7c738aedce38a21d172eeda1b309eaf9c8f4848030dac9d4421ddd",
+  "status": "PASS_source_only"
+}

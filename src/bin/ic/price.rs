@@ -1091,7 +1091,7 @@ fn step_prices(
         units.push(unit);
         let t = Instant::now();
         for i in 0..CANONS {
-            let (rep, mu) = classes.canon(&bg, pts[i & 1023]);
+            let (rep, mu) = classes.canon(&bg, &mut GroupOps::default(), pts[i & 1023]);
             sink ^= rep.x ^ rep.y ^ mu;
         }
         canon_units.push(t.elapsed().as_nanos() as f64 / CANONS as f64 / unit);

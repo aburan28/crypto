@@ -1,0 +1,67 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-11",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/isogeny_fibers_20261010/round4/16_3_vertical_margin",
+  "run": null,
+  "files": [
+    {
+      "source": "research/isogeny_fibers_20261010/round4/16_3_vertical_margin/fig1_cost_vs_ell.svg",
+      "copy": "visuals/research/isogeny_fibers_20261010/round4/16_3_vertical_margin/fig1_cost_vs_ell.svg",
+      "sha256": "887a95ca891d2c617882b78853f067fcfe76df5710ef355df3fe25510cefe254",
+      "bytes": 73953
+    },
+    {
+      "source": "research/isogeny_fibers_20261010/round4/16_3_vertical_margin/fig2_crossover.svg",
+      "copy": "visuals/research/isogeny_fibers_20261010/round4/16_3_vertical_margin/fig2_crossover.svg",
+      "sha256": "3094cd06dd51a570cc5e4936a660821b5bedf41a4f43f284225b7f2c8c4aa1cb",
+      "bytes": 19888
+    },
+    {
+      "source": "research/isogeny_fibers_20261010/round4/16_3_vertical_margin/fig3_wall_generic.svg",
+      "copy": "visuals/research/isogeny_fibers_20261010/round4/16_3_vertical_margin/fig3_wall_generic.svg",
+      "sha256": "eca75ff2fd80c133b6754c077a8931767e085d799ebeea953b9f5f82d99cb187",
+      "bytes": 31202
+    },
+    {
+      "source": "research/isogeny_fibers_20261010/round4/16_3_vertical_margin/report.pdf",
+      "copy": "visuals/research/isogeny_fibers_20261010/round4/16_3_vertical_margin/report.pdf",
+      "sha256": "4129cf5a7d458f7d28bf32299d7483edfd0dc77ad1e3583c15f08056613b20ef",
+      "bytes": 141019
+    }
+  ],
+  "pngs": [
+    {
+      "source": "visuals/research/isogeny_fibers_20261010/round4/16_3_vertical_margin/fig1_cost_vs_ell.svg",
+      "copy": "visuals/research/isogeny_fibers_20261010/round4/16_3_vertical_margin/fig1_cost_vs_ell.png",
+      "dpi": 150,
+      "width": 1080,
+      "height": 690,
+      "sha256": "33e80b6db3137a9d5fb5b72dfd9e05e9307ddfa0c3856a8c16b7e26819e90be9",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/isogeny_fibers_20261010/round4/16_3_vertical_margin/fig2_crossover.svg",
+      "copy": "visuals/research/isogeny_fibers_20261010/round4/16_3_vertical_margin/fig2_crossover.png",
+      "dpi": 150,
+      "width": 1080,
+      "height": 570,
+      "sha256": "78d84d8f198333185eec3a9118f62400831ce40c84d55d62c6e132b1955cbea1",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/isogeny_fibers_20261010/round4/16_3_vertical_margin/fig3_wall_generic.svg",
+      "copy": "visuals/research/isogeny_fibers_20261010/round4/16_3_vertical_margin/fig3_wall_generic.png",
+      "dpi": 150,
+      "width": 1080,
+      "height": 450,
+      "sha256": "8178064e5c9bf78ef71e28cbc80404f488bea349a6473363db476cf7108c1b7e",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    }
+  ],
+  "verbatim_source_report": {
+    "source": "research/isogeny_fibers_20261010/round4/16_3_vertical_margin/RESULTS.md",
+    "copy": "SOURCE_REPORT.md",
+    "sha256": "815610fbc9eda978a0c1fead09a3e05b3627e9947f2ea9d4e2250f9a94c6b943"
+  }
+}

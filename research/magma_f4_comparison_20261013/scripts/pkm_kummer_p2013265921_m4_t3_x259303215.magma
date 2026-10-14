@@ -1,0 +1,30 @@
+// pkm_kummer_p2013265921_m4_t3_x259303215: PKM's Kummer tower system (m = 4, t = 3, N = 12, 14 unknowns, 15 equations)
+// from research/pkm_tower_round2_20260925/runs/M4-kummer-m4-p1.jsonl; written by examples/pkm_tower_pilot.rs --export-magma-rows.
+// Ours (that row): engine f4_fp_tower, 9382.611961 ms, inconsistent = true, timed out = false.
+K := GF(2013265921);
+P := PolynomialRing(K, 14, "grevlex");
+AssignNames(~P, ["y0_0", "y0_1", "y0_2", "y1_0", "y1_1", "y1_2", "y2_0", "y2_1", "y2_2", "y3_0", "y3_1", "y3_2", "u0", "u1"]);
+F := [P |
+  263657943 + 960734617*P.13 + 1789901145*P.4 + 816190028*P.4*P.13 + 1296391235*P.4^2*P.13^2 + 1789901145*P.1 + 816190028*P.1*P.13 + 1390681568*P.1*P.4 + 1433749372*P.1*P.4*P.13^2 + 727330154*P.1*P.4^2*P.13 + 1296391235*P.1^2*P.13^2 + 727330154*P.1^2*P.4*P.13 + 295470518*P.1^2*P.4^2,
+  263657943 + 960734617*P.14 + 960734617*P.13 + 96254015*P.13*P.14 + 1*P.13^2*P.14^2 + 1789901145*P.7 + 816190028*P.7*P.14 + 816190028*P.7*P.13 + 851010706*P.7*P.13*P.14^2 + 851010706*P.7*P.13^2*P.14 + 1296391235*P.7^2*P.14^2 + 1433749372*P.7^2*P.13*P.14 + 1296391235*P.7^2*P.13^2,
+  1830629494 + 1474914145*P.14 + 2009644912*P.14^2 + 1732811853*P.10 + 288945800*P.10*P.14 + 574896389*P.10*P.14^2 + 1248104982*P.10^2 + 257443772*P.10^2*P.14 + 1296391235*P.10^2*P.14^2,
+  1*P.2 + 2013265920*P.1^2,
+  1*P.3 + 2013265920*P.2^2,
+  1 + 2013265920*P.3^2,
+  1*P.5 + 2013265920*P.4^2,
+  1*P.6 + 2013265920*P.5^2,
+  1 + 2013265920*P.6^2,
+  1*P.8 + 2013265920*P.7^2,
+  1*P.9 + 2013265920*P.8^2,
+  1 + 2013265920*P.9^2,
+  1*P.11 + 2013265920*P.10^2,
+  1*P.12 + 2013265920*P.11^2,
+  1 + 2013265920*P.12^2
+];
+I := ideal<P | F>;
+t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);
+unit := G eq [P | 1];
+printf "RESULT-GB name=pkm_kummer_p2013265921_m4_t3_x259303215 p=2013265921 magma_gb_s=%o basis_len=%o unit=%o ours_inconsistent=true\n", tg, #G, unit;
+if not unit and Dimension(I) eq 0 then
+  t1 := Cputime(); V := Variety(I); printf "RESULT-VAR name=pkm_kummer_p2013265921_m4_t3_x259303215 magma_variety_s=%o magma_solutions=%o\n", Cputime(t1), #V;
+end if;

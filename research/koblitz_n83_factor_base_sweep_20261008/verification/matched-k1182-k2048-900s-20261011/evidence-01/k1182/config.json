@@ -1,0 +1,48 @@
+{
+  "binary": "/private/tmp/n83-matched-k1182-k2048-900s-20261011/build/worker",
+  "binary_sha256": "a195936edd6ed15fa96201dd69b54f62c67e99871e3ba7d02c2f12713c753c7d",
+  "columns": 1182,
+  "conflict_budget": 5000,
+  "container_image": "sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce",
+  "container_image_id": "sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce",
+  "container_name": "n83-chain-search-fab5c39c059d4d13",
+  "cpu_limit": 1.0,
+  "domain_encoding": "frobenius_orbit_phase",
+  "fixture_dir": "/Volumes/SSD990/crypto/worktrees/codex-n83-ordered-first-pair-20261011/research/koblitz_n83_factor_base_sweep_20261008/pilot-01",
+  "fixture_sha256": {
+    "probe-corpus.json": "760ae5c2e88615152e2569653a0e0c0cf3b2f84691f2b0731247f9ee3759dcbd",
+    "probe-validation.json": "1c6d3a45c8b4654ff208751258fa2e34f0cc60e1c30ba48e9214db62be60472f"
+  },
+  "max_domain_clauses": 1000000,
+  "max_models": 32,
+  "max_trials": 1,
+  "max_variables": 150000,
+  "memory_cgroup_limit_bytes": 4294967296,
+  "memory_cgroup_swap_limit_bytes": 0,
+  "panel_dir": "/private/tmp/n83-matched-k1182-k2048-900s-20261011/panel-k1182",
+  "panel_sha256": {
+    "manifest.json": "2735f6960233749ac887f68705fd514dfc003e2212d722a8e50e5e9738aadcfa",
+    "replay.json": "6205a6ab30721a7d7700eb36a8c31d769d611e535773f247f56591ca96052e9e",
+    "upload-receipt.json": "ebf303210b5220f190ecd46dbde42ad868d775dfe7ebdc0797dd8a9a92bb5d88"
+  },
+  "policy": "public_x_hash",
+  "schema": "n83.chain-s3-search-config/v1",
+  "seed": 2026100801,
+  "selected_best_total_runtime": null,
+  "selected_object": "objects/76e1cbe4ea5a9d26e5b24a2d27f9401271dc471846529190a0416d8e09837a92.jsonl.gz",
+  "selected_object_sha256": "eb342b574e244e1e67e8e78c805f33ee88edcdb4f3a14d4114e6f413beede380",
+  "selected_point_set_blake3": "429cde4bc514bf1026e4993e269192f858cb7410ade777178a1c0db7dbf0001a",
+  "source_commit": "831cedf9eea92ab21751965b9769687855bb898a",
+  "source_sha256": {
+    "attestation.json": "3b78ceac14fc5aa026d48a117d8c3f237dea7aed2ef64198904471ba72467f05",
+    "examples/koblitz_n83_factor_base_export.rs": "7ee02a922a1482affc963e360e3192b9fccbd8297919c55ab6704c077ef32fa7",
+    "research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs": "2cfeb7250bbc52b13d21967bc4b2c42331306f9e389c2ecc80cd74c2c55ef05b",
+    "research/koblitz_n83_factor_base_sweep_20261008/size-frontier-v2.json": "7526b6218dfe0b074368901f3869ddf4a978cb0bacffe8654056056700f8a972",
+    "src/cryptanalysis/binary_semaev_chain_sat.rs": "0031972aab435d963af54a5f28f0510e45e5301f00c49466661191815becc06e",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "eedc0eeeb20472097b93e088de5a931adc595e83666ccd33e457f7da9acf2936"
+  },
+  "study": "koblitz_n83_factor_base_sweep_20261008",
+  "summands": 5,
+  "wall_seconds": 280.0,
+  "worker_wall_seconds": 280
+}

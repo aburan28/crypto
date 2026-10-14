@@ -1,0 +1,10 @@
+Working directory: /workspace/crypto-integration
+source /workspace/integration-env.sh
+export CARGO_BUILD_JOBS=2
+export CARGO_TARGET_DIR=/tmp/crypto-surfaces-validation-target
+nice -n 10 bash tools/ecdlp-surfaces/check.sh
+
+check.sh checks formatting, release tests, Clippy with -D warnings, release binaries,
+byte-for-byte replay of three committed fixtures, and two rejection controls.
+Its generated fixtures are in a temporary directory removed by the script.
+No timing or new research claims are made.

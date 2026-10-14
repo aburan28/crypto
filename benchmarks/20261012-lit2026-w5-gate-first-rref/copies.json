@@ -1,0 +1,34 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-12",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/lit2026_w5_lane_batched_f4_20261011",
+  "run": "run-20261012T0008Z",
+  "files": [
+    {
+      "source": "research/lit2026_w5_lane_batched_f4_20261011/reports/run-20261012T0008Z/report.pdf",
+      "copy": "run-report.pdf",
+      "sha256": "09e066ae100b6666ae601c3f0b6ccb4fcb92bf8a3a015a919640a89a2b7c3bfc",
+      "bytes": 136384
+    },
+    {
+      "source": "research/lit2026_w5_lane_batched_f4_20261011/REPORT.pdf",
+      "copy": "results-report.pdf",
+      "sha256": "3e76b8fa145e86f38d0b5d9e8608ef1f346366a471df89f67eb7b239f2f72ad2",
+      "bytes": 241376
+    },
+    {
+      "source": "research/lit2026_w5_lane_batched_f4_20261011/reports/run-20261012T0008Z/arms.svg",
+      "copy": "arms.svg",
+      "sha256": "a3d6fca88aa5ec2dbfc7969f91c42b66aff830c39173db46deea3c3d193f8c67",
+      "bytes": 146516
+    }
+  ],
+  "pngs": [
+    {
+      "source": "arms.svg",
+      "copy": "arms.png",
+      "dpi": 150
+    }
+  ]
+}

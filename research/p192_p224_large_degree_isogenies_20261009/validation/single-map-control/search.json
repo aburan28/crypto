@@ -1,0 +1,22 @@
+{
+  "attempts": [
+    {
+      "curve": "p192",
+      "ell": 199,
+      "receipt": {
+        "command": [
+          "known-answer-map-selection",
+          "research/p192_p224_large_degree_isogenies_20261008/evidence-v4/p192/ell-199.json"
+        ],
+        "exit_code": 0,
+        "known_answer_control": true,
+        "map_count": 1,
+        "status": "PASS",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "ell-199.json",
+        "stdout_sha256": "c7426a94daa0ef7f0a53997c6d9cf804ecbd8081e30a7b18c2551b1639cfd5b5"
+      }
+    }
+  ],
+  "known_answer_control": true
+}

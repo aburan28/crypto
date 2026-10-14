@@ -1,0 +1,67 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-11",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/koblitz-isogeny",
+  "run": "run-20261011T2150Z",
+  "files": [
+    {
+      "source": "research/koblitz-isogeny/reports/run-20261011T2150Z/full_solves_pin.svg",
+      "copy": "visuals/research/koblitz-isogeny/reports/run-20261011T2150Z/full_solves_pin.svg",
+      "sha256": "c0e2781e635e17d65b8c5f1f8983d6ebb6b1e23e3fa2bc1d96da5e2640956c91",
+      "bytes": 42507
+    },
+    {
+      "source": "research/koblitz-isogeny/reports/run-20261011T2150Z/icc_n19_m3.svg",
+      "copy": "visuals/research/koblitz-isogeny/reports/run-20261011T2150Z/icc_n19_m3.svg",
+      "sha256": "a6d56fed24ec110e8161db3a3f4d791026d4a833709fc68fba5fce074020afbe",
+      "bytes": 44752
+    },
+    {
+      "source": "research/koblitz-isogeny/reports/run-20261011T2150Z/per_call.svg",
+      "copy": "visuals/research/koblitz-isogeny/reports/run-20261011T2150Z/per_call.svg",
+      "sha256": "cd5fc3ff8d6c7fdcf10e1274ee99c725fc592a6cddf385525f30ec29b08807d5",
+      "bytes": 44504
+    },
+    {
+      "source": "research/koblitz-isogeny/reports/run-20261011T2150Z/report.pdf",
+      "copy": "visuals/research/koblitz-isogeny/reports/run-20261011T2150Z/report.pdf",
+      "sha256": "3f0893e56263c62a9e6bb70a78bb84c4ddf5802c7f0b40cf8218a0c1bc6f5f55",
+      "bytes": 87788
+    }
+  ],
+  "pngs": [
+    {
+      "source": "visuals/research/koblitz-isogeny/reports/run-20261011T2150Z/full_solves_pin.svg",
+      "copy": "visuals/research/koblitz-isogeny/reports/run-20261011T2150Z/full_solves_pin.png",
+      "dpi": 150,
+      "width": 900,
+      "height": 480,
+      "sha256": "4b37067db74d25b39c7216da1ac6e796bab60c31d7c08055c9ec10ab745b1df9",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/koblitz-isogeny/reports/run-20261011T2150Z/icc_n19_m3.svg",
+      "copy": "visuals/research/koblitz-isogeny/reports/run-20261011T2150Z/icc_n19_m3.png",
+      "dpi": 150,
+      "width": 960,
+      "height": 510,
+      "sha256": "bf978012b782a1a99a8b0e92ec0ee72528bc7da449d2f7016e7ccc12a37d1fde",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/koblitz-isogeny/reports/run-20261011T2150Z/per_call.svg",
+      "copy": "visuals/research/koblitz-isogeny/reports/run-20261011T2150Z/per_call.png",
+      "dpi": 150,
+      "width": 1080,
+      "height": 600,
+      "sha256": "cc9bcd23daa88112cd543fe4c54ab82b72668f82d9c8c8d96a3e4690522a73d6",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    }
+  ],
+  "verbatim_source_report": {
+    "source": "research/koblitz-isogeny/reports/run-20261011T2150Z/README.md",
+    "copy": "SOURCE_REPORT.md",
+    "sha256": "3e1b76d165028bf9790ed15f51b17e24f49f1ae0897bd727f281276c69f025e9"
+  }
+}

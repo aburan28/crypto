@@ -37,7 +37,7 @@ law, §15.4 table) and §16 (the leads) are the background. Read them first.
   claim about a deployed curve's security. Name curves with ledger slugs
   (`python3 scripts/check_curve_names.py` must stay at 0 problems for your
   files; for Koblitz curves write e.g. the `icv1-...` slug or describe
-  them as "the a=0 Koblitz curve over F_2^n" in prose, never `K_0/F_2^71`
+  them as "the a=0 Koblitz curve over F_2^n" in prose, never retired K-subscript
   style names). ECC2K-130 and sect233k1 may be named as standards.
 - Report evidence faithfully (`.claude/skills/report-evidence/SKILL.md`):
   label each number measured or derived, state negative and null results

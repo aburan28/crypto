@@ -1,0 +1,334 @@
+{
+  "arm": "fold-L32-DP4-E0",
+  "candidate_id": "fold-L32-DP4-E0",
+  "capped_charge_rule": "verified min(actualwall,60), everyunverified/cap60; nozeroimputation",
+  "capped_charge_wall_s": 2.802594442,
+  "config": {
+    "backend": "fold",
+    "dp_bits": 4,
+    "escape_fruitless": false,
+    "lanes": 32,
+    "step_cap_factor": 2000
+  },
+  "config_file_sha256": "c0a43a5723578160dd4dc9177f27a777cd3de031cb73e1b0252aab5a66d67ca2",
+  "cpu_total_s": 2.797182,
+  "elapsed_process_wall_s": 2.802594442,
+  "parent_known_answer_scalar_match": true,
+  "peak_rss_bytes": 106696704,
+  "process_receipt_path": "/workspace/n83_optimization/panel/policy/runs/P08-fold-L32-DP4-E0/execution.json",
+  "process_receipt_sha256": "e9a0c737ab1da3e955f20355e3379c8eae0efbe7151531f0ca54a7fa9e8e3752",
+  "producer_online_ms": 2606.137741,
+  "producer_phase_gap_ms": 0.0005710000000362925,
+  "producer_preparation_ms": 188.91267,
+  "raw_process_receipt": {
+    "accounting": "Whole-process wall/CPU include launch, load, preparation, online, replay. Producer online interval is separate.",
+    "argv": [
+      "/workspace/n83_optimization/frozen_binaries/rho_optimization",
+      "/workspace/n83_optimization/fixtures/training_3.jsonl",
+      "202610128318",
+      "/workspace/n83_optimization/panel/policy/configs/fold-L32-DP4-E0.json",
+      "/workspace/n83_optimization/panel/policy/runs/P08-fold-L32-DP4-E0/producer.json"
+    ],
+    "argv_existing_file_sha256": {
+      "/workspace/n83_optimization/fixtures/training_3.jsonl": "3fe1ae465875f83305ce8136fea0aaa07f7bbeeb58b299a7aadb0f7b3ca2362c",
+      "/workspace/n83_optimization/panel/policy/configs/fold-L32-DP4-E0.json": "c0a43a5723578160dd4dc9177f27a777cd3de031cb73e1b0252aab5a66d67ca2"
+    },
+    "arm": "rho",
+    "binary_sha256": "21827dcc645fd4591b39dd913619f047d267a98d541854bd7c83ee7143d8bbcb",
+    "cpu_system_s": 0.031468,
+    "cpu_total_s": 2.797182,
+    "cpu_user_s": 2.765714,
+    "cwd": "/workspace/repos/crypto",
+    "elapsed_process_wall_s": 2.802594442,
+    "environment": {
+      "KIC_RANK_THREADS": "1",
+      "KIC_RHO_THREADS": "1",
+      "KIC_TARGET_THREADS": "1",
+      "KIC_THREADS": "1",
+      "LC_ALL": "C",
+      "MKL_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "PATH": "/usr/bin:/bin",
+      "RAYON_NUM_THREADS": "1"
+    },
+    "exit_observation_delay_note": "Nominal 0-5 ms plus scheduling and poll-body delays; no strict bound under arbitrary scheduling",
+    "exit_observation_poll_ms": 5,
+    "finished_epoch_ms": 1791783276521,
+    "interrupted_signal": 0,
+    "known_answer_environment_present": false,
+    "memory_limit_hit": null,
+    "memory_limit_note": "RLIMIT_AS allocation refusal may appear as nonzero/abort; no inference from exit code alone",
+    "peak_rss_bytes": 106696704,
+    "peak_rss_native_kib": 104196,
+    "peak_rss_source": "Linux wait4(2) ru_maxrss KiB multiplied by 1024; exact child process",
+    "pid": 32637,
+    "raw_wait_status": 0,
+    "resource_envelope": {
+      "address_space_limit_bytes": 12884901888,
+      "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+      "cpu_affinity": [
+        3
+      ],
+      "cpu_count": 1,
+      "online_target_threads": 1,
+      "rank_threads": 1,
+      "threads": 1,
+      "timeout_s": 60.0
+    },
+    "return_code": 0,
+    "schema": "n83.process-receipt/v1",
+    "semantic": {
+      "exit_code_field_ok": true,
+      "group_verified": true,
+      "independent_replay_required": true,
+      "online_boundary_qualified": true,
+      "producer_online_ms": 2606.137741,
+      "producer_phase_gap_ms": 0.0005710000000362925,
+      "producer_phase_sum_ms": 2606.13717,
+      "producer_phases_ms": {
+        "generic_scalar_replay": 0.247524,
+        "target_query_and_validation": 0.23272,
+        "walk_and_collision": 2605.656926
+      },
+      "producer_preparation_ms": 188.91267,
+      "public_target_match": true,
+      "recovered_scalar": "3128670139705323",
+      "scalar_is_verified_by_producer_group_replay_only": true,
+      "scalar_present": true,
+      "selected_row": {
+        "a": 1,
+        "arithmetic_kernel": {
+          "backend": "fold",
+          "carryless_multiply": "pclmulqdq",
+          "reduction": "two_clmul_tail_folds",
+          "squaring": "bit_spread_then_reduce"
+        },
+        "b": 1,
+        "base_snapshot": "a8194d616ed8c04489ec46177d369f1b1670360a",
+        "canonical_candidate_id": null,
+        "canonical_workload_id": null,
+        "claim_boundary": "public synthetic exact legacy n83 a1 target; answer correctness and exploratory local timing only; no admitted speedup",
+        "cofactor": "1128547018",
+        "compiled_source_revision": null,
+        "compiled_source_sha256": {
+          "examples/n83_rho_optimization_eval.rs": "fb14072f4fa5d08e18d8b79130b6d58a220adae0f76369cc9be949691c83eaa0",
+          "src/cryptanalysis/koblitz_strong_rho.rs": "3e45be340df4fe5b73998b8f907ad0a1a77d58c06609c73f77f17f2babd90108",
+          "src/cryptanalysis/semaev_decomp.rs": "be551d55d574b89bab1e9cd6fe1b1ad298966dd4fcf48a7cd1262d3e5ef4925a",
+          "src/cryptanalysis/wide_gf2m.rs": "086c786cdb2410c852c4242abc543255776a5ec3fff873ab972d08978907c701"
+        },
+        "config_input_blake3": "a1822931e56d3aae90d718bba0b2ca7cd98df980a0213c30ef28edd90e5967fd",
+        "config_input_sha256": "c0a43a5723578160dd4dc9177f27a777cd3de031cb73e1b0252aab5a66d67ca2",
+        "controlled_speedup": null,
+        "curve_id": "ICV1:f2m-83-a5fd0d39:6151469093347:9671406556910881928556062:0x1:-7:unk:r:9eba6cd5d359",
+        "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+        "executable_blake3": "cbe7cb12e78695df206e439829a350ecbe11fa9abd976eef3fb2fcc547015627",
+        "failure_counter_note": null,
+        "field_encoding": "polynomial words as canonical decimal strings",
+        "field_modulus_low_terms": [
+          0,
+          2,
+          4,
+          7
+        ],
+        "generator": [
+          "6614244651398184860292015",
+          "8868260410029249391539529"
+        ],
+        "generic_scalar_replay_verified": true,
+        "group_verified": true,
+        "host_isolation_receipt": null,
+        "jump_seed": 1251085159145640418,
+        "known_answer_input": false,
+        "lambda": "2998004823950457",
+        "n": 83,
+        "online_interval": {
+          "excluded_stages": [
+            "input_and_config_loading",
+            "curve_normal_basis_G_only_jumps",
+            "receipt_hashing",
+            "receipt_serialization",
+            "receipt_io"
+          ],
+          "included_stages": [
+            "target_validation",
+            "walk_starts",
+            "walk_and_collision",
+            "generic_scalar_replay"
+          ],
+          "start_event": "before_public_target_membership_and_subgroup_validation",
+          "stop_event": "after_generic_scalar_replay"
+        },
+        "online_interval_ns": 2606137741,
+        "online_ms": 2606.137741,
+        "online_phase_ns": {
+          "generic_scalar_replay": 247524,
+          "target_query_and_validation": 232720,
+          "walk_and_collision": 2605656926
+        },
+        "online_phase_sum_ns": 2606137170,
+        "online_timer_boundary_residual_ns": 571,
+        "online_total_ms": 2606.137741,
+        "optimization_backend": "fold",
+        "optimization_config": {
+          "backend": "fold",
+          "dp_bits": 4,
+          "escape_fruitless": false,
+          "lanes": 32,
+          "step_cap_factor": 2000
+        },
+        "outcome": {
+          "automorphism_size": 166,
+          "capped_walks": 118,
+          "charges_setup_and_solve": {
+            "canonicalizations": 8123423,
+            "failed_collisions": 0,
+            "group_additions": 8123424,
+            "partition_hashes": 7614030,
+            "scalar_multiplications": 35,
+            "table_inserts": 507922,
+            "table_queries": 507923
+          },
+          "fruitless_cycles": 1321,
+          "fruitless_escapes": 0,
+          "ideal_steps": 9005148.640969077,
+          "table_entries": 507922,
+          "table_payload_lower_bound_bytes": 24888178,
+          "walk_steps": 7614030,
+          "walks": 509393,
+          "wasted_merges": 0
+        },
+        "peak_rss_bytes": 106696704,
+        "peak_rss_source": "getrusage RUSAGE_SELF ru_maxrss; platform-scaled bytes",
+        "preparation_charges": {
+          "canonicalizations": 0,
+          "failed_collisions": 0,
+          "group_additions": 0,
+          "partition_hashes": 0,
+          "scalar_multiplications": 32,
+          "table_inserts": 0,
+          "table_queries": 0
+        },
+        "preparation_ns_excluded": 188912670,
+        "process_ns_before_receipt_io": 2797396231,
+        "public_input_blake3": "32b5dd4e5883cc130772cdbeed841235223d6c4c96b6c62ae0e0529b3971d62c",
+        "public_input_sha256": "3fe1ae465875f83305ce8136fea0aaa07f7bbeeb58b299a7aadb0f7b3ca2362c",
+        "public_target_q": [
+          "5514069636500090561116602",
+          "1776162466666115131558898"
+        ],
+        "published_q": [
+          "5514069636500090561116602",
+          "1776162466666115131558898"
+        ],
+        "record_class": "verified_answer_exploratory_wall",
+        "recovered_scalar": "3128670139705323",
+        "reference_grade": "strong_configured_field_u64_scalar",
+        "reference_group_validation": true,
+        "rho_policy": {
+          "G_only_jumps_target_independent": true,
+          "distinguished_bits": 4,
+          "escape_fruitless": false,
+          "jump_count": 32,
+          "lanes": 32,
+          "quotient": "signed_frobenius",
+          "step_cap": 18010298000,
+          "step_cap_factor": 2000
+        },
+        "run_id": "N83A1RhoOptfoldL32DP4E0W202610128318Q32b5dd4e5883",
+        "schema": "n83-rho-optimization-evaluation/v1",
+        "started_unix_ms": 1791783273719,
+        "status": "PASS_VERIFIED_PUBLIC_TARGET",
+        "subgroup_order": "8569786107849059",
+        "target_count": 1,
+        "target_in_subgroup": true,
+        "target_ms": 2606.137741,
+        "target_on_curve": true,
+        "validation_sidecar_opened": false,
+        "walk_seed": 202610128318,
+        "worker_count": 1,
+        "worker_source_blake3": "4175b0c043148a86b459b176ec7730d0131373f31e644bd25be44d3636e2fd1c",
+        "worker_source_sha256": "fb14072f4fa5d08e18d8b79130b6d58a220adae0f76369cc9be949691c83eaa0"
+      },
+      "valid": true,
+      "verified_flag_ok": true
+    },
+    "semantic_path": "/workspace/n83_optimization/panel/policy/runs/P08-fold-L32-DP4-E0/stdout.jsonl",
+    "semantic_sha256": "32f67d8cfc70d4db047354b790ce842c499fc5fc8bedfabeab4e17374654664a",
+    "started_epoch_ms": 1791783273717,
+    "status": "COMPLETED_VERIFIED",
+    "stderr_path": "/workspace/n83_optimization/panel/policy/runs/P08-fold-L32-DP4-E0/stderr.txt",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_path": "/workspace/n83_optimization/panel/policy/runs/P08-fold-L32-DP4-E0/stdout.jsonl",
+    "stdout_sha256": "32f67d8cfc70d4db047354b790ce842c499fc5fc8bedfabeab4e17374654664a",
+    "target_sha256": "3fe1ae465875f83305ce8136fea0aaa07f7bbeeb58b299a7aadb0f7b3ca2362c",
+    "termination_signal": null,
+    "timeout": false
+  },
+  "recovered_scalar": "3128670139705323",
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 60.0
+  },
+  "run_id": "P08-fold-L32-DP4-E0",
+  "schema": "n83.optimization-observation/v1",
+  "seed": 202610128318,
+  "status": "COMPLETED_VERIFIED",
+  "target_file_sha256": "3fe1ae465875f83305ce8136fea0aaa07f7bbeeb58b299a7aadb0f7b3ca2362c",
+  "target_id": "training_3",
+  "trajectory": {
+    "group_verified": true,
+    "outcome": {
+      "automorphism_size": 166,
+      "capped_walks": 118,
+      "charges_setup_and_solve": {
+        "canonicalizations": 8123423,
+        "failed_collisions": 0,
+        "group_additions": 8123424,
+        "partition_hashes": 7614030,
+        "scalar_multiplications": 35,
+        "table_inserts": 507922,
+        "table_queries": 507923
+      },
+      "fruitless_cycles": 1321,
+      "fruitless_escapes": 0,
+      "ideal_steps": 9005148.640969077,
+      "table_entries": 507922,
+      "table_payload_lower_bound_bytes": 24888178,
+      "walk_steps": 7614030,
+      "walks": 509393,
+      "wasted_merges": 0
+    },
+    "preparation_charges": {
+      "canonicalizations": 0,
+      "failed_collisions": 0,
+      "group_additions": 0,
+      "partition_hashes": 0,
+      "scalar_multiplications": 32,
+      "table_inserts": 0,
+      "table_queries": 0
+    },
+    "producer_status": "PASS_VERIFIED_PUBLIC_TARGET",
+    "rho_policy": {
+      "G_only_jumps_target_independent": true,
+      "distinguished_bits": 4,
+      "escape_fruitless": false,
+      "jump_count": 32,
+      "lanes": 32,
+      "quotient": "signed_frobenius",
+      "step_cap": 18010298000,
+      "step_cap_factor": 2000
+    },
+    "scalar": "3128670139705323"
+  },
+  "verified": true,
+  "wrong_answer": false
+}

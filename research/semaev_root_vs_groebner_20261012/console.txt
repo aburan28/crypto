@@ -1,0 +1,33 @@
+Root-finding decomposition vs F4/F5 Gröbner — head to head.
+Public synthetic known-answer; every decomposition re-checked in the group.
+
+=== Binary Koblitz curves: pair-table root finding vs matrix-F4 ===
+
+  n   |F|   targets  decomp     root-find     matrix-F4    speedup
+  9    55       254     254      728.54µs      279.16ms       383×
+ 13  4005       256     256        2.54ms         3.91s      1535×
+
+=== Binary end-to-end DLP: same logarithm, two oracles ===
+
+      strategy     log   relations       wall
+     root-find      53           4    23.30ms
+     matrix-F4      53           3     4.08ms
+  both recover log = 53.
+
+=== Prime a=-3 curves: direct-subtraction root finding vs groebner_f4 ===
+
+ bits   |F|   targets  decomp     root-find   groebner_f4    speedup   refuted
+   16     6        40       1       29.58µs         1.05s     35592×        39
+   20     6        40       1       33.21µs         1.15s     34602×        39
+   24     6        40       1       26.13µs         1.23s     46911×        39
+
+=== Prime root finding at factor-base sizes where F4 is infeasible ===
+
+ bits    |F|      log ok     targets       wall
+   20    120        true        4438     9.00ms
+   24    120        true       78159   162.87ms
+   28    160        true     1040671      2.83s
+
+Wrote raw results to research/semaev_root_vs_groebner_20261012/results.json
+
+All oracles agreed on every target and every decomposition verified in-group.

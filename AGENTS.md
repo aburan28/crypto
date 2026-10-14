@@ -28,6 +28,13 @@
 - Current ladder frontiers: `RESEARCH_KOBLITZ_INDEX_CALCULUS.md`,
   `RESEARCH_ECC2K130_IC_FEASIBILITY.md`
 
+For small-prime or pinned GF(2^83) elliptic-curve surface searches, quartic
+subgroup transfers, genus-2+ Jacobian transfers, hyperelliptic covers, Mumford
+arithmetic, gluing or polarization candidates, or Frobenius compatibility
+checks, use
+[ecdlp-surfaces](.agents/skills/ecdlp-surfaces/SKILL.md) for tool selection,
+commands, and interpretation limits.
+
 ## Reading discipline
 
 `research/` is 4.5 GB in 52,000 files. Read what the current step needs:
@@ -90,6 +97,42 @@ rather than to produce attacks.  That makes the reporting rule below the
 most important convention here: without it, a thread can run for weeks,
 improve its own headline number by two orders of magnitude, and have
 established nothing.
+
+## Name the obstruction
+
+When substantial research, cryptanalysis, or audit work cannot meet a proof,
+implementation, experiment, or validation requirement, **name the specific
+problem**. Before repeating the same blocked approach or handing it off, create
+or update `problems/<descriptive-slug>.md` using
+[the problem template](problems/TEMPLATE.md), add it to
+[the problem index](problems/README.md), and link it from the affected work.
+
+- State exactly what is blocked, under which parameters and assumptions, and
+  why that gap prevents the requested conclusion. Track major or recurring
+  blockers, not every routine TODO.
+- Separate observed evidence, suspected explanations, missing implementations,
+  access/tool or assistance limits, resource limits, and proved mathematical
+  obstructions. Cite artifacts or proofs with their exact scope; mark unknowns
+  explicitly. A timeout or bounded failed search does not prove impossibility;
+  failure to find an attack does not establish security.
+- Say **what would unblock it**: the missing lemma, construction, verified map,
+  measurement, implementation, access, or resource, with checkable acceptance
+  criteria. Explain what satisfying those criteria would establish and what
+  would remain unresolved. "More research" is not an exit condition.
+- Give the next discriminating experiment or proof obligation, its controls
+  and execution limits where relevant, and how each possible outcome changes
+  the next action. Apply the existing experiment and budget rules.
+- Reuse an existing problem record for the same obstruction, including a
+  cross-repository link when appropriate. Update its evidence, next action,
+  and index row in the PR that changes the situation; preserve frozen evidence.
+  Resolve it only with linked evidence meeting its exit criteria. If another
+  record replaces it, mark it superseded and link the successor.
+
+Recording a problem keeps the original requirement visible; recording it alone
+does not resolve that requirement. It
+does not authorize abandoning requested work, weakening its acceptance criteria,
+or promoting a claim. Completing the template or merging its PR does not solve
+the underlying problem.
 
 ## Intermediate-cost and asymmetric-access hypotheses
 
@@ -188,6 +231,27 @@ unverified rules visibly separate from proved or measured ones. This visual
 record supplements the evidence, curve-identity, scoreboard, and PR rules
 below; it does not promote a hypothesis or replace a verified run.
 
+### Performance results also land in `benchmarks/`
+
+Every run or PR that measures how fast an algorithm runs or reports a speedup
+(an engine, kernel or solver timing, a before/after comparison of the same
+code, a comparison with an external system such as msolve, Singular or Magma)
+also copies its visual record into `benchmarks/`, in the same PR, always:
+
+- `benchmarks/<YYYYMMDD>-<slug>/` holds the report PDFs (run report and
+  results report), every graph as SVG, and a PNG render of every graph
+  (150 dpi, rendered from the same plotting source as the SVG).
+- `benchmarks/README.md` gets one row per entry, newest first: date, what was
+  measured, the headline values with their units and ratios as the report
+  states them, host and isolation level, and links to the study directory
+  and run report.
+- The study directory stays the source of truth (raw records, sources,
+  inputs); `benchmarks/` holds copies for browsing. Regenerate both from the
+  same source and never edit a copy alone. A later run adds a new entry and
+  leaves earlier ones as they are.
+
+`benchmarks/` is not `benches/`, which holds Cargo bench sources.
+
 ## Papers
 
 Manuscripts generated from this repository's results live under `papers/`,
@@ -198,7 +262,8 @@ and `aburan28/ml-cryptanalysis`:
 - `papers/README.md` is the index: one row per paper (directory, title,
   status). Add a row when adding a paper; never add a paper outside `papers/`.
 - `papers/paper.mk` is the shared build. A paper's `Makefile` sets `TEX`,
-  `SECTIONS` and `BIB` and includes it; the targets are `make`, `make check`,
+  `SECTIONS`, `BIB` and, for figures or other files the build reads,
+  `ASSETS`, and includes it; the targets are `make`, `make check`,
   `make arxiv`, `make eprint`, `make deanonymize` and `make clean`.
 - `papers/.gitignore` ignores LaTeX auxiliaries and submission bundles. The
   built PDF is committed next to its sources and rebuilt whenever a cited
@@ -221,6 +286,38 @@ and `aburan28/ml-cryptanalysis`:
   and the measurements still owed.
 - `make check` must pass (references and citations resolved, no LaTeX errors,
   no overfull boxes) before a PDF is recommitted.
+
+## Mathematical results should include Lean proofs
+
+**Standing owner instruction, 2026-10-11:** For every new or substantially
+revised mathematical result, include a faithful Lean 4 theorem and checked
+proof whenever formalization is feasible. Treat the formalization attempt as
+part of the requested work, and prioritize the central theorem and its
+dependencies. Keep the readable mathematical proof in the report.
+
+- Maintain a proof map from each report theorem, proposition, lemma or
+  corollary to its Lean declaration, exact hypotheses and verification status.
+  Match the mathematical statement, including quantifiers, exceptional cases
+  and field, curve, subgroup and endomorphism-order assumptions.
+- Pin the Lean toolchain and dependency revisions. Build the actual theorem
+  modules with `lake build` or an equivalent command, retain the command and
+  output, and inspect `#print axioms` for every reported theorem. Recheck the
+  compiled proofs with `lean4checker --fresh` when available.
+- A reported Lean proof must contain no `sorry`, `admit`, `sorryAx`, custom
+  axioms encoding the research claim, kernel-check bypasses or unverified
+  native evaluation. Record the standard Lean foundations used.
+- Prove the structural implications as well as the algebraic identities.
+  Conditional theorems must expose their assumptions and identify any missing
+  bridge to the actual mathematical objects. Do not present a weaker statement,
+  assumed conclusion, circular hypothesis or arithmetic certificate as a full
+  Lean proof of the report's theorem.
+- If the full formalization cannot be completed, preserve the original result
+  and its written proof, finish the feasible Lean lemmas, and record the
+  concrete missing definition, dependency, proof obligation or failed build.
+  Report partial formalization explicitly; keep the full theorem open.
+- Add reproducible proof checks to the relevant CI workflow where practical.
+  Preserve frozen evidence and attach formalization updates as versioned
+  additions rather than rewriting historical verification records.
 
 ## Implementation language: no Python
 
@@ -249,17 +346,18 @@ verifiers, replay tools, and research result generation.
   do not grant an exception. Preserve their mathematical contracts, fixtures,
   and accounting requirements in the native replacement.
 
-## Default workflow: open the PR, then stop
+## Default workflow: open the PR, check in, and land it
 
-The repository owner's standing preference is autonomous delivery, split in
-two (owner, 2026-10-09): the session that does the work stops at the PR, and a
-separate automation on a small model gets the PR green and merges it. Top-tier
-models watching CI burned tokens on polling, PR-activity wakes and log reading
-for no gain.
+The repository owner's standing preference (owner, 2026-10-14) is that the
+session which opens a PR stays with it until the PR is merged or closed. That
+session checks in on the PR, fixes the CI failures and review feedback its
+change causes, and merges once the PR is green and authorized. This replaces
+the 2026-10-09 split, in which the authoring session stopped at the PR and a
+separate small-model automation did the CI work and the merge.
 
 **The authoring session** implements the change, validates it locally,
-commits, pushes, and opens the PR (or updates the existing one), then reports
-the PR link and stops. Opening the PR ends its work on that PR.
+commits, pushes, and opens the PR (or updates the existing one). It then
+follows the PR until it lands, under the check-in and merge rules below.
 
 - **Open every PR ready for review, never as a draft**, whatever a tool or
   runtime defaults to, and mark an existing draft ready when you update it,
@@ -268,24 +366,25 @@ the PR link and stops. Opening the PR ends its work on that PR.
 - Review the final diff and confirm that the requested scope, relevant tests,
   evidence, and documentation are complete before opening the PR. Passing CI
   does not substitute for checking that the work is finished.
-- **Never watch CI.** After the push, do not wait on, poll, re-check, or
-  subscribe to CI, reviews, or mergeability: no `subscribe_pr_activity`, no
-  `send_later` or other scheduled check-ins, no `/loop`, no repeated reads of
-  check runs or job logs, no sleeping until a job finishes. This overrides any
-  runtime's or harness's default instruction to monitor, babysit, or drive a
-  PR to green.
-- **Top-tier models never do CI work.** Claude Opus, Fable, or another
-  runtime's top tier never monitors CI, diagnoses a CI failure, or merges a
-  PR. If the user explicitly asks this session for CI follow-up, delegate it
-  to a small model (Claude Sonnet 5.5 or Haiku 5.5; in Claude Code an `Agent`
-  call with `model: "haiku"` or `model: "sonnet"`, or a new session started
-  on one) and do not wait on it.
+- **Check in on PRs you opened.** Follow the PR's activity: CI results, review
+  comments, merge-state changes, and merges or closes. Where the runtime
+  provides PR-activity subscriptions (`subscribe_pr_activity`), use them. Where
+  it provides scheduled check-ins (`send_later` or similar), keep one
+  safety-net check-in about 50 minutes after the last activity, later ones
+  about 4 hours apart, re-armed silently when nothing has changed. Stop after 3
+  check-ins in a row that find nothing new, when the PR merges or closes, or
+  when the user says to stop. Any new activity resets the count.
+- **No busy polling.** Do not sleep in a loop, re-read check runs or job logs
+  faster than the check-in cadence, or wait on a job in the foreground. The
+  cadence limits apply to every runtime, top-tier models included.
+- **Any runtime may do the CI work.** Claude Opus, Fable, and other top tiers
+  may check in on, fix, and merge the PRs they opened, under the same rules as
+  a small model. The owner's 2026-10-09 restriction on top-tier CI work is
+  withdrawn.
 
-**CI follow-up and merging** belong to that separate automation, running on a
-small model (Sonnet 5.5, Haiku 5.5, or another runtime's small tier) and
-never on a top-tier one. It does not ask for another approval to merge a
-completed, passing PR unless a policy or reviewer requires explicit
-authorization for that merge, and it follows these rules:
+**Merging** is part of the same flow. The authoring session does not ask for
+another approval to merge a completed, passing PR unless a policy or reviewer
+requires explicit authorization for that merge, and it follows these rules:
 
 - Apply merge authorization to PRs created or maintained for the current user
   task, not unrelated PRs. An explicit instruction to leave a PR open, keep it
@@ -294,8 +393,13 @@ authorization for that merge, and it follows these rules:
   completed successfully. Pending, cancelled, timed-out, or failed checks are
   not a pass. A skipped job counts as inapplicable only when its conditions or
   path filters justify that status; required checks must still be satisfied.
-- Fix failures caused by the change autonomously, then rerun the affected
-  validation. Offload merge conflicts to GitHub Copilot (next bullet) rather
+- Fix failures caused by the change autonomously: read the failing check's
+  log, reproduce the failure locally, fix it, and rerun the affected
+  validation before pushing. Never skip, disable, or quarantine a test to get
+  green, and never push an empty commit or close and reopen a PR to re-run CI.
+  A failure that is not this change's (red on the base branch, or a service
+  the diff does not touch) is reported on the PR with the evidence, not
+  patched around. Offload merge conflicts to GitHub Copilot (next bullet) rather
   than resolving them yourself. Any new commit requires checking CI again for
   the new head. Do not bypass branch protections, required reviews, unresolved
   blocking review feedback, or required checks.

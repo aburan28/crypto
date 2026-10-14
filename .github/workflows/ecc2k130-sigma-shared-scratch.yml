@@ -8,8 +8,7 @@ on:
 
 concurrency:
   group: ecc2k130-sigma-shared-scratch-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 permissions:
   contents: read
 
@@ -45,7 +44,7 @@ jobs:
 
   sm120-compile:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 60 }}
     container:
       image: nvidia/cuda:13.3.1-devel-ubuntu24.04
     steps:
