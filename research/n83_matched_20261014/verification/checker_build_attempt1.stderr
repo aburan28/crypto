@@ -1,0 +1,7 @@
+research/n83_matched_20261014/verification/verify_matched_campaign.cpp: In function ‘int main(int, char**)’:
+research/n83_matched_20261014/verification/verify_matched_campaign.cpp:112:6: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+  112 |      for(const auto&key:{"target_query_ms","target_pdp_ms","target_relation_check_ms","target_descent_ms","target_recovery_check_ms"})row.phase_sum+=finite_nonnegative(raw,key);require(std::abs(row.phase_sum-finite_nonnegative(raw,"target_phase_sum_ms"))<1e-6,"IC recorded five-phase sum mismatch");
+      |      ^~~
+research/n83_matched_20261014/verification/verify_matched_campaign.cpp:112:178: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+  112 |      for(const auto&key:{"target_query_ms","target_pdp_ms","target_relation_check_ms","target_descent_ms","target_recovery_check_ms"})row.phase_sum+=finite_nonnegative(raw,key);require(std::abs(row.phase_sum-finite_nonnegative(raw,"target_phase_sum_ms"))<1e-6,"IC recorded five-phase sum mismatch");
+      |                                                                                                                                                                                  ^~~~~~~

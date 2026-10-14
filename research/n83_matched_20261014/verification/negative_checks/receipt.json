@@ -1,0 +1,9 @@
+{
+  "kind": "native_fixture_negative_checks",
+  "status": "PASS",
+  "existing_output_directory_rejected": 1,
+  "existing_verification_receipt_rejected": 1,
+  "wrong_point_bytes_rejected": 1,
+  "wrong_scalar_rejected_after_updating_sidecar_hash": 1,
+  "arithmetic_and_replay_decisions": "native C++ checker; shell/jq prepare copies only"
+}

@@ -1,0 +1,9 @@
+The exact configured guard accepts the unchanged checked proof sources.
+The exact configured guard rejects 'sorry'.
+The exact configured guard rejects 'admit'.
+The exact configured guard rejects 'sorryAx'.
+The exact configured guard rejects 'axiom'.
+The exact configured guard rejects 'native_decide'.
+The exact configured guard rejects '#eval'.
+A missing ripgrep executable fails closed; it cannot skip validation.
+Workflow YAML parses, installation precedes validation, and all gate checks pass.

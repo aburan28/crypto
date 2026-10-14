@@ -1,0 +1,12 @@
+   Compiling crypto v0.1.0 (/workspace/repos/crypto)
+    Finished `release` profile [optimized] target(s) in 1.53s
+     Running unittests examples/n83_rho_matched_eval.rs (/workspace/n83_evaluation/build/release/examples/n83_rho_matched_eval-f9ef4383e130348f)
+
+running 4 tests
+test tests::seed_point_count_must_match ... ok
+test tests::policy_drift_and_unknown_fields_rejected ... ok
+test tests::numeric_coordinates_and_scalars_rejected ... ok
+test tests::exact_legacy_constructor_is_pinned ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
+

@@ -1,0 +1,154 @@
+{
+  "evidence_status": "PENDING:NATIVE_RECORDS_VERIFIED_LAYOUT_ONLY",
+  "title": "Matched degree-83 IC and optimized rho",
+  "subtitle": "Actual cold processes, genuine reused setup, and a larger fresh target panel",
+  "cover_label": "UNIFIED CURVE-BASES REPORT / MATCHED FOLLOW-UP",
+  "author": "Crypto research evidence synthesis",
+  "date": "14 October 2026 — PENDING:ACTUAL_CAMPAIGN_ID",
+  "running_header": "EXACT LEGACY DEGREE-83 / MATCHED IC AND OPTIMIZED RHO",
+  "cover_meta": [
+    "Exact curve: icv1-f2m83-t6151469093347-9eba6cd5",
+    "32 fresh targets; three real shared-setup cohorts; eight actual singleton pairs",
+    "Ratios are IC/rho; values below 1 favor IC",
+    "A new addendum precedes the preserved earlier 70 pages"
+  ],
+  "cover_note": "PENDING:OBSERVED_PRIMARY_VALUES_AND_CONDITIONAL_SCOPE",
+  "contents_intro": "The actual complete-process boundaries lead this report. Query distributions, memory and the additive break-even model are secondary. Source links bind every new value to native records. Historical evidence is unchanged.",
+  "sections": [
+    {
+      "title": "Actual complete-process comparison",
+      "blocks": [
+        {"type": "callout", "text": "PENDING:NATIVE_PRIMARY_BATCH_AND_COLD_CONCLUSION_WITH_COUNTS"},
+        {"type": "paragraph", "text": "The two frozen methods solve the same point-only inputs under one recorded resource envelope. IC is the existing wide koblitz_orbit_dlp_fast producer with the retained K600 factor base. Rho uses Fold field reduction, reference u64 scalar arithmetic, 256 lockstep lanes, DP6, fruitless escape off and step-cap factor 2000. This study performs no further configuration selection on the new points."},
+        {"type": "table", "headers": ["Actual measured workload", "IC wall (s)", "Rho wall (s)", "IC/rho and native interval"], "rows": [["Eight fresh singleton pairs", "PENDING:COLD_IC", "PENDING:COLD_RHO", "PENDING:COLD_RATIO_CI"], ["Three real 32-target cohort pairs", "PENDING:SHARED_IC", "PENDING:SHARED_RHO", "PENDING:SHARED_RATIO_CI"]], "widths": [1.7, 0.9, 0.9, 1.8], "padding": 4},
+        {"type": "paragraph", "text": "Cold here means an actual fresh process given the already materialized K600 artifact. Historical factor-base selection and construction cost is unavailable and remains an additive gap for a curve-only cold-start comparison. The shared workload initializes each arm once for 32 points; every target receives fresh walk, distinguished-point and collision state."},
+        {"type": "small", "text": "PENDING:FAILURE_COMPLETENESS_AND_AA_ADMISSION_SCOPE"}
+      ],
+      "source_note": "PENDING:SOURCE_LINKS_PROTOCOL_STATISTICS_AND_REPLAY"
+    },
+    {
+      "title": "Curve, bases and invariants held fixed",
+      "blocks": [
+        {"type": "paragraph", "text": "The retained model is icv1-f2m83-t6151469093347-9eba6cd5: y²+xy=x³+x²+1 over GF(2)[z]/(z^83+z^7+z^4+z²+1), prime subgroup r=8569786107849059, cofactor 1128547018, and G=(6614244651398184860292015,8868260410029249391539529). The field degree is 83; the subgroup has about 52.928 bits. The signed Frobenius quotient uses 166 phases and eigenvalue λ=2998004823950457."},
+        {"type": "table", "headers": ["Representation or invariant", "Role in the measured algorithm", "Identity / accounting status"], "rows": [["Binary field and polynomial basis", "Exact field arithmetic and curve representation", "Tail 149; no tail-45 or a=0 substitution"], ["Normal-basis conversion and signed Frobenius quotient", "Shared coordinate/quotient machinery; 166 signed phases", "Charged once per genuine process"], ["K600 factor-base point set", "600 columns and 99,600 signed orbit points for IC", "Artifact parsing, index and rank/log reconstruction charged; original selection unavailable"], ["Reference scalar arithmetic and rho policy", "Fold field, u64 scalars, 256 lockstep lanes, DP6, escape off", "Frozen prior selected configuration; no new tuning"]], "widths": [1.15, 1.6, 1.7], "padding": 4},
+        {"type": "paragraph", "text": "These are distinct objects: a field representation, an orbit quotient, an IC factor-base point set and a solver policy. They can share exact curve and subgroup invariants without sharing a cost boundary. This follow-up changes measurement coverage and workload accounting; it establishes no new generic counting exponent or algebraic invariant."},
+        {"type": "small", "text": "PENDING:EC1_UID_POINTSET_HASH_SOURCE_BINDINGS"}
+      ],
+      "source_note": "PENDING:EXACT_IDENTITIES_AND_SOURCE_LINKS"
+    },
+    {
+      "title": "Fresh panel and frozen execution order",
+      "blocks": [
+        {"type": "paragraph", "text": "Native C++ generation uses unbiased nonzero scalar rejection sampling with SplitMix64 seed 202610146301. It excludes the signed orbits of the K600 representatives, the original exposed target, all 16 prior optimization targets and each accepted new target. There are 617 initially excluded orbits. Solvers receive point-only files; known validation scalars remain in a checker-only sidecar."},
+        {"type": "table", "headers": ["Prospective component", "Processes / answers", "Order and purpose"], "rows": [["Five identical rho A/A pairs", "10 processes / 10 answers", "target_01, equal seed inside each pair; noise diagnostic"], ["Three genuine shared cohorts", "6 processes / 192 matched answers", "32 points per arm, target orders rotated by 0/11/22; second rotated order reversed"], ["Eight actual singleton cold pairs", "16 processes / 16 matched answers", "target_01 through target_08; predeclared alternating arm order"], ["Total prospective matrix", "32 processes / 218 answers", "208 main matched answers plus 10 A/A answers; every attempt retained"]], "widths": [1.3, 1.1, 2.1], "padding": 4},
+        {"type": "small", "text": "PENDING:ACTUAL_COMPLETED_FAILURES_GENERATION_RECEIPT_AND_SEEDS"},
+        {"type": "paragraph", "text": "No fastest-seed selection, target deletion, adaptive pruning or policy change is permitted. Sampling is conditional on orbit exclusions and without replacement. Target and preparation repetitions are distinct: the online panel has 32 target blocks sharing three IC preparations."}
+      ],
+      "source_note": "PENDING:FIXTURE_AND_MATRIX_LINKS"
+    },
+    {
+      "title": "What the clocks include",
+      "blocks": [
+        {"type": "figure", "path": "figures/workload_boundaries.png", "max_height": 305, "caption": "Actual fresh singleton and genuine reused-setup process boundaries. Public-point generation, compilation and external research audit are outside both arm process clocks. Historical K600 selection cost is missing."},
+        {"type": "paragraph", "text": "Actual process wall includes launch, public input parsing, curve/basis setup, IC index and rank/log reconstruction or rho jumps, Q checks, solving, scalar recovery, built-in verification, output and exit. A whole-process timeout and native wait4 meters apply equally to both arms."},
+        {"type": "paragraph", "text": "Stock IC target_ms omits input/Q-validation/output intervals that rho online includes. Those producer query timings stay secondary and retain the mismatch. The five exported IC stage fields and their residual are shown; they are not silently redefined as five exhaustive mutually exclusive end-to-end phases."},
+        {"type": "small", "text": "PENDING:SETUP_PHASE_VALUES_RESIDUAL_AND_EXTERNAL_AUDIT_METERS"}
+      ],
+      "source_note": "PENDING:WORKER_BOUNDARY_LINKS"
+    },
+    {
+      "title": "Eight actual cold singleton pairs",
+      "blocks": [
+        {"type": "figure", "path": "figures/cold_pairs.png", "max_height": 270, "caption": "All eight predeclared actual complete-process singleton pairs. Seconds, paired public points, IC/rho direction. PENDING:NATIVE_ADMISSION_AND_RUN_ID"},
+        {"type": "table", "headers": ["Target", "IC process (s)", "Rho process (s)", "IC/rho / status"], "rows": [["PENDING:ALL_EIGHT_NATIVE_ROWS", "PENDING:IC", "PENDING:RHO", "PENDING:STATUS"]], "widths": [0.65, 1, 1, 1.4], "padding": 3},
+        {"type": "small", "text": "PENDING:NATIVE_COLD_MEANS_MEDIANS_MIN_MAX_INTERVAL_AND_CORRECTNESS"}
+      ],
+      "source_note": "PENDING:COLD_RAW_AND_ANALYSIS_LINKS"
+    },
+    {
+      "title": "Three genuine reused-setup cohorts",
+      "blocks": [
+        {"type": "figure", "path": "figures/shared_cohorts.png", "max_height": 260, "caption": "All three actual 32-target process pairs. Each process charges its own once-only infrastructure and all 32 fresh target solves; rho collision state is reset between points. PENDING:NATIVE_ADMISSION_AND_RUN_ID"},
+        {"type": "table", "headers": ["Cohort", "IC process / setup (s)", "Rho process / setup (s)", "IC/rho / status"], "rows": [["PENDING:ALL_THREE_NATIVE_ROWS", "PENDING:IC", "PENDING:RHO", "PENDING:STATUS"]], "widths": [0.6, 1.15, 1.15, 1.1], "padding": 3},
+        {"type": "paragraph", "text": "The primary shared-workload estimate uses mean actual process cost over three paired cohorts, not a synthetic sum of singleton launches divided by 32. Its native paired bootstrap conditions on this one host and only three preparation clusters; it does not describe independent-host uncertainty or robust extreme tails."},
+        {"type": "small", "text": "PENDING:NATIVE_SHARED_RATIO_CI_COMPLETE_AND_RESOURCE_STATUS"}
+      ],
+      "source_note": "PENDING:COHORT_RAW_AND_ANALYSIS_LINKS"
+    },
+    {
+      "title": "Producer query distributions and slow cases",
+      "blocks": [
+        {"type": "figure", "path": "figures/query_targets.png", "max_height": 310, "caption": "All 32 native target means, each from three shared-cohort query observations. Producer boundaries differ; this graph is secondary. PENDING:UNITS_NATIVE_STATISTIC_AND_RUN_ID"},
+        {"type": "table", "headers": ["Native descriptive statistic", "IC", "Rho", "Scope"], "rows": [["PENDING:MEAN_MEDIAN_P90_P95_MAX_ROWS", "PENDING:IC", "PENDING:RHO", "32 target blocks / 3 preparations"]], "widths": [1.2, 0.9, 0.9, 1.7], "padding": 3},
+        {"type": "small", "text": "PENDING:NATIVE_TARGETBLOCK_AND_CROSSED_SENSITIVITY_INTERVALS_WITH_FAILURES"},
+        {"type": "paragraph", "text": "Means, medians and tail quantiles answer different questions. Conventional even-sample medians use midpoint interpolation in native analysis. Every slow or regressing point remains in the panel; successful subset summaries never turn a failed or missing solve into a win."}
+      ],
+      "source_note": "PENDING:QUERY_AND_TAIL_LINKS"
+    },
+    {
+      "title": "Complete query rows: targets 01–16",
+      "blocks": [
+        {"type": "small", "text": "Each row contains the native three IC producer query observations, three rho observations and native target means/ratio. Units and unequal Q-validation boundaries remain explicit. Seeds and full point hashes are in the source records."},
+        {"type": "table", "headers": ["Target", "IC three queries", "Rho three queries", "Native means / IC/rho"], "rows": [["PENDING:TARGETS_01_TO_16_NATIVE_ROWS", "PENDING:IC", "PENDING:RHO", "PENDING:MEANS_RATIO"]], "widths": [0.55, 1.5, 1.5, 1.3], "padding": 3}
+      ],
+      "source_note": "PENDING:COMPLETE_ROWS_01_16_LINKS"
+    },
+    {
+      "title": "Complete query rows: targets 17–32",
+      "blocks": [
+        {"type": "small", "text": "The same native accounting and formatting apply to every point. These rows are retained rather than replacing the panel with a pooled median or selected fastest cases."},
+        {"type": "table", "headers": ["Target", "IC three queries", "Rho three queries", "Native means / IC/rho"], "rows": [["PENDING:TARGETS_17_TO_32_NATIVE_ROWS", "PENDING:IC", "PENDING:RHO", "PENDING:MEANS_RATIO"]], "widths": [0.55, 1.5, 1.5, 1.3], "padding": 3}
+      ],
+      "source_note": "PENDING:COMPLETE_ROWS_17_32_LINKS"
+    },
+    {
+      "title": "Memory, CPU and retained failures",
+      "blocks": [
+        {"type": "figure", "path": "figures/process_memory.png", "max_height": 280, "caption": "Recorded native wait4 peak RSS for all cold and genuine shared processes. These are process peaks, not simultaneous additive memory footprints. PENDING:RSS_UNITS_AND_RUN_ID"},
+        {"type": "table", "headers": ["Workload / arm", "CPU / peak RSS", "Complete / failure status"], "rows": [["PENDING:NATIVE_RESOURCE_AND_STATUS_ROWS", "PENDING:VALUES", "PENDING:STATUS"]], "widths": [1.2, 1.4, 1.9], "padding": 3},
+        {"type": "paragraph", "text": "Timeouts, OOMs, signal exits, invalid scalars, unattempted downstream targets and internal capped-walk restarts remain recorded. Internal rho lane restarts are charged algorithmic work; zero whole-process timeout does not imply zero internal restarts."},
+        {"type": "small", "text": "PENDING:ACTUAL_RESOURCE_FAILURE_SUMMARY_WITH_RAW_LINKS"}
+      ],
+      "source_note": "PENDING:MONITOR_AND_FAILURE_LINKS"
+    },
+    {
+      "title": "Reusable-setup break-even is a model",
+      "blocks": [
+        {"type": "figure", "path": "figures/break_even_model.png", "max_height": 290, "caption": "Native additive setup-plus-linear-query model, with actual measured target-count range marked. N>32 is modeled, not an executed crossover. PENDING:NATIVE_FINITE_NONFINITE_STATUS"},
+        {"type": "table", "headers": ["Model field", "Native value / status"], "rows": [["Setup and per-target coefficients", "PENDING:NATIVE_COEFFICIENTS_WITH_UNITS"], ["Point-estimate threshold", "PENDING:NATIVE_FINITE_THRESHOLD_OR_NULL"], ["Bootstrap nonfinite mass", "PENDING:NATIVE_MASS_NOT_DROPPED"], ["Observed workload sizes", "Actual 1-target and 32-target processes; no observed larger crossover"]], "widths": [1.3, 2.7], "padding": 4},
+        {"type": "paragraph", "text": "The model assumes additive reusable setup and a stable mean per-target cost. Producer query intervals have unequal Q-validation boundaries, and the original K600 construction cost is absent. Thresholds conditional on those quantities cannot establish a complete production or curve-only crossover. If IC's mean query cost is not lower, the native point estimate has no finite threshold."},
+        {"type": "small", "text": "PENDING:MODELED_THRESHOLD_INTERVAL_AND_ACTUAL_PREFIX_DISCLOSURE"}
+      ],
+      "source_note": "PENDING:NATIVE_MODEL_LINKS"
+    },
+    {
+      "title": "A/A noise, isolation and admission",
+      "blocks": [
+        {"type": "figure", "path": "figures/aa_noise.png", "max_height": 240, "caption": "Five identical rho fresh-process A/A pairs. Native recorded ratio, median and range are descriptive; they are not a confidence band or universal noise ceiling. PENDING:NATIVE_RUN_ID"},
+        {"type": "table", "headers": ["Envelope / admission", "Recorded status"], "rows": [["CPU and threads", "CPU3, one OS thread; 256 lockstep lanes are not threads"], ["Common limits", "12 GiB RLIMIT_AS; 2100 s whole-process timeout"], ["Reservation and contention", "PENDING:NATIVE_SAMPLE_STATUS"], ["Host / compiler / profile", "PENDING:HOST_TOOLCHAIN_HASHES"], ["Calibrated S, ecbench L2 and independent host", "Unset; local diagnostic only"]], "widths": [1.2, 2.8], "padding": 4},
+        {"type": "small", "text": "PENDING:NATIVE_AA_VALUES_AND_CONDITIONAL_WALL_INTERPRETATION"},
+        {"type": "paragraph", "text": "A guest reservation monitors movable processes and local pressure. Physical-host neighbours and frequency are outside its reach. All timing statements are conditional on the measured host, declared target exclusions, retained materialized base and workload boundaries."}
+      ],
+      "source_note": "PENDING:HOST_RESERVATION_AA_LINKS"
+    },
+    {
+      "title": "Verification and requirement status",
+      "blocks": [
+        {"type": "table", "headers": ["Obligation", "Actual status / evidence / remaining gap"], "rows": [["Frozen larger matched panel", "PENDING:COMPLETION_FIXTURE_MATRIX_HASHES"], ["Actual singleton cold and genuine reused setup", "PENDING:COMPLETE_PROCESS_COUNTS_AND_RECORDS"], ["Every completed scalar and IC four-point witness", "PENDING:INDEPENDENT_NATIVE_RECEIPT_COUNTS_HASH_METERS"], ["Full IC rank/log transcript", "Not exported by the existing wide producer; remains unvalidated"], ["Release and touched-example checks", "PENDING:VALIDATION_LOGS"], ["Source-linked PDFs and immutable prior pages", "PENDING:LAYOUT_QA_AND_ARCHIVE_POINTERS"], ["Ledger / global optimality / independent host", "No promotion; unsupported admission remains unset"]], "widths": [1.4, 2.8], "padding": 4},
+        {"type": "paragraph", "text": "Independent C++ arithmetic regenerates the fixtures, replays every completed scalar and verifies every exported IC decomposition witness. File and execution-matrix audits bind source, binaries, inputs and records. The post-hoc audit is metered separately and is not silently assigned as a per-target production-verification charge."},
+        {"type": "small", "text": "PENDING:VERIFICATION_SCOPE_FAILURE_PRESERVATION_AND_SOURCE_FREEZE"}
+      ],
+      "source_note": "PENDING:VERIFICATION_AND_VALIDATION_LINKS"
+    },
+    {
+      "title": "What changes in the measurement approach",
+      "blocks": [
+        {"type": "paragraph", "text": "PENDING:EVIDENCE_BOUNDED_METHOD_CHOICE_FOR_SINGLETON_AND_32_TARGET_WORKLOADS"},
+        {"type": "table", "headers": ["Measurement change", "Why it matters / next validation"], "rows": [["Keep complete-process totals alongside producer stages", "Primary cold and shared workloads charge every implemented phase; a faster query alone is insufficient"], ["Separate target, seed, preparation and host repetitions", "Target-block and crossed sensitivity describe different uncertainty; only three shared setups were measured"], ["Publish means, conventional medians and tail rows", "A mean improvement does not imply a median or worst-case improvement"], ["Validate an additive model with an executed larger workload", "Any claimed crossover beyond 32 targets needs a new frozen actual workload"], ["Add complete stage boundaries and calibrated units", "Equal online intervals and admitted ecbench/independent-host evidence remain separate implementation obligations"]], "widths": [1.35, 2.9], "padding": 4},
+        {"type": "paragraph", "text": "The broad curve/vector-basis synthesis and all earlier degree-83 studies follow as the unchanged 70-page historical appendix. New figures are study-local diagnostics. Canonical admitted boundary graphs and ledger values change only when their own claim contracts are met."},
+        {"type": "small", "text": "PENDING:SOURCES_INDEX_REPRODUCTION_AND_BENCHMARK_COPY_LINKS"}
+      ],
+      "source_note": "PENDING:CANONICAL_GRAPHS_CHECKED_UNCHANGED_AND_SOURCE_LINKS"
+    }
+  ]
+}

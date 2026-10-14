@@ -1,0 +1,7 @@
+Initial narrow native analysis build/test, before any measured campaign:
+env RUSTUP_HOME=/workspace/n83_evaluation/toolchain/rustup CARGO_HOME=/workspace/n83_evaluation/toolchain/cargo CARGO_TARGET_DIR=/workspace/n83_evaluation/build PATH=/workspace/n83_evaluation/toolchain/rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin:/usr/bin:/bin cargo test --release --offline --manifest-path research/n83_matched_20261014/analysis/Cargo.toml
+exit 101
+error: no rules expected `.`
+ --> src/lib.rs:248:72
+The serde_json json! macro required parentheses around a method-chain value.
+Corrected before source freeze. No timed algorithm child ran in this attempt.

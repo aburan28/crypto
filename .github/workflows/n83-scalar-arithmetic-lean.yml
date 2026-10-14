@@ -24,6 +24,10 @@ jobs:
         working-directory: research/n83_speed_20261012/audit
     steps:
       - uses: actions/checkout@v4
+      - name: Install proof-source validation tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
       - name: Reject incomplete or bypassed proof sources
         run: |
           command -v rg >/dev/null

@@ -1,0 +1,126 @@
+{
+  "schema": "n83.pr-ci-fixes/v1",
+  "observed_at_utc": "2026-10-14 19:12:16 UTC",
+  "published_head": "12321a1855d0afada849d601559d1b5eaa6e0b39",
+  "reproduction_base": "275beb93f3bf33ade6c19f19e8b336027a00b297",
+  "source_language_scope": "Existing repository metadata/CI policy validation; no cryptographic algorithms or benchmark orchestration.",
+  "ci_snapshot": "archives/check-20261014T1900Z.json",
+  "ci_jobs": "archives/jobs-20261014T1901Z.json",
+  "ci_logs": "archives/logs-20261014T1902Z.json",
+  "conductor": {
+    "cmd": "conductor check --summary 'Repair PR 1828 CI tooling and frozen-source label exemptions' --scope path:.github/workflows/n83-scalar-arithmetic-lean.yml --scope path:scripts/check_curve_names.py --scope path:scripts/test_curve_names_archived_labels.py --scope path:research/n83_matched_20261014/checks/pr_ci_fixes",
+    "exit_code": 127,
+    "output": "/bin/bash: line 1: conductor: command not found"
+  },
+  "commands": [
+    {
+      "name": "baseline",
+      "cmd": "set -o noclobber\nPYTHONPATH=/workspace/repos/crypto/scripts python3 research/n83_matched_20261014/checks/pr_ci_fixes/baseline_check_curve_names.py --diff 275beb93f3bf33ade6c19f19e8b336027a00b297 > research/n83_matched_20261014/checks/pr_ci_fixes/baseline.stdout.log 2> research/n83_matched_20261014/checks/pr_ci_fixes/baseline.stderr.log",
+      "result": {
+        "chunk_id": "68a363",
+        "wall_time_seconds": 4.113827515,
+        "exit_code": 1,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "name": "archive_tests",
+      "cmd": "set -o noclobber\npython3 scripts/test_curve_names_archived_labels.py > research/n83_matched_20261014/checks/pr_ci_fixes/archive_tests.stdout.log 2> research/n83_matched_20261014/checks/pr_ci_fixes/archive_tests.stderr.log",
+      "result": {
+        "chunk_id": "d4a026",
+        "wall_time_seconds": 0.135353122,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "name": "fixed",
+      "cmd": "set -o noclobber\npython3 scripts/check_curve_names.py --diff 275beb93f3bf33ade6c19f19e8b336027a00b297 > research/n83_matched_20261014/checks/pr_ci_fixes/fixed.stdout.log 2> research/n83_matched_20261014/checks/pr_ci_fixes/fixed.stderr.log",
+      "result": {
+        "chunk_id": "967abf",
+        "wall_time_seconds": 4.006103,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "name": "archives_unchanged",
+      "cmd": "git diff --exit-code -- research/n83_speed_20261012/archives research/n83_speed_20261012/audit",
+      "result": {
+        "chunk_id": "764144",
+        "wall_time_seconds": 0.000024417,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    }
+  ],
+  "relocated_baseline_source": "archives/baseline_check_curve_names.py",
+  "relocated_baseline_replay": {
+    "cmd": "set -o noclobber\nPYTHONPATH=/workspace/repos/crypto/scripts python3 research/n83_matched_20261014/checks/pr_ci_fixes/archives/baseline_check_curve_names.py --diff 275beb93f3bf33ade6c19f19e8b336027a00b297 > research/n83_matched_20261014/checks/pr_ci_fixes/baseline_archived.stdout.log 2> research/n83_matched_20261014/checks/pr_ci_fixes/baseline_archived.stderr.log",
+    "result": {
+      "chunk_id": "186dea",
+      "wall_time_seconds": 4.30979415,
+      "exit_code": 1,
+      "original_token_count": 0,
+      "output": ""
+    }
+  },
+  "workflow_gate": {
+    "cmd": "set -o noclobber\npython3 research/n83_matched_20261014/checks/pr_ci_fixes/check_workflow.py > research/n83_matched_20261014/checks/pr_ci_fixes/workflow_gate.stdout.log 2> research/n83_matched_20261014/checks/pr_ci_fixes/workflow_gate.stderr.log",
+    "exit_code": 0,
+    "valid_proof_sources_accepted": true,
+    "forbidden_constructs_rejected": [
+      "sorry",
+      "admit",
+      "sorryAx",
+      "axiom",
+      "native_decide",
+      "#eval"
+    ],
+    "missing_ripgrep_fails_closed": true,
+    "explicit_installation_precedes_guard": true
+  },
+  "source_sha256": {
+    ".github/workflows/n83-scalar-arithmetic-lean.yml": "7f1a887e720c1093ba4ca04d0faa44f280de2eb1f0a6b2054905d71fd118d596",
+    "scripts/check_curve_names.py": "104531dc98fc8e3e54cab35a0490324e6f4a9c80da404e54918e8b1537bec7b9",
+    "scripts/test_curve_names_archived_labels.py": "084e12cce8a910a27807a0e37b5343907bb2ab2498dc18ab6c0454b25127ef0f",
+    "research/n83_matched_20261014/checks/pr_ci_fixes/check_workflow.py": "7d86ff6a5a27819876e471da1a635836ac172a0c23ba1ff720c93639fead516a",
+    "research/n83_matched_20261014/checks/pr_ci_fixes/archives/baseline_check_curve_names.py": "d89d8b16fbe0c6ed028b5b4afc994ec5a1195503829b09e0e362d535aefe0bf6",
+    "research/n83_speed_20261012/audit/ScalarArithmetic.lean": "89f3e3b63a3280c35808d6e4c29678cf2d9d9216ab21196fd3bc919f1c744a9e",
+    "research/n83_speed_20261012/audit/AxiomAudit.lean": "b2756beabca438fe9525dfd35a4fae0266fa48808a7f23246b19afa819470a3a"
+  },
+  "merge_audit": {
+    "fetch_cmd": "git fetch --filter=blob:none --no-tags origin main",
+    "fetch_exit_code": 0,
+    "base_head": "ed3780f4dda63f691377c43280c10000fc2a0ee2",
+    "dry_merge_cmd": "git merge-tree --write-tree HEAD origin/main",
+    "dry_merge_result": {
+      "chunk_id": "727c64",
+      "wall_time_seconds": 0.000024006,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    },
+    "temporary_tree": "1e85b9775ad9bfc6f89d4f68ace2a368e8927d6c",
+    "result": "clean",
+    "branch_index_working_tree_unchanged": true,
+    "copilot_requested": false
+  },
+  "review_gate": {
+    "state": "human_review_required",
+    "review": "PRR_kwDOSMdswM8AAAABSQXYXQ",
+    "review_state": "COMMENTED",
+    "requested_reviewers": "No reviewer requested by this session; user choice remains pending."
+  },
+  "auxiliary_autofix": {
+    "run_id": 38599281496,
+    "job_id": 115985933776,
+    "failure": "Missing repository ANTHROPIC_API_KEY secret before PR claim.",
+    "caused_by_change": false
+  },
+  "validation_status": "Locally verified repairs; resulting-head remote CI remains a gate after commit/push."
+}

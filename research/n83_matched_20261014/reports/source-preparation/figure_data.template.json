@@ -1,0 +1,21 @@
+{
+  "evidence_status": "PENDING:NATIVE_RECORDS_VERIFIED_LAYOUT_ONLY",
+  "research_results_recomputed": false,
+  "display_values_policy": "Copy native recorded values or native precomputed summaries verbatim; no selection, aggregation, ratios, quantiles or bootstrap in presentation code.",
+  "figures": [
+    {
+      "name": "PENDING:FIGURE_NAME",
+      "kind": "grouped_bars",
+      "title": "PENDING:NATIVE_QUANTITY_AND_SCOPE",
+      "source": "PENDING:NATIVE_PATH_AND_RUN_ID",
+      "population": "PENDING:TARGET_PREPARATION_AND_HOST_COUNTS",
+      "xlabel": "PENDING:UNITS",
+      "ylabel": "PENDING:UNITS",
+      "scope_note": "PENDING:PRIMARY_SECONDARY_OR_MODELED",
+      "series": [
+        {"label": "IC", "x": [], "y": [], "display_offset": -0.18, "display_width": 0.35},
+        {"label": "Rho", "x": [], "y": [], "display_offset": 0.18, "display_width": 0.35}
+      ]
+    }
+  ]
+}
