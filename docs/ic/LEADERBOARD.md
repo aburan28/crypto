@@ -106,6 +106,17 @@ Shares are fractions of each row's own `S`, so they carry no unit; read each row
 
 The separately calibrated `icv1-f2m37-tm534059-32aad96b` shared-rank K16 candidate (`IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h44f5af6dc772`) has 1,184 usable points and 16 folded columns. Across 40 verified one-target runs, its mean cold counted `S` lower bound is 2.111; its counted IC/rho quotient is 5.034 and K16/K42 is 0.349. Native work is unpriced for both arms, and L0 timing cannot establish an online speedup. This row is intentionally outside the three fully priced unit families; read the [frozen decision](../../research/ecbench_n37_rank_columns_20261004/RESULT.json).
 
+## Round 314 known-log transport diagnostic outside tables A–C
+
+The hash-selected exact-log candidate improves its sequential schedule on every frozen cell but remains above same-target strong rho. Its base consists of scalar-labelled generator multiples, so this is a generic mechanism screen, not transport into the fixed P-256 Dickson base. Native work is unpriced and all sessions are L0; a fully priced cold speedup and wall-time speedup are unset. The counted-work exponent is 0.474 [0.335, 0.612], and the pair-table exponent is 0.492. The exact `icv1-fp256-t89188191154553853111372247798585809583-f188c491` / `FB1h2f8621cda105` certificate finds 0 transport relations and leaves 131,458 log dimensions. Read the [frozen analysis](../../research/ecbench_known_log_transport_round314_20261014/ANALYSIS.json).
+
+| curve | log₂ r | rho S | sequential S | hash S | hash / rho | hash / sequential | peak RSS KiB |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| `icv1-f2m37-tm534059-32aad96b` | 27.781 | 0.281 | 0.758 | 0.596 | 2.121 [1.908, 2.409] | 0.787 | 7,316 |
+| `icv1-f2m43-tm998717-e2e742b0` | 32.113 | 0.170 | 0.576 | 0.441 | 2.591 [2.190, 3.059] | 0.765 | 8,084 |
+| `icv1-f2m47-t22705043-f4e44623` | 36.636 | 0.121 | 0.623 | 0.394 | 3.267 [2.578, 4.301] | 0.632 | 10,488 |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.000 | 0.163 | 0.711 | 0.516 | 3.161 [2.361, 4.389] | 0.726 | 12,996 |
+
 The untouched 16-target K8/K16 confirmation selected `IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h0eb4fc2e0d54` for the cold implementation route: K16/K8 whole-solve Callgrind Ir is 1.190 [1.158, 1.222], and K8/rho is 3.645 [3.235, 4.136]. All 64 profiles and 320 independent measured replays verified. The unit is simulated whole-solve instructions, not isolated online wall time; K16 remains a target-only candidate. Read the [raw instruction decision](../../research/ecbench_n37_k8_k16_20261004/DECISION.json).
 
 The fresh 16-target panel reverses the base choice inside the **target-only simulated-instruction** interval: `IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hbbfdf029e5a2` is prioritized for an isolated n37 online wall test because K8/K16 target-only Callgrind Ir is 2.886 [1.730, 4.602]. K16/rho is 0.153 [0.092, 0.240] in the same instruction unit, while K8/K16 complete-solve Ir is 0.848. All 64 profile scalars and 320 independent measured replays verified. Mac L0 timing leaves the primary online wall speedup unknown; both bases remain live at n41/n53. Read the [raw target-only decision](../../research/ecbench_n37_online_ir_20261004/DECISION.json).
@@ -153,4 +164,5 @@ The preregistered one-target workload `f6d79f6dd9f2` on `icv1-f2m9-tm5-4a3ea183`
 - `research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl` — sha256 `b65613c68d68d744…`
 - `research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json` — sha256 `307f02ce84e5cb46…`
 - `research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json` — sha256 `69ca54385c62a50e…`
+- `research/ecbench_known_log_transport_round314_20261014/ANALYSIS.json` — sha256 `e887ca37106e24b3…`
 - `docs/curves/registry.json` — sha256 `b1b8439baf4d1830…`

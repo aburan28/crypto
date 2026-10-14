@@ -295,6 +295,9 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 | `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
 | `claw.pair_table` | the known-log base's seed scalar multiplications, every table addition `P_i + F_b`, both query additions `Q − (F_k + F_l)`, the addition that rebuilds a hit's table sum; phases `base`, `table`, `search`, `recover` | Frobenius maps, canonicalisations, table inserts and probes |
 | `ic.pipeline` | factor base, oracle set-up (pair tables), relation trials, linear algebra, verification, each a phase; native work (lookups, row operations, square roots, Artin–Schreier solves, …) at the pinned ratio where the repository has one | native work with no pinned ratio for this curve; algebraic-solver operations |
+| `ic.shared_rank` | compact-orbit base construction, target-blind relation collection and elimination, exact column-log replay, point-only target descent, witness replay and final scalar replay | field arithmetic, hashing, allocation, canonicalisations and table operations without a pinned price |
+| `ic.transported_logs` | increasing known-multiple base construction, folded m=3 pair-table setup, exact transported-column replay, every failed target probe, witness replay and final scalar replay | field arithmetic, hashing, allocation, canonicalisations, table operations and modular combination |
+| `ic.transported_logs_hash` | every hash-selected base scalar multiplication plus the same complete cold phases as `ic.transported_logs`; its seed and schedule are method parameters | hash draws and the same unpriced native work as `ic.transported_logs` |
 
 `ic.pipeline` defaults to `linalg=incremental-gauss`, which stops when the
 target scalar is pinned; the factor-base logs can still be underdetermined.
@@ -319,6 +322,15 @@ unpinned work keeps the reported `S` a lower bound. The
 probe but adds canonicalisation, Frobenius-map, lookup, entry and
 representative counts to `oracle_setup`. Use `mitm-frobenius:m=3` on the
 same base as its accounting control.
+
+`known-log-orbit:columns=N,scalar_cap=M` builds signed-Frobenius orbits from
+generator multiples whose scalar labels are known.  With
+`schedule=hash,seed=S`, the representatives are deterministic hash-selected
+nonzero scalars and every `[s]G` construction is charged.  This is a generic
+mechanism/control base: it makes no claim that its points satisfy a separately
+prescribed geometric factor-base predicate.  Round 314's complete cold
+measurements are in
+[`research/ecbench_known_log_transport_round314_20261014`](../../research/ecbench_known_log_transport_round314_20261014/RESULT.md).
 
 `koblitz-standard-subspace:dimension=d` with
 `pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N` runs

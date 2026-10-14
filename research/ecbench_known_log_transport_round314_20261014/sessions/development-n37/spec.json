@@ -1,0 +1,32 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Round314 transported-log m3 n37 development confirmation",
+  "description": "Development-only 64-target K confirmation on the declared seed; not holdout evidence.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 37}],
+    "targets_per_curve": 64,
+    "target_seed": 20261014314001,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong", "params": {"lanes": "32", "dp_bits": "8", "step_cap_factor": "2000"}}},
+    {"name": "transport-k6", "role": "candidate", "method": {"id": "ic.transported_logs", "params": {"factor_base": "known-log-orbit:columns=6,scalar_cap=1000000", "target_max_attempts": "2048"}}},
+    {"name": "transport-k7", "role": "candidate", "method": {"id": "ic.transported_logs", "params": {"factor_base": "known-log-orbit:columns=7,scalar_cap=1000000", "target_max_attempts": "2048"}}},
+    {"name": "transport-k8", "role": "candidate", "method": {"id": "ic.transported_logs", "params": {"factor_base": "known-log-orbit:columns=8,scalar_cap=1000000", "target_max_attempts": "2048"}}},
+    {"name": "transport-k9", "role": "candidate", "method": {"id": "ic.transported_logs", "params": {"factor_base": "known-log-orbit:columns=9,scalar_cap=1000000", "target_max_attempts": "2048"}}},
+    {"name": "transport-k10", "role": "candidate", "method": {"id": "ic.transported_logs", "params": {"factor_base": "known-log-orbit:columns=10,scalar_cap=1000000", "target_max_attempts": "2048"}}},
+    {"name": "transport-k11", "role": "candidate", "method": {"id": "ic.transported_logs", "params": {"factor_base": "known-log-orbit:columns=11,scalar_cap=1000000", "target_max_attempts": "2048"}}},
+    {"name": "transport-k12", "role": "candidate", "method": {"id": "ic.transported_logs", "params": {"factor_base": "known-log-orbit:columns=12,scalar_cap=1000000", "target_max_attempts": "2048"}}},
+    {"name": "transport-k13", "role": "candidate", "method": {"id": "ic.transported_logs", "params": {"factor_base": "known-log-orbit:columns=13,scalar_cap=1000000", "target_max_attempts": "2048"}}},
+    {"name": "transport-k14", "role": "candidate", "method": {"id": "ic.transported_logs", "params": {"factor_base": "known-log-orbit:columns=14,scalar_cap=1000000", "target_max_attempts": "2048"}}},
+    {"name": "claw-c1", "role": "baseline", "method": {"id": "claw.pair_table", "params": {"base_scale": "4", "table_scale": "1", "cap_multiple": "64"}}}
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 20261014314001,
+    "isolation_required": "L0",
+    "timeout_seconds": 120
+  }
+}

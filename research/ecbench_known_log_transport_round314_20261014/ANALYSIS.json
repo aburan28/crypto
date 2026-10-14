@@ -1,0 +1,1177 @@
+{
+  "comparison_unit": "ecbench.gae; S = cold total GAE / sqrt(subgroup order)",
+  "correctness": {
+    "crashes": 0,
+    "exact_counted_aa_pairs": 160,
+    "exhausted_runs": 0,
+    "measured_records": 800,
+    "measured_records_replayed_identically": 800,
+    "observed_false_negatives_on_checked_instances": 0,
+    "observed_false_positives": 0,
+    "records": 960,
+    "timeouts": 0,
+    "wrong_answers": 0
+  },
+  "date": "2026-10-14",
+  "decision": {
+    "classification": "engineering improvement; negative parity and transfer result",
+    "dominant_obstruction": "The exact-log construction is a generic scalar-labelled base, not the fixed Dickson base. Even on applicable Koblitz analogues its fully charged cold count remains above strong rho, while the exact P-256 census leaves all 131,458 FB1 log dimensions independent.",
+    "full_p256_attempt_authorized": false,
+    "parity_achieved": false,
+    "round_stop": "The preregistered single post-holdout iteration has been consumed; another algorithmic change requires a new preregistration and fresh hidden targets."
+  },
+  "input_sha256": {
+    "ITERATION_N37_AUDIT.json": "86b49fa611f08157f18b014c8b0d6855fccd0f89c659b7d62972af5e97dcd172",
+    "ITERATION_N41_AUDIT.json": "58f93c2243202d87eb3e58b2bd66f488102fe20ca5877d499beb4da1aea30bc8",
+    "ITERATION_N43_AUDIT.json": "0cc5b71fcd7eadac625b7d84cfff73f5e348105b19425c777e9dfdc9a1299c80",
+    "ITERATION_N47_AUDIT.json": "f44247caba6ac1513c6d005a00033196d1ab37471616a2b913147890c5d69a16",
+    "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_fb_log_transport_round21_20261006/transport-result.json": "4aaf5fde72257ed1f262d5674ab2fe81c7b4f90698fa3767615adfed6524e757",
+    "sessions/iteration-n37/records.jsonl": "8d8f185d0ee40a7c3aefff697ef7ac876531e856137e5418ca9c881bab9b99ca",
+    "sessions/iteration-n41/records.jsonl": "97b0ee8f0fed08129f537b780d770457f7947d74a581d4c36569d0776379ccd4",
+    "sessions/iteration-n43/records.jsonl": "9612f512ce2fe0d7f8241fff57791b1ab2dcbbbe32bca84d489047ffaee6333e",
+    "sessions/iteration-n47/records.jsonl": "0b8ca292d9910b9ff15f8229c301e26f0a9ba813948f0ba3423bb56d641cc4a2"
+  },
+  "limits": [
+    "Every session earned L0, so wall-time ratios are descriptive and excluded.",
+    "Field arithmetic, hashing, allocation, and modular combination remain explicitly unpriced; all reported operation ratios are lower-bound diagnostics.",
+    "Four finite scaling points do not prove an asymptotic exponent.",
+    "The transported-log method bypasses a polynomial system; it does not establish a new Groebner degree. The fixed P-256 base retains its independently certified structured residual degree 4 and unknown unsplit S17 degree.",
+    "No Koblitz measurement is extrapolated into a P-256 attack cost after the exact transfer gate fails."
+  ],
+  "p256_transfer": {
+    "certificate_schema": "p256.fb_log_transport/v1",
+    "certificate_sha256": "4aaf5fde72257ed1f262d5674ab2fe81c7b4f90698fa3767615adfed6524e757",
+    "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+    "dickson_block_images": 5986344,
+    "factor_base": "FB1h2f8621cda105",
+    "reason": "Known multiples have exact logs only by changing the point set. The complete registered census finds no admitted log transport inside FB1h2f8621cda105; obtaining a fixed FB1 point's scalar is the ECDLP being solved.",
+    "remaining_log_dimensions": 131458,
+    "small_multiple_images": 8413312,
+    "structured_residual_degree": 4,
+    "transfer_passes": false,
+    "transport_relations": 0,
+    "unsplit_s17_degree_of_regularity": null
+  },
+  "promotion_gates": {
+    "all_conjunctive_gates_pass": false,
+    "all_records_verified_and_replayed": true,
+    "candidate_work_exponent_at_most_0_55": true,
+    "cold_setup_included": true,
+    "degree37_hash_over_rho_at_most_1_30": false,
+    "exact_counted_aa": true,
+    "p256_exact_membership_and_log_transport": false
+  },
+  "question": "Can a fully charged exact-log signed-Frobenius base reach cold one-target parity with strong Pollard rho, and can that mechanism transfer to the fixed P-256 Dickson base?",
+  "rows": [
+    {
+      "all_measured_replayed_identically": true,
+      "all_records_verified": true,
+      "arms": {
+        "claw-c1": {
+          "mean_cold_gae_lower_bound": 6174.825,
+          "mean_cold_s_lower_bound": 0.4066230748306632,
+          "mean_factor_base_bytes_floor": 0.0,
+          "mean_group_ops": {
+            "adds": 5323.6,
+            "doubles": 851.225,
+            "scalar_mults": 33.0
+          },
+          "mean_pair_table_entries": 0.0,
+          "mean_ratio_to_generic_floor_lower_bound": 2.790923557497415,
+          "mean_target_attempts": 0.0,
+          "measured_runs": 40,
+          "method": "claw.pair_table",
+          "peak_process_rss_kib": 7088,
+          "phase_mean_gae_lower_bound": {
+            "base": 1270.125,
+            "recover": 1.0,
+            "search": 2397.4,
+            "table": 2506.3
+          },
+          "phase_native_totals": {},
+          "verified_runs": 40
+        },
+        "rho-strong": {
+          "mean_cold_gae_lower_bound": 4267.868946991287,
+          "mean_cold_s_lower_bound": 0.2810466683994935,
+          "mean_factor_base_bytes_floor": 0.0,
+          "mean_group_ops": {
+            "adds": 2809.375,
+            "doubles": 0.0,
+            "scalar_mults": 35.0
+          },
+          "mean_pair_table_entries": 0.0,
+          "mean_ratio_to_generic_floor_lower_bound": 1.9290094835836922,
+          "mean_target_attempts": 0.0,
+          "measured_runs": 40,
+          "method": "rho.signed_frobenius_strong",
+          "peak_process_rss_kib": 7072,
+          "phase_mean_gae_lower_bound": {
+            "search": 2934.388766884965,
+            "setup": 1333.4801801063218
+          },
+          "phase_native_totals": {},
+          "verified_runs": 40
+        },
+        "transport-hash": {
+          "mean_cold_gae_lower_bound": 9053.0999069,
+          "mean_cold_s_lower_bound": 0.5961625343054854,
+          "mean_factor_base_bytes_floor": 39160.0,
+          "mean_group_ops": {
+            "adds": 6928.625,
+            "doubles": 700.625,
+            "scalar_mults": 26.75
+          },
+          "mean_pair_table_entries": 4441.0,
+          "mean_ratio_to_generic_floor_lower_bound": 4.091858441096688,
+          "mean_target_attempts": 2.75,
+          "measured_runs": 40,
+          "method": "ic.transported_logs_hash",
+          "peak_process_rss_kib": 7316,
+          "phase_mean_gae_lower_bound": {
+            "factor_base": 486.87850400000013,
+            "oracle_setup": 6173.255253000004,
+            "target_PDP": 1791.2411498999998,
+            "target_descent": 0.0,
+            "target_query": 115.1,
+            "target_recovery_check": 37.625,
+            "target_relation_check": 3.0,
+            "transport_verification": 446.0
+          },
+          "phase_native_totals": {
+            "attempts": 110,
+            "canonicalisations": 261581,
+            "curve_equation_checks_uncharged": 16720,
+            "factor_base_vec_bytes_floor_uncharged": 1566400,
+            "factor_point_inserts_uncharged": 32560,
+            "frobenius_maps": 1188480,
+            "frobfold_mismatches": 0,
+            "hash_scalar_draws_uncharged": 440,
+            "known_column_logs_uncharged": 440,
+            "lift_failures": 0,
+            "lookups": 1238821,
+            "min_key_field_squares_uncharged": 15840,
+            "pair_table_entries": 177640,
+            "pair_table_representatives": 440,
+            "point_negations_uncharged": 48840,
+            "scalar_replays": 40,
+            "scalars_scanned_uncharged": 440,
+            "transported_columns_checked": 440,
+            "witnesses_checked": 40
+          },
+          "verified_runs": 40
+        },
+        "transport-hash-aa": {
+          "mean_cold_gae_lower_bound": 9053.0999069,
+          "mean_cold_s_lower_bound": 0.5961625343054854,
+          "mean_factor_base_bytes_floor": 39160.0,
+          "mean_group_ops": {
+            "adds": 6928.625,
+            "doubles": 700.625,
+            "scalar_mults": 26.75
+          },
+          "mean_pair_table_entries": 4441.0,
+          "mean_ratio_to_generic_floor_lower_bound": 4.091858441096688,
+          "mean_target_attempts": 2.75,
+          "measured_runs": 40,
+          "method": "ic.transported_logs_hash",
+          "peak_process_rss_kib": 7328,
+          "phase_mean_gae_lower_bound": {
+            "factor_base": 486.87850400000013,
+            "oracle_setup": 6173.255253000004,
+            "target_PDP": 1791.2411498999998,
+            "target_descent": 0.0,
+            "target_query": 115.1,
+            "target_recovery_check": 37.625,
+            "target_relation_check": 3.0,
+            "transport_verification": 446.0
+          },
+          "phase_native_totals": {
+            "attempts": 110,
+            "canonicalisations": 261581,
+            "curve_equation_checks_uncharged": 16720,
+            "factor_base_vec_bytes_floor_uncharged": 1566400,
+            "factor_point_inserts_uncharged": 32560,
+            "frobenius_maps": 1188480,
+            "frobfold_mismatches": 0,
+            "hash_scalar_draws_uncharged": 440,
+            "known_column_logs_uncharged": 440,
+            "lift_failures": 0,
+            "lookups": 1238821,
+            "min_key_field_squares_uncharged": 15840,
+            "pair_table_entries": 177640,
+            "pair_table_representatives": 440,
+            "point_negations_uncharged": 48840,
+            "scalar_replays": 40,
+            "scalars_scanned_uncharged": 440,
+            "transported_columns_checked": 440,
+            "witnesses_checked": 40
+          },
+          "verified_runs": 40
+        },
+        "transport-sequential": {
+          "mean_cold_gae_lower_bound": 11503.2966501,
+          "mean_cold_s_lower_bound": 0.7575122946080141,
+          "mean_factor_base_bytes_floor": 39160.0,
+          "mean_group_ops": {
+            "adds": 9624.25,
+            "doubles": 237.225,
+            "scalar_mults": 19.425
+          },
+          "mean_pair_table_entries": 3406.0,
+          "mean_ratio_to_generic_floor_lower_bound": 5.1993087431053,
+          "mean_target_attempts": 6.425,
+          "measured_runs": 40,
+          "method": "ic.transported_logs",
+          "peak_process_rss_kib": 7324,
+          "phase_mean_gae_lower_bound": {
+            "factor_base": 51.87850400000001,
+            "oracle_setup": 6173.255253000004,
+            "target_PDP": 4945.4128931,
+            "target_descent": 0.0,
+            "target_query": 261.125,
+            "target_recovery_check": 37.625,
+            "target_relation_check": 3.0,
+            "transport_verification": 31.0
+          },
+          "phase_native_totals": {
+            "attempts": 257,
+            "canonicalisations": 379029,
+            "curve_equation_checks_uncharged": 16720,
+            "factor_base_vec_bytes_floor_uncharged": 1566400,
+            "factor_point_inserts_uncharged": 32560,
+            "frobenius_maps": 1188480,
+            "frobfold_mismatches": 0,
+            "known_column_logs_uncharged": 440,
+            "lift_failures": 0,
+            "lookups": 1356269,
+            "min_key_field_squares_uncharged": 15840,
+            "pair_table_entries": 136240,
+            "pair_table_representatives": 440,
+            "point_negations_uncharged": 48840,
+            "scalar_replays": 40,
+            "scalars_scanned_uncharged": 440,
+            "transported_columns_checked": 440,
+            "witnesses_checked": 40
+          },
+          "verified_runs": 40
+        }
+      },
+      "audit_sha256": "86b49fa611f08157f18b014c8b0d6855fccd0f89c659b7d62972af5e97dcd172",
+      "binary_sha256": "47e8a8ff267cf3286a98be89779155140966a1007b03095da8558030bd6e989b",
+      "curve": "icv1-f2m37-tm534059-32aad96b",
+      "field_degree": 37,
+      "isolation_level": "L0",
+      "log2_subgroup_order": 27.78083708554834,
+      "measured_rounds_per_target": 5,
+      "paired_count_ratios": {
+        "claw_over_rho": 1.4468169188637003,
+        "hash_aa": 1.0,
+        "hash_over_rho": 2.121222563144107,
+        "hash_over_rho_ci95": [
+          1.9082669507418688,
+          2.4094735823535647
+        ],
+        "hash_over_sequential": 0.7870004731922913,
+        "hash_over_sequential_ci95": [
+          0.6713727594073272,
+          0.9161510863749672
+        ],
+        "sequential_over_rho": 2.695325651507987
+      },
+      "panel": "n37",
+      "records_sha256": "8d8f185d0ee40a7c3aefff697ef7ac876531e856137e5418ca9c881bab9b99ca",
+      "session_id": "ECBS1h9245b38c90f5",
+      "spec_id": "ECS1h9364547e74a0",
+      "subgroup_order": 230603167,
+      "target_count": 8,
+      "wall_time_admissible": false
+    },
+    {
+      "all_measured_replayed_identically": true,
+      "all_records_verified": true,
+      "arms": {
+        "claw-c1": {
+          "mean_cold_gae_lower_bound": 22834.775,
+          "mean_cold_s_lower_bound": 0.3350748197150883,
+          "mean_factor_base_bytes_floor": 0.0,
+          "mean_group_ops": {
+            "adds": 20936.675,
+            "doubles": 1898.1,
+            "scalar_mults": 63.0
+          },
+          "mean_pair_table_entries": 0.0,
+          "mean_ratio_to_generic_floor_lower_bound": 2.479311413609714,
+          "mean_target_attempts": 0.0,
+          "measured_runs": 40,
+          "method": "claw.pair_table",
+          "peak_process_rss_kib": 7952,
+          "phase_mean_gae_lower_bound": {
+            "base": 2832.25,
+            "recover": 1.0,
+            "search": 9591.2,
+            "table": 10410.325
+          },
+          "phase_native_totals": {},
+          "verified_runs": 40
+        },
+        "rho-strong": {
+          "mean_cold_gae_lower_bound": 11588.470926287668,
+          "mean_cold_s_lower_bound": 0.17004786806085834,
+          "mean_factor_base_bytes_floor": 0.0,
+          "mean_group_ops": {
+            "adds": 9902.55,
+            "doubles": 0.0,
+            "scalar_mults": 35.0
+          },
+          "mean_pair_table_entries": 0.0,
+          "mean_ratio_to_generic_floor_lower_bound": 1.2582312824991433,
+          "mean_target_attempts": 0.0,
+          "measured_runs": 40,
+          "method": "rho.signed_frobenius_strong",
+          "peak_process_rss_kib": 7072,
+          "phase_mean_gae_lower_bound": {
+            "search": 10047.057507967525,
+            "setup": 1541.413418320166
+          },
+          "phase_native_totals": {},
+          "verified_runs": 40
+        },
+        "transport-hash": {
+          "mean_cold_gae_lower_bound": 30030.725,
+          "mean_cold_s_lower_bound": 0.4406673490449718,
+          "mean_factor_base_bytes_floor": 86856.0,
+          "mean_group_ops": {
+            "adds": 28551.225,
+            "doubles": 1479.5,
+            "scalar_mults": 49.175
+          },
+          "mean_pair_table_entries": 18894.0,
+          "mean_ratio_to_generic_floor_lower_bound": 3.260619789399045,
+          "mean_target_attempts": 5.175,
+          "measured_runs": 40,
+          "method": "ic.transported_logs_hash",
+          "peak_process_rss_kib": 8084,
+          "phase_mean_gae_lower_bound": {
+            "factor_base": 1016.0,
+            "oracle_setup": 19866.0,
+            "target_PDP": 7890.6,
+            "target_descent": 0.0,
+            "target_query": 238.75,
+            "target_recovery_check": 45.375,
+            "target_relation_check": 3.0,
+            "transport_verification": 971.0
+          },
+          "phase_native_totals": {
+            "attempts": 207,
+            "canonicalisations": 1109384,
+            "curve_equation_checks_uncharged": 36960,
+            "factor_base_vec_bytes_floor_uncharged": 3474240,
+            "factor_point_inserts_uncharged": 72240,
+            "frobenius_maps": 3070240,
+            "frobfold_mismatches": 0,
+            "hash_scalar_draws_uncharged": 840,
+            "known_column_logs_uncharged": 840,
+            "lift_failures": 0,
+            "lookups": 3349664,
+            "min_key_field_squares_uncharged": 35280,
+            "pair_table_entries": 755760,
+            "pair_table_representatives": 840,
+            "point_negations_uncharged": 108360,
+            "scalar_replays": 40,
+            "scalars_scanned_uncharged": 840,
+            "transported_columns_checked": 840,
+            "witnesses_checked": 40
+          },
+          "verified_runs": 40
+        },
+        "transport-hash-aa": {
+          "mean_cold_gae_lower_bound": 30030.725,
+          "mean_cold_s_lower_bound": 0.4406673490449718,
+          "mean_factor_base_bytes_floor": 86856.0,
+          "mean_group_ops": {
+            "adds": 28551.225,
+            "doubles": 1479.5,
+            "scalar_mults": 49.175
+          },
+          "mean_pair_table_entries": 18894.0,
+          "mean_ratio_to_generic_floor_lower_bound": 3.260619789399045,
+          "mean_target_attempts": 5.175,
+          "measured_runs": 40,
+          "method": "ic.transported_logs_hash",
+          "peak_process_rss_kib": 8084,
+          "phase_mean_gae_lower_bound": {
+            "factor_base": 1016.0,
+            "oracle_setup": 19866.0,
+            "target_PDP": 7890.6,
+            "target_descent": 0.0,
+            "target_query": 238.75,
+            "target_recovery_check": 45.375,
+            "target_relation_check": 3.0,
+            "transport_verification": 971.0
+          },
+          "phase_native_totals": {
+            "attempts": 207,
+            "canonicalisations": 1109384,
+            "curve_equation_checks_uncharged": 36960,
+            "factor_base_vec_bytes_floor_uncharged": 3474240,
+            "factor_point_inserts_uncharged": 72240,
+            "frobenius_maps": 3070240,
+            "frobfold_mismatches": 0,
+            "hash_scalar_draws_uncharged": 840,
+            "known_column_logs_uncharged": 840,
+            "lift_failures": 0,
+            "lookups": 3349664,
+            "min_key_field_squares_uncharged": 35280,
+            "pair_table_entries": 755760,
+            "pair_table_representatives": 840,
+            "point_negations_uncharged": 108360,
+            "scalar_replays": 40,
+            "scalars_scanned_uncharged": 840,
+            "transported_columns_checked": 840,
+            "witnesses_checked": 40
+          },
+          "verified_runs": 40
+        },
+        "transport-sequential": {
+          "mean_cold_gae_lower_bound": 39232.025,
+          "mean_cold_s_lower_bound": 0.5756861499153303,
+          "mean_factor_base_bytes_floor": 86856.0,
+          "mean_group_ops": {
+            "adds": 38775.825,
+            "doubles": 456.2,
+            "scalar_mults": 34.1
+          },
+          "mean_pair_table_entries": 14485.0,
+          "mean_ratio_to_generic_floor_lower_bound": 4.25966129999186,
+          "mean_target_attempts": 11.1,
+          "measured_runs": 40,
+          "method": "ic.transported_logs",
+          "peak_process_rss_kib": 8084,
+          "phase_mean_gae_lower_bound": {
+            "factor_base": 66.0,
+            "oracle_setup": 19866.0,
+            "target_PDP": 18657.675,
+            "target_descent": 0.0,
+            "target_query": 511.975,
+            "target_recovery_check": 45.375,
+            "target_relation_check": 3.0,
+            "transport_verification": 82.0
+          },
+          "phase_native_totals": {
+            "attempts": 444,
+            "canonicalisations": 1540067,
+            "curve_equation_checks_uncharged": 36960,
+            "factor_base_vec_bytes_floor_uncharged": 3474240,
+            "factor_point_inserts_uncharged": 72240,
+            "frobenius_maps": 3070240,
+            "frobfold_mismatches": 0,
+            "known_column_logs_uncharged": 840,
+            "lift_failures": 0,
+            "lookups": 3780347,
+            "min_key_field_squares_uncharged": 35280,
+            "pair_table_entries": 579400,
+            "pair_table_representatives": 840,
+            "point_negations_uncharged": 108360,
+            "scalar_replays": 40,
+            "scalars_scanned_uncharged": 840,
+            "transported_columns_checked": 840,
+            "witnesses_checked": 40
+          },
+          "verified_runs": 40
+        }
+      },
+      "audit_sha256": "0cc5b71fcd7eadac625b7d84cfff73f5e348105b19425c777e9dfdc9a1299c80",
+      "binary_sha256": "47e8a8ff267cf3286a98be89779155140966a1007b03095da8558030bd6e989b",
+      "curve": "icv1-f2m43-tm998717-e2e742b0",
+      "field_degree": 43,
+      "isolation_level": "L0",
+      "log2_subgroup_order": 32.112779548336775,
+      "measured_rounds_per_target": 5,
+      "paired_count_ratios": {
+        "claw_over_rho": 1.9704735115830356,
+        "hash_aa": 1.0,
+        "hash_over_rho": 2.591431189759236,
+        "hash_over_rho_ci95": [
+          2.189749743608479,
+          3.0587392753749723
+        ],
+        "hash_over_sequential": 0.7654645662567757,
+        "hash_over_sequential_ci95": [
+          0.5973142317136626,
+          0.9684952432255964
+        ],
+        "sequential_over_rho": 3.385435856857074
+      },
+      "panel": "n43",
+      "records_sha256": "9612f512ce2fe0d7f8241fff57791b1ab2dcbbbe32bca84d489047ffaee6333e",
+      "session_id": "ECBS1hadc6338f9904",
+      "spec_id": "ECS1h5561fa845ce8",
+      "subgroup_order": 4644189029,
+      "target_count": 8,
+      "wall_time_admissible": false
+    },
+    {
+      "all_measured_replayed_identically": true,
+      "all_records_verified": true,
+      "arms": {
+        "claw-c1": {
+          "mean_cold_gae_lower_bound": 107156.125,
+          "mean_cold_s_lower_bound": 0.3279214625090439,
+          "mean_factor_base_bytes_floor": 0.0,
+          "mean_group_ops": {
+            "adds": 102709.75,
+            "doubles": 4446.375,
+            "scalar_mults": 128.0
+          },
+          "mean_pair_table_entries": 0.0,
+          "mean_ratio_to_generic_floor_lower_bound": 2.5367275789683794,
+          "mean_target_attempts": 0.0,
+          "measured_runs": 40,
+          "method": "claw.pair_table",
+          "peak_process_rss_kib": 9616,
+          "phase_mean_gae_lower_bound": {
+            "base": 6637.775,
+            "recover": 1.0,
+            "search": 52809.1,
+            "table": 47708.25
+          },
+          "phase_native_totals": {},
+          "verified_runs": 40
+        },
+        "rho-strong": {
+          "mean_cold_gae_lower_bound": 39422.60791839277,
+          "mean_cold_s_lower_bound": 0.12064190679272864,
+          "mean_factor_base_bytes_floor": 0.0,
+          "mean_group_ops": {
+            "adds": 37499.225,
+            "doubles": 0.0,
+            "scalar_mults": 35.0
+          },
+          "mean_pair_table_entries": 0.0,
+          "mean_ratio_to_generic_floor_lower_bound": 0.9332589876821714,
+          "mean_target_attempts": 0.0,
+          "measured_runs": 40,
+          "method": "rho.signed_frobenius_strong",
+          "peak_process_rss_kib": 7072,
+          "phase_mean_gae_lower_bound": {
+            "search": 37664.08639300511,
+            "setup": 1758.5215253876809
+          },
+          "phase_native_totals": {},
+          "verified_runs": 40
+        },
+        "transport-hash": {
+          "mean_cold_gae_lower_bound": 128784.425,
+          "mean_cold_s_lower_bound": 0.3941088481352445,
+          "mean_factor_base_bytes_floor": 194360.0,
+          "mean_group_ops": {
+            "adds": 125369.5,
+            "doubles": 3414.925,
+            "scalar_mults": 97.35
+          },
+          "mean_pair_table_entries": 86774.0,
+          "mean_ratio_to_generic_floor_lower_bound": 3.048738489181882,
+          "mean_target_attempts": 9.35,
+          "measured_runs": 40,
+          "method": "ic.transported_logs_hash",
+          "peak_process_rss_kib": 10488,
+          "phase_mean_gae_lower_bound": {
+            "factor_base": 2259.0,
+            "oracle_setup": 88924.0,
+            "target_PDP": 34841.425,
+            "target_descent": 0.0,
+            "target_query": 490.75,
+            "target_recovery_check": 51.25,
+            "target_relation_check": 3.0,
+            "transport_verification": 2215.0
+          },
+          "phase_native_totals": {
+            "attempts": 374,
+            "canonicalisations": 4948857,
+            "curve_equation_checks_uncharged": 82560,
+            "factor_base_vec_bytes_floor_uncharged": 7774400,
+            "factor_point_inserts_uncharged": 161680,
+            "frobenius_maps": 7518160,
+            "frobfold_mismatches": 0,
+            "hash_scalar_draws_uncharged": 1720,
+            "known_column_logs_uncharged": 1720,
+            "lift_failures": 0,
+            "lookups": 8830897,
+            "min_key_field_squares_uncharged": 79120,
+            "pair_table_entries": 3470960,
+            "pair_table_representatives": 1720,
+            "point_negations_uncharged": 242520,
+            "scalar_replays": 40,
+            "scalars_scanned_uncharged": 1720,
+            "transported_columns_checked": 1720,
+            "witnesses_checked": 40
+          },
+          "verified_runs": 40
+        },
+        "transport-hash-aa": {
+          "mean_cold_gae_lower_bound": 128784.425,
+          "mean_cold_s_lower_bound": 0.3941088481352445,
+          "mean_factor_base_bytes_floor": 194360.0,
+          "mean_group_ops": {
+            "adds": 125369.5,
+            "doubles": 3414.925,
+            "scalar_mults": 97.35
+          },
+          "mean_pair_table_entries": 86774.0,
+          "mean_ratio_to_generic_floor_lower_bound": 3.048738489181882,
+          "mean_target_attempts": 9.35,
+          "measured_runs": 40,
+          "method": "ic.transported_logs_hash",
+          "peak_process_rss_kib": 10488,
+          "phase_mean_gae_lower_bound": {
+            "factor_base": 2259.0,
+            "oracle_setup": 88924.0,
+            "target_PDP": 34841.425,
+            "target_descent": 0.0,
+            "target_query": 490.75,
+            "target_recovery_check": 51.25,
+            "target_relation_check": 3.0,
+            "transport_verification": 2215.0
+          },
+          "phase_native_totals": {
+            "attempts": 374,
+            "canonicalisations": 4948857,
+            "curve_equation_checks_uncharged": 82560,
+            "factor_base_vec_bytes_floor_uncharged": 7774400,
+            "factor_point_inserts_uncharged": 161680,
+            "frobenius_maps": 7518160,
+            "frobfold_mismatches": 0,
+            "hash_scalar_draws_uncharged": 1720,
+            "known_column_logs_uncharged": 1720,
+            "lift_failures": 0,
+            "lookups": 8830897,
+            "min_key_field_squares_uncharged": 79120,
+            "pair_table_entries": 3470960,
+            "pair_table_representatives": 1720,
+            "point_negations_uncharged": 242520,
+            "scalar_replays": 40,
+            "scalars_scanned_uncharged": 1720,
+            "transported_columns_checked": 1720,
+            "witnesses_checked": 40
+          },
+          "verified_runs": 40
+        },
+        "transport-sequential": {
+          "mean_cold_gae_lower_bound": 203659.275,
+          "mean_cold_s_lower_bound": 0.623242463382579,
+          "mean_factor_base_bytes_floor": 194360.0,
+          "mean_group_ops": {
+            "adds": 202438.45,
+            "doubles": 1220.825,
+            "scalar_mults": 73.675
+          },
+          "mean_pair_table_entries": 67196.0,
+          "mean_ratio_to_generic_floor_lower_bound": 4.821265229637648,
+          "mean_target_attempts": 28.675,
+          "measured_runs": 40,
+          "method": "ic.transported_logs",
+          "peak_process_rss_kib": 10488,
+          "phase_mean_gae_lower_bound": {
+            "factor_base": 87.0,
+            "oracle_setup": 88924.0,
+            "target_PDP": 112855.075,
+            "target_descent": 0.0,
+            "target_query": 1511.95,
+            "target_recovery_check": 51.25,
+            "target_relation_check": 3.0,
+            "transport_verification": 227.0
+          },
+          "phase_native_totals": {
+            "attempts": 1147,
+            "canonicalisations": 8069403,
+            "curve_equation_checks_uncharged": 82560,
+            "factor_base_vec_bytes_floor_uncharged": 7774400,
+            "factor_point_inserts_uncharged": 161680,
+            "frobenius_maps": 7518160,
+            "frobfold_mismatches": 0,
+            "known_column_logs_uncharged": 1720,
+            "lift_failures": 0,
+            "lookups": 11951443,
+            "min_key_field_squares_uncharged": 79120,
+            "pair_table_entries": 2687840,
+            "pair_table_representatives": 1720,
+            "point_negations_uncharged": 242520,
+            "scalar_replays": 40,
+            "scalars_scanned_uncharged": 1720,
+            "transported_columns_checked": 1720,
+            "witnesses_checked": 40
+          },
+          "verified_runs": 40
+        }
+      },
+      "audit_sha256": "f44247caba6ac1513c6d005a00033196d1ab37471616a2b913147890c5d69a16",
+      "binary_sha256": "47e8a8ff267cf3286a98be89779155140966a1007b03095da8558030bd6e989b",
+      "curve": "icv1-f2m47-t22705043-f4e44623",
+      "field_degree": 47,
+      "isolation_level": "L0",
+      "log2_subgroup_order": 36.635865112243344,
+      "measured_rounds_per_target": 5,
+      "paired_count_ratios": {
+        "claw_over_rho": 2.71813892226054,
+        "hash_aa": 1.0,
+        "hash_over_rho": 3.2667657417944453,
+        "hash_over_rho_ci95": [
+          2.5777633691708526,
+          4.300790916729631
+        ],
+        "hash_over_sequential": 0.6323523689259913,
+        "hash_over_sequential_ci95": [
+          0.5100467654148337,
+          0.7838026744807857
+        ],
+        "sequential_over_rho": 5.166052824855912
+      },
+      "panel": "n47",
+      "records_sha256": "0b8ca292d9910b9ff15f8229c301e26f0a9ba813948f0ba3423bb56d641cc4a2",
+      "session_id": "ECBS1h02a93eb07dc0",
+      "spec_id": "ECS1h66587cc40a8a",
+      "subgroup_order": 106781081677,
+      "target_count": 8,
+      "wall_time_admissible": false
+    },
+    {
+      "all_measured_replayed_identically": true,
+      "all_records_verified": true,
+      "arms": {
+        "claw-c1": {
+          "mean_cold_gae_lower_bound": 244908.2,
+          "mean_cold_s_lower_bound": 0.3303073083885914,
+          "mean_factor_base_bytes_floor": 0.0,
+          "mean_group_ops": {
+            "adds": 237024.3,
+            "doubles": 7883.9,
+            "scalar_mults": 213.0
+          },
+          "mean_pair_table_entries": 0.0,
+          "mean_ratio_to_generic_floor_lower_bound": 2.386520507784934,
+          "mean_target_attempts": 0.0,
+          "measured_runs": 40,
+          "method": "claw.pair_table",
+          "peak_process_rss_kib": 15888,
+          "phase_mean_gae_lower_bound": {
+            "base": 11827.3,
+            "recover": 1.0,
+            "search": 117226.5,
+            "table": 115853.4
+          },
+          "phase_native_totals": {},
+          "verified_runs": 40
+        },
+        "rho-strong": {
+          "mean_cold_gae_lower_bound": 120965.00007950244,
+          "mean_cold_s_lower_bound": 0.16314530744779568,
+          "mean_factor_base_bytes_floor": 0.0,
+          "mean_group_ops": {
+            "adds": 118917.5,
+            "doubles": 0.0,
+            "scalar_mults": 35.0
+          },
+          "mean_pair_table_entries": 0.0,
+          "mean_ratio_to_generic_floor_lower_bound": 1.1787496433926623,
+          "mean_target_attempts": 0.0,
+          "measured_runs": 40,
+          "method": "rho.signed_frobenius_strong",
+          "peak_process_rss_kib": 8648,
+          "phase_mean_gae_lower_bound": {
+            "search": 119093.00000681449,
+            "setup": 1872.000072688034
+          },
+          "phase_native_totals": {},
+          "verified_runs": 40
+        },
+        "transport-hash": {
+          "mean_cold_gae_lower_bound": 382385.47349380003,
+          "mean_cold_s_lower_bound": 0.515722693305631,
+          "mean_factor_base_bytes_floor": 280024.0,
+          "mean_group_ops": {
+            "adds": 343002.075,
+            "doubles": 6203.975,
+            "scalar_mults": 167.15
+          },
+          "mean_pair_table_entries": 206465.0,
+          "mean_ratio_to_generic_floor_lower_bound": 3.7261748458075545,
+          "mean_target_attempts": 23.15,
+          "measured_runs": 40,
+          "method": "ic.transported_logs_hash",
+          "peak_process_rss_kib": 12996,
+          "phase_mean_gae_lower_bound": {
+            "factor_base": 4105.738207999997,
+            "oracle_setup": 232384.50058499994,
+            "target_PDP": 140556.53470080002,
+            "target_descent": 0.0,
+            "target_query": 1308.2,
+            "target_recovery_check": 55.5,
+            "target_relation_check": 3.0,
+            "transport_verification": 3972.0
+          },
+          "phase_native_totals": {
+            "attempts": 926,
+            "canonicalisations": 13590614,
+            "curve_equation_checks_uncharged": 119280,
+            "factor_base_vec_bytes_floor_uncharged": 11200960,
+            "factor_point_inserts_uncharged": 232880,
+            "frobenius_maps": 9431680,
+            "frobfold_mismatches": 0,
+            "hash_scalar_draws_uncharged": 2840,
+            "known_column_logs_uncharged": 2840,
+            "lift_failures": 0,
+            "lookups": 14524974,
+            "min_key_field_squares_uncharged": 113600,
+            "pair_table_entries": 8258600,
+            "pair_table_representatives": 2840,
+            "point_negations_uncharged": 349320,
+            "scalar_replays": 40,
+            "scalars_scanned_uncharged": 2840,
+            "transported_columns_checked": 2840,
+            "witnesses_checked": 40
+          },
+          "verified_runs": 40
+        },
+        "transport-hash-aa": {
+          "mean_cold_gae_lower_bound": 382385.47349380003,
+          "mean_cold_s_lower_bound": 0.515722693305631,
+          "mean_factor_base_bytes_floor": 280024.0,
+          "mean_group_ops": {
+            "adds": 343002.075,
+            "doubles": 6203.975,
+            "scalar_mults": 167.15
+          },
+          "mean_pair_table_entries": 206465.0,
+          "mean_ratio_to_generic_floor_lower_bound": 3.7261748458075545,
+          "mean_target_attempts": 23.15,
+          "measured_runs": 40,
+          "method": "ic.transported_logs_hash",
+          "peak_process_rss_kib": 12996,
+          "phase_mean_gae_lower_bound": {
+            "factor_base": 4105.738207999997,
+            "oracle_setup": 232384.50058499994,
+            "target_PDP": 140556.53470080002,
+            "target_descent": 0.0,
+            "target_query": 1308.2,
+            "target_recovery_check": 55.5,
+            "target_relation_check": 3.0,
+            "transport_verification": 3972.0
+          },
+          "phase_native_totals": {
+            "attempts": 926,
+            "canonicalisations": 13590614,
+            "curve_equation_checks_uncharged": 119280,
+            "factor_base_vec_bytes_floor_uncharged": 11200960,
+            "factor_point_inserts_uncharged": 232880,
+            "frobenius_maps": 9431680,
+            "frobfold_mismatches": 0,
+            "hash_scalar_draws_uncharged": 2840,
+            "known_column_logs_uncharged": 2840,
+            "lift_failures": 0,
+            "lookups": 14524974,
+            "min_key_field_squares_uncharged": 113600,
+            "pair_table_entries": 8258600,
+            "pair_table_representatives": 2840,
+            "point_negations_uncharged": 349320,
+            "scalar_replays": 40,
+            "scalars_scanned_uncharged": 2840,
+            "transported_columns_checked": 2840,
+            "witnesses_checked": 40
+          },
+          "verified_runs": 40
+        },
+        "transport-sequential": {
+          "mean_cold_gae_lower_bound": 527036.8286794,
+          "mean_cold_s_lower_bound": 0.7108137510412139,
+          "mean_factor_base_bytes_floor": 280024.0,
+          "mean_group_ops": {
+            "adds": 480675.775,
+            "doubles": 2124.2,
+            "scalar_mults": 120.1
+          },
+          "mean_pair_table_entries": 150946.0,
+          "mean_ratio_to_generic_floor_lower_bound": 5.1357373905868515,
+          "mean_target_attempts": 47.1,
+          "measured_runs": 40,
+          "method": "ic.transported_logs",
+          "peak_process_rss_kib": 12996,
+          "phase_mean_gae_lower_bound": {
+            "factor_base": 204.73820799999982,
+            "oracle_setup": 232384.50058499994,
+            "target_PDP": 291284.4148864,
+            "target_descent": 0.0,
+            "target_query": 2657.675,
+            "target_recovery_check": 55.5,
+            "target_relation_check": 3.0,
+            "transport_verification": 447.0
+          },
+          "phase_native_totals": {
+            "attempts": 1884,
+            "canonicalisations": 19177432,
+            "curve_equation_checks_uncharged": 119280,
+            "factor_base_vec_bytes_floor_uncharged": 11200960,
+            "factor_point_inserts_uncharged": 232880,
+            "frobenius_maps": 9431680,
+            "frobfold_mismatches": 0,
+            "known_column_logs_uncharged": 2840,
+            "lift_failures": 0,
+            "lookups": 20111792,
+            "min_key_field_squares_uncharged": 113600,
+            "pair_table_entries": 6037840,
+            "pair_table_representatives": 2840,
+            "point_negations_uncharged": 349320,
+            "scalar_replays": 40,
+            "scalars_scanned_uncharged": 2840,
+            "transported_columns_checked": 2840,
+            "witnesses_checked": 40
+          },
+          "verified_runs": 40
+        }
+      },
+      "audit_sha256": "58f93c2243202d87eb3e58b2bd66f488102fe20ca5877d499beb4da1aea30bc8",
+      "binary_sha256": "47e8a8ff267cf3286a98be89779155140966a1007b03095da8558030bd6e989b",
+      "curve": "icv1-f2m41-tm2308219-7f48b14a",
+      "field_degree": 41,
+      "isolation_level": "L0",
+      "log2_subgroup_order": 39.00000151433405,
+      "measured_rounds_per_target": 5,
+      "paired_count_ratios": {
+        "claw_over_rho": 2.02462034339716,
+        "hash_aa": 1.0,
+        "hash_over_rho": 3.1611248976355353,
+        "hash_over_rho_ci95": [
+          2.36115315789779,
+          4.388696453926343
+        ],
+        "hash_over_sequential": 0.7255384304963016,
+        "hash_over_sequential_ci95": [
+          0.5105079664378623,
+          1.048775476874232
+        ],
+        "sequential_over_rho": 4.356936538114433
+      },
+      "panel": "n41",
+      "records_sha256": "97b0ee8f0fed08129f537b780d770457f7947d74a581d4c36569d0776379ccd4",
+      "session_id": "ECBS1ha4734a5bf3e0",
+      "spec_id": "ECS1h462bee839cd1",
+      "subgroup_order": 549756390943,
+      "target_count": 8,
+      "wall_time_admissible": false
+    }
+  ],
+  "scaling_fits": {
+    "hash_candidate_cold_work": {
+      "exponent": 0.47379375555173797,
+      "intercept": -0.16885205609530018,
+      "model": "log2(metric) = intercept + exponent*log2(r)",
+      "points": 4,
+      "r_squared": 0.9908496475236548,
+      "residuals": [
+        {
+          "log2_r": 27.78083708554834,
+          "observed_log2": 13.144196160233546,
+          "panel": "n37",
+          "predicted_log2": 12.993535079037647,
+          "residual_log2": 0.15066108119589927
+        },
+        {
+          "log2_r": 32.112779548336775,
+          "observed_log2": 14.874151684323929,
+          "panel": "n43",
+          "predicted_log2": 15.045982367316224,
+          "residual_log2": -0.17183068299229554
+        },
+        {
+          "log2_r": 36.635865112243344,
+          "observed_log2": 16.974598601010847,
+          "panel": "n47",
+          "predicted_log2": 17.18899206332137,
+          "residual_log2": -0.2143934623105217
+        },
+        {
+          "log2_r": 39.00000151433405,
+          "observed_log2": 18.544668192011418,
+          "panel": "n41",
+          "predicted_log2": 18.3091051279045,
+          "residual_log2": 0.23556306410691974
+        }
+      ],
+      "slope_ci95_t_df2": [
+        0.3352695518873595,
+        0.6123179592161164
+      ],
+      "slope_standard_error": 0.03219506949940651
+    },
+    "hash_candidate_pair_entries": {
+      "exponent": 0.49178581072199823,
+      "intercept": -1.5671636196435852,
+      "model": "log2(metric) = intercept + exponent*log2(r)",
+      "points": 4,
+      "r_squared": 0.9997365129823095,
+      "residuals": [
+        {
+          "log2_r": 27.78083708554834,
+          "observed_log2": 12.116668855967113,
+          "panel": "n37",
+          "predicted_log2": 12.09505786900856,
+          "residual_log2": 0.021610986958553013
+        },
+        {
+          "log2_r": 32.112779548336775,
+          "observed_log2": 14.205640542856566,
+          "panel": "n43",
+          "predicted_log2": 14.225445705072019,
+          "residual_log2": -0.019805162215453365
+        },
+        {
+          "log2_r": 36.635865112243344,
+          "observed_log2": 16.404975213808456,
+          "panel": "n47",
+          "predicted_log2": 16.44983500608278,
+          "residual_log2": -0.04485979227432324
+        },
+        {
+          "log2_r": 39.00000151433405,
+          "observed_log2": 17.655537710773565,
+          "panel": "n41",
+          "predicted_log2": 17.612483743242343,
+          "residual_log2": 0.043053967531221815
+        }
+      ],
+      "slope_ci95_t_df2": [
+        0.46749544098595314,
+        0.5160761804580434
+      ],
+      "slope_standard_error": 0.0056454404438446345
+    },
+    "hash_candidate_peak_rss_kib": {
+      "exponent": 0.07308737327853408,
+      "intercept": 10.733607757843856,
+      "model": "log2(metric) = intercept + exponent*log2(r)",
+      "points": 4,
+      "r_squared": 0.9407406504898643,
+      "residuals": [
+        {
+          "log2_r": 27.78083708554834,
+          "observed_log2": 12.836839359748716,
+          "panel": "n37",
+          "predicted_log2": 12.76403616790547,
+          "residual_log2": 0.07280319184324568
+        },
+        {
+          "log2_r": 32.112779548336775,
+          "observed_log2": 12.980853606379736,
+          "panel": "n43",
+          "predicted_log2": 13.080646463704422,
+          "residual_log2": -0.09979285732468668
+        },
+        {
+          "log2_r": 36.635865112243344,
+          "observed_log2": 13.356451970221755,
+          "panel": "n47",
+          "predicted_log2": 13.411226906684409,
+          "residual_log2": -0.0547749364626533
+        },
+        {
+          "log2_r": 39.00000151433405,
+          "observed_log2": 13.665780028329483,
+          "panel": "n41",
+          "predicted_log2": 13.584015426385383,
+          "residual_log2": 0.08176460194409962
+        }
+      ],
+      "slope_ci95_t_df2": [
+        0.017278001247631007,
+        0.12889674530943715
+      ],
+      "slope_standard_error": 0.012970921786393948
+    },
+    "hash_candidate_target_attempts": {
+      "exponent": 0.2559808050718238,
+      "intercept": -5.776012275339763,
+      "model": "log2(metric) = intercept + exponent*log2(r)",
+      "points": 4,
+      "r_squared": 0.9475350007680509,
+      "residuals": [
+        {
+          "log2_r": 27.78083708554834,
+          "observed_log2": 1.4594316186372973,
+          "panel": "n37",
+          "predicted_log2": 1.3353487673880808,
+          "residual_log2": 0.12408285124921647
+        },
+        {
+          "log2_r": 32.112779548336775,
+          "observed_log2": 2.371558862611963,
+          "panel": "n43",
+          "predicted_log2": 2.4442428865374826,
+          "residual_log2": -0.07268402392551954
+        },
+        {
+          "log2_r": 36.635865112243344,
+          "observed_log2": 3.2249663650002742,
+          "panel": "n47",
+          "predicted_log2": 3.6020659705950298,
+          "residual_log2": -0.3770996055947555
+        },
+        {
+          "log2_r": 39.00000151433405,
+          "observed_log2": 4.532940288372874,
+          "panel": "n41",
+          "predicted_log2": 4.2072395101018145,
+          "residual_log2": 0.3257007782710595
+        }
+      ],
+      "slope_ci95_t_df2": [
+        0.07272155591982016,
+        0.43924005422382745
+      ],
+      "slope_standard_error": 0.04259215434403548
+    },
+    "strong_rho_cold_work": {
+      "exponent": 0.41781801698240517,
+      "intercept": 0.2710021429422813,
+      "model": "log2(metric) = intercept + exponent*log2(r)",
+      "points": 4,
+      "r_squared": 0.9798338890069365,
+      "residuals": [
+        {
+          "log2_r": 27.78083708554834,
+          "observed_log2": 12.059300160817724,
+          "panel": "n37",
+          "predicted_log2": 11.87833640413735,
+          "residual_log2": 0.18096375668037368
+        },
+        {
+          "log2_r": 32.112779548336775,
+          "observed_log2": 13.500402597956548,
+          "panel": "n43",
+          "predicted_log2": 13.68830001362149,
+          "residual_log2": -0.187897415664942
+        },
+        {
+          "log2_r": 36.635865112243344,
+          "observed_log2": 15.26673559749558,
+          "panel": "n47",
+          "predicted_log2": 15.578126654574676,
+          "residual_log2": -0.31139105707909565
+        },
+        {
+          "log2_r": 39.00000151433405,
+          "observed_log2": 16.884230154035794,
+          "panel": "n41",
+          "predicted_log2": 16.565905437972134,
+          "residual_log2": 0.3183247160636604
+        }
+      ],
+      "slope_ci95_t_df2": [
+        0.2354522533635007,
+        0.6001837806013096
+      ],
+      "slope_standard_error": 0.04238449511861566
+    }
+  },
+  "schema": "ecbench.known_log_transport.round314.analysis/v1",
+  "status": "verified_l0_operation_count_negative_result"
+}

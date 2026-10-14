@@ -82,6 +82,10 @@
    "path": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
    "sha256": "69ca54385c62a50e2a1b8fcb5245459dd8550966221f5ba94fcdf3437c1bada6"
   },
+  "known_log_transport_round314": {
+   "path": "research/ecbench_known_log_transport_round314_20261014/ANALYSIS.json",
+   "sha256": "e887ca37106e24b34fc089f9fe13e8f2bd048780118bbf5495065d423b6e16c2"
+  },
   "registry": {
    "path": "docs/curves/registry.json",
    "sha256": "b1b8439baf4d18307bbc81626f28fb840bd48ba69eda585fde4a9090fcc10fdf"
@@ -5193,6 +5197,80 @@
    16.981811137190903
   ],
   "admitted_online_speedup": null
+ },
+ "known_log_transport_round314_diagnostic": {
+  "source": "research/ecbench_known_log_transport_round314_20261014/ANALYSIS.json",
+  "class": "engineering improvement; negative parity and transfer result",
+  "work_exponent": 0.47379375555173797,
+  "work_exponent_ci95": [
+   0.3352695518873595,
+   0.6123179592161164
+  ],
+  "table_exponent": 0.49178581072199823,
+  "p256_curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "p256_factor_base": "FB1h2f8621cda105",
+  "p256_transport_relations": 0,
+  "p256_remaining_log_dimensions": 131458,
+  "rows": [
+   {
+    "curve": "icv1-f2m37-tm534059-32aad96b",
+    "log2_r": 27.78083708554834,
+    "rho_s": 0.2810466683994935,
+    "sequential_s": 0.7575122946080141,
+    "hash_s": 0.5961625343054854,
+    "hash_over_rho": 2.121222563144107,
+    "hash_over_rho_ci95": [
+     1.9082669507418688,
+     2.4094735823535647
+    ],
+    "hash_over_sequential": 0.7870004731922913,
+    "peak_rss_kib": 7316
+   },
+   {
+    "curve": "icv1-f2m43-tm998717-e2e742b0",
+    "log2_r": 32.112779548336775,
+    "rho_s": 0.17004786806085834,
+    "sequential_s": 0.5756861499153303,
+    "hash_s": 0.4406673490449718,
+    "hash_over_rho": 2.591431189759236,
+    "hash_over_rho_ci95": [
+     2.189749743608479,
+     3.0587392753749723
+    ],
+    "hash_over_sequential": 0.7654645662567757,
+    "peak_rss_kib": 8084
+   },
+   {
+    "curve": "icv1-f2m47-t22705043-f4e44623",
+    "log2_r": 36.635865112243344,
+    "rho_s": 0.12064190679272864,
+    "sequential_s": 0.623242463382579,
+    "hash_s": 0.3941088481352445,
+    "hash_over_rho": 3.2667657417944453,
+    "hash_over_rho_ci95": [
+     2.5777633691708526,
+     4.300790916729631
+    ],
+    "hash_over_sequential": 0.6323523689259913,
+    "peak_rss_kib": 10488
+   },
+   {
+    "curve": "icv1-f2m41-tm2308219-7f48b14a",
+    "log2_r": 39.00000151433405,
+    "rho_s": 0.16314530744779568,
+    "sequential_s": 0.7108137510412139,
+    "hash_s": 0.515722693305631,
+    "hash_over_rho": 3.1611248976355353,
+    "hash_over_rho_ci95": [
+     2.36115315789779,
+     4.388696453926343
+    ],
+    "hash_over_sequential": 0.7255384304963016,
+    "peak_rss_kib": 12996
+   }
+  ],
+  "online_speedup": null,
+  "fully_priced_cold_speedup": null
  },
  "f6_small_cold_diagnostic": {
   "curve": "icv1-f2m9-tm5-4a3ea183",

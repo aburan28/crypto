@@ -159,8 +159,11 @@ jobs:
           cmp "$replay/CENSUS.json" "$dir/CENSUS.json"
           cmp "$replay/PROVENANCE.txt" "$dir/PROVENANCE.txt"
           cmp "$replay/INDEPENDENT-AUDIT.json" "$dir/independent_validation/RECEIPT.json"
-          cmp "$replay/Cargo.lock" Cargo.lock
-          cargo build --release --example ecbench_n37_online_ir_analyze
+          # Cargo.lock is intentionally gitignored, so the current checkout's
+          # freshly resolved lock can drift after this archive is sealed. Use
+          # the archived dependency graph for the frozen decision replay.
+          cp "$replay/Cargo.lock" Cargo.lock
+          cargo build --release --locked --example ecbench_n37_online_ir_analyze
           target/release/examples/ecbench_n37_online_ir_analyze \
             "$replay" "$dir/JOBS.json" \
             "$dir/sessions/mac_arm64_l0_01/records.jsonl" \

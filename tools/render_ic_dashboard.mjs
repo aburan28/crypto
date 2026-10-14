@@ -293,6 +293,7 @@ const retainedPanels = [
   ['n61-compact-orbit-hosted-20261003','n61 compact-orbit autolab panels · hosted isolated reruns'],
   ['lab-ecbench-all','Cross-method evidence · every measured candidate'],
   ['lab-pair-claw','Pair claw of cryptanalysis#175 · same-target strong rho'],
+  ['known-log-transport-round314-20261014','Round 314 exact-log transport · same-target strong rho'],
   ['lab-progress','Research progress over time · separate regimes and references'],
   ['lab-currency','How new results update this dashboard']
 ].map(([id,label])=>{

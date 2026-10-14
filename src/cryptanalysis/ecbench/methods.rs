@@ -33,7 +33,8 @@ use crate::cryptanalysis::ic_boundary::{
 };
 use crate::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, CompactOrbitScanBase, DescentAlgebraicOracle, FrobeniusMitmOracle,
-    GlvOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase, SubtractOracle,
+    GlvOrbitBase, KnownLogOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase,
+    SubtractOracle,
 };
 use crate::cryptanalysis::ic_framework::shared_rank::{
     run_shared_rank_targets, SharedRankSpec, SharedTargetSpec,
@@ -41,6 +42,9 @@ use crate::cryptanalysis::ic_framework::shared_rank::{
 use crate::cryptanalysis::ic_framework::solvers::solver_by_name;
 use crate::cryptanalysis::ic_framework::stages::{
     DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, Targets,
+};
+use crate::cryptanalysis::ic_framework::transported_logs::{
+    run_hash_transported_log_target, run_transported_log_target, TransportedLogSpec,
 };
 use crate::cryptanalysis::ic_framework::{run_pipeline, PipelineSpec, RunReport};
 use crate::cryptanalysis::ic_measurement::{self as measurement, Phase, Snapshot};
@@ -213,7 +217,7 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "factor_base",
                     default: None,
-                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M, koblitz-standard-subspace:dimension=D",
+                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M, known-log-orbit:columns=N,scalar_cap=M, koblitz-standard-subspace:dimension=D",
                 },
                 ParamDecl {
                     name: "oracle",
@@ -268,6 +272,44 @@ pub fn registry() -> &'static [MethodDecl] {
                     name: "rank_max_trials",
                     default: None,
                     help: "target-blind relation trial cap",
+                },
+                ParamDecl {
+                    name: "target_max_attempts",
+                    default: None,
+                    help: "direct Q query followed by at most this many total residual attempts",
+                },
+            ],
+        },
+        MethodDecl {
+            id: "ic.transported_logs",
+            family: "ic",
+            summary: "known-log signed-Frobenius orbit base followed by exact m3 target descent; no relation matrix, and no claim that the base satisfies a separate geometric predicate",
+            entry: "ic_framework::transported_logs::run_transported_log_target",
+            applies: Applies::KoblitzOnly,
+            params: &[
+                ParamDecl {
+                    name: "factor_base",
+                    default: None,
+                    help: "known-log-orbit:columns=N,scalar_cap=M; increasing generator-multiple scan with exact transported logs",
+                },
+                ParamDecl {
+                    name: "target_max_attempts",
+                    default: None,
+                    help: "direct Q query followed by at most this many total residual attempts",
+                },
+            ],
+        },
+        MethodDecl {
+            id: "ic.transported_logs_hash",
+            family: "ic",
+            summary: "hash-selected known-log signed-Frobenius orbit base followed by exact m3 target descent; post-holdout correlation control with every base scalar multiplication charged",
+            entry: "ic_framework::transported_logs::run_hash_transported_log_target",
+            applies: Applies::KoblitzOnly,
+            params: &[
+                ParamDecl {
+                    name: "factor_base",
+                    default: None,
+                    help: "known-log-orbit:columns=N,scalar_cap=M,schedule=hash,seed=S; deterministic hash-selected generator multiples",
                 },
                 ParamDecl {
                     name: "target_max_attempts",
@@ -813,6 +855,11 @@ fn solve_inner(
         return Err("a wide instance goes through solve_wide".into());
     }
     match (inst, d.family) {
+        (Instance::Binary(i), _)
+            if m.id == "ic.transported_logs" || m.id == "ic.transported_logs_hash" =>
+        {
+            solve_transported_logs(m, i, curve, FastPoint::affine(tx, ty), seed)
+        }
         (Instance::Binary(i), _) if m.id == "ic.shared_rank" => {
             solve_shared_rank(m, i, curve, FastPoint::affine(tx, ty), seed)
         }
@@ -851,6 +898,175 @@ fn solve_inner(
         }
         (Instance::Wide(_), _) => unreachable!("returned above"),
     }
+}
+
+/// Exact transported base logs plus a point-only folded m3 descent.  This
+/// has the same cold accounting boundary as the other IC arms, but no
+/// relation-collection or linear-algebra phase because the base logs are
+/// obtained from charged generator multiples.
+fn solve_transported_logs(
+    m: &ResolvedMethod,
+    inst: &BinaryInstance,
+    curve: &CurveFacts,
+    target: FastPoint,
+    seed: u64,
+) -> Result<SolveReport, String> {
+    if inst.koblitz.is_none() {
+        return Err("ic.transported_logs needs a Koblitz instance".into());
+    }
+    let hashed = m.id == "ic.transported_logs_hash";
+    let (name, params) = Params::parse_spec(&m.params["factor_base"])?;
+    let common = name == "known-log-orbit"
+        && params.0.contains_key("columns")
+        && params.0.contains_key("scalar_cap");
+    let valid = if hashed {
+        common
+            && params.0.len() == 4
+            && params.get("schedule") == Some("hash")
+            && params.0.contains_key("seed")
+    } else {
+        common && params.0.len() == 2
+    };
+    if !valid {
+        return Err(if hashed {
+            "ic.transported_logs_hash needs exactly known-log-orbit:columns=N,scalar_cap=M,schedule=hash,seed=S".into()
+        } else {
+            "ic.transported_logs needs exactly known-log-orbit:columns=N,scalar_cap=M".into()
+        });
+    }
+    let spec = TransportedLogSpec {
+        columns: usize::try_from(params.u64("columns")?).map_err(|_| "columns do not fit usize")?,
+        scalar_cap: params.u64("scalar_cap")?,
+        residual_seed: seed,
+        max_attempts: u32::try_from(param_u64(m, "target_max_attempts")?)
+            .map_err(|_| "target_max_attempts do not fit u32")?,
+    };
+    let calib = pinned_only_calibration("koblitz", &curve.slug);
+    let started = Instant::now();
+    let report = if hashed {
+        run_hash_transported_log_target(inst, &spec, target, params.u64("seed")?, &calib)?
+    } else {
+        run_transported_log_target(inst, &spec, target, &calib)?
+    };
+    let wall = started.elapsed().as_nanos() as u64;
+    let phases = vec![
+        phase_of("factor_base", &report.base),
+        phase_of("oracle_setup", &report.table),
+        phase_of("transport_verification", &report.transport_verification),
+        phase_of("target_query", &report.query),
+        phase_of("target_PDP", &report.pdp),
+        phase_of("target_relation_check", &report.relation_check),
+        phase_of("target_descent", &report.descent),
+        phase_of("target_recovery_check", &report.recovery_check),
+    ];
+    let mut counters = BTreeMap::new();
+    counters.insert("transported_columns".into(), report.columns as u64);
+    counters.insert("target_attempts".into(), report.attempts.len() as u64);
+    counters.insert(
+        "pair_table_entries".into(),
+        report.table.get("pair_table_entries"),
+    );
+    let mut unpriced = Vec::new();
+    for phase in &phases {
+        for (name, &count) in &phase.native {
+            if count == 0 {
+                continue;
+            }
+            let priced = PRICED_NATIVE
+                .iter()
+                .find(|(counter, _)| *counter == name)
+                .is_some_and(|(_, unit)| calib.is_pinned(unit));
+            if !priced {
+                let label = if name.ends_with("_uncharged") {
+                    name.clone()
+                } else {
+                    format!("{name}_uncharged")
+                };
+                *counters.entry(label.clone()).or_insert(0) += count;
+                unpriced.push(label);
+            }
+        }
+    }
+    unpriced.extend([
+        "field_arithmetic_uncharged".into(),
+        "hash_and_allocation_uncharged".into(),
+        "modular_combination_uncharged".into(),
+    ]);
+    unpriced.sort();
+    unpriced.dedup();
+
+    let builder = KnownLogOrbitBase { instance: inst };
+    let group = BinaryGroup(&inst.fast);
+    let ctx = InstanceCtx {
+        group: &group,
+        generator: inst.generator,
+        target: group.identity(),
+        r: inst.r,
+        cofactor: inst.cofactor,
+        group_order: inst.group_order,
+        name: curve.slug.clone(),
+        field_degree: Some(inst.n),
+    };
+    let mut scratch = GroupOps::default();
+    let fb = builder.build(&ctx, &params, &mut scratch)?;
+    let facts = factor_base_facts(&curve.slug, &m.params["factor_base"], &params, &fb, |p| {
+        group.key(p)
+    })?;
+    if facts.columns != report.columns as u64 || facts.signed_points != report.signed_points as u64
+    {
+        return Err("transported-log factor-base inventory differs from solver setup".into());
+    }
+    let online_names = [
+        ("target_query", report.query.wall_ns),
+        ("target_PDP", report.pdp.wall_ns),
+        ("target_relation_check", report.relation_check.wall_ns),
+        ("target_descent", report.descent.wall_ns),
+        ("target_recovery_check", report.recovery_check.wall_ns),
+    ];
+    let online = OnlineWindow {
+        wall_ns: report.online_wall_ns,
+        phases_ns: online_names
+            .iter()
+            .map(|(name, ns)| ((*name).into(), *ns))
+            .collect(),
+        zero_phases: online_names
+            .iter()
+            .filter(|(_, ns)| *ns == 0)
+            .map(|(name, _)| ((*name).into(), "phase performed no work".into()))
+            .collect(),
+        start_event: "Q subgroup validation after known-log base construction, transport verification and folded table setup".into(),
+        stop_event: "[d]G = Q verified by full-point scalar replay".into(),
+        included_stages: online_names.iter().map(|(name, _)| (*name).into()).collect(),
+        mapping: "direct Q, then run-seeded Q+[a]G residuals; exact m3 folded-table PDP, full-point witness replay, transported-log combination and full-point scalar replay".into(),
+    };
+    if online.phases_ns.values().sum::<u64>() != online.wall_ns {
+        return Err("transported-log online phases do not sum to online wall interval".into());
+    }
+    Ok(SolveReport {
+        recovered: report.recovered_log.map(u128::from),
+        exhausted: !report.verified,
+        phases,
+        total_gae: report.total_gae,
+        automorphisms_used: 2 * inst.n,
+        counters,
+        unpriced,
+        deterministic: true,
+        nondeterminism: Vec::new(),
+        solve_wall_ns: wall,
+        factor_base: Some(facts),
+        detail: if hashed {
+            json!({
+                "base_schedule": "deterministic_hash_selected_scalars",
+                "base_seed": params.u64("seed")?,
+                "report": report,
+            })
+        } else {
+            serde_json::to_value(&report).map_err(|e| e.to_string())?
+        },
+        online: Some(online),
+        online_error: None,
+        solver: None,
+    })
 }
 
 /// The online window from the phase clock's snapshot, mapped to the
@@ -1466,11 +1682,13 @@ fn solve_ic_binary(
     let subspace = BinarySubspaceBase { instance: inst };
     let orbit = KoblitzOrbitBase { instance: inst };
     let compact = CompactOrbitScanBase { instance: inst };
+    let known = KnownLogOrbitBase { instance: inst };
     let plugin_base = binary_plugins().and_then(|p| (p.base)(fb_name.as_str(), inst));
     let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name.as_str() {
         "binary-subspace" => &subspace,
         "koblitz-orbit" => &orbit,
         "compact-orbit-scan" => &compact,
+        "known-log-orbit" => &known,
         other => match plugin_base.as_deref() {
             Some(b) => b,
             None => {
@@ -1768,6 +1986,57 @@ mod shared_rank_tests {
     }
 }
 
+#[cfg(test)]
+mod transported_log_tests {
+    use super::*;
+    use crate::cryptanalysis::ecbench::workload::CurveSpec;
+
+    #[test]
+    fn transported_log_adapter_keeps_the_one_target_window_and_inventory() {
+        let spec = CurveSpec::Koblitz { a: 1, n: 17 };
+        let inst = spec.build().unwrap();
+        let facts = inst.facts(&spec);
+        let Instance::Binary(binary) = &inst else {
+            unreachable!()
+        };
+        let target = binary.fast.mul_u64(binary.generator, 113);
+        let method = resolve(&MethodSpec {
+            id: "ic.transported_logs".into(),
+            params: [
+                (
+                    "factor_base".into(),
+                    "known-log-orbit:columns=4,scalar_cap=100".into(),
+                ),
+                ("target_max_attempts".into(), "256".into()),
+            ]
+            .into_iter()
+            .collect(),
+        })
+        .unwrap();
+        let report = solve(
+            &method,
+            &inst,
+            &facts,
+            &[format!("0x{:x}", target.x), format!("0x{:x}", target.y)],
+            19,
+        )
+        .unwrap();
+        assert_eq!(report.recovered, Some(u128::from(113 % binary.r)));
+        let factor_base = report.factor_base.as_ref().unwrap();
+        assert_eq!(factor_base.family, "known-log-orbit");
+        assert_eq!(factor_base.columns, 4);
+        assert!(report
+            .unpriced
+            .contains(&"field_arithmetic_uncharged".into()));
+        let online = report
+            .online
+            .expect("library online clock survives ecbench");
+        assert!(online.wall_ns > 0);
+        assert_eq!(online.phases_ns.len(), 5);
+        assert_eq!(online.phases_ns.values().sum::<u64>(), online.wall_ns);
+    }
+}
+
 // ── Factor-base dumps ──────────────────────────────────────────────
 
 pub const FB_DUMP_SCHEMA: &str = "ecbench.factor_base_dump/v1";
@@ -1873,11 +2142,13 @@ pub fn dump_factor_base(
             let subspace = BinarySubspaceBase { instance: i };
             let orbit = KoblitzOrbitBase { instance: i };
             let compact = CompactOrbitScanBase { instance: i };
+            let known = KnownLogOrbitBase { instance: i };
             let plugin_base = binary_plugins().and_then(|p| (p.base)(name.as_str(), i));
             let base: &dyn FactorBaseBuilder<BinaryGroup> = match name.as_str() {
                 "binary-subspace" => &subspace,
                 "koblitz-orbit" => &orbit,
                 "compact-orbit-scan" => &compact,
+                "known-log-orbit" => &known,
                 other => match plugin_base.as_deref() {
                     Some(b) => b,
                     None => {

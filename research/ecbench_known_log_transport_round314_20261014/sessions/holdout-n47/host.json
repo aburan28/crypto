@@ -1,0 +1,174 @@
+{
+  "schema": "ecbench.host/v1",
+  "env_class_id": "ECBENV2h64104171e621",
+  "env_class_sha256": "64104171e6217531b7710645f9ab89b9c2bed97d2de4601a9bf93a9bb3e0b330",
+  "stable": {
+    "os": "linux",
+    "arch": "x86_64",
+    "kernel_release": "6.18.44",
+    "cpu_vendor": "GenuineIntel",
+    "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+    "cpu_signature": "6/207/2",
+    "microcode": "0x1",
+    "features": [
+      "adx",
+      "aes",
+      "avx",
+      "avx2",
+      "avx512bw",
+      "avx512dq",
+      "avx512f",
+      "avx512ifma",
+      "avx512vbmi",
+      "avx512vl",
+      "bmi1",
+      "bmi2",
+      "fma",
+      "gfni",
+      "pclmulqdq",
+      "popcnt",
+      "sha",
+      "sse4.2",
+      "vaes",
+      "vpclmulqdq"
+    ],
+    "flags_sha256": "16a7227851bbd0d54c1a76b00030c349f39b11fe7860f6e2de2e0b7e1261be4c",
+    "logical_cpus": 5,
+    "physical_cores": 5,
+    "packages": 1,
+    "numa_nodes": 1,
+    "topology": {
+      "cpus": [
+        {
+          "cpu": 0,
+          "core_id": 0,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            0
+          ]
+        },
+        {
+          "cpu": 1,
+          "core_id": 1,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            1
+          ]
+        },
+        {
+          "cpu": 2,
+          "core_id": 2,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            2
+          ]
+        },
+        {
+          "cpu": 3,
+          "core_id": 3,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            3
+          ]
+        },
+        {
+          "cpu": 4,
+          "core_id": 4,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            4
+          ]
+        }
+      ],
+      "nodes": [
+        {
+          "node": 0,
+          "cpus": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "mem_total_kib": 18440136,
+          "distances": [
+            10
+          ]
+        }
+      ]
+    },
+    "perf_levels": [],
+    "mem_total_kib": 18440136,
+    "cpu_settings": {
+      "0": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "notsupported"
+      },
+      "1": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "notsupported"
+      },
+      "2": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "notsupported"
+      },
+      "3": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "notsupported"
+      },
+      "4": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "notsupported"
+      }
+    },
+    "transparent_hugepages": "always [madvise] never",
+    "virtualization": {
+      "cpu_flag": "hypervisor",
+      "systemd_detect_virt_vm": "kvm"
+    },
+    "rustc_vv": null
+  },
+  "build": {
+    "binary_path": "/workspace/crypto/target/release/ecbench",
+    "binary_sha256": "6829196e9b1528564c0f81d129446e12854a8de985a8bfc39a5ecd0aa0c933f3",
+    "git_commit": "f1e4c1cac874f13f2a785a909706ebe1045e6e8e",
+    "git_dirty": true,
+    "debug_assertions": false,
+    "target_os": "linux",
+    "target_arch": "x86_64",
+    "build_env": {}
+  },
+  "process_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "captured_unix_ms": 1791944655360
+}

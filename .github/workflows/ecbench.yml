@@ -69,6 +69,15 @@ jobs:
         run: cargo test --release --test ecbench
       - name: Build
         run: cargo build --release --bin ecbench
+      - name: Recompute the Round 314 transported-log decision
+        run: |
+          cargo build --release --locked --example known_log_transport_round314_analyze
+          mkdir -p "$RUNNER_TEMP/round314-analysis"
+          ./target/release/examples/known_log_transport_round314_analyze \
+            "$RUNNER_TEMP/round314-analysis/ANALYSIS.json"
+          cmp \
+            research/ecbench_known_log_transport_round314_20261014/ANALYSIS.json \
+            "$RUNNER_TEMP/round314-analysis/ANALYSIS.json"
       - name: Host
         run: ./target/release/ecbench host | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Independent all-run replay of the n37 shared-rank session

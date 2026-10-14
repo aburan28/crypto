@@ -67,6 +67,7 @@ SOURCES = {
     "f6_small_cold_rows": "research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl",
     "f6_small_cold_replay": "research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json",
     "f6_ecbench_ladder": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
+    "known_log_transport_round314": "research/ecbench_known_log_transport_round314_20261014/ANALYSIS.json",
     "registry": "docs/curves/registry.json",
 }
 S22_RUNS = "research/ic_descent_20260930/runs-isolated/main"
@@ -693,6 +694,40 @@ def build() -> dict:
         "panel_k8_over_k16_online_wall_ci95": native_wall_decision["panel_descriptive_ratios"]["k8_over_k16"]["target_block_bootstrap_95"],
         "admitted_online_speedup": None,
     }
+    transported = load(SOURCES["known_log_transport_round314"])
+    if (transported["schema"] != "ecbench.known_log_transport.round314.analysis/v1"
+            or transported["status"] != "verified_l0_operation_count_negative_result"
+            or transported["decision"]["parity_achieved"]
+            or transported["promotion_gates"]["all_conjunctive_gates_pass"]
+            or not transported["promotion_gates"]["all_records_verified_and_replayed"]
+            or not transported["promotion_gates"]["exact_counted_aa"]
+            or transported["promotion_gates"]["p256_exact_membership_and_log_transport"]
+            or transported["p256_transfer"]["remaining_log_dimensions"] != 131458):
+        raise SystemExit("review the Round 314 transported-log result before updating the leaderboard")
+    transported_diagnostic = {
+        "source": SOURCES["known_log_transport_round314"],
+        "class": transported["decision"]["classification"],
+        "work_exponent": transported["scaling_fits"]["hash_candidate_cold_work"]["exponent"],
+        "work_exponent_ci95": transported["scaling_fits"]["hash_candidate_cold_work"]["slope_ci95_t_df2"],
+        "table_exponent": transported["scaling_fits"]["hash_candidate_pair_entries"]["exponent"],
+        "p256_curve": transported["p256_transfer"]["curve"],
+        "p256_factor_base": transported["p256_transfer"]["factor_base"],
+        "p256_transport_relations": transported["p256_transfer"]["transport_relations"],
+        "p256_remaining_log_dimensions": transported["p256_transfer"]["remaining_log_dimensions"],
+        "rows": [{
+            "curve": z["curve"],
+            "log2_r": z["log2_subgroup_order"],
+            "rho_s": z["arms"]["rho-strong"]["mean_cold_s_lower_bound"],
+            "sequential_s": z["arms"]["transport-sequential"]["mean_cold_s_lower_bound"],
+            "hash_s": z["arms"]["transport-hash"]["mean_cold_s_lower_bound"],
+            "hash_over_rho": z["paired_count_ratios"]["hash_over_rho"],
+            "hash_over_rho_ci95": z["paired_count_ratios"]["hash_over_rho_ci95"],
+            "hash_over_sequential": z["paired_count_ratios"]["hash_over_sequential"],
+            "peak_rss_kib": z["arms"]["transport-hash"]["peak_process_rss_kib"],
+        } for z in transported["rows"]],
+        "online_speedup": None,
+        "fully_priced_cold_speedup": None,
+    }
     ladder, kob, kob1 = ladder_rows(names), koblitz_rows(names), koblitz_one_target_rows(names)
     board = ladder + kob1 + kob
     for r in board:
@@ -729,6 +764,7 @@ def build() -> dict:
         "n37_k8_k16_confirmation": k8_confirmation,
         "n37_online_ir_diagnostic": online_ir_diagnostic,
         "n37_native_wall_diagnostic": native_wall_diagnostic,
+        "known_log_transport_round314_diagnostic": transported_diagnostic,
         "f6_small_cold_diagnostic": small_cold_diagnostic,
         "f6_ecbench_ladder_diagnostic": ladder_diagnostic,
         "exponents": exponents(), "roster": roster(names, measured),
@@ -822,6 +858,29 @@ def markdown(doc: dict) -> str:
           "for both arms, and L0 timing cannot establish an online speedup. "
           "This row is intentionally outside the three fully priced unit families; "
           f"read the [frozen decision](../../{d['source']}).", ""]
+    t = doc["known_log_transport_round314_diagnostic"]
+    L += ["## Round 314 known-log transport diagnostic outside tables A–C", "",
+          "The hash-selected exact-log candidate improves its sequential schedule on "
+          "every frozen cell but remains above same-target strong rho. Its base consists "
+          "of scalar-labelled generator multiples, so this is a generic mechanism screen, "
+          "not transport into the fixed P-256 Dickson base. Native work is unpriced and "
+          "all sessions are L0; a fully priced cold speedup and wall-time speedup are unset. "
+          f"The counted-work exponent is {t['work_exponent']:.3f} "
+          f"[{t['work_exponent_ci95'][0]:.3f}, {t['work_exponent_ci95'][1]:.3f}], and "
+          f"the pair-table exponent is {t['table_exponent']:.3f}. The exact "
+          f"`{t['p256_curve']}` / `{t['p256_factor_base']}` certificate finds "
+          f"{t['p256_transport_relations']} transport relations and leaves "
+          f"{t['p256_remaining_log_dimensions']:,} log dimensions. "
+          f"Read the [frozen analysis](../../{t['source']}).", "",
+          "| curve | log₂ r | rho S | sequential S | hash S | hash / rho | hash / sequential | peak RSS KiB |",
+          "|:--|--:|--:|--:|--:|--:|--:|--:|"]
+    for z in t["rows"]:
+        L.append(f"| `{z['curve']}` | {z['log2_r']:.3f} | {z['rho_s']:.3f} | "
+                 f"{z['sequential_s']:.3f} | {z['hash_s']:.3f} | "
+                 f"{z['hash_over_rho']:.3f} [{z['hash_over_rho_ci95'][0]:.3f}, "
+                 f"{z['hash_over_rho_ci95'][1]:.3f}] | {z['hash_over_sequential']:.3f} | "
+                 f"{z['peak_rss_kib']:,} |")
+    L.append("")
     c = doc["n37_k8_k16_confirmation"]
     L += [f"The untouched {c['workloads']}-target K8/K16 confirmation selected "
           f"`{c['candidate_id']}` for the cold implementation route: K16/K8 "
@@ -1103,6 +1162,28 @@ def page(doc: dict, standalone: bool) -> str:
              'A separate whole-solve Callgrind census finds K16/K42 = 0.367 and K16/rho = 4.461 '
              'in simulated instructions on eight paired points; native wall and online speed remain unknown. '
              '<a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_callgrind_solve_20261004/RESULT.md">Raw instruction replay</a>.</p></section>')
+    t = doc["known_log_transport_round314_diagnostic"]
+    P.append(f'<section class="card" id="known-log-transport-round314"><h2>Round 314 known-log transport: engineering gain, no parity</h2>'
+             '<p>The hash-selected exact-log candidate improves its sequential schedule on every frozen cell, '
+             'but remains above same-target strong rho. The scalar-labelled base is a generic mechanism screen, '
+             'not transport into the fixed P-256 Dickson base. Native work is unpriced and all sessions are L0, '
+             'so fully priced cold and wall-time speedups are unset. '
+             f'Its counted-work exponent is {t["work_exponent"]:.3f} '
+             f'[{t["work_exponent_ci95"][0]:.3f}, {t["work_exponent_ci95"][1]:.3f}]; '
+             f'the pair-table exponent is {t["table_exponent"]:.3f}. The exact '
+             f'<code>{esc(t["p256_factor_base"])}</code> certificate finds '
+             f'{t["p256_transport_relations"]} transport relations and leaves '
+             f'{t["p256_remaining_log_dimensions"]:,} log dimensions. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(t["source"])}">Frozen analysis</a>.</p>')
+    P.append('<table><thead><tr><th>Curve</th><th>log₂ r</th><th>Rho S</th><th>Sequential S</th>'
+             '<th>Hash S</th><th>Hash / rho</th><th>Hash / sequential</th><th>Peak RSS KiB</th></tr></thead><tbody>')
+    for z in t["rows"]:
+        P.append(f'<tr><td><code>{esc(z["curve"])}</code></td><td>{z["log2_r"]:.3f}</td>'
+                 f'<td>{z["rho_s"]:.3f}</td><td>{z["sequential_s"]:.3f}</td>'
+                 f'<td>{z["hash_s"]:.3f}</td><td>{z["hash_over_rho"]:.3f} '
+                 f'[{z["hash_over_rho_ci95"][0]:.3f}, {z["hash_over_rho_ci95"][1]:.3f}]</td>'
+                 f'<td>{z["hash_over_sequential"]:.3f}</td><td>{z["peak_rss_kib"]:,}</td></tr>')
+    P.append('</tbody></table></section>')
     c = doc["n37_k8_k16_confirmation"]
     P.append(f'<section class="card" id="bounded-n37-k8-confirmation"><h2>Untouched n37 K8/K16 instruction confirmation</h2>'
              f'<p>On <code>{esc(c["curve"])}</code>, K8 has {c["usable_points"]:,} usable points '

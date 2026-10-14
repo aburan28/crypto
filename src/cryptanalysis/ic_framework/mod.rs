@@ -67,6 +67,7 @@ pub mod plugins;
 pub mod shared_rank;
 pub mod solvers;
 pub mod stages;
+pub mod transported_logs;
 
 use std::time::Instant;
 
