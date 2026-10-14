@@ -368,7 +368,11 @@ def harvest_json(reg: Registry, problems: list[str], fatal: list[str]) -> None:
                     # while using a different polynomial basis from the
                     # repository constructor. Its record name is safe, but
                     # the bare `K_a / GF(2^n)` aliases would be ambiguous.
-                    if fam == "koblitz" and not o.get("suppress_koblitz_aliases"):
+                    # The bare aliases go only to a record over the repository's
+                    # own modulus for that degree (`koblitz_modulus`); any other
+                    # basis is the same curve under another model hash.
+                    if (fam == "koblitz" and not o.get("suppress_koblitz_aliases")
+                            and f == koblitz_modulus(m)[0]):
                         names += koblitz_aliases(a, m)
                     check_rust(o, ident, rel, fatal)
                     reg.add(ident, fam, params, rel, names)
@@ -667,6 +671,19 @@ def harvest_native_standards(reg: Registry) -> None:
             reg.represent(ident, rep["field"], rep["curve"], str(path.relative_to(REPO)))
 
 
+# Entries the append-only rule must not carry: models that never existed
+# as recorded, each with the reason.  A retired slug stops resolving; the
+# model that was meant keeps its own entry.
+RETIRED = {
+    "icv1-fp21-tm700-56b6783a": (
+        "y^2 = x^3 + 2x + 2 over GF(1048583) with the order 1049284, read from "
+        "research/isogeny_fibers_20261010/round4/16_7_agm_isogeny_oracles/out_seed7.json "
+        "before the builder normalized its model y^2 = x^3 + a x^2 + b x; that curve "
+        "is icv1-fp21-tm700-d62ba3a6, and the short model's own order is 1049250 "
+        "(curve_traits' exhaustive count)"),
+}
+
+
 def carry_forward(reg: Registry) -> None:
     """The registry is append-only.  A curve registered once stays, with its
     names and representations, even when no source re-derives it: after
@@ -675,6 +692,8 @@ def carry_forward(reg: Registry) -> None:
     if not OUT.exists():
         return
     for e in json.loads(OUT.read_text())["curves"]:
+        if e["slug"] in RETIRED:
+            continue
         key = hashlib.sha256(e["model_json"].encode("ascii")).hexdigest()
         if key in reg.curves:
             for a in e["aliases"]:

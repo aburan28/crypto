@@ -9348,33 +9348,6 @@ pub fn refutation_degree_trace_take() -> Option<RefutationDegreeTrace> {
     REFUTATION_TRACE.with(|t| t.borrow_mut().as_mut().map(std::mem::take))
 }
 
-fn trace_on() -> bool {
-    REFUTATION_TRACE.with(|t| t.borrow().is_some())
-}
-
-/// Charge the stage-unit word operations a node spent since `w0` (its
-/// entry, children excluded) to the refuted or the split nodes.
-fn trace_cost(w0: Option<u64>, refuted: bool) {
-    let Some(w0) = w0 else { return };
-    let spent = f4_word_ops_thread().wrapping_sub(w0);
-    trace(|t| {
-        if refuted {
-            t.nodes_refuted += 1;
-            t.word_ops_refuted_nodes += spent;
-        } else {
-            t.nodes_split += 1;
-            t.word_ops_split_nodes += spent;
-        }
-    });
-}
-
-fn trace(f: impl FnOnce(&mut RefutationDegreeTrace)) {
-    REFUTATION_TRACE.with(|t| {
-        if let Some(trace) = t.borrow_mut().as_mut() {
-            f(trace);
-        }
-    });
-}
 
 /// Early abort at the refutation degree (lit2026 W4), `KIC_F4_EARLY_ABORT`,
 /// read once per process:
