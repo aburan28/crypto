@@ -23,6 +23,19 @@ applies to the exchangeable first two small domains. The caller must still
 charge unsuccessful searches and feed every accepted candidate to the
 independent graph replay.
 
+`build_exact_residual_suffix_factor_base` connects two already replayed,
+prefix-related stored bases to this producer. It requires the smaller point
+record and both orbit-label maps to be exact prefixes, independently rebuilds
+the larger base's point suffix as a closed signed-Frobenius base, checks every
+suffix orbit index and phase against the envelope, and rejects overlapping
+x-domains through `MixedOrbitDomains::new`. For the retained K=1,182 and
+K=2,048 objects, this defines the 866-orbit residual pool whose compressed
+point rows were checked in the prefix receipt. The constructor itself makes
+no statement about N83 partial yield or graph completion. The
+[source-only validation](verification/residual-suffix-20261012/RESULT.md)
+retains the focused and full-library tests separately from the N83 pilot
+ledger.
+
 An input partial carries a unique source ID and the point equation
 [a]G + [b]Q = sum(small points) + sum(residual points). The adapter checks
 the equation using curve arithmetic. It currently requires the public target,
@@ -65,7 +78,8 @@ source provenance and cap classifications. A Koblitz F2^7 regression builds
 disjoint two-orbit domains and obtains one SAT-discovered one-residual point
 equation, then independently feeds it to the graph. It also checks an exact
 two-residual sign lift and graph feed, overlap rejection and fail-closed
-preflight caps. The two-residual SAT search has no positive regression or
+preflight caps. It now checks exact suffix extraction and rejects changed
+prefix points or suffix orbit labels. The two-residual SAT search has no positive regression or
 retained N83 yield measurement. These checks establish algebra and one
 small-curve producer
 path. They do not measure retained N83 partial-relation yield, rank gain,
@@ -77,3 +91,23 @@ unsuccessful searches and partials, retain every source equation, and pass
 independent graph and group replay. It must then measure graph filtering,
 matrix rank, sparse linear algebra and one complete cold target run against
 matched rho. The matrix bridge above is not a retained-N83 rank measurement.
+
+`examples/koblitz_n83_mixed_orbit_worker.rs` is the source entry point for
+that first producer gate. Its `verify` mode takes the two frozen local S3
+object files and their pinned manifests; it checks compressed and plain
+hashes, curve/subgroup and source-projection identities, every signed orbit
+row, the independent point-set hashes, generic orbit reconstruction, and the
+exact K=1,182 prefix of the K=2,048 envelope. The objects are supplied as
+files by the supervisor; the worker does not fetch S3 content. Its `run` mode
+additionally takes the matched, hash-pinned public fixture-zero corpus, a hard wall budget, trial,
+conflict and model caps, summand counts, and a fresh output directory. It
+requires a 4 GiB zero-swap Linux cgroup, records each deterministic public
+source equation and any partial, and feeds accepted partials to the exact
+large-prime graph. A cap before the first SAT pattern stops the run rather
+than repeating an identical failed preflight. Results separate invalid
+models, preflight caps, search caps, graph caps and completed bounded search.
+The external supervisor must retain its launch, timeout, source and cgroup
+receipts and charge all import, failed-search and artifact time. This worker
+has only source tests at present: no retained N83 `verify` or `run` invocation
+is part of its validation. Graph rows and stage counts cannot select a
+minimum-runtime base without the remaining full-pipeline measurements.

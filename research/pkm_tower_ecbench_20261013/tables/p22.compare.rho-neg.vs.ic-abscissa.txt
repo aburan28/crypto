@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p22/comparisons/rho-neg__ic-abscissa.json
+ops (ok): ic-abscissa / rho-neg = 41.9026 [34.316, 53.368] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 23.1459 [20.995, 25.791]
+| curve | log2 r | workloads | ic-abscissa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp22-tm2947-e15fed69 | 21.19 | 8 | 41.9026 | [34.3164, 53.3680] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-abscissa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W15abd5c646fe | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.1831 | 50.5170 | 42.6999 |
+| W251e2c6702e6 | icv1-fp22-tm2947-e15fed69 | 21.19 | 0.7916 | 50.7739 | 64.1419 |
+| W922bdcc0958f | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.0522 | 50.5681 | 48.0586 |
+| Wc8ca24deff43 | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.1714 | 50.3635 | 42.9932 |
+| Wce40999900d8 | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.5185 | 50.5773 | 33.3074 |
+| Wd5ac0a1d62c6 | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.2512 | 51.2739 | 40.9800 |
+| We4aba132c214 | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.2163 | 50.6513 | 41.6448 |
+| Wf0150ebb311b | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.4948 | 50.8526 | 34.0199 |

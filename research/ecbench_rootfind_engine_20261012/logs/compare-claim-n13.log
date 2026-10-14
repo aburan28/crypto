@@ -1,0 +1,129 @@
+saved research/ecbench_rootfind_engine_20261012/sessions/claim-n13/comparisons/rho-strong__rho-frob.json
+ops (ok): rho-frob / rho-strong = 0.1325 [0.127, 0.139] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 1.2394, not a result: 24 of 24 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | rho-frob / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m13-t181-515ee569 | 10.97 | 8 | 0.1325 | [0.1269, 0.1391] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | rho-frob mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W23ae51507c22 | icv1-f2m13-t181-515ee569 | 10.97 | 14.5716 | 1.8471 | 0.1268 |
+| W96346bcf839e | icv1-f2m13-t181-515ee569 | 10.97 | 13.8492 | 1.8620 | 0.1344 |
+| Wba3041cc3555 | icv1-f2m13-t181-515ee569 | 10.97 | 14.3184 | 1.7130 | 0.1196 |
+| We57e12997b8e | icv1-f2m13-t181-515ee569 | 10.97 | 14.3184 | 1.8769 | 0.1311 |
+| We718d2747255 | icv1-f2m13-t181-515ee569 | 10.97 | 13.8417 | 1.8620 | 0.1345 |
+| Wf3adc0458f26 | icv1-f2m13-t181-515ee569 | 10.97 | 13.6034 | 1.9365 | 0.1424 |
+| Wf9115104de18 | icv1-f2m13-t181-515ee569 | 10.97 | 14.3556 | 1.8545 | 0.1292 |
+| Wff35e13b8437 | icv1-f2m13-t181-515ee569 | 10.97 | 14.0875 | 2.0184 | 0.1433 |
+saved research/ecbench_rootfind_engine_20261012/sessions/claim-n13/comparisons/rho-strong__ic-f4-m3.json
+ops (ok): ic-f4-m3 / rho-strong = 1.1282 [1.074, 1.179] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 1895.6585, not a result: 24 of 24 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-f4-m3 / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m13-t181-515ee569 | 10.97 | 8 | 1.1282 | [1.0738, 1.1792] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | ic-f4-m3 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W23ae51507c22 | icv1-f2m13-t181-515ee569 | 10.97 | 14.5716 | 14.4590 | 0.9923 |
+| W96346bcf839e | icv1-f2m13-t181-515ee569 | 10.97 | 13.8492 | 16.0445 | 1.1585 |
+| Wba3041cc3555 | icv1-f2m13-t181-515ee569 | 10.97 | 14.3184 | 15.4646 | 1.0801 |
+| We57e12997b8e | icv1-f2m13-t181-515ee569 | 10.97 | 14.3184 | 15.9389 | 1.1132 |
+| We718d2747255 | icv1-f2m13-t181-515ee569 | 10.97 | 13.8417 | 15.6007 | 1.1271 |
+| Wf3adc0458f26 | icv1-f2m13-t181-515ee569 | 10.97 | 13.6034 | 16.2281 | 1.1929 |
+| Wf9115104de18 | icv1-f2m13-t181-515ee569 | 10.97 | 14.3556 | 16.6314 | 1.1585 |
+| Wff35e13b8437 | icv1-f2m13-t181-515ee569 | 10.97 | 14.0875 | 17.0593 | 1.2110 |
+saved research/ecbench_rootfind_engine_20261012/sessions/claim-n13/comparisons/rho-strong__ic-rootfind-m3.json
+ops (ok): ic-rootfind-m3 / rho-strong = 2.7498 [2.584, 2.907] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 16.5868, not a result: 24 of 24 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-rootfind-m3 / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m13-t181-515ee569 | 10.97 | 8 | 2.7498 | [2.5837, 2.9067] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | ic-rootfind-m3 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W23ae51507c22 | icv1-f2m13-t181-515ee569 | 10.97 | 14.5716 | 36.1644 | 2.4818 |
+| W96346bcf839e | icv1-f2m13-t181-515ee569 | 10.97 | 13.8492 | 37.2537 | 2.6900 |
+| Wba3041cc3555 | icv1-f2m13-t181-515ee569 | 10.97 | 14.3184 | 38.6347 | 2.6983 |
+| We57e12997b8e | icv1-f2m13-t181-515ee569 | 10.97 | 14.3184 | 36.5142 | 2.5502 |
+| We718d2747255 | icv1-f2m13-t181-515ee569 | 10.97 | 13.8417 | 39.3951 | 2.8461 |
+| Wf3adc0458f26 | icv1-f2m13-t181-515ee569 | 10.97 | 13.6034 | 41.1968 | 3.0284 |
+| Wf9115104de18 | icv1-f2m13-t181-515ee569 | 10.97 | 14.3556 | 41.8228 | 2.9133 |
+| Wff35e13b8437 | icv1-f2m13-t181-515ee569 | 10.97 | 14.0875 | 39.5928 | 2.8105 |
+saved research/ecbench_rootfind_engine_20261012/sessions/claim-n13/comparisons/rho-strong__ic-f4-m2.json
+ops (ok): ic-f4-m2 / rho-strong = 1.1788 [1.071, 1.295] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 140.8158, not a result: 24 of 24 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-f4-m2 / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m13-t181-515ee569 | 10.97 | 8 | 1.1788 | [1.0714, 1.2948] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | ic-f4-m2 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W23ae51507c22 | icv1-f2m13-t181-515ee569 | 10.97 | 14.5716 | 15.2442 | 1.0462 |
+| W96346bcf839e | icv1-f2m13-t181-515ee569 | 10.97 | 13.8492 | 19.8949 | 1.4365 |
+| Wba3041cc3555 | icv1-f2m13-t181-515ee569 | 10.97 | 14.3184 | 17.3058 | 1.2086 |
+| We57e12997b8e | icv1-f2m13-t181-515ee569 | 10.97 | 14.3184 | 15.3686 | 1.0733 |
+| We718d2747255 | icv1-f2m13-t181-515ee569 | 10.97 | 13.8417 | 14.4789 | 1.0460 |
+| Wf3adc0458f26 | icv1-f2m13-t181-515ee569 | 10.97 | 13.6034 | 17.0491 | 1.2533 |
+| Wf9115104de18 | icv1-f2m13-t181-515ee569 | 10.97 | 14.3556 | 19.4104 | 1.3521 |
+| Wff35e13b8437 | icv1-f2m13-t181-515ee569 | 10.97 | 14.0875 | 14.3829 | 1.0210 |
+saved research/ecbench_rootfind_engine_20261012/sessions/claim-n13/comparisons/rho-strong__ic-rootfind-m2.json
+ops (ok): ic-rootfind-m2 / rho-strong = 2.0104 [1.897, 2.133] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 23.0937, not a result: 24 of 24 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-rootfind-m2 / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m13-t181-515ee569 | 10.97 | 8 | 2.0104 | [1.8974, 2.1331] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | ic-rootfind-m2 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W23ae51507c22 | icv1-f2m13-t181-515ee569 | 10.97 | 14.5716 | 26.7179 | 1.8336 |
+| W96346bcf839e | icv1-f2m13-t181-515ee569 | 10.97 | 13.8492 | 31.7573 | 2.2931 |
+| Wba3041cc3555 | icv1-f2m13-t181-515ee569 | 10.97 | 14.3184 | 28.8886 | 2.0176 |
+| We57e12997b8e | icv1-f2m13-t181-515ee569 | 10.97 | 14.3184 | 27.1646 | 1.8972 |
+| We718d2747255 | icv1-f2m13-t181-515ee569 | 10.97 | 13.8417 | 26.4016 | 1.9074 |
+| Wf3adc0458f26 | icv1-f2m13-t181-515ee569 | 10.97 | 13.6034 | 28.8647 | 2.1219 |
+| Wf9115104de18 | icv1-f2m13-t181-515ee569 | 10.97 | 14.3556 | 31.0608 | 2.1637 |
+| Wff35e13b8437 | icv1-f2m13-t181-515ee569 | 10.97 | 14.0875 | 26.2099 | 1.8605 |
+saved research/ecbench_rootfind_engine_20261012/sessions/claim-n13/comparisons/rho-strong__rho-strong-aa.json
+ops (ok): rho-strong-aa / rho-strong = 1.0000 [1.000, 1.000] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 1.0204, not a result: 24 of 24 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | rho-strong-aa / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m13-t181-515ee569 | 10.97 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | rho-strong-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W23ae51507c22 | icv1-f2m13-t181-515ee569 | 10.97 | 14.5716 | 14.5716 | 1.0000 |
+| W96346bcf839e | icv1-f2m13-t181-515ee569 | 10.97 | 13.8492 | 13.8492 | 1.0000 |
+| Wba3041cc3555 | icv1-f2m13-t181-515ee569 | 10.97 | 14.3184 | 14.3184 | 1.0000 |
+| We57e12997b8e | icv1-f2m13-t181-515ee569 | 10.97 | 14.3184 | 14.3184 | 1.0000 |
+| We718d2747255 | icv1-f2m13-t181-515ee569 | 10.97 | 13.8417 | 13.8417 | 1.0000 |
+| Wf3adc0458f26 | icv1-f2m13-t181-515ee569 | 10.97 | 13.6034 | 13.6034 | 1.0000 |
+| Wf9115104de18 | icv1-f2m13-t181-515ee569 | 10.97 | 14.3556 | 14.3556 | 1.0000 |
+| Wff35e13b8437 | icv1-f2m13-t181-515ee569 | 10.97 | 14.0875 | 14.0875 | 1.0000 |
+saved research/ecbench_rootfind_engine_20261012/sessions/claim-n13/comparisons/ic-f4-m3__ic-rootfind-m3.json
+ops (ok): ic-rootfind-m3 / ic-f4-m3 = 2.4373 [2.345, 2.530] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 0.0102, not a result: 24 of 24 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-rootfind-m3 / ic-f4-m3 | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m13-t181-515ee569 | 10.97 | 8 | 2.4373 | [2.3446, 2.5299] | cluster |
+
+| workload | curve | log2 r | ic-f4-m3 mean S | ic-rootfind-m3 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W23ae51507c22 | icv1-f2m13-t181-515ee569 | 10.97 | 14.4590 | 36.1644 | 2.5012 |
+| W96346bcf839e | icv1-f2m13-t181-515ee569 | 10.97 | 16.0445 | 37.2537 | 2.3219 |
+| Wba3041cc3555 | icv1-f2m13-t181-515ee569 | 10.97 | 15.4646 | 38.6347 | 2.4983 |
+| We57e12997b8e | icv1-f2m13-t181-515ee569 | 10.97 | 15.9389 | 36.5142 | 2.2909 |
+| We718d2747255 | icv1-f2m13-t181-515ee569 | 10.97 | 15.6007 | 39.3951 | 2.5252 |
+| Wf3adc0458f26 | icv1-f2m13-t181-515ee569 | 10.97 | 16.2281 | 41.1968 | 2.5386 |
+| Wf9115104de18 | icv1-f2m13-t181-515ee569 | 10.97 | 16.6314 | 41.8228 | 2.5147 |
+| Wff35e13b8437 | icv1-f2m13-t181-515ee569 | 10.97 | 17.0593 | 39.5928 | 2.3209 |
+saved research/ecbench_rootfind_engine_20261012/sessions/claim-n13/comparisons/ic-f4-m2__ic-rootfind-m2.json
+ops (ok): ic-rootfind-m2 / ic-f4-m2 = 1.7055 [1.642, 1.774] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 0.1843, not a result: 24 of 24 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-rootfind-m2 / ic-f4-m2 | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m13-t181-515ee569 | 10.97 | 8 | 1.7055 | [1.6416, 1.7745] | cluster |
+
+| workload | curve | log2 r | ic-f4-m2 mean S | ic-rootfind-m2 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W23ae51507c22 | icv1-f2m13-t181-515ee569 | 10.97 | 15.2442 | 26.7179 | 1.7527 |
+| W96346bcf839e | icv1-f2m13-t181-515ee569 | 10.97 | 19.8949 | 31.7573 | 1.5963 |
+| Wba3041cc3555 | icv1-f2m13-t181-515ee569 | 10.97 | 17.3058 | 28.8886 | 1.6693 |
+| We57e12997b8e | icv1-f2m13-t181-515ee569 | 10.97 | 15.3686 | 27.1646 | 1.7675 |
+| We718d2747255 | icv1-f2m13-t181-515ee569 | 10.97 | 14.4789 | 26.4016 | 1.8235 |
+| Wf3adc0458f26 | icv1-f2m13-t181-515ee569 | 10.97 | 17.0491 | 28.8647 | 1.6930 |
+| Wf9115104de18 | icv1-f2m13-t181-515ee569 | 10.97 | 19.4104 | 31.0608 | 1.6002 |
+| Wff35e13b8437 | icv1-f2m13-t181-515ee569 | 10.97 | 14.3829 | 26.2099 | 1.8223 |
+saved research/ecbench_rootfind_engine_20261012/comparisons/claim-n13.resources.json

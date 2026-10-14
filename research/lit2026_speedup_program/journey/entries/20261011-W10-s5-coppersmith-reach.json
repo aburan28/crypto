@@ -1,0 +1,24 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W10",
+  "slug": "s5-coppersmith-reach",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1691",
+  "papers": ["ePrint 2024/1577", "ePrint 2026/1027", "ePrint 2026/423"],
+  "kind": "negative",
+  "workload": {
+    "id": "fp-s5-small-root-asymptotic",
+    "description": "S5(x1..x4, z) = 0 mod p with |x_i| < p^delta, support = full box [0,8]^4 (6561 monomials, measured on a random 61-bit prime field, random a, b, z; no registered curve id, the computation is curve-independent); asymptotic p -> infinity reach of full-rank triangular single-polynomial Coppersmith lattices",
+    "curve_ids": []
+  },
+  "metric": "asymptotic small-root exponent delta* (exact closure optimum at finite multiplicity; box-family limit)",
+  "unit": "delta = log_p X",
+  "isolation": "L0",
+  "samples": 1,
+  "arms": [],
+  "ratio_original_over_candidate": {"value": null, "interval": null, "interval_kind": "none"},
+  "ratio_previous_over_candidate": {"value": null, "interval": null, "interval_kind": "none"},
+  "outputs_identical": null,
+  "run_report": "research/lit2026_w10_s5_coppersmith_20261011/reports/run-20261011T2118Z/report.pdf",
+  "note": "delta*(S5) = 1/80 for JM basic/extended and for the exact optimum over all monomial sets (70/70 closure cells equal the best box; S5 exact to l=3: 0.006334, bounded box); the whole family is capped at 1/32 for every l by a charging argument. Needed delta ~ 1/5 for arity m = 4, so this route is closed for that family; sublattice/linearisation, multi-polynomial and cuso Groebner-cancelling shifts are not covered."
+}

@@ -1,0 +1,6 @@
+# icv1-f2m41-tm2308219-7f48b14a r = 549756390943 (39.0 bits), cofactor 4
+# n = 41, K = 5: 410 points, 1010 table states (41410 abscissa states), build 0.01 s
+# n=41 K=5 4sum                   rel=  0 targets=  884 S3=   36566506 S4=         0 S3/rel=           - S4/rel=         - outer/rel=         - tgt/rel=       - wall/rel=        - (240.0s, cell_wall)
+# n=41 K=5 6sum_a_iterate_table   rel=  4 targets=    5 S3=   54914537 S4=         0 S3/rel=     1.373e7 S4/rel=   0.000e0 outer/rel=   3.325e2 tgt/rel=   1.250 wall/rel=  6.000e1 (240.0s, cell_wall)
+# n=41 K=5 6sum_b_s4_per_probe    rel=  0 targets=    1 S3=          0 S4=    866728 S3/rel=           - S4/rel=         - outer/rel=         - tgt/rel=       - wall/rel=        - (240.1s, cell_wall)
+# n=41 K=5 5sum_c_control         rel=  0 targets=    3 S3=   46576164 S4=         0 S3/rel=           - S4/rel=         - outer/rel=         - tgt/rel=       - wall/rel=        - (240.0s, cell_wall)

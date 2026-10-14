@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" role="img" aria-labelledby="title desc">
+<title id="title">Where ECDLP index-calculus leads enter the charged pipeline</title>
+<desc id="desc">Five proposed routes enter setup, relation search, or curve transfer, before rank, target descent, and scalar verification. Same-point rho is the reference.</desc>
+<style>text{font:16px Arial,sans-serif;fill:#142536}.small{font-size:14px}.box{fill:#eaf2fb;stroke:#315d87;stroke-width:2}.lead{fill:#fff7e7;stroke:#a66b11;stroke-width:2}.arrow{stroke:#315d87;stroke-width:2;fill:none;marker-end:url(#m)}.rho{fill:#eaf7ee;stroke:#2d7b49;stroke-width:2}</style>
+<defs><marker id="m" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#315d87"/></marker></defs>
+<text x="30" y="35" font-size="23" font-weight="bold">Index-calculus lead map</text>
+<text x="30" y="60" class="small">Every path must pay setup, ordinary relations, useful rank, target descent, and verification.</text>
+<rect class="box" x="30" y="170" width="145" height="68" rx="8"/><text x="45" y="198">Public point</text><text x="45" y="220" class="small">fixed curve / group</text>
+<rect class="box" x="205" y="170" width="145" height="68" rx="8"/><text x="220" y="198">Base and index</text><text x="220" y="220" class="small">reusable setup</text>
+<rect class="box" x="380" y="170" width="145" height="68" rx="8"/><text x="395" y="198">Relations</text><text x="395" y="220" class="small">ordinary yield</text>
+<rect class="box" x="555" y="170" width="145" height="68" rx="8"/><text x="570" y="198">Useful rank</text><text x="570" y="220" class="small">and factor logs</text>
+<rect class="box" x="730" y="170" width="200" height="68" rx="8"/><text x="745" y="198">Target descent</text><text x="745" y="220" class="small">and scalar check</text>
+<path class="arrow" d="M175 204 H200 M350 204 H375 M525 204 H550 M700 204 H725"/>
+<rect class="lead" x="205" y="92" width="145" height="54" rx="8"/><text x="218" y="114" class="small">Compact orbit /</text><text x="218" y="134" class="small">fixed useful base</text><path class="arrow" d="M278 146 V166"/>
+<rect class="lead" x="370" y="92" width="165" height="54" rx="8"/><text x="382" y="114" class="small">Higher-arity</text><text x="382" y="134" class="small">target-coupled join</text><path class="arrow" d="M453 146 V166"/>
+<rect class="lead" x="555" y="92" width="175" height="54" rx="8"/><text x="567" y="114" class="small">Early-prunable</text><text x="567" y="134" class="small">SAT / F4 / F5</text><path class="arrow" d="M643 146 V158 H490 V166"/>
+<rect class="lead" x="30" y="290" width="190" height="54" rx="8"/><text x="42" y="312" class="small">Explicit cover /</text><text x="42" y="332" class="small">isogeny transfer</text><path class="arrow" d="M125 290 V242"/>
+<rect class="lead" x="245" y="290" width="190" height="54" rx="8"/><text x="257" y="312" class="small">Hardware /</text><text x="257" y="332" class="small">multi-target reuse</text><path class="arrow" d="M338 290 V242"/>
+<rect class="rho" x="625" y="320" width="275" height="55" rx="8"/><text x="640" y="343" class="small">Same-point signed-Frobenius rho</text><text x="640" y="362" class="small">reference, matched resources</text><path class="arrow" d="M825 320 V242"/>
+<text x="30" y="430" class="small">Proposed mechanisms are orange; measured pipeline stages and reference are blue/green.</text>
+</svg>

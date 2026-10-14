@@ -1,0 +1,29 @@
+# Run report: d43-ell508433
+
+Session: ECBS1hf8f01c6caea3. Spec: ../../specs/d43-ell508433.json. Exact launch/audit commands: ../../run_sessions.sh.
+
+Host: Apple M4 Pro, aarch64, environment ECBENV2h59034d4cd61b. Binary SHA-256: 9f6a05e86f49711383557ca4a449e6e41773bad2b2672ed08e297f26513b55c3. Recorded revision: be456ef517aa255f98c02c3fe94b33670517a9e0; dirty: false.
+
+96 records: 48 measured, the rest retained warm-ups. Measured failures: 16. Eight independent one-target workloads on each fixed curve; one measured round, one warm-up. All runs are cold. A/A matches: 16 pairs, 0 mismatches.
+
+Audit OK: true; 65 verified records; 32 exact measured replays. This is same-host replay, not independent-host validation.
+
+| curve | role | arm | mean counted S | observed range | lower bound | isolation levels |
+|---|---|---|---:|---|---|---|
+| icv1-fp42-t39-c7134779 | crater | rho-neg | 0.991476 | 0.550274 to 1.27421 | true | {"L0":8} |
+| icv1-fp42-t39-e6b37c6c | floor | rho-neg | 1.07603 | 0.389514 to 1.76459 | true | {"L0":8} |
+| icv1-fp42-t39-c7134779 | crater | rho-neg-aa | 0.991476 | 0.550274 to 1.27421 | true | {"L0":8} |
+| icv1-fp42-t39-e6b37c6c | floor | rho-neg-aa | 1.07603 | 0.389514 to 1.76459 | true | {"L0":8} |
+| icv1-fp42-t39-c7134779 | crater | ic-mitm | missing | missing to missing | true | {"L0":8} |
+| icv1-fp42-t39-e6b37c6c | floor | ic-mitm | missing | missing to missing | true | {"L0":8} |
+
+![Recorded counts](counts.svg)
+
+Dots are native-analyzer means; lines are observed ranges, not confidence intervals. No wall figure is interpreted. Raw records: ../../sessions/d43-ell508433/records.jsonl; their SHA-256: 29a07cfb92e50aecc4287d5eca0f70d4539ced579b820c95da3709d6440d38c6. All exact run IDs and phase means are in ../../analysis.json. No session file was edited.
+
+## Exact representation identities
+
+- crater: EC1P42Ccmcraterhffef43264396; urn:ec-record:1:sha256:ffef43264396dcf71584cfeea88f4d271ff2667732af3b435ce18c958e33cff5. Full hash preimage and subgroup/generator are in ../../analysis.json. Metadata identity is not an additional mathematical certificate.
+- floor: EC1P42Ccmfloorhfa79e1d6a9a4; urn:ec-record:1:sha256:fa79e1d6a9a4354b17833ffd446c1aef3d417e53114f3063aad842d580e350cf. Full hash preimage and subgroup/generator are in ../../analysis.json. Metadata identity is not an additional mathematical certificate.
+
+Unpriced native work, memory and model-dependent primitive prices remain explicit in each record. Counted S and IC/rho quotients do not establish complete-cost advantages. No isogeny was computed or priced; no structural hardness or transport inference is made.

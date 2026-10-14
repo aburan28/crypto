@@ -1,0 +1,45 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-11",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/lit2026_w4_early_abort_20261011",
+  "run": "run-20261011T2025Z",
+  "files": [
+    {
+      "source": "research/lit2026_w4_early_abort_20261011/reports/run-20261011T2025Z/report.pdf",
+      "copy": "run-report.pdf",
+      "sha256": "54aaf7a9dc523f855b3a1ec418d5b5ac52342ab498449d1c026190f48861684b",
+      "bytes": 130071
+    },
+    {
+      "source": "research/lit2026_w4_early_abort_20261011/REPORT.pdf",
+      "copy": "results-report.pdf",
+      "sha256": "edd63ee71213e36fdac188cc324c2b42a85b11375e47f7e14cca2a18042c0d4e",
+      "bytes": 116826
+    },
+    {
+      "source": "research/lit2026_w4_early_abort_20261011/reports/run-20261011T2025Z/arms.svg",
+      "copy": "arms.svg",
+      "sha256": "835f6ea0f9c1e80654ebefbc51843a6acc541870e968467c5762175895b5b0f8",
+      "bytes": 54193
+    },
+    {
+      "source": "research/lit2026_w4_early_abort_20261011/reports/run-20261011T2025Z/degrees.svg",
+      "copy": "degrees.svg",
+      "sha256": "3e272cd9fd7d3fab9ee513ea83eb898179f01744834be8a74a37b6a4b3668a11",
+      "bytes": 29386
+    }
+  ],
+  "pngs": [
+    {
+      "source": "arms.svg",
+      "copy": "arms.png",
+      "dpi": 150
+    },
+    {
+      "source": "degrees.svg",
+      "copy": "degrees.png",
+      "dpi": 150
+    }
+  ]
+}

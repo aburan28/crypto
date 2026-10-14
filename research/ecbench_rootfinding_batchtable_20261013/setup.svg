@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#1c2736}.title{font-size:22px;font-weight:700}.panel{font-size:18px;font-weight:700}.sub{font-size:14px}.tick{font-size:13px}.label{font-size:15px;font-weight:600}.value{font-size:16px;font-weight:700}.grid{stroke:#dbe2ea;stroke-width:1}</style>
+<rect width="960" height="540" fill="white"/>
+<text x="30" y="30" class="title">Prime pair-table setup: same keys, fewer inversions</text>
+<text x="35" y="65" class="panel">Field inversions (derived)</text>
+    <text x="35" y="84" class="sub">B=64; counts from the two builder loops</text><line x1="58" y1="385" x2="355" y2="385" class="grid"/>
+      <text x="50" y="390" text-anchor="end" class="tick">0</text><line x1="58" y1="315" x2="355" y2="315" class="grid"/>
+      <text x="50" y="320" text-anchor="end" class="tick">1,125</text><line x1="58" y1="245" x2="355" y2="245" class="grid"/>
+      <text x="50" y="250" text-anchor="end" class="tick">2,250</text><line x1="58" y1="175" x2="355" y2="175" class="grid"/>
+      <text x="50" y="180" text-anchor="end" class="tick">3,375</text><line x1="58" y1="105" x2="355" y2="105" class="grid"/>
+      <text x="50" y="110" text-anchor="end" class="tick">4,500</text><rect x="125" y="130.13777777777779" width="75" height="254.86222222222221" fill="#5b7db9"/>
+      <text x="162.5" y="123" text-anchor="middle" class="value">4,096</text>
+      <text x="162.5" y="413" text-anchor="middle" class="label">scalar</text><rect x="250" y="381.0177777777778" width="75" height="3.982222222222222" fill="#18a999"/>
+      <text x="287.5" y="373.0177777777778" text-anchor="middle" class="value">64</text>
+      <text x="287.5" y="413" text-anchor="middle" class="label">batch</text>
+<text x="515" y="65" class="panel">Mean setup wall (L0)</text>
+    <text x="515" y="84" class="sub">microseconds; 24 measured runs per arm</text><line x1="538" y1="385" x2="835" y2="385" class="grid"/>
+      <text x="530" y="390" text-anchor="end" class="tick">0</text><line x1="538" y1="315" x2="835" y2="315" class="grid"/>
+      <text x="530" y="320" text-anchor="end" class="tick">70</text><line x1="538" y1="245" x2="835" y2="245" class="grid"/>
+      <text x="530" y="250" text-anchor="end" class="tick">140</text><line x1="538" y1="175" x2="835" y2="175" class="grid"/>
+      <text x="530" y="180" text-anchor="end" class="tick">210</text><line x1="538" y1="105" x2="835" y2="105" class="grid"/>
+      <text x="530" y="110" text-anchor="end" class="tick">280</text><rect x="605" y="141.77420833333335" width="75" height="243.22579166666665" fill="#5b7db9"/>
+      <text x="642.5" y="133.77420833333335" text-anchor="middle" class="value">243</text>
+      <text x="642.5" y="413" text-anchor="middle" class="label">scalar</text><rect x="730" y="256.619875" width="75" height="128.380125" fill="#18a999"/>
+      <text x="767.5" y="248.61987499999998" text-anchor="middle" class="value">128</text>
+      <text x="767.5" y="413" text-anchor="middle" class="label">batch</text>
+<text x="30" y="455" class="sub">Cold total: 18633.042 GAE in each arm; 32/32 paired outputs and counted phases identical.</text>
+<text x="30" y="480" class="sub">ECBS1h4d0b9e4a02a7 · source-derived inversion counts; setup wall is descriptive only.</text>
+<text x="30" y="505" class="sub">macOS L0; prime native work remains partly unpriced; this figure does not establish a whole-solve runtime gain.</text>
+</svg>

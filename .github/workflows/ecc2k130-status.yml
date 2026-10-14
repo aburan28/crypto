@@ -5,9 +5,8 @@ name: ECC2K-130 status pages
 
 on:
   schedule:
-    # Every 3 minutes. scripts/rho_status/render.py sizes history.json from
-    # this interval, and test_rho_status.py pins the two together, so changing
-    # it here without changing that constant shortens the published series.
+    # Every 10 minutes. scripts/rho_status/render.py sizes history.json from
+    # this interval, and test_rho_status.py pins the two together.
     - cron: "*/10 * * * *"
   workflow_dispatch:
   pull_request:
@@ -70,12 +69,11 @@ permissions:
   id-token: write
 
 concurrency:
-  # PRs get their own group so they never cancel each other.
-  # Schedule/push share one deployment group; cancel superseded runs so a
-  # stalled publish cannot hold the account's hosted runners for hours while
-  # every */3 schedule piles up behind it (2026-10-07 run 3682; 2026-10-10 jam).
+  # PRs get their own group so they never cancel each other. Scheduled,
+  # push and manual publishers share one group and admitted runs finish even
+  # when the hosted runner queue is under pressure.
   group: ${{ github.event_name == 'pull_request' && format('ecc2k130-status-pages-pr-{0}', github.event.pull_request.number) || 'ecc2k130-status-pages' }}
-  cancel-in-progress: ${{ github.event_name != 'pull_request' }}
+  cancel-in-progress: false
 
 jobs:
   # Pull requests only. A publishing run runs these same steps inside the

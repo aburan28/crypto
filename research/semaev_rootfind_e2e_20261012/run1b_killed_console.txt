@@ -1,0 +1,34 @@
+End-to-end DLP: root-finding vs F4 decomposition (baseline given every advantage)
+All times are CPU time (process + reaped children, getrusage), not wall-clock.
+
+=== Binary Koblitz K_0/F_2^n: complete DLP, root finding vs matrix-F4 ===
+
+Single-DLP CPU time includes the pair-table build (no amortisation). F4 at its best max_degree per n.
+  n   |F| rbits       d |   root (min)  root (mean) |     F4 (min)    F4 (mean) |     single  per-extra-DLP
+  5    21     4       3 |      2.42 ms      3.12 ms |      65.0 µs     314.3 µs | 0.10× (baseline faster) 0.23× (baseline faster)
+      table build 1.74 ms (deg 2 best for F4)
+  9    55     7      42 |      1.73 ms      2.40 ms |      1.29 ms      1.58 ms | 0.66× (baseline faster)             4×
+      table build 2.04 ms (deg 2 best for F4)
+ 13  4005    11     667 |    273.16 ms    312.16 ms |      7.95 ms     11.68 ms | 0.04× (baseline faster) 0.22× (baseline faster)
+      table build 258.06 ms (deg 2 best for F4)
+ 23  2025    21  698617 |    102.98 ms    118.22 ms |      10.16 s      10.96 s |        93×           312×
+      table build 83.03 ms (deg 2 best for F4)
+
+=== Prime a=−3 curves: complete DLP, root finding vs Buchberger vs msolve ===
+
+msolve found; charged its own process CPU only (harness spawn/file I/O excluded); exec+parse child-CPU floor 4.99 ms (σ 990.9 µs per call, mean of 2000) subtracted; a per-decide value is reported only if it clears 2 standard errors of the mean, otherwise the 2·SE bound is charged.
+A baseline is measured in full when its projected wall is under 900.00 s (E2E_FULL_BUDGET_S); otherwise it is COMPOSED
+from a 100-target sampled per-target cost × the root finder's measured target count on the same stream.
+
+-- 16-bit  p=65519  n=65447  |F|=8  d=13054 --
+   root-finding :   26.80 ms measured  (oracle 4.29 ms, 6544 targets, 13 relations)
+   (Buchberger decide ordering: Lex)
+   Buchberger   :   153.20 s measured  (23.40 ms per target × 6544 targets)   → 5716× vs root
+   (msolve: 6543 decides, net child CPU 0.0 µs per decide, 2·SE 50.6 µs)
+   msolve (F4)  : < 394.36 ms BOUND     (< 50.6 µs per target [2·SE] × 6544 targets)   → at most 15× vs root (F4 cost below resolution)
+
+-- 20-bit  p=1048571  n=1048189  |F|=12  d=630282 --
+   root-finding :  376.98 ms measured  (oracle 49.22 ms, 75683 targets, 26 relations)
+   (Buchberger decide ordering: Lex)
+   Buchberger   :  5983.57 s COMPOSED  (79.06 ms per target × 75683 targets)   → 15872× vs root
+EXIT=143

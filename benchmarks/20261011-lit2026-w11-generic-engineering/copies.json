@@ -1,0 +1,89 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-11",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/lit2026_w11_generic_engineering_20261011",
+  "run": "run-20261011T2049Z",
+  "files": [
+    {
+      "source": "research/lit2026_w11_generic_engineering_20261011/reports/run-20261011T2049Z/report.pdf",
+      "copy": "run-report.pdf",
+      "sha256": "408a71b7ffe09afd06ea7d4c964f7e3caf00b12ebf39da759eb07135e15ebbc2",
+      "bytes": 126178
+    },
+    {
+      "source": "research/lit2026_w11_generic_engineering_20261011/results.pdf",
+      "copy": "results-report.pdf",
+      "sha256": "419727143d61ed5fdc8ff13098f1b4e561c883cdfe080d0b31fa20f1f57823c4",
+      "bytes": 168084
+    },
+    {
+      "source": "research/lit2026_w11_generic_engineering_20261011/reports/run-20261011T2049Z/biext_k2.svg",
+      "copy": "biext_k2.svg",
+      "sha256": "5351eef56b94ad224b4bd6b701e53b29c67473f264141ca55f15729d36dc13b2",
+      "bytes": 22679
+    },
+    {
+      "source": "research/lit2026_w11_generic_engineering_20261011/reports/run-20261011T2049Z/binary_xonly.svg",
+      "copy": "binary_xonly.svg",
+      "sha256": "8f481a2805cddaed3315079d5a100b794dbcc03c48c1430a1353bc122e6704a3",
+      "bytes": 31849
+    },
+    {
+      "source": "research/lit2026_w11_generic_engineering_20261011/reports/run-20261011T2049Z/bsgs_opcount.svg",
+      "copy": "bsgs_opcount.svg",
+      "sha256": "6ad348854f37a851900d1d2e37df8d8c8c71fb2454b2c2bf4d64cc26151fb19c",
+      "bytes": 31202
+    },
+    {
+      "source": "research/lit2026_w11_generic_engineering_20261011/reports/run-20261011T2049Z/bsgs_wall.svg",
+      "copy": "bsgs_wall.svg",
+      "sha256": "7052f2f67f1da7d7cba9a557ad52509473d9901f69089b15caacaa2bb08b57b7",
+      "bytes": 24617
+    },
+    {
+      "source": "research/lit2026_w11_generic_engineering_20261011/reports/run-20261011T2049Z/challenge_ladder.svg",
+      "copy": "challenge_ladder.svg",
+      "sha256": "db47694840c8f9d8e3d1756e3aae081e7bd315dcf416ad88cc6ce2639134ed1e",
+      "bytes": 93802
+    },
+    {
+      "source": "research/lit2026_w11_generic_engineering_20261011/reports/run-20261011T2049Z/dp_stats.svg",
+      "copy": "dp_stats.svg",
+      "sha256": "6fc52b199607a8721e58ed6ce9e06cb88d4a98310858738e8fb0d1a95fdc571a",
+      "bytes": 65428
+    }
+  ],
+  "pngs": [
+    {
+      "source": "biext_k2.svg",
+      "copy": "biext_k2.png",
+      "dpi": 150
+    },
+    {
+      "source": "binary_xonly.svg",
+      "copy": "binary_xonly.png",
+      "dpi": 150
+    },
+    {
+      "source": "bsgs_opcount.svg",
+      "copy": "bsgs_opcount.png",
+      "dpi": 150
+    },
+    {
+      "source": "bsgs_wall.svg",
+      "copy": "bsgs_wall.png",
+      "dpi": 150
+    },
+    {
+      "source": "challenge_ladder.svg",
+      "copy": "challenge_ladder.png",
+      "dpi": 150
+    },
+    {
+      "source": "dp_stats.svg",
+      "copy": "dp_stats.png",
+      "dpi": 150
+    }
+  ]
+}

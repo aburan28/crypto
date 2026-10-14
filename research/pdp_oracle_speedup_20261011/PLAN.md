@@ -48,7 +48,8 @@ loop?
 
 From `research/pdp_followups_20261010/blocked/pairs_and_solve_cpu_l11.txt`:
 one refuting target per `ℓ`, unpinned, shared 4-vCPU container, single run.
-**Not a baseline** (`AGENTS.md` §10); PS-0 replaces it.
+**Not a baseline** (`AGENTS.md` §10); PS-0 replaces it: the measured baseline is in
+[`baseline_v1/README.md`](baseline_v1/README.md) §5 (337.7, 375.4, 393.3, 421.4, 452.3 ns per pair at `l = 8…12`).
 
 | ℓ | n | pairs `2^{2ℓ−1}` | seconds | ns per pair |
 |--:|--:|--:|--:|--:|
@@ -157,7 +158,7 @@ Recorded 2026-10-11 for planning; PS-0 records the baseline host at run time.
 
 | item | value |
 |:--|:--|
-| CPU | Intel Xeon @ 2.80 GHz, 4 vCPU, 1 thread per core, L2 4 MiB per core, L3 33 MiB |
+| CPU | Intel Xeon @ 2.80 GHz, 4 vCPU, 1 thread per core, L2 4 MiB across the 4 cores (`lscpu`: 1 MiB each; corrected by PS-0), L3 33 MiB |
 | features seen in `/proc/cpuinfo` | `avx2`, `avx512f`, `avx512bw`, `bmi2`, `pclmulqdq`; not reported: `avx512vbmi`, `gfni`, `vpclmulqdq` |
 | memory, OS | 15 GiB, Linux 6.18.44 |
 | toolchain | rustc 1.97.0, cargo 1.97.0, valgrind present |
@@ -199,8 +200,10 @@ days (before PS-7).
 | item | status |
 |:--|:--|
 | Scope every task with a frozen protocol | **verified complete** by this PR (§3 and `protocols/`) |
-| Baseline recorded | **partial**: indicative numbers only (§2); PS-0 not run |
-| PS-1 to PS-7, PS-3b | **not attempted** |
+| Baseline recorded | **verified complete** by PS-0 ([`baseline_v1/`](baseline_v1/README.md)): corpus, digests, A/A, counts; supersedes §2 |
+| PS-1 | **partial**: bit-degree, exactness theorem, group-law formulation and gate counts done; identity certificates blocked (schema is `F_p`-only), two candidate formulations not attempted ([`ps1_algebra/`](ps1_algebra/README.md)) |
+| PS-2 | **partial**: scalar group-law kernel with identical digests, A/A-qualified timing (0.067–0.12 of the baseline per pair, 0.016–0.031 per target), gate count and hashed program; the library module and the incremental-update arm are **not** built ([`ps2_scalar/`](ps2_scalar/README.md)) |
+| PS-3 to PS-7, PS-3b | **not attempted** (each updates this row when it lands) |
 | Any speedup claim | **none made** |
 
 ## 9. Graphs and canonical artifacts checked

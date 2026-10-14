@@ -2,6 +2,8 @@
 """Routing regressions for the CI metadata policy, using small YAML fixtures."""
 import importlib.util
 from pathlib import Path
+import shutil
+import tempfile
 import unittest
 
 spec = importlib.util.spec_from_file_location("budget_policy", Path(__file__).with_name("check-pr-budgets.py"))
@@ -77,6 +79,40 @@ class BudgetPolicyTests(unittest.TestCase):
         self.assertFalse(policy.problems(doc))
         doc["jobs"]["producer"]["if"] = "always()"
         self.assertTrue(policy.problems(doc))
+
+    def test_frozen_lean_exceptions_are_exact_and_seal_bound(self):
+        for workflow_path, exception in policy.FROZEN_BUDGET_EXCEPTIONS.items():
+            job = exception["job"]
+            timeout = exception["timeout"]
+            self.assertTrue(policy.frozen_proof_budget_exception(
+                workflow_path, job, timeout, "pull_request"))
+            self.assertFalse(policy.frozen_proof_budget_exception(
+                workflow_path, "other", timeout, "pull_request"))
+            self.assertFalse(policy.frozen_proof_budget_exception(
+                workflow_path, job, timeout, "merge_group"))
+            self.assertFalse(policy.frozen_proof_budget_exception(
+                workflow_path, job, timeout + 1, "pull_request"))
+            self.assertTrue(policy.problems(
+                workflow({"timeout-minutes": 60}), workflow_path))
+
+            with tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                seal = root / exception["seal"]
+                workflow_file = root / workflow_path
+                seal.parent.mkdir(parents=True)
+                workflow_file.parent.mkdir(parents=True)
+                shutil.copy2(policy.REPO_ROOT / exception["seal"], seal)
+                shutil.copy2(policy.REPO_ROOT / workflow_path, workflow_file)
+                self.assertTrue(policy.frozen_proof_budget_exception(
+                    workflow_path, job, timeout, "pull_request", root=root))
+                pinned_seal = seal.read_bytes()
+                seal.write_bytes(pinned_seal + b"\n")
+                self.assertFalse(policy.frozen_proof_budget_exception(
+                    workflow_path, job, timeout, "pull_request", root=root))
+                seal.write_bytes(pinned_seal)
+                workflow_file.write_bytes(workflow_file.read_bytes() + b"\n# modified\n")
+                self.assertFalse(policy.frozen_proof_budget_exception(
+                    workflow_path, job, timeout, "pull_request", root=root))
 
     def test_metadata_is_not_executed(self):
         self.assertIs(policy.expression("__import__('os').system('false')", "pull_request"), policy.UNKNOWN)

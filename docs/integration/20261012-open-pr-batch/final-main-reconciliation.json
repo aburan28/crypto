@@ -1,0 +1,108 @@
+{
+  "source_pins": {
+    "captured_pr": "baa624218809b821400cfe33155c6bacb542e9a8",
+    "pre_merge_integration": "8880bf0c7e286f7aa770adca192627537b2fcd75",
+    "incoming_main": "31088bfce9d9cc86fb55a655b064b5472db263ae",
+    "merge_preview_tree": "1cfc8a7e660e662e0cd9286f9d97709088155acc"
+  },
+  "proposal_files": [
+    {
+      "source_revision": "31088bfce9d9cc86fb55a655b064b5472db263ae",
+      "source_path": "src/cryptanalysis/matrix_f5_f2.rs",
+      "git_blob": "4440fa1191a356985d3e7f0e95db4b62e179e5a4",
+      "sha256": "ad4e3165341654ff6d5ec4bf06a4a52f040dffc515b561c37cd182365eea19fb",
+      "bytes": 67924,
+      "tests": [
+        "direct_criterion_products_match_boolean_multiplication",
+        "direct_criterion_pack_preserves_cancelled_missing_columns",
+        "criterion_cursor_reduces_across_prefix_and_temporary_pivot_words",
+        "criterion_pruning_and_row_spaces_survive_high_bit_embedding",
+        "support_split_certificate_is_exact_and_falls_back",
+        "support_split_certificate_handles_projection_across_words",
+        "sampled_column_certificate_is_exact_and_falls_back",
+        "certified_original_rows_preserve_independent_rows_and_exact_fallback",
+        "direct_scalar_unpack_matches_push_path",
+        "direct_packed_f5_build_matches_sorted_builder_and_falls_back_on_sparse_columns",
+        "avx512_unpack_matches_scalar_for_sparse_dense_and_partial_words",
+        "f5_rows_span_the_f4_row_space_on_random_systems",
+        "fused_row_build_matches_two_pass_rows_and_full_count",
+        "echelon_option_preserves_the_f5_row_space",
+        "frobenius_criterion_prunes_the_leading_monomial_multiple",
+        "koszul_criterion_prunes_leading_monomials_of_earlier_generators",
+        "naive_f2_criterion_is_unsound_in_the_boolean_ring",
+        "criterion_prunes_nothing_for_quadratics_at_degree_three"
+      ]
+    },
+    {
+      "source_revision": "31088bfce9d9cc86fb55a655b064b5472db263ae",
+      "source_path": "src/cryptanalysis/fx_hash.rs",
+      "git_blob": "ec078cdc4801c07eb78426772a14c908fbcd1377",
+      "sha256": "2257031df14bddbba2bc25a7b18b645589a893cb7977095c2ee335ff4b53c344",
+      "bytes": 4570,
+      "tests": [
+        "maps_behave_like_std_maps",
+        "mask_hash_spreads_masks_without_low_bits"
+      ]
+    },
+    {
+      "source_revision": "31088bfce9d9cc86fb55a655b064b5472db263ae",
+      "source_path": "examples/f4_f5_row_build_bench.rs",
+      "git_blob": "2a32e27b7cf8ecbcdbabe4e7566a80cdecdad174",
+      "sha256": "2d221b46f04ab815ad74fade62ddcf9c89fc62d7f452e399648c3db942a3c0b8",
+      "bytes": 14700,
+      "tests": []
+    },
+    {
+      "source_revision": "31088bfce9d9cc86fb55a655b064b5472db263ae",
+      "source_path": "examples/f4_f5_hash_compare.rs",
+      "git_blob": "c54fbaaae4a678ea24b853e3383bedec930951fa",
+      "sha256": "1a89642a5660d172d4eb01937e17a0d72d35c170576b877d873f82fb512a8812",
+      "bytes": 26748,
+      "tests": [
+        "instruction_gate_requires_noise_control_and_reports_regressions",
+        "profile_parser_rejects_missing_zero_and_partial_thread_counts",
+        "frozen_keys_include_every_seed_holdout_arm_and_repetition",
+        "self_costs_exclude_inclusive_call_edges_and_resolve_late_names",
+        "wrapped_incremental_summary_does_not_replace_the_file_totals"
+      ]
+    },
+    {
+      "source_revision": "8880bf0c7e286f7aa770adca192627537b2fcd75",
+      "source_path": "examples/gb_cas_export.rs",
+      "git_blob": "f1d7f1bac65b31f7490d67a0fe93b2baf26faa3d",
+      "sha256": "49d61cfb18f84a11cf9b1cfc8ca8c9066a1cb40ca56f0e257468a8b383fb0c0d",
+      "bytes": 13761,
+      "tests": []
+    }
+  ],
+  "library_tests": {
+    "old_f5": 17,
+    "incoming_f5": 18,
+    "added_library_tests": [
+      "criterion_pruning_and_row_spaces_survive_high_bit_embedding"
+    ],
+    "merge_preview_duplicate_tests": {
+      "direct_criterion_products_match_boolean_multiplication": 2,
+      "direct_criterion_pack_preserves_cancelled_missing_columns": 2,
+      "criterion_cursor_reduces_across_prefix_and_temporary_pivot_words": 2
+    },
+    "fx_hash_existing_test_count": 2
+  },
+  "new_example_tests": [
+    "instruction_gate_requires_noise_control_and_reports_regressions",
+    "profile_parser_rejects_missing_zero_and_partial_thread_counts",
+    "frozen_keys_include_every_seed_holdout_arm_and_repetition",
+    "self_costs_exclude_inclusive_call_edges_and_resolve_late_names",
+    "wrapped_incremental_summary_does_not_replace_the_file_totals"
+  ],
+  "added_test_count_total": 6,
+  "new_hash_study": {
+    "path": "research/f4_f5_hash_20261012",
+    "files": 991,
+    "tree": "e00b12589743ceeb250255f81aa204027e738980",
+    "merge_preview_byte_exact": true
+  },
+  "gb_cas_export_resolution": "Use exact pre-merge integration file: main differences under --ignore-all-space remove only our fp-xl command, FP_XL_CASES, optional case filtering and parameterized case selection. All main standard fp/bool behavior remains represented.",
+  "matrix_f5_resolution": "Use byte-exact incoming main file. It contains all17 pre-merge tests plus1 new high-bit test, and preserves all previous production code with the intentional hasher substitution. Preview differs from incoming main only by82 duplicate test lines.",
+  "validation_scope": "No validation of newly imported source was run or claimed by this proposal. Rerun appropriate final tests/checks after actual merge resolution."
+}

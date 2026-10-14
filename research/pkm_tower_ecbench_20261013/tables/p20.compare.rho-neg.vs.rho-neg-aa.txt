@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p20/comparisons/rho-neg__rho-neg-aa.json
+ops (ok): rho-neg-aa / rho-neg = 1.0000 [1.000, 1.000] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 0.9701 [0.920, 1.048]
+| curve | log2 r | workloads | rho-neg-aa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp20-tm728-d215a2a1 | 18.85 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | rho-neg-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0ef65828562c | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.5754 | 1.5754 | 1.0000 |
+| W34d518f1ba63 | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.0217 | 1.0217 | 1.0000 |
+| W54526e0ea435 | icv1-fp20-tm728-d215a2a1 | 18.85 | 0.9878 | 0.9878 | 1.0000 |
+| W5fa0ccd7cb0f | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.2663 | 1.2663 | 1.0000 |
+| W62af93136693 | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.0992 | 1.0992 | 1.0000 |
+| W91cf98663c8e | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.1704 | 1.1704 | 1.0000 |
+| W957cbe00e31d | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.1912 | 1.1912 | 1.0000 |
+| Wd141cbfa0a83 | icv1-fp20-tm728-d215a2a1 | 18.85 | 0.9195 | 0.9195 | 1.0000 |

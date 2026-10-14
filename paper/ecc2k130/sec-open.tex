@@ -1,0 +1,190 @@
+\section{Open problems}
+\label{sec:open}
+
+This section collects what we would try next, and what would settle
+each question. Some items carry an estimate from the note that
+proposed them; we quote those as estimates, not results. None of them
+moves the exponent. What they could move is the constant, and on
+Blackwell the constant is still being found.
+
+\subsection{Table walk}
+\label{sec:open-table}
+
+The biggest open question is whether a correct table walk can be made
+faster than the $\sigma$-walk again. The $20.08$~billion iterations/s
+build ran cycle rule v2, whose exits from a fruitless cycle depended on
+how a trail had entered it. That was found in review and fixed by rule
+v3, which picks one exit for each detected cycle regardless of
+history (Section~\ref{sec:walk-cycles}). The exact v3 kernel runs at
+$8.24$~billion iterations/s in its latest screen ($5.10$ in its first
+paired panel), against $15.88$ for the best
+$\sigma$-walk~\evcite{\evref{client}, ``The earlier 20.078 B/s table result''; \evref{v3}; \evref{redesign}}.
+Almost all of that gap is the cost of probing for cycles inside the
+critical path, and several ideas attack it:
+\begin{itemize}[leftmargin=1.2em,itemsep=0.2em]
+\item \emph{Deferred cycle detection (a rule v4).} Detect cycles after
+  the fact rather than on every hinted step. The note estimates this
+  recovers ``most of the gap, 15--19'' billion iterations/s, but it is
+  a new rule identity, so the reference model, the corpus header and
+  the replay and walk-constant tools all have to move with
+  it~\evcite{\evref{probelat}, §3.1}.
+\item \emph{A cheaper probe step} in the polynomial basis (estimated at
+  $30$--$45\%$ of the probe's critical path, implemented and passing the
+  host probe, not yet re-measured on a device), and \emph{early
+  termination} of the probe through the formal $\ZZ[\tau]$ sum
+  (estimated $-35\%$ probe work)~\evcite{\evref{probelat}, §3.2--3.3}.
+\item \emph{Moving the probe off the critical path} onto a concurrent
+  resolver, at an estimated $4.5\%$ of ALU work with its latency
+  hidden~\evcite{\evref{probelat}, §3.4--3.5}.
+\item \emph{The paired cost-per-solve run.} Even a fast exact table
+  walk only pays if its cost per solve beats the $\sigma$-walk's. The
+  v2 projection was $0.81$--$0.86\times$, which held only while the table
+  walk kept at least $0.932$--$0.943$ of the $\sigma$-walk's rate, and
+  only for the first $15$--$22\%$ of a campaign. The paired run that would
+  test it has never been executed; its job script is all that
+  exists~\evcite{\evref{walkconst}, §11.1 and §11.5}.
+\end{itemize}
+
+\subsection{$\sigma$-walk}
+\label{sec:open-sigma}
+
+The $\sigma$-walk is at $15.88$~billion iterations/s on one RTX~PRO~6000,
+and the repository's one-card goal of $26$ is unmet. The roofline says
+where the slack is. The polynomial reduction is the largest single
+item, $29\%$ of the integer work, and the path to $30$~billion
+iterations/s needs integer work cut from about $1{,}320$ to $968$
+lane-instructions per update with the carry-less unit fully busy,
+which the note calls a two-card number~\evcite{\evref{roofline}, §2 and §5}.
+Open items:
+\begin{itemize}[leftmargin=1.2em,itemsep=0.2em]
+\item A shared-memory square table for the $\sigma$-walk compiles and
+  fits on \texttt{sm\_120}; its device occupancy and paired rate are
+  pending~\evcite{\evref{sigmasq}}.
+\item Toom-3 over $\FF_2$ is not implemented. A Karatsuba-family search
+  found nothing below $8{,}859$ bitsliced instructions, but the packed
+  kernel's product has never been tried in Toom form~\evcite{\evref{client}, ``What is not done''}.
+\item On the RTX~PRO~4500, the bridge map's collection rate at cutoff 34
+  is unmeasured, and a pre-registered rare-phase skip has not been
+  run~\evcite{\evref{bridge}}.
+\end{itemize}
+
+\subsection{Blackwell pipes}
+\label{sec:open-pipes}
+
+Three questions about the hardware itself would sharpen every estimate
+above.
+\begin{itemize}[leftmargin=1.2em,itemsep=0.2em]
+\item \emph{Is the integer-multiply pipe separate from the logic pipe?}
+  If it is, moving shifts onto \texttt{IMAD.SHL} is the next integer
+  lever; if the two share a datapath, the kernel is already at $96\%$.
+  A small probe settles it: a $1{:}1$ \texttt{LOP3}/\texttt{IMAD} mix
+  running at $1.5\times$ or more says separate, under $1.2\times$ says
+  shared. It has not been run~\evcite{\evref{roofline}, §4.1 and §7}.
+\item \emph{What does \texttt{CLMAD} sustain in the walk's own
+  instruction mix?} The carry-less speed of light for the table walk
+  lies between $22.7$ and $27.4$~billion iterations/s depending on
+  whether paired \texttt{CLMAD}s beside a 40-\texttt{LOP3} chain reach
+  $1.90$ lanes per SM-clock or stop at $1.70$. A screened three-limb
+  Karatsuba arm implies at least $1.654$; a verified run would pin
+  it~\evcite{\evref{roofline}, §3, §4.2 and §7}.
+\item \emph{Hardware counters.} Nsight Compute last read counters on
+  the $17.4$ build; it failed on the rented RTX~PRO~4500 and cannot read
+  counters inside Modal containers, so the utilisation of the $20.08$
+  build and later comes from instruction counts
+  (Section~\ref{sec:profiling}). A host with working counters would
+  replace those estimates with measurements~\evcite{\evref{goal28}, ``Nsight findings''}.
+\end{itemize}
+
+\subsection{Data-centre GPUs}
+\label{sec:open-gpus}
+
+Kernel tuning does not transfer between dies. The B200's three winning
+knobs (fused pass, batch 32, three-limb Karatsuba) are among the RTX
+PRO~6000's largest losses, so every new part needs its own
+sweep~\evcite{\evref{autosweep}, §4}. On the B200 the logic pipe
+binds hard, and $30$~billion iterations/s would need at most $618$ ALU
+slots per update against $955$ after the sweep. The candidate offloads
+all move work onto the carry-less unit: the reduction as products
+against the modulus ($-290$ ALU, $+19$ \texttt{CLMAD}), the basis
+conversions and Frobenius networks as carry-less linear maps (about
+$300$ slots), and the branch selection as polynomial evaluation (about
+$175$). None has been built~\evcite{\evref{twochains}, §6.2 and §6.5; \evref{autosweep}, §3.4}.
+The B300 is an open case: NVIDIA cut its FP64 rate to $1/64$ of
+FP32~\cite{aubrey2025blackwellultra}, and if \texttt{CLMAD} runs on the
+FP64 pipe there as it does elsewhere, the B300 would price carry-less
+work like the workstation die rather than like the B200. Its
+$\sigma$-walk is already slower per SM than the B200's ($51.2$ against
+$59.7$ million iterations per second), but the probe of
+Table~\ref{tab:clmad-dies} has not been run on it. The H100 has been probed but never run the kernel. On the power-capped
+RTX~PRO~4500, the fused build is predicted at $7.2$--$7.4$~billion
+iterations/s on the shipping walk from an energy model calibrated on one
+pair, and a single run would confirm or break the
+model~\evcite{\evref{power}, §4--5}. Multi-GPU instances are not
+implemented: one process drives one device.
+
+\subsection{NIST curves}
+\label{sec:open-nist}
+
+The prime-field walk has had two rounds of tuning, so its open
+questions are nearer the surface:
+\begin{itemize}[leftmargin=1.2em,itemsep=0.2em]
+\item \emph{$W=64$.} Both curves now sit at the 255-register ceiling at
+  $W=32$, so $W=64$ will probably spill and lose; one cell would
+  confirm it.
+\item \emph{Separating the round-2 gain} between the larger batch and the
+  by-reference inversion, with a $W=32$ cell built without the new
+  inversion.
+\item \emph{A Solinas-field walk.} The field benchmark favours Solinas
+  for the P-384 multiplication; the walk has never been built on it.
+\item \emph{Independent chains per thread, reseeding off the critical
+  path, and a second walk per table read}, each named as a next rung
+  in the results file but not yet priced~\evcite{\evref{nistres}; \evref{nist}, ``Measurement rule''}.
+\item \emph{A larger jump table.} The walk uses $2^8$ entries, so a
+  fruitless two-cycle starts about once every 512 steps. The secp256k1
+  notes estimate that going to $2^{11}$ cuts the escape work eightfold;
+  the same argument applies here, untested~\evcite{\evref{eccopt}, §4.1--4.3}.
+\item \emph{Repeated, interleaved pairs} for the best cell against its
+  control, which would turn the single-run ratios of
+  Table~\ref{tab:nist-ladder} into intervals.
+\end{itemize}
+
+\subsection{CPUs}
+\label{sec:open-cpu}
+
+The CPU side has had the least attention and has the clearest
+untested levers.
+\begin{itemize}[leftmargin=1.2em,itemsep=0.2em]
+\item \emph{A packed $\sigma$-walk on x86 with VPCLMULQDQ.} The packed
+  client's carry-less path is measured only with PMULL on an M4~Pro and
+  only for the table walk. AVX-512's \texttt{vpclmulqdq} does four
+  $64\times64$ products per instruction, and AMD's Zen~5 and Intel's
+  current server cores run AVX-512 at full width; nobody has measured
+  either~\evcite{\evref{cpupacked}}.
+\item \emph{Arm's newer vector extensions.} SVE2's \texttt{PMULLB}/\texttt{PMULLT}
+  and its three-input \texttt{EOR3}/\texttt{BCAX} would serve both the
+  packed and the bitsliced client on Neoverse V-class cores; none of
+  the code uses SVE today.
+\item \emph{Prime fields with real carry chains.} A four-limb Montgomery
+  multiply with \texttt{MULX}/\texttt{ADX}, or 52-bit limbs on AVX-512
+  IFMA, would replace the big-integer reference solver; this is the CPU
+  version of the GPU's PTX carry-chain step and has not been tried for
+  rho~\evcite{\evref{nistcpu}}.
+\item \emph{GFNI after a layout change.} GFNI wins on small-field basis
+  changes but was priced as a loss for ECC2K-130's bitsliced conversions
+  because it acts on bytes within a register; a byte-oriented layout
+  could change that verdict~\evcite{\evref{gfni}}.
+\end{itemize}
+
+\subsection{Methodology}
+\label{sec:open-method}
+
+Two lessons from this work are worth keeping as rules. Static
+instruction counts are not throughput: two candidates predicted from
+their static counts at $0.887$ and $0.976$ measured $0.986$ and $0.905$ on
+the device~\evcite{\evref{nativecand}; \evref{g7native}}.
+And a rate is not a cost per solve: every engineering gain in this
+paper is a same-walk scheduling result until a paired run on the walk
+constant says otherwise. Tensor cores, finally, remain a negative
+result for this walk: they need one operand shared across eight or
+sixteen lanes, and no product in the walk has
+one~\evcite{\evref{twochains}, §1}.

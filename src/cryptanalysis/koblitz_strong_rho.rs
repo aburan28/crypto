@@ -512,6 +512,12 @@ pub struct StrongRhoOutcomeG<S> {
     pub automorphisms: usize,
     /// Operation counts.
     pub charges: StrongRhoCharges,
+    /// lit2026 W11 diagnostic: the length (steps since its start) of every
+    /// walk that ended on a distinguished point, in the order they arrived.
+    pub dp_trail_lengths: Vec<u32>,
+    /// lit2026 W11 diagnostic: the length of every walk abandoned in a
+    /// fruitless cycle (`escape_fruitless` off) or at the cap.
+    pub abandoned_trail_lengths: Vec<u32>,
 }
 
 /// The one-word outcome.
@@ -1152,6 +1158,8 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
         let mut scratch: Vec<F::E> = Vec::new();
         let (mut steps, mut walks, mut fruitless, mut capped, mut wasted) = (0u64, 0u64, 0, 0, 0);
         let mut escapes = 0u64;
+        let mut dp_trail_lengths: Vec<u32> = Vec::new();
+        let mut abandoned_trail_lengths: Vec<u32> = Vec::new();
 
         while steps < step_cap {
             // Start a walk in every idle lane.
@@ -1184,6 +1192,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
                     continue;
                 }
                 lane.live = false;
+                dp_trail_lengths.push(lane.length.min(u32::MAX as u64) as u32);
                 let key = lane.state.point.key();
                 charges.table_queries += 1;
                 let Some(&(hit_a, hit_b)) = table.get(&key) else {
@@ -1212,6 +1221,8 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
                         ideal_steps: ideal,
                         automorphisms: self.automorphisms,
                         charges,
+                        dp_trail_lengths,
+                        abandoned_trail_lengths,
                     });
                 }
                 charges.failed_collisions += 1;
@@ -1258,6 +1269,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
                 if next.point == lane.state.point || lane.previous.contains(&next.point) {
                     if !params.escape_fruitless {
                         fruitless += 1;
+                        abandoned_trail_lengths.push(lane.length.min(u32::MAX as u64) as u32);
                         lane.live = false;
                         continue;
                     }
@@ -1276,6 +1288,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
                 }
                 if lane.length > walk_cap {
                     capped += 1;
+                    abandoned_trail_lengths.push(lane.length.min(u32::MAX as u64) as u32);
                     lane.live = false;
                     continue;
                 }

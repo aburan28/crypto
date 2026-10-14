@@ -100,6 +100,7 @@ pub mod auto_attack;
 pub mod avalanche;
 pub mod b_seed_profile;
 pub mod bielliptic_quartic;
+pub mod biext_k2;
 pub mod binary_field_basis;
 pub mod binary_isogeny;
 pub mod binary_semaev;
@@ -113,6 +114,7 @@ pub mod boomerang;
 pub mod bsgs_fast;
 pub mod canonical_lift;
 pub mod cga_hnc;
+pub mod challenge_ladder;
 pub mod cheon_attack;
 pub mod cipher_registry;
 pub mod cm_canonical_lift;
@@ -125,8 +127,10 @@ pub mod curve_catalog;
 pub mod curve_construction;
 pub mod curve_id;
 pub mod curve_traits;
+pub mod cyclotomic_factor_base;
 pub mod degree_reduction;
 pub mod degree_reduction_anf;
+pub mod delta_method;
 pub mod descent_algebraic;
 pub mod descent_expansion;
 pub mod descent_lowgamma;
@@ -162,9 +166,11 @@ pub mod fght_snfs;
 pub(crate) mod fx_hash;
 pub mod gaudry_cubic;
 pub mod gaudry_quartic;
+pub mod gaudry_quartic_d4;
 pub mod genus2_fp;
 pub mod gf2_elim;
 pub mod gf3m;
+pub mod ghs_class_coverage;
 pub mod ghs_descent;
 pub mod ghs_full_attack;
 pub mod ghs_screen;
@@ -173,6 +179,7 @@ pub mod gls_fp2;
 pub mod glv_gaudry;
 pub mod glv_invariant_base;
 pub mod glv_invariant_experiments;
+pub mod gpu_rootfind;
 pub mod groebner_cache;
 pub mod groebner_f4;
 pub mod hash_attacks;
@@ -193,11 +200,11 @@ pub mod identity_certificate;
 pub mod inherited_f4;
 pub mod invalid_curve_attack;
 pub mod isogeny_class_search;
-pub mod jacobian_transfer;
 pub mod isogeny_degree_search;
 pub mod isogeny_eval;
 pub mod isogeny_walk;
 pub mod j0_twists;
+pub mod jacobian_transfer;
 pub mod jv_cover;
 pub mod jv_isogeny_walk;
 pub mod jv_quartic;
@@ -210,14 +217,15 @@ pub mod koblitz_fast;
 pub mod koblitz_fast_arith;
 pub mod koblitz_groebner;
 pub mod koblitz_index_calculus;
-pub mod koblitz_large_prime;
 pub mod koblitz_isogeny_cost;
-pub mod koblitz_sym_s4;
+pub mod koblitz_large_prime;
 pub mod koblitz_pdp_phase_a;
 pub mod koblitz_relation_solver;
 pub mod koblitz_rotated_chain;
+pub mod koblitz_sixsum_extract;
 pub mod koblitz_sparse_la;
 pub mod koblitz_strong_rho;
+pub mod koblitz_sym_s4;
 pub mod koblitz_symmetrised;
 pub mod koblitz_wide;
 pub mod large_prime_filter;
@@ -262,6 +270,7 @@ pub mod p256_isogeny_walk;
 pub mod p256_structural;
 pub mod pc_degree_avg;
 pub mod pc_degree_harness;
+pub mod pdp_split;
 pub mod petit_quisquater;
 pub mod pkm_criterion;
 pub mod pohlig_hellman;
@@ -300,6 +309,7 @@ pub mod shor;
 pub mod sig_fp_tower;
 pub mod signal_ratchet;
 pub mod signature_corpus;
+pub mod smith_kernel_coverage;
 pub mod smt_oracle;
 pub mod solinas_correlations;
 pub mod sparse_macaulay;
@@ -397,8 +407,9 @@ pub use koblitz_index_calculus::{
 pub use koblitz_sparse_la::{
     block_lanczos_solve, block_wiedemann_kernel, filter_relations, solve_sparse_system,
     BlockLanczosOptions, BlockLanczosReport, BlockWiedemannOptions, BlockWiedemannReport,
-    CsrMatrix, FilterOptions, FilterReport, FilteredSystem, SparseCoreSolver, SparseRow,
-    SparseSolveOptions, SparseSolveOutcome, SparseSolveReport, SpmvBackend, SpmvOptions,
+    CsrMatrix, FilterOptions, FilterReport, FilteredSystem, ModWord, SparseCoreSolver, SparseRow,
+    SparseRows, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport, SpmvBackend,
+    SpmvOptions, Wide, WideModulus, WordWidth, U128, U192, U256,
 };
 pub use lattice::{bkz_reduce, lll_reduce};
 pub use legacy_curve_attacks::{

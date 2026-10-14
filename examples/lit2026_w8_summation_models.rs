@@ -61,9 +61,9 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_frobenius_factor_base_from_divisor, points_with_x, KoblitzCurve,
 };
 use crypto_lib::cryptanalysis::koblitz_symmetrised::{
-    artin_schreier, build_direct_x_system, build_symmetrised_factor_base,
-    build_symmetrised_system, divisor_for_dimension, enumerate_symmetrised,
-    lift_symmetrised_root, plain_terms, symmetrised_terms, u_of_x, SymmetrisedFactorBase,
+    artin_schreier, build_direct_x_system, build_symmetrised_factor_base, build_symmetrised_system,
+    divisor_for_dimension, enumerate_symmetrised, lift_symmetrised_root, plain_terms,
+    symmetrised_terms, u_of_x, SymmetrisedFactorBase,
 };
 use crypto_lib::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
 
@@ -279,7 +279,7 @@ fn sym_pow_cached(
     }
     let v = if e == 1 {
         vars[i].clone()
-    } else if e % 2 == 0 {
+    } else if e.is_multiple_of(2) {
         sym_pow_cached(cache, vars, i, e / 2, st).square(st)
     } else {
         sym_pow_cached(cache, vars, i, e - 1, st).mul(&vars[i], st)
@@ -636,7 +636,13 @@ fn run_eg_cell(
 
     let mut rng = StdRng::seed_from_u64(seed);
     let g = kc.generator().clone();
-    let r = kc.subgroup_order.to_u64_digits().first().copied().unwrap_or(2).max(2);
+    let r = kc
+        .subgroup_order
+        .to_u64_digits()
+        .first()
+        .copied()
+        .unwrap_or(2)
+        .max(2);
     let mut tgts = Vec::new();
     while tgts.len() < targets {
         let p = kc.mul(&g, &BigUint::from(rng.gen_range(1..r)));
@@ -671,7 +677,11 @@ fn run_eg_cell(
             name: "sym",
             eqs: sys.equations.clone(),
             n_vars: sys.n_vars,
-            keys: Box::new(move |root| (0..m).map(|i| bits(&span_elem(&wb, root, i * lw, n))).collect()),
+            keys: Box::new(move |root| {
+                (0..m)
+                    .map(|i| bits(&span_elem(&wb, root, i * lw, n)))
+                    .collect()
+            }),
             comparable: true,
         });
         // eg
@@ -685,7 +695,11 @@ fn run_eg_cell(
             name: "eg",
             eqs,
             n_vars: nv,
-            keys: Box::new(move |root| (0..m).map(|i| bits(&span_elem(&wb, root, i * lw, n))).collect()),
+            keys: Box::new(move |root| {
+                (0..m)
+                    .map(|i| bits(&span_elem(&wb, root, i * lw, n)))
+                    .collect()
+            }),
             comparable: true,
         });
         // u-plain
@@ -718,7 +732,11 @@ fn run_eg_cell(
                 name: "x-direct",
                 eqs,
                 n_vars: nv,
-                keys: Box::new(move |root| (0..m).map(|i| bits(&span_elem(&xb, root, i * lx, n))).collect()),
+                keys: Box::new(move |root| {
+                    (0..m)
+                        .map(|i| bits(&span_elem(&xb, root, i * lx, n)))
+                        .collect()
+                }),
                 comparable: false,
             });
         }
@@ -742,7 +760,10 @@ fn run_eg_cell(
             poly,
             system: system_shape(&arm.eqs, arm.n_vars),
             degrees: if degrees_enabled() {
-                cells.iter().map(|c| degrees(&c[ai].eqs, c[ai].n_vars, dmax)).collect()
+                cells
+                    .iter()
+                    .map(|c| degrees(&c[ai].eqs, c[ai].n_vars, dmax))
+                    .collect()
             } else {
                 Vec::new()
             },
@@ -791,10 +812,20 @@ fn run_eg_cell(
             .map(|ti| !comparable || ref_keys[ti].is_none() || arm_keys[ai][ti] == ref_keys[ti])
             .collect();
         rep.key_set_digests = (0..tgts.len())
-            .map(|ti| arm_keys[ai][ti].as_ref().map(key_digest).unwrap_or_default())
+            .map(|ti| {
+                arm_keys[ai][ti]
+                    .as_ref()
+                    .map(key_digest)
+                    .unwrap_or_default()
+            })
             .collect();
         let ms: Vec<f64> = rep.samples.iter().flatten().map(|s| s.ms).collect();
-        let wo: Vec<f64> = rep.samples.iter().flatten().map(|s| s.word_ops as f64).collect();
+        let wo: Vec<f64> = rep
+            .samples
+            .iter()
+            .flatten()
+            .map(|s| s.word_ops as f64)
+            .collect();
         rep.median_ms = median(&ms);
         rep.median_word_ops = median(&wo);
     }
@@ -824,7 +855,11 @@ fn run_eg_cell(
 /// vector (Gaussian elimination, last free column set to 1).
 /// Reduced row echelon over `F_{2^n}`; returns the nullity and one kernel
 /// vector (last free column set to 1) when the nullity is positive.
-fn kernel_vec(mut rows: Vec<Vec<F2mElement>>, ncols: usize, irr: &IrreduciblePoly) -> (usize, Option<Vec<F2mElement>>) {
+fn kernel_vec(
+    mut rows: Vec<Vec<F2mElement>>,
+    ncols: usize,
+    irr: &IrreduciblePoly,
+) -> (usize, Option<Vec<F2mElement>>) {
     let n = rows[0][0].m_value();
     let mut pivots = Vec::new();
     let mut r = 0;
@@ -860,7 +895,6 @@ fn kernel_vec(mut rows: Vec<Vec<F2mElement>>, ncols: usize, irr: &IrreduciblePol
     }
     (nullity, Some(v))
 }
-
 
 /// A binary Edwards model `d₁(x+y) + d₂(x²+y²) = xy + xy(x+y) + x²y²` of
 /// `y² + xy = x³ + a x² + b` (Bernstein–Lange–Rezaeian Farashahi 2008):
@@ -912,7 +946,9 @@ fn to_edwards(
     let xe = num.mul(&u.add(&v).add(&c).flt_inverse(irr)?, irr);
     let ye = num.mul(&v.add(&c).flt_inverse(irr)?, irr);
     // Check the Edwards equation.
-    let lhs = d1.mul(&xe.add(&ye), irr).add(&d2.mul(&xe.square(irr).add(&ye.square(irr)), irr));
+    let lhs = d1
+        .mul(&xe.add(&ye), irr)
+        .add(&d2.mul(&xe.square(irr).add(&ye.square(irr)), irr));
     let xy = xe.mul(&ye, irr);
     let rhs = xy.add(&xy.mul(&xe.add(&ye), irr)).add(&xy.square(irr));
     (lhs == rhs).then_some((xe, ye))
@@ -931,7 +967,12 @@ struct Model {
 }
 
 /// The base abscissa of a model at `x`: `x` itself, or `X = x + √b/x`.
-fn model_base(md: &Model, x: &F2mElement, b: &F2mElement, irr: &IrreduciblePoly) -> Option<F2mElement> {
+fn model_base(
+    md: &Model,
+    x: &F2mElement,
+    b: &F2mElement,
+    irr: &IrreduciblePoly,
+) -> Option<F2mElement> {
     if md.quotient {
         velu_x(x, b, irr)
     } else {
@@ -940,11 +981,18 @@ fn model_base(md: &Model, x: &F2mElement, b: &F2mElement, irr: &IrreduciblePoly)
 }
 
 /// Abscissae `x` over a base value: `[x]`, or the roots of `x² + Xx + √b`.
-fn base_to_xs(md: &Model, v: &F2mElement, b: &F2mElement, irr: &IrreduciblePoly) -> Vec<F2mElement> {
+fn base_to_xs(
+    md: &Model,
+    v: &F2mElement,
+    b: &F2mElement,
+    irr: &IrreduciblePoly,
+) -> Vec<F2mElement> {
     if !md.quotient {
         return vec![v.clone()];
     }
-    let Some(inv) = v.flt_inverse(irr) else { return Vec::new() };
+    let Some(inv) = v.flt_inverse(irr) else {
+        return Vec::new();
+    };
     let c = fsqrt(b, irr).mul(&inv.square(irr), irr);
     match solve_as(&c, irr) {
         Some(t) => {
@@ -1020,9 +1068,10 @@ fn wu_models(curve: &BinaryCurve, seed: u64) -> Result<(Vec<Model>, Value), Stri
     let mut t_tested = 0usize;
     for p in sample.iter().take(16) {
         let q = point_add(curve, p, &t_pt);
-        if let (Some((a1, b1)), Some((a2, b2))) =
-            (to_edwards(p, &d1, &d2, &s, irr), to_edwards(&q, &d1, &d2, &s, irr))
-        {
+        if let (Some((a1, b1)), Some((a2, b2))) = (
+            to_edwards(p, &d1, &d2, &s, irr),
+            to_edwards(&q, &d1, &d2, &s, irr),
+        ) {
             t_tested += 1;
             if a1.add(&b1) == a2.add(&b2) {
                 t_invariant += 1;
@@ -1030,8 +1079,10 @@ fn wu_models(curve: &BinaryCurve, seed: u64) -> Result<(Vec<Model>, Value), Stri
         }
     }
     let try_fit = |base: &dyn Fn(&F2mElement) -> Option<F2mElement>| -> Option<[F2mElement; 4]> {
-        let pts: Vec<(F2mElement, F2mElement)> =
-            fit_pts.iter().filter_map(|(x, w)| Some((base(x)?, w.clone()))).collect();
+        let pts: Vec<(F2mElement, F2mElement)> = fit_pts
+            .iter()
+            .filter_map(|(x, w)| Some((base(x)?, w.clone())))
+            .collect();
         // w (γv + δ) = αv + β  ⇔  α v + β + γ v w + δ w = 0.
         // All points (the sample holds ±P pairs, so any three may repeat).
         let rows: Vec<Vec<F2mElement>> = pts
@@ -1056,7 +1107,12 @@ fn wu_models(curve: &BinaryCurve, seed: u64) -> Result<(Vec<Model>, Value), Stri
         return Err("binary Edwards w is Möbius in neither x nor X = x + sqrt(b)/x".into());
     };
     // Inverse of [α β γ δ] in char 2 is [δ β γ α].
-    let be_to_x = [be_from_x[3].clone(), be_from_x[1].clone(), be_from_x[2].clone(), be_from_x[0].clone()];
+    let be_to_x = [
+        be_from_x[3].clone(),
+        be_from_x[1].clone(),
+        be_from_x[2].clone(),
+        be_from_x[0].clone(),
+    ];
     let models = vec![
         Model {
             name: "weierstrass-x",
@@ -1112,7 +1168,13 @@ fn rand_point_any(curve: &BinaryCurve, rng: &mut StdRng) -> BinaryPoint {
 
 /// Does some sign choice of points with these abscissae sum to `target`?
 fn lifts(curve: &BinaryCurve, xs: &[Vec<F2mElement>], target: &BinaryPoint) -> bool {
-    fn walk(c: &BinaryCurve, xs: &[Vec<F2mElement>], d: usize, acc: &BinaryPoint, t: &BinaryPoint) -> bool {
+    fn walk(
+        c: &BinaryCurve,
+        xs: &[Vec<F2mElement>],
+        d: usize,
+        acc: &BinaryPoint,
+        t: &BinaryPoint,
+    ) -> bool {
         if d == xs.len() {
             return acc == t;
         }
@@ -1144,15 +1206,28 @@ fn run_wu_cell(
         Ok(v) => v,
         Err(e) => return json!({"curve": slug, "error": e}),
     };
-    let basis: Vec<F2mElement> = (0..ell as u32).map(|k| F2mElement::from_bit_positions(&[k], n)).collect();
+    let basis: Vec<F2mElement> = (0..ell as u32)
+        .map(|k| F2mElement::from_bit_positions(&[k], n))
+        .collect();
     let s3 = fpoly_from_terms(&plain_terms(2).unwrap(), n, Some(&curve.b));
     let bpp = quotient_b(&curve, seed ^ 0xE6, 32);
-    let s3q = bpp.as_ref().map(|bq| fpoly_from_terms(&plain_terms(2).unwrap(), n, Some(bq)));
+    let s3q = bpp
+        .as_ref()
+        .map(|bq| fpoly_from_terms(&plain_terms(2).unwrap(), n, Some(bq)));
     let polys: Vec<FPoly> = models
         .iter()
         .map(|md| {
-            let base = if md.quotient { s3q.as_ref().expect("quotient b''") } else { &s3 };
-            mobius_substitute(base, &[2, 2, 2], &[md.to_x.clone(), md.to_x.clone(), md.to_x.clone()], &irr)
+            let base = if md.quotient {
+                s3q.as_ref().expect("quotient b''")
+            } else {
+                &s3
+            };
+            mobius_substitute(
+                base,
+                &[2, 2, 2],
+                &[md.to_x.clone(), md.to_x.clone(), md.to_x.clone()],
+                &irr,
+            )
         })
         .collect();
     // Sanity: each model polynomial vanishes on random relations.
@@ -1191,7 +1266,9 @@ fn run_wu_cell(
         let p = rand_point_any(&curve, &mut rng);
         if let BinaryPoint::Affine { x, .. } = &p {
             if models.iter().all(|md| {
-                model_base(md, x, &curve.b, &irr).and_then(|v| mobius_apply(&md.from_x, &v, &irr)).is_some()
+                model_base(md, x, &curve.b, &irr)
+                    .and_then(|v| mobius_apply(&md.from_x, &v, &irr))
+                    .is_some()
             }) {
                 tgts.push(p);
             }
@@ -1201,23 +1278,41 @@ fn run_wu_cell(
     let mut arms_out = Vec::new();
     let mut cells: Vec<Vec<(Vec<F2BoolPoly>, usize, BTreeSet<u64>, usize)>> = Vec::new();
     for t in &tgts {
-        let BinaryPoint::Affine { x: x_r, .. } = t else { unreachable!() };
+        let BinaryPoint::Affine { x: x_r, .. } = t else {
+            unreachable!()
+        };
         let mut row = Vec::new();
         for (mi, md) in models.iter().enumerate() {
-            let c_r = mobius_apply(&md.from_x, &model_base(md, x_r, &curve.b, &irr).unwrap(), &irr).unwrap();
+            let c_r = mobius_apply(
+                &md.from_x,
+                &model_base(md, x_r, &curve.b, &irr).unwrap(),
+                &irr,
+            )
+            .unwrap();
             let nv = 2 * ell;
-            let vars: Vec<SymElement> = (0..2).map(|i| SymElement::from_subspace_vars(&basis, i * ell, n, nv)).collect();
+            let vars: Vec<SymElement> = (0..2)
+                .map(|i| SymElement::from_subspace_vars(&basis, i * ell, n, nv))
+                .collect();
             let eqs = descend(&polys[mi], &vars, &c_r, &st, &irr, nv);
             // Brute force over V × V.
             let mut truth = BTreeSet::new();
             let mut lifting = 0usize;
             for (i1, c1) in span.iter().enumerate() {
                 for (i2, c2) in span.iter().enumerate() {
-                    if fpoly_eval(&polys[mi], &[c1.clone(), c2.clone(), c_r.clone()], &irr).is_zero() {
+                    if fpoly_eval(&polys[mi], &[c1.clone(), c2.clone(), c_r.clone()], &irr)
+                        .is_zero()
+                    {
                         truth.insert(i1 as u64 | ((i2 as u64) << ell));
                         let xs: Option<Vec<Vec<F2mElement>>> = [c1, c2]
                             .iter()
-                            .map(|c| Some(base_to_xs(md, &mobius_apply(&md.to_x, c, &irr)?, &curve.b, &irr)))
+                            .map(|c| {
+                                Some(base_to_xs(
+                                    md,
+                                    &mobius_apply(&md.to_x, c, &irr)?,
+                                    &curve.b,
+                                    &irr,
+                                ))
+                            })
                             .collect();
                         if let Some(xs) = xs {
                             if lifts(&curve, &xs, t) {
@@ -1251,7 +1346,11 @@ fn run_wu_cell(
     }
     for (mi, md) in models.iter().enumerate() {
         let ms: Vec<f64> = samples[mi].iter().flatten().map(|s| s.ms).collect();
-        let wo: Vec<f64> = samples[mi].iter().flatten().map(|s| s.word_ops as f64).collect();
+        let wo: Vec<f64> = samples[mi]
+            .iter()
+            .flatten()
+            .map(|s| s.word_ops as f64)
+            .collect();
         arms_out.push(json!({
             "arm": md.name,
             "poly": poly_shape(&polys[mi]),
@@ -1298,13 +1397,23 @@ fn build_frob_aux_system(
     let n = st.n;
     let ell = basis.len();
     let terms = plain_terms(m).unwrap();
-    let max_e = terms.iter().flat_map(|t| t[..m].iter().copied()).max().unwrap();
+    let max_e = terms
+        .iter()
+        .flat_map(|t| t[..m].iter().copied())
+        .max()
+        .unwrap();
     let ks: Vec<u32> = (1..).take_while(|k| (1u32 << k) <= max_e).collect();
     let n_vars = m * ell + m * ks.len() * ell;
-    let xs: Vec<SymElement> = (0..m).map(|i| SymElement::from_subspace_vars(basis, i * ell, n, n_vars)).collect();
+    let xs: Vec<SymElement> = (0..m)
+        .map(|i| SymElement::from_subspace_vars(basis, i * ell, n, n_vars))
+        .collect();
     let y_off = |i: usize, kk: usize| m * ell + (i * ks.len() + kk) * ell;
     let ys: Vec<Vec<SymElement>> = (0..m)
-        .map(|i| (0..ks.len()).map(|kk| SymElement::from_subspace_vars(basis, y_off(i, kk), n, n_vars)).collect())
+        .map(|i| {
+            (0..ks.len())
+                .map(|kk| SymElement::from_subspace_vars(basis, y_off(i, kk), n, n_vars))
+                .collect()
+        })
         .collect();
     let mut eqs = Vec::new();
     // Couplings.
@@ -1328,7 +1437,11 @@ fn build_frob_aux_system(
                 if (e >> j) & 1 == 0 {
                     continue;
                 }
-                let f = if j == 0 { xs[i].clone() } else { ys[i][(j - 1) as usize].clone() };
+                let f = if j == 0 {
+                    xs[i].clone()
+                } else {
+                    ys[i][(j - 1) as usize].clone()
+                };
                 prod = Some(match prod {
                     None => f,
                     Some(q) => q.mul(&f, st),
@@ -1367,17 +1480,29 @@ fn run_frob_cell(
     let ell = basis.len();
     let mut rng = StdRng::seed_from_u64(seed);
     let g = kc.generator().clone();
-    let r = kc.subgroup_order.to_u64_digits().first().copied().unwrap_or(2).max(2);
+    let r = kc
+        .subgroup_order
+        .to_u64_digits()
+        .first()
+        .copied()
+        .unwrap_or(2)
+        .max(2);
     let mut cells = Vec::new();
     while cells.len() < targets {
         let p = kc.mul(&g, &BigUint::from(rng.gen_range(1..r)));
-        let BinaryPoint::Affine { x, .. } = &p else { continue };
+        let BinaryPoint::Affine { x, .. } = &p else {
+            continue;
+        };
         let (e0, n0) = build_direct_x_system(&basis, x, m, &st)?;
         let (e1, n1) = build_frob_aux_system(&basis, x, m, &st, &irr);
         cells.push([(e0, n0), (e1, n1)]);
     }
     let names = ["x-direct", "x-frob-aux"];
-    let mask = if m * ell >= 64 { u64::MAX } else { (1u64 << (m * ell)) - 1 };
+    let mask = if m * ell >= 64 {
+        u64::MAX
+    } else {
+        (1u64 << (m * ell)) - 1
+    };
     let mut uptimes = Vec::new();
     let mut samples: Vec<Vec<Vec<SolveSample>>> = vec![vec![Vec::new(); targets]; 2];
     let mut sets: Vec<Vec<Option<BTreeSet<u64>>>> = vec![vec![None; targets]; 2];
@@ -1446,7 +1571,11 @@ fn anf_to_bool_two(p: &AnfPoly, split: u32, off_lo: u32, off_hi: u32, n_vars: us
         .monomials()
         .map(|vs| {
             F2BoolMono::from_mask(vs.iter().fold(0u64, |m, &v| {
-                let idx = if v < split { v + off_lo } else { v - split + off_hi };
+                let idx = if v < split {
+                    v + off_lo
+                } else {
+                    v - split + off_hi
+                };
                 m | (1u64 << idx)
             }))
         })
@@ -1460,7 +1589,12 @@ fn e_len(i: usize, l: usize) -> usize {
 
 /// The repo's split: `x` (3l) then `e` (6l − 3); correspondence
 /// `e_{i,d} = σ_{i,d}(X)` plus the `n` descended `S₄` equations in `e`.
-fn lucas_repo_system(n: u32, l: u32, irr: &IrreduciblePoly, x_r: &F2mElement) -> (Vec<F2BoolPoly>, usize) {
+fn lucas_repo_system(
+    n: u32,
+    l: u32,
+    irr: &IrreduciblePoly,
+    x_r: &F2mElement,
+) -> (Vec<F2BoolPoly>, usize) {
     let sys = weil_descend_s4(n, l, irr, &F2mElement::one(n), x_r);
     let nx = sys.n_x_vars();
     let ne = sys.n_e_vars();
@@ -1469,7 +1603,10 @@ fn lucas_repo_system(n: u32, l: u32, irr: &IrreduciblePoly, x_r: &F2mElement) ->
     for (i, row) in sys.correspondence.iter().enumerate() {
         for (d, sigma) in row.iter().enumerate() {
             let mut p = anf_to_bool(sigma, 0, nv);
-            p = p.add(&F2BoolPoly::from_monos(vec![F2BoolMono::var(nx + sys.e_var(i, d))], nv));
+            p = p.add(&F2BoolPoly::from_monos(
+                vec![F2BoolMono::var(nx + sys.e_var(i, d))],
+                nv,
+            ));
             eqs.push(p);
         }
     }
@@ -1485,7 +1622,12 @@ fn lucas_repo_system(n: u32, l: u32, irr: &IrreduciblePoly, x_r: &F2mElement) ->
 /// The convolution split: `x` (3l), `e` (6l − 3), then `f = X₁X₂` (2l − 1):
 /// `f = X₁X₂`, `e₁ = X₁ + X₂ + X₃`, `e₂ = f + (X₁ + X₂)X₃`, `e₃ = f·X₃`, all
 /// of degree ≤ 2, plus the same descended `S₄` in `e`.
-fn lucas_conv_system(n: u32, l: u32, irr: &IrreduciblePoly, x_r: &F2mElement) -> (Vec<F2BoolPoly>, usize) {
+fn lucas_conv_system(
+    n: u32,
+    l: u32,
+    irr: &IrreduciblePoly,
+    x_r: &F2mElement,
+) -> (Vec<F2BoolPoly>, usize) {
     let sys = weil_descend_s4(n, l, irr, &F2mElement::one(n), x_r);
     let lu = l as usize;
     let nx = 3 * l;
@@ -1494,7 +1636,9 @@ fn lucas_conv_system(n: u32, l: u32, irr: &IrreduciblePoly, x_r: &F2mElement) ->
     let nv = (nx + ne + nf) as usize;
     let f_off = nx + ne;
     // Work in one ANF variable space: x at 0..3l, f at 3l..3l+nf.
-    let xs: Vec<AnfF2m> = (0..3).map(|i| AnfF2m::from_vars(i as u32 * l, lu)).collect();
+    let xs: Vec<AnfF2m> = (0..3)
+        .map(|i| AnfF2m::from_vars(i as u32 * l, lu))
+        .collect();
     let f = AnfF2m::from_vars(nx, nf as usize);
     let x12 = xs[0].mul(&xs[1]);
     let s12 = xs[0].xor(&xs[1]);
@@ -1505,13 +1649,19 @@ fn lucas_conv_system(n: u32, l: u32, irr: &IrreduciblePoly, x_r: &F2mElement) ->
     let mut eqs = Vec::new();
     for d in 0..nf as usize {
         let rhs = x12.coeffs.get(d).cloned().unwrap_or_default();
-        let p = to_bool(&rhs).add(&F2BoolPoly::from_monos(vec![F2BoolMono::var(f_off + d as u32)], nv));
+        let p = to_bool(&rhs).add(&F2BoolPoly::from_monos(
+            vec![F2BoolMono::var(f_off + d as u32)],
+            nv,
+        ));
         eqs.push(p);
     }
     for (i, ei) in [e1, e2, e3].iter().enumerate() {
         for d in 0..e_len(i + 1, lu) {
             let rhs = ei.coeffs.get(d).cloned().unwrap_or_default();
-            let p = to_bool(&rhs).add(&F2BoolPoly::from_monos(vec![F2BoolMono::var(nx + sys.e_var(i, d))], nv));
+            let p = to_bool(&rhs).add(&F2BoolPoly::from_monos(
+                vec![F2BoolMono::var(nx + sys.e_var(i, d))],
+                nv,
+            ));
             eqs.push(p);
         }
     }
@@ -1542,7 +1692,9 @@ fn correspondence_shapes(m: usize, l: u32) -> Value {
         }
         json!({"equations": polys.len(), "max_degree": deg, "distinct_monomials": monos.len(), "total_terms": terms})
     };
-    let xs: Vec<AnfF2m> = (0..m).map(|i| AnfF2m::from_vars(i as u32 * l, lu)).collect();
+    let xs: Vec<AnfF2m> = (0..m)
+        .map(|i| AnfF2m::from_vars(i as u32 * l, lu))
+        .collect();
     // Direct elementary symmetric functions by the recurrence e_k ← e_k + e_{k−1}·X.
     let mut es: Vec<AnfF2m> = vec![AnfF2m::from_const(&F2mElement::one(1), 1)];
     for x in &xs {
@@ -1736,7 +1888,11 @@ fn eg_identity_statement(m: usize) -> IdentityStatement {
         e[i] = 1;
         sigma.insert(e, 1);
     }
-    let lhs = zadd(&zadd(&zmul(&g, &g), &zmul(&g, &h), -1), &zmul(&zmul(&h, &h), &sigma), 1);
+    let lhs = zadd(
+        &zadd(&zmul(&g, &g), &zmul(&g, &h), -1),
+        &zmul(&zmul(&h, &h), &sigma),
+        1,
+    );
     let d = 1u32 << (m - 1);
     let mut eg = ZPoly::new();
     for t in plain_terms(m).unwrap() {
@@ -1745,7 +1901,10 @@ fn eg_identity_statement(m: usize) -> IdentityStatement {
     let diff = zadd(&lhs, &eg, -1);
     assert!(diff.values().all(|c| c % 2 == 0), "not an identity mod 2");
     let q: ZPoly = diff.iter().map(|(e, c)| (e.clone(), c / 2)).collect();
-    let names: Vec<String> = (0..m).map(|i| format!("w{}", i + 1)).chain(["wR".to_string()]).collect();
+    let names: Vec<String> = (0..m)
+        .map(|i| format!("w{}", i + 1))
+        .chain(["wR".to_string()])
+        .collect();
     let lhs_expr = {
         let ge = zexpr(&g, &names);
         let he = zexpr(&h, &names);
@@ -1756,7 +1915,10 @@ fn eg_identity_statement(m: usize) -> IdentityStatement {
             Expr::product(vec![he.clone(), he, se]),
         ])
     };
-    let rhs_expr = Expr::plus(zexpr(&eg, &names), Expr::times(Expr::Const(2), zexpr(&q, &names)));
+    let rhs_expr = Expr::plus(
+        zexpr(&eg, &names),
+        Expr::times(Expr::Const(2), zexpr(&q, &names)),
+    );
     let deg = syntactic_degree(&lhs_expr).max(syntactic_degree(&rhs_expr));
     IdentityStatement {
         name: format!(
@@ -1834,7 +1996,10 @@ fn main() {
             let mut out = Vec::new();
             for (a, n, m, md, dmax, xd) in cells {
                 let tag = format!("{a}-{n}-{m}");
-                if only.as_ref().is_some_and(|o| !o.split(',').any(|x| x == tag)) {
+                if only
+                    .as_ref()
+                    .is_some_and(|o| !o.split(',').any(|x| x == tag))
+                {
                     continue;
                 }
                 eprintln!("eg cell K{a}/F2^{n} m={m}");
@@ -1856,11 +2021,17 @@ fn main() {
             ];
             let mut out = Vec::new();
             for (slug, a, b, low, n, ell) in curves {
-                if only.as_ref().is_some_and(|o| !o.split(',').any(|x| x == slug)) {
+                if only
+                    .as_ref()
+                    .is_some_and(|o| !o.split(',').any(|x| x == slug))
+                {
                     continue;
                 }
                 eprintln!("wu curve {slug}");
-                let irr = IrreduciblePoly { degree: n, low_terms: low };
+                let irr = IrreduciblePoly {
+                    degree: n,
+                    low_terms: low,
+                };
                 let curve = BinaryCurve {
                     m: n,
                     irreducible: irr,
@@ -1870,7 +2041,9 @@ fn main() {
                     order: BigUint::from(0u32),
                     cofactor: BigUint::from(1u32),
                 };
-                out.push(run_wu_cell(slug, curve, ell, targets, rounds, seed, 4, 5, budget));
+                out.push(run_wu_cell(
+                    slug, curve, ell, targets, rounds, seed, 4, 5, budget,
+                ));
                 checkpoint(&out_path, "wu", &out);
             }
             json!({"part": "wu", "cells": out})
@@ -1887,7 +2060,10 @@ fn main() {
             let mut out = Vec::new();
             for (a, n, m, md, dmax) in cells {
                 let tag = format!("{a}-{n}-{m}");
-                if only.as_ref().is_some_and(|o| !o.split(',').any(|x| x == tag)) {
+                if only
+                    .as_ref()
+                    .is_some_and(|o| !o.split(',').any(|x| x == tag))
+                {
                     continue;
                 }
                 eprintln!("frob cell K{a}/F2^{n} m={m}");
@@ -1903,7 +2079,10 @@ fn main() {
             let mut out = Vec::new();
             for (n, l) in [(9u32, 3u32), (12, 4), (15, 5)] {
                 let tag = format!("{n}-{l}");
-                if only.as_ref().is_some_and(|o| !o.split(',').any(|x| x == tag)) {
+                if only
+                    .as_ref()
+                    .is_some_and(|o| !o.split(',').any(|x| x == tag))
+                {
                     continue;
                 }
                 eprintln!("lucas cell n={n} l={l}");
@@ -1957,11 +2136,13 @@ fn main() {
 /// computed here, in the harness, and only plotted downstream.
 fn compare(inputs: &str) -> Value {
     // (cell, label/arm) -> per-round (total ms, total word ops, digests)
-    let mut table: BTreeMap<(String, String), Vec<(f64, u64, Vec<String>, String)>> = BTreeMap::new();
+    let mut table: BTreeMap<(String, String), Vec<(f64, u64, Vec<String>, String)>> =
+        BTreeMap::new();
     let mut uptimes: Vec<(String, String)> = Vec::new();
     for item in inputs.split(',') {
         let (label, path) = item.split_once('=').expect("label=path");
-        let v: Value = serde_json::from_str(&std::fs::read_to_string(path).expect("read input")).expect("json");
+        let v: Value = serde_json::from_str(&std::fs::read_to_string(path).expect("read input"))
+            .expect("json");
         for cell in v["result"]["cells"].as_array().into_iter().flatten() {
             let name = cell["cell"].as_str().unwrap_or("?").to_string();
             for u in cell["uptime_per_round"].as_array().into_iter().flatten() {
@@ -1970,10 +2151,20 @@ fn compare(inputs: &str) -> Value {
             for arm in cell["arms"].as_array().into_iter().flatten() {
                 let aname = arm["arm"].as_str().unwrap_or("?");
                 let samples = arm["samples"].as_array().cloned().unwrap_or_default();
-                let rounds = samples.first().and_then(|t| t.as_array()).map(|t| t.len()).unwrap_or(0);
+                let rounds = samples
+                    .first()
+                    .and_then(|t| t.as_array())
+                    .map(|t| t.len())
+                    .unwrap_or(0);
                 for r in 0..rounds {
-                    let ms: f64 = samples.iter().map(|t| t[r]["ms"].as_f64().unwrap_or(0.0)).sum();
-                    let wo: u64 = samples.iter().map(|t| t[r]["word_ops"].as_u64().unwrap_or(0)).sum();
+                    let ms: f64 = samples
+                        .iter()
+                        .map(|t| t[r]["ms"].as_f64().unwrap_or(0.0))
+                        .sum();
+                    let wo: u64 = samples
+                        .iter()
+                        .map(|t| t[r]["word_ops"].as_u64().unwrap_or(0))
+                        .sum();
                     let dig: Vec<String> = arm["key_set_digests"]
                         .as_array()
                         .into_iter()
@@ -1989,7 +2180,8 @@ fn compare(inputs: &str) -> Value {
         }
     }
     let mut cells: BTreeMap<String, Vec<Value>> = BTreeMap::new();
-    let mut by_cell: BTreeMap<String, BTreeMap<String, Vec<(f64, u64, Vec<String>, String)>>> = BTreeMap::new();
+    let mut by_cell: BTreeMap<String, BTreeMap<String, Vec<(f64, u64, Vec<String>, String)>>> =
+        BTreeMap::new();
     for ((cell, key), rows) in table {
         by_cell.entry(cell).or_default().insert(key, rows);
     }
@@ -2043,8 +2235,12 @@ fn compare(inputs: &str) -> Value {
 /// Write the cells finished so far, so a long part leaves evidence if stopped.
 fn checkpoint(out_path: &Option<String>, part: &str, cells: &[Value]) {
     if let Some(p) = out_path {
-        let v = json!({"schema": "lit2026-w8-run/v1", "partial": true, "part": part, "cells": cells});
-        let _ = std::fs::write(format!("{p}.partial"), serde_json::to_string_pretty(&v).unwrap());
+        let v =
+            json!({"schema": "lit2026-w8-run/v1", "partial": true, "part": part, "cells": cells});
+        let _ = std::fs::write(
+            format!("{p}.partial"),
+            serde_json::to_string_pretty(&v).unwrap(),
+        );
     }
 }
 
@@ -2099,9 +2295,16 @@ mod tests {
     /// are what this harness issues.
     #[test]
     fn committed_eg_certificates_still_check() {
-        let dir = concat!(env!("CARGO_MANIFEST_DIR"), "/research/lit2026_w8_summation_models_20261011/identity-certificates");
-        for (m, file) in [(2usize, "eg-resultant-s3.json"), (3, "eg-resultant-s4.json")] {
-            let text = std::fs::read_to_string(format!("{dir}/{file}")).expect("committed certificate");
+        let dir = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/research/lit2026_w8_summation_models_20261011/identity-certificates"
+        );
+        for (m, file) in [
+            (2usize, "eg-resultant-s3.json"),
+            (3, "eg-resultant-s4.json"),
+        ] {
+            let text =
+                std::fs::read_to_string(format!("{dir}/{file}")).expect("committed certificate");
             let c: IdentityCertificate = serde_json::from_str(&text).unwrap();
             assert!(matches!(check(&c).unwrap(), Verdict::Accept { .. }));
             assert_eq!(c, eg_certificate(m));
@@ -2116,8 +2319,11 @@ mod tests {
         for m in [2usize, 3] {
             let p = eg_poly(m, 9, &kc.curve.irreducible);
             let d = 1u32 << (m - 1);
-            let want: BTreeSet<Vec<u32>> =
-                plain_terms(m).unwrap().iter().map(|t| t.iter().map(|&e| d - e).collect()).collect();
+            let want: BTreeSet<Vec<u32>> = plain_terms(m)
+                .unwrap()
+                .iter()
+                .map(|t| t.iter().map(|&e| d - e).collect())
+                .collect();
             let got: BTreeSet<Vec<u32>> = p.keys().cloned().collect();
             assert_eq!(got, want);
             assert!(p.values().all(|c| bits(c) == 1));
@@ -2165,7 +2371,17 @@ mod tests {
     fn wu_models_small() {
         let n = 9;
         let kc = KoblitzCurve::new(0, n).unwrap();
-        let v = run_wu_cell("icv1-f2m9-t5-81e744be", kc.curve.clone(), 5, 2, 1, 9, 4, 3, 100_000);
+        let v = run_wu_cell(
+            "icv1-f2m9-t5-81e744be",
+            kc.curve.clone(),
+            5,
+            2,
+            1,
+            9,
+            4,
+            3,
+            100_000,
+        );
         assert!(v.get("error").is_none(), "{v}");
         let info = &v["model_info"];
         // Wu's state-model equation holds at every sampled point (Tr(a) = 0).
@@ -2173,9 +2389,15 @@ mod tests {
         // Binary Edwards w is a Dryło compression: Möbius in E/<T>'s abscissa,
         // invariant under T.
         assert_eq!(info["be_w_is_mobius_of"], "X = x + sqrt(b)/x (E/<T>)");
-        assert_eq!(info["be_w_invariant_under_T"][0], info["be_w_invariant_under_T"][1]);
+        assert_eq!(
+            info["be_w_invariant_under_T"][0],
+            info["be_w_invariant_under_T"][1]
+        );
         for arm in v["arms"].as_array().unwrap() {
-            assert_eq!(arm["poly_vanishes_on_random_relations"].as_u64().unwrap() > 0, true);
+            assert_eq!(
+                arm["poly_vanishes_on_random_relations"].as_u64().unwrap() > 0,
+                true
+            );
             for ok in arm["root_sets_equal_brute_force"].as_array().unwrap() {
                 assert!(ok.as_bool().unwrap(), "{}", arm["arm"]);
             }

@@ -1,0 +1,59 @@
+{
+  "schema": "workflow-reconciliation/v1",
+  "branch_integration_commit": "8880bf0c7e286f7aa770adca192627537b2fcd75",
+  "resolution": {
+    "weak_curve_conjectures_workflow": "restored exact frozen bytes",
+    "weak_curve_lean_workflow": "preserved exact frozen bytes",
+    "pages_status": "kept 10-minute cadence, cancel-in-progress false, and compatible DP34 telemetry additions",
+    "release": "kept the isogeny CLI cross-platform build and release asset",
+    "workflow_parse": "kept both evidence-manifest path filters and added frozen-workflow helper trigger and fixture test",
+    "frozen_replay_adapters": "retained frozen-workflow helper, tests, and n53/rotated admission wrappers",
+    "ci_classifier": "retained isogeny release input classification",
+    "ci_budget": "retained both exact, seal-bound 60-minute Lean exceptions",
+    "workflow_retirement": "retained main's 99 completed-study retirement; n53's hash-only PR gate remains active and only its outcome job is label-gated"
+  },
+  "frozen_hashes": [
+    {
+      "workflow": ".github/workflows/weak-curve-conjectures.yml",
+      "workflow_sha256": "9143053691c37f6b8513a3f2162b4b903c58c3221cedc1eaa60aa816e150f872",
+      "manifest": "research/weak_curve_conjectures_20261012/EVIDENCE_SHA256SUMS",
+      "manifest_sha256": "ea93a01006f38bbf9c6f08632324795c6607c4ed0c92ac393851cd18f398275d"
+    },
+    {
+      "workflow": ".github/workflows/weak-curve-lean.yml",
+      "workflow_sha256": "6b6898086ca73664b910487d379787a5dcd94fc0d6f2d980dcd79820970f1e11",
+      "manifest": "research/weak_curve_properties_lean_20261011/EVIDENCE_SHA256.tsv",
+      "manifest_sha256": "118adb8dc0f96521b54b947989c4f3f84ecb25491de45563d71aef51efb6feea"
+    }
+  ],
+  "validation": {
+    "frozen_workflow_fixture": "16/16 passed",
+    "rotated_admission_freeze_historical_controls_current_interface": "passed",
+    "n53_frozen_workflow_check": "passed with a versioned isolated historical-lock overlay",
+    "n53_preflight": "passed using the released nested lock snapshot; live nested/root lock equality was checked before overlay",
+    "n53_negative_controls": "4/4 passed",
+    "n53_archive_check": "passed: RAW_PROVENANCE_AND_INDEPENDENT_RANK_REPLAY_PASS; 23 files, archive SHA 325a5cb9242d9279faf398fcbb1afb7d2a6ad8c5df1af562199d32154c8fe74a; about 3.5 minutes locally; rank/selection replay only, no solver result asserted",
+    "n53_labeled_outcome": "unchanged exact-current-source/head guard remains blocked by live producer drift",
+    "budget_fixtures": "14/14 passed",
+    "routine_budget_check": "0 violations across 352 workflows",
+    "workflow_parser": "4/4 passed",
+    "ci_scope_classifier": "8/8 passed by root with network-enabled execution; earlier sandbox EPERM was superseded",
+    "actionlint": "passed across all 352 workflow files",
+    "diff_check": "passed"
+  },
+  "n53_lock_view": {
+    "workflow_scope": "hash-only is an active pull_request gate for opened, synchronize, reopened and labeled events on listed inputs; only outcome requires run-n53-rotation-once",
+    "original_source_key": "cargo_lock",
+    "original_expected_sha256": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
+    "immutable_source_revision": "d4645a936cb8f0b2e749eb56dd464f0269bc1765",
+    "live_nested_sha256": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+    "live_root_sha256": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+    "overlay_scope": "temporary historical view only; current checkout locks unchanged",
+    "current_rust_producer_sha256": "45d0b22c1e8585d802f1e45b37640721dcc90ee6ca184f503f0a524309909e45",
+    "released_rust_producer_sha256": "99f0b31149691dc551ad563a7be20e3490fee4498f50cde677c3b7969e61e071"
+  },
+  "no_claims": [
+    "current exact-source producer preflight did not pass; labeled outcome remains blocked",
+    "historical-view checks do not claim a solver outcome"
+  ]
+}

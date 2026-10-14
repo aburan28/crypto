@@ -1,0 +1,1429 @@
+{
+  "args": {
+    "cell_timeout_secs": 150,
+    "macaulay_extra": 1,
+    "node_budget": 1024,
+    "seed": 20261012,
+    "solver_engine": "inherited",
+    "solver_engine_note": "Boolean F4 ladder from the system degree (max_degree 3 is the floor; a degree-d system builds degree d), splitting on the engine's rule when the algebra stalls",
+    "targets": 16,
+    "wdsat_timeout_secs": 20,
+    "witness_cap_per_target": 256,
+    "yield_targets": 0
+  },
+  "census": [
+    {
+      "a": 1,
+      "abscissae": 23,
+      "abscissae_with_points": 22,
+      "build_ms": 15.390583,
+      "family": {
+        "family": "cyclotomic",
+        "w": 1
+      },
+      "frobenius_stable": true,
+      "n": 11,
+      "orbits": 4,
+      "p": 23,
+      "points": 44,
+      "points_in_subgroup": 22,
+      "predicted_abscissae": 23,
+      "projected_columns": 11,
+      "projected_points": 22,
+      "retained_orbits": null,
+      "signed_orbits": 2
+    },
+    {
+      "a": 1,
+      "abscissae": 22,
+      "abscissae_with_points": 22,
+      "build_ms": 10.159125,
+      "family": {
+        "family": "onb_weight",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 11,
+      "orbits": 4,
+      "p": 23,
+      "points": 44,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 55,
+      "projected_columns": 22,
+      "projected_points": 44,
+      "retained_orbits": 2,
+      "signed_orbits": 2
+    },
+    {
+      "a": 1,
+      "abscissae": 253,
+      "abscissae_with_points": 110,
+      "build_ms": 230.979125,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 11,
+      "orbits": 20,
+      "p": 23,
+      "points": 220,
+      "points_in_subgroup": 154,
+      "predicted_abscissae": 253,
+      "projected_columns": 110,
+      "projected_points": 220,
+      "retained_orbits": null,
+      "signed_orbits": 10
+    },
+    {
+      "a": 1,
+      "abscissae": 110,
+      "abscissae_with_points": 110,
+      "build_ms": 272.787208,
+      "family": {
+        "family": "onb_weight",
+        "w": 4
+      },
+      "frobenius_stable": true,
+      "n": 11,
+      "orbits": 20,
+      "p": 23,
+      "points": 220,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 330,
+      "projected_columns": 110,
+      "projected_points": 220,
+      "retained_orbits": 10,
+      "signed_orbits": 10
+    },
+    {
+      "a": 1,
+      "abscissae": 1771,
+      "abscissae_with_points": 858,
+      "build_ms": 57.646084,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "frobenius_stable": true,
+      "n": 11,
+      "orbits": 156,
+      "p": 23,
+      "points": 1716,
+      "points_in_subgroup": 814,
+      "predicted_abscissae": 1771,
+      "projected_columns": 484,
+      "projected_points": 968,
+      "retained_orbits": null,
+      "signed_orbits": 78
+    },
+    {
+      "a": 0,
+      "abscissae": 47,
+      "abscissae_with_points": 1,
+      "build_ms": 1.9823750000000002,
+      "family": {
+        "family": "cyclotomic",
+        "w": 1
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 2,
+      "p": 47,
+      "points": 2,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 47,
+      "projected_columns": 0,
+      "projected_points": 0,
+      "retained_orbits": null,
+      "signed_orbits": 1
+    },
+    {
+      "a": 0,
+      "abscissae": 23,
+      "abscissae_with_points": 23,
+      "build_ms": 45.844875,
+      "family": {
+        "family": "onb_weight",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 2,
+      "p": 47,
+      "points": 46,
+      "points_in_subgroup": 46,
+      "predicted_abscissae": 253,
+      "projected_columns": 23,
+      "projected_points": 46,
+      "retained_orbits": 1,
+      "signed_orbits": 1
+    },
+    {
+      "a": 0,
+      "abscissae": 1081,
+      "abscissae_with_points": 391,
+      "build_ms": 35.825708,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 34,
+      "p": 47,
+      "points": 782,
+      "points_in_subgroup": 184,
+      "predicted_abscissae": 1081,
+      "projected_columns": 391,
+      "projected_points": 782,
+      "retained_orbits": null,
+      "signed_orbits": 17
+    },
+    {
+      "a": 0,
+      "abscissae": 391,
+      "abscissae_with_points": 391,
+      "build_ms": 435.26995800000003,
+      "family": {
+        "family": "onb_weight",
+        "w": 3
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 34,
+      "p": 47,
+      "points": 782,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 1771,
+      "projected_columns": 391,
+      "projected_points": 782,
+      "retained_orbits": 17,
+      "signed_orbits": 17
+    },
+    {
+      "a": 0,
+      "abscissae": 16215,
+      "abscissae_with_points": 8441,
+      "build_ms": 1981.637167,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 734,
+      "p": 47,
+      "points": 16882,
+      "points_in_subgroup": 4554,
+      "predicted_abscissae": 16215,
+      "projected_columns": 8441,
+      "projected_points": 16882,
+      "retained_orbits": null,
+      "signed_orbits": 367
+    },
+    {
+      "a": 0,
+      "abscissae": 8441,
+      "abscissae_with_points": 8441,
+      "build_ms": 8966.837584,
+      "family": {
+        "family": "onb_weight",
+        "w": 5
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 734,
+      "p": 47,
+      "points": 16882,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 33649,
+      "projected_columns": 8418,
+      "projected_points": 16836,
+      "retained_orbits": 367,
+      "signed_orbits": 367
+    },
+    {
+      "a": 1,
+      "abscissae": 47,
+      "abscissae_with_points": 46,
+      "build_ms": 1.345167,
+      "family": {
+        "family": "cyclotomic",
+        "w": 1
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 4,
+      "p": 47,
+      "points": 92,
+      "points_in_subgroup": 46,
+      "predicted_abscissae": 47,
+      "projected_columns": 23,
+      "projected_points": 46,
+      "retained_orbits": null,
+      "signed_orbits": 2
+    },
+    {
+      "a": 1,
+      "abscissae": 46,
+      "abscissae_with_points": 46,
+      "build_ms": 133.738,
+      "family": {
+        "family": "onb_weight",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 4,
+      "p": 47,
+      "points": 92,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 253,
+      "projected_columns": 46,
+      "projected_points": 92,
+      "retained_orbits": 2,
+      "signed_orbits": 2
+    },
+    {
+      "a": 1,
+      "abscissae": 1081,
+      "abscissae_with_points": 690,
+      "build_ms": 29.387792,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 60,
+      "p": 47,
+      "points": 1380,
+      "points_in_subgroup": 782,
+      "predicted_abscissae": 1081,
+      "projected_columns": 690,
+      "projected_points": 1380,
+      "retained_orbits": null,
+      "signed_orbits": 30
+    },
+    {
+      "a": 1,
+      "abscissae": 690,
+      "abscissae_with_points": 690,
+      "build_ms": 48.921708,
+      "family": {
+        "family": "onb_weight",
+        "w": 3
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 60,
+      "p": 47,
+      "points": 1380,
+      "points_in_subgroup": 1380,
+      "predicted_abscissae": 1771,
+      "projected_columns": 690,
+      "projected_points": 1380,
+      "retained_orbits": 30,
+      "signed_orbits": 30
+    },
+    {
+      "a": 1,
+      "abscissae": 16215,
+      "abscissae_with_points": 7774,
+      "build_ms": 3340.914333,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 676,
+      "p": 47,
+      "points": 15548,
+      "points_in_subgroup": 8418,
+      "predicted_abscissae": 16215,
+      "projected_columns": 7774,
+      "projected_points": 15548,
+      "retained_orbits": null,
+      "signed_orbits": 338
+    },
+    {
+      "a": 1,
+      "abscissae": 7774,
+      "abscissae_with_points": 7774,
+      "build_ms": 9722.348541000001,
+      "family": {
+        "family": "onb_weight",
+        "w": 5
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 676,
+      "p": 47,
+      "points": 15548,
+      "points_in_subgroup": 15548,
+      "predicted_abscissae": 33649,
+      "projected_columns": 7774,
+      "projected_points": 15548,
+      "retained_orbits": 338,
+      "signed_orbits": 338
+    }
+  ],
+  "generated_utc": "unix:1791855239",
+  "host": {
+    "arch": "aarch64",
+    "os": "macos"
+  },
+  "lead": "A2 cyclotomic-sparse Frobenius-stable factor bases",
+  "matched_pairs": [
+    {
+      "a": 1,
+      "cyclotomic_columns": 2,
+      "n": 11,
+      "onb": {
+        "a": 1,
+        "abscissae": 22,
+        "abscissae_with_points": 22,
+        "build_ms": 10.159125,
+        "family": {
+          "family": "onb_weight",
+          "w": 2
+        },
+        "frobenius_stable": true,
+        "n": 11,
+        "orbits": 4,
+        "p": 23,
+        "points": 44,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 55,
+        "projected_columns": 22,
+        "projected_points": 44,
+        "retained_orbits": 2,
+        "signed_orbits": 2
+      },
+      "w": 1
+    },
+    {
+      "a": 1,
+      "cyclotomic_columns": 10,
+      "n": 11,
+      "onb": {
+        "a": 1,
+        "abscissae": 110,
+        "abscissae_with_points": 110,
+        "build_ms": 272.787208,
+        "family": {
+          "family": "onb_weight",
+          "w": 4
+        },
+        "frobenius_stable": true,
+        "n": 11,
+        "orbits": 20,
+        "p": 23,
+        "points": 220,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 330,
+        "projected_columns": 110,
+        "projected_points": 220,
+        "retained_orbits": 10,
+        "signed_orbits": 10
+      },
+      "w": 2
+    },
+    {
+      "a": 0,
+      "cyclotomic_columns": 1,
+      "n": 23,
+      "onb": {
+        "a": 0,
+        "abscissae": 23,
+        "abscissae_with_points": 23,
+        "build_ms": 45.844875,
+        "family": {
+          "family": "onb_weight",
+          "w": 2
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 2,
+        "p": 47,
+        "points": 46,
+        "points_in_subgroup": 46,
+        "predicted_abscissae": 253,
+        "projected_columns": 23,
+        "projected_points": 46,
+        "retained_orbits": 1,
+        "signed_orbits": 1
+      },
+      "w": 1
+    },
+    {
+      "a": 0,
+      "cyclotomic_columns": 17,
+      "n": 23,
+      "onb": {
+        "a": 0,
+        "abscissae": 391,
+        "abscissae_with_points": 391,
+        "build_ms": 435.26995800000003,
+        "family": {
+          "family": "onb_weight",
+          "w": 3
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 34,
+        "p": 47,
+        "points": 782,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 1771,
+        "projected_columns": 391,
+        "projected_points": 782,
+        "retained_orbits": 17,
+        "signed_orbits": 17
+      },
+      "w": 2
+    },
+    {
+      "a": 0,
+      "cyclotomic_columns": 367,
+      "n": 23,
+      "onb": {
+        "a": 0,
+        "abscissae": 8441,
+        "abscissae_with_points": 8441,
+        "build_ms": 8966.837584,
+        "family": {
+          "family": "onb_weight",
+          "w": 5
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 734,
+        "p": 47,
+        "points": 16882,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 33649,
+        "projected_columns": 8418,
+        "projected_points": 16836,
+        "retained_orbits": 367,
+        "signed_orbits": 367
+      },
+      "w": 3
+    },
+    {
+      "a": 1,
+      "cyclotomic_columns": 2,
+      "n": 23,
+      "onb": {
+        "a": 1,
+        "abscissae": 46,
+        "abscissae_with_points": 46,
+        "build_ms": 133.738,
+        "family": {
+          "family": "onb_weight",
+          "w": 2
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 4,
+        "p": 47,
+        "points": 92,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 253,
+        "projected_columns": 46,
+        "projected_points": 92,
+        "retained_orbits": 2,
+        "signed_orbits": 2
+      },
+      "w": 1
+    },
+    {
+      "a": 1,
+      "cyclotomic_columns": 30,
+      "n": 23,
+      "onb": {
+        "a": 1,
+        "abscissae": 690,
+        "abscissae_with_points": 690,
+        "build_ms": 48.921708,
+        "family": {
+          "family": "onb_weight",
+          "w": 3
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 60,
+        "p": 47,
+        "points": 1380,
+        "points_in_subgroup": 1380,
+        "predicted_abscissae": 1771,
+        "projected_columns": 690,
+        "projected_points": 1380,
+        "retained_orbits": 30,
+        "signed_orbits": 30
+      },
+      "w": 2
+    },
+    {
+      "a": 1,
+      "cyclotomic_columns": 338,
+      "n": 23,
+      "onb": {
+        "a": 1,
+        "abscissae": 7774,
+        "abscissae_with_points": 7774,
+        "build_ms": 9722.348541000001,
+        "family": {
+          "family": "onb_weight",
+          "w": 5
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 676,
+        "p": 47,
+        "points": 15548,
+        "points_in_subgroup": 15548,
+        "predicted_abscissae": 33649,
+        "projected_columns": 7774,
+        "projected_points": 15548,
+        "retained_orbits": 338,
+        "signed_orbits": 338
+      },
+      "w": 3
+    }
+  ],
+  "solver_cells": [
+    {
+      "census": {
+        "a": 0,
+        "abscissae": 47,
+        "abscissae_with_points": 1,
+        "build_ms": 0.663458,
+        "family": {
+          "family": "cyclotomic",
+          "w": 1
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 2,
+        "p": 47,
+        "points": 2,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 47,
+        "projected_columns": 0,
+        "projected_points": 0,
+        "retained_orbits": null,
+        "signed_orbits": 1
+      },
+      "encoding": {
+        "encoding": "cyclotomic_unity",
+        "w": 1
+      },
+      "lines": [],
+      "spec": {
+        "a": 0,
+        "arm": "cyclotomic",
+        "engine": "inherited",
+        "m": 2,
+        "macaulay_extra": 1,
+        "n": 23,
+        "node_budget": 1024,
+        "seed": 20261012,
+        "targets": 16,
+        "w": 1,
+        "wdsat_binary": null,
+        "wdsat_timeout_secs": 20
+      },
+      "summary": {
+        "targets": 0
+      },
+      "timed_out": true,
+      "unsupported": 0,
+      "wall_ms": 150143.519042
+    },
+    {
+      "census": {
+        "a": 0,
+        "abscissae": 23,
+        "abscissae_with_points": 23,
+        "build_ms": 39.884167,
+        "family": {
+          "family": "onb_weight",
+          "w": 2
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 2,
+        "p": 47,
+        "points": 46,
+        "points_in_subgroup": 46,
+        "predicted_abscissae": 253,
+        "projected_columns": 23,
+        "projected_points": 46,
+        "retained_orbits": 1,
+        "signed_orbits": 1
+      },
+      "encoding": {
+        "encoding": "onb_weight",
+        "w": 2
+      },
+      "lines": [
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 5161.821209000001,
+            "f4_reductions": 258,
+            "f4_splits": 235,
+            "f4_word_xors": 36295902,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 7561.993584,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 0
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4173.2172089999995,
+            "f4_reductions": 260,
+            "f4_splits": 233,
+            "f4_word_xors": 36322388,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 6809.456209,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 1
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 4,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4892.920209,
+            "f4_reductions": 261,
+            "f4_splits": 233,
+            "f4_word_xors": 35742582,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 5026.703625,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 2
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 5405.243958,
+            "f4_reductions": 256,
+            "f4_splits": 233,
+            "f4_word_xors": 36605113,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 4757.763125,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 3
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 5271.056791,
+            "f4_reductions": 261,
+            "f4_splits": 235,
+            "f4_word_xors": 36882489,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 7777.477084,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 4
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4800.206708,
+            "f4_reductions": 259,
+            "f4_splits": 235,
+            "f4_word_xors": 36647252,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 5248.441,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 5
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4669.753959000001,
+            "f4_reductions": 261,
+            "f4_splits": 236,
+            "f4_word_xors": 36076844,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 4975.893083,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 6
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 3648.3435000000004,
+            "f4_reductions": 258,
+            "f4_splits": 238,
+            "f4_word_xors": 36329940,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 5919.037708,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 7
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4408.024,
+            "f4_reductions": 260,
+            "f4_splits": 234,
+            "f4_word_xors": 36705878,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 3779.6485410000005,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 8
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4307.877958,
+            "f4_reductions": 260,
+            "f4_splits": 235,
+            "f4_word_xors": 36424955,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 4780.3090409999995,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 9
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4745.767208,
+            "f4_reductions": 262,
+            "f4_splits": 233,
+            "f4_word_xors": 36761365,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 4409.914666,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 10
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4423.519791000001,
+            "f4_reductions": 258,
+            "f4_splits": 233,
+            "f4_word_xors": 37259311,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 6373.807959,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 11
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4965.939417,
+            "f4_reductions": 259,
+            "f4_splits": 233,
+            "f4_word_xors": 36737194,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 5239.948042,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 12
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4622.217417,
+            "f4_reductions": 259,
+            "f4_splits": 235,
+            "f4_word_xors": 36720207,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 5567.957584,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 13
+          },
+          "wdsat": null
+        }
+      ],
+      "spec": {
+        "a": 0,
+        "arm": "onb_matched",
+        "engine": "inherited",
+        "m": 2,
+        "macaulay_extra": 1,
+        "n": 23,
+        "node_budget": 1024,
+        "seed": 20261012,
+        "targets": 16,
+        "w": 1,
+        "wdsat_binary": null,
+        "wdsat_timeout_secs": 20
+      },
+      "summary": {
+        "boolean_roots_total": 4,
+        "equations": 3567,
+        "f4_exhausted": 0,
+        "f4_max_degree_built": 3,
+        "f4_mean_ms": 4678.279238142857,
+        "f4_mean_splits": 234.35714285714286,
+        "f4_mean_word_xors": 36536530.0,
+        "f4_median_ms": 4745.767208,
+        "lifted_decompositions": 0,
+        "macaulay_degree_reached_max": 3,
+        "macaulay_mean_ms": 5587.73937507143,
+        "macaulay_solving_degree_max": null,
+        "macaulay_solving_degree_min": null,
+        "macaulay_solving_degree_resolved": 0,
+        "n_vars": 46,
+        "system_degree": 3,
+        "targets": 14,
+        "wdsat_lifted": 0,
+        "wdsat_mean_ms": null,
+        "wdsat_models_valid": 0,
+        "wdsat_runs": 0,
+        "wdsat_verdicts": {}
+      },
+      "timed_out": true,
+      "unsupported": 0,
+      "wall_ms": 150108.936875
+    },
+    {
+      "census": {
+        "a": 1,
+        "abscissae": 47,
+        "abscissae_with_points": 46,
+        "build_ms": 6.788625000000001,
+        "family": {
+          "family": "cyclotomic",
+          "w": 1
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 4,
+        "p": 47,
+        "points": 92,
+        "points_in_subgroup": 46,
+        "predicted_abscissae": 47,
+        "projected_columns": 23,
+        "projected_points": 46,
+        "retained_orbits": null,
+        "signed_orbits": 2
+      },
+      "encoding": {
+        "encoding": "cyclotomic_unity",
+        "w": 1
+      },
+      "lines": [],
+      "spec": {
+        "a": 1,
+        "arm": "cyclotomic",
+        "engine": "inherited",
+        "m": 2,
+        "macaulay_extra": 1,
+        "n": 23,
+        "node_budget": 1024,
+        "seed": 20261012,
+        "targets": 16,
+        "w": 1,
+        "wdsat_binary": null,
+        "wdsat_timeout_secs": 20
+      },
+      "summary": {
+        "targets": 0
+      },
+      "timed_out": true,
+      "unsupported": 0,
+      "wall_ms": 150223.038458
+    },
+    {
+      "census": {
+        "a": 1,
+        "abscissae": 46,
+        "abscissae_with_points": 46,
+        "build_ms": 59.876332999999995,
+        "family": {
+          "family": "onb_weight",
+          "w": 2
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 4,
+        "p": 47,
+        "points": 92,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 253,
+        "projected_columns": 46,
+        "projected_points": 92,
+        "retained_orbits": 2,
+        "signed_orbits": 2
+      },
+      "encoding": {
+        "encoding": "onb_weight",
+        "w": 2
+      },
+      "lines": [
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4468.914875,
+            "f4_reductions": 254,
+            "f4_splits": 231,
+            "f4_word_xors": 35063645,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 6527.4259170000005,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 0
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 5549.639708,
+            "f4_reductions": 258,
+            "f4_splits": 233,
+            "f4_word_xors": 34221534,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 6641.409875,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 1
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 5742.162166,
+            "f4_reductions": 256,
+            "f4_splits": 232,
+            "f4_word_xors": 35339161,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 5051.328708,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 2
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 5516.291375,
+            "f4_reductions": 261,
+            "f4_splits": 233,
+            "f4_word_xors": 35315015,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 4774.233415999999,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 3
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 3387.809667,
+            "f4_reductions": 257,
+            "f4_splits": 233,
+            "f4_word_xors": 34981485,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 7080.223291,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 4
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 6083.333917,
+            "f4_reductions": 257,
+            "f4_splits": 231,
+            "f4_word_xors": 34962603,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 6345.4237920000005,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 5
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 6053.204458,
+            "f4_reductions": 258,
+            "f4_splits": 233,
+            "f4_word_xors": 35042305,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 5302.818084,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 6
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 5438.11375,
+            "f4_reductions": 255,
+            "f4_splits": 232,
+            "f4_word_xors": 35261531,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 7585.146375,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 7
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 6189.916125,
+            "f4_reductions": 257,
+            "f4_splits": 233,
+            "f4_word_xors": 35084178,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 4318.433917,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 8
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4056.195375,
+            "f4_reductions": 256,
+            "f4_splits": 232,
+            "f4_word_xors": 34679049,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 6531.111042,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 9
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4304.33825,
+            "f4_reductions": 257,
+            "f4_splits": 233,
+            "f4_word_xors": 35646669,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 5154.9445,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 10
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4578.792,
+            "f4_reductions": 258,
+            "f4_splits": 231,
+            "f4_word_xors": 34820996,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 6843.349,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 11
+          },
+          "wdsat": null
+        },
+        {
+          "measurement": {
+            "boolean_roots": 0,
+            "equations": 3567,
+            "f4_exhausted": false,
+            "f4_max_degree_built": 3,
+            "f4_ms": 4586.807708,
+            "f4_reductions": 256,
+            "f4_splits": 231,
+            "f4_word_xors": 35500484,
+            "lifted_decomposition": false,
+            "macaulay_degree_reached": 3,
+            "macaulay_ms": 4809.334709,
+            "macaulay_solving_degree": null,
+            "n_vars": 46,
+            "system_degree": 3,
+            "target_index": 12
+          },
+          "wdsat": null
+        }
+      ],
+      "spec": {
+        "a": 1,
+        "arm": "onb_matched",
+        "engine": "inherited",
+        "m": 2,
+        "macaulay_extra": 1,
+        "n": 23,
+        "node_budget": 1024,
+        "seed": 20261012,
+        "targets": 16,
+        "w": 1,
+        "wdsat_binary": null,
+        "wdsat_timeout_secs": 20
+      },
+      "summary": {
+        "boolean_roots_total": 0,
+        "equations": 3567,
+        "f4_exhausted": 0,
+        "f4_max_degree_built": 3,
+        "f4_mean_ms": 5073.5014903076935,
+        "f4_mean_splits": 232.15384615384616,
+        "f4_mean_word_xors": 35070665.76923077,
+        "f4_median_ms": 5438.11375,
+        "lifted_decompositions": 0,
+        "macaulay_degree_reached_max": 3,
+        "macaulay_mean_ms": 5920.398663538463,
+        "macaulay_solving_degree_max": null,
+        "macaulay_solving_degree_min": null,
+        "macaulay_solving_degree_resolved": 0,
+        "n_vars": 46,
+        "system_degree": 3,
+        "targets": 13,
+        "wdsat_lifted": 0,
+        "wdsat_mean_ms": null,
+        "wdsat_models_valid": 0,
+        "wdsat_runs": 0,
+        "wdsat_verdicts": {}
+      },
+      "timed_out": true,
+      "unsupported": 0,
+      "wall_ms": 150087.044334
+    },
+    {
+      "census": {
+        "a": 0,
+        "abscissae": 1081,
+        "abscissae_with_points": 391,
+        "build_ms": 51.007125,
+        "family": {
+          "family": "cyclotomic",
+          "w": 2
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 34,
+        "p": 47,
+        "points": 782,
+        "points_in_subgroup": 184,
+        "predicted_abscissae": 1081,
+        "projected_columns": 391,
+        "projected_points": 782,
+        "retained_orbits": null,
+        "signed_orbits": 17
+      },
+      "encoding": {
+        "encoding": "cyclotomic_unity",
+        "w": 2
+      },
+      "lines": [],
+      "spec": {
+        "a": 0,
+        "arm": "cyclotomic",
+        "engine": "inherited",
+        "m": 2,
+        "macaulay_extra": 1,
+        "n": 23,
+        "node_budget": 1024,
+        "seed": 20261012,
+        "targets": 16,
+        "w": 2,
+        "wdsat_binary": null,
+        "wdsat_timeout_secs": 20
+      },
+      "summary": {
+        "targets": 0
+      },
+      "timed_out": false,
+      "unsupported": 0,
+      "wall_ms": 100.15312499999999
+    }
+  ],
+  "wall_ms": 626279.14125,
+  "wdsat": {
+    "reason": "neither WDSAT_BINARY nor WDSAT_SRC set and no wdsat_solver on PATH",
+    "status": "unavailable"
+  },
+  "yields": []
+}

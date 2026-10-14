@@ -1,0 +1,52 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-11",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/koblitz-isogeny",
+  "run": "run-20261011T1955Z",
+  "files": [
+    {
+      "source": "research/koblitz-isogeny/reports/run-20261011T1955Z/full_solves.svg",
+      "copy": "visuals/research/koblitz-isogeny/reports/run-20261011T1955Z/full_solves.svg",
+      "sha256": "d964436b58293d4c24c27612fa3e2eaccb3707210d294e4bd5b21ec7ce4e9902",
+      "bytes": 39127
+    },
+    {
+      "source": "research/koblitz-isogeny/reports/run-20261011T1955Z/per_call_n17.svg",
+      "copy": "visuals/research/koblitz-isogeny/reports/run-20261011T1955Z/per_call_n17.svg",
+      "sha256": "3be207a36ef01299c68a3377e77f2f13b38ddf5ab4bc31236461fc781596fd7d",
+      "bytes": 52723
+    },
+    {
+      "source": "research/koblitz-isogeny/reports/run-20261011T1955Z/report.pdf",
+      "copy": "visuals/research/koblitz-isogeny/reports/run-20261011T1955Z/report.pdf",
+      "sha256": "c7f704d2d49330f05264e727c3b25e1a07b103d8a9c7a31d8c81e8feb4c754b9",
+      "bytes": 64856
+    }
+  ],
+  "pngs": [
+    {
+      "source": "visuals/research/koblitz-isogeny/reports/run-20261011T1955Z/full_solves.svg",
+      "copy": "visuals/research/koblitz-isogeny/reports/run-20261011T1955Z/full_solves.png",
+      "dpi": 150,
+      "width": 960,
+      "height": 540,
+      "sha256": "f7c20eab994e9b39040942e1a0a8a4c7786b828f4553fc445245ed77a117cb25",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/koblitz-isogeny/reports/run-20261011T1955Z/per_call_n17.svg",
+      "copy": "visuals/research/koblitz-isogeny/reports/run-20261011T1955Z/per_call_n17.png",
+      "dpi": 150,
+      "width": 960,
+      "height": 600,
+      "sha256": "e176c2f7a599657528667b671284c760f7a314689898ec9e806f3ec7478727df",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    }
+  ],
+  "verbatim_source_report": {
+    "source": "research/koblitz-isogeny/reports/run-20261011T1955Z/README.md",
+    "copy": "SOURCE_REPORT.md",
+    "sha256": "ff5ac272175a727902eaa6495d5d5d4f8678486bfa86e9e5b4a7bed2327aaa98"
+  }
+}

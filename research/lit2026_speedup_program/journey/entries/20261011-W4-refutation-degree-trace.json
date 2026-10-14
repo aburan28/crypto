@@ -1,0 +1,22 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W4",
+  "slug": "refutation-degree-trace",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1687",
+  "papers": ["arXiv 2603.24890"],
+  "kind": "diagnostic",
+  "workload": {
+    "id": "inherited-f4-refutation-degree-4-cells",
+    "description": "f4_refutation_degree_probe, inherited-F4 arm, m = 3 standard-subspace bases on icv1-f2m17-tm101-00378d4e dim 6, icv1-f2m23-tm5197-1f85e9e1 dim 7, icv1-f2m23-t5197-69e76b73 dim 8, icv1-f2m31-tm90707-c95f16f5 dim 9 (prime-order subgroups of KoblitzCurve::new)",
+    "curve_ids": ["icv1-f2m17-tm101-00378d4e", "icv1-f2m23-tm5197-1f85e9e1", "icv1-f2m23-t5197-69e76b73", "icv1-f2m31-tm90707-c95f16f5"]
+  },
+  "metric": "share of F4 refutations first visible at degree 2; share of stage unit spent in refuted nodes",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 17,
+  "arms": [],
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w4_early_abort_20261011/reports/run-20261011T2025Z/report.pdf",
+  "note": "Refutations at degree 2: 40.0 / 77.1 / 35.6 / 88.9 % of F4 refutations; refuted nodes take 17.3 / 3.8 / 20.3 / 0.76 % of the stage unit; every forced variable first appears at degree 3; no root system is refuted at degree 2 or 3. The cost is in non-refuting nodes."
+}

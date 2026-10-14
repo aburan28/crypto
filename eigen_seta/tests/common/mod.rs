@@ -26,3 +26,5 @@ pub fn ed_curve() -> WCurve<F> {
         Fp2::from_fp(fp_hex(Toy16::ED_A6_HEX)),
     )
 }
+
+pub mod testrng;

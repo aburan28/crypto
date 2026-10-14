@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import hashlib
+import shlex
 import json
 import math
 import os
@@ -823,6 +824,24 @@ def build_producers() -> dict[str, str]:
     return binaries
 
 
+def build_example(example: str) -> str:
+    source = REPO / "examples" / f"{example}.rs"
+    require(source.is_file(), f"missing producer source: {source}")
+    completed = subprocess.run(
+        ["cargo", "build", "--release", "--example", example],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+    )
+    require(
+        completed.returncode == 0,
+        f"cargo build --example {example} failed:\n" + completed.stderr[-4000:],
+    )
+    binary = (REPO / "target/release/examples" / example).resolve()
+    require(binary.is_file(), f"built binary missing: {binary}")
+    return str(binary)
+
+
 RESOURCE_RECEIPT_FIELDS = (
     "exit_code",
     "whole_process_wall_ms",
@@ -1449,6 +1468,522 @@ def select_factor_base_row(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
     return rows[0] if rows else None
 
 
+def parse_paired_oracle_stdout(stdout: str) -> dict[str, Any]:
+    """Parse symmetrised_oracle_bench / format_paired text into structured fields."""
+    import re
+
+    header = None
+    for line in stdout.splitlines():
+        m = re.match(
+            r"== K_(\d+)/F_2\^(\d+)\s+m = (\d+)\s+dim V = (\d+)\s+"
+            r"\|F_x\| = (\d+)\s+\|F_u\| = (\d+)\s+targets = (\d+)",
+            line.strip(),
+        )
+        if m:
+            header = {
+                "a": int(m.group(1)),
+                "n": int(m.group(2)),
+                "m": int(m.group(3)),
+                "dim": int(m.group(4)),
+                "F_x": int(m.group(5)),
+                "F_u": int(m.group(6)),
+                "targets": int(m.group(7)),
+            }
+            break
+    require(header is not None, "paired oracle stdout missing K_/F_2 header")
+
+    arms: dict[str, Any] = {}
+    divisor_indices: list[int] | None = None
+    wall_s: float | None = None
+    arm_map = {
+        "x-chained F4": "x_chained_f4",
+        "sym F4": "sym_f4",
+        "x-direct F4": "x_direct_f4",
+    }
+    for line in stdout.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("divisor indices"):
+            dm = re.search(r"divisor indices\s+(\[.*?\])\s+\(([0-9.]+)\s*s\)", stripped)
+            if dm:
+                divisor_indices = json.loads(dm.group(1).replace("'", '"'))
+                wall_s = float(dm.group(2))
+            continue
+        for label, key in arm_map.items():
+            if not stripped.startswith(label):
+                continue
+            rest = stripped[len(label) :].split()
+            # vars eqs deg found refuted inconc viaT found_ms refuted_ms effort [built] ffd gate...
+            require(len(rest) >= 12, f"paired oracle arm row too short: {stripped}")
+            # Current format_paired inserts a 'built' column before ffd.
+            if len(rest) >= 13:
+                vars_n, eqs, deg, found, refuted, inconc, via_t = map(int, rest[0:7])
+                found_ms = float(rest[7]) if rest[7] != "-" else float("nan")
+                refuted_ms = float(rest[8]) if rest[8] != "-" else float("nan")
+                effort = float(rest[9]) if rest[9] != "-" else float("nan")
+                ffd_tok = rest[11]
+                gate = rest[12]
+            else:
+                vars_n, eqs, deg, found, refuted, inconc, via_t = map(int, rest[0:7])
+                found_ms = float(rest[7]) if rest[7] != "-" else float("nan")
+                refuted_ms = float(rest[8]) if rest[8] != "-" else float("nan")
+                effort = float(rest[9]) if rest[9] != "-" else float("nan")
+                ffd_tok = rest[10]
+                gate = rest[11]
+            ffd = None if ffd_tok == "-" else int(ffd_tok)
+            arms[key] = {
+                "vars": vars_n,
+                "eqs": eqs,
+                "deg": deg,
+                "found": found,
+                "refuted": refuted,
+                "inconclusive": inconc,
+                "via_t": via_t,
+                "found_ms_median": found_ms,
+                "refuted_ms_median": refuted_ms,
+                "effort_splits": effort,
+                "ffd": ffd,
+                "gate": gate,
+            }
+            break
+
+    require(arms, "paired oracle stdout missing arm rows")
+    ffds = [arm["ffd"] for arm in arms.values() if isinstance(arm.get("ffd"), int)]
+    # Honesty gate: max of class medians (found/refuted) across arms.
+    class_medians = []
+    for arm in arms.values():
+        for key in ("found_ms_median", "refuted_ms_median"):
+            val = arm.get(key)
+            if isinstance(val, (int, float)) and val == val:  # not NaN
+                class_medians.append(float(val))
+    median_ms = max(class_medians) if class_medians else None
+    disagreements = 0
+    for arm in arms.values():
+        gate = str(arm.get("gate") or "")
+        if gate != "ok":
+            # FAIL N
+            parts = gate.split()
+            if len(parts) == 2 and parts[0] == "FAIL" and parts[1].isdigit():
+                disagreements += int(parts[1])
+            else:
+                disagreements += 1
+    return {
+        "header": header,
+        "arms": arms,
+        "divisor_indices": divisor_indices,
+        "wall_s": wall_s,
+        "ffds": ffds,
+        "median_ms_per_target": median_ms,
+        "disagreements": disagreements,
+    }
+
+
+def parse_semaev_decomp_bench_stdout(stdout: str) -> dict[str, Any]:
+    """Parse examples/semaev_decomp_bench text ladder into structured fields."""
+    import re
+
+    ladder: list[dict[str, Any]] = []
+    for line in stdout.splitlines():
+        m = re.match(
+            r"^\s*(\d+)\s+(\d+)\s+(\d+)\s+([0-9.]+)s\s+([0-9.]+)s\s+([0-9.]+)s\s+([0-9.]+)x\s*$",
+            line,
+        )
+        if not m:
+            continue
+        ladder.append(
+            {
+                "l": int(m.group(1)),
+                "n": int(m.group(2)),
+                "triples": int(m.group(3)),
+                "triples_gen_s": float(m.group(4)),
+                "triples_1wd_s": float(m.group(5)),
+                "pairs_s": float(m.group(6)),
+                "speedup_vs_triples": float(m.group(7)),
+            }
+        )
+    require(ladder, "semaev_decomp_bench stdout missing pairs ladder rows")
+    return {"ladder": ladder}
+
+
+def parse_j0_known_answer_stdout(stdout: str) -> dict[str, Any]:
+    """Parse examples/j0_known_answer_bits JSON result object from stdout."""
+    rows = parse_json_objects(stdout)
+    row = next(
+        (
+            item
+            for item in reversed(rows)
+            if isinstance(item.get("bits"), int)
+            and "ic_ok" in item
+            and "rho_ok" in item
+        ),
+        None,
+    )
+    require(row is not None, "j0_known_answer_bits stdout missing known-answer JSON row")
+    return row
+
+
+def draft_j0_end_to_end_dlp_claim(
+    *,
+    beat: dict[str, Any],
+    beat_id: str,
+    run: Path,
+    direct_obs: dict[str, Any],
+    binaries: dict[str, str],
+) -> dict[str, Any]:
+    parsed = parse_j0_known_answer_stdout(direct_obs.get("stdout") or "")
+    bits = int(beat.get("bits") or parsed["bits"])
+    require(int(parsed["bits"]) == bits, f"producer bits {parsed['bits']} != beat bits {bits}")
+    producers_ok = (
+        direct_obs["exit_code"] == 0
+        and parsed.get("ic_ok") is True
+        and parsed.get("rho_ok") is True
+        and parsed.get("ic_agrees_rho") is True
+    )
+    peak_rss = direct_obs.get("children_peak_rss_bytes")
+    cap = beat.get("resource_cap_bytes")
+    under_cap = (
+        peak_rss is not None and cap is not None and int(peak_rss) <= int(cap)
+        if cap is not None
+        else None
+    )
+    ic_ms = float(parsed["ic_ms"])
+    rho_ms = float(parsed["rho_ms"])
+    source = REPO / "examples" / f"{beat['producer']['example']}.rs"
+    binary_path = binaries.get("custom") or binaries.get("direct")
+    claim = {
+        "schema_version": 2,
+        "task_id": TASK_ID,
+        "beat_id": beat_id,
+        "regime": beat["regime"],
+        "stage": "end_to_end_dlp",
+        "n": bits,
+        "n_or_bits": bits,
+        "curve": parsed.get("curve"),
+        "recovered_d_verified": bool(parsed.get("ic_ok")),
+        "ic_ok": parsed.get("ic_ok"),
+        "rho_ok": parsed.get("rho_ok"),
+        "ic_matches_truth": parsed.get("ic_matches_truth"),
+        "ic_agrees_rho": parsed.get("ic_agrees_rho"),
+        "ic_ms": ic_ms,
+        "rho_ms": rho_ms,
+        "stage_timers": {
+            "ic_ms": ic_ms,
+            "rho_ms": rho_ms,
+            "note": (
+                "producer does not yet split FB/relations/LA; "
+                "wall is full j0_index_calculus_dlp vs pollard_rho"
+            ),
+        },
+        "target_orbits": parsed.get("target_orbits"),
+        "max_trials": parsed.get("max_trials"),
+        "rho_steps": parsed.get("rho_steps"),
+        "wall_s": float(direct_obs.get("whole_process_wall_ms") or 0.0) / 1000.0,
+        "peak_rss_bytes": peak_rss,
+        "verdict": (
+            "J0_16BIT_KA_IC_AGREES_RHO_PENDING_INDEPENDENT_VALIDATION"
+            if producers_ok
+            else "PRODUCER_FAILURE"
+        ),
+        "claim_boundary": (
+            "Public synthetic known-answer j=0 IC vs rho only. "
+            "Not key recovery, not asymptotic sub-rho, not ledger promotion."
+        ),
+        "claim_boundary_non_claims": [
+            "not key recovery on deployed curves",
+            "not asymptotic sub-rho",
+            "not ledger promotion until independent validation",
+            "IC slower than rho on this instance (expected; not a vs_rho crossover)",
+        ],
+        "independent_replay_pointer": independent_replay_pointer(run),
+        "fixture_hash": sha256(source),
+        "executable_or_source_hash": {
+            "executable": sha256(binary_path) if binary_path else None,
+            "source": sha256(source),
+        },
+        "host_id": host_record(),
+        "resource_caps": {
+            "common_cap_bytes": cap,
+            "observed_peak_rss_bytes": peak_rss,
+            "under_cap": under_cap,
+        },
+        "seeds": {"random_scalar": "runtime"},
+        "evidence_paths": [
+            str((run / "logs/direct.stdout.jsonl").resolve()),
+            str((run / "receipts/direct.resource.json").resolve()),
+        ],
+        "created_at": now(),
+        "autolab_run_id": run.name,
+        "producer_exit_codes": {"direct": direct_obs["exit_code"]},
+    }
+    return claim
+
+
+def draft_binary_pairs_decomposition_claim(
+    *,
+    beat: dict[str, Any],
+    beat_id: str,
+    run: Path,
+    direct_obs: dict[str, Any],
+    binaries: dict[str, str],
+) -> dict[str, Any]:
+    parsed = parse_semaev_decomp_bench_stdout(direct_obs.get("stdout") or "")
+    ladder = parsed["ladder"]
+    l_goal = int(beat.get("l") or 8)
+    row = next((item for item in ladder if item["l"] == l_goal), None)
+    require(row is not None, f"semaev_decomp_bench stdout missing l={l_goal} ladder row")
+    producers_ok = direct_obs["exit_code"] == 0
+    peak_rss = direct_obs.get("children_peak_rss_bytes")
+    cap = beat.get("resource_cap_bytes")
+    under_cap = (
+        peak_rss is not None and cap is not None and int(peak_rss) <= int(cap)
+        if cap is not None
+        else None
+    )
+    pairs_s = float(row["pairs_s"])
+    median_ms = pairs_s * 1000.0
+    source = REPO / "examples" / f"{beat['producer']['example']}.rs"
+    binary_path = binaries.get("custom") or binaries.get("direct")
+    claim = {
+        "schema_version": 2,
+        "task_id": TASK_ID,
+        "beat_id": beat_id,
+        "regime": beat["regime"],
+        "stage": "decomposition",
+        "n": beat.get("n", row["n"]),
+        "n_or_bits": beat.get("n", row["n"]),
+        "m_summands": beat.get("m", 3),
+        "dimension_l_or_dim": l_goal,
+        "unknowns": "2*l_bit_pair_space",
+        "system_degree": "quartic_s4_symmetrised",
+        "eq_var_ratio": "inapplicable_pairs_and_solve_no_boolean_system",
+        "ffd_or_degree_of_regularity": {
+            "status": "inapplicable",
+            "reason": (
+                "oracle_class=pairs_and_solve enumerates pair space; "
+                "no Boolean Macaulay/GB system in this arm"
+            ),
+            "note": (
+                "Ledger sub-2^(2l) beat still wants subspace/oracle FFD at l=8; "
+                "see runs_manual/binary_s4_ffd_l8_20260920 for related S4 subspace FFD."
+            ),
+        },
+        "oracle_class": "pairs_and_solve",
+        "median_ms_per_target": median_ms,
+        "largest_solvable": {
+            "budget": "pairs_baseline",
+            "l": l_goal,
+            "n": row["n"],
+            "pairs_solve_s": pairs_s,
+        },
+        "ladder": [
+            {
+                "l": item["l"],
+                "pairs_s": item["pairs_s"],
+                "speedup_vs_triples": item["speedup_vs_triples"],
+                "triples_gen_s": item["triples_gen_s"],
+            }
+            for item in ladder
+        ],
+        "ledger_gate_assessment": {
+            "ffd_logged": False,
+            "median_le_half_pairs": "n/a_until_faster_oracle_measured",
+            "note": (
+                "pairs-and-solve IS Theta(2^(2l)); this measures the baseline, "
+                "not a sub-2^(2l) win"
+            ),
+            "sub_2_to_2l_oracle": False,
+            "targets_le_64": True,
+        },
+        "wall_s": float(direct_obs.get("whole_process_wall_ms") or 0.0) / 1000.0,
+        "peak_rss_bytes": peak_rss,
+        "verdict": (
+            "L8_PAIRS_BASELINE_MEASURED_NO_SUB_2_2L_PENDING_INDEPENDENT_VALIDATION"
+            if producers_ok
+            else "PRODUCER_FAILURE"
+        ),
+        "claim_boundary": (
+            "Public synthetic binary Semaev pairs-and-solve baseline only. "
+            "Not key recovery, not a sub-2^(2l) oracle claim, not ledger promotion."
+        ),
+        "claim_boundary_non_claims": [
+            "not key recovery",
+            "not sub-2^(2l) oracle claim",
+            "not ledger promotion",
+            "FFD unmeasured on pairs arm",
+        ],
+        "independent_replay_pointer": independent_replay_pointer(run),
+        "fixture_hash": sha256(source),
+        "executable_or_source_hash": {
+            "executable": sha256(binary_path) if binary_path else None,
+            "source": sha256(source),
+        },
+        "host_id": host_record(),
+        "resource_caps": {
+            "common_cap_bytes": cap,
+            "observed_peak_rss_bytes": peak_rss,
+            "under_cap": under_cap,
+        },
+        "seeds": {"decomp_bench_internal": "0x9E3779B9"},
+        "evidence_paths": [
+            str((run / "logs/direct.stdout.jsonl").resolve()),
+            str((run / "receipts/direct.resource.json").resolve()),
+        ],
+        "created_at": now(),
+        "autolab_run_id": run.name,
+        "producer_exit_codes": {"direct": direct_obs["exit_code"]},
+    }
+    return claim
+
+
+def draft_decomposition_claim(
+    *,
+    beat: dict[str, Any],
+    beat_id: str,
+    run: Path,
+    direct_obs: dict[str, Any],
+    binaries: dict[str, str],
+    fixtures: int,
+) -> dict[str, Any]:
+    producer = beat.get("producer") or {}
+    if str(producer.get("example") or "") == "semaev_decomp_bench":
+        return draft_binary_pairs_decomposition_claim(
+            beat=beat,
+            beat_id=beat_id,
+            run=run,
+            direct_obs=direct_obs,
+            binaries=binaries,
+        )
+    parsed = parse_paired_oracle_stdout(direct_obs.get("stdout") or "")
+    header = parsed["header"]
+    arms = parsed["arms"]
+    producers_ok = direct_obs["exit_code"] == 0
+    peak_rss = direct_obs.get("children_peak_rss_bytes")
+    cap = beat.get("resource_cap_bytes")
+    under_cap = peak_rss is not None and cap is not None and int(peak_rss) <= int(cap)
+    ffds = parsed["ffds"]
+    ffd_block = {
+        "draws": 1,
+        "min": min(ffds) if ffds else None,
+        "max": max(ffds) if ffds else None,
+        "mean": (sum(ffds) / len(ffds)) if ffds else None,
+        "note": "FFD from first target draw in paired_bench; control-plane decomposition launch",
+    }
+    for key, arm in arms.items():
+        if isinstance(arm.get("ffd"), int):
+            ffd_block[key] = arm["ffd"]
+    x_arm = arms.get("x_chained_f4") or next(iter(arms.values()))
+    unknowns = int(beat.get("unknowns_goal") or x_arm.get("vars") or 0)
+    dim = int(beat.get("dim_goal") or header["dim"])
+    median_ms = parsed["median_ms_per_target"]
+    under_1h = isinstance(median_ms, (int, float)) and median_ms <= 3_600_000.0
+    source = REPO / "examples" / f"{beat['producer']['example']}.rs"
+    binary_path = binaries.get("custom") or binaries.get("direct")
+    claim = {
+        "schema_version": 2,
+        "task_id": TASK_ID,
+        "beat_id": beat_id,
+        "regime": beat["regime"],
+        "stage": "decomposition",
+        "n": beat["n"],
+        "a": beat.get("a", header["a"]),
+        "n_or_bits": beat["n"],
+        "m_summands": beat.get("m", header["m"]),
+        "dimension_l_or_dim": dim,
+        "unknowns": unknowns,
+        "system_degree": beat.get("system_degree", "quadratic"),
+        "eq_var_ratio": (x_arm["eqs"] / x_arm["vars"]) if x_arm.get("vars") else None,
+        "ffd_or_degree_of_regularity": ffd_block,
+        "oracle_class": "groebner",
+        "median_ms_per_target": median_ms,
+        "median_ms_per_target_detail": {
+            "reported_as": "max(found, refuted) class medians for 1h gate honesty",
+            **{
+                f"{key}_found_median_ms": arm.get("found_ms_median")
+                for key, arm in arms.items()
+            },
+            **{
+                f"{key}_refuted_median_ms": arm.get("refuted_ms_median")
+                for key, arm in arms.items()
+            },
+        },
+        "largest_solvable": {
+            "budget": "1h",
+            "dim": dim,
+            "m": beat.get("m", header["m"]),
+            "n": beat["n"],
+            "observed_median_ms": median_ms,
+            "under_budget": under_1h,
+            "unknowns": unknowns,
+            "verdict_mix": {
+                "found": x_arm.get("found"),
+                "inconclusive": x_arm.get("inconclusive"),
+                "refuted": x_arm.get("refuted"),
+            },
+        },
+        "arms": arms,
+        "disagreements": parsed["disagreements"],
+        "divisor_indices": parsed["divisor_indices"],
+        "fb_sizes": {"F_x": header["F_x"], "F_u": header["F_u"]},
+        "targets": header["targets"],
+        "node_budget": 50000,
+        "sat": False,
+        "wall_s": parsed["wall_s"]
+        if parsed["wall_s"] is not None
+        else (float(direct_obs.get("whole_process_wall_ms") or 0.0) / 1000.0),
+        "peak_rss_bytes": peak_rss,
+        "acceptance_vs_ledger": {
+            "dim_16_m_2_quadratic": dim == 16 and int(beat.get("m", 2)) == 2,
+            "disagreements_zero": parsed["disagreements"] == 0,
+            "ffd_logged": bool(ffds),
+            "median_under_1h": under_1h,
+        },
+        "verdict": (
+            "N31_M2_DIM16_PANEL_PASS_UNDER_1H_PENDING_INDEPENDENT_VALIDATION"
+            if producers_ok
+            and parsed["disagreements"] == 0
+            and under_1h
+            and ffds
+            else (
+                "PRODUCER_FAILURE"
+                if not producers_ok
+                else "DRAFT_INCOMPLETE_OR_GATE_FAIL"
+            )
+        ),
+        "claim_boundary": (
+            "Public synthetic Koblitz Semaev decomposition oracle measure only. "
+            "Not key recovery, not asymptotic sub-rho, not imported points, not "
+            "ledger promotion until independent validation."
+        ),
+        "claim_boundary_non_claims": [
+            "not key recovery",
+            "not asymptotic sub-sqrt",
+            "not imported/external points",
+            "not ledger promotion until independent validation",
+        ],
+        "independent_replay_pointer": independent_replay_pointer(run),
+        "fixture_hash": sha256(source),
+        "executable_or_source_hash": {
+            "executable": sha256(binary_path) if binary_path else None,
+            "source": sha256(source),
+        },
+        "host_id": host_record(),
+        "resource_caps": {
+            "common_cap_bytes": cap,
+            "node_budget": 50000,
+            "observed_peak_rss_bytes": peak_rss,
+            "under_cap": under_cap,
+        },
+        "seeds": {"paired_bench_default": hex(int((beat.get("env") or {}).get("seed", 0x5EED)))},
+        "evidence_paths": [
+            str((run / "logs/direct.stdout.jsonl").resolve()),
+            str((run / "receipts/direct.resource.json").resolve()),
+        ],
+        "created_at": now(),
+        "autolab_run_id": run.name,
+        "producer_exit_codes": {"direct": direct_obs["exit_code"]},
+    }
+    return claim
+
+
 def draft_factor_base_claim(
     *,
     beat: dict[str, Any],
@@ -1628,7 +2163,22 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
             write_json(run / "artifacts/prepared_commands.json", commands)
             return state
 
-        binaries = build_producers()
+        stage = str(beat.get("stage") or "vs_rho")
+        if stage in ("decomposition", "end_to_end_dlp") and isinstance(
+            beat.get("producer"), dict
+        ) and beat["producer"].get("example"):
+            require(
+                beat["producer"].get("example"),
+                f"beat {beat_id} stage {stage} requires producer.example",
+            )
+            custom = build_example(str(beat["producer"]["example"]))
+            binaries = {"custom": custom, "direct": custom}
+        elif stage == "decomposition":
+            raise AutolabError(
+                f"beat {beat_id} stage decomposition requires producer.example"
+            )
+        else:
+            binaries = build_producers()
         write_json(
             run / "artifacts/binaries.json",
             {key: {"path": path, "sha256": sha256(path)} for key, path in binaries.items()},
@@ -1643,7 +2193,6 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
         for key, value in (beat.get("env") or {}).items():
             env[str(key)] = str(value)
 
-        stage = str(beat.get("stage") or "vs_rho")
         commands = producer_commands(beat, beat_id, fixtures, binaries=binaries)
         write_json(run / "artifacts/commands.json", commands)
 
@@ -1771,6 +2320,65 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
                 claim_check=validation["status"],
                 pairing_errors=pairing_errors,
             )
+        elif stage == "decomposition":
+            claim = draft_decomposition_claim(
+                beat=beat,
+                beat_id=beat_id,
+                run=run,
+                direct_obs=direct_obs,
+                binaries=binaries,
+                fixtures=fixtures,
+            )
+            write_json(run / "artifacts/claim_draft.json", claim)
+            validation = validate_claim(claim, stage="decomposition", ledger=ledger)
+            write_json(run / "artifacts/claim_check.json", validation)
+            producers_ok = direct_obs["exit_code"] == 0
+            status = (
+                "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
+            )
+            if producers_ok and validation["status"] != "PASS":
+                status = "SCHEMA_INCOMPLETE"
+            state.update(
+                status=status,
+                phase="analysis",
+                updated_at=now(),
+                direct_exit_code=direct_obs["exit_code"],
+                claim_check=validation["status"],
+            )
+        elif stage == "end_to_end_dlp":
+            producer = beat.get("producer") or {}
+            require(
+                str(producer.get("example") or "") == "j0_known_answer_bits",
+                f"beat {beat_id} end_to_end_dlp launch supports j0_known_answer_bits only",
+            )
+            claim = draft_j0_end_to_end_dlp_claim(
+                beat=beat,
+                beat_id=beat_id,
+                run=run,
+                direct_obs=direct_obs,
+                binaries=binaries,
+            )
+            write_json(run / "artifacts/claim_draft.json", claim)
+            validation = validate_claim(claim, stage="end_to_end_dlp", ledger=ledger)
+            write_json(run / "artifacts/claim_check.json", validation)
+            producers_ok = (
+                direct_obs["exit_code"] == 0
+                and claim.get("ic_ok") is True
+                and claim.get("rho_ok") is True
+                and claim.get("ic_agrees_rho") is True
+            )
+            status = (
+                "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
+            )
+            if producers_ok and validation["status"] != "PASS":
+                status = "SCHEMA_INCOMPLETE"
+            state.update(
+                status=status,
+                phase="analysis",
+                updated_at=now(),
+                direct_exit_code=direct_obs["exit_code"],
+                claim_check=validation["status"],
+            )
         else:
             raise AutolabError(f"unsupported launch stage: {stage}")
 
@@ -1811,6 +2419,39 @@ def producer_commands(
     fixtures: int,
     binaries: dict[str, str] | None,
 ) -> dict[str, Any]:
+    producer = beat.get("producer")
+    if isinstance(producer, dict) and producer.get("args_template"):
+        example = str(producer["example"])
+        direct_bin = (
+            binaries.get("custom")
+            if binaries and binaries.get("custom")
+            else f"target/release/examples/{example}"
+        )
+        rendered = str(producer["args_template"]).format(
+            a=beat.get("a", 0),
+            n=beat.get("n"),
+            m=beat.get("m"),
+            l=beat.get("l"),
+            bits=beat.get("bits"),
+            fixtures=fixtures,
+        )
+        direct_argv = [direct_bin, *shlex.split(rendered)]
+        return {
+            "build": f"cargo build --release --example {example}",
+            "stage": beat.get("stage"),
+            "direct": " ".join(direct_argv),
+            "direct_argv": direct_argv,
+            "fixtures": fixtures,
+            "online_target_count": fixtures,
+            "precompute_fixtures": 0,
+            "direct_producer_fixture_count": fixtures,
+            "rho_producer_fixture_count": 0,
+            "env": beat.get("env") or {},
+            "rho": None,
+            "rho_argv": None,
+            "custom_example": example,
+        }
+
     direct_bin = (
         binaries["direct"]
         if binaries

@@ -162,6 +162,7 @@ def make_manifest(args: argparse.Namespace) -> None:
                     "research/sat_factor_base_review_20260908/autolab/protocol.json",
                     "research/sat_factor_base_review_20260908/autolab/single_target_panel.py",
                     "research/ic_candidate_tournament_20260915/oracle.py",
+                    "research/ic_candidate_tournament_20260915/oracle_u128.py",
                     "research/ic_candidate_tournament_20260915/identity.py"))
     artifacts = [str(ROOT / name) for name in sorted(sources)]
     artifacts.extend((str(script), str(args.ic_binary), str(args.rho_binary)))

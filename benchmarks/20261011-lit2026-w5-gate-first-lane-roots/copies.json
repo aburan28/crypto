@@ -1,0 +1,67 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-11",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/lit2026_w5_lane_batched_f4_20261011",
+  "run": "run-20261011T2225Z",
+  "files": [
+    {
+      "source": "research/lit2026_w5_lane_batched_f4_20261011/reports/run-20261011T2225Z/report.pdf",
+      "copy": "run-report.pdf",
+      "sha256": "d8b047e6855a18d6af16010391ddcdf2cc7f8dc003a946ead01cd330aae2abf4",
+      "bytes": 240367
+    },
+    {
+      "source": "research/lit2026_w5_lane_batched_f4_20261011/REPORT.pdf",
+      "copy": "results-report.pdf",
+      "sha256": "3e76b8fa145e86f38d0b5d9e8608ef1f346366a471df89f67eb7b239f2f72ad2",
+      "bytes": 241376
+    },
+    {
+      "source": "research/lit2026_w5_lane_batched_f4_20261011/reports/run-20261011T2225Z/arms.svg",
+      "copy": "arms.svg",
+      "sha256": "1b1062aaae8f3d01b3caa1b90617be97b7152375979333888e440f43eb3c1b27",
+      "bytes": 145969
+    },
+    {
+      "source": "research/lit2026_w5_lane_batched_f4_20261011/reports/run-20261011T2225Z/costmodel.svg",
+      "copy": "costmodel.svg",
+      "sha256": "b57eebc3ccb25e5fa362fe6941b27b01eab763db463dfb69d945858580d7750f",
+      "bytes": 65466
+    },
+    {
+      "source": "research/lit2026_w5_lane_batched_f4_20261011/reports/run-20261011T2225Z/lanes.svg",
+      "copy": "lanes.svg",
+      "sha256": "332f25a3e3f7d19e8ed39d06f970513a463c8d5138e7d161f5c0ca9f1bf8a2ff",
+      "bytes": 121982
+    },
+    {
+      "source": "research/lit2026_w5_lane_batched_f4_20261011/reports/run-20261011T2225Z/lockstep.svg",
+      "copy": "lockstep.svg",
+      "sha256": "cdfee71f3e759b977a47c44eeefeb6cc7366148eea3da05b56b79ce0791b8b65",
+      "bytes": 51904
+    }
+  ],
+  "pngs": [
+    {
+      "source": "arms.svg",
+      "copy": "arms.png",
+      "dpi": 150
+    },
+    {
+      "source": "costmodel.svg",
+      "copy": "costmodel.png",
+      "dpi": 150
+    },
+    {
+      "source": "lanes.svg",
+      "copy": "lanes.png",
+      "dpi": 150
+    },
+    {
+      "source": "lockstep.svg",
+      "copy": "lockstep.png",
+      "dpi": 150
+    }
+  ]
+}

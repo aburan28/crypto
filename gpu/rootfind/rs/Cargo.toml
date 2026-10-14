@@ -1,0 +1,38 @@
+[package]
+name = "gpu-rootfind"
+version = "0.1.0"
+edition = "2021"
+publish = false
+build = "build.rs"
+description = "Rust bindings + fail-closed validation harness for the GPU root-finding 2-decomposition oracle (gpu/rootfind/)"
+
+# Deliberately a *separate* crate rather than a feature of the root crate.
+# A build script in the root package makes cargo walk the whole 80k-file
+# repository to fingerprint it, which fails on the CI runners (gix:
+# "Failed to update the excludes stack"), and an optional *path*
+# dependency must exist at resolution time even when its feature is off,
+# which breaks the 14 workflows that build the root crate from a sparse
+# checkout.  Living here, this crate costs the root crate nothing: no
+# feature, no dependency, no build script.  It depends on the root crate
+# for the curve engine (`prime_fast`) and the CPU reference
+# (`cryptanalysis::gpu_rootfind`).
+[workspace]
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "gpu_rootfind_validate"
+path = "src/bin/gpu_rootfind_validate.rs"
+
+[dependencies]
+crypto_lib = { package = "crypto", path = "../../.." }
+rand = { version = "0.8", features = ["small_rng"] }
+serde_json = "1.0"
+num-bigint = "0.4"
+
+[build-dependencies]
+cc = "1"
+
+[profile.release]
+debug = 1

@@ -2,31 +2,177 @@
   "schema": "lit2026-workstreams/v1",
   "program_baseline_commit": "4b6e09b78",
   "source_report": "research/literature_search_20261011/README.md",
-  "status_values": ["not started", "in progress", "PR open", "merged", "negative (closed)", "blocked"],
+  "status_values": [
+    "not started",
+    "in progress",
+    "PR open",
+    "merged",
+    "negative (closed)",
+    "blocked"
+  ],
   "workstreams": [
-    {"id": "W1", "kind": "diagnostic", "title": "Solving-degree diagnostics on descended S3/S4: saturation exponent, first degree fall, generic leading-monomial divergence, algebraic-randomness Hilbert test",
-     "papers": ["ePrint 2024/528", "arXiv 2410.23211", "arXiv 2505.10246", "ePrint 2024/1924", "arXiv 2609.14052"], "status": "not started", "prs": []},
-    {"id": "W2", "kind": "diagnostic+speedup", "title": "Multi-graded regularity of descended S3 (point blocks), block monomial orders, variable-order variance",
-     "papers": ["ePrint 2025/2060", "ePrint 2025/793", "arXiv 2602.02972", "arXiv 2509.14754"], "status": "not started", "prs": []},
-    {"id": "W3", "kind": "audit", "title": "Structured generic-group delta table for every IC configuration; adaptive/non-adaptive precompute classification; multi-target slope",
-     "papers": ["ePrint 2026/384", "arXiv 2505.00894", "ePrint 2026/2253"], "status": "PR open", "prs": ["aburan28/crypto#1683"]},
-    {"id": "W4", "kind": "speedup", "title": "Early abort at the refutation degree in GF(2) F4/F5 decomposition solves",
-     "papers": ["arXiv 2603.24890"], "status": "not started", "prs": []},
-    {"id": "W5", "kind": "speedup", "title": "Lane-batched inherited-F4 replay (k targets per step plan) and F4-tracer cost-model check",
-     "papers": ["arXiv 2607.06372", "arXiv 2603.16378"], "status": "PR open", "prs": ["aburan28/crypto#1714"]},
-    {"id": "W6", "kind": "speedup", "title": "Crossbred: preprocessing trimming, admissibility condition, smoothed degree, oracle multistep; Hamming-ball / decremental Boolean exhaustive phase",
-     "papers": ["ePrint 2026/360", "ePrint 2024/758", "ePrint 2026/408", "arXiv 2506.09950", "ePrint 2026/040", "ePrint 2026/1704", "ePrint 2025/1788"], "status": "not started", "prs": []},
-    {"id": "W7", "kind": "speedup", "title": "Sparse linear algebra: Wiedemann final-phase pruning; check Galois k^2 saving in Koblitz linear algebra",
-     "papers": ["ePrint 2026/1787", "ePrint 2026/560"], "status": "not started", "prs": []},
-    {"id": "W8", "kind": "diagnostic", "title": "Summation-polynomial models: E/G check of torsion symmetrisation, characteristic-uniform model S3, Frobenius auxiliary variable, Lucas-identity splitting",
-     "papers": ["ePrint 2026/1299", "arXiv 2608.01675", "ePrint 2026/1927", "arXiv 2609.18866"], "status": "PR open", "prs": ["aburan28/crypto#1712"]},
-    {"id": "W9", "kind": "speedup", "title": "F_p F4 Las-Vegas probabilistic echelon; F5 criteria data structure (gated on profile share); tracer zero-reduction predictor",
-     "papers": ["arXiv 2609.14433", "arXiv 2601.05026", "arXiv 2505.23696"], "status": "not started", "prs": []},
-    {"id": "W10", "kind": "feasibility", "title": "Prime-field S5 small-root oracle: asymptotic Coppersmith bound (LP / optimal shifts) against delta = 1/5",
-     "papers": ["ePrint 2024/1577", "ePrint 2026/1027", "ePrint 2026/423"], "status": "not started", "prs": []},
-    {"id": "W11", "kind": "speedup", "title": "Generic-method engineering: co-Z paired BSGS with windowed batch inversion; binary x-only isogeny evaluation; k=2 biextension pairing; DP hit-rate statistics; external challenge ladder",
-     "papers": ["ePrint 2026/2102", "ePrint 2026/704", "ePrint 2025/1652", "ePrint 2026/1823", "arXiv 2508.14011"], "status": "not started", "prs": []},
-    {"id": "W12", "kind": "audit", "title": "Flagged claims: reproduce the zero-minor ECDLP method at 20-30 bits against rho; record ePrint 2025/015 as unimplementable from its abstract",
-     "papers": ["arXiv 2607.09814", "ePrint 2025/015"], "status": "not started", "prs": []}
+    {
+      "id": "W1",
+      "kind": "diagnostic",
+      "title": "Solving-degree diagnostics on descended S3/S4: saturation exponent, first degree fall, generic leading-monomial divergence, algebraic-randomness Hilbert test",
+      "papers": [
+        "ePrint 2024/528",
+        "arXiv 2410.23211",
+        "arXiv 2505.10246",
+        "ePrint 2024/1924",
+        "arXiv 2609.14052"
+      ],
+      "status": "not started",
+      "prs": []
+    },
+    {
+      "id": "W2",
+      "kind": "diagnostic+speedup",
+      "title": "Multi-graded regularity of descended S3 (point blocks), block monomial orders, variable-order variance",
+      "papers": [
+        "ePrint 2025/2060",
+        "ePrint 2025/793",
+        "arXiv 2602.02972",
+        "arXiv 2509.14754"
+      ],
+      "status": "not started",
+      "prs": []
+    },
+    {
+      "id": "W3",
+      "kind": "audit",
+      "title": "Structured generic-group delta table for every IC configuration; adaptive/non-adaptive precompute classification; multi-target slope",
+      "papers": [
+        "ePrint 2026/384",
+        "arXiv 2505.00894",
+        "ePrint 2026/2253"
+      ],
+      "status": "merged",
+      "prs": [
+        "aburan28/crypto#1683"
+      ]
+    },
+    {
+      "id": "W4",
+      "kind": "speedup",
+      "title": "Early abort at the refutation degree in GF(2) F4/F5 decomposition solves",
+      "papers": [
+        "arXiv 2603.24890"
+      ],
+      "status": "PR open",
+      "prs": [
+        "aburan28/crypto#1687"
+      ]
+    },
+    {
+      "id": "W5",
+      "kind": "speedup",
+      "title": "Lane-batched inherited-F4 replay (k targets per step plan) and F4-tracer cost-model check",
+      "papers": [
+        "arXiv 2607.06372",
+        "arXiv 2603.16378"
+      ],
+      "status": "merged",
+      "prs": [
+        "aburan28/crypto#1714"
+      ]
+    },
+    {
+      "id": "W6",
+      "kind": "speedup",
+      "title": "Crossbred: preprocessing trimming, admissibility condition, smoothed degree, oracle multistep; Hamming-ball / decremental Boolean exhaustive phase",
+      "papers": [
+        "ePrint 2026/360",
+        "ePrint 2024/758",
+        "ePrint 2026/408",
+        "arXiv 2506.09950",
+        "ePrint 2026/040",
+        "ePrint 2026/1704",
+        "ePrint 2025/1788"
+      ],
+      "status": "not started",
+      "prs": []
+    },
+    {
+      "id": "W7",
+      "kind": "speedup",
+      "title": "Sparse linear algebra: Wiedemann final-phase pruning; check Galois k^2 saving in Koblitz linear algebra",
+      "papers": [
+        "ePrint 2026/1787",
+        "ePrint 2026/560"
+      ],
+      "status": "not started",
+      "prs": []
+    },
+    {
+      "id": "W8",
+      "kind": "diagnostic",
+      "title": "Summation-polynomial models: E/G check of torsion symmetrisation, characteristic-uniform model S3, Frobenius auxiliary variable, Lucas-identity splitting",
+      "papers": [
+        "ePrint 2026/1299",
+        "arXiv 2608.01675",
+        "ePrint 2026/1927",
+        "arXiv 2609.18866"
+      ],
+      "status": "PR open",
+      "prs": [
+        "aburan28/crypto#1712"
+      ]
+    },
+    {
+      "id": "W9",
+      "kind": "speedup",
+      "title": "F_p F4 Las-Vegas probabilistic echelon; F5 criteria data structure (gated on profile share); tracer zero-reduction predictor",
+      "papers": [
+        "arXiv 2609.14433",
+        "arXiv 2601.05026",
+        "arXiv 2505.23696"
+      ],
+      "status": "not started",
+      "prs": []
+    },
+    {
+      "id": "W10",
+      "kind": "feasibility",
+      "title": "Prime-field S5 small-root oracle: asymptotic Coppersmith bound (LP / optimal shifts) against delta = 1/5",
+      "papers": [
+        "ePrint 2024/1577",
+        "ePrint 2026/1027",
+        "ePrint 2026/423"
+      ],
+      "status": "PR open",
+      "prs": [
+        "aburan28/crypto#1691"
+      ]
+    },
+    {
+      "id": "W11",
+      "kind": "speedup",
+      "title": "Generic-method engineering: co-Z paired BSGS with windowed batch inversion; binary x-only isogeny evaluation; k=2 biextension pairing; DP hit-rate statistics; external challenge ladder",
+      "papers": [
+        "ePrint 2026/2102",
+        "ePrint 2026/704",
+        "ePrint 2025/1652",
+        "ePrint 2026/1823",
+        "arXiv 2508.14011"
+      ],
+      "status": "PR open",
+      "prs": [
+        "aburan28/crypto#1692"
+      ]
+    },
+    {
+      "id": "W12",
+      "kind": "audit",
+      "title": "Flagged claims: reproduce the zero-minor ECDLP method at 20-30 bits against rho; record ePrint 2025/015 as unimplementable from its abstract",
+      "papers": [
+        "arXiv 2607.09814",
+        "ePrint 2025/015"
+      ],
+      "status": "PR open",
+      "prs": [
+        "aburan28/crypto#1713"
+      ]
+    }
   ]
 }

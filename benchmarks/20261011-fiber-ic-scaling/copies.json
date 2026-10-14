@@ -1,0 +1,100 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-11",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/fiber_ic_scaling_20261011",
+  "run": "three sessions: 2037Z,2039Z,2044Z",
+  "files": [
+    {
+      "source": "research/fiber_ic_scaling_20261011/figures/envelope_vs_size.svg",
+      "copy": "visuals/research/fiber_ic_scaling_20261011/figures/envelope_vs_size.svg",
+      "sha256": "5ab6fdb16a0e6e242b0cfb04d0b6f79360795881393e8b236c041a6f381a94f8",
+      "bytes": 61243
+    },
+    {
+      "source": "research/fiber_ic_scaling_20261011/report.pdf",
+      "copy": "visuals/research/fiber_ic_scaling_20261011/report.pdf",
+      "sha256": "163eedcc1751a69c530b79e2615cc0f086b1bf5ba271bda4bc7fe60eccf31406",
+      "bytes": 58320
+    },
+    {
+      "source": "research/fiber_ic_scaling_20261011/reports/run-20261011T2037Z/report.pdf",
+      "copy": "visuals/research/fiber_ic_scaling_20261011/reports/run-20261011T2037Z/report.pdf",
+      "sha256": "b79b8ec2028a8030a1d3cd7a7bb67c459938fd52f53dc804b7a8f752ce4b969e",
+      "bytes": 51017
+    },
+    {
+      "source": "research/fiber_ic_scaling_20261011/reports/run-20261011T2037Z/s_by_arm.svg",
+      "copy": "visuals/research/fiber_ic_scaling_20261011/reports/run-20261011T2037Z/s_by_arm.svg",
+      "sha256": "d4a8787ff7532e940b0b7eb81a4f749948b9c1e77e3c3c86d812bae74f60b20c",
+      "bytes": 99365
+    },
+    {
+      "source": "research/fiber_ic_scaling_20261011/reports/run-20261011T2039Z/report.pdf",
+      "copy": "visuals/research/fiber_ic_scaling_20261011/reports/run-20261011T2039Z/report.pdf",
+      "sha256": "cfe8d1565581f80a73c3b69ac87760bdf1f76c6639b814c521987fa2a7fdb825",
+      "bytes": 50900
+    },
+    {
+      "source": "research/fiber_ic_scaling_20261011/reports/run-20261011T2039Z/s_by_arm.svg",
+      "copy": "visuals/research/fiber_ic_scaling_20261011/reports/run-20261011T2039Z/s_by_arm.svg",
+      "sha256": "57ec44b6b89fcca488f54b787079d4eca2d46092babd2eae14a960621b78a215",
+      "bytes": 106975
+    },
+    {
+      "source": "research/fiber_ic_scaling_20261011/reports/run-20261011T2044Z/report.pdf",
+      "copy": "visuals/research/fiber_ic_scaling_20261011/reports/run-20261011T2044Z/report.pdf",
+      "sha256": "219d1ca4bd1fde57bbfd6dee5f82a750f6df09f744674af09e0f7b971934a62f",
+      "bytes": 47318
+    },
+    {
+      "source": "research/fiber_ic_scaling_20261011/reports/run-20261011T2044Z/s_by_arm.svg",
+      "copy": "visuals/research/fiber_ic_scaling_20261011/reports/run-20261011T2044Z/s_by_arm.svg",
+      "sha256": "be788775941a8b51ff5ba422327c9f618d9177e7e7bb768c4eacecfb94110204",
+      "bytes": 72753
+    }
+  ],
+  "pngs": [
+    {
+      "source": "visuals/research/fiber_ic_scaling_20261011/figures/envelope_vs_size.svg",
+      "copy": "visuals/research/fiber_ic_scaling_20261011/figures/envelope_vs_size.png",
+      "dpi": 150,
+      "width": 1080,
+      "height": 660,
+      "sha256": "5dfa22dea14cc7daabb04c5a6e5cbd1987a68be4f7114e1b02ad77470721f83e",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/fiber_ic_scaling_20261011/reports/run-20261011T2037Z/s_by_arm.svg",
+      "copy": "visuals/research/fiber_ic_scaling_20261011/reports/run-20261011T2037Z/s_by_arm.png",
+      "dpi": 150,
+      "width": 1125,
+      "height": 660,
+      "sha256": "65df4e82dea99e88bcbbd8fac79495ca03a9fd9638c9d8c72b9e788816165a05",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/fiber_ic_scaling_20261011/reports/run-20261011T2039Z/s_by_arm.svg",
+      "copy": "visuals/research/fiber_ic_scaling_20261011/reports/run-20261011T2039Z/s_by_arm.png",
+      "dpi": 150,
+      "width": 1125,
+      "height": 660,
+      "sha256": "e9c6e1ff21a9d9855c410a2a15b7abdc9f0a7b1974990969b9753327bebe1028",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/fiber_ic_scaling_20261011/reports/run-20261011T2044Z/s_by_arm.svg",
+      "copy": "visuals/research/fiber_ic_scaling_20261011/reports/run-20261011T2044Z/s_by_arm.png",
+      "dpi": 150,
+      "width": 1125,
+      "height": 660,
+      "sha256": "b214e4d18ed14725d5c0775bdab6494f56a172c8f7157740bb2a0d3f6bfdf8cb",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    }
+  ],
+  "verbatim_source_report": {
+    "source": "research/fiber_ic_scaling_20261011/README.md",
+    "copy": "SOURCE_REPORT.md",
+    "sha256": "24cb7122a3077bb70732f64f9950c789f20b9d04eba7c4795b1779557ad76716"
+  }
+}

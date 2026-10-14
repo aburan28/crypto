@@ -1,0 +1,55 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg-aa",
+      "role": "control"
+    }
+  ],
+  "description": "Fresh certified CM pair from the drastic-gap search; independent one-target workloads on each curve, target law hashes the curve model. No isogeny walk; no cross-curve transport. Counts are primary.",
+  "label": "Drastic prime conductor gap: D=-43, ell=2033609, 46-bit field",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261012,
+    "timeout_seconds": 600,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 9628813676156,
+        "b": 21238319095335,
+        "group_order": 44457329934361,
+        "gx": 1,
+        "gy": 39701117931673,
+        "kind": "prime_explicit",
+        "p": 44457329933693,
+        "r": 44457329934361
+      },
+      {
+        "a": 25643121330242,
+        "b": 10496271268403,
+        "group_order": 44457329934361,
+        "gx": 1,
+        "gy": 20078116696333,
+        "kind": "prime_explicit",
+        "p": 44457329933693,
+        "r": 44457329934361
+      }
+    ],
+    "target_seed": 2026101201,
+    "targets_per_curve": 8
+  }
+}

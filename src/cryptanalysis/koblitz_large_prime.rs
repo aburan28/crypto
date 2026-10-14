@@ -8,6 +8,7 @@
 //! algebra. Bounded chained-S3 discovery uses disjoint, exact Frobenius
 //! domains and checks every accepted point equation in the curve group.
 
+use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use num_bigint::BigUint;
@@ -20,7 +21,8 @@ use crate::cryptanalysis::binary_semaev_chain_sat::{
 };
 use crate::cryptanalysis::ec_index_calculus::gaussian_eliminate_mod_n_particular;
 use crate::cryptanalysis::koblitz_index_calculus::{
-    point_key, points_with_x, ChainS3Limits, ChainS3Stats, FrobeniusFactorBase, KoblitzCurve,
+    build_explicit_frobenius_point_factor_base, point_key, points_with_x, ChainS3Limits,
+    ChainS3Stats, FrobeniusFactorBase, KoblitzCurve,
 };
 use crate::cryptanalysis::sat::SolveResult;
 use crate::utils::mod_inverse;
@@ -49,6 +51,90 @@ pub struct MixedOrbitDomains<'a> {
     residual_xs: BTreeSet<BigUint>,
     small_index: HashMap<PointKey, usize>,
     residual_index: HashMap<PointKey, usize>,
+}
+
+/// Materialise the residual signed-orbit suffix of two replayed, ordered bases.
+///
+/// The smaller point record and both of its orbit maps must be exact prefixes
+/// of the envelope. Rebuilding the suffix independently checks its closure and
+/// labels before it can be used as the second domain of `MixedOrbitDomains`.
+/// This does not infer partial-relation yield from the sizes of the two bases.
+pub fn build_exact_residual_suffix_factor_base(
+    curve: &KoblitzCurve,
+    small: &FrobeniusFactorBase,
+    envelope: &FrobeniusFactorBase,
+) -> Result<FrobeniusFactorBase, &'static str> {
+    let prefix_points = small.points.len();
+    let prefix_orbits = small.orbits.len();
+    let prefix_signed = small.signed_orbits.len();
+    if prefix_points == 0
+        || envelope.points.len() <= prefix_points
+        || envelope.orbits.len() <= prefix_orbits
+        || envelope.signed_orbits.len() <= prefix_signed
+        || small.orbit_of.len() != prefix_points
+        || small.signed_orbit_of.len() != prefix_points
+        || envelope.orbit_of.len() != envelope.points.len()
+        || envelope.signed_orbit_of.len() != envelope.points.len()
+        || envelope.points.get(..prefix_points) != Some(small.points.as_slice())
+        || envelope.orbits.get(..prefix_orbits) != Some(small.orbits.as_slice())
+        || envelope.signed_orbits.get(..prefix_signed) != Some(small.signed_orbits.as_slice())
+        || envelope.orbit_of.get(..prefix_points) != Some(small.orbit_of.as_slice())
+        || envelope.signed_orbit_of.get(..prefix_points) != Some(small.signed_orbit_of.as_slice())
+    {
+        return Err("smaller factor base is not an exact orbit-labelled prefix");
+    }
+    let residual = build_explicit_frobenius_point_factor_base(
+        curve,
+        envelope.points[prefix_points..].to_vec(),
+    )
+    .ok_or("residual suffix is not a complete signed-Frobenius base")?;
+    if residual.orbits.len() + prefix_orbits != envelope.orbits.len()
+        || residual.signed_orbits.len() + prefix_signed != envelope.signed_orbits.len()
+        || residual
+            .orbits
+            .iter()
+            .zip(&envelope.orbits[prefix_orbits..])
+            .any(|(local, full)| {
+                local.len() != full.len()
+                    || local
+                        .iter()
+                        .zip(full)
+                        .any(|(&index, &full_index)| index + prefix_points != full_index)
+            })
+        || residual
+            .signed_orbits
+            .iter()
+            .zip(&envelope.signed_orbits[prefix_signed..])
+            .any(|(local, full)| {
+                local.len() != full.len()
+                    || local
+                        .iter()
+                        .zip(full)
+                        .any(|(&index, &full_index)| index + prefix_points != full_index)
+            })
+        || residual
+            .orbit_of
+            .iter()
+            .zip(&envelope.orbit_of[prefix_points..])
+            .any(|(&(orbit, phase), &(full_orbit, full_phase))| {
+                orbit + prefix_orbits != full_orbit || phase != full_phase
+            })
+        || residual
+            .signed_orbit_of
+            .iter()
+            .zip(&envelope.signed_orbit_of[prefix_points..])
+            .any(
+                |(&(orbit, phase, negated), &(full_orbit, full_phase, full_negated))| {
+                    orbit + prefix_signed != full_orbit
+                        || phase != full_phase
+                        || negated != full_negated
+                },
+            )
+    {
+        return Err("residual suffix orbit labels differ from the envelope");
+    }
+    MixedOrbitDomains::new(curve, small, &residual)?;
+    Ok(residual)
 }
 
 impl<'a> MixedOrbitDomains<'a> {
@@ -610,7 +696,7 @@ impl Reducer {
 /// separate gates.
 pub struct WideLargePrimeEliminator<'a> {
     curve: &'a KoblitzCurve,
-    base: &'a FrobeniusFactorBase,
+    base: Cow<'a, FrobeniusFactorBase>,
     target: BinaryPoint,
     base_index: HashMap<PointKey, usize>,
     reducer: Reducer,
@@ -622,6 +708,37 @@ impl<'a> WideLargePrimeEliminator<'a> {
     pub fn new(
         curve: &'a KoblitzCurve,
         base: &'a FrobeniusFactorBase,
+        target: BinaryPoint,
+        limits: LargePrimeLimits,
+    ) -> Result<Self, &'static str> {
+        Self::with_base(curve, Cow::Borrowed(base), target, limits)
+    }
+
+    /// [`new`](Self::new) over a base the eliminator owns, for a caller
+    /// that builds the signed-orbit base and the eliminator together
+    /// (the framework's large-prime collector).
+    pub fn new_owned(
+        curve: &'a KoblitzCurve,
+        base: FrobeniusFactorBase,
+        target: BinaryPoint,
+        limits: LargePrimeLimits,
+    ) -> Result<Self, &'static str> {
+        Self::with_base(curve, Cow::Owned(base), target, limits)
+    }
+
+    /// The signed-orbit base rows are written over.
+    pub fn base(&self) -> &FrobeniusFactorBase {
+        &self.base
+    }
+
+    /// The public target `Q` every row's `coef_b` multiplies.
+    pub fn target(&self) -> &BinaryPoint {
+        &self.target
+    }
+
+    fn with_base(
+        curve: &'a KoblitzCurve,
+        base: Cow<'a, FrobeniusFactorBase>,
         target: BinaryPoint,
         limits: LargePrimeLimits,
     ) -> Result<Self, &'static str> {
@@ -648,11 +765,12 @@ impl<'a> WideLargePrimeEliminator<'a> {
                 return Err("signed orbit representative is outside the subgroup");
             }
         }
+        let base_index = base.index_map();
         Ok(Self {
             curve,
             base,
             target,
-            base_index: base.index_map(),
+            base_index,
             reducer: Reducer::new(modulus.clone(), limits)?,
             seen_sources: BTreeSet::new(),
             stats: LargePrimeStats::default(),
@@ -975,6 +1093,27 @@ mod tests {
             &[selected[2].1.clone(), selected[3].1.clone()],
         )
         .unwrap();
+        let envelope = build_explicit_frobenius_point_factor_base(
+            &curve,
+            small
+                .points
+                .iter()
+                .chain(&residual.points)
+                .cloned()
+                .collect(),
+        )
+        .unwrap();
+        let extracted = build_exact_residual_suffix_factor_base(&curve, &small, &envelope).unwrap();
+        assert_eq!(extracted.points, residual.points);
+        assert_eq!(extracted.signed_orbits, residual.signed_orbits);
+        let mut changed_prefix = envelope.clone();
+        changed_prefix.points.swap(0, small.points.len());
+        assert!(build_exact_residual_suffix_factor_base(&curve, &small, &changed_prefix).is_err());
+        let mut changed_suffix_label = envelope.clone();
+        changed_suffix_label.signed_orbit_of[small.points.len()].0 = 0;
+        assert!(
+            build_exact_residual_suffix_factor_base(&curve, &small, &changed_suffix_label).is_err()
+        );
         let domains = MixedOrbitDomains::new(&curve, &small, &residual).unwrap();
         let target = curve.mul(curve.generator(), &BigUint::from(17u32));
         let xs = vec![
@@ -1143,7 +1282,8 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = curve.generator() else {
             panic!("generator is affine");
         };
-        let base = build_explicit_frobenius_orbit_factor_base(&curve, &[x.clone()]).unwrap();
+        let base =
+            build_explicit_frobenius_orbit_factor_base(&curve, std::slice::from_ref(x)).unwrap();
         let target = curve.mul(curve.generator(), &BigUint::from(17u32));
         let mut graph =
             WideLargePrimeEliminator::new(&curve, &base, target, LargePrimeLimits::default())
@@ -1204,7 +1344,7 @@ mod tests {
         );
         assert_eq!(base.unknowns(), 1);
         assert!(graph
-            .solve_completed_full_rank(&[full.clone()])
+            .solve_completed_full_rank(std::slice::from_ref(&full))
             .unwrap()
             .is_none());
         let FeedOutcome::Full(direct) = graph
