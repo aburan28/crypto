@@ -151,3 +151,13 @@ weight sgauss D=16384 m=2 seed=3 t=4 rc=0 1.68043s
 weight full-bw D=16384 m=2 seed=3 t=4 rc=0 0.377182s
 weight full-bl D=16384 m=2 seed=3 t=4 rc=0 0.47493s
 weight core-bw D=16384 m=2 seed=3 t=4 rc=0 0.278616s
+weight sgauss D=16384 m=4 seed=1 t=4 rc=0 735.928s
+weight full-bw D=16384 m=4 seed=1 t=4 rc=0 2.66688s
+weight full-bl D=16384 m=4 seed=1 t=4 rc=0 5.31174s
+weight core-bw D=16384 m=4 seed=1 t=4 rc=0 13.8352s
+weight cado-bwc D=16384 m=4 seed=1 t=4 rc=0 46.3637s
+weight sgauss D=16384 m=4 seed=2 t=4 rc=0 688.822s
+weight full-bw D=16384 m=4 seed=2 t=4 rc=0 2.52073s
+weight full-bl D=16384 m=4 seed=2 t=4 rc=0 4.24109s
+weight core-bw D=16384 m=4 seed=2 t=4 rc=0 13.0522s
+weight cado-bwc D=16384 m=4 seed=2 t=4 rc=0 45.2717s
