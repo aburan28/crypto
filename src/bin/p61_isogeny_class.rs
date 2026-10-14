@@ -49,6 +49,8 @@ enum Command {
         output: PathBuf,
         #[arg(long)]
         checkpoint_output: PathBuf,
+        #[arg(long)]
+        receipt_output: PathBuf,
     },
     /// Replay every record and kernel in one segment.
     VerifySegment {
@@ -62,6 +64,8 @@ enum Command {
         audit_points: usize,
         #[arg(long, default_value_t = 7)]
         audit_seed_x: u64,
+        #[arg(long)]
+        receipt_output: PathBuf,
     },
 }
 
@@ -126,9 +130,10 @@ fn generate(
     previous_checkpoint_path: Option<&Path>,
     output: &Path,
     checkpoint_output: &Path,
+    receipt_output: &Path,
 ) -> Result<(), String> {
-    if output.exists() || checkpoint_output.exists() {
-        return Err("refusing to overwrite a segment or checkpoint".into());
+    if output.exists() || checkpoint_output.exists() || receipt_output.exists() {
+        return Err("refusing to overwrite a segment, checkpoint, or receipt".into());
     }
     let previous = previous_checkpoint_path
         .map(checkpoint_with_digest)
@@ -197,15 +202,22 @@ fn generate(
     let segment_digest = digest_file(output)?;
     receipt.checkpoint.segment_sha256 = segment_digest.sha256.clone();
     let checkpoint_digest = write_json_new(checkpoint_output, &receipt.checkpoint)?;
+    let durable_receipt = json!({
+        "status": "pass",
+        "segment": output,
+        "segment_digest": segment_digest,
+        "checkpoint": checkpoint_output,
+        "checkpoint_digest": checkpoint_digest,
+        "receipt": receipt,
+    });
+    let receipt_digest = write_json_new(receipt_output, &durable_receipt)?;
     println!(
         "{}",
         serde_json::to_string_pretty(&json!({
             "status": "pass",
-            "segment": output,
-            "segment_digest": segment_digest,
-            "checkpoint": checkpoint_output,
-            "checkpoint_digest": checkpoint_digest,
-            "receipt": receipt,
+            "receipt_output": receipt_output,
+            "receipt_digest": receipt_digest,
+            "result": durable_receipt,
         }))
         .map_err(|error| error.to_string())?
     );
@@ -218,7 +230,14 @@ fn verify(
     previous_checkpoint_path: Option<&Path>,
     audit_points: usize,
     audit_seed_x: u64,
+    receipt_output: &Path,
 ) -> Result<(), String> {
+    if receipt_output.exists() {
+        return Err(format!(
+            "refusing to overwrite {}",
+            receipt_output.display()
+        ));
+    }
     let (checkpoint, checkpoint_digest) = checkpoint_with_digest(checkpoint_path)?;
     let segment_digest = digest_file(input)?;
     if checkpoint.segment_sha256 != segment_digest.sha256 {
@@ -238,15 +257,22 @@ fn verify(
         audit_points,
         audit_seed_x,
     )?;
+    let durable_receipt = json!({
+        "status": "pass",
+        "segment": input,
+        "segment_digest": segment_digest,
+        "checkpoint": checkpoint_path,
+        "checkpoint_digest": checkpoint_digest,
+        "receipt": receipt,
+    });
+    let receipt_digest = write_json_new(receipt_output, &durable_receipt)?;
     println!(
         "{}",
         serde_json::to_string_pretty(&json!({
             "status": "pass",
-            "segment": input,
-            "segment_digest": segment_digest,
-            "checkpoint": checkpoint_path,
-            "checkpoint_digest": checkpoint_digest,
-            "receipt": receipt,
+            "receipt_output": receipt_output,
+            "receipt_digest": receipt_digest,
+            "result": durable_receipt,
         }))
         .map_err(|error| error.to_string())?
     );
@@ -283,6 +309,7 @@ fn run() -> Result<(), String> {
             previous_checkpoint,
             output,
             checkpoint_output,
+            receipt_output,
         } => generate(
             x_start,
             length,
@@ -294,6 +321,7 @@ fn run() -> Result<(), String> {
             previous_checkpoint.as_deref(),
             &output,
             &checkpoint_output,
+            &receipt_output,
         ),
         Command::VerifySegment {
             input,
@@ -301,12 +329,14 @@ fn run() -> Result<(), String> {
             previous_checkpoint,
             audit_points,
             audit_seed_x,
+            receipt_output,
         } => verify(
             &input,
             &checkpoint,
             previous_checkpoint.as_deref(),
             audit_points,
             audit_seed_x,
+            &receipt_output,
         ),
     }
 }

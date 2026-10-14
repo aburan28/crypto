@@ -136,7 +136,8 @@ target/release/p61_isogeny_class --threads 8 generate-segment \
   --source-commit <40-hex-commit> \
   --class-number-receipt-sha256 <64-hex-digest> \
   --output segments/segment-000000000000-000000010000.jsonl.gz \
-  --checkpoint-output checkpoints/checkpoint-000000010000.json
+  --checkpoint-output checkpoints/checkpoint-000000010000.json \
+  --receipt-output receipts/generate-000000000000-000000010000.json
 ```
 
 Replay it with different order-audit settings:
@@ -146,7 +147,8 @@ target/release/p61_isogeny_class --threads 8 verify-segment \
   --input segments/segment-000000000000-000000010000.jsonl.gz \
   --checkpoint checkpoints/checkpoint-000000010000.json \
   --audit-points 2 \
-  --audit-seed-x 7
+  --audit-seed-x 7 \
+  --receipt-output verification/verify-000000000000-000000010000.json
 ```
 
 Continuation generation and verification both require the immediately prior
