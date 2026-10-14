@@ -156,6 +156,31 @@ Appendix~\ref{app:evidence} lists them. The records were produced in three devel
 came from. Live campaign aggregates are published at
 \url{https://aburan28.github.io/crypto/status/}.
 
+\paragraph{Use of AI.} Much of the engineering behind this paper was
+carried out with AI coding agents (Claude Code, OpenAI Codex and Cursor)
+working in the development repositories under the author's direction.
+Agents wrote much of the GPU, CPU and FPGA code, ran benchmark and
+profiling jobs on rented hardware, and wrote many of the notes that
+became the evidence records. In the main development repository, $389$ of the
+$761$ commits from 2026-09-18 to the time of writing ($51\%$) were made
+by an agent or carry an agent co-author line. The research ledger
+\texttt{crypto-autoresearcher} is itself a multi-agent system, with
+separate roles for proposing, approving, executing, validating and
+challenging an experiment. The text of this paper was drafted and
+revised with an AI assistant from those records. What stands between
+agent output and a number in this paper is the protocol, not trust in
+the agent: every adopted kernel re-walks its device reports against the
+host reference and recovers planted logarithms, every speed claim is a
+paired comparison against a rule written down before the run
+(Section~\ref{sec:gates}), and every number cites the record it came
+from. Errors caught by these checks or in review are reported where they
+matter: the corrected distinguished-point interval
+(Section~\ref{sec:campaign-interval}), the static SASS counter
+(Section~\ref{sec:floor}), the two first-run NIST bugs
+(Section~\ref{sec:nist}) and cycle rule v2
+(Section~\ref{sec:sigma-vs-table}). The author is responsible for every
+claim.
+
 \paragraph{Scope and limitations.} We have not recovered a logarithm on
 the challenge curve, and we do not expect one from the corpus
 collected so far; collection is currently paused. We quote no rate for

@@ -827,5 +827,27 @@
    "research/ecc2k130_iteration_redesign_20261012/reports/run-20261012T2057Z-aggregate/report.md",
    "research/ecc2k130_iteration_redesign_20261012/reports/run-20261012T1913Z/report.md"
   ]
+ },
+ "tp29": {
+  "id": "E90",
+  "title": "Throughput rounds toward 29 billion iterations/s on the RTX PRO 6000, with Nsight Compute counters",
+  "repository": "crypto",
+  "kind": "design and measurement notes",
+  "sources": [
+   "ecc2k130/THROUGHPUT-29B.md",
+   "ecc2k130/benchmarks/throughput-29b-gpu/summary.json"
+  ]
+ },
+ "probes": {
+  "id": "E91",
+  "title": "Instruction-rate probes and static SASS cost tools",
+  "repository": "crypto",
+  "kind": "microbenchmarks and tools",
+  "sources": [
+   "ecc2k130/benchmarks/clmad-price/probe.cu",
+   "ecc2k130/benchmarks/hardware-limits/probe.cu",
+   "ecc2k130/kernel_cost.py",
+   "ecc2k130/kernel_attribution.py"
+  ]
  }
 }

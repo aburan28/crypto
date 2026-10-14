@@ -87,11 +87,12 @@ above.
   $1.90$ lanes per SM-clock or stop at $1.70$. A screened three-limb
   Karatsuba arm implies at least $1.654$; a verified run would pin
   it~\evcite{\evref{roofline}, §3, §4.2 and §7}.
-\item \emph{Hardware counters.} Nsight Compute failed to profile on the
-  rented RTX~PRO~4500 and cannot read counters inside Modal containers,
-  so no pipe-utilisation figure in this paper comes from a hardware
-  counter. A host with working counters would replace our probe-based
-  estimates with measurements~\evcite{\evref{goal28}, ``Nsight findings''}.
+\item \emph{Hardware counters.} Nsight Compute last read counters on
+  the $17.4$ build; it failed on the rented RTX~PRO~4500 and cannot read
+  counters inside Modal containers, so the utilisation of the $20.08$
+  build and later comes from instruction counts
+  (Section~\ref{sec:profiling}). A host with working counters would
+  replace those estimates with measurements~\evcite{\evref{goal28}, ``Nsight findings''}.
 \end{itemize}
 
 \subsection{Data-centre GPUs}

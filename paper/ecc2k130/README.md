@@ -137,6 +137,11 @@ GPU; the paper says so in its availability paragraph and Appendix A.
   The exact v3 table-walk rate is updated from 5.10 to the 2026-10-12
   screen's 8.24 (new evidence record E89), and §8 now says the 20.08
   receipt ran rule v2.
+  New §8 "Profiling" subsection (rates, static and dynamic SASS counts,
+  pipe-rate probes, clock64 phase builds, where Nsight Compute did and did
+  not read counters) and a "Use of AI" paragraph in the introduction;
+  evidence records E90 (THROUGHPUT-29B, Nsight counters) and E91 (probes
+  and SASS cost tools).
   Section and subsection headings shortened to terse labels (for example
   "NIST curves", "FPGA", "Table walk vs. σ-walk", "Walk constant"), with the remaining rhetorical questions
   and informal phrases in the text replaced.

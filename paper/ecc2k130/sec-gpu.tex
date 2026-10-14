@@ -91,7 +91,7 @@ it never rested on the carry-less unit alone.
 \small
 \caption{Roofline of the $20.078$~billion iterations/s table-walk build on the
   RTX~PRO~6000: 188 SMs at $2.415$~GHz, $22.61$ SM-clocks per update.
-  Work per update is measured lane-instructions; the ceiling is the
+  Work per update is lane-instructions from the dynamic count (Section~\ref{sec:profiling}); the ceiling is the
   rate at which that unit alone would saturate.}
 \label{tab:roofline}
 \begin{tabular}{@{}lrrrr@{}}
@@ -124,6 +124,7 @@ rate~\evcite{\evref{iterfn}, §3}. The floor argument does
 not depend on which count is used, since the budgets are below both.
 
 \subsection{Acceptance criteria}
+\label{sec:gates}
 
 With two exceptions named in Section~\ref{sec:declined}, every step
 in this section is a paired comparison on one GPU allocation: the
@@ -140,6 +141,76 @@ reference ($300$ of $300$ in the later notes) and recovers planted
 logarithms on $\mathrm{GF}(2^{41})$. A candidate that fails the rule
 stays in the tree behind a flag, with its ratio on record;
 Section~\ref{sec:declined} collects them.
+
+\subsection{Profiling}
+\label{sec:profiling}
+
+Each number in this section comes from one of five instruments, and
+we say which.
+
+\paragraph{Rates.} A rate is the client's own count of complete scalar
+updates divided by wall time over the timed launches, as printed at
+the end of a \texttt{-{}-bench} run. Distinguished-point reporting is off
+in the timed invocation; a separate run of the same binary re-walks its
+device reports on the host reference. Candidates and controls are
+timed in interleaved pairs on one allocation (Section~\ref{sec:gates}).
+Where a rate is converted to SM-clocks per update, the SM clock is the
+median sampled with \texttt{nvidia-smi} after the timed
+runs~\evcite{\evref{roofline}, §2}.
+
+\paragraph{Static instruction counts.} A script compiles the walk kernel
+with the preset's exact flags, disassembles the SASS with
+\texttt{cuobjdump}, finds the step and slot loops from their backward
+branches, weights each loop body by its trip count and charges every
+out-of-line callee to its call sites. It reports logic, integer-multiply,
+\texttt{CLMAD} and memory lane-instructions per update, with registers,
+spills and stack frame from \texttt{ptxas -v}. Because a static count
+includes both arms of every predicated branch, it is an upper bound on
+what a warp issues~\evcite{\evref{iterfn}, §3; \evref{probes}}.
+
+\paragraph{Dynamic instruction counts.} For the roofline
+(Table~\ref{tab:roofline}) a second tool disassembles with
+\texttt{nvdisasm}, builds the control-flow graph, gives each branch a
+probability from the source (loop trip counts; rare events such as a
+distinguished point near zero), solves the visit equations exactly and
+prices each instruction on the pipe that executes it. Two checks bind
+the result: the dynamic \texttt{CLMAD} count must equal the count the
+arithmetic implies ($33.125$ per update for the $20.08$ build, and all
+46 sweep builds pass), and the analysed kernel must match the full
+client's SASS instruction for instruction ($4{,}920$ of $4{,}920$ for
+that build)~\evcite{\evref{roofline}, §1}.
+
+\paragraph{Pipe rates.} Microbenchmarks price each instruction class
+on the device. Each stream issues one kind of instruction in sixteen
+independent accumulator chains, so issue rate rather than latency is
+measured, with no memory traffic and a host check on the result; the
+streams alternate and repeat, so thermal drift is not charged to
+whichever ran last. On the RTX~PRO~6000 they give $62$--$64$ lanes per
+SM-clock for \texttt{LOP3}, \texttt{IADD3} and \texttt{SHF}, $62.3$ for
+\texttt{IMAD}, about $16$ for \texttt{POPC} and shared-memory loads, and
+about two for \texttt{CLMAD} in an isolated stream, somewhat less inside
+the walk (Section~\ref{sec:blackwell-rates})~\evcite{\evref{probes}; \evref{roofline}, §2}.
+Inside the walk, a \texttt{clock64()} phase build has lane 0 of every
+warp accumulate the cycles of the forward pass, the inversion and the
+reverse pass, and counter builds tally events such as cycle-probe hints,
+which is how the v3 latency of Section~\ref{sec:sigma-vs-table} was
+traced~\evcite{\evref{oneblock}; \evref{probelat}}.
+
+\paragraph{Hardware counters.} Nsight Compute read counters on one
+RTX~PRO~6000 host with root access, for two builds of the ledger. On
+the $17.30$~billion iterations/s control it put the FP64 pipe, which
+executes \texttt{CLMAD}, at $71\%$, the logic pipe at $36\%$ and DRAM at
+$11\%$; on the $17.41$ build, issue at $52\%$ with $3.44$ active and
+$1.04$ eligible warps per scheduler~\evcite{\evref{tp29}, §5}. It is also the source of the
+attribution of \texttt{CLMAD} to the FP64 pipe
+(Section~\ref{sec:blackwell-rates}). On a rented RTX~PRO~4500 every
+Nsight Compute command failed before producing counters, and Modal
+containers do not expose them; Nsight Systems traces from those runs
+were used only to separate launch overhead ($0.113$~ms of launch calls
+against $628.6$~ms of kernel time) from work inside the kernel, never as
+a rate~\evcite{\evref{goal28}, ``Nsight findings''}. The pipe utilisation
+of the $20.08$ build and of every later build therefore comes from the
+dynamic counts and the measured pipe rates, not from hardware counters.
 
 \subsection{Ledger}
 \label{sec:ledger}
@@ -399,7 +470,7 @@ not give one.
 Table~\ref{tab:survey} puts every part we measured side by side, with
 the $\sigma$-walk and the table walk in separate columns. The
 $\sigma$-walk column is one survey run of the same packed preset on
-each Modal SKU (automatic workers, three valid \texttt{--bench}
+each Modal SKU (automatic workers, three valid \texttt{-{}-bench}
 repeats, unpaired); the next column gives the best paired result on
 that part, where one exists. The table-walk rates were all measured
 under cycle rules older than the current v3, for the reason given in
