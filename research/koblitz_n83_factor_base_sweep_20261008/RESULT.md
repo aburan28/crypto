@@ -1,5 +1,7 @@
 # Degree-83 factor-base sweep: observed evidence
 
+The [source-only replay of the v7 known witness](verification/known-witness-first-pattern-replay-20261014/RESULT.md) verifies affine partial sums, the exact target group sum, and four zero S3 residuals. The native worker tries that all-affine identity pattern first; its 5,000-conflict `UNKNOWN_search_cap` is therefore a censored solver observation, not an algebraic obstruction. The replay does not test CNF satisfiability, natural yield, or complete runtime, and it charges no additional N83 search time.
+
 The [exact primary pilot overlap census](verification/pilot-overlap-census-20261013/RESULT.md) replays all 27 primary signed-Frobenius archives and measures all 648 ordered cross-stream pairs. It finds 378 disjoint pairs, 33 with an empty residual domain, and 57 with a singleton residual domain; 558 pass the current worker's minimum two-residual-orbit screen. These are exact import-shape observations, not natural relation-yield or complete-runtime measurements.
 
 The [post-19,800 control-input preflight](verification/control-v7-input-preflight-20261013/RESULT.md) retrieved the pinned K=1,182 archive from S3, verified it and the retained K=2,048 archive against compressed SHA-256/BLAKE3 and plain BLAKE3, rechecked the prior audit chain, and observed the required local Docker image. The separately authorized known-witness SAT control was later launched and independently audited as `VALIDATED_CENSORED` after 5,000 conflicts and zero models.
