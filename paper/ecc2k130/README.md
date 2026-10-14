@@ -1,4 +1,4 @@
-# Pollard Rho on NVIDIA Blackwell: ECC2K-130, Carry-less Multiplication and the NIST Curves
+# Accelerating Pollard Rho with GPU Field Arithmetic: ECC2K-130 on NVIDIA Blackwell
 
 `ecc2k130.tex` is a paper-quality LaTeX account of Pollard rho on
 current NVIDIA hardware, with ECC2K-130 as the yardstick: the
@@ -132,6 +132,8 @@ GPU; the paper says so in its availability paragraph and Appendix A.
   The NIST round-2 results are no longer described as unmerged: PR 1778
   merged with `gpu/nist` identical to the cited commit, so E49 now points
   at `gpu/nist/RESULTS.md` on `main`.
+  Retitled "Accelerating Pollard Rho with GPU Field Arithmetic: ECC2K-130 on NVIDIA Blackwell" to lead with the
+  arithmetic speedup.
   Section and subsection headings shortened to terse labels (for example
   "NIST curves", "FPGA", "Table walk vs. σ-walk", "Walk constant"), with the remaining rhetorical questions
   and informal phrases in the text replaced.
