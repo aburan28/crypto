@@ -39,7 +39,7 @@ fn is_prime(n: u64) -> bool {
         return false;
     }
     for p in [2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
-        if n % p == 0 {
+        if n.is_multiple_of(p) {
             return n == p;
         }
     }
@@ -80,7 +80,7 @@ fn sqrtmod(a: u64, p: u64) -> Option<u64> {
     }
     let mut q = p - 1;
     let mut s = 0;
-    while q % 2 == 0 {
+    while q.is_multiple_of(2) {
         q /= 2;
         s += 1;
     }
@@ -91,7 +91,7 @@ fn sqrtmod(a: u64, p: u64) -> Option<u64> {
     let mut m = s;
     let mut c = powmod(z, q, p);
     let mut t = powmod(a, q, p);
-    let mut r = powmod(a, (q + 1) / 2, p);
+    let mut r = powmod(a, q.div_ceil(2), p);
     while t != 1 {
         let mut i = 0;
         let mut tt = t;
@@ -227,23 +227,23 @@ fn main() {
         let scan_start = Instant::now();
         let base = 1u64 << k;
         let mut lo = base - base / 33;
-        if lo % 2 == 0 {
+        if lo.is_multiple_of(2) {
             lo += 1;
         }
         let hi = base + base / 33;
         let mut found: Option<Value> = None;
         let mut ells_tried = 0u64;
         let mut tees_tried = 0u64;
-        'outer: for ell in ((lo..=hi).step_by(2)) {
+        'outer: for ell in (lo..=hi).step_by(2) {
             if !is_prime(ell) {
                 continue;
             }
             ells_tried += 1;
             for t in (3u64..=3999).step_by(2) {
                 for &sign in &[1i64, -1i64] {
-                    let tt = (t as i64 * sign) as i64;
+                    let tt = t as i64 * sign;
                     let num = (tt * tt) as u128 + 3u128 * (ell as u128) * (ell as u128);
-                    if num % 4 != 0 {
+                    if !num.is_multiple_of(4) {
                         continue;
                     }
                     let q = (num / 4) as u64;

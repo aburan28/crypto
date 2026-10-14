@@ -9348,6 +9348,42 @@ pub fn refutation_degree_trace_take() -> Option<RefutationDegreeTrace> {
     REFUTATION_TRACE.with(|t| t.borrow_mut().as_mut().map(std::mem::take))
 }
 
+// KNOWN GAP (needs the W4 author): the engine call sites of these helpers (and
+// of the early-abort probes) were added in acd95f18f (lit2026 W4) and dropped
+// by the merge ca6c5d42e into the W4 branch, which took main's rewritten solver
+// (#1714). Until they are re-wired, f4_refutation_degree_probe emits an empty
+// trace. The allow is only to keep clippy -D warnings green, not a retirement.
+#[allow(dead_code)]
+fn trace_on() -> bool {
+    REFUTATION_TRACE.with(|t| t.borrow().is_some())
+}
+
+/// Charge the stage-unit word operations a node spent since `w0` (its
+/// entry, children excluded) to the refuted or the split nodes.
+#[allow(dead_code)]
+fn trace_cost(w0: Option<u64>, refuted: bool) {
+    let Some(w0) = w0 else { return };
+    let spent = f4_word_ops_thread().wrapping_sub(w0);
+    trace(|t| {
+        if refuted {
+            t.nodes_refuted += 1;
+            t.word_ops_refuted_nodes += spent;
+        } else {
+            t.nodes_split += 1;
+            t.word_ops_split_nodes += spent;
+        }
+    });
+}
+
+#[allow(dead_code)]
+fn trace(f: impl FnOnce(&mut RefutationDegreeTrace)) {
+    REFUTATION_TRACE.with(|t| {
+        if let Some(trace) = t.borrow_mut().as_mut() {
+            f(trace);
+        }
+    });
+}
+
 /// Early abort at the refutation degree (lit2026 W4), `KIC_F4_EARLY_ABORT`,
 /// read once per process:
 ///

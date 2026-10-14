@@ -253,10 +253,7 @@ fn run_cell_child(spec: &CellSpec) {
     let index_of = index_map(&built.base);
     let targets = seeded_targets(&kc, spec.targets, spec.seed);
     let stdout = std::io::stdout();
-    println!(
-        "{}",
-        json!({"census": built.census, "encoding": encoding}).to_string()
-    );
+    println!("{}", json!({"census": built.census, "encoding": encoding}));
     for (i, (_, target)) in targets.iter().enumerate() {
         let Some(sys) = system_for(&cf, &st, &kc, target, encoding, spec.m) else {
             println!(
@@ -1052,7 +1049,6 @@ fn main() {
     };
     let want_n11 = matches!(args.cells.as_str(), "all" | "n11");
     let want_n23 = matches!(args.cells.as_str(), "all" | "n23") && !args.skip_n23_solver;
-    let want_n23_w2 = args.cells == "n23_w2";
     if want_n11 {
         for arm in ["cyclotomic", "onb_matched"] {
             cells.push(mk(1, 11, 1, 2, arm));

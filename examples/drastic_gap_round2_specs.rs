@@ -5,7 +5,6 @@
 //! targets). 32 targets per curve; the cubic arm refuses the floor by
 //! construction, so it runs in its own spec.
 use serde_json::{json, Value};
-use std::path::Path;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
