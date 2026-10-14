@@ -538,7 +538,7 @@ pub fn run_match(opts: &GpuMatchOptions) -> Result<GpuMatch, String> {
     if prime.r > (1u64 << 63) - 1 {
         return Err("CUDA BSGS interval exceeds 63 bits".into());
     }
-    if opts.args.len() % 2 != 0
+    if !opts.args.len().is_multiple_of(2)
         || opts.args.chunks_exact(2).any(|pair| {
             !["--walks", "--iters", "--w", "--neg", "--variant"].contains(&pair[0].as_str())
         })
