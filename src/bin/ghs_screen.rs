@@ -60,6 +60,7 @@ struct JsonTower {
     genus: String,
     ghs_type: &'static str,
     artin_schreier_cover_degree: String,
+    mmt_condition_8: bool,
     within_genus_bound: bool,
 }
 
@@ -92,7 +93,7 @@ fn parse_number(value: &str, name: &str) -> Result<BigUint, String> {
 fn json_report(input: &GhsCurveInput, report: &GhsScreenReport) -> JsonReport {
     let best = report.best();
     JsonReport {
-        schema: "ghs-screen/v1",
+        schema: "ghs-screen/v2",
         curve: JsonCurve {
             model: "y^2+xy=x^3+a*x^2+b",
             absolute_degree: input.absolute_degree,
@@ -126,6 +127,7 @@ fn json_report(input: &GhsCurveInput, report: &GhsScreenReport) -> JsonReport {
                 genus: row.genus.to_string(),
                 ghs_type: if row.type_i { "I" } else { "II" },
                 artin_schreier_cover_degree: row.cover_degree.to_string(),
+                mmt_condition_8: row.descends,
                 within_genus_bound: row.within_genus_bound,
             })
             .collect(),
@@ -195,6 +197,7 @@ mod tests {
                 genus: genus.clone(),
                 type_i: false,
                 cover_degree: BigUint::from(1u32) << 33usize,
+                descends: true,
                 within_genus_bound: false,
             }],
         };

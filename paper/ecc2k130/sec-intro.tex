@@ -2,115 +2,195 @@
 \label{sec:intro}
 
 In 1997 Certicom published a list of elliptic-curve discrete
-logarithm challenges~\cite{certicom1997}. The Koblitz challenges
-ECC2K-95, ECC2K-108 and ECC2K-130 ask for $k$ with $Q=[k]P$ on
-$y^2+xy=x^3+1$ over $\FF_{2^{97}}$, $\FF_{2^{109}}$ and $\FF_{2^{131}}$.
-Harley's group solved ECC2K-95 in 1998~\cite{harley1998} and ECC2K-108
-in 2000; ECC2K-130 is open. In 2009 a consortium of twenty authors
-published the arithmetic, the iteration function and the per-platform
-throughput of a planned attack~\cite{bailey2009,bailey2009sharcs,bos2010cell,fan2010fpga}
-and estimated the work at $2^{60.9}$ iterations. The attack did not
-complete.
+logarithm challenges~\cite{certicom1997}. Three of them, ECC2K-95,
+ECC2K-108 and ECC2K-130, use the Koblitz curve $y^2+xy=x^3+1$ over
+$\FF_{2^{97}}$, $\FF_{2^{109}}$ and $\FF_{2^{131}}$ and ask for the $k$
+with $Q=[k]P$. Harley's group solved ECC2K-95 in 1998~\cite{harley1998}
+and ECC2K-108 in 2000. ECC2K-130 is still open. In 2009 a consortium of
+twenty authors published the arithmetic, the iteration function and
+per-platform throughput for an attack on
+it~\cite{bailey2009,bailey2009sharcs,bos2010cell,fan2010fpga}, and
+estimated the work at $2^{60.9}$ iterations. That attack was never
+completed.
 
-This paper is a measured account of a second attempt, built from
-scratch on hardware that did not exist in 2009 and documented to a
-standard the first attempt's reports set: every rate paired against
-an adjacent control on the same allocation, every boundary written
-down before the kernel was tuned toward it, every claim footnoted to a
-file in the repository that holds it. The work is not an advance on
-the generic-group floor and the paper does not say it is. What it
-reports is the cost of one step, measured on GPUs, CPUs and an FPGA,
-the number of steps, measured on toy curves of the same family and
-extrapolated, and a campaign that has walked $2^{56.7}$ of the $2^{60.9}$, most of it
-before its fleet was taken away.
+This paper is about what Pollard rho costs on the current generation
+of NVIDIA hardware, and ECC2K-130 is the yardstick. In 2009 the
+fastest GPU in the consortium's plan had no carry-less multiplier and
+a binary-field product had to be built bit by bit from AND and XOR
+(Section~\ref{sec:history}). Today CUDA~13.3 exposes a carry-less
+multiply-add, \texttt{clmad}, in PTX; on this walk a Blackwell SM retires
+integer logic at about twice an Ada SM's per-clock rate; and three-input logic, funnel
+shifts and byte permutes all issue at full rate. We rebuilt the
+ECC2K-130 attack from scratch around that hardware and measured, step
+by step, how far each change moves the rate. On one RTX~PRO~6000
+Blackwell the campaign's walk runs at $14.64$ billion iterations per
+second in its audited build and $15.88$ in the best later build, about
+$230$ times the best published GTX~295 kernel of
+2010~\cite{bernstein2010gpu}, so the whole $2^{60.9}$ budget is now
+about five GPU-years (Section~\ref{sec:history-compare}).
+
+We also wanted to know which of those gains belong to binary fields
+and which belong to rho on GPUs in general. So we carried the same
+optimisations to Pollard rho on NIST P-256 and P-384, on the same card.
+Most of the levers transferred; their relative sizes did not.
+
+We tried to hold the work to the standard the first attempt's reports
+set, and in places to a stricter one: every rate is paired against an
+adjacent control on the same machine, every target was written down
+before we tuned toward it, and every claim cites the evidence record
+that backs it. None of this improves on the
+generic-group bound, and we do not pretend otherwise. What we report is
+the cost of one step on GPUs, CPUs and an FPGA; the number of steps,
+measured on small curves of the same family and extrapolated; and a
+campaign that has walked $2^{56.7}$ of the $2^{60.9}$ iterations, most of
+it before its cloud fleet was taken away.
+
+All rates in this paper are in billions of iterations per second on
+one device unless a row says otherwise. An iteration is one complete
+step of one walk, including its share of the batched inversion, the
+distinguished-point test and the restart path.
 
 \paragraph{Contributions.}
 \begin{itemize}[leftmargin=1.2em,itemsep=0.3em]
-\item A code generator that builds every field routine from one
-  symmetric-vector model of $\FF_{2^{131}}$ and checks it before
-  emitting it; a bitsliced backend at every word width from 64 to 512
-  lanes and a packed CUDA backend with native carry-less products;
-  bit-for-bit compatible records across all of them and a VHDL engine
-  (Sections~\ref{sec:curve}, \ref{sec:arith}).
-\item Three iteration functions on the $\langle\sigma,-1\rangle$
-  classes, with the walk constant measured on toy Koblitz curves and
-  extrapolated: $2^{60.91}$--$2^{60.92}$ iterations for the campaign's
-  walk, with the table walk's fruitless cycles measured, priced and
-  repaired (Section~\ref{sec:walk}).
-\item A GPU ledger of sixteen paired rungs from $0.85$ to
-  $14.64$~B/s on one RTX~PRO~6000, the campaign build; later
-  $\sigma$-walk builds at $15.44$ and $15.88$; a table walk at
-  $20.08$~B/s, a rate whose cost per solve is not yet measured; a
-  twelve-SKU survey, a roofline, and a floor derived from the
-  carry-less unit before tuning that rules out $28$~B/s on one card;
-  with every declined candidate and its ratio (Section~\ref{sec:gpu}).
-\item An inventory of the other GPU arithmetic in the repositories,
-  prime-field (secp256k1 rho with order-six folding, baby-step
-  giant-step, kangaroo, P-256/P-384) and binary-field (the ECC2K-95
-  kernel, pair tables, polynomial-system solvers), with their
-  instruction ledgers and emulated walk constants, and a plain
-  statement of which of them have run on a device: the F4 elimination
-  kernels and the P-256/P-384 rho walk have ($1.34$ and $0.44$~G
-  steps/s on one RTX~PRO~6000), the rest have not
-  (Section~\ref{sec:othergpu}).
-\item A pipelined-Karatsuba FPGA engine measured at $8.25$~G steps/s
-  on one AWS F2, within a pre-board estimate of $5$--$12$
-  (Section~\ref{sec:fpga}).
-\item The campaign: configuration, the calibration of the
-  distinguished-point interval (and the retraction of a wrong one),
-  the storage and replay protocol, fleet economics, and the state at
-  $486$~M points and $2^{56.68}$ iterations (Section~\ref{sec:campaign}).
-\item The structural alternatives priced in the same unit and found
-  wanting: index calculus on the Koblitz curve at $10^7\times$ rho, and
-  point decomposition $35$--$51$ bits short of its budget
+\item A side-by-side account of ECC2K-130 rates on 2009--2010 hardware
+  and on current GPUs, in one unit (Section~\ref{sec:history}).
+\item Background on the instructions this arithmetic relies on, from
+  Fermi's \texttt{PRMT} to the PTX~9.3 \texttt{clmad}, and on x86, Arm and
+  RISC-V from \texttt{PCLMULQDQ} to AVX-512, SVE2 and Zvbc
+  (Section~\ref{sec:isa}).
+\item A measured description of what current NVIDIA hardware changes
+  for rho: the PTX~9.3 \texttt{clmad} instruction, its rate on three
+  dies (from $1.69$ lanes per SM-clock on the RTX~PRO~6000 to $29.9$ on
+  the H100), and why the same source change can win on one Blackwell
+  part and lose on another (Section~\ref{sec:blackwell}).
+\item Diagrams of the kernel itself (thread layout, the step's data
+  flow, the carry-less product, the memory layout) and a breakdown of
+  where the speedup came from by kind of change. None of it changed the
+  algorithm (Section~\ref{sec:what-changed}).
+\item A GPU ledger of sixteen paired optimisation steps, taking one
+  RTX~PRO~6000 from $0.85$ to $14.64$ billion iterations per second for
+  the campaign build, with later $\sigma$-walk builds at $15.44$ and
+  $15.88$, a roofline, a floor derived from the carry-less unit before
+  tuning that rules out $28$ on one card, and every candidate we built
+  and rejected (Section~\ref{sec:gpu}).
+\item A clear separation of the $\sigma$-walk from the table walk. The
+  table walk's $20.08$ was measured under a cycle rule later found to
+  exit cycles inconsistently; the exact rule runs at $8.24$ today, so
+  the $\sigma$-walk is the fastest correct walk we have
+  (Section~\ref{sec:sigma-vs-table}).
+\item Measurements on twelve GPUs from Turing to Blackwell, per card,
+  per SM and per dollar (Section~\ref{sec:survey}).
+\item The same ladder applied to Pollard rho on NIST P-256 and P-384 on
+  the RTX~PRO~6000: $1.52\times$ and $2.61\times$ over the first working
+  build, to $1.632$ and $0.548$ billion iterations per second
+  (Section~\ref{sec:nist}).
+\item Supporting work: a code generator that builds every field routine
+  from one checked model of $\FF_{2^{131}}$
+  (Sections~\ref{sec:curve} and \ref{sec:arith}); walk constants
+  measured rather than assumed, $2^{60.91}$--$2^{60.92}$ iterations for
+  the campaign's walk (Section~\ref{sec:walk}); bitsliced CPU clients
+  (Section~\ref{sec:cpu}); an inventory of the repositories' other GPU
+  kernels (Section~\ref{sec:othergpu}); an FPGA engine at $8.25$ billion
+  iterations per second on one AWS F2 (Section~\ref{sec:fpga}); the
+  campaign at $486$~M points and $2^{56.68}$ iterations
+  (Section~\ref{sec:campaign}); and structural alternatives priced in
+  the same unit, none of which come close
   (Section~\ref{sec:alternatives}).
+\item CPU measurements by instruction set: AVX2, AVX-512's ternary
+  logic, NEON with \texttt{BSL} and \texttt{EOR3}, and a packed client on
+  the CPU's carry-less multiply at $2.9\times$ its software product
+  (Section~\ref{sec:cpu}).
+\item Upper bounds per platform: about $24$--$26$ billion iterations per
+  second for any one-addition walk on one RTX~PRO~6000, a $1.55\times$
+  logic cut for $30$ on a B200, $9.3$ for the F2 FPGA, and $4.6$--$12.2$ for
+  the NIST walk, with what each would mean for the cost of a solve
+  (Section~\ref{sec:bounds}).
+\item The time to a solve on every measured device and fleet size,
+  including rho's spread and the detection delay of the
+  distinguished-point cutoff. Five RTX~PRO~6000s solve ECC2K-130 in
+  about a year, 56 in a month, 290 in a week, and a thousand in about
+  three days. In 2010, a one-year solve needed 1{,}066 GTX~295 cards. The
+  same model puts P-256 at about $6\cdot10^{21}$ card-years
+  (Section~\ref{sec:solvetime}).
+\item A list of open questions and next optimisations, each with what
+  would settle it (Section~\ref{sec:open}).
 \end{itemize}
 
-\paragraph{Method.} The reporting rule of the repository, stated
-here once, governs every section. A change is measured as a ratio to
-a boundary that was written down before the change was attempted: a
-\emph{floor}, from a counting, generic-group or hardware-pipe argument
-that the method cannot cross, or a \emph{reference}, the best existing
-method on the same instance in the same unit. Every cost the method
-incurs is inside the ratio: precomputation, verification, the
-inversion a batch shares, the work left in flight when a collision
-lands. A number that prices one phase is a stage diagnostic, never a
-speed. Every change is classified by what moved: an \emph{advance}
-lowers the ratio to the floor; \emph{engineering} lowers the cost with
-the ratio to the floor flat; \emph{relabelling} lowers a headline
-while the total rises; \emph{accounting} changes a number without
-changing the algorithm. All four are committed, and every row in this
-paper is one of the last three. The same rule, applied across Pollard
-rho, baby-step giant-step, kangaroo and prime-field index calculus,
-is the subject of a companion draft in the sibling
-library~\cite{ecdlppaper}; this paper does not depend on it. A rate quoted
-without its paired control, its hardware and its geometry is the
-unit mistake this paper tries hardest not to make, and
+\paragraph{Reporting methodology.} One rule from the repository
+governs every section, so we state it once here. A change is measured
+as a ratio to a boundary that was written down before the change was
+attempted. That boundary is either a \emph{floor}, a counting,
+generic-group or hardware argument the method cannot cross, or a
+\emph{reference}, the best existing method on the same instance in the
+same unit. Every cost the method incurs goes inside the ratio:
+precomputation, verification, the inversion a batch shares, and the
+work still in flight when a collision lands. A number that prices only
+one phase is a stage diagnostic, never a speed. We then classify each
+change by what moved. An \emph{advance} lowers the ratio to the floor.
+\emph{Engineering} lowers the cost while the ratio to the floor stays
+flat. \emph{Relabelling} lowers a headline while the total cost rises.
+\emph{Accounting} changes a number without changing the algorithm.
+Every row in this paper falls into one of the last three. The same
+rule, applied across Pollard rho, baby-step giant-step, kangaroo and
+prime-field index calculus, is the subject of a companion draft in the
+\texttt{cryptanalysis} repository~\cite{ecdlppaper}, though this paper does not depend
+on it. The mistake we tried hardest to avoid is quoting a rate without
+its paired control, its hardware and its launch geometry, and
 Sections~\ref{sec:ledger} and \ref{sec:campaign-interval} each record
-one instance where an earlier draft of the repository made it.
+a case where an earlier draft in the repository made exactly that
+mistake.
 
-\paragraph{Availability.} Every number in this paper carries a
-footnote naming the file it came from. The campaign lives in a public
-study repository, \thisrepo\ (\url{https://github.com/aburan28/crypto}),
-whose notes are cited by path relative to its root. A public sibling
-library, \sibling\ (\url{https://github.com/aburan28/cryptanalysis}),
-holds an independent C golden model of the same field, a digit-serial
-FPGA core with no vendor timing, an import of the $20$~B/s GPU client
-with its own host re-walk, and the boundary ledger for index
-calculus; its paths are prefixed \texttt{cryptanalysis:}. Two evidence
-records cited in Section~\ref{sec:alternatives} live in a third public
-repository, the research ledger
-(\url{https://github.com/aburan28/crypto-autoresearcher}), prefixed
-\texttt{autoresearcher:}. The campaign's live aggregates are published
-at \url{https://aburan28.github.io/crypto/status/}; the snapshot this
-paper reports is committed beside the paper source.
+\paragraph{Availability.} We are preparing one companion repository,
+\texttt{rho-blackwell}~\cite{rhoblackwell}, to hold everything needed to
+read, check and rerun this work: the paper source, the ECC2K-130 GPU and
+CPU clients, the NIST P-256/P-384 rho kernel, the benchmark data behind
+every figure, a copy of every evidence record, and a Docker image that
+builds the client and starts walking ECC2K-130 by default
+(Appendix~\ref{app:repro}). At the time of writing it is not yet public,
+and the Docker image has not yet been built and run on a GPU; until it is,
+the records are available in the development repositories below. Every
+measured number in the paper cites an evidence record, written [E$n$], and
+Appendix~\ref{app:evidence} lists them. The records were produced in three development repositories
+(\texttt{crypto}, \texttt{cryptanalysis} and the research ledger
+\texttt{crypto-autoresearcher}), and the appendix names which one each
+came from. Live campaign aggregates are published at
+\url{https://aburan28.github.io/crypto/status/}.
 
-\paragraph{What is not claimed.} No logarithm has been recovered on
-the challenge curve and none is expected from the corpus so far;
-collection is paused and the paper says so. No
-rate in this paper is quoted for hardware that was not measured; the
-L40S collection rate, the RTX~PRO~4500 collection rate under the
-bridge map and the G7e instance family are unmeasured and are said to
-be. Projections (the $7.2$--$7.4$~B/s fused build on the 4500, the
-table walk's $0.81$--$0.86$ cost per solve, the 136- and 144-engine F2
-images) are labelled as projections where they appear.
+\paragraph{Use of AI.} Much of the engineering behind this paper was
+carried out with AI coding agents (Claude Code, OpenAI Codex and Cursor)
+working in the development repositories under the author's direction.
+Agents wrote much of the GPU, CPU and FPGA code, ran benchmark and
+profiling jobs on rented hardware, and wrote many of the notes that
+became the evidence records. In the main development repository, $389$ of the
+$761$ commits from 2026-09-18 to the time of writing ($51\%$) were made
+by an agent or carry an agent co-author line. The research ledger
+\texttt{crypto-autoresearcher} is itself a multi-agent system, with
+separate roles for proposing, approving, executing, validating and
+challenging an experiment. The text of this paper was drafted and
+revised with an AI assistant from those records. What stands between
+agent output and a number in this paper is the protocol, not trust in
+the agent: every adopted kernel re-walks its device reports against the
+host reference and recovers planted logarithms, every speed claim is a
+paired comparison against a rule written down before the run
+(Section~\ref{sec:gates}), and every number cites the record it came
+from. Errors caught by these checks or in review are reported where they
+matter: the corrected distinguished-point interval
+(Section~\ref{sec:campaign-interval}), the static SASS counter
+(Section~\ref{sec:floor}), the two first-run NIST bugs
+(Section~\ref{sec:nist}) and cycle rule v2
+(Section~\ref{sec:sigma-vs-table}). The author is responsible for every
+claim.
+
+\paragraph{Scope and limitations.} We have not recovered a logarithm on
+the challenge curve, and we do not expect one from the corpus
+collected so far; collection is currently paused. We quote no rate for
+hardware we did not measure. The L40S collection rate, the RTX~PRO~4500
+collection rate under the bridge map and the G7e instance family are
+unmeasured, and we say so where they come up. The table walk's
+$20.08$ and $19.40$ were measured under superseded cycle rules and are
+rates for the arithmetic, not for a correct walk. Projections, such as
+the $7.2$--$7.4$~billion iterations/s fused build on the 4500, the table walk's
+$0.81$--$0.86$ relative cost per solve, and the 136- and 144-engine F2
+images, are labelled as projections wherever they appear. The NIST
+rates in Section~\ref{sec:nist} are throughput on a walk that will not
+finish, and say nothing about the security of those curves.

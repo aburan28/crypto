@@ -8,8 +8,14 @@
 use crypto_lib::cryptanalysis::koblitz_index_calculus::*;
 
 fn main() {
-    let degree: u32 = std::env::args().nth(1).and_then(|s| s.parse().ok()).unwrap_or(61);
-    let points: usize = std::env::args().nth(2).and_then(|s| s.parse().ok()).unwrap_or(12000);
+    let degree: u32 = std::env::args()
+        .nth(1)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(61);
+    let points: usize = std::env::args()
+        .nth(2)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(12000);
     let budget: u128 = std::env::args()
         .nth(3)
         .and_then(|s| s.parse().ok())
@@ -19,15 +25,26 @@ fn main() {
     let n = fb.points.len();
     let orbits = fb.signed_orbits.len();
     println!("base {n} points, {orbits} signed orbits at degree {degree}");
-    println!("  full    would want {:>12} bytes ({:.2} GiB)",
-        PairSumTable::byte_size(n), PairSumTable::byte_size(n) as f64 / (1u128 << 30) as f64);
-    println!("  compact would want {:>12} bytes ({:.2} GiB)",
+    println!(
+        "  full    would want {:>12} bytes ({:.2} GiB)",
+        PairSumTable::byte_size(n),
+        PairSumTable::byte_size(n) as f64 / (1u128 << 30) as f64
+    );
+    println!(
+        "  compact would want {:>12} bytes ({:.2} GiB)",
         PairSumTable::compact_byte_size(n, degree),
-        PairSumTable::compact_byte_size(n, degree) as f64 / (1u128 << 30) as f64);
-    println!("  folded  would want {:>12} bytes ({:.2} GiB)",
+        PairSumTable::compact_byte_size(n, degree) as f64 / (1u128 << 30) as f64
+    );
+    println!(
+        "  folded  would want {:>12} bytes ({:.2} GiB)",
         PairSumTable::folded_byte_size(orbits, n, degree),
-        PairSumTable::folded_byte_size(orbits, n, degree) as f64 / (1u128 << 30) as f64);
-    println!("  budget             {:>12} bytes ({:.2} GiB)", budget, budget as f64 / (1u128 << 30) as f64);
+        PairSumTable::folded_byte_size(orbits, n, degree) as f64 / (1u128 << 30) as f64
+    );
+    println!(
+        "  budget             {:>12} bytes ({:.2} GiB)",
+        budget,
+        budget as f64 / (1u128 << 30) as f64
+    );
     let t = PairSumTable::build_within(&kc, &fb, budget).expect("a tier fits the budget");
     let tier = if t.is_folded() {
         "folded"
@@ -36,5 +53,8 @@ fn main() {
     } else {
         "full (summands stored)"
     };
-    println!("  -> build_within selected: {tier}, {} stored pairs", t.len());
+    println!(
+        "  -> build_within selected: {tier}, {} stored pairs",
+        t.len()
+    );
 }
