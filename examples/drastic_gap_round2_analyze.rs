@@ -38,20 +38,19 @@ fn ratio_of(a: &[f64], b: &[f64]) -> Value {
 }
 
 fn arg(args: &[String], name: &str) -> String {
-    let i = args.iter().position(|s| s == name).expect("required argument");
+    let i = args
+        .iter()
+        .position(|s| s == name)
+        .expect("required argument");
     args.get(i + 1).expect("argument value").clone()
 }
 
 /// (arm, per-workload S means, per-workload wall ms, slug) for one
 /// session, split by curve when the session holds two.
-fn samples(
-    dir: &Path,
-    arms: &[&str],
-) -> Result<Vec<Value>, String> {
-    let spec: Value = serde_json::from_slice(
-        &std::fs::read(dir.join("spec.json")).map_err(|e| e.to_string())?,
-    )
-    .map_err(|e| e.to_string())?;
+fn samples(dir: &Path, arms: &[&str]) -> Result<Vec<Value>, String> {
+    let spec: Value =
+        serde_json::from_slice(&std::fs::read(dir.join("spec.json")).map_err(|e| e.to_string())?)
+            .map_err(|e| e.to_string())?;
     let curves = spec["workloads"]["curves"].as_array().ok_or("curves")?;
     let records = read_records(dir)?;
     let measured: Vec<_> = records.iter().filter(|r| !r.warmup).collect();
@@ -68,9 +67,7 @@ fn samples(
             let mut statuses = BTreeMap::<String, usize>::new();
             let mut count = 0usize;
             for r in measured.iter() {
-                if r.arm != *arm
-                    || serde_json::to_value(&r.workload.curve_spec).unwrap() != *c
-                {
+                if r.arm != *arm || serde_json::to_value(&r.workload.curve_spec).unwrap() != *c {
                     continue;
                 }
                 count += 1;
@@ -82,11 +79,20 @@ fn samples(
                         .or_default()
                         .push(s);
                     let wall = r.time.solve_wall_ns.unwrap_or(0) as f64 / 1e6;
-                    walls.entry(r.workload.workload_id.clone()).or_default().push(wall);
+                    walls
+                        .entry(r.workload.workload_id.clone())
+                        .or_default()
+                        .push(wall);
                 }
             }
-            let s_vals = workloads.values().map(|v| mean(v).unwrap()).collect::<Vec<f64>>();
-            let w_vals = walls.values().map(|v| mean(v).unwrap()).collect::<Vec<f64>>();
+            let s_vals = workloads
+                .values()
+                .map(|v| mean(v).unwrap())
+                .collect::<Vec<f64>>();
+            let w_vals = walls
+                .values()
+                .map(|v| mean(v).unwrap())
+                .collect::<Vec<f64>>();
             out.push(json!({
                 "curve_index": ci, "arm": arm,
                 "slug": records.iter().find(|r| serde_json::to_value(&r.workload.curve_spec).unwrap() == *c)
@@ -189,8 +195,12 @@ fn main() -> Result<(), String> {
 
     let mut pairs = Vec::new();
     for ell in [1016839u64, 2033609u64] {
-        let rho = sessions[&format!("d3-ell{ell}-rho")]["rows"].as_array().unwrap();
-        let cubic = sessions[&format!("d3-ell{ell}-cubic")]["rows"].as_array().unwrap();
+        let rho = sessions[&format!("d3-ell{ell}-rho")]["rows"]
+            .as_array()
+            .unwrap();
+        let cubic = sessions[&format!("d3-ell{ell}-cubic")]["rows"]
+            .as_array()
+            .unwrap();
         let crater_neg = pick(rho, 0, "rho-neg");
         let floor_neg = pick(rho, 1, "rho-neg");
         let crater_cubic = pick(cubic, 0, "rho-cubic");
@@ -227,7 +237,9 @@ fn main() -> Result<(), String> {
     }
 
     // round-1 lead replication
-    let repl = sessions["replicate-d43-ell1016839"]["rows"].as_array().unwrap();
+    let repl = sessions["replicate-d43-ell1016839"]["rows"]
+        .as_array()
+        .unwrap();
     let replication = match (pick(repl, 0, "rho-neg"), pick(repl, 1, "rho-neg")) {
         (Some(a), Some(b)) => json!({
             "same_method_rho_neg": ratio_of(&a, &b),

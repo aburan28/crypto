@@ -1,0 +1,85 @@
+{
+  "schema": "ecbench.audit/v1",
+  "session_id": "ECBS1h627cfb7e3fb1",
+  "session_status": "complete",
+  "ok": true,
+  "problems": [],
+  "checks": {
+    "arms": true,
+    "env_class": true,
+    "executions": true,
+    "host_hash": true,
+    "plan_hash": true,
+    "record_count": true,
+    "records": true,
+    "records_hash": true,
+    "replays": true,
+    "session_complete": true,
+    "spec_id": true,
+    "workloads": true
+  },
+  "records": 30,
+  "verified_records": 30,
+  "regraded": true,
+  "replays": [
+    {
+      "seq": 10,
+      "record_id": "ECR1he42dfd7b1dde",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 12,
+      "record_id": "ECR1h5d882f0862bf",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 15,
+      "record_id": "ECR1h7235c1f87ee5",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 17,
+      "record_id": "ECR1h6b37b5a2790b",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 20,
+      "record_id": "ECR1h11f9070cd072",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 22,
+      "record_id": "ECR1hb465509e5407",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 25,
+      "record_id": "ECR1h09e6d4869d99",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 27,
+      "record_id": "ECR1hc23d7fb90a86",
+      "reproduced": true,
+      "detail": "identical"
+    }
+  ],
+  "files": {
+    "host.json": "49dc6542abfed1abaad1deb832a4e7a6e3e40ca090599041a7053ec0724b38d0",
+    "plan.json": "13b7f972524d797aa962dd14ab16632826955fe01db20e624938a07795a23402",
+    "records.jsonl": "f1f5ef7baf411433caacead9f2dbe9a9624199fd861aaf6589d938f54a003934",
+    "session.json": "f25d38c24557aef5ac7e5407f34c621eee5e5f9adca3608af60c3ec35dbdf027",
+    "spec.json": "c1136de2dd0433044865aae00642010aee1ff1a9a0808e0c2c9e1704c46a7e21"
+  },
+  "auditor_binary_sha256": "27fd2653b706b6e82e8da1c39a8c26c8f686e3f6e4831953b85eb9798610b76c",
+  "auditor_env_class_id": "ECBENV2h59034d4cd61b",
+  "auditor_hardware_class_id": "ECBHW1h7d1934655eee",
+  "audited_unix_ms": 1791949195247
+}

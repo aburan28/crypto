@@ -322,7 +322,7 @@ fn prime_biguint_section(json: &mut Json) {
     }
 
     let mut rng = StdRng::seed_from_u64(0x83_u64);
-    let p_u128 = u128::from_str_radix("9671406556917033397649353", 10).unwrap();
+    let p_u128 = "9671406556917033397649353".parse::<u128>().unwrap();
 
     // (a) rejection cost on random on-curve targets.
     let n_rand = 200usize;

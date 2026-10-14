@@ -1,0 +1,293 @@
+{
+  "schema": "rootfinding.fixed_prefix_summary/v1",
+  "input_sha256": "dce97f11622307770ec27cf961f599c239666f6504f29f18d073fa06d16864df",
+  "targets": 8,
+  "strides": {
+    "1": {
+      "unique_pair_keys": 2286,
+      "uniform_hit_probability": 0.008129069424244257,
+      "structural_bytes_floor": 38880,
+      "levels": {
+        "512": {
+          "probes_per_target": 512,
+          "total_probes": 4096,
+          "hits": 40,
+          "uniform_expected_hits": 33.29666836170448,
+          "observed_to_uniform": 1.201321392443132,
+          "independent_rank": 40,
+          "mean_rank_per_target": 5.0,
+          "independent_rank_per_1000_probes": 9.765625,
+          "cold_gae_lower_bound": 33154.0,
+          "independent_rank_per_1000_gae": 1.2064909211558184,
+          "row_ops": 208,
+          "group_field_invs_only": 11180
+        },
+        "1024": {
+          "probes_per_target": 1024,
+          "total_probes": 8192,
+          "hits": 67,
+          "uniform_expected_hits": 66.59333672340895,
+          "observed_to_uniform": 1.006106666171123,
+          "independent_rank": 67,
+          "mean_rank_per_target": 8.375,
+          "independent_rank_per_1000_probes": 8.1787109375,
+          "cold_gae_lower_bound": 37572.0,
+          "independent_rank_per_1000_gae": 1.7832428404130736,
+          "row_ops": 348,
+          "group_field_invs_only": 11986
+        },
+        "2048": {
+          "probes_per_target": 2048,
+          "total_probes": 16384,
+          "hits": 125,
+          "uniform_expected_hits": 133.1866734468179,
+          "observed_to_uniform": 0.9385323378461968,
+          "independent_rank": 125,
+          "mean_rank_per_target": 15.625,
+          "independent_rank_per_1000_probes": 7.62939453125,
+          "cold_gae_lower_bound": 47049.0,
+          "independent_rank_per_1000_gae": 2.656804607961912,
+          "row_ops": 861,
+          "group_field_invs_only": 14281
+        },
+        "4096": {
+          "probes_per_target": 4096,
+          "total_probes": 32768,
+          "hits": 246,
+          "uniform_expected_hits": 266.3733468936358,
+          "observed_to_uniform": 0.9235158204406577,
+          "independent_rank": 240,
+          "mean_rank_per_target": 30.0,
+          "independent_rank_per_1000_probes": 7.32421875,
+          "cold_gae_lower_bound": 67743.0,
+          "independent_rank_per_1000_gae": 3.54280147026261,
+          "row_ops": 2526,
+          "group_field_invs_only": 20576
+        },
+        "8192": {
+          "probes_per_target": 8192,
+          "total_probes": 65536,
+          "hits": 525,
+          "uniform_expected_hits": 532.7466937872716,
+          "observed_to_uniform": 0.9854589547385068,
+          "independent_rank": 367,
+          "mean_rank_per_target": 45.875,
+          "independent_rank_per_1000_probes": 5.5999755859375,
+          "cold_gae_lower_bound": 102110.0,
+          "independent_rank_per_1000_gae": 3.5941631573792967,
+          "row_ops": 5452,
+          "group_field_invs_only": 25929
+        }
+      }
+    },
+    "7": {
+      "unique_pair_keys": 2301,
+      "uniform_hit_probability": 0.00818240977479704,
+      "structural_bytes_floor": 39120,
+      "levels": {
+        "512": {
+          "probes_per_target": 512,
+          "total_probes": 4096,
+          "hits": 29,
+          "uniform_expected_hits": 33.51515043756868,
+          "observed_to_uniform": 0.8652803171515101,
+          "independent_rank": 29,
+          "mean_rank_per_target": 3.625,
+          "independent_rank_per_1000_probes": 7.080078125,
+          "cold_gae_lower_bound": 33143.0,
+          "independent_rank_per_1000_gae": 0.8749962284645325,
+          "row_ops": 123,
+          "group_field_invs_only": 11169
+        },
+        "1024": {
+          "probes_per_target": 1024,
+          "total_probes": 8192,
+          "hits": 61,
+          "uniform_expected_hits": 67.03030087513736,
+          "observed_to_uniform": 0.9100361956248642,
+          "independent_rank": 61,
+          "mean_rank_per_target": 7.625,
+          "independent_rank_per_1000_probes": 7.4462890625,
+          "cold_gae_lower_bound": 37566.0,
+          "independent_rank_per_1000_gae": 1.6238087632433584,
+          "row_ops": 299,
+          "group_field_invs_only": 11980
+        },
+        "2048": {
+          "probes_per_target": 2048,
+          "total_probes": 16384,
+          "hits": 124,
+          "uniform_expected_hits": 134.0606017502747,
+          "observed_to_uniform": 0.9249548217826488,
+          "independent_rank": 124,
+          "mean_rank_per_target": 15.5,
+          "independent_rank_per_1000_probes": 7.568359375,
+          "cold_gae_lower_bound": 47048.0,
+          "independent_rank_per_1000_gae": 2.6356061894235676,
+          "row_ops": 751,
+          "group_field_invs_only": 14280
+        },
+        "4096": {
+          "probes_per_target": 4096,
+          "total_probes": 32768,
+          "hits": 256,
+          "uniform_expected_hits": 268.1212035005494,
+          "observed_to_uniform": 0.9547920740982181,
+          "independent_rank": 252,
+          "mean_rank_per_target": 31.5,
+          "independent_rank_per_1000_probes": 7.6904296875,
+          "cold_gae_lower_bound": 67753.0,
+          "independent_rank_per_1000_gae": 3.7193924992251266,
+          "row_ops": 2694,
+          "group_field_invs_only": 20586
+        },
+        "8192": {
+          "probes_per_target": 8192,
+          "total_probes": 65536,
+          "hits": 520,
+          "uniform_expected_hits": 536.2424070010989,
+          "observed_to_uniform": 0.9697107002560027,
+          "independent_rank": 374,
+          "mean_rank_per_target": 46.75,
+          "independent_rank_per_1000_probes": 5.706787109375,
+          "cold_gae_lower_bound": 102105.0,
+          "independent_rank_per_1000_gae": 3.6628960383918514,
+          "row_ops": 5288,
+          "group_field_invs_only": 25924
+        }
+      }
+    },
+    "23": {
+      "unique_pair_keys": 2298,
+      "uniform_hit_probability": 0.008171741704686483,
+      "structural_bytes_floor": 39072,
+      "levels": {
+        "512": {
+          "probes_per_target": 512,
+          "total_probes": 4096,
+          "hits": 43,
+          "uniform_expected_hits": 33.47145402239583,
+          "observed_to_uniform": 1.284676786709911,
+          "independent_rank": 43,
+          "mean_rank_per_target": 5.375,
+          "independent_rank_per_1000_probes": 10.498046875,
+          "cold_gae_lower_bound": 33157.0,
+          "independent_rank_per_1000_gae": 1.296860391470881,
+          "row_ops": 188,
+          "group_field_invs_only": 11183
+        },
+        "1024": {
+          "probes_per_target": 1024,
+          "total_probes": 8192,
+          "hits": 76,
+          "uniform_expected_hits": 66.94290804479166,
+          "observed_to_uniform": 1.1352957649994562,
+          "independent_rank": 76,
+          "mean_rank_per_target": 9.5,
+          "independent_rank_per_1000_probes": 9.27734375,
+          "cold_gae_lower_bound": 37581.0,
+          "independent_rank_per_1000_gae": 2.022298501902557,
+          "row_ops": 425,
+          "group_field_invs_only": 11995
+        },
+        "2048": {
+          "probes_per_target": 2048,
+          "total_probes": 16384,
+          "hits": 145,
+          "uniform_expected_hits": 133.88581608958333,
+          "observed_to_uniform": 1.083012407400797,
+          "independent_rank": 145,
+          "mean_rank_per_target": 18.125,
+          "independent_rank_per_1000_probes": 8.85009765625,
+          "cold_gae_lower_bound": 47069.0,
+          "independent_rank_per_1000_gae": 3.0805838237481145,
+          "row_ops": 932,
+          "group_field_invs_only": 14301
+        },
+        "4096": {
+          "probes_per_target": 4096,
+          "total_probes": 32768,
+          "hits": 312,
+          "uniform_expected_hits": 267.77163217916666,
+          "observed_to_uniform": 1.165171969341547,
+          "independent_rank": 297,
+          "mean_rank_per_target": 37.125,
+          "independent_rank_per_1000_probes": 9.063720703125,
+          "cold_gae_lower_bound": 67809.0,
+          "independent_rank_per_1000_gae": 4.3799495642171395,
+          "row_ops": 3744,
+          "group_field_invs_only": 20642
+        },
+        "8192": {
+          "probes_per_target": 8192,
+          "total_probes": 65536,
+          "hits": 557,
+          "uniform_expected_hits": 535.5432643583333,
+          "observed_to_uniform": 1.0400653636590413,
+          "independent_rank": 370,
+          "mean_rank_per_target": 46.25,
+          "independent_rank_per_1000_probes": 5.645751953125,
+          "cold_gae_lower_bound": 102142.0,
+          "independent_rank_per_1000_gae": 3.6224080202071627,
+          "row_ops": 5685,
+          "group_field_invs_only": 25961
+        }
+      }
+    }
+  },
+  "paired": {
+    "7_vs_1_at_4096": {
+      "mean_rank_difference_per_target": 1.5,
+      "mean_rank_difference_interval_95": [
+        -3.0,
+        7.0
+      ],
+      "rank_per_gae_ratio": 1.0498450253125324,
+      "rank_per_gae_ratio_interval_95": [
+        0.9074240716391266,
+        1.262373853618352
+      ],
+      "method": "paired target-cluster bootstrap, 20000 resamples"
+    },
+    "7_vs_1_at_8192": {
+      "mean_rank_difference_per_target": 0.875,
+      "mean_rank_difference_interval_95": [
+        -0.375,
+        2.125
+      ],
+      "rank_per_gae_ratio": 1.0191234726980707,
+      "rank_per_gae_ratio_interval_95": [
+        0.9921591731419795,
+        1.0471734812375515
+      ],
+      "method": "paired target-cluster bootstrap, 20000 resamples"
+    },
+    "23_vs_1_at_4096": {
+      "mean_rank_difference_per_target": 7.125,
+      "mean_rank_difference_interval_95": [
+        1.75,
+        11.875
+      ],
+      "rank_per_gae_ratio": 1.2362955138698404,
+      "rank_per_gae_ratio_interval_95": [
+        1.053681487083549,
+        1.4471765124670322
+      ],
+      "method": "paired target-cluster bootstrap, 20000 resamples"
+    },
+    "23_vs_1_at_8192": {
+      "mean_rank_difference_per_target": 0.375,
+      "mean_rank_difference_interval_95": [
+        -1.125,
+        1.625
+      ],
+      "rank_per_gae_ratio": 1.0078585366303907,
+      "rank_per_gae_ratio_interval_95": [
+        0.9756456867178317,
+        1.036120020337163
+      ],
+      "method": "paired target-cluster bootstrap, 20000 resamples"
+    }
+  },
+  "inference_limit": "The public targets were reused from the prior coverage holdout; this is an exploratory, correlated-walk component test. Bootstrap intervals are over eight targets and no multiple-look correction is applied."
+}

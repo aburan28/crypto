@@ -47,7 +47,9 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_frobenius_factor_base, groebner_decompose, koblitz_index_calculus_dlp,
     DecompositionStrategy, KoblitzCurve, KoblitzIcOptions, PairSumTable,
 };
-use crypto_lib::cryptanalysis::prime_fast::{find_a3_curve, ic_solve, FastCurve, FastFactorBase, Pt};
+use crypto_lib::cryptanalysis::prime_fast::{
+    find_a3_curve, ic_solve, FastCurve, FastFactorBase, Pt,
+};
 use crypto_lib::cryptanalysis::symmetrized_semaev::MPoly;
 use crypto_lib::ecc::field::FieldElement;
 
@@ -222,12 +224,8 @@ fn binary_section(json: &mut Json) {
 
 fn binary_end_to_end(json: &mut Json) {
     println!("\n=== Binary end-to-end DLP: correctness cross-check (same logarithm) ===\n");
-    println!(
-        "  (wall is setup-dominated at |F| = 55: the one-time pair-sum table build is"
-    );
-    println!(
-        "   not yet amortised in a single small DLP — see the per-decomposition table above"
-    );
+    println!("  (wall is setup-dominated at |F| = 55: the one-time pair-sum table build is");
+    println!("   not yet amortised in a single small DLP — see the per-decomposition table above");
     println!("   for the apples-to-apples oracle cost.)\n");
     println!(
         "{:>14}  {:>6}  {:>10}  {:>9}",
@@ -252,14 +250,20 @@ fn binary_end_to_end(json: &mut Json) {
         println!(
             "{:>14}  {:>6}  {:>10}  {:>9.2?}",
             label,
-            rep.log.as_ref().map(|v| v.to_string()).unwrap_or_else(|| "—".into()),
+            rep.log
+                .as_ref()
+                .map(|v| v.to_string())
+                .unwrap_or_else(|| "—".into()),
             rep.relations,
             wall
         );
         logs.push(rep.log.clone());
         json.row(format!(
             "{{\"kind\":\"binary_e2e\",\"strategy\":\"{label}\",\"log\":{},\"wall_s\":{:.6}}}",
-            rep.log.as_ref().map(|v| v.to_string()).unwrap_or_else(|| "null".into()),
+            rep.log
+                .as_ref()
+                .map(|v| v.to_string())
+                .unwrap_or_else(|| "null".into()),
             wall.as_secs_f64()
         ));
     }
@@ -364,7 +368,12 @@ fn prime_section(json: &mut Json) {
             // Is the Gröbner basis the whole ring {1}?  Then F4 refutes.
             let is_unit = reduced.len() == 1
                 && reduced[0].terms.len() == 1
-                && reduced[0].terms.keys().next().map(|m| m.iter().all(|&e| e == 0)) == Some(true);
+                && reduced[0]
+                    .terms
+                    .keys()
+                    .next()
+                    .map(|m| m.iter().all(|&e| e == 0))
+                    == Some(true);
 
             if !pairs.is_empty() {
                 decomp += 1;
@@ -431,7 +440,10 @@ fn prime_scaling(json: &mut Json) {
         };
         let t = Instant::now();
         let Some((x, rep)) = ic_solve(&curve, g, q, fb_size, 6, 2, 5_000_000, 0xC0FFEE) else {
-            println!("{bits:>5}  {fb_size:>5}  {:>10}  {:>10}  {:>9}", "—", "—", "(no solve)");
+            println!(
+                "{bits:>5}  {fb_size:>5}  {:>10}  {:>10}  {:>9}",
+                "—", "—", "(no solve)"
+            );
             continue;
         };
         let wall = t.elapsed();
