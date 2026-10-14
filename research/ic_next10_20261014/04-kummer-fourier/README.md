@@ -3,8 +3,6 @@ title: "Item 4: full Fourier spectrum of decompositions on the Kummer tower"
 date: 2026-10-14
 ---
 
-# Item 4: full Fourier spectrum of decompositions on the Kummer tower
-
 IC next-10 campaign, item 4 (`reports/Index calculus leads next steps.md`,
 "### 4."). Frozen protocol: [`PROTOCOL.md`](PROTOCOL.md). Run 2026-10-14
 (UTC 18:05–20:40) on the shared 4-core campaign host, single-threaded jobs
@@ -19,8 +17,8 @@ no character's normalised coefficient on PKM's Kummer tower is above the
 permutation null's 99.9th percentile. This holds for the frozen statistic
 `Z` and for the type-standardised `Zt`. No cell exceeds on the C4 family
 `(1,…,1)·N/2^k` or on the marginal either. The top-100 mass `M100` is inside
-the null band in every cell. Three cells have one top-k mass statistic just
-outside the [0.1, 99.9] band. Two of the three are on the *flat* side, and
+the null band in every cell. Three cells have a top-k mass statistic just outside the [0.1, 99.9]
+band; in two of the three the crossing is on the *flat* side, and
 none survives the pre-registered 2,000-permutation replay at
 `p < 0.05/31` (table below). The tower is also ordinary against the
 random-factor-base null: across the 31 cells, the smallest rank p of `Zt`
@@ -139,7 +137,20 @@ band in all 31 cells. Three cells have one top-k statistic outside its band.
 Each went to the pre-registered replay with 2,000 fresh permutation nulls,
 which needs `p < 0.05/31 = 0.0016` to count:
 
-REPLAY_TABLE
+| cell | crossing in main run (200 nulls) | replay, 2,000 fresh perms: p (side) | survives `p < 0.0016`? |
+|---|---|---|---|
+| 20b m2 c2 | `M1`, `M10` **below** band (flatter than null) | `M1` 0.0095 (lower), `M10` 0.008 (lower) | no |
+| 22b m3 c1 | `ZtM100` **below** band (flatter) | `ZtM100` 0.0055 (lower) | no |
+| 22b m3 c4 | `M10` above band | `M10` 0.0025, `M100` 0.004, max \|Zt\| 0.005, max \|Z\| 0.038 (upper) | no |
+
+The `22b m3 c4` cell (`p = 4206593, a = 2011201, b = 1443718`, 9,400
+informative targets) is the one tower cell that sits in the upper tail on
+several statistics. Its random-base rank is `p = 0.020`, and its top classes
+are `(55,64,64)`, `(55,64,73)` and `(0,9,119)`, with negative `Zt`, i.e.
+*anti*-concentration. It does not reach the Bonferroni level, and the other
+four 22-bit `m = 3` curves are ordinary (`p_perm(Zt)` 0.20–0.71). The
+enumeration is exhaustive and deterministic, so this cell cannot be
+"re-sampled". A check would need more curves at this size.
 
 Under the null, about 1 % of exchangeable draws fall outside an empirical
 [0.1, 99.9] band of 200 values. With 31 cells × 6 mass statistics, about 1.9
