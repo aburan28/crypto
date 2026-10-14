@@ -43,12 +43,15 @@ for ax, m in zip(axes, (4, 3)):
     if lbs:
         ax.plot([p[0] for p in lbs], [p[1] for p in lbs], "^", color=C["xl"], ms=9,
                 label="XL lower bound (degree 6 built, not refuted)")
-    for (mm, n, ell), ds in sorted(cells.items()):
-        if mm != m:
-            continue
-        jitter = [ell + 0.06 * (i - 1.5) for i in range(len(ds))]
-        ax.plot(jitter, ds, "s", color=C["f4"], ms=5, alpha=0.8)
-        ax.annotate(f"n={n}", (ell, max(ds) + 0.15), ha="center", fontsize=7, color=C["f4"])
+    mine = sorted(k for k in cells if k[0] == m)
+    for (mm, n, ell) in mine:
+        ds = cells[(mm, n, ell)]
+        same = [k for k in mine if k[2] == ell]
+        off = (same.index((mm, n, ell)) - (len(same) - 1) / 2) * 0.22
+        for i, dv in enumerate(ds):
+            ax.plot(ell + off + 0.04 * (i - 1.5), dv, "s", color=C["f4"], ms=4, alpha=0.85)
+        ax.annotate(f"n={n}", (ell + off, 2.3), ha="center", fontsize=6, rotation=90,
+                    color=C["f4"])
     ax.plot([], [], "s", color=C["f4"], label="F4 solving degree (msolve), each draw")
     ax.set_title(f"m = {m} chained system, unsatisfiable draws")
     ax.set_xlabel("ℓ (factor-base dimension)")
@@ -61,8 +64,8 @@ if d:
     axes[0].axhline(min(r62), color=C["rand"], ls="--", lw=1)
     axes[0].text(1.0, min(r62) + 0.1, f"random systems, (6,2) shape: F4 reaches ≥{min(r62)}",
                  fontsize=7, color=C["rand"])
-axes[0].legend(fontsize=7, loc="lower right")
-axes[0].set_ylim(2.5, 8.5)
+axes[0].legend(fontsize=7, loc="upper right")
+axes[0].set_ylim(2.1, 8.9)
 fig.tight_layout()
 for ext in ("svg", "png"):
     fig.savefig(os.path.join(HERE, f"fig_degree_vs_ell.{ext}"), dpi=150)

@@ -142,13 +142,18 @@ def solve_case(name, nv, large, supps, leads, ell, ext, verbose=False):
     delta = Fraction(0)
     best = None
     it = 0
+    timed_out = False
     while True:
         it += 1
         c = np.concatenate([large_sum + float(delta) * small_sum, -gain])  # minimise −objective
         res = milp(c, constraints=cons, integrality=np.ones(nvar), bounds=Bounds(0, 1),
-                   options={"disp": False, "time_limit": 600, "mip_rel_gap": 0})
-        if res.status not in (0,):
-            raise RuntimeError(f"milp status {res.status} {res.message}")
+                   options={"disp": False, "time_limit": 400, "mip_rel_gap": 0})
+        if res.status != 0:
+            timed_out = True
+            if res.x is None:
+                break
+        else:
+            timed_out = False
         x = np.round(res.x).astype(int)
         msel = x[:nm]
         zsel = x[nm:]
@@ -173,7 +178,7 @@ def solve_case(name, nv, large, supps, leads, ell, ext, verbose=False):
     binds = any(maxes[v] == ext[v] for v in range(nv))
     return {"system": name, "ell": ell, "leads": [list(a) for a in leads], "ext": list(ext),
             "delta": float(nd), "delta_exact": f"{nd.numerator}/{nd.denominator}", "dim": dim, "sum_k": G,
-            "maxes": maxes, "binds": binds, "nz": nz, "nm": nm, "iters": it}
+            "maxes": maxes, "binds": binds, "milp_time_limit_hit": timed_out, "nz": nz, "nm": nm, "iters": it}
 
 
 def run_system(name, nv, large, supps, ell, ext, lead_filter=None, out=None):
@@ -192,6 +197,7 @@ def run_system(name, nv, large, supps, ell, ext, lead_filter=None, out=None):
               f"{r['sum_k']} | {r.get('maxes')} | {'BINDS' if r['binds'] else 'no'} | {r['nm']}+{r['nz']} | {r['seconds']} |",
               flush=True)
         out.append(r)
+        json.dump(out, open(sys.argv[1], "w"), indent=1)
         if best is None or r["delta"] > best["delta"]:
             best = r
     print(f"| **{name} best over {len(combos)} leading-vertex choices** | {ell} | {best['leads']} | | "
@@ -210,6 +216,8 @@ def main():
     if not which or "c1" in which:
         s3 = box_support(2, {0: 2, 1: 2})
         run_system("C1 S3 (all M)", 2, [False, False], [s3], 1, [6, 6], out=out)
+    if "c1l2" in which:
+        s3 = box_support(2, {0: 2, 1: 2})
         run_system("C1 S3 (all M)", 2, [False, False], [s3], 2, [9, 9], out=out)
     # V3: S3 pair sharing x1 (x1, x2, x3), all M — validates the down-closed restriction
     if not which or "v3" in which:

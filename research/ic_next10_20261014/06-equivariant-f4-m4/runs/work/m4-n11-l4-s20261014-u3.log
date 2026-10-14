@@ -47,4 +47,37 @@ deg     sel   pairs        mat          density            new data         time
   3     132   19720    2855 x 3907        2.12%      112 new      20 zero         3.48 | 0.83         
   4    9509   20534   62289 x 71717       0.24%     2301 new    7233 zero       206.61 | 45.13        
   3    1895   26301    6433 x 6730        1.51%      116 new    1797 zero        10.11 | 2.04         
-  4   20992   26948   82831 x 65592       0.26%     2148 new   18949 zero
+  4   20992   26948   82831 x 65592       0.26%     2148 new   18949 zero       356.97 | 76.67        
+------------------------------------------------------------------------------------------------------
+reduce final basis        1 x 1         100.00%        1 new       0 zero------------------------------------------------------------------------------------
+msolve overall time         634.52 sec (elapsed) / 137.21 sec (cpu)
+------------------------------------------------------------------------------------
+         0.03 | 0.00         
+------------------------------------------------------------------------------------------------------
+
+---------------- TIMINGS ---------------
+overall(elapsed)      634.42 sec
+overall(cpu)          137.18 sec
+select                 10.86 sec   1.7%
+symbolic prep.         19.73 sec   3.1%
+update                395.75 sec  62.4%
+convert                 0.75 sec   0.1%
+linear algebra        207.06 sec  32.6%
+reduce gb               0.00 sec   0.0%
+-----------------------------------------
+
+---------- COMPUTATIONAL DATA -----------
+size of basis                     1
+#terms in basis                   1
+#pairs reduced                39590
+#GM criterion              26640653
+#redundant elements            7305
+#rows reduced                 79563
+#zero reductions              32546
+max. matrix data              82831 x 65592 (0.256%)
+max. symbolic hash table size  2^17
+max. basis hash table size     2^22
+-----------------------------------------
+
+Grobner basis has a single element
+No solution
