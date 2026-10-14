@@ -81,6 +81,32 @@ pub struct GreedyBuildReport {
     /// selection is prefix-stable, so entry `k − 1` is the coverage of the
     /// `k`-orbit base, whichever budget the run was given.
     pub coverage_by_column: Vec<usize>,
+    /// Abscissa of one point per chosen orbit, as a bitmask, sorted.  These
+    /// freeze the selection: rebuilding the base from them
+    /// ([`explicit_orbit_factor_base`]) needs no scan and no enumeration of
+    /// the subgroup, and does not depend on this algorithm staying the same.
+    pub representatives: Vec<u64>,
+}
+
+/// The base made of the Frobenius orbits of the given abscissae (as
+/// polynomial-basis bitmasks), exactly as the production builder closes
+/// them.  This is what a frozen greedy selection rebuilds from.
+pub fn explicit_orbit_factor_base(
+    kc: &KoblitzCurve,
+    abscissae: &[u64],
+) -> Result<FrobeniusFactorBase, String> {
+    if kc.n >= 64 {
+        return Err("explicit orbit bases need n < 64".into());
+    }
+    if abscissae.iter().any(|&m| m == 0 || m >= 1u64 << kc.n) {
+        return Err("abscissa outside the field".into());
+    }
+    let reps: Vec<F2mElement> = abscissae
+        .iter()
+        .map(|&m| F2mElement::from_biguint(&BigUint::from(m), kc.n))
+        .collect();
+    build_explicit_frobenius_orbit_factor_base(kc, &reps)
+        .ok_or_else(|| "abscissae did not define a factor base".into())
 }
 
 /// One signed Frobenius orbit of subgroup points.
@@ -362,6 +388,11 @@ fn greedy_select(
 
     report.covered_model = covered;
     report.units_chosen = chosen.len();
+    report.representatives = chosen
+        .iter()
+        .filter_map(|&u| units[u].rep.to_biguint().to_u64())
+        .collect();
+    report.representatives.sort_unstable();
     let reps: Vec<F2mElement> = chosen.iter().map(|&u| units[u].rep.clone()).collect();
     let fb = build_explicit_frobenius_orbit_factor_base(kc, &reps)
         .ok_or("greedy representatives did not define a factor base")?;
@@ -474,6 +505,68 @@ mod tests {
         assert_eq!(fb.points.len() % 2, 0);
         assert_eq!(report.points, fb.points.len());
         assert_eq!(report.units_chosen, fb.signed_orbits.len());
+    }
+
+    #[test]
+    fn frozen_selection_rebuilds_the_same_base_without_the_scan() {
+        use crate::cryptanalysis::koblitz_factor_base_search::{freeze_spec, FactorBaseSpec};
+        let kc = KoblitzCurve::new(0, 13).expect("curve");
+        let spec = FactorBaseSpec::GreedyCoverage {
+            seed: 1,
+            points: 52,
+            pool: 0,
+        };
+        let frozen = freeze_spec(&kc, &spec).expect("freeze");
+        assert!(matches!(frozen, FactorBaseSpec::ExplicitOrbits { .. }));
+        let a = spec.materialize(&kc).expect("greedy");
+        let b = frozen.materialize(&kc).expect("frozen");
+        let mut pa: Vec<_> = a.points.iter().map(|p| format!("{p:?}")).collect();
+        let mut pb: Vec<_> = b.points.iter().map(|p| format!("{p:?}")).collect();
+        pa.sort();
+        pb.sort();
+        assert_eq!(pa, pb);
+        assert_eq!(a.signed_orbits.len(), b.signed_orbits.len());
+        // A wrapper around the greedy freezes through to its parent.
+        let wrapped = FactorBaseSpec::TwoTorsionSaturated {
+            parent: Box::new(spec.clone()),
+        };
+        let fw = freeze_spec(&kc, &wrapped).expect("freeze wrapped");
+        let FactorBaseSpec::TwoTorsionSaturated { parent } = fw else {
+            panic!("wrapper lost");
+        };
+        assert!(matches!(*parent, FactorBaseSpec::ExplicitOrbits { .. }));
+        // Specs with no greedy root pass through unchanged.
+        let plain = FactorBaseSpec::SubgroupOrbits {
+            seed: 2,
+            points: 30,
+        };
+        assert_eq!(freeze_spec(&kc, &plain).expect("plain"), plain);
+    }
+
+    #[test]
+    fn search_offers_greedy_candidates_only_when_asked_and_only_where_they_fit() {
+        use crate::cryptanalysis::koblitz_factor_base_search::{
+            candidate_specs, FactorBaseSpec, Family, SearchOptions,
+        };
+        let kc = KoblitzCurve::new(0, 13).expect("curve");
+        let off = SearchOptions::default();
+        assert!(candidate_specs(&kc, &off)
+            .iter()
+            .all(|s| !matches!(s, FactorBaseSpec::GreedyCoverage { .. })));
+        let on = SearchOptions {
+            families: vec![Family::Greedy],
+            saturate: false,
+            ..SearchOptions::default()
+        };
+        let specs = candidate_specs(&kc, &on);
+        assert!(!specs.is_empty());
+        assert!(specs
+            .iter()
+            .all(|s| matches!(s, FactorBaseSpec::GreedyCoverage { pool: 0, .. })));
+        // Beyond the scalar model's cap there is nothing to enumerate, so
+        // the family yields no candidates instead of failing the search.
+        let wide = KoblitzCurve::new(0, 41).expect("curve");
+        assert!(candidate_specs(&wide, &on).is_empty());
     }
 
     #[test]

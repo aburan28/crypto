@@ -74,7 +74,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::binary_ecc::{BinaryPoint, F2mElement};
 
-use super::koblitz_greedy_base::build_greedy_coverage_factor_base;
+use super::koblitz_greedy_base::{
+    build_greedy_coverage_factor_base, explicit_orbit_factor_base, MAX_SUBGROUP_ORDER,
+};
 use super::koblitz_groebner::{f4_word_ops_thread, FieldStructure, SolverEngine};
 use super::koblitz_index_calculus::{
     all_factors_of_x_n_minus_1, build_frobenius_factor_base,
@@ -152,6 +154,12 @@ pub enum FactorBaseSpec {
         /// Candidate orbits scored per step, or `0` for all.
         pool: usize,
     },
+    /// The Frobenius orbits of these abscissae (polynomial-basis
+    /// bitmasks), one per orbit.  A frozen selection: `ic search` writes
+    /// this in place of `GreedyCoverage`, so a saved recipe rebuilds in
+    /// milliseconds and keeps meaning the same base if the selection rule
+    /// later changes.
+    ExplicitOrbits { abscissae: Vec<u64> },
     /// The parent base restricted to the signed Frobenius orbits whose
     /// canonical (smallest) abscissa is listed.
     Pruned {
@@ -171,6 +179,7 @@ impl FactorBaseSpec {
             Self::FrobeniusUnion { .. } => "frobenius_union",
             Self::SubgroupOrbits { .. } => "subgroup_orbits",
             Self::GreedyCoverage { .. } => "greedy_coverage",
+            Self::ExplicitOrbits { .. } => "explicit_orbits",
             Self::TwoTorsionSaturated { .. } => "two_torsion_saturated",
             Self::Pruned { .. } => "pruned",
         }
@@ -241,6 +250,7 @@ impl FactorBaseSpec {
             Self::GreedyCoverage { seed, points, pool } => {
                 build_greedy_coverage_factor_base(kc, *points, *pool, *seed).map(|(fb, _)| fb)
             }
+            Self::ExplicitOrbits { abscissae } => explicit_orbit_factor_base(kc, abscissae),
             Self::TwoTorsionSaturated { parent } => {
                 let inner = parent.materialize(kc)?;
                 saturate_factor_base_two_torsion(kc, &inner)
@@ -585,6 +595,12 @@ pub fn greedy_prune(
 
 // ── Search ─────────────────────────────────────────────────────────
 
+/// Largest subgroup order for which the search scores every orbit at
+/// each greedy step; above it a sampled pool is used.
+const GREEDY_FULL_SCAN_ORDER: u64 = 1 << 17;
+/// Orbits scored per greedy step when the full scan is too slow.
+const GREEDY_SEARCH_POOL: usize = 64;
+
 /// Candidate families.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -599,6 +615,12 @@ pub enum Family {
     /// no linear structure, so only the pair-table oracle can use it —
     /// and it is the family that decomposes targets most often.
     Subgroup,
+    /// Signed Frobenius orbits chosen greedily to cover the most new
+    /// subgroup targets as sums of two base points
+    /// ([`super::koblitz_greedy_base`]).  Pair-table oracle only, like
+    /// `Subgroup`, and only where the subgroup is small enough to
+    /// enumerate (`MAX_SUBGROUP_ORDER`); elsewhere it yields no candidates.
+    Greedy,
 }
 
 /// Search controls.
@@ -869,12 +891,45 @@ fn spec_abscissa_bound(spec: &FactorBaseSpec, n: u32) -> Option<u64> {
         // at all.
         FactorBaseSpec::CofactorProjected { .. }
         | FactorBaseSpec::SubgroupOrbits { .. }
-        | FactorBaseSpec::GreedyCoverage { .. } => None,
+        | FactorBaseSpec::GreedyCoverage { .. }
+        | FactorBaseSpec::ExplicitOrbits { .. } => None,
         // Saturation is monotone in abscissae (parent x-values are kept),
         // so a parent bound is a lower bound for the child.
         FactorBaseSpec::TwoTorsionSaturated { parent } => spec_abscissa_bound(parent, n),
         FactorBaseSpec::FrobeniusUnion { .. } | FactorBaseSpec::Pruned { .. } => None,
     }
+}
+
+/// Replace every greedy selection in `spec` by the orbits it chose.
+///
+/// The greedy scans the whole prime-order subgroup, which costs seconds on
+/// a degree-17 curve, and every consumer of a recipe would pay that again.
+/// A frozen spec names the same base by its orbits, so it materialises in
+/// milliseconds and does not change meaning if the rule is later improved.
+/// Specs with no greedy root are returned unchanged.
+pub fn freeze_spec(kc: &KoblitzCurve, spec: &FactorBaseSpec) -> Result<FactorBaseSpec, String> {
+    Ok(match spec {
+        FactorBaseSpec::GreedyCoverage { seed, points, pool } => {
+            let (_, report) = build_greedy_coverage_factor_base(kc, *points, *pool, *seed)?;
+            FactorBaseSpec::ExplicitOrbits {
+                abscissae: report.representatives,
+            }
+        }
+        FactorBaseSpec::Pruned {
+            parent,
+            retained_abscissa_orbits,
+        } => FactorBaseSpec::Pruned {
+            parent: Box::new(freeze_spec(kc, parent)?),
+            retained_abscissa_orbits: retained_abscissa_orbits.clone(),
+        },
+        FactorBaseSpec::TwoTorsionSaturated { parent } => FactorBaseSpec::TwoTorsionSaturated {
+            parent: Box::new(freeze_spec(kc, parent)?),
+        },
+        FactorBaseSpec::CofactorProjected { parent } => FactorBaseSpec::CofactorProjected {
+            parent: Box::new(freeze_spec(kc, parent)?),
+        },
+        other => other.clone(),
+    })
 }
 
 /// Score one spec on a target set.  With `prune` set, a pruned variant
@@ -1233,6 +1288,31 @@ pub fn candidate_specs(kc: &KoblitzCurve, opts: &SearchOptions) -> Vec<FactorBas
                 push(FactorBaseSpec::SubgroupOrbits {
                     seed: opts.seed ^ (0x5355_4247_5250_0000 + dim as u64 * 31 + sample as u64),
                     points,
+                });
+            }
+        }
+    }
+    if opts.families.contains(&Family::Greedy) && kc.n < 64 {
+        // Same point budgets as the subgroup family, so the two line up.
+        // A full scan of every orbit is exact and seed-free; a sampled
+        // pool keeps the larger subgroups affordable.
+        let order = kc.subgroup_order.to_u64();
+        if let Some(r) = order.filter(|&r| r <= MAX_SUBGROUP_ORDER) {
+            let pool = if r <= GREEDY_FULL_SCAN_ORDER {
+                0
+            } else {
+                GREEDY_SEARCH_POOL
+            };
+            let (lo, hi) = opts.union_seed_dimensions;
+            for dim in lo.max(1)..=hi.min(12) {
+                let points = (1usize << dim) * kc.n as usize;
+                if points > 2 * opts.max_abscissae {
+                    continue;
+                }
+                push(FactorBaseSpec::GreedyCoverage {
+                    seed: opts.seed ^ (0x4752_4545_4459_0000 + dim as u64),
+                    points,
+                    pool,
                 });
             }
         }

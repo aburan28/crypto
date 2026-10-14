@@ -580,7 +580,7 @@ report with `ic workflow`'s report and relation files, field by field.
 
 ### Choosing a factor base
 
-Five families are recipes (`ic search --family`): `factor`, `divisor`
+Five families are recipes, and `greedy` is a sixth that is opt-in (`ic search --family`): `factor`, `divisor`
 and `union` are linear — an invariant subspace, a divisor of `x^e − 1`,
 or a union of Frobenius translates of a seed span — and `subgroup` is
 not. The linear families exist because the algebraic oracles need them:
@@ -598,6 +598,25 @@ uses no logarithm: `[h]P` is in the subgroup whatever `P` is.
 
 Use it with the pair-table solver. `groebner` and `sat` need a linear
 domain and will refuse.
+
+`greedy` (opt-in, not part of `--family all`) chooses the signed Frobenius
+orbits instead of drawing them: at each step it adds the orbit that covers
+the most new subgroup targets as a sum of two base points. At equal columns
+and equal points it covered up to 18% more targets than random orbits where
+coverage was partial (`K₀/2¹³`, `K₀/2¹⁵`, `K₁/2¹⁷`), and cut the expected
+trials at the best column count by 8–18%; the gain vanishes once coverage
+saturates. Use it with the pair-table solver, like `subgroup`. It enumerates
+the prime-order subgroup, so it is limited to `r ≤ 2²²` and yields no
+candidates beyond that; above `r = 2¹⁷` the search scores a sample of 64
+orbits per step, which keeps less of the gain. Measurements and limits:
+`research/greedy_factor_base_yield_20261014/REPORT.pdf`; the end-to-end
+`search → run → logs → solve → workflow` record is
+`research/greedy_factor_base_yield_20261014/e2e/E2E.md`.
+
+A greedy selection is saved **frozen**: `ic search --spec-out` and the
+workflow's select stage write `{"kind":"explicit_orbits","abscissae":[…]}`
+(inside `pruned` where pruning applied) in place of the `greedy_coverage`
+recipe, so a recipe rebuilds in milliseconds instead of re-running the scan.
 
 **How big?** With a subgroup base the work per target falls as
 `r/|F|²` — four times cheaper per doubling — while the pair table grows

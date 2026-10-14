@@ -4,7 +4,8 @@ use clap::{Args, ValueEnum};
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement, IrreduciblePoly};
 use crypto_lib::cryptanalysis::curve_id;
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
-    search_with_progress, Candidate, FactorBaseSpec, Family, SearchOptions, SearchReport,
+    freeze_spec, search_with_progress, Candidate, FactorBaseSpec, Family, SearchOptions,
+    SearchReport,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::is_irreducible_f2;
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
@@ -431,6 +432,8 @@ pub enum FamilyArg {
     Divisor,
     Union,
     Subgroup,
+    /// Greedy coverage-driven orbits; opt-in, not part of `all`.
+    Greedy,
     All,
 }
 #[derive(Clone, Debug, Args)]
@@ -1654,6 +1657,7 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
         FamilyArg::Divisor => vec![Family::Divisor],
         FamilyArg::Union => vec![Family::Union],
         FamilyArg::Subgroup => vec![Family::Subgroup],
+        FamilyArg::Greedy => vec![Family::Greedy],
         FamilyArg::All => vec![
             Family::Factor,
             Family::Divisor,
@@ -1717,6 +1721,8 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
 
     // Validate the best few by real end-to-end runs on fresh fixtures.
     let mut validations = Vec::new();
+    let mut frozen_specs: std::collections::HashMap<usize, FactorBaseSpec> =
+        std::collections::HashMap::new();
     let mut winner: Option<(usize, f64)> = None;
     let scored: Vec<(usize, &Candidate)> = report
         .candidates
@@ -1726,14 +1732,19 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
         .take(args.validate_top as usize)
         .collect();
     for (rank, candidate) in scored {
+        // Validate and save the frozen form of a greedy selection: the
+        // greedy scans the whole subgroup, and every run reading the recipe
+        // would repeat that.
+        let frozen = freeze_spec(&kc, &candidate.spec).unwrap_or_else(|_| candidate.spec.clone());
         let doc = FactorBaseDocument {
             schema_version: 1,
             degree: kc.n,
             curve_a: kc.a,
             subfield: kc.k,
             curve_b: kc.b_index,
-            spec: candidate.spec.clone(),
+            spec: frozen.clone(),
         };
+        frozen_specs.insert(rank, frozen);
         let temp = TempSpec::new(&doc, rank)?;
         let mut runs = Vec::new();
         let mut costs = Vec::new();
@@ -1780,13 +1791,16 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
         );
     }
     let selected = winner.map(|(rank, _)| &report.candidates[rank]);
-    let selected_doc = selected.map(|c| FactorBaseDocument {
+    let selected_doc = winner.map(|(rank, _)| FactorBaseDocument {
         schema_version: 1,
         degree: kc.n,
         curve_a: kc.a,
         subfield: kc.k,
         curve_b: kc.b_index,
-        spec: c.spec.clone(),
+        spec: frozen_specs
+            .get(&rank)
+            .cloned()
+            .unwrap_or_else(|| report.candidates[rank].spec.clone()),
     });
     if let (Some(path), Some(doc)) = (&args.spec_out, &selected_doc) {
         write_new(path, &serde_json::to_value(doc).map_err(|e| e.to_string())?)?;

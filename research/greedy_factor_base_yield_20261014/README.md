@@ -28,6 +28,7 @@ the subgroup, so it does not yet build cryptographic-size bases.
 | `data/rows.json` | one row per base (2776 rows): arm, seed, columns, points, covered, coverage, expected trials, build and census times, scalar-model count and whether it matches the census |
 | `data/summary.json` | 56 column counts, with means over seeds and 95% bootstrap intervals on the coverage ratio |
 | `data/run.log` | the run's stderr |
+| `e2e/E2E.md` | the greedy family run through `ic search`, `run`, `logs`, `solve` and `workflow`, with the saved recipes, workflow params and report |
 | `graphs/plot_yield.py` | the figure source; reads only the two JSON files above |
 | `graphs/fig1_coverage_vs_columns.{svg,png}` | coverage against column count, three curves |
 | `graphs/fig2_coverage_ratio.{svg,png}` | greedy over random coverage ratio, with bootstrap band |
