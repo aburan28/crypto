@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p22/comparisons/rho-neg__ic-rootfind.json
+ops (ok): ic-rootfind / rho-neg = 41.9356 [34.300, 53.396] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 26.4294 [25.374, 31.758]
+| curve | log2 r | workloads | ic-rootfind / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp22-tm2947-e15fed69 | 21.19 | 8 | 41.9356 | [34.3001, 53.3958] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W15abd5c646fe | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.1831 | 50.6718 | 42.8307 |
+| W251e2c6702e6 | icv1-fp22-tm2947-e15fed69 | 21.19 | 0.7916 | 50.8011 | 64.1762 |
+| W922bdcc0958f | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.0522 | 50.7056 | 48.1893 |
+| Wc8ca24deff43 | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.1714 | 50.4795 | 43.0922 |
+| Wce40999900d8 | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.5185 | 50.7054 | 33.3917 |
+| Wd5ac0a1d62c6 | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.2512 | 50.6937 | 40.5164 |
+| We4aba132c214 | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.2163 | 51.1471 | 42.0525 |
+| Wf0150ebb311b | icv1-fp22-tm2947-e15fed69 | 21.19 | 1.4948 | 50.6931 | 33.9132 |
