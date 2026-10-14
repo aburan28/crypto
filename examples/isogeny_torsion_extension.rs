@@ -1039,7 +1039,7 @@ fn summarize(path: &str) {
     }
 }
 
-fn plot(path: &str) {
+fn plot(path: &str, include_iso: bool) {
     let mut rows = BTreeMap::<(u64, String), serde_json::Value>::new();
     for line in std::fs::read_to_string(path).unwrap().lines() {
         let v: serde_json::Value = serde_json::from_str(line).unwrap();
@@ -1065,7 +1065,7 @@ fn plot(path: &str) {
     }
     let floor = x((std::f64::consts::PI / 4.0).sqrt());
     writeln!(svg,"<line x1=\"{floor:.1}\" y1=\"92\" x2=\"{floor:.1}\" y2=\"941\" stroke=\"#b91c1c\" stroke-dasharray=\"4 4\"/><text x=\"{floor:.1}\" y=\"987\" text-anchor=\"middle\" class=\"small\">two-class floor</text>").unwrap();
-    let arms = [
+    let mut arms = vec![
         ("rho-negation", "rho negation", "#2563eb"),
         ("rho-negation-aa", "rho A/A", "#60a5fa"),
         ("rho-six-class", "rho six class", "#1e3a8a"),
@@ -1074,6 +1074,12 @@ fn plot(path: &str) {
         ("isogeny-projected-pair", "isogeny image", "#7c3aed"),
         ("raw-pair", "raw pair", "#6b7280"),
     ];
+    if include_iso {
+        arms.insert(
+            6,
+            ("isomorphism-projected-pair", "scaling image", "#a21caf"),
+        );
+    }
     for (group, (p, r)) in [(61, 19), (271, 61), (787, 211), (3319, 811)]
         .iter()
         .enumerate()
@@ -1113,7 +1119,7 @@ fn plot(path: &str) {
         }
     }
     writeln!(svg,"<text x=\"665\" y=\"1012\" text-anchor=\"middle\" class=\"label\">Whole-solve CPU in calibrated group-addition equivalents per sqrt(r), logarithmic axis</text>").unwrap();
-    writeln!(svg,"<text x=\"30\" y=\"1037\" class=\"small\">Source: SUMMARY_V3.jsonl · hollow raw-pair points spent their cap without a scalar · no isolated-host wall claim</text></svg>").unwrap();
+    writeln!(svg,"<text x=\"30\" y=\"1037\" class=\"small\">Source: SUMMARY_V{}.jsonl · hollow raw-pair points spent their cap without a scalar · no isolated-host wall claim</text></svg>", if include_iso {4} else {3}).unwrap();
     print!("{svg}");
 }
 
@@ -1295,7 +1301,12 @@ fn check_point(v: &serde_json::Value) -> CheckPoint {
     ))
 }
 
-fn verify_independent(run_path: &str, fixture_path: &str) {
+fn verify_independent(
+    run_path: &str,
+    fixture_path: &str,
+    expected_run_sha256: &str,
+    include_iso: bool,
+) {
     let fixture_bytes = std::fs::read(fixture_path).expect("fixture bytes");
     let run_bytes = std::fs::read(run_path).expect("run bytes");
     assert_eq!(
@@ -1305,7 +1316,7 @@ fn verify_independent(run_path: &str, fixture_path: &str) {
     );
     assert_eq!(
         sha256_hex(&run_bytes),
-        "ca9a0ec7e31de59c58a78ae5c269350b37963b62ff9de815c805c36c2ec26693",
+        expected_run_sha256,
         "run bytes differ from the frozen V3 result"
     );
     let fixtures: Vec<serde_json::Value> = String::from_utf8(fixture_bytes.clone())
@@ -1314,7 +1325,7 @@ fn verify_independent(run_path: &str, fixture_path: &str) {
         .map(|line| serde_json::from_str(line).unwrap())
         .collect();
     assert_eq!(fixtures.len(), 4);
-    let arms = [
+    let mut arms = vec![
         "raw-pair",
         "projected-pair",
         "chi-orbit-index",
@@ -1323,6 +1334,9 @@ fn verify_independent(run_path: &str, fixture_path: &str) {
         "rho-negation-aa",
         "rho-six-class",
     ];
+    if include_iso {
+        arms.insert(4, "isomorphism-projected-pair");
+    }
     let mut seen = BTreeSet::new();
     let mut verified = 0;
     let mut exhausted = 0;
@@ -1384,11 +1398,14 @@ fn verify_independent(run_path: &str, fixture_path: &str) {
             }
         }
     }
-    assert_eq!((verified, exhausted), (75, 9));
+    assert_eq!(
+        (verified, exhausted),
+        (if include_iso { 87 } else { 75 }, 9)
+    );
     println!(
         "{}",
         json!({
-            "schema":"torsion_extension_independent_replay/v2",
+            "schema":if include_iso {"torsion_extension_independent_replay/v3"} else {"torsion_extension_independent_replay/v2"},
             "arithmetic":"independent_u128_fp2_chord_tangent",
             "fixture_sha256":sha256_hex(&fixture_bytes),
             "records_sha256":sha256_hex(&run_bytes),
@@ -1467,6 +1484,71 @@ fn iso_check(path: &str) {
                 "fixture_sha256":fixture_sha256,"pair_checks":64,
                 "fixed_point_checks":v["base_raw"].as_array().unwrap().len()+2,
                 "group_ops":ops,
+            })
+        );
+    }
+}
+
+fn audit_v4(path: &str) {
+    let bytes = std::fs::read(path).expect("paired run bytes");
+    assert_eq!(
+        sha256_hex(&bytes),
+        "71a0e8f7d96f630d372299f64a407d398b68dc21b9a8fa04de5c11c8c3b67b6a"
+    );
+    let selected = [
+        "projected-pair",
+        "chi-orbit-index",
+        "isogeny-projected-pair",
+        "isomorphism-projected-pair",
+    ];
+    let mut paired = BTreeMap::<(u64, u64), BTreeMap<String, serde_json::Value>>::new();
+    for line in String::from_utf8(bytes).unwrap().lines() {
+        let v: serde_json::Value = serde_json::from_str(line).unwrap();
+        if v["kind"] != "run" {
+            continue;
+        }
+        let arm = v["arm"].as_str().unwrap();
+        if !selected.contains(&arm) {
+            continue;
+        }
+        let key = (v["p"].as_u64().unwrap(), v["round"].as_u64().unwrap());
+        assert!(paired
+            .entry(key)
+            .or_default()
+            .insert(arm.to_string(), v)
+            .is_none());
+    }
+    assert_eq!(paired.len(), 12);
+    for ((p, round), arms) in paired {
+        assert_eq!(arms.len(), selected.len());
+        let reference = &arms["projected-pair"];
+        for arm in selected {
+            let row = &arms[arm];
+            assert_eq!(row["extra"]["status"], "verified");
+            assert_eq!(
+                row["result"]["decomposition"]["relations_found"],
+                reference["result"]["decomposition"]["relations_found"]
+            );
+            assert_eq!(
+                row["result"]["decomposition"]["targets_tried"],
+                reference["result"]["decomposition"]["targets_tried"]
+            );
+            assert_eq!(
+                row["result"]["linear_algebra"]["rank"],
+                reference["result"]["linear_algebra"]["rank"]
+            );
+            assert_eq!(row["result"]["recovered"], reference["result"]["recovered"]);
+        }
+        println!(
+            "{}",
+            json!({
+                "schema":"torsion_extension_paired_audit/v4",
+                "p":p,"round":round,"arms":selected,
+                "relations_found":reference["result"]["decomposition"]["relations_found"],
+                "targets_tried":reference["result"]["decomposition"]["targets_tried"],
+                "rank":reference["result"]["linear_algebra"]["rank"],
+                "recovered":reference["result"]["recovered"],
+                "same_outcome":true,
             })
         );
     }
@@ -1589,13 +1671,23 @@ fn main() {
         ),
         Some("support") => support(&std::env::args().nth(2).expect("fixture path")),
         Some("summarize") => summarize(&std::env::args().nth(2).expect("run path")),
-        Some("plot") => plot(&std::env::args().nth(2).expect("summary path")),
+        Some("plot") => plot(&std::env::args().nth(2).expect("summary path"), false),
+        Some("plot-v4") => plot(&std::env::args().nth(2).expect("summary path"), true),
         Some("identities") => identities(&std::env::args().nth(2).expect("fixture path")),
         Some("verify-independent") => verify_independent(
             &std::env::args().nth(2).expect("records path"),
             &std::env::args().nth(3).expect("fixture path"),
+            "ca9a0ec7e31de59c58a78ae5c269350b37963b62ff9de815c805c36c2ec26693",
+            false,
+        ),
+        Some("verify-independent-v4") => verify_independent(
+            &std::env::args().nth(2).expect("records path"),
+            &std::env::args().nth(3).expect("fixture path"),
+            "71a0e8f7d96f630d372299f64a407d398b68dc21b9a8fa04de5c11c8c3b67b6a",
+            true,
         ),
         Some("iso-check") => iso_check(&std::env::args().nth(2).expect("fixture path")),
+        Some("audit-v4") => audit_v4(&std::env::args().nth(2).expect("run path")),
         _ => panic!("usage: isogeny_torsion_extension screen"),
     }
 }
