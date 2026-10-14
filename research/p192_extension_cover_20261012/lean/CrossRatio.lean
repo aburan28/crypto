@@ -208,6 +208,81 @@ theorem conorm_exact_prime_order_of_push_pull_two
 
 set_option linter.style.haveILetI true
 
+/-- The three elliptic quotient coordinates determine an odd-order class
+    when the Klein-four pull-push sum is doubling. The latter identity is
+    the geometric hypothesis of the Type I cover. -/
+theorem three_quotients_faithful_on_odd_torsion
+    {J E₀ E₁ E₂ : Type*} [AddCommGroup J]
+    [AddCommGroup E₀] [AddCommGroup E₁] [AddCommGroup E₂]
+    (push₀ : J →+ E₀) (push₁ : J →+ E₁) (push₂ : J →+ E₂)
+    (pull₀ : E₀ →+ J) (pull₁ : E₁ →+ J) (pull₂ : E₂ →+ J)
+    (hdecomp : ∀ z, pull₀ (push₀ z) + pull₁ (push₁ z) +
+      pull₂ (push₂ z) = z + z)
+    (r k : ℕ) (hodd : r = 2 * k + 1)
+    (x y : J) (hx : r • x = 0) (hy : r • y = 0)
+    (h₀ : push₀ x = push₀ y) (h₁ : push₁ x = push₁ y)
+    (h₂ : push₂ x = push₂ y) : x = y := by
+  let z := x - y
+  have hz₀ : push₀ z = 0 := by simp [z, map_sub, h₀]
+  have hz₁ : push₁ z = 0 := by simp [z, map_sub, h₁]
+  have hz₂ : push₂ z = 0 := by simp [z, map_sub, h₂]
+  have hdouble : z + z = 0 := by
+    calc
+      z + z = pull₀ (push₀ z) + pull₁ (push₁ z) +
+          pull₂ (push₂ z) := (hdecomp z).symm
+      _ = 0 := by simp [hz₀, hz₁, hz₂]
+  have hrz : r • z = 0 := by simp [z, nsmul_sub, hx, hy]
+  have h2k : (2 * k) • z = 0 := by
+    calc
+      (2 * k) • z = (k + k) • z := by congr 1; omega
+      _ = k • z + k • z := by rw [add_nsmul]
+      _ = k • (z + z) := by rw [smul_add]
+      _ = 0 := by rw [hdouble, nsmul_zero]
+  have hrz' : (2 * k + 1) • z = 0 := by simpa [hodd] using hrz
+  have hrepr : (2 * k + 1) • z = z := by
+    rw [add_nsmul, h2k, one_nsmul, zero_add]
+  rw [hrepr] at hrz'
+  exact sub_eq_zero.mp hrz'
+
+set_option linter.style.haveILetI false
+
+/-- A three-step Frobenius norm is fixed and has exact prime order when
+    one elliptic quotient sees a nonzero component in precisely one
+    translate.  The concrete quotient coordinates are checked by Sage. -/
+theorem cyclic_three_norm_exact_prime_order
+    {J E : Type*} [AddCommGroup J] [AddCommGroup E]
+    (σ : J →+ J) (f : J →+ E) (r : ℕ) (D : J) (U : E)
+    (hr : r.Prime) (hrD : r • D = 0)
+    (hσ3 : σ (σ (σ D)) = D)
+    (h0 : f D = U) (h1 : f (σ D) = 0)
+    (h2 : f (σ (σ D)) = 0) (hU : U ≠ 0) :
+    let N := D + σ D + σ (σ D)
+    σ N = N ∧ f N = U ∧ addOrderOf N = r := by
+  let N := D + σ D + σ (σ D)
+  have hfixed : σ N = N := by
+    dsimp [N]
+    rw [map_add, map_add, hσ3]
+    ac_rfl
+  have hproj : f N = U := by
+    simp [N, map_add, h0, h1, h2]
+  have hne : N ≠ 0 := by
+    intro hzero
+    apply hU
+    calc
+      U = f N := hproj.symm
+      _ = f 0 := by rw [hzero]
+      _ = 0 := map_zero f
+  have hσD : r • σ D = 0 := by
+    simpa only [map_nsmul, map_zero] using congrArg σ hrD
+  have hσ2D : r • σ (σ D) = 0 := by
+    simpa only [map_nsmul, map_zero] using congrArg σ hσD
+  have hmul : r • N = 0 := by
+    simp [N, nsmul_add, hrD, hσD, hσ2D]
+  haveI : Fact r.Prime := ⟨hr⟩
+  exact ⟨hfixed, hproj, addOrderOf_eq_prime hmul hne⟩
+
+set_option linter.style.haveILetI true
+
 /-- Clearing the denominator in the quartic-to-cubic Möbius coordinate
     change. The exact P-192 coefficients and square twist are checked by
     the generator-map Sage receipt. -/
@@ -261,6 +336,8 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.conorm_preserves_torsion
 #print axioms P192ExtensionCover.conorm_nonzero_torsion_of_push_pull_two
 #print axioms P192ExtensionCover.conorm_exact_prime_order_of_push_pull_two
+#print axioms P192ExtensionCover.cyclic_three_norm_exact_prime_order
+#print axioms P192ExtensionCover.three_quotients_faithful_on_odd_torsion
 #print axioms P192ExtensionCover.mobius_quartic_clear
 #print axioms P192ExtensionCover.canonicalTriples16_card
 #print axioms P192ExtensionCover.three_sum_support_bound

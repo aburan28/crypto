@@ -156,13 +156,18 @@ coordinates for a nonzero P-192 Scholten subgroup class, 16 verified
 subgroup-usable classes in a compact base, and a 64-query zero-yield relation
 probe with an exact three-sum coverage bound. It also gives checked Type I
 generator fibers and a conorm class of exact P-192 subgroup order, proved
-through degree-two push-pull and checked quotient images; its Frobenius norm
-has an explicit formal divisor. A separate
+through degree-two push-pull and checked quotient images. Three elliptic
+quotients reduce its genus-three subgroup class to
+\((-2G,0,0)\); the three-step Frobenius norm reduces to
+\((-2G,-2G,-2G)\), giving a nonzero class of exact order \(r\) over
+\(\mathbf F_{p^2}\). An independent point-coordinate verifier replays the
+quotient values. A separate
 \(\mathbf F_{23^3}\) Scholten instance verifies the complete relation,
 rank, target, and same-point rho pipeline. P-192 final rank, target descent,
 and matched one-target cost remain unknown for the tested compact policy;
-the Type I Frobenius-norm class still requires genus-three Jacobian reduction
-and nonvanishing verification.
+the Type I branch still needs a relation method and complete target cost;
+generic plane-quartic divisor reduction remains available as a separate
+implementation route.
 
 ## Reproduction
 
