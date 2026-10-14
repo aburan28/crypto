@@ -1363,12 +1363,7 @@ impl CubicClasses {
     /// The six classes of a `j = 0` prime instance, or `None` when the
     /// curve, the field or the subgroup lacks the structure: `a ≠ 0`,
     /// `p ≢ 1 (mod 3)`, `3 ∤ r − 1`, or `ζ₃` fixes the subgroup.
-    pub fn new(
-        g: &PrimeCurve,
-        generator: PrimePoint,
-        r: u64,
-        ops: &mut GroupOps,
-    ) -> Option<Self> {
+    pub fn new(g: &PrimeCurve, generator: PrimePoint, r: u64, ops: &mut GroupOps) -> Option<Self> {
         if g.a != 0 || g.b == 0 || g.p < 7 || g.p % 3 != 1 || r % 3 != 1 {
             return None;
         }
@@ -1425,7 +1420,11 @@ impl RhoClasses<PrimeCurve> for CubicClasses {
         let mut best_key = g.key(&p);
         let mut best_mu = 1u64;
         let kappa_sq = mulmod(self.kappa, self.kappa, c);
-        let mut consider = |pt: PrimePoint, mu: u64, best: &mut PrimePoint, best_key: &mut u64, best_mu: &mut u64| {
+        let mut consider = |pt: PrimePoint,
+                            mu: u64,
+                            best: &mut PrimePoint,
+                            best_key: &mut u64,
+                            best_mu: &mut u64| {
             let k = g.key(&pt);
             if k < *best_key {
                 *best = pt;
@@ -1433,8 +1432,20 @@ impl RhoClasses<PrimeCurve> for CubicClasses {
                 *best_mu = mu;
             }
         };
-        consider(PrimePoint::affine(x2, p.y), self.kappa, &mut best, &mut best_key, &mut best_mu);
-        consider(PrimePoint::affine(x3, p.y), kappa_sq, &mut best, &mut best_key, &mut best_mu);
+        consider(
+            PrimePoint::affine(x2, p.y),
+            self.kappa,
+            &mut best,
+            &mut best_key,
+            &mut best_mu,
+        );
+        consider(
+            PrimePoint::affine(x3, p.y),
+            kappa_sq,
+            &mut best,
+            &mut best_key,
+            &mut best_mu,
+        );
         let neg = g.neg(p);
         let neg_key = g.key(&neg);
         if neg_key < best_key {
@@ -1443,9 +1454,21 @@ impl RhoClasses<PrimeCurve> for CubicClasses {
             best_mu = submod(0, 1, c);
         }
         let neg2 = g.neg(PrimePoint::affine(x2, p.y));
-        consider(neg2, submod(0, self.kappa, c), &mut best, &mut best_key, &mut best_mu);
+        consider(
+            neg2,
+            submod(0, self.kappa, c),
+            &mut best,
+            &mut best_key,
+            &mut best_mu,
+        );
         let neg3 = g.neg(PrimePoint::affine(x3, p.y));
-        consider(neg3, submod(0, kappa_sq, c), &mut best, &mut best_key, &mut best_mu);
+        consider(
+            neg3,
+            submod(0, kappa_sq, c),
+            &mut best,
+            &mut best_key,
+            &mut best_mu,
+        );
         (best, best_mu)
     }
     fn method(&self) -> &'static str {
@@ -1480,12 +1503,7 @@ impl QuarticClasses {
     /// The four classes of a `j = 1728` prime instance, or `None` when
     /// the curve, field or subgroup lacks the structure: `b ≠ 0`,
     /// `p ≢ 1 (mod 4)`, `4 ∤ r − 1`, or `ι` fixes the subgroup.
-    pub fn new(
-        g: &PrimeCurve,
-        generator: PrimePoint,
-        r: u64,
-        ops: &mut GroupOps,
-    ) -> Option<Self> {
+    pub fn new(g: &PrimeCurve, generator: PrimePoint, r: u64, ops: &mut GroupOps) -> Option<Self> {
         if g.b != 0 || g.a == 0 || g.p < 5 || g.p % 4 != 1 || r % 4 != 1 {
             return None;
         }
@@ -1548,10 +1566,7 @@ impl RhoClasses<PrimeCurve> for QuarticClasses {
             best_key = neg_key;
             best_mu = submod(0, 1, c);
         }
-        for (pt, mu) in [
-            (rot, self.kappa),
-            (g.neg(rot), submod(0, self.kappa, c)),
-        ] {
+        for (pt, mu) in [(rot, self.kappa), (g.neg(rot), submod(0, self.kappa, c))] {
             let k = g.key(&pt);
             if k < best_key {
                 best = pt;
@@ -5327,7 +5342,10 @@ impl TargetSource {
         }
     }
     pub fn is_walk(&self) -> bool {
-        matches!(self, TargetSource::Walk | TargetSource::WalkPrimeFast | TargetSource::WalkSharedJumps)
+        matches!(
+            self,
+            TargetSource::Walk | TargetSource::WalkPrimeFast | TargetSource::WalkSharedJumps
+        )
     }
     /// **Whether a target the run has already decomposed is skipped.**
     ///
@@ -5342,7 +5360,10 @@ impl TargetSource {
     /// search nothing.  The guard is one hash insert per target, counted
     /// and priced as a lookup.
     pub fn is_guarded(&self) -> bool {
-        matches!(self, TargetSource::Random | TargetSource::Walk | TargetSource::WalkPrimeFast)
+        matches!(
+            self,
+            TargetSource::Random | TargetSource::Walk | TargetSource::WalkPrimeFast
+        )
     }
 }
 
@@ -5844,8 +5865,7 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
             {
                 first_target_pin = Some((matrix.rank() as u64, trials, found));
             }
-            if completion == CompletionRule::FullRank && matrix.rank() == cols && pinned.is_none()
-            {
+            if completion == CompletionRule::FullRank && matrix.rank() == cols && pinned.is_none() {
                 la.count("full_rank_unpinned", 1);
                 stop = true;
                 break;
@@ -8187,10 +8207,7 @@ mod tests {
             let p = curve.mul(&mut ops, g, k);
             let (rep, mu) = classes.canon(&curve, &mut ops, p);
             assert_eq!(rep, curve.mul(&mut ops, g, mulmod(k, mu, r)), "k = {k}");
-            let zeta_p = PrimePoint::affine(
-                mulmod(classes.omega_for_test(), p.x, curve.p),
-                p.y,
-            );
+            let zeta_p = PrimePoint::affine(mulmod(classes.omega_for_test(), p.x, curve.p), p.y);
             for q in [zeta_p, curve.neg(zeta_p)] {
                 let (rep2, _) = classes.canon(&curve, &mut ops, q);
                 assert_eq!(rep2, rep, "k = {k}");
@@ -8223,7 +8240,11 @@ mod tests {
     fn quartic_classes_name_the_class_and_solve() {
         // p = 10037 (10037 = 1 mod 4), y^2 = x^3 + 8x: order 9946 = 2 * 4973
         // (4973 = 1 mod 4), a j = 1728 curve with the full four classes.
-        let curve = PrimeCurve { p: 10037, a: 8, b: 0 };
+        let curve = PrimeCurve {
+            p: 10037,
+            a: 8,
+            b: 0,
+        };
         assert_eq!(curve.point_count(), 9946);
         let r = 4973u64;
         // a generator of the order-r subgroup: twice a full-order point
@@ -8267,6 +8288,7 @@ mod tests {
         }
     }
 
+    #[test]
     fn signed_frobenius_classes_name_the_class_and_its_multiplier() {
         let inst = koblitz_instance_best(23).expect("a Koblitz curve at n = 23");
         let classes = SignedFrobeniusClasses::new(&inst).expect("Koblitz classes");
@@ -9396,7 +9418,10 @@ mod tests {
         assert_eq!(native_ops.adds, ordinary_ops.adds);
         let neg = curve.neg(g);
         assert_eq!(fast_add(&mut native_ops, g, neg), PrimePoint::INFINITY);
-        assert_eq!(fast_add(&mut native_ops, g, g), curve.add(&mut ordinary_ops, g, g));
+        assert_eq!(
+            fast_add(&mut native_ops, g, g),
+            curve.add(&mut ordinary_ops, g, g)
+        );
     }
 
     #[test]
