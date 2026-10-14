@@ -1,5 +1,12 @@
 # Curves
 
+The [SEC 2 v1.0/v2.0 curve inventory](../../research/sec2_curve_inventory_20261012/REPORT.md)
+lists all 33 historical SECG names, identifies the 20 retained in 2010, and
+links each exact curve to the complete trait, cover, and transfer-screening
+records. Its [PDF](../../research/sec2_curve_inventory_20261012/REPORT.pdf)
+and [machine-readable source crosscheck](../../research/sec2_curve_inventory_20261012/inventory.json)
+preserve version and evidence status.
+
 The [weak-curve family catalogue](weak-families/README.md) organizes 21
 published or verified families and structural conditions, with their recognition
 rules, construction domains and evidence. Its [searchable browser](weak-families/index.html)
