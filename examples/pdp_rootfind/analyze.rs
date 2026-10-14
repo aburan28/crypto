@@ -580,7 +580,7 @@ pub fn run(args: &[String]) {
         bref.insert("inherited_f4_targets".into(), json!(f6_xors.len()));
         bref.insert("inherited_f4_word_xors_all".into(), json!(f6_xors));
         bref.insert("inherited_f4_ms_all".into(), json!(f6_ms));
-        md.push_str(&format!("\n## Binary Gröbner references on K₁/GF(2^23), ℓ = 8, m = 3\n\n- inherited F4 (`f6_ic_probe`, default decomposition oracle): {} targets, median {:.3e} word XORs and {:.1} ms per target.\n", f6_xors.len(), median(&mut f6_xors.clone()).unwrap(), median(&mut f6_ms.clone()).unwrap()));
+        md.push_str(&format!("\n## Binary Gröbner references on icv1-f2m23-tm5197-1f85e9e1, ℓ = 8, m = 3\n\n- inherited F4 (`f6_ic_probe`, default decomposition oracle): {} targets, median {:.3e} word XORs and {:.1} ms per target.\n", f6_xors.len(), median(&mut f6_xors.clone()).unwrap(), median(&mut f6_ms.clone()).unwrap()));
     }
     bref.insert("split_dreg_rows".into(), Value::Array(split_rows.clone()));
     if split_rows.is_empty() {

@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p26/comparisons/rho-neg__ic-abscissa.json
+ops (ok): ic-abscissa / rho-neg = 96.0845 [76.699, 124.199] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 74.3871 [59.957, 88.271]
+| curve | log2 r | workloads | ic-abscissa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp26-t2838-8e779ca8 | 23.28 | 8 | 96.0845 | [76.6995, 124.1990] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-abscissa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W20d829c87466 | icv1-fp26-t2838-8e779ca8 | 23.28 | 1.0362 | 94.0369 | 90.7493 |
+| W459edf43e5a7 | icv1-fp26-t2838-8e779ca8 | 23.28 | 0.4867 | 94.8738 | 194.9460 |
+| W57379abdf921 | icv1-fp26-t2838-8e779ca8 | 23.28 | 0.8366 | 96.4948 | 115.3421 |
+| W7243e01194eb | icv1-fp26-t2838-8e779ca8 | 23.28 | 1.3677 | 94.9455 | 69.4200 |
+| W8e64c636e70a | icv1-fp26-t2838-8e779ca8 | 23.28 | 1.2327 | 96.0770 | 77.9384 |
+| Wba2d4897c8cd | icv1-fp26-t2838-8e779ca8 | 23.28 | 0.9749 | 95.6986 | 98.1626 |
+| Wda47d0f7e67b | icv1-fp26-t2838-8e779ca8 | 23.28 | 1.1939 | 97.6873 | 81.8200 |
+| Wfb330cc2db9c | icv1-fp26-t2838-8e779ca8 | 23.28 | 0.8487 | 96.6942 | 113.9328 |

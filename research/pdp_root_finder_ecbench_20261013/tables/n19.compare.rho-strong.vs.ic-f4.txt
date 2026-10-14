@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pdp_root_finder_ecbench_20261013/sessions/n19/comparisons/rho-strong__ic-f4.json
+ops (ok): ic-f4 / rho-strong = 1.5640 [1.511, 1.616] (cluster) over 40 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 30845.5741, not a result: 40 of 40 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-f4 / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m19-t797-b6cf2467 | 17.00 | 8 | 1.5640 | [1.5107, 1.6158] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | ic-f4 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W00eb7693de5f | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.1258 | 4.8921 | 1.5651 |
+| W2646a04cba9f | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.2844 | 5.0348 | 1.5329 |
+| W4b22eefd1b6a | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.2313 | 4.8910 | 1.5136 |
+| W7066c0498278 | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.1423 | 5.0702 | 1.6135 |
+| W834c0c4e2d83 | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.1418 | 4.9557 | 1.5774 |
+| W8c731b99a5c1 | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.1611 | 4.7871 | 1.5144 |
+| Wed3081c51b8f | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.0014 | 4.8269 | 1.6082 |
+| Wf83108e5d557 | icv1-f2m19-t797-b6cf2467 | 17.00 | 3.1423 | 5.0038 | 1.5924 |
