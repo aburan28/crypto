@@ -1190,10 +1190,10 @@ fn run(cfg: &RunCfg, emit: &mut dyn FnMut(Value)) -> RunResult {
 mod wide {
     use super::{inverse_mod, mul_mod, signed_automorphism_size, sub_mod, Charges, JUMPS};
     use crypto_lib::binary_ecc::BinaryPoint;
+    use crypto_lib::cryptanalysis::ecbench::isolation::HwCounters;
     use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
     use crypto_lib::cryptanalysis::semaev_decomp::Gf2_128;
     use rand::rngs::StdRng;
-    use crypto_lib::cryptanalysis::ecbench::isolation::HwCounters;
     use rand::{Rng, SeedableRng};
     use serde_json::{json, Value};
     use std::collections::HashMap;
@@ -1996,9 +1996,7 @@ mod wide {
                         let j = active.len();
                         jump_index[j] = ji;
                         denominators[j] = match (lane.state.point, jumps[ji].point) {
-                            (WPoint::Affine { x: x1, .. }, WPoint::Affine { x: x2, .. }) => {
-                                x1 ^ x2
-                            }
+                            (WPoint::Affine { x: x1, .. }, WPoint::Affine { x: x2, .. }) => x1 ^ x2,
                             _ => 0,
                         };
                         active.push(li);

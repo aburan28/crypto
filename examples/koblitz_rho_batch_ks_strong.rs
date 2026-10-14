@@ -1877,9 +1877,7 @@ mod wide {
                         let j = active.len();
                         jump_index[j] = ji;
                         denominators[j] = match (lane.state.point, jumps[ji].point) {
-                            (WPoint::Affine { x: x1, .. }, WPoint::Affine { x: x2, .. }) => {
-                                x1 ^ x2
-                            }
+                            (WPoint::Affine { x: x1, .. }, WPoint::Affine { x: x2, .. }) => x1 ^ x2,
                             _ => 0,
                         };
                         active.push(li);
