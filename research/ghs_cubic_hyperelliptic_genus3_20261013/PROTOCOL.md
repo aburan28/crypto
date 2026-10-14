@@ -146,3 +146,28 @@ about deployed curves.
 tool is single-threaded), one compile at a time on the shared host. Output
 JSONL + `env.txt` (command, base commit, source and protocol sha256,
 toolchain, host, uptime). Python only plots recorded values.
+
+## Amendment 2026-10-13 (after development runs, before the recorded run)
+
+Written after unrecorded development runs of the tool at q = 5, 7, 11, 13
+(scratch output, not kept; the recorded run re-runs everything from scratch
+with the same deterministic code plus these two changes). Nothing above is
+changed.
+
+1. **Conjugate arm at q = 7 has no admissible instance.** All 2352
+   conjugate-arm candidates at q = 7 have `#E0(K) ∈ {320, 336, 352, 368}`, all
+   divisible by 16, so the rule `h ∈ {4, 8}` selects nothing. Rule added: an
+   arm with no admissible candidate takes its first 2 candidates in the frozen
+   order, with `ℓ` the largest prime factor and `h = #E0(K)/ℓ`, flagged
+   `selected_by_amendment`; P1–P3 and P5 are tested on them exactly as above
+   (the cofactor plays no role there; no transfer is run on this arm anyway).
+2. **P4(d) extension.** The development run showed that many reduced
+   divisors `φ(P)` contain points over `x = ∞` (and some over `a, b, r_i`), so
+   the preregistered "avoids the special fibres" set is about half of the
+   eligible points at q = 5. Added, reported separately and also required by
+   the P4 flag: `π0_*(φ(P)) = 4P` for **every** `P ∈ E0(K)`, using derived
+   images of special-fibre points: over `x = ∞`, `v0 = w/(xn(z)·ρ1ρ2)` with
+   `(ρ1, ρ2) = (X0/X1, X2/X1)` at `z` and image `(S, Y) = (0, e1·v0)`; over
+   `a, b, r1`: `(x, 0)`; over `r0`: `O`; over `r2`:
+   `u12 = (r2−r1)·X2/X0`, `y0 = w·(r2−r0)(r2−r1)/(u12·xd(z))`. The
+   preregistered metric is still reported unchanged.
