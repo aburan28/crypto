@@ -397,7 +397,10 @@ fn binary_cell(
     let ds_with_censored: Vec<f64> = ds
         .iter()
         .cloned()
-        .chain(std::iter::repeat((budget.d_max + 1) as f64).take(censored as usize))
+        .chain(std::iter::repeat_n(
+            (budget.d_max + 1) as f64,
+            censored as usize,
+        ))
         .collect();
     let mut calib_refuted = 0u32;
     for (b, x3) in &pool_d {
@@ -548,6 +551,7 @@ fn prime_arm(bits_list: &[u32], fb_sizes: &[usize], reps: u64) -> Vec<Value> {
 // ── Analysis (protocol decision rules and the derived cost model) ────
 
 /// Inverse standard-normal CDF (Acklam), for Bonferroni-adjusted z.
+#[allow(clippy::excessive_precision)]
 fn norm_ppf(p: f64) -> f64 {
     let a = [
         -3.969683028665376e+01,
