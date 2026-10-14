@@ -1,0 +1,9 @@
+warning: failed to query latest release, using existing version 'leanprover/lean4:v4.34.1'
+'N83RootFour.decode_selector' depends on axioms: [propext, Quot.sound]
+'N83RootFour.decode_state' depends on axioms: [propext, Quot.sound]
+'N83RootFour.decode_fingerprint' depends on axioms: [propext, Quot.sound]
+'N83RootFour.encode_nonzero' depends on axioms: [propext, Quot.sound]
+'N83RootFour.encode_fits_u32' depends on axioms: [propext, Quot.sound]
+'N83RootFour.k3550_complete_key_bound_fits_fixed_slots' does not depend on any axioms
+'N83RootFour.k3550_state_id_fits_30_bits' does not depend on any axioms
+'N83RootFour.k3550_one_root_and_slot_payload_below_14_gibibytes' does not depend on any axioms
