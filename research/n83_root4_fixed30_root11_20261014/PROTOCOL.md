@@ -9,8 +9,13 @@ witness. It changes the early table request from `2^30` to `2^29` entries,
 which the constructor doubles to `2^30` four-byte slots. The mode keeps the
 29-bit state-ID and complete-root capacity guards.
 
-The IC Rust source SHA-256 is
+The corrected seven-arm execution uses IC Rust source SHA-256
+`3112f5617548d68dab023d8dd9133cd68a1d07fd89e05311c3a2f4b532990c74`.
+The first execution used source SHA-256
 `5281bfc1c370255d8c03851fe85b4b35499ee55c066ba460b5de414b59d202a3`.
+Its direct 21-byte control has the indexed-insertion error recorded in the
+preceding fixed30 campaign; retain that execution's raw arm statuses and
+verification receipt separately from the corrected run.
 The same 1,000 public N83 points frozen for the preceding factor-base
 refinement are used in all arms. Their SHA-256 is
 `35e34151dcc1ad6048939560adf28fc7c1b1017833fe005a656c3f4e2bc07de8`;

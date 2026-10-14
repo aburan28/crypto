@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 BASE = ROOT / "research/n83_root4_fixed30_20261014/run.py"
-SOURCE_SHA256 = "5281bfc1c370255d8c03851fe85b4b35499ee55c066ba460b5de414b59d202a3"
+SOURCE_SHA256 = "3112f5617548d68dab023d8dd9133cd68a1d07fd89e05311c3a2f4b532990c74"
 ARMS = ((3300, "root4f30r11", 1200), (3300, "root11", 1200),
         (3300, "root4f30", 1200), (3350, "root4f30r11", 1200),
         (3400, "root4f30r11", 1200), (3450, "root4f30r11", 1200),
