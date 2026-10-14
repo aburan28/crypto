@@ -1088,6 +1088,12 @@ impl PrimeBatchMitmOracle {
     }
 }
 
+impl Default for PrimeBatchMitmOracle {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DecompositionOracle<PrimeCurve> for PrimeBatchMitmOracle {
     fn name(&self) -> &str {
         "mitm-prime-batch"
