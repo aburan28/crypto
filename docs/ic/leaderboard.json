@@ -104,7 +104,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "a167df37f0b4d24a3a4ad6cc531a39189b6a38f7bcf856984f8ca6beac2d67bb"
+   "sha256": "03f63efa54482b2ea37baed22da046202cd67739c76d9b43f569e2375f025ca4"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -7010,12 +7010,7 @@
    "standard": [],
    "ec1": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
-   "legacy": [
-    "k1n83",
-    "K_1 / GF(2^83)",
-    "K_1/2^83",
-    "K_1/F_2^83"
-   ],
+   "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"

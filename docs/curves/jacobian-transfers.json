@@ -2,7 +2,7 @@
   "schema": "jacobian-transfers/2",
   "generated_by": "cargo run --release --bin jacobian_transfers -- build",
   "what_this_is": "Every known route from each registered curve's discrete logarithm into a Jacobian, priced by one frozen formula-level cost model against Pollard rho on the same subgroup; see docs/curves/JACOBIAN_TRANSFERS.md. Rows are formulas and leads, never measurements or security claims.",
-  "registry_sha256": "a167df37f0b4d24a3a4ad6cc531a39189b6a38f7bcf856984f8ca6beac2d67bb",
+  "registry_sha256": "03f63efa54482b2ea37baed22da046202cd67739c76d9b43f569e2375f025ca4",
   "factor_budget": 200000,
   "cost_model": {
     "karatsuba_exponent": 1.585,

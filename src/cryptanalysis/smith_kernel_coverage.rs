@@ -651,7 +651,7 @@ struct CurveRec {
 }
 
 pub fn prime_report(p: u32, cheb: &ChebotarevReport) -> PrimeReport {
-    assert!(p % 2 == 1 && p >= 3 && p % 2 == 1 && 8 % p != 0);
+    assert!(p % 2 == 1 && p >= 3 && 8 % p != 0);
     let fields = [Fpk::new(p, 1), Fpk::new(p, 2), Fpk::new(p, 3)];
     let by_type: HashMap<Vec<u32>, &ChebotarevRow> = cheb
         .rows

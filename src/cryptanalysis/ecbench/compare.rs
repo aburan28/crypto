@@ -567,10 +567,10 @@ fn measurement_quality(
     }
     q.p95_foreign_busy_percent = crate::cryptanalysis::ecbench::stats::quantile(&foreign, 0.95);
     q.p95_run_queue_percent = crate::cryptanalysis::ecbench::stats::quantile(&delay, 0.95);
-    if let Some(per_attempt) = points.checked_div(q.paired_attempts) {
+    if let Some(mean_points) = points.checked_div(q.paired_attempts) {
         let calibrated = required >= Level::L2
             && matches!(wall.aa_ci95, Some((lo, hi)) if (0.9..=1.0).contains(&lo) && (1.0..=1.1).contains(&hi));
-        q.score = Some((per_attempt as u8).saturating_add(if calibrated { 10 } else { 0 }));
+        q.score = Some((mean_points as u8).saturating_add(if calibrated { 10 } else { 0 }));
         if required < Level::L2 {
             q.notes
                 .push("A/A bonus unavailable: the spec permits wall runs below L2".into());

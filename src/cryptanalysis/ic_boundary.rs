@@ -120,6 +120,7 @@ use crate::cryptanalysis::koblitz_index_calculus::{
     saturate_factor_base_two_torsion, FrobeniusFactorBase, KoblitzCurve, KoblitzSignedRhoOptions,
     ProjectedFactorBase,
 };
+use crate::cryptanalysis::prime_fast::{FastCurve as FastPrimeCurve, Fp64, Pt as FastPrimePoint};
 use crate::cryptanalysis::research_bench::{bench_curves, linear_fit};
 use crate::cryptanalysis::residual_walk::is_prime_u64;
 use crate::cryptanalysis::semaev_decomp::{Gf2, SubspaceOracle};
@@ -176,6 +177,10 @@ pub struct GroupOps {
     /// optional record block, written only when the group counted it.
     #[serde(skip)]
     pub field_ops: FieldOps,
+    /// Native `from_mont` reductions; kept separate from true modular
+    /// multiplications.  Existing serialised group ledgers are unchanged.
+    #[serde(skip)]
+    pub montgomery_reductions: u64,
 }
 
 impl GroupOps {
@@ -191,6 +196,7 @@ impl GroupOps {
         self.doubles += other.doubles;
         self.scalar_mults += other.scalar_mults;
         self.field_ops.merge(other.field_ops);
+        self.montgomery_reductions += other.montgomery_reductions;
     }
 }
 
@@ -970,6 +976,33 @@ pub trait CountedGroup {
     fn neg(&self, p: Self::Elt) -> Self::Elt;
     /// A key that identifies the element (both walks must agree on it).
     fn key(&self, p: &Self::Elt) -> u64;
+    /// An opt-in addition path for the relation walk.  The closure lives for
+    /// one solve, so an implementation may retain native field state between
+    /// steps.  Other group operations keep their established accounting.
+    fn native_walk_adder(
+        &self,
+    ) -> Option<Box<dyn FnMut(&mut GroupOps, Self::Elt, Self::Elt) -> Self::Elt + '_>> {
+        None
+    }
+    /// One synchronized round of independent lanes.  Each tuple is
+    /// `(lane_index, current_point, addend, addend_slot)`; outputs retain
+    /// tuple order.  Slots 0..16 are jumps, 16..32 are restart offsets.
+    /// The serial and batched closures must consume the same tuples.
+    #[allow(clippy::type_complexity)]
+    fn native_lane_walk_adder(
+        &self,
+        _batched: bool,
+    ) -> Option<
+        Box<
+            dyn FnMut(&mut GroupOps, &[(usize, Self::Elt, Self::Elt, usize)]) -> Vec<Self::Elt>
+                + '_,
+        >,
+    > {
+        None
+    }
+    fn supports_native_lane_walk(&self) -> bool {
+        false
+    }
     /// Whether `add` and `double` tally the field operations behind them
     /// into the ledger's `field_ops`.  `false` by default, and then the
     /// tally stays at zero and means *unknown*, never "no field work":
@@ -2494,6 +2527,7 @@ pub fn signed_frobenius_rho(
         scalar_mults: c.setup_scalar_multiplications
             + c.candidate_verification_scalar_multiplications,
         field_ops: FieldOps::default(),
+        montgomery_reductions: 0,
     };
     let gae = gops.gae() + scalar_adds;
     let expected = generic_floor_ops(r as f64, 2.0 * n as f64);
@@ -3540,6 +3574,168 @@ impl CountedGroup for PrimeCurve {
             ((p.x + 1) << 1) | u64::from(p.y > self.p - p.y)
         }
     }
+    fn native_walk_adder(
+        &self,
+    ) -> Option<Box<dyn FnMut(&mut GroupOps, PrimePoint, PrimePoint) -> PrimePoint + '_>> {
+        if self.p >= (1u64 << crate::cryptanalysis::prime_fast::MAX_BITS) {
+            return None;
+        }
+        let fast = FastPrimeCurve::new("relation-walk", self.p, self.a, self.b, 1);
+        let mut last: Option<(PrimePoint, Option<FastPrimePoint>)> = None;
+        let mut jumps: Vec<(PrimePoint, Option<FastPrimePoint>)> = Vec::new();
+        Some(Box::new(move |ops, p, q| {
+            let fp = if let Some((prior, native)) = last {
+                if prior == p {
+                    native
+                } else if p.infinity {
+                    None
+                } else {
+                    ops.field_ops.muls += 2; // canonical -> Montgomery
+                    Some(fast.point(p.x, p.y))
+                }
+            } else if p.infinity {
+                None
+            } else {
+                ops.field_ops.muls += 2;
+                Some(fast.point(p.x, p.y))
+            };
+            let fq = if let Some((_, native)) = jumps.iter().find(|(point, _)| *point == q) {
+                *native
+            } else {
+                let native = if q.infinity {
+                    None
+                } else {
+                    ops.field_ops.muls += 2;
+                    Some(fast.point(q.x, q.y))
+                };
+                jumps.push((q, native));
+                native
+            };
+            ops.adds += 1;
+            if !p.infinity && !q.infinity {
+                if p.x == q.x {
+                    if p.y == q.y && p.y != 0 {
+                        // FastCurve::double: 2M + 2S + 1I.
+                        ops.field_ops.muls += 2;
+                        ops.field_ops.sqrs += 2;
+                        ops.field_ops.invs += 1;
+                    }
+                } else {
+                    ops.field_ops.muls += 2;
+                    ops.field_ops.sqrs += 1;
+                    ops.field_ops.invs += 1;
+                }
+            }
+            let native = fast.add(fp, fq);
+            let out = match native {
+                Some(pt) => {
+                    let (x, y) = fast.canonical(pt);
+                    PrimePoint::affine(x, y)
+                }
+                None => PrimePoint::INFINITY,
+            };
+            last = Some((out, native));
+            out
+        }))
+    }
+    fn native_lane_walk_adder(
+        &self,
+        batched: bool,
+    ) -> Option<
+        Box<
+            dyn FnMut(&mut GroupOps, &[(usize, PrimePoint, PrimePoint, usize)]) -> Vec<PrimePoint>
+                + '_,
+        >,
+    > {
+        use crate::cryptanalysis::prime_fast::BatchAddScratch;
+        if self.p >= (1u64 << crate::cryptanalysis::prime_fast::MAX_BITS) {
+            return None;
+        }
+        let fast = FastPrimeCurve::new("relation-lanes", self.p, self.a, self.b, 1);
+        let mut previous: Vec<Option<(PrimePoint, Option<FastPrimePoint>)>> = Vec::new();
+        let mut addends: Vec<Option<(PrimePoint, Option<FastPrimePoint>)>> = vec![None; 32];
+        let mut scratch = BatchAddScratch::default();
+        Some(Box::new(move |ops, requests| {
+            let mut left = Vec::with_capacity(requests.len());
+            let mut right = Vec::with_capacity(requests.len());
+            for &(lane, p, q, slot) in requests {
+                assert!(slot < addends.len());
+                if previous.len() <= lane {
+                    previous.resize(lane + 1, None);
+                }
+                let fp = if let Some((_, native)) = previous[lane].filter(|(old, _)| *old == p) {
+                    native
+                } else if p.infinity {
+                    None
+                } else {
+                    ops.field_ops.muls += 2;
+                    Some(fast.point(p.x, p.y))
+                };
+                let fq = if let Some((_, native)) = addends[slot].filter(|(old, _)| *old == q) {
+                    native
+                } else {
+                    let native = if q.infinity {
+                        None
+                    } else {
+                        ops.field_ops.muls += 2;
+                        Some(fast.point(q.x, q.y))
+                    };
+                    addends[slot] = Some((q, native));
+                    native
+                };
+                left.push(fp);
+                right.push(fq);
+                ops.adds += 1;
+                match (fp, fq) {
+                    (Some(a), Some(b)) if a.x != b.x => {
+                        ops.field_ops.muls += 2;
+                        ops.field_ops.sqrs += 1;
+                        if !batched {
+                            ops.field_ops.invs += 1;
+                            ops.field_ops.muls += 1; // Fp64::inv Montgomery correction.
+                        }
+                    }
+                    (Some(a), Some(b)) if a.y == b.y && a.y != 0 => {
+                        ops.field_ops.muls += 2;
+                        ops.field_ops.sqrs += 2;
+                        ops.field_ops.invs += 1;
+                        ops.field_ops.muls += 1; // Fp64::inv Montgomery correction.
+                    }
+                    _ => {}
+                }
+            }
+            if batched {
+                let stats = fast.add_many_batched(&mut left, &right, &mut scratch);
+                if stats.ordinary > 0 {
+                    ops.field_ops.invs += 1;
+                    // batch_inv performs k prefix and 2k suffix multiplies.
+                    ops.field_ops.muls += 3 * stats.ordinary as u64 + 1;
+                }
+            } else {
+                for (p, q) in left.iter_mut().zip(right) {
+                    *p = fast.add(*p, q);
+                }
+            }
+            left.into_iter()
+                .zip(requests)
+                .map(|(native, &(lane, _, _, _))| {
+                    let out = match native {
+                        Some(pt) => {
+                            ops.montgomery_reductions += 2; // Montgomery -> canonical.
+                            let (x, y) = fast.canonical(pt);
+                            PrimePoint::affine(x, y)
+                        }
+                        None => PrimePoint::INFINITY,
+                    };
+                    previous[lane] = Some((out, native));
+                    out
+                })
+                .collect()
+        }))
+    }
+    fn supports_native_lane_walk(&self) -> bool {
+        self.p < (1u64 << crate::cryptanalysis::prime_fast::MAX_BITS)
+    }
 }
 
 /// A prime-field instance: curve, prime-order subgroup, generator.
@@ -4228,6 +4424,66 @@ pub fn prime_factor_base(inst: &PrimeInstance, size: usize) -> FactorBase<PrimeP
     fb
 }
 
+/// Coverage control: scan canonical abscissae in a fixed nonzero stride
+/// modulo p.  This changes the base while retaining the same column count
+/// and the same exact point-lift, setup and table accounting as the ordinary
+/// smallest-abscissa base.  The stride is fixed before any target is drawn.
+pub fn prime_factor_base_strided(
+    inst: &PrimeInstance,
+    size: usize,
+    stride: u64,
+) -> FactorBase<PrimePoint> {
+    assert!(stride > 0 && stride < inst.curve.p);
+    let start = Instant::now();
+    let curve = &inst.curve;
+    let mut fb = FactorBase::empty(format!("stride {stride}, {size} abscissae"));
+    let mut x = 1u64;
+    let mut scanned = 0u64;
+    let mut sqrts = 0u64;
+    while fb.abscissae < size && scanned < curve.p {
+        scanned += 1;
+        let rhs = curve.rhs(x);
+        if curve.legendre(rhs) >= 0 {
+            sqrts += 1;
+            if let Some(y) = curve.sqrt(rhs) {
+                let y = if y == 0 { 0 } else { y.min(curve.p - y) };
+                let p = PrimePoint::affine(x, y);
+                let q = curve.neg(p);
+                let col = fb.abscissae;
+                let i = fb.points.len();
+                fb.points.push(p);
+                fb.col_of.push(col);
+                fb.coef_of.push(1);
+                if q != p {
+                    fb.points.push(q);
+                    fb.col_of.push(col);
+                    fb.coef_of.push(inst.r - 1);
+                    fb.neg_index.push(i + 1);
+                    fb.neg_index.push(i);
+                    fb.x_index.insert(x, vec![i, i + 1]);
+                } else {
+                    fb.neg_index.push(i);
+                    fb.x_index.insert(x, vec![i]);
+                }
+                fb.abscissae += 1;
+            }
+        }
+        x = ((x as u128 + stride as u128) % curve.p as u128) as u64;
+    }
+    fb.columns = fb.abscissae;
+    for (i, p) in fb.points.iter().enumerate() {
+        fb.point_index.insert(curve.key(p), i);
+    }
+    fb.abscissa_list = fb.x_index.keys().copied().collect();
+    fb.abscissa_list.sort_unstable();
+    fb.cost.wall_ns = start.elapsed().as_nanos() as u64;
+    fb.cost.count("abscissae_scanned", scanned);
+    fb.cost.count("legendre_symbols", scanned);
+    fb.cost.count("sqrt_solves", sqrts);
+    fb.cost.count("abscissa_stride", stride);
+    fb
+}
+
 /// A binary base over the span of `basis` (single words), every point
 /// above every non-zero element, columns by abscissa.
 pub fn binary_subspace_factor_base(inst: &BinaryInstance, basis: &[u64]) -> FactorBase<FastPoint> {
@@ -4535,6 +4791,90 @@ impl PairTable {
             build_ops: ops,
             build_wall_ns: start.elapsed().as_nanos() as u64,
         }
+    }
+
+    /// Prime-field version of the same folded table. A row shares one
+    /// inversion across its doubling and all later abscissae; each signed
+    /// pair uses the same inverse. Only the sum's x coordinate is needed
+    /// for the key. The exact point is re-added by `probe` on a hit.
+    pub fn build_negation_folded_prime_batch(
+        g: &PrimeCurve,
+        fb: &FactorBase<PrimePoint>,
+    ) -> Result<Self, String> {
+        if g.p < 5 || g.p & 1 == 0 || g.p >= (1u64 << crate::cryptanalysis::prime_fast::MAX_BITS) {
+            return Err("batched prime table requires odd 3 < p < 2^62".into());
+        }
+        let start = Instant::now();
+        let f = Fp64::new(g.p);
+        let groups: Vec<&Vec<usize>> = fb
+            .abscissa_list
+            .iter()
+            .map(|x| fb.x_index.get(x).expect("every listed abscissa is indexed"))
+            .collect();
+        let a = groups.len();
+        let mut ops = GroupOps::default();
+        let mut map: FastMap<(u32, u32)> = fast_map(a * a + 1);
+        let pts: Vec<(u64, u64)> = fb
+            .points
+            .iter()
+            .map(|pt| (f.to_mont(pt.x), f.to_mont(pt.y)))
+            .collect();
+        ops.field_ops.muls += 2 * pts.len() as u64;
+        let am = f.to_mont(g.a);
+        ops.field_ops.muls += 1;
+        let mut denominators = Vec::with_capacity(a);
+        let mut scratch = Vec::with_capacity(a);
+        for ai in 0..a {
+            let i = groups[ai][0];
+            let (xi, yi) = pts[i];
+            if yi == 0 {
+                return Err("batched prime table does not accept a 2-torsion base point".into());
+            }
+            denominators.clear();
+            denominators.push(f.add(yi, yi));
+            for group in groups.iter().skip(ai + 1) {
+                let d = f.sub(pts[group[0]].0, xi);
+                if d == 0 {
+                    return Err("batched prime table requires distinct abscissae".into());
+                }
+                denominators.push(d);
+            }
+            let k = denominators.len();
+            f.batch_inv(&mut denominators, &mut scratch);
+            ops.field_ops.invs += 1;
+            // batch_inv performs k prefix products, 2k backward products,
+            // and one Montgomery conversion in its inverse.
+            ops.field_ops.muls += 3 * k as u64 + 1;
+            for (offset, group) in groups.iter().skip(ai).enumerate() {
+                for &j in group.iter() {
+                    // Preserve the generic table's abstract group-operation
+                    // charge, including the zero-work P + (-P) case.
+                    ops.adds += 1;
+                    if offset == 0 && j != i {
+                        continue;
+                    }
+                    let lambda = if offset == 0 {
+                        let x2 = f.sqr(xi);
+                        ops.field_ops.sqrs += 1;
+                        f.mul(f.add(f.add(x2, x2), f.add(x2, am)), denominators[0])
+                    } else {
+                        f.mul(f.sub(pts[j].1, yi), denominators[offset])
+                    };
+                    let x_sum = f.sub(f.sub(f.sqr(lambda), xi), pts[j].0);
+                    let x = f.from_mont(x_sum);
+                    ops.field_ops.muls += 2;
+                    ops.field_ops.sqrs += 1;
+                    map.entry(x + 1).or_insert((i as u32, j as u32));
+                }
+            }
+        }
+        Ok(Self {
+            kind: "negation_folded_prime_batch",
+            entries: map.len() as u64,
+            map,
+            build_ops: ops,
+            build_wall_ns: start.elapsed().as_nanos() as u64,
+        })
     }
 
     pub fn cost(&self) -> TableCost {
@@ -5165,6 +5505,12 @@ pub enum TargetSource {
     /// selects, so every segment has its own step function at no group
     /// cost; the guard below forces the restart.
     Walk,
+    /// The same guarded walk and coefficient stream as `Walk`, with
+    /// Montgomery prime-field additions for jumps and pooled restarts.
+    WalkPrimeFast,
+    /// Synchronized independent prime walks; `batched` controls only the
+    /// field inversion schedule, not the generated lane requests.
+    WalkPrimeLanes { lanes: u8, batched: bool },
     /// The walk as the Round-2 ladder first ran it: one jump table for
     /// every segment and no guard, so segments merge as rho's walks do.
     /// For the diagnostic of §10.2 only.
@@ -5177,11 +5523,20 @@ impl TargetSource {
             TargetSource::Random => "random",
             TargetSource::RandomUnguarded => "random_unguarded",
             TargetSource::Walk => "walk",
+            TargetSource::WalkPrimeFast => "walk_prime_fast",
+            TargetSource::WalkPrimeLanes { batched: false, .. } => "walk_prime_lanes_serial",
+            TargetSource::WalkPrimeLanes { batched: true, .. } => "walk_prime_lanes_batch",
             TargetSource::WalkSharedJumps => "walk_shared_jumps",
         }
     }
     pub fn is_walk(&self) -> bool {
-        matches!(self, TargetSource::Walk | TargetSource::WalkSharedJumps)
+        matches!(
+            self,
+            TargetSource::Walk
+                | TargetSource::WalkPrimeFast
+                | TargetSource::WalkPrimeLanes { .. }
+                | TargetSource::WalkSharedJumps
+        )
     }
     /// **Whether a target the run has already decomposed is skipped.**
     ///
@@ -5196,7 +5551,13 @@ impl TargetSource {
     /// search nothing.  The guard is one hash insert per target, counted
     /// and priced as a lookup.
     pub fn is_guarded(&self) -> bool {
-        matches!(self, TargetSource::Random | TargetSource::Walk)
+        matches!(
+            self,
+            TargetSource::Random
+                | TargetSource::Walk
+                | TargetSource::WalkPrimeFast
+                | TargetSource::WalkPrimeLanes { .. }
+        )
     }
 }
 
@@ -5402,6 +5763,16 @@ pub fn collect_and_solve_with_completion<G: CountedGroup, L: RelationSolver + ?S
 /// coefficients so a collector can store a partial relation against
 /// them; nothing else differs, and the classic wrapper above produces
 /// bit-identical counters.
+struct PrimeWalkLane<E> {
+    point: E,
+    a: u64,
+    b: u64,
+    fresh: bool,
+    restarts: u64,
+    segment_steps: u64,
+    permutation: Vec<usize>,
+}
+
 #[allow(clippy::too_many_arguments)]
 pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
     g: &G,
@@ -5496,6 +5867,12 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
     let mut pool_taken = 0u64;
     let mut jump_perm: Vec<usize> = (0..jump_count).collect();
     let mut walk_point = g.identity();
+    let mut native_walk = if targets == TargetSource::WalkPrimeFast {
+        Some(g.native_walk_adder().expect("native prime walk required"))
+    } else {
+        None
+    };
+    let mut native_walk_calls = 0u64;
     let (mut wa, mut wb) = (0u64, 0u64);
     let mut walk_fresh = true;
     let segment_cap = ((r as f64).sqrt() * 4.0) as u64 + 65_536;
@@ -5503,6 +5880,28 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
     let mut seen: FastMap<()> = fast_map(if guarded { 1 << 12 } else { 0 });
     let (mut walk_steps, mut walk_restarts, mut repeats_skipped, mut guard_probes, mut walk_jumps) =
         (0u64, 0u64, 0u64, 0u64, 0u64);
+    let lane_config = match targets {
+        TargetSource::WalkPrimeLanes { lanes, batched } => Some((lanes as usize, batched)),
+        _ => None,
+    };
+    let mut lanes: Vec<PrimeWalkLane<G::Elt>> = (0..lane_config.map_or(0, |x| x.0))
+        .map(|_| PrimeWalkLane {
+            point: g.identity(),
+            a: 0,
+            b: 0,
+            fresh: true,
+            restarts: 0,
+            segment_steps: 0,
+            permutation: (0..jump_count).collect(),
+        })
+        .collect();
+    let mut lane_queue: std::collections::VecDeque<(usize, G::Elt, u64, u64)> =
+        std::collections::VecDeque::new();
+    let mut lane_adder = lane_config.map(|(_, batched)| {
+        g.native_lane_walk_adder(batched)
+            .expect("prime lanes required")
+    });
+    let (mut lane_rounds, mut lane_prepared) = (0u64, 0u64);
     if targets.is_walk() {
         jumps = draw_jumps(
             g,
@@ -5531,10 +5930,79 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
     }
 
     while trials < max_trials {
+        if lane_config.is_some() && lane_queue.is_empty() {
+            let mut requests = Vec::with_capacity(lanes.len());
+            for (index, lane) in lanes.iter_mut().enumerate() {
+                if lane.fresh || lane.segment_steps >= segment_cap {
+                    if lane.restarts == 0 {
+                        lane.a = rng.gen_range(1..r);
+                        lane.b = rng.gen_range(1..r);
+                        let ag = g.mul(&mut rel.group_ops, generator, lane.a);
+                        let bq = g.mul(&mut rel.group_ops, target, lane.b);
+                        lane.point = g.add(&mut rel.group_ops, ag, bq);
+                    } else {
+                        let pool_index = (pool_taken as usize) % pool_count;
+                        pool_taken += 1;
+                        if pool_index == pool.len() {
+                            let off = draw_pool_offset(
+                                g,
+                                generator,
+                                target,
+                                r,
+                                &mut pool_rng,
+                                &mut rel.group_ops,
+                                &mut pool_ops,
+                            );
+                            pool.push(off);
+                        }
+                        let (offset, oa, ob) = pool[pool_index];
+                        requests.push((index, lane.point, offset, jump_count + pool_index));
+                        lane.a = addmod(lane.a, oa, r);
+                        lane.b = addmod(lane.b, ob, r);
+                        for i in (1..jump_count).rev() {
+                            lane.permutation.swap(i, rng.gen_range(0..i + 1));
+                        }
+                    }
+                    lane.fresh = false;
+                    lane.restarts += 1;
+                    walk_restarts += 1;
+                    lane.segment_steps = 0;
+                } else {
+                    let j =
+                        lane.permutation[((mix(g.key(&lane.point)) >> 24) as usize) % jump_count];
+                    let (jump, aj, bj) = jumps[j];
+                    requests.push((index, lane.point, jump, j));
+                    lane.a = addmod(lane.a, aj, r);
+                    lane.b = addmod(lane.b, bj, r);
+                    lane.segment_steps += 1;
+                    walk_steps += 1;
+                }
+            }
+            if !requests.is_empty() {
+                let outputs = lane_adder.as_mut().expect("prime lanes required")(
+                    &mut rel.group_ops,
+                    &requests,
+                );
+                native_walk_calls += requests.len() as u64;
+                for ((index, _, _, _), point) in requests.iter().zip(outputs) {
+                    lanes[*index].point = point;
+                }
+            }
+            for (index, lane) in lanes.iter_mut().enumerate() {
+                if g.is_identity(&lane.point) {
+                    lane.fresh = true;
+                    direct_skipped += 1;
+                } else {
+                    lane_queue.push_back((index, lane.point, lane.a, lane.b));
+                    lane_prepared += 1;
+                }
+            }
+            lane_rounds += 1;
+        }
         // Exclusive phase marks (no-ops without an `ic_measurement`
         // session): drawing the target-dependent query point.
         measurement::mark(measurement::Phase::TargetQuery);
-        let (point, a, b) = match targets {
+        let (point, a, b, lane_id) = match targets {
             TargetSource::Random | TargetSource::RandomUnguarded => {
                 let a = rng.gen_range(1..r);
                 let b = rng.gen_range(1..r);
@@ -5545,9 +6013,9 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                     direct_skipped += 1;
                     continue;
                 }
-                (point, a, b)
+                (point, a, b, None)
             }
-            TargetSource::Walk | TargetSource::WalkSharedJumps => {
+            TargetSource::Walk | TargetSource::WalkPrimeFast | TargetSource::WalkSharedJumps => {
                 if walk_fresh || segment_steps >= segment_cap {
                     if walk_restarts == 0 || shared_jumps {
                         // The first segment, and every segment of the
@@ -5576,7 +6044,12 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                             pool.push(off);
                         }
                         let (op, oa, ob) = pool[idx];
-                        walk_point = g.add(&mut rel.group_ops, walk_point, op);
+                        walk_point = if let Some(add) = native_walk.as_mut() {
+                            native_walk_calls += 1;
+                            add(&mut rel.group_ops, walk_point, op)
+                        } else {
+                            g.add(&mut rel.group_ops, walk_point, op)
+                        };
                         wa = addmod(wa, oa, r);
                         wb = addmod(wb, ob, r);
                         // A fresh index map for the segment: Fisher–Yates
@@ -5592,7 +6065,12 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                     let hsh = mix(g.key(&walk_point));
                     let j = jump_perm[((hsh >> 24) as usize) % jump_count];
                     let (jp, aj, bj) = jumps[j];
-                    walk_point = g.add(&mut rel.group_ops, walk_point, jp);
+                    walk_point = if let Some(add) = native_walk.as_mut() {
+                        native_walk_calls += 1;
+                        add(&mut rel.group_ops, walk_point, jp)
+                    } else {
+                        g.add(&mut rel.group_ops, walk_point, jp)
+                    };
                     wa = addmod(wa, aj, r);
                     wb = addmod(wb, bj, r);
                     walk_steps += 1;
@@ -5603,7 +6081,11 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                     direct_skipped += 1;
                     continue;
                 }
-                (walk_point, wa, wb)
+                (walk_point, wa, wb, None)
+            }
+            TargetSource::WalkPrimeLanes { .. } => {
+                let (lane, point, a, b) = lane_queue.pop_front().expect("nonempty lane round");
+                (point, a, b, Some(lane))
             }
         };
         trials += 1;
@@ -5614,7 +6096,11 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
             guard_probes += 1;
             if seen.insert(g.key(&point), ()).is_some() {
                 repeats_skipped += 1;
-                walk_fresh = true;
+                if let Some(index) = lane_id {
+                    lanes[index].fresh = true;
+                } else {
+                    walk_fresh = true;
+                }
                 continue;
             }
         }
@@ -5736,6 +6222,24 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
         rel.count("walk_pool_restarts", pool_taken);
         rel.count("walk_steps", walk_steps);
         rel.count("walk_restarts", walk_restarts);
+        if targets == TargetSource::WalkPrimeFast || lane_config.is_some() {
+            rel.count("native_walk_calls", native_walk_calls);
+        }
+        if let Some((lane_count, batched)) = lane_config {
+            rel.count("lane_count", lane_count as u64);
+            rel.count("lane_batch_inversion", u64::from(batched));
+            rel.count("lane_rounds", lane_rounds);
+            rel.count("lane_prepared", lane_prepared);
+            rel.count("lane_unused_prepared", lane_queue.len() as u64);
+            let reductions = rel.group_ops.montgomery_reductions;
+            rel.count("montgomery_reductions", reductions);
+            rel.count(
+                "lane_state_bytes_floor",
+                (lane_count
+                    * (std::mem::size_of::<PrimeWalkLane<G::Elt>>()
+                        + jump_count * std::mem::size_of::<usize>())) as u64,
+            );
+        }
     }
     la.wall_ns = la_ns;
     let (work, work_unit) = matrix.work();
@@ -8993,6 +9497,143 @@ mod tests {
     }
 
     #[test]
+    fn prime_lane_collector_has_identical_serial_and_batched_streams() {
+        let inst = roster_prime_instance(14).unwrap();
+        let curve = &inst.curve;
+        let generator = inst.generator_point();
+        let mut setup = GroupOps::default();
+        let target = curve.mul(&mut setup, generator, 137);
+        let fb = prime_factor_base(&inst, 20);
+        for lanes in [4, 8, 16] {
+            let run = |batched| {
+                let mut seen = Vec::new();
+                let mut matrix = IncrementalGauss::new(fb.columns + 1, inst.r);
+                let outcome = collect_and_solve_relations(
+                    curve,
+                    generator,
+                    target,
+                    inst.r,
+                    inst.cofactor,
+                    &fb,
+                    20261020,
+                    2048,
+                    TargetSource::WalkPrimeLanes { lanes, batched },
+                    RestartPool::Lazy,
+                    &mut matrix,
+                    CompletionRule::TargetPinned,
+                    |_, _, point, a, b| {
+                        seen.push((point, a, b));
+                        Vec::new()
+                    },
+                );
+                (seen, outcome)
+            };
+            let (serial, s) = run(false);
+            let (batch, b) = run(true);
+            assert_eq!(serial, batch, "lane width {lanes}");
+            assert_eq!(s.trials, b.trials);
+            assert_eq!(
+                s.relations.get("walk_restarts"),
+                b.relations.get("walk_restarts")
+            );
+            assert_eq!(
+                s.relations.get("repeated_targets_skipped"),
+                b.relations.get("repeated_targets_skipped")
+            );
+            assert!(s.relations.get("walk_restarts") > lanes as u64);
+            assert!(b.relations.group_ops.field_ops.invs < s.relations.group_ops.field_ops.invs);
+        }
+    }
+
+    /// Local component diagnostic.  An admitted timing claim additionally
+    /// needs the isolated ecbench host gate in the frozen protocol.
+    #[test]
+    #[ignore]
+    fn prime_lane_probe_component_profile() {
+        use std::hint::black_box;
+        let inst = prime_instance_for(20, 59297);
+        let curve = &inst.curve;
+        let fast = FastPrimeCurve::new("component-profile", curve.p, curve.a, curve.b, inst.r);
+        let fb = prime_factor_base(&inst, 48);
+        let table = PairTable::build_negation_folded(curve, &fb);
+        let mut setup = GroupOps::default();
+        let generator = inst.generator_point();
+        let target = curve.mul(&mut setup, generator, 137);
+        let points: Vec<_> = (1..=512)
+            .map(|i| curve.mul(&mut setup, generator, i))
+            .collect();
+        let keys: Vec<_> = points.iter().map(|p| curve.key(p)).collect();
+        let n = 200_000u64;
+        let inverses: Vec<_> = (1..=512).map(|i| fast.f.to_mont(i)).collect();
+        let start = Instant::now();
+        for i in 0..n {
+            black_box(fast.f.inv(black_box(inverses[i as usize % 512])));
+        }
+        let inversion_ns = start.elapsed().as_nanos() as u64;
+        let start = Instant::now();
+        for i in 0..n {
+            let p = points[i as usize % 512];
+            let native = fast.point(black_box(p.x), black_box(p.y));
+            black_box(fast.canonical(native));
+        }
+        let conversion_ns = start.elapsed().as_nanos() as u64;
+        let start = Instant::now();
+        for i in 0..n {
+            black_box(((mix(black_box(keys[i as usize % 512])) >> 24) as usize) % 16);
+        }
+        let jump_select_ns = start.elapsed().as_nanos() as u64;
+        let start = Instant::now();
+        for i in 0..n {
+            black_box(table.map.get(&(black_box(keys[i as usize % 512]) >> 1)));
+        }
+        let table_lookup_ns = start.elapsed().as_nanos() as u64;
+        let mut guard: FastMap<()> = fast_map(1024);
+        let start = Instant::now();
+        for i in 0..n {
+            black_box(guard.insert(black_box(keys[i as usize % 512]), ()));
+        }
+        let guard_ns = start.elapsed().as_nanos() as u64;
+        let mut pool_rng = StdRng::seed_from_u64(20261020);
+        let mut total_ops = GroupOps::default();
+        let mut pool_ops = GroupOps::default();
+        let pool_n = 256u64;
+        let start = Instant::now();
+        for _ in 0..pool_n {
+            black_box(draw_pool_offset(
+                curve,
+                generator,
+                target,
+                inst.r,
+                &mut pool_rng,
+                &mut total_ops,
+                &mut pool_ops,
+            ));
+        }
+        let pool_ns = start.elapsed().as_nanos() as u64;
+        println!("PROFILE {{\"samples\":{n},\"inversion_ns\":{inversion_ns},\"coordinate_roundtrip_ns\":{conversion_ns},\"jump_select_ns\":{jump_select_ns},\"table_lookup_ns\":{table_lookup_ns},\"guard_insert_ns\":{guard_ns},\"pool_samples\":{pool_n},\"pool_ns\":{pool_ns},\"pool_group_ops\":{}}}", pool_ops.adds + pool_ops.doubles);
+    }
+
+    #[test]
+    fn fixed_stride_prime_bases_have_exact_signed_columns() {
+        let inst = roster_prime_instance(16).unwrap();
+        let ordinary = prime_factor_base(&inst, 24);
+        let unit_stride = prime_factor_base_strided(&inst, 24, 1);
+        assert_eq!(ordinary.points, unit_stride.points);
+        for stride in [7, 23] {
+            let fb = prime_factor_base_strided(&inst, 24, stride);
+            assert_eq!(fb.abscissae, 24);
+            assert_eq!(fb.columns, 24);
+            assert_eq!(fb.points.len(), fb.col_of.len());
+            for (i, &point) in fb.points.iter().enumerate() {
+                assert!(inst.curve.is_on_curve(point));
+                assert_eq!(inst.curve.neg(point), fb.points[fb.neg_index[i]]);
+                assert_eq!(fb.col_of[i], fb.col_of[fb.neg_index[i]]);
+                assert_eq!(fb.index_of_key(inst.curve.key(&point)), Some(i));
+            }
+        }
+    }
+
+    #[test]
     fn full_rank_continues_after_target_pin_and_exhausts_at_the_frozen_cap() {
         // Two representatives per base column in Z/101. Their labels
         // encode 1, 2 and 3, 6 respectively, so every returned row is
@@ -9165,6 +9806,94 @@ mod tests {
                 let s = curve.add(&mut ops, fb.points[w[0]], fb.points[w[1]]);
                 assert_eq!(s, q);
             }
+        }
+    }
+
+    #[test]
+    fn prime_batch_table_matches_scalar_table_and_reduces_inversions() {
+        let inst = roster_prime_instance(14).unwrap();
+        let curve = &inst.curve;
+        let fb = prime_factor_base(&inst, 24);
+        let scalar = PairTable::build_negation_folded(curve, &fb);
+        let batch = PairTable::build_negation_folded_prime_batch(curve, &fb).unwrap();
+        assert_eq!(batch.map, scalar.map, "every x key keeps the same witness");
+        assert_eq!(batch.entries, scalar.entries);
+        assert_eq!(batch.build_ops.adds, scalar.build_ops.adds);
+        assert_eq!(batch.build_ops.doubles, scalar.build_ops.doubles);
+        assert_eq!(batch.build_ops.field_ops.invs, fb.abscissae as u64);
+        assert!(batch.build_ops.field_ops.invs < scalar.build_ops.field_ops.invs);
+    }
+
+    #[test]
+    fn native_prime_walk_preserves_point_and_coefficient_stream() {
+        let inst = roster_prime_instance(14).unwrap();
+        let curve = &inst.curve;
+        let g = inst.generator_point();
+        let mut setup = GroupOps::default();
+        let q = curve.mul(&mut setup, g, 1337 % inst.r);
+        let mut rng = StdRng::seed_from_u64(20261018);
+        let jumps: Vec<(PrimePoint, u64, u64)> = (0..16)
+            .map(|_| {
+                let a = rng.gen_range(1..inst.r);
+                let b = rng.gen_range(1..inst.r);
+                let ag = curve.mul(&mut setup, g, a);
+                let bq = curve.mul(&mut setup, q, b);
+                (curve.add(&mut setup, ag, bq), a, b)
+            })
+            .collect();
+        let mut fast_add = curve.native_walk_adder().unwrap();
+        let mut ordinary_ops = GroupOps::default();
+        let mut native_ops = GroupOps::default();
+        let mut ordinary = g;
+        let mut native = g;
+        let (mut oa, mut ob) = (1u64, 0u64);
+        let (mut na, mut nb) = (1u64, 0u64);
+        for step in 0..4096 {
+            if step > 0 && step % 97 == 0 {
+                let a = rng.gen_range(1..inst.r);
+                let b = rng.gen_range(1..inst.r);
+                let ag = curve.mul(&mut setup, g, a);
+                let bq = curve.mul(&mut setup, q, b);
+                ordinary = curve.add(&mut setup, ag, bq);
+                native = ordinary;
+                (oa, ob) = (a, b);
+                (na, nb) = (a, b);
+            }
+            let j = ((mix(curve.key(&ordinary)) >> 24) as usize) % jumps.len();
+            let (jump, aj, bj) = jumps[j];
+            ordinary = curve.add(&mut ordinary_ops, ordinary, jump);
+            native = fast_add(&mut native_ops, native, jump);
+            oa = addmod(oa, aj, inst.r);
+            ob = addmod(ob, bj, inst.r);
+            na = addmod(na, aj, inst.r);
+            nb = addmod(nb, bj, inst.r);
+            assert_eq!((native, na, nb), (ordinary, oa, ob), "step {step}");
+        }
+        assert_eq!(native_ops.adds, ordinary_ops.adds);
+        let neg = curve.neg(g);
+        assert_eq!(fast_add(&mut native_ops, g, neg), PrimePoint::INFINITY);
+        assert_eq!(
+            fast_add(&mut native_ops, g, g),
+            curve.add(&mut ordinary_ops, g, g)
+        );
+    }
+
+    #[test]
+    #[ignore]
+    fn profile_prime_pair_table_occupancy_for_pinned_sweep() {
+        let inst = prime_instance_for(20, 59297);
+        for size in [40usize, 48, 64, 80] {
+            let base = prime_factor_base(&inst, size);
+            let table = PairTable::build_negation_folded_prime_batch(&inst.curve, &base).unwrap();
+            println!(
+                "size={size} abscissae={} signed_points={} columns={} pair_keys={} table_adds={} table_inversions={}",
+                base.abscissae,
+                base.points.len(),
+                base.columns,
+                table.entries,
+                table.build_ops.adds,
+                table.build_ops.field_ops.invs
+            );
         }
     }
 

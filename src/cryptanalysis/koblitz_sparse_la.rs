@@ -182,7 +182,7 @@ impl WordWidth {
             return None;
         }
         match bits {
-            0..=127 => Some(Self::U128),
+            ..=127 => Some(Self::U128),
             128..=191 => Some(Self::U192),
             192..=MAX_MODULUS_BITS => Some(Self::U256),
             _ => None,

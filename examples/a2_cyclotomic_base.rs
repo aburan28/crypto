@@ -1049,7 +1049,6 @@ fn main() {
     };
     let want_n11 = matches!(args.cells.as_str(), "all" | "n11");
     let want_n23 = matches!(args.cells.as_str(), "all" | "n23") && !args.skip_n23_solver;
-    let _want_n23_w2 = args.cells == "n23_w2";
     if want_n11 {
         for arm in ["cyclotomic", "onb_matched"] {
             cells.push(mk(1, 11, 1, 2, arm));

@@ -368,11 +368,7 @@ def harvest_json(reg: Registry, problems: list[str], fatal: list[str]) -> None:
                     # while using a different polynomial basis from the
                     # repository constructor. Its record name is safe, but
                     # the bare `K_a / GF(2^n)` aliases would be ambiguous.
-                    # The bare aliases go only to a record over the repository's
-                    # own modulus for that degree (`koblitz_modulus`); any other
-                    # basis is the same curve under another model hash.
-                    if (fam == "koblitz" and not o.get("suppress_koblitz_aliases")
-                            and f == koblitz_modulus(m)[0]):
+                    if fam == "koblitz" and not o.get("suppress_koblitz_aliases"):
                         names += koblitz_aliases(a, m)
                     check_rust(o, ident, rel, fatal)
                     reg.add(ident, fam, params, rel, names)
@@ -512,9 +508,8 @@ def harvest_curve_records(reg: Registry) -> None:
             ident = cid.binary_id(m, modulus, a, b, order, end="-7" if koblitz else "unk")
             params = ({"a": a, "n": m, "modulus": cid._hex(modulus), "modulus_rule": "recorded in the run"}
                       if koblitz else {"m": m, "modulus": cid._hex(modulus), "a": cid._hex(a), "b": cid._hex(b)})
-            # Bare aliases only over the repository's modulus, as in harvest_json.
             reg.add(ident, "koblitz" if koblitz else "binary", params, rel,
-                    koblitz_aliases(a, m) if koblitz and modulus == koblitz_modulus(m)[0] else [])
+                    koblitz_aliases(a, m) if koblitz else [])
             reg.represent(ident, f, {k: v for k, v in c.items() if k != "curve_id"}, rel)
 
 
@@ -672,20 +667,6 @@ def harvest_native_standards(reg: Registry) -> None:
             reg.represent(ident, rep["field"], rep["curve"], str(path.relative_to(REPO)))
 
 
-# Entries the append-only rule must not carry: the deprecated extraction
-# labels of docs/curves/sources/prime-model-corrections.json, models that
-# never existed as recorded (each names the correct record, which keeps its
-# own entry).  The corrections file keeps them as provenance.
-CORRECTIONS = REPO / "docs/curves/sources/prime-model-corrections.json"
-
-
-def retired_slugs() -> set[str]:
-    if not CORRECTIONS.exists():
-        return set()
-    doc = json.loads(CORRECTIONS.read_text())
-    return {c["deprecated_extraction_slug"] for c in doc.get("corrections", [])}
-
-
 def carry_forward(reg: Registry) -> None:
     """The registry is append-only.  A curve registered once stays, with its
     names and representations, even when no source re-derives it: after
@@ -693,9 +674,18 @@ def carry_forward(reg: Registry) -> None:
     curve is gone, and the slug that replaced it must still resolve."""
     if not OUT.exists():
         return
-    retired = retired_slugs()
+    # Deprecated erroneous extraction labels (prime-model-corrections.json)
+    # are retained as provenance in that file only; carrying them forward
+    # would resurrect the wrong models, e.g. after a merge of a stale
+    # registry.json.
+    try:
+        corrections = json.loads(
+            (REPO / "docs/curves/sources/prime-model-corrections.json").read_text())["corrections"]
+        deprecated = {c["deprecated_extraction_slug"] for c in corrections}
+    except (OSError, ValueError, KeyError):
+        deprecated = set()
     for e in json.loads(OUT.read_text())["curves"]:
-        if e["slug"] in retired:
+        if e["slug"] in deprecated:
             continue
         key = hashlib.sha256(e["model_json"].encode("ascii")).hexdigest()
         if key in reg.curves:
