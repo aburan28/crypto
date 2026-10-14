@@ -1687,8 +1687,8 @@ mod wide {
     #[cfg(test)]
     mod root_bloom_table_tests {
         use super::{
-            Gf2_128, NormalBasis128, PackedRootLayout, RootBloom, RootSlots128, RootTable128,
-            S3Solver128, State128, State83, StateStore128,
+            build_index128_with_symmetry, Gf2_128, NormalBasis128, PackedRootLayout, RootBloom,
+            RootSlots128, RootTable128, S3Solver128, State128, State83, StateStore128,
         };
         use crate::mix_root_bloom;
         use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse_wide;
@@ -1779,6 +1779,68 @@ mod wide {
                     indexed.get_with_context(key, &states, &basis),
                     packed.get(key)
                 );
+            }
+        }
+
+        #[test]
+        fn symmetric_s3_states_preserve_exact_root_keys_and_first_witness() {
+            let gf = Gf2_128::new(&find_irreducible_sparse_wide(83).unwrap());
+            let basis = NormalBasis128::new(&gf);
+            let solver = S3Solver128::new(&gf, 1);
+            let reps = [
+                8342699431223747237330307u128,
+                1922428771273471083037496,
+                8050843414474538827389079,
+                3206891573540907568398899,
+                2445342385696756367155238,
+                5959927424489161220022208,
+            ];
+            let full = build_index128_with_symmetry(&gf, &basis, &solver, &reps, false);
+            let quotient = build_index128_with_symmetry(&gf, &basis, &solver, &reps, true);
+            assert!(quotient.states.len() < full.states.len());
+            assert_eq!(quotient.table.len, full.table.len);
+            let mut full_indexed = RootTable128::with_capacity_indexed83(full.states.len() * 2);
+            let mut quotient_indexed =
+                RootTable128::with_capacity_indexed83(quotient.states.len() * 2);
+            for (states, table) in [
+                (&full.states, &mut full_indexed),
+                (&quotient.states, &mut quotient_indexed),
+            ] {
+                for index in 0..states.len() {
+                    let state = states.get(index);
+                    for (selector, root) in state.normal_roots.into_iter().enumerate() {
+                        let key = basis.canonical_selected(root).0;
+                        table.insert_indexed83(
+                            key,
+                            index,
+                            selector,
+                            |state_index, root_selector| {
+                                basis
+                                    .canonical_selected(states.root_at(state_index, root_selector))
+                                    .0
+                            },
+                        );
+                    }
+                }
+            }
+            assert_eq!(quotient_indexed.len, full_indexed.len);
+            for index in 0..full.states.len() {
+                let state = full.states.get(index);
+                for root in state.normal_roots {
+                    let key = basis.canonical_selected(root).0;
+                    assert_eq!(
+                        quotient
+                            .table
+                            .get_with_context(key, &quotient.states, &basis),
+                        full.table.get_with_context(key, &full.states, &basis),
+                        "first witness differs for key {key}",
+                    );
+                    assert_eq!(
+                        quotient_indexed.get_with_context(key, &quotient.states, &basis),
+                        full_indexed.get_with_context(key, &full.states, &basis),
+                        "five-byte first witness differs for key {key}",
+                    );
+                }
             }
         }
 
@@ -2113,6 +2175,7 @@ mod wide {
         states: StateStore128,
         table: RootTable128,
         shifted: Vec<Vec<u128>>,
+        symmetric_states: bool,
         dense_table: bool,
         load75_table: bool,
         indexed5_table: bool,
@@ -2321,7 +2384,22 @@ mod wide {
         solver: &S3Solver128,
         reps: &[u128],
     ) -> Index128 {
+        let symmetric_states = std::env::var("KIC_SYMMETRIC_S3").as_deref() == Ok("1");
+        build_index128_with_symmetry(gf, basis, solver, reps, symmetric_states)
+    }
+
+    fn build_index128_with_symmetry(
+        gf: &Gf2_128,
+        basis: &NormalBasis128,
+        solver: &S3Solver128,
+        reps: &[u128],
+        symmetric_states: bool,
+    ) -> Index128 {
         let n = gf.n as usize;
+        assert!(
+            !symmetric_states || gf.n == 83,
+            "symmetric S3 index requires N83"
+        );
         let shifted: Vec<Vec<u128>> = reps
             .iter()
             .map(|&code| {
@@ -2336,11 +2414,26 @@ mod wide {
             .collect();
         let packed_state83 = std::env::var("KIC_STATE28").as_deref() == Ok("1");
         assert!(!packed_state83 || gf.n == 83, "28-byte states require N83");
-        let max_states = reps
-            .len()
-            .checked_mul(reps.len())
-            .and_then(|pairs| pairs.checked_mul(n))
-            .expect("state capacity exceeds usize");
+        // S3(x,y,z) is symmetric in x,y.  Frobenius^relative maps the
+        // reversed pair (right,left,n-relative) to (left,right,relative)
+        // up to exchange.  Canonical root keys are therefore identical.
+        // Keep the lexicographically first state for every such pair so
+        // first-inserted exact-root witnesses remain available.
+        let k = reps.len();
+        let max_states = if symmetric_states {
+            k.checked_mul(k.saturating_sub(1))
+                .and_then(|pairs| pairs.checked_div(2))
+                .and_then(|pairs| pairs.checked_mul(n))
+                .and_then(|off_diagonal| {
+                    k.checked_mul(n / 2 + 1)
+                        .and_then(|diagonal| off_diagonal.checked_add(diagonal))
+                })
+                .expect("symmetric state capacity exceeds usize")
+        } else {
+            k.checked_mul(k)
+                .and_then(|pairs| pairs.checked_mul(n))
+                .expect("state capacity exceeds usize")
+        };
         let mut states83 = if packed_state83 {
             Vec::with_capacity(max_states)
         } else {
@@ -2350,6 +2443,9 @@ mod wide {
         for left in 0..reps.len() {
             for right in 0..reps.len() {
                 for relative in 0..n {
+                    if symmetric_states && (left > right || (left == right && relative > n / 2)) {
+                        continue;
+                    }
                     if let Some(roots) =
                         solver.roots(gf, basis, shifted[left][0], shifted[right][relative])
                     {
@@ -2435,6 +2531,7 @@ mod wide {
             states,
             table,
             shifted,
+            symmetric_states,
             dense_table,
             load75_table,
             indexed5_table,
@@ -3086,7 +3183,7 @@ mod wide {
             index.table.layout_receipt();
         let (root_state_layout, root_state_slot_bytes, root_state_allocated_bytes) =
             index.states.layout_receipt();
-        let summary = json!({
+        let mut summary = json!({
             "kind":"compact_orbit_dlp_summary",
             "schema_version":"1.0",
             "n":n, "a":a,
@@ -3142,6 +3239,7 @@ mod wide {
             "target_threads":target_threads,
             "scope":"public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
         });
+        summary["symmetric_s3_states_enabled"] = json!(index.symmetric_states);
         println!("{summary}");
         if let Ok(path) = std::env::var("KIC_DUMP_BASE") {
             let dump = json!({
