@@ -1,0 +1,31 @@
+WARNING: The directory '/home/agent/.cache/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+Collecting typst==0.14.2
+  Downloading typst-0.14.2-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.6 kB)
+Collecting cairosvg==2.8.2
+  Downloading cairosvg-2.8.2-py3-none-any.whl.metadata (2.7 kB)
+Collecting cairocffi (from cairosvg==2.8.2)
+  Downloading cairocffi-1.7.1-py3-none-any.whl.metadata (3.3 kB)
+Collecting cssselect2 (from cairosvg==2.8.2)
+  Downloading cssselect2-0.10.1-py3-none-any.whl.metadata (2.9 kB)
+Collecting defusedxml (from cairosvg==2.8.2)
+  Downloading defusedxml-0.7.1-py2.py3-none-any.whl.metadata (32 kB)
+Requirement already satisfied: pillow in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from cairosvg==2.8.2) (12.3.0)
+Collecting tinycss2 (from cairosvg==2.8.2)
+  Downloading tinycss2-1.5.1-py3-none-any.whl.metadata (3.0 kB)
+Requirement already satisfied: cffi>=1.1.0 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from cairocffi->cairosvg==2.8.2) (2.1.1)
+Collecting webencodings (from cssselect2->cairosvg==2.8.2)
+  Downloading webencodings-0.6.1-py3-none-any.whl.metadata (3.4 kB)
+Requirement already satisfied: pycparser in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from cffi>=1.1.0->cairocffi->cairosvg==2.8.2) (3.0)
+Downloading typst-0.14.2-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (26.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 26.0/26.0 MB 12.0 MB/s eta 0:00:00
+Downloading cairosvg-2.8.2-py3-none-any.whl (45 kB)
+Downloading cairocffi-1.7.1-py3-none-any.whl (75 kB)
+Downloading cssselect2-0.10.1-py3-none-any.whl (15 kB)
+Downloading defusedxml-0.7.1-py2.py3-none-any.whl (25 kB)
+Downloading tinycss2-1.5.1-py3-none-any.whl (28 kB)
+Downloading webencodings-0.6.1-py3-none-any.whl (8.7 kB)
+Installing collected packages: webencodings, typst, defusedxml, tinycss2, cairocffi, cssselect2, cairosvg
+Successfully installed cairocffi-1.7.1 cairosvg-2.8.2 cssselect2-0.10.1 defusedxml-0.7.1 tinycss2-1.5.1 typst-0.14.2 webencodings-0.6.1
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.1
+[notice] To update, run: python3 -m pip install --upgrade pip

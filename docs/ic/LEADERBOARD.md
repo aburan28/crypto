@@ -217,6 +217,17 @@ Copied from native analysis: eight independent one-target workloads per fixed cu
 | 8209 | 0.975242 | 0.603463 to 1.450934 |
 | 131101 | 1.127134 | 0.922471 to 1.341694 |
 
+## Conductor-gap complete implementation instruction census
+
+Copied from native Callgrind analysis in a separate instruction unit. The same archived one-target workloads are replayed; method resolution, target construction, external verification and kernel work remain outside the interval. No full-cost GAE ranking changes.
+
+Profiles verified: 100/100; comparison status: admissible_implementation_diagnostic.
+
+| gap cell | IC floor/crater Ir | 99% interval |
+|---|---:|---|
+| ell8209-q29 | 0.968807 | 0.573521 to 1.492155 |
+| ell131101-q37 | 1.162501 | 0.901657 to 1.462762 |
+
 ## Sources
 
 - `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` — sha256 `28aadc91af9e4c0b…`
@@ -241,6 +252,7 @@ Copied from native analysis: eight independent one-target workloads per fixed cu
 - `research/f4_f5_f6_cross_family_20261011/ANALYSIS.json` — sha256 `143247c6b81d3539…`
 - `research/ecbench_n41_n53_shared_rank_20261005/DECISION.json` — sha256 `fe55908f837840ee…`
 - `research/ecbench_conductor_gap_20261012/analysis.json` — sha256 `0ff9b20fd773ea67…`
+- `research/ecbench_conductor_gap_ir_20261014/analysis.json` — sha256 `c211baf8a91f79d4…`
 - `research/ecbench_frontier_20261013/frontier-data.json` — sha256 `765f6e8d05ebbf75…`
 - `docs/curves/registry.json` — sha256 `03f63efa54482b2e…`
 - `docs/curves/ic/curves.schema.json` — sha256 `42cd9793dd299384…`

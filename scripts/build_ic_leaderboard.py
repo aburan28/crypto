@@ -71,6 +71,7 @@ SOURCES = {
     "f4_f5_f6_cross_family": "research/f4_f5_f6_cross_family_20261011/ANALYSIS.json",
     "n41_n53_counted": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
     "conductor_gap_counts": "research/ecbench_conductor_gap_20261012/analysis.json",
+    "conductor_gap_instructions": "research/ecbench_conductor_gap_ir_20261014/analysis.json",
     "frontier_audit": "research/ecbench_frontier_20261013/frontier-data.json",
     "registry": "docs/curves/registry.json",
     "curves_schema": "docs/curves/ic/curves.schema.json",
@@ -966,6 +967,7 @@ def build() -> dict:
         # Native analysis computes these observations; this view only copies
         # and renders them, outside the fully priced rankings.
         "conductor_gap_count_diagnostic": load(SOURCES["conductor_gap_counts"]),
+        "conductor_gap_instruction_diagnostic": load(SOURCES["conductor_gap_instructions"]),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
     }
 
@@ -1260,6 +1262,20 @@ def markdown(doc: dict) -> str:
         observed = session["arms"]["ic-mitm"]["cross_curve"]
         L.append(f"| {session['ell']} | {observed['ratio_floor_over_crater']:.6f} | "
                  f"{observed['ci99'][0]:.6f} to {observed['ci99'][1]:.6f} |")
+    ir = doc["conductor_gap_instruction_diagnostic"]
+    L += ["", "## Conductor-gap complete implementation instruction census", "",
+          "Copied from native Callgrind analysis in a separate instruction unit. "
+          "The same archived one-target workloads are replayed; method resolution, "
+          "target construction, external verification and kernel work remain outside "
+          "the interval. No full-cost GAE ranking changes.", "",
+          f"Profiles verified: {ir['verified_profiles']}/{ir['expected_profiles']}; "
+          f"comparison status: {ir['comparison_status']}.", "",
+          "| gap cell | IC floor/crater Ir | 99% interval |", "|---|---:|---|"]
+    for c in ir["comparisons"]:
+        if c["kind"] == "floor_over_crater_ic":
+            e = c["estimate"]
+            L.append(f"| {c['cell']} | {e['ratio_of_means']:.6f} | "
+                     f"{e['bootstrap_99'][0]:.6f} to {e['bootstrap_99'][1]:.6f} |")
     L += ["", "## Sources", ""]
     for k, v in doc["sources"].items():
         L.append(f"- `{v['path']}` — sha256 `{v['sha256'][:16]}…`")
@@ -1866,6 +1882,23 @@ def page(doc: dict, standalone: bool) -> str:
         P.append(f'<tr><td>{session["ell"]}</td><td>{observed["ratio_floor_over_crater"]:.6f}</td>'
                  f'<td>{observed["ci99"][0]:.6f} to {observed["ci99"][1]:.6f}</td></tr>')
     P.append('</tbody></table>' + gh(SOURCES["conductor_gap_counts"], 'Native analysis and source records') + '</section>')
+
+    ir = doc["conductor_gap_instruction_diagnostic"]
+    P.append('<section id="conductor-gap-instructions"><h2>Conductor-gap complete instruction census</h2>'
+             '<p>Callgrind simulated user-space instructions, including setup inside methods::solve. '
+             'Method resolution, target construction, external independent verification '
+             'and kernel work are excluded. This separate unit '
+             'does not change the GAE floor or fully priced rankings. '
+             f'{ir["verified_profiles"]}/{ir["expected_profiles"]} profiles verified; '
+             f'comparison status: {esc(ir["comparison_status"])}.</p>'
+             '<table><thead><tr><th>gap cell</th><th>IC floor/crater Ir</th>'
+             '<th>99% interval</th></tr></thead><tbody>')
+    for c in ir["comparisons"]:
+        if c["kind"] == "floor_over_crater_ic":
+            e = c["estimate"]
+            P.append(f'<tr><td>{esc(c["cell"])}</td><td>{e["ratio_of_means"]:.6f}</td>'
+                     f'<td>{e["bootstrap_99"][0]:.6f} to {e["bootstrap_99"][1]:.6f}</td></tr>')
+    P.append('</tbody></table>' + gh(SOURCES["conductor_gap_instructions"], 'Native instruction census and evidence') + '</section>')
 
     # Footer.
     P.append('<footer><p><strong>What this is not.</strong> A view of frozen measurements, class accounting: no row '

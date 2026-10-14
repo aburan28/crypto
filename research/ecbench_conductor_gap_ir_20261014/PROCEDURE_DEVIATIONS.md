@@ -49,3 +49,16 @@ The running library-test compiler had consumed over 81 CPU minutes without
 producing a test result. It and the queued build were terminated when v2 source
 changes required a new snapshot. Do not report the interrupted compilation as
 a passing or failing test suite; final validation remains required.
+
+## Final validation materialization
+
+The CI compile-input helper uses leading-slash non-cone sparse patterns. Its
+first final-validation invocation failed in this cone-mode workspace before
+starting Cargo (`materialize-final.log`). The thin local wrapper now uses the
+same source/dependency graph to add the missing parent directories with native
+`git sparse-checkout add --skip-checks`. No fixtures, test expectations or
+scientific parameters are changed. The first failure log is retained.
+
+Final tests use release optimization level 3 with 256 code-generation units
+and a separate target directory to bound compiler work. These executables
+supply no instruction measurements; the pinned v2 profiler remains unchanged.

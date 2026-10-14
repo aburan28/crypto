@@ -20,7 +20,7 @@ const panel=`<section class="panel" id="${anchor}">
 <h2>Conductor gap: complete implementation instruction census <span class="chip">accounting</span></h2>
 <p class="panel-summary">The archived prime-field IC and matched rho solves are counted in Callgrind user-space instructions. ${a.verified_profiles}/${a.expected_profiles} profiles passed native point/scalar and exact deterministic-counter replay.</p>
 <p>IC floor/crater ratios and independent 99% intervals: ${esc(summary)}. Frozen repeated instruction lead: ${a.repeated_instruction_lead}. A/A within 2%: ${a.aa_within_two_percent}. Comparison status: ${esc(a.comparison_status)}.</p>
-<div class="scroll"><table><caption>Cold methods::solve instruction census; eight archived one-target workloads per fixed curve and primary arm. Setup and all user-space work inside the adapter are included. Kernel work and the external independent verification are excluded and remain unmeasured. Ir is a separate unit from the GAE generic floor.</caption><thead><tr><th>gap cell</th><th>ICV1 model</th><th>arm</th><th>n</th><th>mean Ir</th><th>mean Ir/sqrt(r)</th></tr></thead><tbody>${table}</tbody></table></div>
+<div class="scroll"><table><caption>Cold methods::solve instruction census; eight archived one-target workloads per fixed curve and primary arm. Setup and all user-space work inside the adapter are included. Method resolution, target construction, kernel work and the external independent verification are excluded and remain unmeasured. Ir is a separate unit from the GAE generic floor.</caption><thead><tr><th>gap cell</th><th>ICV1 model</th><th>arm</th><th>n</th><th>mean Ir</th><th>mean Ir/sqrt(r)</th></tr></thead><tbody>${table}</tbody></table></div>
 <p>The same archived targets are reused for accounting; no new map or target transport is constructed. These two fixed pairs cannot establish intrinsic hardness. Prime-field F4/SAT, representation controls and another-host validation remain open. <a href="${source}">Reports, PDFs, frozen jobs and lossless evidence</a>.</p>
 </section>\n`;
 let page=read('docs/index-calculus-scoreboard.html');
@@ -34,7 +34,7 @@ let rows='';
 for(const c of a.comparisons.filter(c=>c.kind==='ic_over_rho')) {
   const point={date:'2026-10-14',value:c.estimate.ratio_of_means,reference:'matched',unit:'Callgrind Ir diagnostic',
     label:`Conductor gap ${c.cell}, ${c.slug}, archived eight-target IC/rho census`,
-    detail:`Complete user-space implementation Ir; paired 95% interval ${interval(c.estimate.bootstrap_95)}. ${a.verified_profiles}/${a.expected_profiles} profiles verified. Comparison status: ${a.comparison_status}. Target preparation, kernel work and external audit excluded; no native wall-time or intrinsic-hardness conclusion.`,
+    detail:`Complete user-space implementation Ir; paired 95% interval ${interval(c.estimate.bootstrap_95)}. ${a.verified_profiles}/${a.expected_profiles} profiles verified. Comparison status: ${a.comparison_status}. Method resolution, target preparation, kernel work and external audit excluded; no native wall-time or intrinsic-hardness conclusion.`,
     class:'accounting',anchor:'#'+anchor,source};
   series.points.push(point);
   rows+=`<tr><td>${point.date}</td><td>${esc(series.label)}</td><td>${esc(point.label)}</td><td class="n">${fmt(point.value)}&times; <small>simulated instruction diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="${point.anchor}">panel</a> · <a href="${source}">source</a></td></tr>\n`;

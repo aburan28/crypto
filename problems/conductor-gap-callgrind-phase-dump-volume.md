@@ -1,6 +1,6 @@
 # Conductor-gap Callgrind phase-dump volume
 
-- **Status:** investigating
+- **Status:** resolved for the v2 instruction census
 - **Kind:** profiling implementation obstruction
 - **Affected work:** [instruction census](../research/ecbench_conductor_gap_ir_20261014/PROTOCOL.md), [v2 mechanism](../research/ecbench_conductor_gap_ir_20261014/PROTOCOL-v2.md)
 - **Next action owner:** native ecbench measurement workstream
@@ -30,27 +30,33 @@ intended bounded output envelope.
 
 ## What would unblock it
 
-- [ ] A regression demonstrates that internal dump suppression preserves
+- [x] A regression demonstrates that internal dump suppression preserves
   exclusive clocks and unconditional external markers, and default behavior.
-- [ ] A newly pinned native executable emits a bounded number of parts for a
+- [x] A newly pinned native executable emits a bounded number of parts for a
   full IC solve; its scalar and every deterministic phase counter match the
   archived record.
-- [ ] All 100 frozen jobs execute under the amended protocol, and raw-part
+- [x] All 100 frozen jobs execute under the amended protocol, and raw-part
   re-derivation plus native verification admits the complete panel.
 
-The first condition is implemented and passes standalone module tests. The
-release rebuild and full census remain pending. These conditions establish
-only the measured instruction census; structural hardness remains unresolved.
+All seven module checks pass, including the isolated strict-session check.
+The pinned release executable completed all 100 profiles. Every native Ir
+receipt has exactly one solve part; every archived scalar, point and
+deterministic phase counter matches. [Native analysis](../research/ecbench_conductor_gap_ir_20261014/analysis.json)
+and the lossless raw archive record this bounded-output census. These conditions
+establish only the measured instruction census; structural hardness remains unresolved.
 
 ## Next discriminating step
 
-Run the same complete frozen panel with `ECBENCH_CALLGRIND_PHASE_DUMPS=0`,
-the v2 pinned binary, unchanged 1800-second child watchdogs, and the same
-scalar/counter controls. A correct bounded-output solve permits completion of
-the panel; a missing marker, counter mismatch or watchdog exit remains a
-failure and blocks inference. Recheck when the v2 release build completes.
+The complete frozen panel passed with `ECBENCH_CALLGRIND_PHASE_DUMPS=0`,
+the v2 pinned binary, unchanged 1800-second child watchdogs and scalar/counter
+controls. Recheck the clock/marker regressions and append a fresh bounded-output
+census if this mechanism changes. Missing markers, counter mismatches and
+watchdog exits must remain failures that block inference.
 
 ## Resolution and history
 
-Unresolved. Both interrupted attempts are retained losslessly and excluded
-from primary estimates. No instruction result has yet been admitted.
+2026-10-14: resolved for the pinned v2 census after all 100 profiles passed
+native validation. Both interrupted attempts are retained losslessly and
+excluded from primary estimates. The frozen repeated instruction-lead criterion
+was not met; both floor/crater 99% intervals include one. This resolves the
+profiling obstruction, not the broader hardness question or missing algebraic oracle.

@@ -148,6 +148,15 @@ jobs:
         run: cargo test --release --test ecbench_large_prime
       - name: Build
         run: cargo build --release --bin ecbench
+      - name: Re-derive the conductor-gap instruction census from archived profiles
+        run: |
+          study=research/ecbench_conductor_gap_ir_20261014
+          archive=research/ecbench_conductor_gap_20261012
+          cargo test --release --example conductor_gap_ir
+          (cd "$study" && sha256sum -c raw-callgrind.tar.xz.sha256)
+          tar -xJf "$study/raw-callgrind.tar.xz" -C "$study"
+          cargo run --release --example conductor_gap_ir -- analyze "$study" "$archive"
+          git diff --exit-code -- "$study/analysis.json" "$study/analysis.md"
       - name: Host
         run: ./target/release/ecbench host | tee -a "$GITHUB_STEP_SUMMARY"
       # Bounds are re-derivable from the sessions they name, challenges must
