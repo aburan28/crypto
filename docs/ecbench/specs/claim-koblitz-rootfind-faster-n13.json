@@ -1,0 +1,40 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "rootfind faster claim v3: XOR-priced F4 vs complete negfold and counted compact-frob on public E_0 n=13",
+  "description": "After faster cycles 1–3. Cold complete candidate is rootfind-negfold m=2 d=5 (and d=4 if cycle-3 wins). F4 m=3 d=5 should now price pinned word XORs into admitted S. Compact-orbit counted frob kept as best LB IC arm. Public synthetic; classification engineering; no security claim; multi-target amortization secondary only.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 13}],
+    "targets_per_curve": 8,
+    "target_seed": 202610140900,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "rho-frob", "role": "baseline", "method": {"id": "rho.signed_frobenius"}},
+    {"name": "ic-f4-m3-d5", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192",
+      "max_trials": "200000"}}},
+    {"name": "ic-negfold-m2-d5", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+      "max_trials": "200000"}}},
+    {"name": "ic-negfold-m2-d4", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=4",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+      "max_trials": "200000"}}},
+    {"name": "ic-c2-frob-counted-m2", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "compact-orbit-scan:columns=2,raw_x_cap=10000",
+      "oracle": "mitm-frobenius-counted:m=2",
+      "max_trials": "200000"}}},
+    {"name": "rho-strong-aa", "role": "control", "method": {"id": "rho.signed_frobenius_strong"}}
+  ],
+  "measurement": {
+    "rounds": 3,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 202610140901,
+    "isolation_required": "L2",
+    "timeout_seconds": 1800
+  }
+}
