@@ -488,8 +488,20 @@ fn main() {
             }
             write_out(&out, &rows);
         }
+        "classes" => {
+            let lo: u32 = arg(&args, "--min-n").map_or(8, |s| s.parse().unwrap());
+            let hi: u32 = arg(&args, "--max-n").map_or(20, |s| s.parse().unwrap());
+            let out = arg(&args, "--out").expect("--out");
+            class_ceiling(lo, hi, &out);
+        }
+        "summary" => {
+            let catalog = arg(&args, "--catalog").expect("--catalog CSV");
+            let null = arg(&args, "--null").expect("--null CSV");
+            let out = arg(&args, "--out").expect("--out");
+            summary(&catalog, &null, &out);
+        }
         _ => {
-            eprintln!("usage: twist_walk_blocked_towers control|catalog|null [--registry F] [--out F] [--samples N] [--seed S]");
+            eprintln!("usage: twist_walk_blocked_towers control|catalog|null|summary|classes [--registry F] [--out F] [--samples N] [--seed S] [--catalog F --null F]");
             std::process::exit(2);
         }
     }
@@ -498,4 +510,234 @@ fn main() {
 
 fn field_degree(reg: &serde_json::Value, slug: &str) -> u64 {
     find_curve(reg, slug)["params"]["m"].as_u64().expect("m")
+}
+
+// ── Summary: counts and Clopper-Pearson intervals ───────────────────────
+
+fn ln_gamma(x: f64) -> f64 {
+    // Lanczos approximation (g = 7, n = 9), accurate to ~1e-13 for x > 0.
+    const C: [f64; 9] = [
+        0.999_999_999_999_809_9,
+        676.520_368_121_885_1,
+        -1_259.139_216_722_402_8,
+        771.323_428_777_653_1,
+        -176.615_029_162_140_6,
+        12.507_343_278_686_905,
+        -0.138_571_095_265_720_12,
+        9.984_369_578_019_572e-6,
+        1.505_632_735_149_311_6e-7,
+    ];
+    if x < 0.5 {
+        return (std::f64::consts::PI / (std::f64::consts::PI * x).sin()).ln() - ln_gamma(1.0 - x);
+    }
+    let x = x - 1.0;
+    let mut a = C[0];
+    let t = x + 7.5;
+    for (i, c) in C.iter().enumerate().skip(1) {
+        a += c / (x + i as f64);
+    }
+    0.5 * (2.0 * std::f64::consts::PI).ln() + (x + 0.5) * t.ln() - t + a.ln()
+}
+
+/// `P(X <= k)` for `X ~ Binomial(n, p)`, summed in log space.
+fn binom_cdf(k: u64, n: u64, p: f64) -> f64 {
+    if p <= 0.0 {
+        return 1.0;
+    }
+    if p >= 1.0 {
+        return if k >= n { 1.0 } else { 0.0 };
+    }
+    let (lp, lq) = (p.ln(), (1.0 - p).ln());
+    let lnn = ln_gamma(n as f64 + 1.0);
+    let mut total = 0.0;
+    for i in 0..=k.min(n) {
+        let ln_pmf = lnn - ln_gamma(i as f64 + 1.0) - ln_gamma((n - i) as f64 + 1.0)
+            + i as f64 * lp
+            + (n - i) as f64 * lq;
+        total += ln_pmf.exp();
+    }
+    total.min(1.0)
+}
+
+/// Two-sided 95% Clopper-Pearson interval for `k` successes in `n` trials.
+fn clopper_pearson(k: u64, n: u64) -> (f64, f64) {
+    let alpha = 0.05;
+    let bisect = |f: &dyn Fn(f64) -> f64, target: f64, increasing: bool| {
+        // find p in [0, 1] with f(p) = target; f monotone
+        let (mut lo, mut hi) = (0.0f64, 1.0f64);
+        for _ in 0..200 {
+            let mid = 0.5 * (lo + hi);
+            if (f(mid) < target) == increasing {
+                lo = mid;
+            } else {
+                hi = mid;
+            }
+        }
+        0.5 * (lo + hi)
+    };
+    // lower: P(X >= k | p) = alpha/2, increasing in p
+    let lower = if k == 0 {
+        0.0
+    } else {
+        bisect(&|p| 1.0 - binom_cdf(k - 1, n, p), alpha / 2.0, true)
+    };
+    // upper: P(X <= k | p) = alpha/2, decreasing in p
+    let upper = if k == n {
+        1.0
+    } else {
+        bisect(&|p| binom_cdf(k, n, p), alpha / 2.0, false)
+    };
+    (lower, upper)
+}
+
+struct Cfg {
+    n_total: u32,
+    l: u32,
+    null_n: u64,
+    has_neighbour: u64,
+    escape: [u64; DEPTH + 1],
+    escape_generic_m: u64,
+}
+
+fn summary(catalog_csv: &str, null_csv: &str, out: &str) {
+    let read = |path: &str| -> Vec<Vec<String>> {
+        let text = fs::read_to_string(path).expect("csv");
+        text.lines()
+            .skip(1)
+            .map(|l| l.split(',').map(str::to_string).collect())
+            .collect()
+    };
+    let col = |name: &str| HEADER.split(',').position(|c| c == name).expect(name);
+    let (cn, cl, cnn) = (col("N"), col("l"), col("n"));
+    let (cnodes1, cfirst) = (col("nodes_d1"), col("first_unblocked_depth"));
+    let cmin4 = col("min_m_unblocked_le4");
+    let mut cfgs: Vec<Cfg> = Vec::new();
+    for r in read(null_csv) {
+        let (n_total, l): (u32, u32) = (r[cn].parse().unwrap(), r[cl].parse().unwrap());
+        let i = match cfgs.iter().position(|c| c.n_total == n_total && c.l == l) {
+            Some(i) => i,
+            None => {
+                cfgs.push(Cfg {
+                    n_total,
+                    l,
+                    null_n: 0,
+                    has_neighbour: 0,
+                    escape: [0; DEPTH + 1],
+                    escape_generic_m: 0,
+                });
+                cfgs.len() - 1
+            }
+        };
+        let c = &mut cfgs[i];
+        c.null_n += 1;
+        if r[cnodes1].parse::<u64>().unwrap() > 0 {
+            c.has_neighbour += 1;
+        }
+        if let Ok(first) = r[cfirst].parse::<usize>() {
+            for d in first..=DEPTH {
+                c.escape[d] += 1;
+            }
+            let n_rel: u32 = r[cnn].parse().unwrap();
+            if r[cmin4].parse::<u32>().ok() == Some(n_rel) {
+                c.escape_generic_m += 1;
+            }
+        }
+    }
+    let mut lines = vec![
+        "kind,N,l,n,sample,start_m,has_neighbour,escape_le1,escape_le2,escape_le3,escape_le4,escape_le4_ci_lo,escape_le4_ci_hi,has_neighbour_ci_lo,has_neighbour_ci_hi,escape_with_generic_m,first_unblocked_depth,min_m_unblocked_le4".to_string(),
+    ];
+    for c in &cfgs {
+        let (elo, ehi) = clopper_pearson(c.escape[DEPTH], c.null_n);
+        let (nlo, nhi) = clopper_pearson(c.has_neighbour, c.null_n);
+        lines.push(format!(
+            "null,{},{},{},{},,{}/{},{}/{},{}/{},{}/{},{}/{},{elo:.4},{ehi:.4},{nlo:.4},{nhi:.4},{}/{},,",
+            c.n_total, c.l, c.n_total / c.l, c.null_n, c.has_neighbour, c.null_n,
+            c.escape[1], c.null_n, c.escape[2], c.null_n, c.escape[3], c.null_n, c.escape[4], c.null_n,
+            c.escape_generic_m, c.escape[DEPTH].max(1),
+        ));
+    }
+    let cn_idx = (col("sample"), col("start_m"));
+    for r in read(catalog_csv) {
+        lines.push(format!(
+            "catalog,{},{},{},{},{},{},,,,,,,,,,{},{}",
+            r[cn],
+            r[cl],
+            r[cnn],
+            r[cn_idx.0],
+            r[cn_idx.1],
+            r[cnodes1].parse::<u64>().unwrap() > 0,
+            r[cfirst],
+            r[cmin4],
+        ));
+    }
+    fs::write(out, lines.join("\n") + "\n").expect("summary out");
+    println!("wrote {out}");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn clopper_pearson_matches_known_values() {
+        // 0 of 2000: upper = 1 - (alpha/2)^(1/n)
+        let (lo, hi) = clopper_pearson(0, 2000);
+        assert_eq!(lo, 0.0);
+        assert!(
+            (hi - (1.0 - 0.025f64.powf(1.0 / 2000.0))).abs() < 1e-9,
+            "hi = {hi}"
+        );
+        // 10 of 20: the standard exact interval (0.2719, 0.7281)
+        let (lo, hi) = clopper_pearson(10, 20);
+        assert!(
+            (lo - 0.2719).abs() < 5e-4 && (hi - 0.7281).abs() < 5e-4,
+            "({lo}, {hi})"
+        );
+        // 20 of 20: lower = (alpha/2)^(1/n)
+        let (lo, hi) = clopper_pearson(20, 20);
+        assert_eq!(hi, 1.0);
+        assert!((lo - 0.025f64.powf(1.0 / 20.0)).abs() < 1e-9, "lo = {lo}");
+    }
+}
+
+/// Exact class-level ceiling.  The twist-side isogeny class of `b` is
+/// `{b' : t(b') = t(b)}` (the `a = 0` family has trace `t(b)`, its twist
+/// `-t(b)`, and `b` is unchanged by the twist).  For every `N` in `lo..=hi` and
+/// every `l | N` with `n = N/l` even, count the trace classes with a blocked
+/// twist tower (`Tr_{K/k}(b) = 0`), those with no unblocked curve at all, and
+/// the mixed ones, where some isogenous curve is unblocked.  A walk can leave a
+/// blocked tower only inside a mixed class.
+fn class_ceiling(lo: u32, hi: u32, out: &str) {
+    use crypto_lib::cryptanalysis::ghs_class_coverage::{traces_a0, Gf2Log};
+    let mut lines = vec!["N,l,n,curves,classes,classes_with_blocked,classes_all_blocked,classes_mixed,curves_blocked,curves_blocked_in_mixed_classes".to_string()];
+    for n_total in lo..=hi {
+        let f = Gf2Log::new(n_total);
+        let t = traces_a0(&f);
+        for l in (1..=n_total).filter(|l| n_total % l == 0 && (n_total / l) % 2 == 0) {
+            // per trace value: (blocked count, unblocked count)
+            let mut per: HashMap<i32, (u64, u64)> = HashMap::new();
+            for b in 1..f.size() as u32 {
+                let e = per.entry(t[b as usize]).or_insert((0, 0));
+                if f.rel_trace(b, l) == 0 {
+                    e.0 += 1;
+                } else {
+                    e.1 += 1;
+                }
+            }
+            let classes = per.len();
+            let with_blocked = per.values().filter(|v| v.0 > 0).count();
+            let all_blocked = per.values().filter(|v| v.0 > 0 && v.1 == 0).count();
+            let mixed = per.values().filter(|v| v.0 > 0 && v.1 > 0).count();
+            let blocked: u64 = per.values().map(|v| v.0).sum();
+            let blocked_mixed: u64 = per.values().filter(|v| v.1 > 0).map(|v| v.0).sum();
+            lines.push(format!(
+                "{n_total},{l},{},{},{classes},{with_blocked},{all_blocked},{mixed},{blocked},{blocked_mixed}",
+                n_total / l,
+                f.size() - 1
+            ));
+        }
+        eprintln!("N = {n_total} done");
+    }
+    fs::write(out, lines.join("\n") + "\n").expect("classes out");
+    println!("wrote {out}");
 }
