@@ -147,6 +147,11 @@ namespace eccPacked131 {
 #ifndef ECC_SIGMA_FUSED
 #define ECC_SIGMA_FUSED 0
 #endif
+// ECC_SIGMA_SIGN is wired into one forward pass: the campaign's, weighted
+// prefixes (2) with the Frobenius network.  Every other path refuses it.
+#if ECC_SIGMA_SIGN && (ECC_SIGMA_FUSED || ECC_PACKED_SIGMA_TABLE || ECC_PACKED_WEIGHTED_PREFIX != 2 || ECC_TABLE_PIPE_SELECT)
+#error "ECC_SIGMA_SIGN needs SIGMA_FUSED=0 PACKED_SIGMA_TABLE=0 PACKED_WEIGHTED_PREFIX=2"
+#endif
 #if ECC_SIGMA_FUSED != 0 && ECC_SIGMA_FUSED != 1
 #error "ECC_SIGMA_FUSED must be 0 or 1"
 #endif
@@ -1423,7 +1428,17 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             const SigmaWalkPair131 sigmas = sigmaWalkNetworkPair131(x, normalY, j - 3);
 #endif
             P131 d = add131(x, sigmas.first);
+#if ECC_SIGMA_SIGN
+            // R - sigma^j(R) = R + (x_Q, x_Q + y_Q): the slope's numerator
+            // gains x_Q, the denominator and the inversion are unchanged.
+            const unsigned minusMask = 0u - unsigned((hw >> ECC_SIGMA_SIGN_BIT) & 1);
+            P131 en = add131(normalY, sigmas.second);
+#pragma unroll
+            for (int k = 0; k < 5; ++k) en.v[k] ^= sigmas.first.v[k] & minusMask;
+            P131 ep = toPolynomial131(en);
+#else
             P131 ep = toPolynomial131(add131(normalY, sigmas.second));
+#endif
             P131 dp = toPolynomial131(d);
 #endif
 #else

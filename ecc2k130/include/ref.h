@@ -14,6 +14,17 @@
 #include "bigmod.h"
 #include "tablewalk.h"
 
+// The signed sigma walk (walk.h has the same defaults).
+#ifndef ECC_SIGMA_SIGN
+#define ECC_SIGMA_SIGN 0
+#endif
+#ifndef ECC_SIGMA_SIGN_BIT
+#define ECC_SIGMA_SIGN_BIT 4
+#endif
+#ifndef ECC_STEP_KINDS
+#define ECC_STEP_KINDS (ECC_SIGMA_SIGN ? 16 : 8)
+#endif
+
 #ifndef ECC_PACKED_XONLY_23
 #define ECC_PACKED_XONLY_23 0
 #endif
@@ -494,6 +505,10 @@ struct RefT {
 
     // ---- the iteration function ----------------------------------------
     static int jOf(int hw) { return 3 + ((hw >> 1) & 7); }
+    // Whether the step subtracts sigma^j(R) (ECC_SIGMA_SIGN), and the index
+    // of the step's multiplier among (1 + s^j) [0, 8) and (1 - s^j) [8, 16).
+    static bool minusOf(int hw) { return ECC_SIGMA_SIGN && ((hw >> ECC_SIGMA_SIGN_BIT) & 1); }
+    static int stepIndex(int hw) { return jOf(hw) - 3 + (minusOf(hw) ? 8 : 0); }
     // Packed polynomial low word of a GF(2^131) normal-basis coordinate.
     // Matches packedtransform131.h with FAST_CONVERT=1, which is algebraically
     // the same map as the slower factorization.
@@ -569,7 +584,8 @@ struct RefT {
 #endif
 #endif
 #else
-        return addPt(p, frob(p, jOf(hw)));
+        const Point q = frob(p, jOf(hw));
+        return addPt(p, minusOf(hw) ? neg(q) : q);
 #endif
     }
 

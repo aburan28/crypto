@@ -27,6 +27,18 @@
 // per-branch step counter is.  ECC_WITNESS=0 compiles the counting out, which
 // is the control the paired comparison in CAIRN-WITNESS.md asks for.
 #define ECC_JCOUNT 8
+// ECC_SIGMA_SIGN=1: the step is R + sigma^j(R) or R - sigma^j(R), the sign
+// being bit ECC_SIGMA_SIGN_BIT of the normal-basis weight (class-invariant, as
+// j is).  The rewalk then counts sixteen step kinds, (1 + s^j) and (1 - s^j).
+#ifndef ECC_SIGMA_SIGN
+#define ECC_SIGMA_SIGN 0
+#endif
+#ifndef ECC_SIGMA_SIGN_BIT
+#define ECC_SIGMA_SIGN_BIT 4
+#endif
+#ifndef ECC_STEP_KINDS
+#define ECC_STEP_KINDS (ECC_SIGMA_SIGN ? 16 : 8)
+#endif
 // Default to carrying the witness -- except on the table walk, which cannot
 // produce one (see below).  Defaulting rather than erroring matters because
 // several build recipes select the table walk and say nothing about the
@@ -38,6 +50,12 @@
 #else
 #define ECC_WITNESS 1
 #endif
+#endif
+#if ECC_SIGMA_SIGN && ECC_WITNESS
+#error "ECC_SIGMA_SIGN has no device witness yet (eight counters); build with WITNESS=0"
+#endif
+#if ECC_SIGMA_SIGN && ((defined(ECC_WALK_TABLE) && ECC_WALK_TABLE) || (defined(ECC_PACKED_XONLY_23) && ECC_PACKED_XONLY_23))
+#error "ECC_SIGMA_SIGN modifies the sigma walk only"
 #endif
 #ifndef ECC_COUNT_BITS
 #define ECC_COUNT_BITS 32

@@ -30,6 +30,14 @@
 //!   is a function of the class.  A return to one of the walk's own last
 //!   `RECENT` classes is counted by length and the walk restarts, as for the
 //!   table walk; for `sigma` the same returns are counted only.
+//! - `sigmapm`: the σ walk stepping to `R + σʲ(R)` or `R − σʲ(R)` by a sign
+//!   read from `R`'s class (bit 4 of the normal-basis weight under `native`,
+//!   a salted class hash otherwise): sixteen branches, eight `σʲ`, and only
+//!   the chosen candidate is computed (the sign is an XOR of `x(σʲR)` into
+//!   the slope's numerator).
+//! - `sigma2t`: `R − σʲ(R)` when `R + σʲ(R)` scores below the median
+//!   (`--score hw`: weight below `n/2`; `key`: hash below `2^63`), else
+//!   `R + σʲ(R)`; only one candidate's score is needed.
 //!
 //! and three ways of choosing the branch `b`, all class-invariant:
 //!
@@ -106,6 +114,8 @@ enum Walk {
     Table,
     Adding,
     Sigma2,
+    SigmaPm,
+    Sigma2t,
 }
 
 /// The score `sigma2` picks its candidate by (`--score`).
@@ -511,7 +521,7 @@ impl Setup {
 
     fn mapping(&self, rng: &mut StdRng) -> Mapping {
         let table = match self.walk {
-            Walk::Sigma | Walk::Sigma2 => Vec::new(),
+            Walk::Sigma | Walk::Sigma2 | Walk::SigmaPm | Walk::Sigma2t => Vec::new(),
             Walk::Table | Walk::Adding => (0..self.branches)
                 .map(|_| {
                     self.curve
@@ -573,13 +583,24 @@ fn trial(s: &Setup, rng: &mut StdRng, t: &mut Tally) {
             }
             let b = s.branch(m, &w.p, key);
             t.branch_counts[b] += 1;
-            let next = if s.walk == Walk::Sigma || s.walk == Walk::Sigma2 {
+            let sigma_family = matches!(s.walk, Walk::Sigma | Walk::Sigma2 | Walk::SigmaPm | Walk::Sigma2t);
+            let next = if sigma_family {
                 let q = s.curve.frobenius_k(w.p, 3 + b as u32);
                 let plus = s.curve.add(w.p, q);
                 let mut steptag = 3 + b as u32;
-                let next = if s.walk == Walk::Sigma2 {
+                let next = if s.walk != Walk::Sigma {
                     let minus = s.curve.add(w.p, s.curve.neg(q));
-                    let take_minus = s.score(m, &minus) > s.score(m, &plus);
+                    let take_minus = match s.walk {
+                        Walk::Sigma2 => s.score(m, &minus) > s.score(m, &plus),
+                        Walk::Sigma2t => match s.score {
+                            Score::Hw => s.score(m, &plus) < u64::from(s.n / 2),
+                            Score::Key => s.score(m, &plus) < 1 << 63,
+                        },
+                        _ => match s.dist {
+                            Dist::Native => (s.canon.coords(w.p.x).count_ones() >> 4) & 1 == 1,
+                            _ => splitmix(key ^ m.salt ^ 0x51_67_4e) & 1 == 1,
+                        },
+                    };
                     t.minus += u64::from(take_minus);
                     if take_minus {
                         steptag |= 0x100;
@@ -607,7 +628,7 @@ fn trial(s: &Setup, rng: &mut StdRng, t: &mut Tally) {
                         } else if t.short_cycle.iter().sum::<u64>() < 4 {
                             eprintln!("non-formal short return, length {l}: {tags:x?}");
                         }
-                        if s.walk == Walk::Sigma2 {
+                        if s.walk != Walk::Sigma {
                             *w = s.start(rng);
                             if !seen.insert(s.key(&w.p)) {
                                 break 'run;
@@ -742,6 +763,8 @@ fn main() {
         "table" => Walk::Table,
         "adding" => Walk::Adding,
         "sigma2" => Walk::Sigma2,
+        "sigmapm" => Walk::SigmaPm,
+        "sigma2t" => Walk::Sigma2t,
         w => panic!("unknown walk {w}"),
     };
     let dist = match get("--dist").as_deref().unwrap_or("ecc2k130") {
@@ -752,14 +775,14 @@ fn main() {
     };
     let branches: usize = get("--branches").map_or(
         match walk {
-            Walk::Sigma | Walk::Sigma2 => 8,
+            Walk::Sigma | Walk::Sigma2 | Walk::SigmaPm | Walk::Sigma2t => 8,
             Walk::Table => 8,
             Walk::Adding => 256,
         },
         |v| v.parse().expect("--branches"),
     );
     assert!(
-        !matches!(walk, Walk::Sigma | Walk::Sigma2) || branches == 8,
+        !matches!(walk, Walk::Sigma | Walk::Sigma2 | Walk::SigmaPm | Walk::Sigma2t) || branches == 8,
         "the sigma walk has eight branches"
     );
     assert!(branches <= 1 << 16, "at most 2^16 branches");
@@ -833,7 +856,7 @@ fn main() {
     let merge: u64 = get("--merge").map_or(0, |v| v.parse().expect("--merge"));
     if merge > 0 {
         assert!(
-            !matches!(walk, Walk::Sigma | Walk::Sigma2),
+            !matches!(walk, Walk::Sigma | Walk::Sigma2 | Walk::SigmaPm | Walk::Sigma2t),
             "the sigma walks have no history to part on"
         );
         let next = AtomicU64::new(0);
@@ -949,7 +972,7 @@ fn main() {
     // collisions are suppressed only when the frames agree, 1/2n of them.
     let injective = 1.0 / (1.0 - s2).sqrt();
     let class_frame = 1.0 / (1.0 - s2 / (2.0 * n as f64)).sqrt();
-    let model = if matches!(walk, Walk::Sigma | Walk::Sigma2) {
+    let model = if matches!(walk, Walk::Sigma | Walk::Sigma2 | Walk::SigmaPm | Walk::Sigma2t) {
         injective
     } else {
         class_frame
