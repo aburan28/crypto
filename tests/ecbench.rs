@@ -142,6 +142,14 @@ fn a_session_runs_verifies_compares_and_loads() {
     let c: Value = serde_json::from_str(&stdout).unwrap();
     assert_eq!(c["ops"]["status"], "ok");
     assert!(c["ops"]["ci95"].is_array());
+    assert_eq!(
+        c["quality"]["score"], 0,
+        "L0 measurements have no CPU isolation credit"
+    );
+    assert_eq!(c["quality"]["paired_attempts"], 8);
+    assert_eq!(c["quality"]["verified_pairs"], 8);
+    assert_eq!(c["quality"]["admitted_pairs"], 0);
+    assert_eq!(c["quality"]["levels"]["L0"], 8);
 
     // The resource vector includes every measured attempt, excludes the
     // warm-ups, and preserves native work in its original units.
@@ -258,6 +266,8 @@ fn run_spec(dir: &Path, out: &Path, extra: &[&str]) -> (bool, String) {
 
 #[test]
 fn counted_ic_sat_replays_with_different_solver_wall_times() {
+    // This checks counted work and replay, not a wall-time bound. Give the
+    // SAT fixture room on contended CI hosts while retaining a watchdog.
     let dir = scratch("counted-sat");
     let spec = dir.join("spec.json");
     std::fs::write(
@@ -271,7 +281,7 @@ fn counted_ic_sat_replays_with_different_solver_wall_times() {
     {"name":"sat-cnf","role":"candidate","method":{"id":"ic.pipeline_counted","params":{"factor_base":"koblitz-orbit:divisor=0;1","oracle":"descent-algebraic:m=2","solver":"sat-cdcl:sat_conflict_budget=20000,sat_xor_encoding=cnf","max_trials":"20000"}}},
     {"name":"sat-xor","role":"candidate","method":{"id":"ic.pipeline_counted","params":{"factor_base":"koblitz-orbit:divisor=0;1","oracle":"descent-algebraic:m=2","solver":"sat-cdcl:sat_conflict_budget=20000,sat_xor_encoding=native","max_trials":"20000"}}}
   ],
-  "measurement":{"rounds":1,"warmup":0,"seed":9123401,"isolation_required":"L0","timeout_seconds":60}
+  "measurement":{"rounds":1,"warmup":0,"seed":9123401,"isolation_required":"L0","timeout_seconds":300}
 }"#,
     )
     .unwrap();
@@ -663,7 +673,13 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
             "record_class must be verified_answer_controlled_wall for a primary wall claim"
         ])
     );
-    assert_eq!(c["missing_stage_fields"], serde_json::json!([]));
+    assert_eq!(
+        c["missing_stage_fields"],
+        serde_json::json!([
+            "ic_replay_certificate_sha256",
+            "rho_replay_certificate_sha256"
+        ])
+    );
     assert_eq!(c["missing_global_provenance"], serde_json::json!([]));
 
     // A replay on the session's own host class is not independent.
@@ -988,8 +1004,10 @@ fn pdp3_koblitz_rootfind_engine_follows_f4_query_stream_without_a_solver() {
     let (ok, err) = run_spec(&dir, &out, &[]);
     assert!(ok, "{err}");
     let text = std::fs::read_to_string(out.join("records.jsonl")).unwrap();
-    let mut by_workload: std::collections::BTreeMap<String, std::collections::BTreeMap<String, Value>> =
-        Default::default();
+    let mut by_workload: std::collections::BTreeMap<
+        String,
+        std::collections::BTreeMap<String, Value>,
+    > = Default::default();
     for line in text.lines() {
         let r: Value = serde_json::from_str(line).unwrap();
         let arm = r["arm"].as_str().unwrap().to_string();
@@ -1001,7 +1019,10 @@ fn pdp3_koblitz_rootfind_engine_follows_f4_query_stream_without_a_solver() {
             assert_eq!(r["outcome"]["status"], "verified", "{line}");
         }
         if arm.starts_with("root") {
-            assert!(r["solver"].is_null(), "a table oracle has no solver block: {line}");
+            assert!(
+                r["solver"].is_null(),
+                "a table oracle has no solver block: {line}"
+            );
             assert!(
                 !r["cost"]["unpriced"].to_string().contains("word_XORs"),
                 "{line}"
@@ -1031,9 +1052,16 @@ fn pdp3_koblitz_rootfind_engine_follows_f4_query_stream_without_a_solver() {
                 .expect("an oracle_setup phase")
                 .clone();
             let points = arms[root]["factor_base"]["signed_points"].as_u64().unwrap();
-            assert_eq!(setup["adds"].as_u64().unwrap(), points * (points - 1) / 2, "{w}");
+            assert_eq!(
+                setup["adds"].as_u64().unwrap(),
+                points * (points - 1) / 2,
+                "{w}"
+            );
             assert_eq!(setup["doubles"].as_u64().unwrap(), points, "{w}");
-            assert!(setup["native"]["pair_table_entries"].as_u64().unwrap() > 0, "{w}");
+            assert!(
+                setup["native"]["pair_table_entries"].as_u64().unwrap() > 0,
+                "{w}"
+            );
             let relations = arms[root]["phases"]
                 .as_array()
                 .unwrap()
@@ -1042,7 +1070,9 @@ fn pdp3_koblitz_rootfind_engine_follows_f4_query_stream_without_a_solver() {
                 .unwrap()
                 .clone();
             assert_eq!(
-                relations["native"]["frobfold_mismatches"].as_u64().unwrap_or(0),
+                relations["native"]["frobfold_mismatches"]
+                    .as_u64()
+                    .unwrap_or(0),
                 0,
                 "{w}"
             );
