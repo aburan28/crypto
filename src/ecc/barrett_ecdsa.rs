@@ -293,7 +293,10 @@ fn next_prime(alpha: &BigUint) -> BigUint {
 /// (~20 bits or less).
 fn find_curve_with_prime_order(p: &BigUint) -> Option<(BigUint, BigUint, BigUint)> {
     let p_u64: u64 = p.try_into().ok()?;
-    for a in 0..p_u64 {
+    // Search the j=0 family last. For p = 2 (mod 3), every nonsingular
+    // a=0 curve has order p+1, so scanning all b first repeats a composite
+    // point count and can make the small-prime test take minutes.
+    for a in (1..p_u64).chain(std::iter::once(0)) {
         for b in 0..p_u64 {
             // Skip singular curves (4a³ + 27b² ≡ 0 mod p)
             let disc = (4u128 * (a as u128).pow(3) + 27 * (b as u128).pow(2)) % p_u64 as u128;
