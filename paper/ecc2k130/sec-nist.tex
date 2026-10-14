@@ -130,8 +130,7 @@ CUDA~13.3, \texttt{sm\_120}).
   on one RTX~PRO~6000. Rates are in billions of iterations per second. Each NIST ratio compares
   adjacent cells of the same sweep; the cells are single runs, not the
   interleaved repeated pairs of Section~\ref{sec:gpu}. Rows marked
-  $^\ast$ come from the round-2 sweep, which at the time of writing is
-  in an open pull request. Class: engineering.}
+  $^\ast$ come from the round-2 sweep. Class: engineering.}
 \label{tab:nist-ladder}
 \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.25\textwidth}>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.20\textwidth}rr@{}}
 \toprule
@@ -188,7 +187,7 @@ $W=16$ on P-256, and from $0.096$ to $0.438$ on P-384
 second round passed the inversion's scratch arrays by reference and
 compiled a $W=32$ instance. That cell reached $1.632$ and
 $0.548$~billion iterations/s, $1.22\times$ and $1.31\times$ over $W=16$ at the
-same geometry~\evcite{\evref{nistres}, round 2 (aburan28/crypto pull request 1778)}.
+same geometry~\evcite{\evref{nistres}, round 2}.
 We cannot cleanly split that gain between the larger batch and the
 by-reference inversion, because round 1 never compiled $W=32$. What we
 can say is that at $W\le16$ the two rounds agree within noise

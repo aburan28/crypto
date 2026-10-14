@@ -130,6 +130,9 @@ GPU; the paper says so in its availability paragraph and Appendix A.
   subsection puts P-256 at about 6e21 card-years. That corrects the
   earlier "about 1e30 seconds" to 1.9e29 here and in the NIST benchmark
   report. Abstract, introduction and conclusion updated.
+  The NIST round-2 results are no longer described as unmerged: PR 1778
+  merged with `gpu/nist` identical to the cited commit, so E49 now points
+  at `gpu/nist/RESULTS.md` on `main`.
 - Draft 6: refocused on rho on Blackwell and retitled. New §2 (2009–2012
   rates from Bailey et al., the INDOCRYPT 2010 GPU paper, the Cell
   papers and Niederhagen's thesis, against today's), new §6 on `clmad`
@@ -177,9 +180,10 @@ GPU; the paper says so in its availability paragraph and Appendix A.
   the `gpu/ecc` occupancy and stack tables predate the order-six fold
   and the cycle ring and are quoted as such.
 - The NIST round-2 rows (W=32, register caps; 1.632 / 0.548 Gstep/s,
-  1.52× / 2.61× cumulative) come from aburan28/crypto PR 1778, which
-  was open when Draft 4 was written; round 1 (1.340 / 0.438) is on
-  `main`. The NIST sweep cells are single runs, not interleaved
+  1.52× / 2.61× cumulative) come from aburan28/crypto PR 1778, merged
+  on 2026-10-14 with `gpu/nist` unchanged from the commit the paper
+  cited (c0fc85eb7); round 1 (1.340 / 0.438) was already on `main`. The
+  NIST sweep cells are single runs, not interleaved
   repeated pairs, and the paper says so in the table caption. A
   Solinas-field walk has not been built; only the field benchmark
   compares the two representations.
