@@ -27,13 +27,24 @@ fn sub(a: Expr, b: Expr) -> Expr {
 }
 
 fn main() {
-    let which = std::env::args().nth(1).expect("third_cover or cycle_closes");
-    let vars: Vec<String> = ["u", "u1", "u2", "y0", "y1", "y2"].iter().map(|s| s.to_string()).collect();
+    let which = std::env::args()
+        .nth(1)
+        .expect("third_cover or cycle_closes");
+    let vars: Vec<String> = ["u", "u1", "u2", "y0", "y1", "y2"]
+        .iter()
+        .map(|s| s.to_string())
+        .collect();
     let (u, u1, u2, y0, y1, y2) = (v("u"), v("u1"), v("u2"), v("y0"), v("y1"), v("y2"));
     let uy2 = Mul(vec![u.clone(), y2.clone()]);
     let y0y1 = Mul(vec![y0.clone(), y1.clone()]);
-    let h0 = sub(Mul(vec![y0.clone(), y0.clone()]), Mul(vec![u.clone(), u2.clone()])); // y0^2 - u u''
-    let h1 = sub(Mul(vec![y1.clone(), y1.clone()]), Mul(vec![u.clone(), u1.clone()])); // y1^2 - u u'
+    let h0 = sub(
+        Mul(vec![y0.clone(), y0.clone()]),
+        Mul(vec![u.clone(), u2.clone()]),
+    ); // y0^2 - u u''
+    let h1 = sub(
+        Mul(vec![y1.clone(), y1.clone()]),
+        Mul(vec![u.clone(), u1.clone()]),
+    ); // y1^2 - u u'
     let h2 = sub(uy2.clone(), y0y1.clone()); // u y2 - y0 y1
 
     // third_cover: (u y2)^2 - u^2 u' u'' = (u y2 - y0 y1)(u y2 + y0 y1) + y1^2 (y0^2 - u u'') + u u'' (y1^2 - u u')
@@ -60,8 +71,9 @@ fn main() {
     };
 
     let lean_sha = {
-        let bytes = std::fs::read("research/ghs_cubic_genus3_build_20261012/lean/DescentCycle.lean")
-            .expect("run from the repository root");
+        let bytes =
+            std::fs::read("research/ghs_cubic_genus3_build_20261012/lean/DescentCycle.lean")
+                .expect("run from the repository root");
         hex::encode(sha256(&bytes))
     };
     let proof = || {
@@ -71,7 +83,10 @@ fn main() {
             sha256: lean_sha.clone(),
         })
     };
-    for (file, stmt, seed) in [("third_cover", third, 0x6753_0000_0000_0001u64), ("cycle_closes", cycle, 0x6753_0000_0000_0002u64)] {
+    for (file, stmt, seed) in [
+        ("third_cover", third, 0x6753_0000_0000_0001u64),
+        ("cycle_closes", cycle, 0x6753_0000_0000_0002u64),
+    ] {
         if file != which {
             continue;
         }
@@ -88,6 +103,9 @@ fn main() {
             Verdict::Accept { .. } => {}
             other => panic!("self-check failed: {other:?}"),
         }
-        println!("{}", serde_json::to_string_pretty(&cert).expect("serialises"));
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&cert).expect("serialises")
+        );
     }
 }

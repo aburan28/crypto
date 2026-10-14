@@ -1862,8 +1862,8 @@ mod wide {
                     .collect(),
                 k: reps.len(),
                 shifted,
-                gf: gf.clone(),
-                basis: basis.clone(),
+                gf: Box::new(gf.clone()),
+                basis: Box::new(basis.clone()),
             };
             for index in 0..quotient.states.len() {
                 let expected = quotient.states.get(index);
@@ -2448,8 +2448,8 @@ mod wide {
             states: Vec<RootOnly11>,
             k: usize,
             shifted: Vec<Vec<u128>>,
-            gf: Gf2_128,
-            basis: NormalBasis128,
+            gf: Box<Gf2_128>,
+            basis: Box<NormalBasis128>,
         },
     }
 
@@ -3095,8 +3095,8 @@ mod wide {
                 states: root_only11_states,
                 k,
                 shifted: shifted.clone(),
-                gf: gf.clone(),
-                basis: basis.clone(),
+                gf: Box::new(gf.clone()),
+                basis: Box::new(basis.clone()),
             }
         } else {
             StateStore128::Wide(states_wide)
