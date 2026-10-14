@@ -6,23 +6,19 @@ decision and a revision password by email. Two of its rules bind this paper:
 
 1. **No anonymous papers.** The first page must carry the title, the
    author names and a contact address or affiliation, and the PDF must
-   include the author email address(es). The committed PDF is anonymized,
-   so the author block has to be restored first (step 1 below).
+   include the author email address(es). The committed PDF already does
+   (Adam Buran and Kevin Nguyen, Isogeny Labs, with both addresses).
 2. **The license is irrevocable** and every named author must agree to
    the submission. Only an author should press Submit.
 
-## 1. Restore the author block and rebuild
+## 1. Build and check
 
 ```sh
 cd paper/rho-blackwell
-cp AUTHORS.example AUTHORS      # fill in names, affiliation, email;
-                                 # keep the %pdfauthor= line (PDF metadata)
-make deanonymize                 # rewrites \author{...} and pdfauthor; keeps a .anon-backup
-make && make check               # PDF with authors; no bad refs / overfull boxes
-make eprint                      # eprint-submission.zip (PDF + sources)
+make && make check               # PDF; no bad refs / overfull boxes
 ```
 
-`AUTHORS` is git-ignored. Check the first page of the PDF before uploading.
+Check the first page of `rho-blackwell.pdf` before uploading.
 
 ## 2. The form
 
