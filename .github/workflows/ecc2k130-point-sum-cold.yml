@@ -36,6 +36,7 @@ jobs:
             research/notes/ecc2k130/point_sum_cold_20260930
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             tools/isolated_bench.py
+      - uses: Swatinem/rust-cache@v2
       - name: Replay the frozen inputs and check runner syntax
         run: |
           mkdir -p "$RUNNER_TEMP/point-sum-cold"
@@ -142,6 +143,7 @@ jobs:
             research/notes/ecc2k130/point_sum_cold_20260930
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             tools/isolated_bench.py
+      - uses: Swatinem/rust-cache@v2
       - uses: actions/checkout@v4
         with:
           ref: d8d67d3b683334db105195b0fc74d8e660dc4b5e

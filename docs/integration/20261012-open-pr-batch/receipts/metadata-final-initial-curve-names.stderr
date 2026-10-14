@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "/workspace/crypto-integration/scripts/check_curve_names.py", line 302, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspace/crypto-integration/scripts/check_curve_names.py", line 289, in main
+    problems = lint(res, pinned_hashes(), args.fix)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto-integration/scripts/check_curve_names.py", line 223, in lint
+    text = path.read_text(errors="ignore")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/crypto-integration/research/boolean_affine_substitution_20260923/ARCHIVE_NOTES.md'

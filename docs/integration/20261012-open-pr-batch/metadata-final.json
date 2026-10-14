@@ -1,0 +1,126 @@
+{
+  "schema": "integration-metadata-final/v1",
+  "source_commit": "9479a6730e6318dd3998575a3272c1d3540c4c93",
+  "timestamp_utc": "2026-10-12T04:45:13.874403+00:00",
+  "scope": "Read-only Python metadata, naming and freshness checks after final main/hash-study integration; no native compilation or scientific measurements.",
+  "overall_status": "PASS",
+  "checks": [
+    {
+      "name": "curve-names",
+      "command": [
+        "python3",
+        "scripts/check_curve_names.py"
+      ],
+      "status": "PASS",
+      "exit_status": 0,
+      "stdout": "receipts/metadata-final-curve-names.stdout",
+      "stderr": "receipts/metadata-final-curve-names.stderr",
+      "exit_receipt": "receipts/metadata-final-curve-names.exit"
+    },
+    {
+      "name": "prime-model-cache",
+      "command": [
+        "python3",
+        "scripts/test_prime_model_normalization.py"
+      ],
+      "status": "PASS",
+      "exit_status": 0,
+      "stdout": "receipts/metadata-final-prime-model-cache.stdout",
+      "stderr": "receipts/metadata-final-prime-model-cache.stderr",
+      "exit_receipt": "receipts/metadata-final-prime-model-cache.exit"
+    },
+    {
+      "name": "archived-labels",
+      "command": [
+        "python3",
+        "scripts/test_curve_names_archived_labels.py"
+      ],
+      "status": "PASS",
+      "exit_status": 0,
+      "stdout": "receipts/metadata-final-archived-labels.stdout",
+      "stderr": "receipts/metadata-final-archived-labels.stderr",
+      "exit_receipt": "receipts/metadata-final-archived-labels.exit"
+    },
+    {
+      "name": "identity-metadata",
+      "command": [
+        "python3",
+        "tests/test_curve_identity.py"
+      ],
+      "status": "PASS",
+      "exit_status": 0,
+      "stdout": "receipts/metadata-final-identity-metadata.stdout",
+      "stderr": "receipts/metadata-final-identity-metadata.stderr",
+      "exit_receipt": "receipts/metadata-final-identity-metadata.exit"
+    },
+    {
+      "name": "leaderboard-freshness",
+      "command": [
+        "python3",
+        "scripts/build_ic_leaderboard.py",
+        "--check"
+      ],
+      "status": "PASS",
+      "exit_status": 0,
+      "stdout": "receipts/metadata-final-leaderboard-freshness.stdout",
+      "stderr": "receipts/metadata-final-leaderboard-freshness.stderr",
+      "exit_receipt": "receipts/metadata-final-leaderboard-freshness.exit"
+    },
+    {
+      "name": "browser-freshness",
+      "command": [
+        "python3",
+        "scripts/build_lab_browser.py",
+        "--check"
+      ],
+      "status": "PASS",
+      "exit_status": 0,
+      "stdout": "receipts/metadata-final-browser-freshness.stdout",
+      "stderr": "receipts/metadata-final-browser-freshness.stderr",
+      "exit_receipt": "receipts/metadata-final-browser-freshness.exit"
+    },
+    {
+      "name": "panel-index-freshness",
+      "command": [
+        "python3",
+        "scripts/site/panel_index.py",
+        "--check"
+      ],
+      "status": "PASS",
+      "exit_status": 0,
+      "stdout": "receipts/metadata-final-panel-index-freshness.stdout",
+      "stderr": "receipts/metadata-final-panel-index-freshness.stderr",
+      "exit_receipt": "receipts/metadata-final-panel-index-freshness.exit"
+    },
+    {
+      "name": "workflow-metadata",
+      "command": [
+        "python3",
+        "scripts/test_workflows_parse.py"
+      ],
+      "status": "PASS",
+      "exit_status": 0,
+      "stdout": "receipts/metadata-final-workflow-metadata.stdout",
+      "stderr": "receipts/metadata-final-workflow-metadata.stderr",
+      "exit_receipt": "receipts/metadata-final-workflow-metadata.exit"
+    }
+  ],
+  "actual_counts": {
+    "registry_models": 2073,
+    "alias_targets": 5112,
+    "traits_models": 2073,
+    "browser_root_arrays": {
+      "curves": 2073,
+      "methods": 107,
+      "factor_bases": 336,
+      "candidates": 266,
+      "rounds": 30,
+      "sessions": 62,
+      "yields": 9354
+    }
+  },
+  "registry_sha256": "adb8105bbefa21b76e5f288e4dc9ce80fa8024bad5d735e4b90ae8982e07f16a",
+  "traits_registry_digest_matches": true,
+  "frozen_report_sha256": "d481fbfa188cafe6fb1364c4df1b8a7c704bd2867b7d866cc3a39c66c7b85ba9",
+  "input_materialization": "Root materialized1018 exact required tracked inputs additively. Initial missing-input diagnostics are retained in receipts/metadata-final-initial-*; no source or index edits by this metadata audit."
+}

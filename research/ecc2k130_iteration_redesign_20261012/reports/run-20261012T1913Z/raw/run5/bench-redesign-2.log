@@ -1,0 +1,94 @@
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM
+packed kernel: 128 registers/thread, 400 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed theoretical occupancy: 33.3% (2 blocks/SM, 256 threads/block, 188 SMs); grid 376 blocks
+packed launch bounds: 256 threads, 2 min blocks
+packed sigma table: 0 (0 dynamic shared bytes)
+packed driver reserved shared bytes/block: 1024, device 0
+packed denominator cache: 1
+packed last-slot cache mode: 0
+packed multiply by value: 1
+packed Frobenius network: 3
+packed partial Frobenius routing mask: 0
+packed Frobenius stage order: 0
+packed byte-select Frobenius: 0
+packed seven-stage conversion: 0
+packed polynomial chain: 1
+packed polynomial state: 1
+packed unrolled inversion: 1
+packed paired products: 1
+packed pair ilp: 0
+packed pair clmul: 0
+packed clmul flat: 0
+packed top hoist: 0
+packed onb inv: 0
+packed from reduced: 0
+packed inline polynomial: 0
+packed slot unroll: 1
+packed chains: 1
+packed slot prefetch: 0
+packed slot pipeline: 0
+packed sigma fused: 0
+packed sigma fused late y: 0
+packed sigma fused shared slots: 0
+packed witness: 0
+packed L2 persist: 0
+packed direct reduction: 1
+packed add combine: 0
+packed generated product: 1
+packed native carryless multiply: 1
+packed native full product: 0
+packed native reduction: 0
+packed fused sigma: 0
+packed inline mask: 0
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed x-only 2/3 walk: 0
+packed sparse sigma^3 bridge: 0
+packed sigma^1 common path: 0
+packed sparse bridge modulus 72: 0
+packed skip empty bridge phase: 0
+packed arithmetic-only diagnostic: 0
+packed polynomial-bit selector: 0
+packed polynomial-bit Hamming DP convert: 1
+packed state tile: 256
+packed block inverse: 0
+packed physical slots/thread: 16; logical workers/block: 256
+packed native carryless square: 0
+packed three-limb Karatsuba: 0
+packed top clmad: 0
+packed add combine: 0
+packed alu square: 0
+packed alu onb square: 0
+packed square table: 0
+packed sigma square table: 0, 0 shared bytes
+packed polynomial inversion: 0
+packed profile ranges: 0
+packed table GPU-wide hints: 0
+packed hint scheduling: table fused 0, pipe select 0, chain first 0, inline polynomial 0, phase profile 0, cycle profile 0
+packed table pivot bytes: 1, table shared bytes 48732
+packed table phase popc: 0
+packed table split forward: 0
+packed table batch hints: 0
+packed table block hints: 0, queue 512
+packed cycle fast2: 0
+packed cycle profile: 0
+packed table global: 0
+packed table addend global: 0
+packed table walk: 1 (8 branches, 48732 shared bytes)
+backend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch
+       2.1 s    2947.507 M it/s  6308233216 iterations         0 dp         0 stored         0 dropped
+       4.7 s    2371.304 M it/s  11039408128 iterations         0 dp         0 stored         0 dropped
+       7.6 s    2072.551 M it/s  15770583040 iterations         0 dp         0 stored         0 dropped
+       9.7 s    1948.574 M it/s  18924699648 iterations         0 dp         0 stored         0 dropped
+      11.9 s    1854.627 M it/s  22078816256 iterations         0 dp         0 stored         0 dropped
+      14.3 s    1762.733 M it/s  25232932864 iterations         0 dp         0 stored         0 dropped
+      16.8 s    1688.784 M it/s  28387049472 iterations         0 dp         0 stored         0 dropped
+      19.3 s    1631.552 M it/s  31541166080 iterations         0 dp         0 stored         0 dropped
+      21.9 s    1583.353 M it/s  34695282688 iterations         0 dp         0 stored         0 dropped
+      24.6 s    1539.126 M it/s  37849399296 iterations         0 dp         0 stored         0 dropped
+      27.5 s    1492.505 M it/s  41003515904 iterations         0 dp         0 stored         0 dropped
+      30.5 s    1446.516 M it/s  44157632512 iterations         0 dp         0 stored         0 dropped
+      33.7 s    1405.439 M it/s  47311749120 iterations         0 dp         0 stored         0 dropped
+      36.9 s    1367.783 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped
+  finished: 1367.780 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)

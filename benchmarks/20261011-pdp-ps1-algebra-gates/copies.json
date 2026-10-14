@@ -1,0 +1,28 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-11",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/pdp_oracle_speedup_20261011",
+  "run": "run-20261011T2217Z",
+  "files": [
+    {
+      "source": "research/pdp_oracle_speedup_20261011/reports/run-20261011T2217Z/report.pdf",
+      "copy": "run-report.pdf",
+      "sha256": "4fb3bf1ebd78ce3e4f622086dabc97c352b0f876013782fae746f7be5c3e538c",
+      "bytes": 77515
+    },
+    {
+      "source": "research/pdp_oracle_speedup_20261011/reports/run-20261011T2217Z/gates_per_task.svg",
+      "copy": "gates_per_task.svg",
+      "sha256": "761b34e7638a69025396a2d708bc4084eb53c69b4869bd4797ec80f65d8032bf",
+      "bytes": 55742
+    }
+  ],
+  "pngs": [
+    {
+      "source": "gates_per_task.svg",
+      "copy": "gates_per_task.png",
+      "dpi": 150
+    }
+  ]
+}

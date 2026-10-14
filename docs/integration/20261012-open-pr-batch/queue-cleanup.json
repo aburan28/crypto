@@ -1,0 +1,41 @@
+{
+  "repo": "aburan28/crypto",
+  "completed_at_utc": "2026-10-12T03:45:55.147403+00:00",
+  "canceled_candidate_count": 192,
+  "cancel_api_success_count": 192,
+  "cancel_api_failure_count": 0,
+  "canceled_run_receipt": "queue-canceled-runs.json",
+  "cancel_results_receipt": "queue-cancel-results.json",
+  "updated_active_counts": {
+    "queued": 618,
+    "in_progress": 3,
+    "unique_total": 621
+  },
+  "remaining_obsolete_conventional_candidates": 0,
+  "in_progress_runs": [
+    {
+      "id": 38200353248,
+      "workflow": "Copilot cloud agent",
+      "event": "dynamic",
+      "head": "codex/ci-scope-and-runtime",
+      "sha": "eff5cc69d662e43974fa42b9fdfa94c596788f5f",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38200353248"
+    },
+    {
+      "id": 38200272967,
+      "workflow": "perf history",
+      "event": "pull_request",
+      "head": "codex/n83-ordered-first-pair-20261011",
+      "sha": "f6557daa6da9e38361bea9f8c35356e8a2aa631d",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38200272967"
+    },
+    {
+      "id": 38200272982,
+      "workflow": "IC autolab integration",
+      "event": "pull_request",
+      "head": "codex/n83-ordered-first-pair-20261011",
+      "sha": "f6557daa6da9e38361bea9f8c35356e8a2aa631d",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38200272982"
+    }
+  ]
+}

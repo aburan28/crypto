@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520">
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#1c2736}.title{font-size:22px;font-weight:700}.sub{font-size:14px}.tick{font-size:13px}.label{font-size:16px;font-weight:600}.value{font-size:16px;font-weight:700}.grid{stroke:#dbe2ea;stroke-width:1}</style>
+<rect width="900" height="520" fill="white"/>
+<text x="40" y="30" class="title">Cold counted cost by phase</text>
+<text x="40" y="50" class="sub">20-bit prime subgroup, 8 public targets × 3 measured rounds per arm; ecbench.gae</text>
+<line x1="90" y1="390" x2="810" y2="390" class="grid"/>
+    <text x="75" y="395" text-anchor="end" class="tick">0k</text><line x1="90" y1="323" x2="810" y2="323" class="grid"/>
+    <text x="75" y="328" text-anchor="end" class="tick">5k</text><line x1="90" y1="256" x2="810" y2="256" class="grid"/>
+    <text x="75" y="261" text-anchor="end" class="tick">10k</text><line x1="90" y1="189" x2="810" y2="189" class="grid"/>
+    <text x="75" y="194" text-anchor="end" class="tick">15k</text><line x1="90" y1="122" x2="810" y2="122" class="grid"/>
+    <text x="75" y="127" text-anchor="end" class="tick">20k</text><line x1="90" y1="55" x2="810" y2="55" class="grid"/>
+    <text x="75" y="60" text-anchor="end" class="tick">25k</text><rect x="155" y="375.85" width="110" height="14.15" fill="#5b7db9"/><rect x="155" y="105.30" width="110" height="270.55" fill="#18a999"/><rect x="155" y="93.94" width="110" height="11.37" fill="#ef9f35"/><text x="210" y="83.94" text-anchor="middle" class="value">22,094</text>
+    <text x="210" y="416" text-anchor="middle" class="label">pair-b32</text><rect x="375" y="334.26" width="110" height="55.74" fill="#5b7db9"/><rect x="375" y="166.45" width="110" height="167.81" fill="#18a999"/><rect x="375" y="144.20" width="110" height="22.25" fill="#ef9f35"/><text x="430" y="134.20" text-anchor="middle" class="value">18,343</text>
+    <text x="430" y="416" text-anchor="middle" class="label">pair-b64</text><rect x="595" y="389.66" width="110" height="0.34" fill="#ef9f35"/><rect x="595" y="378.86" width="110" height="10.80" fill="#18a999"/><rect x="595" y="376.98" width="110" height="1.88" fill="#5b7db9"/><text x="650" y="366.98" text-anchor="middle" class="value">972</text>
+    <text x="650" y="416" text-anchor="middle" class="label">rho-neg</text>
+<rect x="110" y="449" width="13" height="13" fill="#5b7db9"/><text x="130" y="460" class="tick">table or rho setup</text>
+<rect x="300" y="449" width="13" height="13" fill="#18a999"/><text x="320" y="460" class="tick">relations or rho search</text>
+<rect x="520" y="449" width="13" height="13" fill="#ef9f35"/><text x="540" y="460" class="tick">verification</text>
+<text x="40" y="492" class="sub">ECBS1h382073f2a6ad · means from sealed records; prime native work remains unpriced; L0 wall</text>
+</svg>

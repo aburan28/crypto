@@ -1,0 +1,37 @@
+{
+  "cold_or_warm": "one_fresh_process_per_candidate_with_empty_index_and_logs; five_target_secondary_selection_after_shared_preparation",
+  "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+  "input_law": {
+    "fixture_split": "holdout_1_through_holdout_5",
+    "generator_receipt_sha256": "c93edc32a77411443229191e2db4cc3eeb7e99976b7f79a8a753ba103bce9909",
+    "random_generator": "SplitMix64: state+=0x9e3779b97f4a7c15; xor/multiply bf58476d1ce4e5b9,94d049bb133111eb",
+    "sampling_law": "Uniform nonzero subgroup scalar proposals via unbiased64-bit rejection; accepted point law conditioned on exclusion of prior signed Frobenius orbit,K600base and previously accepted fixture orbits",
+    "seed": 202610128301
+  },
+  "public_targets": [
+    [
+      "4566057969910634118716199",
+      "3243784791760122731624216"
+    ],
+    [
+      "8481534110544954902917272",
+      "5917574502041933900767407"
+    ],
+    [
+      "3866102233437469661323596",
+      "3119866044596018664004883"
+    ],
+    [
+      "1805763013378908953324663",
+      "2893206319992959820958634"
+    ],
+    [
+      "3879255647717437847116918",
+      "9404462396953024402361015"
+    ]
+  ],
+  "schema_version": 1,
+  "target_count": 5,
+  "target_sha256": "b96672b4d75df4b90a337c1e471d54dc147edbf236ef8d0054adb716d2314871",
+  "workload_id": "b8dd47a8e4d8"
+}

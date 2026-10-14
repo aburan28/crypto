@@ -1,0 +1,37 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-11",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/isogeny_fibers_20261010/round4/16_2_fast_4e",
+  "run": null,
+  "files": [
+    {
+      "source": "research/isogeny_fibers_20261010/round4/16_2_fast_4e/costs.svg",
+      "copy": "visuals/research/isogeny_fibers_20261010/round4/16_2_fast_4e/costs.svg",
+      "sha256": "682ceb02e356dca8452ba3beaf8778bf1e7aacb175c84b6b9aeed671b5aa7d91",
+      "bytes": 136375
+    },
+    {
+      "source": "research/isogeny_fibers_20261010/round4/16_2_fast_4e/report.pdf",
+      "copy": "visuals/research/isogeny_fibers_20261010/round4/16_2_fast_4e/report.pdf",
+      "sha256": "84d68c625dc0132b0a65eacf1ae4fcbf86b6431285f9cffffb35729310559d58",
+      "bytes": 135697
+    }
+  ],
+  "pngs": [
+    {
+      "source": "visuals/research/isogeny_fibers_20261010/round4/16_2_fast_4e/costs.svg",
+      "copy": "visuals/research/isogeny_fibers_20261010/round4/16_2_fast_4e/costs.png",
+      "dpi": 150,
+      "width": 1650,
+      "height": 660,
+      "sha256": "f84a5bd19134a357c1be4f782e48a53d6ff8b82de38b34dc6a1965120465e16b",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    }
+  ],
+  "verbatim_source_report": {
+    "source": "research/isogeny_fibers_20261010/round4/16_2_fast_4e/RESULTS.md",
+    "copy": "SOURCE_REPORT.md",
+    "sha256": "5f22dae7b1876a176efbf64a37ae87671412a7131edad37ffe49b70aecbdad49"
+  }
+}

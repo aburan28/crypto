@@ -1,0 +1,16 @@
+{
+  "provider": "runpod",
+  "gpu_type": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "gpu_driver": "595.91.07",
+  "cuda_toolkit": "13.3.73",
+  "source_revision": "779a4044e73148758302ff1c997654b25f53d4f3",
+  "source_archive_sha256": "caa36e37992126bb50165c7b31080d2901da65123174f27c377ff2c6ddb7a3f0",
+  "started_at": "2026-10-12T18:46:10Z",
+  "finished_at": "2026-10-12T18:52:50Z",
+  "exit_code": 1,
+  "outcome": "correctness preflight failed; timing suppressed",
+  "failure": "both arms exceeded the 65536 DP capacity",
+  "capacity": 65536,
+  "redesign_reports": 126368,
+  "shipping_reports": 126798
+}

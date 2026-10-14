@@ -1,0 +1,7 @@
+name = "orbit_nine"
+version = "0.1.0"
+defaultTargets = ["OrbitNine"]
+
+[[lean_lib]]
+name = "OrbitNine"
+roots = ["OrbitNine"]

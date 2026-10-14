@@ -415,7 +415,7 @@ pub fn full_rank_stream_until<G: CountedGroup>(
             continue;
         }
         if let Some(c) = classes {
-            let (rep, _) = c.canon(g, point);
+            let (rep, _) = c.canon(g, &mut GroupOps::default(), point);
             if !orbits.insert(g.key(&rep)) {
                 orbit_duplicates += 1;
             }

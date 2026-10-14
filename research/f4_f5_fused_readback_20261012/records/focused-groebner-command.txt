@@ -1,0 +1,1 @@
+timeout -k 5 1200 cargo test --locked --release --lib cryptanalysis::koblitz_groebner::tests -j2 -- --test-threads=3

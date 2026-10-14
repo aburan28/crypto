@@ -8,6 +8,7 @@ directory per paper.
 | [`structural-completeness/`](structural-completeness/) | Structural Completeness of Prime-Field Elliptic Curves Against Isogeny-Graph Cryptanalysis | research draft, anonymized, not submitted; Markdown twin in `research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md` |
 | [`lll-degeneracy-note/`](lll-degeneracy-note/) | An Empirical Note on LLL Degeneracy of the Boneh–Venkatesan Lattice for secp256k1 | research note, anonymized, not submitted |
 | [`eigen-seta/`](eigen-seta/) | Eigen-Séta: an isogeny KEM whose trapdoor is a hidden-degree endomorphism | research draft, anonymized, not peer reviewed, not submitted; code in `eigen_seta/` |
+| [`rootfinding-decomposition/`](rootfinding-decomposition/) | Point Decomposition by Root Finding: Replacing Gröbner-Basis Solvers in Elliptic-Curve Index Calculus, with Measurements on Prime and Binary Curves up to NIST P-521 | research draft, anonymized, not submitted, not cleared; engineering-class stage result, no security claim; Markdown twin in `RESEARCH_SEMAEV_ROOTFIND_VS_GROEBNER.md`; Prop. 1 machine-checked in `rootfinding-decomposition/lean/` |
 
 Markdown drafts that are not yet typeset stay with their notes and are listed
 here so they are not lost: `research/ecdlp_autolab/PAPER_DRAFT.md` (An Empirical
@@ -23,7 +24,8 @@ Conventions shared by every paper here and by the sibling repositories
   what it says, what it does not say, how to build, reproduction pointers, the
   checklist owed before submission), an `abstract.txt` and the built PDF;
 - the build is `paper.mk` in this directory: a paper's `Makefile` sets `TEX`,
-  `SECTIONS` and `BIB` and includes it (`make`, `make check`, `make arxiv`,
+  `SECTIONS`, `BIB` and, for figures or other files the build reads, `ASSETS`,
+  and includes it (`make`, `make check`, `make arxiv`,
   `make eprint`, `make deanonymize`, `make clean`);
 - every number cites a committed artefact in this repository or a sibling
   (`crypto:`, `cryptanalysis:` or `crypto-autoresearcher:` prefix); a stage

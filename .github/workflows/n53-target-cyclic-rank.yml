@@ -14,6 +14,7 @@ on:
       - 'research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928/**'
       - '.github/workflows/n53-target-cyclic-rank.yml'
       - '.github/scripts/*frozen-workflow-check*'
+      - '.github/scripts/n53-historical-cargo-lock-view-v1.json'
 
 permissions:
   contents: write
@@ -34,14 +35,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Verify frozen scheduling metadata, source custody, target schedule and archive
+      - name: Verify frozen scheduling, historical source custody, current lockstep, targets and archive
         run: |
           node .github/scripts/frozen-workflow-check.mjs \
             --workflow .github/workflows/n53-target-cyclic-rank.yml \
             --revision aa0cee7bd1769222e5706e61b64478d5aad6d573 \
             --manifest research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928/FROZEN.json \
+            --input-view-manifest .github/scripts/n53-historical-cargo-lock-view-v1.json \
             --root research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928 \
             --root research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925 \
+            --root Cargo.lock \
             --root Cargo.toml \
             --root examples/koblitz_s5_sat_instance.rs \
             --root research/sat_factor_base_review_20260908/autolab_combined_l384_coldbase_n53_20260925/Cargo.lock \

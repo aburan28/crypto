@@ -65,6 +65,7 @@ jobs:
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930_rho_replay.py
             research/ic_candidate_tournament_20260915/identity.py
             research/ic_candidate_tournament_20260915/oracle.py
+            research/ic_candidate_tournament_20260915/oracle_u128.py
             research/ic_single_target_20260930/curve_ids.json
             tools/curve_identity.py
             tools/isolated_bench.py
@@ -83,7 +84,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     needs: validate
     runs-on: ubuntu-24.04
-    timeout-minutes: 300
+    timeout-minutes: 480
     steps:
       - uses: actions/checkout@v4
         with:
@@ -108,6 +109,7 @@ jobs:
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930_rho_replay.py
             research/ic_candidate_tournament_20260915/identity.py
             research/ic_candidate_tournament_20260915/oracle.py
+            research/ic_candidate_tournament_20260915/oracle_u128.py
             research/ic_single_target_20260930/curve_ids.json
             tools/curve_identity.py
             tools/isolated_bench.py

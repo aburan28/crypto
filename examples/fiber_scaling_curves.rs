@@ -50,7 +50,7 @@ fn is_prime(n: u64) -> bool {
         return false;
     }
     for q in [2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
-        if n % q == 0 {
+        if n.is_multiple_of(q) {
             return n == q;
         }
     }
@@ -238,7 +238,7 @@ fn find(bits: u32, h: u64, rng: &mut Lcg) -> Value {
                 continue;
             }
             let n = ms[0];
-            if n % h != 0 || !is_prime(n / h) {
+            if !n.is_multiple_of(h) || !is_prime(n / h) {
                 continue;
             }
             let r = n / h;

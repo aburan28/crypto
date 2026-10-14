@@ -8,6 +8,7 @@
 //! algebra. Bounded chained-S3 discovery uses disjoint, exact Frobenius
 //! domains and checks every accepted point equation in the curve group.
 
+use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use num_bigint::BigUint;
@@ -764,7 +765,7 @@ impl Reducer {
 /// separate gates.
 pub struct WideLargePrimeEliminator<'a> {
     curve: &'a KoblitzCurve,
-    base: &'a FrobeniusFactorBase,
+    base: Cow<'a, FrobeniusFactorBase>,
     target: BinaryPoint,
     base_index: HashMap<PointKey, usize>,
     reducer: Reducer,
@@ -776,6 +777,37 @@ impl<'a> WideLargePrimeEliminator<'a> {
     pub fn new(
         curve: &'a KoblitzCurve,
         base: &'a FrobeniusFactorBase,
+        target: BinaryPoint,
+        limits: LargePrimeLimits,
+    ) -> Result<Self, &'static str> {
+        Self::with_base(curve, Cow::Borrowed(base), target, limits)
+    }
+
+    /// [`new`](Self::new) over a base the eliminator owns, for a caller
+    /// that builds the signed-orbit base and the eliminator together
+    /// (the framework's large-prime collector).
+    pub fn new_owned(
+        curve: &'a KoblitzCurve,
+        base: FrobeniusFactorBase,
+        target: BinaryPoint,
+        limits: LargePrimeLimits,
+    ) -> Result<Self, &'static str> {
+        Self::with_base(curve, Cow::Owned(base), target, limits)
+    }
+
+    /// The signed-orbit base rows are written over.
+    pub fn base(&self) -> &FrobeniusFactorBase {
+        &self.base
+    }
+
+    /// The public target `Q` every row's `coef_b` multiplies.
+    pub fn target(&self) -> &BinaryPoint {
+        &self.target
+    }
+
+    fn with_base(
+        curve: &'a KoblitzCurve,
+        base: Cow<'a, FrobeniusFactorBase>,
         target: BinaryPoint,
         limits: LargePrimeLimits,
     ) -> Result<Self, &'static str> {
@@ -802,11 +834,12 @@ impl<'a> WideLargePrimeEliminator<'a> {
                 return Err("signed orbit representative is outside the subgroup");
             }
         }
+        let base_index = base.index_map();
         Ok(Self {
             curve,
             base,
             target,
-            base_index: base.index_map(),
+            base_index,
             reducer: Reducer::new(modulus.clone(), limits)?,
             seen_sources: BTreeSet::new(),
             stats: LargePrimeStats::default(),

@@ -1082,6 +1082,953 @@ fn run(cfg: &RunCfg, emit: &mut dyn FnMut(Value)) -> RunResult {
     }
 }
 
+// ── Wide (`u128`-word) batched KS rho for `64 ≤ n ≤ 127` ──────────────
+//
+// Twin of the `u64` flow above with identical jump table, target
+// derivation, walk schedule, cycle rules and JSON schema; the `u64`
+// code is deliberately untouched so every `n ≤ 63` fixture stays
+// bit-identical.  Subgroup scalars stay `u64` (every admitted rung
+// has `r < 2^64`); only field elements widen to `u128` through the
+// library `Gf2_128` (the wide twin of the IC kernel) and the wide
+// normal basis from `koblitz_orbit_dlp_fast.rs`.  Wide-run field
+// coordinates are emitted as decimal strings, matching the IC wide
+// producer's wire format.
+mod wide {
+    use super::{inverse_mod, mul_mod, signed_automorphism_size, sub_mod, Charges, JUMPS};
+    use crypto_lib::binary_ecc::BinaryPoint;
+    use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
+    use crypto_lib::cryptanalysis::semaev_decomp::Gf2_128;
+    use rand::rngs::StdRng;
+    use rand::{Rng, SeedableRng};
+    use serde_json::{json, Value};
+    use std::collections::HashMap;
+    use std::time::Instant;
+
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+    enum WPoint {
+        Infinity,
+        Affine { x: u128, y: u128 },
+    }
+
+    #[derive(Clone, Copy)]
+    struct WState {
+        point: WPoint,
+        a: u64,
+        b: u64,
+    }
+
+    #[derive(Clone, Copy)]
+    struct WJump {
+        point: WPoint,
+        a: u64,
+        b: u64,
+    }
+
+    pub struct WideCfg {
+        n: u32,
+        a: u8,
+        fixtures: u32,
+        batch_seed: u64,
+        dp_bits: u32,
+        corpus: Option<String>,
+        rung: u8,
+        lanes: usize,
+        explicit_scalar: Option<u64>,
+        /// Walk to this public point instead; no scalar is known.
+        target_point: Option<(u128, u128)>,
+    }
+
+    pub struct WideRunResult {
+        total_steps: u64,
+        per_fixture_steps: Vec<u64>,
+        recovered: Vec<u64>,
+        planted: Vec<u64>,
+        table_entries: usize,
+        cross_solves: u32,
+    }
+
+    // Wide normal basis: same construction as `koblitz_orbit_dlp_fast.rs`'s
+    // `mod wide`.
+    struct Linear128 {
+        tables: Vec<[u128; 256]>,
+    }
+
+    impl Linear128 {
+        fn from_images(images: &[u128]) -> Self {
+            let chunks = images.len().div_ceil(8);
+            let mut tables = vec![[0u128; 256]; chunks];
+            for (chunk, table) in tables.iter_mut().enumerate() {
+                for byte in 1usize..256 {
+                    let low = byte & (byte - 1);
+                    let bit = chunk * 8 + byte.trailing_zeros() as usize;
+                    let image = images.get(bit).copied().unwrap_or(0);
+                    table[byte] = table[low] ^ image;
+                }
+            }
+            Self { tables }
+        }
+
+        #[inline(always)]
+        fn apply(&self, v: u128) -> u128 {
+            let mut acc = 0u128;
+            for (chunk, table) in self.tables.iter().enumerate() {
+                acc ^= table[((v >> (8 * chunk)) & 0xff) as usize];
+            }
+            acc
+        }
+    }
+
+    fn invert_columns128(columns: &[u128], n: usize) -> Option<Vec<u128>> {
+        let mut rows: Vec<(u128, u128)> = (0..n)
+            .map(|r| {
+                let mut m = 0u128;
+                for (i, &column) in columns.iter().enumerate() {
+                    if (column >> r) & 1 == 1 {
+                        m |= 1u128 << i;
+                    }
+                }
+                (m, 1u128 << r)
+            })
+            .collect();
+        for pivot in 0..n {
+            let found = (pivot..n).find(|&r| (rows[r].0 >> pivot) & 1 == 1)?;
+            rows.swap(pivot, found);
+            for r in 0..n {
+                if r != pivot && (rows[r].0 >> pivot) & 1 == 1 {
+                    rows[r].0 ^= rows[pivot].0;
+                    rows[r].1 ^= rows[pivot].1;
+                }
+            }
+        }
+        let mut images = vec![0u128; n];
+        for (i, &(_, ih)) in rows.iter().enumerate() {
+            for r in 0..n {
+                if (ih >> r) & 1 == 1 {
+                    images[r] |= 1u128 << i;
+                }
+            }
+        }
+        Some(images)
+    }
+
+    struct NormalBasis128 {
+        n: u32,
+        mask: u128,
+        to_normal: Linear128,
+        to_poly: Linear128,
+    }
+
+    impl NormalBasis128 {
+        fn new(gf: &Gf2_128) -> Self {
+            let n = gf.n as usize;
+            let mask = (1u128 << n) - 1;
+            for candidate in 2u128.. {
+                let mut conjugates = Vec::with_capacity(n);
+                let mut value = candidate & mask;
+                for _ in 0..n {
+                    conjugates.push(value);
+                    value = gf.sqr(value);
+                }
+                let Some(inverse_columns) = invert_columns128(&conjugates, n) else {
+                    continue;
+                };
+                return Self {
+                    n: gf.n,
+                    mask,
+                    to_normal: Linear128::from_images(&inverse_columns),
+                    to_poly: Linear128::from_images(&conjugates),
+                };
+            }
+            unreachable!()
+        }
+
+        #[inline(always)]
+        fn rotate(&self, v: u128, k: u32) -> u128 {
+            if k == 0 {
+                return v;
+            }
+            ((v << k) | (v >> (self.n - k))) & self.mask
+        }
+    }
+
+    /// Everything the wide group law needs; every multiply and square is the
+    /// library `Gf2_128` (the rung-1-equivalent kernel).
+    struct Field128<'a> {
+        gf: &'a Gf2_128,
+        nb: &'a NormalBasis128,
+        a: u128,
+    }
+
+    impl Field128<'_> {
+        #[inline(always)]
+        fn mul(&self, left: u128, right: u128) -> u128 {
+            self.gf.mul(left, right)
+        }
+
+        #[inline(always)]
+        fn sqr(&self, value: u128) -> u128 {
+            self.gf.sqr(value)
+        }
+
+        /// Itoh–Tsujii with the `a^(2^k)` steps as normal-basis rotations.
+        fn inv(&self, value: u128) -> u128 {
+            assert_ne!(value, 0);
+            let e = self.nb.n - 1;
+            let mut c = value;
+            let mut k = 1u32;
+            let bits = 32 - e.leading_zeros();
+            for i in (0..bits - 1).rev() {
+                let raised = self
+                    .nb
+                    .to_poly
+                    .apply(self.nb.rotate(self.nb.to_normal.apply(c), k));
+                c = self.mul(c, raised);
+                k *= 2;
+                if (e >> i) & 1 == 1 {
+                    c = self.mul(self.sqr(c), value);
+                    k += 1;
+                }
+            }
+            self.sqr(c)
+        }
+    }
+
+    fn point_neg(point: WPoint) -> WPoint {
+        match point {
+            WPoint::Infinity => WPoint::Infinity,
+            WPoint::Affine { x, y } => WPoint::Affine { x, y: y ^ x },
+        }
+    }
+
+    fn point_double(f: &Field128, point: WPoint) -> WPoint {
+        let WPoint::Affine { x, y } = point else {
+            return WPoint::Infinity;
+        };
+        if x == 0 {
+            return WPoint::Infinity;
+        }
+        let lambda = x ^ f.mul(y, f.inv(x));
+        let x3 = f.sqr(lambda) ^ lambda ^ f.a;
+        let y3 = f.sqr(x) ^ f.mul(lambda ^ 1, x3);
+        WPoint::Affine { x: x3, y: y3 }
+    }
+
+    fn point_add(f: &Field128, left: WPoint, right: WPoint) -> WPoint {
+        match (left, right) {
+            (WPoint::Infinity, point) | (point, WPoint::Infinity) => point,
+            (WPoint::Affine { x: x1, y: y1 }, WPoint::Affine { x: x2, y: y2 }) => {
+                if x1 == x2 {
+                    return if y1 ^ y2 == x1 {
+                        WPoint::Infinity
+                    } else {
+                        point_double(f, left)
+                    };
+                }
+                let lambda = f.mul(y1 ^ y2, f.inv(x1 ^ x2));
+                add_with_slope(f, x1, y1, x2, lambda)
+            }
+        }
+    }
+
+    #[inline(always)]
+    fn add_with_slope(f: &Field128, x1: u128, y1: u128, x2: u128, lambda: u128) -> WPoint {
+        let x3 = f.sqr(lambda) ^ lambda ^ x1 ^ x2 ^ f.a;
+        let y3 = f.mul(lambda, x1 ^ x3) ^ x3 ^ y1;
+        WPoint::Affine { x: x3, y: y3 }
+    }
+
+    fn scalar_mul(f: &Field128, point: WPoint, scalar: u64) -> WPoint {
+        let mut result = WPoint::Infinity;
+        for bit in (0..64 - scalar.leading_zeros()).rev() {
+            result = point_double(f, result);
+            if (scalar >> bit) & 1 == 1 {
+                result = point_add(f, result, point);
+            }
+        }
+        result
+    }
+
+    fn raw_key(point: WPoint) -> (u8, u128, u128) {
+        match point {
+            WPoint::Infinity => (0, 0, 0),
+            WPoint::Affine { x, y } => (1, x, y),
+        }
+    }
+
+    // Wide canonicalization: rungs 0 and 1 exhaustive poly-basis, rung 2+
+    // least rotation of the x normal coordinates (the wide twin of
+    // `FastCanon`; plain `u128` modular multiply instead of `FastMod`).
+    fn canonicalize_poly(
+        f: &Field128,
+        state: WState,
+        modulus: u64,
+        lambda: u64,
+        charges: &mut Charges,
+    ) -> WState {
+        charges.canonicalizations += 1;
+        let WPoint::Affine { x: x0, y: y0 } = state.point else {
+            return state;
+        };
+        let nb = f.nb;
+        let x_normal = nb.to_normal.apply(x0);
+        let y_normal = nb.to_normal.apply(y0);
+        let mut multiplier = 1u64;
+        let mut best_key = raw_key(state.point);
+        let mut best_point = state.point;
+        let mut best_multiplier = multiplier;
+        for exponent in 0..f.nb.n {
+            let point = if exponent == 0 {
+                state.point
+            } else {
+                WPoint::Affine {
+                    x: nb.to_poly.apply(nb.rotate(x_normal, exponent)),
+                    y: nb.to_poly.apply(nb.rotate(y_normal, exponent)),
+                }
+            };
+            let key = raw_key(point);
+            if key < best_key {
+                best_key = key;
+                best_point = point;
+                best_multiplier = multiplier;
+            }
+            let negative = point_neg(point);
+            if raw_key(negative) < best_key {
+                best_key = raw_key(negative);
+                best_point = negative;
+                best_multiplier = modulus - multiplier;
+            }
+            if exponent + 1 < f.nb.n {
+                multiplier = mul_mod(multiplier, lambda, modulus);
+            }
+        }
+        WState {
+            point: best_point,
+            a: mul_mod(state.a, best_multiplier, modulus),
+            b: mul_mod(state.b, best_multiplier, modulus),
+        }
+    }
+
+    fn normal_coordinate_choice(nb: &NormalBasis128, xc: u128, yc: u128) -> (u32, bool) {
+        let mut best = (u128::MAX, u128::MAX);
+        let mut choice = (0u32, false);
+        for k in 0..nb.n {
+            let xk = nb.rotate(xc, k);
+            let yk = nb.rotate(yc, k);
+            if (xk, yk) < best {
+                best = (xk, yk);
+                choice = (k, false);
+            }
+            if (xk, yk ^ xk) < best {
+                best = (xk, yk ^ xk);
+                choice = (k, true);
+            }
+        }
+        choice
+    }
+
+    struct FastCanon128<'a> {
+        nb: &'a NormalBasis128,
+        lam_pow: Vec<u64>,
+        modulus: u64,
+    }
+
+    impl<'a> FastCanon128<'a> {
+        fn new(nb: &'a NormalBasis128, lambda: u64, modulus: u64) -> Self {
+            let mut lam_pow = Vec::with_capacity(nb.n as usize);
+            let mut cur = 1u64;
+            for _ in 0..nb.n {
+                lam_pow.push(cur);
+                cur = mul_mod(cur, lambda, modulus);
+            }
+            FastCanon128 {
+                nb,
+                lam_pow,
+                modulus,
+            }
+        }
+
+        #[inline]
+        fn apply(&self, state: WState, charges: &mut Charges) -> WState {
+            charges.canonicalizations += 1;
+            let WPoint::Affine { x, y } = state.point else {
+                return state;
+            };
+            let nb = self.nb;
+            let n = nb.n;
+            let xc = nb.to_normal.apply(x);
+            let yc = nb.to_normal.apply(y);
+            let mut best = xc;
+            let mut best_k = 0u32;
+            let mut cur = xc;
+            let mut tie = false;
+            for k in 1..n {
+                cur = ((cur << 1) | (cur >> (n - 1))) & nb.mask;
+                if cur < best {
+                    best = cur;
+                    best_k = k;
+                    tie = false;
+                } else if cur == best {
+                    tie = true;
+                }
+            }
+            let (k, negated) = if tie {
+                normal_coordinate_choice(nb, xc, yc)
+            } else {
+                let yk = nb.rotate(yc, best_k);
+                (best_k, (yk ^ best) < yk)
+            };
+            let xk = nb.rotate(xc, k);
+            let yk = nb.rotate(yc, k);
+            let yk = if negated { yk ^ xk } else { yk };
+            let lam = self.lam_pow[k as usize];
+            let multiplier = if negated { self.modulus - lam } else { lam };
+            WState {
+                point: WPoint::Affine {
+                    x: nb.to_poly.apply(xk),
+                    y: nb.to_poly.apply(yk),
+                },
+                a: mul_mod(state.a, multiplier, self.modulus),
+                b: mul_mod(state.b, multiplier, self.modulus),
+            }
+        }
+    }
+
+    enum Canon128<'a> {
+        Poly {
+            f: &'a Field128<'a>,
+            modulus: u64,
+            lambda: u64,
+        },
+        Fast(FastCanon128<'a>),
+    }
+
+    impl Canon128<'_> {
+        #[inline]
+        fn apply(&self, state: WState, charges: &mut Charges) -> WState {
+            match self {
+                Canon128::Poly { f, modulus, lambda } => {
+                    canonicalize_poly(f, state, *modulus, *lambda, charges)
+                }
+                Canon128::Fast(fast) => fast.apply(state, charges),
+            }
+        }
+    }
+
+    /// Fold a wide point into one `u64` word, then the same SplitMix-style
+    /// finalizer as the `u64` partition/DP hashes.
+    #[inline(always)]
+    fn fold_point(point: WPoint) -> u64 {
+        let (_, x, y) = raw_key(point);
+        let mut value = (x as u64)
+            ^ ((x >> 64) as u64).rotate_left(32)
+            ^ (y as u64).rotate_left(16)
+            ^ ((y >> 64) as u64).rotate_left(48)
+            ^ 0x9e37_79b9_7f4a_7c15;
+        value ^= value >> 30;
+        value = value.wrapping_mul(0xbf58_476d_1ce4_e5b9);
+        value ^= value >> 27;
+        value = value.wrapping_mul(0x94d0_49bb_1331_11eb);
+        value ^= value >> 31;
+        value
+    }
+
+    fn raw_partition(point: WPoint) -> usize {
+        fold_point(point) as usize % JUMPS
+    }
+
+    fn dp_hash(point: WPoint) -> u64 {
+        let mut v = fold_point(point) ^ 0x2545_f491_4f6c_dd1d;
+        v ^= v >> 33;
+        v = v.wrapping_mul(0xff51_afd7_ed55_8ccd);
+        v ^= v >> 33;
+        v = v.wrapping_mul(0xc4ce_b9fe_1a85_ec53);
+        v ^ (v >> 33)
+    }
+
+    #[derive(Clone, Copy)]
+    struct Trail {
+        a: u64,
+        b: u64,
+        target: u32,
+    }
+
+    struct Lane {
+        state: WState,
+        previous: [WPoint; 4],
+        length: u64,
+        live: bool,
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn resolve_distinguished_point(
+        f: &Field128,
+        table: &mut HashMap<(u8, u128, u128), Trail>,
+        solved: &[u64],
+        state: WState,
+        index: u32,
+        q: WPoint,
+        generator: WPoint,
+        modulus: u64,
+        charges: &mut Charges,
+        wasted_merges: &mut u64,
+    ) -> Option<(u64, u32)> {
+        let key = raw_key(state.point);
+        charges.table_queries += 1;
+        let Some(&hit) = table.get(&key) else {
+            table.insert(
+                key,
+                Trail {
+                    a: state.a,
+                    b: state.b,
+                    target: index,
+                },
+            );
+            charges.table_inserts += 1;
+            return None;
+        };
+        let candidate = if hit.target == index {
+            let denominator = sub_mod(state.b, hit.b, modulus);
+            inverse_mod(denominator, modulus)
+                .map(|inv| mul_mod(sub_mod(hit.a, state.a, modulus), inv, modulus))
+        } else {
+            let base = solved[hit.target as usize];
+            let known = (hit.a as u128 + mul_mod(hit.b, base, modulus) as u128) % modulus as u128;
+            inverse_mod(state.b, modulus)
+                .map(|inv| mul_mod(sub_mod(known as u64, state.a, modulus), inv, modulus))
+        };
+        let Some(candidate) = candidate else {
+            *wasted_merges += 1;
+            return None;
+        };
+        charges.scalar_multiplications += 1;
+        if scalar_mul(f, generator, candidate) == q {
+            return Some((candidate, hit.target));
+        }
+        charges.failed_collisions += 1;
+        None
+    }
+
+    pub fn run(cfg: &WideCfg, emit: &mut dyn FnMut(Value)) -> WideRunResult {
+        let (n, a) = (cfg.n, cfg.a);
+        assert!(
+            (64..=127).contains(&n),
+            "wide rho pipeline needs 64 <= n <= 127"
+        );
+        let process_started = Instant::now();
+        let curve = KoblitzCurve::new(a, n).expect("frozen exact rung must construct");
+        let gf = Gf2_128::new(&curve.curve.irreducible);
+        let nb = NormalBasis128::new(&gf);
+        let f = Field128 {
+            gf: &gf,
+            nb: &nb,
+            a: u128::from(a),
+        };
+        let modulus = curve.subgroup_order.to_u64_digits()[0];
+        let lambda = curve.lambda.to_u64_digits()[0];
+        let automorphisms = signed_automorphism_size(lambda, modulus, n);
+        let generator = match curve.generator() {
+            BinaryPoint::Affine { x, y } => WPoint::Affine {
+                x: gf.from_element(x),
+                y: gf.from_element(y),
+            },
+            BinaryPoint::Infinity => WPoint::Infinity,
+        };
+        let canon = if cfg.rung >= 2 {
+            Canon128::Fast(FastCanon128::new(&nb, lambda, modulus))
+        } else {
+            Canon128::Poly {
+                f: &f,
+                modulus,
+                lambda,
+            }
+        };
+        let mut charges = Charges::default();
+
+        let setup_started = Instant::now();
+        let jump_digest =
+            blake3::hash(format!("KIC-KS-BATCH-JUMPS-v1|{n}|{a}|{}", cfg.batch_seed).as_bytes());
+        let mut jump_rng = StdRng::seed_from_u64(u64::from_le_bytes(
+            jump_digest.as_bytes()[..8].try_into().unwrap(),
+        ));
+        let jumps: Vec<WJump> = (0..JUMPS)
+            .map(|_| loop {
+                let s = jump_rng.gen_range(1..modulus);
+                charges.scalar_multiplications += 1;
+                let point = scalar_mul(&f, generator, s);
+                if point != WPoint::Infinity {
+                    break WJump { point, a: s, b: 0 };
+                }
+            })
+            .collect();
+        let setup_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
+
+        let dp_mask = (1u64 << cfg.dp_bits) - 1;
+        let walk_cap = 8u64 << cfg.dp_bits;
+        let ideal_single =
+            (std::f64::consts::PI * modulus as f64 / (2.0 * automorphisms as f64)).sqrt();
+        let step_cap = (ideal_single.ceil() as u64)
+            .saturating_mul(2_000)
+            .max(1_000_000);
+        let mut table: HashMap<(u8, u128, u128), Trail> = HashMap::new();
+        let mut solved: Vec<u64> = Vec::with_capacity(cfg.fixtures as usize);
+        let mut planted: Vec<u64> = Vec::with_capacity(cfg.fixtures as usize);
+        let mut per_fixture_steps: Vec<u64> = Vec::with_capacity(cfg.fixtures as usize);
+        let mut total_steps = 0u64;
+        let mut cross_solves = 0u32;
+
+        let mut denominators: Vec<u128> = vec![0; cfg.lanes.max(1)];
+        let mut jump_index: Vec<usize> = vec![0; cfg.lanes.max(1)];
+        let mut active: Vec<usize> = Vec::with_capacity(cfg.lanes.max(1));
+        let mut scratch: Vec<u128> = Vec::new();
+
+        for index in 0..cfg.fixtures {
+            let material = match &cfg.corpus {
+                Some(corpus) => format!(
+                    "KIC-SHARED-PUBLIC-FIXTURE-v1|{n}|{a}|{corpus}|{}|{index}",
+                    cfg.batch_seed
+                ),
+                None => format!(
+                    "TASK-KIC-DIRECT-BATCH-20260910|rho|{n}|{a}|signed_frobenius|{}|{index}",
+                    cfg.batch_seed
+                ),
+            };
+            let digest = blake3::hash(material.as_bytes());
+            let seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
+            let mut rng = StdRng::seed_from_u64(seed);
+            let drawn_d0 = rng.gen_range(1..modulus);
+            let generated_d0 = match cfg.explicit_scalar {
+                Some(scalar) => {
+                    assert!(
+                        cfg.fixtures == 1 && (1..modulus).contains(&scalar),
+                        "KIC_RHO_EXPLICIT_SCALAR needs one fixture and a scalar in [1, r)"
+                    );
+                    scalar
+                }
+                None => drawn_d0,
+            };
+            let started = Instant::now();
+            let q = match cfg.target_point {
+                Some((x, y)) => {
+                    assert!(
+                        cfg.fixtures == 1 && cfg.explicit_scalar.is_none(),
+                        "KIC_RHO_TARGET_POINT needs one fixture and no explicit scalar"
+                    );
+                    let point = WPoint::Affine { x, y };
+                    let x2 = f.sqr(x);
+                    let rhs = f.mul(x2, x) ^ if a == 1 { x2 } else { 0 } ^ 1;
+                    assert!(
+                        f.sqr(y) ^ f.mul(x, y) == rhs
+                            && scalar_mul(&f, point, modulus) == WPoint::Infinity,
+                        "target point must lie in the order-r subgroup"
+                    );
+                    point
+                }
+                None => {
+                    charges.scalar_multiplications += 1;
+                    scalar_mul(&f, generator, generated_d0)
+                }
+            };
+            let known_answer = cfg.target_point.is_none();
+            let table_before = table.len();
+            let stride_a = rng.gen_range(1..modulus);
+            let stride = scalar_mul(&f, generator, stride_a);
+            let mut cursor_a = rng.gen_range(0..modulus);
+            let mut cursor = point_add(&f, scalar_mul(&f, generator, cursor_a), q);
+            charges.scalar_multiplications += 2;
+            charges.group_additions += 1;
+
+            let mut steps = 0u64;
+            let mut walks = 0u64;
+            let mut fruitless = 0u64;
+            let mut capped = 0u64;
+            let mut wasted_merges = 0u64;
+            let mut recovered = None;
+            let mut via_target = None;
+
+            if cfg.rung < 3 {
+                'walks: while steps < step_cap {
+                    walks += 1;
+                    let start = cursor;
+                    let start_a = cursor_a;
+                    cursor = point_add(&f, cursor, stride);
+                    cursor_a = (cursor_a + stride_a) % modulus;
+                    charges.group_additions += 1;
+                    if start == WPoint::Infinity {
+                        continue;
+                    }
+                    let mut state = canon.apply(
+                        WState {
+                            point: start,
+                            a: start_a,
+                            b: 1,
+                        },
+                        &mut charges,
+                    );
+                    let mut previous = [WPoint::Infinity; 4];
+                    let mut length = 0u64;
+                    while dp_hash(state.point) & dp_mask != 0 {
+                        let jump = &jumps[raw_partition(state.point)];
+                        charges.partition_hashes += 1;
+                        let next = WState {
+                            point: point_add(&f, state.point, jump.point),
+                            a: (state.a + jump.a) % modulus,
+                            b: state.b,
+                        };
+                        charges.group_additions += 1;
+                        let next = canon.apply(next, &mut charges);
+                        steps += 1;
+                        length += 1;
+                        if next.point == state.point || previous.contains(&next.point) {
+                            fruitless += 1;
+                            continue 'walks;
+                        }
+                        if length > walk_cap {
+                            capped += 1;
+                            continue 'walks;
+                        }
+                        previous = [state.point, previous[0], previous[1], previous[2]];
+                        state = next;
+                    }
+                    if let Some((scalar, via)) = resolve_distinguished_point(
+                        &f,
+                        &mut table,
+                        &solved,
+                        state,
+                        index,
+                        q,
+                        generator,
+                        modulus,
+                        &mut charges,
+                        &mut wasted_merges,
+                    ) {
+                        recovered = Some(scalar);
+                        via_target = Some(via);
+                        break;
+                    }
+                }
+            } else {
+                let lanes_n = cfg.lanes.max(1);
+                let mut lanes: Vec<Lane> = (0..lanes_n)
+                    .map(|_| Lane {
+                        state: WState {
+                            point: WPoint::Infinity,
+                            a: 0,
+                            b: 0,
+                        },
+                        previous: [WPoint::Infinity; 4],
+                        length: 0,
+                        live: false,
+                    })
+                    .collect();
+                'target: while steps < step_cap {
+                    for lane in lanes.iter_mut().filter(|lane| !lane.live) {
+                        loop {
+                            walks += 1;
+                            let start = cursor;
+                            let start_a = cursor_a;
+                            cursor = point_add(&f, cursor, stride);
+                            cursor_a = (cursor_a + stride_a) % modulus;
+                            charges.group_additions += 1;
+                            if start == WPoint::Infinity {
+                                continue;
+                            }
+                            lane.state = canon.apply(
+                                WState {
+                                    point: start,
+                                    a: start_a,
+                                    b: 1,
+                                },
+                                &mut charges,
+                            );
+                            lane.previous = [WPoint::Infinity; 4];
+                            lane.length = 0;
+                            lane.live = true;
+                            break;
+                        }
+                    }
+                    for lane in lanes.iter_mut() {
+                        if lane.live && dp_hash(lane.state.point) & dp_mask == 0 {
+                            lane.live = false;
+                            if let Some((scalar, via)) = resolve_distinguished_point(
+                                &f,
+                                &mut table,
+                                &solved,
+                                lane.state,
+                                index,
+                                q,
+                                generator,
+                                modulus,
+                                &mut charges,
+                                &mut wasted_merges,
+                            ) {
+                                recovered = Some(scalar);
+                                via_target = Some(via);
+                                break 'target;
+                            }
+                        }
+                    }
+                    active.clear();
+                    for (li, lane) in lanes.iter().enumerate() {
+                        if !lane.live {
+                            continue;
+                        }
+                        let ji = raw_partition(lane.state.point);
+                        charges.partition_hashes += 1;
+                        let j = active.len();
+                        jump_index[j] = ji;
+                        denominators[j] = match (lane.state.point, jumps[ji].point) {
+                            (WPoint::Affine { x: x1, .. }, WPoint::Affine { x: x2, .. }) => x1 ^ x2,
+                            _ => 0,
+                        };
+                        active.push(li);
+                    }
+                    gf.batch_inv(&mut denominators[..active.len()], &mut scratch);
+                    for (j, &li) in active.iter().enumerate() {
+                        let lane = &mut lanes[li];
+                        let jump = &jumps[jump_index[j]];
+                        let sum = match (lane.state.point, jump.point) {
+                            (WPoint::Affine { x: x1, y: y1 }, WPoint::Affine { x: x2, y: y2 })
+                                if denominators[j] != 0 =>
+                            {
+                                let slope = f.mul(y1 ^ y2, denominators[j]);
+                                add_with_slope(&f, x1, y1, x2, slope)
+                            }
+                            _ => point_add(&f, lane.state.point, jump.point),
+                        };
+                        let next = WState {
+                            point: sum,
+                            a: (lane.state.a + jump.a) % modulus,
+                            b: lane.state.b,
+                        };
+                        charges.group_additions += 1;
+                        let next = canon.apply(next, &mut charges);
+                        steps += 1;
+                        lane.length += 1;
+                        if next.point == lane.state.point || lane.previous.contains(&next.point) {
+                            fruitless += 1;
+                            lane.live = false;
+                            continue;
+                        }
+                        if lane.length > walk_cap {
+                            capped += 1;
+                            lane.live = false;
+                            continue;
+                        }
+                        lane.previous = [
+                            lane.state.point,
+                            lane.previous[0],
+                            lane.previous[1],
+                            lane.previous[2],
+                        ];
+                        lane.state = next;
+                    }
+                }
+            }
+
+            let solve_ms = started.elapsed().as_secs_f64() * 1000.0;
+            let recovered = recovered.expect("batched rho exceeded the per-target step cap");
+            if known_answer {
+                assert_eq!(recovered, generated_d0, "recovered scalar is wrong");
+            }
+            let via = via_target.unwrap();
+            if via != index {
+                cross_solves += 1;
+            }
+            solved.push(recovered);
+            planted.push(generated_d0);
+            per_fixture_steps.push(steps);
+            total_steps += steps;
+            let q_key = raw_key(q);
+            emit(json!({
+                "kind":"rho_ks_batch_fixture",
+                "evidence_class":"measured_rho_observation",
+                "n":n,"a":a,"quotient_mode":"signed_frobenius","automorphism_size":automorphisms,
+                "fixture_index":index,"fixture_seed":seed,"batch_seed":cfg.batch_seed,
+                "target_source":if known_answer { "derived_known_scalar" } else { "public_point" },
+                "published_fixture_scalar":if known_answer { Some(generated_d0) } else { None },
+                "recovered_fixture_scalar":recovered,
+                "field_value_encoding":"base-10 strings for u128 field values",
+                "published_q":[q_key.1.to_string(),q_key.2.to_string()],"verified":true,
+                "solved_via_target":via,"cross_target_solve":via != index,
+                "walk_steps":steps,"walks":walks,"fruitless_two_cycles":fruitless,
+                "capped_walks":capped,"wasted_merges":wasted_merges,
+                "table_entries_before":table_before,"table_entries_after":table.len(),
+                "total_ms":solve_ms,
+                "ideal_independent_steps":ideal_single,
+            }));
+        }
+        let process_ms = process_started.elapsed().as_secs_f64() * 1000.0;
+        emit(json!({
+            "kind":"rho_ks_batch_summary","producer_version":"v5_strong_rho_ladder",
+            "rung":cfg.rung,"lanes":if cfg.rung >= 3 { cfg.lanes } else { 1 },
+            "n":n,"a":a,"quotient_mode":"signed_frobenius","automorphism_size":automorphisms,
+            "fixtures":cfg.fixtures,"batch_seed":cfg.batch_seed,"corpus":cfg.corpus,"explicit_scalar":cfg.explicit_scalar,
+            "dp_bits":cfg.dp_bits,"jump_count":JUMPS,
+            "target_source":if cfg.target_point.is_some() { "public_point" } else { "derived_known_scalar" },
+            "field_value_encoding":"base-10 strings for u128 field values",
+            "library_gf2_kernel":"library Gf2_128 (wide twin of the IC kernel)",
+            "rho_field_path":"library Gf2_128 (wide carry-less product and table reduction)",
+            "all_verified":true,"cross_target_solves":cross_solves,
+            "total_walk_steps":total_steps,"table_entries":table.len(),
+            "table_payload_lower_bound_bytes":table.len() * (1 + 4 * std::mem::size_of::<u64>()),
+            "setup_ms":setup_ms,"in_process_ms":process_ms,
+            "charges":{
+                "group_additions":charges.group_additions,
+                "scalar_multiplications":charges.scalar_multiplications,
+                "canonicalizations":charges.canonicalizations,
+                "partition_hashes":charges.partition_hashes,
+                "table_queries":charges.table_queries,
+                "table_inserts":charges.table_inserts,
+                "failed_collisions":charges.failed_collisions
+            },
+            "scope":"published synthetic toy fixtures; no external point, unknown scalar, or production key",
+        }));
+        WideRunResult {
+            total_steps,
+            per_fixture_steps,
+            recovered: solved,
+            planted,
+            table_entries: table.len(),
+            cross_solves,
+        }
+    }
+
+    /// Parse the wide configuration from `args`/environment (the `u64`
+    /// `main` dispatches here after reading `n`).
+    pub fn main_config(args: &[String]) -> WideCfg {
+        let cfg = WideCfg {
+            n: args[1].parse().unwrap(),
+            a: args[2].parse().unwrap(),
+            fixtures: args[4].parse().unwrap(),
+            batch_seed: args[5].parse().unwrap(),
+            dp_bits: std::env::var("KIC_RHO_DP_BITS")
+                .map(|v| v.parse().expect("KIC_RHO_DP_BITS must be an integer"))
+                .unwrap_or(8),
+            corpus: std::env::var("KIC_RHO_BATCH_CORPUS").ok(),
+            rung: std::env::var("KIC_RHO_RUNG")
+                .map(|v| v.parse().expect("KIC_RHO_RUNG must be 0..=3"))
+                .unwrap_or(3),
+            lanes: std::env::var("KIC_RHO_LANES")
+                .map(|v| v.parse().expect("KIC_RHO_LANES must be an integer"))
+                .unwrap_or(32),
+            explicit_scalar: std::env::var("KIC_RHO_EXPLICIT_SCALAR")
+                .ok()
+                .map(|v| v.parse().expect("KIC_RHO_EXPLICIT_SCALAR must be a u64")),
+            target_point: std::env::var("KIC_RHO_TARGET_POINT").ok().map(|v| {
+                let (x, y) = v
+                    .split_once(',')
+                    .expect("KIC_RHO_TARGET_POINT must be <x>,<y>");
+                (
+                    x.trim().parse().expect("target x must be a u128"),
+                    y.trim().parse().expect("target y must be a u128"),
+                )
+            }),
+        };
+        assert!(cfg.dp_bits < 32 && cfg.fixtures > 0 && cfg.rung <= 3);
+        cfg
+    }
+}
+
 fn main() {
     let args: Vec<_> = std::env::args().collect();
     assert_eq!(
@@ -1093,8 +2040,17 @@ fn main() {
         args[3], "signed_frobenius",
         "only signed_frobenius is built"
     );
+    let n: u32 = args[1].parse().unwrap();
+    // Wide pipeline (`u128` words) for 64 <= n <= 127.  The degree is
+    // detected here so the `u64` flow below stays bit-identical; the wide
+    // path re-parses its own arguments and environment.
+    if (64..=127).contains(&n) {
+        let cfg = wide::main_config(&args);
+        wide::run(&cfg, &mut |line| println!("{line}"));
+        return;
+    }
     let cfg = RunCfg {
-        n: args[1].parse().unwrap(),
+        n,
         a: args[2].parse().unwrap(),
         fixtures: args[4].parse().unwrap(),
         batch_seed: args[5].parse().unwrap(),

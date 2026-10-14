@@ -13,6 +13,19 @@ export const scopes = ['rust_root', 'rust_cd', 'rust_fmt', 'release_rust',
 const maintained = /^(src|tests|examples|benches)\//;
 const frozenExamples = /^experiments\/koblitz-s3-pair-query-20261007-v4\/(baseline|candidate)\.rs$/;
 const rustConfig = /^(Cargo\.(toml|lock)|build\.rs|rust-toolchain(\.toml)?|rustfmt\.toml|clippy\.toml|\.cargo\/.*)$/;
+// The release packages this independent crate and its path dependency. These
+// paths do not belong to the root Cargo package, so classify their own sources,
+// manifests, build script and embedded inputs explicitly.
+const isogenyCliRust = /^tools\/isogeny-cli\//;
+const isogenyAlgosInputs = /^isogeny_algos\/(?:Cargo\.toml|build\.rs|src\/.*\.rs)$/;
+const isogenyEmbeddedInputs = new Set([
+  'docs/curves/registry.json',
+  'docs/curves/standards/coverage.json',
+  'research/p192_p224_hundred_large_prime_isogenies_20261010/PROTOCOL.md',
+  'research/p192_p224_large_degree_isogenies_20261009/PROTOCOL.md',
+  'research/p192_p224_large_degree_isogenies_20261009/verification_poly.rs',
+  'research/p192_p224_large_degree_isogenies_20261009/verification_kernel.rs',
+]);
 const prose = /\.(md|rst|txt|pdf|svg|png|jpg|jpeg|gif)$/i;
 const control = /^\.github\/scripts\/.*ci-scope.*$/;
 
@@ -28,7 +41,9 @@ export function classify(files, embedded = new Set(), cargoSources = new Set()) 
     result.rust_fmt ||= /\.rs$/.test(file) && (maintained.test(file) || /^cd_attack\//.test(file) || file === 'build.rs');
     result.release_rust ||= /^src\//.test(file) && !prose.test(file) || rustConfig.test(file)
       || file === 'tests/fixtures/ecbench_manifest_small.json'
-      || /^docs\/curves\//.test(file) || embedded.has(file);
+      || /^docs\/curves\//.test(file) || embedded.has(file)
+      || isogenyCliRust.test(file) || isogenyAlgosInputs.test(file)
+      || isogenyEmbeddedInputs.has(file);
     // Both Makefile targets compile src/main.cu against include/ and the
     // committed generated headers; research benchmark sources are separate.
     const client = file === 'ecc2k130/src/main.cu' || file === 'ecc2k130/Makefile'

@@ -1,0 +1,9 @@
+{
+  "provider": "runpod",
+  "requested_gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "allocated_gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition MIG 1g.24gb",
+  "pod_id": "zeu8xrg3tnvy3w",
+  "started_at": "2026-10-12T18:45:18Z",
+  "outcome": "aborted and terminated before benchmark",
+  "reason": "RunPod matched a MIG partition rather than the full 96 GB SKU"
+}
