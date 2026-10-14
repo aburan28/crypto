@@ -32,8 +32,14 @@ Accept only if `r>=11`, `gcd(r,3)=1`, `r` does not divide `n1`, and
 `phi:E -> E':y^2=x^3-27` preserves the group law on the checked samples.
 Record `ord_r(p)` and the base-field isomorphism test for `E,E'`.
 
-Choose the first accepted instance in each of the fixed prime intervals
-`[31,127]`, `[128,511]`, `[512,2047]`, `[2048,4093]` that also gives at
+Selector amendment v2, dated 2026-10-14 **after the v1 screen and before any
+paired DLP run**: the v1 selector returned subgroup orders `19,31,19,73` as
+`p` increased. Retain [SCREEN_V1.jsonl](SCREEN_V1.jsonl) and require the
+minimum subgroup orders `17,53,211,811` in the four respective intervals.
+This changes the instance screen to produce actually increasing DLP sizes;
+it changes no solver or cost threshold. Choose the first accepted instance
+in each of the fixed prime intervals `[31,127]`, `[128,511]`,
+`[512,2047]`, `[2048,4093]` meeting those minima and giving at
 least eight distinct nonidentity projected base elements from some line
 `x=c*t`, `t in F_p`, where `c` is the first of `s,1+s,2+s,...` meeting this
 condition. Enumerate signed lifts in increasing `t`, then packed y order.
