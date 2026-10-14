@@ -114,7 +114,7 @@ def fig_cells(rows, cells):
         ax.set_yscale("log")
         ax.grid(axis="y", alpha=0.3)
     h, l = axes[0].get_legend_handles_labels()
-    fig.legend(h, l, fontsize=8, loc="lower center", ncol=4, bbox_to_anchor=(0.5, 0.0), markerscale=3)
+    fig.legend(h, l, fontsize=8, loc="lower center", ncol=4, bbox_to_anchor=(0.5, 0.0), markerscale=1.5)
     axes[1].set_xticks(xs)
     axes[1].set_xticklabels([label(r) for r in rows], rotation=70, fontsize=7)
     fig.suptitle("Item 4: max Fourier coefficient of the target-conditioned decomposition spectrum, tower vs nulls", fontsize=11)
