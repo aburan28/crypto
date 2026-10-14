@@ -54,7 +54,9 @@
 #if ECC_SIGMA_SIGN && ECC_WITNESS
 #error "ECC_SIGMA_SIGN has no device witness yet (eight counters); build with WITNESS=0"
 #endif
-#if ECC_SIGMA_SIGN && ((defined(ECC_WALK_TABLE) && ECC_WALK_TABLE) || (defined(ECC_PACKED_XONLY_23) && ECC_PACKED_XONLY_23))
+// The sign changes Ref::step, the sigma walk; a table-walk build carries it
+// unused (walkconstant.cpp compiles both walks), the x-only walk cannot.
+#if ECC_SIGMA_SIGN && defined(ECC_PACKED_XONLY_23) && ECC_PACKED_XONLY_23
 #error "ECC_SIGMA_SIGN modifies the sigma walk only"
 #endif
 #ifndef ECC_COUNT_BITS
