@@ -212,6 +212,7 @@ pub mod jv_quintic_edwards;
 pub mod jv_sieve;
 pub mod koblitz_bench;
 pub mod koblitz_factor_base_search;
+pub mod koblitz_greedy_base;
 pub mod koblitz_fast;
 pub mod koblitz_fast_arith;
 pub mod koblitz_groebner;

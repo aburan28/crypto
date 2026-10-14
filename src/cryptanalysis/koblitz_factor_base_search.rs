@@ -74,6 +74,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::binary_ecc::{BinaryPoint, F2mElement};
 
+use super::koblitz_greedy_base::build_greedy_coverage_factor_base;
 use super::koblitz_groebner::{f4_word_ops_thread, FieldStructure, SolverEngine};
 use super::koblitz_index_calculus::{
     all_factors_of_x_n_minus_1, build_frobenius_factor_base,
@@ -137,6 +138,20 @@ pub enum FactorBaseSpec {
         /// Sampling stops once the base has at least this many points.
         points: usize,
     },
+    /// Signed Frobenius orbits of the prime-order subgroup, chosen one at
+    /// a time to cover the most new subgroup targets as sums of two base
+    /// points.  Same stopping rule as `SubgroupOrbits`; see
+    /// [`super::koblitz_greedy_base`] for the construction and why its
+    /// count is exact.  `pool` is the number of candidate orbits scored
+    /// per step (`0` scores all of them, and then `seed` has no effect).
+    GreedyCoverage {
+        /// Seed for the candidate sample; ignored when `pool` is `0`.
+        seed: u64,
+        /// Target point count, reached by whole orbits.
+        points: usize,
+        /// Candidate orbits scored per step, or `0` for all.
+        pool: usize,
+    },
     /// The parent base restricted to the signed Frobenius orbits whose
     /// canonical (smallest) abscissa is listed.
     Pruned {
@@ -155,6 +170,7 @@ impl FactorBaseSpec {
             Self::Divisor { .. } => "divisor",
             Self::FrobeniusUnion { .. } => "frobenius_union",
             Self::SubgroupOrbits { .. } => "subgroup_orbits",
+            Self::GreedyCoverage { .. } => "greedy_coverage",
             Self::TwoTorsionSaturated { .. } => "two_torsion_saturated",
             Self::Pruned { .. } => "pruned",
         }
@@ -221,6 +237,9 @@ impl FactorBaseSpec {
             }
             Self::SubgroupOrbits { seed, points } => {
                 build_subgroup_orbit_factor_base(kc, *seed, *points)
+            }
+            Self::GreedyCoverage { seed, points, pool } => {
+                build_greedy_coverage_factor_base(kc, *points, *pool, *seed).map(|(fb, _)| fb)
             }
             Self::TwoTorsionSaturated { parent } => {
                 let inner = parent.materialize(kc)?;
@@ -848,7 +867,9 @@ fn spec_abscissa_bound(spec: &FactorBaseSpec, n: u32) -> Option<u64> {
         // A cofactor image can merge abscissae, so the parent bound is
         // not a lower bound for the child; sampled orbits have no bound
         // at all.
-        FactorBaseSpec::CofactorProjected { .. } | FactorBaseSpec::SubgroupOrbits { .. } => None,
+        FactorBaseSpec::CofactorProjected { .. }
+        | FactorBaseSpec::SubgroupOrbits { .. }
+        | FactorBaseSpec::GreedyCoverage { .. } => None,
         // Saturation is monotone in abscissae (parent x-values are kept),
         // so a parent bound is a lower bound for the child.
         FactorBaseSpec::TwoTorsionSaturated { parent } => spec_abscissa_bound(parent, n),
