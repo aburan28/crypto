@@ -1024,7 +1024,9 @@ mod tests {
             "word XORs (elimination, specialisation and linear elimination only)"
         ));
         assert!(super::is_word_xor_op_unit("word XORs (elimination only)"));
-        assert!(!super::is_word_xor_op_unit("vector XORs (Gray-code steps, 4 lanes of 32 bits)"));
+        assert!(!super::is_word_xor_op_unit(
+            "vector XORs (Gray-code steps, 4 lanes of 32 bits)"
+        ));
         assert!(!super::is_word_xor_op_unit(
             "word operations (partial: extraction, transform and filter; per-point solves in solve_row_ops)"
         ));

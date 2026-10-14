@@ -1127,8 +1127,10 @@ fn pdp3_koblitz_rootfind_window_shortens_m3_scan_and_records_window_len() {
     let (ok, err) = run_spec(&dir, &out, &[]);
     assert!(ok, "{err}");
     let text = std::fs::read_to_string(out.join("records.jsonl")).unwrap();
-    let mut by_workload: std::collections::BTreeMap<String, std::collections::BTreeMap<String, Value>> =
-        Default::default();
+    let mut by_workload: std::collections::BTreeMap<
+        String,
+        std::collections::BTreeMap<String, Value>,
+    > = Default::default();
     for line in text.lines() {
         let r: Value = serde_json::from_str(line).unwrap();
         let arm = r["arm"].as_str().unwrap().to_string();
@@ -1192,7 +1194,10 @@ fn pdp3_koblitz_rootfind_window_shortens_m3_scan_and_records_window_len() {
             .find(|p| p["name"] == "oracle_setup")
             .unwrap()
             .clone();
-        assert_eq!(setup["gae"], full_setup["gae"], "{w}: same table build charge");
+        assert_eq!(
+            setup["gae"], full_setup["gae"],
+            "{w}: same table build charge"
+        );
         assert_eq!(setup["adds"], full_setup["adds"], "{w}");
         assert!(
             arms["root-full"]["phases"]
