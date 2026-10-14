@@ -1,0 +1,39 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  font=\scriptsize,
+  arr/.style={-{Stealth[length=4pt]},inkS},
+  leaf/.style={draw=inkS,rounded corners=2pt,fill=cB!22,align=center,inner sep=2.5pt,text width=2.6cm},
+  alu/.style={draw=inkS,rounded corners=2pt,fill=cA!15,align=center,inner sep=2.5pt},
+]
+% operand
+\node[anchor=west,font=\footnotesize\bfseries] at (0,4.35) {A 131-bit operand in five 32-bit words, read as two 64-bit limbs and 3 top bits};
+\fill[cA!35] (0,3.55) rectangle (6.4,4.0);  \node at (3.2,3.775) {$A_0$: bits 0--63};
+\fill[cA!55] (6.45,3.55) rectangle (12.85,4.0); \node at (9.65,3.775) {$A_1$: bits 64--127};
+\fill[inkS!45] (12.9,3.55) rectangle (13.2,4.0); \node[anchor=west] at (13.25,3.775) {$a_4$};
+% leaves
+\node[leaf] (L) at (2.0,2.25) {$L=A_0B_0$\\\texttt{clmad.lo} + \texttt{clmad.hi}};
+\node[leaf] (M) at (6.6,2.25) {$M=(A_0{\oplus}A_1)(B_0{\oplus}B_1)$\\\texttt{clmad.lo} + \texttt{clmad.hi}};
+\node[leaf] (H) at (11.2,2.25) {$H=A_1B_1$\\\texttt{clmad.lo} + \texttt{clmad.hi}};
+\draw[arr] (3.2,3.55) -- (L); \draw[arr] (6.42,3.55) -- (M); \draw[arr] (9.65,3.55) -- (H);
+% fold
+\node[alu,text width=6.8cm] (F) at (6.6,0.85) {fold: $L \oplus (M\oplus L\oplus H)\,x^{64} \oplus H\,x^{128}$\\
+  plus the top-3-bit correction $a_4B + Ab_4 + a_4b_4x^{256}$ (65 of 77 logic instructions)};
+\draw[arr] (L) -- (F); \draw[arr] (M) -- (F); \draw[arr] (H) -- (F);
+\draw[arr,dashed] (13.05,3.55) -- (13.05,0.85) -- (F.east);
+% reduction
+\node[alu,text width=6.8cm] (R) at (6.6,-0.55) {reduce the 261-bit product modulo the 19-term $m(c)$:\\shifts and XORs only, 77 logic instructions};
+\draw[arr] (F) -- (R);
+\node[alu,text width=6.8cm] (C) at (6.6,-1.8) {basis conversions where the normal basis is needed\\(weight, branch, Frobenius networks): shift-and-mask networks};
+\draw[arr] (R) -- (C);
+\end{tikzpicture}
+\caption{The packed 131-bit product. Three $64\times64$ carry-less leaves
+  (six \texttt{CLMAD} instructions) form a one-level Karatsuba; the three
+  top bits, the fold, the reduction and every basis change run on the
+  logic pipe. On the RTX~PRO~6000 a \texttt{CLMAD} costs the issue time of
+  $37.8$ logic instructions, so the split keeps only the six leaf products
+  on the carry-less unit; on a B200 or H100, where it costs $2$--$3.8$,
+  moving the correction and even the reduction onto \texttt{CLMAD} pays
+  instead (Section~\ref{sec:blackwell-rates}).}
+\label{fig:clmad}
+\end{figure}

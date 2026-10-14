@@ -339,7 +339,7 @@ pub fn lagrangians() -> Vec<([u8; 7], bool)> {
                 }
                 let mut span = [0u8; 7];
                 let mut ok = true;
-                for s in 1u8..8 {
+                for (n, s) in (1u8..8).enumerate() {
                     let mut v = 0u8;
                     if s & 1 != 0 {
                         v ^= a;
@@ -355,7 +355,7 @@ pub fn lagrangians() -> Vec<([u8; 7], bool)> {
                         ok = false;
                         break;
                     }
-                    span[usize::from(s - 1)] = v;
+                    span[n] = v;
                 }
                 if !ok {
                     continue;

@@ -1,0 +1,73 @@
+% x: billion iterations per second, 0.37 cm per unit.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[font=\scriptsize,x=0.37cm,y=1cm,
+  meas/.style={circle,fill=cA,inner sep=2.1pt},
+  old/.style={circle,draw=cA,fill=white,thick,inner sep=1.8pt},
+  ceil/.style={draw=cB,line width=1.6pt},
+  band/.style={fill=cB!30,draw=cB},
+  lab/.style={anchor=east,align=right,font=\scriptsize}]
+% grid
+\foreach \v in {0,5,10,15,20,25,30}{
+  \draw[gridc] (\v,0.4) -- (\v,-6.2);
+  \node[below,font=\scriptsize] at (\v,-6.2) {\v};
+}
+\node[below=10pt,font=\small] at (15,-6.2) {billion iterations per second, one device};
+% Row 1: RTX PRO 6000 sigma
+\node[lab] at (-0.4,0) {RTX PRO 6000\\$\sigma$-walk};
+\draw[inkS!40,line width=3pt] (0,0) -- (14.64,0);
+\node[meas] at (14.64,0) {}; \node[meas] at (15.88,0) {};
+\node[above,font=\tiny] at (14.0,0.08) {14.64};
+\node[above,font=\tiny] at (16.5,0.08) {15.88};
+\draw[ceil] (23.97,-0.22) -- (23.97,0.22); \node[above,font=\tiny,align=center] at (23.97,0.22) {24.0 carry-less\\ceiling, rest free};
+\fill[band] (24.7,-0.15) rectangle (26.1,0.15);
+\node[right,font=\tiny,align=left] at (26.2,0) {24.7--26.1 one-add\\floor};
+% Row 2: RTX PRO 6000 table
+\node[lab] at (-0.4,-1.1) {RTX PRO 6000\\table walk};
+\draw[inkS!40,line width=3pt] (0,-1.1) -- (8.24,-1.1);
+\node[meas] at (8.24,-1.1) {}; \node[above,font=\tiny] at (8.24,-1.02) {8.24 exact (v3)};
+\node[old] at (20.08,-1.1) {}; \node[above,font=\tiny] at (19.3,-1.02) {20.08 (v2)};
+\draw[ceil] (22.0,-1.32) -- (22.0,-0.88); \node[below,font=\tiny] at (22.0,-1.32) {22.0 logic pipe};
+\fill[band] (22.7,-1.25) rectangle (27.4,-0.95); \node[right,font=\tiny] at (27.5,-1.1) {22.7--27.4 SOL};
+% Row 3: B200
+\node[lab] at (-0.4,-2.2) {B200};
+\draw[inkS!40,line width=3pt] (0,-2.2) -- (8.84,-2.2);
+\node[meas] at (8.84,-2.2) {}; \node[above,font=\tiny] at (8.84,-2.12) {8.84 $\sigma$};
+\node[old] at (19.40,-2.2) {}; \node[above,font=\tiny] at (19.40,-2.12) {19.40 table};
+\draw[-{Stealth[length=4pt]},dashed,cB,thick] (19.9,-2.2) -- (29.6,-2.2);
+\node[below,font=\tiny,align=center] at (24.8,-2.27) {30 needs a $1.55\times$ logic cut\\(carry-less floor: 255)};
+% Row 4: RTX PRO 4500
+\node[lab] at (-0.4,-3.3) {RTX PRO 4500\\(165\,W)};
+\draw[inkS!40,line width=3pt] (0,-3.3) -- (5.107,-3.3);
+\node[meas] at (5.107,-3.3) {}; \node[above,font=\tiny] at (4.6,-3.22) {5.11 $\sigma$};
+\node[meas] at (12.50,-3.3) {}; \node[above,font=\tiny] at (12.5,-3.22) {12.50 bridge map};
+\draw[ceil] (14.14,-3.52) -- (14.14,-3.08); \node[right,font=\tiny] at (14.3,-3.3) {14.1 map's arithmetic ceiling};
+% Row 5: FPGA
+\node[lab] at (-0.4,-4.4) {VU47P FPGA\\(AWS F2)};
+\draw[inkS!40,line width=3pt] (0,-4.4) -- (8.25,-4.4);
+\node[meas] at (8.25,-4.4) {}; \node[above,font=\tiny] at (8.0,-4.32) {8.25};
+\fill[band] (8.8,-4.55) rectangle (9.3,-4.25); \node[right,font=\tiny] at (9.45,-4.4) {8.8--9.3 at the block-RAM limit (not met)};
+% Row 6: NIST
+\node[lab] at (-0.4,-5.5) {P-256 rho on\\RTX PRO 6000};
+\draw[inkS!40,line width=3pt] (0,-5.5) -- (1.632,-5.5);
+\node[meas] at (1.632,-5.5) {}; \node[above,font=\tiny] at (1.632,-5.42) {1.63};
+\draw[ceil] (4.6,-5.72) -- (4.6,-5.28); \node[below,font=\tiny] at (4.6,-5.72) {4.6 multiplies only, $W{=}32$};
+\draw[ceil] (12.2,-5.72) -- (12.2,-5.28); \node[right,font=\tiny] at (12.35,-5.5) {12.2 multiplies only, $W\to\infty$};
+% key
+\begin{scope}[shift={(0,-7.6)}]
+\node[meas] at (0.3,0) {}; \node[anchor=west] at (0.8,0) {measured};
+\node[old] at (6.3,0) {}; \node[anchor=west] at (6.8,0) {measured, superseded cycle rule};
+\draw[ceil] (20.0,-0.2) -- (20.0,0.2); \node[anchor=west] at (20.4,0) {ceiling};
+\fill[band] (24.0,-0.15) rectangle (25.4,0.15); \node[anchor=west] at (25.6,0) {band or projection};
+\end{scope}
+\end{tikzpicture}
+\caption{How far each platform can go, against what it does today.
+  Ceilings are derived from measured pipe rates with every other cost
+  set to zero, so they are upper bounds, not targets: the RTX~PRO~6000's
+  are its carry-less and logic pipes for any walk with one affine
+  addition per step (Section~\ref{sec:floor}); the NIST bounds count only
+  field multiplications at the measured multiply rate
+  (Section~\ref{sec:bounds-nist}). None of these moves the $2^{60.9}$
+  iteration count.}
+\label{fig:bounds}
+\end{figure}
