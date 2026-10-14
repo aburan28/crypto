@@ -1,0 +1,68 @@
+{
+  "base_hash": "e2c0276a010a4787cdd617043ad9833a528c919e9e3882b7de377a0e9e4f7015",
+  "beat_id": "koblitz.factor_base.n53",
+  "claim_boundary": "Public synthetic Koblitz factor-base construction measure only. Not key recovery, not asymptotic sub-rho, not an imported-point attack, and not a ledger promotion until independent validation and schema PASS.",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not asymptotic sub-sqrt",
+    "not imported/external points",
+    "not ledger promotion until independent validation"
+  ],
+  "construction_method": "point_defined_signed_quotient_eta_1_16_summary_only",
+  "construction_wall_ms": 90942.115833,
+  "dimension_l_or_dim": 188,
+  "direct_rows": 2,
+  "eta": {
+    "denominator": 16,
+    "numerator": 1
+  },
+  "executable_or_source_hash": {
+    "direct": "65e06a614134bcfbba9e778816bb32da43e7e0686ae26d1eb578f0516c89cb87",
+    "rank_fixture_source": "25354dec50ff2d6062dc7e699b1b6b3ddb0ddfffd7cbe3e01834aff162c1b0a4"
+  },
+  "factor_base_size_F": 19928,
+  "fixture_hash": "25354dec50ff2d6062dc7e699b1b6b3ddb0ddfffd7cbe3e01834aff162c1b0a4",
+  "frobenius_closed": true,
+  "host_id": {
+    "cpu_count": 14,
+    "machine": "arm64",
+    "node": "Mac.attlocal.net",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.9.10"
+  },
+  "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/runs/20261014T014101Z-9264d0fee7/validation/independent_replay.json",
+  "materialized": true,
+  "n": 53,
+  "n_or_bits": 53,
+  "negation_closed": true,
+  "orbit_count_K": 188,
+  "pair_index_mode": "signed_quotient",
+  "producer_exit_codes": {
+    "direct": 0
+  },
+  "producer_timings_ms": {
+    "base_construction_ms": 23.95175,
+    "curve_setup_ms": 0.926583,
+    "independent_base_validation_ms": 245.08991699999999,
+    "support_index_ms": 90740.803542,
+    "total_setup_ms": 90942.115833,
+    "whole_process_wall_ms": 4995823.641334
+  },
+  "regime": "koblitz",
+  "resource_caps": {
+    "common_cap_bytes": 17179869184,
+    "observed_peak_rss_bytes": 2881667072,
+    "under_cap": true
+  },
+  "retained_bytes": 89887680,
+  "schema_version": 2,
+  "seeds": {
+    "direct": 13655157592039865889
+  },
+  "stage": "factor_base",
+  "subgroup_membership_verified": true,
+  "support_table_allocated_bytes": 92274688,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "verdict": "DRAFT_PENDING_INDEPENDENT_VALIDATION",
+  "whole_process_wall_ms": 4995823.641334
+}

@@ -1433,9 +1433,13 @@ fn write_or_print(out: Option<&Path>, text: &str) -> Result<(), String> {
 /// with its two-stage bootstrap interval (workloads, then runs), the
 /// method's derived expectation, and the ratios to the curve's generic
 /// floor and to the reference arm on the same workloads.
+///
+/// Median `solve_wall_ms` is descriptive host timing (L0 unless isolation
+/// says otherwise); it is not an admitted cost unit.  Kept on the table so
+/// oracle-time wins vs Gröbner are visible beside S without a second tool.
 fn table(dirs: &[PathBuf], reference: Option<&str>) -> Result<(), String> {
-    println!("| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | levels |");
-    println!("|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---|");
+    println!("| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | med wall ms | levels |");
+    println!("|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---:|---|");
     for d in dirs {
         let s = runner::read_session(d)?;
         let recs = runner::read_records(d)?;
@@ -1515,8 +1519,19 @@ fn table(dirs: &[PathBuf], reference: Option<&str>) -> Result<(), String> {
                     *levels.entry(r.isolation.level.name()).or_insert(0) += 1;
                 }
                 let o = |v: Option<f64>| v.map(|x| format!("{x:.3}")).unwrap_or_else(|| "–".into());
+                let mut walls_ms: Vec<f64> = mine
+                    .iter()
+                    .filter(|r| r.counts())
+                    .filter_map(|r| r.time.solve_wall_ns.map(|ns| ns as f64 / 1e6))
+                    .collect();
+                walls_ms.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+                let med_wall = if walls_ms.is_empty() {
+                    None
+                } else {
+                    Some(walls_ms[walls_ms.len() / 2])
+                };
                 println!(
-                    "| {} | {} | {} | {} | {:.2} | {}/{} | {} | {} | {} | {} | {} | {} | {} | {} |",
+                    "| {} | {} | {} | {} | {:.2} | {}/{} | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
                     s.session_id,
                     arm.name,
                     arm.method.id,
@@ -1540,6 +1555,9 @@ fn table(dirs: &[PathBuf], reference: Option<&str>) -> Result<(), String> {
                     } else {
                         "no"
                     },
+                    med_wall
+                        .map(|ms| format!("{ms:.3}"))
+                        .unwrap_or_else(|| "–".into()),
                     levels
                         .iter()
                         .map(|(k, v)| format!("{k}×{v}"))

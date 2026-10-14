@@ -45,13 +45,19 @@ fn main() {
     let t0 = Instant::now();
     let ic = j0_index_calculus_dlp(&curve, &g, &q, target_orbits, extra, max_trials);
     let ic_ms = t0.elapsed().as_secs_f64() * 1e3;
-    let ic_ok = ic.as_ref().map(|r| g.scalar_mul(r, &a_fe) == q).unwrap_or(false);
+    let ic_ok = ic
+        .as_ref()
+        .map(|r| g.scalar_mul(r, &a_fe) == q)
+        .unwrap_or(false);
     let ic_match = ic.as_ref().map(|r| r == &x_truth).unwrap_or(false);
 
     let t1 = Instant::now();
     let rho = pollard_rho_ecdlp(&curve, &g, &q, rho_steps);
     let rho_ms = t1.elapsed().as_secs_f64() * 1e3;
-    let rho_ok = rho.as_ref().map(|r| g.scalar_mul(r, &a_fe) == q).unwrap_or(false);
+    let rho_ok = rho
+        .as_ref()
+        .map(|r| g.scalar_mul(r, &a_fe) == q)
+        .unwrap_or(false);
 
     let agree = match (&ic, &rho) {
         (Some(a), Some(b)) => a == b,

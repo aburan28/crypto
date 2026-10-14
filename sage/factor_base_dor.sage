@@ -1071,11 +1071,13 @@ def measure_structure(field, name, dim, dmax, targets_int, seed):
         if not labels[t_int]:
             continue  # satisfiable targets do not refute; D* is for UNSAT
         eqs = descent_equations(field, basis1, basis2, t_int, b_int)
-        dstar, profile = refutation_degree(eqs, nvars, dmax)
+        shapes = {}
+        dstar, profile = refutation_degree(eqs, nvars, dmax, shapes)
         results.append({
             "target": "0x%x" % t_int,
             "d_star": dstar,
             "rank_profile": {str(k): v for k, v in profile.items()},
+            "macaulay_shape": {str(k): list(val) for k, val in shapes.items()},
         })
     solved = [r["d_star"] for r in results if r["d_star"] is not None]
     censored = sum(1 for r in results if r["d_star"] is None)
@@ -1152,8 +1154,8 @@ def main():
         if args.out:
             with open(args.out, "w") as handle:
                 handle.write(json.dumps({"schema": "factor-base-stacking-v1", "field_degree": args.field,
-                                         "window_dim": args.dim, "weights": [wa, wb], "seed": args.seed,
-                                         "rows": rows}, indent=2) + "\n")
+                                         "window_dim": args.dim, "weights": [wa, wb], "seed": int(args.seed),
+                                         "rows": rows}, indent=2, default=int) + "\n")
         return
 
     if args.curve in ("p192", "p224", "p256"):

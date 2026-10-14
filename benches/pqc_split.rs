@@ -21,6 +21,7 @@ fn cycles() -> u64 {
 /// bench compiles and stays comparable on aarch64 hosts (the unit changes,
 /// the split it reports does not).
 #[cfg(not(target_arch = "x86_64"))]
+#[allow(dead_code)] // measure/main are x86_64-only; keep the stand-in compiling
 #[inline]
 fn cycles() -> u64 {
     use std::sync::OnceLock;

@@ -40,7 +40,7 @@ use crate::cryptanalysis::ic_framework::fiber::{
 use crate::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, CompactOrbitScanBase, CyclotomicBase, DescentAlgebraicOracle,
     FrobeniusMitmOracle, GlvOrbitBase, KoblitzOrbitBase, MitmOracle, OnbWeightBase,
-    PrimeAbscissaBase, RootfindSubtractOracle, SubtractOracle,
+    PrimeAbscissaBase, PrimeBatchMitmOracle, RootfindSubtractOracle, SubtractOracle,
 };
 use crate::cryptanalysis::ic_framework::prime_tower::PrimeKummerBase;
 use crate::cryptanalysis::ic_framework::rootfind::{RootfindMitmOracle, RootfindPairsOracle};
@@ -123,7 +123,7 @@ const IC_COUNTED_PARAMS: &[ParamDecl] = &[
     ParamDecl {
         name: "targets",
         default: Some("walk"),
-        help: "random or walk",
+        help: "random, walk, or walk-prime-fast on single-word prime curves",
     },
     ParamDecl {
         name: "max_trials",
@@ -308,7 +308,7 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "oracle",
                     default: None,
-                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; rootfind-subtract:m=2|3 (prime curves: prime_fast's direct-subtraction root finding, one batched inversion a target); the cofactor-fiber-aware mitm-fiber:fiber=closed|lifts|blind, mitm-frobenius-fiber:fiber=closed|lifts|blind and descent-algebraic-fiber:fiber=combined|lifts|blind (ic_framework::fiber); or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N and pdp3-koblitz:m=2|3,engine=rootfind (the pair-sum table of DecompositionStrategy::PairTable) on koblitz-standard-subspace",
+                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; mitm-prime-batch:m=2 (prime folded table with batched inversions); rootfind-subtract:m=2|3 (prime curves: prime_fast's direct-subtraction root finding, one batched inversion a target); the cofactor-fiber-aware mitm-fiber:fiber=closed|lifts|blind, mitm-frobenius-fiber:fiber=closed|lifts|blind and descent-algebraic-fiber:fiber=combined|lifts|blind (ic_framework::fiber); or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N, pdp3-koblitz:m=2|3,engine=rootfind (PairSumTable), pdp3-koblitz:m=3,engine=rootfind-window (cyclic ⌈|F|/3⌉ window), pdp3-koblitz:m=2|3,engine=rootfind-negfold (PairTable negation fold, ~half set-up), and pdp3-koblitz:m=3,engine=rootfind-window-negfold on koblitz-standard-subspace",
                 },
                 ParamDecl {
                     name: "solver",
@@ -323,7 +323,7 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "targets",
                     default: Some("walk"),
-                    help: "random ([a]G+[b]Q per trial) or walk (one addition per trial)",
+                    help: "random ([a]G+[b]Q per trial), walk, or walk-prime-fast (same guarded stream using native Montgomery additions on prime curves)",
                 },
                 ParamDecl {
                     name: "max_trials",
@@ -1812,6 +1812,7 @@ fn solve_ic_prime(
     let ms = spec.oracle_params.u64_or("m", 2)? as u32;
     let mut subtract = SubtractOracle;
     let mut mitm = MitmOracle::new(ms);
+    let mut prime_batch = PrimeBatchMitmOracle::new();
     let mut mitm_fiber = FiberMitmOracle::new(ms);
     let mut rootfind_mitm = RootfindMitmOracle::new(ms);
     let mut rootfind_pairs = RootfindPairsOracle::new(ms);
@@ -1819,6 +1820,7 @@ fn solve_ic_prime(
     let oracle: &mut dyn DecompositionOracle<_> = match or_name.as_str() {
         "subtract" => &mut subtract,
         "mitm" => &mut mitm,
+        "mitm-prime-batch" => &mut prime_batch,
         "mitm-fiber" => &mut mitm_fiber,
         "rootfind-mitm" => &mut rootfind_mitm,
         "rootfind-pairs" => &mut rootfind_pairs,
