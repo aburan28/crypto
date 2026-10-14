@@ -13,7 +13,8 @@
 //!
 //! Prints one JSON line (draw index, basis, x_R, unknowns, equations,
 //! solution count) on stdout.  `--sat-ok` exports the K-th draw regardless of
-//! satisfiability (for satisfiable controls).
+//! satisfiability (for satisfiable controls), still reporting its exact count;
+//! `--no-count` skips the count.
 
 use crypto_lib::binary_ecc::F2mElement;
 use crypto_lib::cryptanalysis::koblitz_bench::{
@@ -51,6 +52,9 @@ fn main() {
     let k = num("--unsat-index", 0) as usize;
     let max_draws = num("--max-draws", 4096) as usize;
     let sat_ok = args.iter().any(|a| a == "--sat-ok");
+    // `--no-count`: skip the exact count (cells where it is too dear); the
+    // JSON then reports `"solutions":-1` and the GB itself decides.
+    let no_count = args.iter().any(|a| a == "--no-count");
     let out = flag("--out").expect("--out FILE");
 
     let irr = find_irreducible_sparse(n).expect("field");
@@ -60,14 +64,14 @@ fn main() {
     let mut seen = 0usize;
     for drawn in 0..max_draws {
         let (basis, x_r) = ladder_sample(n, ell, &mut rng);
-        let solutions = if sat_ok {
+        let solutions = if no_count {
             0
         } else if m == 3 {
             chained_s3_solution_count(&basis, &x_r, &b, &irr)
         } else {
             chained_solution_count(m, &basis, &x_r, &b, &irr)
         };
-        if solutions > 0 {
+        if solutions > 0 && !sat_ok {
             continue;
         }
         if seen < k {
@@ -118,7 +122,7 @@ fn main() {
             r#"{{"m":{m},"n":{n},"ell":{ell},"seed":{seed},"unsat_index":{k},"draw":{drawn},"n_vars":{nv},"n_eqs":{n_eqs},"max_eq_degree":{max_deg},"v_basis":{:?},"x_r":{},"solutions":{},"sat_ok":{sat_ok}}}"#,
             basis.iter().map(word).collect::<Vec<_>>(),
             word(&x_r),
-            if sat_ok { -1i64 } else { solutions as i64 }
+            if no_count { -1i64 } else { solutions as i64 }
         );
         return;
     }
