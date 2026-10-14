@@ -895,6 +895,7 @@ mod wide {
     use std::time::Instant;
 
     /// F2-linear map on n ≤ 128 bits applied by byte tables.
+    #[derive(Clone)]
     struct Linear128 {
         tables: Vec<[u128; 256]>,
     }
@@ -924,6 +925,7 @@ mod wide {
         }
     }
 
+    #[derive(Clone)]
     struct NormalBasis128 {
         n: u32,
         mask: u128,
@@ -1691,9 +1693,10 @@ mod wide {
     #[cfg(test)]
     mod root_bloom_table_tests {
         use super::{
-            build_index128_with_symmetry, symmetric_state_prefix, Gf2_128, NormalBasis128,
-            PackedRootLayout, RootBloom, RootOnly21, RootOnly83, RootSlots128, RootTable128,
-            S3Solver128, State128, State26, State83, StateStore128,
+            build_index128_with_symmetry, symmetric_labels_for_ordinal, symmetric_state_prefix,
+            Gf2_128, NormalBasis128, PackedRootLayout, RootBloom, RootOnly11, RootOnly21,
+            RootOnly83, RootSlots128, RootTable128, S3Solver128, State128, State26, State83,
+            StateStore128,
         };
         use crate::mix_root_bloom;
         use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse_wide;
@@ -1848,8 +1851,40 @@ mod wide {
                     .collect(),
                 k: reps.len(),
             };
+            assert_eq!(std::mem::size_of::<RootOnly11>(), 11);
+            let shifted: Vec<Vec<u128>> = reps
+                .iter()
+                .map(|&code| (0..gf.n).map(|relative| gf.sqr_k(code, relative)).collect())
+                .collect();
+            let root_only11 = StateStore128::RootOnly11 {
+                states: (0..quotient.states.len())
+                    .map(|index| RootOnly11::from_wide(quotient.states.get(index)))
+                    .collect(),
+                k: reps.len(),
+                shifted,
+                gf: gf.clone(),
+                basis: basis.clone(),
+            };
             for index in 0..quotient.states.len() {
                 let expected = quotient.states.get(index);
+                let (left, right, relative) = symmetric_labels_for_ordinal(reps.len(), index);
+                assert_eq!(
+                    (left, right, relative),
+                    (expected.left, expected.right, expected.relative)
+                );
+                let x = reps[left as usize];
+                let y = gf.sqr_k(reps[right as usize], relative as u32);
+                let denominator = gf.sqr(x ^ y);
+                let root_sum = if denominator == 0 {
+                    0
+                } else {
+                    gf.mul(gf.mul(x, y), gf.inv(denominator))
+                };
+                assert_eq!(
+                    expected.normal_roots[0] ^ basis.to_normal.apply(root_sum),
+                    expected.normal_roots[1],
+                    "one-root S3 reconstruction differs at state {index}"
+                );
                 let actual = root_only.get(index);
                 assert_eq!(
                     (actual.left, actual.right, actual.relative),
@@ -1860,12 +1895,18 @@ mod wide {
                 assert_eq!(root_only21.get(index).left, expected.left);
                 assert_eq!(root_only21.get(index).right, expected.right);
                 assert_eq!(root_only21.get(index).relative, expected.relative);
+                assert_eq!(root_only11.get(index).normal_roots, expected.normal_roots);
+                assert_eq!(root_only11.get(index).left, expected.left);
+                assert_eq!(root_only11.get(index).right, expected.right);
+                assert_eq!(root_only11.get(index).relative, expected.relative);
             }
             let mut full_indexed = RootTable128::with_capacity_indexed83(full.states.len() * 2);
             let mut quotient_indexed =
                 RootTable128::with_capacity_indexed83(quotient.states.len() * 2);
             let mut dense_quotient_indexed =
                 RootTable128::with_capacity_indexed83((quotient.states.len() * 4 + 2) / 3);
+            let mut single_root_indexed =
+                RootTable128::with_capacity_indexed83(quotient.states.len() * 2);
             for (states, table) in [
                 (&full.states, &mut full_indexed),
                 (&quotient.states, &mut quotient_indexed),
@@ -1907,6 +1948,25 @@ mod wide {
                 }
             }
             assert_eq!(dense_quotient_indexed.len, quotient_indexed.len);
+            for index in 0..quotient.states.len() {
+                let state = quotient.states.get(index);
+                for (selector, root) in state.normal_roots.into_iter().enumerate() {
+                    let key = basis.canonical_selected(root).0;
+                    single_root_indexed.insert_indexed83(
+                        key,
+                        index,
+                        selector,
+                        |prior_index, prior_selector| {
+                            basis
+                                .canonical_selected(
+                                    root_only11.root_at(prior_index, prior_selector),
+                                )
+                                .0
+                        },
+                    );
+                }
+            }
+            assert_eq!(single_root_indexed.len, quotient_indexed.len);
             assert!(
                 dense_quotient_indexed.layout_receipt().2 < quotient_indexed.layout_receipt().2
             );
@@ -1941,6 +2001,11 @@ mod wide {
                         quotient_indexed.get_with_context(key, &quotient.states, &basis),
                         "21-byte first witness differs for key {key}",
                     );
+                    assert_eq!(
+                        single_root_indexed.get_with_context(key, &root_only11, &basis),
+                        quotient_indexed.get_with_context(key, &quotient.states, &basis),
+                        "11-byte first witness differs for key {key}",
+                    );
                 }
             }
             for probe in 1..2048u128 {
@@ -1961,6 +2026,11 @@ mod wide {
                     quotient_indexed.get_with_context(key, &root_only21, &basis),
                     quotient_indexed.get_with_context(key, &quotient.states, &basis),
                     "21-byte probe differs for key {key}",
+                );
+                assert_eq!(
+                    single_root_indexed.get_with_context(key, &root_only11, &basis),
+                    quotient_indexed.get_with_context(key, &quotient.states, &basis),
+                    "11-byte probe differs for key {key}",
                 );
             }
         }
@@ -2294,6 +2364,46 @@ mod wide {
         }
     }
 
+    // Retain one exact root. The other differs by x*y/(x+y)^2 in the
+    // regular S3 quadratic, and equals the first on its exceptional path.
+    #[derive(Clone, Copy)]
+    struct RootOnly11 {
+        root0: [u8; 11],
+    }
+
+    impl RootOnly11 {
+        fn from_wide(state: State128) -> Self {
+            Self {
+                root0: State83::encode_root(state.normal_roots[0]),
+            }
+        }
+    }
+
+    fn root11_at(
+        states: &[RootOnly11],
+        k: usize,
+        shifted: &[Vec<u128>],
+        gf: &Gf2_128,
+        basis: &NormalBasis128,
+        index: usize,
+        selector: usize,
+    ) -> u128 {
+        assert!(selector < 2);
+        let root0 = State83::decode_root(states[index].root0);
+        if selector == 0 {
+            return root0;
+        }
+        let (left, right, relative) = symmetric_labels_for_ordinal(k, index);
+        let x = shifted[left as usize][0];
+        let y = shifted[right as usize][relative as usize];
+        let denominator = gf.sqr(x ^ y);
+        if denominator == 0 {
+            return root0;
+        }
+        let root_sum = gf.mul(gf.mul(x, y), invert128(gf, basis, denominator));
+        root0 ^ basis.to_normal.apply(root_sum)
+    }
+
     fn symmetric_state_prefix(k: usize, left: usize) -> usize {
         assert!(k > 0 && left <= k);
         42 * left + 83 * (left * (k - 1) - left * left.saturating_sub(1) / 2)
@@ -2326,8 +2436,21 @@ mod wide {
         Wide(Vec<State128>),
         Packed83(Vec<State83>),
         Packed26(Vec<State26>),
-        RootOnly83 { states: Vec<RootOnly83>, k: usize },
-        RootOnly21 { states: Vec<RootOnly21>, k: usize },
+        RootOnly83 {
+            states: Vec<RootOnly83>,
+            k: usize,
+        },
+        RootOnly21 {
+            states: Vec<RootOnly21>,
+            k: usize,
+        },
+        RootOnly11 {
+            states: Vec<RootOnly11>,
+            k: usize,
+            shifted: Vec<Vec<u128>>,
+            gf: Gf2_128,
+            basis: NormalBasis128,
+        },
     }
 
     impl StateStore128 {
@@ -2338,6 +2461,7 @@ mod wide {
                 Self::Packed26(states) => states.len(),
                 Self::RootOnly83 { states, .. } => states.len(),
                 Self::RootOnly21 { states, .. } => states.len(),
+                Self::RootOnly11 { states, .. } => states.len(),
             }
         }
 
@@ -2362,6 +2486,24 @@ mod wide {
                         right,
                         relative,
                         normal_roots: states[index].roots(),
+                    }
+                }
+                Self::RootOnly11 {
+                    states,
+                    k,
+                    shifted,
+                    gf,
+                    basis,
+                } => {
+                    let (left, right, relative) = symmetric_labels_for_ordinal(*k, index);
+                    State128 {
+                        left,
+                        right,
+                        relative,
+                        normal_roots: [
+                            root11_at(states, *k, shifted, gf, basis, index, 0),
+                            root11_at(states, *k, shifted, gf, basis, index, 1),
+                        ],
                     }
                 }
             }
@@ -2397,6 +2539,13 @@ mod wide {
                     })
                 }
                 Self::RootOnly21 { states, .. } => states[index].roots()[selector],
+                Self::RootOnly11 {
+                    states,
+                    k,
+                    shifted,
+                    gf,
+                    basis,
+                } => root11_at(states, *k, shifted, gf, basis, index, selector),
             }
         }
 
@@ -2426,6 +2575,11 @@ mod wide {
                     "root_only83_21byte_states",
                     std::mem::size_of::<RootOnly21>(),
                     states.capacity() * std::mem::size_of::<RootOnly21>(),
+                ),
+                Self::RootOnly11 { states, .. } => (
+                    "root_only83_11byte_states_reconstructed_second_root",
+                    std::mem::size_of::<RootOnly11>(),
+                    states.capacity() * std::mem::size_of::<RootOnly11>(),
                 ),
             }
         }
@@ -2774,15 +2928,20 @@ mod wide {
         let packed_state26 = std::env::var("KIC_STATE26").as_deref() == Ok("1");
         let root_only83 = std::env::var("KIC_ROOT_ONLY22").as_deref() == Ok("1");
         let root_only21 = std::env::var("KIC_ROOT_ONLY21").as_deref() == Ok("1");
+        let root_only11 = std::env::var("KIC_ROOT_ONLY11").as_deref() == Ok("1");
         assert!(
-            (packed_state83 as u8 + packed_state26 as u8 + root_only83 as u8 + root_only21 as u8)
+            (packed_state83 as u8
+                + packed_state26 as u8
+                + root_only83 as u8
+                + root_only21 as u8
+                + root_only11 as u8)
                 <= 1,
             "select one packed state layout"
         );
         assert!(!packed_state83 || gf.n == 83, "28-byte states require N83");
         assert!(!packed_state26 || gf.n == 83, "26-byte states require N83");
         assert!(
-            !(root_only83 || root_only21) || (gf.n == 83 && symmetric_states),
+            !(root_only83 || root_only21 || root_only11) || (gf.n == 83 && symmetric_states),
             "root-only states require symmetric N83 traversal"
         );
         assert!(
@@ -2809,6 +2968,22 @@ mod wide {
                 .and_then(|pairs| pairs.checked_mul(n))
                 .expect("state capacity exceeds usize")
         };
+        if root_only11 {
+            assert!(
+                std::env::var("KIC_INDEXED_ROOT5").as_deref() == Ok("1")
+                    && std::env::var("KIC_INDEXED5_FIXED30").as_deref() == Ok("1")
+                    && std::env::var("KIC_PACKED_ROOT_TABLE").as_deref() == Ok("1")
+                    && !indexed5_load75
+                    && !root_bloom_enabled(),
+                "one-root states require exact indexed fixed30 slots without a Bloom filter"
+            );
+            assert!(
+                max_states.checked_mul(2).unwrap() < (1usize << 30),
+                "one-root complete key bound exceeds fixed 2^30 slots"
+            );
+        }
+        let mut early_root11_table =
+            root_only11.then(|| RootTable128::with_capacity_indexed83(1usize << 29));
         let mut states83 = if packed_state83 {
             Vec::with_capacity(max_states)
         } else {
@@ -2829,6 +3004,11 @@ mod wide {
         } else {
             Vec::new()
         };
+        let mut root_only11_states = if root_only11 {
+            Vec::with_capacity(max_states)
+        } else {
+            Vec::new()
+        };
         let mut states_wide = Vec::new();
         for left in 0..reps.len() {
             for right in 0..reps.len() {
@@ -2837,7 +3017,7 @@ mod wide {
                         continue;
                     }
                     let roots = solver.roots(gf, basis, shifted[left][0], shifted[right][relative]);
-                    if root_only83 || root_only21 {
+                    if root_only83 || root_only21 || root_only11 {
                         assert!(
                             roots.is_some(),
                             "root-only state domain has a missing S3 root"
@@ -2861,6 +3041,31 @@ mod wide {
                             root_only_states.push(RootOnly83::from_wide(state));
                         } else if root_only21 {
                             root_only21_states.push(RootOnly21::from_wide(state));
+                        } else if root_only11 {
+                            let state_index = root_only11_states.len();
+                            root_only11_states.push(RootOnly11::from_wide(state));
+                            let table = early_root11_table.as_mut().unwrap();
+                            for (selector, root) in state.normal_roots.into_iter().enumerate() {
+                                let canonical = basis.canonical_selected(root).0;
+                                table.insert_indexed83(
+                                    canonical,
+                                    state_index,
+                                    selector,
+                                    |prior_index, prior_selector| {
+                                        basis
+                                            .canonical_selected(root11_at(
+                                                &root_only11_states,
+                                                k,
+                                                &shifted,
+                                                gf,
+                                                basis,
+                                                prior_index,
+                                                prior_selector,
+                                            ))
+                                            .0
+                                    },
+                                );
+                            }
                         } else {
                             states_wide.push(state);
                         }
@@ -2884,6 +3089,15 @@ mod wide {
                 states: root_only21_states,
                 k,
             }
+        } else if root_only11 {
+            assert_eq!(root_only11_states.len(), max_states);
+            StateStore128::RootOnly11 {
+                states: root_only11_states,
+                k,
+                shifted: shifted.clone(),
+                gf: gf.clone(),
+                basis: basis.clone(),
+            }
         } else {
             StateStore128::Wide(states_wide)
         };
@@ -2903,7 +3117,11 @@ mod wide {
         assert!(
             !indexed5_table
                 || (gf.n == 83
-                    && (packed_state83 || packed_state26 || root_only83 || root_only21)
+                    && (packed_state83
+                        || packed_state26
+                        || root_only83
+                        || root_only21
+                        || root_only11)
                     && packed
                     && !dense_table
                     && !load75_table),
@@ -2914,8 +3132,9 @@ mod wide {
             "indexed five-byte load75 request requires the indexed table"
         );
         assert!(
-            !indexed5_fixed30 || (indexed5_table && root_only21 && !indexed5_load75),
-            "fixed 2^30 root slots require the indexed 21-byte state layout"
+            !indexed5_fixed30
+                || (indexed5_table && (root_only21 || root_only11) && !indexed5_load75),
+            "fixed 2^30 root slots require an indexed root-only state layout"
         );
         if indexed5_fixed30 {
             assert!(
@@ -2947,34 +3166,38 @@ mod wide {
         } else {
             states.len() * 2
         };
-        let mut table = if indexed5_table {
+        let mut table = if let Some(table) = early_root11_table {
+            table
+        } else if indexed5_table {
             RootTable128::with_capacity_indexed83(root_table_request_entries)
         } else {
             RootTable128::with_capacity(root_table_request_entries, gf.n, reps.len(), packed)
         };
-        for state_index in 0..states.len() {
-            if indexed5_table {
-                for root_selector in 0..2 {
-                    let canonical = basis
-                        .canonical_selected(states.root_at(state_index, root_selector))
-                        .0;
-                    table.insert_indexed83(
-                        canonical,
-                        state_index,
-                        root_selector,
-                        |index, selector| {
-                            basis.canonical_selected(states.root_at(index, selector)).0
-                        },
-                    );
-                }
-            } else {
-                let state = states.get(state_index);
-                for &root in &state.normal_roots {
-                    let (canonical, shift) = basis.canonical_selected(root);
-                    table.insert_if_absent(
-                        canonical,
-                        pack(state.left, state.right, state.relative, shift),
-                    );
+        if !root_only11 {
+            for state_index in 0..states.len() {
+                if indexed5_table {
+                    for root_selector in 0..2 {
+                        let canonical = basis
+                            .canonical_selected(states.root_at(state_index, root_selector))
+                            .0;
+                        table.insert_indexed83(
+                            canonical,
+                            state_index,
+                            root_selector,
+                            |index, selector| {
+                                basis.canonical_selected(states.root_at(index, selector)).0
+                            },
+                        );
+                    }
+                } else {
+                    let state = states.get(state_index);
+                    for &root in &state.normal_roots {
+                        let (canonical, shift) = basis.canonical_selected(root);
+                        table.insert_if_absent(
+                            canonical,
+                            pack(state.left, state.right, state.relative, shift),
+                        );
+                    }
                 }
             }
         }
@@ -3695,6 +3918,8 @@ mod wide {
         summary["symmetric_s3_states_enabled"] = json!(index.symmetric_states);
         summary["indexed5_load75_enabled"] = json!(index.indexed5_load75);
         summary["indexed5_fixed30_enabled"] = json!(index.indexed5_fixed30);
+        summary["root_only11_enabled"] =
+            json!(matches!(&index.states, StateStore128::RootOnly11 { .. }));
         println!("{summary}");
         if let Ok(path) = std::env::var("KIC_DUMP_BASE") {
             let dump = json!({
