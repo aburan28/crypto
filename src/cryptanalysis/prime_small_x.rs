@@ -43,6 +43,8 @@ use serde::Serialize;
 use super::p192_native::{
     p192_order, p192_prime, AffinePoint, Fp, JacobianPoint, P192Arithmetic, B_HEX, GX_HEX, GY_HEX,
 };
+use super::secg_standards::{SecgCurve, SecgField};
+use crate::ct_bignum::{MontgomeryContext, Uint};
 
 /// An exact, canonical key for a field element.
 pub type Key = [u64; 3];
@@ -225,6 +227,82 @@ impl PrimeField for SmallPrime {
     }
 }
 
+/// An element of [`MontField`]: three little-endian limbs in Montgomery form.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct MElem(pub [u64; 3]);
+
+/// Any odd prime field of at most 192 bits, three-limb Montgomery
+/// arithmetic.  This is the field of the SECG `secp112…secp192` curves.
+#[derive(Clone)]
+pub struct MontField {
+    ctx: MontgomeryContext<3>,
+    p: BigUint,
+    p_minus_2: BigUint,
+}
+
+impl MontField {
+    pub fn new(p: &BigUint) -> Result<Self, String> {
+        if p.bits() > 192 {
+            return Err(format!("{} bits do not fit three limbs", p.bits()));
+        }
+        let ctx = MontgomeryContext::<3>::new(Uint::<3>::from_biguint(p))
+            .ok_or("the modulus must be odd and nonzero")?;
+        Ok(Self {
+            ctx,
+            p: p.clone(),
+            p_minus_2: p - BigUint::from(2u8),
+        })
+    }
+
+    fn n(&self) -> Uint<3> {
+        self.ctx.n
+    }
+}
+
+impl PrimeField for MontField {
+    type E = MElem;
+    fn modulus(&self) -> BigUint {
+        self.p.clone()
+    }
+    fn zero(&self) -> MElem {
+        MElem([0; 3])
+    }
+    fn one(&self) -> MElem {
+        MElem(self.ctx.r_mod_n.0)
+    }
+    fn embed_u64(&self, v: u64) -> MElem {
+        MElem(self.ctx.to_montgomery(&Uint([v, 0, 0])).0)
+    }
+    fn embed_big(&self, v: &BigUint) -> Result<MElem, String> {
+        if v >= &self.p {
+            return Err("element is not canonical".into());
+        }
+        Ok(MElem(self.ctx.to_montgomery(&Uint::<3>::from_biguint(v)).0))
+    }
+    fn add(&mut self, a: MElem, b: MElem) -> MElem {
+        MElem(Uint(a.0).add_mod(&Uint(b.0), &self.n()).0)
+    }
+    fn sub(&mut self, a: MElem, b: MElem) -> MElem {
+        MElem(Uint(a.0).sub_mod(&Uint(b.0), &self.n()).0)
+    }
+    fn mul(&mut self, a: MElem, b: MElem) -> MElem {
+        MElem(self.ctx.mont_mul(&Uint(a.0), &Uint(b.0)).0)
+    }
+    fn sqr(&mut self, a: MElem) -> MElem {
+        MElem(self.ctx.mont_sqr(&Uint(a.0)).0)
+    }
+    fn inv(&mut self, a: MElem) -> Option<MElem> {
+        if self.is_zero(a) {
+            return None;
+        }
+        let e = self.p_minus_2.clone();
+        Some(self.pow(a, &e))
+    }
+    fn key(&self, a: MElem) -> Key {
+        self.ctx.from_montgomery(&Uint(a.0)).0
+    }
+}
+
 // ── Curves and points ──────────────────────────────────────────────
 
 /// An affine point `(x, y)`.
@@ -241,9 +319,15 @@ pub struct Curve<F: PrimeField> {
     pub field: F,
     pub a: F::E,
     pub b: F::E,
+    /// Order of the subgroup the base and targets live in: the whole group
+    /// when the cofactor is 1, else the prime-order subgroup `[h]E`.
     pub order: BigUint,
-    /// Whether the group order is known to be prime.
+    /// Whether that order is known to be prime.
     pub order_is_prime: bool,
+    /// Cofactor `h`: the group has `h·order` points.  Base points enter as
+    /// `[h]P`, targets as `[h]` of a uniform point, so both lie in the
+    /// subgroup.
+    pub cofactor: u64,
 }
 
 impl Curve<P192Field> {
@@ -259,6 +343,7 @@ impl Curve<P192Field> {
             b,
             order: p192_order(),
             order_is_prime: true,
+            cofactor: 1,
         }
     }
 
@@ -271,7 +356,83 @@ impl Curve<P192Field> {
     }
 }
 
+impl Curve<MontField> {
+    /// A SECG prime-field curve of at most 192 bits from the standards
+    /// database.  Needs `p ≡ 3 (mod 4)` (the square-root formula used).
+    pub fn from_secg(c: &SecgCurve) -> Result<Self, String> {
+        let SecgField::Prime { p } = &c.field else {
+            return Err(format!("{} is not a prime-field curve", c.name));
+        };
+        if p % 4u8 != BigUint::from(3u8) {
+            return Err(format!("{}: p is not 3 mod 4", c.name));
+        }
+        let field = MontField::new(p)?;
+        let curve = Self {
+            name: c.name.clone(),
+            a: field.embed_big(&c.a)?,
+            b: field.embed_big(&c.b)?,
+            order: c.order.clone(),
+            order_is_prime: true,
+            cofactor: c.cofactor,
+            field,
+        };
+        let mut f = curve.field.clone();
+        let g = curve.secg_generator(c)?;
+        if !curve.on_curve(&mut f, &g) {
+            return Err(format!("{}: the generator is not on the curve", c.name));
+        }
+        Ok(curve)
+    }
+
+    /// The published base point of a curve built by [`Curve::from_secg`].
+    pub fn secg_generator(&self, c: &SecgCurve) -> Result<Pt<MElem>, String> {
+        Ok(Pt {
+            x: self.field.embed_big(&c.gx)?,
+            y: self.field.embed_big(&c.gy)?,
+        })
+    }
+}
+
 impl<F: PrimeField> Curve<F> {
+    /// `[k]P` for `k ≥ 1`; `None` for the point at infinity.
+    pub fn mul_big(&self, f: &mut F, p: &Pt<F::E>, k: &BigUint) -> Option<Pt<F::E>> {
+        let mut acc: Option<Pt<F::E>> = None;
+        for i in (0..k.bits()).rev() {
+            acc = match acc {
+                Some(a) => self.add_points(f, &a, &a),
+                None => None,
+            };
+            if k.bit(i) {
+                acc = match acc {
+                    Some(a) => self.add_points(f, &a, p),
+                    None => Some(*p),
+                };
+            }
+        }
+        acc
+    }
+
+    /// A uniform element of the subgroup of order [`Curve::order`] other
+    /// than `O`: a uniform point pushed through `[h]`.  With cofactor 1 it
+    /// is [`Curve::random_point`] exactly.
+    pub fn random_subgroup_point(&self, f: &mut F, rng: &mut StdRng, exp: &BigUint) -> Pt<F::E> {
+        if self.cofactor == 1 {
+            return self.random_point(f, rng, exp);
+        }
+        let h = BigUint::from(self.cofactor);
+        loop {
+            let p = self.random_point(f, rng, exp);
+            let p = if rng.gen::<bool>() {
+                self.negate(f, &p)
+            } else {
+                p
+            };
+            if let Some(q) = self.mul_big(f, &p, &h) {
+                return q;
+            }
+        }
+    }
+
     /// `x³ + a·x + b`.
     pub fn rhs(&self, f: &mut F, x: F::E) -> F::E {
         let x2 = f.sqr(x);
@@ -352,12 +513,25 @@ impl<F: PrimeField> Curve<F> {
 }
 
 /// The first `size` points with the smallest abscissae `x = 0, 1, 2, …`
-/// that lie on the curve (one of the two signs of each).
+/// that lie on the curve (one of the two signs of each).  With a cofactor
+/// `h > 1` each enters as `[h]P`, so the base lies in the prime-order
+/// subgroup; infinity and repeated abscissae are skipped.
 pub fn small_x_base<F: PrimeField>(c: &Curve<F>, size: usize) -> Result<Vec<Pt<F::E>>, String> {
+    small_x_base_with_extent(c, size).map(|(base, _)| base)
+}
+
+/// [`small_x_base`] and the largest `x` examined.
+pub fn small_x_base_with_extent<F: PrimeField>(
+    c: &Curve<F>,
+    size: usize,
+) -> Result<(Vec<Pt<F::E>>, u64), String> {
     let mut f = c.field.clone();
     let exp = c.euler_exponent(&f);
-    let mut out = Vec::with_capacity(size);
+    let h = BigUint::from(c.cofactor);
+    let mut out: Vec<Pt<F::E>> = Vec::with_capacity(size);
+    let mut seen: std::collections::HashSet<Key> = std::collections::HashSet::new();
     let mut x = 0u64;
+    let mut largest = 0u64;
     while out.len() < size {
         if x > 64 * size as u64 + 1024 {
             return Err("ran out of small abscissae on this curve".into());
@@ -366,11 +540,22 @@ pub fn small_x_base<F: PrimeField>(c: &Curve<F>, size: usize) -> Result<Vec<Pt<F
         let r = c.rhs(&mut f, xe);
         if c.is_square(&mut f, r, &exp) {
             let y = c.sqrt(&mut f, r).ok_or("square without a root")?;
-            out.push(Pt { x: xe, y });
+            let p = Pt { x: xe, y };
+            largest = x;
+            let q = if c.cofactor == 1 {
+                Some(p)
+            } else {
+                c.mul_big(&mut f, &p, &h)
+            };
+            if let Some(q) = q {
+                if seen.insert(f.key(q.x)) {
+                    out.push(q);
+                }
+            }
         }
         x += 1;
     }
-    Ok(out)
+    Ok((out, largest))
 }
 
 /// The abscissae of `a ± b` for every pair of distinct base abscissae and of
@@ -455,6 +640,11 @@ pub struct Options {
 #[derive(Clone, Debug, Serialize)]
 pub struct YieldReport {
     pub curve: String,
+    /// `"prime"` or `"binary"`.
+    pub field_kind: &'static str,
+    /// Cofactor `h`; the base and targets lie in the subgroup of order
+    /// [`YieldReport::order`], reached through `[h]`.
+    pub cofactor: u64,
     pub field_bits: u64,
     pub order_bits: f64,
     pub order: String,
@@ -504,7 +694,7 @@ pub struct Timing {
     pub controls: f64,
 }
 
-fn log2_big(x: &BigUint) -> f64 {
+pub(crate) fn log2_big(x: &BigUint) -> f64 {
     if x.is_zero() {
         return f64::NEG_INFINITY;
     }
@@ -517,7 +707,7 @@ fn log2_big(x: &BigUint) -> f64 {
 }
 
 /// 95% interval for a binomial rate; exact one-sided bound when no hit.
-fn binomial_ci(hits: u64, trials: u64) -> [f64; 2] {
+pub(crate) fn binomial_ci(hits: u64, trials: u64) -> [f64; 2] {
     if trials == 0 {
         return [0.0, 1.0];
     }
@@ -567,17 +757,12 @@ pub fn measure<F: PrimeField>(c: &Curve<F>, opts: &Options) -> Result<YieldRepor
     let exp = c.euler_exponent(&f);
 
     let t0 = Instant::now();
-    let base = small_x_base(c, opts.size)?;
+    let (base, largest_x) = small_x_base_with_extent(c, opts.size)?;
     for p in &base {
         if !c.on_curve(&mut f, p) {
             return Err("a base point is not on the curve".into());
         }
     }
-    let largest_x = {
-        // The abscissae are the smallest integers on the curve; read the last.
-        let last = f.key(base[base.len() - 1].x);
-        last[0]
-    };
     let base_ms = t0.elapsed().as_secs_f64() * 1000.0;
 
     let t1 = Instant::now();
@@ -616,7 +801,7 @@ pub fn measure<F: PrimeField>(c: &Curve<F>, opts: &Options) -> Result<YieldRepor
             let mut hits = 0u64;
             let mut samples: Vec<Pt<F::E>> = Vec::new();
             for _ in 0..here {
-                let p = c.random_point(&mut f, &mut rng, &exp);
+                let p = c.random_subgroup_point(&mut f, &mut rng, &exp);
                 if keys.binary_search(&f.key(p.x)).is_ok() {
                     hits += 1;
                     if samples.len() < 4 {
@@ -675,6 +860,8 @@ pub fn measure<F: PrimeField>(c: &Curve<F>, opts: &Options) -> Result<YieldRepor
     let trials_full = (opts.size as f64 + 1.0).log2() - exact_log2;
     Ok(YieldReport {
         curve: c.name.clone(),
+        field_kind: "prime",
+        cofactor: c.cofactor,
         field_bits: f.modulus().bits(),
         order_bits,
         order: c.order.to_string(),
@@ -809,6 +996,7 @@ pub fn toy_curve(bits: u32, seed: u64) -> Result<Curve<SmallPrime>, String> {
                 b,
                 order: BigUint::from(points),
                 order_is_prime: is_prime_u64(points),
+                cofactor: 1,
             });
         }
     }
@@ -980,5 +1168,128 @@ mod tests {
         let a = g.embed_u64(123_456_789);
         let i = g.inv(a).unwrap();
         assert!(g.mul(a, i) == g.one());
+    }
+
+    fn secg_prime(name: &str) -> Curve<MontField> {
+        use crate::cryptanalysis::secg_standards::secg;
+        Curve::from_secg(secg(name).expect(name)).unwrap_or_else(|e| panic!("{name}: {e}"))
+    }
+
+    #[test]
+    fn mont_field_agrees_with_biguint_arithmetic_at_160_and_192_bits() {
+        use crate::cryptanalysis::secg_standards::{secg, SecgField};
+        for name in [
+            "secp160k1",
+            "secp160r1",
+            "secp160r2",
+            "secp192k1",
+            "secp128r1",
+        ] {
+            let SecgField::Prime { p } = secg(name).unwrap().field.clone() else {
+                panic!()
+            };
+            let mut f = MontField::new(&p).unwrap();
+            let mut rng = StdRng::seed_from_u64(4);
+            for _ in 0..50 {
+                let (a, b) = (f.random(&mut rng), f.random(&mut rng));
+                let (ba, bb) = (
+                    BigUint::from_slice(
+                        &f.key(a)
+                            .iter()
+                            .flat_map(|w| [*w as u32, (*w >> 32) as u32])
+                            .collect::<Vec<_>>(),
+                    ),
+                    BigUint::from_slice(
+                        &f.key(b)
+                            .iter()
+                            .flat_map(|w| [*w as u32, (*w >> 32) as u32])
+                            .collect::<Vec<_>>(),
+                    ),
+                );
+                let big = |k: Key| {
+                    BigUint::from_slice(
+                        &k.iter()
+                            .flat_map(|w| [*w as u32, (*w >> 32) as u32])
+                            .collect::<Vec<_>>(),
+                    )
+                };
+                let r = f.mul(a, b);
+                assert_eq!(big(f.key(r)), (&ba * &bb) % &p, "{name} mul");
+                let r = f.add(a, b);
+                assert_eq!(big(f.key(r)), (&ba + &bb) % &p, "{name} add");
+                let r = f.sub(a, b);
+                assert_eq!(big(f.key(r)), (&ba + &p - &bb) % &p, "{name} sub");
+                if !f.is_zero(a) {
+                    let i = f.inv(a).unwrap();
+                    assert!(f.mul(a, i) == f.one(), "{name} inverse");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn secg_prime_generators_have_the_published_order() {
+        for name in [
+            "secp112r1",
+            "secp128r1",
+            "secp160k1",
+            "secp160r1",
+            "secp160r2",
+            "secp192k1",
+            "secp192r1",
+        ] {
+            let c = secg_prime(name);
+            let mut f = c.field.clone();
+            let g = c
+                .secg_generator(crate::cryptanalysis::secg_standards::secg(name).unwrap())
+                .unwrap();
+            assert!(c.on_curve(&mut f, &g), "{name}");
+            assert!(
+                c.mul_big(&mut f, &g, &c.order).is_none(),
+                "{name}: n·G != O"
+            );
+            assert!(c.mul_big(&mut f, &g, &(&c.order - 1u8)).is_some(), "{name}");
+        }
+    }
+
+    #[test]
+    fn montgomery_p192_gives_the_same_yield_as_the_native_p192_field() {
+        let opts = Options {
+            size: 48,
+            trials: 500,
+            controls: 8,
+            seed: 3,
+        };
+        let native = measure(&Curve::p192(), &opts).unwrap();
+        let generic = measure(&secg_prime("secp192r1"), &opts).unwrap();
+        assert_eq!(native.distinct_sums, generic.distinct_sums);
+        assert_eq!(native.largest_small_x, generic.largest_small_x);
+        assert_eq!(native.exact_yield_log2, generic.exact_yield_log2);
+        assert_eq!(generic.controls_recovered, generic.controls);
+    }
+
+    #[test]
+    fn cofactor_four_base_lies_in_the_subgroup() {
+        let c = secg_prime("secp112r2");
+        assert_eq!(c.cofactor, 4);
+        let mut f = c.field.clone();
+        let base = small_x_base(&c, 5).unwrap();
+        assert_eq!(base.len(), 5);
+        for p in &base {
+            assert!(c.on_curve(&mut f, p));
+            assert!(c.mul_big(&mut f, p, &c.order).is_none(), "n·P != O");
+        }
+        let rep = measure(
+            &c,
+            &Options {
+                size: 32,
+                trials: 400,
+                controls: 8,
+                seed: 2,
+            },
+        )
+        .unwrap();
+        assert_eq!(rep.cofactor, 4);
+        assert_eq!(rep.controls_recovered, rep.controls);
     }
 }

@@ -132,7 +132,7 @@ fn execute(cli: &Cli) -> Result<Value, String> {
     }
     match &cli.command {
         Some(Action::List) => Ok(
-            json!({"schema_version":1,"operation":"list","status":"complete","curves":params::NAMES}),
+            json!({"schema_version":1,"operation":"list","status":"complete","curves":params::names()}),
         ),
         Some(Action::Inspect(args)) => inspect(InspectArgs {
             curve: args.curve.clone(),
@@ -486,7 +486,7 @@ fn display(report: &Value) {
             );
         }
         Some("list") => {
-            for name in params::NAMES {
+            for name in params::names() {
                 println!("{name}");
             }
         }
