@@ -1,0 +1,29 @@
+{
+  "schema": "torsion_extension_run_spec/v1",
+  "date_utc": "2026-10-14",
+  "fixture_path": "research/isogeny_torsion_fibers_20261012/extension_field_20261014/FIXTURES.jsonl",
+  "fixture_sha256": "1a63cc22a22e0fe27d44359325d502038d26d3ac616374fc5558c041939218b7",
+  "p": [61, 271, 787, 3319],
+  "r": [19, 61, 211, 811],
+  "rounds": 3,
+  "seed_law": "(0x20261014 XOR p) + round * 0x9e3779b9 modulo 2^64",
+  "max_relation_trials_law": "min(1000000, 20*r)",
+  "max_rho_steps": 1000000,
+  "target_source": "guarded_walk",
+  "completion": "target_pinned_with_independent_scalar_replay",
+  "arms": [
+    "raw-pair",
+    "projected-pair",
+    "chi-orbit-index",
+    "isogeny-projected-pair",
+    "rho-negation",
+    "rho-negation-aa",
+    "rho-six-class"
+  ],
+  "scope": "Exact pair-table collectors on frozen extension-field points. The chi arm indexes exact projected sums by the order-three Mobius orbit and verifies the full point; it is not the pending chi polynomial-system oracle. The raw arm is an exact-pair control, not the pending Semaev resultant arm.",
+  "one_unit": "Whole-solve thread CPU nanoseconds divided by measured thread CPU nanoseconds per source group addition, then divided by sqrt(r); host-dependent L0 only.",
+  "other_costs": "Exact group-op, base sqrt, lookup, row-op, Fp multiplication/inversion, pair-entry and wall-time counters are retained by phase or row. The calibrated-count S is secondary; whole-solve CPU S includes all native work in this implementation.",
+  "floor_s": 0.886226925452758,
+  "success": "Every successful arm recovers the same frozen scalar, checked in a separate native process; compare complete cold totals to same-target two-class and six-class rho with A/A timing noise.",
+  "stop": "Verified scalar, finite cap, or explicit error. Preserve every row and failure. The original polynomial-oracle and four-size isolated-host gates remain open."
+}
