@@ -238,8 +238,7 @@ impl Arm {
         let full = if lp == 0 {
             Some(rel)
         } else {
-            self
-                .elim
+            self.elim
                 .as_mut()
                 .expect("large primes need an eliminator")
                 .feed(rel, &mut self.merge_ops)
@@ -301,7 +300,11 @@ fn x_line_base(curve: &Curve4, rng: &mut StdRng) -> Vec<Pt4> {
 }
 
 /// Y-line base and its fold: `P_{p−y} = ±(P_y + T)`.
-fn y_line(inst: &FoldInstance4, d4: &D4Instance, rng: &mut StdRng) -> (Vec<(u64, Pt4)>, Vec<(usize, i64)>, usize) {
+fn y_line(
+    inst: &FoldInstance4,
+    d4: &D4Instance,
+    rng: &mut StdRng,
+) -> (Vec<(u64, Pt4)>, Vec<(usize, i64)>, usize) {
     let curve = &d4.curve;
     let p = inst.p;
     let base = y_base(d4, rng);
@@ -406,10 +409,26 @@ fn run_stream(
         .iter()
         .map(|arm| {
             let g = |k: &str| *arm.snapshot.get(k).unwrap_or(&0) as f64;
-            let trials = if arm.solved { g("trials") } else { st.trials as f64 };
-            let scalar = if arm.solved { g("scalar_ops") } else { st.scalar_ops as f64 };
-            let orc = if arm.solved { g("oracle_ops") } else { st.oracle_ops as f64 };
-            let ver = if arm.solved { g("verify_ops") } else { st.verify_ops as f64 };
+            let trials = if arm.solved {
+                g("trials")
+            } else {
+                st.trials as f64
+            };
+            let scalar = if arm.solved {
+                g("scalar_ops")
+            } else {
+                st.scalar_ops as f64
+            };
+            let orc = if arm.solved {
+                g("oracle_ops")
+            } else {
+                st.oracle_ops as f64
+            };
+            let ver = if arm.solved {
+                g("verify_ops")
+            } else {
+                st.verify_ops as f64
+            };
             let la_gae = (arm.la_ops + arm.merge_ops) as f64 * C_MODN / C_ADD;
             let solver_gae = trials * c4 / C_ADD;
             let check = 1.5 * (r as f64).log2();
@@ -456,7 +475,11 @@ fn arg<T: std::str::FromStr>(args: &[String], k: &str, d: T) -> T {
 }
 
 fn emit(path: &str, v: &Value) {
-    let mut f = OpenOptions::new().create(true).append(true).open(path).expect("json");
+    let mut f = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(path)
+        .expect("json");
     writeln!(f, "{v}").unwrap();
     println!("{v}");
 }
@@ -512,14 +535,24 @@ fn ladder(args: &[String]) {
         row["x_oracle_build_s"] = json!(tb.elapsed().as_secs_f64());
         row["x_fb_gae"] = json!(fb_gae);
         let ident: Vec<(usize, i64)> = (0..m).map(|i| (i, 1)).collect();
-        let dlp_col: Vec<(usize, i64)> = (0..m).map(|i| (if i < s { i } else { i + 1 }, 1)).collect();
+        let dlp_col: Vec<(usize, i64)> =
+            (0..m).map(|i| (if i < s { i } else { i + 1 }, 1)).collect();
         let mut arms = vec![
             Arm::new("plain", ident.clone(), m, 0, r),
             Arm::new("dlp", dlp_col, s, 2, r),
             Arm::new("dlp-null", ident, m, 2, r),
         ];
         let cap = 600 * m as u64;
-        let (st, mut out) = run_stream(&inst, &curve, &oracle, &mut arms, seed, cap, C4_S4, &mut la_rng);
+        let (st, mut out) = run_stream(
+            &inst,
+            &curve,
+            &oracle,
+            &mut arms,
+            seed,
+            cap,
+            C4_S4,
+            &mut la_rng,
+        );
         for o in out.iter_mut() {
             o["fb_gae"] = json!(fb_gae);
             o["oracle_setup_gae"] = json!(oracle.setup_ops);
@@ -548,7 +581,16 @@ fn ladder(args: &[String]) {
         row["y_oracle_build_s"] = json!(tb.elapsed().as_secs_f64());
         let mut arms = vec![Arm::new("d4", col, ncols, 0, r)];
         let cap = 2000 * ncols as u64;
-        let (st, mut out) = run_stream(&inst, dcurve, &oracle, &mut arms, seed, cap, c4_d4, &mut la_rng);
+        let (st, mut out) = run_stream(
+            &inst,
+            dcurve,
+            &oracle,
+            &mut arms,
+            seed,
+            cap,
+            c4_d4,
+            &mut la_rng,
+        );
         for o in out.iter_mut() {
             o["fb_gae"] = json!(fb_gae);
             o["oracle_setup_gae"] = json!(oracle.setup_ops);
@@ -665,7 +707,10 @@ fn census(args: &[String]) {
             *hist.entry(inst.cofactor).or_default() += 1;
         }
     }
-    emit(&json_path, &json!({"p": p, "curves": curves, "cofactor_hist": hist}));
+    emit(
+        &json_path,
+        &json!({"p": p, "curves": curves, "cofactor_hist": hist}),
+    );
 }
 
 // ── Analysis: fits and pooled constants from the recorded rows (Rust, so
@@ -713,7 +758,11 @@ fn analyze(args: &[String]) {
     let input: String = arg(args, "--in", "raw/ladder.jsonl".to_string());
     let out_path: String = arg(args, "--out", "raw/summary.json".to_string());
     let text = std::fs::read_to_string(&input).expect("ladder jsonl");
-    let rows: Vec<Value> = text.lines().filter(|l| !l.trim().is_empty()).map(|l| serde_json::from_str(l).unwrap()).collect();
+    let rows: Vec<Value> = text
+        .lines()
+        .filter(|l| !l.trim().is_empty())
+        .map(|l| serde_json::from_str(l).unwrap())
+        .collect();
     let mut rng = StdRng::seed_from_u64(20261014);
     let mut table: Vec<Value> = Vec::new();
     let mut null_ok = true;
@@ -728,25 +777,39 @@ fn analyze(args: &[String]) {
         let rho = row["rho"]["rho"]["mean_S"].as_f64().unwrap();
         let rhoneg = row["rho"]["rho-neg"]["mean_S"].as_f64().unwrap();
         for k in ["rho", "rho-neg"] {
-            all_verified &= row["rho"][k]["runs"].as_array().unwrap().iter().all(|w| w["correct"].as_bool() == Some(true));
+            all_verified &= row["rho"][k]["runs"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|w| w["correct"].as_bool() == Some(true));
         }
         rho_cost.push((l2e, rho * sr, rhoneg * sr));
         let arms = row["arms"].as_array().unwrap();
         let get = |n: &str| arms.iter().find(|a| a["arm"] == n).cloned();
         if let (Some(a), Some(b)) = (get("plain"), get("dlp-null")) {
-            null_ok &= a["trials"] == b["trials"] && a["la_modr_mults"] == b["la_modr_mults"] && a["full_relations"] == b["full_relations"];
+            null_ok &= a["trials"] == b["trials"]
+                && a["la_modr_mults"] == b["la_modr_mults"]
+                && a["full_relations"] == b["full_relations"];
         }
         let mut cells = serde_json::Map::new();
         for a in arms {
             let name = a["arm"].as_str().unwrap().to_string();
             all_verified &= a["correct"].as_bool() == Some(true);
             let g = &a["gae"];
-            let rel = g["trial_scalar"].as_f64().unwrap() + g["solver_charged"].as_f64().unwrap() + g["verify"].as_f64().unwrap();
+            let rel = g["trial_scalar"].as_f64().unwrap()
+                + g["solver_charged"].as_f64().unwrap()
+                + g["verify"].as_f64().unwrap();
             let la = g["la"].as_f64().unwrap();
             let sc = a["S_charged"].as_f64().unwrap();
             let ratio = sc / rhoneg;
             per.entry(name.clone()).or_default().push([
-                l2e, sc * sr, rel, la, a["trials"].as_f64().unwrap(), ratio, la / sr / rhoneg,
+                l2e,
+                sc * sr,
+                rel,
+                la,
+                a["trials"].as_f64().unwrap(),
+                ratio,
+                la / sr / rhoneg,
             ]);
             cells.insert(name, json!({"S_charged": sc, "S_executed": a["S_executed"], "ratio_vs_rho_neg": ratio,
                 "ratio_vs_rho": sc / rho, "la_ratio_vs_rho_neg": la / sr / rhoneg, "trials": a["trials"],
@@ -773,8 +836,14 @@ fn analyze(args: &[String]) {
         }));
     }
     let x: Vec<f64> = rho_cost.iter().map(|c| c.0).collect();
-    fits.insert("rho".into(), json!({"cost": fit(&x, &rho_cost.iter().map(|c| c.1).collect::<Vec<_>>(), &mut rng)}));
-    fits.insert("rho-neg".into(), json!({"cost": fit(&x, &rho_cost.iter().map(|c| c.2).collect::<Vec<_>>(), &mut rng)}));
+    fits.insert(
+        "rho".into(),
+        json!({"cost": fit(&x, &rho_cost.iter().map(|c| c.1).collect::<Vec<_>>(), &mut rng)}),
+    );
+    fits.insert(
+        "rho-neg".into(),
+        json!({"cost": fit(&x, &rho_cost.iter().map(|c| c.2).collect::<Vec<_>>(), &mut rng)}),
+    );
     // Extrapolated handover (labelled as such).  Rho is taken at its
     // large-size S (rows with log2 r ≥ 34, where the walk's set-up is
     // under 10 %), times √r = √(#E / h); each IC phase is its own fitted
@@ -785,7 +854,10 @@ fn analyze(args: &[String]) {
         .map(|t| t["rho_neg_S"].as_f64().unwrap())
         .collect();
     let (rho_inf, rho_inf_sd) = mean_sd(&big);
-    let h = rows.first().map(|r| r["cofactor"].as_f64().unwrap()).unwrap_or(4.0);
+    let h = rows
+        .first()
+        .map(|r| r["cofactor"].as_f64().unwrap())
+        .unwrap_or(4.0);
     let rho_c = |e: f64| rho_inf * 2f64.powf((e - h.log2()) / 2.0);
     let term = |name: &str, k: &str, e: f64| -> f64 {
         let f = &fits[name][k];
@@ -824,19 +896,25 @@ fn analyze(args: &[String]) {
         if !fits.contains_key(name) {
             continue;
         }
-        handover.insert(name.into(), json!({
-            "log2_E_ic_below_rho_neg": first(&|e| total(name, e) <= rho_c(e)),
-            "ratio_at_2^128": total(name, 128.0) / rho_c(128.0),
-            "ratio_at_2^160": total(name, 160.0) / rho_c(160.0),
-            "ratio_at_2^256": total(name, 256.0) / rho_c(256.0),
-            "la_share_at_2^160": 1.0 - term(name, "relation_phase", 160.0) / total(name, 160.0),
-            "la_ratio_large_sizes": la_large(name),
-        }));
+        handover.insert(
+            name.into(),
+            json!({
+                "log2_E_ic_below_rho_neg": first(&|e| total(name, e) <= rho_c(e)),
+                "ratio_at_2^128": total(name, 128.0) / rho_c(128.0),
+                "ratio_at_2^160": total(name, 160.0) / rho_c(160.0),
+                "ratio_at_2^256": total(name, 256.0) / rho_c(256.0),
+                "la_share_at_2^160": 1.0 - term(name, "relation_phase", 160.0) / total(name, 160.0),
+                "la_ratio_large_sizes": la_large(name),
+            }),
+        );
     }
     // Sensitivity: the relation phase anchored at the largest size's mean
     // and carried at the theoretical exponent (1/4; 3/8 for DLP) instead
     // of the fitted one.
-    let emax = table.iter().map(|t| t["log2_E"].as_f64().unwrap()).fold(0.0, f64::max);
+    let emax = table
+        .iter()
+        .map(|t| t["log2_E"].as_f64().unwrap())
+        .fold(0.0, f64::max);
     let anchored = |name: &str, e: f64| -> f64 {
         let v: Vec<f64> = table
             .iter()
@@ -854,14 +932,23 @@ fn analyze(args: &[String]) {
     };
     for name in ["plain", "d4", "dlp"] {
         if let Some(Value::Object(m)) = handover.get_mut(name) {
-            m.insert("anchored_theory_exponent_log2_E_below_rho_neg".into(), first(&|e| anchored(name, e) <= rho_c(e)));
+            m.insert(
+                "anchored_theory_exponent_log2_E_below_rho_neg".into(),
+                first(&|e| anchored(name, e) <= rho_c(e)),
+            );
         }
     }
     if fits.contains_key("plain") && fits.contains_key("dlp") {
-        handover.insert("dlp_below_plain".into(), json!({
-            "log2_E": first(&|e| total("dlp", e) <= total("plain", e))}));
+        handover.insert(
+            "dlp_below_plain".into(),
+            json!({
+            "log2_E": first(&|e| total("dlp", e) <= total("plain", e))}),
+        );
     }
-    handover.insert("rho_neg_S_large".into(), json!({"mean": rho_inf, "sd": rho_inf_sd, "n": big.len(), "cofactor": h}));
+    handover.insert(
+        "rho_neg_S_large".into(),
+        json!({"mean": rho_inf, "sd": rho_inf_sd, "n": big.len(), "cofactor": h}),
+    );
     let summary = json!({"rows": table, "fits": fits, "null_control_identical": null_ok,
         "every_logarithm_verified": all_verified, "extrapolated_handover": handover,
         "note": "fits: OLS of log2(quantity) on log2 #E over curves, 95% bootstrap over curves (2000); handover is an extrapolation of the fitted power laws, not a measurement"});

@@ -872,6 +872,7 @@ fn main() {
         let zeta = gf.root_of_unity(n as u64, &mut rng);
         let zeta_inv = gf.inv(zeta);
         let mut blocks = Vec::new();
+        let mut eq_rank_blocks = 0usize;
         for (j, size) in character_orbits(nn) {
             assert_eq!(size as u32, d, "orbit size must equal d for the trace descent");
             let zj = gf.pow(zeta_inv, j as u64);
@@ -895,8 +896,18 @@ fn main() {
                     rows_k.push(row);
                 }
             }
-            let (rr, pv) = rref_gf(&gf, rows_k, free_canon.len());
-            blocks.push((j, size, rr, pv));
+            let (mut rr, mut pv) = rref_gf(&gf, rows_k, free_canon.len());
+            let rank_j = rr.len();
+            if !control {
+                // keep only the degree-fall rows; memory, not arithmetic
+                let keep: Vec<bool> = pv.iter().map(|&p| mask_deg(&free_canon[p]) < degree).collect();
+                let mut it = keep.iter();
+                rr.retain(|_| *it.next().unwrap());
+                let mut it = keep.iter();
+                pv.retain(|_| *it.next().unwrap());
+                eq_rank_blocks += (rank_j - rr.len()) * size;
+            }
+            blocks.push((j, size, rr, pv, rank_j));
         }
         let blocks_s = t_blocks.elapsed().as_secs_f64();
         let blocks_cpu = cpu_s() - c_blocks;
@@ -928,7 +939,15 @@ fn main() {
         let ttab = trace_table(&gf);
         let mut u_rows: Vec<Vec<u64>> = Vec::new();
         let mut u_low = 0usize;
+        // Without --control only the degree-fall rows (pivot degree < D, the
+        // output a solver needs) are transformed and kept; the others are
+        // counted.
+        let mut eq_rank = 0usize;
         for (row, &p) in triv_rref.iter().zip(&triv_piv) {
+            if !control && !low(&canon_set[p]) {
+                eq_rank += 1;
+                continue;
+            }
             let mut u = vec![0u64; w_all];
             for k in 0..n_triv {
                 if (row[k / 64] >> (k % 64)) & 1 == 1 {
@@ -940,13 +959,19 @@ fn main() {
             if low(&canon_set[p]) {
                 u_low += 1;
             }
+            eq_rank += 1;
             u_rows.push(u);
         }
         let zeta_pows: Vec<u64> = (0..nn).map(|t| gf.pow(zeta, t as u64)).collect();
-        for (j, _size, rr, pv) in &blocks {
+        eq_rank += eq_rank_blocks;
+        for (j, _size, rr, pv, _) in &blocks {
             let zjt: Vec<u64> = (0..nn).map(|t| zeta_pows[(j * t) % nn]).collect();
             for (row, &p) in rr.iter().zip(pv) {
                 let is_low = low(&free_canon[p]);
+                if !control && !is_low {
+                    eq_rank += d as usize;
+                    continue;
+                }
                 for b in 0..d {
                     let lambda = 1u64 << b;
                     let mut u = vec![0u64; w_all];
@@ -964,6 +989,7 @@ fn main() {
                     if is_low {
                         u_low += 1;
                     }
+                    eq_rank += 1;
                     u_rows.push(u);
                 }
             }
@@ -974,10 +1000,9 @@ fn main() {
             .last()
             .map(|&p| mask_deg(&canon_set[p]) == 0)
             .unwrap_or(false);
-        let eq_rank = u_rows.len();
         let block_desc: Vec<String> = blocks
             .iter()
-            .map(|(j, s, rr, _)| format!("χ{j}×{s}:{}", rr.len()))
+            .map(|(j, s, _, _, rank_j)| format!("χ{j}×{s}:{rank_j}"))
             .collect();
 
         // ── control: full F₂ RREF of the symmetric matrix, same column order ──

@@ -70,18 +70,21 @@ fig.tight_layout()
 for ext in ("svg", "png"):
     fig.savefig(os.path.join(HERE, f"fig_degree_vs_ell.{ext}"), dpi=150)
 
-g = load("g2_full_pass.jsonl")
+g = load("g2_full_pass_control.jsonl") + load("g2_full_pass_blocks.jsonl")
 if g:
     g = sorted(g, key=lambda r: r["n"])
     fig, ax = plt.subplots(figsize=(6, 4))
     ns = [r["n"] for r in g]
-    ax.semilogy(ns, [r["blocks_rref_cpu"] + r["inverse_cpu"] for r in g], "o-", color=C["f4"],
+    ax.semilogy(ns, [max(r["blocks_rref_cpu"] + r["inverse_cpu"], 0.01) for r in g], "o-", color=C["f4"],
                 label="equivariant: block RREF + inverse transform (CPU s)")
+    ax.semilogy(ns, [max(r["build_s"], 0.01) for r in g], ":", color=C["f4"], alpha=0.6,
+                label="equivariant: orbit/row assembly (wall s)")
     fc = [(r["n"], r["full_rref_cpu"]) for r in g if r.get("full_rref_cpu") is not None]
     if fc:
         ax.semilogy([x for x, _ in fc], [y for _, y in fc], "s-", color=C["xl"],
                     label="full F₂ RREF of the symmetric matrix (CPU s)")
-    ax.set_xlabel("n (barrel system, l = 3, degree 3)")
+    ax.set_xlabel("n (barrel system, l = 3, Macaulay degree 3)")
+    ax.set_title("G2: one full Macaulay pass, equivariant vs F₂")
     ax.set_ylabel("CPU seconds")
     ax.grid(alpha=0.3, which="both")
     ax.legend(fontsize=8)

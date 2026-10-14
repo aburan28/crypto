@@ -35,8 +35,9 @@ for k in sorted(cells, key=lambda k: (-k[0], k[2], k[1])):
     def one_draw(r):
         if r["exit"] == 0:
             return str(r["d_f4"])
-        why = "3 GB cap hit" if r["exit"] == -11 else str(r["exit"])
-        return f"unresolved: {why} in a degree-{r['d_f4']} round"
+        why = "3 GB cap" if r["exit"] == -11 else str(r["exit"])
+        x = " -u 1" if r.get("msolve_extra") else ""
+        return f"u{r['export']['unsat_index']}{x}: cap, deg ≤{r['d_f4']} so far"
     ds = "; ".join(one_draw(r) for r in rs)
     one = "yes" if all(r.get("gb_is_one") for r in rs) else "NO"
     secs = [r["secs"] for r in rs]

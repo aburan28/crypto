@@ -495,6 +495,93 @@
  {
   "mode": "F4 closure",
   "n": 31,
+  "k": 15,
+  "base": "random=2",
+  "yield_": 0.204,
+  "ci": [
+   0.18017859900704303,
+   0.23008692495610017
+  ],
+  "mean_decomps": 0.472,
+  "refute_degrees": [
+   ">3",
+   ">3",
+   ">3",
+   ">3",
+   ">3",
+   ">3"
+  ],
+  "steps": [
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR"
+  ],
+  "median_word_xors": 49476239
+ },
+ {
+  "mode": "F4 closure",
+  "n": 31,
+  "k": 15,
+  "base": "random=3",
+  "yield_": 0.226,
+  "ci": [
+   0.20115424829035228,
+   0.25294289213498977
+  ],
+  "mean_decomps": 0.504,
+  "refute_degrees": [
+   ">3",
+   ">3",
+   ">3",
+   ">3",
+   ">3",
+   ">3"
+  ],
+  "steps": [
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR"
+  ],
+  "median_word_xors": 46640029
+ },
+ {
+  "mode": "F4 closure",
+  "n": 31,
+  "k": 15,
+  "base": "random=4",
+  "yield_": 0.23,
+  "ci": [
+   0.20497925388093172,
+   0.25708727135571924
+  ],
+  "mean_decomps": 0.526,
+  "refute_degrees": [
+   ">3",
+   ">3",
+   ">3",
+   ">3",
+   ">3",
+   ">3"
+  ],
+  "steps": [
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR"
+  ],
+  "median_word_xors": 48003233
+ },
+ {
+  "mode": "F4 closure",
+  "n": 31,
   "k": 16,
   "base": "g=0x10117",
   "yield_": 0.609,
@@ -520,6 +607,122 @@
    "d2:noR d3:noR"
   ],
   "median_word_xors": 58200293
+ },
+ {
+  "mode": "F4 closure",
+  "n": 31,
+  "k": 16,
+  "base": "random=1",
+  "yield_": 0.648,
+  "ci": [
+   0.6178833051802876,
+   0.676983932838141
+  ],
+  "mean_decomps": 2.064,
+  "refute_degrees": [
+   ">3",
+   ">3",
+   ">3",
+   ">3",
+   ">3",
+   ">3"
+  ],
+  "steps": [
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR"
+  ],
+  "median_word_xors": 62317933
+ },
+ {
+  "mode": "F4 closure",
+  "n": 31,
+  "k": 16,
+  "base": "random=2",
+  "yield_": 0.637,
+  "ci": [
+   0.606723866851864,
+   0.666227562935465
+  ],
+  "mean_decomps": 1.986,
+  "refute_degrees": [
+   ">3",
+   ">3",
+   ">3",
+   ">3",
+   ">3",
+   ">3"
+  ],
+  "steps": [
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR"
+  ],
+  "median_word_xors": 65227622
+ },
+ {
+  "mode": "F4 closure",
+  "n": 31,
+  "k": 16,
+  "base": "random=3",
+  "yield_": 0.637,
+  "ci": [
+   0.606723866851864,
+   0.666227562935465
+  ],
+  "mean_decomps": 2.02,
+  "refute_degrees": [
+   ">3",
+   ">3",
+   ">3",
+   ">3",
+   ">3",
+   ">3"
+  ],
+  "steps": [
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR"
+  ],
+  "median_word_xors": 61977603
+ },
+ {
+  "mode": "F4 closure",
+  "n": 31,
+  "k": 16,
+  "base": "random=4",
+  "yield_": 0.631,
+  "ci": [
+   0.6006439854406335,
+   0.6603533671297322
+  ],
+  "mean_decomps": 2.016,
+  "refute_degrees": [
+   ">3",
+   ">3",
+   ">3",
+   ">3",
+   ">3",
+   ">3"
+  ],
+  "steps": [
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR",
+   "d2:noR d3:noR"
+  ],
+  "median_word_xors": 62365569
  },
  {
   "mode": "one-pass Macaulay",
@@ -880,6 +1083,209 @@
    0.23008692495610017
   ],
   "mean_decomps": 0.472,
+  "refute_degrees": [
+   ">4",
+   ">4",
+   ">4",
+   ">4",
+   ">4",
+   ">4"
+  ],
+  "steps": [
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR"
+  ],
+  "median_word_xors": 0
+ },
+ {
+  "mode": "one-pass Macaulay",
+  "n": 31,
+  "k": 15,
+  "base": "random=3",
+  "yield_": 0.226,
+  "ci": [
+   0.20115424829035228,
+   0.25294289213498977
+  ],
+  "mean_decomps": 0.504,
+  "refute_degrees": [
+   ">4",
+   ">4",
+   ">4",
+   ">4",
+   ">4",
+   ">4"
+  ],
+  "steps": [
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR"
+  ],
+  "median_word_xors": 0
+ },
+ {
+  "mode": "one-pass Macaulay",
+  "n": 31,
+  "k": 15,
+  "base": "random=4",
+  "yield_": 0.23,
+  "ci": [
+   0.20497925388093172,
+   0.25708727135571924
+  ],
+  "mean_decomps": 0.526,
+  "refute_degrees": [
+   ">4",
+   ">4",
+   ">4",
+   ">4",
+   ">4",
+   ">4"
+  ],
+  "steps": [
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR"
+  ],
+  "median_word_xors": 0
+ },
+ {
+  "mode": "one-pass Macaulay",
+  "n": 31,
+  "k": 16,
+  "base": "g=0x10117",
+  "yield_": 0.609,
+  "ci": [
+   0.5783929481543383,
+   0.6387727879538286
+  ],
+  "mean_decomps": 1.904,
+  "refute_degrees": [
+   ">4",
+   ">4",
+   ">4",
+   ">4",
+   ">4",
+   ">4"
+  ],
+  "steps": [
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR"
+  ],
+  "median_word_xors": 0
+ },
+ {
+  "mode": "one-pass Macaulay",
+  "n": 31,
+  "k": 16,
+  "base": "random=1",
+  "yield_": 0.648,
+  "ci": [
+   0.6178833051802876,
+   0.676983932838141
+  ],
+  "mean_decomps": 2.064,
+  "refute_degrees": [
+   ">4",
+   ">4",
+   ">4",
+   ">4",
+   ">4",
+   ">4"
+  ],
+  "steps": [
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR"
+  ],
+  "median_word_xors": 0
+ },
+ {
+  "mode": "one-pass Macaulay",
+  "n": 31,
+  "k": 16,
+  "base": "random=2",
+  "yield_": 0.637,
+  "ci": [
+   0.606723866851864,
+   0.666227562935465
+  ],
+  "mean_decomps": 1.986,
+  "refute_degrees": [
+   ">4",
+   ">4",
+   ">4",
+   ">4",
+   ">4",
+   ">4"
+  ],
+  "steps": [
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR"
+  ],
+  "median_word_xors": 0
+ },
+ {
+  "mode": "one-pass Macaulay",
+  "n": 31,
+  "k": 16,
+  "base": "random=3",
+  "yield_": 0.637,
+  "ci": [
+   0.606723866851864,
+   0.666227562935465
+  ],
+  "mean_decomps": 2.02,
+  "refute_degrees": [
+   ">4",
+   ">4",
+   ">4",
+   ">4",
+   ">4",
+   ">4"
+  ],
+  "steps": [
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR",
+   "d2:noR d3:noR d4:noR"
+  ],
+  "median_word_xors": 0
+ },
+ {
+  "mode": "one-pass Macaulay",
+  "n": 31,
+  "k": 16,
+  "base": "random=4",
+  "yield_": 0.631,
+  "ci": [
+   0.6006439854406335,
+   0.6603533671297322
+  ],
+  "mean_decomps": 2.016,
   "refute_degrees": [
    ">4",
    ">4",
