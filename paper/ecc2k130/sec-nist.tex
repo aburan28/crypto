@@ -21,7 +21,7 @@ same curve at every rung, with one step per counted step, so
 $S=\text{steps}/\sqrt n$ does not move; only the cost of a step
 does~\evcite{\evref{nistres}}.
 
-\subsection{The walk and the field}
+\subsection{Setting up the walk}
 \label{sec:nist-walk}
 
 The library holds a P-256 element in eight 32-bit limbs and a P-384
@@ -114,7 +114,7 @@ the best cell~\evcite{\evref{nistres}, ``Correctness evidence on hardware''}.
 The CPU suite also checks the specialised steppers below bit for bit
 against the generic one, for every batch width that was compiled.
 
-\subsection{The rungs}
+\subsection{What each change bought}
 \label{sec:nist-rungs}
 
 Table~\ref{tab:nist-ladder} lines the NIST rungs up against the
@@ -253,7 +253,7 @@ occupancy bought with spilled state has not paid on either field.
 \label{fig:nist-w}
 \end{figure}
 
-\subsection{What carried over and what did not}
+\subsection{What transferred from ECC2K-130, and what didn't}
 \label{sec:nist-lessons}
 
 Three of the ECC2K-130 levers transferred directly. Native carry

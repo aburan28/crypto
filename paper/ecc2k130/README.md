@@ -133,6 +133,8 @@ GPU; the paper says so in its availability paragraph and Appendix A.
   The NIST round-2 results are no longer described as unmerged: PR 1778
   merged with `gpu/nist` identical to the cited commit, so E49 now points
   at `gpu/nist/RESULTS.md` on `main`.
+  Subsection titles rewritten in plain language (for example "How many
+  steps the walk really needs" for "The walk constant, measured").
 - Draft 6: refocused on rho on Blackwell and retitled. New §2 (2009–2012
   rates from Bailey et al., the INDOCRYPT 2010 GPU paper, the Cell
   papers and Niederhagen's thesis, against today's), new §6 on `clmad`

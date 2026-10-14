@@ -30,7 +30,7 @@ Converting the published challenge point out of the normal basis gives
 back Certicom's polynomial-basis hex, \texttt{05 1C99BFA6 F18DE467
 C80C23B9 8C7994AA}~\evcite{\evref{client}, ``Validation''}.
 
-\subsection{A type-II optimal normal basis}
+\subsection{Why we use a normal basis}
 \label{sec:onb}
 
 Because $2\cdot131+1=263$ is prime and $2$ has order $131$ modulo
@@ -64,7 +64,7 @@ the Hamming weight of the vector is invariant under $\sigma$ and under
 \end{tabular}
 \end{center}
 
-\subsection{The golden model}
+\subsection{One model to check everything against}
 \label{sec:golden}
 
 The code generator models the field as symmetric vectors over
@@ -103,7 +103,7 @@ cutoff loosened from 34 to 50 so that points actually appear, $3.1$~M
 iterations produced $12{,}368$ reports, and the 25 we recomputed all
 matched exactly~\evcite{\evref{client}, ``Validation''}.
 
-\subsection{ECC2K-95 as the end-to-end control}
+\subsection{Solving ECC2K-95 to prove the pipeline works}
 \label{sec:ecc2k95}
 
 ECC2K-95 is the retired Certicom challenge on the same curve equation

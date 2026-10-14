@@ -7,7 +7,7 @@ proposed them; we quote those as estimates, not results. None of them
 moves the exponent. What they could move is the constant, and on
 Blackwell the constant is still being found.
 
-\subsection{The table walk: making the exact rule fast}
+\subsection{Making the exact table walk fast}
 \label{sec:open-table}
 
 The biggest open question is whether a correct table walk can be made
@@ -44,7 +44,7 @@ critical path, and several ideas attack it:
   exists~\evcite{\evref{walkconst}, §11.1 and §11.5}.
 \end{itemize}
 
-\subsection{The $\sigma$-walk: the last integer slots}
+\subsection{Squeezing the last instructions out of the $\sigma$-walk}
 \label{sec:open-sigma}
 
 The $\sigma$-walk is at $15.88$~billion iterations/s on one RTX~PRO~6000,
@@ -67,7 +67,7 @@ Open items:
   run~\evcite{\evref{bridge}}.
 \end{itemize}
 
-\subsection{Instructions and pipes on Blackwell}
+\subsection{What we still don't know about Blackwell's pipes}
 \label{sec:open-pipes}
 
 Three questions about the hardware itself would sharpen every estimate
@@ -93,7 +93,7 @@ above.
   estimates with measurements~\evcite{\evref{goal28}, ``Nsight findings''}.
 \end{itemize}
 
-\subsection{Other Blackwell parts}
+\subsection{Tuning for the data-centre parts}
 \label{sec:open-gpus}
 
 Kernel tuning does not transfer between dies. The B200's three winning
@@ -120,7 +120,7 @@ pair, and a single run would confirm or break the
 model~\evcite{\evref{power}, §4--5}. Multi-GPU instances are not
 implemented: one process drives one device.
 
-\subsection{The NIST walk}
+\subsection{Next steps for the NIST walk}
 \label{sec:open-nist}
 
 The prime-field walk has had two rounds of tuning, so its open
@@ -146,7 +146,7 @@ questions are nearer the surface:
   Table~\ref{tab:nist-ladder} into intervals.
 \end{itemize}
 
-\subsection{CPUs}
+\subsection{Next steps on CPUs}
 \label{sec:open-cpu}
 
 The CPU side has had the least attention and has the clearest
@@ -173,7 +173,7 @@ untested levers.
   could change that verdict~\evcite{\evref{gfni}}.
 \end{itemize}
 
-\subsection{Method}
+\subsection{Two lessons worth keeping}
 \label{sec:open-method}
 
 Two lessons from this work are worth keeping as rules. Static
