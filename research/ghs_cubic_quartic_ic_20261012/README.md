@@ -7,10 +7,26 @@ Frozen protocol: [PROTOCOL.md](PROTOCOL.md) (do not edit in this PR). This direc
 
 ## What ran
 
-Smokes on the first split instance per `q`, planted scalar in `<G> ⊂ E0(K)[ℓ]`,
+Runs on the first split instance per `q`, planted scalar in `<G> ⊂ E0(K)[ℓ]`,
 costs in unit `S = ops / √ℓ`. Recovery `ic` means the PROTOCOL-style path on
 `F_q`-rational transfer divisors (Gal-orbit pairs), with no
 `transfer_pushforward_dlog` fallback.
+
+### Recorded run 20261014T0241Z (q ∈ {5, 7, 11}, 10 targets per variant)
+
+| q | variant | trials | outcome |
+|---|---------|--------|---------|
+| 5 | `rho` / `full` / `2lp` | 10 each | **PASS** — all `correct:true`; IC `recovery:ic`; mean rho steps 9.0; S = 650 896.03 |
+| 7 | `rho` / `full` / `2lp` | 10 each | **PASS** — all `correct:true`; IC `recovery:ic`; mean rho steps 11.5; S = 2 751 662.59 |
+| 11 | `rho` / `full` / `2lp` | 10 each | **PASS** — all `correct:true`; IC `recovery:ic`; mean rho steps 30.7; S = 37 920 187.89 |
+| 5, 7, 11 | `--check-lin-equiv` | 1 each | **PASS** — `pic_jacobian` (homomorphism, associativity, `#Jac`/`ℓ` annihilators, cubic reduction smoke) |
+
+90/90 trials correct. Run report: [reports/run-20261014T0241Z/REPORT.md](reports/run-20261014T0241Z/REPORT.md).
+The rho arm records step counts only (not priced operations), so this vehicle
+supports no IC-vs-rho `S` ratio and no "below rho" claim. Before this run,
+the prior smoke run `run-20261014T0200Z` was reproduced exactly.
+
+### Prior smoke run 20261014T0200Z (superseded, kept)
 
 | q | variant | trials | outcome |
 |---|---------|--------|---------|
@@ -21,7 +37,7 @@ costs in unit `S = ops / √ℓ`. Recovery `ic` means the PROTOCOL-style path on
 | 11 | `rho` / `full` | 1 each | **PASS** — IC `recovery:ic` |
 | 11 | `--check-lin-equiv` | 1 | **PASS** |
 
-Latest JSONL: [results/run-20261014T0200Z.jsonl](results/run-20261014T0200Z.jsonl).
+Latest JSONL: [results/run-20261014T0241Z.jsonl](results/run-20261014T0241Z.jsonl).
 Toolchain: [results/.env.txt](results/.env.txt).
 
 ## What works
@@ -52,9 +68,9 @@ No deployed-curve or sub-ρ security claims.
 ```bash
 cd research/ghs_cubic_quartic_ic_20261012
 rustc --edition 2021 -O quartic_ic.rs
-./quartic_ic 7 3 full
+./quartic_ic 7 10 full
 ./quartic_ic 7 1 --check-lin-equiv
-python3 reports/plot.py results/run-20261014T0200Z.jsonl reports/run-20261014T0200Z
+python3 reports/plot.py results/run-20261014T0241Z.jsonl reports/run-20261014T0241Z
 ```
 
 Links: PR #1761 (quartic build), #1763 (problem record), #1768 (this study).

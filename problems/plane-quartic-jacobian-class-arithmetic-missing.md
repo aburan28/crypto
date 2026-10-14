@@ -19,7 +19,7 @@ The instances were the nine `F_q` plane quartics of run `20261013T0320Z` (`q ∈
 1. **Pic / linear-equivalence checks** on `F_q`-rational transfer divisors (typically two Gal(`K/F_q`) orbits): `--check-lin-equiv` runs `pic_jacobian` (homomorphism and associativity via deg-6 divisor keys, `#Jac` / `ℓ` annihilators, cubic residual reduction smoke). Passes on `q ∈ {7,11}`.
 2. **Pure IC target path** keyed by those Gal-orbit deg-6 divisors: planted-scalar recovery with `recovery:ic` and **no** `transfer_pushforward_dlog` fallback on `q=7` and `q=11` smokes.
 
-Evidence: `research/ghs_cubic_quartic_ic_20261012/results/run-20261014T0200Z.jsonl`, README table.
+Evidence: `research/ghs_cubic_quartic_ic_20261012/results/run-20261014T0200Z.jsonl` (smoke) and `run-20261014T0241Z.jsonl` (10 targets per variant per field, `q ∈ {5, 7, 11}`, 90/90 correct), README tables.
 
 ## Different route: the hyperelliptic `m = 3, r = 5` type (2026-10-13, T-2463)
 
