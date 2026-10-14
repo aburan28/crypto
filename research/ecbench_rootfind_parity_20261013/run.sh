@@ -41,8 +41,23 @@ case "${1:-all}" in
   cycle2)
     run_cycle2
     ;;
+  claim|cycle3)
+    name=claim-n13
+    spec="$ROOT/docs/ecbench/specs/claim-koblitz-rootfind-parity-n13.json"
+    out="$HERE/sessions/claim-n13"
+    echo "==> $name"
+    rm -rf "$out"
+    # shellcheck disable=SC2086
+    nice -n 19 "$ECBENCH" run --wait --spec "$spec" --out "$out" $CPUS
+    nice -n 19 "$ECBENCH" verify --dir "$out" --replay 12 --out "$HERE/audits/audit-$name.json"
+    nice -n 19 "$ECBENCH" table --dir "$out" | tee "$HERE/tables/table-$name.md"
+    nice -n 19 "$ECBENCH" compare --dir "$out" --a ic-f4-m3-d5 --b ic-negfold-m2-d5 --save
+    nice -n 19 "$ECBENCH" compare --dir "$out" --a ic-rootfind-m2-d5 --b ic-negfold-m2-d5 --save
+    nice -n 19 "$ECBENCH" compare --dir "$out" --a rho-strong --b ic-negfold-m2-d5 --save
+    python3 "$HERE/analyze_resources.py" --records "$out/records.jsonl" | tee "$HERE/tables/amortized-$name.txt"
+    ;;
   *)
-    echo "usage: $0 cycle1|cycle2|..."
+    echo "usage: $0 cycle1|cycle2|claim|..."
     exit 1
     ;;
 esac
