@@ -1,0 +1,64 @@
+{
+  "schema": "factor-base-delta-sweep-v1",
+  "field_degree": 11,
+  "structure": "standard",
+  "summands": 2,
+  "dmax": 6,
+  "targets": 24,
+  "rows": [
+    {
+      "delta": -1,
+      "dim": 6,
+      "nvars": 12,
+      "decomposable_fraction": 0.875,
+      "unsat_measured": 3,
+      "censored_above_dmax": 0,
+      "d_star_mean": 4.0,
+      "d_star_max": 4,
+      "macaulay_rows_mean": 869.0,
+      "macaulay_cols_mean": 794.0,
+      "work_proxy": 689986.0,
+      "work_per_relation_proxy": 788555.4285714285
+    },
+    {
+      "delta": 0,
+      "skipped": "m*dim = n - delta has no integer dim"
+    },
+    {
+      "delta": 1,
+      "dim": 5,
+      "nvars": 10,
+      "decomposable_fraction": 0.16666666666666666,
+      "unsat_measured": 20,
+      "censored_above_dmax": 0,
+      "d_star_mean": 3.2,
+      "d_star_max": 4,
+      "macaulay_rows_mean": 239.25,
+      "macaulay_cols_mean": 222.5,
+      "work_proxy": 53233.125,
+      "work_per_relation_proxy": 319398.75
+    },
+    {
+      "delta": 2,
+      "skipped": "m*dim = n - delta has no integer dim"
+    },
+    {
+      "delta": 3,
+      "dim": 4,
+      "nvars": 8,
+      "decomposable_fraction": 0.041666666666666664,
+      "unsat_measured": 23,
+      "censored_above_dmax": 0,
+      "d_star_mean": 2.652173913043478,
+      "d_star_max": 3,
+      "macaulay_rows_mean": 68.3913043478261,
+      "macaulay_cols_mean": 73.52173913043478,
+      "work_proxy": 5028.24763705104,
+      "work_per_relation_proxy": 120677.94328922498
+    },
+    {
+      "delta": 4,
+      "skipped": "m*dim = n - delta has no integer dim"
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "schema": "rootfinding.coverage_efficiency/v1",
+  "panels": {
+    "train": {
+      "session_id": "ECBS1hb4afb33dbfd5",
+      "binary_sha256": "b24171038803d4873d63dbdf5b5c95d5958b0549a7c40266f559fb3331405105",
+      "records_sha256": "1c6430d45036066a6cbb761ce054d5166ca3188c707fb536d250f370b0d52467",
+      "occupancy_sha256": "cfc8d72eab4b825e1801f736f5ab323d69a013153cba273128b1e936bb3cc0dd",
+      "arms": {
+        "b48-stride-1": {
+          "runs": 24,
+          "verified": 24,
+          "total_independent_rank": 723,
+          "total_cold_gae_lower_bound": 185617.0,
+          "lookups": 84897,
+          "peak_rss_kib": 31120,
+          "independent_rank_per_1000_gae_lower_bound": 3.895117365327529,
+          "independent_rank_per_1000_lookups": 8.516201985935899,
+          "mean_rank_per_peak_rss_mib": 0.9912596401028277,
+          "relations_per_1000_lookups": 8.516201985935899,
+          "unique_pair_keys": 2286,
+          "observed_to_uniform_ratio": 1.0476232323145196,
+          "target_cluster_ratio_interval_95": [
+            0.9875954631574627,
+            1.1087612250348822
+          ]
+        },
+        "b48-stride-23": {
+          "runs": 24,
+          "verified": 24,
+          "total_independent_rank": 668,
+          "total_cold_gae_lower_bound": 182025.0,
+          "lookups": 81664,
+          "peak_rss_kib": 31120,
+          "independent_rank_per_1000_gae_lower_bound": 3.669825573410246,
+          "independent_rank_per_1000_lookups": 8.179858934169278,
+          "mean_rank_per_peak_rss_mib": 0.9158526135389888,
+          "relations_per_1000_lookups": 8.179858934169278,
+          "unique_pair_keys": 2298,
+          "observed_to_uniform_ratio": 1.0009933291795237,
+          "target_cluster_ratio_interval_95": [
+            0.9211188896580259,
+            1.1108569426067574
+          ]
+        },
+        "b48-stride-7": {
+          "runs": 24,
+          "verified": 24,
+          "total_independent_rank": 792,
+          "total_cold_gae_lower_bound": 201808.0,
+          "lookups": 98642,
+          "peak_rss_kib": 31184,
+          "independent_rank_per_1000_gae_lower_bound": 3.9245223182430826,
+          "independent_rank_per_1000_lookups": 8.029034285598426,
+          "mean_rank_per_peak_rss_mib": 1.0836326321190355,
+          "relations_per_1000_lookups": 8.029034285598426,
+          "unique_pair_keys": 2301,
+          "observed_to_uniform_ratio": 0.9812554622146851,
+          "target_cluster_ratio_interval_95": [
+            0.9208480836665683,
+            1.0408844870592526
+          ]
+        }
+      }
+    },
+    "holdout": {
+      "session_id": "ECBS1h1b585c89ebd1",
+      "binary_sha256": "b24171038803d4873d63dbdf5b5c95d5958b0549a7c40266f559fb3331405105",
+      "records_sha256": "8305acc015dc77437df966126bb915bdeae244a1b7c559bc52d7f3413e02601a",
+      "occupancy_sha256": "b59ca38bddde77da08a24ae9fd29eef2afc2776fa28b2baad925a6c5cb43abbd",
+      "arms": {
+        "b48-stride-1": {
+          "runs": 24,
+          "verified": 24,
+          "total_independent_rank": 722,
+          "total_cold_gae_lower_bound": 194348.0,
+          "lookups": 92058,
+          "peak_rss_kib": 31184,
+          "independent_rank_per_1000_gae_lower_bound": 3.71498548994587,
+          "independent_rank_per_1000_lookups": 7.84288166156119,
+          "mean_rank_per_peak_rss_mib": 0.9878570206943731,
+          "relations_per_1000_lookups": 7.84288166156119,
+          "unique_pair_keys": 2286,
+          "observed_to_uniform_ratio": 0.9647945234875794,
+          "target_cluster_ratio_interval_95": [
+            0.899201769397867,
+            1.054514855992221
+          ]
+        },
+        "b48-stride-23": {
+          "runs": 24,
+          "verified": 24,
+          "total_independent_rank": 718,
+          "total_cold_gae_lower_bound": 187251.0,
+          "lookups": 86521,
+          "peak_rss_kib": 31200,
+          "independent_rank_per_1000_gae_lower_bound": 3.8344254503313735,
+          "independent_rank_per_1000_lookups": 8.29856335456132,
+          "mean_rank_per_peak_rss_mib": 0.9818803418803419,
+          "relations_per_1000_lookups": 8.29856335456132,
+          "unique_pair_keys": 2298,
+          "observed_to_uniform_ratio": 1.0155195372612067,
+          "target_cluster_ratio_interval_95": [
+            0.9336162566706948,
+            1.1282900352628773
+          ]
+        },
+        "b48-stride-7": {
+          "runs": 24,
+          "verified": 24,
+          "total_independent_rank": 744,
+          "total_cold_gae_lower_bound": 197722.0,
+          "lookups": 94587,
+          "peak_rss_kib": 31152,
+          "independent_rank_per_1000_gae_lower_bound": 3.762858963595351,
+          "independent_rank_per_1000_lookups": 7.865774366456279,
+          "mean_rank_per_peak_rss_mib": 1.0190035952747818,
+          "relations_per_1000_lookups": 7.865774366456279,
+          "unique_pair_keys": 2301,
+          "observed_to_uniform_ratio": 0.9613029147823855,
+          "target_cluster_ratio_interval_95": [
+            0.9005720413575121,
+            1.0196710346834619
+          ]
+        }
+      }
+    }
+  },
+  "inference_limit": "Target-pinned walks stop at different probe counts; rank and cold-cost ratios are descriptive lower bounds, not fixed-budget yield or a qualified speed comparison."
+}

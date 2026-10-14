@@ -29,8 +29,14 @@ const ADDS: usize = 2_000_000;
 const SECONDS: f64 = 2.0;
 
 fn main() {
-    let degree: u32 = std::env::args().nth(1).and_then(|s| s.parse().ok()).unwrap_or(41);
-    let points: usize = std::env::args().nth(2).and_then(|s| s.parse().ok()).unwrap_or(15300);
+    let degree: u32 = std::env::args()
+        .nth(1)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(41);
+    let points: usize = std::env::args()
+        .nth(2)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(15300);
     let kc = KoblitzCurve::new(0, degree).expect("curve");
     let fb = build_subgroup_orbit_factor_base(&kc, 1, points).expect("factor base");
     let fc = FastCurve::new(&kc.curve).expect("fast curve");
@@ -52,7 +58,10 @@ fn main() {
     std::hint::black_box(out.len());
     println!("base {base} points, degree {degree}");
     println!("one batched group addition = {add_ns:.2} ns   <- the unit");
-    println!("\n{:>8} {:>10} {:>11} {:>14}", "window", "ns/summand", "adds/summand", "vs full scan");
+    println!(
+        "\n{:>8} {:>10} {:>11} {:>14}",
+        "window", "ns/summand", "adds/summand", "vs full scan"
+    );
 
     let mut windows: Vec<usize> = vec![64, 128, 256, 512, 1024, 2048, 4096, 8192, base];
     windows.retain(|&w| w <= base);
@@ -81,7 +90,10 @@ fn main() {
             table.witnesses_fast_scan(
                 t,
                 3,
-                Scan::Cyclic { start: (targets * 7919) % base, len: w },
+                Scan::Cyclic {
+                    start: (targets * 7919) % base,
+                    len: w,
+                },
                 &mut scratch,
                 &mut |_| true,
             );

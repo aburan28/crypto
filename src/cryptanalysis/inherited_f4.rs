@@ -510,6 +510,7 @@ struct LayoutStep {
     to_here: RefCell<HashMap<u32, Rc<Vec<u32>>>>,
     /// The word-wise rewrite plans of those composed maps (and of this
     /// step's own map, under key `to − 1`), built on demand from the map.
+    #[allow(dead_code)] // rewrite-plan cache reserved for a later path
     plans: RefCell<HashMap<u32, Rc<RewritePlan>>>,
 }
 
@@ -547,6 +548,7 @@ struct RewritePlan {
 
 impl RewritePlan {
     /// The plan of `map`, with nothing built yet.
+    #[allow(dead_code)]
     fn new(map: Rc<Vec<u32>>) -> Self {
         let n_src_words = map.len().div_ceil(64);
         Self {
@@ -1016,6 +1018,7 @@ impl From<Vec<u64>> for RowWords {
 
 /// A zeroed shared buffer of `n` words, allocated once (an `Rc<[u64]>`
 /// made from a `Vec` would copy it).
+#[allow(dead_code)]
 fn zeroed_words(n: usize) -> Rc<[u64]> {
     std::iter::repeat_n(0u64, n).collect()
 }
@@ -1805,6 +1808,7 @@ impl ReducedBasis {
 
     /// The word-wise plan of [`ReducedBasis::composite`], memoised on the
     /// step that maps into the current layout like the map itself.
+    #[allow(dead_code)]
     fn rewrite_plan(&self, from: u32) -> Rc<RewritePlan> {
         let to = self.epoch();
         let step = &self.history[(to - 1) as usize];

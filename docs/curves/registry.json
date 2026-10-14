@@ -2630,7 +2630,7 @@
     "a": 0,
     "n": 71,
     "modulus": "0x80000000000000002b",
-    "modulus_rule": "least sparse irreducible, uncapped (docs/curves/ICV1.md)"
+    "modulus_rule": "recorded in the run"
    },
    "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-71-1a1d8f78\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80000000000000002b\",\"v\":\"1\"}",
    "trace": 48653080717,
@@ -2645,10 +2645,49 @@
    ],
    "standard_names": [],
    "sources": [
+    "research/ic_single_target_20260930/curve_records.json",
     "prose, by the constructor rule: docs/curves/registry.json"
    ],
-   "representations": [],
-   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
+   "representations": [
+    {
+     "ec1": "EC1N71Ce0hac1355ef3db6",
+     "curve_uid": "urn:ec-record:1:sha256:ac1355ef3db6e4a4ddcffb7c98dc7b22a53f806e23e08a6e82415b5e2b3df897",
+     "field_sha256": "54fccbfca0ae2e3e2f4865cc5789b9e138bfb96ba89629682519c2be80353858",
+     "field": {
+      "characteristic": 2,
+      "degree": 71,
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant",
+      "modulus_exponents": [
+       71,
+       5,
+       3,
+       1,
+       0
+      ],
+      "representation": "polynomial"
+     },
+     "curve": {
+      "coefficients": [
+       1,
+       0,
+       0,
+       0,
+       1
+      ],
+      "cofactor": 428276,
+      "generator": [
+       "0x1907df26d8ab0a9b66",
+       "0x17f0e34088b4f1dc4f"
+      ],
+      "model": "binary Weierstrass",
+      "subgroup_order": "5513228015079457",
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_single_target_20260930/curve_records.json"
+     ]
+    }
+   ]
   },
   {
    "slug": "icv1-f2m71-tm48653080717-f25c4638",
@@ -2765,6 +2804,67 @@
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
   },
   {
+   "slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+   "icv1": "ICV1:f2m-83-a5fd0d39:6151469093347:9671406556910881928556062:0x1:-7:unk:r:9eba6cd5d359",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 83,
+    "modulus": "0x800000000000000000095",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-83-a5fd0d39\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x800000000000000000095\",\"v\":\"1\"}",
+   "trace": 6151469093347,
+   "order": "9671406556910881928556062",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_single_target_20260930/curve_records.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N83Ce1h35c7ced6b497",
+     "curve_uid": "urn:ec-record:1:sha256:35c7ced6b497231fbc82fe24db596fd55379a87356962dad47a7dc774388ce9d",
+     "field_sha256": "ad8dd02f82f1738e511a756c2198675e77193bb8d4e498ec41d57b82a2c4bde6",
+     "field": {
+      "characteristic": 2,
+      "degree": 83,
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant",
+      "modulus_exponents": [
+       83,
+       7,
+       4,
+       2,
+       0
+      ],
+      "representation": "polynomial"
+     },
+     "curve": {
+      "coefficients": [
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "cofactor": 1128547018,
+      "generator": [
+       "0x5789eebc7f493ecfe93af",
+       "0x755ed5c31e037ed90b549"
+      ],
+      "model": "binary Weierstrass",
+      "subgroup_order": "8569786107849059",
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_single_target_20260930/curve_records.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-f2m83-t6151469093347-cdcc5432",
    "icv1": "ICV1:f2m-83-a1d5abfa:6151469093347:9671406556910881928556062:0x1:-7:unk:r:cdcc5432fa2b",
    "family": "koblitz",
@@ -2779,15 +2879,10 @@
    "order": "9671406556910881928556062",
    "j": "0x1",
    "end": "-7",
-   "aliases": [
-    "k1n83",
-    "K_1 / GF(2^83)",
-    "K_1/2^83",
-    "K_1/F_2^83"
-   ],
+   "aliases": [],
    "standard_names": [],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: research/ic_single_target_20260930/curve_ids.json"
    ],
    "representations": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
@@ -11638,6 +11733,30 @@
    ]
   },
   {
+   "slug": "icv1-fp20-tm728-d215a2a1",
+   "icv1": "ICV1:fp-946177:-728:946906:503689:unk:unk:r:d215a2a139a7",
+   "family": "prime",
+   "params": {
+    "p": "946177",
+    "a": "304973",
+    "b": "530845"
+   },
+   "model_json": "{\"a\":\"304973\",\"b\":\"530845\",\"field\":\"fp-946177\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"946177\",\"v\":\"1\"}",
+   "trace": -728,
+   "order": "946906",
+   "j": "503689",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/pkm_tower_ecbench_20261013/sessions/p20/plan.json",
+    "research/pkm_tower_ecbench_20261013/sessions/p20/spec.json",
+    "research/pkm_tower_ecbench_20261013/specs/SPEC-p20.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp20-t1293-3c2999ba",
    "icv1": "ICV1:fp-1048291:1293:1046999:326892:unk:unk:r:3c2999ba43b0",
    "family": "prime",
@@ -11715,50 +11834,6 @@
    "trace": -700,
    "order": "1049284",
    "j": "10976",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/isogeny_fibers_20261010/round4/16_7_agm_isogeny_oracles/out_seed7.json"
-   ],
-   "representations": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
-  },
-  {
-   "slug": "icv1-fp21-tm700-56b6783a",
-   "icv1": "ICV1:fp-1048583:-700:1049284:60314:unk:unk:r:56b6783a1485",
-   "family": "prime",
-   "params": {
-    "p": "1048583",
-    "a": "2",
-    "b": "2"
-   },
-   "model_json": "{\"a\":\"2\",\"b\":\"2\",\"field\":\"fp-1048583\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1048583\",\"v\":\"1\"}",
-   "trace": -700,
-   "order": "1049284",
-   "j": "60314",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/isogeny_fibers_20261010/round4/16_7_agm_isogeny_oracles/out_seed7.json"
-   ],
-   "representations": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
-  },
-  {
-   "slug": "icv1-fp21-tm700-7ee99c50",
-   "icv1": "ICV1:fp-1048583:-700:1049284:188138:unk:unk:r:7ee99c50b352",
-   "family": "prime",
-   "params": {
-    "p": "1048583",
-    "a": "1048579",
-    "b": "1048579"
-   },
-   "model_json": "{\"a\":\"1048579\",\"b\":\"1048579\",\"field\":\"fp-1048583\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1048583\",\"v\":\"1\"}",
-   "trace": -700,
-   "order": "1049284",
-   "j": "188138",
    "end": "unk",
    "aliases": [],
    "standard_names": [],
@@ -12105,6 +12180,30 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "icv1-fp22-tm2947-e15fed69",
+   "icv1": "ICV1:fp-2387969:-2947:2390917:1200559:unk:unk:r:e15fed6973bc",
+   "family": "prime",
+   "params": {
+    "p": "2387969",
+    "a": "1427047",
+    "b": "558169"
+   },
+   "model_json": "{\"a\":\"1427047\",\"b\":\"558169\",\"field\":\"fp-2387969\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"2387969\",\"v\":\"1\"}",
+   "trace": -2947,
+   "order": "2390917",
+   "j": "1200559",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/pkm_tower_ecbench_20261013/sessions/p22/plan.json",
+    "research/pkm_tower_ecbench_20261013/sessions/p22/spec.json",
+    "research/pkm_tower_ecbench_20261013/specs/SPEC-p22.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-fp22-t2832-1bcc0978",
@@ -16015,6 +16114,30 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "icv1-fp24-t2705-27cbb01b",
+   "icv1": "ICV1:fp-10940417:2705:10937713:10457630:unk:unk:r:27cbb01b4058",
+   "family": "prime",
+   "params": {
+    "p": "10940417",
+    "a": "10128206",
+    "b": "867458"
+   },
+   "model_json": "{\"a\":\"10128206\",\"b\":\"867458\",\"field\":\"fp-10940417\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"10940417\",\"v\":\"1\"}",
+   "trace": 2705,
+   "order": "10937713",
+   "j": "10457630",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/pkm_tower_ecbench_20261013/sessions/p24/plan.json",
+    "research/pkm_tower_ecbench_20261013/sessions/p24/spec.json",
+    "research/pkm_tower_ecbench_20261013/specs/SPEC-p24.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-fp24-t1465-0b7163ca",
@@ -20636,6 +20759,30 @@
    ]
   },
   {
+   "slug": "icv1-fp26-t2838-8e779ca8",
+   "icv1": "ICV1:fp-40857601:2838:40854764:31379448:unk:unk:r:8e779ca8b118",
+   "family": "prime",
+   "params": {
+    "p": "40857601",
+    "a": "8702713",
+    "b": "9617118"
+   },
+   "model_json": "{\"a\":\"8702713\",\"b\":\"9617118\",\"field\":\"fp-40857601\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"40857601\",\"v\":\"1\"}",
+   "trace": 2838,
+   "order": "40854764",
+   "j": "31379448",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/pkm_tower_ecbench_20261013/sessions/p26/plan.json",
+    "research/pkm_tower_ecbench_20261013/sessions/p26/spec.json",
+    "research/pkm_tower_ecbench_20261013/specs/SPEC-p26.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp26-tm1775-7e8fb6df",
    "icv1": "ICV1:fp-42652151:-1775:42653927:38191413:unk:unk:r:7e8fb6df0943",
    "family": "prime",
@@ -25185,6 +25332,30 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "icv1-fp28-t4155-50f492b1",
+   "icv1": "ICV1:fp-231657473:4155:231653319:64717639:unk:unk:r:50f492b1756c",
+   "family": "prime",
+   "params": {
+    "p": "231657473",
+    "a": "95419558",
+    "b": "159693275"
+   },
+   "model_json": "{\"a\":\"95419558\",\"b\":\"159693275\",\"field\":\"fp-231657473\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"231657473\",\"v\":\"1\"}",
+   "trace": 4155,
+   "order": "231653319",
+   "j": "64717639",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/pkm_tower_ecbench_20261013/sessions/p28/plan.json",
+    "research/pkm_tower_ecbench_20261013/sessions/p28/spec.json",
+    "research/pkm_tower_ecbench_20261013/specs/SPEC-p28.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-fp28-t30500-03f726f4",
@@ -36262,12 +36433,12 @@
    ],
    "standard_names": [],
    "sources": [
-    "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/changed-generator/step-000/curves.json",
-    "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/changed-source/step-000/curves.json",
-    "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/empty-chain/step-000/curves.json",
-    "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/valid/step-000/curves.json",
-    "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls/changed-generator/step-000/curves.json",
-    "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls/changed-source/step-000/curves.json"
+    "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/long-prefix/step-000/curves.json",
+    "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/mutations/changed-generator/step-000/curves.json",
+    "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/mutations/changed-source/step-000/curves.json",
+    "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/mutations/empty-chain/step-000/curves.json",
+    "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/mutations/valid/step-000/curves.json",
+    "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/changed-generator/step-000/curves.json"
    ],
    "representations": [
     {
@@ -36298,6 +36469,7 @@
       "target_group": "prime-order subgroup"
      },
      "sources": [
+      "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/mutations/changed-generator/step-000/curves.json",
       "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/changed-generator/step-000/curves.json",
       "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls/changed-generator/step-000/curves.json"
      ]
@@ -36330,12 +36502,12 @@
       "target_group": "prime-order subgroup"
      },
      "sources": [
+      "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/long-prefix/step-000/curves.json",
+      "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/mutations/changed-source/step-000/curves.json",
+      "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/mutations/empty-chain/step-000/curves.json",
+      "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/mutations/valid/step-000/curves.json",
       "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/changed-source/step-000/curves.json",
-      "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/empty-chain/step-000/curves.json",
-      "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/valid/step-000/curves.json",
-      "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls/changed-source/step-000/curves.json",
-      "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls/valid/step-000/curves.json",
-      "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/p224/step-000/curves.json"
+      "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/empty-chain/step-000/curves.json"
      ]
     }
    ]
@@ -37658,12 +37830,12 @@
    ],
    "standard_names": [],
    "sources": [
-    "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/changed-generator/step-001/curves.json",
-    "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/changed-source/step-001/curves.json",
-    "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/empty-chain/step-001/curves.json",
-    "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/valid/step-001/curves.json",
-    "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls/changed-generator/step-001/curves.json",
-    "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls/changed-source/step-001/curves.json"
+    "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/long-prefix/step-001/curves.json",
+    "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/mutations/changed-generator/step-001/curves.json",
+    "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/mutations/changed-source/step-001/curves.json",
+    "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/mutations/empty-chain/step-001/curves.json",
+    "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/mutations/valid/step-001/curves.json",
+    "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/changed-generator/step-001/curves.json"
    ],
    "representations": [
     {
@@ -37694,12 +37866,12 @@
       "target_group": "prime-order subgroup"
      },
      "sources": [
-      "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/changed-generator/step-001/curves.json",
-      "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/changed-source/step-001/curves.json",
-      "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/empty-chain/step-001/curves.json",
-      "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/valid/step-001/curves.json",
-      "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls/changed-generator/step-001/curves.json",
-      "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls/changed-source/step-001/curves.json"
+      "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/long-prefix/step-001/curves.json",
+      "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/mutations/changed-generator/step-001/curves.json",
+      "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/mutations/changed-source/step-001/curves.json",
+      "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/mutations/empty-chain/step-001/curves.json",
+      "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/controls/mutations/valid/step-001/curves.json",
+      "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/controls-next/changed-generator/step-001/curves.json"
      ]
     }
    ]
@@ -42494,6 +42666,7 @@
    "sources": [
     "research/isogeny_coverage_optimization_20261009/VERIFIED_MODELS.json",
     "research/isogeny_coverage_optimization_20261009/evidence/p384-19/curves.json",
+    "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/archive-p384-control/curves.json",
     "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/installed-449-p384-control/curves.json"
    ],
    "representations": [
@@ -42527,6 +42700,7 @@
      "sources": [
       "research/isogeny_coverage_optimization_20261009/VERIFIED_MODELS.json",
       "research/isogeny_coverage_optimization_20261009/evidence/p384-19/curves.json",
+      "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/archive-p384-control/curves.json",
       "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/installed-449-p384-control/curves.json"
      ]
     }
@@ -42669,6 +42843,7 @@
    "sources": [
     "research/isogeny_coverage_optimization_20261009/VERIFIED_MODELS.json",
     "research/isogeny_coverage_optimization_20261009/evidence/p384-19/curves.json",
+    "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/archive-p384-control/curves.json",
     "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/installed-449-p384-control/curves.json"
    ],
    "representations": [
@@ -42702,6 +42877,7 @@
      "sources": [
       "research/isogeny_coverage_optimization_20261009/VERIFIED_MODELS.json",
       "research/isogeny_coverage_optimization_20261009/evidence/p384-19/curves.json",
+      "research/p192_p224_2000_more_large_prime_isogenies_20261010/evidence/archive-p384-control/curves.json",
       "research/p192_p224_hundred_large_prime_isogenies_20261010/evidence/installed-449-p384-control/curves.json"
      ]
     }
@@ -116879,116 +117055,6 @@
    ],
    "standard_names": [],
    "trace": "80369948951667839190628429049567884210",
-   "representations": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
-  },
-  {
-   "slug": "icv1-fp20-tm728-d215a2a1",
-   "icv1": "ICV1:fp-946177:-728:946906:503689:unk:unk:r:d215a2a139a7",
-   "family": "prime",
-   "params": {
-    "p": "946177",
-    "a": "304973",
-    "b": "530845"
-   },
-   "model_json": "{\"a\":\"304973\",\"b\":\"530845\",\"field\":\"fp-946177\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"946177\",\"v\":\"1\"}",
-   "trace": -728,
-   "order": "946906",
-   "j": "503689",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/pkm_tower_ecbench_20261013/specs/SPEC-p20.json"
-   ],
-   "representations": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
-  },
-  {
-   "slug": "icv1-fp22-tm2947-e15fed69",
-   "icv1": "ICV1:fp-2387969:-2947:2390917:1200559:unk:unk:r:e15fed6973bc",
-   "family": "prime",
-   "params": {
-    "p": "2387969",
-    "a": "1427047",
-    "b": "558169"
-   },
-   "model_json": "{\"a\":\"1427047\",\"b\":\"558169\",\"field\":\"fp-2387969\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"2387969\",\"v\":\"1\"}",
-   "trace": -2947,
-   "order": "2390917",
-   "j": "1200559",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/pkm_tower_ecbench_20261013/specs/SPEC-p22.json"
-   ],
-   "representations": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
-  },
-  {
-   "slug": "icv1-fp24-t2705-27cbb01b",
-   "icv1": "ICV1:fp-10940417:2705:10937713:10457630:unk:unk:r:27cbb01b4058",
-   "family": "prime",
-   "params": {
-    "p": "10940417",
-    "a": "10128206",
-    "b": "867458"
-   },
-   "model_json": "{\"a\":\"10128206\",\"b\":\"867458\",\"field\":\"fp-10940417\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"10940417\",\"v\":\"1\"}",
-   "trace": 2705,
-   "order": "10937713",
-   "j": "10457630",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/pkm_tower_ecbench_20261013/specs/SPEC-p24.json"
-   ],
-   "representations": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
-  },
-  {
-   "slug": "icv1-fp26-t2838-8e779ca8",
-   "icv1": "ICV1:fp-40857601:2838:40854764:31379448:unk:unk:r:8e779ca8b118",
-   "family": "prime",
-   "params": {
-    "p": "40857601",
-    "a": "8702713",
-    "b": "9617118"
-   },
-   "model_json": "{\"a\":\"8702713\",\"b\":\"9617118\",\"field\":\"fp-40857601\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"40857601\",\"v\":\"1\"}",
-   "trace": 2838,
-   "order": "40854764",
-   "j": "31379448",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/pkm_tower_ecbench_20261013/specs/SPEC-p26.json"
-   ],
-   "representations": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
-  },
-  {
-   "slug": "icv1-fp28-t4155-50f492b1",
-   "icv1": "ICV1:fp-231657473:4155:231653319:64717639:unk:unk:r:50f492b1756c",
-   "family": "prime",
-   "params": {
-    "p": "231657473",
-    "a": "95419558",
-    "b": "159693275"
-   },
-   "model_json": "{\"a\":\"95419558\",\"b\":\"159693275\",\"field\":\"fp-231657473\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"231657473\",\"v\":\"1\"}",
-   "trace": 4155,
-   "order": "231653319",
-   "j": "64717639",
-   "end": "unk",
-   "aliases": [],
-   "standard_names": [],
-   "sources": [
-    "research/pkm_tower_ecbench_20261013/specs/SPEC-p28.json"
-   ],
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   }

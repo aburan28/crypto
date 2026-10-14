@@ -1,0 +1,10 @@
+
+running 1 test
+lanes=1 steps=4096 scalar_ns=732250 batch_ns=1076500 scalar_inversions_at_most=4096 batch_inversions=4096
+lanes=4 steps=4096 scalar_ns=1588833 batch_ns=599666 scalar_inversions_at_most=16384 batch_inversions=4096
+lanes=8 steps=4096 scalar_ns=4269625 batch_ns=2501667 scalar_inversions_at_most=32768 batch_inversions=4096
+lanes=16 steps=4096 scalar_ns=12687125 batch_ns=1229000 scalar_inversions_at_most=65536 batch_inversions=4096
+test cryptanalysis::prime_fast::tests::profile_native_walk_lane_batch ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4193 filtered out; finished in 0.03s
+
