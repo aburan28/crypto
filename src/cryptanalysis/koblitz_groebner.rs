@@ -9348,7 +9348,6 @@ pub fn refutation_degree_trace_take() -> Option<RefutationDegreeTrace> {
     REFUTATION_TRACE.with(|t| t.borrow_mut().as_mut().map(std::mem::take))
 }
 
-
 /// Early abort at the refutation degree (lit2026 W4), `KIC_F4_EARLY_ABORT`,
 /// read once per process:
 ///
@@ -9395,4 +9394,3 @@ thread_local! {
 pub fn set_early_abort_mode(mode: Option<u8>) {
     EARLY_ABORT_OVERRIDE.with(|m| m.set(mode));
 }
-
