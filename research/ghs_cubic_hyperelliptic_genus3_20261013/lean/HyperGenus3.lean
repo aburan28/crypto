@@ -122,7 +122,35 @@ theorem hyperelliptic_equation (x s0 s1 s2 c0 c1 y0 y1 y2 w xn xd : R)
   rw [hF, hH]
   grind
 
+/-- Addendum: the norm identity behind a reduction step of the real model,
+`f − v_a² = (f − V₊²) − (v_a − V₊)(v_a + V₊)`. -/
+theorem step_norm (f va vp : R) : f - va ^ 2 = (f - vp ^ 2) - (va - vp) * (va + vp) := by grind
+
 end Alg
+
+/-! ## Part C (addendum 2026-10-14): integer bookkeeping of the balanced real-model arithmetic, genus 3
+
+A class is `A + n∞₊ + m∞₋ − D∞` with `deg A + n + m = 3` and `D∞ = 2∞₊ + ∞₋`. -/
+
+/-- Reduction step: if `div(y − v_a) = A + A' − e₊∞₊ − e₋∞₋` (so `degA + degA' = e₊ + e₋`), then
+`A ~ ιA' + (e₊ − degA')∞₊ + (e₋ − degA')∞₋`, hence `n' = n + degA − e₋`, and the new
+coefficients again sum to `3 − degA'`. -/
+theorem step_bookkeeping (degA degA' ep em n m : Int) (hdiv : degA + degA' = ep + em)
+    (hsum : degA + n + m = 3) :
+    n + (ep - degA') = n + degA - em ∧ degA' + (n + (ep - degA')) + (m + (em - degA')) = 3 := by omega
+
+/-- Composition: `A₁ + A₂ = A + (pairs over d)` and each pair is `~ ∞₊ + ∞₋`; with `−2D∞ = −D∞ − 2∞₊ − ∞₋`
+the new coefficients are `n₁ + n₂ + deg d − 2` and `m₁ + m₂ + deg d − 1`, and they sum correctly. -/
+theorem compose_bookkeeping (d1 d2 dd n1 m1 n2 m2 : Int) (h1 : d1 + n1 + m1 = 3) (h2 : d2 + n2 + m2 = 3) :
+    (d1 + d2 - 2 * dd) + (n1 + n2 + dd - 2) + (m1 + m2 + dd - 1) = 3 := by omega
+
+/-- Negation: `−(A + n∞₊ + m∞₋ − D∞) ~ ιA + (4 − degA − n)∞₊ + (2 − degA − m)∞₋ − D∞`. -/
+theorem neg_bookkeeping (dA n m : Int) (h : dA + n + m = 3) : dA + (4 - dA - n) + (2 - dA - m) = 3 := by omega
+
+/-- The transfer's correction term: twelve classes `[Q_k − ∞₊]` plus `6·[∞₊ − ∞₋]` equal
+`Σ Q_k − 6∞₊ − 6∞₋` (coefficients at infinity). -/
+theorem transfer_infinity : (-12 + 6 : Int) = -6 ∧ (0 - 6 : Int) = -6 := by decide
+
 end HyperGenus3
 
 #print axioms HyperGenus3.r_eq_five
@@ -137,3 +165,8 @@ end HyperGenus3
 #print axioms HyperGenus3.conic_model
 #print axioms HyperGenus3.product_of_conjugates
 #print axioms HyperGenus3.hyperelliptic_equation
+#print axioms HyperGenus3.step_norm
+#print axioms HyperGenus3.step_bookkeeping
+#print axioms HyperGenus3.compose_bookkeeping
+#print axioms HyperGenus3.neg_bookkeeping
+#print axioms HyperGenus3.transfer_infinity

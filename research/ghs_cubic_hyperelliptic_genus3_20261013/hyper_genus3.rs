@@ -159,6 +159,11 @@ impl Inst {
         let xx = [f.mul(u12, u20), f.mul(u20, u01), f.mul(u01, u12)]; let zz = mv(f, &self.mm, &xx); let co = mv(f, &self.binv, &zz);
         if co[2] == 0 { return None; } let z = f.div(co[1], co[2]);
         let w = f.div(f.mul(f.mul(f.mul(y0, y1), y2), pev(f, &self.xd, z)), f.mul(qx, pev(f, &self.np, x))); Some((z, w)) }
+    // addendum: a generic point lying over z = infinity (the conic base point P*): returns s = lim w/z^4
+    fn fwd_inf(&self, f: &F, pt: [u32; 4]) -> Option<u32> {
+        let [x, y0, y1, y2] = pt; let qx = pev(f, &self.qp, x); if qx == 0 || self.r.contains(&x) || y0 == 0 || y1 == 0 || y2 == 0 || dg(&self.xd) != 4 { return None; }
+        let co = mv(f, &self.binv, &mv(f, &self.mm, &self.xtrue(f, pt))); if co[2] != 0 || co[1] != 0 { return None; }
+        Some(f.div(f.mul(f.mul(f.mul(y0, y1), y2), self.xd[4]), f.mul(qx, pev(f, &self.np, x)))) }
     fn xtrue(&self, f: &F, pt: [u32; 4]) -> [u32; 3] { let [x, y0, y1, y2] = pt; let qx = pev(f, &self.qp, x);
         let u01 = f.div(f.mul(y0, y1), f.mul(qx, f.sub(x, self.r[1]))); let u12 = f.div(f.mul(y1, y2), f.mul(qx, f.sub(x, self.r[2]))); let u20 = f.div(f.mul(y2, y0), f.mul(qx, f.sub(x, self.r[0])));
         [f.mul(u12, u20), f.mul(u20, u01), f.mul(u01, u12)] }
@@ -490,7 +495,10 @@ fn main() {
             let elig = |pp: WP| -> bool { match to_e(pp) { None => false, Some((x, _)) => !inst.special(&f, x) } };
             let phi = |pp: WP| -> Rd { let (x, y0) = to_e(pp).unwrap(); let s1 = f.sqrt(pev(&f, &inst.fi[1], x)).unwrap(); let s2 = f.sqrt(pev(&f, &inst.fi[2], x)).unwrap();
                 let mut d = rzero(); for e in 0..4 { let mut pt = [x, y0, if e & 1 == 1 { f.neg(s1) } else { s1 }, if e & 2 == 2 { f.neg(s2) } else { s2 }];
-                    for _ in 0..3 { let (z, w) = inst.fwd(&f, pt).expect("generic point maps"); d = radd(&f, &rm, &d, &ptc(z, w)); pt = frc(&f, pt); } }
+                    for _ in 0..3 { let c = match inst.fwd(&f, pt) { Some((z, w)) => ptc(z, w),
+                            // point over z = infinity of the original model (fibre of the conic base point P*): z' = 0, w' = s/w0, s = lim w/z^4
+                            None => { let s = inst.fwd_inf(&f, pt).expect("generic point maps"); Rd { u: vec![0, 1], v: tr(vec![f.div(s, w0)]), n: 1 } } };
+                        d = radd(&f, &rm, &d, &c); pt = frc(&f, pt); } }
                 radd(&f, &rm, &d, &rmul(&f, &rm, 6, &jp)) };
             let mut val: HashMap<WP, Rd> = HashMap::new(); let el: Vec<WP> = wpts.iter().cloned().filter(|&pp| elig(pp)).collect(); let mut valid_ok = 0;
             for &pp in &el { let d = phi(pp); if rvalid(&f, &rm, &d) { valid_ok += 1; } val.insert(pp, d); }
