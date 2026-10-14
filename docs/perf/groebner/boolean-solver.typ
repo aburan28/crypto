@@ -168,7 +168,12 @@ text("2026-10-14 / 912a98ed"),
 text("1,784,912,427"),
 text("1,805,177,722"),
 text("174.838"),
-text("177.121"))]
+text("177.121"),
+text("2026-10-14 / 8d8b1295"),
+text("1,784,912,427"),
+text("1,805,177,722"),
+text("175.021"),
+text("177.613"))]
 
 #text("Historical Python-orchestrated perf.history/v1 snapshots; no new performance run or speedup claim.")
 
@@ -180,5 +185,5 @@ text("177.121"))]
 
 #text("X positions are measured revision order, labelled with UTC commit date and revision; spacing is not elapsed time.")
 
-#text("Evidence: 32 imported perf.history/v1 snapshots; historical_sources in plot-data.json retains raw filenames, SHA-256 hashes, hosts, harnesses and sample counts.")
+#text("Evidence: 33 imported perf.history/v1 snapshots; historical_sources in plot-data.json retains raw filenames, SHA-256 hashes, hosts, harnesses and sample counts.")
 #text("Source data and provenance: plot-data.json and REPORT.md. These plots do not establish an end-to-end ECDLP gain.")
