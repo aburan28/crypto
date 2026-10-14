@@ -117,7 +117,7 @@ for ax, n in zip(axes, pick):
     ax.set_xlabel("factor-base dimension n'")
     ax.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(integer=True))
 axes[0].set_ylabel("derived seconds (decomp. + LA)")
-axes[-1].legend(fontsize=6.5, loc="lower right")
+axes[0].legend(fontsize=6.5, loc="lower left")
 fig.suptitle("Derived cost model, coordinate factor base (measured inputs, PROTOCOL.md model)", fontsize=10)
 fig.text(0.01, 0.005, TAG + "; Macaulay curve is a lower bound where D* was censored", fontsize=7, color=INK2)
 fig.tight_layout(rect=(0, 0.03, 1, 1))
@@ -137,7 +137,7 @@ for ax, b in zip(axes, bits):
                        edgecolors=SURF, linewidths=0.8, label=f"IC {meth[-2:]} solved", zorder=3)
         if bad:
             ax.scatter([r["fb_size"] for r in bad], [r["seconds"] for r in bad], facecolors="none",
-                       edgecolors=col, marker=mk, s=28, label=f"IC {meth[-2:]} failed (budget)", zorder=3)
+                       edgecolors=col, marker=mk, s=28, label=f"IC {meth[-2:]} no solve", zorder=3)
     rho = [r["seconds"] for r in prime if r["bits"] == b and r["method"] == "rho_negation_1thread" and r["solved"]]
     if rho:
         ax.axhspan(min(rho), max(rho), color="#1baf7a", alpha=0.25, lw=0)
