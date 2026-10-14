@@ -43,35 +43,33 @@ ax.set_ylabel("log2 observed carrier mass")
 ax.set_title("Carrier mass per (family, target, sign)")
 ax.legend(fontsize=7.5, loc="upper left")
 
-# right: A5 / W5 / A7 predicted mass per genus vs observation, cumulative over families
+# right: log2(observed / predicted) for every nonzero (family, target, sign)
 ax = axes[1]
-for pre, lab, col in groups[2:]:
-    by_g = {}
-    for r in rows:
-        if r["target"].startswith(pre) and r["arm"] != "ci5_sub":
-            by_g.setdefault(r["genus"], [0.0, 0.0])
-            by_g[r["genus"]][0] += r["pred_mass_h1"] / 2  # two signs -> per sign
-            by_g[r["genus"]][1] += r["mass"]
-    gs = sorted(by_g)
-    ax.plot(gs, [math.log2(by_g[g][0]) for g in gs], "-o", color=col, label=f"{lab}: predicted (per sign, h=1)")
-    ax.plot(gs, [math.log2(by_g[g][1]) if by_g[g][1] > 0 else FLOOR for g in gs], "v", color=col, ms=9,
-            alpha=0.6)
-pc = {}
+offs = {"A3": -0.2, "B7": -0.07, "W3": 0.07, "A5": 0.0, "W5": 0.0, "A7": 0.2, "W7": 0.3}
+cols = {"A3": "#2a7ab9", "B7": "#8a5cc2", "W3": "#2a9d8f", "A7": "#555555", "W7": "#111111"}
+labs = {"A3": "A3 (dim 2, n=3 control)", "W3": "W3 (dim 3, n=3)", "B7": "B7 factors (dim 3, n=7)",
+        "A7": "A7 (dim 6, n=7)", "W7": "W7 (dim 7, n=7)"}
+seen = set()
 for r in rows:
-    if r["target"].startswith("A3") and r["arm"] != "ci5":
-        pc.setdefault(r["genus"], [0.0, 0.0])
-        pc[r["genus"]][0] += r["pred_mass_h1"] / 2
-        pc[r["genus"]][1] += r["mass"] / 2
-gs = sorted(pc)
-ax.plot(gs, [math.log2(pc[g][0]) for g in gs], "-o", color="#2a7ab9", label="A3 control: predicted")
-ax.plot(gs, [math.log2(pc[g][1]) for g in gs], "s", color="#2a7ab9", ms=8, label="A3 control: observed")
-ax.axhline(0, color="#999", lw=0.8, ls=":")
-ax.text(3.05, 0.3, "one curve class", fontsize=8, color="#666")
-ax.set_ylim(FLOOR - 1, 8)
-ax.set_xlabel("genus G (enumerated families only)")
-ax.set_ylabel("log2 carrier mass (sum over enumerated families)")
-ax.set_title("Toy ladder: triangles at bottom = zero observed")
-ax.legend(fontsize=7.5, loc="lower left")
+    pre = r["target"][:2]
+    if r["mass"] <= 0 or pre not in cols or r["arm"] == "ci5_sub" and pre != "A3":
+        continue
+    if r["arm"] == "ci5" and pre == "A3":
+        continue
+    y = math.log2(r["mass"] / r["pred_mass_h1"])
+    ax.scatter(r["genus"] + offs[pre], y, c=cols[pre], s=30, edgecolor="white", linewidth=0.5,
+               label=labs[pre] if pre not in seen else None)
+    seen.add(pre)
+ax.axhline(0, color="#999", lw=1, ls="--")
+ax.axhspan(0, 3, color="#ccc", alpha=0.3)
+ax.text(2.8, 0.5, "heuristic band, h in [1, 8]", fontsize=8, color="#666")
+ax.text(5.1, -4.5, "A5, W5: zero carriers in every family\n(predicted mass 2^-1.3 .. 2^-15)", fontsize=8,
+        color="#d1495b")
+ax.set_xlim(2.6, 8.6)
+ax.set_xlabel("genus G")
+ax.set_ylabel("log2(observed / predicted carrier mass)")
+ax.set_title("Where carriers exist, the heuristic under-predicts")
+ax.legend(fontsize=7.5, loc="upper left")
 fig.tight_layout()
 for ext in ("svg", "png"):
     fig.savefig(os.path.join(HERE, f"torelli_toy.{ext}"), dpi=150)
