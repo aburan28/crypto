@@ -46,8 +46,8 @@ needed for a qualified performance claim; none predicts a faster algorithm.
 
 ## Next discriminating step
 
-The [later native snapshot](../research/binary_genus2_speed_20261014/runs/run-20261014T2148Z/ARCHIVE.md)
-has seven matched native full-target recoveries and 23 verified resumable
+The [completed a=1 native panel](../research/binary_genus2_speed_20261014/runs/run-20261014T2250Z/ARCHIVE.md)
+has eight matched native full-target recoveries and 24 verified resumable
 completions. These external records satisfy none of the registered-session,
 common-pricing or independent-host exit criteria; the problem remains open.
 
