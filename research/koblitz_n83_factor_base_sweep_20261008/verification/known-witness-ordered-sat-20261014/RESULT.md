@@ -57,3 +57,7 @@ still verifies the group/S3 witness, and the earlier unrestricted call remains
 censored at its own conflict cap. A factor-base winner requires observed
 natural relation yield, rank, linear algebra, a fresh ordinary target and
 matched complete cost accounting.
+
+[Validation](VALIDATION.md) records the current focused checks, the earlier
+complete release-library result, and the host-contended full rerun that was
+intentionally stopped without a terminal full-suite pass.
