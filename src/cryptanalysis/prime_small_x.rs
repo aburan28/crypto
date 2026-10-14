@@ -1,0 +1,984 @@
+//! # Small-x factor bases over prime fields, and their exact pair-sum yield.
+//!
+//! The binary-field work in this repository chooses a factor base by the
+//! number of subgroup targets its sums cover.  This module asks the same
+//! question of a prime-field curve `y² = x³ − 3x + b` with the classical
+//! **small-x factor base**: the points whose abscissa is one of the smallest
+//! integers `0, 1, 2, …` that lie on the curve, with both signs.
+//!
+//! For a base of `B` abscissae the sums of two base points are, up to sign,
+//! `x(a+b)` and `x(a−b)` for the `B(B−1)/2` pairs of distinct abscissae and
+//! `x(2a)` for each of the `B`, which is `B²` abscissae if no two coincide.
+//! A target `T` is a signed sum of two base points exactly when `x(T)` is
+//! one of them, and then so is `−T`.  The number of covered targets is
+//! therefore twice the number of **distinct** sum abscissae `D`, and the
+//! probability that a uniformly random group element decomposes in one trial
+//! is exactly
+//!
+//! ```text
+//!     yield = 2·D / (N − 1),        N = the group order,
+//! ```
+//!
+//! with no sampling.  `D ≤ B²` with equality when no two sums collide, so
+//! `2B²/(N − 1)` is the collision-free model and the gap between the two
+//! counts the collisions.  [`measure`] computes `D` from every pair sum
+//! (one batched inversion per row, about seven field multiplications a
+//! pair), draws random group elements to check the count by Monte Carlo
+//! where the yield is large enough to see, and plants known decompositions
+//! to show the detector fires.
+//!
+//! The field is a trait so the same code runs on the native P-192 field
+//! ([`super::p192_native`]) and on small toy primes, where collisions and
+//! hits are common and the method can be tested against brute force.
+
+use std::collections::HashMap;
+use std::time::Instant;
+
+use num_bigint::BigUint;
+use num_traits::{One, ToPrimitive, Zero};
+use rand::{rngs::StdRng, Rng, SeedableRng};
+use rayon::prelude::*;
+use serde::Serialize;
+
+use super::p192_native::{
+    p192_order, p192_prime, AffinePoint, Fp, JacobianPoint, P192Arithmetic, B_HEX, GX_HEX, GY_HEX,
+};
+
+/// An exact, canonical key for a field element.
+pub type Key = [u64; 3];
+
+// ── Prime fields ───────────────────────────────────────────────────
+
+/// What the yield measurement needs of a prime field.
+pub trait PrimeField: Clone + Send + Sync {
+    type E: Copy + Eq + Send + Sync;
+    fn modulus(&self) -> BigUint;
+    fn zero(&self) -> Self::E;
+    fn one(&self) -> Self::E;
+    fn embed_u64(&self, v: u64) -> Self::E;
+    fn embed_big(&self, v: &BigUint) -> Result<Self::E, String>;
+    fn add(&mut self, a: Self::E, b: Self::E) -> Self::E;
+    fn sub(&mut self, a: Self::E, b: Self::E) -> Self::E;
+    fn mul(&mut self, a: Self::E, b: Self::E) -> Self::E;
+    fn sqr(&mut self, a: Self::E) -> Self::E;
+    fn inv(&mut self, a: Self::E) -> Option<Self::E>;
+    /// Canonical value as three little-endian limbs.
+    fn key(&self, a: Self::E) -> Key;
+
+    fn neg(&mut self, a: Self::E) -> Self::E {
+        let z = self.zero();
+        self.sub(z, a)
+    }
+
+    fn is_zero(&self, a: Self::E) -> bool {
+        a == self.zero()
+    }
+
+    /// `base^exp` by square and multiply.
+    fn pow(&mut self, base: Self::E, exp: &BigUint) -> Self::E {
+        let mut acc = self.one();
+        for i in (0..exp.bits()).rev() {
+            acc = self.sqr(acc);
+            if exp.bit(i) {
+                acc = self.mul(acc, base);
+            }
+        }
+        acc
+    }
+
+    /// A uniform element, from a generator the caller seeds.
+    fn random(&self, rng: &mut StdRng) -> Self::E {
+        let m = self.modulus();
+        let limbs = (m.bits() as usize).div_ceil(64) + 1;
+        let bytes: Vec<u8> = (0..limbs * 8).map(|_| rng.gen()).collect();
+        let v = BigUint::from_bytes_le(&bytes) % &m;
+        self.embed_big(&v).expect("reduced value is canonical")
+    }
+}
+
+/// The native P-192 field, three-limb Montgomery arithmetic.
+#[derive(Clone)]
+pub struct P192Field {
+    ar: P192Arithmetic,
+    p: BigUint,
+}
+
+impl P192Field {
+    pub fn new() -> Self {
+        Self {
+            ar: P192Arithmetic::new(),
+            p: p192_prime(),
+        }
+    }
+}
+
+impl Default for P192Field {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl PrimeField for P192Field {
+    type E = Fp;
+    fn modulus(&self) -> BigUint {
+        self.p.clone()
+    }
+    fn zero(&self) -> Fp {
+        self.ar.zero()
+    }
+    fn one(&self) -> Fp {
+        self.ar.one()
+    }
+    fn embed_u64(&self, v: u64) -> Fp {
+        self.ar.from_u64(v)
+    }
+    fn embed_big(&self, v: &BigUint) -> Result<Fp, String> {
+        self.ar.from_biguint(v)
+    }
+    fn add(&mut self, a: Fp, b: Fp) -> Fp {
+        self.ar.add(a, b)
+    }
+    fn sub(&mut self, a: Fp, b: Fp) -> Fp {
+        self.ar.sub(a, b)
+    }
+    fn mul(&mut self, a: Fp, b: Fp) -> Fp {
+        self.ar.mul(a, b)
+    }
+    fn sqr(&mut self, a: Fp) -> Fp {
+        self.ar.square(a)
+    }
+    fn inv(&mut self, a: Fp) -> Option<Fp> {
+        // Fermat with the cached exponent, not the module's per-call parse.
+        if self.is_zero(a) {
+            return None;
+        }
+        let e = &self.p - BigUint::from(2u8);
+        Some(self.pow(a, &e))
+    }
+    fn key(&self, a: Fp) -> Key {
+        self.ar.canonical(a).0
+    }
+}
+
+/// A prime field of fewer than 63 bits, for toy curves.
+#[derive(Clone)]
+pub struct SmallPrime {
+    p: u64,
+}
+
+impl SmallPrime {
+    pub fn new(p: u64) -> Self {
+        assert!(p > 3 && p < (1 << 62));
+        Self { p }
+    }
+}
+
+impl PrimeField for SmallPrime {
+    type E = u64;
+    fn modulus(&self) -> BigUint {
+        BigUint::from(self.p)
+    }
+    fn zero(&self) -> u64 {
+        0
+    }
+    fn one(&self) -> u64 {
+        1
+    }
+    fn embed_u64(&self, v: u64) -> u64 {
+        v % self.p
+    }
+    fn embed_big(&self, v: &BigUint) -> Result<u64, String> {
+        v.to_u64()
+            .filter(|&x| x < self.p)
+            .ok_or_else(|| "element is not canonical".into())
+    }
+    fn add(&mut self, a: u64, b: u64) -> u64 {
+        (a + b) % self.p
+    }
+    fn sub(&mut self, a: u64, b: u64) -> u64 {
+        (a + self.p - b) % self.p
+    }
+    fn mul(&mut self, a: u64, b: u64) -> u64 {
+        ((a as u128 * b as u128) % self.p as u128) as u64
+    }
+    fn sqr(&mut self, a: u64) -> u64 {
+        self.mul(a, a)
+    }
+    fn inv(&mut self, a: u64) -> Option<u64> {
+        if a == 0 {
+            return None;
+        }
+        let (mut t, mut new_t) = (0i128, 1i128);
+        let (mut r, mut new_r) = (self.p as i128, a as i128);
+        while new_r != 0 {
+            let q = r / new_r;
+            (t, new_t) = (new_t, t - q * new_t);
+            (r, new_r) = (new_r, r - q * new_r);
+        }
+        if r != 1 {
+            return None;
+        }
+        Some(t.rem_euclid(self.p as i128) as u64)
+    }
+    fn key(&self, a: u64) -> Key {
+        [a, 0, 0]
+    }
+}
+
+// ── Curves and points ──────────────────────────────────────────────
+
+/// An affine point `(x, y)`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Pt<E> {
+    pub x: E,
+    pub y: E,
+}
+
+/// `y² = x³ + a·x + b` over a prime field, with its group order `N`.
+#[derive(Clone)]
+pub struct Curve<F: PrimeField> {
+    pub name: String,
+    pub field: F,
+    pub a: F::E,
+    pub b: F::E,
+    pub order: BigUint,
+    /// Whether the group order is known to be prime.
+    pub order_is_prime: bool,
+}
+
+impl Curve<P192Field> {
+    /// NIST P-192 (secp192r1): `a = −3`, prime order, cofactor 1.
+    pub fn p192() -> Self {
+        let mut field = P192Field::new();
+        let a = field.neg(field.embed_u64(3));
+        let b = field.ar.from_hex(B_HEX);
+        Self {
+            name: "secp192r1 (NIST P-192)".into(),
+            field,
+            a,
+            b,
+            order: p192_order(),
+            order_is_prime: true,
+        }
+    }
+
+    /// The curve's base point.
+    pub fn p192_generator(&self) -> Pt<Fp> {
+        Pt {
+            x: self.field.ar.from_hex(GX_HEX),
+            y: self.field.ar.from_hex(GY_HEX),
+        }
+    }
+}
+
+impl<F: PrimeField> Curve<F> {
+    /// `x³ + a·x + b`.
+    pub fn rhs(&self, f: &mut F, x: F::E) -> F::E {
+        let x2 = f.sqr(x);
+        let t = f.add(x2, self.a);
+        let t = f.mul(t, x);
+        f.add(t, self.b)
+    }
+
+    fn euler_exponent(&self, f: &F) -> BigUint {
+        (f.modulus() - BigUint::one()) >> 1
+    }
+
+    /// Whether `v` is a nonzero square.
+    pub fn is_square(&self, f: &mut F, v: F::E, exp: &BigUint) -> bool {
+        !f.is_zero(v) && f.pow(v, exp) == f.one()
+    }
+
+    /// A square root of `v` for `p ≡ 3 (mod 4)`.
+    pub fn sqrt(&self, f: &mut F, v: F::E) -> Option<F::E> {
+        let e = (f.modulus() + BigUint::one()) >> 2;
+        let r = f.pow(v, &e);
+        (f.sqr(r) == v).then_some(r)
+    }
+
+    pub fn on_curve(&self, f: &mut F, p: &Pt<F::E>) -> bool {
+        let lhs = f.sqr(p.y);
+        lhs == self.rhs(f, p.x)
+    }
+
+    /// `P + Q`, or `None` for the point at infinity.
+    pub fn add_points(&self, f: &mut F, p: &Pt<F::E>, q: &Pt<F::E>) -> Option<Pt<F::E>> {
+        let lambda = if p.x == q.x {
+            let sum_y = f.add(p.y, q.y);
+            if f.is_zero(sum_y) {
+                return None;
+            }
+            let x2 = f.sqr(p.x);
+            let three = f.embed_u64(3);
+            let num = f.mul(x2, three);
+            let num = f.add(num, self.a);
+            let two = f.embed_u64(2);
+            let den = f.mul(two, p.y);
+            let inv = f.inv(den)?;
+            f.mul(num, inv)
+        } else {
+            let num = f.sub(q.y, p.y);
+            let den = f.sub(q.x, p.x);
+            let inv = f.inv(den)?;
+            f.mul(num, inv)
+        };
+        let l2 = f.sqr(lambda);
+        let x3 = f.sub(l2, p.x);
+        let x3 = f.sub(x3, q.x);
+        let dx = f.sub(p.x, x3);
+        let y3 = f.mul(lambda, dx);
+        let y3 = f.sub(y3, p.y);
+        Some(Pt { x: x3, y: y3 })
+    }
+
+    pub fn negate(&self, f: &mut F, p: &Pt<F::E>) -> Pt<F::E> {
+        Pt {
+            x: p.x,
+            y: f.neg(p.y),
+        }
+    }
+
+    /// A uniform group element other than `O`, from `rng`.
+    pub fn random_point(&self, f: &mut F, rng: &mut StdRng, exp: &BigUint) -> Pt<F::E> {
+        loop {
+            let x = f.random(rng);
+            let r = self.rhs(f, x);
+            if self.is_square(f, r, exp) {
+                let y = self.sqrt(f, r).expect("square has a root");
+                return Pt { x, y };
+            }
+        }
+    }
+}
+
+/// The first `size` points with the smallest abscissae `x = 0, 1, 2, …`
+/// that lie on the curve (one of the two signs of each).
+pub fn small_x_base<F: PrimeField>(c: &Curve<F>, size: usize) -> Result<Vec<Pt<F::E>>, String> {
+    let mut f = c.field.clone();
+    let exp = c.euler_exponent(&f);
+    let mut out = Vec::with_capacity(size);
+    let mut x = 0u64;
+    while out.len() < size {
+        if x > 64 * size as u64 + 1024 {
+            return Err("ran out of small abscissae on this curve".into());
+        }
+        let xe = f.embed_u64(x);
+        let r = c.rhs(&mut f, xe);
+        if c.is_square(&mut f, r, &exp) {
+            let y = c.sqrt(&mut f, r).ok_or("square without a root")?;
+            out.push(Pt { x: xe, y });
+        }
+        x += 1;
+    }
+    Ok(out)
+}
+
+/// The abscissae of `a ± b` for every pair of distinct base abscissae and of
+/// `2a` for every `a`: `B²` keys with repeats where sums collide.
+pub fn pair_sum_keys<F: PrimeField>(c: &Curve<F>, base: &[Pt<F::E>]) -> Vec<Key> {
+    let n = base.len();
+    let mut keys: Vec<Key> = (0..n)
+        .into_par_iter()
+        .map(|i| {
+            let mut f = c.field.clone();
+            let mut out: Vec<Key> = Vec::with_capacity(2 * (n - i) + 1);
+            let a = base[i];
+            // Doubling: x(2a) = λ² − 2x with λ = (3x² + a)/(2y).
+            let x2 = f.sqr(a.x);
+            let three = f.embed_u64(3);
+            let num = f.mul(x2, three);
+            let num = f.add(num, c.a);
+            let two = f.embed_u64(2);
+            let den = f.mul(two, a.y);
+            let inv = f.inv(den).expect("an on-curve point has y != 0 here");
+            let l = f.mul(num, inv);
+            let l2 = f.sqr(l);
+            let t = f.sub(l2, a.x);
+            let x3 = f.sub(t, a.x);
+            out.push(f.key(x3));
+            // a ± b for j > i, with one inversion for the whole row.
+            let rest = &base[i + 1..];
+            if !rest.is_empty() {
+                let dens: Vec<F::E> = rest.iter().map(|b| f.sub(a.x, b.x)).collect();
+                let mut prefix = Vec::with_capacity(dens.len());
+                let mut acc = f.one();
+                for d in &dens {
+                    acc = f.mul(acc, *d);
+                    prefix.push(acc);
+                }
+                let mut inv_acc = f.inv(acc).expect("abscissae are distinct");
+                let mut invs = vec![f.zero(); dens.len()];
+                for k in (0..dens.len()).rev() {
+                    let before = if k == 0 { f.one() } else { prefix[k - 1] };
+                    invs[k] = f.mul(inv_acc, before);
+                    inv_acc = f.mul(inv_acc, dens[k]);
+                }
+                for (k, b) in rest.iter().enumerate() {
+                    let sx = f.add(a.x, b.x);
+                    for sign_plus in [false, true] {
+                        let ny = if sign_plus {
+                            f.add(a.y, b.y)
+                        } else {
+                            f.sub(a.y, b.y)
+                        };
+                        let lam = f.mul(ny, invs[k]);
+                        let l2 = f.sqr(lam);
+                        let x3 = f.sub(l2, sx);
+                        out.push(f.key(x3));
+                    }
+                }
+            }
+            out
+        })
+        .flatten()
+        .collect();
+    keys.par_sort_unstable();
+    // Keep the repeats: the caller counts them, then dedups.
+    keys
+}
+
+// ── Measurement ────────────────────────────────────────────────────
+
+/// What to measure.
+#[derive(Clone, Debug, Serialize)]
+pub struct Options {
+    /// Abscissae in the base; the base has twice as many points.
+    pub size: usize,
+    /// Random group elements tested by Monte Carlo.
+    pub trials: u64,
+    /// Planted decompositions that must be detected and recovered.
+    pub controls: usize,
+    pub seed: u64,
+}
+
+/// The exact yield of a small-x base and its checks.
+#[derive(Clone, Debug, Serialize)]
+pub struct YieldReport {
+    pub curve: String,
+    pub field_bits: u64,
+    pub order_bits: f64,
+    pub order: String,
+    pub base_abscissae: usize,
+    pub base_points: usize,
+    /// The largest `x` used by the base.
+    pub largest_small_x: u64,
+    /// `B²`: pair-sum abscissae if no two coincide.
+    pub sums: u64,
+    pub distinct_sums: u64,
+    pub collisions: u64,
+    /// `2·D`.
+    pub covered_targets: String,
+    /// `log₂` of the exact yield per trial, `2D/(N − 1)`.
+    pub exact_yield_log2: f64,
+    pub exact_yield: f64,
+    /// `log₂` of the collision-free model, `2B²/(N − 1)`.
+    pub model_yield_log2: f64,
+    pub model_yield: f64,
+    /// `log₂` of the expected trials per relation, `(N − 1)/(2D)`.
+    pub expected_trials_log2: f64,
+    /// `log₂` of the trials to collect `B + 1` relations.
+    pub trials_for_full_system_log2: f64,
+    /// `log₂ √N`, the cost of Pollard rho in group operations to leading order.
+    pub rho_log2: f64,
+    pub mc_trials: u64,
+    pub mc_hits: u64,
+    pub mc_hits_verified: u64,
+    pub mc_rate: f64,
+    pub mc_ci95: [f64; 2],
+    /// Monte Carlo rate over the exact yield, when there are hits.
+    pub mc_over_exact: Option<f64>,
+    pub controls: usize,
+    pub controls_detected: usize,
+    pub controls_recovered: usize,
+    pub timing_ms: Timing,
+    pub threads: usize,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct Timing {
+    pub base: f64,
+    pub pair_sums: f64,
+    pub monte_carlo: f64,
+    /// Wall microseconds per Monte Carlo trial, all threads together.
+    pub us_per_trial_wall: f64,
+    pub controls: f64,
+}
+
+fn log2_big(x: &BigUint) -> f64 {
+    if x.is_zero() {
+        return f64::NEG_INFINITY;
+    }
+    let b = x.bits();
+    if b <= 64 {
+        return x.to_f64().unwrap_or(f64::MAX).log2();
+    }
+    let top = (x >> (b - 64) as usize).to_f64().unwrap_or(f64::MAX);
+    top.log2() + (b - 64) as f64
+}
+
+/// 95% interval for a binomial rate; exact one-sided bound when no hit.
+fn binomial_ci(hits: u64, trials: u64) -> [f64; 2] {
+    if trials == 0 {
+        return [0.0, 1.0];
+    }
+    let n = trials as f64;
+    if hits == 0 {
+        return [0.0, 1.0 - 0.025f64.powf(1.0 / n)];
+    }
+    let p = hits as f64 / n;
+    let z = 1.959_964;
+    let denom = 1.0 + z * z / n;
+    let centre = (p + z * z / (2.0 * n)) / denom;
+    let half = z * (p * (1.0 - p) / n + z * z / (4.0 * n * n)).sqrt() / denom;
+    [(centre - half).max(0.0), (centre + half).min(1.0)]
+}
+
+/// Whether `target` is `±a ± b` for base points; returns the signs and
+/// indices when it is.
+fn recover<F: PrimeField>(
+    c: &Curve<F>,
+    f: &mut F,
+    base: &[Pt<F::E>],
+    index: &HashMap<Key, usize>,
+    target: &Pt<F::E>,
+) -> Option<(bool, usize, usize)> {
+    for (i, a) in base.iter().enumerate() {
+        for negate in [false, true] {
+            let a_signed = if negate { c.negate(f, a) } else { *a };
+            // Q = target − a_signed, so target = a_signed + Q.
+            let minus_a = c.negate(f, &a_signed);
+            let Some(q) = c.add_points(f, target, &minus_a) else {
+                continue;
+            };
+            if let Some(&j) = index.get(&f.key(q.x)) {
+                return Some((negate, i, j));
+            }
+        }
+    }
+    None
+}
+
+/// Measure the exact yield of the small-x base of `c`.
+pub fn measure<F: PrimeField>(c: &Curve<F>, opts: &Options) -> Result<YieldReport, String> {
+    if opts.size < 2 {
+        return Err("a base needs at least two abscissae".into());
+    }
+    let mut f = c.field.clone();
+    let exp = c.euler_exponent(&f);
+
+    let t0 = Instant::now();
+    let base = small_x_base(c, opts.size)?;
+    for p in &base {
+        if !c.on_curve(&mut f, p) {
+            return Err("a base point is not on the curve".into());
+        }
+    }
+    let largest_x = {
+        // The abscissae are the smallest integers on the curve; read the last.
+        let last = f.key(base[base.len() - 1].x);
+        last[0]
+    };
+    let base_ms = t0.elapsed().as_secs_f64() * 1000.0;
+
+    let t1 = Instant::now();
+    let mut keys = pair_sum_keys(c, &base);
+    let total = keys.len() as u64;
+    keys.dedup();
+    let distinct = keys.len() as u64;
+    let pair_ms = t1.elapsed().as_secs_f64() * 1000.0;
+
+    let order_minus_one = &c.order - BigUint::one();
+    let covered = BigUint::from(2 * distinct);
+    let exact_log2 = log2_big(&covered) - log2_big(&order_minus_one);
+    let model_log2 =
+        log2_big(&BigUint::from(2 * (opts.size as u64).pow(2))) - log2_big(&order_minus_one);
+    let exact_yield = 2.0f64.powf(exact_log2);
+    let model_yield = 2.0f64.powf(model_log2);
+
+    // Index of base abscissae, for recovering decompositions.
+    let index: HashMap<Key, usize> = base
+        .iter()
+        .enumerate()
+        .map(|(i, p)| (f.key(p.x), i))
+        .collect();
+
+    // Monte Carlo on uniform group elements.
+    let t2 = Instant::now();
+    let chunk = 2048u64;
+    let chunks = opts.trials.div_ceil(chunk);
+    let (hits, samples) = (0..chunks)
+        .into_par_iter()
+        .map(|ci| {
+            let mut f = c.field.clone();
+            let mut rng =
+                StdRng::seed_from_u64(opts.seed ^ 0x9e37_79b9_7f4a_7c15u64.wrapping_mul(ci + 1));
+            let here = chunk.min(opts.trials - ci * chunk);
+            let mut hits = 0u64;
+            let mut samples: Vec<Pt<F::E>> = Vec::new();
+            for _ in 0..here {
+                let p = c.random_point(&mut f, &mut rng, &exp);
+                if keys.binary_search(&f.key(p.x)).is_ok() {
+                    hits += 1;
+                    if samples.len() < 4 {
+                        samples.push(p);
+                    }
+                }
+            }
+            (hits, samples)
+        })
+        .reduce(
+            || (0u64, Vec::new()),
+            |(h1, mut s1), (h2, s2)| {
+                s1.extend(s2);
+                s1.truncate(16);
+                (h1 + h2, s1)
+            },
+        );
+    let mc_ms = t2.elapsed().as_secs_f64() * 1000.0;
+
+    // A hit is a real decomposition: recover it.
+    let mut verified = 0u64;
+    for p in samples.iter().take(8) {
+        if recover(c, &mut f, &base, &index, p).is_some() {
+            verified += 1;
+        }
+    }
+
+    // Positive control: plant a decomposition and require the detector fire.
+    let t3 = Instant::now();
+    let mut rng = StdRng::seed_from_u64(opts.seed ^ 0x434f_4e54_524f_4c53);
+    let (mut detected, mut recovered) = (0usize, 0usize);
+    let mut planted = 0usize;
+    while planted < opts.controls {
+        let i = rng.gen_range(0..base.len());
+        let j = rng.gen_range(0..base.len());
+        let a = base[i];
+        let mut b = base[j];
+        if rng.gen::<bool>() {
+            b = c.negate(&mut f, &b);
+        }
+        let Some(target) = c.add_points(&mut f, &a, &b) else {
+            continue;
+        };
+        planted += 1;
+        if keys.binary_search(&f.key(target.x)).is_ok() {
+            detected += 1;
+        }
+        if recover(c, &mut f, &base, &index, &target).is_some() {
+            recovered += 1;
+        }
+    }
+    let ctl_ms = t3.elapsed().as_secs_f64() * 1000.0;
+
+    let trials = opts.trials;
+    let order_bits = log2_big(&c.order);
+    let trials_full = (opts.size as f64 + 1.0).log2() - exact_log2;
+    Ok(YieldReport {
+        curve: c.name.clone(),
+        field_bits: f.modulus().bits(),
+        order_bits,
+        order: c.order.to_string(),
+        base_abscissae: opts.size,
+        base_points: 2 * opts.size,
+        largest_small_x: largest_x,
+        sums: total,
+        distinct_sums: distinct,
+        collisions: total - distinct,
+        covered_targets: covered.to_string(),
+        exact_yield_log2: exact_log2,
+        exact_yield,
+        model_yield_log2: model_log2,
+        model_yield,
+        expected_trials_log2: -exact_log2,
+        trials_for_full_system_log2: trials_full,
+        rho_log2: order_bits / 2.0,
+        mc_trials: trials,
+        mc_hits: hits,
+        mc_hits_verified: verified,
+        mc_rate: if trials == 0 {
+            0.0
+        } else {
+            hits as f64 / trials as f64
+        },
+        mc_ci95: binomial_ci(hits, trials),
+        mc_over_exact: (hits > 0 && exact_yield > 0.0)
+            .then(|| (hits as f64 / trials as f64) / exact_yield),
+        controls: opts.controls,
+        controls_detected: detected,
+        controls_recovered: recovered,
+        timing_ms: Timing {
+            base: base_ms,
+            pair_sums: pair_ms,
+            monte_carlo: mc_ms,
+            us_per_trial_wall: if trials == 0 {
+                0.0
+            } else {
+                mc_ms * 1000.0 / trials as f64
+            },
+            controls: ctl_ms,
+        },
+        threads: rayon::current_num_threads(),
+    })
+}
+
+// ── Toy curves ─────────────────────────────────────────────────────
+
+fn is_prime_u64(n: u64) -> bool {
+    if n < 2 {
+        return false;
+    }
+    for p in [2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
+        if n.is_multiple_of(p) {
+            return n == p;
+        }
+    }
+    let (mut d, mut s) = (n - 1, 0);
+    while d % 2 == 0 {
+        d /= 2;
+        s += 1;
+    }
+    let mulmod = |a: u64, b: u64| ((a as u128 * b as u128) % n as u128) as u64;
+    let powmod = |mut b: u64, mut e: u64| {
+        let mut r = 1u64;
+        while e > 0 {
+            if e & 1 == 1 {
+                r = mulmod(r, b);
+            }
+            b = mulmod(b, b);
+            e >>= 1;
+        }
+        r
+    };
+    'witness: for a in [2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
+        let mut x = powmod(a, d);
+        if x == 1 || x == n - 1 {
+            continue;
+        }
+        for _ in 0..s - 1 {
+            x = mulmod(x, x);
+            if x == n - 1 {
+                continue 'witness;
+            }
+        }
+        return false;
+    }
+    true
+}
+
+/// A toy curve `y² = x³ − 3x + b` over a prime `p ≡ 3 (mod 4)` just below
+/// `2^bits`, with `b` chosen from `seed` so the cubic has no root (no
+/// rational 2-torsion, so the group order is odd and every abscissa on the
+/// curve carries two points).  The order is counted exactly.  Needs
+/// `bits ≤ 28`: the count walks the field.
+pub fn toy_curve(bits: u32, seed: u64) -> Result<Curve<SmallPrime>, String> {
+    if !(8..=28).contains(&bits) {
+        return Err("toy curves use 8 to 28 bit primes".into());
+    }
+    let mut p = (1u64 << bits) - 1;
+    while !(p % 4 == 3 && is_prime_u64(p)) {
+        p -= 2;
+    }
+    let f = SmallPrime::new(p);
+    let mut squares = vec![0u64; (p as usize) / 64 + 1];
+    for y in 0..p {
+        let s = ((y as u128 * y as u128) % p as u128) as usize;
+        squares[s / 64] |= 1 << (s % 64);
+    }
+    let is_sq = |v: u64| (squares[v as usize / 64] >> (v % 64)) & 1 == 1;
+    let mut rng = StdRng::seed_from_u64(seed ^ u64::from(bits));
+    for _ in 0..200 {
+        let b = rng.gen_range(1..p);
+        let a = p - 3;
+        let (mut points, mut roots) = (1u64, 0u64);
+        for x in 0..p {
+            let x2 = ((x as u128 * x as u128) % p as u128) as u64;
+            let t = (x2 + a) % p;
+            let r = (((t as u128 * x as u128) % p as u128) as u64 + b) % p;
+            if r == 0 {
+                roots += 1;
+                points += 1;
+            } else if is_sq(r) {
+                points += 2;
+            }
+        }
+        if roots == 0 {
+            return Ok(Curve {
+                name: format!("toy y²=x³−3x+{b} over F_{p} ({bits} bits)"),
+                field: f,
+                a,
+                b,
+                order: BigUint::from(points),
+                order_is_prime: is_prime_u64(points),
+            });
+        }
+    }
+    Err("no root-free cubic found".into())
+}
+
+/// `a + b` by the native Jacobian arithmetic, for cross-checks.
+pub fn p192_native_sum(a: &Pt<Fp>, b: &Pt<Fp>, ar: &mut P192Arithmetic) -> Option<AffinePoint> {
+    let j = JacobianPoint::from_affine(AffinePoint { x: a.x, y: a.y }, ar);
+    j.add_affine(AffinePoint { x: b.x, y: b.y }, ar)
+        .to_affine(ar)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashSet;
+
+    /// Every point of a toy curve, found by walking the field.
+    fn all_points(c: &Curve<SmallPrime>) -> Vec<Pt<u64>> {
+        let mut f = c.field.clone();
+        let exp = c.euler_exponent(&f);
+        let mut out = Vec::new();
+        for x in 0..f.p {
+            let r = c.rhs(&mut f, x);
+            if c.is_square(&mut f, r, &exp) {
+                let y = c.sqrt(&mut f, r).unwrap();
+                out.push(Pt { x, y });
+                out.push(Pt { x, y: f.neg(y) });
+            }
+        }
+        out
+    }
+
+    #[test]
+    fn toy_order_is_the_number_of_points_plus_infinity() {
+        let c = toy_curve(12, 1).expect("toy");
+        let n = all_points(&c).len() as u64 + 1;
+        assert_eq!(c.order, BigUint::from(n));
+        assert!(n % 2 == 1, "no 2-torsion");
+    }
+
+    #[test]
+    fn exact_yield_equals_brute_force_coverage_on_a_toy_curve() {
+        // Brute force: every sum of two signed base points, by the group
+        // law, over the whole curve; the covered targets are the distinct
+        // points reached, and must be twice the distinct abscissae.
+        let c = toy_curve(14, 3).expect("toy");
+        let mut f = c.field.clone();
+        let base = small_x_base(&c, 40).expect("base");
+        let mut signed: Vec<Pt<u64>> = Vec::new();
+        for p in &base {
+            signed.push(*p);
+            signed.push(c.negate(&mut f, p));
+        }
+        let mut covered: HashSet<(u64, u64)> = HashSet::new();
+        for a in &signed {
+            for b in &signed {
+                if let Some(s) = c.add_points(&mut f, a, b) {
+                    covered.insert((s.x, s.y));
+                }
+            }
+        }
+        let mut keys = pair_sum_keys(&c, &base);
+        keys.dedup();
+        assert_eq!(covered.len(), 2 * keys.len());
+        // And the report agrees with it.
+        let rep = measure(
+            &c,
+            &Options {
+                size: 40,
+                trials: 2000,
+                controls: 16,
+                seed: 5,
+            },
+        )
+        .expect("measure");
+        assert_eq!(rep.distinct_sums as usize, keys.len());
+        assert_eq!(rep.covered_targets, (2 * keys.len()).to_string());
+        assert_eq!(rep.controls_detected, rep.controls);
+        assert_eq!(rep.controls_recovered, rep.controls);
+    }
+
+    #[test]
+    fn monte_carlo_rate_matches_the_exact_yield() {
+        let c = toy_curve(16, 7).expect("toy");
+        let rep = measure(
+            &c,
+            &Options {
+                size: 300,
+                trials: 400_000,
+                controls: 8,
+                seed: 11,
+            },
+        )
+        .expect("measure");
+        assert!(rep.collisions > 0, "this regime has collisions");
+        assert!(rep.mc_hits > 1000, "hits {}", rep.mc_hits);
+        let [lo, hi] = rep.mc_ci95;
+        assert!(
+            lo <= rep.exact_yield && rep.exact_yield <= hi,
+            "exact {} outside [{lo}, {hi}]",
+            rep.exact_yield
+        );
+        // Every sampled hit was recovered as a real decomposition.
+        assert_eq!(rep.mc_hits_verified, 8);
+    }
+
+    #[test]
+    fn p192_base_is_on_the_curve_and_has_no_collisions() {
+        let c = Curve::p192();
+        let mut f = c.field.clone();
+        let base = small_x_base(&c, 64).expect("base");
+        assert!(base.iter().all(|p| c.on_curve(&mut f, p)));
+        let rep = measure(
+            &c,
+            &Options {
+                size: 64,
+                trials: 2000,
+                controls: 8,
+                seed: 1,
+            },
+        )
+        .expect("measure");
+        assert_eq!(rep.collisions, 0);
+        assert_eq!(rep.distinct_sums, 64 * 64);
+        assert_eq!(rep.mc_hits, 0);
+        assert_eq!(rep.controls_detected, 8);
+        assert_eq!(rep.controls_recovered, 8);
+        // 2·64² / (N − 1), N ≈ 2^192.
+        assert!(
+            (rep.exact_yield_log2 + 179.0).abs() < 1.0,
+            "{}",
+            rep.exact_yield_log2
+        );
+    }
+
+    #[test]
+    fn p192_sum_abscissae_agree_with_the_native_jacobian_arithmetic() {
+        let c = Curve::p192();
+        let mut ar = P192Arithmetic::new();
+        let base = small_x_base(&c, 6).expect("base");
+        let mut f = c.field.clone();
+        // Keys from the batched formula, against x(a ± b) from Jacobian.
+        let keys: HashSet<Key> = pair_sum_keys(&c, &base).into_iter().collect();
+        for i in 0..base.len() {
+            for j in (i + 1)..base.len() {
+                for neg in [false, true] {
+                    let b = if neg {
+                        c.negate(&mut f, &base[j])
+                    } else {
+                        base[j]
+                    };
+                    let s = p192_native_sum(&base[i], &b, &mut ar).expect("sum");
+                    assert!(keys.contains(&ar.canonical(s.x).0));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn small_prime_inverse_and_p192_inverse_are_inverses() {
+        let mut f = SmallPrime::new(1_000_003);
+        for a in [1u64, 2, 12345, 999_999] {
+            let i = f.inv(a).unwrap();
+            assert_eq!(f.mul(a, i), 1);
+        }
+        let mut g = P192Field::new();
+        let a = g.embed_u64(123_456_789);
+        let i = g.inv(a).unwrap();
+        assert!(g.mul(a, i) == g.one());
+    }
+}

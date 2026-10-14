@@ -578,6 +578,33 @@ The control that the counts are the workflow's own is
 `research/ic_exponent_20260926/control.py`, which compares a price
 report with `ic workflow`'s report and relation files, field by field.
 
+### Prime-field curves: `ic prime` and `secp192r1`
+
+`ic list` includes **`secp192r1`** (NIST P-192; also `p192`, `nist-p192`,
+`p-192`): `ic secp192r1` or `ic inspect --curve secp192r1` checks the order,
+the modulus, nonsingularity and the generator, and reports the group
+cardinality as not implemented for prime curves.
+
+`search`, `run`, `logs`, `solve` and `workflow` are binary Koblitz pipelines.
+`ic prime` is the one prime-field factor-base measurement: it builds the
+**small-x** factor base (the points with the smallest abscissae `x = 0, 1, 2, …`
+on the curve, both signs) and reports the probability that a random point is a
+signed sum of two base points, **exactly**. A base of `B` abscissae has `B²`
+pair-sum abscissae if none coincide, a target is covered when its abscissa is
+one, and the yield is `2·D/(N − 1)` for `D` distinct sum abscissae and group
+order `N`. `ic prime` computes `D` from every pair sum, checks it by Monte
+Carlo on random group elements, and plants decompositions that must be
+detected and recovered.
+
+    ic prime --size 4096                  # P-192: exact yield 2^-167.0, 0 collisions
+    ic prime --curve toy:20 --size 512    # a toy prime: exact count against Monte Carlo hits
+
+On P-192 the yield is `2B²/(N − 1)`, from 2⁻¹⁷⁵ (`B = 256`) to 2⁻¹⁶⁵
+(`B = 8192`, the largest base); on toy primes the exact count equals the Monte
+Carlo rate to within 0.5%. Two-point sums only, and the cost of deciding a
+target (a Semaev S₃ solve) is not included. Measurements and limits:
+`research/prime_small_x_p192_20261014/REPORT.pdf`.
+
 ### Choosing a factor base
 
 Five families are recipes, and `greedy` is a sixth that is opt-in (`ic search --family`): `factor`, `divisor`

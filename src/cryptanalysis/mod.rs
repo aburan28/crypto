@@ -259,6 +259,7 @@ pub mod p192_cm_norm_sieve;
 pub mod p192_cm_relation_search;
 pub mod p192_interval_bsgs;
 pub mod p192_native;
+pub mod prime_small_x;
 pub mod p192_singular_recovery;
 pub mod p256_attacks;
 pub mod p256_backdoor_map;

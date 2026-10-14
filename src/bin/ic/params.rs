@@ -87,7 +87,13 @@ pub fn binary_coordinates(point: &BinaryPoint) -> Option<Coordinates> {
         }),
     }
 }
-pub const NAMES: &[&str] = &["ecc2k-130", "ecc2k-95", "sect163k1", "secp256k1"];
+pub const NAMES: &[&str] = &[
+    "ecc2k-130",
+    "ecc2k-95",
+    "sect163k1",
+    "secp192r1",
+    "secp256k1",
+];
 pub fn named(name: &str) -> Result<Parameters, String> {
     let profile = match name.to_ascii_lowercase().as_str() {
         "ecc2k-130" => Parameters {
@@ -143,6 +149,28 @@ pub fn named(name: &str) -> Result<Parameters, String> {
                 subgroup_order: hex(&c.order),
                 cofactor: hex(&c.cofactor),
                 generator: binary_coordinates(&c.generator),
+                point: None,
+                fixture: None,
+            }
+        }
+        "secp192r1" | "p192" | "nist-p192" | "p-192" => {
+            use crypto_lib::cryptanalysis::p192_native::{
+                p192_order, p192_prime, B_HEX, GX_HEX, GY_HEX,
+            };
+            // NIST P-192 (SEC 2 secp192r1): y² = x³ − 3x + b, prime order, cofactor 1.
+            let p = p192_prime();
+            Parameters {
+                schema_version: 1,
+                name: "secp192r1 (NIST P-192)".into(),
+                field: Field::Prime { modulus: hex(&p) },
+                a: hex(&(&p - BigUint::from(3u8))),
+                b: format!("0x{B_HEX}"),
+                subgroup_order: hex(&p192_order()),
+                cofactor: "1".into(),
+                generator: Some(Coordinates {
+                    x: format!("0x{GX_HEX}"),
+                    y: format!("0x{GY_HEX}"),
+                }),
                 point: None,
                 fixture: None,
             }

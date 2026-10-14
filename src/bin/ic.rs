@@ -17,6 +17,8 @@ mod large_prime;
 mod params;
 #[path = "ic/price.rs"]
 mod price;
+#[path = "ic/prime.rs"]
+mod prime;
 #[path = "ic/rho.rs"]
 mod rho;
 #[path = "ic/workflow.rs"]
@@ -95,6 +97,9 @@ enum Action {
     /// Import the ECBench binary-curve battery and run bounded exact
     /// n−1 index calculus with the zero/single/double-large-prime variation.
     LargePrime(large_prime::LargePrimeArgs),
+    /// Measure the exact pair-sum yield of a small-x factor base on a
+    /// prime-field curve (NIST P-192, or toy primes where hits are common).
+    Prime(prime::PrimeArgs),
 }
 #[derive(Args)]
 #[group(required = true, multiple = false)]
@@ -148,6 +153,7 @@ fn execute(cli: &Cli) -> Result<Value, String> {
         Some(Action::Rho(args)) => rho::run(args.clone(), cli.json),
         Some(Action::Price(args)) => price::run(args.clone(), cli.json),
         Some(Action::LargePrime(args)) => large_prime::run(args.clone()),
+        Some(Action::Prime(args)) => prime::run(args.clone()),
         Some(Action::Run(args)) => experiment::run(args.clone(), cli.json),
         None => {
             if let Some(name) = &cli.profile {
@@ -483,6 +489,49 @@ fn display(report: &Value) {
             for name in params::NAMES {
                 println!("{name}");
             }
+        }
+        Some("prime") => {
+            let r = &report["report"];
+            let f = |k: &str| r[k].as_f64().unwrap_or(f64::NAN);
+            println!(
+                "Small-x factor base on {}\n  base: {} abscissae ({} points), x up to {}\n  pair sums: {} ({} distinct, {} collisions); group order 2^{:.2}",
+                r["curve"].as_str().unwrap_or("?"),
+                r["base_abscissae"],
+                r["base_points"],
+                r["largest_small_x"],
+                r["sums"],
+                r["distinct_sums"],
+                r["collisions"],
+                f("order_bits")
+            );
+            println!(
+                "  yield per trial, exact: 2^{:.2} ({:.3e}); collision-free model: 2^{:.2}",
+                f("exact_yield_log2"),
+                f("exact_yield"),
+                f("model_yield_log2")
+            );
+            println!(
+                "  expected trials per relation 2^{:.2}; for {} relations 2^{:.2}; rho 2^{:.2} group operations",
+                f("expected_trials_log2"),
+                r["base_abscissae"].as_u64().unwrap_or(0) + 1,
+                f("trials_for_full_system_log2"),
+                f("rho_log2")
+            );
+            let ci = &r["mc_ci95"];
+            println!(
+                "  Monte Carlo: {} hits in {} trials (rate {:.3e}, 95% [{:.2e}, {:.2e}]), {} recovered; {:.2} us per trial",
+                r["mc_hits"],
+                r["mc_trials"],
+                f("mc_rate"),
+                ci[0].as_f64().unwrap_or(f64::NAN),
+                ci[1].as_f64().unwrap_or(f64::NAN),
+                r["mc_hits_verified"],
+                r["timing_ms"]["us_per_trial_wall"].as_f64().unwrap_or(f64::NAN)
+            );
+            println!(
+                "  planted controls: {}/{} detected, {}/{} recovered",
+                r["controls_detected"], r["controls"], r["controls_recovered"], r["controls"]
+            );
         }
         Some("large-prime") => {
             println!(
