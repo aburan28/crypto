@@ -5,7 +5,7 @@
 
 = The hyperelliptic genus-3 GHS cover ($m = 3, r = 5$): explicit $FF_q$ model, Frobenius, and the transfer executed with Cantor arithmetic
 
-2026-10-13 · Conductor T-2463 · `research/ghs_cubic_hyperelliptic_genus3_20261013/` · recorded run `20261014T0029Z` (base commit `12331a9a7`, source sha256 `373c1663…`). *Structural stage diagnostic on toy fields.* No index calculus, no relation collection, no discrete logarithm, no cost or speedup claim. Protocol frozen before the recorded run (`PROTOCOL.md`, one dated amendment written after development runs).
+2026-10-13 · Conductor T-2463 · `research/ghs_cubic_hyperelliptic_genus3_20261013/` · recorded run `20261014T0029Z` (base commit `12331a9a7`, pre-rebase, = `f69cec000` on the PR branch; source sha256 `be4c3374…`). *Structural stage diagnostic on toy fields.* No index calculus, no relation collection, no discrete logarithm, no cost or speedup claim. Protocol frozen before the recorded run (`PROTOCOL.md`, one dated amendment written after development runs).
 
 == Question
 The cover census (PR \#1759) found a hyperelliptic genus-3 type ($m=3$, $r=5$) of GHS cover for $E\/FF_(q^3)$. The $m=2$ genus-3 covers built in PR \#1761 are plane quartics without class arithmetic in the repository. Can the $m=3, r=5$ curve be written over $FF_q$, does its Frobenius match, and does the transfer $E_0(FF_(q^3)) -> "Jac"(C)(FF_q)$ run as a group map?

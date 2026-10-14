@@ -222,6 +222,11 @@ records carry the key `"P4"` twice (detail object and flag), which is
 ambiguous JSON; the tool was changed only to rename the detail object to
 `P4_detail` and re-run as `20261014T0029Z`, whose records are identical apart
 from that key and wall times (checked by diff). No run was interrupted.
+The base commits in the env files (`17be1bfff`, `12331a9a7`) are pre-rebase
+SHAs; after rebasing onto `main` the same trees are `ae436c10e` and
+`f69cec000`. The tool is identified by its sha256 (`be4c3374…` for the
+recorded run, `373c1663…` for the superseded one), which the rebase did not
+change.
 Curve identities: [results/e0_icv1.json](results/e0_icv1.json) (computed
 with `scripts/curve_id.py`, which recounts each `#E0(K)` independently and
 agrees; not registered in `docs/curves/registry.json`, as in PR #1761).
