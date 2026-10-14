@@ -529,6 +529,15 @@ pub enum Targets {
     /// The same guarded walk with native Montgomery additions on supported
     /// single-word prime curves.
     WalkPrimeFast,
+    /// Synchronized independent prime walks, with ordinary additions done
+    /// separately.  The paired reference for the batch variants.
+    WalkPrimeSerial4,
+    WalkPrimeSerial8,
+    WalkPrimeSerial16,
+    /// The same lane schedule with Montgomery batch inversion.
+    WalkPrimeBatch4,
+    WalkPrimeBatch8,
+    WalkPrimeBatch16,
     /// Residual matching (lead L3): the walk subtracts a base point at
     /// every step and relations come from collisions of the residuals;
     /// the oracle is not consulted.  See `ic_framework::residual`.
@@ -541,6 +550,12 @@ impl Targets {
             Targets::Random => "random",
             Targets::Walk => "walk",
             Targets::WalkPrimeFast => "walk-prime-fast",
+            Targets::WalkPrimeSerial4 => "walk-prime-serial-4",
+            Targets::WalkPrimeSerial8 => "walk-prime-serial-8",
+            Targets::WalkPrimeSerial16 => "walk-prime-serial-16",
+            Targets::WalkPrimeBatch4 => "walk-prime-batch-4",
+            Targets::WalkPrimeBatch8 => "walk-prime-batch-8",
+            Targets::WalkPrimeBatch16 => "walk-prime-batch-16",
             Targets::Residual => "residual",
         }
     }
@@ -550,9 +565,15 @@ impl Targets {
             "random" => Ok(Targets::Random),
             "walk" => Ok(Targets::Walk),
             "walk-prime-fast" => Ok(Targets::WalkPrimeFast),
+            "walk-prime-serial-4" => Ok(Targets::WalkPrimeSerial4),
+            "walk-prime-serial-8" => Ok(Targets::WalkPrimeSerial8),
+            "walk-prime-serial-16" => Ok(Targets::WalkPrimeSerial16),
+            "walk-prime-batch-4" => Ok(Targets::WalkPrimeBatch4),
+            "walk-prime-batch-8" => Ok(Targets::WalkPrimeBatch8),
+            "walk-prime-batch-16" => Ok(Targets::WalkPrimeBatch16),
             "residual" => Ok(Targets::Residual),
             other => Err(format!(
-                "unknown target source `{other}`; try random, walk, walk-prime-fast or residual"
+                "unknown target source `{other}`; try random, walk, walk-prime-fast, walk-prime-serial-4/8/16, walk-prime-batch-4/8/16 or residual"
             )),
         }
     }

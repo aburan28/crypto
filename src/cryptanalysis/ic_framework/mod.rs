@@ -356,9 +356,20 @@ pub fn run_pipeline<G: CountedGroup>(
         Targets::Random => TargetSource::Random,
         Targets::Walk | Targets::Residual => TargetSource::Walk,
         Targets::WalkPrimeFast => TargetSource::WalkPrimeFast,
+        Targets::WalkPrimeSerial4 => TargetSource::WalkPrimeLanes { lanes: 4, batched: false },
+        Targets::WalkPrimeSerial8 => TargetSource::WalkPrimeLanes { lanes: 8, batched: false },
+        Targets::WalkPrimeSerial16 => TargetSource::WalkPrimeLanes { lanes: 16, batched: false },
+        Targets::WalkPrimeBatch4 => TargetSource::WalkPrimeLanes { lanes: 4, batched: true },
+        Targets::WalkPrimeBatch8 => TargetSource::WalkPrimeLanes { lanes: 8, batched: true },
+        Targets::WalkPrimeBatch16 => TargetSource::WalkPrimeLanes { lanes: 16, batched: true },
     };
-    if spec.targets == Targets::WalkPrimeFast && ctx.group.native_walk_adder().is_none() {
+    if matches!(spec.targets, Targets::WalkPrimeFast) && ctx.group.native_walk_adder().is_none() {
         return Err("walk-prime-fast requires a prime curve with p < 2^62".into());
+    }
+    if matches!(source, TargetSource::WalkPrimeLanes { .. })
+        && !ctx.group.supports_native_lane_walk()
+    {
+        return Err("walk-prime-serial/batch requires a prime curve with p < 2^62".into());
     }
     measurement::begin_online(measurement::Phase::TargetQuery);
     let checked_full_rank = linalg_name == "incremental-gauss-full-rank-checked";

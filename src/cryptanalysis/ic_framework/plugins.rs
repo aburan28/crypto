@@ -52,7 +52,7 @@ use crate::cryptanalysis::gls_fp2::{gls_line_base, Fp2Curve, Fp2Point, GlsInstan
 use crate::cryptanalysis::glv_invariant_base::{glv_orbit_base, AutomorphismGroup};
 use crate::cryptanalysis::ic_boundary::{
     binary_subspace_factor_base, decompose_mitm, decompose_mitm_frobenius, koblitz_factor_base,
-    prime_factor_base, BinaryGroup, BinaryInstance, ColumnFold, CountedGroup, FactorBase,
+    prime_factor_base, prime_factor_base_strided, BinaryGroup, BinaryInstance, ColumnFold, CountedGroup, FactorBase,
     FrobeniusPairTable, GroupOps, OracleCounters, PairTable, PrimeCurve, PrimeInstance, PrimePoint,
     Relation,
 };
@@ -82,17 +82,23 @@ impl FactorBaseBuilder<PrimeCurve> for PrimeAbscissaBase<'_> {
     }
 
     fn describe(&self, params: &Params) -> String {
-        format!(
-            "the {} smallest abscissae carrying a point, one column each",
-            params.get("size").unwrap_or("?")
-        )
+        match params.get("stride") {
+            None | Some("1") => format!(
+                "the {} smallest abscissae carrying a point, one column each",
+                params.get("size").unwrap_or("?")
+            ),
+            Some(stride) => format!(
+                "{} abscissae carrying a point, scanned at stride {stride} modulo p, one column each",
+                params.get("size").unwrap_or("?")
+            ),
+        }
     }
 
     fn parameters(&self) -> &[(&str, &str)] {
-        &[(
-            "size",
-            "abscissae in the base; the family optimum is about #E^(1/3)",
-        )]
+        &[
+            ("size", "abscissae in the base; the family optimum is about #E^(1/3)"),
+            ("stride", "fixed nonzero abscissa stride modulo p; default 1"),
+        ]
     }
 
     fn build(
@@ -105,7 +111,17 @@ impl FactorBaseBuilder<PrimeCurve> for PrimeAbscissaBase<'_> {
         if size == 0 {
             return Err("factor base size must be positive".into());
         }
-        Ok(prime_factor_base(self.instance, size))
+        let stride = params.get("stride").map_or(Ok(1u64), |s| {
+            s.parse::<u64>().map_err(|_| "stride must be an unsigned integer".to_string())
+        })?;
+        if stride == 0 || stride >= self.instance.curve.p {
+            return Err("stride must lie in 1..p".into());
+        }
+        if stride == 1 {
+            Ok(prime_factor_base(self.instance, size))
+        } else {
+            Ok(prime_factor_base_strided(self.instance, size, stride))
+        }
     }
 }
 
