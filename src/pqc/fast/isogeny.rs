@@ -468,9 +468,15 @@ pub struct Fp2 {
 
 impl Fp2 {
     /// Additive identity.
-    pub const ZERO: Fp2 = Fp2 { re: Fp::ZERO, im: Fp::ZERO };
+    pub const ZERO: Fp2 = Fp2 {
+        re: Fp::ZERO,
+        im: Fp::ZERO,
+    };
     /// Multiplicative identity.
-    pub const ONE: Fp2 = Fp2 { re: Fp::ONE, im: Fp::ZERO };
+    pub const ONE: Fp2 = Fp2 {
+        re: Fp::ONE,
+        im: Fp::ZERO,
+    };
 
     /// `re + im*i`.
     #[inline(always)]
@@ -481,31 +487,46 @@ impl Fp2 {
     /// The image of `v` under `F_p -> F_p^2`.
     #[inline(always)]
     pub fn from_u64(v: u64) -> Fp2 {
-        Fp2 { re: Fp::from_u64(v), im: Fp::ZERO }
+        Fp2 {
+            re: Fp::from_u64(v),
+            im: Fp::ZERO,
+        }
     }
 
     /// Componentwise addition.
     #[inline(always)]
     pub fn add(&self, o: &Fp2) -> Fp2 {
-        Fp2 { re: self.re.add(&o.re), im: self.im.add(&o.im) }
+        Fp2 {
+            re: self.re.add(&o.re),
+            im: self.im.add(&o.im),
+        }
     }
 
     /// Componentwise subtraction.
     #[inline(always)]
     pub fn sub(&self, o: &Fp2) -> Fp2 {
-        Fp2 { re: self.re.sub(&o.re), im: self.im.sub(&o.im) }
+        Fp2 {
+            re: self.re.sub(&o.re),
+            im: self.im.sub(&o.im),
+        }
     }
 
     /// Componentwise negation.
     #[inline(always)]
     pub fn neg(&self) -> Fp2 {
-        Fp2 { re: self.re.neg(), im: self.im.neg() }
+        Fp2 {
+            re: self.re.neg(),
+            im: self.im.neg(),
+        }
     }
 
     /// `2a`.
     #[inline(always)]
     pub fn double(&self) -> Fp2 {
-        Fp2 { re: self.re.double(), im: self.im.double() }
+        Fp2 {
+            re: self.re.double(),
+            im: self.im.double(),
+        }
     }
 
     /// Multiplication by Karatsuba: **three** `F_p` multiplications, not four.
@@ -524,7 +545,10 @@ impl Fp2 {
         let v0 = self.re.mul(&o.re);
         let v1 = self.im.mul(&o.im);
         let s = self.re.add(&self.im).mul(&o.re.add(&o.im));
-        Fp2 { re: v0.sub(&v1), im: s.sub(&v0).sub(&v1) }
+        Fp2 {
+            re: v0.sub(&v1),
+            im: s.sub(&v0).sub(&v1),
+        }
     }
 
     /// Squaring: **two** `F_p` multiplications.
@@ -547,7 +571,10 @@ impl Fp2 {
     /// `a * b` where `b` lies in the base field.
     #[inline(always)]
     pub fn mul_fp(&self, o: &Fp) -> Fp2 {
-        Fp2 { re: self.re.mul(o), im: self.im.mul(o) }
+        Fp2 {
+            re: self.re.mul(o),
+            im: self.im.mul(o),
+        }
     }
 
     /// The norm `N(a) = a * conj(a) = a0^2 + a1^2`, an element of `F_p`.
@@ -563,7 +590,10 @@ impl Fp2 {
     /// the base field instead of the extension.
     pub fn inv(&self) -> Fp2 {
         let n = self.norm().inv();
-        Fp2 { re: self.re.mul(&n), im: self.im.mul(&n).neg() }
+        Fp2 {
+            re: self.re.mul(&n),
+            im: self.im.mul(&n).neg(),
+        }
     }
 
     /// Is this the zero element?
@@ -595,8 +625,14 @@ impl Fp2 {
             // a is in F_p: either sqrt(a0) is in F_p, or sqrt(-a0) is and the
             // root is i*sqrt(-a0).
             return match self.re.sqrt() {
-                Some(r) => Some(Fp2 { re: r, im: Fp::ZERO }),
-                None => self.re.neg().sqrt().map(|r| Fp2 { re: Fp::ZERO, im: r }),
+                Some(r) => Some(Fp2 {
+                    re: r,
+                    im: Fp::ZERO,
+                }),
+                None => self.re.neg().sqrt().map(|r| Fp2 {
+                    re: Fp::ZERO,
+                    im: r,
+                }),
             };
         }
         let s = self.norm().sqrt()?;
@@ -642,7 +678,10 @@ pub struct PointX {
 
 impl PointX {
     /// The point at infinity, `(1 : 0)`.
-    pub const INFINITY: PointX = PointX { x: Fp2::ONE, z: Fp2::ZERO };
+    pub const INFINITY: PointX = PointX {
+        x: Fp2::ONE,
+        z: Fp2::ZERO,
+    };
 
     /// `(x : 1)`.
     pub fn from_affine(x: Fp2) -> PointX {
@@ -712,7 +751,10 @@ pub struct Curve {
 impl Curve {
     /// The curve `y^2 = x^3 + A x^2 + x`, i.e. `C = 1`.
     pub fn from_a(a: Fp2) -> Curve {
-        Curve { a24plus: a.add(&Fp2::from_u64(2)), c24: Fp2::from_u64(4) }
+        Curve {
+            a24plus: a.add(&Fp2::from_u64(2)),
+            c24: Fp2::from_u64(4),
+        }
     }
 
     /// The projective coefficient pair `(A : C)`.
@@ -761,7 +803,7 @@ impl Curve {
         let t = a2.sub(&c2.add(&c2).add(&c2)); // A^2 - 3C^2
         let num = t.sqr().mul(&t); // (A^2 - 3C^2)^3
         let den = c4.mul(&a2.sub(&c2.double().double())); // C^4 (A^2 - 4C^2)
-        // 256 * num / den
+                                                          // 256 * num / den
         let mut n = num;
         for _ in 0..8 {
             n = n.double();
@@ -852,7 +894,10 @@ pub fn xadd(p: &PointX, q: &PointX, pmq: &PointX) -> PointX {
     let t1 = t1.mul(&t2);
     let t2 = t0.add(&t1);
     let t3 = t0.sub(&t1);
-    PointX { x: pmq.z.mul(&t2.sqr()), z: pmq.x.mul(&t3.sqr()) }
+    PointX {
+        x: pmq.z.mul(&t2.sqr()),
+        z: pmq.x.mul(&t3.sqr()),
+    }
 }
 
 /// Simultaneous `x(2P)` and `x(P+Q)`, sharing the `(X±Z)` sub-expressions.
@@ -971,8 +1016,17 @@ pub fn isog2_codomain(k: &PointX) -> Option<(Curve, Kps2)> {
     }
     let x2 = k.x.sqr();
     let z2 = k.z.sqr();
-    let curve = Curve { a24plus: z2.sub(&x2), c24: z2 };
-    Some((curve, Kps2 { plus: k.x.add(&k.z), minus: k.x.sub(&k.z) }))
+    let curve = Curve {
+        a24plus: z2.sub(&x2),
+        c24: z2,
+    };
+    Some((
+        curve,
+        Kps2 {
+            plus: k.x.add(&k.z),
+            minus: k.x.sub(&k.z),
+        },
+    ))
 }
 
 /// Push a point through the 2-isogeny described by `kps`.
@@ -991,7 +1045,10 @@ pub fn isog2_eval(q: &PointX, kps: &Kps2) -> PointX {
     let t1 = q.x.sub(&q.z);
     let t2 = kps.plus.mul(&t1);
     let t3 = kps.minus.mul(&t0);
-    PointX { x: q.x.mul(&t2.add(&t3)), z: q.z.mul(&t2.sub(&t3)) }
+    PointX {
+        x: q.x.mul(&t2.add(&t3)),
+        z: q.z.mul(&t2.sub(&t3)),
+    }
 }
 
 /// Codomain of the 4-isogeny with kernel `<K>`, `K = (X4 : Z4)` of order 4.
@@ -1019,8 +1076,15 @@ pub fn isog4_codomain(k: &PointX) -> (Curve, Kps4) {
     let t2 = k.z.sqr();
     let t3 = t2.add(&t1);
     let t4 = t2.sub(&t1);
-    let curve = Curve { a24plus: t3.mul(&t4), c24: t2.sqr() };
-    let kps = Kps4 { k0: t2.double().double(), k1: k.x.sub(&k.z), k2: k.x.add(&k.z) };
+    let curve = Curve {
+        a24plus: t3.mul(&t4),
+        c24: t2.sqr(),
+    };
+    let kps = Kps4 {
+        k0: t2.double().double(),
+        k1: k.x.sub(&k.z),
+        k2: k.x.add(&k.z),
+    };
     (curve, kps)
 }
 
@@ -1053,7 +1117,10 @@ pub fn isog4_eval(q: &PointX, kps: &Kps4) -> PointX {
     rz = rz.sqr();
     rx = t0.add(&t1);
     let t0 = t0.sub(&rz);
-    PointX { x: rx.mul(&t1), z: rz.mul(&t0) }
+    PointX {
+        x: rx.mul(&t1),
+        z: rz.mul(&t0),
+    }
 }
 
 // ─── chains ─────────────────────────────────────────────────────────────────
@@ -1313,7 +1380,10 @@ mod tests {
             }
         }
         fn fp2(&mut self) -> Fp2 {
-            Fp2 { re: self.fp(), im: self.fp() }
+            Fp2 {
+                re: self.fp(),
+                im: self.fp(),
+            }
         }
     }
 
@@ -1402,13 +1472,20 @@ mod tests {
         // p' = 1; checking the congruence is the whole argument.
         let r64 = BigUint::one() << 64u32;
         assert_eq!(&p % &r64, &r64 - BigUint::one(), "p is not -1 mod 2^64");
-        assert_eq!((&p * (&r64 - BigUint::one())) % &r64, BigUint::one(), "p * -1 != 1");
+        assert_eq!(
+            (&p * (&r64 - BigUint::one())) % &r64,
+            BigUint::one(),
+            "p * -1 != 1"
+        );
         // R and R^2.
         let r = BigUint::one() << (64 * NLIMBS as u32);
         assert_eq!(limbs_to_big(&R_MOD_P), &r % &p);
         assert_eq!(limbs_to_big(&R2_MOD_P), (&r * &r) % &p);
         assert_eq!(limbs_to_big(&P_PLUS_1), &p + BigUint::one());
-        assert_eq!(limbs_to_big(&P_PLUS_1), BigUint::from(3u32) << TWO_TORSION_POWER as u32);
+        assert_eq!(
+            limbs_to_big(&P_PLUS_1),
+            BigUint::from(3u32) << TWO_TORSION_POWER as u32
+        );
     }
 
     // ── F_p against num-bigint ──────────────────────────────────────────────
@@ -1493,7 +1570,10 @@ mod tests {
         }
         // Half of F_p* is non-square; seeing none would mean the criterion is
         // broken in the direction the assertions above cannot see.
-        assert!(nonsquares > 100, "suspiciously few non-squares: {nonsquares}");
+        assert!(
+            nonsquares > 100,
+            "suspiciously few non-squares: {nonsquares}"
+        );
     }
 
     // ── F_p^2 against num-bigint ────────────────────────────────────────────
@@ -1535,7 +1615,10 @@ mod tests {
                 assert_eq!(a.mul(&a.inv()), Fp2::ONE, "a * a^-1 == 1");
             }
             // i^2 == -1, the defining relation of the basis.
-            let i = Fp2 { re: Fp::ZERO, im: Fp::ONE };
+            let i = Fp2 {
+                re: Fp::ZERO,
+                im: Fp::ONE,
+            };
             assert_eq!(i.sqr(), Fp2::ONE.neg(), "i^2 == -1");
         }
     }
@@ -1556,7 +1639,10 @@ mod tests {
                 assert!(a.sqrt().is_none(), "non-squares have no root");
             }
         }
-        assert!(nonsquares > 60, "suspiciously few non-squares: {nonsquares}");
+        assert!(
+            nonsquares > 60,
+            "suspiciously few non-squares: {nonsquares}"
+        );
     }
 
     // ── curve arithmetic ────────────────────────────────────────────────────
@@ -1800,7 +1886,10 @@ mod tests {
             let r3 = order_three_point(&mut rng, &curve, &a24);
             let r3i = isog2_eval(&r3, &kps);
             assert!(!r3i.is_infinity(), "order-3 point killed by a 2-isogeny");
-            assert!(ladder(&[3], 8, &r3i, &a24i).is_infinity(), "order 3 not preserved");
+            assert!(
+                ladder(&[3], 8, &r3i, &a24i).is_infinity(),
+                "order 3 not preserved"
+            );
         }
     }
 
@@ -1840,14 +1929,20 @@ mod tests {
             assert!(phi2(&mid.j_invariant(), &img2.j_invariant()).is_zero());
 
             // the kernel dies, images live on the codomain
-            assert!(isog4_eval(&k4, &kps4).is_infinity(), "4-isogeny kernel not killed");
+            assert!(
+                isog4_eval(&k4, &kps4).is_infinity(),
+                "4-isogeny kernel not killed"
+            );
             assert!(img4.is_on_curve(&t4), "4-isogeny image off the codomain");
             assert!(img2.is_on_curve(&t2), "2+2 image off the codomain");
 
             // The two models differ by x |-> -x, so the images must match up
             // to that sign.
             let (x4, x2) = (t4.affine_x().unwrap(), t2.affine_x().unwrap());
-            assert!(x4 == x2 || x4 == x2.neg(), "images differ by more than the model");
+            assert!(
+                x4 == x2 || x4 == x2.neg(),
+                "images differ by more than the model"
+            );
         }
     }
 
@@ -1874,7 +1969,10 @@ mod tests {
             // (push-then-double vs double-then-push), so they land on the same
             // curve with different projective scalings.  Compare the curve,
             // not the representative.
-            assert!(ca.same_curve(&cb), "strategy and naive codomains differ at n={n}");
+            assert!(
+                ca.same_curve(&cb),
+                "strategy and naive codomains differ at n={n}"
+            );
             assert_eq!(
                 ca.j_invariant(),
                 cb.j_invariant(),
@@ -1883,7 +1981,10 @@ mod tests {
             assert!(a[0].is_infinity(), "kernel not killed at n={n}");
             assert!(b[0].is_infinity(), "kernel not killed at n={n} (naive)");
             assert!(a[1].same_x(&b[1]), "pushed point differs at n={n}");
-            assert!(ca.is_on_curve(&a[1]), "pushed point off the codomain at n={n}");
+            assert!(
+                ca.is_on_curve(&a[1]),
+                "pushed point off the codomain at n={n}"
+            );
         }
     }
 
@@ -1899,16 +2000,22 @@ mod tests {
         let r3 = order_three_point(&mut rng, &curve, &a24);
 
         let mut push = [t, r3];
-        let img = two_isogeny_chain(&curve, &t, TWO_TORSION_POWER, &mut push)
-            .expect("generic kernel");
+        let img =
+            two_isogeny_chain(&curve, &t, TWO_TORSION_POWER, &mut push).expect("generic kernel");
 
         // (1) the kernel generator maps to the identity.
-        assert!(push[0].is_infinity(), "kernel of the 2^324-isogeny survived");
+        assert!(
+            push[0].is_infinity(),
+            "kernel of the 2^324-isogeny survived"
+        );
 
         // (2) the order-3 point keeps order exactly 3.
         let a24i = img.normalised_a24();
         assert!(!push[1].is_infinity(), "order-3 point was killed");
-        assert!(ladder(&[3], 8, &push[1], &a24i).is_infinity(), "order is no longer 3");
+        assert!(
+            ladder(&[3], 8, &push[1], &a24i).is_infinity(),
+            "order is no longer 3"
+        );
         assert!(img.is_on_curve(&push[1]), "image off the codomain");
 
         // (3) the codomain is still supersingular with the same group order.
@@ -1924,8 +2031,14 @@ mod tests {
         let img_odd = two_isogeny_chain(&curve, &k323, TWO_TORSION_POWER - 1, &mut push2)
             .expect("generic kernel");
         // <t2> meets the kernel in index 2, so the image of t2 has order 2.
-        assert!(!push2[0].is_infinity(), "a 2^323-isogeny should not kill a 2^324 point");
+        assert!(
+            !push2[0].is_infinity(),
+            "a 2^323-isogeny should not kill a 2^324 point"
+        );
         let a24o = img_odd.normalised_a24();
-        assert!(xdbl_a24(&push2[0], &a24o).is_infinity(), "image should have order 2");
+        assert!(
+            xdbl_a24(&push2[0], &a24o).is_infinity(),
+            "image should have order 2"
+        );
     }
 }

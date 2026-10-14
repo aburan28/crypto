@@ -256,7 +256,11 @@ struct Report {
     total_wall_s: f64,
 }
 
-fn build_base(inst: &BinaryInstance, columns: usize, raw_x_cap: u64) -> Result<FactorBase<FastPoint>, String> {
+fn build_base(
+    inst: &BinaryInstance,
+    columns: usize,
+    raw_x_cap: u64,
+) -> Result<FactorBase<FastPoint>, String> {
     let group = BinaryGroup(&inst.fast);
     let ctx = InstanceCtx {
         group: &group,
@@ -357,7 +361,10 @@ fn main() {
                     deadline: Some(deadline),
                 };
                 let mut rng = StdRng::seed_from_u64(
-                    args.seed ^ ((n as u64) << 40) ^ ((columns as u64) << 20) ^ kernel.arity() as u64,
+                    args.seed
+                        ^ ((n as u64) << 40)
+                        ^ ((columns as u64) << 20)
+                        ^ kernel.arity() as u64,
                 );
                 let mut relations = 0u64;
                 let mut full_support = 0u64;
@@ -405,8 +412,15 @@ fn main() {
                         }
                     }
                     t += 1;
-                    if end == ScanEnd::Budget && (ctr.s3_solves >= args.max_s3 || ctr.s4_solves >= args.max_s4) {
-                        stop_reason = if ctr.s3_solves >= args.max_s3 { "max_s3" } else { "max_s4" }.to_string();
+                    if end == ScanEnd::Budget
+                        && (ctr.s3_solves >= args.max_s3 || ctr.s4_solves >= args.max_s4)
+                    {
+                        stop_reason = if ctr.s3_solves >= args.max_s3 {
+                            "max_s3"
+                        } else {
+                            "max_s4"
+                        }
+                        .to_string();
                         break;
                     }
                 }
@@ -424,7 +438,12 @@ fn main() {
                 // one scan unit, dense solves/relation).
                 let (structural_outer, scan_solves, unit_lambda, dense) = match kernel {
                     // One target scan; it has a 4-sum with rate λ₄.
-                    Kernel::FourSum => (rf / (4.0 * abs_states), abs_states, lambda4, rf / (4.0 * abs_states)),
+                    Kernel::FourSum => (
+                        rf / (4.0 * abs_states),
+                        abs_states,
+                        lambda4,
+                        rf / (4.0 * abs_states),
+                    ),
                     // One inner 4-sum scan of R − s₁ per outer probe.
                     Kernel::IterateTable => (
                         rf / (4.0 * abs_states * abs_states),
@@ -457,7 +476,11 @@ fn main() {
                 };
                 let structural_targets = 1.0 / (1.0 - (-rel_per_target).exp());
                 let sparse = scan_solves / unit_lambda;
-                let mu = if kernel == Kernel::S4Strided { 45.0 } else { 6.0 };
+                let mu = if kernel == Kernel::S4Strided {
+                    45.0
+                } else {
+                    6.0
+                };
                 let interp = scan_solves
                     * ((-unit_lambda).exp() / (1.0 - (-unit_lambda).exp())
                         + 1.0 / (mu * unit_lambda + 1.0));
@@ -530,14 +553,21 @@ fn main() {
     argmap.insert("columns".into(), format!("{:?}", args.columns));
     argmap.insert(
         "kernels".into(),
-        args.kernels.iter().map(|k| k.name()).collect::<Vec<_>>().join(","),
+        args.kernels
+            .iter()
+            .map(|k| k.name())
+            .collect::<Vec<_>>()
+            .join(","),
     );
     argmap.insert("relations".into(), args.relations.to_string());
     argmap.insert("seed".into(), args.seed.to_string());
     argmap.insert("max_targets".into(), args.max_targets.to_string());
     argmap.insert("max_s3".into(), args.max_s3.to_string());
     argmap.insert("max_s4".into(), args.max_s4.to_string());
-    argmap.insert("cell_wall_s".into(), args.cell_wall.as_secs_f64().to_string());
+    argmap.insert(
+        "cell_wall_s".into(),
+        args.cell_wall.as_secs_f64().to_string(),
+    );
     argmap.insert("early_abort".into(), args.early_abort.to_string());
     argmap.insert("raw_x_cap".into(), args.raw_x_cap.to_string());
     let report = Report {

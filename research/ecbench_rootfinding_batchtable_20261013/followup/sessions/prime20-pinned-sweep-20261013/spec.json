@@ -1,0 +1,22 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Prime target-pinned relation collection and root-finding sweep",
+  "description": "Cold paired public-target comparison of completion rule, factor-base size, and subtraction oracle with exact answer verification.",
+  "workloads": {
+    "curves": [{"kind": "prime_search", "bits": 20, "seed": 59297}],
+    "target_kind": "public",
+    "targets_per_curve": 8,
+    "target_seed": 20261016
+  },
+  "arms": [
+    {"name": "rho-neg", "role": "reference", "method": {"id": "rho.negation"}},
+    {"name": "b64-full", "role": "baseline", "method": {"id": "ic.pipeline", "params": {"factor_base": "prime-abscissa:size=64", "oracle": "mitm-prime-batch:m=2", "linalg": "incremental-gauss-full-rank-checked", "max_trials": "5000000"}}},
+    {"name": "b40-pin", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "prime-abscissa:size=40", "oracle": "mitm-prime-batch:m=2", "linalg": "incremental-gauss", "max_trials": "5000000"}}},
+    {"name": "b48-pin", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "prime-abscissa:size=48", "oracle": "mitm-prime-batch:m=2", "linalg": "incremental-gauss", "max_trials": "5000000"}}},
+    {"name": "b64-pin", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "prime-abscissa:size=64", "oracle": "mitm-prime-batch:m=2", "linalg": "incremental-gauss", "max_trials": "5000000"}}},
+    {"name": "b80-pin", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "prime-abscissa:size=80", "oracle": "mitm-prime-batch:m=2", "linalg": "incremental-gauss", "max_trials": "5000000"}}},
+    {"name": "b64-subtract", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "prime-abscissa:size=64", "oracle": "rootfind-subtract:m=2", "linalg": "incremental-gauss", "max_trials": "5000000"}}},
+    {"name": "rho-neg-aa", "role": "control", "method": {"id": "rho.negation"}}
+  ],
+  "measurement": {"rounds": 3, "warmup": 1, "order": "alternate", "seed": 20261016, "isolation_required": "L2", "timeout_seconds": 120}
+}

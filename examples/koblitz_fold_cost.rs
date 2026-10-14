@@ -88,7 +88,7 @@ fn main() {
         let sqr_shift = |a: u64| -> u64 {
             // spread the bits, then fold the high half down by the
             // irreducible's low terms: z^n ≡ Σ z^t.
-            let lo = spread32(a) ;
+            let lo = spread32(a);
             let hi = spread32(a >> 32);
             let mut w = (lo as u128) | ((hi as u128) << 64);
             for _ in 0..2 {

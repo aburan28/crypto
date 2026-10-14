@@ -48,8 +48,7 @@ use super::koblitz_groebner::{
 };
 use super::koblitz_index_calculus::{
     build_explicit_frobenius_orbit_factor_base, cofactor_project_factor_base, lift_candidate,
-    order_of_2_mod_n, point_key, restrict_factor_base_to_orbits, FrobeniusFactorBase,
-    KoblitzCurve,
+    order_of_2_mod_n, point_key, restrict_factor_base_to_orbits, FrobeniusFactorBase, KoblitzCurve,
 };
 use super::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
 
@@ -57,7 +56,7 @@ use super::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
 
 /// Why a degree does not carry the construction.
 fn check_degree(n: u32) -> Result<u32, String> {
-    if n < 3 || n > 62 {
+    if !(3..=62).contains(&n) {
         return Err(format!("degree {n} outside the single-word range 3..=62"));
     }
     let p = 2 * n + 1;
@@ -79,7 +78,7 @@ fn is_prime_u32(v: u32) -> bool {
     }
     let mut d = 2u32;
     while d * d <= v {
-        if v % d == 0 {
+        if v.is_multiple_of(d) {
             return false;
         }
         d += 1;
@@ -175,7 +174,7 @@ impl CyclotomicField {
             return Err("irreducible polynomial degree does not match n".into());
         }
         let group_order = (1u64 << n) - 1;
-        if group_order % p as u64 != 0 {
+        if !group_order.is_multiple_of(p as u64) {
             return Err(format!("{p} does not divide 2^{n} − 1"));
         }
         let exponent = group_order / p as u64;
@@ -183,7 +182,11 @@ impl CyclotomicField {
         // word so the construction is canonical for the field.
         let mut gamma = None;
         for g in 2..(1u64 << n) {
-            let candidate = pow(&F2mElement::from_biguint(&BigUint::from(g), n), exponent, irr);
+            let candidate = pow(
+                &F2mElement::from_biguint(&BigUint::from(g), n),
+                exponent,
+                irr,
+            );
             if candidate != F2mElement::one(n) && !candidate.is_zero() {
                 let mut least = candidate.clone();
                 let mut current = candidate.clone();
@@ -263,7 +266,10 @@ impl CyclotomicField {
             return Err(format!("weight {w} outside 1..={}", atoms.len()));
         }
         if count > 4_000_000 {
-            return Err(format!("C({}, {w}) = {count} subsets is above the 4·10⁶ cap", atoms.len()));
+            return Err(format!(
+                "C({}, {w}) = {count} subsets is above the 4·10⁶ cap",
+                atoms.len()
+            ));
         }
         let mut out: BTreeMap<u64, F2mElement> = BTreeMap::new();
         for_each_subset(atoms.len(), w, |subset| {
@@ -279,7 +285,8 @@ impl CyclotomicField {
     /// Whether the set is closed under `x ↦ x²`.
     pub fn is_frobenius_stable(&self, set: &[F2mElement]) -> bool {
         let members: HashSet<u64> = set.iter().map(word).collect();
-        set.iter().all(|x| members.contains(&word(&x.square(&self.irr))))
+        set.iter()
+            .all(|x| members.contains(&word(&x.square(&self.irr))))
     }
 
     /// The `n` Boolean coordinate equations of `z^p + 1 = 0` for a symbolic
@@ -689,15 +696,12 @@ pub fn build_membership_system(
                 let offset = i * nn;
                 summands.push(SymElement::from_subspace_vars(&cf.onb, offset, n, n_vars));
                 // Every (w+1)-product vanishes: HW ≤ w.
-                if w + 1 <= nn {
+                if w < nn {
                     for_each_subset(nn, w + 1, |subset| {
                         let mask = subset
                             .iter()
                             .fold(0u64, |acc, &t| acc | (1u64 << (offset + t)));
-                        equations.push(F2BoolPoly::from_monos(
-                            vec![F2BoolMono { mask }],
-                            n_vars,
-                        ));
+                        equations.push(F2BoolPoly::from_monos(vec![F2BoolMono { mask }], n_vars));
                         membership_equations += 1;
                     });
                 }
@@ -893,7 +897,10 @@ mod tests {
         assert!(have.contains(&11) && have.contains(&23));
         for &n in &have {
             let p = 2 * n + 1;
-            assert!(((1u64 << n) - 1) % p as u64 == 0, "μ_{p} ⊂ F_2^{n}");
+            assert!(
+                ((1u64 << n) - 1).is_multiple_of(p as u64),
+                "μ_{p} ⊂ F_2^{n}"
+            );
         }
     }
 
@@ -928,9 +935,19 @@ mod tests {
         // element, while no γ^k is an ONB basis element (and
         // γ^0 = 1 = Σ β_i has full ONB weight).
         let one = cf.gamma_weight_set(1).expect("μ_23");
-        let two: HashSet<u64> = cf.gamma_weight_set(2).expect("C_2").iter().map(word).collect();
+        let two: HashSet<u64> = cf
+            .gamma_weight_set(2)
+            .expect("C_2")
+            .iter()
+            .map(word)
+            .collect();
         assert_eq!(cf.onb_coordinates(&F2mElement::one(11)).count_ones(), 11);
-        assert_eq!(one.iter().filter(|x| cf.onb_coordinates(x).count_ones() == 1).count(), 0);
+        assert_eq!(
+            one.iter()
+                .filter(|x| cf.onb_coordinates(x).count_ones() == 1)
+                .count(),
+            0
+        );
         for beta in &cf.onb {
             assert!(two.contains(&word(beta)), "β_i ∈ C_2");
         }
@@ -1023,7 +1040,12 @@ mod tests {
         let eqs = cf.unity_membership(&z, &st);
         assert_eq!(eqs.len(), 11);
         assert_eq!(system_degree(&eqs), 4, "23 = 16 + 4 + 2 + 1");
-        let members: HashSet<u64> = cf.gamma_weight_set(1).expect("μ_23").iter().map(word).collect();
+        let members: HashSet<u64> = cf
+            .gamma_weight_set(1)
+            .expect("μ_23")
+            .iter()
+            .map(word)
+            .collect();
         assert_eq!(members.len(), 23);
         let mut satisfied = 0;
         for x in 0..(1u64 << 11) {
@@ -1086,7 +1108,10 @@ mod tests {
             for root in roots {
                 for i in 0..2 {
                     let x = sys.summand_x(root, i, 11);
-                    assert!(allowed.contains(&word(&x)), "{encoding:?} root leaves the set");
+                    assert!(
+                        allowed.contains(&word(&x)),
+                        "{encoding:?} root leaves the set"
+                    );
                 }
             }
         }

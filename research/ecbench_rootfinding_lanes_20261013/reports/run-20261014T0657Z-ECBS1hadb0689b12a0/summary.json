@@ -1,0 +1,122 @@
+{
+  "b40-batch-8": {
+    "n": 24,
+    "verified": 24,
+    "gae_mean": 8356.75,
+    "gae_min": 4840.0,
+    "gae_max": 10849.0,
+    "lookups": 112450,
+    "relations": 637,
+    "relations_per_1000_lookups": 5.664739884393064,
+    "field_ops_serialized": false,
+    "isolation_levels": [
+      "L0"
+    ],
+    "rss_kib_max": 31232
+  },
+  "b44-batch-8": {
+    "n": 24,
+    "verified": 24,
+    "gae_mean": 8290.208333333334,
+    "gae_min": 5181.0,
+    "gae_max": 10932.0,
+    "lookups": 103516,
+    "relations": 708,
+    "relations_per_1000_lookups": 6.839522392673596,
+    "field_ops_serialized": false,
+    "isolation_levels": [
+      "L0"
+    ],
+    "rss_kib_max": 31152
+  },
+  "b48-batch-8": {
+    "n": 24,
+    "verified": 24,
+    "gae_mean": 8328.291666666666,
+    "gae_min": 4562.0,
+    "gae_max": 10789.0,
+    "lookups": 96568,
+    "relations": 770,
+    "relations_per_1000_lookups": 7.973655869439152,
+    "field_ops_serialized": false,
+    "isolation_levels": [
+      "L0"
+    ],
+    "rss_kib_max": 31232
+  },
+  "b52-batch-8": {
+    "n": 24,
+    "verified": 24,
+    "gae_mean": 8283.75,
+    "gae_min": 4966.0,
+    "gae_max": 10364.0,
+    "lookups": 87542,
+    "relations": 833,
+    "relations_per_1000_lookups": 9.515432592355669,
+    "field_ops_serialized": false,
+    "isolation_levels": [
+      "L0"
+    ],
+    "rss_kib_max": 31216
+  },
+  "b56-batch-8": {
+    "n": 24,
+    "verified": 24,
+    "gae_mean": 8151.708333333333,
+    "gae_min": 5402.0,
+    "gae_max": 10452.0,
+    "lookups": 76615,
+    "relations": 870,
+    "relations_per_1000_lookups": 11.355478692162109,
+    "field_ops_serialized": false,
+    "isolation_levels": [
+      "L0"
+    ],
+    "rss_kib_max": 31200
+  },
+  "b64-batch-8": {
+    "n": 24,
+    "verified": 24,
+    "gae_mean": 8764.125,
+    "gae_min": 6372.0,
+    "gae_max": 10697.0,
+    "lookups": 69581,
+    "relations": 1036,
+    "relations_per_1000_lookups": 14.889122030439344,
+    "field_ops_serialized": false,
+    "isolation_levels": [
+      "L0"
+    ],
+    "rss_kib_max": 31392
+  },
+  "rho-neg": {
+    "n": 24,
+    "verified": 24,
+    "gae_mean": 1046.7083333333333,
+    "gae_min": 410.0,
+    "gae_max": 2297.0,
+    "lookups": 0,
+    "relations": 0,
+    "relations_per_1000_lookups": null,
+    "field_ops_serialized": true,
+    "isolation_levels": [
+      "L0"
+    ],
+    "rss_kib_max": 27680
+  },
+  "rho-neg-aa": {
+    "n": 24,
+    "verified": 24,
+    "gae_mean": 1046.7083333333333,
+    "gae_min": 410.0,
+    "gae_max": 2297.0,
+    "lookups": 0,
+    "relations": 0,
+    "relations_per_1000_lookups": null,
+    "field_ops_serialized": true,
+    "isolation_levels": [
+      "L0"
+    ],
+    "rss_kib_max": 27696
+  }
+}
