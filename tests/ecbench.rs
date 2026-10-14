@@ -266,6 +266,8 @@ fn run_spec(dir: &Path, out: &Path, extra: &[&str]) -> (bool, String) {
 
 #[test]
 fn counted_ic_sat_replays_with_different_solver_wall_times() {
+    // This checks counted work and replay, not a wall-time bound. Give the
+    // SAT fixture room on contended CI hosts while retaining a watchdog.
     let dir = scratch("counted-sat");
     let spec = dir.join("spec.json");
     std::fs::write(
@@ -279,7 +281,7 @@ fn counted_ic_sat_replays_with_different_solver_wall_times() {
     {"name":"sat-cnf","role":"candidate","method":{"id":"ic.pipeline_counted","params":{"factor_base":"koblitz-orbit:divisor=0;1","oracle":"descent-algebraic:m=2","solver":"sat-cdcl:sat_conflict_budget=20000,sat_xor_encoding=cnf","max_trials":"20000"}}},
     {"name":"sat-xor","role":"candidate","method":{"id":"ic.pipeline_counted","params":{"factor_base":"koblitz-orbit:divisor=0;1","oracle":"descent-algebraic:m=2","solver":"sat-cdcl:sat_conflict_budget=20000,sat_xor_encoding=native","max_trials":"20000"}}}
   ],
-  "measurement":{"rounds":1,"warmup":0,"seed":9123401,"isolation_required":"L0","timeout_seconds":60}
+  "measurement":{"rounds":1,"warmup":0,"seed":9123401,"isolation_required":"L0","timeout_seconds":300}
 }"#,
     )
     .unwrap();
