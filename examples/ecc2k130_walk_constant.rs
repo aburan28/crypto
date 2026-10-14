@@ -22,6 +22,14 @@
 //!   cycle rule use.
 //! - `adding`: the table walk with hundreds of uniform branches, a control
 //!   whose constant is `≈ 1`.
+//! - `sigma2`: the σ walk stepping to the better of `R + σʲ(R)` and
+//!   `R − σʲ(R)` (one shared inversion on the device), better by a
+//!   class-invariant score (`--score hw`: the normal-basis weight of `x`,
+//!   ties to `+`; `--score key`: a salted hash of the class).  Both candidate
+//!   classes are invariant under `σ` and `−1` with their labels, so the step
+//!   is a function of the class.  A return to one of the walk's own last
+//!   `RECENT` classes is counted by length and the walk restarts, as for the
+//!   table walk; for `sigma` the same returns are counted only.
 //!
 //! and three ways of choosing the branch `b`, all class-invariant:
 //!
@@ -97,6 +105,14 @@ enum Walk {
     Sigma,
     Table,
     Adding,
+    Sigma2,
+}
+
+/// The score `sigma2` picks its candidate by (`--score`).
+#[derive(Clone, Copy, PartialEq, Debug)]
+enum Score {
+    Hw,
+    Key,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -237,6 +253,40 @@ fn cancels(tags: &[u32]) -> bool {
     true
 }
 
+/// `a + bτ` in `Z[τ]`, `τ² + τ + 2 = 0` (Frobenius on the `a = 0` curves).
+fn ztau_mul(x: (i128, i128), y: (i128, i128)) -> (i128, i128) {
+    let (a, b, c, d) = (x.0, x.1, y.0, y.1);
+    (a * c - 2 * b * d, a * d + b * c - b * d)
+}
+
+/// Whether the σ-walk steps `tags` (`j` in bits 0–7, minus in bit 8)
+/// multiply to `±τᵏ` in `Z[τ]`: a return that holds as an identity.
+fn sigma_word_formal(tags: &[u32]) -> bool {
+    let mut prod = (1i128, 0i128);
+    let mut deg = 0u32;
+    for &t in tags {
+        let j = t & 0xff;
+        let mut tj = (1i128, 0i128);
+        for _ in 0..j {
+            tj = ztau_mul(tj, (0, 1));
+        }
+        let m = if t & 0x100 != 0 { (1 - tj.0, -tj.1) } else { (1 + tj.0, tj.1) };
+        prod = ztau_mul(prod, m);
+        deg += j;
+    }
+    let mut tk = (1i128, 0i128);
+    for _ in 0..=2 * deg + 8 {
+        if prod == tk || prod == (-tk.0, -tk.1) {
+            return true;
+        }
+        if tk.0.abs() > 1 << 100 || tk.1.abs() > 1 << 100 {
+            break;
+        }
+        tk = ztau_mul(tk, (0, 1));
+    }
+    false
+}
+
 fn splitmix(mut z: u64) -> u64 {
     z = z.wrapping_add(0x9e37_79b9_7f4a_7c15);
     z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
@@ -289,6 +339,8 @@ struct Setup {
     fixed: Option<Mapping>,
     /// The table walk's cycle rule.
     rule: Rule,
+    /// `sigma2`'s candidate score.
+    score: Score,
 }
 
 /// The part of a mapping a trial draws for itself.
@@ -323,6 +375,14 @@ struct Tally {
     relation: [u64; RECENT + 1],
     /// Exact short returns that are not formal (genuine collisions).
     short_returns: u64,
+    /// σ walks: `short_cycle[L]`, returns to the walk's own class `L` steps
+    /// back.
+    short_cycle: [u64; RECENT + 1],
+    /// `sigma2`: steps that took `R − σʲ(R)`.
+    minus: u64,
+    /// σ walks: short returns whose step multipliers multiply to `±τᵏ` in
+    /// `Z[τ]` (formal, so present at every degree).
+    short_formal: u64,
 }
 
 impl Tally {
@@ -335,6 +395,11 @@ impl Tally {
         self.cycle_rule += t.cycle_rule;
         self.restarts += t.restarts;
         self.short_returns += t.short_returns;
+        self.minus += t.minus;
+        self.short_formal += t.short_formal;
+        for (x, y) in self.short_cycle.iter_mut().zip(&t.short_cycle) {
+            *x += y;
+        }
         for (x, y) in self.branch_counts.iter_mut().zip(&t.branch_counts) {
             *x += y;
         }
@@ -362,6 +427,17 @@ impl Setup {
     /// The class key: least rotation of the normal coordinates of `x`.
     fn key(&self, p: &FastPoint) -> u64 {
         self.canon.canon(p.x)
+    }
+
+    /// `sigma2`'s score of a candidate; the larger wins, ties go to `+`.
+    fn score(&self, m: &Mapping, p: &FastPoint) -> u64 {
+        if p.infinity {
+            return 0;
+        }
+        match self.score {
+            Score::Hw => u64::from(self.canon.coords(p.x).count_ones()),
+            Score::Key => splitmix(self.key(p) ^ m.salt ^ 0x5c0e_5c0e),
+        }
     }
 
     fn branch(&self, m: &Mapping, p: &FastPoint, key: u64) -> usize {
@@ -435,7 +511,7 @@ impl Setup {
 
     fn mapping(&self, rng: &mut StdRng) -> Mapping {
         let table = match self.walk {
-            Walk::Sigma => Vec::new(),
+            Walk::Sigma | Walk::Sigma2 => Vec::new(),
             Walk::Table | Walk::Adding => (0..self.branches)
                 .map(|_| {
                     self.curve
@@ -497,8 +573,50 @@ fn trial(s: &Setup, rng: &mut StdRng, t: &mut Tally) {
             }
             let b = s.branch(m, &w.p, key);
             t.branch_counts[b] += 1;
-            let next = if s.walk == Walk::Sigma {
-                s.curve.add(w.p, s.curve.frobenius_k(w.p, 3 + b as u32))
+            let next = if s.walk == Walk::Sigma || s.walk == Walk::Sigma2 {
+                let q = s.curve.frobenius_k(w.p, 3 + b as u32);
+                let plus = s.curve.add(w.p, q);
+                let mut steptag = 3 + b as u32;
+                let next = if s.walk == Walk::Sigma2 {
+                    let minus = s.curve.add(w.p, s.curve.neg(q));
+                    let take_minus = s.score(m, &minus) > s.score(m, &plus);
+                    t.minus += u64::from(take_minus);
+                    if take_minus {
+                        steptag |= 0x100;
+                        minus
+                    } else {
+                        plus
+                    }
+                } else {
+                    plus
+                };
+                // A return to one of the walk's own recent classes.
+                let slot = w.len % RECENT;
+                w.recent[slot] = (w.p, steptag);
+                w.len += 1;
+                if !next.infinity {
+                    let nk = s.key(&next);
+                    if let Some(l) =
+                        (1..=RECENT.min(w.len)).find(|&l| s.key(&w.recent[(w.len - l) % RECENT].0) == nk)
+                    {
+                        t.short_cycle[l] += 1;
+                        let tags: Vec<u32> =
+                            (1..=l).map(|i| w.recent[(w.len - i) % RECENT].1).collect();
+                        if sigma_word_formal(&tags) {
+                            t.short_formal += 1;
+                        } else if t.short_cycle.iter().sum::<u64>() < 4 {
+                            eprintln!("non-formal short return, length {l}: {tags:x?}");
+                        }
+                        if s.walk == Walk::Sigma2 {
+                            *w = s.start(rng);
+                            if !seen.insert(s.key(&w.p)) {
+                                break 'run;
+                            }
+                            continue;
+                        }
+                    }
+                }
+                next
             } else {
                 let (next, tg, fired) = s.table_step(m, w, b);
                 t.cycle_rule += u64::from(fired);
@@ -623,6 +741,7 @@ fn main() {
         "sigma" => Walk::Sigma,
         "table" => Walk::Table,
         "adding" => Walk::Adding,
+        "sigma2" => Walk::Sigma2,
         w => panic!("unknown walk {w}"),
     };
     let dist = match get("--dist").as_deref().unwrap_or("ecc2k130") {
@@ -633,14 +752,14 @@ fn main() {
     };
     let branches: usize = get("--branches").map_or(
         match walk {
-            Walk::Sigma => 8,
+            Walk::Sigma | Walk::Sigma2 => 8,
             Walk::Table => 8,
             Walk::Adding => 256,
         },
         |v| v.parse().expect("--branches"),
     );
     assert!(
-        walk != Walk::Sigma || branches == 8,
+        !matches!(walk, Walk::Sigma | Walk::Sigma2) || branches == 8,
         "the sigma walk has eight branches"
     );
     assert!(branches <= 1 << 16, "at most 2^16 branches");
@@ -685,6 +804,11 @@ fn main() {
         "v2" => Rule::V2,
         r => panic!("unknown rule {r}"),
     };
+    let score = match get("--score").as_deref().unwrap_or("hw") {
+        "hw" => Score::Hw,
+        "key" => Score::Key,
+        v => panic!("unknown score {v}"),
+    };
     let mut setup = Setup {
         walk,
         dist,
@@ -699,6 +823,7 @@ fn main() {
         squaring_rotates_left,
         fixed: None,
         rule,
+        score,
     };
     if fixed_mapping {
         let mut rng = StdRng::seed_from_u64(splitmix(seed ^ 0x6d61_7070_696e_6721));
@@ -708,8 +833,8 @@ fn main() {
     let merge: u64 = get("--merge").map_or(0, |v| v.parse().expect("--merge"));
     if merge > 0 {
         assert!(
-            walk != Walk::Sigma,
-            "the sigma walk has no history to part on"
+            !matches!(walk, Walk::Sigma | Walk::Sigma2),
+            "the sigma walks have no history to part on"
         );
         let next = AtomicU64::new(0);
         let total = Mutex::new(MergeTally {
@@ -824,7 +949,7 @@ fn main() {
     // collisions are suppressed only when the frames agree, 1/2n of them.
     let injective = 1.0 / (1.0 - s2).sqrt();
     let class_frame = 1.0 / (1.0 - s2 / (2.0 * n as f64)).sqrt();
-    let model = if walk == Walk::Sigma {
+    let model = if matches!(walk, Walk::Sigma | Walk::Sigma2) {
         injective
     } else {
         class_frame
@@ -853,6 +978,10 @@ fn main() {
     let (fruitless_rate, relation_rate) = (per_step(&t.fruitless), per_step(&t.relation));
     let (fruitless_json, relation_json) = (by_length(&t.fruitless), by_length(&t.relation));
     let walk_name = format!("{walk:?}").to_lowercase();
+    let short_json = by_length(&t.short_cycle);
+    let short_rate = per_step(&t.short_cycle);
+    let score_name = format!("{score:?}").to_lowercase();
+    let minus_fraction = t.minus as f64 / steps.max(1) as f64;
     let rule_name = format!("{rule:?}").to_lowercase();
     let dist_name = format!("{dist:?}").to_lowercase();
     eprintln!(
@@ -880,11 +1009,13 @@ fn main() {
          \"fruitless_predicted\":{pairwise_predicted:.6e},\"relation\":{{{relation_json}}},\
          \"relation_per_step\":{relation_rate:.6e},\"relation_predicted\":{relation_predicted:.6e},\
          \"short_returns\":{},\"fixed_mapping\":{fixed_mapping},\
-         \"emulation\":\"device-rule\",\"rule\":\"{rule_name}\"}}",
+         \"emulation\":\"device-rule\",\"rule\":\"{rule_name}\",\"score\":\"{score_name}\",\
+         \"minus_fraction\":{minus_fraction:.6},\"short_cycle\":{{{short_json}}},\"short_cycle_per_step\":{short_rate:.6e},\"short_formal\":{}}}",
         t.trials,
         t.even as f64 / t.weighed.max(1) as f64,
         t.cycle_rule,
         t.restarts,
         t.short_returns,
+        t.short_formal,
     );
 }
