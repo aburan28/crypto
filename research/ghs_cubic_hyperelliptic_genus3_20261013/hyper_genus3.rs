@@ -409,7 +409,7 @@ fn main() {
             let p4 = fq_ok == el.len() && mumford_ok == el.len() && all_vals_fq && exc_ok && ua_ok && ub_ok && hom_ok == hom_t && dbl_ok == dbl_t && dbl_t == 100 && g_nonzero && g_ell && ker4 && t1_in && img_ok && pf_bad == 0 && pfx_bad == 0;
             pass.push(("P4", p4));
             let gpt_s = match gpt { WP::A(s, y) => format!("[{},{}]", kc(&iso, q, s), kc(&iso, q, y)), WP::O => "null".into() };
-            out += &format!(",\"P4\":{{\"E0_points\":{},\"eligible\":{},\"exceptional\":{},\"exceptional_detail\":[{}],\"phi_Fq_coeffs\":{},\"phi_valid_mumford\":{},\"u_a_deg3_divides_h\":{},\"u_b_deg4_divides_h\":{},\
+            out += &format!(",\"P4_detail\":{{\"E0_points\":{},\"eligible\":{},\"exceptional\":{},\"exceptional_detail\":[{}],\"phi_Fq_coeffs\":{},\"phi_valid_mumford\":{},\"u_a_deg3_divides_h\":{},\"u_b_deg4_divides_h\":{},\
 \"hom_pairs\":{},\"hom_pass\":{},\"doublings\":{},\"doubling_pass\":{},\"G_weierstrass_SY\":{},\"G_eligible\":{},\"phi_G_nonzero\":{},\"ell_phi_G_zero\":{},\"kernel_size\":{},\"kernel_orders\":{:?},\"kernel_in_E0_4\":{},\"T1_in_kernel\":{},\"image_size\":{},\"image_times_kernel_eq_order\":{},\
 \"pushforward_eq_4P\":{},\"pushforward_fail\":{},\"pushforward_not_evaluable\":{},\"pushforward_skip_reasons\":{:?},\"ext_pushforward_all_E0K_eq_4P\":{},\"ext_pushforward_fail\":{},\"phi_G\":{{\"u\":{},\"v\":{}}}}},\"P4\":{}",
                 wpts.len(), el.len(), exc.len(), exc_lines.join(","), fq_ok, mumford_ok, ua_ok, ub_ok, hom_t, hom_ok, dbl_t, dbl_ok, gpt_s, g_elig, g_nonzero, g_ell, ker.len(), ker_orders, ker4, t1_in, img.len(), img_ok,
