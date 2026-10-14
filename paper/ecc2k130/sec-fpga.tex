@@ -1,4 +1,4 @@
-\section{The FPGA engine}
+\section{FPGA}
 \label{sec:fpga}
 
 In some ways this field suits an FPGA better than a GPU. The GPU has
@@ -7,7 +7,7 @@ carry-less multipliers, and $\sigma^k$ is just wiring. We designed a
 VHDL engine for the AWS F2 (Xilinx VU47P), estimated its rate before
 any board time, and then measured it.
 
-\subsection{Estimate before the board}
+\subsection{Estimate}
 \label{sec:fpga-estimate}
 
 Before synthesis, we mapped the client's own straight-line multiplier
@@ -23,9 +23,9 @@ $1{,}303{,}680$ CLB LUTs at $70$--$80\%$ utilisation gives 29--34 or
 20--23 cores at an estimated $250$--$350$~MHz. The estimate came to
 $5$--$12$~billion iterations/s per VU47P, with a central value of $8$~billion iterations/s:
 slower per chip than the $14.1$~billion iterations/s GPU, roughly level on cost per
-solve, and $2$--$5\times$ better per watt.\art{ecc2k130/FPGA-CEILING.md}
+solve, and $2$--$5\times$ better per watt~\evcite{\evref{fpgaest}}.
 
-\subsection{Design}
+\subsection{Architecture}
 \label{sec:fpga-design}
 
 \paragraph{Multiplier.} \texttt{gf131\_mul} follows the Bernstein--Lange
@@ -38,7 +38,7 @@ step. At three levels the product is $7{,}803$ AND and $9{,}404$ XOR2,
 $14{,}553$ XOR2 per multiply including conversions, against $17{,}161$
 AND and $22{,}049$ XOR2 for schoolbook. Out of context in Vivado 2025.2
 at a $4.0$~ns clock, three levels map to $4{,}855$ LUTs and $4{,}647$
-FFs with $+2.68$~ns of slack.\art{hdl/ecc2k130/README.md}
+FFs with $+2.68$~ns of slack~\evcite{\evref{hdl}}.
 
 A DSP leaf computes a $17$-bit $\mathrm{GF}(2)$ product as six
 $25\times16$ integer products with coefficients spaced three bits
@@ -48,7 +48,7 @@ LUTs. Eleven of the 27 leaves go to DSPs, 66 DSP48E2 per multiplier,
 which takes the multiplier to $4{,}004$ LUTs at a latency of 14 clocks
 including a 261-FF copy register (11 clocks with LUT leaves). The
 pblock holds $7{,}992$ DSPs, so 120 engines can take 11 DSP leaves and
-128 engines ten.\art{hdl/ecc2k130/gf2_dsp_leaf.vhd}\art{hdl/ecc2k130/README.md}
+128 engines ten~\evcite{\evref{hdl}; \evref{hdl}}.
 
 \paragraph{Step and batch.} An unbatched step is ten multiplies:
 $d=x+\sigma^j x$, $\lambda=(y+\sigma^j y)/d$ with the eight-multiply
@@ -60,7 +60,7 @@ inversion, $2(W-1)$ backward, $W$ for $\lambda$ and $W$ for $y_3$,
 $5W+5$ per batch, $5+5/W$ per step: $5.31$ at $W=16$, $5.16$ at $W=32$,
 $5.08$ at $W=64$. A batch is a chain of $2\log_2 W+10$ bursts, and
 several batches are kept in flight to hide the multiplier latency.
-Table~\ref{tab:fpga-sim} is the simulated rate.\art{hdl/ecc2k130/ec2k_batch_pipe.vhd}\art{hdl/ecc2k130/README.md}
+Table~\ref{tab:fpga-sim} is the simulated rate~\evcite{\evref{hdl}; \evref{hdl}}.
 
 \begin{table}[t]
 \centering
@@ -96,9 +96,9 @@ credit-based register spine (about 870 FFs and 300 LUTs per engine),
 introduced after the first flat 48-engine build placed at
 $-2.5$~ns. The host program is a drop-in for the CUDA client under
 the same worker script: it writes the same 32-byte records and can re-walk the first $N$
-reports from their seeds on the CPU (\texttt{--verify N}); production
+reports from their seeds on the CPU (\texttt{-{}-verify N}); production
 workers leave verification to the campaign
-merge.\art{hdl/ecc2k130/ec2k_walker.vhd}\art{hdl/ecc2k130/host/ecc2k130_fpga.cpp}
+merge~\evcite{\evref{hdl}; \evref{hdl}}.
 
 \paragraph{Verification.} The reference script imports the client's
 field model and emits 256 multiplier vectors (including 0, the
@@ -110,9 +110,9 @@ challenge curve. The batch testbench passes for every $W$ from 2 to
 32 with 2 to 16 batches in flight; the walker testbench checks every
 report's id, step count and point against the reference trajectory
 (64 distinguished points from 797 steps in $19{,}194$
-clocks).\art{hdl/ecc2k130/ecc2k_ref.py}\art{hdl/ecc2k130/vectors_ecc2k130.txt}
+clocks)~\evcite{\evref{hdl}; \evref{hdl}}.
 
-\subsection{Measured on \texttt{f2.6xlarge}}
+\subsection{AWS F2 results}
 \label{sec:fpga-measured}
 
 \begin{table}[t]
@@ -140,7 +140,7 @@ engines & MHz & geometry & routed WNS (ns) & million it/s & clk/step \\
 \end{table}
 
 Table~\ref{tab:fpga-images} lists every image we built, placed,
-loaded and timed, and Figure~\ref{fig:fpga} plots them.\art{hdl/ecc2k130/aws/README.md}
+loaded and timed, and Figure~\ref{fig:fpga} plots them~\evcite{\evref{f2}}.
 The 48-engine run read back its geometry (48 engines of 512 walks,
 weight 34, $333.3$~MHz), seeded $24{,}576$ walks over AXI-Lite in
 $7.3$~s, held $3{,}010$~million iterations/s from ten seconds on, and completed
@@ -154,7 +154,7 @@ that failed block-RAM placement ($3{,}744$ RAMB18 sites needed against
 $3{,}576$) are recorded alongside; the projection at $5.16$ clocks per step is $8.8$~billion iterations/s at 136 engines
 and $9.3$ at 144 or at 128 engines and 375~MHz, neither yet met (128
 at 375~MHz routed at $-0.21$~ns; 144 failed
-placement).\art{hdl/ecc2k130/README.md}
+placement)~\evcite{\evref{hdl}}.
 
 \begin{figure}[t]
 \centering
@@ -190,9 +190,9 @@ placement).\art{hdl/ecc2k130/README.md}
 Per engine the current revision is $6{,}790$--$6{,}940$ LUTs, $9{,}371$
 FFs, 12 RAMB36, 4 URAM and 66 DSPs; the 96-engine image used $62\%$ of
 the LUTs and $81\%$ of the block RAM, and block RAM, not logic, is
-what bounds the engine count on this part.\art{hdl/ecc2k130/README.md}
+what bounds the engine count on this part~\evcite{\evref{hdl}}.
 
-\subsection{F2 against the GPU}
+\subsection{FPGA vs.\ GPU}
 \label{sec:fpga-vs-gpu}
 
 At the prices observed on 2026-09-11, an F2 instance at $\$1.980$
@@ -201,7 +201,7 @@ $\$1.31$ per GPU-hour, the expected $2^{60.9}$ iterations cost about $72{,}400$
 F2-hours at the measured $8.25$~billion iterations/s, roughly $\$51$k spot, against
 $42{,}400$ GPU-hours and $\$56$k spot at the campaign's $14.11$~billion iterations/s
 collection rate.\footnote{Derived here from the measured rate and the
-prices recorded in \texttt{ecc2k130/FPGA-CEILING.md}; the note's own
+prices recorded in \evref{fpgaest}; the note's own
 table priced the hypothetical $8$~billion iterations/s image at $\$53$k spot.} So
 the two platforms are level on cost per solve, within the noise of spot
 pricing, and the FPGA is about $2$--$5\times$ better per watt on the

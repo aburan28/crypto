@@ -1,0 +1,132 @@
+==> cycle3
+   1/30 rho-strong     icv1-f2m13-t181-515ee569 W6f8fb255a59d  verified S=14.318 L0
+   2/30 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 W6f8fb255a59d  verified S=416.982 L0
+   3/30 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 W6f8fb255a59d  verified S=22.453 L0
+   4/30 ic-negfold-m2-d4 icv1-f2m13-t181-515ee569 W6f8fb255a59d  verified S=35.683 L0
+   5/30 ic-c2-frob-counted-m2 icv1-f2m13-t181-515ee569 W6f8fb255a59d  verified S=15.240 L0
+   6/30 rho-strong     icv1-f2m13-t181-515ee569 We47397cdd5c3  verified S=15.033 L0
+   7/30 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 We47397cdd5c3  verified S=376.006 L0
+   8/30 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 We47397cdd5c3  verified S=20.992 L0
+   9/30 ic-negfold-m2-d4 icv1-f2m13-t181-515ee569 We47397cdd5c3  verified S=32.283 L0
+  10/30 ic-c2-frob-counted-m2 icv1-f2m13-t181-515ee569 We47397cdd5c3  verified S=15.355 L0
+  11/30 ic-c2-frob-counted-m2 icv1-f2m13-t181-515ee569 W6f8fb255a59d  verified S=15.752 L0
+  12/30 ic-negfold-m2-d4 icv1-f2m13-t181-515ee569 W6f8fb255a59d  verified S=31.866 L0
+  13/30 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 W6f8fb255a59d  verified S=34.391 L0
+  14/30 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 W6f8fb255a59d  verified S=552.688 L0
+  15/30 rho-strong     icv1-f2m13-t181-515ee569 W6f8fb255a59d  verified S=15.167 L0
+  16/30 ic-c2-frob-counted-m2 icv1-f2m13-t181-515ee569 We47397cdd5c3  verified S=15.820 L0
+  17/30 ic-negfold-m2-d4 icv1-f2m13-t181-515ee569 We47397cdd5c3  verified S=29.609 L0
+  18/30 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 We47397cdd5c3  verified S=30.240 L0
+  19/30 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 We47397cdd5c3  verified S=310.588 L0
+  20/30 rho-strong     icv1-f2m13-t181-515ee569 We47397cdd5c3  verified S=14.341 L0
+  21/30 rho-strong     icv1-f2m13-t181-515ee569 W6f8fb255a59d  verified S=15.033 L0
+  22/30 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 W6f8fb255a59d  verified S=345.431 L0
+  23/30 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 W6f8fb255a59d  verified S=23.459 L0
+  24/30 ic-negfold-m2-d4 icv1-f2m13-t181-515ee569 W6f8fb255a59d  verified S=18.991 L0
+  25/30 ic-c2-frob-counted-m2 icv1-f2m13-t181-515ee569 W6f8fb255a59d  verified S=16.401 L0
+  26/30 rho-strong     icv1-f2m13-t181-515ee569 We47397cdd5c3  verified S=13.603 L0
+  27/30 ic-f4-m3-d5    icv1-f2m13-t181-515ee569 We47397cdd5c3  verified S=578.308 L0
+  28/30 ic-negfold-m2-d5 icv1-f2m13-t181-515ee569 We47397cdd5c3  verified S=26.517 L0
+  29/30 ic-negfold-m2-d4 icv1-f2m13-t181-515ee569 We47397cdd5c3  verified S=22.253 L0
+  30/30 ic-c2-frob-counted-m2 icv1-f2m13-t181-515ee569 We47397cdd5c3  verified S=15.377 L0
+session ECBS1h627cfb7e3fb1 complete -> /Volumes/SSD990/wt-ecbench-rootfind-improve/research/ecbench_rootfind_faster_20261014/sessions/cycle3 (30 records: {"verified": 30})
+receipt sha256 c7bbb2f1ee1047bd17856ee20b07739070058b9fe867f74283f559fa0d44cb11
+{
+  "schema": "ecbench.audit/v1",
+  "session_id": "ECBS1h627cfb7e3fb1",
+  "session_status": "complete",
+  "ok": true,
+  "problems": [],
+  "checks": {
+    "arms": true,
+    "env_class": true,
+    "executions": true,
+    "host_hash": true,
+    "plan_hash": true,
+    "record_count": true,
+    "records": true,
+    "records_hash": true,
+    "replays": true,
+    "session_complete": true,
+    "spec_id": true,
+    "workloads": true
+  },
+  "records": 30,
+  "verified_records": 30,
+  "regraded": true,
+  "replays": [
+    {
+      "seq": 10,
+      "record_id": "ECR1he42dfd7b1dde",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 12,
+      "record_id": "ECR1h5d882f0862bf",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 15,
+      "record_id": "ECR1h7235c1f87ee5",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 17,
+      "record_id": "ECR1h6b37b5a2790b",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 20,
+      "record_id": "ECR1h11f9070cd072",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 22,
+      "record_id": "ECR1hb465509e5407",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 25,
+      "record_id": "ECR1h09e6d4869d99",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 27,
+      "record_id": "ECR1hc23d7fb90a86",
+      "reproduced": true,
+      "detail": "identical"
+    }
+  ],
+  "files": {
+    "host.json": "49dc6542abfed1abaad1deb832a4e7a6e3e40ca090599041a7053ec0724b38d0",
+    "plan.json": "13b7f972524d797aa962dd14ab16632826955fe01db20e624938a07795a23402",
+    "records.jsonl": "f1f5ef7baf411433caacead9f2dbe9a9624199fd861aaf6589d938f54a003934",
+    "session.json": "f25d38c24557aef5ac7e5407f34c621eee5e5f9adca3608af60c3ec35dbdf027",
+    "spec.json": "c1136de2dd0433044865aae00642010aee1ff1a9a0808e0c2c9e1704c46a7e21"
+  },
+  "auditor_binary_sha256": "27fd2653b706b6e82e8da1c39a8c26c8f686e3f6e4831953b85eb9798610b76c",
+  "auditor_env_class_id": "ECBENV2h59034d4cd61b",
+  "auditor_hardware_class_id": "ECBHW1h7d1934655eee",
+  "audited_unix_ms": 1791949195247
+}
+audit OK: 30 records, 30 verified, 8 replays reproduced, 0 problems
+| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | med wall ms | levels |
+|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---:|---|
+| ECBS1h627cfb7e3fb1 | rho-strong | rho.signed_frobenius_strong | icv1-f2m13-t181-515ee569 | 10.97 | 4/4 | 14.536 | [13.788, 15.134] | 0.246 | 59.140 | 59.140 | 1.000 | yes | 0.085 | L0×4 |
+| ECBS1h627cfb7e3fb1 | ic-f4-m3-d5 | ic.pipeline | icv1-f2m13-t181-515ee569 | 10.97 | 4/4 | 446.754 | [328.009, 565.498] | – | – | 1817.586 | 30.734 | no | 205.950 | L0×4 |
+| ECBS1h627cfb7e3fb1 | ic-negfold-m2-d5 | ic.pipeline | icv1-f2m13-t181-515ee569 | 10.97 | 4/4 | 28.652 | [24.988, 32.315] | – | – | 116.567 | 1.971 | no | 0.326 | L0×4 |
+| ECBS1h627cfb7e3fb1 | ic-negfold-m2-d4 | ic.pipeline | icv1-f2m13-t181-515ee569 | 10.97 | 4/4 | 25.680 | [20.622, 30.737] | – | – | 104.475 | 1.767 | no | 1.033 | L0×4 |
+| ECBS1h627cfb7e3fb1 | ic-c2-frob-counted-m2 | ic.pipeline | icv1-f2m13-t181-515ee569 | 10.97 | 4/4 | 15.837 | [15.487, 16.238] | – | – | 64.432 | 1.089 | yes | 0.161 | L0×4 |
+arm                                 coldS     amS@1     amS@8    amS@64   wall_ms
+ic-c2-frob-counted-m2              15.657    15.657    11.741    11.252      0.21
+ic-f4-m3-d5                       430.000   430.000   429.925   429.915    158.20
+ic-negfold-m2-d4                   28.447    28.447    26.275    26.004      0.63
+ic-negfold-m2-d5                   26.342    26.342    20.303    19.548      0.32
+rho-strong                         14.583     0.000     0.000     0.000      0.11
