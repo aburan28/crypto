@@ -1,5 +1,11 @@
 # Degree-83 factor-base sweep: observed evidence
 
+A [source-only stage-marked successor](verification/known-witness-stage-preflight-20261014/RESULT.md)
+now emits flushed receipts around full-domain construction and SAT entry for
+the ordered witness. Its marker-only self-test and fail-closed trace checker
+pass; the actual N83 solver path was not run, so the local ledger stays at
+22,200 seconds and the complete-runtime base remains unselected.
+
 The [ordered fixed-witness SAT control](verification/known-witness-ordered-sat-20261014/RESULT.md)
 was configured with full K1182 plus residual-K2048 signed-Frobenius domains
 and the algebraically replayed witness in the first all-affine pattern. Its
