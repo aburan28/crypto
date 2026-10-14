@@ -522,6 +522,20 @@ Two consequences to read every table with:
   full costs. Read it as a counted-work diagnostic until both arms have
   complete, calibrated costs; do not infer an end-to-end speedup from it.
 
+- **Full pricing is opt-in.** `ic.pipeline_full`,
+  `rho.signed_frobenius_full` and `rho.signed_frobenius_strong_full` run
+  their base method unchanged, then price every native counter (field
+  multiplications, squarings and inversions, Artin–Schreier solves, hash
+  probes, canonicalisations, row operations, word XORs) from
+  `docs/ecbench/full_prices.json`, one host's measured ratios to an affine
+  addition, written by `ecbench price-units --curve a:n …`.
+  `src/cryptanalysis/ecbench/full_price.rs` gives each counter an explicit
+  rule. A counter without a rule stays unpriced, so the record is still
+  marked a lower bound. The pinned `docs/ic/calibration.json` and every
+  other method are unchanged. `ecbench trend --compare …` fits how a paired
+  ratio moves with `ln r` and `ln n` across curves. First use:
+  `research/ecbench_frobenius_orbit_vs_rho_20261014/`.
+
 `ecbench resources --dir SESSION --out resources.json` reports, for every
 measured attempt including failures, the native integer counters by phase,
 charged GAE and clocks by phase, the target's exclusive online window,

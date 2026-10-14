@@ -47,16 +47,16 @@ fn n_of(slug: &str) -> Result<u32, String> {
         .strip_prefix("icv1-f2m")
         .ok_or_else(|| format!("{slug}: not a binary-field ICV1 slug"))?;
     let digits: String = rest.chars().take_while(char::is_ascii_digit).collect();
-    digits.parse().map_err(|_| format!("{slug}: no field degree"))
+    digits
+        .parse()
+        .map_err(|_| format!("{slug}: no field degree"))
 }
 
 /// The per-curve points of comparison files (`ecbench.comparison/v1`).
 pub fn points(docs: &[Value]) -> Result<Vec<Point>, String> {
     let mut out = Vec::new();
     for d in docs {
-        let curves = d["curves"]
-            .as_array()
-            .ok_or("comparison without curves")?;
+        let curves = d["curves"].as_array().ok_or("comparison without curves")?;
         for c in curves {
             let slug = c["slug"].as_str().ok_or("curve without slug")?.to_string();
             let ratio = c["ratio_b_over_a"].as_f64().ok_or("curve without ratio")?;
@@ -220,21 +220,27 @@ mod tests {
 
     #[test]
     fn exact_power_laws_are_recovered() {
-        let pts: Vec<Point> = [(13u32, 11.0), (17, 16.0), (19, 17.0), (23, 21.0), (29, 15.4)]
-            .iter()
-            .map(|&(n, l2r)| {
-                let r: f64 = 2f64.powf(l2r);
-                let ratio = 0.3 * r.powf(1.0 / 6.0) / f64::from(n).sqrt();
-                Point {
-                    slug: format!("icv1-f2m{n}-x"),
-                    n,
-                    log2_r: l2r,
-                    ratio,
-                    ci95: [ratio * 0.9, ratio * 1.1],
-                    se_ln: 0.05,
-                }
-            })
-            .collect();
+        let pts: Vec<Point> = [
+            (13u32, 11.0),
+            (17, 16.0),
+            (19, 17.0),
+            (23, 21.0),
+            (29, 15.4),
+        ]
+        .iter()
+        .map(|&(n, l2r)| {
+            let r: f64 = 2f64.powf(l2r);
+            let ratio = 0.3 * r.powf(1.0 / 6.0) / f64::from(n).sqrt();
+            Point {
+                slug: format!("icv1-f2m{n}-x"),
+                n,
+                log2_r: l2r,
+                ratio,
+                ci95: [ratio * 0.9, ratio * 1.1],
+                se_ln: 0.05,
+            }
+        })
+        .collect();
         let f = fits(&pts, 1.0 / 6.0, -0.5);
         let rn = f.iter().find(|f| f.name == "free_r_n").unwrap();
         assert!((rn.coefficients[1].1 - 1.0 / 6.0).abs() < 1e-9);

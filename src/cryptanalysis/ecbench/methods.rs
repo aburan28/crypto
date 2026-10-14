@@ -21,8 +21,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
 use crate::cryptanalysis::ecbench::canonical::{derive_u64, sha256_hex, short_id};
-use crate::cryptanalysis::ecbench::full_price;
 use crate::cryptanalysis::ecbench::claw::{pair_claw, pair_claw_wide, ClawOutcome, ClawShape};
+use crate::cryptanalysis::ecbench::full_price;
 use crate::cryptanalysis::ecbench::generic::{
     bsgs_interleaved, bsgs_negation, bsgs_textbook, kangaroo, GenericOutcome,
 };
@@ -131,21 +131,21 @@ const IC_PIPELINE_PARAMS: &[ParamDecl] = &[
 ];
 
 const STRONG_PARAMS: &[ParamDecl] = &[
-        ParamDecl {
-            name: "lanes",
-            default: Some("32"),
-            help: "walks advanced in lockstep (batch-inversion width); the reference measured 32",
-        },
-        ParamDecl {
-            name: "dp_bits",
-            default: Some("4"),
-            help: "distinguished-point bits; the reference measured 4",
-        },
-        ParamDecl {
-            name: "step_cap_factor",
-            default: Some("2000"),
-            help: "give up after this multiple of the ideal step count",
-        },
+    ParamDecl {
+        name: "lanes",
+        default: Some("32"),
+        help: "walks advanced in lockstep (batch-inversion width); the reference measured 32",
+    },
+    ParamDecl {
+        name: "dp_bits",
+        default: Some("4"),
+        help: "distinguished-point bits; the reference measured 4",
+    },
+    ParamDecl {
+        name: "step_cap_factor",
+        default: Some("2000"),
+        help: "give up after this multiple of the ideal step count",
+    },
 ];
 
 const RHO_PARAMS: &[ParamDecl] = &[ParamDecl {

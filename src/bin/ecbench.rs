@@ -41,8 +41,8 @@ use clap::{Parser, Subcommand};
 
 use crypto_lib::cryptanalysis::ecbench::{
     audit, bounds, callgrind, canonical, challenge, claim, compare, db, frontier, full_price, gpu,
-    host,
-    isolab, isolation, methods, record, resources, runner, signals, spec, stats, trend, workload,
+    host, isolab, isolation, methods, record, resources, runner, signals, spec, stats, trend,
+    workload,
 };
 
 #[derive(Parser)]
@@ -660,7 +660,9 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                     "path": p.display().to_string(),
                     "sha256": canonical::sha256_hex(text.as_bytes()),
                 }));
-                docs.push(serde_json::from_str(&text).map_err(|e| format!("{}: {e}", p.display()))?);
+                docs.push(
+                    serde_json::from_str(&text).map_err(|e| format!("{}: {e}", p.display()))?,
+                );
             }
             let pts = trend::points(&docs)?;
             let fits = trend::fits(&pts, beta, gamma);

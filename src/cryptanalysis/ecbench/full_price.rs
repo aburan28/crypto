@@ -307,7 +307,9 @@ fn field_and_lookup_ns(inst: &BinaryInstance, seed: u64) -> BTreeMap<&'static st
     let gf = &inst.gf;
     let mut rng = StdRng::seed_from_u64(seed);
     let mask = (1u64 << inst.n) - 1;
-    let xs: Vec<u64> = (0..1024).map(|_| (rng.gen::<u64>() & mask).max(1)).collect();
+    let xs: Vec<u64> = (0..1024)
+        .map(|_| (rng.gen::<u64>() & mask).max(1))
+        .collect();
     let samples = 400_000u64;
     let mut out = BTreeMap::new();
     let start = Instant::now();
@@ -315,14 +317,20 @@ fn field_and_lookup_ns(inst: &BinaryInstance, seed: u64) -> BTreeMap<&'static st
     for i in 0..samples {
         acc = gf.mul(acc, xs[(i % 1024) as usize]) ^ 1;
     }
-    out.insert("field_mul", start.elapsed().as_nanos() as f64 / samples as f64);
+    out.insert(
+        "field_mul",
+        start.elapsed().as_nanos() as f64 / samples as f64,
+    );
     std::hint::black_box(acc);
     let start = Instant::now();
     let mut acc = xs[1];
     for i in 0..samples {
         acc = gf.sqr(acc) ^ xs[(i % 1024) as usize];
     }
-    out.insert("field_sqr", start.elapsed().as_nanos() as f64 / samples as f64);
+    out.insert(
+        "field_sqr",
+        start.elapsed().as_nanos() as f64 / samples as f64,
+    );
     std::hint::black_box(acc);
     let inv_samples = samples / 4;
     let start = Instant::now();
@@ -422,14 +430,23 @@ mod tests {
         for (slug, _) in doc["instances"].as_object().unwrap() {
             let r = row(slug).unwrap();
             assert_eq!(r.len(), UNITS.len());
-            assert!(r.values().all(|v| *v > 0.0), "{slug}: a unit priced at zero");
+            assert!(
+                r.values().all(|v| *v > 0.0),
+                "{slug}: a unit priced at zero"
+            );
         }
     }
 
     #[test]
     fn an_unknown_counter_stays_unpriced() {
         let doc: Value = serde_json::from_str(FULL_PRICES).unwrap();
-        let slug = doc["instances"].as_object().unwrap().keys().next().unwrap().clone();
+        let slug = doc["instances"]
+            .as_object()
+            .unwrap()
+            .keys()
+            .next()
+            .unwrap()
+            .clone();
         let mut rep = SolveReport {
             recovered: None,
             exhausted: false,
@@ -437,9 +454,12 @@ mod tests {
                 name: "relations".into(),
                 adds: 10,
                 doubles: 2,
-                native: [("lookups".to_string(), 4u64), ("mystery_work".to_string(), 3)]
-                    .into_iter()
-                    .collect(),
+                native: [
+                    ("lookups".to_string(), 4u64),
+                    ("mystery_work".to_string(), 3),
+                ]
+                .into_iter()
+                .collect(),
                 ..Default::default()
             }],
             total_gae: 0.0,
