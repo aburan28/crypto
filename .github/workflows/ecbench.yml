@@ -339,7 +339,10 @@ jobs:
           # This L0 diagnostic also needs an independent replay. The native
           # checker enforces both conditions without a legacy Python verifier.
           ./target/release/ecbench claim check --report "$RUNNER_TEMP/claim.json" > "$RUNNER_TEMP/check-native.json" && exit 1 || true
-          jq -e '.status == "FAIL" and .validation_errors == [
+          jq -e '.status == "FAIL" and .missing_global_provenance == []
+            and .pairing_errors == [] and .missing_stage_fields == [
+            "ic_replay_certificate_sha256",
+            "rho_replay_certificate_sha256"] and .validation_errors == [
             "independent_validation must be true",
             "ic_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
             "rho_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
