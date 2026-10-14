@@ -9348,12 +9348,17 @@ pub fn refutation_degree_trace_take() -> Option<RefutationDegreeTrace> {
     REFUTATION_TRACE.with(|t| t.borrow_mut().as_mut().map(std::mem::take))
 }
 
+// Retain these hooks for the sealed trace schema and probe. No production
+// call site is enabled yet, so manufacturing accounting events here would be
+// less accurate than leaving the dormant hooks explicit.
+#[allow(dead_code)]
 fn trace_on() -> bool {
     REFUTATION_TRACE.with(|t| t.borrow().is_some())
 }
 
 /// Charge the stage-unit word operations a node spent since `w0` (its
 /// entry, children excluded) to the refuted or the split nodes.
+#[allow(dead_code)]
 fn trace_cost(w0: Option<u64>, refuted: bool) {
     let Some(w0) = w0 else { return };
     let spent = f4_word_ops_thread().wrapping_sub(w0);
@@ -9368,6 +9373,7 @@ fn trace_cost(w0: Option<u64>, refuted: bool) {
     });
 }
 
+#[allow(dead_code)]
 fn trace(f: impl FnOnce(&mut RefutationDegreeTrace)) {
     REFUTATION_TRACE.with(|t| {
         if let Some(trace) = t.borrow_mut().as_mut() {
@@ -9422,4 +9428,3 @@ thread_local! {
 pub fn set_early_abort_mode(mode: Option<u8>) {
     EARLY_ABORT_OVERRIDE.with(|m| m.set(mode));
 }
-

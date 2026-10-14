@@ -41,7 +41,7 @@ fn is_prime(n: u64) -> bool {
         return false;
     }
     for p in [2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
-        if n % p == 0 {
+        if n.is_multiple_of(p) {
             return n == p;
         }
     }
@@ -82,7 +82,7 @@ fn sqrtmod(a: u64, p: u64) -> Option<u64> {
     }
     let mut q = p - 1;
     let mut s = 0;
-    while q % 2 == 0 {
+    while q.is_multiple_of(2) {
         q /= 2;
         s += 1;
     }
@@ -93,7 +93,7 @@ fn sqrtmod(a: u64, p: u64) -> Option<u64> {
     let mut m = s;
     let mut c = powmod(z, q, p);
     let mut t = powmod(a, q, p);
-    let mut r = powmod(a, (q + 1) / 2, p);
+    let mut r = powmod(a, q.div_ceil(2), p);
     while t != 1 {
         let mut i = 0;
         let mut tt = t;
@@ -232,10 +232,15 @@ fn order_2r_generator(p: u64, a: u64, b: u64, n: u64, r: u64, rng: &mut Rng) -> 
 
 /// The first point of order 2r on a curve known to have order 2r, then
 /// its double (order r). Returns the order-r generator.
+#[allow(dead_code)]
 fn first_generator_2r(p: u64, a: u64, b: u64, n: u64, r: u64) -> Option<(u64, u64)> {
     let mut x = 0u64;
     while x < p {
-        let rhs = addmod(addmod(mulmod(x, mulmod(x, x, p), p), mulmod(a, x, p), p), b, p);
+        let rhs = addmod(
+            addmod(mulmod(x, mulmod(x, x, p), p), mulmod(a, x, p), p),
+            b,
+            p,
+        );
         if let Some(y) = sqrtmod(rhs, p) {
             if y != 0 {
                 let pt = Some((x, y));
@@ -255,10 +260,14 @@ fn first_generator_2r(p: u64, a: u64, b: u64, n: u64, r: u64) -> Option<(u64, u6
 }
 
 /// The first point of order exactly N (cofactor 1).
-fn first_generator(p: u64, a: u64, b: u64, n: u64) -> Option<(u64, u64)> {
+fn first_generator(p: u64, a: u64, b: u64, _n: u64) -> Option<(u64, u64)> {
     let mut x = 0u64;
     while x < p {
-        let rhs = addmod(addmod(mulmod(x, mulmod(x, x, p), p), mulmod(a, x, p), p), b, p);
+        let rhs = addmod(
+            addmod(mulmod(x, mulmod(x, x, p), p), mulmod(a, x, p), p),
+            b,
+            p,
+        );
         if let Some(y) = sqrtmod(rhs, p) {
             if y != 0 {
                 return Some((x, y));
@@ -298,12 +307,12 @@ fn main() {
         let k = 20u32;
         let base = 1u64 << k;
         let mut lo = base - base / 33;
-        if lo % 2 == 0 {
+        if lo.is_multiple_of(2) {
             lo += 1;
         }
         let hi = base + base / 33;
         let mut found: Option<Value> = None;
-        'd4: for ell in ((lo..=hi).step_by(2)) {
+        'd4: for ell in (lo..=hi).step_by(2) {
             if !is_prime(ell) {
                 continue;
             }
@@ -338,7 +347,10 @@ fn main() {
                 let (ca, gx, gy) = match crater {
                     Some(c) => c,
                     None => {
-                        eprintln!("d4 crater miss ell={} t={} after {} trials", ell, t, crater_trials);
+                        eprintln!(
+                            "d4 crater miss ell={} t={} after {} trials",
+                            ell, t, crater_trials
+                        );
                         failures.push(json!({"family": "d4", "ell": ell, "t": t,
                             "reason": "no order-2r quartic twist of j = 1728 within the scan"}));
                         continue;
@@ -408,20 +420,20 @@ fn main() {
         let k = 22u32;
         let base = 1u64 << k;
         let mut lo = base - base / 33;
-        if lo % 2 == 0 {
+        if lo.is_multiple_of(2) {
             lo += 1;
         }
         let hi = base + base / 33;
         let mut found: Option<Value> = None;
-        'd19: for ell in ((lo..=hi).step_by(2)) {
+        'd19: for ell in (lo..=hi).step_by(2) {
             if !is_prime(ell) {
                 continue;
             }
             for t in (3u64..=3999).step_by(2) {
                 for &sign in &[1i64, -1i64] {
-                    let tt = (t as i64 * sign) as i64;
+                    let tt = t as i64 * sign;
                     let num = (tt * tt) as u128 + 19u128 * (ell as u128) * (ell as u128);
-                    if num % 4 != 0 {
+                    if !num.is_multiple_of(4) {
                         continue;
                     }
                     let q = (num / 4) as u64;
