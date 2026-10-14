@@ -70,3 +70,8 @@ ECBENCH=$CARGO_TARGET_DIR/release/ecbench bash research/ecbench_rootfind_parity_
 ECBENCH=$CARGO_TARGET_DIR/release/ecbench bash research/ecbench_rootfind_parity_20261013/run.sh cycle2
 ECBENCH=$CARGO_TARGET_DIR/release/ecbench bash research/ecbench_rootfind_parity_20261013/run.sh claim
 ```
+
+## Tests
+
+- Full `cargo test --release --lib`: **4 failures**, all `cryptanalysis::jv_cover::*` (isolated as flaky per brief); suite interrupted while `ecc::barrett_ecdsa::full_param_generation_tiny_prime` was still running.
+- `cargo test --release --lib -- --skip jv_cover`: **4035 ok / 0 failed** before interrupt; three unrelated slow tests still running (`koblitz_sym_s4::symmetric_solver`, `pdp_split::plans_agree_with_exhaustive_m3`, `barrett_ecdsa::full_param_generation_tiny_prime`). Logs under `logs/`.
