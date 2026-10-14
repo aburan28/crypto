@@ -269,6 +269,12 @@ fn main() {
                 continue;
             }
             let cost = x["cost"].as_f64().unwrap();
+            if x["correct"].as_bool().unwrap() && (arm == "ic2lp" || arm == "basic" || arm == "ic1lp") {
+                // phase split (derived): linear algebra = counted mults mod ell; the rest = relation phase
+                let la = x["counters"][2].as_f64().unwrap();
+                d.entry(format!("{}_la", arm)).or_default().entry(b).or_default().insert(c, (q.ln(), la.ln()));
+                d.entry(format!("{}_rel", arm)).or_default().entry(b).or_default().insert(c, (q.ln(), (cost - la).ln()));
+            }
             if x["correct"].as_bool().unwrap() {
                 d.entry(arm.clone()).or_default().entry(b).or_default().insert(c, (q.ln(), cost.ln()));
                 d9.entry(arm.clone()).or_default().entry(b).or_default().insert(c, (q.ln(), x["cost_cl9"].as_f64().unwrap().ln()));

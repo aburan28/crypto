@@ -46,6 +46,11 @@ for arm, lab, col, mk in ARMS:
     lo = [iv["local"] - iv["ci"][0] for iv in le["intervals"]]
     hi = [iv["ci"][1] - iv["local"] for iv in le["intervals"]]
     ax.errorbar(xs, ys, yerr=[lo, hi], fmt=mk + "-", color=col, ms=4, capsize=2, lw=1, label=lab)
+for arm, lab, col, ls in [("ic2lp_la", "IC-2LP linear algebra only", "#1f6fb2", "--"),
+                          ("ic2lp_rel", "IC-2LP relation phase only", "#1f6fb2", ":")]:
+    le = S["local_exponents"].get(arm)
+    xs = [(iv["from"] + iv["to"]) / 2 for iv in le["intervals"]]
+    ax.plot(xs, [iv["local"] for iv in le["intervals"]], ls, color=col, lw=1.2, alpha=0.7, label=lab)
 for v, t in [(4 / 3, "4/3 (GTTD, g=3)"), (10 / 7, "10/7 (1LP)"), (2.0, "2")]:
     ax.axhline(v, color="#999", ls=":", lw=1)
     ax.text(10.1, v + 0.01, t, fontsize=7, color="#555")

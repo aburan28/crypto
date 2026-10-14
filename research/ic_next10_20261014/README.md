@@ -1,5 +1,11 @@
 # IC next-10 campaign: improvements measured (2026-10-14)
 
+> **Correction (2026-10-14, [improvement round](../ic_improve_20261014/README.md)).** Three figures here are corrected by the follow-up round:
+>
+> - Item 7's 1.30 vs 1.65 compared different size ranges. On a common range the figures are q^1.385 vs q^1.910 (Δ −0.525).
+> - Item 6's 44–73× was measured against a naive kernel; it is 2–3× against `gf2_elim`.
+> - Item 8's trace-zero filter never fires on odd-order IC targets.
+
 This campaign ran the ten unexecuted index calculus (IC) items ranked in
 [`reports/Index calculus leads next steps.md`](../../reports/Index%20calculus%20leads%20next%20steps.md).
 
