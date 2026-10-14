@@ -39,3 +39,7 @@ record (`d8593190…`), which remains the published factor_base frontier.
 Closed PR #1621 archived a mid-receipt-crash recovery of the same beat as
 `20261010T044040Z-2b5ad63dff` and never merged. This run replaces that draft
 with a clean receipt on current main.
+
+## Later independent replay
+
+Control-plane replay archived at `../20261014-koblitz-factor-base-n53/` (run `20261014T014101Z-9264d0fee7`).

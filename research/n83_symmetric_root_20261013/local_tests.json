@@ -1,0 +1,112 @@
+{
+  "cargo_lock_sha256": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+  "current_merge_commit": "412b9970eebb3cd21db006a5451dad8f4ec8fb7a",
+  "example_suite": {
+    "command": "cargo test --locked --release --example koblitz_orbit_dlp_fast",
+    "log": "example_tests.log",
+    "status": "PASS",
+    "tests_passed": 16
+  },
+  "first_witness_control": {
+    "log": "first_witness_test.log",
+    "status": "PASS"
+  },
+  "interpretation": "The broad local library attempt is not a passing suite. Targeted retries pass for every failure observed; current merged-head CI remains required before merge.",
+  "lean": {
+    "log": "proof_check.log",
+    "status": "PASS_CHECKED_MODULE_AXIOM_AUDIT"
+  },
+  "library_attempt_1": {
+    "log": "lib_tests_sparse_missing.log",
+    "status": "FAILED_SPARSE_MISSING_TEST_FIXTURE"
+  },
+  "library_attempt_2": {
+    "command": "CARGO_TARGET_DIR=/Volumes/SSD990/llm/tmp/n83-symmetric-target cargo test --locked --release --lib",
+    "completed_test_lines": 4122,
+    "declared_tests": 4167,
+    "exit_code": 130,
+    "failed_tests": [
+      "cryptanalysis::jv_cover::tests::stopped_f4_agrees_with_the_full_solver_and_the_oracle",
+      "cryptanalysis::jv_cover::tests::replayed_f4_agrees_with_the_full_solver_and_the_oracle",
+      "cryptanalysis::jv_cover::tests::the_solver_loses_no_rational_solution_at_small_p",
+      "cryptanalysis::jv_cover::tests::nagao_finds_planted_six_sums_and_agrees_with_the_oracle",
+      "cryptanalysis::pollard_collab::cairn::tests::a_key_submitter_signs_what_cairn_verifies",
+      "cryptanalysis::pollard_collab::cairn::tests::an_older_node_without_progress_turns_heartbeats_off_quietly",
+      "cryptanalysis::pollard_collab::cairn::tests::generic_artifacts_use_the_persisted_commit_reveal_outbox",
+      "cryptanalysis::pollard_collab::cairn::tests::heartbeats_carry_the_sessions_own_counters_at_the_cadence",
+      "cryptanalysis::pollard_collab::cairn::tests::pending_commitments_survive_a_restart",
+      "cryptanalysis::pollard_collab::cairn::tests::points_travel_through_cairn_as_commit_reveal_claims_and_solve",
+      "cryptanalysis::pollard_collab::cairn::tests::the_client_speaks_enough_http",
+      "cryptanalysis::pollard_collab::net::tests::foreign_job_is_refused",
+      "cryptanalysis::pollard_collab::net::tests::three_nodes_in_a_chain_converge",
+      "ecc::cryptopro_b_chain_set::tests::a_step_that_does_not_compose_is_refused - should panic",
+      "ecc::cryptopro_b_chain_set::tests::frozen_chains_are_multiplication_by_lambda_and_orderings_agree",
+      "ecc::cryptopro_b_chain_set::tests::frozen_set_loads_and_every_chain_prepares",
+      "ecc::cryptopro_b_chain_set::tests::frozen_set_reproduces_its_test_vectors",
+      "ecc::cryptopro_b_chain_set::tests::tampered_sets_are_refused"
+    ],
+    "log": "lib_tests.log",
+    "reported_failures": 18,
+    "status": "INTERRUPTED_AFTER_FAILURES"
+  },
+  "log_sha256": {
+    "cryptopro_fixture_retry.log": "bc55f07f9a812ff3e2dc78aef3fbbf0f003d1bdeaef40b31761a7c5cd7eb5391",
+    "example_tests.log": "0557e2b8f60742ff7a1c243d5d22d1a9446340a2fb674d8cb676ddd27c43d78d",
+    "first_witness_test.log": "ef44bbf45bd7425714453b63330dc2a85fd811d6ef85a9bcc2505ff2ba0c1705",
+    "jv_loss_retry.log": "e412a66e8c04e94864ddafd8e33b8242ce13fe26120d2485fff70cd038a39b81",
+    "jv_nagao_retry.log": "4cdf673f33df35c91dd474768737bf159f91c89b7063d3abd1e229ba9abd8e72",
+    "jv_replayed_retry.log": "db5854348b269de8ef23ef768f69c627c237178ea1b06ebaad5b362ab83bba3c",
+    "jv_stopped_retry.log": "bc1a595e413d0f2411a3173d5ca0a29512339fc5c87b41d8ba0d1abd36cd2e3a",
+    "lib_tests.log": "74427451f1d949e5e6b0e07dfc3c344ecebaa957aa9896718f7ba0d95237d65a",
+    "lib_tests_sparse_missing.log": "294f7b7354960ad85c6e3353a41bcbb5d2d75513ab86d5b27154ae43a1f83443",
+    "pollard_socket_retry.log": "355ad7107efca6493b1b18c11af6c6ddfc3916203d1effe0b496c743f079378d",
+    "proof_check.log": "72f2c3e09d224d8eb03996965dd396e3f6f7ee10ddbb191074fe442981c5f544"
+  },
+  "schema": "n83.symmetric-s3-local-verification/v1",
+  "source_commit": "4d196194b31e839409c7dfcf452f20ca5e48b2e6",
+  "source_sha256": "e3a37208fc72fe809a8bbc2a1604f0d59f8a6582a9deaa3fd58a077083bf2c3f",
+  "targeted_retries": [
+    {
+      "condition": "materialized research/cryptopro_b_chain_sweep_20261006/frozen_inputs in sparse checkout",
+      "group": "CryptoPro committed fixture",
+      "log": "cryptopro_fixture_retry.log",
+      "status": "PASS",
+      "tests_passed": 5
+    },
+    {
+      "condition": "loopback socket access; one test thread",
+      "group": "Pollard collaboration",
+      "log": "pollard_socket_retry.log",
+      "status": "PASS",
+      "tests_passed": 37
+    },
+    {
+      "condition": "one test thread",
+      "group": "jv_cover nagao",
+      "log": "jv_nagao_retry.log",
+      "status": "PASS",
+      "tests_passed": 1
+    },
+    {
+      "condition": "one test thread",
+      "group": "jv_cover stopped",
+      "log": "jv_stopped_retry.log",
+      "status": "PASS",
+      "tests_passed": 1
+    },
+    {
+      "condition": "one test thread",
+      "group": "jv_cover replayed",
+      "log": "jv_replayed_retry.log",
+      "status": "PASS",
+      "tests_passed": 1
+    },
+    {
+      "condition": "one test thread",
+      "group": "jv_cover loss",
+      "log": "jv_loss_retry.log",
+      "status": "PASS",
+      "tests_passed": 1
+    }
+  ]
+}

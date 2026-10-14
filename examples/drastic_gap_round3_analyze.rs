@@ -19,9 +19,7 @@ fn log_paired(a: &[f64], b: &[f64]) -> Value {
     // b/a per index (same target index = same scalar), mean of logs,
     // bootstrap over indices jointly.
     let n = a.len().min(b.len());
-    let d: Vec<f64> = (0..n)
-        .map(|i| (b[i] / a[i]).ln())
-        .collect();
+    let d: Vec<f64> = (0..n).map(|i| (b[i] / a[i]).ln()).collect();
     let stat = d.iter().sum::<f64>() / n as f64;
     let mut rng = Resampler::new(SEED);
     let mut boot = Vec::with_capacity(SAMPLES);
@@ -58,17 +56,19 @@ fn independent(a: &[f64], b: &[f64]) -> Value {
 }
 
 fn arg(args: &[String], name: &str) -> String {
-    let i = args.iter().position(|s| s == name).expect("required argument");
+    let i = args
+        .iter()
+        .position(|s| s == name)
+        .expect("required argument");
     args.get(i + 1).expect("argument value").clone()
 }
 
 /// Per-workload S keyed by target index (the planted k's index), for one
 /// (session, arm, curve). Only measured, verified, shared-law records.
 fn per_index(dir: &Path, arm: &str, curve_index: usize) -> Result<BTreeMap<u64, f64>, String> {
-    let spec: Value = serde_json::from_slice(
-        &std::fs::read(dir.join("spec.json")).map_err(|e| e.to_string())?,
-    )
-    .map_err(|e| e.to_string())?;
+    let spec: Value =
+        serde_json::from_slice(&std::fs::read(dir.join("spec.json")).map_err(|e| e.to_string())?)
+            .map_err(|e| e.to_string())?;
     let curves = spec["workloads"]["curves"].as_array().ok_or("curves")?;
     if curves.len() <= curve_index {
         return Err("curve index out of range".into());
@@ -152,10 +152,8 @@ fn main() -> Result<(), String> {
     // D = -4 pair: rho-neg both, rho-quartic crater
     {
         let doc: Value = serde_json::from_slice(
-            &std::fs::read(
-                Path::new(&root).join("..").join("pairs").join("pairs.json"),
-            )
-            .map_err(|e| e.to_string())?,
+            &std::fs::read(Path::new(&root).join("..").join("pairs").join("pairs.json"))
+                .map_err(|e| e.to_string())?,
         )
         .map_err(|e| e.to_string())?;
         let ell = doc["pairs"]
@@ -183,10 +181,8 @@ fn main() -> Result<(), String> {
     // D = -19 gap sweep
     {
         let doc: Value = serde_json::from_slice(
-            &std::fs::read(
-                Path::new(&root).join("..").join("pairs").join("pairs.json"),
-            )
-            .map_err(|e| e.to_string())?,
+            &std::fs::read(Path::new(&root).join("..").join("pairs").join("pairs.json"))
+                .map_err(|e| e.to_string())?,
         )
         .map_err(|e| e.to_string())?;
         let ell = doc["pairs"]
@@ -241,7 +237,9 @@ Paired planted-shared scalars (the same `k` on both curves); per-index log quoti
         let _ = writeln!(
             md,
             "| {} | {} | {} | {} | {} | {} |",
-            r["family"], r["ell"], r["prediction"],
+            r["family"],
+            r["ell"],
+            r["prediction"],
             q("same_method_paired"),
             q("best_method_paired"),
             q("same_method_independent"),
