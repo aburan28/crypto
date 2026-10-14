@@ -47,8 +47,8 @@ fn main() {
             collection_window: window,
             ..KoblitzIcOptions::default()
         };
-        let collector = RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair))
-            .expect("collector");
+        let collector =
+            RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair)).expect("collector");
         let unit = RelationWorkUnit {
             seed: 7,
             start: 0,

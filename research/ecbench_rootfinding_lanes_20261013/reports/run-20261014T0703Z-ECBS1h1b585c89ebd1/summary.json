@@ -1,0 +1,77 @@
+{
+  "b48-stride-1": {
+    "n": 24,
+    "verified": 24,
+    "gae_mean": 8097.833333333333,
+    "gae_min": 5624.0,
+    "gae_max": 10711.0,
+    "lookups": 92058,
+    "relations": 722,
+    "relations_per_1000_lookups": 7.84288166156119,
+    "field_ops_serialized": false,
+    "isolation_levels": [
+      "L0"
+    ],
+    "rss_kib_max": 31184
+  },
+  "b48-stride-23": {
+    "n": 24,
+    "verified": 24,
+    "gae_mean": 7802.125,
+    "gae_min": 5816.0,
+    "gae_max": 11168.0,
+    "lookups": 86521,
+    "relations": 718,
+    "relations_per_1000_lookups": 8.29856335456132,
+    "field_ops_serialized": false,
+    "isolation_levels": [
+      "L0"
+    ],
+    "rss_kib_max": 31200
+  },
+  "b48-stride-7": {
+    "n": 24,
+    "verified": 24,
+    "gae_mean": 8238.416666666666,
+    "gae_min": 5907.0,
+    "gae_max": 10692.0,
+    "lookups": 94587,
+    "relations": 744,
+    "relations_per_1000_lookups": 7.865774366456279,
+    "field_ops_serialized": false,
+    "isolation_levels": [
+      "L0"
+    ],
+    "rss_kib_max": 31152
+  },
+  "rho-neg": {
+    "n": 24,
+    "verified": 24,
+    "gae_mean": 886.3333333333334,
+    "gae_min": 303.0,
+    "gae_max": 1790.0,
+    "lookups": 0,
+    "relations": 0,
+    "relations_per_1000_lookups": null,
+    "field_ops_serialized": true,
+    "isolation_levels": [
+      "L0"
+    ],
+    "rss_kib_max": 27664
+  },
+  "rho-neg-aa": {
+    "n": 24,
+    "verified": 24,
+    "gae_mean": 886.3333333333334,
+    "gae_min": 303.0,
+    "gae_max": 1790.0,
+    "lookups": 0,
+    "relations": 0,
+    "relations_per_1000_lookups": null,
+    "field_ops_serialized": true,
+    "isolation_levels": [
+      "L0"
+    ],
+    "rss_kib_max": 27648
+  }
+}

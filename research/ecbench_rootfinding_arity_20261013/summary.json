@@ -1,0 +1,122 @@
+[
+  {
+    "arm": "pair-m2",
+    "n": 24,
+    "verified": 24,
+    "errors": 0,
+    "error_messages": [],
+    "mean_gae": 17909.291666666668,
+    "mean_trials": 10223,
+    "phases": [
+      {
+        "name": "factor_base",
+        "mean_gae": 0
+      },
+      {
+        "name": "linear_algebra",
+        "mean_gae": 0
+      },
+      {
+        "name": "oracle_setup",
+        "mean_gae": 4160
+      },
+      {
+        "name": "relations",
+        "mean_gae": 12087.916666666666
+      },
+      {
+        "name": "verify",
+        "mean_gae": 1661.375
+      }
+    ]
+  },
+  {
+    "arm": "pair-m3",
+    "n": 24,
+    "verified": 24,
+    "errors": 0,
+    "error_messages": [],
+    "mean_gae": 25634.375,
+    "mean_trials": 227.5,
+    "phases": [
+      {
+        "name": "factor_base",
+        "mean_gae": 0
+      },
+      {
+        "name": "linear_algebra",
+        "mean_gae": 0
+      },
+      {
+        "name": "oracle_setup",
+        "mean_gae": 4160
+      },
+      {
+        "name": "relations",
+        "mean_gae": 19813
+      },
+      {
+        "name": "verify",
+        "mean_gae": 1661.375
+      }
+    ]
+  },
+  {
+    "arm": "rho-neg",
+    "n": 24,
+    "verified": 24,
+    "errors": 0,
+    "error_messages": [],
+    "mean_gae": 894.1666666666666,
+    "mean_trials": null,
+    "phases": [
+      {
+        "name": "internal_verification",
+        "mean_gae": 26.375
+      },
+      {
+        "name": "search",
+        "mean_gae": 729.7083333333334
+      },
+      {
+        "name": "setup",
+        "mean_gae": 138.08333333333334
+      }
+    ]
+  },
+  {
+    "arm": "rho-neg-aa",
+    "n": 24,
+    "verified": 24,
+    "errors": 0,
+    "error_messages": [],
+    "mean_gae": 894.1666666666666,
+    "mean_trials": null,
+    "phases": [
+      {
+        "name": "internal_verification",
+        "mean_gae": 26.375
+      },
+      {
+        "name": "search",
+        "mean_gae": 729.7083333333334
+      },
+      {
+        "name": "setup",
+        "mean_gae": 138.08333333333334
+      }
+    ]
+  },
+  {
+    "arm": "rootfind-m3",
+    "n": 24,
+    "verified": 0,
+    "errors": 24,
+    "error_messages": [
+      "oracle `rootfind-subtract` does not run on a prime curve"
+    ],
+    "mean_gae": null,
+    "mean_trials": null,
+    "phases": []
+  }
+]

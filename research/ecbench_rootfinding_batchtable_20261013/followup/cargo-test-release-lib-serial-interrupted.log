@@ -1,0 +1,881 @@
+warning: unused import: `ToPrimitive`
+  --> src/cryptanalysis/curve_traits/mod.rs:50:31
+   |
+50 | use num_traits::{One, Signed, ToPrimitive, Zero};
+   |                               ^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: duplicated attribute
+    --> src/cryptanalysis/ic_boundary.rs:8167:5
+     |
+8167 |     #[test]
+     |     ^^^^^^^
+     |
+     = note: `#[warn(duplicate_macro_attributes)]` on by default
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:727:13
+    |
+727 |         let current = LegacyFloatFixture {
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:733:13
+    |
+733 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:734:13
+    |
+734 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:735:13
+    |
+735 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: variable does not need to be mutable
+    --> src/cryptanalysis/ic_boundary.rs:1428:13
+     |
+1428 |         let mut consider = |pt: PrimePoint, mu: u64, best: &mut PrimePoint, best_key: &mut u64, best_mu: &mut u64| {
+     |             ----^^^^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `signed_frobenius_classes_name_the_class_and_its_multiplier` is never used
+    --> src/cryptanalysis/ic_boundary.rs:8270:8
+     |
+8270 |     fn signed_frobenius_classes_name_the_class_and_its_multiplier() {
+     |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `plans` is never read
+   --> src/cryptanalysis/inherited_f4.rs:513:5
+    |
+505 | struct LayoutStep {
+    |        ---------- field in this struct
+...
+513 |     plans: RefCell<HashMap<u32, Rc<RewritePlan>>>,
+    |     ^^^^^
+    |
+    = note: `LayoutStep` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: function `zeroed_words` is never used
+    --> src/cryptanalysis/inherited_f4.rs:1019:4
+     |
+1019 | fn zeroed_words(n: usize) -> Rc<[u64]> {
+     |    ^^^^^^^^^^^^
+
+warning: method `rewrite_plan` is never used
+    --> src/cryptanalysis/inherited_f4.rs:1808:8
+     |
+1330 | impl ReducedBasis {
+     | ----------------- method in this implementation
+...
+1808 |     fn rewrite_plan(&self, from: u32) -> Rc<RewritePlan> {
+     |        ^^^^^^^^^^^^
+
+warning: function `trace_on` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:9351:4
+     |
+9351 | fn trace_on() -> bool {
+     |    ^^^^^^^^
+
+warning: function `trace_cost` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:9357:4
+     |
+9357 | fn trace_cost(w0: Option<u64>, refuted: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `trace` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:9371:4
+     |
+9371 | fn trace(f: impl FnOnce(&mut RefutationDegreeTrace)) {
+     |    ^^^^^
+
+warning: `crypto` (lib test) generated 14 warnings (run `cargo fix --lib -p crypto --tests` to apply 6 suggestions)
+    Finished `release` profile [optimized] target(s) in 0.67s
+     Running unittests src/lib.rs (target/release/deps/crypto_lib-e89b2f0dbc9b5389)
+
+running 4194 tests
+test asymmetric::ec_elgamal::tests::checked_encrypt_rejects_invalid_public_key_and_plaintext_collision ... ok
+test asymmetric::ec_elgamal::tests::decrypt_large_message_bounded ... ignored, slow: 1M-entry BSGS table; run with --ignored
+test asymmetric::ec_elgamal::tests::decrypt_out_of_range_fails ... ok
+test asymmetric::ec_elgamal::tests::decrypt_rejects_invalid_ciphertext_points ... ok
+test asymmetric::ec_elgamal::tests::decrypt_with_wrong_key_fails ... ok
+test asymmetric::ec_elgamal::tests::encrypt_decrypt_roundtrip_one ... ok
+test asymmetric::ec_elgamal::tests::encrypt_decrypt_roundtrip_small ... ignored, slow: 5 × P-256 affine scalar mul + 5 × BSGS; run with --ignored
+test asymmetric::ec_elgamal::tests::encrypt_is_probabilistic ... ignored, slow: two P-256 encrypts + two BSGS decrypts; run with --ignored
+test asymmetric::ec_elgamal::tests::encrypted_vote_tally ... ignored, slow: 10 P-256 ballots + tally + BSGS decrypt; run with --ignored
+test asymmetric::ec_elgamal::tests::homomorphic_add_plain ... ignored, slow: P-256 affine scalar mul; run with --ignored
+test asymmetric::ec_elgamal::tests::homomorphic_add_two_ciphertexts ... ignored, slow: P-256 affine scalar mul; run with --ignored
+test asymmetric::ec_elgamal::tests::homomorphic_scalar_multiply ... ignored, slow: P-256 affine scalar mul; run with --ignored
+test asymmetric::ec_elgamal::tests::integer_sqrt_ceil_matches_small_cases ... ok
+test asymmetric::ec_elgamal::tests::keygen_produces_valid_keypair ... ok
+test asymmetric::elgamal::tests::decrypt_with_wrong_key_fails ... ok
+test asymmetric::elgamal::tests::encrypt_decrypt_roundtrip ... ok
+test asymmetric::elgamal::tests::encrypt_is_probabilistic ... ok
+test asymmetric::elgamal::tests::encrypt_rejects_zero_and_oversize ... ok
+test asymmetric::elgamal::tests::homomorphic_chained_product ... ok
+test asymmetric::elgamal::tests::homomorphic_exponentiate ... ok
+test asymmetric::elgamal::tests::homomorphic_multiply_by_plain ... ok
+test asymmetric::elgamal::tests::homomorphic_multiply_two_ciphertexts ... ok
+test asymmetric::elgamal::tests::keygen_produces_consistent_keypair ... ok
+test asymmetric::elgamal::tests::rerandomise_preserves_plaintext ... ok
+test asymmetric::elgamal::tests::rfc3526_group_14_is_2048_bit_safe_prime ... ok
+test asymmetric::paillier::tests::decrypt_with_wrong_key_fails ... ok
+test asymmetric::paillier::tests::encrypt_decrypt_max_plaintext ... ok
+test asymmetric::paillier::tests::encrypt_decrypt_roundtrip ... ok
+test asymmetric::paillier::tests::encrypt_decrypt_zero ... ok
+test asymmetric::paillier::tests::encrypt_is_probabilistic ... ok
+test asymmetric::paillier::tests::encrypt_rejects_oversize_plaintext ... ok
+test asymmetric::paillier::tests::encrypted_aggregation_of_ten_values ... ok
+test asymmetric::paillier::tests::homomorphic_add_plain ... ok
+test asymmetric::paillier::tests::homomorphic_add_two_ciphertexts ... ok
+test asymmetric::paillier::tests::homomorphic_add_wraps_at_modulus ... ok
+test asymmetric::paillier::tests::homomorphic_scalar_multiply ... ok
+test asymmetric::paillier::tests::keygen_2048_produces_valid_keypair ... ok
+test asymmetric::paillier::tests::keygen_rejects_small_modulus ... ok
+test asymmetric::paillier::tests::rerandomise_preserves_plaintext ... ok
+test asymmetric::rsa::tests::crt_matches_non_crt_1024 ... ok
+test asymmetric::rsa::tests::crt_params_are_well_formed ... ok
+test asymmetric::rsa::tests::crt_round_trip_1024 ... ok
+test asymmetric::rsa::tests::crt_round_trip_2048 ... ignored, slow keygen — run with `cargo test -- --ignored`
+test asymmetric::rsa::tests::pkcs1_pad_rejects_oversized_message ... ok
+test asymmetric::rsa::tests::pkcs1_pad_unpad_roundtrip ... ok
+test asymmetric::rsa::tests::pkcs1_unpad_rejects_malformed ... ok
+test asymmetric::rsa::tests::primality_known_large_primes ... ok
+test asymmetric::rsa::tests::primality_small ... ok
+test asymmetric::rsa::tests::random_prime_has_correct_bit_length ... ok
+test asymmetric::rsa::tests::rsa_1024_sign_verify ... ok
+test asymmetric::rsa::tests::rsa_decrypt_rejects_tampered_ciphertext ... ok
+test asymmetric::rsa::tests::rsa_encrypt_decrypt ... ok
+test asymmetric::rsa::tests::rsa_encrypt_empty_and_max_message ... ok
+test asymmetric::rsa::tests::rsa_encrypt_is_randomized ... ok
+test asymmetric::rsa::tests::rsa_keygen_modulus_bit_length ... ok
+test asymmetric::rsa::tests::rsa_sign_wrong_message ... ok
+test asymmetric::rsa::tests::rsa_signature_unique_per_message ... ok
+test asymmetric::rsa::tests::rsa_signature_uses_pkcs1_v1_5_encoding ... ok
+test asymmetric::rsa::tests::rsa_verify_with_wrong_key_fails ... ok
+test binary_ecc::cover_transfer::tests::construction_checks_geometry_and_rejects_invalid_inputs ... ok
+test binary_ecc::cover_transfer::tests::exhaustive_f8_models_points_maps_and_compositions ... ok
+test binary_ecc::cover_transfer::tests::infinity_and_exceptional_two_torsion_are_explicit ... ok
+test binary_ecc::cover_transfer::tests::subgroup_status_and_arbitrary_pushforward_boundary ... ok
+test binary_ecc::curve::tests::curves_outside_preconditions_take_the_scalar_path ... ok
+test binary_ecc::curve::tests::double_equals_self_add ... ok
+test binary_ecc::curve::tests::double_stays_on_curve ... ok
+test binary_ecc::curve::tests::inconsistent_declared_order_keeps_the_scalar_subgroup_check ... ok
+test binary_ecc::curve::tests::is_in_4e_edge_cases ... ok
+test binary_ecc::curve::tests::is_in_4e_matches_scalar_check_on_every_point_small_odd_m ... ok
+test binary_ecc::curve::tests::is_in_4e_matches_scalar_check_on_random_coset_points_ecc2k130_sect233k1 ... ok
+test binary_ecc::curve::tests::is_in_4e_on_library_koblitz_cofactor4_generators ... ok
+test binary_ecc::curve::tests::legacy_binary_generators_are_on_curve ... ok
+test binary_ecc::curve::tests::low_security_binary_base_points_match_published_constants ... ok
+test binary_ecc::curve::tests::low_security_binary_catalog_security_categories ... ok
+test binary_ecc::curve::tests::low_security_order_times_generator_is_identity ... ok
+test binary_ecc::curve::tests::point_plus_neg_is_infinity ... ok
+test binary_ecc::curve::tests::public_point_validation_rejects_malformed_coordinate_width_without_panicking ... ok
+test binary_ecc::curve::tests::scalar_mul_by_order_is_identity ... ignored
+test binary_ecc::curve::tests::scalar_mul_matches_handcomputed ... ok
+test binary_ecc::curve::tests::scalar_mul_small_consistency ... ok
+test binary_ecc::curve::tests::sect113r1_public_point_validation_accepts_generator ... ok
+test binary_ecc::curve::tests::sect113r1_public_point_validation_rejects_nominal_order_two_point ... ok
+test binary_ecc::curve::tests::sect113r1_public_point_validation_rejects_same_a_singular_point ... ok
+test binary_ecc::curve::tests::sect163_base_points_match_sec2_constants ... ok
+test binary_ecc::curve::tests::sect163_nominal_security_category_is_80_bit ... ok
+test binary_ecc::curve::tests::sect163_order_times_generator_is_identity ... ok
+test binary_ecc::f2m::tests::add_is_xor ... ok
+test binary_ecc::f2m::tests::debug_output_is_unchanged ... ok
+test binary_ecc::f2m::tests::flt_inverse_deg16_sanity ... ok
+test binary_ecc::f2m::tests::flt_inverse_of_zero_is_none ... ok
+test binary_ecc::f2m::tests::flt_inverse_roundtrip ... ok
+test binary_ecc::f2m::tests::frobenius_endomorphism ... ok
+test binary_ecc::f2m::tests::inline_and_heap_storage_agree_across_the_boundary ... ok
+test binary_ecc::f2m::tests::inverse_roundtrip_all_fields ... ok
+test binary_ecc::f2m::tests::mul_by_one_is_identity ... ok
+test binary_ecc::f2m::tests::mul_commutes ... ok
+test binary_ecc::f2m::tests::reduce_words_matches_bitwise_reduction ... ok
+test binary_ecc::f2m::tests::reduction_works_at_boundary ... ok
+test binary_ecc::f2m::tests::schoolbook_and_karatsuba_agree ... ok
+test binary_ecc::f2m::tests::soft_clmul_matches_shift_xor ... ok
+test binary_ecc::f2m::tests::trace_and_half_trace_tables_match_definitions ... ok
+test binary_ecc::f2m::tests::word_mul_matches_bitwise_reference ... ok
+test binary_ecc::f2m::tests::word_square_matches_mul ... ok
+test binary_ecc::hyperelliptic::tests::bsgs_finds_small_dlp ... ok
+test binary_ecc::hyperelliptic::tests::checked_curve_constructor_binds_field_degree_and_smoothness_errors ... ok
+test binary_ecc::hyperelliptic::tests::checked_divisor_api_rejects_malformed_public_pairs_without_debug_asserts ... ok
+test binary_ecc::hyperelliptic::tests::double_equals_self_add ... ok
+test binary_ecc::hyperelliptic::tests::exhaustive_f8_reduced_domain_has_closure_inverses_and_scalar_consistency ... ok
+test binary_ecc::hyperelliptic::tests::explicit_f8_cubic_cover_map_holds_on_every_affine_pair ... ok
+test binary_ecc::hyperelliptic::tests::identity_is_identity ... ok
+test binary_ecc::hyperelliptic::tests::neg_then_add_is_identity ... ok
+test binary_ecc::hyperelliptic::tests::nontrivial_shared_support_divisors_cover_both_cantor_gcd_branches ... ok
+test binary_ecc::hyperelliptic::tests::ramified_origin_has_a_valid_mumford_pair_and_order_two ... ok
+test binary_ecc::hyperelliptic::tests::scalar_mul_distributes_over_zero ... ok
+test binary_ecc::poly_f2m::tests::add_is_xor ... ok
+test binary_ecc::poly_f2m::tests::divrem_invariant ... ok
+test binary_ecc::poly_f2m::tests::divrem_random_nonmonic_163 ... ok
+test binary_ecc::poly_f2m::tests::divrem_self_is_one_zero ... ok
+test binary_ecc::poly_f2m::tests::eval_horner ... ok
+test binary_ecc::poly_f2m::tests::ext_gcd_bezout ... ok
+test binary_ecc::poly_f2m::tests::gcd_monic ... ok
+test binary_ecc::poly_f2m::tests::mul_degree_adds ... ok
+test bls12_381::fq12::tests::inverse_roundtrip ... ok
+test bls12_381::fq12::tests::mul_one_is_identity ... ok
+test bls12_381::fq12::tests::square_matches_mul ... ok
+test bls12_381::fq2::tests::add_sub_neg_basic ... ok
+test bls12_381::fq2::tests::frobenius_squared_is_identity ... ok
+test bls12_381::fq2::tests::inverse_roundtrip ... ok
+test bls12_381::fq2::tests::mul_by_nonresidue_consistent ... ok
+test bls12_381::fq2::tests::mul_distributive ... ok
+test bls12_381::fq2::tests::square_matches_mul ... ok
+test bls12_381::fq6::tests::add_neg_inverse ... ok
+test bls12_381::fq6::tests::inverse_roundtrip ... ok
+test bls12_381::fq6::tests::mul_distributive ... ok
+test bls12_381::fq6::tests::mul_one_is_identity ... ok
+test bls12_381::fq6::tests::square_matches_mul ... ok
+test bls12_381::fq::tests::add_sub_neg_basic ... ok
+test bls12_381::fq::tests::inverse_roundtrip ... ok
+test bls12_381::fq::tests::modulus_has_381_bits ... ok
+test bls12_381::fq::tests::modulus_is_3_mod_4 ... ok
+test bls12_381::fq::tests::mul_square_consistency ... ok
+test bls12_381::fq::tests::non_qr_returns_none ... ok
+test bls12_381::fq::tests::scalar_modulus_has_255_bits ... ok
+test bls12_381::fq::tests::sqrt_roundtrip ... ok
+test bls12_381::g1::tests::add_neg_is_infinity ... ok
+test bls12_381::g1::tests::double_matches_self_add ... ok
+test bls12_381::g1::tests::generator_is_on_curve ... ok
+test bls12_381::g1::tests::scalar_mul_1_is_self ... ok
+test bls12_381::g1::tests::scalar_mul_associates ... ok
+test bls12_381::g1::tests::subgroup_check_on_generator ... ok
+test bls12_381::g2::tests::add_neg_is_infinity ... ok
+test bls12_381::g2::tests::double_matches_self_add ... ok
+test bls12_381::g2::tests::generator_is_on_curve ... ok
+test bls12_381::g2::tests::scalar_mul_associates ... ok
+test bls12_381::g2::tests::subgroup_check_on_generator ... ignored
+test bls12_381::pairing::tests::pairing_bilinear_in_g1 ... ignored
+test bls12_381::pairing::tests::pairing_bilinear_in_g2 ... ignored
+test bls12_381::pairing::tests::pairing_nonzero ... ignored
+test bls12_381::pairing::tests::pairing_with_infinity_is_one ... ok
+test bls12_381::signature::tests::aggregate_is_sum ... ok
+test bls12_381::signature::tests::aggregate_same_message_collapses_to_sum_of_sks ... ok
+test bls12_381::signature::tests::aggregate_verify_three_messages ... ignored
+test bls12_381::signature::tests::expand_message_xmd_basic ... ok
+test bls12_381::signature::tests::hash_to_field_deterministic ... ok
+test bls12_381::signature::tests::hash_to_g2_deterministic_and_distinct ... ok
+test bls12_381::signature::tests::hash_to_g2_on_curve ... ok
+test bls12_381::signature::tests::keygen_deterministic ... ok
+test bls12_381::signature::tests::keygen_in_range_and_pk_on_curve ... ok
+test bls12_381::signature::tests::sign_is_sk_times_hashed_msg ... ok
+test bls12_381::signature::tests::sign_tampered_msg_differs ... ok
+test bls12_381::signature::tests::sign_verify_roundtrip ... ignored
+test bls12_381::signature::tests::sswu_output_on_iso_curve ... ok
+test bls12_381::signature::tests::verify_rejects_infinity_sig_and_pk ... ok
+test build_provenance::tests::dirty_flag_is_strict ... ok
+test cryptanalysis::aes::algebraic::tests::quadratic_equations_actually_vanish ... ok
+test cryptanalysis::aes::algebraic::tests::sbox4_has_many_quadratic_equations ... ok
+test cryptanalysis::aes::biclique::tests::biclique_covers_four_keys ... ok
+test cryptanalysis::aes::biclique::tests::mitm_finds_base_key ... ok
+test cryptanalysis::aes::boomerang::tests::aes_boomerang_uniformity_is_six ... ok
+test cryptanalysis::aes::boomerang::tests::bct_origin ... ok
+test cryptanalysis::aes::boomerang::tests::random_fixed_delta_does_not_return ... ok
+test cryptanalysis::aes::boomerang::tests::realised_delta_always_returns ... ok
+test cryptanalysis::aes::cache_timing::tests::bernstein_recovers_high_nibbles_no_noise ... ok
+test cryptanalysis::aes::cache_timing::tests::bernstein_recovers_with_noise ... ok
+test cryptanalysis::aes::cache_timing::tests::demo_bernstein_cache_attack ... ignored
+test cryptanalysis::aes::cache_timing::tests::timing_reflects_cache_line_collisions ... ok
+test cryptanalysis::aes::dfa::tests::candidate_enum_returns_reasonable_count ... ok
+test cryptanalysis::aes::dfa::tests::demo_dfa_visualization ... ignored
+test cryptanalysis::aes::dfa::tests::dfa_visualization_renders ... ok
+test cryptanalysis::aes::dfa::tests::fault_diff_active_bytes_span_4_columns ... ok
+test cryptanalysis::aes::dfa::tests::fault_diff_has_exactly_4_active_bytes ... ok
+test cryptanalysis::aes::dfa::tests::fault_injection_changes_ciphertext ... ok
+test cryptanalysis::aes::dfa::tests::per_column_candidates_contain_true_key_byte ... ok
+test cryptanalysis::aes::dfa::tests::round_8_vs_round_9_fault_diffusion_contrast ... ok
+test cryptanalysis::aes::dfa::tests::tunstall_round_8_fault_diffuses_to_all_bytes ... ok
+test cryptanalysis::aes::dfa::tests::zero_fault_yields_identical_ciphertexts ... ok
+test cryptanalysis::aes::differential::tests::aes_max_dp_is_four ... ok
+test cryptanalysis::aes::differential::tests::ciphertext_difference_active_pattern_matches_theory ... ok
+test cryptanalysis::aes::differential::tests::ddt_entries_even ... ok
+test cryptanalysis::aes::differential::tests::ddt_row_structure ... ok
+test cryptanalysis::aes::differential::tests::ddt_row_zero ... ok
+test cryptanalysis::aes::differential::tests::ddt_rows_sum_to_256 ... ok
+test cryptanalysis::aes::differential::tests::gf_inv_round_trips ... ok
+test cryptanalysis::aes::differential::tests::one_active_byte_propagates_to_full_column ... ok
+test cryptanalysis::aes::differential::tests::two_round_differential_recovers_active_bytes ... ok
+test cryptanalysis::aes::dpa::tests::cpa_fails_with_too_few_noisy_traces ... ok
+test cryptanalysis::aes::dpa::tests::cpa_recovers_byte_no_noise ... ok
+test cryptanalysis::aes::dpa::tests::cpa_recovers_byte_with_noise ... ok
+test cryptanalysis::aes::dpa::tests::cpa_recovers_full_key_no_noise ... ok
+test cryptanalysis::aes::dpa::tests::demo_cpa_attack ... ignored
+test cryptanalysis::aes::dpa::tests::hamming_weight_smoke ... ok
+test cryptanalysis::aes::higher_order::tests::constant_function_has_zero_state_derivative ... ok
+test cryptanalysis::aes::higher_order::tests::degree_1_function_has_zero_2nd_derivative ... ok
+test cryptanalysis::aes::higher_order::tests::degree_probe_1_round_runs ... ok
+test cryptanalysis::aes::higher_order::tests::demo_integral_visualization ... ignored
+test cryptanalysis::aes::higher_order::tests::first_order_derivative_matches_xor_diff ... ok
+test cryptanalysis::aes::higher_order::tests::integral_3_round_aes_balanced ... ok
+test cryptanalysis::aes::higher_order::tests::integral_4_round_aes_not_balanced ... ok
+test cryptanalysis::aes::higher_order::tests::integral_visualization_shows_balance ... ok
+test cryptanalysis::aes::impossible::tests::four_round_no_one_active_byte ... ok
+test cryptanalysis::aes::impossible::tests::three_round_not_impossible ... ok
+test cryptanalysis::aes::impossible::tests::true_key_never_contradicts ... ok
+test cryptanalysis::aes::impossible::tests::wrong_key_eventually_contradicts ... ignored, slow: scans 2^20 pairs to see a handful of contradictions
+test cryptanalysis::aes::linear::tests::aes_max_correlation ... ok
+test cryptanalysis::aes::linear::tests::aes_max_linear_bias_is_sixteen ... ok
+test cryptanalysis::aes::linear::tests::lat_entries_even ... ok
+test cryptanalysis::aes::linear::tests::lat_origin ... ok
+test cryptanalysis::aes::linear::tests::one_round_byte_recovery ... ok
+test cryptanalysis::aes::linear::tests::single_bit_majority_vote_converges ... ok
+test cryptanalysis::aes::milp::tests::branch_number_constraint ... ok
+test cryptanalysis::aes::milp::tests::classical_bounds ... ok
+test cryptanalysis::aes::milp::tests::invalid_trail_rejected ... ok
+test cryptanalysis::aes::milp::tests::shift_rows_permutes_activity ... ok
+test cryptanalysis::aes::milp::tests::two_round_trail_achieves_five ... ok
+test cryptanalysis::aes::mitm::tests::delta_set_has_uniform_multiset_at_active_byte ... ok
+test cryptanalysis::aes::mitm::tests::mitm_two_round_recovers_key_bytes ... ok
+test cryptanalysis::aes::mitm::tests::one_round_multiset_uniform_at_affected_position ... ok
+test cryptanalysis::aes::mixture::tests::algebraic_identity_breaks_at_two_rounds ... ok
+test cryptanalysis::aes::mixture::tests::algebraic_identity_one_round ... ok
+test cryptanalysis::aes::mixture::tests::column_confined_subspace_distinguisher ... ok
+test cryptanalysis::aes::mixture::tests::pairwise_equality_one_round_only ... ok
+test cryptanalysis::aes::mixture::tests::xor_identity_always_holds ... ok
+test cryptanalysis::aes::quantum_grover::tests::aes_128_at_least_grover_threshold ... ok
+test cryptanalysis::aes::quantum_grover::tests::aes_128_cost_matches_published ... ok
+test cryptanalysis::aes::quantum_grover::tests::aes_256_cost_double_iterations ... ok
+test cryptanalysis::aes::quantum_grover::tests::grover_iteration_count_at_128 ... ok
+test cryptanalysis::aes::reduced::tests::key_schedule_inverts ... ok
+test cryptanalysis::aes::reduced::tests::matches_production_aes128 ... ok
+test cryptanalysis::aes::reduced::tests::round_trip_at_various_round_counts ... ok
+test cryptanalysis::aes::related_differential::tests::classify_disjoint_values_is_independent ... ok
+test cryptanalysis::aes::related_differential::tests::classify_permutation_at_another_diagonal_is_mixed ... ok
+test cryptanalysis::aes::related_differential::tests::classify_rotation_is_shifted ... ok
+test cryptanalysis::aes::related_differential::tests::classify_same_diagonal_permutation_is_exchanged ... ok
+test cryptanalysis::aes::related_differential::tests::mix_columns_family_is_pairwise_shifted ... ok
+test cryptanalysis::aes::related_differential::tests::one_round_is_always_column_confined ... ok
+test cryptanalysis::aes::related_differential::tests::shifted_family_probability_matches_ddt ... ok
+test cryptanalysis::aes::related_differential::tests::two_rounds_never_stays_confined ... ok
+test cryptanalysis::aes::related_key::tests::aes256_key_schedule_has_slower_diffusion ... ok
+test cryptanalysis::aes::related_key::tests::format_key_schedule_diff_renders ... ok
+test cryptanalysis::aes::related_key::tests::local_collision_four_round_decays ... ok
+test cryptanalysis::aes::related_key::tests::local_collision_one_round_perfect ... ok
+test cryptanalysis::aes::related_key::tests::related_key_avalanche_full_aes_approaches_ideal ... ok
+test cryptanalysis::aes::related_key::tests::related_key_avalanche_one_round_has_bias ... ok
+test cryptanalysis::aes::related_key::tests::related_key_boomerang_degenerate_zero_diff ... ok
+test cryptanalysis::aes::related_key::tests::related_key_boomerang_runs_end_to_end ... ok
+test cryptanalysis::aes::related_key::tests::single_byte_delta_diffuses_through_aes128_schedule ... ok
+test cryptanalysis::aes::related_key::tests::zero_delta_key_schedule_difference_is_zero ... ok
+test cryptanalysis::aes::slide::tests::genuine_aes_no_slid_pair_at_256 ... ok
+test cryptanalysis::aes::slide::tests::slide_comparison_runs ... ok
+test cryptanalysis::aes::slide::tests::slide_report_renders ... ok
+test cryptanalysis::aes::slide::tests::symmetric_aes_is_deterministic ... ok
+test cryptanalysis::aes::small_scale::tests::brute_force_key_recovery_works ... ok
+test cryptanalysis::aes::small_scale::tests::gf16_inv_round_trips ... ok
+test cryptanalysis::aes::small_scale::tests::sbox4_is_bijective ... ok
+test cryptanalysis::aes::small_scale::tests::small_aes_round_trips ... ok
+test cryptanalysis::aes::square::tests::four_round_key_recovery_random_key ... ok
+test cryptanalysis::aes::square::tests::four_round_not_balanced_at_output ... ok
+test cryptanalysis::aes::square::tests::invert_final_round_undoes_one_round ... ok
+test cryptanalysis::aes::square::tests::three_round_balanced ... ok
+test cryptanalysis::aes::truncated_diff::tests::active_bytes_is_popcount ... ok
+test cryptanalysis::aes::truncated_diff::tests::demo_4_round_truncated_trail ... ignored
+test cryptanalysis::aes::truncated_diff::tests::mc_branch_number_5_holds ... ok
+test cryptanalysis::aes::truncated_diff::tests::minimum_active_sboxes_4_rounds_is_at_least_5 ... ok
+test cryptanalysis::aes::truncated_diff::tests::render_full_column_active_pattern ... ok
+test cryptanalysis::aes::truncated_diff::tests::shift_rows_fixes_first_column_first_row ... ok
+test cryptanalysis::aes::truncated_diff::tests::trail_diagram_renders_input_plus_rounds ... ok
+test cryptanalysis::aes::visualize::tests::active_pattern_distinguishes_zero_from_nonzero ... ok
+test cryptanalysis::aes::visualize::tests::boomerang_diagram_has_all_arrows ... ok
+test cryptanalysis::aes::visualize::tests::heatmap_4bit_renders_full_table ... ok
+test cryptanalysis::aes::visualize::tests::histogram_handles_uniform_data ... ok
+test cryptanalysis::aes::visualize::tests::recovery_progress_renders_percent ... ok
+test cryptanalysis::aes::visualize::tests::round_bars_normalize_to_max ... ok
+test cryptanalysis::aes::visualize::tests::round_bars_zero_max_does_not_panic ... ok
+test cryptanalysis::aes::visualize::tests::state_grid_renders_16_bytes ... ok
+test cryptanalysis::aes::visualize::tests::summary_8bit_lists_top_entries ... ok
+test cryptanalysis::aes::visualize::tests::trail_renders_multi_round ... ok
+test cryptanalysis::aes::yoyo::tests::exchange_round_trips ... ok
+test cryptanalysis::aes::yoyo::tests::one_round_yoyo_always_preserves_structure ... ok
+test cryptanalysis::aes::yoyo::tests::three_round_yoyo_loses_structure ... ok
+test cryptanalysis::aes::yoyo::tests::two_round_yoyo_also_preserves_structure ... ok
+test cryptanalysis::aes::zero_correlation::tests::demo_zero_correlation_pairs ... ignored
+test cryptanalysis::aes::zero_correlation::tests::distinguisher_filters_correct_key ... ok
+test cryptanalysis::aes::zero_correlation::tests::find_zero_correlation_pair_works ... ok
+test cryptanalysis::aes::zero_correlation::tests::inner_product_smoke ... ok
+test cryptanalysis::aes::zero_correlation::tests::many_zero_correlation_pairs_exist ... ok
+test cryptanalysis::aes::zero_correlation::tests::trivial_correlation_is_one ... ok
+test cryptanalysis::ai_schoof::tests::ai_schoof_end_to_end_toy ... ok
+test cryptanalysis::ai_schoof::tests::count_points_satisfies_hasse ... ok
+test cryptanalysis::ai_schoof::tests::net_output_in_unit_interval ... ok
+test cryptanalysis::ai_schoof::tests::sgd_reduces_loss ... ok
+test cryptanalysis::algebra_cache::tests::a_local_hit_does_not_re_parse ... ok
+test cryptanalysis::algebra_cache::tests::an_oversized_artifact_is_still_served_locally ... ok
+test cryptanalysis::algebra_cache::tests::bounded_storage ... ok
+test cryptanalysis::algebra_cache::tests::cached_reductions_preserve_answers_and_node_budgets ... ok
+test cryptanalysis::algebra_cache::tests::layers_are_disjoint_and_none_is_not_cached ... ok
+test cryptanalysis::algebra_cache::tests::one_key_at_two_types_recomputes ... ok
+test cryptanalysis::algebra_cache::tests::oversize_can_be_downgraded_to_a_warning ... ok
+test cryptanalysis::algebra_cache::tests::oversize_is_fatal_by_default - should panic ... ok
+test cryptanalysis::algebra_cache::tests::the_env_opt_out_reads_only_falsey_values ... ok
+test cryptanalysis::algebra_cache::tests::the_oversize_warning_is_once_per_layer ... ok
+test cryptanalysis::aut_folded_rho::tests::apply_aut_canonicalises ... ok
+test cryptanalysis::aut_folded_rho::tests::aut_group_axioms ... ok
+test cryptanalysis::aut_folded_rho::tests::canonical_form_matches_applying_each_automorphism ... ok
+test cryptanalysis::aut_folded_rho::tests::canonicalisation_invariant_on_orbit ... ok
+test cryptanalysis::aut_folded_rho::tests::empirical_speedup_versus_unfolded_rho ... ignored, experimental: ~30 s of repeated rho runs; --ignored to opt in
+test cryptanalysis::aut_folded_rho::tests::exponent_updates_match_the_textbook_form ... ok
+test cryptanalysis::aut_folded_rho::tests::folded_rho_matches_the_original_stack_across_word_widths ... ok
+test cryptanalysis::aut_folded_rho::tests::folded_rho_matches_the_original_walk ... ok
+test cryptanalysis::aut_folded_rho::tests::folded_rho_recovers_planted_dlp ... ok
+test cryptanalysis::aut_folded_rho::tests::integer_action_matches_point_action ... ok
+test cryptanalysis::aut_folded_rho::tests::mod_pos_matches_the_textbook_form ... ok
+test cryptanalysis::aut_folded_rho::tests::walk_bucket_matches_the_encoding ... ok
+test cryptanalysis::auto_attack::tests::auto_attack_aes_skips_trail_search ... ok
+test cryptanalysis::auto_attack::tests::auto_attack_rejects_unknown_cipher ... ok
+test cryptanalysis::auto_attack::tests::auto_attack_report_is_markdown ... ok
+test cryptanalysis::auto_attack::tests::auto_attack_runs_on_all_registered_ciphers ... ok
+test cryptanalysis::auto_attack::tests::auto_attack_toyspn_runs_trail_search ... ok
+test cryptanalysis::avalanche::tests::avalanche_matrix_shape_and_identity ... ok
+test cryptanalysis::avalanche::tests::identity_function_fails_sac ... ok
+test cryptanalysis::avalanche::tests::sha256_passes_sac_loosely ... ok
+test cryptanalysis::avalanche::tests::weakest_bit_for_identity_is_full_deviation ... ok
+test cryptanalysis::b_seed_profile::tests::ks_test_passes_under_null ... ok
+test cryptanalysis::b_seed_profile::tests::ks_test_rejects_under_alternative ... ok
+test cryptanalysis::b_seed_profile::tests::p256_b_seed_deep_profile ... ok
+test cryptanalysis::bielliptic_quartic::tests::all_pair_sections_match_independent_rational_point_control ... ok
+test cryptanalysis::bielliptic_quartic::tests::budgets_and_rank_deficiency_remain_failures ... ok
+test cryptanalysis::bielliptic_quartic::tests::checked_four_point_section_matches_example ... ok
+test cryptanalysis::bielliptic_quartic::tests::complete_known_answer_controls_use_no_target_scalar_input ... ok
+test cryptanalysis::bielliptic_quartic::tests::infinity_and_repeated_intersections_are_counted ... ok
+test cryptanalysis::bielliptic_quartic::tests::later_anchor_column_recovers_with_a_different_generator ... ok
+test cryptanalysis::bielliptic_quartic::tests::rejects_unsupported_and_noncanonical_inputs ... ok
+test cryptanalysis::bielliptic_quartic::tests::row_reduction_uses_group_order_not_field_characteristic ... ok
+test cryptanalysis::bielliptic_quartic::tests::section_tampering_is_rejected_even_with_zero_norm ... ok
+test cryptanalysis::biext_k2::tests::three_loops_agree_with_eds_mov_at_toy_size ... ok
+test cryptanalysis::binary_field_basis::tests::both_directions_preserve_small_field_arithmetic ... ok
+test cryptanalysis::binary_field_basis::tests::frozen_n37_public_targets_cross_without_logs ... ok
+test cryptanalysis::binary_isogeny::tests::j_inverts_b ... ok
+test cryptanalysis::binary_isogeny::tests::j_round_trip ... ok
+test cryptanalysis::binary_isogeny::tests::phi_2_is_cubic ... ok
+test cryptanalysis::binary_isogeny::tests::root_finder_basic ... ok
+test cryptanalysis::binary_isogeny::tests::walk_terminates ... ok
+test cryptanalysis::binary_semaev::tests::artin_schreier_round_trip ... ok
+test cryptanalysis::binary_semaev::tests::quadratic_round_trip ... ok
+test cryptanalysis::binary_semaev::tests::s3_assembled_form_matches ... ok
+test cryptanalysis::binary_semaev::tests::s3_symmetric ... ok
+test cryptanalysis::binary_semaev::tests::s3_vanishes_on_collinear_triple ... ok
+test cryptanalysis::binary_semaev::tests::s4_symmetric_in_all_args ... ok
+test cryptanalysis::binary_semaev::tests::s4_vanishes_on_4_points_summing_to_o ... ok
+test cryptanalysis::binary_semaev_chain_sat::tests::finite_domain_clause_preflight_is_exact_and_rejects_before_installation ... ok
+test cryptanalysis::binary_semaev_chain_sat::tests::first_pair_lex_constraint_keeps_exactly_one_swap_orientation ... ok
+test cryptanalysis::binary_semaev_chain_sat::tests::first_pair_order_cap_is_checked_before_mutation ... ok
+test cryptanalysis::binary_semaev_chain_sat::tests::frobenius_orbit_domain_accepts_exactly_the_small_field_closure ... ok
+test cryptanalysis::binary_semaev_chain_sat::tests::frobenius_orbit_preflight_caps_before_mutation_and_counts_n83 ... ok
+test cryptanalysis::binary_semaev_chain_sat::tests::heterogeneous_orbit_domains_preflight_and_guard_pair_symmetry ... ok
+test cryptanalysis::binary_semaev_chain_sat::tests::intermediate_and_final_identity_patterns_preserve_real_group_sums ... ok
+test cryptanalysis::binary_semaev_chain_sat::tests::product_gates_match_field_multiplication_and_reject_a_wrong_output ... ok
+test cryptanalysis::binary_semaev_chain_sat::tests::product_gates_preserve_bits_above_one_word_in_the_pinned_field ... ok
+test cryptanalysis::binary_semaev_chain_sat::tests::s3_circuit_agrees_with_original_field_polynomial_on_roots_and_nonroots ... ok
+test cryptanalysis::binary_semaev_chain_sat::tests::source_bound_covers_degree_83_without_constructing_a_model ... ok
+test cryptanalysis::binary_semaev_s4::tests::anf_addition_cancels ... ok
+test cryptanalysis::binary_semaev_s4::tests::anf_monomials_are_squarefree ... ok
+test cryptanalysis::binary_semaev_s4::tests::anf_sums_agree_with_toggles ... ok
+test cryptanalysis::binary_semaev_s4::tests::anf_sums_agree_with_toggles_on_lopsided_operands ... ok
+test cryptanalysis::binary_semaev_s4::tests::descended_system_is_quadratic ... ok
+test cryptanalysis::binary_semaev_s4::tests::descended_system_vanishes_on_planted_solution ... ok
+test cryptanalysis::binary_semaev_s4::tests::general_b_is_rejected - should panic ... ok
+test cryptanalysis::binary_semaev_s4::tests::review_mul_across_small_sum_threshold ... ok
+test cryptanalysis::binary_semaev_s4::tests::review_packed_key_is_order_preserving ... ok
+test cryptanalysis::binary_semaev_s4::tests::review_retain_odd_is_parity ... ok
+test cryptanalysis::binary_semaev_s4::tests::review_symbolic_field_ops_on_dense_coefficients ... ok
+test cryptanalysis::binary_semaev_s4::tests::review_weil_descent_sweep ... ok
+test cryptanalysis::binary_semaev_s4::tests::review_xor_assign_across_size_grid ... ok
+test cryptanalysis::binary_semaev_s4::tests::review_xor_sum_is_parity_sum ... ok
+test cryptanalysis::binary_semaev_s4::tests::single_monomial_paths_agree_with_toggles ... ok
+test cryptanalysis::binary_semaev_s4::tests::square_agrees_with_multiplication ... ok
+test cryptanalysis::binary_semaev_s4::tests::square_is_relocation ... ok
+test cryptanalysis::binary_semaev_s4::tests::symbolic_field_ops_agree_with_toggles ... ok
+test cryptanalysis::binary_semaev_s4::tests::symbolic_field_ops_agree_with_toggles_at_word_edges ... ok
+test cryptanalysis::binary_semaev_s4::tests::symmetrised_s4_is_not_identically_zero ... ok
+test cryptanalysis::binary_semaev_s4::tests::symmetrised_s4_vanishes_on_corpus_planted_solution ... ok
+test cryptanalysis::binary_semaev_s4::tests::weil_descent_agrees_with_toggle_reference ... ok
+test cryptanalysis::binary_semaev_s4::tests::weil_descent_agrees_with_toggle_reference_at_edges ... ok
+test cryptanalysis::binary_torsion_walk::tests::affine_addition_agrees_with_the_ladder ... ok
+test cryptanalysis::binary_torsion_walk::tests::artin_schreier_solves_in_odd_and_even_degree ... ok
+test cryptanalysis::binary_torsion_walk::tests::extension_arithmetic_is_a_field ... ok
+test cryptanalysis::binary_torsion_walk::tests::group_order_over_the_base_field_matches_point_counting ... ok
+test cryptanalysis::binary_torsion_walk::tests::pair_fraction_matches_batch_inversion ... ok
+test cryptanalysis::binary_torsion_walk::tests::torsion_kernels_equal_psi3_kernels_at_the_crater ... ok
+test cryptanalysis::binary_torsion_walk::tests::x_only_formulas_match_point_arithmetic ... ok
+test cryptanalysis::binary_velu::tests::archived_degree_73_descent_has_oriented_native_point_map ... ok
+test cryptanalysis::binary_velu::tests::frozen_unknown_targets_reach_degree_73_leaf_through_basis_bridge ... ok
+test cryptanalysis::binary_velu::tests::full_point_map_preserves_sign_and_addition_on_small_curve ... ok
+test cryptanalysis::binary_velu::tests::psi3_matches_its_closed_form_and_psi_recurrence_agrees ... ok
+test cryptanalysis::binary_velu::tests::rational_torsion_finds_every_subgroup_the_division_polynomial_does ... ok
+test cryptanalysis::binary_velu::tests::the_codomain_is_isogenous_so_its_order_is_unchanged ... ok
+test cryptanalysis::binary_velu::tests::the_x_map_sends_the_curve_into_its_codomain ... ok
+test cryptanalysis::binary_velu::tests::velu_matches_the_modular_polynomial_at_ell_3 ... ok
+test cryptanalysis::binary_velu::tests::wide_point_map_retains_high_bits_and_rejects_width_mismatches ... ok
+test cryptanalysis::binary_velu::tests::xonly_evaluators_match_velu_at_163_bits ... ok
+test cryptanalysis::bleichenbacher::tests::bias_magnitude_peaks_at_correct_d ... ok
+test cryptanalysis::bleichenbacher::tests::bleichenbacher_direct_recovers_d_at_toy_scale ... ok
+test cryptanalysis::bleichenbacher::tests::bleichenbacher_handles_one_bit_bias ... ok
+test cryptanalysis::bleichenbacher::tests::bleichenbacher_no_bias_no_peak ... ok
+test cryptanalysis::bleichenbacher::tests::fft_handles_sub_bit_bias ... ok
+test cryptanalysis::bleichenbacher::tests::fft_matches_direct_at_toy_scale ... ok
+test cryptanalysis::bleichenbacher::tests::fft_no_bias_no_peak ... ok
+test cryptanalysis::bleichenbacher::tests::fft_of_constant_is_peak_at_dc ... ok
+test cryptanalysis::bleichenbacher::tests::fft_of_delta_is_flat ... ok
+test cryptanalysis::bleichenbacher::tests::rejects_malformed_signatures ... ok
+test cryptanalysis::bleichenbacher::tests::rejects_short_transcripts ... ok
+test cryptanalysis::boolean::tests::algebraic_degree_of_and_is_2 ... ok
+test cryptanalysis::boolean::tests::algebraic_degree_of_xor_is_1 ... ok
+test cryptanalysis::boolean::tests::anf_of_and_is_x0_times_x1 ... ok
+test cryptanalysis::boolean::tests::anf_of_xor_is_x0_xor_x1 ... ok
+test cryptanalysis::boolean::tests::walsh_of_constant_zero_is_concentrated_at_origin ... ok
+test cryptanalysis::boolean::tests::walsh_of_xor_function_is_concentrated ... ok
+test cryptanalysis::boomerang::tests::boomerang_distinguishes_2round_toyspn_from_random ... ok
+test cryptanalysis::boomerang::tests::boomerang_trail_pair_search_finds_pair ... ok
+test cryptanalysis::boomerang::tests::boomerang_zero_difference_always_right_quartet ... ok
+test cryptanalysis::boomerang::tests::rectangle_attack_finds_quartets_with_identity_sbox ... ok
+test cryptanalysis::boomerang::tests::rectangle_attack_runs_on_two_round_toyspn ... ok
+test cryptanalysis::boomerang::tests::reduced_aes_round_trip_via_blockcipher_trait ... ok
+test cryptanalysis::boomerang::tests::sandwich_consumes_sbox_bct ... ok
+test cryptanalysis::boomerang::tests::sandwich_with_identity_middle_matches_boomerang ... ok
+test cryptanalysis::boomerang::tests::toyspn_bit_permutation_inverse_is_correct ... ok
+test cryptanalysis::boomerang::tests::toyspn_bit_permutation_is_a_bijection ... ok
+test cryptanalysis::boomerang::tests::toyspn_encrypt_decrypt_inverses ... ok
+test cryptanalysis::boomerang::tests::trail_search_finds_two_round_trail ... ok
+test cryptanalysis::boomerang::tests::trail_search_respects_threshold ... ok
+test cryptanalysis::bsgs_fast::tests::agrees_with_the_general_bsgs ... ok
+test cryptanalysis::bsgs_fast::tests::batch_inversion_matches_one_at_a_time ... ok
+test cryptanalysis::bsgs_fast::tests::covers_every_x_in_small_intervals ... ok
+test cryptanalysis::bsgs_fast::tests::false_candidates_are_rejected_not_returned ... ok
+test cryptanalysis::bsgs_fast::tests::field_matches_biguint ... ok
+test cryptanalysis::bsgs_fast::tests::group_law_matches_reference ... ok
+test cryptanalysis::bsgs_fast::tests::kernel_op_counts_are_as_derived ... ok
+test cryptanalysis::bsgs_fast::tests::kernels_solve_identically ... ok
+test cryptanalysis::bsgs_fast::tests::kernels_survive_degenerate_rounds_on_a_tiny_group ... ok
+test cryptanalysis::bsgs_fast::tests::kernels_visit_identical_points ... ok
+test cryptanalysis::bsgs_fast::tests::one_table_serves_many_targets ... ok
+test cryptanalysis::bsgs_fast::tests::solves_intervals_on_toy40 ... ok
+test cryptanalysis::bsgs_fast::tests::solves_the_full_group_on_toy40 ... ok
+test cryptanalysis::bsgs_fast::tests::table_inserts_and_finds ... ok
+test cryptanalysis::bsgs_fast::tests::target_outside_the_interval_is_not_found ... ok
+test cryptanalysis::canonical_lift::tests::find_anomalous_curve_works ... ok
+test cryptanalysis::canonical_lift::tests::hensel_lift_satisfies_curve_equation ... ok
+test cryptanalysis::canonical_lift::tests::smart_attack_recovers_d_on_tiny_anomalous_curves ... ok
+test cryptanalysis::canonical_lift::tests::zp_arithmetic_basic ... ok
+test cryptanalysis::canonical_lift::tests::zp_curve_doubling_self_consistent ... ok
+test cryptanalysis::canonical_lift::tests::zp_inverse_verifies ... ok
+test cryptanalysis::canonical_lift::tests::zp_valuation_correct ... ok
+test cryptanalysis::cga_hnc::tests::double_equals_self_plus_self ... ok
+test cryptanalysis::cga_hnc::tests::experiment_3_1_useful_curves_distribution ... ignored, Phase-3 experimental sweep; --ignored to opt in
+test cryptanalysis::cga_hnc::tests::experiment_3_2_useful_curves_on_non_brittle ... ignored, Phase-3 experimental sweep; --ignored to opt in
+test cryptanalysis::cga_hnc::tests::experiment_3_3_cross_curve_necessity ... ignored, Phase-3 experimental sweep; --ignored to opt in
+test cryptanalysis::cga_hnc::tests::experiment_p1_at_p_10007 ... ignored, experimental: ~2 min of orbit walks; --ignored to opt in
+test cryptanalysis::cga_hnc::tests::experiment_p1_smoothness_at_p_1009 ... ignored, experimental: runs ~30s of orbit walks; --ignored to opt in
+test cryptanalysis::cga_hnc::tests::experiment_p1_smoothness_at_p_1009_b10 ... ignored, experimental: runs ~30s of orbit walks; --ignored to opt in
+test cryptanalysis::cga_hnc::tests::j_curve_roundtrip ... ok
+test cryptanalysis::cga_hnc::tests::j_invariant_x3_minus_x ... ok
+test cryptanalysis::cga_hnc::tests::j_invariant_x3_plus_1 ... ok
+test cryptanalysis::cga_hnc::tests::mod_pos_matches_the_textbook_form ... ok
+test cryptanalysis::cga_hnc::tests::modular_inverse_matches_the_conversion_path ... ok
+test cryptanalysis::cga_hnc::tests::orbit_bfs_terminates ... ok
+test cryptanalysis::cga_hnc::tests::orbit_smoothness_report_runs ... ok
+test cryptanalysis::cga_hnc::tests::phase_2_end_to_end_recovery_on_brittle_curve ... ignored, experimental Phase-2 demo; --ignored to opt in
+test cryptanalysis::cga_hnc::tests::phi_2_nonzero ... ok
+test cryptanalysis::cga_hnc::tests::pohlig_hellman_recovers_planted_d ... ok
+test cryptanalysis::cga_hnc::tests::point_count_satisfies_hasse ... ok
+test cryptanalysis::cga_hnc::tests::point_count_x3_plus_1_f5 ... ok
+test cryptanalysis::cga_hnc::tests::point_order_divides_curve_order ... ok
+test cryptanalysis::cga_hnc::tests::smoothness_decomposition ... ok
+test cryptanalysis::cga_hnc::tests::two_isogeny_codomain_verified_by_phi_2 ... ok
+test cryptanalysis::cga_hnc::tests::word_group_law_matches_the_bigint_formulas ... ok
+test cryptanalysis::challenge_ladder::tests::cornacchia_and_sqrt ... ok
+test cryptanalysis::challenge_ladder::tests::matches_published_cards ... ok
+test cryptanalysis::cheon_attack::tests::cheon_cost_tracks_prediction ... ok
+test cryptanalysis::cheon_attack::tests::cheon_needs_the_auxiliary_input ... ok
+test cryptanalysis::cheon_attack::tests::cheon_recovers_alpha_for_every_divisor ... ok
+test cryptanalysis::cheon_attack::tests::cheon_rejects_non_divisor ... ok
+test cryptanalysis::cheon_attack::tests::cheon_visualization_renders ... ok
+test cryptanalysis::cipher_registry::tests::aes_sbox_helper_matches_fips197 ... ok
+test cryptanalysis::cipher_registry::tests::all_registered_ciphers_construct ... ok
+test cryptanalysis::cipher_registry::tests::all_registered_ciphers_round_trip ... ok
+test cryptanalysis::cipher_registry::tests::registered_cipher_via_blockcipher_trait ... ok
+test cryptanalysis::cipher_registry::tests::unknown_cipher_name_returns_none ... ok
+test cryptanalysis::cm_canonical_lift::tests::cm_smart_attack_valuation_test ... ok
+test cryptanalysis::coleman_integration::tests::iterated_coleman_clean_d_squared_test ... ok
+test cryptanalysis::coleman_integration::tests::iterated_coleman_d_squared_relation ... ok
+test cryptanalysis::coleman_integration::tests::iterated_coleman_is_non_additive ... ok
+test cryptanalysis::coleman_integration::tests::iterated_coleman_with_real_scalar_mul ... ok
+test cryptanalysis::coleman_integration::tests::omega_holomorphic_leading_terms ... ok
+test cryptanalysis::coleman_integration::tests::pseries_add_mul_integrate_basic ... ok
+test cryptanalysis::coleman_integration::tests::single_coleman_integral_matches_formal_log ... ok
+test cryptanalysis::coordinate_descent::tests::in_gaudrys_setting_one_involution_descends_and_the_klein_group_does_not ... ok
+test cryptanalysis::coordinate_quotients::tests::a_translation_descends_to_the_quotient_by_an_automorphism_iff_its_point_is_fixed ... ok
+test cryptanalysis::coordinate_quotients::tests::four_torsion_on_the_two_isogeny_line_gives_a_system ... ok
+test cryptanalysis::coordinate_quotients::tests::klein_four_on_a_prime_curve_separates_128_orbits ... ok
+test cryptanalysis::coordinate_quotients::tests::koblitz_k0_has_rational_four_torsion_and_it_acts_on_relations ... ok
+test cryptanalysis::coordinate_quotients::tests::three_torsion_is_velu_on_the_x_line_and_mobius_on_the_y_line ... ok
+test cryptanalysis::coordinate_quotients::tests::torsion_translations_become_mobius_maps_on_the_new_lines ... ok
+test cryptanalysis::coordinate_quotients::tests::two_torsion_quotient_reproduces_the_first_search ... ok
+test cryptanalysis::coordinate_search::tests::additive_frame_factor_base_needs_the_x_minus_1_factor ... ok
+test cryptanalysis::coordinate_search::tests::additive_symmetrisation_halves_degree_and_quadruples_collapse ... ok
+test cryptanalysis::coordinate_search::tests::binary_field_arithmetic_and_artin_schreier ... ok
+test cryptanalysis::coordinate_search::tests::group_law_is_a_group_on_both_characteristics ... ok
+test cryptanalysis::coordinate_search::tests::interpolated_s3_matches_closed_form_binary ... ok
+test cryptanalysis::coordinate_search::tests::interpolated_s3_matches_closed_form_prime ... ok
+test cryptanalysis::coordinate_search::tests::interpolated_s3_over_an_extension_field_matches_the_closed_form ... ok
+test cryptanalysis::coordinate_search::tests::j0_automorphism_is_global_not_pairwise ... ok
+test cryptanalysis::coordinate_search::tests::koblitz_orders_match_known_counts ... ok
+test cryptanalysis::coordinate_search::tests::koblitz_two_torsion_acts_as_inversion_and_linearises_additively ... ok
+test cryptanalysis::coordinate_search::tests::mobius_fit_recovers_a_map ... ok
+test cryptanalysis::coordinate_search::tests::odd_extension_field_arithmetic ... ok
+test cryptanalysis::coordinate_search::tests::prime_field_arithmetic ... ok
+test cryptanalysis::coordinate_search::tests::search_report_runs_end_to_end_on_a_koblitz_toy ... ok
+test cryptanalysis::coordinate_search::tests::sign_symmetrisation_on_a_prime_curve_with_rational_halving ... ok
+test cryptanalysis::crossbred::tests::crossbred_agrees_with_brute_force_on_a_random_system ... ok
+test cryptanalysis::crossbred::tests::crossbred_covers_the_f4_oracle_on_the_cubic_m3_system ... ok
+test cryptanalysis::crossbred::tests::crossbred_polynomials_vanish_on_every_solution ... ok
+test cryptanalysis::crossbred::tests::crossbred_refutes_an_unsatisfiable_system ... ok
+test cryptanalysis::crossbred::tests::crossbred_solves_a_koblitz_decomposition_system ... ok
+test cryptanalysis::crossbred::tests::mobius_transform_evaluates_the_anf ... ok
+test cryptanalysis::crossbred::tests::mobius_transform_is_its_own_inverse ... ok
+test cryptanalysis::crossbred::tests::sweep_reports_every_cell ... ok
+test cryptanalysis::crossbred::tests::the_m2_system_is_bilinear_so_splitting_at_ell_needs_no_lift ... ok
+test cryptanalysis::curve_catalog::tests::every_catalog_curve_verifies ... ok
+test cryptanalysis::curve_catalog::tests::hardcoded_char3_constants_match_computed ... ok
+test cryptanalysis::curve_catalog::tests::hasse_bound_rejects_cardinalities_outside_exact_integer_limit ... ok
+test cryptanalysis::curve_catalog::tests::names_are_unique_and_resolvable ... ok
+test cryptanalysis::curve_catalog::tests::security_estimate_is_reasonable ... ok
+test cryptanalysis::curve_construction::counterfactual::tests::attainable_pairs_match_an_exhaustive_scan ... ok
+test cryptanalysis::curve_construction::counterfactual::tests::attainable_pairs_match_an_exhaustive_scan_for_l_above_1 ... ok
+test cryptanalysis::curve_construction::counterfactual::tests::genus_255_witness_exists_over_f2_130 ... ok
+test cryptanalysis::curve_construction::counterfactual::tests::legacy_rule_reproduces_the_note_table ... ok
+test cryptanalysis::curve_construction::counterfactual::tests::n130_l1_least_admissible_is_genus_255 ... ok
+test cryptanalysis::curve_construction::cyclic::tests::toy_and_challenge_bounds ... ok
+test cryptanalysis::curve_construction::enumerate::tests::genus_two_counts_match_direct_enumeration ... ok
+test cryptanalysis::curve_construction::enumerate::tests::klein_quartic_is_smooth_with_known_counts ... ok
+test cryptanalysis::curve_construction::enumerate::tests::smoothness_criterion_on_known_curves ... ok
+test cryptanalysis::curve_construction::gf2k::tests::field_axioms_small_degrees ... ok
+test cryptanalysis::curve_construction::klein::tests::conductor49_traces ... ok
+test cryptanalysis::curve_construction::klein::tests::klein_over_small_primes ... ok
+test cryptanalysis::curve_construction::kummer::tests::miller_functions_have_the_right_shape ... ok
+test cryptanalysis::curve_construction::kummer::tests::two_branch_point_covers_are_weil_and_split ... ok
+test cryptanalysis::curve_construction::legacy::tests::ghs_census_matches_mmt ... ok
+test cryptanalysis::curve_construction::lpoly::tests::division_detects_factors ... ok
+test cryptanalysis::curve_construction::lpoly::tests::elliptic_curve_round_trip ... ok
+test cryptanalysis::curve_construction::modular::tests::x0_121_formula_agrees ... ok
+test cryptanalysis::curve_construction::modular::tests::x0_49_has_genus_one_and_x7_genus_three ... ok
+test cryptanalysis::curve_construction::stickelberger::tests::klein_is_found_at_m7 ... ok
+test cryptanalysis::curve_construction::weil::tests::small_koblitz_orders ... ok
+test cryptanalysis::curve_construction::weil::tests::tonelli_shanks_round_trip ... ok
+test cryptanalysis::curve_construction::weil::tests::trace_zero_part_has_r_points ... ok
+test cryptanalysis::curve_construction::window::tests::rational_model_divisor_counts ... ok
+test cryptanalysis::curve_traits::arith::tests::an_exhausted_budget_leaves_a_residue_not_a_fake_prime ... ok
+test cryptanalysis::curve_traits::arith::tests::an_unfactored_square_still_fixes_the_cm_discriminant ... ok
+test cryptanalysis::curve_traits::arith::tests::discriminant_split_matches_hand_cases ... ok
+test cryptanalysis::curve_traits::arith::tests::factor_finds_large_squares_without_rho ... ok
+test cryptanalysis::curve_traits::arith::tests::factor_is_complete_on_smooth_and_semiprime_inputs ... ok
+test cryptanalysis::curve_traits::arith::tests::local_data_agrees_with_the_full_split ... ok
+test cryptanalysis::curve_traits::arith::tests::multiplicative_order_and_lucas ... ok
+test cryptanalysis::curve_traits::certify::tests::counts_match_known_orders ... ok
+test cryptanalysis::curve_traits::query::tests::neighbours_of_ecc2k_130_share_its_cm_field_and_descent ... ok
+test cryptanalysis::curve_traits::query::tests::the_koblitz_family_is_one_group_across_sizes ... ok
+test cryptanalysis::curve_traits::query::tests::unknown_values_never_match ... ok
+test cryptanalysis::curve_traits::subfield::tests::a_generic_curve_has_no_proper_subfield_of_definition ... ok
+test cryptanalysis::curve_traits::subfield::tests::a_gf4_curve_over_gf2_6_descends_to_gf4 ... ok
+test cryptanalysis::curve_traits::subfield::tests::an_inconsistent_trace_is_an_error ... ok
+test cryptanalysis::curve_traits::subfield::tests::koblitz_curves_descend_to_gf2 ... ok
+test cryptanalysis::curve_traits::subfield::tests::the_twist_of_a_koblitz_curve_over_an_even_degree_descends_only_to_gf4 ... ok
+test cryptanalysis::curve_traits::tests::a_small_koblitz_curve ... ok
+test cryptanalysis::curve_traits::tests::coordinate_models_keep_exact_fields_and_available_order_certificates ... ok
+test cryptanalysis::curve_traits::tests::ecc2k_130_conductor_is_exact ... ok
+test cryptanalysis::curve_traits::tests::endomorphism_rings_from_contained_orders ... ok
+test cryptanalysis::curve_traits::tests::every_registry_entry_parses_with_its_order_identity ... ok
+test cryptanalysis::curve_traits::tests::extension_registry_preserves_field_and_subgroup_records ... ok
+test cryptanalysis::curve_traits::tests::registered_montgomery_and_edwards_generators_certify ... ok
+test cryptanalysis::curve_traits::tests::the_gf2_18_twist_groups_with_koblitz_by_cm_not_by_descent ... ok
+test cryptanalysis::cyclotomic_factor_base::tests::degrees_with_the_structure_include_the_ladder ... ok
+test cryptanalysis::cyclotomic_factor_base::tests::gamma_weight_sets_are_frobenius_stable_with_predicted_size ... ok
+test cryptanalysis::cyclotomic_factor_base::tests::k0_weight_one_base_is_the_four_torsion_above_x_equals_one ... ok
+test cryptanalysis::cyclotomic_factor_base::tests::lifted_points_lie_on_the_curve_and_project_into_the_subgroup ... ok
+test cryptanalysis::cyclotomic_factor_base::tests::matched_onb_base_has_the_requested_columns ... ok
+test cryptanalysis::cyclotomic_factor_base::tests::membership_systems_find_planted_decompositions ... ok
+test cryptanalysis::cyclotomic_factor_base::tests::subset_enumeration_counts_binomials ... ok
+test cryptanalysis::cyclotomic_factor_base::tests::unity_membership_is_satisfied_exactly_by_mu_p_at_n_11 ... ok
+test cryptanalysis::degree_reduction::tests::augmenting_with_falls_never_raises_dstar ... ok
+test cryptanalysis::degree_reduction::tests::blocked_rank_does_not_mix_unequal_stratum_sizes ... ok
+test cryptanalysis::degree_reduction::tests::boundary_optimum_is_reported_as_non_interior ... ok
+test cryptanalysis::degree_reduction::tests::cancellation_space_splits_into_syzygies_and_falls ... ok
+test cryptanalysis::degree_reduction::tests::collapse_fraction_declines_when_already_at_the_floor ... ok
+test cryptanalysis::degree_reduction::tests::collapse_fraction_finds_the_floor ... ok
+test cryptanalysis::degree_reduction::tests::composed_boundary_flag_agrees_with_the_argmin ... ok
+test cryptanalysis::degree_reduction::tests::composed_collapse_fraction_is_at_most_the_raw_one ... ok
+test cryptanalysis::degree_reduction::tests::composed_mutant_never_above_raw_on_the_same_slices ... ok
+test cryptanalysis::degree_reduction::tests::composed_total_prices_extraction_at_the_callers_omega ... ok
+test cryptanalysis::degree_reduction::tests::controlled_statistics_agree_under_unequal_strata ... ok
+test cryptanalysis::degree_reduction::tests::cost_model_uses_the_histogram_not_the_mean ... ok
+test cryptanalysis::degree_reduction::tests::defect_cells_are_labelled_and_measured_consistently ... ok
+test cryptanalysis::degree_reduction::tests::defect_profile_readings_are_consistent ... ok
+test cryptanalysis::degree_reduction::tests::defect_variant_values_are_non_negative ... ok
+test cryptanalysis::degree_reduction::tests::defect_variants_rank_identically_within_a_fixed_shape ... ok
+test cryptanalysis::degree_reduction::tests::degenerate_block_is_skipped_not_zeroed ... ok
+test cryptanalysis::degree_reduction::tests::degree_falls_vanish_on_every_solution ... ok
+test cryptanalysis::degree_reduction::tests::enumeration_baseline_bounds_the_full_guess_endpoint ... ok
+test cryptanalysis::degree_reduction::tests::guess_patterns_pick_distinct_in_range_indices ... ok
+test cryptanalysis::degree_reduction::tests::hybrid_sweep_runs_and_every_slice_refutes ... ok
+test cryptanalysis::degree_reduction::tests::k0_row_is_pattern_independent ... ok
+test cryptanalysis::degree_reduction::tests::new_generators_are_independent_of_the_originals ... ok
+test cryptanalysis::degree_reduction::tests::per_block_is_reported_and_sorted ... ok
+test cryptanalysis::degree_reduction::tests::presentation_dose_axis_is_monotone ... ok
+test cryptanalysis::degree_reduction::tests::pure_size_proxy_is_caught ... ok
+test cryptanalysis::degree_reduction::tests::refuting_early_means_little_early_defect ... ok
+test cryptanalysis::degree_reduction::tests::saturation_consumes_the_early_defect ... ok
+test cryptanalysis::degree_reduction::tests::saturation_terminates_and_only_grows_the_system ... ok
+test cryptanalysis::degree_reduction::tests::slicing_does_not_raise_the_mean_solving_degree ... ok
+test cryptanalysis::degree_reduction::tests::specialize_agrees_with_direct_evaluation ... ok
+test cryptanalysis::degree_reduction::tests::specialize_with_no_fixed_vars_is_identity ... ok
+test cryptanalysis::degree_reduction::tests::undersized_input_reports_nothing ... ok
+test cryptanalysis::degree_reduction::tests::within_block_relation_survives_control ... ok
+test cryptanalysis::degree_reduction_anf::tests::degenerate_elimination_is_flagged ... ok
+test cryptanalysis::degree_reduction_anf::tests::elimination_raises_the_generator_degree ... ok
+test cryptanalysis::degree_reduction_anf::tests::multilinear_monomials_are_complete_and_distinct ... ok
+test cryptanalysis::degree_reduction_anf::tests::refutation_exists_exactly_when_undecomposable ... ok
+test cryptanalysis::degree_reduction_anf::tests::shift_vars_preserves_the_polynomial ... ok
+test cryptanalysis::degree_reduction_anf::tests::the_two_presentations_agree_on_every_assignment ... ok
+test cryptanalysis::delta_method::tests::dimension_selection_follows_m_ell_equals_n_minus_delta ... ok
+test cryptanalysis::delta_method::tests::yield_fraction_matches_pair_table_and_coverage_model_at_a_small_cell ... ok
+test cryptanalysis::descent_algebraic::tests::defect_aggregation ... ok
+test cryptanalysis::descent_algebraic::tests::profile_shape_and_nonneg_defect ... ok
+test cryptanalysis::descent_algebraic::tests::subfield_has_larger_early_defect_than_random ... ok
+test cryptanalysis::descent_expansion::tests::boundary_expansion_matching ... ok
+test cryptanalysis::descent_expansion::tests::enumerated_are_irreducible ... ok
+test cryptanalysis::descent_expansion::tests::irreducibility_known_cases ... ok
+test cryptanalysis::descent_expansion::tests::irreducible_counts ... ok
+test cryptanalysis::descent_expansion::tests::report_runs_at_larger_n ... ok
+test cryptanalysis::descent_expansion::tests::report_runs_on_real_field ... ok
+test cryptanalysis::descent_expansion::tests::spearman_monotone ... ok
+test cryptanalysis::descent_expansion::tests::spectral_gap_complete_bipartite ... ok
+test cryptanalysis::descent_expansion::tests::spectral_gap_matching ... ok
+test cryptanalysis::descent_expansion::tests::system_expansion_varies_across_bases ... ok
+test cryptanalysis::descent_expansion::tests::system_incidence_shape ... ok
+test cryptanalysis::descent_expansion::tests::tensor_expansion_is_basis_independent_in_refutable_regime ... ok
+test cryptanalysis::descent_expansion::tests::tensor_incidence_shape ... ok
+test cryptanalysis::descent_expansion::tests::tensor_reproduces_field_identities ... ok
+test cryptanalysis::descent_lowgamma::tests::all_families_measure ... ok
+test cryptanalysis::descent_lowgamma::tests::cell_runner_basic ... ok
+test cryptanalysis::descent_lowgamma::tests::coordinate_matches_restrict_to_subspace ... ok
+test cryptanalysis::descent_lowgamma::tests::random_basis_fullrank_and_shape ... ok
+test cryptanalysis::descent_lowgamma::tests::refutation_iff_nondecomposable_on_subspace ... ok
+test cryptanalysis::descent_lowgamma::tests::subfield_basis_is_independent ... ok
+test cryptanalysis::descent_lowgamma::tests::subfield_lower_dstar_but_not_lower_gamma ... ok
+test cryptanalysis::descent_lowgamma::tests::subfield_requires_divisibility ... ok
+test cryptanalysis::descent_treewidth::tests::descended_primal_graph_is_complete ... ok
+test cryptanalysis::descent_treewidth::tests::primal_graph_cliques_per_equation ... ok
+test cryptanalysis::descent_treewidth::tests::treewidth_complete_is_n_minus_1 ... ok
+test cryptanalysis::descent_treewidth::tests::treewidth_cycle_is_two ... ok
+test cryptanalysis::descent_treewidth::tests::treewidth_edgeless_is_zero ... ok
+test cryptanalysis::descent_treewidth::tests::treewidth_path_is_one ... ok
+test cryptanalysis::descent_treewidth::tests::treewidth_two_triangles ... ok
+test cryptanalysis::descent_treewidth::tests::vertex_cap_returns_none ... ok
+test cryptanalysis::diem_descent::tests::curve_arithmetic_consistency ... ok
+test cryptanalysis::diem_descent::tests::end_to_end_decomposition ... ok
+test cryptanalysis::diem_descent::tests::factor_base_has_some_points ... ok
+test cryptanalysis::diem_descent::tests::fpk_arithmetic_basic ... ok
+test cryptanalysis::diem_descent::tests::fpk_inverse_round_trip ... ok
+test cryptanalysis::ec_index_calculus::tests::ec_index_calculus_small_dlp ... ok
+test cryptanalysis::ec_index_calculus::tests::factor_base_on_curve ... ok
+test cryptanalysis::ec_index_calculus::tests::fast_roots_match_brute_force_past_cutoff ... ok
+test cryptanalysis::ec_index_calculus::tests::find_roots_fp_round_trip ... ok
+test cryptanalysis::ec_index_calculus::tests::gaussian_particular_flags_only_pinned_columns ... ok
+test cryptanalysis::ec_index_calculus::tests::gaussian_rejects_inconsistent_system ... ok
+test cryptanalysis::ec_index_calculus::tests::gaussian_rejects_underdetermined_system ... ok
+test cryptanalysis::ec_index_calculus::tests::gaussian_solves_small_system ... ok
+test cryptanalysis::ec_index_calculus::tests::gaussian_solves_square_full_rank_system ... ok
+test cryptanalysis::ec_index_calculus::tests::ic_and_rho_agree_on_random_dlp ... ok
+test cryptanalysis::ec_index_calculus::tests::pollard_rho_recovers_small_dlp ... ok
+test cryptanalysis::ec_index_calculus::tests::s3_symmetric ... ok
+test cryptanalysis::ec_index_calculus::tests::s3_vanishes_on_collinear ... ok
+test cryptanalysis::ec_index_calculus::tests::s4_relation_search_solves_and_uses_three_entries ... ok
+test cryptanalysis::ec_index_calculus::tests::s4_root_finder_recovers_x4 ... ok
+test cryptanalysis::ec_index_calculus::tests::s4_vanishes_on_four_collinear ... ok
+test cryptanalysis::ec_index_calculus::tests::staged_dlp_recovers_and_splits_stages ... ok
+test cryptanalysis::ec_index_calculus::tests::tonelli_shanks_invertible ... ok
+test cryptanalysis::ec_index_calculus::tests::tonelli_shanks_rejects_nqr ... ok
+test cryptanalysis::ec_index_calculus::tests::u64_elimination_matches_biguint_path ... ok
+test cryptanalysis::ec_index_calculus_j0::tests::cube_root_of_unity_exists_for_p_211 ... ok
+test cryptanalysis::ec_index_calculus_j0::tests::cube_root_rejects_p_not_one_mod_three ... ok
+test cryptanalysis::ec_index_calculus_j0::tests::detects_j_invariant_zero ... ok
+test cryptanalysis::ec_index_calculus_j0::tests::eisenstein_factor_base_differs_from_smallest_x_fb ... ok
+test cryptanalysis::ec_index_calculus_j0::tests::eisenstein_factor_base_is_on_curve_and_unique ... ok
+test cryptanalysis::ec_index_calculus_j0::tests::eisenstein_smooth_ic_recovers_dlp ... ok
+test cryptanalysis::ec_index_calculus_j0::tests::j0_ic_recovers_dlp ... ok
+test cryptanalysis::ec_index_calculus_j0::tests::orbit_factor_base_canonical_x_is_minimum ... ok
+test cryptanalysis::ec_index_calculus_j0::tests::orbit_factor_base_has_no_duplicate_orbits ... ok
+test cryptanalysis::ec_index_calculus_j0::tests::psi_acts_as_lambda_on_torsion ... ok
+test cryptanalysis::ec_index_calculus_j0::tests::psi_amplification_gives_three_rows ... ok
+test cryptanalysis::ec_index_calculus_j0::tests::psi_is_a_curve_automorphism_of_order_three ... ok
+test cryptanalysis::ec_index_calculus_j0::tests::s3_is_zeta_equivariant_on_j0 ... ok
+test cryptanalysis::ec_index_calculus_j0::tests::s3_not_zeta_equivariant_on_generic_curve ... ok
+test cryptanalysis::ec_index_calculus_j0::tests::staged_dlp_recovers_and_splits_stages ... ok
+test cryptanalysis::ec_trapdoor::tests::audit_curve_includes_all_factorisations ... ok
+test cryptanalysis::ec_trapdoor::tests::audit_curve_puts_descending_towers_first ... ok
+test cryptanalysis::ec_trapdoor::tests::f2_dim_singleton ... ok
+test cryptanalysis::ec_trapdoor::tests::f2_dim_three_independent_vectors ... ok
+test cryptanalysis::ec_trapdoor::tests::frobenius_orbit_lengths_divide_n ... ok
+test cryptanalysis::ec_trapdoor::tests::genus_is_exact_beyond_u32_shift_width ... ok
+test cryptanalysis::ec_trapdoor::tests::genus_type_n5 ... ok
+test cryptanalysis::ec_trapdoor::tests::magic_number_b_in_subfield_is_one ... ok
+test cryptanalysis::ec_trapdoor::tests::magic_number_constructor_targets_two ... ok
+test cryptanalysis::ec_trapdoor::tests::mmt_condition_8_counts_n12 ... ok
+test cryptanalysis::ec_trapdoor::tests::mmt_theorem5_counts_n12 ... ok
+test cryptanalysis::ec_trapdoor::tests::plain_orbit_undercounts_on_relative_trace_zero ... ok
+test cryptanalysis::ec_trapdoor::tests::sqrt_squares_to_input ... ok
+test cryptanalysis::ec_trapdoor::tests::subfield_detection ... ok
+test cryptanalysis::ec_trapdoor::tests::trapdoor_curves_satisfy_condition_8 ... ok
+test cryptanalysis::ecbench::audit::tests::legacy_rounding_is_reproduced_from_the_record_alone ... ok
+test cryptanalysis::ecbench::audit::tests::legacy_rounding_needs_the_records_own_total_and_a_wall_price ... ok
+test cryptanalysis::ecbench::bounds::tests::a_sealed_document_checks_and_a_changed_byte_does_not ... ok
+test cryptanalysis::ecbench::bounds::tests::ols_recovers_an_exact_power_law ... ok
+test cryptanalysis::ecbench::bounds::tests::power_law_interval_brackets_the_slope_and_needs_two_sizes ... ok
+test cryptanalysis::ecbench::bounds::tests::the_domain_id_ignores_nothing_and_is_stable ... ok
+test cryptanalysis::ecbench::bounds::tests::tiers_follow_the_field_size ... ok
+test cryptanalysis::ecbench::callgrind::tests::counts_only_the_bracketed_parts_including_internal_phase_dumps ... ok
+test cryptanalysis::ecbench::callgrind::tests::parses_the_ir_column_of_a_callgrind_part ... ok
+test cryptanalysis::ecbench::callgrind::tests::refuses_an_incomplete_or_reversed_profile ... ok
+test cryptanalysis::ecbench::callgrind::tests::refuses_missing_duplicate_reversed_or_outside_online_markers ... ok
+test cryptanalysis::ecbench::callgrind::tests::separates_reusable_and_one_target_instructions_without_losing_work ... ok
+test cryptanalysis::ecbench::canonical::tests::canonical_sorts_and_compacts ... ok
+test cryptanalysis::ecbench::canonical::tests::compat_u128_is_a_number_below_two_to_the_64_and_a_string_above ... ok
+test cryptanalysis::ecbench::canonical::tests::floats_are_refused ... ok
+test cryptanalysis::ecbench::canonical::tests::short_id_is_a_prefix_of_the_digest ... ok
+test cryptanalysis::ecbench::challenge::tests::a_challenge_may_name_a_field_axis_and_nothing_else_new ... ok
+test cryptanalysis::ecbench::challenge::tests::a_challenge_outside_its_tier_or_family_is_refused ... ok
+test cryptanalysis::ecbench::challenge::tests::axis_verdicts_read_the_interval_against_one ... ok
+test cryptanalysis::ecbench::challenge::tests::the_level_is_named_from_the_axes_advanced_on ... ok
+test cryptanalysis::ecbench::challenge::tests::the_outcome_is_pareto_over_deciding_axes_only ... ok
+test cryptanalysis::ecbench::challenge::tests::the_spec_is_a_function_of_challenge_candidate_and_epoch ... ok
+test cryptanalysis::ecbench::claim::tests::a_fold_other_than_sign_and_frobenius_is_refused ... ok
+test cryptanalysis::ecbench::claim::tests::canonical_utf8_writes_non_ascii_raw ... ok
+test cryptanalysis::ecbench::claim::tests::compiler_change_on_one_machine_cannot_supply_independence ... ok
+test cryptanalysis::ecbench::claim::tests::identities_match_identity_py ... ok
+test cryptanalysis::ecbench::claim::tests::native_counter_ledgers_keep_recorded_units_and_unknown_calibration ... ok
+test cryptanalysis::ecbench::claim::tests::print_identity_inputs ... ignored
+test cryptanalysis::ecbench::claim::tests::wall_record_class_requires_both_recorded_levels_and_the_l2_floor ... ok
+test cryptanalysis::ecbench::claw::tests::claw_is_deterministic_in_seed ... ok
+test cryptanalysis::ecbench::claw::tests::claw_recovers_planted_logs_on_koblitz_curves ... ok
+test cryptanalysis::ecbench::claw::tests::wide_claw_recovers_planted_logs ... error: test failed, to rerun pass `--lib`
+
+Caused by:
+  process didn't exit successfully: `/Volumes/SSD990-2/crypto/wt/codex-rootfind-ecbench-20261012/target/release/deps/crypto_lib-e89b2f0dbc9b5389 --test-threads=1` (signal: 2, SIGINT: terminal interrupt signal)
