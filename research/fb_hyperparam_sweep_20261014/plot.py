@@ -14,6 +14,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.ticker  # noqa: E402
 
 HERE = Path(__file__).parent
 SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else HERE / "data" / "sweep.json"
@@ -71,7 +72,7 @@ save(fig, "yield_vs_heuristic")
 # 2. d_ff and mean D* vs n' (small multiples by family; generic_b).
 ns = sorted({r["n"] for r in rows})
 pick = [n for n in ns if n in (10, 12, 14, 16)] or ns[-4:]
-fig, axes = plt.subplots(1, len(pick), figsize=(2.6 * len(pick), 3.6), sharey=True)
+fig, axes = plt.subplots(1, len(pick), figsize=(max(7.5, 2.6 * len(pick)), 3.8), sharey=True)
 axes = axes if len(pick) > 1 else [axes]
 for ax, n in zip(axes, pick):
     for fam, (col, mk) in FAM.items():
@@ -88,16 +89,17 @@ for ax, n in zip(axes, pick):
             ax.plot(xf, ff, marker=mk, color=col, ls=":", lw=1.2, ms=4, mfc=SURF, label=f"d_ff {fam}")
     ax.set_title(f"n = {n}", fontsize=10, color=INK)
     ax.set_xlabel("factor-base dimension n'")
-axes[0].set_ylabel("Macaulay degree (mean ± sd, 16 non-decomp. targets)")
+    ax.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(integer=True))
+axes[0].set_ylabel("Macaulay degree (mean ± sd)")
 axes[-1].legend(fontsize=7, loc="upper left")
-fig.suptitle("First-fall degree (dotted) vs refutation degree D* (solid), generic b; censored D* excluded from mean",
-             fontsize=9)
-fig.text(0.01, 0.005, TAG + f"; d_max = {doc['budget']['d_max']}", fontsize=7, color=INK2)
+fig.suptitle("First-fall degree d_ff (dotted) vs refutation degree D* (solid), generic b", fontsize=10)
+fig.text(0.01, 0.005, TAG + f"; 16 non-decomposable targets per cell; d_max = {doc['budget']['d_max']}, censored D* excluded from the mean",
+         fontsize=7, color=INK2)
 fig.tight_layout(rect=(0, 0.03, 1, 1))
 save(fig, "dff_vs_dstar")
 
 # 3. Derived cost model vs n' for the coordinate family, against the rho reference.
-fig, axes = plt.subplots(1, len(pick), figsize=(2.6 * len(pick), 3.6), sharey=True)
+fig, axes = plt.subplots(1, len(pick), figsize=(max(7.5, 2.6 * len(pick)), 3.8), sharey=True)
 axes = axes if len(pick) > 1 else [axes]
 for ax, n in zip(axes, pick):
     for cls, ls in (("generic_b", "-"), ("koblitz_b1", "--")):
@@ -113,9 +115,10 @@ for ax, n in zip(axes, pick):
         ax.axhline(rho[0], color=INK2, lw=1, ls=":", label="rho reference")
     ax.set_yscale("log"); ax.set_title(f"n = {n}", fontsize=10, color=INK)
     ax.set_xlabel("factor-base dimension n'")
-axes[0].set_ylabel("derived total seconds (decomposition + LA)")
+    ax.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(integer=True))
+axes[0].set_ylabel("derived seconds (decomp. + LA)")
 axes[-1].legend(fontsize=6.5, loc="lower right")
-fig.suptitle("Derived cost model, coordinate factor base (inputs measured; model per PROTOCOL.md)", fontsize=9)
+fig.suptitle("Derived cost model, coordinate factor base (measured inputs, PROTOCOL.md model)", fontsize=10)
 fig.text(0.01, 0.005, TAG + "; Macaulay curve is a lower bound where D* was censored", fontsize=7, color=INK2)
 fig.tight_layout(rect=(0, 0.03, 1, 1))
 save(fig, "cost_model")
@@ -123,7 +126,7 @@ save(fig, "cost_model")
 # 4. Prime negative control: whole-solve seconds vs FB size, IC m=2/3 vs rho.
 prime = doc["prime"]
 bits = sorted({r["bits"] for r in prime})
-fig, axes = plt.subplots(1, len(bits), figsize=(3.2 * len(bits), 3.5), sharey=True)
+fig, axes = plt.subplots(1, len(bits), figsize=(max(7.5, 3.2 * len(bits)), 3.8), sharey=True)
 axes = axes if len(bits) > 1 else [axes]
 for ax, b in zip(axes, bits):
     for meth, col, mk in (("ic_m2", "#2a78d6", "o"), ("ic_m3", "#eb6834", "s")):
@@ -137,13 +140,15 @@ for ax, b in zip(axes, bits):
                        edgecolors=col, marker=mk, s=28, label=f"IC {meth[-2:]} failed (budget)", zorder=3)
     rho = [r["seconds"] for r in prime if r["bits"] == b and r["method"] == "rho_negation_1thread" and r["solved"]]
     if rho:
-        ax.axhspan(min(rho), max(rho), color="#1baf7a", alpha=0.25, lw=0, label=f"rho, {len(rho)} solves (range)")
+        ax.axhspan(min(rho), max(rho), color="#1baf7a", alpha=0.25, lw=0)
+        ax.axhline(min(rho), color="#1baf7a", lw=1.5, label=f"rho, {len(rho)} solves (min–max band)")
+        ax.axhline(max(rho), color="#1baf7a", lw=1.5)
     ax.set_xscale("log", base=2); ax.set_yscale("log")
     ax.set_title(f"{b}-bit a = −3 curve", fontsize=10, color=INK)
     ax.set_xlabel("factor-base size (points)")
-axes[0].set_ylabel("whole DLP solve, wall seconds (1 thread, L0)")
+axes[0].set_ylabel("whole solve, wall s (1 thread)")
 axes[0].legend(fontsize=7, loc="upper left")
-fig.suptitle("Prime-field negative control: small-x factor base vs rho on the same curve and secret", fontsize=9)
+fig.suptitle("Prime-field negative control: small-x factor base vs rho, same curve and secret", fontsize=10)
 fig.text(0.01, 0.005, TAG, fontsize=7, color=INK2)
 fig.tight_layout(rect=(0, 0.03, 1, 1))
 save(fig, "prime_control")
