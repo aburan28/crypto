@@ -43,26 +43,30 @@ TeX can open the paper.
 
 All rates are in billions of iterations per second on one device.
 
-- §1 Introduction. §2 Where 2009 left off: 2009–2012 rates against today.
-- §3 Curve, field, golden model. §4 The walk. §5 Field arithmetic (with
-  a figure of the packed carry-less product).
-- §6 Instruction sets that matter: NVIDIA (PRMT, SHF, LOP3, carry
-  chains, PTX 9.3 `clmad`), x86 (PCLMULQDQ, MULX/ADX, VPTERNLOGD, IFMA,
+- §1 Introduction. §2 Prior ECC2K-130 implementations: 2009–2012 rates
+  against today.
+- §3 Curve, field and reference model. §4 Iteration functions. §5 Field
+  arithmetic (with a figure of the packed carry-less product).
+- §6 Instruction-set support: NVIDIA (PRMT, SHF, LOP3, carry chains,
+  PTX 9.3 `clmad`), x86 (PCLMULQDQ, MULX/ADX, VPTERNLOGD, IFMA,
   VPCLMULQDQ/GFNI, AVX10.2, APX), Arm (PMULL, EOR3, SVE2), RISC-V
   (Zbc, Zvbc), with a timeline figure.
-- §7 What current NVIDIA hardware changes: `clmad` rates on three dies.
-- §8 The GPU client: floor and roofline, the ledger (staircase figure),
-  where the speedup came from, what changed and what did not (no
-  algorithmic change), kernel anatomy, step data flow and memory-layout
-  figures, σ-walk against table walk (cycle-rule figure), per-GPU charts.
-- §9 CPU clients and CPU instruction sets (with a per-ISA chart).
-- §10 NIST P-256/P-384. §11 Other GPU kernels. §12 FPGA. §13 Campaign.
-- §14 Structural alternatives. §15 Upper bounds per platform (figure).
-- §16 How long a solve takes: expected time and cost for every measured
-  device at one, 100 and 1,000 devices, rho's spread, the cutoff-32
+- §7 Carry-less multiplication on current NVIDIA GPUs: `clmad` rates on
+  three dies.
+- §8 GPU implementation: floor and roofline, the optimisation ledger
+  (staircase figure), sources of the speedup (no algorithmic change),
+  kernel anatomy, step data flow and memory-layout figures, σ-walk
+  versus table walk (cycle-rule figure), cross-GPU comparison.
+- §9 CPU implementations (with a per-ISA chart).
+- §10 Application to NIST P-256 and P-384. §11 Other GPU kernels.
+  §12 FPGA implementation. §13 The ECC2K-130 campaign.
+- §14 Structural alternatives to rho. §15 Performance upper bounds
+  (figure).
+- §16 Time and cost to solution: expected time and cost for every
+  measured device at one, 100 and 1,000 devices, variance, the cutoff-32
   detection delay, the campaign corpus credit, a fleet-size figure, and
-  P-256/P-384 on the same footing.
-- §17 Open questions. §18 Related work. §19 Conclusion.
+  P-256/P-384.
+- §17 Open problems and future work. §18 Related work. §19 Conclusion.
 - Appendix A: reproduction (companion repository and Docker image).
 - Appendix B: evidence records.
 
@@ -133,8 +137,10 @@ GPU; the paper says so in its availability paragraph and Appendix A.
   The NIST round-2 results are no longer described as unmerged: PR 1778
   merged with `gpu/nist` identical to the cited commit, so E49 now points
   at `gpu/nist/RESULTS.md` on `main`.
-  Subsection titles rewritten in plain language (for example "How many
-  steps the walk really needs" for "The walk constant, measured").
+  Section, subsection and paragraph headings rewritten as conventional
+  noun-phrase headings (for example "Measured walk constants",
+  "Time and cost to solution"), with the remaining rhetorical questions
+  and informal phrases in the text replaced.
 - Draft 6: refocused on rho on Blackwell and retitled. New §2 (2009–2012
   rates from Bailey et al., the INDOCRYPT 2010 GPU paper, the Cell
   papers and Niederhagen's thesis, against today's), new §6 on `clmad`

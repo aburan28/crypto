@@ -1,10 +1,10 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-Here is where Pollard rho stands on current NVIDIA hardware, as far as
-this work can measure it.
+We summarise the state of Pollard rho on current NVIDIA hardware as
+measured in this work.
 
-\paragraph{The step got about 230 times cheaper per card.} In 2010 the
+\paragraph{Per-card throughput.} In 2010 the
 best GTX~295 kernel ran ECC2K-130 at $0.064$ billion iterations per
 second. On one RTX~PRO~6000 Blackwell the same walk runs at $14.64$ in
 the audited campaign build and $15.88$ in the best later build, and the
@@ -15,7 +15,7 @@ three representation changes did most of the work: Frobenius
 permutation networks, the native carry-less product, and the smaller
 batch that the native product made possible.
 
-\paragraph{A solve is now a fleet-sizing decision.} At $15.88$ billion
+\paragraph{Time to solution.} At $15.88$ billion
 iterations per second, five RTX~PRO~6000s expect to find the collision
 in about a year, 56 in a month, 290 in a week, and a thousand in about
 three days, half of them spent waiting for the last trail to reach a
@@ -24,7 +24,7 @@ price and \$38k--\$56k on the spot quotes we saw, whatever the fleet
 size. The same rates leave P-256 about $6\cdot10^{21}$ card-years away
 (Section~\ref{sec:solvetime}).
 
-\paragraph{\texttt{clmad} matters, and so does which die it runs on.}
+\paragraph{Carry-less multiplication across dies.}
 PTX~9.3 gives every part from \texttt{sm\_80} onward a carry-less
 multiply, but not at the same rate. On the RTX~PRO~6000 it issues at
 about $1.7$ lanes per SM-clock, the cost of $38$ logic instructions; on
@@ -37,7 +37,7 @@ carry-less unit, and kernel tuning does not travel between them. For
 any walk with one affine addition per step, $28$ billion iterations per
 second on one RTX~PRO~6000 is out of reach on both pipes.
 
-\paragraph{The $\sigma$-walk is the fastest correct walk.} The table walk
+\paragraph{Choice of iteration function.} The table walk
 does the arithmetic of a step more cheaply, and reached $20.08$ under
 cycle rule v2. But v2's exits from fruitless cycles depended on how a
 trail arrived, and the exact v3 rule that fixes this runs at $5.10$
@@ -45,8 +45,7 @@ today. Closing that gap, with a deferred or off-critical-path cycle
 check, is the largest open optimisation in this paper, and even then a
 table walk must win on cost per solve, which nobody has measured.
 
-\paragraph{The ladder transfers to prime fields, in different
-proportions.} On NIST P-256 and P-384 on the same card, explicit carry
+\paragraph{Transfer to prime fields.} On NIST P-256 and P-384 on the same card, explicit carry
 chains, a wider shared inversion and the same refusal of register-cap
 trades gave $1.52\times$ and $2.61\times$, to $1.632$ and $0.548$ billion
 iterations per second. The batch width, a modest knob on the binary
@@ -56,7 +55,7 @@ normal-basis one. A P-256 step remains about nine times as expensive
 as an ECC2K-130 step on the same card, which is the carry-less unit's
 advantage in one number.
 
-\paragraph{The headroom is finite and measurable.} None of the speedup
+\paragraph{Remaining headroom.} None of the speedup
 came from changing the algorithm: every step kept Bailey et al.'s walk
 and its distinguished points bit for bit, and the gains split into
 representation and arithmetic ($6.3\times$), batch and geometry
@@ -71,8 +70,7 @@ logic and wider words give $2.4$--$3\times$ to the bitsliced client, and a
 packed client on the CPU's own carry-less multiply runs $2.9\times$ faster
 than with a software product.
 
-\paragraph{The exponent did not move, and the campaign is a priced
-corpus.} The campaign's walk needs $2^{60.91}$--$2^{60.92}$ iterations,
+\paragraph{Asymptotic cost and the campaign.} The campaign's walk needs $2^{60.91}$--$2^{60.92}$ iterations,
 which agrees with the 2009 estimate. Index calculus on the curve costs
 $10^7$ times as much as rho, and the best measured decomposition is
 $35$--$51$ bits short of its budget. The campaign stored $486$ million

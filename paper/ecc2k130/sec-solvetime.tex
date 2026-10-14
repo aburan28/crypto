@@ -1,4 +1,4 @@
-\section{How long would a solve take?}
+\section{Time and cost to solution}
 \label{sec:solvetime}
 
 The rates in this paper translate directly into calendar time and
@@ -10,26 +10,26 @@ is feasible but how many cards, for how long, at what price. For the
 NIST curves, the same arithmetic gives an answer that no plausible
 amount of hardware changes.
 
-\subsection{What sets the time}
+\subsection{Model}
 \label{sec:solvetime-model}
 
 Three quantities set the time to a collision.
 
-\paragraph{The work.} The $\sigma$-walk needs $2^{60.9}\approx2.15\cdot10^{18}$
+\paragraph{Expected work.} The $\sigma$-walk needs $2^{60.9}\approx2.15\cdot10^{18}$
 iterations in expectation (Section~\ref{sec:walk-constant}). One
 device running at $R$ billion iterations per second therefore needs
 $2.15\cdot10^{18}/R$ nanoseconds, or $68.2/R$ years
 (Table~\ref{tab:history-compare}), and a fleet of $N$ such devices
 needs $1/N$ of that.
 
-\paragraph{The spread.} Rho's running time is random. The probability
+\paragraph{Variance.} Rho's running time is random. The probability
 of no collision after a fraction $c$ of the expected work is about
 $\exp(-\pi c^2/4)$ (Section~\ref{sec:campaign-state}). Half of all
 solves finish by $c=0.94$, nine in ten by $c=1.71$ and 99 in 100 by
 $c=2.42$ (our arithmetic). So a plan that must finish with $90\%$
 probability should budget $1.7$ times the expected work.
 
-\paragraph{The detection delay.} A collision is only seen when the
+\paragraph{Detection delay.} A collision is only seen when the
 second of the two merged trails reaches a distinguished point. At
 cutoff 32 that is on average another $2^{28.41}$ steps of one walk
 (Section~\ref{sec:campaign-interval}). Each walk advances at $R$
@@ -50,14 +50,14 @@ A fleet of $N$ devices at $R$ therefore expects a collision after
 where $D$ is the detection delay. The first term is multiplied by $0.94$
 for the median and by $1.71$ for a $90\%$ plan.
 
-\paragraph{The corpus.} The campaign has already walked $2^{56.68}$
+\paragraph{Existing corpus.} The campaign has already walked $2^{56.68}$
 iterations without a collision (Table~\ref{tab:state}). A new fleet
 that runs the same $\sigma$-walk at cutoff 32 and merges with that
 corpus inherits the credit. Given no collision so far, the expected
 remaining work is $0.949$ of the total (our arithmetic). That is a
 saving of $5\%$; it changes the plan, not the scale.
 
-\subsection{One device, a hundred, a thousand}
+\subsection{Estimates by device and fleet size}
 \label{sec:solvetime-table}
 
 Table~\ref{tab:solvetime} applies the first term of the model to every
@@ -149,7 +149,7 @@ while spot capacity lasts. The spot market reclaimed the campaign's
 whole fleet on 2026-09-18 (Section~\ref{sec:campaign-state}), and a
 solve on spot capacity has to plan for that.
 
-\paragraph{What these estimates assume.} Every rate in
+\paragraph{Assumptions.} Every rate in
 Table~\ref{tab:solvetime} is sustained for the whole solve. The survey
 rows are single unpaired runs, and the campaign's own fleet measured
 its RTX~PRO~6000 workers at a median of $14.66$
@@ -162,7 +162,7 @@ one card of an \texttt{f2.6xlarge}. The CPU row is one core and assumes
 the per-core rate holds across a server. The costs exclude storage,
 egress and the merge.
 
-\subsection{And the NIST curves?}
+\subsection{NIST P-256 and P-384}
 \label{sec:solvetime-nist}
 
 The same model applies to the NIST walk of Section~\ref{sec:nist}, and

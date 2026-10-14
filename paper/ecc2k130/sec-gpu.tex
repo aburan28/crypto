@@ -1,4 +1,4 @@
-\section{The GPU client}
+\section{GPU implementation}
 \label{sec:gpu}
 
 On the GPU the exponent is fixed, so the only question is throughput.
@@ -16,7 +16,7 @@ kernel toward it.
 
 \input{figures/fig-step}
 
-\subsection{Setting the limits before tuning}
+\subsection{Performance floor and roofline}
 \label{sec:floor}
 
 Any walk that keeps the rho collision structure performs one affine
@@ -63,9 +63,9 @@ $17.5$ SM-clocks per update, a ceiling of $24.7$--$26.1$~billion iterations/s ev
 everything else were free. On the logic pipe, about $1{,}090$ ALU slots
 already exceed the $959$--$1{,}013$ that $28$~billion iterations/s would allow. At $90\%$
 utilisation of either pipe the ceiling is $22.2$--$23.4$~billion iterations/s. The note
-was written to answer one question: could a different iteration
-function take one card from the audited $14.64$ to $28$~billion iterations/s? The
-answer came before any kernel was built. It cannot, because $28$~billion iterations/s
+was written to decide whether a different iteration function could
+take one card from the audited $14.64$ to $28$~billion iterations/s. The
+answer came before any kernel was built: it cannot, because $28$~billion iterations/s
 is below the floor of any walk that performs one affine addition per
 iteration.
 
@@ -123,7 +123,7 @@ $45$ \texttt{CLMAD} statically, or $2{,}324$ once \texttt{POPC} and
 rate~\evcite{\evref{iterfn}, §3}. The floor argument does
 not depend on which count is used, since the budgets are below both.
 
-\subsection{How we decided a change was real}
+\subsection{Acceptance criteria}
 
 With two exceptions named in Section~\ref{sec:declined}, every step
 in this section is a paired comparison on one GPU allocation: the
@@ -141,7 +141,7 @@ logarithms on $\mathrm{GF}(2^{41})$. A candidate that fails the rule
 stays in the tree behind a flag, with its ratio on record;
 Section~\ref{sec:declined} collects them.
 
-\subsection{From $0.85$ to $14.64$ billion iterations per second, one step at a time}
+\subsection{Optimisation ledger}
 \label{sec:ledger}
 
 The original client was bitsliced, with 32 walks in the bit lanes of
@@ -241,7 +241,7 @@ These are the current $\sigma$-walk headlines. The campaign
 configuration of Section~\ref{sec:campaign} was frozen before they
 existed and still ships the audited $14.64$ build.
 
-\subsection{The hardware changed; the algorithm did not}
+\subsection{Sources of the speedup}
 \label{sec:what-changed}
 
 None of the sixteen steps changed the algorithm. The iteration function
@@ -266,7 +266,7 @@ well as the rate (Section~\ref{sec:walk-cycles}).
 
 \input{figures/fig-tiling}
 
-\subsection{How cheap can a table-walk step get?}
+\subsection{Table-walk arithmetic}
 \label{sec:tablewalk}
 
 This subsection measures how cheap the table walk's step can be made.
@@ -314,7 +314,7 @@ reports re-walked correctly, and the distinguished-point count matched
 the reference's $472{,}776$~\evcite{\evref{oneblock}}. This is
 the \texttt{gpu-rtx-pro6000-20b} build, and it ran cycle rule v2.
 
-\subsection{Which walk should you actually run?}
+\subsection{$\sigma$-walk versus table walk}
 \label{sec:sigma-vs-table}
 
 \input{figures/fig-cycles}
@@ -360,7 +360,7 @@ $\sigma$-walk's; under v2 that was projected at $0.81$--$0.86\times$ and has
 never been measured. Section~\ref{sec:open-table} lists the routes we
 see.
 
-\subsection{A smaller card: the RTX~PRO~4500}
+\subsection{RTX~PRO~4500}
 \label{sec:g7}
 
 The campaign's second GPU family is the RTX~PRO~4500 (82 SMs, 165~W)
@@ -384,7 +384,7 @@ ran at $12.632704$~billion iterations/s over $2^{36}$ updates~\evcite{\evref{cli
 We have not measured its DP34 collection rate on this card, so we do
 not give one.
 
-\subsection{How twelve GPUs compare}
+\subsection{Cross-GPU comparison}
 \label{sec:survey}
 
 Table~\ref{tab:survey} puts every part we measured side by side, with
@@ -466,7 +466,7 @@ on both dies ($0.826\times$ on the B200, $0.696\times$ on the 6000),
 which points to the register file rather than to any unit's
 rate~\evcite{\evref{twochains}, §5, §6.2 and §6.4}.
 
-\subsection{Ideas we measured and turned down}
+\subsection{Rejected optimisations}
 \label{sec:declined}
 
 Table~\ref{tab:declined} lists every GPU candidate that we built,

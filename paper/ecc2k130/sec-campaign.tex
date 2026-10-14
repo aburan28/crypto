@@ -1,4 +1,4 @@
-\section{The campaign}
+\section{The ECC2K-130 campaign}
 \label{sec:campaign}
 
 At the campaign's collection rate, $2^{60.9}$ iterations is about
@@ -9,7 +9,7 @@ the time and merged as it arrives. This section covers its
 configuration, its calibration, its storage protocol and where it
 stands now.
 
-\subsection{How the campaign was set up}
+\subsection{Configuration}
 
 The configuration is one file in the repository; the copy in the
 storage bucket is what workers read~\evcite{\evref{ops}; \evref{ops}}. Walk: $\sigma$ (Section~\ref{sec:walk-sigma}). \texttt{dpWeight}: 32,
@@ -28,7 +28,7 @@ and the state-layout knobs) freeze once any slot exists;
 \texttt{sm\_120}~\evcite{\evref{ops}}. A checkpoint is about
 370~MB (six million walks at 60 bytes).
 
-\subsection{How rare a distinguished point should be}
+\subsection{Distinguished-point cutoff}
 \label{sec:campaign-interval}
 
 The planning numbers follow from the cutoff~\evcite{\evref{ops}, ``The numbers that decide the plan''}.
@@ -84,7 +84,7 @@ all & 132 & $1.169\cdot10^{16}$ & $32{,}794{,}655$ & $\mathbf{2^{28.41}}$ & $\ap
 \end{tabular}
 \end{table}
 
-\subsection{Paying for the fleet}
+\subsection{Fleet economics}
 \label{sec:campaign-goal28}
 
 The total cost depends on the work, not on the size of the fleet: at the
@@ -127,7 +127,7 @@ $+2.6\%$), predicts $7.2$--$7.4$~billion iterations/s for the fused build
 there~\evcite{\evref{power}}. That prediction still
 needs a measurement; the bridge map got there first.
 
-\subsection{Storing points and proving a collision}
+\subsection{Storage, seeding and certification}
 \label{sec:campaign-storage}
 
 A record is 32 bytes: a little-endian 64-bit seed and the canonical
@@ -171,7 +171,7 @@ walk~\evcite{\evref{cert}; \evref{audit}; \evref{ops}}.
 The public dashboard publishes aggregates only: not point keys,
 coefficients, seeds or database locations~\evcite{\evref{status}; \evref{status}}.
 
-\subsection{Where the campaign stands}
+\subsection{Current state}
 \label{sec:campaign-state}
 
 The campaign was created on 2026-09-11. Its fleet on 2026-09-17 was about 133 workers (the 132 with enough

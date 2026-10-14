@@ -1,4 +1,4 @@
-\section{Structural alternatives, measured}
+\section{Structural alternatives to rho}
 \label{sec:alternatives}
 
 Everything above is engineering against a fixed exponent. Three
@@ -7,7 +7,7 @@ itself could move for this curve. We report each with its measurement,
 so that anyone who has the same idea later finds a number instead of
 folklore. None of them changed the campaign.
 
-\subsection{Could index calculus beat rho here?}
+\subsection{Index calculus on the Koblitz curve}
 \label{sec:alt-ic}
 
 Index calculus on $E(\FF_{2^n})$ decomposes a random point into $m$
@@ -111,13 +111,13 @@ re-measurement) for a balanced two-summand base; the secondary
 complete-CPU panel on disjoint public points at $n=37,41,53$ has rho
 ahead in every cell~\evcite{\evref{icledger}; \evref{icledger}}.
 
-\subsection{How fast would point decomposition have to be?}
+\subsection{Point decomposition}
 \label{sec:alt-pdp}
 
 The \texttt{cryptanalysis} library prices the same question from the other end:
-given rho's $2^{60.81}$ orbit-walk iterations, how fast must one
-$m$-summand decomposition be for index calculus to fit inside that
-budget, and how fast is the best one measured? With a base of
+given rho's $2^{60.81}$ orbit-walk iterations, it derives the speed an
+$m$-summand decomposition must reach for index calculus to fit inside
+that budget, and compares it with the best measured decomposition. With a base of
 $2^\ell$ points, $m=4$ at $\ell=29$ needs $2^{48.6}$ decompositions and
 $2^{60.0}$ of linear algebra, leaving $2^{12}$ rho-iterations per
 decomposition; $m=5$ at $\ell=28$ leaves $2^{33}$; $m=6$ at $\ell=24$
@@ -139,7 +139,7 @@ leaves even a free oracle above rho at $m=3$ ($2^{68.6}$) and below it
 only from $m=4$ ($2^{56.4}$, leaving $2^{4.4}$ of headroom for the
 oracle itself), where no measured oracle comes close~\evcite{\evref{evicperf}}.
 
-\subsection{What the failures tell us}
+\subsection{Discussion}
 
 We carried each alternative through to a measurement, and each
 landed above rho by a margin that is a matter of exponent, not

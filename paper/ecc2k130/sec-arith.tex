@@ -1,4 +1,4 @@
-\section{Field arithmetic: two representations, one model}
+\section{Field arithmetic}
 \label{sec:arith}
 
 Field multiplication dominates a step. The addition itself needs two
@@ -14,7 +14,7 @@ multiplication budget~\evcite{\evref{client}, ``Throughput''}. How a
 multiplication is represented is therefore the central design
 decision, and the repository carries two answers.
 
-\subsection{Bitsliced: 32 walks packed into every word}
+\subsection{Bitsliced representation}
 \label{sec:arith-bitsliced}
 
 The original client is bitsliced in Biham's sense~\cite{biham1997}:
@@ -69,7 +69,7 @@ RTX~PRO~6000 is $17.6$~billion iterations/s ($27.1$~T lane-operations/s over abo
 $1{,}540$ lane-operations per update, a different
 count)~\evcite{\evref{ceiling}}.
 
-\subsection{Packed: each thread runs its own walk}
+\subsection{Packed representation}
 \label{sec:arith-packed}
 
 The packed backend holds one walk's coordinates in five 32-bit words
@@ -101,7 +101,7 @@ $20$~billion iterations/s build~\evcite{\evref{roofline}}.
 
 \input{figures/fig-clmad}
 
-\subsection{Keeping the two in exact agreement}
+\subsection{Cross-validation}
 \label{sec:arith-compat}
 
 The two backends, the CPU client at every word width, the VHDL engine

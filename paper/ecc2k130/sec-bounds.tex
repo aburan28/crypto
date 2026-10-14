@@ -1,4 +1,4 @@
-\section{Upper bounds: how far can this go?}
+\section{Performance upper bounds}
 \label{sec:bounds}
 
 Everything in this paper is engineering against a fixed exponent, so the
@@ -10,7 +10,7 @@ draws them against today's measurements.
 
 \input{figures/fig-bounds}
 
-\subsection{How far one RTX~PRO~6000 can go}
+\subsection{RTX~PRO~6000}
 \label{sec:bounds-6000}
 
 The ceiling for any walk that performs one affine addition per step is
@@ -35,7 +35,7 @@ lane-instructions per update with the carry-less unit fully busy, which
 the note calls a two-card number~\evcite{\evref{roofline}, §5}. Two cards at
 today's rates already exceed it.
 
-\subsection{The data-centre parts and the RTX~PRO~4500}
+\subsection{Data-centre parts and the RTX~PRO~4500}
 \label{sec:bounds-other}
 
 On the B200 the carry-less unit is so fast that its floor, $255$ billion
@@ -51,7 +51,7 @@ the bridge map's own arithmetic ceiling is $14.1$, measured with the
 rest of the map stripped out, so $15$ is not available on that map
 either~\evcite{\evref{bridge}}.
 
-\subsection{How far the FPGA can go}
+\subsection{FPGA}
 \label{sec:bounds-fpga}
 
 The F2 engine scales linearly with engine count and is bounded by block
@@ -62,7 +62,7 @@ engines and 375~MHz; the 144-engine build failed placement and the
 About $13\%$ above today's $8.25$ is all this part offers without a new
 design.
 
-\subsection{How much room the NIST walk has}
+\subsection{NIST walk}
 \label{sec:bounds-nist}
 
 The prime-field walk has more room, because it is further from any
@@ -80,7 +80,7 @@ derived from the measured multiply rate, and that rate is itself a
 single dependent chain, so a throughput-bound multiplier would raise
 them~\evcite{\evref{nistres}}.
 
-\subsection{What a faster card would save}
+\subsection{Implications for solution cost}
 \label{sec:bounds-cost}
 
 Cost per solve scales inversely with the rate. At the campaign's

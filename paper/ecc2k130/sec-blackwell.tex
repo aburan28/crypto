@@ -1,4 +1,4 @@
-\section{What current NVIDIA hardware changes}
+\section{Carry-less multiplication on current NVIDIA GPUs}
 \label{sec:blackwell}
 
 The 2009 GPU client ran on hardware with no carry-less multiplier at
@@ -7,7 +7,7 @@ bit-slice at a time. Three things are different on current NVIDIA
 parts, and between them they explain most of the gap between the
 rates in Section~\ref{sec:history} and the ones in this paper.
 
-\subsection{PTX finally gets a carry-less multiply}
+\subsection{The PTX \texttt{clmad} instruction}
 \label{sec:blackwell-clmad}
 
 PTX ISA~9.3, shipped with CUDA~13.3, added a carry-less multiply-add,
@@ -35,7 +35,7 @@ port gave $1.19\times$ on the walk. The T4, at \texttt{sm\_75}, has no
 \texttt{clmad} and runs the software product, which is why it sits at
 the bottom of every table in this paper~\evcite{\evref{t4}}.
 
-\subsection{Same instruction, very different speeds}
+\subsection{\texttt{clmad} throughput across dies}
 \label{sec:blackwell-rates}
 
 Having the instruction is not the same as having it fast. We measured
@@ -84,7 +84,7 @@ on the B200~\evcite{\evref{topclmad}; \evref{autosweep}, §3.2 and §4}.
 Kernel tuning does not travel between dies, and each part in this
 paper was tuned on its own.
 
-\subsection{The older instructions that still matter}
+\subsection{Three-input logic and the integer pipeline}
 \label{sec:blackwell-logic}
 
 The other instructions that matter are older but just as important.

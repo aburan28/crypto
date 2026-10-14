@@ -1,4 +1,4 @@
-\section{CPU clients and CPU instruction sets}
+\section{CPU implementations}
 \label{sec:cpu}
 
 The CPU client matters for three reasons. Every GPU report is verified
@@ -35,7 +35,7 @@ Modal container, 4 threads & AVX-512 & 512 & 12.4 & 49.4~M on 4 threads \\
 \end{tabular}
 \end{table}
 
-\subsection{Where wider vectors pay off}
+\subsection{Bitsliced vector implementations}
 \label{sec:cpu-bitsliced}
 
 Table~\ref{tab:cpu} collects the measurements~\evcite{\evref{client}, ``Throughput''},
@@ -66,7 +66,7 @@ $3{,}903$) and missed its declared target; repeated single-thread runs in
 a shared container ranged from $15$ to $18.6$ million iterations per
 second, too noisy for a throughput claim~\evcite{\evref{hostsched}}.
 
-\subsection{Using the CPU's own carry-less multiply}
+\subsection{Carry-less multiplication on CPUs}
 \label{sec:cpu-clmul}
 
 Every current CPU family also has a carry-less multiply: PCLMULQDQ and
@@ -94,7 +94,7 @@ priced as a loss, since it acts on bytes inside a register where the
 bitsliced maps act on whole words~\evcite{\evref{gfni}}. PCLMULQDQ made a
 41-bit Koblitz rho $1.76\times$ faster end to end~\evcite{\evref{smallclmul}}.
 
-\subsection{Prime fields: where the CPU code lags}
+\subsection{Prime-field arithmetic on CPUs}
 \label{sec:cpu-prime}
 
 The repository's prime-field CPU solver is a reference implementation,
@@ -105,7 +105,7 @@ P-256~\evcite{\evref{nistcpu}}. That is the CPU counterpart of the gap the
 GPU closed with explicit carry chains (Section~\ref{sec:nist}), and it is
 listed as an open question in Section~\ref{sec:open-cpu}.
 
-\subsection{What CPUs added to the campaign}
+\subsection{CPU contribution to the campaign}
 \label{sec:cpu-fleet}
 
 In the campaign a CPU worker was a whole multi-core instance, and the

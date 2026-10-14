@@ -1,4 +1,4 @@
-\section{The same ladder on the NIST curves}
+\section{Application to NIST P-256 and P-384}
 \label{sec:nist}
 
 Most of what made the ECC2K-130 client fast has nothing to do with
@@ -7,7 +7,7 @@ hardware's own carry instructions instead of emulating them, choosing
 the launch shape by measurement, and refusing occupancy trades that
 look good on paper are all properties of an affine-addition rho walk
 on a GPU, not of $\FF_{2^{131}}$. So once the ECC2K-130 ladder was
-written down, the obvious question was how much of it carries over to
+written down, the natural question was how much of it carries over to
 a prime-field walk. We tried it on NIST P-256 and P-384, on the same
 RTX~PRO~6000, and this section reports what happened.
 
@@ -21,7 +21,7 @@ same curve at every rung, with one step per counted step, so
 $S=\text{steps}/\sqrt n$ does not move; only the cost of a step
 does~\evcite{\evref{nistres}}.
 
-\subsection{Setting up the walk}
+\subsection{Walk and field arithmetic}
 \label{sec:nist-walk}
 
 The library holds a P-256 element in eight 32-bit limbs and a P-384
@@ -85,7 +85,7 @@ breaking CM-constructed anomalous curves of 129, 257 and 522 bits in
 none of the fifteen has a structural weakness; the documentation says
 both~\evcite{\evref{nistcpu}}.
 
-\subsection{Getting a first honest number}
+\subsection{Baseline measurement}
 \label{sec:nist-first}
 
 The kernel had been written and verified entirely on hosts without a
@@ -114,7 +114,7 @@ the best cell~\evcite{\evref{nistres}, ``Correctness evidence on hardware''}.
 The CPU suite also checks the specialised steppers below bit for bit
 against the generic one, for every batch width that was compiled.
 
-\subsection{What each change bought}
+\subsection{Optimisation steps}
 \label{sec:nist-rungs}
 
 Table~\ref{tab:nist-ladder} lines the NIST rungs up against the
@@ -201,8 +201,8 @@ small next to the one-block geometry's $9.4\%$ on ECC2K-130, and it
 makes sense: the binary kernel was shaped by a shared-memory table and
 an L1 budget, while the prime-field walk is limited by registers.
 
-\paragraph{What was declined.} At $W=32$ both instantiations sit at
-the 255-register ceiling. The obvious counter-move is a register cap,
+\paragraph{Rejected changes.} At $W=32$ both instantiations sit at
+the 255-register ceiling. The standard counter-measure is a register cap,
 trading spills for occupancy, and the round-2 sweep tried caps of 96,
 128 and 160 registers. All of them lost to the unrestricted build:
 P-256 fell to $1.589$--$1.595$ and P-384 to $0.447$--$0.455$. That
@@ -253,7 +253,7 @@ occupancy bought with spilled state has not paid on either field.
 \label{fig:nist-w}
 \end{figure}
 
-\subsection{What transferred from ECC2K-130, and what didn't}
+\subsection{Transfer from ECC2K-130}
 \label{sec:nist-lessons}
 
 Three of the ECC2K-130 levers transferred directly. Native carry
@@ -276,7 +276,7 @@ instructions; a 256-bit prime product is two hundred or so
 carry-chained integer instructions (Table~\ref{tab:fp256}). That
 factor of nine is the carry-less unit's advantage made concrete.
 
-The obvious next rungs are the ones the round-2 record names: a $W=64$
+The next candidate steps are the ones the round-2 record names: a $W=64$
 instance (which will spill at the register ceiling and probably lose,
 but is worth one cell to confirm), reseeding off the critical path,
 and a second walk per step from the same table read. A repeated,
