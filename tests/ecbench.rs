@@ -671,7 +671,13 @@ fn a_public_target_session_yields_a_checked_vs_rho_claim() {
             "record_class must be verified_answer_controlled_wall for a primary wall claim"
         ])
     );
-    assert_eq!(c["missing_stage_fields"], serde_json::json!([]));
+    assert_eq!(
+        c["missing_stage_fields"],
+        serde_json::json!([
+            "ic_replay_certificate_sha256",
+            "rho_replay_certificate_sha256"
+        ])
+    );
     assert_eq!(c["missing_global_provenance"], serde_json::json!([]));
 
     // A replay on the session's own host class is not independent.
