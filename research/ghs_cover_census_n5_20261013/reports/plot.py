@@ -32,12 +32,12 @@ def stacked(ax, rows, groups, title, genera):
             ax.bar(k, c / n, bottom=y, width=0.62, color=col[g], edgecolor="white", linewidth=0.8)
             if c / n > 0.07: ax.text(k, y + c / (2 * n), str(g), ha="center", va="center", color="white", fontsize=7)
             y += c / n
-        ax.text(k, -0.13, f"n={n}", ha="center", va="top", color=MUTED, fontsize=7, transform=ax.get_xaxis_transform())
+        ax.text(k, -0.24, f"n={n}", ha="center", va="top", color=MUTED, fontsize=7, transform=ax.get_xaxis_transform())
     ax.set_xticks(range(len(groups))); ax.set_xticklabels([g[1] for g in groups], fontsize=7.5)
     ax.set_ylim(0, 1.0); ax.set_title(title, color=INK, fontsize=8.5); ax.grid(axis="y", color=GRID, linewidth=0.7); ax.set_axisbelow(True)
 
 # Figure 1: n = 3, minimum over the isogeny class (exhaustive) or within one 2-isogeny step (sample), by #E(K) mod 4
-G4 = [("odd", "odd"), ("2mod4", "2 mod 4"), ("0mod4", "0 mod 4")]
+G4 = [("odd", "odd"), ("2mod4", "2 mod\n4"), ("0mod4", "0 mod\n4")]
 n3 = [("R1-n3-q5", 5, "class"), ("R1-n3-q7", 7, "class"), ("A-n3-q11", 11, "class"), ("B-n3-q13", 13, "class"), ("C-n3-q17-sample200", 17, "2isog")]
 gen3 = [3, 5, 7, 9, 11, 13, 17]
 arms = [(a, q, s, [r for r in load(a) if r.get("rec") == "group" and r["by"] == "order_mod4" and r["scope"] == s]) for a, q, s in n3]
@@ -46,27 +46,27 @@ if arms:
     fig, axes = plt.subplots(1, len(arms), figsize=(1.75 * len(arms) + 0.6, 3.0), sharey=True)
     axes = axes if len(arms) > 1 else [axes]
     for ax, (a, q, s, rows) in zip(axes, arms):
-        stacked(ax, rows, G4, f"q={q}: " + ("class min, all curves" if s == "class" else "≤1 step, sample"), gen3)
+        stacked(ax, rows, G4, f"q={q}\n" + ("class min, all curves" if s == "class" else "≤1 step, sample"), gen3)
     axes[0].set_ylabel("fraction of curves")
     fig.legend(handles=[Patch(color=PAL[i], label=f"g={g}") for i, g in enumerate(gen3)], frameon=False, loc="upper center", bbox_to_anchor=(0.5, 1.07), ncol=len(gen3), fontsize=7.5)
-    fig.text(0.5, -0.05, "n = 3: minimal genus by #E(K) mod 4 (q = 5, 7 reproduce PR #1759)", ha="center", color=INK)
+    fig.text(0.5, -0.1, "n = 3: minimal genus by #E(K) mod 4 (q = 5, 7 reproduce PR #1759)", ha="center", color=INK)
     fig.savefig(f"{out}/n3_min_genus_by_mod4.svg", bbox_inches="tight"); fig.savefig(f"{out}/n3_min_genus_by_mod4.png", dpi=150, bbox_inches="tight")
 
 # Figure 2: n = 5, minimal genus by (#E(K) mod 4, #E(K)[2])
 G5 = [("odd/1", "odd\nE[2]=1"), ("2mod4/2", "2 mod 4\nE[2]=2"), ("0mod4/2", "0 mod 4\nE[2]=2"), ("0mod4/4", "0 mod 4\nE[2]=4")]
 gen5 = [5, 17, 25, 33, 41, 49, 65, 97]
-n5 = [("D-n5-q3-cosets", 3, "self", "q=3: self, all curves"), ("D-n5-q3-cosets", 3, "class", "q=3: class min, all curves"),
-      ("E-n5-q5-sample60", 5, "self", "q=5: self, sample"), ("E-n5-q5-sample60", 5, "2isog", "q=5: ≤1 step, sample")]
+n5 = [("D-n5-q3-cosets", 3, "self", "q=3\nself, all curves"), ("D-n5-q3-cosets", 3, "class", "q=3\nclass min, all curves"),
+      ("E-n5-q5-sample60", 5, "self", "q=5\nself, sample"), ("E-n5-q5-sample60", 5, "2isog", "q=5\n≤1 step, sample")]
 arms = [(t, [r for r in load(a) if r.get("rec") == "group" and r["by"] == "mod4_E2" and r["scope"] == s]) for a, q, s, t in n5]
 arms = [x for x in arms if x[1]]
 if arms:
-    fig, axes = plt.subplots(1, len(arms), figsize=(2.3 * len(arms) + 0.4, 3.1), sharey=True)
+    fig, axes = plt.subplots(1, len(arms), figsize=(3.0 * len(arms) + 0.4, 3.1), sharey=True)
     axes = axes if len(arms) > 1 else [axes]
     for ax, (t, rows) in zip(axes, arms):
         stacked(ax, rows, G5, t, gen5)
     axes[0].set_ylabel("fraction of curves")
     fig.legend(handles=[Patch(color=PAL[i], label=f"g={g}") for i, g in enumerate(gen5)], frameon=False, loc="upper center", bbox_to_anchor=(0.5, 1.07), ncol=len(gen5), fontsize=7.5)
-    fig.text(0.5, -0.08, "n = 5: minimal genus by (#E(K) mod 4, #E(K)[2]); derived floors 33 / 33 / 25 / 5", ha="center", color=INK)
+    fig.text(0.5, -0.2, "n = 5: minimal genus by (#E(K) mod 4, #E(K)[2]); derived floors 33 / 33 / 25 / 5", ha="center", color=INK)
     fig.savefig(f"{out}/n5_min_genus_by_2torsion.svg", bbox_inches="tight"); fig.savefig(f"{out}/n5_min_genus_by_2torsion.png", dpi=150, bbox_inches="tight")
 
 # Figure 3: n = 5, structures by (r, m) summed over all censused models, against the derived allowed set
