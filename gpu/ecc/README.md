@@ -85,6 +85,60 @@ interval on the device and solves a planted log in it, and `--targets 16`
 amortises that table over sixteen of them; `selftest` also
 covers the BSGS kernels against the host driver.
 
+### EC Bench matched workload
+
+`ecbench gpu-match` gives the CUDA BSGS driver a frozen EC Bench point. The
+driver searches the full subgroup starting at zero; it receives the target
+coordinates and tuning flags, never the planted scalar. The Rust front door
+rebuilds the workload, checks the compiled curve parameters printed by the
+driver, and independently verifies `[k]G = Q`. Its separate receipt is
+`ecbench.gpu_match/v1`; it does not pretend that GPU chain steps are the
+CPU harness's group-addition-equivalent unit.
+
+```bash
+ecbench plan --spec gpu/ecc/specs/ecbench-toy36j0.json --json \
+  | jq '.workloads[0]' > /tmp/ecbench-gpu-workload.json
+make -C gpu/ecc bench CURVE=toy36j0
+ecbench gpu-match --binary gpu/ecc/bench \
+  --workload /tmp/ecbench-gpu-workload.json --out /tmp/ecbench-gpu-run
+ecbench gpu-match-verify --dir /tmp/ecbench-gpu-run
+```
+
+The second frozen spec is `gpu/ecc/specs/ecbench-toy40.json`; build a separate
+CUDA binary with `CURVE=toy40`. Regenerate either spec using
+`ecbench_spec.py --curve NAME` and review the diff before changing a published
+workload. A CPU session from the same spec can supply a verified record
+with `--cpu-record`, which binds its record ID and raw hash to the GPU receipt.
+The front door does not print a CPU/GPU speed ratio from unrelated sessions.
+
+The receipt keeps the binary snapshot, exact workload, raw selftest and solve
+streams, CUDA event time, host elapsed, setup and candidate-verification time,
+explicit `cudaMemcpy` time and bytes by direction, BSGS steps, and periodic
+`nvidia-smi` samples. Wall time
+is admitted only when at least two complete samples identify one stable GPU,
+show no other compute process, expose clocks, SM and memory activity, memory
+capacity and PCIe traffic, show at most 20% pre-run GPU and memory activity,
+at most 90% pre-run device memory use, and show at most 10%
+SM clock spread. At least two SM clock samples must overlap the solve. A missing field or process list
+refuses timing admission while leaving a correctly verified answer intact.
+The host elapsed duration includes process startup and all one-target work;
+the CUDA event duration covers the instrumented kernels and seed phases.
+
+`ecbench calibrate --quiet Q.json ... --contended C.json ... --out report.json`
+checks repeated CPU A/A comparisons. It reports empirical coverage of one,
+Wilson intervals, quiet false-positive rate and the rate at which contended
+sessions pass the wall gate. Its status requires 100 independent sessions in
+each class, complete CPU contention channels, a 5% quiet/contended separation,
+one host environment class, and conservative coverage and false-admission
+bounds. Supply the saved comparison files under their original session
+directories so `session.json` can bind the host class. Calibration audits
+those sessions and rederives each comparison from its recorded bootstrap
+seed; older comparison files without that seed need regenerating. The existing
+0–100 measurement quality score remains an operational isolation rubric, not
+a probability of algorithm correctness.
+Contended controls may have no admitted wall interval; their missing intervals
+are reported and their admission rate still uses every complete session.
+
 ### Without a GPU of your own
 
 `modal_app.py` rents one:

@@ -159,6 +159,10 @@ pub struct MeasurementQuality {
 pub struct Comparison {
     pub schema: String,
     pub comparison_id: String,
+    /// The deterministic bootstrap seed. Historical v1 files did not store
+    /// it and remain readable; calibration requires a recorded seed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resample_seed: Option<u64>,
     pub a: ArmSummary,
     pub b: ArmSummary,
     pub workloads: Vec<WorkloadRow>,
@@ -470,6 +474,7 @@ pub fn compare(
     Ok(Comparison {
         schema: COMPARISON_SCHEMA.into(),
         comparison_id,
+        resample_seed: Some(seed),
         a,
         b,
         workloads: rows,

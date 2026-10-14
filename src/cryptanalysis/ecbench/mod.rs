@@ -22,7 +22,8 @@
 //! | [`signals`] | interruption: the host is restored and no child outlives the runner |
 //! | [`compare`] | paired ratios with bootstrap intervals; wall time gated by level |
 //! | [`resources`] | cold native-work, memory and PMU vectors without invented GAE prices |
-//! | [`gpu`] | bounded CUDA ECC stage runs with a device self-test and raw receipts |
+//! | [`gpu`] | bounded CUDA stage runs and matched-workload GPU receipts with independent replay |
+//! | [`calibration`] | empirical A/A coverage and contention-admission checks |
 //! | [`claim`] | `vs_rho` claims: the IC1 identity, the claim report, the native checker |
 //! | [`audit`] | re-derive a session from its files; replay runs exactly |
 //! | [`db`] | SQL that loads sessions into the schema in `docs/ecbench/schema.sql` |
@@ -35,6 +36,7 @@
 
 pub mod audit;
 pub mod bounds;
+pub mod calibration;
 pub mod callgrind;
 pub mod canonical;
 pub mod challenge;
