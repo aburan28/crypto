@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspace/historical-metadata-check/research/notes/ecc2k130/leaf_m10_support_outcome_20260930/verify_archive.py", line 56, in <module>
+    main()
+  File "/workspace/historical-metadata-check/research/notes/ecc2k130/leaf_m10_support_outcome_20260930/verify_archive.py", line 48, in main
+    assert paths == {path.relative_to(EVIDENCE).as_posix()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

@@ -40,3 +40,8 @@ under benchmarks/20261014-ecbench-ten-questions/.
 No L2 wall, independent-host, GPU, annealer, complete-cost or asymptotic claim
 passes. All ten original mathematical resolutions remain partial. PR review/CI
 and merger are separate from local experimental correctness.
+
+PR1853 is ready for review. Its initial CI head993319d4f has pending checks and
+one unchanged leaf-m10 archive file-set failure, reproduced on baseline f9011e.
+The [baseline CI problem](../../problems/ecbench-ten-question-baseline-ci.md)
+retains that merge gate. No CI success or merger is claimed.
