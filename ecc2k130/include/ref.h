@@ -507,8 +507,21 @@ struct RefT {
     static int jOf(int hw) { return 3 + ((hw >> 1) & 7); }
     // Whether the step subtracts sigma^j(R) (ECC_SIGMA_SIGN), and the index
     // of the step's multiplier among (1 + s^j) [0, 8) and (1 - s^j) [8, 16).
-    static bool minusOf(int hw) { return ECC_SIGMA_SIGN && ((hw >> ECC_SIGMA_SIGN_BIT) & 1); }
-    static int stepIndex(int hw) { return jOf(hw) - 3 + (minusOf(hw) ? 8 : 0); }
+    // SIGMA_SIGN=1: bit 4 of the weight.  SIGMA_SIGN=2: the parity of
+    // popcount(x AND sigma^j(x)) in normal coordinates, which sigma only
+    // permutes, so it is class-invariant and nearly independent of the weight.
+    static bool minusOf(const Elem &x, int hw) {
+#if ECC_SIGMA_SIGN == 2
+        const Elem a = nbCoords(x), b = nbCoords(sigma(x, jOf(hw)));
+        int c = 0;
+        for (int l = 0; l < NL; ++l) c += __builtin_popcountll(a.v[l] & b.v[l]);
+        return c & 1;
+#else
+        (void)x;
+        return ECC_SIGMA_SIGN && ((hw >> ECC_SIGMA_SIGN_BIT) & 1);
+#endif
+    }
+    static int stepIndex(const Elem &x, int hw) { return jOf(hw) - 3 + (minusOf(x, hw) ? 8 : 0); }
     // Packed polynomial low word of a GF(2^131) normal-basis coordinate.
     // Matches packedtransform131.h with FAST_CONVERT=1, which is algebraically
     // the same map as the slower factorization.
@@ -585,7 +598,7 @@ struct RefT {
 #endif
 #else
         const Point q = frob(p, jOf(hw));
-        return addPt(p, minusOf(hw) ? neg(q) : q);
+        return addPt(p, minusOf(p.x, hw) ? neg(q) : q);
 #endif
     }
 

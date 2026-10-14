@@ -1431,7 +1431,15 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #if ECC_SIGMA_SIGN
             // R - sigma^j(R) = R + (x_Q, x_Q + y_Q): the slope's numerator
             // gains x_Q, the denominator and the inversion are unchanged.
+#if ECC_SIGMA_SIGN == 2
+            // parity of popcount(x AND sigma^j(x)), both normal coordinates
+            int adjacent = 0;
+#pragma unroll
+            for (int k = 0; k < 5; ++k) adjacent += __popc(x.v[k] & sigmas.first.v[k]);
+            const unsigned minusMask = 0u - unsigned(adjacent & 1);
+#else
             const unsigned minusMask = 0u - unsigned((hw >> ECC_SIGMA_SIGN_BIT) & 1);
+#endif
             P131 en = add131(normalY, sigmas.second);
 #pragma unroll
             for (int k = 0; k < 5; ++k) en.v[k] ^= sigmas.first.v[k] & minusMask;

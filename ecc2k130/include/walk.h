@@ -27,9 +27,9 @@
 // per-branch step counter is.  ECC_WITNESS=0 compiles the counting out, which
 // is the control the paired comparison in CAIRN-WITNESS.md asks for.
 #define ECC_JCOUNT 8
-// ECC_SIGMA_SIGN=1: the step is R + sigma^j(R) or R - sigma^j(R), the sign
-// being bit ECC_SIGMA_SIGN_BIT of the normal-basis weight (class-invariant, as
-// j is).  The rewalk then counts sixteen step kinds, (1 + s^j) and (1 - s^j).
+// ECC_SIGMA_SIGN=1/2: the step is R + sigma^j(R) or R - sigma^j(R), the sign
+// being bit ECC_SIGMA_SIGN_BIT of the normal-basis weight (1) or the parity of
+// popcount(x AND sigma^j(x)) in normal coordinates (2); both class-invariant.  The rewalk then counts sixteen step kinds, (1 + s^j) and (1 - s^j).
 #ifndef ECC_SIGMA_SIGN
 #define ECC_SIGMA_SIGN 0
 #endif

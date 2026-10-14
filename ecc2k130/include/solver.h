@@ -145,7 +145,7 @@ struct Solver {
             out.counts[(hw >> 1) & 1]++;
 #endif
 #else
-            out.counts[R::stepIndex(hw)]++;
+            out.counts[R::stepIndex(p.x, hw)]++;
 #endif
             p = R::step(p, hw);
 #endif

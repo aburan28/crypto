@@ -130,8 +130,9 @@ UNROLL_SLOTS ?= 1
 PACKED_SLOT_PREFETCH ?= 0
 PACKED_SLOT_PIPELINE ?= 0
 SIGMA_FUSED ?= 0
-# R + sigma^j(R) or R - sigma^j(R) by bit 4 of the normal-basis weight
-# (benchmarks/best-of-two): sixteen branches, no extra field product.
+# R + sigma^j(R) or R - sigma^j(R) (benchmarks/best-of-two): sixteen
+# branches, no extra field product.  1: the sign is bit 4 of the normal-basis
+# weight; 2: the parity of popcount(x AND sigma^j(x)) in normal coordinates.
 # A different walk: its distinguished points never collide with sigma's.
 SIGMA_SIGN ?= 0
 SIGMA_FUSED_LATE_Y ?= 0

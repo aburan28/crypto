@@ -31,8 +31,10 @@
 //!   `RECENT` classes is counted by length and the walk restarts, as for the
 //!   table walk; for `sigma` the same returns are counted only.
 //! - `sigmapm`: the σ walk stepping to `R + σʲ(R)` or `R − σʲ(R)` by a sign
-//!   read from `R`'s class (bit 4 of the normal-basis weight under `native`,
-//!   a salted class hash otherwise): sixteen branches, eight `σʲ`, and only
+//!   read from `R`'s class (`--sign hw4`: bit 4 of the normal-basis weight,
+//!   the default under `native`; `sj`: the parity of `popcount(x AND σʲ(x))`
+//!   in normal coordinates; `hash`: a salted class hash, the default
+//!   otherwise): sixteen branches, eight `σʲ`, and only
 //!   the chosen candidate is computed (the sign is an XOR of `x(σʲR)` into
 //!   the slope's numerator).
 //! - `sigma2t`: `R − σʲ(R)` when `R + σʲ(R)` scores below the median
@@ -116,6 +118,15 @@ enum Walk {
     Sigma2,
     SigmaPm,
     Sigma2t,
+}
+
+/// Where `sigmapm` reads its sign (`--sign`): bit 4 of the weight, the parity
+/// of `popcount(x AND σʲ(x))` in normal coordinates, or a salted class hash.
+#[derive(Clone, Copy, PartialEq, Debug)]
+enum SignRule {
+    Hw4,
+    Sj,
+    Hash,
 }
 
 /// The score `sigma2` picks its candidate by (`--score`).
@@ -351,6 +362,8 @@ struct Setup {
     rule: Rule,
     /// `sigma2`'s candidate score.
     score: Score,
+    /// `sigmapm`'s sign rule.
+    sign: SignRule,
 }
 
 /// The part of a mapping a trial draws for itself.
@@ -596,9 +609,13 @@ fn trial(s: &Setup, rng: &mut StdRng, t: &mut Tally) {
                             Score::Hw => s.score(m, &plus) < u64::from(s.n / 2),
                             Score::Key => s.score(m, &plus) < 1 << 63,
                         },
-                        _ => match s.dist {
-                            Dist::Native => (s.canon.coords(w.p.x).count_ones() >> 4) & 1 == 1,
-                            _ => splitmix(key ^ m.salt ^ 0x51_67_4e) & 1 == 1,
+                        _ => match s.sign {
+                            SignRule::Hw4 => (s.canon.coords(w.p.x).count_ones() >> 4) & 1 == 1,
+                            SignRule::Sj => {
+                                let c = s.canon.coords(w.p.x);
+                                (c & s.canon.coords(q.x)).count_ones() & 1 == 1
+                            }
+                            SignRule::Hash => splitmix(key ^ m.salt ^ 0x51_67_4e) & 1 == 1,
                         },
                     };
                     t.minus += u64::from(take_minus);
@@ -832,6 +849,14 @@ fn main() {
         "key" => Score::Key,
         v => panic!("unknown score {v}"),
     };
+    // Default: the PR's first device rule under native branches, a hash otherwise.
+    let sign = match get("--sign").as_deref() {
+        Some("hw4") => SignRule::Hw4,
+        Some("sj") => SignRule::Sj,
+        Some("hash") => SignRule::Hash,
+        Some(v) => panic!("unknown sign {v}"),
+        None => if dist == Dist::Native { SignRule::Hw4 } else { SignRule::Hash },
+    };
     let mut setup = Setup {
         walk,
         dist,
@@ -847,6 +872,7 @@ fn main() {
         fixed: None,
         rule,
         score,
+        sign,
     };
     if fixed_mapping {
         let mut rng = StdRng::seed_from_u64(splitmix(seed ^ 0x6d61_7070_696e_6721));
@@ -1004,6 +1030,7 @@ fn main() {
     let short_json = by_length(&t.short_cycle);
     let short_rate = per_step(&t.short_cycle);
     let score_name = format!("{score:?}").to_lowercase();
+    let sign_name = format!("{sign:?}").to_lowercase();
     let minus_fraction = t.minus as f64 / steps.max(1) as f64;
     let rule_name = format!("{rule:?}").to_lowercase();
     let dist_name = format!("{dist:?}").to_lowercase();
@@ -1032,7 +1059,7 @@ fn main() {
          \"fruitless_predicted\":{pairwise_predicted:.6e},\"relation\":{{{relation_json}}},\
          \"relation_per_step\":{relation_rate:.6e},\"relation_predicted\":{relation_predicted:.6e},\
          \"short_returns\":{},\"fixed_mapping\":{fixed_mapping},\
-         \"emulation\":\"device-rule\",\"rule\":\"{rule_name}\",\"score\":\"{score_name}\",\
+         \"emulation\":\"device-rule\",\"rule\":\"{rule_name}\",\"score\":\"{score_name}\",\"sign\":\"{sign_name}\",\
          \"minus_fraction\":{minus_fraction:.6},\"short_cycle\":{{{short_json}}},\"short_cycle_per_step\":{short_rate:.6e},\"short_formal\":{}}}",
         t.trials,
         t.even as f64 / t.weighed.max(1) as f64,

@@ -1021,7 +1021,7 @@ static void testWitness(Rng &rng, Solver<Cfg> &sol) {
         bool ran = true;
         for (int i = 0; i < STEPS; ++i) {
             const int hw = R::weight(p.x);
-            counts[R::stepIndex(hw)]++;
+            counts[R::stepIndex(p.x, hw)]++;
             p = R::step(p, hw);
             ++taken;
             if (p.inf) { ran = false; break; }

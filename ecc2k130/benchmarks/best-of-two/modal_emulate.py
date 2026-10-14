@@ -30,6 +30,8 @@ TRIALS = {23: 200000, 31: 200000, 37: 40000, 41: 20000, 53: 10000, 59: 100000}
 WALKS = [("sigma", "hw"), ("sigma2", "hw"), ("sigma2", "key")]
 if os.environ.get("WALKS") == "v2":
     WALKS = [("sigmapm", "hw"), ("sigma2t", "hw"), ("sigma2t", "key")]
+if os.environ.get("WALKS") == "v3":
+    WALKS = [("sigmapm", "hw", "sj"), ("sigma", "hw")]
 DISTS = ["ecc2k130", "native"]
 
 
@@ -42,9 +44,9 @@ def cell(argv: list) -> dict:
 
 @app.local_entrypoint()
 def main(out: str = "emulation.jsonl", seed: int = 20261014):
-    jobs = [["--n", str(n), "--walk", w, "--score", sc, "--dist", d, "--walks", "16",
-             "--trials", str(TRIALS[n]), "--seed", str(seed)]
-            for n in TRIALS for (w, sc) in WALKS for d in DISTS]
+    jobs = [["--n", str(n), "--walk", wk[0], "--score", wk[1], "--dist", d, "--walks", "16",
+             "--trials", str(TRIALS[n]), "--seed", str(seed)] + (["--sign", wk[2]] if len(wk) > 2 else [])
+            for n in TRIALS for wk in WALKS for d in DISTS]
     started = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     sha = hashlib.sha256(BIN.read_bytes()).hexdigest()  # the binary the image was built from
     res = list(cell.map(jobs, order_outputs=True))

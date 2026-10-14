@@ -47,7 +47,9 @@ COMMON=(
   PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1
   WALK_TABLE=0 TABLE_BRANCHES=8 WITNESS=0
 )
-signOf() { case "$1" in control) echo 0 ;; candidate) echo 1 ;; esac; }
+# CANDIDATE_SIGN: 1 = bit 4 of the weight, 2 = parity of popcount(x AND sigma^j x)
+CANDIDATE_SIGN=${CANDIDATE_SIGN:-2}
+signOf() { case "$1" in control) echo 0 ;; candidate) echo "$CANDIDATE_SIGN" ;; esac; }
 
 build() {
   local name=$1 sign
