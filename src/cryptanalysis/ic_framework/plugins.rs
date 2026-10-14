@@ -52,9 +52,9 @@ use crate::cryptanalysis::gls_fp2::{gls_line_base, Fp2Curve, Fp2Point, GlsInstan
 use crate::cryptanalysis::glv_invariant_base::{glv_orbit_base, AutomorphismGroup};
 use crate::cryptanalysis::ic_boundary::{
     binary_subspace_factor_base, decompose_mitm, decompose_mitm_frobenius, koblitz_factor_base,
-    prime_factor_base, prime_factor_base_strided, BinaryGroup, BinaryInstance, ColumnFold, CountedGroup, FactorBase,
-    FrobeniusPairTable, GroupOps, OracleCounters, PairTable, PrimeCurve, PrimeInstance, PrimePoint,
-    Relation,
+    prime_factor_base, prime_factor_base_strided, BinaryGroup, BinaryInstance, ColumnFold,
+    CountedGroup, FactorBase, FrobeniusPairTable, GroupOps, OracleCounters, PairTable, PrimeCurve,
+    PrimeInstance, PrimePoint, Relation,
 };
 use crate::cryptanalysis::koblitz_factor_base_search::subspace_is_trace_zero;
 use crate::cryptanalysis::koblitz_fast::FastPoint;
@@ -96,8 +96,14 @@ impl FactorBaseBuilder<PrimeCurve> for PrimeAbscissaBase<'_> {
 
     fn parameters(&self) -> &[(&str, &str)] {
         &[
-            ("size", "abscissae in the base; the family optimum is about #E^(1/3)"),
-            ("stride", "fixed nonzero abscissa stride modulo p; default 1"),
+            (
+                "size",
+                "abscissae in the base; the family optimum is about #E^(1/3)",
+            ),
+            (
+                "stride",
+                "fixed nonzero abscissa stride modulo p; default 1",
+            ),
         ]
     }
 
@@ -112,7 +118,8 @@ impl FactorBaseBuilder<PrimeCurve> for PrimeAbscissaBase<'_> {
             return Err("factor base size must be positive".into());
         }
         let stride = params.get("stride").map_or(Ok(1u64), |s| {
-            s.parse::<u64>().map_err(|_| "stride must be an unsigned integer".to_string())
+            s.parse::<u64>()
+                .map_err(|_| "stride must be an unsigned integer".to_string())
         })?;
         if stride == 0 || stride >= self.instance.curve.p {
             return Err("stride must lie in 1..p".into());

@@ -365,12 +365,30 @@ pub fn run_pipeline<G: CountedGroup>(
         Targets::Random => TargetSource::Random,
         Targets::Walk | Targets::Residual => TargetSource::Walk,
         Targets::WalkPrimeFast => TargetSource::WalkPrimeFast,
-        Targets::WalkPrimeSerial4 => TargetSource::WalkPrimeLanes { lanes: 4, batched: false },
-        Targets::WalkPrimeSerial8 => TargetSource::WalkPrimeLanes { lanes: 8, batched: false },
-        Targets::WalkPrimeSerial16 => TargetSource::WalkPrimeLanes { lanes: 16, batched: false },
-        Targets::WalkPrimeBatch4 => TargetSource::WalkPrimeLanes { lanes: 4, batched: true },
-        Targets::WalkPrimeBatch8 => TargetSource::WalkPrimeLanes { lanes: 8, batched: true },
-        Targets::WalkPrimeBatch16 => TargetSource::WalkPrimeLanes { lanes: 16, batched: true },
+        Targets::WalkPrimeSerial4 => TargetSource::WalkPrimeLanes {
+            lanes: 4,
+            batched: false,
+        },
+        Targets::WalkPrimeSerial8 => TargetSource::WalkPrimeLanes {
+            lanes: 8,
+            batched: false,
+        },
+        Targets::WalkPrimeSerial16 => TargetSource::WalkPrimeLanes {
+            lanes: 16,
+            batched: false,
+        },
+        Targets::WalkPrimeBatch4 => TargetSource::WalkPrimeLanes {
+            lanes: 4,
+            batched: true,
+        },
+        Targets::WalkPrimeBatch8 => TargetSource::WalkPrimeLanes {
+            lanes: 8,
+            batched: true,
+        },
+        Targets::WalkPrimeBatch16 => TargetSource::WalkPrimeLanes {
+            lanes: 16,
+            batched: true,
+        },
     };
     if matches!(spec.targets, Targets::WalkPrimeFast) && ctx.group.native_walk_adder().is_none() {
         return Err("walk-prime-fast requires a prime curve with p < 2^62".into());

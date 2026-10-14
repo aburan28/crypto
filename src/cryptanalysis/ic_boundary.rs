@@ -992,7 +992,12 @@ pub trait CountedGroup {
     fn native_lane_walk_adder(
         &self,
         _batched: bool,
-    ) -> Option<Box<dyn FnMut(&mut GroupOps, &[(usize, Self::Elt, Self::Elt, usize)]) -> Vec<Self::Elt> + '_>> {
+    ) -> Option<
+        Box<
+            dyn FnMut(&mut GroupOps, &[(usize, Self::Elt, Self::Elt, usize)]) -> Vec<Self::Elt>
+                + '_,
+        >,
+    > {
         None
     }
     fn supports_native_lane_walk(&self) -> bool {
@@ -3636,7 +3641,12 @@ impl CountedGroup for PrimeCurve {
     fn native_lane_walk_adder(
         &self,
         batched: bool,
-    ) -> Option<Box<dyn FnMut(&mut GroupOps, &[(usize, PrimePoint, PrimePoint, usize)]) -> Vec<PrimePoint> + '_>> {
+    ) -> Option<
+        Box<
+            dyn FnMut(&mut GroupOps, &[(usize, PrimePoint, PrimePoint, usize)]) -> Vec<PrimePoint>
+                + '_,
+        >,
+    > {
         use crate::cryptanalysis::prime_fast::BatchAddScratch;
         if self.p >= (1u64 << crate::cryptanalysis::prime_fast::MAX_BITS) {
             return None;
@@ -3706,18 +3716,21 @@ impl CountedGroup for PrimeCurve {
                     *p = fast.add(*p, q);
                 }
             }
-            left.into_iter().zip(requests).map(|(native, &(lane, _, _, _))| {
-                let out = match native {
-                    Some(pt) => {
-                        ops.montgomery_reductions += 2; // Montgomery -> canonical.
-                        let (x, y) = fast.canonical(pt);
-                        PrimePoint::affine(x, y)
-                    }
-                    None => PrimePoint::INFINITY,
-                };
-                previous[lane] = Some((out, native));
-                out
-            }).collect()
+            left.into_iter()
+                .zip(requests)
+                .map(|(native, &(lane, _, _, _))| {
+                    let out = match native {
+                        Some(pt) => {
+                            ops.montgomery_reductions += 2; // Montgomery -> canonical.
+                            let (x, y) = fast.canonical(pt);
+                            PrimePoint::affine(x, y)
+                        }
+                        None => PrimePoint::INFINITY,
+                    };
+                    previous[lane] = Some((out, native));
+                    out
+                })
+                .collect()
         }))
     }
     fn supports_native_lane_walk(&self) -> bool {
@@ -5873,14 +5886,21 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
     };
     let mut lanes: Vec<PrimeWalkLane<G::Elt>> = (0..lane_config.map_or(0, |x| x.0))
         .map(|_| PrimeWalkLane {
-            point: g.identity(), a: 0, b: 0, fresh: true, restarts: 0,
-            segment_steps: 0, permutation: (0..jump_count).collect(),
+            point: g.identity(),
+            a: 0,
+            b: 0,
+            fresh: true,
+            restarts: 0,
+            segment_steps: 0,
+            permutation: (0..jump_count).collect(),
         })
         .collect();
     let mut lane_queue: std::collections::VecDeque<(usize, G::Elt, u64, u64)> =
         std::collections::VecDeque::new();
-    let mut lane_adder = lane_config
-        .map(|(_, batched)| g.native_lane_walk_adder(batched).expect("prime lanes required"));
+    let mut lane_adder = lane_config.map(|(_, batched)| {
+        g.native_lane_walk_adder(batched)
+            .expect("prime lanes required")
+    });
     let (mut lane_rounds, mut lane_prepared) = (0u64, 0u64);
     if targets.is_walk() {
         jumps = draw_jumps(
@@ -5925,8 +5945,13 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                         pool_taken += 1;
                         if pool_index == pool.len() {
                             let off = draw_pool_offset(
-                                g, generator, target, r, &mut pool_rng,
-                                &mut rel.group_ops, &mut pool_ops,
+                                g,
+                                generator,
+                                target,
+                                r,
+                                &mut pool_rng,
+                                &mut rel.group_ops,
+                                &mut pool_ops,
                             );
                             pool.push(off);
                         }
@@ -5943,8 +5968,8 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                     walk_restarts += 1;
                     lane.segment_steps = 0;
                 } else {
-                    let j = lane.permutation
-                        [((mix(g.key(&lane.point)) >> 24) as usize) % jump_count];
+                    let j =
+                        lane.permutation[((mix(g.key(&lane.point)) >> 24) as usize) % jump_count];
                     let (jump, aj, bj) = jumps[j];
                     requests.push((index, lane.point, jump, j));
                     lane.a = addmod(lane.a, aj, r);
@@ -5954,8 +5979,10 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                 }
             }
             if !requests.is_empty() {
-                let outputs = lane_adder.as_mut().expect("prime lanes required")
-                    (&mut rel.group_ops, &requests);
+                let outputs = lane_adder.as_mut().expect("prime lanes required")(
+                    &mut rel.group_ops,
+                    &requests,
+                );
                 native_walk_calls += requests.len() as u64;
                 for ((index, _, _, _), point) in requests.iter().zip(outputs) {
                     lanes[*index].point = point;
@@ -6208,8 +6235,9 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
             rel.count("montgomery_reductions", reductions);
             rel.count(
                 "lane_state_bytes_floor",
-                (lane_count * (std::mem::size_of::<PrimeWalkLane<G::Elt>>()
-                    + jump_count * std::mem::size_of::<usize>())) as u64,
+                (lane_count
+                    * (std::mem::size_of::<PrimeWalkLane<G::Elt>>()
+                        + jump_count * std::mem::size_of::<usize>())) as u64,
             );
         }
     }
@@ -9481,10 +9509,18 @@ mod tests {
                 let mut seen = Vec::new();
                 let mut matrix = IncrementalGauss::new(fb.columns + 1, inst.r);
                 let outcome = collect_and_solve_relations(
-                    curve, generator, target, inst.r, inst.cofactor, &fb,
-                    20261020, 2048,
+                    curve,
+                    generator,
+                    target,
+                    inst.r,
+                    inst.cofactor,
+                    &fb,
+                    20261020,
+                    2048,
                     TargetSource::WalkPrimeLanes { lanes, batched },
-                    RestartPool::Lazy, &mut matrix, CompletionRule::TargetPinned,
+                    RestartPool::Lazy,
+                    &mut matrix,
+                    CompletionRule::TargetPinned,
                     |_, _, point, a, b| {
                         seen.push((point, a, b));
                         Vec::new()
@@ -9496,8 +9532,14 @@ mod tests {
             let (batch, b) = run(true);
             assert_eq!(serial, batch, "lane width {lanes}");
             assert_eq!(s.trials, b.trials);
-            assert_eq!(s.relations.get("walk_restarts"), b.relations.get("walk_restarts"));
-            assert_eq!(s.relations.get("repeated_targets_skipped"), b.relations.get("repeated_targets_skipped"));
+            assert_eq!(
+                s.relations.get("walk_restarts"),
+                b.relations.get("walk_restarts")
+            );
+            assert_eq!(
+                s.relations.get("repeated_targets_skipped"),
+                b.relations.get("repeated_targets_skipped")
+            );
             assert!(s.relations.get("walk_restarts") > lanes as u64);
             assert!(b.relations.group_ops.field_ops.invs < s.relations.group_ops.field_ops.invs);
         }
@@ -9517,7 +9559,9 @@ mod tests {
         let mut setup = GroupOps::default();
         let generator = inst.generator_point();
         let target = curve.mul(&mut setup, generator, 137);
-        let points: Vec<_> = (1..=512).map(|i| curve.mul(&mut setup, generator, i)).collect();
+        let points: Vec<_> = (1..=512)
+            .map(|i| curve.mul(&mut setup, generator, i))
+            .collect();
         let keys: Vec<_> = points.iter().map(|p| curve.key(p)).collect();
         let n = 200_000u64;
         let inverses: Vec<_> = (1..=512).map(|i| fast.f.to_mont(i)).collect();
@@ -9556,8 +9600,13 @@ mod tests {
         let start = Instant::now();
         for _ in 0..pool_n {
             black_box(draw_pool_offset(
-                curve, generator, target, inst.r, &mut pool_rng,
-                &mut total_ops, &mut pool_ops,
+                curve,
+                generator,
+                target,
+                inst.r,
+                &mut pool_rng,
+                &mut total_ops,
+                &mut pool_ops,
             ));
         }
         let pool_ns = start.elapsed().as_nanos() as u64;

@@ -2,6 +2,8 @@
 
 The [protocol](FRESH_PREFIX_PROTOCOL.md) and [workload](specs/fixed-prefix-fresh.json) froze the target seed and primary comparison before target generation. The [input checker](fixed-prefix-fresh-input-check.json) binds eight new public targets and algorithm seeds, with no overlap against the earlier coverage holdout. The [raw log](fixed-prefix-fresh.log.gz), [machine receipt](fixed-prefix-fresh-result.json), [derived summary](fixed-prefix-fresh.json), and [chart](fixed-prefix-fresh.svg) retain the exact source commit and test-binary hash. The test passed: each target supplied at least 8,192 surviving batch-8 walk points within the 20,000-attempt cap, and every B48 base consumed the same point prefix.
 
+After merging the existing PR branch and current main, the [post-merge replay receipt](fixed-prefix-postmerge-replay.json) and [raw log](fixed-prefix-postmerge-replay.log.gz) reproduced the complete fresh-panel JSON result exactly with a new test binary. The original run record remains unchanged.
+
 ![Rank and table-hit coverage on fresh targets](fixed-prefix-fresh.svg)
 
 | x stride | Unique pair keys | Hits at 4,096 probes × 8 | Mean independent rank at 4,096 | Rank per 1,000 lower-bound cold GAE at 4,096 | Mean rank at 8,192 |
