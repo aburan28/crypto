@@ -144,7 +144,8 @@ paper does not discuss these cases." The obvious evasion was tested and
 fails: embedding `E(F_2^131)` into `F_2^{131m}` collapses both towers —
 with `q = 2^131` the cover step is trivial and decomposition reverts to
 the original problem over a larger field, and with `d = 131` the ordinary GHS
-cover lies on the `2^130−1` or `2^130` branch, which is exactly the constraint
+cover is either the genus-1 branch whose transfer annihilates the target or a
+nontrivial genus-`2^130−1`/`2^130` branch, which is exactly the constraint
 `research/notes/ecc2k130/RESEARCH_ECC2K130_HYPERELLIPTIC.md` derived independently. No 2011–2026
 work removes the composite-degree condition.
 
@@ -174,9 +175,9 @@ refuted claims touch any of:
   rho or scalar multiplication — the τ-adic expansion, CM by
   `(1 ± √−7)/2`, the class group of `Z[τ]`.
 
-The hard structural constraints (`131` prime, `2` primitive mod `131`, and
-ordinary GHS branches `1`, `{2^129−1,2^129}`, and
-`{2^130−1,2^130}`) pre-filter much of item 4. **They do not
+The hard structural constraints (`131` prime, `2` primitive mod `131`, ordinary
+GHS magic values `{1,131}`, and genera `1`, `2^130−1`, or `2^130`) pre-filter
+much of item 4. **They do not
 touch item 3 at all** — the choice of MQ/hybrid solver is orthogonal to
 the factor-base construction — and they do not obviously touch item 5.
 

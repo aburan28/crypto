@@ -1,0 +1,30 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "faster cycle-3: negfold m=2 at d=4 vs d=5 for complete-S drop",
+  "description": "Hypothesis: smaller standard-subspace |F| at dimension=4 cuts PairTable set-up enough that complete rootfind-negfold cold S drops toward (still-priced) F4 / rho without window_div. Public synthetic; engineering; no security claim. Dead ends not repeated: window_div, window@d4, orbit-divisor subtract.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 13}],
+    "targets_per_curve": 2,
+    "target_seed": 202610140300,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "ic-f4-m3-d5", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192",
+      "max_trials": "200000"}}},
+    {"name": "ic-negfold-m2-d5", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+      "max_trials": "200000"}}},
+    {"name": "ic-negfold-m2-d4", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=4",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+      "max_trials": "200000"}}},
+    {"name": "ic-c2-frob-counted-m2", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "compact-orbit-scan:columns=2,raw_x_cap=10000",
+      "oracle": "mitm-frobenius-counted:m=2", "max_trials": "200000"}}}
+  ],
+  "measurement": {"rounds": 2, "warmup": 1, "order": "alternate", "seed": 202610140301, "isolation_required": "L0", "timeout_seconds": 900}
+}

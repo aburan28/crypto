@@ -32,15 +32,18 @@ use crate::cryptanalysis::ecbench_large_prime::{
 use crate::cryptanalysis::ic_boundary::{
     price_phase, rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup,
     BinaryInstance, Calibration, CountedGroup, CubicClasses, FieldOps, GroupOps, NegationClasses,
-    PhaseCost, PointClasses, PrimeInstance, PrimePoint, RhoResult, RhoWalk,
+    PhaseCost, PointClasses, PrimeInstance, PrimePoint, QuarticClasses, RhoResult, RhoWalk,
 };
 use crate::cryptanalysis::ic_framework::fiber::{
     FiberDescentOracle, FiberFrobeniusMitmOracle, FiberMitmOracle,
 };
 use crate::cryptanalysis::ic_framework::plugins::{
-    BinarySubspaceBase, CompactOrbitScanBase, DescentAlgebraicOracle, FrobeniusMitmOracle,
-    GlvOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase, SubtractOracle,
+    BinarySubspaceBase, CompactOrbitScanBase, CyclotomicBase, DescentAlgebraicOracle,
+    FrobeniusMitmOracle, GlvOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase,
+    RootfindSubtractOracle, SubtractOracle,
 };
+use crate::cryptanalysis::ic_framework::prime_tower::PrimeKummerBase;
+use crate::cryptanalysis::ic_framework::rootfind::{RootfindMitmOracle, RootfindPairsOracle};
 use crate::cryptanalysis::ic_framework::shared_rank::{
     run_shared_rank_targets, SharedRankSpec, SharedTargetSpec,
 };
@@ -171,6 +174,14 @@ pub fn registry() -> &'static [MethodDecl] {
             params: RHO_PARAMS,
         },
         MethodDecl {
+            id: "rho.quartic",
+            family: "rho",
+            summary: "tuned walk on {±ι^i(P)} (A = 4), the rational order-4 automorphism of a j = 1728 curve with p ≡ 1 (mod 4) and 4 | r − 1; Wiener–Zuccherato look-ahead and cycle escape; refuses any curve without the structure",
+            entry: "ic_boundary::QuarticClasses with RhoWalk::negation()",
+            applies: Applies::Any,
+            params: RHO_PARAMS,
+        },
+        MethodDecl {
             id: "rho.signed_frobenius",
             family: "rho",
             summary: "tuned walk on signed Frobenius orbits {±φ^t P} (A = 2n), Koblitz curves only",
@@ -292,12 +303,12 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "factor_base",
                     default: None,
-                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M, koblitz-standard-subspace:dimension=D",
+                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M, cyclotomic:w=W[,columns=N], koblitz-standard-subspace:dimension=D",
                 },
                 ParamDecl {
                     name: "oracle",
                     default: None,
-                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; the cofactor-fiber-aware mitm-fiber:fiber=closed|lifts|blind, mitm-frobenius-fiber:fiber=closed|lifts|blind and descent-algebraic-fiber:fiber=combined|lifts|blind (ic_framework::fiber); or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N on koblitz-standard-subspace",
+                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; rootfind-subtract:m=2|3 (prime curves: prime_fast's direct-subtraction root finding, one batched inversion a target); the cofactor-fiber-aware mitm-fiber:fiber=closed|lifts|blind, mitm-frobenius-fiber:fiber=closed|lifts|blind and descent-algebraic-fiber:fiber=combined|lifts|blind (ic_framework::fiber); or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N, pdp3-koblitz:m=2|3,engine=rootfind (PairSumTable), pdp3-koblitz:m=3,engine=rootfind-window (cyclic ⌈|F|/3⌉ window), pdp3-koblitz:m=2|3,engine=rootfind-negfold (PairTable negation fold, ~half set-up), and pdp3-koblitz:m=3,engine=rootfind-window-negfold on koblitz-standard-subspace",
                 },
                 ParamDecl {
                     name: "solver",
@@ -428,6 +439,7 @@ pub fn expected_s(id: &str, a_available: u32) -> Option<f64> {
         "rho.frozen_reference" | "rho.plain" => Some((PI / 2.0).sqrt()),
         "rho.negation" => Some((PI / 4.0).sqrt()),
         "rho.cubic" => Some((PI / 12.0).sqrt()),
+        "rho.quartic" => Some((PI / 8.0).sqrt()),
         "rho.signed_frobenius"
         | "rho.signed_frobenius_strong"
         | "rho.signed_frobenius_strong_escape" => {
@@ -1019,6 +1031,32 @@ fn solve_inner(
             measurement::end_online();
             // A Koblitz walk does not count its field operations: unknown.
             Ok(rho_report(res, t.elapsed().as_nanos() as u64, None))
+        }
+        (Instance::Prime(i), _) if m.id == "rho.quartic" => {
+            let t = Instant::now();
+            measurement::begin_online(Phase::RhoSolve);
+            let mut setup = GroupOps::default();
+            let classes =
+                QuarticClasses::new(&i.curve, i.generator_point(), i.r, &mut setup).ok_or(
+                    format!(
+                        "`rho.quartic` needs a j = 1728 curve over p ≡ 1 (mod 4) with 4 | r − 1 and a nontrivial ι on the subgroup; {} lacks the structure",
+                        curve.slug
+                    ),
+                )?;
+            let mut res = rho_walk_with(
+                &i.curve,
+                &classes,
+                i.generator_point(),
+                PrimePoint::affine(tx, ty),
+                i.r,
+                seed,
+                rho_cap(i.r, param_u64(m, "cap_multiple")? as f64),
+                RhoWalk::negation(),
+            );
+            res.group_ops.merge(setup);
+            measurement::end_online();
+            let f = FieldOps::total(&[res.group_ops]);
+            Ok(rho_report(res, t.elapsed().as_nanos() as u64, Some(f)))
         }
         (Instance::Prime(i), _) if m.id == "rho.cubic" => {
             let t = Instant::now();
@@ -1760,9 +1798,11 @@ fn solve_ic_prime(
     let (spec, fb_name, or_name) = pipeline_spec(m, seed)?;
     let abscissa = PrimeAbscissaBase { instance: inst };
     let orbit = GlvOrbitBase { instance: inst };
+    let kummer = PrimeKummerBase { instance: inst };
     let base: &dyn FactorBaseBuilder<_> = match fb_name.as_str() {
         "prime-abscissa" => &abscissa,
         "glv-orbit" => &orbit,
+        "prime-kummer" => &kummer,
         other => {
             return Err(format!(
                 "factor base `{other}` does not run on a prime curve"
@@ -1773,10 +1813,16 @@ fn solve_ic_prime(
     let mut subtract = SubtractOracle;
     let mut mitm = MitmOracle::new(ms);
     let mut mitm_fiber = FiberMitmOracle::new(ms);
+    let mut rootfind_mitm = RootfindMitmOracle::new(ms);
+    let mut rootfind_pairs = RootfindPairsOracle::new(ms);
+    let mut rootfind = RootfindSubtractOracle::new(ms, inst);
     let oracle: &mut dyn DecompositionOracle<_> = match or_name.as_str() {
         "subtract" => &mut subtract,
         "mitm" => &mut mitm,
         "mitm-fiber" => &mut mitm_fiber,
+        "rootfind-mitm" => &mut rootfind_mitm,
+        "rootfind-pairs" => &mut rootfind_pairs,
+        "rootfind-subtract" => &mut rootfind,
         other => return Err(format!("oracle `{other}` does not run on a prime curve")),
     };
     let ctx = InstanceCtx {
@@ -1861,11 +1907,13 @@ fn solve_ic_binary(
     let subspace = BinarySubspaceBase { instance: inst };
     let orbit = KoblitzOrbitBase { instance: inst };
     let compact = CompactOrbitScanBase { instance: inst };
+    let cyclotomic = CyclotomicBase { instance: inst };
     let plugin_base = binary_plugins().and_then(|p| (p.base)(fb_name.as_str(), inst));
     let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name.as_str() {
         "binary-subspace" => &subspace,
         "koblitz-orbit" => &orbit,
         "compact-orbit-scan" => &compact,
+        "cyclotomic" => &cyclotomic,
         other => match plugin_base.as_deref() {
             Some(b) => b,
             None => {
@@ -1882,6 +1930,8 @@ fn solve_ic_binary(
     let mut frob_counted = FrobeniusMitmOracle::new_counted(ms, inst);
     let mut mitm_fiber = FiberMitmOracle::new(ms);
     let mut frob_fiber = FiberFrobeniusMitmOracle::new(ms, inst);
+    let mut rootfind_mitm = RootfindMitmOracle::new(ms);
+    let mut rootfind_pairs = RootfindPairsOracle::new(ms);
     let mut descent_fiber = match or_name.as_str() {
         "descent-algebraic-fiber" => {
             let name = spec
@@ -1926,6 +1976,8 @@ fn solve_ic_binary(
         "mitm-frobenius-counted" => &mut frob_counted,
         "mitm-fiber" => &mut mitm_fiber,
         "mitm-frobenius-fiber" => &mut frob_fiber,
+        "rootfind-mitm" => &mut rootfind_mitm,
+        "rootfind-pairs" => &mut rootfind_pairs,
         "descent-algebraic" => algebraic.as_mut().expect("built above"),
         "descent-algebraic-fiber" => descent_fiber.as_mut().expect("built above"),
         other => match plugin_oracle.as_deref_mut() {
@@ -2251,9 +2303,11 @@ pub fn dump_factor_base(
         Instance::Prime(i) => {
             let abscissa = PrimeAbscissaBase { instance: i };
             let orbit = GlvOrbitBase { instance: i };
+            let kummer = PrimeKummerBase { instance: i };
             let base: &dyn FactorBaseBuilder<_> = match name.as_str() {
                 "prime-abscissa" => &abscissa,
                 "glv-orbit" => &orbit,
+                "prime-kummer" => &kummer,
                 other => {
                     return Err(format!(
                         "factor base `{other}` does not run on a prime curve"
@@ -2292,11 +2346,13 @@ pub fn dump_factor_base(
             let subspace = BinarySubspaceBase { instance: i };
             let orbit = KoblitzOrbitBase { instance: i };
             let compact = CompactOrbitScanBase { instance: i };
+            let cyclotomic = CyclotomicBase { instance: i };
             let plugin_base = binary_plugins().and_then(|p| (p.base)(name.as_str(), i));
             let base: &dyn FactorBaseBuilder<BinaryGroup> = match name.as_str() {
                 "binary-subspace" => &subspace,
                 "koblitz-orbit" => &orbit,
                 "compact-orbit-scan" => &compact,
+                "cyclotomic" => &cyclotomic,
                 other => match plugin_base.as_deref() {
                     Some(b) => b,
                     None => {
@@ -2486,6 +2542,117 @@ mod tests {
         assert!(rep.field_ops.is_none(), "unknown is not zero");
         let v = serde_json::to_value(&rep).unwrap();
         assert!(v.get("field_ops").is_none(), "absent, not null");
+    }
+
+    /// `rootfind-subtract` is `subtract`'s search on `prime_fast`'s
+    /// arithmetic: the same candidates in the same order, so the two arms
+    /// issue the same queries and find the same relations on one seed,
+    /// with one batched inversion a target instead of one per candidate.
+    /// Its hits are re-added on the ledger (one addition each), which is
+    /// the only charge the two differ by.
+    #[test]
+    fn rootfind_subtract_follows_subtract_query_stream_on_a_prime_curve() {
+        use crate::cryptanalysis::ecbench::workload::CurveSpec;
+        let spec = CurveSpec::PrimeSearch {
+            bits: 20,
+            seed: 59297,
+        };
+        let inst = spec.build().unwrap();
+        let facts = inst.facts(&spec);
+        let Instance::Prime(prime) = &inst else {
+            unreachable!()
+        };
+        let mut scratch = GroupOps::default();
+        let target = prime.curve.mul(&mut scratch, prime.generator_point(), 4099);
+        let coords = [format!("0x{:x}", target.x), format!("0x{:x}", target.y)];
+        let run = |oracle: &str| {
+            let m = resolve(&MethodSpec {
+                id: "ic.pipeline".into(),
+                params: [
+                    (
+                        "factor_base".to_string(),
+                        "prime-abscissa:size=32".to_string(),
+                    ),
+                    ("oracle".to_string(), oracle.to_string()),
+                ]
+                .into_iter()
+                .collect(),
+            })
+            .unwrap();
+            solve(&m, &inst, &facts, &coords, 11).unwrap()
+        };
+        let sub = run("subtract");
+        let root = run("rootfind-subtract:m=2");
+        assert_eq!(sub.recovered, Some(4099 % u128::from(prime.r)));
+        assert_eq!(root.recovered, sub.recovered);
+        for key in ["targets_tried", "relations_found", "matrix_rank"] {
+            assert_eq!(sub.counters[key], root.counters[key], "{key}");
+        }
+        let relations = |r: &SolveReport| {
+            r.phases
+                .iter()
+                .find(|p| p.name == "relations")
+                .cloned()
+                .expect("a relations phase")
+        };
+        let (s, r) = (relations(&sub), relations(&root));
+        // The same candidate points, each one addition; the root finder
+        // adds one re-addition per relation and nothing else.
+        assert_eq!(
+            r.adds,
+            s.adds + root.counters["relations_found"],
+            "{s:?} {r:?}"
+        );
+        assert_eq!(r.native["lookups"], s.native["lookups"]);
+        // One batched inversion per oracle call; the relation loop's
+        // target guard skips a few trials before the oracle sees them.
+        let inversions = r.native["inversions"];
+        assert!(inversions > 0 && inversions <= root.counters["targets_tried"]);
+        assert_eq!(s.native.get("inversions").copied().unwrap_or(0), 0);
+        assert_eq!(r.native.get("frobfold_mismatches").copied().unwrap_or(0), 0);
+        assert!(root.solver.is_none(), "a table oracle solves no system");
+        assert!(root.deterministic);
+
+        // A knob the engine does not read is refused, as is a summand
+        // count it does not take.
+        for bad in [
+            "rootfind-subtract:m=2,negation_folded=1",
+            "rootfind-subtract:m=4",
+        ] {
+            let m = resolve(&MethodSpec {
+                id: "ic.pipeline".into(),
+                params: [
+                    (
+                        "factor_base".to_string(),
+                        "prime-abscissa:size=32".to_string(),
+                    ),
+                    ("oracle".to_string(), bad.to_string()),
+                ]
+                .into_iter()
+                .collect(),
+            })
+            .unwrap();
+            assert!(solve(&m, &inst, &facts, &coords, 11).is_err(), "{bad}");
+        }
+        let m = resolve(&MethodSpec {
+            id: "ic.pipeline".into(),
+            params: [
+                (
+                    "factor_base".to_string(),
+                    "prime-abscissa:size=32".to_string(),
+                ),
+                ("oracle".to_string(), "rootfind-subtract:m=3".to_string()),
+            ]
+            .into_iter()
+            .collect(),
+        })
+        .unwrap();
+        let three = solve(&m, &inst, &facts, &coords, 11).unwrap();
+        assert_eq!(three.recovered, sub.recovered);
+        assert!(three
+            .phases
+            .iter()
+            .any(|p| p.name == "oracle_setup" && p.adds > 0));
     }
 
     #[test]

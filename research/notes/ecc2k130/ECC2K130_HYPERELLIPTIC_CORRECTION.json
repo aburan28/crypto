@@ -1,7 +1,9 @@
 {
   "schema_version": "ecc2k130-hyperelliptic-boundary-correction/v1",
   "correction_date": "2026-10-14",
-  "status": "claim_fields_superseded",
+  "status": "claim_fields_superseded_by_mmt_definition",
+  "authoritative_audit": "docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md",
+  "primary_source": "Maurer, Menezes, and Teske (2002), equation (5) and Theorem 5(i)",
   "frozen_artifact": {
     "path": "experiments/ecc2k130_hyperelliptic_cover_boundary.json",
     "git_blob_oid": "9f8bbfa7029477996d0216758872a01515fe77b1",
@@ -16,30 +18,35 @@
   "superseded_fields": [
     {
       "json_path": "$.boundary_C_ghs_genus_trichotomy.statement",
-      "reason": "The statement is broader than the ordinary binary GHS model and treats the two possible genus formulas as exact powers of two.",
-      "replacement": "For ordinary curves in the stated GHS model over F_2^131, the available magic numbers are 1, 130, and 131. The corresponding genus branches are 1 for the checked challenge branch, 2^129-1 or 2^129, and 2^130-1 or 2^130. This is not a claim about supersingular curves or non-GHS constructions."
+      "reason": "The frozen record used the plain Frobenius-orbit dimension as the magic number. MMT equation (5) uses dim span{(1, sigma^i(sqrt(b)))}; this raises the non-base-field trace-zero class from 130 to 131 and fixes its genus type.",
+      "replacement": "For ordinary curves in the stated GHS model over F_2^131, the attainable MMT magic numbers are 1 and 131. The challenge branch b=1 has m=1, type II, genus 1; trace-zero b outside F_2 has m=131, type I, genus 2^130-1; trace-one b has m=131, type II, genus 2^130. This is not a claim about supersingular curves or non-GHS constructions."
     },
     {
       "json_path": "$.boundary_C_ghs_genus_trichotomy.isogeny_shift_closed",
-      "reason": "The field argument constrains ordinary curves to the listed magic numbers; it does not establish a universal statement for every elliptic-curve model.",
-      "replacement": "Within the ordinary GHS model assessed here, an isogeny shift cannot produce a magic number outside 1, 130, or 131."
+      "reason": "The frozen conclusion used the wrong magic-number set and was broader than the ordinary GHS model.",
+      "replacement": "Within the ordinary GHS model assessed here, an isogeny shift cannot produce a magic number outside 1 or 131."
+    },
+    {
+      "json_path": "$.boundary_C_ghs_genus_trichotomy.magic_number_census",
+      "reason": "The 194 trace-zero samples were labelled m=130 by the plain-orbit rule.",
+      "replacement": "The trace census is preserved, but those 194 samples are m=131, type I, genus 2^130-1; the 206 trace-one samples are m=131, type II, genus 2^130."
     },
     {
       "json_path": "$.boundary_C_ghs_genus_trichotomy.log2_available_genera",
-      "reason": "The values 129 and 130 are branch-size proxies, not exact logarithms for both splitting cases.",
-      "replacement": "Interpret 129 and 130 only as asymptotically identical size proxies for the sets {2^129-1,2^129} and {2^130-1,2^130}."
+      "reason": "The stored 129-bit branch is an artifact of the wrong m=130 label, not a valid size proxy for an available GHS genus.",
+      "replacement": "The available genera are 1, 2^130-1, and 2^130; their base-2 logarithms are 0, log2(2^130-1), and 130."
     },
     {
       "json_path": "$.boundary_C_ghs_genus_trichotomy.cost_floor_for_the_large_genus",
-      "reason": "The record fixes genus 2^129, while the magic-130 branch may instead have genus 2^129-1.",
-      "replacement": "The description-length floor is approximately 2^129 operations for either member of the magic-130 branch; the stored 129.0-bit value is a size proxy, not an exact genus certificate."
+      "reason": "The record priced a nonexistent m=130 branch.",
+      "replacement": "The smallest nontrivial ordinary-GHS genus is 2^130-1, so the description-length floor is at least 2^130-1 operations, approximately 130 bits or 2^69.19 times the 2^60.81 rho reference."
     }
   ],
   "preserved_results": [
     "ord_131(2)=130 and the factor degrees 1 and 130",
-    "the available Frobenius-stable subspace dimensions 0, 1, 130, and 131",
+    "the available Frobenius-stable subspace dimensions 0, 1, 130, and 131, which are not themselves the MMT magic-number set",
     "the checked challenge branch has magic number 1 and the trace transfer annihilates the stated subgroup",
-    "the large branches remain far beyond the modeled useful genus window; the possible minus one does not change the cost conclusion"
+    "the nontrivial branches remain far beyond the modeled useful genus window"
   ],
   "claim_boundary": "This sidecar corrects claim interpretation without rewriting the frozen historical artifact. It is not a new cover, transfer, subgroup, solver, or performance certificate."
 }

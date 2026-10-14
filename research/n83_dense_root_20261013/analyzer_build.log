@@ -1,0 +1,121 @@
+     Locking 129 packages to latest compatible versions
+      Adding num-bigint v0.4.8 (available: v0.5.1)
+   Compiling unicode-ident v1.0.27
+   Compiling zerocopy v0.8.62
+   Compiling smallvec v1.16.3
+   Compiling cc v1.8.0
+   Compiling serde_json v1.0.154
+   Compiling either v1.19.0
+   Compiling proc-macro2 v1.0.107
+   Compiling rayon v1.12.0
+   Compiling quote v1.0.47
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+   Compiling blake3 v1.8.7
+   Compiling synstructure v0.14.0
+   Compiling zeroize_derive v1.5.0
+   Compiling zerovec-derive v0.11.6
+   Compiling displaydoc v0.2.7
+   Compiling clap_derive v4.6.7
+   Compiling serde_derive v1.0.229
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling zeroize v1.9.1
+   Compiling ppv-lite86 v0.2.21
+   Compiling rand_chacha v0.3.1
+   Compiling zerofrom v0.1.8
+   Compiling rand v0.8.8
+   Compiling yoke v0.8.3
+   Compiling clap v4.6.7
+   Compiling num-bigint v0.4.8
+   Compiling zerovec v0.11.8
+   Compiling zerotrie v0.2.5
+   Compiling serde v1.0.229
+   Compiling tinystr v0.8.4
+   Compiling potential_utf v0.1.6
+   Compiling icu_collections v2.3.0
+   Compiling icu_locale_core v2.3.0
+   Compiling icu_provider v2.3.1
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_properties v2.3.0
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling url v2.5.8
+   Compiling redis v1.7.1
+   Compiling crypto v0.1.0 (/Volumes/SSD990/llm/tmp/n83-dense-root-crypto-20261013)
+warning: unused import: `ToPrimitive`
+  --> /Volumes/SSD990/llm/tmp/n83-dense-root-crypto-20261013/src/cryptanalysis/curve_traits/mod.rs:50:31
+   |
+50 | use num_traits::{One, Signed, ToPrimitive, Zero};
+   |                               ^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+    --> /Volumes/SSD990/llm/tmp/n83-dense-root-crypto-20261013/src/cryptanalysis/ic_boundary.rs:1419:13
+     |
+1419 |         let mut consider = |pt: PrimePoint, mu: u64, best: &mut PrimePoint, best_key: &mut u64, best_mu: &mut u64| {
+     |             ----^^^^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `plans` is never read
+   --> /Volumes/SSD990/llm/tmp/n83-dense-root-crypto-20261013/src/cryptanalysis/inherited_f4.rs:513:5
+    |
+505 | struct LayoutStep {
+    |        ---------- field in this struct
+...
+513 |     plans: RefCell<HashMap<u32, Rc<RewritePlan>>>,
+    |     ^^^^^
+    |
+    = note: `LayoutStep` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: associated function `new` is never used
+   --> /Volumes/SSD990/llm/tmp/n83-dense-root-crypto-20261013/src/cryptanalysis/inherited_f4.rs:550:8
+    |
+548 | impl RewritePlan {
+    | ---------------- associated function in this implementation
+549 |     /// The plan of `map`, with nothing built yet.
+550 |     fn new(map: Rc<Vec<u32>>) -> Self {
+    |        ^^^
+
+warning: function `zeroed_words` is never used
+    --> /Volumes/SSD990/llm/tmp/n83-dense-root-crypto-20261013/src/cryptanalysis/inherited_f4.rs:1019:4
+     |
+1019 | fn zeroed_words(n: usize) -> Rc<[u64]> {
+     |    ^^^^^^^^^^^^
+
+warning: method `rewrite_plan` is never used
+    --> /Volumes/SSD990/llm/tmp/n83-dense-root-crypto-20261013/src/cryptanalysis/inherited_f4.rs:1808:8
+     |
+1330 | impl ReducedBasis {
+     | ----------------- method in this implementation
+...
+1808 |     fn rewrite_plan(&self, from: u32) -> Rc<RewritePlan> {
+     |        ^^^^^^^^^^^^
+
+warning: function `trace_on` is never used
+    --> /Volumes/SSD990/llm/tmp/n83-dense-root-crypto-20261013/src/cryptanalysis/koblitz_groebner.rs:9351:4
+     |
+9351 | fn trace_on() -> bool {
+     |    ^^^^^^^^
+
+warning: function `trace_cost` is never used
+    --> /Volumes/SSD990/llm/tmp/n83-dense-root-crypto-20261013/src/cryptanalysis/koblitz_groebner.rs:9357:4
+     |
+9357 | fn trace_cost(w0: Option<u64>, refuted: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `trace` is never used
+    --> /Volumes/SSD990/llm/tmp/n83-dense-root-crypto-20261013/src/cryptanalysis/koblitz_groebner.rs:9371:4
+     |
+9371 | fn trace(f: impl FnOnce(&mut RefutationDegreeTrace)) {
+     |    ^^^^^
+
+warning: `crypto` (lib) generated 9 warnings (run `cargo fix --lib -p crypto` to apply 1 suggestion)
+   Compiling n83-dense-root-analyzer v0.1.0 (/Volumes/SSD990/llm/tmp/n83-dense-root-crypto-20261013/research/n83_dense_root_20261013/analyzer)
+    Finished `release` profile [optimized] target(s) in 1m 37s
+     Running `/Volumes/SSD990/llm/tmp/n83-dense-root-cargo-target/release/n83-dense-root-analyzer research/n83_dense_root_20261013 primary`

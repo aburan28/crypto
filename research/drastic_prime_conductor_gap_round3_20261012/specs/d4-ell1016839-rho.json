@@ -1,0 +1,56 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg-aa",
+      "role": "control"
+    }
+  ],
+  "description": "Paired planted_shared targets: the same scalars on both curves (equal r). Counts are primary; the paired quotient removes between-target variance.",
+  "label": "Drastic gap round 3, rho: d4 ell=1016839",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261012,
+    "timeout_seconds": 900,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 175699121631,
+        "b": 0,
+        "group_order": 1033961567546,
+        "gx": 628792900021,
+        "gy": 538304981282,
+        "kind": "prime_explicit",
+        "p": 1033961567797,
+        "r": 516980783773
+      },
+      {
+        "a": 368584293439,
+        "b": 328570663304,
+        "group_order": 1033961567546,
+        "gx": 43657219251,
+        "gy": 695220369953,
+        "kind": "prime_explicit",
+        "p": 1033961567797,
+        "r": 516980783773
+      }
+    ],
+    "target_kind": "planted_shared",
+    "target_seed": 2026101204,
+    "targets_per_curve": 32
+  }
+}

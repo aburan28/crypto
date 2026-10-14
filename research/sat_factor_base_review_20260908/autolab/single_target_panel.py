@@ -102,6 +102,17 @@ def input_law(beat: dict[str, Any]) -> str:
             "of digest byte 8; Q = [h]P. No scalar is known to either arm.")
 
 
+def same_point(a, b) -> bool:
+    """Compare public points numerically: wide producers emit u128 coordinates
+    as decimal strings while the panel stores Python ints."""
+    def norm(p):
+        return [int(v) for v in p]
+    try:
+        return norm(a) == norm(b)
+    except (TypeError, ValueError):
+        return a == b
+
+
 def primary_claim_fields(ic_record: dict[str, Any], rho_record: dict[str, Any],
                          interval: dict[str, Any]) -> dict[str, Any]:
     """Build the paired one-target fields from the two verified producer rows."""
@@ -139,7 +150,7 @@ def primary_claim_fields(ic_record: dict[str, Any], rho_record: dict[str, Any],
         "paired_target": {
             "ic_public_q": ic_record["target"],
             "rho_public_q": rho_record["published_q"],
-            "same_public_point": ic_record["target"] == rho_record["published_q"],
+            "same_public_point": same_point(ic_record["target"], rho_record["published_q"]),
         },
         "ic_verified": ic_record["group_verified"] is True,
         "rho_verified": rho_record["verified"] is True,
@@ -272,9 +283,9 @@ def replay_certificate(path: Path, digest: str, fixture: dict[str, Any],
     scalar = int(cert["scalar"])
     checks = {
         "digest_matches": recomputed == digest,
-        "target_is_workload_target": cert["target"] == [int(v) for v in fixture["targets"][0]],
+        "target_is_workload_target": same_point(cert["target"], [int(v) for v in fixture["targets"][0]]),
         "target_in_subgroup": target is not None and curve.mul(target, curve.r) is None,
-        "generator_matches_fixture": cert["generator"] == [int(v) for v in fixture["generator"]],
+        "generator_matches_fixture": same_point(cert["generator"], [int(v) for v in fixture["generator"]]),
         "scalar_in_range": 0 <= scalar < curve.r,
         "scalar_times_g_is_target": curve.mul(curve.g, scalar) == target,
     }
@@ -456,7 +467,7 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                 summary_rows = lab.read_jsonl(run / f"logs/tune_K{k}_w{seed:03d}.summary.json")
                 summary = summary_rows[-1] if summary_rows else {}
                 ok = (measured["exit_code"] == 0 and len(records) == 1
-                      and records[0].get("group_verified") is True and records[0]["target"] == entry["point"])
+                      and records[0].get("group_verified") is True and same_point(records[0]["target"], entry["point"]))
                 tune["rows"].append({
                     "K": k, "workload": seed, "state": "ok" if ok else "failed",
                     "estimated_ic_rss_bytes": need, "available_memory_bytes": available,
@@ -661,7 +672,7 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
             fixture = fixture_base | {"targets": [[str(v) for v in row["target"]]], "target_seeds": [seed],
                                       "target_scalar_constructed": False}
             producers_ok = row["ic"]["exit_code"] == 0 and row["rho"]["exit_code"] == 0
-            ic_ok = bool(ic_record) and ic_record.get("group_verified") is True and ic_record["target"] == row["target"]
+            ic_ok = bool(ic_record) and ic_record.get("group_verified") is True and same_point(ic_record["target"], row["target"])
             rho_ok = bool(rho_record) and rho_record.get("verified") is True and rho_record["published_q"] == row["target"]
             verify: dict[str, Any] = {"workload": seed, "producers_ok": producers_ok, "ic_ok": ic_ok, "rho_ok": rho_ok,
                                       "base_hash": (row["ic_summary"] or {}).get("base_hash")}

@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pdp_root_finder_ecbench_20261013/claim_round/sessions/n31/comparisons/ic-mitm__ic-rootfind.json
+ops (ok): ic-rootfind / ic-mitm = 1.0015 [1.001, 1.002] (cluster) over 24 pairs on 8 workloads, 1 curve(s); wall: admitted median 0.7423 [0.709, 0.798]
+| curve | log2 r | workloads | ic-rootfind / ic-mitm | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m31-tm90707-c95f16f5 | 20.46 | 8 | 1.0015 | [1.0014, 1.0016] | cluster |
+
+| workload | curve | log2 r | ic-mitm mean S | ic-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W1d01141db39c | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 265.9248 | 266.3038 | 1.0014 |
+| W30116c6f587f | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 286.7627 | 287.2201 | 1.0016 |
+| W45a83de82ef9 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 276.6478 | 277.0548 | 1.0015 |
+| W62b600abcf33 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 286.0593 | 286.4687 | 1.0014 |
+| W673f7ec5e471 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 235.4706 | 235.8541 | 1.0016 |
+| W698f787fe571 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 258.2913 | 258.7054 | 1.0016 |
+| Wa20736cf0ae7 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 245.5801 | 245.9834 | 1.0016 |
+| Wca3f7a8736d8 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 245.8131 | 246.1313 | 1.0013 |

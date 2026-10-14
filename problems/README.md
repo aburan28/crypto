@@ -14,7 +14,10 @@ Keep resolved and superseded records in the index.
 | [Prime-cover balanced Jacobians and induced maps](prime-cover-balanced-jacobian-and-induced-maps-missing.md) | open | executable Jacobian and transfer claims for 1,931 odd-characteristic cover maps and their 530 EC1 representations | checked two-infinity arithmetic and pullback/norm implementations over every claimed field family, with composition and independent replay |
 | [Catalog-general binary-cover arbitrary-class norm](binary-cover-arbitrary-jacobian-norm-missing.md) | open | pushforward and recovery from arbitrary classes for 160 binary cover maps and their 134 EC1 representations; the separate exact fixed-`GF(8)` fixture is implemented | generalize the checked norm to catalog fields and add independent divisor-map homomorphism/composition controls |
 | [Catalog cover-subgroup certificates](catalog-cover-subgroup-certificates-incomplete.md) | open | proof-grade exact-order, image-order, kernel, and recovery claims for 663 EC1/map bindings beyond the one order-29 certificate | exact source-order proofs and map-bound image/kernel/recovery certificates for every named EC1 representation |
+| [EC Bench GPU matched workload and validation](ecbench-gpu-matched-workload-contract.md) | open | admitted CPU/GPU comparison of the same ECDLP workload | frozen CUDA input/output, exact costs, independent answer replay and GPU contention controls |
 | [N83 recorded-query sampler contract](n83-recorded-query-sampler-contract-mismatch.md) | open | green whole-library validation on the pinned baseline | traced and versioned query law, point checks and passing regression |
+| [GHS → Smith characteristic mismatch](ghs-to-smith-pipeline-characteristic-mismatch.md) | open | the GHS → Smith → Diem pipeline | a char-2 hyperelliptic→quartic isogeny, or an odd-char descent onto genus-3 hyperelliptic curves |
+| [Smith 18.57% walk extension](smith-kernel-isogeny-class-walk.md) | open | costing walks that lift Smith's coverage toward 50.16% | native Smith Prop. 2/4 tests and per-class success counts |
 
 ## Add or update a problem
 

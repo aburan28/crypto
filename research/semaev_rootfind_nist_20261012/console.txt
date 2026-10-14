@@ -1,0 +1,34 @@
+Root-finding decomposition on NIST P-192 / P-224 / P-256 / P-384 / P-521
+(decomposition subroutine only — NOT a security claim; see module docs)
+knobs: F4_FB=6 F4_CONSTRUCTED=5 F4_RANDOM=5 SCALE_FB=64 SCALE_RANDOM=200 controls=100
+
+=== P-192 (192 -bit prime, a = −3, FIPS 186-4 b) ===
+  A. vs F4   |F|=6   targets=10 (decomposed 5, refuted 5, all cross-checks pass)
+             root-find   119.7 µs/target   F4  413.54 ms/target   speedup 3455×
+  B. scale   |F|=64  random 200 → 0 hits,   369.2 µs/target (generic field); controls verified 100/100,   300.7 µs/target
+
+=== P-224 (224 -bit prime, a = −3, FIPS 186-4 b) ===
+  A. vs F4   |F|=6   targets=10 (decomposed 5, refuted 5, all cross-checks pass)
+             root-find   218.1 µs/target   F4     1.27 s/target   speedup 5802×
+  B. scale   |F|=64  random 200 → 0 hits,   427.6 µs/target (generic field); controls verified 100/100,   268.1 µs/target
+
+=== P-256 (256 -bit prime, a = −3, FIPS 186-4 b) ===
+  A. vs F4   |F|=6   targets=10 (decomposed 5, refuted 5, all cross-checks pass)
+             root-find   203.0 µs/target   F4  613.12 ms/target   speedup 3021×
+  B. scale   |F|=64  random 200 → 0 hits,   433.4 µs/target (generic field); controls verified 100/100,   323.9 µs/target
+  C. special |F|=64  P256FieldElement: random    41.0 µs/target (11× vs generic), controls 100/100    28.1 µs/target (12× vs generic)
+
+=== P-384 (384 -bit prime, a = −3, FIPS 186-4 b) ===
+  A. vs F4   |F|=6   targets=10 (decomposed 5, refuted 5, all cross-checks pass)
+             root-find   337.1 µs/target   F4     1.09 s/target   speedup 3235×
+  B. scale   |F|=64  random 200 → 0 hits,   583.0 µs/target (generic field); controls verified 100/100,   394.3 µs/target
+
+=== P-521 (521 -bit prime, a = −3, FIPS 186-4 b) ===
+  A. vs F4   |F|=6   targets=10 (decomposed 5, refuted 5, all cross-checks pass)
+             root-find   747.0 µs/target   F4     2.54 s/target   speedup 3395×
+  B. scale   |F|=64  random 200 → 0 hits,    1.28 ms/target (generic field); controls verified 100/100,    3.66 ms/target
+
+Closing check — root-finding beats F4 on every NIST P-curve: YES
+(per-target decomposition subroutine on a bounded factor base; not an ECDLP or security result)
+
+wrote research/semaev_rootfind_nist_20261012/results.json

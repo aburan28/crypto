@@ -148,3 +148,24 @@ docs/ic/boundary_targets.json text eol=lf
 research/cover_transfer_assessment_20261013/README.md text eol=lf
 src/binary_ecc/cover_transfer.rs text eol=lf
 problems/catalog-cover-subgroup-certificates-incomplete.md text eol=lf
+
+# N83 dense-root benchmark media and immutable raw archives.
+benchmarks/20261013-n83-dense-root/*.pdf binary
+benchmarks/20261013-n83-dense-root/*.png binary
+benchmarks/20261013-n83-dense-root/*.svg -diff -whitespace
+research/n83_dense_root_20261013/*.pdf binary
+research/n83_dense_root_20261013/reports/**/*.pdf binary
+research/n83_dense_root_20261013/reports/**/*.png binary
+research/n83_dense_root_20261013/reports/**/*.svg -diff -whitespace
+research/n83_dense_root_20261013/runs/panel/*/base_dump.jsonl -diff -whitespace
+research/n83_dense_root_20261013/final_fmt.log -diff -whitespace
+research/n83_dense_root_20261013/final_*_tests.log whitespace=-blank-at-eof
+
+# ECBench frontier synthesis media.
+benchmarks/20261013-ecbench-frontier/*.pdf binary
+benchmarks/20261013-ecbench-frontier/*.png binary
+benchmarks/20261013-ecbench-frontier/*.svg -diff -whitespace
+research/ecbench_frontier_20261013/*.pdf binary
+research/ecbench_frontier_20261013/reports/**/*.pdf binary
+research/ecbench_frontier_20261013/reports/**/*.png binary
+research/ecbench_frontier_20261013/reports/**/*.svg -diff -whitespace
