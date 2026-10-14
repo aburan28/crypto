@@ -1,0 +1,69 @@
+skip m2_n11_d2_s1
+skip m2_n11_d3_s1
+skip m2_n11_d4_s1
+skip m2_n11_d5_s1
+skip m2_n13_d2_s1
+skip m2_n13_d3_s1
+skip m2_n13_d4_s1
+skip m2_n13_d5_s1
+skip m2_n13_d6_s1
+skip m2_n11_d2_s2
+skip m2_n11_d3_s2
+skip m2_n11_d4_s2
+skip m2_n11_d5_s2
+skip m2_n13_d2_s2
+skip m2_n13_d3_s2
+skip m2_n13_d4_s2
+skip m2_n13_d5_s2
+skip m2_n13_d6_s2
+skip m2_n11_d2_s3
+skip m2_n11_d3_s3
+skip m2_n11_d4_s3
+skip m2_n11_d5_s3
+skip m2_n13_d2_s3
+skip m2_n13_d3_s3
+skip m2_n13_d4_s3
+skip m2_n13_d5_s3
+skip m2_n13_d6_s3
+skip m2_n9_d3_s1
+skip m2_n15_d3_s1
+skip m2_n15_d5_s1
+skip m2_n9_d3_s2
+skip m2_n15_d3_s2
+skip m2_n15_d5_s2
+skip m2_n9_d3_s3
+skip m2_n15_d3_s3
+skip m2_n15_d5_s3
+skip delta_n11_m2
+skip delta_n13_m2
+=== delta_n11_m3 : --field 11 --structures standard --summands 3 --delta-sweep=-1,0,1,2,3 --dmax 6 --targets 24 --dstar-sample 6
+run_campaign.sh: line 9: 55940 Terminated: 15          sage "$SAGE" "$@" --out "$RAW/$name.json" > "$RAW/$name.log" 2>&1
+FAILED delta_n11_m3 (see raw/delta_n11_m3.log)
+=== m3_n11_d3_s1 : --field 11 --dim 3 --summands 3 --dstar-sample 6 --targets 24 --seed 1 --dmax 6
+run_campaign.sh: line 9: 33170 Terminated: 15          sage "$SAGE" "$@" --out "$RAW/$name.json" > "$RAW/$name.log" 2>&1
+FAILED m3_n11_d3_s1 (see raw/m3_n11_d3_s1.log)
+=== m3_n13_d4_s1 : --field 13 --dim 4 --summands 3 --dstar-sample 6 --targets 24 --seed 1 --dmax 6
+run_campaign.sh: line 9: 48622 Terminated: 15          sage "$SAGE" "$@" --out "$RAW/$name.json" > "$RAW/$name.log" 2>&1
+FAILED m3_n13_d4_s1 (see raw/m3_n13_d4_s1.log)
+=== m3_n11_d3_s2 : --field 11 --dim 3 --summands 3 --dstar-sample 6 --targets 24 --seed 2 --dmax 6
+run_campaign.sh: line 9: 48875 Terminated: 15          sage "$SAGE" "$@" --out "$RAW/$name.json" > "$RAW/$name.log" 2>&1
+FAILED m3_n11_d3_s2 (see raw/m3_n11_d3_s2.log)
+=== m3_n13_d4_s2 : --field 13 --dim 4 --summands 3 --dstar-sample 6 --targets 24 --seed 2 --dmax 6
+run_campaign.sh: line 9: 48992 Terminated: 15          sage "$SAGE" "$@" --out "$RAW/$name.json" > "$RAW/$name.log" 2>&1
+FAILED m3_n13_d4_s2 (see raw/m3_n13_d4_s2.log)
+=== m3_n11_d3_s3 : --field 11 --dim 3 --summands 3 --dstar-sample 6 --targets 24 --seed 3 --dmax 6
+run_campaign.sh: line 9: 49109 Terminated: 15          sage "$SAGE" "$@" --out "$RAW/$name.json" > "$RAW/$name.log" 2>&1
+FAILED m3_n11_d3_s3 (see raw/m3_n11_d3_s3.log)
+=== m3_n13_d4_s3 : --field 13 --dim 4 --summands 3 --dstar-sample 6 --targets 24 --seed 3 --dmax 6
+run_campaign.sh: line 9: 49233 Terminated: 15          sage "$SAGE" "$@" --out "$RAW/$name.json" > "$RAW/$name.log" 2>&1
+FAILED m3_n13_d4_s3 (see raw/m3_n13_d4_s3.log)
+=== sym4_n9_l2 : --field 9 --dim 2 --symmetric-s4 --structures geometric,standard,subfield,random --targets 16 --dmax 5 --dstar-sample 6
+=== sym4_n15_l3 : --field 15 --dim 3 --symmetric-s4 --structures geometric,standard,subfield,random --targets 16 --dmax 5 --dstar-sample 6
+=== frobwin_n131 : --frobenius-windows --field 131 --dim 4 --summands 3
+run_campaign.sh: line 9: 49733 Terminated: 15          sage "$SAGE" "$@" --out "$RAW/$name.json" > "$RAW/$name.log" 2>&1
+FAILED frobwin_n131 (see raw/frobwin_n131.log)
+=== stack_n11 : --stacking 1,2 --field 11 --dim 4
+FAILED stack_n11 (see raw/stack_n11.log)
+=== stack_n13 : --stacking 1,2 --field 13 --dim 4
+FAILED stack_n13 (see raw/stack_n13.log)
+campaign done
