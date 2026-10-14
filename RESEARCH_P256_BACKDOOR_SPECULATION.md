@@ -180,8 +180,15 @@ predicate shape a 2^55-seed grind admits. Recorded outcomes
   ≤ 100.
 - **Endomorphism/isogeny (H3).** GLS gap `4p − t²` is 258 bits (no GLS
   structure); the trace has Hamming weight 59 (z ≈ −0.9) and no
-  sparse form; `x³ − 3x + b` has exactly one rational root, so exactly
-  one rational 2-isogeny — the generic case.
+  sparse form. *Corrected 2026-10-13:* the round-2 report recorded
+  "one rational root" for `x³ − 3x + b`; a convention bug in the
+  root counter (fixed in the round-4 PR, regression-pinned by the odd
+  order `n`) gives the true value: **zero** rational roots — the
+  2-division polynomial is irreducible with square discriminant
+  (Galois group C₃), so P-256 has **no** rational 2-isogenies. This is
+  not a free datum: it is *forced* by the cofactor-1 acceptance
+  (prime, hence odd, `n` ⇒ no rational 2-torsion), which is exactly
+  the conditioning the round-4 post-selection simulation applies.
 
 **Round-2 verdict.** No new groundable locus found: every
 microsecond-testable invariant of the seed-derived values measured

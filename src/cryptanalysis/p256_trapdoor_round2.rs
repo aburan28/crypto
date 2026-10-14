@@ -333,8 +333,16 @@ pub fn cubic_rational_root_count(f1: &BigUint, f2: &BigUint, f3: &BigUint, p: &B
         }
         out
     };
+    // Polynomial Euclid: divide f by g (degrees ≤ 3 and < 3). NB: f is
+    // power-indexed here ([const, x, x², x³]), unlike the leading-first
+    // [1, x², x, const] convention of poly_mul_mod above.
     let mut g_cur = g;
-    let mut f_cur = f;
+    let mut f_cur = [
+        f[3].clone(),
+        f[2].clone(),
+        f[1].clone(),
+        f[0].clone(),
+    ];
     loop {
         let r = div_rem_cubic(&f_cur, &g_cur, p);
         if degree_of(&r).is_none() {
@@ -353,9 +361,12 @@ pub fn cubic_rational_root_count(f1: &BigUint, f2: &BigUint, f3: &BigUint, p: &B
         f_cur = f_next;
         g_cur = r;
     }
-    // The last nonzero g is the gcd.
+    // g_cur is the gcd at break. Its DEGREE (not degree + 1) is the
+    // rational root count: a constant gcd means f and x^p − x share no
+    // factor, i.e. f is irreducible over F_p and has no rational root.
     match degree_of(&g_cur) {
-        Some(d) => d + 1,
+        Some(0) => 0,
+        Some(d) => d,
         None => 0,
     }
 }
@@ -612,9 +623,7 @@ pub fn p256_trapdoor_round2_report(pollard_iters: u64) -> Vec<TrapdoorProbeRecor
         name: "rational roots of x³ − 3x + b over F_p".into(),
         measured: format!(
             "{} rational roots ({} rational 2-isogenies), fully_splits={}",
-            split.rational_roots,
-            if split.rational_roots == 0 { 1 } else { split.rational_roots },
-            split.fully_splits
+            split.rational_roots, split.rational_roots, split.fully_splits
         ),
         anomaly: false,
     });
@@ -709,6 +718,30 @@ mod tests {
             &p,
         );
         assert_eq!(count, brute.len());
+        // f(x) = x^3 + x + 2 over F_11: x=5 → 125+7=132=12·11 → root at 5
+        // only? brute-force it too, and add an irreducible case:
+        // x^3 + x + 4: check no roots by brute force.
+        let g = |x: u64| (x * x * x + x + 4) % 11;
+        assert!((0..11).all(|x| g(x) != 0), "expected irreducible");
+        assert_eq!(
+            cubic_rational_root_count(
+                &BigUint::zero(),
+                &BigUint::one(),
+                &BigUint::from(4u32),
+                &p,
+            ),
+            0
+        );
+    }
+
+    #[test]
+    fn p256_two_division_polynomial_is_irreducible_because_n_is_odd() {
+        // n is prime (cofactor 1), hence odd, so E(F_p) has no point of
+        // order 2: x³ − 3x + b must have no rational root, its Galois
+        // group is C3 (round-4 correction of the round-2 record).
+        let split = p256_two_torsion_split();
+        assert_eq!(split.rational_roots, 0);
+        assert!(!split.fully_splits);
     }
 
     #[test]
