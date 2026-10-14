@@ -21,7 +21,9 @@ $E(FF_(29^4))$ with rational 2-torsion, $\#E = 16 dot 44263$ (registered `icv1-f
   [rho-neg-aa], [`rho.negation`], [1.065], [L2],
 )
 
-633 relation trials, 631 solves at $2.32 dot 10^10$ $FF_p$ multiplications each, 8 relations, rank 8 on 8 unknowns; relations are $approx 100 %$ of $S$. *Index calculus costs $6.7 dot 10^8 times$ rho*, within 2× of the model's $1.3 dot 10^9$; every registered prediction held. Three decompositions were lost to a summand outside the base (probably $Y = 0$); 9 of 631 systems were degenerate.
+633 relation trials, 631 solves at $2.32 dot 10^10$ $FF_p$ multiplications each, 8 relations, rank 8 on 8 unknowns; relations are $approx 100 %$ of $S$. *Index calculus costs $6.7 dot 10^8 times$ rho*, within 2× of the model's $1.3 dot 10^9$; every registered range held, though the decomposition rate the trial range assumed (0.003–0.008) was low against the 0.017 seen. $S$ omits the 9 degenerate solves (under 1.4 %). Three decompositions were lost to a summand outside the base (probably $Y = 0$); 9 of 631 systems were degenerate.
+
+*Amendment 1.* With the order-4 point $Y = 0$ in the base (`fghr-y-line:zero=1`): 574 trials, no lost decomposition, $S = 6.49 dot 10^8$ (−9.5 %), audit OK. On 24,000 enumerated targets the point raises the decomposition rate $1.42 times$.
 
 Scope: one small curve and one target; the method working and priced end to end where it was expected to lose by nine orders of magnitude. It confirms the model's relation-phase constant, not the projected crossover near $2^135$.
 

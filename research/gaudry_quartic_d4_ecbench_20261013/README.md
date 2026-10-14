@@ -65,6 +65,31 @@ timing; `S` does not depend on it).
   #1792).
 - **Isolation.** The two-hour IC run graded L1, the rho runs L2.
 
+## Amendment 1: the `Y = 0` point back in the base
+
+`fghr-y-line:zero=1` adds the order-4 point with `Y = 0` as its own column
+(its logarithm is 0: `[h]P₀ = O`).  Measured first by exact enumeration on
+24,000 uniform targets (`raw/hit_rate_zero.jsonl`): 136 decompose with it,
+96 without, **1.42×**, 29 % ± 8 % of hits needing it.  Then end to end on
+the same workload and seeds (`sessions/k4-p29-zero/`, audit **OK**, 2 of 2
+replays identical):
+
+| | first session | with `Y = 0` |
+|:--|--:|--:|
+| trials | 633 | **574** |
+| relations (columns + target) | 8 (8) | 9 (9) |
+| decompositions lost (`lift_failures`) | 3 | **0** |
+| degenerate systems | 9 | 9 |
+| `S` | 7.17·10⁸ | **6.49·10⁸** (−9.5 %) |
+| ÷ rho | 6.7·10⁸ | 6.1·10⁸ |
+
+Predictions (amendment): Z1 (verified, identical, no lost decompositions)
+**held**; Z2 (fewer trials, 290–610) **held** at 574, above the ~450 point
+estimate because the extra column needed one more relation; Z3 (`S` in
+proportion to the trials) **held** in proportion, but the ~`5·10⁸` figure
+built on 450 trials **missed**.  One target cannot resolve a 1.4× rate;
+the 24,000-target count is the measurement.
+
 ## Scope
 
 One curve, one target, `p = 29`: the method working and priced end to end

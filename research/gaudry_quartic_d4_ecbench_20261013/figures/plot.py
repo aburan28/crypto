@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 
 here = os.path.dirname(os.path.abspath(__file__))
 rows = [json.loads(l) for l in open(os.path.join(here, "..", "sessions", "k4-p29", "records.jsonl"))]
+# The amendment-1 IC run (base with Y = 0), same workload and seeds.
+rows += [r for r in (json.loads(l) for l in open(os.path.join(here, "..", "sessions", "k4-p29-zero", "records.jsonl")))
+         if r["arm"].startswith("ic")]
 C = {"blue": "#2a78d6", "orange": "#eb6834", "aqua": "#1baf7a", "ink": "#0b0b0b", "ink2": "#52514e",
      "grid": "#e6e5e1", "surface": "#fcfcfb", "wash": "#9aa3ad", "plum": "#8e5bd1"}
 plt.rcParams.update({"font.size": 9, "axes.edgecolor": C["grid"], "axes.labelcolor": C["ink2"],
