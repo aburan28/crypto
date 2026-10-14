@@ -135,9 +135,9 @@ fn prime_factors(mut v: u64) -> Vec<u64> {
     let mut out = Vec::new();
     let mut p = 2u64;
     while p * p <= v {
-        if v % p == 0 {
+        if v.is_multiple_of(p) {
             out.push(p);
-            while v % p == 0 {
+            while v.is_multiple_of(p) {
                 v /= p;
             }
         }
@@ -681,7 +681,7 @@ pub fn field_report(big_n: u32, build_walk: bool) -> FieldReport {
 
     let mut factorisations = Vec::new();
     for n in 2..=big_n {
-        if big_n % n != 0 {
+        if !big_n.is_multiple_of(n) {
             continue;
         }
         let l = big_n / n;
