@@ -171,3 +171,76 @@ changed.
    `a, b, r1`: `(x, 0)`; over `r0`: `O`; over `r2`:
    `u12 = (r2−r1)·X2/X0`, `y0 = w·(r2−r0)(r2−r1)/(u12·xd(z))`. The
    preregistered metric is still reported unchanged.
+
+## Addendum 2026-10-14 (frozen before the addendum runs)
+
+Owner follow-up on PR #1796: execute the transfer on the conjugate arm, and
+cross-check the census at `q ≥ 11` directly. Same scope limit (no index
+calculus, no relations, no logarithms). Recorded run `20261014T0029Z` stays
+unchanged; the addendum gets a new run id. The instances are the same 20
+(same tool, same deterministic selection); the split-arm records of the new
+run must reproduce those of `20261014T0029Z` field for field (consistency
+check).
+
+### Conjugate arm: real-model arithmetic
+
+*Why not degree 7.* The conjugate-arm Weierstrass points are the 8 points
+over `a, b ∈ F_{q²} \ F_q`; none is `F_q`-rational (`a ∉ F_q`), so no
+`F_q`-model change gives degree 7. Option (a) of the request is unavailable on
+all 8 instances, and real-model arithmetic is implemented.
+
+*Model.* Choose the first `z0 ∈ F_q` (integer order) with `h(z0)` a non-zero
+square and `x(z0)` finite and outside `{r_i} ∪ {Q = 0}`; `w0` the tool's
+square root. `z' = 1/(z − z0)`, `w' = w/((z − z0)⁴ w0)` gives the monic,
+squarefree degree-8 `f(z') = z'⁸ h(z0 + 1/z')/h(z0)` with two `F_q`-rational
+points at infinity: `∞± ↔ (z0, ±w0)`. `V+` = polynomial part (degree 4) of
+`√f`.
+
+*Arithmetic (balanced representation, Galbraith–Harrison–Mireles 2008;
+bookkeeping re-derived in the README).* A class is `(u, v, n)`:
+`div(u, v) + n∞+ + (3 − deg u − n)∞− − D∞`, `D∞ = 2∞+ + ∞−`, reduced iff
+`deg u ≤ 3`, `0 ≤ n ≤ 3 − deg u`, `v` taken mod `u`. Zero `(1, 0, 2)`.
+Composition: Cantor composition of the affine parts, `n = n1 + n2 + deg d − 2`.
+Steps with `v` adapted to `±V+`: `+`-step `n ↦ n + deg u − 4`, `−`-step
+`m ↦ m + deg u − 4`; reduce by `+`-steps while `deg u > 3`, then `−`-steps
+while `n < 0`, `+`-steps while `n > 3 − deg u`. Negation
+`(u, −v, 4 − deg u − n)` then reduce. Point class `[P − ∞+] = (z' − z'_P, w'_P, 1)`,
+`[∞+ − ∞−] = (1, 0, 3)`.
+
+*Transfer.* `φ(P) = Σ_{12 points} [Q_k − ∞+] + 6·[∞+ − ∞−]`, i.e. the class of
+`Σ Q_k − 6(∞+ + ∞−)`, which equals `(1 + Fr + Fr²)∘π0^*([P] − [O])` because
+`π0^*[O]` (four points over `r0`, two `ι`-pairs) `~ 2(∞+ + ∞−)`.
+
+### Pre-registered predictions (addendum)
+
+- **V (validation of the real-model arithmetic, conjugate arm, 8 instances).**
+  V1: an independent enumeration of reduced triples `(u, v, n)` over `F_q`
+  (all monic `u` of degree ≤ 3, all `v` with `deg v < deg u` and
+  `u | v² − f`, all admissible `n`) counts exactly `L(1) = #E0(K)`;
+  V2: associativity `(A + B) + C = A + (B + C)` on 300 seeded random triples;
+  V3: `[#E0(K)]·D = 0` on 100 random `D`; V4: `D + (−D) = 0` and
+  `D + 0 = D` on the same 100. *Falsifier:* any mismatch (then P4c is not
+  reported as verified).
+- **P4c (transfer, conjugate arm).** The P4 checks of the split arm, with the
+  same sizes: every `φ(P)` is a reduced triple with `F_q` coefficients;
+  homomorphism on 400 random pairs and 100 doublings; `φ(G) ≠ 0`,
+  `ℓ·φ(G) = 0` for a generator of the `ℓ`-part (`ℓ` the largest prime factor;
+  at q = 7, `ℓ = 23` with cofactor 16, as recorded); exceptional points
+  (`x ∈ {r0, r1, r2, ∞}`) by the `R`-route with three `R`, plus the direct
+  values `φ(O) = 0`, `φ((r1,0)) = 0`; `ker φ ⊆ E0(K)[4]`, `T1 ∈ ker φ`,
+  `|image|·|ker| = #E0(K)`; `π0_*(φ(P)) = 4P` for every `P ∈ E0(K)`, with the
+  special-fibre images of the 2026-10-13 amendment and the images of
+  `∞± = (z0, ±w0)`; reported with the count of points not evaluable (if any).
+  *Falsifier:* any failure.
+- **P5c (census at q = 11, 13; called P5b in the request, renamed because P5b
+  is the `4 | #E0(K)` check).** Fork `census_list.rs` of
+  `../ghs_cubic_cover_census_20261012/cover_census.rs`: identical code plus a
+  `list` mode that runs the unchanged per-curve `census()` over every
+  `F_q`-structure for given `(A_idx, B_idx)`. Gate: the fork in the original
+  exhaustive mode reproduces the census records for q = 5 and 7
+  byte-for-byte (`diff` against `run-20261013T0403Z.jsonl`). Then, for each
+  built `E0` at q = 11, 13 (both arms) and its two `σ`-conjugates: the number
+  of structures equals `(Q³ − Q)/(q³ − q)`, `min_genus = 3`, the types at the
+  minimum include `m = 3, r = 5, hyperelliptic`, the census order equals
+  `#E0(K)`, and 0 subcover mismatches; report the number of structures
+  attaining genus 3, by type. *Falsifier:* any record failing these.
