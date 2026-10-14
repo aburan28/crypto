@@ -180,11 +180,7 @@ fn run_transported_log_target_with_params(
             representatives[column] = Some(index);
         }
     }
-    for (column, (&log, representative)) in column_logs
-        .iter()
-        .zip(representatives.into_iter())
-        .enumerate()
-    {
+    for (column, (&log, representative)) in column_logs.iter().zip(representatives).enumerate() {
         let index = representative.ok_or_else(|| format!("column {column} has no point"))?;
         if fb.coef_of[index] != 1 {
             return Err(format!(
