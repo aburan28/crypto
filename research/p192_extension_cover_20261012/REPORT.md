@@ -152,8 +152,9 @@ decomposition method and base choice.
 The [branch continuation](BRANCH_CONTINUATION.md) resolves the direct
 quadratic-root test, constructs a Type I genus-3 cover and a nonfixed
 Scholten genus-2 cover over their lower fields, and verifies the earlier
-same-field controls. The next gate is an explicit Jacobian divisor image and
-conorm-norm replay on each descended cover. Their subgroup-usable factor bases,
+same-field controls. The continuation verifies a nonzero Scholten Jacobian
+pullback norm over \(\mathbf F_{p^6}\); its lower-field Mumford coordinates and
+the Type I divisor image remain open. Their subgroup-usable factor bases,
 relation yields, ranks, final linear algebra, target descent, and matched single-target rho reference
 remain **unknown** for the P-192 instance.
 
