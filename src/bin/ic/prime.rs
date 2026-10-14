@@ -12,8 +12,9 @@ use clap::{Args, ValueEnum};
 use crypto_lib::cryptanalysis::{
     binary_small_x,
     prime_small_x::{self, measure, toy_curve, toy_curve_with_cofactor, Curve, Options},
-    secg_small_x::measure_secg,
+    secg_small_x::{measure_secg, Extras},
     secg_standards::secg,
+    semaev_s3_cost::{s3_cost_binary, s3_cost_prime},
 };
 use serde::Serialize;
 use serde_json::{json, Value};
@@ -57,6 +58,12 @@ pub struct PrimeArgs {
     /// the factor by which that variant loses against the base used here.
     #[arg(long, default_value_t = 0, value_parser = clap::value_parser!(u64).range(0..=1_000_000))]
     pub raw_samples: u64,
+    /// Decide this many random targets by a Semaev S₃ solve over the base
+    /// (one quadratic per base abscissa), check each against the pair-sum
+    /// table and time it: the cost of a trial without the table, and the time
+    /// to collect `B + 1` relations against Pollard rho on the same machine.
+    #[arg(long, default_value_t = 0, value_parser = clap::value_parser!(u64).range(0..=100_000))]
+    pub s3_trials: u64,
 }
 
 pub fn run(args: PrimeArgs) -> Result<Value, String> {
@@ -83,6 +90,7 @@ pub fn run(args: PrimeArgs) -> Result<Value, String> {
         Ok((n, seed, h))
     };
     let raw = args.raw_samples;
+    let s3n = args.s3_trials;
     let size = args.size as usize;
     let report = if matches!(name.as_str(), "secp192r1" | "p192" | "nist-p192" | "p-192") {
         let c = Curve::p192();
@@ -117,7 +125,14 @@ pub fn run(args: PrimeArgs) -> Result<Value, String> {
         }
         r
     } else if let Some(c) = secg(&name) {
-        measure_secg(c, &opts, raw)?
+        measure_secg(
+            c,
+            &opts,
+            Extras {
+                raw_samples: raw,
+                s3_trials: s3n,
+            },
+        )?
     } else {
         return Err(format!(
             "unknown curve {:?}; use a SECG name from `ic list`, secp192r1, toy:<bits> or toy-binary:<degree>",
@@ -135,7 +150,7 @@ pub fn run(args: PrimeArgs) -> Result<Value, String> {
         "limitations": [
             "Two-point sums only: a relation is a signed sum of two base points of the small-x base.",
             "The yield is exact for the base built. The Monte Carlo rate agrees with it only where the yield is large enough to produce hits; at P-192 it is a null result and bounds the rate from above.",
-            "The cost of each trial, deciding by a Semaev S₃ solve whether a target decomposes, is not part of this measurement, and neither is any linear algebra or descent: a relation yield is not a discrete logarithm.",
+            "The cost of deciding a trial by a Semaev S₃ solve is measured only with --s3-trials; linear algebra and descent are not measured: a relation yield is not a discrete logarithm.",
             "The base is capped at 8192 abscissae, and lower where the pair-sum keys would not fit in memory (wide fields).",
             "With a cofactor h > 1 (every SECG binary curve, secp112r2, secp128r2) each small-x point enters the base as [h]P and targets are [h] times a uniform point, so base and targets lie in the prime-order subgroup and the yield is over that subgroup. --raw-samples measures, by sampling, the share of raw small-x pair sums that lie in the subgroup."
         ]

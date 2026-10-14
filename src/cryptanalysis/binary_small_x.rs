@@ -741,6 +741,7 @@ pub fn measure<const L: usize>(c: &BinCurve<L>, opts: &Options) -> Result<YieldR
         },
         threads: rayon::current_num_threads(),
         raw_base: None,
+        s3: None,
     })
 }
 

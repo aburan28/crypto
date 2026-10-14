@@ -705,6 +705,40 @@ pub struct RawBase {
     pub raw_yield_log2: f64,
 }
 
+/// The measured cost of deciding whether a target is a signed sum of two
+/// base points by solving Semaev's summation polynomial `S₃(x₁, x₂, X) = 0`
+/// for `x₂` at every base abscissa `x₁`, against the pair-sum table lookup,
+/// the unit of work that the yield counts. See `semaev_s3_cost`.
+#[derive(Clone, Debug, Serialize)]
+pub struct S3Cost {
+    pub base_abscissae: usize,
+    /// Random subgroup targets decided by both methods.
+    pub trials: u64,
+    /// Wall microseconds per target for the S₃ solve, one thread.
+    pub s3_us_per_trial: f64,
+    /// Wall nanoseconds per target for the sorted pair-sum lookup.
+    pub table_ns_per_trial: f64,
+    /// Nanoseconds per field multiplication, one thread.
+    pub field_mul_ns: f64,
+    /// S₃ cost in field multiplications per target.
+    pub s3_field_muls_per_trial: f64,
+    /// Microseconds per affine group addition, one thread.
+    pub group_add_us: f64,
+    /// Targets on which the two methods disagree (must be 0).
+    pub disagreements: u64,
+    /// Planted decompositions the S₃ solve found, of `planted`.
+    pub planted_found: usize,
+    pub planted: usize,
+    /// `log₂` seconds of S₃ solving to collect `B + 1` relations at the exact
+    /// yield: trials for a full system times the cost of one solve.
+    pub s3_full_system_log2_s: f64,
+    /// `log₂` seconds of Pollard rho at `√n` affine additions.
+    pub rho_log2_s: f64,
+    /// `s3_full_system_log2_s − rho_log2_s`: the factor by which this
+    /// method is slower than rho, in bits, on the same machine.
+    pub bits_slower_than_rho: f64,
+}
+
 /// The exact yield of a small-x base and its checks.
 #[derive(Clone, Debug, Serialize)]
 pub struct YieldReport {
@@ -753,6 +787,8 @@ pub struct YieldReport {
     pub threads: usize,
     /// Present when the raw small-x variant was sampled.
     pub raw_base: Option<RawBase>,
+    /// Present when the cost of deciding a target by a Semaev S₃ solve was measured.
+    pub s3: Option<S3Cost>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -978,6 +1014,7 @@ pub fn measure<F: PrimeField>(c: &Curve<F>, opts: &Options) -> Result<YieldRepor
         },
         threads: rayon::current_num_threads(),
         raw_base: None,
+        s3: None,
     })
 }
 

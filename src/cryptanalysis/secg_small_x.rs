@@ -9,15 +9,23 @@
 use super::binary_small_x::{self, BinCurve};
 use super::prime_small_x::{self, Curve, MontField, Options, YieldReport};
 use super::secg_standards::{SecgCurve, SecgField};
+use super::semaev_s3_cost::{s3_cost_binary, s3_cost_prime};
 
-/// Measure the exact small-x yield of `c`. With `raw_samples > 0` the share
-/// of raw small-x pair sums that land in the prime-order subgroup is also
-/// sampled (see [`prime_small_x::raw_subgroup_fraction`]).
-pub fn measure_secg(
-    c: &SecgCurve,
-    opts: &Options,
-    raw_samples: u64,
-) -> Result<YieldReport, String> {
+/// Optional measurements added to the yield.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Extras {
+    /// Sample this many raw small-x pair sums for the share in the subgroup
+    /// ([`prime_small_x::raw_subgroup_fraction`]).
+    pub raw_samples: u64,
+    /// Decide this many targets by a Semaev S₃ solve and time it
+    /// ([`super::semaev_s3_cost`]).
+    pub s3_trials: u64,
+}
+
+/// Measure the exact small-x yield of `c`, with the optional extras.
+pub fn measure_secg(c: &SecgCurve, opts: &Options, extras: Extras) -> Result<YieldReport, String> {
+    let raw_samples = extras.raw_samples;
+    let s3_trials = extras.s3_trials;
     macro_rules! binary {
         ($l:literal) => {{
             let cv = BinCurve::<$l>::from_secg(c)?;
@@ -29,6 +37,9 @@ pub fn measure_secg(
                     raw_samples,
                     opts.seed,
                 )?);
+            }
+            if s3_trials > 0 {
+                r.s3 = Some(s3_cost_binary(&cv, opts, &r, s3_trials)?);
             }
             Ok(r)
         }};
@@ -44,6 +55,9 @@ pub fn measure_secg(
                     raw_samples,
                     opts.seed,
                 )?);
+            }
+            if s3_trials > 0 {
+                r.s3 = Some(s3_cost_prime(&cv, opts, &r, s3_trials)?);
             }
             Ok(r)
         }};
@@ -86,7 +100,7 @@ mod tests {
                     controls: 4,
                     seed: 1,
                 },
-                0,
+                Extras::default(),
             )
             .unwrap_or_else(|e| panic!("{name}: {e}"));
             assert_eq!(r.cofactor, c.cofactor, "{name}");
