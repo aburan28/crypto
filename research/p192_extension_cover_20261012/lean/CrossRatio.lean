@@ -1,5 +1,9 @@
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.Ring
+import Mathlib.Data.Finset.Card
+import Mathlib.Data.Finset.Fin
+import Mathlib.Data.Finset.Prod
+import Mathlib.Data.Fintype.Basic
 
 /-!
 The algebraic core of the P-192 Legendre obstruction.  If Frobenius cycles
@@ -137,6 +141,65 @@ theorem type_i_subfield_rhs_square {K : Type*} [CommRing K]
     _ = (((x - a) * (x - b)) ^ (n + 1)) ^ 2 :=
       odd_power_pair_square ((x - a) * (x - b)) n
 
+/-- A Frobenius-conjugate pair gives a fixed norm class whenever the
+    induced action is an involution on the ambient divisor-class group. -/
+theorem involution_norm_fixed {A : Type*} [AddCommGroup A]
+    (σ : A →+ A) (hσ : ∀ x, σ (σ x) = x) (D : A) :
+    σ (D + σ D) = D + σ D := by
+  rw [map_add, hσ]
+  exact add_comm (σ D) D
+
+/-- The norm of an `r`-torsion divisor class remains `r`-torsion.  This is
+    the group bridge used by the explicit Scholten norm computation. -/
+theorem involution_norm_torsion {A : Type*} [AddCommGroup A]
+    (σ : A →+ A) (r : ℤ) (D : A) (hD : r • D = 0) :
+    r • (D + σ D) = 0 := by
+  have hσD : r • σ D = 0 := by
+    simpa only [map_zsmul, map_zero] using congrArg σ hD
+  simp [zsmul_add, hD, hσD]
+
+/-- Conorm of a torsion class remains torsion under an additive divisor
+    class map; geometry must provide the particular conorm homomorphism. -/
+theorem conorm_preserves_torsion {A B : Type*} [AddCommGroup A] [AddCommGroup B]
+    (pull : A →+ B) (r : ℤ) (D : A) (hD : r • D = 0) :
+    r • pull D = 0 := by
+  simpa only [map_zsmul, map_zero] using congrArg pull hD
+
+/-- Clearing the denominator in the quartic-to-cubic Möbius coordinate
+    change. The exact P-192 coefficients and square twist are checked by
+    the generator-map Sage receipt. -/
+theorem mobius_quartic_clear {K : Type*} [Field K]
+    (a b C D ρ X : K) (hX : X ≠ ρ) :
+    ((C + D / (X - ρ)) ^ 3 + a * (C + D / (X - ρ)) + b) *
+        (X - ρ) ^ 4 =
+      (C * (X - ρ) + D) ^ 3 * (X - ρ) +
+        a * (C * (X - ρ) + D) * (X - ρ) ^ 3 +
+        b * (X - ρ) ^ 4 := by
+  have h : X - ρ ≠ 0 := sub_ne_zero.mpr hX
+  field_simp [h]
+
+/-- Canonical unordered triples, with repetitions, from a 16-point base. -/
+def canonicalTriples16 : Finset (Fin 16 × (Fin 16 × Fin 16)) :=
+  ((Finset.univ : Finset (Fin 16)).product
+    ((Finset.univ : Finset (Fin 16)).product
+      (Finset.univ : Finset (Fin 16)))).filter
+    (fun t => t.1 ≤ t.2.1 ∧ t.2.1 ≤ t.2.2)
+
+set_option maxRecDepth 4096 in
+theorem canonicalTriples16_card : canonicalTriples16.card = 816 := by
+  decide
+
+/-- A fixed 16-element base has at most 816 distinct three-sum images. -/
+theorem three_sum_support_bound {A : Type*} [AddCommMonoid A] [DecidableEq A]
+    (base : Fin 16 → A) :
+    (canonicalTriples16.image
+      (fun t => base t.1 + base t.2.1 + base t.2.2)).card ≤ 816 := by
+  calc
+    (canonicalTriples16.image
+        (fun t => base t.1 + base t.2.1 + base t.2.2)).card ≤
+        canonicalTriples16.card := Finset.card_image_le
+    _ = 816 := canonicalTriples16_card
+
 end P192ExtensionCover
 
 #print axioms P192ExtensionCover.cyclic_cross_ratio_product
@@ -150,3 +213,9 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.projected_target_scalar
 #print axioms P192ExtensionCover.odd_power_pair_square
 #print axioms P192ExtensionCover.type_i_subfield_rhs_square
+#print axioms P192ExtensionCover.involution_norm_fixed
+#print axioms P192ExtensionCover.involution_norm_torsion
+#print axioms P192ExtensionCover.conorm_preserves_torsion
+#print axioms P192ExtensionCover.mobius_quartic_clear
+#print axioms P192ExtensionCover.canonicalTriples16_card
+#print axioms P192ExtensionCover.three_sum_support_bound

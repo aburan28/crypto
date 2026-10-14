@@ -150,13 +150,16 @@ measured speed ratio or a lower bound on every cover method. See
 decomposition method and base choice.
 
 The [branch continuation](BRANCH_CONTINUATION.md) resolves the direct
-quadratic-root test, constructs a Type I genus-3 cover and a nonfixed
-Scholten genus-2 cover over their lower fields, and verifies the earlier
-same-field controls. The continuation verifies a nonzero Scholten Jacobian
-pullback norm over \(\mathbf F_{p^6}\); its lower-field Mumford coordinates and
-the Type I divisor image remain open. Their subgroup-usable factor bases,
-relation yields, ranks, final linear algebra, target descent, and matched single-target rho reference
-remain **unknown** for the P-192 instance.
+quadratic-root test and constructs Type I genus-3 and nonfixed Scholten
+genus-2 covers over their lower fields. It gives explicit lower-field Mumford
+coordinates for a nonzero P-192 Scholten subgroup class, 16 verified
+subgroup-usable classes in a compact base, and a 64-query zero-yield relation
+probe with an exact three-sum coverage bound. It also gives checked Type I
+generator fibers and a formal conorm–Frobenius-norm divisor. A separate
+\(\mathbf F_{23^3}\) Scholten instance verifies the complete relation,
+rank, target, and same-point rho pipeline. P-192 final rank, target descent,
+and matched one-target cost remain unknown for the tested compact policy;
+the Type I formal divisor still requires genus-three Jacobian reduction.
 
 ## Reproduction
 
