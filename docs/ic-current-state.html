@@ -184,7 +184,7 @@ td.inst { white-space: nowrap; }
   <p class="lede">Each panel on the scoreboard carries a one-line summary under its title: what it measured or decided, and its class. This index lists them in ledger order; each title links to the panel. It is written from the scoreboard by <code>scripts/site/panel_index.py</code> and checked in CI, so it cannot drift from the ledger.</p>
 <!-- BEGIN panel-index -->
   <details>
-    <summary>Show all 326 panels, one line each</summary>
+    <summary>Show all 327 panels, one line each</summary>
     <ol class="index">
       <li><a href="./#lab-results">A promising average. No reliable win.</a><br>Decision: the stricter familywise upper bound is 1.034×. The frozen promotion gate failed.</li>
       <li><a href="./#rho-results-title">How does that incumbent compare with rho?</a><br>This is the pair-table incumbent. It does not rank F5 or SAT. Reusable preparation is excluded; cold costs and other curve sizes answer different questions.</li>
@@ -512,6 +512,7 @@ td.inst { white-space: nowrap; }
       <li><a href="./#p256-permutation-dichotomy-round310-20261008">P-256 Round 310: rank-one permutation images are exactly affine</a> <span class="chip">linear-image dichotomy / negative</span><br>On the complete fixed-sum S17 coefficient span, a same-base column permutation has a one-dimensional paired image if and only if its transported log vector is affine in the original logs. Such a transport is impossible for an unaligned product target or is a direct target-log witness; non-affine transports have rank two.</li>
       <li><a href="./#p256-involution-atom-round311-20261013">P-256 Round 311: half-turn atoms separate the target but not the log space</a> <span class="chip">factor-base census / negative</span><br>For each actual Round-309 two-cycle, A=P+P_pi and B=P-P_pi split the product target into (Q+G)/2 and (Q-G)/2. The complete P-256 census nevertheless finds 65,724 distinct atom columns from 65,724 parents: the transform is invertible and reduces the unknown-log dimension by zero.</li>
       <li><a href="./#p256-dickson-additive-rank-round312-20261013">P-256 Round 312: Dickson-local atoms add no static rank</a> <span class="chip">complete local census / negative</span><br>On the actual FB1h2f8621cda105 base, every unordered pair with minimal Dickson coalescence at levels 1--7 is tested through both P_i+P_j and P_i-P_j. Complete collision and small-multiple matching finds no identity, so the certified static relation rank is zero.</li>
+      <li><a href="./#p256-dickson-walsh-round313-20261014">P-256 Round 313: complete Dickson-Walsh transport has rank zero</a> <span class="chip">complete global census / negative</span><br>The group-valued Walsh transform exhausts all 262,144 characters of the actual FB1h2f8621cda105 Dickson fibre. Every output is nonidentity, and exhaustive collision and small-multiple matching produces no relation, so certified static rank is zero.</li>
     </ol>
   </details>
 <!-- END panel-index -->

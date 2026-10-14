@@ -92,6 +92,17 @@ pub struct WideBuildResult {
     pub legacy_enumeration_sha256: String,
 }
 
+/// A wide build together with the builder's canonical torus-enumeration
+/// index for every materialised column.  `None` marks a trace abscissa that
+/// does not lift to P-256.  This is intentionally an auxiliary view: the
+/// FB1 identity and dump remain exactly those returned by [`build`].
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct IndexedWideBuildResult {
+    pub built: WideBuildResult,
+    pub enumeration_to_column: Vec<Option<u32>>,
+    pub enumeration_to_column_sha256: String,
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct RelationMetrics {
     pub columns: u64,
@@ -392,6 +403,63 @@ pub fn build(spec: &str) -> Result<WideBuildResult, String> {
     })
 }
 
+/// Rebuild a factor base and recover the pre-sort torus index of every
+/// column.  The ordinary builder deliberately stores columns in abscissa
+/// order; global character experiments need this second, canonical order
+/// without changing the frozen dump format or its FB1 preimage.
+pub fn build_indexed(spec: &str) -> Result<IndexedWideBuildResult, String> {
+    let (depth, requested_root) = parse_spec(spec)?;
+    let built = build(spec)?;
+    let curve = CurveParams::p256();
+    let g96 = norm_one_2_primary_generator(&curve.p)?;
+    let root_exponent =
+        requested_root.unwrap_or_else(|| BigUint::from(3u8) << (94usize - depth as usize));
+    let exponent_modulus = BigUint::one() << (96usize - depth as usize);
+    let root_exponent = root_exponent % exponent_modulus;
+    let mut z = g96.pow(&root_exponent, &curve.p);
+    let step = g96.pow(&(BigUint::one() << (96usize - depth as usize)), &curve.p);
+
+    let sorted_x = built
+        .dump
+        .points
+        .chunks_exact(2)
+        .map(|rows| parse_big(&rows[0].x))
+        .collect::<Result<Vec<_>, _>>()?;
+    if sorted_x.len() != built.dump.factor_base.columns as usize {
+        return Err("indexed build column count differs from the dump".into());
+    }
+    let mut seen = vec![false; sorted_x.len()];
+    let mut mapping = Vec::with_capacity(1usize << depth);
+    let mut digest = Vec::with_capacity((1usize << depth) * 8);
+    for index in 0..1usize << depth {
+        let x = (BigUint::from(2u8) * &z.re) % &curve.p;
+        let column = match sorted_x.binary_search(&x) {
+            Ok(column) => {
+                if seen[column] {
+                    return Err(format!(
+                        "torus enumeration repeats factor-base column {column}"
+                    ));
+                }
+                seen[column] = true;
+                Some(u32::try_from(column).map_err(|_| "column index exceeds u32")?)
+            }
+            Err(_) => None,
+        };
+        digest.extend_from_slice(&(index as u32).to_be_bytes());
+        digest.extend_from_slice(&column.unwrap_or(u32::MAX).to_be_bytes());
+        mapping.push(column);
+        z = z.mul(&step, &curve.p);
+    }
+    if seen.iter().any(|value| !value) {
+        return Err("indexed build did not recover every factor-base column".into());
+    }
+    Ok(IndexedWideBuildResult {
+        built,
+        enumeration_to_column: mapping,
+        enumeration_to_column_sha256: sha256_hex(&digest),
+    })
+}
+
 /// Rebuild and compare every field and point row of a wide dump.
 pub fn verify(dump: &WideFactorBaseDump) -> Result<WideBuildResult, String> {
     if dump.schema != DUMP_SCHEMA {
@@ -579,6 +647,34 @@ mod tests {
         );
         assert_eq!(result.dump.factor_base.fb_id, "FB1h6bcde28318a3");
         assert_eq!(verify(&result.dump).unwrap(), result);
+    }
+
+    #[test]
+    fn indexed_view_preserves_the_frozen_dump() {
+        let spec = "dickson-torus:depth=9,root_exponent=0x2d48091227bc911483d168";
+        let ordinary = build(spec).unwrap();
+        let indexed = build_indexed(spec).unwrap();
+        assert_eq!(indexed.built, ordinary);
+        assert_eq!(indexed.enumeration_to_column.len(), 1 << 9);
+        assert_eq!(
+            indexed
+                .enumeration_to_column
+                .iter()
+                .filter(|column| column.is_some())
+                .count(),
+            ordinary.dump.factor_base.columns as usize
+        );
+        let mut columns = indexed
+            .enumeration_to_column
+            .iter()
+            .flatten()
+            .copied()
+            .collect::<Vec<_>>();
+        columns.sort_unstable();
+        assert_eq!(
+            columns,
+            (0..ordinary.dump.factor_base.columns as u32).collect::<Vec<_>>()
+        );
     }
 
     #[test]

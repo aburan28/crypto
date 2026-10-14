@@ -1,0 +1,156 @@
+{
+  "boundary": {
+    "adjusted_rows_with_five_percent_allowance": 138031,
+    "certified_static_rank": 0,
+    "complete_cold_s": null,
+    "effective_log_classes": 131458,
+    "free_oracle_ratio_to_rho": 394.4252803452522,
+    "free_oracle_s": 512.7528644488278,
+    "imported_attack_storage_log2_bytes": 148.9262550201028,
+    "imported_per_usable_relation_fme_log2": 148.08097992234076,
+    "original_columns": 131458,
+    "original_requested_rows": 138031,
+    "projected_collection_fme_log2": 165.15561271105437,
+    "projection_is_measurement": false,
+    "rho_s": 1.3,
+    "unit": "P-256 group-addition equivalents / sqrt(n)"
+  },
+  "controls": {
+    "complete_cyclic": {
+      "active_slots": 16,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "fibre_size": 16,
+      "modulus": 101,
+      "optimized_relations": 18,
+      "reference_relations": 18,
+      "relation_sha256": "31a347521b2253339a497afe6ac8d0531526a56754914cab8cab9e6401c90f32",
+      "replay_failures": 0,
+      "transform_mismatches": 0
+    },
+    "p256_scalar_labelled": {
+      "active_slots": 16,
+      "character_one_double_match_found": true,
+      "detected_relations": 2,
+      "fibre_size": 16,
+      "identity_character_zero_found": true,
+      "relation_sha256": "48c267e8b6bddb1dfd5b0860a1bef987d4db25fa0751ac45c548345fb52070db",
+      "replay_failures": 0,
+      "replayed_relations": 2
+    }
+  },
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "decision": "Do not attempt a full-depth unplanted relation; preserve the complete Walsh result and leave parity unclaimed",
+  "dependencies": [
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_dickson_terminal_degree_round2_20261004/factor-base-result.json",
+      "schema": "p256.dickson_coset_search/v1",
+      "sha256": "dcaa1f66f5f89757a3670a4a8e158ca6d5c360b7ca119d384d2c4a0b2794c2c8"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_multilevel_selector_round19_20261005/selector-result.json",
+      "schema": "p256.s17_multilevel_selector/v1",
+      "sha256": "3096540621408e4a48cfa18963ad01da9686d3527ee26776c8b6cf6f45a71114"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_dickson_additive_rank_round312_20261013/dickson-additive-rank-result.json",
+      "schema": "p256-dickson-additive-rank-screen/v1",
+      "sha256": "0cdec91f0097b498d1642c80c358aadac279c8a0bae951ed433381e1bf53db8e"
+    }
+  ],
+  "ecbench": {
+    "candidate_eligible": false,
+    "p256_limit": "ecbench prime execution requires p < 2^62; projections are not session records",
+    "p256_prime_path_supported": false,
+    "reason": "the complete Walsh family does not reach the free-oracle parity gate, so no logarithm-recovering candidate exists for an ecbench session",
+    "session_run": false
+  },
+  "factor_base": {
+    "columns": 131458,
+    "complete_rebuild_verified": true,
+    "enumeration_to_column_sha256": "fd41465ddac4907b6b6e8975e821383fdad06760537bd30fd30e4f3676334da0",
+    "fb_id": "FB1h2f8621cda105",
+    "fb_sha256": "2f8621cda105a51f8703dabe38dec87f3715ab855770acd7b2af0a14906f9e42",
+    "legacy_enumeration_sha256": "c41c8da6e1bcdd6de94f11a7c4b6aaf25877829dbc558a5b85fe5305ad716b9e",
+    "points_sha256": "70ab21cbda76205ff43ab6bf85c68607be9f6b89df6399e6fa98e3489b888cf1",
+    "preregistered_builder_source_sha256": "a8740201f5f5c7dc56489827eb6f6a98d946338a512eb943741979f43eaf58c5",
+    "signed_points": 262916,
+    "spec": "dickson-torus:depth=18,root_exponent=0x2b6fdc73dc04e7667129"
+  },
+  "full_depth_unplanted_attempted": false,
+  "promotion_gates": {
+    "collection_below_2_120": false,
+    "complete_cold_s_at_most_rho": false,
+    "ecbench_eligible": false,
+    "exact_p256_replay": true,
+    "per_usable_relation_below_2_103": false,
+    "promoted": false,
+    "storage_below_2_50": false,
+    "structured_residual_degree_at_most_5": true,
+    "zero_false_positives_and_false_negatives": true
+  },
+  "rank": {
+    "active_columns": 0,
+    "exact_rows": 0,
+    "materialization_limit_entries": 16000000,
+    "materialization_limit_rows": 256,
+    "promotion_credited_rank": 0,
+    "rank_mod_2_61_minus_1": 0,
+    "rank_mod_p256_order": 0,
+    "reverse_rank_mod_2_61_minus_1": 0,
+    "reverse_rank_mod_p256_order": 0,
+    "unset_due_to_limit": false
+  },
+  "relations": {
+    "every_reported_row_replayed": true,
+    "exact_unique_rows": 0,
+    "ordered_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "receipts": []
+  },
+  "schema": "p256.dickson_walsh_transport/v1",
+  "storage": {
+    "conservative_logical_materialized_bytes": 236811486,
+    "conservative_logical_materialized_log2_bytes": 27.81916381638911,
+    "exact_row_materialized_bytes_component": 0,
+    "factor_base_serialized_bytes_component": 55088230,
+    "logical_dependency_read_bytes": 40316,
+    "observed_physical_disk_bytes": null,
+    "physical_disk_measurement_reason": "the native isolator records process resource usage but not block-I/O counters"
+  },
+  "walsh_family": {
+    "active_index_affine_span_dimension": 18,
+    "active_slots": 131458,
+    "characters_exhausted": 262144,
+    "complete_scope": true,
+    "depth": 18,
+    "discarded_characters": 0,
+    "distinct_character_rows_certified": true,
+    "fibre_slots": 262144,
+    "identity_outputs": [],
+    "nonidentity_outputs": 262144,
+    "nonlifting_identity_slots": 130686,
+    "output_collision_candidates": 0,
+    "output_multiple_candidates": 0
+  },
+  "work": {
+    "batch_inversions": 2,
+    "canonical_key_comparisons": 39557274,
+    "duplicate_rows_discarded": 0,
+    "exact_rows_constructed": 0,
+    "multiple_group_additions": 131458,
+    "multiple_group_doublings": 525832,
+    "normalization_batches": 2,
+    "normalization_multiplications": 6305350,
+    "output_collision_candidates": 0,
+    "output_multiple_candidates": 0,
+    "rank_modular_inversions": 0,
+    "rank_modular_multiplications": 0,
+    "replay_additions": 0,
+    "replay_doublings": 0,
+    "replay_failures": 0,
+    "replay_rows": 0,
+    "walsh_butterflies": 2359296,
+    "walsh_group_additions": 4718592,
+    "zero_rows_discarded": 0
+  }
+}
