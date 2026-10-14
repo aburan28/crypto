@@ -1,0 +1,42 @@
+pair p=617 r=103 source_b=1 destination_b=590 order=618 kernel=3 image_size=206 nonisomorphic=true homomorphism_pairs=381924 generator=(66, 264) image_generator=(483, 13) preflight_ns=2858236791 status=pass
+target p=617 index=0 source=(360, 235) image=(319, 100)
+target p=617 index=1 source=(14, 413) image=(354, 97)
+target p=617 index=2 source=(597, 380) image=(270, 294)
+target p=617 index=3 source=(586, 92) image=(421, 68)
+target p=617 index=4 source=(119, 51) image=(160, 104)
+target p=617 index=5 source=(317, 184) image=(332, 79)
+target p=617 index=6 source=(557, 493) image=(315, 177)
+target p=617 index=7 source=(320, 164) image=(432, 296)
+pair_complete p=617 r=103 measured_rows=160 warmup_rows=32 cumulative_failures=0
+pair p=2633 r=439 source_b=1 destination_b=2606 order=2634 kernel=3 image_size=878 nonisomorphic=true homomorphism_pairs=256 generator=(240, 728) image_generator=(2453, 643) preflight_ns=1444833 status=pass
+target p=2633 index=0 source=(240, 1905) image=(2453, 1990)
+target p=2633 index=1 source=(682, 1671) image=(191, 1861)
+target p=2633 index=2 source=(2526, 2589) image=(384, 1570)
+target p=2633 index=3 source=(70, 263) image=(775, 1736)
+target p=2633 index=4 source=(1237, 1684) image=(2620, 411)
+target p=2633 index=5 source=(565, 132) image=(615, 1763)
+target p=2633 index=6 source=(1496, 2290) image=(1341, 1969)
+target p=2633 index=7 source=(1105, 1869) image=(1952, 1022)
+pair_complete p=2633 r=439 measured_rows=160 warmup_rows=32 cumulative_failures=0
+pair p=9677 r=1613 source_b=1 destination_b=9650 order=9678 kernel=3 image_size=3226 nonisomorphic=true homomorphism_pairs=256 generator=(3188, 1881) image_generator=(4515, 3563) preflight_ns=7332667 status=pass
+target p=9677 index=0 source=(2642, 4231) image=(981, 4848)
+target p=9677 index=1 source=(6239, 859) image=(1626, 2562)
+target p=9677 index=2 source=(474, 2483) image=(4993, 7484)
+target p=9677 index=3 source=(2937, 7228) image=(7562, 6839)
+target p=9677 index=4 source=(4074, 5305) image=(6798, 1446)
+target p=9677 index=5 source=(6318, 5514) image=(5951, 8158)
+target p=9677 index=6 source=(8292, 1872) image=(4828, 5)
+target p=9677 index=7 source=(6502, 7465) image=(3746, 9257)
+pair_complete p=9677 r=1613 measured_rows=160 warmup_rows=32 cumulative_failures=0
+pair p=38561 r=6427 source_b=1 destination_b=38534 order=38562 kernel=3 image_size=12854 nonisomorphic=true homomorphism_pairs=256 generator=(38503, 10141) image_generator=(35110, 19035) preflight_ns=711065375 status=pass
+target p=38561 index=0 source=(3082, 1805) image=(28284, 33918)
+target p=38561 index=1 source=(1878, 15474) image=(17036, 34500)
+target p=38561 index=2 source=(21394, 35654) image=(80, 23355)
+target p=38561 index=3 source=(31708, 16647) image=(370, 16323)
+target p=38561 index=4 source=(15609, 36751) image=(1322, 5329)
+target p=38561 index=5 source=(31350, 12384) image=(28968, 36325)
+target p=38561 index=6 source=(9478, 21821) image=(29135, 11271)
+target p=38561 index=7 source=(23972, 23438) image=(27642, 36890)
+pair_complete p=38561 r=6427 measured_rows=160 warmup_rows=32 cumulative_failures=0
+sizes=4 workloads=32 measured_rows=640 warmup_rows=128 failed_workloads=0
+all_workloads_verified=32 measured_arms_verified=640

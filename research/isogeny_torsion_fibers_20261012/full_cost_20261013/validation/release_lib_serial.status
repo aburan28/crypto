@@ -1,0 +1,4 @@
+Command: RUST_TEST_THREADS=1 cargo test --release --lib
+Result: interrupted with exit 130 after 3+ minutes of wall time and about 10 seconds of test-process CPU, still on the first costly ElGamal case
+Raw partial output: release_lib_serial.log
+Classification: resource-limited incomplete validation attempt; no completed suite verdict

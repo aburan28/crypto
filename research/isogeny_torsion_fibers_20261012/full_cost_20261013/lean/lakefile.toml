@@ -1,0 +1,6 @@
+name = "isogeny_fiber_four_sizes"
+version = "0.1.0"
+defaultTargets = ["NonisomorphicFour"]
+
+[[lean_lib]]
+name = "NonisomorphicFour"

@@ -1,0 +1,4 @@
+Command: lake build > build-v2.log 2>&1
+Source: NonisomorphicFour-v2.lean (raised maxRecDepth 65536)
+Exit: 130 (interrupted after 11 minutes of Lean execution with no output)
+Classification: resource-bounded incomplete proof attempt; no theorem from this build is reported as checked

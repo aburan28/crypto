@@ -7,7 +7,8 @@
   [2026-10-12 correction and bounded control](../research/isogeny_torsion_fibers_20261012/REPORT.md),
   [same-target paired round](../research/isogeny_torsion_fibers_20261012/paired_round/REPORT.md),
   [2026-10-13 isomorphism and six-class controls](../research/isogeny_torsion_fibers_20261012/paired_round/iso_control_20261013/REPORT.md),
-  [2026-10-13 non-isomorphic rational-fiber control](../research/isogeny_torsion_fibers_20261012/nonisomorphic_pair_20261013/REPORT.md)
+  [2026-10-13 non-isomorphic rational-fiber control](../research/isogeny_torsion_fibers_20261012/nonisomorphic_pair_20261013/REPORT.md),
+  [four-size cold native CPU comparison](../research/isogeny_torsion_fibers_20261012/full_cost_20261013/REPORT.md)
 - **Next action owner:** unassigned
 - **Last updated:** 2026-10-13
 
@@ -16,10 +17,13 @@
 The paired round now executes a complete relation-based solve after
 transport through an explicit `F_q`-isogeny with a non-rational geometric
 kernel, on 16 public targets in two small prime-order pairs. It also runs
-matched source-target negation rho and verifies every answer. A fully
-priced, isolated, independently replayed cold-cost comparison showing
-whether the transport helps ECDLP is still missing. The pairs have orders
-19 and 211; extrapolation from them is not an acceptance criterion.
+matched source-target negation rho and verifies every answer. A four-size
+native cold-solve comparison now prices each arm directly in current-thread
+CPU time, including setup, collection, recovery, transfer, descent and
+verification. It has same-host exact replay and an independent relation
+checker. A portable counted-unit price, L2 isolation, and independent-host
+replay are still missing. The earlier pairs have orders 19 and 211;
+extrapolation from them is not an acceptance criterion.
 Both curves admit a rational order-three automorphism. A fixed six-class
 rho control has now been executed and independently checked, but its
 small-order restarts do not calibrate the best available reference.
@@ -29,8 +33,9 @@ base field: `ψ_u(x,y)=(u²x,u³y)` with `u=2` at `p=13` and `u=14` at
 destination relation workload at order 211. This does not assign the
 recorded difference specifically to the degree-three map. A later
 base-field non-isomorphic `F617` pair with a three-point rational kernel
-has now been solved in both relation arms. Broader sizes and complete
-native-cost controls are still missing.
+has now been solved in both relation arms. Three more non-isomorphic pairs
+and direct cold CPU timing have since been added. An isomorphism-only arm
+on the exact four-size targets remains a separate attribution control.
 
 ## Evidence and uncertainty
 
@@ -79,14 +84,25 @@ native-cost controls are still missing.
   1.145531 in that unit. Clean v2 execution and replay were byte-identical;
   v1's post-child timing-wrapper failure remains preserved. This is one
   small subgroup order on a shared host, with native costs unpriced.
+- **Observed at four sizes:** the [native run](../research/isogeny_torsion_fibers_20261012/full_cost_20261013/REPORT.md)
+  used subgroups 103, 439, 1,613 and 6,427 on explicit base-field
+  non-isomorphic degree-three pairs. Eight public targets per size, five
+  measured rounds and one warmup produced 640/640 verified measured arm
+  records. An independent Rust checker reconstructed all 384 relation
+  records per version including warmups; same-host replay matched 768
+  deterministic answer/counter rows. Complete cold current-thread CPU
+  transport/rho ratios were 3.449, 9.789, 25.459 and 81.820;
+  transport/source ratios were 1.043, 1.028, 1.058 and 0.975. All four
+  paired transport/source intervals contain one, within residual 8–19%
+  rho A/A CPU imbalance. V1 wall and V2 CPU control failures are preserved.
+  These are L0 direct-time observations, without admitted isolated wall.
 - **Missing capability:** a native ecbench or equivalently audited paired
   session that prices map evaluation, factor-base lifts, table lookups,
-  modular algebra and memory in a common unit, at growing sizes and with
-  independent-host replay. The F617 pair removes the public scaling
-  isomorphism confound for its exact workload, but one order and eight
-  targets do not establish a general degree-three-specific effect. The
-  current runner counts these activities but has no pinned conversion for
-  all of them.
+  modular algebra and memory in a portable counted unit, with L2 isolation
+  and independent-host replay. Direct CPU includes those costs locally but
+  does not pin their conversion to ecbench's counted `S` unit. The four
+  pairs remove a public base-field scaling isomorphism; a same-target
+  isomorphism-only model arm is still needed for attribution.
 - **What this evidence does not establish:** an admitted end-to-end speed
   ratio, an asymptotic improvement, or a result for deployed curves or
   other fields.
@@ -105,14 +121,16 @@ native-cost controls are still missing.
   complete paired relation recovery, original-source scalar checks,
   matched negation rho, and independent native verification. See the
   [F617 report](../research/isogeny_torsion_fibers_20261012/nonisomorphic_pair_20261013/REPORT.md).
-- [ ] Obtain verified logs for both solver arms, full phase accounting,
-  **priced** native work, failed-attempt records, and independent-host replay;
-  compare the degree-three arm with a scaling-isomorphism arm and a
-  base-field non-isomorphic pair across growing sizes, calibrate the
-  rational automorphism-aware rho available on each curve, then report a cold-cost ratio
-  and interval in the repository's counted unit at at least four growing
-  sizes. The bounded rounds have verified logs, phase counts and retained
-  failed record versions, but do not meet the full pricing and replay gate.
+- [x] Execute four increasing non-isomorphic pairs with paired relation
+  recovery and matched rho, independent arithmetic replay, retained
+  failures, full phase accounting, and complete local cold CPU pricing.
+  See the [four-size report](../research/isogeny_torsion_fibers_20261012/full_cost_20261013/REPORT.md).
+- [ ] On those same targets, add a base-field isomorphism-only model arm
+  and a duplicate relation A/A control; admit an L2 isolated run and a
+  second-host exact replay. Pin all native-work conversions for a portable
+  complete `S` price and interval, including construction and memory with
+  exact setup reuse. The [next protocol](../research/isogeny_torsion_fibers_20261012/full_cost_20261013/NEXT_GATE.md)
+  gives fixed inputs, stop conditions and receipts.
 
 Meeting these conditions would settle only the measured pair and workload.
 It would not prove a general exponent change or a result for another curve.
@@ -137,11 +155,10 @@ It would not prove a general exponent change or a result for another curve.
   pair. Destination relation work was higher in the aggregate and lower
   on three of eight individual targets. This observation is exact for the
   frozen workload.
-- **Action:** extend native ecbench with a paired target transport path or
-  an equivalently audited counted runner; preregister at least four
-  increasing prime-order subgroup isogeny pairs, eight or more public
-  targets per size, and five interleaved rounds. Include a base-field
-  non-isomorphic pairs at growing sizes to test a degree-three-specific effect.
+- **Action:** execute the [frozen next gate](../research/isogeny_torsion_fibers_20261012/full_cost_20261013/NEXT_GATE.md)
+  on an available isolated host: same four pairs and targets, the public
+  scaling model, duplicate relation and rho controls, portable native
+  conversion, and independent-host replay.
 - **Inputs and controls:** exact ICV1/EC1 pairs, executable isogeny,
   same source target transported to destination, source relation baseline,
   matched negation rho, six-class automorphism-aware rho where rationally
@@ -178,3 +195,11 @@ three, and eight explicitly checked three-point target fibers. All 24
 same-target relation/rho rows verified, with destination/source counted
 group operations 3,794/3,312 and same-host byte-identical replay. Full
 native pricing, growing sizes and independent-host replay remain open.
+
+2026-10-13: four growing non-isomorphic pairs received a native complete
+cold current-thread CPU comparison with 640 independently verified
+measured arm records and preserved V1/V2 timing-control failures. At
+orders 103, 439, 1,613 and 6,427 the destination/rho CPU ratios were
+3.449, 9.789, 25.459 and 81.820. The remaining gap is portable counted
+pricing, an iso-only same-target attribution control, L2 admission and
+independent-host replay; the problem stays open.
