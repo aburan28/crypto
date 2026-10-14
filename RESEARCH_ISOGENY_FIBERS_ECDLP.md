@@ -430,11 +430,15 @@ F₁ = φ⁻¹(F₂) ∩ E₁(F_q) for F₂ = {Q ∈ E₂(F_q) : x(Q) ∈ V}. Th
 * the decomposition system is S_m^{E₂} in the u_i, of the *same* degree as
   S_m^{E₁}, and its solutions enumerate |M^π|^{m−1} decompositions on E₁ at
   once (Thm. 4.2);
-* after projection the |M^π|·|F₂| points of F₁ carry only |F₂| independent
-  logarithms, so B is divided by |M^π| at *unchanged* PDP cost per call and
-  unchanged success probability per target, i.e. the primary metric improves
-  by exactly the factor |M^π| — minus the bookkeeping that each relation now
-  involves ≤ m·|M^π| factor-base coordinates;
+* after projection the |M^π|·|F₂| points of this torsion-closed F₁ carry
+  only |F₂| subgroup-log unknowns. Quotienting removes duplicate columns
+  while preserving this *same orbit base's* target support. It does not by
+  itself improve relation yield over an optimized source implementation that
+  already stores one unknown per orbit; a factor-|M^π| collection gain
+  against a distinct-point source base does not follow. The exact four-size
+  [three-torsion support screen](research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/REPORT.md)
+  found identical two-sum support for 12 subgroup points and their 36
+  torsion translates, while 36 distinct subgroup points had higher support;
 * the symmetrised polynomials are sparser (fewer Weil-descent monomials)
   because the invariant ring of the dihedral-type group ⟨−1, T⟩ has smaller
   generators; this is where the measured F4 speedups in those papers come
@@ -455,7 +459,7 @@ and the only non-trivial instance (M^π ≠ 0, factor base a union of cosets) is
 the 2014–2015 torsion-symmetrisation, with gain |M^π| ≤ #E(F_q)_tors.
 ---
 
-## 4.5 Best candidate algorithm: quotient-isogeny symmetrised index calculus (H1, with H4)
+## 4.5 Quotient-isogeny control: symmetrised index calculus (H1, with H4)
 
 Scope: E/F_{qⁿ} (q = p or 2), rational torsion subgroup K = M^π of order k
 (k ∈ {2, 3, 4}), target subgroup G of prime order r, h = N/r, decomposition
@@ -506,23 +510,42 @@ Koblitz case, canonical τ-orbit representatives of F₂ (the existing Koblitz
 ledger code already does this for F₁; the only change is that orbits are now
 taken on E₂ and the class table replaces the point list).
 
-**Complexity relative to the plain generator on E with factor base
-{x ∈ V} of the same size |F₁| ≈ k|F₂|.** Collection: identical c_D per
-target, identical success probability per target (the symmetrised system has
-the same solution count as the plain system on E₂; by Thm. 4.2 each solution
-packs k^{m−1} decompositions on E, all with the same projected logs), but the
-number of required relations drops from |F₁| to |F₂| = |F₁|/k. Linear
-algebra: (|F₁|/k)² instead of |F₁|². Net: ×k on collection, ×k² on linear
-algebra, ×1 on everything else; preprocessing adds |F₂| isogeny evaluations
-(negligible). Memory halves to quarters. This is the *entire* upside, and it
-is exactly the upside the 2014–2015 papers measured.
+**Complexity comparison still owed.** Relative to the *same torsion-closed*
+base represented without orbit deduplication, the quotient reduces duplicate
+log columns from k|F₂| to |F₂| and preserves its target support. A competent
+source solver can perform that deduplication too. Relative to a source base
+with k|F₂| distinct projected subgroup elements, the success probability and
+decomposition-oracle cost are not generally identical; both must be measured.
+The k-fold collection and k² linear-algebra savings previously asserted in
+this paragraph were conditional on a redundant baseline and cannot be used
+as a complete-method gain. The [exact support control](research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/REPORT.md)
+exhibits the distinction for two sums on four finite prime-field curves.
+The 2014 torsion-symmetrised polynomial mechanism remains a separate
+extension-field oracle-cost hypothesis, with its own same-target pricing gate.
 
-**What would make it fail in practice.** If the implementation's F4 cost is
-dominated not by the number of targets but by the first-fall degree (as the
-binary ledger shows: the degree-4 Macaulay matrix is 96 % useful rows), then
-collection cost per relation is unchanged and the only saving is the
-×k fewer relations needed. The 2× milestone therefore requires k ≥ 2 and a
-linear-algebra share that is not already negligible.
+**What would make it fail in practice.** The oracle-cost lead fails if
+symmetrisation leaves decomposition cost, independent-row yield and total
+recovery cost unchanged against a nonredundant matched source baseline.
+Orbit deduplication alone then supplies no end-to-end gain. Any 2× milestone
+requires a measured oracle or linear-algebra reduction against that baseline,
+after all setup and descent work is charged.
+
+**Distinct cubic equivariance lead (2026-10-13).** On `E:y²=x³+1` with
+`T=(0,1)`, the degree-three projective coordinate
+`chi=(y+1)/(y−1)` obeys `chi(P+T)=1/(1−chi(P))`. It takes the three values
+`1, infinity, 0` on `O,T,2T`, respectively, so unlike `x∘phi` it does not
+factor through the degree-three quotient. The [frozen identity test](research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/EQUIVARIANT_PROTOCOL.md)
+checked the action exhaustively on all rational points of the four
+non-isomorphic prime-field pairs; the [result report](research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/REPORT.md)
+gives the algebraic derivation, exact counts, and the
+[`IDC1h41adc1f4e1c5522c`](research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/group-law.identity.certificate.json)
+and [`IDC1ha0c3d83775e32754`](research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/mobius-conjugacy.identity.certificate.json)
+polynomial-step certificates. This is an explicit
+candidate coordinate for the nontrivial torsion action considered by
+Faugère et al.; it is not a measured extension-field decomposition oracle
+or a DLP gain. Its [next gate](research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/NEXT_GATE.md)
+compares `chi`, the direct source system, source orbit canonicalisation,
+and invariant `x∘phi` on matched targets with full pricing.
 ---
 
 ## 5. Worked example (toy field, every number from `fiber_probe.json` / `pullback_factor.out`)

@@ -1,0 +1,286 @@
+{
+  "schema": "identity.certificate/v1",
+  "id": "IDC1h41adc1f4e1c5522c",
+  "statement": {
+    "name": "Cubic torsion translation y-coordinate reduction",
+    "source": "research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/REPORT.md",
+    "variables": [
+      "x",
+      "y"
+    ],
+    "degree_bound": 5,
+    "lhs": {
+      "op": "add",
+      "args": [
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x"
+                },
+                {
+                  "op": "var",
+                  "args": "x"
+                },
+                {
+                  "op": "var",
+                  "args": "x"
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "y"
+                },
+                {
+                  "op": "const",
+                  "args": 1
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "y"
+                },
+                {
+                  "op": "neg",
+                  "args": {
+                    "op": "const",
+                    "args": 2
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "neg",
+          "args": {
+            "op": "mul",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "y"
+                      },
+                      {
+                        "op": "neg",
+                        "args": {
+                          "op": "const",
+                          "args": 1
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "y"
+                      },
+                      {
+                        "op": "neg",
+                        "args": {
+                          "op": "const",
+                          "args": 1
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "y"
+                      },
+                      {
+                        "op": "neg",
+                        "args": {
+                          "op": "const",
+                          "args": 1
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "y"
+                  },
+                  {
+                    "op": "const",
+                    "args": 1
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "op": "neg",
+          "args": {
+            "op": "mul",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "x"
+                  },
+                  {
+                    "op": "var",
+                    "args": "x"
+                  },
+                  {
+                    "op": "var",
+                    "args": "x"
+                  }
+                ]
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "y"
+                  },
+                  {
+                    "op": "neg",
+                    "args": {
+                      "op": "const",
+                      "args": 3
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "y"
+                    },
+                    {
+                      "op": "neg",
+                      "args": {
+                        "op": "const",
+                        "args": 1
+                      }
+                    }
+                  ]
+                },
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "y"
+                    },
+                    {
+                      "op": "neg",
+                      "args": {
+                        "op": "const",
+                        "args": 1
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "y"
+                        },
+                        {
+                          "op": "var",
+                          "args": "y"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "neg",
+                      "args": {
+                        "op": "mul",
+                        "args": [
+                          {
+                            "op": "var",
+                            "args": "x"
+                          },
+                          {
+                            "op": "var",
+                            "args": "x"
+                          },
+                          {
+                            "op": "var",
+                            "args": "x"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "op": "neg",
+                  "args": {
+                    "op": "const",
+                    "args": 1
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "rhs": {
+      "op": "const",
+      "args": 0
+    }
+  },
+  "modulus": 2305843009213693951,
+  "points": 64,
+  "seed": 539365395,
+  "value_digest": "076a27c79e5ace2a3d47f9dd2e83e4ff6ea8872b3c2218f66c92b89b55f36560",
+  "independence": "issued by examples/isogeny_torsion_identity.rs; the same native checker replays the id-bound points and a separate checker-seed stream",
+  "proof": null
+}

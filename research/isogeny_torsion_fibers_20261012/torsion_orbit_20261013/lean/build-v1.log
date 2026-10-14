@@ -1,0 +1,9 @@
+info: torsion_orbit_support: no previous manifest, creating one from scratch
+info: toolchain not updated; already up-to-date
+✖ [2/3] Building OrbitSupport (2.2s)
+trace: .> LEAN_PATH=/Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/lean/.lake/build/lib/lean /Users/adamburan/.elan/toolchains/leanprover--lean4---v4.34.1/bin/lean /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/lean/OrbitSupport.lean -o /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/lean/.lake/build/lib/lean/OrbitSupport.olean -i /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/lean/.lake/build/lib/lean/OrbitSupport.ilean -c /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/lean/.lake/build/ir/OrbitSupport.c --setup /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/lean/.lake/build/ir/OrbitSupport.setup.json --json
+error: OrbitSupport.lean:31:10: No goals to be solved
+info: OrbitSupport.lean:40:0: 'torsion_orbit_pair_support' depends on axioms: [sorryAx]
+Some required targets logged failures:
+- OrbitSupport
+error: build failed

@@ -9,6 +9,7 @@
   [2026-10-13 isomorphism and six-class controls](../research/isogeny_torsion_fibers_20261012/paired_round/iso_control_20261013/REPORT.md),
   [2026-10-13 non-isomorphic rational-fiber control](../research/isogeny_torsion_fibers_20261012/nonisomorphic_pair_20261013/REPORT.md),
   [four-size cold native CPU comparison](../research/isogeny_torsion_fibers_20261012/full_cost_20261013/REPORT.md)
+  and [three-torsion orbit support screen](../research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/REPORT.md)
 - **Next action owner:** unassigned
 - **Last updated:** 2026-10-13
 
@@ -96,6 +97,26 @@ on the exact four-size targets remains a separate attribution control.
   paired transport/source intervals contain one, within residual 8–19%
   rho A/A CPU imbalance. V1 wall and V2 CPU control failures are preserved.
   These are L0 direct-time observations, without admitted isolated wall.
+- **Observed in the torsion-orbit screen:** the [exact native counts](../research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/raw-v1.tsv)
+  found two-sum subgroup support 64, 74, 75 and 78 for both twelve
+  subgroup points and all 36 of their rational three-torsion lifts.
+  Thirty-six distinct subgroup points reached 103, 351, 559 and 642 at
+  the same four subgroup sizes. A complete scalar index agreed with group
+  addition. The conditional support identity compiled in Lean without
+  axioms. This is a relation-hit diagnostic, with no new full-solve timing.
+- **Constructed equivariant coordinate:** on the same source family,
+  `chi=(y+1)/(y−1)` obeys `chi(P+(0,1))=1/(1−chi(P))` and takes distinct
+  values `1, infinity, 0` on the three kernel points. The
+  [native verifier](../research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/equivariant-v1.tsv)
+  passed both translation identities on all 51,492 rational points across
+  the four fields and the order-three projective action on all 51,492
+  projective-line points. Denominator-cleared algebraic steps have
+  [`IDC1h41adc1f4e1c5522c`](../research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/group-law.identity.certificate.json)
+  and [`IDC1ha0c3d83775e32754`](../research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/mobius-conjugacy.identity.certificate.json)
+  certificates; the report gives the curve-law derivation.
+  Lean checks the induced linear action's order but lacks the curve-level
+  bridge. A decomposition system using this nonfactorable coordinate has
+  not been built or measured.
 - **Missing capability:** a native ecbench or equivalently audited paired
   session that prices map evaluation, factor-base lifts, table lookups,
   modular algebra and memory in a portable counted unit, with L2 isolation
@@ -131,6 +152,14 @@ on the exact four-size targets remains a separate attribution control.
   complete `S` price and interval, including construction and memory with
   exact setup reuse. The [next protocol](../research/isogeny_torsion_fibers_20261012/full_cost_20261013/NEXT_GATE.md)
   gives fixed inputs, stop conditions and receipts.
+- [ ] Complete a Lean theorem for `chi(P+T)=1/(1−chi(P))` as a projective
+  identity on `E:y²=x³+1`, including `O,T,2T`, with a faithful elliptic-curve
+  group-law definition and checked curve/subgroup assumptions. The current
+  [proof map](../research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/PROOF_MAP.md)
+  has conditional algebra and polynomial-step certificates, but no
+  curve-level bridge. Completing it would establish the coordinate identity
+  under the theorem's field assumptions; it would not establish an oracle
+  or a DLP speed advantage.
 
 Meeting these conditions would settle only the measured pair and workload.
 It would not prove a general exponent change or a result for another curve.
@@ -159,6 +188,13 @@ It would not prove a general exponent change or a result for another curve.
   on an available isolated host: same four pairs and targets, the public
   scaling model, duplicate relation and rho controls, portable native
   conversion, and independent-host replay.
+- **Separate torsion lead:** the free three-lift relation-yield multiplier
+  failed its exact pair-table test. The remaining discriminating test is
+  [extension-field torsion-symmetric decomposition](../research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/NEXT_GATE.md),
+  using the explicit nonfactorable `chi` coordinate, paired with direct
+  source, source-orbit, and invariant-quotient controls on the same public targets.
+  Its oracle construction, rank, complete pricing and independent replay
+  are unimplemented, so no collection or DLP speed ratio is assigned.
 - **Inputs and controls:** exact ICV1/EC1 pairs, executable isogeny,
   same source target transported to destination, source relation baseline,
   matched negation rho, six-class automorphism-aware rho where rationally
@@ -203,3 +239,13 @@ orders 103, 439, 1,613 and 6,427 the destination/rho CPU ratios were
 3.449, 9.789, 25.459 and 81.820. The remaining gap is portable counted
 pricing, an iso-only same-target attribution control, L2 admission and
 independent-host replay; the problem stays open.
+
+2026-10-13 local: a frozen exact screen checked rational three-torsion
+orbits on the same four pairs. Orbit-expanded bases had identical two-sum
+support to their twelve underlying subgroup points. The existing research
+note's unconditional factor-three collection interpretation was corrected;
+the extension-field polynomial-oracle mechanism remains open. A further
+frozen exact check established the nonfactorable degree-three coordinate
+`chi=(y+1)/(y−1)` and its order-three torsion action on every rational
+point of the four curves. This is an explicit oracle construction lead;
+it carries no measured DLP cost yet.
