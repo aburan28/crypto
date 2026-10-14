@@ -17,7 +17,7 @@
     {
       "charts": [
         {
-          "caption": "25 archived revisions; recorded historical profiler scope, worker coverage incomplete.\nGaps mark changed outputs or measurement conditions. Sources: plot-data.json.",
+          "caption": "26 archived revisions; recorded historical profiler scope, worker coverage incomplete.\nGaps mark changed outputs or measurement conditions. Sources: plot-data.json.",
           "id": "boolean-matrix-instructions",
           "series": [
             {
@@ -1079,6 +1079,43 @@
                   "value_label": "679,449,939",
                   "wall_samples": 5,
                   "x": 24
+                },
+                {
+                  "break_before": true,
+                  "break_reasons": [
+                    "host, compiler, harness or profiler changed"
+                  ],
+                  "conditions_sha256": "e63326d64d49cc64ec6ed45830f60c40d65771acd1a468aff68a0d3df2108922",
+                  "date": "2026-10-14",
+                  "fingerprint": "1fc2c0870c59158b",
+                  "harness_sha256": "10d94ecb6d134687a5da27b81e217b917bbf181a35692c6a537ddc89f13ccf4f",
+                  "host": {
+                    "arch": "x86_64",
+                    "cpu": "AMD EPYC 7763 64-Core Processor",
+                    "cpu_flags": [
+                      "pclmulqdq",
+                      "popcnt",
+                      "avx",
+                      "bmi1",
+                      "avx2",
+                      "bmi2",
+                      "adx",
+                      "vpclmulqdq"
+                    ],
+                    "logical_cores": 4,
+                    "memory": "16373452 kB",
+                    "os": "Linux 6.17.0-1022-azure",
+                    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)"
+                  },
+                  "label": "2026-10-14\ncc962159",
+                  "raw_value": 679449939,
+                  "revision": "cc96215953864883d4a1e7cd8dc74ca467d62336",
+                  "source": "20261014T001920Z-cc9621595386.json",
+                  "source_sha256": "f7dbbad2540f887a05ebc89a2a80e2edbc148dcbb363398015ba224f94d50e2d",
+                  "value": 679449939,
+                  "value_label": "679,449,939",
+                  "wall_samples": 5,
+                  "x": 25
                 }
               ]
             },
@@ -2141,6 +2178,43 @@
                   "value_label": "653,828,331",
                   "wall_samples": 5,
                   "x": 24
+                },
+                {
+                  "break_before": true,
+                  "break_reasons": [
+                    "host, compiler, harness or profiler changed"
+                  ],
+                  "conditions_sha256": "e63326d64d49cc64ec6ed45830f60c40d65771acd1a468aff68a0d3df2108922",
+                  "date": "2026-10-14",
+                  "fingerprint": "73eb345bb2349f1c",
+                  "harness_sha256": "10d94ecb6d134687a5da27b81e217b917bbf181a35692c6a537ddc89f13ccf4f",
+                  "host": {
+                    "arch": "x86_64",
+                    "cpu": "AMD EPYC 7763 64-Core Processor",
+                    "cpu_flags": [
+                      "pclmulqdq",
+                      "popcnt",
+                      "avx",
+                      "bmi1",
+                      "avx2",
+                      "bmi2",
+                      "adx",
+                      "vpclmulqdq"
+                    ],
+                    "logical_cores": 4,
+                    "memory": "16373452 kB",
+                    "os": "Linux 6.17.0-1022-azure",
+                    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)"
+                  },
+                  "label": "2026-10-14\ncc962159",
+                  "raw_value": 653831656,
+                  "revision": "cc96215953864883d4a1e7cd8dc74ca467d62336",
+                  "source": "20261014T001920Z-cc9621595386.json",
+                  "source_sha256": "f7dbbad2540f887a05ebc89a2a80e2edbc148dcbb363398015ba224f94d50e2d",
+                  "value": 653831656,
+                  "value_label": "653,831,656",
+                  "wall_samples": 5,
+                  "x": 25
                 }
               ]
             }
@@ -2149,7 +2223,7 @@
           "unit": "Recorded Ir (instructions)"
         },
         {
-          "caption": "25 archived revisions; recorded medians, no stored spread or isolated timing eligibility.\nCI runtime diagnostics; sample counts and condition changes retained in plot-data.json.",
+          "caption": "26 archived revisions; recorded medians, no stored spread or isolated timing eligibility.\nCI runtime diagnostics; sample counts and condition changes retained in plot-data.json.",
           "id": "boolean-matrix-runtime",
           "series": [
             {
@@ -3211,6 +3285,43 @@
                   "value_label": "56.215",
                   "wall_samples": 5,
                   "x": 24
+                },
+                {
+                  "break_before": true,
+                  "break_reasons": [
+                    "host, compiler, harness or profiler changed"
+                  ],
+                  "conditions_sha256": "e63326d64d49cc64ec6ed45830f60c40d65771acd1a468aff68a0d3df2108922",
+                  "date": "2026-10-14",
+                  "fingerprint": "1fc2c0870c59158b",
+                  "harness_sha256": "10d94ecb6d134687a5da27b81e217b917bbf181a35692c6a537ddc89f13ccf4f",
+                  "host": {
+                    "arch": "x86_64",
+                    "cpu": "AMD EPYC 7763 64-Core Processor",
+                    "cpu_flags": [
+                      "pclmulqdq",
+                      "popcnt",
+                      "avx",
+                      "bmi1",
+                      "avx2",
+                      "bmi2",
+                      "adx",
+                      "vpclmulqdq"
+                    ],
+                    "logical_cores": 4,
+                    "memory": "16373452 kB",
+                    "os": "Linux 6.17.0-1022-azure",
+                    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)"
+                  },
+                  "label": "2026-10-14\ncc962159",
+                  "raw_value": 88546398,
+                  "revision": "cc96215953864883d4a1e7cd8dc74ca467d62336",
+                  "source": "20261014T001920Z-cc9621595386.json",
+                  "source_sha256": "f7dbbad2540f887a05ebc89a2a80e2edbc148dcbb363398015ba224f94d50e2d",
+                  "value": 88.546398,
+                  "value_label": "88.546",
+                  "wall_samples": 5,
+                  "x": 25
                 }
               ]
             },
@@ -4273,6 +4384,43 @@
                   "value_label": "57.961",
                   "wall_samples": 5,
                   "x": 24
+                },
+                {
+                  "break_before": true,
+                  "break_reasons": [
+                    "host, compiler, harness or profiler changed"
+                  ],
+                  "conditions_sha256": "e63326d64d49cc64ec6ed45830f60c40d65771acd1a468aff68a0d3df2108922",
+                  "date": "2026-10-14",
+                  "fingerprint": "73eb345bb2349f1c",
+                  "harness_sha256": "10d94ecb6d134687a5da27b81e217b917bbf181a35692c6a537ddc89f13ccf4f",
+                  "host": {
+                    "arch": "x86_64",
+                    "cpu": "AMD EPYC 7763 64-Core Processor",
+                    "cpu_flags": [
+                      "pclmulqdq",
+                      "popcnt",
+                      "avx",
+                      "bmi1",
+                      "avx2",
+                      "bmi2",
+                      "adx",
+                      "vpclmulqdq"
+                    ],
+                    "logical_cores": 4,
+                    "memory": "16373452 kB",
+                    "os": "Linux 6.17.0-1022-azure",
+                    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)"
+                  },
+                  "label": "2026-10-14\ncc962159",
+                  "raw_value": 90148526,
+                  "revision": "cc96215953864883d4a1e7cd8dc74ca467d62336",
+                  "source": "20261014T001920Z-cc9621595386.json",
+                  "source_sha256": "f7dbbad2540f887a05ebc89a2a80e2edbc148dcbb363398015ba224f94d50e2d",
+                  "value": 90.148526,
+                  "value_label": "90.149",
+                  "wall_samples": 5,
+                  "x": 25
                 }
               ]
             }
@@ -4295,7 +4443,7 @@
     {
       "charts": [
         {
-          "caption": "25 archived revisions; recorded historical profiler scope, worker coverage incomplete.\nGaps mark changed outputs or measurement conditions. Sources: plot-data.json.",
+          "caption": "26 archived revisions; recorded historical profiler scope, worker coverage incomplete.\nGaps mark changed outputs or measurement conditions. Sources: plot-data.json.",
           "id": "boolean-solver-instructions",
           "series": [
             {
@@ -5357,6 +5505,43 @@
                   "value_label": "1,787,969,850",
                   "wall_samples": 5,
                   "x": 24
+                },
+                {
+                  "break_before": true,
+                  "break_reasons": [
+                    "host, compiler, harness or profiler changed"
+                  ],
+                  "conditions_sha256": "e63326d64d49cc64ec6ed45830f60c40d65771acd1a468aff68a0d3df2108922",
+                  "date": "2026-10-14",
+                  "fingerprint": "817ce5a59d3cdfc1",
+                  "harness_sha256": "10d94ecb6d134687a5da27b81e217b917bbf181a35692c6a537ddc89f13ccf4f",
+                  "host": {
+                    "arch": "x86_64",
+                    "cpu": "AMD EPYC 7763 64-Core Processor",
+                    "cpu_flags": [
+                      "pclmulqdq",
+                      "popcnt",
+                      "avx",
+                      "bmi1",
+                      "avx2",
+                      "bmi2",
+                      "adx",
+                      "vpclmulqdq"
+                    ],
+                    "logical_cores": 4,
+                    "memory": "16373452 kB",
+                    "os": "Linux 6.17.0-1022-azure",
+                    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)"
+                  },
+                  "label": "2026-10-14\ncc962159",
+                  "raw_value": 1787965641,
+                  "revision": "cc96215953864883d4a1e7cd8dc74ca467d62336",
+                  "source": "20261014T001920Z-cc9621595386.json",
+                  "source_sha256": "f7dbbad2540f887a05ebc89a2a80e2edbc148dcbb363398015ba224f94d50e2d",
+                  "value": 1787965641,
+                  "value_label": "1,787,965,641",
+                  "wall_samples": 5,
+                  "x": 25
                 }
               ]
             },
@@ -6419,6 +6604,43 @@
                   "value_label": "1,807,674,723",
                   "wall_samples": 5,
                   "x": 24
+                },
+                {
+                  "break_before": true,
+                  "break_reasons": [
+                    "host, compiler, harness or profiler changed"
+                  ],
+                  "conditions_sha256": "e63326d64d49cc64ec6ed45830f60c40d65771acd1a468aff68a0d3df2108922",
+                  "date": "2026-10-14",
+                  "fingerprint": "dfb6c8d72b84cbee",
+                  "harness_sha256": "10d94ecb6d134687a5da27b81e217b917bbf181a35692c6a537ddc89f13ccf4f",
+                  "host": {
+                    "arch": "x86_64",
+                    "cpu": "AMD EPYC 7763 64-Core Processor",
+                    "cpu_flags": [
+                      "pclmulqdq",
+                      "popcnt",
+                      "avx",
+                      "bmi1",
+                      "avx2",
+                      "bmi2",
+                      "adx",
+                      "vpclmulqdq"
+                    ],
+                    "logical_cores": 4,
+                    "memory": "16373452 kB",
+                    "os": "Linux 6.17.0-1022-azure",
+                    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)"
+                  },
+                  "label": "2026-10-14\ncc962159",
+                  "raw_value": 1808168023,
+                  "revision": "cc96215953864883d4a1e7cd8dc74ca467d62336",
+                  "source": "20261014T001920Z-cc9621595386.json",
+                  "source_sha256": "f7dbbad2540f887a05ebc89a2a80e2edbc148dcbb363398015ba224f94d50e2d",
+                  "value": 1808168023,
+                  "value_label": "1,808,168,023",
+                  "wall_samples": 5,
+                  "x": 25
                 }
               ]
             }
@@ -6427,7 +6649,7 @@
           "unit": "Recorded Ir (instructions)"
         },
         {
-          "caption": "25 archived revisions; recorded medians, no stored spread or isolated timing eligibility.\nCI runtime diagnostics; sample counts and condition changes retained in plot-data.json.",
+          "caption": "26 archived revisions; recorded medians, no stored spread or isolated timing eligibility.\nCI runtime diagnostics; sample counts and condition changes retained in plot-data.json.",
           "id": "boolean-solver-runtime",
           "series": [
             {
@@ -7489,6 +7711,43 @@
                   "value_label": "123.983",
                   "wall_samples": 5,
                   "x": 24
+                },
+                {
+                  "break_before": true,
+                  "break_reasons": [
+                    "host, compiler, harness or profiler changed"
+                  ],
+                  "conditions_sha256": "e63326d64d49cc64ec6ed45830f60c40d65771acd1a468aff68a0d3df2108922",
+                  "date": "2026-10-14",
+                  "fingerprint": "817ce5a59d3cdfc1",
+                  "harness_sha256": "10d94ecb6d134687a5da27b81e217b917bbf181a35692c6a537ddc89f13ccf4f",
+                  "host": {
+                    "arch": "x86_64",
+                    "cpu": "AMD EPYC 7763 64-Core Processor",
+                    "cpu_flags": [
+                      "pclmulqdq",
+                      "popcnt",
+                      "avx",
+                      "bmi1",
+                      "avx2",
+                      "bmi2",
+                      "adx",
+                      "vpclmulqdq"
+                    ],
+                    "logical_cores": 4,
+                    "memory": "16373452 kB",
+                    "os": "Linux 6.17.0-1022-azure",
+                    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)"
+                  },
+                  "label": "2026-10-14\ncc962159",
+                  "raw_value": 173510099,
+                  "revision": "cc96215953864883d4a1e7cd8dc74ca467d62336",
+                  "source": "20261014T001920Z-cc9621595386.json",
+                  "source_sha256": "f7dbbad2540f887a05ebc89a2a80e2edbc148dcbb363398015ba224f94d50e2d",
+                  "value": 173.510099,
+                  "value_label": "173.510",
+                  "wall_samples": 5,
+                  "x": 25
                 }
               ]
             },
@@ -8551,6 +8810,43 @@
                   "value_label": "119.998",
                   "wall_samples": 5,
                   "x": 24
+                },
+                {
+                  "break_before": true,
+                  "break_reasons": [
+                    "host, compiler, harness or profiler changed"
+                  ],
+                  "conditions_sha256": "e63326d64d49cc64ec6ed45830f60c40d65771acd1a468aff68a0d3df2108922",
+                  "date": "2026-10-14",
+                  "fingerprint": "dfb6c8d72b84cbee",
+                  "harness_sha256": "10d94ecb6d134687a5da27b81e217b917bbf181a35692c6a537ddc89f13ccf4f",
+                  "host": {
+                    "arch": "x86_64",
+                    "cpu": "AMD EPYC 7763 64-Core Processor",
+                    "cpu_flags": [
+                      "pclmulqdq",
+                      "popcnt",
+                      "avx",
+                      "bmi1",
+                      "avx2",
+                      "bmi2",
+                      "adx",
+                      "vpclmulqdq"
+                    ],
+                    "logical_cores": 4,
+                    "memory": "16373452 kB",
+                    "os": "Linux 6.17.0-1022-azure",
+                    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)"
+                  },
+                  "label": "2026-10-14\ncc962159",
+                  "raw_value": 175689769,
+                  "revision": "cc96215953864883d4a1e7cd8dc74ca467d62336",
+                  "source": "20261014T001920Z-cc9621595386.json",
+                  "source_sha256": "f7dbbad2540f887a05ebc89a2a80e2edbc148dcbb363398015ba224f94d50e2d",
+                  "value": 175.689769,
+                  "value_label": "175.690",
+                  "wall_samples": 5,
+                  "x": 25
                 }
               ]
             }
@@ -9708,10 +10004,38 @@
       "sha256": "efbd712118a9b5ef341cab4107f33c6ef271642442b5f01639bcf3ba86a124d4",
       "valgrind": "valgrind-3.22.0",
       "wall_samples": 5
+    },
+    {
+      "committed_at": "2026-10-13T17:19:20-07:00",
+      "file": "20261014T001920Z-cc9621595386.json",
+      "harness_sha256": "10d94ecb6d134687a5da27b81e217b917bbf181a35692c6a537ddc89f13ccf4f",
+      "host": {
+        "arch": "x86_64",
+        "cpu": "AMD EPYC 7763 64-Core Processor",
+        "cpu_flags": [
+          "pclmulqdq",
+          "popcnt",
+          "avx",
+          "bmi1",
+          "avx2",
+          "bmi2",
+          "adx",
+          "vpclmulqdq"
+        ],
+        "logical_cores": 4,
+        "memory": "16373452 kB",
+        "os": "Linux 6.17.0-1022-azure",
+        "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)"
+      },
+      "recorded_at": "2026-10-14T00:35:35+00:00",
+      "revision": "cc96215953864883d4a1e7cd8dc74ca467d62336",
+      "sha256": "f7dbbad2540f887a05ebc89a2a80e2edbc148dcbb363398015ba224f94d50e2d",
+      "valgrind": "valgrind-3.22.0",
+      "wall_samples": 5
     }
   ],
   "producer": "tools/groebner-history (native Rust, read-only evidence preparation)",
   "runtime_conversion": "Recorded wall_ns / 1,000,000 = milliseconds; no runtime ratio or confidence interval computed.",
   "schema": "groebner.plot-data/v1",
-  "snapshot_count": 25
+  "snapshot_count": 26
 }
