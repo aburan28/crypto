@@ -1615,7 +1615,8 @@ mod tests {
     /// folded down to degree < m.
     #[test]
     fn reduction_works_at_boundary() {
-        let irr = IrreduciblePoly::deg_8(); // x⁸ + x⁴ + x³ + x + 1
+        // x⁸ + x⁴ + x³ + x + 1
+        let irr = IrreduciblePoly::deg_8();
         // a = z⁵, b = z⁵.  a·b = z¹⁰ = z² · z⁸ = z² · (z⁴ + z³ + z + 1)
         //                       = z⁶ + z⁵ + z³ + z².
         let a = F2mElement::from_bit_positions(&[5], 8);
