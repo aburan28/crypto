@@ -5,10 +5,11 @@
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
+use std::fmt::Write as _;
 use std::rc::Rc;
 use std::time::Instant;
 
-use crypto_lib::cryptanalysis::ecbench::canonical::sha256_hex;
+use crypto_lib::cryptanalysis::ecbench::canonical::{canonical, sha256_hex};
 use crypto_lib::cryptanalysis::ext_curve::{jacobi, take_field_counters, ExtDiagonalAutomorphism};
 use crypto_lib::cryptanalysis::ext_curve::{random_point, ExtCurve, ExtField, ExtPoint, Fp2};
 use crypto_lib::cryptanalysis::glv_invariant_base::{
@@ -1000,6 +1001,435 @@ fn summarize(path: &str) {
     }
 }
 
+fn plot(path: &str) {
+    let mut rows = BTreeMap::<(u64, String), serde_json::Value>::new();
+    for line in std::fs::read_to_string(path).unwrap().lines() {
+        let v: serde_json::Value = serde_json::from_str(line).unwrap();
+        rows.insert(
+            (v["p"].as_u64().unwrap(), v["arm"].as_str().unwrap().into()),
+            v,
+        );
+    }
+    let mut svg = String::new();
+    writeln!(svg,"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1300 1050\" role=\"img\" aria-label=\"Extension field DLP cold CPU cost by arm and subgroup order\">").unwrap();
+    writeln!(svg,"<rect width=\"1300\" height=\"1050\" fill=\"#ffffff\"/><style>text{{font-family:Arial,Helvetica,sans-serif;fill:#17202a}} .title{{font-size:25px;font-weight:bold}} .group{{font-size:19px;font-weight:bold}} .label{{font-size:15px}} .small{{font-size:13px;fill:#4b5563}} .tick{{font-size:15px;fill:#4b5563}}</style>").unwrap();
+    writeln!(svg,"<text x=\"30\" y=\"39\" class=\"title\">Cold extension-field DLP cost, one target per curve</text>").unwrap();
+    writeln!(svg,"<text x=\"30\" y=\"65\" class=\"small\">Median and range over three paired rounds · S = whole-solve thread CPU / calibrated source addition / sqrt(r) · Darwin arm64 L0</text>").unwrap();
+    let x = |s: f64| 235.0 + 255.0 * s.log10();
+    for tick in [1.0f64, 10.0, 100.0, 1000.0] {
+        let xx = x(tick);
+        writeln!(svg,"<line x1=\"{xx:.1}\" y1=\"92\" x2=\"{xx:.1}\" y2=\"941\" stroke=\"#e5e7eb\" stroke-width=\"1\"/>").unwrap();
+        writeln!(
+            svg,
+            "<text x=\"{xx:.1}\" y=\"969\" text-anchor=\"middle\" class=\"tick\">{tick:.0}</text>"
+        )
+        .unwrap();
+    }
+    let floor = x((std::f64::consts::PI / 4.0).sqrt());
+    writeln!(svg,"<line x1=\"{floor:.1}\" y1=\"92\" x2=\"{floor:.1}\" y2=\"941\" stroke=\"#b91c1c\" stroke-dasharray=\"4 4\"/><text x=\"{floor:.1}\" y=\"987\" text-anchor=\"middle\" class=\"small\">two-class floor</text>").unwrap();
+    let arms = [
+        ("rho-negation", "rho negation", "#2563eb"),
+        ("rho-negation-aa", "rho A/A", "#60a5fa"),
+        ("rho-six-class", "rho six class", "#1e3a8a"),
+        ("projected-pair", "projected pair", "#0f766e"),
+        ("chi-orbit-index", "chi orbit index", "#ea580c"),
+        ("isogeny-projected-pair", "isogeny image", "#7c3aed"),
+        ("raw-pair", "raw pair", "#6b7280"),
+    ];
+    for (group, (p, r)) in [(61, 19), (271, 61), (787, 211), (3319, 811)]
+        .iter()
+        .enumerate()
+    {
+        let top = 105.0 + group as f64 * 210.0;
+        writeln!(
+            svg,
+            "<text x=\"30\" y=\"{top:.1}\" class=\"group\">F_{}² · r = {}</text>",
+            p, r
+        )
+        .unwrap();
+        for (i, (id, label, color)) in arms.iter().enumerate() {
+            let v = &rows[&(*p, id.to_string())];
+            let y = top + 22.0 + i as f64 * 23.0;
+            let lo = x(v["s_cpu_min"].as_f64().unwrap());
+            let hi = x(v["s_cpu_max"].as_f64().unwrap());
+            let med = x(v["s_cpu_median"].as_f64().unwrap());
+            let correct = v["verified"].as_u64().unwrap() == 3;
+            let fill = if correct { *color } else { "#ffffff" };
+            writeln!(
+                svg,
+                "<text x=\"205\" y=\"{:.1}\" text-anchor=\"end\" class=\"label\">{label}</text>",
+                y + 5.0
+            )
+            .unwrap();
+            writeln!(svg,"<line x1=\"{lo:.1}\" y1=\"{y:.1}\" x2=\"{hi:.1}\" y2=\"{y:.1}\" stroke=\"{color}\" stroke-width=\"3\"/><line x1=\"{lo:.1}\" y1=\"{:.1}\" x2=\"{lo:.1}\" y2=\"{:.1}\" stroke=\"{color}\"/><line x1=\"{hi:.1}\" y1=\"{:.1}\" x2=\"{hi:.1}\" y2=\"{:.1}\" stroke=\"{color}\"/>",y-4.0,y+4.0,y-4.0,y+4.0).unwrap();
+            writeln!(svg,"<circle cx=\"{med:.1}\" cy=\"{y:.1}\" r=\"5.5\" fill=\"{fill}\" stroke=\"{color}\" stroke-width=\"2\"/>").unwrap();
+            let suffix = if correct { "" } else { " (cap)" };
+            writeln!(
+                svg,
+                "<text x=\"{:.1}\" y=\"{:.1}\" class=\"small\">{:.1}{suffix}</text>",
+                hi + 10.0,
+                y + 4.0,
+                v["s_cpu_median"].as_f64().unwrap()
+            )
+            .unwrap();
+        }
+    }
+    writeln!(svg,"<text x=\"665\" y=\"1012\" text-anchor=\"middle\" class=\"label\">Whole-solve CPU in calibrated group-addition equivalents per sqrt(r), logarithmic axis</text>").unwrap();
+    writeln!(svg,"<text x=\"30\" y=\"1037\" class=\"small\">Source: SUMMARY_V3.jsonl · hollow raw-pair points spent their cap without a scalar · no isolated-host wall claim</text></svg>").unwrap();
+    print!("{svg}");
+}
+
+fn identities(path: &str) {
+    for line in std::fs::read_to_string(path).unwrap().lines() {
+        let v: serde_json::Value = serde_json::from_str(line).unwrap();
+        let p = v["p"].as_u64().unwrap();
+        let nu = v["nu"].as_u64().unwrap();
+        let r = v["r"].as_u64().unwrap();
+        let h = v["cofactor"].as_u64().unwrap();
+        let n2 = v["n2"].as_u64().unwrap();
+        let f = Fp2::new(p).unwrap();
+        assert_eq!(f.nu, nu);
+        assert_eq!(n2, h * r);
+        let curve = Curve {
+            f,
+            a: f.zero(),
+            b: f.one(),
+        };
+        let generator = parse_point(&v["generator"]);
+        let dest = Curve {
+            f,
+            a: f.zero(),
+            b: f.from_fp(p - 27),
+        };
+        let dest_generator = phi(&curve, generator);
+        let mut ops = GroupOps::default();
+        assert!(curve.is_on_curve(generator));
+        assert!(curve.mul(&mut ops, generator, r).infinity);
+        assert!(dest.is_on_curve(dest_generator));
+        assert!(dest.mul(&mut ops, dest_generator, r).infinity);
+        let field = json!({
+            "characteristic":p,"degree":2,"representation":"polynomial_basis",
+            "defining_polynomial":[p-nu,0,1],"element_encoding":"two_u64_coefficients_le",
+        });
+        for (name, b, g, id) in [
+            ("source", 1, generator, v["source"]["id"].as_str().unwrap()),
+            (
+                "destination",
+                p - 27,
+                dest_generator,
+                v["destination"]["id"].as_str().unwrap(),
+            ),
+        ] {
+            let model = json!({
+                "model":"short_weierstrass","a":[0,0],"b":[b,0],
+                "group_order":n2,"subgroup_order":r,"cofactor":h,
+                "generator":{"x":g.x,"y":g.y},"target_group":"cyclic_prime_order_subgroup",
+            });
+            let input = json!({"field":field,"curve":model});
+            let sha = sha256_hex(canonical(&input).unwrap().as_bytes());
+            let field_sha = sha256_hex(canonical(&field).unwrap().as_bytes());
+            let alias = format!("EC1Q{p}D2C{name}h{}", &sha[..12]);
+            println!(
+                "{}",
+                json!({
+                    "schema":"torsion_extension_identity/v1","p":p,"name":name,
+                    "icv1":id,"ec1_alias":alias,"curve_uid":format!("urn:ec-record:1:sha256:{sha}"),
+                    "curve_sha256":sha,"field_sha256":field_sha,"field":field,"curve":model,
+                })
+            );
+        }
+    }
+}
+
+// A deliberately separate arithmetic path for checking frozen answers. None
+// of these operations call the run's Fp2, Curve, GroupOps, or scalar routine.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct CheckF2(u64, u64);
+
+type CheckPoint = Option<(CheckF2, CheckF2)>;
+
+#[derive(Clone, Copy)]
+struct CheckField {
+    p: u64,
+    nu: u64,
+}
+
+impl CheckField {
+    fn residue(self, x: u128) -> u64 {
+        (x % self.p as u128) as u64
+    }
+    fn add_fp(self, a: u64, b: u64) -> u64 {
+        self.residue(a as u128 + b as u128)
+    }
+    fn sub_fp(self, a: u64, b: u64) -> u64 {
+        self.residue(a as u128 + self.p as u128 - b as u128)
+    }
+    fn mul_fp(self, a: u64, b: u64) -> u64 {
+        self.residue(a as u128 * b as u128)
+    }
+    fn pow_fp(self, mut a: u64, mut n: u64) -> u64 {
+        let mut result = 1;
+        while n > 0 {
+            if n & 1 != 0 {
+                result = self.mul_fp(result, a);
+            }
+            a = self.mul_fp(a, a);
+            n >>= 1;
+        }
+        result
+    }
+    fn add(self, a: CheckF2, b: CheckF2) -> CheckF2 {
+        CheckF2(self.add_fp(a.0, b.0), self.add_fp(a.1, b.1))
+    }
+    fn sub(self, a: CheckF2, b: CheckF2) -> CheckF2 {
+        CheckF2(self.sub_fp(a.0, b.0), self.sub_fp(a.1, b.1))
+    }
+    fn mul(self, a: CheckF2, b: CheckF2) -> CheckF2 {
+        CheckF2(
+            self.add_fp(
+                self.mul_fp(a.0, b.0),
+                self.mul_fp(self.nu, self.mul_fp(a.1, b.1)),
+            ),
+            self.add_fp(self.mul_fp(a.0, b.1), self.mul_fp(a.1, b.0)),
+        )
+    }
+    fn inv(self, a: CheckF2) -> CheckF2 {
+        let norm = self.sub_fp(
+            self.mul_fp(a.0, a.0),
+            self.mul_fp(self.nu, self.mul_fp(a.1, a.1)),
+        );
+        assert_ne!(norm, 0, "inverse of zero");
+        let scale = self.pow_fp(norm, self.p - 2);
+        CheckF2(
+            self.mul_fp(a.0, scale),
+            self.mul_fp(self.sub_fp(0, a.1), scale),
+        )
+    }
+    fn on_curve(self, point: CheckPoint) -> bool {
+        match point {
+            None => true,
+            Some((x, y)) => self.mul(y, y) == self.add(self.mul(self.mul(x, x), x), CheckF2(1, 0)),
+        }
+    }
+    fn add_points(self, a: CheckPoint, b: CheckPoint) -> CheckPoint {
+        let Some((x1, y1)) = a else {
+            return b;
+        };
+        let Some((x2, y2)) = b else {
+            return a;
+        };
+        let slope = if x1 == x2 {
+            if y1 != y2 || y1 == CheckF2(0, 0) {
+                return None;
+            }
+            let x_sq = self.mul(x1, x1);
+            self.mul(
+                self.mul(CheckF2(3, 0), x_sq),
+                self.inv(self.mul(CheckF2(2, 0), y1)),
+            )
+        } else {
+            self.mul(self.sub(y2, y1), self.inv(self.sub(x2, x1)))
+        };
+        let x3 = self.sub(self.sub(self.mul(slope, slope), x1), x2);
+        let y3 = self.sub(self.mul(slope, self.sub(x1, x3)), y1);
+        Some((x3, y3))
+    }
+    fn scalar(self, mut point: CheckPoint, mut k: u64) -> CheckPoint {
+        let mut result = None;
+        while k > 0 {
+            if k & 1 != 0 {
+                result = self.add_points(result, point);
+            }
+            point = self.add_points(point, point);
+            k >>= 1;
+        }
+        result
+    }
+}
+
+fn check_point(v: &serde_json::Value) -> CheckPoint {
+    if v["infinity"].as_bool().unwrap() {
+        return None;
+    }
+    Some((
+        CheckF2(v["x"][0].as_u64().unwrap(), v["x"][1].as_u64().unwrap()),
+        CheckF2(v["y"][0].as_u64().unwrap(), v["y"][1].as_u64().unwrap()),
+    ))
+}
+
+fn verify_independent(run_path: &str, fixture_path: &str) {
+    let fixture_bytes = std::fs::read(fixture_path).expect("fixture bytes");
+    let run_bytes = std::fs::read(run_path).expect("run bytes");
+    assert_eq!(
+        sha256_hex(&fixture_bytes),
+        "1a63cc22a22e0fe27d44359325d502038d26d3ac616374fc5558c041939218b7",
+        "fixture bytes differ from the frozen input"
+    );
+    assert_eq!(
+        sha256_hex(&run_bytes),
+        "ca9a0ec7e31de59c58a78ae5c269350b37963b62ff9de815c805c36c2ec26693",
+        "run bytes differ from the frozen V3 result"
+    );
+    let fixtures: Vec<serde_json::Value> = String::from_utf8(fixture_bytes.clone())
+        .unwrap()
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    assert_eq!(fixtures.len(), 4);
+    let arms = [
+        "raw-pair",
+        "projected-pair",
+        "chi-orbit-index",
+        "isogeny-projected-pair",
+        "rho-negation",
+        "rho-negation-aa",
+        "rho-six-class",
+    ];
+    let mut seen = BTreeSet::new();
+    let mut verified = 0;
+    let mut exhausted = 0;
+    for line in String::from_utf8(run_bytes.clone()).unwrap().lines() {
+        let v: serde_json::Value = serde_json::from_str(line).unwrap();
+        if v["kind"] == "calibration" {
+            continue;
+        }
+        assert_eq!(v["kind"], "run");
+        let p = v["p"].as_u64().unwrap();
+        let round = v["round"].as_u64().unwrap();
+        let arm = v["arm"].as_str().unwrap();
+        assert!(round < 3 && arms.contains(&arm));
+        assert!(
+            seen.insert((p, round, arm.to_owned())),
+            "duplicate run slot"
+        );
+        let fix = fixtures
+            .iter()
+            .find(|f| f["p"].as_u64() == Some(p))
+            .expect("unknown field");
+        let r = fix["r"].as_u64().unwrap();
+        assert_eq!(v["r"].as_u64(), Some(r));
+        assert_eq!(
+            v["seed"].as_u64(),
+            Some((0x2026_1014u64 ^ p).wrapping_add(round * 0x9e37_79b9))
+        );
+        let nu = fix["nu"].as_u64().unwrap();
+        let field = CheckField { p, nu };
+        assert!(p > 3 && (2..).take_while(|d| d * d <= p).all(|d| p % d != 0));
+        assert_eq!(field.pow_fp(nu, (p - 1) / 2), p - 1);
+        let g = check_point(&fix["generator"]);
+        let q = check_point(&fix["target"]);
+        assert!(g.is_some() && q.is_some());
+        assert!(field.on_curve(g) && field.on_curve(q));
+        assert_eq!(field.scalar(g, r), None, "generator order: p={p}");
+        assert_eq!(field.scalar(q, r), None, "target order: p={p}");
+        if let Some(k) = v["result"]["recovered"].as_u64() {
+            assert!(k < r);
+            assert_eq!(field.scalar(g, k), q, "independent scalar replay: p={p}");
+            assert_eq!(k, fix["answer_scalar"].as_u64().unwrap());
+            assert_eq!(v["extra"]["status"], "verified");
+            assert_eq!(v["result"]["verified"], true);
+            verified += 1;
+        } else {
+            assert_eq!(arm, "raw-pair");
+            assert_eq!(v["extra"]["status"], "exhausted");
+            assert_eq!(v["result"]["exhausted"], true);
+            assert_eq!(v["result"]["verified"], false);
+            exhausted += 1;
+        }
+    }
+    assert_eq!(seen.len(), fixtures.len() * 3 * arms.len());
+    for fix in &fixtures {
+        let p = fix["p"].as_u64().unwrap();
+        for round in 0..3 {
+            for arm in &arms {
+                assert!(seen.contains(&(p, round, (*arm).to_owned())));
+            }
+        }
+    }
+    assert_eq!((verified, exhausted), (75, 9));
+    println!(
+        "{}",
+        json!({
+            "schema":"torsion_extension_independent_replay/v2",
+            "arithmetic":"independent_u128_fp2_chord_tangent",
+            "fixture_sha256":sha256_hex(&fixture_bytes),
+            "records_sha256":sha256_hex(&run_bytes),
+            "slots":seen.len(),"verified":verified,"exhausted":exhausted,
+        })
+    );
+}
+
+fn iso_scale(curve: &Curve, u: u64, point: Point) -> Point {
+    if point.infinity {
+        return curve.identity();
+    }
+    let f = &curve.f;
+    let u2 = (u as u128 * u as u128 % f.p as u128) as u64;
+    let u3 = (u2 as u128 * u as u128 % f.p as u128) as u64;
+    Point::affine(f.scale(point.x, u2), f.scale(point.y, u3))
+}
+
+fn iso_check(path: &str) {
+    let bytes = std::fs::read(path).expect("frozen fixture bytes");
+    let fixture_sha256 = sha256_hex(&bytes);
+    for line in String::from_utf8(bytes.clone()).unwrap().lines() {
+        let v: serde_json::Value = serde_json::from_str(line).unwrap();
+        let p = v["p"].as_u64().unwrap();
+        let r = v["r"].as_u64().unwrap();
+        let f = Fp2::new(p).unwrap();
+        let src = Curve {
+            f,
+            a: f.zero(),
+            b: f.one(),
+        };
+        let dst = Curve {
+            f,
+            a: f.zero(),
+            b: f.from_fp(p - 27),
+        };
+        let u = (1..p)
+            .find(|u| ((*u as u128 * *u as u128) % p as u128) as u64 == p - 3)
+            .expect("no base-field scaling isomorphism");
+        let u2 = (u as u128 * u as u128 % p as u128) as u64;
+        let u3 = (u2 as u128 * u as u128 % p as u128) as u64;
+        let u6 = (u3 as u128 * u3 as u128 % p as u128) as u64;
+        assert_eq!(u6, (p - 27) % p);
+        let g = parse_point(&v["generator"]);
+        let q = parse_point(&v["target"]);
+        let mut ops = GroupOps::default();
+        for point in std::iter::once(g)
+            .chain(std::iter::once(q))
+            .chain(v["base_raw"].as_array().unwrap().iter().map(parse_point))
+        {
+            assert!(src.is_on_curve(point));
+            assert!(dst.is_on_curve(iso_scale(&src, u, point)));
+        }
+        assert!(dst.mul(&mut ops, iso_scale(&src, u, g), r).infinity);
+        assert!(dst.mul(&mut ops, iso_scale(&src, u, q), r).infinity);
+        let seed = v["target_seed"].as_str().unwrap();
+        let seed_sha = sha256_hex(seed.as_bytes());
+        let mut rng = StdRng::seed_from_u64(u64::from_str_radix(&seed_sha[..16], 16).unwrap());
+        for _ in 0..64 {
+            let a = random_point(&src, &mut rng);
+            let b = random_point(&src, &mut rng);
+            let lhs = iso_scale(&src, u, src.add(&mut ops, a, b));
+            let rhs = dst.add(&mut ops, iso_scale(&src, u, a), iso_scale(&src, u, b));
+            assert_eq!(lhs, rhs, "scaling homomorphism p={p}");
+        }
+        println!(
+            "{}",
+            json!({
+                "schema":"torsion_extension_iso_check/v1", "p":p,"r":r,"u":u,
+                "u2":u2,"u3":u3,"u6":u6,
+                "source_icv1":v["source"]["id"],"destination_icv1":v["destination"]["id"],
+                "fixture_sha256":fixture_sha256,"pair_checks":64,
+                "fixed_point_checks":v["base_raw"].as_array().unwrap().len()+2,
+                "group_ops":ops,
+            })
+        );
+    }
+}
+
 fn base_order(p: u64) -> u64 {
     let mut n = 1;
     for x in 0..p {
@@ -1116,6 +1546,13 @@ fn main() {
         ),
         Some("support") => support(&std::env::args().nth(2).expect("fixture path")),
         Some("summarize") => summarize(&std::env::args().nth(2).expect("run path")),
+        Some("plot") => plot(&std::env::args().nth(2).expect("summary path")),
+        Some("identities") => identities(&std::env::args().nth(2).expect("fixture path")),
+        Some("verify-independent") => verify_independent(
+            &std::env::args().nth(2).expect("records path"),
+            &std::env::args().nth(3).expect("fixture path"),
+        ),
+        Some("iso-check") => iso_check(&std::env::args().nth(2).expect("fixture path")),
         _ => panic!("usage: isogeny_torsion_extension screen"),
     }
 }
