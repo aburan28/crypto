@@ -294,6 +294,8 @@ jobs:
         run: |
           cargo build --locked --release --manifest-path tools/isogeny-cli/Cargo.toml --target ${{ matrix.target }}
           cargo test --locked --release --manifest-path tools/isogeny-cli/Cargo.toml --target ${{ matrix.target }}
+          cargo build --locked --release --manifest-path isogeny_algos/Cargo.toml --target ${{ matrix.target }} --bin isogeny-perf
+          cargo test --locked --release --manifest-path isogeny_algos/Cargo.toml --target ${{ matrix.target }} --bin isogeny-perf
       - name: Check the portable receipt-hash fallback
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.scope.outputs.release_rust != 'false'
         env:
@@ -310,8 +312,10 @@ jobs:
           [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
           mkdir -p "$RUNNER_TEMP/isogeny-installed"
           cp "tools/isogeny-cli/target/${{ matrix.target }}/release/isogeny$ext" "$RUNNER_TEMP/isogeny-installed/"
+          cp "isogeny_algos/target/${{ matrix.target }}/release/isogeny-perf$ext" "$RUNNER_TEMP/isogeny-installed/"
           cd "$RUNNER_TEMP/isogeny-installed"
           "./isogeny$ext" --help > /dev/null
+          "./isogeny-perf$ext" --help > /dev/null
           "./isogeny$ext" --version > BUILD.json
           grep -Fq '"git_commit": "'"$GITHUB_SHA"'"' BUILD.json
           "./isogeny$ext" screen --curve p192 --from 1010 --to 65537 > screen.json
@@ -336,6 +340,7 @@ jobs:
           [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
           mkdir -p "dist/$name"
           cp "tools/isogeny-cli/target/${{ matrix.target }}/release/isogeny$ext" "dist/$name/"
+          cp "isogeny_algos/target/${{ matrix.target }}/release/isogeny-perf$ext" "dist/$name/"
           cp tools/isogeny-cli/README.md "dist/$name/README.md"
           cp "$RUNNER_TEMP/isogeny-installed/BUILD.json" "dist/$name/BUILD.json"
           for license in LICENSE LICENSE.md; do

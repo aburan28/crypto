@@ -16,6 +16,9 @@ use std::sync::{
 };
 use std::time::Instant;
 
+#[path = "perf_campaign/mod.rs"]
+mod campaign;
+
 #[derive(Clone)]
 struct Counted<F> {
     inner: F,
@@ -107,7 +110,28 @@ fn host() -> Json {
     let cpu = if cfg!(target_os = "macos") {
         command("sysctl", &["-n", "machdep.cpu.brand_string"])
     } else {
-        std::fs::read_to_string("/proc/cpuinfo").unwrap_or_else(|_| "unavailable".into())
+        std::fs::read_to_string("/proc/cpuinfo")
+            .map(|s| {
+                s.lines()
+                    .filter(|line| {
+                        [
+                            "model name",
+                            "vendor_id",
+                            "CPU implementer",
+                            "CPU part",
+                            "Hardware",
+                            "flags",
+                            "Features",
+                        ]
+                        .iter()
+                        .any(|key| line.starts_with(key))
+                    })
+                    .collect::<std::collections::BTreeSet<_>>()
+                    .into_iter()
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            })
+            .unwrap_or_else(|_| "unavailable".into())
     };
     Json::obj(vec![
         ("os", Json::str(std::env::consts::OS)),
@@ -271,6 +295,9 @@ fn main_run() -> Result<(), String> {
     if args.first().is_some_and(|a| a == "compare") {
         return compare(&args[1..]);
     }
+    if args.first().is_some_and(|a| a == "campaign") {
+        return campaign::run(&args[1..]);
+    }
     if args.is_empty() || args.iter().any(|a| a == "--help") {
         println!("isogeny-perf --out FRESH.jsonl --revision SOURCE_SHA [--bits 192,224,256,511] [--ells 7,31,101] [--samples 5] [--diagnostic-timing]\nisogeny-perf compare BASELINE.jsonl CANDIDATE.jsonl FRESH_COMPARISON.json\nAll eight BMSS methods; exact kernel/map equality and four point transports.\nCounts are an abstract arithmetic model. Timing is unreserved, diagnostic only.\nSynthetic supersingular fixtures at the requested field widths, not named NIST curves.");
         return Ok(());
@@ -408,6 +435,12 @@ fn load_cases(path: &str) -> Result<(Json, Vec<Json>), String> {
             || row.get("verified") != Some(&Json::Bool(true))
         {
             return Err("unverified case".into());
+        }
+        if !Method::ALL
+            .iter()
+            .any(|m| Some(m.name()) == row.get("algorithm").and_then(Json::as_str))
+        {
+            return Err("unknown algorithm".into());
         }
         let input = row.get("input").ok_or("missing input")?;
         if sha256_hex(input.dump().as_bytes()) != text_field(row, "input_sha256")? {

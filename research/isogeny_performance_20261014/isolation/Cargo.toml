@@ -1,0 +1,18 @@
+[package]
+name = "isogeny-performance-isolation"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[[bin]]
+name = "isolated-bench"
+path = "../../../src/bin/isolated_bench.rs"
+
+[dependencies]
+clap = { version = "4.6", features = ["derive"] }
+libc = "0.2"
+
+[profile.release]
+opt-level = 3

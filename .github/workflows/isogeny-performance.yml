@@ -1,0 +1,106 @@
+name: isogeny-performance
+
+on:
+  pull_request:
+    paths:
+      - 'isogeny_algos/**'
+      - 'research/isogeny_performance_20261014/**'
+      - '.github/workflows/isogeny-performance.yml'
+  workflow_dispatch:
+    inputs:
+      baseline:
+        description: 'Full baseline source SHA (before algorithm optimization)'
+        required: true
+        default: '79006eb85a400474e83f6a76fac0dca6b60a8b5d'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: isogeny-performance-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, macos-15-intel]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    env:
+      BASE_SHA: ${{ inputs.baseline || '79006eb85a400474e83f6a76fac0dca6b60a8b5d' }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      RAYON_NUM_THREADS: '1'
+      CARGO_TERM_COLOR: never
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /isogeny_algos/
+            /research/isogeny_performance_20261014/isolation/
+            /src/bin/isolated_bench.rs
+            /src/bin/isolated_bench/
+            /src/bin/icprog/json.rs
+      - uses: dtolnay/rust-toolchain@1.98
+      - name: Freeze baseline algorithms with the same measurement harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin "$BASE_SHA"
+          mkdir -p "$RUNNER_TEMP/isogeny-base" evidence
+          git archive "$BASE_SHA" isogeny_algos | tar -x -C "$RUNNER_TEMP/isogeny-base"
+          cp isogeny_algos/src/bin/isogeny-perf.rs "$RUNNER_TEMP/isogeny-base/isogeny_algos/src/bin/"
+          cp -R isogeny_algos/src/bin/perf_campaign "$RUNNER_TEMP/isogeny-base/isogeny_algos/src/bin/"
+          git rev-parse HEAD > evidence/HEAD_SHA.txt
+          printf '%s\n' "$BASE_SHA" > evidence/BASE_SHA.txt
+          rustc --version --verbose > evidence/compiler.txt
+          git diff --no-index /dev/null isogeny_algos/src/bin/isogeny-perf.rs > evidence/harness.patch || test "$?" -eq 1
+          cargo build --release --locked --manifest-path "$RUNNER_TEMP/isogeny-base/isogeny_algos/Cargo.toml" --bin isogeny-perf
+          cargo build --release --locked --manifest-path isogeny_algos/Cargo.toml --bin isogeny-perf
+          if [ "$RUNNER_OS" = Linux ]; then
+            cargo build --release --locked --manifest-path research/isogeny_performance_20261014/isolation/Cargo.toml
+          fi
+      - name: Exact-output arithmetic counts on every CPU
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="$RUNNER_TEMP/isogeny-base/isogeny_algos/target/release/isogeny-perf"
+          HEAD="$GITHUB_WORKSPACE/isogeny_algos/target/release/isogeny-perf"
+          "$BASE" --out evidence/baseline.jsonl --revision "$BASE_SHA" --bits 192,224,256,511 --ells 7,31,101
+          "$HEAD" --out evidence/candidate.jsonl --revision "$HEAD_SHA" --bits 192,224,256,511 --ells 7,31,101
+          "$HEAD" compare evidence/baseline.jsonl evidence/candidate.jsonl evidence/COMPARISON.json
+      - name: Five A/A pairs and five interleaved A/B pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="$RUNNER_TEMP/isogeny-base/isogeny_algos/target/release/isogeny-perf"
+          HEAD="$GITHUB_WORKSPACE/isogeny_algos/target/release/isogeny-perf"
+          if [ "$RUNNER_OS" = Linux ]; then
+            ISO="$GITHUB_WORKSPACE/research/isogeny_performance_20261014/isolation/target/release/isolated-bench"
+            LAST_CPU=$(($(nproc) - 1))
+            CPUS=$(cat "/sys/devices/system/cpu/cpu$LAST_CPU/topology/thread_siblings_list")
+            # Isolator refusals stay in the campaign receipts. They fail this
+            # measurement job; no unreserved retry is promoted as qualified.
+            "$HEAD" campaign "$BASE" "$HEAD" "$BASE_SHA" "$HEAD_SHA" evidence/campaign "$ISO" "$CPUS"
+          else
+            # macOS: exact repeated counts, with no wall measurements.
+            "$HEAD" campaign "$BASE" "$HEAD" "$BASE_SHA" "$HEAD_SHA" evidence/campaign
+          fi
+      - name: Keep source, binaries, raw records and censored attempts
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p evidence/binaries
+          cp "$RUNNER_TEMP/isogeny-base/isogeny_algos/target/release/isogeny-perf" evidence/binaries/baseline || true
+          cp isogeny_algos/target/release/isogeny-perf evidence/binaries/candidate || true
+          git archive HEAD isogeny_algos research/isogeny_performance_20261014/isolation src/bin/isolated_bench.rs src/bin/isolated_bench src/bin/icprog/json.rs > evidence/source.tar
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: isogeny-performance-${{ matrix.runner }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: error
