@@ -1,0 +1,103 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {}
+      },
+      "name": "rho",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {}
+      },
+      "name": "rho-aa",
+      "role": "control"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=3",
+          "linalg": "incremental-gauss",
+          "max_trials": "8",
+          "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=4,node_budget=4096",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "inherited-f4",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=3",
+          "linalg": "incremental-gauss",
+          "max_trials": "8",
+          "oracle": "pdp3-koblitz:m=3,engine=f6-ic,degree=4,node_budget=4096",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "f6-ic",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=3",
+          "linalg": "incremental-gauss",
+          "max_trials": "8",
+          "oracle": "pdp3-koblitz:m=3,engine=rootfind",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "rootfind-control",
+      "role": "candidate"
+    }
+  ],
+  "description": "PROTOCOL-v1.md. Public single-target diagnostics; full cold counts and unpriced counters retained. No wall-time or asymptotic claim from L0 measurements.",
+  "label": "Q2 solver diagnostics at fixed summand dimension3; intermediate field variables retained",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261014,
+    "timeout_seconds": 180,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 13
+      },
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 19
+      },
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 23
+      },
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 31
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261014,
+    "targets_per_curve": 2
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "arms": [
+    {
+      "method": {
+        "entry": "ic_framework::run_pipeline + ecbench::ic_report(counted)",
+        "family": "ic",
+        "id": "ic.pipeline_counted",
+        "method_id": "ECM1h1a36a7d39e4c",
+        "method_sha256": "1a36a7d39e4c5605c7d3b4549c0e07899b83aed9eaa56dea6d40f103fc39ca77",
+        "params": {
+          "factor_base": "compact-orbit-scan:columns=4,raw_x_cap=4096",
+          "linalg": "incremental-gauss",
+          "max_trials": "256",
+          "oracle": "mitm-frobenius:m=3",
+          "solver": "",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "ic-n83",
+      "role": "candidate"
+    }
+  ],
+  "executions": 1,
+  "spec_id": "ECS1haae2d6bde831",
+  "spec_sha256": "aae2d6bde83188043bfa124f89c7de81cc07b21dcf92e245cc9e555dd3f0441d",
+  "workloads": [
+    {
+      "curve": {
+        "automorphisms_available": 166,
+        "cofactor": 4,
+        "construction": "WideKoblitz::new(0, registry modulus for n = 83)",
+        "curve_uid": null,
+        "ec1": null,
+        "family": "koblitz",
+        "field_bits": null,
+        "field_degree": 83,
+        "generator": [
+          "0xe3bbbbbbb83555555544",
+          "0x3df25943c9ed8f7f815f4"
+        ],
+        "group_order": "9671406556923184866742756",
+        "icv1": "ICV1:f2m-83-a1d5abfa:-6151469093347:9671406556923184866742756:0x1:-7:unk:r:debefd742f59",
+        "r": "2417851639230796216685689",
+        "registered": true,
+        "slug": "icv1-f2m83-tm6151469093347-debefd74"
+      },
+      "curve_spec": {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 83
+      },
+      "planted": null,
+      "target": [
+        "0x58641dab73a456caa183a",
+        "0x34b89f8a83af74122808"
+      ],
+      "target_counter": 1,
+      "target_index": 0,
+      "target_law": "hash_to_subgroup_v2",
+      "target_seed": 20261014,
+      "workload_id": "W65a1371cad32",
+      "workload_sha256": "65a1371cad3246b983b552647716db47af6a96cfdc457b8905b618b4efee7444"
+    }
+  ]
+}

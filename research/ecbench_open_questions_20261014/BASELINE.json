@@ -1,0 +1,15 @@
+{
+  "schema": "ecbench-ten-questions-baseline/v1",
+  "repository": "https://github.com/aburan28/crypto",
+  "source_commit": "f9011e5375155bd9ef7839abe4eea12718e4b401",
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "unmodified_build": "cargo build --release --locked --bin ecbench --bin quartic-ic --bin hyperelliptic-cover",
+  "unmodified_ecbench_sha256": "5f534497377fd8d4a174ff89ea78324d191894efaca22420972168e7a02f4418",
+  "unmodified_cover_sha256": "42027a758cc6a2526eb43bf05cfeffd1a70960214926bde02a9d8dc64d6a65e1",
+  "unmodified_quartic_sha256": "a8f4fd04ac97d5f4e1a77fb8c2dfc6951b896f1c9fa3ba6e9c7b9cac77ba3c04",
+  "host_class": "ECBENV2h687984d4e73d",
+  "cpu": "AMD EPYC 9V45 96-Core Processor",
+  "virtualized": true,
+  "baseline_build_metadata_missing": true,
+  "note": "Baseline copies preserved outside the repo. Measured binary is rebuilt after the frozen-protocol commit with explicit source metadata; its digest is recorded by ecbench. No frozen method implementation is changed by this campaign."
+}
