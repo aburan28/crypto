@@ -4,7 +4,6 @@
 //! crater only (same target seed, so the crater solves the same ks).
 //! Plus the D = -19 ell ~ 2^23 gap-sweep pair (rho only, 32 targets).
 use serde_json::{json, Value};
-use std::path::Path;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();

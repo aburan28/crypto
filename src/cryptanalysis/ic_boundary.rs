@@ -1494,12 +1494,7 @@ impl QuarticClasses {
     /// The four classes of a `j = 1728` prime instance, or `None` when
     /// the curve, field or subgroup lacks the structure: `b ≠ 0`,
     /// `p ≢ 1 (mod 4)`, `4 ∤ r − 1`, or `ι` fixes the subgroup.
-    pub fn new(
-        g: &PrimeCurve,
-        generator: PrimePoint,
-        r: u64,
-        ops: &mut GroupOps,
-    ) -> Option<Self> {
+    pub fn new(g: &PrimeCurve, generator: PrimePoint, r: u64, ops: &mut GroupOps) -> Option<Self> {
         if g.b != 0 || g.a == 0 || g.p < 5 || g.p % 4 != 1 || r % 4 != 1 {
             return None;
         }
@@ -1562,10 +1557,7 @@ impl RhoClasses<PrimeCurve> for QuarticClasses {
             best_key = neg_key;
             best_mu = submod(0, 1, c);
         }
-        for (pt, mu) in [
-            (rot, self.kappa),
-            (g.neg(rot), submod(0, self.kappa, c)),
-        ] {
+        for (pt, mu) in [(rot, self.kappa), (g.neg(rot), submod(0, self.kappa, c))] {
             let k = g.key(&pt);
             if k < best_key {
                 best = pt;
@@ -8058,7 +8050,11 @@ mod tests {
     fn quartic_classes_name_the_class_and_solve() {
         // p = 10037 (10037 = 1 mod 4), y^2 = x^3 + 8x: order 9946 = 2 * 4973
         // (4973 = 1 mod 4), a j = 1728 curve with the full four classes.
-        let curve = PrimeCurve { p: 10037, a: 8, b: 0 };
+        let curve = PrimeCurve {
+            p: 10037,
+            a: 8,
+            b: 0,
+        };
         assert_eq!(curve.point_count(), 9946);
         let r = 4973u64;
         // a generator of the order-r subgroup: twice a full-order point
