@@ -304,7 +304,15 @@ and exhaustive small-field fixtures.
   and the exceptional ramified fiber;
 - pushforward of rational source-point divisors and the implementation's own
   typed pullback witnesses; and
-- `phi_* phi^* = [3]` on that typed point-class domain.
+- a native typed-path check whose pushforward result equals `[3]P` for the
+  implementation's own pullback witness.
+
+The last item is implementation/test evidence on values constructed by the
+same typed API, not a proof-grade universal algebraic identity. No
+`identity.certificate/v1` / `IDC1h…` record has been issued for
+`phi_* phi^* = [3]`. Until such a certificate and an independent divisor-map
+replay exist, universal composition, kernel, and subgroup-recovery conclusions
+remain conditional or `unknown` as stated below.
 
 For the exact fixed-`GF(8)` fixture described in the addendum, the library now
 implements arbitrary-class pushforward and exhaustively checks its group-law
@@ -346,7 +354,8 @@ pushforward, while multiplication by `d` is bijective on a finite group whose
 cardinality is coprime to `d`.
 
 That Lean theorem assumes exact cardinality and the composition identity; it
-constructs neither map and does not promote the 134 catalog rows by itself.
+constructs neither map, does not supply the missing `IDC1h…` identity
+certificate, and does not promote the 134 catalog rows by itself.
 The additional bridge from `[r]G=O` to
 `ord(G) | r`, and hence coprimality with the actual generated-subgroup order,
 is used in the native certificate but is not a separately formalized Lean

@@ -4,7 +4,7 @@
 - **Kind:** proof gap, implementation gap, and independent-verification gap
 - **Affected work:** all 664 EC1/map bindings in the [content-addressed cover graph](../docs/curves/cover-links.yaml), the [ICV1/EC1 registry](../docs/curves/registry.json), and the [catalog-wide transfer assessment](../docs/curves/cover-transfer-assessments.json)
 - **Next action owner:** curve identity and transfer certification workstream (unassigned)
-- **Last updated:** 2026-10-13
+- **Last updated:** 2026-10-14
 
 ## Problem
 
@@ -38,7 +38,9 @@ certificates and do not provide an arbitrary-class recovery path.
   pullback is injective on that subgroup and multiplication by `d^-1 mod r`
   recovers the source class. The antecedents, especially exact source order
   and an executable composition map on the relevant domain, are not supplied
-  merely by the catalog tuple or gcd calculation.
+  merely by the catalog tuple or gcd calculation. The native typed-path checks
+  have no `identity.certificate/v1` / `IDC1h…` record, so they are not promoted
+  to a proof-grade universal algebraic identity.
 - **Suspected explanation:** none. Evidence coverage, not an unexplained
   arithmetic failure, is the known gap.
 - **Missing capability:** proof-grade primality/factor and exact generator
@@ -65,6 +67,9 @@ certificates and do not provide an arbitrary-class recovery path.
 - [ ] Check the composition and `d^-1 mod r` recovery identity on the public
   supported domain, including infinity and ramified fibers; keep recovery from
   arbitrary Jacobian output unknown until the relevant general norm exists.
+- [ ] Issue and replay the required `identity.certificate/v1` record, or attach
+  a stronger independently checked formal proof, for every universal
+  `phi_* phi^* = [d]` statement used by a subgroup certificate.
 - [ ] Add independent replays and negative controls for altered generators,
   orders, fields, map UIDs, coordinate conversions, and the five models with
   multiple EC1 representations. Extension-field coordinates must remain their
