@@ -30,6 +30,7 @@
 //! |:--|:--|:--|
 //! | `subtract` | 2 | test `R − P ∈ F` for every signed base point; no table |
 //! | `mitm` | 2 or 3 | a pair table probed once per target, or once per `R − P` |
+//! | `mitm-prime-batch` | 2 | the same folded prime pair table, built with one batched inversion per abscissa row and x-only sums |
 //! | `mitm-frobenius` | 2 or 3 | the same on a Frobenius-folded table (Koblitz) |
 //! | `mitm-frobenius-counted` | 2 or 3 | the same table and probe, with native table setup counters |
 //! | `rootfind-subtract` | 2 or 3 | prime curves: `prime_fast`'s direct-subtraction root finding, every `x(R ∓ F_i)` of a target from one Montgomery batched inversion, then a lookup (`m = 2`) or a probe of the negation-folded pair table (`m = 3`) |
@@ -51,9 +52,9 @@ use crate::cryptanalysis::gls_fp2::{gls_line_base, Fp2Curve, Fp2Point, GlsInstan
 use crate::cryptanalysis::glv_invariant_base::{glv_orbit_base, AutomorphismGroup};
 use crate::cryptanalysis::ic_boundary::{
     binary_subspace_factor_base, decompose_mitm, decompose_mitm_frobenius, koblitz_factor_base,
-    prime_factor_base, BinaryGroup, BinaryInstance, ColumnFold, CountedGroup, FactorBase,
-    FrobeniusPairTable, GroupOps, OracleCounters, PairTable, PrimeCurve, PrimeInstance, PrimePoint,
-    Relation,
+    prime_factor_base, prime_factor_base_strided, BinaryGroup, BinaryInstance, ColumnFold,
+    CountedGroup, FactorBase, FrobeniusPairTable, GroupOps, OracleCounters, PairTable, PrimeCurve,
+    PrimeInstance, PrimePoint, Relation,
 };
 use crate::cryptanalysis::koblitz_factor_base_search::subspace_is_trace_zero;
 use crate::cryptanalysis::koblitz_fast::FastPoint;
@@ -81,17 +82,29 @@ impl FactorBaseBuilder<PrimeCurve> for PrimeAbscissaBase<'_> {
     }
 
     fn describe(&self, params: &Params) -> String {
-        format!(
-            "the {} smallest abscissae carrying a point, one column each",
-            params.get("size").unwrap_or("?")
-        )
+        match params.get("stride") {
+            None | Some("1") => format!(
+                "the {} smallest abscissae carrying a point, one column each",
+                params.get("size").unwrap_or("?")
+            ),
+            Some(stride) => format!(
+                "{} abscissae carrying a point, scanned at stride {stride} modulo p, one column each",
+                params.get("size").unwrap_or("?")
+            ),
+        }
     }
 
     fn parameters(&self) -> &[(&str, &str)] {
-        &[(
-            "size",
-            "abscissae in the base; the family optimum is about #E^(1/3)",
-        )]
+        &[
+            (
+                "size",
+                "abscissae in the base; the family optimum is about #E^(1/3)",
+            ),
+            (
+                "stride",
+                "fixed nonzero abscissa stride modulo p; default 1",
+            ),
+        ]
     }
 
     fn build(
@@ -104,7 +117,18 @@ impl FactorBaseBuilder<PrimeCurve> for PrimeAbscissaBase<'_> {
         if size == 0 {
             return Err("factor base size must be positive".into());
         }
-        Ok(prime_factor_base(self.instance, size))
+        let stride = params.get("stride").map_or(Ok(1u64), |s| {
+            s.parse::<u64>()
+                .map_err(|_| "stride must be an unsigned integer".to_string())
+        })?;
+        if stride == 0 || stride >= self.instance.curve.p {
+            return Err("stride must lie in 1..p".into());
+        }
+        if stride == 1 {
+            Ok(prime_factor_base(self.instance, size))
+        } else {
+            Ok(prime_factor_base_strided(self.instance, size, stride))
+        }
     }
 }
 
@@ -1072,6 +1096,70 @@ impl<G: CountedGroup> DecompositionOracle<G> for MitmOracle {
     ) -> Option<Vec<usize>> {
         let table = self.table.as_ref()?;
         decompose_mitm(ctx.group, fb, table, self.m, ops, counters, point)
+    }
+}
+
+/// The two-summand prime MITM search with the same probe and table keys as
+/// `mitm`, but a batched-inversion, x-only table construction.
+pub struct PrimeBatchMitmOracle {
+    table: Option<PairTable>,
+}
+
+impl PrimeBatchMitmOracle {
+    pub fn new() -> Self {
+        Self { table: None }
+    }
+}
+
+impl Default for PrimeBatchMitmOracle {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl DecompositionOracle<PrimeCurve> for PrimeBatchMitmOracle {
+    fn name(&self) -> &str {
+        "mitm-prime-batch"
+    }
+
+    fn summands(&self) -> u32 {
+        2
+    }
+
+    fn describe(&self, _params: &Params) -> String {
+        "negation-folded pair table built with batched prime-field inversions; identical MITM probe"
+            .into()
+    }
+
+    fn parameters(&self) -> &[(&str, &str)] {
+        &[("m", "must be 2")]
+    }
+
+    fn prepare(
+        &mut self,
+        ctx: &InstanceCtx<PrimeCurve>,
+        fb: &FactorBase<PrimePoint>,
+        params: &Params,
+        ops: &mut GroupOps,
+    ) -> Result<(), String> {
+        if params.u64_or("m", 2)? != 2 || params.0.keys().any(|key| key != "m") {
+            return Err("mitm-prime-batch accepts only m=2".into());
+        }
+        let table = PairTable::build_negation_folded_prime_batch(ctx.group, fb)?;
+        ops.merge(table.build_ops);
+        self.table = Some(table);
+        Ok(())
+    }
+
+    fn decompose(
+        &mut self,
+        ctx: &InstanceCtx<PrimeCurve>,
+        fb: &FactorBase<PrimePoint>,
+        ops: &mut GroupOps,
+        counters: &mut OracleCounters,
+        point: PrimePoint,
+    ) -> Option<Vec<usize>> {
+        decompose_mitm(ctx.group, fb, self.table.as_ref()?, 2, ops, counters, point)
     }
 }
 
