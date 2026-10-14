@@ -21,6 +21,7 @@
 //! ecbench challenge seal --draft C.json --out C.json    validate and seal a challenge
 //! ecbench challenge spec --challenge C --candidate '{"id":"..."}' --epoch N --out spec.json
 //! ecbench challenge verdict --challenge C --dir D --epoch N --replay-all --out V.json
+//! ecbench gpu-stage --binary gpu/ecc/bench --out D --mode rho -- --iters 256
 //! ```
 //!
 //! Bounds, frontiers and challenges are `docs/bounds/README.md`.
@@ -39,8 +40,8 @@ use std::process::ExitCode;
 use clap::{Parser, Subcommand};
 
 use crypto_lib::cryptanalysis::ecbench::{
-    audit, bounds, callgrind, canonical, challenge, claim, compare, db, frontier, host, isolab,
-    isolation, methods, record, resources, runner, signals, spec, stats, workload,
+    audit, bounds, callgrind, canonical, challenge, claim, compare, db, frontier, gpu, host,
+    isolab, isolation, methods, record, resources, runner, signals, spec, stats, workload,
 };
 
 #[derive(Parser)]
@@ -58,6 +59,24 @@ struct Cli {
 enum Cmd {
     /// Push, pull and index large files (factor bases, tables) in the object store.
     Store(crypto_lib::store::cli::StoreArgs),
+    /// Run the existing CUDA ECC binary as a separately labelled GPU stage.
+    GpuStage {
+        /// A built gpu/ecc/bench CUDA binary.
+        #[arg(long)]
+        binary: PathBuf,
+        /// A new directory for exact outputs and the receipt.
+        #[arg(long)]
+        out: PathBuf,
+        /// field, mul, rho or bsgs.
+        #[arg(long)]
+        mode: String,
+        /// Watchdog limit for each command, including the device self-test.
+        #[arg(long, default_value_t = 600)]
+        timeout_seconds: u64,
+        /// Options forwarded to the CUDA binary after `--`.
+        #[arg(last = true)]
+        gpu_args: Vec<String>,
+    },
     /// List every method with its parameters.
     Methods {
         #[arg(long)]
@@ -854,6 +873,26 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 return Ok(ExitCode::from(1));
             }
         }
+        Cmd::GpuStage {
+            binary,
+            out,
+            mode,
+            timeout_seconds,
+            gpu_args,
+        } => {
+            let receipt = gpu::run(&gpu::GpuOptions {
+                binary,
+                out: out.clone(),
+                mode,
+                args: gpu_args,
+                timeout_seconds,
+            })?;
+            print_json(&receipt)?;
+            if receipt.status != "stage_completed" {
+                eprintln!("GPU stage {}: see {}", receipt.status, out.display());
+                return Ok(ExitCode::from(1));
+            }
+        }
         Cmd::Compare {
             dir,
             a,
@@ -880,6 +919,21 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 print_json(&c)?;
             } else {
                 println!("{}", c.verdict);
+                if let Some(q) = &c.quality {
+                    println!(
+                        "measurement quality: {} / 100; paired attempts {}, verified {}, admitted {}; levels {:?}; p95 foreign busy {}%, p95 run queue {}%",
+                        q.score.map(|n| n.to_string()).unwrap_or_else(|| "unavailable".into()),
+                        q.paired_attempts,
+                        q.verified_pairs,
+                        q.admitted_pairs,
+                        q.levels,
+                        q.p95_foreign_busy_percent.map(|n| format!("{n:.2}")).unwrap_or_else(|| "unknown".into()),
+                        q.p95_run_queue_percent.map(|n| format!("{n:.2}")).unwrap_or_else(|| "unknown".into()),
+                    );
+                    if !q.notes.is_empty() {
+                        println!("quality notes: {}", q.notes.join("; "));
+                    }
+                }
                 let o = |v: Option<f64>| v.map(|x| format!("{x:.4}")).unwrap_or_else(|| "–".into());
                 let ci = |v: Option<(f64, f64)>| {
                     v.map(|(l, h)| format!("[{l:.4}, {h:.4}]"))
@@ -1342,9 +1396,13 @@ fn write_or_print(out: Option<&Path>, text: &str) -> Result<(), String> {
 /// with its two-stage bootstrap interval (workloads, then runs), the
 /// method's derived expectation, and the ratios to the curve's generic
 /// floor and to the reference arm on the same workloads.
+///
+/// Median `solve_wall_ms` is descriptive host timing (L0 unless isolation
+/// says otherwise); it is not an admitted cost unit.  Kept on the table so
+/// oracle-time wins vs Gröbner are visible beside S without a second tool.
 fn table(dirs: &[PathBuf], reference: Option<&str>) -> Result<(), String> {
-    println!("| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | levels |");
-    println!("|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---|");
+    println!("| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | med wall ms | levels |");
+    println!("|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---:|---|");
     for d in dirs {
         let s = runner::read_session(d)?;
         let recs = runner::read_records(d)?;
@@ -1424,8 +1482,19 @@ fn table(dirs: &[PathBuf], reference: Option<&str>) -> Result<(), String> {
                     *levels.entry(r.isolation.level.name()).or_insert(0) += 1;
                 }
                 let o = |v: Option<f64>| v.map(|x| format!("{x:.3}")).unwrap_or_else(|| "–".into());
+                let mut walls_ms: Vec<f64> = mine
+                    .iter()
+                    .filter(|r| r.counts())
+                    .filter_map(|r| r.time.solve_wall_ns.map(|ns| ns as f64 / 1e6))
+                    .collect();
+                walls_ms.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+                let med_wall = if walls_ms.is_empty() {
+                    None
+                } else {
+                    Some(walls_ms[walls_ms.len() / 2])
+                };
                 println!(
-                    "| {} | {} | {} | {} | {:.2} | {}/{} | {} | {} | {} | {} | {} | {} | {} | {} |",
+                    "| {} | {} | {} | {} | {:.2} | {}/{} | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
                     s.session_id,
                     arm.name,
                     arm.method.id,
@@ -1449,6 +1518,9 @@ fn table(dirs: &[PathBuf], reference: Option<&str>) -> Result<(), String> {
                     } else {
                         "no"
                     },
+                    med_wall
+                        .map(|ms| format!("{ms:.3}"))
+                        .unwrap_or_else(|| "–".into()),
                     levels
                         .iter()
                         .map(|(k, v)| format!("{k}×{v}"))

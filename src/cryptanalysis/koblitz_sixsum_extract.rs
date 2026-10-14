@@ -370,10 +370,9 @@ impl SixSumTable {
             for t in 1..n {
                 p = inst.fast.frobenius_k(p, 1);
                 stats.frobenius_maps += 1;
-                let idx = *fb
-                    .point_index
-                    .get(&p.pack())
-                    .ok_or_else(|| format!("base is not closed under the Frobenius at point {i}"))?;
+                let idx = *fb.point_index.get(&p.pack()).ok_or_else(|| {
+                    format!("base is not closed under the Frobenius at point {i}")
+                })?;
                 member_of[i * n + t] = idx as u32;
             }
         }
@@ -649,25 +648,26 @@ impl SixSumTable {
         let mut seen: HashMap<Vec<usize>, ()> = HashMap::new();
         let early = budget.early_abort;
         // Verify, dedupe, record; `false` stops the scan.
-        let mut accept = |indices: &[usize], ctr: &mut ProbeCounters, out: &mut Vec<Relation>| -> bool {
-            let mut sorted = indices.to_vec();
-            sorted.sort_unstable();
-            if seen.contains_key(&sorted) {
-                return true;
-            }
-            match verify_relation(inst, fb, &sorted, target, ctr) {
-                Ok(rel) => {
-                    seen.insert(sorted, ());
-                    ctr.verified_relations += 1;
-                    out.push(rel);
-                    !early
+        let mut accept =
+            |indices: &[usize], ctr: &mut ProbeCounters, out: &mut Vec<Relation>| -> bool {
+                let mut sorted = indices.to_vec();
+                sorted.sort_unstable();
+                if seen.contains_key(&sorted) {
+                    return true;
                 }
-                Err(_) => {
-                    ctr.verification_rejects += 1;
-                    true
+                match verify_relation(inst, fb, &sorted, target, ctr) {
+                    Ok(rel) => {
+                        seen.insert(sorted, ());
+                        ctr.verified_relations += 1;
+                        out.push(rel);
+                        !early
+                    }
+                    Err(_) => {
+                        ctr.verification_rejects += 1;
+                        true
+                    }
                 }
-            }
-        };
+            };
         let end = match kernel {
             Kernel::FourSum => {
                 let count = self.states.len().max(1);
@@ -1209,7 +1209,11 @@ fn gcd(gf: &Gf2, a: &[u64], b: &[u64]) -> Vec<u64> {
     trim(&mut b);
     while !b.is_empty() {
         monic(gf, &mut b);
-        let r = if b.len() == 1 { Vec::new() } else { rem(gf, &a, &b) };
+        let r = if b.len() == 1 {
+            Vec::new()
+        } else {
+            rem(gf, &a, &b)
+        };
         a = b;
         b = r;
     }
@@ -1390,8 +1394,7 @@ fn quadratic_roots(gf: &Gf2, g: &[u64], roots: &mut Vec<u64>) {
     }
     let inv_a = gf.inv(a);
     let c = gf.mul(b, gf.sqr(inv_a));
-    let Some(z) = crate::cryptanalysis::koblitz_fast_arith::artin_schreier_root(gf, gf.n, c)
-    else {
+    let Some(z) = crate::cryptanalysis::koblitz_fast_arith::artin_schreier_root(gf, gf.n, c) else {
         return;
     };
     let r1 = gf.mul(a, z);
@@ -1439,9 +1442,8 @@ fn split_with_powers(gf: &Gf2, g: &[u64], powers: &[Vec<u64>], from: u32, roots:
         if let Some(dh) = degree(&h) {
             if dh > 0 && dh < d {
                 let (q, _) = divmod(gf, g, &h);
-                let reduce = |m: &[u64]| -> Vec<Vec<u64>> {
-                    powers.iter().map(|p| rem(gf, p, m)).collect()
-                };
+                let reduce =
+                    |m: &[u64]| -> Vec<Vec<u64>> { powers.iter().map(|p| rem(gf, p, m)).collect() };
                 let ph = reduce(&h);
                 split_with_powers(gf, &h, &ph, i + 1, roots);
                 let pq = reduce(&q);
@@ -1657,7 +1659,10 @@ mod tests {
             let mut general = Vec::new();
             s4_roots(gf, &q, &mut general);
             general.sort_unstable();
-            assert_eq!(general, brute, "round {round}: gcd root finder vs brute force");
+            assert_eq!(
+                general, brute,
+                "round {round}: gcd root finder vs brute force"
+            );
             let mut split = Vec::new();
             s4_roots_split(gf, &q, &mut split);
             split.sort_unstable();
@@ -1680,7 +1685,8 @@ mod tests {
                 inst.fast.add(inst.fast.add(r, s1), s2),
                 inst.fast.add(inst.fast.add(r, s1), inst.fast.neg(s2)),
                 inst.fast.add(inst.fast.add(r, inst.fast.neg(s1)), s2),
-                inst.fast.add(inst.fast.add(r, inst.fast.neg(s1)), inst.fast.neg(s2)),
+                inst.fast
+                    .add(inst.fast.add(r, inst.fast.neg(s1)), inst.fast.neg(s2)),
             ]
             .iter()
             .filter(|p| !p.infinity)
@@ -1726,14 +1732,17 @@ mod tests {
         let mut ctr = ProbeCounters::default();
         for (e, s) in table.states.iter().enumerate() {
             assert_eq!(
-                inst.fast.add(fb.points[s.a as usize], fb.points[s.b as usize]),
+                inst.fast
+                    .add(fb.points[s.a as usize], fb.points[s.b as usize]),
                 s.point
             );
             for t in 0..23usize {
                 let (p, _) = table.state_point(&inst, &fb, e, t, &mut ctr);
                 assert_eq!(p, inst.fast.frobenius_k(s.point, t as u32), "e={e} t={t}");
                 assert_eq!(p.x, table.x_of(e, t));
-                let (e2, t2) = table.lookup(p.x, &mut ctr).expect("state abscissa is in the table");
+                let (e2, t2) = table
+                    .lookup(p.x, &mut ctr)
+                    .expect("state abscissa is in the table");
                 // Another entry may share the orbit (duplicate keys are
                 // dropped), but the shifted abscissa must agree.
                 assert_eq!(table.x_of(e2, t2), p.x, "e={e} t={t}");
@@ -1757,7 +1766,10 @@ mod tests {
             let idx = table.state_indices(e, t);
             let p = inst.fast.add(fb.points[idx[0]], fb.points[idx[1]]);
             if neg {
-                (inst.fast.neg(p), [fb.neg_index[idx[0]], fb.neg_index[idx[1]]])
+                (
+                    inst.fast.neg(p),
+                    [fb.neg_index[idx[0]], fb.neg_index[idx[1]]],
+                )
             } else {
                 (p, idx)
             }
@@ -1784,7 +1796,10 @@ mod tests {
         assert_eq!(sum_of(&inst, &fb, &rels[0].indices), r6);
         let mut planted: Vec<usize> = [i1, i2, i3].concat();
         planted.sort_unstable();
-        assert_eq!(rels[0].indices, planted, "kernel A recovers the planted six points");
+        assert_eq!(
+            rels[0].indices, planted,
+            "kernel A recovers the planted six points"
+        );
 
         // Kernel B on the same target: pair (s1, s2) is reached from the
         // outer index 0.
@@ -1793,7 +1808,10 @@ mod tests {
         assert_eq!(rels.len(), 1);
         assert_eq!(rels[0].arity, 6);
         assert_eq!(sum_of(&inst, &fb, &rels[0].indices), r6);
-        assert_eq!(rels[0].indices, planted, "kernel B recovers the planted six points");
+        assert_eq!(
+            rels[0].indices, planted,
+            "kernel B recovers the planted six points"
+        );
         assert!(ctr.s4_solves > 0);
 
         // Kernel B2 (diagonal stride) on the same target, started at
@@ -1931,9 +1949,16 @@ mod tests {
             early_abort: false,
             ..Budget::default()
         };
-        for kernel in [Kernel::FourSum, Kernel::FiveSumControl, Kernel::IterateTable] {
+        for kernel in [
+            Kernel::FourSum,
+            Kernel::FiveSumControl,
+            Kernel::IterateTable,
+        ] {
             let (rels, end) = table.extract(&inst, &fb, target, kernel, 3, &complete, &mut ctr);
-            assert!(rels.is_empty(), "{kernel:?} found a relation outside the lattice");
+            assert!(
+                rels.is_empty(),
+                "{kernel:?} found a relation outside the lattice"
+            );
             assert_eq!(end, ScanEnd::Complete, "{kernel:?}");
         }
         let budgeted = Budget {
@@ -1999,11 +2024,21 @@ mod tests {
         let torsion = FastPoint::affine(0, inst.gf.sqr_k(inst.b, inst.n - 1));
         assert!(inst.fast.is_on_curve(torsion));
         let off = inst.fast.add(inst.fast.mul_u64(rep, 12345), torsion);
-        assert!(!inst.fast.mul_u64(off, r).infinity, "R + T is outside the subgroup");
+        assert!(
+            !inst.fast.mul_u64(off, r).infinity,
+            "R + T is outside the subgroup"
+        );
         let mut ctr2 = ProbeCounters::default();
-        for kernel in [Kernel::FourSum, Kernel::FiveSumControl, Kernel::IterateTable] {
+        for kernel in [
+            Kernel::FourSum,
+            Kernel::FiveSumControl,
+            Kernel::IterateTable,
+        ] {
             let (rels, _) = table.extract(&inst, &fb, off, kernel, 0, &complete, &mut ctr2);
-            assert!(rels.is_empty(), "{kernel:?} verified a relation off the subgroup");
+            assert!(
+                rels.is_empty(),
+                "{kernel:?} verified a relation off the subgroup"
+            );
         }
         assert_eq!(ctr2.verified_relations, 0);
     }
@@ -2019,7 +2054,14 @@ mod tests {
         let mut ctr = ProbeCounters::default();
         let rel = verify_relation(&inst, &fb, &idx, target, &mut ctr).expect("true relation");
         assert_eq!(rel.arity, 4);
-        assert!(verify_relation(&inst, &fb, &idx, inst.fast.add(target, fb.points[1]), &mut ctr).is_err());
+        assert!(verify_relation(
+            &inst,
+            &fb,
+            &idx,
+            inst.fast.add(target, fb.points[1]),
+            &mut ctr
+        )
+        .is_err());
         assert!(verify_relation(&inst, &fb, &[0, 3, 5, 9], target, &mut ctr).is_err());
         assert!(verify_relation(&inst, &fb, &[0, 3, 5, usize::MAX], target, &mut ctr).is_err());
         // P + (−P) cancels in the support.

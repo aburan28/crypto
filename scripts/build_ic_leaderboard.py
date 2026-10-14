@@ -72,6 +72,7 @@ SOURCES = {
     "n41_n53_counted": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
     "conductor_gap_counts": "research/ecbench_conductor_gap_20261012/analysis.json",
     "higher_arity_n41": "research/koblitz_higher_arity_rho_20261013/evidence.json",
+    "frontier_audit": "research/ecbench_frontier_20261013/frontier-data.json",
     "registry": "docs/curves/registry.json",
     "curves_schema": "docs/curves/ic/curves.schema.json",
     "curves_yaml": "docs/curves/ic/curves.yaml",
@@ -580,8 +581,69 @@ def families(board: list[dict]) -> dict:
     return out
 
 
+def latest_frontier_audit() -> dict:
+    """Copy the accounting-only frontier synthesis into the generated board.
+
+    This record is deliberately separate from the ranked curve rows: its source
+    says that no admitted whole-pipeline measurement, reference, or curve moved.
+    """
+    audit = load(SOURCES["frontier_audit"])
+    effect = audit.get("leaderboard_effect", {})
+    cold = audit.get("canonical_koblitz_medium", {}).get("ops_leader", {})
+    online = {row.get("label"): row for row in audit.get("online_boundary", [])}
+    n61 = online.get("n61 compact orbit", {})
+    n83 = online.get("n83 dense K1798", {})
+    failed = next((r for r in audit.get("current_replay_audit", {}).get("receipts", [])
+                   if r.get("file") == "audits/rootfind-n13-replay-all-failed.json"), {})
+    if (audit.get("schema") != "crypto.ecbench_frontier_synthesis/v1"
+            or audit.get("classification") != "evidence synthesis; no new bound or challenge verdict"
+            or effect.get("ranked_rows_changed") is not False
+            or effect.get("generated_audit_record_required") is not True
+            or cold.get("method") != "rho.signed_frobenius_strong"
+            or cold.get("bound_id") != "ECBND1h05a2ea918f3c"
+            or n61.get("status") != "admitted online"
+            or n61.get("targets") != 64
+            or n83.get("status") != "exploratory one point"
+            or n83.get("targets") != 1
+            or "not a matched cold ratio" not in n83.get("setup_inclusive_class", "")
+            or failed.get("ok") is not False
+            or failed.get("replays_identical") != 120
+            or failed.get("replays_total") != 168
+            or failed.get("failures") != 48):
+        raise SystemExit("review the ECBench frontier audit before updating the leaderboard")
+    return {
+        "date": audit["date"],
+        "source": SOURCES["frontier_audit"],
+        "classification": audit["classification"],
+        "ranked_rows_changed": effect["ranked_rows_changed"],
+        "reason": effect["reason"],
+        "cold": {
+            "method": cold["method"], "bound_id": cold["bound_id"],
+            "ops_over_floor": cold["ops_over_floor"], "ops_ci95": cold["ops_ci95"],
+            "runs": cold["runs"], "sizes": cold["sizes"],
+        },
+        "admitted_online": {
+            "label": n61["label"], "rho_over_ic": n61["online_rho_over_ic"],
+            "ci95": n61["online_ci95"], "targets": n61["targets"],
+            "setup_seconds_approx": n61["setup_seconds_approx"], "status": n61["status"],
+        },
+        "exploratory_online": {
+            "label": n83["label"], "rho_over_ic": n83["online_rho_over_ic"],
+            "targets": n83["targets"], "complete_process_seconds": n83["complete_process_seconds"],
+            "setup_inclusive_class": n83["setup_inclusive_class"],
+            "first_integer_break_even_under_model": n83["first_integer_break_even_under_model"],
+            "status": n83["status"],
+        },
+        "replay_block": {
+            "identical": failed["replays_identical"], "total": failed["replays_total"],
+            "failures": failed["failures"], "scope": failed["failure_scope"],
+        },
+    }
+
+
 def build() -> dict:
     names = Names()
+    frontier_audit = latest_frontier_audit()
     small_rows = [json.loads(line) for line in (REPO / SOURCES["f6_small_cold_rows"]).read_text().splitlines() if line]
     small_replay = load(SOURCES["f6_small_cold_replay"])
     small_by_arm = {row["arm"]: row for row in small_rows}
@@ -894,6 +956,7 @@ def build() -> dict:
         "f6_small_cold_diagnostic": small_cold_diagnostic,
         "f6_ecbench_ladder_diagnostic": ladder_diagnostic,
         "f4_f5_f6_cross_family_diagnostic": cross_diagnostic,
+        "latest_frontier_audit": frontier_audit,
         "curve_records": {
             "registry": SOURCES["registry"], "schema": SOURCES["curves_schema"], "yaml": SOURCES["curves_yaml"],
             "yaml_records": n_records,
@@ -972,6 +1035,33 @@ def markdown(doc: dict) -> str:
          "`× reference` and `× floor` are comparable within a table and nowhere else.  The same slug "
          "can appear in two tables with different `S`, because the unit, the reference and the number "
          "of targets differ.", ""]
+    audit = doc["latest_frontier_audit"]
+    cold = audit["cold"]
+    admitted = audit["admitted_online"]
+    exploratory = audit["exploratory_online"]
+    replay = audit["replay_block"]
+    L += [f"## Latest frontier audit ({audit['date']})", "",
+          "This accounting synthesis is published on every performance handoff. It does not replace the "
+          "curve-by-curve tables: the frozen source records that no ranked row changed.", "",
+          "| boundary | observed result | leaderboard treatment |",
+          "|:--|:--|:--|",
+          f"| Canonical medium-tier Koblitz cold operations | `{cold['method']}` / "
+          f"`{cold['bound_id']}`: {cold['ops_over_floor']:.3f}× floor "
+          f"[{cold['ops_ci95'][0]:.3f}, {cold['ops_ci95'][1]:.3f}], "
+          f"{cold['runs']} runs at {cold['sizes']} sizes | Standing rho boundary; not an IC row |",
+          f"| Retained-setup online, `{admitted['label']}` | rho/IC "
+          f"{admitted['rho_over_ic']:.1f}× [{admitted['ci95'][0]:.1f}, "
+          f"{admitted['ci95'][1]:.1f}], {admitted['targets']} unseen targets; about "
+          f"{admitted['setup_seconds_approx']:.0f} s setup excluded | Admitted online result; "
+          "kept separate from cold ranked rows |",
+          f"| Retained-setup online, `{exploratory['label']}` | rho/IC "
+          f"{exploratory['rho_over_ic']:.6f}× on {exploratory['targets']} public point; complete IC "
+          f"process {exploratory['complete_process_seconds']:.3f} s | Exploratory shared-host result; "
+          "no matched cold ratio and no rank promotion |",
+          f"| Current-binary root-finder replay-all | {replay['identical']}/{replay['total']} identical; "
+          f"{replay['failures']} inherited-F4 counter mismatches | Failed replay retained; affected "
+          "stage counters blocked from promotion |", "",
+          f"[Frozen synthesis data](../../{audit['source']}). {audit['reason']}", ""]
     for code in ("A", "B", "C"):
         f = fams[code]
         rows = [r for r in doc["board"] if r["family"] == code]
@@ -1373,6 +1463,36 @@ def page(doc: dict, standalone: bool) -> str:
                  f'{unit_ref("B")}</p></div>')
     P.append(f'<div class="fact"><dt>Curves</dt><dd>{len({r["slug"] for r in board})} priced</dd>'
              f'<p>of {len(doc["roster"])} named in the repository; every one by its ICV1 slug</p></div></dl></header>')
+    audit = doc["latest_frontier_audit"]
+    acold = audit["cold"]
+    admitted = audit["admitted_online"]
+    exploratory = audit["exploratory_online"]
+    replay = audit["replay_block"]
+    P.append(f'<section class="panel" id="frontier-audit"><h2>Latest frontier audit · '
+             f'{esc(audit["date"])} <span class="chip">accounting</span></h2>'
+             '<p>This synthesis is carried on the leaderboard even though it changes no ranked curve row. '
+             'Cold, retained-setup online, exploratory and failed-replay evidence remain separate.</p>'
+             '<div class="scroll"><table><thead><tr><th>Boundary</th><th>Observed result</th>'
+             '<th>Leaderboard treatment</th></tr></thead><tbody>'
+             '<tr><td>Canonical medium-tier Koblitz cold operations</td>'
+             f'<td><code>{esc(acold["method"])}</code> / <code>{esc(acold["bound_id"])}</code>: '
+             f'{acold["ops_over_floor"]:.3f}× floor [{acold["ops_ci95"][0]:.3f}, '
+             f'{acold["ops_ci95"][1]:.3f}], {acold["runs"]} runs at {acold["sizes"]} sizes</td>'
+             '<td>Standing rho boundary; not an IC row</td></tr>'
+             f'<tr><td>Retained-setup online · <code>{esc(admitted["label"])}</code></td>'
+             f'<td>rho/IC {admitted["rho_over_ic"]:.1f}× [{admitted["ci95"][0]:.1f}, '
+             f'{admitted["ci95"][1]:.1f}], {admitted["targets"]} unseen targets; about '
+             f'{admitted["setup_seconds_approx"]:.0f} s setup excluded</td>'
+             '<td>Admitted online result; separate from cold ranked rows</td></tr>'
+             f'<tr><td>Retained-setup online · <code>{esc(exploratory["label"])}</code></td>'
+             f'<td>rho/IC {exploratory["rho_over_ic"]:.6f}× on {exploratory["targets"]} public point; '
+             f'complete IC process {exploratory["complete_process_seconds"]:.3f} s</td>'
+             '<td>Exploratory shared-host result; no matched cold ratio and no rank promotion</td></tr>'
+             f'<tr><td>Current-binary root-finder replay-all</td><td>{replay["identical"]}/'
+             f'{replay["total"]} identical; {replay["failures"]} inherited-F4 counter mismatches</td>'
+             '<td>Failed replay retained; affected stage counters blocked from promotion</td></tr>'
+             '</tbody></table></div>'
+             f'<p>{esc(audit["reason"])} {gh(audit["source"], "Frozen synthesis data")}.</p></section>')
     d = doc["bounded_diagnostics"][0]
     P.append(f'<section class="card" id="bounded-n37-diagnostic"><h2>New n37 counted diagnostic, outside the priced tables</h2>'
              f'<p>On <code>{esc(d["curve"])}</code>, shared-rank K16 has {d["usable_points"]:,} actual usable '
@@ -1789,7 +1909,8 @@ def page(doc: dict, standalone: bool) -> str:
              '<a href="https://github.com/aburan28/crypto/blob/main/docs/ic/BOUNDARY_TARGETS.md">docs/ic/BOUNDARY_TARGETS.md</a>; the canonical page is the '
              '<a href="https://aburan28.github.io/crypto/scoreboard/">index-calculus scoreboard</a>. No IC pipeline has been priced '
              'end to end on ECC2K-130 or on the m = 83 confidence gate (AGENTS.md §8a).</p>'
-             f'<p>Current through ledger §{LEDGER_COVERED_THROUGH}. Built by '
+             f'<p>Current through ledger §{LEDGER_COVERED_THROUGH}; latest frontier audit '
+             f'{esc(doc["latest_frontier_audit"]["date"])}. Built by '
              '<code>scripts/build_ic_leaderboard.py</code> from: '
              + ", ".join(f'<code>{esc(v["path"])}</code> ({v["sha256"][:12]})' for v in doc["sources"].values())
              + '. Curves are named by ICV1 slug (<a href="https://github.com/aburan28/crypto/blob/main/docs/curves/ICV1.md">docs/curves/ICV1.md</a>); '

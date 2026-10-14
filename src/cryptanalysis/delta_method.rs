@@ -204,7 +204,9 @@ pub fn run_delta_cell(
     let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
     let n_vars = m * ell as usize + (m - 2) * kc.n as usize;
     if n_vars > MAX_VARS {
-        return Err(format!("{n_vars} unknowns exceed the {MAX_VARS}-variable engine"));
+        return Err(format!(
+            "{n_vars} unknowns exceed the {MAX_VARS}-variable engine"
+        ));
     }
     let mut records = Vec::with_capacity(targets.len());
     let mut truncated = false;
@@ -231,7 +233,15 @@ pub fn run_delta_cell(
         on_record(&record);
         records.push(record);
     }
-    Ok(summarise_cell(kc, m, ell, &base, targets.len(), records, truncated))
+    Ok(summarise_cell(
+        kc,
+        m,
+        ell,
+        &base,
+        targets.len(),
+        records,
+        truncated,
+    ))
 }
 
 /// Fold the records of a cell into its summary.
@@ -294,7 +304,11 @@ pub fn summarise_cell(
         mean_wall_ms: mean_wall,
         median_wall_ms: median_wall,
         mean_word_xors: mean_xors,
-        max_degree_built: records.iter().map(|r| r.max_degree_built).max().unwrap_or(0),
+        max_degree_built: records
+            .iter()
+            .map(|r| r.max_degree_built)
+            .max()
+            .unwrap_or(0),
         split_free: records.iter().all(|r| r.splits == 0),
         mean_splits,
         net_ms_per_relation: if fraction > 0.0 {
@@ -326,12 +340,18 @@ mod tests {
         );
         let n17_m3 = delta_dimensions(17, 3, -2, 4);
         assert_eq!(
-            n17_m3.iter().map(|c| (c.ell, c.delta, c.n_vars)).collect::<Vec<_>>(),
+            n17_m3
+                .iter()
+                .map(|c| (c.ell, c.delta, c.n_vars))
+                .collect::<Vec<_>>(),
             vec![(5, 2, 32), (6, -1, 35)]
         );
         let n31_m3 = delta_dimensions(31, 3, -2, 4);
         assert_eq!(
-            n31_m3.iter().map(|c| (c.ell, c.delta, c.n_vars)).collect::<Vec<_>>(),
+            n31_m3
+                .iter()
+                .map(|c| (c.ell, c.delta, c.n_vars))
+                .collect::<Vec<_>>(),
             vec![(9, 4, 58), (10, 1, 61), (11, -2, 64)]
         );
         // The variable cap clamps: at n = 41, m = 3 every ℓ with δ ≤ 4
@@ -383,7 +403,10 @@ mod tests {
             .map(|(_, t)| table.decompose(&kc, &base, t, m).is_some())
             .collect();
         let exact_count = exact.iter().filter(|&&d| d).count();
-        assert_eq!(cell.decomposed, exact_count, "solver and pair table disagree");
+        assert_eq!(
+            cell.decomposed, exact_count,
+            "solver and pair table disagree"
+        );
         for (record, truth) in cell.records.iter().zip(&exact) {
             assert_eq!(record.decomposed, *truth, "scalar {}", record.scalar);
         }

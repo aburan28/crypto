@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p20/comparisons/rho-neg__ic-mitm.json
+ops (ok): ic-mitm / rho-neg = 28.0744 [22.955, 35.262] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 11.3999 [11.051, 12.778]
+| curve | log2 r | workloads | ic-mitm / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp20-tm728-d215a2a1 | 18.85 | 8 | 28.0744 | [22.9547, 35.2618] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-mitm mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0ef65828562c | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.5754 | 31.6805 | 20.1095 |
+| W34d518f1ba63 | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.0217 | 34.0232 | 33.3011 |
+| W54526e0ea435 | icv1-fp20-tm728-d215a2a1 | 18.85 | 0.9878 | 31.5409 | 31.9313 |
+| W5fa0ccd7cb0f | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.2663 | 32.4231 | 25.6041 |
+| W62af93136693 | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.0992 | 33.1638 | 30.1710 |
+| W91cf98663c8e | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.1704 | 31.3743 | 26.8063 |
+| W957cbe00e31d | icv1-fp20-tm728-d215a2a1 | 18.85 | 1.1912 | 31.8229 | 26.7141 |
+| Wd141cbfa0a83 | icv1-fp20-tm728-d215a2a1 | 18.85 | 0.9195 | 33.1401 | 36.0427 |

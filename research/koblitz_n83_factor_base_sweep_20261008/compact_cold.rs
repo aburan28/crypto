@@ -1127,9 +1127,13 @@ mod wide {
                                         index.shifted[left2][left_shift2],
                                         index.shifted[right2][right_shift2],
                                     ];
-                                    if let Some(point_indices) =
-                                        lift128(fast, domain, &codes, target, &mut relation_check_ns)
-                                    {
+                                    if let Some(point_indices) = lift128(
+                                        fast,
+                                        domain,
+                                        &codes,
+                                        target,
+                                        &mut relation_check_ns,
+                                    ) {
                                         let position = pos_lo + offset;
                                         sender
                                             .send((
@@ -1404,9 +1408,7 @@ mod wide {
             return Err("compact four-sum requires an affine on-curve target".into());
         }
         let pair_count = if unordered_pairs {
-            columns
-                .checked_mul(columns + 1)
-                .map(|value| value / 2)
+            columns.checked_mul(columns + 1).map(|value| value / 2)
         } else {
             columns.checked_mul(columns)
         }
@@ -1446,7 +1448,14 @@ mod wide {
         let index = build_index128(&gf, &basis, &solver, &reps, unordered_pairs);
         let mut relation_check_ns = 0;
         let witness = extract128(
-            &gf, &fast, &basis, &solver, &index, &domain, target_fast, 0,
+            &gf,
+            &fast,
+            &basis,
+            &solver,
+            &index,
+            &domain,
+            target_fast,
+            0,
             &mut relation_check_ns,
         );
         if let Some(relation) = &witness {
@@ -2186,10 +2195,19 @@ mod wide {
                 }
                 let mut check_ns = 0;
                 let witness = extract128(
-                    &gf, &fast, &basis, &solver, &index, &domain, target,
-                    trial, &mut check_ns,
+                    &gf,
+                    &fast,
+                    &basis,
+                    &solver,
+                    &index,
+                    &domain,
+                    target,
+                    trial,
+                    &mut check_ns,
                 )
-                .unwrap_or_else(|| panic!("planted four-sum missed: unordered={unordered} trial={trial}"));
+                .unwrap_or_else(|| {
+                    panic!("planted four-sum missed: unordered={unordered} trial={trial}")
+                });
                 let mut sum = BinaryPoint::Infinity;
                 for (summand, &point_index) in witness.point_indices.iter().enumerate() {
                     let point = to_general(base.points[point_index]);

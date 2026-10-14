@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p22/comparisons/ic-abscissa__ic-rootfind.json
+ops (ok): ic-rootfind / ic-abscissa = 1.0008 [0.996, 1.006] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.1346 [1.089, 1.180]
+| curve | log2 r | workloads | ic-rootfind / ic-abscissa | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp22-tm2947-e15fed69 | 21.19 | 8 | 1.0008 | [0.9955, 1.0059] | cluster |
+
+| workload | curve | log2 r | ic-abscissa mean S | ic-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W15abd5c646fe | icv1-fp22-tm2947-e15fed69 | 21.19 | 50.5170 | 50.6718 | 1.0031 |
+| W251e2c6702e6 | icv1-fp22-tm2947-e15fed69 | 21.19 | 50.7739 | 50.8011 | 1.0005 |
+| W922bdcc0958f | icv1-fp22-tm2947-e15fed69 | 21.19 | 50.5681 | 50.7056 | 1.0027 |
+| Wc8ca24deff43 | icv1-fp22-tm2947-e15fed69 | 21.19 | 50.3635 | 50.4795 | 1.0023 |
+| Wce40999900d8 | icv1-fp22-tm2947-e15fed69 | 21.19 | 50.5773 | 50.7054 | 1.0025 |
+| Wd5ac0a1d62c6 | icv1-fp22-tm2947-e15fed69 | 21.19 | 51.2739 | 50.6937 | 0.9887 |
+| We4aba132c214 | icv1-fp22-tm2947-e15fed69 | 21.19 | 50.6513 | 51.1471 | 1.0098 |
+| Wf0150ebb311b | icv1-fp22-tm2947-e15fed69 | 21.19 | 50.8526 | 50.6931 | 0.9969 |

@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pdp_root_finder_ecbench_20261013/claim_round/sessions/n31/comparisons/rho-strong__ic-rootfind.json
+ops (ok): ic-rootfind / rho-strong = 212.4949 [194.016, 229.255] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 0.4218 [0.417, 0.463]
+| curve | log2 r | workloads | ic-rootfind / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m31-tm90707-c95f16f5 | 20.46 | 8 | 212.4949 | [194.0160, 229.2547] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | ic-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W1d01141db39c | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.2341 | 266.3038 | 215.7801 |
+| W30116c6f587f | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.2964 | 287.2201 | 221.5556 |
+| W45a83de82ef9 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.2961 | 277.0548 | 213.7601 |
+| W62b600abcf33 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.2522 | 286.4687 | 228.7717 |
+| W673f7ec5e471 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.1983 | 235.8541 | 196.8234 |
+| W698f787fe571 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.1011 | 258.7054 | 234.9602 |
+| Wa20736cf0ae7 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.3053 | 245.9834 | 188.4540 |
+| Wca3f7a8736d8 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.2166 | 246.1313 | 202.3041 |

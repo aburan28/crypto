@@ -1,0 +1,93 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "PKM Kummer-tower index calculus vs rho, 20-bit p, t=8",
+  "description": "Preregistered prime-field ladder (PROTOCOL.md): ic.pipeline with Petit-Kosters-Messeng's Kummer tower base prime-kummer:t=8 (|V| = 2^8, 123 abscissae on the curve) and the root-finding oracles rootfind-mitm and rootfind-pairs, the harness's mitm:m=3 table oracle, a prime-abscissa control of the same size, against rho with the negation map, eight one-target workloads. All IC arms charge every group operation.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "prime_explicit",
+        "p": 946177,
+        "a": 304973,
+        "b": 530845,
+        "group_order": 946906,
+        "r": 473453,
+        "gx": 507332,
+        "gy": 85990
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 202610132020
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-mitm",
+      "role": "baseline",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-kummer:t=8",
+          "oracle": "mitm:m=3,negation_folded=1",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-rootfind",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-kummer:t=8",
+          "oracle": "rootfind-mitm:m=3",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-rootfind-pairs",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-kummer:t=8",
+          "oracle": "rootfind-pairs:m=3",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-abscissa",
+      "role": "control",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=123",
+          "oracle": "rootfind-mitm:m=3",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "rho-neg-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.negation"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 3,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 202610133020,
+    "isolation_required": "L2",
+    "timeout_seconds": 3600
+  }
+}

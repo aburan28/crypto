@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 470" font-family="Helvetica, Arial, sans-serif" font-size="13">
+  <rect width="960" height="470" fill="#ffffff"/>
+  <text x="480" y="26" text-anchor="middle" font-size="16" font-weight="bold">Why the (7,4) weak curve has two weak lines</text>
+  <text x="480" y="46" text-anchor="middle" font-size="12" fill="#444">status: every box below is measured (weak_line_lab f2) unless labelled derived; Lemma A is derived and tested on 13 + 12 field arms</text>
+
+  <!-- F_q-structure of g -->
+  <rect x="30" y="70" width="270" height="130" rx="8" fill="#eef4fb" stroke="#1f77b4"/>
+  <text x="165" y="92" text-anchor="middle" font-weight="bold">g in F_7[x] (measured)</text>
+  <text x="165" y="114" text-anchor="middle">g(x) = x^5+2x^4+x^3+3x^2+4x+3</text>
+  <text x="165" y="136" text-anchor="middle">x0 = -g4/5 = 1 in F_7</text>
+  <text x="165" y="158" text-anchor="middle">g(x0+s) = s^5 + 5 s^3 + 5 s   (odd)</text>
+  <text x="165" y="180" text-anchor="middle">nu(s) = -s + 2 x0 is in Aut(g), over F_7</text>
+
+  <!-- curve over K -->
+  <rect x="345" y="70" width="270" height="130" rx="8" fill="#f6f6f6" stroke="#555"/>
+  <text x="480" y="92" text-anchor="middle" font-weight="bold">C / K = F_{7^4} (measured)</text>
+  <text x="480" y="114" text-anchor="middle">y^2 = f(x),  f(x) = beta^5 g(x/beta)</text>
+  <text x="480" y="136" text-anchor="middle">#J(K) = 6170256 (point counts =</text>
+  <text x="480" y="154" text-anchor="middle">Frobenius route, both lines)</text>
+  <text x="480" y="180" text-anchor="middle">a weak line: c f(β't+b) in F_7[t]</text>
+
+  <!-- Lemma A -->
+  <rect x="660" y="70" width="270" height="130" rx="8" fill="#fff6e6" stroke="#ff7f0e"/>
+  <text x="795" y="92" text-anchor="middle" font-weight="bold">Lemma A (derived)</text>
+  <text x="795" y="114" text-anchor="middle">#weak lines = #{ nu in Aut(g) :</text>
+  <text x="795" y="132" text-anchor="middle">N(nu) = phi^{n-1}(nu)...phi(nu) nu = 1 }</text>
+  <text x="795" y="154" text-anchor="middle">nu over F_q: N(nu) = nu^n</text>
+  <text x="795" y="176" text-anchor="middle">nu = -s+2x0:  nu^n = id iff n even</text>
+
+  <!-- lines -->
+  <rect x="60" y="270" width="300" height="76" rx="8" fill="#e8f5e9" stroke="#2ca02c"/>
+  <text x="210" y="294" text-anchor="middle" font-weight="bold">line 1 = beta F_7 (through 0)</text>
+  <text x="210" y="314" text-anchor="middle">psi1 = t^5+4t^4+4t^3+3t^2+t+5</text>
+  <text x="210" y="334" text-anchor="middle">a1=0, a2=-4, #J(F_7)=46, #J(F_49)=2116</text>
+  <rect x="600" y="270" width="300" height="76" rx="8" fill="#e8f5e9" stroke="#2ca02c"/>
+  <text x="750" y="294" text-anchor="middle" font-weight="bold">line 2 = sigma1(mu F_7), not a scaling line</text>
+  <text x="750" y="314" text-anchor="middle">psi2 = t^5+5t^4+t^2+2t+4</text>
+  <text x="750" y="334" text-anchor="middle">a1=0, a2=-4, #J(F_7)=46, #J(F_49)=2116</text>
+
+  <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#333"/></marker></defs>
+  <line x1="165" y1="200" x2="195" y2="268" stroke="#333" marker-end="url(#ah)"/>
+  <line x1="795" y1="200" x2="765" y2="268" stroke="#333" marker-end="url(#ah)"/>
+  <line x1="365" y1="308" x2="595" y2="308" stroke="#d62728" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="480" y="290" text-anchor="middle" fill="#d62728" font-weight="bold">mu : t -> delta t + gamma</text>
+  <text x="480" y="326" text-anchor="middle" fill="#d62728">psi1(mu t) = (delta)^5 psi2(t)</text>
+  <text x="480" y="344" text-anchor="middle" fill="#d62728">delta in F_49 \ F_7 (measured)</text>
+
+  <rect x="150" y="385" width="660" height="62" rx="8" fill="#fdecea" stroke="#d62728"/>
+  <text x="480" y="407" text-anchor="middle">mu^phi mu^-1 = (-1, 4) = nu in Aut(psi1), order 2, over F_7 (measured): delta^(q-1) = -1</text>
+  <text x="480" y="427" text-anchor="middle">psi2 is not F_7-equivalent to psi1 or g (0 maps), but is over F_49 (2 maps): a twist trivialised over F_49</text>
+  <line x1="480" y1="346" x2="480" y2="383" stroke="#333" marker-end="url(#ah)"/>
+</svg>

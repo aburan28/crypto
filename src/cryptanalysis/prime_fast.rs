@@ -343,6 +343,23 @@ pub struct FastCurve {
     pub name: String,
 }
 
+/// Reused storage for simultaneous additions from independent walk lanes.
+/// Each active ordinary lane contributes one denominator; exceptional lanes
+/// use the ordinary group law after the shared inversion.
+#[derive(Default)]
+pub struct BatchAddScratch {
+    denominators: Vec<u64>,
+    prefix: Vec<u64>,
+    ordinary: Vec<Option<usize>>,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct BatchAddStats {
+    pub ordinary: usize,
+    pub exceptional: usize,
+    pub inversions: usize,
+}
+
 impl FastCurve {
     pub fn new(name: &str, p: u64, a: u64, b: u64, n: u64) -> Self {
         let f = Fp64::new(p);
@@ -468,6 +485,55 @@ impl FastCurve {
                 }
             }
         }
+    }
+
+    /// Advance independent affine walk lanes with one Montgomery inversion
+    /// across their ordinary additions.  Lane order and each output agree
+    /// exactly with calling `add` separately.  The caller owns lane fill,
+    /// drain, jump selection, coefficients and target verification.
+    pub fn add_many_batched(
+        &self,
+        left: &mut [Option<Pt>],
+        right: &[Option<Pt>],
+        scratch: &mut BatchAddScratch,
+    ) -> BatchAddStats {
+        assert_eq!(left.len(), right.len());
+        let n = left.len();
+        scratch.denominators.clear();
+        scratch.ordinary.clear();
+        scratch.denominators.reserve(n);
+        scratch.ordinary.reserve(n);
+        let mut stats = BatchAddStats::default();
+        for (&a, &b) in left.iter().zip(right) {
+            if let (Some(p), Some(q)) = (a, b) {
+                if p.x != q.x {
+                    let index = scratch.denominators.len();
+                    scratch.denominators.push(self.f.sub(q.x, p.x));
+                    scratch.ordinary.push(Some(index));
+                    stats.ordinary += 1;
+                    continue;
+                }
+            }
+            scratch.ordinary.push(None);
+            stats.exceptional += 1;
+        }
+        if stats.ordinary > 0 {
+            self.f
+                .batch_inv(&mut scratch.denominators, &mut scratch.prefix);
+            stats.inversions = 1;
+        }
+        for i in 0..n {
+            left[i] = if let Some(index) = scratch.ordinary[i] {
+                Some(self.add_with_inv(
+                    left[i].expect("ordinary lane"),
+                    right[i].expect("ordinary lane"),
+                    scratch.denominators[index],
+                ))
+            } else {
+                self.add(left[i], right[i])
+            };
+        }
+        stats
     }
 
     /// `[k]P` by double-and-add (variable time; everything here is public).
@@ -1548,6 +1614,75 @@ mod tests {
                 let res = rho_parallel(&fc, g, q, &cfg).expect("rho solves");
                 assert_eq!(res.log, k, "bits={bits} negation={negation}");
             }
+        }
+    }
+
+    #[test]
+    fn batched_additions_preserve_independent_lane_streams() {
+        let (curve, g) = ladder(20);
+        let mut rng = StdRng::seed_from_u64(20261018);
+        for width in [1usize, 2, 4, 8, 16] {
+            let starts: Vec<Option<Pt>> = (0..width)
+                .map(|_| curve.mul(Some(g), rng.gen_range(1..curve.n)))
+                .collect();
+            let jumps: Vec<Option<Pt>> = (0..width)
+                .map(|_| curve.mul(Some(g), rng.gen_range(1..curve.n)))
+                .collect();
+            let mut scalar = starts.clone();
+            let mut batch = starts;
+            let mut scratch = BatchAddScratch::default();
+            let mut inversions = 0usize;
+            for step in 0..1024 {
+                for (left, right) in scalar.iter_mut().zip(&jumps) {
+                    *left = curve.add(*left, *right);
+                }
+                let stats = curve.add_many_batched(&mut batch, &jumps, &mut scratch);
+                inversions += stats.inversions;
+                assert_eq!(batch, scalar, "width {width}, step {step}");
+            }
+            assert!(inversions <= 1024);
+        }
+    }
+
+    /// Kernel throughput diagnostic only: this excludes factor-base setup,
+    /// target probing, lane fill/drain and the matrix.
+    #[test]
+    #[ignore]
+    fn profile_native_walk_lane_batch() {
+        let (curve, g) = ladder(20);
+        let mut rng = StdRng::seed_from_u64(20261018);
+        for width in [1usize, 4, 8, 16] {
+            let starts: Vec<Option<Pt>> = (0..width)
+                .map(|_| curve.mul(Some(g), rng.gen_range(1..curve.n)))
+                .collect();
+            let jumps: Vec<Option<Pt>> = (0..width)
+                .map(|_| curve.mul(Some(g), rng.gen_range(1..curve.n)))
+                .collect();
+            let mut scalar = starts.clone();
+            let mut batch = starts;
+            let steps = 4096usize;
+            let started = Instant::now();
+            for _ in 0..steps {
+                for (left, right) in scalar.iter_mut().zip(&jumps) {
+                    *left = curve.add(*left, *right);
+                }
+            }
+            let scalar_ns = started.elapsed().as_nanos();
+            let started = Instant::now();
+            let mut scratch = BatchAddScratch::default();
+            let mut inversions = 0usize;
+            for _ in 0..steps {
+                inversions += curve
+                    .add_many_batched(&mut batch, &jumps, &mut scratch)
+                    .inversions;
+            }
+            let batch_ns = started.elapsed().as_nanos();
+            assert_eq!(scalar, batch);
+            println!(
+                "lanes={width} steps={steps} scalar_ns={scalar_ns} batch_ns={batch_ns} \
+                 scalar_inversions_at_most={} batch_inversions={inversions}",
+                steps * width
+            );
         }
     }
 

@@ -1,0 +1,72 @@
+{
+  "session": "research/ecbench_rootfinding_lanes_20261013/sessions/coverage-holdout-local-20261013",
+  "arms": {
+    "b48-stride-1": {
+      "curve_p": 563153,
+      "curve_a": 51142,
+      "curve_b": 548946,
+      "subgroup_r": 562427,
+      "unique_pair_keys": 2286,
+      "uniform_hit_probability": 0.008129069424244257,
+      "factor_base_sha256": "4660a62ac78b879ca075bad22eb4edfd6d1dbf9d26e908c6e8a24386be727327",
+      "measured_runs": 24,
+      "targets": 8,
+      "lookups": 92058,
+      "relations": 722,
+      "observed_hit_probability": 0.007842881661561189,
+      "observed_to_uniform_ratio": 0.9647945234875794,
+      "target_cluster_ratio_interval_95": [
+        0.899201769397867,
+        1.054514855992221
+      ],
+      "mean_cold_gae": 8097.833333333333,
+      "peak_rss_kib": 31184,
+      "mean_independent_rank": 30.083333333333332
+    },
+    "b48-stride-23": {
+      "curve_p": 563153,
+      "curve_a": 51142,
+      "curve_b": 548946,
+      "subgroup_r": 562427,
+      "unique_pair_keys": 2298,
+      "uniform_hit_probability": 0.008171741704686483,
+      "factor_base_sha256": "5d2515cd81bad2988b60d3bfd1d7002e45b5b3c09319dac94557ae38fbc1ee0d",
+      "measured_runs": 24,
+      "targets": 8,
+      "lookups": 86521,
+      "relations": 718,
+      "observed_hit_probability": 0.00829856335456132,
+      "observed_to_uniform_ratio": 1.0155195372612067,
+      "target_cluster_ratio_interval_95": [
+        0.9336162566706948,
+        1.1282900352628773
+      ],
+      "mean_cold_gae": 7802.125,
+      "peak_rss_kib": 31200,
+      "mean_independent_rank": 29.916666666666668
+    },
+    "b48-stride-7": {
+      "curve_p": 563153,
+      "curve_a": 51142,
+      "curve_b": 548946,
+      "subgroup_r": 562427,
+      "unique_pair_keys": 2301,
+      "uniform_hit_probability": 0.00818240977479704,
+      "factor_base_sha256": "634e3316c69abbae2f0596e4bf5e9b0e14f880f36795d72258b4f714457e8c28",
+      "measured_runs": 24,
+      "targets": 8,
+      "lookups": 94587,
+      "relations": 744,
+      "observed_hit_probability": 0.007865774366456278,
+      "observed_to_uniform_ratio": 0.9613029147823855,
+      "target_cluster_ratio_interval_95": [
+        0.9005720413575121,
+        1.0196710346834619
+      ],
+      "mean_cold_gae": 8238.416666666666,
+      "peak_rss_kib": 31152,
+      "mean_independent_rank": 31.0
+    }
+  },
+  "inference_limit": "Walk probes are correlated and stop at target pin; the uniform probability is exact for independent uniform subgroup points, while the target-cluster intervals are descriptive."
+}
