@@ -1,0 +1,14 @@
+{
+  "schema": "conductor_gap.callgrind_profile_config/v2",
+  "binary_sha256": "ee7b82cf016f2433e99edd096f6a5dbfb3b3f9c4447f1583fae22864252a12e1",
+  "source_commit": "a92902a93",
+  "source_base": "275beb93f3bf33ade6c19f19e8b336027a00b297",
+  "phase_dumps": false,
+  "collection": "enabled throughout methods::solve; outer before/after markers retained",
+  "valgrind_version": "3.24.0",
+  "release_optimization": "Cargo default release profile, optimized",
+  "cpu_feature_dispatch": "unknown",
+  "jobs": "jobs.json",
+  "expected_profiles": 100,
+  "watchdog_seconds": 1800
+}
