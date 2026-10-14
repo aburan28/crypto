@@ -11,7 +11,7 @@ Keep resolved and superseded records in the index.
 
 | Problem | Status | What it blocks | What would unblock it |
 | --- | --- | --- | --- |
-| [ECC arithmetic cross-platform performance](ecc-arithmetic-platform-measurement.md) | open | controlled multi-platform and worldwide arithmetic comparisons | identified isolated ARM/x86 hosts with A/A controls, validated backend implementations and matched comparators; Modal source access resolved |
+| [ECC arithmetic cross-platform performance](ecc-arithmetic-platform-measurement.md) | open | controlled multi-platform and worldwide arithmetic comparisons | identified isolated ARM/x86 hosts with A/A controls, validated backend implementations and matched comparators; new X25519 Modal bundle awaits explicit source-export approval |
 | [N83 recorded-query sampler contract](n83-recorded-query-sampler-contract-mismatch.md) | open | green whole-library validation on the pinned baseline | traced and versioned query law, point checks and passing regression |
 | [GHS → Smith characteristic mismatch](ghs-to-smith-pipeline-characteristic-mismatch.md) | open | the GHS → Smith → Diem pipeline | a char-2 hyperelliptic→quartic isogeny, or an odd-char descent onto genus-3 hyperelliptic curves |
 | [Smith 18.57% walk extension](smith-kernel-isogeny-class-walk.md) | open | costing walks that lift Smith's coverage toward 50.16% | native Smith Prop. 2/4 tests and per-class success counts |

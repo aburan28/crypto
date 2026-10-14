@@ -56,9 +56,28 @@ field timings; they do not pass the controlled wall-time gate or establish
 a worldwide rank. See the [Modal report](reports/modal-20261013/REPORT.md),
 [all rows](modal_paired.csv), and [two-run graph](modal_paired.svg).
 
-The broader prime curves,
-Curve25519/Ed25519, Koblitz scalar path, Metal and CUDA/HIP kernels remain
-unimplemented or unmeasured as listed in [PLAN.md](PLAN.md).
+The broader prime curves, Ed25519, Koblitz scalar path, Metal and CUDA/HIP
+kernels remain unimplemented or unmeasured as listed in [PLAN.md](PLAN.md).
+
+Subsequent work added a five-limb X25519 field and ladder. The
+[local validation record](x25519_validation/README.md) has 1,000 field rows,
+100 full-operation outputs, two RFC vectors, independent integer checkers,
+and a [PDF diagram](x25519_validation/REPORT.pdf). This is correctness
+evidence, not an X25519 timing comparison. A focused repository release build
+was [stopped under host load](x25519_validation/CARGO_RELEASE_ATTEMPT.md)
+before emitting a test result. A smaller
+[source-bound Cargo harness](source_tests/README.md) subsequently passed
+13 focused tests across the 25519 and P-521 modules. Automatic approval review
+[rejected](x25519_validation/MODAL_REVIEW_DENIAL.md) the new source bundle's
+Modal export before a worker started. Ed25519 remains on its `BigUint` path.
+
+A nine-word P-521 field was also added and exposed as a module. Its
+[validation record](p521_validation/README.md) retains 1,000 deterministic
+rows and a separate Python integer replay of canonicalization, addition,
+subtraction, multiplication, and inversion; all rows matched. The
+[diagram and PDF](p521_validation/REPORT.pdf) bind this observation to the
+field boundary. No P-521 point or scalar path uses the new field yet, and
+there is no P-521 timing comparison or compiled-code side-channel result.
 
 The ECC2K boundary scoreboard and ecbench comparisons were checked at base
 commit `11459b07f` and receive no updated performance claim, because the

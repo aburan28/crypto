@@ -44,5 +44,34 @@ remote source path and its receipt remains. The completed workers reported
 PCLMULQDQ but no CPU model or reserved-core receipt; absolute times changed
 markedly between them, including the unchanged control. The dedicated Modal
 report and graph are in research/ecc_arithmetic_20261013/reports/modal-20261013/.
-No controlled wall-time or worldwide claim follows. NIST primes, Curve25519,
-Ed25519, Koblitz scalar recoding, Metal and CUDA/HIP remain open.
+No controlled wall-time or worldwide claim follows.
+
+#pagebreak()
+== Next implementation: X25519
+
+A five-limb radix-2^51 field and X25519 ladder were added after the field
+panels. Local source-bound checks passed 1,000 field rows against Python
+integers, 100 full X25519 outputs against an independent integer ladder,
+and two RFC 7748 vectors. The separate
+research/ecc_arithmetic_20261013/x25519_validation/REPORT.pdf shows the
+validation flow and receipt boundaries. A focused Cargo release build was
+stopped under host load before a test result; an x86-64 Modal export of the new source was rejected before
+launch pending specific authorization. No X25519 timing or machine-code
+constant-time conclusion follows.
+The smaller source-bound Cargo harness later passed 13 focused tests across
+the imported 25519 and P-521 modules; it does not replace the full suite.
+
+#image("x25519_validation/validation_flow.svg", width: 100%)
+
+== Next implementation: P-521 field
+
+A nine-word field modulo 2^521 - 1 is exposed in the ECC library. Its separate
+validation flow and raw receipt are in
+research/ecc_arithmetic_20261013/p521_validation/REPORT.pdf and README.md.
+The Rust source emitted 1,000 deterministic rows; a Python integer oracle
+matched canonicalization, addition, subtraction, multiplication and inversion
+in every row. No P-521 point or scalar path uses the field, and no timing or
+machine-code side-channel conclusion follows. P-192/224/384, Ed25519,
+Koblitz recoding, Metal and CUDA/HIP remain open.
+
+#image("p521_validation/p521_flow.svg", width: 100%)

@@ -1,11 +1,15 @@
 # ECC arithmetic implementation map, 2026-10-13
 
-**Status:** implementation analysis and test plan. The only new measured
-kernel in this change is the binary-field CPU multiply in
-[`src/binary_ecc/f2m.rs`](../../src/binary_ecc/f2m.rs). The backend options
-below are candidates until built and measured. I treated the missing major
-backend in the request as NVIDIA CUDA and included AMD HIP/ROCm as another
-relevant platform.
+**Status:** implementation analysis and test plan. The only new timed kernel
+in this change is the binary-field CPU multiply in
+[`src/binary_ecc/f2m.rs`](../../src/binary_ecc/f2m.rs). A five-limb
+[`X25519` field and ladder](../../src/ecc/f25519.rs) now have
+[local correctness validation](x25519_validation/README.md) but no qualified
+timing. A nine-word [P-521 field](../../src/ecc/p521_field.rs) has a separate
+[local arithmetic check](p521_validation/README.md) but no point integration or
+timing. The other backend options remain candidates until built and measured.
+I treated the missing major backend in the request as NVIDIA CUDA and included
+AMD HIP/ROCm as another relevant platform.
 
 ## Separate workloads before tuning
 
@@ -68,9 +72,10 @@ a single scalar multiplication may lose to CPU after dispatch and transfer.
 | --- | --- | --- |
 | ECC2K-130, GF(2^131) | Generic `F2mElement`; specialized walk kernels exist elsewhere in the repository | PMULL/PCLMUL three-limb Karatsuba, sparse reduction specialized for the exact modulus; square as bit spread; batch inversion; Koblitz Frobenius recoding for scalar multiplication |
 | General GF(2^m) | Arbitrary-width `F2mElement` | Width-specific 2/3/4/6/9-limb multiplication crossover, CLMUL vs shift/XOR reduction, sparse/dense moduli kept distinct |
-| NIST P-192/224/384/521 | General prime field `BigUint` path in the audited surface | Fixed-limb constant-time fields with modulus-specific reduction; P-521 merits a Mersenne fold; use verified generated arithmetic as a differential reference |
+| NIST P-192/224/384 | General prime field `BigUint` path in the audited surface | Fixed-limb fields with modulus-specific reduction; use verified generated arithmetic as a differential reference |
+| NIST P-521 | General `BigUint` point path; new nine-word field is not connected to it | Mersenne folding field is locally validated; integrate points, test complete scalar path, inspect machine code, then compare timing |
 | NIST P-256 | Existing constant-time Montgomery field and projective point path | Compare fused multiply/reduce and point formulas against established implementations at identical secrecy and conversion boundaries |
-| Curve25519 | `BigUint` field in `curve25519.rs` | Fixed radix 5x51 or 10x25/26 field, Montgomery ladder for X25519, RFC 7748 decoding and all-zero behavior |
+| Curve25519 / X25519 | The former `BigUint` ladder remains a reference; the public X25519 path now uses fixed radix 5x51 | Release library tests, compiled-code timing review, isolated ARM/x86 panels, and same-boundary production comparators |
 | Ed25519 | Shares the `BigUint` field | Reuse verified fixed radix field, extended Edwards point formulas, separate signing and verification workloads and RFC 8032 encoding checks |
 
 The field and curve identities follow the checkout's
@@ -90,11 +95,11 @@ The exact modulus and candidate limb layout are separate choices:
 | P-224 | `2^224 - 2^96 + 1` | 4 x 56-bit or 7 x 32-bit limbs; bound carry propagation before comparing to Montgomery |
 | P-256 | `2^256 - 2^224 + 2^192 + 2^96 - 1` | Existing 4 x 64 Montgomery baseline; test fused reduction and verified generated output |
 | P-384 | `2^384 - 2^128 - 2^96 + 2^32 - 1` | 6 x 64-bit limbs; compare direct folding and interleaved Montgomery carry chains |
-| P-521 | `2^521 - 1` | 9 limbs with a short top limb or a radix chosen for carry bounds; Mersenne fold |
+| P-521 | `2^521 - 1` | Implemented 9 x 64 words with a 9-bit top word and end-around Mersenne fold; point integration and performance unmeasured |
 | 25519 | `2^255 - 19` | 5 x 51-bit on 64-bit CPUs and 10 alternating 25/26-bit on narrower SIMD/GPU lanes |
 
-The local code does not currently provide these six fixed-limb paths as a
-matched panel. For each candidate, prove or test bounds after multiplication,
+The local code does not currently provide these fields as a matched panel.
+For each candidate, prove or test bounds after multiplication,
 carry and reduction, canonical output, and constant-time conditional
 subtraction. A shorter reduction expression can still lose if it lengthens
 the dependency chain. The cited [NIST parameter source](https://csrc.nist.gov/pubs/sp/800/186/final)
