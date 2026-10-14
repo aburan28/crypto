@@ -782,6 +782,123 @@ fn verify(path: &str, fixture_path: &str) {
     );
 }
 
+fn support(path: &str) {
+    for line in std::fs::read_to_string(path).unwrap().lines() {
+        let v: serde_json::Value = serde_json::from_str(line).unwrap();
+        let p = v["p"].as_u64().unwrap();
+        let r = v["r"].as_u64().unwrap();
+        let h = v["cofactor"].as_u64().unwrap();
+        let f = Fp2::new(p).unwrap();
+        let curve = Curve {
+            f,
+            a: f.zero(),
+            b: f.one(),
+        };
+        let dest = Curve {
+            f,
+            a: f.zero(),
+            b: f.from_fp(p - 27),
+        };
+        let g = parse_point(&v["generator"]);
+        let target = parse_point(&v["target"]);
+        let raw: Vec<Point> = v["base_raw"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(parse_point)
+            .collect();
+        let mut points = Vec::with_capacity(raw.len() * 2);
+        for point in raw {
+            points.push(point);
+            points.push(curve.neg(point));
+        }
+        let mut ops = GroupOps::default();
+        let torsion = Point::affine(f.zero(), f.one());
+        assert!(curve.mul(&mut ops, torsion, 3).infinity);
+        assert!(
+            curve.mul(&mut ops, torsion, h).infinity,
+            "cofactor must kill T"
+        );
+        let t2 = curve.add(&mut ops, torsion, torsion);
+        let shifts = [curve.identity(), torsion, t2];
+        let rshifts: Vec<Point> = shifts
+            .iter()
+            .map(|&pt| curve.mul(&mut ops, pt, r))
+            .collect();
+        let mut supports: [BTreeSet<u64>; 3] = std::array::from_fn(|_| BTreeSet::new());
+        let mut raw_pair_counts = [0u64; 3];
+        let mut projected_support = BTreeSet::new();
+        let mut mapped_support = BTreeSet::new();
+        let mut chi_keys = BTreeMap::<Option<[u64; 2]>, BTreeSet<u64>>::new();
+        let mut chi_checks = 0u64;
+        let mut pairs = 0u64;
+        for i in 0..points.len() {
+            for j in i..points.len() {
+                let sum = curve.add(&mut ops, points[i], points[j]);
+                if sum.infinity {
+                    continue;
+                }
+                pairs += 1;
+                let projected = curve.mul(&mut ops, sum, h);
+                if !projected.infinity {
+                    let key = curve.key(&projected);
+                    projected_support.insert(key);
+                    mapped_support.insert(dest.key(&phi(&curve, projected)));
+                }
+                assert_eq!(
+                    chi(&curve, curve.add(&mut ops, sum, torsion)),
+                    mobius(&f, chi(&curve, sum))
+                );
+                chi_checks += 1;
+                chi_keys
+                    .entry(orbit_key(&curve, projected))
+                    .or_default()
+                    .insert(curve.key(&projected));
+                let rsum = curve.mul(&mut ops, sum, r);
+                for a in 0..3 {
+                    if rsum == rshifts[a] {
+                        let corrected = curve.add(&mut ops, sum, curve.neg(shifts[a]));
+                        assert!(curve.mul(&mut ops, corrected, r).infinity);
+                        if !corrected.infinity {
+                            supports[a].insert(curve.key(&corrected));
+                            raw_pair_counts[a] += 1;
+                        }
+                    }
+                }
+            }
+        }
+        let mut union = BTreeSet::new();
+        for set in &supports {
+            union.extend(set.iter().copied());
+        }
+        let mut subgroup = BTreeSet::new();
+        for k in 1..r {
+            subgroup.insert(curve.key(&curve.mul(&mut ops, g, k)));
+        }
+        assert_eq!(subgroup.len(), (r - 1) as usize);
+        assert!(union.is_subset(&subgroup));
+        assert_eq!(
+            projected_support.len(),
+            mapped_support.len(),
+            "isogeny injectivity on observed subgroup sums"
+        );
+        let target_key = curve.key(&target);
+        println!(
+            "{}",
+            json!({
+                "schema":"torsion_extension_support/v1","p":p,"r":r,"signed_base_points":points.len(),
+                "pair_sums_nonidentity":pairs,"raw_pair_counts_by_shift":raw_pair_counts,
+                "raw_support_sizes_by_shift":supports.iter().map(BTreeSet::len).collect::<Vec<_>>(),
+                "raw_support_union":union.len(),"raw_target_present":supports[0].contains(&target_key),
+                "torsion_target_present":union.contains(&target_key),
+                "projected_support":projected_support.len(),"isogeny_mapped_support":mapped_support.len(),
+                "chi_orbit_keys":chi_keys.len(),"chi_key_collisions":chi_keys.values().filter(|s|s.len()>1).count(),
+                "chi_checks":chi_checks,"group_ops":ops,
+            })
+        );
+    }
+}
+
 fn base_order(p: u64) -> u64 {
     let mut n = 1;
     for x in 0..p {
@@ -896,6 +1013,7 @@ fn main() {
             &std::env::args().nth(2).expect("records path"),
             &std::env::args().nth(3).expect("fixture path"),
         ),
+        Some("support") => support(&std::env::args().nth(2).expect("fixture path")),
         _ => panic!("usage: isogeny_torsion_extension screen"),
     }
 }
