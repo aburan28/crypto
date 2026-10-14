@@ -327,12 +327,16 @@ fn run_rows(out: &mut String, r: &Record) {
             .iter()
             .find(|p| p.name == "relations")
             .and_then(|p| p.native.get("trials").copied());
-        let relations = r.phases.iter().find(|p| p.name == "relations").and_then(|p| {
-            p.native
-                .get("relations")
-                .or_else(|| p.native.get("hits"))
-                .copied()
-        });
+        let relations = r
+            .phases
+            .iter()
+            .find(|p| p.name == "relations")
+            .and_then(|p| {
+                p.native
+                    .get("relations")
+                    .or_else(|| p.native.get("hits"))
+                    .copied()
+            });
         let yield_per_trial = match (relations, trials) {
             (Some(rel), Some(t)) if t > 0 => Some(rel as f64 / t as f64),
             _ => None,
