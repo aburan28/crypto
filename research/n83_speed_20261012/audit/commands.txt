@@ -1,0 +1,20 @@
+Scope preflight: conductor check --summary "Audit exact N83 scalar optimization and frozen campaign fairness" --scope path:research/n83_speed_20261012/audit
+Preflight status: conductor unavailable; command not found. .conductor/WORKFLOW.md absent.
+
+Official Lean release: https://github.com/leanprover/lean4/releases/download/v4.34.1/lean-4.34.1-linux.tar.zst
+curl --location --fail --silent --show-error --max-time 120 https://github.com/leanprover/lean4/releases/download/v4.34.1/lean-4.34.1-linux.tar.zst --output /workspace/n83_speed/proof_toolchain/lean-4.34.1-linux.tar.zst
+Downloaded bytes: 580432872
+sha256sum /workspace/n83_speed/proof_toolchain/lean-4.34.1-linux.tar.zst
+tar --zstd -xf /workspace/n83_speed/proof_toolchain/lean-4.34.1-linux.tar.zst -C /workspace/n83_speed/proof_toolchain
+Compressed scratch archive removed after recording SHA-256; extracted toolchain retained.
+PATH=/workspace/n83_speed/proof_toolchain/lean-4.34.1-linux/bin:/usr/bin:/bin
+cd research/n83_speed_20261012/audit
+lake build
+lake env lean AxiomAudit.lean
+lake env leanchecker --fresh --verbose ScalarArithmetic
+
+g++ -std=c++20 -O2 -Wall -Wextra -Werror research/n83_speed_20261012/audit/independent_scalar_check.cpp -lgmpxx -lgmp -o /workspace/n83_speed/audit_build/independent_scalar_check
+/workspace/n83_speed/audit_build/independent_scalar_check
+
+/workspace/n83_evaluation/toolchain/rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --edition=2021 -O research/n83_speed_20261012/audit/issue_limb_identity.rs --extern crypto_lib=/workspace/n83_evaluation/build/release/deps/libcrypto_lib-f2b277864209ea01.rlib --extern serde_json=/workspace/n83_evaluation/build/release/deps/libserde_json-d00c0fe8816b70e5.rlib -L dependency=/workspace/n83_evaluation/build/release/deps -o /workspace/n83_speed/audit_build/issue_limb_identity
+/workspace/n83_speed/audit_build/issue_limb_identity research/n83_speed_20261012/audit/limb_expansion.certificate.json

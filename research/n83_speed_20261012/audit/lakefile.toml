@@ -1,0 +1,6 @@
+name = "n83_scalar_arithmetic"
+version = "0.1.0"
+defaultTargets = ["ScalarArithmetic"]
+
+[[lean_lib]]
+name = "ScalarArithmetic"

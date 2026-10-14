@@ -1,0 +1,63 @@
+{
+  "schema": "n83-independent-arithmetic-and-proof-audit/v1",
+  "status": "PASS_WITH_EXPLICIT_MACHINE_BRIDGES",
+  "verification_before_timed_campaign": true,
+  "lean_toolchain": "leanprover/lean4:v4.34.1",
+  "lean_compiler_commit": "5045d0056413266e57c625dcd7c365b10e377c52",
+  "lean_platform": "x86_64-unknown-linux-gnu",
+  "lean_dependencies": "bundled Init only; no external packages",
+  "lean_source_sha256": "89f3e3b63a3280c35808d6e4c29678cf2d9d9216ab21196fd3bc919f1c744a9e",
+  "checked_declarations": [
+    "N83ScalarArithmetic.limb_product_expansion",
+    "N83ScalarArithmetic.barrett_residual_bounds",
+    "N83ScalarArithmetic.barrett_one_correction",
+    "N83ScalarArithmetic.canonical_add_one_subtraction"
+  ],
+  "lean_verification": {
+    "lake_build": {"exit_status": 0, "log": "lake_build.attempt2.log"},
+    "print_axioms": {"exit_status": 0, "log": "axioms.attempt2.log"},
+    "fresh_kernel_replay": {"exit_status": 0, "command": "lake env leanchecker --fresh --verbose ScalarArithmetic", "log": "kernel.attempt2.log"},
+    "observed_standard_axioms_union": ["propext", "Classical.choice", "Quot.sound"],
+    "custom_claim_axioms": false,
+    "sorry_or_admit": false,
+    "native_evaluation_or_kernel_bypass": false
+  },
+  "independent_native_scalar_checks": {
+    "status": "PASS", "receipt": "cpp_check.json",
+    "receipt_sha256": "b5004e1a0d28a0e7a72d21e61fd897ec4f19ab88f75e96875b020b0f88e02b52",
+    "high128_checks": 100049,
+    "modulus_cases": 1023,
+    "multiply_checks": 1048575,
+    "add_checks": 1048575,
+    "one_corrections_observed": 41936,
+    "oracle": "GMP arbitrary precision for high128 and reciprocal; exact unsigned128 remainder"
+  },
+  "limb_identity_certificate": {
+    "id": "IDC1hc23ae1d80fc5fefa",
+    "receipt": "certificate_check.json",
+    "certificate_points": 64,
+    "extra_checker_points": 64,
+    "formal_proof_pointer": null,
+    "scope": "evaluated polynomial expansion over the certificate field only"
+  },
+  "scope_not_formally_verified": [
+    "floor/carry reconstruction and Rust word casts for high128",
+    "MAX-word reciprocal representation and addition",
+    "overflow-aware wrapping word implementation",
+    "compiled Rust program, target generation, benchmark timing or solver records"
+  ],
+  "machine_bridges": "Written exact word-arithmetic proof, worker native tests and independent finite GMP checks; no formal verification of the Rust program is claimed.",
+  "preserved_failed_attempts": [
+    "cpp_build.attempt1.stderr: missing Boost headers, corrected to installed GMP",
+    "lean_build.attempt1.log and lean_build.attempt2.log: algebra simplification errors, corrected",
+    "kernel.attempt1.log: broad Std replay intentionally terminated with exit 143 before switching to Init"
+  ],
+  "local_ci_validation": {
+    "workflow": "../../../.github/workflows/n83-scalar-arithmetic-lean.yml",
+    "yaml_structure_and_declared_configuration": "ci_yaml_check.log",
+    "source_and_transitive_axiom_guards": "ci_guards.log",
+    "remote_ci_executed": false
+  },
+  "source_and_receipt_hashes": "EVIDENCE_SHA256.tsv",
+  "complete_campaign_answer_replay": "../verification/final_receipt.json"
+}

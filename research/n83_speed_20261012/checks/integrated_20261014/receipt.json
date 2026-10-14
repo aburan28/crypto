@@ -1,0 +1,47 @@
+{
+  "schema": "n83.integrated-validation/v1",
+  "status": "PASS_INTEGRATED_LIBRARY_AND_NEW_WORKER",
+  "tested_revision": "2ea7fd32086dfaf4189b1f95071739ae3f1d8ffe",
+  "integrated_main_revision": "275beb93f3bf33ade6c19f19e8b336027a00b297",
+  "started_utc": "2026-10-14T14:40:52Z",
+  "finished_utc": "2026-10-14T14:51:31Z",
+  "compiler": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "commands": "Repository: /workspace/repos/crypto\nIntegrated HEAD: 2ea7fd32086dfaf4189b1f95071739ae3f1d8ffe\nNetwork permission enabled for cached Cargo dependency access and local-socket library tests.\nConductor attempted: unavailable (command not found); no tracked workflow file present.\nNo source edits or benchmark runs performed.\n\nexport RUSTUP_HOME=/workspace/n83_evaluation/toolchain/rustup\nexport CARGO_HOME=/workspace/n83_evaluation/toolchain/cargo\nexport CARGO_TARGET_DIR=/workspace/n83_evaluation/build\nexport CARGO_BUILD_JOBS=4\nexport PATH=/workspace/n83_evaluation/toolchain/rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin:/usr/bin:/bin\ncargo test --release --locked --lib\ncargo test --release --locked --example n83_rho_speed_eval\n",
+  "scope": "Correctness regression validation after upstream integration; no new performance measurements",
+  "source_hashes_sha256": "bd2e5b2ed4ca4229f187b3f1c5c613633d9cb773200c961fdd8cbe8fb1d65241  examples/n83_rho_speed_eval.rs\nf426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9  src/cryptanalysis/koblitz_strong_rho.rs\n4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3  src/cryptanalysis/semaev_decomp.rs\ne86704bff4137600952d2b459f1b6dc74093435c5a08707b8b45334a0cb01b55  src/cryptanalysis/koblitz_index_calculus.rs\n49b5f9478f133f905d5388d8c609d097830d69fe912c46dbc95b387b5d14a3de  Cargo.toml\nac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90  Cargo.lock\n1f7f51627557e0d3e6fcebc1a389fa406e6b2ee4c544a84075a36c47a09cfe38  AGENTS.md\n",
+  "source_hashes_unchanged_during_checks": true,
+  "source_recheck": "examples/n83_rho_speed_eval.rs: OK\nsrc/cryptanalysis/koblitz_strong_rho.rs: OK\nsrc/cryptanalysis/semaev_decomp.rs: OK\nsrc/cryptanalysis/koblitz_index_calculus.rs: OK\nCargo.toml: OK\nCargo.lock: OK\nAGENTS.md: OK\n",
+  "frozen_benchmark_and_pdf_hashes_sha256": "997f6102564cd0ebc72ee46e17e834f3d5970ed129c86d9c56b9274d5405a2ec  /workspace/n83_speed/frozen_binaries/rho_speed\nceed3b30b7ee40c68d3854f865f72fa9dabb28b73f73437c421673cbb93796b4  /workspace/report_output/n83_faster_rho_evaluation.pdf\n856edd55dd4172374f0f60b23e8605230ce7e63ee41d025c2bc7e9e6d0a8fb0c  /workspace/report_output/unified_curve_basis_report_faster_rho.pdf\n",
+  "frozen_artifacts_unchanged": true,
+  "source_edits_performed": false,
+  "benchmarks_run": false,
+  "network_additional_permissions": true,
+  "conductor_status": "unavailable: command not found",
+  "library": {
+    "command": "cargo test --release --locked --lib",
+    "exit_code": 0,
+    "passed": 4089,
+    "failed": 0,
+    "ignored": 117,
+    "result_line": "test result: ok. 4089 passed; 0 failed; 117 ignored; 0 measured; 0 filtered out; finished in 228.17s",
+    "log_path": "full_lib.log",
+    "log_sha256": "2a5824fa2ab6175202cdcf34b33d2a77f4a1051016e11beccb643d2a4f156dfd"
+  },
+  "new_example": {
+    "command": "cargo test --release --locked --example n83_rho_speed_eval",
+    "exit_code": 0,
+    "passed": 7,
+    "failed": 0,
+    "ignored": 0,
+    "result_line": "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.67s",
+    "log_path": "new_example.log",
+    "log_sha256": "1d9deae6f483f0c2355235caba8a575e6369f011b69d17a86675e2868fd88524"
+  },
+  "post_run_console_summary_helper": {
+    "initial_status": "rg unavailable in minimal build PATH",
+    "reproduced_exit_code": 127,
+    "retained_log": "postrun_summary_path_reproduction.log",
+    "recovery": "Result extraction succeeded under normal tool PATH; Cargo commands both exited zero"
+  },
+  "historical_performance_claim_status": "Still bound to October 12 frozen source and executable; integrated correctness checks do not transfer the benchmark result to updated library code"
+}

@@ -256,10 +256,24 @@ def lint(res: Resolver, pins: dict[str, set[str]], fix: bool) -> list[str]:
     return problems
 
 
-def lint_diff(base: str, res: Resolver) -> list[str]:
+def lint_diff(base: str, res: Resolver, pins: dict[str, set[str]] | None = None) -> list[str]:
     problems = []
+    exemptions = {}
+
+    def frozen(rel: str) -> bool:
+        if rel not in exemptions:
+            # Use the normal linter's existing frozen-evidence contract. Read
+            # complete current contents before applying a hash-bound exemption.
+            if exempt(rel, "", {}):
+                exemptions[rel] = True
+            else:
+                path = REPO / rel
+                exemptions[rel] = bool(pins and path.is_file() and
+                                       exempt(rel, path.read_text(errors="ignore"), pins))
+        return exemptions[rel]
+
     for rel in git("diff", "--name-only", "--diff-filter=A", f"{base}...HEAD").split():
-        if RETIRED_FILE.search(rel):
+        if RETIRED_FILE.search(rel) and not frozen(rel):
             problems.append(f"{rel}: new file named by a retired curve stem; name it by the slug")
     diff = git("diff", "-U0", f"{base}...HEAD", "--", *DIFF_TEXT)
     archived_text = {rel: (REPO / rel).read_text() for rel in ARCHIVED_LABELS
@@ -270,7 +284,7 @@ def lint_diff(base: str, res: Resolver) -> list[str]:
             rel = raw[6:] if raw.startswith("+++ b/") else None
         elif raw.startswith("@@"):
             line = int(re.search(r"\+(\d+)", raw).group(1))
-        elif raw.startswith("+") and rel and rel not in SELF:
+        elif raw.startswith("+") and rel and not frozen(rel):
             for _, _, found, repl in find_retired(raw[1:], "added.txt", res):
                 if archived_label(rel, archived_text.get(rel, ""), found, repl):
                     continue
@@ -286,12 +300,13 @@ def main() -> int:
     ap.add_argument("--diff", metavar="BASE", help="also lint what HEAD adds over BASE")
     args = ap.parse_args()
     res = Resolver()
-    problems = lint(res, pinned_hashes(), args.fix)
+    pins = pinned_hashes()
+    problems = lint(res, pins, args.fix)
     if not cid.ALIAS_MAP.exists() or cid.ALIAS_MAP.read_text() != cid.alias_map_text(res.reg):
         problems.append("src/cryptanalysis/curve_aliases.json does not match docs/curves/registry.json; "
                         "run scripts/build_curve_registry.py")
     if args.diff:
-        problems += lint_diff(args.diff, res)
+        problems += lint_diff(args.diff, res, pins)
     for p in problems:
         print(p)
     print(f"curve names: {len(problems)} problem(s)", file=sys.stderr)

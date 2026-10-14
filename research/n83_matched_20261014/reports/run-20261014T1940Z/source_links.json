@@ -1,0 +1,95 @@
+{
+  "kind": "report_presentation_source_links",
+  "evidence_status": "PENDING:NATIVE_EXECUTION_ANALYSIS_AND_INDEPENDENT_VERIFICATION",
+  "research_results_recomputed": false,
+  "run_id": "run-20261014T1940Z",
+  "actual_campaign_started_utc": "2026-10-14T19:40:24Z",
+  "measurement_source_freeze_commit": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+  "pre_timing_metadata_commit": "ba94c10811ab48da60c9af1824c1eb767a9e17ec",
+  "protocol_sha256": "abc72a3e98367ea0ccbde40f44c68aa4e3355b43ace579f4f162355277d5b1bc",
+  "frozen_manifest_sha256": "896bd5d03e6f7d68998851aa7f9688f2fe0122546173cf74ab6b138eb19975d0",
+  "binaries": {
+    "ic": "02d8e74211e4cccd71ad5cf7720181fa1f4b4fbab01e0860f538a7b2409dd5f3",
+    "rho_matched": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+    "native_controller": "509325d317e9b37b26e7bf70d19bcb7909e58b11415e8cf07b196c686052092c",
+    "native_analysis": "b1820abad3d17cb4f40f7d4d1a0a6c92ade2dfa056a43a0c4eee2d315c3a8346"
+  },
+  "prior_pdf": {
+    "source": "../../../n83_speed_20261012/reports/run-20261012T1543Z/unified_curve_basis_report_faster_rho.pdf",
+    "sha256": "856edd55dd4172374f0f60b23e8605230ce7e63ee41d025c2bc7e9e6d0a8fb0c",
+    "pages": 70,
+    "status": "FROZEN_READ_ONLY"
+  },
+  "links": {
+    "M01": {
+      "title": "Prospective human protocol",
+      "path": "../../PROTOCOL.md",
+      "url": "https://github.com/aburan28/crypto/blob/c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03/research/n83_matched_20261014/PROTOCOL.md"
+    },
+    "M02": {
+      "title": "Frozen machine protocol",
+      "path": "../../provenance/protocol.json",
+      "url": "https://github.com/aburan28/crypto/blob/ba94c10811ab48da60c9af1824c1eb767a9e17ec/research/n83_matched_20261014/provenance/protocol.json"
+    },
+    "M03": {
+      "title": "Frozen ordered campaign manifest",
+      "path": "../../provenance/frozen_campaign_manifest.json",
+      "url": "https://github.com/aburan28/crypto/blob/ba94c10811ab48da60c9af1824c1eb767a9e17ec/research/n83_matched_20261014/provenance/frozen_campaign_manifest.json"
+    },
+    "M04": {
+      "title": "Shared compiler and executable build receipt",
+      "path": "../../provenance/build_receipt.json",
+      "url": "https://github.com/aburan28/crypto/blob/ba94c10811ab48da60c9af1824c1eb767a9e17ec/research/n83_matched_20261014/provenance/build_receipt.json"
+    },
+    "M05": {
+      "title": "Strict single-target and reused-setup rho worker",
+      "path": "../../../../examples/n83_rho_matched_eval.rs",
+      "url": "https://github.com/aburan28/crypto/blob/c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03/examples/n83_rho_matched_eval.rs"
+    },
+    "M06": {
+      "title": "Existing wide IC producer",
+      "path": "../../../../examples/koblitz_orbit_dlp_fast.rs",
+      "url": "https://github.com/aburan28/crypto/blob/c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03/examples/koblitz_orbit_dlp_fast.rs"
+    },
+    "M07": {
+      "title": "Native controller and wait4 monitor",
+      "path": "../../native_runner/",
+      "url": "https://github.com/aburan28/crypto/tree/c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03/research/n83_matched_20261014/native_runner"
+    },
+    "M08": {
+      "title": "Frozen native statistical analysis and model semantics",
+      "path": "../../analysis/README.md",
+      "url": "https://github.com/aburan28/crypto/blob/c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03/research/n83_matched_20261014/analysis/README.md"
+    },
+    "M09": {
+      "title": "Native fixture generation and independent verification source",
+      "path": "../../verification/",
+      "url": "https://github.com/aburan28/crypto/tree/c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03/research/n83_matched_20261014/verification"
+    },
+    "M10": {
+      "title": "Pre-timing validation",
+      "path": "../../checks/README.md",
+      "url": "https://github.com/aburan28/crypto/blob/c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03/research/n83_matched_20261014/checks/README.md"
+    },
+    "M11": {
+      "title": "Native recorded statistics",
+      "path": "PENDING:FINAL_STATISTICS_PATH",
+      "url": "PENDING:FINAL_STATISTICS_LINK"
+    },
+    "M12": {
+      "title": "Independent final answer and witness replay receipt",
+      "path": "PENDING:FINAL_VERIFICATION_PATH",
+      "url": "PENDING:FINAL_VERIFICATION_LINK"
+    },
+    "M13": {
+      "title": "Native file and matrix provenance audit",
+      "path": "PENDING:FINAL_FILE_AUDIT_PATH",
+      "url": "PENDING:FINAL_FILE_AUDIT_LINK"
+    },
+    "M14": {
+      "title": "Host and isolation records",
+      "path": "PENDING:FINAL_HOST_AND_RESERVATION_PATH",
+      "url": "PENDING:FINAL_HOST_AND_RESERVATION_LINK"
+    }
+  }
+}

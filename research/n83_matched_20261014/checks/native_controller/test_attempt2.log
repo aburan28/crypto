@@ -1,0 +1,22 @@
+   Compiling zmij v1.0.23
+   Compiling serde_core v1.0.229
+   Compiling serde_json v1.0.151
+   Compiling libc v0.2.190
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling n83-matched-runner v0.1.0 (/workspace/repos/crypto/research/n83_matched_20261014/native_runner)
+    Finished `release` profile [optimized] target(s) in 8.80s
+     Running unittests src/main.rs (/workspace/n83_matched/controller_build/release/deps/n83_matched_runner-034aade5ccb75dfe)
+
+running 8 tests
+test monitor::tests::missing_rank_or_wrong_base_rejects_ic_summary ... ok
+test monitor::tests::ic_batch_cannot_substitute_rho_phases_or_duplicate_points ... ok
+test tests::complete_matrix_and_seed_domains_are_predeclared ... ok
+test monitor::tests::zero_budget_or_memory_is_rejected_before_launch ... ok
+test tests::repeated_aa_seed_is_within_pair_only_and_orders_alternate ... ok
+test tests::wrong_scalar_point_policy_or_seed_rejects_a_target ... ok
+test monitor::tests::address_space_envelope_is_retained_on_allocation_failure ... ok
+test monitor::tests::timeout_is_recorded_and_process_is_terminated ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+

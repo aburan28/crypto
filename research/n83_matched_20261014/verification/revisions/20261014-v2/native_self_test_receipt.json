@@ -1,0 +1,11 @@
+{
+  "kind":"native_matched_checker_usage_negative_self_test",
+  "status":"PASS",
+  "launch_failure_is_retained_no_child":true,
+  "null_metrics_cannot_claim_completed_child":true,
+  "valid_launched_child_metrics_accepted":true,
+  "malformed_metric_cases_rejected":4,
+  "float_tolerance_accepts_roundtrip_noise_rejects_one_ns_at_cap":true,
+  "checker_source_sha256":"4084e76329b83131f9538a48bb8376d40ffa065a8c4b70afe8b35b443bd0b5a3",
+  "checker_executable_sha256":"88e3a37000f312de280fbace1e6843cfb6d2911b46d49b52fdbca3bc01398ca3"
+}

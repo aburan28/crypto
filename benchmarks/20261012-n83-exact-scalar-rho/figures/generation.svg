@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480">
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#40566b"/></marker></defs>
+  <rect width="900" height="480" fill="#ffffff"/>
+  <g font-family="DejaVu Sans,Arial,sans-serif" fill="#172b41">
+    <text x="30" y="36" font-size="22" font-weight="bold">Fresh degree-83 point generation and independent replay</text>
+    <text x="30" y="64" font-size="13">Exact legacy a=1 curve; r=8569786107849059; standalone native C++ arithmetic</text>
+    <rect x="30" y="92" width="250" height="117" rx="8" fill="#eef2f6" stroke="#71889e"/>
+    <text x="45" y="120" font-size="15" font-weight="bold">Frozen exclusion inputs</text>
+    <text x="45" y="145" font-size="13">600 K600 signed orbits</text>
+    <text x="45" y="167" font-size="13">Original Q + eight old targets</text>
+    <text x="45" y="189" font-size="13">609 prior signed-orbit keys</text>
+    <rect x="330" y="92" width="260" height="117" rx="8" fill="#e8f3fb" stroke="#49789c"/>
+    <text x="345" y="120" font-size="15" font-weight="bold">Fixed proposal stream</text>
+    <text x="345" y="145" font-size="13">SplitMix64 seed 202610126201</text>
+    <text x="345" y="167" font-size="13">Unbiased modulo conversion: 1..r-1</text>
+    <text x="345" y="189" font-size="13">Q=dG; reject excluded orbits</text>
+    <rect x="640" y="92" width="230" height="117" rx="8" fill="#eaf5ed" stroke="#62866b"/>
+    <text x="655" y="120" font-size="15" font-weight="bold">Eight accepted targets</text>
+    <text x="655" y="145" font-size="13">3 training + 5 holdout</text>
+    <text x="655" y="167" font-size="13">8 draws; 0 rejections</text>
+    <text x="655" y="189" font-size="13">All new signed orbits distinct</text>
+    <path d="M280,151 L325,151" stroke="#40566b" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M590,151 L635,151" stroke="#40566b" stroke-width="2" marker-end="url(#arrow)"/>
+    <rect x="85" y="265" width="325" height="110" rx="8" fill="#e8f3fb" stroke="#49789c"/>
+    <text x="100" y="294" font-size="15" font-weight="bold">Solver receives only public points</text>
+    <text x="100" y="320" font-size="13">Eight separate one-point JSONL files</text>
+    <text x="100" y="343" font-size="13">No validation scalar in solver arguments</text>
+    <rect x="470" y="265" width="365" height="110" rx="8" fill="#fff5df" stroke="#a28c54"/>
+    <text x="485" y="294" font-size="15" font-weight="bold">Independent verifier opens the sidecar</text>
+    <text x="485" y="320" font-size="13">Curve membership, rQ=O, dG=Q; file binding</text>
+    <text x="485" y="343" font-size="13">Exact draw stream + all exclusion keys reproduced</text>
+    <path d="M755,209 L755,238 L247,238 L247,260" fill="none" stroke="#40566b" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M755,238 L652,238 L652,260" fill="none" stroke="#40566b" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="30" y="413" font-size="13" font-weight="bold">Verified invariant</text>
+    <text x="30" y="436" font-size="13">Key = minimum Frobenius x coordinate. Binary-curve negation preserves x, so one key represents all 166 signed points.</text>
+    <text x="30" y="459" font-size="12" fill="#506579">Source: generator_receipt.json and fixture_replay_receipt.json. Fixture correctness only; no timing or speed claim.</text>
+  </g>
+</svg>

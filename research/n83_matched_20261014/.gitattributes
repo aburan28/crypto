@@ -1,0 +1,5 @@
+# Raw logs retain their original final blank lines.
+**/*.log whitespace=-blank-at-eof
+reports/**/*.svg -diff -whitespace
+reports/**/*.pdf binary
+reports/**/*.png binary

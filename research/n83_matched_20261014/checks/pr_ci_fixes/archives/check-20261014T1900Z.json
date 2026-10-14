@@ -1,0 +1,274 @@
+{
+  "observed_at": {
+    "current_time": "2026-10-14 18:59:38 UTC"
+  },
+  "head_sha": "12321a1855d0afada849d601559d1b5eaa6e0b39",
+  "results": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "workflows",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Action completed."
+            }
+          ],
+          "structuredContent": {
+            "workflow_runs": [
+              {
+                "id": 38585952306,
+                "name": "Workflow files parse",
+                "status": "completed",
+                "conclusion": "success",
+                "run_number": 895,
+                "jobs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952306/jobs",
+                "logs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952306/logs",
+                "workflow_id": 361889833
+              },
+              {
+                "id": 38585952345,
+                "name": "Workflow syntax",
+                "status": "completed",
+                "conclusion": "success",
+                "run_number": 1416,
+                "jobs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952345/jobs",
+                "logs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952345/logs",
+                "workflow_id": 363054155
+              },
+              {
+                "id": 38585952348,
+                "name": "Bounded bielliptic quartic diagnostic",
+                "status": "completed",
+                "conclusion": "success",
+                "run_number": 395,
+                "jobs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952348/jobs",
+                "logs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952348/logs",
+                "workflow_id": 375649465
+              },
+              {
+                "id": 38585952452,
+                "name": "N83 scalar arithmetic Lean proofs",
+                "status": "completed",
+                "conclusion": "failure",
+                "run_number": 1,
+                "jobs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952452/jobs",
+                "logs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952452/logs",
+                "workflow_id": 384460345
+              },
+              {
+                "id": 38585952256,
+                "name": "curve-names",
+                "status": "completed",
+                "conclusion": "failure",
+                "run_number": 2661,
+                "jobs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952256/jobs",
+                "logs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952256/logs",
+                "workflow_id": 370689340
+              },
+              {
+                "id": 38585952270,
+                "name": "ecbench",
+                "status": "completed",
+                "conclusion": "success",
+                "run_number": 755,
+                "jobs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952270/jobs",
+                "logs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952270/logs",
+                "workflow_id": 373568789
+              },
+              {
+                "id": 38585952379,
+                "name": "Rust all targets compile",
+                "status": "completed",
+                "conclusion": "success",
+                "run_number": 1954,
+                "jobs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952379/jobs",
+                "logs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952379/logs",
+                "workflow_id": 361883252
+              },
+              {
+                "id": 38585952407,
+                "name": "Rust lint",
+                "status": "completed",
+                "conclusion": "success",
+                "run_number": 2840,
+                "jobs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952407/jobs",
+                "logs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952407/logs",
+                "workflow_id": 365119264
+              },
+              {
+                "id": 38585952228,
+                "name": "CodeQL Advanced",
+                "status": "completed",
+                "conclusion": "success",
+                "run_number": 890,
+                "jobs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952228/jobs",
+                "logs_url": "https://api.github.com/repos/aburan28/crypto/actions/runs/38585952228/logs",
+                "workflow_id": 380911344
+              }
+            ]
+          },
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "combined_status",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Action completed."
+            }
+          ],
+          "structuredContent": {
+            "statuses": []
+          },
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "reviews",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Action completed."
+            }
+          ],
+          "structuredContent": {
+            "reviews": [
+              {
+                "id": "PRR_kwDOSMdswM8AAAABSQXYXQ",
+                "state": "COMMENTED",
+                "body": "<!-- CURSOR_AUTOMATION_ID: 7b157c4c-9426-11f1-ba66-0e7d0216e441 | RUN_ID: bc-3cf2d72d-5857-4ffb-98a5-deb5088ae798 -->\nNot approved: Cursor Bugbot could not review this PR (too large / incomplete analysis), so human review is needed. No reviewers were assigned.\n\n<div><a href=\"https://cursor.com/agents/bc-3cf2d72d-5857-4ffb-98a5-deb5088ae798?cursor_ref=pr_footer&cursor_cta=open_in_web\"><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://cursor.com/assets/images/open-in-web-dark.png\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://cursor.com/assets/images/open-in-web-light.png\"><img alt=\"Open in Web\" width=\"114\" height=\"28\" src=\"https://cursor.com/assets/images/open-in-web-dark.png\"></picture></a>&nbsp;<a href=\"https://cursor.com/automations/7b157c4c-9426-11f1-ba66-0e7d0216e441\"><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://cursor.com/assets/images/view-automation-dark.png\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://cursor.com/assets/images/view-automation-light.png\"><img alt=\"View Automation\" width=\"141\" height=\"28\" src=\"https://cursor.com/assets/images/view-automation-dark.png\"></picture></a>&nbsp;</div>\n\n<sub>Sent by Cursor Approval Agent: Pull Request Router and Approver</sub>\n",
+                "submitted_at": "2026-10-14T15:05:29Z",
+                "author": {
+                  "login": "cursor",
+                  "name": "cursor",
+                  "email": null,
+                  "avatar_url": "https://avatars.githubusercontent.com/in/1210556?v=4",
+                  "id": null
+                }
+              }
+            ]
+          },
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "threads",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Action completed."
+            }
+          ],
+          "structuredContent": {
+            "review_threads": []
+          },
+          "isError": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "timeline",
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Action completed."
+            }
+          ],
+          "structuredContent": {
+            "comments": [
+              {
+                "url": "https://github.com/aburan28/crypto/pull/1828#issuecomment-6171439064",
+                "body": "<!-- BUGBOT_TOO_LARGE_TO_REVIEW -->\nThis PR is too large for Bugbot to review. It changes 54,565 lines and 3,635,631 characters. Split the change into smaller pull requests to get a review.",
+                "user": {
+                  "login": "cursor[bot]",
+                  "name": "cursor[bot]",
+                  "email": null,
+                  "avatar_url": "https://avatars.githubusercontent.com/in/1210556?v=4",
+                  "id": 206951365
+                },
+                "id": 6171439064,
+                "pull_request_review_id": null,
+                "in_reply_to_id": null,
+                "created_at": "2026-10-14T15:04:01Z",
+                "updated_at": "2026-10-14T15:04:01Z",
+                "review": null,
+                "side": null,
+                "line": null,
+                "start_line": null,
+                "path": null,
+                "body_html": "\n<p dir=\"auto\">This PR is too large for Bugbot to review. It changes 54,565 lines and 3,635,631 characters. Split the change into smaller pull requests to get a review.</p>"
+              },
+              {
+                "url": "https://github.com/aburan28/crypto/pull/1828#pullrequestreview-5520087133",
+                "body": "<!-- CURSOR_AUTOMATION_ID: 7b157c4c-9426-11f1-ba66-0e7d0216e441 | RUN_ID: bc-3cf2d72d-5857-4ffb-98a5-deb5088ae798 -->\nNot approved: Cursor Bugbot could not review this PR (too large / incomplete analysis), so human review is needed. No reviewers were assigned.\n\n<div><a href=\"https://cursor.com/agents/bc-3cf2d72d-5857-4ffb-98a5-deb5088ae798?cursor_ref=pr_footer&cursor_cta=open_in_web\"><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://cursor.com/assets/images/open-in-web-dark.png\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://cursor.com/assets/images/open-in-web-light.png\"><img alt=\"Open in Web\" width=\"114\" height=\"28\" src=\"https://cursor.com/assets/images/open-in-web-dark.png\"></picture></a>&nbsp;<a href=\"https://cursor.com/automations/7b157c4c-9426-11f1-ba66-0e7d0216e441\"><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://cursor.com/assets/images/view-automation-dark.png\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://cursor.com/assets/images/view-automation-light.png\"><img alt=\"View Automation\" width=\"141\" height=\"28\" src=\"https://cursor.com/assets/images/view-automation-dark.png\"></picture></a>&nbsp;</div>\n\n<sub>Sent by Cursor Approval Agent: Pull Request Router and Approver</sub>\n",
+                "user": {
+                  "login": "cursor[bot]",
+                  "name": "cursor[bot]",
+                  "email": null,
+                  "avatar_url": "https://avatars.githubusercontent.com/in/1210556?v=4",
+                  "id": 206951365
+                },
+                "id": 5520087133,
+                "pull_request_review_id": null,
+                "in_reply_to_id": null,
+                "created_at": "2026-10-14T15:05:29Z",
+                "updated_at": null,
+                "review": "COMMENTED",
+                "side": null,
+                "line": null,
+                "start_line": null,
+                "path": null,
+                "body_html": "\n<p dir=\"auto\">Not approved: Cursor Bugbot could not review this PR (too large / incomplete analysis), so human review is needed. No reviewers were assigned.</p>\n<div dir=\"auto\"><a href=\"https://cursor.com/agents/bc-3cf2d72d-5857-4ffb-98a5-deb5088ae798?cursor_ref=pr_footer&amp;cursor_cta=open_in_web\" rel=\"nofollow\"><themed-picture data-catalyst-inline=\"true\"><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://camo.githubusercontent.com/ae5336cc4565ed7dd126cd5bfcb9f6a53979c32e32819e23ffd98524f0526bc9/68747470733a2f2f637572736f722e636f6d2f6173736574732f696d616765732f6f70656e2d696e2d7765622d6461726b2e706e67\" data-canonical-src=\"https://cursor.com/assets/images/open-in-web-dark.png\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://camo.githubusercontent.com/53f781c974d148726c13ed968f0f82681c0d611baf2e357940e284d0d618f736/68747470733a2f2f637572736f722e636f6d2f6173736574732f696d616765732f6f70656e2d696e2d7765622d6c696768742e706e67\" data-canonical-src=\"https://cursor.com/assets/images/open-in-web-light.png\"><img alt=\"Open in Web\" width=\"114\" height=\"28\" src=\"https://camo.githubusercontent.com/ae5336cc4565ed7dd126cd5bfcb9f6a53979c32e32819e23ffd98524f0526bc9/68747470733a2f2f637572736f722e636f6d2f6173736574732f696d616765732f6f70656e2d696e2d7765622d6461726b2e706e67\" data-canonical-src=\"https://cursor.com/assets/images/open-in-web-dark.png\"></picture></themed-picture></a> <a href=\"https://cursor.com/automations/7b157c4c-9426-11f1-ba66-0e7d0216e441\" rel=\"nofollow\"><themed-picture data-catalyst-inline=\"true\"><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://camo.githubusercontent.com/ad05535c2247b4a4bcab294d7bdee41de7dd45871ba0a904920f0d068d7479fa/68747470733a2f2f637572736f722e636f6d2f6173736574732f696d616765732f766965772d6175746f6d6174696f6e2d6461726b2e706e67\" data-canonical-src=\"https://cursor.com/assets/images/view-automation-dark.png\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://camo.githubusercontent.com/84fa66315aa12208dd1ff8f3df34b4d5a1d53fd58f2c2342c00d5a4b2793aa95/68747470733a2f2f637572736f722e636f6d2f6173736574732f696d616765732f766965772d6175746f6d6174696f6e2d6c696768742e706e67\" data-canonical-src=\"https://cursor.com/assets/images/view-automation-light.png\"><img alt=\"View Automation\" width=\"141\" height=\"28\" src=\"https://camo.githubusercontent.com/ad05535c2247b4a4bcab294d7bdee41de7dd45871ba0a904920f0d068d7479fa/68747470733a2f2f637572736f722e636f6d2f6173736574732f696d616765732f766965772d6175746f6d6174696f6e2d6461726b2e706e67\" data-canonical-src=\"https://cursor.com/assets/images/view-automation-dark.png\"></picture></themed-picture></a> </div>\n<p dir=\"auto\"><sub>Sent by Cursor Approval Agent: Pull Request Router and Approver</sub></p>"
+              },
+              {
+                "url": "https://github.com/aburan28/crypto/pull/1828#issuecomment-6173856180",
+                "body": "**autofix** could not fix this PR, so it is labelled `needs-human`.\n\n\n<sub>[run](https://github.com/aburan28/crypto/actions/runs/38599281496)</sub>\n",
+                "user": {
+                  "login": "github-actions[bot]",
+                  "name": "github-actions[bot]",
+                  "email": null,
+                  "avatar_url": "https://avatars.githubusercontent.com/in/15368?v=4",
+                  "id": 41898282
+                },
+                "id": 6173856180,
+                "pull_request_review_id": null,
+                "in_reply_to_id": null,
+                "created_at": "2026-10-14T17:05:25Z",
+                "updated_at": "2026-10-14T17:05:25Z",
+                "review": null,
+                "side": null,
+                "line": null,
+                "start_line": null,
+                "path": null,
+                "body_html": "<p dir=\"auto\"><strong>autofix</strong> could not fix this PR, so it is labelled <code class=\"notranslate\">needs-human</code>.</p>\n<p dir=\"auto\"><sub><a href=\"https://github.com/aburan28/crypto/actions/runs/38599281496\">run</a></sub></p>"
+              }
+            ],
+            "url": "https://github.com/aburan28/crypto/pull/1828",
+            "title": "aburan28/crypto PR #1828 comments",
+            "display_url": "https://github.com/aburan28/crypto/pull/1828",
+            "display_title": "aburan28/crypto PR #1828 comments"
+          },
+          "isError": false
+        }
+      }
+    }
+  ]
+}

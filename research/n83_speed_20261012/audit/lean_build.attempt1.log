@@ -1,0 +1,82 @@
+research/n83_speed_20261012/audit/ScalarArithmetic.lean:9:8: warning: This simp argument is unused:
+  Nat.add_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Nat.mul_add, Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm, Nat.add_assoc, Nat.add_comm,
+    Nat.add_left_comm]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+research/n83_speed_20261012/audit/ScalarArithmetic.lean:9:34: warning: This simp argument is unused:
+  Nat.mul_assoc
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Nat.add_mul, Nat.mul_add, Nat.mul_comm, Nat.mul_left_comm, Nat.add_assoc, Nat.add_comm,
+    Nat.add_left_comm]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+research/n83_speed_20261012/audit/ScalarArithmetic.lean:10:33: warning: This simp argument is unused:
+  Nat.add_left_comm
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Nat.add_mul, Nat.mul_add, Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm, Nat.add_assoc, Nat.add_comm]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+research/n83_speed_20261012/audit/ScalarArithmetic.lean:42:36: error: unsolved goals
+B m x : Nat
+hB : 0 < B
+hm : 0 < m
+hx : x < B
+mu : Nat := B / m
+q : Nat := x * mu / B
+s : Nat := B % m
+t : Nat := x * mu % B
+hmu : mu * m ≤ B
+hq : q * B ≤ x * mu
+hprod : q * m * B ≤ x * B
+hqx : q * m ≤ x
+hs : s < m
+ht : t < B
+hBd : m * mu + s = B
+hXd : B * q + t = x * mu
+⊢ x * (m * mu + s) = m * (x * mu) + x * s
+research/n83_speed_20261012/audit/ScalarArithmetic.lean:60:6: error: Type mismatch: After simplification, term
+  hless
+ has type
+  B * (x - m * q) < B * m + B * m
+but is expected to have type
+  B * (x - m * q) < B * (m * 2)
+research/n83_speed_20261012/audit/ScalarArithmetic.lean:28:44: warning: This simp argument is unused:
+  Nat.mul_assoc
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Nat.mul_comm, Nat.mul_left_comm]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+research/n83_speed_20261012/audit/ScalarArithmetic.lean:42:45: warning: This simp argument is unused:
+  Nat.add_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+research/n83_speed_20261012/audit/ScalarArithmetic.lean:42:58: warning: This simp argument is unused:
+  Nat.mul_assoc
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Nat.add_mul, Nat.mul_comm, Nat.mul_left_comm]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+research/n83_speed_20261012/audit/ScalarArithmetic.lean:42:87: warning: This simp argument is unused:
+  Nat.mul_left_comm
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Nat.add_mul, Nat.mul_assoc, Nat.mul_comm]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+research/n83_speed_20261012/audit/ScalarArithmetic.lean:44:67: warning: This simp argument is unused:
+  Nat.mul_assoc
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Nat.mul_add, Nat.mul_comm, Nat.mul_left_comm, Nat.add_assoc]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`

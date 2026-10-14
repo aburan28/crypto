@@ -1,0 +1,44 @@
+{
+  "argv": [
+    "/workspace/n83_speed/frozen_binaries/rho_speed",
+    "/workspace/n83_speed/fixtures/training_1.jsonl",
+    "202610126212",
+    "/workspace/n83_speed/panel/policy/configs/reference-L128-DP10-E0.json",
+    "/workspace/n83_speed/panel/policy/runs/P02-reference-L128-DP10-E0/producer.json"
+  ],
+  "argv_existing_file_sha256": {
+    "/workspace/n83_speed/fixtures/training_1.jsonl": "a0d1cb5c178dade9ec1ba1dd8b09733bcc20cbd684d0c9e618fd3dba33a67044",
+    "/workspace/n83_speed/panel/policy/configs/reference-L128-DP10-E0.json": "99b87444ced914541a78d9267e309be7d0f28d34f4b74b4aec37d1dd6d78ce32"
+  },
+  "arm": "rho",
+  "binary_sha256": "997f6102564cd0ebc72ee46e17e834f3d5970ed129c86d9c56b9274d5405a2ec",
+  "cwd": "/workspace/repos/crypto",
+  "environment": {
+    "KIC_RANK_THREADS": "1",
+    "KIC_RHO_THREADS": "1",
+    "KIC_TARGET_THREADS": "1",
+    "KIC_THREADS": "1",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 60.0
+  },
+  "schema": "n83.process-start/v1",
+  "started_epoch_ms": 1791819969711,
+  "target_file": "/workspace/n83_speed/fixtures/training_1.jsonl",
+  "target_sha256": "a0d1cb5c178dade9ec1ba1dd8b09733bcc20cbd684d0c9e618fd3dba33a67044"
+}

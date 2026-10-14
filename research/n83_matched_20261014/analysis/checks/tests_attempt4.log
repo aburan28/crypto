@@ -1,0 +1,36 @@
+   Compiling n83-matched-analysis v0.1.0 (/workspace/repos/crypto/research/n83_matched_20261014/analysis)
+    Finished `release` profile [optimized] target(s) in 2.14s
+     Running unittests src/lib.rs (/workspace/n83_evaluation/build/release/deps/n83_matched_analysis-ab53ca60a622e059)
+
+running 13 tests
+test tests::conventional_even_median_and_tail_rule ... ok
+test tests::bootstrap_is_reproducible_and_keeps_pairs ... ok
+test tests::failure_cost_retained_without_primary_success_claim ... ok
+test tests::duplicate_target_and_process_reject_matrices ... ok
+test tests::false_gate_and_mismatched_protocol_are_rejected ... ok
+test tests::missing_independent_gate_withholds_all_claims ... ok
+test tests::missing_seed_draw_cannot_be_imputed_or_completed_subset ... ok
+test tests::correct_whole_process_and_nested_estimands ... ok
+test tests::aa_missing_seed_and_wrong_order_reject ... ok
+test tests::slower_query_with_lower_setup_is_initial_advantage_not_eventual_crossover ... ok
+test tests::false_verified_flag_or_wrong_answer_rejects ... ok
+test tests::nonfinite_threshold_mass_is_not_discarded ... ok
+test tests::rho_jump_work_scales_per_target_not_fixed_batch_intercept ... FAILED
+
+failures:
+
+---- tests::rho_jump_work_scales_per_target_not_fixed_batch_intercept stdout ----
+
+thread 'tests::rho_jump_work_scales_per_target_not_fixed_batch_intercept' (17474) panicked at src/lib.rs:504:9:
+assertion `left == right` failed
+  left: Number(0.10000000000000142)
+ right: 0.1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::rho_jump_work_scales_per_target_not_fixed_batch_intercept
+
+test result: FAILED. 12 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `--lib`

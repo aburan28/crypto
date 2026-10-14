@@ -1,0 +1,20 @@
+Nat.le_of_mul_le_mul_right {a b c : Nat} (h : a * c ≤ b * c) (hc : 0 < c) : a ≤ b
+Nat.lt_of_mul_lt_mul_right {a b c : Nat} (h : b * a < c * a) : b < c
+Nat.mul_lt_mul_of_pos_right {n m k : Nat} (h : n < m) (hk : k > 0) : n * k < m * k
+Nat.mul_le_mul_right {n m : Nat} (k : Nat) (h : n ≤ m) : n * k ≤ m * k
+Nat.mul_le_mul_left {n m : Nat} (k : Nat) (h : n ≤ m) : k * n ≤ k * m
+Nat.mul_pos {n m : Nat} (hn : 0 < n) (hm : 0 < m) : 0 < n * m
+Nat.div_mul_le_self (m n : Nat) : m / n * n ≤ m
+Nat.div_add_mod (m n : Nat) : n * (m / n) + m % n = m
+Nat.mod_lt (x : Nat) {y : Nat} (hy : 0 < y) : x % y < y
+Nat.mod_eq_sub_mod {a b : Nat} (h : a ≥ b) : a % b = (a - b) % b
+Nat.mod_eq_of_lt {a b : Nat} (h : a < b) : a % b = a
+Nat.mod_eq_sub_mul_div {x k : Nat} : x % k = x - k * (x / k)
+Nat.mul_div_cancel (m : Nat) {n : Nat} (H : 0 < n) : m * n / n = m
+Nat.mod_add_div (m k : Nat) : m % k + k * (m / k) = m
+Nat.div_lt_iff_lt_mul {k x y : Nat} (Hk : 0 < k) : x / k < y ↔ x < y * k
+Nat.add_mul_mod_self_left (x y z : Nat) : (x + y * z) % y = x % y
+Nat.add_mul_mod_self_right (x y z : Nat) : (x + y * z) % z = x % z
+Nat.sub_add_cancel {n m : Nat} (h : m ≤ n) : n - m + m = n
+Nat.mod_eq_of_lt {a b : Nat} (h : a < b) : a % b = a
+Nat.mul_sub (n m k : Nat) : n * (m - k) = n * m - n * k

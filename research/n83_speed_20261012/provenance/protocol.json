@@ -1,0 +1,46 @@
+{
+  "schema": "n83.speed-campaign/v1",
+  "protocol_id": "N83A1-exact-scalar-policy-20261012",
+  "cwd": "/workspace/repos/crypto",
+  "rho_binary": "/workspace/n83_speed/frozen_binaries/rho_speed",
+  "expected_rho_binary_sha256": "997f6102564cd0ebc72ee46e17e834f3d5970ed129c86d9c56b9274d5405a2ec",
+  "fixtures_dir": "/workspace/n83_speed/fixtures",
+  "validation_sidecar": "/workspace/n83_speed/fixtures/validation_sidecar.json",
+  "expected_validation_sidecar_sha256": "2fda516c7c6277364a9a7adba84fdd58af1923e4138d1a80d62d2c40ca5cd17d",
+  "generator_receipt": "/workspace/n83_speed/fixtures/generator_receipt.json",
+  "expected_generator_receipt_sha256": "2b2a4987a5f93e751f5a28eb7856d31f8833a5b4d55f9baa92eb2c5ec427e0ae",
+  "expected_fixture_file_sha256": {
+    "training_1": "a0d1cb5c178dade9ec1ba1dd8b09733bcc20cbd684d0c9e618fd3dba33a67044",
+    "training_2": "2d4c6fd0aa29d7e7c2cbafc3ed207523d1586d1015e0a06335e4be8a4dc3d1c2",
+    "training_3": "881345d6ca022bf39819f7d1643119040a9353685f773bb7895d6266811ed993",
+    "holdout_1": "8cb893707f7eb480d1cd600436005d435f17687027eade3c39aa87ab459ae73d",
+    "holdout_2": "9435ef2c831fc45e84a6c3fa0896c81bdeea52ed87bf5ee4c229b896a67191d6",
+    "holdout_3": "1bb782d973d191738a568cb78d799390e3e41405ad1bc4744e7cfa25108076a1",
+    "holdout_4": "707a7312bb8c55466a9234cde36fa5e0eab478b3f2ba486545a9efd9b2afa795",
+    "holdout_5": "67f5d8d64bb4b12cb13d4d3f287f91283b7bd292258f84e83c01548c4ae2e0d3"
+  },
+  "host_context_file": "/workspace/n83_speed/host_context.json",
+  "human_protocol": "/workspace/repos/crypto/research/n83_speed_20261012/PROTOCOL.md",
+  "human_protocol_sha256": "eb0eb30ed3f86417365cfa33d19aef192ccf8f1791a3c6be9ef54e0fec7dd375",
+  "baseline_commit": "c62555b7a1746490dba707589d791669a20bb0d0",
+  "delivery_branch": "codex/n83-rho-speed-20261012",
+  "prior_report_pr": "https://github.com/aburan28/crypto/pull/1722",
+  "selection_primary": "all-nine-verified arithmetic mean whole-process wall; default preferred within2percent",
+  "aa_pairs": 5,
+  "training_seed_range": [
+    202610126211,
+    202610126219
+  ],
+  "holdout_seed_range": [
+    202610126241,
+    202610126255
+  ],
+  "bootstrap_seed": 202610126299,
+  "bootstrap_resamples": 20000,
+  "requested_processes": 139,
+  "resource": {
+    "cpu": 3,
+    "memory_bytes": 12884901888,
+    "rho_timeout_s": 60
+  }
+}

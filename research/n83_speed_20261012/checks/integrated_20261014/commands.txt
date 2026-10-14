@@ -1,0 +1,13 @@
+Repository: /workspace/repos/crypto
+Integrated HEAD: 2ea7fd32086dfaf4189b1f95071739ae3f1d8ffe
+Network permission enabled for cached Cargo dependency access and local-socket library tests.
+Conductor attempted: unavailable (command not found); no tracked workflow file present.
+No source edits or benchmark runs performed.
+
+export RUSTUP_HOME=/workspace/n83_evaluation/toolchain/rustup
+export CARGO_HOME=/workspace/n83_evaluation/toolchain/cargo
+export CARGO_TARGET_DIR=/workspace/n83_evaluation/build
+export CARGO_BUILD_JOBS=4
+export PATH=/workspace/n83_evaluation/toolchain/rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin:/usr/bin:/bin
+cargo test --release --locked --lib
+cargo test --release --locked --example n83_rho_speed_eval

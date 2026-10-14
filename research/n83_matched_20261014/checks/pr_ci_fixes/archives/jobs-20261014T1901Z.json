@@ -1,0 +1,339 @@
+[
+  {
+    "status": "fulfilled",
+    "value": {
+      "run_id": 38585952452,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "jobs": [
+            {
+              "id": 115927883933,
+              "name": "proofs",
+              "status": "completed",
+              "conclusion": "failure",
+              "run_id": 38585952452,
+              "logs_url": null,
+              "steps": [
+                {
+                  "name": "Set up job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 1
+                },
+                {
+                  "name": "Run actions/checkout@v4",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 2
+                },
+                {
+                  "name": "Reject incomplete or bypassed proof sources",
+                  "status": "completed",
+                  "conclusion": "failure",
+                  "number": 3
+                },
+                {
+                  "name": "Build proofs and replay in a fresh kernel",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 4
+                },
+                {
+                  "name": "Audit every theorem's transitive axioms",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 5
+                },
+                {
+                  "name": "Post Run actions/checkout@v4",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 10
+                },
+                {
+                  "name": "Complete job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 11
+                }
+              ]
+            }
+          ]
+        },
+        "isError": false
+      }
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "run_id": 38585952256,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "jobs": [
+            {
+              "id": 115927888168,
+              "name": "names",
+              "status": "completed",
+              "conclusion": "failure",
+              "run_id": 38585952256,
+              "logs_url": null,
+              "steps": [
+                {
+                  "name": "Set up job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 1
+                },
+                {
+                  "name": "Run actions/checkout@v4",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 2
+                },
+                {
+                  "name": "Run actions/setup-python@v5",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 3
+                },
+                {
+                  "name": "Reference implementation matches its vectors",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 4
+                },
+                {
+                  "name": "No retired curve name in Markdown or HTML, every slug registered",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 5
+                },
+                {
+                  "name": "The pull request adds no retired curve name",
+                  "status": "completed",
+                  "conclusion": "failure",
+                  "number": 6
+                },
+                {
+                  "name": "Post Run actions/setup-python@v5",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 11
+                },
+                {
+                  "name": "Post Run actions/checkout@v4",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 12
+                },
+                {
+                  "name": "Complete job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 13
+                }
+              ]
+            }
+          ]
+        },
+        "isError": false
+      }
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "run_id": 38599281496,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "jobs": [
+            {
+              "id": 115974007087,
+              "name": "triage",
+              "status": "completed",
+              "conclusion": "success",
+              "run_id": 38599281496,
+              "logs_url": null,
+              "steps": [
+                {
+                  "name": "Set up job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 1
+                },
+                {
+                  "name": "Run actions/checkout@v6",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 2
+                },
+                {
+                  "name": "Ensure labels exist",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 3
+                },
+                {
+                  "name": "Triage open pull requests",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 4
+                },
+                {
+                  "name": "Consume the `autofix` label",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 5
+                },
+                {
+                  "name": "Post Run actions/checkout@v6",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 10
+                },
+                {
+                  "name": "Complete job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 11
+                }
+              ]
+            },
+            {
+              "id": 115985933776,
+              "name": "#1828 (sonnet)",
+              "status": "completed",
+              "conclusion": "failure",
+              "run_id": 38599281496,
+              "logs_url": null,
+              "steps": [
+                {
+                  "name": "Set up job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 1
+                },
+                {
+                  "name": "Require ANTHROPIC_API_KEY",
+                  "status": "completed",
+                  "conclusion": "failure",
+                  "number": 2
+                },
+                {
+                  "name": "Claim PR",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 3
+                },
+                {
+                  "name": "Run actions/checkout@v6",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 4
+                },
+                {
+                  "name": "Set git identity",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 5
+                },
+                {
+                  "name": "Prepare (Haiku)",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 6
+                },
+                {
+                  "name": "Haiku attempt",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 7
+                },
+                {
+                  "name": "Verify (Haiku)",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 8
+                },
+                {
+                  "name": "Decide on Sonnet",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 9
+                },
+                {
+                  "name": "Prepare (Sonnet)",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 10
+                },
+                {
+                  "name": "Sonnet attempt",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 11
+                },
+                {
+                  "name": "Verify (Sonnet)",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 12
+                },
+                {
+                  "name": "Pick the accepted attempt",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 13
+                },
+                {
+                  "name": "Commit and push",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 14
+                },
+                {
+                  "name": "Re-run flaky jobs",
+                  "status": "completed",
+                  "conclusion": "skipped",
+                  "number": 15
+                },
+                {
+                  "name": "Report and release",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 16
+                },
+                {
+                  "name": "Complete job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 17
+                }
+              ]
+            }
+          ]
+        },
+        "isError": false
+      }
+    }
+  }
+]

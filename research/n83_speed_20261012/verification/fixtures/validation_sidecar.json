@@ -1,0 +1,14 @@
+{
+  "kind":"validation_only_scalar_sidecar",
+  "must_not_be_passed_to_measured_children":true,
+  "entries":[
+    {"fixture_id":"training_1","split":"training","point":["1563800431976168596679317","4800535333933919962178258"],"scalar_validation_only":"4808357693808461"},
+    {"fixture_id":"training_2","split":"training","point":["5323029871610490893836245","2695261837233390436688162"],"scalar_validation_only":"6065439902940783"},
+    {"fixture_id":"training_3","split":"training","point":["8904333729853189426324026","3957590849747353098536693"],"scalar_validation_only":"6817478394194252"},
+    {"fixture_id":"holdout_1","split":"holdout","point":["2276293614448838520573184","278690618123076595657135"],"scalar_validation_only":"2334800134210224"},
+    {"fixture_id":"holdout_2","split":"holdout","point":["8398981957426112200992979","6098614629622887843011800"],"scalar_validation_only":"4166774788137979"},
+    {"fixture_id":"holdout_3","split":"holdout","point":["6759932551028364155812192","7561593030065598644097528"],"scalar_validation_only":"1716678483748384"},
+    {"fixture_id":"holdout_4","split":"holdout","point":["6402116464022600190296435","1474536173002680095921696"],"scalar_validation_only":"1487981590764985"},
+    {"fixture_id":"holdout_5","split":"holdout","point":["4664765639792684282339367","4811095748417114041312387"],"scalar_validation_only":"428983394635543"}
+  ]
+}

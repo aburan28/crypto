@@ -1,0 +1,21 @@
+{
+  "kind":"native_n83_matched_fixture_verification",
+  "status":"PASS_FIXTURES_ONLY",
+  "curve_slug":"icv1-f2m83-t6151469093347-9eba6cd5",
+  "field_modulus_low_terms":[0,2,4,7],
+  "fresh_generation_seed":202610146301,
+  "holdout_fixtures_verified":32,
+  "old_optimization_fixtures_reproduced_and_excluded":8,
+  "old_speed_fixtures_reproduced_and_excluded":8,
+  "initial_excluded_signed_orbits":617,
+  "retained_base_points_and_labels_verified":99600,
+  "all_fixture_curve_subgroup_scalar_and_exact_draw_stream_checks":true,
+  "all_new_signed_orbits_disjoint_from_original_Q_old16_targets_K600_and_one_another":true,
+  "fixture_manifest_sha256":"8a58e6482647c239fb3fdb40756e322ff1245093252f72391b0903df6aa56894",
+  "prior_fixture_manifest_sha256":"c93edc32a77411443229191e2db4cc3eeb7e99976b7f79a8a753ba103bce9909",
+  "prior_speed_fixture_manifest_sha256":"2b2a4987a5f93e751f5a28eb7856d31f8833a5b4d55f9baa92eb2c5ec427e0ae",
+  "validation_sidecar_sha256":"db228f6d41db96433d49e82e8eb0e5e7d611f929e19eb311df53883426d2db38",
+  "checker_source_sha256":"e14740991c9ad120cc8e0aadafb9ec5053f81219f7af72fc08d320d5c396bcaf",
+  "checker_executable_sha256":"7e4a3d28d7db622597c82f91e9ea81c819a35b6a70d268559994eadadf1d1a66",
+  "performance_claim":false
+}

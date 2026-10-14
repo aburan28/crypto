@@ -1,0 +1,9 @@
+The first figure-render attempt failed in the campaign diagram's Matplotlib
+angle3 arrow: the two specified vertical tangent angles differed by 180
+degrees and did not intersect. It produced no completed figure set or PDF.
+The following PDF attempt consequently failed on the missing campaign-flow
+PNG; its actual output is preserved as rendering_build.attempt1.log.
+
+The diagram route was corrected to explicit horizontal/vertical segments.
+This is a document-layout correction; no native research value or source
+record changed.

@@ -1,0 +1,24 @@
+cwd=/workspace/repos/crypto
+source_freeze_commit=c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03
+Both commands below were executed before reserved solver timing, with one build job per Cargo process.
+
+Controller:
+env N83_SOURCE_COMMIT=c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03 RUSTUP_HOME=/workspace/n83_evaluation/toolchain/rustup CARGO_HOME=/workspace/n83_evaluation/toolchain/cargo CARGO_TARGET_DIR=/workspace/n83_matched/controller_build CARGO_BUILD_JOBS=1 PATH=/workspace/n83_evaluation/toolchain/rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin:/usr/bin:/bin cargo build --release --locked --offline --manifest-path research/n83_matched_20261014/native_runner/Cargo.toml
+stdout+stderr=controller_build.log
+exit=controller_build.exit.txt
+
+All three workers, in one release compiler/profile command:
+env N83_SOURCE_COMMIT=c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03 RUSTUP_HOME=/workspace/n83_evaluation/toolchain/rustup CARGO_HOME=/workspace/n83_evaluation/toolchain/cargo CARGO_TARGET_DIR=/workspace/n83_evaluation/build CARGO_BUILD_JOBS=1 PATH=/workspace/n83_evaluation/toolchain/rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin:/usr/bin:/bin cargo build --release --locked --offline --example n83_rho_matched_eval --example koblitz_orbit_dlp_fast --example n83_rho_speed_eval
+stdout+stderr=workers_build.log
+exit=workers_build.exit.txt
+
+The native analysis CLI was previously tested and built from the now-frozen source; its existing SHA256 b1820abad3d17cb4f40f7d4d1a0a6c92ade2dfa056a43a0c4eee2d315c3a8346 is verified before copying. No research analysis is performed by these build checks.
+
+Create-new binary copies (all destinations verified absent beforehand):
+cp /workspace/n83_matched/controller_build/release/n83-matched-runner /workspace/n83_matched/frozen_binaries/runner
+cp /workspace/n83_evaluation/build/release/examples/n83_rho_matched_eval /workspace/n83_matched/frozen_binaries/rho_matched
+cp /workspace/n83_evaluation/build/release/examples/koblitz_orbit_dlp_fast /workspace/n83_matched/frozen_binaries/ic
+cp /workspace/n83_evaluation/build/release/examples/n83_rho_speed_eval /workspace/n83_matched/frozen_binaries/rho_speed_control
+cp /workspace/n83_evaluation/build/release/n83-matched-analysis /workspace/n83_matched/frozen_binaries/analysis
+chmod 555 /workspace/n83_matched/frozen_binaries/runner /workspace/n83_matched/frozen_binaries/rho_matched /workspace/n83_matched/frozen_binaries/ic /workspace/n83_matched/frozen_binaries/rho_speed_control /workspace/n83_matched/frozen_binaries/analysis
+sha256sum of all five frozen executables is retained in binaries.sha256; sizes/modes are in binaries.stat.txt.

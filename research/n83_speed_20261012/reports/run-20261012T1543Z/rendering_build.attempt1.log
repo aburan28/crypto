@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "/workspace/repos/crypto/research/n83_speed_20261012/reports/run-20261012T1543Z/build_report.py", line 119, in <module>
+    main()
+  File "/workspace/repos/crypto/research/n83_speed_20261012/reports/run-20261012T1543Z/build_report.py", line 99, in main
+    metadata = build_pdf(args.content, args.output)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/repos/crypto/research/n83_speed_20261012/reports/run-20261012T1543Z/render_engine.py", line 350, in build_pdf
+    story.extend(render_block(block, styles, content_path.parent))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/repos/crypto/research/n83_speed_20261012/reports/run-20261012T1543Z/render_engine.py", line 296, in render_block
+    return [render_figure(block, styles, source_dir)]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/repos/crypto/research/n83_speed_20261012/reports/run-20261012T1543Z/render_engine.py", line 258, in render_figure
+    raise FileNotFoundError(f"Figure does not exist: {path}")
+FileNotFoundError: Figure does not exist: /workspace/repos/crypto/research/n83_speed_20261012/reports/run-20261012T1543Z/figures/campaign_flow.png

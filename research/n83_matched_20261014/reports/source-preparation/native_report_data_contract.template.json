@@ -1,0 +1,56 @@
+{
+  "contract_status": "PENDING:NATIVE_EXECUTION_ANALYSIS_AND_INDEPENDENT_VERIFICATION",
+  "purpose": "Native producer and analysis outputs bind the report; Python performs presentation only.",
+  "campaign": {
+    "run_id": "PENDING:ACTUAL_UTC_START",
+    "source_freeze_commit": "PENDING:FREEZE_COMMIT",
+    "protocol_sha256": "PENDING:NATIVE_PROTOCOL_HASH",
+    "execution_matrix_sha256": "PENDING:NATIVE_MATRIX_HASH",
+    "worker_binary_sha256": "PENDING:MATCHED_WORKER",
+    "controller_binary_sha256": "PENDING:NATIVE_CONTROLLER",
+    "processes_requested": 32,
+    "main_target_answers_requested": 208,
+    "aa_target_answers_requested": 10,
+    "completed_disposition": "PENDING:ALL_ATTEMPTS_RETAINED"
+  },
+  "native_inputs": {
+    "protocol": {"source": "../../provenance/protocol.json", "sha256": "PENDING:HASH"},
+    "fixture_receipt": {"source": "../../verification/fixture_replay_receipt.json", "sha256": "PENDING:PATH_AND_HASH"},
+    "host_context": {"source": "../../provenance/host_context.json", "sha256": "PENDING:PATH_AND_HASH"},
+    "statistics": {"source": "../../analysis/statistics.json", "sha256": "PENDING:PATH_AND_HASH"},
+    "answer_replay": {"source": "../../verification/final_receipt.json", "sha256": "PENDING:PATH_AND_HASH"},
+    "file_provenance": {"source": "../../verification/file_provenance_receipt.json", "sha256": "PENDING:PATH_AND_HASH"},
+    "validation": {"source": "../../checks/validation_receipt.json", "sha256": "PENDING:PATH_AND_HASH"}
+  },
+  "display_contract": {
+    "ratio_direction": "IC/rho; below 1 favors IC",
+    "primary_shared": "Arithmetic mean of the three actual IC batch process costs divided by arithmetic mean of the three matched rho batch process costs; paired native 20,000-draw three-cohort bootstrap.",
+    "primary_cold": "Arithmetic mean actual singleton process IC cost divided by arithmetic mean matched rho cost over target_01 through target_08; native paired target-block bootstrap.",
+    "secondary_queries": "Native three-repetition target means and ratios for all 32 points; target-block and separately labeled crossed target/cohort sensitivity intervals.",
+    "descriptive_spread": "Native conventional midpoint medians, minima, p90, p95, maxima and complete tail/regression rows; no Python quantiles.",
+    "cohort_costs": "Each actual shared process has its own complete setup, target order, cumulative measured or modeled cost definitions and RSS; preparation occurs once per arm/cohort.",
+    "break_even": "Native additive coefficients, point threshold or null, bootstrap nonfinite mass and model coordinates; N>32 is extrapolated/model-only.",
+    "correctness": "Independent native receipts, witness replay counts, failures and meters; report binding is not a new certificate verification.",
+    "missing_policy": "Preserve native nulls, failures, censored values and withheld admission. Never replace absent values with zero or filter failed cases."
+  },
+  "accounting": {
+    "materialized_factor_base": "K600 is already available; historical selection/construction cost remains unavailable and additive.",
+    "cold_start": "Actual fresh process, without OS-cache flushing; includes parsing, setup, rank/logs, Q checks, solving, recovery, built-in verification and output.",
+    "reused_setup": "Actual single 32-target process per arm/cohort; rho normal-basis and seed-specific jumps charged, no shared target-dependent collision table.",
+    "query_boundary": "Stock IC target_ms omits Q-validation/input/output intervals that rho online includes; queries remain secondary.",
+    "external_audit": "Post-hoc native correctness audit, metered separately outside both solver intervals.",
+    "calibrated_S": null,
+    "ecbench_L2_admission": null,
+    "independent_host_confirmation": null,
+    "full_IC_rank_log_transcript_validation": null
+  },
+  "figure_contracts": {
+    "workflow": "Static diagram of actual singleton and reused-setup execution boundaries; no measured numbers until native results.",
+    "complete_process_costs": "All 8 paired cold costs and all 3 paired genuine 32-target batch costs, with units and native admission status.",
+    "query_points": "All native per-target query means and all 3 values per arm; mismatch disclosed, 32 target blocks and 3 shared setups.",
+    "query_spread": "Supplied native medians/p90/p95/max, or direct plotting of raw observations; no renderer-computed statistics.",
+    "memory": "All recorded wait4 process RSS and CPU observations, separately from wall time.",
+    "model": "Native precomputed model points, native finite/nonfinite threshold status and measured-count range clearly marked.",
+    "aa": "Five native same-arm process ratios, median/minimum/maximum; descriptive noise, not a confidence band."
+  }
+}

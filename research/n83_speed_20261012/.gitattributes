@@ -1,0 +1,12 @@
+checks/** -whitespace
+records/** -whitespace
+reports/**/*.log -whitespace
+reports/**/*.svg -whitespace
+audit/*.log -whitespace
+audit/*.stdout -whitespace
+audit/*.stderr -whitespace
+analysis/*.log -whitespace
+provenance/*.diff -whitespace
+*.pdf binary
+*.png binary
+*.jpg binary
