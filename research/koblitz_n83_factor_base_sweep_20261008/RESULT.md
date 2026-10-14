@@ -1,5 +1,15 @@
 # Degree-83 factor-base sweep: observed evidence
 
+The [ordered fixed-witness SAT control](verification/known-witness-ordered-sat-20261014/RESULT.md)
+was configured with full K1182 plus residual-K2048 signed-Frobenius domains
+and the algebraically replayed witness in the first all-affine pattern. Its
+840-second external watchdog exited 124 with empty solver output, so native
+construction and solver entry are unconfirmed. The audit classifies
+this as a censored encoding-control result, with neither a SAT model nor an
+UNSAT certificate. The conservative cumulative local N83 charge is now
+22,200 seconds; this run supplies no natural yield, rank, or complete-runtime
+factor-base comparison.
+
 The [source-only replay of the v7 known witness](verification/known-witness-first-pattern-replay-20261014/RESULT.md) verifies affine partial sums, the exact target group sum, and four zero S3 residuals. The fixture's first two small-domain points violate the worker's unsigned first-pair order as listed; swapping them preserves the target and S3 chain and satisfies that order. The native worker tries the resulting all-affine identity pattern first; its 5,000-conflict `UNKNOWN_search_cap` is therefore a censored solver observation, not an algebraic obstruction. The replay does not test CNF satisfiability, natural yield, or complete runtime, and it charges no additional N83 search time.
 
 The [exact primary pilot overlap census](verification/pilot-overlap-census-20261013/RESULT.md) replays all 27 primary signed-Frobenius archives and measures all 648 ordered cross-stream pairs. It finds 378 disjoint pairs, 33 with an empty residual domain, and 57 with a singleton residual domain; 558 pass the current worker's minimum two-residual-orbit screen. These are exact import-shape observations, not natural relation-yield or complete-runtime measurements.
