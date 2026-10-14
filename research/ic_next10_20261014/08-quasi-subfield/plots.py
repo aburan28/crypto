@@ -67,15 +67,15 @@ save(fig, "fig_beta_frontier")
 
 # ---------------- Figure 2: decomposition (if present) ----------------
 dec = []
-for p in sorted(glob.glob(f"{D}/decomp_*.jsonl")):
+for p in sorted(glob.glob(f"{D}/decomp_*.jsonl")) + sorted(glob.glob(f"{D}/onepass_*.jsonl")):
     with open(p) as fh:
         dec += [json.loads(l) for l in fh if l.strip()]
 if dec:
     groups = {}
     for r in dec:
-        groups.setdefault((r["n"], r["k"]), []).append(r)
+        groups.setdefault((r.get("refute_mode", "F4 closure"), r["n"], r["k"]), []).append(r)
     keys = sorted(groups)
-    fig, axes = plt.subplots(1, 2, figsize=(10, 4.2))
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.6))
     for gi, key in enumerate(keys):
         for r in groups[key]:
             structured = not r["base"].startswith("random")
@@ -91,7 +91,7 @@ if dec:
                                 color="#9b2226" if structured else "#264653", alpha=0.6)
     for ax in axes:
         ax.set_xticks(range(len(keys)))
-        ax.set_xticklabels([f"n={n}, k={k}" for n, k in keys], fontsize=8)
+        ax.set_xticklabels([f"n={n}, k={k}\n{'closure' if m.startswith('F4') else 'one-pass'}" for m, n, k in keys], fontsize=7)
     axes[0].set_ylabel("relation yield (fraction of targets decomposed), 95% CI")
     axes[1].set_ylabel("refutation degree d (d_max+1 = not refuted by d_max)")
     axes[0].set_title("Yield: structured (●) vs random subspaces (×)")

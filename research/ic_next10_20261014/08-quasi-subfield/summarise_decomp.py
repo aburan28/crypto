@@ -20,14 +20,16 @@ def wilson(k, n, z=1.96):
 
 
 rows = []
-for p in sorted(glob.glob(f"{D}/decomp_*.jsonl")):
+for p in sorted(glob.glob(f"{D}/decomp_*.jsonl")) + sorted(glob.glob(f"{D}/onepass_*.jsonl")):
     for line in open(p):
         if line.strip():
             rows.append(json.loads(line))
-rows.sort(key=lambda r: (r["n"], r["k"], r["base"].startswith("random"), r["base"]))
+for r in rows:
+    r.setdefault("refute_mode", "F4 closure")
+rows.sort(key=lambda r: (r["refute_mode"], r["n"], r["k"], r["base"].startswith("random"), r["base"]))
 out = []
-print("| n | k | base | V on curve | yield (95% CI) | mean ordered decomps | refutation degrees (6 targets) | median word XORs |")
-print("|--:|--:|---|--:|---|--:|---|--:|")
+print("| instrument | n | k | base | V on curve | yield (95% CI) | mean ordered decomps | refutation degrees (6 targets) | median word XORs |")
+print("|---|--:|--:|---|--:|---|--:|---|--:|")
 for r in rows:
     lo, hi = wilson(r["decomposed"], r["yield_targets"])
     degs = [t["refute_degree"] if t["refute_degree"] is not None else f">{r['d_max']}" for t in r["refute"]]
@@ -35,10 +37,10 @@ for r in rows:
     xs = sorted(t["word_xors"] for t in r["refute"])
     med = xs[len(xs) // 2] if xs else None
     cap = any("CAP" in s for s in steps)
-    print(f"| {r['n']} | {r['k']} | {r['base']} | {r['v_on_curve']}/{r['v_size']} | "
+    print(f"| {r['refute_mode']} (d<={r['d_max']}) | {r['n']} | {r['k']} | {r['base']} | {r['v_on_curve']}/{r['v_size']} | "
           f"{r['yield']:.3f} ({lo:.3f}–{hi:.3f}) | {r['mean_ordered_decomps']:.2f} | "
           f"{' '.join(map(str, degs))}{' (size cap hit)' if cap else ''} | {med} |")
-    out.append(dict(n=r["n"], k=r["k"], base=r["base"], yield_=r["yield"], ci=[lo, hi],
+    out.append(dict(mode=r["refute_mode"], n=r["n"], k=r["k"], base=r["base"], yield_=r["yield"], ci=[lo, hi],
                     mean_decomps=r["mean_ordered_decomps"], refute_degrees=degs, steps=steps,
                     median_word_xors=med))
 json.dump(out, open(f"{D}/decomp_summary.json", "w"), indent=1)

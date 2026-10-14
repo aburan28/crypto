@@ -1,0 +1,45 @@
+
+--------------- INPUT DATA ---------------
+#variables                      38
+#equations                      71
+#invalid equations               0
+field characteristic             2
+homogeneous input?               0
+signature-based computation      0
+monomial order                 DRL
+basis hash table resetting     OFF
+linear algebra option            2
+initial hash table size     131072 (2^17)
+max pair selection             ALL
+reduce gb                        1
+#threads                         1
+info level                       2
+generate pbm files               0
+------------------------------------------
+
+Legend for f4 information
+--------------------------------------------------------
+deg       current degree of pairs selected in this round
+sel       number of pairs selected in this round
+pairs     total number of pairs in pair list
+mat       matrix dimensions (# rows x # columns)
+density   density of the matrix
+new data  # new elements for basis in this round
+          # zero reductions during linear algebra
+time(rd)  time of the current f4 round in seconds given
+          for real and cpu time
+--------------------------------------------------------
+
+deg     sel   pairs        mat          density            new data         time(rd) in sec (real|cpu)
+------------------------------------------------------------------------------------------------------
+  2       7      78      11 x 60         48.18%        7 new       0 zero         0.00 | 0.00         
+  2       4      96      26 x 82         12.99%        3 new       1 zero         0.00 | 0.00         
+  3      65     109     421 x 1596        1.60%       55 new      10 zero         0.06 | 0.01         
+  3      80     399     491 x 669         3.33%       78 new       2 zero         0.02 | 0.01         
+  4    1174    1493    7926 x 18350       0.20%      365 new     809 zero         1.12 | 0.28         
+  2      14    2819     124 x 125         8.50%        0 new      14 zero         0.01 | 0.00         
+  3     948    2805    1625 x 670         1.96%        0 new     970 zero         0.03 | 0.01         
+  4     795    1857   37021 x 62034       0.08%      504 new     291 zero         6.99 | 1.45         
+  2      14    8131     116 x 162         5.95%        0 new      14 zero         0.07 | 0.00         
+  3     228    8117    2022 x 3371        1.20%       59 new     169 zero         0.65 | 0.13         
+  4    3633    8773   47719 x 66481       0.12%     1416 new    2235 zero

@@ -25,7 +25,8 @@ The report's kill criterion is "an LP δ\* for S₅ below 1/32 in every new fami
   summands) gives `(r − ½)/(n − 1) ≥ 1/4`, so this window is empty. The best such pattern only
   ties rho, with exponent 1/2.
 - **Curve equations.** Adding them gives **exactly no gain**. The exact MILP picks the bare
-  `S₃` lattice, 9/100, for all 8 + 16 leading-vertex choices.
+  `S₃` lattice for every leading-vertex choice: 9/100 at ℓ = 1 (8 + 16 choices) and 13/112 at
+  ℓ = 2 (8 choices).
 - **Semaev chain with large intermediate unknowns.** It gives **no lattice at all** (δ\* = 0).
 
 The one variant with a real reach gain is the shared-target `S₃` pair. At toy size LLL confirms the
@@ -156,7 +157,7 @@ This beats rho iff `(r − ½)/(n − 1) < δ < 1/4`.
 | V3 `S₃` pair, all `M` | 1 | 4 of 16 finished | 9/95, the same as the down-closed optimum, for 3 tuples; 1/11 for the constant/constant tuple, where the MILP hit its time limit (lower bound) | the other 12 tuples were stopped for time (§6) |
 | V1 `S₃` + curve eq. for x₁ | 1 | 8 / 8 | 9/100 | optimum never uses the curve equation |
 | V1 `S₃` + both curve eqs | 1 | 16 / 16 | 9/100 | same |
-| V1 `S₃` + curve eq., ℓ = 2 | 2 | see [`milp_v1_l2.md`](milp_v1_l2.md) | | |
+| V1 `S₃` + curve eq. for x₁ | 2 | 8 / 8 | 13/112 | = single `S₃` at ℓ = 2 (W10); curve equation never used ([`milp_v1_l2.md`](milp_v1_l2.md)) |
 | V2 `S₄` chain (t large) | 1 | 16 / 16 | 0 | no `M` has positive gain even at δ = 0 |
 
 For V1 with one curve equation, the "binds" flag comes from the unused coordinate `y₂`, whose
@@ -165,8 +166,8 @@ bounding box is `[0, 0]`. It is an artefact of the flag, not a binding box.
 ### 4.4 LLL at toy size (the only variant with a gain: the `S₃` pair)
 
 Setup: closure-optimal ℓ = 1 lattices. The single `S₃` lattice has dim 25 and LP δ₁ = 0.0900; the
-pair lattice has dim 45 and LP δ₁ = 0.0947. Prime p = 2^40 − 2^…: `p = 1099511627563` (40-bit) and
-the largest 56-bit p ≡ 3 mod 4; a = −3, b = 31. Planted points have `x < ⌊p^δ⌋`. LLL is the repo's
+pair lattice has dim 45 and LP δ₁ = 0.0947. Primes: `p = 1099511627563` (40-bit) and `p = 72057594037927931` (56-bit), the largest p ≡ 3 mod 4
+below 2^bits; a = −3, b = 31. Planted points have `x < ⌊p^δ⌋`. LLL is the repo's
 `lll_reduce` (f64 Gram–Schmidt, used up to dim 30) or `lll_reduce_hp` (above dim 30), with δ_LLL = 0.99.
 A trial succeeds when at least n reduced rows vanish over Z at the root. Measured values:
 

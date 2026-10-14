@@ -1,21 +1,11 @@
-memory allocation of 7656 bytes failed
-stack backtrace:
-note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
-memory allocation of 7048 bytes failed
-stack backtrace:
-note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
-memory allocation of 6224 bytes failed
-stack backtrace:
-note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
-memory allocation of 7184 bytes failed
-stack backtrace:
-note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
-memory allocation of 6104 bytes failed
-stack backtrace:
-note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
-memory allocation of 33216 bytes failed
-stack backtrace:
-note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
-memory allocation of 32752 bytes failed
-stack backtrace:
-note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+{"base":"g=0x201","decomposed":1010,"k":9,"mean_ordered_decomps":4.575,"n":18,"partial":"yield","yield_targets":2000}
+{"base":"random=1","decomposed":723,"k":9,"mean_ordered_decomps":0.895,"n":18,"partial":"yield","yield_targets":2000}
+{"base":"random=2","decomposed":795,"k":9,"mean_ordered_decomps":1.027,"n":18,"partial":"yield","yield_targets":2000}
+{"base":"random=3","decomposed":851,"k":9,"mean_ordered_decomps":1.094,"n":18,"partial":"yield","yield_targets":2000}
+{"base":"random=4","decomposed":715,"k":9,"mean_ordered_decomps":0.8965,"n":18,"partial":"yield","yield_targets":2000}
+{"base":"g=0x279","decomposed":1182,"k":9,"mean_ordered_decomps":1.819,"n":17,"partial":"yield","yield_targets":2000}
+{"base":"random=1","decomposed":1258,"k":9,"mean_ordered_decomps":1.95,"n":17,"partial":"yield","yield_targets":2000}
+{"base":"random=2","decomposed":1318,"k":9,"mean_ordered_decomps":2.1635,"n":17,"partial":"yield","yield_targets":2000}
+{"base":"random=3","decomposed":1244,"k":9,"mean_ordered_decomps":1.9685,"n":17,"partial":"yield","yield_targets":2000}
+{"base":"random=4","decomposed":1288,"k":9,"mean_ordered_decomps":2.095,"n":17,"partial":"yield","yield_targets":2000}
+{"base":"g=0x808b","decomposed":214,"k":15,"mean_ordered_decomps":0.514,"n":31,"partial":"yield","yield_targets":1000}

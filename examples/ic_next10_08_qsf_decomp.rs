@@ -22,7 +22,7 @@
 //! Prints one JSON line.
 use crypto_lib::binary_ecc::F2mElement;
 use crypto_lib::cryptanalysis::koblitz_groebner::{
-    build_decomposition_system, matrix_f4_f2_counted, FieldStructure,
+    build_decomposition_system, matrix_f4_f2_counted, solving_profile, FieldStructure,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
 use crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly;
@@ -204,6 +204,7 @@ fn main() {
     let n_ref: usize = a[4].parse().unwrap();
     let d_max: u32 = a[5].parse().unwrap();
     let seed: u64 = a[6].parse().unwrap();
+    let onepass = std::env::var("QSF_ONEPASS").map(|v| v == "1").unwrap_or(false);
     let irr = find_irreducible_sparse(n).unwrap();
     let gf = Gf2::new(&irr);
     let fmask = (1u64 << n) - 1;
@@ -303,6 +304,11 @@ fn main() {
         done += 1;
     }
     let yield_secs = t0.elapsed().as_secs_f64();
+    eprintln!(
+        "{}",
+        serde_json::json!({"partial": "yield", "n": n, "k": k, "base": base, "decomposed": decomposed,
+            "yield_targets": n_yield, "mean_ordered_decomps": total_dec as f64 / n_yield as f64})
+    );
 
     // ---- refutation degree ----
     let st = FieldStructure::new(n, &irr);
@@ -326,7 +332,16 @@ fn main() {
         let mut xors_total = 0u64;
         let mut notes = Vec::new();
         for d in 2..=d_max {
-            let (refuted, converged, xors, cap) = closure(&sys.equations, sys.n_vars, d, 12);
+            // QSF_ONEPASS=1: one degree-d Macaulay matrix (no closure rounds),
+            // which fits the memory cap at n = 31, d = 4.
+            let (refuted, converged, xors, cap) = if onepass {
+                match solving_profile(&sys.equations, sys.n_vars, d) {
+                    Some(p) => (p.refuted, true, 0, false),
+                    None => (false, false, 0, true),
+                }
+            } else {
+                closure(&sys.equations, sys.n_vars, d, 12)
+            };
             xors_total += xors;
             notes.push(format!(
                 "d{d}:{}",
@@ -357,6 +372,7 @@ fn main() {
             "mean_ordered_decomps": total_dec as f64 / n_yield as f64,
             "yield_secs": yield_secs,
             "refute": ref_rows, "refute_tries": tries, "d_max": d_max,
+            "refute_mode": if onepass { "one-pass Macaulay" } else { "F4 closure" },
         })
     );
 }
