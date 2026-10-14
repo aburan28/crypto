@@ -8,6 +8,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 EVIDENCE = HERE.parent / "leaf_m10_support_20260930/evidence"
+RAW_RUN = "run_36707051160"
 
 
 def sha(path: Path) -> str:
@@ -45,8 +46,22 @@ def main() -> None:
         else:
             assert item["provenance"] == "mac_replay"
             assert item["path"] == "mac_replay.json"
-    assert paths == {path.relative_to(EVIDENCE).as_posix()
-                     for path in EVIDENCE.rglob("*") if path.is_file()}
+    # The sibling raw-run directory is a separately checksummed receipt copy
+    # (its own SHA256SUMS); the manifest covers everything outside it.
+    present = {path.relative_to(EVIDENCE).as_posix()
+               for path in EVIDENCE.rglob("*")
+               if path.is_file() and RAW_RUN not in path.relative_to(EVIDENCE).parts}
+    assert paths == present
+    raw = EVIDENCE / RAW_RUN
+    if raw.is_dir():
+        listed = set()
+        for line in (raw / "SHA256SUMS").read_text().splitlines():
+            digest, name = line.split("  ", 1)
+            assert sha(raw / name) == digest, name
+            listed.add(name)
+        assert listed == {path.relative_to(raw).as_posix()
+                          for path in raw.rglob("*")
+                          if path.is_file() and path.name != "SHA256SUMS"}
     assert hosted_files == manifest["hosted_artifact_files"] == 101
     assert hosted_bytes == manifest["hosted_artifact_bytes"]
     print(f"PASS {len(paths)} files, {hosted_bytes} hosted bytes")
