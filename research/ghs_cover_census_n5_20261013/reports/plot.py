@@ -49,7 +49,7 @@ if arms:
         stacked(ax, rows, G4, f"q={q}\n" + ("class min, all curves" if s == "class" else "≤1 step, sample"), gen3)
     axes[0].set_ylabel("fraction of curves")
     fig.legend(handles=[Patch(color=PAL[i], label=f"g={g}") for i, g in enumerate(gen3)], frameon=False, loc="upper center", bbox_to_anchor=(0.5, 1.07), ncol=len(gen3), fontsize=7.5)
-    fig.text(0.5, -0.1, "n = 3: minimal genus by #E(K) mod 4 (q = 5, 7 reproduce PR #1759)", ha="center", color=INK)
+    fig.text(0.5, -0.2, "n = 3: minimal genus by #E(K) mod 4 (q = 5, 7 reproduce PR #1759)", ha="center", color=INK)
     fig.savefig(f"{out}/n3_min_genus_by_mod4.svg", bbox_inches="tight"); fig.savefig(f"{out}/n3_min_genus_by_mod4.png", dpi=150, bbox_inches="tight")
 
 # Figure 2: n = 5, minimal genus by (#E(K) mod 4, #E(K)[2])

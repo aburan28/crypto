@@ -8,9 +8,9 @@ Descriptive record of one run. Interpretation is in the study `README.md` / `REP
 == What ran
 - Spec: `PROTOCOL.md`, frozen at commit `2d95bde3f` before any panel; amendment `338cd011a` (hypothesis H) after panel D and before panels A, B, C, E produced output. Protocol-versioned at commit, not independently preregistered.
 - Tool: `cover_census_n.rs` (dependency-free Rust, `rustc --edition 2021 -O`), sha256 in the environment block. Orchestration `run.sh` (pilot, reproduction arms, panel D) and `run_panels.sh` (panels A, B, C, E); comparisons `compare.sh` (`jq` + `cmp`).
-- Isolation: none. Shared Apple M4 Pro host, load average 60--190 throughout; 6 threads. Wall times are bookkeeping, not results. All recorded values are exact, deterministic counts.
+- Isolation: none. Shared Apple M4 Pro host, load average 60--260 throughout; 6 threads. Wall times are bookkeeping, not results. All recorded values are exact, deterministic counts.
 - Seeds: fixed-seed stream of the merged tool (seed 20261012; tag q for n = 3, tag 100q + n for n = 5).
-- Interruptions: the session that wrote the protocol ended during a timing pilot (`n = 5, q = 5, sample:1`, output unread); its scratch outputs, including the first `n = 3, q = 3` pilot records, were lost, and the pilot was rerun unchanged in this run. A later session interruption (API limit) did not stop the running panel process; no arm was restarted.
+- Interruptions: the session that wrote the protocol ended during a timing pilot (`n = 5, q = 5, sample:1`, output unread); its scratch outputs, including the first `n = 3, q = 3` pilot records, were lost, and the pilot was rerun unchanged in this run. A later session interruption did not stop the running panel process. Panel E was killed once by a host restart about 2h15m into its first attempt, before it wrote any curve record; it was rerun from scratch with the same command and seed (recorded in the environment block). No other arm was restarted.
 - Raw records: `results/run-20261014T0050Z/*.jsonl` (`rec` = field, curve, group, mr, derived_checks, totals), stderr files (all empty), `reproduction-checks.txt`.
 
 #raw(read("../../results/run-20261014T0050Z.env.txt"), block: true)
@@ -26,7 +26,7 @@ Descriptive record of one run. Interpretation is in the study `README.md` / `REP
   [A], [n=3, q=11, all classes], [2662], [1786323], [panel],
   [B], [n=3, q=13, all classes], [4400], [4855539], [panel],
   [C], [n=3, q=17, sample 200], [200 + 187 neighbours], [24221379], [panel],
-  [E], [n=5, q=5, sample 60], [E_COMPLETED], [254313125], [panel],
+  [E], [n=5, q=5, sample 60], [60 + 64 neighbours (after one restart: host restarted 2h15m into the first attempt, no records written; rerun from scratch, same seed)], [254313125], [panel],
 )
 
 == Reproduction checks
@@ -41,7 +41,7 @@ Unit: number of isomorphism classes of curves (exhaustive arms) or sampled curve
 
 #figure(image("n5_m_r_q3.svg", width: 100%), caption: [Run 20261014T0050Z, n = 5, q = 3: every structure of every curve by (r, m) and \#E(K)[2], from the `mr` records.])
 
-E_MR_FIG
+#figure(image("n5_m_r_q5.svg", width: 100%), caption: [Run 20261014T0050Z, n = 5, q = 5: every structure of the 124 sampled and neighbour models by (r, m) and \#E(K)[2].])
 
 == Missing data
 - Isogeny-class minima for the sampled arms C and E.
