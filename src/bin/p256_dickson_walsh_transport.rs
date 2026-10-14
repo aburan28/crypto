@@ -962,6 +962,13 @@ fn gamma_ratio(collisions: u64) -> f64 {
 }
 
 fn run(cli: Cli) -> Result<(), String> {
+    let logical_dependency_read_bytes = [&cli.round2, &cli.round19, &cli.round312]
+        .iter()
+        .try_fold(0u64, |total, path| {
+            fs::metadata(path)
+                .map(|metadata| total + metadata.len())
+                .map_err(|error| format!("cannot size {}: {error}", path.display()))
+        })?;
     let (round2_receipt, round2) = load_dependency(&cli.round2, ROUND2_SHA256)?;
     let (round19_receipt, round19) = load_dependency(&cli.round19, ROUND19_SHA256)?;
     let (round312_receipt, round312) = load_dependency(&cli.round312, ROUND312_SHA256)?;
@@ -1279,7 +1286,9 @@ fn run(cli: Cli) -> Result<(), String> {
             "conservative_logical_materialized_log2_bytes": (logical_bytes as f64).log2(),
             "factor_base_serialized_bytes_component": dump_serialized_bytes,
             "exact_row_materialized_bytes_component": row_materialized_bytes,
-            "disk_traffic_bytes_excluding_result_and_isolation": 0,
+            "logical_dependency_read_bytes": logical_dependency_read_bytes,
+            "observed_physical_disk_bytes": Value::Null,
+            "physical_disk_measurement_reason": "the native isolator records process resource usage but not block-I/O counters",
         },
         "boundary": {
             "unit": "P-256 group-addition equivalents / sqrt(n)",
