@@ -77,6 +77,27 @@ theorem pullback_injective_of_push_pull_two {A B : Type*} [AddCommGroup A]
     _ = push (pull y) := congrArg push hxy
     _ = y + y := hpushpull y
 
+/-- Projecting an exact three-point Jacobian relation by a cofactor also
+    projects the known multiple of the generator. This is the group step
+    used by the small-field relation-control implementation. -/
+theorem projected_three_point_relation {A : Type*} [AddCommGroup A]
+    (c k : ℤ) (T D P Q R : A) (h : T + k • D = P + Q + R) :
+    c • T + (c * k) • D = c • P + c • Q + c • R := by
+  calc
+    c • T + (c * k) • D = c • (T + k • D) := by simp [zsmul_add, mul_zsmul]
+    _ = c • (P + Q + R) := congrArg (fun X : A => c • X) h
+    _ = c • P + c • Q + c • R := by simp [zsmul_add]
+
+/-- Scalar recovery after cofactor projection must divide the sum of
+    projected base logs by the cofactor, then remove the target offset. -/
+theorem projected_target_scalar {K : Type*} [Field K]
+    (c x k l₁ l₂ l₃ : K) (hc : c ≠ 0)
+    (h : c * (x + k) = l₁ + l₂ + l₃) :
+    x = (l₁ + l₂ + l₃) / c - k := by
+  calc
+    x = (c * (x + k)) / c - k := by field_simp [hc]; ring
+    _ = (l₁ + l₂ + l₃) / c - k := by rw [h]
+
 end P192ExtensionCover
 
 #print axioms P192ExtensionCover.cyclic_cross_ratio_product
@@ -85,3 +106,5 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.legendre_j_difference_factor
 #print axioms P192ExtensionCover.scholten_palindromic_identity
 #print axioms P192ExtensionCover.quartic_projection_identity
+#print axioms P192ExtensionCover.projected_three_point_relation
+#print axioms P192ExtensionCover.projected_target_scalar

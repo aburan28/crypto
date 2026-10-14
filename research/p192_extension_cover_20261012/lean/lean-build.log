@@ -1,8 +1,10 @@
-ℹ [763/764] Built CrossRatio (33s)
-info: CrossRatio.lean:82:0: 'P192ExtensionCover.cyclic_cross_ratio_product' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:83:0: 'P192ExtensionCover.cyclic_cross_ratio_not_norm_one' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:84:0: 'P192ExtensionCover.pullback_injective_of_push_pull_two' does not depend on any axioms
-info: CrossRatio.lean:85:0: 'P192ExtensionCover.legendre_j_difference_factor' depends on axioms: [propext, Quot.sound]
-info: CrossRatio.lean:86:0: 'P192ExtensionCover.scholten_palindromic_identity' depends on axioms: [propext]
-info: CrossRatio.lean:87:0: 'P192ExtensionCover.quartic_projection_identity' depends on axioms: [propext]
+ℹ [763/764] Built CrossRatio (42s)
+info: CrossRatio.lean:103:0: 'P192ExtensionCover.cyclic_cross_ratio_product' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:104:0: 'P192ExtensionCover.cyclic_cross_ratio_not_norm_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:105:0: 'P192ExtensionCover.pullback_injective_of_push_pull_two' does not depend on any axioms
+info: CrossRatio.lean:106:0: 'P192ExtensionCover.legendre_j_difference_factor' depends on axioms: [propext, Quot.sound]
+info: CrossRatio.lean:107:0: 'P192ExtensionCover.scholten_palindromic_identity' depends on axioms: [propext]
+info: CrossRatio.lean:108:0: 'P192ExtensionCover.quartic_projection_identity' depends on axioms: [propext]
+info: CrossRatio.lean:109:0: 'P192ExtensionCover.projected_three_point_relation' depends on axioms: [propext]
+info: CrossRatio.lean:110:0: 'P192ExtensionCover.projected_target_scalar' depends on axioms: [propext, Classical.choice, Quot.sound]
 Build completed successfully (764 jobs).
