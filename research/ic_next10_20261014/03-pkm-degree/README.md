@@ -5,51 +5,84 @@ date: 2026-10-14
 
 # Item 3: the PKM tower's solving degree past the memory wall
 
-**Verdict: INCONCLUSIVE on the plateau, because the wall stopped every run at
-`N ≥ 15`. POSITIVE on the conflict with `d + δ`, which is now resolved.**
+**Verdict: NEGATIVE for the `m = 4` plateau, INCONCLUSIVE for `m = 3`, and the
+`d + δ` conflict is resolved.**
 
-- **The plateau.** msolve 0.6.5 reproduces the committed F4 degree on every
-  control it finished: 15 of 15 systems (`m = 2`, `N = 12–18`; `m = 3`,
-  `N = 9, 12`; `m = 4`, `N = 8, 12`), with the same verdict on each.
-- At `m = 3`, `N = 21` and `24` it gets only as far as a **productive
-  degree-7 step** (`D ≥ 7`). The jobs then hit this host's 45-minute wall
-  inside the second degree-7 step, and **no step above degree 7 started**.
-  - The design's kill test needs `D ≥ 8` at `N = 21` and `≥ 9` at `N = 24`.
-    These runs cannot evaluate it, and they do not show `D = 7` either.
-- **The wall is wall-clock time, not memory.** The host ran at a load of
-  22–25 on 4 cores, so each single-threaded job got about 19% of a core. The
-  peak resident memory was 2.6 GB at `N = 21`, well under the 5 GB cap.
+- **The plateau at 7 does not hold at `m = 4`.** At `m = 4`, `N = 20`, on
+  **both targets**, msolve 0.6.5 completes **three productive degree-8 F4
+  rounds**, adding 1,241, 2,507 and 3,578 basis elements. It then hits the
+  5 GB cap. The two traces are identical.
+  - msolve takes pairs of the lowest degree first, so it reaches degree 8
+    only after every pair of degree ≤ 7 has been reduced. The degree-7 closure
+    therefore does not contain `1`, and **`D ≥ 8` at `m = 4`, `N = 20`**.
+  - The `m = 4` line now reads `D = 6, 7, 7, ≥ 8` at `N = 8, 12, 16, 20`. The
+    first two are msolve's, matching `f4_fp_tower`. The value at 16 is
+    `f4_fp_tower`'s; msolve reached 49 rounds there with no degree above 7
+    before the memory cap.
+  - Under the note's rule for a stopped run ("a productive step at degree 8
+    or more"), this reads **H0: growth resumes**. It is about one degree per
+    eight tower unknowns over `N = 12–20`.
+  - **Caveat:** the `D ≥ 8` is msolve's, on the raw presentation.
+    `f4_fp_tower` (reduced presentation) has not run `N = 20`, which needs more
+    than 14 GB. The two engines agree on every one of the 16 control systems
+    both finished.
+- **`m = 3` stays inconclusive.** At `N = 18`, 21 and 24 msolve completes one
+  productive degree-7 step (`D ≥ 7`). It is stopped by the 45-minute wall
+  inside the second degree-7 step, at 2.6 GB, before any degree-8 round.
+  - The design's kill test, `D ≥ 8` at `N = 21` and `≥ 9` at `N = 24`, can be
+    evaluated neither way.
+- **Positive control: passed.** msolve matches the committed `D` and verdict
+  on all 16 control systems it finished:
+  - `m = 2`, `N = 12–18`: `D = 5` (8 of 8);
+  - `m = 3`, `N = 9, 12`: `D = 6` (4 of 4);
+  - `m = 4`, `N = 8`: `D = 6`; `N = 12`: `D = 7` (4 of 4).
+  - At `m = 3`, `N = 15` it reaches a productive degree-7 step (`D ≥ 7`,
+    committed 7) before the time cap.
+- **Where the wall falls.**
+  - **`m = 4`: memory.** All three `m = 4` jobs ended with a segmentation
+    fault (exit 139) on allocation, at `VmPeak` 4.86–4.87 GB of the 5 GB cap
+    (resident 3.7 GB):
+    - `N = 16` at round 50, a degree-7 round with 31,902 pairs;
+    - `N = 20` at round 22, the fourth degree-8 round, with 13,262 pairs, on
+      both targets.
+  - **`m = 3`: time.** The host ran at a load of 22–25 on 4 cores, so a
+    single-threaded job got about 19% of a core. `N = 15`, 18 and 21 were
+    stopped at 45 minutes (`N = 24` by the operator at 27 minutes), each
+    inside the second degree-7 step. Their peak resident memory was
+    1.5–2.6 GB.
 - **The `d + δ` conflict is resolved.**
   - For the `m = 2` full presentation, Proposition 2 is an equality. `δ = N`
     exactly at `N = 12–26`: the inverse `1/S̄` has every one of its `2^N`
-    square-free coefficients non-zero. So the Macaulay/XL degree is
-    `D_XL = N + 4` (16 → 30), while F4 needs 5–6.
+    square-free coefficients non-zero, and its weight histogram is exactly
+    `C(N, k)`. So the Macaulay/XL degree is `D_XL = N + 4`, from 16 at
+    `N = 12` to 30 at `N = 26`, while F4 needs 5–6.
   - A direct Macaulay rank computation confirms `D_XL = 16` at `N = 12`. It
-    also gives `D_XL = 13` at `m = 3`, `N = 9`, against F4's 6; `D_XL ≥ 14` at
-    `m = 3`, `N = 12`, against 6; and `D_XL = 12` at `m = 4`, `N = 8`,
-    against 6.
-  - The bound is real and tight, but it bounds XL only. F4 is not bound by it,
-    because it reuses rows that reduce to a lower degree.
+    gives `D_XL = 13` at `m = 3`, `N = 9` (F4: 6), `≥ 14` at `m = 3`,
+    `N = 12` (F4: 6), and 12 at `m = 4`, `N = 8` (F4: 6).
+  - The bound is real and tight, but it bounds XL only, which never reuses a
+    reduced row at a lower degree. F4 escapes it through degree falls.
+  - So the conflict is not evidence for a plateau. The `m = 4`, `N = 20`
+    result shows that F4's degree does rise, far more slowly than `N`.
   - The Hilbert-series predictors fail as the note's §3.4 says they must:
     - the top-part ideal of the full presentation has series `(1+t)^N`, so
       `d_reg = N + 1`;
-    - the chain presentation has no finite `d_reg`;
-    - the affine Hilbert function of the homogenised generators reaches 0 only
-      at `D_XL`.
+    - the chain presentation is positive-dimensional at infinity and has no
+      `d_reg`;
+    - the homogenised generators' affine Hilbert function reaches 0 only at
+      `D_XL`.
 
-  None of them predicts the measured `D` at any `N ≤ 18`.
-- **A new structural observation.** msolve's F4 trace is identical round for
-  round at `N = 18`, 21 and 24 (`m = 3`) through the first degree-7 step. The
-  selected pairs, rows, new elements and zero reductions all match. The
-  columns match too, except in that step at `N = 18`, and at `N = 21` and 24
-  they match there as well. That step adds 2,354 elements at every one
-  of these sizes, and `f4_fp_tower` added 2,354 at its step 19 at `N = 18`.
-  - So F4's work up to and including its first degree-7 step does not depend
-    on `t` once `t ≥ 6`. This is the "level-window" mechanism of the note's
-    §10.5, now seen at `m = 3` and in a second engine.
-  - What grows with `N` is the degree-7 phase after that step. It has 2 steps
-    at `N = 15` and 6 at `N = 18` (`f4_fp_tower`). Whether it ever needs
-    degree 8 is exactly what the wall hid.
+    None predicts `D` at any `N ≤ 18`, so none is used beyond.
+- **A structural observation: level windows.** msolve's F4 trace at `m = 3`
+  is identical round for round at `N = 18`, 21 and 24 through the first
+  degree-7 step: selected pairs, rows, new elements and zero reductions. At
+  `N = 21` and 24 the columns match too. That step adds 2,354 elements at
+  every one of these sizes, and so did `f4_fp_tower`'s step 19 at `N = 18`.
+  - At `m = 4`, the two `N = 20` targets have identical traces.
+  - F4's work up to the first top-degree step therefore does not depend on
+    `t` once `t` is large enough. What grows with `N` is the phase after it:
+    - at `m = 3`, two degree-7 steps at `N = 15` and six at `N = 18`;
+    - at `m = 4`, 38 degree-7 steps at `N = 16`, against 5 degree-7 rounds
+      followed by degree 8 at `N = 20`.
 
 ## 1. Setup
 
@@ -99,33 +132,43 @@ date: 2026-10-14
 | 3 | 15 | 1 | 7 | stopped at 45 min in the 2nd degree-7 step: `D ≥ 7` | — | 1.47 GB | 2701 |
 | 4 | 8 | 2 | 6 | 6, 6 | yes | 6 MB | 2–3 |
 | 4 | 12 | 2 | 7 | 7, 7 | yes | 477 MB | 595–1242 |
+| 4 | 16 | 1 | 7 | 5 GB cap at round 50, 37 degree-7 rounds, none above 7: `D ≥ 7` | — | 3.76 GB | 2327 |
 
-Every finished control agrees in `D` and in verdict: 14 systems, plus the
-`m = 3`, `N = 9` pilot system, 15 in all. msolve's sequence of round degrees
+Every finished control agrees in `D` and in verdict: 16 systems, with 16
+`[-1]` (no solution) verdicts. msolve's sequence of round degrees
 has the same shape as `f4_fp_tower`'s: it climbs to the plateau degree, then
 falls and finds `1` at a lower degree.
 
 **Instrument check at `p₁`.** The note warns that msolve 0.6.5 failed a
 known-answer battery above `2^16` in another project. On these systems, at
-`p₁ ≈ 2^31`, every verdict agrees with the committed rows, and those rows were
-verified against exhaustive search. The linear-algebra variants `-l 2`
+`p₁ ≈ 2^31`, all 16 verdicts agree with the committed rows, and those rows
+were verified against exhaustive search. The linear-algebra variants `-l 2`
 (default), `-l 42` and `-l 44` give identical round tables at `m = 3`,
 `N = 12` (`runs_l42/`).
 
-### 2.2 The new sizes
+### 2.2 The new sizes (and `N = 16` at `m = 4`)
 
-| m | N | msolve state at the wall | rounds | `D` lower bound | largest matrix | peak RSS | VmPeak |
-|--:|--:|:--|--:|--:|:--|--:|--:|
-| 3 | 18 | in the 2nd degree-7 step | 23 | 7 | 170,436 × 184,453 | 2.58 GB | 3.66 GB |
-| 3 | 21 | in the 2nd degree-7 step | 22 | 7 | 170,445 × 194,842 | 2.58 GB | 3.66 GB |
-| 3 | 24 | see `results.csv` (filled in §2.4) | | | | | |
-| 4 | 16, 20 | see `results.csv` (filled in §2.4) | | | | | |
+| m | N | target | how it ended | rounds | degree sequence (run lengths) | `D` lower bound | largest matrix | peak RSS | VmPeak |
+|--:|--:|--:|:--|--:|:--|--:|:--|--:|--:|
+| 3 | 18 | 0 | 45-min wall, 2nd degree-7 step | 23 | 4³ 5⁴ 6 5³ 6⁸ 7 6² 7 | 7 | 170,436 × 184,453 | 2.58 GB | 3.66 GB |
+| 3 | 21 | 0 | 45-min wall, 2nd degree-7 step | 22 | same as 18 through round 20 | 7 | 170,445 × 194,842 | 2.58 GB | 3.66 GB |
+| 3 | 24 | 0 | stopped by the operator at 27 min (memory budget), 2nd degree-7 step | 22 | same as 21 through round 21 | 7 | 170,445 × 194,887 | 2.59 GB | 3.67 GB |
+| 4 | 16 | 0 | **5 GB cap** (segfault on allocation), round 50 | 49 | 4³ 5⁵ 6⁴ 7³⁷ | 7 | 118,846 × 167,176 | 3.76 GB | 4.86 GB |
+| 4 | 20 | 0 | **5 GB cap**, round 22 (4th degree-8 round) | 21 | 4³ 5⁴ 6⁴ 7⁵ 8 7 8 7 8 | **8** | 213,684 × 320,433 | 3.71 GB | 4.87 GB |
+| 4 | 20 | 1 | **5 GB cap**, round 22 | 21 | identical to target 0 | **8** | 213,684 × 320,433 | 3.70 GB | 4.86 GB |
 
-- At `N = 18` the committed `f4_fp_tower` run needed six degree-7 steps and
-  176 minutes on four unloaded threads. Under this host's load, msolve
-  finished one degree-7 step in 45 minutes.
-- The first degree-7 step took 2,024 s wall and 384 s CPU at `N = 18`, and
-  2,041 s wall and 396 s CPU at `N = 21`.
+- **The degree-8 rounds at `m = 4`, `N = 20`.** Each round's `(sel, pairs, rows × cols, new, zero)` is
+  `(4432, 10966, 78739 × 134970, 1241, 3193)`,
+  `(9955, 25599, 151098 × 236724, 2507, 7448)` and
+  `(13412, 51333, 213684 × 320433, 3578, 9868)`. Each is followed by a short
+  degree-7 round on the new elements' pairs.
+- **The committed `f4_fp_tower` run at `m = 4`, `N = 16`** has degree run
+  lengths `4² 5⁵ 6⁴ 7³⁸ 6⁴`, and refutes at 7. msolve at `N = 16` followed
+  the same shape for 49 rounds (37 degree-7 rounds) before the cap.
+- **Timing at `m = 3`.** The first degree-7 step took 2,024 s wall and 384 s
+  CPU at `N = 18`, and 2,041 s wall and 396 s CPU at `N = 21`. The committed
+  `f4_fp_tower` run at `N = 18` needed six degree-7 steps and 176 minutes on
+  four unloaded threads.
 
 ### 2.3 The trace is independent of `t` up to the first degree-7 step
 
@@ -200,20 +243,25 @@ The `(deg, sel, pairs, rows, cols, new, zero)` rows of `logs/trace_*.txt`:
 
 ## 3. Where the wall falls
 
-- **In this item (5 GB cap, 45 min per job, shared host at load 22–25 on
-  4 cores):**
-  - msolve finishes `m = 3` at `N ≤ 12` and `m = 4` at `N ≤ 12`.
-  - At `m = 3`, `N = 15` it is stopped by **time** inside its second
-    degree-7 step, at 1.47 GB.
-  - At `N = 18`, 21 and 24 it is stopped by time inside the second degree-7
-    step, at 2.6 GB resident.
-  - No run reached the memory cap.
-- **The memory wall itself was not located.** The second degree-7 step at
-  `N = 21` has 170,445 × 194,842 rows and columns. At `N = 18`, `f4_fp_tower`
-  needed 13 GB in its degree-7 steps 22–26.
-  - Whether msolve fits `N = 21` in 5 GB is unknown: its resident memory was
-    still rising when the time cap fired.
-  - That is a statement about what was seen, not an extrapolation.
+This host gave each job a 5 GB address-space cap and 45 minutes of wall time,
+and ran at a load of 22–25 on 4 cores, about 19% of a core per job.
+
+- **`m = 4`: the memory wall** sits between `N = 12`, which finishes at
+  0.48 GB resident and 1.54 GB address space, and `N = 16`.
+  - `N = 16` ran out of the 5 GB address space at round 50, a degree-7 round
+    with 31,902 pairs, after 37 degree-7 rounds.
+  - `N = 20` ran out at round 22, the fourth degree-8 round with 13,262 pairs,
+    on both targets.
+  - Every failure was a segmentation fault on allocation: `VmPeak` reached
+    4.86–4.87 GB of 5.0 GB, and resident memory 3.7 GB.
+- **`m = 3`: the time wall** sits between `N = 12`, which finishes in 36 s,
+  and `N = 15`, stopped at 45 minutes.
+  - Every run at `N = 15–24` was inside its second degree-7 step when it was
+    stopped, at 1.5–2.6 GB resident.
+  - At `m = 3` the memory wall was not reached, so where it falls is not
+    known.
+- **For comparison, the previous wall.** `f4_fp_tower` needed 13 GB at
+  `m = 3`, `N = 18`, and 8.1 GB at `m = 4`, `N = 16`.
 
 ## 4. Deviations from the protocol
 
@@ -225,10 +273,16 @@ The `(deg, sel, pairs, rows, cols, new, zero)` rows of `logs/trace_*.txt`:
    `m = 3`, `N = 15` target 1. They are kept as `logs/aborted_*.log` and
    `progress.txt` records them; neither is used. The `m = 2`, `N = 22`
    controls were never started.
-3. **Concurrency.** Up to three msolve jobs of this item ran at once. Each was
-   under its own 5 GB cap, and their summed resident memory stayed below
-   5.5 GB.
-4. **Arm PL (planted systems) was not run.** The instrument check rests on 15
+3. **Concurrency.** Up to four jobs of this item ran at once, each under its
+   own 5 GB cap. At about 19:53 UTC their summed resident memory reached
+   about 6.9 GB, and the host had 2.5 GB available. The `N = 24` run was
+   stopped (exit 143) to bring the total down. Its trace up to that point is
+   kept and used only as a lower bound.
+6. **Kill criterion at `m = 4`.** The design states its kill criterion for
+   `m = 3`. The `m = 4` reading (H0 from a productive degree-8 step) applies
+   the note's §16.1 rule for stopped runs to the `m = 4` line. That line mixes
+   engines: `N = 16` is `f4_fp_tower`'s, and `N = 20` is msolve's.
+4. **Arm PL (planted systems) was not run.** The instrument check rests on 16
    agreeing verdicts and degrees instead.
 5. **Exhaustive verification.** None was needed for new verdicts, because no
    new system finished.
