@@ -853,7 +853,8 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for CyclotomicBase<'_> {
             |p| inst.fast.neg(*p).pack(),
             |p| p.x,
         )?;
-        fb.cost.count("abscissae_enumerated_uncharged", abscissae.len() as u64);
+        fb.cost
+            .count("abscissae_enumerated_uncharged", abscissae.len() as u64);
         fb.cost.count("point_lifts_uncharged", lifts);
         fb.cost.count("cofactor_projected_points", projected);
         fb.cost.count("frobenius_maps", frobenius_maps);
@@ -1156,7 +1157,10 @@ impl DecompositionOracle<PrimeCurve> for RootfindSubtractOracle<'_> {
     }
 
     fn parameters(&self) -> &[(&str, &str)] {
-        &[("m", "summands, 2 or 3; 3 builds the negation-folded pair table")]
+        &[(
+            "m",
+            "summands, 2 or 3; 3 builds the negation-folded pair table",
+        )]
     }
 
     fn prepare(
@@ -1167,7 +1171,10 @@ impl DecompositionOracle<PrimeCurve> for RootfindSubtractOracle<'_> {
         ops: &mut GroupOps,
     ) -> Result<(), String> {
         if !(2..=3).contains(&self.m) {
-            return Err(format!("rootfind-subtract takes m = 2 or 3, got {}", self.m));
+            return Err(format!(
+                "rootfind-subtract takes m = 2 or 3, got {}",
+                self.m
+            ));
         }
         for key in params.0.keys() {
             if key != "m" {

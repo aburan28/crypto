@@ -1,0 +1,43 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "rootfind parity cycle-1: negation-folded PairTable vs full rootfind and F4 on E_0 n=13",
+  "description": "Hypothesis: PairTable::build_negation_folded (~|F|^2/4 set-up) cuts cold S vs full PairSumTable while keeping yield. Arms: m=2/d=4 and m=2/d=5 negfold candidates, window-negfold m=3/d=5, full rootfind and F4 baselines, strong rho. Public synthetic; L0 ops OK; engineering classification; no security claim.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 13}],
+    "targets_per_curve": 2,
+    "target_seed": 202610131501,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "ic-f4-m3-d5", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192",
+      "max_trials": "200000"}}},
+    {"name": "ic-rootfind-m2-d4", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=4",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind",
+      "max_trials": "200000"}}},
+    {"name": "ic-rootfind-m2-d5", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind",
+      "max_trials": "200000"}}},
+    {"name": "ic-negfold-m2-d4", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=4",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+      "max_trials": "200000"}}},
+    {"name": "ic-negfold-m2-d5", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+      "max_trials": "200000"}}},
+    {"name": "ic-window-negfold-m3-d5", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=3,engine=rootfind-window-negfold,window_div=3",
+      "max_trials": "200000"}}},
+    {"name": "ic-rootfind-window-m3-d5", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=3,engine=rootfind-window",
+      "max_trials": "200000"}}}
+  ],
+  "measurement": {"rounds": 2, "warmup": 1, "order": "alternate", "seed": 202610131502, "isolation_required": "L0", "timeout_seconds": 600}
+}

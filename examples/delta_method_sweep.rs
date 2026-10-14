@@ -80,7 +80,10 @@ fn parse_args() -> Args {
             "--delta-min" => args.delta_min = value().parse().expect("delta"),
             "--delta-max" => args.delta_max = value().parse().expect("delta"),
             "--degrees" => {
-                args.degrees = value().split(',').map(|s| s.parse().expect("degree")).collect()
+                args.degrees = value()
+                    .split(',')
+                    .map(|s| s.parse().expect("degree"))
+                    .collect()
             }
             "--summands" => {
                 args.summands = value().split(',').map(|s| s.parse().expect("m")).collect()
@@ -171,7 +174,11 @@ fn run_cell_parent(spec: &CellSpec, timeout: Duration) -> DeltaCellResult {
                 spec.m,
                 spec.ell,
                 r.scalar,
-                if r.decomposed { "DECOMPOSED" } else { "refuted" },
+                if r.decomposed {
+                    "DECOMPOSED"
+                } else {
+                    "refuted"
+                },
                 r.wall_ms,
                 r.max_degree_built,
                 r.splits
@@ -201,7 +208,15 @@ fn run_cell_parent(spec: &CellSpec, timeout: Duration) -> DeltaCellResult {
     let _ = child.wait();
     let kc = KoblitzCurve::new(spec.a, spec.n).expect("usable Koblitz curve");
     let (base, _) = standard_base(&kc, spec.ell).expect("base");
-    summarise_cell(&kc, spec.m, spec.ell, &base, spec.targets, records, truncated)
+    summarise_cell(
+        &kc,
+        spec.m,
+        spec.ell,
+        &base,
+        spec.targets,
+        records,
+        truncated,
+    )
 }
 
 fn main() {
@@ -296,11 +311,23 @@ fn main() {
         "skipped": skipped,
         "wall_ms": sweep_started.elapsed().as_secs_f64() * 1e3,
     });
-    let suffix = args.label.as_ref().map(|l| format!("_{l}")).unwrap_or_default();
+    let suffix = args
+        .label
+        .as_ref()
+        .map(|l| format!("_{l}"))
+        .unwrap_or_default();
     let path = args.out.join(format!("delta_results{suffix}.json"));
     std::fs::write(&path, serde_json::to_string_pretty(&report).unwrap()).expect("write results");
-    write_table(&args.out.join(format!("delta_summary{suffix}.md")), &results, &skipped);
-    eprintln!("wrote {} after {:.1} s", path.display(), sweep_started.elapsed().as_secs_f64());
+    write_table(
+        &args.out.join(format!("delta_summary{suffix}.md")),
+        &results,
+        &skipped,
+    );
+    eprintln!(
+        "wrote {} after {:.1} s",
+        path.display(),
+        sweep_started.elapsed().as_secs_f64()
+    );
 }
 
 fn write_table(path: &Path, results: &[DeltaCellResult], skipped: &[Value]) {
