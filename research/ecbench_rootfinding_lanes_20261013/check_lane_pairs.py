@@ -32,11 +32,16 @@ for width in (4, 8, 16):
         outcome_equal = (serial['outcome']['recovered'] == batch['outcome']['recovered']
                          and serial['outcome']['status'] == 'verified' and batch['outcome']['status'] == 'verified')
         cost_equal = serial['cost']['total_gae'] == batch['cost']['total_gae']
-        inversion_reduced = batch['field_ops']['invs'] <= serial['field_ops']['invs']
-        outcomes.append(counters_equal and native_equal and outcome_equal and cost_equal
-                        and inversion_reduced)
-    checks[str(width)] = {'pairs': len(outcomes), 'all_exact': all(outcomes),
-                          'failed_pairs': [i for i, ok in enumerate(outcomes) if not ok]}
+        # The current ecbench record omits GroupOps.field_ops.  Report that
+        # separately instead of treating absent inversion evidence as zero.
+        field_available = 'field_ops' in serial and 'field_ops' in batch
+        inversion_reduced = (batch['field_ops']['invs'] <= serial['field_ops']['invs']) if field_available else None
+        outcomes.append((counters_equal and native_equal and outcome_equal and cost_equal,
+                         field_available, inversion_reduced))
+    checks[str(width)] = {'pairs': len(outcomes), 'all_exact': all(item[0] for item in outcomes),
+                          'field_ops_available': all(item[1] for item in outcomes),
+                          'inversion_reduced_when_available': all(item[2] for item in outcomes) if all(item[1] for item in outcomes) else None,
+                          'failed_pairs': [i for i, item in enumerate(outcomes) if not item[0]]}
 result = {'session': str(session), 'checks': checks,
           'all_pass': all(value['all_exact'] for value in checks.values())}
 print(json.dumps(result, indent=2))
