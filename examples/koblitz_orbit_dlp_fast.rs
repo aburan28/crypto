@@ -1535,6 +1535,10 @@ mod wide {
                 if existing == [0; 5] {
                     slots[slot] = Self::indexed83_encode(state_index, root_selector, fingerprint);
                     self.len += 1;
+                    assert!(
+                        self.len < slots.len(),
+                        "indexed root table capacity exhausted"
+                    );
                     if let Some(bloom) = &mut self.bloom {
                         bloom.insert(key);
                     }
@@ -1795,13 +1799,15 @@ mod wide {
                 2445342385696756367155238,
                 5959927424489161220022208,
             ];
-            let full = build_index128_with_symmetry(&gf, &basis, &solver, &reps, false);
-            let quotient = build_index128_with_symmetry(&gf, &basis, &solver, &reps, true);
+            let full = build_index128_with_symmetry(&gf, &basis, &solver, &reps, false, false);
+            let quotient = build_index128_with_symmetry(&gf, &basis, &solver, &reps, true, false);
             assert!(quotient.states.len() < full.states.len());
             assert_eq!(quotient.table.len, full.table.len);
             let mut full_indexed = RootTable128::with_capacity_indexed83(full.states.len() * 2);
             let mut quotient_indexed =
                 RootTable128::with_capacity_indexed83(quotient.states.len() * 2);
+            let mut dense_quotient_indexed =
+                RootTable128::with_capacity_indexed83((quotient.states.len() * 4 + 2) / 3);
             for (states, table) in [
                 (&full.states, &mut full_indexed),
                 (&quotient.states, &mut quotient_indexed),
@@ -1824,6 +1830,28 @@ mod wide {
                 }
             }
             assert_eq!(quotient_indexed.len, full_indexed.len);
+            for index in 0..quotient.states.len() {
+                let state = quotient.states.get(index);
+                for (selector, root) in state.normal_roots.into_iter().enumerate() {
+                    let key = basis.canonical_selected(root).0;
+                    dense_quotient_indexed.insert_indexed83(
+                        key,
+                        index,
+                        selector,
+                        |state_index, root_selector| {
+                            basis
+                                .canonical_selected(
+                                    quotient.states.root_at(state_index, root_selector),
+                                )
+                                .0
+                        },
+                    );
+                }
+            }
+            assert_eq!(dense_quotient_indexed.len, quotient_indexed.len);
+            assert!(
+                dense_quotient_indexed.layout_receipt().2 < quotient_indexed.layout_receipt().2
+            );
             for index in 0..full.states.len() {
                 let state = full.states.get(index);
                 for root in state.normal_roots {
@@ -1836,11 +1864,26 @@ mod wide {
                         "first witness differs for key {key}",
                     );
                     assert_eq!(
+                        dense_quotient_indexed.get_with_context(key, &quotient.states, &basis),
+                        quotient_indexed.get_with_context(key, &quotient.states, &basis),
+                        "dense five-byte first witness differs for key {key}",
+                    );
+                    assert_eq!(
                         quotient_indexed.get_with_context(key, &quotient.states, &basis),
                         full_indexed.get_with_context(key, &full.states, &basis),
                         "five-byte first witness differs for key {key}",
                     );
                 }
+            }
+            for probe in 1..2048u128 {
+                let key = basis
+                    .canonical_selected(probe.wrapping_mul(0x2545_F491_4F6C_DD1D) & basis.mask)
+                    .0;
+                assert_eq!(
+                    dense_quotient_indexed.get_with_context(key, &quotient.states, &basis),
+                    quotient_indexed.get_with_context(key, &quotient.states, &basis),
+                    "dense five-byte probe differs for key {key}",
+                );
             }
         }
 
@@ -2179,6 +2222,7 @@ mod wide {
         dense_table: bool,
         load75_table: bool,
         indexed5_table: bool,
+        indexed5_load75: bool,
         root_table_request_entries: usize,
     }
 
@@ -2385,7 +2429,8 @@ mod wide {
         reps: &[u128],
     ) -> Index128 {
         let symmetric_states = std::env::var("KIC_SYMMETRIC_S3").as_deref() == Ok("1");
-        build_index128_with_symmetry(gf, basis, solver, reps, symmetric_states)
+        let indexed5_load75 = std::env::var("KIC_INDEXED5_LOAD75").as_deref() == Ok("1");
+        build_index128_with_symmetry(gf, basis, solver, reps, symmetric_states, indexed5_load75)
     }
 
     fn build_index128_with_symmetry(
@@ -2394,6 +2439,7 @@ mod wide {
         solver: &S3Solver128,
         reps: &[u128],
         symmetric_states: bool,
+        indexed5_load75: bool,
     ) -> Index128 {
         let n = gf.n as usize;
         assert!(
@@ -2489,7 +2535,21 @@ mod wide {
                 || (gf.n == 83 && packed_state83 && packed && !dense_table && !load75_table),
             "five-byte indexed roots require N83 compact states and the regular packed request"
         );
-        let root_table_request_entries = if load75_table {
+        assert!(
+            !indexed5_load75 || indexed5_table,
+            "indexed five-byte load75 request requires the indexed table"
+        );
+        // The symmetric quotient retains almost two distinct canonical root
+        // keys per state.  Requesting 4*S/3 therefore targets at most 75%
+        // occupancy after the constructor doubles the request.
+        let root_table_request_entries = if indexed5_load75 {
+            states
+                .len()
+                .checked_mul(4)
+                .and_then(|n| n.checked_add(2))
+                .expect("indexed root table request exceeds usize")
+                / 3
+        } else if load75_table {
             states
                 .len()
                 .checked_mul(2)
@@ -2535,6 +2595,7 @@ mod wide {
             dense_table,
             load75_table,
             indexed5_table,
+            indexed5_load75,
             root_table_request_entries,
         }
     }
@@ -3240,6 +3301,7 @@ mod wide {
             "scope":"public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
         });
         summary["symmetric_s3_states_enabled"] = json!(index.symmetric_states);
+        summary["indexed5_load75_enabled"] = json!(index.indexed5_load75);
         println!("{summary}");
         if let Ok(path) = std::env::var("KIC_DUMP_BASE") {
             let dump = json!({

@@ -864,9 +864,10 @@ fn pdp3_koblitz_f4_and_f6_verify_on_one_query_stream() {
     for line in text.lines() {
         let r: Value = serde_json::from_str(line).unwrap();
         assert_eq!(r["outcome"]["status"], "verified", "{line}");
-        assert_eq!(r["cost"]["lower_bound"], true, "{line}");
-        let unpriced = r["cost"]["unpriced"].to_string();
-        assert!(unpriced.contains("word_XORs"), "{unpriced}");
+        // The F4 word XORs are priced at the calibrated ratio since
+        // c8b1594f6, so the cost is no longer a lower bound.
+        assert_eq!(r["cost"]["lower_bound"], false, "{line}");
+        assert_eq!(r["cost"]["unpriced"], serde_json::json!([]), "{line}");
         let extra = &r["solver"]["extra"];
         let geometry = extra["geometric_group_additions"].as_u64().unwrap();
         assert_eq!(extra["geometric_fallbacks"], 0, "{line}");
@@ -1028,7 +1029,7 @@ fn pdp3_koblitz_rootfind_engine_follows_f4_query_stream_without_a_solver() {
                 "{line}"
             );
         } else {
-            assert_eq!(r["cost"]["lower_bound"], true, "{line}");
+            assert_eq!(r["cost"]["lower_bound"], false, "{line}");
             assert!(r["solver"]["ops"].as_u64().unwrap() > 0, "{line}");
         }
         let w = r["workload"]["workload_id"].as_str().unwrap().to_string();
