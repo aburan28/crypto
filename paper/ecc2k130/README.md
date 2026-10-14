@@ -134,6 +134,9 @@ GPU; the paper says so in its availability paragraph and Appendix A.
   at `gpu/nist/RESULTS.md` on `main`.
   Retitled "Accelerating Pollard Rho with GPU Field Arithmetic: ECC2K-130 on NVIDIA Blackwell" to lead with the
   arithmetic speedup.
+  The exact v3 table-walk rate is updated from 5.10 to the 2026-10-12
+  screen's 8.24 (new evidence record E89), and §8 now says the 20.08
+  receipt ran rule v2.
   Section and subsection headings shortened to terse labels (for example
   "NIST curves", "FPGA", "Table walk vs. σ-walk", "Walk constant"), with the remaining rhetorical questions
   and informal phrases in the text replaced.
@@ -164,8 +167,11 @@ GPU; the paper says so in its availability paragraph and Appendix A.
   (15.44 fused, 15.88 with nibble tables); the campaign preset still
   ships 14.64 and the paper leads with that number, naming the others.
 - The 20.08 B/s table-walk rate is a rate, not a cost per solve; the
-  cycle-rule v2 cost projection (0.81–0.86× σ) is unmeasured, and the
-  v3 rule's throughput and walk constant are not yet measured at all.
+  cycle-rule v2 cost projection (0.81–0.86× σ) is unmeasured. The 20.08
+  build ran rule v2 (116 registers, no frame; v3 needs 128 and a 400-byte
+  frame). Exact v3 measured 5.10 in its first paired panel and 8.24 in an
+  unpaired 2026-10-12 screen of the same knob set (E89), whose raw logs are
+  not in the tree; v3's walk constant is not yet measured.
 - The RTX PRO 4500 bridge map's DP34 collection rate, the L40S
   collection rate and the G7e family are unmeasured.
 - The packed-walk witness cost (34.7%) is stated in `CAIRN-WITNESS.md`

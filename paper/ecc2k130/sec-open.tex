@@ -16,8 +16,9 @@ build ran cycle rule v2, whose exits from a fruitless cycle depended on
 how a trail had entered it. That was found in review and fixed by rule
 v3, which picks one exit for each detected cycle regardless of
 history (Section~\ref{sec:walk-cycles}). The exact v3 kernel runs at
-$5.10$~billion iterations/s today, against $15.88$ for the best
-$\sigma$-walk~\evcite{\evref{client}, ``The earlier 20.078 B/s table result''; \evref{v3}}.
+$8.24$~billion iterations/s in its latest screen ($5.10$ in its first
+paired panel), against $15.88$ for the best
+$\sigma$-walk~\evcite{\evref{client}, ``The earlier 20.078 B/s table result''; \evref{v3}; \evref{redesign}}.
 Almost all of that gap is the cost of probing for cycles inside the
 critical path, and several ideas attack it:
 \begin{itemize}[leftmargin=1.2em,itemsep=0.2em]

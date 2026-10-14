@@ -345,8 +345,17 @@ leaving it, and the rules have had three versions:
 \item \emph{v3} fixes that. On a hint it follows at most eight raw
   steps, confirms an exact cycle, and leaves at one anchor chosen from
   the cycle itself, so every trail entering a cycle leaves it the same
-  way. The probe sits on the critical path, and the exact v3 kernel
-  currently runs at $5.10$~billion iterations/s on the RTX~PRO~6000~\evcite{\evref{v3}; \evref{client}, ``The earlier 20.078 B/s table result''}.
+  way. The probe sits on the critical path. The exact v3 kernel's
+  first paired panel measured $5.10$~billion iterations/s on the
+  RTX~PRO~6000~\evcite{\evref{v3}; \evref{client}, ``The earlier 20.078 B/s table result''}.
+  On 2026-10-12 the fully tuned v3 build, which uses the same knob set
+  as the $20.08$ build but now compiles rule v3, was screened at
+  $8.24$ with its 300-report replay gate passing. That figure is a
+  single unpaired screen, and the report that gives it does not carry
+  its raw logs~\evcite{\evref{redesign}}. The $20.08$ receipt itself
+  predates v3: its kernel had 116 registers and no stack frame, while
+  the v3 probe needs 128 registers and a 400-byte
+  frame~\evcite{\evref{oneblock}; \evref{v3}}.
 \end{itemize}
 
 So the honest summary is this. The $\sigma$-walk is the fastest
@@ -406,7 +415,7 @@ Section~\ref{sec:sigma-vs-table}~\evcite{\evref{survey}; \evref{client}, ``Table
   paired'': the best paired result on that part. ``Table, pre-v3'':
   table-walk rates under cycle rules v1 or v2, which are superseded
   (Section~\ref{sec:sigma-vs-table}); the exact v3 table walk measures
-  $5.10$ on the RTX~PRO~6000. ``M/SM'': million iterations per second per SM, our quotient of the
+  $8.24$ on the RTX~PRO~6000 in an unpaired screen ($5.10$ in its first paired panel). ``M/SM'': million iterations per second per SM, our quotient of the
   survey rate by the SM count. ``T/\$'': trillions of iterations per dollar at
   Modal list price, 2026-09-19.}
 \label{tab:survey}

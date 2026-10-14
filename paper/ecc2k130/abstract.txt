@@ -18,7 +18,7 @@ per SM and per dollar, show the kernel and where its speedup came from
 (none of it from changing the algorithm), and set the work against the
 instruction sets that made it possible on GPUs and CPUs. We separate the $\sigma$-walk from the table walk:
 the table walk's $20.08$ was measured under a cycle rule later found to
-leave cycles inconsistently, the exact rule runs at $5.10$ today, and the
+leave cycles inconsistently, the exact rule runs at $8.24$ today, and the
 $\sigma$-walk is the fastest correct walk we have. Applying the same
 optimisations to Pollard rho on NIST P-256 and P-384 on the same card
 gives $1.52\times$ and $2.61\times$, to $1.632$ and $0.548$ billion iterations
