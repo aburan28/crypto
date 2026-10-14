@@ -5522,6 +5522,14 @@ pub enum TargetSource {
     /// repeats only once `k` reaches `r`, so the guard restarts it (a
     /// fresh `R₀`, the same `S`) only after `r` steps or at the identity.
     Stride,
+    /// `Stride` with `S ← S + T` after every target that yields a
+    /// relation (`T` drawn once, one addition a relation).  Under one
+    /// fixed `S`, two pairs of relations the same number of steps apart
+    /// whose factor-base differences coincide give a four-row dependency
+    /// with `Σc = Σ c·k = 0`, which cancels the target and pins nothing;
+    /// a new stride per relation makes equal step counts unequal
+    /// differences.
+    StrideRenew,
 }
 
 impl TargetSource {
@@ -5535,6 +5543,7 @@ impl TargetSource {
             TargetSource::WalkPrimeLanes { batched: true, .. } => "walk_prime_lanes_batch",
             TargetSource::WalkSharedJumps => "walk_shared_jumps",
             TargetSource::Stride => "stride",
+            TargetSource::StrideRenew => "stride_renew",
         }
     }
     pub fn is_walk(&self) -> bool {
@@ -5566,6 +5575,7 @@ impl TargetSource {
                 | TargetSource::WalkPrimeFast
                 | TargetSource::WalkPrimeLanes { .. }
                 | TargetSource::Stride
+                | TargetSource::StrideRenew
         )
     }
 }
@@ -5911,12 +5921,19 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
             .expect("prime lanes required")
     });
     let (mut lane_rounds, mut lane_prepared) = (0u64, 0u64);
-    let (mut stride, mut stride_steps, mut stride_restarts) =
-        ((g.identity(), 0u64, 0u64), 0u64, 0u64);
-    if targets == TargetSource::Stride {
+    let striding = matches!(targets, TargetSource::Stride | TargetSource::StrideRenew);
+    let (mut stride, mut stride_steps, mut stride_restarts, mut stride_renewals) =
+        ((g.identity(), 0u64, 0u64), 0u64, 0u64, 0u64);
+    let mut renew_by = (g.identity(), 0u64, 0u64);
+    if striding {
         // A stride at the identity would present one point forever.
         while g.is_identity(&stride.0) {
             stride = draw_jumps(g, generator, target, r, &mut rng, &mut rel.group_ops, 1)[0];
+        }
+    }
+    if targets == TargetSource::StrideRenew {
+        while g.is_identity(&renew_by.0) {
+            renew_by = draw_jumps(g, generator, target, r, &mut rng, &mut rel.group_ops, 1)[0];
         }
     }
     if targets.is_walk() {
@@ -6100,7 +6117,7 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                 }
                 (walk_point, wa, wb, None)
             }
-            TargetSource::Stride => {
+            TargetSource::Stride | TargetSource::StrideRenew => {
                 if walk_fresh {
                     wa = rng.gen_range(1..r);
                     wb = rng.gen_range(1..r);
@@ -6138,9 +6155,11 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
                 repeats_skipped += 1;
                 if let Some(index) = lane_id {
                     lanes[index].fresh = true;
-                } else {
+                } else if targets != TargetSource::StrideRenew {
                     walk_fresh = true;
                 }
+                // A renewed stride crosses an earlier progression in at
+                // most one point: step past it rather than restart.
                 continue;
             }
         }
@@ -6148,6 +6167,19 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
         let relations = oracle(&mut rel.group_ops, &mut ctr, point, a, b);
         if relations.is_empty() {
             continue;
+        }
+        if targets == TargetSource::StrideRenew {
+            loop {
+                stride = (
+                    g.add(&mut rel.group_ops, stride.0, renew_by.0),
+                    addmod(stride.1, renew_by.1, r),
+                    addmod(stride.2, renew_by.2, r),
+                );
+                stride_renewals += 1;
+                if !g.is_identity(&stride.0) {
+                    break;
+                }
+            }
         }
         // The relation enters the target's elimination: in this classic
         // form every relation carries the target, so the solve is the
@@ -6255,9 +6287,12 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
     rel.count("direct_relations_skipped", direct_skipped);
     rel.count("repeated_targets_skipped", repeats_skipped);
     rel.count("target_guard_probes", guard_probes);
-    if targets == TargetSource::Stride {
+    if striding {
         rel.count("stride_steps", stride_steps);
         rel.count("stride_restarts", stride_restarts);
+    }
+    if targets == TargetSource::StrideRenew {
+        rel.count("stride_renewals", stride_renewals);
     }
     if targets.is_walk() {
         rel.count("walk_jumps", walk_jumps + pool.len() as u64);
