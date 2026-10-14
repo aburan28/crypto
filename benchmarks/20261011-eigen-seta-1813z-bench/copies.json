@@ -1,0 +1,58 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-11",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/eigen_seta_rust_20261011",
+  "run": "run-20261011T1813Z-bench",
+  "files": [
+    {
+      "source": "research/eigen_seta_rust_20261011/reports/run-20261011T1813Z-bench/field_ops.svg",
+      "copy": "visuals/research/eigen_seta_rust_20261011/reports/run-20261011T1813Z-bench/field_ops.svg",
+      "sha256": "d65a62b07621a2bda7b765eba9e713692461f9c071763ca28e626673fd006047",
+      "bytes": 74798
+    },
+    {
+      "source": "research/eigen_seta_rust_20261011/reports/run-20261011T1813Z-bench/kem_times.svg",
+      "copy": "visuals/research/eigen_seta_rust_20261011/reports/run-20261011T1813Z-bench/kem_times.svg",
+      "sha256": "308cd7e11c0b2a5101caea86b4b7df1e1b6a1344c54e44593b80c542f4dc65bb",
+      "bytes": 69955
+    },
+    {
+      "source": "research/eigen_seta_rust_20261011/reports/run-20261011T1813Z-bench/report.pdf",
+      "copy": "visuals/research/eigen_seta_rust_20261011/reports/run-20261011T1813Z-bench/report.pdf",
+      "sha256": "31af7a264cd4c0b3e62050a5da2bb41b4e3b7029c0a0261d4e14c1d457ad8559",
+      "bytes": 78740
+    },
+    {
+      "source": "research/eigen_seta_rust_20261011/report.pdf",
+      "copy": "visuals/research/eigen_seta_rust_20261011/report.pdf",
+      "sha256": "950efcce37fccc7e07b24aa2353f9e1cf4bc4ff446456a40f09cd6679e250202",
+      "bytes": 114077
+    }
+  ],
+  "pngs": [
+    {
+      "source": "visuals/research/eigen_seta_rust_20261011/reports/run-20261011T1813Z-bench/field_ops.svg",
+      "copy": "visuals/research/eigen_seta_rust_20261011/reports/run-20261011T1813Z-bench/field_ops.png",
+      "dpi": 150,
+      "width": 1050,
+      "height": 600,
+      "sha256": "0a6d6fb40fa8579641fe3374e2d6cc370e6396d19adaebebff1765b82cf36e68",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/eigen_seta_rust_20261011/reports/run-20261011T1813Z-bench/kem_times.svg",
+      "copy": "visuals/research/eigen_seta_rust_20261011/reports/run-20261011T1813Z-bench/kem_times.png",
+      "dpi": 150,
+      "width": 1050,
+      "height": 600,
+      "sha256": "cf4c2cd052dbb593fb569f6deaf1c169788f3c5dbea6bfeee4b9f8c86e8d1927",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    }
+  ],
+  "verbatim_source_report": {
+    "source": "research/eigen_seta_rust_20261011/reports/run-20261011T1813Z-bench/README.md",
+    "copy": "SOURCE_REPORT.md",
+    "sha256": "f80e8fb82158c54457f148e3f1eec934cc22e022c495104a5cedda7e40cf8071"
+  }
+}

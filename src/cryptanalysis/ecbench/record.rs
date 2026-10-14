@@ -51,8 +51,8 @@ pub struct ChildInput {
     pub curve: CurveSpec,
     pub target_seed: u64,
     pub target_index: u64,
-    /// Planted or public; older inputs are planted.
-    #[serde(default, skip_serializing_if = "TargetKind::is_planted")]
+    /// Planted, planted_shared or public; older inputs are planted.
+    #[serde(default, skip_serializing_if = "TargetKind::is_plain_planted")]
     pub target_kind: TargetKind,
     pub expected_workload_id: String,
     pub method: MethodSpec,
@@ -722,17 +722,7 @@ mod tests {
     #[test]
     fn legacy_record_deserializer_reproduces_v1_decimal_semantics() {
         let text = r#"{"gae":3934.0137668849675,"nested":[0.37222665730402227],"integer":17}"#;
-        // Use the correctly rounded standard parser as the reference. serde_json's
-        // direct f64 decoder may itself use the legacy parser under its feature set.
-        let current = LegacyFloatFixture {
-            gae: "3934.0137668849675".parse().unwrap(),
-            nested: vec!["0.37222665730402227".parse().unwrap()],
-            integer: 17,
-        };
         let legacy: LegacyFloatFixture = from_str_legacy_floats(text).unwrap();
-        let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
-        let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
-        let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
 
         // Freeze the v1 parser's exact binary results independently of the

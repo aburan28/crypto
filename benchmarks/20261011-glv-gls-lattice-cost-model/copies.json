@@ -1,0 +1,94 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-11",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/isogeny_loop_glv_20261011",
+  "run": "run-20261011T2258Z-degree-bound and glvgls-lattice",
+  "files": [
+    {
+      "source": "research/isogeny_loop_glv_20261011/REPORT.pdf",
+      "copy": "visuals/research/isogeny_loop_glv_20261011/REPORT.pdf",
+      "sha256": "70cb44bf0aa88a828cade6178b513cc1162059be614ef6b005d0332d9e975809",
+      "bytes": 154213
+    },
+    {
+      "source": "research/isogeny_loop_glv_20261011/figures/construction.svg",
+      "copy": "visuals/research/isogeny_loop_glv_20261011/figures/construction.svg",
+      "sha256": "211773bc0a4d8f742a9595d595dfe2df93bee06af13d11d543a88168dc4113ce",
+      "bytes": 11913
+    },
+    {
+      "source": "research/isogeny_loop_glv_20261011/figures/degree_bound.svg",
+      "copy": "visuals/research/isogeny_loop_glv_20261011/figures/degree_bound.svg",
+      "sha256": "149f52c1a499cc6be4d6184d6d614e78ae30c5bdc1752874da413bbfa8446984",
+      "bytes": 31522
+    },
+    {
+      "source": "research/isogeny_loop_glv_20261011/figures/glvgls_bits.svg",
+      "copy": "visuals/research/isogeny_loop_glv_20261011/figures/glvgls_bits.svg",
+      "sha256": "5740d30f90b05c4b6584ebfbc34c325910b5ce2352c1db2b0d77157b88b20feb",
+      "bytes": 17755
+    },
+    {
+      "source": "research/isogeny_loop_glv_20261011/figures/glvgls_model.svg",
+      "copy": "visuals/research/isogeny_loop_glv_20261011/figures/glvgls_model.svg",
+      "sha256": "25f47acaeab573dd2e7e7be04b3252ea07de2f02847dd496dc5d3c6850bebc8d",
+      "bytes": 19006
+    },
+    {
+      "source": "research/isogeny_loop_glv_20261011/reports/run-20261011T2258Z-degree-bound/report.pdf",
+      "copy": "visuals/research/isogeny_loop_glv_20261011/reports/run-20261011T2258Z-degree-bound/report.pdf",
+      "sha256": "a14e972fc78427990b1236a1d4ef4c510e195101784510f06156bc5cd3581ebb",
+      "bytes": 62247
+    },
+    {
+      "source": "research/isogeny_loop_glv_20261011/reports/run-20261011T2258Z-glvgls-lattice/report.pdf",
+      "copy": "visuals/research/isogeny_loop_glv_20261011/reports/run-20261011T2258Z-glvgls-lattice/report.pdf",
+      "sha256": "83c1004c4e7ec0cefcbee55d0d77f280e3b779c54583854ed7456ef390f9542f",
+      "bytes": 61640
+    }
+  ],
+  "pngs": [
+    {
+      "source": "visuals/research/isogeny_loop_glv_20261011/figures/construction.svg",
+      "copy": "visuals/research/isogeny_loop_glv_20261011/figures/construction.png",
+      "dpi": 150,
+      "width": 1110,
+      "height": 600,
+      "sha256": "3fd4e1d4d4186dffe138771b831c51e4f604801a28adad17f7db82e099faf89d",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/isogeny_loop_glv_20261011/figures/degree_bound.svg",
+      "copy": "visuals/research/isogeny_loop_glv_20261011/figures/degree_bound.png",
+      "dpi": 150,
+      "width": 1080,
+      "height": 1095,
+      "sha256": "c607de8122921e073025896df5a52e890e445851aae01ab11a88c197c1b97cc9",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/isogeny_loop_glv_20261011/figures/glvgls_bits.svg",
+      "copy": "visuals/research/isogeny_loop_glv_20261011/figures/glvgls_bits.png",
+      "dpi": 150,
+      "width": 1080,
+      "height": 966,
+      "sha256": "e68c679e36ac69312bccfad2ca2a25c5ba2e45eb1599dfa437e584e40d7f9ba4",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/isogeny_loop_glv_20261011/figures/glvgls_model.svg",
+      "copy": "visuals/research/isogeny_loop_glv_20261011/figures/glvgls_model.png",
+      "dpi": 150,
+      "width": 1080,
+      "height": 540,
+      "sha256": "e6d16e3759d80610f69bb7353845cd726882e56a04eed6946b10ab54ef86fbbe",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    }
+  ],
+  "verbatim_source_report": {
+    "source": "research/isogeny_loop_glv_20261011/README.md",
+    "copy": "SOURCE_REPORT.md",
+    "sha256": "a0812fed54a011d8e1a9a99e0a3713a8ad402d488e29b0d6c7c9c67a84b52c8c"
+  }
+}

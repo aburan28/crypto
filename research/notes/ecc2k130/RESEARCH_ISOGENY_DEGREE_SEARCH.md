@@ -299,6 +299,13 @@ degree 130, and the attainable magic numbers over `F_{2^131}` are
     {0, 1, 130, 131}.
 ```
 
+*Correction 2026-10-13:* `{0, 1, 130, 131}` is the set of invariant
+subspace dimensions.  The GHS magic number (Maurer–Menezes–Teske 2002,
+eq. (5)) is `dim span{(1, σ^i(√b))}`, so the attainable values for `b ≠ 0`
+are `{1, 131}` (`achievable_magic_numbers` now returns these;
+`frobenius_subspace_dimensions` returns the set above).  See
+`docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md`.
+
 The specified low magic-number window `2 ≤ m ≤ 6` is empty for
 curves over this field. This excludes that standard GHS construction
 at degree 131, not every possible descent model. For comparison, the

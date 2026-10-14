@@ -147,6 +147,36 @@ peels the large-prime hypergraph, closes graph cycles, and performs bounded
 Markowitz elimination on arbitrary hyperedges. Collector adapters remain
 explicit so different point encodings cannot be mixed silently.
 
+Since 2026-10-12 the Koblitz pair-table pipeline has an integrated one- and
+two-large-prime collector
+([`ic_framework/large_prime.rs`](../../src/cryptanalysis/ic_framework/large_prime.rs),
+`mitm-frobenius:m=3,large_primes={1,2},lp_domain_factor=c`, or
+`ic bench --large-primes --lp-domain-factor`). The domain `D` is the next
+`c·|F|` signed points of the compact-orbit raw-x scan after the base; the
+three-summand loop keeps its classic table and adds a second Frobenius-folded
+table over `F ∪ D` without the `F × F` pairs, so a probe `T = R − P_i` yields
+`R = P_i + L` (orbit-key lookup), `R = P_i + P_j + L` or `R = P_i + L_1 + L_2`.
+Partials are merged online by
+[`koblitz_large_prime::WideLargePrimeEliminator`](../../src/cryptanalysis/koblitz_large_prime.rs)
+(exact `±λ^t` orbit coefficients modulo `r`, every partial and every completed
+row replayed as a point equation) and each merged row is checked again in the
+counted group before it enters the matrix through the `Relation::Row` seam of
+the shared relation loop. Measured on `K_0` at n = 23, 31 and 41 with 5/10/20
+compact-orbit columns, `|D|/|F| ∈ {3, 10, 30}`, 4–8 planted targets per cell,
+all 260 targets verified, no partial rejected and no merged row failing
+replay (`research/ic_techniques_20261012/double_large_prime/`): at n = 23 and
+31 (`r` ≈ 2²¹ and 2^20.5, where the plain table already decomposes almost
+every trial) every large-prime cell costs 2.2–750× the plain oracle end to
+end and the `F ∪ D` table saturates at the subgroup's `r/2n` orbits; at n =
+41 (`r` = 2³⁹), 10 columns, the single large prime cuts trials per complete
+relation 4.1–10.3× and the double 8.7–138×, but against the plain oracle on a
+base the size of `F ∪ D` (40 and 110 columns) the single is 1.07–1.98× worse
+and the double 2.1× better at equal table size (one-target total 2.21·10⁶ GAE
+against 4.59·10⁶; still 17.7× the counted rho). One rung with headroom, no
+exponent fitted: a constant-factor device of the pair-table family,
+classified engineering; the README there has the cells and the verdict
+against `LEAD_LADDER_METHODOLOGY_20261010.md` §7 item 4.
+
 ## 3. Relation filtering
 
 ### Duplicate removal and singleton peeling — Integrated

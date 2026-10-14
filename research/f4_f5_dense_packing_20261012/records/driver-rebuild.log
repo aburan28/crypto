@@ -1,0 +1,63 @@
+warning: unused import: `super::koblitz_fast_arith::FastBinaryCurve`
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:77:5
+   |
+77 | use super::koblitz_fast_arith::FastBinaryCurve;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `crate::cryptanalysis::binary_semaev::binary_semaev_s3`
+   --> src/cryptanalysis/semaev_sat.rs:105:5
+    |
+105 | use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `ToPrimitive`
+  --> src/cryptanalysis/curve_traits/mod.rs:50:31
+   |
+50 | use num_traits::{One, Signed, ToPrimitive, Zero};
+   |                               ^^^^^^^^^^^
+
+warning: unused variable: `sums`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:3226:9
+     |
+3226 |     let sums = fast.batch_add(&pairs);
+     |         ^^^^ help: if this is intentional, prefix it with an underscore: `_sums`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `projected`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:8891:10
+     |
+8891 |     let (projected, _) = project_by_frobenius_orbits_generic(kc, fb);
+     |          ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_projected`
+
+warning: static `ALL_FACTORS_MEMO` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:527:8
+    |
+527 | static ALL_FACTORS_MEMO: std::sync::OnceLock<std::sync::Mutex<HashMap<u32, Vec<u64>>>> =
+    |        ^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `memo_get` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:530:4
+    |
+530 | fn memo_get(
+    |    ^^^^^^^^
+
+warning: function `memo_put` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:541:4
+    |
+541 | fn memo_put(
+    |    ^^^^^^^^
+
+warning: function `sample_relation_scalar` is never used
+    --> src/cryptanalysis/koblitz_index_calculus.rs:9644:4
+     |
+9644 | fn sample_relation_scalar(r: &BigUint, rng: &mut StdRng) -> BigUint {
+     |    ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `crypto` (lib) generated 9 warnings (run `cargo fix --lib -p crypto` to apply 4 suggestions)
+   Compiling crypto v0.1.0 (/workspace/crypto)
+    Finished `release` profile [optimized] target(s) in 2.43s

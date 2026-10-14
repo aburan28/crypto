@@ -1,0 +1,82 @@
+    Finished `release` profile [optimized] target(s) in 0.13s
+     Running unittests src/lib.rs (/tmp/1680-final-target/release/deps/eigen_seta-0d283e79cca863c9)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests/chain.rs (/tmp/1680-final-target/release/deps/chain-ea785817a815065b)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/chain_debug.rs (/tmp/1680-final-target/release/deps/chain_debug-44ccbdf939d873cd)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/curve_debug.rs (/tmp/1680-final-target/release/deps/curve_debug-c20e2d55abea2ed8)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/field.rs (/tmp/1680-final-target/release/deps/field-897d5124873f99f2)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s
+
+     Running tests/kani_unit.rs (/tmp/1680-final-target/release/deps/kani_unit-14788770cfa33f03)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests/kat.rs (/tmp/1680-final-target/release/deps/kat-e1eea8529048a33c)
+
+running 1 test
+test kat_l1 has been running for over 60 seconds
+test kat_l1 ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 91.19s
+
+     Running tests/kem.rs (/tmp/1680-final-target/release/deps/kem-9f58e9b34ddf08a2)
+
+running 1 test
+test kem_toy32 ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 6.90s
+
+     Running tests/mont.rs (/tmp/1680-final-target/release/deps/mont-003a0ec0d96f90f5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/pairing.rs (/tmp/1680-final-target/release/deps/pairing-856c184142446dca)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/pke.rs (/tmp/1680-final-target/release/deps/pke-98ee988d3eae8e64)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/robustness.rs (/tmp/1680-final-target/release/deps/robustness-eb94c9d5672b4a6e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+   Doc-tests eigen_seta
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

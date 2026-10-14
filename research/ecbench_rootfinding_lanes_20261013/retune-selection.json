@@ -1,0 +1,17 @@
+{
+  "schema": "rootfinding.retune_selection/v1",
+  "train_session_id": "ECBS1hbdfb5bc7d8a8",
+  "selection_metric": "mean cold ecbench.gae across 24 measured executions per B",
+  "selected_arm": "b48-batch-8",
+  "scores": {
+    "b40-batch-8": 8225.208333333334,
+    "b44-batch-8": 8262.875,
+    "b48-batch-8": 7957.416666666667,
+    "b52-batch-8": 8192.166666666666,
+    "b56-batch-8": 8289.333333333334,
+    "b64-batch-8": 8706.291666666666
+  },
+  "all_verified": true,
+  "cost_scope": "lower_bound: native field operations, table lookups, row work and factor-base field work remain unpriced",
+  "holdout_inspected_before_selection": false
+}

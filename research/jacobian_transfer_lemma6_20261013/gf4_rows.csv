@@ -1,0 +1,11 @@
+state,curve,role,label,magic_number,bound,mmt_condition_8,genus,field_bits,transport,evidence,ratio_log2,class,curve_verdict
+before,c2pnb176w1,gf4_row+best,"GHS descent to Jac(C)/GF(2^2), N = 88 * 2 [m = 8, lower bound]",8,lower,,128,2.0,size_admits,heuristic,23.637,unresolved,unresolved
+before,c2pnb176w1,gf4_row,"GHS descent to Jac(C)/GF(2^2), N = 88 * 2 [m = 9, upper bound]",9,upper,,256,2.0,size_admits,heuristic,-5.762,boundary,unresolved
+before,c2pnb272w1,gf4_row+best,"GHS descent to Jac(C)/GF(2^2), N = 136 * 2 [m = 8, lower bound]",8,lower,,128,2.0,size_admits,heuristic,72.196,formula_advantage,formula_advantage
+before,c2pnb272w1,gf4_row,"GHS descent to Jac(C)/GF(2^2), N = 136 * 2 [m = 9, upper bound]",9,upper,,256,2.0,size_admits,heuristic,41.322,formula_advantage,formula_advantage
+before,c2pnb304w1,gf4_row,"GHS descent to Jac(C)/GF(2^2), N = 152 * 2 [m = 8, lower bound]",8,lower,,128,2.0,too_small,heuristic,88.414,not_carried,unresolved
+before,c2pnb304w1,gf4_row+best,"GHS descent to Jac(C)/GF(2^2), N = 152 * 2 [m = 9, upper bound]",9,upper,,256,2.0,size_admits,heuristic,57.561,unresolved,unresolved
+after,c2pnb176w1,gf4_row+best,"GHS descent to Jac(C)/GF(2^2), N = 88 * 2",8,exact,True,128,2.0,size_admits,exact_invariant,23.637,formula_advantage,formula_advantage
+after,c2pnb272w1,gf4_row+best,"GHS descent to Jac(C)/GF(2^2), N = 136 * 2",8,exact,True,128,2.0,size_admits,exact_invariant,72.196,formula_advantage,formula_advantage
+after,c2pnb304w1,+best,"GHS descent to Jac(C)/GF(2^76), N = 4 * 76",4,exact,True,8,76.0,size_admits,exact_invariant,2.001,formula_marginal,formula_marginal
+after,c2pnb304w1,gf4_row,"GHS descent to Jac(C)/GF(2^2), N = 152 * 2",8,exact,True,128,2.0,too_small,exact_invariant,88.414,not_carried,formula_marginal

@@ -1,0 +1,52 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[x=0.78cm,y=1cm,font=\scriptsize,
+  ev/.style={circle,inner sep=1.7pt},
+  lbl/.style={align=center,font=\scriptsize}]
+% axis
+\draw[inkS,thick] (0,0) -- (16.6,0);
+\foreach \y in {0,2,...,16}{
+  \draw[inkS] (\y,-0.08) -- (\y,0.08);
+  \node[below,font=\scriptsize] at (\y,-0.1) {\the\numexpr2010+\y\relax};
+}
+\node[anchor=east,font=\footnotesize\bfseries] at (-0.2,1.6) {NVIDIA};
+\node[anchor=east,font=\footnotesize\bfseries] at (-0.2,-1.9) {CPUs};
+% GPU events (above)
+\foreach \x/\h/\t/\c in {
+  0/0.7/{\texttt{PRMT}, \texttt{POPC}\\(Fermi)}/cA,
+  2.6/1.55/{\texttt{SHF}\\(Kepler)}/cA,
+  4.2/0.7/{\texttt{LOP3}, \texttt{IADD3}\\(Maxwell)}/cA,
+  7.4/1.55/{native \texttt{IMAD}\\(Volta)}/cA,
+  10.4/0.7/{INT32/FP32 split\\(GA10x)}/cA,
+  12.7/1.55/{DPX, clusters\\(Hopper)}/cA,
+  15/0.7/{unified INT32\\(\texttt{sm\_120})}/cA,
+  16.4/1.55/{\texttt{clmad}\\(CUDA 13.3)}/cB}{
+  \draw[gridc] (\x,0) -- (\x,\h-0.2);
+  \node[ev,fill=\c] at (\x,0) {};
+  \node[lbl] at (\x,\h) {\t};
+}
+% CPU events (below)
+\foreach \x/\h/\t/\c in {
+  0/-1.0/{\texttt{PCLMULQDQ}\\(Westmere)}/cB,
+  1.6/-1.9/{\texttt{PMULL}\\(Armv8)}/cB,
+  3.5/-1.0/{\texttt{MULX}\\(Haswell)}/cA,
+  5.4/-1.9/{\texttt{ADX}; \texttt{EOR3}\\(Broadwell; Armv8.2)}/cA,
+  7.3/-1.0/{\texttt{VPTERNLOGD}\\(Skylake-SP)}/cA,
+  9.2/-1.9/{\texttt{VPCLMULQDQ}, GFNI\\(Ice Lake)}/cB,
+  11.3/-1.0/{SVE2; Zbc\\(Armv9; RISC-V)}/cB,
+  13.0/-1.9/{AVX-512\\(AMD Zen 4)}/cA,
+  15.2/-1.0/{full-width AVX-512\\(Zen 5)}/cA}{
+  \draw[gridc] (\x,0) -- (\x,\h+0.25);
+  \node[ev,fill=\c] at (\x,0) {};
+  \node[lbl] at (\x,\h) {\t};
+}
+\node[ev,fill=cB] at (0.2,-2.75) {}; \node[anchor=west] at (0.4,-2.75) {carry-less multiply};
+\node[ev,fill=cA] at (4.6,-2.75) {}; \node[anchor=west] at (4.8,-2.75) {logic, shifts and integer carry chains};
+\end{tikzpicture}
+\caption{When the instructions this arithmetic relies on arrived. Dates
+  are first availability in a shipping product (Armv8 and Armv8.2 are
+  architecture versions; Zbc is the ratification date). The GPU
+  carry-less multiply arrived last of all, in 2026, which is why the
+  ECC2K-130 GPU client is new work rather than a port.}
+\label{fig:isa}
+\end{figure}

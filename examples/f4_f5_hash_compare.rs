@@ -1,4 +1,4 @@
-//! Native validation and statistical comparison of the frozen hash study.
+//! Native validation and comparison of frozen eleven-system F4/F5 profiles.
 //! `cargo run --release --example f4_f5_hash_compare -- RECORDS_DIRECTORY`
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, BTreeSet};
@@ -405,10 +405,13 @@ fn self_costs(text: &str, known_names: &BTreeMap<String, String>) -> Result<BTre
     Ok(result)
 }
 
-fn inspect(root: &Path, name: &str, repeats: u64) -> Result<Value> {
+fn inspect(root: &Path, name: &str, repeats: u64, arm: &str) -> Result<Value> {
+    if !["f4", "f5", "criterion"].contains(&arm) {
+        return Err(format!("unknown profile arm: {arm}"));
+    }
     let run = read_run(root, name, repeats)?;
     let mut profile = BTreeMap::<String, u64>::new();
-    let mut criterion_summary = 0u64;
+    let mut summary = 0u64;
     let mut names = BTreeMap::new();
     for source in &run.sources {
         let path = source["path"].as_str().unwrap();
@@ -425,7 +428,7 @@ fn inspect(root: &Path, name: &str, repeats: u64) -> Result<Value> {
         let text = std::fs::read_to_string(root.join(path)).map_err(|e| e.to_string())?;
         let (label, ir) = parse_dump(&text)?.ok_or("request missing")?;
         let label: Value = serde_json::from_str(&label).map_err(|e| e.to_string())?;
-        if label[3] != "criterion" {
+        if label[3] != arm {
             continue;
         }
         let costs = self_costs(&text, &names)?;
@@ -435,7 +438,7 @@ fn inspect(root: &Path, name: &str, repeats: u64) -> Result<Value> {
                 costs.values().sum::<u64>()
             ));
         }
-        criterion_summary += ir;
+        summary += ir;
         for (function, cost) in costs {
             *profile.entry(function).or_default() += cost;
         }
@@ -454,13 +457,22 @@ fn inspect(root: &Path, name: &str, repeats: u64) -> Result<Value> {
         .into_iter()
         .map(|arm| json!({"arm":arm,"calls":11*repeats,"ir":total(&run,arm)}))
         .collect();
-    Ok(
-        json!({"run":name,"repeats":repeats,"systems":11,"merged_worker_profile":true,
-        "arms":arms,
-        "criterion_self_cost_sum":criterion_summary,"standard_hash_self_ir":hashing_ir,
-        "standard_hash_self_percent":100.0*hashing_ir as f64/criterion_summary as f64,
-        "criterion_hotspots":functions.into_iter().take(20).map(|(function,ir)|json!({"function":function,"ir":ir})).collect::<Vec<_>>(),"sources":run.sources}),
-    )
+    let hotspots: Vec<_> = functions
+        .into_iter()
+        .take(20)
+        .map(|(function, ir)| json!({"function":function,"ir":ir}))
+        .collect();
+    let mut result = json!({"run":name,"repeats":repeats,"systems":11,"merged_worker_profile":true,
+        "arms":arms,"profile_arm":arm,"self_cost_sum":summary,
+        "standard_hash_self_ir":hashing_ir,
+        "standard_hash_self_percent":100.0*hashing_ir as f64/summary as f64,
+        "hotspots":hotspots,"sources":run.sources});
+    // Keep the original criterion fields for frozen-study consumers.
+    if arm == "criterion" {
+        result["criterion_self_cost_sum"] = json!(summary);
+        result["criterion_hotspots"] = result["hotspots"].clone();
+    }
+    Ok(result)
 }
 
 fn analyze(root: &Path) -> Result<Value> {
@@ -576,6 +588,20 @@ fn analyze(root: &Path) -> Result<Value> {
         result["aa_primary_ir"] = json!(total(&aa, arm));
         result["calls_per_round"] = json!(11);
         result["primary_calls"] = json!(33);
+        for field in ["allocations", "allocated_bytes"] {
+            let sum = |run: &Run| -> Result<u64> {
+                run.rows
+                    .values()
+                    .filter(|row| row["arm"] == arm)
+                    .try_fold(0u64, |sum, row| Ok(sum + number(row, field)?))
+            };
+            let baseline: u64 = sum(&a)?;
+            let candidate: u64 = sum(&b)?;
+            result[format!("primary_baseline_{field}")] = json!(baseline);
+            result[format!("primary_candidate_{field}")] = json!(candidate);
+            result[format!("primary_{field}_reduction_percent")] =
+                json!(100.0 * (1.0 - candidate as f64 / baseline as f64));
+        }
         arms.push(result);
     }
     for (label, row) in rounds[0].0.rows.iter() {
@@ -599,6 +625,22 @@ fn analyze(root: &Path) -> Result<Value> {
     let accepted = f5["verdict"] == "fewer_instructions"
         && f4["verdict"] != "more_instructions"
         && memory_regressions.is_empty();
+    let two_arm_accepted = accepted
+        && f4["verdict"] == "fewer_instructions"
+        && case_verdicts
+            .iter()
+            .all(|case| case["verdict"] != "more_instructions");
+    let complete_call_accepted = accepted
+        && f4["verdict"] == "fewer_instructions"
+        && case_verdicts
+            .iter()
+            .filter(|case| case["arm"] == "f4" || case["arm"] == "f5")
+            .all(|case| case["verdict"] != "more_instructions");
+    let f5_guarded_accepted = accepted
+        && case_verdicts
+            .iter()
+            .filter(|case| case["arm"] == "f4" || case["arm"] == "f5")
+            .all(|case| case["verdict"] != "more_instructions");
     let mut sources = Vec::new();
     for run in [&a, &b, &aa] {
         sources.extend_from_slice(&run.sources);
@@ -613,6 +655,9 @@ fn analyze(root: &Path) -> Result<Value> {
         "bootstrap_resamples":2000,"bootstrap_seed":"0x243f6a8885a308d3","exact_outputs_and_counts":true,
         "measurement":"Callgrind Ir, instrumented complete calls, merged worker coverage",
         "runtime_speedup":null,"rss":null,"acceptance_met":accepted,"memory_regressions":memory_regressions,
+        "two_arm_acceptance_met":two_arm_accepted,
+        "complete_call_acceptance_met":complete_call_accepted,
+        "f5_with_complete_call_guards_met":f5_guarded_accepted,
         "arms":arms,"case_verdicts":case_verdicts,"primary_cases":per_case,"memory_cases":memory_cases,"sources":sources}),
     )
 }
@@ -620,8 +665,31 @@ fn analyze(root: &Path) -> Result<Value> {
 fn main() {
     let args: Vec<_> = std::env::args().collect();
     let result = if args.get(1).is_some_and(|s| s == "inspect") {
-        assert_eq!(args.len(), 5, "inspect RECORDS_DIRECTORY RUN_NAME REPEATS");
-        inspect(Path::new(&args[2]), &args[3], args[4].parse().unwrap())
+        assert!(
+            matches!(args.len(), 5 | 6),
+            "inspect RECORDS_DIRECTORY RUN_NAME REPEATS [f4|f5|criterion]"
+        );
+        inspect(
+            Path::new(&args[2]),
+            &args[3],
+            args[4].parse().unwrap(),
+            args.get(5).map_or("criterion", String::as_str),
+        )
+    } else if args.get(1).is_some_and(|s| s == "check") {
+        assert_eq!(
+            args.len(),
+            7,
+            "check RECORDS_DIRECTORY REFERENCE_RUN REPEATS CANDIDATE_RUN REPEATS"
+        );
+        let root = Path::new(&args[2]);
+        (|| {
+            let reference = read_run(root, &args[3], args[4].parse().unwrap())?;
+            let candidate = read_run(root, &args[5], args[6].parse().unwrap())?;
+            check_against(&reference, &candidate)?;
+            Ok(json!({"reference":args[3],"candidate":args[5],
+                "exact_outputs_and_counts":true,"candidate_calls":candidate.rows.len(),
+                "reference_sources":reference.sources,"candidate_sources":candidate.sources}))
+        })()
     } else {
         assert_eq!(args.len(), 2, "RECORDS_DIRECTORY");
         analyze(Path::new(&args[1]))

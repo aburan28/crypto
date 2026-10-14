@@ -147,16 +147,29 @@ whose discriminants did not factor are not thereby alike. `--keys` compares
 on a chosen set instead, each weighted 1; `--other-sizes` leaves out curves
 over a field of the target's size.
 
-## What the current registry shows
+## Current catalogue and earlier classification panel
 
-From `group --by cm,descent --min-sizes 2` on the 321 distinct registry curves:
+The generated index covers every registered model. It includes the
+100 independently verified large-prime isogeny codomains. Each record retains
+the status of its order certificate and every derived trait. Models whose
+coordinate/order adapter is unavailable explicitly report `not_evaluated`;
+Curve25519 is one such record. A complete catalogue entry does not by itself
+certify its coordinates or group order.
 
-- **CM by −7, defined over `GF(2)`: 60 curves at 42 degrees**, 7 to 577:
+The following classification panel describes the earlier 121-model registry
+snapshot, with registry digest
+`a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed`.
+Its counts refer to that snapshot. The current generated file provides the
+expanded records and their individual certification statuses.
+
+From `group --by cm,descent --min-sizes 2` on that 121-model snapshot:
+
+- **CM by −7, defined over `GF(2)`: 59 curves at 41 degrees**, 7 to 577:
   the `K_a / GF(2^n)` family, every member with `|t₁| = 1`;
   `descent_signed` separates `K_0` (`t₁ = −1`) from `K_1` (`t₁ = 1`).
   Adding `cofactor` picks out the `K_0` curves of order 4·prime (14 curves
   from `GF(2^7)` to `GF(2^571)`, ECC2K-130 among them) and the `K_1`
-  curves of order 2·prime (9 curves up to sect163k1); 35 others have a
+  curves of order 2·prime (8 curves up to sect163k1); 35 others have a
   composite `#E/4` or `#E/2`, and two (degrees 157 and 577) an order that
   did not factor within the budget.
 - **CM by −15, defined over `GF(4)` with `t₂ = 1`: 3 curves**, over
@@ -168,17 +181,14 @@ From `group --by cm,descent --min-sizes 2` on the 321 distinct registry curves:
 - secp256k1 has `d_K = −3` (`j = 0`) and a 128-bit conductor;
   P-256's `Δ` does not factor within the budget, so its `cm` is `unknown`
   and its conductor only bounded.
-- `End(E) = O_K` is recorded for 188 curves (146 `proved`, 42 `probable`),
-  including all 60 Koblitz curves through `Z[τ]`, the four curves defined
-  over `GF(4)` through their `GF(4)` Frobenius, and secp256k1 through
-  `Z[ζ₃]`. Another 51 have a conductor bound and 82 remain `unknown`;
-  P-256 is among the latter because its `d_K` is not determined at this
-  budget.
-- Order checks are `proved` for 123 curves and `probable` for 126:
-  60 exhaustive counts, 47 descent counts, and 142 generator certificates.
-  The 39 registered models without an implemented group law are
-  `not_evaluated`; 33 further orders lack a usable certificate at this
-  budget.
+- `End(E) = O_K` is established for 114 of the 121 curves, 61 of them
+  where `Z[π]` itself is not maximal: all 59 Koblitz curves through `Z[τ]`,
+  the four curves defined over `GF(4)` through their `GF(4)` Frobenius, and
+  secp256k1 through `Z[ζ₃]`. Six remain unresolved between `Z[π]` and
+  `O_K`; P-256 is unknown with its `d_K`.
+- Every order in that snapshot was certified: 60 by exhaustive count, 41 by
+  a descent count, the rest by generator certificates (4 of those rest on
+  a probable prime).
 
 ## Keeping it current
 

@@ -1,0 +1,106 @@
+{
+  "schema": "ecbench.factor_base_dump/v1",
+  "curve": {
+    "slug": "icv1-f2m17-tm101-00378d4e",
+    "icv1": "ICV1:f2m-17-237ceae1:-101:131174:0x1:-7:unk:r:00378d4e488b",
+    "family": "koblitz",
+    "construction": "KoblitzCurve::new(1, 17)",
+    "field_degree": 17,
+    "field_bits": null,
+    "group_order": 131174,
+    "r": 65587,
+    "cofactor": 2,
+    "generator": [
+      "0xaaad",
+      "0x5b2b"
+    ],
+    "automorphisms_available": 34,
+    "registered": true,
+    "ec1": "EC1N17Ce1hdfbf24105ef5",
+    "curve_uid": "urn:ec-record:1:sha256:dfbf24105ef5c3f3743c8d5c0917e98d601a89714ebcf54c1d886b722329161d"
+  },
+  "factor_base": {
+    "fb_id": "FB1h554bcb8d6c56",
+    "fb_sha256": "554bcb8d6c560de21a21fe8bdafbd45d6a0b06e2f6f940a404061d06eb57a6bb",
+    "family": "koblitz-standard-subspace",
+    "params": {
+      "dimension": "4"
+    },
+    "description": "standard subspace, dimension 4, 11 points",
+    "signed_points": 11,
+    "abscissae": 6,
+    "columns": 6,
+    "dimension": 4,
+    "points_sha256": "85b55acabfe71b9417dc87c2f4707392623645020756f99baac3b822f275bea8"
+  },
+  "build_adds": 0,
+  "build_doubles": 0,
+  "points": [
+    {
+      "x": "0x0",
+      "y": "0x1",
+      "col": 0,
+      "coef": 1
+    },
+    {
+      "x": "0x3",
+      "y": "0x17588",
+      "col": 1,
+      "coef": 1
+    },
+    {
+      "x": "0x3",
+      "y": "0x1758b",
+      "col": 1,
+      "coef": 65586
+    },
+    {
+      "x": "0x5",
+      "y": "0x19e9a",
+      "col": 2,
+      "coef": 1
+    },
+    {
+      "x": "0x5",
+      "y": "0x19e9f",
+      "col": 2,
+      "coef": 65586
+    },
+    {
+      "x": "0x8",
+      "y": "0xa609",
+      "col": 3,
+      "coef": 1
+    },
+    {
+      "x": "0x8",
+      "y": "0xa601",
+      "col": 3,
+      "coef": 65586
+    },
+    {
+      "x": "0xb",
+      "y": "0x132ed",
+      "col": 4,
+      "coef": 1
+    },
+    {
+      "x": "0xb",
+      "y": "0x132e6",
+      "col": 4,
+      "coef": 65586
+    },
+    {
+      "x": "0xd",
+      "y": "0x9947",
+      "col": 5,
+      "coef": 1
+    },
+    {
+      "x": "0xd",
+      "y": "0x994a",
+      "col": 5,
+      "coef": 65586
+    }
+  ]
+}

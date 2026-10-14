@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" role="img" aria-labelledby="title desc">
+  <title id="title">ECC2K130 aggregate throughput</title>
+  <desc id="desc">Two RTX PRO 6000 workers sum to 31.754902 billion iterations per second, above the 30 billion target.</desc>
+  <rect width="900" height="520" fill="#ffffff"/>
+  <text x="450" y="42" text-anchor="middle" font-family="sans-serif" font-size="25" font-weight="700">RunPod RTX PRO 6000 throughput</text>
+  <text x="450" y="72" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#555">Full verification: 300/300 per worker, zero drops</text>
+  <line x1="110" y1="410" x2="830" y2="410" stroke="#333" stroke-width="2"/>
+  <line x1="110" y1="110" x2="110" y2="410" stroke="#333" stroke-width="2"/>
+  <line x1="110" y1="210" x2="830" y2="210" stroke="#d33" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="820" y="202" text-anchor="end" font-family="sans-serif" font-size="15" fill="#b22">30 B/s target</text>
+  <g font-family="sans-serif" font-size="14" fill="#333">
+    <text x="98" y="414" text-anchor="end">0</text>
+    <text x="98" y="314" text-anchor="end">15</text>
+    <text x="98" y="214" text-anchor="end">30</text>
+    <text x="98" y="114" text-anchor="end">45</text>
+    <text x="470" y="465" text-anchor="middle">complete scalar iterations per second (B/s)</text>
+  </g>
+  <g stroke="#777" stroke-width="1">
+    <line x1="110" y1="310" x2="830" y2="310"/>
+    <line x1="110" y1="110" x2="830" y2="110"/>
+  </g>
+  <rect x="190" y="303.37" width="140" height="106.63" fill="#4c78a8"/>
+  <rect x="380" y="304.26" width="140" height="105.74" fill="#59a14f"/>
+  <rect x="570" y="198.30" width="140" height="211.70" fill="#f28e2b"/>
+  <g font-family="sans-serif" font-size="17" font-weight="700" fill="#222" text-anchor="middle">
+    <text x="260" y="289">15.994424</text>
+    <text x="450" y="290">15.760478</text>
+    <text x="640" y="183">31.754902</text>
+  </g>
+  <g font-family="sans-serif" font-size="16" fill="#333" text-anchor="middle">
+    <text x="260" y="438">worker A</text>
+    <text x="450" y="438">worker B</text>
+    <text x="640" y="438">aggregate</text>
+  </g>
+</svg>

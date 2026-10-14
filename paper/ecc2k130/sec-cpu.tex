@@ -1,18 +1,23 @@
-\section{CPU clients}
+\section{CPU}
 \label{sec:cpu}
 
-The CPU client is the bitsliced backend at the host's word width. It
-matters for three reasons: it is the verification path for every GPU
-report, it is the ECC2K-95 end-to-end control, and the campaign's
-spot fleet included CPU workers whose points are indistinguishable
-from the GPUs'.
+The CPU client matters for three reasons. Every GPU report is verified
+on it, it runs the ECC2K-95 end-to-end control, and the campaign's spot
+fleet included CPU workers whose points cannot be told apart from the
+GPUs'. It is also where the instruction-set story of
+Section~\ref{sec:isa} can be measured most directly, because the same
+source compiles to scalar 64-bit words, AVX2, AVX-512 and NEON.
 
 \begin{table}[t]
 \centering
 \small
 \caption{Bitsliced CPU client, $\mathrm{GF}(2^{131})$, one core, median
-  of five. Speedups are against the g++ 64-lane build on the same host. The 2009 qhasm implementation of Bailey et al.\ reached
-  $533$ cycles per iteration on a Core~2 with 128-bit vectors.}
+  of five; M it/s is million iterations per second. Speedups are against
+  the g++ 64-lane build on the same host. The Xeon's model is not
+  recorded beyond its clock, and the record does not say whether the
+  AVX2 row was built with AVX-512VL's ternary logic on 256-bit words. The 2009 qhasm implementation of Bailey et
+  al.\ reached $533$ cycles per iteration on a Core~2 with 128-bit
+  vectors.}
 \label{tab:cpu}
 \begin{tabular}{@{}llrrl@{}}
 \toprule
@@ -25,32 +30,90 @@ M4 Pro, g++ 16.1 & NEON & 128 & 11.342 & $2.19\times$ over 64 lanes (5.185) \\
 M4 Pro, Apple clang 17 & NEON & 128 & 15.673 & $3.02\times$ over g++/64 \\
 Graviton3 (V1, SHA3), clang & NEON & 128 & 6.214 & $2.38\times$ over g++/64 \\
 Graviton2 (N1, no SHA3), clang & NEON & 128 & 4.220 & $2.09\times$ over g++/64 \\
-Modal container, 4 threads & AVX-512 & 512 & 12.4 & 49.4~M it/s on 4 threads \\
+Modal container, 4 threads & AVX-512 & 512 & 12.4 & 49.4~M on 4 threads \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:cpu} is the ledger.\art{ecc2k130/README.md, ``Throughput''}
-Two of its facts generalise. The AVX-512 build spends half its
-multiply on moves rather than arithmetic ($4{,}069$ logic instructions
-against $4{,}287$ \texttt{vmovdqa32}) because the Karatsuba leaf keeps
-254 values live against 32 registers; a scheduling pass over the same
-DAG recovered moves only in the conversion ($4{,}287$ to $3{,}903$),
-missed its declared target, and recorded the leaf-size and compiler
-levers as measured dead ends.\art{ecc2k130/HOST-SCHEDULE.md} On
-aarch64 the gain splits cleanly: the NEON word with \texttt{BSL} alone
-is $1.76\times$ on the M4~Pro, \texttt{EOR3} a further $1.24\times$, and a core without \texttt{FEAT\_SHA3} (Graviton2) still takes
-$1.81\times$ from the wider word and \texttt{BSL}. Compiler choice is worth more than either on
-this code: gcc emits $9{,}372$ instructions for the multiply leaf,
-$59\%$ of them loads and stores against spilled temporaries, where
-clang emits $1{,}902$ plus five outlined calls. The SHA3 probe is gated
-on the CPU reporting the feature, because an ungated probe on a
-Graviton2 selects a \texttt{+sha3} spelling under both compilers and
-the resulting binary dies with \texttt{SIGILL} on its $8{,}907$
-\texttt{eor3} instructions.\art{ecc2k130/README.md, ``Word width''}
+\subsection{Bitsliced SIMD}
+\label{sec:cpu-bitsliced}
 
-In the fleet a CPU worker at $2.3$~B/s (the self-reported median of
-the twelve CPU slots on 2026-09-17) is about a sixth of an
-RTX~PRO~6000; on Modal a 32-thread (16-core) sidecar beside a GPU adds about
-$25\%$ to the container's cost for $2.7\%$ more iterations and is off
-by default.\art{ecc2k130/benchmarks/dp-interval/raw/worker-counters-2026-09-17.tsv}\art{ecc2k130/README.md, ``Walking on the container's CPUs too''}
+Table~\ref{tab:cpu} collects the measurements~\evcite{\evref{client}, ``Throughput''},
+and Figure~\ref{fig:cpu} draws them. A bitsliced client gains from a
+CPU's vector extensions in two ways: wider words carry more walks per
+instruction, and three-input logic fuses the XOR that follows every AND.
+On x86 the step from 64-bit words to AVX2 is $2.4\times$ and AVX-512 adds
+another $1.18\times$; AVX-512's \texttt{vpternlogd} is the CPU counterpart
+of the GPU's \texttt{LOP3}. On Arm the gain splits cleanly. On the
+M4~Pro the 128-bit NEON word with \texttt{BSL} alone is worth $1.76\times$
+and \texttt{EOR3}, from the SHA3 extension, a further $1.24\times$; a core
+without \texttt{FEAT\_SHA3} (Graviton2) still gets $1.81\times$ from the
+wider word and \texttt{BSL}. On this code the compiler matters as much as
+the instruction set: gcc emits $9{,}372$ instructions for the multiply
+leaf, $59\%$ of them loads and stores of spilled temporaries, where clang
+emits $1{,}902$ plus five outlined calls. We enable the SHA3 path only when
+the CPU reports the feature: an ungated probe on a Graviton2 picks a
+\texttt{+sha3} spelling under both compilers, and the binary dies with
+\texttt{SIGILL} on its $8{,}907$ \texttt{eor3}
+instructions~\evcite{\evref{client}, ``Word width''}.
+
+The AVX-512 build's limit is data movement, not arithmetic. It spends
+about half of each multiply on moves ($4{,}069$ logic instructions
+against $4{,}287$ \texttt{vmovdqa32}), because the Karatsuba leaf keeps
+254 values live with only 32 vector registers. A scheduling pass over
+the same DAG recovered moves only in the conversion ($4{,}287$ to
+$3{,}903$) and missed its declared target; repeated single-thread runs in
+a shared container ranged from $15$ to $18.6$ million iterations per
+second, too noisy for a throughput claim~\evcite{\evref{hostsched}}.
+
+\subsection{Carry-less multiply}
+\label{sec:cpu-clmul}
+
+Every current CPU family also has a carry-less multiply: PCLMULQDQ and
+its 512-bit form VPCLMULQDQ on x86, PMULL on Arm. The bitsliced client
+deliberately does not use it. Its multiply leaf costs about 11
+instructions per walk amortised over 512 lanes, while a per-walk 131-bit
+carry-less product needs about nine \texttt{vpclmulqdq} plus a reduction
+for a single walk~\evcite{\evref{hostsched}, §7}. A packed client is the
+other design, the CPU twin of the GPU client: one walk per lane of
+64-bit limbs, the product on the carry-less multiplier. The
+\texttt{cryptanalysis} repository has one, using PMULL on Arm and
+PCLMULQDQ on x86. On one M4~Pro core it runs an iteration in $53.5$~ns,
+$18.6$ million iterations per second, against $153$~ns with the software
+product in the same engine, a $2.9\times$ gain from the instruction; all
+14 cores give $139$--$159$ million. It walks the table walk, not the
+campaign's $\sigma$-walk, and has not been measured on x86 at
+all~\evcite{\evref{cpupacked}}. On the same M4~Pro the integrated GPU, through
+Metal and a software product, reaches $389$--$390$ million.
+
+Two other CPU instructions were priced or measured on smaller binary
+fields. GFNI's affine transform (\texttt{vgf2p8affineqb}) speeds up a
+basis change $3$--$5\times$ for fields up to $2^{63}$ in the repository's
+index-calculus code, but for ECC2K-130's bitsliced conversions it was
+priced as a loss, since it acts on bytes inside a register where the
+bitsliced maps act on whole words~\evcite{\evref{gfni}}. PCLMULQDQ made a
+41-bit Koblitz rho $1.76\times$ faster end to end~\evcite{\evref{smallclmul}}.
+
+\subsection{Prime fields}
+\label{sec:cpu-prime}
+
+The repository's prime-field CPU solver is a reference implementation,
+not a fast one: it uses heap-allocated big integers, not four 64-bit
+limbs with \texttt{MULX}/\texttt{ADX} carry chains or AVX-512 IFMA, and
+manages about $32{,}000$ affine additions per second per thread on
+P-256~\evcite{\evref{nistcpu}}. That is the CPU counterpart of the gap the
+GPU closed with explicit carry chains (Section~\ref{sec:nist}), and it is
+listed as an open question in Section~\ref{sec:open-cpu}.
+
+\subsection{CPUs in the campaign}
+\label{sec:cpu-fleet}
+
+In the campaign a CPU worker was a whole multi-core instance, and the
+twelve CPU slots self-reported a median of $2.3$ billion iterations per
+second on 2026-09-17, about a sixth of an RTX~PRO~6000. On Modal, a
+32-thread (16-core) sidecar beside a GPU adds about $25\%$ to the
+container's cost for $2.7\%$ more iterations, so it is off by
+default~\evcite{\evref{dpint}; \evref{client}, ``Walking on the container's CPUs too''}.
+Per dollar, a CPU walker is roughly ten times worse than the GPU.
+
+\input{figures/fig-cpu}

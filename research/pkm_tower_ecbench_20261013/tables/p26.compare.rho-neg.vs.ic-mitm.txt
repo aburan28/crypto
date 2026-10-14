@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p26/comparisons/rho-neg__ic-mitm.json
+ops (ok): ic-mitm / rho-neg = 91.5518 [73.553, 118.017] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 84.9460 [65.585, 100.101]
+| curve | log2 r | workloads | ic-mitm / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp26-t2838-8e779ca8 | 23.28 | 8 | 91.5518 | [73.5527, 118.0168] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-mitm mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W20d829c87466 | icv1-fp26-t2838-8e779ca8 | 23.28 | 1.0362 | 89.0458 | 85.9327 |
+| W459edf43e5a7 | icv1-fp26-t2838-8e779ca8 | 23.28 | 0.4867 | 90.2806 | 185.5079 |
+| W57379abdf921 | icv1-fp26-t2838-8e779ca8 | 23.28 | 0.8366 | 92.1417 | 110.1388 |
+| W7243e01194eb | icv1-fp26-t2838-8e779ca8 | 23.28 | 1.3677 | 92.6910 | 67.7717 |
+| W8e64c636e70a | icv1-fp26-t2838-8e779ca8 | 23.28 | 1.2327 | 90.6507 | 73.5365 |
+| Wba2d4897c8cd | icv1-fp26-t2838-8e779ca8 | 23.28 | 0.9749 | 92.4106 | 94.7899 |
+| Wda47d0f7e67b | icv1-fp26-t2838-8e779ca8 | 23.28 | 1.1939 | 91.4104 | 76.5626 |
+| Wfb330cc2db9c | icv1-fp26-t2838-8e779ca8 | 23.28 | 0.8487 | 91.7181 | 108.0696 |

@@ -1,0 +1,17 @@
+
+running 1 test
+
+thread 'a_public_target_session_yields_a_checked_vs_rho_claim' (95802) panicked at tests/ecbench.rs:644:5:
+assertion `left == right` failed
+  left: String("single_target_online_wall")
+ right: "single_target_online"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test a_public_target_session_yields_a_checked_vs_rho_claim ... FAILED
+
+failures:
+
+failures:
+    a_public_target_session_yields_a_checked_vs_rho_claim
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 2.35s
+

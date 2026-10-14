@@ -384,5 +384,7 @@ fn main() {
     println!();
     println!("What this prices is the decomposition oracle only.  Relation collection stays");
     println!("Θ(2^n) with any oracle polynomial in the factor base — see");
-    println!("research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md, `What this does not buy`.");
+    println!(
+        "research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md, `What this does not buy`."
+    );
 }

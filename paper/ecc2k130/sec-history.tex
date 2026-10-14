@@ -1,0 +1,111 @@
+\section{History}
+\label{sec:history}
+
+The 2009 attack is the baseline every number in this paper should be
+read against. Bailey et al.\ fixed the iteration function, the
+distinguished-point rule and the $2^{60.9}$ budget, and measured one
+step on every platform they could get: Core~2 and Phenom CPUs, the
+Cell processor in a PlayStation~3, the NVIDIA GTX~295, Spartan-3
+FPGAs, and a synthesised ASIC~\cite{bailey2009}. Follow-up papers
+then tuned the Cell~\cite{bos2010cell}, the GPU~\cite{bernstein2010gpu}
+and the FPGA~\cite{fan2010fpga} clients, and Niederhagen's thesis
+collects the final figures~\cite{niederhagen2012thesis}.
+Table~\ref{tab:history} restates them in this paper's unit.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{ECC2K-130 rates reported in 2009--2012, all for the
+  Bailey et al.\ iteration function, converted to billions of
+  iterations per second per chip. ``Reported'' is the source's own
+  figure; the converted value is ours where the source gives cycles
+  per iteration (cores $\times$ clock / cycles). GTX~295 figures are
+  per card, which carries two GPU dies. The last column is the number
+  of chips the source says (or its rate implies) would perform
+  $2^{60.9}$ iterations in one year.}
+\label{tab:history}
+\begin{tabular}{@{}lllrrr@{}}
+\toprule
+year & platform & reported & billion it/s & chips, 1 yr & source \\
+\midrule
+2009 & Core 2 Q6850, 4 cores, 3.0~GHz & 534 cycles/it per core & 0.0225 & 3{,}039 & \cite{bailey2009} \\
+2009 & Phenom 9550, 4 cores, 2.2~GHz & 637 cycles/it per core & 0.0138 & --- & \cite{bailey2009} \\
+2009 & Cell (PS3, 6 SPEs + PPE) & 27.67 M it/s & 0.0277 & 2{,}466 & \cite{bailey2009} \\
+2009 & GTX 295 (two GT200b dies) & 25.12 M it/s & 0.0251 & 2{,}716 & \cite{bailey2009} \\
+2009 & Spartan-3 XC3S5000, 20 engines & 33.67 M it/s & 0.0337 & 2{,}026 & \cite{bailey2009} \\
+2009 & ASIC, 90~nm (synthesis est.) & 800 M it/s & 0.800 & 85 & \cite{bailey2009} \\
+2010 & Spartan-3 XC3S5000 & 111 M it/s & 0.111 & --- & \cite{fan2010fpga} \\
+2010 & GTX 295, final kernel & 1{,}164 cycles/it per MP & 0.064 & 1{,}066 & \cite{bernstein2010gpu,niederhagen2012thesis} \\
+2012 & Cell (PS3, 6 SPEs) & 741.79 cycles/it per SPE & 0.0259 & 2{,}636 & \cite{niederhagen2012thesis} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A few details matter when comparing. The GTX~295 is two GPUs on one
+card, so its $25.12$ and $64$~million iterations per second are per
+card; per die they are half. The INDOCRYPT paper prints ``63 million''
+for the final kernel, while its own cycle count gives $64.0$, which is
+also what the thesis and the two-year device count
+use~\cite{bernstein2010gpu,niederhagen2012thesis}. The 2009 FPGA figure
+was partly estimated (only the multiplier of the chosen design was
+implemented), the ASIC is a synthesis result rather than silicon, and
+the $111$~million figure for the 2010 FPGA design is as cited by later
+work, since we could not obtain the primary text. The 85-ASIC count
+comes from the project's status page, which Bailey et al.'s ``less than
+100 dedicated ASICs'' matches.
+
+\input{figures/fig-history}
+
+\subsection{Comparison with today}
+\label{sec:history-compare}
+
+Table~\ref{tab:history-compare} sets the best 2009--2012 figure for
+each platform class next to what we measured. All rows walk the same
+classes of the same curve with the same $2^{60.9}$ budget; the 2009
+walk and our campaign walk are the same map, and only the arithmetic
+and the hardware differ.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Best published rate per platform class against this paper's
+  measurements, billions of iterations per second per chip. Ratios
+  are ours. One year of $2^{60.9}$ iterations needs about $68.2$ billion
+  iterations per second.}
+\label{tab:history-compare}
+\begin{tabular}{@{}llrlrr@{}}
+\toprule
+class & then & billion it/s & now & billion it/s & ratio \\
+\midrule
+GPU, per card & GTX 295 (2010) & 0.064 & RTX PRO 6000, campaign & 14.64 & $229\times$ \\
+ & & & RTX PRO 6000, best $\sigma$ & 15.88 & $248\times$ \\
+GPU, per die & GT200b (2010) & 0.032 & RTX PRO 6000 & 14.64 & $458\times$ \\
+FPGA & Spartan-3 XC3S5000 (2010) & 0.111 & VU47P (AWS F2) & 8.25 & $74\times$ \\
+ASIC & 90~nm estimate (2009) & 0.800 & --- & --- & --- \\
+CPU, per core & Core 2, 3.0~GHz (2009) & 0.0056 & Xeon 2.1~GHz, AVX-512 & 0.0126 & $2.2\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The GPU row is the headline. One RTX~PRO~6000 running the campaign
+build does the work of about 229 GTX~295 cards, and at that rate the
+whole $2^{60.9}$ budget is about $4.7$ GPU-years instead of the 1{,}066
+card-years of 2012. Of that factor, part is simply a bigger and faster
+chip: 188 SMs at about $2.4$~GHz against 60 multiprocessors at
+$1.24$~GHz is about $6\times$ more SM-clocks per second. The rest, roughly
+$38\times$ per SM-clock, is the arithmetic: a native carry-less product
+instead of a bitsliced one, three-input logic, a packed representation
+with the Frobenius as a permutation network, and a batch shape tuned
+against measured pipe rates. Figure~\ref{fig:gains} splits that factor, and Sections~\ref{sec:arith}
+through~\ref{sec:gpu} take it apart step by step.
+
+The FPGA gain is smaller, about $74\times$ from a 2010 Spartan-3 to a
+current VU47P, and on cost per solve the F2 is level with the GPU
+(Section~\ref{sec:fpga-vs-gpu}). The CPU gain per core is only about
+$2\times$: the CPU client is the same bitsliced design as in 2009, and
+it is the GPU that changed. The one platform class we have not
+revisited is the ASIC. A 2009 synthesis estimate of $0.8$ billion
+iterations per second per chip at 90~nm already needed fewer than a
+hundred chips for a one-year solve; a modern node would need far
+fewer, but that is a manufacturing question and outside this paper.
