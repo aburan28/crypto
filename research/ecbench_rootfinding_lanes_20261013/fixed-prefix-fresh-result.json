@@ -1,0 +1,1399 @@
+{
+  "schema": "rootfinding.fixed_prefix_receipt/v1",
+  "recorded_at_utc": "2026-10-14T07:41:04.935541+00:00",
+  "source_commit": "4ba3d5a6f08a0f95334a815c493cecbe5c447686",
+  "git_dirty_before_output_write": false,
+  "command": "ROOTFIND_PREFIX_INPUT=research/ecbench_rootfinding_lanes_20261013/fixed-prefix-fresh-input.json cargo test --offline --locked --release --test rootfinding_fixed_prefix -- --nocapture",
+  "input_sha256": "ed454dcb2a8030c8cc2920b3b676ee1547c11f1a5f570fa65374c22e8f16cd82",
+  "test_binary": "target/release/deps/rootfinding_fixed_prefix-a40bd1fe298948f3",
+  "test_binary_sha256": "3ffd3df74e9f3e8c96f8f4c0a545a9760b38f47a3a129e9c2e5c7d638a138bff",
+  "raw_log_sha256": "3dba917fdec54378ffb42796b9f14eb1a0a625bfeed26f07caf2d27c3e7bbc48",
+  "raw_log_file": "fixed-prefix-fresh.log.gz",
+  "result": {
+    "curve": "icv1-fp20-t727-cd198a38",
+    "lane_width": 8,
+    "prefix_surviving_probes": 8192,
+    "schema": "rootfinding.fixed_prefix/v1",
+    "subgroup_r": 562427,
+    "target_source": "fresh public ecbench plan, target_seed 20261025",
+    "targets": [
+      {
+        "algorithm_seed": 5721571958887971291,
+        "arms": [
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4153.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1401,
+                "hits": 2,
+                "independent_rank": 2,
+                "probes": 512,
+                "row_ops": 12
+              },
+              {
+                "cold_gae_lower_bound": 4666.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1466,
+                "hits": 3,
+                "independent_rank": 3,
+                "probes": 1024,
+                "row_ops": 16
+              },
+              {
+                "cold_gae_lower_bound": 5965.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1869,
+                "hits": 12,
+                "independent_rank": 12,
+                "probes": 2048,
+                "row_ops": 61
+              },
+              {
+                "cold_gae_lower_bound": 8553.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 2658,
+                "hits": 20,
+                "independent_rank": 20,
+                "probes": 4096,
+                "row_ops": 124
+              },
+              {
+                "cold_gae_lower_bound": 12730.0,
+                "dependent_rows": 11,
+                "group_field_invs_only": 3209,
+                "hits": 53,
+                "independent_rank": 42,
+                "probes": 8192,
+                "row_ops": 496
+              }
+            ],
+            "stride": 1,
+            "structural_bytes_floor": 38880,
+            "uniform_hit_probability": 0.008129069424244257,
+            "unique_pair_keys": 2286
+          },
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4154.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1402,
+                "hits": 3,
+                "independent_rank": 3,
+                "probes": 512,
+                "row_ops": 12
+              },
+              {
+                "cold_gae_lower_bound": 4672.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1472,
+                "hits": 9,
+                "independent_rank": 9,
+                "probes": 1024,
+                "row_ops": 40
+              },
+              {
+                "cold_gae_lower_bound": 5979.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1883,
+                "hits": 26,
+                "independent_rank": 26,
+                "probes": 2048,
+                "row_ops": 228
+              },
+              {
+                "cold_gae_lower_bound": 8577.0,
+                "dependent_rows": 5,
+                "group_field_invs_only": 2682,
+                "hits": 44,
+                "independent_rank": 39,
+                "probes": 4096,
+                "row_ops": 686
+              },
+              {
+                "cold_gae_lower_bound": 12750.0,
+                "dependent_rows": 24,
+                "group_field_invs_only": 3229,
+                "hits": 73,
+                "independent_rank": 49,
+                "probes": 8192,
+                "row_ops": 865
+              }
+            ],
+            "stride": 7,
+            "structural_bytes_floor": 39120,
+            "uniform_hit_probability": 0.00818240977479704,
+            "unique_pair_keys": 2301
+          },
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4153.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1401,
+                "hits": 2,
+                "independent_rank": 2,
+                "probes": 512,
+                "row_ops": 8
+              },
+              {
+                "cold_gae_lower_bound": 4667.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1467,
+                "hits": 4,
+                "independent_rank": 4,
+                "probes": 1024,
+                "row_ops": 15
+              },
+              {
+                "cold_gae_lower_bound": 5964.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1868,
+                "hits": 11,
+                "independent_rank": 11,
+                "probes": 2048,
+                "row_ops": 57
+              },
+              {
+                "cold_gae_lower_bound": 8560.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 2665,
+                "hits": 27,
+                "independent_rank": 27,
+                "probes": 4096,
+                "row_ops": 203
+              },
+              {
+                "cold_gae_lower_bound": 12740.0,
+                "dependent_rows": 19,
+                "group_field_invs_only": 3219,
+                "hits": 63,
+                "independent_rank": 44,
+                "probes": 8192,
+                "row_ops": 571
+              }
+            ],
+            "stride": 23,
+            "structural_bytes_floor": 39072,
+            "uniform_hit_probability": 0.008171741704686483,
+            "unique_pair_keys": 2298
+          }
+        ],
+        "attempted_points": 20000,
+        "fixed_prefix": 8192,
+        "surviving_points": 19672,
+        "target": [
+          "0x54586",
+          "0x2ea8d"
+        ],
+        "target_index": 0
+      },
+      {
+        "algorithm_seed": 811304270667031695,
+        "arms": [
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4147.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1402,
+                "hits": 4,
+                "independent_rank": 4,
+                "probes": 512,
+                "row_ops": 40
+              },
+              {
+                "cold_gae_lower_bound": 4663.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1470,
+                "hits": 8,
+                "independent_rank": 8,
+                "probes": 1024,
+                "row_ops": 56
+              },
+              {
+                "cold_gae_lower_bound": 5756.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1660,
+                "hits": 15,
+                "independent_rank": 15,
+                "probes": 2048,
+                "row_ops": 102
+              },
+              {
+                "cold_gae_lower_bound": 8293.0,
+                "dependent_rows": 2,
+                "group_field_invs_only": 2398,
+                "hits": 36,
+                "independent_rank": 34,
+                "probes": 4096,
+                "row_ops": 368
+              },
+              {
+                "cold_gae_lower_bound": 12810.0,
+                "dependent_rows": 38,
+                "group_field_invs_only": 3289,
+                "hits": 85,
+                "independent_rank": 47,
+                "probes": 8192,
+                "row_ops": 679
+              }
+            ],
+            "stride": 1,
+            "structural_bytes_floor": 38880,
+            "uniform_hit_probability": 0.008129069424244257,
+            "unique_pair_keys": 2286
+          },
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4147.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1402,
+                "hits": 4,
+                "independent_rank": 4,
+                "probes": 512,
+                "row_ops": 16
+              },
+              {
+                "cold_gae_lower_bound": 4663.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1470,
+                "hits": 8,
+                "independent_rank": 8,
+                "probes": 1024,
+                "row_ops": 48
+              },
+              {
+                "cold_gae_lower_bound": 5759.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1663,
+                "hits": 18,
+                "independent_rank": 18,
+                "probes": 2048,
+                "row_ops": 132
+              },
+              {
+                "cold_gae_lower_bound": 8295.0,
+                "dependent_rows": 2,
+                "group_field_invs_only": 2400,
+                "hits": 38,
+                "independent_rank": 36,
+                "probes": 4096,
+                "row_ops": 347
+              },
+              {
+                "cold_gae_lower_bound": 12795.0,
+                "dependent_rows": 24,
+                "group_field_invs_only": 3274,
+                "hits": 70,
+                "independent_rank": 46,
+                "probes": 8192,
+                "row_ops": 567
+              }
+            ],
+            "stride": 7,
+            "structural_bytes_floor": 39120,
+            "uniform_hit_probability": 0.00818240977479704,
+            "unique_pair_keys": 2301
+          },
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4143.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1398,
+                "hits": 0,
+                "independent_rank": 0,
+                "probes": 512,
+                "row_ops": 0
+              },
+              {
+                "cold_gae_lower_bound": 4662.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1469,
+                "hits": 7,
+                "independent_rank": 7,
+                "probes": 1024,
+                "row_ops": 32
+              },
+              {
+                "cold_gae_lower_bound": 5760.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1664,
+                "hits": 19,
+                "independent_rank": 19,
+                "probes": 2048,
+                "row_ops": 123
+              },
+              {
+                "cold_gae_lower_bound": 8293.0,
+                "dependent_rows": 1,
+                "group_field_invs_only": 2398,
+                "hits": 36,
+                "independent_rank": 35,
+                "probes": 4096,
+                "row_ops": 369
+              },
+              {
+                "cold_gae_lower_bound": 12801.0,
+                "dependent_rows": 31,
+                "group_field_invs_only": 3280,
+                "hits": 76,
+                "independent_rank": 45,
+                "probes": 8192,
+                "row_ops": 615
+              }
+            ],
+            "stride": 23,
+            "structural_bytes_floor": 39072,
+            "uniform_hit_probability": 0.008171741704686483,
+            "unique_pair_keys": 2298
+          }
+        ],
+        "attempted_points": 20000,
+        "fixed_prefix": 8192,
+        "surviving_points": 19680,
+        "target": [
+          "0x3b91d",
+          "0x4fef9"
+        ],
+        "target_index": 1
+      },
+      {
+        "algorithm_seed": 8809037384814122751,
+        "arms": [
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4118.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1373,
+                "hits": 3,
+                "independent_rank": 3,
+                "probes": 512,
+                "row_ops": 12
+              },
+              {
+                "cold_gae_lower_bound": 4634.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1441,
+                "hits": 7,
+                "independent_rank": 7,
+                "probes": 1024,
+                "row_ops": 32
+              },
+              {
+                "cold_gae_lower_bound": 5731.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1635,
+                "hits": 14,
+                "independent_rank": 14,
+                "probes": 2048,
+                "row_ops": 129
+              },
+              {
+                "cold_gae_lower_bound": 8476.0,
+                "dependent_rows": 2,
+                "group_field_invs_only": 2581,
+                "hits": 32,
+                "independent_rank": 30,
+                "probes": 4096,
+                "row_ops": 309
+              },
+              {
+                "cold_gae_lower_bound": 12726.0,
+                "dependent_rows": 16,
+                "group_field_invs_only": 3226,
+                "hits": 58,
+                "independent_rank": 42,
+                "probes": 8192,
+                "row_ops": 487
+              }
+            ],
+            "stride": 1,
+            "structural_bytes_floor": 38880,
+            "uniform_hit_probability": 0.008129069424244257,
+            "unique_pair_keys": 2286
+          },
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4121.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1376,
+                "hits": 6,
+                "independent_rank": 6,
+                "probes": 512,
+                "row_ops": 24
+              },
+              {
+                "cold_gae_lower_bound": 4637.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1444,
+                "hits": 10,
+                "independent_rank": 10,
+                "probes": 1024,
+                "row_ops": 40
+              },
+              {
+                "cold_gae_lower_bound": 5734.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1638,
+                "hits": 17,
+                "independent_rank": 17,
+                "probes": 2048,
+                "row_ops": 120
+              },
+              {
+                "cold_gae_lower_bound": 8483.0,
+                "dependent_rows": 2,
+                "group_field_invs_only": 2588,
+                "hits": 39,
+                "independent_rank": 37,
+                "probes": 4096,
+                "row_ops": 545
+              },
+              {
+                "cold_gae_lower_bound": 12728.0,
+                "dependent_rows": 15,
+                "group_field_invs_only": 3228,
+                "hits": 60,
+                "independent_rank": 45,
+                "probes": 8192,
+                "row_ops": 682
+              }
+            ],
+            "stride": 7,
+            "structural_bytes_floor": 39120,
+            "uniform_hit_probability": 0.00818240977479704,
+            "unique_pair_keys": 2301
+          },
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4119.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1374,
+                "hits": 4,
+                "independent_rank": 4,
+                "probes": 512,
+                "row_ops": 16
+              },
+              {
+                "cold_gae_lower_bound": 4636.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1443,
+                "hits": 9,
+                "independent_rank": 9,
+                "probes": 1024,
+                "row_ops": 44
+              },
+              {
+                "cold_gae_lower_bound": 5737.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1641,
+                "hits": 20,
+                "independent_rank": 20,
+                "probes": 2048,
+                "row_ops": 168
+              },
+              {
+                "cold_gae_lower_bound": 8479.0,
+                "dependent_rows": 2,
+                "group_field_invs_only": 2584,
+                "hits": 35,
+                "independent_rank": 33,
+                "probes": 4096,
+                "row_ops": 406
+              },
+              {
+                "cold_gae_lower_bound": 12731.0,
+                "dependent_rows": 20,
+                "group_field_invs_only": 3231,
+                "hits": 63,
+                "independent_rank": 43,
+                "probes": 8192,
+                "row_ops": 591
+              }
+            ],
+            "stride": 23,
+            "structural_bytes_floor": 39072,
+            "uniform_hit_probability": 0.008171741704686483,
+            "unique_pair_keys": 2298
+          }
+        ],
+        "attempted_points": 20000,
+        "fixed_prefix": 8192,
+        "surviving_points": 19679,
+        "target": [
+          "0x5e95a",
+          "0x440f0"
+        ],
+        "target_index": 2
+      },
+      {
+        "algorithm_seed": 10724406905590052964,
+        "arms": [
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4100.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1355,
+                "hits": 2,
+                "independent_rank": 2,
+                "probes": 512,
+                "row_ops": 8
+              },
+              {
+                "cold_gae_lower_bound": 4675.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1475,
+                "hits": 6,
+                "independent_rank": 6,
+                "probes": 1024,
+                "row_ops": 24
+              },
+              {
+                "cold_gae_lower_bound": 5811.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1715,
+                "hits": 15,
+                "independent_rank": 15,
+                "probes": 2048,
+                "row_ops": 72
+              },
+              {
+                "cold_gae_lower_bound": 8305.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 2410,
+                "hits": 30,
+                "independent_rank": 30,
+                "probes": 4096,
+                "row_ops": 270
+              },
+              {
+                "cold_gae_lower_bound": 12753.0,
+                "dependent_rows": 10,
+                "group_field_invs_only": 3232,
+                "hits": 54,
+                "independent_rank": 44,
+                "probes": 8192,
+                "row_ops": 561
+              }
+            ],
+            "stride": 1,
+            "structural_bytes_floor": 38880,
+            "uniform_hit_probability": 0.008129069424244257,
+            "unique_pair_keys": 2286
+          },
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4100.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1355,
+                "hits": 2,
+                "independent_rank": 2,
+                "probes": 512,
+                "row_ops": 8
+              },
+              {
+                "cold_gae_lower_bound": 4675.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1475,
+                "hits": 6,
+                "independent_rank": 6,
+                "probes": 1024,
+                "row_ops": 32
+              },
+              {
+                "cold_gae_lower_bound": 5816.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1720,
+                "hits": 20,
+                "independent_rank": 20,
+                "probes": 2048,
+                "row_ops": 160
+              },
+              {
+                "cold_gae_lower_bound": 8307.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 2412,
+                "hits": 32,
+                "independent_rank": 32,
+                "probes": 4096,
+                "row_ops": 373
+              },
+              {
+                "cold_gae_lower_bound": 12761.0,
+                "dependent_rows": 20,
+                "group_field_invs_only": 3240,
+                "hits": 62,
+                "independent_rank": 42,
+                "probes": 8192,
+                "row_ops": 578
+              }
+            ],
+            "stride": 7,
+            "structural_bytes_floor": 39120,
+            "uniform_hit_probability": 0.00818240977479704,
+            "unique_pair_keys": 2301
+          },
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4102.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1357,
+                "hits": 4,
+                "independent_rank": 4,
+                "probes": 512,
+                "row_ops": 44
+              },
+              {
+                "cold_gae_lower_bound": 4676.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1476,
+                "hits": 7,
+                "independent_rank": 7,
+                "probes": 1024,
+                "row_ops": 56
+              },
+              {
+                "cold_gae_lower_bound": 5813.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1717,
+                "hits": 17,
+                "independent_rank": 17,
+                "probes": 2048,
+                "row_ops": 164
+              },
+              {
+                "cold_gae_lower_bound": 8306.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 2411,
+                "hits": 31,
+                "independent_rank": 31,
+                "probes": 4096,
+                "row_ops": 538
+              },
+              {
+                "cold_gae_lower_bound": 12757.0,
+                "dependent_rows": 14,
+                "group_field_invs_only": 3236,
+                "hits": 58,
+                "independent_rank": 44,
+                "probes": 8192,
+                "row_ops": 795
+              }
+            ],
+            "stride": 23,
+            "structural_bytes_floor": 39072,
+            "uniform_hit_probability": 0.008171741704686483,
+            "unique_pair_keys": 2298
+          }
+        ],
+        "attempted_points": 20000,
+        "fixed_prefix": 8192,
+        "surviving_points": 19711,
+        "target": [
+          "0xdf6",
+          "0x30e83"
+        ],
+        "target_index": 3
+      },
+      {
+        "algorithm_seed": 3241159602644571423,
+        "arms": [
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4144.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1399,
+                "hits": 11,
+                "independent_rank": 11,
+                "probes": 512,
+                "row_ops": 60
+              },
+              {
+                "cold_gae_lower_bound": 4715.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1515,
+                "hits": 15,
+                "independent_rank": 15,
+                "probes": 1024,
+                "row_ops": 116
+              },
+              {
+                "cold_gae_lower_bound": 5852.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1756,
+                "hits": 23,
+                "independent_rank": 23,
+                "probes": 2048,
+                "row_ops": 255
+              },
+              {
+                "cold_gae_lower_bound": 8130.0,
+                "dependent_rows": 4,
+                "group_field_invs_only": 2242,
+                "hits": 34,
+                "independent_rank": 30,
+                "probes": 4096,
+                "row_ops": 334
+              },
+              {
+                "cold_gae_lower_bound": 12757.0,
+                "dependent_rows": 26,
+                "group_field_invs_only": 3243,
+                "hits": 70,
+                "independent_rank": 44,
+                "probes": 8192,
+                "row_ops": 578
+              }
+            ],
+            "stride": 1,
+            "structural_bytes_floor": 38880,
+            "uniform_hit_probability": 0.008129069424244257,
+            "unique_pair_keys": 2286
+          },
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4138.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1393,
+                "hits": 5,
+                "independent_rank": 5,
+                "probes": 512,
+                "row_ops": 20
+              },
+              {
+                "cold_gae_lower_bound": 4711.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1511,
+                "hits": 11,
+                "independent_rank": 11,
+                "probes": 1024,
+                "row_ops": 51
+              },
+              {
+                "cold_gae_lower_bound": 5847.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1751,
+                "hits": 18,
+                "independent_rank": 18,
+                "probes": 2048,
+                "row_ops": 94
+              },
+              {
+                "cold_gae_lower_bound": 8134.0,
+                "dependent_rows": 1,
+                "group_field_invs_only": 2246,
+                "hits": 38,
+                "independent_rank": 37,
+                "probes": 4096,
+                "row_ops": 385
+              },
+              {
+                "cold_gae_lower_bound": 12746.0,
+                "dependent_rows": 14,
+                "group_field_invs_only": 3232,
+                "hits": 59,
+                "independent_rank": 45,
+                "probes": 8192,
+                "row_ops": 541
+              }
+            ],
+            "stride": 7,
+            "structural_bytes_floor": 39120,
+            "uniform_hit_probability": 0.00818240977479704,
+            "unique_pair_keys": 2301
+          },
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4138.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1393,
+                "hits": 5,
+                "independent_rank": 5,
+                "probes": 512,
+                "row_ops": 24
+              },
+              {
+                "cold_gae_lower_bound": 4713.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1513,
+                "hits": 13,
+                "independent_rank": 13,
+                "probes": 1024,
+                "row_ops": 96
+              },
+              {
+                "cold_gae_lower_bound": 5844.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1748,
+                "hits": 15,
+                "independent_rank": 15,
+                "probes": 2048,
+                "row_ops": 104
+              },
+              {
+                "cold_gae_lower_bound": 8127.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 2239,
+                "hits": 31,
+                "independent_rank": 31,
+                "probes": 4096,
+                "row_ops": 285
+              },
+              {
+                "cold_gae_lower_bound": 12765.0,
+                "dependent_rows": 30,
+                "group_field_invs_only": 3251,
+                "hits": 78,
+                "independent_rank": 48,
+                "probes": 8192,
+                "row_ops": 714
+              }
+            ],
+            "stride": 23,
+            "structural_bytes_floor": 39072,
+            "uniform_hit_probability": 0.008171741704686483,
+            "unique_pair_keys": 2298
+          }
+        ],
+        "attempted_points": 20000,
+        "fixed_prefix": 8192,
+        "surviving_points": 19712,
+        "target": [
+          "0x6d8c5",
+          "0x3c4be"
+        ],
+        "target_index": 4
+      },
+      {
+        "algorithm_seed": 11588566958633861767,
+        "arms": [
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4184.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1432,
+                "hits": 2,
+                "independent_rank": 2,
+                "probes": 512,
+                "row_ops": 8
+              },
+              {
+                "cold_gae_lower_bound": 4702.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1502,
+                "hits": 8,
+                "independent_rank": 8,
+                "probes": 1024,
+                "row_ops": 32
+              },
+              {
+                "cold_gae_lower_bound": 5901.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1805,
+                "hits": 12,
+                "independent_rank": 12,
+                "probes": 2048,
+                "row_ops": 52
+              },
+              {
+                "cold_gae_lower_bound": 8398.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 2503,
+                "hits": 26,
+                "independent_rank": 26,
+                "probes": 4096,
+                "row_ops": 164
+              },
+              {
+                "cold_gae_lower_bound": 12794.0,
+                "dependent_rows": 15,
+                "group_field_invs_only": 3266,
+                "hits": 61,
+                "independent_rank": 46,
+                "probes": 8192,
+                "row_ops": 585
+              }
+            ],
+            "stride": 1,
+            "structural_bytes_floor": 38880,
+            "uniform_hit_probability": 0.008129069424244257,
+            "unique_pair_keys": 2286
+          },
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4189.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1437,
+                "hits": 7,
+                "independent_rank": 7,
+                "probes": 512,
+                "row_ops": 32
+              },
+              {
+                "cold_gae_lower_bound": 4705.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1505,
+                "hits": 11,
+                "independent_rank": 11,
+                "probes": 1024,
+                "row_ops": 56
+              },
+              {
+                "cold_gae_lower_bound": 5911.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1815,
+                "hits": 22,
+                "independent_rank": 22,
+                "probes": 2048,
+                "row_ops": 160
+              },
+              {
+                "cold_gae_lower_bound": 8409.0,
+                "dependent_rows": 4,
+                "group_field_invs_only": 2514,
+                "hits": 37,
+                "independent_rank": 33,
+                "probes": 4096,
+                "row_ops": 386
+              },
+              {
+                "cold_gae_lower_bound": 12806.0,
+                "dependent_rows": 26,
+                "group_field_invs_only": 3278,
+                "hits": 73,
+                "independent_rank": 47,
+                "probes": 8192,
+                "row_ops": 622
+              }
+            ],
+            "stride": 7,
+            "structural_bytes_floor": 39120,
+            "uniform_hit_probability": 0.00818240977479704,
+            "unique_pair_keys": 2301
+          },
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4187.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1435,
+                "hits": 5,
+                "independent_rank": 5,
+                "probes": 512,
+                "row_ops": 20
+              },
+              {
+                "cold_gae_lower_bound": 4707.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1507,
+                "hits": 13,
+                "independent_rank": 13,
+                "probes": 1024,
+                "row_ops": 100
+              },
+              {
+                "cold_gae_lower_bound": 5904.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1808,
+                "hits": 15,
+                "independent_rank": 15,
+                "probes": 2048,
+                "row_ops": 112
+              },
+              {
+                "cold_gae_lower_bound": 8406.0,
+                "dependent_rows": 2,
+                "group_field_invs_only": 2511,
+                "hits": 34,
+                "independent_rank": 32,
+                "probes": 4096,
+                "row_ops": 407
+              },
+              {
+                "cold_gae_lower_bound": 12801.0,
+                "dependent_rows": 22,
+                "group_field_invs_only": 3273,
+                "hits": 68,
+                "independent_rank": 46,
+                "probes": 8192,
+                "row_ops": 628
+              }
+            ],
+            "stride": 23,
+            "structural_bytes_floor": 39072,
+            "uniform_hit_probability": 0.008171741704686483,
+            "unique_pair_keys": 2298
+          }
+        ],
+        "attempted_points": 20000,
+        "fixed_prefix": 8192,
+        "surviving_points": 19673,
+        "target": [
+          "0x39508",
+          "0x86d1f"
+        ],
+        "target_index": 5
+      },
+      {
+        "algorithm_seed": 3513612762121240431,
+        "arms": [
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4172.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1420,
+                "hits": 2,
+                "independent_rank": 2,
+                "probes": 512,
+                "row_ops": 8
+              },
+              {
+                "cold_gae_lower_bound": 4735.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1535,
+                "hits": 8,
+                "independent_rank": 8,
+                "probes": 1024,
+                "row_ops": 44
+              },
+              {
+                "cold_gae_lower_bound": 5868.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1772,
+                "hits": 13,
+                "independent_rank": 13,
+                "probes": 2048,
+                "row_ops": 76
+              },
+              {
+                "cold_gae_lower_bound": 8594.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 2692,
+                "hits": 28,
+                "independent_rank": 28,
+                "probes": 4096,
+                "row_ops": 219
+              },
+              {
+                "cold_gae_lower_bound": 12769.0,
+                "dependent_rows": 20,
+                "group_field_invs_only": 3248,
+                "hits": 67,
+                "independent_rank": 47,
+                "probes": 8192,
+                "row_ops": 627
+              }
+            ],
+            "stride": 1,
+            "structural_bytes_floor": 38880,
+            "uniform_hit_probability": 0.008129069424244257,
+            "unique_pair_keys": 2286
+          },
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4173.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1421,
+                "hits": 3,
+                "independent_rank": 3,
+                "probes": 512,
+                "row_ops": 12
+              },
+              {
+                "cold_gae_lower_bound": 4734.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1534,
+                "hits": 7,
+                "independent_rank": 7,
+                "probes": 1024,
+                "row_ops": 32
+              },
+              {
+                "cold_gae_lower_bound": 5870.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1774,
+                "hits": 15,
+                "independent_rank": 15,
+                "probes": 2048,
+                "row_ops": 68
+              },
+              {
+                "cold_gae_lower_bound": 8597.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 2695,
+                "hits": 31,
+                "independent_rank": 31,
+                "probes": 4096,
+                "row_ops": 334
+              },
+              {
+                "cold_gae_lower_bound": 12764.0,
+                "dependent_rows": 16,
+                "group_field_invs_only": 3243,
+                "hits": 62,
+                "independent_rank": 46,
+                "probes": 8192,
+                "row_ops": 630
+              }
+            ],
+            "stride": 7,
+            "structural_bytes_floor": 39120,
+            "uniform_hit_probability": 0.00818240977479704,
+            "unique_pair_keys": 2301
+          },
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4173.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1421,
+                "hits": 3,
+                "independent_rank": 3,
+                "probes": 512,
+                "row_ops": 20
+              },
+              {
+                "cold_gae_lower_bound": 4732.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1532,
+                "hits": 5,
+                "independent_rank": 5,
+                "probes": 1024,
+                "row_ops": 30
+              },
+              {
+                "cold_gae_lower_bound": 5870.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1774,
+                "hits": 15,
+                "independent_rank": 15,
+                "probes": 2048,
+                "row_ops": 78
+              },
+              {
+                "cold_gae_lower_bound": 8600.0,
+                "dependent_rows": 2,
+                "group_field_invs_only": 2698,
+                "hits": 34,
+                "independent_rank": 32,
+                "probes": 4096,
+                "row_ops": 302
+              },
+              {
+                "cold_gae_lower_bound": 12784.0,
+                "dependent_rows": 33,
+                "group_field_invs_only": 3263,
+                "hits": 82,
+                "independent_rank": 49,
+                "probes": 8192,
+                "row_ops": 604
+              }
+            ],
+            "stride": 23,
+            "structural_bytes_floor": 39072,
+            "uniform_hit_probability": 0.008171741704686483,
+            "unique_pair_keys": 2298
+          }
+        ],
+        "attempted_points": 20000,
+        "fixed_prefix": 8192,
+        "surviving_points": 19663,
+        "target": [
+          "0x4e5c",
+          "0x1bb48"
+        ],
+        "target_index": 6
+      },
+      {
+        "algorithm_seed": 15949983506533277204,
+        "arms": [
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4122.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1370,
+                "hits": 4,
+                "independent_rank": 4,
+                "probes": 512,
+                "row_ops": 16
+              },
+              {
+                "cold_gae_lower_bound": 4691.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1491,
+                "hits": 5,
+                "independent_rank": 5,
+                "probes": 1024,
+                "row_ops": 20
+              },
+              {
+                "cold_gae_lower_bound": 5880.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1784,
+                "hits": 15,
+                "independent_rank": 15,
+                "probes": 2048,
+                "row_ops": 92
+              },
+              {
+                "cold_gae_lower_bound": 8518.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 2623,
+                "hits": 33,
+                "independent_rank": 33,
+                "probes": 4096,
+                "row_ops": 419
+              },
+              {
+                "cold_gae_lower_bound": 12698.0,
+                "dependent_rows": 23,
+                "group_field_invs_only": 3177,
+                "hits": 69,
+                "independent_rank": 46,
+                "probes": 8192,
+                "row_ops": 697
+              }
+            ],
+            "stride": 1,
+            "structural_bytes_floor": 38880,
+            "uniform_hit_probability": 0.008129069424244257,
+            "unique_pair_keys": 2286
+          },
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4123.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1371,
+                "hits": 5,
+                "independent_rank": 5,
+                "probes": 512,
+                "row_ops": 24
+              },
+              {
+                "cold_gae_lower_bound": 4696.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1496,
+                "hits": 10,
+                "independent_rank": 10,
+                "probes": 1024,
+                "row_ops": 52
+              },
+              {
+                "cold_gae_lower_bound": 5885.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1789,
+                "hits": 20,
+                "independent_rank": 20,
+                "probes": 2048,
+                "row_ops": 124
+              },
+              {
+                "cold_gae_lower_bound": 8523.0,
+                "dependent_rows": 3,
+                "group_field_invs_only": 2628,
+                "hits": 38,
+                "independent_rank": 35,
+                "probes": 4096,
+                "row_ops": 427
+              },
+              {
+                "cold_gae_lower_bound": 12701.0,
+                "dependent_rows": 24,
+                "group_field_invs_only": 3180,
+                "hits": 72,
+                "independent_rank": 48,
+                "probes": 8192,
+                "row_ops": 650
+              }
+            ],
+            "stride": 7,
+            "structural_bytes_floor": 39120,
+            "uniform_hit_probability": 0.00818240977479704,
+            "unique_pair_keys": 2301
+          },
+          {
+            "milestones": [
+              {
+                "cold_gae_lower_bound": 4123.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1371,
+                "hits": 5,
+                "independent_rank": 5,
+                "probes": 512,
+                "row_ops": 28
+              },
+              {
+                "cold_gae_lower_bound": 4696.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1496,
+                "hits": 10,
+                "independent_rank": 10,
+                "probes": 1024,
+                "row_ops": 48
+              },
+              {
+                "cold_gae_lower_bound": 5888.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 1792,
+                "hits": 23,
+                "independent_rank": 23,
+                "probes": 2048,
+                "row_ops": 140
+              },
+              {
+                "cold_gae_lower_bound": 8517.0,
+                "dependent_rows": 0,
+                "group_field_invs_only": 2622,
+                "hits": 32,
+                "independent_rank": 32,
+                "probes": 4096,
+                "row_ops": 316
+              },
+              {
+                "cold_gae_lower_bound": 12701.0,
+                "dependent_rows": 24,
+                "group_field_invs_only": 3180,
+                "hits": 72,
+                "independent_rank": 48,
+                "probes": 8192,
+                "row_ops": 781
+              }
+            ],
+            "stride": 23,
+            "structural_bytes_floor": 39072,
+            "uniform_hit_probability": 0.008171741704686483,
+            "unique_pair_keys": 2298
+          }
+        ],
+        "attempted_points": 20000,
+        "fixed_prefix": 8192,
+        "surviving_points": 19649,
+        "target": [
+          "0x66f70",
+          "0x1bee7"
+        ],
+        "target_index": 7
+      }
+    ],
+    "trial_cap": 20000
+  }
+}

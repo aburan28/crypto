@@ -1,0 +1,23 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "smoke: the direct-subtraction root-finding oracle beside subtract and mitm on a registered 20-bit prime-order curve",
+  "description": "Correctness and plumbing check of rootfind-subtract (prime_fast's direct-subtraction root finding: every x(R ∓ F_i) of a target from one Montgomery batched inversion, RESEARCH_SEMAEV_ROOTFIND_VS_GROEBNER.md §2) against the subtract oracle, whose search it follows candidate for candidate, and the negation-folded mitm table, on the smoke-prime base, with rho.negation as the reference. The repository has no prime-curve Groebner decomposition oracle in ecbench (the note's Buchberger baseline terminates only at |F| = 6, too small to solve a DLP), so the prime comparison is against the existing table and subtraction oracles. Not a performance claim.",
+  "workloads": {
+    "curves": [{"kind": "prime_search", "bits": 20, "seed": 59297}],
+    "targets_per_curve": 2,
+    "target_seed": 20261012
+  },
+  "arms": [
+    {"name": "rho-neg", "role": "reference", "method": {"id": "rho.negation"}},
+    {"name": "ic-subtract", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "prime-abscissa:size=32", "oracle": "subtract"}}},
+    {"name": "ic-mitm", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "prime-abscissa:size=32", "oracle": "mitm:negation_folded=1"}}},
+    {"name": "ic-rootfind-m2", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "prime-abscissa:size=32", "oracle": "rootfind-subtract:m=2"}}},
+    {"name": "ic-rootfind-m3", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "prime-abscissa:size=32", "oracle": "rootfind-subtract:m=3"}}},
+    {"name": "rho-neg-aa", "role": "control", "method": {"id": "rho.negation"}}
+  ],
+  "measurement": {"rounds": 2, "warmup": 1, "order": "alternate", "seed": 1, "isolation_required": "L2", "timeout_seconds": 120}
+}

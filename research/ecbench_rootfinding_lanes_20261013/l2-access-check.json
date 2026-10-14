@@ -1,0 +1,36 @@
+{
+  "schema": "rootfinding.l2_access_check/v1",
+  "utc": "2026-10-14T07:10:46.579616+00:00",
+  "ISOLAB_URL_configured": false,
+  "isolab_cli_present": false,
+  "ssh_checks": [
+    {
+      "command": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=5",
+        "runpod-isolated-blush-stork",
+        "true"
+      ],
+      "exit_code": 255,
+      "stdout": "",
+      "stderr": "ssh: connect to host 157.157.221.30 port 37254: Connection refused\n"
+    },
+    {
+      "command": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=5",
+        "runpod",
+        "true"
+      ],
+      "exit_code": 255,
+      "stdout": "",
+      "stderr": "ssh: connect to host 213.173.110.47 port 19497: Connection refused\n"
+    }
+  ]
+}

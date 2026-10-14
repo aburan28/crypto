@@ -1,0 +1,1045 @@
+{
+  "schema": "ecbench.audit/v1",
+  "session_id": "ECBS1hdf7014120171",
+  "session_status": "complete",
+  "ok": true,
+  "problems": [],
+  "checks": {
+    "arms": true,
+    "env_class": true,
+    "executions": true,
+    "host_hash": true,
+    "plan_hash": true,
+    "record_count": true,
+    "records": true,
+    "records_hash": true,
+    "replays": true,
+    "session_complete": true,
+    "spec_id": true,
+    "workloads": true
+  },
+  "records": 224,
+  "verified_records": 224,
+  "regraded": true,
+  "replays": [
+    {
+      "seq": 56,
+      "record_id": "ECR1h55a51a549a97",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 57,
+      "record_id": "ECR1h3c9443c942b2",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 58,
+      "record_id": "ECR1hc409ae94b4aa",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 59,
+      "record_id": "ECR1h9aeccd0dce08",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 60,
+      "record_id": "ECR1h5885c3d489da",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 61,
+      "record_id": "ECR1hf51f65ab44dd",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 62,
+      "record_id": "ECR1h24f4cbd4c4fb",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 63,
+      "record_id": "ECR1hb19af8b0cfd4",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 64,
+      "record_id": "ECR1h8be7e55b986b",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 65,
+      "record_id": "ECR1h8619bacf5ade",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 66,
+      "record_id": "ECR1h846c62c229d1",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 67,
+      "record_id": "ECR1he4a23b8ec733",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 68,
+      "record_id": "ECR1h215d82868fe3",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 69,
+      "record_id": "ECR1h135f7ee4977f",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 70,
+      "record_id": "ECR1haebbe6941c7f",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 71,
+      "record_id": "ECR1hd84119e7262c",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 72,
+      "record_id": "ECR1ha2b68facdadc",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 73,
+      "record_id": "ECR1h864c45337dd3",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 74,
+      "record_id": "ECR1ha8521df06911",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 75,
+      "record_id": "ECR1hf32bb6d7ac86",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 76,
+      "record_id": "ECR1h44a58dc6becf",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 77,
+      "record_id": "ECR1h85fbf858ca19",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 78,
+      "record_id": "ECR1hfe020d4680e2",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 79,
+      "record_id": "ECR1h6c691b01425b",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 80,
+      "record_id": "ECR1he0814212a001",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 81,
+      "record_id": "ECR1h1e759d7488f9",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 82,
+      "record_id": "ECR1h115bccb488f1",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 83,
+      "record_id": "ECR1h2bef17fd6168",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 84,
+      "record_id": "ECR1h4f99d08904f1",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 85,
+      "record_id": "ECR1h17cce8303e79",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 86,
+      "record_id": "ECR1h3cc03ce69514",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 87,
+      "record_id": "ECR1hfea8fb9266af",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 88,
+      "record_id": "ECR1h9a83799fdec7",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 89,
+      "record_id": "ECR1h17b2052bc981",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 90,
+      "record_id": "ECR1hd30856f17688",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 91,
+      "record_id": "ECR1hbf11bf2f3139",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 92,
+      "record_id": "ECR1h33bd6914bbea",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 93,
+      "record_id": "ECR1h652e29ef62cc",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 94,
+      "record_id": "ECR1h65b5608d396e",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 95,
+      "record_id": "ECR1h15201905cc3a",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 96,
+      "record_id": "ECR1hb8a5079fd697",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 97,
+      "record_id": "ECR1he6e508679ea8",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 98,
+      "record_id": "ECR1he08d71011cdf",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 99,
+      "record_id": "ECR1h3f917c9fb929",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 100,
+      "record_id": "ECR1h380fafaaf0b3",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 101,
+      "record_id": "ECR1h1aa810d65094",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 102,
+      "record_id": "ECR1h53fcc4be356d",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 103,
+      "record_id": "ECR1ha36ca604d70a",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 104,
+      "record_id": "ECR1h9f8f134d9671",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 105,
+      "record_id": "ECR1h793b153eaca5",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 106,
+      "record_id": "ECR1h969fc524a830",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 107,
+      "record_id": "ECR1hbff616d0c63f",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 108,
+      "record_id": "ECR1hce0d661c170d",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 109,
+      "record_id": "ECR1h3612138911ad",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 110,
+      "record_id": "ECR1h37d5ae61eecb",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 111,
+      "record_id": "ECR1h2a4341c16dce",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 112,
+      "record_id": "ECR1hf9a67f359b62",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 113,
+      "record_id": "ECR1h00cf0aca0635",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 114,
+      "record_id": "ECR1hc7717f4b63f8",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 115,
+      "record_id": "ECR1h96d6bc6a99ee",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 116,
+      "record_id": "ECR1h7e6d328cbc8d",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 117,
+      "record_id": "ECR1h3b2b1c9f5a8e",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 118,
+      "record_id": "ECR1h85b140cb831b",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 119,
+      "record_id": "ECR1hd672fc893332",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 120,
+      "record_id": "ECR1h75ea37e19772",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 121,
+      "record_id": "ECR1h6d704e536987",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 122,
+      "record_id": "ECR1headb78314081",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 123,
+      "record_id": "ECR1hcb9598c618b1",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 124,
+      "record_id": "ECR1h6452309e45a7",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 125,
+      "record_id": "ECR1hfd72be605e28",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 126,
+      "record_id": "ECR1h187ac96a15d0",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 127,
+      "record_id": "ECR1h4fe090cee988",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 128,
+      "record_id": "ECR1h2788d0e1a8ad",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 129,
+      "record_id": "ECR1h311b6cbb3ffd",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 130,
+      "record_id": "ECR1hceef13cfb262",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 131,
+      "record_id": "ECR1hc20f37f025a2",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 132,
+      "record_id": "ECR1h27077dd65aa2",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 133,
+      "record_id": "ECR1hff680cecde4f",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 134,
+      "record_id": "ECR1hf2281c7dca77",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 135,
+      "record_id": "ECR1h753f437e09b5",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 136,
+      "record_id": "ECR1h39dd12527128",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 137,
+      "record_id": "ECR1h40794744b9b3",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 138,
+      "record_id": "ECR1hf7d099fbe60f",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 139,
+      "record_id": "ECR1h09fe2261c4aa",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 140,
+      "record_id": "ECR1hb29a5af30f58",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 141,
+      "record_id": "ECR1h67ce0a62afe5",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 142,
+      "record_id": "ECR1hb675b3285a9f",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 143,
+      "record_id": "ECR1ha8f5e1bfd30d",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 144,
+      "record_id": "ECR1he10b0dac6b4f",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 145,
+      "record_id": "ECR1h785df9e8e0a9",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 146,
+      "record_id": "ECR1h2433e41cb218",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 147,
+      "record_id": "ECR1hca8f47b61510",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 148,
+      "record_id": "ECR1h6292d5f55c29",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 149,
+      "record_id": "ECR1h9ac576a9b429",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 150,
+      "record_id": "ECR1h5b38042c389b",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 151,
+      "record_id": "ECR1h323932e50a30",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 152,
+      "record_id": "ECR1h136e0b2cbedb",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 153,
+      "record_id": "ECR1hb393311e53ba",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 154,
+      "record_id": "ECR1h7b855986e3c9",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 155,
+      "record_id": "ECR1h8033a19405a6",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 156,
+      "record_id": "ECR1h3a740c197809",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 157,
+      "record_id": "ECR1h0cddd5860aef",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 158,
+      "record_id": "ECR1hd0610a1d3d06",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 159,
+      "record_id": "ECR1he7d3bd402cc4",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 160,
+      "record_id": "ECR1h1f9b52d7a9b4",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 161,
+      "record_id": "ECR1h597e291c6ce5",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 162,
+      "record_id": "ECR1hdae31593d9d9",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 163,
+      "record_id": "ECR1hdfb608e9ee3a",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 164,
+      "record_id": "ECR1h30e0f7afb85d",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 165,
+      "record_id": "ECR1h0469c52b2ae1",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 166,
+      "record_id": "ECR1h16f67cea82b2",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 167,
+      "record_id": "ECR1h25ffc022d8ac",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 168,
+      "record_id": "ECR1h11cb550da919",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 169,
+      "record_id": "ECR1haab4c4d7e89e",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 170,
+      "record_id": "ECR1h05783d6d495a",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 171,
+      "record_id": "ECR1h7c10e69de050",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 172,
+      "record_id": "ECR1ha469934f4b31",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 173,
+      "record_id": "ECR1h2a8af131f6e1",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 174,
+      "record_id": "ECR1hd2c5fd78cfd9",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 175,
+      "record_id": "ECR1h1fab2cbb3273",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 176,
+      "record_id": "ECR1h92e6f0990c1e",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 177,
+      "record_id": "ECR1h4e331f1c635a",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 178,
+      "record_id": "ECR1hc614f1d06487",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 179,
+      "record_id": "ECR1h8ad4de981369",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 180,
+      "record_id": "ECR1h1ce844bb4917",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 181,
+      "record_id": "ECR1hfe1356ba46c0",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 182,
+      "record_id": "ECR1hcf3d84acb026",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 183,
+      "record_id": "ECR1hf729bed2369c",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 184,
+      "record_id": "ECR1h68fea4b266cc",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 185,
+      "record_id": "ECR1h620327635efc",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 186,
+      "record_id": "ECR1h63fc6f202d91",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 187,
+      "record_id": "ECR1h8e0c0444089b",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 188,
+      "record_id": "ECR1h5de75eb9465b",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 189,
+      "record_id": "ECR1h4823ff53a7fb",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 190,
+      "record_id": "ECR1h7ddd048d85a1",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 191,
+      "record_id": "ECR1h35c0a07e96a0",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 192,
+      "record_id": "ECR1h9ecc8f6a786b",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 193,
+      "record_id": "ECR1h37848c0f4e5e",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 194,
+      "record_id": "ECR1h8a47628759dc",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 195,
+      "record_id": "ECR1h8068c21604fc",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 196,
+      "record_id": "ECR1h5db469273870",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 197,
+      "record_id": "ECR1h5f97c72496f6",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 198,
+      "record_id": "ECR1h30dca9296994",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 199,
+      "record_id": "ECR1hae2b496155a2",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 200,
+      "record_id": "ECR1hdd76b448d9ea",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 201,
+      "record_id": "ECR1hfad6ab68bbd0",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 202,
+      "record_id": "ECR1h01eded17c16d",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 203,
+      "record_id": "ECR1haf5ccaa565e1",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 204,
+      "record_id": "ECR1h7c1edd48f071",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 205,
+      "record_id": "ECR1h44a4d77305a1",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 206,
+      "record_id": "ECR1h8a3772737789",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 207,
+      "record_id": "ECR1h3cb828d3a1d6",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 208,
+      "record_id": "ECR1h10d36bd118be",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 209,
+      "record_id": "ECR1hbd5949a063e0",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 210,
+      "record_id": "ECR1h2c7e9f496e6e",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 211,
+      "record_id": "ECR1h143eb28fba46",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 212,
+      "record_id": "ECR1h056b78ff85b8",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 213,
+      "record_id": "ECR1h6f8ba4ae1adb",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 214,
+      "record_id": "ECR1h500a803196fd",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 215,
+      "record_id": "ECR1h032eb177d978",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 216,
+      "record_id": "ECR1hcd8d95835a52",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 217,
+      "record_id": "ECR1he1db4235491b",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 218,
+      "record_id": "ECR1h292dfca176c9",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 219,
+      "record_id": "ECR1ha33e7c56af55",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 220,
+      "record_id": "ECR1h77d6e5960b09",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 221,
+      "record_id": "ECR1h20a6537ac4b4",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 222,
+      "record_id": "ECR1hcccc532137b9",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 223,
+      "record_id": "ECR1ha7632729faf2",
+      "reproduced": true,
+      "detail": "identical"
+    }
+  ],
+  "files": {
+    "host.json": "07afa4b9f15d1b85f504173c98112eefb21d0d48db9c60f4e99e2fa62a3dae7c",
+    "plan.json": "478b8fa5caaff786a220a0a1e7abcced41e2b32d4333621b0153fb07fe775d9c",
+    "records.jsonl": "3776ded92f55e09548650e9457c61f4e04f799332d7c684d84d507e549eaf74b",
+    "session.json": "952438cc67c57c02de61d8de2d40e3299d9aa666ff1ec039108766d7293b499e",
+    "spec.json": "eaea367c1820024c97f903bbcb3f537c7449322ac8fb56b6e54bf178994fdd8c"
+  },
+  "auditor_binary_sha256": "ee160be86a9edb6f826ee808de04d7864aca5920b4a335a76213bf90694c63f7",
+  "auditor_env_class_id": "ECBENV2hf4bb2d232f69",
+  "auditor_hardware_class_id": "ECBHW1hd16c602b9fe9",
+  "audited_unix_ms": 1791858792762
+}

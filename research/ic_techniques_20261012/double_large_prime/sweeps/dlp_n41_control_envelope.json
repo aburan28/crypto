@@ -1,0 +1,22 @@
+{
+ "_comment": "Equal-envelope control for the n=41, 10-column double-large-prime cells: the classic m=3 Frobenius table over 40 and 110 compact-orbit columns (the size of F \u222a D at |D|/|F| = 3 and 10), same seed and repeats.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 41
+ },
+ "repeats": 4,
+ "seed": 20261012,
+ "max_trials": 40000000,
+ "matrix": {
+  "factor_base": [
+   "compact-orbit-scan:columns=40,raw_x_cap=400000000",
+   "compact-orbit-scan:columns=110,raw_x_cap=400000000"
+  ],
+  "oracle": [
+   "mitm-frobenius:m=3"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

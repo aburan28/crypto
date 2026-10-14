@@ -1,0 +1,25 @@
+saved research/drastic_prime_conductor_gap_20261012/sessions/d19-ell508433/comparisons/rho-neg__rho-neg-aa.json
+ops (ok): rho-neg-aa / rho-neg = 1.0000 [1.000, 1.000] (cluster) over 16 pairs on 16 workloads, 2 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 1.0001, not a result: 16 of 16 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | rho-neg-aa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp41-tm9-003f1c29 | 40.16 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+| icv1-fp41-tm9-cb9df1e0 | 40.16 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | rho-neg-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W10a1aeff19ac | icv1-fp41-tm9-003f1c29 | 40.16 | 0.6146 | 0.6146 | 1.0000 |
+| W2a6a78e7823b | icv1-fp41-tm9-cb9df1e0 | 40.16 | 0.8278 | 0.8278 | 1.0000 |
+| W3d0e1794c104 | icv1-fp41-tm9-003f1c29 | 40.16 | 1.2277 | 1.2277 | 1.0000 |
+| W5de6e777e0df | icv1-fp41-tm9-003f1c29 | 40.16 | 0.5177 | 0.5177 | 1.0000 |
+| W62a830536c09 | icv1-fp41-tm9-cb9df1e0 | 40.16 | 0.9426 | 0.9426 | 1.0000 |
+| W812bc627066e | icv1-fp41-tm9-cb9df1e0 | 40.16 | 0.7626 | 0.7626 | 1.0000 |
+| W8e8278dd92f0 | icv1-fp41-tm9-cb9df1e0 | 40.16 | 0.4796 | 0.4796 | 1.0000 |
+| W92af5f1f4a95 | icv1-fp41-tm9-003f1c29 | 40.16 | 1.3175 | 1.3175 | 1.0000 |
+| Wa00fc88cf070 | icv1-fp41-tm9-cb9df1e0 | 40.16 | 1.0667 | 1.0667 | 1.0000 |
+| Wab95e3c594ea | icv1-fp41-tm9-cb9df1e0 | 40.16 | 1.7700 | 1.7700 | 1.0000 |
+| Wabe879c3cd65 | icv1-fp41-tm9-cb9df1e0 | 40.16 | 1.2703 | 1.2703 | 1.0000 |
+| Wae8b81dd492a | icv1-fp41-tm9-003f1c29 | 40.16 | 1.4529 | 1.4529 | 1.0000 |
+| Wae9c1d9b79e7 | icv1-fp41-tm9-cb9df1e0 | 40.16 | 0.9850 | 0.9850 | 1.0000 |
+| Wbad4777858de | icv1-fp41-tm9-003f1c29 | 40.16 | 1.1921 | 1.1921 | 1.0000 |
+| Wc118833a8f45 | icv1-fp41-tm9-003f1c29 | 40.16 | 0.8249 | 0.8249 | 1.0000 |
+| Weae76b32c53f | icv1-fp41-tm9-003f1c29 | 40.16 | 0.8888 | 0.8888 | 1.0000 |

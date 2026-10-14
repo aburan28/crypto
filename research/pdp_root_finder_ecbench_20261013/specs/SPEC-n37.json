@@ -1,0 +1,82 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "root-finding oracles vs F4 vs strong rho, E_0 n=37, d=12",
+  "description": "Preregistered size-ladder round (PROTOCOL.md): index calculus on the standard subspace base of dimension 12 of E_0 over F_2^37 with the root-finding oracles rootfind-mitm, the harness's mitm:m=3 table oracle (no Groebner arm: inherited F4 did not finish at this size in research/f6_ic_ecbench_ladder_20261005), against the strong signed-Frobenius rho on eight public one-target workloads. IC S with the F4 oracle is a counted lower bound (Boolean reductions uncharged); the table and root-finding oracles' S is complete.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 37
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 202610130037,
+    "target_kind": "public"
+  },
+  "arms": [
+    {
+      "name": "rho-strong",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {
+          "lanes": "32",
+          "dp_bits": "4",
+          "step_cap_factor": "2000"
+        }
+      }
+    },
+    {
+      "name": "rho",
+      "role": "baseline",
+      "method": {
+        "id": "rho.signed_frobenius"
+      }
+    },
+    {
+      "name": "ic-mitm",
+      "role": "baseline",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=12",
+          "oracle": "mitm:m=3,negation_folded=1",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-rootfind",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=12",
+          "oracle": "rootfind-mitm:m=3",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "rho-strong-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {
+          "lanes": "32",
+          "dp_bits": "4",
+          "step_cap_factor": "2000"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 3,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 202610131037,
+    "isolation_required": "L2",
+    "timeout_seconds": 3600
+  }
+}

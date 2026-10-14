@@ -1,0 +1,104 @@
+{
+  "schema": "ecbench.comparison/v1",
+  "comparison_id": "ECC1h466af44aacdf",
+  "a": {
+    "session_id": "ECBS1hcd05f1dc18a3",
+    "arm": "ic-f4-m3-d5",
+    "method_id": "ECM1h4fcbc0f6a3a8",
+    "method": "ic.pipeline",
+    "measured": 4,
+    "verified": 4,
+    "statuses": {
+      "verified": 4
+    },
+    "mean_s": 16.120355199652106,
+    "mean_ratio_to_floor": 65.5845197000128,
+    "lower_bound": true,
+    "deterministic": true
+  },
+  "b": {
+    "session_id": "ECBS1hcd05f1dc18a3",
+    "arm": "ic-negfold-m2-d5",
+    "method_id": "ECM1h826b1ea86bae",
+    "method": "ic.pipeline",
+    "measured": 4,
+    "verified": 4,
+    "statuses": {
+      "verified": 4
+    },
+    "mean_s": 23.51548513475824,
+    "mean_ratio_to_floor": 95.67108038098279,
+    "lower_bound": false,
+    "deterministic": true
+  },
+  "workloads": [
+    {
+      "workload_id": "W873bd368ab3d",
+      "slug": "icv1-f2m13-t181-515ee569",
+      "r": 2003,
+      "floor_s": 0.2457951247243632,
+      "pairs": 2,
+      "a_mean_s": 15.366531550286812,
+      "b_mean_s": 22.062219504906693,
+      "ratio_b_over_a": 1.4357318977746092
+    },
+    {
+      "workload_id": "Wc4ec21d3bc2e",
+      "slug": "icv1-f2m13-t181-515ee569",
+      "r": 2003,
+      "floor_s": 0.2457951247243632,
+      "pairs": 2,
+      "a_mean_s": 16.874178849017397,
+      "b_mean_s": 24.968750764609783,
+      "ratio_b_over_a": 1.4797016784057462
+    }
+  ],
+  "curves": [
+    {
+      "slug": "icv1-f2m13-t181-515ee569",
+      "log2_r": 10.967946705812707,
+      "workloads": 2,
+      "pairs": 4,
+      "ratio_b_over_a": 1.4587448504401272,
+      "ci95": [
+        1.4036118279179541,
+        1.4933957529433493
+      ],
+      "ci_method": "cluster"
+    }
+  ],
+  "ops": {
+    "status": "ok",
+    "unit": "ecbench.gae",
+    "ratio_b_over_a": 1.4587448504401272,
+    "ci95": [
+      1.4036118279179541,
+      1.4933957529433493
+    ],
+    "ci_method": "cluster",
+    "pairs": 4,
+    "unpaired_runs": 0,
+    "same_seeds": true,
+    "same_session": true,
+    "pooled_curves": 1,
+    "bounded": true,
+    "resamples": 4000
+  },
+  "wall": {
+    "status": "descriptive",
+    "reasons": [
+      "4 admitted pairs; at least 5 are needed"
+    ],
+    "required_level": "L0",
+    "pairs": 4,
+    "pairs_below_level": 0,
+    "median_ratio": 0.0025552320777362924,
+    "ci95": null,
+    "aa_arms": null,
+    "aa_pairs": 0,
+    "aa_median_ratio": null,
+    "aa_ci95": null,
+    "outside_noise": null
+  },
+  "verdict": "ops (ok): ic-negfold-m2-d5 / ic-f4-m3-d5 = 1.4587 [1.404, 1.493] (cluster) over 4 pairs on 2 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 0.0026, not a result: 4 admitted pairs; at least 5 are needed)"
+}

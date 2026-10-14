@@ -162,7 +162,7 @@ use crate::cryptanalysis::koblitz_relation_solver::{
     to_u64_mod, RelationSolver, RowStatus, U64RankTracker, WideRankTracker,
 };
 use crate::cryptanalysis::koblitz_sparse_la::{
-    self, SparseCoreSolver, SparseRow, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
+    SparseCoreSolver, SparseRows, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
 };
 use crate::cryptanalysis::pq_groebner_f2::F2BoolPoly;
 use crate::cryptanalysis::sat::SolveResult;
@@ -9294,9 +9294,10 @@ pub enum LinearAlgebra {
     /// as columns.  The reference path.
     Dense,
     /// Relation filtering followed by block Wiedemann on the reduced
-    /// core ([`crate::cryptanalysis::koblitz_sparse_la`]); falls back to
-    /// [`Self::Dense`] when the subgroup order does not fit the `u64`
-    /// arithmetic.
+    /// core ([`crate::cryptanalysis::koblitz_sparse_la`]), in the word
+    /// width the subgroup order needs (`u64` below `2⁶³`, then two to
+    /// four 64-bit limbs); falls back to [`Self::Dense`] when no width
+    /// supports the order ([`crate::cryptanalysis::koblitz_sparse_la::modulus_supported`]).
     Sparse(SparseSolveOptions),
 }
 
@@ -10061,7 +10062,11 @@ fn koblitz_index_calculus_dlp_observed(
                 }
                 DecompositionStrategy::ChainedS3FrobeniusOrbitOrdered => {
                     let (idxs, stats) = sat_decompose_chained_s3_frobenius_orbit_ordered(
-                        kc, fb, target, opts.m, opts.chain_s3_limits,
+                        kc,
+                        fb,
+                        target,
+                        opts.m,
+                        opts.chain_s3_limits,
                     );
                     RelationAttemptOutcome::ChainedS3(idxs, stats)
                 }
@@ -11828,7 +11833,11 @@ fn decompose_once(
         }
         DecompositionStrategy::ChainedS3FrobeniusOrbitOrdered => {
             let (points, stats) = sat_decompose_chained_s3_frobenius_orbit_ordered(
-                kc, fb, target, opts.m, opts.chain_s3_limits,
+                kc,
+                fb,
+                target,
+                opts.m,
+                opts.chain_s3_limits,
             );
             PdpAttempt::chained(points, stats)
         }
@@ -12549,12 +12558,13 @@ struct LogSystem<'a> {
     opts: &'a KoblitzIcOptions,
     projected: Arc<ProjectedSignedOrbitMap>,
     n_cols: usize,
-    r_u64: u64,
     h: BigUint,
     sparse_opts: Option<SparseSolveOptions>,
     dense_matrix: Vec<Vec<BigUint>>,
     dense_rhs: Vec<BigUint>,
-    sparse_rows: Vec<SparseRow>,
+    /// In the word width `r` needs; empty (and over a placeholder
+    /// width) on the dense path.
+    sparse_rows: SparseRows,
 }
 
 impl<'a> LogSystem<'a> {
@@ -12579,9 +12589,14 @@ impl<'a> LogSystem<'a> {
         if n_cols == 0 {
             return None;
         }
-        let sparse_opts = match opts.linear_algebra {
-            LinearAlgebra::Sparse(s) if koblitz_sparse_la::modulus_supported(r) => Some(s),
-            _ => None,
+        // The sparse path needs a word width for `r`; without one the
+        // rows stay empty over a placeholder and the dense path runs.
+        let (sparse_opts, sparse_rows) = match (opts.linear_algebra, SparseRows::for_modulus(r)) {
+            (LinearAlgebra::Sparse(s), Some(rows)) => (Some(s), rows),
+            _ => (
+                None,
+                SparseRows::for_modulus(&BigUint::from(2u32)).expect("2 is supported"),
+            ),
         };
         Some(Self {
             kc,
@@ -12589,12 +12604,11 @@ impl<'a> LogSystem<'a> {
             opts,
             projected,
             n_cols,
-            r_u64: r.to_u64_digits().first().copied().unwrap_or(1).max(2),
             h: &kc.cofactor % r,
             sparse_opts,
             dense_matrix: Vec::new(),
             dense_rhs: Vec::new(),
-            sparse_rows: Vec::new(),
+            sparse_rows,
         })
     }
 
@@ -12609,10 +12623,13 @@ impl<'a> LogSystem<'a> {
     fn uncovered_columns(&self) -> Vec<usize> {
         let mut covered = vec![false; self.n_cols];
         if self.sparse_opts.is_some() {
-            for row in &self.sparse_rows {
-                for &(column, _) in &row.entries {
-                    covered[column as usize] = true;
-                }
+            for (column, weight) in self
+                .sparse_rows
+                .column_weights(self.n_cols)
+                .into_iter()
+                .enumerate()
+            {
+                covered[column] = weight > 0;
             }
         } else {
             for row in &self.dense_matrix {
@@ -12631,11 +12648,7 @@ impl<'a> LogSystem<'a> {
     fn least_covered_columns(&self, limit: usize) -> Vec<usize> {
         let mut weights = vec![0usize; self.n_cols];
         if self.sparse_opts.is_some() {
-            for row in &self.sparse_rows {
-                for &(column, _) in &row.entries {
-                    weights[column as usize] += 1;
-                }
-            }
+            weights = self.sparse_rows.column_weights(self.n_cols);
         } else {
             for row in &self.dense_matrix {
                 for (column, value) in row.iter().enumerate() {
@@ -12664,11 +12677,16 @@ impl<'a> LogSystem<'a> {
             Some(self.projected.as_ref()),
         );
         let rhs = (&self.h * &a) % r;
+        self.push_row(relation.row, rhs);
+    }
+
+    /// Store a row `Σ c_o x_o ≡ rhs` in the configured form (sparse in
+    /// the word width `r` needs, or dense big integers).
+    fn push_row(&mut self, row: Vec<BigUint>, rhs: BigUint) {
         if self.sparse_opts.is_some() {
-            self.sparse_rows
-                .push(SparseRow::from_dense(&relation.row, &rhs, self.r_u64));
+            self.sparse_rows.push_dense(&row, &rhs);
         } else {
-            self.dense_matrix.push(relation.row);
+            self.dense_matrix.push(row);
             self.dense_rhs.push(rhs);
         }
     }
@@ -12681,17 +12699,10 @@ impl<'a> LogSystem<'a> {
         let begin = std::time::Instant::now();
         let solution = match self.sparse_opts {
             Some(sopts) => {
-                let (outcome, sreport) = koblitz_sparse_la::solve_sparse_system(
-                    &self.sparse_rows,
-                    self.n_cols,
-                    self.r_u64,
-                    &sopts,
-                );
+                let (outcome, sreport) = self.sparse_rows.solve(self.n_cols, &sopts);
                 report.sparse_report = Some(sreport);
                 match outcome {
-                    SparseSolveOutcome::Solved(x) => {
-                        Some(x.into_iter().map(BigUint::from).collect())
-                    }
+                    SparseSolveOutcome::Solved(x) => Some(x),
                     SparseSolveOutcome::Undetermined | SparseSolveOutcome::Inconsistent => None,
                 }
             }
@@ -12785,15 +12796,11 @@ pub fn solve_factor_base_logs(
         report.collection_seconds += creport.elapsed_seconds;
         for rel in &relations {
             system.push(rel);
-            let row = system.dense_matrix.last().cloned().or_else(|| {
-                system.sparse_rows.last().map(|sparse| {
-                    let mut row = vec![BigUint::zero(); system.n_cols];
-                    for &(column, value) in &sparse.entries {
-                        row[column as usize] = BigUint::from(value);
-                    }
-                    row
-                })
-            })?;
+            let row = system
+                .dense_matrix
+                .last()
+                .cloned()
+                .or_else(|| system.sparse_rows.last_dense(system.n_cols))?;
             report.coefficient_rank = ranker.insert(
                 row.iter()
                     .map(|coefficient| to_u64_mod(coefficient, r_u64))
@@ -12827,8 +12834,12 @@ pub fn solve_factor_base_logs(
 
 /// Full-width, serial precompute. Every accepted decomposition is checked
 /// against the original group equation before it enters the matrix.
-/// Coefficient rank gates the dense solve, so an underdetermined system
-/// cannot produce a purported logarithm table.
+/// Coefficient rank gates the solve, so an underdetermined system cannot
+/// produce a purported logarithm table.  The rows are stored dense or,
+/// under [`LinearAlgebra::Sparse`] for an order some word width of
+/// [`crate::cryptanalysis::koblitz_sparse_la`] supports, sparse in that
+/// width; the sparse path attempts at the same interval as the `u64`
+/// path once the rank is full.
 fn solve_factor_base_logs_wide(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
@@ -12838,11 +12849,13 @@ fn solve_factor_base_logs_wide(
         return None;
     }
     let mut system = LogSystem::new(kc, fb, opts)?;
-    debug_assert!(system.sparse_opts.is_none());
     let mut report = LogTableReport {
+        sparse: system.sparse_opts.is_some(),
         columns: system.n_cols,
         ..LogTableReport::default()
     };
+    let interval = system.attempt_interval();
+    let mut last_attempt = 0usize;
     let mut ranker = WideRankTracker::new(&kc.subgroup_order, system.n_cols);
     let index_of = fb.shared_index_map();
     let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
@@ -12882,10 +12895,11 @@ fn solve_factor_base_logs_wide(
             Some(system.projected.as_ref()),
         );
         report.coefficient_rank = ranker.insert(relation.row.clone());
-        system.dense_matrix.push(relation.row);
-        system.dense_rhs.push((&system.h * &a) % &kc.subgroup_order);
+        let rhs = (&system.h * &a) % &kc.subgroup_order;
+        system.push_row(relation.row, rhs);
         report.relations += 1;
-        if report.coefficient_rank == system.n_cols {
+        if report.coefficient_rank == system.n_cols && report.relations - last_attempt >= interval {
+            last_attempt = report.relations;
             report.collection_seconds = begin.elapsed().as_secs_f64();
             if let Some(table) = system.attempt(&mut report) {
                 report.verified = true;
@@ -12894,12 +12908,21 @@ fn solve_factor_base_logs_wide(
         }
     }
     report.collection_seconds = begin.elapsed().as_secs_f64();
-    Some((
-        FactorBaseLogTable {
-            columns: Vec::new(),
-        },
-        report,
-    ))
+    if report.coefficient_rank < system.n_cols || last_attempt == report.relations {
+        return Some((
+            FactorBaseLogTable {
+                columns: Vec::new(),
+            },
+            report,
+        ));
+    }
+    // Full coefficient rank reached, but the sparse path's interval
+    // skipped an attempt on the last rows.
+    let columns = system
+        .attempt(&mut report)
+        .map(|t| t.columns)
+        .unwrap_or_default();
+    Some((FactorBaseLogTable { columns }, report))
 }
 
 /// **Solve the logarithm database from relations collected elsewhere.**
@@ -13048,16 +13071,16 @@ impl<'a> FactorBaseLogSolver<'a> {
             })
             .collect();
         let rows = if system.sparse_opts.is_some() {
-            system
-                .sparse_rows
-                .iter()
-                .map(|row| RelationMatrixRow {
-                    entries: row
-                        .entries
-                        .iter()
-                        .map(|&(j, v)| (j as usize, v.to_string()))
-                        .collect(),
-                    rhs: row.rhs.to_string(),
+            (0..system.sparse_rows.len())
+                .map(|i| {
+                    let (entries, rhs) = system.sparse_rows.row_biguint(i);
+                    RelationMatrixRow {
+                        entries: entries
+                            .iter()
+                            .map(|(j, v)| (*j as usize, v.to_string()))
+                            .collect(),
+                        rhs: rhs.to_string(),
+                    }
                 })
                 .collect()
         } else {
@@ -15772,7 +15795,8 @@ mod tests {
                 } else {
                     sat_decompose_chained_s3_frobenius_orbit(&kc, &fb, &target, m, limits)
                 };
-                let indices = found.unwrap_or_else(|| panic!("m={m}, ordered={ordered}: {stats:?}"));
+                let indices =
+                    found.unwrap_or_else(|| panic!("m={m}, ordered={ordered}: {stats:?}"));
                 assert_eq!(indices.len(), m);
                 assert_eq!(
                     indices.iter().fold(BinaryPoint::Infinity, |acc, &index| {
@@ -16758,7 +16782,7 @@ mod tests {
             };
             let sparse = KoblitzIcOptions {
                 linear_algebra: LinearAlgebra::Sparse(SparseSolveOptions {
-                    wiedemann: koblitz_sparse_la::BlockWiedemannOptions {
+                    wiedemann: crate::cryptanalysis::koblitz_sparse_la::BlockWiedemannOptions {
                         block_m: 2,
                         block_n: 3,
                         margin: 8,
@@ -16798,6 +16822,51 @@ mod tests {
     }
 
     #[test]
+    fn the_sparse_dispatch_picks_a_wide_word_width_for_an_82_bit_order() {
+        // The public N83 fixture's subgroup order is 82 bits: past the
+        // `u64` sparse arithmetic, within `U128`.  The sparse option must
+        // now be honoured there (it used to fall back to dense), the rows
+        // must be held in that width, and the dense option must stay
+        // dense.
+        use crate::cryptanalysis::koblitz_sparse_la::WordWidth;
+        let kc = KoblitzCurve::known_n83_k0().expect("public N83 curve fixture");
+        assert!(kc.subgroup_order.bits() > 64);
+        let BinaryPoint::Affine { x, .. } = kc.generator() else {
+            panic!("N83 generator must be affine");
+        };
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x))
+            .expect("complete signed orbit");
+        let sparse = KoblitzIcOptions {
+            linear_algebra: LinearAlgebra::Sparse(SparseSolveOptions::default()),
+            ..KoblitzIcOptions::default()
+        };
+        let mut system = LogSystem::new(&kc, &fb, &sparse).unwrap();
+        assert!(system.sparse_opts.is_some());
+        assert_eq!(system.sparse_rows.width(), WordWidth::U128);
+        assert_eq!(system.sparse_rows.modulus(), kc.subgroup_order);
+        assert_eq!(system.attempt_interval(), (system.n_cols / 32).max(1));
+        // A row with a coefficient past 64 bits survives the round trip.
+        let big = &kc.subgroup_order - BigUint::from(3u32);
+        let mut row = vec![BigUint::zero(); system.n_cols];
+        row[0] = big.clone();
+        system.push_row(row, BigUint::from(5u32));
+        assert_eq!(system.rows(), 1);
+        assert!(system.dense_matrix.is_empty());
+        let (entries, rhs) = system.sparse_rows.row_biguint(0);
+        assert_eq!(entries, vec![(0, big)]);
+        assert_eq!(rhs, BigUint::from(5u32));
+        assert_eq!(system.uncovered_columns().len(), system.n_cols - 1);
+
+        let dense = KoblitzIcOptions {
+            linear_algebra: LinearAlgebra::Dense,
+            ..KoblitzIcOptions::default()
+        };
+        let system = LogSystem::new(&kc, &fb, &dense).unwrap();
+        assert!(system.sparse_opts.is_none());
+        assert_eq!(system.attempt_interval(), 1);
+    }
+
+    #[test]
     fn an_underdetermined_sparse_attempt_keeps_its_report() {
         let kc = KoblitzCurve::new(0, 9).unwrap();
         let fb = build_frobenius_factor_base(&kc, 0).unwrap();
@@ -16807,13 +16876,15 @@ mod tests {
         };
         let mut system = LogSystem::new(&kc, &fb, &opts).unwrap();
         let columns = system.n_cols;
-        let modulus = system.r_u64;
         // Enough rows to trigger a solve, but every row touches only
         // column zero.  The sparse filter must report the other columns
         // as uncovered and the failed attempt must remain observable.
-        system.sparse_rows = (0..columns)
-            .map(|_| SparseRow::new(vec![(0, 1)], 1, modulus))
-            .collect();
+        system.sparse_rows.clear();
+        for _ in 0..columns {
+            system
+                .sparse_rows
+                .push_entries(&[(0, BigUint::one())], &BigUint::one());
+        }
         let mut solver = FactorBaseLogSolver::with_system(&kc, &fb, &opts, system).unwrap();
         assert!(solver.try_solve().is_none());
         let report = solver.report();
@@ -18460,9 +18531,13 @@ mod tests {
             assert!(cols > 1);
             let zero = vec![BigUint::zero(); cols];
             if solver.system.sparse_opts.is_some() {
-                solver.system.sparse_rows = (0..cols)
-                    .map(|_| SparseRow::from_dense(&zero, &BigUint::zero(), solver.system.r_u64))
-                    .collect();
+                solver.system.sparse_rows.clear();
+                for _ in 0..cols {
+                    solver
+                        .system
+                        .sparse_rows
+                        .push_dense(&zero, &BigUint::zero());
+                }
             } else {
                 solver.system.dense_matrix = vec![zero; cols];
                 solver.system.dense_rhs = vec![BigUint::zero(); cols];
