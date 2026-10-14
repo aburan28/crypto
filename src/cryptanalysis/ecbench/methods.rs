@@ -1168,13 +1168,16 @@ fn solve_fp4(
     let base = match m.params["base"].as_str() {
         "xline" => K4Base::XLine,
         "yline-d4" => K4Base::YLineD4,
-        other => return Err(format!("base `{other}`: xline or yline-d4")),
+        // Item ic_improve_20261014/01: the D₄ Y-line stacked with double
+        // large primes (|F'| = ⌈columns^lp_exponent⌉ of the folded columns).
+        "yline-d4-lp" => K4Base::YLineD4,
+        other => return Err(format!("base `{other}`: xline, yline-d4 or yline-d4-lp")),
     };
     let large_primes = param_u64(m, "large_primes")? as usize;
     if large_primes != 0 && large_primes != 2 {
         return Err("large_primes is 0 or 2".into());
     }
-    if base == K4Base::YLineD4 && large_primes != 0 {
+    if m.params["base"] == "yline-d4" && large_primes != 0 {
         return Err("yline-d4 runs without large primes".into());
     }
     let prm = K4Params {

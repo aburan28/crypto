@@ -47,11 +47,11 @@ for ax, ph, title in zip(axs, ("whole", "relation", "la"),
     ax.set_xlabel("log₂ #E(F_{p⁴})")
     ax.set_title(title)
 axs[0].set_ylabel("candidate / D₄ (paired, same curve and stream)")
-axs[0].text(0.02, 0.02, "dashed: D₄ incumbent (= 1); bars: 95 % bootstrap over 3 curves",
-            transform=axs[0].transAxes, fontsize=7)
-for ax in axs:
-    ax.legend(fontsize=6.5, frameon=False, loc="upper left")
-fig.suptitle("Item 01: D₄ + double large primes vs D₄, held-out test curves (24 curves, p = 101…1301)", fontsize=10)
+axs[2].set_ylim(bottom=2 ** -3.4)
+for ax, loc in zip(axs, ("upper left", "upper left", "lower left")):
+    ax.legend(fontsize=6.5, frameon=False, loc=loc)
+fig.suptitle("Item 01: D₄ + double large primes vs D₄, held-out test curves (24 curves, p = 101…1301); "
+             "dashed = D₄ incumbent; bars = 95 % bootstrap over 3 curves per size", fontsize=9.5)
 save(fig, "paired_ratio")
 
 # Figure 2: phase costs against log2 #E with fitted exponents.
@@ -92,7 +92,7 @@ ax.axhline(1.0, color="k", lw=0.8, ls="--")
 ax.set_yscale("log", base=2)
 ax.set_xlabel("large-prime bound α  (|F'| = ⌈columns^α⌉)")
 ax.set_ylabel("geo-mean whole-cost ratio vs D₄ (train, p ≥ 521, 6 curves)")
-ax.set_title(f"Training grid (14 curves, seeds 4–5); frozen: {F['frozen']['name']} = {F['frozen']['score']:.4f}", fontsize=9)
+ax.set_title(f"Training grid (14 curves, seeds 4–5; dotted minlp coincides with uniform)\nfrozen: {F['frozen']['name']} = {F['frozen']['score']:.4f}", fontsize=9)
 ax.legend(fontsize=6.5, frameon=False, ncol=2)
 save(fig, "training_grid")
 print("figures written")

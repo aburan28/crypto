@@ -884,23 +884,25 @@ fn analyze(args: &[String]) {
     };
     let mut handover = serde_json::Map::new();
     for a in ["d4-2lp", "d4-2lp-gaudry"] {
-        let mut first = Value::Null;
+        let mut flips: Vec<f64> = Vec::new();
         let mut e = 20.0;
         let below_now = model(a, 20.0) <= model("d4", 20.0);
+        let mut state = below_now;
         while e <= 600.0 {
-            if (model(a, e) <= model("d4", e)) != below_now {
-                first = json!((e * 10.0).round() / 10.0);
-                break;
+            if (model(a, e) <= model("d4", e)) != state {
+                state = !state;
+                flips.push((e * 10.0).round() / 10.0);
             }
             e += 0.1;
         }
+        let first = json!(flips);
         let la_share = {
             let f = &fits["d4"]["la"];
             2f64.powf(f["intercept_log2"].as_f64().unwrap() + f["slope"].as_f64().unwrap() * 128.0)
                 / model("d4", 128.0)
         };
         handover.insert(a.into(), json!({"modelled_below_d4_at_2^20": below_now,
-            "first_log2_E_where_order_flips": first,
+            "log2_E_where_order_flips": first, "model_ratio_at_2^256": model(a, 256.0) / model("d4", 256.0),
             "model_ratio_at_2^40": model(a, 40.0) / model("d4", 40.0),
             "model_ratio_at_2^64": model(a, 64.0) / model("d4", 64.0),
             "model_ratio_at_2^128": model(a, 128.0) / model("d4", 128.0),
