@@ -13,6 +13,8 @@ Registered prime subgroup `r=562427`; five frozen local ecbench sessions; releas
 
 #image("coverage-efficiency.svg", width: 100%)
 
+*Equal-prefix follow-up.* On eight fresh public targets frozen before the run, each B48 base consumed the same first 8,192 surviving batch-8 walk points. At the predeclared 4,096-probe comparison, stride 23 minus stride 1 yielded 2.750 independent rows per target (paired bootstrap interval 1.000–4.625); rank per lower-bound cold GAE ratio was 1.095 (1.032–1.176). This bounded early-prefix effect was smaller than in the exploratory panel and attenuated by 8,192 probes. See `FIXED_PREFIX_FRESH.pdf` and the raw receipt. The equal-prefix component result does not price the full pipeline.
+
 *Local component diagnostic.* Inversion 79.51 ns; coordinate round trip 4.22 ns; jump choice 1.28 ns; table lookup 3.70 ns; guard insert 3.80 ns per 200,000-sample microloop. Restart-pool draws averaged 5,143.88 ns across 256 draws. These numbers are not isolated whole-collector timings.
 
-*Outstanding gates.* Serialize native field-operation counts; price native costs in a common unit; record a fixed probe prefix for equal-budget coverage; run the frozen L2 panel with A/A noise and independent-host replay. A matched rho comparison for batch-8 was 7.463 in lower-bound cold GAE (5.817–9.626), with unpriced work on both arms. No larger-field or qualified wall conclusion is drawn here.
+*Outstanding gates.* Serialize native field-operation counts; price native costs in a common unit; run the frozen L2 panel with A/A noise and independent-host replay. A matched rho comparison for batch-8 was 7.463 in lower-bound cold GAE (5.817–9.626), with unpriced work on both arms. No larger-field or qualified wall conclusion is drawn here.

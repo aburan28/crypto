@@ -3,11 +3,6 @@
   "source_of_truth": "research/ecbench_rootfinding_lanes_20261013",
   "files": [
     {
-      "copy": "benchmarks/20261014-rootfinding-lanes-coverage/results-report.pdf",
-      "source": "research/ecbench_rootfinding_lanes_20261013/REPORT.pdf",
-      "sha256": "45b5f225c48b5900a9b8072f25b3583a54e73d4a138753694211741bd5c4278a"
-    },
-    {
       "copy": "benchmarks/20261014-rootfinding-lanes-coverage/coverage-efficiency.svg",
       "source": "research/ecbench_rootfinding_lanes_20261013/coverage-efficiency.svg",
       "sha256": "559c8510a97e81bbd1d9409f21dd307e2eeb6d742776e2214228ab8922044939"
@@ -91,6 +86,26 @@
       "copy": "benchmarks/20261014-rootfinding-lanes-coverage/coverage-holdout-counts.png",
       "source": "research/ecbench_rootfinding_lanes_20261013/reports/run-20261014T0703Z-ECBS1h1b585c89ebd1/counts.png",
       "sha256": "8592d1ecb33ae2d7db8aa639dd9ed31b4f5a240af5a85521ae96f82960cfa413"
+    },
+    {
+      "copy": "benchmarks/20261014-rootfinding-lanes-coverage/results-report.pdf",
+      "source": "research/ecbench_rootfinding_lanes_20261013/REPORT.pdf",
+      "sha256": "5907510a737c449935ae5b5c02808c4ee83882fe433bcdf53cdb5a8abe3c235d"
+    },
+    {
+      "copy": "benchmarks/20261014-rootfinding-lanes-coverage/fixed-prefix-fresh-report.pdf",
+      "source": "research/ecbench_rootfinding_lanes_20261013/FIXED_PREFIX_FRESH.pdf",
+      "sha256": "a8a0da79a7f1914d6a0f7bac25821f49e33f76aa99f94537eeb1c40b0478feb9"
+    },
+    {
+      "copy": "benchmarks/20261014-rootfinding-lanes-coverage/fixed-prefix-fresh.svg",
+      "source": "research/ecbench_rootfinding_lanes_20261013/fixed-prefix-fresh.svg",
+      "sha256": "58be8196fc027cf17b84a00ca9c6fb69be66459373091f601bec696956294bb0"
+    },
+    {
+      "copy": "benchmarks/20261014-rootfinding-lanes-coverage/fixed-prefix-fresh.png",
+      "source": "research/ecbench_rootfinding_lanes_20261013/fixed-prefix-fresh.png",
+      "sha256": "ad2c81d7292134807c79d4fc000267f2fd383718e7823fab0bcc783f7869f92d"
     }
   ]
 }

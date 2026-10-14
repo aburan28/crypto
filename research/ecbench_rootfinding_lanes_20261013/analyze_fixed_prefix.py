@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 source = Path(sys.argv[1])
 prefix = Path(sys.argv[2])
+bootstrap_seed = int(sys.argv[3]) if len(sys.argv) > 3 else 20261024
 receipt = json.loads(source.read_text())
 data = receipt['result']
 targets = data['targets']
@@ -35,8 +36,10 @@ def interval(values):
 
 summary = {'schema': 'rootfinding.fixed_prefix_summary/v1',
            'input_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),
-           'targets': len(targets), 'strides': {}, 'paired': {},
-           'inference_limit': 'The public targets were reused from the prior coverage holdout; this is an exploratory, correlated-walk component test. Bootstrap intervals are over eight targets and no multiple-look correction is applied.'}
+           'targets': len(targets), 'bootstrap_seed': bootstrap_seed, 'strides': {}, 'paired': {},
+           'inference_limit': ('The public targets are fresh and the 4096-probe comparison was frozen before target generation; this remains a correlated-walk component test. Bootstrap intervals are over eight targets; other inspected prefixes are secondary.'
+                               if 'fresh' in data['target_source'] else
+                               'The public targets were reused from the prior coverage holdout; this is an exploratory, correlated-walk component test. Bootstrap intervals are over eight targets and no multiple-look correction is applied.')}
 for stride in strides:
     entries = arm(targets[0], stride)['unique_pair_keys']
     probability = arm(targets[0], stride)['uniform_hit_probability']
@@ -62,7 +65,7 @@ for stride in strides:
                                        'structural_bytes_floor': arm(targets[0], stride)['structural_bytes_floor'],
                                        'levels': levels_out}
 
-rng = random.Random(20261024)
+rng = random.Random(bootstrap_seed)
 for stride in (7, 23):
     for level in (4096, 8192):
         differences = []
