@@ -2,7 +2,7 @@
 
 The authorized v7 control imported the retained K1182/K2048 bases and passed
 the read-only fixture verification. Its single known-answer SAT call then
-exhausted 5,000 conflicts on the first sign pattern in 471.165 seconds of
+exhausted 5,000 conflicts on the first identity pattern in 471.165 seconds of
 worker wall time. It returned zero models and no candidate. The independent
 auditor classified the result `VALIDATED_CENSORED` (`UNKNOWN_search_cap`),
 not a refutation of the known five-point witness. This control measures solver

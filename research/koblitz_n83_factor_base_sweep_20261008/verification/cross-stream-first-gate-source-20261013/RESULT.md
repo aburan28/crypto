@@ -19,7 +19,7 @@ The conservative stage charges are 600 seconds build, 360 import, 1,200 search,
 and 240 cleanup, totaling 2,400 additional local seconds. Earlier K600 work
 is charged 17,400 seconds; a complete use of this gate would bring that
 ledger to 19,800 seconds. The one-trial search uses three base points and two
-residual points, at most 5,000 conflicts, 32 models per sign pattern, eight
+residual points, at most 5,000 conflicts, 32 models per identity pattern, eight
 patterns, and an 1,100-second internal wall watchdog. Only exact overlap after
 the import determines the actual residual-domain size. The capacity screen
 for all 648 primary pilot pairs is conditional source arithmetic, not a
@@ -56,7 +56,7 @@ the specified S3 factor-base prefix under `a0/objects/<BLAKE3>.jsonl.gz`.
 | Solver status | `UNKNOWN_search_cap` |
 | Conservative additional / cumulative charge, seconds | 2,400 / 19,800 |
 
-The first of eight possible sign patterns reached its 5,000-conflict cap.
+The first of eight possible identity patterns reached its 5,000-conflict cap.
 This is a censored search observation: it supplies neither a zero-yield
 estimate nor a refutation of the relation equation. The run produced no graph
 rows, rank, or complete index-calculus runtime, so the boundary ledger and

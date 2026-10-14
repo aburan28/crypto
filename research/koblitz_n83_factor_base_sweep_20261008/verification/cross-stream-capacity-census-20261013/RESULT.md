@@ -48,7 +48,7 @@ K600 public-X hash versus K600 public-X sequential. The copied
 Its exact overlap was zero. The observed 97,080 variables, 269,830
 domain clauses and 4,980 XOR rows match the zero-overlap formula for the
 five-summand/two-residual shape. Search reached `UNKNOWN_search_cap` after
-5,000 conflicts on its first sign pattern. That is a censored observation,
+5,000 conflicts on its first identity pattern. That is a censored observation,
 not a yield estimate. The frozen v4 source-class label still says
 `pilot_exact_import_gate_available_unexecuted` because the design preceded
 this one retained run; the census reports its outcome separately.
