@@ -899,6 +899,107 @@ fn support(path: &str) {
     }
 }
 
+fn median(mut values: Vec<f64>) -> f64 {
+    values.sort_by(f64::total_cmp);
+    values[values.len() / 2]
+}
+
+fn summarize(path: &str) {
+    let mut by_p = BTreeMap::<u64, BTreeMap<u64, BTreeMap<String, serde_json::Value>>>::new();
+    for line in std::fs::read_to_string(path).unwrap().lines() {
+        let v: serde_json::Value = serde_json::from_str(line).unwrap();
+        if v["kind"] != "run" {
+            continue;
+        }
+        let p = v["p"].as_u64().unwrap();
+        let round = v["round"].as_u64().unwrap();
+        let arm = v["arm"].as_str().unwrap().to_string();
+        assert!(by_p
+            .entry(p)
+            .or_default()
+            .entry(round)
+            .or_default()
+            .insert(arm, v)
+            .is_none());
+    }
+    for (p, rounds) in by_p {
+        assert_eq!(rounds.len(), 3);
+        let r = rounds[&0]["rho-negation"]["r"].as_u64().unwrap();
+        let floor = (std::f64::consts::PI / 4.0).sqrt();
+        let mut arms = BTreeSet::new();
+        for round in rounds.values() {
+            arms.extend(round.keys().cloned());
+        }
+        for arm in arms {
+            let rows: Vec<&serde_json::Value> = rounds.values().map(|row| &row[&arm]).collect();
+            let cpu: Vec<f64> = rows.iter().map(|v| v["cpu_ns"].as_f64().unwrap()).collect();
+            let s: Vec<f64> = rows
+                .iter()
+                .map(|v| v["s_cpu_gae"].as_f64().unwrap())
+                .collect();
+            let counted: Vec<f64> = rows
+                .iter()
+                .map(|v| v["result"]["s"].as_f64().unwrap())
+                .collect();
+            let success = rows
+                .iter()
+                .filter(|v| v["extra"]["status"] == "verified")
+                .count();
+            let exhausted = rows
+                .iter()
+                .filter(|v| v["extra"]["status"] == "exhausted")
+                .count();
+            let paired_neg: Vec<f64> = rounds
+                .values()
+                .map(|row| {
+                    row[&arm]["cpu_ns"].as_f64().unwrap()
+                        / row["rho-negation"]["cpu_ns"].as_f64().unwrap()
+                })
+                .collect();
+            let paired_six: Vec<f64> = rounds
+                .values()
+                .map(|row| {
+                    row[&arm]["cpu_ns"].as_f64().unwrap()
+                        / row["rho-six-class"]["cpu_ns"].as_f64().unwrap()
+                })
+                .collect();
+            let trials: Vec<f64> = rows
+                .iter()
+                .map(|v| {
+                    v["result"]["decomposition"]["targets_tried"]
+                        .as_f64()
+                        .unwrap_or(0.0)
+                })
+                .collect();
+            let ranks: Vec<f64> = rows
+                .iter()
+                .map(|v| {
+                    v["result"]["linear_algebra"]["rank"]
+                        .as_f64()
+                        .unwrap_or(0.0)
+                })
+                .collect();
+            let pairs = rows[0]["result"]["decomposition"]["setup"]["native"]["pair_entries"]
+                .as_u64()
+                .unwrap_or(0);
+            println!(
+                "{}",
+                json!({
+                    "schema":"torsion_extension_summary/v1","source_sha256":sha256_hex(std::fs::read(path).unwrap().as_slice()),
+                    "p":p,"r":r,"arm":arm,"n":rows.len(),"verified":success,"exhausted":exhausted,
+                    "s_cpu_median":median(s.clone()),"s_cpu_min":s.iter().copied().fold(f64::INFINITY,f64::min),"s_cpu_max":s.iter().copied().fold(0.0,f64::max),
+                    "cpu_ns_median":median(cpu),"s_counted_median":median(counted),
+                    "ratio_floor":if success==rows.len(){Some(median(s)/floor)}else{None},
+                    "paired_ratio_neg_rho":if success==rows.len(){Some(median(paired_neg))}else{None},
+                    "paired_ratio_six_rho":if success==rows.len(){Some(median(paired_six))}else{None},
+                    "trials_median":median(trials),"rank_median":median(ranks),"pair_entries":pairs,
+                    "pair_entry_payload_lower_bytes":pairs*std::mem::size_of::<(u64,usize,usize)>() as u64,
+                })
+            );
+        }
+    }
+}
+
 fn base_order(p: u64) -> u64 {
     let mut n = 1;
     for x in 0..p {
@@ -1014,6 +1115,7 @@ fn main() {
             &std::env::args().nth(3).expect("fixture path"),
         ),
         Some("support") => support(&std::env::args().nth(2).expect("fixture path")),
+        Some("summarize") => summarize(&std::env::args().nth(2).expect("run path")),
         _ => panic!("usage: isogeny_torsion_extension screen"),
     }
 }
