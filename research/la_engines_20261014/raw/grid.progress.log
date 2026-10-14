@@ -203,3 +203,7 @@ onethread cado-bwc D=32768 m=3 seed=2 t=1 rc=0 62.2728s
 onethread core-bw D=32768 m=3 seed=3 t=1 rc=0 24.6633s
 onethread cado-bwc D=32768 m=3 seed=3 t=1 rc=0 60.8432s
 onethread core-bw D=65536 m=3 seed=1 t=1 rc=0 103.365s
+onethread cado-bwc D=65536 m=3 seed=1 t=1 rc=0 228.683s
+onethread core-bw D=65536 m=3 seed=2 t=1 rc=0 105.592s
+onethread cado-bwc D=65536 m=3 seed=2 t=1 rc=0 231.425s
+onethread core-bw D=65536 m=3 seed=3 t=1 rc=0 103.651s
