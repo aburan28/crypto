@@ -1,0 +1,80 @@
+\section{Isogeny, transfer and structure routes}\label{sec:transfer}
+
+A recurring hope was that some other representation of the same
+instance---an isogenous curve, a curve at another level of the isogeny
+volcano, a Jacobian, a Weil descent---would make index calculus cheaper.
+These routes produced the programme's clearest negatives, and one lemma
+that explains most of them.
+
+\begin{lemma}[transport conservation,
+\art{docs/ic/RESEARCH_TRANSFER_AWARE_IC_20261010.md} \S1]\label{lem:conservation}
+Let $\varphi:E\to E'$ be an $\FF_q$-rational isogeny (or any homomorphism
+of rational points), $\kappa=\ker\varphi\cap E(\FF_q)$, $R\in E(\FF_q)$,
+$\Fb'\subset\varphi(E(\FF_q))$ a factor base on the codomain and
+$\Fb=\varphi^{-1}(\Fb')\cap E(\FF_q)$. Then the number of ordered
+$m$-decompositions of $R$ over $\Fb$ is $\abs\kappa^{m-1}$ times the number
+of ordered $m$-decompositions of $\varphi(R)$ over $\Fb'$.
+\end{lemma}
+\begin{proof}
+Images of decompositions of $R$ are decompositions of $\varphi(R)$.
+Conversely, for $\sum Q_i=\varphi(R)$ choose rational preimages $P_i$ of
+the $Q_i$; then $\sum P_i-R\in\kappa$, and of the $\abs\kappa^m$ choices
+exactly $\abs\kappa^{m-1}$ sum to $R$ (translate $P_1$ by the kernel
+element).
+\end{proof}
+
+So a homomorphic transfer changes nothing but three curve-specific inputs:
+the rational kernel symmetry $\abs\kappa^{m-1}$ (bounded by the rational
+torsion; trivial on prime-order curves), the factor-base geometry
+available on the destination, and the cost of arithmetic there. Sequences
+of isogenies compose to one homomorphism; a loop is an endomorphism and
+acts on the subgroup as a known scalar, useful only as a known-log
+multiplier. Multi-curve factor bases glued by isogenies are single-curve
+bases in disguise.
+
+\paragraph{Conductor gaps in the ECC2K-130 class.} Jao, Miller and
+Venkatesan~\cite{jmv2005} prove random self-reducibility among curves with
+the same endomorphism ring, leaving open whether curves whose conductors
+differ by a large prime could differ in hardness. The ECC2K-130 class has
+conductor gap 263; we computed its structure
+(\art{docs/ic/RESEARCH_ISOGENY_CONDUCTOR_GAP_20261007.md}) and ran
+several rounds of experiments. Native counted-$S$ index calculus on two fixed CM
+pairs gave floor/crater ratios $0.975$ (99\% $[0.603,1.451]$) at
+$\ell=8209$ and $1.127$ $[0.922,1.342]$ at $\ell=131101$: no level effect
+(192 verified records, 96 exact replays;
+\art{research/ecbench_conductor_gap_20261012/}). Two-torsion
+symmetrisation is a quotient isogeny: at a matched base of abscissae it
+cut F4 row-reduction work $4.1$--$4.3\times$ ($\abs H=2$) and
+$17.6$--$19.6\times$ ($\abs H=4$) over 1{,}128 systems---but a correction
+the next day showed that at a matched number of \emph{columns} the saving
+disappears; it was the cost of a redundant orbit base. A combined Weil
+descent used $234$--$529\times$ the F4 operations of the blind system
+(\art{research/isogeny_conductor_gap_round3_20261011/}).
+
+\paragraph{Fibre-aware index calculus.} Isogeny fibres are torsors whose
+arithmetic is controlled by one cohomology class
+(\art{RESEARCH_ISOGENY_FIBERS_ECDLP.md}); relation generation is
+isogeny-equivariant at zero lifting cost, and a fibre-closed pair table was
+the best lever of the conductor-gap rounds ($12.8\times$ rho in its best
+cell). Measured against matched rho across sizes at fixed cofactor, the
+envelope IC/rho ratio grows from $8.4$--$8.8$ to $35.1$--$37.0$ ($h=4$) and
+from $13.4$--$20.1$ to $60.4$--$63.1$ ($h=72$), as $\#E^{1/6}$: the gap
+widens, it does not close (816 audited records;
+\art{research/fiber_ic_scaling_20261011/}).
+
+\paragraph{Other structure.} Symmetrised $u$-frame bases saved
+$0.84\times$ at $n=17$ and $0.76$--$0.77\times$ at $n=23$, but cost
+$4.01\times$ at $n=31$ (\art{research/koblitz_symmetrised_e2e_20260927/}).
+GHS and hyperelliptic covers: ECC2K-130 does map to hyperelliptic curves,
+but the genus that would pay is missing; end-to-end GHS exists only for
+$m=1$ toys (\art{docs/GHS_SCREEN.md}, ledger implementation caps). The
+isogeny-loop GLV/GLS work produced a measured $1.09$--$1.15\times$ faster
+four-dimensional scalar multiplication (\art{research/isogeny_loop_glv_20261012/})
+and a $\sqrt{\text{\'elu}}$ kernel cost exponent $0.822$ $[0.805,0.838]$;
+these speed up curve arithmetic, not the discrete logarithm.
+
+\paragraph{Named obstructions.} Blocked requirements are kept open as
+problem records (\art{problems/README.md}), among them the complete-cost
+calibration of root-finding IC
+(\art{problems/rootfinding-complete-cost-calibration.md}), with exit
+criteria rather than abandoned.

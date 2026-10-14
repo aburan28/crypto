@@ -1,0 +1,27 @@
+\section{Conclusion}\label{sec:conclusion}
+
+Fourteen weeks of work produced three kinds of result. The first is
+infrastructure: a single unit and harness in which rho, BSGS, the kangaroo
+and every index-calculus variant are charged the same way on the same
+one-target workloads, with sealed records, exact replays and admitted
+intervals; and a ledger that refuses a claim with a missing field. The
+second is a set of constant-factor improvements, the largest of which---the
+closed-form roots of $\Sem3$---began as one sentence in a manuscript we were
+asked to check, and ended as a proved identity, an oracle family covering
+prime and binary fields, two to four summands, CPU and GPU, plain, tower
+and dense-index bases, and the default decomposition strategy of the
+codebase. The third is a map of what does not work, which is longer than
+the list of what does: SAT that does not scale, symmetry that pays at
+$n=17$ and costs at $n=31$, transfers that provably cannot change
+decomposition counts, fibre-aware bases whose gap to rho grows as
+$\#E^{1/6}$, literature attacks that are exhaustive search.
+
+The honest summary is the frontier of \S\ref{sec:frontier}. On the
+question the programme was built to answer---does index calculus solve one
+unseen elliptic-curve target, cold, for less than rho?---the answer at
+every size we measured is no, and the closest complete arm is $1.55\times$
+rho on a Koblitz curve over $\FF_{2^{13}}$. With preparation retained, index calculus
+does beat rho online on Koblitz curves, by an admitted $13.9\times$ at
+$n=61$. The stage costs that dominated in September are now small; the
+stages that remain are relation yield, factor-base size and linear algebra,
+and that is where the next measurement should look.

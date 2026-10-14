@@ -1,0 +1,61 @@
+\section{Organising the publication}\label{app:organisation}
+
+This document is a programme record: it is complete about what was done
+and deliberately long. For external submission we recommend splitting it
+into a short series, each paper self-contained, each citing this record for
+provenance. Table~\ref{tab:split} is the proposed split.
+
+\begin{table}[h]
+\centering\small
+\caption[]{Proposed papers. ``Ready'' means every number exists in a
+committed artefact; ``owed'' lists what must be done before submission.}
+\label{tab:split}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright}p{3.3cm}>{\raggedright}X>{\raggedright\arraybackslash}p{4.2cm}@{}}
+\toprule
+Paper & Content (sections here) & Owed before submission \\
+\midrule
+P1. Root-finding decomposition &
+  \S\ref{sec:rootfinding}; extends \art{papers/rootfinding-decomposition/}
+  with the PDP family, GPU, Kummer tower, ecbench loops and the audit
+  corrections &
+  novelty audit against the literature; a stronger F4 cross-check
+  (Magma/msolve on every row); a GPU run on hardware; $m\ge3$ prime
+  measurements \\
+P2. ecbench: one unit for every ECDLP method &
+  \S\ref{sec:method}, Def.~\ref{def:domain}, the corrections list, the
+  isolation rubric, the frontier synthesis &
+  an L3 cross-host replay certificate; resolution of the inherited-F4
+  counter drift; a four-size bound for each incumbent \\
+P3. Index calculus on Koblitz curves, measured &
+  \S\ref{sec:koblitz}, the compact orbit, the online ladder, the
+  admitted $n=61$ panel, the ECC2K-130 extrapolation &
+  isolated panels at $n=71,73,83$; reconciliation of the constant $C$;
+  a cold session at $n=83$ \\
+P4. Symmetry at $k=4$ &
+  \S\ref{sec:gaudry}: generic Macaulay solve, $D_4$ invariants, measured
+  $C_4$ and rate, modelled crossover &
+  a second prime and more seeds; the degenerate-target cause; an
+  end-to-end measured point instead of the model alone \\
+P5. Negative results &
+  \S\ref{sec:transfer}, the lit2026 negatives, SAT scaling, symmetrised
+  bases, fibre-aware IC; Lemma~\ref{lem:conservation} &
+  literature check of Lemma~\ref{lem:conservation}'s novelty; the
+  conductor-gap yield experiment (E6) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Suggested outline for each paper.} (1) The question, stated as
+a boundary in the sense of Definition~\ref{def:domain}. (2) The
+mathematics, with proofs or certificates. (3) The implementation and its
+fail-closed verification. (4) Results on the stated boundary first, stage
+results second, each with unit, sample, interval and artefact. (5) What the
+result does not establish. (6) Reproduction: commit, binary hash, spec,
+session id, replay certificate.
+
+\paragraph{Venue.} P1, P3 and P4 fit a cryptanalysis venue (an IACR
+conference or journal; ePrint first, using the repository's
+\texttt{iacr-eprint} workflow); P2 fits an artefact or experimental
+methodology track; P5 can be a short ePrint note or a section of P2.
+Every paper must be de-anonymised (\texttt{make deanonymize}) and pass
+\texttt{make check} before posting.
