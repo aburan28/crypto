@@ -477,6 +477,17 @@ fn thread_cpu_ns() -> u64 {
     ts.tv_sec as u64 * 1_000_000_000 + ts.tv_nsec as u64
 }
 
+fn timed<T>(f: impl FnOnce() -> T) -> (T, u64, u64, (u64, u64)) {
+    take_field_counters();
+    let wall_start = Instant::now();
+    let cpu_start = thread_cpu_ns();
+    let value = f();
+    let cpu_ns = thread_cpu_ns() - cpu_start;
+    let wall_ns = wall_start.elapsed().as_nanos() as u64;
+    let field = take_field_counters();
+    (value, cpu_ns, wall_ns, field)
+}
+
 fn cpu_add_calibration(curve: &Curve, points: &[Point]) -> f64 {
     let mut ops = GroupOps::default();
     let mut acc = points[0];
@@ -622,75 +633,99 @@ fn solve(path: &str) {
                 arm_names.reverse();
             }
             for arm in arm_names {
-                take_field_counters();
-                let started = Instant::now();
-                let cpu_start = thread_cpu_ns();
-                let (result, extra) = match arm {
+                let (result, extra, cpu_ns, wall_ns, field) = match arm {
                     "rho-negation" | "rho-negation-aa" => {
-                        let res = rho_reference_negation(&curve, g, q, r, seed, 1_000_000);
+                        let (res, cpu_ns, wall_ns, field) =
+                            timed(|| rho_reference_negation(&curve, g, q, r, seed, 1_000_000));
                         (
                             json!(res),
                             json!({"status":if res.verified{"verified"}else{"exhausted"}}),
+                            cpu_ns,
+                            wall_ns,
+                            field,
                         )
                     }
                     "rho-six-class" => {
-                        let (aut, eigen_ops) = six_class_endomorphism(&curve, g, r);
-                        let neg = Negation { r };
-                        let gens: [&dyn Endomorphism<Curve>; 2] = [&neg, &aut];
-                        let res =
-                            rho_reference_folded(&curve, g, q, r, seed, 1_000_000, &gens).unwrap();
+                        let ((res, eigen_ops, lambda), cpu_ns, wall_ns, field) = timed(|| {
+                            let (aut, eigen_ops) = six_class_endomorphism(&curve, g, r);
+                            let neg = Negation { r };
+                            let gens: [&dyn Endomorphism<Curve>; 2] = [&neg, &aut];
+                            let res = rho_reference_folded(&curve, g, q, r, seed, 1_000_000, &gens)
+                                .unwrap();
+                            (res, eigen_ops, aut.eigenvalue)
+                        });
                         (
                             json!(res),
-                            json!({"eigen_setup_group_ops":eigen_ops,"eigenvalue":aut.eigenvalue,"status":if res.verified{"verified"}else{"exhausted"}}),
+                            json!({"eigen_setup_group_ops":eigen_ops,"eigenvalue":lambda,"status":if res.verified{"verified"}else{"exhausted"}}),
+                            cpu_ns,
+                            wall_ns,
+                            field,
                         )
                     }
                     _ => {
-                        let projected = Rc::new(RefCell::new(Vec::new()));
-                        let base = LineBase {
-                            frozen: frozen_raw.clone(),
-                            projected: projected.clone(),
-                            columns,
-                            line: f.s(),
-                        };
-                        let mut spec = PipelineSpec {
-                            factor_base: base.name().into(),
-                            oracle: arm.into(),
-                            targets: Targets::Walk,
-                            linalg: "incremental-gauss".into(),
-                            max_trials: cap,
-                            seed,
-                            ..Default::default()
-                        };
-                        // All arms receive exactly the same seed, factor base and target.
-                        spec.factor_base_params = Params::default();
                         let mut c = calib.clone();
-                        let report = if arm == "raw-pair" {
-                            let mut oracle = MitmOracle::new(2);
-                            run_pipeline(&ctx, &spec, &base, &mut oracle, answers, &c, None)
-                                .unwrap()
-                        } else {
+                        if arm != "raw-pair" {
                             let mode = match arm {
                                 "projected-pair" => IndexMode::Projected,
                                 "chi-orbit-index" => IndexMode::Chi,
                                 _ => IndexMode::Isogeny,
                             };
                             c.ns_per_canon = Some(transform_calibration(&curve, g, mode));
-                            let mut oracle = ProjectedOracle::new(mode, projected);
-                            let rep =
+                        }
+                        let (report, cpu_ns, wall_ns, field) = timed(|| {
+                            let projected = Rc::new(RefCell::new(Vec::new()));
+                            let base = LineBase {
+                                frozen: frozen_raw.clone(),
+                                projected: projected.clone(),
+                                columns,
+                                line: f.s(),
+                            };
+                            let spec = PipelineSpec {
+                                factor_base: base.name().into(),
+                                oracle: arm.into(),
+                                targets: Targets::Walk,
+                                linalg: "incremental-gauss".into(),
+                                max_trials: cap,
+                                seed,
+                                ..Default::default()
+                            };
+                            if arm == "raw-pair" {
+                                let mut oracle = MitmOracle::new(2);
                                 run_pipeline(&ctx, &spec, &base, &mut oracle, answers, &c, None)
-                                    .unwrap();
-                            assert_eq!(oracle.false_candidates, 0, "invalid projected relation");
-                            rep
-                        };
+                                    .unwrap()
+                            } else {
+                                let mode = match arm {
+                                    "projected-pair" => IndexMode::Projected,
+                                    "chi-orbit-index" => IndexMode::Chi,
+                                    _ => IndexMode::Isogeny,
+                                };
+                                let mut oracle = ProjectedOracle::new(mode, projected);
+                                let rep = run_pipeline(
+                                    &ctx,
+                                    &spec,
+                                    &base,
+                                    &mut oracle,
+                                    answers,
+                                    &c,
+                                    None,
+                                )
+                                .unwrap();
+                                assert_eq!(
+                                    oracle.false_candidates, 0,
+                                    "invalid projected relation"
+                                );
+                                rep
+                            }
+                        });
                         (
                             json!(report),
                             json!({"status":if report.verified{"verified"}else if report.exhausted{"exhausted"}else{"wrong_answer"}}),
+                            cpu_ns,
+                            wall_ns,
+                            field,
                         )
                     }
                 };
-                let cpu_ns = thread_cpu_ns() - cpu_start;
-                let wall_ns = started.elapsed().as_nanos() as u64;
-                let field = take_field_counters();
                 let s_cpu = (cpu_ns as f64 / ns_add_cpu) / (r as f64).sqrt();
                 println!(
                     "{}",
@@ -729,11 +764,7 @@ fn verify(path: &str, fixture_path: &str) {
         };
         let g = parse_point(&fix["generator"]);
         let q = parse_point(&fix["target"]);
-        let rec = if v["arm"].as_str().unwrap().starts_with("rho") {
-            v["result"]["recovered"].as_u64()
-        } else {
-            v["result"]["recovered"].as_u64()
-        };
+        let rec = v["result"]["recovered"].as_u64();
         if let Some(k) = rec {
             let mut ops = GroupOps::default();
             assert_eq!(curve.mul(&mut ops, g, k), q, "scalar replay fails: p={p}");
