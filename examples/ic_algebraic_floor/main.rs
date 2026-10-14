@@ -37,12 +37,10 @@ use crypto_lib::cryptanalysis::koblitz_groebner::{
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_standard_subspace_factor_base, groebner_decompose, groebner_decompose_f6_ic,
-    sat_decompose_with, FrobeniusFactorBase, KoblitzCurve, PairSumTable,
-    SatDecompositionOptions,
+    sat_decompose_with, FrobeniusFactorBase, KoblitzCurve, PairSumTable, SatDecompositionOptions,
 };
 use crypto_lib::cryptanalysis::pdp_split::{
-    build_for_instance, exhaustive_decompositions, solve_branch, summands_of,
-    verify_decomposition,
+    build_for_instance, exhaustive_decompositions, solve_branch, summands_of, verify_decomposition,
 };
 use num_bigint::BigUint;
 use num_traits::ToPrimitive;
@@ -122,9 +120,9 @@ impl Cell {
     }
 
     fn check_witness(&self, idx: &[usize], target: &BinaryPoint) -> bool {
-        let sum = idx
-            .iter()
-            .fold(BinaryPoint::Infinity, |s, &i| self.kc.add(&s, &self.fb.points[i]));
+        let sum = idx.iter().fold(BinaryPoint::Infinity, |s, &i| {
+            self.kc.add(&s, &self.fb.points[i])
+        });
         &sum == target
     }
 
@@ -213,9 +211,16 @@ fn truth(
         all.sort();
         all.dedup();
         for w in &all {
-            assert!(cell.check_witness(w, &target), "pair-table witness does not add up");
+            assert!(
+                cell.check_witness(w, &target),
+                "pair-table witness does not add up"
+            );
         }
-        assert_eq!(first.is_some(), !all.is_empty(), "decision and count disagree");
+        assert_eq!(
+            first.is_some(),
+            !all.is_empty(),
+            "decision and count disagree"
+        );
         sum_ns += ns;
         sum_adds += adds;
         total_decomps += all.len() as u64;
@@ -248,7 +253,9 @@ fn truth(
                 mitm.insert(cell.abscissae(w));
                 true
             });
-            exhaustive.push(json!({"k": k, "exhaustive": ex.len(), "mitm": mitm.len(), "equal": ex == mitm}));
+            exhaustive.push(
+                json!({"k": k, "exhaustive": ex.len(), "mitm": mitm.len(), "equal": ex == mitm}),
+            );
         }
     }
     // Interleave yes/no so the early-stop rule sees both strata first.
@@ -311,10 +318,26 @@ fn solve(cell: &Cell, m: usize, arm: &str, k: u64, budget: Duration) -> Value {
     let (hit, exhausted, unsupported): (Option<Vec<usize>>, bool, bool) = match arm {
         "f4-chain" | "f6-ic" => {
             let (h, s) = if arm == "f4-chain" {
-                groebner_decompose(&cell.kc, &cell.fb, &index_of, &st, &target, m, engine, node_budget)
+                groebner_decompose(
+                    &cell.kc,
+                    &cell.fb,
+                    &index_of,
+                    &st,
+                    &target,
+                    m,
+                    engine,
+                    node_budget,
+                )
             } else {
                 groebner_decompose_f6_ic(
-                    &cell.kc, &cell.fb, &index_of, &st, &target, m, engine, node_budget,
+                    &cell.kc,
+                    &cell.fb,
+                    &index_of,
+                    &st,
+                    &target,
+                    m,
+                    engine,
+                    node_budget,
                 )
             };
             extra = json!({"reductions": s.reductions, "splits": s.splits,
@@ -328,7 +351,15 @@ fn solve(cell: &Cell, m: usize, arm: &str, k: u64, budget: Duration) -> Value {
                 ..SatDecompositionOptions::default()
             };
             let (h, s) = sat_decompose_with(
-                &cell.kc, &cell.fb, &index_of, &st, &target, m, 1 << 24, None, options,
+                &cell.kc,
+                &cell.fb,
+                &index_of,
+                &st,
+                &target,
+                m,
+                1 << 24,
+                None,
+                options,
             );
             extra = json!({"conflicts": s.conflicts, "models": s.models,
                 "solver_calls": s.solver_calls, "spurious": s.spurious, "refuted": s.refuted});
@@ -336,7 +367,11 @@ fn solve(cell: &Cell, m: usize, arm: &str, k: u64, budget: Duration) -> Value {
         }
         a if a.starts_with("s4-hybrid") || a.starts_with("s22-hybrid") => {
             let g = hybrid_g(a, m, cell.d).expect("hybrid arm names its g");
-            let plan: Vec<usize> = if a.starts_with("s4") { vec![3] } else { vec![2, 2] };
+            let plan: Vec<usize> = if a.starts_with("s4") {
+                vec![3]
+            } else {
+                vec![2, 2]
+            };
             assert_eq!(plan.iter().sum::<usize>(), m, "{a} does not match m = {m}");
             let xr = cell.x_of(&target);
             match build_for_instance(&cell.inst, &plan, cell.d as usize, xr) {
@@ -346,7 +381,8 @@ fn solve(cell: &Cell, m: usize, arm: &str, k: u64, budget: Duration) -> Value {
                 }
                 Ok((sys, _)) => {
                     let words = cell.basis_words();
-                    let (mut xors, mut branches, mut unresolved, mut timed_out) = (0u64, 0u64, 0u64, false);
+                    let (mut xors, mut branches, mut unresolved, mut timed_out) =
+                        (0u64, 0u64, 0u64, false);
                     let mut found: Option<Vec<u64>> = None;
                     let mut max_sd = 0u32;
                     'branches: for guess in 0..(1u64 << g) {
@@ -424,9 +460,19 @@ fn run_child(
     let t0 = Instant::now();
     let mut child = Command::new(exe)
         .args([
-            "solve", "--m", &m.to_string(), "--arm", arm, "--cell", &format!("{a}:{n}:{d}"),
-            "--k", &k.to_string(), "--budget-secs", &budget_secs.to_string(),
-            "--mem-gib", &mem_gib.to_string(),
+            "solve",
+            "--m",
+            &m.to_string(),
+            "--arm",
+            arm,
+            "--cell",
+            &format!("{a}:{n}:{d}"),
+            "--k",
+            &k.to_string(),
+            "--budget-secs",
+            &budget_secs.to_string(),
+            "--mem-gib",
+            &mem_gib.to_string(),
         ])
         // One core per solve, so wall time compares like with like.
         .env("RAYON_NUM_THREADS", "1")
@@ -468,8 +514,11 @@ fn censored(v: &Value) -> bool {
     if v["unsupported"].as_bool() == Some(true) {
         return false;
     }
-    matches!(v["verdict"].as_str(), Some("timeout") | Some("crash") | Some("none"))
-        || v["wall_ns"].as_u64().unwrap_or(0) as f64 / 1e9 >= v["budget_secs"].as_f64().unwrap_or(f64::MAX)
+    matches!(
+        v["verdict"].as_str(),
+        Some("timeout") | Some("crash") | Some("none")
+    ) || v["wall_ns"].as_u64().unwrap_or(0) as f64 / 1e9
+        >= v["budget_secs"].as_f64().unwrap_or(f64::MAX)
 }
 
 fn cmd_run(args: &[String]) {
@@ -519,8 +568,12 @@ fn cmd_run(args: &[String]) {
             let path = out.join(format!("arm-{arm}-m{m}-n{n}-d{d}.jsonl"));
             let mut f = std::fs::File::create(&path).unwrap();
             if stopped.contains(arm) {
-                writeln!(f, "{}", json!({"cmd": "skipped", "arm": arm, "m": m, "n": n, "d": d,
-                    "reason": "an earlier cell of this arm met the early-stop rule"}))
+                writeln!(
+                    f,
+                    "{}",
+                    json!({"cmd": "skipped", "arm": arm, "m": m, "n": n, "d": d,
+                    "reason": "an earlier cell of this arm met the early-stop rule"})
+                )
                 .unwrap();
                 eprintln!("  {arm}: skipped (stopped at a smaller cell)");
                 continue;
@@ -541,7 +594,8 @@ fn cmd_run(args: &[String]) {
                 f.flush().unwrap();
                 eprintln!(
                     "  {arm} k={k} truth={yes} verdict={} {:.3}s",
-                    v["verdict"], v["wall_ns"].as_u64().unwrap_or(0) as f64 / 1e9
+                    v["verdict"],
+                    v["wall_ns"].as_u64().unwrap_or(0) as f64 / 1e9
                 );
                 if v["unsupported"].as_bool() == Some(true) {
                     eprintln!("  {arm}: unsupported at n={n} (encoder or variable limit)");
@@ -551,8 +605,12 @@ fn cmd_run(args: &[String]) {
                     lead_censored += 1;
                 }
                 if i + 1 == stop_after && lead_censored == stop_after {
-                    writeln!(f, "{}", json!({"cmd": "stopped", "arm": arm, "m": m, "n": n, "d": d,
-                        "reason": format!("the first {stop_after} targets were all censored")}))
+                    writeln!(
+                        f,
+                        "{}",
+                        json!({"cmd": "stopped", "arm": arm, "m": m, "n": n, "d": d,
+                        "reason": format!("the first {stop_after} targets were all censored")})
+                    )
                     .unwrap();
                     stopped.insert(arm.clone());
                     eprintln!("  {arm}: early stop at n={n}");

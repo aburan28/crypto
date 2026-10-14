@@ -83,18 +83,25 @@ fn mean(v: &[f64]) -> f64 {
 }
 
 fn resample<T: Clone>(rng: &mut StdRng, v: &[T]) -> Vec<T> {
-    (0..v.len()).map(|_| v[rng.gen_range(0..v.len())].clone()).collect()
+    (0..v.len())
+        .map(|_| v[rng.gen_range(0..v.len())].clone())
+        .collect()
 }
 
 /// Floor cost per relation, wall ns (amortized, online) and adds.
+/// Sensitivity switch (`--floor online`, post-hoc, not the frozen primary):
+/// read the floor without its table build.
+static FLOOR_ONLINE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
 fn floor_cost(t: &Truth, yes: &[bool], ns: &[f64], adds: &[f64]) -> Option<(f64, f64, f64)> {
     let p = yes.iter().filter(|&&y| y).count() as f64 / yes.len() as f64;
     if p == 0.0 {
         return None;
     }
     let online = mean(ns) / p;
-    let amort = online + t.build_ns / t.columns;
-    let adds_amort = mean(adds) / p + t.build_adds / t.columns;
+    let build = !FLOOR_ONLINE.load(std::sync::atomic::Ordering::Relaxed);
+    let amort = online + if build { t.build_ns / t.columns } else { 0.0 };
+    let adds_amort = mean(adds) / p + if build { t.build_adds / t.columns } else { 0.0 };
     Some((amort, online, adds_amort))
 }
 
@@ -121,16 +128,26 @@ fn pct(v: &mut [f64], q: f64) -> f64 {
     v[i]
 }
 
-fn load(dirs: &[PathBuf]) -> (BTreeMap<(usize, u32), Truth>, BTreeMap<(usize, String), Vec<ArmCell>>) {
+fn load(
+    dirs: &[PathBuf],
+) -> (
+    BTreeMap<(usize, u32), Truth>,
+    BTreeMap<(usize, String), Vec<ArmCell>>,
+) {
     let mut truths = BTreeMap::new();
     let mut arms: BTreeMap<(usize, String), Vec<ArmCell>> = BTreeMap::new();
     for dir in dirs {
-        let mut entries: Vec<_> = std::fs::read_dir(dir).unwrap().flatten().map(|e| e.path()).collect();
+        let mut entries: Vec<_> = std::fs::read_dir(dir)
+            .unwrap()
+            .flatten()
+            .map(|e| e.path())
+            .collect();
         entries.sort();
         for path in entries {
             let name = path.file_name().unwrap().to_string_lossy().to_string();
             if name.starts_with("truth-") && name.ends_with(".json") {
-                let v: Value = serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
+                let v: Value =
+                    serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
                 let rows = v["rows"].as_array().unwrap();
                 let ex = v["exhaustive_check"].as_array().unwrap();
                 let t = Truth {
@@ -145,7 +162,10 @@ fn load(dirs: &[PathBuf]) -> (BTreeMap<(usize, u32), Truth>, BTreeMap<(usize, St
                     fb_points: v["fb_points"].as_u64().unwrap(),
                     total_decomps: v["total_decomps"].as_u64().unwrap(),
                     exhaustive_checked: ex.len(),
-                    exhaustive_equal: ex.iter().filter(|e| e["equal"].as_bool() == Some(true)).count(),
+                    exhaustive_equal: ex
+                        .iter()
+                        .filter(|e| e["equal"].as_bool() == Some(true))
+                        .count(),
                 };
                 truths.insert((v["m"].as_u64().unwrap() as usize, t.n), t);
             } else if name.starts_with("arm-") && name.ends_with(".jsonl") {
@@ -221,23 +241,57 @@ pub fn cmd_analyze(args: &[String]) {
         .map(PathBuf::from)
         .collect();
     let boot: usize = flag("--boot").and_then(|v| v.parse().ok()).unwrap_or(2000);
-    let seed: u64 = flag("--seed").and_then(|v| v.parse().ok()).unwrap_or(20261014);
+    let seed: u64 = flag("--seed")
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(20261014);
+    FLOOR_ONLINE.store(
+        flag("--floor").as_deref() == Some("online"),
+        std::sync::atomic::Ordering::Relaxed,
+    );
+    // Sensitivity switch (`--exclude-n 11,…`, post-hoc): drop whole cells.
+    let exclude: Vec<u32> = flag("--exclude-n")
+        .map(|s| s.split(',').map(|v| v.parse().unwrap()).collect())
+        .unwrap_or_default();
     let out = PathBuf::from(flag("--out").expect("--out ANALYSIS.json"));
     let (truths, arms) = load(&dirs);
+    let truths: BTreeMap<(usize, u32), Truth> = truths
+        .into_iter()
+        .filter(|(k, _)| !exclude.contains(&k.1))
+        .collect();
+    let arms: BTreeMap<(usize, String), Vec<ArmCell>> = arms
+        .into_iter()
+        .map(|(k, v)| {
+            (
+                k,
+                v.into_iter().filter(|c| !exclude.contains(&c.n)).collect(),
+            )
+        })
+        .collect();
     let mut rng = StdRng::seed_from_u64(seed);
 
-    let ms: Vec<usize> = truths.keys().map(|k| k.0).collect::<std::collections::BTreeSet<_>>().into_iter().collect();
+    let ms: Vec<usize> = truths
+        .keys()
+        .map(|k| k.0)
+        .collect::<std::collections::BTreeSet<_>>()
+        .into_iter()
+        .collect();
     let mut report = json!({"protocol": "research/ic_m3_algebraic_vs_mitm_20261014/PROTOCOL.md",
         "boot": boot, "seed": seed, "by_m": {}});
     let mut md = String::new();
     md.push_str("# ANALYSIS (written by `ic_algebraic_floor analyze`)\n\n");
-    md.push_str("Cost per relation in wall-clock ns (log2), one core, same binary and host. \
+    md.push_str(
+        "Cost per relation in wall-clock ns (log2), one core, same binary and host. \
         `measured` = every target finished; `lower_bound` = some target censored at its budget or \
-        the cell stopped early; intervals are 95% bootstrap percentiles.\n\n");
+        the cell stopped early; intervals are 95% bootstrap percentiles.\n\n",
+    );
     let mut csv = String::from("m,arm,n,d,status,log2_cost_ns,lo,hi,log2_counted,counted_unit\n");
 
     for &m in &ms {
-        let cells: Vec<&Truth> = truths.iter().filter(|(k, _)| k.0 == m).map(|(_, t)| t).collect();
+        let cells: Vec<&Truth> = truths
+            .iter()
+            .filter(|(k, _)| k.0 == m)
+            .map(|(_, t)| t)
+            .collect();
         // Point estimates.
         let mut cell_rows = Vec::new();
         for t in &cells {
@@ -252,12 +306,19 @@ pub fn cmd_analyze(args: &[String]) {
                 "exhaustive_checked": t.exhaustive_checked, "exhaustive_equal": t.exhaustive_equal}));
         }
         // Bootstrap replicates: per cell, floor (amortized, online) and per arm.
-        let arm_names: Vec<String> = arms.keys().filter(|k| k.0 == m).map(|k| k.1.clone()).collect();
-        let mut floor_reps: Vec<Vec<Option<(f64, f64)>>> = vec![Vec::with_capacity(boot); cells.len()];
+        let arm_names: Vec<String> = arms
+            .keys()
+            .filter(|k| k.0 == m)
+            .map(|k| k.1.clone())
+            .collect();
+        let mut floor_reps: Vec<Vec<Option<(f64, f64)>>> =
+            vec![Vec::with_capacity(boot); cells.len()];
         let mut arm_reps: BTreeMap<(String, u32), Vec<Option<f64>>> = BTreeMap::new();
         for _ in 0..boot {
             for (ci, t) in cells.iter().enumerate() {
-                let idx: Vec<usize> = (0..t.pool_yes.len()).map(|_| rng.gen_range(0..t.pool_yes.len())).collect();
+                let idx: Vec<usize> = (0..t.pool_yes.len())
+                    .map(|_| rng.gen_range(0..t.pool_yes.len()))
+                    .collect();
                 let yes: Vec<bool> = idx.iter().map(|&i| t.pool_yes[i]).collect();
                 let ns: Vec<f64> = idx.iter().map(|&i| t.pool_ns[i]).collect();
                 let adds: Vec<f64> = idx.iter().map(|&i| t.pool_adds[i]).collect();
@@ -284,29 +345,46 @@ pub fn cmd_analyze(args: &[String]) {
         let ns_of: Vec<f64> = cells.iter().map(|t| t.n as f64).collect();
         let log2 = |x: f64| x.log2();
         // Floor slopes (all cells with p > 0).
-        let floor_ok: Vec<usize> = (0..cells.len()).filter(|&i| cell_rows[i]["floor_amortized_ns"].is_f64()).collect();
+        let floor_ok: Vec<usize> = (0..cells.len())
+            .filter(|&i| cell_rows[i]["floor_amortized_ns"].is_f64())
+            .collect();
         let fit = |sel: &[usize], ys: &dyn Fn(usize) -> f64| -> f64 {
             let xs: Vec<f64> = sel.iter().map(|&i| ns_of[i]).collect();
             let y: Vec<f64> = sel.iter().map(|&i| ys(i)).collect();
             ols_slope(&xs, &y)
         };
-        let floor_point = fit(&floor_ok, &|i| log2(cell_rows[i]["floor_amortized_ns"].as_f64().unwrap()));
-        let floor_online_point = fit(&floor_ok, &|i| log2(cell_rows[i]["floor_online_ns"].as_f64().unwrap()));
-        let floor_adds_point = fit(&floor_ok, &|i| log2(cell_rows[i]["floor_amortized_adds"].as_f64().unwrap()));
+        let floor_point = fit(&floor_ok, &|i| {
+            log2(cell_rows[i]["floor_amortized_ns"].as_f64().unwrap())
+        });
+        let floor_online_point = fit(&floor_ok, &|i| {
+            log2(cell_rows[i]["floor_online_ns"].as_f64().unwrap())
+        });
+        let floor_adds_point = fit(&floor_ok, &|i| {
+            log2(cell_rows[i]["floor_amortized_adds"].as_f64().unwrap())
+        });
         let floor_slope_rep = |b: usize, sel: &[usize]| -> Option<f64> {
-            let ys: Option<Vec<f64>> = sel.iter().map(|&i| floor_reps[i][b].map(|c| log2(c.0))).collect();
+            let ys: Option<Vec<f64>> = sel
+                .iter()
+                .map(|&i| floor_reps[i][b].map(|c| log2(c.0)))
+                .collect();
             ys.map(|y| ols_slope(&sel.iter().map(|&i| ns_of[i]).collect::<Vec<_>>(), &y))
         };
-        let mut fs: Vec<f64> = (0..boot).filter_map(|b| floor_slope_rep(b, &floor_ok)).collect();
+        let mut fs: Vec<f64> = (0..boot)
+            .filter_map(|b| floor_slope_rep(b, &floor_ok))
+            .collect();
         let floor_ci = (pct(&mut fs, 0.025), pct(&mut fs, 0.975));
         for (ci, t) in cells.iter().enumerate() {
-            let mut v: Vec<f64> = floor_reps[ci].iter().filter_map(|c| c.map(|c| log2(c.0))).collect();
+            let mut v: Vec<f64> = floor_reps[ci]
+                .iter()
+                .filter_map(|c| c.map(|c| log2(c.0)))
+                .collect();
             if !v.is_empty() {
                 let (lo, hi) = (pct(&mut v, 0.025), pct(&mut v, 0.975));
                 cell_rows[ci]["floor_log2_ci"] = json!([lo, hi]);
                 csv.push_str(&format!(
                     "{m},floor-mitm,{},{},measured,{:.4},{lo:.4},{hi:.4},{:.4},group_adds\n",
-                    t.n, t.d,
+                    t.n,
+                    t.d,
                     log2(cell_rows[ci]["floor_amortized_ns"].as_f64().unwrap()),
                     log2(cell_rows[ci]["floor_amortized_adds"].as_f64().unwrap())
                 ));
@@ -319,13 +397,26 @@ pub fn cmd_analyze(args: &[String]) {
             let ci = r["floor_log2_ci"].as_array();
             md.push_str(&format!(
                 "| {} | {} | {} | {:.3} | {:.3} | {}/{} | {} | {} |\n",
-                r["n"], r["d"], r["fb_points"], r["p_decomposable"].as_f64().unwrap(),
-                r["decomps_per_target"].as_f64().unwrap(), r["exhaustive_equal"], r["exhaustive_checked"],
+                r["n"],
+                r["d"],
+                r["fb_points"],
+                r["p_decomposable"].as_f64().unwrap(),
+                r["decomps_per_target"].as_f64().unwrap(),
+                r["exhaustive_equal"],
+                r["exhaustive_checked"],
                 match (r["floor_amortized_ns"].as_f64(), ci) {
-                    (Some(c), Some(ci)) => format!("{:.2} [{:.2}, {:.2}]", log2(c), ci[0].as_f64().unwrap(), ci[1].as_f64().unwrap()),
+                    (Some(c), Some(ci)) => format!(
+                        "{:.2} [{:.2}, {:.2}]",
+                        log2(c),
+                        ci[0].as_f64().unwrap(),
+                        ci[1].as_f64().unwrap()
+                    ),
                     _ => "p = 0".into(),
                 },
-                r["floor_online_ns"].as_f64().map(|c| format!("{:.2}", log2(c))).unwrap_or_default()
+                r["floor_online_ns"]
+                    .as_f64()
+                    .map(|c| format!("{:.2}", log2(c)))
+                    .unwrap_or_default()
             ));
         }
         md.push_str(&format!(
@@ -343,7 +434,9 @@ pub fn cmd_analyze(args: &[String]) {
             let mut bounded: Vec<usize> = Vec::new();
             let mut point: BTreeMap<usize, f64> = BTreeMap::new();
             for ac in acs {
-                let Some(ci) = cells.iter().position(|t| t.n == ac.n) else { continue };
+                let Some(ci) = cells.iter().position(|t| t.n == ac.n) else {
+                    continue;
+                };
                 let p = cell_rows[ci]["p_decomposable"].as_f64().unwrap();
                 let status = ac.status();
                 let c = arm_cost(p, &ac.rows, |r| r.wall);
@@ -374,14 +467,22 @@ pub fn cmd_analyze(args: &[String]) {
                 let cens = ac.rows.iter().filter(|r| r.censored).count();
                 md.push_str(&format!(
                     "| {arm} | {} | {} | {status} | {}/{} | {cens} | {} | {} | {} |\n",
-                    ac.n, ac.d, yes, ac.rows.len() - yes,
-                    match (c, ci95, ac.rows.is_empty()) {
-                        (Some(c), Some(ci), false) if status == "measured" => format!("{:.2} [{:.2}, {:.2}]", log2(c), ci.0, ci.1),
+                    ac.n,
+                    ac.d,
+                    yes,
+                    ac.rows.len() - yes,
+                    match (c, ci95, ac.rows.is_empty() || status == "unsupported") {
+                        (Some(c), Some(ci), false) if status == "measured" =>
+                            format!("{:.2} [{:.2}, {:.2}]", log2(c), ci.0, ci.1),
                         (Some(c), _, false) => format!("≥ {:.2}", log2(c)),
                         _ => "—".into(),
                     },
-                    match (c, floor, ac.rows.is_empty()) {
-                        (Some(c), Some(f), false) => format!("{}{:.3e}", if status == "measured" { "" } else { "≥ " }, c / f),
+                    match (c, floor, ac.rows.is_empty() || status == "unsupported") {
+                        (Some(c), Some(f), false) => format!(
+                            "{}{:.3e}",
+                            if status == "measured" { "" } else { "≥ " },
+                            c / f
+                        ),
                         _ => "—".into(),
                     },
                     match (counted, status) {
@@ -389,13 +490,18 @@ pub fn cmd_analyze(args: &[String]) {
                         _ => "—".into(),
                     }
                 ));
-                if !ac.rows.is_empty() {
+                if !ac.rows.is_empty() && status != "unsupported" {
                     if let Some(c) = c {
                         let (lo, hi) = ci95.unwrap_or((f64::NAN, f64::NAN));
                         csv.push_str(&format!(
                             "{m},{arm},{},{},{status},{:.4},{lo:.4},{hi:.4},{},{unit}\n",
-                            ac.n, ac.d, log2(c),
-                            counted.filter(|x| *x > 0.0).map(|x| format!("{:.4}", log2(x))).unwrap_or_default()
+                            ac.n,
+                            ac.d,
+                            log2(c),
+                            counted
+                                .filter(|x| *x > 0.0)
+                                .map(|x| format!("{:.4}", log2(x)))
+                                .unwrap_or_default()
                         ));
                     }
                 }
@@ -409,7 +515,10 @@ pub fn cmd_analyze(args: &[String]) {
             // Slopes and the decision rule.
             let slope_of = |sel: &[usize]| -> Option<f64> {
                 (sel.len() >= 2).then(|| {
-                    ols_slope(&sel.iter().map(|&i| ns_of[i]).collect::<Vec<_>>(), &sel.iter().map(|&i| point[&i]).collect::<Vec<_>>())
+                    ols_slope(
+                        &sel.iter().map(|&i| ns_of[i]).collect::<Vec<_>>(),
+                        &sel.iter().map(|&i| point[&i]).collect::<Vec<_>>(),
+                    )
                 })
             };
             let boot_delta = |sel: &[usize]| -> Option<(f64, f64, f64, f64)> {
@@ -421,7 +530,12 @@ pub fn cmd_analyze(args: &[String]) {
                 for b in 0..boot {
                     let ys: Option<Vec<f64>> = sel
                         .iter()
-                        .map(|&i| arm_reps.get(&(arm.clone(), cells[i].n)).and_then(|r| r[b]).map(log2))
+                        .map(|&i| {
+                            arm_reps
+                                .get(&(arm.clone(), cells[i].n))
+                                .and_then(|r| r[b])
+                                .map(log2)
+                        })
                         .collect();
                     let Some(ys) = ys else { continue };
                     let s = ols_slope(&sel.iter().map(|&i| ns_of[i]).collect::<Vec<_>>(), &ys);
@@ -434,10 +548,19 @@ pub fn cmd_analyze(args: &[String]) {
                 if ds.is_empty() {
                     return None;
                 }
-                Some((pct(&mut ss, 0.025), pct(&mut ss, 0.975), pct(&mut ds, 0.025), pct(&mut ds, 0.975)))
+                Some((
+                    pct(&mut ss, 0.025),
+                    pct(&mut ss, 0.975),
+                    pct(&mut ds, 0.025),
+                    pct(&mut ds, 0.975),
+                ))
             };
             let floor_on = |sel: &[usize]| -> Option<f64> {
-                (sel.len() >= 2).then(|| fit(sel, &|i| log2(cell_rows[i]["floor_amortized_ns"].as_f64().unwrap())))
+                (sel.len() >= 2).then(|| {
+                    fit(sel, &|i| {
+                        log2(cell_rows[i]["floor_amortized_ns"].as_f64().unwrap())
+                    })
+                })
             };
             let mut all_sel: Vec<usize> = measured.iter().chain(bounded.iter()).copied().collect();
             all_sel.sort_unstable();
@@ -462,7 +585,9 @@ pub fn cmd_analyze(args: &[String]) {
                 }
             } else if all_sel.len() >= 3 && lb_valid {
                 match lb_boot {
-                    Some((_, _, lo, _)) if lo > 0.0 => "grows faster than the floor (lower-bound fit)",
+                    Some((_, _, lo, _)) if lo > 0.0 => {
+                        "grows faster than the floor (lower-bound fit)"
+                    }
                     _ => "undetermined (lower-bound fit does not separate)",
                 }
             } else {
@@ -482,7 +607,9 @@ pub fn cmd_analyze(args: &[String]) {
                 md.push_str("| arm | n | d | status | targets run (yes/no) | censored | log2 ns per relation [95%] | ÷ floor | counted per relation |\n|---|--:|--:|---|--:|--:|--:|--:|--:|\n");
             }
             let _ = mean_measured_n;
-            arm_out.insert(arm.clone(), json!({"cells": cells_json,
+            arm_out.insert(
+                arm.clone(),
+                json!({"cells": cells_json,
                 "measured_cells": measured.iter().map(|&i| cells[i].n).collect::<Vec<_>>(),
                 "lower_bound_cells": bounded.iter().map(|&i| cells[i].n).collect::<Vec<_>>(),
                 "slope_measured": m_slope, "slope_measured_ci": m_boot.map(|b| [b.0, b.1]),
@@ -490,7 +617,8 @@ pub fn cmd_analyze(args: &[String]) {
                 "delta_ci": m_boot.map(|b| [b.2, b.3]),
                 "slope_lower_bound_fit": lb_slope, "lower_bound_fit_valid": lb_valid,
                 "delta_lower_bound_ci": lb_boot.map(|b| [b.2, b.3]),
-                "verdict": verdict}));
+                "verdict": verdict}),
+            );
         }
         report["by_m"][m.to_string()] = json!({"cells": cell_rows,
             "floor_slope_amortized": floor_point, "floor_slope_amortized_ci": [floor_ci.0, floor_ci.1],

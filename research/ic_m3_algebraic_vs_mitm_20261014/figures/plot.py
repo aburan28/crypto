@@ -35,7 +35,7 @@ def save(fig, name):
 
 
 for m in sorted({r["m"] for r in rows}):
-    fig, ax = plt.subplots(figsize=(7.2, 4.6))
+    fig, ax = plt.subplots(figsize=(9.6, 4.6))
     arms = []
     for r in rows:
         if r["m"] == m and r["arm"] not in arms:
@@ -65,7 +65,10 @@ for m in sorted({r["m"] for r in rows}):
     ax.set_title(f"m = {m}: cost per relation, algebraic/SAT arms vs MITM floor\n"
                  "bars: 95% bootstrap; open markers with arrows: lower bounds")
     ax.grid(alpha=0.3)
-    ax.legend(fontsize=7, loc="upper left")
+    if m == "4":
+        ax.axvspan(21.5, 32, color="#999999", alpha=0.12)
+        ax.text(26.5, 31, "F4 / F6-IC / SAT unsupported here:\nchain has 4d+2n > 64 unknowns\n(MAX_VARS); floor only", ha="center", fontsize=7)
+    ax.legend(fontsize=7, loc="upper left", bbox_to_anchor=(1.01, 1.0))
     fig.tight_layout()
     save(fig, f"cost_per_relation_m{m}")
 
@@ -88,13 +91,13 @@ for m, blk in sorted(ana["by_m"].items()):
             his.append(hi - vals[-1])
             cols.append(STYLE.get(arm, ("grey",))[0])
 ys = list(range(len(labels)))
-ax.errorbar(vals, ys, xerr=[los, his], fmt="none", ecolor=cols, capsize=3)
-ax.scatter(vals, ys, c=cols, zorder=3)
+for v, y, lo, hi, c in zip(vals, ys, los, his, cols):
+    ax.errorbar([v], [y], xerr=[[lo], [hi]], fmt="o", color=c, capsize=3)
 ax.set_yticks(ys)
 ax.set_yticklabels(labels, fontsize=8)
 ax.invert_yaxis()
 ax.set_xlabel("slope: log2 ns per relation per unit n (95% bootstrap)")
-ax.set_title("Growth in n on measured cells (arms with >= 3 measured cells)")
+ax.set_title("Slope on each arm's measured cells (>= 3); floor rows: slope over all cells.\nThe decision uses arm − floor fitted on the same cells (ANALYSIS.md)", fontsize=9)
 ax.grid(alpha=0.3, axis="x")
 fig.tight_layout()
 save(fig, "slopes")
