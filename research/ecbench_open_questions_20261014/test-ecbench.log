@@ -1,0 +1,26 @@
+   Compiling crypto v0.1.0 (/workspace/crypto)
+    Finished `release` profile [optimized] target(s) in 1m 47s
+     Running tests/ecbench.rs (target/release/deps/ecbench-7b5b0163cde53c89)
+
+running 16 tests
+test a_factor_base_dump_carries_its_points ... ok
+test a_resealed_hand_edited_figure_is_caught ... ok
+test bad_specs_are_refused_before_anything_runs ... ok
+test a_public_target_session_yields_a_checked_vs_rho_claim ... ok
+test a_session_runs_verifies_compares_and_loads ... ok
+test a_candidate_session_compares_against_a_baseline_session ... ok
+test online_windows_split_into_exclusive_claim_phases ... ok
+test field_operations_are_counted_bounded_and_judged ... ok
+test pdp3_koblitz_f4_and_f6_verify_on_one_query_stream ... ok
+test pdp3_koblitz_rootfind_engine_follows_f4_query_stream_without_a_solver ... ok
+test pdp3_koblitz_rootfind_window_shortens_m3_scan_and_records_window_len ... ok
+test the_database_refuses_a_slug_with_another_identity ... ok
+session ECBS1h95b2d1f3f7ee complete -> /tmp/ecbench-test-16636-race/s (48 records: {"verified": 48})
+ecbench: /tmp/ecbench-test-16636-race/s exists; a session never overwrites another
+test two_sessions_queued_for_one_directory_cannot_both_write_it ... ok
+test bounds_a_frontier_and_challenge_verdicts_round_trip ... ok
+test counted_ic_sat_replays_with_different_solver_wall_times ... ok
+test pdp3_binary_runs_every_engine_on_a_generic_binary_curve ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 55.18s
+

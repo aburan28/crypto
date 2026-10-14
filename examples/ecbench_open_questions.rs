@@ -301,6 +301,7 @@ fn main() -> Result<(), String> {
     match command {
         "freeze" => freeze(root),
         "controls" => save(&root.join("controls.json"), &controls::run()?),
+        "controls-extended" => save(&root.join("controls-v3.json"), &controls::run()?),
         "analyze" => analyze::run(root),
         _ => Err(format!("unknown command {command}")),
     }

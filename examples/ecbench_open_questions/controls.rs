@@ -1,11 +1,12 @@
 //! Executable prerequisites, kept separate from measured ecbench pipelines.
 use crypto_lib::binary_ecc::{
-    curve::scalar_mul, BinaryCurve, BinaryPoint, F2mElement, MumfordDivisor, OrdinaryBinaryCover,
+    curve::scalar_mul, hcdlp_bsgs, BinaryCurve, BinaryPoint, F2mElement, MumfordDivisor,
+    OrdinaryBinaryCover,
 };
 use crypto_lib::cryptanalysis::{
     ecbench::{
         conductor_gap,
-        workload::{registry_koblitz_modulus, CurveSpec, Instance},
+        workload::{registry_koblitz_modulus, CurveSpec, Instance, TargetKind, Workload},
     },
     ic_boundary::{koblitz_instance, BinaryGroup, CountedGroup, GroupOps},
     ic_framework::{
@@ -459,7 +460,7 @@ fn covers() -> Result<Value, String> {
         };
         let off_curve_rejected = cover.pullback_point_class(&off_curve).is_err();
         let no_general_norm = cover
-            .pushforward_arbitrary_jacobian_class(&MumfordDivisor::identity(3))
+            .pushforward_arbitrary_jacobian_class(&MumfordDivisor::identity(n))
             .is_err();
         if !source_annihilation
             || image.is_identity()
@@ -473,6 +474,38 @@ fn covers() -> Result<Value, String> {
         {
             return Err(format!("cover correctness control failed on {slug}"));
         }
+        let destination_recovery = if n == 7 {
+            let (workload, _) = Workload::build(
+                &CurveSpec::Koblitz { a, n },
+                20261014,
+                0,
+                TargetKind::Public,
+            )?;
+            let parse = |s: &str| {
+                BigUint::parse_bytes(s.trim_start_matches("0x").as_bytes(), 16)
+                    .ok_or("bad public target".to_string())
+            };
+            let public_point = BinaryPoint::Affine {
+                x: F2mElement::from_biguint(&parse(&workload.target[0])?, n),
+                y: F2mElement::from_biguint(&parse(&workload.target[1])?, n),
+            };
+            let public_image = cover.pullback_point_class(&public_point).map_err(err)?;
+            let recovered = hcdlp_bsgs(&image, &public_image, &r, cover.source_curve())
+                .ok_or("generic destination solver failed")?;
+            let elliptic_replay = scalar_mul(&curve, &g, &recovered) == public_point;
+            let jacobian_replay = image
+                .try_scalar_mul(&recovered, cover.source_curve())
+                .map_err(err)?
+                == public_image;
+            if !elliptic_replay || !jacobian_replay {
+                return Err("destination recovery failed replay".into());
+            }
+            json!({"workload_id":workload.workload_id,"target_law":workload.target_law,"target":workload.target,
+                "recovered":recovered.to_string(),"elliptic_replay":elliptic_replay,"jacobian_replay":jacobian_replay,
+                "method":"existing generic Jacobian BSGS","measured_cost":null})
+        } else {
+            Value::Null
+        };
         rows.push(json!({"curve":slug,"n":n,"a":a,"modulus_low_terms":irr.low_terms,
             "subgroup_order":r.to_string(),"generator":[generator.0.to_string(),generator.1.to_string()],
             "certificate":format!("{:?}",cover.certificate()),"source_generator_nonidentity":true,"source_order_annihilation":source_annihilation,
@@ -480,7 +513,8 @@ fn covers() -> Result<Value, String> {
             "sample_scalar":7,"sample_scalar_homomorphism":scalar_homomorphism,"typed_push_pull_identity":composition.identity_holds,
             "infinity_check":infinity,"ramified_two_torsion_check":torsion_check,"off_curve_rejected":off_curve_rejected,
             "general_norm_unsupported":no_general_norm,"subgroup_status":format!("{:?}",cover.subgroup_transfer_status(&r).map_err(err)?),
-            "independent_exact_prime_order_certificate":false,"destination_dlp_run":false,
+            "independent_exact_prime_order_certificate":false,"destination_dlp_run":n==7,
+            "public_target_destination_recovery":destination_recovery,
             "scope":"actual genus-3 divisor pullbacks, not a higher-genus index-calculus speed result"}));
     }
     Ok(json!(rows))
@@ -515,7 +549,12 @@ fn isogeny_controls() -> Result<Value, String> {
 pub fn run() -> Result<Value, String> {
     let mut module = Vec::new();
     for n in [19, 23, 31, 37, 53, 83, 131] {
-        module.push(json!({"n":n,"cyclotomic_coset_sizes":cyclotomic_cosets(n).map(|c|c.iter().map(Vec::len).collect::<Vec<_>>()),
+        let mut residue = 1u32;
+        let order = (1..=n).find(|_| {
+            residue = (residue * 2) % n;
+            residue == 1
+        });
+        module.push(json!({"n":n,"order_of_2_mod_n":order,"cyclotomic_coset_sizes":cyclotomic_cosets(n).map(|c|c.iter().map(Vec::len).collect::<Vec<_>>()),
             "stable_subspace_dimensions":stable_subspace_dimensions(n)}));
     }
     // A failure in one prerequisite must not discard earlier or unrelated
@@ -524,8 +563,8 @@ pub fn run() -> Result<Value, String> {
         Ok(data) => json!({"status":"completed","data":data}),
         Err(error) => json!({"status":"error","error":error}),
     };
-    let out = json!({"schema":"ecbench-ten-questions-controls/v2",
-        "protocol":"CONTROLS-AMENDMENT-v2.md",
+    let out = json!({"schema":"ecbench-ten-questions-controls/v3",
+        "protocol":"CONTROLS-AMENDMENT-v3.md",
         "quasi_subfield":stage(quasi()),"nonlinear_bases":stage(nonlinear()),"degree_profiles":stage(degree_profiles()),
         "qubo":stage(qubo_control()),"covers":stage(covers()),"isogeny":stage(isogeny_controls()),
         "frobenius_module":module,"new_mathematical_theorem_claimed":false});

@@ -1,0 +1,47 @@
+{
+  "command": "verify",
+  "result": {
+    "certificate": {
+      "construction": "prime_quadratic_pullback_v1",
+      "degree": 2,
+      "f": [
+        "0x2e",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x1"
+      ],
+      "genus": 2,
+      "h": [],
+      "x": [
+        "0x0",
+        "0x0",
+        "0x1"
+      ],
+      "y_0": [],
+      "y_v": [
+        "0x1"
+      ]
+    },
+    "verification": {
+      "construction": "explicit",
+      "defining_equation_identity": "verified_exact_polynomial_identity",
+      "degree": "verified_degree_2",
+      "field_of_definition": "same_as_target",
+      "field_validation": "fixed-base_probable_prime_screen",
+      "genus": "verified_genus_2",
+      "infinity": "two_base_field_rational_points",
+      "jacobian_arithmetic": "unsupported_even_degree_two_infinity_model",
+      "pullback": "not_implemented_for_this_cover_family",
+      "pushforward": "not_implemented_for_this_cover_family",
+      "separability": "verified_characteristic_not_2",
+      "source_smoothness": "verified_by_squarefree_sextic",
+      "subgroup_transfer": "unknown",
+      "target_smoothness": "verified_by_discriminant"
+    }
+  },
+  "schema": "hyperelliptic-infrastructure-command/v1",
+  "status": "ok"
+}

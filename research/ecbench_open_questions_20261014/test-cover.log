@@ -1,0 +1,14 @@
+   Compiling crypto v0.1.0 (/workspace/crypto)
+    Finished `release` profile [optimized] target(s) in 1.58s
+     Running unittests src/bin/hyperelliptic_cover.rs (target/release/deps/hyperelliptic_cover-8c0911d06d2c9772)
+
+running 6 tests
+test tests::odd_one_infinity_branch_divisor_is_supported_separately ... ok
+test tests::construction_rejects_unknown_model_fields ... ok
+test tests::malformed_divisor_is_rejected_before_arithmetic ... ok
+test tests::construction_has_separate_verified_claims ... ok
+test tests::zero_prime_modulus_is_a_structured_error_not_a_panic ... ok
+test tests::prime_cover_arithmetic_is_structured_unsupported ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

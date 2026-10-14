@@ -1,0 +1,108 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {}
+      },
+      "name": "rho",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {}
+      },
+      "name": "rho-aa",
+      "role": "control"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "cyclotomic:w=1,columns=8",
+          "linalg": "incremental-gauss",
+          "max_trials": "256",
+          "oracle": "mitm-frobenius:m=3",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "gamma-weight-1",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "cyclotomic:w=2,columns=8",
+          "linalg": "incremental-gauss",
+          "max_trials": "256",
+          "oracle": "mitm-frobenius:m=3",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "gamma-weight-2",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "cyclotomic:w=3,columns=8",
+          "linalg": "incremental-gauss",
+          "max_trials": "256",
+          "oracle": "mitm-frobenius:m=3",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "gamma-weight-3",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "compact-orbit-scan:columns=8,raw_x_cap=4096",
+          "linalg": "incremental-gauss",
+          "max_trials": "256",
+          "oracle": "mitm-frobenius:m=3",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "compact-control",
+      "role": "candidate"
+    }
+  ],
+  "description": "PROTOCOL-v1.md. Public single-target diagnostics; full cold counts and unpriced counters retained. No wall-time or asymptotic claim from L0 measurements.",
+  "label": "Q4 nonlinear gamma-weight bases; gamma weight is not a normal-basis Hamming ideal",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 2,
+    "seed": 20261014,
+    "timeout_seconds": 180,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 1,
+        "kind": "koblitz",
+        "n": 11
+      },
+      {
+        "a": 1,
+        "kind": "koblitz",
+        "n": 23
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261014,
+    "targets_per_curve": 4
+  }
+}

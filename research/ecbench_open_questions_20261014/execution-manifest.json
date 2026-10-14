@@ -1,0 +1,1281 @@
+{
+  "commands": [
+    {
+      "arguments": [
+        "run",
+        "--spec",
+        "research/ecbench_open_questions_20261014/specs/q01-prime.json",
+        "--out",
+        "research/ecbench_open_questions_20261014/sessions/q01-prime",
+        "--cpus",
+        "none",
+        "--allow-busy",
+        "--wait"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q01-prime.run.log",
+      "started_unix_utc": 1792006426,
+      "success": true
+    },
+    {
+      "arguments": [
+        "verify",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q01-prime",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "research/ecbench_open_questions_20261014/q01-prime.audit.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q01-prime.verify.log",
+      "started_unix_utc": 1792006439,
+      "success": true
+    },
+    {
+      "arguments": [
+        "table",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q01-prime"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q01-prime.table.md",
+      "started_unix_utc": 1792006449,
+      "success": true
+    },
+    {
+      "arguments": [
+        "resources",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q01-prime",
+        "--out",
+        "research/ecbench_open_questions_20261014/q01-prime.resources.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q01-prime.resources.log",
+      "started_unix_utc": 1792006449,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q01-prime",
+        "--a",
+        "rho",
+        "--b",
+        "rho-aa",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q01-prime__rho__rho-aa.json",
+      "started_unix_utc": 1792006449,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q01-prime",
+        "--a",
+        "rho",
+        "--b",
+        "abs32-subtract2",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q01-prime__rho__abs32-subtract2.json",
+      "started_unix_utc": 1792006449,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q01-prime",
+        "--a",
+        "rho",
+        "--b",
+        "abs64-subtract2",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q01-prime__rho__abs64-subtract2.json",
+      "started_unix_utc": 1792006449,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q01-prime",
+        "--a",
+        "rho",
+        "--b",
+        "abs64-mitm2",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q01-prime__rho__abs64-mitm2.json",
+      "started_unix_utc": 1792006449,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q01-prime",
+        "--a",
+        "rho",
+        "--b",
+        "abs64-subtract3",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q01-prime__rho__abs64-subtract3.json",
+      "started_unix_utc": 1792006449,
+      "success": true
+    },
+    {
+      "arguments": [
+        "run",
+        "--spec",
+        "research/ecbench_open_questions_20261014/specs/q02-binary.json",
+        "--out",
+        "research/ecbench_open_questions_20261014/sessions/q02-binary",
+        "--cpus",
+        "none",
+        "--allow-busy",
+        "--wait"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q02-binary.run.log",
+      "started_unix_utc": 1792006449,
+      "success": true
+    },
+    {
+      "arguments": [
+        "verify",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q02-binary",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "research/ecbench_open_questions_20261014/q02-binary.audit.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q02-binary.verify.log",
+      "started_unix_utc": 1792006453,
+      "success": true
+    },
+    {
+      "arguments": [
+        "table",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q02-binary"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q02-binary.table.md",
+      "started_unix_utc": 1792006455,
+      "success": true
+    },
+    {
+      "arguments": [
+        "resources",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q02-binary",
+        "--out",
+        "research/ecbench_open_questions_20261014/q02-binary.resources.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q02-binary.resources.log",
+      "started_unix_utc": 1792006455,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q02-binary",
+        "--a",
+        "rho",
+        "--b",
+        "rho-aa",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q02-binary__rho__rho-aa.json",
+      "started_unix_utc": 1792006455,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q02-binary",
+        "--a",
+        "rho",
+        "--b",
+        "sub3-mitm3",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q02-binary__rho__sub3-mitm3.json",
+      "started_unix_utc": 1792006455,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q02-binary",
+        "--a",
+        "rho",
+        "--b",
+        "sub4-mitm3",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q02-binary__rho__sub4-mitm3.json",
+      "started_unix_utc": 1792006455,
+      "success": true
+    },
+    {
+      "arguments": [
+        "run",
+        "--spec",
+        "research/ecbench_open_questions_20261014/specs/q02-solvers.json",
+        "--out",
+        "research/ecbench_open_questions_20261014/sessions/q02-solvers",
+        "--cpus",
+        "none",
+        "--allow-busy",
+        "--wait"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q02-solvers.run.log",
+      "started_unix_utc": 1792006455,
+      "success": true
+    },
+    {
+      "arguments": [
+        "verify",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q02-solvers",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "research/ecbench_open_questions_20261014/q02-solvers.audit.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q02-solvers.verify.log",
+      "started_unix_utc": 1792006523,
+      "success": true
+    },
+    {
+      "arguments": [
+        "table",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q02-solvers"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q02-solvers.table.md",
+      "started_unix_utc": 1792006524,
+      "success": true
+    },
+    {
+      "arguments": [
+        "resources",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q02-solvers",
+        "--out",
+        "research/ecbench_open_questions_20261014/q02-solvers.resources.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q02-solvers.resources.log",
+      "started_unix_utc": 1792006524,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q02-solvers",
+        "--a",
+        "rho",
+        "--b",
+        "rho-aa",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q02-solvers__rho__rho-aa.json",
+      "started_unix_utc": 1792006524,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q02-solvers",
+        "--a",
+        "rho",
+        "--b",
+        "inherited-f4",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q02-solvers__rho__inherited-f4.json",
+      "started_unix_utc": 1792006524,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q02-solvers",
+        "--a",
+        "rho",
+        "--b",
+        "f6-ic",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q02-solvers__rho__f6-ic.json",
+      "started_unix_utc": 1792006524,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q02-solvers",
+        "--a",
+        "rho",
+        "--b",
+        "rootfind-control",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q02-solvers__rho__rootfind-control.json",
+      "started_unix_utc": 1792006524,
+      "success": true
+    },
+    {
+      "arguments": [
+        "run",
+        "--spec",
+        "research/ecbench_open_questions_20261014/specs/q03-frobenius.json",
+        "--out",
+        "research/ecbench_open_questions_20261014/sessions/q03-frobenius",
+        "--cpus",
+        "none",
+        "--allow-busy",
+        "--wait"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q03-frobenius.run.log",
+      "started_unix_utc": 1792006524,
+      "success": true
+    },
+    {
+      "arguments": [
+        "verify",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q03-frobenius",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "research/ecbench_open_questions_20261014/q03-frobenius.audit.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q03-frobenius.verify.log",
+      "started_unix_utc": 1792006529,
+      "success": true
+    },
+    {
+      "arguments": [
+        "table",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q03-frobenius"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q03-frobenius.table.md",
+      "started_unix_utc": 1792006532,
+      "success": true
+    },
+    {
+      "arguments": [
+        "resources",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q03-frobenius",
+        "--out",
+        "research/ecbench_open_questions_20261014/q03-frobenius.resources.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q03-frobenius.resources.log",
+      "started_unix_utc": 1792006532,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q03-frobenius",
+        "--a",
+        "rho",
+        "--b",
+        "rho-aa",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q03-frobenius__rho__rho-aa.json",
+      "started_unix_utc": 1792006532,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q03-frobenius",
+        "--a",
+        "rho",
+        "--b",
+        "direct",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q03-frobenius__rho__direct.json",
+      "started_unix_utc": 1792006532,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q03-frobenius",
+        "--a",
+        "rho",
+        "--b",
+        "orbit-folded",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q03-frobenius__rho__orbit-folded.json",
+      "started_unix_utc": 1792006532,
+      "success": true
+    },
+    {
+      "arguments": [
+        "run",
+        "--spec",
+        "research/ecbench_open_questions_20261014/specs/q04-nonlinear.json",
+        "--out",
+        "research/ecbench_open_questions_20261014/sessions/q04-nonlinear",
+        "--cpus",
+        "none",
+        "--allow-busy",
+        "--wait"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q04-nonlinear.run.log",
+      "started_unix_utc": 1792006532,
+      "success": true
+    },
+    {
+      "arguments": [
+        "verify",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q04-nonlinear",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "research/ecbench_open_questions_20261014/q04-nonlinear.audit.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q04-nonlinear.verify.log",
+      "started_unix_utc": 1792006535,
+      "success": true
+    },
+    {
+      "arguments": [
+        "table",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q04-nonlinear"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q04-nonlinear.table.md",
+      "started_unix_utc": 1792006536,
+      "success": true
+    },
+    {
+      "arguments": [
+        "resources",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q04-nonlinear",
+        "--out",
+        "research/ecbench_open_questions_20261014/q04-nonlinear.resources.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q04-nonlinear.resources.log",
+      "started_unix_utc": 1792006536,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q04-nonlinear",
+        "--a",
+        "rho",
+        "--b",
+        "rho-aa",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q04-nonlinear__rho__rho-aa.json",
+      "started_unix_utc": 1792006536,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q04-nonlinear",
+        "--a",
+        "rho",
+        "--b",
+        "gamma-weight-1",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q04-nonlinear__rho__gamma-weight-1.json",
+      "started_unix_utc": 1792006536,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q04-nonlinear",
+        "--a",
+        "rho",
+        "--b",
+        "gamma-weight-2",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q04-nonlinear__rho__gamma-weight-2.json",
+      "started_unix_utc": 1792006536,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q04-nonlinear",
+        "--a",
+        "rho",
+        "--b",
+        "gamma-weight-3",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q04-nonlinear__rho__gamma-weight-3.json",
+      "started_unix_utc": 1792006536,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q04-nonlinear",
+        "--a",
+        "rho",
+        "--b",
+        "compact-control",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q04-nonlinear__rho__compact-control.json",
+      "started_unix_utc": 1792006536,
+      "success": true
+    },
+    {
+      "arguments": [
+        "run",
+        "--spec",
+        "research/ecbench_open_questions_20261014/specs/q06-many-summand.json",
+        "--out",
+        "research/ecbench_open_questions_20261014/sessions/q06-many-summand",
+        "--cpus",
+        "none",
+        "--allow-busy",
+        "--wait"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q06-many-summand.run.log",
+      "started_unix_utc": 1792006536,
+      "success": true
+    },
+    {
+      "arguments": [
+        "verify",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q06-many-summand",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "research/ecbench_open_questions_20261014/q06-many-summand.audit.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q06-many-summand.verify.log",
+      "started_unix_utc": 1792006538,
+      "success": true
+    },
+    {
+      "arguments": [
+        "table",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q06-many-summand"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q06-many-summand.table.md",
+      "started_unix_utc": 1792006540,
+      "success": true
+    },
+    {
+      "arguments": [
+        "resources",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q06-many-summand",
+        "--out",
+        "research/ecbench_open_questions_20261014/q06-many-summand.resources.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q06-many-summand.resources.log",
+      "started_unix_utc": 1792006540,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q06-many-summand",
+        "--a",
+        "rho",
+        "--b",
+        "rho-aa",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q06-many-summand__rho__rho-aa.json",
+      "started_unix_utc": 1792006540,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q06-many-summand",
+        "--a",
+        "rho",
+        "--b",
+        "m3-lp0",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q06-many-summand__rho__m3-lp0.json",
+      "started_unix_utc": 1792006540,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q06-many-summand",
+        "--a",
+        "rho",
+        "--b",
+        "m4-lp0",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q06-many-summand__rho__m4-lp0.json",
+      "started_unix_utc": 1792006540,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q06-many-summand",
+        "--a",
+        "rho",
+        "--b",
+        "m6-lp0",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q06-many-summand__rho__m6-lp0.json",
+      "started_unix_utc": 1792006540,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q06-many-summand",
+        "--a",
+        "rho",
+        "--b",
+        "mn-1-lp0",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q06-many-summand__rho__mn-1-lp0.json",
+      "started_unix_utc": 1792006540,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q06-many-summand",
+        "--a",
+        "rho",
+        "--b",
+        "m3-lp1",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q06-many-summand__rho__m3-lp1.json",
+      "started_unix_utc": 1792006540,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q06-many-summand",
+        "--a",
+        "rho",
+        "--b",
+        "m3-lp2",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q06-many-summand__rho__m3-lp2.json",
+      "started_unix_utc": 1792006540,
+      "success": true
+    },
+    {
+      "arguments": [
+        "run",
+        "--spec",
+        "research/ecbench_open_questions_20261014/specs/q07-rank.json",
+        "--out",
+        "research/ecbench_open_questions_20261014/sessions/q07-rank",
+        "--cpus",
+        "none",
+        "--allow-busy",
+        "--wait"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q07-rank.run.log",
+      "started_unix_utc": 1792006540,
+      "success": true
+    },
+    {
+      "arguments": [
+        "verify",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q07-rank",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "research/ecbench_open_questions_20261014/q07-rank.audit.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q07-rank.verify.log",
+      "started_unix_utc": 1792006542,
+      "success": true
+    },
+    {
+      "arguments": [
+        "table",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q07-rank"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q07-rank.table.md",
+      "started_unix_utc": 1792006543,
+      "success": true
+    },
+    {
+      "arguments": [
+        "resources",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q07-rank",
+        "--out",
+        "research/ecbench_open_questions_20261014/q07-rank.resources.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q07-rank.resources.log",
+      "started_unix_utc": 1792006543,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q07-rank",
+        "--a",
+        "rho",
+        "--b",
+        "rho-aa",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q07-rank__rho__rho-aa.json",
+      "started_unix_utc": 1792006543,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q07-rank",
+        "--a",
+        "rho",
+        "--b",
+        "target-pin",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q07-rank__rho__target-pin.json",
+      "started_unix_utc": 1792006543,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q07-rank",
+        "--a",
+        "rho",
+        "--b",
+        "full-rank",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q07-rank__rho__full-rank.json",
+      "started_unix_utc": 1792006543,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q07-rank",
+        "--a",
+        "rho",
+        "--b",
+        "checked-rank",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q07-rank__rho__checked-rank.json",
+      "started_unix_utc": 1792006543,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q07-rank",
+        "--a",
+        "rho",
+        "--b",
+        "shared-rank",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q07-rank__rho__shared-rank.json",
+      "started_unix_utc": 1792006543,
+      "success": true
+    },
+    {
+      "arguments": [
+        "run",
+        "--spec",
+        "research/ecbench_open_questions_20261014/specs/q08-isogeny.json",
+        "--out",
+        "research/ecbench_open_questions_20261014/sessions/q08-isogeny",
+        "--cpus",
+        "none",
+        "--allow-busy",
+        "--wait"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q08-isogeny.run.log",
+      "started_unix_utc": 1792006543,
+      "success": true
+    },
+    {
+      "arguments": [
+        "verify",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q08-isogeny",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "research/ecbench_open_questions_20261014/q08-isogeny.audit.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q08-isogeny.verify.log",
+      "started_unix_utc": 1792006545,
+      "success": true
+    },
+    {
+      "arguments": [
+        "table",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q08-isogeny"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q08-isogeny.table.md",
+      "started_unix_utc": 1792006546,
+      "success": true
+    },
+    {
+      "arguments": [
+        "resources",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q08-isogeny",
+        "--out",
+        "research/ecbench_open_questions_20261014/q08-isogeny.resources.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q08-isogeny.resources.log",
+      "started_unix_utc": 1792006546,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q08-isogeny",
+        "--a",
+        "rho",
+        "--b",
+        "rho-aa",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q08-isogeny__rho__rho-aa.json",
+      "started_unix_utc": 1792006546,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q08-isogeny",
+        "--a",
+        "rho",
+        "--b",
+        "abscissa-mitm",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q08-isogeny__rho__abscissa-mitm.json",
+      "started_unix_utc": 1792006546,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q08-isogeny",
+        "--a",
+        "rho",
+        "--b",
+        "abscissa-subtract",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/comparisons/q08-isogeny__rho__abscissa-subtract.json",
+      "started_unix_utc": 1792006546,
+      "success": true
+    },
+    {
+      "arguments": [
+        "run",
+        "--spec",
+        "research/ecbench_open_questions_20261014/specs/q10-n83-gate.json",
+        "--out",
+        "research/ecbench_open_questions_20261014/sessions/q10-n83-gate",
+        "--cpus",
+        "none",
+        "--allow-busy",
+        "--wait"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q10-n83-gate.run.log",
+      "started_unix_utc": 1792006546,
+      "success": true
+    },
+    {
+      "arguments": [
+        "verify",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q10-n83-gate",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "research/ecbench_open_questions_20261014/q10-n83-gate.audit.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q10-n83-gate.verify.log",
+      "started_unix_utc": 1792006546,
+      "success": true
+    },
+    {
+      "arguments": [
+        "table",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q10-n83-gate"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q10-n83-gate.table.md",
+      "started_unix_utc": 1792006547,
+      "success": true
+    },
+    {
+      "arguments": [
+        "resources",
+        "--dir",
+        "research/ecbench_open_questions_20261014/sessions/q10-n83-gate",
+        "--out",
+        "research/ecbench_open_questions_20261014/q10-n83-gate.resources.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-c716",
+      "exit_code": 0,
+      "log": "research/ecbench_open_questions_20261014/q10-n83-gate.resources.log",
+      "started_unix_utc": 1792006547,
+      "success": true
+    }
+  ],
+  "completed_through": "q10-n83-gate",
+  "schema": "ecbench-ten-questions-execution/v1"
+}
