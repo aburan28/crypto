@@ -31,7 +31,7 @@ use crate::cryptanalysis::ecbench_large_prime::{
 };
 use crate::cryptanalysis::gaudry_quartic::Pt4;
 use crate::cryptanalysis::gaudry_quartic_d4::{
-    fp_muls_per_add, unpack_e4, D4Curve, D4Oracle, YLineBase,
+    fp_muls_per_add, unpack_e4, D4Curve, D4Options, D4Oracle, YLineBase,
 };
 use crate::cryptanalysis::ic_boundary::{
     price_phase, rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup,
@@ -1922,6 +1922,19 @@ fn solve_ic_fp4(
         1 => true,
         v => return Err(format!("gaudry-d4: charge_unsolved is 0 or 1, not {v}")),
     };
+    let flag = |k: &str| -> Result<bool, String> {
+        match spec.oracle_params.u64_or(k, 0)? {
+            0 => Ok(false),
+            1 => Ok(true),
+            v => Err(format!("gaudry-d4: {k} is 0 or 1, not {v}")),
+        }
+    };
+    oracle.opts = D4Options {
+        weighted: flag("weighted")?,
+        chains: flag("chains")?,
+        sparsest: flag("sparsest")?,
+    };
+    oracle.replay = flag("replay")?;
     let c = &inst.inst.curve;
     let ctx = InstanceCtx {
         group: c,
