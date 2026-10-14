@@ -10,9 +10,10 @@
 //! same count can be checked against brute force and against hits.
 use clap::{Args, ValueEnum};
 use crypto_lib::cryptanalysis::{
-    binary_small_x::{self, BinCurve},
-    prime_small_x::{measure, toy_curve, Curve, Options},
-    secg_standards::{secg, SecgField},
+    binary_small_x,
+    prime_small_x::{self, measure, toy_curve, toy_curve_with_cofactor, Curve, Options},
+    secg_small_x::measure_secg,
+    secg_standards::secg,
 };
 use serde::Serialize;
 use serde_json::{json, Value};
@@ -27,12 +28,13 @@ pub enum PrimeBase {
 
 #[derive(Args, Clone, Debug, Serialize)]
 pub struct PrimeArgs {
-    /// A SECG curve of at most 192 bits over a prime field or of odd degree
-    /// at most 256 over a binary field (`secp192r1` also as `p192`,
-    /// `nist-p192`; `sect113r1`, `sect163r2`, `secp160k1`, …), or a toy
-    /// curve: `toy:<bits>[,<seed>]` over a prime just below `2^bits` (8 to
-    /// 28 bits), `toy-binary:<degree>[,<seed>]` over `F_2^degree` (11, 13,
-    /// 17 or 19).
+    /// Any SECG curve of the standards database that `ic list` names
+    /// (`secp192r1` also as `p192`, `nist-p192`; `sect113r1`, `sect163r2`,
+    /// `secp160k1`, … up to `secp521r1` and `sect571r1`), or a toy curve:
+    /// `toy:<bits>[,<seed>[,<cofactor>]]` over a prime just below `2^bits`
+    /// (8 to 28 bits; cofactor 2, 4 or 8, else a root-free curve of odd
+    /// order), `toy-binary:<degree>[,<seed>[,<cofactor>]]` over
+    /// `F_2^degree` (11, 13, 17 or 19; cofactor 2 or 4).
     #[arg(long, default_value = "secp192r1")]
     pub curve: String,
     /// Factor-base family; the small-x base is the only one so far.
@@ -50,6 +52,11 @@ pub struct PrimeArgs {
     pub controls: u32,
     #[arg(long, default_value_t = 1)]
     pub seed: u64,
+    /// Sample this many signed pair sums of *raw* small-x points (no `[h]`)
+    /// and report the share that lands in the prime-order subgroup, which is
+    /// the factor by which that variant loses against the base used here.
+    #[arg(long, default_value_t = 0, value_parser = clap::value_parser!(u64).range(0..=1_000_000))]
+    pub raw_samples: u64,
 }
 
 pub fn run(args: PrimeArgs) -> Result<Value, String> {
@@ -61,33 +68,59 @@ pub fn run(args: PrimeArgs) -> Result<Value, String> {
         seed: args.seed,
     };
     let name = args.curve.to_ascii_lowercase();
-    let toy_args = |spec: &str, what: &str| -> Result<(u32, u64), String> {
+    let toy_args = |spec: &str, what: &str| -> Result<(u32, u64, Option<u64>), String> {
         let mut parts = spec.split(',');
-        let n: u32 = parts
-            .next()
-            .and_then(|s| s.parse().ok())
-            .ok_or_else(|| format!("{what} curves are written {what}:<size>[,<seed>]"))?;
+        let n: u32 = parts.next().and_then(|s| s.parse().ok()).ok_or_else(|| {
+            format!("{what} curves are written {what}:<size>[,<seed>[,<cofactor>]]")
+        })?;
         let seed: u64 = parts.next().map_or(Ok(args.seed), |s| {
             s.parse().map_err(|_| "toy curve seed must be an integer")
         })?;
-        Ok((n, seed))
+        let h: Option<u64> = parts
+            .next()
+            .map(|s| s.parse().map_err(|_| "toy cofactor must be an integer"))
+            .transpose()?;
+        Ok((n, seed, h))
     };
+    let raw = args.raw_samples;
+    let size = args.size as usize;
     let report = if matches!(name.as_str(), "secp192r1" | "p192" | "nist-p192" | "p-192") {
-        measure(&Curve::p192(), &opts)?
-    } else if let Some(spec) = name.strip_prefix("toy-binary:") {
-        let (degree, seed) = toy_args(spec, "toy-binary")?;
-        binary_small_x::measure(&binary_small_x::toy_curve(degree, seed)?, &opts)?
-    } else if let Some(spec) = name.strip_prefix("toy:") {
-        let (bits, seed) = toy_args(spec, "toy")?;
-        measure(&toy_curve(bits, seed)?, &opts)?
-    } else if let Some(c) = secg(&name) {
-        match &c.field {
-            SecgField::Binary { .. } => binary_small_x::measure(&BinCurve::from_secg(c)?, &opts)?,
-            SecgField::Prime { .. } => measure(&Curve::from_secg(c)?, &opts)?,
+        let c = Curve::p192();
+        let mut r = measure(&c, &opts)?;
+        if raw > 0 {
+            r.raw_base = Some(prime_small_x::raw_subgroup_fraction(
+                &c, size, raw, args.seed,
+            )?);
         }
+        r
+    } else if let Some(spec) = name.strip_prefix("toy-binary:") {
+        let (degree, seed, h) = toy_args(spec, "toy-binary")?;
+        let c = binary_small_x::toy_curve_with_cofactor::<1>(degree, seed, h.unwrap_or(2))?;
+        let mut r = binary_small_x::measure(&c, &opts)?;
+        if raw > 0 {
+            r.raw_base = Some(binary_small_x::raw_subgroup_fraction(
+                &c, size, raw, args.seed,
+            )?);
+        }
+        r
+    } else if let Some(spec) = name.strip_prefix("toy:") {
+        let (bits, seed, h) = toy_args(spec, "toy")?;
+        let c = match h {
+            Some(h) => toy_curve_with_cofactor(bits, seed, h)?,
+            None => toy_curve(bits, seed)?,
+        };
+        let mut r = measure(&c, &opts)?;
+        if raw > 0 {
+            r.raw_base = Some(prime_small_x::raw_subgroup_fraction(
+                &c, size, raw, args.seed,
+            )?);
+        }
+        r
+    } else if let Some(c) = secg(&name) {
+        measure_secg(c, &opts, raw)?
     } else {
         return Err(format!(
-            "unknown curve {:?}; use a SECG name from `ic list` (primes up to 192 bits, binary fields of odd degree up to 256), secp192r1, toy:<bits> or toy-binary:<degree>",
+            "unknown curve {:?}; use a SECG name from `ic list`, secp192r1, toy:<bits> or toy-binary:<degree>",
             args.curve
         ));
     };
@@ -103,8 +136,8 @@ pub fn run(args: PrimeArgs) -> Result<Value, String> {
             "Two-point sums only: a relation is a signed sum of two base points of the small-x base.",
             "The yield is exact for the base built. The Monte Carlo rate agrees with it only where the yield is large enough to produce hits; at P-192 it is a null result and bounds the rate from above.",
             "The cost of each trial, deciding by a Semaev S₃ solve whether a target decomposes, is not part of this measurement, and neither is any linear algebra or descent: a relation yield is not a discrete logarithm.",
-            "The base is capped at 8192 abscissae by the memory of the pair-sum set.",
-            "With a cofactor h > 1 (every SECG binary curve, secp112r2, secp128r2) each small-x point enters the base as [h]P and targets are [h] times a uniform point, so base and targets lie in the prime-order subgroup and the yield is over that subgroup; keeping raw small-x points and counting only the pairs that sum into it would give about 1/h of this yield."
+            "The base is capped at 8192 abscissae, and lower where the pair-sum keys would not fit in memory (wide fields).",
+            "With a cofactor h > 1 (every SECG binary curve, secp112r2, secp128r2) each small-x point enters the base as [h]P and targets are [h] times a uniform point, so base and targets lie in the prime-order subgroup and the yield is over that subgroup. --raw-samples measures, by sampling, the share of raw small-x pair sums that lie in the subgroup."
         ]
     }))
 }

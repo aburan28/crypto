@@ -92,10 +92,7 @@ pub fn binary_coordinates(point: &BinaryPoint) -> Option<Coordinates> {
 /// and every SECG curve in the standards database.
 pub fn names() -> Vec<&'static str> {
     let mut v = vec!["ecc2k-130", "ecc2k-95"];
-    // The inspector reads prime fields of at most 512 bits (secp521r1 is out).
-    v.extend(secg_names().into_iter().filter(
-        |n| !matches!(secg(n).map(|c| &c.field), Some(SecgField::Prime { p }) if p.bits() > 512),
-    ));
+    v.extend(secg_names());
     v
 }
 /// A SECG curve from the standards database as inspection parameters.
@@ -544,8 +541,8 @@ pub fn inspect(p: Parameters, source: String) -> Result<Value, String> {
         }
         Field::Prime { modulus } => {
             q = number(modulus)?;
-            if q.bits() > 512 || q < BigUint::from(5u8) {
-                return Err("prime-field modulus must be >=5 and at most 512 bits".into());
+            if q.bits() > 1024 || q < BigUint::from(5u8) {
+                return Err("prime-field modulus must be >=5 and at most 1024 bits".into());
             }
             let prime = probable_prime(&q);
             check(

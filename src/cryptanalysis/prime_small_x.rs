@@ -54,6 +54,8 @@ pub type Key = [u64; 3];
 /// What the yield measurement needs of a prime field.
 pub trait PrimeField: Clone + Send + Sync {
     type E: Copy + Eq + Send + Sync;
+    /// An exact, canonical, orderable key for an element.
+    type K: Copy + Ord + std::hash::Hash + Send + Sync + std::fmt::Debug;
     fn modulus(&self) -> BigUint;
     fn zero(&self) -> Self::E;
     fn one(&self) -> Self::E;
@@ -65,7 +67,7 @@ pub trait PrimeField: Clone + Send + Sync {
     fn sqr(&mut self, a: Self::E) -> Self::E;
     fn inv(&mut self, a: Self::E) -> Option<Self::E>;
     /// Canonical value as three little-endian limbs.
-    fn key(&self, a: Self::E) -> Key;
+    fn key(&self, a: Self::E) -> Self::K;
 
     fn neg(&mut self, a: Self::E) -> Self::E {
         let z = self.zero();
@@ -122,6 +124,7 @@ impl Default for P192Field {
 
 impl PrimeField for P192Field {
     type E = Fp;
+    type K = Key;
     fn modulus(&self) -> BigUint {
         self.p.clone()
     }
@@ -177,6 +180,7 @@ impl SmallPrime {
 
 impl PrimeField for SmallPrime {
     type E = u64;
+    type K = Key;
     fn modulus(&self) -> BigUint {
         BigUint::from(self.p)
     }
@@ -227,25 +231,26 @@ impl PrimeField for SmallPrime {
     }
 }
 
-/// An element of [`MontField`]: three little-endian limbs in Montgomery form.
+/// An element of [`MontField`]: `L` little-endian limbs in Montgomery form.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct MElem(pub [u64; 3]);
+pub struct MElem<const L: usize>(pub [u64; L]);
 
-/// Any odd prime field of at most 192 bits, three-limb Montgomery
-/// arithmetic.  This is the field of the SECG `secp112…secp192` curves.
+/// Any odd prime field of at most `64·L` bits, `L`-limb Montgomery
+/// arithmetic: `L = 3` for the SECG `secp112…secp192` curves, 4 for
+/// `secp224…secp256`, 6 for `secp384r1`, 9 for `secp521r1`.
 #[derive(Clone)]
-pub struct MontField {
-    ctx: MontgomeryContext<3>,
+pub struct MontField<const L: usize> {
+    ctx: MontgomeryContext<L>,
     p: BigUint,
     p_minus_2: BigUint,
 }
 
-impl MontField {
+impl<const L: usize> MontField<L> {
     pub fn new(p: &BigUint) -> Result<Self, String> {
-        if p.bits() > 192 {
-            return Err(format!("{} bits do not fit three limbs", p.bits()));
+        if p.bits() > 64 * L as u64 {
+            return Err(format!("{} bits do not fit {L} limbs", p.bits()));
         }
-        let ctx = MontgomeryContext::<3>::new(Uint::<3>::from_biguint(p))
+        let ctx = MontgomeryContext::<L>::new(Uint::<L>::from_biguint(p))
             .ok_or("the modulus must be odd and nonzero")?;
         Ok(Self {
             ctx,
@@ -254,51 +259,54 @@ impl MontField {
         })
     }
 
-    fn n(&self) -> Uint<3> {
+    fn n(&self) -> Uint<L> {
         self.ctx.n
     }
 }
 
-impl PrimeField for MontField {
-    type E = MElem;
+impl<const L: usize> PrimeField for MontField<L> {
+    type E = MElem<L>;
+    type K = [u64; L];
     fn modulus(&self) -> BigUint {
         self.p.clone()
     }
-    fn zero(&self) -> MElem {
-        MElem([0; 3])
+    fn zero(&self) -> MElem<L> {
+        MElem([0; L])
     }
-    fn one(&self) -> MElem {
+    fn one(&self) -> MElem<L> {
         MElem(self.ctx.r_mod_n.0)
     }
-    fn embed_u64(&self, v: u64) -> MElem {
-        MElem(self.ctx.to_montgomery(&Uint([v, 0, 0])).0)
+    fn embed_u64(&self, v: u64) -> MElem<L> {
+        let mut a = [0u64; L];
+        a[0] = v;
+        MElem(self.ctx.to_montgomery(&Uint(a)).0)
     }
-    fn embed_big(&self, v: &BigUint) -> Result<MElem, String> {
+    fn embed_big(&self, v: &BigUint) -> Result<MElem<L>, String> {
         if v >= &self.p {
             return Err("element is not canonical".into());
         }
-        Ok(MElem(self.ctx.to_montgomery(&Uint::<3>::from_biguint(v)).0))
+        Ok(MElem(self.ctx.to_montgomery(&Uint::<L>::from_biguint(v)).0))
     }
-    fn add(&mut self, a: MElem, b: MElem) -> MElem {
+    fn add(&mut self, a: MElem<L>, b: MElem<L>) -> MElem<L> {
         MElem(Uint(a.0).add_mod(&Uint(b.0), &self.n()).0)
     }
-    fn sub(&mut self, a: MElem, b: MElem) -> MElem {
+    fn sub(&mut self, a: MElem<L>, b: MElem<L>) -> MElem<L> {
         MElem(Uint(a.0).sub_mod(&Uint(b.0), &self.n()).0)
     }
-    fn mul(&mut self, a: MElem, b: MElem) -> MElem {
+    fn mul(&mut self, a: MElem<L>, b: MElem<L>) -> MElem<L> {
         MElem(self.ctx.mont_mul(&Uint(a.0), &Uint(b.0)).0)
     }
-    fn sqr(&mut self, a: MElem) -> MElem {
+    fn sqr(&mut self, a: MElem<L>) -> MElem<L> {
         MElem(self.ctx.mont_sqr(&Uint(a.0)).0)
     }
-    fn inv(&mut self, a: MElem) -> Option<MElem> {
+    fn inv(&mut self, a: MElem<L>) -> Option<MElem<L>> {
         if self.is_zero(a) {
             return None;
         }
         let e = self.p_minus_2.clone();
         Some(self.pow(a, &e))
     }
-    fn key(&self, a: MElem) -> Key {
+    fn key(&self, a: MElem<L>) -> [u64; L] {
         self.ctx.from_montgomery(&Uint(a.0)).0
     }
 }
@@ -356,17 +364,14 @@ impl Curve<P192Field> {
     }
 }
 
-impl Curve<MontField> {
+impl<const L: usize> Curve<MontField<L>> {
     /// A SECG prime-field curve of at most 192 bits from the standards
     /// database.  Needs `p ≡ 3 (mod 4)` (the square-root formula used).
     pub fn from_secg(c: &SecgCurve) -> Result<Self, String> {
         let SecgField::Prime { p } = &c.field else {
             return Err(format!("{} is not a prime-field curve", c.name));
         };
-        if p % 4u8 != BigUint::from(3u8) {
-            return Err(format!("{}: p is not 3 mod 4", c.name));
-        }
-        let field = MontField::new(p)?;
+        let field = MontField::<L>::new(p)?;
         let curve = Self {
             name: c.name.clone(),
             a: field.embed_big(&c.a)?,
@@ -385,7 +390,7 @@ impl Curve<MontField> {
     }
 
     /// The published base point of a curve built by [`Curve::from_secg`].
-    pub fn secg_generator(&self, c: &SecgCurve) -> Result<Pt<MElem>, String> {
+    pub fn secg_generator(&self, c: &SecgCurve) -> Result<Pt<MElem<L>>, String> {
         Ok(Pt {
             x: self.field.embed_big(&c.gx)?,
             y: self.field.embed_big(&c.gy)?,
@@ -450,10 +455,58 @@ impl<F: PrimeField> Curve<F> {
         !f.is_zero(v) && f.pow(v, exp) == f.one()
     }
 
-    /// A square root of `v` for `p ≡ 3 (mod 4)`.
+    /// A square root of `v`, or `None` when `v` is not a square: the
+    /// `(p + 1)/4` power for `p ≡ 3 (mod 4)`, Tonelli–Shanks otherwise.
     pub fn sqrt(&self, f: &mut F, v: F::E) -> Option<F::E> {
-        let e = (f.modulus() + BigUint::one()) >> 2;
-        let r = f.pow(v, &e);
+        let p = f.modulus();
+        if f.is_zero(v) {
+            return Some(v);
+        }
+        if (&p % 4u8) == BigUint::from(3u8) {
+            let e = (p + BigUint::one()) >> 2;
+            let r = f.pow(v, &e);
+            return (f.sqr(r) == v).then_some(r);
+        }
+        let one = f.one();
+        let pm1 = &p - BigUint::one();
+        if f.pow(v, &(&pm1 >> 1)) != one {
+            return None;
+        }
+        // p − 1 = q·2^s with q odd.
+        let s = pm1.trailing_zeros().unwrap_or(0) as usize;
+        let q = &pm1 >> s;
+        // A quadratic non-residue.
+        let mut z = 2u64;
+        let nonres = loop {
+            let zz = f.embed_u64(z);
+            if f.pow(zz, &(&pm1 >> 1)) != one {
+                break zz;
+            }
+            z += 1;
+        };
+        let mut m = s;
+        let mut c = f.pow(nonres, &q);
+        let mut t = f.pow(v, &q);
+        let mut r = f.pow(v, &((&q + BigUint::one()) >> 1));
+        while t != one {
+            let mut i = 0usize;
+            let mut t2 = t;
+            while t2 != one {
+                t2 = f.sqr(t2);
+                i += 1;
+                if i == m {
+                    return None;
+                }
+            }
+            let mut b = c;
+            for _ in 0..(m - i - 1) {
+                b = f.sqr(b);
+            }
+            m = i;
+            c = f.sqr(b);
+            t = f.mul(t, c);
+            r = f.mul(r, b);
+        }
         (f.sqr(r) == v).then_some(r)
     }
 
@@ -529,7 +582,7 @@ pub fn small_x_base_with_extent<F: PrimeField>(
     let exp = c.euler_exponent(&f);
     let h = BigUint::from(c.cofactor);
     let mut out: Vec<Pt<F::E>> = Vec::with_capacity(size);
-    let mut seen: std::collections::HashSet<Key> = std::collections::HashSet::new();
+    let mut seen: std::collections::HashSet<F::K> = std::collections::HashSet::new();
     let mut x = 0u64;
     let mut largest = 0u64;
     while out.len() < size {
@@ -560,13 +613,13 @@ pub fn small_x_base_with_extent<F: PrimeField>(
 
 /// The abscissae of `a ± b` for every pair of distinct base abscissae and of
 /// `2a` for every `a`: `B²` keys with repeats where sums collide.
-pub fn pair_sum_keys<F: PrimeField>(c: &Curve<F>, base: &[Pt<F::E>]) -> Vec<Key> {
+pub fn pair_sum_keys<F: PrimeField>(c: &Curve<F>, base: &[Pt<F::E>]) -> Vec<F::K> {
     let n = base.len();
-    let mut keys: Vec<Key> = (0..n)
+    let mut keys: Vec<F::K> = (0..n)
         .into_par_iter()
         .map(|i| {
             let mut f = c.field.clone();
-            let mut out: Vec<Key> = Vec::with_capacity(2 * (n - i) + 1);
+            let mut out: Vec<F::K> = Vec::with_capacity(2 * (n - i) + 1);
             let a = base[i];
             // Doubling: x(2a) = λ² − 2x with λ = (3x² + a)/(2y).
             let x2 = f.sqr(a.x);
@@ -636,6 +689,22 @@ pub struct Options {
     pub seed: u64,
 }
 
+/// How much of the raw small-x base's pair-sum yield survives in the
+/// prime-order subgroup, by sampling (see [`raw_subgroup_fraction`]).
+#[derive(Clone, Debug, Serialize)]
+pub struct RawBase {
+    pub samples: u64,
+    pub in_subgroup: u64,
+    /// `in_subgroup / samples`: the share of signed pair sums of raw small-x
+    /// points that lie in the subgroup.
+    pub fraction: f64,
+    pub ci95: [f64; 2],
+    /// `1/h`, the share if the cofactor classes were uniform.
+    pub one_over_h: f64,
+    /// `log₂` of `fraction · 2B²/(n − 1)`, the raw-base yield when no sums collide.
+    pub raw_yield_log2: f64,
+}
+
 /// The exact yield of a small-x base and its checks.
 #[derive(Clone, Debug, Serialize)]
 pub struct YieldReport {
@@ -682,6 +751,8 @@ pub struct YieldReport {
     pub controls_recovered: usize,
     pub timing_ms: Timing,
     pub threads: usize,
+    /// Present when the raw small-x variant was sampled.
+    pub raw_base: Option<RawBase>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -729,7 +800,7 @@ fn recover<F: PrimeField>(
     c: &Curve<F>,
     f: &mut F,
     base: &[Pt<F::E>],
-    index: &HashMap<Key, usize>,
+    index: &HashMap<F::K, usize>,
     target: &Pt<F::E>,
 ) -> Option<(bool, usize, usize)> {
     for (i, a) in base.iter().enumerate() {
@@ -765,6 +836,7 @@ pub fn measure<F: PrimeField>(c: &Curve<F>, opts: &Options) -> Result<YieldRepor
     }
     let base_ms = t0.elapsed().as_secs_f64() * 1000.0;
 
+    check_memory(opts.size, std::mem::size_of::<F::K>())?;
     let t1 = Instant::now();
     let mut keys = pair_sum_keys(c, &base);
     let total = keys.len() as u64;
@@ -781,7 +853,7 @@ pub fn measure<F: PrimeField>(c: &Curve<F>, opts: &Options) -> Result<YieldRepor
     let model_yield = 2.0f64.powf(model_log2);
 
     // Index of base abscissae, for recovering decompositions.
-    let index: HashMap<Key, usize> = base
+    let index: HashMap<F::K, usize> = base
         .iter()
         .enumerate()
         .map(|(i, p)| (f.key(p.x), i))
@@ -905,7 +977,77 @@ pub fn measure<F: PrimeField>(c: &Curve<F>, opts: &Options) -> Result<YieldRepor
             controls: ctl_ms,
         },
         threads: rayon::current_num_threads(),
+        raw_base: None,
     })
+}
+
+/// Refuse a base whose pair-sum keys would not fit in memory: the keys are
+/// held twice at the peak (per-row vectors, then the flattened set).
+pub(crate) fn check_memory(size: usize, key_bytes: usize) -> Result<(), String> {
+    let bytes = 2.0 * (size as f64).powi(2) * key_bytes as f64;
+    if bytes > 9.0e9 {
+        return Err(format!(
+            "a base of {size} abscissae needs about {:.1} GB of pair-sum keys at this field size; use fewer",
+            bytes / 1e9
+        ));
+    }
+    Ok(())
+}
+
+/// The share of signed pair sums `±a ± b` of *raw* small-x points (no
+/// cofactor multiplication) that lie in the prime-order subgroup, from
+/// `samples` random pairs: `[n]S = O` is the membership test. With the
+/// raw base the yield over the subgroup is this fraction times the
+/// subgroup-base yield, since a target of the subgroup can only be a sum
+/// that lands in it.
+pub fn raw_subgroup_fraction<F: PrimeField>(
+    c: &Curve<F>,
+    size: usize,
+    samples: u64,
+    seed: u64,
+) -> Result<RawBase, String> {
+    let mut raw_curve = c.clone();
+    raw_curve.cofactor = 1;
+    let base = small_x_base(&raw_curve, size)?;
+    let hits: u64 = (0..samples)
+        .into_par_iter()
+        .map(|i| {
+            let mut f = c.field.clone();
+            let mut rng = StdRng::seed_from_u64(seed ^ 0x5241_5742_4153_45u64.wrapping_mul(i + 1));
+            loop {
+                let a = base[rng.gen_range(0..base.len())];
+                let mut b = base[rng.gen_range(0..base.len())];
+                if rng.gen::<bool>() {
+                    b = c.negate(&mut f, &b);
+                }
+                match c.add_points(&mut f, &a, &b) {
+                    None => return 1, // a + b = O is in the subgroup
+                    Some(sum) => return u64::from(c.mul_big(&mut f, &sum, &c.order).is_none()),
+                }
+            }
+        })
+        .sum();
+    Ok(raw_base_summary(c.cofactor, &c.order, size, hits, samples))
+}
+
+pub(crate) fn raw_base_summary(
+    cofactor: u64,
+    order: &BigUint,
+    size: usize,
+    hits: u64,
+    samples: u64,
+) -> RawBase {
+    let fraction = hits as f64 / samples.max(1) as f64;
+    let order_minus_one = order - BigUint::one();
+    let sub_log2 = log2_big(&BigUint::from(2 * (size as u64).pow(2))) - log2_big(&order_minus_one);
+    RawBase {
+        samples,
+        in_subgroup: hits,
+        fraction,
+        ci95: binomial_ci(hits, samples),
+        one_over_h: 1.0 / cofactor as f64,
+        raw_yield_log2: fraction.log2() + sub_log2,
+    }
 }
 
 // ── Toy curves ─────────────────────────────────────────────────────
@@ -1001,6 +1143,59 @@ pub fn toy_curve(bits: u32, seed: u64) -> Result<Curve<SmallPrime>, String> {
         }
     }
     Err("no root-free cubic found".into())
+}
+
+/// A toy curve `y² = x³ − 3x + b` over a prime `p ≡ 3 (mod 4)` just below
+/// `2^bits` whose group order is `h·n` with `n` prime, `h ∈ {2, 4}`, counted
+/// exactly by walking the field. The subgroup of order `n` is `[h]E`, so
+/// this exercises the cofactor path where hits are common.
+pub fn toy_curve_with_cofactor(bits: u32, seed: u64, h: u64) -> Result<Curve<SmallPrime>, String> {
+    if !(8..=28).contains(&bits) {
+        return Err("toy curves use 8 to 28 bit primes".into());
+    }
+    if h < 2 || !h.is_power_of_two() || h > 8 {
+        return Err("toy cofactors are 2, 4 or 8".into());
+    }
+    let mut p = (1u64 << bits) - 1;
+    while !(p % 4 == 3 && is_prime_u64(p)) {
+        p -= 2;
+    }
+    let f = SmallPrime::new(p);
+    let mut squares = vec![0u64; (p as usize) / 64 + 1];
+    for y in 0..p {
+        let s = ((y as u128 * y as u128) % p as u128) as usize;
+        squares[s / 64] |= 1 << (s % 64);
+    }
+    let is_sq = |v: u64| (squares[v as usize / 64] >> (v % 64)) & 1 == 1;
+    let mut rng = StdRng::seed_from_u64(seed ^ u64::from(bits) ^ (h << 40));
+    for _ in 0..4000 {
+        let b = rng.gen_range(1..p);
+        let a = p - 3;
+        let mut points = 1u64;
+        for x in 0..p {
+            let x2 = ((x as u128 * x as u128) % p as u128) as u64;
+            let t = (x2 + a) % p;
+            let r = (((t as u128 * x as u128) % p as u128) as u64 + b) % p;
+            if r == 0 {
+                points += 1;
+            } else if is_sq(r) {
+                points += 2;
+            }
+        }
+        if points % h == 0 && is_prime_u64(points / h) && points / h > 7 {
+            let n = points / h;
+            return Ok(Curve {
+                name: format!("toy y²=x³−3x+{b} over F_{p} ({bits} bits), #E = {h}·{n}"),
+                field: f,
+                a,
+                b,
+                order: BigUint::from(n),
+                order_is_prime: true,
+                cofactor: h,
+            });
+        }
+    }
+    Err("no toy curve of that cofactor found".into())
 }
 
 /// `a + b` by the native Jacobian arithmetic, for cross-checks.
@@ -1170,7 +1365,7 @@ mod tests {
         assert!(g.mul(a, i) == g.one());
     }
 
-    fn secg_prime(name: &str) -> Curve<MontField> {
+    fn secg_prime(name: &str) -> Curve<MontField<3>> {
         use crate::cryptanalysis::secg_standards::secg;
         Curve::from_secg(secg(name).expect(name)).unwrap_or_else(|e| panic!("{name}: {e}"))
     }
@@ -1188,7 +1383,7 @@ mod tests {
             let SecgField::Prime { p } = secg(name).unwrap().field.clone() else {
                 panic!()
             };
-            let mut f = MontField::new(&p).unwrap();
+            let mut f = MontField::<3>::new(&p).unwrap();
             let mut rng = StdRng::seed_from_u64(4);
             for _ in 0..50 {
                 let (a, b) = (f.random(&mut rng), f.random(&mut rng));
@@ -1291,5 +1486,125 @@ mod tests {
         .unwrap();
         assert_eq!(rep.cofactor, 4);
         assert_eq!(rep.controls_recovered, rep.controls);
+    }
+
+    fn mont_matches_biguint<const L: usize>(name: &str) {
+        use crate::cryptanalysis::secg_standards::{secg, SecgField};
+        let SecgField::Prime { p } = secg(name).unwrap().field.clone() else {
+            panic!()
+        };
+        let mut f = MontField::<L>::new(&p).unwrap();
+        let big = |k: [u64; L]| {
+            k.iter()
+                .rev()
+                .fold(BigUint::from(0u8), |a, &w| (a << 64u32) | BigUint::from(w))
+        };
+        let mut rng = StdRng::seed_from_u64(6);
+        for _ in 0..30 {
+            let (a, b) = (f.random(&mut rng), f.random(&mut rng));
+            let (ba, bb) = (big(f.key(a)), big(f.key(b)));
+            let r = f.mul(a, b);
+            assert_eq!(big(f.key(r)), (&ba * &bb) % &p, "{name} mul");
+            let r = f.add(a, b);
+            assert_eq!(big(f.key(r)), (&ba + &bb) % &p, "{name} add");
+            let r = f.sub(a, b);
+            assert_eq!(big(f.key(r)), (&ba + &p - &bb) % &p, "{name} sub");
+            if !f.is_zero(a) {
+                let i = f.inv(a).unwrap();
+                assert!(f.mul(a, i) == f.one(), "{name} inverse");
+            }
+        }
+    }
+
+    #[test]
+    fn mont_field_agrees_with_biguint_at_every_limb_count() {
+        mont_matches_biguint::<4>("secp224r1");
+        mont_matches_biguint::<4>("secp256k1");
+        mont_matches_biguint::<6>("secp384r1");
+        mont_matches_biguint::<9>("secp521r1");
+    }
+
+    fn generator_has_the_published_order<const L: usize>(name: &str) {
+        use crate::cryptanalysis::secg_standards::secg;
+        let c = Curve::<MontField<L>>::from_secg(secg(name).unwrap()).unwrap();
+        let mut f = c.field.clone();
+        let g = c.secg_generator(secg(name).unwrap()).unwrap();
+        assert!(c.on_curve(&mut f, &g), "{name}");
+        assert!(
+            c.mul_big(&mut f, &g, &c.order).is_none(),
+            "{name}: n·G != O"
+        );
+    }
+
+    #[test]
+    fn wide_prime_generators_have_the_published_order() {
+        generator_has_the_published_order::<4>("secp224k1");
+        generator_has_the_published_order::<4>("secp224r1");
+        generator_has_the_published_order::<4>("secp256k1");
+        generator_has_the_published_order::<4>("secp256r1");
+        generator_has_the_published_order::<6>("secp384r1");
+        generator_has_the_published_order::<9>("secp521r1");
+    }
+
+    #[test]
+    fn tonelli_shanks_takes_square_roots_when_p_is_1_mod_4() {
+        use crate::cryptanalysis::secg_standards::secg;
+        // secp224r1 has p ≡ 1 (mod 4) with 2^96 | p − 1.
+        let c = Curve::<MontField<4>>::from_secg(secg("secp224r1").unwrap()).unwrap();
+        let mut f = c.field.clone();
+        assert_eq!(f.modulus() % 4u8, BigUint::from(1u8));
+        let mut rng = StdRng::seed_from_u64(8);
+        for _ in 0..20 {
+            let x = f.random(&mut rng);
+            let sq = f.sqr(x);
+            let r = c.sqrt(&mut f, sq).expect("a square has a root");
+            assert!(f.sqr(r) == sq);
+        }
+        // A non-square has none.
+        let exp = c.euler_exponent(&f);
+        let mut z = 2u64;
+        let nonsquare = loop {
+            let e = f.embed_u64(z);
+            if !c.is_square(&mut f, e, &exp) {
+                break e;
+            }
+            z += 1;
+        };
+        assert!(c.sqrt(&mut f, nonsquare).is_none());
+    }
+
+    #[test]
+    fn toy_prime_curves_with_cofactor_match_monte_carlo() {
+        for (bits, seed, h, size) in [(18u32, 3u64, 2u64, 90usize), (20, 5, 4, 200)] {
+            let c = toy_curve_with_cofactor(bits, seed, h).expect("toy");
+            assert_eq!(c.cofactor, h);
+            let rep = measure(
+                &c,
+                &Options {
+                    size,
+                    trials: 400_000,
+                    controls: 8,
+                    seed: 11,
+                },
+            )
+            .expect("measure");
+            assert!(rep.mc_hits > 300, "h={h}: hits {}", rep.mc_hits);
+            let [lo, hi] = rep.mc_ci95;
+            assert!(
+                lo <= rep.exact_yield && rep.exact_yield <= hi,
+                "h={h}: exact {} outside [{lo}, {hi}]",
+                rep.exact_yield
+            );
+            assert_eq!(rep.controls_recovered, rep.controls);
+            assert_eq!(rep.mc_hits_verified, 8.min(rep.mc_hits));
+        }
+    }
+
+    #[test]
+    fn raw_base_fraction_is_one_over_h_on_a_toy_prime_curve() {
+        let c = toy_curve_with_cofactor(18, 3, 2).expect("toy");
+        let r = raw_subgroup_fraction(&c, 60, 3000, 4).expect("raw");
+        let [lo, hi] = r.ci95;
+        assert!(lo <= 0.5 && 0.5 <= hi, "{r:?}");
     }
 }

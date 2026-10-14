@@ -302,6 +302,7 @@ pub mod research_bench;
 pub mod residual_walk;
 pub mod sat;
 pub mod sbox;
+pub mod secg_small_x;
 pub mod secg_standards;
 pub mod sect113r1_audit;
 pub mod semaev_corpus;
