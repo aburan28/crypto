@@ -83,6 +83,14 @@ took 29.975 seconds. These startup-dominated measurements validate the format,
 not full-run throughput. A longer native calibration tranche is required before
 choosing segment size or estimating wall time.
 
+Generation and replay both parallelize the eighteen independent degree-13
+lanes inside each bounded batch. Replay first reads one lane-major batch so the
+JSONL chain remains deterministic, then verifies those lane records in the
+Rayon pool. The buffered replay footprint remains `18 * batch_steps` node
+records. Segment sizing should be large enough to amortize modular-polynomial
+construction, while checkpoints should remain frequent enough that an
+interruption loses only a bounded tranche.
+
 The earlier all-edge projection was about 5.14 TB of uncompressed records and
 6.43 TB with 25 percent headroom. The vertex census should be substantially
 smaller because it stores one parent certificate per vertex. Full adjacency is

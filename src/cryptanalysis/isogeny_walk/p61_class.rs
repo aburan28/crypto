@@ -1297,12 +1297,29 @@ pub fn verify_segment_jsonl<R: BufRead>(
     let mut block_start = first_new_x;
     while block_start < config.x_end() {
         let block_end = config.x_end().min(block_start + config.batch_steps as u64);
-        for state in &mut states {
-            for x in block_start..block_end {
+        let mut rows = Vec::with_capacity(states.len());
+        for _ in 0..states.len() {
+            let mut row = Vec::with_capacity((block_end - block_start) as usize);
+            for _ in block_start..block_end {
                 let record: NodeRecord = input.read(true)?;
-                verify_row_record(&context, state, x, record, audit_points, audit_seed_x)?;
-                parent_edges += 1;
+                row.push(record);
             }
+            rows.push(row);
+        }
+        let verified: Vec<Result<u64, String>> = states
+            .par_iter_mut()
+            .zip(rows.into_par_iter())
+            .map(|(state, row)| {
+                for (x, record) in (block_start..block_end).zip(row) {
+                    verify_row_record(&context, state, x, record, audit_points, audit_seed_x)?;
+                }
+                Ok(block_end - block_start)
+            })
+            .collect();
+        for count in verified {
+            parent_edges = parent_edges
+                .checked_add(count?)
+                .ok_or("verification parent-edge count overflow")?;
         }
         block_start = block_end;
     }
