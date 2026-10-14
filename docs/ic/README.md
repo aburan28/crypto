@@ -580,19 +580,18 @@ report with `ic workflow`'s report and relation files, field by field.
 
 ### SECG curves and `ic prime`
 
-`ic list` now names **every SECG curve in the repository's standards database**
+`ic list` names **every SECG curve in the repository's standards database**
 (`docs/curves/standards/parameters.json`, read by
-`src/cryptanalysis/secg_standards.rs`): `secp112r1` … `secp256r1`, `secp384r1`,
-and `sect113r1`, `sect113r2`, `sect131r1/r2`, `sect163k1/r1/r2`, `sect193r1/r2`,
-`sect233k1/r1`, `sect239k1`, `sect283k1/r1`, `sect409k1/r1`, `sect571k1/r1`
-(`secp521r1` is left out because the inspector reads prime fields of at most 512
-bits). `ic inspect --curve sect113r1` (or `ic sect113r1`) checks the order, the
-modulus or reduction polynomial, nonsingularity, that the generator is on the
-curve and that `[r]G = O`. The cardinality check is reported as not implemented
-for these curves. **`secp192r1`** is also `p192`, `nist-p192`, `p-192`.
+`src/cryptanalysis/secg_standards.rs`): `secp112r1` … `secp521r1` and
+`sect113r1` … `sect571r1`, including `sect113r1`, `sect113r2`, `sect163r1`,
+`sect163r2` and `secp160k1/r1/r2`. `ic inspect --curve sect113r1` (or `ic
+sect113r1`) checks the order, the modulus or reduction polynomial,
+nonsingularity, that the generator is on the curve and that `[r]G = O`; the
+cardinality check is reported as not implemented for these curves.
+`secp192r1` is also `p192`, `nist-p192`, `p-192`.
 
 `search`, `run`, `logs`, `solve` and `workflow` are binary Koblitz pipelines.
-`ic prime` is the one factor-base measurement that covers the other SECG curves:
+`ic prime` is the one factor-base measurement that covers every SECG curve:
 it builds the **small-x** factor base (the points with the smallest abscissae
 `x = 0, 1, 2, …` on the curve, both signs) and reports the probability that a
 random subgroup element is a signed sum of two base points, **exactly**. A base
@@ -606,26 +605,38 @@ elements, and plants decompositions that must be detected and recovered.
     ic prime --curve sect113r1 --size 4096     # binary, cofactor 2
     ic prime --curve sect163r2 --size 4096
     ic prime --curve secp160r1 --size 4096     # prime, 160 bits
-    ic prime --curve toy:20 --size 512         # a toy prime: exact count against Monte Carlo hits
-    ic prime --curve toy-binary:17 --size 128  # a toy binary curve, cofactor 2
+    ic prime --curve sect571r1 --size 4096 --trials 100000
+    ic prime --curve toy:20,7,4 --size 512     # toy prime with cofactor 4: exact count against Monte Carlo hits
+    ic prime --curve toy-binary:17,7,4 --size 128   # toy binary curve, cofactor 4
 
-Supported fields: primes of at most 192 bits with `p ≡ 3 (mod 4)` (every SECG
-`secp112…secp192`), binary fields of odd degree at most 256 (`sect113` … `sect239`).
-Larger SECG fields are named and inspectable but `ic prime` refuses them.
+Fields: primes up to 521 bits (3, 4, 6 or 9 limbs of Montgomery arithmetic;
+Tonelli–Shanks when `p ≡ 1 mod 4`) and binary fields up to degree 571 (2, 3, 4,
+5, 7 or 9 limbs). The base is capped at 8192 abscissae and lower where the
+pair-sum keys would not fit in memory (`secp521r1`, `sect571k1/r1` stop at 4096).
 
 **Cofactor.** Every SECG binary curve has `h = 2` or `4`, and `secp112r2`,
 `secp128r2` have `h = 4`. A relation is a relation in the subgroup `⟨G⟩`, so
 each small-x point `P` enters the base as `[h]P` and a target is `[h]` of a
-uniform point; the yield is over that subgroup. The base abscissae are then no
-longer small. Keeping the raw small-x points and accepting the pairs that sum
-into `⟨G⟩` gives about `1/h` of this yield.
+uniform point; the yield is over that subgroup. `--raw-samples N` samples the
+share of raw small-x pair sums (no `[h]`) that lands in `⟨G⟩`: 1/h on nine of
+ten curves measured, which is the factor the raw variant loses.
 
-On P-192 the yield is `2B²/(n − 1)`, from 2⁻¹⁷⁵ (`B = 256`) to 2⁻¹⁶⁵ (`B = 8192`,
-the largest base); on toy primes and toy binary curves the exact count equals
-the Monte Carlo rate. Two-point sums only, and the cost of deciding a target (a
-Semaev S₃ solve) is not included. Measurements and limits:
-`research/prime_small_x_p192_20261014/REPORT.pdf` (P-192) and
-`research/secg_small_x_20261014/REPORT.pdf` (the other SECG curves).
+**Cost of a trial.** `--s3-trials N` decides `N` random subgroup targets by
+solving Semaev's `S₃(x₁, x₂, X) = 0` for `x₂` at every base abscissa (a
+quadratic each), checks every decision against the pair-sum table, plants
+decompositions that must be found, and times it against the table lookup and
+against Pollard rho on the same machine:
+
+    ic prime --curve sect163r2 --size 4096 --trials 1000 --s3-trials 20
+
+At `B = 4096` a target costs 5.4 ms on `sect113r1`, 9.6 ms on `sect163r2` and
+42 ms on `secp160r1`; collecting `B + 1` relations that way is 52, 77 and 79 bits
+slower than rho (52 to 280 bits over the 33 curves).
+
+On P-192 the yield is `2B²/(n − 1)`, from 2⁻¹⁷⁵ (`B = 256`) to 2⁻¹⁶⁵
+(`B = 8192`). Two-point sums only; linear algebra and descent are not measured.
+Measurements and limits: `research/prime_small_x_p192_20261014/REPORT.pdf`
+(P-192) and `research/secg_small_x_20261014/REPORT.pdf` (all SECG curves).
 
 ### Choosing a factor base
 

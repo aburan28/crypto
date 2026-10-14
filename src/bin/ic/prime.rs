@@ -100,6 +100,9 @@ pub fn run(args: PrimeArgs) -> Result<Value, String> {
                 &c, size, raw, args.seed,
             )?);
         }
+        if s3n > 0 {
+            r.s3 = Some(s3_cost_prime(&c, &opts, &r, s3n)?);
+        }
         r
     } else if let Some(spec) = name.strip_prefix("toy-binary:") {
         let (degree, seed, h) = toy_args(spec, "toy-binary")?;
@@ -109,6 +112,9 @@ pub fn run(args: PrimeArgs) -> Result<Value, String> {
             r.raw_base = Some(binary_small_x::raw_subgroup_fraction(
                 &c, size, raw, args.seed,
             )?);
+        }
+        if s3n > 0 {
+            r.s3 = Some(s3_cost_binary(&c, &opts, &r, s3n)?);
         }
         r
     } else if let Some(spec) = name.strip_prefix("toy:") {
@@ -122,6 +128,9 @@ pub fn run(args: PrimeArgs) -> Result<Value, String> {
             r.raw_base = Some(prime_small_x::raw_subgroup_fraction(
                 &c, size, raw, args.seed,
             )?);
+        }
+        if s3n > 0 {
+            r.s3 = Some(s3_cost_prime(&c, &opts, &r, s3n)?);
         }
         r
     } else if let Some(c) = secg(&name) {

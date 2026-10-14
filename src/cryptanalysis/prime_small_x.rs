@@ -1051,16 +1051,14 @@ pub fn raw_subgroup_fraction<F: PrimeField>(
         .map(|i| {
             let mut f = c.field.clone();
             let mut rng = StdRng::seed_from_u64(seed ^ 0x5241_5742_4153_45u64.wrapping_mul(i + 1));
-            loop {
-                let a = base[rng.gen_range(0..base.len())];
-                let mut b = base[rng.gen_range(0..base.len())];
-                if rng.gen::<bool>() {
-                    b = c.negate(&mut f, &b);
-                }
-                match c.add_points(&mut f, &a, &b) {
-                    None => return 1, // a + b = O is in the subgroup
-                    Some(sum) => return u64::from(c.mul_big(&mut f, &sum, &c.order).is_none()),
-                }
+            let a = base[rng.gen_range(0..base.len())];
+            let mut b = base[rng.gen_range(0..base.len())];
+            if rng.gen::<bool>() {
+                b = c.negate(&mut f, &b);
+            }
+            match c.add_points(&mut f, &a, &b) {
+                None => 1, // a + b = O is in the subgroup
+                Some(sum) => u64::from(c.mul_big(&mut f, &sum, &c.order).is_none()),
             }
         })
         .sum();
@@ -1219,7 +1217,7 @@ pub fn toy_curve_with_cofactor(bits: u32, seed: u64, h: u64) -> Result<Curve<Sma
                 points += 2;
             }
         }
-        if points % h == 0 && is_prime_u64(points / h) && points / h > 7 {
+        if points.is_multiple_of(h) && is_prime_u64(points / h) && points / h > 7 {
             let n = points / h;
             return Ok(Curve {
                 name: format!("toy y²=x³−3x+{b} over F_{p} ({bits} bits), #E = {h}·{n}"),

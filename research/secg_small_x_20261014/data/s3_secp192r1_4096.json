@@ -9,7 +9,7 @@
     "size": 4096,
     "trials": 1000
   },
-  "elapsed_seconds": 1.7526476789999998,
+  "elapsed_seconds": 4.408673187,
   "evidence_scope": "exact_pair_sum_yield_with_monte_carlo",
   "limitations": [
     "Two-point sums only: a relation is a signed sum of two base points of the small-x base.",
@@ -51,22 +51,36 @@
     "order_bits": 192.0,
     "raw_base": null,
     "rho_log2": 96.0,
-    "s3": null,
+    "s3": {
+      "base_abscissae": 4096,
+      "bits_slower_than_rho": 94.68217788990484,
+      "disagreements": 0,
+      "field_mul_ns": 42.53581,
+      "group_add_us": 13.1537725,
+      "planted": 16,
+      "planted_found": 16,
+      "rho_log2_s": 79.78583614914947,
+      "s3_field_muls_per_trial": 1015957.5508259982,
+      "s3_full_system_log2_s": 174.4680140390543,
+      "s3_us_per_trial": 43214.57735,
+      "table_ns_per_trial": 3044.4,
+      "trials": 20
+    },
     "sums": 16777216,
     "threads": 4,
     "timing_ms": {
-      "base": 135.48275600000002,
-      "controls": 193.043468,
-      "monte_carlo": 36.450784,
-      "pair_sums": 1363.266313,
-      "us_per_trial_wall": 36.450784
+      "base": 135.413162,
+      "controls": 167.52081199999998,
+      "monte_carlo": 36.143257999999996,
+      "pair_sums": 1422.664135,
+      "us_per_trial_wall": 36.143257999999996
     },
     "trials_for_full_system_log2": 179.0003521774803
   },
   "schema_version": 1,
   "software": {
     "arch": "x86_64",
-    "binary_blake3": "1a44437168affb0978246e3ae5919d3cb2a8205b8a3ac8f82a0aa934b484d981",
+    "binary_blake3": "ebe74343de1a0e918f3c70de279992ceb78f739592450ba73c9d4f5232fcdf25",
     "git_commit": null,
     "git_commit_source": null,
     "git_dirty": null,

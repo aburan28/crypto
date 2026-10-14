@@ -31,7 +31,6 @@
 use std::collections::HashSet;
 use std::time::Instant;
 
-use num_bigint::BigUint;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 
 use super::binary_small_x::{self as bin, BinCurve, Elem, Pt as BPt};
@@ -88,7 +87,7 @@ impl<'a, const L: usize> BinaryS3<'a, L> {
         let ones: u32 = (0..L)
             .map(|i| (z[i] & self.trace_mask[i]).count_ones())
             .sum();
-        ones % 2 == 0
+        ones.is_multiple_of(2)
     }
 
     fn half_trace_of(&self, z: &Elem<L>) -> Elem<L> {

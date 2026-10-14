@@ -75,7 +75,7 @@ struct Sampler {
 
 impl Sampler {
     fn new(kc: &KoblitzCurve, seed: u64) -> Result<Self, String> {
-        if kc.n % 2 == 0 {
+        if kc.n.is_multiple_of(2) {
             return Err("the sampled selector needs odd n".into());
         }
         if !kc.frobenius_is_endomorphism {
