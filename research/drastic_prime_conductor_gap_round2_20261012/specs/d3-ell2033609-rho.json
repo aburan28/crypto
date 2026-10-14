@@ -1,0 +1,55 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg-aa",
+      "role": "control"
+    }
+  ],
+  "description": "Certified j = 0 crater and j != 0 floor of a D = -3 pair; independent one-target workloads. Counts are primary.",
+  "label": "Drastic gap round 2, rho: D=-3, ell=2033609",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261012,
+    "timeout_seconds": 600,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 0,
+        "b": 1258454212334,
+        "group_order": 3101674318441,
+        "gx": 2,
+        "gy": 2797844748338,
+        "kind": "prime_explicit",
+        "p": 3101674319203,
+        "r": 3101674318441
+      },
+      {
+        "a": 173708838450,
+        "b": 1353164309739,
+        "group_order": 3101674318441,
+        "gx": 0,
+        "gy": 2225013558874,
+        "kind": "prime_explicit",
+        "p": 3101674319203,
+        "r": 3101674318441
+      }
+    ],
+    "target_seed": 2026101202,
+    "targets_per_curve": 32
+  }
+}

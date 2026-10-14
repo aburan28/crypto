@@ -1,0 +1,50 @@
+% Expected days = 2^60.9 / (N R) / 86400 = 24896 / (N R) for R in billion it/s.
+% Plotted parametrically in log10(N) so the curves sample evenly on the log axis.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{loglogaxis}[
+  width=0.92\textwidth, height=0.56\textwidth,
+  xmin=1, xmax=10000, ymin=0.3, ymax=8e5,
+  xlabel={devices in the fleet},
+  ylabel={expected days to a collision},
+  xmajorgrids, ymajorgrids,
+  legend style={at={(0.5,-0.2)},anchor=north,font=\scriptsize},
+  legend columns=3, legend cell align=left,
+  every axis plot/.append style={thick},
+]
+\addplot[cA,domain=0:4,samples=2] ({10^x},{24896/(15.884*10^x)});
+\addlegendentry{RTX PRO 6000, $\sigma$ 15.88}
+\addplot[cA,dashed,domain=0:4,samples=60] ({10^x},{24896/(15.884*10^x)+1.6});
+\addlegendentry{same, with the cutoff-32 delay}
+\addplot[cB,densely dashed,domain=0:4,samples=2] ({10^x},{24896/(25*10^x)});
+\addlegendentry{RTX PRO 6000 ceiling, 25}
+\addplot[cE,domain=0:4,samples=2] ({10^x},{24896/(8.840*10^x)});
+\addlegendentry{B200, $\sigma$ 8.84}
+\addplot[cD,domain=0:4,samples=2] ({10^x},{24896/(7.540*10^x)});
+\addlegendentry{H100, $\sigma$ 7.54}
+\addplot[cC,domain=0:4,samples=2] ({10^x},{24896/(2.561*10^x)});
+\addlegendentry{L4, $\sigma$ 2.56}
+\addplot[inkS!60,domain=0:4,samples=2] ({10^x},{24896/(0.541*10^x)});
+\addlegendentry{T4, no \texttt{clmad}, 0.541}
+\addplot[inkS,densely dotted,domain=0:4,samples=2] ({10^x},{24896/(0.064*10^x)});
+\addlegendentry{GTX 295 card, 2010, 0.064}
+% calendar references
+\draw[gridc!60!inkS,line width=0.4pt] (axis cs:1,7) -- (axis cs:10000,7);
+\node[anchor=north west,font=\tiny,text=inkS,inner sep=1.5pt] at (axis cs:1,7) {one week};
+\draw[gridc!60!inkS,line width=0.4pt] (axis cs:1,30) -- (axis cs:10000,30);
+\node[anchor=north west,font=\tiny,text=inkS,inner sep=1.5pt] at (axis cs:1,30) {one month};
+\draw[gridc!60!inkS,line width=0.4pt] (axis cs:1,365) -- (axis cs:10000,365);
+\node[anchor=north west,font=\tiny,text=inkS,inner sep=1.5pt] at (axis cs:1,365) {one year};
+\end{loglogaxis}
+\end{tikzpicture}
+\caption{Expected calendar time to walk $2^{60.9}$ iterations of
+  ECC2K-130 against fleet size, at measured one-device rates in billions
+  of iterations per second (Table~\ref{tab:solvetime}), with the 2010
+  GTX~295 for comparison. Solid lines count walking time only. The
+  dashed line adds the RTX~PRO~6000's detection delay at cutoff 32
+  (about $1.6$ days), which sets a floor that more cards cannot lower.
+  The median solve is $0.94\times$ the plotted time and the $90\%$
+  point $1.71\times$.}
+\label{fig:solvetime}
+\end{figure}

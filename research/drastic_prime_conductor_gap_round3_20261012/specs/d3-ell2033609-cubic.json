@@ -1,0 +1,39 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.cubic"
+      },
+      "name": "rho-cubic",
+      "role": "candidate"
+    }
+  ],
+  "description": "The same crater and the same scalars as the paired rho spec, walked by rho.cubic.",
+  "label": "Drastic gap round 3, paired cubic crater: D=-3 ell=2033609",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261012,
+    "timeout_seconds": 900,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 0,
+        "b": 1258454212334,
+        "group_order": 3101674318441,
+        "gx": 2,
+        "gy": 2797844748338,
+        "kind": "prime_explicit",
+        "p": 3101674319203,
+        "r": 3101674318441
+      }
+    ],
+    "target_kind": "planted_shared",
+    "target_seed": 2026101205,
+    "targets_per_curve": 64
+  }
+}

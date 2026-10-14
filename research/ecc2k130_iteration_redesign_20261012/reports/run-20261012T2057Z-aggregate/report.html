@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ECC2K130 aggregate throughput confirmation</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ECC2K130 aggregate throughput confirmation</h1>
+</header>
+<h1
+id="ecc2k130-iteration-redesign-two-worker-aggregate-confirmation">ECC2K130
+iteration redesign: two-worker aggregate confirmation</h1>
+<p>Run date: 2026-10-12. This report records a fresh RunPod aggregate
+throughput confirmation from the open iteration-redesign PR. It does not
+promote the v3 table walk to the DP32 campaign.</p>
+<h2 id="result">Result</h2>
+<p>The 30 B/s objective is reached in aggregate with two independent RTX
+PRO 6000 Blackwell Server Edition workers running the audited shipping
+σ-table preset:</p>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 28%" />
+<col style="width: 28%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>worker</th>
+<th style="text-align: right;">median</th>
+<th style="text-align: right;">range</th>
+<th>verification</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A, RunPod pod `w7w5h1nz5nh5fo`</td>
+<td style="text-align: right;">15.994424 B/s</td>
+<td style="text-align: right;">15.980796–16.014132</td>
+<td>300/300, 0 dropped</td>
+</tr>
+<tr class="even">
+<td>B, RunPod pod `q43dhtqgu21c9w`</td>
+<td style="text-align: right;">15.760478 B/s</td>
+<td style="text-align: right;">15.739614–15.783810</td>
+<td>300/300, 0 dropped</td>
+</tr>
+<tr class="odd">
+<td><strong>aggregate</strong></td>
+<td style="text-align: right;"><strong>31.754902 B/s</strong></td>
+<td style="text-align: right;">—</td>
+<td><strong>600/600, 0 dropped</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The aggregate is <strong>1.754902 B/s (5.85%) above</strong> the 30
+B/s target. This is an aggregate result across two GPUs, not a claim
+that one GPU reaches 30 B/s.</p>
+<figure>
+<img src="throughput.png" alt="Throughput confirmation" />
+<figcaption aria-hidden="true">Throughput confirmation</figcaption>
+</figure>
+<h2 id="exact-inputs">Exact inputs</h2>
+<ul>
+<li>Repository: `https://github.com/aburan28/crypto.git`</li>
+<li>Branch: `codex/dp32-dp34-status-tabs`</li>
+<li>Source revision: `c10182d4a66550e04bb41168ba76e10446874e30`</li>
+<li>GPU SKU: `NVIDIA RTX PRO 6000 Blackwell Server Edition`</li>
+<li>Worker A: 188 SMs, CUDA 13.3.73, driver 595.91.07, 2.430 GHz
+max</li>
+<li>Worker B: 188 SMs, CUDA 13.3.73, driver 580.173.02, 2.430 GHz
+max</li>
+<li>Build preset: `make -B gpu-rtx-pro6000-sigma-table
+PRO6000_ARCH=“-gencode arch=compute_120,code=sm_120”`</li>
+<li>Verification: `–curve 131 –packed –dp-weight 50 –dp-cap 262144
+–steps 16 –launches 6 –verify 300 –run-id 35`</li>
+<li>Timing: `–curve 131 –packed –bench –steps 64 –launches 4`, three
+repeats per worker, no DP reporting in the timed invocation</li>
+<li>Harness: `ecc2k130/benchmarks/iteration-redesign/sigmajob.sh`</li>
+</ul>
+<p>The exact worker receipts and selected log lines are retained in <a
+href="raw/worker-a.md">`raw/worker-a.md`</a> and <a
+href="raw/worker-b.md">`raw/worker-b.md`</a>.</p>
+<h2 id="relationship-to-the-redesign">Relationship to the redesign</h2>
+<p>The same commit’s full tuned v3 table-walk redesign was also screened
+on the requested RTX PRO 6000 and measured <strong>8.241422 B/s</strong>
+median, with its verification gate passing. The two-worker result
+therefore establishes a practical 30 B/s aggregate using the shipping
+σ-table path; it does not establish a 30 B/s single-GPU result for the
+new v3 table walk.</p>
+<p>The benchmark workers were run with `–bench`; they did not write
+campaign DPs or alter the DP ingester. The redesign remains opt-in and
+separate from the live DP32 corpus.</p>
+<h2 id="reproduction-and-decision">Reproduction and decision</h2>
+<p>The tracked `sigmajob.sh` harness derives the architecture from
+`nvidia-smi`, records source and host receipts, performs the 300-report
+reference replay, and suppresses timing on any correctness failure. The
+two pods exited successfully and were terminated after artifact
+upload.</p>
+<p>Decision: <strong>30 B/s achieved for the two-worker aggregate
+objective; single GPU v3 redesign objective remains unmet.</strong></p>
+</body>
+</html>

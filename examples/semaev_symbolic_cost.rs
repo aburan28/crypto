@@ -10,7 +10,10 @@ use std::hint::black_box;
 use std::time::Instant;
 
 fn main() {
-    let a: Vec<usize> = std::env::args().skip(1).filter_map(|x| x.parse().ok()).collect();
+    let a: Vec<usize> = std::env::args()
+        .skip(1)
+        .filter_map(|x| x.parse().ok())
+        .collect();
     let ms: Vec<usize> = if a.is_empty() { vec![2, 3] } else { a };
     println!(
         "{:>3} {:>6} {:>14} {:>12} {:>13} {:>13}   (NVARS={})",
@@ -40,8 +43,12 @@ fn main() {
         let mut used = [false; NVARS];
         for t in &p.terms {
             for (i, &e) in t.iter().enumerate() {
-                if e > max_exp { max_exp = e; }
-                if e != 0 { used[i] = true; }
+                if e > max_exp {
+                    max_exp = e;
+                }
+                if e != 0 {
+                    used[i] = true;
+                }
             }
         }
         let live: Vec<usize> = (0..NVARS).filter(|&i| used[i]).collect();

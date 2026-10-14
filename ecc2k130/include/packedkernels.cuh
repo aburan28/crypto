@@ -459,8 +459,8 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 #if ECC_SIGMA_FUSED && ECC_PACKED_CHAINS != 1
 #error "ECC_SIGMA_FUSED requires one Montgomery chain"
 #endif
-#if ECC_PACKED_SIGMA_TABLE && !ECC_SIGMA_FUSED
-#error "ECC_PACKED_SIGMA_TABLE is implemented for the fused sigma walk only"
+#if ECC_PACKED_SIGMA_TABLE && (!ECC_PACKED_POLY_STATE || ECC_PACKED_WEIGHTED_PREFIX != 2 || ECC_WALK_TABLE)
+#error "ECC_PACKED_SIGMA_TABLE requires the polynomial-state ordinary or fused sigma walk"
 #endif
 #if ECC_PACKED_SIGMA_TABLE
 // Dynamic shared memory for the Frobenius nibble table (SIGMA_TABLE_BYTES
@@ -613,13 +613,13 @@ __device__ __forceinline__ void tableResolveHintSlot(const WalkParams<unsigned> 
     const size_t id = size_t(slot) * p.threads + tid;
     unsigned long long hist = p.hist[id];
     const unsigned raw = unsigned(hist & 0xffffull);
-    const P131 x = fromPolynomial131(load(p.x, slot, tid, p.threads));
+    const P131 xp = load(p.x, slot, tid, p.threads);
     const P131 yp = load(p.y, slot, tid, p.threads);
 #if ECC_CYCLE_PROFILE
-    const unsigned tag = twCycleTagProfile(x, yp, raw, twSel, twTab, p.dpWeight,
+    const unsigned tag = twCycleTagProfile(xp, yp, raw, twSel, twTab, p.dpWeight,
                                            p.cycleProfile);
 #else
-    const unsigned tag = twCycleTag(x, yp, raw, twSel, twTab, p.dpWeight);
+    const unsigned tag = twCycleTag(xp, yp, raw, twSel, twTab, p.dpWeight);
 #endif
     p.hist[id] = (hist & ~0xffffull) | tag;
 }
@@ -1161,6 +1161,13 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #elif ECC_PACKED_SHARED_SIGMA
     initSigmaWalkShared131();
 #endif
+#if ECC_PACKED_SIGMA_TABLE
+    // The table is exact for both sigma schedules. Stage it before the
+    // inactive partial-block return, just as the fused path does.
+    const uint32_t sigmaBase = stageSigmaTable(eccSigmaTableDevice, eccSigmaSmem);
+#else
+    const uint32_t sigmaBase = 0;
+#endif
 #if ECC_TABLE_BLOCK_HINTS && defined(__CUDA_ARCH__)
     __shared__ unsigned tableHintCount;
     __shared__ unsigned short tableHintQueue[ECC_TABLE_HINT_QUEUE];
@@ -1327,7 +1334,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             }
 #else
             P131 x = load(p.x, slot, tid, p.threads);
-#if ECC_WALK_TABLE
+#if ECC_WALK_TABLE || ECC_PACKED_SIGMA_TABLE
             const P131 xp = x;
 #endif
 #endif
@@ -1403,8 +1410,13 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             js[slot] = j;
 #endif
 #if ECC_PACKED_WEIGHTED_PREFIX
-            const P131 normalY = fromPolynomial131(load(p.y, slot, tid, p.threads));
 #if ECC_PACKED_WEIGHTED_PREFIX == 2
+#if ECC_PACKED_SIGMA_TABLE
+            const P131 yp = load(p.y, slot, tid, p.threads);
+            P131 dp = sigmaPlusTable131(xp, j - 3, sigmaBase);
+            P131 ep = sigmaPlusTable131(yp, j - 3, sigmaBase);
+#else
+            const P131 normalY = fromPolynomial131(load(p.y, slot, tid, p.threads));
 #if ECC_PACKED_SHARED_SIGMA
             const SigmaWalkPair131 sigmas = sigmaWalkNetworkPairShared131(x, normalY, j - 3);
 #else
@@ -1412,11 +1424,14 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #endif
             P131 d = add131(x, sigmas.first);
             P131 ep = toPolynomial131(add131(normalY, sigmas.second));
+            P131 dp = toPolynomial131(d);
+#endif
 #else
+            const P131 normalY = fromPolynomial131(load(p.y, slot, tid, p.threads));
             P131 d = add131(x, sigma131(x, j));
             P131 ep = toPolynomial131(add131(normalY, sigma131(normalY, j)));
-#endif
             P131 dp = toPolynomial131(d);
+#endif
             // W_i = E_i * product_{k<i}(D_k). Every prefix slot is used.
             if (slot) {
                 PolynomialPair pair = mulPolynomialPair131(prod, ep, dp);
@@ -1542,8 +1557,12 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             P131 dp = load(denominators, slot, tid, p.threads), ii;
             const int j = 3 + ((dp.v[4] >> 3) & 7);
             dp.v[4] &= 7;
+#if ECC_PACKED_SIGMA_TABLE
+            P131 ep = sigmaPlusTable131(y, j - 3, sigmaBase);
+#else
             const P131 normalY = fromPolynomial131(y);
             P131 ep = toPolynomial131(add131(normalY, sigma131(normalY, j)));
+#endif
 #elif ECC_PACKED_CACHE_DENOM
             P131 d = load(denominators, slot, tid, p.threads), ii;
             const int j = 3 + ((d.v[4] >> 3) & 7);
