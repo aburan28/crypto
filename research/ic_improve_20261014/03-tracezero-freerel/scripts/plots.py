@@ -51,28 +51,28 @@ for ax, (metric, title) in zip(axes, panels):
     ax.set_title(title, color=INK, fontsize=9.5)
     ax.set_ylabel("arm / A (ratio of means, 95% CI)")
     style(ax)
-axes[0].legend(frameon=False, fontsize=8, loc="lower left")
-axes[1].legend(frameon=False, fontsize=8, loc="lower left")
+h, l = axes[1].get_legend_handles_labels()
+fig.legend(h, l, frameon=False, fontsize=8, loc="lower center", ncol=5)
 reps = ", ".join(f"{s}: {res[s]['A_replicates']} seeds" for s in sizes)
 fig.suptitle(f"Item 03 paired arms against the incumbent copy A ({reps}; 8 targets each)", color=INK, fontsize=10)
-fig.tight_layout()
+fig.tight_layout(rect=(0, 0.07, 1, 1))
 fig.savefig(D / "fig_paired.svg")
 fig.savefig(D / "fig_paired.png", dpi=150)
 
 # Figure 2: (left) filter firing rate by target law; (right) free rank vs K.
-fig, (a1, a2) = plt.subplots(1, 2, figsize=(9.5, 3.4))
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 3.6))
 rows = [json.loads(l) for l in (D / "data" / "trace_theory.jsonl").read_text().splitlines()]
 labels, vals = [], []
 for r in rows:
     if r["check"] == "control_uniform_abscissae":
-        labels.append(f"uniform curve x\nn={r['n']} a={r['a']}")
+        labels.append(f"uniform x\nn={r['n']}, a={r['a']}")
         vals.append(r["fraction"])
 for r in rows:
     if r["check"] == "control_subgroup" and r["n"] == 61:
-        labels.append("subgroup [k]G\nn=61")
+        labels.append("[k]G\nn=61")
         vals.append(r["filter_fires_kG"] / r["samples"])
 inc_rej = sum(res[s]["F"]["filter_rejections_total"] for s in sizes if "F" in res[s])
-labels.append("incumbent pipeline\n(all F-arm attempts)")
+labels.append("incumbent\nF-arm runs")
 vals.append(0.0 if inc_rej == 0 else float("nan"))
 a1.bar(range(len(vals)), vals, color=COL["F"], width=0.6)
 for i, v in enumerate(vals):
