@@ -88,7 +88,12 @@ version = "0.1.0"
 dependencies = [
  "crypto",
  "ecdlp-surfaces",
+ "hex",
+ "libc",
  "num-bigint 0.4.8",
+ "num-integer",
+ "rand",
+ "serde",
  "serde_json",
  "surface-evidence",
 ]
