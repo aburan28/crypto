@@ -1,0 +1,9 @@
+# Every run, as executed (release `ic`, 4 vCPU, seed 7, 32 planted controls). Output of `ic --json prime ...` is the JSON file named.
+# SECG curves, 1 000 000 Monte Carlo trials:
+#   <curve>_<B>.json   ic --json prime --curve <curve> --size B --trials 1000000 --controls 32 --seed 7
+#   B in {256, 1024, 4096} for every curve below; B = 8192 also for sect113r1, sect163r2, secp160r1
+#   binary: sect113r1 sect113r2 sect131r1 sect131r2 sect163k1 sect163r1 sect163r2 sect193r1 sect193r2 sect233k1 sect233r1 sect239k1
+#   prime:  secp112r1 secp112r2 secp128r1 secp128r2 secp160k1 secp160r1 secp160r2 secp192k1 secp192r1
+# Toy binary curves (method check, 3 000 000 trials):
+#   toyb<degree>_<B>.json   ic --json prime --curve toy-binary:<degree> --size B --trials 3000000 --controls 32 --seed 7
+#   degree 13: B in 8 16 32 64;  degree 17: B in 16 32 64 128 256;  degree 19: B in 32 64 128 256 512 1024
