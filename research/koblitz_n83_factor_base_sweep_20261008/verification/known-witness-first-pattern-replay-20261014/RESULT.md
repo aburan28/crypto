@@ -1,23 +1,30 @@
 # N83 known-witness algebra replay of the first identity pattern
 
-The [replay receipt](replay.json) confirms that the pinned public v7 five-point
-known-answer fixture has an affine partial sum after every term. Its final sum
-equals the pinned target, and the four binary Semaev S3 residuals are all zero.
-The native mixed-orbit worker visits `identity_mask=0` first, so this witness
-has the algebraic shape of that first all-affine pattern. The v7 worker spent
-its 5,000-conflict cap on one identity pattern and returned
+The [v2 replay receipt](replay.json) confirms that the pinned public v7
+five-point known-answer fixture has an affine partial sum after every term.
+Its final sum equals the pinned target, and the four binary Semaev S3 residuals
+are all zero. The fixture lists its first two small-domain points with
+`x[0] > x[1]`, while the v7 worker enables unsigned `x[0] <= x[1]` ordering.
+Swapping those two points gives the worker's allowed orientation. Its first
+partial sum changes; every later partial sum, the target, and all four zero S3
+residuals remain valid. The native mixed-orbit worker visits
+`identity_mask=0` first, so the **ordered** witness has the algebraic shape of
+that first all-affine pattern. The v7 worker spent its 5,000-conflict cap on
+one identity pattern and returned
 `UNKNOWN_search_cap` with zero SAT models. That bounded result does not refute
 the known group/S3 witness.
 
 `replay.py` reads only committed files. It pins the fixture, v7 result and
-independent audit, Python reference arithmetic, and both relevant Rust source
-files by SHA-256, then checks each against baseline commit
+independent audit, Python reference arithmetic, and the relevant Rust library
+and worker source files by SHA-256, then checks each against baseline commit
 `d42167ff4e80a9507911338df35572b5d24021c5`. The fixture uses three
 small-domain and two residual-domain positive phase-zero points at global
 indices 0, 166, 332, 196212, and 196378. The replay computes each partial
 sum with the existing Python group implementation and evaluates
 `S3(x,y,z) = xyz + (xy + xz + yz)^2 + 1` in the same binary field. It checks
-that all four equations vanish and the final affine point matches the target.
+both fixture and worker-ordered sequences. The original narrower
+[v1 receipt](replay-v1.json) is retained byte-for-byte and pinned to its
+previous commit; it checked the fixture order only.
 
 Reproduce from the repository root with:
 

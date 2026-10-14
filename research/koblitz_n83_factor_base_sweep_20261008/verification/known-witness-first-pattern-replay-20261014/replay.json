@@ -3,17 +3,15 @@
   "baseline_commit": "d42167ff4e80a9507911338df35572b5d24021c5",
   "capped_worker_conflicts": 5000,
   "capped_worker_models": 0,
-  "identity_mask": 0,
-  "input_sha256": {
-    "research/koblitz_n83_factor_base_sweep_20261008/chain_search_supervisor.py": "fa0443e453e5fb7011019a08b61a219834e1594acc99e007f405f27e44b97a66",
-    "research/koblitz_n83_factor_base_sweep_20261008/verification/mixed-orbit-control-reuse-19800-20261013/evidence-01/run/audit.json": "6c0926ced564fd5c9e0fff229667cfc1d036f8877974b525270602e27208df6e",
-    "research/koblitz_n83_factor_base_sweep_20261008/verification/mixed-orbit-control-reuse-19800-20261013/evidence-01/run/control/result.json": "e1c93b0e9d3d91ccf7eca304f39723298fc96bed4aba24f97101ab9e74811465",
-    "research/koblitz_n83_factor_base_sweep_20261008/verification/mixed-orbit-known-witness-source-20261012/fixture.json": "fc203db28eed0164e47b0c755c3d9a09f80df1acd5e4c7e09dfe172fa5f0a538",
-    "src/cryptanalysis/binary_semaev_chain_sat.rs": "0031972aab435d963af54a5f28f0510e45e5301f00c49466661191815becc06e",
-    "src/cryptanalysis/koblitz_large_prime.rs": "6ac5580c444cc65ba3a095fe117557c9c8628283a2e725fcbfa117f144d8b987"
-  },
-  "natural_relations": null,
-  "partial_sums": [
+  "first_pair_unsigned_leq": true,
+  "fixture_order_indices": [
+    0,
+    166,
+    332,
+    196212,
+    196378
+  ],
+  "fixture_order_partial_sums": [
     [
       "6322576162995772655031682",
       "7602502822968073983643739"
@@ -35,15 +33,63 @@
       "9473620351503970875544348"
     ]
   ],
-  "s3_residuals": [
+  "fixture_order_s3_residuals": [
     0,
     0,
     0,
     0
   ],
-  "schema": "n83.known-witness-first-pattern-algebra-replay/v1",
+  "identity_mask": 0,
+  "input_sha256": {
+    "examples/koblitz_n83_mixed_orbit_worker.rs": "5f310f7495989a94004a6545bed5682d54d3bc4b4f41db543ed24408a1fa1b7b",
+    "research/koblitz_n83_factor_base_sweep_20261008/chain_search_supervisor.py": "fa0443e453e5fb7011019a08b61a219834e1594acc99e007f405f27e44b97a66",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/mixed-orbit-control-reuse-19800-20261013/evidence-01/run/audit.json": "6c0926ced564fd5c9e0fff229667cfc1d036f8877974b525270602e27208df6e",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/mixed-orbit-control-reuse-19800-20261013/evidence-01/run/control/result.json": "e1c93b0e9d3d91ccf7eca304f39723298fc96bed4aba24f97101ab9e74811465",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/mixed-orbit-known-witness-source-20261012/fixture.json": "fc203db28eed0164e47b0c755c3d9a09f80df1acd5e4c7e09dfe172fa5f0a538",
+    "src/cryptanalysis/binary_semaev_chain_sat.rs": "0031972aab435d963af54a5f28f0510e45e5301f00c49466661191815becc06e",
+    "src/cryptanalysis/koblitz_large_prime.rs": "6ac5580c444cc65ba3a095fe117557c9c8628283a2e725fcbfa117f144d8b987"
+  },
+  "natural_relations": null,
+  "previous_replay_commit": "355598ffb09867b9264d7ae3d9390a7fc401b1d7",
+  "previous_replay_sha256": "c2ae2a916b8ff8e16a670c9e8bbb043ab38c1ea3ce76eba0831afb8588e86165",
+  "sat_order_indices": [
+    166,
+    0,
+    332,
+    196212,
+    196378
+  ],
+  "sat_order_partial_sums": [
+    [
+      "3190528981678629953846779",
+      "9566461183009654662464871"
+    ],
+    [
+      "6074522724576400135011444",
+      "5422717383075996735969660"
+    ],
+    [
+      "4229099761816125480084059",
+      "9096132042194153845393781"
+    ],
+    [
+      "976447405114368105838624",
+      "8147231288659614119648610"
+    ],
+    [
+      "6595116073687692399614168",
+      "9473620351503970875544348"
+    ]
+  ],
+  "sat_order_s3_residuals": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "schema": "n83.known-witness-first-pattern-algebra-replay/v2",
   "scope": "known_answer_control_only",
   "selected_best_total_runtime": null,
-  "status": "PASS_group_and_S3_witness_for_first_identity_pattern",
+  "status": "PASS_ordered_group_and_S3_witness_for_first_identity_pattern",
   "target_matches": true
 }
