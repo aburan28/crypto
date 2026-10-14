@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p24/comparisons/ic-mitm__ic-rootfind.json
+ops (ok): ic-rootfind / ic-mitm = 1.0807 [1.076, 1.086] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.1687 [1.084, 1.189]
+| curve | log2 r | workloads | ic-rootfind / ic-mitm | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp24-t2705-27cbb01b | 23.38 | 8 | 1.0807 | [1.0757, 1.0860] | cluster |
+
+| workload | curve | log2 r | ic-mitm mean S | ic-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0287641ad93a | icv1-fp24-t2705-27cbb01b | 23.38 | 30.6881 | 33.0510 | 1.0770 |
+| W6eec974fe4d1 | icv1-fp24-t2705-27cbb01b | 23.38 | 31.0057 | 33.5836 | 1.0831 |
+| W92133e527902 | icv1-fp24-t2705-27cbb01b | 23.38 | 31.2396 | 33.8040 | 1.0821 |
+| Wa9bf5407587e | icv1-fp24-t2705-27cbb01b | 23.38 | 31.6069 | 33.9321 | 1.0736 |
+| Wc92b25cbd51e | icv1-fp24-t2705-27cbb01b | 23.38 | 31.2260 | 34.0198 | 1.0895 |
+| We4c95c8871a0 | icv1-fp24-t2705-27cbb01b | 23.38 | 31.6752 | 34.5460 | 1.0906 |
+| We9584cba4c14 | icv1-fp24-t2705-27cbb01b | 23.38 | 30.5728 | 32.8601 | 1.0748 |
+| Wf7e403c855fa | icv1-fp24-t2705-27cbb01b | 23.38 | 31.0380 | 33.3443 | 1.0743 |
