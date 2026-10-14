@@ -434,7 +434,7 @@ fn summary(args: &[String]) {
         &fs::read_to_string(arg(args, "--jacobian").expect("--jacobian")).unwrap(),
     )
     .unwrap();
-    let mut lines = vec!["kind,op,p,g,mean_mul,mean_inv,mean_total,model_10g2,log2_ratio_to_model,fit_log2_c,fit_exponent,exponent_ci_lo,exponent_ci_hi".to_string()];
+    let mut lines = vec!["kind,op,p,g,mean_mul,mean_inv,mean_total,model_10g2,log2_ratio_to_model,fit_log2_c,fit_exponent,exponent_ci_lo,exponent_ci_hi,local_exponent".to_string()];
     let mut rng = StdRng::seed_from_u64(7);
     let mut fits: Vec<(String, u64, f64, f64)> = Vec::new(); // (op, p, c, e) for the sensitivity step
     let mut ops: Vec<(String, u64)> = rows.iter().map(|r| (r.op.clone(), r.p)).collect();
@@ -490,8 +490,16 @@ fn summary(args: &[String]) {
             let mean_inv: f64 =
                 sel.iter().filter(|r| r.g == *g).map(|r| r.inv).sum::<f64>() / by_g[i].len() as f64;
             let model = 10.0 * (*g as f64) * (*g as f64);
+            // exponent between this genus and the previous one
+            let local = if i == 0 {
+                String::new()
+            } else {
+                let num = means[i].log2() - means[i - 1].log2();
+                let den = (*g as f64).log2() - (gs[i - 1] as f64).log2();
+                format!("{:.3}", num / den)
+            };
             lines.push(format!(
-                "genus,{op},{p},{g},{mean_mul:.1},{mean_inv:.2},{:.1},{model:.0},{:.3},{a:.3},{e:.3},{lo:.3},{hi:.3}",
+                "genus,{op},{p},{g},{mean_mul:.1},{mean_inv:.2},{:.1},{model:.0},{:.3},{a:.3},{e:.3},{lo:.3},{hi:.3},{local}",
                 means[i],
                 (means[i] / model).log2()
             ));
@@ -530,13 +538,18 @@ fn summary(args: &[String]) {
         }
     }
     let within = |b: f64| slacks.iter().filter(|s| s.0 <= b).count();
+    let detail = format!(
+        "advantage_curves={};marginal_curves={};slack_le_1bit={};slack_le_2bits={};slack_le_3bits={};would_drop_below_margin_if_measured_cost_applied_to_the_whole_route={}",
+        slacks.len(),
+        marginal,
+        within(1.0),
+        within(2.0),
+        within(3.0),
+        flipped
+    );
     lines.push(format!(
-        "sensitivity,,,,,,,,,{:.3},{:.3},,{}",
-        add_fit.2, add_fit.3,
-        format!(
-            "advantage_curves={};marginal_curves={};slack_le_1bit={};slack_le_2bits={};slack_le_3bits={};would_drop_below_margin_if_measured_cost_applied_to_the_whole_route={}",
-            slacks.len(), marginal, within(1.0), within(2.0), within(3.0), flipped
-        )
+        "sensitivity,,,,,,,,,{:.3},{:.3},,{detail}",
+        add_fit.2, add_fit.3
     ));
     fs::write(&out, lines.join("\n") + "\n").expect("summary");
     println!("wrote {out}");
