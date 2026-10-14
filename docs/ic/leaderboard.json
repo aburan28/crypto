@@ -104,7 +104,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "f926db9f9756509c484262b9e371739836afc841b64b67a495be6e6df8b9dedf"
+   "sha256": "a167df37f0b4d24a3a4ad6cc531a39189b6a38f7bcf856984f8ca6beac2d67bb"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -112,7 +112,7 @@
   },
   "curves_yaml": {
    "path": "docs/curves/ic/curves.yaml",
-   "sha256": "566ed698a961aae8c81b7fb7863e808f9871d3080ee512afd111719783fab77e"
+   "sha256": "ab4891397fe07fca9478d96e1533c167a885b7557be9e6801025d14fec0976c5"
   }
  },
  "families": {
@@ -6895,8 +6895,10 @@
    "coefficients": "a = 0, b = 1",
    "order_bits": 71,
    "standard": [],
-   "ec1": [],
-   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "ec1": [
+    "EC1N71Ce0hac1355ef3db6"
+   ],
+   "ec1_unresolved": null,
    "legacy": [
     "k0n71",
     "K_0 / GF(2^71)",
@@ -6979,6 +6981,22 @@
     "K_0/2^83",
     "K_0/F_2^83"
    ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+   "family": "koblitz",
+   "field": "GF(2^83)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 83,
+   "standard": [],
+   "ec1": [
+    "EC1N83Ce1h35c7ced6b497"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
@@ -9560,6 +9578,20 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp20-tm728-d215a2a1",
+   "family": "prime",
+   "field": "GF(p), p = 946177",
+   "coefficients": "a = 304973, b = 530845",
+   "order_bits": 20,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp20-t1293-3c2999ba",
    "family": "prime",
    "field": "GF(p), p = 1048291",
@@ -9582,34 +9614,6 @@
    "family": "prime",
    "field": "GF(p), p = 1048583",
    "coefficients": "a = 699046, b = 388354",
-   "order_bits": 21,
-   "standard": [],
-   "ec1": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
-   "legacy": [],
-   "on_board": false,
-   "curves_yaml_key": null,
-   "factor_base_link_status": "no_curves_yaml_record"
-  },
-  {
-   "slug": "icv1-fp21-tm700-56b6783a",
-   "family": "prime",
-   "field": "GF(p), p = 1048583",
-   "coefficients": "a = 2, b = 2",
-   "order_bits": 21,
-   "standard": [],
-   "ec1": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
-   "legacy": [],
-   "on_board": false,
-   "curves_yaml_key": null,
-   "factor_base_link_status": "no_curves_yaml_record"
-  },
-  {
-   "slug": "icv1-fp21-tm700-7ee99c50",
-   "family": "prime",
-   "field": "GF(p), p = 1048583",
-   "coefficients": "a = 1048579, b = 1048579",
    "order_bits": 21,
    "standard": [],
    "ec1": [],
@@ -9733,6 +9737,20 @@
    "legacy": [
     "isogeny-gap-prime-D3-l7-h3-22b-level-L1"
    ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp22-tm2947-e15fed69",
+   "family": "prime",
+   "field": "GF(p), p = 2387969",
+   "coefficients": "a = 1427047, b = 558169",
+   "order_bits": 22,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
@@ -10964,6 +10982,20 @@
     "generated-24bit-10935329"
    ],
    "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp24-t2705-27cbb01b",
+   "family": "prime",
+   "field": "GF(p), p = 10940417",
+   "coefficients": "a = 10128206, b = 867458",
+   "order_bits": 24,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
   },
@@ -12408,6 +12440,20 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp26-t2838-8e779ca8",
+   "family": "prime",
+   "field": "GF(p), p = 40857601",
+   "coefficients": "a = 8702713, b = 9617118",
+   "order_bits": 26,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp26-tm1775-7e8fb6df",
    "family": "prime",
    "field": "GF(p), p = 42652151",
@@ -13845,6 +13891,20 @@
    "legacy": [
     "isogeny-gap-prime-D4-l5-h4-26b-level-L1"
    ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp28-t4155-50f492b1",
+   "family": "prime",
+   "field": "GF(p), p = 231657473",
+   "coefficients": "a = 95419558, b = 159693275",
+   "order_bits": 28,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
@@ -38672,76 +38732,6 @@
    "field": "GF(2^None)",
    "coefficients": "a = ['2253803012394', '3630391213102', '3374266364292', '1282446936815', '996618294589', '2194249978977'], b = ['2889000543283', '880590613020', '1658349615202', '633515690453', '3340196979196', '3373097675899']",
    "order_bits": 253,
-   "standard": [],
-   "ec1": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
-   "legacy": [],
-   "on_board": false,
-   "curves_yaml_key": null,
-   "factor_base_link_status": "no_curves_yaml_record"
-  },
-  {
-   "slug": "icv1-fp20-tm728-d215a2a1",
-   "family": "prime",
-   "field": "GF(p), p = 946177",
-   "coefficients": "a = 304973, b = 530845",
-   "order_bits": 20,
-   "standard": [],
-   "ec1": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
-   "legacy": [],
-   "on_board": false,
-   "curves_yaml_key": null,
-   "factor_base_link_status": "no_curves_yaml_record"
-  },
-  {
-   "slug": "icv1-fp22-tm2947-e15fed69",
-   "family": "prime",
-   "field": "GF(p), p = 2387969",
-   "coefficients": "a = 1427047, b = 558169",
-   "order_bits": 22,
-   "standard": [],
-   "ec1": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
-   "legacy": [],
-   "on_board": false,
-   "curves_yaml_key": null,
-   "factor_base_link_status": "no_curves_yaml_record"
-  },
-  {
-   "slug": "icv1-fp24-t2705-27cbb01b",
-   "family": "prime",
-   "field": "GF(p), p = 10940417",
-   "coefficients": "a = 10128206, b = 867458",
-   "order_bits": 24,
-   "standard": [],
-   "ec1": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
-   "legacy": [],
-   "on_board": false,
-   "curves_yaml_key": null,
-   "factor_base_link_status": "no_curves_yaml_record"
-  },
-  {
-   "slug": "icv1-fp26-t2838-8e779ca8",
-   "family": "prime",
-   "field": "GF(p), p = 40857601",
-   "coefficients": "a = 8702713, b = 9617118",
-   "order_bits": 26,
-   "standard": [],
-   "ec1": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
-   "legacy": [],
-   "on_board": false,
-   "curves_yaml_key": null,
-   "factor_base_link_status": "no_curves_yaml_record"
-  },
-  {
-   "slug": "icv1-fp28-t4155-50f492b1",
-   "family": "prime",
-   "field": "GF(p), p = 231657473",
-   "coefficients": "a = 95419558, b = 159693275",
-   "order_bits": 28,
    "standard": [],
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",

@@ -730,6 +730,7 @@ mod tests {
             integer: 17,
         };
         let legacy: LegacyFloatFixture = from_str_legacy_floats(text).unwrap();
+        let serde: LegacyFloatFixture = serde_json::from_str(text).unwrap();
 
         // Freeze the v1 parser's exact binary results independently of the
         // serde_json feature set used by the current build.
@@ -758,8 +759,8 @@ mod tests {
         // serde_json >= 1.0.15x parses decimals exactly under
         // arbitrary_precision, so the default path now agrees bit for bit
         // with the legacy reproducer instead of losing the tail.
-        assert_eq!(legacy.gae.to_bits(), current.gae.to_bits());
-        assert_eq!(legacy.nested[0].to_bits(), current.nested[0].to_bits());
+        assert_eq!(legacy.gae.to_bits(), serde.gae.to_bits());
+        assert_eq!(legacy.nested[0].to_bits(), serde.nested[0].to_bits());
         assert_eq!(legacy.integer, 17);
     }
 
