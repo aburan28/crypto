@@ -1,0 +1,30 @@
+{
+  "algorithm_seed": 15139448917701222296,
+  "curve": {
+    "a": 101186781,
+    "b": 57596093,
+    "group_order": 320091991,
+    "gx": 0,
+    "gy": 112219098,
+    "kind": "prime_explicit",
+    "p": 320092037,
+    "r": 320091991
+  },
+  "expected_method_id": "ECM1h0a90b9dbc108",
+  "expected_workload_id": "Wb710a9e566f6",
+  "method": {
+    "id": "ic.pipeline",
+    "params": {
+      "factor_base": "prime-abscissa:size=256",
+      "linalg": "structured-gauss",
+      "max_trials": "100000000",
+      "oracle": "mitm:m=2,negation_folded=1",
+      "solver": "",
+      "solver_budget_seconds": "0",
+      "targets": "walk"
+    }
+  },
+  "schema": "ecbench.child_input/v1",
+  "target_index": 7,
+  "target_seed": 2026101201
+}
