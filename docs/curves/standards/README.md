@@ -1,5 +1,14 @@
 # Standards inventory and cover linkage
 
+The [SEC 2 edition crosswalk and trait report](../../../research/sec2_curve_inventory_20261012/REPORT.md)
+binds all 33 SEC 2 v1.0 names and the 20 retained in v2.0 to exact registry
+identities. Its [machine-readable inventory](../../../research/sec2_curve_inventory_20261012/inventory.json)
+includes the existing trait, cover and transfer-screening records, primary PDF
+parameter comparisons, seeds, and status-bearing bounded checks of the SEC 1
+`n±1` recommendation. The [PDF](../../../research/sec2_curve_inventory_20261012/REPORT.pdf)
+and [SVG](../../../research/sec2_curve_inventory_20261012/sizes.svg) provide a
+readable overview.
+
 The importer accounts for **every row in its pinned inputs**, including failures.
 It does not claim an exhaustive list of every curve ever adopted by every agency.
 The initial inventory contains 265 source records: 258 imported records, deduplicated

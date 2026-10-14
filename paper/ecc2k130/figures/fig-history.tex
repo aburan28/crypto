@@ -1,0 +1,55 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  xbar, xmode=log, log basis x=10, log origin=infty,
+  width=0.64\textwidth, height=0.6\textwidth,
+  bar width=7pt, bar shift=0pt,
+  xmin=0.008, xmax=80,
+  xtick={0.01,0.1,1,10}, xticklabels={0.01,0.1,1,10},
+  xlabel={billion iterations per second per chip or card (log scale)},
+  symbolic y coords={core2,cell09,gtx09,sthreea,cell12,gtx10,sthreeb,asic,xeon,vu47p,pro6000c,pro6000b},
+  ytick={core2,cell09,gtx09,sthreea,cell12,gtx10,sthreeb,asic,xeon,vu47p,pro6000c,pro6000b},
+  yticklabels={
+    {2009 Core 2 Q6850 (4 cores)},
+    {2009 Cell, PlayStation 3},
+    {2009 GTX 295 (card, 2 dies)},
+    {2009 Spartan-3 XC3S5000},
+    {2012 Cell, PlayStation 3},
+    {2010 GTX 295, final (card, 2 dies)},
+    {2010 Spartan-3 XC3S5000},
+    {2009 ASIC 90\,nm (estimate)},
+    {2026 Xeon, 4 threads, AVX-512},
+    {2026 VU47P FPGA (AWS F2)},
+    {2026 RTX PRO 6000, campaign},
+    {2026 RTX PRO 6000, best $\sigma$},
+  },
+  y dir=reverse,
+  xmajorgrids,
+  enlarge y limits=0.05,
+  nodes near coords,
+  nodes near coords style={font=\scriptsize,color=black,anchor=west},
+  point meta=explicit symbolic,
+  legend style={at={(0.5,1.02)},anchor=south},
+  legend columns=3,
+  legend cell align=left,
+]
+\addplot[fill=inkS!55,draw=none] coordinates {
+  (0.0225,core2) [0.0225] (0.0277,cell09) [0.0277] (0.0251,gtx09) [0.0251]
+  (0.0337,sthreea) [0.0337] (0.0259,cell12) [0.0259] (0.064,gtx10) [0.064]
+  (0.111,sthreeb) [0.111]};
+\addlegendentry{2009--2012, measured}
+\addplot[fill=white,draw=inkS,pattern=north east lines,pattern color=inkS!70] coordinates {(0.8,asic) [0.8 est.]};
+\addlegendentry{2009 synthesis estimate}
+\addplot[fill=cA,draw=none] coordinates {
+  (0.040,xeon) [0.040] (8.25,vu47p) [8.25] (14.64,pro6000c) [14.64] (15.88,pro6000b) [15.88]};
+\addlegendentry{this paper, measured}
+\end{axis}
+\end{tikzpicture}
+\caption{ECC2K-130 rates, 2009--2012 against today, on one log scale
+  (Tables~\ref{tab:history} and~\ref{tab:history-compare}). Each bar is
+  one chip except the two GTX~295 bars, which are one card carrying two
+  GPU dies, as their sources report them; per die they are half. One RTX~PRO~6000
+  does the work of about 229 of the 2010 cards.}
+\label{fig:history}
+\end{figure}

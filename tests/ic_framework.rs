@@ -161,7 +161,8 @@ fn boundary_ledger_quick_run_prices_every_regime_and_verifies() {
             // (§10.2); it must not happen on any row.
             assert_eq!(
                 var["linear_algebra"]["native"]["repeated_column_rows"], 0,
-                "{}", var["name"]
+                "{}",
+                var["name"]
             );
         }
     }
@@ -188,7 +189,9 @@ fn corpus_writes_certified_instances_in_every_format() {
     assert_eq!(v["status"], "complete");
     let instances = v["instances"].as_array().unwrap();
     assert_eq!(instances.len(), 2);
-    assert!(instances.iter().all(|i| i["label_checked_by_own_solver"] == true));
+    assert!(instances
+        .iter()
+        .all(|i| i["label_checked_by_own_solver"] == true));
     assert_eq!(v["written"].as_array().unwrap().len(), 10);
     assert!(dir.join("n13l4-1-S.cnf").exists());
     let info = std::fs::read_to_string(dir.join("INFOn13l4-1-S")).unwrap();
@@ -622,8 +625,16 @@ fn workflow_rejects_a_solve_cost_objective_that_does_not_match_the_run() {
     });
     let cases: [(&str, Value, &str); 5] = [
         ("wrong oracle", json!({"solver":"pair_table"}), "groebner"),
-        ("pruned candidates", json!({"prune":true}), "prune and saturate"),
-        ("saturated candidates", json!({"saturate":true}), "prune and saturate"),
+        (
+            "pruned candidates",
+            json!({"prune":true}),
+            "prune and saturate",
+        ),
+        (
+            "saturated candidates",
+            json!({"saturate":true}),
+            "prune and saturate",
+        ),
         ("out of range", json!({"solve_cost_targets":0}), "1..=4096"),
         ("unpriceable family", json!({"family":"union"}), "factor"),
     ];

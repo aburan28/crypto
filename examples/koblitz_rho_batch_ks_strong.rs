@@ -1628,8 +1628,8 @@ mod wide {
         let automorphisms = signed_automorphism_size(lambda, modulus, n);
         let generator = match curve.generator() {
             BinaryPoint::Affine { x, y } => WPoint::Affine {
-                x: gf.from_element(&x),
-                y: gf.from_element(&y),
+                x: gf.from_element(x),
+                y: gf.from_element(y),
             },
             BinaryPoint::Infinity => WPoint::Infinity,
         };
@@ -1877,9 +1877,7 @@ mod wide {
                         let j = active.len();
                         jump_index[j] = ji;
                         denominators[j] = match (lane.state.point, jumps[ji].point) {
-                            (WPoint::Affine { x: x1, .. }, WPoint::Affine { x: x2, .. }) => {
-                                x1 ^ x2
-                            }
+                            (WPoint::Affine { x: x1, .. }, WPoint::Affine { x: x2, .. }) => x1 ^ x2,
                             _ => 0,
                         };
                         active.push(li);
