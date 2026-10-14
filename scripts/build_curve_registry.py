@@ -512,8 +512,9 @@ def harvest_curve_records(reg: Registry) -> None:
             ident = cid.binary_id(m, modulus, a, b, order, end="-7" if koblitz else "unk")
             params = ({"a": a, "n": m, "modulus": cid._hex(modulus), "modulus_rule": "recorded in the run"}
                       if koblitz else {"m": m, "modulus": cid._hex(modulus), "a": cid._hex(a), "b": cid._hex(b)})
+            # Bare aliases only over the repository's modulus, as in harvest_json.
             reg.add(ident, "koblitz" if koblitz else "binary", params, rel,
-                    koblitz_aliases(a, m) if koblitz else [])
+                    koblitz_aliases(a, m) if koblitz and modulus == koblitz_modulus(m)[0] else [])
             reg.represent(ident, f, {k: v for k, v in c.items() if k != "curve_id"}, rel)
 
 
@@ -671,17 +672,18 @@ def harvest_native_standards(reg: Registry) -> None:
             reg.represent(ident, rep["field"], rep["curve"], str(path.relative_to(REPO)))
 
 
-# Entries the append-only rule must not carry: models that never existed
-# as recorded, each with the reason.  A retired slug stops resolving; the
-# model that was meant keeps its own entry.
-RETIRED = {
-    "icv1-fp21-tm700-56b6783a": (
-        "y^2 = x^3 + 2x + 2 over GF(1048583) with the order 1049284, read from "
-        "research/isogeny_fibers_20261010/round4/16_7_agm_isogeny_oracles/out_seed7.json "
-        "before the builder normalized its model y^2 = x^3 + a x^2 + b x; that curve "
-        "is icv1-fp21-tm700-d62ba3a6, and the short model's own order is 1049250 "
-        "(curve_traits' exhaustive count)"),
-}
+# Entries the append-only rule must not carry: the deprecated extraction
+# labels of docs/curves/sources/prime-model-corrections.json, models that
+# never existed as recorded (each names the correct record, which keeps its
+# own entry).  The corrections file keeps them as provenance.
+CORRECTIONS = REPO / "docs/curves/sources/prime-model-corrections.json"
+
+
+def retired_slugs() -> set[str]:
+    if not CORRECTIONS.exists():
+        return set()
+    doc = json.loads(CORRECTIONS.read_text())
+    return {c["deprecated_extraction_slug"] for c in doc.get("corrections", [])}
 
 
 def carry_forward(reg: Registry) -> None:
@@ -691,8 +693,9 @@ def carry_forward(reg: Registry) -> None:
     curve is gone, and the slug that replaced it must still resolve."""
     if not OUT.exists():
         return
+    retired = retired_slugs()
     for e in json.loads(OUT.read_text())["curves"]:
-        if e["slug"] in RETIRED:
+        if e["slug"] in retired:
             continue
         key = hashlib.sha256(e["model_json"].encode("ascii")).hexdigest()
         if key in reg.curves:

@@ -182,9 +182,9 @@ impl WordWidth {
             return None;
         }
         match bits {
-            ..=127 => Some(Self::U128),
-            ..=191 => Some(Self::U192),
-            ..=MAX_MODULUS_BITS => Some(Self::U256),
+            0..=127 => Some(Self::U128),
+            128..=191 => Some(Self::U192),
+            192..=MAX_MODULUS_BITS => Some(Self::U256),
             _ => None,
         }
     }
@@ -1161,9 +1161,9 @@ impl<W: ModWord> SparseRow<W> {
     /// `Σ c · x_col mod r` for a full assignment `x`.
     fn evaluate(&self, x: &[W], modulus: W::Modulus) -> W {
         let m = &modulus;
-        self.entries
-            .iter()
-            .fold(W::zero(), |acc, &(c, v)| acc.add(v.mul(x[c as usize], m), m))
+        self.entries.iter().fold(W::zero(), |acc, &(c, v)| {
+            acc.add(v.mul(x[c as usize], m), m)
+        })
     }
 
     /// `self − factor · other`, entries merged by column (`factor < r`).
@@ -1976,13 +1976,22 @@ impl<W: ModWord> CsrMatrix<W> {
             }
             target.push('\n');
         };
-        append(&mut contract, &mut self.row_ptr.iter().map(|v| v.to_string()));
-        append(&mut contract, &mut self.col_idx.iter().map(|v| v.to_string()));
+        append(
+            &mut contract,
+            &mut self.row_ptr.iter().map(|v| v.to_string()),
+        );
+        append(
+            &mut contract,
+            &mut self.col_idx.iter().map(|v| v.to_string()),
+        );
         append(
             &mut contract,
             &mut (0..self.vals.len()).map(|k| self.coefficient(k).to_biguint().to_string()),
         );
-        append(&mut contract, &mut x.iter().map(|v| v.to_biguint().to_string()));
+        append(
+            &mut contract,
+            &mut x.iter().map(|v| v.to_biguint().to_string()),
+        );
         contract
     }
 
@@ -2657,7 +2666,8 @@ fn block_gram<W: ModWord>(
         for i in 0..lanes {
             let a = left[row * lanes + i];
             for j in 0..lanes {
-                out[i * lanes + j] = out[i * lanes + j].add(a.mul(right[row * lanes + j], modulus), modulus);
+                out[i * lanes + j] =
+                    out[i * lanes + j].add(a.mul(right[row * lanes + j], modulus), modulus);
             }
         }
     }
@@ -2672,7 +2682,8 @@ fn small_product<W: ModWord>(a: &[W], b: &[W], n: usize, modulus: &W::Modulus) -
                 continue;
             }
             for j in 0..n {
-                out[i * n + j] = out[i * n + j].add(a[i * n + k].mul(b[k * n + j], modulus), modulus);
+                out[i * n + j] =
+                    out[i * n + j].add(a[i * n + k].mul(b[k * n + j], modulus), modulus);
             }
         }
     }
@@ -2797,11 +2808,7 @@ pub fn block_lanczos_solve<W: ModWord>(
             let answer: Vec<W> = solution.chunks(lanes).map(|block| block[0]).collect();
             let mut check = vec![W::zero(); dimension];
             a.mul_block(&answer, 1, &mut check);
-            if check
-                .iter()
-                .zip(b)
-                .all(|(&x, &y)| x == y.reduce(modulus))
-            {
+            if check.iter().zip(b).all(|(&x, &y)| x == y.reduce(modulus)) {
                 return Some((answer, report));
             }
             return None;
@@ -3081,10 +3088,22 @@ pub enum SparseRows {
 macro_rules! with_rows {
     ($self:expr, |$modulus:ident, $rows:ident| $body:expr) => {
         match $self {
-            SparseRows::U64 { modulus: $modulus, rows: $rows } => $body,
-            SparseRows::U128 { modulus: $modulus, rows: $rows } => $body,
-            SparseRows::U192 { modulus: $modulus, rows: $rows } => $body,
-            SparseRows::U256 { modulus: $modulus, rows: $rows } => $body,
+            SparseRows::U64 {
+                modulus: $modulus,
+                rows: $rows,
+            } => $body,
+            SparseRows::U128 {
+                modulus: $modulus,
+                rows: $rows,
+            } => $body,
+            SparseRows::U192 {
+                modulus: $modulus,
+                rows: $rows,
+            } => $body,
+            SparseRows::U256 {
+                modulus: $modulus,
+                rows: $rows,
+            } => $body,
         }
     };
 }
@@ -3145,9 +3164,8 @@ impl SparseRows {
 
     /// Append a row given densely over the columns.
     pub fn push_dense(&mut self, row: &[BigUint], rhs: &BigUint) {
-        with_rows!(self, |modulus, rows| rows.push(SparseRow::from_dense(
-            row, rhs, *modulus
-        )))
+        with_rows!(self, |modulus, rows| rows
+            .push(SparseRow::from_dense(row, rhs, *modulus)))
     }
 
     /// Append a row from `(column, coefficient)` pairs (unsorted,
@@ -4309,7 +4327,8 @@ mod wide_tests {
     /// `2¹⁹¹ − 19`: the top of `U192`, where an accumulator absorbs two products.
     const P191: &str = "3138550867693340381917894711603833208051177722232017256429";
     /// `2²⁵⁰ − 207`.
-    const P250: &str = "1809251394333065553493296640760748560207343510400633813116524750123642650417";
+    const P250: &str =
+        "1809251394333065553493296640760748560207343510400633813116524750123642650417";
 
     fn big(s: &str) -> BigUint {
         BigUint::from_str(s).unwrap()
@@ -4391,7 +4410,9 @@ mod wide_tests {
             let expect = coeffs
                 .iter()
                 .zip(&data)
-                .fold(BigUint::zero(), |acc, (c, d)| acc + c.to_biguint() * d.to_biguint())
+                .fold(BigUint::zero(), |acc, (c, d)| {
+                    acc + c.to_biguint() * d.to_biguint()
+                })
                 % &mb;
             let lazy_coeffs: Vec<W> = coeffs.iter().map(|&c| W::lazy_form(c, &m)).collect();
             let mut acc = LazyLanes::<W, 1>::new(&lazy);
@@ -4493,7 +4514,10 @@ mod wide_tests {
         let rows_n = columns + columns / 10 + 64;
         let (rows, x) = planted::<W>(&mut rng, rows_n, columns, 5, &m);
         let mut last = None;
-        for solver in [SparseCoreSolver::BlockWiedemann, SparseCoreSolver::BlockLanczos] {
+        for solver in [
+            SparseCoreSolver::BlockWiedemann,
+            SparseCoreSolver::BlockLanczos,
+        ] {
             let opts = SparseSolveOptions {
                 solver,
                 seed,
@@ -4504,7 +4528,10 @@ mod wide_tests {
                 SparseSolveOutcome::Solved(sol) => assert_eq!(sol, x, "{s} {solver:?}"),
                 other => panic!("{s} {solver:?}: {other:?} ({report:?})"),
             }
-            assert_eq!(report.core_dimension + report.reconstructed_columns, columns);
+            assert_eq!(
+                report.core_dimension + report.reconstructed_columns,
+                columns
+            );
             match solver {
                 SparseCoreSolver::BlockWiedemann => assert!(report.wiedemann.is_some()),
                 SparseCoreSolver::BlockLanczos => assert!(report.lanczos.is_some()),
@@ -4525,14 +4552,23 @@ mod wide_tests {
             })
             .collect();
         let rhs: Vec<W> = rows_s.iter().map(|r| r.rhs).collect();
-        assert_eq!(dense_solve_unique(dense, rhs, m), Some(x_s.clone()), "{s} dense");
+        assert_eq!(
+            dense_solve_unique(dense, rhs, m),
+            Some(x_s.clone()),
+            "{s} dense"
+        );
         // The pipeline on the small instance agrees with the dense solve.
         let (outcome, _) = solve_sparse_system(&rows_s, small, m, &SparseSolveOptions::default());
-        assert_eq!(outcome, SparseSolveOutcome::Solved(x_s), "{s} small pipeline");
+        assert_eq!(
+            outcome,
+            SparseSolveOutcome::Solved(x_s),
+            "{s} small pipeline"
+        );
         // Singular: a column no row covers, and a rank-deficient system.
         let (mut rows_u, _) = planted::<W>(&mut rng, small + 8, small, 5, &m);
         rows_u.retain(|r| r.entries.iter().all(|&(c, _)| c != 3));
-        let (outcome, report) = solve_sparse_system(&rows_u, small, m, &SparseSolveOptions::default());
+        let (outcome, report) =
+            solve_sparse_system(&rows_u, small, m, &SparseSolveOptions::default());
         assert_eq!(outcome, SparseSolveOutcome::Undetermined, "{s} uncovered");
         assert_eq!(report.filter.uncovered_columns, 1);
         // Rank-deficient, consistent, every column covered: a square
@@ -4558,8 +4594,15 @@ mod wide_tests {
             })
             .collect();
         let rhs_d: Vec<W> = rows_d.iter().map(|r| r.rhs).collect();
-        assert_eq!(dense_solve_unique(dense_d, rhs_d, m), None, "{s} dense rank-deficient");
-        for solver in [SparseCoreSolver::BlockWiedemann, SparseCoreSolver::BlockLanczos] {
+        assert_eq!(
+            dense_solve_unique(dense_d, rhs_d, m),
+            None,
+            "{s} dense rank-deficient"
+        );
+        for solver in [
+            SparseCoreSolver::BlockWiedemann,
+            SparseCoreSolver::BlockLanczos,
+        ] {
             let opts = SparseSolveOptions {
                 solver,
                 ..SparseSolveOptions::default()
@@ -4580,8 +4623,13 @@ mod wide_tests {
             }
         }
         rows_d[2] = rows_d[1].clone(); // an exact duplicate: removed, rows < columns
-        let (outcome, report) = solve_sparse_system(&rows_d, small, m, &SparseSolveOptions::default());
-        assert_eq!(outcome, SparseSolveOutcome::Undetermined, "{s} duplicate row");
+        let (outcome, report) =
+            solve_sparse_system(&rows_d, small, m, &SparseSolveOptions::default());
+        assert_eq!(
+            outcome,
+            SparseSolveOutcome::Undetermined,
+            "{s} duplicate row"
+        );
         assert!(
             report.filter.duplicates_removed == 1 || report.filter.uncovered_columns == 1,
             "{s} duplicate row: {report:?}"
@@ -4651,14 +4699,21 @@ mod wide_tests {
                 rhs: U128::from_u64(r.rhs, &m128),
             })
             .collect();
-        for solver in [SparseCoreSolver::BlockWiedemann, SparseCoreSolver::BlockLanczos] {
+        for solver in [
+            SparseCoreSolver::BlockWiedemann,
+            SparseCoreSolver::BlockLanczos,
+        ] {
             let opts = SparseSolveOptions {
                 solver,
                 ..SparseSolveOptions::default()
             };
             let (o64, r64) = solve_sparse_system(&rows64, columns, m64, &opts);
             let (o128, r128) = solve_sparse_system(&rows128, columns, m128, &opts);
-            assert_eq!(o64, SparseSolveOutcome::Solved(x64.clone()), "{solver:?} u64");
+            assert_eq!(
+                o64,
+                SparseSolveOutcome::Solved(x64.clone()),
+                "{solver:?} u64"
+            );
             let SparseSolveOutcome::Solved(s128) = o128 else {
                 panic!("{solver:?} U128: {o128:?}");
             };
@@ -4768,7 +4823,8 @@ mod wide_tests {
             .and_then(|v| v.parse().ok())
             .unwrap_or(10_000);
         let width = std::env::var("KOBLITZ_SPARSE_LA_WIDTH").unwrap_or_else(|_| "u64".into());
-        let solvers = std::env::var("KOBLITZ_SPARSE_LA_SOLVERS").unwrap_or_else(|_| "wiedemann,lanczos".into());
+        let solvers = std::env::var("KOBLITZ_SPARSE_LA_SOLVERS")
+            .unwrap_or_else(|_| "wiedemann,lanczos".into());
         match width.as_str() {
             "u64" => bench::<u64>(P61, "u64", columns, &solvers),
             "u128" => bench::<U128>(P127, "u128", columns, &solvers),
@@ -4818,7 +4874,9 @@ mod wide_tests {
         // SpMV: block of 4 lanes (the default Krylov block) and 1 lane,
         // serial and with the default (parallel over rows) backend.
         for lanes in [4usize, 1] {
-            let v: Vec<W> = (0..columns * lanes).map(|_| W::random(&mut rng, &m)).collect();
+            let v: Vec<W> = (0..columns * lanes)
+                .map(|_| W::random(&mut rng, &m))
+                .collect();
             let mut y = vec![W::zero(); rows_n * lanes];
             for backend in [SpmvBackend::Serial, SpmvBackend::Auto] {
                 let a = a.clone().with_spmv(SpmvOptions { backend, shards: 0 });
@@ -4866,7 +4924,12 @@ mod wide_tests {
                 .wiedemann
                 .as_ref()
                 .map(|w| w.products * w.block_n)
-                .or_else(|| report.lanczos.as_ref().map(|l| l.sparse_products * l.block_size))
+                .or_else(|| {
+                    report
+                        .lanczos
+                        .as_ref()
+                        .map(|l| l.sparse_products * l.block_size)
+                })
                 .unwrap_or(0);
             println!(
                 "BENCH_JSON {{\"kind\":\"solve\",\"width\":\"{width}\",\"modulus_bits\":{bits},\"columns\":{columns},\"rows\":{rows_n},\"nnz\":{nnz},\"solver\":\"{solver:?}\",\"threads\":{threads},\"seconds\":{secs:.3},\"cpu_seconds\":{cpu:.3},\"load_average\":{load:.1},\"verified\":{verified},\"core_dimension\":{},\"core_nonzeros\":{},\"attempts\":{},\"core_lane_products\":{core_products},\"report\":{}}}",

@@ -88,7 +88,8 @@ impl LargePrimeConfig {
                 .parse::<f64>()
                 .map_err(|_| format!("parameter `lp_domain_factor` is not a number: `{raw}`"))?,
         };
-        if !(domain_factor > 0.0) || !domain_factor.is_finite() {
+        // NaN fails every comparison, so it is named.
+        if domain_factor.is_nan() || domain_factor <= 0.0 || !domain_factor.is_finite() {
             return Err("lp_domain_factor must be a positive number".into());
         }
         let raw_x_cap = params.u64_or("lp_raw_x_cap", 1 << 40)?;
@@ -207,7 +208,9 @@ impl<'i> LargePrimeCollector<'i> {
         }
         for &u in &column_unit {
             if !g.is_identity(&g.mul(ops, fb.points[u], r)) {
-                return Err("large primes need a factor base inside the prime-order subgroup".into());
+                return Err(
+                    "large primes need a factor base inside the prime-order subgroup".into(),
+                );
             }
         }
 
@@ -264,7 +267,10 @@ impl<'i> LargePrimeCollector<'i> {
                 continue;
             }
             if !g.is_identity(&g.mul(ops, seed, r)) {
-                return Err(format!("projected point from raw x {} has wrong order", raw_x - 1));
+                return Err(format!(
+                    "projected point from raw x {} has wrong order",
+                    raw_x - 1
+                ));
             }
             membership.insert(key, Membership::Domain);
             let column = fb.columns + domain_orbits;
@@ -351,13 +357,9 @@ impl<'i> LargePrimeCollector<'i> {
                 (fb.col_of[rep], fb.coef_of[rep])
             })
             .collect();
-        let eliminator = WideLargePrimeEliminator::new_owned(
-            kc,
-            ffb,
-            fast.lower(ctx.target),
-            config.limits,
-        )
-        .map_err(|e| format!("large-prime eliminator: {e}"))?;
+        let eliminator =
+            WideLargePrimeEliminator::new_owned(kc, ffb, fast.lower(ctx.target), config.limits)
+                .map_err(|e| format!("large-prime eliminator: {e}"))?;
 
         let mut setup = BTreeMap::new();
         setup.insert("lp_domain_orbits".into(), domain_orbits as u64);
@@ -374,9 +376,15 @@ impl<'i> LargePrimeCollector<'i> {
             table_large.build_canonicalisations,
         );
         setup.insert("lp_table_lookups".into(), table_large.build_lookups);
-        setup.insert("lp_table_frobenius_maps".into(), table_large.build_frobenius_maps);
+        setup.insert(
+            "lp_table_frobenius_maps".into(),
+            table_large.build_frobenius_maps,
+        );
         setup.insert("pair_table_entries".into(), table_small.entries);
-        setup.insert("canonicalisations".into(), table_small.build_canonicalisations);
+        setup.insert(
+            "canonicalisations".into(),
+            table_small.build_canonicalisations,
+        );
         setup.insert("frobenius_maps".into(), table_small.build_frobenius_maps);
         setup.insert("lookups".into(), table_small.build_lookups);
         Ok(Self {
@@ -579,7 +587,9 @@ impl<'i> LargePrimeCollector<'i> {
             if let Some((j, k)) = self.table_large.probe(g, &self.envelope, ops, counters, t) {
                 let (j_large, k_large) = (j >= self.small_points, k >= self.small_points);
                 let (small, residual) = match (j_large, k_large) {
-                    (false, false) => unreachable!("F × F pairs are filtered out of the large table"),
+                    (false, false) => {
+                        unreachable!("F × F pairs are filtered out of the large table")
+                    }
                     (true, true) => {
                         self.counters.partials_two_large += 1;
                         (
@@ -758,7 +768,7 @@ mod tests {
         assert_eq!(lp.domain_points(), 6 * 2 * 13);
         for k in [5u64, 7, 14] {
             assert!(
-                fb.point_index.get(&multiple(&inst, k).pack()).is_none(),
+                !fb.point_index.contains_key(&multiple(&inst, k).pack()),
                 "[{k}]G must not lie in the base"
             );
         }
@@ -772,7 +782,15 @@ mod tests {
             .feed(&g, &fb, &mut ops, 8, 0, vec![i_g], vec![l])
             .is_none());
         let merged = lp
-            .feed(&g, &fb, &mut ops, (3 + lam(7)) % r, 0, vec![i_3g], vec![sigma_l])
+            .feed(
+                &g,
+                &fb,
+                &mut ops,
+                (3 + lam(7)) % r,
+                0,
+                vec![i_3g],
+                vec![sigma_l],
+            )
             .expect("two partials on one residual orbit close");
         let Relation::Row { columns, a, b } = &merged else {
             panic!("expected a merged row, got {merged:?}");
@@ -797,7 +815,15 @@ mod tests {
             .feed(&g, &fb, &mut ops, 6, 0, vec![i_g], vec![l1])
             .is_none());
         let third = lp
-            .feed(&g, &fb, &mut ops, (3 + lam(14)) % r, 0, vec![i_3g], vec![sigma_l2])
+            .feed(
+                &g,
+                &fb,
+                &mut ops,
+                (3 + lam(14)) % r,
+                0,
+                vec![i_3g],
+                vec![sigma_l2],
+            )
             .expect("the two-large-prime cycle closes");
         let Relation::Row { columns, a, b } = &third else {
             panic!("expected a merged row, got {third:?}");
@@ -824,7 +850,10 @@ mod tests {
         assert_eq!(lp.counters.rejected, 1);
         assert_eq!(lp.eliminator.stats().pivot_rows, stored_before);
         assert!(lp.last_error().is_some());
-        assert!(ops.scalar_mults > 0, "merged rows were replayed in the counted group");
+        assert!(
+            ops.scalar_mults > 0,
+            "merged rows were replayed in the counted group"
+        );
     }
 
     /// With `large_primes` unset the framework loop runs the classic
@@ -952,7 +981,16 @@ mod tests {
             if large_primes == 1 {
                 assert_eq!(rel.get("lp_partials_two_large"), 0);
             }
-            assert!(report.decomposition.setup.native.get("lp_table_entries").copied().unwrap_or(0) > 0);
+            assert!(
+                report
+                    .decomposition
+                    .setup
+                    .native
+                    .get("lp_table_entries")
+                    .copied()
+                    .unwrap_or(0)
+                    > 0
+            );
         }
     }
 }
