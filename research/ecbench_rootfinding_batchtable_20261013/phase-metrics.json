@@ -1,0 +1,30 @@
+[
+  {
+    "arm": "pair-batch",
+    "n": 24,
+    "verified": 24,
+    "base_abscissae": 64,
+    "base_signed_points": 128,
+    "mean_setup_wall_ns": 128380.125,
+    "mean_total_gae": 18633.041666666668,
+    "mean_setup_gae": 4160,
+    "mean_relation_gae": 12810.666666666666,
+    "mean_trials": 10936.5,
+    "setup_inversions_derived": 64,
+    "inversion_derivation": "one Montgomery batch inversion per abscissa row: B"
+  },
+  {
+    "arm": "pair-scalar",
+    "n": 24,
+    "verified": 24,
+    "base_abscissae": 64,
+    "base_signed_points": 128,
+    "mean_setup_wall_ns": 243225.79166666666,
+    "mean_total_gae": 18633.041666666668,
+    "mean_setup_gae": 4160,
+    "mean_relation_gae": 12810.666666666666,
+    "mean_trials": 10936.5,
+    "setup_inversions_derived": 4096,
+    "inversion_derivation": "one inversion per non-identity pair sum: B^2"
+  }
+]

@@ -134,8 +134,12 @@ fn main() {
             }
             "--generic" => {
                 i += 1;
-                generic_degrees =
-                    Some(args[i].split(',').map(|v| v.parse().expect("--generic")).collect());
+                generic_degrees = Some(
+                    args[i]
+                        .split(',')
+                        .map(|v| v.parse().expect("--generic"))
+                        .collect(),
+                );
             }
             other => panic!("unknown argument {other}"),
         }
@@ -206,7 +210,10 @@ fn main() {
         };
         let mut st = QuarticSolve::default();
         f.reset_muls();
-        eprintln!("residual {idx} ({}):", if constructed { "constructed" } else { "random" });
+        eprintln!(
+            "residual {idx} ({}):",
+            if constructed { "constructed" } else { "random" }
+        );
         let sols = solve_s5_subspace(&curve, &pre, &r.x, &mut rng, &mut st, true);
         let solver_q = sols
             .as_ref()

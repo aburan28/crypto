@@ -1,0 +1,676 @@
+{
+  "schema": "ghs_counterfactual/v1",
+  "command": "cargo run --release --example ghs_counterfactual -- --out results.json",
+  "model": "curve_construction::window::price, random-polynomial point counts #C(F_2^k) = 2^k + 1, smoothness bound b <= 200; fixed-genus g!q^(2-2/g) for l >= 2",
+  "admissibility_rule": "l * genus >= N - 2 (the note's rule, unchanged)",
+  "tables": [
+    {
+      "field_degree": 130,
+      "rule": "mmt",
+      "rows": [
+        {
+          "field_degree_n_total": 130,
+          "subfield_degree_l": 1,
+          "extension_degree_n": 130,
+          "rule": "mmt",
+          "available_magic_numbers": [
+            1,
+            2,
+            5,
+            6,
+            9,
+            10,
+            13,
+            14,
+            17,
+            18,
+            21,
+            22
+          ],
+          "least_admissible_magic_number": 9,
+          "type_i": true,
+          "genus": "255",
+          "log2_genus": 7.994353436858858,
+          "cost_model": "large genus over F_2 (boundary E)",
+          "log2_cost": 55.60311624533212,
+          "smoothness_bound_b": 27,
+          "log2_rho_on_that_group": 60.314564158221934,
+          "breaks_rho": true
+        },
+        {
+          "field_degree_n_total": 130,
+          "subfield_degree_l": 2,
+          "extension_degree_n": 65,
+          "rule": "mmt",
+          "available_magic_numbers": [
+            1,
+            5,
+            13,
+            17,
+            25,
+            29,
+            37,
+            41,
+            49,
+            53,
+            61,
+            65
+          ],
+          "least_admissible_magic_number": 13,
+          "type_i": true,
+          "genus": "4095",
+          "log2_genus": 11.99964773652837,
+          "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+          "log2_cost": 43242.045913134316,
+          "smoothness_bound_b": null,
+          "log2_rho_on_that_group": 60.314564158221934,
+          "breaks_rho": false
+        },
+        {
+          "field_degree_n_total": 130,
+          "subfield_degree_l": 5,
+          "extension_degree_n": 26,
+          "rule": "mmt",
+          "available_magic_numbers": [
+            1,
+            2,
+            13,
+            14,
+            25,
+            26
+          ],
+          "least_admissible_magic_number": 13,
+          "type_i": true,
+          "genus": "4095",
+          "log2_genus": 11.99964773652837,
+          "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+          "log2_cost": 43248.04444793285,
+          "smoothness_bound_b": null,
+          "log2_rho_on_that_group": 60.314564158221934,
+          "breaks_rho": false
+        },
+        {
+          "field_degree_n_total": 130,
+          "subfield_degree_l": 10,
+          "extension_degree_n": 13,
+          "rule": "mmt",
+          "available_magic_numbers": [
+            1,
+            13
+          ],
+          "least_admissible_magic_number": 13,
+          "type_i": true,
+          "genus": "4095",
+          "log2_genus": 11.99964773652837,
+          "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+          "log2_cost": 43258.04200593041,
+          "smoothness_bound_b": null,
+          "log2_rho_on_that_group": 60.314564158221934,
+          "breaks_rho": false
+        },
+        {
+          "field_degree_n_total": 130,
+          "subfield_degree_l": 13,
+          "extension_degree_n": 10,
+          "rule": "mmt",
+          "available_magic_numbers": [
+            1,
+            2,
+            5,
+            6,
+            9,
+            10
+          ],
+          "least_admissible_magic_number": 5,
+          "type_i": true,
+          "genus": "15",
+          "log2_genus": 3.9068905956085187,
+          "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+          "log2_cost": 64.51680713654929,
+          "smoothness_bound_b": null,
+          "log2_rho_on_that_group": 60.314564158221934,
+          "breaks_rho": false
+        },
+        {
+          "field_degree_n_total": 130,
+          "subfield_degree_l": 26,
+          "extension_degree_n": 5,
+          "rule": "mmt",
+          "available_magic_numbers": [
+            1,
+            5
+          ],
+          "least_admissible_magic_number": 5,
+          "type_i": true,
+          "genus": "15",
+          "log2_genus": 3.9068905956085187,
+          "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+          "log2_cost": 88.78347380321594,
+          "smoothness_bound_b": null,
+          "log2_rho_on_that_group": 60.314564158221934,
+          "breaks_rho": false
+        },
+        {
+          "field_degree_n_total": 130,
+          "subfield_degree_l": 65,
+          "extension_degree_n": 2,
+          "rule": "mmt",
+          "available_magic_numbers": [
+            1,
+            2
+          ],
+          "least_admissible_magic_number": 2,
+          "type_i": false,
+          "genus": "2",
+          "log2_genus": 1.0,
+          "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+          "log2_cost": 66.0,
+          "smoothness_bound_b": null,
+          "log2_rho_on_that_group": 60.314564158221934,
+          "breaks_rho": false
+        }
+      ]
+    },
+    {
+      "field_degree": 130,
+      "rule": "legacy",
+      "rows": [
+        {
+          "field_degree_n_total": 130,
+          "subfield_degree_l": 1,
+          "extension_degree_n": 130,
+          "rule": "legacy",
+          "available_magic_numbers": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            8,
+            9,
+            10,
+            12,
+            13,
+            14,
+            16
+          ],
+          "least_admissible_magic_number": 8,
+          "type_i": false,
+          "genus": "128",
+          "log2_genus": 7.0,
+          "cost_model": "large genus over F_2 (boundary E)",
+          "log2_cost": 36.40950720493362,
+          "smoothness_bound_b": 17,
+          "log2_rho_on_that_group": 60.314564158221934,
+          "breaks_rho": true
+        },
+        {
+          "field_degree_n_total": 130,
+          "subfield_degree_l": 2,
+          "extension_degree_n": 65,
+          "rule": "legacy",
+          "available_magic_numbers": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "least_admissible_magic_number": 7,
+          "type_i": false,
+          "genus": "64",
+          "log2_genus": 6.0,
+          "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+          "log2_cost": 299.932643941724,
+          "smoothness_bound_b": null,
+          "log2_rho_on_that_group": 60.314564158221934,
+          "breaks_rho": false
+        },
+        {
+          "field_degree_n_total": 130,
+          "subfield_degree_l": 5,
+          "extension_degree_n": 26,
+          "rule": "legacy",
+          "available_magic_numbers": [
+            1,
+            2,
+            12,
+            13,
+            14,
+            24,
+            25,
+            26
+          ],
+          "least_admissible_magic_number": 12,
+          "type_i": false,
+          "genus": "2048",
+          "log2_genus": 11.0,
+          "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+          "log2_cost": 19590.181480215066,
+          "smoothness_bound_b": null,
+          "log2_rho_on_that_group": 60.314564158221934,
+          "breaks_rho": false
+        },
+        {
+          "field_degree_n_total": 130,
+          "subfield_degree_l": 10,
+          "extension_degree_n": 13,
+          "rule": "legacy",
+          "available_magic_numbers": [
+            1,
+            6,
+            7,
+            12,
+            13
+          ],
+          "least_admissible_magic_number": 6,
+          "type_i": false,
+          "genus": "32",
+          "log2_genus": 5.0,
+          "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+          "log2_cost": 137.03826365236029,
+          "smoothness_bound_b": null,
+          "log2_rho_on_that_group": 60.314564158221934,
+          "breaks_rho": false
+        },
+        {
+          "field_degree_n_total": 130,
+          "subfield_degree_l": 13,
+          "extension_degree_n": 10,
+          "rule": "legacy",
+          "available_magic_numbers": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            8,
+            9,
+            10
+          ],
+          "least_admissible_magic_number": 5,
+          "type_i": false,
+          "genus": "16",
+          "log2_genus": 4.0,
+          "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+          "log2_cost": 68.62514046988261,
+          "smoothness_bound_b": null,
+          "log2_rho_on_that_group": 60.314564158221934,
+          "breaks_rho": false
+        },
+        {
+          "field_degree_n_total": 130,
+          "subfield_degree_l": 26,
+          "extension_degree_n": 5,
+          "rule": "legacy",
+          "available_magic_numbers": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "least_admissible_magic_number": 4,
+          "type_i": false,
+          "genus": "8",
+          "log2_genus": 3.0,
+          "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+          "log2_cost": 60.799208018387276,
+          "smoothness_bound_b": null,
+          "log2_rho_on_that_group": 60.314564158221934,
+          "breaks_rho": false
+        },
+        {
+          "field_degree_n_total": 130,
+          "subfield_degree_l": 65,
+          "extension_degree_n": 2,
+          "rule": "legacy",
+          "available_magic_numbers": [
+            1,
+            2
+          ],
+          "least_admissible_magic_number": 2,
+          "type_i": false,
+          "genus": "2",
+          "log2_genus": 1.0,
+          "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+          "log2_cost": 66.0,
+          "smoothness_bound_b": null,
+          "log2_rho_on_that_group": 60.314564158221934,
+          "breaks_rho": false
+        }
+      ]
+    },
+    {
+      "field_degree": 131,
+      "rule": "mmt",
+      "rows": [
+        {
+          "field_degree_n_total": 131,
+          "subfield_degree_l": 1,
+          "extension_degree_n": 131,
+          "rule": "mmt",
+          "available_magic_numbers": [
+            1,
+            131
+          ],
+          "least_admissible_magic_number": 131,
+          "type_i": true,
+          "genus": "1361129467683753853853498429727072845823",
+          "log2_genus": 130.0,
+          "cost_model": "large genus over F_2, floor = bits per divisor",
+          "log2_cost": 130.0,
+          "smoothness_bound_b": null,
+          "log2_rho_on_that_group": 60.80903656396744,
+          "breaks_rho": false
+        }
+      ]
+    },
+    {
+      "field_degree": 131,
+      "rule": "legacy",
+      "rows": [
+        {
+          "field_degree_n_total": 131,
+          "subfield_degree_l": 1,
+          "extension_degree_n": 131,
+          "rule": "legacy",
+          "available_magic_numbers": [
+            1,
+            130,
+            131
+          ],
+          "least_admissible_magic_number": 130,
+          "type_i": false,
+          "genus": "680564733841876926926749214863536422912",
+          "log2_genus": 129.0,
+          "cost_model": "large genus over F_2, floor = bits per divisor",
+          "log2_cost": 129.0,
+          "smoothness_bound_b": null,
+          "log2_rho_on_that_group": 60.80903656396744,
+          "breaks_rho": false
+        }
+      ]
+    }
+  ],
+  "sweep_n130_l1": [
+    {
+      "genus": 96,
+      "smoothness_bound_b": 14,
+      "log2_cost": 30.441979671043114,
+      "log2_relations": 29.441979671043114,
+      "log2_linear_algebra": 29.20505186001617,
+      "log2_ratio_to_rho": -29.87258448717882,
+      "beats_rho": true
+    },
+    {
+      "genus": 104,
+      "smoothness_bound_b": 15,
+      "log2_cost": 32.11019325334908,
+      "log2_relations": 30.76674096811186,
+      "log2_linear_algebra": 31.110193253349077,
+      "log2_ratio_to_rho": -28.204370904872853,
+      "beats_rho": true
+    },
+    {
+      "genus": 112,
+      "smoothness_bound_b": 16,
+      "log2_cost": 34.014258405489784,
+      "log2_relations": 32.04857461627803,
+      "log2_linear_algebra": 33.014258405489784,
+      "log2_ratio_to_rho": -26.30030575273215,
+      "beats_rho": true
+    },
+    {
+      "genus": 120,
+      "smoothness_bound_b": 16,
+      "log2_cost": 35.28898533168004,
+      "log2_relations": 34.28898533168004,
+      "log2_linear_algebra": 33.113794079040694,
+      "log2_ratio_to_rho": -25.025578826541896,
+      "beats_rho": true
+    },
+    {
+      "genus": 128,
+      "smoothness_bound_b": 17,
+      "log2_cost": 36.40950720493362,
+      "log2_relations": 35.40950720493362,
+      "log2_linear_algebra": 35.02227976051597,
+      "log2_ratio_to_rho": -23.905056953288316,
+      "beats_rho": true
+    },
+    {
+      "genus": 136,
+      "smoothness_bound_b": 18,
+      "log2_cost": 37.93142357338789,
+      "log2_relations": 36.51359087135388,
+      "log2_linear_algebra": 36.93142357338789,
+      "log2_ratio_to_rho": -22.383140584834045,
+      "beats_rho": true
+    },
+    {
+      "genus": 144,
+      "smoothness_bound_b": 18,
+      "log2_cost": 39.57361307285121,
+      "log2_relations": 38.57361307285121,
+      "log2_linear_algebra": 37.013885733579855,
+      "log2_ratio_to_rho": -20.740951085370725,
+      "beats_rho": true
+    },
+    {
+      "genus": 152,
+      "smoothness_bound_b": 19,
+      "log2_cost": 40.557478452101385,
+      "log2_relations": 39.557478452101385,
+      "log2_linear_algebra": 38.92697486025544,
+      "log2_ratio_to_rho": -19.75708570612055,
+      "beats_rho": true
+    },
+    {
+      "genus": 160,
+      "smoothness_bound_b": 20,
+      "log2_cost": 41.84269229703695,
+      "log2_relations": 40.53946244925076,
+      "log2_linear_algebra": 40.84269229703695,
+      "log2_ratio_to_rho": -18.471871861184987,
+      "beats_rho": true
+    },
+    {
+      "genus": 168,
+      "smoothness_bound_b": 20,
+      "log2_cost": 43.440118251255726,
+      "log2_relations": 42.440118251255726,
+      "log2_linear_algebra": 40.913081624928346,
+      "log2_ratio_to_rho": -16.87444590696621,
+      "beats_rho": true
+    },
+    {
+      "genus": 176,
+      "smoothness_bound_b": 21,
+      "log2_cost": 44.331056622826694,
+      "log2_relations": 43.331056622826694,
+      "log2_linear_algebra": 42.831447655423055,
+      "log2_ratio_to_rho": -15.98350753539524,
+      "beats_rho": true
+    },
+    {
+      "genus": 184,
+      "smoothness_bound_b": 22,
+      "log2_cost": 45.753132591968544,
+      "log2_relations": 44.228666567560154,
+      "log2_linear_algebra": 44.753132591968544,
+      "log2_ratio_to_rho": -14.56143156625339,
+      "beats_rho": true
+    },
+    {
+      "genus": 192,
+      "smoothness_bound_b": 22,
+      "log2_cost": 46.989755014738094,
+      "log2_relations": 45.989755014738094,
+      "log2_linear_algebra": 44.81453313663268,
+      "log2_ratio_to_rho": -13.32480914348384,
+      "beats_rho": true
+    },
+    {
+      "genus": 200,
+      "smoothness_bound_b": 23,
+      "log2_cost": 47.81672724156083,
+      "log2_relations": 46.81672724156083,
+      "log2_linear_algebra": 46.73839465788912,
+      "log2_ratio_to_rho": -12.497836916661107,
+      "beats_rho": true
+    },
+    {
+      "genus": 208,
+      "smoothness_bound_b": 23,
+      "log2_cost": 49.527261001638365,
+      "log2_relations": 48.527261001638365,
+      "log2_linear_algebra": 46.794978186255484,
+      "log2_ratio_to_rho": -10.787303156583569,
+      "beats_rho": true
+    },
+    {
+      "genus": 216,
+      "smoothness_bound_b": 24,
+      "log2_cost": 50.294304716886074,
+      "log2_relations": 49.294304716886074,
+      "log2_linear_algebra": 48.71986733035085,
+      "log2_ratio_to_rho": -10.02025944133586,
+      "beats_rho": true
+    },
+    {
+      "genus": 224,
+      "smoothness_bound_b": 25,
+      "log2_cost": 51.64875268284952,
+      "log2_relations": 50.077119044068596,
+      "log2_linear_algebra": 50.64875268284952,
+      "log2_ratio_to_rho": -8.665811475372415,
+      "beats_rho": true
+    },
+    {
+      "genus": 232,
+      "smoothness_bound_b": 25,
+      "log2_cost": 52.67099905362603,
+      "log2_relations": 51.67099905362603,
+      "log2_linear_algebra": 50.69937875591948,
+      "log2_ratio_to_rho": -7.6435651045959006,
+      "beats_rho": true
+    },
+    {
+      "genus": 240,
+      "smoothness_bound_b": 26,
+      "log2_cost": 53.62952315168176,
+      "log2_relations": 52.40592543497253,
+      "log2_linear_algebra": 52.62952315168176,
+      "log2_ratio_to_rho": -6.685041006540175,
+      "beats_rho": true
+    },
+    {
+      "genus": 248,
+      "smoothness_bound_b": 26,
+      "log2_cost": 54.956194019980884,
+      "log2_relations": 53.956194019980884,
+      "log2_linear_algebra": 52.67682886646012,
+      "log2_ratio_to_rho": -5.35837013824105,
+      "beats_rho": true
+    },
+    {
+      "genus": 255,
+      "smoothness_bound_b": 27,
+      "log2_cost": 55.60311624533212,
+      "log2_relations": 54.46228605148914,
+      "log2_linear_algebra": 54.60311624533212,
+      "log2_ratio_to_rho": -4.711447912889817,
+      "beats_rho": true
+    },
+    {
+      "genus": 256,
+      "smoothness_bound_b": 27,
+      "log2_cost": 55.64964200142688,
+      "log2_relations": 54.64964200142688,
+      "log2_linear_algebra": 54.60876280847326,
+      "log2_ratio_to_rho": -4.664922156795058,
+      "beats_rho": true
+    },
+    {
+      "genus": 264,
+      "smoothness_bound_b": 27,
+      "log2_cost": 57.1578796884176,
+      "log2_relations": 56.1578796884176,
+      "log2_linear_algebra": 54.653156927831716,
+      "log2_ratio_to_rho": -3.1566844698043326,
+      "beats_rho": true
+    },
+    {
+      "genus": 272,
+      "smoothness_bound_b": 28,
+      "log2_cost": 57.81570616077883,
+      "log2_relations": 56.81570616077883,
+      "log2_linear_algebra": 56.58656755955674,
+      "log2_ratio_to_rho": -2.4988579974431033,
+      "beats_rho": true
+    },
+    {
+      "genus": 280,
+      "smoothness_bound_b": 28,
+      "log2_cost": 59.28356618533809,
+      "log2_relations": 58.28356618533809,
+      "log2_linear_algebra": 56.628387735251366,
+      "log2_ratio_to_rho": -1.0309979728838456,
+      "beats_rho": true
+    },
+    {
+      "genus": 288,
+      "smoothness_bound_b": 29,
+      "log2_cost": 59.910618244845736,
+      "log2_relations": 58.910618244845736,
+      "log2_linear_algebra": 58.56349968500328,
+      "log2_ratio_to_rho": -0.403945913376198,
+      "beats_rho": true
+    },
+    {
+      "genus": 296,
+      "smoothness_bound_b": 29,
+      "log2_cost": 61.33973376738602,
+      "log2_relations": 60.33973376738602,
+      "log2_linear_algebra": 58.603028049189916,
+      "log2_ratio_to_rho": 1.025169609164088,
+      "beats_rho": false
+    },
+    {
+      "genus": 304,
+      "smoothness_bound_b": 30,
+      "log2_cost": 61.9403768747768,
+      "log2_relations": 60.9403768747768,
+      "log2_linear_algebra": 60.539642737054976,
+      "log2_ratio_to_rho": 1.6258127165548686,
+      "beats_rho": false
+    },
+    {
+      "genus": 312,
+      "smoothness_bound_b": 30,
+      "log2_cost": 63.332368112520214,
+      "log2_relations": 62.332368112520214,
+      "log2_linear_algebra": 60.577117442473636,
+      "log2_ratio_to_rho": 3.01780395429828,
+      "beats_rho": false
+    },
+    {
+      "genus": 320,
+      "smoothness_bound_b": 31,
+      "log2_cost": 63.91027189909712,
+      "log2_relations": 62.91027189909712,
+      "log2_linear_algebra": 62.515323784727094,
+      "log2_ratio_to_rho": 3.5957077408751843,
+      "beats_rho": false
+    }
+  ],
+  "log2_rho_n130": 60.314564158221934
+}

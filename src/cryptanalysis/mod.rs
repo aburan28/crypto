@@ -179,6 +179,7 @@ pub mod gls_fp2;
 pub mod glv_gaudry;
 pub mod glv_invariant_base;
 pub mod glv_invariant_experiments;
+pub mod gpu_rootfind;
 pub mod groebner_cache;
 pub mod groebner_f4;
 pub mod hash_attacks;
@@ -408,9 +409,9 @@ pub use koblitz_index_calculus::{
 pub use koblitz_sparse_la::{
     block_lanczos_solve, block_wiedemann_kernel, filter_relations, solve_sparse_system,
     BlockLanczosOptions, BlockLanczosReport, BlockWiedemannOptions, BlockWiedemannReport,
-    CsrMatrix, FilterOptions, FilterReport, FilteredSystem, ModWord, SparseCoreSolver,
-    SparseRow, SparseRows, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
-    SpmvBackend, SpmvOptions, Wide, WideModulus, WordWidth, U128, U192, U256,
+    CsrMatrix, FilterOptions, FilterReport, FilteredSystem, ModWord, SparseCoreSolver, SparseRow,
+    SparseRows, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport, SpmvBackend,
+    SpmvOptions, Wide, WideModulus, WordWidth, U128, U192, U256,
 };
 pub use lattice::{bkz_reduce, lll_reduce};
 pub use legacy_curve_attacks::{

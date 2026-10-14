@@ -45,7 +45,7 @@ use crate::cryptanalysis::curve_traits::arith::{factor, log2_abs};
 use crate::cryptanalysis::ec_trapdoor::DescentRow;
 use cost::{CostModel, DestinationCost, DestinationSolver};
 
-pub const SCHEMA: &str = "jacobian-transfers/1";
+pub const SCHEMA: &str = "jacobian-transfers/2";
 
 /// Pollard-rho iterations spent factoring an order whose subgroup the
 /// registry does not record.
@@ -98,8 +98,7 @@ fn str_field<'a>(v: &'a Value, key: &str) -> Result<&'a str, String> {
 
 fn parse_field(model: &Value, label: &str) -> Result<Field, String> {
     let num = |key: &str| {
-        str_field(model, key)
-            .and_then(|s| parse_uint(s).ok_or_else(|| format!("bad {key}: {s}")))
+        str_field(model, key).and_then(|s| parse_uint(s).ok_or_else(|| format!("bad {key}: {s}")))
     };
     if label.starts_with("f2m-") {
         let modulus = num("modulus")?;
@@ -142,7 +141,9 @@ pub fn read_registry(text: &str) -> Result<Vec<RegistryCurve>, String> {
         let ctx = |e: String| format!("{slug}: {e}");
         let icv1 = str_field(c, "icv1")?.to_string();
         let parts: Vec<&str> = icv1.split(':').collect();
-        let label = parts.get(1).ok_or_else(|| ctx("ICV1 has no field".into()))?;
+        let label = parts
+            .get(1)
+            .ok_or_else(|| ctx("ICV1 has no field".into()))?;
         let model: Value = serde_json::from_str(str_field(c, "model_json")?)
             .map_err(|e| ctx(format!("model JSON: {e}")))?;
         let field = parse_field(&model, label).map_err(ctx)?;
@@ -259,6 +260,9 @@ pub enum Transport {
     TooSmall,
     /// The descent curve is `E` itself over the subfield: nothing is gained.
     Degenerate,
+    /// The GHS cover exists over the top field but does not descend to the
+    /// subfield: MMT Lemma 6 condition (8) fails.
+    DescentObstructed,
     /// Not applicable: the route stays on `E`.
     SameGroup,
 }
@@ -272,10 +276,6 @@ pub enum RouteClass {
     /// The formulas place the route below rho but by less than the margin:
     /// the exponents favour it and the constants decide.
     FormulaMarginal,
-    /// One bound of an unresolved invariant (the GHS magic number when the
-    /// trace of `a` leaves it at `m_b` or `m_b + 1`) puts the route below rho
-    /// and the other does not: the verdict waits on that invariant.
-    Unresolved,
     /// The formulas place the route at or above rho.
     Boundary,
     /// The subgroup is not carried, so the route solves a different problem.
@@ -368,8 +368,6 @@ pub struct Summary {
     /// Slugs whose verdict is `formula_advantage` or `formula_marginal`, with
     /// the route that gives it.
     pub formula_advantage: Vec<(String, String)>,
-    /// Slugs whose verdict is `unresolved`, with the favourable-bound route.
-    pub unresolved: Vec<(String, String)>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -472,9 +470,9 @@ impl RouteBuilder<'_> {
     ) -> TransferRoute {
         let log2_genus = log2_biguint(genus).max(0.0);
         let log2_order = log2_genus.exp2() * field_bits;
-        let destination_cost = self
-            .model
-            .jacobian_destination(self.subgroup_bits, log2_genus, field_bits);
+        let destination_cost =
+            self.model
+                .jacobian_destination(self.subgroup_bits, log2_genus, field_bits);
         // One evaluation of the transfer map: at least `g` operations over the
         // source field (the GHS conorm–norm map writes a genus-`g` divisor).
         let log2_transfer = log2_genus + self.model.log2_elliptic_op(self.source_field_bits);
@@ -512,7 +510,8 @@ impl RouteBuilder<'_> {
         destination_cost: DestinationCost,
         notes: Vec<String>,
     ) -> TransferRoute {
-        let log2_total = binary::log2_total(&[log2_search, log2_transfer, destination_cost.log2_cost]);
+        let log2_total =
+            binary::log2_total(&[log2_search, log2_transfer, destination_cost.log2_cost]);
         let ratio_log2 = self.reference_log2 - log2_total;
         let exponent_ratio_log2 = 0.5 * self.subgroup_bits - destination_cost.log2_leading;
         let carried = matches!(
@@ -548,7 +547,9 @@ impl RouteBuilder<'_> {
             transport,
             cost: RouteCost {
                 log2_search: log2_search.is_finite().then(|| round_to(log2_search, 3)),
-                log2_transfer: log2_transfer.is_finite().then(|| round_to(log2_transfer, 3)),
+                log2_transfer: log2_transfer
+                    .is_finite()
+                    .then(|| round_to(log2_transfer, 3)),
                 destination: destination_cost,
                 log2_total: round_to(log2_total, 3),
                 ratio_log2: round_to(ratio_log2, 3),
@@ -569,10 +570,20 @@ impl RouteBuilder<'_> {
 }
 
 fn inv<K: Into<String>, V: Into<Value>>(pairs: Vec<(K, V)>) -> BTreeMap<String, Value> {
-    pairs.into_iter().map(|(k, v)| (k.into(), v.into())).collect()
+    pairs
+        .into_iter()
+        .map(|(k, v)| (k.into(), v.into()))
+        .collect()
 }
 
-fn binary_routes(rb: &RouteBuilder, c: &RegistryCurve, n_total: u32, irr: &IrreduciblePoly, a: &F2mElement, b: &F2mElement) -> Vec<TransferRoute> {
+fn binary_routes(
+    rb: &RouteBuilder,
+    c: &RegistryCurve,
+    n_total: u32,
+    irr: &IrreduciblePoly,
+    a: &F2mElement,
+    b: &F2mElement,
+) -> Vec<TransferRoute> {
     let mut routes = Vec::new();
     let disc = &c.trace * &c.trace - BigInt::from(BigUint::from(1u32) << n_total) * 4;
     let log2_abs_disc = log2_abs(&disc);
@@ -580,72 +591,84 @@ fn binary_routes(rb: &RouteBuilder, c: &RegistryCurve, n_total: u32, irr: &Irred
         let l = audit.l;
         let magic = binary::ghs_magic(n_total, l, irr, a, b);
         let field_bits = f64::from(l);
-        // When Tr(a) = 1 and n is even the reduced a may add one generator:
-        // the GHS magic number is magic_b or magic_b + 1, and both are priced.
-        let variants: Vec<(u32, &str)> = if magic.a_may_add_one {
-            vec![(magic.magic_b, "lower"), (magic.magic_b + 1, "upper")]
-        } else {
-            vec![(magic.magic_b, "exact")]
+        let m = magic.magic_b;
+        let genus = crate::cryptanalysis::ec_trapdoor::ghs_genus_for_type(m, magic.type_i);
+        let row = DescentRow {
+            n: audit.n,
+            l,
+            magic_m: m,
+            genus,
+            type_i: magic.type_i,
+            descends: magic.descent_exists,
         };
-        let mut row = DescentRow::default();
-        for (m, bound) in variants {
-            let type_i = magic.orbit_length == m;
-            let genus = crate::cryptanalysis::ec_trapdoor::ghs_genus_for_type(m, type_i);
-            row = DescentRow { n: audit.n, l, magic_m: m, genus, type_i };
-            let log2_genus = log2_biguint(&row.genus).max(0.0);
-            let transport = if row.magic_m <= 1 {
-                Transport::Degenerate
-            } else {
-                rb.transport_by_size(log2_genus, field_bits)
-            };
-            let mut notes = vec![
-                "GHS Weil descent: magic number dim Span{(1, σ^i(√b))} and genus as in research/cover_route_prime_binary_20261008/ghs_magic.rs (Hess); the cover C/GF(2^l) is not constructed here".into(),
-            ];
-            if row.magic_m <= 1 {
-                notes.push("sqrt(b) lies in the subfield: E is defined over GF(2^l) and the descent is the trace map onto E(GF(2^l)), which cannot carry the subgroup".into());
-            }
-            if bound != "exact" {
-                notes.push(format!(
-                    "Tr(a) = 1 with n even: a cannot be reduced into F_2 and may add one generator, so the magic number is {} or {}; this row prices the {bound} value and is heuristic until the reduced a is computed",
-                    magic.magic_b,
-                    magic.magic_b + 1
-                ));
-            }
-            if audit.magic_m != magic.magic_b && audit.magic_m != magic.magic_b + u32::from(magic.a_may_add_one) {
-                notes.push(format!(
-                    "ec_trapdoor::audit_curve reports magic number {} here: it adds the Frobenius differences of an unreduced a as generators, while a matters only modulo {{α²+α}}",
-                    audit.magic_m
-                ));
-            }
-            let (label_suffix, evidence) = match bound {
-                "exact" => (String::new(), Evidence::ExactInvariant),
-                b => (format!(" [m = {m}, {b} bound]"), Evidence::Heuristic),
-            };
-            routes.push(rb.jacobian_route(
-                "ghs_weil_descent",
-                format!("GHS descent to Jac(C)/GF(2^{l}), N = {} * {l}{label_suffix}", row.n),
-                evidence,
-                inv(vec![
-                    ("relative_degree", Value::from(row.n)),
-                    ("base_degree", Value::from(l)),
-                    ("magic_number", Value::from(row.magic_m)),
-                    ("magic_number_b", Value::from(magic.magic_b)),
-                    ("magic_number_bound", Value::from(bound)),
-                    ("trace_a", Value::from(magic.trace_a)),
-                    ("audit_curve_magic_number", Value::from(audit.magic_m)),
-                    ("type_i", Value::from(row.type_i)),
-                    ("cover_degree_log2", Value::from(row.magic_m)),
-                ]),
-                &row.genus,
-                field_bits,
-                transport,
-                f64::NEG_INFINITY,
-                notes,
+        let log2_genus = log2_biguint(&row.genus).max(0.0);
+        let transport = if !magic.descent_exists {
+            Transport::DescentObstructed
+        } else if row.magic_m <= 1 {
+            Transport::Degenerate
+        } else {
+            rb.transport_by_size(log2_genus, field_bits)
+        };
+        let mut notes = vec![
+            "GHS Weil descent: magic number dim Span{(1, σ^i(√b))} and genus as in research/cover_route_prime_binary_20261008/ghs_magic.rs (Hess); the cover C/GF(2^l) is not constructed here".into(),
+        ];
+        if !magic.descent_exists {
+            notes.push(format!(
+                "MMT Lemma 6 condition (8) fails: n = {} is even, Tr(a) = 1 and Tr_(K/k)(b) = 0, so the Artin–Schreier compositum has no σ-lift of order n and there is no descent to GF(2^{l}); the magic number and genus describe the cover over K only",
+                row.n
+            ));
+        } else if row.magic_m <= 1 {
+            notes.push("sqrt(b) lies in the subfield: E is defined over GF(2^l) and the descent is the trace map onto E(GF(2^l)), which cannot carry the subgroup".into());
+        }
+        if audit.magic_m != magic.magic_b {
+            notes.push(format!(
+                "ec_trapdoor::audit_curve reports magic number {} here, against {} from the span of (1, σ^i(√b))",
+                audit.magic_m, magic.magic_b
             ));
         }
-        let row = DescentRow { magic_m: magic.magic_b, ..row };
+        routes.push(rb.jacobian_route(
+            "ghs_weil_descent",
+            format!("GHS descent to Jac(C)/GF(2^{l}), N = {} * {l}", row.n),
+            Evidence::ExactInvariant,
+            inv(vec![
+                ("relative_degree", Value::from(row.n)),
+                ("base_degree", Value::from(l)),
+                ("magic_number", Value::from(row.magic_m)),
+                ("trace_a", Value::from(magic.trace_a)),
+                (
+                    "relative_trace_b_zero",
+                    Value::from(magic.relative_trace_b_zero),
+                ),
+                ("mmt_condition_8", Value::from(magic.descent_exists)),
+                ("audit_curve_magic_number", Value::from(audit.magic_m)),
+                ("type_i", Value::from(row.type_i)),
+                ("cover_degree_log2", Value::from(row.magic_m)),
+            ]),
+            &row.genus,
+            field_bits,
+            transport,
+            f64::NEG_INFINITY,
+            notes,
+        ));
         // Galbraith–Hess–Smart isogeny extension, priced heuristically.
-        let estimates = binary::isogeny_extension_estimates(rb.model, n_total, l, row.n, row.magic_m, log2_abs_disc);
+        // Tr(a) is an isogeny invariant: with Tr(a) = 1 and n even, only
+        // targets satisfying MMT condition (8) count.  An obstructed direct
+        // descent caps nothing, so every degree up to n is a gain then.
+        let needs_unit = magic.trace_a == 1 && row.n.is_multiple_of(2);
+        let cap = if magic.descent_exists {
+            row.magic_m
+        } else {
+            row.n + 1
+        };
+        let estimates = binary::isogeny_extension_estimates(
+            rb.model,
+            n_total,
+            l,
+            row.n,
+            cap,
+            log2_abs_disc,
+            needs_unit,
+        );
         let mut chosen: Vec<&binary::IsogenyExtensionEstimate> = Vec::new();
         if let Some(first) = estimates.first() {
             chosen.push(first);
@@ -659,7 +682,10 @@ fn binary_routes(rb: &RouteBuilder, c: &RegistryCurve, n_total: u32, irr: &Irred
                 cx.partial_cmp(&cy).unwrap_or(std::cmp::Ordering::Equal)
             });
         if let Some(bp) = best_plausible {
-            if !chosen.iter().any(|e| e.annihilator_degree == bp.annihilator_degree) {
+            if !chosen
+                .iter()
+                .any(|e| e.annihilator_degree == bp.annihilator_degree)
+            {
                 chosen.push(bp);
             }
         }
@@ -679,6 +705,8 @@ fn binary_routes(rb: &RouteBuilder, c: &RegistryCurve, n_total: u32, irr: &Irred
                     ("relative_degree", Value::from(row.n)),
                     ("base_degree", Value::from(l)),
                     ("direct_magic_number", Value::from(row.magic_m)),
+                    ("direct_descent_exists", Value::from(magic.descent_exists)),
+                    ("target_needs_mmt_condition_8", Value::from(needs_unit)),
                     ("target_annihilator_degree", Value::from(e.annihilator_degree)),
                     ("target_magic_number_bound", Value::from(e.magic_bound)),
                     ("log2_candidate_curves", Value::from(round_to(e.log2_candidate_curves, 3))),
@@ -718,10 +746,16 @@ fn binary_routes(rb: &RouteBuilder, c: &RegistryCurve, n_total: u32, irr: &Irred
     routes
 }
 
-fn route_cost_preview(rb: &RouteBuilder, e: &binary::IsogenyExtensionEstimate, field_bits: f64) -> f64 {
+fn route_cost_preview(
+    rb: &RouteBuilder,
+    e: &binary::IsogenyExtensionEstimate,
+    field_bits: f64,
+) -> f64 {
     let genus = binary::generic_genus(e.magic_bound);
     let log2_genus = log2_biguint(&genus).max(0.0);
-    let dest = rb.model.jacobian_destination(rb.subgroup_bits, log2_genus, field_bits);
+    let dest = rb
+        .model
+        .jacobian_destination(rb.subgroup_bits, log2_genus, field_bits);
     binary::log2_total(&[e.log2_search_cost, dest.log2_cost])
 }
 
@@ -760,7 +794,12 @@ fn prime_routes(rb: &RouteBuilder, p: &BigUint) -> Vec<TransferRoute> {
     routes
 }
 
-fn extension_routes(rb: &RouteBuilder, c: &RegistryCurve, p: &BigUint, k: u32) -> Vec<TransferRoute> {
+fn extension_routes(
+    rb: &RouteBuilder,
+    c: &RegistryCurve,
+    p: &BigUint,
+    k: u32,
+) -> Vec<TransferRoute> {
     let p_bits = log2_biguint(p);
     let two_torsion = (&c.order % 2u32).is_zero();
     let mut routes = Vec::new();
@@ -823,40 +862,6 @@ fn extension_routes(rb: &RouteBuilder, c: &RegistryCurve, p: &BigUint, k: u32) -
     routes
 }
 
-/// For each GHS tower priced at both magic-number bounds, the pair's
-/// classes are replaced by `unresolved` when they disagree on whether the
-/// route beats rho; when they agree, each keeps its own class.
-fn resolve_bound_pairs(routes: &mut [TransferRoute]) {
-    let favourable = |c: RouteClass| matches!(c, RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal);
-    let pairs: Vec<(usize, usize)> = routes
-        .iter()
-        .enumerate()
-        .filter(|(_, r)| r.invariants.get("magic_number_bound").and_then(Value::as_str) == Some("lower"))
-        .filter_map(|(i, r)| {
-            let l = r.invariants.get("base_degree")?.clone();
-            let j = routes.iter().position(|x| {
-                x.kind == r.kind
-                    && x.invariants.get("base_degree") == Some(&l)
-                    && x.invariants.get("magic_number_bound").and_then(Value::as_str) == Some("upper")
-            })?;
-            Some((i, j))
-        })
-        .collect();
-    for (i, j) in pairs {
-        if favourable(routes[i].class) != favourable(routes[j].class) {
-            let (win, lose) = if favourable(routes[i].class) { (i, j) } else { (j, i) };
-            let other = class_name(routes[lose].class);
-            routes[win].class = RouteClass::Unresolved;
-            routes[win].notes.push(format!(
-                "unresolved: this magic-number bound beats rho and the other bound is {other}; compute the reduced a (Hess) to decide"
-            ));
-            routes[lose].notes.push(
-                "the other magic-number bound of this tower beats rho; the pair is unresolved".into(),
-            );
-        }
-    }
-}
-
 /// Screen one registry curve.
 pub fn screen(c: &RegistryCurve, model: &CostModel, budget: u64) -> CurveTransfers {
     let field = field_info(&c.field);
@@ -873,8 +878,6 @@ pub fn screen(c: &RegistryCurve, model: &CostModel, budget: u64) -> CurveTransfe
         Field::Prime { p } => prime_routes(&rb, p),
         Field::Extension { p, k } => extension_routes(&rb, c, p, *k),
     };
-    let mut routes = routes;
-    resolve_bound_pairs(&mut routes);
     let best_route = routes
         .iter()
         .enumerate()
@@ -910,23 +913,28 @@ impl TransferFile {
     pub fn build(registry_text: &str, model: CostModel, budget: u64) -> Result<Self, String> {
         use rayon::prelude::*;
         let curves = read_registry(registry_text)?;
-        let records: Vec<CurveTransfers> = curves.par_iter().map(|c| screen(c, &model, budget)).collect();
+        let records: Vec<CurveTransfers> = curves
+            .par_iter()
+            .map(|c| screen(c, &model, budget))
+            .collect();
         let digest = crate::hash::sha256::sha256(registry_text.as_bytes());
         let mut by_class = BTreeMap::new();
         let mut by_route_kind = BTreeMap::new();
         let mut formula_advantage = Vec::new();
-        let mut unresolved = Vec::new();
         for r in &records {
             *by_class.entry(class_name(r.verdict)).or_insert(0) += 1;
             for route in &r.routes {
                 *by_route_kind.entry(route.kind.clone()).or_insert(0) += 1;
             }
-            if matches!(r.verdict, RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal) {
-                let best = r.best_route.map(|i| r.routes[i].label.clone()).unwrap_or_default();
+            if matches!(
+                r.verdict,
+                RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal
+            ) {
+                let best = r
+                    .best_route
+                    .map(|i| r.routes[i].label.clone())
+                    .unwrap_or_default();
                 formula_advantage.push((r.slug.clone(), best));
-            } else if r.verdict == RouteClass::Unresolved {
-                let best = r.best_route.map(|i| r.routes[i].label.clone()).unwrap_or_default();
-                unresolved.push((r.slug.clone(), best));
             }
         }
         Ok(TransferFile {
@@ -946,7 +954,6 @@ impl TransferFile {
                 by_class,
                 by_route_kind,
                 formula_advantage,
-                unresolved,
             },
             curves: records,
         })
@@ -996,9 +1003,15 @@ mod tests {
     fn every_registry_entry_parses() {
         let curves = registry();
         assert!(curves.len() >= 300);
-        assert!(curves.iter().any(|c| matches!(c.field, Field::Extension { .. })));
-        assert!(curves.iter().any(|c| matches!(c.field, Field::Binary { .. })));
-        assert!(curves.iter().any(|c| matches!(c.field, Field::Prime { .. })));
+        assert!(curves
+            .iter()
+            .any(|c| matches!(c.field, Field::Extension { .. })));
+        assert!(curves
+            .iter()
+            .any(|c| matches!(c.field, Field::Binary { .. })));
+        assert!(curves
+            .iter()
+            .any(|c| matches!(c.field, Field::Prime { .. })));
     }
 
     #[test]
@@ -1024,11 +1037,13 @@ mod tests {
             .iter()
             .find(|x| x.kind == "ghs_weil_descent" && x.invariants["base_degree"] == 31)
             .unwrap();
-        // Type I: genus 2^4 - 1.
-        assert_eq!(g16.destination.genus, "15");
+        // Tr_{K/k}(b) != 0, so (x - 1) | Ord_b: type II, genus 2^4 = 16
+        // (MMT Theorem 5(i)).  Before 2026-10-13 the orbit-length type rule
+        // reported type I, genus 15.
+        assert_eq!(g16.destination.genus, "16");
         assert_eq!(g16.transport, Transport::SizeAdmits);
-        // Genus 15 over GF(2^31): relation collection 15! * 2^31 = 2^71.25
-        // against rho's 2^76 leaves an exponent ratio near 4.75 bits, which the
+        // Genus 16 over GF(2^31): relation collection 16! * 2^31 = 2^75.25
+        // against rho's 2^76 leaves an exponent ratio near 0.75 bits, which the
         // genus constants (10 g^2 per Jacobian operation) consume.
         assert!(g16.cost.ratio_log2 < cost::CostModel::default().advantage_margin_bits);
         assert_ne!(g16.class, RouteClass::FormulaAdvantage);
@@ -1036,27 +1051,78 @@ mod tests {
     }
 
     #[test]
-    fn unresolved_trace_of_a_prices_both_magic_bounds() {
-        // c2pnb304w1: Tr(a) = 1 with n = 152 even over GF(4); magic_b = 8.
-        let r = screen(&by_name("c2pnb304w1"), &CostModel::default(), DEFAULT_FACTOR_BUDGET);
-        let rows: Vec<_> = r
+    fn trace_of_a_decides_whether_the_descent_exists() {
+        // c2pnb304w1, c2pnb272w1 and c2pnb176w1 have Tr(a) = 1 with n even
+        // over GF(4), but Tr_(K/k)(b) != 0, so MMT condition (8) holds and the
+        // magic number 8 is exact: one row per tower, genus 2^7 = 128.
+        // Before 2026-10-13 the screen bracketed it as 8 or 9.
+        for (name, l, n, class) in [
+            ("c2pnb304w1", 2, 152, RouteClass::NotCarried),
+            ("c2pnb272w1", 2, 136, RouteClass::FormulaAdvantage),
+            ("c2pnb176w1", 2, 88, RouteClass::FormulaAdvantage),
+        ] {
+            let r = screen(&by_name(name), &CostModel::default(), DEFAULT_FACTOR_BUDGET);
+            let rows: Vec<_> = r
+                .routes
+                .iter()
+                .filter(|x| x.kind == "ghs_weil_descent" && x.invariants["base_degree"] == l)
+                .collect();
+            assert_eq!(rows.len(), 1, "{name}");
+            let row = rows[0];
+            assert_eq!(row.invariants["relative_degree"], n);
+            assert_eq!(row.invariants["trace_a"], 1);
+            assert_eq!(row.invariants["mmt_condition_8"], true);
+            assert_eq!(row.invariants["magic_number"], 8);
+            assert_eq!(row.evidence, Evidence::ExactInvariant);
+            assert_eq!(row.destination.genus, "128");
+            assert_eq!(row.class, class, "{name}");
+            // Every isogenous target must satisfy (8) as well, which forces
+            // (x - 1)^8 into its annihilator: nothing below m = 8 remains.
+            assert!(
+                !r.routes
+                    .iter()
+                    .any(|x| x.kind == "ghs_isogeny_extension" && x.invariants["base_degree"] == l),
+                "{name}"
+            );
+        }
+        // c2pnb304w1's 288-bit subgroup does not fit in a 256-bit Jacobian;
+        // its best route is the n = 4 descent over GF(2^76).
+        let r = screen(
+            &by_name("c2pnb304w1"),
+            &CostModel::default(),
+            DEFAULT_FACTOR_BUDGET,
+        );
+        assert_eq!(r.verdict, RouteClass::FormulaMarginal);
+        assert_eq!(
+            r.routes[r.best_route.unwrap()].invariants["base_degree"],
+            76
+        );
+        // A registry curve where (8) fails: b in F_2, Tr(a) = 1, N = 18.
+        let r = screen(
+            &by_name("icv1-f2m18-t999-40751283"),
+            &CostModel::default(),
+            DEFAULT_FACTOR_BUDGET,
+        );
+        let obstructed: Vec<u64> = r
             .routes
             .iter()
-            .filter(|x| x.kind == "ghs_weil_descent" && x.invariants["base_degree"] == 2)
+            .filter(|x| x.transport == Transport::DescentObstructed)
+            .map(|x| x.invariants["base_degree"].as_u64().unwrap())
             .collect();
-        assert_eq!(rows.len(), 2);
-        assert_eq!(rows[0].invariants["magic_number"], 8);
-        assert_eq!(rows[1].invariants["magic_number"], 9);
-        assert!(rows.iter().all(|x| x.evidence == Evidence::Heuristic));
-        // The lower bound cannot carry the 288-bit subgroup; the upper bound
-        // beats rho in formula terms, so the pair is unresolved.
-        assert_eq!(rows[0].transport, Transport::TooSmall);
-        assert_eq!(rows[0].class, RouteClass::NotCarried);
-        assert_eq!(rows[1].class, RouteClass::Unresolved);
-        assert_eq!(r.verdict, RouteClass::Unresolved);
-        assert_eq!(&r.routes[r.best_route.unwrap()], rows[1]);
+        assert_eq!(obstructed, [9, 3, 1]);
+        assert!(
+            r.routes
+                .iter()
+                .filter(|x| x.transport == Transport::DescentObstructed)
+                .all(|x| x.class == RouteClass::NotCarried
+                    && x.invariants["mmt_condition_8"] == false)
+        );
         // c2pnb368w1 has Tr(a) = 0: one exact row per tower.
-        let r = screen(&by_name("c2pnb368w1"), &CostModel::default(), DEFAULT_FACTOR_BUDGET);
+        let r = screen(
+            &by_name("c2pnb368w1"),
+            &CostModel::default(),
+            DEFAULT_FACTOR_BUDGET,
+        );
         let g7 = r
             .routes
             .iter()
@@ -1064,23 +1130,43 @@ mod tests {
             .collect::<Vec<_>>();
         assert_eq!(g7.len(), 1);
         assert_eq!(g7[0].evidence, Evidence::ExactInvariant);
-        assert_eq!(g7[0].destination.genus, "7");
+        // n = 4: x^4 - 1 = (x - 1)^4, so every curve is type II and m = 4
+        // gives genus 8 (7 under the pre-2026-10-13 orbit-length rule).
+        assert_eq!(g7[0].destination.genus, "8");
     }
 
     #[test]
     fn koblitz_curves_degenerate_and_random_b_sits_at_the_maximum() {
-        let k = screen(&by_name("sect163k1"), &CostModel::default(), DEFAULT_FACTOR_BUDGET);
-        let ghs: Vec<_> = k.routes.iter().filter(|x| x.kind == "ghs_weil_descent").collect();
+        let k = screen(
+            &by_name("sect163k1"),
+            &CostModel::default(),
+            DEFAULT_FACTOR_BUDGET,
+        );
+        let ghs: Vec<_> = k
+            .routes
+            .iter()
+            .filter(|x| x.kind == "ghs_weil_descent")
+            .collect();
         assert_eq!(ghs.len(), 1);
         assert_eq!(ghs[0].invariants["magic_number"], 1);
         assert_eq!(ghs[0].transport, Transport::Degenerate);
         assert_eq!(k.verdict, RouteClass::Boundary);
-        let b = screen(&by_name("sect113r1"), &CostModel::default(), DEFAULT_FACTOR_BUDGET);
-        let ghs = b.routes.iter().find(|x| x.kind == "ghs_weil_descent").unwrap();
+        let b = screen(
+            &by_name("sect113r1"),
+            &CostModel::default(),
+            DEFAULT_FACTOR_BUDGET,
+        );
+        let ghs = b
+            .routes
+            .iter()
+            .find(|x| x.kind == "ghs_weil_descent")
+            .unwrap();
         assert_eq!(ghs.invariants["magic_number"], 113);
         let two_112 = BigUint::from(1u32) << 112u32;
-        assert!(ghs.destination.genus == two_112.to_string()
-            || ghs.destination.genus == (&two_112 - BigUint::from(1u32)).to_string());
+        assert!(
+            ghs.destination.genus == two_112.to_string()
+                || ghs.destination.genus == (&two_112 - BigUint::from(1u32)).to_string()
+        );
         assert_eq!(b.verdict, RouteClass::Boundary);
     }
 
@@ -1091,7 +1177,13 @@ mod tests {
             assert_eq!(r.verdict, RouteClass::Boundary, "{name}");
             assert!(r.routes.iter().all(|x| x.cost.ratio_log2 < 0.0), "{name}");
             assert!(r.routes.iter().any(|x| x.kind == "same_field_cover"));
-            assert_eq!(r.routes.iter().filter(|x| x.kind == "base_change_descent").count(), 2);
+            assert_eq!(
+                r.routes
+                    .iter()
+                    .filter(|x| x.kind == "base_change_descent")
+                    .count(),
+                2
+            );
         }
     }
 
@@ -1103,7 +1195,10 @@ mod tests {
             .unwrap();
         let r = screen(&c, &CostModel::default(), DEFAULT_FACTOR_BUDGET);
         assert_eq!(r.field.kind, "extension");
-        assert!(r.routes.iter().any(|x| x.kind == "extension_index_calculus"));
+        assert!(r
+            .routes
+            .iter()
+            .any(|x| x.kind == "extension_index_calculus"));
         assert!(r.routes.iter().any(|x| x.kind == "cover_descent"));
     }
 
@@ -1120,10 +1215,14 @@ mod tests {
 
     #[test]
     fn the_whole_registry_builds_and_round_trips() {
-        let file = TransferFile::build(REGISTRY, CostModel::default(), DEFAULT_FACTOR_BUDGET).unwrap();
+        let file =
+            TransferFile::build(REGISTRY, CostModel::default(), DEFAULT_FACTOR_BUDGET).unwrap();
         assert_eq!(file.curves.len(), registry().len());
         let json = file.to_json();
-        assert!(!json.contains("null,") || !json.contains("\"log2_cost\": null"), "non-finite cost");
+        assert!(
+            !json.contains("null,") || !json.contains("\"log2_cost\": null"),
+            "non-finite cost"
+        );
         let back: TransferFile = serde_json::from_str(&json).unwrap();
         // The file parses back; values agree to 12 significant digits (the
         // JSON parser is not correctly rounded above 2^53, and `check` rebuilds
@@ -1136,11 +1235,16 @@ mod tests {
             assert_eq!(x.best_route, y.best_route);
             for (rx, ry) in x.routes.iter().zip(&y.routes) {
                 let (a, b) = (rx.cost.log2_total, ry.cost.log2_total);
-                assert!((a - b).abs() <= 1e-11 * a.abs().max(1.0), "{} {a} {b}", x.slug);
+                assert!(
+                    (a - b).abs() <= 1e-11 * a.abs().max(1.0),
+                    "{} {a} {b}",
+                    x.slug
+                );
             }
         }
         // Rebuilding is deterministic.
-        let again = TransferFile::build(REGISTRY, CostModel::default(), DEFAULT_FACTOR_BUDGET).unwrap();
+        let again =
+            TransferFile::build(REGISTRY, CostModel::default(), DEFAULT_FACTOR_BUDGET).unwrap();
         assert_eq!(again.to_json(), json);
         assert_eq!(file.summary.curves, file.curves.len());
         assert!(file.find("Oakley Group 3").is_some());
