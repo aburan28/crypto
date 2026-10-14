@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 const root = path.dirname(new URL(import.meta.url).pathname);
 const a = JSON.parse(fs.readFileSync(path.join(root, 'analysis.json'), 'utf8'));
+const config = JSON.parse(fs.readFileSync(path.join(root, 'profile-config.json'), 'utf8'));
 const f = n => typeof n === 'number' ? n.toPrecision(7) : 'missing';
 const esc = s => String(s).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 const cells = ['ell8209-q29', 'ell131101-q37'];
@@ -46,7 +47,7 @@ for (const cell of cells) {
   const summaries=a.summaries.filter(s=>s.cell===cell);
   const rows=a.rows.filter(s=>s.cell===cell);
   let run=`# Run report: ${cell}\n\nUnit: Callgrind simulated user-space instructions over the entire methods::solve call. Profiles requested: ${rows.length}; verified: ${rows.filter(r=>!r.error).length}. Each fixed curve retains its eight archived independent one-target workloads. No wall-clock value is interpreted.\n\n`;
-  run += `Valgrind 3.24.0; original native ecbench SHA-256 429de171c022b71427759b47d411d8f8d6dd52e9f2daa819de23f4a67536194a. Source revision 7df956f97dad09c96dab12772b2b4cb244146f. CPU feature dispatch under Callgrind: unknown. Host and tool receipts: ../../host.txt and ../../tool-hashes.sha256. Exact commands and excluded costs: ../../COMMANDS.md and ../../PROTOCOL.md.\n\n`;
+  run += `Valgrind 3.24.0; v2 native ecbench SHA-256 ${config.binary_sha256}. Source snapshot ${config.source_commit}; phase dump suppression is enabled while complete collection and outer markers remain active. CPU feature dispatch under Callgrind: unknown. Host and tool receipts: ../../host.txt and ../../tool-hashes.sha256. Exact commands and excluded costs: ../../COMMANDS.md, ../../PROTOCOL.md and ../../PROTOCOL-v2.md.\n\n`;
   run += '| ICV1 curve model | Arm | n | Mean Ir | Range |\n|---|---|---:|---:|---|\n';
   for (const s of summaries) run += `| ${s.slug} | ${s.arm} | ${s.n} | ${f(s.mean_ir)} | ${s.min_ir} to ${s.max_ir} |\n`;
   run += '\n![Recorded instruction means](instructions.svg)\n\nThe bars show native-analyzer means and observed ranges, not confidence intervals. All raw profile IDs, source run/record IDs, scalar and count validation errors are in ../../analysis.json. The four additional IC repeats are A/A diagnostics, excluded from primary means. Profile receipts and raw parts are retained losslessly in the study evidence archive; all original sealed sessions remain unchanged.\n';

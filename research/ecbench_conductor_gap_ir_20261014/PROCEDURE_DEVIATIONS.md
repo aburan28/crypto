@@ -33,3 +33,19 @@ The required pre-edit `conductor check` command returned exit 127 because the
 CLI is unavailable. Publication scope expansion was declared before editing
 the problem index and the leaderboard presentation generator. No competing
 reservation is inferred from this absence.
+
+## Fine-grained Callgrind dump expansion
+
+The committed v1 attempt produced at least 80,938 profile parts in its first
+solve and no completed-job log message. It was interrupted; all files remain
+under `attempt-phase-dumps/`. Its algorithmic outcome is unknown, and no
+primary estimate uses it. `Trace::boundary` was observed to dump/reset on every
+phase transition, including repeated relation-loop transitions. Version 2
+changes only that profiling mechanism, with a newly pinned executable and the
+same complete job panel. This is a profiling implementation obstruction, not
+a mathematical negative or a measured conductor effect.
+
+The running library-test compiler had consumed over 81 CPU minutes without
+producing a test result. It and the queued build were terminated when v2 source
+changes required a new snapshot. Do not report the interrupted compilation as
+a passing or failing test suite; final validation remains required.

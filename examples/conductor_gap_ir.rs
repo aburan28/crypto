@@ -187,7 +187,13 @@ fn checked_jobs(study: &Path, archive: &Path) -> Result<Vec<Value>, String> {
 }
 
 fn census(study: &Path, archive: &Path, binary: &Path, valgrind: &Path) -> Result<(), String> {
-    binary_check(binary)?;
+    let config = value(&study.join("profile-config.json"))?;
+    if config["schema"] != "conductor_gap.callgrind_profile_config/v2"
+        || config["phase_dumps"] != false
+        || hash(binary)? != string(&config, "binary_sha256")?
+    {
+        return Err("profiling executable differs from the frozen v2 configuration".into());
+    }
     let jobs = checked_jobs(study, archive)?;
     let raw = study.join("raw");
     fs::create_dir(&raw).map_err(|e| format!("refusing existing census directory: {e}"))?;
@@ -212,6 +218,7 @@ fn census(study: &Path, archive: &Path, binary: &Path, valgrind: &Path) -> Resul
             .arg(binary)
             .arg("exec")
             .env("ECBENCH_CALLGRIND_SOLVE", "1")
+            .env("ECBENCH_CALLGRIND_PHASE_DUMPS", "0")
             .env("RAYON_NUM_THREADS", "1")
             .env_remove("ECBENCH_CALLGRIND_TARGET")
             .stdin(Stdio::from(
@@ -519,6 +526,9 @@ fn analyze(study: &Path, archive: &Path) -> Result<(), String> {
         && direction(leads[0]) != 0
         && direction(leads[0]) == direction(leads[1]);
     let result = json!({"schema":"conductor_gap.callgrind_analysis/v1","unit":"callgrind.Ir","expected_profiles":100,"verified_profiles":rows.iter().filter(|v|v["error"].is_null()).count(),"all_profiles_verified":all_ok,"jobs_sha256":hash(&study.join("jobs.json"))?,"aa_pairs":aa,"aa_max_deviation":aa_max,"aa_within_two_percent":all_ok && aa.len()==36 && aa_max<=0.02,"comparison_status":if !all_ok {"inadmissible_missing_or_failed_profiles"} else if aa_max>0.02 {"exploratory_aa_gate_failed"} else {"admissible_implementation_diagnostic"},"summaries":summaries,"comparisons":comparisons,"repeated_instruction_lead":repeated_lead,"rows":rows,"claim_limit":"complete simulated user-space implementation instruction census; external independent verification excluded; no native wall-time, intrinsic-hardness, asymptotic or cryptographic-scale conclusion"});
+    let mut result = result;
+    result["profile_config_sha256"] = json!(hash(&study.join("profile-config.json"))?);
+    result["profiling_snapshot"] = value(&study.join("profile-config.json"))?;
     write(&study.join("analysis.json"), &result)?;
     let mut md=String::from("# Complete implementation instruction census\n\nUnit: Callgrind simulated user-space instructions, inside `methods::solve`. External independent verification is outside this interval. No native wall-time claim.\n\n");
     md.push_str(&format!("Verified profiles: {}/100. A/A maximum relative deviation: {:.6}%. Frozen repeated instruction-lead criterion: {}.\n\n",result["verified_profiles"],aa_max*100.,repeated_lead));
