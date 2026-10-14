@@ -255,4 +255,25 @@ Lean 4 (no Mathlib) for the feasible lemmas.
   characteristic 3) whose isogeny-class minimum is 7, so the `0 mod 4 → 3`
   pattern is already known to fail at `q = 3`. Kept as a labelled pilot.
 - Timing pilot `n = 5`, `q = 5`, `sample:1`, output sent to `/dev/null`
-  unread. The session running it ended before it finished (about 8 minutes wall, 3.4 CPU-minutes, at load average about 90); no timing line survived and the scratch output was lost. Panel sizes above were set from that partial observation (roughly 0.3–0.4 µs of CPU per structure) and the stop rule. The `n = 3`, `q = 3` pilot records were lost with the same scratch directory; the pilot is rerun once, unchanged, and committed as `results/pilot-n3-q3.jsonl`, labelled pilot.
+  unread. The session running it ended before it finished (about 8 minutes wall, 3.4 CPU-minutes, at load average about 90); no timing line survived and the scratch output was lost. Panel sizes above were set from that partial observation (roughly 0.3–0.4 µs of CPU per structure) and the stop rule. The `n = 3`, `q = 3` pilot records were lost with the same scratch directory; the pilot is rerun once, unchanged, and committed as `results/pilot-n3-q3.jsonl`, labelled pilot. (As run, the rerun pilot landed as
+  `results/run-20261014T0050Z/pilot-n3-q3-{cosets,cocycles}.jsonl`.)
+
+## Amendment 2026-10-14 (after panel D, before panels A, B, C, E produced output)
+
+Adds one hypothesis; changes no panel, input or derived statement.
+Panel D (`n = 5`, `q = 3`, exhaustive) showed: among `E(K)[2] = Z/2`,
+`4 | #E(K)` curves, genus 25 on the curve itself occurs exactly for
+`v₂(#E(K)) ≥ 3` (60 of 60), never for `v₂ = 2` (61 curves, minimum 33 or
+65); genus 5 occurs only with `#E(K)[4] = 8`. A candidate reason, not a
+proof: in Proposition T the configuration has `μ = h^{1 − (−q)^k}`; at
+`q ≡ 3 mod 4` both exponents (`1 + q`, `1 − q²`) are divisible by 4 and
+`K* ⊂ F_{Q²}*⁴`, so `μ` is a fourth power in `U₁`, a finer 2-adic condition
+than Proposition T; at `q ≡ 1 mod 4` the `k = 1` exponent `1 + q` is
+`2 mod 4` and no such refinement follows.
+
+**Hypothesis H (prediction for panel E, `q = 5 ≡ 1 mod 4`):** the `v₂ ≥ 3`
+restriction does not persist: some sampled `E(K)[2] = Z/2` curve with
+`v₂(#E(K)) = 2` has genus 25 on itself. Falsifier: in panel E every
+genus-25 `E(K)[2] = Z/2` curve has `v₂ ≥ 3`. With fewer than 5 sampled
+`E(K)[2] = Z/2`, `v₂ = 2` models the test is reported as underpowered, not
+as a pass.
