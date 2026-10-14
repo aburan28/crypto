@@ -213,6 +213,48 @@ fn build(f: &F, split: bool, c0: u32, c1: u32, ab: Option<(u32, u32)>, p: u32) -
     Ok(Inst { split, c0, c1, ab, r, qp, fi, np, mm, g, ps, v0, v1, binv, xp, xn, xd, h, gen: 3, pts_conic, pts_over_a })
 }
 
+// ---------------------------------------------------------------- real model (addendum 2026-10-14): y^2 = f, f monic deg 8, genus 3
+// class (u, v, n) = div(u, v) + n inf+ + (3 - deg u - n) inf- - Dinf, Dinf = 2 inf+ + inf-; reduced iff deg u <= 3, 0 <= n <= 3 - deg u
+struct Rm { f: P, vp: P }
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+struct Rd { u: P, v: P, n: i32 }
+fn rzero() -> Rd { Rd { u: vec![1], v: vec![], n: 2 } }
+// one step with v adapted to +V+ (plus) or -V+ (minus). Returns u', v' and the pole order e of y - va at the
+// other point at infinity (inf- for plus, inf+ for minus): plus gives n' = n + deg u - e, minus gives m' = m + deg u - e.
+fn rstep(fl: &F, rm: &Rm, u: &P, v: &P, plus: bool) -> (P, P, i32) {
+    let va = if plus { psub(fl, &rm.vp, &pmod(fl, &psub(fl, &rm.vp, v), u)) } else { padd(fl, &pneg(fl, &rm.vp), &pmod(fl, &padd(fl, &rm.vp, v), u)) };
+    let up = pmonic(fl, &pexact(fl, &psub(fl, &rm.f, &pmul(fl, &va, &va)), u)); let vn = pmod(fl, &pneg(fl, &va), &up);
+    let e = if plus { dg(&padd(fl, &rm.vp, &va)) } else { dg(&psub(fl, &rm.vp, &va)) }; (up, vn, e) }
+fn rred(fl: &F, rm: &Rm, u: P, v: P, n: i32) -> Rd {
+    let mut u = pmonic(fl, &u); let mut v = pmod(fl, &v, &u); let mut n = n;
+    while dg(&u) > 3 { let du = dg(&u); let (a, b, e) = rstep(fl, rm, &u, &v, true); u = a; v = b; n += du - e; }
+    let mut guard = 0;
+    loop { guard += 1; assert!(guard < 100, "real-model reduction does not terminate");
+        let m = 3 - dg(&u) - n;
+        if n < 0 { let du = dg(&u); let (a, b, e) = rstep(fl, rm, &u, &v, false); u = a; v = b; let m2 = m + du - e; n = 3 - dg(&u) - m2; }
+        else if m < 0 { let du = dg(&u); let (a, b, e) = rstep(fl, rm, &u, &v, true); u = a; v = b; n += du - e; }
+        else { break; } }
+    if dg(&u) <= 0 { u = vec![1]; v = vec![]; }
+    Rd { u, v, n } }
+fn radd(fl: &F, rm: &Rm, a: &Rd, b: &Rd) -> Rd {
+    let (d0, e1, e2) = pxgcd(fl, &a.u, &b.u); let vs = padd(fl, &a.v, &b.v); let (d, c1, c2) = pxgcd(fl, &d0, &vs);
+    let (s1, s2, s3) = (pmul(fl, &c1, &e1), pmul(fl, &c1, &e2), c2);
+    let u = pexact(fl, &pmul(fl, &a.u, &b.u), &pmul(fl, &d, &d));
+    let t = padd(fl, &padd(fl, &pmul(fl, &pmul(fl, &s1, &a.u), &b.v), &pmul(fl, &pmul(fl, &s2, &b.u), &a.v)), &pmul(fl, &s3, &padd(fl, &pmul(fl, &a.v, &b.v), &rm.f)));
+    let v = pexact(fl, &t, &d); rred(fl, rm, u, v, a.n + b.n + dg(&d) - 2) }
+fn rneg(fl: &F, rm: &Rm, a: &Rd) -> Rd { rred(fl, rm, a.u.clone(), pneg(fl, &a.v), 4 - dg(&a.u) - a.n) }
+fn rmul(fl: &F, rm: &Rm, mut n: u64, a: &Rd) -> Rd { let mut r = rzero(); let mut b = a.clone(); while n > 0 { if n & 1 == 1 { r = radd(fl, rm, &r, &b); } b = radd(fl, rm, &b, &b); n >>= 1; } r }
+fn rvalid(fl: &F, rm: &Rm, d: &Rd) -> bool { d.u.last() == Some(&1) && dg(&d.u) <= 3 && d.n >= 0 && d.n <= 3 - dg(&d.u) && dg(&d.v) < dg(&d.u)
+    && pmod(fl, &psub(fl, &pmul(fl, &d.v, &d.v), &rm.f), &d.u).is_empty() && p_in(fl, &d.u, 1) && p_in(fl, &d.v, 1) }
+// roots over L of u in F_q[z], deg <= 3, with multiplicities
+fn roots3(f: &F, u: &P, kel: &[u32]) -> Vec<(u32, u64)> {
+    let mut rem = u.clone(); let mut roots = vec![];
+    for c in 0..f.q { let cv = f.int(c as i64); let mut mlt = 0; while dg(&rem) >= 1 && pev(f, &rem, cv) == 0 { rem = pexact(f, &rem, &plin(f, cv)); mlt += 1; } if mlt > 0 { roots.push((cv, mlt)); } }
+    if dg(&rem) == 2 { let (c0r, c1r) = (rem[0], rem[1]); let disc = f.sub(f.mul(c1r, c1r), f.mul(f.int(4), c0r)); let sd = f.sqrt(disc).unwrap(); let i2 = f.inv(f.int(2));
+        roots.push((f.mul(f.sub(sd, c1r), i2), 1)); roots.push((f.mul(f.sub(f.neg(sd), c1r), i2), 1)); }
+    else if dg(&rem) == 3 { let rho = *kel.iter().find(|&&t| pev(f, &rem, t) == 0).unwrap(); roots.push((rho, 1)); roots.push((f.frob(rho), 1)); roots.push((f.frob(f.frob(rho)), 1)); }
+    roots }
+
 // ---------------------------------------------------------------- helpers for output
 struct Iso { cen2l: Vec<u32>, l2cen: HashMap<u32, u32> }
 fn kc(iso: &Iso, q: u32, v: u32) -> String { let i = iso.l2cen[&v]; let d = digits(q, 3, i); format!("[{},{},{}]", d[0], d[1], d[2]) }
@@ -414,6 +456,102 @@ fn main() {
 \"pushforward_eq_4P\":{},\"pushforward_fail\":{},\"pushforward_not_evaluable\":{},\"pushforward_skip_reasons\":{:?},\"ext_pushforward_all_E0K_eq_4P\":{},\"ext_pushforward_fail\":{},\"phi_G\":{{\"u\":{},\"v\":{}}}}},\"P4\":{}",
                 wpts.len(), el.len(), exc.len(), exc_lines.join(","), fq_ok, mumford_ok, ua_ok, ub_ok, hom_t, hom_ok, dbl_t, dbl_ok, gpt_s, g_elig, g_nonzero, g_ell, ker.len(), ker_orders, ker4, t1_in, img.len(), img_ok,
                 pf_ok, pf_bad, pf_skip, { let mut v: Vec<_> = pf_why.iter().map(|(k, c)| format!("{}:{}", k, c)).collect(); v.sort(); v }, pfx_ok, pfx_bad, pints(&f, &gv.u), pints(&f, &gv.v), p4);
+        } else {
+            // ---- addendum 2026-10-14: transfer on the conjugate arm with real-model (balanced) arithmetic
+            let r = inst.r; let h = &inst.h;
+            // F_q-rational base point (z0, w0) of the model change
+            let mut z0w0 = None; for c in 0..q { let z = f.int(c as i64); let hz = pev(&f, h, z); let xdz = pev(&f, &inst.xd, z);
+                if hz != 0 && f.chi(hz, 1) == 1 && xdz != 0 && !inst.special(&f, f.div(pev(&f, &inst.xn, z), xdz)) { z0w0 = Some((z, f.sqrt(hz).unwrap())); break; } }
+            let (z0, w0) = z0w0.expect("no base point");
+            // f(z') = z'^8 h(z0 + 1/z') / h(z0)
+            let mut hs = vec![0u32; 9]; { let mut t = h.clone(); for k in 0..9 { let (qq, rr) = pdivrem(&f, &t, &plin(&f, z0)); hs[k] = *rr.first().unwrap_or(&0); t = qq; } }
+            let fr: P = tr((0..9).map(|k| f.div(hs[8 - k], hs[0])).collect());
+            let mut vp = vec![0u32; 5]; vp[4] = 1; for k in (0..4).rev() { let sq = pmul(&f, &vp, &vp); vp[k] = f.div(f.sub(*fr.get(4 + k).unwrap_or(&0), *sq.get(4 + k).unwrap_or(&0)), f.int(2)); }
+            let vp = tr(vp); let rm = Rm { f: fr.clone(), vp: vp.clone() };
+            let fr_ok = dg(&fr) == 8 && fr[8] == 1 && p_in(&f, &fr, 1) && dg(&pgcd(&f, &fr, &pder(&f, &fr))) == 0 && dg(&psub(&f, &fr, &pmul(&f, &vp, &vp))) <= 3;
+            let jp = Rd { u: vec![1], v: vec![], n: 3 }; // [inf+ - inf-]
+            let ptc = |z: u32, w: u32| -> Rd { if z == z0 { if w == w0 { rzero() } else { Rd { u: vec![1], v: vec![], n: 1 } } }
+                else { let d = f.sub(z, z0); let zp = f.inv(d); let wp = f.div(w, f.mul(f.pow(d, 4), w0)); Rd { u: plin(&f, zp), v: tr(vec![wp]), n: 1 } } };
+            // V: enumeration of reduced triples, associativity, order, inverse
+            let mut all: Vec<Rd> = vec![]; for d in 0..=3u32 { for uc in 0..q.pow(d) { let mut u: P = digits(q, d as usize, uc).iter().map(|&c| f.int(c as i64)).collect(); u.push(1);
+                let fm = pmod(&f, &fr, &u);
+                for vc in 0..q.pow(d) { let v = tr(digits(q, d as usize, vc).iter().map(|&c| f.int(c as i64)).collect()); if pmod(&f, &pmul(&f, &v, &v), &u) == fm { for nn in 0..=(3 - d as i32) { all.push(Rd { u: u.clone(), v: v.clone(), n: nn }); } } } } }
+            let v1 = all.len() as u64 == n;
+            let pick = |rng: &mut Rng| all[rng.below(all.len() as u64) as usize].clone();
+            let (mut v2_ok, mut v3_ok, mut v4_ok) = (0, 0, 0);
+            for _ in 0..300 { let (a1, b1, c1) = (pick(&mut rng), pick(&mut rng), pick(&mut rng)); if radd(&f, &rm, &radd(&f, &rm, &a1, &b1), &c1) == radd(&f, &rm, &a1, &radd(&f, &rm, &b1, &c1)) { v2_ok += 1; } }
+            for _ in 0..100 { let d = pick(&mut rng); if rmul(&f, &rm, n, &d) == rzero() { v3_ok += 1; }
+                if radd(&f, &rm, &d, &rneg(&f, &rm, &d)) == rzero() && radd(&f, &rm, &d, &rzero()) == d { v4_ok += 1; } }
+            let vpass = fr_ok && v1 && v2_ok == 300 && v3_ok == 100 && v4_ok == 100;
+            pass.push(("V", vpass));
+            // E0 <-> W
+            let to_e = |pp: WP| -> Option<(u32, u32)> { match pp { WP::O => None, WP::A(s, y) => if s == 0 { None } else { Some((f.add(r[0], f.div(te1, s)), f.div(f.mul(y, te1), f.mul(s, s)))) } } };
+            let to_w = |x: u32, y0: u32| -> WP { let d = f.sub(x, r[0]); WP::A(f.div(te1, d), f.div(f.mul(te1, y0), f.mul(d, d))) };
+            let elig = |pp: WP| -> bool { match to_e(pp) { None => false, Some((x, _)) => !inst.special(&f, x) } };
+            let phi = |pp: WP| -> Rd { let (x, y0) = to_e(pp).unwrap(); let s1 = f.sqrt(pev(&f, &inst.fi[1], x)).unwrap(); let s2 = f.sqrt(pev(&f, &inst.fi[2], x)).unwrap();
+                let mut d = rzero(); for e in 0..4 { let mut pt = [x, y0, if e & 1 == 1 { f.neg(s1) } else { s1 }, if e & 2 == 2 { f.neg(s2) } else { s2 }];
+                    for _ in 0..3 { let (z, w) = inst.fwd(&f, pt).expect("generic point maps"); d = radd(&f, &rm, &d, &ptc(z, w)); pt = frc(&f, pt); } }
+                radd(&f, &rm, &d, &rmul(&f, &rm, 6, &jp)) };
+            let mut val: HashMap<WP, Rd> = HashMap::new(); let el: Vec<WP> = wpts.iter().cloned().filter(|&pp| elig(pp)).collect(); let mut valid_ok = 0;
+            for &pp in &el { let d = phi(pp); if rvalid(&f, &rm, &d) { valid_ok += 1; } val.insert(pp, d); }
+            let exc: Vec<WP> = wpts.iter().cloned().filter(|&pp| !elig(pp)).collect();
+            let mut exc_lines = vec![]; let mut exc_ok = true;
+            for &pp in &exc { let mut vals = vec![]; let mut tries = 0; while vals.len() < 3 && tries < 10000 { tries += 1; let rr = el[rng.below(el.len() as u64) as usize]; let s = wadd(&f, &wc, pp, rr);
+                    if elig(s) { vals.push(radd(&f, &rm, &val[&s], &rneg(&f, &rm, &val[&rr]))); } }
+                let agree = vals.len() == 3 && vals.iter().all(|v| v == &vals[0]);
+                let dir = match to_e(pp) { None => if pp == WP::O { Some(rzero()) } else { None }, Some((x, _)) => if x == r[1] { Some(rzero()) } else { None } };
+                let dir_agree = dir.as_ref().map(|d| d == &vals[0]); if !agree || dir_agree == Some(false) || !rvalid(&f, &rm, &vals[0]) { exc_ok = false; }
+                let kind = match to_e(pp) { None => if pp == WP::O { "O=(r0,0)".to_string() } else { "x=inf".to_string() }, Some((x, _)) => if x == r[1] { "(r1,0)".into() } else if x == r[2] { "x=r2".into() } else { "other".into() } };
+                exc_lines.push(format!("{{\"kind\":\"{}\",\"R_route_values_agree\":{},\"direct_value_agrees\":{},\"phi_is_zero\":{}}}", kind, agree, match dir_agree { Some(t) => t.to_string(), None => "null".into() }, vals[0] == rzero()));
+                val.insert(pp, vals[0].clone()); }
+            let (mut hom_t, mut hom_ok, mut dbl_t, mut dbl_ok) = (0, 0, 0, 0);
+            while hom_t < 400 { let p1 = el[rng.below(el.len() as u64) as usize]; let p2 = el[rng.below(el.len() as u64) as usize]; let s = wadd(&f, &wc, p1, p2); if !elig(s) { continue; }
+                hom_t += 1; if radd(&f, &rm, &val[&p1], &val[&p2]) == val[&s] { hom_ok += 1; } }
+            let mut guard = 0; while dbl_t < 100 && guard < 100000 { guard += 1; let p1 = el[rng.below(el.len() as u64) as usize]; let s = wadd(&f, &wc, p1, p1); if !elig(s) { continue; }
+                dbl_t += 1; if radd(&f, &rm, &val[&p1], &val[&p1]) == val[&s] { dbl_ok += 1; } }
+            let mut gpt = WP::O; while gpt == WP::O { gpt = wmul(&f, &wc, n / ll, wpts[rng.below(wpts.len() as u64) as usize]); }
+            let gv = val[&gpt].clone(); let g_nonzero = gv != rzero(); let g_ell = rmul(&f, &rm, ll, &gv) == rzero();
+            let ker: Vec<WP> = wpts.iter().cloned().filter(|pp| val[pp] == rzero()).collect();
+            let ker4 = ker.iter().all(|&pp| wmul(&f, &wc, 4, pp) == WP::O); let t1_in = ker.contains(&to_w(r[1], 0));
+            let img: HashSet<Rd> = wpts.iter().map(|pp| val[pp].clone()).collect(); let img_ok = img.len() as u64 * ker.len() as u64 == n;
+            let ker_orders: Vec<u64> = ker.iter().map(|&pp| (1..=n).find(|&k| wmul(&f, &wc, k, pp) == WP::O).unwrap()).collect();
+            let all_valid = wpts.iter().all(|pp| rvalid(&f, &rm, &val[pp]));
+            // pi0_* : images of points of C given homogeneous data (X at z, xn, xd, w), special fibres included
+            let pimg = |az: [u32; 3], xnum: u32, xden: u32, wv: u32| -> Option<WP> {
+                if xden == 0 { let prod = f.div(wv, xnum); let (r1v, r2v) = (f.div(az[0], az[1]), f.div(az[2], az[1])); let v0 = f.div(prod, f.mul(r1v, r2v));
+                    return if f.mul(v0, v0) != 1 { None } else { Some(WP::A(0, f.mul(te1, v0))) }; }
+                let x = f.div(xnum, xden);
+                if pev(&f, &inst.qp, x) == 0 || x == r[1] { return Some(to_w(x, 0)); } if x == r[0] { return Some(WP::O); }
+                if x == r[2] { let u12 = f.div(f.mul(f.sub(r[2], r[1]), az[2]), az[0]); let y0 = f.div(f.mul(wv, f.mul(f.sub(r[2], r[0]), f.sub(r[2], r[1]))), f.mul(u12, xden));
+                    return if f.mul(y0, y0) != pev(&f, &inst.fi[0], x) { None } else { Some(to_w(x, y0)) }; }
+                let mut s = [0u32; 3]; for i in 0..3 { s[i] = f.sqrt(pev(&f, &inst.fi[i], x))?; }
+                let target = f.div(f.mul(f.mul(wv, pev(&f, &inst.qp, x)), pev(&f, &inst.np, x)), xden); let mut found = vec![];
+                for e in 0..8u32 { let y: Vec<u32> = (0..3).map(|i| if e >> i & 1 == 1 { f.neg(s[i]) } else { s[i] }).collect();
+                    if f.mul(f.mul(y[0], y[1]), y[2]) != target { continue; } let pt = [x, y[0], y[1], y[2]]; if parallel(&f, &inst.xtrue(&f, pt), &az) { found.push(pt); } }
+                if found.len() == 1 { Some(to_w(found[0][0], found[0][1])) } else { None } };
+            let img_fin = |z: u32, w: u32| -> Option<WP> { pimg([pev(&f, &inst.xp[0], z), pev(&f, &inst.xp[1], z), pev(&f, &inst.xp[2], z)], pev(&f, &inst.xn, z), pev(&f, &inst.xd, z), w) };
+            let top = |p: &P, k: usize| *p.get(k).unwrap_or(&0);
+            let img_inf = |s: u32| -> Option<WP> { pimg([top(&inst.xp[0], 2), top(&inst.xp[1], 2), top(&inst.xp[2], 2)], top(&inst.xn, 4), top(&inst.xd, 4), s) };
+            let (ip_plus, ip_minus) = (img_fin(z0, w0), img_fin(z0, f.neg(w0)));
+            let (mut pf_ok, mut pf_bad, mut pf_ne) = (0, 0, 0);
+            for &pp in &wpts { let d = &val[&pp]; let mut acc = WP::O; let mut bad = ip_plus.is_none() || ip_minus.is_none();
+                for (zp, mlt) in roots3(&f, &d.u, &kel) { let wp = pev(&f, &d.v, zp);
+                    let im = if zp == 0 { img_inf(f.mul(wp, w0)) } else { let zi = f.inv(zp); img_fin(f.add(z0, zi), f.div(f.mul(wp, w0), f.pow(zp, 4))) };
+                    match im { Some(t) => { acc = wadd(&f, &wc, acc, wmul(&f, &wc, mlt, t)); } None => { bad = true; } } }
+                if bad { pf_ne += 1; continue; }
+                let (nn, mm) = (d.n as i64 - 2, 3 - dg(&d.u) as i64 - d.n as i64 - 1);
+                let sc = |k: i64, t: WP| -> WP { if k >= 0 { wmul(&f, &wc, k as u64, t) } else { wneg(&f, wmul(&f, &wc, (-k) as u64, t)) } };
+                acc = wadd(&f, &wc, acc, wadd(&f, &wc, sc(nn, ip_plus.unwrap()), sc(mm, ip_minus.unwrap())));
+                if acc == wmul(&f, &wc, 4, pp) { pf_ok += 1; } else { pf_bad += 1; } }
+            let p4c = vpass && valid_ok == el.len() && all_valid && exc_ok && hom_ok == hom_t && dbl_ok == dbl_t && dbl_t == 100 && g_nonzero && g_ell && ker4 && t1_in && img_ok && pf_bad == 0 && pf_ne == 0;
+            pass.push(("P4c", p4c));
+            let gpt_s = match gpt { WP::A(s, y) => format!("[{},{}]", kc(&iso, q, s), kc(&iso, q, y)), WP::O => "null".into() };
+            out += &format!(",\"real_model\":{{\"z0\":{},\"w0\":{},\"f\":{},\"V_plus\":{},\"f_monic_deg8_squarefree\":{},\"reduced_triples_enumerated\":{},\"V1_enum_eq_order\":{},\"V2_assoc_pass\":{},\"V3_order_kills_pass\":{},\"V4_inverse_identity_pass\":{},\"V\":{}}},\
+\"P4c_detail\":{{\"E0_points\":{},\"eligible\":{},\"exceptional\":{},\"exceptional_detail\":[{}],\"phi_valid_reduced_Fq\":{},\"all_values_valid\":{},\"hom_pairs\":{},\"hom_pass\":{},\"doublings\":{},\"doubling_pass\":{},\"G_weierstrass_SY\":{},\"G_eligible\":{},\"phi_G_nonzero\":{},\"ell_phi_G_zero\":{},\
+\"kernel_size\":{},\"kernel_orders\":{:?},\"kernel_in_E0_4\":{},\"T1_in_kernel\":{},\"image_size\":{},\"image_times_kernel_eq_order\":{},\"pushforward_all_E0K_eq_4P\":{},\"pushforward_fail\":{},\"pushforward_not_evaluable\":{},\"phi_G\":{{\"u\":{},\"v\":{},\"n\":{}}}}},\"V\":{},\"P4c\":{}",
+                f.to_int(z0), f.to_int(w0), pints(&f, &fr), pints(&f, &vp), fr_ok, all.len(), v1, v2_ok, v3_ok, v4_ok, vpass,
+                wpts.len(), el.len(), exc.len(), exc_lines.join(","), valid_ok, all_valid, hom_t, hom_ok, dbl_t, dbl_ok, gpt_s, elig(gpt), g_nonzero, g_ell,
+                ker.len(), ker_orders, ker4, t1_in, img.len(), img_ok, pf_ok, pf_bad, pf_ne, pints(&f, &gv.u), pints(&f, &gv.v), gv.n, vpass, p4c);
         }
         let ip = pass.iter().all(|x| x.1); all_pass &= ip;
         out += &format!(",\"all_pass\":{}}}", ip); println!("{}", out);

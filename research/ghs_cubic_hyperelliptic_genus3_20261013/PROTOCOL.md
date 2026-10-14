@@ -244,3 +244,21 @@ while `n < 0`, `+`-steps while `n > 3 − deg u`. Negation
   minimum include `m = 3, r = 5, hyperelliptic`, the census order equals
   `#E0(K)`, and 0 subcover mismatches; report the number of structures
   attaining genus 3, by type. *Falsifier:* any record failing these.
+
+### Correction to the addendum (2026-10-14, after a development run, before the recorded addendum run)
+
+The step rule written above, `n ↦ n + deg u − 4` (`+`-step) and
+`m ↦ m + deg u − 4` (`−`-step), is wrong when the adapted `v` has degree
+above 4 (possible right after a composition with `deg u ≥ 5`). The first
+development run at q = 5 failed V2 (associativity 155/300 and 162/300), V3
+and V4, as the validation was meant to catch. The correct rule, from
+`div(y − v_a) = A + A' − e₊∞₊ − e₋∞₋` with `e₊ + e₋ = deg A + deg A'`, is
+`n ↦ n + deg u − deg(V+ + v_a)` for the `+`-step and
+`m ↦ m + deg u − deg(V+ − v_a)` for the `−`-step (pole order of `y − v_a` at
+the other point at infinity); it reduces to `deg u − 4` when `deg v_a ≤ 4`.
+The tool now uses it. Predictions, sizes and falsifiers are unchanged. The
+development output (q = 5, 7) was scratch and is not kept.
+
+The census fork gate was run before this correction and passed: the fork's
+exhaustive q = 5 and q = 7 output is byte-identical to those lines of
+`run-20261013T0403Z.jsonl` (976 lines, sha256 `65021870…`, 154 s).
