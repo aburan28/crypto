@@ -1807,7 +1807,7 @@ mod wide {
             let mut quotient_indexed =
                 RootTable128::with_capacity_indexed83(quotient.states.len() * 2);
             let mut dense_quotient_indexed =
-                RootTable128::with_capacity_indexed83((quotient.states.len() * 2 + 2) / 3);
+                RootTable128::with_capacity_indexed83((quotient.states.len() * 4 + 2) / 3);
             for (states, table) in [
                 (&full.states, &mut full_indexed),
                 (&quotient.states, &mut quotient_indexed),
@@ -2539,7 +2539,17 @@ mod wide {
             !indexed5_load75 || indexed5_table,
             "indexed five-byte load75 request requires the indexed table"
         );
-        let root_table_request_entries = if load75_table || indexed5_load75 {
+        // The symmetric quotient retains almost two distinct canonical root
+        // keys per state.  Requesting 4*S/3 therefore targets at most 75%
+        // occupancy after the constructor doubles the request.
+        let root_table_request_entries = if indexed5_load75 {
+            states
+                .len()
+                .checked_mul(4)
+                .and_then(|n| n.checked_add(2))
+                .expect("indexed root table request exceeds usize")
+                / 3
+        } else if load75_table {
             states
                 .len()
                 .checked_mul(2)

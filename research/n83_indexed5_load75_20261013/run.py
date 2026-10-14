@@ -23,15 +23,16 @@ POINT = STUDY / "primary_target.jsonl"
 ANSWER = STUDY / "answer.jsonl"
 RHO_CONFIG = ROOT / "research/n83_dense_root_20261013/rho_config.json"
 EXPECTED = {
-    SOURCE: "80e54cba2327bceece22901163bcf32e84c096acc1af795fd4b5d02f0542e287",
+    SOURCE: "ccaa44824ce3fa6587ea886ed0803cd180c641e05ebc3c6efe10ad665452e672",
     LOCK: "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
     POINT: "21c8dfc7d488909e5c4a42c839fcc01bdefa9821c11ba001626a1d15697240e8",
     ANSWER: "651eb7d0ef08a1655036746311b19b6989e340ca4752b6d675606055e59c12a1",
     RHO_CONFIG: "cf76ebb5372acfc1355b88374f875980be66cdffba1a82cb6e4c2f28bcfa723b",
     RHO_SOURCE: "fb14072f4fa5d08e18d8b79130b6d58a220adae0f76369cc9be949691c83eaa0",
 }
-ARMS = ((3114, True, 2400), (3000, True, 2000),
-        (2543, True, 1400), (2543, False, 1400))
+ARMS = ((2830, True, 2400), (2800, True, 2100),
+        (2750, True, 1800), (2543, True, 900),
+        (2543, False, 900))
 RSS_CAP_BYTES = 14 * 1024**3
 
 

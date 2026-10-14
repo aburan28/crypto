@@ -1,11 +1,13 @@
 # N83 indexed five-byte dense-request factor-base gate
 
-The optional `KIC_INDEXED5_LOAD75=1` mode requests `ceil(2S/3)` entries for
+The optional `KIC_INDEXED5_LOAD75=1` mode requests `ceil(4S/3)` entries for
 `S` retained symmetric-S3 states. The five-byte constructor allocates the
 next power of two above twice that request. It keeps the same state and
 canonical-key stream, exact full-key verification, and first witness. This
 gate tests how far the larger usable factor base improves one-target online
-cost within one 16-GB cloud instance.
+cost within one 16-GB cloud instance. The K2543 symmetry receipt recorded
+536,737,856 exact keys from 268,375,505 states, so the request accounts for
+almost two distinct keys per state.
 
 ## Frozen inputs and source
 
@@ -17,7 +19,7 @@ cost within one 16-GB cloud instance.
   The worker receives only the point. The answer sidecar SHA-256 is
   `651eb7d0ef08a1655036746311b19b6989e340ca4752b6d675606055e59c12a1`.
 - Producer source: `examples/koblitz_orbit_dlp_fast.rs`, SHA-256
-  `80e54cba2327bceece22901163bcf32e84c096acc1af795fd4b5d02f0542e287`.
+  `ccaa44824ce3fa6587ea886ed0803cd180c641e05ebc3c6efe10ad665452e672`.
   `Cargo.lock` SHA-256 is
   `ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90`.
 - Shared flags: symmetric S3 state quotient, exact five-byte root index,
@@ -30,18 +32,22 @@ cost within one 16-GB cloud instance.
 
 | Order | Arm | K | Predicted usable points if all orbits are full | State bound | Slot bucket | Child wall cap |
 | ---: | --- | ---: | ---: | ---: | ---: | ---: |
-| 1 | dense request | 3,114 | 516,924 | 402,426,891 | 2.5 GiB | 2,400 s |
-| 2 | dense request | 3,000 | 498,000 | 373,501,500 | 2.5 GiB | 2,000 s |
-| 3 | dense request | 2,543 | 422,138 | 268,375,505 | 2.5 GiB | 1,400 s |
-| 4 | regular request | 2,543 | 422,138 | 268,375,505 | 5 GiB | 1,400 s |
+| 1 | dense request | 2,830 | 469,780 | 332,370,765 | 5 GiB | 2,400 s |
+| 2 | dense request | 2,800 | 464,800 | 325,361,400 | 5 GiB | 2,100 s |
+| 3 | dense request | 2,750 | 456,500 | 313,845,125 | 5 GiB | 1,800 s |
+| 4 | dense request | 2,543 | 422,138 | 268,375,505 | 5 GiB | 900 s |
+| 5 | regular request | 2,543 | 422,138 | 268,375,505 | 5 GiB | 900 s |
 
 The bound is `83*K*(K-1)/2+42*K`; actual usable points and root keys come
-from the producer and independent replay. Lean checks K3114 as the last K
-in this slot bucket and its two-array payload below 13 GiB. The runner
+from the producer and independent replay. Lean checks that K3114 fits and
+K3115 crosses this slot bucket, and that K2830's two-array payload is below
+13.7 GiB. The
+K2543 measured overhead above those arrays was 0.297 GiB; K2830's total
+RSS remains to be measured. The runner
 records sampled child RSS and stops a child above 14 GiB. It retains wall,
 CPU, RSS, page faults, context switches, cgroup counters, raw output,
-resource stops, and timeouts. All four arms run even if an earlier one is
-censored. The overall workflow cap is 160 minutes, above the 120 minutes
+resource stops, and timeouts. All five arms run even if an earlier one is
+censored. The overall workflow cap is 160 minutes, above the 135 minutes
 of summed arm caps plus the 120-second rho cap.
 
 The same-point strong-rho reference uses archived `fold-L64-DP6-E0`, seed
@@ -51,7 +57,9 @@ The same-point strong-rho reference uses archived `fold-L64-DP6-E0`, seed
 The independent verifier replays the complete point-defined base, subgroup,
 four-point relation, recovered scalar, and five exclusive online phases.
 It checks the state bound and table layout. At K2543 it compares dense and
-regular root-key counts, base hashes, and first target witness. The N83
+regular root-key counts, base hashes, and recovered scalars. Rank-worker
+completion can change the later target query sequence, so equal target-row
+witnesses are not a parity gate. The N83
 source test compares every canonical key and first witness at both table
 densities for six representatives. Every completed arm receives a distinct
 canonical `IC1` manifest and one-target workload/run ID.

@@ -9,7 +9,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "research/n83_indexed5_20261013/analyze.py"
 ANSWER = ROOT / "research/n83_indexed5_20261013/answer.jsonl"
-ARMS = ((3114, True), (3000, True), (2543, True), (2543, False))
+ARMS = ((2830, True), (2800, True), (2750, True),
+        (2543, True), (2543, False))
 
 spec = importlib.util.spec_from_file_location("n83_independent_group", SOURCE)
 group = importlib.util.module_from_spec(spec)
@@ -49,7 +50,7 @@ def verify_arm(output, k, dense_request, answer):
     if summary["regular_states"] > state_bound:
         raise ValueError(f"{arm}: regular-state count exceeds source-loop bound")
     states = summary["regular_states"]
-    requested = (2 * states + 2) // 3 if dense_request else 2 * states
+    requested = (4 * states + 2) // 3 if dense_request else 2 * states
     slots = max(16, 1 << (2 * requested - 1).bit_length())
     if (summary["root_table_request_entries"] != requested
             or summary["root_table_allocated_bytes"] != 5 * slots
@@ -82,7 +83,7 @@ def verify_arm(output, k, dense_request, answer):
     online_ms = float(target["target_ms"])
     if abs(online_ms - phase_ms) > 1.0:
         raise ValueError(f"{arm}: exclusive online phases do not sum")
-    control_parity = None
+    control_summary = None
     if k == 2543 and dense_request:
         control_folder = output / "runs" / "primary" / "k2543_regular"
         control_usage_path = control_folder / "usage.json"
@@ -94,15 +95,10 @@ def verify_arm(output, k, dense_request, answer):
             except (OSError, json.JSONDecodeError):
                 control_summary = None
             if control_summary is not None:
-                control_parity = (
-                    summary["base_hash"] == control_summary["base_hash"]
-                    and summary["root_table_entries"] == control_summary["root_table_entries"]
-                    and indices == control_target["point_indices"]
-                    and target["x_codes"] == control_target["x_codes"]
-                    and target["probes"] == control_target["probes"]
-                    and scalar == control_target["recovered_scalar"])
-                if not control_parity:
-                    raise ValueError(f"{arm}: dense and regular exact first witnesses differ")
+                if (summary["base_hash"] != control_summary["base_hash"]
+                        or summary["root_table_entries"] != control_summary["root_table_entries"]
+                        or scalar != control_target["recovered_scalar"]):
+                    raise ValueError(f"{arm}: dense and regular base, key count or scalar differ")
     return {
         "arm": arm, "status": "PASS_INDEPENDENT_REPLAY",
         "actual_factor_base_points": len(base), "effective_columns": k,
@@ -116,7 +112,9 @@ def verify_arm(output, k, dense_request, answer):
         "rank_ms": summary["timing_ms"]["rank_stage"],
         "final_la_ms": summary["timing_ms"]["linear_algebra"],
         "peak_rss_bytes": usage["peak_rss_bytes"],
-        "control_first_witness_parity": control_parity,
+        "control_base_key_count_scalar_parity": (
+            "PASS" if k == 2543 and dense_request and control_summary is not None
+            else None),
         "symmetric_s3_states_enabled": True,
         "indexed5_load75_enabled": dense_request,
         "root_table_slots": slots,
