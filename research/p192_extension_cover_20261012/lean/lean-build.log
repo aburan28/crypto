@@ -1,5 +1,8 @@
-ℹ [763/764] Built CrossRatio (28s)
-info: CrossRatio.lean:46:0: 'P192ExtensionCover.cyclic_cross_ratio_product' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:47:0: 'P192ExtensionCover.cyclic_cross_ratio_not_norm_one' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:48:0: 'P192ExtensionCover.pullback_injective_of_push_pull_two' does not depend on any axioms
+ℹ [763/764] Built CrossRatio (33s)
+info: CrossRatio.lean:82:0: 'P192ExtensionCover.cyclic_cross_ratio_product' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:83:0: 'P192ExtensionCover.cyclic_cross_ratio_not_norm_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:84:0: 'P192ExtensionCover.pullback_injective_of_push_pull_two' does not depend on any axioms
+info: CrossRatio.lean:85:0: 'P192ExtensionCover.legendre_j_difference_factor' depends on axioms: [propext, Quot.sound]
+info: CrossRatio.lean:86:0: 'P192ExtensionCover.scholten_palindromic_identity' depends on axioms: [propext]
+info: CrossRatio.lean:87:0: 'P192ExtensionCover.quartic_projection_identity' depends on axioms: [propext]
 Build completed successfully (764 jobs).

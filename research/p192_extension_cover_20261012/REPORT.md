@@ -1,5 +1,10 @@
 # Exact extension-cover screen for standard NIST P-192
 
+**Continuation:** The [three-branch follow-up](BRANCH_CONTINUATION.md) proves
+that the nonsplit-quadratic direct genus-3 branch is excluded as well, and
+constructs verified nonhyperelliptic genus-3 and Scholten genus-2 controls.
+The original screen and receipts below remain the baseline for that result.
+
 **Result.** For standard P-192 viewed over \(\mathbf F_{p^6}\), every Legendre
 cross-ratio of its nonzero 2-torsion has norm \(-1\) to \(\mathbf F_{p^2}\).
 Thus it cannot be written in the split-linear-root hyperelliptic genus-3
@@ -7,8 +12,10 @@ family \(y^2=x(x-\alpha)(x-\alpha^{p^2})\) used in the explicit cubic-cover
 construction of Joux and Vitse. A separate, exact genus-2 cover
 \(H:v^2=(u^2)^3+a u^2+b\), \((u,v)\mapsto(u^2,v)\), does preserve the P-192
 prime-order subgroup, but is already defined over \(\mathbf F_p\). The
-quadratic-root genus-3, nonhyperelliptic genus-3, and genuinely descended
-genus-2 routes remain candidates for the next construction and cost screen.
+subsequent [branch continuation](BRANCH_CONTINUATION.md) excludes the direct
+quadratic-root genus-3 family and constructs two further subgroup-preserving
+covers. The genuinely descended nonhyperelliptic and Scholten routes and
+their relation pipelines remain open.
 
 ## Instance and exact receipts
 
@@ -139,14 +146,12 @@ measured speed ratio or a lower bound on every cover method. See
 [Joux–Vitse, §§3–4](https://eprint.iacr.org/2011/020.pdf) for the
 decomposition method and base choice.
 
-The next useful experiment is to construct an explicit Scholten genus-2
-cover over \(\mathbf F_{p^3}\) or a quadratic-root genus-3 cover over
-\(\mathbf F_{p^2}\), compute its conorm-norm image of \(G\), and verify a
-nonzero \(r\)-torsion image. It must then specify an enumerated usable
-factor base and measure relation yield, rank, final linear algebra, target
-descent, and a matched single-target rho reference under the repository
-measurement contract. Those costs are currently **unknown** for the
-P-192 instance.
+The [branch continuation](BRANCH_CONTINUATION.md) resolves the direct
+quadratic-root test and verifies a Scholten-form genus-2 cover over
+\(\mathbf F_{p^3}\). The next construction gate is a nontrivially descended
+cover with an explicit conorm-norm image. Its usable factor base, relation
+yield, rank, final linear algebra, target descent, and matched single-target
+rho reference remain **unknown** for the P-192 instance.
 
 ## Reproduction
 
