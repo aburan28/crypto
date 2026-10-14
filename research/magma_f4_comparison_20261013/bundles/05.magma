@@ -1,0 +1,338 @@
+// bundle 05 of 14: pkm_kummer_p2013265921_m2_t6_x558177188, pkm_kummer_p2013265921_m2_t6_x464833983, pkm_kummer_p2013265921_m3_t3_x1389271940, pkm_kummer_p2013265921_m3_t3_x388393539, generic_d4_s0, pkm_kummer_p2013265921_m2_t7_x1255255582, pkm_kummer_p2013265921_m2_t7_x1563871033, generic_d5_s0, pkm_kummer_p2013265921_m2_t8_x1312284326, pkm_kummer_p2013265921_m2_t8_x1731249962, pkm_kummer_p2013265921_m3_t4_x334226296, pkm_kummer_p2013265921_m3_t4_x427640318
+// pkm_kummer_p2013265921_m2_t6_x558177188: PKM's Kummer tower system (m = 2, t = 6, N = 12, 12 unknowns, 13 equations)
+// from research/pkm_tower_round2_20260925/runs/K1-kummer-m2-p1.jsonl; written by examples/pkm_tower_pilot.rs --export-magma-rows.
+// Ours (that row): engine f4_fp_tower, 48.912152 ms, inconsistent = true, timed out = false.
+K := GF(2013265921);
+P := PolynomialRing(K, 12, "grevlex");
+AssignNames(~P, ["y0_0", "y0_1", "y0_2", "y0_3", "y0_4", "y0_5", "y1_0", "y1_1", "y1_2", "y1_3", "y1_4", "y1_5"]);
+F := [P |
+  96593153 + 141093073*P.7 + 1525731036*P.7^2 + 141093073*P.1 + 1370797335*P.1*P.7 + 1635010208*P.1*P.7^2 + 1525731036*P.1^2 + 1635010208*P.1^2*P.7 + 1718918932*P.1^2*P.7^2,
+  1*P.2 + 2013265920*P.1^2,
+  1*P.3 + 2013265920*P.2^2,
+  1*P.4 + 2013265920*P.3^2,
+  1*P.5 + 2013265920*P.4^2,
+  1*P.6 + 2013265920*P.5^2,
+  1 + 2013265920*P.6^2,
+  1*P.8 + 2013265920*P.7^2,
+  1*P.9 + 2013265920*P.8^2,
+  1*P.10 + 2013265920*P.9^2,
+  1*P.11 + 2013265920*P.10^2,
+  1*P.12 + 2013265920*P.11^2,
+  1 + 2013265920*P.12^2
+];
+I := ideal<P | F>;
+t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);
+unit := G eq [P | 1];
+printf "RESULT-GB name=pkm_kummer_p2013265921_m2_t6_x558177188 p=2013265921 magma_gb_s=%o basis_len=%o unit=%o ours_inconsistent=true\n", tg, #G, unit;
+if not unit and Dimension(I) eq 0 then
+  t1 := Cputime(); V := Variety(I); printf "RESULT-VAR name=pkm_kummer_p2013265921_m2_t6_x558177188 magma_variety_s=%o magma_solutions=%o\n", Cputime(t1), #V;
+end if;
+
+// pkm_kummer_p2013265921_m2_t6_x464833983: PKM's Kummer tower system (m = 2, t = 6, N = 12, 12 unknowns, 13 equations)
+// from research/pkm_tower_round2_20260925/runs/K1-kummer-m2-p1.jsonl; written by examples/pkm_tower_pilot.rs --export-magma-rows.
+// Ours (that row): engine f4_fp_tower, 57.184503 ms, inconsistent = true, timed out = false.
+K := GF(2013265921);
+P := PolynomialRing(K, 12, "grevlex");
+AssignNames(~P, ["y0_0", "y0_1", "y0_2", "y0_3", "y0_4", "y0_5", "y1_0", "y1_1", "y1_2", "y1_3", "y1_4", "y1_5"]);
+F := [P |
+  1283433363 + 1926570889*P.7 + 138057412*P.7^2 + 1926570889*P.1 + 119612741*P.1*P.7 + 900631006*P.1*P.7^2 + 138057412*P.1^2 + 900631006*P.1^2*P.7 + 1718918932*P.1^2*P.7^2,
+  1*P.2 + 2013265920*P.1^2,
+  1*P.3 + 2013265920*P.2^2,
+  1*P.4 + 2013265920*P.3^2,
+  1*P.5 + 2013265920*P.4^2,
+  1*P.6 + 2013265920*P.5^2,
+  1 + 2013265920*P.6^2,
+  1*P.8 + 2013265920*P.7^2,
+  1*P.9 + 2013265920*P.8^2,
+  1*P.10 + 2013265920*P.9^2,
+  1*P.11 + 2013265920*P.10^2,
+  1*P.12 + 2013265920*P.11^2,
+  1 + 2013265920*P.12^2
+];
+I := ideal<P | F>;
+t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);
+unit := G eq [P | 1];
+printf "RESULT-GB name=pkm_kummer_p2013265921_m2_t6_x464833983 p=2013265921 magma_gb_s=%o basis_len=%o unit=%o ours_inconsistent=true\n", tg, #G, unit;
+if not unit and Dimension(I) eq 0 then
+  t1 := Cputime(); V := Variety(I); printf "RESULT-VAR name=pkm_kummer_p2013265921_m2_t6_x464833983 magma_variety_s=%o magma_solutions=%o\n", Cputime(t1), #V;
+end if;
+
+// pkm_kummer_p2013265921_m3_t3_x1389271940: PKM's Kummer tower system (m = 3, t = 3, N = 9, 10 unknowns, 11 equations)
+// from research/pkm_tower_round2_20260925/runs/M3-kummer-m3-p1.jsonl; written by examples/pkm_tower_pilot.rs --export-magma-rows.
+// Ours (that row): engine f4_fp_tower, 88.273173 ms, inconsistent = true, timed out = false.
+K := GF(2013265921);
+P := PolynomialRing(K, 10, "grevlex");
+AssignNames(~P, ["y0_0", "y0_1", "y0_2", "y1_0", "y1_1", "y1_2", "y2_0", "y2_1", "y2_2", "u0"]);
+F := [P |
+  1377113239 + 207999544*P.10 + 2012118292*P.4 + 142646064*P.4*P.10 + 1055327837*P.4^2*P.10^2 + 2012118292*P.1 + 142646064*P.1*P.10 + 1046877334*P.1*P.4 + 1915876168*P.1*P.4*P.10^2 + 1302107817*P.1*P.4^2*P.10 + 1055327837*P.1^2*P.10^2 + 1302107817*P.1^2*P.4*P.10 + 117800629*P.1^2*P.4^2,
+  224346595 + 29309309*P.10 + 365220541*P.10^2 + 49714514*P.7 + 20591452*P.7*P.10 + 1051927159*P.7*P.10^2 + 412272915*P.7^2 + 623961040*P.7^2*P.10 + 1055327837*P.7^2*P.10^2,
+  1*P.2 + 2013265920*P.1^2,
+  1*P.3 + 2013265920*P.2^2,
+  1 + 2013265920*P.3^2,
+  1*P.5 + 2013265920*P.4^2,
+  1*P.6 + 2013265920*P.5^2,
+  1 + 2013265920*P.6^2,
+  1*P.8 + 2013265920*P.7^2,
+  1*P.9 + 2013265920*P.8^2,
+  1 + 2013265920*P.9^2
+];
+I := ideal<P | F>;
+t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);
+unit := G eq [P | 1];
+printf "RESULT-GB name=pkm_kummer_p2013265921_m3_t3_x1389271940 p=2013265921 magma_gb_s=%o basis_len=%o unit=%o ours_inconsistent=true\n", tg, #G, unit;
+if not unit and Dimension(I) eq 0 then
+  t1 := Cputime(); V := Variety(I); printf "RESULT-VAR name=pkm_kummer_p2013265921_m3_t3_x1389271940 magma_variety_s=%o magma_solutions=%o\n", Cputime(t1), #V;
+end if;
+
+// pkm_kummer_p2013265921_m3_t3_x388393539: PKM's Kummer tower system (m = 3, t = 3, N = 9, 10 unknowns, 11 equations)
+// from research/pkm_tower_round2_20260925/runs/M3-kummer-m3-p1.jsonl; written by examples/pkm_tower_pilot.rs --export-magma-rows.
+// Ours (that row): engine f4_fp_tower, 91.288206 ms, inconsistent = true, timed out = false.
+K := GF(2013265921);
+P := PolynomialRing(K, 10, "grevlex");
+AssignNames(~P, ["y0_0", "y0_1", "y0_2", "y1_0", "y1_1", "y1_2", "y2_0", "y2_1", "y2_2", "u0"]);
+F := [P |
+  1377113239 + 207999544*P.10 + 2012118292*P.4 + 142646064*P.4*P.10 + 1055327837*P.4^2*P.10^2 + 2012118292*P.1 + 142646064*P.1*P.10 + 1046877334*P.1*P.4 + 1915876168*P.1*P.4*P.10^2 + 1302107817*P.1*P.4^2*P.10 + 1055327837*P.1^2*P.10^2 + 1302107817*P.1^2*P.4*P.10 + 117800629*P.1^2*P.4^2,
+  1001521254 + 832971343*P.10 + 1166556904*P.10^2 + 425005834*P.7 + 1935861160*P.7*P.10 + 763785330*P.7*P.10^2 + 1524474357*P.7^2 + 1349959888*P.7^2*P.10 + 1055327837*P.7^2*P.10^2,
+  1*P.2 + 2013265920*P.1^2,
+  1*P.3 + 2013265920*P.2^2,
+  1 + 2013265920*P.3^2,
+  1*P.5 + 2013265920*P.4^2,
+  1*P.6 + 2013265920*P.5^2,
+  1 + 2013265920*P.6^2,
+  1*P.8 + 2013265920*P.7^2,
+  1*P.9 + 2013265920*P.8^2,
+  1 + 2013265920*P.9^2
+];
+I := ideal<P | F>;
+t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);
+unit := G eq [P | 1];
+printf "RESULT-GB name=pkm_kummer_p2013265921_m3_t3_x388393539 p=2013265921 magma_gb_s=%o basis_len=%o unit=%o ours_inconsistent=true\n", tg, #G, unit;
+if not unit and Dimension(I) eq 0 then
+  t1 := Cputime(); V := Variety(I); printf "RESULT-VAR name=pkm_kummer_p2013265921_m3_t3_x388393539 magma_variety_s=%o magma_solutions=%o\n", Cputime(t1), #V;
+end if;
+
+// generic_d4_s0: four equations in e1..e4 over GF(269); written by
+// examples/gaudry_quartic_replay.rs --export-magma.  Ours: 2 rational
+// solutions, 231683394 F_p multiplications, 162 ms (gaudry_quartic::solve_system4).
+K := GF(269);
+P<e1,e2,e3,e4> := PolynomialRing(K, 4, "grevlex");
+F := [P |
+  168 + 238*e4 + 244*e4^2 + 19*e4^3 + 131*e4^4 + 6*e3 + 76*e3*e4 + 119*e3*e4^2 + 110*e3*e4^3 + 82*e3^2 + 259*e3^2*e4 + 50*e3^2*e4^2 + 198*e3^3 + 255*e3^3*e4 + 52*e3^4 + 81*e2 + 168*e2*e4 + 60*e2*e4^2 + 50*e2*e4^3 + 148*e2*e3 + 175*e2*e3*e4 + 204*e2*e3*e4^2 + 40*e2*e3^2 + 258*e2*e3^2*e4 + 105*e2*e3^3 + 227*e2^2 + 60*e2^2*e4 + 238*e2^2*e4^2 + 102*e2^2*e3 + 55*e2^2*e3*e4 + 154*e2^2*e3^2 + 64*e2^3 + 202*e2^3*e4 + 121*e2^3*e3 + 181*e2^4 + 265*e1 + 34*e1*e4 + 247*e1*e4^2 + 229*e1*e4^3 + 222*e1*e3 + 30*e1*e3*e4 + 261*e1*e3*e4^2 + 241*e1*e3^2 + 121*e1*e3^2*e4 + 58*e1*e3^3 + 113*e1*e2 + 27*e1*e2*e4 + 137*e1*e2*e4^2 + 118*e1*e2*e3 + 46*e1*e2*e3*e4 + 199*e1*e2*e3^2 + 107*e1*e2^2 + 41*e1*e2^2*e4 + 257*e1*e2^2*e3 + 172*e1*e2^3 + 194*e1^2 + 222*e1^2*e4 + 266*e1^2*e4^2 + 68*e1^2*e3 + 127*e1^2*e3*e4 + 108*e1^2*e3^2 + 170*e1^2*e2 + 39*e1^2*e2*e4 + 107*e1^2*e2*e3 + 200*e1^2*e2^2 + 146*e1^3 + 168*e1^3*e4 + 67*e1^3*e3 + 233*e1^3*e2 + 207*e1^4,
+  62 + 84*e4 + 14*e4^2 + 49*e4^3 + 143*e4^4 + 64*e3 + 210*e3*e4 + 221*e3*e4^2 + 194*e3*e4^3 + 245*e3^2 + 143*e3^2*e4 + 88*e3^2*e4^2 + 101*e3^3 + 230*e3^3*e4 + 149*e3^4 + 260*e2 + 31*e2*e4 + 199*e2*e4^2 + 9*e2*e4^3 + 53*e2*e3 + 133*e2*e3*e4 + 50*e2*e3*e4^2 + 197*e2*e3^2 + 53*e2*e3^2*e4 + 209*e2*e3^3 + 217*e2^2 + 73*e2^2*e4 + 38*e2^2*e4^2 + 186*e2^2*e3 + 188*e2^2*e3*e4 + 31*e2^2*e3^2 + 80*e2^3 + 77*e2^3*e4 + 134*e2^3*e3 + 35*e2^4 + 49*e1 + 107*e1*e4 + 88*e1*e4^2 + 177*e1*e4^3 + 129*e1*e3 + 9*e1*e3*e4 + 50*e1*e3*e4^2 + 40*e1*e3^2 + 245*e1*e3^2*e4 + 155*e1*e3^3 + 35*e1*e2 + 225*e1*e2*e4 + 58*e1*e2*e4^2 + 252*e1*e2*e3 + 196*e1*e2*e3*e4 + 163*e1*e2*e3^2 + 36*e1*e2^2 + 93*e1*e2^2*e4 + 24*e1*e2^2*e3 + 23*e1*e2^3 + 250*e1^2 + 257*e1^2*e4 + 67*e1^2*e4^2 + 165*e1^2*e3 + 103*e1^2*e3*e4 + 247*e1^2*e3^2 + 41*e1^2*e2 + 255*e1^2*e2*e4 + 178*e1^2*e2*e3 + 67*e1^2*e2^2 + 133*e1^3 + 68*e1^3*e4 + 250*e1^3*e3 + 257*e1^3*e2 + 101*e1^4,
+  199 + 132*e4 + 68*e4^2 + 131*e4^3 + 229*e4^4 + 125*e3 + 95*e3*e4 + 179*e3*e4^2 + 12*e3*e4^3 + 82*e3^2 + 165*e3^2*e4 + 195*e3^2*e4^2 + 30*e3^3 + 189*e3^3*e4 + 144*e3^4 + 155*e2 + 94*e2*e4 + 221*e2*e4^2 + 12*e2*e4^3 + 131*e2*e3 + 218*e2*e3*e4 + 33*e2*e3*e4^2 + 190*e2*e3^2 + 98*e2*e3^2*e4 + 180*e2*e3^3 + 76*e2^2 + 75*e2^2*e4 + 207*e2^2*e4^2 + 183*e2^2*e3 + 22*e2^2*e3*e4 + 36*e2^2*e3^2 + 3*e2^3 + 47*e2^3*e4 + 212*e2^3*e3 + 12*e2^4 + 232*e1 + 175*e1*e4 + 212*e1*e4^2 + 74*e1*e4^3 + 7*e1*e3 + 154*e1*e3*e4 + 18*e1*e3*e4^2 + 91*e1*e3^2 + 88*e1*e3^2*e4 + 26*e1*e3^3 + 58*e1*e2 + 225*e1*e2*e4 + 228*e1*e2*e4^2 + 142*e1*e2*e3 + 172*e1*e2*e3*e4 + 72*e1*e2*e3^2 + 31*e1*e2^2 + 261*e1*e2^2*e4 + 181*e1*e2^2*e3 + 222*e1*e2^3 + 83*e1^2 + 115*e1^2*e4 + 74*e1^2*e4^2 + 154*e1^2*e3 + 175*e1^2*e3*e4 + 44*e1^2*e3^2 + 90*e1^2*e2 + 188*e1^2*e2*e4 + 6*e1^2*e2*e3 + 54*e1^2*e2^2 + 121*e1^3 + 162*e1^3*e4 + 265*e1^3*e3 + 21*e1^3*e2 + 59*e1^4,
+  183 + 137*e4 + 65*e4^2 + 160*e4^3 + 154*e4^4 + 215*e3 + 59*e3*e4 + 194*e3*e4^2 + 182*e3*e4^3 + 187*e3^2 + 264*e3^2*e4 + 44*e3^2*e4^2 + 210*e3^3 + 2*e3^3*e4 + 87*e3^4 + 169*e2 + 128*e2*e4 + 6*e2*e4^2 + 130*e2*e4^3 + 123*e2*e3 + 235*e2*e3*e4 + 155*e2*e3*e4^2 + 106*e2*e3^2 + 235*e2*e3^2*e4 + 51*e2*e3^3 + 165*e2^2 + 134*e2^2*e4 + 176*e2^2*e4^2 + 90*e2^2*e3 + 121*e2^2*e3*e4 + 55*e2^2*e3^2 + 16*e2^3 + 211*e2^3*e4 + 167*e2^3*e3 + 66*e2^4 + 115*e1 + 9*e1*e4 + 17*e1*e4^2 + 105*e1*e4^3 + 241*e1*e3 + 16*e1*e3*e4 + 48*e1*e3*e4^2 + 74*e1*e3^2 + 17*e1*e3^2*e4 + 78*e1*e3^3 + 172*e1*e2 + 3*e1*e2*e4 + 70*e1*e2*e4^2 + 192*e1*e2*e3 + 152*e1*e2*e3*e4 + 66*e1*e2*e3^2 + 146*e1*e2^2 + 231*e1*e2^2*e4 + 169*e1*e2^2*e3 + 41*e1*e2^3 + 34*e1^2 + 241*e1^2*e4 + 239*e1^2*e4^2 + 13*e1^2*e3 + 51*e1^2*e3*e4 + 180*e1^2*e3^2 + 181*e1^2*e2 + 168*e1^2*e2*e4 + 96*e1^2*e2*e3 + 28*e1^2*e2^2 + 31*e1^3 + 237*e1^3*e4 + 193*e1^3*e3 + 149*e1^3*e2 + 65*e1^4
+];
+I := ideal<P | F>;
+ours := { [K| 1, 35, 44, 102], [K| 69, 3, 215, 89] };
+t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);
+printf "RESULT-GB name=generic_d4_s0 p=269 magma_gb_s=%o basis_len=%o dim=%o\n", tg, #G, Dimension(I);
+t1 := Cputime(); V := Variety(I); tv := Cputime(t1);
+theirs := { [K| v[1], v[2], v[3], v[4]] : v in V };
+printf "RESULT-VAR name=generic_d4_s0 magma_variety_s=%o magma_solutions=%o ours_solutions=2 agree=%o\n", tv, #theirs, theirs eq ours;
+
+// pkm_kummer_p2013265921_m2_t7_x1255255582: PKM's Kummer tower system (m = 2, t = 7, N = 14, 14 unknowns, 15 equations)
+// from research/pkm_tower_round2_20260925/runs/K1-kummer-m2-p1.jsonl; written by examples/pkm_tower_pilot.rs --export-magma-rows.
+// Ours (that row): engine f4_fp_tower, 207.07664300000002 ms, inconsistent = true, timed out = false.
+K := GF(2013265921);
+P := PolynomialRing(K, 14, "grevlex");
+AssignNames(~P, ["y0_0", "y0_1", "y0_2", "y0_3", "y0_4", "y0_5", "y0_6", "y1_0", "y1_1", "y1_2", "y1_3", "y1_4", "y1_5", "y1_6"]);
+F := [P |
+  284652759 + 1160258272*P.8 + 1849804838*P.8^2 + 1160258272*P.1 + 501359157*P.1*P.8 + 1523251246*P.1*P.8^2 + 1849804838*P.1^2 + 1523251246*P.1^2*P.8 + 796134346*P.1^2*P.8^2,
+  1*P.2 + 2013265920*P.1^2,
+  1*P.3 + 2013265920*P.2^2,
+  1*P.4 + 2013265920*P.3^2,
+  1*P.5 + 2013265920*P.4^2,
+  1*P.6 + 2013265920*P.5^2,
+  1*P.7 + 2013265920*P.6^2,
+  1 + 2013265920*P.7^2,
+  1*P.9 + 2013265920*P.8^2,
+  1*P.10 + 2013265920*P.9^2,
+  1*P.11 + 2013265920*P.10^2,
+  1*P.12 + 2013265920*P.11^2,
+  1*P.13 + 2013265920*P.12^2,
+  1*P.14 + 2013265920*P.13^2,
+  1 + 2013265920*P.14^2
+];
+I := ideal<P | F>;
+t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);
+unit := G eq [P | 1];
+printf "RESULT-GB name=pkm_kummer_p2013265921_m2_t7_x1255255582 p=2013265921 magma_gb_s=%o basis_len=%o unit=%o ours_inconsistent=true\n", tg, #G, unit;
+if not unit and Dimension(I) eq 0 then
+  t1 := Cputime(); V := Variety(I); printf "RESULT-VAR name=pkm_kummer_p2013265921_m2_t7_x1255255582 magma_variety_s=%o magma_solutions=%o\n", Cputime(t1), #V;
+end if;
+
+// pkm_kummer_p2013265921_m2_t7_x1563871033: PKM's Kummer tower system (m = 2, t = 7, N = 14, 14 unknowns, 15 equations)
+// from research/pkm_tower_round2_20260925/runs/K1-kummer-m2-p1.jsonl; written by examples/pkm_tower_pilot.rs --export-magma-rows.
+// Ours (that row): engine f4_fp_tower, 243.18928200000002 ms, inconsistent = true, timed out = false.
+K := GF(2013265921);
+P := PolynomialRing(K, 14, "grevlex");
+AssignNames(~P, ["y0_0", "y0_1", "y0_2", "y0_3", "y0_4", "y0_5", "y0_6", "y1_0", "y1_1", "y1_2", "y1_3", "y1_4", "y1_5", "y1_6"]);
+F := [P |
+  53427385 + 65540387*P.8 + 1330562264*P.8^2 + 65540387*P.1 + 1539844305*P.1*P.8 + 1792324599*P.1*P.8^2 + 1330562264*P.1^2 + 1792324599*P.1^2*P.8 + 796134346*P.1^2*P.8^2,
+  1*P.2 + 2013265920*P.1^2,
+  1*P.3 + 2013265920*P.2^2,
+  1*P.4 + 2013265920*P.3^2,
+  1*P.5 + 2013265920*P.4^2,
+  1*P.6 + 2013265920*P.5^2,
+  1*P.7 + 2013265920*P.6^2,
+  1 + 2013265920*P.7^2,
+  1*P.9 + 2013265920*P.8^2,
+  1*P.10 + 2013265920*P.9^2,
+  1*P.11 + 2013265920*P.10^2,
+  1*P.12 + 2013265920*P.11^2,
+  1*P.13 + 2013265920*P.12^2,
+  1*P.14 + 2013265920*P.13^2,
+  1 + 2013265920*P.14^2
+];
+I := ideal<P | F>;
+t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);
+unit := G eq [P | 1];
+printf "RESULT-GB name=pkm_kummer_p2013265921_m2_t7_x1563871033 p=2013265921 magma_gb_s=%o basis_len=%o unit=%o ours_inconsistent=true\n", tg, #G, unit;
+if not unit and Dimension(I) eq 0 then
+  t1 := Cputime(); V := Variety(I); printf "RESULT-VAR name=pkm_kummer_p2013265921_m2_t7_x1563871033 magma_variety_s=%o magma_solutions=%o\n", Cputime(t1), #V;
+end if;
+
+// generic_d5_s0: four equations in e1..e4 over GF(269); written by
+// examples/gaudry_quartic_replay.rs --export-magma.  Ours: 3 rational
+// solutions, 3765197360 F_p multiplications, 1107 ms (gaudry_quartic::solve_system4).
+K := GF(269);
+P<e1,e2,e3,e4> := PolynomialRing(K, 4, "grevlex");
+F := [P |
+  195 + 94*e4 + 3*e4^2 + 107*e4^3 + 12*e4^4 + 217*e4^5 + 203*e3 + 56*e3*e4 + 64*e3*e4^2 + 224*e3*e4^3 + 112*e3*e4^4 + 171*e3^2 + 58*e3^2*e4 + 128*e3^2*e4^2 + 261*e3^2*e4^3 + 174*e3^3 + 79*e3^3*e4 + 64*e3^3*e4^2 + 13*e3^4 + 117*e3^4*e4 + 49*e3^5 + 53*e2 + 91*e2*e4 + 161*e2*e4^2 + 21*e2*e4^3 + 253*e2*e4^4 + 125*e2*e3 + 90*e2*e3*e4 + 39*e2*e3*e4^2 + 100*e2*e3*e4^3 + 116*e2*e3^2 + 87*e2*e3^2*e4 + 151*e2*e3^2*e4^2 + 23*e2*e3^3 + 194*e2*e3^3*e4 + 258*e2*e3^4 + 24*e2^2 + 116*e2^2*e4 + 164*e2^2*e4^2 + 258*e2^2*e4^3 + 185*e2^2*e3 + 131*e2^2*e3*e4 + 110*e2^2*e3*e4^2 + 129*e2^2*e3^2 + 102*e2^2*e3^2*e4 + 157*e2^2*e3^3 + 198*e2^3 + 147*e2^3*e4 + 20*e2^3*e4^2 + 120*e2^3*e3 + 256*e2^3*e3*e4 + 220*e2^3*e3^2 + 1*e2^4 + 155*e2^4*e4 + 122*e2^4*e3 + 87*e2^5 + 230*e1 + 239*e1*e4 + 116*e1*e4^2 + 234*e1*e4^3 + 79*e1*e4^4 + 203*e1*e3 + 102*e1*e3*e4 + 248*e1*e3*e4^2 + 17*e1*e3*e4^3 + 141*e1*e3^2 + 160*e1*e3^2*e4 + 244*e1*e3^2*e4^2 + 170*e1*e3^3 + 78*e1*e3^3*e4 + 92*e1*e3^4 + 194*e1*e2 + 64*e1*e2*e4 + 96*e1*e2*e4^2 + 218*e1*e2*e4^3 + 265*e1*e2*e3 + 172*e1*e2*e3*e4 + 196*e1*e2*e3*e4^2 + 101*e1*e2*e3^2 + 65*e1*e2*e3^2*e4 + 186*e1*e2*e3^3 + 178*e1*e2^2 + 266*e1*e2^2*e4 + 237*e1*e2^2*e4^2 + 178*e1*e2^2*e3 + 57*e1*e2^2*e3*e4 + 157*e1*e2^2*e3^2 + 215*e1*e2^3 + 250*e1*e2^3*e4 + 11*e1*e2^3*e3 + 182*e1*e2^4 + 59*e1^2 + 50*e1^2*e4 + 229*e1^2*e4^2 + 136*e1^2*e4^3 + 12*e1^2*e3 + 185*e1^2*e3*e4 + 221*e1^2*e3*e4^2 + 250*e1^2*e3^2 + 166*e1^2*e3^2*e4 + 233*e1^2*e3^3 + 214*e1^2*e2 + 58*e1^2*e2*e4 + 135*e1^2*e2*e4^2 + 180*e1^2*e2*e3 + 201*e1^2*e2*e3*e4 + 190*e1^2*e2*e3^2 + 134*e1^2*e2^2 + 191*e1^2*e2^2*e4 + 150*e1^2*e2^2*e3 + 114*e1^2*e2^3 + 181*e1^3 + 71*e1^3*e4 + 88*e1^3*e4^2 + 142*e1^3*e3 + 207*e1^3*e3*e4 + 200*e1^3*e3^2 + 51*e1^3*e2 + 22*e1^3*e2*e4 + 107*e1^3*e2*e3 + 255*e1^3*e2^2 + 91*e1^4 + 199*e1^4*e4 + 148*e1^4*e3 + 188*e1^4*e2 + 35*e1^5,
+  54 + 145*e4 + 142*e4^2 + 95*e4^3 + 189*e4^4 + 131*e4^5 + 235*e3 + 59*e3*e4 + 110*e3*e4^2 + 200*e3*e4^3 + 36*e3*e4^4 + 103*e3^2 + 69*e3^2*e4 + 19*e3^2*e4^2 + 73*e3^2*e4^3 + 12*e3^3 + 8*e3^3*e4 + 231*e3^3*e4^2 + 152*e3^4 + 31*e3^4*e4 + 215*e3^5 + 266*e2 + 108*e2*e4 + 75*e2*e4^2 + 39*e2*e4^3 + 210*e2*e4^4 + 172*e2*e3 + 27*e2*e3*e4 + 122*e2*e3*e4^2 + 239*e2*e3*e4^3 + 155*e2*e3^2 + 10*e2*e3^2*e4 + 231*e2*e3^2*e4^2 + 36*e2*e3^3 + 16*e2*e3^3*e4 + 112*e2*e3^4 + 242*e2^2 + 85*e2^2*e4 + 10*e2^2*e4^2 + 99*e2^2*e4^3 + 5*e2^2*e3 + 107*e2^2*e3*e4 + 140*e2^2*e3*e4^2 + 43*e2^2*e3^2 + 70*e2^2*e3^2*e4 + 267*e2^2*e3^3 + 95*e2^3 + 181*e2^3*e4 + 183*e2^3*e4^2 + 86*e2^3*e3 + 68*e2^3*e3*e4 + 83*e2^3*e3^2 + 258*e2^4 + 149*e2^4*e4 + 231*e2^4*e3 + 21*e2^5 + 20*e1 + 216*e1*e4 + 215*e1*e4^2 + 213*e1*e4^3 + 33*e1*e4^4 + 221*e1*e3 + 180*e1*e3*e4 + 27*e1*e3*e4^2 + 148*e1*e3*e4^3 + 115*e1*e3^2 + 164*e1*e3^2*e4 + 114*e1*e3^2*e4^2 + 72*e1*e3^3 + 251*e1*e3^3*e4 + 218*e1*e3^4 + 157*e1*e2 + 218*e1*e2*e4 + 129*e1*e2*e4^2 + 111*e1*e2*e4^3 + 26*e1*e2*e3 + 255*e1*e2*e3*e4 + 249*e1*e2*e3*e4^2 + 35*e1*e2*e3^2 + 195*e1*e2*e3^2*e4 + 240*e1*e2*e3^3 + 152*e1*e2^2 + 170*e1*e2^2*e4 + 255*e1*e2^2*e4^2 + 189*e1*e2^2*e3 + 135*e1*e2^2*e3*e4 + 266*e1*e2^2*e3^2 + 173*e1*e2^3 + 87*e1*e2^3*e4 + 217*e1*e2^3*e3 + 254*e1*e2^4 + 71*e1^2 + 19*e1^2*e4 + 89*e1^2*e4^2 + 30*e1^2*e4^3 + 252*e1^2*e3 + 34*e1^2*e3*e4 + 250*e1^2*e3*e4^2 + 72*e1^2*e3^2 + 98*e1^2*e3^2*e4 + 241*e1^2*e3^3 + 57*e1^2*e2 + 203*e1^2*e2*e4 + 117*e1^2*e2*e4^2 + 69*e1^2*e2*e3 + 20*e1^2*e2*e3*e4 + 223*e1^2*e2*e3^2 + 230*e1^2*e2^2 + 170*e1^2*e2^2*e4 + 167*e1^2*e2^2*e3 + 267*e1^2*e2^3 + 203*e1^3 + 243*e1^3*e4 + 49*e1^3*e4^2 + 235*e1^3*e3 + 52*e1^3*e3*e4 + 4*e1^3*e3^2 + 257*e1^3*e2 + 73*e1^3*e2*e4 + 192*e1^3*e2*e3 + 251*e1^3*e2^2 + 47*e1^4 + 186*e1^4*e4 + 166*e1^4*e3 + 154*e1^4*e2 + 220*e1^5,
+  36 + 198*e4 + 24*e4^2 + 145*e4^3 + 166*e4^4 + 45*e4^5 + 121*e3 + 254*e3*e4 + 69*e3*e4^2 + 238*e3*e4^3 + 22*e3*e4^4 + 176*e3^2 + 73*e3^2*e4 + 178*e3^2*e4^2 + 160*e3^2*e4^3 + 248*e3^3 + 83*e3^3*e4 + 114*e3^3*e4^2 + 196*e3^4 + 189*e3^4*e4 + 100*e3^5 + 10*e2 + 61*e2*e4 + 151*e2*e4^2 + 58*e2*e4^3 + 27*e2*e4^4 + 1*e2*e3 + 36*e2*e3*e4 + 179*e2*e3*e4^2 + 225*e2*e3*e4^3 + 82*e2*e3^2 + 52*e2*e3^2*e4 + 166*e2*e3^2*e4^2 + 187*e2*e3^3 + 89*e2*e3^3*e4 + 95*e2*e3^4 + 44*e2^2 + 155*e2^2*e4 + 183*e2^2*e4^2 + 247*e2^2*e4^3 + 135*e2^2*e3 + 71*e2^2*e3*e4 + 153*e2^2*e3*e4^2 + 148*e2^2*e3^2 + 110*e2^2*e3^2*e4 + 40*e2^2*e3^3 + 72*e2^3 + 103*e2^3*e4 + 243*e2^3*e4^2 + 264*e2^3*e3 + 71*e2^3*e3*e4 + 123*e2^3*e3^2 + 27*e2^4 + 101*e2^4*e4 + 154*e2^4*e3 + 116*e2^5 + 227*e1 + 66*e1*e4 + 220*e1*e4^2 + 75*e1*e4^3 + 18*e1*e4^4 + 99*e1*e3 + 1*e1*e3*e4 + 200*e1*e3*e4^2 + 177*e1*e3*e4^3 + 96*e1*e3^2 + 200*e1*e3^2*e4 + 73*e1*e3^2*e4^2 + 265*e1*e3^3 + 51*e1*e3^3*e4 + 140*e1*e3^4 + 253*e1*e2 + 256*e1*e2*e4 + 172*e1*e2*e4^2 + 165*e1*e2*e4^3 + 194*e1*e2*e3 + 247*e1*e2*e3*e4 + 212*e1*e2*e3*e4^2 + 159*e1*e2*e3^2 + 30*e1*e2*e3^2*e4 + 111*e1*e2*e3^3 + 162*e1*e2^2 + 176*e1*e2^2*e4 + 143*e1*e2^2*e4^2 + 224*e1*e2^2*e3 + 204*e1*e2^2*e3*e4 + 198*e1*e2^2*e3^2 + 107*e1*e2^3 + 107*e1*e2^3*e4 + 49*e1*e2^3*e3 + 221*e1*e2^4 + 34*e1^2 + 112*e1^2*e4 + 155*e1^2*e4^2 + 18*e1^2*e4^3 + 204*e1^2*e3 + 209*e1^2*e3*e4 + 68*e1^2*e3*e4^2 + 39*e1^2*e3^2 + 186*e1^2*e3^2*e4 + 102*e1^2*e3^3 + 105*e1^2*e2 + 157*e1^2*e2*e4 + 48*e1^2*e2*e4^2 + 252*e1^2*e2*e3 + 10*e1^2*e2*e3*e4 + 182*e1^2*e2*e3^2 + 118*e1^2*e2^2 + 157*e1^2*e2^2*e4 + 118*e1^2*e2^2*e3 + 228*e1^2*e2^3 + 27*e1^3 + 40*e1^3*e4 + 128*e1^3*e4^2 + 179*e1^3*e3 + 264*e1^3*e3*e4 + 207*e1^3*e3^2 + 104*e1^3*e2 + 179*e1^3*e2*e4 + 141*e1^3*e2*e3 + 220*e1^3*e2^2 + 22*e1^4 + 92*e1^4*e4 + 166*e1^4*e3 + 55*e1^4*e2 + 178*e1^5,
+  81 + 204*e4 + 256*e4^2 + 77*e4^3 + 110*e4^4 + 57*e4^5 + 170*e3 + 122*e3*e4 + 199*e3*e4^2 + 146*e3*e4^3 + 105*e3*e4^4 + 51*e3^2 + 9*e3^2*e4 + 229*e3^2*e4^2 + 192*e3^2*e4^3 + 138*e3^3 + 231*e3^3*e4 + 123*e3^3*e4^2 + 147*e3^4 + 54*e3^4*e4 + 79*e3^5 + 207*e2 + 111*e2*e4 + 36*e2*e4^2 + 267*e2*e4^3 + 166*e2*e4^4 + 152*e2*e3 + 142*e2*e3*e4 + 55*e2*e3*e4^2 + 220*e2*e3*e4^3 + 211*e2*e3^2 + 114*e2*e3^2*e4 + 142*e2*e3^2*e4^2 + 147*e2*e3^3 + 162*e2*e3^3*e4 + 244*e2*e3^4 + 167*e2^2 + 124*e2^2*e4 + 109*e2^2*e4^2 + 196*e2^2*e4^3 + 127*e2^2*e3 + 233*e2^2*e3*e4 + 206*e2^2*e3*e4^2 + 106*e2^2*e3^2 + 147*e2^2*e3^2*e4 + 43*e2^2*e3^3 + 268*e2^3 + 103*e2^3*e4 + 43*e2^3*e4^2 + 87*e2^3*e3 + 115*e2^3*e3*e4 + 137*e2^3*e3^2 + 49*e2^4 + 232*e2^4*e4 + 62*e2^4*e3 + 211*e2^5 + 234*e1 + 165*e1*e4 + 135*e1*e4^2 + 208*e1*e4^3 + 107*e1*e4^4 + 174*e1*e3 + 229*e1*e3*e4 + 144*e1*e3*e4^2 + 263*e1*e3*e4^3 + 168*e1*e3^2 + 230*e1*e3^2*e4 + 166*e1*e3^2*e4^2 + 215*e1*e3^3 + 184*e1*e3^3*e4 + 39*e1*e3^4 + 152*e1*e2 + 70*e1*e2*e4 + 247*e1*e2*e4^2 + 110*e1*e2*e4^3 + 25*e1*e2*e3 + 105*e1*e2*e3*e4 + 114*e1*e2*e3*e4^2 + 33*e1*e2*e3^2 + 84*e1*e2*e3^2*e4 + 90*e1*e2*e3^3 + 76*e1*e2^2 + 121*e1*e2^2*e4 + 16*e1*e2^2*e4^2 + 251*e1*e2^2*e3 + 114*e1*e2^2*e3*e4 + 219*e1*e2^2*e3^2 + 200*e1*e2^3 + 130*e1*e2^3*e4 + 151*e1*e2^3*e3 + 78*e1*e2^4 + 140*e1^2 + 87*e1^2*e4 + 252*e1^2*e4^2 + 10*e1^2*e4^3 + 40*e1^2*e3 + 209*e1^2*e3*e4 + 118*e1^2*e3*e4^2 + 1*e1^2*e3^2 + 230*e1^2*e3^2*e4 + 160*e1^2*e3^3 + 65*e1^2*e2 + 148*e1^2*e2*e4 + 199*e1^2*e2*e4^2 + 184*e1^2*e2*e3 + 265*e1^2*e2*e3*e4 + 182*e1^2*e2*e3^2 + 148*e1^2*e2^2 + 222*e1^2*e2^2*e4 + 109*e1^2*e2^2*e3 + 239*e1^2*e2^3 + 207*e1^3 + 35*e1^3*e4 + 84*e1^3*e4^2 + 195*e1^3*e3 + 117*e1^3*e3*e4 + 120*e1^3*e3^2 + 61*e1^3*e2 + 15*e1^3*e2*e4 + 23*e1^3*e2*e3 + 115*e1^3*e2^2 + 152*e1^4 + 98*e1^4*e4 + 165*e1^4*e3 + 111*e1^4*e2 + 124*e1^5
+];
+I := ideal<P | F>;
+ours := { [K| 51, 206, 209, 256], [K| 261, 132, 119, 6], [K| 262, 40, 174, 1] };
+t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);
+printf "RESULT-GB name=generic_d5_s0 p=269 magma_gb_s=%o basis_len=%o dim=%o\n", tg, #G, Dimension(I);
+t1 := Cputime(); V := Variety(I); tv := Cputime(t1);
+theirs := { [K| v[1], v[2], v[3], v[4]] : v in V };
+printf "RESULT-VAR name=generic_d5_s0 magma_variety_s=%o magma_solutions=%o ours_solutions=3 agree=%o\n", tv, #theirs, theirs eq ours;
+
+// pkm_kummer_p2013265921_m2_t8_x1312284326: PKM's Kummer tower system (m = 2, t = 8, N = 16, 16 unknowns, 17 equations)
+// from research/pkm_tower_round2_20260925/runs/K1-kummer-m2-p1.jsonl; written by examples/pkm_tower_pilot.rs --export-magma-rows.
+// Ours (that row): engine f4_fp_tower, 1107.346058 ms, inconsistent = true, timed out = false.
+K := GF(2013265921);
+P := PolynomialRing(K, 16, "grevlex");
+AssignNames(~P, ["y0_0", "y0_1", "y0_2", "y0_3", "y0_4", "y0_5", "y0_6", "y0_7", "y1_0", "y1_1", "y1_2", "y1_3", "y1_4", "y1_5", "y1_6", "y1_7"]);
+F := [P |
+  763758064 + 1433107782*P.9 + 853360638*P.9^2 + 1433107782*P.1 + 1550301160*P.1*P.9 + 1456755337*P.1*P.9^2 + 853360638*P.1^2 + 1456755337*P.1^2*P.9 + 748093626*P.1^2*P.9^2,
+  1*P.2 + 2013265920*P.1^2,
+  1*P.3 + 2013265920*P.2^2,
+  1*P.4 + 2013265920*P.3^2,
+  1*P.5 + 2013265920*P.4^2,
+  1*P.6 + 2013265920*P.5^2,
+  1*P.7 + 2013265920*P.6^2,
+  1*P.8 + 2013265920*P.7^2,
+  1 + 2013265920*P.8^2,
+  1*P.10 + 2013265920*P.9^2,
+  1*P.11 + 2013265920*P.10^2,
+  1*P.12 + 2013265920*P.11^2,
+  1*P.13 + 2013265920*P.12^2,
+  1*P.14 + 2013265920*P.13^2,
+  1*P.15 + 2013265920*P.14^2,
+  1*P.16 + 2013265920*P.15^2,
+  1 + 2013265920*P.16^2
+];
+I := ideal<P | F>;
+t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);
+unit := G eq [P | 1];
+printf "RESULT-GB name=pkm_kummer_p2013265921_m2_t8_x1312284326 p=2013265921 magma_gb_s=%o basis_len=%o unit=%o ours_inconsistent=true\n", tg, #G, unit;
+if not unit and Dimension(I) eq 0 then
+  t1 := Cputime(); V := Variety(I); printf "RESULT-VAR name=pkm_kummer_p2013265921_m2_t8_x1312284326 magma_variety_s=%o magma_solutions=%o\n", Cputime(t1), #V;
+end if;
+
+// pkm_kummer_p2013265921_m2_t8_x1731249962: PKM's Kummer tower system (m = 2, t = 8, N = 16, 16 unknowns, 17 equations)
+// from research/pkm_tower_round2_20260925/runs/K1-kummer-m2-p1.jsonl; written by examples/pkm_tower_pilot.rs --export-magma-rows.
+// Ours (that row): engine f4_fp_tower, 1114.1170220000001 ms, inconsistent = true, timed out = false.
+K := GF(2013265921);
+P := PolynomialRing(K, 16, "grevlex");
+AssignNames(~P, ["y0_0", "y0_1", "y0_2", "y0_3", "y0_4", "y0_5", "y0_6", "y0_7", "y1_0", "y1_1", "y1_2", "y1_3", "y1_4", "y1_5", "y1_6", "y1_7"]);
+F := [P |
+  326100400 + 295955920*P.9 + 495432401*P.9^2 + 295955920*P.1 + 252891713*P.1*P.9 + 704113146*P.1*P.9^2 + 495432401*P.1^2 + 704113146*P.1^2*P.9 + 748093626*P.1^2*P.9^2,
+  1*P.2 + 2013265920*P.1^2,
+  1*P.3 + 2013265920*P.2^2,
+  1*P.4 + 2013265920*P.3^2,
+  1*P.5 + 2013265920*P.4^2,
+  1*P.6 + 2013265920*P.5^2,
+  1*P.7 + 2013265920*P.6^2,
+  1*P.8 + 2013265920*P.7^2,
+  1 + 2013265920*P.8^2,
+  1*P.10 + 2013265920*P.9^2,
+  1*P.11 + 2013265920*P.10^2,
+  1*P.12 + 2013265920*P.11^2,
+  1*P.13 + 2013265920*P.12^2,
+  1*P.14 + 2013265920*P.13^2,
+  1*P.15 + 2013265920*P.14^2,
+  1*P.16 + 2013265920*P.15^2,
+  1 + 2013265920*P.16^2
+];
+I := ideal<P | F>;
+t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);
+unit := G eq [P | 1];
+printf "RESULT-GB name=pkm_kummer_p2013265921_m2_t8_x1731249962 p=2013265921 magma_gb_s=%o basis_len=%o unit=%o ours_inconsistent=true\n", tg, #G, unit;
+if not unit and Dimension(I) eq 0 then
+  t1 := Cputime(); V := Variety(I); printf "RESULT-VAR name=pkm_kummer_p2013265921_m2_t8_x1731249962 magma_variety_s=%o magma_solutions=%o\n", Cputime(t1), #V;
+end if;
+
+// pkm_kummer_p2013265921_m3_t4_x334226296: PKM's Kummer tower system (m = 3, t = 4, N = 12, 13 unknowns, 14 equations)
+// from research/pkm_tower_round2_20260925/runs/M3-kummer-m3-p1.jsonl; written by examples/pkm_tower_pilot.rs --export-magma-rows.
+// Ours (that row): engine f4_fp_tower, 1847.8527080000001 ms, inconsistent = true, timed out = false.
+K := GF(2013265921);
+P := PolynomialRing(K, 13, "grevlex");
+AssignNames(~P, ["y0_0", "y0_1", "y0_2", "y0_3", "y1_0", "y1_1", "y1_2", "y1_3", "y2_0", "y2_1", "y2_2", "y2_3", "u0"]);
+F := [P |
+  341159397 + 1591253317*P.13 + 1398050386*P.5 + 1485107280*P.5*P.13 + 294339934*P.5^2*P.13^2 + 1398050386*P.1 + 1485107280*P.1*P.13 + 473579195*P.1*P.5 + 1424586053*P.1*P.5*P.13^2 + 439949939*P.1*P.5^2*P.13 + 294339934*P.1^2*P.13^2 + 439949939*P.1^2*P.5*P.13 + 139406991*P.1^2*P.5^2,
+  56481368 + 590583787*P.13 + 1696555962*P.13^2 + 1970939641*P.9 + 1412697374*P.9*P.13 + 379089193*P.9*P.13^2 + 412942922*P.9^2 + 1068071313*P.9^2*P.13 + 294339934*P.9^2*P.13^2,
+  1*P.2 + 2013265920*P.1^2,
+  1*P.3 + 2013265920*P.2^2,
+  1*P.4 + 2013265920*P.3^2,
+  1 + 2013265920*P.4^2,
+  1*P.6 + 2013265920*P.5^2,
+  1*P.7 + 2013265920*P.6^2,
+  1*P.8 + 2013265920*P.7^2,
+  1 + 2013265920*P.8^2,
+  1*P.10 + 2013265920*P.9^2,
+  1*P.11 + 2013265920*P.10^2,
+  1*P.12 + 2013265920*P.11^2,
+  1 + 2013265920*P.12^2
+];
+I := ideal<P | F>;
+t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);
+unit := G eq [P | 1];
+printf "RESULT-GB name=pkm_kummer_p2013265921_m3_t4_x334226296 p=2013265921 magma_gb_s=%o basis_len=%o unit=%o ours_inconsistent=true\n", tg, #G, unit;
+if not unit and Dimension(I) eq 0 then
+  t1 := Cputime(); V := Variety(I); printf "RESULT-VAR name=pkm_kummer_p2013265921_m3_t4_x334226296 magma_variety_s=%o magma_solutions=%o\n", Cputime(t1), #V;
+end if;
+
+// pkm_kummer_p2013265921_m3_t4_x427640318: PKM's Kummer tower system (m = 3, t = 4, N = 12, 13 unknowns, 14 equations)
+// from research/pkm_tower_round2_20260925/runs/M3-kummer-m3-p1.jsonl; written by examples/pkm_tower_pilot.rs --export-magma-rows.
+// Ours (that row): engine f4_fp_tower, 1924.134139 ms, inconsistent = true, timed out = false.
+K := GF(2013265921);
+P := PolynomialRing(K, 13, "grevlex");
+AssignNames(~P, ["y0_0", "y0_1", "y0_2", "y0_3", "y1_0", "y1_1", "y1_2", "y1_3", "y2_0", "y2_1", "y2_2", "y2_3", "u0"]);
+F := [P |
+  341159397 + 1591253317*P.13 + 1398050386*P.5 + 1485107280*P.5*P.13 + 294339934*P.5^2*P.13^2 + 1398050386*P.1 + 1485107280*P.1*P.13 + 473579195*P.1*P.5 + 1424586053*P.1*P.5*P.13^2 + 439949939*P.1*P.5^2*P.13 + 294339934*P.1^2*P.13^2 + 439949939*P.1^2*P.5*P.13 + 139406991*P.1^2*P.5^2,
+  270065787 + 252054010*P.13 + 1539628393*P.13^2 + 1883446662*P.9 + 1721132626*P.9*P.13 + 1973709701*P.9*P.13^2 + 93253642*P.9^2 + 300264359*P.9^2*P.13 + 294339934*P.9^2*P.13^2,
+  1*P.2 + 2013265920*P.1^2,
+  1*P.3 + 2013265920*P.2^2,
+  1*P.4 + 2013265920*P.3^2,
+  1 + 2013265920*P.4^2,
+  1*P.6 + 2013265920*P.5^2,
+  1*P.7 + 2013265920*P.6^2,
+  1*P.8 + 2013265920*P.7^2,
+  1 + 2013265920*P.8^2,
+  1*P.10 + 2013265920*P.9^2,
+  1*P.11 + 2013265920*P.10^2,
+  1*P.12 + 2013265920*P.11^2,
+  1 + 2013265920*P.12^2
+];
+I := ideal<P | F>;
+t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);
+unit := G eq [P | 1];
+printf "RESULT-GB name=pkm_kummer_p2013265921_m3_t4_x427640318 p=2013265921 magma_gb_s=%o basis_len=%o unit=%o ours_inconsistent=true\n", tg, #G, unit;
+if not unit and Dimension(I) eq 0 then
+  t1 := Cputime(); V := Variety(I); printf "RESULT-VAR name=pkm_kummer_p2013265921_m3_t4_x427640318 magma_variety_s=%o magma_solutions=%o\n", Cputime(t1), #V;
+end if;
