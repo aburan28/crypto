@@ -14,14 +14,21 @@ Measured source commit: `2fd065a6c32533a81c1936121e17daa03c4448e8`.
 | report plot source | pass; Python AST parse succeeds |
 | report PDFs | pass; both are two-page letter PDFs and were visually inspected |
 | benchmark copies | pass; PDFs and SVGs are byte-equal to the study copies |
-| `rustfmt --edition 2021 --check` on changed Rust files under Rust 1.94.1 | pass |
-| `cargo clippy --locked --all-targets -- -D warnings` under Rust 1.98.1 | pass; warning-free |
-| `cargo test --locked --release --lib` under Rust 1.98.1 | pass; 4,060 passed, 0 failed, 114 ignored; 302.43 s |
-| `cargo test --locked --release --test ecbench` under Rust 1.98.1 | pass; 15 passed, 0 failed; 75.75 s |
-| `cargo test --locked --release --test ecbench_large_prime` under Rust 1.98.1 | pass; 5 passed, 0 failed; 0.05 s |
+| measured-source `rustfmt --edition 2021 --check` on changed Rust files under Rust 1.94.1 | pass |
+| measured-source `cargo clippy --locked --all-targets -- -D warnings` under Rust 1.98.1 | pass; warning-free |
+| measured-source `cargo test --locked --release --lib` under Rust 1.98.1 | pass; 4,060 passed, 0 failed, 114 ignored; 302.43 s |
+| measured-source `cargo test --locked --release --test ecbench` under Rust 1.98.1 | pass; 15 passed, 0 failed; 75.75 s |
+| measured-source `cargo test --locked --release --test ecbench_large_prime` under Rust 1.98.1 | pass; 5 passed, 0 failed; 0.05 s |
+| post-main-sync `rustfmt --edition 2021 --check` on touched Rust files under Rust 1.94.1 | pass |
+| post-main-sync `cargo clippy --locked --all-targets -- -D warnings` under Rust 1.98.1 | pass; warning-free |
+| post-main-sync `cargo test --locked --release --lib` under Rust 1.98.1 | pass; 4,083 passed, 0 failed, 114 ignored; 218.89 s |
+| final-tree focused ECBench comparison unit tests under Rust 1.98.1 | pass; 2 passed, 0 failed (4,195 filtered out) |
+| post-main-sync `cargo test --locked --release --test ecbench` under Rust 1.98.1 | pass; 15 passed, 0 failed; 75.84 s |
+| post-main-sync `cargo test --locked --release --test ecbench_large_prime` under Rust 1.98.1 | pass; 5 passed, 0 failed; 0.05 s |
 | leaderboard path-check tests | pass; 9/9 |
 | leaderboard workflow path coverage | pass; push and pull-request filters cover all 215 builder inputs |
 | leaderboard and lab-browser freshness checks | pass; ranked rows unchanged and the rho audit is current |
+| synchronized curve-cover catalog | pass; 2,100/2,100 registry curves verified and generated cover artifacts refreshed |
 | authored/generated publication whitespace check | pass; raw Callgrind files excluded because Valgrind emits significant trailing spaces and their byte hashes are retained |
 
 The result PDF SHA-256 is

@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p24/comparisons/rho-neg__ic-mitm.json
+ops (ok): ic-mitm / rho-neg = 27.1782 [21.929, 34.505] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 22.4898 [14.983, 27.260]
+| curve | log2 r | workloads | ic-mitm / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp24-t2705-27cbb01b | 23.38 | 8 | 27.1782 | [21.9287, 34.5054] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-mitm mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0287641ad93a | icv1-fp24-t2705-27cbb01b | 23.38 | 0.9948 | 30.6881 | 30.8487 |
+| W6eec974fe4d1 | icv1-fp24-t2705-27cbb01b | 23.38 | 1.0103 | 31.0057 | 30.6891 |
+| W92133e527902 | icv1-fp24-t2705-27cbb01b | 23.38 | 1.5583 | 31.2396 | 20.0472 |
+| Wa9bf5407587e | icv1-fp24-t2705-27cbb01b | 23.38 | 1.0308 | 31.6069 | 30.6632 |
+| Wc92b25cbd51e | icv1-fp24-t2705-27cbb01b | 23.38 | 0.9524 | 31.2260 | 32.7880 |
+| We4c95c8871a0 | icv1-fp24-t2705-27cbb01b | 23.38 | 0.9214 | 31.6752 | 34.3766 |
+| We9584cba4c14 | icv1-fp24-t2705-27cbb01b | 23.38 | 1.4504 | 30.5728 | 21.0794 |
+| Wf7e403c855fa | icv1-fp24-t2705-27cbb01b | 23.38 | 1.2454 | 31.0380 | 24.9230 |

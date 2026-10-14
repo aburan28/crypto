@@ -36,6 +36,7 @@ spec.json ──ecbench run──► session/                ──ecbench verif
 10. [The database](#10-the-database)
 11. [Adding a method, a curve family or a factor base](#11-adding-a-method-a-curve-family-or-a-factor-base)
 12. [Limits](#12-limits)
+13. [GPU stage runner](#13-gpu-stage-runner)
 
 Factor bases (build with `ecbench fb`, publish to Git/`store:`, run
 `ic.pipeline` with a matching plug-in string):
@@ -288,6 +289,21 @@ a bare label.
 A spec's `isolation_required` (default L2) is the level a **wall-clock**
 figure needs to be admitted. Operation counts never need one.
 
+`ecbench compare` also reports a **measurement quality score** from 0 to
+100. This is an operational rubric, not a probability that the result is
+correct and not a confidence interval. For each measured pair, an
+unverified result gets zero points; a verified pair gets the lower of its
+two isolation levels: L0=0, L1=40, L2=75, L3=90. The average is taken
+over every paired attempt. Quality admission requires at least L2, even
+if a diagnostic spec requests L0 or L1. A further 10 points are earned
+only when an L2-or-higher A/A control has a 95% interval containing 1 and
+wholly inside `[0.9, 1.1]`. The comparison records the level counts, verified and
+admitted pair counts, 95th percentile foreign CPU busy fraction, 95th
+percentile run-queue delay, and whether telemetry was missing. The
+thresholds in the L0–L3 gate still decide whether wall time is admitted.
+The separate bootstrap 95% interval measures sampling uncertainty over
+the stated targets and seeds; a high quality score does not narrow it.
+
 What hosts earn, as recorded so far:
 
 - **macOS:** L0, because there is no affinity control.
@@ -408,6 +424,32 @@ frozen-source replays rebuild it against pre-F6 snapshots of
 `koblitz_index_calculus.rs`, `Cargo.toml` is pinned by other frozen
 evaluations, and the tournament admits no root build script. It also
 refuses to run while a `KIC_*`, `F4_*` or `SOLVER_*` tuning override is set.
+
+`rootfind-mitm:m=3` and `rootfind-pairs:m=3` are the root-finding
+decomposition oracles of `research/pdp_root_finder_20261012` as plug-ins
+(`ic_framework::rootfind`), on any base and both tracks. `rootfind-mitm`
+builds the negation-folded pair table once (`full_table=1` for every
+`i ≤ j` pair) and, per target, computes the points `R ∓ P_k` — one
+representative `P_k` an abscissa — in blocks of 32 abscissae, probes each
+and stops at the first hit;
+`rootfind-pairs` keeps no table and tests every candidate `U ∓ P_j` of
+every row point `U = R ∓ P_i` for membership in the base: the enumeration
+floor, the memoryless control.
+
+- **Charged:** every point addition, one each: the table build, the
+  additions a target (`2A` for a refutation, the count `mitm:m=3` charges
+  over the `2A` signed points; on a hit at most one block more than
+  `mitm`'s early exit), the probe's confirming addition on a key hit, and
+  every candidate of `rootfind-pairs`.  The cost is complete: on a binary
+  curve the group computes a block with one shared inversion
+  (`FastCurve::add_many`), which is how the charged additions are done,
+  not work beside them; on a prime curve the default path inverts once an
+  addition.
+- **Counted, not charged:** table lookups and membership tests
+  (`lookups`).  What the new ids change against `mitm` is therefore the
+  arithmetic behind the same charged additions, which wall time sees and
+  `S` does not; and the memoryless three-summand arm, which the harness
+  had not had.
 
 **The root-finding decomposition engine.**
 `RESEARCH_SEMAEV_ROOTFIND_VS_GROEBNER.md` replaces the Gröbner solve of the
@@ -823,3 +865,36 @@ Stated so that nothing here is read as more than it is:
 - **One thread.** Parallel collision search is out of scope until a
   multi-thread run can be graded (a parallel change must be measured at
   one thread and at many, AGENTS.md §10).
+
+## 13. GPU stage runner
+
+`ecbench gpu-stage` runs the repository's existing CUDA ECC driver
+(`gpu/ecc/bench`) with a device self-test before a bounded benchmark. Build
+the CUDA binary on a GPU host with `make -C gpu/ecc bench`, then run, for
+example:
+
+```bash
+ecbench gpu-stage --binary gpu/ecc/bench --out /tmp/ecbench-gpu-rho-1 \
+  --mode rho --timeout-seconds 600 -- --iters 256 --fold 2
+```
+
+The command creates a new output directory and writes `selftest.stdout`,
+`selftest.stderr`, `benchmark.stdout`, `benchmark.stderr`, and
+`gpu-stage.json`, plus a private byte copy of the binary. The receipt binds
+the binary SHA-256, `CUDA_VISIBLE_DEVICES`, exact argument
+vector, exit code, timeout, timestamps, and output hashes. A failed device
+self-test prevents the benchmark. The directory is never overwritten.
+`--solve` is excluded from this stage command so a large-group solver does
+not run indefinitely under a throughput request.
+
+This entry point runs real CUDA code, but its current fixed curves and
+targets do not share `ecbench run`'s workload identity or independently
+replayed answer and operation ledger. The stage receipt therefore stays
+separate from `records.jsonl`, `ecbench compare`, and the L0–L3 CPU score.
+It has no GPU contention sensor or admitted CPU/GPU interval yet. To make
+a GPU ECDLP method fully comparable, the CUDA driver must accept the
+frozen EC Bench workload and seed, emit exact phase counts and recovered
+answer, expose GPU device and contention telemetry, and pass independent
+answer replay under the same record contract. The specific acceptance test
+and remaining device-validation gap are tracked in
+[the GPU matched-workload problem](../../problems/ecbench-gpu-matched-workload-contract.md).

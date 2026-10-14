@@ -18,6 +18,7 @@
 //! from [`window`].  Protocol:
 //! `research/notes/ecc2k130/curve_construction_20261006/PROTOCOL.md`.
 
+pub mod counterfactual;
 pub mod cyclic;
 pub mod enumerate;
 pub mod gf2k;
