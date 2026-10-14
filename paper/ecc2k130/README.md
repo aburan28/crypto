@@ -1,7 +1,11 @@
-# ECC2K-130 on Commodity Hardware
+# Pollard Rho on NVIDIA Blackwell: ECC2K-130, Carry-less Multiplication and the NIST Curves
 
-`ecc2k130.tex` is a paper-quality LaTeX account of the ECC2K-130
-Pollard-rho campaign documented in [`../../ecc2k130/`](../../ecc2k130/),
+`ecc2k130.tex` is a paper-quality LaTeX account of Pollard rho on
+current NVIDIA hardware, with ECC2K-130 as the yardstick: the
+optimisation ledger, the PTX `clmad` instruction across dies, twelve
+GPUs from Turing to Blackwell, the same optimisations on NIST P-256 and
+P-384, and the 2009–2012 rates for comparison. The campaign it reports
+is documented in [`../../ecc2k130/`](../../ecc2k130/),
 [`../../hdl/ecc2k130/`](../../hdl/ecc2k130/) and the research notes this
 repository holds, with the structural alternatives priced in
 [`../../RESEARCH_ECC2K130_IC_FEASIBILITY.md`](../../RESEARCH_ECC2K130_IC_FEASIBILITY.md)
@@ -37,30 +41,36 @@ TeX can open the paper.
 
 ## Contents
 
+All rates are in billions of iterations per second on one device.
+
 - Abstract.
-- §1 Introduction: the challenge, contributions, method, the two
-  repositories, what is not claimed.
-- §2 The curve, the type-II optimal normal basis, the golden model,
+- §1 Introduction: rho on Blackwell, contributions, the reporting rule,
+  availability, what is not claimed.
+- §2 Where 2009 left off: the 2009–2012 rates per platform (Core 2,
+  Cell, GTX 295, Spartan-3, ASIC estimate) in one unit, and the same
+  yardstick today (about 230× per GPU card, 74× per FPGA).
+- §3 The curve, the type-II optimal normal basis, the golden model,
   ECC2K-95 as the end-to-end control.
-- §3 The walk: the σ-walk, the r-adding table walk, the x-only bridge
+- §4 The walk: the σ-walk, the r-adding table walk, the x-only bridge
   map, the measured walk constant, cost per solve.
-- §4 Field arithmetic: bitsliced and packed backends, LOP3 fusion,
+- §5 Field arithmetic: bitsliced and packed backends, LOP3 fusion,
   bit-for-bit compatibility.
-- §5 The GPU client: the carry-less floor and roofline, acceptance
-  rules, the 0.85→14.64 B/s ledger, the table walk at 20.08, the RTX
-  PRO 4500, the twelve-SKU survey, every declined candidate.
-- §6 CPU clients.
-- §7 The other GPU kernels: an evidence-class inventory, 256-bit
-  secp256k1 arithmetic and its instruction ledger, rho with order-six
-  folding and baby-step giant-step, kangaroo, P-256/P-384, the ECC2K-95
-  kernel and pair table, the polynomial-system and linear-algebra
-  solvers, and the F4 elimination kernels that did run on a device.
-- §8 The FPGA engine: pre-board estimate, design, measured F2 images.
-- §9 The campaign: configuration, the 2^28.41 interval, fleet
-  economics, storage and certification, state.
-- §10 Structural alternatives: index calculus on the Koblitz curve,
-  point decomposition against the budget.
-- §11 Related work. §12 Conclusion.
+- §6 What current NVIDIA hardware changes: PTX 9.3 `clmad` (sm_80+,
+  CUDA 13.3), its issue rate on the RTX PRO 6000, B200 and H100, why the
+  same change wins on one die and loses on another, the integer pipe.
+- §7 The GPU client: floor and roofline, acceptance rules, the
+  0.85 → 14.64 ledger, the table walk's arithmetic, σ-walk against table
+  walk (cycle rules v1/v2/v3), the RTX PRO 4500, twelve GPUs per card,
+  per SM and per dollar, every declined candidate.
+- §8 CPU clients.
+- §9 The same ladder on the NIST curves: P-256 1.075 → 1.632 (1.52×),
+  P-384 0.210 → 0.548 (2.61×), the fifteen-curve CPU solver.
+- §10 The other GPU kernels: evidence-class inventory.
+- §11 The FPGA engine. §12 The campaign. §13 Structural alternatives.
+- §14 Open questions and next optimisations: exact table-walk speed,
+  σ-walk integer slots, pipe and `clmad`-rate probes, other Blackwell
+  parts, the NIST walk, method.
+- §15 Related work. §16 Conclusion.
 - Appendix A: reproduction commands.
 
 Every number is footnoted to a repository artefact (`\art{path}`);
@@ -97,6 +107,26 @@ paths prefixed `cryptanalysis:` are in the sibling library.
   folding and Smart-attack results. Curve25519 added to the
   secp256k1 row. Abstract, introduction, conclusion and the
   evidence-class table updated to say which kernels have now run.
+- Draft 6: refocused on rho on Blackwell and retitled. New §2 (2009–2012
+  rates from Bailey et al., the INDOCRYPT 2010 GPU paper, the Cell
+  papers and Niederhagen's thesis, against today's), new §6 on `clmad`
+  and the integer pipe across dies, a per-GPU matrix splitting σ-walk
+  and table walk, a σ-walk-versus-table-walk subsection (the 20.08 table
+  rate ran superseded rule v2; exact v3 is 5.10), and a new §14 on open
+  questions. Every rate is now in billions of iterations per second.
+  Bibliography: INDOCRYPT 2010 GPU paper, Niederhagen thesis,
+  Wenger–Wolfger SAC 2014 and JCE 2016 added; SHARCS 2009 author list
+  and pages corrected; CRYPTO 2009 volume added.
+- Draft 5: a prose pass over every section for readability (first
+  person plural, shorter sentences, fewer stock phrases; every number,
+  footnote, table and label kept), and a new §7 on the NIST curves (replacing the Draft 4 NIST subsection of §8):
+  the `gpu/nist` rho walk's first device runs on the RTX PRO 6000
+  (`gpu/nist/RESULTS.md`), set against the ECC2K-130 levers they
+  borrow from. The P-256/P-384 row of the other-GPU inventory moves
+  from "never" to "measured", and the abstract, introduction,
+  related work, conclusion and reproduction appendix are updated to
+  match. Graph and report copies are in
+  `benchmarks/20261013-nist-gpu-rho-ladder/`.
 
 ## Known caveats carried into the text
 
@@ -123,5 +153,12 @@ paths prefixed `cryptanalysis:` are in the sibling library.
   three-repeat protocol;
   the `gpu/ecc` occupancy and stack tables predate the order-six fold
   and the cycle ring and are quoted as such.
+- The NIST round-2 rows (W=32, register caps; 1.632 / 0.548 Gstep/s,
+  1.52× / 2.61× cumulative) come from aburan28/crypto PR 1778, which
+  was open when Draft 4 was written; round 1 (1.340 / 0.438) is on
+  `main`. The NIST sweep cells are single runs, not interleaved
+  repeated pairs, and the paper says so in the table caption. A
+  Solinas-field walk has not been built; only the field benchmark
+  compares the two representations.
 - The author block is anonymized; `make deanonymize` with an `AUTHORS`
   file restores it.

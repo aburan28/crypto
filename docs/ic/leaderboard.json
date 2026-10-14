@@ -98,6 +98,10 @@
    "path": "research/ecbench_conductor_gap_20261012/analysis.json",
    "sha256": "0ff9b20fd773ea67fa8fc2c434635e77f97422b2904d687b61eac75a02c04279"
   },
+  "frontier_audit": {
+   "path": "research/ecbench_frontier_20261013/frontier-data.json",
+   "sha256": "765f6e8d05ebbf75e7a3dddcbb886015274311589352b9107746976fb2a670d7"
+  },
   "registry": {
    "path": "docs/curves/registry.json",
    "sha256": "5c95bdce54ee3da67303044d70d7cae7a0972df3074e04c04d306f2ef9c52484"
@@ -5832,6 +5836,50 @@
   ],
   "online_speedup": null,
   "fully_priced_cold_speedup": null
+ },
+ "latest_frontier_audit": {
+  "date": "2026-10-13",
+  "source": "research/ecbench_frontier_20261013/frontier-data.json",
+  "classification": "evidence synthesis; no new bound or challenge verdict",
+  "ranked_rows_changed": false,
+  "reason": "No new admitted whole-pipeline measurement, re-matched reference, or newly priced curve; retain every ranked row and publish this synthesis as an accounting audit.",
+  "cold": {
+   "method": "rho.signed_frobenius_strong",
+   "bound_id": "ECBND1h05a2ea918f3c",
+   "ops_over_floor": 1.08884235548,
+   "ops_ci95": [
+    0.927407595186,
+    1.26085607681
+   ],
+   "runs": 144,
+   "sizes": 6
+  },
+  "admitted_online": {
+   "label": "n61 compact orbit",
+   "rho_over_ic": 13.9,
+   "ci95": [
+    9.8,
+    19.1
+   ],
+   "targets": 64,
+   "setup_seconds_approx": 28.0,
+   "status": "admitted online"
+  },
+  "exploratory_online": {
+   "label": "n83 dense K1798",
+   "rho_over_ic": 18.528377,
+   "targets": 1,
+   "complete_process_seconds": 339.068,
+   "setup_inclusive_class": "diagnostic: complete IC process divided by reported rho online time; not a matched cold ratio",
+   "first_integer_break_even_under_model": 306,
+   "status": "exploratory one point"
+  },
+  "replay_block": {
+   "identical": 120,
+   "total": 168,
+   "failures": 48,
+   "scope": "all inherited-F4 rows differ in solver phase counts; root-finder and rho rows identical"
+  }
  },
  "curve_records": {
   "registry": "docs/curves/registry.json",
