@@ -58,6 +58,10 @@ struct Params {
     seed: u64,
     p: u64,
     wide: bool,
+    /// All coefficients +1 (a repeated column gives +2): the shape CADO's
+    /// relation format can carry (nonnegative valuations).  Draws the same
+    /// random stream as `unit`, so the column pattern is identical.
+    positive: bool,
     block: usize,
 }
 
@@ -84,7 +88,7 @@ fn generate(p: &Params) -> System {
             let c = rng.gen_range(0..p.cols) as u32;
             let v = if p.wide {
                 rng.gen_range(1..p.p)
-            } else if rng.gen::<bool>() {
+            } else if rng.gen::<bool>() || p.positive {
                 1
             } else {
                 p.p - 1
@@ -180,7 +184,7 @@ fn run_ours(p: &Params, arm: &str) -> serde_json::Value {
     let nnz: usize = sys.rows.iter().map(|r| r.entries.len()).sum();
     let mut out = serde_json::json!({
         "arm": arm, "cols": p.cols, "weight": p.weight, "excess": p.excess,
-        "seed": p.seed, "modulus": p.p.to_string(), "coeffs": if p.wide {"wide"} else {"unit"},
+        "seed": p.seed, "modulus": p.p.to_string(), "coeffs": coeffs_name(p),
         "block": p.block, "threads": threads(),
         "rows": sys.rows.len(), "rows_to_cover": sys.rows_to_cover, "nonzeros": nnz,
         "generate_s": gen_s,
@@ -347,6 +351,144 @@ fn check_cado(p: &Params, dir: &str, sol: &str) -> serde_json::Value {
     result
 }
 
+fn coeffs_name(p: &Params) -> &'static str {
+    if p.wide {
+        "wide"
+    } else if p.positive {
+        "positive"
+    } else {
+        "unit"
+    }
+}
+
+// ── CADO's own filter: purge → merge-dl → replay-dl → bwc ─────────────
+
+/// Relations in CADO's indexed format, `a,b:i1,…,ik` (hex), an index
+/// repeated once per unit of its (nonnegative) exponent.  `a` is the row
+/// number, so the purged file maps back to the original rows.
+fn cado_export_rels(p: &Params, dir: &str) -> serde_json::Value {
+    assert!(p.positive, "CADO relations need --coeffs positive");
+    std::fs::create_dir_all(dir).unwrap();
+    let sys = generate(p);
+    let mut w = std::io::BufWriter::new(std::fs::File::create(format!("{dir}/rels")).unwrap());
+    for (i, r) in sys.rows.iter().enumerate() {
+        let mut ids = Vec::new();
+        for &(c, v) in &r.entries {
+            assert!(v <= 64, "positive coefficients stay small");
+            for _ in 0..v {
+                ids.push(format!("{c:x}"));
+            }
+        }
+        writeln!(w, "{i:x},1:{}", ids.join(",")).unwrap();
+    }
+    serde_json::json!({"rows": sys.rows.len(), "cols": p.cols, "dir": dir})
+}
+
+/// Original row of each line of a purged file (its `a`, in hex).
+fn purged_rows(path: &str) -> Vec<usize> {
+    let text = std::fs::read_to_string(path).unwrap();
+    text.lines()
+        .filter(|l| !l.starts_with('#') && !l.is_empty())
+        .map(|l| usize::from_str_radix(l.split(',').next().unwrap(), 16).unwrap())
+        .collect()
+}
+
+/// Right-hand side of each row of the replayed matrix: a relation set
+/// `n id:e …` (ids index the purged file, exponents signed) sums
+/// `e · rhs(row)`.  Written as `bwc.pl`'s ASCII rhs.
+fn cado_rhs(p: &Params, dir: &str) -> serde_json::Value {
+    let t = Instant::now();
+    let sys = generate(p);
+    let gen_s = t.elapsed().as_secs_f64();
+    let t = Instant::now();
+    let purged = purged_rows(&format!("{dir}/purged"));
+    let index = std::fs::read_to_string(format!("{dir}/small.index")).unwrap();
+    let mut lines = index.lines();
+    let n: usize = lines.next().unwrap().trim().parse().unwrap();
+    let mut w = std::io::BufWriter::new(std::fs::File::create(format!("{dir}/rhs.txt")).unwrap());
+    writeln!(w, "{n} 1 {}", p.p).unwrap();
+    for line in lines.take(n) {
+        let mut acc = 0u64;
+        for item in line.split_whitespace().skip(1) {
+            let (id, e) = item.split_once(':').unwrap_or((item, "1"));
+            let id = usize::from_str_radix(id, 16).unwrap();
+            let e: i64 = e.parse().unwrap();
+            let e = if e < 0 { p.p - ((-e) as u64 % p.p) } else { e as u64 % p.p };
+            acc = addmod(acc, mulmod(e, sys.rows[purged[id]].rhs, p.p), p.p);
+        }
+        writeln!(w, "{acc}").unwrap();
+    }
+    serde_json::json!({"small_rows": n, "rhs_s": t.elapsed().as_secs_f64(), "generate_s": gen_s})
+}
+
+/// Logs of the replayed matrix's columns from a `K.sols` file (column `i`
+/// is ideal `h` per `small.ideal`), then iterative propagation through
+/// every original row with exactly one unknown — what CADO's
+/// `reconstructlog-dl` does, minus the NFS-specific parts.
+fn cado_reconstruct(p: &Params, dir: &str, sol: &str) -> serde_json::Value {
+    let sys = generate(p);
+    let t = Instant::now();
+    let ideals = std::fs::read_to_string(format!("{dir}/small.ideal")).unwrap();
+    let col_of: Vec<usize> = ideals
+        .lines()
+        // A one-token line is the header (column count), when present.
+        .filter(|l| !l.starts_with('#') && l.split_whitespace().count() == 2)
+        .map(|l| {
+            let mut it = l.split_whitespace();
+            let _i: usize = it.next().unwrap().parse().unwrap();
+            usize::from_str_radix(it.next().unwrap(), 16).unwrap()
+        })
+        .collect();
+    let mut bytes = Vec::new();
+    std::fs::File::open(sol).unwrap().read_to_end(&mut bytes).unwrap();
+    let words: Vec<u64> = bytes
+        .chunks_exact(8)
+        .map(|c| u64::from_le_bytes(c.try_into().unwrap()))
+        .collect();
+    let k = col_of.len();
+    let y = *words.last().unwrap() % p.p;
+    let mut value: Vec<Option<u64>> = vec![None; p.cols];
+    if y != 0 && words.len() > k {
+        let inv = modinv(p.p - y, p.p);
+        for (i, &c) in col_of.iter().enumerate() {
+            value[c] = Some(mulmod(words[i] % p.p, inv, p.p));
+        }
+    }
+    // Propagate: a row with one unknown determines it.
+    let mut col_rows: Vec<Vec<u32>> = vec![Vec::new(); p.cols];
+    for (i, r) in sys.rows.iter().enumerate() {
+        for &(c, _) in &r.entries {
+            col_rows[c as usize].push(i as u32);
+        }
+    }
+    let mut queue: Vec<u32> = (0..sys.rows.len() as u32).collect();
+    while let Some(i) = queue.pop() {
+        let r = &sys.rows[i as usize];
+        let unknown: Vec<&(u32, u64)> =
+            r.entries.iter().filter(|(c, _)| value[*c as usize].is_none()).collect();
+        if unknown.len() != 1 {
+            continue;
+        }
+        let (c, v) = *unknown[0];
+        let mut s = r.rhs;
+        for &(c2, v2) in &r.entries {
+            if let Some(x) = value[c2 as usize] {
+                s = (s + p.p - mulmod(v2, x, p.p)) % p.p;
+            }
+        }
+        value[c as usize] = Some(mulmod(s, modinv(v, p.p), p.p));
+        queue.extend(col_rows[c as usize].iter().copied());
+    }
+    let reconstruct_s = t.elapsed().as_secs_f64();
+    let known = value.iter().filter(|v| v.is_some()).count();
+    let ok = value
+        .iter()
+        .zip(&sys.planted)
+        .all(|(v, &x)| *v == Some(x));
+    serde_json::json!({"small_cols": k, "determined": known, "cols": p.cols,
+        "reconstruct_s": reconstruct_s, "verified": ok})
+}
+
 fn modinv(a: u64, m: u64) -> u64 {
     let (mut r0, mut r1) = (m as i128, a as i128);
     let (mut t0, mut t1) = (0i128, 1i128);
@@ -374,6 +516,7 @@ fn main() {
         seed: num("--seed", 1),
         p: num("--modulus", DEFAULT_P),
         wide: get("--coeffs").as_deref() == Some("wide"),
+        positive: get("--coeffs").as_deref() == Some("positive"),
         block: num("--block", 4) as usize,
     };
     let v = match cmd.as_str() {
@@ -384,8 +527,15 @@ fn main() {
             &get("--dir").expect("--dir"),
             &get("--sol").expect("--sol"),
         ),
+        "cado-export-rels" => cado_export_rels(&p, &get("--dir").expect("--dir")),
+        "cado-rhs" => cado_rhs(&p, &get("--dir").expect("--dir")),
+        "cado-reconstruct" => cado_reconstruct(
+            &p,
+            &get("--dir").expect("--dir"),
+            &get("--sol").expect("--sol"),
+        ),
         _ => {
-            eprintln!("usage: la_engine_bench ours|export-core|check-cado [options]");
+            eprintln!("usage: la_engine_bench ours|export-core|check-cado|cado-export-rels|cado-rhs|cado-reconstruct [options]");
             std::process::exit(2);
         }
     };
