@@ -1,7 +1,9 @@
 # Fresh matched degree-83 IC versus optimized rho
 
-Status: implementation and prospective protocol preparation; no new solver
-timings or winner are reported yet. User authorized execution on14October2026.
+Status: prepared and source-frozen; the main timed campaign has not started.
+No new matched-panel winner is reported yet. User authorized execution
+on14October2026. Worker/controller/analysis source freeze:
+`c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03`.
 
 The [prospective protocol](PROTOCOL.md) freezes the exact legacy a=1/tail149
 curve,32 new point-only targets, three genuinely reused-setup IC/rho cohort
@@ -20,11 +22,11 @@ a newly measured rho time.
 | User requirement | Current status | Evidence or remaining gate |
 |---|---|---|
 | Larger unseen matched panel | Fixtures independently verified | [Generation and native replay](verification/README.md) |
-| Freeze both algorithms before testing | Implementing; freeze commit pending | [Protocol](PROTOCOL.md) and upcoming source/binary pins |
+| Freeze both algorithms before testing | Verified before main timing | [Protocol](PROTOCOL.md), [build receipt](provenance/build_receipt.json), [frozen matrix](provenance/frozen_campaign_manifest.json) |
 | Actual cold-start comparison | Not yet run | Eight predeclared singleton pairs |
-| Genuine setup reuse for both methods | Implementing; not yet run | Three32-target cohorts per method |
-| Complete cost, memory and failures | Native controller implementation | Whole-process wall/CPU/RSS and raw semantics |
-| Means, medians, slow cases and uncertainty | Native analysis implementation | Target/preparation clusters and non-finite modeled crossovers retained |
+| Genuine setup reuse for both methods | Implemented; batch campaign not yet run | New rho singleton matches existing worker's exported work; three32-target cohorts planned |
+| Complete cost, memory and failures | Controller tests pass; campaign pending | Nine tests, including native timeout and launch/memory failure handling |
+| Means, medians, slow cases and uncertainty | Native analysis14tests pass; measured input pending | Target/preparation clusters and non-finite modeled crossovers retained |
 | Independent correctness and provenance | Fixtures pass; solve audit pending | Scalar and IC four-point witness replay |
 | Comprehensive PDF and reviewable publication | Pending executed evidence | New addendum preserving prior70pages; extend PR1828 |
 

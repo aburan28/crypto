@@ -1,0 +1,17 @@
+{
+  "kind":"native_rho_preflight_negative_self_test",
+  "status":"PASS",
+  "same_point_scalar_seed_policy":true,
+  "common_outcome_fields_checked":9,
+  "table_payload_lower_bound_derived_and_checked":true,
+  "preparation_and_total_charges_equal":true,
+  "independent_canonical_scalar_replays":2,
+  "old_receipt_sha256":"790625449c1ea5d10e0f3a3b6890108e86b48f21a63f8c418ca7380a8bb4d7b9",
+  "new_target_file_sha256":"89513c668d4e0add040135a8c0538cde1ead947849c4432dafc163f67d8c48f6",
+  "checker_source_sha256":"f2677ba8280a5cfcc39104fe2e0170cb65a71b56e39a1721650adf132c15f485",
+  "checker_executable_sha256":"ca6c00cf26940caa7689da85c9218774056af0e7d9d4981c6e0d80cd8b118b49",
+  "mismatched_counter_rejected":true,
+  "mismatched_scalar_rejected":true,
+  "scope":"Singleton worker reshape control on one fixed historical public target; equality of exported outcomes and charges, not a full trajectory trace or fresh-panel result",
+  "performance_claim":false
+}

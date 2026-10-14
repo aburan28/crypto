@@ -1,5 +1,6 @@
 // Independent arithmetic and retained-file verification. No solver is invoked.
 #include "matched_fixture_helpers.hpp"
+#include <limits>
 
 inline bool equal_json(const J&a,const J&b) {
  if(a.type!=b.type||a.scalar!=b.scalar||a.array.size()!=b.array.size()||a.object.size()!=b.object.size())return false;
@@ -21,12 +22,42 @@ inline std::vector<Run> independent_matrix(){
  }require(out.size()==32,"Independent run matrix size failure");return out;
 }
 inline double finite_nonnegative(const J&j,const std::string&key){double x=real(j.at(key));require(std::isfinite(x)&&x>=0,"Nonfinite/negative time field");return x;}
+// Both producers serialize f64 values. Allow only eight machine epsilons after
+// decimal round-trip, u128-to-f64 conversion, division/subtraction. At the
+// 2100s process cap this is less than0.004ns in millisecond units, so a one-ns
+// clock change is rejected; integer phase/residual identities remain exact.
+inline bool same_serialized_f64(double a,double b){return std::isfinite(a)&&std::isfinite(b)&&std::abs(a-b)<=8*std::numeric_limits<double>::epsilon()*std::max({1.,std::abs(a),std::abs(b)});}
+inline bool verify_child_usage(const J&execution){
+ finite_nonnegative(execution,"elapsed_process_wall_s");
+ if(execution.at("status").scalar=="LAUNCH_FAILED"){
+  for(const auto&key:{"cpu_user_s","cpu_system_s","cpu_total_s","peak_rss_native_kib","peak_rss_bytes","return_code","termination_signal"})require(execution.at(key).scalar=="null","Launch failure has child usage/exit metrics");
+  require(!truth(execution.at("timeout"))&&!truth(execution.at("semantic").at("valid")),"Launch failure claims successful child/timeout");
+  return false;
+ }
+ for(const auto&key:{"cpu_user_s","cpu_system_s","cpu_total_s","peak_rss_native_kib","peak_rss_bytes"})require(value_present(execution,key),"Actually launched child lacks usage metrics");
+ require(std::abs(finite_nonnegative(execution,"cpu_user_s")+finite_nonnegative(execution,"cpu_system_s")-finite_nonnegative(execution,"cpu_total_s"))<1e-9&&num(execution.at("peak_rss_native_kib"))*1024==num(execution.at("peak_rss_bytes")),"CPU sum/RSS conversion mismatch");
+ return true;
+}
+inline J json_text(const std::string&s){Parser p;p.s=s;auto j=p.value();p.ws();require(p.i==p.s.size(),"Trailing self-test JSON");return j;}
+inline void child_usage_self_test(const files::path&output,const char*executable){
+ require(!files::exists(output),"Refusing existing checker self-test receipt");
+ auto failed=json_text(R"({"status":"LAUNCH_FAILED","elapsed_process_wall_s":0.01,"cpu_user_s":null,"cpu_system_s":null,"cpu_total_s":null,"peak_rss_native_kib":null,"peak_rss_bytes":null,"return_code":null,"termination_signal":null,"timeout":false,"semantic":{"valid":false}})");
+ require(!verify_child_usage(failed),"Launch failure classified as a successfully launched child");
+ size_t rejected=0;
+ for(const auto&status:{"COMPLETED_VERIFIED","PROCESS_FAILED","TIMEOUT"}){auto bad=failed;bad.object.at("status").scalar=status;try{verify_child_usage(bad);}catch(const std::exception&){++rejected;}}
+ auto bad=failed;bad.object.at("cpu_user_s")=json_text("0");try{verify_child_usage(bad);}catch(const std::exception&){++rejected;}
+ auto actual=json_text(R"({"status":"COMPLETED_VERIFIED","elapsed_process_wall_s":0.125,"cpu_user_s":0.07,"cpu_system_s":0.03,"cpu_total_s":0.1,"peak_rss_native_kib":256,"peak_rss_bytes":262144,"return_code":0,"termination_signal":null,"timeout":false,"semantic":{"valid":true}})");
+ require(verify_child_usage(actual)&&rejected==4,"Child usage self-test rejected a valid child or admitted malformed metrics");
+ require(same_serialized_f64(2100000.,std::nextafter(2100000.,INFINITY))&&!same_serialized_f64(2100000.,2100000.+1e-6),"Float tolerance must admit round-trip noise and reject one nanosecond");
+ std::ostringstream out;out<<"{\n  \"kind\":\"native_matched_checker_usage_negative_self_test\",\n  \"status\":\"PASS\",\n  \"launch_failure_is_retained_no_child\":true,\n  \"null_metrics_cannot_claim_completed_child\":true,\n  \"valid_launched_child_metrics_accepted\":true,\n  \"malformed_metric_cases_rejected\":"<<rejected<<",\n  \"float_tolerance_accepts_roundtrip_noise_rejects_one_ns_at_cap\":true,\n  \"checker_source_sha256\":"<<qstr(digest(__FILE__))<<",\n  \"checker_executable_sha256\":"<<qstr(digest(executable))<<"\n}\n";create_new(output,out.str());std::cout<<"PASS: no-child versus launched-child usage distinction,4 negative metric cases and strict float tolerance\n";
+}
 struct CheckedRow{
  std::string run,id,arm,status,error,scalar;bool present=false,answer=false,replay=false,witness=false,sidecar=false,complete=false;
  double online=0,phase_sum=0,gap=0;
 };
 
 int main(int argc,char**argv){try{
+ if(argc==3&&std::string(argv[1])=="--self-test"){child_usage_self_test(argv[2],argv[0]);return 0;}
  require(argc==8,"usage: verify_matched_campaign ARCHIVE PRIOR_OPTIMIZATION_FIXTURES PRIOR_SPEED_FIXTURES MATCHED_FIXTURES CAMPAIGN FROZEN_PROTOCOL NEW_RECEIPT");
  files::path archive=argv[1],prior=argv[2],speed=argv[3],fresh=argv[4],campaign=argv[5],protocol_file=argv[6],output=argv[7];
  require(!files::exists(output),"Refusing existing final verification receipt");
@@ -53,7 +84,7 @@ int main(int argc,char**argv){try{
  for(const auto&f:fixtures)match(fresh/(f.id+".jsonl"),protocol.at("expected_fixture_file_sha256").at(f.id).scalar);
  const std::map<std::string,std::string> clean_env={{"KIC_RANK_THREADS","1"},{"KIC_RHO_THREADS","1"},{"KIC_TARGET_THREADS","1"},{"KIC_THREADS","1"},{"LC_ALL","C"},{"MKL_NUM_THREADS","1"},{"OMP_NUM_THREADS","1"},{"OPENBLAS_NUM_THREADS","1"},{"PATH","/usr/bin:/bin"},{"RAYON_NUM_THREADS","1"}};
  std::vector<CheckedRow> rows;std::vector<std::string> errors;std::set<files::path> planned_dirs;std::map<std::string,J> aa_records;
- size_t processes=0,completed=0,checked=0,missing=0,invalid=0,nonanswers=0,ic_answers=0,rho_answers=0,witnesses=0;
+ size_t processes=0,completed=0,launch_failures=0,checked=0,missing=0,invalid=0,nonanswers=0,ic_answers=0,rho_answers=0,witnesses=0;
  U previous_finished=0;
  for(size_t ri=0;ri<matrix.size();++ri){
   const auto&r=matrix[ri];const auto&declared=ordered[ri];auto dir=campaign/"runs"/r.id,point_file=campaign/"inputs"/(r.id+"-points.jsonl"),seed_file=campaign/"inputs"/(r.id+"-seeds.json");planned_dirs.insert(files::weakly_canonical(dir));
@@ -64,7 +95,7 @@ int main(int argc,char**argv){try{
   else require(num(declared.at("rank_seed"))==29&&declared.at("walk_seeds").scalar=="null"&&declared.at("seed_file").scalar=="null","Frozen IC rank seed mismatch");
   auto execution_file=dir/"execution.json";
   if(!files::is_regular_file(execution_file)){errors.push_back("Missing execution: "+r.id);for(const auto&id:r.targets){CheckedRow row;row.run=r.id;row.id=id;row.arm=r.arm;row.status="NOT_ATTEMPTED_OR_MISSING_RECEIPT";rows.push_back(row);++missing;}continue;}
-  ++processes;auto execution=read_json(execution_file.string());auto status=execution.at("status").scalar;
+  ++processes;auto execution=read_json(execution_file.string());auto status=execution.at("status").scalar;if(status=="LAUNCH_FAILED")++launch_failures;
   bool process_ok=status=="COMPLETED_VERIFIED"&&execution.at("return_code").scalar=="0"&&execution.at("termination_signal").scalar=="null"&&execution.at("timeout").scalar=="false";if(process_ok)++completed;
   auto targets_file=dir/"targets.jsonl";auto semantic=files::is_regular_file(targets_file)?lines(targets_file):std::vector<J>{};std::string metadata_error;J observation;
   try{
@@ -80,7 +111,7 @@ int main(int argc,char**argv){try{
    match(dir/"stdout.jsonl",execution.at("stdout_sha256").scalar);match(dir/"stderr.txt",execution.at("stderr_sha256").scalar);if(files::is_regular_file(targets_file))match(targets_file,execution.at("semantic_sha256").scalar);
    std::map<std::string,std::string> env;for(const auto&e:execution.at("environment").object)env[e.first]=e.second.scalar;require(env==clean_env,"Recorded clean child environment mismatch");++env_checks;
    const auto&envp=execution.at("resource_envelope");require(num(envp.at("cpu_count"))==1&&envp.at("cpu_affinity").array.size()==1&&num(envp.at("cpu_affinity").at(0))==3&&num(envp.at("threads"))==1&&num(envp.at("rank_threads"))==1&&num(envp.at("online_target_threads"))==1&&num(envp.at("address_space_limit_bytes"))==12884901888ULL&&real(envp.at("timeout_s"))==2100.,"CPU/thread/memory/timeout envelope mismatch");++resource_checks;
-   finite_nonnegative(execution,"elapsed_process_wall_s");require(std::abs(finite_nonnegative(execution,"cpu_user_s")+finite_nonnegative(execution,"cpu_system_s")-finite_nonnegative(execution,"cpu_total_s"))<1e-9&&num(execution.at("peak_rss_native_kib"))*1024==num(execution.at("peak_rss_bytes")),"CPU sum/RSS conversion mismatch");
+   bool child_launched=verify_child_usage(execution);if(!child_launched)require(semantic.empty(),"Launch failure contains claimed semantic answers");
    require(num(execution.at("started_epoch_ms"))>=num(manifest.at("frozen_before_any_child_epoch_ms"))&&num(execution.at("started_epoch_ms"))>=previous_finished&&num(execution.at("finished_epoch_ms"))>=num(execution.at("started_epoch_ms")),"Actual run order overlaps or predates manifest");previous_finished=num(execution.at("finished_epoch_ms"));
    auto started=read_json((dir/"started.json").string());for(const auto&key:{"argv","cwd","environment","resource_envelope","target_sha256","binary_sha256","argv_existing_file_sha256","started_epoch_ms"})require(equal_json(started.at(key),execution.at(key)),"Started/execution metadata mismatch");
    observation=read_json((dir/"observation.json").string());match(execution_file,observation.at("execution_receipt_sha256").scalar);require(observation.at("run_id").scalar==r.id&&observation.at("kind").scalar==r.kind&&observation.at("arm").scalar==r.arm&&observation.at("campaign_manifest_sha256").scalar==hash(manifest_file)&&equal_json(observation.at("raw_process_receipt"),execution)&&observation.at("target_rows").array.size()==r.targets.size(),"Observation/manifest/execution mismatch");
@@ -93,6 +124,9 @@ int main(int argc,char**argv){try{
     else{require(equal_json(s.at("optimization_config"),config)&&!truth(s.at("target_dependent_state_shared"))&&num(s.at("target_independent_curve_normal_basis_constructions"))==1&&num(s.at("G_only_jump_tables"))==r.targets.size(),"Rho summary policy/shared state mismatch");finite_nonnegative(s,"producer_preparation_ms");}
     double preparation=finite_nonnegative(s.at("timing_ms"),"setup_total");if(r.arm=="ic"){preparation+=finite_nonnegative(s.at("timing_ms"),"rank_stage");preparation+=finite_nonnegative(s.at("timing_ms"),"linear_algebra");}
     require(std::abs(finite_nonnegative(observation,"producer_preparation_ms")-preparation)<1e-6&&observation.at("status").scalar=="COMPLETED_VERIFIED"&&truth(observation.at("all_verified")),"Observation preparation cost/completion status mismatch");
+    double shared_preparation=preparation,per_target_preparation=0.;
+    if(r.arm=="rho"){double jumps=finite_nonnegative(s.at("timing_ms"),"all_G_only_jumps");shared_preparation=preparation-jumps;per_target_preparation=jumps/double(r.targets.size());}
+    require(shared_preparation>=0&&same_serialized_f64(finite_nonnegative(observation,"producer_shared_preparation_ms"),shared_preparation)&&same_serialized_f64(finite_nonnegative(observation,"producer_per_target_preparation_ms"),per_target_preparation),"Observation shared/per-target preparation split differs from raw summary");
    }
   }catch(const std::exception&e){metadata_error=e.what();errors.push_back(r.id+": "+metadata_error);++invalid;}
   if(semantic.size()!=r.targets.size())errors.push_back(r.id+": retained target count "+std::to_string(semantic.size())+" differs from requested "+std::to_string(r.targets.size()));
@@ -122,6 +156,7 @@ int main(int argc,char**argv){try{
     }else{
      require(raw.at("status").scalar=="PASS_VERIFIED_PUBLIC_TARGET"&&truth(raw.at("verified"))&&truth(raw.at("target_on_curve"))&&truth(raw.at("target_in_subgroup")),"Rho success/membership flags inconsistent");
      U ns=0;for(const auto&key:{"target_query_and_validation","walk_and_collision","generic_scalar_replay"})ns+=num(raw.at("online_phase_ns").at(key));require(ns==num(raw.at("online_phase_sum_ns"))&&ns+num(raw.at("online_timer_boundary_residual_ns"))==num(raw.at("online_interval_ns")),"Rho phase/timer residual mismatch");row.phase_sum=double(ns)/1e6;
+     double ns_total_ms=double(num(raw.at("online_interval_ns")))/1e6;require(same_serialized_f64(row.online,ns_total_ms)&&same_serialized_f64(finite_nonnegative(raw,"online_total_ms"),ns_total_ms),"Rho millisecond total differs from integer nanosecond interval");
     }
     row.gap=row.online-row.phase_sum;row.complete=process_ok&&metadata_error.empty();if(r.arm=="ic")++ic_answers;else ++rho_answers;
     if(r.kind=="aa")require(aa_records.emplace(r.id,raw).second,"Duplicate A/A target record");
@@ -140,16 +175,23 @@ int main(int argc,char**argv){try{
  for(const auto&e:files::recursive_directory_iterator(campaign))if(e.is_regular_file())hash(e.path());
  auto isolation=campaign.parent_path()/"isolation";if(files::is_directory(isolation))for(const auto&e:files::recursive_directory_iterator(isolation))if(e.is_regular_file())hash(e.path());
  hash(protocol_file);hash(manifest_file);hash(fresh/"generator_receipt.json");hash(fresh/"validation_sidecar.json");
- bool complete=processes==32&&completed==32&&checked==218&&missing==0&&invalid==0&&nonanswers==0&&ic_answers==104&&rho_answers==114&&witnesses==104&&aa_semantic_gate&&aa_semantic_pairs==5&&errors.empty();
+ bool complete=processes==32&&completed==32&&launch_failures==0&&checked==218&&missing==0&&invalid==0&&nonanswers==0&&ic_answers==104&&rho_answers==114&&witnesses==104&&aa_semantic_gate&&aa_semantic_pairs==5&&errors.empty();
  std::ostringstream out;out<<std::setprecision(17)<<"{\n  \"kind\":\"native_n83_matched_answer_and_file_verification\",\n  \"status\":"<<qstr(complete?"PASS":(invalid?"FAIL_INVALID_EVIDENCE":"INCOMPLETE_OR_RETAINED_FAILURES"))<<",\n";
  out<<"  \"campaign_manifest_sha256\":"<<qstr(hash(manifest_file))<<",\n  \"protocol_sha256\":"<<qstr(hash(protocol_file))<<",\n  \"frozen_protocol_sha256\":"<<qstr(hash(protocol_file))<<",\n  \"fixture_manifest_sha256\":"<<qstr(hash(fresh/"generator_receipt.json"))<<",\n  \"validation_sidecar_sha256\":"<<qstr(hash(fresh/"validation_sidecar.json"))<<",\n";
  out<<"  \"curve_slug\":\"icv1-f2m83-t6151469093347-9eba6cd5\",\n  \"planned_processes\":32,\n  \"observed_processes\":"<<processes<<",\n  \"completed_verified_processes\":"<<completed<<",\n  \"planned_target_rows\":218,\n  \"checked_target_rows\":"<<checked<<",\n  \"independent_scalar_replays\":"<<ic_answers+rho_answers<<",\n  \"IC_scalar_replays\":"<<ic_answers<<",\n  \"rho_scalar_replays\":"<<rho_answers<<",\n  \"IC_four_point_witness_replays\":"<<witnesses<<",\n  \"missing_target_rows\":"<<missing<<",\n  \"nonanswer_rows\":"<<nonanswers<<",\n  \"invalid_rows\":"<<invalid<<",\n";
  out<<"  \"recorded_hash_bindings_checked\":"<<hash_checks<<",\n  \"distinct_files_with_recorded_binding\":"<<bound.size()<<",\n  \"all_files_snapshotted\":"<<snapshots.size()<<",\n  \"source_bindings_checked\":"<<source_checks<<",\n  \"clean_environment_records_checked\":"<<env_checks<<",\n  \"resource_envelopes_checked\":"<<resource_checks<<",\n  \"observation_execution_bindings_checked\":"<<observation_checks<<",\n";
+ out<<"  \"launch_failed_processes\":"<<launch_failures<<",\n  \"no_child_usage_policy\":\"Null CPU/RSS/exit fields accepted only for LAUNCH_FAILED with no semantic answers; these processes remain incomplete and can never PASS\",\n  \"floating_binding_tolerance\":\"8*f64_epsilon*max(1,abs(a),abs(b)); less than0.004ns at2100s cap in ms units; integer phase/residual identities exact\",\n";
  out<<"  \"initial_excluded_signed_orbits\":617,\n  \"fresh_fixtures_reproduced\":32,\n  \"both_prior_eight_fixture_streams_reproduced\":true,\n  \"retained_base_points_and_labels_verified\":99600,\n  \"checked_aa_semantic_pairs\":"<<aa_semantic_pairs<<",\n  \"aa_semantic_gate\":"<<(aa_semantic_gate?"true":"false")<<",\n  \"aa_semantic_scope\":\"Same point, seed, policy, recovered scalar, recorded outcome and preparation charges; not a full intermediate-state trace\",\n  \"complete_panel_gate\":"<<(complete?"true":"false")<<",\n";
  out<<"  \"verification_cost_boundary\":\"This external C++ audit is outside all solver process and online intervals; its resource receipt is reported separately. Both methods already charge built-in group verification.\",\n  \"checker_source_sha256\":"<<qstr(digest(__FILE__))<<",\n  \"checker_executable_sha256\":"<<qstr(digest(argv[0]))<<",\n";
  out<<"  \"not_established\":[\"Independent timing reproduction\",\"Independent host or physical-host exclusivity\",\"Full IC rank and factor-log transcript\",\"Full compiled dependency closure\",\"Common calibrated operation units\",\"Exact five-phase IC online conformance: residual and input-validation mismatch retained\"],\n  \"gate_errors\":[";
  for(size_t i=0;i<errors.size();++i){if(i)out<<",";out<<qstr(errors[i]);}out<<"],\n  \"rows\":[\n";
- for(size_t i=0;i<rows.size();++i){const auto&r=rows[i];if(i)out<<",\n";out<<"    {\"run_id\":"<<qstr(r.run)<<",\"fixture_id\":"<<qstr(r.id)<<",\"arm\":"<<qstr(r.arm)<<",\"process_status\":"<<qstr(r.status)<<",\"row_present\":"<<(r.present?"true":"false")<<",\"answer_present\":"<<(r.answer?"true":"false")<<",\"independent_scalar_replay\":"<<(r.replay?"true":"false")<<",\"IC_four_point_witness_replay\":"<<(r.witness?"true":"false")<<",\"sidecar_checked_after_answer\":"<<(r.sidecar?"true":"false")<<",\"complete_verified_row\":"<<(r.complete?"true":"false")<<",\"recovered_scalar\":"<<(r.scalar.empty()?"null":qstr(r.scalar))<<",\"online_ms\":";if(r.replay)out<<r.online;else out<<"null";out<<",\"phase_sum_ms\":";if(r.replay)out<<r.phase_sum;else out<<"null";out<<",\"phase_gap_ms\":";if(r.replay)out<<r.gap;else out<<"null";out<<",\"error\":"<<(r.error.empty()?"null":qstr(r.error))<<"}";}
+ for(size_t i=0;i<rows.size();++i){
+  const auto&r=rows[i];if(i)out<<",\n";
+  out<<"    {\"run_id\":"<<qstr(r.run)<<",\"fixture_id\":"<<qstr(r.id)<<",\"arm\":"<<qstr(r.arm)<<",\"process_status\":"<<qstr(r.status);
+  out<<",\"child_launched\":"<<(r.status=="LAUNCH_FAILED"?"false":(r.status=="NOT_ATTEMPTED_OR_MISSING_RECEIPT"?"null":"true"));
+  out<<",\"row_present\":"<<(r.present?"true":"false")<<",\"answer_present\":"<<(r.answer?"true":"false")<<",\"independent_scalar_replay\":"<<(r.replay?"true":"false")<<",\"IC_four_point_witness_replay\":"<<(r.witness?"true":"false")<<",\"sidecar_checked_after_answer\":"<<(r.sidecar?"true":"false")<<",\"complete_verified_row\":"<<(r.complete?"true":"false")<<",\"recovered_scalar\":"<<(r.scalar.empty()?"null":qstr(r.scalar))<<",\"online_ms\":";
+  if(r.replay)out<<r.online;else out<<"null";out<<",\"phase_sum_ms\":";if(r.replay)out<<r.phase_sum;else out<<"null";out<<",\"phase_gap_ms\":";if(r.replay)out<<r.gap;else out<<"null";out<<",\"error\":"<<(r.error.empty()?"null":qstr(r.error))<<"}";
+ }
  out<<"\n  ],\n  \"files\":[\n";size_t count=0;for(const auto&e:snapshots){if(count++)out<<",\n";out<<"    {\"path\":"<<qstr(e.first.string())<<",\"sha256\":"<<qstr(e.second)<<",\"matched_recorded_binding\":"<<(bound.count(e.first)?"true":"false")<<"}";}out<<"\n  ]\n}\n";create_new(output,out.str());
  std::cout<<(complete?"PASS":"INCOMPLETE/INVALID")<<": processes="<<processes<<"; target_rows="<<checked<<"; independent scalar replays="<<ic_answers+rho_answers<<"; IC witnesses="<<witnesses<<"; invalid="<<invalid<<"; recorded hashes="<<hash_checks<<"\n";return complete?0:(invalid?1:2);
  }catch(const std::exception&e){std::cerr<<"FAIL: "<<e.what()<<"\n";return 1;}}

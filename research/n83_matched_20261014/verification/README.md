@@ -119,10 +119,14 @@ separately metered native isolated-bench invocation:
 `verify_matched_campaign ARCHIVE PRIOR_OPTIMIZATION_FIXTURES PRIOR_SPEED_FIXTURES MATCHED_FIXTURES CAMPAIGN FROZEN_PROTOCOL NEW_RECEIPT`
 
 The standalone executable is
-`/workspace/n83_matched/verification/verify_matched_campaign`.
-[final_checker_hashes.sha256](final_checker_hashes.sha256) pins its current
-source and executable. The final compile is warning-free; the earlier warning
-and correction remain in the build logs. Final answer/file replay has not yet
+`/workspace/n83_matched/verification/verify_matched_campaign_v2`.
+[The separate verification revision](revisions/20261014-v2/README.md) explains
+the strengthened preparation/timer bindings and launch-failure classification,
+with preserved old/new source and executable hashes. The old
+[final_checker_hashes.sha256](final_checker_hashes.sha256) remains the original
+pre-revision pin; the measured workers and fixtures remain unchanged. The final
+compile is warning-free; the earlier warning and correction remain in the build
+logs. Final answer/file replay has not yet
 run. Its external audit wall, CPU and RSS belong to a separate receipt and
 are outside the already charged built-in solver verification intervals.
 
