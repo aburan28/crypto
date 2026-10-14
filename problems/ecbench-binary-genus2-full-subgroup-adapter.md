@@ -46,6 +46,11 @@ needed for a qualified performance claim; none predicts a faster algorithm.
 
 ## Next discriminating step
 
+The [later native snapshot](../research/binary_genus2_speed_20261014/runs/run-20261014T2034Z/ARCHIVE.md)
+has four matched native full-target recoveries and 20 verified resumable
+completions. These external records satisfy none of the registered-session,
+common-pricing or independent-host exit criteria; the problem remains open.
+
 Run the public-job native correctness/restart checks, calibrate the checked
 arithmetic paths, and execute full-order public targets using the already
 available arithmetic. Preserve checkpoints and censored outcomes. In parallel
