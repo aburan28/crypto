@@ -67,9 +67,11 @@ Five targets: two `known_log`, one `random_seed`, two `public_hash_seed`.
 ## Limits
 
 - Two curves only (K₀/2¹³ and K₁/2¹⁷), synthetic targets, pair-table oracle, pair sums.
-- The greedy still enumerates the subgroup (`r ≤ 2²²`), so `--family greedy` yields no
-  candidates on larger subgroups; the search then simply has fewer candidates.
-- `--family greedy` scans every orbit up to `r ≤ 2¹⁷` and a sample of 64 per step above that;
-  the sampled form loses part of the gain (REPORT.pdf, construction cost section).
+- `--family greedy` scans every orbit up to `r ≤ 2¹⁷` and a sample of 64 per step up to
+  `r ≤ 2²²`, which loses part of the gain (REPORT.pdf, construction cost section). Above
+  `2²²` the sampled selector runs (no enumeration, at most 8192 points a base). It was
+  exercised through `ic` once, on K₀/2³⁷ (`r = 2²⁷·⁸`): `ic-n37` in `../scaling`.
+  There it ties with `--family subgroup` within the sampling noise, because its gain
+  shrinks as the subgroup grows (REPORT.pdf, section 3.6).
 - The select stage of a search pays for building every greedy candidate once (seconds at
   degree 17). That cost is paid once per curve and recipe.

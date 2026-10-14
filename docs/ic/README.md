@@ -605,10 +605,14 @@ the most new subgroup targets as a sum of two base points. At equal columns
 and equal points it covered up to 18% more targets than random orbits where
 coverage was partial (`K₀/2¹³`, `K₀/2¹⁵`, `K₁/2¹⁷`), and cut the expected
 trials at the best column count by 8–18%; the gain vanishes once coverage
-saturates. Use it with the pair-table solver, like `subgroup`. It enumerates
-the prime-order subgroup, so it is limited to `r ≤ 2²²` and yields no
-candidates beyond that; above `r = 2¹⁷` the search scores a sample of 64
-orbits per step, which keeps less of the gain. Measurements and limits:
+saturates. Use it with the pair-table solver, like `subgroup`. Up to
+`r = 2²²` it scans the enumerated orbits (every orbit up to `r = 2¹⁷`, a
+sample of 64 per step above that, which keeps less of the gain). Above `2²²`
+a sampled selector takes over: it draws candidate orbits and tracks covered
+sums in a hashed set, with no enumeration, capped at 8192 points per base.
+Its measured advantage over random orbits shrinks as the subgroup grows (about
+1.09 at `r = 2¹⁶`, 1.04 at `2²¹`, 1.012 at `2²⁷·⁸`, and 1.000 at `2³⁹`), so past
+`r ≈ 2²⁸` use `subgroup`. Measurements and limits:
 `research/greedy_factor_base_yield_20261014/REPORT.pdf`; the end-to-end
 `search → run → logs → solve → workflow` record is
 `research/greedy_factor_base_yield_20261014/e2e/E2E.md`.

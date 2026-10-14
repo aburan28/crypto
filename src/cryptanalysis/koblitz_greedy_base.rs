@@ -258,6 +258,13 @@ pub fn build_random_column_factor_base(
     columns: usize,
     seed: u64,
 ) -> Result<FrobeniusFactorBase, String> {
+    if kc
+        .subgroup_order
+        .to_u64()
+        .is_none_or(|r| r > MAX_SUBGROUP_ORDER)
+    {
+        return super::koblitz_greedy_sampled::sampled_random(kc, columns, seed);
+    }
     let r = subgroup_scalar_order(kc)?;
     let units = signed_orbit_units(kc, r)?;
     if columns == 0 || columns > units.len() {
@@ -295,6 +302,15 @@ fn greedy_select(
     pool: usize,
     seed: u64,
 ) -> Result<(FrobeniusFactorBase, GreedyBuildReport), String> {
+    // Past the scalar model's cap the subgroup cannot be enumerated, so the
+    // same rule runs on sampled candidates and a hashed set of sums.
+    if kc
+        .subgroup_order
+        .to_u64()
+        .is_none_or(|r| r > MAX_SUBGROUP_ORDER)
+    {
+        return super::koblitz_greedy_sampled::sampled_select(kc, budget, pool, seed);
+    }
     let start = Instant::now();
     let r = subgroup_scalar_order(kc)?;
 
@@ -544,7 +560,7 @@ mod tests {
     }
 
     #[test]
-    fn search_offers_greedy_candidates_only_when_asked_and_only_where_they_fit() {
+    fn search_offers_greedy_candidates_only_when_asked_and_sizes_them_to_the_selector() {
         use crate::cryptanalysis::koblitz_factor_base_search::{
             candidate_specs, FactorBaseSpec, Family, SearchOptions,
         };
@@ -563,10 +579,16 @@ mod tests {
         assert!(specs
             .iter()
             .all(|s| matches!(s, FactorBaseSpec::GreedyCoverage { pool: 0, .. })));
-        // Beyond the scalar model's cap there is nothing to enumerate, so
-        // the family yields no candidates instead of failing the search.
+        // Past the scalar model's cap the sampled selector takes over, with
+        // a sampled pool and a cap on the points of a base.
         let wide = KoblitzCurve::new(0, 41).expect("curve");
-        assert!(candidate_specs(&wide, &on).is_empty());
+        let wide_specs = candidate_specs(&wide, &on);
+        assert!(!wide_specs.is_empty());
+        assert!(wide_specs.iter().all(|s| matches!(
+            s,
+            FactorBaseSpec::GreedyCoverage { pool: 64, points, .. }
+                if *points <= crate::cryptanalysis::koblitz_greedy_sampled::MAX_SAMPLED_POINTS
+        )));
     }
 
     #[test]

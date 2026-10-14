@@ -28,6 +28,8 @@ the subgroup, so it does not yet build cryptographic-size bases.
 | `data/rows.json` | one row per base (2776 rows): arm, seed, columns, points, covered, coverage, expected trials, build and census times, scalar-model count and whether it matches the census |
 | `data/summary.json` | 56 column counts, with means over seeds and 95% bootstrap intervals on the coverage ratio |
 | `data/run.log` | the run's stderr |
+| `scaling/` | the sampled selector past `r = 2²²`: `main`, `k0n37-large` and `pool{8,64,512}` (rows and summaries from `examples/koblitz_greedy_scaling.rs`), `ic-n37` (`ic search` on K₀/2³⁷ and its recipes) |
+| `graphs/plot_scaling.py`, `graphs/fig5_*`, `graphs/fig6_*` | the scaling figures and their source |
 | `e2e/E2E.md` | the greedy family run through `ic search`, `run`, `logs`, `solve` and `workflow`, with the saved recipes, workflow params and report |
 | `graphs/plot_yield.py` | the figure source; reads only the two JSON files above |
 | `graphs/fig1_coverage_vs_columns.{svg,png}` | coverage against column count, three curves |
@@ -63,5 +65,5 @@ fields will differ between hosts and runs.
 - Degrees 9, 13, 15, 17 only. `K₁/2⁹` and `K₁/2¹⁵` are saturated by one orbit and do not discriminate.
 - Pair sums (`m = 2`) only. Per-trial oracle cost is not measured; bases are matched in points, so the pair-table cost is matched by construction.
 - The greedy is a heuristic, deterministic in full-scan form, with no optimality claim.
-- The construction enumerates the prime-order subgroup and is capped at `r ≤ 2²²`. Scaling it needs sampled candidates and a hashed set of covered sums; that is follow-up work.
+- The dense construction enumerates the prime-order subgroup and is capped at `r ≤ 2²²`. The sampled selector (`koblitz_greedy_sampled`) has no such cap, only 8192 points a base, and measures a gain that shrinks with `r`: about 1.09 at `r = 2¹⁶`, 1.04 at `2²¹`, 1.012 at `2²⁷·⁸`, 1.000 at `2³⁹` (REPORT.pdf section 3.6).
 - The construction time is not comparable with the shipped sampler, which does not enumerate the subgroup.

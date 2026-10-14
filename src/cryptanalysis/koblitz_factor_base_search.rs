@@ -77,6 +77,7 @@ use crate::binary_ecc::{BinaryPoint, F2mElement};
 use super::koblitz_greedy_base::{
     build_greedy_coverage_factor_base, explicit_orbit_factor_base, MAX_SUBGROUP_ORDER,
 };
+use super::koblitz_greedy_sampled::MAX_SAMPLED_POINTS;
 use super::koblitz_groebner::{f4_word_ops_thread, FieldStructure, SolverEngine};
 use super::koblitz_index_calculus::{
     all_factors_of_x_n_minus_1, build_frobenius_factor_base,
@@ -145,7 +146,9 @@ pub enum FactorBaseSpec {
     /// points.  Same stopping rule as `SubgroupOrbits`; see
     /// [`super::koblitz_greedy_base`] for the construction and why its
     /// count is exact.  `pool` is the number of candidate orbits scored
-    /// per step (`0` scores all of them, and then `seed` has no effect).
+    /// per step (`0` scores all of them, and then `seed` has no effect).  Above
+    /// `MAX_SUBGROUP_ORDER` the sampled selector runs instead: `0` means 64
+    /// candidates drawn per step, and `seed` selects them.
     GreedyCoverage {
         /// Seed for the candidate sample; ignored when `pool` is `0`.
         seed: u64,
@@ -618,8 +621,11 @@ pub enum Family {
     /// Signed Frobenius orbits chosen greedily to cover the most new
     /// subgroup targets as sums of two base points
     /// ([`super::koblitz_greedy_base`]).  Pair-table oracle only, like
-    /// `Subgroup`, and only where the subgroup is small enough to
-    /// enumerate (`MAX_SUBGROUP_ORDER`); elsewhere it yields no candidates.
+    /// `Subgroup`.  Up to `MAX_SUBGROUP_ORDER` the dense selector scans the
+    /// enumerated orbits; above it the sampled selector
+    /// ([`super::koblitz_greedy_sampled`]) draws candidates and caps a base
+    /// at `MAX_SAMPLED_POINTS`, and measures no gain once the subgroup is
+    /// much larger than the base can cover.
     Greedy,
 }
 
@@ -1295,26 +1301,26 @@ pub fn candidate_specs(kc: &KoblitzCurve, opts: &SearchOptions) -> Vec<FactorBas
     if opts.families.contains(&Family::Greedy) && kc.n < 64 {
         // Same point budgets as the subgroup family, so the two line up.
         // A full scan of every orbit is exact and seed-free; a sampled
-        // pool keeps the larger subgroups affordable.
+        // pool keeps the larger subgroups affordable.  Past the dense
+        // selector's cap the sampled selector takes over, and it has a
+        // cap of its own on the points of a base.
         let order = kc.subgroup_order.to_u64();
-        if let Some(r) = order.filter(|&r| r <= MAX_SUBGROUP_ORDER) {
-            let pool = if r <= GREEDY_FULL_SCAN_ORDER {
-                0
-            } else {
-                GREEDY_SEARCH_POOL
-            };
-            let (lo, hi) = opts.union_seed_dimensions;
-            for dim in lo.max(1)..=hi.min(12) {
-                let points = (1usize << dim) * kc.n as usize;
-                if points > 2 * opts.max_abscissae {
-                    continue;
-                }
-                push(FactorBaseSpec::GreedyCoverage {
-                    seed: opts.seed ^ (0x4752_4545_4459_0000 + dim as u64),
-                    points,
-                    pool,
-                });
+        let dense = order.is_some_and(|r| r <= MAX_SUBGROUP_ORDER);
+        let pool = match order {
+            Some(r) if r <= GREEDY_FULL_SCAN_ORDER => 0,
+            _ => GREEDY_SEARCH_POOL,
+        };
+        let (lo, hi) = opts.union_seed_dimensions;
+        for dim in lo.max(1)..=hi.min(12) {
+            let points = (1usize << dim) * kc.n as usize;
+            if points > 2 * opts.max_abscissae || (!dense && points > MAX_SAMPLED_POINTS) {
+                continue;
             }
+            push(FactorBaseSpec::GreedyCoverage {
+                seed: opts.seed ^ (0x4752_4545_4459_0000 + dim as u64),
+                points,
+                pool,
+            });
         }
     }
     if opts.saturate && (&kc.cofactor % BigUint::from(2u32)).is_zero() {

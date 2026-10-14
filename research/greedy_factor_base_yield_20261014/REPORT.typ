@@ -19,7 +19,7 @@
 
 #align(center)[$E = (U + 1) T / "covered"$, where $U$ is the number of columns and $T$ the number of nonzero targets.]
 
-*Answer, for the measured curves.* Yes, when coverage is only partial. At equal columns and equal points, a greedy choice covers up to *18% more* targets than uniformly random orbits, and it reaches full coverage with fewer columns. At the best column count the expected number of trials falls by *1.18× on K₀/2¹³, 1.08× on K₀/2¹⁵ and 1.11× on K₁/2¹⁷*, that is 8–18%. The gain vanishes once coverage saturates, and the construction does not yet scale past r ≈ 2²². This is a constant-factor effect measured at small and medium degree. It is not an asymptotic improvement, and it is not a cryptographic-size factor-base builder.
+*Answer, for the measured curves.* Yes, when coverage is only partial. At equal columns and equal points, a greedy choice covers up to *18% more* targets than uniformly random orbits, and it reaches full coverage with fewer columns. At the best column count the expected number of trials falls by *1.18× on K₀/2¹³, 1.08× on K₀/2¹⁵ and 1.11× on K₁/2¹⁷*, that is 8–18%. The gain vanishes once coverage saturates. The dense construction stops at r ≈ 2²². A sampled version runs past that, and measured there the gain falls toward nothing as r grows (section 3.6). This is a constant-factor effect at small and medium subgroup size. It is not an asymptotic improvement, and it is not a cryptographic-size factor-base builder.
 
 = Method
 
@@ -142,6 +142,52 @@ At matched size the shipped sampler is indistinguishable from the random control
 
 The greedy scoring is the cost. On K₁/2¹⁷ a full-scan base costs 231 ms at U = 4, 601 ms at U = 8 and 1507 ms at U = 12. Sampling 64 candidates per step keeps the cost near the enumeration floor (134 ms at U = 12) and keeps most of the gain: at U = 12 the pooled coverage ratio is 1.086, against 1.112 for the full scan. The construction is a one-off per curve and per factor base, which relation collections on the same base amortise. The shipped sampler's 0.2 ms is not comparable, because it does not enumerate the subgroup.
 
+== Past the dense selector's cap
+
+The dense selector holds an array of length r. A second selector, `koblitz_greedy_sampled`, makes the same choice without enumerating the subgroup. Each step draws 64 random subgroup orbits (a random abscissa, lifted, multiplied by the cofactor), scores each by the number of its pair sums whose abscissa is not yet covered, and adds the best. Covered sums are a hashed set. Because a base closed under negation covers a target T exactly when it covers −T, the number of covered targets is exactly twice the number of distinct sum abscissae, so coverage is exact with no target set. It is capped at 8192 points by the memory of the set.
+
+Every number below is recomputed from the finished base alone by an independent pair-sum count, and the selector's own count equals it in all 438 greedy bases of these runs. The comparison is again at equal columns, against orbits drawn uniformly by the same sampler.
+
+#figure(
+  image("graphs/fig5_scaling_ratio.svg", width: 100%),
+  caption: [Left: coverage ratio of greedy over random against columns, for eight Koblitz curves ordered by subgroup size, with 95% bootstrap bars over 8 seeds (3 for K₀/2³⁷). Right: the same ratio against the coverage of the random base. Source: `scaling/main/summary.json`, `scaling/k0n37-large/summary.json`; plot `graphs/plot_scaling.py`.],
+)
+
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto, auto),
+    align: (left, right, right, right, right, right),
+    table.hline(),
+    [*curve*], [*r*], [*columns*], [*points*], [*random coverage*], [*ratio (95% CI)*],
+    table.hline(stroke: 0.5pt),
+    [K₁/2¹⁷], [2¹⁶·⁰], [8], [272], [0.428], [1.090 (1.070, 1.109)],
+    [K₀/2¹⁹], [2¹⁷·⁰], [8], [304], [0.294], [1.076 (1.065, 1.088)],
+    [K₁/2¹⁹], [2¹⁸·⁰], [16], [608], [0.503], [1.069 (1.059, 1.080)],
+    [K₀/2³¹], [2²⁰·⁵], [16], [992], [0.289], [1.045 (1.037, 1.052)],
+    [K₀/2²³], [2²¹·⁰], [32], [1472], [0.402], [1.046 (1.042, 1.051)],
+    [K₁/2²³], [2²²·⁰], [48], [2208], [0.440], [1.036 (1.034, 1.039)],
+    [K₀/2³⁷], [2²⁷·⁸], [96], [7104], [0.104], [1.012 (1.011, 1.012)],
+    [K₀/2⁴¹], [2³⁹·⁰], [16], [1312], [1.6×10⁻⁶], [1.0000 (1.0000, 1.0000)],
+    table.hline(),
+  ),
+  caption: [Largest coverage ratio found for each curve at the column counts swept, with the base size and coverage of the random base there. The last two rows are limited by the point cap (2400 points in the main run; 7104 for K₀/2³⁷), not by where the gain would peak. Source: `scaling/*/summary.json`.],
+)
+
+*What the data show.* The gain falls as r grows. At equal coverage of about 10% the ratio is about 1.045 at r = 2¹⁶, 1.035 at 2²¹ and 1.012 at 2²⁷·⁸. At r = 2³⁹ every base the cap allows has coverage near 10⁻⁶, all sums of the random base are already distinct, and the ratio is exactly 1.0000: there are no collisions for the greedy to avoid. On K₀/2³⁷ the ratio rises steadily with the base (1.0017, 1.0047, 1.0088, 1.0116 at 8, 32, 64 and 96 columns), and the peak, near |F| ≈ √r or about 16 000 points there, is above the point cap.
+
+*Why, as a candidate explanation.* The greedy can recover only the collisions a random base would suffer, and the best of a sample of candidates beats the mean by a fixed number of standard deviations of the collision count, which shrinks relative to the number of sums as bases grow. If that is right, the gain should grow with the sample size like √(2 ln pool). It does:
+
+#figure(
+  image("graphs/fig6_pool_sensitivity.svg", width: 70%),
+  caption: [Coverage ratio minus 1 against the candidates scored per step, at 16 columns, 6 seeds. Source: `scaling/pool8`, `pool64`, `pool512`, field `ratio`.],
+)
+
+Dividing the excess ratio by √(2 ln pool) gives 0.017, 0.018 and 0.018 on K₁/2¹⁷ for pools of 8, 64 and 512, 0.0129, 0.0129 and 0.0127 on K₀/2²³, and 0.0054, 0.0065 and 0.0064 on K₁/2²³: constant to within the noise on each curve. Using the full list of 1929 orbits of K₁/2¹⁷ (√(2 ln 1929) = 3.89) with its constant of 0.0178, that predicts a ratio of 1.069 at 16 columns, and the dense full scan measured 1.071. This is a fit of three points per curve and one out-of-sample check, so it is consistent with the explanation, not a proof of it.
+
+*Cost.* The sampled selector's wall time grows with the square of the base: 0.4 s at 592 points, 6.6 s at 2368, 31 s at 4736 and 82 s at 7104 on K₀/2³⁷ (one core, 64 candidates per step).
+
+*Through the `ic` tool.* `ic search --family greedy` on K₀/2³⁷ (r = 2²⁷·⁸, above the dense cap) generates, scores and validates sampled candidates and saves a frozen recipe. Against `--family subgroup` with the same budgets, the best expected trials were 2705 and 2389 on 4096 sampled targets. At 1.3% coverage that is about 53 and 61 covered targets, so the sampling noise exceeds the at most 1% gain, and the two cannot be told apart. The saved recipe solved a known-answer target (recovered 123456789, verified, 32 columns, 2456 trials, 0.18 s). Source: `scaling/ic-n37`.
+
 = Checks
 
 - *Scalar model against census.* For all 56 greedy bases the builder's count equals the production census (`model_match` true in every row). The unit tests check this on K₀/2⁹ as well.
@@ -149,12 +195,13 @@ The greedy scoring is the cost. On K₁/2¹⁷ a full-scan base costs 231 ms at 
 - *Determinism.* The full-scan greedy is independent of the seed (unit test). The pooled greedy and the random control are reproducible from their seeds.
 - *Prefix stability.* The greedy base with k columns is the first k selected orbits of the base with more columns, so one run gives the whole coverage trajectory (`coverage_by_column`).
 - *Serialisation.* The `greedy_coverage` recipe round-trips through JSON and materialises to the direct build (unit test), so the `ic` tool can read it as a factor-base recipe.
-- *Regression.* The existing factor-base search tests pass (11 of 11), and the new module has 7 passing unit tests.
+- *Sampled selector.* In all 438 greedy bases of the scaling runs, its running count equals the independent pair-sum count; on K₀/2¹³ it also equals the production census over every target (unit test).
+- *Regression.* The existing factor-base search tests pass (11 of 11), and the new modules have 13 passing unit tests.
 
 = Limits
 
-+ *Scale.* The construction enumerates ⟨G⟩ to form orbits and keeps a coverage array of length r. The implementation is capped at r ≤ 2²² (`MAX_SUBGROUP_ORDER`). It cannot build a base for a cryptographic-size curve as written. Scaling it needs a candidate generator from sampled abscissae, and a hashed set of covered sums in place of a dense array. That is a follow-up, not something measured here.
-+ *Degrees.* Only n ∈ {9, 13, 15, 17} were measured. K₁/2⁹ and K₁/2¹⁵ are saturated by one orbit and do not discriminate. Degree 19 was not run: the full scan is too slow at that size, and the pooled arm is the candidate for it.
++ *Scale.* The dense selector enumerates ⟨G⟩ and is capped at r ≤ 2²² (`MAX_SUBGROUP_ORDER`). The sampled selector has no such cap but holds a set of about |F|²/2 sums and is capped at 8192 points. Past r ≈ 2²⁸ that cap keeps the base far below √r, where the gain would be, and the measured gain there is below 2%. A base large enough to matter at r = 2³⁹ would need about a million points and a set of 10¹¹ sums, which does not fit. So neither selector builds a useful base at cryptographic size for pair sums.
++ *Degrees.* The equal-column comparison against the dense selector covers n ∈ {9, 13, 15, 17}; the sampled selector adds eight curves up to r = 2³⁹ (section 3.6). K₁/2⁹ and K₁/2¹⁵ are saturated by one orbit and do not discriminate. Larger degrees use the sampled selector only.
 + *Only pair sums.* m = 2. The effect at m = 3 and with the algebraic oracles is not measured. The coverage counted here is the pair-table oracle's.
 + *Trials, not solve time.* The metric is the census's expected trials, (U + 1) T / covered. Per-trial oracle cost is not measured. Because the bases match in points, the pair-table cost per trial is matched; this is an inference, not a measurement.
 + *Heuristic.* The greedy maximises the gain of the next orbit and does not look ahead. No optimality is claimed. It is deterministic only in the full-scan form.
@@ -163,7 +210,7 @@ The greedy scoring is the cost. On K₁/2¹⁷ a full-scan base costs 231 ms at 
 
 = Conclusion
 
-Within these limits, the greedy coverage rule is a real improvement over choosing orbits at random. It is worth 8–18% of expected relation trials at the best column count on the measured curves. It does not change the asymptotic cost, and as written it works only at small and medium degree. The shipped sampler performs like the random control at the same size. Making the greedy usable at cryptographic size is the next step, and it is not done here.
+Within these limits, the greedy coverage rule is a real improvement over choosing orbits at random. It is worth 8–18% of expected relation trials at the best column count on the measured curves. It does not change the asymptotic cost. The gain is largest where a base's sums cover a third to a half of the subgroup, and it falls to nothing as the subgroup grows, because a base that fits in memory then has no collisions to avoid: the sampled selector measures 1.012 at r = 2²⁷·⁸ and exactly 1.0000 at r = 2³⁹. The shipped sampler performs like the random control at the same size. Scaling the selector past r = 2²² is done, and it shows the idea does not carry to cryptographic size for pair sums. Whether the same choice helps three-point sums, which are what a real attack uses at those sizes, is not measured here.
 
 = Reproduction
 
@@ -174,5 +221,7 @@ cargo run --release --example koblitz_greedy_factor_base_yield -- \
 # figures from the recorded values
 python3 research/greedy_factor_base_yield_20261014/graphs/plot_yield.py
 ```
+
+The scaling runs are `cargo run --release --example koblitz_greedy_scaling -- research/greedy_factor_base_yield_20261014/scaling/main 17,19,23,31,37,41 8 2400`, then `… scaling/k0n37-large 37 3 8192`, then `… scaling/pool<P> 17,23 6 2400 <P> 16` for P = 8, 64, 512, and `python3 …/graphs/plot_scaling.py`.
 
 Files: `data/rows.json` (one row per base, 2776 rows), `data/summary.json` (56 column counts), `data/run.log` (the run's stderr), `graphs/plot_yield.py` (the figure source), `graphs/fig*.svg` (vectors) and `graphs/fig*.png` (150 dpi renders).
