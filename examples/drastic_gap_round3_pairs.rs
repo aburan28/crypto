@@ -235,7 +235,11 @@ fn order_2r_generator(p: u64, a: u64, b: u64, n: u64, r: u64, rng: &mut Rng) -> 
 fn first_generator_2r(p: u64, a: u64, b: u64, n: u64, r: u64) -> Option<(u64, u64)> {
     let mut x = 0u64;
     while x < p {
-        let rhs = addmod(addmod(mulmod(x, mulmod(x, x, p), p), mulmod(a, x, p), p), b, p);
+        let rhs = addmod(
+            addmod(mulmod(x, mulmod(x, x, p), p), mulmod(a, x, p), p),
+            b,
+            p,
+        );
         if let Some(y) = sqrtmod(rhs, p) {
             if y != 0 {
                 let pt = Some((x, y));
@@ -258,7 +262,11 @@ fn first_generator_2r(p: u64, a: u64, b: u64, n: u64, r: u64) -> Option<(u64, u6
 fn first_generator(p: u64, a: u64, b: u64, n: u64) -> Option<(u64, u64)> {
     let mut x = 0u64;
     while x < p {
-        let rhs = addmod(addmod(mulmod(x, mulmod(x, x, p), p), mulmod(a, x, p), p), b, p);
+        let rhs = addmod(
+            addmod(mulmod(x, mulmod(x, x, p), p), mulmod(a, x, p), p),
+            b,
+            p,
+        );
         if let Some(y) = sqrtmod(rhs, p) {
             if y != 0 {
                 return Some((x, y));
@@ -338,7 +346,10 @@ fn main() {
                 let (ca, gx, gy) = match crater {
                     Some(c) => c,
                     None => {
-                        eprintln!("d4 crater miss ell={} t={} after {} trials", ell, t, crater_trials);
+                        eprintln!(
+                            "d4 crater miss ell={} t={} after {} trials",
+                            ell, t, crater_trials
+                        );
                         failures.push(json!({"family": "d4", "ell": ell, "t": t,
                             "reason": "no order-2r quartic twist of j = 1728 within the scan"}));
                         continue;

@@ -194,7 +194,11 @@ fn has_order_n(p: u64, a: u64, b: u64, n: u64, rng: &mut Rng) -> bool {
 fn first_generator(p: u64, a: u64, b: u64) -> Option<(u64, u64)> {
     let mut x = 0u64;
     while x < p {
-        let rhs = addmod(addmod(mulmod(x, mulmod(x, x, p), p), mulmod(a, x, p), p), b, p);
+        let rhs = addmod(
+            addmod(mulmod(x, mulmod(x, x, p), p), mulmod(a, x, p), p),
+            b,
+            p,
+        );
         if let Some(y) = sqrtmod(rhs, p) {
             if y != 0 {
                 return Some((x, y));
@@ -291,10 +295,7 @@ fn main() {
                     // the two quadratic twists of the j(O_K) model carry traces
                     // +t and -t; the one with order N is the crater
                     let mut crater: Option<(u64, u64, u64)> = None; // (a, b, twist)
-                    for (wia, wib, wtag) in [
-                        (ca, cb, "model"),
-                        (ca, submod(0, cb, q), "twist"),
-                    ] {
+                    for (wia, wib, wtag) in [(ca, cb, "model"), (ca, submod(0, cb, q), "twist")] {
                         if has_order_n(q, wia, wib, n, &mut rng) {
                             crater = Some((wia, wib, if wtag == "model" { 0 } else { 1 }));
                             break;

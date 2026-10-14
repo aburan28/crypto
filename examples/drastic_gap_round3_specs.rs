@@ -37,12 +37,7 @@ fn main() {
             )
         } else {
             // d19: gap sweep, rho only
-            (
-                format!("d19-ell{}", ell),
-                Value::Null,
-                2026101207u64,
-                32u64,
-            )
+            (format!("d19-ell{}", ell), Value::Null, 2026101207u64, 32u64)
         };
         let rho = json!({
             "schema": "ecbench.spec/v1",
@@ -125,6 +120,9 @@ fn main() {
 }
 
 fn arg(args: &[String], name: &str) -> String {
-    let i = args.iter().position(|s| s == name).expect("required argument");
+    let i = args
+        .iter()
+        .position(|s| s == name)
+        .expect("required argument");
     args.get(i + 1).expect("argument value").clone()
 }

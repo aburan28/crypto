@@ -36,11 +36,13 @@ fn main() {
     let cubic_arms = json!([
         {"name": "rho-cubic", "role": "candidate", "method": {"id": "rho.cubic"}}
     ]);
-    let measurement = |timeout: u64| json!({
-        "rounds": 1, "warmup": 1, "order": "alternate",
-        "seed": 20261012, "isolation_required": "L2",
-        "timeout_seconds": timeout
-    });
+    let measurement = |timeout: u64| {
+        json!({
+            "rounds": 1, "warmup": 1, "order": "alternate",
+            "seed": 20261012, "isolation_required": "L2",
+            "timeout_seconds": timeout
+        })
+    };
 
     let doc: Value =
         serde_json::from_slice(&std::fs::read(&pairs_path).unwrap()).expect("pairs json");
