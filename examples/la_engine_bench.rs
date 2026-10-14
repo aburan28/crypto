@@ -29,11 +29,11 @@
 //! cargo run --release --example la_engine_bench -- check-cado --cols 16384 --weight 3 --dir /tmp/c --sol /tmp/c/wdir/K.sols0-1.0
 //! ```
 
-use crypto_lib::cryptanalysis::ic_framework::linalg::matrix_by_name;
 use crypto_lib::cryptanalysis::ic_boundary::RowStatus;
+use crypto_lib::cryptanalysis::ic_framework::linalg::matrix_by_name;
 use crypto_lib::cryptanalysis::{
-    filter_relations, solve_sparse_system, FilterOptions, SparseCoreSolver, SparseRow,
-    SparseSolveOptions, SparseSolveOutcome,
+    filter_relations, solve_sparse_system, FilterOptions, FilterStrategy, SparseCoreSolver,
+    SparseRow, SparseSolveOptions, SparseSolveOutcome,
 };
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use std::collections::HashMap;
@@ -67,6 +67,13 @@ struct Params {
     /// thresholds (defaults 8 and 32) for the `full-*` arms.
     merge_max_weight: Option<usize>,
     max_row_weight: Option<usize>,
+    /// `--filter-strategy cado` and `--target-density N` (0: stop on the
+    /// Krylov cost) select the CADO-style filter.
+    markowitz: bool,
+    target_density: usize,
+    /// `--filter-preset cado`: exactly `FilterOptions::cado()` (what `ic logs`
+    /// runs by default); later flags may still override single fields.
+    cado_preset: bool,
 }
 
 struct System {
@@ -138,6 +145,7 @@ fn unmerged_core(p: &Params, sys: &System) -> (Vec<SparseRow<u64>>, Vec<u32>) {
         target_excess: 0,
         merge_max_weight: 0,
         max_row_weight: usize::MAX,
+        ..FilterOptions::default()
     };
     let f = filter_relations(sys.rows.clone(), p.cols, p.p, &opts).expect("consistent");
     let index: HashMap<u32, u32> = f
@@ -171,6 +179,13 @@ fn sparse_opts(p: &Params, solver: SparseCoreSolver, filter: bool) -> SparseSolv
     if let Some(w) = p.max_row_weight {
         o.filter.max_row_weight = w;
     }
+    if p.cado_preset {
+        o.filter = FilterOptions::cado();
+    }
+    if p.markowitz {
+        o.filter.strategy = FilterStrategy::Cado;
+        o.filter.target_density = p.target_density;
+    }
     if !filter {
         o.filter = FilterOptions {
             remove_duplicates: false,
@@ -178,6 +193,7 @@ fn sparse_opts(p: &Params, solver: SparseCoreSolver, filter: bool) -> SparseSolv
             target_excess: usize::MAX,
             merge_max_weight: 0,
             max_row_weight: usize::MAX,
+            ..FilterOptions::default()
         };
     }
     o
@@ -197,13 +213,18 @@ fn run_ours(p: &Params, arm: &str) -> serde_json::Value {
         "seed": p.seed, "modulus": p.p.to_string(), "coeffs": coeffs_name(p),
         "block": p.block, "threads": threads(),
         "merge_max_weight": p.merge_max_weight, "max_row_weight": p.max_row_weight,
+        "filter_strategy": if p.markowitz || p.cado_preset {"cado"} else {"legacy"}, "filter_preset": p.cado_preset, "target_density": p.target_density,
         "rows": sys.rows.len(), "rows_to_cover": sys.rows_to_cover, "nonzeros": nnz,
         "generate_s": gen_s,
     });
     let o = out.as_object_mut().unwrap();
     match arm {
         "igauss" | "sgauss" => {
-            let name = if arm == "igauss" { "incremental-gauss" } else { "structured-gauss" };
+            let name = if arm == "igauss" {
+                "incremental-gauss"
+            } else {
+                "structured-gauss"
+            };
             let mut m = matrix_by_name(name, p.cols, p.p).unwrap();
             let t = Instant::now();
             let mut fed = 0usize;
@@ -222,8 +243,8 @@ fn run_ours(p: &Params, arm: &str) -> serde_json::Value {
             }
             let solve_s = t.elapsed().as_secs_f64();
             let solved: Vec<Option<u64>> = (0..p.cols).map(|c| m.pinned(c)).collect();
-            let ok = m.rank() == p.cols
-                && solved.iter().zip(&sys.planted).all(|(s, &x)| *s == Some(x));
+            let ok =
+                m.rank() == p.cols && solved.iter().zip(&sys.planted).all(|(s, &x)| *s == Some(x));
             let (work, unit) = m.work();
             o.insert("rows_fed".into(), fed.into());
             o.insert("rank".into(), m.rank().into());
@@ -249,7 +270,10 @@ fn run_ours(p: &Params, arm: &str) -> serde_json::Value {
             let ok = matches!(&outcome, SparseSolveOutcome::Solved(x) if *x == sys.planted);
             o.insert("filter_s".into(), filter_s.into());
             o.insert("solve_s".into(), solve_s.into());
-            o.insert("core_s_derived".into(), (solve_s - filter_s).max(0.0).into());
+            o.insert(
+                "core_s_derived".into(),
+                (solve_s - filter_s).max(0.0).into(),
+            );
             o.insert("report".into(), serde_json::to_value(&report).unwrap());
             o.insert("verified".into(), ok.into());
         }
@@ -294,12 +318,17 @@ fn export_core(p: &Params, dir: &str) -> serde_json::Value {
     let sys = generate(p);
     let (core, cols) = unmerged_core(p, &sys);
     assert_eq!(core.len(), cols.len(), "core must be square");
-    let mut w = std::io::BufWriter::new(std::fs::File::create(format!("{dir}/matrix.bin")).unwrap());
+    let mut w =
+        std::io::BufWriter::new(std::fs::File::create(format!("{dir}/matrix.bin")).unwrap());
     let half = p.p / 2;
     for r in &core {
         u32le(&mut w, r.entries.len() as u32);
         for &(c, v) in &r.entries {
-            let s: i64 = if v > half { -((p.p - v) as i64) } else { v as i64 };
+            let s: i64 = if v > half {
+                -((p.p - v) as i64)
+            } else {
+                v as i64
+            };
             assert!(s.abs() < (1 << 31), "coefficient too large for CADO int32");
             u32le(&mut w, c);
             w.write_all(&(s as i32).to_le_bytes()).unwrap();
@@ -329,7 +358,10 @@ fn check_cado(p: &Params, dir: &str, sol: &str) -> serde_json::Value {
     let (core, cols) = unmerged_core(p, &sys);
     let n = cols.len();
     let mut bytes = Vec::new();
-    std::fs::File::open(sol).unwrap().read_to_end(&mut bytes).unwrap();
+    std::fs::File::open(sol)
+        .unwrap()
+        .read_to_end(&mut bytes)
+        .unwrap();
     let words: Vec<u64> = bytes
         .chunks_exact(8)
         .map(|c| u64::from_le_bytes(c.try_into().unwrap()))
@@ -345,7 +377,10 @@ fn check_cado(p: &Params, dir: &str, sol: &str) -> serde_json::Value {
     }
     // x / (−y)
     let inv = modinv(p.p - y, p.p);
-    let x: Vec<u64> = words[..n].iter().map(|&v| mulmod(v % p.p, inv, p.p)).collect();
+    let x: Vec<u64> = words[..n]
+        .iter()
+        .map(|&v| mulmod(v % p.p, inv, p.p))
+        .collect();
     let rows_ok = core.iter().all(|r| {
         let mut s = 0u64;
         for &(c, v) in &r.entries {
@@ -424,7 +459,11 @@ fn cado_rhs(p: &Params, dir: &str) -> serde_json::Value {
             let (id, e) = item.split_once(':').unwrap_or((item, "1"));
             let id = usize::from_str_radix(id, 16).unwrap();
             let e: i64 = e.parse().unwrap();
-            let e = if e < 0 { p.p - ((-e) as u64 % p.p) } else { e as u64 % p.p };
+            let e = if e < 0 {
+                p.p - ((-e) as u64 % p.p)
+            } else {
+                e as u64 % p.p
+            };
             acc = addmod(acc, mulmod(e, sys.rows[purged[id]].rhs, p.p), p.p);
         }
         writeln!(w, "{acc}").unwrap();
@@ -451,7 +490,10 @@ fn cado_reconstruct(p: &Params, dir: &str, sol: &str) -> serde_json::Value {
         })
         .collect();
     let mut bytes = Vec::new();
-    std::fs::File::open(sol).unwrap().read_to_end(&mut bytes).unwrap();
+    std::fs::File::open(sol)
+        .unwrap()
+        .read_to_end(&mut bytes)
+        .unwrap();
     let words: Vec<u64> = bytes
         .chunks_exact(8)
         .map(|c| u64::from_le_bytes(c.try_into().unwrap()))
@@ -475,8 +517,11 @@ fn cado_reconstruct(p: &Params, dir: &str, sol: &str) -> serde_json::Value {
     let mut queue: Vec<u32> = (0..sys.rows.len() as u32).collect();
     while let Some(i) = queue.pop() {
         let r = &sys.rows[i as usize];
-        let unknown: Vec<&(u32, u64)> =
-            r.entries.iter().filter(|(c, _)| value[*c as usize].is_none()).collect();
+        let unknown: Vec<&(u32, u64)> = r
+            .entries
+            .iter()
+            .filter(|(c, _)| value[*c as usize].is_none())
+            .collect();
         if unknown.len() != 1 {
             continue;
         }
@@ -492,10 +537,7 @@ fn cado_reconstruct(p: &Params, dir: &str, sol: &str) -> serde_json::Value {
     }
     let reconstruct_s = t.elapsed().as_secs_f64();
     let known = value.iter().filter(|v| v.is_some()).count();
-    let ok = value
-        .iter()
-        .zip(&sys.planted)
-        .all(|(v, &x)| *v == Some(x));
+    let ok = value.iter().zip(&sys.planted).all(|(v, &x)| *v == Some(x));
     serde_json::json!({"small_cols": k, "determined": known, "cols": p.cols,
         "reconstruct_s": reconstruct_s, "verified": ok})
 }
@@ -531,6 +573,9 @@ fn main() {
         block: num("--block", 4) as usize,
         merge_max_weight: get("--merge-max-weight").map(|v| v.parse().unwrap()),
         max_row_weight: get("--max-row-weight").map(|v| v.parse().unwrap()),
+        markowitz: get("--filter-strategy").as_deref() == Some("cado"),
+        target_density: num("--target-density", 0) as usize,
+        cado_preset: get("--filter-preset").as_deref() == Some("cado"),
     };
     let v = match cmd.as_str() {
         "ours" => run_ours(&p, &get("--arm").expect("--arm")),

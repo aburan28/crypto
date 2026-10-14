@@ -18,3 +18,22 @@ rerun onethread cado-bwc D=65536 m=3 s=3 rc=0 225.13s
 rerun amend1 cado-full D=32768 m=3 s=1 rc=1 0.644727s
 rerun amend1 full-bw-pos D=32768 m=3 s=1 rc=0 1.72845s
 rerun amend1 full-bl-pos D=32768 m=3 s=1 rc=0 2.43036s
+rerun amend1 cado-full D=32768 m=3 s=2 rc=0 4.46003s
+rerun amend1 full-bw-pos D=32768 m=3 s=2 rc=0 1.83758s
+rerun amend1 full-bl-pos D=32768 m=3 s=2 rc=0 2.61923s
+rerun amend1 cado-full D=32768 m=3 s=3 rc=0 4.36271s
+rerun amend1 full-bw-pos D=32768 m=3 s=3 rc=0 1.66845s
+rerun amend1 full-bl-pos D=32768 m=3 s=3 rc=0 2.43041s
+rerun amend1 full-bw-pos D=65536 m=3 s=1 rc=0 5.48975s
+rerun amend1 full-bl-pos D=65536 m=3 s=1 rc=0 8.99964s
+rerun amend1 full-bw-pos D=65536 m=3 s=2 rc=0 5.84335s
+rerun amend1 full-bl-pos D=65536 m=3 s=2 rc=0 9.03583s
+rerun amend1 full-bw-pos D=65536 m=3 s=3 rc=0 5.95911s
+rerun amend1 full-bl-pos D=65536 m=3 s=3 rc=0 8.85712s
+rerun amend1 full-bw-pos D=131072 m=3 s=1 rc=0 21.0406s
+rerun amend1 full-bl-pos D=131072 m=3 s=1 rc=0 28.0712s
+rerun amend1 full-bw-pos D=131072 m=3 s=2 rc=0 21.5677s
+rerun amend1 full-bl-pos D=131072 m=3 s=2 rc=0 28.4156s
+rerun amend1 full-bw-pos D=131072 m=3 s=3 rc=0 22.623s
+rerun amend1 full-bl-pos D=131072 m=3 s=3 rc=0 29.312s
+done
