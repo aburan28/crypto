@@ -275,17 +275,6 @@ jobs:
         run: git config --global core.longpaths true
       - if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.scope.outputs.release_rust != 'false'
         uses: actions/checkout@v4
-        with:
-          filter: blob:none
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            /tools/isogeny-cli/
-            /isogeny_algos/
-            /docs/curves/registry.json
-            /docs/curves/standards/coverage.json
-            /research/p192_p224_hundred_large_prime_isogenies_20261010/PROTOCOL.md
-            /research/p192_p224_large_degree_isogenies_20261009/PROTOCOL.md
-            /research/p192_p224_large_degree_isogenies_20261008/PROTOCOL.md
       - uses: dtolnay/rust-toolchain@1.93.1
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.scope.outputs.release_rust != 'false'
         with:
