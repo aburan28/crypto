@@ -87,13 +87,18 @@ fn v_series<F: Field>(f: &F, e: &Curve<F::E>, n: usize) -> Vec<F::E> {
 /// Monic polynomial of degree d whose first d power sums are q[1..=d] (Newton identities).
 fn poly_from_power_sums<F: Field>(f: &F, q: &[F::E], d: usize) -> Poly<F> {
     let mut e = vec![f.one()];
+    let invs =
+        (d >= 8).then(|| f.batch_inv(&(1..=d).map(|k| f.from_u64(k as u64)).collect::<Vec<_>>()));
     for k in 1..=d {
         let mut s = f.zero();
         for i in 1..=k {
             let t = f.mul(e[k - i], q[i]);
             s = if i % 2 == 1 { f.add(s, t) } else { f.sub(s, t) };
         }
-        e.push(f.div(s, f.from_u64(k as u64)));
+        e.push(match &invs {
+            Some(inverses) => f.mul(s, inverses[k - 1]),
+            None => f.div(s, f.from_u64(k as u64)),
+        });
     }
     let mut g = vec![f.zero(); d + 1];
     for k in 0..=d {

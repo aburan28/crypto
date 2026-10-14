@@ -583,4 +583,66 @@ mod tests {
         assert_eq!(f.snapshot().get("mul").and_then(Json::as_str), Some("2"));
         assert_eq!(f.snapshot().get("inv").and_then(Json::as_str), Some("1"));
     }
+    #[test]
+    fn incomplete_or_mutated_runs_cannot_be_compared() {
+        let path =
+            std::env::temp_dir().join(format!("isogeny-perf-parser-{}.jsonl", std::process::id()));
+        let input = Json::obj(vec![("p", Json::str(101))]);
+        let header = Json::obj(vec![("schema", Json::str("isogeny-perf.run/v1"))]);
+        let mut rows = vec![header];
+        for method in Method::ALL {
+            rows.push(Json::obj(vec![
+                ("schema", Json::str("isogeny-perf.case/v1")),
+                ("verified", Json::Bool(true)),
+                ("bits", Json::str(192)),
+                ("ell", Json::str(7)),
+                ("algorithm", Json::str(method.name())),
+                ("input", input.clone()),
+                (
+                    "input_sha256",
+                    Json::str(sha256_hex(input.dump().as_bytes())),
+                ),
+                (
+                    "operations",
+                    Json::obj(
+                        ["add_sub", "mul", "inv", "neg"]
+                            .into_iter()
+                            .map(|k| (k, Json::str(1)))
+                            .collect(),
+                    ),
+                ),
+            ]));
+        }
+        rows.push(Json::obj(vec![
+            ("schema", Json::str("isogeny-perf.exit/v1")),
+            ("status", Json::str("PASS")),
+        ]));
+        let write = |xs: &[Json]| {
+            std::fs::write(
+                &path,
+                xs.iter().map(Json::dump).collect::<Vec<_>>().join("\n"),
+            )
+            .unwrap()
+        };
+        write(&rows);
+        assert_eq!(load_cases(path.to_str().unwrap()).unwrap().1.len(), 8);
+        write(&rows[..rows.len() - 1]);
+        assert!(load_cases(path.to_str().unwrap()).is_err());
+        let mut missing = rows.clone();
+        missing.remove(1);
+        write(&missing);
+        assert!(load_cases(path.to_str().unwrap()).is_err());
+        let mut mutated = rows.clone();
+        let Json::Obj(fields) = &mut mutated[1] else {
+            unreachable!()
+        };
+        fields
+            .iter_mut()
+            .find(|(k, _)| k == "input_sha256")
+            .unwrap()
+            .1 = Json::str("00");
+        write(&mutated);
+        assert!(load_cases(path.to_str().unwrap()).is_err());
+        std::fs::remove_file(path).unwrap();
+    }
 }
