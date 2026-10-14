@@ -40,8 +40,9 @@ use std::process::ExitCode;
 use clap::{Parser, Subcommand};
 
 use crypto_lib::cryptanalysis::ecbench::{
-    audit, bounds, callgrind, canonical, challenge, claim, compare, db, frontier, gpu, host,
-    isolab, isolation, methods, record, resources, runner, signals, spec, stats, workload,
+    audit, bounds, callgrind, canonical, challenge, claim, compare, db, frontier, full_price, gpu,
+    host,
+    isolab, isolation, methods, record, resources, runner, signals, spec, stats, trend, workload,
 };
 
 #[derive(Parser)]
@@ -81,6 +82,27 @@ enum Cmd {
     Methods {
         #[arg(long)]
         json: bool,
+    },
+    /// Measure the full-pricing units (docs/ecbench/full_prices.json) on
+    /// this host for Koblitz curves `a:n`, median of `reps` passes each.
+    PriceUnits {
+        /// Curves as `a:n`, e.g. `0:13 0:19 1:29`.
+        #[arg(long, num_args = 1.., required = true)]
+        curve: Vec<String>,
+        #[arg(long, default_value_t = 9)]
+        reps: usize,
+    },
+    /// Fit how a paired ratio moves across curves (ln ratio against ln r
+    /// and ln n) from `compare --save` files; JSON to stdout.
+    Trend {
+        #[arg(long, num_args = 1.., required = true)]
+        compare: Vec<PathBuf>,
+        /// Fixed exponent of r in the `model` fit.
+        #[arg(long, allow_hyphen_values = true, default_value_t = 1.0 / 6.0)]
+        beta: f64,
+        /// Fixed exponent of n in the `model` fit.
+        #[arg(long, allow_hyphen_values = true, default_value_t = -0.5)]
+        gamma: f64,
     },
     /// Print the host capsule.
     Host {
@@ -602,6 +624,52 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                     }
                 }
             }
+        }
+        Cmd::PriceUnits { curve, reps } => {
+            let mut rows = serde_json::Map::new();
+            for c in &curve {
+                let (a, n) = c
+                    .split_once(':')
+                    .ok_or_else(|| format!("curve `{c}` is not a:n"))?;
+                let a: u8 = a.parse().map_err(|_| format!("bad a in `{c}`"))?;
+                let n: u32 = n.parse().map_err(|_| format!("bad n in `{c}`"))?;
+                let cs = workload::CurveSpec::Koblitz { a, n };
+                let inst = cs.build()?;
+                let slug = inst.facts(&cs).slug;
+                let workload::Instance::Binary(bi) = &inst else {
+                    return Err(format!("{c}: not a one-word binary instance"));
+                };
+                eprintln!("measuring {slug}");
+                rows.insert(slug, full_price::measure(bi, reps)?);
+            }
+            print_json(&serde_json::json!({
+                "host": host::capture()?.stable,
+                "curves": rows,
+            }))?;
+        }
+        Cmd::Trend {
+            compare,
+            beta,
+            gamma,
+        } => {
+            let mut docs = Vec::new();
+            let mut inputs = Vec::new();
+            for p in &compare {
+                let text = read(p)?;
+                inputs.push(serde_json::json!({
+                    "path": p.display().to_string(),
+                    "sha256": canonical::sha256_hex(text.as_bytes()),
+                }));
+                docs.push(serde_json::from_str(&text).map_err(|e| format!("{}: {e}", p.display()))?);
+            }
+            let pts = trend::points(&docs)?;
+            let fits = trend::fits(&pts, beta, gamma);
+            print_json(&serde_json::json!({
+                "schema": "ecbench.trend/v1",
+                "inputs": inputs,
+                "points": pts,
+                "fits": fits,
+            }))?;
         }
         Cmd::Host { json } => {
             let c = host::capture()?;
