@@ -1,6 +1,9 @@
 {
   "all_fiber_points_on_descended_model": true,
-  "boundary": "exact point-level divisor and Frobenius orbit; genus-three Jacobian class reduction, nonzero norm class, and subgroup order need a separate checker",
+  "boundary": "exact point-level conorm and nonzero r-torsion deduction; genus-three Jacobian reduction and nonzero Frobenius-norm class still need separate checks",
+  "conorm_order_deduction": "pullback of -G is nonzero and r-torsion by push-pull=[2] and r odd prime; the genus-three class is not reduced",
+  "conorm_pushforward_equals_minus_2G": true,
+  "conorm_pushforward_nonzero_and_r_torsion": true,
   "fiber_2G_Fp6": [
     [
       [
@@ -148,6 +151,8 @@
   "frobenius_q_orbits_return_after_three_steps": true,
   "generator_map_source_sha256": "c0f68c219797fdc185286e9418b7961084d2b87cc261589696032416ffbb7a4b",
   "group_relation": "G - 2G = -G, order r on P-192",
-  "source_sha256": "57879043ded327b2f7b49dbc3e417766c891868ed68a275fa5e126e3bbbb73be",
+  "quotient_image_of_each_fiber_checked": true,
+  "r_prime_and_odd_checked": true,
+  "source_sha256": "62f7025733aaeeee3467f466191aa32b172223a4d1af1df73453c41caff221d7",
   "status": "verified_type_i_point_level_conorm_norm"
 }

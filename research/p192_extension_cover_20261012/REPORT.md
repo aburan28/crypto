@@ -155,11 +155,14 @@ genus-2 covers over their lower fields. It gives explicit lower-field Mumford
 coordinates for a nonzero P-192 Scholten subgroup class, 16 verified
 subgroup-usable classes in a compact base, and a 64-query zero-yield relation
 probe with an exact three-sum coverage bound. It also gives checked Type I
-generator fibers and a formal conorm–Frobenius-norm divisor. A separate
+generator fibers and a conorm class of exact P-192 subgroup order, proved
+through degree-two push-pull and checked quotient images; its Frobenius norm
+has an explicit formal divisor. A separate
 \(\mathbf F_{23^3}\) Scholten instance verifies the complete relation,
 rank, target, and same-point rho pipeline. P-192 final rank, target descent,
 and matched one-target cost remain unknown for the tested compact policy;
-the Type I formal divisor still requires genus-three Jacobian reduction.
+the Type I Frobenius-norm class still requires genus-three Jacobian reduction
+and nonvanishing verification.
 
 ## Reproduction
 

@@ -18,6 +18,7 @@ zeta, beta = gm.z, gm.be
 quartic_roots = gm.rl
 inf, c0, d0, kappa = gm.inf, gm.c0, gm.d0, gm.kappa
 r = gm.Integer('FFFFFFFFFFFFFFFFFFFFFFFF99DEF836146BC9B1B4D22831', 16)
+assert r.is_prime() and r % 2 == 1
 q = p**2
 E = EllipticCurve(gm.F, [gm.F(gm.a), gm.F(gm.b)])
 G = E(gm.F(gm.gx), gm.F(gm.gy))
@@ -61,8 +62,20 @@ def fiber(P):
     assert points[0] != points[1]
     return points
 
+def quotient_image(point):
+    X = point[0]
+    assert X != inf
+    y0 = check_model(point)[0]
+    return E(c0+d0/(X-inf), kappa*y0/(X-inf)**2)
+
 print('building two rational fibers and six Frobenius pairs', flush=True)
 fiber_G, fiber_G2 = fiber(G), fiber(G2)
+assert all(quotient_image(P) == G for P in fiber_G)
+assert all(quotient_image(P) == G2 for P in fiber_G2)
+conorm_pushforward = sum((quotient_image(P) for P in fiber_G), E(0)) - sum(
+    (quotient_image(P) for P in fiber_G2), E(0))
+assert conorm_pushforward == 2*(G-G2) == -2*G
+assert conorm_pushforward != E(0) and r*conorm_pushforward == E(0)
 frobenius = lambda point, power: tuple(c**power for c in point)
 for initial in fiber_G+fiber_G2:
     orbit = [frobenius(initial, q**i) for i in range(3)]
@@ -89,8 +102,13 @@ out = {
     'all_fiber_points_on_descended_model': True,
     'frobenius_q_orbits_return_after_three_steps': True,
     'formal_conorm': 'Pplus(G)+Pminus(G)-Pplus(2G)-Pminus(2G)',
+    'quotient_image_of_each_fiber_checked': True,
+    'conorm_pushforward_equals_minus_2G': True,
+    'conorm_pushforward_nonzero_and_r_torsion': True,
+    'r_prime_and_odd_checked': True,
+    'conorm_order_deduction': 'pullback of -G is nonzero and r-torsion by push-pull=[2] and r odd prime; the genus-three class is not reduced',
     'formal_norm_to_Fp2': 'sum of q^i-Frobenius translates of the formal conorm for i=0,1,2; q=p^2',
-    'boundary': 'exact point-level divisor and Frobenius orbit; genus-three Jacobian class reduction, nonzero norm class, and subgroup order need a separate checker',
+    'boundary': 'exact point-level conorm and nonzero r-torsion deduction; genus-three Jacobian reduction and nonzero Frobenius-norm class still need separate checks',
 }
 (HERE / 'type_i_divisor_transfer.json').write_text(json.dumps(out, indent=2, sort_keys=True) + '\n')
 print(json.dumps({k:v for k,v in out.items() if k not in ('fiber_G_Fp6','fiber_2G_Fp6')}, indent=2, sort_keys=True))

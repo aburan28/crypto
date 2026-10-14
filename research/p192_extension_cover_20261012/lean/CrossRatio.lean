@@ -165,6 +165,24 @@ theorem conorm_preserves_torsion {A B : Type*} [AddCommGroup A] [AddCommGroup B]
     r • pull D = 0 := by
   simpa only [map_zsmul, map_zero] using congrArg pull hD
 
+/-- A degree-two cover carries a nonzero `r`-torsion source class to a
+    nonzero `r`-torsion conorm whenever its double is nonzero. The
+    push-pull identity is the geometric hypothesis supplied by the cover. -/
+theorem conorm_nonzero_torsion_of_push_pull_two
+    {A B : Type*} [AddCommGroup A] [AddCommGroup B]
+    (pull : A →+ B) (push : B →+ A) (r : ℤ) (D : A)
+    (hpushpull : ∀ x, push (pull x) = x + x)
+    (hrD : r • D = 0) (hdouble : D + D ≠ 0) :
+    pull D ≠ 0 ∧ r • pull D = 0 := by
+  constructor
+  · intro hzero
+    apply hdouble
+    calc
+      D + D = push (pull D) := (hpushpull D).symm
+      _ = push 0 := by rw [hzero]
+      _ = 0 := map_zero push
+  · exact conorm_preserves_torsion pull r D hrD
+
 /-- Clearing the denominator in the quartic-to-cubic Möbius coordinate
     change. The exact P-192 coefficients and square twist are checked by
     the generator-map Sage receipt. -/
@@ -216,6 +234,7 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.involution_norm_fixed
 #print axioms P192ExtensionCover.involution_norm_torsion
 #print axioms P192ExtensionCover.conorm_preserves_torsion
+#print axioms P192ExtensionCover.conorm_nonzero_torsion_of_push_pull_two
 #print axioms P192ExtensionCover.mobius_quartic_clear
 #print axioms P192ExtensionCover.canonicalTriples16_card
 #print axioms P192ExtensionCover.three_sum_support_bound
