@@ -1,0 +1,10 @@
+
+running 1 test
+size=40 abscissae=40 signed_points=80 columns=40 pair_keys=1600 table_adds=1640 table_inversions=40
+size=48 abscissae=48 signed_points=96 columns=48 pair_keys=2304 table_adds=2352 table_inversions=48
+size=64 abscissae=64 signed_points=128 columns=64 pair_keys=4084 table_adds=4160 table_inversions=64
+size=80 abscissae=80 signed_points=160 columns=80 pair_keys=6371 table_adds=6480 table_inversions=80
+test cryptanalysis::ic_boundary::tests::profile_prime_pair_table_occupancy_for_pinned_sweep ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4193 filtered out; finished in 0.01s
+

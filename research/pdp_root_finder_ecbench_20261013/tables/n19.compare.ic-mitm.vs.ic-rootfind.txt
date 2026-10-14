@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pdp_root_finder_ecbench_20261013/sessions/n19/comparisons/ic-mitm__ic-rootfind.json
+ops (ok): ic-rootfind / ic-mitm = 1.1859 [1.170, 1.202] (cluster) over 40 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 0.6974 [0.680, 0.733]
+| curve | log2 r | workloads | ic-rootfind / ic-mitm | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m19-t797-b6cf2467 | 17.00 | 8 | 1.1859 | [1.1705, 1.2016] | cluster |
+
+| workload | curve | log2 r | ic-mitm mean S | ic-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W00eb7693de5f | icv1-f2m19-t797-b6cf2467 | 17.00 | 41.5586 | 47.8766 | 1.1520 |
+| W2646a04cba9f | icv1-f2m19-t797-b6cf2467 | 17.00 | 37.6693 | 45.1847 | 1.1995 |
+| W4b22eefd1b6a | icv1-f2m19-t797-b6cf2467 | 17.00 | 40.0267 | 47.7090 | 1.1919 |
+| W7066c0498278 | icv1-f2m19-t797-b6cf2467 | 17.00 | 40.6298 | 48.4023 | 1.1913 |
+| W834c0c4e2d83 | icv1-f2m19-t797-b6cf2467 | 17.00 | 38.7983 | 46.8847 | 1.2084 |
+| W8c731b99a5c1 | icv1-f2m19-t797-b6cf2467 | 17.00 | 38.6224 | 46.0809 | 1.1931 |
+| Wed3081c51b8f | icv1-f2m19-t797-b6cf2467 | 17.00 | 37.8435 | 44.6253 | 1.1792 |
+| Wf83108e5d557 | icv1-f2m19-t797-b6cf2467 | 17.00 | 43.9436 | 51.6542 | 1.1755 |

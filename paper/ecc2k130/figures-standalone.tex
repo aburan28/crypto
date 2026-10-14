@@ -1,0 +1,54 @@
+% Builds every paper figure as its own page for export (make figures-export).
+% Captions and labels are dropped; the figures themselves are unchanged.
+\documentclass[tikz,border=6pt]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage[protrusion=true,expansion=false]{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds,calc,shapes.geometric,decorations.pathreplacing,patterns}
+\usepgfplotslibrary{groupplots}
+% Categorical palette (fixed order) and neutrals for every figure.
+\definecolor{cA}{HTML}{2A78D6}  % blue: representation / arithmetic
+\definecolor{cB}{HTML}{EB6834}  % orange: instruction (hardware feature)
+\definecolor{cC}{HTML}{1BAF7A}  % aqua: memory / layout
+\definecolor{cD}{HTML}{EDA100}  % yellow: launch geometry
+\definecolor{cE}{HTML}{6250D6}  % violet
+\definecolor{inkS}{HTML}{52514E}
+\definecolor{gridc}{HTML}{D9D8D3}
+\definecolor{boxfill}{HTML}{F4F3EF}
+\pgfplotsset{every axis/.append style={axis line style={inkS},tick style={inkS},
+  major grid style={gridc},label style={font=\small},tick label style={font=\footnotesize},
+  legend style={font=\footnotesize,draw=none,fill=none}}}
+
+\newcommand{\FF}{\mathbb{F}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\setlength{\textwidth}{159.2mm}
+\renewenvironment{figure}[1][]{}{}
+\renewcommand{\caption}[1]{}
+\renewcommand{\label}[1]{}
+\renewcommand{\centering}{}
+\begin{document}
+\input{figures/fig-history}
+\input{figures/fig-ledger}
+\input{figures/fig-gains}
+\input{figures/fig-kernel}
+\input{figures/fig-step}
+\input{figures/fig-clmad}
+\input{figures/fig-tiling}
+\input{figures/fig-roofline}
+\input{figures/fig-cycles}
+\input{figures/fig-gpus}
+\input{figures/fig-cpu}
+\input{figures/fig-isa}
+\input{figures/fig-bounds}
+\input{figures/fig-solvetime}
+\end{document}

@@ -1,4 +1,4 @@
-\section{What current NVIDIA hardware changes}
+\section{Carry-less multiply on NVIDIA GPUs}
 \label{sec:blackwell}
 
 The 2009 GPU client ran on hardware with no carry-less multiplier at
@@ -7,40 +7,40 @@ bit-slice at a time. Three things are different on current NVIDIA
 parts, and between them they explain most of the gap between the
 rates in Section~\ref{sec:history} and the ones in this paper.
 
-\subsection{A carry-less multiply in PTX}
+\subsection{\texttt{clmad}}
 \label{sec:blackwell-clmad}
 
 PTX ISA~9.3, shipped with CUDA~13.3, added a carry-less multiply-add,
 \texttt{clmad.lo.u64} and \texttt{clmad.hi.u64}, which returns the low
 and high halves of a $64\times64$-bit product over $\FF_2$. NVIDIA
 documents it for \texttt{sm\_80} and later, so it covers Ampere, Ada,
-Hopper and Blackwell but not Turing.\art{ecc2k130/NATIVE-CARRYLESS.md}
+Hopper and Blackwell but not Turing~\evcite{\evref{clmad}}.
 Our client uses both halves with zero addends and feeds them into a
 three-leaf Karatsuba, so a $131$-bit product is six \texttt{CLMAD}
 instructions. The native binary for \texttt{sm\_120} contains real
 \texttt{CLMAD} opcodes in its SASS, and the build refuses to compile
 the native path with anything older than CUDA~13.3 while keeping the
 software product for \texttt{sm\_75} slices of a mixed
-binary.\art{ecc2k130/include/packed131.h}\art{ecc2k130/benchmarks/ecc2k-clmad/RESULTS.md}
+binary~\evcite{\evref{packedsrc}; \evref{ecc2k95clmad}}.
 
 The gain depends on the part. On the RTX~PRO~6000 the native product
 lifted the packed walk by $22.4\%$ ($7.110$ to $8.704$~billion
 iterations/s) and roughly halved the instructions issued per update,
 which is what later let the batch drop to 16 walks per inversion
-(Section~\ref{sec:ledger}).\art{ecc2k130/NATIVE-CARRYLESS.md} On Ada
+(Section~\ref{sec:ledger})~\evcite{\evref{clmad}}. On Ada
 the effect is larger, because the software product it replaces is
 more expensive there: $1.81\times$ on the L40S and $1.88\times$ on the
-L4.\art{ecc2k130/ADA-L4-L40S.md, section 3} On the ECC2K-95 kernel the same
+L4~\evcite{\evref{ada}, §3}. On the ECC2K-95 kernel the same
 port gave $1.19\times$ on the walk. The T4, at \texttt{sm\_75}, has no
 \texttt{clmad} and runs the software product, which is why it sits at
-the bottom of every table in this paper.\art{ecc2k130/T4-G4DN.md}
+the bottom of every table in this paper~\evcite{\evref{t4}}.
 
-\subsection{The same instruction at very different rates}
+\subsection{\texttt{clmad} throughput}
 \label{sec:blackwell-rates}
 
 Having the instruction is not the same as having it fast. We measured
 issue rates with one probe on three parts in one session
-(Table~\ref{tab:clmad-dies}).\art{ecc2k130/TWO-CHAINS.md, section 6.1}
+(Table~\ref{tab:clmad-dies})~\evcite{\evref{twochains}, §6.1}.
 
 \begin{table}[t]
 \centering
@@ -68,8 +68,8 @@ Blackwell die executes FP64 at $1/64$ of its FP32 rate, about two lanes
 per SM-clock; the data-centre dies run it ten to eighteen times faster
 per clock. On the RTX~PRO~6000 one \texttt{CLMAD.lo} costs as much issue
 time as $37.8$ logic instructions, on the B200 $3.78$, on the H100
-$2.00$.\art{ecc2k130/TWO-CHAINS.md, section 6} The RTX~PRO~4500 matches the
-6000 to within $1\%$.\art{ecc2k130/ITERATION-FUNCTION.md, section 3.1 and section 4.5}
+$2.00$~\evcite{\evref{twochains}, §6}. The RTX~PRO~4500 matches the
+6000 to within $1\%$~\evcite{\evref{iterfn}, §3.1 and §4.5}.
 
 This one number reshapes the optimisation problem. On the workstation
 die the carry-less unit is scarce, so the right move is to keep
@@ -80,23 +80,23 @@ opposite: push reductions, corrections and even basis changes onto
 Blackwell part and lose on another. Moving the top-bit correction onto
 \texttt{CLMAD} costs $15\%$ on the RTX~PRO~6000 and gains $13.4\%$ on the
 B200; a three-limb Karatsuba loses $30\%$ on the 6000 and gains $4.9\%$
-on the B200.\art{ecc2k130/TOP-CLMAD.md}\art{ecc2k130/AUTOSWEEP.md, section 3.2 and section 4}
+on the B200~\evcite{\evref{topclmad}; \evref{autosweep}, §3.2 and §4}.
 Kernel tuning does not travel between dies, and each part in this
 paper was tuned on its own.
 
-\subsection{Three-input logic and the rest of the integer pipe}
+\subsection{Integer pipe}
 \label{sec:blackwell-logic}
 
 The other instructions that matter are older but just as important.
 \texttt{LOP3} evaluates any three-input Boolean function in one
 instruction, which is worth $1.65\times$ on the bitsliced product
 (Section~\ref{sec:arith-bitsliced}) and makes a full adder two
-instructions.\art{ecc2k130/README.md, ``Findings''} On the RTX~PRO~6000,
+instructions~\evcite{\evref{client}, ``Findings''}. On the RTX~PRO~6000,
 \texttt{LOP3}, \texttt{IADD3}, the funnel shift \texttt{SHF},
 \texttt{PRMT} and \texttt{IMAD} all issue at about 62--63 lanes per
 SM-clock, while \texttt{POPC} and \texttt{FLO} run at quarter rate
 ($15.8$), so each Hamming weight costs about four logic slots; the
-static cost model prices them that way.\art{ecc2k130/THROUGHPUT-CEILING.md}\art{ecc2k130/ITERATION-FUNCTION.md, section 3.1}
+static cost model prices them that way~\evcite{\evref{ceiling}; \evref{iterfn}, §3.1}.
 The prime-field walk of Section~\ref{sec:nist} depends instead on the
 carry-chain forms \texttt{mad.lo.cc}, \texttt{madc.hi.cc} and
 \texttt{addc}, which exist only at 32-bit granularity; writing them by
@@ -109,7 +109,7 @@ integer logic at half the per-clock rate of \texttt{sm\_120}. The L40S
 fits that prediction: with the software product it reached $34.4$
 million iterations per second per SM, $0.427$ of the RTX~PRO~6000's
 $80.4$ on its shipping build, and \texttt{CLMAD} took it to $62.2$
-($0.774$).\art{ecc2k130/ADA-L4-L40S.md}
+($0.774$)~\evcite{\evref{ada}}.
 Because the walk is bound by integer logic and the carry-less unit, not
 by memory bandwidth or tensor cores, the part that wins is the one with
 the most SMs at the highest clock for the money, which on today's

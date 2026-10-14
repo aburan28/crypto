@@ -1,4 +1,4 @@
-\section{The same ladder on the NIST curves}
+\section{NIST curves}
 \label{sec:nist}
 
 Most of what made the ECC2K-130 client fast has nothing to do with
@@ -7,21 +7,21 @@ hardware's own carry instructions instead of emulating them, choosing
 the launch shape by measurement, and refusing occupancy trades that
 look good on paper are all properties of an affine-addition rho walk
 on a GPU, not of $\FF_{2^{131}}$. So once the ECC2K-130 ladder was
-written down, the obvious question was how much of it carries over to
+written down, the natural question was how much of it carries over to
 a prime-field walk. We tried it on NIST P-256 and P-384, on the same
 RTX~PRO~6000, and this section reports what happened.
 
 Two things should be clear before the numbers. First, these are
 throughput measurements on a walk that nobody expects to finish: at
-the rates below a P-256 collision is still about $10^{30}$ seconds
-away, and nothing here says anything about the security of the NIST
+the rates below a P-256 collision is still about $2\cdot10^{29}$ seconds
+away (Section~\ref{sec:solvetime-nist}), and nothing here says anything about the security of the NIST
 curves. Second, every row is engineering in the sense of
 Section~\ref{sec:intro}. The walk computes the same function on the
 same curve at every rung, with one step per counted step, so
 $S=\text{steps}/\sqrt n$ does not move; only the cost of a step
-does.\art{gpu/nist/RESULTS.md}
+does~\evcite{\evref{nistres}}.
 
-\subsection{The walk and the field}
+\subsection{Walk and field}
 \label{sec:nist-walk}
 
 The library holds a P-256 element in eight 32-bit limbs and a P-384
@@ -31,14 +31,14 @@ constant is $n'=1$, and every limb of either modulus in radix $2^{32}$
 is $0$, $1$, $2^{32}-1$ or $2^{32}-2$; the reduction row therefore
 needs carries but no multiplications. A generalised-Mersenne (Solinas)
 field is kept alongside as a matched competitor, so that the device
-rather than an argument decides between the two.\art{gpu/nist/README.md}
+rather than an argument decides between the two~\evcite{\evref{nist}}.
 Both representations are checked on $20{,}000$ random pairs per curve
 against Boost.Multiprecision, and the Jacobian doubling and mixed
 addition against independent affine arithmetic. The benchmark
 protocol was pre-registered before any device time: workloads, seeds,
 the threads-per-block and register-cap sweep, and a $5\%$ threshold
 below which the simpler configuration wins by
-rule.\art{research/nist_gpu_arithmetic_20260926/PROTOCOL.md}
+rule~\evcite{\evref{nistproto}}.
 
 The rho walk on top of the field mirrors the structure of
 Section~\ref{sec:walk}, minus the Frobenius. It is an $r$-adding walk
@@ -47,7 +47,7 @@ a $\sqrt2$ saving; $j\neq0$ on both curves, so $\pm1$ is the whole
 automorphism group), distinguished points by a mask on the next byte
 at probability $2^{-24}$, fruitless two-cycles detected and escaped,
 and walks batched per thread so that one inversion serves all of
-them through Montgomery's trick.\art{gpu/nist/nist_rho.cuh} The
+them through Montgomery's trick~\evcite{\evref{nist}}. The
 inversion is Fermat's $a^{p-2}$ with a four-bit fixed window, which
 for P-256 is on the order of 256 squarings and 64 window
 multiplications (our count from the exponent length, not a measured
@@ -60,7 +60,7 @@ The host test suite runs the exact kernel body on the CPU: group-law
 identities, determinism of a single step, the negation fold as a
 class function, and an end-to-end logarithm on a toy curve of order
 about $2^{20}$, where the folded walk needs the expected $\sqrt2$
-fewer steps than the unfolded one.\art{gpu/nist/README.md, ``Correctness''}
+fewer steps than the unfolded one~\evcite{\evref{nist}, ``Correctness''}.
 
 \paragraph{The CPU solver across all fifteen curves.} The GPU walk has a CPU
 counterpart: a host solver that takes any of the fifteen FIPS~186-4
@@ -83,9 +83,9 @@ $m=41$) at a cost of $m$ squarings per step; and the Smart attack
 breaking CM-constructed anomalous curves of 129, 257 and 522 bits in
 3, 10 and 33~ms. No full-width scalar has been recovered on any NIST curve, and
 none of the fifteen has a structural weakness; the documentation says
-both.\art{docs/ECDLP_NIST.md}
+both~\evcite{\evref{nistcpu}}.
 
-\subsection{Getting a first honest number}
+\subsection{Baseline}
 \label{sec:nist-first}
 
 The kernel had been written and verified entirely on hosts without a
@@ -99,7 +99,7 @@ the host compiler happily compiles host-only code. A second bug, an
 unguarded \texttt{atomicAdd} on a null cycle counter, faulted on the
 first fruitless two-cycle, which arrives about once every 512 steps.
 Both are fixed and now covered by tests, and the device benchmark
-checks every launch for errors.\art{gpu/nist/RESULTS.md, ``What this round fixed''}
+checks every launch for errors~\evcite{\evref{nistres}, ``What this round fixed''}.
 
 This is the same lesson that Section~\ref{sec:arith-bitsliced} drew
 from code size, in a different form: a static count or a host
@@ -110,11 +110,11 @@ points are distinguished with probability $2^{-24}$, every cell must
 report about $\text{walks}\times\text{iterations}/2^{24}$ of them.
 Every cell did, for example $11{,}969$ observed against $12{,}085$
 expected on the first P-256 run and $12{,}154$ against $12{,}096$ in
-the best cell.\art{gpu/nist/RESULTS.md, ``Correctness evidence on hardware''}
+the best cell~\evcite{\evref{nistres}, ``Correctness evidence on hardware''}.
 The CPU suite also checks the specialised steppers below bit for bit
 against the generic one, for every batch width that was compiled.
 
-\subsection{The rungs}
+\subsection{Optimisations}
 \label{sec:nist-rungs}
 
 Table~\ref{tab:nist-ladder} lines the NIST rungs up against the
@@ -130,8 +130,7 @@ CUDA~13.3, \texttt{sm\_120}).
   on one RTX~PRO~6000. Rates are in billions of iterations per second. Each NIST ratio compares
   adjacent cells of the same sweep; the cells are single runs, not the
   interleaved repeated pairs of Section~\ref{sec:gpu}. Rows marked
-  $^\ast$ come from the round-2 sweep, which at the time of writing is
-  in an open pull request. Class: engineering.}
+  $^\ast$ come from the round-2 sweep. Class: engineering.}
 \label{tab:nist-ladder}
 \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.25\textwidth}>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.20\textwidth}rr@{}}
 \toprule
@@ -171,8 +170,8 @@ multiplication is $14\%$ faster ($36.7$ against $32.2$) but the
 Montgomery doubling is $4\%$ faster ($1{,}712$ against $1{,}647$~million
 doublings/s). These field rows are a first run at one block size, not
 the protocol's three repeats, so the question stays
-open.\art{gpu/nist/RESULTS.md, ``Field arithmetic''} The walk is built
-on the Montgomery field for both curves; a Solinas walk has not been compiled or measured.\art{gpu/nist/nist_curve.cuh}
+open~\evcite{\evref{nistres}, ``Field arithmetic''}. The walk is built
+on the Montgomery field for both curves; a Solinas walk has not been compiled or measured~\evcite{\evref{nist}}.
 
 \paragraph{Batch width.} This is where the two fields differ most,
 and the reason is the inversion. On ECC2K-130 the batch went
@@ -184,11 +183,11 @@ compile time let the per-walk arrays live in registers instead of
 64-wide local arrays, and the rate climbed with $W$ on every
 geometry: at 256 threads per block from $0.466$ at $W=2$ to $1.340$ at
 $W=16$ on P-256, and from $0.096$ to $0.438$ on P-384
-(Figure~\ref{fig:nist-w}).\art{gpu/nist/RESULTS.md, ``Rho walk''} A
+(Figure~\ref{fig:nist-w})~\evcite{\evref{nistres}, ``Rho walk''}. A
 second round passed the inversion's scratch arrays by reference and
 compiled a $W=32$ instance. That cell reached $1.632$ and
 $0.548$~billion iterations/s, $1.22\times$ and $1.31\times$ over $W=16$ at the
-same geometry.\art{gpu/nist/RESULTS.md, round 2 (aburan28/crypto pull request 1778)}
+same geometry~\evcite{\evref{nistres}, round 2}.
 We cannot cleanly split that gain between the larger batch and the
 by-reference inversion, because round 1 never compiled $W=32$. What we
 can say is that at $W\le16$ the two rounds agree within noise
@@ -202,8 +201,8 @@ small next to the one-block geometry's $9.4\%$ on ECC2K-130, and it
 makes sense: the binary kernel was shaped by a shared-memory table and
 an L1 budget, while the prime-field walk is limited by registers.
 
-\paragraph{What was declined.} At $W=32$ both instantiations sit at
-the 255-register ceiling. The obvious counter-move is a register cap,
+\paragraph{Rejected changes.} At $W=32$ both instantiations sit at
+the 255-register ceiling. The standard counter-measure is a register cap,
 trading spills for occupancy, and the round-2 sweep tried caps of 96,
 128 and 160 registers. All of them lost to the unrestricted build:
 P-256 fell to $1.589$--$1.595$ and P-384 to $0.447$--$0.455$. That
@@ -254,7 +253,7 @@ occupancy bought with spilled state has not paid on either field.
 \label{fig:nist-w}
 \end{figure}
 
-\subsection{What carried over and what did not}
+\subsection{Transfer from ECC2K-130}
 \label{sec:nist-lessons}
 
 Three of the ECC2K-130 levers transferred directly. Native carry
@@ -277,7 +276,7 @@ instructions; a 256-bit prime product is two hundred or so
 carry-chained integer instructions (Table~\ref{tab:fp256}). That
 factor of nine is the carry-less unit's advantage made concrete.
 
-The obvious next rungs are the ones the round-2 record names: a $W=64$
+The next candidate steps are the ones the round-2 record names: a $W=64$
 instance (which will spill at the register ceiling and probably lose,
 but is worth one cell to confirm), reseeding off the critical path,
 and a second walk per step from the same table read. A repeated,

@@ -1,0 +1,54 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=\textwidth, height=0.56\textwidth,
+  ymode=log, log basis y=10,
+  ymin=0.6, ymax=24,
+  xmin=-0.6, xmax=15.6,
+  ytick={1,2,4,8,16}, yticklabels={1,2,4,8,16},
+  ylabel={billion iterations/s (log scale)},
+  xtick={0,...,15},
+  xticklabels={
+    bitsliced control, packed basis, single product, denominator cache,
+    Frobenius networks, poly.\ batch chain, paired products, poly.\ state,
+    direct reduction, generated product, 256-worker tiles, native \texttt{clmad},
+    batch 16, weighted prefixes, compact state, shared masks},
+  x tick label style={rotate=50,anchor=east,font=\scriptsize},
+  ymajorgrids,
+  legend style={at={(0.98,0.04)},anchor=south east,fill=white,fill opacity=0.9,text opacity=1},
+  legend cell align=left,
+]
+\addplot[inkS!60,thick,const plot mark mid,forget plot] coordinates {
+  (0,0.852) (1,2.958) (2,3.367) (3,4.024) (4,5.811) (5,6.054) (6,6.215)
+  (7,6.548) (8,6.906) (9,6.924) (10,6.995) (11,8.704) (12,13.206)
+  (13,13.323) (14,14.403) (15,14.411)};
+\addplot[only marks,mark=*,mark size=3pt,color=cA] coordinates {
+  (1,2.958) (2,3.367) (4,5.811) (5,6.054) (6,6.215) (7,6.548) (8,6.906)
+  (9,6.924) (13,13.323)};
+\addlegendentry{representation / arithmetic}
+\addplot[only marks,mark=diamond*,mark size=4pt,color=cB] coordinates {(11,8.704)};
+\addlegendentry{instruction: native \texttt{clmad}}
+\addplot[only marks,mark=square*,mark size=2.8pt,color=cC] coordinates {
+  (3,4.024) (10,6.995) (14,14.403) (15,14.411)};
+\addlegendentry{memory / layout}
+\addplot[only marks,mark=triangle*,mark size=3.6pt,color=cD] coordinates {(12,13.206)};
+\addlegendentry{launch geometry / batch}
+\addplot[only marks,mark=o,mark size=3pt,color=inkS] coordinates {(0,0.852)};
+\addlegendentry{bitsliced control}
+\node[font=\scriptsize,anchor=south] at (axis cs:1,2.958) {$3.47\times$};
+\node[font=\scriptsize,anchor=south] at (axis cs:4,5.811) {$+41\%$};
+\node[font=\scriptsize,anchor=south east] at (axis cs:11,8.704) {$+22\%$};
+\node[font=\scriptsize,anchor=south east] at (axis cs:12,13.206) {$+52\%$};
+\draw[dashed,cA] (axis cs:-0.6,14.64) -- (axis cs:15.6,14.64)
+  node[pos=0.02,anchor=south west,font=\scriptsize,color=black] {audited campaign build, 14.64 billion iterations/s};
+\end{axis}
+\end{tikzpicture}
+\caption{The packed-backend ledger on one RTX~PRO~6000
+  (Table~\ref{tab:ledger}), each step's candidate rate, with the marker
+  showing what kind of change it was. No step changed the walk: the
+  iteration function, the step count and the distinguished points are
+  the same throughout. Steps are separate paired comparisons, not one
+  chain, so the line joins candidates measured in different sessions.}
+\label{fig:ledger}
+\end{figure}

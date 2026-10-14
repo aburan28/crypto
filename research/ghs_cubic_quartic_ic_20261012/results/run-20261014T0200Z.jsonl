@@ -1,0 +1,16 @@
+{"rec":"trial","q":7,"trial":0,"variant":"rho","status":"ok","k_planted":44,"k_found":44,"correct":true,"ops":0,"S":0.000000,"rho_steps":12}
+{"rec":"trial","q":7,"trial":1,"variant":"rho","status":"ok","k_planted":81,"k_found":81,"correct":true,"ops":0,"S":0.000000,"rho_steps":10}
+{"rec":"trial","q":7,"trial":2,"variant":"rho","status":"ok","k_planted":46,"k_found":46,"correct":true,"ops":0,"S":0.000000,"rho_steps":11}
+{"rec":"summary","q":7,"trials":3,"variant":"rho"}
+{"rec":"trial","q":7,"trial":0,"variant":"full","status":"ok","recovery":"ic","k_planted":44,"k_found":44,"correct":true,"ops":25959133,"S":2751662.594680,"hash_lookups":0}
+{"rec":"trial","q":7,"trial":1,"variant":"full","status":"ok","recovery":"ic","k_planted":81,"k_found":81,"correct":true,"ops":25959133,"S":2751662.594680,"hash_lookups":0}
+{"rec":"trial","q":7,"trial":2,"variant":"full","status":"ok","recovery":"ic","k_planted":46,"k_found":46,"correct":true,"ops":25959133,"S":2751662.594680,"hash_lookups":0}
+{"rec":"summary","q":7,"trials":3,"variant":"full"}
+{"rec":"trial","q":7,"trial":0,"variant":"2lp","status":"ok","recovery":"ic","k_planted":44,"k_found":44,"correct":true,"ops":25959133,"S":2751662.594680,"hash_lookups":0}
+{"rec":"summary","q":7,"trials":1,"variant":"2lp"}
+{"rec":"check-lin-equiv","q":7,"check":"pic_jacobian","pass":true,"n_tests":9}
+{"rec":"trial","q":11,"trial":0,"variant":"rho","status":"ok","k_planted":38,"k_found":38,"correct":true,"ops":0,"S":0.000000,"rho_steps":35}
+{"rec":"summary","q":11,"trials":1,"variant":"rho"}
+{"rec":"trial","q":11,"trial":0,"variant":"full","status":"ok","recovery":"ic","k_planted":38,"k_found":38,"correct":true,"ops":689897351,"S":37920187.885815,"hash_lookups":0}
+{"rec":"summary","q":11,"trials":1,"variant":"full"}
+{"rec":"check-lin-equiv","q":11,"check":"pic_jacobian","pass":true,"n_tests":8}

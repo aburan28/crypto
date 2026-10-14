@@ -14,13 +14,21 @@ optimisation steps and measure \texttt{clmad} on three dies: its issue
 rate per SM-clock differs by up to $18\times$ between the workstation and
 data-centre parts, so the same change can win on one Blackwell part and
 lose on another. We report twelve GPUs, Turing to Blackwell, per card,
-per SM and per dollar. We separate the $\sigma$-walk from the table walk:
+per SM and per dollar, show the kernel and where its speedup came from
+(none of it from changing the algorithm), and set the work against the
+instruction sets that made it possible on GPUs and CPUs. We separate the $\sigma$-walk from the table walk:
 the table walk's $20.08$ was measured under a cycle rule later found to
-leave cycles inconsistently, the exact rule runs at $5.10$ today, and the
+leave cycles inconsistently, the exact rule runs at $8.24$ today, and the
 $\sigma$-walk is the fastest correct walk we have. Applying the same
 optimisations to Pollard rho on NIST P-256 and P-384 on the same card
 gives $1.52\times$ and $2.61\times$, to $1.632$ and $0.548$ billion iterations
-per second; the levers transfer, but their relative sizes do not. The
+per second; the levers transfer, but their relative sizes do not. Upper bounds
+derived from measured pipe rates put any one-addition walk on one
+RTX~PRO~6000 at about $24$--$26$ billion iterations per second. In
+calendar terms, a fleet of five RTX~PRO~6000s expects to solve
+ECC2K-130 in a year, 56 in a month and a thousand in about three days,
+where the 2010 kernel needed over a thousand cards for a one-year solve;
+at the same rates P-256 remains about $6\cdot10^{21}$ card-years away. The
 walk constant is measured rather than assumed, at $2^{60.91}$--$2^{60.92}$
 iterations, and a floor derived from the carry-less unit before tuning
 rules out $28$ billion iterations per second on one card. We also report
@@ -28,6 +36,7 @@ an FPGA engine at $8.25$ billion iterations per second on one AWS F2; a
 campaign that stored $486$ million distinguished points and $2^{56.68}$
 iterations ($5.4\%$ of the expected work) before its fleet was reclaimed;
 structural alternatives that land far above rho; and the open questions
-we would pursue next. Every number is footnoted to a file in a public
-repository. None of this improves on the generic-group bound, and we do
+we would pursue next. Every number cites an evidence record; the code, data
+and a Docker image that starts the ECC2K-130 walk are being prepared for
+release with the paper. None of this improves on the generic-group bound, and we do
 not claim that it does.
