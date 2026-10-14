@@ -1,0 +1,316 @@
+{
+  "schema": "ecbench.factor_base_dump/v1",
+  "curve": {
+    "slug": "icv1-f2m23-tm5197-1f85e9e1",
+    "icv1": "ICV1:f2m-23-c07a6b8c:-5197:8393806:0x1:-7:unk:r:1f85e9e1acf0",
+    "family": "koblitz",
+    "construction": "KoblitzCurve::new(1, 23)",
+    "field_degree": 23,
+    "field_bits": null,
+    "group_order": 8393806,
+    "r": 4196903,
+    "cofactor": 2,
+    "generator": [
+      "0x2aaaa5",
+      "0x13907b"
+    ],
+    "automorphisms_available": 46,
+    "registered": true,
+    "ec1": "EC1N23Ce1heec6a3619e3f",
+    "curve_uid": "urn:ec-record:1:sha256:eec6a3619e3fdf05035e0ef5d3ec8cf3af507268cf760c77d47518d62141b00f"
+  },
+  "factor_base": {
+    "fb_id": "FB1h089756e11c3b",
+    "fb_sha256": "089756e11c3bf0fc1538647e5ef1a469e0e9332c6da7c5eda98b95a4a5245498",
+    "family": "cyclotomic",
+    "params": {
+      "w": "1"
+    },
+    "description": "1 projected signed Frobenius orbits of the 47 gamma-weight-1 abscissae",
+    "signed_points": 46,
+    "abscissae": 23,
+    "columns": 1,
+    "dimension": null,
+    "points_sha256": "a4f69780f6926b58ef09b3ce6a626ef589b662df2683282e4ae71f1b0ad54cf9"
+  },
+  "build_adds": 6,
+  "build_doubles": 114,
+  "points": [
+    {
+      "x": "0x50770b",
+      "y": "0xd0ddc",
+      "col": 0,
+      "coef": 1
+    },
+    {
+      "x": "0x50770b",
+      "y": "0x5d7ad7",
+      "col": 0,
+      "coef": 4196902
+    },
+    {
+      "x": "0x770427",
+      "y": "0x45b350",
+      "col": 0,
+      "coef": 368914
+    },
+    {
+      "x": "0x770427",
+      "y": "0x32b777",
+      "col": 0,
+      "coef": 3827989
+    },
+    {
+      "x": "0x7f6f5f",
+      "y": "0x2163c2",
+      "col": 0,
+      "coef": 368912
+    },
+    {
+      "x": "0x7f6f5f",
+      "y": "0x5e0c9d",
+      "col": 0,
+      "coef": 3827991
+    },
+    {
+      "x": "0x2aff37",
+      "y": "0xd176e",
+      "col": 0,
+      "coef": 3827987
+    },
+    {
+      "x": "0x2aff37",
+      "y": "0x27e859",
+      "col": 0,
+      "coef": 368916
+    },
+    {
+      "x": "0x4c98bd",
+      "y": "0x1f616",
+      "col": 0,
+      "coef": 3090163
+    },
+    {
+      "x": "0x4c98bd",
+      "y": "0x4d6eab",
+      "col": 0,
+      "coef": 1106740
+    },
+    {
+      "x": "0x74f49b",
+      "y": "0x1456fe",
+      "col": 0,
+      "coef": 3827995
+    },
+    {
+      "x": "0x74f49b",
+      "y": "0x60a265",
+      "col": 0,
+      "coef": 368908
+    },
+    {
+      "x": "0x7e75e5",
+      "y": "0x527136",
+      "col": 0,
+      "coef": 1844572
+    },
+    {
+      "x": "0x7e75e5",
+      "y": "0x2c04d3",
+      "col": 0,
+      "coef": 2352331
+    },
+    {
+      "x": "0x6ef831",
+      "y": "0x620976",
+      "col": 0,
+      "coef": 2582388
+    },
+    {
+      "x": "0x6ef831",
+      "y": "0xcf147",
+      "col": 0,
+      "coef": 1614515
+    },
+    {
+      "x": "0x7db9a1",
+      "y": "0x681c5e",
+      "col": 0,
+      "coef": 3090147
+    },
+    {
+      "x": "0x7db9a1",
+      "y": "0x15a5ff",
+      "col": 0,
+      "coef": 1106756
+    },
+    {
+      "x": "0x3fb681",
+      "y": "0x68905c",
+      "col": 0,
+      "coef": 2122274
+    },
+    {
+      "x": "0x3fb681",
+      "y": "0x5726dd",
+      "col": 0,
+      "coef": 2074629
+    },
+    {
+      "x": "0x4bbb89",
+      "y": "0x3880d8",
+      "col": 0,
+      "coef": 138883
+    },
+    {
+      "x": "0x4bbb89",
+      "y": "0x733b51",
+      "col": 0,
+      "coef": 4058020
+    },
+    {
+      "x": "0x749a83",
+      "y": "0x5ac182",
+      "col": 0,
+      "coef": 91238
+    },
+    {
+      "x": "0x749a83",
+      "y": "0x2e5b01",
+      "col": 0,
+      "coef": 4105665
+    },
+    {
+      "x": "0x2a718d",
+      "y": "0x72ddac",
+      "col": 0,
+      "coef": 4010375
+    },
+    {
+      "x": "0x2a718d",
+      "y": "0x58ac21",
+      "col": 0,
+      "coef": 186528
+    },
+    {
+      "x": "0x18cd79",
+      "y": "0x3a59f8",
+      "col": 0,
+      "coef": 3827899
+    },
+    {
+      "x": "0x18cd79",
+      "y": "0x229481",
+      "col": 0,
+      "coef": 369004
+    },
+    {
+      "x": "0x381e1",
+      "y": "0x1ad960",
+      "col": 0,
+      "coef": 4052
+    },
+    {
+      "x": "0x381e1",
+      "y": "0x195881",
+      "col": 0,
+      "coef": 4192851
+    },
+    {
+      "x": "0xe81",
+      "y": "0x1288e2",
+      "col": 0,
+      "coef": 742060
+    },
+    {
+      "x": "0xe81",
+      "y": "0x128663",
+      "col": 0,
+      "coef": 3454843
+    },
+    {
+      "x": "0x544001",
+      "y": "0x34c84",
+      "col": 0,
+      "coef": 733956
+    },
+    {
+      "x": "0x544001",
+      "y": "0x570c85",
+      "col": 0,
+      "coef": 3462947
+    },
+    {
+      "x": "0x662529",
+      "y": "0x510e30",
+      "col": 0,
+      "coef": 3446739
+    },
+    {
+      "x": "0x662529",
+      "y": "0x372b19",
+      "col": 0,
+      "coef": 750164
+    },
+    {
+      "x": "0x3c2c03",
+      "y": "0x364608",
+      "col": 0,
+      "coef": 1978827
+    },
+    {
+      "x": "0x3c2c03",
+      "y": "0xa6a0b",
+      "col": 0,
+      "coef": 2218076
+    },
+    {
+      "x": "0xea14f",
+      "y": "0x5b2c22",
+      "col": 0,
+      "coef": 3479155
+    },
+    {
+      "x": "0xea14f",
+      "y": "0x558d6d",
+      "col": 0,
+      "coef": 717748
+    },
+    {
+      "x": "0x14a9dd",
+      "y": "0x23ce04",
+      "col": 0,
+      "coef": 3718404
+    },
+    {
+      "x": "0x14a9dd",
+      "y": "0x3767d9",
+      "col": 0,
+      "coef": 478499
+    },
+    {
+      "x": "0x760d9",
+      "y": "0x5d5ef2",
+      "col": 0,
+      "coef": 956997
+    },
+    {
+      "x": "0x760d9",
+      "y": "0x5a3e2b",
+      "col": 0,
+      "coef": 3239906
+    },
+    {
+      "x": "0x53e69",
+      "y": "0x22b26e",
+      "col": 0,
+      "coef": 1913995
+    },
+    {
+      "x": "0x53e69",
+      "y": "0x278c07",
+      "col": 0,
+      "coef": 2282908
+    }
+  ]
+}

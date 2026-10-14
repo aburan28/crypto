@@ -1,0 +1,38 @@
+# icv1-f2m23-t5197-69e76b73 r = 2095853 (21.0 bits), cofactor 4
+# n = 23, K = 5: 230 points, 560 table states (12880 abscissa states), build 0.00 s
+# n=23 K=5 4sum                   rel= 32 targets=   32 S3=       1287 S4=         0 S3/rel=     4.022e1 S4/rel=   0.000e0 outer/rel=   4.022e1 tgt/rel=   1.000 wall/rel= 2.915e-5 (0.0s, relations)
+# n=23 K=5 6sum_a_iterate_table   rel= 32 targets=   32 S3=       1772 S4=         0 S3/rel=     5.538e1 S4/rel=   0.000e0 outer/rel=   1.000e0 tgt/rel=   1.000 wall/rel= 3.785e-5 (0.0s, relations)
+# n=23 K=5 6sum_b_s4_per_probe    rel= 32 targets=   32 S3=          0 S4=       924 S3/rel=     0.000e0 S4/rel=   2.888e1 outer/rel=   2.888e1 tgt/rel=   1.000 wall/rel= 4.313e-4 (0.0s, relations)
+# n=23 K=5 6sum_b2_s4_strided     rel= 32 targets=   32 S3=          0 S4=       608 S3/rel=     0.000e0 S4/rel=   1.900e1 outer/rel=   1.900e1 tgt/rel=   1.000 wall/rel= 2.816e-4 (0.0s, relations)
+# n=23 K=5 5sum_c_control         rel= 32 targets=   32 S3=       1206 S4=         0 S3/rel=     3.769e1 S4/rel=   0.000e0 outer/rel=   1.000e0 tgt/rel=   1.000 wall/rel= 4.499e-5 (0.0s, relations)
+# n = 23, K = 10: 460 points, 2223 table states (51129 abscissa states), build 0.01 s
+# n=23 K=10 4sum                   rel= 32 targets=   32 S3=        341 S4=         0 S3/rel=     1.066e1 S4/rel=   0.000e0 outer/rel=   1.066e1 tgt/rel=   1.000 wall/rel= 1.634e-5 (0.0s, relations)
+# n=23 K=10 6sum_a_iterate_table   rel= 32 targets=   32 S3=        420 S4=         0 S3/rel=     1.312e1 S4/rel=   0.000e0 outer/rel=   1.000e0 tgt/rel=   1.000 wall/rel= 1.979e-5 (0.0s, relations)
+# n=23 K=10 6sum_b_s4_per_probe    rel= 32 targets=   32 S3=          0 S4=       197 S3/rel=     0.000e0 S4/rel=   6.156e0 outer/rel=   6.156e0 tgt/rel=   1.000 wall/rel= 7.299e-5 (0.0s, relations)
+# n=23 K=10 6sum_b2_s4_strided     rel= 32 targets=   32 S3=          0 S4=       175 S3/rel=     0.000e0 S4/rel=   5.469e0 outer/rel=   5.469e0 tgt/rel=   1.000 wall/rel= 1.002e-4 (0.0s, relations)
+# n=23 K=10 5sum_c_control         rel= 32 targets=   32 S3=        451 S4=         0 S3/rel=     1.409e1 S4/rel=   0.000e0 outer/rel=   1.000e0 tgt/rel=   1.000 wall/rel= 1.925e-5 (0.0s, relations)
+# n = 23, K = 20: 920 points, 8241 table states (189543 abscissa states), build 0.01 s
+# n=23 K=20 4sum                   rel= 32 targets=   32 S3=         95 S4=         0 S3/rel=     2.969e0 S4/rel=   0.000e0 outer/rel=   2.969e0 tgt/rel=   1.000 wall/rel= 3.879e-5 (0.0s, relations)
+# n=23 K=20 6sum_a_iterate_table   rel= 32 targets=   32 S3=         82 S4=         0 S3/rel=     2.562e0 S4/rel=   0.000e0 outer/rel=   1.000e0 tgt/rel=   1.000 wall/rel= 1.758e-5 (0.0s, relations)
+# n=23 K=20 6sum_b_s4_per_probe    rel= 32 targets=   32 S3=          0 S4=        83 S3/rel=     0.000e0 S4/rel=   2.594e0 outer/rel=   2.594e0 tgt/rel=   1.000 wall/rel= 4.317e-5 (0.0s, relations)
+# n=23 K=20 6sum_b2_s4_strided     rel= 32 targets=   32 S3=          0 S4=        57 S3/rel=     0.000e0 S4/rel=   1.781e0 outer/rel=   1.781e0 tgt/rel=   1.000 wall/rel= 1.924e-4 (0.0s, relations)
+# n=23 K=20 5sum_c_control         rel= 32 targets=   32 S3=         97 S4=         0 S3/rel=     3.031e0 S4/rel=   0.000e0 outer/rel=   1.000e0 tgt/rel=   1.000 wall/rel= 1.490e-5 (0.0s, relations)
+# icv1-f2m31-tm90707-c95f16f5 r = 1439393 (20.5 bits), cofactor 1492
+# n = 31, K = 5: 310 points, 745 table states (23095 abscissa states), build 0.01 s
+# n=31 K=5 4sum                   rel= 32 targets=   32 S3=        426 S4=         0 S3/rel=     1.331e1 S4/rel=   0.000e0 outer/rel=   1.331e1 tgt/rel=   1.000 wall/rel= 2.683e-5 (0.0s, relations)
+# n=31 K=5 6sum_a_iterate_table   rel= 32 targets=   32 S3=        578 S4=         0 S3/rel=     1.806e1 S4/rel=   0.000e0 outer/rel=   1.000e0 tgt/rel=   1.000 wall/rel= 4.258e-5 (0.0s, relations)
+# n=31 K=5 6sum_b_s4_per_probe    rel= 32 targets=   32 S3=          0 S4=       247 S3/rel=     0.000e0 S4/rel=   7.719e0 outer/rel=   7.719e0 tgt/rel=   1.000 wall/rel= 2.405e-4 (0.0s, relations)
+# n=31 K=5 6sum_b2_s4_strided     rel= 32 targets=   32 S3=          0 S4=       214 S3/rel=     0.000e0 S4/rel=   6.688e0 outer/rel=   6.688e0 tgt/rel=   1.000 wall/rel= 2.150e-4 (0.0s, relations)
+# n=31 K=5 5sum_c_control         rel= 32 targets=   32 S3=        565 S4=         0 S3/rel=     1.766e1 S4/rel=   0.000e0 outer/rel=   1.000e0 tgt/rel=   1.000 wall/rel= 3.215e-5 (0.0s, relations)
+# n = 31, K = 10: 620 points, 2888 table states (89528 abscissa states), build 0.01 s
+# n=31 K=10 4sum                   rel= 32 targets=   32 S3=        119 S4=         0 S3/rel=     3.719e0 S4/rel=   0.000e0 outer/rel=   3.719e0 tgt/rel=   1.000 wall/rel= 1.699e-5 (0.0s, relations)
+# n=31 K=10 6sum_a_iterate_table   rel= 32 targets=   32 S3=        122 S4=         0 S3/rel=     3.812e0 S4/rel=   0.000e0 outer/rel=   1.000e0 tgt/rel=   1.000 wall/rel= 2.028e-5 (0.0s, relations)
+# n=31 K=10 6sum_b_s4_per_probe    rel= 32 targets=   32 S3=          0 S4=        86 S3/rel=     0.000e0 S4/rel=   2.688e0 outer/rel=   2.688e0 tgt/rel=   1.000 wall/rel= 3.855e-5 (0.0s, relations)
+# n=31 K=10 6sum_b2_s4_strided     rel= 32 targets=   32 S3=          0 S4=        68 S3/rel=     0.000e0 S4/rel=   2.125e0 outer/rel=   2.125e0 tgt/rel=   1.000 wall/rel= 6.800e-5 (0.0s, relations)
+# n=31 K=10 5sum_c_control         rel= 32 targets=   32 S3=        122 S4=         0 S3/rel=     3.812e0 S4/rel=   0.000e0 outer/rel=   1.000e0 tgt/rel=   1.000 wall/rel= 1.869e-5 (0.0s, relations)
+# n = 31, K = 20: 1240 points, 9548 table states (295988 abscissa states), build 0.02 s
+# n=31 K=20 4sum                   rel= 32 targets=   32 S3=         43 S4=         0 S3/rel=     1.344e0 S4/rel=   0.000e0 outer/rel=   1.344e0 tgt/rel=   1.000 wall/rel= 1.586e-5 (0.0s, relations)
+# n=31 K=20 6sum_a_iterate_table   rel= 32 targets=   32 S3=         46 S4=         0 S3/rel=     1.438e0 S4/rel=   0.000e0 outer/rel=   1.000e0 tgt/rel=   1.000 wall/rel= 1.898e-5 (0.0s, relations)
+# n=31 K=20 6sum_b_s4_per_probe    rel= 32 targets=   32 S3=          0 S4=        43 S3/rel=     0.000e0 S4/rel=   1.344e0 outer/rel=   1.344e0 tgt/rel=   1.000 wall/rel= 2.404e-5 (0.0s, relations)
+# n=31 K=20 6sum_b2_s4_strided     rel= 32 targets=   32 S3=          0 S4=        37 S3/rel=     0.000e0 S4/rel=   1.156e0 outer/rel=   1.156e0 tgt/rel=   1.000 wall/rel= 2.936e-4 (0.0s, relations)
+# n=31 K=20 5sum_c_control         rel= 32 targets=   32 S3=         48 S4=         0 S3/rel=     1.500e0 S4/rel=   0.000e0 outer/rel=   1.000e0 tgt/rel=   1.000 wall/rel= 1.744e-5 (0.0s, relations)

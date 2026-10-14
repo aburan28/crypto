@@ -80,7 +80,12 @@ fn parse_args() -> Args {
             "--ic-max-bits" => a.ic_max_bits = next(&mut i).parse().unwrap_or(32),
             "--seeds" => a.seeds = next(&mut i).parse().unwrap_or(3),
             "--json" => a.json = Some(next(&mut i)),
-            "--sections" => a.sections = next(&mut i).split(',').map(|s| s.trim().to_string()).collect(),
+            "--sections" => {
+                a.sections = next(&mut i)
+                    .split(',')
+                    .map(|s| s.trim().to_string())
+                    .collect()
+            }
             other => eprintln!("ignoring unknown argument {other}"),
         }
         i += 1;
@@ -202,7 +207,10 @@ fn micro(out: &mut Vec<serde_json::Value>) {
             std::hint::black_box(v)
         });
         let nf_b = tf / (200.0 * 1024.0) * 1e9;
-        println!("| {bits} | inv, batched W=1024 | — | {nf_b:.2} | {:.0}× vs BigUint inv |", nb / nf_b);
+        println!(
+            "| {bits} | inv, batched W=1024 | — | {nf_b:.2} | {:.0}× vs BigUint inv |",
+            nb / nf_b
+        );
         out.push(json!({"section":"micro","bits":bits,"op":"inv_batched_1024","fast_ns":nf_b}));
     }
 
@@ -231,8 +239,13 @@ fn micro(out: &mut Vec<serde_json::Value>) {
         };
         let a_fe = c.a_fe();
         let tg = c.generator();
-        let pts_fast: Vec<Pt> = (1..=1024u64).map(|k| curve.mul(Some(g), k).unwrap()).collect();
-        let pts_text: Vec<Point> = pts_fast.iter().map(|p| curve.to_textbook(Some(*p))).collect();
+        let pts_fast: Vec<Pt> = (1..=1024u64)
+            .map(|k| curve.mul(Some(g), k).unwrap())
+            .collect();
+        let pts_text: Vec<Point> = pts_fast
+            .iter()
+            .map(|p| curve.to_textbook(Some(*p)))
+            .collect();
         let iters = 20_000usize;
         let (_, tb) = secs(|| {
             let mut acc = tg.clone();
@@ -273,8 +286,14 @@ fn micro(out: &mut Vec<serde_json::Value>) {
         let nb = tb / iters as f64 * 1e9;
         let nf = tf / iters as f64 * 1e9;
         let nbat = tbat / (200.0 * 1024.0) * 1e9;
-        println!("| {label} | affine add (own inverse) | {nb:.0} | {nf:.0} | {:.0}× |", nb / nf);
-        println!("| {label} | affine add, batched W=1024 | — | {nbat:.1} | {:.0}× vs BigUint add |", nb / nbat);
+        println!(
+            "| {label} | affine add (own inverse) | {nb:.0} | {nf:.0} | {:.0}× |",
+            nb / nf
+        );
+        println!(
+            "| {label} | affine add, batched W=1024 | — | {nbat:.1} | {:.0}× vs BigUint add |",
+            nb / nbat
+        );
         out.push(json!({"section":"micro","curve":label,"op":"affine_add","biguint_ns":nb,"fast_ns":nf,"fast_batched_ns":nbat}));
     }
     println!();
@@ -330,7 +349,11 @@ fn rho_section(args: &Args, out: &mut Vec<serde_json::Value>) {
                 let a_fe = c.a_fe();
                 let tg = c.generator();
                 let tq = tg.scalar_mul(&BigUint::from(k), &a_fe);
-                assert_eq!(fc.to_textbook(Some(q)), tq, "fast and textbook [k]G disagree");
+                assert_eq!(
+                    fc.to_textbook(Some(q)),
+                    tq,
+                    "fast and textbook [k]G disagree"
+                );
                 let max_steps = (1usize << (bits / 2 + 8)).min(5_000_000);
                 let (res, wall) = secs(|| pollard_rho_ecdlp(c, &tg, &tq, max_steps));
                 match res {
@@ -350,16 +373,26 @@ fn rho_section(args: &Args, out: &mut Vec<serde_json::Value>) {
         let fw = median(&mut fast_walls);
         let rate = median(&mut rates);
         let st = median(&mut steps);
-        let speedup = if textbook.is_some() { format!("{:.0}×", bw / fw) } else { "—".into() };
-        let bws = if textbook.is_some() { format!("{bw:.3}") } else { "—".into() };
+        let speedup = if textbook.is_some() {
+            format!("{:.0}×", bw / fw)
+        } else {
+            "—".into()
+        };
+        let bws = if textbook.is_some() {
+            format!("{bw:.3}")
+        } else {
+            "—".into()
+        };
         println!(
             "| {bits} | {} | {bws} | {fw:.4} | {speedup} | {:.2e} | {} × {} | {} | {:.3e} |",
             fc.name, rate, cfg.threads, cfg.walkers, cfg.dp_bits, st
         );
-        out.push(json!({"section":"rho","bits":bits,"curve":fc.name,"p":fc.f.p,"n":fc.n,
+        out.push(
+            json!({"section":"rho","bits":bits,"curve":fc.name,"p":fc.f.p,"n":fc.n,
             "baseline_wall_s": if textbook.is_some() { Some(bw) } else { None },
             "fast_wall_s":fw,"fast_steps_per_s":rate,"fast_steps_median":st,
-            "threads":cfg.threads,"walkers":cfg.walkers,"dp_bits":cfg.dp_bits,"seeds":args.seeds}));
+            "threads":cfg.threads,"walkers":cfg.walkers,"dp_bits":cfg.dp_bits,"seeds":args.seeds}),
+        );
     }
     println!();
 }
@@ -384,7 +417,9 @@ fn ic2_section(args: &Args, out: &mut Vec<serde_json::Value>) {
             let g = fc.from_textbook(&c.generator()).unwrap();
             (fc, g, Some(c))
         } else {
-            let Some((fc, g)) = find_a3_curve(bits, 3) else { continue };
+            let Some((fc, g)) = find_a3_curve(bits, 3) else {
+                continue;
+            };
             (fc, g, None)
         };
         let mut rng = StdRng::seed_from_u64(20261007 + bits as u64);
@@ -402,7 +437,13 @@ fn ic2_section(args: &Args, out: &mut Vec<serde_json::Value>) {
                 match res {
                     Some((x, rep)) => {
                         assert_eq!(x, BigUint::from(k));
-                        base = Some((wall, rep.factor_base_ms, rep.relations_ms, rep.linear_algebra_ms, rep.trials_total));
+                        base = Some((
+                            wall,
+                            rep.factor_base_ms,
+                            rep.relations_ms,
+                            rep.linear_algebra_ms,
+                            rep.trials_total,
+                        ));
                     }
                     None => eprintln!("baseline IC failed at {bits} bits"),
                 }
@@ -419,7 +460,12 @@ fn ic2_section(args: &Args, out: &mut Vec<serde_json::Value>) {
         let rho = rho_parallel(&fc, g, q, &cfg).unwrap();
         assert_eq!(rho.log, k);
         let base_str = match base {
-            Some((w, fbm, rm, lam, _)) => format!("{w:.2} ({:.3} / {:.2} / {:.3})", fbm / 1e3, rm / 1e3, lam / 1e3),
+            Some((w, fbm, rm, lam, _)) => format!(
+                "{w:.2} ({:.3} / {:.2} / {:.3})",
+                fbm / 1e3,
+                rm / 1e3,
+                lam / 1e3
+            ),
             None => "—".into(),
         };
         let speedup = match base {
@@ -465,7 +511,9 @@ fn ic3_section(args: &Args, out: &mut Vec<serde_json::Value>) {
             let g = fc.from_textbook(&c.generator()).unwrap();
             (fc, g, Some(c))
         } else {
-            let Some((fc, g)) = find_a3_curve(bits, 3) else { continue };
+            let Some((fc, g)) = find_a3_curve(bits, 3) else {
+                continue;
+            };
             (fc, g, None)
         };
         let mut rng = StdRng::seed_from_u64(20261007 + bits as u64);
@@ -533,7 +581,10 @@ fn main() {
         "os": std::env::consts::OS,
     });
     println!("# Prime-field ECDLP speed-up bench\n");
-    println!("Host: {} {} with {} hardware threads.\n", host["os"], host["arch"], host["threads"]);
+    println!(
+        "Host: {} {} with {} hardware threads.\n",
+        host["os"], host["arch"], host["threads"]
+    );
     let on = |name: &str| args.sections.iter().any(|s| s == name);
     if on("micro") {
         micro(&mut out);

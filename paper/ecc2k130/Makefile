@@ -10,20 +10,22 @@
 
 TEX     := ecc2k130.tex
 PDF     := $(TEX:.tex=.pdf)
-SECTIONS := sec-intro.tex sec-curve.tex sec-walk.tex sec-arith.tex \
-            sec-gpu.tex sec-cpu.tex sec-othergpu.tex sec-fpga.tex sec-campaign.tex \
-            sec-alternatives.tex sec-related.tex sec-conclusion.tex app-reproduction.tex
+SECTIONS := sec-intro.tex sec-history.tex sec-curve.tex sec-walk.tex sec-arith.tex \
+            sec-isa.tex sec-blackwell.tex sec-gpu.tex sec-cpu.tex sec-nist.tex sec-othergpu.tex sec-fpga.tex sec-campaign.tex \
+            sec-alternatives.tex sec-bounds.tex sec-solvetime.tex sec-open.tex sec-related.tex sec-conclusion.tex app-reproduction.tex app-evidence.tex
 BIB     := ecc2k130.bib
 AUX     := $(TEX:.tex=.aux) $(TEX:.tex=.log) $(TEX:.tex=.out) $(TEX:.tex=.toc) \
            $(TEX:.tex=.bbl) $(TEX:.tex=.blg) $(TEX:.tex=.lof) $(TEX:.tex=.lot)
 ARXIV_TARBALL := arxiv-submission.tar.gz
 EPRINT_ZIP    := eprint-submission.zip
 
-.PHONY: all clean arxiv eprint deanonymize check
+.PHONY: all clean arxiv eprint deanonymize check figures-export
 
 all: $(PDF)
 
-$(PDF): $(TEX) $(SECTIONS) $(BIB)
+FIGURES := $(wildcard figures/*.tex)
+
+$(PDF): $(TEX) $(SECTIONS) $(FIGURES) $(BIB) abstract.txt
 	pdflatex -interaction=nonstopmode $(TEX) || true
 	bibtex $(TEX:.tex=)
 	pdflatex -interaction=nonstopmode $(TEX) || true
@@ -38,6 +40,7 @@ clean:
 # No PDF (arXiv compiles it server-side).
 arxiv: $(TEX) $(SECTIONS) $(BIB)
 	mkdir -p submission-staging/arxiv
+	mkdir -p submission-staging/arxiv/figures && cp $(FIGURES) submission-staging/arxiv/figures/
 	cp $(TEX) $(SECTIONS) $(BIB) abstract.txt AUTHORS.example Makefile README.md \
 	  submission-staging/arxiv/
 	cd submission-staging/arxiv && tar czf ../../$(ARXIV_TARBALL) *
@@ -46,10 +49,11 @@ arxiv: $(TEX) $(SECTIONS) $(BIB)
 
 # IACR ePrint accepts PDF + optional source.
 eprint: $(PDF)
-	mkdir -p submission-staging/eprint
+	mkdir -p submission-staging/eprint/figures
+	cp $(FIGURES) submission-staging/eprint/figures/
 	cp $(PDF) $(TEX) $(SECTIONS) $(BIB) abstract.txt README.md Makefile \
 	  submission-staging/eprint/
-	cd submission-staging/eprint && zip -q ../../$(EPRINT_ZIP) *
+	cd submission-staging/eprint && zip -q -r ../../$(EPRINT_ZIP) .
 	rm -rf submission-staging/eprint
 	@echo "IACR ePrint submission bundle ready: $(EPRINT_ZIP)"
 
@@ -66,9 +70,12 @@ deanonymize: $(TEX)
 	@python3 -c 'import re; \
 tex = open("$(TEX)").read(); \
 authors = open("AUTHORS").read().strip(); \
-tex = re.sub(r"\\author\{Anonymous\}\s*\\date\{\}", authors + "\n", tex, count=1); \
+pa = re.search(r"^%\s*pdfauthor\s*=\s*(.+)$$", authors, re.M); \
+authors = re.sub(r"^%.*\n?", "", authors, flags=re.M).strip(); \
+tex = re.sub(r"\\author\{Anonymous\}\s*\\date\{\}", lambda _: authors + "\n", tex, count=1); \
+tex = tex.replace("pdfauthor={Anonymous}", "pdfauthor={" + pa.group(1).strip() + "}") if pa else tex; \
 open("$(TEX)", "w").write(tex); \
-print("De-anonymized $(TEX); backup saved as $(TEX).anon-backup")'
+print("De-anonymized $(TEX); backup saved as $(TEX).anon-backup" + ("" if pa else "; pdfauthor left as Anonymous (add a %pdfauthor= line to AUTHORS)"))'
 
 check: $(PDF)
 	@echo "Checking $(PDF)..."
@@ -92,3 +99,17 @@ check: $(PDF)
 	@echo "Page count:"
 	@pdfinfo $(PDF) | grep -i pages
 	@ls -lh $(PDF)
+
+# Every figure as SVG and 150-dpi PNG (repository policy for performance
+# figures). FIGDIR defaults to this round's benchmarks entry.
+FIGDIR ?= ../../benchmarks/20261014-paper-figures
+figures-export: figures-standalone.tex $(FIGURES)
+	pdflatex -interaction=nonstopmode figures-standalone.tex >/dev/null
+	mkdir -p $(FIGDIR)
+	@i=1; for f in $$(sed -n 's/^\\input{figures\/\(.*\)}$$/\1/p' figures-standalone.tex); do \
+	  pdftocairo -svg -f $$i -l $$i figures-standalone.pdf $(FIGDIR)/$$f.svg; \
+	  pdftoppm -r 150 -png -singlefile -f $$i -l $$i figures-standalone.pdf $(FIGDIR)/$$f; \
+	  i=$$((i+1)); done
+	cp figures-standalone.pdf $(FIGDIR)/figures.pdf
+	rm -f figures-standalone.aux figures-standalone.log figures-standalone.pdf
+	@echo "exported $$(ls $(FIGDIR)/*.svg | wc -l) figures to $(FIGDIR)"

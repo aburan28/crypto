@@ -1,0 +1,14 @@
+gpu_rootfind_validate: backend library = host emulation only (built without RF_HAVE_CUDA)
+  cuda_available = false
+  curve a3-fast-56bit-p256class : p = 72057594037927931 (56 bits), n = 72057594202405003  [1.16s]
+  factor base |F| = 16384 (max x = 32870)
+  targets: 256 positive + 16 degenerate controls, 4096 random, 0 production (collect_relations: 200000 targets scanned, 0 relations)
+  cpu prime_fast reference: 272 relations over 4368 targets in 0.971s (7.368e7 (target,i) pairs/s)
+  emulate sorted chunk=16 : PASS  272 relations, re-add fail 0, dup 0, missing 0, spurious 0, controls missing 0  [0.659s kernel, 0.659s wall, 1.086e8 pairs/s]
+  emulate sorted chunk=32 : PASS  272 relations, re-add fail 0, dup 0, missing 0, spurious 0, controls missing 0  [0.544s kernel, 0.545s wall, 1.314e8 pairs/s]
+  emulate sorted chunk=64 : PASS  272 relations, re-add fail 0, dup 0, missing 0, spurious 0, controls missing 0  [0.501s kernel, 0.501s wall, 1.429e8 pairs/s]
+  emulate hash   chunk=16 : PASS  272 relations, re-add fail 0, dup 0, missing 0, spurious 0, controls missing 0  [0.539s kernel, 0.539s wall, 1.328e8 pairs/s]
+  emulate hash   chunk=32 : PASS  272 relations, re-add fail 0, dup 0, missing 0, spurious 0, controls missing 0  [0.480s kernel, 0.481s wall, 1.490e8 pairs/s]
+  emulate hash   chunk=64 : PASS  272 relations, re-add fail 0, dup 0, missing 0, spurious 0, controls missing 0  [0.463s kernel, 0.463s wall, 1.547e8 pairs/s]
+RESULT PASS: 4368 targets (272 controls, 4096 random, 0 production), 272 reference relations, 6 configurations, 0 failures
+wrote research/gpu_rootfind_decomposition_20261012/validate_56bit_fb16384_seed20261012.json

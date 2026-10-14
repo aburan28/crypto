@@ -1,0 +1,42 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={group size=2 by 1, horizontal sep=0.6cm, yticklabels at=edge left},
+  xbar, /pgf/bar width=6pt, /pgf/bar shift=0pt,
+  width=0.44\textwidth, height=0.52\textwidth,
+  symbolic y coords={p6000,b200,l40s,h200,b300,h100,a10080,a10040,l4,a10,t4},
+  ytick={p6000,b200,l40s,h200,b300,h100,a10080,a10040,l4,a10,t4},
+  yticklabels={RTX PRO 6000,B200,L40S,H200,B300,H100,A100-80GB,A100-40GB,L4,A10,T4 (no \texttt{clmad})},
+  y dir=reverse,
+  xmajorgrids, xmin=0,
+  nodes near coords, nodes near coords style={font=\scriptsize,anchor=west},
+  tick label style={font=\scriptsize},
+]
+\nextgroupplot[xmax=19, xlabel={billion iterations/s, one GPU}, title={\small throughput}]
+\addplot[fill=cA,draw=none] coordinates {(15.116,p6000) (8.840,b200) (7.575,b300)};
+\addplot[fill=cE,draw=none] coordinates {(7.632,h200) (7.540,h100)};
+\addplot[fill=cC,draw=none] coordinates {(8.696,l40s) (2.561,l4)};
+\addplot[fill=cD,draw=none] coordinates {(4.632,a10080) (4.618,a10040) (2.423,a10)};
+\addplot[fill=inkS!50,draw=none] coordinates {(0.541,t4)};
+\nextgroupplot[xmax=22, xlabel={trillion iterations per dollar}, title={\small per dollar (Modal list)},
+  legend style={at={(-0.05,-0.2)},anchor=north,font=\scriptsize,draw=none},legend columns=5]
+\addplot[fill=cA,draw=none] coordinates {(17.95,p6000) (5.09,b200) (3.84,b300)};
+\addlegendentry{Blackwell}
+\addplot[fill=cE,draw=none] coordinates {(6.05,h200) (6.87,h100)};
+\addlegendentry{Hopper}
+\addplot[fill=cC,draw=none] coordinates {(16.04,l40s) (11.54,l4)};
+\addlegendentry{Ada}
+\addplot[fill=cD,draw=none] coordinates {(6.67,a10080) (7.92,a10040) (7.92,a10)};
+\addlegendentry{Ampere}
+\addplot[fill=inkS!50,draw=none] coordinates {(3.30,t4)};
+\addlegendentry{Turing}
+\end{groupplot}
+\end{tikzpicture}
+\caption{The campaign's $\sigma$-walk on eleven GPUs, one survey run each
+  with the same preset (Table~\ref{tab:survey}), by throughput and by
+  iterations per dollar at Modal list price. The workstation Blackwell
+  part leads on both; the data-centre Blackwell and Hopper parts run this
+  integer-bound walk at about half its rate and a third of its value.}
+\label{fig:gpus}
+\end{figure}

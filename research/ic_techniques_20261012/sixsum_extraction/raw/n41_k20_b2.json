@@ -1,0 +1,273 @@
+{
+  "tool": "koblitz_sixsum_extract_probe",
+  "version": 2,
+  "date_utc": "2026-10-13T00:35:33Z",
+  "args": {
+    "a": "0",
+    "cell_wall_s": "240",
+    "columns": "[20]",
+    "early_abort": "true",
+    "kernels": "6sum_b2_s4_strided",
+    "max_s3": "400000000",
+    "max_s4": "50000000",
+    "max_targets": "4096",
+    "n": "[41]",
+    "raw_x_cap": "100000000",
+    "relations": "32",
+    "seed": "20261012"
+  },
+  "note": "Public synthetic [a]G targets on registered Koblitz rungs; every relation re-added as a group equation (fast and general arithmetic) before it counts. Units: S3/S4 root solves, targets, wall. No key-recovery, sub-rho or deployed-curve claim.",
+  "rungs": [
+    {
+      "n": 41,
+      "a": 0,
+      "name": "icv1-f2m41-tm2308219-7f48b14a",
+      "r": 549756390943,
+      "cofactor": 4,
+      "group_order": 2199025563772,
+      "bases": [
+        {
+          "columns": 20,
+          "points": 1640,
+          "table": {
+            "base_points": 1640,
+            "columns": 20,
+            "orbit_representatives": 20,
+            "pair_adds": 17220,
+            "states": 16340,
+            "duplicate_keys": 860,
+            "canonicalisations": 18840,
+            "frobenius_maps": 65600,
+            "coefficient_checks": 1640,
+            "wall_ns": 88501458
+          },
+          "base_wall_s": 0.002878
+        }
+      ]
+    }
+  ],
+  "cells": [
+    {
+      "n": 41,
+      "a": 0,
+      "columns": 20,
+      "kernel": "6sum_b2_s4_strided",
+      "arity": 6,
+      "r": 549756390943,
+      "cofactor": 4,
+      "base_points": 1640,
+      "table_states": 16340,
+      "abscissa_states": 669940,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 0,
+        "s4_solves": 4227906,
+        "outer_probes": 4227906,
+        "point_adds": 229,
+        "canonicalisations": 16911581,
+        "lookups": 16911581,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 205462909459
+      },
+      "relations": 32,
+      "full_support_relations": 31,
+      "support_histogram": {
+        "4": 1,
+        "6": 31
+      },
+      "s3_solves_per_relation": 0.0,
+      "s4_solves_per_relation": 132122.0625,
+      "solves_per_relation": 132122.0625,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 6.4207429948125,
+      "point_adds_per_relation": 7.15625,
+      "lookups_per_relation": 528486.90625,
+      "outer_probes_per_relation": 132122.0625,
+      "structural_outer_probes_per_relation": 102575.67672907276,
+      "expected_relations_per_target": 49154.16297632577,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 224409801800.0,
+      "scan_unit_lambda": 49154.16297632577,
+      "structural_dense_solves_per_relation": 102575.67672907276,
+      "structural_sparse_solves_per_relation": 4565428.2000098955,
+      "structural_solves_per_relation": 4565428.2000098955,
+      "models": {
+        "r_over_n2k2": 817603.1989039262,
+        "r_over_4n2k2": 204400.79972598155,
+        "model_45r_over_n4k4": 54.71764418601529,
+        "structural_s3_solves_per_relation": 205151.35345814552,
+        "structural_s4_solves_per_relation": 102575.67672907276
+      },
+      "fit_c_solves": 0.1615968023084083,
+      "targets_over_model_45": 0.0182756406069028,
+      "outer_probes_over_model_45": 2414.6153304927498,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            20,
+            240,
+            253,
+            811,
+            1081,
+            1336
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              76586737322
+            ],
+            [
+              2,
+              306984657881
+            ],
+            [
+              3,
+              256851699271
+            ],
+            [
+              9,
+              473010226473
+            ],
+            [
+              13,
+              401063668851
+            ],
+            [
+              16,
+              536314133415
+            ]
+          ],
+          "target_x": 97779245772,
+          "target_y": 996152074763
+        },
+        {
+          "indices": [
+            164,
+            381,
+            466,
+            692,
+            842,
+            1594
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              2,
+              1
+            ],
+            [
+              4,
+              310620721103
+            ],
+            [
+              5,
+              53986937258
+            ],
+            [
+              8,
+              157861198973
+            ],
+            [
+              10,
+              410025173827
+            ],
+            [
+              19,
+              157861198973
+            ]
+          ],
+          "target_x": 1517147489754,
+          "target_y": 1204119237836
+        },
+        {
+          "indices": [
+            77,
+            467,
+            696,
+            1165,
+            1295,
+            1589
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              242771733062
+            ],
+            [
+              5,
+              495769453685
+            ],
+            [
+              8,
+              517149289729
+            ],
+            [
+              14,
+              328957684081
+            ],
+            [
+              15,
+              158975621288
+            ],
+            [
+              19,
+              319789206816
+            ]
+          ],
+          "target_x": 201183380502,
+          "target_y": 1460777021927
+        },
+        {
+          "indices": [
+            127,
+            458,
+            756,
+            1014,
+            1015,
+            1454
+          ],
+          "arity": 6,
+          "support": 4,
+          "row": [
+            [
+              1,
+              533623492250
+            ],
+            [
+              5,
+              82029708777
+            ],
+            [
+              9,
+              31572239897
+            ],
+            [
+              17,
+              530765681695
+            ]
+          ],
+          "target_x": 1008990796018,
+          "target_y": 529513858927
+        }
+      ]
+    }
+  ],
+  "total_wall_s": 205.559016459
+}
