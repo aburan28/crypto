@@ -10,9 +10,11 @@ is documented in [`../../ecc2k130/`](../../ecc2k130/),
 repository holds, with the sibling library
 [aburan28/cryptanalysis](https://github.com/aburan28/cryptanalysis).
 
-**Status**: research draft, anonymized for double-blind review. Restore
-real authors via `make deanonymize` after creating an `AUTHORS` file
-(see `AUTHORS.example`).
+**Authors**: Adam Buran and Kevin Nguyen, Isogeny Labs
+(`adam@isogenylabs.io`, `kevin@isogenylabs.io`).
+
+**Status**: research draft with named authors. For a double-blind venue,
+replace the author block in `rho-blackwell.tex` with `\author{Anonymous}`.
 
 ## Building
 
@@ -209,5 +211,3 @@ GPU; the paper says so in its availability paragraph and Appendix A.
   repeated pairs, and the paper says so in the table caption. A
   Solinas-field walk has not been built; only the field benchmark
   compares the two representations.
-- The author block is anonymized; `make deanonymize` with an `AUTHORS`
-  file restores it.
