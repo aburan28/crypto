@@ -40,8 +40,10 @@ use crate::cryptanalysis::ic_framework::fiber::{
 use crate::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, CompactOrbitScanBase, CyclotomicBase, DescentAlgebraicOracle,
     FrobeniusMitmOracle, GlvOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase,
-    RootfindSubtractOracle, SubtractOracle,
+    PrimeBatchMitmOracle, RootfindSubtractOracle, SubtractOracle,
 };
+use crate::cryptanalysis::ic_framework::prime_tower::PrimeKummerBase;
+use crate::cryptanalysis::ic_framework::rootfind::{RootfindMitmOracle, RootfindPairsOracle};
 use crate::cryptanalysis::ic_framework::shared_rank::{
     run_shared_rank_targets, SharedRankSpec, SharedTargetSpec,
 };
@@ -121,7 +123,7 @@ const IC_COUNTED_PARAMS: &[ParamDecl] = &[
     ParamDecl {
         name: "targets",
         default: Some("walk"),
-        help: "random or walk",
+        help: "random, walk, or walk-prime-fast on single-word prime curves",
     },
     ParamDecl {
         name: "max_trials",
@@ -306,7 +308,7 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "oracle",
                     default: None,
-                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; rootfind-subtract:m=2|3 (prime curves: prime_fast's direct-subtraction root finding, one batched inversion a target); the cofactor-fiber-aware mitm-fiber:fiber=closed|lifts|blind, mitm-frobenius-fiber:fiber=closed|lifts|blind and descent-algebraic-fiber:fiber=combined|lifts|blind (ic_framework::fiber); or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N and pdp3-koblitz:m=2|3,engine=rootfind (the pair-sum table of DecompositionStrategy::PairTable) on koblitz-standard-subspace",
+                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; mitm-prime-batch:m=2 (prime folded table with batched inversions); rootfind-subtract:m=2|3 (prime curves: prime_fast's direct-subtraction root finding, one batched inversion a target); the cofactor-fiber-aware mitm-fiber:fiber=closed|lifts|blind, mitm-frobenius-fiber:fiber=closed|lifts|blind and descent-algebraic-fiber:fiber=combined|lifts|blind (ic_framework::fiber); or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N, pdp3-koblitz:m=2|3,engine=rootfind (PairSumTable), pdp3-koblitz:m=3,engine=rootfind-window (cyclic ⌈|F|/3⌉ window), pdp3-koblitz:m=2|3,engine=rootfind-negfold (PairTable negation fold, ~half set-up), and pdp3-koblitz:m=3,engine=rootfind-window-negfold on koblitz-standard-subspace",
                 },
                 ParamDecl {
                     name: "solver",
@@ -321,7 +323,7 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "targets",
                     default: Some("walk"),
-                    help: "random ([a]G+[b]Q per trial) or walk (one addition per trial)",
+                    help: "random ([a]G+[b]Q per trial), walk, or walk-prime-fast (same guarded stream using native Montgomery additions on prime curves)",
                 },
                 ParamDecl {
                     name: "max_trials",
@@ -1796,9 +1798,11 @@ fn solve_ic_prime(
     let (spec, fb_name, or_name) = pipeline_spec(m, seed)?;
     let abscissa = PrimeAbscissaBase { instance: inst };
     let orbit = GlvOrbitBase { instance: inst };
+    let kummer = PrimeKummerBase { instance: inst };
     let base: &dyn FactorBaseBuilder<_> = match fb_name.as_str() {
         "prime-abscissa" => &abscissa,
         "glv-orbit" => &orbit,
+        "prime-kummer" => &kummer,
         other => {
             return Err(format!(
                 "factor base `{other}` does not run on a prime curve"
@@ -1808,12 +1812,18 @@ fn solve_ic_prime(
     let ms = spec.oracle_params.u64_or("m", 2)? as u32;
     let mut subtract = SubtractOracle;
     let mut mitm = MitmOracle::new(ms);
+    let mut prime_batch = PrimeBatchMitmOracle::new();
     let mut mitm_fiber = FiberMitmOracle::new(ms);
+    let mut rootfind_mitm = RootfindMitmOracle::new(ms);
+    let mut rootfind_pairs = RootfindPairsOracle::new(ms);
     let mut rootfind = RootfindSubtractOracle::new(ms, inst);
     let oracle: &mut dyn DecompositionOracle<_> = match or_name.as_str() {
         "subtract" => &mut subtract,
         "mitm" => &mut mitm,
+        "mitm-prime-batch" => &mut prime_batch,
         "mitm-fiber" => &mut mitm_fiber,
+        "rootfind-mitm" => &mut rootfind_mitm,
+        "rootfind-pairs" => &mut rootfind_pairs,
         "rootfind-subtract" => &mut rootfind,
         other => return Err(format!("oracle `{other}` does not run on a prime curve")),
     };
@@ -1922,6 +1932,8 @@ fn solve_ic_binary(
     let mut frob_counted = FrobeniusMitmOracle::new_counted(ms, inst);
     let mut mitm_fiber = FiberMitmOracle::new(ms);
     let mut frob_fiber = FiberFrobeniusMitmOracle::new(ms, inst);
+    let mut rootfind_mitm = RootfindMitmOracle::new(ms);
+    let mut rootfind_pairs = RootfindPairsOracle::new(ms);
     let mut descent_fiber = match or_name.as_str() {
         "descent-algebraic-fiber" => {
             let name = spec
@@ -1966,6 +1978,8 @@ fn solve_ic_binary(
         "mitm-frobenius-counted" => &mut frob_counted,
         "mitm-fiber" => &mut mitm_fiber,
         "mitm-frobenius-fiber" => &mut frob_fiber,
+        "rootfind-mitm" => &mut rootfind_mitm,
+        "rootfind-pairs" => &mut rootfind_pairs,
         "descent-algebraic" => algebraic.as_mut().expect("built above"),
         "descent-algebraic-fiber" => descent_fiber.as_mut().expect("built above"),
         other => match plugin_oracle.as_deref_mut() {
@@ -2291,9 +2305,11 @@ pub fn dump_factor_base(
         Instance::Prime(i) => {
             let abscissa = PrimeAbscissaBase { instance: i };
             let orbit = GlvOrbitBase { instance: i };
+            let kummer = PrimeKummerBase { instance: i };
             let base: &dyn FactorBaseBuilder<_> = match name.as_str() {
                 "prime-abscissa" => &abscissa,
                 "glv-orbit" => &orbit,
+                "prime-kummer" => &kummer,
                 other => {
                     return Err(format!(
                         "factor base `{other}` does not run on a prime curve"
@@ -2555,7 +2571,10 @@ mod tests {
             let m = resolve(&MethodSpec {
                 id: "ic.pipeline".into(),
                 params: [
-                    ("factor_base".to_string(), "prime-abscissa:size=32".to_string()),
+                    (
+                        "factor_base".to_string(),
+                        "prime-abscissa:size=32".to_string(),
+                    ),
                     ("oracle".to_string(), oracle.to_string()),
                 ]
                 .into_iter()
@@ -2581,7 +2600,11 @@ mod tests {
         let (s, r) = (relations(&sub), relations(&root));
         // The same candidate points, each one addition; the root finder
         // adds one re-addition per relation and nothing else.
-        assert_eq!(r.adds, s.adds + root.counters["relations_found"], "{s:?} {r:?}");
+        assert_eq!(
+            r.adds,
+            s.adds + root.counters["relations_found"],
+            "{s:?} {r:?}"
+        );
         assert_eq!(r.native["lookups"], s.native["lookups"]);
         // One batched inversion per oracle call; the relation loop's
         // target guard skips a few trials before the oracle sees them.
@@ -2594,11 +2617,17 @@ mod tests {
 
         // A knob the engine does not read is refused, as is a summand
         // count it does not take.
-        for bad in ["rootfind-subtract:m=2,negation_folded=1", "rootfind-subtract:m=4"] {
+        for bad in [
+            "rootfind-subtract:m=2,negation_folded=1",
+            "rootfind-subtract:m=4",
+        ] {
             let m = resolve(&MethodSpec {
                 id: "ic.pipeline".into(),
                 params: [
-                    ("factor_base".to_string(), "prime-abscissa:size=32".to_string()),
+                    (
+                        "factor_base".to_string(),
+                        "prime-abscissa:size=32".to_string(),
+                    ),
                     ("oracle".to_string(), bad.to_string()),
                 ]
                 .into_iter()
@@ -2610,7 +2639,10 @@ mod tests {
         let m = resolve(&MethodSpec {
             id: "ic.pipeline".into(),
             params: [
-                ("factor_base".to_string(), "prime-abscissa:size=32".to_string()),
+                (
+                    "factor_base".to_string(),
+                    "prime-abscissa:size=32".to_string(),
+                ),
                 ("oracle".to_string(), "rootfind-subtract:m=3".to_string()),
             ]
             .into_iter()

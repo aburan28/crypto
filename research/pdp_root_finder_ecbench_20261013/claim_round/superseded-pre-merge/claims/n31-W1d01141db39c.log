@@ -1,0 +1,10 @@
+claim /home/user/crypto/research/pdp_root_finder_ecbench_20261013/claim_round/claims/n31-W1d01141db39c.json sha256 556258bfd05488de48c65788987433996a97febcf423e147f66c3c48e2d294a9
+one-run online ratio 0.0070 (rho / IC) on one public target, both runs at L2 or above; an independent replay and paired A/A evidence are still required for a runtime claim
+vs_rho check: 7 problem(s)
+  - missing field ic_replay_certificate_sha256
+  - missing field rho_replay_certificate_sha256
+  - missing field operation_accounting
+  - missing field record_class
+  - independent_validation must be true
+  - ic_replay_certificate_sha256 must be a full lowercase SHA-256 digest
+  - rho_replay_certificate_sha256 must be a full lowercase SHA-256 digest

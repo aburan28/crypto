@@ -285,29 +285,30 @@ template<class C> NF_HD void rho_batch_step(const rho_ctx<C>&c,uint32_t tid,
 }
 
 /* Compile-time-W variant for the device kernel: Wc is known to the compiler,
- * so mode/jj and the phase loops unroll and stay in registers instead of the
+ * so mode/jj and the phase loops unroll, and the batched inversion takes the
+ * den/scratch arrays by reference so they can live in registers instead of the
  * 64-wide local arrays the runtime-W body needs.  Semantically identical;
  * test_rho cross-checks it against rho_batch_step for every Wc it builds. */
-template<class C,int Wc> NF_HD void rho_batch_step_w(const rho_ctx<C>&c,uint32_t tid,
-                                                     typename C::Field::elt*den,typename C::Field::elt*scratch){
+template<class C,int Wc> NF_HD void rho_batch_step_w(const rho_ctx<C>&c,uint32_t tid){
   typedef typename C::Field F;
   rho_state<C> st; int mode[Wc]; uint32_t jj[Wc];
+  typename F::elt denr[Wc],scratchr[Wc];
   for(int w=0;w<Wc;w++){
    uint32_t idx=tid+(uint32_t)w*c.nthreads;
    rho_load(c,idx,st);
    typename F::elt d; uint32_t j;
    int m=rho_phase_a<C>(st,c.table,c.prm,d,j);
    mode[w]=m; jj[w]=j;
-   if(m==RHO_MODE_INF){ den[w]=F::one(); }
-   else den[w]=d;
+   if(m==RHO_MODE_INF){ denr[w]=F::one(); }
+   else denr[w]=d;
   }
-  F::batch_inv(den,Wc,scratch);
+  F::template batch_inv_w<Wc>(denr,scratchr);
   for(int w=0;w<Wc;w++){
    uint32_t idx=tid+(uint32_t)w*c.nthreads;
    rho_load(c,idx,st);
    int m=mode[w];
    if(m==RHO_MODE_INF){ c.restarts[idx]++; rho_seed_walk(c,idx,st); c.steps[idx]=0; rho_store(c,idx,st); continue; }
-   int aut; int r=rho_phase_b<C>(st,c.table,c.prm,m,jj[w],den[w],&aut);
+   int aut; int r=rho_phase_b<C>(st,c.table,c.prm,m,jj[w],denr[w],&aut);
    if(r<0){ rho_count(c.cycles? &c.cycles[(-r)-2]:0); rho_store(c,idx,st); continue; }
    if(r==RHO_STEP_SEEK){ rho_store(c,idx,st); continue; }
    uint32_t s=++c.steps[idx];

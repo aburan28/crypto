@@ -33,8 +33,14 @@ const ADDS: usize = 2_000_000;
 const BLOCK: usize = 1024;
 
 fn main() {
-    let degree: u32 = std::env::args().nth(1).and_then(|s| s.parse().ok()).unwrap_or(61);
-    let points: usize = std::env::args().nth(2).and_then(|s| s.parse().ok()).unwrap_or(12000);
+    let degree: u32 = std::env::args()
+        .nth(1)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(61);
+    let points: usize = std::env::args()
+        .nth(2)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(12000);
     let kc = KoblitzCurve::new(0, degree).expect("curve");
     let fb = build_subgroup_orbit_factor_base(&kc, 1, points).expect("factor base");
     let fc = FastCurve::new(&kc.curve).expect("fast curve");
@@ -74,7 +80,10 @@ fn main() {
     let add_ns = t.elapsed().as_secs_f64() * 1e9 / (rounds * batch.len()) as f64;
     std::hint::black_box(out.len());
 
-    println!("base {n} points, {orbits} signed orbits, degree {degree}, r = 2^{:.1}", (r as f64).log2());
+    println!(
+        "base {n} points, {orbits} signed orbits, degree {degree}, r = 2^{:.1}",
+        (r as f64).log2()
+    );
     println!("one group addition, chained (own inversion):  {chained_ns:.2} ns");
     println!("one group addition, batched (shared inverse): {add_ns:.2} ns   <- the unit");
 
@@ -83,14 +92,25 @@ fn main() {
     let mut rng: u64 = 0x9e37_79b9_7f4a_7c15;
     let mut targets: Vec<FastPoint> = Vec::with_capacity(PROBES);
     for _ in 0..PROBES {
-        rng = rng.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        rng = rng
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
         targets.push(fc.mul_u64(g, 1 + rng % (r - 1)));
     }
 
     let tiers: [(&str, Option<PairSumTable>); 3] = [
-        ("folded", PairSumTable::build_folded_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET)),
-        ("compact", PairSumTable::build_compact_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET)),
-        ("full", PairSumTable::build_full_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET)),
+        (
+            "folded",
+            PairSumTable::build_folded_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET),
+        ),
+        (
+            "compact",
+            PairSumTable::build_compact_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET),
+        ),
+        (
+            "full",
+            PairSumTable::build_full_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET),
+        ),
     ];
     println!(
         "\n{:<8} {:>14} {:>12} {:>10} {:>10} {:>10} {:>10} {:>9} {:>9} {:>9} {:>9}",
@@ -115,8 +135,12 @@ fn main() {
         // its native count is one addition per stored pair.
         let t = Instant::now();
         let rebuilt = match name {
-            "folded" => PairSumTable::build_folded_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET),
-            "compact" => PairSumTable::build_compact_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET),
+            "folded" => {
+                PairSumTable::build_folded_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET)
+            }
+            "compact" => {
+                PairSumTable::build_compact_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET)
+            }
             _ => PairSumTable::build_full_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET),
         }
         .expect("it fit a moment ago");
@@ -159,7 +183,10 @@ fn main() {
             }
         }
         let blocked_ns = t.elapsed().as_secs_f64() * 1e9 / PROBES as f64;
-        assert_eq!(blocked_hits, hits, "{name}: the blocked probe answered differently");
+        assert_eq!(
+            blocked_hits, hits,
+            "{name}: the blocked probe answered differently"
+        );
 
         // Shape 3: the `m = 3` scan, with a sink that never stops so the
         // whole window is walked and the figure is a true per-base-point

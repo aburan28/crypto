@@ -1,0 +1,191 @@
+\section{Time to solve}
+\label{sec:solvetime}
+
+The rates in this paper translate directly into calendar time and
+money, and this section does that translation for every device we
+measured. Nothing here is a new measurement: each estimate divides the
+expected work by a rate recorded earlier in the paper and states what
+else it assumes. The question for ECC2K-130 is no longer whether a solve
+is feasible but how many cards, for how long, at what price. For the
+NIST curves, the same arithmetic gives an answer that no plausible
+amount of hardware changes.
+
+\subsection{Model}
+\label{sec:solvetime-model}
+
+Three quantities set the time to a collision.
+
+\paragraph{Expected work.} The $\sigma$-walk needs $2^{60.9}\approx2.15\cdot10^{18}$
+iterations in expectation (Section~\ref{sec:walk-constant}). One
+device running at $R$ billion iterations per second therefore needs
+$2.15\cdot10^{18}/R$ nanoseconds, or $68.2/R$ years
+(Table~\ref{tab:history-compare}), and a fleet of $N$ such devices
+needs $1/N$ of that.
+
+\paragraph{Variance.} Rho's running time is random. The probability
+of no collision after a fraction $c$ of the expected work is about
+$\exp(-\pi c^2/4)$ (Section~\ref{sec:campaign-state}). Half of all
+solves finish by $c=0.94$, nine in ten by $c=1.71$ and 99 in 100 by
+$c=2.42$ (our arithmetic). So a plan that must finish with $90\%$
+probability should budget $1.7$ times the expected work.
+
+\paragraph{Detection delay.} A collision is only seen when the
+second of the two merged trails reaches a distinguished point. At
+cutoff 32 that is on average another $2^{28.41}$ steps of one walk
+(Section~\ref{sec:campaign-interval}). Each walk advances at $R$
+divided by the number of walks on the card. With $6.16$ million walks
+on an RTX~PRO~6000, the delay is about $42$ hours at $14.64$ and $38$
+hours at $15.88$, whatever the fleet size (our arithmetic; the campaign
+note gives $43$ GPU-hours per GPU at $14.11$~\evcite{\evref{ops}}).
+Every card keeps walking during the delay, so a large fleet pays for it
+in GPU-hours as well as calendar time. At 1{,}000 cards it adds about
+as much work as the solve itself. Cutoff 34 cuts the delay to about
+$4.4$ hours at $15.88$, at the cost of an $8.8\times$ larger corpus
+(about $1.7$~TB instead of $0.19$~TB).
+
+A fleet of $N$ devices at $R$ therefore expects a collision after
+\[
+  T(N) \approx \frac{2^{60.9}}{N\,R} + D,
+\]
+where $D$ is the detection delay. The first term is multiplied by $0.94$
+for the median and by $1.71$ for a $90\%$ plan.
+
+\paragraph{Existing corpus.} The campaign has already walked $2^{56.68}$
+iterations without a collision (Table~\ref{tab:state}). A new fleet
+that runs the same $\sigma$-walk at cutoff 32 and merges with that
+corpus inherits the credit. Given no collision so far, the expected
+remaining work is $0.949$ of the total (our arithmetic). That is a
+saving of $5\%$; it changes the plan, not the scale.
+
+\subsection{By device and fleet size}
+\label{sec:solvetime-table}
+
+Table~\ref{tab:solvetime} applies the first term of the model to every
+rate in this paper. The $\sigma$-walk rows are the survey and paired
+rates of Table~\ref{tab:survey}. Points from these rows can merge with
+the campaign corpus. The other rows use other walks or other platforms.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Expected time to walk $2^{60.9}$ iterations of ECC2K-130 at
+  each recorded rate, our arithmetic. ``Years, one'': device-years on a
+  single device. ``Days, 100'' and ``Days, 1{,}000'': calendar days for
+  a fleet of that size, excluding the detection delay $D$ (about
+  $1.6$--$1.7$ days on the RTX~PRO~6000 at cutoff 32). The median is
+  $0.94\times$ these figures and the $90\%$ point $1.71\times$. ``Cost'':
+  the expected work at the Modal list price implied by
+  Table~\ref{tab:survey}'s iterations per dollar (2026-09-19). Spot
+  prices are much lower (text). Table-walk rates are absent because no
+  table-walk build has a measured cost per solve
+  (Section~\ref{sec:sigma-vs-table}).}
+\label{tab:solvetime}
+\begin{tabular}{@{}llrrrrr@{}}
+\toprule
+device & build & billion it/s & years, one & days, 100 & days, 1{,}000 & cost \\
+\midrule
+\multicolumn{7}{@{}l}{\emph{$\sigma$-walk (merges with the campaign corpus)}} \\
+RTX PRO 6000 & campaign preset & 14.64 & 4.66 & 17.0 & 1.70 & \$124k \\
+RTX PRO 6000 & nibble-table $\sigma$ & 15.88 & 4.29 & 15.7 & 1.57 & \$114k \\
+L40S & survey & 8.70 & 7.84 & 28.6 & 2.86 & \$134k \\
+B200 & survey & 8.84 & 7.71 & 28.2 & 2.82 & \$423k \\
+B300 & survey & 7.58 & 9.00 & 32.9 & 3.29 & \$560k \\
+H200 & survey & 7.63 & 8.93 & 32.6 & 3.26 & \$356k \\
+H100 & survey & 7.54 & 9.04 & 33.0 & 3.30 & \$313k \\
+A100-80GB & survey & 4.63 & 14.7 & 53.8 & 5.38 & \$323k \\
+L4 & survey & 2.56 & 26.6 & 97.2 & 9.72 & \$186k \\
+A10 & survey & 2.42 & 28.1 & 102.8 & 10.3 & \$272k \\
+T4 & no \texttt{clmad} & 0.541 & 126 & 460 & 46.0 & \$652k \\
+\addlinespace
+\multicolumn{7}{@{}l}{\emph{other walks and platforms}} \\
+RTX PRO 4500 & $x$-only bridge map & 12.50 & 5.46 & 19.9 & 1.99 & --- \\
+RTX PRO 4500 & $\sigma$-walk & 5.11 & 13.3 & 48.8 & 4.88 & --- \\
+VU47P (AWS F2) & 128 engines & 8.25 & 8.26 & 30.2 & 3.02 & --- \\
+Xeon, one core & AVX-512 bitsliced & 0.0126 & 5{,}410 & --- & --- & --- \\
+\addlinespace
+\multicolumn{7}{@{}l}{\emph{bound and history}} \\
+RTX PRO 6000 & ceiling (Section~\ref{sec:bounds-6000}) & 24--26 & 2.6--2.8 & 9.6--10.4 & 0.96--1.04 & --- \\
+GTX 295 card & 2010 kernel & 0.064 & 1{,}065 & 3{,}891 & 389 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\input{figures/fig-solvetime}
+
+On the best card, a solve is about four device-years. A fleet of five
+RTX~PRO~6000s finishes in about a year. With 56 the expected time is a
+month, including the detection delay. With 290 it is a week. A thousand
+cards bring the expected time down to about $3.2$ days, $1.6$ of
+walking and $1.6$ of waiting for the last trail to reach a
+distinguished point. Nine times in ten, a thousand cards finish within
+$4.3$ days. Beyond a few hundred cards the delay dominates, which is
+where Figure~\ref{fig:solvetime}'s dashed line bends away from the
+solid one. A larger fleet buys little calendar time unless it also
+lowers the cutoff.
+
+The new GPUs moved this by more than two orders of magnitude. With the
+2010 kernel on a GTX~295, a one-year solve needed about 1{,}066 cards
+and a one-week solve more than $55{,}000$. Today the same one-year and
+one-week targets need five cards and 290. If the RTX~PRO~6000 reached
+its ceiling, the solve would be about $2.7$ device-years. Even the
+campaign's own peak, about $83$~billion iterations/s from a mixed spot
+fleet (Table~\ref{tab:state}), would finish the remaining expected
+work in about $285$ days.
+
+\paragraph{Cost.} The cost of the work does not depend on the size of
+the fleet. At Modal list prices the cheapest per solve are the
+RTX~PRO~6000 and the L40S, about \$114k--\$134k. The data-centre
+Blackwell and Hopper parts cost two and a half to five times as much
+for the same work, because this integer-bound walk does not use what
+they are priced for (Section~\ref{sec:survey}). Spot capacity is
+cheaper again. At the 2026-09-11 spot price of \$1.31 per RTX~PRO~6000
+hour the expected work is about \$56k at the campaign's collection rate
+of $14.11$. An AWS F2 at its spot price comes to about \$51k
+(Section~\ref{sec:fpga-vs-gpu}). The best quote seen, an L4 in
+\texttt{eu-north-1} on 2026-09-18, priced a full walk at about
+\$38k~\evcite{\evref{ops}; \evref{quotes}}. Those spot figures hold only
+while spot capacity lasts. The spot market reclaimed the campaign's
+whole fleet on 2026-09-18 (Section~\ref{sec:campaign-state}), and a
+solve on spot capacity has to plan for that.
+
+\paragraph{Assumptions.} Every rate in
+Table~\ref{tab:solvetime} is sustained for the whole solve. The survey
+rows are single unpaired runs, and the campaign's own fleet measured
+its RTX~PRO~6000 workers at a median of $14.66$
+(Table~\ref{tab:cutoff}), so the survey rates are close to what a fleet
+sees but are not guaranteed. The bridge map on the RTX~PRO~4500 walks a
+different function, so its points do not merge with the
+$\sigma$-walk corpus. Its frozen study measured $1.007\times$ the work
+of the map it replaced (Section~\ref{sec:walk-bridge}). The FPGA row is
+one card of an \texttt{f2.6xlarge}. The CPU row is one core and assumes
+the per-core rate holds across a server. The costs exclude storage,
+egress and the merge.
+
+\subsection{NIST curves}
+\label{sec:solvetime-nist}
+
+The same model applies to the NIST walk of Section~\ref{sec:nist}, and
+it shows why that section's rates say nothing about the security of
+those curves. With the negation map, the expected work for a group of
+prime order $n$ is about $\sqrt{\pi n/4}$ iterations. For P-256 that is
+$2^{127.8}\approx3.0\cdot10^{38}$ iterations, and for P-384
+$2^{191.8}\approx5.6\cdot10^{57}$ (our arithmetic from the standard group
+orders; any walk constant above one only adds to it).
+\begin{itemize}[nosep]
+\item \textbf{P-256.} At the best measured $1.632$~billion
+  iterations/s on one RTX~PRO~6000, the expected time is $1.9\cdot10^{29}$
+  seconds, about $5.9\cdot10^{21}$ card-years. A billion cards would
+  need $5.9\cdot10^{12}$ years, more than 400 times the age of the
+  universe.
+  At the multiplies-only bound of $12.2$ (Section~\ref{sec:bounds-nist})
+  it is still $7.8\cdot10^{20}$ card-years.
+\item \textbf{P-384.} At $0.548$ the expected time is $1.0\cdot10^{49}$
+  seconds, about $3.2\cdot10^{41}$ card-years.
+\end{itemize}
+The engineering of Section~\ref{sec:nist} multiplied the P-256 rate by
+$1.52$ and the P-384 rate by $2.61$, and divided these times by the
+same factors. P-256 needs about $2^{67}$ times the work of ECC2K-130, so
+a speedup of any engineering size leaves it where it was. The levers
+that bring ECC2K-130 within a fleet's reach shorten a P-256 attack by a
+factor that disappears against the exponent.

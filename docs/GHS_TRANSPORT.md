@@ -44,7 +44,11 @@ the previously supplied affine formula requires its stated `a=1` case.
 `sect113r1` uses `F_(2^113)`, a prime absolute extension degree. Its
 only proper subfield is `F_2`, and the exact `ghs_screen` run with the
 SEC 2 parameters below found a magic number of 113, a genus of
-`2^112 - 1`, and no genus-4 candidate:
+`2^112 - 1`, and no genus-4 candidate.  (*Correction 2026-10-13:* the genus
+is `2^112`, type II: the plain orbit of `√b` has rank 113, so `(x − 1)`
+divides `Ord_b`.  The recorded `2^112 - 1` came from the old orbit-length
+type rule; the magic number and the no-candidate result are unchanged.  See
+[`audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md`](audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md).)
 
 ```sh
 cargo run --bin ghs_screen -- \
