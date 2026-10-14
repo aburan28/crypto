@@ -444,11 +444,6 @@ impl<'i> Pdp3KoblitzOracle<'i> {
         }
     }
 
-    /// Which engine `prepare` selected.
-    pub fn engine(&self) -> Pdp3Engine {
-        self.engine
-    }
-
     /// The root-finding decomposition: one table probe for `m = 2`, one
     /// per `R − P_k` for `m = 3`, every hit re-added in the group on the
     /// ledger before it is returned.
@@ -533,7 +528,10 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
 
     fn parameters(&self) -> &[(&str, &str)] {
         &[
-            ("m", "summands; #1333 ran 3 (Semaev S4); rootfind takes 2 or 3"),
+            (
+                "m",
+                "summands; #1333 ran 3 (Semaev S4); rootfind takes 2 or 3",
+            ),
             (
                 "engine",
                 "inherited-f4 (the control), f6-ic, matrix-f4, matrix-f5, or rootfind (the \
@@ -654,19 +652,16 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
             // The table of every `P_i + P_j`, in the summand-storing tier
             // so a hit is read, never recovered by a scan.  Its additions
             // are charged to the oracle set-up phase from the base's size.
-            let table = PairSumTable::build_full_within(
-                kc,
-                &frob,
-                PairSumTable::DEFAULT_BYTE_BUDGET,
-            )
-            .ok_or_else(|| {
-                format!(
+            let table =
+                PairSumTable::build_full_within(kc, &frob, PairSumTable::DEFAULT_BYTE_BUDGET)
+                    .ok_or_else(|| {
+                        format!(
                     "the pair-sum table of {} points does not fit the {} GiB budget or the field \
                      is too wide to pack a point into a word",
                     frob.points.len(),
                     PairSumTable::DEFAULT_BYTE_BUDGET >> 30
                 )
-            })?;
+                    })?;
             // The table's own lift must agree with the run's, point for
             // point, or a probe key would name the wrong entry.  The
             // group re-addition of every hit would catch a disagreement
