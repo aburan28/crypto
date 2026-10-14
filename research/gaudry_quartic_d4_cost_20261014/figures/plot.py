@@ -36,7 +36,7 @@ ABL = [("abl_committed", "committed\n(plain, deg 14)"), ("abl_s", "+ sparsest"),
 ABL = [a for a in ABL if a[0] in cfg]
 PH = [("echelon_muls", "elimination", C["blue"]), ("nf_muls", "normal forms", C["orange"]),
       ("charpoly_muls", "char. polynomial / det A", C["aqua"]), ("eigenvector_muls", "eigenvectors", C["plum"])]
-fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 4.2), gridspec_kw={"width_ratios": [1.3, 1]})
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 4.6), gridspec_kw={"width_ratios": [1.3, 1]})
 for i, (k, lab) in enumerate(ABL):
     c = cfg[k]
     m, (lo, hi) = c["mean_muls"], c["ci95_muls"]
@@ -59,7 +59,7 @@ a2.set_xticks(range(len(ABL)), [str(i + 1) for i in range(len(ABL))], fontsize=8
 a2.set_xlabel("configuration (left panel, in order)")
 a2.set_ylabel("share of C₄")
 a2.set_ylim(0, 1)
-a2.legend(frameon=False, fontsize=7.5, loc="lower left")
+a2.legend(frameon=False, fontsize=7.5, loc="upper center", bbox_to_anchor=(0.5, -0.17), ncol=2)
 a2.set_title("where the multiplications go", fontsize=9)
 save(fig, "c4_ablation")
 
@@ -79,7 +79,7 @@ for kind, col, mk, lab in [("new_planted", C["blue"], "o", "new, planted"), ("ne
 ax.set_xscale("log")
 ax.set_yscale("log")
 ax.set_ylim(1e7, 1e11)
-ax.set_xlabel("p (field F_{p⁴})")
+ax.set_xlabel("p (curves over F_p⁴)")
 ax.set_ylabel("C₄ (F_p multiplications, mean, 95 % bootstrap)")
 ax.grid(color=C["grid"], lw=0.6)
 ax.legend(frameon=False, fontsize=8)
@@ -104,7 +104,7 @@ if X:
         if x.get("r_inf") == "phi=0.73" and x.get("h") == 2:
             for key, col in [("log2_n_star_committed_c4_2.54e10", C["wash"]), ("log2_n_star_new", C["blue"])]:
                 ax.axvline(x[key], color=col, lw=0.8, ls=":")
-                ax.text(x[key] + 0.8, 300, f"n* ≈ 2^{x[key]:.1f}", color=C["ink"], fontsize=8, rotation=90, va="center")
+                ax.text(x[key] + 0.6, 0.065, f"n* ≈ 2^{x[key]:.1f} (h = 2)", color=C["ink"], fontsize=7.5)
     ax.axhline(1, color=C["ink2"], lw=0.8)
     ax.text(81, 1.2, "rho", fontsize=8, color=C["ink2"])
     ax.set_yscale("log")
