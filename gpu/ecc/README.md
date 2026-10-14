@@ -124,6 +124,11 @@ refuses timing admission while leaving a correctly verified answer intact.
 The host elapsed duration includes process startup and all one-target work;
 the CUDA event duration covers the instrumented kernels and seed phases.
 
+The [2026-10-13 RunPod RTX 4090 validation](validation/20261013-runpod-4090/README.md)
+contains a frozen-target solve, the CUDA binary snapshot and a passing offline
+receipt audit. Its answer is verified; wall time was refused because the tested
+driver does not expose the requested PCIe traffic counter.
+
 `ecbench calibrate --quiet Q.json ... --contended C.json ... --out report.json`
 checks repeated CPU A/A comparisons. It reports empirical coverage of one,
 Wilson intervals, quiet false-positive rate and the rate at which contended

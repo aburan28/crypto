@@ -278,6 +278,8 @@ pub struct GpuSample {
     pub completed_unix_ms: u128,
     pub gpu_csv: Option<String>,
     pub pcie_traffic_csv: Option<String>,
+    #[serde(default)]
+    pub pcie_error: Option<String>,
     pub processes_csv: Option<String>,
     pub error: Option<String>,
 }
@@ -323,24 +325,30 @@ fn sample_gpu(binary: &Path) -> GpuSample {
             .output()
             .map_err(|e| e.to_string())?;
         if !o.status.success() {
-            return Err(format!("{}: {}", arg, String::from_utf8_lossy(&o.stderr)));
+            let detail = if o.stderr.is_empty() {
+                &o.stdout
+            } else {
+                &o.stderr
+            };
+            return Err(format!(
+                "{}: {}",
+                arg,
+                String::from_utf8_lossy(detail).trim()
+            ));
         }
         String::from_utf8(o.stdout).map_err(|e| e.to_string())
     };
     let gpu = query("--query-gpu=index,uuid,clocks.current.sm,clocks.current.memory,utilization.gpu,utilization.memory,pcie.link.gen.current,pcie.link.width.current,memory.used,memory.total");
-    let completed = unix_ms();
     let pcie = query("--query-gpu=pcie.rx_util,pcie.tx_util");
     let processes = query("--query-compute-apps=pid,gpu_uuid");
     GpuSample {
         unix_ms: started,
-        completed_unix_ms: completed,
+        completed_unix_ms: unix_ms(),
         gpu_csv: gpu.as_ref().ok().cloned(),
         pcie_traffic_csv: pcie.as_ref().ok().cloned(),
+        pcie_error: pcie.as_ref().err().cloned(),
         processes_csv: processes.as_ref().ok().cloned(),
-        error: gpu
-            .err()
-            .or_else(|| pcie.err())
-            .or_else(|| processes.as_ref().err().cloned()),
+        error: gpu.err().or_else(|| processes.as_ref().err().cloned()),
     }
 }
 
@@ -370,6 +378,15 @@ fn field_u64(map: &std::collections::BTreeMap<String, String>, key: &str) -> Opt
 fn parse_scalar_hex(value: &str) -> Option<u128> {
     let digits = value.strip_prefix("0x")?.trim_start_matches('0');
     u128::from_str_radix(if digits.is_empty() { "0" } else { digits }, 16).ok()
+}
+
+fn parse_coordinate_hex(value: &str) -> Result<u64, String> {
+    let digits = value
+        .strip_prefix("0x")
+        .or_else(|| value.strip_prefix("0X"))
+        .unwrap_or(value);
+    u64::from_str_radix(digits, 16)
+        .map_err(|e| format!("invalid workload target coordinate {value:?}: {e}"))
 }
 
 fn gpu_admission(
@@ -433,7 +450,10 @@ fn gpu_admission(
             let parts: Vec<_> = v.trim().split(',').map(str::trim).collect();
             parts.len() != 2 || parts.iter().any(|p| p.parse::<f64>().is_err())
         }) {
-            blockers.push("PCIe traffic counters unavailable".into());
+            blockers.push(match &s.pcie_error {
+                Some(e) => format!("PCIe traffic counters unavailable: {e}"),
+                None => "PCIe traffic counters unavailable".into(),
+            });
         }
         match cols[2].parse::<f64>() {
             Ok(v) if v > 0.0 => {
@@ -526,8 +546,8 @@ pub fn run_match(opts: &GpuMatchOptions) -> Result<GpuMatch, String> {
         );
     }
     let target = workload.target.clone();
-    let x = u64::from_str_radix(&target[0], 16).map_err(|e| e.to_string())?;
-    let y = u64::from_str_radix(&target[1], 16).map_err(|e| e.to_string())?;
+    let x = parse_coordinate_hex(&target[0])?;
+    let y = parse_coordinate_hex(&target[1])?;
     let mut cpu_id = None;
     let mut cpu_sha = None;
     let mut cpu_raw = None;
@@ -798,14 +818,8 @@ pub fn audit_match(dir: &Path) -> Result<Vec<String>, String> {
     }
     if let Some(command) = &receipt.solve {
         let stdout = check_command("solve", command, &mut issues)?;
-        let expected_x = format!(
-            "0x{:x}",
-            u64::from_str_radix(&workload.target[0], 16).map_err(|e| e.to_string())?
-        );
-        let expected_y = format!(
-            "0x{:x}",
-            u64::from_str_radix(&workload.target[1], 16).map_err(|e| e.to_string())?
-        );
+        let expected_x = format!("0x{:x}", parse_coordinate_hex(&workload.target[0])?);
+        let expected_y = format!("0x{:x}", parse_coordinate_hex(&workload.target[1])?);
         let argv = &command.argv;
         if argv.first().and_then(|s| Path::new(s).file_name())
             != Some(std::ffi::OsStr::new("gpu-bench.binary"))
@@ -927,6 +941,7 @@ mod tests {
             completed_unix_ms: 21,
             gpu_csv: Some("0, GPU-test, 1500, 5000, 0, 0, 4, 16, 950, 1000".into()),
             pcie_traffic_csv: Some("1, 1".into()),
+            pcie_error: None,
             processes_csv: Some(String::new()),
             error: None,
         };
@@ -934,6 +949,24 @@ mod tests {
         assert!(blockers
             .iter()
             .any(|reason| reason.contains("memory exceeded 90 percent")));
+    }
+
+    #[test]
+    fn unavailable_pcie_counters_do_not_erase_gpu_identity_or_clock_samples() {
+        let sample = GpuSample {
+            unix_ms: 20,
+            completed_unix_ms: 21,
+            gpu_csv: Some("0, GPU-test, 1500, 5000, 0, 0, 4, 16, 100, 1000".into()),
+            pcie_traffic_csv: None,
+            pcie_error: Some("field unsupported".into()),
+            processes_csv: Some(String::new()),
+            error: None,
+        };
+        let blockers = gpu_admission(&[sample.clone(), sample], 42, 10, 100);
+        assert_eq!(
+            blockers,
+            vec!["PCIe traffic counters unavailable: field unsupported".to_string()]
+        );
     }
 
     #[test]
