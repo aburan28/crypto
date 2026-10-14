@@ -13,3 +13,4 @@ Success = at least n reduced rows vanish over Z at the planted root (n = 2 singl
 | C1 S3 | 1 | max [4] | 25 | 0.09000 | 0.150 | 63 | 6/24 | 0.79 | 55 |
 | C1 S3 | 1 | max [4] | 25 | 0.09000 | 0.160 | 84 | 1/24 | 0.29 | 54 |
 | V3 S3 pair s=1 | 1 | max [4, 4] | 45 | 0.09474 | 0.110 | 21 | 24/24 | 12.29 | 4005 |
+| V3 S3 pair s=1 | 1 | max [4, 4] | 45 | 0.09474 | 0.120 | 27 | 24/24 | 7.62 | 3501 |
