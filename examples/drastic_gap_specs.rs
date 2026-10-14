@@ -23,7 +23,7 @@ fn main() {
     let doc: Value =
         serde_json::from_slice(&std::fs::read(&pairs_path).unwrap()).expect("pairs json");
     let mut written = Vec::new();
-    for pair in doc["pairs"].as_array().unwrap() {
+    for pair in doc["pairs"].as_array().unwrap().iter() {
         let d = pair["d"].as_u64().unwrap();
         let ell = pair["ell"].as_u64().unwrap();
         let label = format!("d{}-ell{}", d, ell);

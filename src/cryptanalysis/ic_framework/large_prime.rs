@@ -88,7 +88,9 @@ impl LargePrimeConfig {
                 .parse::<f64>()
                 .map_err(|_| format!("parameter `lp_domain_factor` is not a number: `{raw}`"))?,
         };
-        if !domain_factor.is_finite() || domain_factor <= 0.0 {
+        if domain_factor.partial_cmp(&0.0) != Some(std::cmp::Ordering::Greater)
+            || !domain_factor.is_finite()
+        {
             return Err("lp_domain_factor must be a positive number".into());
         }
         let raw_x_cap = params.u64_or("lp_raw_x_cap", 1 << 40)?;

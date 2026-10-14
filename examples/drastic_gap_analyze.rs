@@ -52,7 +52,10 @@ fn cross_curve(a: &[f64], b: &[f64]) -> Value {
 }
 
 fn arg(args: &[String], name: &str) -> String {
-    let i = args.iter().position(|s| s == name).expect("required argument");
+    let i = args
+        .iter()
+        .position(|s| s == name)
+        .expect("required argument");
     args.get(i + 1).expect("argument value").clone()
 }
 
@@ -86,10 +89,9 @@ fn identities(spec: &Value) -> Vec<Value> {
 }
 
 fn analyze(dir: &Path, cell: &str) -> Result<Value, String> {
-    let spec: Value = serde_json::from_slice(
-        &std::fs::read(dir.join("spec.json")).map_err(|e| e.to_string())?,
-    )
-    .map_err(|e| e.to_string())?;
+    let spec: Value =
+        serde_json::from_slice(&std::fs::read(dir.join("spec.json")).map_err(|e| e.to_string())?)
+            .map_err(|e| e.to_string())?;
     let curves = spec["workloads"]["curves"].as_array().ok_or("curves")?;
     if curves.len() != 2 {
         return Err("the protocol requires exactly two fixed curves".into());
@@ -138,7 +140,9 @@ fn analyze(dir: &Path, cell: &str) -> Result<Value, String> {
             let mut levels = BTreeMap::<String, usize>::new();
             for r in &selected {
                 *statuses.entry(r.outcome.status.clone()).or_default() += 1;
-                *levels.entry(r.isolation.level.name().to_string()).or_default() += 1;
+                *levels
+                    .entry(r.isolation.level.name().to_string())
+                    .or_default() += 1;
                 ids.push(r.run_id.clone());
                 bounded |= r.cost.lower_bound;
                 unpriced.extend(r.cost.unpriced.clone());
@@ -147,7 +151,10 @@ fn analyze(dir: &Path, cell: &str) -> Result<Value, String> {
                     if !s.is_finite() || s <= 0.0 {
                         return Err("invalid S".into());
                     }
-                    workloads.entry(r.workload.workload_id.clone()).or_default().push(s);
+                    workloads
+                        .entry(r.workload.workload_id.clone())
+                        .or_default()
+                        .push(s);
                     for p in &r.phases {
                         *phases.entry(p.name.clone()).or_default() += p.gae;
                     }
@@ -167,7 +174,10 @@ fn analyze(dir: &Path, cell: &str) -> Result<Value, String> {
             let valid = selected.iter().all(|r| r.outcome.status == "verified")
                 && selected.len() == 8
                 && workloads.len() == 8;
-            let values = workloads.values().map(|v| mean(v).unwrap()).collect::<Vec<f64>>();
+            let values = workloads
+                .values()
+                .map(|v| mean(v).unwrap())
+                .collect::<Vec<f64>>();
             samples.push(values.clone());
             let mean_s = valid.then(|| mean(&values)).flatten();
             let n = selected.len() as f64;
@@ -228,12 +238,14 @@ fn analyze(dir: &Path, cell: &str) -> Result<Value, String> {
         );
     }
     let source = std::fs::read(dir.join("records.jsonl")).map_err(|e| e.to_string())?;
-    Ok(json!({"cell":cell,"session":dir,"session_id":records.first().map(|r|&r.session_id),
+    Ok(
+        json!({"cell":cell,"session":dir,"session_id":records.first().map(|r|&r.session_id),
     "curve_manifests":identities(&spec),
     "records":records.len(),"measured":measured.len(),"failed":failed,
     "records_sha256":sha256_hex(&source),"arms":arms,"ic_vs_rho":by_curve,
     "aa":{"pairs":aa_pairs,"mismatches":aa_mismatch},
-    "status":"observations on two fixed curves; no population hardness or speedup claim"}))
+    "status":"observations on two fixed curves; no population hardness or speedup claim"}),
+    )
 }
 
 fn selected_control<'a>(
@@ -265,7 +277,8 @@ fn main() -> Result<(), String> {
     ];
     let mut sessions = Vec::new();
     for (cell, d, ell) in cells {
-        sessions.push(analyze(&Path::new(&root).join(cell), cell).map_err(|e| format!("{cell}: {e}"))?);
+        sessions
+            .push(analyze(&Path::new(&root).join(cell), cell).map_err(|e| format!("{cell}: {e}"))?);
         let _ = (d, ell);
     }
     let mut markdown = String::from(
@@ -294,7 +307,9 @@ Independent target samples on each fixed curve. Ratios of lower bounds are diagn
                 cc["ci99"][0].as_f64().unwrap(),
                 cc["ci99"][1].as_f64().unwrap(),
                 cc["permutation_p_two_sided"].as_f64().unwrap(),
-                s["ic_vs_rho"]["crater"]["ic_arm_present"].as_bool().unwrap(),
+                s["ic_vs_rho"]["crater"]["ic_arm_present"]
+                    .as_bool()
+                    .unwrap(),
             );
         }
         let _ = writeln!(
@@ -302,7 +317,10 @@ Independent target samples on each fixed curve. Ratios of lower bounds are diagn
             "| {} | aa-control | pairs {} mismatches {} | | | | | |",
             s["cell"].as_str().unwrap_or_default(),
             s["aa"]["pairs"],
-            s["aa"]["mismatches"].as_array().map(|m| m.len()).unwrap_or(0),
+            s["aa"]["mismatches"]
+                .as_array()
+                .map(|m| m.len())
+                .unwrap_or(0),
         );
     }
     std::fs::create_dir_all(&out).unwrap();

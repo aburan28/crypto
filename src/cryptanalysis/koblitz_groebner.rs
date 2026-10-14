@@ -9348,9 +9348,11 @@ pub fn refutation_degree_trace_take() -> Option<RefutationDegreeTrace> {
     REFUTATION_TRACE.with(|t| t.borrow_mut().as_mut().map(std::mem::take))
 }
 
-// Retain these hooks for the sealed trace schema and probe. No production
-// call site is enabled yet, so manufacturing accounting events here would be
-// less accurate than leaving the dormant hooks explicit.
+// KNOWN GAP (needs the W4 author): the engine call sites of these helpers (and
+// of the early-abort probes) were added in acd95f18f (lit2026 W4) and dropped
+// by the merge ca6c5d42e into the W4 branch, which took main's rewritten solver
+// (#1714). Until they are re-wired, f4_refutation_degree_probe emits an empty
+// trace. The allow is only to keep clippy -D warnings green, not a retirement.
 #[allow(dead_code)]
 fn trace_on() -> bool {
     REFUTATION_TRACE.with(|t| t.borrow().is_some())

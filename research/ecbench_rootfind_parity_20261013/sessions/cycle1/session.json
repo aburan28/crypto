@@ -1,0 +1,52 @@
+{
+  "schema": "ecbench.session/v1",
+  "session_id": "ECBS1hcd05f1dc18a3",
+  "label": "rootfind parity cycle-1: negation-folded PairTable vs full rootfind and F4 on E_0 n=13",
+  "spec_id": "ECS1h017848b078cf",
+  "spec_sha256": "017848b078cfc136f4dd21d4c9be1cf24e1947764e72c85c7b6feb65575c98d7",
+  "env_class_id": "ECBENV2h59034d4cd61b",
+  "host_sha256": "9cb52e986be88ba05c1ab8084a998d7616bd53cc5352dbfe7273c5236661fea1",
+  "plan_sha256": "4d971e2edf4e8e685d837ecfecb9076f2e6276275d6477892113f0e110e5c542",
+  "binary_sha256": "de2e66bcf3ed770d5ea6fdf87a4c24bb16fd3c4f554cee5a65dc41699dcb320c",
+  "git_commit": "2fad98b0bdaedc5735156ba7e3188c729e5f8c03",
+  "git_dirty": true,
+  "options": {
+    "cpus": "none",
+    "lock_path": "/tmp/crypto-bench.lock",
+    "wait_for_lock": true,
+    "allow_busy": true,
+    "thresholds": {
+      "settle_seconds": 2.0,
+      "max_other_cpu": 0.1,
+      "max_psi": 5.0,
+      "max_preemptions_per_second": 50.0
+    },
+    "exe": "/Volumes/SSD990/wt-ecbench-rootfind-improve/target-parity/release/ecbench"
+  },
+  "cpu_plan": null,
+  "preflight": null,
+  "eviction": null,
+  "runner_on_run_cpu": false,
+  "runner_cpus": null,
+  "ticks_per_second": 100,
+  "grading_version": 2,
+  "child_env_sha256": "c864f1c39059fcb9b5d2c164fc1b15ad9b732e186305f882864a8e39c25c95c6",
+  "child_env": {
+    "HOME": "/Users/adamburan",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "PATH": "/Users/adamburan/.local/bin:/Users/adamburan/.bun/bin:/Users/adamburan/.bun/bin:/Users/adamburan/.bun/bin:/Users/adamburan/bin:/Users/adamburan/.opencode/bin:/Users/adamburan/.bun/bin:/Users/adamburan/.pyenv/shims:/Users/adamburan/.pyenv/bin:/Users/adamburan/.elan/bin:/Users/adamburan/.local/bin:/Users/adamburan/.local/share/solana/install/active_release/bin:/Library/Frameworks/Python.framework/Versions/3.13/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS:/usr/local/go/bin:/Applications/Cursor.app/Contents/Resources/app/node_modules/@vscode/ripgrep/bin:/Users/adamburan/.local/bin:/Users/adamburan/.bun/bin:/Users/adamburan/bin:/Users/adamburan/.opencode/bin:/Users/adamburan/.atuin/bin:/Users/adamburan/.pyenv/bin:/Users/adamburan/.elan/bin:/Users/adamburan/.local/share/solana/install/active_release/bin:/Library/Frameworks/Python.framework/Versions/3.13/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/adamburan/.cargo/bin:/Users/adamburan/.docker/bin:/Users/adamburan/go/bin:/Users/adamburan/istio-1.24.0/bin:/Users/adamburan/.lmstudio/bin:/Users/adamburan/.docker/bin:/Users/adamburan/go/bin:/Users/adamburan/istio-1.24.0/bin:/Users/adamburan/.local/bin:/Users/adamburan/.lmstudio/bin",
+    "RAYON_NUM_THREADS": "1",
+    "RUST_BACKTRACE": "0",
+    "RUST_MIN_STACK": "8388608"
+  },
+  "started_unix_ms": 1791939104971,
+  "finished_unix_ms": 1791939107598,
+  "status": "complete",
+  "executions_planned": 48,
+  "records_written": 48,
+  "records_sha256": "dcb46b71698c151046d8e37221b27860f739ea2ff33bb9937f04c6c73f289a2c",
+  "status_counts": {
+    "verified": 48
+  }
+}

@@ -230,35 +230,6 @@ fn order_2r_generator(p: u64, a: u64, b: u64, n: u64, r: u64, rng: &mut Rng) -> 
     None
 }
 
-/// The first point of order 2r on a curve known to have order 2r, then
-/// its double (order r). Returns the order-r generator.
-#[allow(dead_code)]
-fn first_generator_2r(p: u64, a: u64, b: u64, n: u64, r: u64) -> Option<(u64, u64)> {
-    let mut x = 0u64;
-    while x < p {
-        let rhs = addmod(
-            addmod(mulmod(x, mulmod(x, x, p), p), mulmod(a, x, p), p),
-            b,
-            p,
-        );
-        if let Some(y) = sqrtmod(rhs, p) {
-            if y != 0 {
-                let pt = Some((x, y));
-                if pmul(&pt, n, a, p).is_none() && pmul(&pt, r, a, p).is_some() {
-                    let double = padd(&pt, &pt, a, p)?;
-                    let g = Some(double);
-                    if pmul(&g, r, a, p).is_some() {
-                        return None; // [r][2]P must be O
-                    }
-                    return Some(double);
-                }
-            }
-        }
-        x += 1;
-    }
-    None
-}
-
 /// The first point of order exactly N (cofactor 1).
 fn first_generator(p: u64, a: u64, b: u64, _n: u64) -> Option<(u64, u64)> {
     let mut x = 0u64;

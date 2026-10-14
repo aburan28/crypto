@@ -1,0 +1,9 @@
+{
+  "schema": "rootfinding.lane_test_receipt/v1",
+  "invocation_source_commit": "21de047e5c02fd608c913f184bc21eab9ef7c965",
+  "command": "cargo test --offline --locked --release --lib prime_lane_collector_has_identical_serial_and_batched_streams -- --test-threads=1",
+  "result": "passed",
+  "raw_log_file": "prime-lanes-postmerge-preformat.log.gz",
+  "raw_log_sha256": "2f7b72eb9d0191e0d28fdd2c5dbcb0fc6404747833904e9805ee5433c231ebd8",
+  "source_note": "Formatting-only edits to ic_boundary.rs and ic_framework modules were made while this release compilation was in progress; a final-tree build is recorded separately."
+}

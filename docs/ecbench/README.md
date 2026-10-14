@@ -470,6 +470,14 @@ bases the Gröbner arms use, so the engines meet on one query stream
   **Counted, not charged:** one `lookup` per probe (priced only where the
   curve has a pinned ratio, like every table oracle's) and the table's
   entry count in `oracle_setup`. The record has no `solver` block.
+- `pdp3-koblitz:m=3,engine=rootfind-window` is the same table and set-up
+  charge with the cyclic third-summand window of
+  `PairSumTable::decompose_fast_window`: `⌈|F|/3⌉` probes a target, started
+  at `x(R) mod |F|` (deterministic in the public point). It is a different
+  search from full `rootfind` (and from inherited-F4), so it is a separate
+  engine id and is not compared on query-stream identity. The native
+  counters record `pair_table_points` and `scan_window_len`. Improve-loop
+  evidence: `research/ecbench_rootfind_improve_20261013/`.
 - `rootfind-subtract:m=2|3` on a prime curve is `prime_fast`'s
   direct-subtraction root finding: the Semaev `S₃` root in the third
   variable is `x(R ∓ F_i)`, so every candidate of a target comes from one

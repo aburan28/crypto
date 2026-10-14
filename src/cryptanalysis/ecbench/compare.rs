@@ -567,12 +567,9 @@ fn measurement_quality(
     }
     q.p95_foreign_busy_percent = crate::cryptanalysis::ecbench::stats::quantile(&foreign, 0.95);
     q.p95_run_queue_percent = crate::cryptanalysis::ecbench::stats::quantile(&delay, 0.95);
-    if q.paired_attempts > 0 {
+    if let Some(mean_points) = points.checked_div(q.paired_attempts) {
         let calibrated = required >= Level::L2
             && matches!(wall.aa_ci95, Some((lo, hi)) if (0.9..=1.0).contains(&lo) && (1.0..=1.1).contains(&hi));
-        let mean_points = points
-            .checked_div(q.paired_attempts)
-            .expect("paired attempts are nonzero");
         q.score = Some((mean_points as u8).saturating_add(if calibrated { 10 } else { 0 }));
         if required < Level::L2 {
             q.notes

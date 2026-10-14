@@ -1,0 +1,22 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Prime root-finding pair table: two versus three summands at 64 abscissae",
+  "description": "Cold single-target counted-cost comparison on fresh public targets; same base and checked linear algebra, different relation arity.",
+  "workloads": {
+    "curves": [{"kind": "prime_search", "bits": 20, "seed": 59297}],
+    "target_kind": "public",
+    "targets_per_curve": 8,
+    "target_seed": 20261014
+  },
+  "arms": [
+    {"name": "rho-neg", "role": "reference", "method": {"id": "rho.negation"}},
+    {"name": "pair-m2", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "prime-abscissa:size=64", "oracle": "mitm:m=2,negation_folded=1", "linalg": "incremental-gauss-full-rank-checked", "max_trials": "5000000"}}},
+    {"name": "pair-m3", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "prime-abscissa:size=64", "oracle": "mitm:m=3,negation_folded=1", "linalg": "incremental-gauss-full-rank-checked", "max_trials": "5000000"}}},
+    {"name": "rootfind-m3", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "prime-abscissa:size=64", "oracle": "rootfind-subtract:m=3", "linalg": "incremental-gauss-full-rank-checked", "max_trials": "5000000"}}},
+    {"name": "rho-neg-aa", "role": "control", "method": {"id": "rho.negation"}}
+  ],
+  "measurement": {"rounds": 3, "warmup": 1, "order": "alternate", "seed": 20261014, "isolation_required": "L2", "timeout_seconds": 120}
+}
