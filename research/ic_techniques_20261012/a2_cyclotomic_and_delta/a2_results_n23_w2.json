@@ -1,0 +1,604 @@
+{
+  "args": {
+    "cell_timeout_secs": 60,
+    "macaulay_extra": 1,
+    "node_budget": 1024,
+    "seed": 20261012,
+    "solver_engine": "inherited",
+    "solver_engine_note": "Boolean F4 ladder from the system degree (max_degree 3 is the floor; a degree-d system builds degree d), splitting on the engine's rule when the algebra stalls",
+    "targets": 16,
+    "wdsat_timeout_secs": 20,
+    "witness_cap_per_target": 256,
+    "yield_targets": 0
+  },
+  "census": [
+    {
+      "a": 1,
+      "abscissae": 23,
+      "abscissae_with_points": 22,
+      "build_ms": 21.952125,
+      "family": {
+        "family": "cyclotomic",
+        "w": 1
+      },
+      "frobenius_stable": true,
+      "n": 11,
+      "orbits": 4,
+      "p": 23,
+      "points": 44,
+      "points_in_subgroup": 22,
+      "predicted_abscissae": 23,
+      "projected_columns": 11,
+      "projected_points": 22,
+      "retained_orbits": null,
+      "signed_orbits": 2
+    },
+    {
+      "a": 1,
+      "abscissae": 22,
+      "abscissae_with_points": 22,
+      "build_ms": 21.350082999999998,
+      "family": {
+        "family": "onb_weight",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 11,
+      "orbits": 4,
+      "p": 23,
+      "points": 44,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 55,
+      "projected_columns": 22,
+      "projected_points": 44,
+      "retained_orbits": 2,
+      "signed_orbits": 2
+    },
+    {
+      "a": 1,
+      "abscissae": 253,
+      "abscissae_with_points": 110,
+      "build_ms": 3.56475,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 11,
+      "orbits": 20,
+      "p": 23,
+      "points": 220,
+      "points_in_subgroup": 154,
+      "predicted_abscissae": 253,
+      "projected_columns": 110,
+      "projected_points": 220,
+      "retained_orbits": null,
+      "signed_orbits": 10
+    },
+    {
+      "a": 1,
+      "abscissae": 110,
+      "abscissae_with_points": 110,
+      "build_ms": 165.91525,
+      "family": {
+        "family": "onb_weight",
+        "w": 4
+      },
+      "frobenius_stable": true,
+      "n": 11,
+      "orbits": 20,
+      "p": 23,
+      "points": 220,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 330,
+      "projected_columns": 110,
+      "projected_points": 220,
+      "retained_orbits": 10,
+      "signed_orbits": 10
+    },
+    {
+      "a": 1,
+      "abscissae": 1771,
+      "abscissae_with_points": 858,
+      "build_ms": 104.151917,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "frobenius_stable": true,
+      "n": 11,
+      "orbits": 156,
+      "p": 23,
+      "points": 1716,
+      "points_in_subgroup": 814,
+      "predicted_abscissae": 1771,
+      "projected_columns": 484,
+      "projected_points": 968,
+      "retained_orbits": null,
+      "signed_orbits": 78
+    },
+    {
+      "a": 0,
+      "abscissae": 47,
+      "abscissae_with_points": 1,
+      "build_ms": 11.675875000000001,
+      "family": {
+        "family": "cyclotomic",
+        "w": 1
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 2,
+      "p": 47,
+      "points": 2,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 47,
+      "projected_columns": 0,
+      "projected_points": 0,
+      "retained_orbits": null,
+      "signed_orbits": 1
+    },
+    {
+      "a": 0,
+      "abscissae": 23,
+      "abscissae_with_points": 23,
+      "build_ms": 43.202,
+      "family": {
+        "family": "onb_weight",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 2,
+      "p": 47,
+      "points": 46,
+      "points_in_subgroup": 46,
+      "predicted_abscissae": 253,
+      "projected_columns": 23,
+      "projected_points": 46,
+      "retained_orbits": 1,
+      "signed_orbits": 1
+    },
+    {
+      "a": 0,
+      "abscissae": 1081,
+      "abscissae_with_points": 391,
+      "build_ms": 34.643375,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 34,
+      "p": 47,
+      "points": 782,
+      "points_in_subgroup": 184,
+      "predicted_abscissae": 1081,
+      "projected_columns": 391,
+      "projected_points": 782,
+      "retained_orbits": null,
+      "signed_orbits": 17
+    },
+    {
+      "a": 0,
+      "abscissae": 391,
+      "abscissae_with_points": 391,
+      "build_ms": 240.224625,
+      "family": {
+        "family": "onb_weight",
+        "w": 3
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 34,
+      "p": 47,
+      "points": 782,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 1771,
+      "projected_columns": 391,
+      "projected_points": 782,
+      "retained_orbits": 17,
+      "signed_orbits": 17
+    },
+    {
+      "a": 0,
+      "abscissae": 16215,
+      "abscissae_with_points": 8441,
+      "build_ms": 1049.8880829999998,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 734,
+      "p": 47,
+      "points": 16882,
+      "points_in_subgroup": 4554,
+      "predicted_abscissae": 16215,
+      "projected_columns": 8441,
+      "projected_points": 16882,
+      "retained_orbits": null,
+      "signed_orbits": 367
+    },
+    {
+      "a": 0,
+      "abscissae": 8441,
+      "abscissae_with_points": 8441,
+      "build_ms": 2923.167792,
+      "family": {
+        "family": "onb_weight",
+        "w": 5
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 734,
+      "p": 47,
+      "points": 16882,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 33649,
+      "projected_columns": 8418,
+      "projected_points": 16836,
+      "retained_orbits": 367,
+      "signed_orbits": 367
+    },
+    {
+      "a": 1,
+      "abscissae": 47,
+      "abscissae_with_points": 46,
+      "build_ms": 21.071708,
+      "family": {
+        "family": "cyclotomic",
+        "w": 1
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 4,
+      "p": 47,
+      "points": 92,
+      "points_in_subgroup": 46,
+      "predicted_abscissae": 47,
+      "projected_columns": 23,
+      "projected_points": 46,
+      "retained_orbits": null,
+      "signed_orbits": 2
+    },
+    {
+      "a": 1,
+      "abscissae": 46,
+      "abscissae_with_points": 46,
+      "build_ms": 80.01733399999999,
+      "family": {
+        "family": "onb_weight",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 4,
+      "p": 47,
+      "points": 92,
+      "points_in_subgroup": 0,
+      "predicted_abscissae": 253,
+      "projected_columns": 46,
+      "projected_points": 92,
+      "retained_orbits": 2,
+      "signed_orbits": 2
+    },
+    {
+      "a": 1,
+      "abscissae": 1081,
+      "abscissae_with_points": 690,
+      "build_ms": 31.430542,
+      "family": {
+        "family": "cyclotomic",
+        "w": 2
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 60,
+      "p": 47,
+      "points": 1380,
+      "points_in_subgroup": 782,
+      "predicted_abscissae": 1081,
+      "projected_columns": 690,
+      "projected_points": 1380,
+      "retained_orbits": null,
+      "signed_orbits": 30
+    },
+    {
+      "a": 1,
+      "abscissae": 690,
+      "abscissae_with_points": 690,
+      "build_ms": 241.009041,
+      "family": {
+        "family": "onb_weight",
+        "w": 3
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 60,
+      "p": 47,
+      "points": 1380,
+      "points_in_subgroup": 1380,
+      "predicted_abscissae": 1771,
+      "projected_columns": 690,
+      "projected_points": 1380,
+      "retained_orbits": 30,
+      "signed_orbits": 30
+    },
+    {
+      "a": 1,
+      "abscissae": 16215,
+      "abscissae_with_points": 7774,
+      "build_ms": 761.737708,
+      "family": {
+        "family": "cyclotomic",
+        "w": 3
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 676,
+      "p": 47,
+      "points": 15548,
+      "points_in_subgroup": 8418,
+      "predicted_abscissae": 16215,
+      "projected_columns": 7774,
+      "projected_points": 15548,
+      "retained_orbits": null,
+      "signed_orbits": 338
+    },
+    {
+      "a": 1,
+      "abscissae": 7774,
+      "abscissae_with_points": 7774,
+      "build_ms": 2820.428625,
+      "family": {
+        "family": "onb_weight",
+        "w": 5
+      },
+      "frobenius_stable": true,
+      "n": 23,
+      "orbits": 676,
+      "p": 47,
+      "points": 15548,
+      "points_in_subgroup": 15548,
+      "predicted_abscissae": 33649,
+      "projected_columns": 7774,
+      "projected_points": 15548,
+      "retained_orbits": 338,
+      "signed_orbits": 338
+    }
+  ],
+  "generated_utc": "unix:1791856301",
+  "host": {
+    "arch": "aarch64",
+    "os": "macos"
+  },
+  "lead": "A2 cyclotomic-sparse Frobenius-stable factor bases",
+  "matched_pairs": [
+    {
+      "a": 1,
+      "cyclotomic_columns": 2,
+      "n": 11,
+      "onb": {
+        "a": 1,
+        "abscissae": 22,
+        "abscissae_with_points": 22,
+        "build_ms": 21.350082999999998,
+        "family": {
+          "family": "onb_weight",
+          "w": 2
+        },
+        "frobenius_stable": true,
+        "n": 11,
+        "orbits": 4,
+        "p": 23,
+        "points": 44,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 55,
+        "projected_columns": 22,
+        "projected_points": 44,
+        "retained_orbits": 2,
+        "signed_orbits": 2
+      },
+      "w": 1
+    },
+    {
+      "a": 1,
+      "cyclotomic_columns": 10,
+      "n": 11,
+      "onb": {
+        "a": 1,
+        "abscissae": 110,
+        "abscissae_with_points": 110,
+        "build_ms": 165.91525,
+        "family": {
+          "family": "onb_weight",
+          "w": 4
+        },
+        "frobenius_stable": true,
+        "n": 11,
+        "orbits": 20,
+        "p": 23,
+        "points": 220,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 330,
+        "projected_columns": 110,
+        "projected_points": 220,
+        "retained_orbits": 10,
+        "signed_orbits": 10
+      },
+      "w": 2
+    },
+    {
+      "a": 0,
+      "cyclotomic_columns": 1,
+      "n": 23,
+      "onb": {
+        "a": 0,
+        "abscissae": 23,
+        "abscissae_with_points": 23,
+        "build_ms": 43.202,
+        "family": {
+          "family": "onb_weight",
+          "w": 2
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 2,
+        "p": 47,
+        "points": 46,
+        "points_in_subgroup": 46,
+        "predicted_abscissae": 253,
+        "projected_columns": 23,
+        "projected_points": 46,
+        "retained_orbits": 1,
+        "signed_orbits": 1
+      },
+      "w": 1
+    },
+    {
+      "a": 0,
+      "cyclotomic_columns": 17,
+      "n": 23,
+      "onb": {
+        "a": 0,
+        "abscissae": 391,
+        "abscissae_with_points": 391,
+        "build_ms": 240.224625,
+        "family": {
+          "family": "onb_weight",
+          "w": 3
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 34,
+        "p": 47,
+        "points": 782,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 1771,
+        "projected_columns": 391,
+        "projected_points": 782,
+        "retained_orbits": 17,
+        "signed_orbits": 17
+      },
+      "w": 2
+    },
+    {
+      "a": 0,
+      "cyclotomic_columns": 367,
+      "n": 23,
+      "onb": {
+        "a": 0,
+        "abscissae": 8441,
+        "abscissae_with_points": 8441,
+        "build_ms": 2923.167792,
+        "family": {
+          "family": "onb_weight",
+          "w": 5
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 734,
+        "p": 47,
+        "points": 16882,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 33649,
+        "projected_columns": 8418,
+        "projected_points": 16836,
+        "retained_orbits": 367,
+        "signed_orbits": 367
+      },
+      "w": 3
+    },
+    {
+      "a": 1,
+      "cyclotomic_columns": 2,
+      "n": 23,
+      "onb": {
+        "a": 1,
+        "abscissae": 46,
+        "abscissae_with_points": 46,
+        "build_ms": 80.01733399999999,
+        "family": {
+          "family": "onb_weight",
+          "w": 2
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 4,
+        "p": 47,
+        "points": 92,
+        "points_in_subgroup": 0,
+        "predicted_abscissae": 253,
+        "projected_columns": 46,
+        "projected_points": 92,
+        "retained_orbits": 2,
+        "signed_orbits": 2
+      },
+      "w": 1
+    },
+    {
+      "a": 1,
+      "cyclotomic_columns": 30,
+      "n": 23,
+      "onb": {
+        "a": 1,
+        "abscissae": 690,
+        "abscissae_with_points": 690,
+        "build_ms": 241.009041,
+        "family": {
+          "family": "onb_weight",
+          "w": 3
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 60,
+        "p": 47,
+        "points": 1380,
+        "points_in_subgroup": 1380,
+        "predicted_abscissae": 1771,
+        "projected_columns": 690,
+        "projected_points": 1380,
+        "retained_orbits": 30,
+        "signed_orbits": 30
+      },
+      "w": 2
+    },
+    {
+      "a": 1,
+      "cyclotomic_columns": 338,
+      "n": 23,
+      "onb": {
+        "a": 1,
+        "abscissae": 7774,
+        "abscissae_with_points": 7774,
+        "build_ms": 2820.428625,
+        "family": {
+          "family": "onb_weight",
+          "w": 5
+        },
+        "frobenius_stable": true,
+        "n": 23,
+        "orbits": 676,
+        "p": 47,
+        "points": 15548,
+        "points_in_subgroup": 15548,
+        "predicted_abscissae": 33649,
+        "projected_columns": 7774,
+        "projected_points": 15548,
+        "retained_orbits": 338,
+        "signed_orbits": 338
+      },
+      "w": 3
+    }
+  ],
+  "solver_cells": [],
+  "wall_ms": 8776.638667000001,
+  "wdsat": {
+    "reason": "no solver cells requested",
+    "status": "unavailable"
+  },
+  "yields": []
+}

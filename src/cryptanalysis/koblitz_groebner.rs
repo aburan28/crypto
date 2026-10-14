@@ -1215,7 +1215,7 @@ pub fn matrix_f4_f2_blocked(
     for row in matrix.iter().take(rank) {
         let monos = row_monos(row, &cols);
         if !monos.is_empty() {
-            out.push(F2BoolPoly::from_monos(monos, n_vars_out));
+            out.push(poly_from_column_order(monos, n_vars_out));
         }
     }
     Some((out, word_ops))
@@ -1242,6 +1242,16 @@ fn row_monos(row: &[u64], cols: &[u64]) -> Vec<F2BoolMono> {
         }
     }
     monos
+}
+
+/// Adopt terms read from unique, descending Macaulay columns. Set-bit
+/// readback preserves that order, so sorting and cancelling again would
+/// only copy the terms into another allocation.
+fn poly_from_column_order(terms: Vec<F2BoolMono>, n_vars: usize) -> F2BoolPoly {
+    debug_assert!(terms
+        .windows(2)
+        .all(|pair| cmp_mono(pair[0], pair[1]).is_gt()));
+    F2BoolPoly { terms, n_vars }
 }
 
 // ── Matrix-F4 over the Boolean ring ────────────────────────────────
@@ -1577,7 +1587,7 @@ fn matrix_f4_f2_counted_impl(
                     monos.push(F2BoolMono::from_mask(cols[column]));
                 }
             }
-            let poly = F2BoolPoly::from_monos(monos, n_vars_out);
+            let poly = poly_from_column_order(monos, n_vars_out);
             if is_constant_one(&poly) || forced_assignment(&poly).is_some() {
                 out.push(poly);
             }
@@ -1602,7 +1612,7 @@ fn matrix_f4_f2_counted_impl(
                     }
                 }
                 if monos.len() <= 2 {
-                    let poly = F2BoolPoly::from_monos(monos, n_vars_out);
+                    let poly = poly_from_column_order(monos, n_vars_out);
                     if is_constant_one(&poly) || forced_assignment(&poly).is_some() {
                         out.push(poly);
                     }
@@ -1610,7 +1620,7 @@ fn matrix_f4_f2_counted_impl(
             } else {
                 let monos = row_monos(row, &cols);
                 if !monos.is_empty() {
-                    out.push(F2BoolPoly::from_monos(monos, n_vars_out));
+                    out.push(poly_from_column_order(monos, n_vars_out));
                 }
             }
         }
@@ -2108,13 +2118,33 @@ pub(crate) fn f5_rows_monos_with_mask(
 
 /// Pack monomial rows as bit-rows over `cols` (descending monomial order).
 pub(crate) fn pack_rows(rows_monos: &[Vec<u64>], cols: &[u64]) -> Vec<Vec<u64>> {
+    let words = cols.len().div_ceil(64).max(1);
+    if std::env::var("KIC_F4_HASH_COLUMN_INDEX").as_deref() != Ok("1") {
+        if let Some(index) = F4ColumnIndex::dense_table(cols) {
+            return pack_rows_with_lookup(rows_monos, words, |monomial| {
+                let mask = usize::try_from(*monomial).expect("monomial exceeds dense column range");
+                let column = index[mask];
+                assert_ne!(column, u16::MAX, "monomial missing from column layout");
+                usize::from(column)
+            });
+        }
+    }
     let index: crate::cryptanalysis::fx_hash::MaskMap<usize> =
         cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
-    let words = cols.len().div_ceil(64).max(1);
+    pack_rows_with_lookup(rows_monos, words, |monomial| index[monomial])
+}
+
+// Choose the representation before packing. Separate monomorphisations avoid
+// an enum branch for every term on the sparse/high-bit hash fallback.
+fn pack_rows_with_lookup(
+    rows_monos: &[Vec<u64>],
+    words: usize,
+    lookup: impl Fn(&u64) -> usize + Sync,
+) -> Vec<Vec<u64>> {
     let pack = |monos: &Vec<u64>| {
         let mut row = vec![0u64; words];
         for m in monos {
-            let c = index[m];
+            let c = lookup(m);
             row[c / 64] |= 1u64 << (c % 64);
         }
         row
@@ -2956,7 +2986,7 @@ fn pack_rows_with_layout(
     for monos in rows_monos {
         let mut row = vec![0u64; words];
         for monomial in monos {
-            let &column = layout.index.get(monomial)?;
+            let column = layout.index.get(monomial)?;
             row[column / 64] |= 1 << (column % 64);
             if let Some(seen) = &mut seen {
                 seen[column] = true;
@@ -2991,7 +3021,7 @@ fn pack_rows_flat_with_layout(
     for (row_index, monos) in rows_monos.iter().enumerate() {
         let row = &mut data[row_index * words..(row_index + 1) * words];
         for monomial in monos {
-            let &column = layout.index.get(monomial)?;
+            let column = layout.index.get(monomial)?;
             row[column / 64] |= 1 << (column % 64);
             if let Some(seen) = &mut seen {
                 seen[column] = true;
@@ -3081,7 +3111,7 @@ fn pack_polynomials_flat_fused(
             data.resize(start + words, 0);
             let row = &mut data[start..start + words];
             for monomial in &product[..write] {
-                let &column = layout.index.get(monomial)?;
+                let column = layout.index.get(monomial)?;
                 row[column / 64] |= 1 << (column % 64);
                 seen[column] = true;
             }
@@ -3146,7 +3176,7 @@ fn pack_polynomials_nested_fused<const DIRECT: bool>(
                 let mut row = vec![0u64; words];
                 for term in &polynomial.terms {
                     let monomial = term.mask | multiplier;
-                    let &column = layout.index.get(&monomial)?;
+                    let column = layout.index.get(&monomial)?;
                     row[column / 64] ^= 1 << (column % 64);
                 }
                 if row.iter().all(|&word| word == 0) {
@@ -3189,7 +3219,7 @@ fn pack_polynomials_nested_fused<const DIRECT: bool>(
             }
             let mut row = vec![0u64; words];
             for monomial in &product[..write] {
-                let &column = layout.index.get(monomial)?;
+                let column = layout.index.get(monomial)?;
                 row[column / 64] |= 1 << (column % 64);
                 seen[column] = true;
             }
@@ -3481,6 +3511,12 @@ impl F4ColumnLayout {
                     .map(|(column, &monomial)| (monomial, column))
                     .collect(),
             )
+        } else if let Some(dense) = (std::env::var("KIC_F4_HASH_COLUMN_INDEX").as_deref()
+            != Ok("1"))
+        .then(|| F4ColumnIndex::dense(&columns))
+        .flatten()
+        {
+            dense
         } else {
             let mut index = FastColumnMap::with_capacity_and_hasher(
                 columns.len(),
@@ -3492,7 +3528,7 @@ impl F4ColumnLayout {
                     .enumerate()
                     .map(|(column, &monomial)| (monomial, column)),
             );
-            F4ColumnIndex::Fast(index)
+            F4ColumnIndex::Fast(F4FastColumnIndex::Hashed(index))
         };
         Self { columns, index }
     }
@@ -3500,14 +3536,54 @@ impl F4ColumnLayout {
 
 enum F4ColumnIndex {
     Standard(std::collections::HashMap<u64, usize>),
-    Fast(FastColumnMap),
+    Fast(F4FastColumnIndex),
+}
+
+// Nest the fast representations so the outer enum retains the original
+// hash-only metadata size, including on high-bit fallback layouts.
+enum F4FastColumnIndex {
+    Hashed(FastColumnMap),
+    Dense(Vec<u16>),
 }
 
 impl F4ColumnIndex {
-    fn get(&self, monomial: &u64) -> Option<&usize> {
+    /// Direct lookup only when it uses at most the entry bytes the hash
+    /// map must store, excluding its spare buckets and control bytes.
+    /// High-bit or sparse ranges fall back before allocating a table.
+    fn dense(columns: &[u64]) -> Option<Self> {
+        Self::dense_table(columns).map(|index| Self::Fast(F4FastColumnIndex::Dense(index)))
+    }
+
+    fn dense_table(columns: &[u64]) -> Option<Vec<u16>> {
+        if columns.len() > u16::MAX as usize {
+            return None;
+        }
+        let slots = usize::try_from(columns.iter().copied().max()?)
+            .ok()?
+            .checked_add(1)?;
+        let bytes = slots.checked_mul(std::mem::size_of::<u16>())?;
+        let hash_entry_bytes = columns
+            .len()
+            .checked_mul(std::mem::size_of::<(u64, usize)>())?;
+        if bytes > hash_entry_bytes {
+            return None;
+        }
+        let mut index = vec![u16::MAX; slots];
+        for (column, &monomial) in columns.iter().enumerate() {
+            index[monomial as usize] = column as u16;
+        }
+        Some(index)
+    }
+
+    fn get(&self, monomial: &u64) -> Option<usize> {
         match self {
-            Self::Standard(index) => index.get(monomial),
-            Self::Fast(index) => index.get(monomial),
+            Self::Standard(index) => index.get(monomial).copied(),
+            Self::Fast(F4FastColumnIndex::Hashed(index)) => index.get(monomial).copied(),
+            Self::Fast(F4FastColumnIndex::Dense(index)) => index
+                .get(usize::try_from(*monomial).ok()?)
+                .copied()
+                .filter(|&column| column != u16::MAX)
+                .map(usize::from),
         }
     }
 }
@@ -6633,6 +6709,209 @@ mod tests {
     }
 
     #[test]
+    fn packed_rows_match_column_positions_for_dense_sparse_and_parallel_inputs() {
+        // Reconstruct each bit from its column position, without lookup tables.
+        let reference = |rows: &[Vec<u64>], columns: &[u64]| -> Vec<Vec<u64>> {
+            rows.iter()
+                .map(|row| {
+                    let mut packed = vec![0; columns.len().div_ceil(64).max(1)];
+                    for (column, mask) in columns.iter().enumerate() {
+                        if row.contains(mask) {
+                            packed[column / 64] |= 1 << (column % 64);
+                        }
+                    }
+                    packed
+                })
+                .collect()
+        };
+        for columns in [
+            Vec::new(),
+            vec![0],
+            (0..137).map(|i| (i * 13) % 256).collect(),
+            vec![1 << 63, 0, 1 << 52, (1 << 63) | (1 << 52)],
+            vec![0, 1 << 20],
+            (0..u16::MAX as u64).collect(),
+            (0..=u16::MAX as u64).collect(),
+        ] {
+            let rows = vec![
+                Vec::new(),
+                columns.iter().copied().step_by(31).collect(),
+                columns
+                    .iter()
+                    .enumerate()
+                    .filter(|(i, _)| matches!(i % 128, 0 | 63 | 64 | 127))
+                    .flat_map(|(_, &mask)| [mask, mask])
+                    .collect(),
+                columns.iter().copied().rev().take(3).collect(),
+            ];
+            assert_eq!(pack_rows(&rows, &columns), reference(&rows, &columns));
+        }
+
+        // Wide rows cross the Rayon threshold without hundreds of thousands
+        // of small row allocations in this correctness test.
+        let columns: Vec<u64> = (0..u16::MAX as u64).collect();
+        let template = vec![columns[0], columns[63], columns[64], columns[65534]];
+        let words = columns.len().div_ceil(64);
+        let rows = vec![template.clone(); M4RI_PARALLEL_WORDS / words + 1];
+        let expected = reference(&[template], &columns).pop().unwrap();
+        assert!(pack_rows(&rows, &columns)
+            .iter()
+            .all(|row| *row == expected));
+        let index: crate::cryptanalysis::fx_hash::MaskMap<usize> = columns
+            .iter()
+            .enumerate()
+            .map(|(column, &mask)| (mask, column))
+            .collect();
+        assert!(pack_rows_with_lookup(&rows, words, |mask| index[mask])
+            .iter()
+            .all(|row| *row == expected));
+    }
+
+    #[test]
+    fn dense_column_lookup_matches_a_map_and_preserves_missing_masks() {
+        #[allow(dead_code)]
+        enum OriginalHashIndex {
+            Standard(std::collections::HashMap<u64, usize>),
+            Fast(FastColumnMap),
+        }
+        assert!(
+            std::mem::size_of::<F4ColumnIndex>() <= std::mem::size_of::<OriginalHashIndex>(),
+            "index metadata must not enlarge heap-resident fallback layouts"
+        );
+        let columns = [9, 0, 1, 7, 3, 5, 8];
+        let reference: std::collections::HashMap<_, _> = columns
+            .iter()
+            .enumerate()
+            .map(|(column, &mask)| (mask, column))
+            .collect();
+        let dense = F4ColumnIndex::dense(&columns).unwrap();
+        for mask in (0..32).chain([1 << 63, u64::MAX]) {
+            assert_eq!(dense.get(&mask), reference.get(&mask).copied());
+        }
+        assert!(F4ColumnIndex::dense(&[]).is_none());
+        assert!(F4ColumnIndex::dense(&[0, 1 << 20]).is_none());
+        assert!(F4ColumnIndex::dense(&[0, 1 << 63]).is_none());
+        assert!(F4ColumnIndex::dense(&[u64::MAX]).is_none());
+
+        // The largest encodable index is one below the missing sentinel.
+        let columns: Vec<_> = (0..u16::MAX as u64).collect();
+        let dense = F4ColumnIndex::dense(&columns).unwrap();
+        assert_eq!(dense.get(&(u16::MAX as u64 - 1)), Some(65534));
+        assert_eq!(dense.get(&(u16::MAX as u64)), None);
+        let too_many: Vec<_> = (0..=u16::MAX as u64).collect();
+        assert!(F4ColumnIndex::dense(&too_many).is_none());
+    }
+
+    #[test]
+    fn packed_readback_preserves_canonical_order_across_words_and_padding() {
+        let support = [0, 2, 7, 18, 52, 60, 63];
+        let mut cols: Vec<u64> = (0..128u64)
+            .map(|subset| {
+                support.iter().enumerate().fold(0, |mask, (i, bit)| {
+                    mask | if subset & (1 << i) != 0 { 1 << bit } else { 0 }
+                })
+            })
+            .collect();
+        cols.sort_unstable_by(|&a, &b| {
+            cmp_mono(F2BoolMono::from_mask(b), F2BoolMono::from_mask(a))
+        });
+        cols.truncate(117);
+        // Include boundary columns 63/64/116, padding from column 117,
+        // an extra padding word, empty rows and every valid column.
+        for row in [
+            [0, 0, 0],
+            [0, 0, u64::MAX],
+            [1 << 63, (1 << 52) | (1 << 53) | 1, u64::MAX],
+            [u64::MAX, u64::MAX, u64::MAX],
+            [0xaaaa_5555_aaaa_5555, 0x5555_aaaa_5555_aaaa, 0],
+        ] {
+            let expected = F2BoolPoly::from_monos(
+                cols.iter()
+                    .enumerate()
+                    .filter(|(i, _)| row[i / 64] & (1 << (i % 64)) != 0)
+                    .map(|(_, &mask)| F2BoolMono::from_mask(mask))
+                    .collect(),
+                64,
+            );
+            let actual = poly_from_column_order(row_monos(&row, &cols), 64);
+            assert_eq!(actual, expected);
+            assert!(actual
+                .terms
+                .windows(2)
+                .all(|pair| cmp_mono(pair[0], pair[1]).is_gt()));
+        }
+    }
+
+    #[test]
+    fn fused_f5_count_matches_polynomial_products_at_every_cap_boundary() {
+        let n_vars = 6;
+        let mask = all_variable_mask(n_vars);
+        let from_masks = |masks: &[u64]| {
+            F2BoolPoly::from_monos(
+                masks.iter().copied().map(F2BoolMono::from_mask).collect(),
+                64,
+            )
+        };
+        let polys = [
+            F2BoolPoly::zero(64),
+            from_masks(&[1, 3]), // Multiplication by x_1 cancels this row.
+            from_masks(&[3, 4, 0]),
+            from_masks(&[(1 << 63) | 4, 1 << 52, 0]),
+            F2BoolPoly::one(64),
+        ];
+        for degree in 0..=4 {
+            let criterion = F5Criterion::new(&polys, n_vars, degree, mask);
+            let mut full = 0;
+            let mut expected = Vec::new();
+            for (i, polynomial) in polys.iter().enumerate() {
+                let polynomial_degree = polynomial
+                    .terms
+                    .iter()
+                    .map(|term| term.degree())
+                    .max()
+                    .unwrap_or(0);
+                // Enumerate the whole small Boolean multiplier universe
+                // independently of the builder's cached row schedules.
+                for multiplier in 0..=mask {
+                    if polynomial_degree + multiplier.count_ones() > degree {
+                        continue;
+                    }
+                    let product = polynomial.mul_mono(F2BoolMono::from_mask(multiplier));
+                    if product.is_zero() {
+                        continue;
+                    }
+                    full += 1;
+                    if !criterion.prunes(i, multiplier) {
+                        let mut row: Vec<_> = product.terms.iter().map(|term| term.mask).collect();
+                        row.sort_unstable();
+                        expected.push(row);
+                    }
+                }
+            }
+            expected.sort_unstable();
+            for cap in 0..=full + 1 {
+                let mut rows = Vec::new();
+                let result = visit_macaulay_rows_counted::<true>(
+                    &polys,
+                    n_vars,
+                    degree,
+                    mask,
+                    Some(&criterion),
+                    cap,
+                    |row| rows.push(row.to_vec()),
+                );
+                if cap < full {
+                    assert!(result.is_none(), "degree {degree}, cap {cap}, full {full}");
+                } else {
+                    assert_eq!(result, Some((expected.len(), full)));
+                    rows.sort_unstable();
+                    assert_eq!(rows, expected, "degree {degree}, cap {cap}");
+                }
+            }
+        }
+    }
+
+    #[test]
     fn fused_f5_count_applies_the_full_f4_row_cap() {
         let n_vars = 4;
         let f = F2BoolPoly::from_monos(
@@ -9069,34 +9348,6 @@ pub fn refutation_degree_trace_take() -> Option<RefutationDegreeTrace> {
     REFUTATION_TRACE.with(|t| t.borrow_mut().as_mut().map(std::mem::take))
 }
 
-fn trace_on() -> bool {
-    REFUTATION_TRACE.with(|t| t.borrow().is_some())
-}
-
-/// Charge the stage-unit word operations a node spent since `w0` (its
-/// entry, children excluded) to the refuted or the split nodes.
-fn trace_cost(w0: Option<u64>, refuted: bool) {
-    let Some(w0) = w0 else { return };
-    let spent = f4_word_ops_thread().wrapping_sub(w0);
-    trace(|t| {
-        if refuted {
-            t.nodes_refuted += 1;
-            t.word_ops_refuted_nodes += spent;
-        } else {
-            t.nodes_split += 1;
-            t.word_ops_split_nodes += spent;
-        }
-    });
-}
-
-fn trace(f: impl FnOnce(&mut RefutationDegreeTrace)) {
-    REFUTATION_TRACE.with(|t| {
-        if let Some(trace) = t.borrow_mut().as_mut() {
-            f(trace);
-        }
-    });
-}
-
 /// Early abort at the refutation degree (lit2026 W4), `KIC_F4_EARLY_ABORT`,
 /// read once per process:
 ///
@@ -9143,4 +9394,3 @@ thread_local! {
 pub fn set_early_abort_mode(mode: Option<u8>) {
     EARLY_ABORT_OVERRIDE.with(|m| m.set(mode));
 }
-

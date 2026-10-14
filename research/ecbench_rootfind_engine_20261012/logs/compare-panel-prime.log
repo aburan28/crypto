@@ -1,0 +1,302 @@
+saved research/ecbench_rootfind_engine_20261012/sessions/panel-prime/comparisons/rho-neg__ic-subtract.json
+ops (ok): ic-subtract / rho-neg = 858.1937 [578.511, 1225.981] (cluster) over 96 pairs on 32 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 259.2282, not a result: 96 of 96 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-subtract / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp18-tm337-d28d5e09 | 17.70 | 8 | 239.4509 | [187.2618, 301.4837] | cluster |
+| icv1-fp20-t727-cd198a38 | 19.10 | 8 | 333.9672 | [230.7708, 465.5250] | cluster |
+| icv1-fp22-tm1385-475dcb5f | 21.22 | 8 | 626.3359 | [505.9009, 767.9607] | cluster |
+| icv1-fp24-t1059-6df599df | 23.97 | 8 | 2569.1594 | [1871.5459, 3474.2368] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-subtract mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W006c080a3f72 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.2880 | 297.5729 | 231.0286 |
+| W0244066ca1c9 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.8276 | 1166.9701 | 638.5296 |
+| W0372a5207366 | icv1-fp20-t727-cd198a38 | 19.10 | 0.7098 | 469.9732 | 662.0983 |
+| W2734d8a015b9 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.7695 | 816.0571 | 461.1804 |
+| W28a6ca541d5a | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.6807 | 228.5535 | 135.9841 |
+| W28b4cfe9ce93 | icv1-fp20-t727-cd198a38 | 19.10 | 1.2147 | 582.3507 | 479.4014 |
+| W40205a8c768f | icv1-fp24-t1059-6df599df | 23.97 | 0.7646 | 3174.6517 | 4152.2417 |
+| W4787ab6088f0 | icv1-fp24-t1059-6df599df | 23.97 | 1.2675 | 4574.3736 | 3609.0944 |
+| W5b230afd20c7 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.0740 | 402.5626 | 374.8377 |
+| W5ea10cc72dc0 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.0162 | 885.7964 | 871.6704 |
+| W6a3ed92cf4c7 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.1023 | 1007.2096 | 913.7531 |
+| W6f3b6b57793c | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.1881 | 971.6420 | 817.7868 |
+| W6fca37f7cc9a | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.8453 | 827.8679 | 448.6319 |
+| W74e97e4a2870 | icv1-fp24-t1059-6df599df | 23.97 | 1.3482 | 2240.0601 | 1661.4589 |
+| W7cd38a178483 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.1709 | 274.9596 | 234.8326 |
+| W7ef06b772aae | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.5675 | 810.0525 | 516.7960 |
+| W861f5dc133f2 | icv1-fp20-t727-cd198a38 | 19.10 | 1.4268 | 485.3919 | 340.2059 |
+| W8795a5e04c81 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.4949 | 309.9687 | 207.3546 |
+| W8f448e9d9ef1 | icv1-fp20-t727-cd198a38 | 19.10 | 2.0481 | 266.0710 | 129.9091 |
+| W93a161edf681 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.0834 | 300.8729 | 277.7203 |
+| W9b062075ec82 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.4204 | 325.4389 | 229.1207 |
+| Wac7787be9c96 | icv1-fp20-t727-cd198a38 | 19.10 | 1.3401 | 481.1312 | 359.0299 |
+| Wb08608805f9d | icv1-fp24-t1059-6df599df | 23.97 | 0.9592 | 2171.3099 | 2263.7795 |
+| Wb575cd7f0237 | icv1-fp20-t727-cd198a38 | 19.10 | 1.0321 | 394.6318 | 382.3704 |
+| Wc29d7c6a749a | icv1-fp20-t727-cd198a38 | 19.10 | 1.1179 | 508.5739 | 454.9571 |
+| Wc438af43fd3e | icv1-fp24-t1059-6df599df | 23.97 | 1.4206 | 1832.0624 | 1289.6548 |
+| Wcd5b54c76641 | icv1-fp20-t727-cd198a38 | 19.10 | 1.8588 | 401.4407 | 215.9692 |
+| Wcd716c25ac09 | icv1-fp24-t1059-6df599df | 23.97 | 1.1818 | 2639.4393 | 2233.3649 |
+| Wdc5881bcf1b5 | icv1-fp24-t1059-6df599df | 23.97 | 0.9310 | 2887.4760 | 3101.5097 |
+| We2822c9e7ec0 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.1405 | 339.0417 | 297.2746 |
+| Wec54f424abb7 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.5200 | 928.0353 | 610.5348 |
+| Wf87386dd8131 | icv1-fp24-t1059-6df599df | 23.97 | 0.7683 | 2680.9287 | 3489.6201 |
+saved research/ecbench_rootfind_engine_20261012/sessions/panel-prime/comparisons/rho-neg__ic-mitm.json
+ops (ok): ic-mitm / rho-neg = 15.4730 [11.321, 21.087] (cluster) over 96 pairs on 32 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 11.3240, not a result: 96 of 96 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-mitm / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp18-tm337-d28d5e09 | 17.70 | 8 | 7.6970 | [6.2918, 9.3351] | cluster |
+| icv1-fp20-t727-cd198a38 | 19.10 | 8 | 7.8049 | [5.6498, 10.6647] | cluster |
+| icv1-fp22-tm1385-475dcb5f | 21.22 | 8 | 10.9720 | [8.9672, 13.3945] | cluster |
+| icv1-fp24-t1059-6df599df | 23.97 | 8 | 40.4926 | [29.5643, 54.6588] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-mitm mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W006c080a3f72 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.2880 | 9.6657 | 7.5042 |
+| W0244066ca1c9 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.8276 | 19.9918 | 10.9389 |
+| W0372a5207366 | icv1-fp20-t727-cd198a38 | 19.10 | 0.7098 | 10.9300 | 15.3982 |
+| W2734d8a015b9 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.7695 | 14.5372 | 8.2154 |
+| W28a6ca541d5a | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.6807 | 8.2699 | 4.9204 |
+| W28b4cfe9ce93 | icv1-fp20-t727-cd198a38 | 19.10 | 1.2147 | 12.7444 | 10.4914 |
+| W40205a8c768f | icv1-fp24-t1059-6df599df | 23.97 | 0.7646 | 49.9270 | 65.3013 |
+| W4787ab6088f0 | icv1-fp24-t1059-6df599df | 23.97 | 1.2675 | 71.7716 | 56.6264 |
+| W5b230afd20c7 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.0740 | 11.6719 | 10.8680 |
+| W5ea10cc72dc0 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.0162 | 15.6064 | 15.3575 |
+| W6a3ed92cf4c7 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.1023 | 17.5047 | 15.8804 |
+| W6f3b6b57793c | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.1881 | 16.9498 | 14.2659 |
+| W6fca37f7cc9a | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.8453 | 14.5633 | 7.8920 |
+| W74e97e4a2870 | icv1-fp24-t1059-6df599df | 23.97 | 1.3482 | 35.4205 | 26.2715 |
+| W7cd38a178483 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.1709 | 9.4328 | 8.0562 |
+| W7ef06b772aae | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.5675 | 14.4481 | 9.2176 |
+| W861f5dc133f2 | icv1-fp20-t727-cd198a38 | 19.10 | 1.4268 | 11.1163 | 7.7913 |
+| W8795a5e04c81 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.4949 | 9.9774 | 6.6744 |
+| W8f448e9d9ef1 | icv1-fp20-t727-cd198a38 | 19.10 | 2.0481 | 7.2485 | 3.5391 |
+| W93a161edf681 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.0834 | 9.8342 | 9.0774 |
+| W9b062075ec82 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.4204 | 10.5176 | 7.4048 |
+| Wac7787be9c96 | icv1-fp20-t727-cd198a38 | 19.10 | 1.3401 | 10.9212 | 8.1496 |
+| Wb08608805f9d | icv1-fp24-t1059-6df599df | 23.97 | 0.9592 | 34.3487 | 35.8115 |
+| Wb575cd7f0237 | icv1-fp20-t727-cd198a38 | 19.10 | 1.0321 | 9.5468 | 9.2502 |
+| Wc29d7c6a749a | icv1-fp20-t727-cd198a38 | 19.10 | 1.1179 | 11.5603 | 10.3416 |
+| Wc438af43fd3e | icv1-fp24-t1059-6df599df | 23.97 | 1.4206 | 29.0904 | 20.4778 |
+| Wcd5b54c76641 | icv1-fp20-t727-cd198a38 | 19.10 | 1.8588 | 9.8220 | 5.2841 |
+| Wcd716c25ac09 | icv1-fp24-t1059-6df599df | 23.97 | 1.1818 | 41.6119 | 35.2099 |
+| Wdc5881bcf1b5 | icv1-fp24-t1059-6df599df | 23.97 | 0.9310 | 45.4556 | 48.8250 |
+| We2822c9e7ec0 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.1405 | 10.3151 | 9.0444 |
+| Wec54f424abb7 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.5200 | 16.2689 | 10.7030 |
+| Wf87386dd8131 | icv1-fp24-t1059-6df599df | 23.97 | 0.7683 | 42.2742 | 55.0261 |
+saved research/ecbench_rootfind_engine_20261012/sessions/panel-prime/comparisons/rho-neg__ic-rootfind-m2.json
+ops (ok): ic-rootfind-m2 / rho-neg = 858.2107 [578.529, 1225.998] (cluster) over 96 pairs on 32 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 104.9103, not a result: 96 of 96 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-rootfind-m2 / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp18-tm337-d28d5e09 | 17.70 | 8 | 239.4868 | [187.2909, 301.5281] | cluster |
+| icv1-fp20-t727-cd198a38 | 19.10 | 8 | 333.9862 | [230.7840, 465.5533] | cluster |
+| icv1-fp22-tm1385-475dcb5f | 21.22 | 8 | 626.3438 | [505.9077, 767.9707] | cluster |
+| icv1-fp24-t1059-6df599df | 23.97 | 8 | 2569.1640 | [1871.5496, 3474.2424] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-rootfind-m2 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W006c080a3f72 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.2880 | 297.6098 | 231.0573 |
+| W0244066ca1c9 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.8276 | 1166.9837 | 638.5371 |
+| W0372a5207366 | icv1-fp20-t727-cd198a38 | 19.10 | 0.7098 | 470.0007 | 662.1371 |
+| W2734d8a015b9 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.7695 | 816.0667 | 461.1859 |
+| W28a6ca541d5a | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.6807 | 228.5940 | 136.0082 |
+| W28b4cfe9ce93 | icv1-fp20-t727-cd198a38 | 19.10 | 1.2147 | 582.3791 | 479.4248 |
+| W40205a8c768f | icv1-fp24-t1059-6df599df | 23.97 | 0.7646 | 3174.6572 | 4152.2490 |
+| W4787ab6088f0 | icv1-fp24-t1059-6df599df | 23.97 | 1.2675 | 4574.3794 | 3609.0990 |
+| W5b230afd20c7 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.0740 | 402.6212 | 374.8923 |
+| W5ea10cc72dc0 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.0162 | 885.8047 | 871.6786 |
+| W6a3ed92cf4c7 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.1023 | 1007.2244 | 913.7665 |
+| W6f3b6b57793c | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.1881 | 971.6533 | 817.7963 |
+| W6fca37f7cc9a | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.8453 | 827.8778 | 448.6373 |
+| W74e97e4a2870 | icv1-fp24-t1059-6df599df | 23.97 | 1.3482 | 2240.0651 | 1661.4626 |
+| W7cd38a178483 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.1709 | 275.0059 | 234.8721 |
+| W7ef06b772aae | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.5675 | 810.0656 | 516.8043 |
+| W861f5dc133f2 | icv1-fp20-t727-cd198a38 | 19.10 | 1.4268 | 485.4186 | 340.2246 |
+| W8795a5e04c81 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.4949 | 310.0237 | 207.3914 |
+| W8f448e9d9ef1 | icv1-fp20-t727-cd198a38 | 19.10 | 2.0481 | 266.0928 | 129.9197 |
+| W93a161edf681 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.0834 | 300.9134 | 277.7577 |
+| W9b062075ec82 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.4204 | 325.4888 | 229.1558 |
+| Wac7787be9c96 | icv1-fp20-t727-cd198a38 | 19.10 | 1.3401 | 481.1548 | 359.0474 |
+| Wb08608805f9d | icv1-fp24-t1059-6df599df | 23.97 | 0.9592 | 2171.3145 | 2263.7843 |
+| Wb575cd7f0237 | icv1-fp20-t727-cd198a38 | 19.10 | 1.0321 | 394.6576 | 382.3953 |
+| Wc29d7c6a749a | icv1-fp20-t727-cd198a38 | 19.10 | 1.1179 | 508.6050 | 454.9849 |
+| Wc438af43fd3e | icv1-fp24-t1059-6df599df | 23.97 | 1.4206 | 1832.0667 | 1289.6578 |
+| Wcd5b54c76641 | icv1-fp20-t727-cd198a38 | 19.10 | 1.8588 | 401.4594 | 215.9792 |
+| Wcd716c25ac09 | icv1-fp24-t1059-6df599df | 23.97 | 1.1818 | 2639.4443 | 2233.3692 |
+| Wdc5881bcf1b5 | icv1-fp24-t1059-6df599df | 23.97 | 0.9310 | 2887.4814 | 3101.5155 |
+| We2822c9e7ec0 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.1405 | 339.0865 | 297.3139 |
+| Wec54f424abb7 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.5200 | 928.0477 | 610.5429 |
+| Wf87386dd8131 | icv1-fp24-t1059-6df599df | 23.97 | 0.7683 | 2680.9333 | 3489.6262 |
+saved research/ecbench_rootfind_engine_20261012/sessions/panel-prime/comparisons/rho-neg__ic-rootfind-m3.json
+ops (ok): ic-rootfind-m3 / rho-neg = 62.7519 [43.598, 86.089] (cluster) over 96 pairs on 32 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 10.6936, not a result: 96 of 96 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-rootfind-m3 / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp18-tm337-d28d5e09 | 17.70 | 8 | 19.4592 | [16.6407, 22.6972] | cluster |
+| icv1-fp20-t727-cd198a38 | 19.10 | 8 | 26.3369 | [20.5432, 35.0656] | cluster |
+| icv1-fp22-tm1385-475dcb5f | 21.22 | 8 | 48.2585 | [40.0440, 58.6021] | cluster |
+| icv1-fp24-t1059-6df599df | 23.97 | 8 | 179.7684 | [147.9630, 222.7469] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-rootfind-m3 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W006c080a3f72 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.2880 | 25.1467 | 19.5233 |
+| W0244066ca1c9 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.8276 | 69.3138 | 37.9264 |
+| W0372a5207366 | icv1-fp20-t727-cd198a38 | 19.10 | 0.7098 | 37.4069 | 52.6988 |
+| W2734d8a015b9 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.7695 | 58.4171 | 33.0134 |
+| W28a6ca541d5a | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.6807 | 27.2520 | 16.2143 |
+| W28b4cfe9ce93 | icv1-fp20-t727-cd198a38 | 19.10 | 1.2147 | 29.3512 | 24.1625 |
+| W40205a8c768f | icv1-fp24-t1059-6df599df | 23.97 | 0.7646 | 188.1962 | 246.1486 |
+| W4787ab6088f0 | icv1-fp24-t1059-6df599df | 23.97 | 1.2675 | 179.4729 | 141.6008 |
+| W5b230afd20c7 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.0740 | 24.0706 | 22.4128 |
+| W5ea10cc72dc0 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.0162 | 61.8850 | 60.8981 |
+| W6a3ed92cf4c7 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.1023 | 77.5456 | 70.3503 |
+| W6f3b6b57793c | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.1881 | 70.3700 | 59.2272 |
+| W6fca37f7cc9a | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.8453 | 86.9550 | 47.1220 |
+| W74e97e4a2870 | icv1-fp24-t1059-6df599df | 23.97 | 1.3482 | 188.6452 | 139.9186 |
+| W7cd38a178483 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.1709 | 25.0476 | 21.3922 |
+| W7ef06b772aae | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.5675 | 72.8838 | 46.4983 |
+| W861f5dc133f2 | icv1-fp20-t727-cd198a38 | 19.10 | 1.4268 | 33.9738 | 23.8118 |
+| W8795a5e04c81 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.4949 | 21.6854 | 14.5065 |
+| W8f448e9d9ef1 | icv1-fp20-t727-cd198a38 | 19.10 | 2.0481 | 36.8326 | 17.9835 |
+| W93a161edf681 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.0834 | 25.7332 | 23.7530 |
+| W9b062075ec82 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.4204 | 27.2505 | 19.1853 |
+| Wac7787be9c96 | icv1-fp20-t727-cd198a38 | 19.10 | 1.3401 | 29.3899 | 21.9313 |
+| Wb08608805f9d | icv1-fp24-t1059-6df599df | 23.97 | 0.9592 | 176.5798 | 184.0998 |
+| Wb575cd7f0237 | icv1-fp20-t727-cd198a38 | 19.10 | 1.0321 | 39.2341 | 38.0151 |
+| Wc29d7c6a749a | icv1-fp20-t727-cd198a38 | 19.10 | 1.1179 | 34.7654 | 31.1002 |
+| Wc438af43fd3e | icv1-fp24-t1059-6df599df | 23.97 | 1.4206 | 248.7744 | 175.1213 |
+| Wcd5b54c76641 | icv1-fp20-t727-cd198a38 | 19.10 | 1.8588 | 42.1218 | 22.6609 |
+| Wcd716c25ac09 | icv1-fp24-t1059-6df599df | 23.97 | 1.1818 | 211.7557 | 179.1774 |
+| Wdc5881bcf1b5 | icv1-fp24-t1059-6df599df | 23.97 | 0.9310 | 185.6014 | 199.3590 |
+| We2822c9e7ec0 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.1405 | 25.2704 | 22.1573 |
+| Wec54f424abb7 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.5200 | 73.8417 | 48.5789 |
+| Wf87386dd8131 | icv1-fp24-t1059-6df599df | 23.97 | 0.7683 | 174.3667 | 226.9638 |
+saved research/ecbench_rootfind_engine_20261012/sessions/panel-prime/comparisons/rho-neg__rho-neg-aa.json
+ops (ok): rho-neg-aa / rho-neg = 1.0000 [1.000, 1.000] (cluster) over 96 pairs on 32 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 1.0079, not a result: 96 of 96 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | rho-neg-aa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp18-tm337-d28d5e09 | 17.70 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+| icv1-fp20-t727-cd198a38 | 19.10 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+| icv1-fp22-tm1385-475dcb5f | 21.22 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+| icv1-fp24-t1059-6df599df | 23.97 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | rho-neg-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W006c080a3f72 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.2880 | 1.2880 | 1.0000 |
+| W0244066ca1c9 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.8276 | 1.8276 | 1.0000 |
+| W0372a5207366 | icv1-fp20-t727-cd198a38 | 19.10 | 0.7098 | 0.7098 | 1.0000 |
+| W2734d8a015b9 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.7695 | 1.7695 | 1.0000 |
+| W28a6ca541d5a | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.6807 | 1.6807 | 1.0000 |
+| W28b4cfe9ce93 | icv1-fp20-t727-cd198a38 | 19.10 | 1.2147 | 1.2147 | 1.0000 |
+| W40205a8c768f | icv1-fp24-t1059-6df599df | 23.97 | 0.7646 | 0.7646 | 1.0000 |
+| W4787ab6088f0 | icv1-fp24-t1059-6df599df | 23.97 | 1.2675 | 1.2675 | 1.0000 |
+| W5b230afd20c7 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.0740 | 1.0740 | 1.0000 |
+| W5ea10cc72dc0 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.0162 | 1.0162 | 1.0000 |
+| W6a3ed92cf4c7 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.1023 | 1.1023 | 1.0000 |
+| W6f3b6b57793c | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.1881 | 1.1881 | 1.0000 |
+| W6fca37f7cc9a | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.8453 | 1.8453 | 1.0000 |
+| W74e97e4a2870 | icv1-fp24-t1059-6df599df | 23.97 | 1.3482 | 1.3482 | 1.0000 |
+| W7cd38a178483 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.1709 | 1.1709 | 1.0000 |
+| W7ef06b772aae | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.5675 | 1.5675 | 1.0000 |
+| W861f5dc133f2 | icv1-fp20-t727-cd198a38 | 19.10 | 1.4268 | 1.4268 | 1.0000 |
+| W8795a5e04c81 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.4949 | 1.4949 | 1.0000 |
+| W8f448e9d9ef1 | icv1-fp20-t727-cd198a38 | 19.10 | 2.0481 | 2.0481 | 1.0000 |
+| W93a161edf681 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.0834 | 1.0834 | 1.0000 |
+| W9b062075ec82 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.4204 | 1.4204 | 1.0000 |
+| Wac7787be9c96 | icv1-fp20-t727-cd198a38 | 19.10 | 1.3401 | 1.3401 | 1.0000 |
+| Wb08608805f9d | icv1-fp24-t1059-6df599df | 23.97 | 0.9592 | 0.9592 | 1.0000 |
+| Wb575cd7f0237 | icv1-fp20-t727-cd198a38 | 19.10 | 1.0321 | 1.0321 | 1.0000 |
+| Wc29d7c6a749a | icv1-fp20-t727-cd198a38 | 19.10 | 1.1179 | 1.1179 | 1.0000 |
+| Wc438af43fd3e | icv1-fp24-t1059-6df599df | 23.97 | 1.4206 | 1.4206 | 1.0000 |
+| Wcd5b54c76641 | icv1-fp20-t727-cd198a38 | 19.10 | 1.8588 | 1.8588 | 1.0000 |
+| Wcd716c25ac09 | icv1-fp24-t1059-6df599df | 23.97 | 1.1818 | 1.1818 | 1.0000 |
+| Wdc5881bcf1b5 | icv1-fp24-t1059-6df599df | 23.97 | 0.9310 | 0.9310 | 1.0000 |
+| We2822c9e7ec0 | icv1-fp18-tm337-d28d5e09 | 17.70 | 1.1405 | 1.1405 | 1.0000 |
+| Wec54f424abb7 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1.5200 | 1.5200 | 1.0000 |
+| Wf87386dd8131 | icv1-fp24-t1059-6df599df | 23.97 | 0.7683 | 0.7683 | 1.0000 |
+saved research/ecbench_rootfind_engine_20261012/sessions/panel-prime/comparisons/ic-subtract__ic-rootfind-m2.json
+ops (ok): ic-rootfind-m2 / ic-subtract = 1.0000 [1.000, 1.000] (cluster) over 96 pairs on 32 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 0.3709, not a result: 96 of 96 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-rootfind-m2 / ic-subtract | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp18-tm337-d28d5e09 | 17.70 | 8 | 1.0002 | [1.0001, 1.0002] | cluster |
+| icv1-fp20-t727-cd198a38 | 19.10 | 8 | 1.0001 | [1.0001, 1.0001] | cluster |
+| icv1-fp22-tm1385-475dcb5f | 21.22 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+| icv1-fp24-t1059-6df599df | 23.97 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | ic-subtract mean S | ic-rootfind-m2 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W006c080a3f72 | icv1-fp18-tm337-d28d5e09 | 17.70 | 297.5729 | 297.6098 | 1.0001 |
+| W0244066ca1c9 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1166.9701 | 1166.9837 | 1.0000 |
+| W0372a5207366 | icv1-fp20-t727-cd198a38 | 19.10 | 469.9732 | 470.0007 | 1.0001 |
+| W2734d8a015b9 | icv1-fp22-tm1385-475dcb5f | 21.22 | 816.0571 | 816.0667 | 1.0000 |
+| W28a6ca541d5a | icv1-fp18-tm337-d28d5e09 | 17.70 | 228.5535 | 228.5940 | 1.0002 |
+| W28b4cfe9ce93 | icv1-fp20-t727-cd198a38 | 19.10 | 582.3507 | 582.3791 | 1.0000 |
+| W40205a8c768f | icv1-fp24-t1059-6df599df | 23.97 | 3174.6517 | 3174.6572 | 1.0000 |
+| W4787ab6088f0 | icv1-fp24-t1059-6df599df | 23.97 | 4574.3736 | 4574.3794 | 1.0000 |
+| W5b230afd20c7 | icv1-fp18-tm337-d28d5e09 | 17.70 | 402.5626 | 402.6212 | 1.0001 |
+| W5ea10cc72dc0 | icv1-fp22-tm1385-475dcb5f | 21.22 | 885.7964 | 885.8047 | 1.0000 |
+| W6a3ed92cf4c7 | icv1-fp22-tm1385-475dcb5f | 21.22 | 1007.2096 | 1007.2244 | 1.0000 |
+| W6f3b6b57793c | icv1-fp22-tm1385-475dcb5f | 21.22 | 971.6420 | 971.6533 | 1.0000 |
+| W6fca37f7cc9a | icv1-fp22-tm1385-475dcb5f | 21.22 | 827.8679 | 827.8778 | 1.0000 |
+| W74e97e4a2870 | icv1-fp24-t1059-6df599df | 23.97 | 2240.0601 | 2240.0651 | 1.0000 |
+| W7cd38a178483 | icv1-fp18-tm337-d28d5e09 | 17.70 | 274.9596 | 275.0059 | 1.0002 |
+| W7ef06b772aae | icv1-fp22-tm1385-475dcb5f | 21.22 | 810.0525 | 810.0656 | 1.0000 |
+| W861f5dc133f2 | icv1-fp20-t727-cd198a38 | 19.10 | 485.3919 | 485.4186 | 1.0001 |
+| W8795a5e04c81 | icv1-fp18-tm337-d28d5e09 | 17.70 | 309.9687 | 310.0237 | 1.0002 |
+| W8f448e9d9ef1 | icv1-fp20-t727-cd198a38 | 19.10 | 266.0710 | 266.0928 | 1.0001 |
+| W93a161edf681 | icv1-fp18-tm337-d28d5e09 | 17.70 | 300.8729 | 300.9134 | 1.0001 |
+| W9b062075ec82 | icv1-fp18-tm337-d28d5e09 | 17.70 | 325.4389 | 325.4888 | 1.0002 |
+| Wac7787be9c96 | icv1-fp20-t727-cd198a38 | 19.10 | 481.1312 | 481.1548 | 1.0000 |
+| Wb08608805f9d | icv1-fp24-t1059-6df599df | 23.97 | 2171.3099 | 2171.3145 | 1.0000 |
+| Wb575cd7f0237 | icv1-fp20-t727-cd198a38 | 19.10 | 394.6318 | 394.6576 | 1.0001 |
+| Wc29d7c6a749a | icv1-fp20-t727-cd198a38 | 19.10 | 508.5739 | 508.6050 | 1.0001 |
+| Wc438af43fd3e | icv1-fp24-t1059-6df599df | 23.97 | 1832.0624 | 1832.0667 | 1.0000 |
+| Wcd5b54c76641 | icv1-fp20-t727-cd198a38 | 19.10 | 401.4407 | 401.4594 | 1.0000 |
+| Wcd716c25ac09 | icv1-fp24-t1059-6df599df | 23.97 | 2639.4393 | 2639.4443 | 1.0000 |
+| Wdc5881bcf1b5 | icv1-fp24-t1059-6df599df | 23.97 | 2887.4760 | 2887.4814 | 1.0000 |
+| We2822c9e7ec0 | icv1-fp18-tm337-d28d5e09 | 17.70 | 339.0417 | 339.0865 | 1.0001 |
+| Wec54f424abb7 | icv1-fp22-tm1385-475dcb5f | 21.22 | 928.0353 | 928.0477 | 1.0000 |
+| Wf87386dd8131 | icv1-fp24-t1059-6df599df | 23.97 | 2680.9287 | 2680.9333 | 1.0000 |
+saved research/ecbench_rootfind_engine_20261012/sessions/panel-prime/comparisons/ic-mitm__ic-rootfind-m3.json
+ops (ok): ic-rootfind-m3 / ic-mitm = 4.0556 [3.441, 4.758] (cluster) over 96 pairs on 32 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 0.7468, not a result: 96 of 96 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-rootfind-m3 / ic-mitm | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp18-tm337-d28d5e09 | 17.70 | 8 | 2.5282 | [2.2464, 2.8461] | cluster |
+| icv1-fp20-t727-cd198a38 | 19.10 | 8 | 3.3744 | [2.7728, 4.1239] | cluster |
+| icv1-fp22-tm1385-475dcb5f | 21.22 | 8 | 4.3983 | [3.7544, 5.2948] | cluster |
+| icv1-fp24-t1059-6df599df | 23.97 | 8 | 4.4395 | [3.4736, 5.8387] | cluster |
+
+| workload | curve | log2 r | ic-mitm mean S | ic-rootfind-m3 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W006c080a3f72 | icv1-fp18-tm337-d28d5e09 | 17.70 | 9.6657 | 25.1467 | 2.6016 |
+| W0244066ca1c9 | icv1-fp22-tm1385-475dcb5f | 21.22 | 19.9918 | 69.3138 | 3.4671 |
+| W0372a5207366 | icv1-fp20-t727-cd198a38 | 19.10 | 10.9300 | 37.4069 | 3.4224 |
+| W2734d8a015b9 | icv1-fp22-tm1385-475dcb5f | 21.22 | 14.5372 | 58.4171 | 4.0185 |
+| W28a6ca541d5a | icv1-fp18-tm337-d28d5e09 | 17.70 | 8.2699 | 27.2520 | 3.2953 |
+| W28b4cfe9ce93 | icv1-fp20-t727-cd198a38 | 19.10 | 12.7444 | 29.3512 | 2.3031 |
+| W40205a8c768f | icv1-fp24-t1059-6df599df | 23.97 | 49.9270 | 188.1962 | 3.7694 |
+| W4787ab6088f0 | icv1-fp24-t1059-6df599df | 23.97 | 71.7716 | 179.4729 | 2.5006 |
+| W5b230afd20c7 | icv1-fp18-tm337-d28d5e09 | 17.70 | 11.6719 | 24.0706 | 2.0623 |
+| W5ea10cc72dc0 | icv1-fp22-tm1385-475dcb5f | 21.22 | 15.6064 | 61.8850 | 3.9654 |
+| W6a3ed92cf4c7 | icv1-fp22-tm1385-475dcb5f | 21.22 | 17.5047 | 77.5456 | 4.4300 |
+| W6f3b6b57793c | icv1-fp22-tm1385-475dcb5f | 21.22 | 16.9498 | 70.3700 | 4.1517 |
+| W6fca37f7cc9a | icv1-fp22-tm1385-475dcb5f | 21.22 | 14.5633 | 86.9550 | 5.9708 |
+| W74e97e4a2870 | icv1-fp24-t1059-6df599df | 23.97 | 35.4205 | 188.6452 | 5.3259 |
+| W7cd38a178483 | icv1-fp18-tm337-d28d5e09 | 17.70 | 9.4328 | 25.0476 | 2.6554 |
+| W7ef06b772aae | icv1-fp22-tm1385-475dcb5f | 21.22 | 14.4481 | 72.8838 | 5.0445 |
+| W861f5dc133f2 | icv1-fp20-t727-cd198a38 | 19.10 | 11.1163 | 33.9738 | 3.0562 |
+| W8795a5e04c81 | icv1-fp18-tm337-d28d5e09 | 17.70 | 9.9774 | 21.6854 | 2.1735 |
+| W8f448e9d9ef1 | icv1-fp20-t727-cd198a38 | 19.10 | 7.2485 | 36.8326 | 5.0814 |
+| W93a161edf681 | icv1-fp18-tm337-d28d5e09 | 17.70 | 9.8342 | 25.7332 | 2.6167 |
+| W9b062075ec82 | icv1-fp18-tm337-d28d5e09 | 17.70 | 10.5176 | 27.2505 | 2.5909 |
+| Wac7787be9c96 | icv1-fp20-t727-cd198a38 | 19.10 | 10.9212 | 29.3899 | 2.6911 |
+| Wb08608805f9d | icv1-fp24-t1059-6df599df | 23.97 | 34.3487 | 176.5798 | 5.1408 |
+| Wb575cd7f0237 | icv1-fp20-t727-cd198a38 | 19.10 | 9.5468 | 39.2341 | 4.1096 |
+| Wc29d7c6a749a | icv1-fp20-t727-cd198a38 | 19.10 | 11.5603 | 34.7654 | 3.0073 |
+| Wc438af43fd3e | icv1-fp24-t1059-6df599df | 23.97 | 29.0904 | 248.7744 | 8.5518 |
+| Wcd5b54c76641 | icv1-fp20-t727-cd198a38 | 19.10 | 9.8220 | 42.1218 | 4.2885 |
+| Wcd716c25ac09 | icv1-fp24-t1059-6df599df | 23.97 | 41.6119 | 211.7557 | 5.0888 |
+| Wdc5881bcf1b5 | icv1-fp24-t1059-6df599df | 23.97 | 45.4556 | 185.6014 | 4.0831 |
+| We2822c9e7ec0 | icv1-fp18-tm337-d28d5e09 | 17.70 | 10.3151 | 25.2704 | 2.4498 |
+| Wec54f424abb7 | icv1-fp22-tm1385-475dcb5f | 21.22 | 16.2689 | 73.8417 | 4.5388 |
+| Wf87386dd8131 | icv1-fp24-t1059-6df599df | 23.97 | 42.2742 | 174.3667 | 4.1247 |
+saved research/ecbench_rootfind_engine_20261012/comparisons/panel-prime.resources.json

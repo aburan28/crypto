@@ -127,16 +127,29 @@ template<class M> struct NistField {
   }
   return acc;
  }
- /* Montgomery's simultaneous inversion: one inv + 3(n-1) muls.  `scratch`
-  * holds n slots.  No input may be zero (caller filters). */
- static void batch_inv(elt*x,int n,elt*scratch){
-  scratch[0]=x[0];
-  for(int i=1;i<n;i++)scratch[i]=mul(scratch[i-1],x[i]);
-  elt t=inv(scratch[n-1]);
-  for(int i=n-1;i>0;i--){elt xi=mul(t,scratch[i-1]);t=mul(t,x[i]);x[i]=xi;}
-  x[0]=t;
- }
-};
+  /* Montgomery's simultaneous inversion: one inv + 3(n-1) muls.  `scratch`
+   * holds n slots.  No input may be zero (caller filters). */
+  NF_HD static void batch_inv(elt*x,int n,elt*scratch){
+   scratch[0]=x[0];
+   for(int i=1;i<n;i++)scratch[i]=mul(scratch[i-1],x[i]);
+   elt t=inv(scratch[n-1]);
+   for(int i=n-1;i>0;i--){elt xi=mul(t,scratch[i-1]);t=mul(t,x[i]);x[i]=xi;}
+   x[0]=t;
+  }
+  /* Same algorithm with the arrays passed by reference and n a compile-time
+   * constant: the loops unroll and ptxas can keep both in registers instead
+   * of the local-memory backing a pointer parameter needs.  test_rho checks
+   * it against batch_inv element for element. */
+  template<int Wc> NF_HD static void batch_inv_w(elt(&x)[Wc],elt(&scratch)[Wc]){
+   scratch[0]=x[0];
+#pragma unroll
+   for(int i=1;i<Wc;i++)scratch[i]=mul(scratch[i-1],x[i]);
+   elt t=inv(scratch[Wc-1]);
+#pragma unroll
+   for(int i=Wc-1;i>0;i--){elt xi=mul(t,scratch[i-1]);t=mul(t,x[i]);x[i]=xi;}
+   x[0]=t;
+  }
+ };
 
 typedef NistField<P256Mod> Fp256;
 typedef NistField<P384Mod> Fp384;

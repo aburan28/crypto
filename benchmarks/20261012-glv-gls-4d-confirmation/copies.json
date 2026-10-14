@@ -1,0 +1,88 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-12",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/isogeny_loop_glv_20261012",
+  "run": "run-20261012T0216Z-bench-confirm",
+  "files": [
+    {
+      "source": "research/isogeny_loop_glv_20261012/REPORT.pdf",
+      "copy": "visuals/research/isogeny_loop_glv_20261012/REPORT.pdf",
+      "sha256": "bf5a6c20017f7cafa4fef0b8e8cf6ca882dd7c012029b9b1d24621f5376a76fa",
+      "bytes": 189294
+    },
+    {
+      "source": "research/isogeny_loop_glv_20261012/reports/run-20261012T0216Z-bench-confirm/report.pdf",
+      "copy": "visuals/research/isogeny_loop_glv_20261012/reports/run-20261012T0216Z-bench-confirm/report.pdf",
+      "sha256": "1c1da782c494e2f1fc3a691e2924c3ddcf0a82d40a91dafa2473d94bf7d23bda",
+      "bytes": 70911
+    },
+    {
+      "source": "research/isogeny_loop_glv_20261012/figures/bench_arms.svg",
+      "copy": "visuals/research/isogeny_loop_glv_20261012/figures/bench_arms.svg",
+      "sha256": "26caf73dc99fe5041878f365569d10c68f1cab9582c0721b52070dc3eda81443",
+      "bytes": 30791
+    },
+    {
+      "source": "research/isogeny_loop_glv_20261012/figures/bench_trend.svg",
+      "copy": "visuals/research/isogeny_loop_glv_20261012/figures/bench_trend.svg",
+      "sha256": "c2e129a0144a968ac697ff0ca9a8af1a6d8792dfc8a7cfdf37d374fa65012023",
+      "bytes": 18096
+    },
+    {
+      "source": "research/isogeny_loop_glv_20261012/figures/binary_scan.svg",
+      "copy": "visuals/research/isogeny_loop_glv_20261012/figures/binary_scan.svg",
+      "sha256": "7a079d42d4ae34c4b5510df5416db8951a25ed711f3fae4df01bfa4a45d56e6d",
+      "bytes": 38838
+    },
+    {
+      "source": "research/isogeny_loop_glv_20261012/figures/status.svg",
+      "copy": "visuals/research/isogeny_loop_glv_20261012/figures/status.svg",
+      "sha256": "9b159b3319627931f57ea131cd6745cbf24adf3e8fd7bca7a46c068fc941a80d",
+      "bytes": 9423
+    }
+  ],
+  "pngs": [
+    {
+      "source": "visuals/research/isogeny_loop_glv_20261012/figures/bench_arms.svg",
+      "copy": "visuals/research/isogeny_loop_glv_20261012/figures/bench_arms.png",
+      "dpi": 150,
+      "width": 1080,
+      "height": 435,
+      "sha256": "34ac33e40376e17bc442125bac90d902c7324a0529293801d593d14be85837cd",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/isogeny_loop_glv_20261012/figures/bench_trend.svg",
+      "copy": "visuals/research/isogeny_loop_glv_20261012/figures/bench_trend.png",
+      "dpi": 150,
+      "width": 930,
+      "height": 465,
+      "sha256": "d361682657dd91182827c54cb7c382828e375a4c8e9f839a1c17cb3d49a22d6d",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/isogeny_loop_glv_20261012/figures/binary_scan.svg",
+      "copy": "visuals/research/isogeny_loop_glv_20261012/figures/binary_scan.png",
+      "dpi": 150,
+      "width": 1110,
+      "height": 435,
+      "sha256": "0707b3e4e39ba2deb86b1c28fc33432c31792ce8253bd2d0dbe8c59c2a2127ce",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    },
+    {
+      "source": "visuals/research/isogeny_loop_glv_20261012/figures/status.svg",
+      "copy": "visuals/research/isogeny_loop_glv_20261012/figures/status.png",
+      "dpi": 150,
+      "width": 913,
+      "height": 376,
+      "sha256": "773aa31bc6b391158be50ab7b1e0e9489e771969a70fe5257dd9bf1482b07fcc",
+      "renderer": "CairoSVG 150dpi from byte-identical SVG; Pillow adds PNG dpi metadata only"
+    }
+  ],
+  "verbatim_source_report": {
+    "source": "research/isogeny_loop_glv_20261012/README.md",
+    "copy": "SOURCE_REPORT.md",
+    "sha256": "7bfaf6ec1ceaacdcba5ae4e3d57a6ef4c1ec282fadd5feddf793066875847ec8"
+  }
+}

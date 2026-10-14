@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pdp_root_finder_ecbench_20261013/sessions/n13/comparisons/rho-strong__ic-f4.json
+ops (ok): ic-f4 / rho-strong = 1.1142 [1.057, 1.163] (cluster) over 40 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1261.8658 [1096.036, 1500.943]
+| curve | log2 r | workloads | ic-f4 / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m13-t181-515ee569 | 10.97 | 8 | 1.1142 | [1.0571, 1.1625] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | ic-f4 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W1d5b9217f460 | icv1-f2m13-t181-515ee569 | 10.97 | 14.0458 | 16.6692 | 1.1868 |
+| W268b53a21c15 | icv1-f2m13-t181-515ee569 | 10.97 | 14.7608 | 15.3367 | 1.0390 |
+| W55ee9b215d63 | icv1-f2m13-t181-515ee569 | 10.97 | 14.0413 | 16.4147 | 1.1690 |
+| W689bed0ecc5c | icv1-f2m13-t181-515ee569 | 10.97 | 14.5016 | 16.1315 | 1.1124 |
+| Wb0d5fdb5f44c | icv1-f2m13-t181-515ee569 | 10.97 | 14.4837 | 16.6531 | 1.1498 |
+| Wcf0c3b0c08eb | icv1-f2m13-t181-515ee569 | 10.97 | 14.3407 | 16.4232 | 1.1452 |
+| Wf015eb7e6950 | icv1-f2m13-t181-515ee569 | 10.97 | 14.0324 | 15.9981 | 1.1401 |
+| Wf0e5b345f4a1 | icv1-f2m13-t181-515ee569 | 10.97 | 15.9763 | 15.8192 | 0.9902 |

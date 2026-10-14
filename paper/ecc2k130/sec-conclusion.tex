@@ -1,49 +1,59 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-Four statements survive the accounting.
+Here is where Pollard rho stands on current NVIDIA hardware, as far as
+this work can measure it.
 
-First, ECC2K-130 is an arithmetic problem at a known exponent, and the
-exponent did not move. Index calculus on the curve, priced end to
-end, is $10^7$ times rho at the challenge size with four-summand
-relations; the best measured decomposition is $35$--$51$ bits short of
-the per-call budget; the Frobenius-stable subspaces that the
-literature's construction needs do not exist at $n=131$. The number
-the campaign walks toward is still $\sqrt{\pi\ell/(2\cdot262)}$ class
-steps.
+\paragraph{The step got about 230 times cheaper per card.} In 2010 the
+best GTX~295 kernel ran ECC2K-130 at $0.064$ billion iterations per
+second. On one RTX~PRO~6000 Blackwell the same walk runs at $14.64$ in
+the audited campaign build and $15.88$ in the best later build, and the
+whole $2^{60.9}$ budget is about five GPU-years. Roughly a sixth of that
+factor is a bigger, faster chip; the rest is arithmetic. Sixteen paired
+steps took the client from a $0.85$ bitsliced control to $14.64$, and
+three representation changes did most of the work: Frobenius
+permutation networks, the native carry-less product, and the smaller
+batch that the native product made possible.
 
-Second, the cost of a step on a GPU was measured against a floor
-written first. Sixteen paired rungs took one RTX~PRO~6000 from
-$0.85$ to $14.64$ billion complete iterations per second with the
-campaign's $\sigma$-walk, later $\sigma$-walk builds reached $15.88$,
-a table walk reached $20.08$ as a rate, and the roofline of that build
-puts the logic pipe at $91\%$ and the carry-less unit at $73\%$ of
-saturation. Twenty-eight on one card is
-below both pipes for any walk that performs one affine addition per
-step; thirty is a two-card number. A $17.0$~B/s target declared before a build declined a $16.56$~B/s
-result, which is what a declared target is for. The other GPU
-arithmetic in the repositories, prime-field and binary, is verified
-and statically accounted to the same standard and, with the exception
-of F4 elimination on rented cards, has not yet been measured on a
-device; the paper says so rather than quoting its emulations as
-rates.
+\paragraph{\texttt{clmad} matters, and so does which die it runs on.}
+PTX~9.3 gives every part from \texttt{sm\_80} onward a carry-less
+multiply, but not at the same rate. On the RTX~PRO~6000 it issues at
+about $1.7$ lanes per SM-clock, the cost of $38$ logic instructions; on
+the B200 and H100 it is ten to eighteen times faster. The workstation
+part still wins on this walk, per card, per SM and per dollar, because
+the walk is bound by integer logic and the RTX~PRO~6000 has the most
+SMs at the highest clock for the money. On the data-centre parts the
+logic pipe binds instead, the right kernel moves work onto the
+carry-less unit, and kernel tuning does not travel between them. For
+any walk with one affine addition per step, $28$ billion iterations per
+second on one RTX~PRO~6000 is out of reach on both pipes.
 
-Third, the step count is measured, not assumed. The campaign's
-$\sigma$-walk costs $2^{60.91}$--$2^{60.92}$ iterations, the 2009
-estimate within its own precision; the table walk's cheaper constant
-was paid back several times over by fruitless cycles until the rule
-was fixed, and its projected $0.81$--$0.86$ cost per solve awaits the
-paired run that would confirm it. An FPGA engine designed from the
-same model measured $8.25$~G steps/s on one F2 against a pre-board
-central estimate of $8$, level with the GPU on cost per solve.
+\paragraph{The $\sigma$-walk is the fastest correct walk.} The table walk
+does the arithmetic of a step more cheaply, and reached $20.08$ under
+cycle rule v2. But v2's exits from fruitless cycles depended on how a
+trail arrived, and the exact v3 rule that fixes this runs at $5.10$
+today. Closing that gap, with a deferred or off-critical-path cycle
+check, is the largest open optimisation in this paper, and even then a
+table walk must win on cost per solve, which nobody has measured.
 
-Fourth, the campaign is a corpus, and the corpus is honest. One
-report per $2^{28.41}$ iterations at cutoff 32, a figure that replaced
-a wrong $2^{27.9}$ and says so; $486$ million points and $2^{56.68}$
-iterations with no collision, $5.4\%$ of the expected work, every
-record re-walkable from its seed and every rate in this paper
-re-walked before it was recorded. The fleet that produced most of it
-was reclaimed on 2026-09-18, the last point landed on 2026-10-07, and
-collection is paused. Whether the remaining $94.6\%$ is walked is a
-question of money, not of mathematics; this paper's contribution is
-to have priced it.
+\paragraph{The ladder transfers to prime fields, in different
+proportions.} On NIST P-256 and P-384 on the same card, explicit carry
+chains, a wider shared inversion and the same refusal of register-cap
+trades gave $1.52\times$ and $2.61\times$, to $1.632$ and $0.548$ billion
+iterations per second. The batch width, a modest knob on the binary
+walk, was the biggest lever on the prime one, because a Fermat
+inversion costs some forty times as many multiplications as a
+normal-basis one. A P-256 step remains about nine times as expensive
+as an ECC2K-130 step on the same card, which is the carry-less unit's
+advantage in one number.
+
+\paragraph{The exponent did not move, and the campaign is a priced
+corpus.} The campaign's walk needs $2^{60.91}$--$2^{60.92}$ iterations,
+which agrees with the 2009 estimate. Index calculus on the curve costs
+$10^7$ times as much as rho, and the best measured decomposition is
+$35$--$51$ bits short of its budget. The campaign stored $486$ million
+points and $2^{56.68}$ iterations, $5.4\%$ of the expected work, with no
+collision, every record re-walkable from its seed; its fleet was
+reclaimed on 2026-09-18 and collection is paused. Whether the remaining
+$94.6\%$ is walked is a question of money, not mathematics, and at five
+GPU-years it is a much smaller question than it was in 2009.

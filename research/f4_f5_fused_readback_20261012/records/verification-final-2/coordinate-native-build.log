@@ -1,0 +1,17 @@
+error[E0433]: cannot find `isogeny` in the crate root
+   --> /workspace/crypto/src/cryptanalysis/curve_traits/mod.rs:736:25
+    |
+736 |             Some(crate::isogeny::class_group::class_number(dk)),
+    |                         ^^^^^^^ could not find `isogeny` in the crate root
+
+warning: unused import: `ToPrimitive`
+  --> /workspace/crypto/src/cryptanalysis/curve_traits/mod.rs:50:31
+   |
+50 | use num_traits::{One, Signed, ToPrimitive, Zero};
+   |                               ^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error: aborting due to 1 previous error; 1 warning emitted
+
+For more information about this error, try `rustc --explain E0433`.

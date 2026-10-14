@@ -53,6 +53,33 @@ test('dependencies, workflow edits and frozen evidence remain applicable', () =>
   assert.equal(classify(['research/fixture.json'], new Set(['research/fixture.json'])).rust_root, true);
 });
 
+test('isogeny release inputs select the Rust package lane', () => {
+  const inputs = [
+    'tools/isogeny-cli/Cargo.toml',
+    'tools/isogeny-cli/Cargo.lock',
+    'tools/isogeny-cli/build.rs',
+    'tools/isogeny-cli/src/main.rs',
+    'tools/isogeny-cli/README.md',
+    'isogeny_algos/Cargo.toml',
+    'isogeny_algos/src/lib.rs',
+    'isogeny_algos/src/field.rs',
+    'docs/curves/registry.json',
+    'docs/curves/standards/coverage.json',
+    'research/p192_p224_hundred_large_prime_isogenies_20261010/PROTOCOL.md',
+    'research/p192_p224_large_degree_isogenies_20261009/PROTOCOL.md',
+    'research/p192_p224_large_degree_isogenies_20261009/verification_poly.rs',
+    'research/p192_p224_large_degree_isogenies_20261009/verification_kernel.rs',
+  ];
+  for (const file of inputs) {
+    const result = classify([file]);
+    assert.equal(result.release_rust, true, file);
+    assert.equal(result.release_native, false, file);
+    assert.equal(result.release_cuda, false, file);
+  }
+  // Unrelated isogeny research reports do not invoke the release builder.
+  assert.equal(classify(['research/p192_p224_large_degree_isogenies_20261008/PROTOCOL.md']).release_rust, false);
+});
+
 test('real git diffs include renames, deletes, unusual names and over 300 files', () => {
   const cwd = mkdtempSync(path.join(os.tmpdir(), 'crypto-ci-scope-'));
   const git = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();

@@ -63,9 +63,12 @@
 //! report what comes out.
 
 pub mod fiber;
+pub mod large_prime;
 pub mod linalg;
 pub mod plugins;
+pub mod prime_tower;
 pub mod residual;
+pub mod rootfind;
 pub mod shared_rank;
 pub mod solvers;
 pub mod stages;
@@ -75,7 +78,7 @@ use std::time::Instant;
 use serde::Serialize;
 
 use crate::cryptanalysis::ic_boundary::{
-    collect_and_solve_with_completion, price_phase, Calibration, CompletionRule, CountedGroup,
+    collect_and_solve_relations, price_phase, Calibration, CompletionRule, CountedGroup,
     FactorBase, GroupOps, PhaseCost, PipelineOutcome, RelationSolver, RestartPool, TargetSource,
 };
 use crate::cryptanalysis::ic_framework::residual as residual_mod;
@@ -379,7 +382,11 @@ pub fn run_pipeline<G: CountedGroup>(
             matrix.as_mut(),
         )
     } else {
-        collect_and_solve_with_completion(
+        // `decompose_relations` is `decompose` for every oracle without
+        // large primes (the trait default), so this is the loop every
+        // recorded run took; the large-prime collector returns merged
+        // rows through the same call.
+        collect_and_solve_relations(
             ctx.group,
             ctx.generator,
             ctx.target,
@@ -392,9 +399,14 @@ pub fn run_pipeline<G: CountedGroup>(
             RestartPool::Lazy,
             matrix.as_mut(),
             completion,
-            |ops, counters, point| oracle.decompose(ctx, &fb, ops, counters, point),
+            |ops, counters, point, a, b| {
+                oracle.decompose_relations(ctx, &fb, ops, counters, point, a, b)
+            },
         )
     };
+    for (name, value) in oracle.relation_counters() {
+        outcome.relations.count(&name, value);
+    }
     // Kept opt-in so the previously recorded full-rank sessions retain
     // byte-identical replay and charging. A checked run cannot claim a
     // verified full-rank solution solely from the target-point check.

@@ -1,0 +1,8 @@
+Captured output excerpt; command used the workflow's complete pinned-root list and original freeze/historical/tests/current-control commands.
+FROZEN_WORKFLOW_METADATA_VIEW {"workflow":".github/workflows/ecc2k130-rotated-solver-admission.yml","revision":"aa0cee7bd1769222e5706e61b64478d5aad6d573","live_workflow_sha256":"f57a08312310bfe997071d4c1c111f790b7b58946af2ab6b3f85471090d5c8c6","view_workflow_sha256":"aa74fd5460758d668588cc0fd6bdd8bfb17366532096bb32e9ae02c2c5d971a5","scope":"only workflow scheduling metadata substituted; current source/evidence copied unchanged; original replay workflow digest refers to this view"}
+NEW_AND_ORIGINAL_FREEZE_PASS
+Frozen source, corpus, protocol and input hashes PASS; no solver or admission outcome read.
+Frozen corpus/interface blocker and raw receipt replay PASS; zero solver outcomes claimed.
+HISTORICAL_REPLAY_PASS
+Ran 4 replay controls: OK
+{"checked_layout_arithmetic":true,"decision":"CURRENT_GENERIC_CONTRACT_PASS","generic_builder_admits_layout":{"n13-m5-d2":true,"n19-m6-d2":false},"max_vars":64,"raw_bits":{"n13-m5-d2":49,"n19-m6-d2":88},"reuse_template_width_checked":true,"scope":"generic_direct_reuse_and_groebner_frontend_only","shared_basis_for_all_slots":true,"unsupported_is_inconclusive":true}

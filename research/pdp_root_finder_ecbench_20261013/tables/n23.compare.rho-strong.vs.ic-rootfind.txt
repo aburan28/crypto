@@ -1,0 +1,16 @@
+saved research/pdp_root_finder_ecbench_20261013/sessions/n23/comparisons/rho-strong__ic-rootfind.json
+ops (ok): ic-rootfind / rho-strong = 60.9034 [56.118, 65.962] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 34.5133 [31.837, 36.686]
+| curve | log2 r | workloads | ic-rootfind / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m23-t5197-69e76b73 | 21.00 | 8 | 60.9034 | [56.1178, 65.9617] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | ic-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W153f13bcf471 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1674 | 73.9427 | 63.3371 |
+| W2baf373849dd | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.0355 | 65.8114 | 63.5543 |
+| W530f63a2316a | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1235 | 68.7573 | 61.2009 |
+| W6306444be024 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.1753 | 70.7540 | 60.2021 |
+| W7b5deb6e8b25 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.0127 | 72.9901 | 72.0734 |
+| W937d3e5afad4 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.0945 | 69.4262 | 63.4344 |
+| Wd9f090cd6360 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.2858 | 62.9252 | 48.9387 |
+| Wee97446a4f05 | icv1-f2m23-t5197-69e76b73 | 21.00 | 1.2264 | 70.8972 | 57.8097 |

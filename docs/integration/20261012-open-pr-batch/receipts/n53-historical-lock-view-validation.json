@@ -1,0 +1,34 @@
+{
+  "schema": "workflow-validation-receipt/v1",
+  "workflow": ".github/workflows/n53-target-cyclic-rank.yml",
+  "adapter_manifest": ".github/scripts/n53-historical-cargo-lock-view-v1.json",
+  "custody": {
+    "original_freeze_sha256": "e787ea56ed6948dcd9dcbe52266aff76d94c4ee9412ebd7a5bd6dd9d8561fa92",
+    "original_cargo_lock_sha256": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
+    "immutable_revision": "d4645a936cb8f0b2e749eb56dd464f0269bc1765",
+    "live_nested_cargo_lock_sha256": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+    "live_root_cargo_lock_sha256": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+    "overlay": "isolated temporary historical view only; no checkout, lock, evidence, freeze, or index mutation"
+  },
+  "checks": {
+    "node_frozen_workflow_fixtures": "16/16 pass",
+    "n53_frozen_workflow_and_original_freeze": "pass",
+    "n53_historical_preflight": "pass; 512 targets",
+    "n53_replay_negative_controls": "4/4 pass",
+    "n53_archive": "pass; RAW_PROVENANCE_AND_INDEPENDENT_RANK_REPLAY_PASS; 23 files; archive SHA 325a5cb9242d9279faf398fcbb1afb7d2a6ad8c5df1af562199d32154c8fe74a; approx. 3.5 minutes local elapsed",
+    "pr_budget_fixtures": "14/14 pass",
+    "budget_scan": "pass; 0 violations across 352 workflows",
+    "workflow_parser": "4/4 pass",
+    "ci_scope_fixtures": "8/8 pass",
+    "actionlint": "pass across all 352 workflow files",
+    "git_diff_check": "pass",
+    "n53_archive_scope": "independent known-scalar group/rank stage replay; no solver outcome or measurement claim"
+  },
+  "live_outcome_guard": {
+    "status": "unchanged and blocked by current source drift",
+    "live_rust_producer_sha256": "45d0b22c1e8585d802f1e45b37640721dcc90ee6ca184f503f0a524309909e45",
+    "released_rust_producer_sha256": "99f0b31149691dc551ad563a7be20e3490fee4498f50cde677c3b7969e61e071",
+    "measurement_authorized": false
+  },
+  "log": "docs/integration/20261012-open-pr-batch/receipts/workflow-n53-lock-view.log"
+}

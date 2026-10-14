@@ -1,0 +1,5763 @@
+{
+  "tool": "koblitz_sixsum_extract_probe",
+  "version": 3,
+  "date_utc": "2026-10-13T00:37:35Z",
+  "args": {
+    "a": "0",
+    "cell_wall_s": "120",
+    "columns": "[5, 10, 20]",
+    "early_abort": "true",
+    "kernels": "4sum,6sum_a_iterate_table,6sum_b_s4_per_probe,6sum_b2_s4_strided,5sum_c_control",
+    "max_s3": "400000000",
+    "max_s4": "50000000",
+    "max_targets": "4096",
+    "n": "[23, 31]",
+    "raw_x_cap": "100000000",
+    "relations": "32",
+    "seed": "20261012"
+  },
+  "note": "Public synthetic [a]G targets on registered Koblitz rungs; every relation re-added as a group equation (fast and general arithmetic) before it counts. Units: S3/S4 root solves, targets, wall. No key-recovery, sub-rho or deployed-curve claim.",
+  "rungs": [
+    {
+      "n": 23,
+      "a": 0,
+      "name": "icv1-f2m23-t5197-69e76b73",
+      "r": 2095853,
+      "cofactor": 4,
+      "group_order": 8383412,
+      "bases": [
+        {
+          "columns": 5,
+          "points": 230,
+          "table": {
+            "base_points": 230,
+            "columns": 5,
+            "orbit_representatives": 5,
+            "pair_adds": 690,
+            "states": 560,
+            "duplicate_keys": 125,
+            "canonicalisations": 915,
+            "frobenius_maps": 5060,
+            "coefficient_checks": 230,
+            "wall_ns": 1630375
+          },
+          "base_wall_s": 0.00011075
+        },
+        {
+          "columns": 10,
+          "points": 460,
+          "table": {
+            "base_points": 460,
+            "columns": 10,
+            "orbit_representatives": 10,
+            "pair_adds": 2530,
+            "states": 2223,
+            "duplicate_keys": 297,
+            "canonicalisations": 2980,
+            "frobenius_maps": 10120,
+            "coefficient_checks": 460,
+            "wall_ns": 5270875
+          },
+          "base_wall_s": 0.000185125
+        },
+        {
+          "columns": 20,
+          "points": 920,
+          "table": {
+            "base_points": 920,
+            "columns": 20,
+            "orbit_representatives": 20,
+            "pair_adds": 9660,
+            "states": 8241,
+            "duplicate_keys": 1399,
+            "canonicalisations": 10560,
+            "frobenius_maps": 20240,
+            "coefficient_checks": 920,
+            "wall_ns": 14303500
+          },
+          "base_wall_s": 0.000329625
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "a": 0,
+      "name": "icv1-f2m31-tm90707-c95f16f5",
+      "r": 1439393,
+      "cofactor": 1492,
+      "group_order": 2147574356,
+      "bases": [
+        {
+          "columns": 5,
+          "points": 310,
+          "table": {
+            "base_points": 310,
+            "columns": 5,
+            "orbit_representatives": 5,
+            "pair_adds": 930,
+            "states": 745,
+            "duplicate_keys": 180,
+            "canonicalisations": 1235,
+            "frobenius_maps": 9300,
+            "coefficient_checks": 310,
+            "wall_ns": 7186084
+          },
+          "base_wall_s": 0.000590041
+        },
+        {
+          "columns": 10,
+          "points": 620,
+          "table": {
+            "base_points": 620,
+            "columns": 10,
+            "orbit_representatives": 10,
+            "pair_adds": 3410,
+            "states": 2888,
+            "duplicate_keys": 512,
+            "canonicalisations": 4020,
+            "frobenius_maps": 18600,
+            "coefficient_checks": 620,
+            "wall_ns": 7121292
+          },
+          "base_wall_s": 0.000369042
+        },
+        {
+          "columns": 20,
+          "points": 1240,
+          "table": {
+            "base_points": 1240,
+            "columns": 20,
+            "orbit_representatives": 20,
+            "pair_adds": 13020,
+            "states": 9548,
+            "duplicate_keys": 3452,
+            "canonicalisations": 14240,
+            "frobenius_maps": 37200,
+            "coefficient_checks": 1240,
+            "wall_ns": 19842167
+          },
+          "base_wall_s": 0.000647667
+        }
+      ]
+    }
+  ],
+  "cells": [
+    {
+      "n": 23,
+      "a": 0,
+      "columns": 5,
+      "kernel": "4sum",
+      "arity": 4,
+      "r": 2095853,
+      "cofactor": 4,
+      "base_points": 230,
+      "table_states": 560,
+      "abscissa_states": 12880,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 1287,
+        "s4_solves": 0,
+        "outer_probes": 1287,
+        "point_adds": 111,
+        "canonicalisations": 2557,
+        "lookups": 2557,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 128,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 722085
+      },
+      "relations": 32,
+      "full_support_relations": 32,
+      "support_histogram": {
+        "4": 32
+      },
+      "s3_solves_per_relation": 40.21875,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 40.21875,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.00002914975,
+      "point_adds_per_relation": 3.46875,
+      "lookups_per_relation": 79.90625,
+      "outer_probes_per_relation": 40.21875,
+      "structural_outer_probes_per_relation": 40.68037655279503,
+      "expected_relations_per_target": 55.63387158673183,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 12880.0,
+      "scan_unit_lambda": 55.63387158673183,
+      "structural_dense_solves_per_relation": 40.68037655279503,
+      "structural_sparse_solves_per_relation": 231.513637872935,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 38.470357703689814,
+      "models": {
+        "r_over_n2k2": 158.47659735349717,
+        "r_over_4n2k2": 39.61914933837429,
+        "model_45r_over_n4k4": 0.539239839766153,
+        "structural_s3_solves_per_relation": 40.68037655279503,
+        "structural_s4_solves_per_relation": 20.340188276397516
+      },
+      "fit_c_solves": 0.25378352811480576,
+      "targets_over_model_45": 1.854462386224394,
+      "outer_probes_over_model_45": 74.58415909596235,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            11,
+            48,
+            58,
+            127
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              0,
+              93200
+            ],
+            [
+              1,
+              1723079
+            ],
+            [
+              2,
+              1990329
+            ]
+          ],
+          "target_x": 8075502,
+          "target_y": 4545750
+        },
+        {
+          "indices": [
+            78,
+            122,
+            212,
+            215
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              1,
+              1812401
+            ],
+            [
+              2,
+              88964
+            ],
+            [
+              4,
+              8280
+            ]
+          ],
+          "target_x": 7457674,
+          "target_y": 5777847
+        },
+        {
+          "indices": [
+            59,
+            77,
+            125,
+            139
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              1,
+              377004
+            ],
+            [
+              2,
+              283452
+            ],
+            [
+              3,
+              2095852
+            ]
+          ],
+          "target_x": 4390766,
+          "target_y": 6327993
+        },
+        {
+          "indices": [
+            87,
+            90,
+            103,
+            215
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              1,
+              1251661
+            ],
+            [
+              2,
+              93200
+            ],
+            [
+              4,
+              2006889
+            ]
+          ],
+          "target_x": 2784584,
+          "target_y": 6786483
+        }
+      ]
+    },
+    {
+      "n": 23,
+      "a": 0,
+      "columns": 5,
+      "kernel": "6sum_a_iterate_table",
+      "arity": 6,
+      "r": 2095853,
+      "cofactor": 4,
+      "base_points": 230,
+      "table_states": 560,
+      "abscissa_states": 12880,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 1772,
+        "s4_solves": 0,
+        "outer_probes": 32,
+        "point_adds": 180,
+        "canonicalisations": 3532,
+        "lookups": 3532,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 1008831
+      },
+      "relations": 32,
+      "full_support_relations": 30,
+      "support_histogram": {
+        "4": 2,
+        "6": 30
+      },
+      "s3_solves_per_relation": 55.375,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 55.375,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.00003784765625,
+      "point_adds_per_relation": 5.625,
+      "lookups_per_relation": 110.375,
+      "outer_probes_per_relation": 1.0,
+      "structural_outer_probes_per_relation": 0.0031584143286331546,
+      "expected_relations_per_target": 98101.06023127046,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 12880.0,
+      "scan_unit_lambda": 55.63387158673183,
+      "structural_dense_solves_per_relation": 40.68037655279503,
+      "structural_sparse_solves_per_relation": 231.513637872935,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 38.470357703689814,
+      "models": {
+        "r_over_n2k2": 158.47659735349717,
+        "r_over_4n2k2": 39.61914933837429,
+        "model_45r_over_n4k4": 0.539239839766153,
+        "structural_s3_solves_per_relation": 40.68037655279503,
+        "structural_s4_solves_per_relation": 20.340188276397516
+      },
+      "fit_c_solves": 0.34942067740437904,
+      "targets_over_model_45": 1.854462386224394,
+      "outer_probes_over_model_45": 1.854462386224394,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            124,
+            145,
+            151,
+            167,
+            176,
+            188
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              2,
+              1812401
+            ],
+            [
+              3,
+              1885341
+            ],
+            [
+              4,
+              2002657
+            ]
+          ],
+          "target_x": 4467098,
+          "target_y": 3724210
+        },
+        {
+          "indices": [
+            69,
+            159,
+            186,
+            210,
+            213,
+            228
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              2048266
+            ],
+            [
+              3,
+              1070685
+            ],
+            [
+              4,
+              904175
+            ]
+          ],
+          "target_x": 7721422,
+          "target_y": 5860243
+        },
+        {
+          "indices": [
+            8,
+            33,
+            43,
+            146,
+            174,
+            180
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              1063701
+            ],
+            [
+              3,
+              240299
+            ]
+          ],
+          "target_x": 4743156,
+          "target_y": 2384699
+        },
+        {
+          "indices": [
+            111,
+            118,
+            121,
+            167,
+            207,
+            215
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              2,
+              1393956
+            ],
+            [
+              3,
+              1998609
+            ],
+            [
+              4,
+              1959302
+            ]
+          ],
+          "target_x": 3076424,
+          "target_y": 6071077
+        }
+      ]
+    },
+    {
+      "n": 23,
+      "a": 0,
+      "columns": 5,
+      "kernel": "6sum_b_s4_per_probe",
+      "arity": 6,
+      "r": 2095853,
+      "cofactor": 4,
+      "base_points": 230,
+      "table_states": 560,
+      "abscissa_states": 12880,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 0,
+        "s4_solves": 924,
+        "outer_probes": 924,
+        "point_adds": 216,
+        "canonicalisations": 3580,
+        "lookups": 3580,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 13565544
+      },
+      "relations": 32,
+      "full_support_relations": 30,
+      "support_histogram": {
+        "4": 2,
+        "6": 30
+      },
+      "s3_solves_per_relation": 0.0,
+      "s4_solves_per_relation": 28.875,
+      "solves_per_relation": 28.875,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.00043130340625,
+      "point_adds_per_relation": 6.75,
+      "lookups_per_relation": 111.875,
+      "outer_probes_per_relation": 28.875,
+      "structural_outer_probes_per_relation": 20.340188276397516,
+      "expected_relations_per_target": 98101.06023127046,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 12880.0,
+      "scan_unit_lambda": 111.26774317346366,
+      "structural_dense_solves_per_relation": 20.340188276397516,
+      "structural_sparse_solves_per_relation": 115.7568189364675,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 19.263947911119985,
+      "models": {
+        "r_over_n2k2": 158.47659735349717,
+        "r_over_4n2k2": 39.61914933837429,
+        "model_45r_over_n4k4": 0.539239839766153,
+        "structural_s3_solves_per_relation": 40.68037655279503,
+        "structural_s4_solves_per_relation": 20.340188276397516
+      },
+      "fit_c_solves": 0.1822035586465272,
+      "targets_over_model_45": 1.854462386224394,
+      "outer_probes_over_model_45": 53.54760140222938,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            99,
+            122,
+            129,
+            141,
+            163,
+            180
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              2,
+              1816629
+            ],
+            [
+              3,
+              1504064
+            ]
+          ],
+          "target_x": 4467098,
+          "target_y": 3724210
+        },
+        {
+          "indices": [
+            5,
+            141,
+            196,
+            205,
+            207,
+            216
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              93196
+            ],
+            [
+              3,
+              2002659
+            ],
+            [
+              4,
+              273678
+            ]
+          ],
+          "target_x": 7721422,
+          "target_y": 5860243
+        },
+        {
+          "indices": [
+            52,
+            62,
+            68,
+            99,
+            108,
+            135
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              233963
+            ],
+            [
+              2,
+              873425
+            ]
+          ],
+          "target_x": 4743156,
+          "target_y": 2384699
+        },
+        {
+          "indices": [
+            58,
+            87,
+            127,
+            162,
+            163,
+            181
+          ],
+          "arity": 6,
+          "support": 4,
+          "row": [
+            [
+              1,
+              1880217
+            ],
+            [
+              2,
+              1990329
+            ],
+            [
+              3,
+              500665
+            ]
+          ],
+          "target_x": 3076424,
+          "target_y": 6071077
+        }
+      ]
+    },
+    {
+      "n": 23,
+      "a": 0,
+      "columns": 5,
+      "kernel": "6sum_b2_s4_strided",
+      "arity": 6,
+      "r": 2095853,
+      "cofactor": 4,
+      "base_points": 230,
+      "table_states": 560,
+      "abscissa_states": 12880,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 0,
+        "s4_solves": 608,
+        "outer_probes": 608,
+        "point_adds": 245,
+        "canonicalisations": 2379,
+        "lookups": 2379,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 8721249
+      },
+      "relations": 32,
+      "full_support_relations": 30,
+      "support_histogram": {
+        "4": 2,
+        "6": 30
+      },
+      "s3_solves_per_relation": 0.0,
+      "s4_solves_per_relation": 19.0,
+      "solves_per_relation": 19.0,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.00028164325,
+      "point_adds_per_relation": 7.65625,
+      "lookups_per_relation": 74.34375,
+      "outer_probes_per_relation": 19.0,
+      "structural_outer_probes_per_relation": 20.340188276397516,
+      "expected_relations_per_target": 98101.06023127046,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 82947200.0,
+      "scan_unit_lambda": 98101.06023127046,
+      "structural_dense_solves_per_relation": 20.340188276397516,
+      "structural_sparse_solves_per_relation": 845.5280687533278,
+      "scan_unit_multiplicity": 45.0,
+      "structural_solves_per_relation": 18.789508382692524,
+      "models": {
+        "r_over_n2k2": 158.47659735349717,
+        "r_over_4n2k2": 39.61914933837429,
+        "model_45r_over_n4k4": 0.539239839766153,
+        "structural_s3_solves_per_relation": 40.68037655279503,
+        "structural_s4_solves_per_relation": 20.340188276397516
+      },
+      "fit_c_solves": 0.11989151910940318,
+      "targets_over_model_45": 1.854462386224394,
+      "outer_probes_over_model_45": 35.23478533826349,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            16,
+            30,
+            84,
+            100,
+            142,
+            172
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              368532
+            ],
+            [
+              1,
+              1423425
+            ],
+            [
+              2,
+              279584
+            ],
+            [
+              3,
+              12328
+            ]
+          ],
+          "target_x": 4467098,
+          "target_y": 3724210
+        },
+        {
+          "indices": [
+            58,
+            67,
+            175,
+            189,
+            201,
+            221
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              604717
+            ],
+            [
+              3,
+              1634473
+            ],
+            [
+              4,
+              1448101
+            ]
+          ],
+          "target_x": 7721422,
+          "target_y": 5860243
+        },
+        {
+          "indices": [
+            0,
+            0,
+            73,
+            100,
+            162,
+            181
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              93104
+            ],
+            [
+              2,
+              279584
+            ],
+            [
+              3,
+              498595
+            ]
+          ],
+          "target_x": 4743156,
+          "target_y": 2384699
+        },
+        {
+          "indices": [
+            8,
+            11,
+            11,
+            102,
+            133,
+            224
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              465984
+            ],
+            [
+              2,
+              157132
+            ],
+            [
+              4,
+              1845521
+            ]
+          ],
+          "target_x": 3076424,
+          "target_y": 6071077
+        }
+      ]
+    },
+    {
+      "n": 23,
+      "a": 0,
+      "columns": 5,
+      "kernel": "5sum_c_control",
+      "arity": 5,
+      "r": 2095853,
+      "cofactor": 4,
+      "base_points": 230,
+      "table_states": 560,
+      "abscissa_states": 12880,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 1206,
+        "s4_solves": 0,
+        "outer_probes": 32,
+        "point_adds": 143,
+        "canonicalisations": 2398,
+        "lookups": 2398,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 160,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 1189962
+      },
+      "relations": 32,
+      "full_support_relations": 32,
+      "support_histogram": {
+        "5": 32
+      },
+      "s3_solves_per_relation": 37.6875,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 37.6875,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.00004498828125,
+      "point_adds_per_relation": 4.46875,
+      "lookups_per_relation": 74.9375,
+      "outer_probes_per_relation": 1.0,
+      "structural_outer_probes_per_relation": 0.0031584143286331546,
+      "expected_relations_per_target": 2559.158092989664,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 12880.0,
+      "scan_unit_lambda": 55.63387158673183,
+      "structural_dense_solves_per_relation": 40.68037655279503,
+      "structural_sparse_solves_per_relation": 231.513637872935,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 38.470357703689814,
+      "models": {
+        "r_over_n2k2": 158.47659735349717,
+        "r_over_4n2k2": 39.61914933837429,
+        "model_45r_over_n4k4": 0.539239839766153,
+        "structural_s3_solves_per_relation": 40.68037655279503,
+        "structural_s4_solves_per_relation": 20.340188276397516
+      },
+      "fit_c_solves": 0.23781113823345434,
+      "targets_over_model_45": 1.854462386224394,
+      "outer_probes_over_model_45": 1.854462386224394,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            30,
+            33,
+            159,
+            203,
+            226
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              372416
+            ],
+            [
+              3,
+              1070685
+            ],
+            [
+              4,
+              1083639
+            ]
+          ],
+          "target_x": 6577518,
+          "target_y": 5124411
+        },
+        {
+          "indices": [
+            7,
+            8,
+            91,
+            103,
+            144
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              372776
+            ],
+            [
+              1,
+              1094524
+            ],
+            [
+              2,
+              93200
+            ],
+            [
+              3,
+              2002661
+            ]
+          ],
+          "target_x": 5358848,
+          "target_y": 2510743
+        },
+        {
+          "indices": [
+            0,
+            13,
+            45,
+            85,
+            102
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              1560493
+            ],
+            [
+              1,
+              672428
+            ],
+            [
+              2,
+              2002653
+            ]
+          ],
+          "target_x": 3988838,
+          "target_y": 1411692
+        },
+        {
+          "indices": [
+            37,
+            43,
+            47,
+            87,
+            198
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              39285
+            ],
+            [
+              1,
+              250331
+            ],
+            [
+              4,
+              652368
+            ]
+          ],
+          "target_x": 5466372,
+          "target_y": 1579938
+        }
+      ]
+    },
+    {
+      "n": 23,
+      "a": 0,
+      "columns": 10,
+      "kernel": "4sum",
+      "arity": 4,
+      "r": 2095853,
+      "cofactor": 4,
+      "base_points": 460,
+      "table_states": 2223,
+      "abscissa_states": 51129,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 341,
+        "s4_solves": 0,
+        "outer_probes": 341,
+        "point_adds": 114,
+        "canonicalisations": 668,
+        "lookups": 668,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 128,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 319671
+      },
+      "relations": 32,
+      "full_support_relations": 32,
+      "support_histogram": {
+        "4": 32
+      },
+      "s3_solves_per_relation": 10.65625,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 10.65625,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.0000163424375,
+      "point_adds_per_relation": 3.5625,
+      "lookups_per_relation": 20.875,
+      "outer_probes_per_relation": 10.65625,
+      "structural_outer_probes_per_relation": 10.247868137456239,
+      "expected_relations_per_target": 890.1419453877093,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 51129.0,
+      "scan_unit_lambda": 890.1419453877093,
+      "structural_dense_solves_per_relation": 10.247868137456239,
+      "structural_sparse_solves_per_relation": 57.439153682090904,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 9.571400169135448,
+      "models": {
+        "r_over_n2k2": 39.61914933837429,
+        "r_over_4n2k2": 9.904787334593573,
+        "model_45r_over_n4k4": 0.03370248998538456,
+        "structural_s3_solves_per_relation": 10.247868137456239,
+        "structural_s4_solves_per_relation": 5.123934068728119
+      },
+      "fit_c_solves": 0.26896715800201637,
+      "targets_over_model_45": 29.671398179590305,
+      "outer_probes_over_model_45": 316.1858368512592,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            51,
+            54,
+            67,
+            134
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              1,
+              1443465
+            ],
+            [
+              2,
+              1595188
+            ]
+          ],
+          "target_x": 7249836,
+          "target_y": 4486629
+        },
+        {
+          "indices": [
+            143,
+            226,
+            392,
+            411
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              3,
+              93196
+            ],
+            [
+              4,
+              1595188
+            ],
+            [
+              8,
+              498595
+            ]
+          ],
+          "target_x": 7794618,
+          "target_y": 1734883
+        },
+        {
+          "indices": [
+            119,
+            293,
+            347,
+            428
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              2,
+              93104
+            ],
+            [
+              6,
+              1816285
+            ],
+            [
+              7,
+              2070
+            ],
+            [
+              9,
+              652368
+            ]
+          ],
+          "target_x": 1948908,
+          "target_y": 1430582
+        },
+        {
+          "indices": [
+            11,
+            159,
+            424,
+            442
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              0,
+              93200
+            ],
+            [
+              3,
+              1070685
+            ],
+            [
+              9,
+              4044
+            ]
+          ],
+          "target_x": 8199844,
+          "target_y": 4689016
+        }
+      ]
+    },
+    {
+      "n": 23,
+      "a": 0,
+      "columns": 10,
+      "kernel": "6sum_a_iterate_table",
+      "arity": 6,
+      "r": 2095853,
+      "cofactor": 4,
+      "base_points": 460,
+      "table_states": 2223,
+      "abscissa_states": 51129,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 420,
+        "s4_solves": 0,
+        "outer_probes": 32,
+        "point_adds": 176,
+        "canonicalisations": 824,
+        "lookups": 824,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 434582
+      },
+      "relations": 32,
+      "full_support_relations": 29,
+      "support_histogram": {
+        "4": 3,
+        "6": 29
+      },
+      "s3_solves_per_relation": 13.125,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 13.125,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.00001978515625,
+      "point_adds_per_relation": 5.5,
+      "lookups_per_relation": 25.75,
+      "outer_probes_per_relation": 1.0,
+      "structural_outer_probes_per_relation": 0.0002004316168408582,
+      "expected_relations_per_target": 6278467.854801309,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 51129.0,
+      "scan_unit_lambda": 890.1419453877093,
+      "structural_dense_solves_per_relation": 10.247868137456239,
+      "structural_sparse_solves_per_relation": 57.439153682090904,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 9.571400169135448,
+      "models": {
+        "r_over_n2k2": 39.61914933837429,
+        "r_over_4n2k2": 9.904787334593573,
+        "model_45r_over_n4k4": 0.03370248998538456,
+        "structural_s3_solves_per_relation": 10.247868137456239,
+        "structural_s4_solves_per_relation": 5.123934068728119
+      },
+      "fit_c_solves": 0.33127919753914037,
+      "targets_over_model_45": 29.671398179590305,
+      "outer_probes_over_model_45": 29.671398179590305,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            5,
+            31,
+            41,
+            42,
+            229,
+            302
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              1849752
+            ],
+            [
+              4,
+              1094524
+            ],
+            [
+              6,
+              2002749
+            ]
+          ],
+          "target_x": 8066410,
+          "target_y": 5185169
+        },
+        {
+          "indices": [
+            184,
+            202,
+            231,
+            241,
+            260,
+            399
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              4,
+              511550
+            ],
+            [
+              5,
+              182163
+            ],
+            [
+              8,
+              2006889
+            ]
+          ],
+          "target_x": 3615648,
+          "target_y": 5688419
+        },
+        {
+          "indices": [
+            11,
+            21,
+            23,
+            167,
+            174,
+            242
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              1116298
+            ],
+            [
+              3,
+              364136
+            ],
+            [
+              5,
+              1629885
+            ]
+          ],
+          "target_x": 7586854,
+          "target_y": 4002541
+        },
+        {
+          "indices": [
+            159,
+            171,
+            185,
+            196,
+            325,
+            420
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              3,
+              1354137
+            ],
+            [
+              4,
+              1629884
+            ],
+            [
+              7,
+              2002659
+            ],
+            [
+              9,
+              2002661
+            ]
+          ],
+          "target_x": 7678808,
+          "target_y": 8321318
+        }
+      ]
+    },
+    {
+      "n": 23,
+      "a": 0,
+      "columns": 10,
+      "kernel": "6sum_b_s4_per_probe",
+      "arity": 6,
+      "r": 2095853,
+      "cofactor": 4,
+      "base_points": 460,
+      "table_states": 2223,
+      "abscissa_states": 51129,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 0,
+        "s4_solves": 197,
+        "outer_probes": 197,
+        "point_adds": 218,
+        "canonicalisations": 669,
+        "lookups": 669,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 2132792
+      },
+      "relations": 32,
+      "full_support_relations": 31,
+      "support_histogram": {
+        "4": 1,
+        "6": 31
+      },
+      "s3_solves_per_relation": 0.0,
+      "s4_solves_per_relation": 6.15625,
+      "solves_per_relation": 6.15625,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.000072987,
+      "point_adds_per_relation": 6.8125,
+      "lookups_per_relation": 20.90625,
+      "outer_probes_per_relation": 6.15625,
+      "structural_outer_probes_per_relation": 5.123934068728119,
+      "expected_relations_per_target": 6278467.854801309,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 51129.0,
+      "scan_unit_lambda": 1780.2838907754185,
+      "structural_dense_solves_per_relation": 5.123934068728119,
+      "structural_sparse_solves_per_relation": 28.719576841045452,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 4.78614807043143,
+      "models": {
+        "r_over_n2k2": 39.61914933837429,
+        "r_over_4n2k2": 9.904787334593573,
+        "model_45r_over_n4k4": 0.03370248998538456,
+        "structural_s3_solves_per_relation": 10.247868137456239,
+        "structural_s4_solves_per_relation": 5.123934068728119
+      },
+      "fit_c_solves": 0.15538571884573965,
+      "targets_over_model_45": 29.671398179590305,
+      "outer_probes_over_model_45": 182.66454504310283,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            6,
+            6,
+            39,
+            39,
+            115,
+            129
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              1158472
+            ],
+            [
+              2,
+              1586886
+            ]
+          ],
+          "target_x": 8066410,
+          "target_y": 5185169
+        },
+        {
+          "indices": [
+            36,
+            83,
+            84,
+            372,
+            392,
+            395
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              461380
+            ],
+            [
+              1,
+              962045
+            ],
+            [
+              8,
+              2093691
+            ]
+          ],
+          "target_x": 3615648,
+          "target_y": 5688419
+        },
+        {
+          "indices": [
+            42,
+            43,
+            44,
+            265,
+            281,
+            282
+          ],
+          "arity": 6,
+          "support": 4,
+          "row": [
+            [
+              0,
+              1001329
+            ],
+            [
+              5,
+              1990329
+            ],
+            [
+              6,
+              4
+            ]
+          ],
+          "target_x": 7586854,
+          "target_y": 4002541
+        },
+        {
+          "indices": [
+            8,
+            43,
+            143,
+            202,
+            216,
+            411
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              780249
+            ],
+            [
+              3,
+              93196
+            ],
+            [
+              4,
+              228097
+            ],
+            [
+              8,
+              500665
+            ]
+          ],
+          "target_x": 7678808,
+          "target_y": 8321318
+        }
+      ]
+    },
+    {
+      "n": 23,
+      "a": 0,
+      "columns": 10,
+      "kernel": "6sum_b2_s4_strided",
+      "arity": 6,
+      "r": 2095853,
+      "cofactor": 4,
+      "base_points": 460,
+      "table_states": 2223,
+      "abscissa_states": 51129,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 0,
+        "s4_solves": 175,
+        "outer_probes": 175,
+        "point_adds": 244,
+        "canonicalisations": 643,
+        "lookups": 643,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 2991376
+      },
+      "relations": 32,
+      "full_support_relations": 31,
+      "support_histogram": {
+        "4": 1,
+        "6": 31
+      },
+      "s3_solves_per_relation": 0.0,
+      "s4_solves_per_relation": 5.46875,
+      "solves_per_relation": 5.46875,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.00010018490625,
+      "point_adds_per_relation": 7.625,
+      "lookups_per_relation": 20.09375,
+      "outer_probes_per_relation": 5.46875,
+      "structural_outer_probes_per_relation": 5.123934068728119,
+      "expected_relations_per_target": 6278467.854801309,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 1307087320.5,
+      "scan_unit_lambda": 6278467.854801309,
+      "structural_dense_solves_per_relation": 5.123934068728119,
+      "structural_sparse_solves_per_relation": 208.18571516623055,
+      "scan_unit_multiplicity": 45.0,
+      "structural_solves_per_relation": 4.626349209541577,
+      "models": {
+        "r_over_n2k2": 39.61914933837429,
+        "r_over_4n2k2": 9.904787334593573,
+        "model_45r_over_n4k4": 0.03370248998538456,
+        "structural_s3_solves_per_relation": 10.247868137456239,
+        "structural_s4_solves_per_relation": 5.123934068728119
+      },
+      "fit_c_solves": 0.13803299897464183,
+      "targets_over_model_45": 29.671398179590305,
+      "outer_probes_over_model_45": 162.2654587946345,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            4,
+            4,
+            210,
+            229,
+            321,
+            364
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              1909461
+            ],
+            [
+              4,
+              1001420
+            ],
+            [
+              6,
+              1094524
+            ],
+            [
+              7,
+              1595188
+            ]
+          ],
+          "target_x": 8066410,
+          "target_y": 5185169
+        },
+        {
+          "indices": [
+            14,
+            84,
+            182,
+            244,
+            247,
+            395
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              652368
+            ],
+            [
+              1,
+              1423425
+            ],
+            [
+              3,
+              1001329
+            ],
+            [
+              5,
+              372800
+            ],
+            [
+              8,
+              93104
+            ]
+          ],
+          "target_x": 3615648,
+          "target_y": 5688419
+        },
+        {
+          "indices": [
+            23,
+            23,
+            91,
+            195,
+            201,
+            343
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              2000679
+            ],
+            [
+              1,
+              1094524
+            ],
+            [
+              4,
+              1909485
+            ],
+            [
+              7,
+              1070685
+            ]
+          ],
+          "target_x": 7586854,
+          "target_y": 4002541
+        },
+        {
+          "indices": [
+            9,
+            9,
+            71,
+            188,
+            351,
+            453
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              1536685
+            ],
+            [
+              1,
+              2070
+            ],
+            [
+              4,
+              2002657
+            ],
+            [
+              7,
+              1998609
+            ],
+            [
+              9,
+              672428
+            ]
+          ],
+          "target_x": 7678808,
+          "target_y": 8321318
+        }
+      ]
+    },
+    {
+      "n": 23,
+      "a": 0,
+      "columns": 10,
+      "kernel": "5sum_c_control",
+      "arity": 5,
+      "r": 2095853,
+      "cofactor": 4,
+      "base_points": 460,
+      "table_states": 2223,
+      "abscissa_states": 51129,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 451,
+        "s4_solves": 0,
+        "outer_probes": 32,
+        "point_adds": 142,
+        "canonicalisations": 884,
+        "lookups": 884,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 160,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 406916
+      },
+      "relations": 32,
+      "full_support_relations": 32,
+      "support_histogram": {
+        "5": 32
+      },
+      "s3_solves_per_relation": 14.09375,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 14.09375,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.00001924609375,
+      "point_adds_per_relation": 4.4375,
+      "lookups_per_relation": 27.625,
+      "outer_probes_per_relation": 1.0,
+      "structural_outer_probes_per_relation": 0.0002004316168408582,
+      "expected_relations_per_target": 81893.05897566925,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 51129.0,
+      "scan_unit_lambda": 890.1419453877093,
+      "structural_dense_solves_per_relation": 10.247868137456239,
+      "structural_sparse_solves_per_relation": 57.439153682090904,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 9.571400169135448,
+      "models": {
+        "r_over_n2k2": 39.61914933837429,
+        "r_over_4n2k2": 9.904787334593573,
+        "model_45r_over_n4k4": 0.03370248998538456,
+        "structural_s3_solves_per_relation": 10.247868137456239,
+        "structural_s4_solves_per_relation": 5.123934068728119
+      },
+      "fit_c_solves": 0.3557307573575055,
+      "targets_over_model_45": 29.671398179590305,
+      "outer_probes_over_model_45": 29.671398179590305,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            30,
+            30,
+            132,
+            157,
+            455
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              177928
+            ],
+            [
+              2,
+              1845521
+            ],
+            [
+              3,
+              1584304
+            ],
+            [
+              9,
+              250332
+            ]
+          ],
+          "target_x": 5527520,
+          "target_y": 6584918
+        },
+        {
+          "indices": [
+            9,
+            9,
+            242,
+            417,
+            422
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              1536685
+            ],
+            [
+              5,
+              1629885
+            ],
+            [
+              9,
+              186390
+            ]
+          ],
+          "target_x": 3077536,
+          "target_y": 2147450
+        },
+        {
+          "indices": [
+            2,
+            5,
+            151,
+            276,
+            303
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              186390
+            ],
+            [
+              3,
+              465968
+            ],
+            [
+              6,
+              93105
+            ]
+          ],
+          "target_x": 682298,
+          "target_y": 186395
+        },
+        {
+          "indices": [
+            0,
+            0,
+            254,
+            371,
+            390
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              2
+            ],
+            [
+              5,
+              2093783
+            ],
+            [
+              8,
+              2050246
+            ]
+          ],
+          "target_x": 1241396,
+          "target_y": 493401
+        }
+      ]
+    },
+    {
+      "n": 23,
+      "a": 0,
+      "columns": 20,
+      "kernel": "4sum",
+      "arity": 4,
+      "r": 2095853,
+      "cofactor": 4,
+      "base_points": 920,
+      "table_states": 8241,
+      "abscissa_states": 189543,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 95,
+        "s4_solves": 0,
+        "outer_probes": 95,
+        "point_adds": 115,
+        "canonicalisations": 175,
+        "lookups": 175,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 128,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 823375
+      },
+      "relations": 32,
+      "full_support_relations": 32,
+      "support_histogram": {
+        "4": 32
+      },
+      "s3_solves_per_relation": 2.96875,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 2.96875,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.0000387864375,
+      "point_adds_per_relation": 3.59375,
+      "lookups_per_relation": 5.46875,
+      "outer_probes_per_relation": 2.96875,
+      "structural_outer_probes_per_relation": 2.764350305735374,
+      "expected_relations_per_target": 14242.271126203348,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 189543.0,
+      "scan_unit_lambda": 14242.271126203348,
+      "structural_dense_solves_per_relation": 2.764350305735374,
+      "structural_sparse_solves_per_relation": 13.308481373541136,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 2.2180542726902197,
+      "models": {
+        "r_over_n2k2": 9.904787334593573,
+        "r_over_4n2k2": 2.4761968336483933,
+        "model_45r_over_n4k4": 0.002106405624086535,
+        "structural_s3_solves_per_relation": 2.764350305735374,
+        "structural_s4_solves_per_relation": 1.382175152867687
+      },
+      "fit_c_solves": 0.29972879777350797,
+      "targets_over_model_45": 474.7423708734449,
+      "outer_probes_over_model_45": 1409.3914135305395,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            38,
+            188,
+            456,
+            479
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              0,
+              1423425
+            ],
+            [
+              4,
+              2002657
+            ],
+            [
+              9,
+              1595188
+            ],
+            [
+              10,
+              1584304
+            ]
+          ],
+          "target_x": 7215430,
+          "target_y": 7058116
+        },
+        {
+          "indices": [
+            68,
+            554,
+            798,
+            904
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              1,
+              47587
+            ],
+            [
+              12,
+              93194
+            ],
+            [
+              17,
+              279568
+            ],
+            [
+              19,
+              88964
+            ]
+          ],
+          "target_x": 8135540,
+          "target_y": 2870157
+        },
+        {
+          "indices": [
+            93,
+            313,
+            400,
+            720
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              2,
+              2095852
+            ],
+            [
+              6,
+              1634473
+            ],
+            [
+              8,
+              1812401
+            ],
+            [
+              15,
+              88964
+            ]
+          ],
+          "target_x": 5251394,
+          "target_y": 7634847
+        },
+        {
+          "indices": [
+            555,
+            779,
+            872,
+            896
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              12,
+              2002659
+            ],
+            [
+              16,
+              500665
+            ],
+            [
+              18,
+              1001329
+            ],
+            [
+              19,
+              47587
+            ]
+          ],
+          "target_x": 6594026,
+          "target_y": 5657453
+        }
+      ]
+    },
+    {
+      "n": 23,
+      "a": 0,
+      "columns": 20,
+      "kernel": "6sum_a_iterate_table",
+      "arity": 6,
+      "r": 2095853,
+      "cofactor": 4,
+      "base_points": 920,
+      "table_states": 8241,
+      "abscissa_states": 189543,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 82,
+        "s4_solves": 0,
+        "outer_probes": 32,
+        "point_adds": 177,
+        "canonicalisations": 142,
+        "lookups": 142,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 345997
+      },
+      "relations": 32,
+      "full_support_relations": 30,
+      "support_histogram": {
+        "4": 2,
+        "6": 30
+      },
+      "s3_solves_per_relation": 2.5625,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 2.5625,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.00001757553125,
+      "point_adds_per_relation": 5.53125,
+      "lookups_per_relation": 4.4375,
+      "outer_probes_per_relation": 1.0,
+      "structural_outer_probes_per_relation": 0.000014584291193741652,
+      "expected_relations_per_target": 401821942.7072838,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 189543.0,
+      "scan_unit_lambda": 14242.271126203348,
+      "structural_dense_solves_per_relation": 2.764350305735374,
+      "structural_sparse_solves_per_relation": 13.308481373541136,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 2.2180542726902197,
+      "models": {
+        "r_over_n2k2": 9.904787334593573,
+        "r_over_4n2k2": 2.4761968336483933,
+        "model_45r_over_n4k4": 0.002106405624086535,
+        "structural_s3_solves_per_relation": 2.764350305735374,
+        "structural_s4_solves_per_relation": 1.382175152867687
+      },
+      "fit_c_solves": 0.25871327807818584,
+      "targets_over_model_45": 474.7423708734449,
+      "outer_probes_over_model_45": 474.7423708734449,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            65,
+            277,
+            294,
+            342,
+            835,
+            865
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              1584304
+            ],
+            [
+              6,
+              511548
+            ],
+            [
+              7,
+              1025168
+            ],
+            [
+              18,
+              1727665
+            ]
+          ],
+          "target_x": 6435232,
+          "target_y": 5980676
+        },
+        {
+          "indices": [
+            47,
+            84,
+            485,
+            506,
+            544,
+            650
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              1423424
+            ],
+            [
+              10,
+              2070
+            ],
+            [
+              11,
+              1423426
+            ],
+            [
+              14,
+              2002661
+            ]
+          ],
+          "target_x": 5454160,
+          "target_y": 369522
+        },
+        {
+          "indices": [
+            138,
+            158,
+            615,
+            633,
+            658,
+            685
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              3,
+              1025169
+            ],
+            [
+              13,
+              1710761
+            ],
+            [
+              14,
+              902700
+            ]
+          ],
+          "target_x": 1010722,
+          "target_y": 2924911
+        },
+        {
+          "indices": [
+            49,
+            62,
+            286,
+            315,
+            318,
+            439
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              186374
+            ],
+            [
+              6,
+              78563
+            ],
+            [
+              9,
+              2070
+            ]
+          ],
+          "target_x": 3981898,
+          "target_y": 7167201
+        }
+      ]
+    },
+    {
+      "n": 23,
+      "a": 0,
+      "columns": 20,
+      "kernel": "6sum_b_s4_per_probe",
+      "arity": 6,
+      "r": 2095853,
+      "cofactor": 4,
+      "base_points": 920,
+      "table_states": 8241,
+      "abscissa_states": 189543,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 0,
+        "s4_solves": 83,
+        "outer_probes": 83,
+        "point_adds": 223,
+        "canonicalisations": 223,
+        "lookups": 223,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 1058249
+      },
+      "relations": 32,
+      "full_support_relations": 30,
+      "support_histogram": {
+        "4": 2,
+        "6": 30
+      },
+      "s3_solves_per_relation": 0.0,
+      "s4_solves_per_relation": 2.59375,
+      "solves_per_relation": 2.59375,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.00004316796875,
+      "point_adds_per_relation": 6.96875,
+      "lookups_per_relation": 6.96875,
+      "outer_probes_per_relation": 2.59375,
+      "structural_outer_probes_per_relation": 1.382175152867687,
+      "expected_relations_per_target": 401821942.7072838,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 189543.0,
+      "scan_unit_lambda": 28484.542252406696,
+      "structural_dense_solves_per_relation": 1.382175152867687,
+      "structural_sparse_solves_per_relation": 6.654240686770568,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 1.1090336253654676,
+      "models": {
+        "r_over_n2k2": 9.904787334593573,
+        "r_over_4n2k2": 2.4761968336483933,
+        "model_45r_over_n4k4": 0.002106405624086535,
+        "structural_s3_solves_per_relation": 2.764350305735374,
+        "structural_s4_solves_per_relation": 1.382175152867687
+      },
+      "fit_c_solves": 0.2618683180547491,
+      "targets_over_model_45": 474.7423708734449,
+      "outer_probes_over_model_45": 1231.3630244529977,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            46,
+            83,
+            215,
+            261,
+            808,
+            820
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              1634474
+            ],
+            [
+              4,
+              2006889
+            ],
+            [
+              5,
+              2006889
+            ],
+            [
+              17,
+              1330321
+            ]
+          ],
+          "target_x": 6435232,
+          "target_y": 5980676
+        },
+        {
+          "indices": [
+            169,
+            169,
+            290,
+            290,
+            489,
+            706
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              3,
+              1917925
+            ],
+            [
+              6,
+              1304736
+            ],
+            [
+              10,
+              1998609
+            ],
+            [
+              15,
+              279568
+            ]
+          ],
+          "target_x": 5454160,
+          "target_y": 369522
+        },
+        {
+          "indices": [
+            95,
+            266,
+            371,
+            408,
+            816,
+            824
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              2,
+              2002659
+            ],
+            [
+              5,
+              461380
+            ],
+            [
+              8,
+              1752327
+            ],
+            [
+              17,
+              1700712
+            ]
+          ],
+          "target_x": 1010722,
+          "target_y": 2924911
+        },
+        {
+          "indices": [
+            125,
+            126,
+            300,
+            627,
+            645,
+            646
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              2,
+              388976
+            ],
+            [
+              6,
+              2093783
+            ],
+            [
+              13,
+              1998609
+            ],
+            [
+              14,
+              93193
+            ]
+          ],
+          "target_x": 3981898,
+          "target_y": 7167201
+        }
+      ]
+    },
+    {
+      "n": 23,
+      "a": 0,
+      "columns": 20,
+      "kernel": "6sum_b2_s4_strided",
+      "arity": 6,
+      "r": 2095853,
+      "cofactor": 4,
+      "base_points": 920,
+      "table_states": 8241,
+      "abscissa_states": 189543,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 0,
+        "s4_solves": 57,
+        "outer_probes": 57,
+        "point_adds": 223,
+        "canonicalisations": 164,
+        "lookups": 164,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 5752375
+      },
+      "relations": 32,
+      "full_support_relations": 31,
+      "support_histogram": {
+        "4": 1,
+        "6": 31
+      },
+      "s3_solves_per_relation": 0.0,
+      "s4_solves_per_relation": 1.78125,
+      "solves_per_relation": 1.78125,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.0001923580625,
+      "point_adds_per_relation": 6.96875,
+      "lookups_per_relation": 5.125,
+      "outer_probes_per_relation": 1.78125,
+      "structural_outer_probes_per_relation": 1.382175152867687,
+      "expected_relations_per_target": 401821942.7072838,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 17963274424.5,
+      "scan_unit_lambda": 401821942.7072838,
+      "structural_dense_solves_per_relation": 1.382175152867687,
+      "structural_sparse_solves_per_relation": 44.7045631790839,
+      "scan_unit_multiplicity": 45.0,
+      "structural_solves_per_relation": 0.993434737258035,
+      "models": {
+        "r_over_n2k2": 9.904787334593573,
+        "r_over_4n2k2": 2.4761968336483933,
+        "model_45r_over_n4k4": 0.002106405624086535,
+        "structural_s3_solves_per_relation": 2.764350305735374,
+        "structural_s4_solves_per_relation": 1.382175152867687
+      },
+      "fit_c_solves": 0.1798372786641048,
+      "targets_over_model_45": 474.7423708734449,
+      "outer_probes_over_model_45": 845.6348481183237,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            1,
+            1,
+            191,
+            317,
+            707,
+            878
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              2095851
+            ],
+            [
+              4,
+              93192
+            ],
+            [
+              6,
+              250332
+            ],
+            [
+              15,
+              1816285
+            ],
+            [
+              19,
+              2002657
+            ]
+          ],
+          "target_x": 6435232,
+          "target_y": 5980676
+        },
+        {
+          "indices": [
+            0,
+            0,
+            192,
+            441,
+            618,
+            748
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              2
+            ],
+            [
+              4,
+              279584
+            ],
+            [
+              9,
+              93104
+            ],
+            [
+              13,
+              1025168
+            ],
+            [
+              16,
+              1629885
+            ]
+          ],
+          "target_x": 5454160,
+          "target_y": 369522
+        },
+        {
+          "indices": [
+            133,
+            379,
+            409,
+            511,
+            627,
+            817
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              2,
+              250332
+            ],
+            [
+              8,
+              343532
+            ],
+            [
+              11,
+              93196
+            ],
+            [
+              13,
+              1998609
+            ],
+            [
+              17,
+              1990329
+            ]
+          ],
+          "target_x": 1010722,
+          "target_y": 2924911
+        },
+        {
+          "indices": [
+            1,
+            1,
+            12,
+            309,
+            379,
+            914
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              1629883
+            ],
+            [
+              6,
+              283452
+            ],
+            [
+              8,
+              93200
+            ],
+            [
+              19,
+              1845521
+            ]
+          ],
+          "target_x": 3981898,
+          "target_y": 7167201
+        }
+      ]
+    },
+    {
+      "n": 23,
+      "a": 0,
+      "columns": 20,
+      "kernel": "5sum_c_control",
+      "arity": 5,
+      "r": 2095853,
+      "cofactor": 4,
+      "base_points": 920,
+      "table_states": 8241,
+      "abscissa_states": 189543,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 97,
+        "s4_solves": 0,
+        "outer_probes": 32,
+        "point_adds": 147,
+        "canonicalisations": 178,
+        "lookups": 178,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 160,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 267666
+      },
+      "relations": 32,
+      "full_support_relations": 32,
+      "support_histogram": {
+        "5": 32
+      },
+      "s3_solves_per_relation": 3.03125,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 3.03125,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.000014897125,
+      "point_adds_per_relation": 4.59375,
+      "lookups_per_relation": 5.5625,
+      "outer_probes_per_relation": 1.0,
+      "structural_outer_probes_per_relation": 0.000014584291193741652,
+      "expected_relations_per_target": 2620577.887221416,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 189543.0,
+      "scan_unit_lambda": 14242.271126203348,
+      "structural_dense_solves_per_relation": 2.764350305735374,
+      "structural_sparse_solves_per_relation": 13.308481373541136,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 2.2180542726902197,
+      "models": {
+        "r_over_n2k2": 9.904787334593573,
+        "r_over_4n2k2": 2.4761968336483933,
+        "model_45r_over_n4k4": 0.002106405624086535,
+        "structural_s3_solves_per_relation": 2.764350305735374,
+        "structural_s4_solves_per_relation": 1.382175152867687
+      },
+      "fit_c_solves": 0.30603887772663446,
+      "targets_over_model_45": 474.7423708734449,
+      "outer_probes_over_model_45": 474.7423708734449,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            3,
+            3,
+            449,
+            538,
+            837
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              1909465
+            ],
+            [
+              9,
+              1990329
+            ],
+            [
+              11,
+              1812401
+            ],
+            [
+              18,
+              1816269
+            ]
+          ],
+          "target_x": 4303804,
+          "target_y": 7730337
+        },
+        {
+          "indices": [
+            2,
+            2,
+            169,
+            309,
+            686
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              186388
+            ],
+            [
+              3,
+              2006889
+            ],
+            [
+              6,
+              283452
+            ],
+            [
+              14,
+              1595188
+            ]
+          ],
+          "target_x": 1459430,
+          "target_y": 6823755
+        },
+        {
+          "indices": [
+            1,
+            1,
+            509,
+            589,
+            727
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              2095851
+            ],
+            [
+              11,
+              2002659
+            ],
+            [
+              12,
+              1634473
+            ],
+            [
+              15,
+              1634473
+            ]
+          ],
+          "target_x": 6456760,
+          "target_y": 1498911
+        },
+        {
+          "indices": [
+            4,
+            4,
+            107,
+            478,
+            865
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              1909461
+            ],
+            [
+              2,
+              1443485
+            ],
+            [
+              10,
+              511549
+            ],
+            [
+              18,
+              1634473
+            ]
+          ],
+          "target_x": 5185252,
+          "target_y": 2813755
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "a": 0,
+      "columns": 5,
+      "kernel": "4sum",
+      "arity": 4,
+      "r": 1439393,
+      "cofactor": 1492,
+      "base_points": 310,
+      "table_states": 745,
+      "abscissa_states": 23095,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 426,
+        "s4_solves": 0,
+        "outer_probes": 426,
+        "point_adds": 112,
+        "canonicalisations": 833,
+        "lookups": 833,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 128,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 594583
+      },
+      "relations": 32,
+      "full_support_relations": 31,
+      "support_histogram": {
+        "2": 1,
+        "4": 31
+      },
+      "s3_solves_per_relation": 13.3125,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 13.3125,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.000026828125,
+      "point_adds_per_relation": 3.5,
+      "lookups_per_relation": 26.03125,
+      "outer_probes_per_relation": 13.3125,
+      "structural_outer_probes_per_relation": 15.58121887854514,
+      "expected_relations_per_target": 267.3352007871837,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 23095.0,
+      "scan_unit_lambda": 267.3352007871837,
+      "structural_dense_solves_per_relation": 15.58121887854514,
+      "structural_sparse_solves_per_relation": 86.38967084018662,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 14.389307645976446,
+      "models": {
+        "r_over_n2k2": 59.91229968782518,
+        "r_over_4n2k2": 14.978074921956296,
+        "model_45r_over_n4k4": 0.1122186674693916,
+        "structural_s3_solves_per_relation": 15.58121887854514,
+        "structural_s4_solves_per_relation": 7.79060943927257
+      },
+      "fit_c_solves": 0.22219978317249006,
+      "targets_over_model_45": 8.911173359572789,
+      "outer_probes_over_model_45": 118.62999534931275,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            6,
+            136,
+            222,
+            238
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              0,
+              1394377
+            ],
+            [
+              2,
+              1214305
+            ],
+            [
+              3,
+              987305
+            ]
+          ],
+          "target_x": 154564996,
+          "target_y": 1139377234
+        },
+        {
+          "indices": [
+            76,
+            139,
+            241,
+            245
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              1,
+              315136
+            ],
+            [
+              2,
+              1124257
+            ],
+            [
+              3,
+              446997
+            ]
+          ],
+          "target_x": 705344704,
+          "target_y": 1431373396
+        },
+        {
+          "indices": [
+            3,
+            144,
+            244,
+            246
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              0,
+              1394375
+            ],
+            [
+              2,
+              495232
+            ],
+            [
+              3,
+              348593
+            ]
+          ],
+          "target_x": 1202260056,
+          "target_y": 980642871
+        },
+        {
+          "indices": [
+            131,
+            131,
+            177,
+            188
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              2,
+              1033227
+            ],
+            [
+              3,
+              45018
+            ]
+          ],
+          "target_x": 1155468130,
+          "target_y": 239753609
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "a": 0,
+      "columns": 5,
+      "kernel": "6sum_a_iterate_table",
+      "arity": 6,
+      "r": 1439393,
+      "cofactor": 1492,
+      "base_points": 310,
+      "table_states": 745,
+      "abscissa_states": 23095,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 578,
+        "s4_solves": 0,
+        "outer_probes": 32,
+        "point_adds": 178,
+        "canonicalisations": 1139,
+        "lookups": 1139,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 815749
+      },
+      "relations": 32,
+      "full_support_relations": 30,
+      "support_histogram": {
+        "4": 2,
+        "6": 30
+      },
+      "s3_solves_per_relation": 18.0625,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 18.0625,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.0000425794375,
+      "point_adds_per_relation": 5.5625,
+      "lookups_per_relation": 35.59375,
+      "outer_probes_per_relation": 1.0,
+      "structural_outer_probes_per_relation": 0.0006746576695624654,
+      "expected_relations_per_target": 856363.759854945,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 23095.0,
+      "scan_unit_lambda": 267.3352007871837,
+      "structural_dense_solves_per_relation": 15.58121887854514,
+      "structural_sparse_solves_per_relation": 86.38967084018662,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 14.389307645976446,
+      "models": {
+        "r_over_n2k2": 59.91229968782518,
+        "r_over_4n2k2": 14.978074921956296,
+        "model_45r_over_n4k4": 0.1122186674693916,
+        "structural_s3_solves_per_relation": 15.58121887854514,
+        "structural_s4_solves_per_relation": 7.79060943927257
+      },
+      "fit_c_solves": 0.301482334914787,
+      "targets_over_model_45": 8.911173359572789,
+      "outer_probes_over_model_45": 8.911173359572789,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            9,
+            152,
+            176,
+            182,
+            263,
+            302
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              1304337
+            ],
+            [
+              2,
+              1365458
+            ],
+            [
+              4,
+              1025854
+            ]
+          ],
+          "target_x": 248748680,
+          "target_y": 1348108305
+        },
+        {
+          "indices": [
+            6,
+            15,
+            43,
+            52,
+            283,
+            283
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              171671
+            ],
+            [
+              4,
+              69553
+            ]
+          ],
+          "target_x": 1236416842,
+          "target_y": 1290772701
+        },
+        {
+          "indices": [
+            62,
+            82,
+            112,
+            160,
+            173,
+            230
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              1016032
+            ],
+            [
+              2,
+              279909
+            ],
+            [
+              3,
+              1156945
+            ]
+          ],
+          "target_x": 769821126,
+          "target_y": 992828675
+        },
+        {
+          "indices": [
+            99,
+            204,
+            233,
+            250,
+            258,
+            276
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              948286
+            ],
+            [
+              3,
+              320383
+            ],
+            [
+              4,
+              1217848
+            ]
+          ],
+          "target_x": 138579848,
+          "target_y": 484434159
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "a": 0,
+      "columns": 5,
+      "kernel": "6sum_b_s4_per_probe",
+      "arity": 6,
+      "r": 1439393,
+      "cofactor": 1492,
+      "base_points": 310,
+      "table_states": 745,
+      "abscissa_states": 23095,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 0,
+        "s4_solves": 247,
+        "outer_probes": 247,
+        "point_adds": 245,
+        "canonicalisations": 882,
+        "lookups": 882,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 7070666
+      },
+      "relations": 32,
+      "full_support_relations": 31,
+      "support_histogram": {
+        "4": 1,
+        "6": 31
+      },
+      "s3_solves_per_relation": 0.0,
+      "s4_solves_per_relation": 7.71875,
+      "solves_per_relation": 7.71875,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.00024049478125,
+      "point_adds_per_relation": 7.65625,
+      "lookups_per_relation": 27.5625,
+      "outer_probes_per_relation": 7.71875,
+      "structural_outer_probes_per_relation": 7.79060943927257,
+      "expected_relations_per_target": 856363.759854945,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 23095.0,
+      "scan_unit_lambda": 534.6704015743674,
+      "structural_dense_solves_per_relation": 7.79060943927257,
+      "structural_sparse_solves_per_relation": 43.19483542009331,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 7.196895830959813,
+      "models": {
+        "r_over_n2k2": 59.91229968782518,
+        "r_over_4n2k2": 14.978074921956296,
+        "model_45r_over_n4k4": 0.1122186674693916,
+        "structural_s3_solves_per_relation": 15.58121887854514,
+        "structural_s4_solves_per_relation": 7.79060943927257
+      },
+      "fit_c_solves": 0.12883414658123252,
+      "targets_over_model_45": 8.911173359572789,
+      "outer_probes_over_model_45": 68.78311936920247,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            105,
+            105,
+            119,
+            255,
+            269,
+            293
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              965243
+            ],
+            [
+              4,
+              1271625
+            ]
+          ],
+          "target_x": 248748680,
+          "target_y": 1348108305
+        },
+        {
+          "indices": [
+            23,
+            42,
+            101,
+            119,
+            222,
+            260
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              368376
+            ],
+            [
+              1,
+              1315547
+            ],
+            [
+              3,
+              491107
+            ],
+            [
+              4,
+              1214305
+            ]
+          ],
+          "target_x": 1236416842,
+          "target_y": 1290772701
+        },
+        {
+          "indices": [
+            145,
+            151,
+            225,
+            238,
+            272,
+            287
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              2,
+              989089
+            ],
+            [
+              3,
+              917752
+            ],
+            [
+              4,
+              1274484
+            ]
+          ],
+          "target_x": 769821126,
+          "target_y": 992828675
+        },
+        {
+          "indices": [
+            187,
+            189,
+            203,
+            217,
+            219,
+            221
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              3,
+              131336
+            ]
+          ],
+          "target_x": 138579848,
+          "target_y": 484434159
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "a": 0,
+      "columns": 5,
+      "kernel": "6sum_b2_s4_strided",
+      "arity": 6,
+      "r": 1439393,
+      "cofactor": 1492,
+      "base_points": 310,
+      "table_states": 745,
+      "abscissa_states": 23095,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 0,
+        "s4_solves": 214,
+        "outer_probes": 214,
+        "point_adds": 207,
+        "canonicalisations": 803,
+        "lookups": 803,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 5838538
+      },
+      "relations": 32,
+      "full_support_relations": 32,
+      "support_histogram": {
+        "6": 32
+      },
+      "s3_solves_per_relation": 0.0,
+      "s4_solves_per_relation": 6.6875,
+      "solves_per_relation": 6.6875,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.00021504296875,
+      "point_adds_per_relation": 6.46875,
+      "lookups_per_relation": 25.09375,
+      "outer_probes_per_relation": 6.6875,
+      "structural_outer_probes_per_relation": 7.79060943927257,
+      "expected_relations_per_target": 856363.759854945,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 266689512.5,
+      "scan_unit_lambda": 856363.759854945,
+      "structural_dense_solves_per_relation": 7.79060943927257,
+      "structural_sparse_solves_per_relation": 311.4208295609954,
+      "scan_unit_multiplicity": 45.0,
+      "structural_solves_per_relation": 6.920462699550596,
+      "models": {
+        "r_over_n2k2": 59.91229968782518,
+        "r_over_4n2k2": 14.978074921956296,
+        "model_45r_over_n4k4": 0.1122186674693916,
+        "structural_s3_solves_per_relation": 15.58121887854514,
+        "structural_s4_solves_per_relation": 7.79060943927257
+      },
+      "fit_c_solves": 0.11162148732139172,
+      "targets_over_model_45": 8.911173359572789,
+      "outer_probes_over_model_45": 59.593471842143025,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            0,
+            0,
+            166,
+            178,
+            217,
+            270
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              1305365
+            ],
+            [
+              3,
+              1127998
+            ],
+            [
+              4,
+              1035392
+            ]
+          ],
+          "target_x": 248748680,
+          "target_y": 1348108305
+        },
+        {
+          "indices": [
+            8,
+            8,
+            39,
+            67,
+            178,
+            209
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              691666
+            ],
+            [
+              1,
+              45020
+            ],
+            [
+              2,
+              1340990
+            ],
+            [
+              3,
+              404001
+            ]
+          ],
+          "target_x": 1236416842,
+          "target_y": 1290772701
+        },
+        {
+          "indices": [
+            154,
+            173,
+            226,
+            235,
+            269,
+            275
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              2,
+              100197
+            ],
+            [
+              3,
+              667535
+            ],
+            [
+              4,
+              989089
+            ]
+          ],
+          "target_x": 769821126,
+          "target_y": 992828675
+        },
+        {
+          "indices": [
+            92,
+            122,
+            206,
+            238,
+            269,
+            278
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              1008582
+            ],
+            [
+              3,
+              991430
+            ],
+            [
+              4,
+              1255556
+            ]
+          ],
+          "target_x": 138579848,
+          "target_y": 484434159
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "a": 0,
+      "columns": 5,
+      "kernel": "5sum_c_control",
+      "arity": 5,
+      "r": 1439393,
+      "cofactor": 1492,
+      "base_points": 310,
+      "table_states": 745,
+      "abscissa_states": 23095,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 565,
+        "s4_solves": 0,
+        "outer_probes": 32,
+        "point_adds": 144,
+        "canonicalisations": 1109,
+        "lookups": 1109,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 160,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 689167
+      },
+      "relations": 32,
+      "full_support_relations": 32,
+      "support_histogram": {
+        "5": 32
+      },
+      "s3_solves_per_relation": 17.65625,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 17.65625,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.00003214584375,
+      "point_adds_per_relation": 4.5,
+      "lookups_per_relation": 34.65625,
+      "outer_probes_per_relation": 1.0,
+      "structural_outer_probes_per_relation": 0.0006746576695624654,
+      "expected_relations_per_target": 16574.78244880539,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 23095.0,
+      "scan_unit_lambda": 267.3352007871837,
+      "structural_dense_solves_per_relation": 15.58121887854514,
+      "structural_sparse_solves_per_relation": 86.38967084018662,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 14.389307645976446,
+      "models": {
+        "r_over_n2k2": 59.91229968782518,
+        "r_over_4n2k2": 14.978074921956296,
+        "model_45r_over_n4k4": 0.1122186674693916,
+        "structural_s3_solves_per_relation": 15.58121887854514,
+        "structural_s4_solves_per_relation": 7.79060943927257
+      },
+      "fit_c_solves": 0.29470159035788,
+      "targets_over_model_45": 8.911173359572789,
+      "outer_probes_over_model_45": 8.911173359572789,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            34,
+            34,
+            133,
+            164,
+            256
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              1369840
+            ],
+            [
+              2,
+              743677
+            ],
+            [
+              4,
+              135056
+            ]
+          ],
+          "target_x": 1988442476,
+          "target_y": 1696441377
+        },
+        {
+          "indices": [
+            7,
+            8,
+            115,
+            166,
+            221
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              180072
+            ],
+            [
+              1,
+              943195
+            ],
+            [
+              2,
+              1403768
+            ],
+            [
+              3,
+              754473
+            ]
+          ],
+          "target_x": 2049521260,
+          "target_y": 1166929300
+        },
+        {
+          "indices": [
+            53,
+            54,
+            121,
+            236,
+            269
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              844792
+            ],
+            [
+              1,
+              348594
+            ],
+            [
+              3,
+              520799
+            ],
+            [
+              4,
+              944161
+            ]
+          ],
+          "target_x": 390270,
+          "target_y": 1761892762
+        },
+        {
+          "indices": [
+            0,
+            3,
+            3,
+            239,
+            294
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              1349358
+            ],
+            [
+              3,
+              943195
+            ],
+            [
+              4,
+              353698
+            ]
+          ],
+          "target_x": 105224194,
+          "target_y": 246439771
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "a": 0,
+      "columns": 10,
+      "kernel": "4sum",
+      "arity": 4,
+      "r": 1439393,
+      "cofactor": 1492,
+      "base_points": 620,
+      "table_states": 2888,
+      "abscissa_states": 89528,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 119,
+        "s4_solves": 0,
+        "outer_probes": 119,
+        "point_adds": 111,
+        "canonicalisations": 222,
+        "lookups": 222,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 128,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 277834
+      },
+      "relations": 32,
+      "full_support_relations": 31,
+      "support_histogram": {
+        "2": 1,
+        "4": 31
+      },
+      "s3_solves_per_relation": 3.71875,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 3.71875,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.000016990875,
+      "point_adds_per_relation": 3.46875,
+      "lookups_per_relation": 6.9375,
+      "outer_probes_per_relation": 3.71875,
+      "structural_outer_probes_per_relation": 4.019393374139934,
+      "expected_relations_per_target": 4277.363212594939,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 89528.0,
+      "scan_unit_lambda": 4277.363212594939,
+      "structural_dense_solves_per_relation": 4.019393374139934,
+      "structural_sparse_solves_per_relation": 20.93065179416602,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 3.488306044494324,
+      "models": {
+        "r_over_n2k2": 14.978074921956296,
+        "r_over_4n2k2": 3.744518730489074,
+        "model_45r_over_n4k4": 0.007013666716836975,
+        "structural_s3_solves_per_relation": 4.019393374139934,
+        "structural_s4_solves_per_relation": 2.009696687069967
+      },
+      "fit_c_solves": 0.24827956992982458,
+      "targets_over_model_45": 142.57877375316463,
+      "outer_probes_over_model_45": 530.214814894581,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            64,
+            138,
+            583,
+            616
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              1,
+              45018
+            ],
+            [
+              2,
+              315136
+            ],
+            [
+              9,
+              237869
+            ]
+          ],
+          "target_x": 1409757364,
+          "target_y": 1430992332
+        },
+        {
+          "indices": [
+            311,
+            352,
+            517,
+            540
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              5,
+              1403767
+            ],
+            [
+              8,
+              661713
+            ]
+          ],
+          "target_x": 1570600086,
+          "target_y": 2037478549
+        },
+        {
+          "indices": [
+            27,
+            306,
+            496,
+            610
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              0,
+              44928
+            ],
+            [
+              4,
+              1090799
+            ],
+            [
+              8,
+              1
+            ],
+            [
+              9,
+              496198
+            ]
+          ],
+          "target_x": 900171354,
+          "target_y": 1521500067
+        },
+        {
+          "indices": [
+            125,
+            317,
+            341,
+            439
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              2,
+              1439392
+            ],
+            [
+              5,
+              1173014
+            ],
+            [
+              7,
+              45020
+            ]
+          ],
+          "target_x": 1110290328,
+          "target_y": 303031519
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "a": 0,
+      "columns": 10,
+      "kernel": "6sum_a_iterate_table",
+      "arity": 6,
+      "r": 1439393,
+      "cofactor": 1492,
+      "base_points": 620,
+      "table_states": 2888,
+      "abscissa_states": 89528,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 122,
+        "s4_solves": 0,
+        "outer_probes": 32,
+        "point_adds": 180,
+        "canonicalisations": 227,
+        "lookups": 227,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 389752
+      },
+      "relations": 32,
+      "full_support_relations": 32,
+      "support_histogram": {
+        "6": 32
+      },
+      "s3_solves_per_relation": 3.8125,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 3.8125,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.000020278625,
+      "point_adds_per_relation": 5.625,
+      "lookups_per_relation": 7.09375,
+      "outer_probes_per_relation": 1.0,
+      "structural_outer_probes_per_relation": 0.00004489537769345829,
+      "expected_relations_per_target": 54807280.63071648,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 89528.0,
+      "scan_unit_lambda": 4277.363212594939,
+      "structural_dense_solves_per_relation": 4.019393374139934,
+      "structural_sparse_solves_per_relation": 20.93065179416602,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 3.488306044494324,
+      "models": {
+        "r_over_n2k2": 14.978074921956296,
+        "r_over_4n2k2": 3.744518730489074,
+        "model_45r_over_n4k4": 0.007013666716836975,
+        "structural_s3_solves_per_relation": 4.019393374139934,
+        "structural_s4_solves_per_relation": 2.009696687069967
+      },
+      "fit_c_solves": 0.25453871875158485,
+      "targets_over_model_45": 142.57877375316463,
+      "outer_probes_over_model_45": 142.57877375316463,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            131,
+            170,
+            219,
+            243,
+            516,
+            524
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              2,
+              398714
+            ],
+            [
+              3,
+              762310
+            ],
+            [
+              8,
+              273693
+            ]
+          ],
+          "target_x": 613461430,
+          "target_y": 1636316748
+        },
+        {
+          "indices": [
+            106,
+            250,
+            252,
+            412,
+            415,
+            608
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              1156945
+            ],
+            [
+              4,
+              1439391
+            ],
+            [
+              6,
+              914358
+            ],
+            [
+              9,
+              520799
+            ]
+          ],
+          "target_x": 2130477966,
+          "target_y": 597554840
+        },
+        {
+          "indices": [
+            6,
+            48,
+            91,
+            163,
+            558,
+            579
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              166182
+            ],
+            [
+              1,
+              221539
+            ],
+            [
+              2,
+              421554
+            ],
+            [
+              9,
+              944162
+            ]
+          ],
+          "target_x": 1188248634,
+          "target_y": 1189408255
+        },
+        {
+          "indices": [
+            36,
+            167,
+            349,
+            370,
+            570,
+            592
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              491107
+            ],
+            [
+              2,
+              35625
+            ],
+            [
+              5,
+              1118741
+            ],
+            [
+              9,
+              459832
+            ]
+          ],
+          "target_x": 2111212136,
+          "target_y": 1524745911
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "a": 0,
+      "columns": 10,
+      "kernel": "6sum_b_s4_per_probe",
+      "arity": 6,
+      "r": 1439393,
+      "cofactor": 1492,
+      "base_points": 620,
+      "table_states": 2888,
+      "abscissa_states": 89528,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 0,
+        "s4_solves": 86,
+        "outer_probes": 86,
+        "point_adds": 212,
+        "canonicalisations": 231,
+        "lookups": 231,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 975249
+      },
+      "relations": 32,
+      "full_support_relations": 31,
+      "support_histogram": {
+        "4": 1,
+        "6": 31
+      },
+      "s3_solves_per_relation": 0.0,
+      "s4_solves_per_relation": 2.6875,
+      "solves_per_relation": 2.6875,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.000038546875,
+      "point_adds_per_relation": 6.625,
+      "lookups_per_relation": 7.21875,
+      "outer_probes_per_relation": 2.6875,
+      "structural_outer_probes_per_relation": 2.009696687069967,
+      "expected_relations_per_target": 54807280.63071648,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 89528.0,
+      "scan_unit_lambda": 8554.726425189878,
+      "structural_dense_solves_per_relation": 2.009696687069967,
+      "structural_sparse_solves_per_relation": 10.46532589708301,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 1.7441870018851602,
+      "models": {
+        "r_over_n2k2": 14.978074921956296,
+        "r_over_4n2k2": 3.744518730489074,
+        "model_45r_over_n4k4": 0.007013666716836975,
+        "structural_s3_solves_per_relation": 4.019393374139934,
+        "structural_s4_solves_per_relation": 2.009696687069967
+      },
+      "fit_c_solves": 0.17942893289046147,
+      "targets_over_model_45": 142.57877375316463,
+      "outer_probes_over_model_45": 383.1804544616299,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            340,
+            343,
+            346,
+            452,
+            455,
+            535
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              5,
+              670819
+            ],
+            [
+              7,
+              178849
+            ],
+            [
+              8,
+              421554
+            ]
+          ],
+          "target_x": 613461430,
+          "target_y": 1636316748
+        },
+        {
+          "indices": [
+            80,
+            129,
+            129,
+            134,
+            226,
+            226
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              674081
+            ],
+            [
+              2,
+              45016
+            ],
+            [
+              3,
+              318073
+            ]
+          ],
+          "target_x": 2130477966,
+          "target_y": 597554840
+        },
+        {
+          "indices": [
+            97,
+            97,
+            271,
+            395,
+            562,
+            562
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              69553
+            ],
+            [
+              4,
+              404001
+            ],
+            [
+              6,
+              404001
+            ],
+            [
+              9,
+              1349353
+            ]
+          ],
+          "target_x": 1188248634,
+          "target_y": 1189408255
+        },
+        {
+          "indices": [
+            138,
+            255,
+            306,
+            354,
+            364,
+            614
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              2,
+              315136
+            ],
+            [
+              4,
+              1135815
+            ],
+            [
+              5,
+              1058542
+            ],
+            [
+              9,
+              545400
+            ]
+          ],
+          "target_x": 2111212136,
+          "target_y": 1524745911
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "a": 0,
+      "columns": 10,
+      "kernel": "6sum_b2_s4_strided",
+      "arity": 6,
+      "r": 1439393,
+      "cofactor": 1492,
+      "base_points": 620,
+      "table_states": 2888,
+      "abscissa_states": 89528,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 0,
+        "s4_solves": 68,
+        "outer_probes": 68,
+        "point_adds": 230,
+        "canonicalisations": 212,
+        "lookups": 212,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 1917041
+      },
+      "relations": 32,
+      "full_support_relations": 32,
+      "support_histogram": {
+        "6": 32
+      },
+      "s3_solves_per_relation": 0.0,
+      "s4_solves_per_relation": 2.125,
+      "solves_per_relation": 2.125,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.0000680013125,
+      "point_adds_per_relation": 7.1875,
+      "lookups_per_relation": 6.625,
+      "outer_probes_per_relation": 2.125,
+      "structural_outer_probes_per_relation": 2.009696687069967,
+      "expected_relations_per_target": 54807280.63071648,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 4007631392.0,
+      "scan_unit_lambda": 54807280.63071648,
+      "structural_dense_solves_per_relation": 2.009696687069967,
+      "structural_sparse_solves_per_relation": 73.12224481639292,
+      "scan_unit_multiplicity": 45.0,
+      "structural_solves_per_relation": 1.6249387730387708,
+      "models": {
+        "r_over_n2k2": 14.978074921956296,
+        "r_over_4n2k2": 3.744518730489074,
+        "model_45r_over_n4k4": 0.007013666716836975,
+        "structural_s3_solves_per_relation": 4.019393374139934,
+        "structural_s4_solves_per_relation": 2.009696687069967
+      },
+      "fit_c_solves": 0.14187403995989975,
+      "targets_over_model_45": 142.57877375316463,
+      "outer_probes_over_model_45": 302.9798942254748,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            154,
+            242,
+            267,
+            342,
+            454,
+            493
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              2,
+              311395
+            ],
+            [
+              3,
+              545400
+            ],
+            [
+              4,
+              765312
+            ],
+            [
+              5,
+              131683
+            ],
+            [
+              7,
+              843826
+            ]
+          ],
+          "target_x": 613461430,
+          "target_y": 1636316748
+        },
+        {
+          "indices": [
+            5,
+            5,
+            165,
+            336,
+            521,
+            596
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              90040
+            ],
+            [
+              2,
+              560660
+            ],
+            [
+              5,
+              1394465
+            ],
+            [
+              8,
+              586463
+            ],
+            [
+              9,
+              1017839
+            ]
+          ],
+          "target_x": 2130477966,
+          "target_y": 597554840
+        },
+        {
+          "indices": [
+            96,
+            98,
+            221,
+            358,
+            563,
+            612
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              1176027
+            ],
+            [
+              3,
+              754473
+            ],
+            [
+              5,
+              211198
+            ],
+            [
+              9,
+              1386010
+            ]
+          ],
+          "target_x": 1188248634,
+          "target_y": 1189408255
+        },
+        {
+          "indices": [
+            149,
+            251,
+            255,
+            275,
+            360,
+            599
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              2,
+              586463
+            ],
+            [
+              4,
+              44926
+            ],
+            [
+              5,
+              520799
+            ],
+            [
+              9,
+              560660
+            ]
+          ],
+          "target_x": 2111212136,
+          "target_y": 1524745911
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "a": 0,
+      "columns": 10,
+      "kernel": "5sum_c_control",
+      "arity": 5,
+      "r": 1439393,
+      "cofactor": 1492,
+      "base_points": 620,
+      "table_states": 2888,
+      "abscissa_states": 89528,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 122,
+        "s4_solves": 0,
+        "outer_probes": 32,
+        "point_adds": 144,
+        "canonicalisations": 223,
+        "lookups": 223,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 160,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 330876
+      },
+      "relations": 32,
+      "full_support_relations": 32,
+      "support_histogram": {
+        "5": 32
+      },
+      "s3_solves_per_relation": 3.8125,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 3.8125,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.000018694,
+      "point_adds_per_relation": 4.5,
+      "lookups_per_relation": 6.96875,
+      "outer_probes_per_relation": 1.0,
+      "structural_outer_probes_per_relation": 0.00004489537769345829,
+      "expected_relations_per_target": 530393.0383617724,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 89528.0,
+      "scan_unit_lambda": 4277.363212594939,
+      "structural_dense_solves_per_relation": 4.019393374139934,
+      "structural_sparse_solves_per_relation": 20.93065179416602,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 3.488306044494324,
+      "models": {
+        "r_over_n2k2": 14.978074921956296,
+        "r_over_4n2k2": 3.744518730489074,
+        "model_45r_over_n4k4": 0.007013666716836975,
+        "structural_s3_solves_per_relation": 4.019393374139934,
+        "structural_s4_solves_per_relation": 2.009696687069967
+      },
+      "fit_c_solves": 0.25453871875158485,
+      "targets_over_model_45": 142.57877375316463,
+      "outer_probes_over_model_45": 142.57877375316463,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            15,
+            15,
+            115,
+            130,
+            255
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              809121
+            ],
+            [
+              1,
+              943195
+            ],
+            [
+              2,
+              1394377
+            ],
+            [
+              4,
+              45016
+            ]
+          ],
+          "target_x": 2004243242,
+          "target_y": 1273526368
+        },
+        {
+          "indices": [
+            3,
+            3,
+            349,
+            438,
+            494
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              1349357
+            ],
+            [
+              5,
+              421554
+            ],
+            [
+              7,
+              652167
+            ]
+          ],
+          "target_x": 390580410,
+          "target_y": 1939114453
+        },
+        {
+          "indices": [
+            3,
+            3,
+            335,
+            518,
+            588
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              1349357
+            ],
+            [
+              5,
+              586463
+            ],
+            [
+              8,
+              1035392
+            ],
+            [
+              9,
+              311395
+            ]
+          ],
+          "target_x": 53521914,
+          "target_y": 724197306
+        },
+        {
+          "indices": [
+            2,
+            2,
+            74,
+            150,
+            320
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              90036
+            ],
+            [
+              1,
+              1214305
+            ],
+            [
+              2,
+              1394465
+            ],
+            [
+              5,
+              1394369
+            ]
+          ],
+          "target_x": 752178332,
+          "target_y": 87199786
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "a": 0,
+      "columns": 20,
+      "kernel": "4sum",
+      "arity": 4,
+      "r": 1439393,
+      "cofactor": 1492,
+      "base_points": 1240,
+      "table_states": 9548,
+      "abscissa_states": 295988,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 43,
+        "s4_solves": 0,
+        "outer_probes": 43,
+        "point_adds": 114,
+        "canonicalisations": 69,
+        "lookups": 69,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 128,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 247667
+      },
+      "relations": 32,
+      "full_support_relations": 32,
+      "support_histogram": {
+        "4": 32
+      },
+      "s3_solves_per_relation": 1.34375,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 1.34375,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.000015859375,
+      "point_adds_per_relation": 3.5625,
+      "lookups_per_relation": 2.15625,
+      "outer_probes_per_relation": 1.34375,
+      "structural_outer_probes_per_relation": 1.2157528345743747,
+      "expected_relations_per_target": 68437.81140151902,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 295988.0,
+      "scan_unit_lambda": 68437.81140151902,
+      "structural_dense_solves_per_relation": 1.2157528345743747,
+      "structural_sparse_solves_per_relation": 4.3249191337148805,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 0.7208181002101473,
+      "models": {
+        "r_over_n2k2": 3.744518730489074,
+        "r_over_4n2k2": 0.9361296826222685,
+        "model_45r_over_n4k4": 0.00043835416980231095,
+        "structural_s3_solves_per_relation": 1.2157528345743747,
+        "structural_s4_solves_per_relation": 0.6078764172871873
+      },
+      "fit_c_solves": 0.35885786578092294,
+      "targets_over_model_45": 2281.260380050634,
+      "outer_probes_over_model_45": 3065.443635693039,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            115,
+            381,
+            682,
+            688
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              1,
+              943195
+            ],
+            [
+              6,
+              1304337
+            ],
+            [
+              11,
+              1394378
+            ]
+          ],
+          "target_x": 876350904,
+          "target_y": 40113242
+        },
+        {
+          "indices": [
+            0,
+            152,
+            702,
+            792
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              1217854
+            ],
+            [
+              11,
+              495232
+            ],
+            [
+              12,
+              211198
+            ]
+          ],
+          "target_x": 563909748,
+          "target_y": 1727506800
+        },
+        {
+          "indices": [
+            100,
+            251,
+            413,
+            804
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              1,
+              1017839
+            ],
+            [
+              4,
+              1394375
+            ],
+            [
+              6,
+              560660
+            ],
+            [
+              12,
+              697187
+            ]
+          ],
+          "target_x": 1811964880,
+          "target_y": 1028728514
+        },
+        {
+          "indices": [
+            55,
+            126,
+            806,
+            935
+          ],
+          "arity": 4,
+          "support": 4,
+          "row": [
+            [
+              0,
+              98403
+            ],
+            [
+              2,
+              45018
+            ],
+            [
+              13,
+              1
+            ],
+            [
+              15,
+              45020
+            ]
+          ],
+          "target_x": 1341174552,
+          "target_y": 335588781
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "a": 0,
+      "columns": 20,
+      "kernel": "6sum_a_iterate_table",
+      "arity": 6,
+      "r": 1439393,
+      "cofactor": 1492,
+      "base_points": 1240,
+      "table_states": 9548,
+      "abscissa_states": 295988,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 46,
+        "s4_solves": 0,
+        "outer_probes": 32,
+        "point_adds": 174,
+        "canonicalisations": 69,
+        "lookups": 69,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 345542
+      },
+      "relations": 32,
+      "full_support_relations": 32,
+      "support_histogram": {
+        "6": 32
+      },
+      "s3_solves_per_relation": 1.4375,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 1.4375,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.00001897525,
+      "point_adds_per_relation": 5.4375,
+      "lookups_per_relation": 2.15625,
+      "outer_probes_per_relation": 1.0,
+      "structural_outer_probes_per_relation": 4.107439607600223e-6,
+      "expected_relations_per_target": 3507665960.3658547,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 295988.0,
+      "scan_unit_lambda": 68437.81140151902,
+      "structural_dense_solves_per_relation": 1.2157528345743747,
+      "structural_sparse_solves_per_relation": 4.3249191337148805,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 0.7208181002101473,
+      "models": {
+        "r_over_n2k2": 3.744518730489074,
+        "r_over_4n2k2": 0.9361296826222685,
+        "model_45r_over_n4k4": 0.00043835416980231095,
+        "structural_s3_solves_per_relation": 1.2157528345743747,
+        "structural_s4_solves_per_relation": 0.6078764172871873
+      },
+      "fit_c_solves": 0.38389446106796404,
+      "targets_over_model_45": 2281.260380050634,
+      "outer_probes_over_model_45": 2281.260380050634,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            879,
+            980,
+            1055,
+            1106,
+            1127,
+            1177
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              14,
+              45024
+            ],
+            [
+              15,
+              520799
+            ],
+            [
+              17,
+              496197
+            ],
+            [
+              18,
+              787230
+            ]
+          ],
+          "target_x": 1368586880,
+          "target_y": 1628194297
+        },
+        {
+          "indices": [
+            186,
+            233,
+            434,
+            880,
+            943,
+            989
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              3,
+              1085696
+            ],
+            [
+              7,
+              1
+            ],
+            [
+              14,
+              1214305
+            ],
+            [
+              15,
+              573682
+            ]
+          ],
+          "target_x": 2138659036,
+          "target_y": 1232728658
+        },
+        {
+          "indices": [
+            187,
+            205,
+            215,
+            231,
+            253,
+            989
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              3,
+              1269298
+            ],
+            [
+              4,
+              45020
+            ],
+            [
+              15,
+              348594
+            ]
+          ],
+          "target_x": 1107320762,
+          "target_y": 1726416459
+        },
+        {
+          "indices": [
+            3,
+            4,
+            158,
+            891,
+            1145,
+            1145
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              1349355
+            ],
+            [
+              2,
+              684920
+            ],
+            [
+              14,
+              404001
+            ],
+            [
+              18,
+              443078
+            ]
+          ],
+          "target_x": 1452892420,
+          "target_y": 348559189
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "a": 0,
+      "columns": 20,
+      "kernel": "6sum_b_s4_per_probe",
+      "arity": 6,
+      "r": 1439393,
+      "cofactor": 1492,
+      "base_points": 1240,
+      "table_states": 9548,
+      "abscissa_states": 295988,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 0,
+        "s4_solves": 43,
+        "outer_probes": 43,
+        "point_adds": 198,
+        "canonicalisations": 67,
+        "lookups": 67,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 507622
+      },
+      "relations": 32,
+      "full_support_relations": 32,
+      "support_histogram": {
+        "6": 32
+      },
+      "s3_solves_per_relation": 0.0,
+      "s4_solves_per_relation": 1.34375,
+      "solves_per_relation": 1.34375,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.00002403515625,
+      "point_adds_per_relation": 6.1875,
+      "lookups_per_relation": 2.09375,
+      "outer_probes_per_relation": 1.34375,
+      "structural_outer_probes_per_relation": 0.6078764172871873,
+      "expected_relations_per_target": 3507665960.3658547,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 295988.0,
+      "scan_unit_lambda": 136875.62280303804,
+      "structural_dense_solves_per_relation": 0.6078764172871873,
+      "structural_sparse_solves_per_relation": 2.1624595668574402,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 0.3604094889567891,
+      "models": {
+        "r_over_n2k2": 3.744518730489074,
+        "r_over_4n2k2": 0.9361296826222685,
+        "model_45r_over_n4k4": 0.00043835416980231095,
+        "structural_s3_solves_per_relation": 1.2157528345743747,
+        "structural_s4_solves_per_relation": 0.6078764172871873
+      },
+      "fit_c_solves": 0.35885786578092294,
+      "targets_over_model_45": 2281.260380050634,
+      "outer_probes_over_model_45": 3065.443635693039,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            545,
+            1035,
+            1035,
+            1042,
+            1042,
+            1174
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              8,
+              1228195
+            ],
+            [
+              16,
+              1112848
+            ],
+            [
+              18,
+              1090799
+            ]
+          ],
+          "target_x": 1368586880,
+          "target_y": 1628194297
+        },
+        {
+          "indices": [
+            652,
+            652,
+            665,
+            665,
+            792,
+            916
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              10,
+              828262
+            ],
+            [
+              12,
+              211198
+            ],
+            [
+              14,
+              211198
+            ]
+          ],
+          "target_x": 2138659036,
+          "target_y": 1232728658
+        },
+        {
+          "indices": [
+            301,
+            472,
+            472,
+            815,
+            815,
+            1032
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              4,
+              943195
+            ],
+            [
+              7,
+              596285
+            ],
+            [
+              13,
+              1169281
+            ],
+            [
+              16,
+              878733
+            ]
+          ],
+          "target_x": 1107320762,
+          "target_y": 1726416459
+        },
+        {
+          "indices": [
+            71,
+            71,
+            335,
+            687,
+            1157,
+            1157
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              1169281
+            ],
+            [
+              5,
+              586463
+            ],
+            [
+              11,
+              45020
+            ],
+            [
+              18,
+              1121320
+            ]
+          ],
+          "target_x": 1452892420,
+          "target_y": 348559189
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "a": 0,
+      "columns": 20,
+      "kernel": "6sum_b2_s4_strided",
+      "arity": 6,
+      "r": 1439393,
+      "cofactor": 1492,
+      "base_points": 1240,
+      "table_states": 9548,
+      "abscissa_states": 295988,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 0,
+        "s4_solves": 37,
+        "outer_probes": 37,
+        "point_adds": 221,
+        "canonicalisations": 78,
+        "lookups": 78,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 192,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 8724584
+      },
+      "relations": 32,
+      "full_support_relations": 32,
+      "support_histogram": {
+        "6": 32
+      },
+      "s3_solves_per_relation": 0.0,
+      "s4_solves_per_relation": 1.15625,
+      "solves_per_relation": 1.15625,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.0002935950625,
+      "point_adds_per_relation": 6.90625,
+      "lookups_per_relation": 2.4375,
+      "outer_probes_per_relation": 1.15625,
+      "structural_outer_probes_per_relation": 0.6078764172871873,
+      "expected_relations_per_target": 3507665960.3658547,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 43804448072.0,
+      "scan_unit_lambda": 3507665960.3658547,
+      "structural_dense_solves_per_relation": 0.6078764172871873,
+      "structural_sparse_solves_per_relation": 12.488203998601717,
+      "scan_unit_multiplicity": 45.0,
+      "structural_solves_per_relation": 0.2775156444116133,
+      "models": {
+        "r_over_n2k2": 3.744518730489074,
+        "r_over_4n2k2": 0.9361296826222685,
+        "model_45r_over_n4k4": 0.00043835416980231095,
+        "structural_s3_solves_per_relation": 1.2157528345743747,
+        "structural_s4_solves_per_relation": 0.6078764172871873
+      },
+      "fit_c_solves": 0.30878467520684066,
+      "targets_over_model_45": 2281.260380050634,
+      "outer_probes_over_model_45": 2637.7073144335454,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            155,
+            181,
+            715,
+            840,
+            1035,
+            1042
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              2,
+              582598
+            ],
+            [
+              11,
+              1307710
+            ],
+            [
+              13,
+              684920
+            ],
+            [
+              16,
+              556424
+            ]
+          ],
+          "target_x": 1368586880,
+          "target_y": 1628194297
+        },
+        {
+          "indices": [
+            68,
+            241,
+            311,
+            653,
+            664,
+            870
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              1394377
+            ],
+            [
+              3,
+              98403
+            ],
+            [
+              5,
+              1439392
+            ],
+            [
+              10,
+              1025262
+            ],
+            [
+              14,
+              45018
+            ]
+          ],
+          "target_x": 2138659036,
+          "target_y": 1232728658
+        },
+        {
+          "indices": [
+            0,
+            0,
+            201,
+            687,
+            1100,
+            1114
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              2
+            ],
+            [
+              3,
+              1124257
+            ],
+            [
+              11,
+              45020
+            ],
+            [
+              17,
+              1050885
+            ]
+          ],
+          "target_x": 1107320762,
+          "target_y": 1726416459
+        },
+        {
+          "indices": [
+            0,
+            0,
+            210,
+            522,
+            737,
+            1079
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              2
+            ],
+            [
+              3,
+              852930
+            ],
+            [
+              8,
+              1394465
+            ],
+            [
+              11,
+              98403
+            ],
+            [
+              17,
+              586463
+            ]
+          ],
+          "target_x": 1452892420,
+          "target_y": 348559189
+        }
+      ]
+    },
+    {
+      "n": 31,
+      "a": 0,
+      "columns": 20,
+      "kernel": "5sum_c_control",
+      "arity": 5,
+      "r": 1439393,
+      "cofactor": 1492,
+      "base_points": 1240,
+      "table_states": 9548,
+      "abscissa_states": 295988,
+      "early_abort": true,
+      "counters": {
+        "targets": 32,
+        "s3_solves": 48,
+        "s4_solves": 0,
+        "outer_probes": 32,
+        "point_adds": 139,
+        "canonicalisations": 78,
+        "lookups": 78,
+        "candidate_hits": 32,
+        "lift_failures": 0,
+        "verified_relations": 32,
+        "verification_rejects": 0,
+        "verification_adds": 160,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 0,
+        "wall_ns": 291876
+      },
+      "relations": 32,
+      "full_support_relations": 32,
+      "support_histogram": {
+        "5": 32
+      },
+      "s3_solves_per_relation": 1.5,
+      "s4_solves_per_relation": 0.0,
+      "solves_per_relation": 1.5,
+      "targets_per_relation": 1.0,
+      "wall_s_per_relation": 0.00001744403125,
+      "point_adds_per_relation": 4.34375,
+      "lookups_per_relation": 2.4375,
+      "outer_probes_per_relation": 1.0,
+      "structural_outer_probes_per_relation": 4.107439607600223e-6,
+      "expected_relations_per_target": 16972577.227576718,
+      "structural_targets_per_relation": 1.0,
+      "scan_unit_solves": 295988.0,
+      "scan_unit_lambda": 68437.81140151902,
+      "structural_dense_solves_per_relation": 1.2157528345743747,
+      "structural_sparse_solves_per_relation": 4.3249191337148805,
+      "scan_unit_multiplicity": 6.0,
+      "structural_solves_per_relation": 0.7208181002101473,
+      "models": {
+        "r_over_n2k2": 3.744518730489074,
+        "r_over_4n2k2": 0.9361296826222685,
+        "model_45r_over_n4k4": 0.00043835416980231095,
+        "structural_s3_solves_per_relation": 1.2157528345743747,
+        "structural_s4_solves_per_relation": 0.6078764172871873
+      },
+      "fit_c_solves": 0.40058552459265817,
+      "targets_over_model_45": 2281.260380050634,
+      "outer_probes_over_model_45": 2281.260380050634,
+      "scan_ends": {
+        "FirstHit": 32
+      },
+      "stop_reason": "relations",
+      "sample_relations": [
+        {
+          "indices": [
+            1,
+            1,
+            307,
+            921,
+            1047
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              1439391
+            ],
+            [
+              4,
+              348594
+            ],
+            [
+              14,
+              943195
+            ],
+            [
+              16,
+              98403
+            ]
+          ],
+          "target_x": 1779875246,
+          "target_y": 941017259
+        },
+        {
+          "indices": [
+            2,
+            2,
+            296,
+            496,
+            579
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              90036
+            ],
+            [
+              4,
+              211198
+            ],
+            [
+              8,
+              1
+            ],
+            [
+              9,
+              944161
+            ]
+          ],
+          "target_x": 579966678,
+          "target_y": 1523881713
+        },
+        {
+          "indices": [
+            0,
+            0,
+            784,
+            1051,
+            1158
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              2
+            ],
+            [
+              12,
+              878733
+            ],
+            [
+              16,
+              348594
+            ],
+            [
+              18,
+              1403768
+            ]
+          ],
+          "target_x": 856917006,
+          "target_y": 1438307231
+        },
+        {
+          "indices": [
+            0,
+            0,
+            113,
+            667,
+            1135
+          ],
+          "arity": 5,
+          "support": 5,
+          "row": [
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              918594
+            ],
+            [
+              10,
+              1085695
+            ],
+            [
+              18,
+              765312
+            ]
+          ],
+          "target_x": 1993193014,
+          "target_y": 62936454
+        }
+      ]
+    }
+  ],
+  "total_wall_s": 0.142460917
+}

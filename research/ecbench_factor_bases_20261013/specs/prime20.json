@@ -1,0 +1,57 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "factor-base suite: 20-bit prime abscissa vs glv-orbit",
+  "description": "prime-abscissa:size=32 and glv-orbit:size=16 vs rho.negation. Not a performance claim.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "prime_search",
+        "bits": 20,
+        "seed": 59297
+      }
+    ],
+    "targets_per_curve": 2,
+    "target_seed": 20261013
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-p20-abscissa",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "oracle": "mitm:negation_folded=1",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-p20-glv",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "glv-orbit:size=16",
+          "oracle": "mitm:negation_folded=1",
+          "max_trials": "200000"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 2,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 13,
+    "isolation_required": "L0",
+    "timeout_seconds": 180
+  }
+}

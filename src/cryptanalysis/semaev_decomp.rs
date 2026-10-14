@@ -308,7 +308,7 @@ impl Gf2 {
     /// Only the x86-64 paths ask; elsewhere the tests alone do.
     #[cfg_attr(not(target_arch = "x86_64"), allow(dead_code))]
     #[inline(always)]
-    pub(crate) fn folds(&self) -> bool {
+    pub fn folds(&self) -> bool {
         self.fold_tail != 0
     }
 

@@ -19,6 +19,7 @@
 #include <iostream>
 #include <cstdint>
 #include <vector>
+#include <type_traits>
 
 static int fails=0;
 #define CHECK(x,msg) do{if(!(x)){std::cerr<<"FAIL "<<(msg)<<"\n";fails++;}}while(0)
@@ -132,8 +133,15 @@ struct SmallField {
  static elt from_canonical(const elt&a){return elt{{a.v[0]%ToyMod::P}};}
  static elt to_canonical(const elt&a){return a;}
  static elt from_limbs(const uint32_t*l){return elt{{l[0]%ToyMod::P}};}
- static void batch_inv(elt*x,int n,elt*sc){sc[0]=x[0];for(int i=1;i<n;i++)sc[i]=mul(sc[i-1],x[i]);elt t=inv(sc[n-1]);for(int i=n-1;i>0;i--){elt xi=mul(t,sc[i-1]);t=mul(t,x[i]);x[i]=xi;}x[0]=t;}
-};
+  static void batch_inv(elt*x,int n,elt*sc){sc[0]=x[0];for(int i=1;i<n;i++)sc[i]=mul(sc[i-1],x[i]);elt t=inv(sc[n-1]);for(int i=n-1;i>0;i--){elt xi=mul(t,sc[i-1]);t=mul(t,x[i]);x[i]=xi;}x[0]=t;}
+  template<int Wc> static void batch_inv_w(elt(&x)[Wc],elt(&sc)[Wc]){
+   sc[0]=x[0];
+   for(int i=1;i<Wc;i++)sc[i]=mul(sc[i-1],x[i]);
+   elt t=inv(sc[Wc-1]);
+   for(int i=Wc-1;i>0;i--){elt xi=mul(t,sc[i-1]);t=mul(t,x[i]);x[i]=xi;}
+   x[0]=t;
+  }
+ };
 struct ToyAP { static SmallField::elt a(){uint32_t v=ToyMod::A;return SmallField::from_limbs(&v);} };
 typedef EcCurve<SmallField,ToyAP> CurveToy;
 
@@ -193,8 +201,71 @@ static void batch_step_test(){
   if(!(r==0||r==1)) bad++;
  }
  CHECK(bad==0,"every DP abscissa is a valid curve point");
- (void)toy_on_curve;
- std::cout<<"batched stepper: "<<dpc<<" DPs over 4000 iters, all valid abscissae\n";
+  (void)toy_on_curve;
+  std::cout<<"batched stepper: "<<dpc<<" DPs over 4000 iters, all valid abscissae\n";
+}
+
+/* rho_batch_step_w<Wc> (the compile-time-W body the CUDA kernel runs) must be
+ * bit-identical to rho_batch_step at the same W: same walk state and the same
+ * distinguished points in the same order, over 1000 iterations. */
+static void batch_step_w_equiv_test(){
+  auto G=toyG(), Q=toyQ();
+  auto run=[&](int W,auto step)->std::string{
+   rho_params prm{}; prm.r_bits=8; prm.dp_mask=(1u<<7)-1u; prm.fold=RHO_FOLD_NEG; prm.max_steps=1u<<16; prm.table_seed=3; prm.order_bits=21;
+   uint32_t R=1u<<prm.r_bits, nthreads=64, nw=nthreads*W;
+   std::vector<nap<SmallField>> tbl(R);
+   for(uint32_t j=0;j<R;j++){uint32_t cc[1],dd[1];rho_table_seed<1>(prm.table_seed,j,cc,dd,prm.order_bits);tbl[j]=CurveToy::double_scalar_mul(G,cc,Q,dd,prm.order_bits);}
+   std::vector<uint32_t> X(nw),Y(nw),H(RHO_CYCLE_DEPTH*nw,0),esc(nw,0),steps(nw,0),restarts(nw,0);
+   std::vector<rho_dp<SmallField>> dp(1<<14); uint32_t dpc=0;
+   rho_ctx<CurveToy> c{}; c.X=X.data(); c.Y=Y.data(); c.H=H.data(); c.esc=esc.data(); c.steps=steps.data(); c.restarts=restarts.data();
+   c.nthreads=nthreads; c.walks_per_thread=(uint32_t)W; c.table=tbl.data(); c.G=G; c.Q=Q; c.prm=prm; c.dp_out=dp.data(); c.dp_count=&dpc; c.dp_cap=(uint32_t)dp.size();
+   for(uint32_t i=0;i<nw;i++){rho_state<CurveToy> st; rho_seed_walk<CurveToy>(c,i,st); rho_store<CurveToy>(c,i,st);}
+   for(int it=0;it<1000;it++) for(uint32_t t=0;t<nthreads;t++){
+    SmallField::elt den[64],scratch[64];
+    step(c,t,den,scratch);
+   }
+   std::string sig;
+   auto app=[&](const auto&v){for(auto u:v){sig+=(char)(u&0xff);sig+=(char)((u>>8)&0xff);sig+=(char)((u>>16)&0xff);sig+=(char)((u>>24)&0xff);}};
+   app(X);app(Y);app(H);app(esc);app(steps);app(restarts);
+   for(uint32_t i=0;i<std::min(dpc,(uint32_t)dp.size());i++){uint32_t xa[1]={dp[i].x[0]};uint32_t ya[4]={dp[i].walk,dp[i].restart,dp[i].steps,dp[i].pad};app(xa);app(ya);}
+   return sig;
+  };
+  int same=0,tot=0;
+  auto cmp=[&](int W,auto step){
+   auto a=run(W,[&](auto&c,uint32_t t,auto d,auto s){rho_batch_step<CurveToy>(c,t,d,s);});
+   auto b=run(W,step);
+   tot++; if(a==b) same++;
+  };
+  cmp(2,[&](auto&c,uint32_t t,auto,auto){rho_batch_step_w<CurveToy,2>(c,t);});
+  cmp(4,[&](auto&c,uint32_t t,auto,auto){rho_batch_step_w<CurveToy,4>(c,t);});
+  cmp(8,[&](auto&c,uint32_t t,auto,auto){rho_batch_step_w<CurveToy,8>(c,t);});
+  cmp(16,[&](auto&c,uint32_t t,auto,auto){rho_batch_step_w<CurveToy,16>(c,t);});
+  cmp(32,[&](auto&c,uint32_t t,auto,auto){rho_batch_step_w<CurveToy,32>(c,t);});
+  CHECK(same==tot,"compile-time-W stepper matches generic stepper bit-for-bit");
+  std::cout<<"batch step W-variant equivalence: "<<same<<"/"<<tot<<" identical\n";
+  /* batch_inv_w (array references, unrolled) against batch_inv (pointers). */
+  {
+   int allok=1;
+   auto tryW=[&](auto wc){
+    constexpr int W=decltype(wc)::value;
+    int ok=0; const int NTRY=2000;
+    for(int n=0;n<NTRY;n++){
+     SmallField::elt a[W],b[W],s1[W],s2[W];
+     for(int i=0;i<W;i++){uint32_t u=(uint32_t)((n*1103515245u+i*12345u)%(ToyMod::P-2))+1;a[i]=b[i]=SmallField::from_limbs(&u);}
+     SmallField::batch_inv(a,W,s1); SmallField::template batch_inv_w<W>(b,s2);
+     int eq=1; for(int i=0;i<W;i++) if(!SmallField::eq(a[i],b[i])) eq=0;
+     if(eq) ok++;
+    }
+    std::cout<<"batch_inv_w vs batch_inv at W="<<W<<": "<<ok<<"/"<<NTRY<<" identical\n";
+    if(ok!=NTRY) allok=0;
+   };
+   tryW(std::integral_constant<int,2>{});
+   tryW(std::integral_constant<int,4>{});
+   tryW(std::integral_constant<int,8>{});
+   tryW(std::integral_constant<int,16>{});
+   tryW(std::integral_constant<int,32>{});
+   CHECK(allok,"batch_inv_w matches batch_inv");
+  }
 }
 
 template<class C> static nap<typename C::Field> gen(const char*xs,const char*ys){
@@ -217,6 +288,6 @@ int main(){
  group_test<CurveP256>("P-256",P256X,P256Y); group_test<CurveP384>("P-384",P384X,P384Y);
  fold_test<CurveP256>("P-256",gen<CurveP256>(P256X,P256Y)); fold_test<CurveP384>("P-384",gen<CurveP384>(P384X,P384Y));
  step_test<CurveP256>("P-256",gen<CurveP256>(P256X,P256Y)); step_test<CurveP384>("P-384",gen<CurveP384>(P384X,P384Y));
- toy_sanity(); batch_step_test(); toy_solve();
+ toy_sanity(); batch_step_test(); batch_step_w_equiv_test(); toy_solve();
  if(fails){std::cerr<<fails<<" failures\n";return 1;} std::cout<<"ALL PASSED\n"; return 0;
 }

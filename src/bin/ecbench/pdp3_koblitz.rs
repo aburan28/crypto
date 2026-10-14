@@ -1,5 +1,7 @@
-//! The PDP3 Groebner decomposition of `koblitz_index_calculus`, inherited
-//! F4 or F6-IC, as an `ic.pipeline` oracle on a Koblitz curve.
+//! The PDP3 decomposition of `koblitz_index_calculus` as an `ic.pipeline`
+//! oracle on a Koblitz curve: the Groebner engines (inherited F4, F6-IC,
+//! matrix F4, matrix F5) and the root-finding engine
+//! (`engine=rootfind`, [`PairSumTable`]) on one base.
 //!
 //! PR #1333 measured F6-IC, which closes branches of an inherited Boolean
 //! F4 search with exact factor-base geometry, in its own worker
@@ -8,6 +10,37 @@
 //! [`groebner_decompose`] and [`groebner_decompose_f6_ic`], unmodified,
 //! inside the native `ic.pipeline`, so both arms are charged in ecbench's
 //! counted unit beside strong rho on the same public point.
+//!
+//! ## The root-finding engine
+//!
+//! `pdp3-koblitz:m=2|3,engine=rootfind` is the decomposition
+//! `koblitz_index_calculus_dlp` runs under
+//! `DecompositionStrategy::PairTable` (`RESEARCH_SEMAEV_ROOTFIND_VS_GROEBNER.md`):
+//! the pair sums `P_i + P_j` of the base are tabulated once
+//! ([`PairSumTable::build_full_within`], the summand-storing tier, so a
+//! hit is read and never recovered by a scan), and a target is decomposed
+//! by *finding* its partner in the table rather than by row-reducing a
+//! Weil-descended Semaev system.  It takes no `degree` and no
+//! `node_budget` and refuses them: there is no Groebner search to bound.
+//!
+//! - **Charged:** the table's `|F|(|F|+1)/2` pair additions
+//!   (`|F|` of them doublings), counted from the base's size since the
+//!   batched builder carries no ledger; for `m = 3` every `R − P_k` on the
+//!   ledger until the first hit; and the re-addition of every hit in the
+//!   group before it is returned (fail-closed, as the strategy's own
+//!   `decompose` re-checks).
+//! - **Counted, not charged:** one `lookup` per table probe, under the
+//!   `lookups` counter the other table oracles use (priced only where the
+//!   curve has a pinned ratio); the table's entry count in `oracle_setup`.
+//!
+//! It is exact and complete for `m ∈ {2, 3}`, so against a Groebner
+//! engine with an unexhausted node budget it issues the same queries and
+//! finds the same relations; the comparison is one of engines on one
+//! query stream, as the F4/F6 arms are.  Its `S` is a complete count of
+//! group additions, while a Groebner arm's `S` is a lower bound (the
+//! solver's word XORs are counted, not charged), so the two are compared
+//! on the resource vector and on wall time, not by dividing one `S` by the
+//! other.
 //!
 //! ## The base
 //!
@@ -64,8 +97,8 @@ use crypto_lib::binary_ecc::{BinaryCurve, F2mElement};
 
 use crypto_lib::cryptanalysis::ecbench::methods::BinaryPlugins;
 use crypto_lib::cryptanalysis::ic_boundary::{
-    koblitz_factor_base, lift_abscissae, BinaryGroup, BinaryInstance, ColumnFold, FactorBase,
-    GroupOps, OracleCounters,
+    koblitz_factor_base, lift_abscissae, BinaryGroup, BinaryInstance, ColumnFold, CountedGroup,
+    FactorBase, GroupOps, OracleCounters,
 };
 use crypto_lib::cryptanalysis::ic_framework::stages::{
     DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SolverCost, SolverTotals,
@@ -77,7 +110,7 @@ use crypto_lib::cryptanalysis::koblitz_groebner::{
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_standard_subspace_factor_base, groebner_decompose, groebner_decompose_f6_ic, point_key,
-    FrobeniusFactorBase, KoblitzCurve,
+    FrobeniusFactorBase, KoblitzCurve, PairSumTable,
 };
 
 /// The unit string of the solver's count.  It matches the symmetrised and
@@ -278,6 +311,11 @@ pub enum Pdp3Engine {
     /// `groebner_decompose` with Boolean matrix-F5: matrix-F4's matrices
     /// less the rows the F5 criterion predicts reduce to zero.
     MatrixF5,
+    /// The root-finding engine of `DecompositionStrategy::PairTable`: a
+    /// [`PairSumTable`] of the base's pair sums, probed once per target
+    /// (`m = 2`) or once per `R − P_k` (`m = 3`).  No Groebner search, so
+    /// no `degree` and no `node_budget`.
+    Rootfind,
 }
 
 impl Pdp3Engine {
@@ -287,8 +325,9 @@ impl Pdp3Engine {
             "f6-ic" => Ok(Self::F6Ic),
             "matrix-f4" => Ok(Self::MatrixF4),
             "matrix-f5" => Ok(Self::MatrixF5),
+            "rootfind" => Ok(Self::Rootfind),
             other => Err(format!(
-                "unknown engine `{other}`; try inherited-f4, f6-ic, matrix-f4 or matrix-f5"
+                "unknown engine `{other}`; try inherited-f4, f6-ic, matrix-f4, matrix-f5 or rootfind"
             )),
         }
     }
@@ -299,17 +338,35 @@ impl Pdp3Engine {
             Self::F6Ic => "f6-ic",
             Self::MatrixF4 => "matrix-f4",
             Self::MatrixF5 => "matrix-f5",
+            Self::Rootfind => "rootfind",
         }
     }
 
-    /// The reduction engine at each node of the splitting tree.
-    fn solver(self, max_degree: u32) -> SolverEngine {
+    /// Whether the engine solves an algebraic system at all.
+    pub fn is_groebner(self) -> bool {
+        !matches!(self, Self::Rootfind)
+    }
+
+    /// The reduction engine at each node of the splitting tree, or
+    /// `None` for the root-finding engine, which has no tree.
+    fn solver(self, max_degree: u32) -> Option<SolverEngine> {
         match self {
-            Self::InheritedF4 | Self::F6Ic => SolverEngine::InheritedF4 { max_degree },
-            Self::MatrixF4 => SolverEngine::MatrixF4 { max_degree },
-            Self::MatrixF5 => SolverEngine::MatrixF5 { max_degree },
+            Self::InheritedF4 | Self::F6Ic => Some(SolverEngine::InheritedF4 { max_degree }),
+            Self::MatrixF4 => Some(SolverEngine::MatrixF4 { max_degree }),
+            Self::MatrixF5 => Some(SolverEngine::MatrixF5 { max_degree }),
+            Self::Rootfind => None,
         }
     }
+}
+
+/// The group operations [`PairSumTable::build_full_within`] performs for
+/// a base of `points` signed points: every `P_i + P_j` with `i ≤ j`, the
+/// `i = j` terms being doublings.  Counted from the base's size because
+/// the batched builder (one Montgomery inversion per row) carries no
+/// ledger, the way `koblitz_factor_base` counts its constructor.
+pub fn pair_table_build_ops(points: usize) -> (u64, u64) {
+    let n = points as u64;
+    (n * n.saturating_sub(1) / 2, n)
 }
 
 /// The per-call counters `extra` carries, by name.  `*_max` keys are
@@ -342,7 +399,8 @@ fn stats_extra(s: &SolveStats) -> BTreeMap<String, u64> {
     e
 }
 
-/// `pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N`.
+/// `pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N`,
+/// or `pdp3-koblitz:m=2|3,engine=rootfind`.
 pub struct Pdp3KoblitzOracle<'i> {
     name: &'static str,
     summands: u32,
@@ -355,9 +413,15 @@ pub struct Pdp3KoblitzOracle<'i> {
     st: Option<FieldStructure>,
     shape: Option<SystemShape>,
     totals: SolverTotals,
+    /// The root-finding engine's table; `None` under a Groebner engine.
+    pair: Option<PairSumTable>,
     /// Witnesses the solver returned that did not re-lift through the
     /// framework's sign resolution.  Must stay zero.
     pub unliftable: u64,
+    /// Pair-table hits whose summands did not re-add to the probed point
+    /// in the group.  Must stay zero; a nonzero count would mean the
+    /// table and the run's base disagree on a point.
+    pub table_mismatches: u64,
 }
 
 impl<'i> Pdp3KoblitzOracle<'i> {
@@ -374,7 +438,67 @@ impl<'i> Pdp3KoblitzOracle<'i> {
             st: None,
             shape: None,
             totals: SolverTotals::default(),
+            pair: None,
             unliftable: 0,
+            table_mismatches: 0,
+        }
+    }
+
+    /// Which engine `prepare` selected.
+    pub fn engine(&self) -> Pdp3Engine {
+        self.engine
+    }
+
+    /// The root-finding decomposition: one table probe for `m = 2`, one
+    /// per `R − P_k` for `m = 3`, every hit re-added in the group on the
+    /// ledger before it is returned.
+    fn decompose_rootfind<'a>(
+        &mut self,
+        ctx: &InstanceCtx<BinaryGroup<'a>>,
+        fb: &FactorBase<FastPoint>,
+        ops: &mut GroupOps,
+        counters: &mut OracleCounters,
+        point: FastPoint,
+    ) -> Option<Vec<usize>> {
+        let table = self.pair.as_ref()?;
+        let g = ctx.group;
+        let mut pairs: Vec<(u32, u32)> = Vec::new();
+        match self.summands {
+            2 => {
+                counters.lookups += 1;
+                table.pairs_for(point, &mut pairs);
+                for &(i, j) in &pairs {
+                    let (i, j) = (i as usize, j as usize);
+                    if g.add(ops, fb.points[i], fb.points[j]) == point {
+                        return Some(vec![i, j]);
+                    }
+                    self.table_mismatches += 1;
+                    counters.frobfold_mismatches += 1;
+                }
+                None
+            }
+            3 => {
+                for k in 0..fb.points.len() {
+                    let rest = g.add(ops, point, g.neg(fb.points[k]));
+                    if g.is_identity(&rest) {
+                        continue;
+                    }
+                    counters.lookups += 1;
+                    table.pairs_for(rest, &mut pairs);
+                    for &(i, j) in &pairs {
+                        let (i, j) = (i as usize, j as usize);
+                        if g.add(ops, fb.points[i], fb.points[j]) == rest {
+                            let mut found = vec![i, j, k];
+                            found.sort_unstable();
+                            return Some(found);
+                        }
+                        self.table_mismatches += 1;
+                        counters.frobfold_mismatches += 1;
+                    }
+                }
+                None
+            }
+            _ => None,
         }
     }
 }
@@ -389,6 +513,14 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
     }
 
     fn describe(&self, params: &Params) -> String {
+        if params.get("engine") == Some("rootfind") {
+            return format!(
+                "root finding over the standard subspace: the pair-sum table of \
+                 DecompositionStrategy::PairTable, probed once per target (m = 2) or once \
+                 per R − P_k (m = {}); no Groebner search",
+                self.summands
+            );
+        }
         format!(
             "Weil-descend S_{} over the standard subspace and solve with #1333's {} \
              (Macaulay cap {}, {} reduction calls)",
@@ -401,15 +533,23 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
 
     fn parameters(&self) -> &[(&str, &str)] {
         &[
-            ("m", "summands; #1333 ran 3 (Semaev S4)"),
+            (
+                "m",
+                "summands; #1333 ran 3 (Semaev S4); rootfind takes 2 or 3",
+            ),
             (
                 "engine",
-                "inherited-f4 (the control), f6-ic, matrix-f4 or matrix-f5",
+                "inherited-f4 (the control), f6-ic, matrix-f4, matrix-f5, or rootfind (the \
+                 pair-sum table of DecompositionStrategy::PairTable; no Groebner search)",
             ),
-            ("degree", "highest Macaulay degree built before splitting"),
+            (
+                "degree",
+                "highest Macaulay degree built before splitting; refused under rootfind",
+            ),
             (
                 "node_budget",
-                "reduction calls before a solve gives up; exhaustion is a failed query",
+                "reduction calls before a solve gives up; exhaustion is a failed query; \
+                 refused under rootfind",
             ),
             (
                 "dimension",
@@ -423,7 +563,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
         _ctx: &InstanceCtx<BinaryGroup<'a>>,
         fb: &FactorBase<FastPoint>,
         params: &Params,
-        _ops: &mut GroupOps,
+        ops: &mut GroupOps,
     ) -> Result<(), String> {
         if let Some((k, _)) =
             std::env::vars().find(|(k, _)| TUNING_PREFIXES.iter().any(|p| k.starts_with(p)))
@@ -442,26 +582,43 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
         let view = self.view.as_ref().map_err(Clone::clone)?;
         let kc = view.curve();
         // Parameters that change the search have no default.
-        let engine = params
-            .get("engine")
-            .ok_or("missing parameter `engine`; try inherited-f4, f6-ic, matrix-f4 or matrix-f5")?;
+        let engine = params.get("engine").ok_or(
+            "missing parameter `engine`; try inherited-f4, f6-ic, matrix-f4, matrix-f5 or rootfind",
+        )?;
         self.engine = Pdp3Engine::parse(engine)?;
-        let degree = params
-            .get("degree")
-            .ok_or("missing parameter `degree`; #1333 ran 3")?;
-        let max_degree: u32 = degree
-            .parse()
-            .map_err(|_| format!("degree `{degree}` is not a number"))?;
-        if !(2..=4).contains(&max_degree) {
-            return Err(format!("degree must be 2..=4, got {max_degree}"));
+        let mut max_degree = 0u32;
+        if self.engine.is_groebner() {
+            let degree = params
+                .get("degree")
+                .ok_or("missing parameter `degree`; #1333 ran 3")?;
+            max_degree = degree
+                .parse()
+                .map_err(|_| format!("degree `{degree}` is not a number"))?;
+            if !(2..=4).contains(&max_degree) {
+                return Err(format!("degree must be 2..=4, got {max_degree}"));
+            }
+            self.solver = self
+                .engine
+                .solver(max_degree)
+                .expect("every Groebner engine has a reduction engine");
+            let budget = params
+                .get("node_budget")
+                .ok_or("missing parameter `node_budget`; #1333 ran 8192 cold")?;
+            self.node_budget = budget
+                .parse()
+                .map_err(|_| format!("node_budget `{budget}` is not a number"))?;
+        } else {
+            // The root-finding engine has no Groebner search to bound.  A
+            // bound it ignored would be a parameter in the method's
+            // identity that changes nothing, so it is refused.
+            for key in ["degree", "node_budget"] {
+                if params.get(key).is_some() {
+                    return Err(format!(
+                        "engine=rootfind performs no Groebner search and takes no `{key}`"
+                    ));
+                }
+            }
         }
-        self.solver = self.engine.solver(max_degree);
-        let budget = params
-            .get("node_budget")
-            .ok_or("missing parameter `node_budget`; #1333 ran 8192 cold")?;
-        self.node_budget = budget
-            .parse()
-            .map_err(|_| format!("node_budget `{budget}` is not a number"))?;
         let dimension = fb
             .dimension
             .ok_or("pdp3-koblitz needs the koblitz-standard-subspace base")?;
@@ -495,6 +652,41 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
                 "the descent has m·d = {}·{} > 64 Boolean unknowns",
                 self.summands, frob.ell
             ));
+        }
+        if !self.engine.is_groebner() {
+            // The table of every `P_i + P_j`, in the summand-storing tier
+            // so a hit is read, never recovered by a scan.  Its additions
+            // are charged to the oracle set-up phase from the base's size.
+            let table =
+                PairSumTable::build_full_within(kc, &frob, PairSumTable::DEFAULT_BYTE_BUDGET)
+                    .ok_or_else(|| {
+                        format!(
+                    "the pair-sum table of {} points does not fit the {} GiB budget or the field \
+                     is too wide to pack a point into a word",
+                    frob.points.len(),
+                    PairSumTable::DEFAULT_BYTE_BUDGET >> 30
+                )
+                    })?;
+            // The table's own lift must agree with the run's, point for
+            // point, or a probe key would name the wrong entry.  The
+            // group re-addition of every hit would catch a disagreement
+            // too; this catches it before any target is spent.
+            for (i, p) in frob.points.iter().enumerate() {
+                if table.curve().lift(p) != fb.points[i] {
+                    return Err(
+                        "the pair-sum table lifts a base point differently from the run".into(),
+                    );
+                }
+            }
+            let (adds, doubles) = pair_table_build_ops(frob.points.len());
+            ops.adds += adds;
+            ops.doubles += doubles;
+            self.pair = Some(table);
+            self.frob = Some(frob);
+            self.shape = None;
+            self.st = None;
+            self.index_of.clear();
+            return Ok(());
         }
         self.index_of = frob
             .points
@@ -533,6 +725,9 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
         counters: &mut OracleCounters,
         point: FastPoint,
     ) -> Option<Vec<usize>> {
+        if !self.engine.is_groebner() {
+            return self.decompose_rootfind(ctx, fb, ops, counters, point);
+        }
         let (Some(frob), Some(st), Some(shape)) = (&self.frob, &self.st, &self.shape) else {
             return None;
         };
@@ -582,11 +777,27 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
         }
     }
 
+    fn setup_native(&self) -> BTreeMap<String, u64> {
+        let mut counts = BTreeMap::new();
+        if let Some(table) = &self.pair {
+            counts.insert("pair_table_entries".into(), table.len() as u64);
+        }
+        counts
+    }
+
+    /// A table oracle solves no system: under `rootfind` both are `None`,
+    /// as for `mitm`, and the record carries no `solver` block.
     fn last_system(&self) -> Option<SystemShape> {
+        if !self.engine.is_groebner() {
+            return None;
+        }
         self.shape.clone()
     }
 
     fn solver_totals(&self) -> Option<SolverTotals> {
+        if !self.engine.is_groebner() {
+            return None;
+        }
         Some(self.totals.clone())
     }
 }

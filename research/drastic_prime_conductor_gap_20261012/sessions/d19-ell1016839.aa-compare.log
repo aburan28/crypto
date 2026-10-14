@@ -1,0 +1,25 @@
+saved research/drastic_prime_conductor_gap_20261012/sessions/d19-ell1016839/comparisons/rho-neg__rho-neg-aa.json
+ops (ok): rho-neg-aa / rho-neg = 1.0000 [1.000, 1.000] (cluster) over 16 pairs on 16 workloads, 2 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 0.9716, not a result: 16 of 16 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | rho-neg-aa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp43-t355-c904a335 | 42.16 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+| icv1-fp43-t355-cee29c26 | 42.16 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | rho-neg-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W03af5e9b3160 | icv1-fp43-t355-cee29c26 | 42.16 | 0.8486 | 0.8486 | 1.0000 |
+| W040722667ee7 | icv1-fp43-t355-c904a335 | 42.16 | 1.3349 | 1.3349 | 1.0000 |
+| W2a49a5f7d4e4 | icv1-fp43-t355-cee29c26 | 42.16 | 0.2154 | 0.2154 | 1.0000 |
+| W380cc1152568 | icv1-fp43-t355-cee29c26 | 42.16 | 1.3857 | 1.3857 | 1.0000 |
+| W38a96b648b74 | icv1-fp43-t355-c904a335 | 42.16 | 1.4136 | 1.4136 | 1.0000 |
+| W413f876a65a0 | icv1-fp43-t355-c904a335 | 42.16 | 0.7468 | 0.7468 | 1.0000 |
+| W5e300eabafc6 | icv1-fp43-t355-cee29c26 | 42.16 | 1.5227 | 1.5227 | 1.0000 |
+| W738d32982ce1 | icv1-fp43-t355-c904a335 | 42.16 | 0.4007 | 0.4007 | 1.0000 |
+| W8b1775cbc492 | icv1-fp43-t355-c904a335 | 42.16 | 1.1679 | 1.1679 | 1.0000 |
+| W8f3bbb152b4f | icv1-fp43-t355-c904a335 | 42.16 | 0.8116 | 0.8116 | 1.0000 |
+| Wab1e958ed977 | icv1-fp43-t355-cee29c26 | 42.16 | 1.1935 | 1.1935 | 1.0000 |
+| Wd30341374ff6 | icv1-fp43-t355-cee29c26 | 42.16 | 1.3138 | 1.3138 | 1.0000 |
+| We32751d53563 | icv1-fp43-t355-cee29c26 | 42.16 | 0.8024 | 0.8024 | 1.0000 |
+| Wee2517864d6d | icv1-fp43-t355-c904a335 | 42.16 | 0.6112 | 0.6112 | 1.0000 |
+| Wf3a58acbd65d | icv1-fp43-t355-cee29c26 | 42.16 | 1.0046 | 1.0046 | 1.0000 |
+| Wf93272633ea9 | icv1-fp43-t355-c904a335 | 42.16 | 0.1677 | 0.1677 | 1.0000 |

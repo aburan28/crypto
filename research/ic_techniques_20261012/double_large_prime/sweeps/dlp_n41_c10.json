@@ -1,0 +1,27 @@
+{
+ "_comment": "Double large prime, n=41, 10 compact-orbit columns: the classic m=3 Frobenius table against the large-prime collector with 1 or 2 residuals in a domain of 3, 10 or 30 x |F| signed points. Operation counts are the metric.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 41
+ },
+ "repeats": 4,
+ "seed": 20261012,
+ "max_trials": 40000000,
+ "matrix": {
+  "factor_base": [
+   "compact-orbit-scan:columns=10,raw_x_cap=400000000"
+  ],
+  "oracle": [
+   "mitm-frobenius:m=3",
+   "mitm-frobenius:m=3,large_primes=1,lp_domain_factor=3,lp_raw_x_cap=400000000",
+   "mitm-frobenius:m=3,large_primes=1,lp_domain_factor=10,lp_raw_x_cap=400000000",
+   "mitm-frobenius:m=3,large_primes=1,lp_domain_factor=30,lp_raw_x_cap=400000000",
+   "mitm-frobenius:m=3,large_primes=2,lp_domain_factor=3,lp_raw_x_cap=400000000",
+   "mitm-frobenius:m=3,large_primes=2,lp_domain_factor=10,lp_raw_x_cap=400000000",
+   "mitm-frobenius:m=3,large_primes=2,lp_domain_factor=30,lp_raw_x_cap=400000000"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

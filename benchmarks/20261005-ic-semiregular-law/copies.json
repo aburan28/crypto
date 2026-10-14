@@ -1,0 +1,30 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-05",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/ic_semiregular_law_20261005",
+  "runs": [
+    "run-20261005T1658Z"
+  ],
+  "files": [
+    {
+      "source": "research/ic_semiregular_law_20261005/reports/run-20261005T1658Z/report.pdf",
+      "copy": "run-20261005T1658Z-report.pdf",
+      "sha256": "6df1a9d39259514aac390c5f8c1a0de2c15ac5c129f787c41d0c66cffeee32e1",
+      "bytes": 121463
+    },
+    {
+      "source": "research/ic_semiregular_law_20261005/reports/run-20261005T1658Z/degrees.svg",
+      "copy": "run-20261005T1658Z-degrees.svg",
+      "sha256": "f9e58fb70fa862524ec1acdec175d0ab5e1b127045a7af7cabf09051242c607b",
+      "bytes": 111277
+    }
+  ],
+  "pngs": [
+    {
+      "source": "run-20261005T1658Z-degrees.svg",
+      "copy": "run-20261005T1658Z-degrees.png",
+      "dpi": 150
+    }
+  ]
+}

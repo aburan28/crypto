@@ -1,0 +1,20 @@
+{
+  "release_library": "Release library: 3,996 passed, 0 failed, 112 ignored, exit 0, 238.05 s with loopback permission. Initial restricted run: 3,987 passed, 9 socket-permission failures, 112 ignored; retained.",
+  "focused": "Focused suites: 47 Boolean Groebner, 18 F5, 21 PQ Groebner; 37 loopback checks; comparator 5 tests. All pass.",
+  "examples": "Cargo example targets: 5 and 0 tests, both pass. Strict Clippy on both examples passes. Runtime ELF code/data equivalence passes.",
+  "catalog_tests": 4108,
+  "release_library_passed": 3996,
+  "release_library_failed": 0,
+  "release_library_ignored": 112,
+  "release_library_exit_status": 0,
+  "initial_restricted_library_passed": 3987,
+  "initial_restricted_library_failed": 9,
+  "initial_restricted_library_exit_status": 101,
+  "complete_comparison_calls": 792,
+  "hash_control_calls": 33,
+  "all_recorded_runs_complete": true,
+  "f5_with_complete_call_guards_met": true,
+  "runtime_code_and_data_equivalent_except_build_id": true,
+  "elapsed_time_gain_measured": false,
+  "process_rss_gain_measured": false
+}

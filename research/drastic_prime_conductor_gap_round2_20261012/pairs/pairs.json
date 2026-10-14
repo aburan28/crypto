@@ -1,0 +1,106 @@
+{
+  "failures": [
+    {
+      "ell": 2033609,
+      "k": 21,
+      "reason": "no random order-N floor with j not in {0, 1728} within the 900 s scan (15548574 trials)",
+      "t": -761
+    }
+  ],
+  "frozen_before": "research/drastic_prime_conductor_gap_round2_20261012/PROTOCOL.md",
+  "pairs": [
+    {
+      "bits": 40,
+      "certificate": {
+        "automorphism_structure": "p = 1 mod 3, r = 1 mod 3, [kappa]G = zeta(G) verified by rho.cubic construction",
+        "crater_end": "End = O_K: j = 0 = j(O_K) and h(-3) = 1 (class number one)",
+        "floor_end": "f_E = 1016839: j not in {0, 1728}, f_E | f_pi = ell, f_E != 1",
+        "frobenius_discriminant": "t^2-4q = -3*1016839^2",
+        "orders_verified": "64 random points per model: [N]P = O",
+        "sage_used": false
+      },
+      "crater": {
+        "a": 0,
+        "b": 654254041891,
+        "group_order": 775471436947,
+        "gx": 1,
+        "gy": 507178549694,
+        "kind": "prime_explicit",
+        "p": 775471435903,
+        "r": 775471436947
+      },
+      "crater_trials": 3,
+      "d": 3,
+      "ell": 1016839,
+      "ells_tried": 1,
+      "floor": {
+        "a": 483575337897,
+        "b": 620539964477,
+        "group_order": 775471436947,
+        "gx": 1,
+        "gy": 246035225889,
+        "kind": "prime_explicit",
+        "p": 775471435903,
+        "r": 775471436947
+      },
+      "floor_scan_seconds": 6.330492875,
+      "floor_trials": 165831,
+      "group_order": 775471436947,
+      "j_crater": 0,
+      "j_floor": 245719404051,
+      "k": 20,
+      "p": 775471435903,
+      "search_seconds": 6.332655375,
+      "t": -1043,
+      "t_candidates_tried": 1042
+    },
+    {
+      "bits": 42,
+      "certificate": {
+        "automorphism_structure": "p = 1 mod 3, r = 1 mod 3, [kappa]G = zeta(G) verified by rho.cubic construction",
+        "crater_end": "End = O_K: j = 0 = j(O_K) and h(-3) = 1 (class number one)",
+        "floor_end": "f_E = 2033609: j not in {0, 1728}, f_E | f_pi = ell, f_E != 1",
+        "frobenius_discriminant": "t^2-4q = -3*2033609^2",
+        "orders_verified": "64 random points per model: [N]P = O",
+        "sage_used": false
+      },
+      "crater": {
+        "a": 0,
+        "b": 1258454212334,
+        "group_order": 3101674318441,
+        "gx": 2,
+        "gy": 2797844748338,
+        "kind": "prime_explicit",
+        "p": 3101674319203,
+        "r": 3101674318441
+      },
+      "crater_trials": 4,
+      "d": 3,
+      "ell": 2033609,
+      "ells_tried": 1,
+      "floor": {
+        "a": 173708838450,
+        "b": 1353164309739,
+        "group_order": 3101674318441,
+        "gx": 0,
+        "gy": 2225013558874,
+        "kind": "prime_explicit",
+        "p": 3101674319203,
+        "r": 3101674318441
+      },
+      "floor_scan_seconds": 305.448504792,
+      "floor_trials": 6515204,
+      "group_order": 3101674318441,
+      "j_crater": 0,
+      "j_floor": 2835398390472,
+      "k": 21,
+      "p": 3101674319203,
+      "search_seconds": 1205.451741791,
+      "t": 763,
+      "t_candidates_tried": 761
+    }
+  ],
+  "schema": "drastic-prime-conductor-gap-pairs-round2/v1",
+  "seed_note": "deterministic xorshift seeded 0x647233736a5a3033",
+  "total_seconds": 1211.784398083
+}

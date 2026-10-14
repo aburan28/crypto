@@ -1,0 +1,13 @@
+Final base/main snapshot: 9479a6730e6318dd3998575a3272c1d3540c4c93.
+Only historical seal verification and read-only Git source-object comparison repeated.
+No proof build, fresh kernel replay, package test, benchmark or mathematical experiment rerun.
+
+From research/weak_curve_properties_lean_20261011:
+/tmp/crypto-lean-integration-validation/proof-check --check
+From research/weak_curve_conjectures_20261012:
+sha256sum -c EVIDENCE_SHA256SUMS
+
+For all five packages and their shared source dependencies:
+git rev-parse ORIGINAL_CHECK_REVISION:SOURCE_PATH FINAL_SNAPSHOT:SOURCE_PATH
+
+Earlier build/test/input revisions, outputs, and previous delivery seal receipts preserved.

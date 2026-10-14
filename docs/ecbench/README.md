@@ -37,6 +37,10 @@ spec.json ──ecbench run──► session/                ──ecbench verif
 11. [Adding a method, a curve family or a factor base](#11-adding-a-method-a-curve-family-or-a-factor-base)
 12. [Limits](#12-limits)
 
+Factor bases (build with `ecbench fb`, publish to Git/`store:`, run
+`ic.pipeline` with a matching plug-in string):
+[FACTOR_BASE_PROTOCOL.md](FACTOR_BASE_PROTOCOL.md).
+
 ## 1. Quick start
 
 Rolling `main` release archives ship `ecbench` beside `ic` for Linux (glibc
@@ -392,6 +396,75 @@ frozen-source replays rebuild it against pre-F6 snapshots of
 `koblitz_index_calculus.rs`, `Cargo.toml` is pinned by other frozen
 evaluations, and the tournament admits no root build script. It also
 refuses to run while a `KIC_*`, `F4_*` or `SOLVER_*` tuning override is set.
+
+`rootfind-mitm:m=3` and `rootfind-pairs:m=3` are the root-finding
+decomposition oracles of `research/pdp_root_finder_20261012` as plug-ins
+(`ic_framework::rootfind`), on any base and both tracks. `rootfind-mitm`
+builds the negation-folded pair table once (`full_table=1` for every
+`i ≤ j` pair) and, per target, computes the points `R ∓ P_k` — one
+representative `P_k` an abscissa — in blocks of 32 abscissae, probes each
+and stops at the first hit;
+`rootfind-pairs` keeps no table and tests every candidate `U ∓ P_j` of
+every row point `U = R ∓ P_i` for membership in the base: the enumeration
+floor, the memoryless control.
+
+- **Charged:** every point addition, one each: the table build, the
+  additions a target (`2A` for a refutation, the count `mitm:m=3` charges
+  over the `2A` signed points; on a hit at most one block more than
+  `mitm`'s early exit), the probe's confirming addition on a key hit, and
+  every candidate of `rootfind-pairs`.  The cost is complete: on a binary
+  curve the group computes a block with one shared inversion
+  (`FastCurve::add_many`), which is how the charged additions are done,
+  not work beside them; on a prime curve the default path inverts once an
+  addition.
+- **Counted, not charged:** table lookups and membership tests
+  (`lookups`).  What the new ids change against `mitm` is therefore the
+  arithmetic behind the same charged additions, which wall time sees and
+  `S` does not; and the memoryless three-summand arm, which the harness
+  had not had.
+
+**The root-finding decomposition engine.**
+`RESEARCH_SEMAEV_ROOTFIND_VS_GROEBNER.md` replaces the Gröbner solve of the
+decomposition step by root finding, and two oracle ids run it here on the
+bases the Gröbner arms use, so the engines meet on one query stream
+(`research/ecbench_rootfind_engine_20261012/`):
+
+- `pdp3-koblitz:m=2|3,engine=rootfind` on `koblitz-standard-subspace` is
+  `DecompositionStrategy::PairTable`, the strategy `koblitz_index_calculus_dlp`
+  runs by default: the base's pair sums `P_i + P_j` tabulated once
+  (`PairSumTable::build_full_within`, the summand-storing tier), a target
+  decomposed by one table probe (`m = 2`) or one per `R − P_k` (`m = 3`).
+  It takes no `degree` and no `node_budget` and refuses them. **Charged:**
+  the table's `|F|(|F|+1)/2` pair additions, counted from the base's size
+  because the batched builder carries no ledger (`|F|` of them doublings);
+  for `m = 3` every `R − P_k` on the ledger until the first hit; and the
+  re-addition of every hit in the group before it is returned.
+  **Counted, not charged:** one `lookup` per probe (priced only where the
+  curve has a pinned ratio, like every table oracle's) and the table's
+  entry count in `oracle_setup`. The record has no `solver` block.
+- `rootfind-subtract:m=2|3` on a prime curve is `prime_fast`'s
+  direct-subtraction root finding: the Semaev `S₃` root in the third
+  variable is `x(R ∓ F_i)`, so every candidate of a target comes from one
+  Montgomery batched inversion over the base's abscissae, each looked up
+  in the base (`m = 2`) or probed against the negation-folded pair table
+  (`m = 3`). It is `subtract`'s search, candidate for candidate in the same
+  order, so the two arms issue the same queries and find the same
+  relations; it is charged as `subtract` is (one addition per candidate
+  point) plus one re-addition per hit, so their `S` differ by one addition
+  per relation and nothing else. The difference the unit does not see, one
+  inversion a target against `2|F_x|`, is in the `inversions` counter, the
+  record's field-operation tally and wall time.
+
+Read a root-finding arm against a Gröbner arm on the resource vector and on
+wall time: the root finder's `S` is a complete count of group additions,
+while a Gröbner arm's `S` is a lower bound (its word XORs are counted and
+not charged), and the ratio of a complete count to a lower bound is not a
+speedup. Against `mitm`, whose generic pair table does the same search in
+the framework's own arithmetic, it is an *engineering* comparison in the
+sense of AGENTS.md §3: the same work in a faster constant. `ecbench` has no
+prime-curve Gröbner oracle (the note's Buchberger baseline terminates only
+at `|F| = 6`, too small for a DLP), so the prime side is compared with the
+existing `subtract` and `mitm` oracles.
 
 **Calibration.** The unit has been checked against theory in
 [`research/ecbench_calibration_20261002`](../../research/ecbench_calibration_20261002/README.md).
