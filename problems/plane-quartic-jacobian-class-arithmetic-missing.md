@@ -51,8 +51,13 @@ transfer `φ = (1 + Fr + Fr²)∘π0^*` with Cantor arithmetic (run
 400/400 random pairs per instance, `φ(G) ≠ 0` and `ℓ·φ(G) = 0` for a
 generator of `E0(K)[ℓ]`, `π0_*∘φ = [4]` on every point of `E0(K)`, and
 `ker φ` of order 2 or 4 (so `φ` is injective on the `ℓ`-part but not an
-isomorphism). This gives an executed genus-3 transfer **for that type
-only**. It does not supply class arithmetic on plane quartics, so this
+isomorphism). Addendum 2026-10-14 (run `20261014T0227Z`): the 8 instances
+whose `{a, b}` is a conjugate pair have no degree-7 `F_q`-model, so the study
+added balanced real-model arithmetic for degree 8 (study-local, genus 3).
+It is validated by enumerating reduced divisors (= `L(1)` on 8/8),
+associativity, and the group order. The same transfer checks pass there too
+(homomorphism 3200/3200, `π0_*∘φ = [4]` on all 8,052 points). This gives an
+executed genus-3 transfer **for that type only**. It does not supply class arithmetic on plane quartics, so this
 record stays open for the `m = 2` covers.
 
 ## Resolution and history

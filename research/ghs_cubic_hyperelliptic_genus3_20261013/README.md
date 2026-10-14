@@ -38,6 +38,64 @@ cyclic, elements of order 4), and the image has index 2 or 4 in
 
 ![P3 and P4](reports/run-20261014T0029Z/checks.svg)
 
+## Addendum 2026-10-14: transfer on the conjugate arm, census at `q ≥ 11`
+
+Owner follow-up. Addendum protocol frozen before its runs (PROTOCOL.md,
+"Addendum 2026-10-14", with one dated correction after a development run).
+Recorded run `20261014T0227Z`: [records](results/run-20261014T0227Z.jsonl),
+[census q = 11](results/run-20261014T0227Z.census_q11.jsonl),
+[census q = 13](results/run-20261014T0227Z.census_q13.jsonl),
+[environment](results/run-20261014T0227Z.env.txt),
+[run report](reports/run-20261014T0227Z/run-report.pdf). It reruns all 20
+instances. Its split-arm records are identical to `20261014T0029Z`, and its
+conjugate-arm P1–P3/P5 fields are too (checked by `jq` diff). The failed
+attempt `20261014T0223Z` is kept: its env file records the panic and the
+cause.
+
+| prediction | outcome (run `20261014T0227Z`) |
+| --- | --- |
+| V real-model arithmetic (8 conjugate instances) | V1: enumerating reduced triples `(u, v, n)` gives exactly `#E0(K)` on 8/8 (124, 124, 368, 368, 1336, 1304, 2264, 2164). V2: associativity 300/300 random triples per instance. V3: `[#E0(K)]·D = 0` 100/100. V4: `D + (−D) = 0` and `D + 0 = D` 100/100 |
+| P4c transfer, conjugate arm | `φ(P)` is a valid reduced triple over `F_q` for every point (8/8). Homomorphism 400/400 and doublings 100/100 per instance (3200 + 800). `φ(G) ≠ 0` and `ℓ·φ(G) = 0` for a generator of the `ℓ`-part (8/8; `ℓ = 31, 31, 23, 23, 167, 163, 283, 541`, cofactors 4, 4, 16, 16, 8, 8, 8, 4). Exceptional points (`x ∈ {r0, r1, r2, ∞}`, 4–6 per instance): three `R`-route values agree, and `φ(O) = φ((r1,0)) = 0` as derived. `ker φ ⊆ E0(K)[4]` and contains `T1`: order 2 (q = 5 both, q = 13 `[4,9]`) or 4 (cyclic; the other 5). `|image|·|ker| = #E0(K)`. `π0_*(φ(P)) = 4P` on every point of `E0(K)`, special fibres included, 0 failures, 0 not evaluable (8/8) |
+| P5c census at q = 11, 13 (all 9 built `E0` × 3 conjugates = 27 curves) | Census fork gate: exhaustive q = 5, 7 output byte-identical to the merged census records (976 lines). Structures: 1,786,323 (q = 11) and 4,855,539 (q = 13), as expected. Every curve has `min_genus = 3`, the type `m = 3, r = 5, hyperelliptic` among the types at the minimum, census order = `#E0(K)`, and 0 subcover mismatches (27/27) |
+
+**Conjugate-arm model.** The 8 Weierstrass points lie over `a, b ∈ F_{q²} \ F_q`,
+so none is `F_q`-rational, and no `F_q`-model has degree 7. Option (a) of the
+request was therefore unavailable on all 8 instances, and real-model
+arithmetic was implemented instead. Each instance uses
+`z' = 1/(z − z0)`, `w' = w/((z − z0)⁴ w0)` at the first `F_q`-point
+`(z0, w0)` with `h(z0)` a non-zero square and `x(z0)` generic
+(`z0 = 1, 3, 3, 1, 1, 3, 1, 0`). This gives a monic squarefree degree-8 `f`
+with `∞± = (z0, ±w0)`. Classes are balanced triples
+`div(u, v) + n∞₊ + (3 − deg u − n)∞₋ − D∞` with `D∞ = 2∞₊ + ∞₋`
+(Galbraith–Harrison–Mireles 2008). Composition is Cantor's with
+`n = n1 + n2 + deg d − 2`. A reduction step with `v` adapted to `±V₊` changes
+`n` (or `m`) by `deg u − e`, where `e` is the pole order of `y − v_a` at the
+other point at infinity. `φ(P)` is the class of
+`Σ_{12 points} Q_k − 6(∞₊ + ∞₋)`, because `π0^*[O] ~ 2(∞₊ + ∞₋)`. Points of
+`π0^*(P)` that lie over the original `z = ∞` (the conic base point) map to
+`z' = 0`; this case caused the failed attempt.
+
+**Census at q ≥ 11, genus-3 structures per curve** (the same for `E0` and both conjugates):
+
+| q | arm | Q | `#E0(K)` | genus-3 structures | of type `m=3, r=5` hyperelliptic | of type `m=2, r=6` |
+| --- | --- | --- | --- | --- | --- | --- |
+| 11 | split | [1,5] | 1336 | 18 | 4 | 14 |
+| 11 | split | [2,8] | 1336 | 16 | 4 | 12 |
+| 11 | split | [4,10] | 1384 | 24 | 4 | 20 |
+| 11 | conjugate | [1,1] | 1336 | 2 | 2 | 0 |
+| 11 | conjugate | [2,10] | 1304 | 2 | 2 | 0 |
+| 13 | split | [0,1] | 2188 | 16 | 4 | 12 |
+| 13 | split | [0,3] | 2188 | 16 | 4 | 12 |
+| 13 | conjugate | [2,6] | 2264 | 2 | 2 | 0 |
+| 13 | conjugate | [4,9] | 2164 | 2 | 2 | 0 |
+
+These are observations on 9 curves (27 with conjugates), not derived rules:
+every split curve has 4 hyperelliptic genus-3 structures plus plane-quartic
+(`m = 2`) ones, while every conjugate curve has exactly 2 genus-3
+structures, both hyperelliptic, and no `m = 2` structure.
+
+![Addendum](reports/run-20261014T0227Z/addendum.svg)
+
 ## Construction (derived; verified by the run)
 
 `K = F_{q³}`, `σ` the `q`-power, `L = F_{q⁶}`. Take `p ∈ K \ F_q`,
@@ -185,7 +243,10 @@ none); the ring identities (proved with `grind` over any
 | conic relation and `x` from `X` | `conic_coeffs`, `conic_model` | proved |
 | `F0F1F2 = Q³N²` | `product_of_conjugates` | proved |
 | `w² = h(z)` (multiplied out by `(QN)²`) | `hyperelliptic_equation` | proved |
-| descent of function fields, Frobenius, L-polynomial, transfer, `π0_*∘φ = [4]`, `T1 ∈ ker` | none | **not formalized** (needs curves and divisors; checked numerically only) |
+| addendum: norm identity of a real-model reduction step, `f − v_a² = (f − V₊²) − (v_a − V₊)(v_a + V₊)` | `step_norm` | proved |
+| addendum: bookkeeping at infinity of a reduction step (`n' = n + deg A − e`) | `step_bookkeeping` | proved (integer part; the divisor of `y − v_a` is the hypothesis) |
+| addendum: bookkeeping of composition and negation; the `6(∞₊ − ∞₋)` correction of `φ` | `compose_bookkeeping`, `neg_bookkeeping`, `transfer_infinity` | proved (integer part) |
+| descent of function fields, Frobenius, L-polynomial, transfer, `π0_*∘φ = [4]`, `T1 ∈ ker`, uniqueness of reduced balanced representatives | none | **not formalized** (needs curves and divisors; checked numerically only — uniqueness through V1) |
 
 ## What this does and does not say
 
@@ -198,10 +259,15 @@ none); the ring identities (proved with `grind` over any
 - The transfer is injective on the odd part and its image has index
   `|ker φ| ∈ {2, 4}`; `#Jac(C)(F_q) = #E0(K)` holds as group orders, not as
   an isomorphism via `φ`.
-- Conjugate arm: model, Frobenius and census checks only. Cantor arithmetic
-  for the degree-8 (real) model is not implemented, so no transfer there.
-- `q = 11, 13`: no census cross-check (the curves are not in the census
-  sample); P5a holds vacuously there.
+- Conjugate arm: in run `20261014T0029Z` only the model, Frobenius and
+  census checks were run. The addendum (run `20261014T0227Z`) adds
+  real-model balanced arithmetic, validated independently (V1–V4), and the
+  full transfer checks (P4c). Both arms now have an executed transfer. The
+  real-model code is study-local; `src/prime_hyperelliptic/` still rejects
+  even-degree models.
+- `q = 11, 13`: in run `20261014T0029Z`, P5a held vacuously because the curves
+  are outside the census sample. The addendum computes the census records
+  directly with a fork of the census tool (P5c, 27/27 curves).
 - No cost, no index calculus, no relation collection, no logarithm. The genus
   is 3, where Diem's index calculus would be `Õ(q^{4/3})` per the census
   report; nothing here measures that.
@@ -227,6 +293,16 @@ SHAs; after rebasing onto `main` the same trees are `ae436c10e` and
 `f69cec000`. The tool is identified by its sha256 (`be4c3374…` for the
 recorded run, `373c1663…` for the superseded one), which the rebase did not
 change.
+Addendum (2026-10-14): `census_list.rs` is `cover_census.rs` with a `list`
+mode added and nothing else changed (its first 141 lines are identical).
+Lean addendum build log: [lean/build-20261014.log](lean/build-20261014.log).
+Addendum run commands, base commit `703e0da8d` and sha256 of both tools are
+in [results/run-20261014T0227Z.env.txt](results/run-20261014T0227Z.env.txt).
+The failed attempt `20261014T0223Z` is
+[kept](results/run-20261014T0223Z.env.txt). Development runs of the addendum
+tool were scratch and are not kept. Plot:
+`python3 research/ghs_cubic_hyperelliptic_genus3_20261013/reports/plot_addendum.py run-20261014T0227Z`.
+
 Curve identities: [results/e0_icv1.json](results/e0_icv1.json) (computed
 with `scripts/curve_id.py`, which recounts each `#E0(K)` independently and
 agrees; not registered in `docs/curves/registry.json`, as in PR #1761).

@@ -5,7 +5,7 @@
 
 = The hyperelliptic genus-3 GHS cover ($m = 3, r = 5$): explicit $FF_q$ model, Frobenius, and the transfer executed with Cantor arithmetic
 
-2026-10-13 · Conductor T-2463 · `research/ghs_cubic_hyperelliptic_genus3_20261013/` · recorded run `20261014T0029Z` (base commit `12331a9a7`, pre-rebase, = `f69cec000` on the PR branch; source sha256 `be4c3374…`). *Structural stage diagnostic on toy fields.* No index calculus, no relation collection, no discrete logarithm, no cost or speedup claim. Protocol frozen before the recorded run (`PROTOCOL.md`, one dated amendment written after development runs).
+2026-10-13 · Conductor T-2463 · `research/ghs_cubic_hyperelliptic_genus3_20261013/` · recorded runs `20261014T0029Z` and addendum `20261014T0227Z` (2026-10-14; base of the first commit `12331a9a7`, pre-rebase, = `f69cec000` on the PR branch; source sha256 `be4c3374…`). *Structural stage diagnostic on toy fields.* No index calculus, no relation collection, no discrete logarithm, no cost or speedup claim. Protocol frozen before the recorded run (`PROTOCOL.md`, one dated amendment written after development runs).
 
 == Question
 The cover census (PR \#1759) found a hyperelliptic genus-3 type ($m=3$, $r=5$) of GHS cover for $E\/FF_(q^3)$. The $m=2$ genus-3 covers built in PR \#1761 are plane quartics without class arithmetic in the repository. Can the $m=3, r=5$ curve be written over $FF_q$, does its Frobenius match, and does the transfer $E_0(FF_(q^3)) -> "Jac"(C)(FF_q)$ run as a group map?
@@ -28,8 +28,21 @@ $K = FF_(q^3)$, $p in K without FF_q$, $r_i = p^(q^i)$, $Q in FF_q [x]$ monic sq
 $K = FF_7[t]\/(t^3+3)$, $p = t$, $Q = x(x-1)$, $\#E_0(K) = 328 = 8 dot 41$, $t_E = 16$:
 $C: w^2 = 6z^7 + z^6 + 3z^5 + 2z^4 + 2z^3 + 5z^2 + 6z + 6$, $x(z) = (z^3+5z^2+6z+6)\/(z^4+2z^3+5z^2+6z+5)$. $N_k = 8, 50, 296$; $\#"Jac"(C)(FF_7) = 328$. $phi(G) = (z^3+2z^2+5z+4, 4z^2+2z+3)$ with $41 phi(G) = 0$; $ker phi$ cyclic of order 4, image of size 82.
 
+== Addendum 2026-10-14 (run `20261014T0227Z`): conjugate-arm transfer, census at $q >= 11$
+Addendum protocol frozen before the runs, with one dated correction written after a development run (the reduction-step bookkeeping at infinity). The run reruns all 20 instances; the split-arm records equal those of `20261014T0029Z`. The failed attempt `20261014T0223Z` (a point over the original $z = infinity$ was not mapped) is kept.
+
+*Model.* The conjugate-arm Weierstrass points lie over $a, b in FF_(q^2) without FF_q$, so there is no degree-7 $FF_q$-model. Moving an $FF_q$-point $(z_0, w_0)$ to infinity gives a monic degree-8 $f$ with $infinity_plus.minus = (z_0, plus.minus w_0)$. Arithmetic uses balanced classes $"div"(u,v) + n infinity_+ + (3 - deg u - n) infinity_- - D_infinity$ with $D_infinity = 2 infinity_+ + infinity_-$ (Galbraith–Harrison–Mireles), and $phi(P) = [sum Q_k - 6(infinity_+ + infinity_-)]$.
+
+#table(columns: (auto, 1fr), stroke: 0.4pt, inset: 4pt,
+  [*V validation* (8 inst.)], [enumerating reduced triples gives $\#E_0(K)$ (8/8); associativity 300/300, $[\#E_0(K)] D = 0$ 100/100, inverse and identity 100/100, per instance],
+  [*P4c transfer* (8 inst.)], [valid reduced $FF_q$ triples for all points; homomorphism 400/400 and doublings 100/100 per instance; $phi(G) != 0$, $ell phi(G) = 0$ ($ell = 31, 31, 23, 23, 167, 163, 283, 541$; cofactors $4,4,16,16,8,8,8,4$); $|ker phi| = 2$ (3) or $4$ (5, cyclic), $subset E_0(K)[4]$, $T_1 in ker$; $pi_(0*) phi(P) = 4P$ on every point, special fibres included, 0 failures, 0 not evaluable],
+  [*P5c census* $q = 11, 13$], [census fork reproduces the merged census at $q = 5, 7$ byte for byte (976 lines); over all 1,786,323 / 4,855,539 structures, all 27 curves ($9$ $E_0$ × 3 conjugates) have minimal genus 3, the type $m=3, r=5$ hyperelliptic, the same order, 0 mismatches. Genus-3 structures per curve: split 16–24 (4 hyperelliptic, the rest $m = 2$); conjugate exactly 2, both hyperelliptic],
+)
+
+#figure(image("reports/run-20261014T0227Z/addendum.svg", width: 100%), caption: [Run `20261014T0227Z`. Left: $pi_(0*) phi(P) = 4P$ verified on every point of $E_0(K)$ for all 20 instances (S split, C conjugate), kernel order annotated. Right: genus-3 structures per curve in the direct census at $q = 11, 13$.])
+
 == Lean
-`lean/HyperGenus3.lean` (v4.34.1, no Mathlib, no `sorry`): branch-set combinatorics ($r=5$, $m=3$, genus 3, rank-2 subspace with union of size 3, $tau B Delta tau^2 B subset B$, triple combination $= {a,b}$), the conic identities, $F_0F_1F_2 = Q^3N^2$, and $w^2 = h$ multiplied out. Not formalized: function-field descent, Frobenius, L-polynomial, the transfer and $pi_(0*) phi = [4]$ (numerical only).
+`lean/HyperGenus3.lean` (v4.34.1, no Mathlib, no `sorry`): branch-set combinatorics ($r=5$, $m=3$, genus 3, rank-2 subspace with union of size 3, $tau B Delta tau^2 B subset B$, triple combination $= {a,b}$), the conic identities, $F_0F_1F_2 = Q^3N^2$, $w^2 = h$ multiplied out; addendum: the norm identity and the integer bookkeeping at infinity of the real-model steps, composition, negation and the $6(infinity_+ - infinity_-)$ correction. Not formalized: function-field descent, Frobenius, L-polynomial, the transfer, $pi_(0*) phi = [4]$, uniqueness of balanced representatives (numerical only).
 
 == Limits
-Closes the plane-quartic obstruction *by a different route for this type only*; plane-quartic class arithmetic is still missing. $phi$ is not an isomorphism (index 2 or 4). No transfer on the conjugate arm (degree-8 model, no real-model Cantor). Toy fields, first instances in a fixed order. No cost statement.
+Closes the plane-quartic obstruction *by a different route for this type only*; plane-quartic class arithmetic is still missing. $phi$ is not an isomorphism (index 2 or 4) on either arm. The real-model arithmetic is study-local and genus-3 only. Toy fields, first instances in a fixed order. No cost statement.
