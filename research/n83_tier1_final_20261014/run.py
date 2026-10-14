@@ -17,6 +17,7 @@ PARENT = ROOT / "research/n83_root11_20261014/run.py"
 TARGETS = HERE / "targets.jsonl"
 ANSWERS = HERE / "answers.jsonl"
 SELECTION = HERE / "selection.json"
+PANEL_SELECTION = ROOT / "research/n83_factor_base_panel_results_20261014/selected_candidate.json"
 TARGETS_SHA256 = "7d80c73fa7930ae0c22113bad3f253d8dfb5c9c71b1ce8fbeedd06f45649556b"
 ANSWERS_SHA256 = "03e299325a2e65e353dc5128d7785617d70a4841092a4b9a45903448a5b60b42"
 SOURCE_SHA256 = "07ce5094f0e561a75bd65ca143f2301830447742268936805c0b920f7a93f6ae"
@@ -55,6 +56,26 @@ def selected_config():
                    for c in data["selection_analysis_sha256"])
             or not data["candidate_id"].startswith("IC1N83")):
         raise ValueError("selection manifest incomplete or inconsistent")
+    panel = json.loads(PANEL_SELECTION.read_text())
+    manifest_path = PANEL_SELECTION.parent / f"candidate_K{data['k']}_{data['variant']}.json"
+    manifest = json.loads(manifest_path.read_text())
+    if (panel["schema"] != "n83.factor-base-panel-selection/v1"
+            or panel["status"] != "PANEL_SELECTED"
+            or panel["selected_arm"] != f"k{data['k']}_{data['variant']}"
+            or parent.digest(PANEL_SELECTION) != data["panel_selection_sha256"]
+            or panel["analysis_sha256"] != data["selection_analysis_sha256"]
+            or panel["source_sha256"] != data["source_sha256"]
+            or panel["candidate_id"] != data["candidate_id"]
+            or panel["candidate_manifest_sha256"] != data["candidate_manifest_sha256"]
+            or panel["source_base_hash_blake3"] != data["source_base_hash_blake3"]
+            or parent.digest(manifest_path) != data["candidate_manifest_sha256"]
+            or manifest["candidate_id"] != data["candidate_id"]
+            or manifest["implementation"]["source_sha256"]["ic"] != SOURCE_SHA256
+            or manifest["factor_base"]["actual_usable_points"] != 166 * data["k"]
+            or manifest["factor_base"]["effective_columns"] != data["k"]
+            or manifest["factor_base"]["source_base_hash_blake3"] !=
+            data["source_base_hash_blake3"]):
+        raise ValueError("selection differs from sealed panel candidate")
     return data
 
 

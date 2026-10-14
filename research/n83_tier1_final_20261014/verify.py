@@ -93,6 +93,7 @@ def verify_ic(folder, point, scalar, selected):
             or summary["targets"] != 1 or summary["targets_solved"] != 1
             or summary["targets_failed"] != 0 or summary["orbit_columns"] != k
             or summary["rank"] != k or summary["regular_states"] != state_bound
+            or summary["base_hash"] != selected["source_base_hash_blake3"]
             or summary["root_table_layout"] != "indexed83_5byte_exact"
             or summary["root_table_slot_bytes"] != 5
             or summary["root_table_indexed5_enabled"] is not True
