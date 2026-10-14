@@ -179,6 +179,7 @@ pub mod gls_fp2;
 pub mod glv_gaudry;
 pub mod glv_invariant_base;
 pub mod glv_invariant_experiments;
+pub mod gpu_rootfind;
 pub mod groebner_cache;
 pub mod groebner_f4;
 pub mod hash_attacks;
