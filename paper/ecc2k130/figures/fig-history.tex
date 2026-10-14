@@ -7,16 +7,16 @@
   bar width=7pt, bar shift=0pt,
   xmin=0.008, xmax=80,
   xtick={0.01,0.1,1,10}, xticklabels={0.01,0.1,1,10},
-  xlabel={billion iterations per second per chip (log scale)},
+  xlabel={billion iterations per second per chip or card (log scale)},
   symbolic y coords={core2,cell09,gtx09,sthreea,cell12,gtx10,sthreeb,asic,xeon,vu47p,pro6000c,pro6000b},
   ytick={core2,cell09,gtx09,sthreea,cell12,gtx10,sthreeb,asic,xeon,vu47p,pro6000c,pro6000b},
   yticklabels={
     {2009 Core 2 Q6850 (4 cores)},
     {2009 Cell, PlayStation 3},
-    {2009 GTX 295},
+    {2009 GTX 295 (card, 2 dies)},
     {2009 Spartan-3 XC3S5000},
     {2012 Cell, PlayStation 3},
-    {2010 GTX 295, final kernel},
+    {2010 GTX 295, final (card, 2 dies)},
     {2010 Spartan-3 XC3S5000},
     {2009 ASIC 90\,nm (estimate)},
     {2026 Xeon, 4 threads, AVX-512},
@@ -46,9 +46,10 @@
 \addlegendentry{this paper, measured}
 \end{axis}
 \end{tikzpicture}
-\caption{ECC2K-130 rates per chip, 2009--2012 against today, on one log
-  scale (Tables~\ref{tab:history} and~\ref{tab:history-compare}). The
-  GTX~295 bars are per card, which carries two GPU dies. One RTX~PRO~6000
+\caption{ECC2K-130 rates, 2009--2012 against today, on one log scale
+  (Tables~\ref{tab:history} and~\ref{tab:history-compare}). Each bar is
+  one chip except the two GTX~295 bars, which are one card carrying two
+  GPU dies, as their sources report them; per die they are half. One RTX~PRO~6000
   does the work of about 229 of the 2010 cards.}
 \label{fig:history}
 \end{figure}

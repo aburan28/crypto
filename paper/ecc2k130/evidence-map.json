@@ -391,7 +391,7 @@
  },
  "survey": {
   "id": "E43",
-  "title": "Twelve-GPU survey on Modal",
+  "title": "Eleven-GPU survey on Modal",
   "repository": "crypto",
   "kind": "measurement report",
   "sources": [
@@ -446,11 +446,12 @@
  },
  "nistres": {
   "id": "E49",
-  "title": "NIST P-256/P-384 rho on the RTX PRO 6000: device results",
+  "title": "NIST P-256/P-384 rho on the RTX PRO 6000: device results, round 1 as merged and round 2 as recorded at commit c0fc85eb7 of pull request 1778",
   "repository": "crypto",
   "kind": "measurement report",
   "sources": [
-   "gpu/nist/RESULTS.md"
+   "gpu/nist/RESULTS.md",
+   "gpu/nist/RESULTS.md@c0fc85eb76ca0af88eb1a682c555a6c931bb1e4c (pull request 1778)"
   ]
  },
  "nist": {

@@ -2,11 +2,17 @@
 \section{Reproduction}
 \label{app:repro}
 
-The companion repository~\cite{rhoblackwell} carries the ECC2K-130
+The companion repository~\cite{rhoblackwell} will carry the ECC2K-130
 client (CUDA and CPU), the NIST P-256/P-384 rho kernel, the paper source,
 the benchmark data behind every figure, the evidence records of
-Appendix~\ref{app:evidence}, and a Docker image. The image is the
-quickest way to run the work.
+Appendix~\ref{app:evidence}, and a Docker image.
+
+\paragraph{Status.} The repository is assembled but not yet public. The
+CPU client, its validation suite, a planted-logarithm solve and every
+mode of the image's entry point have been run from its copy of the
+source; the Docker image itself has not yet been built, and its GPU modes
+have not been run. The commands below describe the intended workflow and
+will be checked before the repository is published.
 
 \paragraph{Docker.} The image compiles the client with CUDA~13.3 for
 Ampere, Ada, Hopper and both Blackwell families, with the audited
@@ -26,10 +32,13 @@ docker run rho-blackwell planted                          # small planted logs
 docker run --gpus all rho-blackwell ecc2k95               # ECC2K-95, answer known
 docker run --gpus all rho-blackwell nist                  # P-256/P-384 rho bench
 \end{verbatim}}
-Each container picks a random run identifier from a range the campaign
-never used (20000--65535) and keeps it with its data; two containers with
-the same identifier would walk the same trails, so set \texttt{RUN\_ID}
-explicitly when running many. A collision is
+A container without \texttt{RUN\_ID} picks a random run identifier from
+a range the campaign never used (20000--65535), keeps it with its data
+and warns that it did so. Two containers with the same identifier walk
+the same trails, and with random choices that happens with probability
+about $0.1\%$ for 10 containers, $10\%$ for 100 and $63\%$ for 300, so any
+run of more than one container must assign each a distinct
+\texttt{RUN\_ID}. A collision is
 found by merging the corpora of all containers that walked with the
 same cutoff; a single container is unlikely to find one alone.
 
@@ -41,6 +50,6 @@ README lists the targets for each measured build, including the fused
 and nibble-table $\sigma$-walks and the B200 and RTX~PRO~4500 presets.
 
 \paragraph{Checking a number.} Every measured number cites an evidence
-record [E$n$]. Each record in the companion repository holds the notes,
-data or source that report the measurement, so a reader can check a
-number without the development history.
+record [E$n$]. Each record in the companion repository will hold the
+notes, data or source that report the measurement, so a reader can check
+a number without the development history.

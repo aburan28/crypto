@@ -19,7 +19,7 @@ AUX     := $(TEX:.tex=.aux) $(TEX:.tex=.log) $(TEX:.tex=.out) $(TEX:.tex=.toc) \
 ARXIV_TARBALL := arxiv-submission.tar.gz
 EPRINT_ZIP    := eprint-submission.zip
 
-.PHONY: all clean arxiv eprint deanonymize check
+.PHONY: all clean arxiv eprint deanonymize check figures-export
 
 all: $(PDF)
 
@@ -49,10 +49,11 @@ arxiv: $(TEX) $(SECTIONS) $(BIB)
 
 # IACR ePrint accepts PDF + optional source.
 eprint: $(PDF)
-	mkdir -p submission-staging/eprint
+	mkdir -p submission-staging/eprint/figures
+	cp $(FIGURES) submission-staging/eprint/figures/
 	cp $(PDF) $(TEX) $(SECTIONS) $(BIB) abstract.txt README.md Makefile \
 	  submission-staging/eprint/
-	cd submission-staging/eprint && zip -q ../../$(EPRINT_ZIP) *
+	cd submission-staging/eprint && zip -q -r ../../$(EPRINT_ZIP) .
 	rm -rf submission-staging/eprint
 	@echo "IACR ePrint submission bundle ready: $(EPRINT_ZIP)"
 
@@ -98,3 +99,17 @@ check: $(PDF)
 	@echo "Page count:"
 	@pdfinfo $(PDF) | grep -i pages
 	@ls -lh $(PDF)
+
+# Every figure as SVG and 150-dpi PNG (repository policy for performance
+# figures). FIGDIR defaults to this round's benchmarks entry.
+FIGDIR ?= ../../benchmarks/20261014-paper-figures
+figures-export: figures-standalone.tex $(FIGURES)
+	pdflatex -interaction=nonstopmode figures-standalone.tex >/dev/null
+	mkdir -p $(FIGDIR)
+	@i=1; for f in $$(sed -n 's/^\\input{figures\/\(.*\)}$$/\1/p' figures-standalone.tex); do \
+	  pdftocairo -svg -f $$i -l $$i figures-standalone.pdf $(FIGDIR)/$$f.svg; \
+	  pdftoppm -r 150 -png -singlefile -f $$i -l $$i figures-standalone.pdf $(FIGDIR)/$$f; \
+	  i=$$((i+1)); done
+	cp figures-standalone.pdf $(FIGDIR)/figures.pdf
+	rm -f figures-standalone.aux figures-standalone.log figures-standalone.pdf
+	@echo "exported $$(ls $(FIGDIR)/*.svg | wc -l) figures to $(FIGDIR)"

@@ -19,7 +19,7 @@
 \node[box,minimum width=2.9cm] at (1.6,4.7) {block 0: 256 threads};
 \node[box,minimum width=2.9cm] at (4.8,4.7) {block 1: 256 threads};
 \node[box,fill=cC!25,minimum width=6.1cm] at (3.2,3.75) {shared: 1{,}792-byte $\sigma$ mask table per block};
-\node at (3.2,2.95) {16 warps per SM; 104 registers per thread, no spills};
+\node at (3.2,2.95) {16 warps per SM; 104 registers per thread};
 % ---- Row 2 right: one thread
 \node[hdr] at (7.0,5.55) {One thread = one worker = 16 walks};
 \foreach \s in {0,...,15}{

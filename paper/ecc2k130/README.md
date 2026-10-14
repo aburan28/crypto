@@ -63,12 +63,12 @@ All rates are in billions of iterations per second on one device.
 - Appendix B: evidence records.
 
 Measured numbers cite evidence records [E*n*] (Appendix B) instead of
-file paths. `app-evidence.tex` lists them; the companion repository
-`rho-blackwell` holds a copy of each record under its number, and its
-`evidence/map.json` maps each record to the files it came from.
-
-Every number is footnoted to a repository artefact (`\art{path}`);
-paths prefixed `cryptanalysis:` are in the sibling library.
+file paths. `app-evidence.tex` lists them, and `evidence-map.json` beside
+the source maps each record to the files it came from. The companion
+repository `rho-blackwell`, which will hold a copy of each record under its
+number together with the code and a Docker image, is assembled but **not
+yet published**, and its Docker image has not yet been built or run on a
+GPU; the paper says so in its availability paragraph and Appendix A.
 
 ## Revision history
 
