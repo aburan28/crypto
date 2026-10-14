@@ -48,13 +48,13 @@ common pricing and independent-host replay remain separate comparison gates.
 
 ## Next discriminating step
 
-Four a=1 native full targets are now verified in the
-[20:37:44 UTC snapshot](../research/binary_genus2_speed_20261014/runs/run-20261014T2034Z/ARCHIVE.md).
-Its a=0 checkpoints retain 236,882,500 E steps, 232,917,459 inverse/E steps
-and 2,383,516 native steps, without candidates. These observations do not
+Seven a=1 native full targets are now verified in the
+[21:49:26 UTC snapshot](../research/binary_genus2_speed_20261014/runs/run-20261014T2148Z/ARCHIVE.md).
+Its a=0 checkpoints retain 410,039,272 E steps, 404,195,619 inverse/E steps
+and 4,137,664 native steps, without candidates. These observations do not
 meet either exit criterion above.
 
-Complete the remaining a=1 native controls, retain a=0 progress, and keep the uncapped current-worker campaign running
+Complete the remaining a=1 native control, retain a=0 progress, and keep the uncapped current-worker campaign running
 with atomic checkpoints. Publish each later snapshot in a new directory.
 An actual a=0 verified collision establishes a completed target; continued
 progress is a censored observation, not a negative result. An infrastructure
