@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="950" height="1090" viewBox="0 0 950 1090">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#23313d}.title{font-size:22px;font-weight:700}.axis{font-size:12px;fill:#526573}.name{font-size:14px;font-weight:600}.small{font-size:11px;fill:#526573}</style>
+<text x="28" y="35" class="title">SEC 2 curve sizes and edition membership</text>
+<text x="28" y="57" class="small">Source: SEC 2 v1.0 (2000) and v2.0 (2010); field bits, 33 named curves</text>
+<line x1="240.0" x2="240.0" y1="78" y2="1014" stroke="#e4e9ee"/>
+<text x="240.0" y="1035" text-anchor="middle" class="axis">0</text>
+<line x1="354.7" x2="354.7" y1="78" y2="1014" stroke="#e4e9ee"/>
+<text x="354.7" y="1035" text-anchor="middle" class="axis">112</text>
+<line x1="436.7" x2="436.7" y1="78" y2="1014" stroke="#e4e9ee"/>
+<text x="436.7" y="1035" text-anchor="middle" class="axis">192</text>
+<line x1="502.3" x2="502.3" y1="78" y2="1014" stroke="#e4e9ee"/>
+<text x="502.3" y="1035" text-anchor="middle" class="axis">256</text>
+<line x1="633.4" x2="633.4" y1="78" y2="1014" stroke="#e4e9ee"/>
+<text x="633.4" y="1035" text-anchor="middle" class="axis">384</text>
+<line x1="773.8" x2="773.8" y1="78" y2="1014" stroke="#e4e9ee"/>
+<text x="773.8" y="1035" text-anchor="middle" class="axis">521</text>
+<line x1="825.0" x2="825.0" y1="78" y2="1014" stroke="#e4e9ee"/>
+<text x="825.0" y="1035" text-anchor="middle" class="axis">571</text>
+<text x="28" y="96" class="name">secp112r1</text>
+<line x1="240" x2="354.7" y1="92" y2="92" stroke="#b86b16" stroke-width="7" stroke-linecap="round"/>
+<circle cx="354.7" cy="92" r="6" fill="#b86b16"/>
+<text x="366.7" y="96" class="small">112 bits; h=1</text>
+<text x="28" y="124" class="name">secp112r2</text>
+<line x1="240" x2="354.7" y1="120" y2="120" stroke="#b86b16" stroke-width="7" stroke-linecap="round"/>
+<circle cx="354.7" cy="120" r="6" fill="#b86b16"/>
+<text x="366.7" y="124" class="small">112 bits; h=4</text>
+<text x="28" y="152" class="name">secp128r1</text>
+<line x1="240" x2="371.1" y1="148" y2="148" stroke="#b86b16" stroke-width="7" stroke-linecap="round"/>
+<circle cx="371.1" cy="148" r="6" fill="#b86b16"/>
+<text x="383.1" y="152" class="small">128 bits; h=1</text>
+<text x="28" y="180" class="name">secp128r2</text>
+<line x1="240" x2="371.1" y1="176" y2="176" stroke="#b86b16" stroke-width="7" stroke-linecap="round"/>
+<circle cx="371.1" cy="176" r="6" fill="#b86b16"/>
+<text x="383.1" y="180" class="small">128 bits; h=4</text>
+<text x="28" y="208" class="name">secp160k1</text>
+<line x1="240" x2="403.9" y1="204" y2="204" stroke="#b86b16" stroke-width="7" stroke-linecap="round"/>
+<circle cx="403.9" cy="204" r="6" fill="#b86b16"/>
+<text x="415.9" y="208" class="small">160 bits; h=1</text>
+<text x="28" y="236" class="name">secp160r1</text>
+<line x1="240" x2="403.9" y1="232" y2="232" stroke="#b86b16" stroke-width="7" stroke-linecap="round"/>
+<circle cx="403.9" cy="232" r="6" fill="#b86b16"/>
+<text x="415.9" y="236" class="small">160 bits; h=1</text>
+<text x="28" y="264" class="name">secp160r2</text>
+<line x1="240" x2="403.9" y1="260" y2="260" stroke="#b86b16" stroke-width="7" stroke-linecap="round"/>
+<circle cx="403.9" cy="260" r="6" fill="#b86b16"/>
+<text x="415.9" y="264" class="small">160 bits; h=1</text>
+<text x="28" y="292" class="name">secp192k1</text>
+<line x1="240" x2="436.7" y1="288" y2="288" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<circle cx="436.7" cy="288" r="6" fill="#176a9f"/>
+<text x="448.7" y="292" class="small">192 bits; h=1</text>
+<text x="28" y="320" class="name">secp192r1</text>
+<line x1="240" x2="436.7" y1="316" y2="316" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<circle cx="436.7" cy="316" r="6" fill="#176a9f"/>
+<text x="448.7" y="320" class="small">192 bits; h=1</text>
+<text x="28" y="348" class="name">secp224k1</text>
+<line x1="240" x2="469.5" y1="344" y2="344" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<circle cx="469.5" cy="344" r="6" fill="#176a9f"/>
+<text x="481.5" y="348" class="small">224 bits; h=1</text>
+<text x="28" y="376" class="name">secp224r1</text>
+<line x1="240" x2="469.5" y1="372" y2="372" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<circle cx="469.5" cy="372" r="6" fill="#176a9f"/>
+<text x="481.5" y="376" class="small">224 bits; h=1</text>
+<text x="28" y="404" class="name">secp256k1</text>
+<line x1="240" x2="502.3" y1="400" y2="400" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<circle cx="502.3" cy="400" r="6" fill="#176a9f"/>
+<text x="514.3" y="404" class="small">256 bits; h=1</text>
+<text x="28" y="432" class="name">secp256r1</text>
+<line x1="240" x2="502.3" y1="428" y2="428" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<circle cx="502.3" cy="428" r="6" fill="#176a9f"/>
+<text x="514.3" y="432" class="small">256 bits; h=1</text>
+<text x="28" y="460" class="name">secp384r1</text>
+<line x1="240" x2="633.4" y1="456" y2="456" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<circle cx="633.4" cy="456" r="6" fill="#176a9f"/>
+<text x="645.4" y="460" class="small">384 bits; h=1</text>
+<text x="28" y="488" class="name">secp521r1</text>
+<line x1="240" x2="773.8" y1="484" y2="484" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<circle cx="773.8" cy="484" r="6" fill="#176a9f"/>
+<text x="785.8" y="488" class="small">521 bits; h=1</text>
+<text x="28" y="516" class="name">sect113r1</text>
+<line x1="240" x2="355.8" y1="512" y2="512" stroke="#b86b16" stroke-width="7" stroke-linecap="round"/>
+<rect x="349.8" y="506" width="12" height="12" fill="#b86b16"/>
+<text x="367.8" y="516" class="small">113 bits; h=2</text>
+<text x="28" y="544" class="name">sect113r2</text>
+<line x1="240" x2="355.8" y1="540" y2="540" stroke="#b86b16" stroke-width="7" stroke-linecap="round"/>
+<rect x="349.8" y="534" width="12" height="12" fill="#b86b16"/>
+<text x="367.8" y="544" class="small">113 bits; h=2</text>
+<text x="28" y="572" class="name">sect131r1</text>
+<line x1="240" x2="374.2" y1="568" y2="568" stroke="#b86b16" stroke-width="7" stroke-linecap="round"/>
+<rect x="368.2" y="562" width="12" height="12" fill="#b86b16"/>
+<text x="386.2" y="572" class="small">131 bits; h=2</text>
+<text x="28" y="600" class="name">sect131r2</text>
+<line x1="240" x2="374.2" y1="596" y2="596" stroke="#b86b16" stroke-width="7" stroke-linecap="round"/>
+<rect x="368.2" y="590" width="12" height="12" fill="#b86b16"/>
+<text x="386.2" y="600" class="small">131 bits; h=2</text>
+<text x="28" y="628" class="name">sect163k1</text>
+<line x1="240" x2="407.0" y1="624" y2="624" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<rect x="401.0" y="618" width="12" height="12" fill="#176a9f"/>
+<text x="419.0" y="628" class="small">163 bits; h=2</text>
+<text x="28" y="656" class="name">sect163r1</text>
+<line x1="240" x2="407.0" y1="652" y2="652" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<rect x="401.0" y="646" width="12" height="12" fill="#176a9f"/>
+<text x="419.0" y="656" class="small">163 bits; h=2</text>
+<text x="28" y="684" class="name">sect163r2</text>
+<line x1="240" x2="407.0" y1="680" y2="680" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<rect x="401.0" y="674" width="12" height="12" fill="#176a9f"/>
+<text x="419.0" y="684" class="small">163 bits; h=2</text>
+<text x="28" y="712" class="name">sect193r1</text>
+<line x1="240" x2="437.7" y1="708" y2="708" stroke="#b86b16" stroke-width="7" stroke-linecap="round"/>
+<rect x="431.7" y="702" width="12" height="12" fill="#b86b16"/>
+<text x="449.7" y="712" class="small">193 bits; h=2</text>
+<text x="28" y="740" class="name">sect193r2</text>
+<line x1="240" x2="437.7" y1="736" y2="736" stroke="#b86b16" stroke-width="7" stroke-linecap="round"/>
+<rect x="431.7" y="730" width="12" height="12" fill="#b86b16"/>
+<text x="449.7" y="740" class="small">193 bits; h=2</text>
+<text x="28" y="768" class="name">sect233k1</text>
+<line x1="240" x2="478.7" y1="764" y2="764" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<rect x="472.7" y="758" width="12" height="12" fill="#176a9f"/>
+<text x="490.7" y="768" class="small">233 bits; h=4</text>
+<text x="28" y="796" class="name">sect233r1</text>
+<line x1="240" x2="478.7" y1="792" y2="792" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<rect x="472.7" y="786" width="12" height="12" fill="#176a9f"/>
+<text x="490.7" y="796" class="small">233 bits; h=2</text>
+<text x="28" y="824" class="name">sect239k1</text>
+<line x1="240" x2="484.9" y1="820" y2="820" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<rect x="478.9" y="814" width="12" height="12" fill="#176a9f"/>
+<text x="496.9" y="824" class="small">239 bits; h=4</text>
+<text x="28" y="852" class="name">sect283k1</text>
+<line x1="240" x2="529.9" y1="848" y2="848" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<rect x="523.9" y="842" width="12" height="12" fill="#176a9f"/>
+<text x="541.9" y="852" class="small">283 bits; h=4</text>
+<text x="28" y="880" class="name">sect283r1</text>
+<line x1="240" x2="529.9" y1="876" y2="876" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<rect x="523.9" y="870" width="12" height="12" fill="#176a9f"/>
+<text x="541.9" y="880" class="small">283 bits; h=2</text>
+<text x="28" y="908" class="name">sect409k1</text>
+<line x1="240" x2="659.0" y1="904" y2="904" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<rect x="653.0" y="898" width="12" height="12" fill="#176a9f"/>
+<text x="671.0" y="908" class="small">409 bits; h=4</text>
+<text x="28" y="936" class="name">sect409r1</text>
+<line x1="240" x2="659.0" y1="932" y2="932" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<rect x="653.0" y="926" width="12" height="12" fill="#176a9f"/>
+<text x="671.0" y="936" class="small">409 bits; h=2</text>
+<text x="28" y="964" class="name">sect571k1</text>
+<line x1="240" x2="825.0" y1="960" y2="960" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<rect x="819.0" y="954" width="12" height="12" fill="#176a9f"/>
+<text x="837.0" y="964" class="small">571 bits; h=4</text>
+<text x="28" y="992" class="name">sect571r1</text>
+<line x1="240" x2="825.0" y1="988" y2="988" stroke="#176a9f" stroke-width="7" stroke-linecap="round"/>
+<rect x="819.0" y="982" width="12" height="12" fill="#176a9f"/>
+<text x="837.0" y="992" class="small">571 bits; h=2</text>
+<circle cx="32" cy="1060" r="6" fill="#176a9f"/>
+<text x="46" y="1064" class="small">2010 recommended; circle=prime field, square=binary field</text>
+<rect x="510" y="1054" width="12" height="12" fill="#b86b16"/>
+<text x="528" y="1064" class="small">2000 edition only</text>
+</svg>
