@@ -38,7 +38,8 @@ Omitting `--scalar` in supplied-Q mode leaves both scalar fields null. Add a
 known witness only to check it. Invalid input or a failed check exits 2.
 The basis is `z^83+z^45+z²+z+1`. Exact subgroup orders are decimal strings;
 field elements and ascending Mumford coefficients are hexadecimal strings.
-The command reuses the historical prime receipt and does not re-prove primality.
+For a=0 the command reuses the cited historical Sage prime receipt. For a=1
+it performs a fresh deterministic u64 seven-base Miller–Rabin check.
 
 For nonzero x, the reduced pullback is
 

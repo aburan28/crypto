@@ -4,8 +4,8 @@ use curve_backend::binary_ecc::{
     BinaryCoverPoint, BinaryPoint, F2mElement, IrreduciblePoly, MumfordDivisor,
 };
 use ecdlp_surfaces::binary::{
-    n83_fixture, BinaryCurve, BinaryField, BinaryPoint as FixturePoint, FIXTURE_SOURCE,
-    PRIME_RECEIPT_SOURCE,
+    is_prime_u64, n83_fixture, BinaryCurve, BinaryField, BinaryPoint as FixturePoint,
+    FIXTURE_SOURCE, PRIME_RECEIPT_SOURCE,
 };
 use num_bigint::BigUint;
 use serde_json::{json, Value};
@@ -63,6 +63,13 @@ pub fn check_n83(a: u8, supplied_q: Option<FixturePoint>, scalar: Option<u128>) 
     let e = fixture.curve;
     let p = fixture.generator;
     let r = fixture.subgroup_order;
+    if a == 1 {
+        let r64 = u64::try_from(r).map_err(|e| e.to_string())?;
+        require(
+            is_prime_u64(r64),
+            "a=1 subgroup order failed deterministic u64 primality",
+        )?;
+    }
     let witness = if supplied_q.is_some() {
         scalar
     } else {
@@ -173,7 +180,8 @@ pub fn check_n83(a: u8, supplied_q: Option<FixturePoint>, scalar: Option<u128>) 
         "fixture_source":FIXTURE_SOURCE, "prime_receipt_source":PRIME_RECEIPT_SOURCE,
         "subgroup_order":r.to_string(), "cofactor":fixture.cofactor.to_string(),
         "source_order":e.trace_and_order().1.to_string(),
-        "prime_proof":"reused historical receipt; this command does not re-prove primality",
+        "prime_proof":if a==0 {"cited historical Sage receipt; not re-proved by this command"} else {"fresh deterministic u64 Miller-Rabin with the established seven-base set"},
+        "fresh_deterministic_u64_prime_check":if a==1 {Some(true)} else {None},
         "P":point_json(p), "Q":point_json(q), "D_P":divisor_json(&dp), "D_Q":divisor_json(&dq),
         "source_genus":2, "cover_degree":3, "base_field_changed":false,
         "target_curve":"v^2+u^2*v=u^5+a*u^4+u^3+u",
