@@ -488,6 +488,11 @@ fn main() {
             }
             write_out(&out, &rows);
         }
+        "tally" => {
+            let jac = arg(&args, "--jacobian").expect("--jacobian JSON");
+            let out = arg(&args, "--out").expect("--out");
+            tally(&jac, &out);
+        }
         "classes" => {
             let lo: u32 = arg(&args, "--min-n").map_or(8, |s| s.parse().unwrap());
             let hi: u32 = arg(&args, "--max-n").map_or(20, |s| s.parse().unwrap());
@@ -501,7 +506,7 @@ fn main() {
             summary(&catalog, &null, &out);
         }
         _ => {
-            eprintln!("usage: twist_walk_blocked_towers control|catalog|null|summary|classes [--registry F] [--out F] [--samples N] [--seed S] [--catalog F --null F]");
+            eprintln!("usage: twist_walk_blocked_towers control|catalog|null|summary|classes|tally [--registry F] [--out F] [--samples N] [--seed S] [--catalog F --null F]");
             std::process::exit(2);
         }
     }
@@ -740,4 +745,99 @@ fn class_ceiling(lo: u32, hi: u32, out: &str) {
     }
     fs::write(out, lines.join("\n") + "\n").expect("classes out");
     println!("wrote {out}");
+}
+
+/// The pilot: one row per GHS tower of the binary catalog curves, copied from
+/// the recorded route invariants of `jacobian-transfers.json`, plus the
+/// quadratic-twist columns.  A twist keeps `b` and flips `Tr_{K/F_2}(a)`, so its
+/// descent is blocked iff the flipped trace is 1, `n` is even and `Tr_{K/k}(b) = 0`.
+fn tally(jacobian: &str, out: &str) {
+    let doc: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(jacobian).expect("json")).expect("json");
+    let mut lines = vec!["slug,standard_name,N,l,n,magic_number,trace_a,relative_trace_b_zero,mmt_condition_8_as_published,trace_a_twist,twist_blocked".to_string()];
+    for c in doc["curves"].as_array().expect("curves") {
+        if c["family"] != "binary" {
+            continue;
+        }
+        for r in c["routes"].as_array().expect("routes") {
+            if r["kind"] != "ghs_weil_descent" {
+                continue;
+            }
+            let iv = &r["invariants"];
+            let n = iv["relative_degree"].as_u64().unwrap();
+            let trace_a = iv["trace_a"].as_u64().unwrap();
+            let rel_zero = iv["relative_trace_b_zero"].as_bool().unwrap();
+            let twist_a = 1 - trace_a;
+            let blocked = twist_a == 1 && n % 2 == 0 && rel_zero;
+            lines.push(format!(
+                "{},{},{},{},{},{},{},{},{},{},{}",
+                c["slug"].as_str().unwrap(),
+                c["standard_names"]
+                    .as_array()
+                    .and_then(|a| a.first())
+                    .and_then(|x| x.as_str())
+                    .unwrap_or(""),
+                c["field"]["degree"].as_u64().unwrap(),
+                iv["base_degree"].as_u64().unwrap(),
+                n,
+                iv["magic_number"].as_u64().unwrap(),
+                trace_a,
+                rel_zero,
+                iv["mmt_condition_8"].as_bool().unwrap(),
+                twist_a,
+                blocked
+            ));
+        }
+    }
+    fs::write(out, lines.join("\n") + "\n").expect("tally out");
+    println!("wrote {} towers to {out}", lines.len() - 1);
+    // Counts for the report, from the rows just written.
+    let rows: Vec<Vec<&str>> = lines
+        .iter()
+        .skip(1)
+        .map(|l| l.split(',').collect())
+        .collect();
+    let curves_of = |pred: &dyn Fn(&Vec<&str>) -> bool| {
+        let mut slugs: Vec<&str> = rows.iter().filter(|r| pred(r)).map(|r| r[0]).collect();
+        slugs.sort_unstable();
+        slugs.dedup();
+        slugs.len()
+    };
+    let count = |pred: &dyn Fn(&Vec<&str>) -> bool| rows.iter().filter(|r| pred(r)).count();
+    let even = |r: &Vec<&str>| r[4].parse::<u64>().unwrap() % 2 == 0;
+    let items: Vec<(&str, usize, usize)> = vec![
+        ("binary catalog towers", rows.len(), curves_of(&|_| true)),
+        (
+            "blocked as recorded",
+            count(&|r| r[8] == "false"),
+            curves_of(&|r| r[8] == "false"),
+        ),
+        (
+            "recorded with Tr(a) = 1",
+            count(&|r| r[6] == "1"),
+            curves_of(&|r| r[6] == "1"),
+        ),
+        (
+            "recorded with Tr(a) = 0 (twist has Tr = 1)",
+            count(&|r| r[6] == "0"),
+            curves_of(&|r| r[6] == "0"),
+        ),
+        (
+            "... of which n even",
+            count(&|r| r[6] == "0" && even(r)),
+            curves_of(&|r| r[6] == "0" && even(r)),
+        ),
+        (
+            "... of which twist blocked",
+            count(&|r| r[10] == "true"),
+            curves_of(&|r| r[10] == "true"),
+        ),
+    ];
+    let mut summary = vec!["quantity,towers,curves".to_string()];
+    for (q, t, c) in items {
+        summary.push(format!("{q},{t},{c}"));
+    }
+    let summary_path = out.replace(".csv", "_summary.csv");
+    fs::write(&summary_path, summary.join("\n") + "\n").expect("tally summary");
+    println!("wrote {summary_path}");
 }
