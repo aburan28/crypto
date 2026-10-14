@@ -4,7 +4,7 @@
 - **Kind:** implementation gap
 - **Affected work:** `research/ghs_cubic_genus3_build_20261012/` (Conductor T-2267); the follow-up it names, a genus-3 index-calculus count against rho on a toy cubic-extension instance
 - **Next action owner:** unassigned
-- **Last updated:** 2026-10-13
+- **Last updated:** 2026-10-13 (T-2463: hyperelliptic-route evidence added)
 
 ## Problem
 
@@ -40,6 +40,20 @@ These are sufficient for an executed transfer. They are not sufficient for a cos
 `research/ghs_cubic_quartic_ic_20261012/quartic_ic.rs` executes the **pushforward identity** `π₀∘φ = [2]` on E0 for toy smokes (`--check-lin-equiv`) and recovers planted scalars via **`transfer_pushforward_dlog`** when the PROTOCOL cubic target path fails. That is not a full Pic linear-equivalence test on `F_q` divisors.
 
 **Still open:** native `F_q` divisor-class equality/addition; PROTOCOL **target cubic** decomposition when the three residual points form a **Galois orbit not in the factor base** (`n_res3_all_fq = 0` → `no_decomposition` on the pure IC path).
+
+## Different route: the hyperelliptic `m = 3, r = 5` type (2026-10-13, T-2463)
+
+`research/ghs_cubic_hyperelliptic_genus3_20261013/` builds the other genus-3
+type of the cover census, which is hyperelliptic, as an explicit
+`w² = h(z)` over `F_q` (degree 7 when `{a, b} ⊂ F_q`), and executes the
+transfer `φ = (1 + Fr + Fr²)∘π0^*` with Cantor arithmetic (run
+`20261014T0029Z`, `q = 5, 7, 11, 13`, 12 instances): homomorphism on
+400/400 random pairs per instance, `φ(G) ≠ 0` and `ℓ·φ(G) = 0` for a
+generator of `E0(K)[ℓ]`, `π0_*∘φ = [4]` on every point of `E0(K)`, and
+`ker φ` of order 2 or 4 (so `φ` is injective on the `ℓ`-part but not an
+isomorphism). This gives an executed genus-3 transfer **for that type
+only**. It does not supply class arithmetic on plane quartics, so this
+record stays open for the `m = 2` covers.
 
 ## Resolution and history
 
