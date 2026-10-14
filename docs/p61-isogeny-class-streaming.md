@@ -106,9 +106,13 @@ The immutable release root is:
 ```
 
 Output paths are create-only. Generation first writes a `.partial` file,
-flushes and syncs it, and then renames it into place. An interrupted `.partial`
-file is retained under `incomplete/` with a failure receipt; it is never treated
-as a completed segment.
+flushes it, attempts `sync_all`, and then renames it into place. Every durable
+receipt records whether `sync_all` completed or the mounted filesystem reported
+that the operation is unsupported. The UGREEN SMB export currently reports the
+latter, so release manifests must also record an explicit host `sync` barrier
+and post-barrier digest replay. An interrupted `.partial` file is retained under
+`incomplete/` with a failure receipt; it is never treated as a completed
+segment.
 
 ## Commands
 

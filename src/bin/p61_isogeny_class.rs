@@ -2,7 +2,7 @@
 
 use std::ffi::OsString;
 use std::fs::{self, File, OpenOptions};
-use std::io::{BufReader, BufWriter, Write};
+use std::io::{BufReader, BufWriter, ErrorKind, Write};
 use std::path::{Path, PathBuf};
 
 use clap::{Parser, Subcommand};
@@ -13,6 +13,12 @@ use crypto_lib::cryptanalysis::isogeny_walk::p61_class::{
 use flate2::{read::GzDecoder, Compression, GzBuilder};
 use serde::{de::DeserializeOwned, Serialize};
 use serde_json::json;
+
+#[derive(Debug, Serialize)]
+struct DurableWrite {
+    digest: FileDigest,
+    sync_status: String,
+}
 
 #[derive(Debug, Parser)]
 #[command(about = "Generate and replay checkpointed p61 complete-class segments")]
@@ -80,7 +86,19 @@ fn read_json<T: DeserializeOwned>(path: &Path) -> Result<T, String> {
     serde_json::from_slice(&bytes).map_err(|error| format!("parse {}: {error}", path.display()))
 }
 
-fn write_json_new<T: Serialize>(path: &Path, value: &T) -> Result<FileDigest, String> {
+fn sync_file(file: &File, path: &Path) -> Result<String, String> {
+    match file.sync_all() {
+        Ok(()) => Ok("sync_all_completed".into()),
+        Err(error)
+            if error.kind() == ErrorKind::Unsupported || error.raw_os_error() == Some(45) =>
+        {
+            Ok("sync_all_unsupported_by_filesystem".into())
+        }
+        Err(error) => Err(format!("sync {}: {error}", path.display())),
+    }
+}
+
+fn write_json_new<T: Serialize>(path: &Path, value: &T) -> Result<DurableWrite, String> {
     if path.exists() {
         return Err(format!("refusing to overwrite {}", path.display()));
     }
@@ -98,10 +116,7 @@ fn write_json_new<T: Serialize>(path: &Path, value: &T) -> Result<FileDigest, St
     serde_json::to_writer_pretty(&mut writer, value).map_err(|error| error.to_string())?;
     writer.write_all(b"\n").map_err(|error| error.to_string())?;
     writer.flush().map_err(|error| error.to_string())?;
-    writer
-        .get_ref()
-        .sync_all()
-        .map_err(|error| error.to_string())?;
+    let sync_status = sync_file(writer.get_ref(), &partial)?;
     fs::rename(&partial, path).map_err(|error| {
         format!(
             "commit {} -> {}: {error}",
@@ -109,7 +124,10 @@ fn write_json_new<T: Serialize>(path: &Path, value: &T) -> Result<FileDigest, St
             path.display()
         )
     })?;
-    digest_file(path)
+    Ok(DurableWrite {
+        digest: digest_file(path)?,
+        sync_status,
+    })
 }
 
 fn checkpoint_with_digest(path: &Path) -> Result<(Checkpoint, FileDigest), String> {
@@ -179,10 +197,7 @@ fn generate(
         .finish()
         .map_err(|error| format!("finish {}: {error}", partial.display()))?;
     buffered.flush().map_err(|error| error.to_string())?;
-    buffered
-        .get_ref()
-        .sync_all()
-        .map_err(|error| error.to_string())?;
+    let segment_sync_status = sync_file(buffered.get_ref(), &partial)?;
     let mut receipt = match result {
         Ok(value) => value,
         Err(error) => {
@@ -201,22 +216,27 @@ fn generate(
     })?;
     let segment_digest = digest_file(output)?;
     receipt.checkpoint.segment_sha256 = segment_digest.sha256.clone();
-    let checkpoint_digest = write_json_new(checkpoint_output, &receipt.checkpoint)?;
+    let checkpoint_write = write_json_new(checkpoint_output, &receipt.checkpoint)?;
     let durable_receipt = json!({
         "status": "pass",
         "segment": output,
         "segment_digest": segment_digest,
         "checkpoint": checkpoint_output,
-        "checkpoint_digest": checkpoint_digest,
+        "checkpoint_digest": checkpoint_write.digest,
+        "durability": {
+            "segment_sync_status": segment_sync_status,
+            "checkpoint_sync_status": checkpoint_write.sync_status,
+        },
         "receipt": receipt,
     });
-    let receipt_digest = write_json_new(receipt_output, &durable_receipt)?;
+    let receipt_write = write_json_new(receipt_output, &durable_receipt)?;
     println!(
         "{}",
         serde_json::to_string_pretty(&json!({
             "status": "pass",
             "receipt_output": receipt_output,
-            "receipt_digest": receipt_digest,
+            "receipt_digest": receipt_write.digest,
+            "receipt_sync_status": receipt_write.sync_status,
             "result": durable_receipt,
         }))
         .map_err(|error| error.to_string())?
@@ -265,13 +285,14 @@ fn verify(
         "checkpoint_digest": checkpoint_digest,
         "receipt": receipt,
     });
-    let receipt_digest = write_json_new(receipt_output, &durable_receipt)?;
+    let receipt_write = write_json_new(receipt_output, &durable_receipt)?;
     println!(
         "{}",
         serde_json::to_string_pretty(&json!({
             "status": "pass",
             "receipt_output": receipt_output,
-            "receipt_digest": receipt_digest,
+            "receipt_digest": receipt_write.digest,
+            "receipt_sync_status": receipt_write.sync_status,
             "result": durable_receipt,
         }))
         .map_err(|error| error.to_string())?
