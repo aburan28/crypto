@@ -264,6 +264,9 @@ jobs:
           - {target: x86_64-pc-windows-msvc,    os: windows-latest}
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && 25 || 30 }}
+    env:
+      # Keep Cargo output outside the package tree while it is fingerprinted.
+      CARGO_TARGET_DIR: ${{ runner.temp }}/isogeny-target
     steps:
       - name: Require successful scope classification
         if: needs.scope.result != 'success' || needs.meta.result != 'success'
@@ -297,6 +300,7 @@ jobs:
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.scope.outputs.release_rust != 'false'
         with:
           workspaces: tools/isogeny-cli
+          cache-targets: false
       - name: Build and test the dedicated executable
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.scope.outputs.release_rust != 'false'
         env:
@@ -320,7 +324,7 @@ jobs:
           ext=""
           [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
           mkdir -p "$RUNNER_TEMP/isogeny-installed"
-          cp "tools/isogeny-cli/target/${{ matrix.target }}/release/isogeny$ext" "$RUNNER_TEMP/isogeny-installed/"
+          cp "$CARGO_TARGET_DIR/${{ matrix.target }}/release/isogeny$ext" "$RUNNER_TEMP/isogeny-installed/"
           cd "$RUNNER_TEMP/isogeny-installed"
           "./isogeny$ext" --help > /dev/null
           "./isogeny$ext" --version > BUILD.json
@@ -346,7 +350,7 @@ jobs:
           ext=""
           [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
           mkdir -p "dist/$name"
-          cp "tools/isogeny-cli/target/${{ matrix.target }}/release/isogeny$ext" "dist/$name/"
+          cp "$CARGO_TARGET_DIR/${{ matrix.target }}/release/isogeny$ext" "dist/$name/"
           cp tools/isogeny-cli/README.md "dist/$name/README.md"
           cp "$RUNNER_TEMP/isogeny-installed/BUILD.json" "dist/$name/BUILD.json"
           for license in LICENSE LICENSE.md; do
