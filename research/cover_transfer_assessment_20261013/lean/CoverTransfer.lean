@@ -1,3 +1,5 @@
+import Mathlib.GroupTheory.OrderOfElement
+
 /-!
 # Conditional injectivity of a cover pullback
 
@@ -10,8 +12,6 @@ that subgroup.
 The theorem does not construct either map or establish the composition
 identity.  Those remain per-cover proof obligations.
 -/
-
-import Mathlib.GroupTheory.OrderOfElement
 
 set_option autoImplicit false
 

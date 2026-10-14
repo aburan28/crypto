@@ -26,6 +26,7 @@ on:
       - 'docs/ic/boundary_targets.json'
       - 'docs/browser/**'
       - 'scripts/build_lab_browser.py'
+      - 'scripts/test_build_lab_browser.py'
       - 'scripts/test_cover_catalog.py'
       - 'scripts/update_curve_standards.py'
       - 'scripts/build_curve_registry.py'
@@ -65,6 +66,7 @@ on:
       - 'docs/ic/boundary_targets.json'
       - 'docs/browser/**'
       - 'scripts/build_lab_browser.py'
+      - 'scripts/test_build_lab_browser.py'
       - 'scripts/test_cover_catalog.py'
       - 'scripts/update_curve_standards.py'
       - 'scripts/build_curve_registry.py'
@@ -89,7 +91,7 @@ concurrency:
 jobs:
   certificates:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -118,7 +120,10 @@ jobs:
       - run: python3 scripts/update_curve_standards.py --check
       - run: cargo run --bin curve_cover_check -- --check
       - run: python3 scripts/test_cover_catalog.py
-      - run: python3 scripts/build_lab_browser.py --check
+      - name: Check sparse-safe lab-browser generation
+        run: |
+          python3 scripts/test_build_lab_browser.py
+          python3 scripts/build_lab_browser.py --check
 
   transfer-assessment:
     name: Cover transfer assessment
@@ -146,7 +151,7 @@ jobs:
   transfer-lemma:
     name: Cover transfer Lean lemma
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: research/cover_transfer_assessment_20261013/lean

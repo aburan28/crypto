@@ -836,6 +836,7 @@ class BuildTests(unittest.TestCase):
         spec.loader.exec_module(builder)
         fresh = builder.build()
         committed = read(os.path.join(ROOT, "docs", "browser", "data.json"))
+        source = builder.RepositoryInputs(ROOT)
         # Mention statistics are volatile (see builder.comparable); the rest
         # must match a fresh build exactly.
         self.assertEqual(builder.comparable(json.loads(committed)), builder.comparable(fresh), "docs/browser/data.json is stale; run python3 scripts/build_lab_browser.py")
@@ -862,13 +863,16 @@ class BuildTests(unittest.TestCase):
         for k in data["candidates"]:
             self.assertTrue(k["slug"] is None or k["slug"] in slugs, k["candidate_id"])
             for path in k["where"]:
-                self.assertTrue(os.path.exists(os.path.join(ROOT, path)), path)
+                self.assertTrue(source.exists(path), path)
         for r in data["rounds"]:
-            self.assertTrue(os.path.isdir(os.path.join(ROOT, r["dir"])), r["round"])
+            self.assertTrue(source.is_directory(r["dir"]), r["round"])
         for s in data["sessions"]:
-            self.assertTrue(os.path.exists(os.path.join(ROOT, s["dir"], "records.jsonl")), s["session_id"])
+            self.assertTrue(
+                source.exists(os.path.join(s["dir"], "records.jsonl")),
+                s["session_id"],
+            )
         for path, digest in data["sources"].items():
-            self.assertTrue(os.path.exists(os.path.join(ROOT, path)), path)
+            self.assertTrue(source.exists(path), path)
             self.assertRegex(digest, r"^[a-f0-9]{64}$", path)
 
     def test_lab_browser_renders_with_dom_nodes_only(self):
