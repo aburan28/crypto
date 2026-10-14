@@ -1,0 +1,26 @@
+{
+  "children_cpu_system_ms": 4870.992999999999,
+  "children_cpu_user_ms": 102468.95900000026,
+  "children_peak_rss_bytes": 3738796032,
+  "cold_start_wall_ms": 2376343.3650829997,
+  "command": [
+    "/Volumes/SSD990/ic-auto-202610132132/target/release/examples/symmetrised_oracle_bench",
+    "--only",
+    "0",
+    "31",
+    "2",
+    "--targets",
+    "1",
+    "--no-sat",
+    "--node-budget",
+    "50000"
+  ],
+  "exit_code": 0,
+  "seed": 5662250096624664199,
+  "stdout_stable": true,
+  "timed_repeats": 1,
+  "whole_process_wall_ms": 158918.43345799998,
+  "whole_process_wall_samples_ms": [
+    158918.43345799998
+  ]
+}
