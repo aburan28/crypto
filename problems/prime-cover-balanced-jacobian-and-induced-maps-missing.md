@@ -2,14 +2,14 @@
 
 - **Status:** `open`
 - **Kind:** implementation gap and independent-verification gap
-- **Affected work:** the 1,931 `prime_quadratic_pullback_v1` map rows in the [cover catalog](../docs/curves/covers.json), their exact HC1/CV1 joins in the [cover graph](../docs/curves/cover-links.yaml), the [catalog-wide transfer assessment](../docs/curves/cover-transfer-assessments.json), and the [hyperelliptic infrastructure contract](../docs/curves/HYPERELLIPTIC_INFRASTRUCTURE.md)
+- **Affected work:** the 1,940 `prime_quadratic_pullback_v1` map rows in the [cover catalog](../docs/curves/covers.json), their exact HC1/CV1 joins in the [cover graph](../docs/curves/cover-links.yaml), the [catalog-wide transfer assessment](../docs/curves/cover-transfer-assessments.json), and the [hyperelliptic infrastructure contract](../docs/curves/HYPERELLIPTIC_INFRASTRUCTURE.md)
 - **Next action owner:** hyperelliptic infrastructure workstream (unassigned)
-- **Last updated:** 2026-10-13
+- **Last updated:** 2026-10-14
 
 ## Problem
 
 We cannot provide executable Jacobian arithmetic, pullback, norm, composition,
-or subgroup-recovery evidence for the catalog's 1,931 odd-characteristic
+or subgroup-recovery evidence for the catalog's 1,940 odd-characteristic
 degree-two cover maps and 530 linked EC1 representations because every source
 is an even-degree genus-two model with two rational points at infinity, while
 the current checked odd-characteristic backend implements only odd-degree,
@@ -24,15 +24,15 @@ phi(u,v) = (u^2 + c,v),        degree 2,
 ```
 
 after the recorded degree-one normalization for Montgomery or Edwards target
-models. The population includes 607 maps over prime fields and 1,324 maps over
-odd-characteristic extension fields. A backend covering only one of those
-field families would narrow this problem but would not resolve the
-catalog-wide obligation.
+models. The population includes 616 maps over prime fields (586 direct and 30
+normalized-target) and 1,324 maps over odd-characteristic extension fields. A
+backend covering only one of those field families would narrow this problem
+but would not resolve the catalog-wide obligation.
 
 ## Evidence and uncertainty
 
 - **Observed:** [`docs/curves/covers.json`](../docs/curves/covers.json) records
-  1,931 verified-over-the-declared-field rows with construction
+  1,940 verified-over-the-declared-field rows with construction
   `prime_quadratic_pullback_v1`, genus two, degree two, same-field maps,
   `subgroup_transfer: not_tested`, and null DLP advantage. The exact
   representation joins in [`cover-links.yaml`](../docs/curves/cover-links.yaml)
@@ -69,7 +69,7 @@ catalog-wide obligation.
   target model.
 - [ ] Verify `phi_* phi^* = [2]`, additivity, and representative independence
   against a separately implemented or CAS reference on exhaustive small-field
-  fixtures, then replay applicability and structured failures across all 1,931
+  fixtures, then replay applicability and structured failures across all 1,940
   exact map records.
 - [ ] Preserve structured `unsupported` results for any field, model, or
   infinity configuration left outside the implemented boundary.

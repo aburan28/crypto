@@ -51,18 +51,21 @@ transfer map.
 
 The current [cover-transfer assessment](cover-transfer-assessments.json),
 validated by its [v2 schema](cover-transfer-assessment.schema.json), classifies
-all 2,091 HC1/CV1 map rows (2,089 distinct cover models) and all 664 linked EC1
-representations. The map population is 160 binary cubic covers and 1,931
-odd-characteristic quadratic covers. Classification is not blanket support:
+all 2,100 HC1/CV1 map rows (2,098 distinct cover models) and all 664 linked EC1
+representations. The map population is 160 binary cubic covers and 1,940
+odd-characteristic quadratic covers: 586 direct prime-field, 30
+normalized-target prime-field, and 1,324 extension-field covers. The EC1
+population is 134 binary and 530 odd-characteristic representations.
+Classification is not blanket support:
 the ledger assigns every declared claim an explicit `supported`, `refuted`,
 `unknown`, or `not_applicable` result and retains each unmet obligation. Its
 [source-linked report](../../research/cover_transfer_assessment_20261013/README.md)
 records the typed graph, costs, controls, exploration boundary, and open
-obligations. The current source constructor accepts all 2,091 inputs. The
+obligations. The current source constructor accepts all 2,100 inputs. The
 published `v0.1.0-main.1371` executable was directly replayed against its
 bundled 592-row registry; comparison of its pinned allowlist with the current
-profiles statically places 737 inputs inside and 1,354 outside its syntactic
-domain. No 2,091-command archived-binary batch receipt exists, so it is not a
+profiles statically places 746 inputs inside and 1,354 outside its syntactic
+domain. No 2,100-command archived-binary batch receipt exists, so it is not a
 catalog-wide packaged artifact. Neither the catalog nor the assessment is a
 Jacobian index-calculus solver.
 

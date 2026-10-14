@@ -1,4 +1,4 @@
-// cover-transfer-assessments/v2; catalog_maps=2091; unique_cover_models=2089; geometry_verified_maps=2091; ec1_representations=664; assessed_maps=2091; unassessed_maps=0; assessed_subgroups=664; unassessed_subgroups=0
+// cover-transfer-assessments/v2; catalog_maps=2100; unique_cover_models=2098; geometry_verified_maps=2100; ec1_representations=664; assessed_maps=2100; unassessed_maps=0; assessed_subgroups=664; unassessed_subgroups=0
 digraph cover_transfer_assessment {
   graph [
     rankdir=TB,
@@ -9,13 +9,13 @@ digraph cover_transfer_assessment {
     fontname="Helvetica",
     fontsize=15,
     labelloc="t",
-    label="Catalog-wide profile assessment (2026-10-13)"
+    label="Catalog-wide profile assessment (2026-10-14)"
   ];
   node [shape=box, style="rounded,filled", fillcolor="white", color="#34495e", fontname="Helvetica", fontsize=11];
   edge [fontname="Helvetica", fontsize=9, color="#34495e", arrowsize=0.7];
 
   catalog [
-    label="Exact current catalog\n2,091 map rows / 2,089 cover models / 664 EC1 representations\nall rows classified; classification is not blanket support",
+    label="Exact current catalog\n2,100 map rows / 2,098 cover models / 664 EC1 representations\nall rows classified; classification is not blanket support",
     fillcolor="#eaf2f8",
     color="#2471a3",
     penwidth=2
@@ -25,10 +25,10 @@ digraph cover_transfer_assessment {
     shape=plain,
     label=<
       <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4" COLOR="#5dade2">
-        <TR><TD COLSPAN="3" BGCOLOR="#eaf2f8"><B>Map assessments: 2,091 / 2,091 exact rows</B></TD></TR>
+        <TR><TD COLSPAN="3" BGCOLOR="#eaf2f8"><B>Map assessments: 2,100 / 2,100 exact rows</B></TD></TR>
         <TR><TD><B>Profile</B></TD><TD BGCOLOR="#eafaf1"><B>SUPPORTED</B></TD><TD BGCOLOR="#f8f9f9"><B>Explicit boundary</B></TD></TR>
         <TR><TD>160 binary<BR/>g3, degree 3</TD><TD BGCOLOR="#eafaf1">construction + geometry<BR/>one-infinity Jacobian<BR/>typed point-class pull/push</TD><TD BGCOLOR="#f8f9f9">all-element oracle: UNKNOWN<BR/>catalog arbitrary Jac(H) norm:<BR/><FONT COLOR="#c0392b">REFUTED as current API</FONT><BR/>fixed GF(8) fixture is outside catalog</TD></TR>
-        <TR><TD>577 odd prime<BR/>direct</TD><TD BGCOLOR="#eafaf1">construction<BR/>+ geometry</TD><TD BGCOLOR="#f8f9f9">two-infinity maps: UNKNOWN<BR/><FONT COLOR="#c0392b">one-infinity use: REFUTED</FONT></TD></TR>
+        <TR><TD>586 odd prime<BR/>direct</TD><TD BGCOLOR="#eafaf1">construction<BR/>+ geometry</TD><TD BGCOLOR="#f8f9f9">two-infinity maps: UNKNOWN<BR/><FONT COLOR="#c0392b">one-infinity use: REFUTED</FONT></TD></TR>
         <TR><TD>30 odd prime<BR/>normalized</TD><TD BGCOLOR="#eafaf1">construction + geometry<BR/>degree-one normalization</TD><TD BGCOLOR="#f8f9f9">coordinate commutation<BR/>+ balanced maps: UNKNOWN</TD></TR>
         <TR><TD>1,324 GF(p^k)</TD><TD BGCOLOR="#eafaf1">same-declared-field<BR/>construction + geometry</TD><TD BGCOLOR="#f8f9f9">proper-subfield descent<BR/>+ balanced maps: UNKNOWN</TD></TR>
       </TABLE>

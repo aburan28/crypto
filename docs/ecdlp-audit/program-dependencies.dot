@@ -27,7 +27,7 @@ digraph ECDLPAuditProgram {
   ];
 
   M0 [label="M0\nScope + authorization +\nidentity/denominator contract\nPARTIAL — denominator unfrozen", fillcolor="#fef3c7"];
-  WS1 [label="WS1  Present evidence gate\npackage • 2,091-input replay • CI/review\nPARTIAL", fillcolor="#fef3c7"];
+  WS1 [label="WS1  Present evidence gate\npackage • 2,100-input replay • CI/review\nPARTIAL", fillcolor="#fef3c7"];
   WS2 [label="WS2  Cover-transfer gaps\ntwo-infinity • binary norm • subgroup certs • oracle\nPARTIAL", fillcolor="#fef3c7"];
   WS3 [label="WS3  Master ledger\nidentity audit • native plan verifier\nPARTIAL — ledger/denominator open", fillcolor="#fef3c7"];
   WS4 [label="WS4  Evidence ladder\nE0–E7 profiles • transition fixtures\nPARTIAL DRAFT — engine/review open", fillcolor="#fef3c7"];

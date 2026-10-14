@@ -25,7 +25,7 @@ digraph typed_transfer_context {
     jac_h [label="Jac(H) = Pic^0(H)\nfield + dimension + infinity model", fillcolor="#eaf2f8", color="#2471a3"];
 
     binding_note [
-      label="typed_bindings\n311 fields / 2,089 Jacobian contexts / 2,091 maps\nfield identity has relative degree 1; GF(p^k) may still have k > 1\nan identity joins objects—it does not claim arithmetic",
+      label="typed_bindings\n318 fields / 2,098 Jacobian contexts / 2,100 maps\nfield identity has relative degree 1; GF(p^k) may still have k > 1\nan identity joins objects—it does not claim arithmetic",
       shape=note,
       fillcolor="#f8f9f9",
       color="#566573"
@@ -43,7 +43,7 @@ digraph typed_transfer_context {
 
     { rank=same; source_h; target_e; }
     { rank=same; pic_e; jac_h; }
-    source_h -> target_e [label="phi: geometry\nSUPPORTED (2,091)", color="#229954", penwidth=2];
+    source_h -> target_e [label="phi: geometry\nSUPPORTED (2,100)", color="#229954", penwidth=2];
     pic_e -> jac_h [label="phi*: bounded\nbinary domain", color="#229954", penwidth=1.5];
     jac_h -> pic_e [label="phi_*: bounded\nbinary domain", color="#229954", penwidth=1.5, constraint=false];
     source_h -> pic_e [style="invis", weight=50];
@@ -54,7 +54,7 @@ digraph typed_transfer_context {
   }
 
   package [
-    label="Standalone boundary (mixed status)\ncurrent-source test: 2,091 / 2,091\npublished direct replay: bundled 592 rows\n737 inside / 1,354 outside old allowlist is a STATIC inference\nnew catalog-wide packaged artifact: UNKNOWN",
+    label="Standalone boundary (mixed status)\ncurrent-source test: 2,100 / 2,100\npublished direct replay: bundled 592 rows\n746 inside / 1,354 outside old allowlist is a STATIC inference\nnew catalog-wide packaged artifact: UNKNOWN",
     fillcolor="#f8f9f9",
     color="#566573"
   ];

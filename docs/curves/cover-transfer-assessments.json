@@ -6,16 +6,16 @@
     "refuted",
     "not_applicable"
   ],
-  "assessment_date": "2026-10-13",
-  "catalog_commit": "6600c7c6c0cfbb6a9e4e596bf8c5cfa292fb269e",
+  "assessment_date": "2026-10-14",
+  "catalog_commit": "ff48e2800f62b45c746b3f391540c07b16af4e75",
   "source_artifacts": [
     {
       "path": "docs/curves/registry.json",
-      "sha256": "9e420a7f2e69a1d72a2590899e6bffb8b3d45eff0f197c5c898ee66c1219e872",
+      "sha256": "f926db9f9756509c484262b9e371739836afc841b64b67a495be6e6df8b9dedf",
       "role": "exact ICV1/EC1 input registry",
       "freshness": {
         "status": "supported",
-        "scope": "the exact input registry for all 2,091 assessed map rows",
+        "scope": "the exact input registry for all 2,100 assessed map rows",
         "rationale": "The digest is computed from the current file and every membership is joined through its model hash.",
         "evidence_refs": [
           "docs/curves/registry.json"
@@ -24,11 +24,11 @@
     },
     {
       "path": "docs/curves/covers.json",
-      "sha256": "baac4c80f89e3cd9c8ef14421b600cce98c9a642b54ed1f182e8dcc8a2928324",
+      "sha256": "030dd067d2f2436627e661e6a958a17bced25d166e777b585831e1079c854808",
       "role": "generated curve-level geometry catalog",
       "freshness": {
         "status": "supported",
-        "scope": "all 2,091 current verified-over-declared-field geometry rows",
+        "scope": "all 2,100 current verified-over-declared-field geometry rows",
         "rationale": "The ledger derives every map profile predicate from this exact file.",
         "evidence_refs": [
           "docs/curves/covers.json"
@@ -37,11 +37,11 @@
     },
     {
       "path": "docs/curves/cover-links.yaml",
-      "sha256": "a662b4458eab6d6c10fc7a51b74c0d2c7f6de3a9f817ea981ee898ada8f8e145",
+      "sha256": "62cbd5715570d123de2dcabb00349dadf3d25bc2d0223e5bda26b8169ac9b003",
       "role": "content-addressed ICV1/EC1/HC1/CV1 graph",
       "freshness": {
         "status": "supported",
-        "scope": "2,091 exact map links, 2,089 unique cover objects, and 664 EC1 triples",
+        "scope": "2,100 exact map links, 2,098 unique cover objects, and 664 EC1 triples",
         "rationale": "The ledger records exact sorted UID memberships rather than count-only coverage.",
         "evidence_refs": [
           "docs/curves/cover-links.yaml"
@@ -63,7 +63,7 @@
     },
     {
       "path": "scripts/build_cover_transfer_assessments.mjs",
-      "sha256": "6b1d08927e319ab3737c9ff2ea2cdaffc50aea6347cfdadf461316af8f9cd522",
+      "sha256": "841f1e987a462e620448925793fc529db80512cf7aa30c270fbe775907a4f4a7",
       "role": "deterministic catalog-wide ledger generator",
       "freshness": {
         "status": "supported",
@@ -128,7 +128,7 @@
     },
     {
       "path": "src/bin/hyperelliptic_cover.rs",
-      "sha256": "40dc338ce4779a7618a681740c6ebc07a17ee380132f6229cf26b90c1114e428",
+      "sha256": "f75dbfb50bce3b63a6dd2291320d006cfcf05bc4d7071731bf5bfef44a0c021d",
       "role": "standalone CLI and native binary subgroup batch certificate",
       "freshness": {
         "status": "supported",
@@ -325,7 +325,7 @@
     },
     {
       "path": "src/cryptanalysis/mod.rs",
-      "sha256": "cbabc88271fe31fcb18ec103f35b6b547b51491a3d4b633916f7494fb42c8080",
+      "sha256": "49801c9c62c924f24a1db81608d9e19bc988c2ebde694f4ee7b85df1d7b669b5",
       "role": "exact implementation-version dependency: src/cryptanalysis/mod.rs",
       "freshness": {
         "status": "supported",
@@ -443,11 +443,11 @@
     },
     {
       "path": "docs/curves/jacobian-transfers.json",
-      "sha256": "aec6338011158c8c1aaddb829d4e90fb96eebc43cd4027d1067979bba3e6ca40",
+      "sha256": "f06c271c03ec5b3fb9f592ab1ff4b67e45c8a796305506590e0b8500300e7ab4",
       "role": "legacy formula-screen inventory; not a transfer certificate",
       "freshness": {
         "status": "refuted",
-        "scope": "claim that this inventory is current for the 2,091-row registry",
+        "scope": "claim that this inventory is current for the 2,100-row registry",
         "rationale": "It pins an older registry, omits current slugs, and contains modeled routes without exact HC1/CV1 subgroup certificates.",
         "evidence_refs": [
           "docs/curves/jacobian-transfers.json",
@@ -458,7 +458,7 @@
     },
     {
       "path": "docs/curves/JACOBIAN_TRANSFERS.md",
-      "sha256": "b7ca1c6bc2a250bdbef8893d124daaeec64da3e58a43dcbb558665a0776d95df",
+      "sha256": "277918373c2c556ba209830eaae686e8df15c27ccac77207102b1bc6fd728fc5",
       "role": "legacy formula-screen documentation pinned for the stale-inventory finding",
       "freshness": {
         "status": "supported",
@@ -471,7 +471,7 @@
     },
     {
       "path": "docs/curves/COVERS.md",
-      "sha256": "ac48fb248794bc95f0c01a078f652221c6fc0d0bb003b03a5328113ff2e1ad80",
+      "sha256": "18fb8fdaa9b85dd3501bdad38bd0aef5f1f6626dd361b1942f932e39d9f2f79e",
       "role": "catalog geometry contract and proof boundary",
       "freshness": {
         "status": "supported",
@@ -484,7 +484,7 @@
     },
     {
       "path": "docs/curves/HYPERELLIPTIC_INFRASTRUCTURE.md",
-      "sha256": "dae768fb14320e7502b8b85c1af8e0d972c8204545683044f0f4269badbff84b",
+      "sha256": "b140b28e7cb40878ff7ee37520d9a606079607784f67deb3f003b2f3674abab9",
       "role": "standalone CLI and supported-model documentation",
       "freshness": {
         "status": "supported",
@@ -536,7 +536,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/verify_assessment.mjs",
-      "sha256": "09f4af92b4db999052e3096b824238ae002d587367125c24459ee67b04816720",
+      "sha256": "3c2487e809350bbe74384952d588f0927a05b1951acac01377069543a9b62951",
       "role": "independent catalog-wide assessment verifier",
       "freshness": {
         "status": "supported",
@@ -549,7 +549,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/README.md",
-      "sha256": "3b17ebad8b3b500caa3e17d9d0558d4d09bc035cec9f11b87daf5ed08f1cbcb0",
+      "sha256": "fb1baf1fd96f633b8cad89d91fa6e613f5c5f2d8d4de51a25451e48b31804e85",
       "role": "source-linked catalog-wide assessment report",
       "freshness": {
         "status": "supported",
@@ -562,7 +562,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/release_replay.txt",
-      "sha256": "2e680dde36c0313fb143e09f06e0f21f1bd7bb31fa2e601e92ed1c4f136af06d",
+      "sha256": "5746314e934b60125bbff02d68fcfa97433810db3b944130ae1e193180e24446",
       "role": "published-artifact replay receipt and source/package boundary",
       "freshness": {
         "status": "supported",
@@ -575,7 +575,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/typed_correspondence.dot",
-      "sha256": "f96ff888ad9408dce17004ecfa6e24ec4d33d72561c96f0ff3756030fabe7609",
+      "sha256": "7ce45fc9ec6026def9c6f6ccb9444f488cd21945140c2a7cbdbc76c05b321110",
       "role": "assessment diagram source",
       "freshness": {
         "status": "supported",
@@ -588,7 +588,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/typed_correspondence.svg",
-      "sha256": "86096aa2e2f0b89b634f41dfe12b83e58d4f19526d93f51ef4487a4a164c82d3",
+      "sha256": "44d5ea3e581cef33013ca40891d858767bceeed1c11476682abec3285dbe8326",
       "role": "rendered assessment diagram in SVG format",
       "freshness": {
         "status": "supported",
@@ -601,7 +601,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/typed_correspondence.png",
-      "sha256": "430838b2c52990055cd3a56d3a897f8ca76de926d21d8277f1103c5492693841",
+      "sha256": "25c216bb488099cbdb06bbbbe00abfab0223748f113c87081e61c59fc6303895",
       "role": "rendered assessment diagram in PNG format",
       "freshness": {
         "status": "supported",
@@ -614,7 +614,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/typed_transfer_context.dot",
-      "sha256": "fe78287e18cebf00719674f96ead7487307a4a9370888df9159b5587db24f7a0",
+      "sha256": "896d7c7eeb6a79097e0f244f6db51e5ca96fcd38aa4a1de81a8e1bb13cb5d115",
       "role": "typed transfer-context diagram source",
       "freshness": {
         "status": "supported",
@@ -627,7 +627,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/typed_transfer_context.svg",
-      "sha256": "8e271b5b0a4ee7ba6f0ba58d6121647344a18d05fdde2a1a18046103a1ed6a83",
+      "sha256": "2622bea9d64d70ff4f44eaaab36fc02e17c760d9df09cdd64b8553652b40c4bf",
       "role": "rendered typed transfer-context diagram in SVG format",
       "freshness": {
         "status": "supported",
@@ -640,7 +640,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/typed_transfer_context.png",
-      "sha256": "b9d80e00aa949946fa880b692462fcaef55d528f354448df46bd9502ebd7108b",
+      "sha256": "009045190603d83eb8705dbfb2617ce0e841b78585d3a01e50c46750becdc6a7",
       "role": "rendered typed transfer-context diagram in PNG format",
       "freshness": {
         "status": "supported",
@@ -653,7 +653,7 @@
     },
     {
       "path": "research/cover_transfer_assessment_20261013/cover_transfer_assessment_20261013.pdf",
-      "sha256": "9fbd6fe6b0477f36ba6d140f658ee250f33750651f7de7a319a6f98b34b33f17",
+      "sha256": "9e0a6c33eb12b05e126912603c7a44a4c12cf334098f7ba9209bab00a49f82f0",
       "role": "rendered catalog-wide assessment PDF",
       "freshness": {
         "status": "supported",
@@ -1349,8 +1349,8 @@
       },
       {
         "profile_id": "map.odd-prime-quadratic.direct",
-        "count": 577,
-        "members_sha256": "2dd905b1a6273ae4672fe73dd866e7639eb493a6a8fd8292ae8c59c1475d546c",
+        "count": 586,
+        "members_sha256": "4777fd59ca63da0e7ac527f927b637a06918e92b8315ab5ce330c938fed07e6a",
         "members": [
           "urn:curve-cover-map:1:sha256:0015c691789713c04c6ffc9493261d68fa4b4f19ada0dffd94c7a3db95be4238",
           "urn:curve-cover-map:1:sha256:00259ba83932bf58fef4366a3789135a334dcfcae81aebbef15693459a05179a",
@@ -1367,6 +1367,7 @@
           "urn:curve-cover-map:1:sha256:046d13ca36f47cb0768644d018dc9ed933607f74c6401ed899e2c96d6bdeacbd",
           "urn:curve-cover-map:1:sha256:0491a52026e5df44b1975609e1a2a8c73696c543e765e0bb4481b7579d088ab2",
           "urn:curve-cover-map:1:sha256:05f677032c674eef56ec92e67f4e317ffc8b60b5ed8fa4382a58938e91090115",
+          "urn:curve-cover-map:1:sha256:0618499d6c50a271f40eebcd08c3f1c2df0f4f33942a3ec0b6cc1e617c5b3ddb",
           "urn:curve-cover-map:1:sha256:066c0a0103aaf514e6a45f5721aaa2c4d53ba9b608ce34d95a8df670deb5cb30",
           "urn:curve-cover-map:1:sha256:06de2129df62fbb303efa7bee7831df6b4964304e6e689711882f43508762ce3",
           "urn:curve-cover-map:1:sha256:07da0ba853e0ab6ea5847aee65100041d6a988e58aec7e13998bd291515d7190",
@@ -1427,6 +1428,7 @@
           "urn:curve-cover-map:1:sha256:1f3de187c91d01a44c2e9d20059fc55c8a2e684afc1a93086b19df690c9dfb5c",
           "urn:curve-cover-map:1:sha256:1f80e65a3fa380427f09edd49720ba53a907541863529de5a4533865770d6b58",
           "urn:curve-cover-map:1:sha256:1fd11ff8439cc965111ccc97c6c4297fafaeb08af0fbba2d8da10809527953ab",
+          "urn:curve-cover-map:1:sha256:1fdbed73c0cb3556488af98993162262a1f43f8e69733453624e29ff43ea0476",
           "urn:curve-cover-map:1:sha256:2006c3f2fdabe1b5f32341a42d855f7a2f00e92bdf5c8f046a899afef09da0ce",
           "urn:curve-cover-map:1:sha256:203f4533089de3731944edf7ac18415da3ee8c4ef2d4ff9b083a3d7a080b7649",
           "urn:curve-cover-map:1:sha256:20773db4176c0a493e2404f529487e45fdcca0669550a968c636d0c7f45e88d2",
@@ -1442,10 +1444,13 @@
           "urn:curve-cover-map:1:sha256:25d2e2c0c4d36a22afa716b6778746f716800a2b590c140982e5d27fe0774304",
           "urn:curve-cover-map:1:sha256:265e23dfada6d6cc7e782d3d70903dbf369b9a18dd1bba4cc26e6f7517e10c24",
           "urn:curve-cover-map:1:sha256:26c3a63a3a19def4902afa3348c6c9bb876bf9502e62c822dabaad96fe1df04d",
+          "urn:curve-cover-map:1:sha256:27cf5012b7002e4bfccfe2fbb75472d4671656e1fe9b667af2217820a030c5ec",
           "urn:curve-cover-map:1:sha256:280de7f66f5874a949b97a3536e135fa4b918fc17810a549d79edd23682e099e",
           "urn:curve-cover-map:1:sha256:281759da50a6b555ae6ba5c4ef5dce987b67e387b747e5f1644356ec9ae98da0",
+          "urn:curve-cover-map:1:sha256:28dc2c6d8931d111725cb0353efbdc991a817a273794bd9e1ddf1169a0bfe9ae",
           "urn:curve-cover-map:1:sha256:28dee9fea3d92832d4596cfe72e41a5777097ad4e1ae750554dda5bcd52067f1",
           "urn:curve-cover-map:1:sha256:29472a6f8eca5bd4a8b8c62a4fc971534e72800c288a0cb0a067123563cfd085",
+          "urn:curve-cover-map:1:sha256:2a00d0dd9bc92610fa2763580597d31c52f834d448f27bb1eade51f84344815c",
           "urn:curve-cover-map:1:sha256:2a694bf6ba5ca93250c2eb293bef02f5c1f13a1c70c15ecaf653be0401712551",
           "urn:curve-cover-map:1:sha256:2b1766fc9d9a2adce98a4e07ff5d45b222c6f74eb6330c1569a9d0be9814409c",
           "urn:curve-cover-map:1:sha256:2bd1f97d0d1368835f27e788429c8f049c5296096623bc2923cd1dd9d9f54a19",
@@ -1797,6 +1802,7 @@
           "urn:curve-cover-map:1:sha256:c56473543c601c9cf83f0af890b187f9a0cd056b6bb8dccb6dca2b5c91d10e9b",
           "urn:curve-cover-map:1:sha256:c5daf62ff229ea497db763fb837a82b34973953b1ae009ce5b155299a5ecf908",
           "urn:curve-cover-map:1:sha256:c5fc637b24c2cb4cbe0824b2d30acc88458f4667d56e6f722234ce513a029a8a",
+          "urn:curve-cover-map:1:sha256:c6508ff6c23447e8785907899d391c3dd51ee1801f985ec668bdae77c00cfa21",
           "urn:curve-cover-map:1:sha256:c681f5da15bfdc113cbb075956e854ad8bd7253650b48eb9d34ac9d9c82838a1",
           "urn:curve-cover-map:1:sha256:c6ba8042db280b9957ecaa9d57f478d6d55f27d5115cf568bc5351b36d4e34f2",
           "urn:curve-cover-map:1:sha256:c8557c9506832597e3482fec85f4abf0aeae6d73f73a2b446dd63d3946159bd6",
@@ -1860,6 +1866,7 @@
           "urn:curve-cover-map:1:sha256:df3b1e528e69ff8e63c3ff4e60e916f85ec3f1d3d45f53c75d925657baff83de",
           "urn:curve-cover-map:1:sha256:e00d3d8d853d0ccc07e2e4c45007e941d5ffc97b8dc1eaca2bdab9a7c5561b4d",
           "urn:curve-cover-map:1:sha256:e0100c0774ac5583111e65556772a2b7bbda004ce5944771fdfe9256b75aa303",
+          "urn:curve-cover-map:1:sha256:e05cd88a4dc67642eee1d86ecca87ea22592e9f89d425acf310ea3f19c8f043a",
           "urn:curve-cover-map:1:sha256:e0f5eb2e71941ecf51d61c49062ff4f54066a58bc102143134777c9c54035b3b",
           "urn:curve-cover-map:1:sha256:e13b8c7a731767c8c38e20bc69a2c938ace1fb4f643651ae8d05230ab2f8d6bb",
           "urn:curve-cover-map:1:sha256:e166602a9054317f318d62a4e3ae5afa76028eaa9ad98ea83f153b7c02ae9b2b",
@@ -1873,6 +1880,7 @@
           "urn:curve-cover-map:1:sha256:e46d5406f3b1477c9b54f46d4a5fd6283a7eab72483db003fa6c27dd7bcde7be",
           "urn:curve-cover-map:1:sha256:e498c3260d67acf5e4d865f493914d998642f6a568b96240db62dd7b9ff31d66",
           "urn:curve-cover-map:1:sha256:e4be97aee3f2f393cee72a670d5d664b1114b670d29dd897329490c8abe2c7ec",
+          "urn:curve-cover-map:1:sha256:e535bd68c9a7c2c74253733a6e42ef218c6ef3bfc468af12cc729596df622f2f",
           "urn:curve-cover-map:1:sha256:e622c2c2b1a67548825596c8a93d540911d668d7da9dd13440eac97b90b1dcce",
           "urn:curve-cover-map:1:sha256:e825e395f9ffb88e482fecbf67eb2d9dd6307a2602093c9638137d2d6ec546ea",
           "urn:curve-cover-map:1:sha256:e82675163fbfd692fb64fdec5671a42d289109785f4599999c884dbcdddad753",
@@ -1885,6 +1893,7 @@
           "urn:curve-cover-map:1:sha256:ebc3e36007e006cb18aa01b13888cb30587eb29f53118e0c5cf6258e4ef17f75",
           "urn:curve-cover-map:1:sha256:ebd32c4255acd7292eab34559e0103bc7071c63ae8a9a2ad19b55d9d741a9135",
           "urn:curve-cover-map:1:sha256:ec7a9302c2624b586230afca22875cb160847500f9a8d4dd56a964bdbe067847",
+          "urn:curve-cover-map:1:sha256:ed0399461d41164d86db41a4d29df50b9545ed067aaac4dcb83544fde8a8839d",
           "urn:curve-cover-map:1:sha256:ed614f47285afac04ed421d8adaf7f86b8360ae6a7559b3795640611b3cd7dd8",
           "urn:curve-cover-map:1:sha256:edae4500798c4aad00581d81e4e0e42719f6161f7ae154fab9595631c2d38dea",
           "urn:curve-cover-map:1:sha256:edb1d710c2e20faa737f725374afdd9dd5c8176eaa436217f6fe7a2b0f04ce25",
@@ -7305,6 +7314,16 @@
         "extension_degree": 1,
         "representation": "prime"
       },
+      "urn:declared-field:1:sha256:3883e51a15475d56d5c84ae01a5500a004801b0e67727da1891be79915889a06": {
+        "field_uid": "urn:declared-field:1:sha256:3883e51a15475d56d5c84ae01a5500a004801b0e67727da1891be79915889a06",
+        "record": {
+          "label": "fp-10940417",
+          "p": "10940417"
+        },
+        "characteristic": "10940417",
+        "extension_degree": 1,
+        "representation": "prime"
+      },
       "urn:declared-field:1:sha256:392545d2607b7dd55ef60a4c12725dccd5beb05f553b49058e45693ff94a986e": {
         "field_uid": "urn:declared-field:1:sha256:392545d2607b7dd55ef60a4c12725dccd5beb05f553b49058e45693ff94a986e",
         "record": {
@@ -7651,6 +7670,16 @@
         "extension_degree": 1,
         "representation": "prime"
       },
+      "urn:declared-field:1:sha256:550a67ecb80d27e59950070d2ac66565265fcf03721297d22250f847f682338e": {
+        "field_uid": "urn:declared-field:1:sha256:550a67ecb80d27e59950070d2ac66565265fcf03721297d22250f847f682338e",
+        "record": {
+          "label": "fp-40857601",
+          "p": "40857601"
+        },
+        "characteristic": "40857601",
+        "extension_degree": 1,
+        "representation": "prime"
+      },
       "urn:declared-field:1:sha256:56c93c1b9c887213a3895aed1537f4e8cdfbb1a3f40547245a3c2b69e40caf83": {
         "field_uid": "urn:declared-field:1:sha256:56c93c1b9c887213a3895aed1537f4e8cdfbb1a3f40547245a3c2b69e40caf83",
         "record": {
@@ -7987,6 +8016,16 @@
         "extension_degree": 1,
         "representation": "prime"
       },
+      "urn:declared-field:1:sha256:6f09e7acfc5b9e8d2646c97b8659bc1facc2fa069119d521364bfe1054b7bd6e": {
+        "field_uid": "urn:declared-field:1:sha256:6f09e7acfc5b9e8d2646c97b8659bc1facc2fa069119d521364bfe1054b7bd6e",
+        "record": {
+          "label": "fp-946177",
+          "p": "946177"
+        },
+        "characteristic": "946177",
+        "extension_degree": 1,
+        "representation": "prime"
+      },
       "urn:declared-field:1:sha256:7043cb4e3b96a273d85fd40ca2bfc44562569c1a3e8008ee9dca43696ec71750": {
         "field_uid": "urn:declared-field:1:sha256:7043cb4e3b96a273d85fd40ca2bfc44562569c1a3e8008ee9dca43696ec71750",
         "record": {
@@ -8152,6 +8191,16 @@
           "p": "216951281"
         },
         "characteristic": "216951281",
+        "extension_degree": 1,
+        "representation": "prime"
+      },
+      "urn:declared-field:1:sha256:7b49213d70f0aa7cd29ee8010ecbe54933e05fe0bec9aecafca7f7720180674c": {
+        "field_uid": "urn:declared-field:1:sha256:7b49213d70f0aa7cd29ee8010ecbe54933e05fe0bec9aecafca7f7720180674c",
+        "record": {
+          "label": "fp-78575552703623",
+          "p": "78575552703623"
+        },
+        "characteristic": "78575552703623",
         "extension_degree": 1,
         "representation": "prime"
       },
@@ -8839,6 +8888,16 @@
         "extension_degree": 47,
         "representation": "binary_polynomial_extension"
       },
+      "urn:declared-field:1:sha256:af67eb12e91201205738f0c0ae5ab9cdfd5f91b7110a9a2fee08c1532718d771": {
+        "field_uid": "urn:declared-field:1:sha256:af67eb12e91201205738f0c0ae5ab9cdfd5f91b7110a9a2fee08c1532718d771",
+        "record": {
+          "label": "fp-2387969",
+          "p": "2387969"
+        },
+        "characteristic": "2387969",
+        "extension_degree": 1,
+        "representation": "prime"
+      },
       "urn:declared-field:1:sha256:af7f0e8a9e96b7ef70024b483ae8ebe8e59271b58b0da0178494bf0b9ab30770": {
         "field_uid": "urn:declared-field:1:sha256:af7f0e8a9e96b7ef70024b483ae8ebe8e59271b58b0da0178494bf0b9ab30770",
         "record": {
@@ -9296,6 +9355,16 @@
         "extension_degree": 1,
         "representation": "prime"
       },
+      "urn:declared-field:1:sha256:ce20bcb7ab61649400bdc3055084833d4381c7df1f43314519f815ace0724464": {
+        "field_uid": "urn:declared-field:1:sha256:ce20bcb7ab61649400bdc3055084833d4381c7df1f43314519f815ace0724464",
+        "record": {
+          "label": "fp-1033961567797",
+          "p": "1033961567797"
+        },
+        "characteristic": "1033961567797",
+        "extension_degree": 1,
+        "representation": "prime"
+      },
       "urn:declared-field:1:sha256:ce96a3e98344ed9545724856ffe81cb9d791bb7b7854c4320b8aecfdb75a930b": {
         "field_uid": "urn:declared-field:1:sha256:ce96a3e98344ed9545724856ffe81cb9d791bb7b7854c4320b8aecfdb75a930b",
         "record": {
@@ -9383,6 +9452,16 @@
         "characteristic": "257",
         "extension_degree": 14,
         "representation": "odd_polynomial_extension"
+      },
+      "urn:declared-field:1:sha256:d5466af0b11885a43a5a936fc59683d1199c2de71a4b525e52391062795b67ef": {
+        "field_uid": "urn:declared-field:1:sha256:d5466af0b11885a43a5a936fc59683d1199c2de71a4b525e52391062795b67ef",
+        "record": {
+          "label": "fp-231657473",
+          "p": "231657473"
+        },
+        "characteristic": "231657473",
+        "extension_degree": 1,
+        "representation": "prime"
       },
       "urn:declared-field:1:sha256:d5615272d2036c4a199b4e6b758f06f4d29fc48190b899a8b5f777928c852ff1": {
         "field_uid": "urn:declared-field:1:sha256:d5615272d2036c4a199b4e6b758f06f4d29fc48190b899a8b5f777928c852ff1",
@@ -14000,6 +14079,17 @@
           "infinity_configuration": "two_rational_points"
         }
       },
+      "urn:jacobian-context:1:sha256:2d3e50845e0897658fde86e9d5b8210c475f2d4a2b23b67dc2659312edc05b4f": {
+        "jacobian_uid": "urn:jacobian-context:1:sha256:2d3e50845e0897658fde86e9d5b8210c475f2d4a2b23b67dc2659312edc05b4f",
+        "record": {
+          "schema_version": "jacobian-context/v1",
+          "source_cover_uid": "urn:hc-model:1:sha256:4d5dad6ab77f19ae5a38e2edffcfad4d97747c43ef7af9ec581e1ad42c10ef05",
+          "declared_field_uid": "urn:declared-field:1:sha256:550a67ecb80d27e59950070d2ac66565265fcf03721297d22250f847f682338e",
+          "dimension": 2,
+          "object": "Picard_degree_zero",
+          "infinity_configuration": "two_rational_points"
+        }
+      },
       "urn:jacobian-context:1:sha256:2d4e8b23aa969a82354218dc4e4a40f21a773fe8469302b643af9cd67693d6e6": {
         "jacobian_uid": "urn:jacobian-context:1:sha256:2d4e8b23aa969a82354218dc4e4a40f21a773fe8469302b643af9cd67693d6e6",
         "record": {
@@ -18477,6 +18567,17 @@
           "infinity_configuration": "two_rational_points"
         }
       },
+      "urn:jacobian-context:1:sha256:60c7e85c531bb7c999822b1dea715d211f97933a33b5e5c374bdf74e1029ecaf": {
+        "jacobian_uid": "urn:jacobian-context:1:sha256:60c7e85c531bb7c999822b1dea715d211f97933a33b5e5c374bdf74e1029ecaf",
+        "record": {
+          "schema_version": "jacobian-context/v1",
+          "source_cover_uid": "urn:hc-model:1:sha256:adef00a21278095c8727a7dcea04002afcf38838c2331b54901cfb9876cbcefa",
+          "declared_field_uid": "urn:declared-field:1:sha256:3883e51a15475d56d5c84ae01a5500a004801b0e67727da1891be79915889a06",
+          "dimension": 2,
+          "object": "Picard_degree_zero",
+          "infinity_configuration": "two_rational_points"
+        }
+      },
       "urn:jacobian-context:1:sha256:60d42cef721e5b88dce65d1806d6d2526b2d2ed68f5498ae4cdb28144b5126d8": {
         "jacobian_uid": "urn:jacobian-context:1:sha256:60d42cef721e5b88dce65d1806d6d2526b2d2ed68f5498ae4cdb28144b5126d8",
         "record": {
@@ -20160,6 +20261,17 @@
           "infinity_configuration": "two_rational_points"
         }
       },
+      "urn:jacobian-context:1:sha256:70db25e5f347e1d8311a510088c2700f3441c50191d306c1dc9d0e54ca8fb62e": {
+        "jacobian_uid": "urn:jacobian-context:1:sha256:70db25e5f347e1d8311a510088c2700f3441c50191d306c1dc9d0e54ca8fb62e",
+        "record": {
+          "schema_version": "jacobian-context/v1",
+          "source_cover_uid": "urn:hc-model:1:sha256:3ee15c22bfbdca536631a89740c1cba5fbea2c9858c08204020eddc06ec9c064",
+          "declared_field_uid": "urn:declared-field:1:sha256:ce20bcb7ab61649400bdc3055084833d4381c7df1f43314519f815ace0724464",
+          "dimension": 2,
+          "object": "Picard_degree_zero",
+          "infinity_configuration": "two_rational_points"
+        }
+      },
       "urn:jacobian-context:1:sha256:71472470bfee9e16dcc6f10f32e4b696bc681521ac04bb2c6baf6bf866dfcda1": {
         "jacobian_uid": "urn:jacobian-context:1:sha256:71472470bfee9e16dcc6f10f32e4b696bc681521ac04bb2c6baf6bf866dfcda1",
         "record": {
@@ -21414,6 +21526,17 @@
           "infinity_configuration": "two_rational_points"
         }
       },
+      "urn:jacobian-context:1:sha256:7e314a35038557bb130f1ccee88673da51359265449bd5a65ad4ec3257e5a37a": {
+        "jacobian_uid": "urn:jacobian-context:1:sha256:7e314a35038557bb130f1ccee88673da51359265449bd5a65ad4ec3257e5a37a",
+        "record": {
+          "schema_version": "jacobian-context/v1",
+          "source_cover_uid": "urn:hc-model:1:sha256:c24c1b5bb22853eee83539c36ca91d5a5bdaeff0068e2115de7facd54655dd2b",
+          "declared_field_uid": "urn:declared-field:1:sha256:7b49213d70f0aa7cd29ee8010ecbe54933e05fe0bec9aecafca7f7720180674c",
+          "dimension": 2,
+          "object": "Picard_degree_zero",
+          "infinity_configuration": "two_rational_points"
+        }
+      },
       "urn:jacobian-context:1:sha256:7e44d8d09ace8dcf2e641471a97cbdd8a2a9060f4432ac30c89188f47a4573a6": {
         "jacobian_uid": "urn:jacobian-context:1:sha256:7e44d8d09ace8dcf2e641471a97cbdd8a2a9060f4432ac30c89188f47a4573a6",
         "record": {
@@ -21431,6 +21554,17 @@
           "schema_version": "jacobian-context/v1",
           "source_cover_uid": "urn:hc-model:1:sha256:7ef314415abf5446cd663308907825dfbd3edc7dec482f31a80251545a5449e4",
           "declared_field_uid": "urn:declared-field:1:sha256:a9457d32b0c4f424cfc41b18bf9bf3db6e65f0d337c9b36bf11746a506613641",
+          "dimension": 2,
+          "object": "Picard_degree_zero",
+          "infinity_configuration": "two_rational_points"
+        }
+      },
+      "urn:jacobian-context:1:sha256:7e68f9767cc8dcf03f40361e7a9dc0ab1ab2186827541fa305cd88456629ad79": {
+        "jacobian_uid": "urn:jacobian-context:1:sha256:7e68f9767cc8dcf03f40361e7a9dc0ab1ab2186827541fa305cd88456629ad79",
+        "record": {
+          "schema_version": "jacobian-context/v1",
+          "source_cover_uid": "urn:hc-model:1:sha256:04b397d097f6e522e9afbf1593d7a5727803b1e60ac017356a3138aa888e30c1",
+          "declared_field_uid": "urn:declared-field:1:sha256:af67eb12e91201205738f0c0ae5ab9cdfd5f91b7110a9a2fee08c1532718d771",
           "dimension": 2,
           "object": "Picard_degree_zero",
           "infinity_configuration": "two_rational_points"
@@ -22245,6 +22379,17 @@
           "schema_version": "jacobian-context/v1",
           "source_cover_uid": "urn:hc-model:1:sha256:72536dc23a84b53382392bafa1a2fc38614f41663453b4bd0042c89348f605bc",
           "declared_field_uid": "urn:declared-field:1:sha256:14913ac3f74a2bd1ee0c55ff024b2c82621706c8ba6d46eb94fcb2805bffbac6",
+          "dimension": 2,
+          "object": "Picard_degree_zero",
+          "infinity_configuration": "two_rational_points"
+        }
+      },
+      "urn:jacobian-context:1:sha256:869987012bb6fbf9584151e04d8ee56e735360727a51445112acc04d7410767a": {
+        "jacobian_uid": "urn:jacobian-context:1:sha256:869987012bb6fbf9584151e04d8ee56e735360727a51445112acc04d7410767a",
+        "record": {
+          "schema_version": "jacobian-context/v1",
+          "source_cover_uid": "urn:hc-model:1:sha256:12df47823835df8b2a6822e197152d9f0f198315113c19d7e619cf92b3f6562b",
+          "declared_field_uid": "urn:declared-field:1:sha256:6f09e7acfc5b9e8d2646c97b8659bc1facc2fa069119d521364bfe1054b7bd6e",
           "dimension": 2,
           "object": "Picard_degree_zero",
           "infinity_configuration": "two_rational_points"
@@ -26177,6 +26322,17 @@
           "infinity_configuration": "two_rational_points"
         }
       },
+      "urn:jacobian-context:1:sha256:b205644667a188862286d559a54fff679b05651bcb7933051f7528ce3ec59475": {
+        "jacobian_uid": "urn:jacobian-context:1:sha256:b205644667a188862286d559a54fff679b05651bcb7933051f7528ce3ec59475",
+        "record": {
+          "schema_version": "jacobian-context/v1",
+          "source_cover_uid": "urn:hc-model:1:sha256:02ea2461b26d77fa4b56af6c14ac51c5529b3c0207f38fd325b5f3ae3b075f45",
+          "declared_field_uid": "urn:declared-field:1:sha256:ce20bcb7ab61649400bdc3055084833d4381c7df1f43314519f815ace0724464",
+          "dimension": 2,
+          "object": "Picard_degree_zero",
+          "infinity_configuration": "two_rational_points"
+        }
+      },
       "urn:jacobian-context:1:sha256:b22ca268958dc8928ec0396ecf0cc1ff3a9303cf9ca610895c3f53493c6e8880": {
         "jacobian_uid": "urn:jacobian-context:1:sha256:b22ca268958dc8928ec0396ecf0cc1ff3a9303cf9ca610895c3f53493c6e8880",
         "record": {
@@ -29554,6 +29710,17 @@
           "infinity_configuration": "two_rational_points"
         }
       },
+      "urn:jacobian-context:1:sha256:d6481c48db7274a51af9b851b5c7ca07cedb21a99fcd8361b57b5e75ed8431b9": {
+        "jacobian_uid": "urn:jacobian-context:1:sha256:d6481c48db7274a51af9b851b5c7ca07cedb21a99fcd8361b57b5e75ed8431b9",
+        "record": {
+          "schema_version": "jacobian-context/v1",
+          "source_cover_uid": "urn:hc-model:1:sha256:4a96d0883dd42e5171e1698865837b8df46f37aedb7a99da1e8a438badbbe1cf",
+          "declared_field_uid": "urn:declared-field:1:sha256:d5466af0b11885a43a5a936fc59683d1199c2de71a4b525e52391062795b67ef",
+          "dimension": 2,
+          "object": "Picard_degree_zero",
+          "infinity_configuration": "two_rational_points"
+        }
+      },
       "urn:jacobian-context:1:sha256:d66627278981d7055b393fcf390dd6c6fde0dba7e94b48737b35fbc8e4f3e711": {
         "jacobian_uid": "urn:jacobian-context:1:sha256:d66627278981d7055b393fcf390dd6c6fde0dba7e94b48737b35fbc8e4f3e711",
         "record": {
@@ -30385,6 +30552,17 @@
           "schema_version": "jacobian-context/v1",
           "source_cover_uid": "urn:hc-model:1:sha256:5845684f2b7aaad9f99605fccb01d225dac204a9f7a63b3a1036a1ea776a61e0",
           "declared_field_uid": "urn:declared-field:1:sha256:72a1b6a4f44569ed873e7c90deb5703350f1b96d2d0d194a522807b21b21604a",
+          "dimension": 2,
+          "object": "Picard_degree_zero",
+          "infinity_configuration": "two_rational_points"
+        }
+      },
+      "urn:jacobian-context:1:sha256:e04b2d10a76173fa87945874ebb651ff56318d6b79af8f04aaff12a7a3e707e3": {
+        "jacobian_uid": "urn:jacobian-context:1:sha256:e04b2d10a76173fa87945874ebb651ff56318d6b79af8f04aaff12a7a3e707e3",
+        "record": {
+          "schema_version": "jacobian-context/v1",
+          "source_cover_uid": "urn:hc-model:1:sha256:354cff95eb1745a50901d53db889fb08ce1f8d863fd677d1f2986bdd0606a880",
+          "declared_field_uid": "urn:declared-field:1:sha256:7b49213d70f0aa7cd29ee8010ecbe54933e05fe0bec9aecafca7f7720180674c",
           "dimension": 2,
           "object": "Picard_degree_zero",
           "infinity_configuration": "two_rational_points"
@@ -33674,6 +33852,19 @@
           "degree": 1
         }
       },
+      "urn:curve-cover-map:1:sha256:0618499d6c50a271f40eebcd08c3f1c2df0f4f33942a3ec0b6cc1e617c5b3ddb": {
+        "map_uid": "urn:curve-cover-map:1:sha256:0618499d6c50a271f40eebcd08c3f1c2df0f4f33942a3ec0b6cc1e617c5b3ddb",
+        "target_icv1_slug": "icv1-fp20-tm728-d215a2a1",
+        "target_model_sha256": "d215a2a139a7172bd3eae7677970118b9fdf014ec2dd1b9ab76209935d1675e8",
+        "source_cover_uid": "urn:hc-model:1:sha256:12df47823835df8b2a6822e197152d9f0f198315113c19d7e619cf92b3f6562b",
+        "source_jacobian_uid": "urn:jacobian-context:1:sha256:869987012bb6fbf9584151e04d8ee56e735360727a51445112acc04d7410767a",
+        "field_relationship": {
+          "kind": "same_declared_field_identity",
+          "source_field_uid": "urn:declared-field:1:sha256:6f09e7acfc5b9e8d2646c97b8659bc1facc2fa069119d521364bfe1054b7bd6e",
+          "target_field_uid": "urn:declared-field:1:sha256:6f09e7acfc5b9e8d2646c97b8659bc1facc2fa069119d521364bfe1054b7bd6e",
+          "degree": 1
+        }
+      },
       "urn:curve-cover-map:1:sha256:061f11b68ad04c86b1fd6fd6c43a89a9d39d4ac513b8ceca4e926149500a968a": {
         "map_uid": "urn:curve-cover-map:1:sha256:061f11b68ad04c86b1fd6fd6c43a89a9d39d4ac513b8ceca4e926149500a968a",
         "target_icv1_slug": "icv1-fp18k14-t7256866063702034327501088129872235306-b32c10b8",
@@ -36508,6 +36699,19 @@
           "degree": 1
         }
       },
+      "urn:curve-cover-map:1:sha256:1fdbed73c0cb3556488af98993162262a1f43f8e69733453624e29ff43ea0476": {
+        "map_uid": "urn:curve-cover-map:1:sha256:1fdbed73c0cb3556488af98993162262a1f43f8e69733453624e29ff43ea0476",
+        "target_icv1_slug": "icv1-fp47-tm809-568d1619",
+        "target_model_sha256": "568d16198b394ce07df49b92ee54b59af9bf6612d8a08f94378d72285d3b30c5",
+        "source_cover_uid": "urn:hc-model:1:sha256:c24c1b5bb22853eee83539c36ca91d5a5bdaeff0068e2115de7facd54655dd2b",
+        "source_jacobian_uid": "urn:jacobian-context:1:sha256:7e314a35038557bb130f1ccee88673da51359265449bd5a65ad4ec3257e5a37a",
+        "field_relationship": {
+          "kind": "same_declared_field_identity",
+          "source_field_uid": "urn:declared-field:1:sha256:7b49213d70f0aa7cd29ee8010ecbe54933e05fe0bec9aecafca7f7720180674c",
+          "target_field_uid": "urn:declared-field:1:sha256:7b49213d70f0aa7cd29ee8010ecbe54933e05fe0bec9aecafca7f7720180674c",
+          "degree": 1
+        }
+      },
       "urn:curve-cover-map:1:sha256:1fe5c68bb21590db4deb7db863f6666c0e5fc13e5da3f469b44ad96731114c3f": {
         "map_uid": "urn:curve-cover-map:1:sha256:1fe5c68bb21590db4deb7db863f6666c0e5fc13e5da3f469b44ad96731114c3f",
         "target_icv1_slug": "icv1-fp38k6-tm39322260952504820046357871321031762-9b21cb30",
@@ -37366,6 +37570,19 @@
           "degree": 1
         }
       },
+      "urn:curve-cover-map:1:sha256:27cf5012b7002e4bfccfe2fbb75472d4671656e1fe9b667af2217820a030c5ec": {
+        "map_uid": "urn:curve-cover-map:1:sha256:27cf5012b7002e4bfccfe2fbb75472d4671656e1fe9b667af2217820a030c5ec",
+        "target_icv1_slug": "icv1-fp22-tm2947-e15fed69",
+        "target_model_sha256": "e15fed6973bc7da1eb83da08c080ecb3e271e6eb2693051eec4ff2166793a75b",
+        "source_cover_uid": "urn:hc-model:1:sha256:04b397d097f6e522e9afbf1593d7a5727803b1e60ac017356a3138aa888e30c1",
+        "source_jacobian_uid": "urn:jacobian-context:1:sha256:7e68f9767cc8dcf03f40361e7a9dc0ab1ab2186827541fa305cd88456629ad79",
+        "field_relationship": {
+          "kind": "same_declared_field_identity",
+          "source_field_uid": "urn:declared-field:1:sha256:af67eb12e91201205738f0c0ae5ab9cdfd5f91b7110a9a2fee08c1532718d771",
+          "target_field_uid": "urn:declared-field:1:sha256:af67eb12e91201205738f0c0ae5ab9cdfd5f91b7110a9a2fee08c1532718d771",
+          "degree": 1
+        }
+      },
       "urn:curve-cover-map:1:sha256:280de7f66f5874a949b97a3536e135fa4b918fc17810a549d79edd23682e099e": {
         "map_uid": "urn:curve-cover-map:1:sha256:280de7f66f5874a949b97a3536e135fa4b918fc17810a549d79edd23682e099e",
         "target_icv1_slug": "icv1-fp22-tm2826-0afa05b6",
@@ -37428,6 +37645,19 @@
           "kind": "same_declared_field_identity",
           "source_field_uid": "urn:declared-field:1:sha256:0df0439aee3cf0d4f2e58544d475a0de3e12c063d37dcda5a4d2fed6590a3a61",
           "target_field_uid": "urn:declared-field:1:sha256:0df0439aee3cf0d4f2e58544d475a0de3e12c063d37dcda5a4d2fed6590a3a61",
+          "degree": 1
+        }
+      },
+      "urn:curve-cover-map:1:sha256:28dc2c6d8931d111725cb0353efbdc991a817a273794bd9e1ddf1169a0bfe9ae": {
+        "map_uid": "urn:curve-cover-map:1:sha256:28dc2c6d8931d111725cb0353efbdc991a817a273794bd9e1ddf1169a0bfe9ae",
+        "target_icv1_slug": "icv1-fp47-tm809-3c558326",
+        "target_model_sha256": "3c5583268bfe498e84cbce50467993810b65d8042df98025e3f489f3ffc40f6d",
+        "source_cover_uid": "urn:hc-model:1:sha256:354cff95eb1745a50901d53db889fb08ce1f8d863fd677d1f2986bdd0606a880",
+        "source_jacobian_uid": "urn:jacobian-context:1:sha256:e04b2d10a76173fa87945874ebb651ff56318d6b79af8f04aaff12a7a3e707e3",
+        "field_relationship": {
+          "kind": "same_declared_field_identity",
+          "source_field_uid": "urn:declared-field:1:sha256:7b49213d70f0aa7cd29ee8010ecbe54933e05fe0bec9aecafca7f7720180674c",
+          "target_field_uid": "urn:declared-field:1:sha256:7b49213d70f0aa7cd29ee8010ecbe54933e05fe0bec9aecafca7f7720180674c",
           "degree": 1
         }
       },
@@ -37597,6 +37827,19 @@
           "kind": "same_declared_field_identity",
           "source_field_uid": "urn:declared-field:1:sha256:18c5cc710d307e15a1b83131a1374cdae790064aa767a20962d62c2157176262",
           "target_field_uid": "urn:declared-field:1:sha256:18c5cc710d307e15a1b83131a1374cdae790064aa767a20962d62c2157176262",
+          "degree": 1
+        }
+      },
+      "urn:curve-cover-map:1:sha256:2a00d0dd9bc92610fa2763580597d31c52f834d448f27bb1eade51f84344815c": {
+        "map_uid": "urn:curve-cover-map:1:sha256:2a00d0dd9bc92610fa2763580597d31c52f834d448f27bb1eade51f84344815c",
+        "target_icv1_slug": "icv1-fp28-t4155-50f492b1",
+        "target_model_sha256": "50f492b1756c03bde86f6ca882139cdfb1a51e011ba84e5989b96080c70d9b5f",
+        "source_cover_uid": "urn:hc-model:1:sha256:4a96d0883dd42e5171e1698865837b8df46f37aedb7a99da1e8a438badbbe1cf",
+        "source_jacobian_uid": "urn:jacobian-context:1:sha256:d6481c48db7274a51af9b851b5c7ca07cedb21a99fcd8361b57b5e75ed8431b9",
+        "field_relationship": {
+          "kind": "same_declared_field_identity",
+          "source_field_uid": "urn:declared-field:1:sha256:d5466af0b11885a43a5a936fc59683d1199c2de71a4b525e52391062795b67ef",
+          "target_field_uid": "urn:declared-field:1:sha256:d5466af0b11885a43a5a936fc59683d1199c2de71a4b525e52391062795b67ef",
           "degree": 1
         }
       },
@@ -53629,6 +53872,19 @@
           "degree": 1
         }
       },
+      "urn:curve-cover-map:1:sha256:c6508ff6c23447e8785907899d391c3dd51ee1801f985ec668bdae77c00cfa21": {
+        "map_uid": "urn:curve-cover-map:1:sha256:c6508ff6c23447e8785907899d391c3dd51ee1801f985ec668bdae77c00cfa21",
+        "target_icv1_slug": "icv1-fp26-t2838-8e779ca8",
+        "target_model_sha256": "8e779ca8b118aa56405caf92bfe12f885fd6e3761e3425ca5de111eb6faff421",
+        "source_cover_uid": "urn:hc-model:1:sha256:4d5dad6ab77f19ae5a38e2edffcfad4d97747c43ef7af9ec581e1ad42c10ef05",
+        "source_jacobian_uid": "urn:jacobian-context:1:sha256:2d3e50845e0897658fde86e9d5b8210c475f2d4a2b23b67dc2659312edc05b4f",
+        "field_relationship": {
+          "kind": "same_declared_field_identity",
+          "source_field_uid": "urn:declared-field:1:sha256:550a67ecb80d27e59950070d2ac66565265fcf03721297d22250f847f682338e",
+          "target_field_uid": "urn:declared-field:1:sha256:550a67ecb80d27e59950070d2ac66565265fcf03721297d22250f847f682338e",
+          "degree": 1
+        }
+      },
       "urn:curve-cover-map:1:sha256:c6588a45dcd7c0794edc9b7ead8c4b11804e62add6dbfebf49f89e9894360e02": {
         "map_uid": "urn:curve-cover-map:1:sha256:c6588a45dcd7c0794edc9b7ead8c4b11804e62add6dbfebf49f89e9894360e02",
         "target_icv1_slug": "icv1-fp255-t186389866128205620941018110855087410992-98107d56",
@@ -56749,6 +57005,19 @@
           "degree": 1
         }
       },
+      "urn:curve-cover-map:1:sha256:e05cd88a4dc67642eee1d86ecca87ea22592e9f89d425acf310ea3f19c8f043a": {
+        "map_uid": "urn:curve-cover-map:1:sha256:e05cd88a4dc67642eee1d86ecca87ea22592e9f89d425acf310ea3f19c8f043a",
+        "target_icv1_slug": "icv1-fp40-t252-1353f62b",
+        "target_model_sha256": "1353f62ba045de91d5737321ba1517e5d396356542188203f77e49564d296c6a",
+        "source_cover_uid": "urn:hc-model:1:sha256:3ee15c22bfbdca536631a89740c1cba5fbea2c9858c08204020eddc06ec9c064",
+        "source_jacobian_uid": "urn:jacobian-context:1:sha256:70db25e5f347e1d8311a510088c2700f3441c50191d306c1dc9d0e54ca8fb62e",
+        "field_relationship": {
+          "kind": "same_declared_field_identity",
+          "source_field_uid": "urn:declared-field:1:sha256:ce20bcb7ab61649400bdc3055084833d4381c7df1f43314519f815ace0724464",
+          "target_field_uid": "urn:declared-field:1:sha256:ce20bcb7ab61649400bdc3055084833d4381c7df1f43314519f815ace0724464",
+          "degree": 1
+        }
+      },
       "urn:curve-cover-map:1:sha256:e076c94ca2f26def2d74748fc59dee37c44f2b1925ffa93cddb97ec3fa55ac97": {
         "map_uid": "urn:curve-cover-map:1:sha256:e076c94ca2f26def2d74748fc59dee37c44f2b1925ffa93cddb97ec3fa55ac97",
         "target_icv1_slug": "icv1-f2m13-t181-515ee569",
@@ -57357,6 +57626,19 @@
           "kind": "same_declared_field_identity",
           "source_field_uid": "urn:declared-field:1:sha256:18c5cc710d307e15a1b83131a1374cdae790064aa767a20962d62c2157176262",
           "target_field_uid": "urn:declared-field:1:sha256:18c5cc710d307e15a1b83131a1374cdae790064aa767a20962d62c2157176262",
+          "degree": 1
+        }
+      },
+      "urn:curve-cover-map:1:sha256:e535bd68c9a7c2c74253733a6e42ef218c6ef3bfc468af12cc729596df622f2f": {
+        "map_uid": "urn:curve-cover-map:1:sha256:e535bd68c9a7c2c74253733a6e42ef218c6ef3bfc468af12cc729596df622f2f",
+        "target_icv1_slug": "icv1-fp40-t252-9ccd690e",
+        "target_model_sha256": "9ccd690e8df51d23fe1ffedb0d43e540d15e0ec3a2ff32c71babef01d377d7b2",
+        "source_cover_uid": "urn:hc-model:1:sha256:02ea2461b26d77fa4b56af6c14ac51c5529b3c0207f38fd325b5f3ae3b075f45",
+        "source_jacobian_uid": "urn:jacobian-context:1:sha256:b205644667a188862286d559a54fff679b05651bcb7933051f7528ce3ec59475",
+        "field_relationship": {
+          "kind": "same_declared_field_identity",
+          "source_field_uid": "urn:declared-field:1:sha256:ce20bcb7ab61649400bdc3055084833d4381c7df1f43314519f815ace0724464",
+          "target_field_uid": "urn:declared-field:1:sha256:ce20bcb7ab61649400bdc3055084833d4381c7df1f43314519f815ace0724464",
           "degree": 1
         }
       },
@@ -58046,6 +58328,19 @@
           "kind": "same_declared_field_identity",
           "source_field_uid": "urn:declared-field:1:sha256:59eb40e7e4d722f82c59d3dbcfa88d20c2bb2d7ca6c5606be835376b027769c2",
           "target_field_uid": "urn:declared-field:1:sha256:59eb40e7e4d722f82c59d3dbcfa88d20c2bb2d7ca6c5606be835376b027769c2",
+          "degree": 1
+        }
+      },
+      "urn:curve-cover-map:1:sha256:ed0399461d41164d86db41a4d29df50b9545ed067aaac4dcb83544fde8a8839d": {
+        "map_uid": "urn:curve-cover-map:1:sha256:ed0399461d41164d86db41a4d29df50b9545ed067aaac4dcb83544fde8a8839d",
+        "target_icv1_slug": "icv1-fp24-t2705-27cbb01b",
+        "target_model_sha256": "27cbb01b405812b8b3b86d714d58178b06b67a6eee24fe023a9ce3de1e5da585",
+        "source_cover_uid": "urn:hc-model:1:sha256:adef00a21278095c8727a7dcea04002afcf38838c2331b54901cfb9876cbcefa",
+        "source_jacobian_uid": "urn:jacobian-context:1:sha256:60c7e85c531bb7c999822b1dea715d211f97933a33b5e5c374bdf74e1029ecaf",
+        "field_relationship": {
+          "kind": "same_declared_field_identity",
+          "source_field_uid": "urn:declared-field:1:sha256:3883e51a15475d56d5c84ae01a5500a004801b0e67727da1891be79915889a06",
+          "target_field_uid": "urn:declared-field:1:sha256:3883e51a15475d56d5c84ae01a5500a004801b0e67727da1891be79915889a06",
           "degree": 1
         }
       },
@@ -60323,15 +60618,15 @@
     }
   ],
   "coverage": {
-    "catalog_maps": 2091,
-    "unique_cover_models": 2089,
-    "geometry_verified_maps": 2091,
+    "catalog_maps": 2100,
+    "unique_cover_models": 2098,
+    "geometry_verified_maps": 2100,
     "ec1_representations": 664,
-    "assessed_maps": 2091,
+    "assessed_maps": 2100,
     "unassessed_maps": 0,
     "assessed_subgroups": 664,
     "unassessed_subgroups": 0,
-    "map_membership_entries": 2091,
+    "map_membership_entries": 2100,
     "subgroup_membership_entries": 664,
     "map_profiles": 4,
     "subgroup_profiles": 2,
@@ -60448,7 +60743,7 @@
       "control": "identity",
       "assessment": {
         "status": "supported",
-        "scope": "all 2,091 map UIDs and 664 exact EC1/curve/map triples",
+        "scope": "all 2,100 map UIDs and 664 exact EC1/curve/map triples",
         "rationale": "The generator resolves exact content-addressed joins and rejects duplicates or missing rows.",
         "evidence_refs": [
           "scripts/build_cover_transfer_assessments.mjs",
@@ -60461,7 +60756,7 @@
       "control": "geometry",
       "assessment": {
         "status": "supported",
-        "scope": "all 2,091 fixed-family cover rows",
+        "scope": "all 2,100 fixed-family cover rows",
         "rationale": "Native certificates cover defining identities, smoothness, genus, degree, separability, and infinity behavior.",
         "evidence_refs": [
           "src/bin/curve_cover_check/checker.rs",
@@ -60512,7 +60807,7 @@
       "control": "odd_degree2_transfer",
       "assessment": {
         "status": "refuted",
-        "scope": "claim that the current one-infinity odd-prime implementation supports the 1,931 even-sextic source models",
+        "scope": "claim that the current one-infinity odd-prime implementation supports the 1,940 even-sextic source models",
         "rationale": "The current model contract and the catalog infinity configuration are structurally incompatible.",
         "evidence_refs": [
           "src/prime_hyperelliptic/curve.rs",
@@ -60525,8 +60820,8 @@
       "control": "published_artifact",
       "assessment": {
         "status": "refuted",
-        "scope": "claim that the published v0.1.0-main.1371 artifact provides executable evidence for direct construction on all 2,091 current catalog models",
-        "rationale": "Direct artifact replay covered only its bundled 592-row registry. Static comparison of the pinned source allowlist with the current partition places 160 binary and 577 direct prime-field forms inside that syntactic domain, and 1,324 extension-field plus 30 normalized-target forms outside it; this 737/1,354 split is not a 2,091-command artifact receipt. Current source adds those paths but has not been published in that artifact.",
+        "scope": "claim that the published v0.1.0-main.1371 artifact provides executable evidence for direct construction on all 2,100 current catalog models",
+        "rationale": "Direct artifact replay covered only its bundled 592-row registry. Static comparison of the pinned source allowlist with the current partition places 160 binary and 586 direct prime-field forms inside that syntactic domain, and 1,324 extension-field plus 30 normalized-target forms outside it; this 746/1,354 split is not a 2,100-command artifact receipt. Current source adds those paths but has not been published in that artifact.",
         "evidence_refs": [
           "research/cover_transfer_assessment_20261013/release_replay.txt",
           "src/bin/hyperelliptic_cover.rs#every_current_catalog_model_reaches_the_standalone_constructor"
@@ -60585,9 +60880,9 @@
   ],
   "exploration_boundary": [
     "No search for production targets, private keys, or discrete logarithms was performed.",
-    "All 2,091 map rows and all 664 linked EC1 representations are classified, but unknown remains unknown and refuted implementation support is not a mathematical nonexistence claim.",
+    "All 2,100 map rows and all 664 linked EC1 representations are classified, but unknown remains unknown and refuted implementation support is not a mathematical nonexistence claim.",
     "The 160 catalog binary maps have bounded typed point-class operations; arbitrary source-Jacobian norm remains unsupported for those rows. The exact fixed-GF(8) fixture is outside this catalog population.",
-    "The 1,931 odd-characteristic maps have verified cover geometry but no compatible balanced/two-infinity Jacobian transfer implementation.",
+    "The 1,940 odd-characteristic maps have verified cover geometry but no compatible balanced/two-infinity Jacobian transfer implementation.",
     "Generator checks and [r]G=O do not by themselves prove that every catalog integer r is the exact source order.",
     "Formula-screen outputs in jacobian-transfers.json were not promoted to executable or measured claims.",
     "A full cover-integrated Jacobian index-calculus solver, relation collection, linear algebra, and target decomposition remain a separate deliverable. The bounded odd-prime one-infinity solver library is outside these catalog-cover paths."
@@ -60625,7 +60920,7 @@
     },
     {
       "id": "catalog_wide_packaged_binary",
-      "description": "Build and publish a standalone artifact that accepts every currently supported catalog input form, including odd-characteristic extension fields and normalized target models, then replay all 2,091 direct commands against that exact artifact.",
+      "description": "Build and publish a standalone artifact that accepts every currently supported catalog input form, including odd-characteristic extension fields and normalized target models, then replay all 2,100 direct commands against that exact artifact.",
       "status": "unknown"
     },
     {

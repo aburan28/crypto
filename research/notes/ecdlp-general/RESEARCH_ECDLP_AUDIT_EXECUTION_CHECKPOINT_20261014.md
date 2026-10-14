@@ -18,7 +18,7 @@ governance work.
 
 No scientific acceptance gate is promoted by this checkpoint. The defensible
 mathematical result remains narrower: explicit cover construction has
-source-level evidence for all 2,091 catalog rows, but catalog-wide Jacobian
+source-level evidence for all 2,100 catalog rows, but catalog-wide Jacobian
 transfer, exact subgroup preservation, an independent divisor-class oracle,
 and an ECDLP advantage are not established.
 
@@ -121,21 +121,25 @@ receipt, not a product or test failure. Clippy completed for the binary; it
 reported existing library warnings plus the inherited unknown-lint warning and
 no diagnostic in `src/bin/ecdlp_audit.rs` or its fixed-F8 verifier module.
 
-These runs began from base revision
-`1e447956d3616092a223264f1c6c31eff8ac9979` in a modified worktree. No immutable
-raw command log or environment image is attached, so these local results are
-not an E5 reproduction receipt and cannot promote a scientific claim.
+The earlier native runs began from base revision
+`1e447956d3616092a223264f1c6c31eff8ac9979` in a modified worktree. The catalog
+and assessment refresh described below used the later catalog checkpoint
+`ff48e2800f62b45c746b3f391540c07b16af4e75` plus current uncommitted assessment
+changes. No immutable raw command log or environment image is attached, so
+these local results are not an E5 reproduction receipt and cannot promote a
+scientific claim.
 
 # WS1 — release and packaged replay
 
 - **Current source ledger — evidence present, but not package evidence.** The
-  generator's byte-exact check passed in a clean checkout. Semantic totals
-  reached 2,091 rows: 160 binary, 1,931 odd, 664 EC1 bindings, and 2,089 unique
-  cover/Jacobian records. Three historical `git show` subprocesses were
-  blocked by the audit sandbox; manual file hashes matched the pinned records.
+  generator's byte-exact check and full semantic replay passed in the current
+  modified worktree. Semantic totals reached 2,100 rows: 160 binary, 1,940 odd,
+  664 EC1 bindings, and 2,098 unique cover/Jacobian records. The semantic
+  replay used read-only local Git access to verify that the registry, cover
+  report, and graph match catalog checkpoint `ff48e280…`.
 - **Published standalone replay — open.** The retained release receipt binds
   release `v0.1.0-main.1371` / tag `bbd330a…` and a Linux glibc artifact, but
-  bundles and replays 592 rows rather than the current 2,091-row denominator.
+  bundles and replays 592 rows rather than the current 2,100-row denominator.
 - **Artifact identity — open.** No Rust `BUILD.json`, embedded build identity,
   SBOM, dependency manifest, or full catalog/export replay receipt was found.
 - **Package/documentation parity — open.** The published/base configuration
@@ -154,7 +158,7 @@ The next admissible WS1 run is an exact-artifact replay: bind the final source,
 toolchain, lockfile, dependencies, SBOM, configuration, catalogs, archive and
 binary hashes; extract the archive in a clean directory; execute its packaged
 `hyperelliptic-cover catalog-export` against the bundled registry; retain all
-2,091 rows including failures; compare canonical mathematical records; and run
+2,100 rows including failures; compare canonical mathematical records; and run
 malformed, singular, reducible, and explicitly unsupported controls.
 
 # WS2 — exact supported mathematics
@@ -168,10 +172,10 @@ malformed, singular, reducible, and explicitly unsupported controls.
   norm is still missing.
 - **Odd covers.** In characteristic greater than 3, short-Weierstrass curves
   map from genus-2 even sextics `v^2=F(u^2+c)` by
-  `(u,v) -> (u^2+c,v)`. There are 1,931 rows: 577 direct-prime, 30 normalized,
+  `(u,v) -> (u^2+c,v)`. There are 1,940 rows: 586 direct-prime, 30 normalized,
   and 1,324 extension rows. Those sources have two infinities; the current odd
   Jacobian backend rejects even degree, and no induced-map implementation or
-  certificate exists for these 1,931 odd catalog covers.
+  certificate exists for these 1,940 odd catalog covers.
 - **Binary Jacobian.** The implementation checks characteristic-two,
   one-infinity Mumford validity, canonicalization, equality, negation, Cantor
   addition/reduction, and scalar multiplication. A fixed F8 fixture exhausts
@@ -182,7 +186,7 @@ malformed, singular, reducible, and explicitly unsupported controls.
   associativity and an independent arithmetic oracle remain open.
 - **Odd Jacobian.** Genuine odd-prime monic odd-degree `2g+1` one-infinity
   arithmetic exists. A genus-2 F3 fixture exhausts 24 classes, pairs, and
-  triples. It accepts zero of the 1,931 catalog even sextics and has no generic
+  triples. It accepts zero of the 1,940 catalog even sextics and has no generic
   `GF(p^k)` backend.
 - **Transfer.** Binary rational-point pushforward, pullback of `[P]-[O]`,
   infinity/two-torsion fibers, and typed point-class pull-push certificates

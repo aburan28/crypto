@@ -135,9 +135,13 @@ existence alone does not establish cheaper computation there.
 
 The separate generated
 [`cover-transfer-assessments.json`](cover-transfer-assessments.json) v2 ledger
-classifies transfer obligations for all 2,091 map rows (2,089 distinct cover
-models) and 664 linked EC1 representations. That classification does not alter
-this geometry catalog: it records bounded binary typed-transfer support,
+classifies transfer obligations for all 2,100 map rows (2,098 distinct cover
+models) and 664 linked EC1 representations. The population comprises 160
+binary maps and 1,940 odd-characteristic maps: 586 direct prime-field, 30
+normalized-target prime-field, and 1,324 extension-field maps. The EC1 links
+comprise 134 binary and 530 odd-characteristic representations. That
+classification does not alter this geometry catalog: it records bounded binary
+typed-transfer support,
 refutes capabilities absent from the current implementation, and leaves the
 odd-characteristic balanced-Jacobian maps and every solver-cost claim open.
 

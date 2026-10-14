@@ -1,7 +1,7 @@
 {
   "schema_version": "ecdlp-audit-plan/v1",
   "record_state": "mock_non_authoritative",
-  "plan_uid": "urn:ecdlp-audit-plan:1:sha256:37d71e75b7634d74b1a4ea9469f1d37b39956267d6a6812e4e122086703d06f4",
+  "plan_uid": "urn:ecdlp-audit-plan:1:sha256:b6a87869f837d5daa9a4e7429c80e571912d6ac04788b0c8381fea2c1b6ede32",
   "title": "Comprehensive elliptic-curve private-key recovery audit",
   "as_of": "2026-10-14",
   "authoritative": false,
@@ -88,7 +88,7 @@
         {
           "id": "WS1-D1",
           "kind": "artifact_replay",
-          "description": "Fresh standalone artifact and exact 2,091-input replay receipt.",
+          "description": "Fresh standalone artifact and exact 2,100-input replay receipt.",
           "path": null,
           "artifact_sha256": null,
           "status": "not_attempted",
@@ -99,7 +99,7 @@
           "kind": "review_receipt",
           "description": "Partial CI, Lean, semantic replay, and review evidence; final closure remains open.",
           "path": "research/cover_transfer_assessment_20261013/README.md",
-          "artifact_sha256": "3b17ebad8b3b500caa3e17d9d0558d4d09bc035cec9f11b87daf5ed08f1cbcb0",
+          "artifact_sha256": "fb1baf1fd96f633b8cad89d91fa6e613f5c5f2d8d4de51a25451e48b31804e85",
           "status": "partial",
           "acceptance_gate_ids": ["WS1-G3"]
         }
@@ -118,7 +118,7 @@
           "id": "WS1-G2",
           "required": true,
           "claim_status": "unknown",
-          "scope": "The exact fresh artifact replays all 2,091 current cover inputs and retains failures and unsupported results.",
+          "scope": "The exact fresh artifact replays all 2,100 current cover inputs and retains failures and unsupported results.",
           "rationale": "The published package was not replayed against all current inputs.",
           "evidence_refs": [],
           "obligation_id": "catalog-wide-packaged-replay"
@@ -194,7 +194,7 @@
           "id": "WS2-G1",
           "required": true,
           "claim_status": "unknown",
-          "scope": "Balanced two-infinity arithmetic and degree-two induced maps cover the exact 1,931-row odd catalog population: 577 direct-prime maps (membership SHA-256 2dd905b1a6273ae4672fe73dd866e7639eb493a6a8fd8292ae8c59c1475d546c), 30 normalized-prime maps (2ae30bea62e93a0681b087d94911ce50b13f152033943e04ed065830730c9d85), and 1,324 extension maps (a5f91e972a2a64b56757b39a35023e1a830a1668fc0de5827954286c3b45fcde), with exhaustive small-field and independent checks.",
+          "scope": "Balanced two-infinity arithmetic and degree-two induced maps cover the exact 1,940-row odd catalog population: 586 direct-prime maps (membership SHA-256 4777fd59ca63da0e7ac527f927b637a06918e92b8315ab5ce330c938fed07e6a), 30 normalized-prime maps (2ae30bea62e93a0681b087d94911ce50b13f152033943e04ed065830730c9d85), and 1,324 extension maps (a5f91e972a2a64b56757b39a35023e1a830a1668fc0de5827954286c3b45fcde), with exhaustive small-field and independent checks.",
           "rationale": "The current odd even-sextic sources are outside the one-infinity backend.",
           "evidence_refs": [],
           "obligation_id": "balanced-two-infinity-jacobian"
@@ -724,9 +724,9 @@
   },
   "open_obligations": [
     {"id": "catalog-artifact-identity", "workstream_id": "WS1", "status": "open", "required": true, "description": "Bind a fresh current-catalog artifact to exact source, build, configuration, dependency, registry, and SBOM identities.", "exit_evidence": "Signed or hashed build manifest plus reproducible artifact receipt."},
-    {"id": "catalog-wide-packaged-replay", "workstream_id": "WS1", "status": "open", "required": true, "description": "Replay all 2,091 current inputs against the exact fresh package.", "exit_evidence": "Per-input manifest, commands, results, failures, resource accounting, and independent replay receipt."},
+    {"id": "catalog-wide-packaged-replay", "workstream_id": "WS1", "status": "open", "required": true, "description": "Replay all 2,100 current inputs against the exact fresh package.", "exit_evidence": "Per-input manifest, commands, results, failures, resource accounting, and independent replay receipt."},
     {"id": "cover-final-evidence-gates", "workstream_id": "WS1", "status": "open", "required": true, "description": "Close final CI, Lean, semantic replay, and independent review gates.", "exit_evidence": "Final-revision CI/replay hashes and distinct reviewer approvals."},
-    {"id": "balanced-two-infinity-jacobian", "workstream_id": "WS2", "status": "open", "required": true, "description": "Implement and certify odd-characteristic balanced two-infinity arithmetic and induced maps for the frozen 1,931-row odd catalog population (577 direct prime, 30 normalized prime, and 1,324 extension maps with the WS2-G1 membership hashes).", "exit_evidence": "Exhaustive small-field and all-1,931 catalog fixtures, exceptional cases, map identities, and independent oracle agreement."},
+    {"id": "balanced-two-infinity-jacobian", "workstream_id": "WS2", "status": "open", "required": true, "description": "Implement and certify odd-characteristic balanced two-infinity arithmetic and induced maps for the frozen 1,940-row odd catalog population (586 direct prime, 30 normalized prime, and 1,324 extension maps with the WS2-G1 membership hashes).", "exit_evidence": "Exhaustive small-field and all-1,940 catalog fixtures, exceptional cases, map identities, and independent oracle agreement."},
     {"id": "arbitrary-binary-jacobian-norm", "workstream_id": "WS2", "status": "open", "required": true, "description": "Generalize and independently verify arbitrary valid-class binary Jacobian pushforward from the exact GF(8) fixture to the frozen 160-row binary map population, export exact catalog-style object/map/certificate bindings, and mirror or integrate it at a current aburan28/cryptanalysis revision.", "exit_evidence": "Independent tiny-field oracle agreement; all-160 field/model coverage; shared/nonsplit/repeated support, homomorphism, and composition receipts; EC1/ICV1/HC1/CV1 linkage for the positive fixture and supported rows; and exact current-tip cryptanalysis parity or integration evidence."},
     {"id": "catalog-subgroup-certificates", "workstream_id": "WS2", "status": "open", "required": true, "description": "Produce exact map-bound subgroup and image certificates for the frozen 664 EC1/curve/map bindings (134 binary and 530 odd with the WS2-G3 membership hashes).", "exit_evidence": "All-664 order/factor, nonzero image, exact image order, kernel intersection, composition, and recovery certificates."},
     {"id": "independent-divisor-class-oracle", "workstream_id": "WS2", "status": "open", "required": true, "description": "Obtain a non-circular divisor-class and transfer reference implementation for the full fixed-GF(8) fixture and at least one exhaustive balanced odd-prime genus-two fixture with p at most 31.", "exit_evidence": "Pinned independent code/CAS revision and differential replay receipts covering all 486 fixed-F8 classes, transfer identities, and the stated odd fixture including exceptional cases."},

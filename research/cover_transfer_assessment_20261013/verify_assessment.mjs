@@ -364,11 +364,11 @@ function check(condition, message) {
   }
 }
 
-check(registry.curves.length === 2091, "unexpected registry row count");
-check(report.curves.length === 2091, "unexpected cover-report row count");
-check(graph.curves.length === 2091, "unexpected graph curve-node count");
-check(Object.keys(graph.maps).length === 2091, "unexpected CV1 map count");
-check(Object.keys(graph.covers).length === 2089, "unexpected HC1 cover count");
+check(registry.curves.length === 2100, "unexpected registry row count");
+check(report.curves.length === 2100, "unexpected cover-report row count");
+check(graph.curves.length === 2100, "unexpected graph curve-node count");
+check(Object.keys(graph.maps).length === 2100, "unexpected CV1 map count");
+check(Object.keys(graph.covers).length === 2098, "unexpected HC1 cover count");
 
 const registryBytes = fs.readFileSync(registryPath);
 check(report.registry_sha256 === sha256(registryBytes), "covers.json registry digest mismatch");
@@ -487,11 +487,11 @@ check(representationCount === 664, "unexpected EC1 representation count");
 check(ec1Aliases.size === 664, "unexpected unique EC1 count");
 check(curveUids.size === 664, "unexpected unique curve-UID count");
 check(
-  mapReferenceCounts.size === 2091 && [...mapReferenceCounts.values()].every((count) => count === 1),
+  mapReferenceCounts.size === 2100 && [...mapReferenceCounts.values()].every((count) => count === 1),
   "CV1 references are not bijective with curve nodes",
 );
 check(
-  coverReferenceCounts.size === 2089 &&
+  coverReferenceCounts.size === 2098 &&
     [...coverReferenceCounts.values()].every((count) => count === 1 || count === 2) &&
     [...coverReferenceCounts.values()].filter((count) => count === 2).length === 2,
   "unexpected HC1 sharing pattern",
@@ -786,9 +786,9 @@ for (const coverResult of report.curves) {
 }
 
 check(constructionCounts.binary_cubic_pullback_v1 === 160, "unexpected binary-construction count");
-check(constructionCounts.prime_quadratic_pullback_v1 === 1931, "unexpected odd-construction count");
+check(constructionCounts.prime_quadratic_pullback_v1 === 1940, "unexpected odd-construction count");
 check(arithmeticChecks.binary === 160, "unexpected binary arithmetic-replay count");
-check(arithmeticChecks.prime === 607, "unexpected prime-field arithmetic-replay count");
+check(arithmeticChecks.prime === 616, "unexpected prime-field arithmetic-replay count");
 check(arithmeticChecks.extension === 1324, "unexpected extension-field arithmetic-replay count");
 check(
   arithmeticChecks.normalized_target === 30,
@@ -796,7 +796,7 @@ check(
 );
 
 const expectedStatusVocabulary = ["unknown", "supported", "refuted", "not_applicable"];
-const expectedCatalogCommit = "6600c7c6c0cfbb6a9e4e596bf8c5cfa292fb269e";
+const expectedCatalogCommit = "ff48e2800f62b45c746b3f391540c07b16af4e75";
 const expectedRootKeys = [
   "assessment_date",
   "catalog_commit",
@@ -1025,8 +1025,8 @@ const expectedSemanticDigests = {
   claim_contract: "36a2bb9524810994c02633462e71ae08ac88da6fbb520df72e66e05150628634",
   result_templates: "74d48723d80213cef7032b499e2d36a051ebed3c23e03bfce5819ad80f5edb7c",
   profiles: "807800e78066e8c3b0caa6634072a585cf4ae924a40b13817d9ca7a3c0aa3710",
-  controls: "e8132b566cbe2d241030a60c1de2ae53e7655a3a5e2d45d42e8500f4660750fb",
-  open_obligations: "94252a8f25872fc8a4f1bc754e3902980707529fa14286e4e64652b0c3b44702",
+  controls: "6ef9bbf2eed4dd04ff0025f06c6d6b73e62519c54519e356c0dc7e3c22eb1850",
+  open_obligations: "142a997795d925f10923d7fc4adb80bfa886ca7d5c46f5a911529d8538189629",
   global_cost_accounting:
     "b3b77a401d4dd76cabfc9a65d5a738fcfb977fd1a3abc2db3733c41820304619",
 };
@@ -1661,10 +1661,10 @@ for (const [mapUid, context] of mapContexts) {
   });
 }
 
-check(expectedFieldBindings.size === 311, "unexpected declared-field context count");
-check(fieldUidByLabel.size === 311, "declared-field labels are not bijective with field contexts");
-check(expectedJacobianBindings.size === 2089, "unexpected Jacobian-context count");
-check(expectedTypedMapBindings.size === 2091, "unexpected typed-map binding count");
+check(expectedFieldBindings.size === 318, "unexpected declared-field context count");
+check(fieldUidByLabel.size === 318, "declared-field labels are not bijective with field contexts");
+check(expectedJacobianBindings.size === 2098, "unexpected Jacobian-context count");
+check(expectedTypedMapBindings.size === 2100, "unexpected typed-map binding count");
 check(
   canonicalJson(actualFieldBindings) === canonicalJson(sortedRecord(expectedFieldBindings)),
   "typed declared-field bindings are not the exact independently derived set",
@@ -1830,7 +1830,7 @@ check(
 
 const expectedPredicateCounts = {
   binary_cubic_same_field: 160,
-  odd_prime_quadratic_direct_same_field: 577,
+  odd_prime_quadratic_direct_same_field: 586,
   odd_prime_quadratic_normalized_same_field: 30,
   odd_extension_quadratic_direct_same_field: 1324,
   linked_subgroup_degree3: 134,
@@ -2175,7 +2175,7 @@ check(
   typeof coverage.scope_note === "string" && coverage.scope_note.trim().length > 0,
   "coverage scope_note is empty",
 );
-check(coverage.assessed_maps === 2091 && coverage.unassessed_maps === 0, "map coverage is incomplete");
+check(coverage.assessed_maps === 2100 && coverage.unassessed_maps === 0, "map coverage is incomplete");
 check(
   coverage.assessed_subgroups === 664 && coverage.unassessed_subgroups === 0,
   "subgroup coverage is incomplete",
@@ -2366,6 +2366,16 @@ const staleReportPatterns = [
   /assess the other 2,089 current map rows/iu,
   /assess the remaining 2,089 maps and 662 EC1 representations/iu,
 ];
+const staleCurrentPopulationPatterns = [
+  /current 2,091-row/iu,
+  /2,091 current (?:map rows|models|inputs)/iu,
+  /1,931-row odd catalog population/iu,
+  /577 direct(?:-prime| short-Weierstrass)/iu,
+  /737 (?:forms inside|models total)/iu,
+  /737\/1,354 result/iu,
+  /all 2,091 current inputs/iu,
+  /all 2,091 model forms/iu,
+];
 for (const [kind, relativePath] of Object.entries(reportArtifacts)) {
   const absolute = resolveRepoPath(relativePath);
   check(absolute !== null, "unsafe report artifact path for " + kind);
@@ -2388,6 +2398,37 @@ for (const [kind, relativePath] of Object.entries(reportArtifacts)) {
     );
     for (const stalePattern of staleReportPatterns) {
       check(!stalePattern.test(contents), `${kind} report retains stale partial-assessment language`);
+    }
+    for (const stalePattern of staleCurrentPopulationPatterns) {
+      check(!stalePattern.test(contents), `${kind} report retains a stale current-population count`);
+    }
+  }
+  if (kind === "context_graph_source") {
+    const contents = bytes.toString("utf8");
+    for (const marker of [
+      "318 fields / 2,098 Jacobian contexts / 2,100 maps",
+      "current-source test: 2,100 / 2,100",
+      "746 inside / 1,354 outside old allowlist",
+    ]) {
+      check(contents.includes(marker), `context graph lacks current marker: ${marker}`);
+    }
+    for (const stalePattern of staleCurrentPopulationPatterns) {
+      check(!stalePattern.test(contents), "context graph retains a stale current-population count");
+    }
+  }
+  if (kind === "release_receipt") {
+    const contents = bytes.toString("utf8");
+    for (const marker of [
+      "current 2,100-row",
+      "586 direct short-Weierstrass prime-field models",
+      "2,100 total",
+      "746/1,354 result",
+      "13 passed; 0 failed",
+    ]) {
+      check(contents.includes(marker), `release receipt lacks current marker: ${marker}`);
+    }
+    for (const stalePattern of staleCurrentPopulationPatterns) {
+      check(!stalePattern.test(contents), "release receipt retains a stale current-population count");
     }
   }
   if (kind === "pdf") {

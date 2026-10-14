@@ -99,7 +99,7 @@ establishes an end-to-end solver.
 1. **Finish the present evidence gate.** The plan supplies catalog-replay,
    release, and dependency gates. Status is partial. Closure still requires
    full-checkout CI and Lean receipts, a fresh package, exact-artifact replay of
-   2,091 inputs, independent semantic replay, and required reviews.
+   2,100 inputs, independent semantic replay, and required reviews.
 2. **Close cover-transfer gaps.** The plan separates implementation tracks
    from the oracle/review gate. Status is partial. Closure still requires
    balanced two-infinity arithmetic, a catalog-general binary norm, all
@@ -160,7 +160,7 @@ Existing systems remain authoritative for their own domains:
   representations, and exact joins. They do not establish protocol deployment
   or attack status.
 - The [cover-transfer ledger](../../../docs/curves/cover-transfer-assessments.json)
-  supplies 2,091 classified maps and 664 subgroup contexts. It does not
+  supplies 2,100 classified maps and 664 subgroup contexts. It does not
   establish complete arithmetic, transfer, a solver, or an advantage.
 - The [IC boundary ledger](../../../docs/ic/BOUNDARY_TARGETS.md) supplies
   fail-closed solver-stage and matched-rho accounting. It does not establish
@@ -310,7 +310,7 @@ governance, not active approval.](../../../docs/ecdlp-audit/program-dependencies
 
 **Current state:** partial. The current
 [assessment](../../../research/cover_transfer_assessment_20261013/README.md)
-classifies all 2,091 map rows and all 664 EC1 bindings. Classification is not
+classifies all 2,100 map rows and all 664 EC1 bindings. Classification is not
 blanket support. The current-source constructor accepts the catalog, while the
 published artifact was replayed only on its bundled 592-row registry.
 
@@ -321,7 +321,7 @@ Deliverables and exit gates:
 2. Obtain full CI, Lean kernel/axiom audit, and semantic-replay receipts.
 3. Build a fresh standalone artifact and record source, binary, dependency,
    toolchain, configuration, and SBOM hashes.
-4. Replay all 2,091 cover inputs against that **exact artifact**, retaining
+4. Replay all 2,100 cover inputs against that **exact artifact**, retaining
    unsupported results, failures, runtime, memory, and commands.
 5. Reconcile crypto and cryptanalysis identities and results.
 6. Obtain mathematical, implementation, and evidence/replay review.
@@ -337,7 +337,7 @@ This is multiple implementation PRs, not a single “complete covers” label.
 
 Implement validity, canonical representation/reduction, equality, negation,
 addition, scalar multiplication, both infinity classes, pullback, and arbitrary
-norm for the 1,931 odd-characteristic catalog covers. Start with exhaustive
+norm for the 1,940 odd-characteristic catalog covers. Start with exhaustive
 public fixtures over `p <= 31`, then small extensions, then catalog replay.
 Exit requires an independent oracle, malformed and exceptional cases,
 representative independence, additivity, and `phi_* phi^* = [2]` on the stated
