@@ -1,0 +1,15 @@
+rerun main cado-bwc D=8192 m=3 s=1 rc=0 11.689s
+rerun main core-bw D=8192 m=3 s=1 rc=0 1.40584s
+rerun main igauss D=8192 m=3 s=2 rc=0 16.8359s
+rerun main sgauss D=8192 m=3 s=2 rc=0 16.2432s
+rerun main full-bw D=8192 m=3 s=2 rc=0 0.189099s
+rerun main full-bl D=8192 m=3 s=2 rc=0 0.252529s
+rerun main core-bw D=8192 m=3 s=2 rc=0 1.31414s
+rerun main cado-bwc D=8192 m=3 s=2 rc=0 11.1689s
+rerun main igauss D=8192 m=3 s=3 rc=0 14.9404s
+rerun main sgauss D=8192 m=3 s=3 rc=0 14.9937s
+rerun main full-bw D=8192 m=3 s=3 rc=0 0.160616s
+rerun main full-bl D=8192 m=3 s=3 rc=0 0.226475s
+rerun main core-bw D=8192 m=3 s=3 rc=0 1.31318s
+rerun main cado-bwc D=8192 m=3 s=3 rc=0 10.4751s
+rerun main sgauss D=16384 m=3 s=1 rc=0 104.904s

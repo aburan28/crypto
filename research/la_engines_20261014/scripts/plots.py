@@ -23,6 +23,23 @@ def load(name):
 
 grid, a1, a2, e2e = load("grid.jsonl"), load("grid_amend1.jsonl"), load("grid_amend2.jsonl"), load("e2e.jsonl")
 
+# Amendment 3: a record whose run overlapped a build or diagnostic window is
+# replaced by its idle-host re-run (matched by pass, arm, D, m, seed; the
+# contended record is identified by its end time). Originals stay in raw/.
+contended = load("contended_runs.jsonl")
+reruns = load("rerun_contended.jsonl")
+replaced = []
+for c, rr in zip(contended, reruns):
+    assert (c["pass"], c["arm"], c["cols"], c["seed"]) == (rr["pass"], rr["arm"], rr["cols"], rr["seed"]), (c, rr)
+    for rows in (grid, a1, a2):
+        for i, r in enumerate(rows):
+            if r.get("utc") == c["utc"] and r.get("arm") == c["arm"] and r.get("cols") == c["cols"] \
+                    and r.get("seed") == c["seed"] and r.get("pass") == c["pass"]:
+                rows[i] = dict(rr, weight=rr.get("weight", c["weight"]), replaced_utc=c["utc"])
+                replaced.append({"pass": c["pass"], "arm": c["arm"], "cols": c["cols"], "weight": c["weight"],
+                                 "seed": c["seed"], "original_s": r.get("solve_s"), "rerun_s": rr.get("solve_s"),
+                                 "rerun_verified": rr.get("verified")})
+
 # The grid driver kept the bench's own arm name; the A/A repeat is the second
 # `core-bw` record for (main, D, seed 1). Relabel it so it never enters a median.
 seen = set()
@@ -176,5 +193,6 @@ if e2e:
     summary["e2e"] = [{k: r[k] for k in ("label", "linear_algebra", "sparse_solver", "seed", "columns", "relations",
                        "elapsed_seconds", "linear_algebra_seconds", "other_seconds_derived")} for r in rows]
 
+summary["amendment3_replaced"] = replaced
 (here / "summary.json").write_text(json.dumps(summary, indent=1, sort_keys=True))
 print("figures:", sorted(p.name for p in figs.iterdir()))
