@@ -31,5 +31,6 @@ arms on this single-target draw.
 
 ## Prior related archives
 
+- `evidence/20261012-koblitz-decomposition-n31-m2-dim16/` (`--fixtures 8`)
 - `runs_manual/n31_decomp_m2_dim16_20260911/` (manual drafts)
 - `autolab_groebner_hyperopt_20260921/runs/selected_default_n31_*` (policy selection)
