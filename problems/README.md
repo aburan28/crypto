@@ -11,6 +11,7 @@ Keep resolved and superseded records in the index.
 
 | Problem | Status | What it blocks | What would unblock it |
 | --- | --- | --- | --- |
+| [a=0 native genus-two full-solve compute](binary-genus2-a0-full-solve-compute.md) | investigating | completed full-order native-Jacobian timings at r=2417851639230796216685689 | retained checkpoints, sufficient durable compute or a verified new method, and actual full-target recoveries |
 | [ecbench binary genus-two full-subgroup adapter](ecbench-binary-genus2-full-subgroup-adapter.md) | open | sealed cross-representation n=83 comparison and qualified speed ratio | explicit wide subgroup selection, registered Mumford-image adapter, common costs and independent replay |
 | [Binary genus-two geometric formalization](binary-genus2-cover-geometric-formalization.md) | open | full Lean theorem for the explicit cover and Picard injection; native construction is verified | actual projective/function-field and divisor-class definitions, genus/degree and pullback bridge proofs |
 | [JV F4 minimum completed cases](jv-f4-minimum-completed-cases.md) | open | unqualified green whole-library gate on the pinned base | explain omitted cases and pass the full original suite without lowering its thresholds |
