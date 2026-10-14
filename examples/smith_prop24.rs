@@ -333,8 +333,69 @@ fn main() {
             write_json(&dir.join("verdict.json"), &v);
             eprintln!("{}", serde_json::to_string_pretty(&v).unwrap());
         }
+        "describe" => {
+            // Post hoc, descriptive (protocol amendment 1): how the
+            // full_success curves spread over the classes that hold a curve
+            // with a rational tractable subgroup.  No verdict rests on it.
+            let dir = PathBuf::from(arg(&args, "--dir").expect("--dir DIR"));
+            let mut out = Vec::new();
+            for p in [7u64, 11] {
+                let [cl, ..] = census_files(&dir, p);
+                if !cl.exists() {
+                    continue;
+                }
+                let classes: Vec<sp::ClassRow> = fs::read_to_string(cl)
+                    .unwrap()
+                    .lines()
+                    .skip(1)
+                    .map(|l| sp::ClassRow::parse(l).expect("class row"))
+                    .collect();
+                // Bins of share = full_success / tractable curves in the class:
+                // exactly 0, (0, 0.1], (0.1, 0.2], ..., (0.9, 1].
+                let mut classes_by_bin = [0u64; 11];
+                let mut curves_by_bin = [0u64; 11];
+                let mut zero_sizes: Vec<u64> = Vec::new();
+                let mut pos_sizes: Vec<u64> = Vec::new();
+                for c in classes.iter().filter(|c| c.tractable_curves > 0) {
+                    let share = c.full_success_curves as f64 / c.tractable_curves as f64;
+                    let b = if c.full_success_curves == 0 {
+                        0
+                    } else {
+                        1 + (((share * 10.0).ceil() as usize).clamp(1, 10) - 1)
+                    };
+                    classes_by_bin[b] += 1;
+                    curves_by_bin[b] += c.curves;
+                    if c.full_success_curves == 0 {
+                        zero_sizes.push(c.curves);
+                    } else {
+                        pos_sizes.push(c.curves);
+                    }
+                }
+                let median = |v: &mut Vec<u64>| -> Option<u64> {
+                    v.sort_unstable();
+                    v.get(v.len() / 2).copied()
+                };
+                let full_total: u64 = classes.iter().map(|c| c.full_success_curves).sum();
+                let tract_total: u64 = classes.iter().map(|c| c.tractable_curves).sum();
+                out.push(json!({
+                    "p": p,
+                    "bins": ["0", "(0,0.1]", "(0.1,0.2]", "(0.2,0.3]", "(0.3,0.4]", "(0.4,0.5]",
+                             "(0.5,0.6]", "(0.6,0.7]", "(0.7,0.8]", "(0.8,0.9]", "(0.9,1]"],
+                    "classes_by_bin": classes_by_bin,
+                    "curves_by_bin": curves_by_bin,
+                    "tractable_classes": classes_by_bin.iter().sum::<u64>(),
+                    "tractable_classes_without_full_success": classes_by_bin[0],
+                    "curves_in_them": curves_by_bin[0],
+                    "median_class_size_without_full_success": median(&mut zero_sizes),
+                    "median_class_size_with_full_success": median(&mut pos_sizes),
+                    "pooled_share_full_over_tractable": full_total as f64 / tract_total as f64,
+                }));
+            }
+            write_json(&dir.join("describe_classes.json"), &out);
+            eprintln!("{}", serde_json::to_string_pretty(&out).unwrap());
+        }
         _ => {
-            eprintln!("usage: smith_prop24 control|random|census|resummarize|verdict ...");
+            eprintln!("usage: smith_prop24 control|random|census|resummarize|verdict|describe ...");
             std::process::exit(64);
         }
     }

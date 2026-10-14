@@ -281,3 +281,21 @@ from the rows by `smith_prop24 resummarize --dir data` and must match byte
 for byte; `smith_prop24 verdict --dir data` writes `data/verdict.json` (the
 Section 5 verdicts) from the recorded files only. Then `REPORT.typ`/`REPORT.pdf` (verdict table first), an SVG figure
 plotted from the recorded values, and a run report under `reports/`.
+
+## Amendment 1 (2026-10-14, after the data; post hoc, descriptive only)
+
+No frozen definition, threshold, seed, population or decision rule changed; the
+verdicts in `data/verdict.json` are computed exactly as Section 5 states.
+
+- **Added `smith_prop24 describe`** (native, in `examples/smith_prop24.rs`):
+  from the committed class rows it bins, per class with a tractable model,
+  the share of tractable models that have `full_success`, and records how
+  many such classes have none (`data/describe_classes.json`, Figure 2 of the
+  report). It was written after the `p = 7` summary had been read and while
+  the `p = 11` census was running. The `p = 11` binary had been built at the
+  freeze commit `31d0beec8`; the uncommitted `describe` edit was stashed until
+  that run ended, so the manifest's clean `git status` describes the code
+  that ran. `describe` is committed separately after the runs.
+- **"C lies below the independence null"** is a post hoc reading of the
+  registered null, which Section 4 registered as a detector-power reference,
+  not as a test. It is reported as descriptive.
