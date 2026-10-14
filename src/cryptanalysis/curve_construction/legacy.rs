@@ -75,8 +75,10 @@ pub struct GhsCensus {
     pub seed: u64,
     pub samples: usize,
     pub census: BTreeMap<String, u64>,
-    pub genus_by_magic_number: BTreeMap<u32, String>,
-    pub trichotomy_holds: bool,
+    pub genus_by_class: BTreeMap<String, String>,
+    /// Every sample matches MMT eq. (5): `m = 1` iff `b = 1`, `m = 131`
+    /// otherwise, type I iff `Tr(b) = 0` and `b != 1`.
+    pub mmt_classes_hold: bool,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -138,14 +140,17 @@ pub fn ghs_census(samples: usize, seed: u64) -> GhsCensus {
         let tr = f2_trace(&b, &irr);
         assert!(tr == zero || tr == one, "absolute trace lies in F_2");
         let tr_bit = u8::from(tr == one);
-        ok &= matches!(m, 1 | 130 | 131);
+        // MMT eq. (5): Ord_b is x + 1 (b = 1), the degree-130 factor f
+        // (Tr b = 0, b != 1) or x^131 - 1 (Tr b = 1); m = 1, 130 + 1, 131.
+        // The f case is type I, genus 2^130 - 1; Tr b = 1 is type II, 2^130.
+        let (g, type_i) = ghs_genus_with_type(&tower, &b);
+        ok &= matches!(m, 1 | 131);
         ok &= (m == 1) == (b == one);
-        ok &= (m == 130) == (tr_bit == 0 && b != one);
+        ok &= type_i == (tr_bit == 0 && b != one);
         *census.entry(format!("m={m},trace={tr_bit}")).or_insert(0) += 1;
-        genus_by_magic.entry(m).or_insert_with(|| {
-            let (g, type_i) = ghs_genus_with_type(&tower, &b);
-            format!("{g} (type {})", if type_i { "I" } else { "II" })
-        });
+        genus_by_magic
+            .entry(format!("m={m},trace={tr_bit}"))
+            .or_insert_with(|| format!("{g} (type {})", if type_i { "I" } else { "II" }));
     }
     GhsCensus {
         field_modulus: "z^131 + z^8 + z^3 + z^2 + 1 (IrreduciblePoly::deg_131)".into(),
@@ -154,8 +159,8 @@ pub fn ghs_census(samples: usize, seed: u64) -> GhsCensus {
         seed,
         samples,
         census,
-        genus_by_magic_number: genus_by_magic,
-        trichotomy_holds: ok,
+        genus_by_class: genus_by_magic,
+        mmt_classes_hold: ok,
     }
 }
 
@@ -242,5 +247,35 @@ pub fn run(samples: usize, seed: u64) -> LegacyReplay {
             cells,
             crossover_between: (last_win, first_loss),
         },
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Over `F_2^131` the MMT magic number is 1 (`b = 1`) or 131, and the
+    /// 131 class splits by `Tr(b)`: type I, genus `2^130 - 1`, for trace 0;
+    /// type II, genus `2^130`, for trace 1.  No sample has `m = 130`.
+    #[test]
+    fn ghs_census_matches_mmt() {
+        let c = ghs_census(40, 20261006);
+        assert!(c.mmt_classes_hold, "{:?}", c.census);
+        assert_eq!(c.ecc2k130_magic_number, 1);
+        assert_eq!(c.ecc2k130_descent_genus, "1");
+        assert!(
+            c.census.keys().all(|k| k.starts_with("m=131,")),
+            "{:?}",
+            c.census
+        );
+        let two130 = BigUint::one() << 130usize;
+        for (k, g) in &c.genus_by_class {
+            let expect = if k.ends_with("trace=0") {
+                format!("{} (type I)", &two130 - 1u32)
+            } else {
+                format!("{two130} (type II)")
+            };
+            assert_eq!(g, &expect, "{k}");
+        }
     }
 }

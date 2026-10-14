@@ -1,0 +1,344 @@
+{
+  "all_stages_charged_same_series": true,
+  "automorphism_discount": "sqrt(2n) with A=2*n=46 signed Frobenius",
+  "candidate_id": "IC1N23Ckb0fb2024PDP3rootfindmitmRCwalkLAincrementalgaussTDjointISO0ha202a9a43e9b",
+  "candidate_manifest": {
+    "curve": {
+      "coefficients": {
+        "a1": 1,
+        "a2": 0,
+        "a3": 0,
+        "a4": 0,
+        "a6": 1
+      },
+      "cofactor": 4,
+      "curve_id": "EC1N23Ckb0h15a530fe9c69",
+      "generator": [
+        7502454,
+        6195881
+      ],
+      "model": "y^2+x*y=x^3+a2*x^2+a6",
+      "order": 8383412,
+      "r": 2095853,
+      "tag": "kb0",
+      "target_group": "prime-order-subgroup-generated-by-G",
+      "trace": 5197
+    },
+    "endomorphism": {
+      "frobenius_order_conductor": null,
+      "order_conductor": null,
+      "volcano_levels": []
+    },
+    "factor_base": {
+      "construction": {
+        "builder": "ic_framework::plugins",
+        "family": "koblitz-orbit",
+        "params": {
+          "divisor": "1"
+        },
+        "points_sha256": "1533cdaba3638256709718783a50f6f4245f78632b7eb99d397be564aaaa88df",
+        "solver_columns": {
+          "fold": "signed Frobenius orbits of the raw lifted points",
+          "identity_image_columns": 1,
+          "merged_columns": 0,
+          "raw_columns": 45
+        }
+      },
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 44,
+        "geometric_order_sha256": "82bb08923d82ee0c2f1b360778e01a89b644b4168f0109fc34e21a8b1264bc9c",
+        "geometric_point_count": 2025,
+        "geometric_set_sha256": "0dfbbba4fde30a763324ebd9e253be4d8f2a9b11bb126e6df8e82b64a9062240",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 2024,
+        "usable_set_sha256": "b9f6886327430b28f78fb013406fd26a90693ce07c4b9b1f101e6db0451d53fc"
+      },
+      "nominal_bound": 2025
+    },
+    "field": {
+      "basis": "polynomial",
+      "element_encoding": "unsigned-integer-polynomial-bits",
+      "modulus": 8388641,
+      "n": 23,
+      "p": 2
+    },
+    "implementation": {
+      "components": [
+        {
+          "role": "ic_pipeline",
+          "sha256": "0b77296a1d919adafb922a358770352f87076e792775d806adedbb55a33b36f5"
+        },
+        {
+          "role": "ic_plugins",
+          "sha256": "358baabc3461b7e0b78eb5845bb2c4d57758b32319f2892d8bc40af34d8b5d42"
+        },
+        {
+          "role": "ic_solvers",
+          "sha256": "47ea17ed273cdcb2651c75c807393e94bde954e5e76055eb8f1ba0ed4f3f5546"
+        },
+        {
+          "role": "ic_linalg",
+          "sha256": "c25629cd28024edaccf279c67d2cd639c83c24e302fb0f9fabfc3179488d146e"
+        },
+        {
+          "role": "relation_loop",
+          "sha256": "a5a3e7a4569cce07f12567b08d4617f6eb2e1bd02907ee7a1c54a71b93110146"
+        },
+        {
+          "role": "harness",
+          "sha256": "fabd24a524c02db10fff28f013464892044a42552f508c2660e54d9a53c2abab"
+        }
+      ],
+      "flags": {
+        "ecbench_method_id": "ECM1hbf5a8df388c1",
+        "params": {
+          "factor_base": "koblitz-orbit:divisor=1",
+          "linalg": "incremental-gauss",
+          "max_trials": "200000",
+          "oracle": "rootfind-mitm:m=3",
+          "solver": "",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "source_manifest_sha256": "8e6a719d0049eba8847a0142a859377df17a9d18b178fd1c19430492680d530f"
+    },
+    "isogeny": "none",
+    "point_decomposition": {
+      "cache_policy": "tables built per run (cold)",
+      "encoding": "pair table (rootfind-mitm)",
+      "equation_order": "not applicable",
+      "internal_matrix_kernel": "not applicable",
+      "limits": "max_trials=200000, solver_budget_seconds=0",
+      "monomial_order": "not applicable",
+      "solver": "rootfindmitm",
+      "source_sha256": "358baabc3461b7e0b78eb5845bb2c4d57758b32319f2892d8bc40af34d8b5d42",
+      "summands": 3,
+      "summation_polynomial": "none: exact table lookup of point sums"
+    },
+    "relation_collection": {
+      "collector": "walk",
+      "dependencies": "incremental elimination drops dependent rows",
+      "duplicates": "guarded by key",
+      "filtering": "target guard: a repeated query is skipped",
+      "query_distribution": "[a]G + [b]Q from the r-adding walk or uniform draws of ic_boundary::collect_and_solve_with",
+      "query_rule": "targets=walk",
+      "source_sha256": "a5a3e7a4569cce07f12567b08d4617f6eb2e1bd02907ee7a1c54a71b93110146",
+      "stop_rule": "stop when the target column is pinned",
+      "verification": "decompositions are exact by construction; the recovered logarithm is checked by [d]G = Q"
+    },
+    "relation_linear_algebra": {
+      "block_parameters": "none",
+      "matrix_construction": "one row per relation over the factor-base columns plus the target column",
+      "modulus": 2095853,
+      "orbit_quotient": "sign-and-Frobenius",
+      "preconditioner": "none",
+      "rank_criterion": "the target column is pinned",
+      "solver": "incrementalgauss",
+      "source_sha256": "c25629cd28024edaccf279c67d2cd639c83c24e302fb0f9fabfc3179488d146e"
+    },
+    "schema_version": 1,
+    "target_descent": {
+      "method": "joint",
+      "policy": "classic index calculus: the target is a column of the relation matrix",
+      "recursive_solvers": "none",
+      "source_sha256": "0b77296a1d919adafb922a358770352f87076e792775d806adedbb55a33b36f5",
+      "stop_rule": "first pinned target column",
+      "success_rule": "[d]G = Q"
+    }
+  },
+  "candidate_manifest_sha256": "a202a9a43e9b7ac6cffa1d40cce11906dde17270c532d90b5fce72d62e384015",
+  "claim_boundary": "one public target on icv1-f2m23-t5197-69e76b73; one-target online windows as AGENTS.md 'IC measurements' defines them; the IC factor base and oracle tables are reusable set-up outside the window (398.041 ms, reported as ic_reusable_setup_ms); host class ECBENV2h2111995717f4",
+  "claim_boundary_non_claims": [
+    "no claim about other targets, curves or sizes",
+    "no claim about cold end-to-end cost, which the records' S reports",
+    "no multi-target or batch claim",
+    "no transfer to m = 83 or m = 131"
+  ],
+  "cost_unit": "ms per one public target, online wall",
+  "ecbench_records": {
+    "ic": "ECR1ha99785455bdd",
+    "rho": "ECR1hb7e867265603",
+    "session": "ECBS1hc0caf0e98e17"
+  },
+  "executable_or_source_hash": "15106bf5509c9462c524985fe50482719eed89720e22d3116dbaa3bb3551db47",
+  "fixture_hash": "9de92f790daeb07752e9972ee568fbf0d3a025545888dd53292d0bb70b8842b3",
+  "host_id": "ECBENV2h2111995717f4",
+  "ic_cost": 0.490998,
+  "ic_online_interval": {
+    "included_stages": [
+      "target_query",
+      "target_PDP",
+      "target_relation_check",
+      "target_descent",
+      "target_recovery_check"
+    ],
+    "start_event": "first target-dependent query ([a]G + [b]Q, or the walk's first jump), after the factor base and the oracle's tables are built",
+    "stop_event": "[d]G = Q verified inside the pipeline",
+    "zero_phases": {
+      "target_relation_check": "the oracle returns exact decompositions (pair-table hits on exact point keys, or solutions it checks under its own relation_check scope); this pipeline has no separate relation check, so any checking cost is inside target_PDP"
+    }
+  },
+  "ic_online_ms": 0.490998,
+  "ic_online_phase_ms": {
+    "T_target_PDP_ms": 0.135762,
+    "T_target_descent_ms": 0.055947,
+    "T_target_query_ms": 0.282453,
+    "T_target_recovery_check_ms": 0.016836,
+    "T_target_relation_check_ms": 0.0
+  },
+  "ic_online_wall_ms": 0.490998,
+  "ic_replay_certificate_sha256": null,
+  "ic_resource_envelope": {
+    "binary_sha256": "15106bf5509c9462c524985fe50482719eed89720e22d3116dbaa3bb3551db47",
+    "cpus": [
+      3
+    ],
+    "env_class_id": "ECBENV2h2111995717f4",
+    "numa_node": 0,
+    "threads": 1,
+    "timeout_seconds": 3600
+  },
+  "ic_reusable_setup_ms": 398.041179,
+  "ic_scalar_verified": true,
+  "ic_target_hash": "d8bb91463b9293cd0f856056bbe7209e99fd4632f6dbfe308cba159725a5050e",
+  "ic_verified": true,
+  "independent_replay": null,
+  "independent_replay_pointer": "none: no independent replay supplied",
+  "independent_validation": false,
+  "isolation_levels": {
+    "ic": "L1",
+    "required": "L2",
+    "rho": "L1"
+  },
+  "n_or_bits": 23,
+  "online_interval": {
+    "ic_included_stages": [
+      "target_query",
+      "target_PDP",
+      "target_relation_check",
+      "target_descent",
+      "target_recovery_check"
+    ],
+    "ic_start_event": "first target-dependent query ([a]G + [b]Q, or the walk's first jump), after the factor base and the oracle's tables are built",
+    "ic_stop_event": "[d]G = Q verified inside the pipeline",
+    "ic_zero_phases": {
+      "target_relation_check": "the oracle returns exact decompositions (pair-table hits on exact point keys, or solutions it checks under its own relation_check scope); this pipeline has no separate relation check, so any checking cost is inside target_PDP"
+    },
+    "rho_included_stages": [
+      "walk",
+      "collision",
+      "recovery_check"
+    ],
+    "rho_start_event": "first walk start [c]G + Q (the jump table [a]G is target-independent set-up)",
+    "rho_stop_event": "[d]G = Q verified inside the method"
+  },
+  "online_speedup": 0.3924048570462609,
+  "paired_target": {
+    "ic_public_q": [
+      "0x6f7610",
+      "0x7aa3e"
+    ],
+    "rho_public_q": [
+      "0x6f7610",
+      "0x7aa3e"
+    ],
+    "same_public_point": true
+  },
+  "resource_caps": {
+    "binary_sha256": "15106bf5509c9462c524985fe50482719eed89720e22d3116dbaa3bb3551db47",
+    "cpus": [
+      3
+    ],
+    "env_class_id": "ECBENV2h2111995717f4",
+    "numa_node": 0,
+    "threads": 1,
+    "timeout_seconds": 3600
+  },
+  "rho_cost": 0.19267,
+  "rho_online_interval": {
+    "included_stages": [
+      "walk",
+      "collision",
+      "recovery_check"
+    ],
+    "start_event": "first walk start [c]G + Q (the jump table [a]G is target-independent set-up)",
+    "stop_event": "[d]G = Q verified inside the method"
+  },
+  "rho_online_ms": 0.19267,
+  "rho_online_phase_ms": {
+    "T_rho_solve_ms": 0.19267
+  },
+  "rho_online_wall_ms": 0.19267,
+  "rho_policy": {
+    "collision_policy": "distinguished points, dp_bits=4; candidates checked by [d]G = Q",
+    "distinguished_point_memory_bytes": 1360,
+    "walk_policy": "signed-Frobenius lockstep walks with batched inversion (koblitz_strong_rho), lanes=32",
+    "worker_count": 1
+  },
+  "rho_replay_certificate_sha256": null,
+  "rho_resource_envelope": {
+    "binary_sha256": "15106bf5509c9462c524985fe50482719eed89720e22d3116dbaa3bb3551db47",
+    "cpus": [
+      3
+    ],
+    "env_class_id": "ECBENV2h2111995717f4",
+    "numa_node": 0,
+    "threads": 1,
+    "timeout_seconds": 3600
+  },
+  "rho_scalar_verified": true,
+  "rho_target_hash": "d8bb91463b9293cd0f856056bbe7209e99fd4632f6dbfe308cba159725a5050e",
+  "rho_verified": true,
+  "run_id": "IC1N23Ckb0fb2024PDP3rootfindmitmRCwalkLAincrementalgaussTDjointISO0ha202a9a43e9bW9de92f790daeR2",
+  "same_resource_envelope": true,
+  "schema": "ecbench.claim/v1",
+  "seeds": {
+    "algorithm_seed": "17211936566336823570",
+    "target": {
+      "counter": 3,
+      "index": 1,
+      "law": "hash_to_subgroup_v1",
+      "seed": 202610134023
+    }
+  },
+  "target_count": 1,
+  "timing_class": "single_target_online_wall",
+  "verdict": "descriptive only, not admissible: the runs earned L1 and L1, below the spec's L2",
+  "workload_id": "9de92f790dae",
+  "workload_manifest": {
+    "algorithm_seed": 17211936566336823570,
+    "cache_policy": "cold",
+    "curve_id": "EC1N23Ckb0h15a530fe9c69",
+    "input_law": "ecbench.hash_to_subgroup_v1",
+    "resource_envelope": {
+      "binary_sha256": "15106bf5509c9462c524985fe50482719eed89720e22d3116dbaa3bb3551db47",
+      "cpus": [
+        3
+      ],
+      "env_class_id": "ECBENV2h2111995717f4",
+      "numa_node": 0,
+      "threads": 1,
+      "timeout_seconds": 3600
+    },
+    "target_count": 1,
+    "target_seeds": [
+      {
+        "counter": 3,
+        "index": 1,
+        "law": "hash_to_subgroup_v1",
+        "seed": 202610134023
+      }
+    ],
+    "targets": [
+      [
+        7304720,
+        502334
+      ]
+    ]
+  },
+  "workload_manifest_sha256": "9de92f790daeb07752e9972ee568fbf0d3a025545888dd53292d0bb70b8842b3"
+}

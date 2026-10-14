@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p28/comparisons/ic-mitm__ic-rootfind.json
+ops (ok): ic-rootfind / ic-mitm = 1.0256 [1.025, 1.026] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 1.0934 [1.034, 1.151]
+| curve | log2 r | workloads | ic-rootfind / ic-mitm | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp28-t4155-50f492b1 | 26.20 | 8 | 1.0256 | [1.0250, 1.0262] | cluster |
+
+| workload | curve | log2 r | ic-mitm mean S | ic-rootfind mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W2ccd8c58d746 | icv1-fp28-t4155-50f492b1 | 26.20 | 128.2884 | 131.6468 | 1.0262 |
+| W312e2a60696a | icv1-fp28-t4155-50f492b1 | 26.20 | 127.5269 | 130.8147 | 1.0258 |
+| W3a315d086353 | icv1-fp28-t4155-50f492b1 | 26.20 | 128.4506 | 131.6150 | 1.0246 |
+| W4f89d827f0f8 | icv1-fp28-t4155-50f492b1 | 26.20 | 129.1572 | 132.4168 | 1.0252 |
+| W6cf3601f38d4 | icv1-fp28-t4155-50f492b1 | 26.20 | 128.8683 | 132.2884 | 1.0265 |
+| W7ae405a02d41 | icv1-fp28-t4155-50f492b1 | 26.20 | 128.1937 | 131.3848 | 1.0249 |
+| Waae34cb814ba | icv1-fp28-t4155-50f492b1 | 26.20 | 128.2503 | 131.5265 | 1.0255 |
+| Wdea0d01c7e18 | icv1-fp28-t4155-50f492b1 | 26.20 | 127.7984 | 131.1155 | 1.0260 |
