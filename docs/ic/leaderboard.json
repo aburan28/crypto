@@ -100,7 +100,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "5c95bdce54ee3da67303044d70d7cae7a0972df3074e04c04d306f2ef9c52484"
+   "sha256": "4fb5c90a28267c302ad1c5c62cb55d7dc2f8ccee273391fe12e481d92cab610b"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -6847,8 +6847,10 @@
    "coefficients": "a = 0, b = 1",
    "order_bits": 71,
    "standard": [],
-   "ec1": [],
-   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "ec1": [
+    "EC1N71Ce0hac1355ef3db6"
+   ],
+   "ec1_unresolved": null,
    "legacy": [
     "k0n71",
     "K_0 / GF(2^71)",
@@ -6936,6 +6938,22 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+   "family": "koblitz",
+   "field": "GF(2^83)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 83,
+   "standard": [],
+   "ec1": [
+    "EC1N83Ce1h35c7ced6b497"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-f2m83-t6151469093347-cdcc5432",
    "family": "koblitz",
    "field": "GF(2^83)",
@@ -6944,12 +6962,7 @@
    "standard": [],
    "ec1": [],
    "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
-   "legacy": [
-    "k1n83",
-    "K_1 / GF(2^83)",
-    "K_1/2^83",
-    "K_1/F_2^83"
-   ],
+   "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
@@ -9534,34 +9547,6 @@
    "family": "prime",
    "field": "GF(p), p = 1048583",
    "coefficients": "a = 699046, b = 388354",
-   "order_bits": 21,
-   "standard": [],
-   "ec1": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
-   "legacy": [],
-   "on_board": false,
-   "curves_yaml_key": null,
-   "factor_base_link_status": "no_curves_yaml_record"
-  },
-  {
-   "slug": "icv1-fp21-tm700-56b6783a",
-   "family": "prime",
-   "field": "GF(p), p = 1048583",
-   "coefficients": "a = 2, b = 2",
-   "order_bits": 21,
-   "standard": [],
-   "ec1": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
-   "legacy": [],
-   "on_board": false,
-   "curves_yaml_key": null,
-   "factor_base_link_status": "no_curves_yaml_record"
-  },
-  {
-   "slug": "icv1-fp21-tm700-7ee99c50",
-   "family": "prime",
-   "field": "GF(p), p = 1048583",
-   "coefficients": "a = 1048579, b = 1048579",
    "order_bits": 21,
    "standard": [],
    "ec1": [],
