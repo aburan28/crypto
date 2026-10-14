@@ -6,7 +6,11 @@ on:
     paths:
       - .github/workflows/n83-indexed5-load75-tier1.yml
       - examples/koblitz_orbit_dlp_fast.rs
-      - research/n83_indexed5_load75_20261013/**
+      - research/n83_indexed5_load75_20261013/DenseCapacity.lean
+      - research/n83_indexed5_load75_20261013/PROTOCOL.md
+      - research/n83_indexed5_load75_20261013/AMENDMENT.md
+      - research/n83_indexed5_load75_20261013/run.py
+      - research/n83_indexed5_load75_20261013/verify.py
   workflow_dispatch:
 
 permissions:
@@ -17,6 +21,30 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  release-lib:
+    if: github.repository == 'aburan28/crypto'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run complete release library gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/n83-indexed5-load75-lib"
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-indexed5-load75-lib-target"
+          export CARGO_BUILD_JOBS=2
+          export RUST_TEST_THREADS=2
+          cargo test --release --locked --lib \
+            > "$RUNNER_TEMP/n83-indexed5-load75-lib/lib-tests.log" 2>&1
+      - name: Preserve release library receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-indexed5-load75-lib-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-indexed5-load75-lib/
+          if-no-files-found: error
+          retention-days: 14
   primary-point:
     if: github.repository == 'aburan28/crypto'
     runs-on: ubuntu-24.04
