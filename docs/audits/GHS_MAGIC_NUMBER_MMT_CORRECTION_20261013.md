@@ -121,15 +121,23 @@ the values above; `curve_construction::legacy::ghs_census` now reports
 `jacobian_transfer::binary::ghs_magic` already used the MMT magic number; only
 its type rule was wrong.  Comparing a build of `main` at ecb69d15 with this
 branch on the same registry and `--budget 200000`: 0 magic numbers change,
-252 GHS rows change genus, 16 rows change class, and 4 curve verdicts change.
+252 GHS rows change genus, 16 rows change class, and 6 curve verdicts change.
 These are formula-level prices from the frozen cost model, not attack results.
 
 | curve | best route (branch) | genus was → now | ratio_log2 was → now | verdict was → now |
 |---|---|---|---|---|
 | Oakley Group 3 (`N = 5·31`) | GHS to `GF(2^31)` | 15 → 16 | +1.15 → −3.04 | formula_marginal → boundary |
 | Oakley Group 4 (`N = 5·37`) | GHS to `GF(2^37)` | 15 → 16 | +10.94 → +6.76 | formula_advantage → formula_marginal |
-| c2pnb368w1 | (was GHS to `GF(2^92)`, `m = 4`) now the heuristic isogeny-extension row to `GF(2^46)` | 7 → 8 | +10.05 → +7.92 | formula_advantage → formula_marginal |
-| c2pnb272w1 | GHS to `GF(2^2)`, `m = 8` "lower bound" row | 127 → 128 | (was unresolved at +41.32) → +72.20 | unresolved → formula_advantage |
+| c2pnb368w1 | was GHS to `GF(2^92)` (`m = 4`); now the heuristic isogeny-extension row to `GF(2^46)` (magic number ≤ 6). The exact `GF(2^92)` row is still there: genus 7 → 8, +10.05 → +6.00 | 7 → 32 (best route) | +10.05 → +7.92 | formula_advantage → formula_marginal |
+| c2pnb272w1 | was the heuristic `GF(2^2)` "`m = 9`, upper bound" row; now the exact `m = 8` row | 256 → 128 | +41.32 → +72.20 | unresolved → formula_advantage |
+| c2pnb176w1 | was the heuristic `GF(2^2)` "`m = 8`, lower bound" row; now the exact `m = 8` row | 127 → 128 | +23.86 → +23.64 | unresolved → formula_advantage |
+| c2pnb304w1 | was the heuristic `GF(2^2)` "`m = 9`, upper bound" row; now GHS to `GF(2^76)`, `m = 4` (the exact `m = 8` row over `GF(4)` is 256 bits and cannot carry the 288-bit subgroup) | 256 → 8 | +57.56 → +2.00 | unresolved → formula_marginal |
+
+The six verdict changes above were re-measured on 2026-10-13 by regenerating
+`docs/curves/jacobian-transfers.json` with a build of `main` (ba10b064) and with
+this branch on the same 2091-curve registry and `--budget 200000`; the branch
+output is byte-identical to the committed file.  The 252 and 16 above are from
+the earlier comparison against ecb69d15 and were not re-derived.
 
 Every `n = 2`, `m = 2` row moves from genus 1 / `not_carried` to genus 2 /
 `boundary` (11 rows: c2pnb176w1, c2pnb208w1, c2pnb272w1, c2pnb304w1,
