@@ -360,10 +360,10 @@ fn main_run() -> Result<(), String> {
     ]);
     writeln!(out, "{}", header.dump()).map_err(|e| e.to_string())?;
     for width in bits {
-        if width == 511 {
-            run::<8>(&mut out, width, &ells, samples, timing)?;
-        } else {
-            run::<4>(&mut out, width, &ells, samples, timing)?;
+        match width {
+            192 => run::<3>(&mut out, width, &ells, samples, timing)?,
+            511 => run::<8>(&mut out, width, &ells, samples, timing)?,
+            _ => run::<4>(&mut out, width, &ells, samples, timing)?,
         }
     }
     writeln!(
