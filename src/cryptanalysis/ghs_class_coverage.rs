@@ -25,8 +25,9 @@
 //!   `sigma = x -> x^(2^l)`.  The leading `1` matters: it adds one to the
 //!   plain orbit dimension exactly when `(x - 1)` does not divide `Ord_b`
 //!   (MMT Theorem 5(i)).  [`crate::cryptanalysis::ec_trapdoor::magic_number`]
-//!   uses the plain orbit dimension; [`tests::plain_orbit_undercounts`]
-//!   records the difference.
+//!   uses this definition since 2026-10-13; its earlier plain orbit
+//!   dimension is [`crate::cryptanalysis::ec_trapdoor::plain_orbit_dim`], and
+//!   [`tests::plain_orbit_undercounts`] records the difference.
 //! * Applicability to the twist `Tr_{K/F2}(a) = 1`: MMT Lemma 6, condition
 //!   (8): `n` odd, or `j_0 = 2^e`.  With `P(x) = (x^n - 1)/(x - 1)`,
 //!   `j_0 = 2^e` iff `P(sigma) b != 0`, and `P(sigma) b = Tr_{K/k}(b)`, so
@@ -348,7 +349,8 @@ pub fn magic_mmt(f: &Gf2Log, b: u32, l: u32) -> u32 {
 }
 
 /// Plain orbit dimension `dim Span{sqrt(sigma^i b)}` (the repository's older
-/// `ec_trapdoor::magic_number` definition).
+/// pre-2026-10-13 `ec_trapdoor::magic_number` definition, now
+/// `ec_trapdoor::plain_orbit_dim`).
 pub fn magic_plain(f: &Gf2Log, b: u32, l: u32) -> u32 {
     let n = f.n / l;
     let s = f.sqrt(b);
@@ -832,7 +834,7 @@ mod tests {
     fn plain_matches_ec_trapdoor() {
         use crate::binary_ecc::{F2mElement, IrreduciblePoly};
         use num_bigint::BigUint;
-        use crate::cryptanalysis::ec_trapdoor::{magic_number, FieldTower};
+        use crate::cryptanalysis::ec_trapdoor::{magic_number, plain_orbit_dim, FieldTower};
         let f = Gf2Log::new(12);
         let irr = IrreduciblePoly {
             degree: 12,
@@ -841,8 +843,9 @@ mod tests {
         let tower = FieldTower::new(12, 3, 4, irr);
         for b in (1..f.size() as u32).step_by(97) {
             let be = F2mElement::from_biguint(&BigUint::from(b), 12);
-            let old = magic_number(&tower, &F2mElement::zero(12), &be);
-            assert_eq!(old, magic_plain(&f, b, 4), "b={b}");
+            assert_eq!(plain_orbit_dim(&tower, &be), magic_plain(&f, b, 4), "b={b}");
+            let mmt = magic_number(&tower, &F2mElement::zero(12), &be);
+            assert_eq!(mmt, magic_mmt(&f, b, 4), "b={b}");
         }
     }
 
