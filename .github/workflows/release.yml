@@ -368,20 +368,6 @@ jobs:
           exit 1
       - if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.scope.outputs.release_native != 'false'
         uses: actions/checkout@v4
-        with:
-          filter: blob:none
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            /ecc2k130/Makefile
-            /ecc2k130/README.md
-            /ecc2k130/src/
-            /ecc2k130/include/
-            /ecc2k130/generated/
-            /gpu/ecc/
-            /gpu/ecc2k/
-            /gpu/semaev/
-            /gpu/macaulay/
-            /gpu/btcpuzzle/
       - name: Build the ECC2K-130 CPU client
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.scope.outputs.release_native != 'false'
         run: make -C ecc2k130 cpu MARCH="$ECC_MARCH"
