@@ -15,6 +15,10 @@ on:
       - 'research/sat_factor_base_review_20260908/autolab/**'
   workflow_dispatch:
     inputs:
+      beat:
+        description: 'Single-target panel beat id'
+        default: 'koblitz.compact_orbit.n61_single_target'
+        required: true
       workloads:
         description: 'One-target eval workloads (>= 16)'
         default: '64'
@@ -27,6 +31,10 @@ on:
         description: 'Fixed K (empty: tune on the disjoint one-target workloads)'
         default: ''
         required: false
+      timeout_minutes:
+        description: 'Measure job timeout in minutes'
+        default: '300'
+        required: true
 
 permissions:
   contents: read
@@ -83,7 +91,7 @@ jobs:
           python3 -m py_compile boundary_autolab.py single_target_panel.py
           python3 -m unittest test_boundary_autolab.py -v
           python3 boundary_autolab.py plan > /dev/null
-          if python3 boundary_autolab.py launch-single --beat koblitz.compact_orbit.n61_single_target --workloads 4; then exit 1; fi
+          if python3 boundary_autolab.py launch-single --beat "${{ inputs.beat }}" --workloads 4; then exit 1; fi
       - run: cargo build --release --locked --example koblitz_orbit_dlp_fast_online --example koblitz_rho_batch_ks_strong_online --example koblitz_orbit_dlp_fast --example koblitz_rho_batch_ks_strong
       - run: cargo test --release --locked --example koblitz_rho_batch_ks_strong_online
 
@@ -91,7 +99,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     needs: validate
     runs-on: ubuntu-24.04
-    timeout-minutes: 300
+    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -129,6 +137,7 @@ jobs:
         id: run
         env:
           RAYON_NUM_THREADS: '1'
+          BEAT: ${{ inputs.beat }}
           WORKLOADS: ${{ inputs.workloads }}
           TUNE_WORKLOADS: ${{ inputs.tune_workloads }}
           FIXED_K: ${{ inputs.k }}
@@ -147,9 +156,9 @@ jobs:
             LOG="$OUT/preflight_${ATTEMPT}.log"
             set +e
             python3 tools/isolated_bench.py reserve --cpus "$CPUS" --max-psi 5 \
-              --out "$OUT/isolation.jsonl" --label "compact-orbit-n61-single-W${WORKLOADS}" -- \
+              --out "$OUT/isolation.jsonl" --label "compact-orbit-single-W${WORKLOADS}" -- \
               python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch-single \
-                --beat koblitz.compact_orbit.n61_single_target --workloads "$WORKLOADS" \
+                --beat "$BEAT" --workloads "$WORKLOADS" \
                 --tune-workloads "$TUNE_WORKLOADS" --run-id "$RUN_ID" --cpu "$CPU" "${K_ARGS[@]}" > "$LOG" 2>&1
             STATUS=$?
             set -e
@@ -172,7 +181,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: compact-orbit-n61-single-target-W${{ inputs.workloads }}
+          name: compact-orbit-single-target-${{ inputs.beat }}-W${{ inputs.workloads }}
           path: ${{ runner.temp }}/n61-single
           if-no-files-found: warn
           retention-days: 90
