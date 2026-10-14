@@ -457,9 +457,11 @@ fn e1_step(s: &Inst, arm: &str, w: W) -> (W, u64) {
 /// coefficients ends the trial. A repeat with the same coefficients is a
 /// fruitless cycle: with `escape` the walk leaves it by doubling (counted),
 /// without it the trial ends unsolved there.
-fn e1_trial(c: &Curve, arm: &str, seed: u64, r: usize, cap: u64, escape: bool) -> Rec {
+fn e1_trial(c: &Curve, arm: &str, seed: u64, r: usize, cap: u64, mode: &str) -> Rec {
     let n = c.n;
+    let escape = mode != "off";
     let mut s = Inst::new(c, seed, r);
+    let shift = s.random_w(); // fixed escape offset for mode "shift"
     let mut w = s.random_w();
     let mut seen: FastMap<(u64, u64), (u64, u64)> = FastMap::default();
     let (mut steps, mut adds, mut escapes) = (0u64, 0u64, 0u64);
@@ -469,7 +471,11 @@ fn e1_trial(c: &Curve, arm: &str, seed: u64, r: usize, cap: u64, escape: bool) -
                 let solved = s.check(a, b, w.a, w.b);
                 return Rec { steps, adds, solved, censored: false, escapes, restarts: 0 };
             }
-            w = W { p: c.dbl(w.p), a: sadd(w.a, w.a, n), b: sadd(w.b, w.b, n) };
+            w = if mode == "shift" {
+                s.wadd(w, shift, false)
+            } else {
+                W { p: c.dbl(w.p), a: sadd(w.a, w.a, n), b: sadd(w.b, w.b, n) }
+            };
             escapes += 1;
             adds += 1;
             continue;
@@ -525,6 +531,7 @@ fn dp_trial(c: &Curve, arm: &str, seed: u64, cfg: &DpCfg) -> Rec {
     let mut s = Inst::new(c, seed, cfg.r);
     let n = c.n;
     let neg = arm.starts_with("neg_");
+    let sel = arm.strip_prefix("sel_"); // e1 selection walks under the DP method
     let mask = (1u64 << cfg.dpbits) - 1;
     let restart_after = 20u64 << cfg.dpbits;
     let epoch_len = 4u64 << cfg.dpbits;
@@ -582,7 +589,11 @@ fn dp_trial(c: &Curve, arm: &str, seed: u64, cfg: &DpCfg) -> Rec {
                 "shared_index" => ((mix(round ^ s.keys[5]) as u128 * cfg.r as u128) >> 64) as usize,
                 _ => s.idx(x, 0, cfg.r),
             };
-            let mut nw = if arm == "pair_table" {
+            let mut nw = if let Some(sa) = sel {
+                let (nw, k) = e1_step(&s, sa, st.w);
+                adds += k - 1;
+                nw
+            } else if arm == "pair_table" {
                 let j = s.idx(x, 1, cfg.r);
                 s.wadd(st.w, pairs[i * cfg.r + j], false)
             } else {
@@ -593,11 +604,15 @@ fn dp_trial(c: &Curve, arm: &str, seed: u64, cfg: &DpCfg) -> Rec {
             let nc = mix(x ^ (i as u64) ^ s.keys[6]) & 1;
             if neg {
                 nw = canon(nw, flip_of(nw.p.x, round));
+            }
+            if neg || sel.is_some() {
                 if !st.prev.inf && nw.p == st.prev {
                     // fruitless 2-cycle {P, f(P)}: leave by doubling the smaller x
                     let m = if st.w.p.x < nw.p.x { st.w } else { nw };
                     nw = W { p: c.dbl(m.p), a: sadd(m.a, m.a, n), b: sadd(m.b, m.b, n) };
-                    nw = canon(nw, flip_of(nw.p.x, round));
+                    if neg {
+                        nw = canon(nw, flip_of(nw.p.x, round));
+                    }
                     adds += 1;
                     escapes += 1;
                 }
@@ -636,93 +651,242 @@ fn dp_trial(c: &Curve, arm: &str, seed: u64, cfg: &DpCfg) -> Rec {
 
 // ----------------------------------------------------------------- bench
 
-/// Batched-affine step cost over m walks (Montgomery simultaneous inversion).
-fn bench_arm(c: &Curve, arm: &str, m: usize, steps: usize, seed: u64) -> (f64, u64) {
-    let f = c.f;
+/// Branch-free L-limb Montgomery field for timing only: every operation runs
+/// the same instructions whatever the data, so short cycles in a walk cannot
+/// make it look cheaper. Values need not be curve points; the cost does not
+/// depend on them.
+#[derive(Clone, Copy)]
+struct MF<const L: usize> {
+    p: [u64; L],
+    ninv: u64,
+    one: [u64; L],
+}
+impl<const L: usize> MF<L> {
+    fn new(p: [u64; L]) -> Self {
+        let mut inv = p[0];
+        for _ in 0..6 {
+            inv = inv.wrapping_mul(2u64.wrapping_sub(p[0].wrapping_mul(inv)));
+        }
+        let mut f = MF { p, ninv: inv.wrapping_neg(), one: [0; L] };
+        let mut r = [0u64; L];
+        r[0] = 1;
+        for _ in 0..64 * L {
+            r = f.add(&r, &r);
+        }
+        f.one = r;
+        f
+    }
+    #[inline(always)]
+    fn sub_p_masked(&self, t: &[u64; L], carry: u64) -> [u64; L] {
+        // t - p if t + carry*2^(64L) >= p, else t; branch-free
+        let mut d = [0u64; L];
+        let mut br = 0u64;
+        for i in 0..L {
+            let (x, b1) = t[i].overflowing_sub(self.p[i]);
+            let (y, b2) = x.overflowing_sub(br);
+            d[i] = y;
+            br = (b1 | b2) as u64;
+        }
+        let keep_t = (br & !carry & 1).wrapping_neg(); // all ones: keep t
+        let mut o = [0u64; L];
+        for i in 0..L {
+            o[i] = (t[i] & keep_t) | (d[i] & !keep_t);
+        }
+        o
+    }
+    #[inline(always)]
+    fn add(&self, a: &[u64; L], b: &[u64; L]) -> [u64; L] {
+        let mut t = [0u64; L];
+        let mut c = 0u64;
+        for i in 0..L {
+            let s = a[i] as u128 + b[i] as u128 + c as u128;
+            t[i] = s as u64;
+            c = (s >> 64) as u64;
+        }
+        self.sub_p_masked(&t, c)
+    }
+    #[inline(always)]
+    fn sub(&self, a: &[u64; L], b: &[u64; L]) -> [u64; L] {
+        let mut t = [0u64; L];
+        let mut br = 0u64;
+        for i in 0..L {
+            let (x, b1) = a[i].overflowing_sub(b[i]);
+            let (y, b2) = x.overflowing_sub(br);
+            t[i] = y;
+            br = (b1 | b2) as u64;
+        }
+        let m = br.wrapping_neg();
+        let mut c = 0u64;
+        for i in 0..L {
+            let s = t[i] as u128 + (self.p[i] & m) as u128 + c as u128;
+            t[i] = s as u64;
+            c = (s >> 64) as u64;
+        }
+        t
+    }
+    #[inline(always)]
+    fn neg(&self, a: &[u64; L]) -> [u64; L] {
+        self.sub(&[0; L], a)
+    }
+    /// CIOS Montgomery multiplication.
+    #[inline(always)]
+    fn mul(&self, a: &[u64; L], b: &[u64; L]) -> [u64; L] {
+        let mut t = [0u64; L];
+        let mut t_hi = 0u64;
+        for i in 0..L {
+            let mut c = 0u64;
+            for j in 0..L {
+                let s = t[j] as u128 + a[j] as u128 * b[i] as u128 + c as u128;
+                t[j] = s as u64;
+                c = (s >> 64) as u64;
+            }
+            let s = t_hi as u128 + c as u128;
+            let (tl, th) = (s as u64, (s >> 64) as u64);
+            let m = t[0].wrapping_mul(self.ninv);
+            let mut c = ((t[0] as u128 + m as u128 * self.p[0] as u128) >> 64) as u64;
+            for j in 1..L {
+                let s = t[j] as u128 + m as u128 * self.p[j] as u128 + c as u128;
+                t[j - 1] = s as u64;
+                c = (s >> 64) as u64;
+            }
+            let s = tl as u128 + c as u128;
+            t[L - 1] = s as u64;
+            t_hi = th + (s >> 64) as u64;
+        }
+        self.sub_p_masked(&t, t_hi)
+    }
+    fn inv(&self, a: &[u64; L]) -> [u64; L] {
+        // a^(p-2), fixed exponent: square-and-multiply on the bits of p-2
+        let mut e = self.p;
+        e[0] -= 2; // p is odd and > 2, no borrow for the primes used here
+        let mut r = self.one;
+        for i in (0..L).rev() {
+            for k in (0..64).rev() {
+                r = self.mul(&r, &r);
+                if (e[i] >> k) & 1 == 1 {
+                    r = self.mul(&r, a);
+                }
+            }
+        }
+        r
+    }
+    fn random(&self, rng: &mut Rng) -> [u64; L] {
+        let mut v = [0u64; L];
+        for x in v.iter_mut() {
+            *x = rng.next();
+        }
+        v[L - 1] %= self.p[L - 1].max(1);
+        v
+    }
+}
+
+#[inline(always)]
+fn sel<const L: usize>(c: bool, a: &[u64; L], b: &[u64; L]) -> [u64; L] {
+    let m = (c as u64).wrapping_neg();
+    let mut o = [0u64; L];
+    for i in 0..L {
+        o[i] = (a[i] & m) | (b[i] & !m);
+    }
+    o
+}
+
+/// Batched-affine step cost over m walks (Montgomery simultaneous inversion),
+/// branch-free arithmetic and selection.
+fn bench_arm<const L: usize>(f: &MF<L>, arm: &str, m: usize, steps: usize, seed: u64) -> (f64, u64) {
     let mut rng = Rng(seed);
     let r = 32;
-    let tab: Vec<Pt> = (0..r).map(|_| c.random_point(&mut rng)).collect();
-    let mut xs: Vec<u64> = Vec::with_capacity(m);
-    let mut ys: Vec<u64> = Vec::with_capacity(m);
-    for _ in 0..m {
-        let p = c.random_point(&mut rng);
-        xs.push(p.x);
-        ys.push(p.y);
-    }
+    let tab: Vec<([u64; L], [u64; L])> = (0..r).map(|_| (f.random(&mut rng), f.random(&mut rng))).collect();
+    let mut xs: Vec<[u64; L]> = (0..m).map(|_| f.random(&mut rng)).collect();
+    let mut ys: Vec<[u64; L]> = (0..m).map(|_| f.random(&mut rng)).collect();
     let k2 = arm == "best4";
     let nd = if k2 { 2 * m } else { m };
-    let mut den = vec![0u64; nd];
-    let mut pre = vec![0u64; nd];
+    let mut den = vec![[0u64; L]; nd];
+    let mut pre = vec![[0u64; L]; nd];
     let mut ii = vec![0usize; nd];
     let ks = 0x5C0E_u64;
     let t0 = Instant::now();
     for _ in 0..steps {
         for w in 0..m {
-            let i = ((mix(xs[w] ^ 0x1D) as u128 * r as u128) >> 64) as usize;
+            let i = ((mix(xs[w][0] ^ 0x1D) as u128 * r as u128) >> 64) as usize;
             ii[w] = i;
-            den[w] = f.sub(tab[i].x, xs[w]);
+            den[w] = f.sub(&tab[i].0, &xs[w]);
             if k2 {
-                let j = ((mix(xs[w] ^ 0x2D) as u128 * r as u128) >> 64) as usize;
+                let j = ((mix(xs[w][0] ^ 0x2D) as u128 * r as u128) >> 64) as usize;
                 ii[m + w] = j;
-                den[m + w] = f.sub(tab[j].x, xs[w]);
+                den[m + w] = f.sub(&tab[j].0, &xs[w]);
             }
         }
         // simultaneous inversion: 3(nd-1) multiplications + one inversion
         let mut acc = f.one;
         for d in 0..nd {
             pre[d] = acc;
-            acc = f.mul(acc, den[d]);
+            acc = f.mul(&acc, &den[d]);
         }
-        let mut inv = f.inv(acc);
+        let mut inv = f.inv(&acc);
         for d in (0..nd).rev() {
-            let id = f.mul(inv, pre[d]);
-            inv = f.mul(inv, den[d]);
+            let id = f.mul(&inv, &pre[d]);
+            inv = f.mul(&inv, &den[d]);
             den[d] = id;
         }
         for w in 0..m {
             let (xp, yp) = (xs[w], ys[w]);
-            let t = tab[ii[w]];
-            match arm {
+            let (tx, ty) = tab[ii[w]];
+            let (l, x3) = match arm {
                 "base" => {
-                    let l = f.mul(f.sub(t.y, yp), den[w]);
-                    let x3 = f.sub(f.sub(f.mul(l, l), xp), t.x);
-                    ys[w] = f.sub(f.mul(l, f.sub(xp, x3)), yp);
-                    xs[w] = x3;
+                    let l = f.mul(&f.sub(&ty, &yp), &den[w]);
+                    (l, f.sub(&f.sub(&f.mul(&l, &l), &xp), &tx))
                 }
                 "pm_score" => {
-                    let lp = f.mul(f.sub(t.y, yp), den[w]);
-                    let lm = f.mul(f.neg(f.add(t.y, yp)), den[w]);
-                    let xp3 = f.sub(f.sub(f.mul(lp, lp), xp), t.x);
-                    let xm3 = f.sub(f.sub(f.mul(lm, lm), xp), t.x);
-                    let (l, x3) = if mix(xp3 ^ ks) >= mix(xm3 ^ ks) { (lp, xp3) } else { (lm, xm3) };
-                    ys[w] = f.sub(f.mul(l, f.sub(xp, x3)), yp);
-                    xs[w] = x3;
+                    let lp = f.mul(&f.sub(&ty, &yp), &den[w]);
+                    let lm = f.mul(&f.neg(&f.add(&ty, &yp)), &den[w]);
+                    let xp3 = f.sub(&f.sub(&f.mul(&lp, &lp), &xp), &tx);
+                    let xm3 = f.sub(&f.sub(&f.mul(&lm, &lm), &xp), &tx);
+                    let c = mix(xp3[0] ^ ks) >= mix(xm3[0] ^ ks);
+                    (sel(c, &lp, &lm), sel(c, &xp3, &xm3))
                 }
                 "best4" => {
-                    let u = tab[ii[m + w]];
-                    let mut best = (0u64, 0u64, 0u64, 0u64);
-                    for (tt, inv) in [(t, den[w]), (u, den[m + w])] {
+                    let (ux, uy) = tab[ii[m + w]];
+                    let mut bl = [0u64; L];
+                    let mut bx = [0u64; L];
+                    let mut bs = 0u64;
+                    for (cx, cy, inv) in [(tx, ty, den[w]), (ux, uy, den[m + w])] {
                         for sgn in [false, true] {
-                            let ty = if sgn { f.neg(tt.y) } else { tt.y };
-                            let l = f.mul(f.sub(ty, yp), inv);
-                            let x3 = f.sub(f.sub(f.mul(l, l), xp), tt.x);
-                            let sc = mix(x3 ^ ks);
-                            if sc >= best.0 {
-                                best = (sc, l, x3, 0);
-                            }
+                            let yy = sel(sgn, &f.neg(&cy), &cy);
+                            let l = f.mul(&f.sub(&yy, &yp), &inv);
+                            let x3 = f.sub(&f.sub(&f.mul(&l, &l), &xp), &cx);
+                            let sc = mix(x3[0] ^ ks);
+                            let c = sc >= bs;
+                            bl = sel(c, &l, &bl);
+                            bx = sel(c, &x3, &bx);
+                            bs = if c { sc } else { bs };
                         }
                     }
-                    let (_, l, x3, _) = best;
-                    ys[w] = f.sub(f.mul(l, f.sub(xp, x3)), yp);
-                    xs[w] = x3;
+                    (bl, bx)
                 }
                 _ => panic!("unknown bench arm {arm}"),
-            }
+            };
+            ys[w] = f.sub(&f.mul(&l, &f.sub(&xp, &x3)), &yp);
+            xs[w] = x3;
         }
     }
     let ns = t0.elapsed().as_nanos() as f64 / (steps * m) as f64;
-    let chk = xs.iter().fold(0u64, |a, &x| a ^ x);
+    let chk = xs.iter().fold(0u64, |a, x| a ^ x[0]);
     (ns, chk)
+}
+
+fn bench_run<const L: usize>(f: &MF<L>, label: &str, arms: &[String], m: usize, steps: usize, reps: usize, seed: u64) {
+    bench_arm(f, "base", m, steps / 4, seed); // warm up
+    for rep in 0..reps {
+        // rotate the arm order every repetition
+        for k in 0..arms.len() {
+            let arm = &arms[(k + rep) % arms.len()];
+            let (ns, chk) = bench_arm(f, arm, m, steps, seed + rep as u64);
+            println!(
+                "{{\"exp\":\"bench\",\"bits\":{},\"field\":\"{label}\",\"arm\":\"{arm}\",\"rep\":{rep},\"walks\":{m},\"steps\":{steps},\"ns_per_step\":{ns:.3},\"chk\":{chk}}}",
+                64 * L
+            );
+        }
+    }
 }
 
 // ----------------------------------------------------------------- driver
@@ -791,14 +955,15 @@ fn main() {
             let c = Curve::generate(bits, seed);
             curve_line(&c, seed);
             let r: usize = arg(&args, "--r", 1024);
-            let escape = arg_s(&args, "--escape", "on") == "on";
+            let mode = arg_s(&args, "--escape", "double");
+            let exp = match mode.as_str() { "double" => "e1", "off" => "e1noesc", "shift" => "e1shift", _ => panic!("--escape double|shift|off") };
             let cap = (40.0 * (c.n as f64).sqrt()) as u64;
             let arms = if arms.is_empty() {
                 ["base", "pm_coin", "pm_score", "two_score", "best4_score"].map(String::from).to_vec()
             } else {
                 arms
             };
-            run_trials("e1", bits, &arms, t0, trials, seed, &|arm, s| e1_trial(&c, arm, s, r, cap, escape), &format!(",\"r\":{r},\"escape\":{escape}"));
+            run_trials(exp, bits, &arms, t0, trials, seed, &|arm, s| e1_trial(&c, arm, s, r, cap, &mode), &format!(",\"r\":{r},\"escape\":\"{mode}\""));
         }
         "rf" => {
             let c = Curve::generate(bits, seed);
@@ -807,17 +972,19 @@ fn main() {
             let arms = if arms.is_empty() { ["k1", "k2", "k4"].map(String::from).to_vec() } else { arms };
             run_trials("rf", bits, &arms, t0, trials, seed, &|arm, s| rf_trial(n, arm[1..].parse().unwrap(), s, cap), "");
         }
-        "e2" | "e4" => {
+        "e2" | "e4" | "e1dp" => {
             let c = Curve::generate(bits, seed);
             curve_line(&c, seed);
             let cfg = DpCfg {
                 walks: arg(&args, "--walks", 64),
                 dpbits: arg(&args, "--dpbits", 8),
-                r: arg(&args, "--r", if cmd == "e4" { 1024 } else { 32 }),
+                r: arg(&args, "--r", if cmd == "e2" { 32 } else { 1024 }),
                 cap: (arg::<f64>(&args, "--cap", 30.0) * (c.n as f64).sqrt()) as u64,
             };
             let arms = if !arms.is_empty() {
                 arms
+            } else if cmd == "e1dp" {
+                ["sel_base", "sel_pm_coin", "sel_pm_score", "sel_two_score", "sel_best4_score"].map(String::from).to_vec()
             } else if cmd == "e2" {
                 ["canon", "lazy_dp", "lazy_index", "shared_index", "pair_table"].map(String::from).to_vec()
             } else {
@@ -827,23 +994,31 @@ fn main() {
             run_trials(cmd, bits, &arms, t0, trials, seed, &|arm, s| dp_trial(&c, arm, s, &cfg), &extra);
         }
         "bench" => {
-            let c = Curve::generate(bits, seed);
-            curve_line(&c, seed);
             let m: usize = arg(&args, "--walks", 512);
             let steps: usize = arg(&args, "--steps", 2000);
             let reps: usize = arg(&args, "--reps", 11);
             let arms = if arms.is_empty() { ["base", "pm_score", "best4"].map(String::from).to_vec() } else { arms };
-            bench_arm(&c, "base", m, steps / 4, seed); // warm up
-            for rep in 0..reps {
-                // rotate the arm order every repetition
-                for k in 0..arms.len() {
-                    let arm = &arms[(k + rep) % arms.len()];
-                    let (ns, chk) = bench_arm(&c, arm, m, steps, seed + rep as u64);
-                    println!(
-                        "{{\"exp\":\"bench\",\"bits\":{bits},\"arm\":\"{arm}\",\"rep\":{rep},\"walks\":{m},\"steps\":{steps},\"ns_per_step\":{ns:.3},\"chk\":{chk}}}"
-                    );
+            // 1 limb: the 62-bit prime 2^62 - 57; 4 limbs: the P-256 prime
+            let f1 = MF::<1>::new([(1u64 << 62) - 57]);
+            bench_run(&f1, "2^62-57", &arms, m, steps, reps, seed);
+            let f4 = MF::<4>::new([0xFFFF_FFFF_FFFF_FFFF, 0x0000_0000_FFFF_FFFF, 0, 0xFFFF_FFFF_0000_0001]);
+            bench_run(&f4, "P-256", &arms, m, steps / 4, reps, seed);
+        }
+        "selftest" => {
+            fn t<const L: usize>(f: &MF<L>, name: &str) {
+                let mut rng = Rng(7);
+                for _ in 0..2000 {
+                    let (a, b, c) = (f.random(&mut rng), f.random(&mut rng), f.random(&mut rng));
+                    assert!(f.mul(&f.inv(&a), &a) == f.one, "{name} inverse");
+                    assert!(f.sub(&f.add(&a, &b), &b) == a, "{name} add/sub");
+                    assert!(f.mul(&a, &f.add(&b, &c)) == f.add(&f.mul(&a, &b), &f.mul(&a, &c)), "{name} distributive");
+                    assert!(f.add(&a, &f.neg(&a)) == [0; L], "{name} neg");
                 }
+                println!("{{\"exp\":\"selftest\",\"field\":\"{name}\",\"ok\":true}}");
             }
+            assert!(is_prime((1u64 << 62) - 57));
+            t(&MF::<1>::new([(1u64 << 62) - 57]), "2^62-57");
+            t(&MF::<4>::new([0xFFFF_FFFF_FFFF_FFFF, 0x0000_0000_FFFF_FFFF, 0, 0xFFFF_FFFF_0000_0001]), "P-256");
         }
         "summary" => summary(&args),
         _ => eprintln!("usage: rho_walk_leads e1|rf|e2|e4|bench|summary [--bits B] [--trials T] [--seed S] [--arms a,b]"),
@@ -863,13 +1038,14 @@ fn jget<'a>(l: &'a str, k: &str) -> Option<&'a str> {
 
 /// Predicted steps ratio reference/arm (a speedup when above 1).
 fn predicted(exp: &str, arm: &str) -> Option<f64> {
+    let (exp, arm) = if exp.starts_with("e1") { ("e1", arm.strip_prefix("sel_").unwrap_or(arm)) } else { (exp, arm) };
     let k2 = |k: f64| (k * k / (2.0 * k - 1.0)).sqrt();
     match (exp, arm) {
         ("e1", "pm_score") | ("e1", "two_score") | ("rf", "k2") => Some(k2(2.0)),
         ("e1", "best4_score") | ("rf", "k4") => Some(k2(4.0)),
-        ("e1", "pm_coin") | ("e2", "lazy_dp") | ("e2", "pair_table") | ("e4", "neg_hashrule") => Some(1.0),
+        ("e1", "pm_coin") | ("e2", "lazy_dp") | ("e2", "pair_table") => Some(1.0),
         ("e2", "lazy_index") => Some(std::f64::consts::FRAC_1_SQRT_2),
-        ("e4", "neg_canon") => Some(std::f64::consts::SQRT_2),
+        ("e4", "neg_canon") | ("e4", "neg_hashrule") => Some(std::f64::consts::SQRT_2),
         _ => None,
     }
 }
@@ -911,7 +1087,8 @@ fn summary(args: &[String]) {
         );
     }
     let reference = |exp: &str| match exp {
-        "e1" => "base",
+        "e1dp" => "sel_base",
+        e if e.starts_with("e1") => "base",
         "rf" => "k1",
         "e2" => "canon",
         "e4" => "nonneg",
@@ -969,7 +1146,7 @@ fn summary(args: &[String]) {
                 }
             }
         }
-        if *exp == "e1" || *exp == "rf" {
+        if *exp == "e1" || *exp == "e1shift" || *exp == "rf" {
             let th = (std::f64::consts::PI * 2f64.powi(*bits as i32) / 2.0).sqrt();
             line += &format!(",\"sqrt_pi_n_over_2_at_2^bits\":{th:.1}");
         }

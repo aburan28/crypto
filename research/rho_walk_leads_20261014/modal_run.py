@@ -34,7 +34,8 @@ def run(argv: list) -> dict:
 
 
 def shards(cmd, bits, trials, per, extra=()):
-    return [(f"{cmd}-{bits}", [cmd, "--bits", str(bits), "--t0", str(t0), "--trials", str(min(per, trials - t0)), *extra])
+    exe = "e1" if cmd.startswith("e1") and cmd != "e1dp" else cmd
+    return [(f"{cmd}-{bits}", [exe, "--bits", str(bits), "--t0", str(t0), "--trials", str(min(per, trials - t0)), *extra])
             for t0 in range(0, trials, per)]
 
 
@@ -43,13 +44,15 @@ PLANS = {
     "full": lambda: (
         shards("e1", 32, 2000, 250)
         + shards("e1", 36, 2000, 125)
-        + [(f"e1noesc-32", ["e1", "--bits", "32", "--trials", "200", "--escape", "off"])]
+        + shards("e1", 40, 500, 32)
+        + shards("e1shift", 36, 2000, 125, ("--escape", "shift"))
+        + [("e1noesc-32", ["e1", "--bits", "32", "--trials", "200", "--escape", "off"])]
+        + shards("e1dp", 36, 1000, 125)
         + shards("rf", 32, 4000, 1000)
         + shards("rf", 36, 2000, 250)
         + shards("e2", 36, 1000, 125)
         + shards("e4", 36, 1000, 125)
-        + [("bench-62", ["bench", "--bits", "62", "--walks", "1024", "--steps", "4000", "--reps", "21"]),
-           ("bench-40", ["bench", "--bits", "40", "--walks", "1024", "--steps", "4000", "--reps", "21"])]
+        + [("bench", ["bench", "--walks", "1024", "--steps", "4000", "--reps", "21"])]
     ),
 }
 
