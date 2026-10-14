@@ -1154,6 +1154,29 @@ class SingleTargetPanelTests(unittest.TestCase):
                   "online_start_ns": 5, "online_stop_event": "e", "relation_checks": 1}
         self.assertEqual(self.stp.untimed(record, ("relation_checks",)), {"kind": "k", "probes": 3})
 
+    def test_point_comparisons_survive_string_coordinates(self) -> None:
+        # Regression: producers emit u128 coordinates as decimal strings while the
+        # panel stores Python ints; rho_ok and the IC relation replay must
+        # normalize both sides instead of comparing raw values.
+        target = list(self.curve.mul(self.curve.g, 12345))
+        self.assertTrue(self.stp.same_point([str(v) for v in target], target))
+        self.assertTrue(self.stp.same_point(target, [str(v) for v in target]))
+        self.assertFalse(self.stp.same_point([str(v) for v in target], [v + 1 for v in target]))
+        points = [self.curve.mul(self.curve.g, s) for s in (11, 22, 33)]
+        last = self.curve.add(self.curve.neg(self.curve.add(self.curve.add(points[0], points[1]), points[2])),
+                              tuple(target))
+        base = points + [last]
+        fixture = dict(self.beat["curve_fixture"], targets=[[str(v) for v in target]])
+        ic = {"arm": "ic", "curve_id": "c", "generator": [int(v) for v in fixture["generator"]],
+              "target": [str(v) for v in target], "scalar": 12345,
+              "relation": {"base_hash": "b", "point_indices": [0, 1, 2, 3],
+                          "x_codes": [str(p[0]) for p in base]}}
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "cert.json"
+            path.write_bytes(self.stp.identity.canonical(ic) + b"\n")
+            replay = self.stp.replay_certificate(path, self.stp.identity.sha256(ic), fixture, base)
+        self.assertTrue(replay["statement_holds"], replay)
+
 
 
 if __name__ == "__main__":
