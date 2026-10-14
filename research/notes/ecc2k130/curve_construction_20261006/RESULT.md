@@ -29,6 +29,11 @@ analysis in `research/notes/ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md`.
   window crossover 290/300, `#A(F_2) = r`).
 - GHS census: 400 random `b` (seed 20261006), magic number ∈ {1, 130, 131} with
   the trace correspondence on every sample (196 at 130, 204 at 131).
+  *Correction 2026-10-13:* these are plain orbit dimensions.  The MMT magic
+  number is 131 for every sample with `b ≠ 1` (trace 0: type I, genus
+  `2^130 − 1`; trace 1: type II, genus `2^130`); the frozen
+  `results/curve_construction.json` keeps the old values.  See
+  [`docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md`](../../../../docs/audits/GHS_MAGIC_NUMBER_MMT_CORRECTION_20261013.md).
 - Klein quartic: counts over `F_{2^k}`, `k ≤ 8`, equal `Res_{F_8/F_2}(E_1)`;
   over `Q`, 93 primes ≤ 499 match the Weil restriction of the conductor-49
   curve from `Q(ζ_7)^+`, 0 mismatches.

@@ -1,0 +1,16 @@
+saved /home/user/crypto/research/pkm_tower_ecbench_20261013/sessions/p26/comparisons/rho-neg__rho-neg-aa.json
+ops (ok): rho-neg-aa / rho-neg = 1.0000 [1.000, 1.000] (cluster) over 24 pairs on 8 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 0.9900 [0.959, 1.062]
+| curve | log2 r | workloads | rho-neg-aa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp26-t2838-8e779ca8 | 23.28 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | rho-neg-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W20d829c87466 | icv1-fp26-t2838-8e779ca8 | 23.28 | 1.0362 | 1.0362 | 1.0000 |
+| W459edf43e5a7 | icv1-fp26-t2838-8e779ca8 | 23.28 | 0.4867 | 0.4867 | 1.0000 |
+| W57379abdf921 | icv1-fp26-t2838-8e779ca8 | 23.28 | 0.8366 | 0.8366 | 1.0000 |
+| W7243e01194eb | icv1-fp26-t2838-8e779ca8 | 23.28 | 1.3677 | 1.3677 | 1.0000 |
+| W8e64c636e70a | icv1-fp26-t2838-8e779ca8 | 23.28 | 1.2327 | 1.2327 | 1.0000 |
+| Wba2d4897c8cd | icv1-fp26-t2838-8e779ca8 | 23.28 | 0.9749 | 0.9749 | 1.0000 |
+| Wda47d0f7e67b | icv1-fp26-t2838-8e779ca8 | 23.28 | 1.1939 | 1.1939 | 1.0000 |
+| Wfb330cc2db9c | icv1-fp26-t2838-8e779ca8 | 23.28 | 0.8487 | 0.8487 | 1.0000 |
