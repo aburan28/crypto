@@ -12,11 +12,13 @@ lookup time even though each slot carries a shorter fingerprint.
 The exact symmetric state count is
 `S(K)=83*K*(K-1)/2+42*K`. At K3550, `S=523,005,525`, so the complete
 two-root upper bound fits `2^31` slots and all ordinals fit 29 bits.
-The 11-byte state plus four-byte table payload is below 14 GiB. This is a
+At K3596, `S=536,647,262`; its state IDs still fit 29 bits, while K3597
+exceeds that encoding range. The 11-byte state plus four-byte table payload
+at K3596 is below 14 GiB. This is a
 payload bound; the observed process peak and 14-GiB guard decide admission.
-`RootFour.lean` checks the bound and slot encode/decode arithmetic.
+`RootFour.lean` checks these closed bounds and slot encode/decode arithmetic.
 
-Run six preselected arms on the same previously used public N83 point:
+Run seven preselected arms on the same previously used public N83 point:
 
 | Order | Arm | Purpose | Child cap |
 | ---: | --- | --- | ---: |
@@ -24,8 +26,9 @@ Run six preselected arms on the same previously used public N83 point:
 | 2 | K3400 root5 | identical-base five-byte control | 1500 s |
 | 3 | K3500 root4 | larger factor base | 1500 s |
 | 4 | K3550 root4 | observed memory boundary | 1500 s |
-| 5 | K2543 root4 | low-load size control | 900 s |
-| 6 | K2543 root5 | identical-base five-byte control | 900 s |
+| 5 | K3596 root4 | 29-bit ordinal encoding boundary | 1500 s |
+| 6 | K2543 root4 | low-load size control | 900 s |
+| 7 | K2543 root5 | identical-base five-byte control | 900 s |
 
 `root4` and `root5` both use the same 11-byte state, symmetric S3 traversal,
 rank seed 29, four rank threads and one target thread. Every arm runs in a

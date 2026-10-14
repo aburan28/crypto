@@ -16,6 +16,9 @@ inequalities use no axioms.
 | K3550 complete two-root bound fits `2^31` slots | `k3550_complete_key_bound_fits_fixed_slots` | `stateBound` as defined | Checked |
 | K3550 state IDs fit 29 bits | `k3550_state_id_fits_29_bits` | `stateBound` as defined | Checked |
 | K3550 arrays have payload below 14 GiB | `k3550_one_root_and_slot_payload_below_14_gibibytes` | 11 bytes per state and four bytes per slot | Checked |
+| K3596 state IDs fit 29 bits | `k3596_state_id_fits_29_bits` | `stateBound` as defined | Checked |
+| K3597 state ID exceeds 29 bits | `k3597_state_id_exceeds_29_bits` | `stateBound` as defined | Checked |
+| K3596 arrays have payload below 14 GiB | `k3596_one_root_and_slot_payload_below_14_gibibytes` | 11 bytes per state and four bytes per slot | Checked |
 | Full root-key equality preserves exact lookup and first witness | Open | Rust open-addressing insertion order and GF(2^83) canonical-root reconstruction | Formalization partial |
 
 The checked decode arithmetic is a model of the slot bit layout. The source

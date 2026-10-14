@@ -10,7 +10,8 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "research/n83_indexed5_20261013/analyze.py"
 ANSWER = ROOT / "research/n83_indexed5_20261013/answer.jsonl"
 ARMS = ((3400, "root4"), (3400, "root5"), (3500, "root4"),
-        (3550, "root4"), (2543, "root4"), (2543, "root5"))
+        (3550, "root4"), (3596, "root4"),
+        (2543, "root4"), (2543, "root5"))
 
 spec = importlib.util.spec_from_file_location("n83_independent_group", SOURCE)
 group = importlib.util.module_from_spec(spec)
