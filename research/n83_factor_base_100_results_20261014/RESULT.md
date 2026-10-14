@@ -69,8 +69,13 @@ The selected manifest SHA-256 is
 `b6f0d5bf6301506ada0483d1aacdeeea4bc5c95bd1b2a272d59831f7e290b9c8`;
 the selected base hash is
 `12c164dd4bbc72df19d8b0c638f1d808c534bd464397c9033822dace74cca92b`.
-The local full-base replay is running against the downloaded raw artifact;
-its terminal exit and digest check will be added to this record.
+An independent local execution of `verify.py` against the downloaded raw
+artifact exited 0 after replaying all twelve complete bases and all 1,200
+four-point target relations and scalars. It reproduced the cloud analysis
+SHA-256 exactly:
+`e75000c34a3b363a5c2282a2bcd77765846fa7777c34ec78522f63ca32124f83`.
+The local run was a correctness replay; its elapsed time is outside the cloud
+target-online intervals.
 
 The reserve five public points have target SHA-256
 `644c56a7bae2c92085704bb6f58ab70b38b278710de90152ece7631058c41dc9`
