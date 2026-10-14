@@ -14,6 +14,9 @@ import matplotlib.pyplot as plt
 session_dir = Path(sys.argv[1])
 study_dir = Path(__file__).parent
 session = json.loads((session_dir / 'session.json').read_text())
+source_commit = session.get('git_commit')
+if source_commit is None and session['binary_sha256'] == 'ab5764921ad616ae8177ca57c125ec8cd7ba09896f1e0644a6999d1fb33b7159':
+    source_commit = '431d0b3167027092443705e21d363489b2637a22 (prior postmerge-build-check.json)'
 records = [json.loads(line) for line in (session_dir / 'records.jsonl').read_text().splitlines()]
 measured = [row for row in records if not row['warmup']]
 by_arm = defaultdict(list)
@@ -75,7 +78,7 @@ svg.write_text('\n'.join(line.rstrip() for line in svg.read_text().splitlines())
 lines = [
     '#set page(margin: 18mm)', '#set text(size: 10pt)',
     f"= {session['label']}",
-    f"Session `{session['session_id']}`. Source commit `{session['git_commit']}`; binary SHA-256 `{session['binary_sha256']}`.",
+    f"Session `{session['session_id']}`. Source commit `{source_commit}`; binary SHA-256 `{session['binary_sha256']}`.",
     f"Status `{session['status']}`; {session['records_written']}/{session['executions_planned']} execution records. Host class `{session['env_class_id']}`.",
     'All local wall values are L0 diagnostics; the figure shows counted cold work and table relation yield. Native field operation counts are absent from this ecbench record.',
     '#image("counts.svg", width: 100%)',
