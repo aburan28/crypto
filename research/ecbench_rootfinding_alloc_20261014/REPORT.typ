@@ -11,7 +11,7 @@ The chart shows L0 wall-time ratios on one shared macOS arm64 host. Each point i
 
 == Results and scope
 
-The three sealed sessions contain 384/384 verified executions and 288/288 identical measured replays. The corrected cross-session checker found zero mismatches among compared deterministic fields in 128 candidate/baseline record pairs and 128 baseline/baseline pairs. All IC arms had mean cold counted cost 7,952.58 GAE; sealed native field work remains unpriced. The native ecbench comparison reports counted-cost ratio 1.000 over 24 measured batch-8 pairs and refuses a cross-session wall comparison.
+The three sealed sessions contain 384/384 verified executions and 288/288 identical measured replays. The corrected cross-session checker found zero mismatches among compared deterministic fields in 128 candidate/baseline record pairs and 128 baseline/baseline pairs. All IC arms had mean cold counted cost 7,952.58 GAE; sealed native field work remains unpriced. The native ecbench comparison reports counted-cost ratio 1.000 over 24 measured batch-8 pairs and refuses a cross-session wall comparison. In the candidate session, batch-8 IC / matched rho has lower-bound counted-cost ratio 6.8747 (interval 5.6689--8.4198).
 
 Custom L0 diagnostics: batch-8 relation-phase wall ratio 0.937 (95% target-cluster interval 0.786--1.122) and whole-solve wall ratio 0.993 (0.803--1.251). The repeated baseline ratios were 1.057 (0.814--1.362) and 1.063 (0.818--1.390), respectively. Every interval includes parity. The run verifies unchanged deterministic behavior and the source-level buffer reuse, while the L0 timings do not establish a wall-time improvement.
 
