@@ -6,6 +6,13 @@ the ordered witness. Its marker-only self-test and fail-closed trace checker
 pass; the actual N83 solver path was not run, so the local ledger stays at
 22,200 seconds and the complete-runtime base remains unselected.
 
+An [exact uniform-query support screen](verification/pilot-pair-support-screen-20261014/RESULT.md)
+uses the archived overlap of all 648 ordered primary pilot pairs. Every one
+of the 558 pairs admitted by the current residual-domain minimum has a
+nonvacuous five-summand single-query hit ceiling; the largest 3+2 ceiling is
+below 0.338. This bounds a fresh uniform nonidentity query, not the frozen
+public target or observed solver yield, and it adds no N83 search charge.
+
 The [ordered fixed-witness SAT control](verification/known-witness-ordered-sat-20261014/RESULT.md)
 was configured with full K1182 plus residual-K2048 signed-Frobenius domains
 and the algebraically replayed witness in the first all-affine pattern. Its
