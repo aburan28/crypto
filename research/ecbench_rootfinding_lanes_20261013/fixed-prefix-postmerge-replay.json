@@ -1,0 +1,13 @@
+{
+  "schema": "rootfinding.fixed_prefix_postmerge_replay/v1",
+  "source_commit": "21de047e5c02fd608c913f184bc21eab9ef7c965",
+  "command": "ROOTFIND_PREFIX_INPUT=research/ecbench_rootfinding_lanes_20261013/fixed-prefix-fresh-input.json cargo test --offline --locked --release --test rootfinding_fixed_prefix -- --nocapture",
+  "test_binary": "target/release/deps/rootfinding_fixed_prefix-a40bd1fe298948f3",
+  "test_binary_sha256": "0bc2e70cf01c33fae863748a9e32ee2b22115178b35fdd7198666a04b5d47d5a",
+  "prior_receipt_sha256": "984fa200e8c5e874fccb65b600002b85855e8e8daf44b0245eda6cd25dda96db",
+  "raw_log_sha256": "ee3fb0f128a938d9527eaea433718887f6835dfd1c00683840e1f85b33c9f268",
+  "raw_log_file": "fixed-prefix-postmerge-replay.log.gz",
+  "exact_result_match": true,
+  "passed": true,
+  "targets": 8
+}

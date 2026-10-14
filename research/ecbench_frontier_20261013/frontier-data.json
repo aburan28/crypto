@@ -1,0 +1,280 @@
+{
+  "schema": "crypto.ecbench_frontier_synthesis/v1",
+  "date": "2026-10-13",
+  "repository_commit": "759978250c1ce53d7b87bd8a1c2304781fcc4fc4",
+  "classification": "evidence synthesis; no new bound or challenge verdict",
+  "leaderboard_effect": {
+    "ranked_rows_changed": false,
+    "generated_audit_record_required": true,
+    "reason": "No new admitted whole-pipeline measurement, re-matched reference, or newly priced curve; retain every ranked row and publish this synthesis as an accounting audit."
+  },
+  "boundary": {
+    "comparability_key": [
+      "curve_and_subgroup",
+      "target_law_and_population",
+      "cold_online_or_stage_interval",
+      "counted_unit_and_unpriced_work",
+      "setup_amortisation_target_count",
+      "memory_and_resource_envelope",
+      "correctness_replay_and_isolation_class"
+    ],
+    "parity": 1.0
+  },
+  "canonical_koblitz_medium": {
+    "domain_id": "ECDOM1h3962632c9fe8",
+    "ops_leader": {
+      "bound_id": "ECBND1h05a2ea918f3c",
+      "method": "rho.signed_frobenius_strong",
+      "ops_over_floor": 1.088842355475427,
+      "ops_ci95": [0.9274075951859404, 1.260856076812353],
+      "alpha": 0.4506815501621097,
+      "alpha_ci95": [0.3989513852947253, 0.512294010716587],
+      "runs": 144,
+      "sizes": 6
+    },
+    "memory_leader": {
+      "bound_id": "ECBND1h46fbc9140ac3",
+      "method": "rho.signed_frobenius",
+      "ops_over_floor": 1.1880117771827217,
+      "ops_ci95": [0.9540213775115876, 1.463766148468154],
+      "memory_over_sqrt_r": 0.0007057904151789579,
+      "memory_ci95": [0.00013029410399949143, 0.0013694192961093386],
+      "runs": 72,
+      "sizes": 3,
+      "bound_level": "constant"
+    },
+    "source": "docs/bounds/frontier.json"
+  },
+  "cold_ops_gap": [
+    {
+      "label": "Matrix F4\nK13",
+      "group": "F4/F5/F6",
+      "ratio_to_matched_rho": 6.97,
+      "reference": "rho.negation",
+      "lower_bound": true,
+      "source": "research/f4_f5_f6_cross_family_20261011/RESULT.md:133"
+    },
+    {
+      "label": "Matrix F5\nK13",
+      "group": "F4/F5/F6",
+      "ratio_to_matched_rho": 6.97,
+      "reference": "rho.negation",
+      "lower_bound": true,
+      "source": "same S as matrix F4; RESULT.md:70"
+    },
+    {
+      "label": "Inherited F4\nK13",
+      "group": "F4/F5/F6",
+      "ratio_to_matched_rho": 7.21,
+      "reference": "rho.negation",
+      "lower_bound": true,
+      "source": "research/f4_f5_f6_cross_family_20261011/RESULT.md:133"
+    },
+    {
+      "label": "Compact FB\nK17",
+      "group": "factor base",
+      "ratio_to_matched_rho": 9.985,
+      "reference": "rho.signed_frobenius",
+      "lower_bound": true,
+      "source": "research/ecbench_factor_bases_20261013/table-koblitz17.md"
+    },
+    {
+      "label": "Prime abscissa\nP20",
+      "group": "factor base",
+      "ratio_to_matched_rho": 12.3,
+      "reference": "rho.negation",
+      "lower_bound": true,
+      "source": "research/ecbench_factor_bases_20261013/table-prime20.md"
+    },
+    {
+      "label": "Rootfind m2\nK13",
+      "group": "root finding",
+      "ratio_to_matched_rho": 15.16996258685195,
+      "reference": "rho.signed_frobenius",
+      "lower_bound": false,
+      "derived": "28.383 / 1.871",
+      "source": "research/ecbench_rootfind_engine_20261012/README.md:45"
+    },
+    {
+      "label": "Orbit FB\nK17",
+      "group": "factor base",
+      "ratio_to_matched_rho": 18.714,
+      "reference": "rho.signed_frobenius",
+      "lower_bound": false,
+      "source": "research/ecbench_factor_bases_20261013/table-koblitz17.md"
+    },
+    {
+      "label": "Rootfind m3\nK13",
+      "group": "root finding",
+      "ratio_to_matched_rho": 20.749331908070552,
+      "reference": "rho.signed_frobenius",
+      "lower_bound": false,
+      "derived": "38.822 / 1.871",
+      "source": "research/ecbench_rootfind_engine_20261012/README.md:45"
+    },
+    {
+      "label": "Prime GLV\nP20",
+      "group": "factor base",
+      "ratio_to_matched_rho": 24.309,
+      "reference": "rho.negation",
+      "lower_bound": true,
+      "source": "research/ecbench_factor_bases_20261013/table-prime20.md"
+    },
+    {
+      "label": "Binary FB\nK17",
+      "group": "factor base",
+      "ratio_to_matched_rho": 47.224,
+      "reference": "rho.signed_frobenius",
+      "lower_bound": false,
+      "source": "research/ecbench_factor_bases_20261013/table-koblitz17.md"
+    },
+    {
+      "label": "Standard FB\nK17",
+      "group": "factor base",
+      "ratio_to_matched_rho": 47.275,
+      "reference": "rho.signed_frobenius",
+      "lower_bound": false,
+      "source": "research/ecbench_factor_bases_20261013/table-koblitz17.md"
+    },
+    {
+      "label": "F6-IC\nK13",
+      "group": "F4/F5/F6",
+      "ratio_to_matched_rho": 509.8,
+      "reference": "rho.negation",
+      "lower_bound": true,
+      "source": "research/f4_f5_f6_cross_family_20261011/RESULT.md:133"
+    }
+  ],
+  "online_boundary": [
+    {
+      "label": "n61 compact orbit",
+      "online_rho_over_ic": 13.9,
+      "online_ci95": [9.8, 19.1],
+      "setup_inclusive_rho_over_ic": 0.011990407673860911,
+      "setup_inclusive_ic_over_rho": 83.4,
+      "setup_inclusive_class": "measured cold ratio",
+      "setup_seconds_approx": 28.0,
+      "status": "admitted online",
+      "targets": 64,
+      "source": "docs/ic/BOUNDARY_TARGETS.md:147"
+    },
+    {
+      "label": "n83 dense K1798",
+      "online_rho_over_ic": 18.528377,
+      "online_ci95": null,
+      "setup_inclusive_rho_over_ic": 0.003460347924310168,
+      "setup_inclusive_ic_over_rho": 288.9882814888776,
+      "setup_inclusive_class": "diagnostic: complete IC process divided by reported rho online time; not a matched cold ratio",
+      "setup_seconds": 339.004,
+      "complete_process_seconds": 339.068,
+      "ic_online_seconds": 0.063324125,
+      "rho_online_seconds": 1.17329325,
+      "derived_break_even_targets": 305.4175042931938,
+      "first_integer_break_even_under_model": 306,
+      "status": "exploratory one point",
+      "targets": 1,
+      "source": "research/n83_dense_root_20261013/REPORT.md:3"
+    }
+  ],
+  "stage_diagnostics": [
+    {
+      "candidate": "matrix F5",
+      "baseline": "matrix F4",
+      "workload": "K13",
+      "unit": "solver word XORs",
+      "candidate_over_baseline": 0.6465,
+      "status": "measured same tree"
+    },
+    {
+      "candidate": "matrix F5",
+      "baseline": "matrix F4",
+      "workload": "R13",
+      "unit": "solver word XORs",
+      "candidate_over_baseline": 0.6414,
+      "status": "measured same tree"
+    },
+    {
+      "candidate": "F6-IC",
+      "baseline": "inherited F4",
+      "workload": "K13",
+      "unit": "solver word XORs",
+      "candidate_over_baseline": 0.8173353284882832,
+      "derived": "2^-0.291",
+      "charged_s_over_baseline": 68.8
+    },
+    {
+      "candidate": "F6-IC",
+      "baseline": "inherited F4",
+      "workload": "K19",
+      "unit": "solver word XORs",
+      "candidate_over_baseline": 0.7797048426113233,
+      "derived": "2^-0.359",
+      "charged_s_over_baseline": 1303.2
+    },
+    {
+      "candidate": "torsion symmetrised u-frame",
+      "baseline": "x-frame",
+      "workload": "n17",
+      "unit": "whole-pipeline S",
+      "candidate_over_baseline": 0.84,
+      "status": "legacy non-ECBench"
+    },
+    {
+      "candidate": "torsion symmetrised u-frame",
+      "baseline": "x-frame",
+      "workload": "n31",
+      "unit": "whole-pipeline S",
+      "candidate_over_baseline": 4.01,
+      "status": "legacy non-ECBench"
+    },
+    {
+      "candidate": "N83 K1798 dense",
+      "baseline": "N83 K1500 dense",
+      "workload": "64-point panel",
+      "unit": "mean root-index probes",
+      "candidate_over_baseline": 0.5635248926094043,
+      "paired_difference": 130952.09375,
+      "paired_difference_ci95": [52057.703125, 209990.828125],
+      "status": "native non-ECBench"
+    }
+  ],
+  "current_replay_audit": {
+    "auditor_binary_sha256": "53654ef1c0e93ed02025acd8188514d2674c4da2f57f25f61db40a510a422950",
+    "auditor_rust": "1.94.1",
+    "auditor_hardware_class_id": "ECBHW1h7373da65e433",
+    "receipts": [
+      {
+        "file": "audits/factor-bases-k17.json",
+        "sha256": "9306d33e1d9d8cf8f5257f221941cfa88214752e3d0da2d70728e150f56b1c21",
+        "ok": true,
+        "replays_identical": 8,
+        "replays_total": 8
+      },
+      {
+        "file": "audits/f4f5f6-k13.json",
+        "sha256": "0304c4963454b4bbc46e6a37c5844ebe70e1ef2d08f808a4a4414ac97a8cf90e",
+        "ok": true,
+        "replays_identical": 7,
+        "replays_total": 7,
+        "coverage": ["rho strong", "rho negation", "matrix F4", "matrix F5", "inherited F4", "F6-IC"]
+      },
+      {
+        "file": "audits/rootfind-n13-sample.json",
+        "sha256": "4814136e3d51fb35849a4e2c490a12ce269bb50bd86fd052c8744fa695c1d88d",
+        "ok": true,
+        "replays_identical": 8,
+        "replays_total": 8,
+        "coverage": ["rho sampled only"]
+      },
+      {
+        "file": "audits/rootfind-n13-replay-all-failed.json",
+        "sha256": "6110727aea2810587b08e88de5eb774d960ae29dd8b8d6aaab2b258bc1c8f5b9",
+        "ok": false,
+        "replays_identical": 120,
+        "replays_total": 168,
+        "failures": 48,
+        "failure_scope": "all inherited-F4 rows differ in solver phase counts; root-finder and rho rows identical"
+      }
+    ]
+  }
+}

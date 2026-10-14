@@ -1,0 +1,26 @@
+// pkm_kummer_p2013265921_m3_t3_x388393539: PKM's Kummer tower system (m = 3, t = 3, N = 9, 10 unknowns, 11 equations)
+// from research/pkm_tower_round2_20260925/runs/M3-kummer-m3-p1.jsonl; written by examples/pkm_tower_pilot.rs --export-magma-rows.
+// Ours (that row): engine f4_fp_tower, 91.288206 ms, inconsistent = true, timed out = false.
+K := GF(2013265921);
+P := PolynomialRing(K, 10, "grevlex");
+AssignNames(~P, ["y0_0", "y0_1", "y0_2", "y1_0", "y1_1", "y1_2", "y2_0", "y2_1", "y2_2", "u0"]);
+F := [P |
+  1377113239 + 207999544*P.10 + 2012118292*P.4 + 142646064*P.4*P.10 + 1055327837*P.4^2*P.10^2 + 2012118292*P.1 + 142646064*P.1*P.10 + 1046877334*P.1*P.4 + 1915876168*P.1*P.4*P.10^2 + 1302107817*P.1*P.4^2*P.10 + 1055327837*P.1^2*P.10^2 + 1302107817*P.1^2*P.4*P.10 + 117800629*P.1^2*P.4^2,
+  1001521254 + 832971343*P.10 + 1166556904*P.10^2 + 425005834*P.7 + 1935861160*P.7*P.10 + 763785330*P.7*P.10^2 + 1524474357*P.7^2 + 1349959888*P.7^2*P.10 + 1055327837*P.7^2*P.10^2,
+  1*P.2 + 2013265920*P.1^2,
+  1*P.3 + 2013265920*P.2^2,
+  1 + 2013265920*P.3^2,
+  1*P.5 + 2013265920*P.4^2,
+  1*P.6 + 2013265920*P.5^2,
+  1 + 2013265920*P.6^2,
+  1*P.8 + 2013265920*P.7^2,
+  1*P.9 + 2013265920*P.8^2,
+  1 + 2013265920*P.9^2
+];
+I := ideal<P | F>;
+t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);
+unit := G eq [P | 1];
+printf "RESULT-GB name=pkm_kummer_p2013265921_m3_t3_x388393539 p=2013265921 magma_gb_s=%o basis_len=%o unit=%o ours_inconsistent=true\n", tg, #G, unit;
+if not unit and Dimension(I) eq 0 then
+  t1 := Cputime(); V := Variety(I); printf "RESULT-VAR name=pkm_kummer_p2013265921_m3_t3_x388393539 magma_variety_s=%o magma_solutions=%o\n", Cputime(t1), #V;
+end if;

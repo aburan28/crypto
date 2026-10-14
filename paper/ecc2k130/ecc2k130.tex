@@ -16,12 +16,27 @@
 \usepackage{tikz}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds,calc,shapes.geometric,decorations.pathreplacing,patterns}
+\usepgfplotslibrary{groupplots}
+% Categorical palette (fixed order) and neutrals for every figure.
+\definecolor{cA}{HTML}{2A78D6}  % blue: representation / arithmetic
+\definecolor{cB}{HTML}{EB6834}  % orange: instruction (hardware feature)
+\definecolor{cC}{HTML}{1BAF7A}  % aqua: memory / layout
+\definecolor{cD}{HTML}{EDA100}  % yellow: launch geometry
+\definecolor{cE}{HTML}{6250D6}  % violet
+\definecolor{inkS}{HTML}{52514E}
+\definecolor{gridc}{HTML}{D9D8D3}
+\definecolor{boxfill}{HTML}{F4F3EF}
+\pgfplotsset{every axis/.append style={axis line style={inkS},tick style={inkS},
+  major grid style={gridc},label style={font=\small},tick label style={font=\footnotesize},
+  legend style={font=\footnotesize,draw=none,fill=none}}}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage{url}
+\usepackage{xurl}
 
 \hypersetup{
-  pdftitle={ECC2K-130 on Commodity Hardware: A Measured Frobenius-Class Pollard Rho Campaign},
-  pdfauthor={Anonymous},
+  pdftitle={Accelerating Pollard Rho with GPU Field Arithmetic: ECC2K-130 on NVIDIA Blackwell},
+  pdfauthor={Adam Buran, Kevin Nguyen},
   colorlinks=true,
   linkcolor=blue!50!black,
   citecolor=blue!50!black,
@@ -40,20 +55,24 @@
 \newcommand{\QQ}{\mathbb{Q}}
 \newcommand{\HW}{\operatorname{HW}}
 \renewcommand{\gcd}{\operatorname{gcd}}
-\newcommand{\Bs}{\,\mathrm{B/s}}
+\newcommand{\Bs}{\,\text{billion iterations/s}}
 \newcommand{\thisrepo}{\texttt{crypto}}
 \newcommand{\sibling}{\texttt{cryptanalysis}}
-% Footnote a number to a repository artefact. Paths without a repo prefix
-% are in this repository; paths prefixed cryptanalysis: are in the sibling
-% library and paths prefixed autoresearcher: in the research-ledger repository.
-\newcommand{\art}[1]{\footnote{\texttt{\detokenize{#1}}.}}
+% Evidence records (Appendix B). \evcite{\evref{key}, §x; \evref{key2}}
+% prints [E3, §x; E7]; each record is numbered in order of first citation.
+\newcounter{evrec}
+\newcommand{\evlabel}[2]{\refstepcounter{evrec}\label{ev:#1}E\theevrec}
+\newcommand{\evref}[1]{\hyperref[ev:#1]{E\ref*{ev:#1}}}
+\newcommand{\evcite}[1]{[#1]}
 
-\title{ECC2K-130 on Commodity Hardware:\\
-       A Measured Frobenius-Class Pollard Rho Campaign}
-% Anonymized for double-blind submission.  Author block restored
-% for camera-ready / preprint release; see README.md.
-\author{Anonymous}
-\date{}
+\title{Accelerating Pollard Rho with GPU Field Arithmetic:\\
+       ECC2K-130 on NVIDIA Blackwell}
+% Author block restored for the IACR ePrint release (make deanonymize).
+\author{Adam Buran \and Kevin Nguyen \\
+        Isogeny Labs \\
+        \texttt{adam@isogenylabs.io}, \texttt{kevin@isogenylabs.io}}
+\date{October 2026}
+
 
 \begin{document}
 \maketitle
@@ -67,18 +86,26 @@
 \clearpage
 
 \input{sec-intro}
+\input{sec-history}
 \input{sec-curve}
 \input{sec-walk}
 \input{sec-arith}
+\input{sec-isa}
+\input{sec-blackwell}
 \input{sec-gpu}
 \input{sec-cpu}
+\input{sec-nist}
 \input{sec-othergpu}
 \input{sec-fpga}
 \input{sec-campaign}
 \input{sec-alternatives}
+\input{sec-bounds}
+\input{sec-solvetime}
+\input{sec-open}
 \input{sec-related}
 \input{sec-conclusion}
 \input{app-reproduction}
+\input{app-evidence}
 
 \bibliographystyle{plainnat}
 \bibliography{ecc2k130}

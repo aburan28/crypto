@@ -964,9 +964,7 @@ fn peak_rss_bytes() -> Option<u64> {
 // indices, packed witnesses, and the rank linear algebra stay `u64`; only
 // field elements move to the wider word.
 mod wide {
-    use super::{
-        ms, mix_root_bloom, pack, unpack, Echelon, ExtractSplit, HwCounters, PhaseClock,
-    };
+    use super::{mix_root_bloom, ms, pack, unpack, Echelon, ExtractSplit, HwCounters, PhaseClock};
     use crypto_lib::cryptanalysis::koblitz_fast_arith::{
         s3_x_roots_128, FastBinaryCurve128, FastPoint128,
     };
@@ -1542,13 +1540,17 @@ mod wide {
         let inner = line.trim().trim_start_matches('[').trim_end_matches(']');
         let mut words = inner.split(',');
         let parse = |raw: &str| -> u128 {
-            raw.trim().trim_matches('"').parse().expect(
-                "wide field coordinate must be a decimal integer or string",
-            )
+            raw.trim()
+                .trim_matches('"')
+                .parse()
+                .expect("wide field coordinate must be a decimal integer or string")
         };
         let x = parse(words.next().expect("wide point needs two coordinates"));
         let y = parse(words.next().expect("wide point needs two coordinates"));
-        assert!(words.next().is_none(), "wide point must have two coordinates");
+        assert!(
+            words.next().is_none(),
+            "wide point must have two coordinates"
+        );
         [x, y]
     }
 
@@ -2172,16 +2174,7 @@ mod wide {
             let query_phase = clock.lap();
             let mut split = ExtractSplit::default();
             let relation = extract128(
-                &gf,
-                &fast,
-                &basis,
-                &solver,
-                &index,
-                &base,
-                target,
-                start,
-                &mut clock,
-                &mut split,
+                &gf, &fast, &basis, &solver, &index, &base, target, start, &mut clock, &mut split,
             );
             let recovered = relation.as_ref().map(|relation| {
                 relation.point_indices.iter().fold(0u64, |acc, &index| {

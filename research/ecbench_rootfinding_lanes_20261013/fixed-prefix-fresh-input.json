@@ -1,0 +1,75 @@
+{
+  "schema": "rootfinding.fixed_prefix_inputs/v1",
+  "source": "fresh public ecbench plan, target_seed 20261025",
+  "curve_slug": "icv1-fp20-t727-cd198a38",
+  "subgroup_r": 562427,
+  "plan_sha256": "8014163c140d496267cb37ddaf855b371923b3124a47ed3595ca2e04a71815ac",
+  "spec_sha256": "15038934050b859cadf5ea0bae15df046356d6a09f393a49bf6d188f4cb8671b",
+  "seed_law": "SHA256 canonical JSON {domain:ecbench.algorithm_seed,parts:[20261025,workload_id_hex,0]} big-endian first 8 bytes",
+  "targets": [
+    {
+      "target_index": 0,
+      "x": "0x54586",
+      "y": "0x2ea8d",
+      "algorithm_seed": 5721571958887971291,
+      "workload_id": "Wcaa3d48bc900",
+      "workload_sha256": "caa3d48bc9007d8514254c27dd3473b5472bc9f225ff0af6b12037cd9488a5a2"
+    },
+    {
+      "target_index": 1,
+      "x": "0x3b91d",
+      "y": "0x4fef9",
+      "algorithm_seed": 811304270667031695,
+      "workload_id": "Wb86513bfdd31",
+      "workload_sha256": "b86513bfdd3179fe15938c6b9273c0ded5644cd2c00d450649c4fe313cf725cb"
+    },
+    {
+      "target_index": 2,
+      "x": "0x5e95a",
+      "y": "0x440f0",
+      "algorithm_seed": 8809037384814122751,
+      "workload_id": "Wce53fbdf146f",
+      "workload_sha256": "ce53fbdf146f6359d466e504ae4693b7ecac22f7fd1bf9afc1f066afb6197751"
+    },
+    {
+      "target_index": 3,
+      "x": "0xdf6",
+      "y": "0x30e83",
+      "algorithm_seed": 10724406905590052964,
+      "workload_id": "Wedd9dc0df434",
+      "workload_sha256": "edd9dc0df43411a6f2496edafcd39fd3cc85f085dedbd8e8646041e8e4d61282"
+    },
+    {
+      "target_index": 4,
+      "x": "0x6d8c5",
+      "y": "0x3c4be",
+      "algorithm_seed": 3241159602644571423,
+      "workload_id": "Wbdc66597c568",
+      "workload_sha256": "bdc66597c568afbeaad076aeab0ff642791bb0cf211b1327cab034d53310e7a5"
+    },
+    {
+      "target_index": 5,
+      "x": "0x39508",
+      "y": "0x86d1f",
+      "algorithm_seed": 11588566958633861767,
+      "workload_id": "W774f81e2dc02",
+      "workload_sha256": "774f81e2dc02d72164c6367a7900a0bfb3b20d9df0ecf32aa943627bdae9561c"
+    },
+    {
+      "target_index": 6,
+      "x": "0x4e5c",
+      "y": "0x1bb48",
+      "algorithm_seed": 3513612762121240431,
+      "workload_id": "Wefd714cab474",
+      "workload_sha256": "efd714cab4741f7496b7e258b3689316a7264c380c6e9c9efb93cc46b2cec9f4"
+    },
+    {
+      "target_index": 7,
+      "x": "0x66f70",
+      "y": "0x1bee7",
+      "algorithm_seed": 15949983506533277204,
+      "workload_id": "W6c658afda526",
+      "workload_sha256": "6c658afda526d9cd151af81629127e34701ad7cd9dc458fafeebcdaf3fc9e1a5"
+    }
+  ]
+}

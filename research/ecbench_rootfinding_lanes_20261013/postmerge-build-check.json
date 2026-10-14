@@ -1,0 +1,15 @@
+{
+  "schema": "rootfinding.postmerge_build_check/v1",
+  "source_commit": "431d0b3167027092443705e21d363489b2637a22",
+  "command": "cargo build --offline --locked --release --bin ecbench",
+  "binary": "target/release/ecbench",
+  "binary_sha256": "ab5764921ad616ae8177ca57c125ec8cd7ba09896f1e0644a6999d1fb33b7159",
+  "build_log_file": "postmerge-ecbench-build.log.gz",
+  "build_log_sha256": "f08634e77f0d3789f80ebee73d80b8a7e8e557c792a0486633c820d80e8bd231",
+  "plan_command": "target/release/ecbench plan --spec research/ecbench_rootfinding_lanes_20261013/specs/lanes.json --json",
+  "plan_file": "postmerge-lanes-plan.json",
+  "plan_sha256": "177e67f8bf34dd851cba5b10e94b5ff3bdd74c69e567250461793daa881dbcb1",
+  "plan_arms_and_workloads_match_sealed_session": true,
+  "plan_execution_count": 256,
+  "main_integration_note": "This build includes origin/main through 5ca51e183; main advanced during validation, and its newest merge touches a separately reserved file."
+}

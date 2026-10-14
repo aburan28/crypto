@@ -39,7 +39,7 @@
 //!   for the workarounds we use in the end-to-end demo.
 
 use crate::binary_ecc::{F2mElement, F2mPoly, IrreduciblePoly};
-use crate::cryptanalysis::ec_trapdoor::{magic_number_full, FieldTower};
+use crate::cryptanalysis::ec_trapdoor::{magic_number_full, mmt_condition_8, FieldTower};
 use crate::cryptanalysis::ghs_descent::ECurve;
 use crate::cryptanalysis::modular_polynomial::{phi_2, phi_3, ModularPolynomial};
 use num_bigint::BigInt;
@@ -353,13 +353,15 @@ impl Default for WalkOptions {
 
 /// BFS the small-`l` isogeny graph from `start`.  At each visited
 /// curve, compute its magic number with respect to the given field
-/// tower; stop and return as soon as we reach `target_magic` or above.
+/// tower; stop and return as soon as we reach `target_magic` or above on a
+/// curve whose GHS cover descends (MMT Lemma 6 condition (8),
+/// [`mmt_condition_8`]).
 ///
 /// We track visited `j`-invariants to avoid cycles.  This is the
 /// "macroscopic" Hess-attack search loop.
 pub fn walk_to_magic(start: &ECurve, tower: &FieldTower, opts: &WalkOptions) -> Option<WalkResult> {
     let start_magic = magic_number_full(tower, &start.a, &start.b);
-    if start_magic >= opts.target_magic {
+    if start_magic >= opts.target_magic && mmt_condition_8(tower, &start.a, &start.b) {
         return Some(WalkResult {
             curve: start.clone(),
             magic: start_magic,
@@ -387,7 +389,7 @@ pub fn walk_to_magic(start: &ECurve, tower: &FieldTower, opts: &WalkOptions) -> 
                 let nb_magic = magic_number_full(tower, &nb.a, &nb.b);
                 let mut path2 = path.clone();
                 path2.push(nb_j.clone());
-                if nb_magic >= opts.target_magic {
+                if nb_magic >= opts.target_magic && mmt_condition_8(tower, &nb.a, &nb.b) {
                     return Some(WalkResult {
                         curve: nb,
                         magic: nb_magic,
