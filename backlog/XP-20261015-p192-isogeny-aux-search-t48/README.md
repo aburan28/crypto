@@ -1,0 +1,106 @@
+# XP-20261015-p192-isogeny-aux-search-t48: an auxiliary curve with a point of order 2^48 over the P-192 prime
+
+**Status: blocked.** Blocked on the wide-field isogeny-tower builder
+(`claude/isogeny-tower-wide`, in progress), on Stage 0's 192-bit field backend
+(`claude/fp-backend`, in progress), on PR #1889 (open), and on a native
+checker route under cairn
+([problems/cairn-certificate-checker-python-only.md](../../problems/cairn-certificate-checker-python-only.md)).
+**Recommended gate:** run it after lead 1
+([XP-20261015-pkm-m3-n21-m4-n20](../XP-20261015-pkm-m3-n21-m4-n20/README.md))
+comes back with a bounded solving degree, or schedule it explicitly as an
+infrastructure and feasibility measurement. Funding 131,072, the lowest of the
+four seed cards.
+
+## Question
+
+PKM's isogeny-tower factor base for a P-192-shaped prime (`v₂(p − 1) = 1`, so
+there is no Kummer tower; encyclopedia §0.2) needs an auxiliary curve `E'/F_p`
+with a rational point of order `2^t`, `t ≈ 48` at `m = 4`. How many curves must
+be drawn before one has such a point, and what does each draw cost at 192 bits?
+
+## Why it matters, and what it does not decide
+
+This run prices *construction*. A curve found here is useful only if the
+tower's F4 solving degree stays bounded as the tower grows (encyclopedia §8
+lead 1). That question is unresolved, and the evidence so far points the
+wrong way: `D` rises at `m = 2, N = 20`. So:
+
+- If lead 1 comes back bounded, the curve found here is the input the relation
+  phase needs, and the measured draws-per-success fixes construction's share of
+  the cost.
+- If lead 1 stays unbounded, this run only measures a feasibility constant.
+- Either way it says nothing about P-192's security. Not finding a curve within
+  the seed space is a bounded negative result about this family and this filter.
+
+## Prerequisites
+
+| needed | where | state |
+|:--|:--|:--|
+| solver binary `pkm-aux-search`: deterministic seed → curve draw, 2-Sylow halving filter, checkpoint/resume | `claude/isogeny-tower-wide` | in progress, not pushed |
+| 192-bit `F_p` Legendre symbol and square root, measured | `claude/fp-backend` (Stage 0) | in progress, not pushed |
+| the measured small-field search (`C = 1.05`) and its projection | PR #1889 | open |
+| a native checker cairn can run (`backlog_check_aux2t`) | [problem record](../../problems/cairn-certificate-checker-python-only.md) | blocked |
+| `PROTOCOL.md`: seed derivation, family, filter, success check, stop rule | this directory | not written |
+
+The solver's flags in `card.json` are provisional; the builder lane fixes them.
+
+## Expected cost (derived; nothing ran at this size)
+
+**Draws.** PR #1889 measured the number of curves tried before one had a point
+of order `2^t` at `C·2^t`, pooled `C = 1.05` over 224 builds at `t = 8…14`
+(16 seeds, two curves; `research/pkm_isogeny_tower_ecbench_20261015/README.md`,
+panel 3, on `claude/leads-isogeny-tower`). A family whose every member already
+has `k` bits of 2-power torsion forces part of the condition, so the
+*hypothesis* (to be measured at small `t` before the run) is
+
+```
+expected draws ≈ C · 2^(t − k)
+```
+
+with `k = 2` for full rational 2-torsion (`Z/2 × Z/2`, the card's default
+`--family z2xz2`) and up to `k = 4` for a `Z/2 × Z/8` family from `X₁(2, 8)`.
+At `t = 48`: `2^46 ≈ 7.0·10¹³` draws for `k = 2`, `2^44 ≈ 1.8·10¹³` for
+`k = 4` (times `C ≈ 1.05`).
+
+**Per draw.** With a halving filter (a point of order `2^j` is halved by
+taking square roots; a draw that cannot be halved past a few levels is
+rejected), most draws are rejected after `O(1)` Legendre symbols and square
+roots at 192 bits. Stage 0 has not measured that cost yet, so the card carries
+a placeholder range of **2–20 µs per draw**:
+
+```
+core-hours = C · 2^(48 − k) · (µs per draw) / 3.6·10⁹
+```
+
+| family | draws | 2 µs/draw | 20 µs/draw |
+|:--|--:|--:|--:|
+| `k = 2` (`Z/2 × Z/2`) | `2^46` | 39,000 core-h ≈ 4.5 core-years | 391,000 core-h ≈ 45 core-years |
+| `k = 4` (`Z/2 × Z/8`) | `2^44` | 9,800 core-h ≈ 1.1 core-years | 98,000 core-h ≈ 11 core-years |
+
+(`C = 1` in the table; multiply by 1.05. A core-year is 8,766 h.)
+
+**The filter is not optional.** The search as measured in PR #1889 charges a
+point draw, `[2^t]P` and a baby-step giant-step over `4√p/2^t` indices per
+curve: about `2^26` group operations per curve at `b = 192, t = 48`, and
+`≈ 2^74` in all (#1889's projection). That is `2^26`–`2^28` times the table
+above; the card is only worth running with the halving filter.
+
+**Parallelism.** Draws are independent, so wall time is core-hours divided by
+cores. The card splits the seed space `[0, 2^48)` into 65,536 shards of `2^32`
+draws (2.4–24 core-hours each). `2^48` seeds are 4 times the `k = 2`
+expectation, so the probability that every shard fails is about `e^{−4} ≈ 2 %`
+if the hypothesis holds. `stop = first_success`: the first verified curve ends
+the search.
+
+## What "done" means
+
+- **Success:** a curve `(a, b)` and point `Q` with `[2^48]Q = O`,
+  `[2^47]Q ≠ O`, checked by the independent checker (`outputs.verify`), plus
+  the total draws, CPU time and per-draw cost actually measured, landed in
+  `research/pkm_aux_search_p192_t48_<date>/` by a PR with its report.
+- **Bounded failure:** every shard ran with no curve; reported with the exact
+  seed space, family and filter. It does not show such curves are rare
+  elsewhere.
+- **Execution:** a cairn objective (`cairn work` with any solver; the pinned
+  checker decides each claim), posted by `backlog cairn-post` once the checker
+  is available; see [backlog/README.md](../README.md).

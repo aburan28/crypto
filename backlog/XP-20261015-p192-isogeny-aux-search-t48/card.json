@@ -1,0 +1,157 @@
+{
+  "schema": "backlog.card/v1",
+  "id": "XP-20261015-p192-isogeny-aux-search-t48",
+  "title": "Auxiliary curve over the NIST P-192 prime with a rational point of order 2^48 (PKM isogeny-tower factor base, t = 48)",
+  "created": "2026-10-15",
+  "authors": [
+    "backlog lane",
+    "coordinator"
+  ],
+  "status": "blocked",
+  "status_note": "Blocked on the wide-field tower builder and the 192-bit field backend (both in progress, not yet pushed) and on a native checker route under cairn. Recommended gate: run only after lead 1 (xp:XP-20261015-pkm-m3-n21-m4-n20) gives a bounded F4 solving degree, or run it explicitly as an infrastructure/feasibility measurement of construction cost at scale.",
+  "blocked_on": [
+    "branch:claude/isogeny-tower-wide wide-field isogeny-tower builder lane, in progress (not yet pushed); provides the solver binary and the 2-Sylow halving filter",
+    "branch:claude/fp-backend Stage 0 192-bit prime-field backend, in progress (not yet pushed); its measured Legendre/sqrt cost fixes the per-trial cost below",
+    "pr:1889 the measured small-field tower and auxiliary-curve search (open, unmerged)",
+    "problem:problems/cairn-certificate-checker-python-only.md"
+  ],
+  "links": {
+    "lead": "docs/ic/factor-base-encyclopedia/README.md §0.2 (isogeny tower, the P-192 shape)",
+    "notes": [
+      "research/pkm_isogeny_tower_ecbench_20261015/README.md on branch claude/leads-isogeny-tower (panel 3: curves tried / 2^t, pooled C = 1.05 over 224 builds, t = 8..14; projection to P-192 size)",
+      "research/notes/index-calculus/RESEARCH_PKM_TOWER_ORACLE.md §10.10 (P-192: v2(p-1) = 1, v2(p+1) = 64)"
+    ],
+    "prs": [
+      1889
+    ]
+  },
+  "question": "How many auxiliary curves over the NIST P-192 prime must be drawn, and at what wall cost per draw, before one has a rational point of order 2^48, using a curve family that forces k bits of 2-power torsion and a halving filter that rejects most draws after O(1) square roots?",
+  "decision_value": "This run prices the construction of a P-192-size isogeny-tower factor base; it does not by itself say anything about P-192 security. The base is useful only if the tower's F4 solving degree stays bounded as the tower grows (encyclopedia §8 lead 1), which is unresolved and trending negative (D rises at m = 2, N = 20). If lead 1 comes back bounded, a curve found here is the input the relation phase needs and the measured trials-per-success fixes the construction's share of the cost; if lead 1 stays unbounded, this run only measures a feasibility constant and should be scheduled as infrastructure work, not as attack evidence. A failure to find a curve within the seed space is a bounded negative result about this family and filter, not about the tower.",
+  "protocol": {
+    "path": null,
+    "blob": null
+  },
+  "code": {
+    "repo": "crypto",
+    "commit": null,
+    "branch": "claude/isogeny-tower-wide",
+    "build": [
+      [
+        "cargo",
+        "build",
+        "--release",
+        "--bin",
+        "pkm-aux-search"
+      ]
+    ]
+  },
+  "resources": {
+    "cpus": 1,
+    "ram_gb": 1,
+    "disk_gb": 1,
+    "gpu": null,
+    "est_core_hours": 39094,
+    "est_wall_hours": null,
+    "notes": "Expected total for the Z/2 x Z/2 family (k = 2) at 2 us per draw: 2^46 draws ~ 39,000 core-hours ~ 4.5 core-years; range 9,800 core-hours (k = 4, 2 us) to 391,000 core-hours (k = 2, 20 us), i.e. 1.1-45 core-years. Embarrassingly parallel: wall time is core-hours / cores. Per shard (2^32 draws): 2.4-24 core-hours. Derivation in README.md. The per-draw cost is a placeholder until claude/fp-backend measures a 192-bit Legendre symbol and square root."
+  },
+  "run": {
+    "argv": [
+      "target/release/pkm-aux-search",
+      "--prime",
+      "nist-p192",
+      "--t",
+      "48",
+      "--family",
+      "z2xz2",
+      "--seed-lo",
+      "{seed_lo}",
+      "--seed-hi",
+      "{seed_hi}",
+      "--out",
+      "{out}/result.json",
+      "--checkpoint",
+      "{checkpoint}"
+    ],
+    "env": {
+      "RAYON_NUM_THREADS": "1"
+    },
+    "timeout_per_shard_s": 172800
+  },
+  "shards": {
+    "count": 65536,
+    "scheme": "seed_range",
+    "params": {
+      "seed_lo": "0",
+      "range_size": "4294967296",
+      "seed_hi": "281474976710656",
+      "seed_meaning": "seed s deterministically derives one curve draw (a, b) of the family; the derivation is fixed in PROTOCOL.md before the card leaves blocked"
+    },
+    "stop": "first_success"
+  },
+  "checkpoint": {
+    "file": "checkpoint.json",
+    "resume_flag": "--resume"
+  },
+  "outputs": {
+    "result_schema": "the solver's result JSON: {a, b, Q: [x, y], t, seed, draws, cpu_seconds}, frozen in PROTOCOL.md",
+    "verify": [
+      "target/release/backlog_check_aux2t",
+      "{out}/result.json"
+    ],
+    "land": "research/pkm_aux_search_p192_t48"
+  },
+  "cairn": {
+    "mode": "objective",
+    "notes": "A checkable search: any solver may submit a curve and the pinned checker decides. Not postable until a native checker can run under cairn (problems/cairn-certificate-checker-python-only.md); then `backlog cairn-post` posts it with this funding as the reward, piecework paying reward/65536 per seed range.",
+    "kind": "certificate",
+    "checker": {
+      "status": "blocked",
+      "bin": "backlog_check_aux2t (not written; src/bin/backlog_check_aux2t.rs)",
+      "argv": [
+        "backlog_check_aux2t",
+        "artifact.json"
+      ],
+      "artifact_schema": {
+        "type": "object",
+        "required": [
+          "a",
+          "b",
+          "Q",
+          "t"
+        ],
+        "properties": {
+          "a": {
+            "type": "string",
+            "description": "decimal, 0 <= a < p"
+          },
+          "b": {
+            "type": "string",
+            "description": "decimal, 0 <= b < p"
+          },
+          "Q": {
+            "type": "array",
+            "description": "[x, y] decimal affine coordinates"
+          },
+          "t": {
+            "type": "integer",
+            "description": "48"
+          }
+        },
+        "checks": "p is the NIST P-192 prime 2^192 - 2^64 - 1; 4a^3 + 27b^2 != 0 mod p; Q on y^2 = x^3 + ax + b; [2^t]Q = O and [2^(t-1)]Q != O"
+      },
+      "blocked_by": "problem:problems/cairn-certificate-checker-python-only.md"
+    },
+    "piecework": {
+      "units": 65536,
+      "unit": "one seed range of 2^32 curve draws (shard k covers seeds [k*2^32, (k+1)*2^32))"
+    },
+    "stop": "first_success",
+    "funding": {
+      "units": 131072,
+      "rationale": "Lowest of the four: gated on lead 1 (the base only matters if the F4 solving degree is bounded), and 1-45 core-years of construction that by itself says nothing about P-192 security."
+    },
+    "goal": "GOAL-crypto-pkm-isogeny-tower-p192",
+    "verifier": null
+  },
+  "owner_hint": "the wide-field isogeny-tower builder lane"
+}

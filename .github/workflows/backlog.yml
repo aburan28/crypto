@@ -1,0 +1,76 @@
+name: backlog
+
+# backlog/README.md: every experiment card validates (`backlog validate --all`),
+# and the `backlog` binary's unit and integration tests pass. The cairn lab
+# tests skip here (no cairn on the runner) and say so. It runs no experiment.
+
+on:
+  pull_request:
+    paths:
+      - 'backlog/**'
+      - 'problems/**'
+      - 'src/bin/backlog.rs'
+      - 'src/bin/backlog/**'
+      - 'tests/backlog_cli.rs'
+      - 'src/hash/sha1.rs'
+      - '.github/workflows/backlog.yml'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - '.cargo/**'
+  push:
+    branches: [main]
+    paths:
+      - 'backlog/**'
+      - 'problems/**'
+      - 'src/bin/backlog.rs'
+      - 'src/bin/backlog/**'
+      - 'tests/backlog_cli.rs'
+      - '.github/workflows/backlog.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/scripts/
+            /Cargo.toml
+            /Cargo.lock
+            /build.rs
+            /.cargo/
+            /rust-toolchain*
+            /rustfmt.toml
+            /clippy.toml
+            /src/
+            /tests/
+            /examples/
+            /benches/
+            /experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs
+            /experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs
+            /backlog/
+            /problems/
+      - name: Materialize compile-time fixture inputs
+        run: node .github/scripts/ci-scope.mjs --materialize
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --release --bin backlog
+      - name: Every card validates
+        run: ./target/release/backlog validate --all
+      - name: Unit tests (card rules, placeholders, schema agreement)
+        run: cargo test --release --bin backlog
+      - name: Integration tests (cairn lab tests skip without cairn)
+        run: cargo test --release --test backlog_cli -- --nocapture
