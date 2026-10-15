@@ -83,9 +83,9 @@ use rand::{rngs::StdRng, Rng, SeedableRng};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::cmp::Reverse;
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::{BinaryHeap, HashMap};
 use std::fmt::Debug;
-use std::hash::Hash;
+use std::hash::{Hash, Hasher};
 use std::io::Write;
 use std::process::Command;
 
@@ -1638,38 +1638,62 @@ fn purge_cado<W: ModWord>(ws: &mut Workspace<W>, target_excess: usize) -> Result
                 }
             }
         }
-        // Per-root weight and an intrusive member list (no hashing).
+        // Per-row Ω₃₁ weights in parallel, then per-root sums and an
+        // intrusive member list in row order (the same summation order as a
+        // serial pass, so the ranking is deterministic).
+        let row_weight: Vec<f64> = ws
+            .rows
+            .par_iter()
+            .map(|row| {
+                row.as_ref().map_or(0.0, |row| {
+                    row.entries
+                        .iter()
+                        .map(|&(c, _)| {
+                            let w = ws.col_rows[c as usize].len();
+                            if w < omega.len() {
+                                omega[w]
+                            } else {
+                                0.0
+                            }
+                        })
+                        .sum::<f64>()
+                })
+            })
+            .collect();
         weight.iter_mut().for_each(|w| *w = 0.0);
         head.iter_mut().for_each(|h| *h = usize::MAX);
         let mut roots: Vec<usize> = Vec::new();
         for id in 0..n {
-            let Some(row) = ws.rows[id].as_ref() else {
+            if ws.rows[id].is_none() {
                 continue;
-            };
+            }
             let root = find_root(&mut parent, id);
             if head[root] == usize::MAX {
                 roots.push(root);
             }
             next[id] = head[root];
             head[root] = id;
-            weight[root] += row
-                .entries
-                .iter()
-                .map(|&(c, _)| {
-                    let w = ws.col_rows[c as usize].len();
-                    if w < omega.len() {
-                        omega[w]
-                    } else {
-                        0.0
-                    }
-                })
-                .sum::<f64>();
+            weight[root] += row_weight[id];
         }
-        // Heaviest first; ties by root for determinism.
+        // Heaviest first; ties by root for determinism.  Only the heaviest
+        // few are needed per step: select them, sort that prefix, and sort
+        // the rest only if the prefix runs out.
+        let heavier = |a: &(f64, usize), b: &(f64, usize)| b.0.total_cmp(&a.0).then(a.1.cmp(&b.1));
         let mut order: Vec<(f64, usize)> = roots.iter().map(|&r| (weight[r], r)).collect();
-        order.sort_unstable_by(|a, b| b.0.total_cmp(&a.0).then(a.1.cmp(&b.1)));
+        let need = (excess(ws) - step_target).max(0) as usize;
+        let prefix = (2 * need + 1024).min(order.len());
+        if prefix < order.len() {
+            order.select_nth_unstable_by(prefix, heavier);
+        }
+        order[..prefix].sort_unstable_by(heavier);
         let mut seeds: Vec<u32> = Vec::new();
-        for (_, root) in order {
+        let mut k = 0;
+        while k < order.len() {
+            if k == prefix && prefix < order.len() {
+                order[prefix..].sort_unstable_by(heavier);
+            }
+            let root = order[k].1;
+            k += 1;
             if excess(ws) <= step_target {
                 break;
             }
@@ -1780,10 +1804,47 @@ pub fn filter_relations<W: ModWord>(
         nonzeros_in: rows.iter().map(SparseRow::weight).sum(),
         ..FilterReport::default()
     };
-    // Duplicates and trivial rows.
+    // Duplicates and trivial rows.  A later row equal to an earlier one is
+    // dropped; rows are hashed in parallel and compared only within a hash
+    // collision, which keeps exactly the rows a set of seen rows would.
+    let duplicate: Vec<bool> = if opts.remove_duplicates {
+        let hashes: Vec<u64> = rows
+            .par_iter()
+            .map(|row| {
+                let mut h = std::collections::hash_map::DefaultHasher::new();
+                row.hash(&mut h);
+                h.finish()
+            })
+            .collect();
+        let mut order: Vec<u32> = (0..rows.len() as u32)
+            .filter(|&i| !rows[i as usize].entries.is_empty())
+            .collect();
+        order.par_sort_unstable_by_key(|&i| (hashes[i as usize], i));
+        let mut duplicate = vec![false; rows.len()];
+        let mut start = 0;
+        while start < order.len() {
+            let h = hashes[order[start] as usize];
+            let mut end = start + 1;
+            while end < order.len() && hashes[order[end] as usize] == h {
+                end += 1;
+            }
+            for j in start + 1..end {
+                let row = &rows[order[j] as usize];
+                if order[start..j]
+                    .iter()
+                    .any(|&i| !duplicate[i as usize] && rows[i as usize] == *row)
+                {
+                    duplicate[order[j] as usize] = true;
+                }
+            }
+            start = end;
+        }
+        duplicate
+    } else {
+        vec![false; rows.len()]
+    };
     let mut kept: Vec<SparseRow<W>> = Vec::with_capacity(rows.len());
-    let mut seen: HashSet<SparseRow<W>> = HashSet::new();
-    for row in rows {
+    for (row, dup) in rows.into_iter().zip(duplicate) {
         if row.entries.is_empty() {
             if !row.rhs.is_zero() {
                 return Err(Inconsistent);
@@ -1791,16 +1852,12 @@ pub fn filter_relations<W: ModWord>(
             report.dependent_rows_dropped += 1;
             continue;
         }
-        if opts.remove_duplicates {
-            if seen.contains(&row) {
-                report.duplicates_removed += 1;
-                continue;
-            }
-            seen.insert(row.clone());
+        if dup {
+            report.duplicates_removed += 1;
+            continue;
         }
         kept.push(row);
     }
-    drop(seen);
 
     let mut ws = Workspace {
         modulus,
@@ -1812,6 +1869,13 @@ pub fn filter_relations<W: ModWord>(
         eliminated: Vec::new(),
         report,
     };
+    let mut counts = vec![0u32; columns];
+    kept.iter()
+        .flat_map(|r| &r.entries)
+        .for_each(|&(c, _)| counts[c as usize] += 1);
+    for (list, &n) in ws.col_rows.iter_mut().zip(&counts) {
+        list.reserve_exact(n as usize);
+    }
     for (id, row) in kept.into_iter().enumerate() {
         ws.rows.push(None);
         ws.attach(id, row);
