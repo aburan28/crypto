@@ -454,7 +454,7 @@ fn sqrt_counted(n: u64, p: u64, muls: &mut u64) -> Option<u64> {
     }
     let mut q = p - 1;
     let mut s = 0u32;
-    while q % 2 == 0 {
+    while q.is_multiple_of(2) {
         q /= 2;
         s += 1;
     }

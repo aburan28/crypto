@@ -1,0 +1,33 @@
+| p | seed | targets | w solved | dim 512 | deg-27 reruns | C_w median (min–max) | L_w median (max) | L_w / C_w max | C_c8 median (min–max) | R_c8 median (min–max) | R_plain median (min–max) | rational sols (w) | split / rooted / candidates | decompositions (w) | w = brute | w = mitm | c8 = w | planted found w / c8 |
+|--:|--:|--:|--:|--:|--:|:--|:--|--:|:--|:--|:--|--:|:--|--:|:--|:--|:--|:--|
+| 13 | 1 | 6 | 6 | 6 | 2 | 1.211e9 (1.165e9–2.823e9) | 2.32e4 (4.85e4) | 3.95e-5 | 2.179e10 (2.162e10–2.182e10) | 18.0 (7.7–18.6) | 1002 (430–1042) | 9 | 3 / 3 / 12 | 6 | 6/6 | 6/6 | 6/6 | 3/3 / 3/3 |
+| 17 | 1 | 6 | 5 | 2 | 1 | 1.207e9 (1.058e9–2.543e9) | 4.56e2 (9.23e4) | 7.29e-5 | 2.052e10 (2.042e10–2.268e10) | 18.5 (8.1–19.3) | 1005 (477–1146) | 5 | 2 / 2 / 12 | 10 | 5/6 | 5/6 | 5/5 | 2/3 / 2/3 |
+| 29 | 1 | 6 | 6 | 6 | 1 | 1.332e9 (1.273e9–3.097e9) | 5.90e4 (2.30e5) | 8.83e-5 | 2.388e10 (2.377e10–2.395e10) | 18.0 (7.7–18.7) | 912 (392–953) | 15 | 4 / 3 / 32 | 24 | 6/6 | 6/6 | 6/6 | 3/3 / 3/3 |
+| 37 | 1 | 6 | 6 | 6 | 0 | 1.341e9 (1.288e9–1.376e9) | 5.74e4 (1.28e5) | 9.45e-5 | 2.421e10 (2.366e10–2.426e10) | 17.9 (17.6–18.7) | 905 (881–942) | 9 | 3 / 3 / 24 | 24 | 6/6 | 6/6 | 6/6 | 3/3 / 3/3 |
+| 269 | 1 | 8 | 8 | 8 | 0 | 1.411e9 (1.358e9–1.572e9) | 8.26e4 (1.91e5) | 1.25e-4 | 2.542e10 (2.535e10–2.561e10) | 18.0 (16.3–18.7) | 860 (772–893) | 20 | 5 / 4 / 32 | 32 | 0/0 | 8/8 | 8/8 | 4/4 / 4/4 |
+| 269 | 2 | 12 | 12 | 12 | 1 | 1.385e9 (1.356e9–3.325e9) | 8.26e4 (1.87e5) | 1.35e-4 | — | — | 876 (365–894) | 21 | 6 / 6 / 48 | 48 | 0/0 | 12/12 | 0/0 | 6/6 / 0/0 |
+| 1033 | 1 | 8 | 8 | 8 | 0 | 1.406e9 (1.366e9–1.474e9) | 1.02e5 (2.24e5) | 1.58e-4 | 2.554e10 (2.549e10–2.562e10) | 18.2 (17.4–18.7) | 863 (823–888) | 13 | 4 / 4 / 32 | 32 | 0/0 | 8/8 | 8/8 | 4/4 / 4/4 |
+| 1033 | 2 | 12 | 12 | 12 | 0 | 1.420e9 (1.393e9–1.527e9) | 1.08e5 (2.35e5) | 1.67e-4 | — | — | 854 (794–871) | 26 | 8 / 6 / 48 | 48 | 0/0 | 12/12 | 0/0 | 6/6 / 0/0 |
+| 4093 | 1 | 8 | 8 | 8 | 0 | 1.437e9 (1.370e9–1.558e9) | 1.32e5 (2.84e5) | 1.98e-4 | 2.561e10 (2.553e10–2.576e10) | 17.8 (16.5–18.6) | 844 (778–885) | 23 | 4 / 4 / 32 | 32 | 0/0 | 8/8 | 8/8 | 4/4 / 4/4 |
+| 4093 | 2 | 12 | 12 | 12 | 0 | 1.424e9 (1.370e9–1.505e9) | 1.30e5 (2.84e5) | 2.01e-4 | — | — | 852 (806–885) | 23 | 7 / 6 / 48 | 48 | 0/0 | 12/12 | 0/0 | 6/6 / 0/0 |
+
+Handover in E18's τ_T frame (derived; extrapolation): n* = 157.9 − 4·log2(1.213e12 / C)
+| solve | C (median, measured sizes) | C4_plain / C | n* (bits) |
+|:--|--:|--:|--:|
+| plain S₄ form (quoted) | 1.213e12 | 1.0 | 157.9 |
+| C8, five unknowns | 2.555e10 | 47.5 | 135.6 |
+| w, four weighted unknowns | 1.420e9 | 854.3 | 118.9 |
+| w + lift-back | 1.420e9 | 854.2 | 118.9 |
+
+Controls:
+{"mode":"invariance_control","p":13,"seed":1,"true_c_in_span":true,"wrong_c":11,"wrong_c_error":"H is not in the span of the D₄ invariants (check point 0, coefficient Y_R^0)","wrong_c_in_span":false}
+{"mode":"invariance_control","p":269,"seed":1,"true_c_in_span":true,"wrong_c":21,"wrong_c_error":"H is not in the span of the D₄ invariants (check point 0, coefficient Y_R^0)","wrong_c_in_span":false}
+{"charpoly_muls":137001114,"cols":4200,"degree_used":26,"dim":512,"echelon_muls":478664389,"mode":"generic","nf_muls":742261239,"p":269,"planted_root_found":true,"rows":3979,"seed":1,"solutions":4,"total_ms":765.448431,"total_muls":1447094134}
+{"charpoly_muls":137005484,"cols":4200,"degree_used":26,"dim":512,"echelon_muls":478299343,"mode":"generic","nf_muls":741885725,"p":269,"planted_root_found":true,"rows":3979,"seed":2,"solutions":2,"total_ms":854.301862,"total_muls":1410935578}
+{"charpoly_muls":137011826,"cols":4200,"degree_used":26,"dim":512,"echelon_muls":478539718,"mode":"generic","nf_muls":743141099,"p":269,"planted_root_found":true,"rows":3979,"seed":3,"solutions":1,"total_ms":674.655033,"total_muls":1385687267}
+{"charpoly_muls":137407836,"cols":4200,"degree_used":26,"dim":512,"echelon_muls":480942036,"mode":"generic","nf_muls":745972485,"p":1033,"planted_root_found":true,"rows":3979,"seed":1,"solutions":1,"total_ms":3611.7096760000004,"total_muls":1392556291}
+{"charpoly_muls":137400759,"cols":4200,"degree_used":26,"dim":512,"echelon_muls":481108596,"mode":"generic","nf_muls":746284358,"p":1033,"planted_root_found":true,"rows":3979,"seed":2,"solutions":1,"total_ms":3438.014008,"total_muls":1393039426}
+{"charpoly_muls":137397420,"cols":4200,"degree_used":26,"dim":512,"echelon_muls":481209827,"mode":"generic","nf_muls":746304974,"p":1033,"planted_root_found":true,"rows":3979,"seed":3,"solutions":1,"total_ms":3464.5917179999997,"total_muls":1393149305}
+{"charpoly_muls":137504891,"cols":4200,"degree_used":26,"dim":512,"echelon_muls":481865873,"mode":"generic","nf_muls":747329608,"p":4093,"planted_root_found":true,"rows":3979,"seed":1,"solutions":2,"total_ms":3566.5671890000003,"total_muls":1423989403}
+{"charpoly_muls":137496634,"cols":4200,"degree_used":26,"dim":512,"echelon_muls":481846479,"mode":"generic","nf_muls":747376412,"p":4093,"planted_root_found":true,"rows":3979,"seed":2,"solutions":3,"total_ms":3573.509848,"total_muls":1450862018}
+{"charpoly_muls":137504153,"cols":4200,"degree_used":26,"dim":512,"echelon_muls":481863976,"mode":"generic","nf_muls":747352679,"p":4093,"planted_root_found":true,"rows":3979,"seed":3,"solutions":1,"total_ms":3705.5566679999997,"total_muls":1397163419}
