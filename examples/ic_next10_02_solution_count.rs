@@ -42,10 +42,18 @@ struct Fp {
 impl Fp {
     fn add(&self, x: u64, y: u64) -> u64 {
         let s = x + y;
-        if s >= self.p { s - self.p } else { s }
+        if s >= self.p {
+            s - self.p
+        } else {
+            s
+        }
     }
     fn sub(&self, x: u64, y: u64) -> u64 {
-        if x >= y { x - y } else { x + self.p - y }
+        if x >= y {
+            x - y
+        } else {
+            x + self.p - y
+        }
     }
     fn mul(&self, x: u64, y: u64) -> u64 {
         ((x as u128 * y as u128) % self.p as u128) as u64
@@ -186,14 +194,20 @@ impl Curve {
             let r = self.rhs(x);
             if r != 0 && self.f.is_sq(r) {
                 let y = self.f.sqrt(r);
-                return if rng.next() & 1 == 0 { Pt::A(x, y) } else { Pt::A(x, self.f.p - y) };
+                return if rng.next() & 1 == 0 {
+                    Pt::A(x, y)
+                } else {
+                    Pt::A(x, self.f.p - y)
+                };
             }
         }
     }
 }
 
 fn arg(args: &[String], k: &str) -> Option<String> {
-    args.iter().position(|s| s == k).map(|i| args[i + 1].clone())
+    args.iter()
+        .position(|s| s == k)
+        .map(|i| args[i + 1].clone())
 }
 
 /// Element of exact order B (power of two) in F_p^*, B | p-1.
@@ -405,7 +419,11 @@ fn count_m3(c: &Curve, sp: &[Pt], tab: &[(u64, u32, u32)], r: Pt) -> usize {
 fn stats(counts: &[usize], rng: &mut Rng) -> (f64, f64, f64, f64, f64) {
     let k = counts.len() as f64;
     let mean = counts.iter().sum::<usize>() as f64 / k;
-    let var = counts.iter().map(|&c| (c as f64 - mean).powi(2)).sum::<f64>() / (k - 1.0);
+    let var = counts
+        .iter()
+        .map(|&c| (c as f64 - mean).powi(2))
+        .sum::<f64>()
+        / (k - 1.0);
     let frac = counts.iter().filter(|&&c| c >= 1).count() as f64 / k;
     let mut boots: Vec<f64> = (0..2000)
         .map(|_| {
@@ -422,7 +440,12 @@ fn stats(counts: &[usize], rng: &mut Rng) -> (f64, f64, f64, f64, f64) {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let g = |k: &str| arg(&args, k).unwrap_or_else(|| panic!("missing {k}")).parse::<u64>().unwrap();
+    let g = |k: &str| {
+        arg(&args, k)
+            .unwrap_or_else(|| panic!("missing {k}"))
+            .parse::<u64>()
+            .unwrap()
+    };
     let (p, a, b, n) = (g("--p"), g("--a"), g("--b"), g("--n"));
     let tmin = g("--tmin");
     let tmax = g("--tmax");
@@ -430,7 +453,9 @@ fn main() {
     let targets3 = g("--targets3") as usize;
     let seed = g("--seed");
     let dump = arg(&args, "--dump-bases");
-    let dump_targets = arg(&args, "--dump-targets").map(|s| s.parse::<usize>().unwrap()).unwrap_or(5);
+    let dump_targets = arg(&args, "--dump-targets")
+        .map(|s| s.parse::<usize>().unwrap())
+        .unwrap_or(5);
     let ms: Vec<usize> = arg(&args, "--ms")
         .unwrap_or("2,3".into())
         .split(',')
@@ -441,7 +466,9 @@ fn main() {
     // shared targets
     let mut trng = Rng(seed ^ 0x7a7a);
     let tmax_targets = targets2.max(targets3);
-    let targets: Vec<Pt> = (0..tmax_targets).map(|_| c.random_point(&mut trng)).collect();
+    let targets: Vec<Pt> = (0..tmax_targets)
+        .map(|_| c.random_point(&mut trng))
+        .collect();
     // every target must lie in the prime-order group (cofactor 1, so automatic) -- spot check
     assert!(c.mul(n, targets[0]) == Pt::O);
 
@@ -456,7 +483,16 @@ fn main() {
         }
     }
 
-    let arms = ["kummer", "subgroup", "dickson", "dickson-torus", "smallx", "random", "onlycurve", "dloginterval"];
+    let arms = [
+        "kummer",
+        "subgroup",
+        "dickson",
+        "dickson-torus",
+        "smallx",
+        "random",
+        "onlycurve",
+        "dloginterval",
+    ];
     println!("p,a,b,n,arm,m,t,B,B_E,targets,skipped,mean,ci_lo,ci_hi,var,frac_ge1,pred_exact,pred_product,Bm1,hist");
     for t in tmin..=tmax {
         let bsz = 1u64 << t;
@@ -477,7 +513,11 @@ fn main() {
             let be = sp.len() / 2;
             for &m in &ms {
                 let ntar = if m == 2 { targets2 } else { targets3 };
-                let tab = if m == 3 { pair_table(&c, &sp) } else { Vec::new() };
+                let tab = if m == 3 {
+                    pair_table(&c, &sp)
+                } else {
+                    Vec::new()
+                };
                 let mut counts = Vec::with_capacity(ntar);
                 let mut skipped = 0;
                 for &r in targets.iter().take(ntar) {
@@ -485,7 +525,11 @@ fn main() {
                         skipped += 1;
                         continue;
                     }
-                    counts.push(if m == 2 { count_m2(&c, &vs, &sp, r) } else { count_m3(&c, &sp, &tab, r) });
+                    counts.push(if m == 2 {
+                        count_m2(&c, &vs, &sp, r)
+                    } else {
+                        count_m3(&c, &sp, &tab, r)
+                    });
                 }
                 let mut srng = Rng(seed ^ 0xb00757 ^ (t << 16) ^ ((ai as u64) << 4) ^ m as u64);
                 let (mean, lo, hi, var, frac) = stats(&counts, &mut srng);

@@ -89,7 +89,11 @@ fn verdict(lo: f64, hi: f64) -> &'static str {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    assert_eq!(args.len(), 5, "usage: <data_dir> <scalars_dir> <results.json> <rows.csv>");
+    assert_eq!(
+        args.len(),
+        5,
+        "usage: <data_dir> <scalars_dir> <results.json> <rows.csv>"
+    );
     let data = &args[1];
     let scalars_dir = &args[2];
     let mut csv = std::fs::File::create(&args[4]).unwrap();
@@ -114,7 +118,8 @@ fn main() {
         for seed in 1..=64u64 {
             for arm in ARMS {
                 let stem = format!("{data}/n{n}_K{k}_s{seed}_{arm}");
-                let Ok(summary_text) = std::fs::read_to_string(format!("{stem}.summary.json")) else {
+                let Ok(summary_text) = std::fs::read_to_string(format!("{stem}.summary.json"))
+                else {
                     continue;
                 };
                 let Ok(summary) = serde_json::from_str::<Value>(summary_text.trim()) else {
@@ -136,7 +141,9 @@ fn main() {
                     let recovered = t["recovered_scalar"].as_u64();
                     if !verified || recovered != Some(scalars[i] % r) {
                         ok = false;
-                        failures.push(format!("{stem}: target {i} verified={verified} recovered={recovered:?}"));
+                        failures.push(format!(
+                            "{stem}: target {i} verified={verified} recovered={recovered:?}"
+                        ));
                     }
                 }
                 if !ok {
@@ -145,14 +152,15 @@ fn main() {
                 if let Some(h) = summary["item03"]["logs_hash"].as_str() {
                     *logs_hashes.entry(h.to_owned()).or_default() += 1;
                 }
-                let t_root: f64 = targets.iter().map(|t| get(t, &["root_calls"])).sum::<f64>()
-                    / TARGETS as f64;
+                let t_root: f64 =
+                    targets.iter().map(|t| get(t, &["root_calls"])).sum::<f64>() / TARGETS as f64;
                 let t_wall: f64 =
                     targets.iter().map(|t| get(t, &["online_ms"])).sum::<f64>() / TARGETS as f64;
                 let filter_checks = get(&summary, &["item03", "filter_checks"]);
                 // Filter checks: rank-stage ones are setup, one per target is online.
                 let per_target_filter = if filter_checks > 0.0 { 1.0 } else { 0.0 };
-                let c_filter = filter_checks - per_target_filter * TARGETS as f64 + per_target_filter;
+                let c_filter =
+                    filter_checks - per_target_filter * TARGETS as f64 + per_target_filter;
                 let c_index = get(&summary, &["index_pair_candidates"]);
                 let c_rank = get(&summary, &["rank_root_calls_total"]);
                 let c_harvest = get(&summary, &["item03", "harvest_additions"]);
@@ -192,14 +200,21 @@ fn main() {
             }
         }
         if logs_hashes.len() > 1 {
-            failures.push(format!("n={n}: {} distinct base-log hashes", logs_hashes.len()));
+            failures.push(format!(
+                "n={n}: {} distinct base-log hashes",
+                logs_hashes.len()
+            ));
         }
         // Paired comparisons against A (and inc against A as the A/A null).
         let base = reps.get("A").cloned().unwrap_or_default();
         let mut size_out = serde_json::Map::new();
         for arm in ["inc", "F", "R", "FR"] {
             let Some(cand) = reps.get(arm) else { continue };
-            let seeds: Vec<u64> = cand.keys().filter(|s| base.contains_key(s)).copied().collect();
+            let seeds: Vec<u64> = cand
+                .keys()
+                .filter(|s| base.contains_key(s))
+                .copied()
+                .collect();
             if seeds.is_empty() {
                 continue;
             }
@@ -214,7 +229,9 @@ fn main() {
                 ("counted_filter_plus_harvest", |r| r.c_filter + r.c_harvest),
                 ("wall_total", |r| r.w_total),
                 ("wall_index", |r| r.w_index),
-                ("wall_harvest_plus_other_setup", |r| r.w_harvest + r.w_setup_other),
+                ("wall_harvest_plus_other_setup", |r| {
+                    r.w_harvest + r.w_setup_other
+                }),
                 ("wall_rank", |r| r.w_rank),
                 ("wall_la", |r| r.w_la),
                 ("wall_target", |r| r.w_target),
@@ -251,8 +268,14 @@ fn main() {
             arm_out.insert("replicates".into(), json!(seeds.len()));
             let fr: Vec<f64> = pick(|r| r.free_rank, cand);
             let rej: Vec<f64> = pick(|r| r.filter_rejections, cand);
-            arm_out.insert("free_rank_mean".into(), json!(fr.iter().sum::<f64>() / fr.len() as f64));
-            arm_out.insert("filter_rejections_total".into(), json!(rej.iter().sum::<f64>()));
+            arm_out.insert(
+                "free_rank_mean".into(),
+                json!(fr.iter().sum::<f64>() / fr.len() as f64),
+            );
+            arm_out.insert(
+                "filter_rejections_total".into(),
+                json!(rej.iter().sum::<f64>()),
+            );
             arm_out.insert(
                 "expected_rank_ratio_K_minus_F_over_K".into(),
                 json!((k as f64 - fr.iter().sum::<f64>() / fr.len() as f64) / k as f64),

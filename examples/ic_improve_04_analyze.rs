@@ -20,7 +20,11 @@ use std::fs;
 
 fn read_jsonl(dir: &str) -> Vec<Value> {
     let mut out = vec![];
-    let mut names: Vec<_> = fs::read_dir(dir).unwrap().flatten().map(|e| e.path()).collect();
+    let mut names: Vec<_> = fs::read_dir(dir)
+        .unwrap()
+        .flatten()
+        .map(|e| e.path())
+        .collect();
     names.sort();
     for p in names {
         if p.extension().map(|e| e == "jsonl").unwrap_or(false) {
@@ -38,15 +42,52 @@ fn xcheck(pydir: &str, rsdir: &str) {
     let py = read_jsonl(pydir);
     let rs = read_jsonl(rsdir);
     let key = |v: &Value| (v["bits"].as_u64().unwrap(), v["curve"].as_u64().unwrap());
-    let pym: BTreeMap<_, _> = py.iter().filter(|v| v["results"][0]["arm"] != "rho").map(|v| (key(v), v)).collect();
-    let inst_fields = ["q", "N", "ell", "c", "h", "a", "b", "r0", "Kmod", "build_tries", "checks"];
+    let pym: BTreeMap<_, _> = py
+        .iter()
+        .filter(|v| v["results"][0]["arm"] != "rho")
+        .map(|v| (key(v), v))
+        .collect();
+    let inst_fields = [
+        "q",
+        "N",
+        "ell",
+        "c",
+        "h",
+        "a",
+        "b",
+        "r0",
+        "Kmod",
+        "build_tries",
+        "checks",
+    ];
     let res_fields = [
-        "arm", "k", "correct", "nfb", "rows", "lp_vertices", "checks", "counters", "setup_counters", "steps",
-        "cand_split", "full", "lp1", "lp2", "lp3", "restarts", "cycles", "weier", "transfer_counters",
-        "total_counters", "cost", "cost_cl9",
+        "arm",
+        "k",
+        "correct",
+        "nfb",
+        "rows",
+        "lp_vertices",
+        "checks",
+        "counters",
+        "setup_counters",
+        "steps",
+        "cand_split",
+        "full",
+        "lp1",
+        "lp2",
+        "lp3",
+        "restarts",
+        "cycles",
+        "weier",
+        "transfer_counters",
+        "total_counters",
+        "cost",
+        "cost_cl9",
     ];
     let (mut n_ok, mut n_bad) = (0, 0);
-    println!("| log2 q | curve | arm | k (both) | steps | cost (Python) | cost (Rust) | fields equal |");
+    println!(
+        "| log2 q | curve | arm | k (both) | steps | cost (Python) | cost (Rust) | fields equal |"
+    );
     println!("|---|---|---|---|---|---|---|---|");
     for r in &rs {
         let kk = key(r);
@@ -88,7 +129,11 @@ fn xcheck(pydir: &str, rsdir: &str) {
                 a["steps"],
                 b["cost"],
                 a["cost"],
-                if ok { "all".to_string() } else { format!("DIFF {:?} {:?}", bad, badr) }
+                if ok {
+                    "all".to_string()
+                } else {
+                    format!("DIFF {:?} {:?}", bad, badr)
+                }
             );
         }
     }
@@ -141,7 +186,11 @@ type Data = BTreeMap<String, BTreeMap<u64, BTreeMap<u64, (f64, f64)>>>;
 fn curves_common(d: &Data, arms: &[&str], b: u64) -> Vec<u64> {
     let mut s: Option<BTreeSet<u64>> = None;
     for a in arms {
-        let cs: BTreeSet<u64> = d.get(*a).and_then(|m| m.get(&b)).map(|m| m.keys().cloned().collect()).unwrap_or_default();
+        let cs: BTreeSet<u64> = d
+            .get(*a)
+            .and_then(|m| m.get(&b))
+            .map(|m| m.keys().cloned().collect())
+            .unwrap_or_default();
         s = Some(match s {
             None => cs,
             Some(x) => x.intersection(&cs).cloned().collect(),
@@ -219,15 +268,26 @@ fn main() {
         for r in read_jsonl(&args[2]) {
             for x in r["results"].as_array().unwrap() {
                 assert!(x["correct"].as_bool().unwrap(), "incorrect training solve");
-                m.entry((x["arm"].as_str().unwrap().into(), format!("{}", x["kappa"]), r["bits"].as_u64().unwrap()))
-                    .or_default()
-                    .push(x["cost"].as_f64().unwrap().ln());
+                m.entry((
+                    x["arm"].as_str().unwrap().into(),
+                    format!("{}", x["kappa"]),
+                    r["bits"].as_u64().unwrap(),
+                ))
+                .or_default()
+                .push(x["cost"].as_f64().unwrap().ln());
             }
         }
         println!("| arm | kappa | log2 q | n | geometric-mean cost |");
         println!("|---|---|---|---|---|");
         for ((a, k, b), v) in &m {
-            println!("| {} | {} | {} | {} | {:.4e} |", a, k, b, v.len(), (v.iter().sum::<f64>() / v.len() as f64).exp());
+            println!(
+                "| {} | {} | {} | {} | {:.4e} |",
+                a,
+                k,
+                b,
+                v.len(),
+                (v.iter().sum::<f64>() / v.len() as f64).exp()
+            );
         }
         return;
     }
@@ -251,7 +311,10 @@ fn main() {
         let b = r["bits"].as_u64().unwrap();
         let c = r["curve"].as_u64().unwrap();
         let q = r["q"].as_f64().unwrap();
-        inst.insert((b, c), json!({"N": r["N"], "ell": r["ell"], "c": r["c"], "checks": r["checks"]}));
+        inst.insert(
+            (b, c),
+            json!({"N": r["N"], "ell": r["ell"], "c": r["c"], "checks": r["checks"]}),
+        );
         for x in r["results"].as_array().unwrap() {
             let arm = x["arm"].as_str().unwrap().to_string();
             let e = correct.entry((arm.clone(), b)).or_insert((0, 0));
@@ -269,15 +332,33 @@ fn main() {
                 continue;
             }
             let cost = x["cost"].as_f64().unwrap();
-            if x["correct"].as_bool().unwrap() && (arm == "ic2lp" || arm == "basic" || arm == "ic1lp") {
+            if x["correct"].as_bool().unwrap()
+                && (arm == "ic2lp" || arm == "basic" || arm == "ic1lp")
+            {
                 // phase split (derived): linear algebra = counted mults mod ell; the rest = relation phase
                 let la = x["counters"][2].as_f64().unwrap();
-                d.entry(format!("{}_la", arm)).or_default().entry(b).or_default().insert(c, (q.ln(), la.ln()));
-                d.entry(format!("{}_rel", arm)).or_default().entry(b).or_default().insert(c, (q.ln(), (cost - la).ln()));
+                d.entry(format!("{}_la", arm))
+                    .or_default()
+                    .entry(b)
+                    .or_default()
+                    .insert(c, (q.ln(), la.ln()));
+                d.entry(format!("{}_rel", arm))
+                    .or_default()
+                    .entry(b)
+                    .or_default()
+                    .insert(c, (q.ln(), (cost - la).ln()));
             }
             if x["correct"].as_bool().unwrap() {
-                d.entry(arm.clone()).or_default().entry(b).or_default().insert(c, (q.ln(), cost.ln()));
-                d9.entry(arm.clone()).or_default().entry(b).or_default().insert(c, (q.ln(), x["cost_cl9"].as_f64().unwrap().ln()));
+                d.entry(arm.clone())
+                    .or_default()
+                    .entry(b)
+                    .or_default()
+                    .insert(c, (q.ln(), cost.ln()));
+                d9.entry(arm.clone())
+                    .or_default()
+                    .entry(b)
+                    .or_default()
+                    .insert(c, (q.ln(), x["cost_cl9"].as_f64().unwrap().ln()));
             }
             extra.entry((arm.clone(), b)).or_default().push(json!({
                 "curve": c, "cost": cost, "steps": x["steps"], "nfb": x["nfb"],
@@ -305,7 +386,11 @@ fn main() {
     let mut own = serde_json::Map::new();
     let mut upper = serde_json::Map::new();
     for a in &arms_all {
-        let bits: Vec<u64> = d[a].keys().cloned().filter(|b| *b >= clo && d[a][b].len() >= 3).collect();
+        let bits: Vec<u64> = d[a]
+            .keys()
+            .cloned()
+            .filter(|b| *b >= clo && d[a][b].len() >= 3)
+            .collect();
         if bits.len() >= 3 {
             own.insert(a.clone(), exp_block(&d, &[a.as_str()], &bits, 3));
         }
@@ -317,14 +402,20 @@ fn main() {
     summary.insert("own_range".into(), Value::Object(own));
     summary.insert("upper_range".into(), Value::Object(upper));
     // A/A and 2LP vs 1LP over the 2LP range
-    let lp_bits: Vec<u64> = d.get("ic2lp").map(|m| m.keys().cloned().filter(|b| *b >= clo).collect()).unwrap_or_default();
+    let lp_bits: Vec<u64> = d
+        .get("ic2lp")
+        .map(|m| m.keys().cloned().filter(|b| *b >= clo).collect())
+        .unwrap_or_default();
     let mut lparms = vec!["ic2lp"];
     for a in ["aa", "ic1lp", "ic2lpt"] {
         if arms_all.iter().any(|x| x == a) {
             lparms.push(a);
         }
     }
-    summary.insert("lp_range_vs_ic2lp".into(), exp_block(&d, &lparms, &lp_bits, 5));
+    summary.insert(
+        "lp_range_vs_ic2lp".into(),
+        exp_block(&d, &lparms, &lp_bits, 5),
+    );
 
     // 3. local exponents per arm, with bootstrap
     let mut local = serde_json::Map::new();
@@ -339,7 +430,9 @@ fn main() {
             let c1: Vec<u64> = d[a][&b1].keys().cloned().collect();
             let lq0 = d[a][&b0][&c0[0]].0;
             let lq1 = d[a][&b1][&c1[0]].0;
-            let est = |s0: &[u64], s1: &[u64]| (gmean(&d, a, b1, s1).ln() - gmean(&d, a, b0, s0).ln()) / (lq1 - lq0);
+            let est = |s0: &[u64], s1: &[u64]| {
+                (gmean(&d, a, b1, s1).ln() - gmean(&d, a, b0, s0).ln()) / (lq1 - lq0)
+            };
             let pt = est(&c0, &c1);
             let mut bs = vec![];
             for _ in 0..NB {
@@ -368,7 +461,14 @@ fn main() {
     summary.insert("local_exponents".into(), Value::Object(local));
 
     // 4. paired ratios per size vs basic, and aa vs ic2lp, ic2lp vs ic1lp
-    let pairs = [("ic2lp", "basic"), ("ic1lp", "basic"), ("ic2lpt", "basic"), ("aa", "ic2lp"), ("ic2lp", "ic1lp"), ("ic2lpt", "ic2lp")];
+    let pairs = [
+        ("ic2lp", "basic"),
+        ("ic1lp", "basic"),
+        ("ic2lpt", "basic"),
+        ("aa", "ic2lp"),
+        ("ic2lp", "ic1lp"),
+        ("ic2lpt", "ic2lp"),
+    ];
     let mut ratios = serde_json::Map::new();
     let mut rng = Rng(11);
     for (num, den) in pairs {
@@ -382,11 +482,15 @@ fn main() {
             if cs.is_empty() {
                 continue;
             }
-            let lr: Vec<f64> = cs.iter().map(|c| d[num][&b][c].1 - d[den][&b][c].1).collect();
+            let lr: Vec<f64> = cs
+                .iter()
+                .map(|c| d[num][&b][c].1 - d[den][&b][c].1)
+                .collect();
             let pt = (lr.iter().sum::<f64>() / lr.len() as f64).exp();
             let mut bs = vec![];
             for _ in 0..NB {
-                let s: f64 = (0..lr.len()).map(|_| lr[rng.below(lr.len())]).sum::<f64>() / lr.len() as f64;
+                let s: f64 =
+                    (0..lr.len()).map(|_| lr[rng.below(lr.len())]).sum::<f64>() / lr.len() as f64;
                 bs.push(s.exp());
             }
             rows.push(json!({"bits": b, "n": cs.len(), "ratio": pt, "ci": ci(bs), "per_curve": lr.iter().map(|x| x.exp()).collect::<Vec<_>>()}));
@@ -397,7 +501,11 @@ fn main() {
 
     // 5. per-size table
     let mut table = vec![];
-    let allb: BTreeSet<u64> = d.values().flat_map(|m| m.keys().cloned()).chain(rho.keys().cloned()).collect();
+    let allb: BTreeSet<u64> = d
+        .values()
+        .flat_map(|m| m.keys().cloned())
+        .chain(rho.keys().cloned())
+        .collect();
     for b in &allb {
         let mut row = serde_json::Map::new();
         row.insert("bits".into(), json!(b));
@@ -413,9 +521,18 @@ fn main() {
         }
         if let Some(v) = rho.get(b) {
             let n = v.len() as f64;
-            row.insert("rho_cost_mean".into(), json!(v.iter().map(|t| t.0).sum::<f64>() / n));
-            row.insert("rho_model_neg_mean".into(), json!(v.iter().map(|t| t.1).sum::<f64>() / n));
-            row.insert("rho_steps_over_sqrt_ell_mean".into(), json!(v.iter().map(|t| t.2).sum::<f64>() / n));
+            row.insert(
+                "rho_cost_mean".into(),
+                json!(v.iter().map(|t| t.0).sum::<f64>() / n),
+            );
+            row.insert(
+                "rho_model_neg_mean".into(),
+                json!(v.iter().map(|t| t.1).sum::<f64>() / n),
+            );
+            row.insert(
+                "rho_steps_over_sqrt_ell_mean".into(),
+                json!(v.iter().map(|t| t.2).sum::<f64>() / n),
+            );
             row.insert("rho_n".into(), json!(v.len()));
             // ic2lp / rho model, per curve
             if let Some(m) = d.get("ic2lp").and_then(|m| m.get(b)) {
@@ -426,7 +543,10 @@ fn main() {
                     }
                 }
                 if !lr.is_empty() {
-                    row.insert("ic2lp_over_rho_model".into(), json!((lr.iter().sum::<f64>() / lr.len() as f64).exp()));
+                    row.insert(
+                        "ic2lp_over_rho_model".into(),
+                        json!((lr.iter().sum::<f64>() / lr.len() as f64).exp()),
+                    );
                 }
             }
         }
@@ -442,10 +562,19 @@ fn main() {
     summary.insert("per_size".into(), Value::Array(table));
     summary.insert(
         "instances".into(),
-        json!(inst.iter().map(|((b, c), v)| json!({"bits": b, "curve": c, "inst": v})).collect::<Vec<_>>()),
+        json!(inst
+            .iter()
+            .map(|((b, c), v)| json!({"bits": b, "curve": c, "inst": v}))
+            .collect::<Vec<_>>()),
     );
     let s = Value::Object(summary);
     fs::write(outp, serde_json::to_string_pretty(&s).unwrap()).unwrap();
-    println!("{}", serde_json::to_string_pretty(&s["common_range"]).unwrap());
-    println!("{}", serde_json::to_string_pretty(&s["upper_range"]).unwrap());
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&s["common_range"]).unwrap()
+    );
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&s["upper_range"]).unwrap()
+    );
 }

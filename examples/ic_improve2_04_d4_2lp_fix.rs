@@ -948,7 +948,9 @@ fn fit(args: &[String]) {
     while x <= 600.0 {
         let (ch, c) = adapt_choice(&model, x);
         if ch != prev {
-            leave.push(json!({"log2_E": (x * 10.0f64).round() / 10.0, "alpha": ch, "modelled_ratio": c}));
+            leave.push(
+                json!({"log2_E": (x * 10.0f64).round() / 10.0, "alpha": ch, "modelled_ratio": c}),
+            );
             prev = ch;
         }
         x += 0.1;

@@ -139,7 +139,10 @@ fn check_identity(out: &mut std::fs::File, n: u32, samples: u64, rng: &mut StdRn
 
 fn check_control(out: &mut std::fs::File, n: u32, a: u8, samples: u64, rng: &mut StdRng) {
     let Some(curve) = KoblitzCurve::new(a, n) else {
-        emit(out, json!({"check":"control_skipped", "n":n, "a":a, "reason":"no admitted Koblitz rung"}));
+        emit(
+            out,
+            json!({"check":"control_skipped", "n":n, "a":a, "reason":"no admitted Koblitz rung"}),
+        );
         return;
     };
     let fast = FastBinaryCurve::new(&curve.curve.irreducible, a as u64).unwrap();
@@ -174,7 +177,9 @@ fn check_control(out: &mut std::fs::File, n: u32, a: u8, samples: u64, rng: &mut
     );
     // Subgroup points [k]G and [k]G - R for a cofactor-projected R.
     let g: FastPoint = match curve.generator() {
-        crypto_lib::binary_ecc::BinaryPoint::Affine { x, y } => Some((fast.word(&x), fast.word(&y))),
+        crypto_lib::binary_ecc::BinaryPoint::Affine { x, y } => {
+            Some((fast.word(&x), fast.word(&y)))
+        }
         _ => unreachable!(),
     };
     let rep = (2u64..)
@@ -203,7 +208,10 @@ fn check_control(out: &mut std::fs::File, n: u32, a: u8, samples: u64, rng: &mut
 
 fn check_exhaustive(out: &mut std::fs::File, n: u32, a: u8, k: usize, rng: &mut StdRng) {
     let Some(curve) = KoblitzCurve::new(a, n) else {
-        emit(out, json!({"check":"exhaustive_skipped", "n":n, "a":a, "reason":"no admitted Koblitz rung"}));
+        emit(
+            out,
+            json!({"check":"exhaustive_skipped", "n":n, "a":a, "reason":"no admitted Koblitz rung"}),
+        );
         return;
     };
     let fast = FastBinaryCurve::new(&curve.curve.irreducible, a as u64).unwrap();
@@ -217,7 +225,10 @@ fn check_exhaustive(out: &mut std::fs::File, n: u32, a: u8, k: usize, rng: &mut 
         all.extend(fast.points_with_x(b, x));
     }
     let order = all.len() as u64 + 1;
-    let all_chi1 = all.iter().filter(|&&p| chi_inv(gf, sb, tr_a, p) == 1).count();
+    let all_chi1 = all
+        .iter()
+        .filter(|&&p| chi_inv(gf, sb, tr_a, p) == 1)
+        .count();
     let sub_chi1 = all
         .iter()
         .filter(|&&p| fast.scalar_mul(p, &curve.subgroup_order).is_none())
@@ -257,7 +268,9 @@ fn check_exhaustive(out: &mut std::fs::File, n: u32, a: u8, k: usize, rng: &mut 
             }
             let mut base: Vec<FastPoint> = Vec::new();
             for mask in 1u64..(1 << k) {
-                let x = (0..k).filter(|&i| (mask >> i) & 1 == 1).fold(0, |acc, i| acc ^ basis[i]);
+                let x = (0..k)
+                    .filter(|&i| (mask >> i) & 1 == 1)
+                    .fold(0, |acc, i| acc ^ basis[i]);
                 base.extend(fast.points_with_x(b, x));
             }
             let base_chi: Vec<u32> = base.iter().map(|&p| chi_inv(gf, sb, tr_a, p)).collect();
@@ -275,9 +288,15 @@ fn check_exhaustive(out: &mut std::fs::File, n: u32, a: u8, k: usize, rng: &mut 
                     level = next;
                 }
                 let affine: Vec<u64> = level.iter().filter_map(|p| p.map(|(x, _)| x)).collect();
-                let chi1 = level.iter().filter(|&&p| chi_inv(gf, sb, tr_a, p) == 1).count();
+                let chi1 = level
+                    .iter()
+                    .filter(|&&p| chi_inv(gf, sb, tr_a, p) == 1)
+                    .count();
                 let inv_span = span_dim(
-                    affine.iter().filter(|&&x| x != 0).map(|&x| gf.mul(sb, gf.inv(x))),
+                    affine
+                        .iter()
+                        .filter(|&&x| x != 0)
+                        .map(|&x| gf.mul(sb, gf.inv(x))),
                 );
                 let x_span = span_dim(affine.iter().copied());
                 // Predicted: if every base point has chi = c, every m-sum has chi = m c.
@@ -300,14 +319,25 @@ fn check_exhaustive(out: &mut std::fs::File, n: u32, a: u8, k: usize, rng: &mut 
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    assert_eq!(args.len(), 2, "usage: ic_improve_03_trace_theory <out.jsonl>");
+    assert_eq!(
+        args.len(),
+        2,
+        "usage: ic_improve_03_trace_theory <out.jsonl>"
+    );
     let mut out = std::fs::File::create(&args[1]).unwrap();
     let mut rng = StdRng::seed_from_u64(0x1C03);
     check_identity(&mut out, 41, 1_000_000, &mut rng);
     for (n, a) in [(41u32, 0u8), (41, 1), (43, 1), (47, 1), (53, 1), (61, 0)] {
         check_control(&mut out, n, a, 1_000_000, &mut rng);
     }
-    for (n, a, k) in [(11u32, 0u8, 5usize), (11, 1, 5), (13, 0, 5), (13, 1, 5), (13, 0, 6), (17, 1, 6)] {
+    for (n, a, k) in [
+        (11u32, 0u8, 5usize),
+        (11, 1, 5),
+        (13, 0, 5),
+        (13, 1, 5),
+        (13, 0, 6),
+        (17, 1, 6),
+    ] {
         check_exhaustive(&mut out, n, a, k, &mut rng);
     }
 }

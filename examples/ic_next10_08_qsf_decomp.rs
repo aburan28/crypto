@@ -79,7 +79,10 @@ impl Echelon {
 }
 
 fn elem(bits: u64, n: u32) -> F2mElement {
-    F2mElement::from_bit_positions(&(0..n).filter(|i| (bits >> i) & 1 == 1).collect::<Vec<_>>(), n)
+    F2mElement::from_bit_positions(
+        &(0..n).filter(|i| (bits >> i) & 1 == 1).collect::<Vec<_>>(),
+        n,
+    )
 }
 
 fn trace(gf: &Gf2, a: u64, n: u32) -> u64 {
@@ -171,7 +174,12 @@ fn is_one(p: &F2BoolPoly) -> bool {
 }
 
 /// degree-d closure; returns (refuted, converged, xors, size_cap)
-fn closure(polys: &[F2BoolPoly], n_vars: usize, d: u32, max_rounds: usize) -> (bool, bool, u64, bool) {
+fn closure(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    d: u32,
+    max_rounds: usize,
+) -> (bool, bool, u64, bool) {
     let mut gens = polys.to_vec();
     let mut prev = signature(&gens);
     let mut xors = 0u64;
@@ -181,7 +189,10 @@ fn closure(polys: &[F2BoolPoly], n_vars: usize, d: u32, max_rounds: usize) -> (b
             None => return (false, false, xors, true),
         };
         xors += x;
-        let next: Vec<_> = reduced.into_iter().filter(|p| !p.terms.is_empty()).collect();
+        let next: Vec<_> = reduced
+            .into_iter()
+            .filter(|p| !p.terms.is_empty())
+            .collect();
         if next.iter().any(is_one) {
             return (true, true, xors, false);
         }
@@ -204,7 +215,9 @@ fn main() {
     let n_ref: usize = a[4].parse().unwrap();
     let d_max: u32 = a[5].parse().unwrap();
     let seed: u64 = a[6].parse().unwrap();
-    let onepass = std::env::var("QSF_ONEPASS").map(|v| v == "1").unwrap_or(false);
+    let onepass = std::env::var("QSF_ONEPASS")
+        .map(|v| v == "1")
+        .unwrap_or(false);
     let irr = find_irreducible_sparse(n).unwrap();
     let gf = Gf2::new(&irr);
     let fmask = (1u64 << n) - 1;
@@ -248,7 +261,13 @@ fn main() {
         }
         b
     };
-    assert_eq!(basis.len(), k as usize, "basis dimension {} != k {}", basis.len(), k);
+    assert_eq!(
+        basis.len(),
+        k as usize,
+        "basis dimension {} != k {}",
+        basis.len(),
+        k
+    );
     let mut vech = Echelon::new();
     for &b in &basis {
         vech.insert(b, 0);
@@ -345,7 +364,15 @@ fn main() {
             xors_total += xors;
             notes.push(format!(
                 "d{d}:{}",
-                if refuted { "R" } else if cap { "CAP" } else if converged { "noR" } else { "nc" }
+                if refuted {
+                    "R"
+                } else if cap {
+                    "CAP"
+                } else if converged {
+                    "noR"
+                } else {
+                    "nc"
+                }
             ));
             if refuted {
                 first = Some(d);

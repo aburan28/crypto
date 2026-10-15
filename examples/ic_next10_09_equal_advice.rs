@@ -250,7 +250,9 @@ fn setup(n: u32, a: u8) -> Setup {
     for probe in 1..512u64 {
         let x = probe.wrapping_mul(0x2545_F491_4F6C_DD1D) & basis.mask;
         assert_eq!(
-            basis.to_poly.apply(basis.rotate(basis.to_normal.apply(x), 1)),
+            basis
+                .to_poly
+                .apply(basis.rotate(basis.to_normal.apply(x), 1)),
             gf.sqr(x)
         );
     }
@@ -411,7 +413,12 @@ impl<'a> Walk<'a> {
         for attempt in 0..LOOKAHEAD {
             let (jx, jy) = self.jump_points[j];
             let sum = self.s.fast.add(Some((lane.x, lane.y)), Some((jx, jy)))?;
-            let next = self.canon(sum.0, sum.1, (lane.u + self.jump_logs[j]) % self.s.r, lane.v);
+            let next = self.canon(
+                sum.0,
+                sum.1,
+                (lane.u + self.jump_logs[j]) % self.s.r,
+                lane.v,
+            );
             let nj = self.partition(next.key);
             candidate = Some(next);
             if nj != j || attempt + 1 == LOOKAHEAD {
@@ -444,7 +451,10 @@ fn step_batch(walk: &Walk, lanes: &mut [Lane], dxs: &mut Vec<u64>, scratch: &mut
         let j = walk.partition(lane.key);
         let (jx, jy) = walk.jump_points[j];
         if lane.x == jx {
-            *lane = walk.step_single(lane).unwrap_or(Lane { len: u64::MAX, ..*lane });
+            *lane = walk.step_single(lane).unwrap_or(Lane {
+                len: u64::MAX,
+                ..*lane
+            });
             continue;
         }
         let lambda = gf.mul(lane.y ^ jy, inv);
@@ -453,7 +463,10 @@ fn step_batch(walk: &Walk, lanes: &mut [Lane], dxs: &mut Vec<u64>, scratch: &mut
         let next = walk.canon(x3, y3, (lane.u + walk.jump_logs[j]) % walk.s.r, lane.v);
         if walk.partition(next.key) == j {
             // Look-ahead branch: recompute this step on the scalar path.
-            *lane = walk.step_single(lane).unwrap_or(Lane { len: u64::MAX, ..*lane });
+            *lane = walk.step_single(lane).unwrap_or(Lane {
+                len: u64::MAX,
+                ..*lane
+            });
             continue;
         }
         let len = lane.len + 1;
@@ -544,7 +557,10 @@ fn mode_bl(args: &[String]) {
     let pre_ms = pre_started.elapsed().as_secs_f64() * 1000.0;
     // Spot-verify table logs.
     for &(key, packed) in table.iter().step_by((entries / 64).max(1)) {
-        let p = s.fast.scalar_mul(s.generator, &BigUint::from(packed & u_mask)).unwrap();
+        let p = s
+            .fast
+            .scalar_mul(s.generator, &BigUint::from(packed & u_mask))
+            .unwrap();
         let c = walk.canon(p.0, p.1, 1, 0);
         assert_eq!(c.key, key, "table entry log does not reproduce its class");
     }
@@ -624,7 +640,9 @@ fn mode_bl(args: &[String]) {
                             // [u]G + [v]Q = [ut]G  =>  d = (ut - u) / v.
                             if lane.v != 0 {
                                 let d = mulmod((ut + r - lane.u) % r, powmod(lane.v, r - 2, r), r);
-                                if s.fast.scalar_mul(s.generator, &BigUint::from(d)) == Some((qx, qy)) {
+                                if s.fast.scalar_mul(s.generator, &BigUint::from(d))
+                                    == Some((qx, qy))
+                                {
                                     result = Some(d);
                                     break 'outer;
                                 }
@@ -782,8 +800,10 @@ fn mode_census(args: &[String]) {
                     let distinct = if roots[0] == roots[1] { 1 } else { 2 };
                     for (bit, &root) in roots.iter().take(distinct).enumerate() {
                         let (canon, _) = s.basis.canonical(s.basis.to_normal.apply(root));
-                        let payload =
-                            (l as u64) | ((rr as u64) << 16) | ((rel as u64) << 32) | ((bit as u64) << 48);
+                        let payload = (l as u64)
+                            | ((rr as u64) << 16)
+                            | ((rel as u64) << 32)
+                            | ((bit as u64) << 48);
                         keys.push((canon, payload));
                     }
                 }

@@ -638,7 +638,6 @@ fn character_orbits(n: usize) -> Vec<(usize, usize)> {
     out
 }
 
-
 // ── new for the full pass ─────────────────────────────────────────────
 
 /// Reduced row echelon form over `F_{2^d}`: the nonzero reduced rows and
@@ -849,8 +848,11 @@ fn main() {
             .copied()
             .filter(|c| !col_info[c].2)
             .collect();
-        let free_index: HashMap<Mask, usize> =
-            free_canon.iter().enumerate().map(|(i, c)| (*c, i)).collect();
+        let free_index: HashMap<Mask, usize> = free_canon
+            .iter()
+            .enumerate()
+            .map(|(i, c)| (*c, i))
+            .collect();
         let n_triv = canon_set.len();
         let build_s = t_all.elapsed().as_secs_f64();
 
@@ -874,7 +876,10 @@ fn main() {
         let mut blocks = Vec::new();
         let mut eq_rank_blocks = 0usize;
         for (j, size) in character_orbits(nn) {
-            assert_eq!(size as u32, d, "orbit size must equal d for the trace descent");
+            assert_eq!(
+                size as u32, d,
+                "orbit size must equal d for the trace descent"
+            );
             let zj = gf.pow(zeta_inv, j as u64);
             let zpow: Vec<u64> = (0..nn).map(|t| gf.pow(zj, t as u64)).collect();
             let mut rows_k: Vec<Vec<u64>> = Vec::new();
@@ -900,7 +905,10 @@ fn main() {
             let rank_j = rr.len();
             if !control {
                 // keep only the degree-fall rows; memory, not arithmetic
-                let keep: Vec<bool> = pv.iter().map(|&p| mask_deg(&free_canon[p]) < degree).collect();
+                let keep: Vec<bool> = pv
+                    .iter()
+                    .map(|&p| mask_deg(&free_canon[p]) < degree)
+                    .collect();
                 let mut it = keep.iter();
                 rr.retain(|_| *it.next().unwrap());
                 let mut it = keep.iter();

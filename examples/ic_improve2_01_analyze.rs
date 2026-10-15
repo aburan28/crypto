@@ -20,7 +20,11 @@ use std::fs;
 
 fn read_jsonl(dir: &str) -> Vec<Value> {
     let mut out = vec![];
-    let mut names: Vec<_> = fs::read_dir(dir).unwrap().flatten().map(|e| e.path()).collect();
+    let mut names: Vec<_> = fs::read_dir(dir)
+        .unwrap()
+        .flatten()
+        .map(|e| e.path())
+        .collect();
     names.sort();
     for p in names {
         if p.extension().map(|e| e == "jsonl").unwrap_or(false) {
@@ -54,7 +58,8 @@ fn load(dir: &str) -> Data {
 }
 
 fn f(v: &Value, k: &str) -> f64 {
-    v[k].as_f64().unwrap_or_else(|| v[k].as_u64().map(|x| x as f64).unwrap_or(f64::NAN))
+    v[k].as_f64()
+        .unwrap_or_else(|| v[k].as_u64().map(|x| x as f64).unwrap_or(f64::NAN))
 }
 
 fn gm(xs: &[f64]) -> f64 {
@@ -107,14 +112,24 @@ fn gate(run: &str, old: &str) {
         if arm != "main:inc" {
             continue;
         }
-        let Some(p) = o.get(&("ic2lp".to_string(), *b, *c)) else { continue };
+        let Some(p) = o.get(&("ic2lp".to_string(), *b, *c)) else {
+            continue;
+        };
         let eq = r["cost"] == p["cost"] && r["k"] == p["k"] && r["la_counters"] == p["la_counters"];
         if eq {
             ok += 1
         } else {
             bad += 1
         }
-        println!("| {} | {} | {} | {} | {} | {} |", b, c, r["k"] == p["k"], p["cost"], r["cost"], if eq { "yes" } else { "NO" });
+        println!(
+            "| {} | {} | {} | {} | {} | {} |",
+            b,
+            c,
+            r["k"] == p["k"],
+            p["cost"],
+            r["cost"],
+            if eq { "yes" } else { "NO" }
+        );
     }
     println!("\ngate 0: {ok} identical, {bad} different");
 }
@@ -131,7 +146,9 @@ fn tune(dir: &str, key: &str) {
                 fails += 1;
             }
             let kv = format!("{}", r[key]);
-            m.entry((r["la"].as_str().unwrap().to_string(), kv, b)).or_default().push(f(r, "cost"));
+            m.entry((r["la"].as_str().unwrap().to_string(), kv, b))
+                .or_default()
+                .push(f(r, "cost"));
         }
     }
     let bits: BTreeSet<u64> = m.keys().map(|k| k.2).collect();
@@ -165,7 +182,13 @@ fn main() {
         "gate" => gate(&a[2], &a[3]),
         "tune1" => tune(&a[2], "cx"),
         "tune2" => tune(&a[2], "kappa"),
-        "analyze" => analyze(&a[2], a[3].parse().unwrap(), a[4].parse().unwrap(), a[5].parse().unwrap(), &a[6]),
+        "analyze" => analyze(
+            &a[2],
+            a[3].parse().unwrap(),
+            a[4].parse().unwrap(),
+            a[5].parse().unwrap(),
+            &a[6],
+        ),
         _ => panic!("usage"),
     }
 }
@@ -185,16 +208,30 @@ fn analyze(dir: &str, lo: u64, hi: u64, up: u64, out: &str) {
     println!("|---|---|---|");
     for arm in &arms {
         let rs: Vec<_> = d.iter().filter(|(k, _)| &k.0 == arm).collect();
-        let ok = rs.iter().filter(|(_, r)| r["correct"] == json!(true)).count();
+        let ok = rs
+            .iter()
+            .filter(|(_, r)| r["correct"] == json!(true))
+            .count();
         let bs: BTreeSet<u64> = rs.iter().map(|(k, _)| k.1).collect();
-        println!("| {} | {}/{} | {}..{} |", arm, ok, rs.len(), bs.iter().next().unwrap(), bs.iter().last().unwrap());
+        println!(
+            "| {} | {}/{} | {}..{} |",
+            arm,
+            ok,
+            rs.len(),
+            bs.iter().next().unwrap(),
+            bs.iter().last().unwrap()
+        );
     }
     // curves per size, common to inc and the arm
     let curves = |arm: &str, b: u64| -> Vec<u64> {
         (0..10u64)
             .filter(|c| {
-                d.get(&(arm.to_string(), b, *c)).map(|r| r["correct"] == json!(true)).unwrap_or(false)
-                    && d.get(&(inc.clone(), b, *c)).map(|r| r["correct"] == json!(true)).unwrap_or(false)
+                d.get(&(arm.to_string(), b, *c))
+                    .map(|r| r["correct"] == json!(true))
+                    .unwrap_or(false)
+                    && d.get(&(inc.clone(), b, *c))
+                        .map(|r| r["correct"] == json!(true))
+                        .unwrap_or(false)
             })
             .collect()
     };
@@ -208,10 +245,16 @@ fn analyze(dir: &str, lo: u64, hi: u64, up: u64, out: &str) {
     let base: BTreeMap<u64, Vec<u64>> = all_bits.iter().map(|&b| (b, curves(&inc, b))).collect();
     let mut plans: Vec<BTreeMap<u64, Vec<u64>>> = vec![base.clone()];
     for _ in 0..nboot {
-        plans.push(base.iter().map(|(&b, cs)| (b, (0..cs.len()).map(|_| cs[rng.below(cs.len())]).collect())).collect());
+        plans.push(
+            base.iter()
+                .map(|(&b, cs)| (b, (0..cs.len()).map(|_| cs[rng.below(cs.len())]).collect()))
+                .collect(),
+        );
     }
     let val = |arm: &str, b: u64, c: u64, m: &str| -> Option<f64> {
-        d.get(&(arm.to_string(), b, c)).filter(|r| r["correct"] == json!(true)).map(|r| f(r, m))
+        d.get(&(arm.to_string(), b, c))
+            .filter(|r| r["correct"] == json!(true))
+            .map(|r| f(r, m))
     };
     // slope over [l, h] for arm/metric under plan
     let slope = |arm: &str, m: &str, l: u64, h: u64, plan: &BTreeMap<u64, Vec<u64>>| -> f64 {
@@ -227,7 +270,11 @@ fn analyze(dir: &str, lo: u64, hi: u64, up: u64, out: &str) {
                 }
             }
         }
-        let nb: BTreeSet<u64> = plan.keys().filter(|&&b| b >= l && b <= h).copied().collect();
+        let nb: BTreeSet<u64> = plan
+            .keys()
+            .filter(|&&b| b >= l && b <= h)
+            .copied()
+            .collect();
         if nb.len() < 2 || x.len() < 2 {
             return f64::NAN;
         }
@@ -248,7 +295,13 @@ fn analyze(dir: &str, lo: u64, hi: u64, up: u64, out: &str) {
     };
     let fmt = |e: (f64, [f64; 2])| format!("{:.3} [{:.3}, {:.3}]", e.0, e.1[0], e.1[1]);
     let fmtr = |e: (f64, [f64; 2])| format!("{:.3} [{:.3}, {:.3}]", e.0, e.1[0], e.1[1]);
-    let arm_bits = |arm: &str| -> Vec<u64> { all_bits.iter().copied().filter(|&b| !curves(arm, b).is_empty() && curves(arm, b).len() == base[&b].len()).collect() };
+    let arm_bits = |arm: &str| -> Vec<u64> {
+        all_bits
+            .iter()
+            .copied()
+            .filter(|&b| !curves(arm, b).is_empty() && curves(arm, b).len() == base[&b].len())
+            .collect()
+    };
 
     println!("\n## Exponents (whole cost and linear algebra), b = {lo}..{hi} and {up}..{hi}\n");
     println!("| arm | sizes | whole {lo}-{hi} | Delta vs inc | whole {up}-{hi} | Delta vs inc | LA {lo}-{hi} | Delta vs inc | LA {up}-{hi} | whole c_ell=9 {lo}-{hi} | Delta vs inc | LA c_ell=9 {lo}-{hi} | relation phase {lo}-{hi} |");
@@ -262,7 +315,15 @@ fn analyze(dir: &str, lo: u64, hi: u64, up: u64, out: &str) {
         let h = h.min(hi);
         let mut ent = json!({});
         let mut cells = vec![arm.clone(), format!("{l}-{h}")];
-        for (m, ll) in [("cost", l), ("cost", up.max(l)), ("la_cost", l), ("la_cost", up.max(l)), ("cost_cl9", l), ("la_cost_cl9", l), ("rel_cost", l)] {
+        for (m, ll) in [
+            ("cost", l),
+            ("cost", up.max(l)),
+            ("la_cost", l),
+            ("la_cost", up.max(l)),
+            ("cost_cl9", l),
+            ("la_cost_cl9", l),
+            ("rel_cost", l),
+        ] {
             let e = est_ci(&|p| slope(arm, m, ll, h, p));
             let dl = est_ci(&|p| slope(arm, m, ll, h, p) - slope(&inc, m, ll, h, p));
             ent[format!("slope_{m}_{ll}_{h}")] = json!([e.0, e.1[0], e.1[1]]);
@@ -287,15 +348,26 @@ fn analyze(dir: &str, lo: u64, hi: u64, up: u64, out: &str) {
             }
             let g = gmp(arm, "cost", b, &cs);
             let gla = gmp(arm, "la_cost", b, &cs);
-            let ratio = |m: &str| est_ci(&|p| {
-                let cs = &p[&b];
-                let v: Vec<f64> = cs.iter().filter_map(|&c| Some(val(arm, b, c, m)? / val(&inc, b, c, m)?)).collect();
-                if v.len() < cs.len() { f64::NAN } else { gm(&v) }
-            });
+            let ratio = |m: &str| {
+                est_ci(&|p| {
+                    let cs = &p[&b];
+                    let v: Vec<f64> = cs
+                        .iter()
+                        .filter_map(|&c| Some(val(arm, b, c, m)? / val(&inc, b, c, m)?))
+                        .collect();
+                    if v.len() < cs.len() {
+                        f64::NAN
+                    } else {
+                        gm(&v)
+                    }
+                })
+            };
             let rw = ratio("cost");
             let rla = ratio("la_cost");
             let rw9 = ratio("cost_cl9");
-            let mean = |k: &str| cs.iter().filter_map(|&c| val(arm, b, c, k)).sum::<f64>() / cs.len() as f64;
+            let mean = |k: &str| {
+                cs.iter().filter_map(|&c| val(arm, b, c, k)).sum::<f64>() / cs.len() as f64
+            };
             let share = gla / g;
             rows.push(json!({"bits": b, "gm_cost": g, "gm_la": gla, "ratio": [rw.0, rw.1[0], rw.1[1]],
                 "ratio_la": [rla.0, rla.1[0], rla.1[1]], "ratio_cl9": [rw9.0, rw9.1[0], rw9.1[1]],
@@ -310,7 +382,12 @@ fn analyze(dir: &str, lo: u64, hi: u64, up: u64, out: &str) {
         println!("| log2 q | cost | LA cost | LA share | ratio whole [95%] | ratio LA [95%] | ratio whole c_ell=9 | solver cols | solver nnz/col | input cols | input nnz/col | checks | LA wall s |");
         println!("|---|---|---|---|---|---|---|---|---|---|---|---|---|");
         for r in &rows {
-            let tr = |k: &str| fmtr((r[k][0].as_f64().unwrap(), [r[k][1].as_f64().unwrap(), r[k][2].as_f64().unwrap()]));
+            let tr = |k: &str| {
+                fmtr((
+                    r[k][0].as_f64().unwrap(),
+                    [r[k][1].as_f64().unwrap(), r[k][2].as_f64().unwrap()],
+                ))
+            };
             println!(
                 "| {} | {:.3e} | {:.3e} | {:.2} | {} | {} | {} | {:.0} | {:.1} | {:.0} | {:.1} | {:.2} | {:.1} |",
                 r["bits"], f(r, "gm_cost"), f(r, "gm_la"), f(r, "la_share"), tr("ratio"), tr("ratio_la"), tr("ratio_cl9"),
@@ -344,7 +421,10 @@ fn analyze(dir: &str, lo: u64, hi: u64, up: u64, out: &str) {
                     print!(" - |");
                     continue;
                 }
-                let e = est_ci(&|p| (gmp(a, m, b1, &p[&b1]).ln() - gmp(a, m, b0, &p[&b0]).ln()) / (lnq(b1) - lnq(b0)));
+                let e = est_ci(&|p| {
+                    (gmp(a, m, b1, &p[&b1]).ln() - gmp(a, m, b0, &p[&b0]).ln())
+                        / (lnq(b1) - lnq(b0))
+                });
                 loc.entry(a.to_string()).or_default().push((b0, e));
                 print!(" {} |", fmt(e));
             }
@@ -353,13 +433,22 @@ fn analyze(dir: &str, lo: u64, hi: u64, up: u64, out: &str) {
         // trend
         print!("| trend per bit |");
         for a in &shown {
-            let bs: Vec<u64> = loc.get(*a).map(|v| v.iter().map(|x| x.0).collect()).unwrap_or_default();
+            let bs: Vec<u64> = loc
+                .get(*a)
+                .map(|v| v.iter().map(|x| x.0).collect())
+                .unwrap_or_default();
             if bs.len() < 3 {
                 print!(" - |");
                 continue;
             }
             let e = est_ci(&|p| {
-                let ys: Vec<f64> = bs.iter().map(|&b0| (gmp(a, m, b0 + 1, &p[&(b0 + 1)]).ln() - gmp(a, m, b0, &p[&b0]).ln()) / (lnq(b0 + 1) - lnq(b0))).collect();
+                let ys: Vec<f64> = bs
+                    .iter()
+                    .map(|&b0| {
+                        (gmp(a, m, b0 + 1, &p[&(b0 + 1)]).ln() - gmp(a, m, b0, &p[&b0]).ln())
+                            / (lnq(b0 + 1) - lnq(b0))
+                    })
+                    .collect();
                 let xs: Vec<f64> = bs.iter().map(|&b| b as f64).collect();
                 ols(&xs, &ys)
             });
@@ -368,7 +457,10 @@ fn analyze(dir: &str, lo: u64, hi: u64, up: u64, out: &str) {
         }
         println!();
         for (a, v) in loc {
-            summary["per_arm"][&a][format!("local_{m}")] = json!(v.iter().map(|(b, e)| json!([b, e.0, e.1[0], e.1[1]])).collect::<Vec<_>>());
+            summary["per_arm"][&a][format!("local_{m}")] = json!(v
+                .iter()
+                .map(|(b, e)| json!([b, e.0, e.1[0], e.1[1]]))
+                .collect::<Vec<_>>());
         }
         println!();
     }

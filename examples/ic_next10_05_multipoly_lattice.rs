@@ -77,7 +77,15 @@ impl Dinic {
             cap[iv as usize] = 0;
             rev[iv as usize] = iu;
         }
-        Dinic { n, rev, to, cap, level: vec![0; n], it: vec![0; n], start }
+        Dinic {
+            n,
+            rev,
+            to,
+            cap,
+            level: vec![0; n],
+            it: vec![0; n],
+            start,
+        }
     }
     fn bfs(&mut self, s: usize, t: usize) -> bool {
         self.level.iter_mut().for_each(|l| *l = -1);
@@ -321,7 +329,12 @@ fn solve(sys: &Sys, ell: i64, ext: &[i64], want_monos: bool) -> LpResult {
         .collect();
     let gidx: Vec<HashMap<Vec<i64>, u32>> = gl
         .iter()
-        .map(|l| l.iter().enumerate().map(|(i, t)| (t.clone(), i as u32)).collect())
+        .map(|l| {
+            l.iter()
+                .enumerate()
+                .map(|(i, t)| (t.clone(), i as u32))
+                .collect()
+        })
         .collect();
     let ng = sys.groups.len();
     let mut stride = vec![1usize; ng];
@@ -540,7 +553,13 @@ fn distinct_perms(t: &[i64]) -> Vec<Vec<i64>> {
 }
 
 /// grow the bounding box until the optimum no longer touches it (or a node cap)
-fn solve_grow(sys: &Sys, ell: i64, ext0: &[i64], node_cap: usize, want: bool) -> (LpResult, Vec<i64>) {
+fn solve_grow(
+    sys: &Sys,
+    ell: i64,
+    ext0: &[i64],
+    node_cap: usize,
+    want: bool,
+) -> (LpResult, Vec<i64>) {
     let mut ext = ext0.to_vec();
     loop {
         let r = solve(sys, ell, &ext, want);
@@ -578,7 +597,12 @@ fn s3(nv: usize, a: usize, b: usize) -> Vec<(usize, i64)> {
     vec![(a, 2), (b, 2)]
 }
 
-fn part_lp(max_ell_s3: i64, only: Option<String>, ells_override: Option<Vec<i64>>, out: &mut Vec<Value>) {
+fn part_lp(
+    max_ell_s3: i64,
+    only: Option<String>,
+    ells_override: Option<Vec<i64>>,
+    out: &mut Vec<Value>,
+) {
     println!("## LP: exact down-closed optimum, top-corner leading monomials\n");
     println!("| system | n small | n large | r | ℓ | δ_ℓ exact | δ_ℓ | dim | Σk | group max | box? | bounded? | nodes | iters | ceiling | ms |");
     println!("|:--|--:|--:|--:|--:|:--|--:|--:|--:|:--|:--|:--|--:|--:|--:|--:|");
@@ -884,7 +908,12 @@ fn lll_trial(
     let r1 = add(p, a, Some(p1), Some(p2));
     let r2 = add(p, a, Some(p1), Some(p3));
     let (Some((z1, _)), Some((z2, _))) = (r1, r2) else {
-        return Trial { vanish: 0, dim: 0, ms: 0.0, recovered: false };
+        return Trial {
+            vanish: 0,
+            dim: 0,
+            ms: 0.0,
+            recovered: false,
+        };
     };
     let mut polys = vec![s3_poly(nv, 0, 1, z1, p, a, b)];
     let mut root = vec![BigInt::from(p1.0), BigInt::from(p2.0)];
@@ -911,8 +940,11 @@ fn lll_trial(
     } else {
         vec![vec![2, 2]]
     };
-    let col: HashMap<Vec<i64>, usize> =
-        monos.iter().enumerate().map(|(i, (m, _))| (m.clone(), i)).collect();
+    let col: HashMap<Vec<i64>, usize> = monos
+        .iter()
+        .enumerate()
+        .map(|(i, (m, _))| (m.clone(), i))
+        .collect();
     let dim = monos.len();
     let bb = BigInt::from(bound.max(1));
     let mut basis: Vec<Vec<BigInt>> = Vec::with_capacity(dim);
@@ -945,7 +977,12 @@ fn lll_trial(
     };
     let ms = t0.elapsed().as_secs_f64() * 1e3;
     if ok.is_err() {
-        return Trial { vanish: 0, dim, ms, recovered: false };
+        return Trial {
+            vanish: 0,
+            dim,
+            ms,
+            recovered: false,
+        };
     }
     let mut vanish = 0;
     for row in &basis {
@@ -962,7 +999,12 @@ fn lll_trial(
             vanish += 1;
         }
     }
-    Trial { vanish, dim, ms, recovered: vanish >= nv }
+    Trial {
+        vanish,
+        dim,
+        ms,
+        recovered: vanish >= nv,
+    }
 }
 
 fn part_lll(bits: u32, ells: &[i64], trials: usize, deltas: &[f64], out: &mut Vec<Value>) {
@@ -1040,7 +1082,12 @@ fn part_lll(bits: u32, ells: &[i64], trials: usize, deltas: &[f64], out: &mut Ve
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let get = |k: &str| args.iter().position(|a| a == k).and_then(|i| args.get(i + 1)).cloned();
+    let get = |k: &str| {
+        args.iter()
+            .position(|a| a == k)
+            .and_then(|i| args.get(i + 1))
+            .cloned()
+    };
     let part = get("--part").unwrap_or_else(|| "lp".into());
     let mut out = Vec::new();
     let t0 = Instant::now();
@@ -1048,7 +1095,8 @@ fn main() {
     if part == "lp" || part == "all" {
         let me: i64 = get("--max-ell").and_then(|s| s.parse().ok()).unwrap_or(8);
         let only = get("--only");
-        let eo: Option<Vec<i64>> = get("--ells").map(|s| s.split(',').map(|x| x.parse().unwrap()).collect());
+        let eo: Option<Vec<i64>> =
+            get("--ells").map(|s| s.split(',').map(|x| x.parse().unwrap()).collect());
         part_lp(me, only, eo, &mut out);
     }
     if part == "lll" || part == "all" {
@@ -1068,7 +1116,14 @@ fn main() {
     }
     println!("total wall {:.1} s", t0.elapsed().as_secs_f64());
     if let Some(path) = get("--json") {
-        std::fs::write(&path, serde_json::to_string_pretty(&json!({"schema":"ic-next10-05/v1","part":part,"records":out})).unwrap()).unwrap();
+        std::fs::write(
+            &path,
+            serde_json::to_string_pretty(
+                &json!({"schema":"ic-next10-05/v1","part":part,"records":out}),
+            )
+            .unwrap(),
+        )
+        .unwrap();
         eprintln!("wrote {path}");
     }
 }

@@ -1313,7 +1313,12 @@ fn main() -> ExitCode {
     // IC03_PREFIX_RULE=1 keeps the incumbent's column choice instead.
     let prefix_rule = flag("IC03_PREFIX_RULE");
     let mut combined = free_echelon;
-    while if free_relations { combined.rank } else { echelon.rank } < base.columns {
+    while if free_relations {
+        combined.rank
+    } else {
+        echelon.rank
+    } < base.columns
+    {
         let query_started = Instant::now();
         rank_seed = rank_seed
             .wrapping_mul(6364136223846793005)
@@ -1480,7 +1485,12 @@ fn main() -> ExitCode {
     let setup_complete_ns = setup_complete_elapsed.as_nanos() as u64;
     let input_control_elapsed = setup_complete_elapsed
         .checked_sub(
-            base_elapsed + basis_elapsed + index_elapsed + harvest_elapsed + rank_elapsed + la_elapsed,
+            base_elapsed
+                + basis_elapsed
+                + index_elapsed
+                + harvest_elapsed
+                + rank_elapsed
+                + la_elapsed,
         )
         .expect("setup phase accounting exceeds setup interval");
 

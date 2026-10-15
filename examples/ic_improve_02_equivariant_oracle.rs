@@ -636,7 +636,6 @@ fn character_orbits(n: usize) -> Vec<(usize, usize)> {
     out
 }
 
-
 // ── new for the full pass ─────────────────────────────────────────────
 
 /// Reduced row echelon form over `F_{2^d}`: the nonzero reduced rows and
@@ -846,7 +845,10 @@ fn reduce_rows(rows: &[Poly]) -> Reduced {
     let piv: Vec<usize> = mat
         .iter()
         .map(|r| {
-            let w = r.iter().position(|&x| x != 0).expect("pivot row is nonzero");
+            let w = r
+                .iter()
+                .position(|&x| x != 0)
+                .expect("pivot row is nonzero");
             w * 64 + r[w].trailing_zeros() as usize
         })
         .collect();
@@ -927,7 +929,10 @@ impl Ctx {
             k
         };
         for (_, size) in character_orbits(nn) {
-            assert_eq!(size as u32, d, "n = {n}: a character orbit is not of size d");
+            assert_eq!(
+                size as u32, d,
+                "n = {n}: a character orbit is not of size d"
+            );
         }
         let irr = find_irreducible(n).expect("irreducible");
         let f = Field::new(n, &irr);
@@ -984,7 +989,9 @@ impl Ctx {
         let xs: Vec<Vec<u64>> = (0..nn)
             .map(|k| {
                 (0..(1u64 << l))
-                    .map(|c| bits_of(&elem_from_bits(c, self.n).square_k_times(k as u32, &self.irr)))
+                    .map(|c| {
+                        bits_of(&elem_from_bits(c, self.n).square_k_times(k as u32, &self.irr))
+                    })
                     .collect()
             })
             .collect();
@@ -1103,8 +1110,11 @@ fn equivariant_pass(cx: &Ctx, lay: &Layout, eqs: &[Poly], fam: &[Fam], degree: u
         .copied()
         .filter(|c| !col_info[c].2)
         .collect();
-    let free_index: HashMap<Mask, usize> =
-        free_canon.iter().enumerate().map(|(i, c)| (*c, i)).collect();
+    let free_index: HashMap<Mask, usize> = free_canon
+        .iter()
+        .enumerate()
+        .map(|(i, c)| (*c, i))
+        .collect();
     let n_triv = canon_set.len();
     let orbit = |canon: &Mask, fixed: bool| -> Vec<Mask> {
         let mut out = Vec::with_capacity(nn);
@@ -1259,7 +1269,8 @@ fn incumbent_step(geqs: &[Poly], gnv: usize, degree: u32) -> (Reduced, usize, f6
 fn run_step(cx: &Ctx, t: u64, degree: u32, check: bool, posctl: bool) {
     let r = cx.target(t);
     let rel = elem_from_bits(r, cx.n);
-    let (lay, eqs, fam) = build_symmetric(cx.n, cx.l, &cx.irr, &cx.f, 1, &rel, &cx.normal, &cx.pinv);
+    let (lay, eqs, fam) =
+        build_symmetric(cx.n, cx.l, &cx.irr, &cx.f, 1, &rel, &cx.normal, &cx.pinv);
     let geqs = gauge_system(&eqs, cx.nn);
     let gnv = lay.n_vars - cx.nn;
     let wall = Instant::now();
@@ -1353,9 +1364,13 @@ fn solve(sys: &[F2BoolPoly], nv: usize) -> (Vec<u64>, f64, u64, usize, bool) {
 fn run_oracle(cx: &Ctx, t: u64, degree: u32) {
     let r = cx.target(t);
     let rel = elem_from_bits(r, cx.n);
-    let (lay, eqs, fam) = build_symmetric(cx.n, cx.l, &cx.irr, &cx.f, 1, &rel, &cx.normal, &cx.pinv);
+    let (lay, eqs, fam) =
+        build_symmetric(cx.n, cx.l, &cx.irr, &cx.f, 1, &rel, &cx.normal, &cx.pinv);
     let gnv = lay.n_vars - cx.nn;
-    assert!(gnv <= 64, "gauge system needs ≤ 64 unknowns for the pipeline solver");
+    assert!(
+        gnv <= 64,
+        "gauge system needs ≤ 64 unknowns for the pipeline solver"
+    );
     let truth = cx.brute_roots(r);
     let wall = Instant::now();
     // I: the incumbent oracle (system construction charged to both arms).

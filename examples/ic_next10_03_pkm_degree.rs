@@ -157,8 +157,18 @@ fn kummer(s: &Sys) -> Kummer {
             eqs.push(k);
         }
     }
-    assert!(tower_seen.iter().all(|&b| b), "every Kummer tower equation present");
-    Kummer { m, t, role, nu, uidx, eqs }
+    assert!(
+        tower_seen.iter().all(|&b| b),
+        "every Kummer tower equation present"
+    );
+    Kummer {
+        m,
+        t,
+        role,
+        nu,
+        uidx,
+        eqs,
+    }
 }
 
 impl Kummer {
@@ -296,7 +306,9 @@ fn delta(inp: &str) {
         }
         f
     };
-    let g = (2..p).find(|&g| fac.iter().all(|&q| pw(g, (p - 1) / q, p) != 1)).unwrap();
+    let g = (2..p)
+        .find(|&g| fac.iter().all(|&q| pw(g, (p - 1) / q, p) != 1))
+        .unwrap();
     let zeta = pw(g, (p - 1) / n as u64, p);
     let f = &s.polys[k.eqs[0]];
     let d = f.iter().map(|(e, _)| deg(e)).max().unwrap();
@@ -516,9 +528,11 @@ fn macaulay(inp: &str, dmax: u32) {
         let has_one = pivots.contains_key(&one);
         let rank = pivots.len() as u64;
         let nnz: usize = pivots.values().map(|r| r.len()).sum();
-        per_d.push(json!({"D":dd,"rows":nrows_total,"rank":rank,"std_monomials_le_D":nstd_le,
+        per_d.push(
+            json!({"D":dd,"rows":nrows_total,"rank":rank,"std_monomials_le_D":nstd_le,
                           "HF_affine": nstd_le.saturating_sub(rank),"echelon_nnz":nnz,
-                          "contains_1":has_one,"s":t0.elapsed().as_secs_f64()}));
+                          "contains_1":has_one,"s":t0.elapsed().as_secs_f64()}),
+        );
         eprintln!("{}", per_d.last().unwrap());
         if has_one {
             found = Some(dd);
@@ -556,7 +570,11 @@ fn top(inp: &str) {
         let surv: Vec<(Vec<u32>, u64)> = f
             .iter()
             .filter(|(e, _)| deg(e) == d)
-            .filter(|(e, _)| e.iter().enumerate().all(|(vi, &x)| k.role[vi].is_none() || x < 2))
+            .filter(|(e, _)| {
+                e.iter()
+                    .enumerate()
+                    .all(|(vi, &x)| k.role[vi].is_none() || x < 2)
+            })
             .cloned()
             .collect();
         let txt: Vec<String> = surv

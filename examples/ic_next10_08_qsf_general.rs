@@ -44,7 +44,10 @@ fn kernel_dim(cols: &mut [u64], n: u32) -> u32 {
 }
 
 fn main() {
-    let args: Vec<u32> = std::env::args().skip(1).map(|a| a.parse().unwrap()).collect();
+    let args: Vec<u32> = std::env::args()
+        .skip(1)
+        .map(|a| a.parse().unwrap())
+        .collect();
     let j_max = args[0];
     println!("n,n0,j,examined,found,beta_if_found,witness_lambda_hex");
     for &n in &args[1..] {
@@ -85,7 +88,11 @@ fn main() {
                 let beta = (j as f64) * (n as f64) / ((n0 * n0) as f64);
                 println!(
                     "{n},{n0},{j},{examined},{found},{},{}",
-                    if found > 0 { format!("{beta:.4}") } else { String::new() },
+                    if found > 0 {
+                        format!("{beta:.4}")
+                    } else {
+                        String::new()
+                    },
                     witness
                 );
             }

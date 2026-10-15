@@ -22,7 +22,10 @@ use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 
 fn tcpu() -> f64 {
-    let mut ts = libc::timespec { tv_sec: 0, tv_nsec: 0 };
+    let mut ts = libc::timespec {
+        tv_sec: 0,
+        tv_nsec: 0,
+    };
     unsafe {
         libc::clock_gettime(libc::CLOCK_THREAD_CPUTIME_ID, &mut ts);
     }
@@ -41,18 +44,34 @@ fn solve(sys: &[F2BoolPoly], nv: usize) -> (Vec<u64>, f64, u64, usize, bool) {
     let (mut roots, st) = solve_boolean_system(sys, nv, &opts);
     let cpu = tcpu() - c0;
     roots.sort_unstable();
-    (roots, cpu, f4_word_ops_thread() - w0, st.splits, st.exhausted)
+    (
+        roots,
+        cpu,
+        f4_word_ops_thread() - w0,
+        st.splits,
+        st.exhausted,
+    )
 }
 
 fn main() {
     let a: Vec<String> = std::env::args().collect();
     let get = |k: &str, d: u64| -> u64 {
-        a.iter().position(|x| x == k).map(|i| a[i + 1].parse().unwrap()).unwrap_or(d)
+        a.iter()
+            .position(|x| x == k)
+            .map(|i| a[i + 1].parse().unwrap())
+            .unwrap_or(d)
     };
-    let (n, m, ell, targets) = (get("--n", 13) as u32, get("--m", 3) as usize, get("--ell", 5) as u32, get("--targets", 4));
+    let (n, m, ell, targets) = (
+        get("--n", 13) as u32,
+        get("--m", 3) as usize,
+        get("--ell", 5) as u32,
+        get("--targets", 4),
+    );
     let irr = find_irreducible(n).unwrap();
     let st = FieldStructure::new(n, &irr);
-    let basis: Vec<F2mElement> = (0..ell).map(|k| F2mElement::from_bit_positions(&[k], n)).collect();
+    let basis: Vec<F2mElement> = (0..ell)
+        .map(|k| F2mElement::from_bit_positions(&[k], n))
+        .collect();
     let b = F2mElement::from_bit_positions(&[0], n);
     for t in 0..targets {
         let mut rng = StdRng::seed_from_u64(20261014 ^ (n as u64 * 1000 + t) ^ 0xfa11);
@@ -63,9 +82,13 @@ fn main() {
         let nv = sys.n_vars;
         let (i_roots, i_cpu, i_ops, i_splits, i_exh) = solve(&sys.equations, nv);
         let c0 = tcpu();
-        let (rows, step_ops) = matrix_f4_f2_counted_with(&sys.equations, nv, 3, RowCriterion::None).expect("matrix");
+        let (rows, step_ops) =
+            matrix_f4_f2_counted_with(&sys.equations, nv, 3, RowCriterion::None).expect("matrix");
         let mut fsys = sys.equations.clone();
-        let extra: Vec<F2BoolPoly> = rows.into_iter().filter(|p| p.terms.iter().all(|t| t.mask.count_ones() < 3)).collect();
+        let extra: Vec<F2BoolPoly> = rows
+            .into_iter()
+            .filter(|p| p.terms.iter().all(|t| t.mask.count_ones() < 3))
+            .collect();
         let n_extra = extra.len();
         fsys.extend(extra);
         let f_step = tcpu() - c0;

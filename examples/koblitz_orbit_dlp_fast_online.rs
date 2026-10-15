@@ -2038,10 +2038,9 @@ mod wide {
         );
         assert_eq!(arguments.len(), 5);
         let process_started = Instant::now();
-        let constructed: Option<(u32, u8, usize)> =
-            arguments[1].strip_prefix("construct:").map(|spec| {
-                super::parse_construct_spec(spec)
-            });
+        let constructed: Option<(u32, u8, usize)> = arguments[1]
+            .strip_prefix("construct:")
+            .map(|spec| super::parse_construct_spec(spec));
         let header: Value = match constructed {
             Some((n, a, _)) => json!({"n":n, "a":a}),
             None => {
@@ -2555,10 +2554,9 @@ fn main() -> ExitCode {
         }
     }
     let process_started = Instant::now();
-    let constructed: Option<(u32, u8, usize)> =
-        arguments[1].strip_prefix("construct:").map(|spec| {
-            parse_construct_spec(spec)
-        });
+    let constructed: Option<(u32, u8, usize)> = arguments[1]
+        .strip_prefix("construct:")
+        .map(|spec| parse_construct_spec(spec));
     let header: Value = match constructed {
         Some((n, a, _)) => json!({"n":n, "a":a}),
         None => {

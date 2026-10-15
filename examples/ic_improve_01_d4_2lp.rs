@@ -139,7 +139,6 @@ impl Oracle {
     }
 }
 
-
 /// One arm's configuration.
 #[derive(Clone, Debug)]
 struct Cfg {
@@ -639,17 +638,25 @@ fn tune(args: &[String]) {
     let mut table: Vec<Value> = Vec::new();
     let mut best: Option<(f64, Cfg)> = None;
     for c in grid() {
-        let (mut lw, mut lw_all, mut lrel, mut lla) = (Vec::new(), Vec::new(), Vec::new(), Vec::new());
+        let (mut lw, mut lw_all, mut lrel, mut lla) =
+            (Vec::new(), Vec::new(), Vec::new(), Vec::new());
         let mut unsolved = 0;
         for row in &rows {
             let i = arm_of(row, "d4");
             let a = arm_of(row, &c.name);
-            let rw = (a["gae"]["whole"].as_f64().unwrap() / i["gae"]["whole"].as_f64().unwrap()).log2();
+            let rw =
+                (a["gae"]["whole"].as_f64().unwrap() / i["gae"]["whole"].as_f64().unwrap()).log2();
             lw_all.push(rw);
             if row["p"].as_u64().unwrap() >= min_p {
                 lw.push(rw);
-                lrel.push((a["gae"]["relation"].as_f64().unwrap() / i["gae"]["relation"].as_f64().unwrap()).log2());
-                lla.push((a["gae"]["la"].as_f64().unwrap() / i["gae"]["la"].as_f64().unwrap()).log2());
+                lrel.push(
+                    (a["gae"]["relation"].as_f64().unwrap()
+                        / i["gae"]["relation"].as_f64().unwrap())
+                    .log2(),
+                );
+                lla.push(
+                    (a["gae"]["la"].as_f64().unwrap() / i["gae"]["la"].as_f64().unwrap()).log2(),
+                );
             }
             if a["solved"] != true {
                 unsolved += 1;
@@ -768,10 +775,18 @@ fn analyze(args: &[String]) {
     let mut prior_map: HashMap<(u64, u64), (f64, f64)> = HashMap::new();
     if !prior.is_empty() {
         for r in load(&prior) {
-            let d4 = r["arms"].as_array().unwrap().iter().find(|a| a["arm"] == "d4").unwrap();
+            let d4 = r["arms"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|a| a["arm"] == "d4")
+                .unwrap();
             prior_map.insert(
                 (r["p"].as_u64().unwrap(), r["seed"].as_u64().unwrap()),
-                (d4["trials"].as_f64().unwrap(), r["rho"]["rho-neg"]["mean_S"].as_f64().unwrap()),
+                (
+                    d4["trials"].as_f64().unwrap(),
+                    r["rho"]["rho-neg"]["mean_S"].as_f64().unwrap(),
+                ),
             );
         }
     }
@@ -802,7 +817,10 @@ fn analyze(args: &[String]) {
             let v = arm_of(row, a);
             verified &= v["solved"] == true && v["correct"] == true;
             for ph in phases {
-                costs.entry((a, ph)).or_default().push(v["gae"][ph].as_f64().unwrap());
+                costs
+                    .entry((a, ph))
+                    .or_default()
+                    .push(v["gae"][ph].as_f64().unwrap());
             }
             cells.insert(a.into(), json!({"S_charged": v["S_charged"], "trials": v["trials"],
                 "small_columns": v["small_columns"], "unknowns_core": v["unknowns_core"],
@@ -851,7 +869,12 @@ fn analyze(args: &[String]) {
                         .filter(|(r, _)| r["p"].as_u64() == Some(p))
                         .map(|(_, x)| *x)
                         .collect();
-                    let l2e = rows.iter().filter(|r| r["p"].as_u64() == Some(p)).map(|r| r["log2_E"].as_f64().unwrap()).sum::<f64>() / v.len() as f64;
+                    let l2e = rows
+                        .iter()
+                        .filter(|r| r["p"].as_u64() == Some(p))
+                        .map(|r| r["log2_E"].as_f64().unwrap())
+                        .sum::<f64>()
+                        / v.len() as f64;
                     let mut c = gm_ci(&v, &mut rng);
                     c["p"] = json!(p);
                     c["log2_E"] = json!(l2e);

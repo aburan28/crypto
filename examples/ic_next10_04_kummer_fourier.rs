@@ -69,7 +69,11 @@ fn add(p: u64, a: u64, u: Pt, v: Pt) -> Pt {
 
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
-    let get = |k: &str| args.iter().position(|a| a == k).map(|i| args[i + 1].clone());
+    let get = |k: &str| {
+        args.iter()
+            .position(|a| a == k)
+            .map(|i| args[i + 1].clone())
+    };
     let num = |k: &str| get(k).map(|s| s.parse::<u64>().expect(k));
     let p = num("--p").expect("--p");
     let a = num("--a").expect("--a");
