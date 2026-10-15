@@ -133,7 +133,7 @@ characteristic 2 take it, and how does the end-to-end gap to rho move with
 | A2 `C₄` (Frobenius) | in `[8·10⁴, 4·10⁵]` at every `m` | 1.13–2.50·10⁵ | **held** |
 | A3 closing | no uniform failure at `m ≥ 6`; planted failures all paired | 0 uniform; 3 planted at `m = 6`, all paired | **held** |
 | A4 ablation | Frobenius ≥ 5× below weighted, weighted ≥ 2× below plain | 18.1×, 26.5× | **held** |
-| B1 | all verify, replays identical, equal trials (±5 %), plain > weighted > Frobenius | 37/37 verified; replay audit: B2 24/24, B1 and B3 pending; trials identical; order held | **held** so far |
+| B1 | all verify, replays identical, equal trials (±5 %), plain > weighted > Frobenius | 37/37 verified; replay audit 37/37 reproduced; trials identical; order held | **held** |
 | B2 ratio to rho theory | `m = 8` `[150, 2000]`, 10 `[40, 600]`, 12 `[10, 200]`, 14 `[3, 60]` | 519–648, 80.6–82.9, 48.1–49.7, 6.06 | **held** |
 | C1 slope | `[−0.35, −0.15]` | −0.248 | **held** |
 | C2 crossover | `n*` and the model's in `[2^{60}, 2^{85}]` | `2^{68.1}`; model `2^{63.1}–2^{69.0}` | **held** |
@@ -143,8 +143,8 @@ characteristic 2 take it, and how does the end-to-end gap to rho move with
 | session | runs re-executed | identical counts |
 |:--|--:|--:|
 | `char2-ladder` | 24 | 24 |
-| `char2-forms-m6` | 10 | pending (running) |
-| `char2-m14` | 3 | pending (running) |
+| `char2-forms-m6` | 10 | 10 |
+| `char2-m14` | 3 | 3 |
 
 ## Scope
 

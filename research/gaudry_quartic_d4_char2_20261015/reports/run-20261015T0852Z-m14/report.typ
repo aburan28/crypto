@@ -13,6 +13,6 @@ Spec `specs/SPEC-char2-m14.json` (id `ECS1h8be34a3d45a9`). Binary sha256 `92610b
   [rho-neg-aa], [1.258], [162.8], [L1],
 )
 
-Recorded IC: 749,350 trials, 4,033 relations, 749,311 shape replays and 38 fallbacks, $1.80 dot 10^11$ solver $FF_q$ multiplications. Derived: IC $S$ ÷ rho's theory $S$ (0.886) = 6.06; `ecbench compare` ic-frobenius/rho-neg = 4.27 (one workload, no interval). Audit: `audits/char2-m14.audit.json`. Records: `sessions/char2-m14/`.
+Recorded IC: 749,350 trials, 4,033 relations, 749,311 shape replays and 38 fallbacks, $1.80 dot 10^11$ solver $FF_q$ multiplications. Derived: IC $S$ ÷ rho's theory $S$ (0.886) = 6.06; `ecbench compare` ic-frobenius/rho-neg = 4.27 (one workload, no interval). Audit: `audits/char2-m14.audit.json` (`verify --replay-all`): OK, 3 replays reproduced, 0 problems. Records: `sessions/char2-m14/`.
 
 #figure(image("crossover.svg", width: 80%), caption: [This run is the right-most point ($log_2 n = 56$); the other points are sessions B1–B2.])

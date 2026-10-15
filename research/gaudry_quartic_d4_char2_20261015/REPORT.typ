@@ -44,7 +44,7 @@ Sessions `ECBS1h4d63e1551dc1` (24/24) and `ECBS1hb9229e3a0f30` (3/3). IC is stil
 
 == Predictions
 
-A1 (exact), A2 ($C_4 in [8 dot 10^4, 4 dot 10^5]$), A3 (closing), A4 (ablation), B1 (verified, replays identical, equal trials, order), B2 (ratio ranges at $m = 8, 10, 12, 14$), C1 (slope in $[-0.35, -0.15]$) and C2 ($n^*$ in $[2^60, 2^85]$): *all held* (B1's replay part pending). The replay audit (`verify --replay-all`) reproduced all 24 runs of B2; those of B1 and B3 are running.
+A1 (exact), A2 ($C_4 in [8 dot 10^4, 4 dot 10^5]$), A3 (closing), A4 (ablation), B1 (verified, replays identical, equal trials, order), B2 (ratio ranges at $m = 8, 10, 12, 14$), C1 (slope in $[-0.35, -0.15]$) and C2 ($n^*$ in $[2^60, 2^85]$): *all held*. The replay audit (`verify --replay-all`) reproduced all 37 runs of the three sessions.
 
 *Scope.* Curves over $FF_(2^(4m))$ are not standard curves; the crossover is an extrapolation plus a model, and $m = 14$ is one target. Prime-degree binary fields are settled separately (#1885).
 

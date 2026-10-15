@@ -35,7 +35,7 @@ Ordinary unit-test runs during development are listed once, as E8.
 | E18 | 05:45 | survey | Read-only survey of prime-degree binary IC oracles (for the second half of the task) | an Explore agent over `src/cryptanalysis/koblitz_*`, `binary_semaev*`, `ic_framework/`, `research/pdp_*` | — | Only cross-target shape replay has headroom there; weighted grading, the chain step, sparsest pivots (rejected 5× before) and Frobenius reduction cannot move cost. Root-finding table oracles already lead and still lose to rho | summarised in the PR |
 | E19 | 09:47–11:41 | audit | Replay audit of B2 | `ecbench verify --replay-all` | — | OK: 24 replays reproduced, 0 problems | `audits/char2-ladder.*` |
 | E20 | 11:41–11:46 | audit (killed) | Replay audit of B1, chained after E19 in one background shell | as E19 | — | **killed** 5 minutes in, when the shell hit the tool's 2-hour background limit; no output. Rerun as E21 | `audits/char2-forms-m6.verify.log` (overwritten by E21) |
-| E21 | 11:46– | audit | Replay audits of B1 and B3, detached | as E19 | — | AUDIT_PENDING | `audits/char2-forms-m6.*`, `audits/char2-m14.*` |
+| E21 | 11:46–14:37 | audit | Replay audits of B1 and B3, detached, concurrently | as E19 | — | OK: B3 3/3 reproduced (14:01), B1 10/10 reproduced (14:37), 0 problems | `audits/char2-forms-m6.*`, `audits/char2-m14.*` |
 | E22 | ~11:50 | analysis | Summary (intervals, paired ratios, trend fit, model), `ecbench compare` (6 comparisons saved) and `ecbench table` | `gaudry_quartic_bin_summary`, `ecbench compare --save`, `ecbench table` | — | slope −0.248, `n*` ≈ 2^68.1 (leave-one-out 2^66.7–2^71.6); model 2^63.1–2^69.0; B1–C2 held | `raw/summary.json`, `raw/table.md`, `sessions/*/comparisons/` |
 
 ## Part A results (claim runs; Part B is in README.md)
