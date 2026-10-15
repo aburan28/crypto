@@ -540,6 +540,31 @@ theorem cubic_residual_class_identity {G : Type*} [AddCommGroup G]
     _ = (B + R_B) - (B + R_A) := by rw [hres]
     _ = R_B - R_A := by abel
 
+/-- If two plane-cubic sections cut the same degree-twelve divisor class,
+    canceling their common six-point residual gives one degree-three
+    representative relative to a fixed degree-three origin. The concrete
+    plane-section intersections are checked by the independent Sage replay. -/
+theorem fixed_origin_cubic_class_identity {G : Type*} [AddCommGroup G]
+    (A B T U D sectionG sectionF : G)
+    (hG : sectionG = B + T + U)
+    (hF : sectionF = A + U + D)
+    (hsame : sectionG = sectionF) :
+    D - T = B - A := by
+  have h : A + D = B + T := by
+    have hcut : B + T + U = A + U + D := by
+      calc
+        B + T + U = sectionG := hG.symm
+        _ = sectionF := hsame
+        _ = A + U + D := hF
+    calc
+      A + D = (A + U + D) - U := by abel
+      _ = (B + T + U) - U := by rw [hcut]
+      _ = B + T := by abel
+  calc
+    D - T = (A + D) - (A + T) := by abel
+    _ = (B + T) - (A + T) := by rw [h]
+    _ = B - A := by abel
+
 end P192ExtensionCover
 
 #print axioms P192ExtensionCover.cyclic_cross_ratio_product
@@ -578,3 +603,4 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.p192_threshold_pair_index_entries
 #print axioms P192ExtensionCover.odd_torsion_half_point
 #print axioms P192ExtensionCover.cubic_residual_class_identity
+#print axioms P192ExtensionCover.fixed_origin_cubic_class_identity
