@@ -6,11 +6,11 @@ and the pinned pairing roster,
 and **36 published odd-characteristic covering cases**. The named roster
 includes Oakley Groups 3 and 4, with exact GHS invariant candidates and
 separate WID1 finding IDs. It adds three exhaustively checked prime-field
-examples and a twenty-three-criterion
+examples and a twenty-four-criterion
 registry for anomalous, smooth-order, MOV, Frey–Rück, supersingular,
 binary-GHS, odd-characteristic GHS, cubic norm-one, quadratic-torus and
 proper-subfield mechanisms, plus direct extension-field decomposition,
-cover-and-decomposition, and cubic Jacobian-isogeny routes. The first [WeakCurves site](../../website/weakcurves/)
+cover-and-decomposition, relation-support capacity and useful-rank checks, and cubic Jacobian-isogeny routes. The first [WeakCurves site](../../website/weakcurves/)
 uses this exact export.
 
 The new [pairing roster](pairing_curves.json) contains the exact Ethereum
@@ -28,15 +28,29 @@ classes and displaying 232 certified directed maps. Its criterion checks
 power the site's vulnerability filters; check stages distinguish exact
 conditions, geometry, explicit maps, candidates and structural screens.
 
-The [WAM1 attack map](attack_map.json) adds 36 source-linked research checks
-to the 23 existing criteria, giving the website 59 searchable checks across
+The [WAM1 attack map](attack_map.json) adds 38 source-linked research checks
+to the 24 existing criteria, giving the website 62 searchable checks across
 curve structure, selected subgroups, auxiliary inputs, pairings, index calculus,
 hyperelliptic divisor and Jacobian decomposition, endomorphisms,
 implementations and isogeny protocols. Each WAM1 row states an
-input prerequisite and a concrete evidence gate. These 36 rows are an
+input prerequisite and a concrete evidence gate. These 38 rows are an
 unassessed research queue: they create no curve-level WID1 finding. The
 [validator](validate_attack_map.py) checks ID uniqueness, source fields,
 source/site byte parity and certified graph edge consistency.
+
+The new `ic_relation_support_rank` criterion separates geometric eligibility
+from actual index-calculus relation yield. For an unordered positive
+\(m\)-sum policy on \(B\) distinct usable classes, at most
+\(\binom{B+m-1}{m}\) targets can be represented; a uniform accepted query set
+of size \(A\) has per-query hit probability at most this support divided by
+\(A\). The [P-192 Type I certificate](../p192_extension_cover_20261012/BRANCH_CONTINUATION.md)
+supplies an exact instance: all 64 accepted guided queries had degree-three
+prime-field divisor pairs, while the fixed 16-class three-sum base produced
+zero verified relations and rank zero. The registry keeps the support bound,
+accepted-query law, verified relation yield, and useful rank as separate gates.
+The generic support and conditioning bounds are checked in
+[Lean](lean/RelationSupport.lean); the [proof map](PROOF_MAP.md) states their
+exact hypotheses and the remaining curve-specific bridge.
 
 The [decomposition property index](decomposition_properties.json) makes thirteen
 hyperelliptic checks filterable for all 922 atlas curves. It binds 917 exact

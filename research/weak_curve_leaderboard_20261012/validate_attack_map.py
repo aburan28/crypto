@@ -15,10 +15,18 @@ def main() -> None:
     assert attack["version"] == "WAM1"
     assert attack["assessment"] == "unassessed_on_indexed_models"
     assert (HERE / "attack_map.json").read_bytes() == (SITE / "attack_map.json").read_bytes()
+    assert (HERE / "criteria.json").read_bytes() == (SITE / "criteria.json").read_bytes()
 
     ids = [entry["id"] for entry in criteria] + [entry["id"] for entry in attack["items"]]
     assert len(ids) == len(set(ids)), "attack and criterion IDs must be distinct"
+    assert "ic_relation_support_rank" in ids, "relation-support criterion missing"
     assert len(attack["items"]) >= 30, "the expansion index lost entries"
+    for item in criteria:
+        for field in ("id", "name", "method", "domain", "recognition", "witness",
+                      "construction", "status", "source", "url"):
+            assert isinstance(item.get(field), str) and item[field].strip(), (item["id"], field)
+        assert re.fullmatch(r"[a-z][a-z0-9_]*", item["id"]), item["id"]
+        assert item["url"].startswith("https://"), item["url"]
     decomposition_ids = {
         "hyperelliptic_divisor_decomposition",
         "hyperelliptic_large_prime",

@@ -1,5 +1,27 @@
 # Validation record
 
+## Fixed-base relation support, 15 October 2026
+
+- `lake build RelationSupport` passed on pinned Lean 4.34.1 and Mathlib
+  `d13f23b723b8a846827a245b89c10fc7d3f11612`.
+  `lake env lean AxiomAudit.lean` checked the generic unordered-sum image
+  and accepted-set intersection bounds. Both declarations report only
+  `propext`, `Classical.choice`, and `Quot.sound`. `lake env leanchecker
+  --fresh --verbose RelationSupport` passed. The build, axiom and fresh
+  replay outputs are retained in `validation/relation_support_*.log`.
+- `python3 validate_attack_map.py` checks 24 indexed criteria and 38 WAM1
+  research checks, including byte equality of the research and site criterion
+  copies. The new criterion records the P-192 fixed-base support cap alongside
+  the independently verified 64 accepted divisor-pair representations,
+  zero three-sum relations, and rank zero.
+- `cargo run --release --locked --offline -- check snapshot.json` compiled
+  but stopped at the existing Oakley source/route assertion: the current
+  `docs/curves/jacobian-transfers.json` records destination genus 16 for
+  Groups 3 and 4, while `src/main.rs` still expects 15. Those source and
+  exporter files are unchanged in this criterion addition. The broader
+  snapshot check is therefore unresolved pending reconciliation of that
+  separate source drift.
+
 ## Joux–Vitse intermediate-field route, 13 October 2026
 
 - The source-linked `2011/020` method now has separate WAM1 checks for the

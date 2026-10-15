@@ -1,6 +1,7 @@
 import PrimeExamples
 import OakleyOrders
 import MinimalPairingField
+import RelationSupport
 
 #print axioms WeakCurveLeaderboard.anomalous_F101_affine
 #print axioms WeakCurveLeaderboard.smooth_F101_affine
@@ -24,3 +25,5 @@ import MinimalPairingField
 #print axioms WeakCurveLeaderboard.embedding_degree_formula
 #print axioms WeakCurveLeaderboard.minimal_degree_divides_pairing_extension
 #print axioms WeakCurveLeaderboard.minimal_degree_is_minimal
+#print axioms WeakCurveLeaderboard.unordered_relation_support_bound
+#print axioms WeakCurveLeaderboard.conditioned_relation_support_bound

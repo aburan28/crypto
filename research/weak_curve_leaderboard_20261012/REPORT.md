@@ -8,8 +8,8 @@ static catalog. The snapshot contains 814 prior exact models, 105 named
 curves (101 standards-provenance curves, two challenge curves, and two
 source-pinned pairing variants), 36
 published odd-characteristic parameter cases, three exact prime-field
-examples and twenty-three criterion entries. The WAM1 research queue adds
-36 input- and witness-specific checks, giving the site 59 searchable attack
+examples and twenty-four criterion entries. The WAM1 research queue adds
+38 input- and witness-specific checks, giving the site 62 searchable attack
 checks in total. Each evaluated finding has a
 [WID1 identifier](IDENTIFIERS.md) distinct from its curve identity.
 
@@ -116,7 +116,7 @@ independent `ellgroup` result is `[10,10]`.
 ## Mechanism map
 
 The [WAM1 attack map](attack_map.json) extends the existing criteria with
-36 source-linked checks. Its entries state the required auxiliary inputs or
+38 source-linked checks. Its entries state the required auxiliary inputs or
 implementation behavior and the exact test needed to assess a curve or
 protocol. They remain `unassessed_on_indexed_models` and add no WID1 result.
 The site filters these checks by family and assessment state, while the curve
@@ -137,8 +137,25 @@ factor is expected; the exact factor maps, selected-subgroup projections and
 costed divisor relation pipeline are the further assessment gates.
 
 The [machine-readable registry](criteria.json) specifies domain, recognition,
-required witness, construction and primary source for twenty-three criteria. The
+required witness, construction and primary source for twenty-four criteria. The
 entries make four crucial separations.
+
+The new `ic_relation_support_rank` entry tests a fixed-base index-calculus
+candidate before treating a covering or character filter as evidence of a
+usable relation method. An unordered positive \(m\)-sum base of \(B\) actual
+usable classes covers at most \(\binom{B+m-1}{m}\) targets. Under a uniform
+accepted-query law on \(A\) targets, its hit probability is at most that
+support divided by \(A\), capped at one; verified relation yield and novel
+rank remain separate measurements. The [P-192 Type I continuation](../p192_extension_cover_20261012/BRANCH_CONTINUATION.md)
+certifies this distinction with 64 degree-three prime-field representations
+among 64 accepted guided known-scalar queries, zero matches from a 16-class
+three-sum base, and rank zero. Lean checks the exact 816-image support bound
+and P-192 numerical capacity threshold. The criterion records feasibility
+evidence and creates no new WID1 finding for an indexed curve.
+The generic finite-image and accepted-set intersection caps are also proved
+in [Lean](lean/RelationSupport.lean). Their [proof map](PROOF_MAP.md)
+separates the combinatorial theorem from the curve-specific summation map
+and the uniform-query assumption behind the probability bound.
 
 First, the [MOV reduction](https://doi.org/10.1145/103418.103434) uses a
 Weil pairing, while [Frey–Rück](https://doi.org/10.1090/S0025-5718-1994-1218343-6)
