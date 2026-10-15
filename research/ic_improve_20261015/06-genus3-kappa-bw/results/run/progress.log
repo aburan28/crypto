@@ -208,3 +208,29 @@ stack backtrace:
 note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
 FAILED rc=101 --bits 22 --curve 2 --kappa 2 --cx 8 --streams main --las lpsgewd,lpsgebw2@8,lpsgebw3@8 --out results/run/b22_c2_main.jsonl
 JOB 0s --bits 22 --curve 2 --kappa 2 --cx 8 --streams main --las lpsgewd,lpsgebw2@8,lpsgebw3@8 --out results/run/b22_c2_main.jsonl
+{"bits":21,"curve":0,"kappa":2,"arm":"aa:lpsgewd","correct":true,"cost":65468580445,"la_cost":32254845198,"cols":31812,"nnz":474995,"checks":1,"la_wall":222.9,"wall":484.5}
+JOB 489s --bits 21 --curve 0 --kappa 2 --cx 8 --streams aa --las lpsgewd --out results/run/b21_c0_aa.jsonl
+{"bits":21,"curve":1,"kappa":2,"arm":"aa:lpsgewd","correct":true,"cost":64909952073,"la_cost":31782294452,"cols":31215,"nnz":477715,"checks":1,"la_wall":226.3,"wall":490.2}
+JOB 490s --bits 21 --curve 1 --kappa 2 --cx 8 --streams aa --las lpsgewd --out results/run/b21_c1_aa.jsonl
+{"bits":21,"curve":2,"kappa":2,"arm":"aa:lpsgewd","correct":true,"cost":65097010159,"la_cost":31965032054,"cols":31407,"nnz":477321,"checks":1,"la_wall":222.9,"wall":483.4}
+JOB 486s --bits 21 --curve 2 --kappa 2 --cx 8 --streams aa --las lpsgewd --out results/run/b21_c2_aa.jsonl
+{"bits":18,"curve":3,"kappa":2,"arm":"main:lpsgewd","correct":true,"cost":3380574368,"la_cost":1312573677,"cols":6354,"nnz":96777,"checks":1,"la_wall":8.1,"wall":40.1}
+{"bits":18,"curve":3,"kappa":2,"arm":"main:lpsgebw2@8","correct":true,"cost":3235424533,"la_cost":1167423842,"cols":6354,"nnz":96777,"checks":1,"la_wall":7.2,"wall":40.1}
+{"bits":18,"curve":3,"kappa":2,"arm":"main:lpsgebw3@8","correct":true,"cost":3295350250,"la_cost":1227349559,"cols":6354,"nnz":96777,"checks":1,"la_wall":7.1,"wall":40.1}
+JOB 41s --bits 18 --curve 3 --kappa 2 --cx 8 --streams main --las lpsgewd,lpsgebw2@8,lpsgebw3@8 --out results/run/b18_c3_main.jsonl
+{"bits":18,"curve":4,"kappa":2,"arm":"main:lpsgewd","correct":true,"cost":3376850919,"la_cost":1296734845,"cols":6314,"nnz":96217,"checks":1,"la_wall":8.7,"wall":41.3}
+{"bits":18,"curve":4,"kappa":2,"arm":"main:lpsgebw2@8","correct":true,"cost":3233372524,"la_cost":1153256450,"cols":6314,"nnz":96217,"checks":1,"la_wall":7.2,"wall":41.3}
+{"bits":18,"curve":4,"kappa":2,"arm":"main:lpsgebw3@8","correct":true,"cost":3292557462,"la_cost":1212441388,"cols":6314,"nnz":96217,"checks":1,"la_wall":7.1,"wall":41.3}
+JOB 42s --bits 18 --curve 4 --kappa 2 --cx 8 --streams main --las lpsgewd,lpsgebw2@8,lpsgebw3@8 --out results/run/b18_c4_main.jsonl
+{"bits":19,"curve":3,"kappa":2,"arm":"main:lpsgewd","correct":true,"cost":9118079684,"la_cost":3866973186,"cols":10871,"nnz":166829,"checks":1,"la_wall":27.7,"wall":114.1}
+{"bits":19,"curve":3,"kappa":2,"arm":"main:lpsgebw2@8","correct":true,"cost":8685509155,"la_cost":3434402657,"cols":10871,"nnz":166829,"checks":1,"la_wall":22.5,"wall":114.1}
+{"bits":19,"curve":3,"kappa":2,"arm":"main:lpsgebw3@8","correct":true,"cost":8857512466,"la_cost":3606405968,"cols":10871,"nnz":166829,"checks":1,"la_wall":21.8,"wall":114.1}
+JOB 114s --bits 19 --curve 3 --kappa 2 --cx 8 --streams main --las lpsgewd,lpsgebw2@8,lpsgebw3@8 --out results/run/b19_c3_main.jsonl
+{"bits":19,"curve":4,"kappa":2,"arm":"main:lpsgewd","correct":true,"cost":9091585176,"la_cost":3827686981,"cols":10811,"nnz":166059,"checks":1,"la_wall":26.7,"wall":115.8}
+{"bits":19,"curve":4,"kappa":2,"arm":"main:lpsgebw2@8","correct":true,"cost":8662969797,"la_cost":3399071602,"cols":10811,"nnz":166059,"checks":1,"la_wall":23.5,"wall":115.8}
+{"bits":19,"curve":4,"kappa":2,"arm":"main:lpsgebw3@8","correct":true,"cost":8832816528,"la_cost":3568918333,"cols":10811,"nnz":166059,"checks":1,"la_wall":22.9,"wall":115.8}
+JOB 116s --bits 19 --curve 4 --kappa 2 --cx 8 --streams main --las lpsgewd,lpsgebw2@8,lpsgebw3@8 --out results/run/b19_c4_main.jsonl
+{"bits":20,"curve":3,"kappa":2,"arm":"main:lpsgewd","correct":true,"cost":24472447196,"la_cost":11255464184,"cols":18567,"nnz":284380,"checks":1,"la_wall":78.2,"wall":306.4}
+{"bits":20,"curve":3,"kappa":2,"arm":"main:lpsgebw2@8","correct":true,"cost":23213924158,"la_cost":9996941146,"cols":18567,"nnz":284380,"checks":1,"la_wall":64.3,"wall":306.4}
+{"bits":20,"curve":3,"kappa":2,"arm":"main:lpsgebw3@8","correct":true,"cost":23715330343,"la_cost":10498347331,"cols":18567,"nnz":284380,"checks":1,"la_wall":63.0,"wall":306.4}
+JOB 308s --bits 20 --curve 3 --kappa 2 --cx 8 --streams main --las lpsgewd,lpsgebw2@8,lpsgebw3@8 --out results/run/b20_c3_main.jsonl
