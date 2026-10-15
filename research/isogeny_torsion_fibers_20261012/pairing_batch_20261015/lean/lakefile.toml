@@ -1,0 +1,6 @@
+name = "pairing_batch_cardinality"
+version = "0.1.0"
+defaultTargets = ["TargetCardinality"]
+
+[[lean_lib]]
+name = "TargetCardinality"
