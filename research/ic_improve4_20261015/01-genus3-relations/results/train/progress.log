@@ -1,0 +1,56 @@
+FAILED rc=143 --bits 18 --curve 6 --kappa 1.5763 --cx 8 --streams w --walks 1 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c6_W1.jsonl
+JOB 8s --bits 18 --curve 6 --kappa 1.5763 --cx 8 --streams w --walks 1 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c6_W1.jsonl
+{"bits":18,"curve":5,"kappa":1.5763,"arm":"w1:none","correct":false,"cost":1210667721,"rel_cost":1210667721,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.8}
+{"bits":18,"curve":5,"kappa":1.5763,"arm":"w1:none+C1","correct":false,"cost":826458566,"rel_cost":826458566,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.8}
+JOB 13s --bits 18 --curve 5 --kappa 1.5763 --cx 8 --streams w1 --walks 1 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c5_W1.jsonl
+{"bits":18,"curve":6,"kappa":1.5763,"arm":"w1:none","correct":false,"cost":1198460055,"rel_cost":1198460055,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.8}
+{"bits":18,"curve":6,"kappa":1.5763,"arm":"w1:none+C1","correct":false,"cost":818141379,"rel_cost":818141379,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.8}
+JOB 12s --bits 18 --curve 6 --kappa 1.5763 --cx 8 --streams w1 --walks 1 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c6_W1.jsonl
+{"bits":18,"curve":7,"kappa":1.5763,"arm":"w1:none","correct":false,"cost":1203764586,"rel_cost":1203764586,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":12.0}
+{"bits":18,"curve":7,"kappa":1.5763,"arm":"w1:none+C1","correct":false,"cost":821852403,"rel_cost":821852403,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":12.0}
+JOB 14s --bits 18 --curve 7 --kappa 1.5763 --cx 8 --streams w1 --walks 1 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c7_W1.jsonl
+{"bits":18,"curve":5,"kappa":1.5763,"arm":"w8:none","correct":false,"cost":1207848139,"rel_cost":1207848139,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":12.2}
+{"bits":18,"curve":5,"kappa":1.5763,"arm":"w8:none+C1","correct":false,"cost":824842992,"rel_cost":824842992,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":12.2}
+{"bits":18,"curve":5,"kappa":1.5763,"arm":"w8:none+C2","correct":false,"cost":1150746779,"rel_cost":1150746779,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":12.2}
+{"bits":18,"curve":5,"kappa":1.5763,"arm":"w8:none+C1C2","correct":false,"cost":767741632,"rel_cost":767741632,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":12.2}
+JOB 13s --bits 18 --curve 5 --kappa 1.5763 --cx 8 --streams w8 --walks 8 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c5_W8.jsonl
+{"bits":18,"curve":6,"kappa":1.5763,"arm":"w8:none","correct":false,"cost":1214531981,"rel_cost":1214531981,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.9}
+{"bits":18,"curve":6,"kappa":1.5763,"arm":"w8:none+C1","correct":false,"cost":828990953,"rel_cost":828990953,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.9}
+{"bits":18,"curve":6,"kappa":1.5763,"arm":"w8:none+C2","correct":false,"cost":1157152525,"rel_cost":1157152525,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.9}
+{"bits":18,"curve":6,"kappa":1.5763,"arm":"w8:none+C1C2","correct":false,"cost":771611497,"rel_cost":771611497,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.9}
+JOB 12s --bits 18 --curve 6 --kappa 1.5763 --cx 8 --streams w8 --walks 8 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c6_W8.jsonl
+{"bits":18,"curve":7,"kappa":1.5763,"arm":"w8:none","correct":false,"cost":1210787964,"rel_cost":1210787964,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.6}
+{"bits":18,"curve":7,"kappa":1.5763,"arm":"w8:none+C1","correct":false,"cost":826699515,"rel_cost":826699515,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.6}
+{"bits":18,"curve":7,"kappa":1.5763,"arm":"w8:none+C2","correct":false,"cost":1153561372,"rel_cost":1153561372,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.6}
+{"bits":18,"curve":7,"kappa":1.5763,"arm":"w8:none+C1C2","correct":false,"cost":769472923,"rel_cost":769472923,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.6}
+JOB 13s --bits 18 --curve 7 --kappa 1.5763 --cx 8 --streams w8 --walks 8 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c7_W8.jsonl
+{"bits":18,"curve":5,"kappa":1.5763,"arm":"w32:none","correct":false,"cost":1210542719,"rel_cost":1210542719,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":12.3}
+{"bits":18,"curve":5,"kappa":1.5763,"arm":"w32:none+C1","correct":false,"cost":826705379,"rel_cost":826705379,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":12.3}
+{"bits":18,"curve":5,"kappa":1.5763,"arm":"w32:none+C2","correct":false,"cost":1147285823,"rel_cost":1147285823,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":12.3}
+{"bits":18,"curve":5,"kappa":1.5763,"arm":"w32:none+C1C2","correct":false,"cost":763448483,"rel_cost":763448483,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":12.3}
+JOB 14s --bits 18 --curve 5 --kappa 1.5763 --cx 8 --streams w32 --walks 32 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c5_W32.jsonl
+{"bits":18,"curve":6,"kappa":1.5763,"arm":"w32:none","correct":false,"cost":1206130655,"rel_cost":1206130655,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":12.0}
+{"bits":18,"curve":6,"kappa":1.5763,"arm":"w32:none+C1","correct":false,"cost":823605254,"rel_cost":823605254,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":12.0}
+{"bits":18,"curve":6,"kappa":1.5763,"arm":"w32:none+C2","correct":false,"cost":1143118191,"rel_cost":1143118191,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":12.0}
+{"bits":18,"curve":6,"kappa":1.5763,"arm":"w32:none+C1C2","correct":false,"cost":760592790,"rel_cost":760592790,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":12.0}
+JOB 13s --bits 18 --curve 6 --kappa 1.5763 --cx 8 --streams w32 --walks 32 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c6_W32.jsonl
+{"bits":18,"curve":7,"kappa":1.5763,"arm":"w32:none","correct":false,"cost":1206370254,"rel_cost":1206370254,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.8}
+{"bits":18,"curve":7,"kappa":1.5763,"arm":"w32:none+C1","correct":false,"cost":824116398,"rel_cost":824116398,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.8}
+{"bits":18,"curve":7,"kappa":1.5763,"arm":"w32:none+C2","correct":false,"cost":1143304382,"rel_cost":1143304382,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.8}
+{"bits":18,"curve":7,"kappa":1.5763,"arm":"w32:none+C1C2","correct":false,"cost":761050526,"rel_cost":761050526,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.8}
+JOB 13s --bits 18 --curve 7 --kappa 1.5763 --cx 8 --streams w32 --walks 32 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c7_W32.jsonl
+{"bits":18,"curve":5,"kappa":1.5763,"arm":"w128:none","correct":false,"cost":1210364180,"rel_cost":1210364180,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.8}
+{"bits":18,"curve":5,"kappa":1.5763,"arm":"w128:none+C1","correct":false,"cost":828418426,"rel_cost":828418426,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.8}
+{"bits":18,"curve":5,"kappa":1.5763,"arm":"w128:none+C2","correct":false,"cost":1145818516,"rel_cost":1145818516,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.8}
+{"bits":18,"curve":5,"kappa":1.5763,"arm":"w128:none+C1C2","correct":false,"cost":763872762,"rel_cost":763872762,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.8}
+JOB 13s --bits 18 --curve 5 --kappa 1.5763 --cx 8 --streams w128 --walks 128 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c5_W128.jsonl
+{"bits":18,"curve":6,"kappa":1.5763,"arm":"w128:none","correct":false,"cost":1212054691,"rel_cost":1212054691,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.7}
+{"bits":18,"curve":6,"kappa":1.5763,"arm":"w128:none+C1","correct":false,"cost":829620753,"rel_cost":829620753,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.7}
+{"bits":18,"curve":6,"kappa":1.5763,"arm":"w128:none+C2","correct":false,"cost":1147422275,"rel_cost":1147422275,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.7}
+{"bits":18,"curve":6,"kappa":1.5763,"arm":"w128:none+C1C2","correct":false,"cost":764988337,"rel_cost":764988337,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.7}
+JOB 12s --bits 18 --curve 6 --kappa 1.5763 --cx 8 --streams w128 --walks 128 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c6_W128.jsonl
+{"bits":18,"curve":7,"kappa":1.5763,"arm":"w128:none","correct":false,"cost":1220074111,"rel_cost":1220074111,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.7}
+{"bits":18,"curve":7,"kappa":1.5763,"arm":"w128:none+C1","correct":false,"cost":834718266,"rel_cost":834718266,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.7}
+{"bits":18,"curve":7,"kappa":1.5763,"arm":"w128:none+C2","correct":false,"cost":1155026799,"rel_cost":1155026799,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.7}
+{"bits":18,"curve":7,"kappa":1.5763,"arm":"w128:none+C1C2","correct":false,"cost":769670954,"rel_cost":769670954,"la_cost":0,"cols":0,"nnz":0,"checks":1,"la_wall":0.0,"wall":11.7}
+JOB 13s --bits 18 --curve 7 --kappa 1.5763 --cx 8 --streams w128 --walks 128 --las none --max-checks 1 --no-gp-check --out results/train/rel_b18_c7_W128.jsonl
