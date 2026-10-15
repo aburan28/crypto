@@ -191,7 +191,7 @@ rule, `N`, seed, metric, cell or critical value:
 1. **Census (counts of the bases, not yields).** `K_full` (projected columns):
    `a = 1, n = 23`: w = 1 → 1, w = 2 → 30, w = 3 → 338; `a = 0, n = 23`:
    w = 1 → none ("no gamma-weight-1 abscissa carries a subgroup point"),
-   w = 2 → 17, w = 3 → 367. `K_0 / F_{2^11}` has no usable prime-order
+   w = 2 → 17, w = 3 → 367. `icv1-f2m11-tm67-f393fc83` (K₀ over F₂¹¹) has no usable prime-order
    subgroup in the repository's constructor, so the `n = 11` rung is `a = 1`
    only. Transition sizes at `a = 1, n = 23`: `K_2 = 52`, `K_3 = 6`.
 2. **The `K = 1` cells are degenerate (identity).** Every one-column base is
@@ -218,7 +218,7 @@ The first cost session (`sessions/void-a1-n23-full-unpriced/`, spec
 `specs/void/cost-a1-n23-full.json`) errored on every record before it was
 stopped: `src/cryptanalysis/ecbench/full_prices.json has no row for
 icv1-f2m23-tm5197-1f85e9e1` (the `*_full` methods need a measured price row,
-and `K_1 / F_{2^23}` has none). Kept as evidence, no values. Change: both cost
+and `icv1-f2m23-tm5197-1f85e9e1` (K₁ over F₂²³) has none). Kept as evidence, no values. Change: both cost
 specs use the operations-only methods `rho.signed_frobenius` and `ic.pipeline`
 (same oracle, targets, factor bases, seeds, sizes), one instrument on both
 rungs; `S` then counts group operations without pricing native field work, as
