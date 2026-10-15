@@ -1,3 +1,4 @@
+import CrossRatio
 import Mathlib.Algebra.Group.Hom.Defs
 import Mathlib.Tactic.NormNum
 
@@ -37,8 +38,23 @@ theorem signed_p192_hit_integer_certificate :
       (1569275433846670190958947353987675545133315652035359680560 : ℕ) := by
   norm_num
 
+/-- Reversing the old degree-three divisor pair makes the same two-cubic
+    fixed-origin reduction represent the negative class. The section-divisor
+    equalities are the concrete finite-field obligations replayed by PARI. -/
+theorem negative_fixed_origin_cubic_class_identity
+    (A B T U D sectionG sectionF : G)
+    (hG : sectionG = A + T + U)
+    (hF : sectionF = B + U + D)
+    (hsame : sectionG = sectionF) :
+    D - T = -(B - A) := by
+  calc
+    D - T = A - B :=
+      fixed_origin_cubic_class_identity B A T U D sectionG sectionF hG hF hsame
+    _ = -(B - A) := by abel
+
 end P192ExtensionCover
 
 #print axioms P192ExtensionCover.signedBase_map
 #print axioms P192ExtensionCover.signed_three_log_equation
 #print axioms P192ExtensionCover.signed_p192_hit_integer_certificate
+#print axioms P192ExtensionCover.negative_fixed_origin_cubic_class_identity

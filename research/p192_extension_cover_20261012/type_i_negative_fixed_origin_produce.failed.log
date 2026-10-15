@@ -1,0 +1,10 @@
+  ***   at top-level: ...r(k=1,16,listput(results,produce(k));print("ne
+  ***                                             ^---------------------
+  ***   in function produce: ...ans);for(t=1,#trials,ans=attempt(k,t);if(#ans,
+  ***                                                    ^---------------------
+  ***   in function attempt: ...=0,return([]));return([k,polyvec(gcoeff,10),po
+  ***                                                    ^---------------------
+  ***   in function polyvec: vector(n,i,lift(polcoeff(z,i-1,x)))
+  ***                                        ^-------------------
+  *** polcoeff: incorrect type in polcoef (t_VEC).
+... skipping file 'research/p192_extension_cover_20261012/type_i_negative_fixed_origin_produce.gp'
