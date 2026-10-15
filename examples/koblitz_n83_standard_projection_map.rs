@@ -8,7 +8,9 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
 };
 use num_bigint::BigUint;
 use serde_json::{json, Value};
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
+#[cfg(test)]
+use std::collections::BTreeSet;
 use std::error::Error;
 use std::fs::OpenOptions;
 use std::io::{BufRead, BufReader, BufWriter, Write};
