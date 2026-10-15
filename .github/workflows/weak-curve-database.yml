@@ -107,12 +107,14 @@ jobs:
           auto-config: false
           use-mathlib-cache: true
           build: true
-          build-args: 'PrimeExamples OakleyOrders MinimalPairingField RelationSupport'
+          build-args: 'PrimeExamples OakleyOrders MinimalPairingField RelationSupport WeightedSupport'
           test: false
           lint: false
           leanchecker: true
           leanchecker-args: '--fresh --verbose RelationSupport'
       - name: Fresh-kernel replay of Oakley genus theorem
         run: lake env leanchecker --fresh --verbose OakleyOrders
+      - name: Fresh-kernel replay of weighted relation support
+        run: lake env leanchecker --fresh --verbose WeightedSupport
       - name: Audit leaderboard theorem axioms
         run: lake env lean AxiomAudit.lean

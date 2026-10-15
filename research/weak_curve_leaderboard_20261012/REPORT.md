@@ -210,6 +210,18 @@ in [Lean](lean/RelationSupport.lean). Their [proof map](PROOF_MAP.md)
 separates the combinatorial theorem from the curve-specific summation map
 and the uniform-query assumption behind the probability bound.
 
+The [weighted Lean extension](lean/WeightedSupport.lean) removes the uniform
+accepted-query premise for a finite seeded sampler. Assign each target the
+number of seeds mapping to it and certify a maximum \(M\) for accepted
+targets. The accepted fixed-base support then receives at most
+\(\binom{B+m-1}{m}M\) seeds. Dividing by the total attempted seed count gives
+the per-attempt hit cap; dividing by accepted seed mass gives the cap per
+accepted query. This detects whether a geometry-guided sampler genuinely
+concentrates known-scalar queries on relation support. The theorem supplies
+the generic combinatorial bound; constructing the exact sampler, certifying
+its maximum preimage multiplicity and measuring useful rank are instance
+checks. The [proof map](PROOF_MAP.md) records those boundaries.
+
 First, the [MOV reduction](https://doi.org/10.1145/103418.103434) uses a
 Weil pairing, while [Frey–Rück](https://doi.org/10.1090/S0025-5718-1994-1218343-6)
 uses a Tate-pairing variant. Both begin with the selected order `r` and

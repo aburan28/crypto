@@ -52,6 +52,13 @@ The generic support and conditioning bounds are checked in
 [Lean](lean/RelationSupport.lean); the [proof map](PROOF_MAP.md) states their
 exact hypotheses and the remaining curve-specific bridge.
 
+The [weighted support theorem](lean/WeightedSupport.lean) extends the same
+criterion to finite seeded query laws with unequal target probabilities. If
+no accepted target has more than \(M\) preimage seeds, the supported accepted
+seed mass is at most \(\binom{B+m-1}{m}M\). This makes sampler concentration
+a checkable input alongside base size, relation yield and rank; the
+[proof map](PROOF_MAP.md) states the exact one-query hypotheses.
+
 The [genus-128 GHS cost audit](ghs_genus128_cost_audit.json) resolves the
 nominal factor-base and relation-query stages behind the two exact-invariant
 `GF(4)` formula-advantage routes. Its independent integer calculation selects
