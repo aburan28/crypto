@@ -1,0 +1,24 @@
+ops (ok): ic-k4-d4-ed / ic-k4-d4 = 0.9904 [0.977, 0.998] (cluster) over 12 pairs on 12 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 0.9658 [0.966, 0.966]
+measurement quality: 0 / 100; paired attempts 12, verified 12, admitted 0; levels {"L0": 12}; p95 foreign busy unknown%, p95 run queue 10.29%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-k4-d4-ed / ic-k4-d4 | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp4p101-t7230-4648f8e2 | 24.63 | 3 | 1.0000 | [1.0000, 1.0000] | cluster |
+| icv1-fp4p181-tm22754-781f401f | 28.00 | 3 | 0.9840 | [0.9258, 1.0000] | cluster |
+| icv1-fp4p269-tm108482-f98bf277 | 30.29 | 3 | 0.9851 | [0.9814, 0.9870] | cluster |
+| icv1-fp4p397-tm257762-06a9c911 | 32.53 | 3 | 0.9797 | [0.9755, 0.9869] | cluster |
+
+| workload | curve | log2 r | ic-k4-d4 mean S | ic-k4-d4-ed mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0766f1795545 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 42087037.7904 | 41535447.0583 | 0.9869 |
+| W1b30ea2a9a56 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 189602363.4455 | 189602363.4455 | 1.0000 |
+| W30de72b3cd66 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 154587792.2948 | 154587792.2948 | 1.0000 |
+| W78848684da63 | icv1-fp4p101-t7230-4648f8e2 | 24.63 | 219123446.2450 | 219123446.2450 | 1.0000 |
+| Wa1329e745cd3 | icv1-fp4p181-tm22754-781f401f | 28.00 | 177344827.0473 | 177344827.0473 | 1.0000 |
+| Wb010803851ce | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 37627792.2546 | 36707366.7589 | 0.9755 |
+| Wb0b25ac59974 | icv1-fp4p397-tm257762-06a9c911 | 32.53 | 54371561.4397 | 53115529.5336 | 0.9769 |
+| Wcdc5351a5b23 | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 73307708.1496 | 72345132.8596 | 0.9869 |
+| Wde4d03d952a4 | icv1-fp4p181-tm22754-781f401f | 28.00 | 92700798.2169 | 85826967.7404 | 0.9258 |
+| We3decdcad31d | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 74407794.1944 | 73025449.2261 | 0.9814 |
+| We6eaa57b80e2 | icv1-fp4p269-tm108482-f98bf277 | 30.29 | 73235334.0520 | 72279996.1683 | 0.9870 |
+| Wecf28ebff258 | icv1-fp4p181-tm22754-781f401f | 28.00 | 158449786.1114 | 158449786.1114 | 1.0000 |

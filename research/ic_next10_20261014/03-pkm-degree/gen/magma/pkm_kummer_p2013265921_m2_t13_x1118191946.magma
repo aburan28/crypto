@@ -1,0 +1,42 @@
+// pkm_kummer_p2013265921_m2_t13_x1118191946: PKM's Kummer tower system (m = 2, t = 13, N = 26, 26 unknowns, 27 equations)
+// from gen/m2_t13.jsonl; written by examples/pkm_tower_pilot.rs --export-magma-rows.
+// Ours (that row): engine f4_fp_tower, 5.227849 ms, inconsistent = false, timed out = true.
+K := GF(2013265921);
+P := PolynomialRing(K, 26, "grevlex");
+AssignNames(~P, ["y0_0", "y0_1", "y0_2", "y0_3", "y0_4", "y0_5", "y0_6", "y0_7", "y0_8", "y0_9", "y0_10", "y0_11", "y0_12", "y1_0", "y1_1", "y1_2", "y1_3", "y1_4", "y1_5", "y1_6", "y1_7", "y1_8", "y1_9", "y1_10", "y1_11", "y1_12"]);
+F := [P |
+  587741638 + 1982575280*P.14 + 1365922184*P.14^2 + 1982575280*P.1 + 525587125*P.1*P.14 + 824803175*P.1*P.14^2 + 1365922184*P.1^2 + 824803175*P.1^2*P.14 + 1154649193*P.1^2*P.14^2,
+  1*P.2 + 2013265920*P.1^2,
+  1*P.3 + 2013265920*P.2^2,
+  1*P.4 + 2013265920*P.3^2,
+  1*P.5 + 2013265920*P.4^2,
+  1*P.6 + 2013265920*P.5^2,
+  1*P.7 + 2013265920*P.6^2,
+  1*P.8 + 2013265920*P.7^2,
+  1*P.9 + 2013265920*P.8^2,
+  1*P.10 + 2013265920*P.9^2,
+  1*P.11 + 2013265920*P.10^2,
+  1*P.12 + 2013265920*P.11^2,
+  1*P.13 + 2013265920*P.12^2,
+  1 + 2013265920*P.13^2,
+  1*P.15 + 2013265920*P.14^2,
+  1*P.16 + 2013265920*P.15^2,
+  1*P.17 + 2013265920*P.16^2,
+  1*P.18 + 2013265920*P.17^2,
+  1*P.19 + 2013265920*P.18^2,
+  1*P.20 + 2013265920*P.19^2,
+  1*P.21 + 2013265920*P.20^2,
+  1*P.22 + 2013265920*P.21^2,
+  1*P.23 + 2013265920*P.22^2,
+  1*P.24 + 2013265920*P.23^2,
+  1*P.25 + 2013265920*P.24^2,
+  1*P.26 + 2013265920*P.25^2,
+  1 + 2013265920*P.26^2
+];
+I := ideal<P | F>;
+t0 := Cputime(); G := GroebnerBasis(I); tg := Cputime(t0);
+unit := G eq [P | 1];
+printf "RESULT-GB name=pkm_kummer_p2013265921_m2_t13_x1118191946 p=2013265921 magma_gb_s=%o basis_len=%o unit=%o ours_inconsistent=false\n", tg, #G, unit;
+if not unit and Dimension(I) eq 0 then
+  t1 := Cputime(); V := Variety(I); printf "RESULT-VAR name=pkm_kummer_p2013265921_m2_t13_x1118191946 magma_variety_s=%o magma_solutions=%o\n", Cputime(t1), #V;
+end if;

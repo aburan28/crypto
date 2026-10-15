@@ -1,10 +1,10 @@
 # The genus-3 IC-2LP study that 04b follows up is not in the repository
 
-- **Status:** `open`
+- **Status:** `investigating`
 - **Kind:** access/tool limit: the source artefacts are absent, or held outside this repository
 - **Affected work:** [`research/ic_improve_20261014/04b-genus3-2lp-rebalance/`](../research/ic_improve_20261014/04b-genus3-2lp-rebalance/README.md) (Conductor T-1)
 - **Next action owner:** the requester; whoever holds `04-genus3-2lp`
-- **Last updated:** 2026-10-15
+- **Last updated:** 2026-10-15 (11:10 UTC)
 
 ## Problem
 
@@ -81,3 +81,15 @@ original tool.
 - 2026-10-15: opened with 04b. The rebuilt baseline departs from 4/3:
   E = 1.383, 99% interval [1.382, 1.384]. Neither requested arm removes the
   departure.
+- 2026-10-15, later: **the artifacts have appeared.** A parallel session merged
+  `research/ic_improve_20261014/04-genus3-2lp/`, `RULES.md` and
+  `examples/ic_improve_04_*.rs` into `main`. The round README there now links
+  04b as an independent study.
+  - The first unblock condition is met: the original tool and records are in
+    the repository.
+  - The second is still open: a matched baseline comparison in one counted
+    unit (local and phase exponents, row weights), with design differences
+    named.
+  - Headline only, unpaired: 04's IC-2LP fits q^1.385 [1.379, 1.391] over
+    2^10–2^18. 04b's rebuilt baseline fits q^1.383 [1.382, 1.384] over
+    2^14–2^20. The two ranges differ, so this is not a comparison.

@@ -23,6 +23,21 @@
 > baseline**. Nothing here is paired with the original's records. The
 > request's figures are compared with the rebuild only qualitatively (§5).
 
+> **Update, 2026-10-15, after the run.** The original study has since landed
+> on `main`: [`../04-genus3-2lp/`](../04-genus3-2lp/README.md), with
+> [`../RULES.md`](../RULES.md) and `examples/ic_improve_04_*.rs`. It came from
+> a parallel session.
+>
+> Nothing below was re-run against it. Every pairing is still with the rebuilt
+> baseline.
+>
+> Headline, unpaired, over different size ranges: 04's IC-2LP fits q^1.385
+> [1.379, 1.391] over 2^10–2^18. The rebuild fits q^1.383 [1.382, 1.384] over
+> 2^14–2^20.
+>
+> A matched comparison of the two baselines is the open step in the
+> [problem record](../../../problems/ic-improve-04-genus3-2lp-study-missing.md).
+
 ## Answer
 
 **On this rebuild, the departure from 4/3 is not an artifact of either choice.**
