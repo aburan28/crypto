@@ -142,3 +142,10 @@ research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/reports/**/*
 research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/reports/**/*.png binary
 research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/reports/**/*.svg -diff -whitespace
 research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/VALIDATION_*.stdout whitespace=-blank-at-eof
+
+# Bounded larger-order different-j screen visuals and exact test logs.
+research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/*.pdf binary
+research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/*.png binary
+research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/VALIDATION_*.stdout -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/VALIDATION_*.stderr -diff -whitespace

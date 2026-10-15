@@ -1,6 +1,19 @@
 # Next discriminating gates after full-image setup reuse
 
-These are **pending** protocols, not measurements. The completed
+**Execution update, 2026-10-15:** the bounded Gate D candidate screen
+is [complete](../different_j_order_screen_20261015/RESULTS.md). It
+selected the first eligible pair at `p=211`, `r=229`, with different
+`j=77` and `160`; independent replay checked 192 map witnesses and a
+direct `F_(p²)` census matched both curve orders at each of three
+accepted primes. A later separately frozen
+[full map/fiber audit](../different_j_order_screen_20261015/FIBER_REPORT.md)
+checked all 44,655 source points, 14,885 three-point fibers and
+52,441 subgroup pairs with independent native replay. The full
+64-target relation/cost comparison and
+Gate A's direct χ-coordinate resultant remain pending. The frozen
+protocol text below is retained as the pre-screen decision rule.
+
+These are **protocols with the execution status above**. The completed
 [60-target result](RESULTS.md) exhausts every nonidentity target in
 the frozen order-61 subgroup. Repeating that same group with duplicate
 targets would not test further genuine setup reuse.

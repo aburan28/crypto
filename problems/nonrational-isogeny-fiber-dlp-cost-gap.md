@@ -17,6 +17,8 @@
   [different-j relation and fiber controls](../research/isogeny_torsion_fibers_20261012/different_j_20261015/reports/run-20261015T1713Z/REPORT.md),
   [different-j full-image factor-base gate](../research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/RESULTS.md),
   [different-j 60-target reuse and whole-process result](../research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/RESULTS.md),
+  [bounded larger-order different-j pair screen](../research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/RESULTS.md),
+  [selected order-229 full rational-fiber audit](../research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/FIBER_REPORT.md),
   and [three-arm pairing batch cost report](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1740Z/REPORT.md)
 - **Next action owner:** unassigned
 - **Last updated:** 2026-10-15
@@ -195,6 +197,20 @@ cannot map to their fixed non-isomorphic destinations.
   2.483. V3 prefix timing omits startup and final stdout; V4 includes
   those costs for the full batch only. Shared-host L0 timing and this
   one group do not establish a portable or growing-size crossover.
+- **Observed in the bounded larger-order screen:** the
+  [native 20-prime census](../research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/RESULTS.md)
+  found three different-j pairs with multiplicity-one prime subgroup
+  order at least 211. The preregistered first pair has `p=211`,
+  `r=229`, `j=77` and `160`, and both curves have 44,655 points over
+  `F_(211²)` by a direct independent field census. The separate Rust
+  checker replayed 192/192 sampled map witnesses across all three
+  accepted pairs. A separately frozen
+  [full selected-pair audit](../research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/FIBER_REPORT.md)
+  then enumerated all 44,655 source points, 14,885 image points with
+  exactly three rational preimages each, and all 52,441 order-229
+  subgroup-pair homomorphism checks. The independent Rust checker
+  reproduced the counts and both full-map hashes. The 64-target
+  relation/BSGS/rho comparison remains open.
 - **Observed in the pairing batch:** the
   [V6 three-arm run](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1740Z/REPORT.md)
   replayed 594/594 scalar outputs on 66 distinct order-67 `F_401`
@@ -282,6 +298,21 @@ cannot map to their fixed non-isomorphic destinations.
   counted-unit price, larger-order pair, isolation and second-host
   performance replay remain open; the native CPU result does not
   discharge those separate acceptance conditions.
+- [x] Execute the frozen `p<=271`, `r>=211` different-j family screen
+  and independent accepted-pair point census. The
+  [result](../research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/RESULTS.md)
+  selects `p=211`, `r=229` for the next panel; this is construction
+  evidence and does not price a DLP solve.
+- [x] On the selected order-229 pair, check every rational map fiber,
+  exact kernel, image subgroup and 52,441 ordered subgroup pairs with
+  an independent native checker. See the
+  [full audit](../research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/FIBER_REPORT.md).
+- [ ] On that selected order-229 pair, solve at least 64 distinct public
+  targets through the projected and
+  full-image relation arms plus direct source BSGS/rho controls, replay
+  every scalar and relation, and give complete cold counted-unit and
+  process costs. The [pending protocol](../research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/NEXT_GATE.md)
+  keeps isolation and an independent-host performance replay open.
 - [x] Construct and cold-price an exact pairing transfer on the first two
   frozen quadratic-extension targets, with a certified evaluation field,
   selected torsion input, separated H search/Miller/final exponent/field-DLP
@@ -481,3 +512,15 @@ local timer interval had a paired rho ratio median of 70.281, dominated
 by construction. Reusing that construction over distinct targets,
 portable counted pricing and the direct χ-coordinate resultant remain
 open obligations.
+
+2026-10-15 larger-order screen and full fiber: the preregistered
+20-prime screen selected a different-j quadratic-extension pair at
+`p=211`, `r=229`. A direct point census counted both curves; the
+separately frozen full map audit and independent checker then agreed
+on 44,655 source points, 14,885 three-point rational fibers, the
+three-point identity kernel, 229 distinct points in each transported
+target subgroup, and 52,441/52,441 subgroup-pair homomorphism checks.
+This discharges the selected pair's finite map/fiber correctness gate.
+The same-target 64-target relation, recovery and BSGS/rho cost panel,
+χ-coordinate resultant, portable counted cost, isolation, independent
+host and general Lean curve theorem remain open.

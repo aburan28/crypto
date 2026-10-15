@@ -1,0 +1,207 @@
+{
+  "accepted": [
+    {
+      "cofactor": 195,
+      "destination_j": [
+        160,
+        0
+      ],
+      "n1": 195,
+      "n2": 44655,
+      "p": 211,
+      "r": 229,
+      "source_j": [
+        77,
+        0
+      ]
+    },
+    {
+      "cofactor": 225,
+      "destination_j": [
+        222,
+        0
+      ],
+      "n1": 225,
+      "n2": 50175,
+      "p": 223,
+      "r": 223,
+      "source_j": [
+        183,
+        0
+      ]
+    },
+    {
+      "cofactor": 243,
+      "destination_j": [
+        164,
+        0
+      ],
+      "n1": 243,
+      "n2": 58563,
+      "p": 241,
+      "r": 241,
+      "source_j": [
+        33,
+        0
+      ]
+    }
+  ],
+  "accepted_count": 3,
+  "candidate_count": 20,
+  "map_witnesses": 192,
+  "portable_counted_S": null,
+  "raw_sha256": "31238914df3663805efb88c3c89c420b4ca42b875668da0cfc954cd1084171b4",
+  "reason_counts": {
+    "accept": 3,
+    "subgroup": 17
+  },
+  "replay_sha256": "ac2c13d5496755d57947b977db0e4c9829267615120b3fdb05fa906e89e73fd4",
+  "rows": [
+    {
+      "largest_prime_factor": 7,
+      "p": 61,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    },
+    {
+      "largest_prime_factor": 61,
+      "p": 67,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    },
+    {
+      "largest_prime_factor": 7,
+      "p": 73,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    },
+    {
+      "largest_prime_factor": 23,
+      "p": 79,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    },
+    {
+      "largest_prime_factor": 109,
+      "p": 97,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    },
+    {
+      "largest_prime_factor": 97,
+      "p": 103,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    },
+    {
+      "largest_prime_factor": 7,
+      "p": 109,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    },
+    {
+      "largest_prime_factor": 7,
+      "p": 127,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    },
+    {
+      "largest_prime_factor": 29,
+      "p": 139,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    },
+    {
+      "largest_prime_factor": 139,
+      "p": 151,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    },
+    {
+      "largest_prime_factor": 29,
+      "p": 157,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    },
+    {
+      "largest_prime_factor": 23,
+      "p": 163,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    },
+    {
+      "largest_prime_factor": 23,
+      "p": 181,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    },
+    {
+      "largest_prime_factor": 61,
+      "p": 193,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    },
+    {
+      "largest_prime_factor": 17,
+      "p": 199,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    },
+    {
+      "largest_prime_factor": 229,
+      "p": 211,
+      "r": 229,
+      "reason": "accept",
+      "status": "accept"
+    },
+    {
+      "largest_prime_factor": 223,
+      "p": 223,
+      "r": 223,
+      "reason": "accept",
+      "status": "accept"
+    },
+    {
+      "largest_prime_factor": 31,
+      "p": 229,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    },
+    {
+      "largest_prime_factor": 241,
+      "p": 241,
+      "r": 241,
+      "reason": "accept",
+      "status": "accept"
+    },
+    {
+      "largest_prime_factor": 11,
+      "p": 271,
+      "r": null,
+      "reason": "subgroup",
+      "status": "reject"
+    }
+  ],
+  "schema": "different_j_order_summary/v1",
+  "selected": {
+    "p": 211,
+    "r": 229
+  },
+  "stage": "bounded_candidate_screen"
+}
