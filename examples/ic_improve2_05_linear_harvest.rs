@@ -211,8 +211,8 @@ fn main() {
     let first: u64 = flag("--first").map(|v| v.parse().unwrap()).unwrap_or(0);
     let phase = flag("--phase").unwrap_or_else(|| "pilot".into());
     let arms: Vec<(String, String)> = flag("--arms")
-        .unwrap_or_else(|| "i:off,h:1,i2:off".into())
-        .split(',')
+        .unwrap_or_else(|| "i:off/h:1/i2:off".into())
+        .split('/')
         .map(|s| {
             let (a, b) = s.split_once(':').expect("name:spec");
             (a.to_string(), b.to_string())
