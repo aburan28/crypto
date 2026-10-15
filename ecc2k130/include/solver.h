@@ -86,7 +86,7 @@ struct Solver {
         // for 196 point operations instead of 392.
         Point startPt;
         unsigned long long iters;
-        unsigned long long counts[8];
+        unsigned long long counts[ECC_STEP_KINDS];
         U192 alpha0;
         U192 a, b;
         u64 seed;
@@ -98,7 +98,7 @@ struct Solver {
         out.ok = false;
         out.seed = seed;
         out.iters = 0;
-        for (int i = 0; i < 8; ++i) out.counts[i] = 0;
+        for (int i = 0; i < ECC_STEP_KINDS; ++i) out.counts[i] = 0;
         Point p = R::startPoint(seed, basis, target, &out.alpha0, ell, spow);
         out.startPt = p;
         out.a = out.alpha0;
@@ -145,7 +145,7 @@ struct Solver {
             out.counts[(hw >> 1) & 1]++;
 #endif
 #else
-            out.counts[R::jOf(hw) - 3]++;
+            out.counts[R::stepIndex(p.x, hw)]++;
 #endif
             p = R::step(p, hw);
 #endif
@@ -171,6 +171,7 @@ struct Solver {
         out.seed = seed;
         out.iters = iters;
         unsigned long long total = 0;
+        for (int i = 0; i < ECC_STEP_KINDS; ++i) out.counts[i] = 0;
         for (int i = 0; i < 8; ++i) { out.counts[i] = counts[i]; total += counts[i]; }
 #if ECC_WALK_TABLE
         (void)total;
@@ -218,9 +219,11 @@ struct Solver {
         }
 #endif
 #else
-        for (int j = 0; j < 8; ++j) {
+        for (int j = 0; j < ECC_STEP_KINDS; ++j) {
             if (!counts[j]) continue;
-            const U192 f = mod_add(u192_from(1), spow[j + 3], ell);
+            // (1 + s^j) for kinds [0, 8), (1 - s^j) for [8, 16)
+            const U192 f = j < 8 ? mod_add(u192_from(1), spow[j + 3], ell)
+                                 : mod_sub(u192_from(1), spow[j - 8 + 3], ell);
             U192 e = u192_zero();
             e.v[0] = counts[j];
             mu = mod_mul(mu, mod_pow(f, e, ell), ell);
