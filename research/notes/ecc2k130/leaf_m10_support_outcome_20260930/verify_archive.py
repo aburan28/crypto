@@ -45,8 +45,13 @@ def main() -> None:
         else:
             assert item["provenance"] == "mac_replay"
             assert item["path"] == "mac_replay.json"
+    # The frozen archive is compared without the later run_* directories that
+    # #1614 added beside it in evidence/ (run_36707051160/); those are a
+    # separate run, not part of this manifest.
     assert paths == {path.relative_to(EVIDENCE).as_posix()
-                     for path in EVIDENCE.rglob("*") if path.is_file()}
+                     for path in EVIDENCE.rglob("*")
+                     if path.is_file()
+                     and not path.relative_to(EVIDENCE).parts[0].startswith("run_")}
     assert hosted_files == manifest["hosted_artifact_files"] == 101
     assert hosted_bytes == manifest["hosted_artifact_bytes"]
     print(f"PASS {len(paths)} files, {hosted_bytes} hosted bytes")
