@@ -17,6 +17,9 @@ deterministic, and wall time is descriptive only.
 | C1 | 06:42 (under a minute) | claim | `chain`, `chain-holdout`, `holdout` ladders × {default, replay} | `run.sh` (binary `be69c5ca…`) | default ÷ replay **0.970, 0.954, 0.983**: replay costs more on all 9 cells run (0.753–0.985×); verdicts identical on all 9; more splits on 6. Cofactor-inadmissible cells skipped by the harness (`chain` 3 of 5 listed, `chain-holdout` 4 of 11). R1–R3 held; decision: recorded null | `raw/`, `summary.json` |
 | D1 | 06:47–06:49 | diagnostic (after the claim) | Why: roots recorded / replayed / rows dropped, per cell, `chain-holdout`, replay arm | counting build (global counters + one line per cell; word operations and verdicts identical to C1's replay arm, checked) | large rank-deficient roots rarely repeat their layout (`K_0/2^15 m=4`: 18 recorded, 6 replayed); repeating roots drop ~4 rows (`K_1/2^15 m=4`: 1,832 replays, 3.8 rows each) | `diag/chain-holdout-replay-counted.json`, `diag/chain-holdout-replay-counts.txt` |
 | D2 | 06:49 | diagnostic | D1 rerun, to check the counters are deterministic | as D1 | identical lines | `diag/chain-holdout-replay-counts.txt` (from this run) |
+| L2 | 07:10 | reading | Lead 2 (weighted/block grading of the symmetrised model): already measured | `RESEARCH_KOBLITZ_INDEX_CALCULUS.md` "The block structure, measured" (2026-09-12) | 1.00× where the minimum setting decides, 0.21× at `n = 15` otherwise: a recorded negative. Not rerun | — |
+| L3a | 07:20 | — | Counters added to `decompose_by_e3` (field multiplications, word XORs); `koblitz_sym_s4` tests 5/5 | `cargo test --release --lib koblitz_sym_s4` | passed | — |
+| L3b | 07:25 | — | **Lead 3 protocol registered** | `PROTOCOL-lead3.md` | — | — |
 
 Times are file and commit timestamps. An earlier revision of this log gave
 estimated times for P2–D2, up to twenty minutes late; they were corrected
