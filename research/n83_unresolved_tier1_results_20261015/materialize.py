@@ -96,6 +96,11 @@ def seal(root, artifact_zip, expected_zip, expected_analysis, artifact_id):
         passed = pair["status"] == "PASS_TIER1_PAIR"
         ic = pair.get("ic") or {}
         rho = pair.get("rho") or {}
+        boundary_overhead_ms = None
+        if passed:
+            boundary_overhead_ms = ic["online_ms"] - sum(ic["phases_ms"].values())
+            if not 0 <= boundary_overhead_ms <= 1:
+                raise ValueError("IC online phase boundary overhead differs")
         measurements.append({
             "candidate_id": candidate["candidate_id"],
             "candidate_manifest_sha256": candidate["candidate_manifest_sha256"],
@@ -113,6 +118,7 @@ def seal(root, artifact_zip, expected_zip, expected_analysis, artifact_id):
             "rho_online_ms": rho.get("online_ms") if passed else None,
             "online_speedup_rho_over_ic": pair.get("ratio_rho_over_ic") if passed else None,
             "ic_online_phases_ms": ic.get("phases_ms") if passed else None,
+            "ic_online_boundary_overhead_ms": boundary_overhead_ms,
             "ic_setup_ms": ic.get("setup_ms"),
             "ic_peak_rss_bytes": ic.get("peak_rss_bytes"),
             "rho_peak_rss_bytes": rho.get("peak_rss_bytes"),
