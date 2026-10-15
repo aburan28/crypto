@@ -1016,12 +1016,12 @@ static void testWitness(Rng &rng, Solver<Cfg> &sol) {
             R::startPoint(seed, sol.basis, sol.target, &alpha0, sol.ell, sol.spow, &degenerate);
         if (degenerate) continue;     // toy fields only; see testStartPoint
         typename R::Point p = start;
-        unsigned long long counts[ECC_JCOUNT] = {0};
+        unsigned long long counts[ECC_STEP_KINDS] = {0};
         unsigned long long taken = 0;
         bool ran = true;
         for (int i = 0; i < STEPS; ++i) {
             const int hw = R::weight(p.x);
-            counts[R::jOf(hw) - 3]++;
+            counts[R::stepIndex(p.x, hw)]++;
             p = R::step(p, hw);
             ++taken;
             if (p.inf) { ran = false; break; }
@@ -1029,7 +1029,7 @@ static void testWitness(Rng &rng, Solver<Cfg> &sol) {
         if (!ran) continue;
         ++walked;
         unsigned long long total = 0;
-        for (int k = 0; k < ECC_JCOUNT; ++k) total += counts[k];
+        for (int k = 0; k < ECC_STEP_KINDS; ++k) total += counts[k];
         if (total != taken) okSum = false;
         // The endpoint identity costs one scalar multiplication, and the
         // reference's is O(m^3) -- at m = 131 it is seconds, so one trail is

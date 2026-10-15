@@ -1,0 +1,14 @@
+{
+ "started_utc": "2026-10-14T17:20:14Z",
+ "finished_utc": "2026-10-14T17:32:57Z",
+ "commit": "4d1b4576c340896a884dd614d37e7c3936f9e843",
+ "binary_sha256": {
+  "0": "3bd4bac93c84ee50acec6b05b30dd59e38fe50373e970ff157211a2697b6fded",
+  "1": "49357288713d9d571d7bf673e18b507f7d291af6d142e6b0192946ebc4a37ff2",
+  "2": "2a83e7b3b652cef842da51150c496a8a721966868c073a857d2fb0930671b6e6"
+ },
+ "image": "ubuntu:24.04",
+ "cpu_per_container": 64,
+ "build": "g++ -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -pthread -DECC_TABLE_BRANCHES=8 -DECC_WITNESS=0 -DECC_SIGMA_SIGN=<s> src/walkconstant.cpp",
+ "cells": 12
+}
