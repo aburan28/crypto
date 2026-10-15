@@ -1,0 +1,114 @@
+{
+  "schema": "backlog.card/v1",
+  "id": "XP-20261015-conductor-original96-floor",
+  "title": "Construct the separate original non-rational-kernel 96-bit floor",
+  "created": "2026-10-15",
+  "authors": [
+    "conductor-gap research lane"
+  ],
+  "status": "blocked",
+  "status_note": "Prospective experiment only; not runnable or published to cairn. Implementation, independent verification and a frozen protocol must land before ready promotion.",
+  "blocked_on": [
+    "pr:1888 verified conductor-gap baseline and inputs must merge",
+    "note:Choose and implement an algorithm whose kernel prerequisites hold; the current rational-point constructor does not apply."
+  ],
+  "links": {
+    "lead": "research/conductor_gap_cm_orbits_20261015/REPORT.md",
+    "notes": [
+      "research/conductor_gap_cm_orbits_20261015/REVIEW.md",
+      "research/conductor_gap_cm_orbits_20261015/results/replication-metrics.json",
+      "research/conductor_gap_cm_orbits_20261015/results/upper-96-floor-certificate.jsonl"
+    ],
+    "prs": [
+      1888
+    ]
+  },
+  "question": "Can a compatible kernel representation construct the floor of the original 96-bit candidate without expanding its enormous point field?",
+  "decision_value": "Success supplies the missing endpoint for this exact older candidate. A failed bounded method leaves it open and identifies the algorithmic prerequisite rather than confusing conductor ratio with construction cost.",
+  "protocol": {
+    "path": null,
+    "blob": null
+  },
+  "code": {
+    "repo": "crypto",
+    "commit": null,
+    "branch": "research/conductor-gap-cm-orbits-20261015",
+    "build": [
+      [
+        "cargo",
+        "build",
+        "--release",
+        "--example",
+        "conductor_gap_study",
+        "--bin",
+        "conductor_gap_check"
+      ]
+    ]
+  },
+  "resources": {
+    "cpus": 2,
+    "ram_gb": 16,
+    "disk_gb": 32,
+    "gpu": null,
+    "est_core_hours": null,
+    "est_wall_hours": null,
+    "notes": "No runtime estimate exists for a compatible method. The frozen prerequisite certificate gives point degree 2226716839561 and twist point degree 4453433679122; a dense basis needs 26720602074732 bytes per coordinate. A four-hour/16-GB admission cap is not evidence that all algorithms are impossible."
+  },
+  "run": {
+    "argv": [
+      "target/release/examples/conductor_gap_study",
+      "conductor-original96-floor",
+      "--out",
+      "{out}"
+    ],
+    "env": {
+      "RAYON_NUM_THREADS": "1"
+    },
+    "timeout_per_shard_s": 14400
+  },
+  "shards": {
+    "count": 1,
+    "scheme": "single",
+    "params": {},
+    "stop": "all"
+  },
+  "checkpoint": {
+    "file": null,
+    "resume_flag": null
+  },
+  "outputs": {
+    "result_schema": "conductor-gap.followup-bundle/v1",
+    "verify": [
+      "target/release/conductor_gap_check",
+      "--protocol",
+      "backlog/XP-20261015-conductor-original96-floor/PROTOCOL.md",
+      "{out}/result.json"
+    ],
+    "land": "research/conductor_gap_followups_20261015/conductor-original96-floor"
+  },
+  "cairn": {
+    "mode": "lab-task",
+    "space": "TBD",
+    "tasks": [
+      "XP-20261015-conductor-original96-floor"
+    ],
+    "ttl_s": 86400,
+    "env": {
+      "name": "crypto-conductor-review",
+      "recipe": "Build from the reviewed merged code commit with Rust 1.98 and the declared native dependencies. No environment or task has been published by this card."
+    },
+    "exec": {
+      "cpus": 2,
+      "memory_mb": 16384,
+      "timeout_s": 14400,
+      "sandbox": "auto",
+      "publish": "runs/XP-20261015-conductor-original96-floor"
+    },
+    "notes": "Funding is a priority proposal for review, not a remote funding action. Select the lab, implement resumable execution and independently verify the driver before ready promotion.",
+    "funding": {
+      "units": 65536,
+      "rationale": "Below the constructed-pair transport card and existing seed cards: no compatible algorithm is implemented or sized."
+    }
+  },
+  "owner_hint": "native cryptanalysis research"
+}

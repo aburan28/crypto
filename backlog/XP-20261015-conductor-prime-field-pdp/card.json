@@ -1,0 +1,114 @@
+{
+  "schema": "backlog.card/v1",
+  "id": "XP-20261015-conductor-prime-field-pdp",
+  "title": "Cross-check an actual prime-field algebraic PDP backend",
+  "created": "2026-10-15",
+  "authors": [
+    "conductor-gap research lane"
+  ],
+  "status": "blocked",
+  "status_note": "Prospective experiment only; not runnable or published to cairn. Implementation, independent verification and a frozen protocol must land before ready promotion.",
+  "blocked_on": [
+    "pr:1888 verified conductor-gap baseline and inputs must merge",
+    "note:Select and cross-check the actual prime-field engine and membership constraints; implement the paired driver and independent complete-fiber checker."
+  ],
+  "links": {
+    "lead": "research/conductor_gap_cm_orbits_20261015/REPORT.md",
+    "notes": [
+      "research/conductor_gap_cm_orbits_20261015/REVIEW.md",
+      "research/conductor_gap_cm_orbits_20261015/results/replication-metrics.json",
+      "research/conductor_gap_cm_orbits_20261015/results/upper-96-floor-certificate.jsonl"
+    ],
+    "prs": [
+      1888
+    ]
+  },
+  "question": "Does a declared prime-field algebraic point-decomposition backend behave differently across certified conductor strata on tiny cross-checkable instances?",
+  "decision_value": "This establishes whether an algebraic-IC comparison is even measured. A validated difference would motivate a dedicated scaling study; failure or censoring cannot establish an intrinsic-hardness gap.",
+  "protocol": {
+    "path": null,
+    "blob": null
+  },
+  "code": {
+    "repo": "crypto",
+    "commit": null,
+    "branch": "research/conductor-gap-cm-orbits-20261015",
+    "build": [
+      [
+        "cargo",
+        "build",
+        "--release",
+        "--example",
+        "conductor_gap_study",
+        "--bin",
+        "conductor_gap_check"
+      ]
+    ]
+  },
+  "resources": {
+    "cpus": 1,
+    "ram_gb": 16,
+    "disk_gb": 32,
+    "gpu": null,
+    "est_core_hours": null,
+    "est_wall_hours": null,
+    "notes": "Not estimable from the completed MITM campaigns: they did not run a prime-field F4/SAT engine. Start with exhaustive tiny controls and a three-hour capped pilot. Size any larger Macaulay/SAT instance from a recorded probe before ready promotion."
+  },
+  "run": {
+    "argv": [
+      "target/release/examples/conductor_gap_study",
+      "conductor-prime-field-pdp",
+      "--out",
+      "{out}"
+    ],
+    "env": {
+      "RAYON_NUM_THREADS": "1"
+    },
+    "timeout_per_shard_s": 10800
+  },
+  "shards": {
+    "count": 1,
+    "scheme": "single",
+    "params": {},
+    "stop": "all"
+  },
+  "checkpoint": {
+    "file": null,
+    "resume_flag": null
+  },
+  "outputs": {
+    "result_schema": "conductor-gap.followup-bundle/v1",
+    "verify": [
+      "target/release/conductor_gap_check",
+      "--protocol",
+      "backlog/XP-20261015-conductor-prime-field-pdp/PROTOCOL.md",
+      "{out}/result.json"
+    ],
+    "land": "research/conductor_gap_followups_20261015/conductor-prime-field-pdp"
+  },
+  "cairn": {
+    "mode": "lab-task",
+    "space": "TBD",
+    "tasks": [
+      "XP-20261015-conductor-prime-field-pdp"
+    ],
+    "ttl_s": 86400,
+    "env": {
+      "name": "crypto-conductor-review",
+      "recipe": "Build from the reviewed merged code commit with Rust 1.98 and the declared native dependencies. No environment or task has been published by this card."
+    },
+    "exec": {
+      "cpus": 1,
+      "memory_mb": 16384,
+      "timeout_s": 10800,
+      "sandbox": "auto",
+      "publish": "runs/XP-20261015-conductor-prime-field-pdp"
+    },
+    "notes": "Funding is a priority proposal for review, not a remote funding action. Select the lab, implement resumable execution and independently verify the driver before ready promotion.",
+    "funding": {
+      "units": 65536,
+      "rationale": "Below the existing seed cards: implementation and complexity are uncertain, and no algebraic claim is needed for the completed generic MITM evidence."
+    }
+  },
+  "owner_hint": "native cryptanalysis research"
+}

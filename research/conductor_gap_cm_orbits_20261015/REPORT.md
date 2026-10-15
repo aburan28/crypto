@@ -341,3 +341,16 @@ The original six-page PDF and source evidence remain in
 The initial source revision was e15e29d. Conductor coordination was attempted
 but returned `not logged in`; no shared task lease is claimed. Work is on an
 isolated feature branch. No remote scientific registry or paper is modified.
+
+## Follow-up experiment cards
+
+The six proposed experiments are blocked backlog cards, with provisional resource estimates and no published tasks or runs:
+
+- [XP-20261015-conductor-96-point-maps](../../backlog/XP-20261015-conductor-96-point-maps/README.md)
+- [XP-20261015-conductor-complete-cost](../../backlog/XP-20261015-conductor-complete-cost/README.md)
+- [XP-20261015-conductor-coordinate-seeds](../../backlog/XP-20261015-conductor-coordinate-seeds/README.md)
+- [XP-20261015-conductor-d43-replication](../../backlog/XP-20261015-conductor-d43-replication/README.md)
+- [XP-20261015-conductor-original96-floor](../../backlog/XP-20261015-conductor-original96-floor/README.md)
+- [XP-20261015-conductor-prime-field-pdp](../../backlog/XP-20261015-conductor-prime-field-pdp/README.md)
+
+Final portability validation rebuilt the Unix adapter and independently replayed a fresh six-record control. This packaging control is excluded from the historical campaign totals. The non-Unix adapter rejects execution before launching the native backend.

@@ -87,3 +87,5 @@ reported separately, with no host-isolation or cache-flush claim.
 study files and maintained implementation/UI/workflow sources. Verify from
 the repository root with `sha256sum -c` and the manifest path. Regenerate after
 changing evidence; active constructor outputs are excluded until sealed.
+
+The native CM backend requires the Unix monotonic-clock domain. Non-Unix builds compile an explicit unsupported-platform adapter that rejects execution before backend launch.
