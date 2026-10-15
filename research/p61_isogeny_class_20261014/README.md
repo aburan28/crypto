@@ -55,6 +55,8 @@ failure records, and rendered PDF are in
 - [Recorded metrics](reports/run-20261015T0436Z-adjacency-pilot/metrics.json)
 - [Build attempts](reports/run-20261015T0436Z-adjacency-pilot/build-attempts.json)
 - [Test and replay results](reports/run-20261015T0436Z-adjacency-pilot/test-results.json)
+- [Campaign launch attempts](reports/run-20261015T0436Z-adjacency-pilot/campaign-launch-attempts.json)
+- [Campaign release manifest](reports/run-20261015T0436Z-adjacency-pilot/campaign-release-manifest.json)
 - [Render attempts](reports/run-20261015T0436Z-adjacency-pilot/render-attempts.json)
 
 `run_adjacency_campaign.py` is the fail-closed adjacency follower. It accepts

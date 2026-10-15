@@ -198,6 +198,7 @@ Terminal completion requires:
 
 - An exact-producer reconstruction under `/private/tmp` exhausted local scratch during archive extraction. The corrected detached worktree on SSD990-2 built in 602 seconds and reproduced the pilot binary digest exactly.
 - The first supervisor unit-test invocation failed during dynamic module registration. The corrected final suite passes five tests, including the bounded-follow guard.
+- The first persistent Terminal launch truncated the long inline command and exited before creating a log or child. A committed short wrapper corrected the interface failure; the supervisor, `caffeinate` guard, and second production-window child were alive at the recorded health observation.
 - SMB per-file sync is unsupported and remains recorded. Host sync and post-write digest replay precede admission.
 - Timings are descriptive shared-host observations, not a comparative speed result.
 

@@ -170,6 +170,12 @@ claimed.
   test harness was corrected; four tests then passed, and the final suite passes
   five tests after adding a guard against combining `--follow` and
   `--max-windows`.
+- The first persistent launch supplied the full command through Terminal's
+  automation interface, which truncated it before the final storage and follow
+  arguments. It exited before creating a log or child process. The corrected
+  launch uses a committed 38-line wrapper; the supervisor, `caffeinate` guard,
+  and second production-window child were all alive at the recorded health
+  observation.
 - The SMB filesystem reports per-file `sync_all` as unsupported. Receipts retain
   that status; the supervisor performs a host sync barrier and post-write digest
   replay before create-only admission.
@@ -179,6 +185,7 @@ claimed.
 Exact records for these outcomes are in
 [`build-attempts.json`](build-attempts.json),
 [`test-results.json`](test-results.json), and
+[`campaign-launch-attempts.json`](campaign-launch-attempts.json), and
 [`metrics.json`](metrics.json).
 
 ## Relationship to hardness modeling
@@ -197,12 +204,15 @@ not isolated incremental geometric signal.
 - Producer/verifier CLI: [`src/bin/p61_isogeny_adjacency.rs`](../../../../src/bin/p61_isogeny_adjacency.rs)
 - Core implementation: [`src/cryptanalysis/isogeny_walk/p61_adjacency.rs`](../../../../src/cryptanalysis/isogeny_walk/p61_adjacency.rs)
 - Campaign supervisor: [`run_adjacency_campaign.py`](../../run_adjacency_campaign.py)
+- Persistent launcher: [`launch_adjacency_campaign.sh`](../../launch_adjacency_campaign.sh)
 - Supervisor tests: [`test_run_adjacency_campaign.py`](../../test_run_adjacency_campaign.py)
 - Recorded metrics: [`metrics.json`](metrics.json)
 - Metric renderer: [`plot_metrics.py`](plot_metrics.py)
 - Evidence renderer: [`plot_pipeline.py`](plot_pipeline.py)
 - Build attempts: [`build-attempts.json`](build-attempts.json)
 - Test and replay results: [`test-results.json`](test-results.json)
+- Campaign launch attempts: [`campaign-launch-attempts.json`](campaign-launch-attempts.json)
+- Campaign release manifest: [`campaign-release-manifest.json`](campaign-release-manifest.json)
 
 The durable data root is
 `/Volumes/data/ec-hardness-atlas-20261012/p61-selected-adjacency-v1/`.

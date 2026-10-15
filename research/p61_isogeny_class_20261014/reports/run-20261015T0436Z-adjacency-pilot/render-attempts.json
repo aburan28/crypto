@@ -53,6 +53,16 @@
       "exit_code": 0,
       "status": "pass",
       "inspection": "all four rendered pages visually inspected; no clipping, overlap, missing figure, or unreadable table was observed"
+    },
+    {
+      "sequence": 7,
+      "command": "/opt/homebrew/bin/typst compile report.typ p61-adjacency-pilot-report.pdf",
+      "exit_code": 0,
+      "status": "pass",
+      "reason": "final render after recording the persistent-launch failure and corrected wrapper",
+      "pages": 4,
+      "file_bytes": 173149,
+      "inspection": "updated page 4 rendered and visually inspected; no clipping or overlap was observed"
     }
   ]
 }
