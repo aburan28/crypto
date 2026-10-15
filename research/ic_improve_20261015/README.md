@@ -12,13 +12,15 @@ These are follow-ups to [`../ic_improve_20261014/README.md`](../ic_improve_20261
 | [04](04-d4-2lp-fix/README.md) | k = 4 IC: first-dependency stop (`d4-ed`) vs D₄. This fixes round 1's D₄+2LP regression. | **ADVANCES** | constant (exponent MATCHES) | <ul><li>0.979× [0.973, 0.986] over 27 held-out curves, p = 101–1601.</li><li>Never worse on any curve.</li><li>Relations reach the exact first-dependency bound.</li><li>ecbench: 0.990×.</li></ul> | ecbench base `yline-d4-ed`. Existing hashes are unchanged. |
 | [05](05-linear-harvest/README.md) | Koblitz Gröbner oracle: harvest the multi-variable linear rows that `decisive_rows` discards, root only, gated on generators per variable < 0.9607 | **ADVANCES** where the gate fires; MATCHES elsewhere | constant | <ul><li>1.075× (19,7) m3; 1.073× (17,9) m2; 1.166× (23,12) m2.</li><li>No cell regresses. 0/96 root-set failures.</li><li>End-to-end reductions −15% / −25%; CPU 1.065× / 0.992×.</li><li>Unit tests 248/248.</li></ul> | **Default on** in `koblitz_groebner.rs`. `KIC_LINEAR_HARVEST=0` restores the old engine (counters 60/60). |
 | [03](03-fallrow-gate/README.md) | Koblitz Gröbner oracle: gated fall-row augmentation | ADVANCES where it fires; production no-op | constant | <ul><li>Barrel systems: 1.83× / 4.42× / 11.9× at n = 9 / 11 / 13.</li><li>The gate never fires on pipeline systems, which MATCH the incumbent.</li></ul> | Opt-in `KIC_FALLROW_GATE=1`. |
-| [01](01-genus3-linalg/) | Genus-3 2LP IC linear algebra: structured Gaussian elimination, Wiedemann, κ retune | *running* | — | — | — |
+| [01](01-genus3-linalg/README.md) | Genus-3 2LP IC: large primes as columns + structured Gaussian elimination + Wiedemann (`lpsgewd`) vs round-1 IC-2LP (DFS substitution + Lanczos on normal equations) | **ADVANCES** | constant; exponent small | <ul><li>Whole solve: 0.653× [0.647, 0.660] at 2^20.</li><li>Exponent q^1.380 vs q^1.398 (Δ −0.018).</li><li>Linear algebra 0.463× at 2^20, but its exponent rises from 1.52 to 1.70 (TRADES).</li><li>The local exponent still rises 0.020 per bit, so it does not settle at 4/3.</li><li>Exploratory κ = 1.41: q^1.357, 0.638× at 2^21.</li><li>474/474 logs verified.</li></ul> | example only |
 
 ## Open follow-ups
 
 - **Koblitz K per size.** Retuning K alone at n = 41 (255 → 100) gives 0.46×, with no new code. The recommended values are K = 125 / 280 / 500 for n = 41 / 53 / 61. Item 02 left the callers' K unchanged; that is an owner decision.
 - **Linear-harvest gate.** Generators per variable is close to (N−1)/N on pipeline systems, so the gate skips the largest gain: ungated root harvest gives 1.28× at (29,15) m2. A gate on variable count or tree size needs its own protocol.
 - **Linear harvest end to end at (23,12).** The bench gain (1.17×) does not carry through: the production path stops at the first accepted root, so its solves are shorter than the bench's.
+
+- **Genus-3 linear algebra.** Elimination removes a shrinking share of columns: it keeps 32% of the incumbent's columns at 2^10 but 91% at 2^20. Weight growth turns into column growth, so linear algebra stays near q^1.54 locally. The next levers are a κ retune at large q (exploratory κ = 1.41 is the cheapest arm at 2^21) and block Wiedemann.
 
 ## Caveats
 

@@ -24,6 +24,7 @@ paired on instance, target and walk.
 | sensitivity, `c_ell = 9` | ratio at 2^20 0.494 [0.486, 0.501]; whole exponent 1.563 against 1.491, Delta +0.071 [+0.068, +0.075] | TRADES (constant ADVANCES, exponent REGRESSES) |
 
 **Does the whole exponent move toward 4/3?** Yes, but only a little.
+
 - It passes the protocol's rule:
   - Delta over 10..20 has its CI below 0.
   - The 14..20 slope falls from 1.425 [1.422, 1.428] to **1.415 [1.413, 1.417]**, with a paired difference of -0.011 [-0.013, -0.008].
@@ -32,13 +33,15 @@ paired on instance, target and walk.
 - It does **not** settle at 4/3. The trend of the local exponents is still +0.020 per bit [+0.017, +0.025], against +0.018 [+0.014, +0.022] for the incumbent.
 
 **Why the linear algebra stays near q^1.5.**
+
 - `lpsgewd` holds the solver's row weight flat at about 15 nonzeros per column. The incumbent's weight climbs from 7.3 to 25.3.
 - But SGE removes a shrinking share of the columns. The solver keeps 32% of the incumbent's column count at 2^10 and 91% at 2^20.
 - So the weight growth is traded for column growth. At 19-20 both arms' linear algebra has the same local exponent, 1.543.
-- The LA ratio stops falling and sits near 0.46 at 2^18 to 2^20. It rises to 0.48 at 2^21 (curves 1 and 2).
+- The LA ratio flattens at 0.45-0.46 over 2^18 to 2^20 and creeps up to 0.479 [0.470, 0.488] at 2^21.
 - The linear-algebra exponent over 10..20 is higher only because SGE's advantage is largest at small q.
 
 **Exploratory (amendment A3): kappa re-tuned to 1.41.** This value came from the training-curve optimum for the incumbent's own linear algebra.
+
 - With the new linear algebra (`tuned:lpsgewd`):
   - **the whole exponent is 1.357 [1.354, 1.360]**, Delta -0.041 [-0.043, -0.039];
   - the 14..20 slope is **1.375 [1.373, 1.378]**, against 1.425;
@@ -80,10 +83,12 @@ paired on instance, target and walk.
   - Wiedemann saves the vector updates and the excess rows.
 
 **Correctness.**
+
 - Every logarithm of every arm at b = 10..20 was verified (`k phi(G) = phi(T)`) and equals the planted `k`: 14 arms, 438 solves, 0 failures.
 - At b = 21 the gate caught a bug in the candidate. On curve 0, where ell = 2^61, the `lpsgewd` arms failed all 8 checks: the Berlekamp-Massey accumulator overflowed (amendment A5). It was fixed and rerun; the failed records are kept.
 
 **Controls.**
+
 - **Gate 0**: `main:inc` reproduces item 04's IC-2LP records exactly on 33/33 solves (k, cost and linear-algebra counters).
 - **A/A** (`aa:inc`, the incumbent on an independent walk stream):
   - the exponent difference over 10..20 is +0.000 [-0.004, +0.004], which passes;
@@ -92,6 +97,7 @@ paired on instance, target and walk.
 - **A/A of the candidate** (`aa:lpsgewd` against `main:inc`): Delta -0.020 [-0.024, -0.016] and ratio 0.655 at 2^20, which agrees with `main:lpsgewd`.
 
 **Rho reference** (item 04's records on the same instances; not part of any verdict):
+
 - At 2^20, measured negation-map rho costs 2.01e10 and the model costs 1.46e10.
 - The best arm here costs 2.44e10, which is 1.21 times measured rho. At the 19-20 local exponents (1.38-1.42 against rho's 1.5), the crossover with measured rho would be near 2^22 to 2^23. That is an extrapolation, not a measurement.
 
@@ -149,7 +155,20 @@ Local exponents of the whole solve (selected; all arms in analysis.md):
 Linear-algebra local exponents at 19-20: `inc` 1.543 [1.515, 1.566], `lpsgewd` 1.543 [1.533, 1.553], `tuned:lpsgewd` 1.504 [1.499, 1.510].
 Trend of the LA local exponents: `inc` +0.002 [-0.005, +0.007]; `lpsgewd` -0.041 [-0.047, -0.037], falling from SGE's large small-q advantage toward about 1.54.
 
-B21_SECTION
+## Extension to 2^21 (amendments A4, A5; not in the primary fits)
+
+The extension covers 3 curves for each of `main:inc`, `main:lpsgewd`, `tuned:inc` and `tuned:lpsgewd`; all 36/36 solves over 10..21 are verified. Tables: [analysis_b21.md](results/run/analysis_b21.md).
+
+| arm | cost at 2^21 | ratio vs `main:inc` [95%] | LA ratio | solver cols, nnz/col | local exponent 20-21, whole | local exponent 20-21, LA | slope 14..21 | Delta 14..21 vs inc |
+|---|---|---|---|---|---|---|---|---|
+| `main:inc` | 1.003e11 | - | - | 32616, 28.0 | 1.425 [1.404, 1.447] | 1.477 [1.444, 1.512] | 1.428 [1.425, 1.430] | - |
+| `main:lpsgewd` | 6.54e10 | 0.652 [0.643, 0.659] | 0.479 [0.470, 0.488] | 31466, 15.2 | 1.421 [1.418, 1.424] | 1.528 [1.519, 1.533] | 1.416 [1.415, 1.418] | -0.012 [-0.014, -0.009] |
+| `tuned:inc` | 8.47e10 | 0.844 [0.835, 0.857] | 0.588 | 23061, 33.6 | 1.415 [1.399, 1.429] | 1.515 | 1.393 [1.392, 1.395] | -0.034 [-0.036, -0.032] |
+| `tuned:lpsgewd` | **6.40e10** | **0.638 [0.631, 0.645]** | 0.281 | 24021, 15.3 | **1.379 [1.378, 1.381]** | 1.496 | **1.377 [1.375, 1.378]** | -0.051 [-0.053, -0.049] |
+
+- At 2^21, kappa 1.41 with `lpsgewd` is the cheapest arm. It overtakes `main:lpsgewd`, as the local exponents at 19-20 predicted.
+- The incumbent's local exponent at 20-21 (1.425) is lower than at 19-20 (1.464). With 3 curves its CI is wide, so the incumbent's rise is not monotone point by point.
+- `main:lpsgewd`'s LA ratio keeps creeping up, from 0.463 to 0.479.
 
 ## Tuning (training curves 5-7, never in the fits)
 
