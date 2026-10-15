@@ -1,8 +1,8 @@
-Listing files in /tmp/cb/cado-full.kFXgB4/wdir via readdir
+Listing files in /tmp/cb/cado-full.pZiDkk/wdir via readdir
 #############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/prep wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 rhs=/tmp/cb/cado-full.kFXgB4/rhs.txt matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4
-/home/user/ext/cado-nfs/build/linalg/bwc/bwc.pl :complete prime=4611686018427387847 matrix=/tmp/cb/cado-full.kFXgB4/small.bin rhs=/tmp/cb/cado-full.kFXgB4/rhs.txt nullspace=right mpi=1x1 thr=2x2 m=4 n=4 wdir=/tmp/cb/cado-full.kFXgB4/wdir
-/tmp/cb/cado-full.kFXgB4/rhs.txt is ascii file with header. Getting nrhs=1 from there
+/home/user/ext/cado-nfs/build/linalg/bwc/prep matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right rhs=/tmp/cb/cado-full.pZiDkk/rhs.txt m=4 prime=4611686018427387847 n=4
+/home/user/ext/cado-nfs/build/linalg/bwc/bwc.pl :complete prime=4611686018427387847 matrix=/tmp/cb/cado-full.pZiDkk/small.bin rhs=/tmp/cb/cado-full.pZiDkk/rhs.txt nullspace=right mpi=1x1 thr=2x2 m=4 n=4 wdir=/tmp/cb/cado-full.pZiDkk/wdir
+/tmp/cb/cado-full.pZiDkk/rhs.txt is ascii file with header. Getting nrhs=1 from there
 ## Entering task: [01;34mprep[0m
 ## [01;33mCheck for prep[0m: none of the output files for prep have been found, need to run prep now. We want to create files:
 ## [01;33mCheck for prep[0m: 	X
@@ -10,11 +10,11 @@ Listing files in /tmp/cb/cado-full.kFXgB4/wdir via readdir
 ## [01;33mCheck for prep[0m: 	V1-2.0
 ## [01;33mCheck for prep[0m: 	V2-3.0
 ## [01;33mCheck for prep[0m: 	V3-4.0
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/prep wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 rhs=/tmp/cb/cado-full.kFXgB4/rhs.txt matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/prep matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right rhs=/tmp/cb/cado-full.pZiDkk/rhs.txt m=4 prime=4611686018427387847 n=4
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/prep wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 rhs=/tmp/cb/cado-full.kFXgB4/rhs.txt matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/prep matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right rhs=/tmp/cb/cado-full.pZiDkk/rhs.txt m=4 prime=4611686018427387847 n=4
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
@@ -26,71 +26,71 @@ cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1
 cpubinding: Target split: 2x2
 cpubinding: no mapping found
 Creating balancing file small.2x2/small.2x2.bin
-/tmp/cb/cado-full.kFXgB4/small.bin: 65 rows 65 cols weight 634
+/tmp/cb/cado-full.pZiDkk/small.bin: 65 rows 65 cols weight 640
 Padding to a square matrix
 Padding to 65+31=96 rows which is 2 blocks of 2*24=48 rows
-read /tmp/cb/cado-full.kFXgB4/small.rw.bin in 0.0 s (29.7 MB / s)
+read /tmp/cb/cado-full.pZiDkk/small.rw.bin in 0.0 s (20.6 MB / s)
 65 row ; avg 9.8 sdev 2.1 [scan time 0.0 s]
 Padding to 65+31=96 columns which is 2 blocks of 2*24=48 columns
-read /tmp/cb/cado-full.kFXgB4/small.cw.bin in 0.0 s (69.1 MB / s)
-65 column ; avg 9.8 sdev 3.7 [scan time 0.0 s]
-Choosing a column permutation based on largest deviation (3.67 > 2.11)
+read /tmp/cb/cado-full.pZiDkk/small.cw.bin in 0.0 s (37.5 MB / s)
+65 column ; avg 9.8 sdev 4.0 [scan time 0.0 s]
+Choosing a column permutation based on largest deviation (4.04 > 2.12)
 sort time 0.0 s
 heap fill time 0.0
-column slice 0, span=48, weight=318
-column slice 1, span=48, weight=316
+column slice 0, span=48, weight=321
+column slice 1, span=48, weight=319
 Writing balancing data to small.2x2/small.2x2.bin
 Now trying to load matrix cache files
 J0 vm done reading (result=0)
 Matrix dispatching starts
-Beginning balancing with 1 readers for file /tmp/cb/cado-full.kFXgB4/small.bin
+Beginning balancing with 1 readers for file /tmp/cb/cado-full.pZiDkk/small.bin
 Job 0 is reader number 0
-Job 0 (reader number 0) reads rows 0 to 65 and expects 5.21 kB
-Job 0 (reader number 0) reads rows 0 to 65 and expects 5.21 kB (5332 bytes) from offset 0
-pass 1, J0 (reader 0/1): 5.21 kB in 0.0s, 255.21 MB/s (done)
-pass 2, J0 (reader 0/1): 5.21 kB in 0.0s, 252.36 MB/s (done)
-Matrix: total 65 rows 65 cols 634 coeffs
+Job 0 (reader number 0) reads rows 0 to 65 and expects 5.25 kB
+Job 0 (reader number 0) reads rows 0 to 65 and expects 5.25 kB (5380 bytes) from offset 0
+pass 1, J0 (reader 0/1): 5.25 kB in 0.0s, 152.76 MB/s (done)
+pass 2, J0 (reader 0/1): 5.25 kB in 0.0s, 177.42 MB/s (done)
+Matrix: total 65 rows 65 cols 640 coeffs
 Matrix rank is at most 65 (based on zero columns and rows encountered)
-// Random generator seeded with 1792022151
-// Creating V0-1.0 (extraction from /tmp/cb/cado-full.kFXgB4/rhs.txt)
-Saving V0-1.0 ... done [0.51 kB in 0.00, 311.93 kB/s]
+// Random generator seeded with 1792025849
+// Creating V0-1.0 (extraction from /tmp/cb/cado-full.pZiDkk/rhs.txt)
+Saving V0-1.0 ... done [0.51 kB in 0.00, 346.18 kB/s]
 // Generating new vectors for x and y[1:] (trial # 0)
 // Choosing new projection vectors with 4 non-zero coordinates per x vector
-Creating random vector V1-2.0... done [0.51 kB in 0.00, 5.09 MB/s]
-Loading V1-2.0 ... done [0.51 kB in 0.00, 211.31 kB/s]
+Creating random vector V1-2.0... done [0.51 kB in 0.00, 7.20 MB/s]
+Loading V1-2.0 ... done [0.51 kB in 0.00, 357.54 kB/s]
 // generated V1-2.0
-Creating random vector V2-3.0... done [0.51 kB in 0.00, 10.60 MB/s]
-Loading V2-3.0 ... done [0.51 kB in 0.00, 294.03 kB/s]
+Creating random vector V2-3.0... done [0.51 kB in 0.00, 10.20 MB/s]
+Loading V2-3.0 ... done [0.51 kB in 0.00, 360.38 kB/s]
 // generated V2-3.0
-Creating random vector V3-4.0... done [0.51 kB in 0.00, 17.10 MB/s]
-Loading V3-4.0 ... done [0.51 kB in 0.00, 342.69 kB/s]
+Creating random vector V3-4.0... done [0.51 kB in 0.00, 11.60 MB/s]
+Loading V3-4.0 ... done [0.51 kB in 0.00, 325.72 kB/s]
 // generated V3-4.0
-Loading V0-1.0 ... done [0.51 kB in 0.00, 262.18 kB/s]
-Loading V1-2.0 ... done [0.51 kB in 0.00, 316.30 kB/s]
-Loading V2-3.0 ... done [0.51 kB in 0.00, 302.17 kB/s]
-Loading V3-4.0 ... done [0.51 kB in 0.00, 296.92 kB/s]
+Loading V0-1.0 ... done [0.51 kB in 0.00, 337.86 kB/s]
+Loading V1-2.0 ... done [0.51 kB in 0.00, 304.40 kB/s]
+Loading V2-3.0 ... done [0.51 kB in 0.00, 319.30 kB/s]
+Loading V3-4.0 ... done [0.51 kB in 0.00, 354.31 kB/s]
 // Dimension of kernel: 0
 // Found good x,y vector pair after 1 trials
 Timings for prep: (wct) 0.06
 Timings for prep: (cpu) 0.08 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.kFXgB4/wdir via readdir
+Listing files in /tmp/cb/cado-full.pZiDkk/wdir via readdir
 #############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/secure wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 check_stops=0,16,64,80
+/home/user/ext/cado-nfs/build/linalg/bwc/secure matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 check_stops=0,16,64,80
 ## Entering task: [01;34mkrylov[0m
+## [01;33mCheck for krylov[0m: missing check vector Cv0-1.64
+## [01;33mCheck for krylov[0m: missing check vector Cd0-1.64
+## [01;33mCheck for krylov[0m: missing check vector Cv0-1.0
 ## [01;33mCheck for krylov[0m: missing check vector Cv0-1.16
 ## [01;33mCheck for krylov[0m: missing check vector Cd0-1.16
 ## [01;33mCheck for krylov[0m: missing check vector Cv0-1.80
 ## [01;33mCheck for krylov[0m: missing check vector Cd0-1.80
-## [01;33mCheck for krylov[0m: missing check vector Cv0-1.0
-## [01;33mCheck for krylov[0m: missing check vector Cv0-1.64
-## [01;33mCheck for krylov[0m: missing check vector Cd0-1.64
 ## [01;33mCheck for krylov[0m: missing check vector Cr0-1.0-1
 ## [01;33mCheck for krylov[0m: missing check vector Ct0-1.0-4
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/secure wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 check_stops=0,16,64,80
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/secure matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 check_stops=0,16,64,80
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/secure wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 check_stops=0,16,64,80
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/secure matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 check_stops=0,16,64,80
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
@@ -102,27 +102,27 @@ cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1
 cpubinding: Target split: 2x2
 cpubinding: no mapping found
 Now trying to load matrix cache files
-[vm] J0: read cache small.2x2/small.2x2.1635727104.h0.v0-zone.bin (and others) in 0.00s
+[vm] J0: read cache small.2x2/small.2x2.3152044288.h0.v0-zone.bin (and others) in 0.00s
 J0 vm done reading (result=1)
-Matrix: total 65 rows 65 cols 634 coeffs
+Matrix: total 65 rows 65 cols 640 coeffs
 // Random generator seeded with 0
 Saved Ct0-1.0-4
 We have start=0: creating Cv0-1.0 as an expanded copy of X*T
-Saving Cv0-1.0 ... done [0.51 kB in 0.00, 310.29 kB/s]
+Saving Cv0-1.0 ... done [0.51 kB in 0.00, 330.59 kB/s]
 Setting interval value to default 0
 Computing trsp(x)*M^k for check stops k=0,16,64,80
-................Saving Cv0-1.16 ... done [0.51 kB in 0.00, 264.87 kB/s]
-Saving Cd0-1.16 ... done [0.51 kB in 0.00, 347.32 kB/s]
-................................................Saving Cv0-1.64 ... done [0.51 kB in 0.00, 323.54 kB/s]
-Saving Cd0-1.64 ... done [0.51 kB in 0.00, 327.97 kB/s]
-................Saving Cv0-1.80 ... done [0.51 kB in 0.00, 331.46 kB/s]
-Saving Cd0-1.80 ... done [0.51 kB in 0.00, 338.09 kB/s]
-Timings for secure: (wct) 0.09
+................Saving Cv0-1.16 ... done [0.51 kB in 0.00, 335.63 kB/s]
+Saving Cd0-1.16 ... done [0.51 kB in 0.00, 337.20 kB/s]
+................................................Saving Cv0-1.64 ... done [0.51 kB in 0.00, 280.93 kB/s]
+Saving Cd0-1.64 ... done [0.51 kB in 0.00, 307.22 kB/s]
+................Saving Cv0-1.80 ... done [0.51 kB in 0.00, 320.61 kB/s]
+Saving Cd0-1.80 ... done [0.51 kB in 0.00, 341.28 kB/s]
+Timings for secure: (wct) 0.08
 Timings for secure: (cpu) 0.11 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.kFXgB4/wdir via readdir
+Listing files in /tmp/cb/cado-full.pZiDkk/wdir via readdir
 Use of uninitialized value in concatenation (.) or string at /home/user/ext/cado-nfs/build/linalg/bwc/bwc.pl line 1227, <F> line 1.
 #############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/krylov wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 ys=0..1 start=0
+/home/user/ext/cado-nfs/build/linalg/bwc/krylov matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 ys=0..1 start=0
 ## krylov max iteration is 48
 ## complete range list for krylov: 0-1 1-2 2-3 3-4
 ## V files for 0..1: last krylov checkpoint is 0
@@ -137,11 +137,11 @@ Use of uninitialized value in concatenation (.) or string at /home/user/ext/cado
 ## [01;33mCheck for krylov[0m: 	ys=3..4 start=0
 ## Entering task: [01;34mkrylov[0m
 ## Check for krylov[0m: Found no way to verify that the starting point is consistent
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 ys=0..1 start=0
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 ys=0..1 start=0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 ys=0..1 start=0
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 ys=0..1 start=0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
@@ -153,93 +153,191 @@ cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1
 cpubinding: Target split: 2x2
 cpubinding: no mapping found
 Now trying to load matrix cache files
-[vm] J0: read cache small.2x2/small.2x2.1635727104.h0.v0-zone.bin (and others) in 0.00s
+[vm] J0: read cache small.2x2/small.2x2.3152044288.h0.v0-zone.bin (and others) in 0.00s
 J0 vm done reading (result=1)
-Matrix: total 65 rows 65 cols 634 coeffs
+Matrix: total 65 rows 65 cols 640 coeffs
 c0  0/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
 c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-r1  1/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
 r0  0/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-Loading V0-1.0 ... done [0.51 kB in 0.00, 334.80 kB/s]
+r1  1/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+Loading V0-1.0 ... done [0.51 kB in 0.00, 340.83 kB/s]
 Setting interval value to default 0
 Target iteration is 64
-Loading Cv0-1.64 ... done [0.51 kB in 0.00, 316.16 kB/s]
+Loading Cv0-1.64 ... done [0.51 kB in 0.00, 362.41 kB/s]
 loaded Ct0-1.0-4
 Each thread allocates 2 kb for the A matrices
 iteration 1
 +-------------------------------+
-|0.00@2%+0.00@1% 0.00@1%+0.00@1%|
-|0.00@8%+0.00@6% 0.00@1%+0.00@1%|
+|0.00@1%+0.00@1% 0.00@2%+0.00@0%|
+|0.00@3%+0.00@2% 0.00@1%+0.00@2%|
 +-------------------------------+
 iteration 2
 +-------------------------------+
-|0.00@1%+0.00@1% 0.00@1%+0.00@1%|
-|0.00@7%+0.00@6% 0.00@1%+0.00@1%|
+|0.00@1%+0.00@1% 0.00@1%+0.00@0%|
+|0.00@3%+0.00@3% 0.00@2%+0.00@2%|
 +-------------------------------+
 iteration 3
 +-------------------------------+
-|0.00@1%+0.00@1% 0.00@1%+0.00@1%|
-|0.00@6%+0.00@6% 0.00@1%+0.00@1%|
+|0.00@1%+0.00@1% 0.00@1%+0.00@0%|
+|0.00@3%+0.00@3% 0.00@2%+0.00@2%|
 +-------------------------------+
 iteration 4
 +-------------------------------+
-|0.00@1%+0.00@2% 0.00@1%+0.00@1%|
-|0.00@6%+0.00@6% 0.00@1%+0.00@1%|
+|0.00@1%+0.00@1% 0.00@1%+0.00@0%|
+|0.00@3%+0.00@3% 0.00@2%+0.00@2%|
 +-------------------------------+
 iteration 5
 +-------------------------------+
-|0.00@2%+0.00@2% 0.00@1%+0.00@1%|
-|0.00@6%+0.00@6% 0.00@1%+0.00@1%|
+|0.00@1%+0.00@1% 0.00@1%+0.00@0%|
+|0.00@3%+0.00@3% 0.00@2%+0.00@2%|
 +-------------------------------+
 iteration 10
 +-------------------------------+
-|0.00@2%+0.00@2% 0.00@1%+0.00@0%|
-|0.00@6%+0.00@6% 0.00@1%+0.00@1%|
+|0.00@1%+0.00@0% 0.00@1%+0.00@0%|
+|0.00@3%+0.00@3% 0.00@1%+0.00@1%|
 +-------------------------------+
 iteration 15
 +-------------------------------+
-|0.00@1%+0.00@1% 0.00@0%+0.00@0%|
-|0.00@6%+0.00@6% 0.00@1%+0.00@1%|
+|0.00@1%+0.00@0% 0.00@0%+0.00@0%|
+|0.00@3%+0.00@3% 0.00@1%+0.00@1%|
 +-------------------------------+
 iteration 20
 +-------------------------------+
-|0.00@1%+0.00@1% 0.00@0%+0.00@0%|
-|0.00@6%+0.00@6% 0.00@1%+0.00@1%|
+|0.00@1%+0.00@0% 0.00@0%+0.00@0%|
+|0.00@3%+0.00@3% 0.00@1%+0.00@0%|
 +-------------------------------+
 iteration 40
 +-------------------------------+
-|0.00@1%+0.00@0% 0.00@0%+0.00@0%|
-|0.00@6%+0.00@7% 0.00@1%+0.00@1%|
+|0.00@0%+0.00@0% 0.00@0%+0.00@0%|
+|0.00@3%+0.00@3% 0.00@1%+0.00@0%|
 +-------------------------------+
 iteration 60
 +-------------------------------+
-|0.00@1%+0.00@0% 0.00@0%+0.00@0%|
-|0.00@5%+0.00@5% 0.00@1%+0.00@1%|
+|0.00@0%+0.00@0% 0.00@0%+0.00@0%|
+|0.00@2%+0.00@2% 0.00@1%+0.00@0%|
 +-------------------------------+
-Saving V0-1.64 ... done [0.51 kB in 0.00, 317.30 kB/s]
-N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 1223.89 ns/0.0Gitems
+Saving V0-1.64 ... done [0.51 kB in 0.00, 382.32 kB/s]
+N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 1136.19 ns/0.0Gitems
 N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=64 ; ETA (N=64): Wed Oct 14 23:55:51 2026 [0.001 s/iter]
-krylov done N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 1318.09 ns/0.0Gitems
+krylov: N=64 ; ETA (N=64): Thu Oct 15 00:57:30 2026 [0.000 s/iter]
+krylov done N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 1221.94 ns/0.0Gitems
+krylov done N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+krylov done N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
+krylov done N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+Done krylov.
+Timings for krylov: (wct) 0.57
+Timings for krylov: (cpu) 0.74 (aggregated over all threads and 1 MPI jobs)
+Listing files in /tmp/cb/cado-full.pZiDkk/wdir via readdir
+Use of uninitialized value in concatenation (.) or string at /home/user/ext/cado-nfs/build/linalg/bwc/bwc.pl line 1227, <F> line 1.
+#############################################################################
+/home/user/ext/cado-nfs/build/linalg/bwc/krylov matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 ys=1..2 start=0
+## Entering task: [01;34mkrylov[0m
+## Check for krylov[0m: Found no way to verify that the starting point is consistent
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 ys=1..2 start=0
+# Compiled with gcc 13.3.0
+# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 ys=1..2 start=0
+# Compiled with gcc 13.3.0
+# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
+1 nodes on vm
+ vm  .
+  .  .
+cpubinding messages on vm:
+cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1 PU:1 
+cpubinding: Target split: 2x2
+cpubinding: no mapping found
+Now trying to load matrix cache files
+[vm] J0: read cache small.2x2/small.2x2.3152044288.h0.v0-zone.bin (and others) in 0.00s
+J0 vm done reading (result=1)
+Matrix: total 65 rows 65 cols 640 coeffs
+c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+c0  0/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+r1  1/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+r0  0/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+Loading V1-2.0 ... done [0.51 kB in 0.00, 283.75 kB/s]
+Setting interval value to default 0
+Target iteration is 64
+Loading Cv0-1.64 ... done [0.51 kB in 0.00, 327.85 kB/s]
+loaded Ct0-1.0-4
+Each thread allocates 2 kb for the A matrices
+iteration 1
++-------------------------------+
+|0.00@1%+0.00@1% 0.00@4%+0.00@4%|
+|0.00@2%+0.00@1% 0.00@2%+0.00@1%|
++-------------------------------+
+iteration 2
++-----------------------------------+
+|0.00@17%+0.00@18% 0.00@17%+0.00@13%|
+|0.00@2%+0.00@1%   0.00@1%+0.00@1%  |
++-----------------------------------+
+iteration 3
++-----------------------------------+
+|0.00@24%+0.00@25% 0.00@18%+0.00@16%|
+|0.00@2%+0.00@1%   0.00@1%+0.00@1%  |
++-----------------------------------+
+iteration 4
++-----------------------------------+
+|0.00@28%+0.00@30% 0.00@17%+0.00@17%|
+|0.00@2%+0.00@2%   0.00@2%+0.00@1%  |
++-----------------------------------+
+iteration 5
++-----------------------------------+
+|0.00@30%+0.00@36% 0.00@17%+0.00@18%|
+|0.00@2%+0.00@1%   0.00@1%+0.00@1%  |
++-----------------------------------+
+iteration 10
++-----------------------------------+
+|0.00@33%+0.00@38% 0.00@18%+0.00@18%|
+|0.00@2%+0.00@2%   0.00@1%+0.00@1%  |
++-----------------------------------+
+iteration 15
++-----------------------------------+
+|0.00@33%+0.00@38% 0.00@19%+0.00@19%|
+|0.00@2%+0.00@2%   0.00@1%+0.00@1%  |
++-----------------------------------+
+iteration 20
++-----------------------------------+
+|0.00@30%+0.00@28% 0.00@20%+0.00@20%|
+|0.00@2%+0.00@2%   0.00@1%+0.00@1%  |
++-----------------------------------+
+iteration 40
++-----------------------------------+
+|0.00@23%+0.00@15% 0.00@20%+0.00@17%|
+|0.00@1%+0.00@1%   0.00@1%+0.00@1%  |
++-----------------------------------+
+iteration 60
++-----------------------------------+
+|0.00@19%+0.00@11% 0.00@17%+0.00@12%|
+|0.00@1%+0.00@1%   0.00@1%+0.00@1%  |
++-----------------------------------+
+Saving V1-2.64 ... done [0.51 kB in 0.00, 342.49 kB/s]
+N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 1289.69 ns/0.0Gitems
+N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
+N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
+N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
+krylov: N=64 ; ETA (N=64): Thu Oct 15 00:57:30 2026 [0.001 s/iter]
+krylov done N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 1389.05 ns/0.0Gitems
 krylov done N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 krylov done N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
 krylov done N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
 Done krylov.
 Timings for krylov: (wct) 0.58
 Timings for krylov: (cpu) 0.72 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.kFXgB4/wdir via readdir
+Listing files in /tmp/cb/cado-full.pZiDkk/wdir via readdir
 Use of uninitialized value in concatenation (.) or string at /home/user/ext/cado-nfs/build/linalg/bwc/bwc.pl line 1227, <F> line 1.
 #############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/krylov wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 ys=1..2 start=0
+/home/user/ext/cado-nfs/build/linalg/bwc/krylov matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 ys=2..3 start=0
 ## Entering task: [01;34mkrylov[0m
 ## Check for krylov[0m: Found no way to verify that the starting point is consistent
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 ys=1..2 start=0
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 ys=2..3 start=0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 ys=1..2 start=0
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 ys=2..3 start=0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
@@ -251,93 +349,93 @@ cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1
 cpubinding: Target split: 2x2
 cpubinding: no mapping found
 Now trying to load matrix cache files
-[vm] J0: read cache small.2x2/small.2x2.1635727104.h0.v0-zone.bin (and others) in 0.00s
+[vm] J0: read cache small.2x2/small.2x2.3152044288.h0.v0-zone.bin (and others) in 0.00s
 J0 vm done reading (result=1)
-Matrix: total 65 rows 65 cols 634 coeffs
+Matrix: total 65 rows 65 cols 640 coeffs
 c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
 c0  0/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
 r0  0/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
 r1  1/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-Loading V1-2.0 ... done [0.51 kB in 0.00, 369.47 kB/s]
+Loading V2-3.0 ... done [0.51 kB in 0.00, 348.20 kB/s]
 Setting interval value to default 0
 Target iteration is 64
-Loading Cv0-1.64 ... done [0.51 kB in 0.00, 389.37 kB/s]
+Loading Cv0-1.64 ... done [0.51 kB in 0.00, 341.65 kB/s]
 loaded Ct0-1.0-4
 Each thread allocates 2 kb for the A matrices
 iteration 1
 +-------------------------------+
-|0.00@5%+0.00@5% 0.00@0%+0.00@0%|
-|0.00@0%+0.00@0% 0.00@2%+0.00@2%|
+|0.00@1%+0.00@1% 0.00@5%+0.00@3%|
+|0.00@2%+0.00@2% 0.00@0%+0.00@0%|
 +-------------------------------+
 iteration 2
 +-------------------------------+
-|0.00@5%+0.00@5% 0.00@0%+0.00@0%|
-|0.00@0%+0.00@0% 0.00@2%+0.00@2%|
+|0.00@1%+0.00@1% 0.00@5%+0.00@4%|
+|0.00@2%+0.00@2% 0.00@0%+0.00@0%|
 +-------------------------------+
 iteration 3
 +-------------------------------+
-|0.00@5%+0.00@5% 0.00@0%+0.00@0%|
-|0.00@0%+0.00@0% 0.00@2%+0.00@2%|
+|0.00@1%+0.00@1% 0.00@4%+0.00@4%|
+|0.00@2%+0.00@2% 0.00@0%+0.00@0%|
 +-------------------------------+
 iteration 4
 +-------------------------------+
-|0.00@5%+0.00@5% 0.00@0%+0.00@0%|
-|0.00@0%+0.00@0% 0.00@2%+0.00@2%|
+|0.00@1%+0.00@1% 0.00@4%+0.00@4%|
+|0.00@2%+0.00@2% 0.00@0%+0.00@0%|
 +-------------------------------+
 iteration 5
 +-------------------------------+
-|0.00@5%+0.00@5% 0.00@0%+0.00@0%|
-|0.00@0%+0.00@0% 0.00@2%+0.00@2%|
+|0.00@1%+0.00@1% 0.00@3%+0.00@3%|
+|0.00@2%+0.00@2% 0.00@0%+0.00@0%|
 +-------------------------------+
 iteration 10
 +-------------------------------+
-|0.00@5%+0.00@5% 0.00@0%+0.00@0%|
-|0.00@0%+0.00@0% 0.00@2%+0.00@2%|
+|0.00@1%+0.00@1% 0.00@3%+0.00@1%|
+|0.00@2%+0.00@2% 0.00@0%+0.00@0%|
 +-------------------------------+
 iteration 15
 +-------------------------------+
-|0.00@5%+0.00@5% 0.00@0%+0.00@0%|
-|0.00@0%+0.00@0% 0.00@2%+0.00@2%|
+|0.00@0%+0.00@0% 0.00@2%+0.00@1%|
+|0.00@2%+0.00@1% 0.00@0%+0.00@0%|
 +-------------------------------+
 iteration 20
 +-------------------------------+
-|0.00@5%+0.00@4% 0.00@0%+0.00@0%|
 |0.00@0%+0.00@0% 0.00@2%+0.00@1%|
+|0.00@1%+0.00@1% 0.00@0%+0.00@0%|
 +-------------------------------+
 iteration 40
 +-------------------------------+
-|0.00@5%+0.00@4% 0.00@0%+0.00@0%|
-|0.00@0%+0.00@0% 0.00@2%+0.00@4%|
+|0.00@0%+0.00@0% 0.00@2%+0.00@0%|
+|0.00@1%+0.00@1% 0.00@0%+0.00@0%|
 +-------------------------------+
 iteration 60
-+---------------------------------+
-|0.00@4%+0.00@3%  0.00@0%+0.00@0% |
-|0.00@0%+0.00@1%  0.00@5%+0.00@11%|
-+---------------------------------+
-Saving V1-2.64 ... done [0.51 kB in 0.00, 374.69 kB/s]
-N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 1116.95 ns/0.0Gitems
++-------------------------------+
+|0.00@0%+0.00@0% 0.00@1%+0.00@0%|
+|0.00@3%+0.00@7% 0.00@0%+0.00@0%|
++-------------------------------+
+Saving V2-3.64 ... done [0.51 kB in 0.00, 304.91 kB/s]
+N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 1220.41 ns/0.0Gitems
 N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=64 ; ETA (N=64): Wed Oct 14 23:55:52 2026 [0.000 s/iter]
-krylov done N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 1204.44 ns/0.0Gitems
+krylov: N=64 ; ETA (N=64): Thu Oct 15 00:57:31 2026 [0.001 s/iter]
+krylov done N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 1316.38 ns/0.0Gitems
 krylov done N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 krylov done N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
 krylov done N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
 Done krylov.
 Timings for krylov: (wct) 0.58
 Timings for krylov: (cpu) 0.73 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.kFXgB4/wdir via readdir
+Listing files in /tmp/cb/cado-full.pZiDkk/wdir via readdir
 Use of uninitialized value in concatenation (.) or string at /home/user/ext/cado-nfs/build/linalg/bwc/bwc.pl line 1227, <F> line 1.
 #############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/krylov wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 ys=2..3 start=0
+/home/user/ext/cado-nfs/build/linalg/bwc/krylov matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 ys=3..4 start=0
 ## Entering task: [01;34mkrylov[0m
 ## Check for krylov[0m: Found no way to verify that the starting point is consistent
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 ys=2..3 start=0
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 ys=3..4 start=0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 ys=2..3 start=0
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 ys=3..4 start=0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
@@ -349,205 +447,107 @@ cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1
 cpubinding: Target split: 2x2
 cpubinding: no mapping found
 Now trying to load matrix cache files
-[vm] J0: read cache small.2x2/small.2x2.1635727104.h0.v0-zone.bin (and others) in 0.00s
+[vm] J0: read cache small.2x2/small.2x2.3152044288.h0.v0-zone.bin (and others) in 0.00s
 J0 vm done reading (result=1)
-Matrix: total 65 rows 65 cols 634 coeffs
-c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+Matrix: total 65 rows 65 cols 640 coeffs
 c0  0/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-r0  0/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
 r1  1/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-Loading V2-3.0 ... done [0.51 kB in 0.00, 393.22 kB/s]
+r0  0/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+Loading V3-4.0 ... done [0.51 kB in 0.00, 340.20 kB/s]
 Setting interval value to default 0
 Target iteration is 64
-Loading Cv0-1.64 ... done [0.51 kB in 0.00, 374.61 kB/s]
+Loading Cv0-1.64 ... done [0.51 kB in 0.00, 327.12 kB/s]
 loaded Ct0-1.0-4
 Each thread allocates 2 kb for the A matrices
 iteration 1
 +-------------------------------+
-|0.00@2%+0.00@1% 0.00@1%+0.00@1%|
-|0.00@0%+0.00@0% 0.00@4%+0.00@4%|
+|0.00@0%+0.00@0% 0.00@1%+0.00@1%|
+|0.00@1%+0.00@2% 0.00@3%+0.00@2%|
 +-------------------------------+
 iteration 2
 +-------------------------------+
-|0.00@2%+0.00@2% 0.00@1%+0.00@1%|
-|0.00@0%+0.00@0% 0.00@4%+0.00@3%|
+|0.00@0%+0.00@0% 0.00@1%+0.00@1%|
+|0.00@1%+0.00@2% 0.00@3%+0.00@2%|
 +-------------------------------+
 iteration 3
 +-------------------------------+
-|0.00@2%+0.00@2% 0.00@1%+0.00@1%|
-|0.00@0%+0.00@0% 0.00@4%+0.00@3%|
+|0.00@0%+0.00@0% 0.00@1%+0.00@1%|
+|0.00@1%+0.00@1% 0.00@3%+0.00@2%|
 +-------------------------------+
 iteration 4
 +-------------------------------+
-|0.00@2%+0.00@2% 0.00@1%+0.00@1%|
-|0.00@0%+0.00@0% 0.00@4%+0.00@3%|
+|0.00@0%+0.00@0% 0.00@1%+0.00@1%|
+|0.00@1%+0.00@1% 0.00@3%+0.00@2%|
 +-------------------------------+
 iteration 5
 +-------------------------------+
-|0.00@2%+0.00@2% 0.00@1%+0.00@1%|
-|0.00@0%+0.00@0% 0.00@3%+0.00@3%|
+|0.00@0%+0.00@0% 0.00@1%+0.00@1%|
+|0.00@1%+0.00@1% 0.00@3%+0.00@2%|
 +-------------------------------+
 iteration 10
 +-------------------------------+
-|0.00@2%+0.00@2% 0.00@1%+0.00@1%|
-|0.00@0%+0.00@0% 0.00@2%+0.00@1%|
+|0.00@0%+0.00@0% 0.00@1%+0.00@1%|
+|0.00@1%+0.00@1% 0.00@3%+0.00@3%|
 +-------------------------------+
 iteration 15
 +-------------------------------+
-|0.00@2%+0.00@2% 0.00@1%+0.00@1%|
-|0.00@0%+0.00@0% 0.00@2%+0.00@1%|
+|0.00@0%+0.00@0% 0.00@1%+0.00@1%|
+|0.00@1%+0.00@1% 0.00@2%+0.00@2%|
 +-------------------------------+
 iteration 20
 +-------------------------------+
-|0.00@2%+0.00@2% 0.00@1%+0.00@1%|
-|0.00@0%+0.00@0% 0.00@2%+0.00@1%|
+|0.00@0%+0.00@0% 0.00@1%+0.00@2%|
+|0.00@1%+0.00@1% 0.00@2%+0.00@1%|
 +-------------------------------+
 iteration 40
 +-------------------------------+
-|0.00@2%+0.00@2% 0.00@1%+0.00@1%|
-|0.00@0%+0.00@0% 0.00@3%+0.00@2%|
-+-------------------------------+
-iteration 60
-+-------------------------------+
-|0.00@2%+0.00@2% 0.00@1%+0.00@1%|
-|0.00@0%+0.00@0% 0.00@6%+0.00@8%|
-+-------------------------------+
-Saving V2-3.64 ... done [0.51 kB in 0.00, 393.71 kB/s]
-N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 1038.45 ns/0.0Gitems
-N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
-N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=64 ; ETA (N=64): Wed Oct 14 23:55:52 2026 [0.000 s/iter]
-krylov done N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 1125.61 ns/0.0Gitems
-krylov done N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
-krylov done N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
-krylov done N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-Done krylov.
-Timings for krylov: (wct) 0.57
-Timings for krylov: (cpu) 0.71 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.kFXgB4/wdir via readdir
-Use of uninitialized value in concatenation (.) or string at /home/user/ext/cado-nfs/build/linalg/bwc/bwc.pl line 1227, <F> line 1.
-#############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/krylov wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 ys=3..4 start=0
-## Entering task: [01;34mkrylov[0m
-## Check for krylov[0m: Found no way to verify that the starting point is consistent
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 ys=3..4 start=0
-# Compiled with gcc 13.3.0
-# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/krylov wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 ys=3..4 start=0
-# Compiled with gcc 13.3.0
-# Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-1 nodes on vm
- vm  .
-  .  .
-cpubinding messages on vm:
-cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1 PU:1 
-cpubinding: Target split: 2x2
-cpubinding: no mapping found
-Now trying to load matrix cache files
-[vm] J0: read cache small.2x2/small.2x2.1635727104.h0.v0-zone.bin (and others) in 0.00s
-J0 vm done reading (result=1)
-Matrix: total 65 rows 65 cols 634 coeffs
-c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-c0  0/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-r1  1/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-r0  0/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-Loading V3-4.0 ... done [0.51 kB in 0.00, 290.41 kB/s]
-Setting interval value to default 0
-Target iteration is 64
-Loading Cv0-1.64 ... done [0.51 kB in 0.00, 337.56 kB/s]
-loaded Ct0-1.0-4
-Each thread allocates 2 kb for the A matrices
-iteration 1
-+-------------------------------+
 |0.00@0%+0.00@0% 0.00@1%+0.00@1%|
-|0.00@3%+0.00@2% 0.00@2%+0.00@1%|
-+-------------------------------+
-iteration 2
-+-------------------------------+
-|0.00@0%+0.00@0% 0.00@1%+0.00@1%|
-|0.00@2%+0.00@2% 0.00@2%+0.00@1%|
-+-------------------------------+
-iteration 3
-+-------------------------------+
-|0.00@0%+0.00@0% 0.00@1%+0.00@1%|
-|0.00@2%+0.00@2% 0.00@2%+0.00@1%|
-+-------------------------------+
-iteration 4
-+-------------------------------+
-|0.00@0%+0.00@0% 0.00@1%+0.00@1%|
-|0.00@2%+0.00@2% 0.00@1%+0.00@1%|
-+-------------------------------+
-iteration 5
-+-------------------------------+
-|0.00@0%+0.00@0% 0.00@1%+0.00@1%|
-|0.00@2%+0.00@2% 0.00@1%+0.00@1%|
-+-------------------------------+
-iteration 10
-+-------------------------------+
-|0.00@0%+0.00@0% 0.00@1%+0.00@1%|
-|0.00@1%+0.00@1% 0.00@1%+0.00@1%|
-+-------------------------------+
-iteration 15
-+-------------------------------+
-|0.00@0%+0.00@0% 0.00@1%+0.00@1%|
-|0.00@1%+0.00@1% 0.00@1%+0.00@1%|
-+-------------------------------+
-iteration 20
-+-------------------------------+
-|0.00@0%+0.00@1% 0.00@1%+0.00@1%|
 |0.00@1%+0.00@0% 0.00@1%+0.00@1%|
 +-------------------------------+
-iteration 40
-+---------------------------------+
-|0.00@1%+0.00@1%  0.00@1%+0.00@1% |
-|0.00@1%+0.00@0%  0.00@3%+0.00@10%|
-+---------------------------------+
 iteration 60
-+---------------------------------+
-|0.00@1%+0.00@2%  0.00@1%+0.00@0% |
-|0.00@1%+0.00@0%  0.00@7%+0.00@13%|
-+---------------------------------+
-Saving V3-4.64 ... done [0.51 kB in 0.00, 352.51 kB/s]
-N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 1189.78 ns/0.0Gitems
++-------------------------------+
+|0.00@1%+0.00@3% 0.00@1%+0.00@1%|
+|0.00@0%+0.00@0% 0.00@2%+0.00@3%|
++-------------------------------+
+Saving V3-4.64 ... done [0.51 kB in 0.00, 367.43 kB/s]
+N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 1350.25 ns/0.0Gitems
 N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-krylov: N=64 ; ETA (N=64): Wed Oct 14 23:55:53 2026 [0.001 s/iter]
-krylov done N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 1279.98 ns/0.0Gitems
+krylov: N=64 ; ETA (N=64): Thu Oct 15 00:57:32 2026 [0.001 s/iter]
+krylov done N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 1441.08 ns/0.0Gitems
 krylov done N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 krylov done N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
 krylov done N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
 Done krylov.
 Timings for krylov: (wct) 0.58
-Timings for krylov: (cpu) 0.71 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.kFXgB4/wdir via readdir
+Timings for krylov: (cpu) 0.69 (aggregated over all threads and 1 MPI jobs)
+Listing files in /tmp/cb/cado-full.pZiDkk/wdir via readdir
 #############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/acollect wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 nullspace=right m=4 n=4 --remove-old
+/home/user/ext/cado-nfs/build/linalg/bwc/acollect wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 --remove-old
 ## Entering task: [01;34mlingen[0m
 ## [01;33mCheck for lingen[0m: Running acollect to create A0-4.0-64
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/acollect wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 nullspace=right m=4 n=4 --remove-old
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/acollect wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 --remove-old
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/acollect wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 nullspace=right m=4 n=4 --remove-old
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/acollect wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 --remove-old
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 A0-4.0-64
 Timings for acollect: (wct) 0.00
 Timings for acollect: (cpu) 0.00 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.kFXgB4/wdir via readdir
+Listing files in /tmp/cb/cado-full.pZiDkk/wdir via readdir
 #############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/lingen_pz split-output-file=1 afile=A0-4.0-64 ffile=F wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=1x1 rhs=/tmp/cb/cado-full.kFXgB4/rhs.txt m=4 n=4 tuning_thresholds=recursive:10,flint:10,notiming:0
+/home/user/ext/cado-nfs/build/linalg/bwc/lingen_pz split-output-file=1 afile=A0-4.0-64 ffile=F thr=1x1 wdir=/tmp/cb/cado-full.pZiDkk/wdir rhs=/tmp/cb/cado-full.pZiDkk/rhs.txt m=4 prime=4611686018427387847 n=4 tuning_thresholds=recursive:10,flint:10,notiming:0
 ## [01;33mCheck for lingen[0m: lingen has not run yet. Running now.
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/lingen_pz split-output-file=1 afile=A0-4.0-64 ffile=F wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=1x1 rhs=/tmp/cb/cado-full.kFXgB4/rhs.txt m=4 n=4 tuning_thresholds=recursive:10,flint:10,notiming:0
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/lingen_pz split-output-file=1 afile=A0-4.0-64 ffile=F thr=1x1 wdir=/tmp/cb/cado-full.pZiDkk/wdir rhs=/tmp/cb/cado-full.pZiDkk/rhs.txt m=4 prime=4611686018427387847 n=4 tuning_thresholds=recursive:10,flint:10,notiming:0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/lingen_pz split-output-file=1 afile=A0-4.0-64 ffile=F wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=1x1 rhs=/tmp/cb/cado-full.kFXgB4/rhs.txt m=4 n=4 tuning_thresholds=recursive:10,flint:10,notiming:0
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/lingen_pz split-output-file=1 afile=A0-4.0-64 ffile=F thr=1x1 wdir=/tmp/cb/cado-full.pZiDkk/wdir rhs=/tmp/cb/cado-full.pZiDkk/rhs.txt m=4 prime=4611686018427387847 n=4 tuning_thresholds=recursive:10,flint:10,notiming:0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
@@ -565,26 +565,26 @@ Found satisfactory init data for t0=1
 (4,4,1,-1.0,0.0)
 # Estimated memory for JUST transforms (per node): 32.00 kB
 # Estimated peak total memory (per node): max at depth 0: 328.23 kB
-Read 62 coefficients (98.4%) in 0.0 s (39.2 MB/s)
+Read 62 coefficients (98.4%) in 0.0 s (40.6 MB/s)
 0* [62, recursive] 0/1
 1* [31, recursive] 0/2
 2* [16, recursive] 0/4
 --* [8, recursive_threshold] 0/8
-3 [8-8, basecase] 1/8 0.00042 -> 0.0  (total: 0.0 wct)
+3 [8-8, basecase] 1/8 0.00039 -> 0.0  (total: 0.0 wct)
 
 lingen ETA: not available yet
 t=33, canceled columns: 5 6 7.
 t=34, canceled columns: 4 5 6 7.
 t=35, canceled columns: 4 5 6 7.
 t=36, canceled columns: 4 5 6 7, complete generator found, for sure.
-0 [62-62, recursive] 1/1 0.0019 -> 0.0  (total: 0.0 wct)
-1 [31-31, recursive] 2/2 0.00084 -> 0.0  (total: 0.0 wct)
-2 [15-16, recursive] 3/4 0.0018 -> 0.0  (total: 0.0 wct)
--- [7-8, recursive_threshold] 5/8 1e-05 -> 0.0  (total: 0.0 wct)
-3 [7-8, basecase] 5/8 0.0005 -> 0.0  (total: 0.0 wct)
+0 [62-62, recursive] 1/1 0.0023 -> 0.0  (total: 0.0 wct)
+1 [31-31, recursive] 2/2 0.00092 -> 0.0  (total: 0.0 wct)
+2 [15-16, recursive] 3/4 0.0011 -> 0.0  (total: 0.0 wct)
+-- [7-8, recursive_threshold] 5/8 9.4e-06 -> 0.0  (total: 0.0 wct)
+3 [7-8, basecase] 5/8 0.00032 -> 0.0  (total: 0.0 wct)
 
-lingen ETA: Wed Oct 14 23:55:53 2026
-lingen done at: Wed Oct 14 23:55:53 2026
+lingen ETA: Thu Oct 15 00:57:32 2026
+lingen done at: Thu Oct 15 00:57:32 2026
 Final, t=  36: delta = 21 [3] 20 17 16 [3]
 (pi.alloc = 21)
 Number of lucky columns: 4 (4 wanted)
@@ -593,12 +593,12 @@ Reordered solutions:
  1 (col 5 in pi, weight 1 on rhs vectors)
  2 (col 6 in pi, weight 1 on rhs vectors)
  3 (col 7 in pi, weight 1 on rhs vectors)
-Written 18 coefficients (81.8%) in 0.0 s (0.6 MB/s)
+Written 18 coefficients (81.8%) in 0.0 s (0.7 MB/s)
 Timings for lingen_pz: (wct) 0.02
 Timings for lingen_pz: (cpu) 0.02 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.kFXgB4/wdir via readdir
+Listing files in /tmp/cb/cado-full.pZiDkk/wdir via readdir
 #############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/mksol wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 solutions=0-1 start=0
+/home/user/ext/cado-nfs/build/linalg/bwc/mksol matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 solutions=0-1 start=0
 ## Entering task: [01;34mmksol[0m
 ## [00;32mCheck for mksol[0m: All auxiliary files for checkpointing are here, good (wanted: 0, 16, 64, 80).
 ## mksol max iteration is 18
@@ -606,11 +606,11 @@ Listing files in /tmp/cb/cado-full.kFXgB4/wdir via readdir
 ## S files for 0-1 --> last mksol checkpoint is 0
 ## [01;33mCheck for mksol[0m: Pending tasks for mksol:
 ## [01;33mCheck for mksol[0m: 	solutions=0-1 start=0
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/mksol wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 solutions=0-1 start=0
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/mksol matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 solutions=0-1 start=0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/mksol wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 solutions=0-1 start=0
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/mksol matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right m=4 prime=4611686018427387847 n=4 solutions=0-1 start=0
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
@@ -622,85 +622,84 @@ cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1
 cpubinding: Target split: 2x2
 cpubinding: no mapping found
 Now trying to load matrix cache files
-[vm] J0: read cache small.2x2/small.2x2.1635727104.h0.v0-zone.bin (and others) in 0.00s
+[vm] J0: read cache small.2x2/small.2x2.3152044288.h0.v0-zone.bin (and others) in 0.00s
 J0 vm done reading (result=1)
-Matrix: total 65 rows 65 cols 634 coeffs
-c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+Matrix: total 65 rows 65 cols 640 coeffs
 c0  0/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
-r1  1/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+c1  1/2, bd: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
 r0  0/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
+r1  1/2, ra: 100 in 0.0s ; one: 0.00s (xput: 0.00 b/s)
 Setting interval value to default 0
 Target iteration is unspecified ; going to end of F file
-As per interval=64 checkpoint_precious=64, we'll load vectors every 64 iterations, and print timings every 64 iterations
 Each thread allocates 1*4*1*8*64=2.00 kB for the F matrices
-Loading V0-1.0 ... done [0.51 kB in 0.00, 233.85 kB/s]
-Loading V1-2.0 ... done [0.51 kB in 0.00, 371.07 kB/s]
-Loading V2-3.0 ... done [0.51 kB in 0.00, 360.28 kB/s]
-Loading V3-4.0 ... done [0.51 kB in 0.00, 348.97 kB/s]
+Loading V0-1.0 ... done [0.51 kB in 0.00, 338.70 kB/s]
+Loading V1-2.0 ... done [0.51 kB in 0.00, 389.89 kB/s]
+Loading V2-3.0 ... done [0.51 kB in 0.00, 381.89 kB/s]
+Loading V3-4.0 ... done [0.51 kB in 0.00, 338.90 kB/s]
 about to do 63 iterations starting from vectors at iteration 0 to handle the coefficients of degree [0..63] in F
 We read 18 coefficients from F in total
 iteration 1
-+---------------------------------+
-|0.02@21%+0.00@7% 0.02@0%+0.00@0% |
-|0.02@1%+0.00@1%  0.02@0%+0.00@0% |
-+---------------------------------+
++-------------------------------+
+|0.01@2%+0.00@2% 0.01@0%+0.00@0%|
+|0.01@1%+0.00@2% 0.01@0%+0.00@0%|
++-------------------------------+
 iteration 2
-+---------------------------------+
-|0.01@20%+0.00@7% 0.01@0%+0.00@0% |
-|0.01@1%+0.00@1%  0.01@0%+0.00@0% |
-+---------------------------------+
++-------------------------------+
+|0.01@2%+0.00@1% 0.01@0%+0.00@0%|
+|0.01@1%+0.00@1% 0.01@0%+0.00@0%|
++-------------------------------+
 iteration 3
-+---------------------------------+
-|0.01@20%+0.00@7% 0.01@0%+0.00@0% |
-|0.01@1%+0.00@1%  0.01@0%+0.00@0% |
-+---------------------------------+
++-------------------------------+
+|0.00@2%+0.00@1% 0.00@0%+0.00@0%|
+|0.00@1%+0.00@1% 0.00@0%+0.00@0%|
++-------------------------------+
 iteration 4
-+---------------------------------+
-|0.00@19%+0.00@5% 0.00@0%+0.00@0% |
-|0.00@1%+0.00@1%  0.00@0%+0.00@1% |
-+---------------------------------+
++-------------------------------+
+|0.00@2%+0.00@0% 0.00@0%+0.00@0%|
+|0.00@1%+0.00@1% 0.00@0%+0.00@0%|
++-------------------------------+
 iteration 5
-+---------------------------------+
-|0.00@18%+0.00@4% 0.00@0%+0.00@1% |
-|0.00@1%+0.00@1%  0.00@0%+0.00@1% |
-+---------------------------------+
++-------------------------------+
+|0.00@2%+0.00@0% 0.00@0%+0.00@0%|
+|0.00@1%+0.00@1% 0.00@0%+0.00@0%|
++-------------------------------+
 iteration 10
-+---------------------------------+
-|0.00@17%+0.00@6% 0.00@0%+0.00@1% |
-|0.00@1%+0.00@4%  0.00@0%+0.00@1% |
-+---------------------------------+
++-------------------------------+
+|0.00@1%+0.00@0% 0.00@0%+0.00@0%|
+|0.00@1%+0.00@1% 0.00@0%+0.00@0%|
++-------------------------------+
 iteration 15
-+-----------------------------------+
-|0.00@18%+0.00@17% 0.00@0%+0.00@1%  |
-|0.00@3%+0.00@13%  0.00@0%+0.00@1%  |
-+-----------------------------------+
-N=18 ; CPU0: 0.00 s/iter [0.001..0.001], 8230.55 ns/0.0Gitems
++-------------------------------+
+|0.00@1%+0.00@0% 0.00@0%+0.00@0%|
+|0.00@1%+0.00@0% 0.00@0%+0.00@0%|
++-------------------------------+
+N=18 ; CPU0: 0.00 s/iter [0.001..0.001], 6239.40 ns/0.0Gitems
 N=18 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 N=18 ; COMM0: 0.00 s/iter [0.000..0.000]
 N=18 ; comm-wait0: 0.00 s/iter [0.000..0.000]
-mksol: N=18 ; ETA (N=64): Wed Oct 14 23:55:54 2026 [0.002 s/iter]
-Saving S.sols0-1.0-64 ... done [0.51 kB in 0.00, 320.23 kB/s]
-mksol done N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 2677.10 ns/0.0Gitems
+mksol: N=18 ; ETA (N=64): Thu Oct 15 00:57:32 2026 [0.001 s/iter]
+Saving S.sols0-1.0-64 ... done [0.51 kB in 0.00, 356.94 kB/s]
+mksol done N=64 ; CPU0: 0.00 s/iter [0.000..0.000], 2088.55 ns/0.0Gitems
 mksol done N=64 ; cpu-wait0: 0.00 s/iter [0.000..0.000]
 mksol done N=64 ; COMM0: 0.00 s/iter [0.000..0.000]
 mksol done N=64 ; comm-wait0: 0.00 s/iter [0.000..0.000]
 Done mksol.
-Timings for mksol: (wct) 0.58
+Timings for mksol: (wct) 0.56
 Timings for mksol: (cpu) 0.70 (aggregated over all threads and 1 MPI jobs)
-Listing files in /tmp/cb/cado-full.kFXgB4/wdir via readdir
+Listing files in /tmp/cb/cado-full.pZiDkk/wdir via readdir
 #############################################################################
-/home/user/ext/cado-nfs/build/linalg/bwc/gather wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 rhs=/tmp/cb/cado-full.kFXgB4/rhs.txt matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 solutions=0-1
+/home/user/ext/cado-nfs/build/linalg/bwc/gather matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right rhs=/tmp/cb/cado-full.pZiDkk/rhs.txt m=4 prime=4611686018427387847 n=4 solutions=0-1
 ## Entering task: [01;34mgather[0m
 ## [01;33mCheck for gather[0m: Need to run gather to create the files: K.sols0-1.0
 ## mksol max iteration is 18
 ## Number of S files found:
 ##        0-1 | 1
 ## [00;32mCheck for gather[0m: All required files for gather seem to be present, good.
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/gather wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 rhs=/tmp/cb/cado-full.kFXgB4/rhs.txt matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 solutions=0-1
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/gather matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right rhs=/tmp/cb/cado-full.pZiDkk/rhs.txt m=4 prime=4611686018427387847 n=4 solutions=0-1
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
-# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/gather wdir=/tmp/cb/cado-full.kFXgB4/wdir prime=4611686018427387847 thr=2x2 rhs=/tmp/cb/cado-full.kFXgB4/rhs.txt matrix=/tmp/cb/cado-full.kFXgB4/small.bin nullspace=right m=4 n=4 solutions=0-1
+# (692ecb7) /home/user/ext/cado-nfs/build/linalg/bwc/gather matrix=/tmp/cb/cado-full.pZiDkk/small.bin thr=2x2 wdir=/tmp/cb/cado-full.pZiDkk/wdir nullspace=right rhs=/tmp/cb/cado-full.pZiDkk/rhs.txt m=4 prime=4611686018427387847 n=4 solutions=0-1
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
@@ -712,9 +711,9 @@ cpubinding: Hardware: Package:1 [NUMANode] L3Cache:1 L2Cache:4 L1dCache:1 Core:1
 cpubinding: Target split: 2x2
 cpubinding: no mapping found
 Now trying to load matrix cache files
-[vm] J0: read cache small.2x2/small.2x2.1635727104.h0.v0-zone.bin (and others) in 0.00s
+[vm] J0: read cache small.2x2/small.2x2.3152044288.h0.v0-zone.bin (and others) in 0.00s
 J0 vm done reading (result=1)
-Matrix: total 65 rows 65 cols 634 coeffs
+Matrix: total 65 rows 65 cols 640 coeffs
 ** Informational note about GF(p) inhomogeneous system:
    Original matrix dimensions: 65 65
    We expect to obtain a vector of size 66
@@ -727,10 +726,10 @@ Matrix: total 65 rows 65 cols 634 coeffs
 loading F.sols0-1.0-1.rhs
 Trying to build solutions 0..1
 loading contributions from iterations 0-64
-Loading S.sols0-1.0-64 ... done [0.51 kB in 0.00, 363.11 kB/s]
+Loading S.sols0-1.0-64 ... done [0.51 kB in 0.00, 380.07 kB/s]
 Hamming weight of sum: 65
-Loading V0-1.0 ... done [0.51 kB in 0.00, 368.46 kB/s]
-Saving K.sols0-1.0 ... done [0.51 kB in 0.00, 322.21 kB/s]
+Loading V0-1.0 ... done [0.51 kB in 0.00, 349.77 kB/s]
+Saving K.sols0-1.0 ... done [0.51 kB in 0.00, 359.18 kB/s]
 M^1 * V + R is zero
 Expanding K.sols0-1.0 so as to include the coefficients for the 1 RHS columns
 K.sols0-1.0 is now a right nullspace vector for (M|RHS) (for a square M of dimension 65x65).
