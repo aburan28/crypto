@@ -9546,6 +9546,8 @@ pub enum KoblitzIcEvent {
         points: usize,
         orbits: usize,
     },
+    /// The meet-in-the-middle pair table is about to be built.
+    PairTableStarted,
     /// The meet-in-the-middle pair table was built.
     PairTableReady {
         entries: usize,
@@ -9556,6 +9558,11 @@ pub enum KoblitzIcEvent {
     RelationProgress {
         collected: usize,
         wanted: usize,
+        trials: usize,
+    },
+    /// A parallel batch is about to generate and decompose these trials.
+    RelationBatchStarted {
+        first_trial: usize,
         trials: usize,
     },
     /// Exact completion record for one generated relation candidate.
@@ -9817,6 +9824,7 @@ fn koblitz_index_calculus_dlp_observed(
 
     // The meet-in-the-middle oracle needs its table once per run.
     let pair_table = if opts.strategy == DecompositionStrategy::PairTable {
+        progress(KoblitzIcEvent::PairTableStarted);
         let start = std::time::Instant::now();
         let table = PairSumTable::build(kc, fb)?;
         report.pair_table_ns = start.elapsed().as_nanos();
@@ -9910,6 +9918,10 @@ fn koblitz_index_calculus_dlp_observed(
     while relations.len() < wanted && report.trials < opts.max_trials {
         let remaining_trials = opts.max_trials - report.trials;
         let batch_size = opts.relation_batch_size.max(1).min(remaining_trials);
+        progress(KoblitzIcEvent::RelationBatchStarted {
+            first_trial: report.trials + 1,
+            trials: batch_size,
+        });
         let attempts: Vec<_> = (0..batch_size)
             .map(|_| {
                 // A zero-inclusive additive draw gives full subgroup support;
@@ -12225,7 +12237,7 @@ impl<'a> RelationCollector<'a> {
         unit: RelationWorkUnit,
         points: Option<&[u32]>,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
-        self.collect_impl(unit, points, false)
+        self.collect_impl(unit, points, false, None)
     }
 
     /// Collect once while retaining every query and frontend outcome.
@@ -12233,7 +12245,7 @@ impl<'a> RelationCollector<'a> {
         &self,
         unit: RelationWorkUnit,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
-        self.collect_impl(unit, None, true)
+        self.collect_impl(unit, None, true, None)
     }
 
     /// Observed counterpart of [`Self::collect_aimed`].
@@ -12242,7 +12254,20 @@ impl<'a> RelationCollector<'a> {
         unit: RelationWorkUnit,
         points: Option<&[u32]>,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
-        self.collect_impl(unit, points, true)
+        self.collect_impl(unit, points, true, None)
+    }
+
+    /// Like [`Self::collect_aimed`], notifying once for every completed probe.
+    /// Callbacks run synchronously on collection workers, in completion order;
+    /// the returned relations retain their usual sorted order. No query is
+    /// rerun and no attempt history is allocated for progress reporting.
+    pub fn collect_aimed_with_progress(
+        &self,
+        unit: RelationWorkUnit,
+        points: Option<&[u32]>,
+        progress: &(dyn Fn(u64, PdpOutcome) + Sync),
+    ) -> (Vec<CollectedRelation>, CollectionReport) {
+        self.collect_impl(unit, points, false, Some(progress))
     }
 
     fn collect_impl(
@@ -12250,18 +12275,19 @@ impl<'a> RelationCollector<'a> {
         unit: RelationWorkUnit,
         points: Option<&[u32]>,
         observe: bool,
+        progress: Option<&(dyn Fn(u64, PdpOutcome) + Sync)>,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
         let _collection = measurement::scope(Phase::Queries);
         // Aiming takes precedence over sweeping: a run that names the
         // summands it still needs has said the sweep is what it wants to
         // stop doing.
         if let Some(targets) = points.and_then(|c| self.aimed(c)) {
-            return self.collect_walked(unit, targets, observe);
+            return self.collect_walked(unit, targets, observe, progress);
         }
         if let Some(window) = self.window() {
-            return self.collect_walked(unit, Targets::Window(window), observe);
+            return self.collect_walked(unit, Targets::Window(window), observe, progress);
         }
-        self.collect_swept(unit, observe)
+        self.collect_swept(unit, observe, progress)
     }
 
     /// [`Self::collect`] without the walked, windowed path: one scalar
@@ -12270,6 +12296,7 @@ impl<'a> RelationCollector<'a> {
         &self,
         unit: RelationWorkUnit,
         observe: bool,
+        progress: Option<&(dyn Fn(u64, PdpOutcome) + Sync)>,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
         let begin = std::time::Instant::now();
         let g = self.kc.generator();
@@ -12317,6 +12344,9 @@ impl<'a> RelationCollector<'a> {
                     }
                 }
             };
+            if let Some(progress) = progress {
+                progress(t, pdp.outcome);
+            }
             (t, a, pdp)
         };
         // Phase boundaries remain on the session's controlling thread. The
@@ -12371,6 +12401,7 @@ impl<'a> RelationCollector<'a> {
         unit: RelationWorkUnit,
         targets: Targets,
         observe: bool,
+        progress: Option<&(dyn Fn(u64, PdpOutcome) + Sync)>,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
         let window = targets.len();
         let begin = std::time::Instant::now();
@@ -12417,6 +12448,9 @@ impl<'a> RelationCollector<'a> {
                 } else {
                     PdpAttempt::bare(None, PdpOutcome::Identity)
                 };
+                if let Some(progress) = progress {
+                    progress(t, pdp.outcome);
+                }
                 found.push(t, a, pdp, observe);
                 measurement::mark(Phase::Queries);
                 // The next trial of the run is one stride further
@@ -12769,8 +12803,40 @@ pub fn solve_factor_base_logs(
     fb: &FrobeniusFactorBase,
     opts: &KoblitzIcOptions,
 ) -> Option<(FactorBaseLogTable, LogTableReport)> {
+    solve_factor_base_logs_with_progress(kc, fb, opts, &mut |_, _| {})
+}
+
+/// A real precomputation boundary; the solve also certifies the column logs.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum LogTableStage {
+    Collection,
+    LinearAlgebraAndVerification,
+    Finished,
+}
+
+/// [`solve_factor_base_logs`] with synchronous collection/rank and solve
+/// notifications. This uses the same batches, rank gates and verification.
+pub fn solve_factor_base_logs_with_progress(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    opts: &KoblitzIcOptions,
+    progress: &mut dyn FnMut(LogTableStage, &LogTableReport),
+) -> Option<(FactorBaseLogTable, LogTableReport)> {
+    let result = solve_factor_base_logs_progress_impl(kc, fb, opts, progress);
+    if let Some((_, report)) = &result {
+        progress(LogTableStage::Finished, report);
+    }
+    result
+}
+
+fn solve_factor_base_logs_progress_impl(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    opts: &KoblitzIcOptions,
+    progress: &mut dyn FnMut(LogTableStage, &LogTableReport),
+) -> Option<(FactorBaseLogTable, LogTableReport)> {
     if kc.subgroup_order.bits() > 64 {
-        return solve_factor_base_logs_wide(kc, fb, opts);
+        return solve_factor_base_logs_wide(kc, fb, opts, progress);
     }
     let mut system = LogSystem::new(kc, fb, opts)?;
     let collector = RelationCollector::new(kc, fb, opts)?;
@@ -12784,6 +12850,7 @@ pub fn solve_factor_base_logs(
     let mut last_attempt = 0usize;
     let r_u64 = kc.subgroup_order.to_u64_digits().first().copied()?;
     let mut ranker = U64RankTracker::new(r_u64, system.n_cols);
+    progress(LogTableStage::Collection, &report);
     while report.trials < opts.max_trials {
         let count = batch.min(opts.max_trials - report.trials);
         let unit = RelationWorkUnit {
@@ -12808,8 +12875,10 @@ pub fn solve_factor_base_logs(
             );
         }
         report.relations = system.rows();
+        progress(LogTableStage::Collection, &report);
         if report.coefficient_rank == system.n_cols && report.relations - last_attempt >= interval {
             last_attempt = report.relations;
+            progress(LogTableStage::LinearAlgebraAndVerification, &report);
             if let Some(table) = system.attempt(&mut report) {
                 report.verified = true;
                 return Some((table, report));
@@ -12825,6 +12894,7 @@ pub fn solve_factor_base_logs(
         ));
     }
     // Full coefficient rank reached, but no table verified.
+    progress(LogTableStage::LinearAlgebraAndVerification, &report);
     let columns = system
         .attempt(&mut report)
         .map(|t| t.columns)
@@ -12844,6 +12914,7 @@ fn solve_factor_base_logs_wide(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
     opts: &KoblitzIcOptions,
+    progress: &mut dyn FnMut(LogTableStage, &LogTableReport),
 ) -> Option<(FactorBaseLogTable, LogTableReport)> {
     if fb.points.is_empty() || opts.strategy == DecompositionStrategy::PairTable {
         return None;
@@ -12863,6 +12934,7 @@ fn solve_factor_base_logs_wide(
     let mut rng = StdRng::seed_from_u64(opts.seed ^ 0x4c_4f_47_53_00_00_00_00);
     let begin = std::time::Instant::now();
     while report.trials < opts.max_trials {
+        progress(LogTableStage::Collection, &report);
         report.trials += 1;
         let a = wide_probe_scalar(&mut rng, &kc.subgroup_order, true);
         let target = kc.mul(generator, &a);
@@ -12901,6 +12973,7 @@ fn solve_factor_base_logs_wide(
         if report.coefficient_rank == system.n_cols && report.relations - last_attempt >= interval {
             last_attempt = report.relations;
             report.collection_seconds = begin.elapsed().as_secs_f64();
+            progress(LogTableStage::LinearAlgebraAndVerification, &report);
             if let Some(table) = system.attempt(&mut report) {
                 report.verified = true;
                 return Some((table, report));
@@ -12918,6 +12991,7 @@ fn solve_factor_base_logs_wide(
     }
     // Full coefficient rank reached, but the sparse path's interval
     // skipped an attempt on the last rows.
+    progress(LogTableStage::LinearAlgebraAndVerification, &report);
     let columns = system
         .attempt(&mut report)
         .map(|t| t.columns)
@@ -13194,14 +13268,26 @@ impl IndividualLogReport {
     /// per probe, hundreds of thousands of times, and would otherwise
     /// assemble and drop an attempt on every one of them.
     #[inline]
-    fn record(&mut self, a: u64, b: u64, pdp: impl FnOnce() -> PdpAttempt) {
-        if let Some(attempts) = &mut self.attempts {
-            attempts.push(QueryAttempt {
-                trial: (self.trials - 1) as u64,
-                a,
-                b,
-                pdp: pdp(),
-            });
+    fn record(
+        &mut self,
+        a: u64,
+        b: u64,
+        progress: &mut Option<&mut dyn FnMut(usize, PdpOutcome)>,
+        pdp: impl FnOnce() -> PdpAttempt,
+    ) {
+        if self.attempts.is_some() || progress.is_some() {
+            let pdp = pdp();
+            if let Some(progress) = progress {
+                progress(self.trials, pdp.outcome);
+            }
+            if let Some(attempts) = &mut self.attempts {
+                attempts.push(QueryAttempt {
+                    trial: (self.trials - 1) as u64,
+                    a,
+                    b,
+                    pdp,
+                });
+            }
         }
     }
 }
@@ -13250,9 +13336,32 @@ pub fn individual_log_with_pair_table(
     pair: Option<&PairSumTable>,
 ) -> Option<(BigUint, IndividualLogReport)> {
     if kc.subgroup_order.bits() > 64 {
-        return individual_log_wide(kc, fb, table, q, opts);
+        return individual_log_wide(kc, fb, table, q, opts, None);
     }
     IndividualLogSolver::new(kc, fb, table, opts, pair)?.solve(q)
+}
+
+/// [`individual_log`] with one live notification per completed decomposition
+/// attempt. Progress does not retain attempts or change the query stream.
+pub fn individual_log_with_progress(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    table: &FactorBaseLogTable,
+    q: &BinaryPoint,
+    opts: &KoblitzIcOptions,
+    progress: &mut dyn FnMut(usize, PdpOutcome),
+) -> Option<(BigUint, IndividualLogReport)> {
+    if kc.subgroup_order.bits() > 64 {
+        return individual_log_wide(kc, fb, table, q, opts, Some(progress));
+    }
+    let pair = if opts.strategy == DecompositionStrategy::PairTable {
+        Some(PairSumTable::build(kc, fb)?)
+    } else {
+        None
+    };
+    let report = IndividualLogSolver::new(kc, fb, table, opts, pair.as_ref())?
+        .solve_report_with_progress(q, progress);
+    report.log.clone().map(|d| (d, report))
 }
 
 /// Full-width descent over a verified column table. The returned witness
@@ -13264,6 +13373,7 @@ fn individual_log_wide(
     table: &FactorBaseLogTable,
     q: &BinaryPoint,
     opts: &KoblitzIcOptions,
+    mut progress: Option<&mut dyn FnMut(usize, PdpOutcome)>,
 ) -> Option<(BigUint, IndividualLogReport)> {
     if fb.points.is_empty() || opts.strategy == DecompositionStrategy::PairTable {
         return None;
@@ -13295,6 +13405,9 @@ fn individual_log_wide(
         let b = wide_probe_scalar(&mut rng, r, true);
         let target = kc.add(&kc.mul(generator, &a), &kc.mul(q, &b));
         if target == BinaryPoint::Infinity {
+            if let Some(progress) = &mut progress {
+                progress(report.trials, PdpOutcome::Identity);
+            }
             if opts.allow_direct_relation {
                 if let Some(d) = solve_for_d(&a, &b, r) {
                     if kc.mul(generator, &d) == *q {
@@ -13311,6 +13424,9 @@ fn individual_log_wide(
             continue;
         }
         let attempt = decompose_once(kc, fb, &index_of, &field, None, opts, &target);
+        if let Some(progress) = &mut progress {
+            progress(report.trials, attempt.outcome);
+        }
         let Some(points) = attempt.points else {
             continue;
         };
@@ -13725,6 +13841,7 @@ impl<'a> IndividualLogSolver<'a> {
         &self,
         q: &BinaryPoint,
         report: &mut IndividualLogReport,
+        progress: &mut Option<&mut dyn FnMut(usize, PdpOutcome)>,
     ) -> Option<Option<BigUint>> {
         let _query = measurement::scope(Phase::TargetQuery);
         let (fc, g) = self.fast.as_ref()?;
@@ -13772,7 +13889,9 @@ impl<'a> IndividualLogSolver<'a> {
                 }
                 report.trials += 1;
                 if state.infinity {
-                    report.record(*a, *b, || PdpAttempt::bare(None, PdpOutcome::Identity));
+                    report.record(*a, *b, progress, || {
+                        PdpAttempt::bare(None, PdpOutcome::Identity)
+                    });
                     if !self.opts.allow_direct_relation {
                         continue;
                     }
@@ -13795,7 +13914,9 @@ impl<'a> IndividualLogSolver<'a> {
                     continue;
                 }
                 if m == 2 && !pair.contains_key(key) {
-                    report.record(*a, *b, || PdpAttempt::bare(None, PdpOutcome::Unresolved));
+                    report.record(*a, *b, progress, || {
+                        PdpAttempt::bare(None, PdpOutcome::Unresolved)
+                    });
                     continue;
                 }
                 let pdp = PdpAttempt::bare(
@@ -13806,7 +13927,7 @@ impl<'a> IndividualLogSolver<'a> {
                         PdpOutcome::Unsupported
                     },
                 );
-                report.record(*a, *b, || pdp.clone());
+                report.record(*a, *b, progress, || pdp.clone());
                 let Some(idxs) = pdp.points else {
                     continue;
                 };
@@ -13855,15 +13976,31 @@ impl<'a> IndividualLogSolver<'a> {
 
     /// Return the terminal report even when the trial budget is exhausted.
     pub fn solve_report(&self, q: &BinaryPoint) -> IndividualLogReport {
-        self.solve_impl(q, false)
+        self.solve_impl(q, false, None)
     }
 
     /// Like [`Self::solve_report`], retaining every attempted query in order.
     pub fn solve_observed(&self, q: &BinaryPoint) -> IndividualLogReport {
-        self.solve_impl(q, true)
+        self.solve_impl(q, true, None)
     }
 
-    fn solve_impl(&self, q: &BinaryPoint, observe: bool) -> IndividualLogReport {
+    /// Like [`Self::solve_report`], notifying synchronously after every PDP
+    /// attempt, without retaining query history. A witness is still subject
+    /// to the usual independent scalar verification before `log` is set.
+    pub fn solve_report_with_progress(
+        &self,
+        q: &BinaryPoint,
+        progress: &mut dyn FnMut(usize, PdpOutcome),
+    ) -> IndividualLogReport {
+        self.solve_impl(q, false, Some(progress))
+    }
+
+    fn solve_impl(
+        &self,
+        q: &BinaryPoint,
+        observe: bool,
+        mut progress: Option<&mut dyn FnMut(usize, PdpOutcome)>,
+    ) -> IndividualLogReport {
         let _query = measurement::scope(Phase::TargetQuery);
         let kc = self.kc;
         let r = &kc.subgroup_order;
@@ -13880,7 +14017,7 @@ impl<'a> IndividualLogSolver<'a> {
         // The walk needs the single-word arithmetic and a pair table;
         // without either, fall through to drawing probes.
         if self.opts.strategy == DecompositionStrategy::PairTable {
-            if let Some(found) = self.solve_by_walking(q, &mut report) {
+            if let Some(found) = self.solve_by_walking(q, &mut report, &mut progress) {
                 report.log = found;
                 return report;
             }
@@ -13893,7 +14030,7 @@ impl<'a> IndividualLogSolver<'a> {
             let a = rng.gen_range(1..self.r_u64);
             let b = rng.gen_range(1..self.r_u64);
             let pdp = self.probe(q, q_fast, a, b);
-            report.record(a, b, || pdp.clone());
+            report.record(a, b, &mut progress, || pdp.clone());
             let idxs = match pdp.points {
                 Some(idxs) => idxs,
                 None if pdp.outcome == PdpOutcome::Identity => {
@@ -13939,6 +14076,118 @@ impl<'a> IndividualLogSolver<'a> {
 mod tests {
     use super::*;
     use crate::cryptanalysis::koblitz_groebner::build_decomposition_system;
+
+    #[test]
+    fn live_collection_progress_preserves_swept_walked_and_aimed_queries() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let aimed = vec![0, 1];
+        for (strategy, window, aim) in [
+            (DecompositionStrategy::Enumerate, None, None),
+            (DecompositionStrategy::PairTable, None, None),
+            (DecompositionStrategy::PairTable, Some(1), None),
+            (
+                DecompositionStrategy::PairTable,
+                Some(1),
+                Some(aimed.as_slice()),
+            ),
+        ] {
+            let opts = KoblitzIcOptions {
+                strategy,
+                collection_window: window,
+                m: 3,
+                ..Default::default()
+            };
+            let collector = RelationCollector::new(&kc, &fb, &opts).unwrap();
+            for count in [0, 73] {
+                let unit = RelationWorkUnit {
+                    seed: 42,
+                    start: 7,
+                    count,
+                };
+                let (expected, observed) = collector.collect_aimed_observed(unit, aim);
+                let calls = std::sync::Mutex::new(Vec::new());
+                let (actual, report) =
+                    collector.collect_aimed_with_progress(unit, aim, &|trial, outcome| {
+                        calls.lock().unwrap().push((trial, outcome));
+                    });
+                let mut calls = calls.into_inner().unwrap();
+                calls.sort_by_key(|&(trial, _)| trial);
+                let expected_calls: Vec<_> = observed
+                    .attempts
+                    .unwrap()
+                    .iter()
+                    .map(|attempt| (attempt.trial, attempt.pdp.outcome))
+                    .collect();
+                assert_eq!(calls, expected_calls);
+                assert_eq!(actual, expected);
+                assert_eq!(report.trials, count as usize);
+                assert_eq!(report.summands_scanned, observed.summands_scanned);
+                assert!(report.attempts.is_none());
+            }
+        }
+    }
+
+    #[test]
+    fn live_log_and_descent_progress_preserve_results_and_failed_attempts() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let opts = KoblitzIcOptions {
+            strategy: DecompositionStrategy::Enumerate,
+            m: 3,
+            max_trials: 1000,
+            ..Default::default()
+        };
+        let (expected_table, expected_report) = solve_factor_base_logs(&kc, &fb, &opts).unwrap();
+        let mut events = Vec::new();
+        let (table, report) =
+            solve_factor_base_logs_with_progress(&kc, &fb, &opts, &mut |stage, report| {
+                events.push((stage, report.trials, report.coefficient_rank));
+            })
+            .unwrap();
+        assert_eq!(table.columns, expected_table.columns);
+        assert_eq!(report.trials, expected_report.trials);
+        assert_eq!(report.relations, expected_report.relations);
+        assert_eq!(report.verified, expected_report.verified);
+        assert!(report.verified);
+        assert_eq!(events.last().unwrap().0, LogTableStage::Finished);
+        assert!(events
+            .iter()
+            .any(|event| event.0 == LogTableStage::LinearAlgebraAndVerification));
+
+        let q = kc.mul(kc.generator(), &BigUint::from(53u32));
+        for strategy in [
+            DecompositionStrategy::Enumerate,
+            DecompositionStrategy::PairTable,
+        ] {
+            for budget in [0, 1, 1000] {
+                let options = KoblitzIcOptions {
+                    strategy,
+                    max_trials: budget,
+                    ..opts.clone()
+                };
+                let pair = (strategy == DecompositionStrategy::PairTable)
+                    .then(|| PairSumTable::build(&kc, &fb).unwrap());
+                let solver =
+                    IndividualLogSolver::new(&kc, &fb, &table, &options, pair.as_ref()).unwrap();
+                let expected = solver.solve_observed(&q);
+                let mut calls = Vec::new();
+                let actual = solver.solve_report_with_progress(&q, &mut |trial, outcome| {
+                    calls.push((trial, outcome))
+                });
+                assert_eq!(actual.log, expected.log);
+                assert_eq!(actual.trials, expected.trials);
+                assert!(actual.attempts.is_none());
+                let expected_calls: Vec<_> = expected
+                    .attempts
+                    .unwrap()
+                    .iter()
+                    .map(|attempt| (attempt.trial as usize + 1, attempt.pdp.outcome))
+                    .collect();
+                assert_eq!(calls, expected_calls);
+            }
+        }
+    }
 
     #[test]
     fn relation_scalar_sampler_preserves_one_word_stream() {
@@ -14963,7 +15212,7 @@ mod tests {
         for d in 1..100u64 {
             let q = kc.mul(kc.generator(), &BigUint::from(d));
             let mut report = IndividualLogReport::default();
-            solver.solve_by_walking(&q, &mut report);
+            solver.solve_by_walking(&q, &mut report, &mut None);
             assert!(report.trials <= 1);
             assert!(report
                 .relation

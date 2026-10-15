@@ -1163,6 +1163,33 @@ bounded observation, not a global optimum, scaling claim, or challenge result.
 
 ## Reports and resource accounting
 
+Use `ic --verbose` (or `ic -v`) for a live, line-by-line trace:
+
+```sh
+ic run --degree 9 --solver enumerate --verbose
+ic workflow --params params.json --dir run-directory --verbose
+ic logs --degree 9 --database logs.json --verbose
+ic solve --degree 9 --logs logs.json --known-log 53 --verbose
+```
+
+Verbose `run` output includes elapsed time, factor-base and pair-table
+construction, batch starts, every trial's outcome (including unsuccessful
+attempts), relation counts, matrix dimensions and rank, and scalar
+verification. Parallel `run` batches report their outcomes in trial order
+after the batch completes; use `--batch 1` for one attempt at a time.
+Workflow collection reports each probe as its worker finishes, so probe IDs
+can appear out of order. Workflow descent and `solve` report each completed
+decomposition attempt; a found decomposition is verified before a target
+is reported solved. `logs` reports collection batches, coefficient rank,
+and the start and completion of linear algebra and column verification.
+Each trace line is flushed immediately, including when piped to `tee`.
+Verbose logging adds I/O work; use ordinary or JSON output for measurements.
+
+The flag is global and can appear before or after the subcommand. `--json`
+takes precedence over `--verbose` and suppresses the trace. Progress text
+does not enter saved reports or change the query stream, solver limits,
+or verification gates.
+
 Add --json for machine-readable output or --out PATH to save the JSON
 report while retaining the human progress display. Output files are
 created exclusively: an existing path is never overwritten.
