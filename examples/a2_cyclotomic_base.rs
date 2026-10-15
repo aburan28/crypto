@@ -154,7 +154,10 @@ fn engine_of(name: &str) -> SolverEngine {
 
 impl CellSpec {
     fn label(&self) -> String {
-        format!("K{}/n{}/w{}/m{}/{}", self.a, self.n, self.w, self.m, self.arm)
+        format!(
+            "K{}/n{}/w{}/m{}/{}",
+            self.a, self.n, self.w, self.m, self.arm
+        )
     }
 }
 
@@ -180,13 +183,18 @@ fn curve(a: u8, n: u32) -> KoblitzCurve {
 }
 
 /// The base of a cell, plus the encoding its system uses.
-fn cell_base(kc: &KoblitzCurve, cf: &CyclotomicField, spec: &CellSpec) -> (CensusedBase, MembershipEncoding) {
+fn cell_base(
+    kc: &KoblitzCurve,
+    cf: &CyclotomicField,
+    spec: &CellSpec,
+) -> (CensusedBase, MembershipEncoding) {
     let cyc = build_cyclotomic_factor_base(kc, cf, spec.w).expect("cyclotomic base");
     match spec.arm.as_str() {
         "cyclotomic" => (cyc, MembershipEncoding::CyclotomicUnity { w: spec.w }),
         "onb_matched" => {
             let columns = cyc.base.signed_orbits.len().max(1);
-            let onb = build_matched_onb_weight_factor_base(kc, cf, columns).expect("matched ONB base");
+            let onb =
+                build_matched_onb_weight_factor_base(kc, cf, columns).expect("matched ONB base");
             let BaseFamily::OnbWeight { w } = onb.census.family else {
                 unreachable!()
             };
@@ -245,10 +253,7 @@ fn run_cell_child(spec: &CellSpec) {
     let index_of = index_map(&built.base);
     let targets = seeded_targets(&kc, spec.targets, spec.seed);
     let stdout = std::io::stdout();
-    println!(
-        "{}",
-        json!({"census": built.census, "encoding": encoding}).to_string()
-    );
+    println!("{}", json!({"census": built.census, "encoding": encoding}));
     for (i, (_, target)) in targets.iter().enumerate() {
         let Some(sys) = system_for(&cf, &st, &kc, target, encoding, spec.m) else {
             println!(
@@ -309,7 +314,9 @@ fn run_cell_child(spec: &CellSpec) {
                         };
                     }
                     let (verdict, model) = wdsat_verdict(&out, sys.n_vars);
-                    let model_valid = model.as_ref().is_some_and(|model| validate_anf(&anf, model));
+                    let model_valid = model
+                        .as_ref()
+                        .is_some_and(|model| validate_anf(&anf, model));
                     let lifted = model_valid
                         && model.as_ref().is_some_and(|model| {
                             let root = model
@@ -366,9 +373,9 @@ fn lift_ok(
         if depth == xs.len() {
             return acc == target;
         }
-        for p in crypto_lib::cryptanalysis::koblitz_index_calculus::points_with_x(
-            &kc.curve, &xs[depth],
-        ) {
+        for p in
+            crypto_lib::cryptanalysis::koblitz_index_calculus::points_with_x(&kc.curve, &xs[depth])
+        {
             let key = crypto_lib::cryptanalysis::koblitz_index_calculus::point_key(&p);
             let Some(&idx) = index_of.get(&key) else {
                 continue;
@@ -594,7 +601,9 @@ impl WdsatNeed {
             equations: self.equations.max(other.equations),
             max_terms: self.max_terms.max(other.max_terms),
             total_terms: self.total_terms.max(other.total_terms),
-            cnf_implication_entries: self.cnf_implication_entries.max(other.cnf_implication_entries),
+            cnf_implication_entries: self
+                .cnf_implication_entries
+                .max(other.cnf_implication_entries),
         }
     }
 
@@ -712,7 +721,8 @@ fn prepare_wdsat(args: &Args, cells: &[CellSpec]) -> (Option<PathBuf>, Value) {
             };
             need = need.max(&WdsatNeed::of(&sys));
             let rows: Vec<AnfRow> = sys.equations.iter().map(AnfRow::from_poly).collect();
-            atoms = atoms.max(suggest_capacity(&format_anf(sys.n_vars as u32, &rows)).xor_atom_count);
+            atoms =
+                atoms.max(suggest_capacity(&format_anf(sys.n_vars as u32, &rows)).xor_atom_count);
         }
         if need.n_vars == 0 {
             continue;
@@ -721,7 +731,10 @@ fn prepare_wdsat(args: &Args, cells: &[CellSpec]) -> (Option<PathBuf>, Value) {
         per_cell.push((spec.label(), need));
     }
     if per_cell.is_empty() {
-        return (None, json!({"status": "unavailable", "reason": "no cell produced a system"}));
+        return (
+            None,
+            json!({"status": "unavailable", "reason": "no cell produced a system"}),
+        );
     }
     // Union the cells that fit under the static-memory cap, smallest first,
     // so one oversized cell costs only itself.
@@ -775,7 +788,10 @@ fn prepare_wdsat(args: &Args, cells: &[CellSpec]) -> (Option<PathBuf>, Value) {
             None,
             json!({"status": "build_failed", "stderr": String::from_utf8_lossy(&out.stderr).chars().take(2000).collect::<String>(), "cells": sized}),
         ),
-        Err(e) => (None, json!({"status": "build_failed", "error": e.to_string()})),
+        Err(e) => (
+            None,
+            json!({"status": "build_failed", "error": e.to_string()}),
+        ),
     }
 }
 
@@ -884,9 +900,23 @@ fn yields(
     targets: &TargetSet,
     witness_cap: usize,
 ) -> Vec<YieldRow> {
-    let mut rows = yields_of(kc, built.census.family, &built.base, false, targets, witness_cap);
+    let mut rows = yields_of(
+        kc,
+        built.census.family,
+        &built.base,
+        false,
+        targets,
+        witness_cap,
+    );
     if let Ok(projected) = cofactor_project_factor_base(kc, &built.base) {
-        rows.extend(yields_of(kc, built.census.family, &projected, true, targets, witness_cap));
+        rows.extend(yields_of(
+            kc,
+            built.census.family,
+            &projected,
+            true,
+            targets,
+            witness_cap,
+        ));
     }
     rows
 }
@@ -905,7 +935,11 @@ fn main() {
     eprintln!("== census ==");
     let mut census_rows: Vec<BaseCensus> = Vec::new();
     let mut matched_pairs: Vec<Value> = Vec::new();
-    let rungs: [(u8, u32, &[usize]); 3] = [(1, 11, &[1, 2, 3]), (0, 23, &[1, 2, 3]), (1, 23, &[1, 2, 3])];
+    let rungs: [(u8, u32, &[usize]); 3] = [
+        (1, 11, &[1, 2, 3]),
+        (0, 23, &[1, 2, 3]),
+        (1, 23, &[1, 2, 3]),
+    ];
     let mut bases: HashMap<(u8, u32, usize), (CensusedBase, Option<CensusedBase>)> = HashMap::new();
     for (a, n, ws) in rungs {
         let kc = curve(a, n);
@@ -1015,7 +1049,6 @@ fn main() {
     };
     let want_n11 = matches!(args.cells.as_str(), "all" | "n11");
     let want_n23 = matches!(args.cells.as_str(), "all" | "n23") && !args.skip_n23_solver;
-    let want_n23_w2 = args.cells == "n23_w2";
     if want_n11 {
         for arm in ["cyclotomic", "onb_matched"] {
             cells.push(mk(1, 11, 1, 2, arm));
@@ -1038,7 +1071,10 @@ fn main() {
         cells.push(mk(0, 23, 2, 2, "cyclotomic"));
     }
     let (wdsat_binary, wdsat_status) = if cells.is_empty() {
-        (None, json!({"status": "unavailable", "reason": "no solver cells requested"}))
+        (
+            None,
+            json!({"status": "unavailable", "reason": "no solver cells requested"}),
+        )
     } else {
         prepare_wdsat(&args, &cells)
     };
@@ -1046,7 +1082,12 @@ fn main() {
     for cell in &mut cells {
         cell.wdsat_binary = wdsat_binary.clone();
     }
-    eprintln!("== solver cells ({} × {} targets, {} s each) ==", cells.len(), args.targets, args.cell_timeout.as_secs());
+    eprintln!(
+        "== solver cells ({} × {} targets, {} s each) ==",
+        cells.len(),
+        args.targets,
+        args.cell_timeout.as_secs()
+    );
     let mut results = Vec::new();
     for spec in &cells {
         eprintln!("-- {}", spec.label());
@@ -1080,10 +1121,18 @@ fn main() {
         "solver_cells": results,
         "wall_ms": sweep_started.elapsed().as_secs_f64() * 1e3,
     });
-    let suffix = args.label.as_ref().map(|l| format!("_{l}")).unwrap_or_default();
+    let suffix = args
+        .label
+        .as_ref()
+        .map(|l| format!("_{l}"))
+        .unwrap_or_default();
     let path = args.out.join(format!("a2_results{suffix}.json"));
     std::fs::write(&path, serde_json::to_string_pretty(&report).unwrap()).expect("write results");
-    eprintln!("wrote {} after {:.1} s", path.display(), sweep_started.elapsed().as_secs_f64());
+    eprintln!(
+        "wrote {} after {:.1} s",
+        path.display(),
+        sweep_started.elapsed().as_secs_f64()
+    );
     write_summary_table(&args.out.join(format!("a2_summary{suffix}.md")), &report);
 }
 
@@ -1101,25 +1150,59 @@ fn write_summary_table(path: &Path, report: &Value) {
     for c in report["census"].as_array().unwrap() {
         s.push_str(&format!(
             "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |\n",
-            c["a"], c["n"], c["family"]["family"].as_str().unwrap_or("?").to_string() + &format!("(w={})", c["family"]["w"]),
-            c["predicted_abscissae"], c["abscissae"], c["frobenius_stable"], c["abscissae_with_points"], c["points"],
-            c["points_in_subgroup"], c["orbits"], c["signed_orbits"], c["projected_columns"], c["retained_orbits"]
+            c["a"],
+            c["n"],
+            c["family"]["family"].as_str().unwrap_or("?").to_string()
+                + &format!("(w={})", c["family"]["w"]),
+            c["predicted_abscissae"],
+            c["abscissae"],
+            c["frobenius_stable"],
+            c["abscissae_with_points"],
+            c["points"],
+            c["points_in_subgroup"],
+            c["orbits"],
+            c["signed_orbits"],
+            c["projected_columns"],
+            c["retained_orbits"]
         ));
     }
     s.push_str("\n## Yields\n\n| a | n | cyc w | family | points | m | columns | points | coverage | covered/targets | mean witnesses | coverage per column |\n|--:|--:|--:|:--|:--|--:|--:|--:|--:|:--|--:|--:|\n");
     for y in report["yields"].as_array().unwrap() {
         s.push_str(&format!(
             "| {} | {} | {} | {}(w={}) | {} | {} | {} | {} | {:.4} | {}/{} | {:.3} | {:.3e} |\n",
-            y["a"], y["n"], y["cyclotomic_w"], y["family"]["family"].as_str().unwrap_or("?"), y["family"]["w"],
-            if y["projected"].as_bool().unwrap_or(false) { "projected" } else { "raw" }, y["m"], y["columns"], y["points"],
-            y["census"]["coverage"].as_f64().unwrap_or(0.0), y["census"]["covered"], y["census"]["targets"],
-            y["census"]["mean_witnesses"].as_f64().unwrap_or(0.0), y["coverage_per_column"].as_f64().unwrap_or(0.0)
+            y["a"],
+            y["n"],
+            y["cyclotomic_w"],
+            y["family"]["family"].as_str().unwrap_or("?"),
+            y["family"]["w"],
+            if y["projected"].as_bool().unwrap_or(false) {
+                "projected"
+            } else {
+                "raw"
+            },
+            y["m"],
+            y["columns"],
+            y["points"],
+            y["census"]["coverage"].as_f64().unwrap_or(0.0),
+            y["census"]["covered"],
+            y["census"]["targets"],
+            y["census"]["mean_witnesses"].as_f64().unwrap_or(0.0),
+            y["coverage_per_column"].as_f64().unwrap_or(0.0)
         ));
     }
     s.push_str("\n## Solver cells\n\n| cell | encoding | vars | eqs | sys deg | Macaulay solving deg (resolved/targets) | F4 mean ms | F4 median ms | F4 mean word XORs | F4 max deg | mean splits | lifted | WDSat runs | WDSat mean ms | WDSat verdicts | timed out |\n|:--|:--|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|\n");
     for c in report["solver_cells"].as_array().unwrap() {
         let sm = &c["summary"];
-        let enc = c["encoding"].as_object().map(|e| format!("{}(w={})", e.get("encoding").and_then(|v| v.as_str()).unwrap_or("?"), e.get("w").cloned().unwrap_or(Value::Null))).unwrap_or_else(|| "?".into());
+        let enc = c["encoding"]
+            .as_object()
+            .map(|e| {
+                format!(
+                    "{}(w={})",
+                    e.get("encoding").and_then(|v| v.as_str()).unwrap_or("?"),
+                    e.get("w").cloned().unwrap_or(Value::Null)
+                )
+            })
+            .unwrap_or_else(|| "?".into());
         s.push_str(&format!(
             "| {} | {} | {} | {} | {} | {}..{} ({}/{}) reached {} | {:.1} | {:.1} | {:.3e} | {} | {:.2} | {} | {} | {} | {} | {} |\n",
             c["spec"]["a"].as_u64().map(|a| format!("K{a}/n{}/w{}/m{}/{}", c["spec"]["n"], c["spec"]["w"], c["spec"]["m"], c["spec"]["arm"].as_str().unwrap_or("?"))).unwrap_or_default(),

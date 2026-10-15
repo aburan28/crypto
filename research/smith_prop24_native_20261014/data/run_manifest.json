@@ -1,0 +1,80 @@
+[
+  {
+    "command": [
+      "/home/user/target-agents/release/examples/smith_prop24",
+      "control",
+      "--out",
+      "research/smith_prop24_native_20261014/data"
+    ],
+    "git_dirty_paths": "",
+    "git_head": "31d0beec8384887fdb494569090ca52d95b218ec",
+    "protocol_sha256": "d7cbe486ff79fe60c3b5c1ae5cb204432a21efa9415159de26a5cd4deec87cb1",
+    "run": "control_example1",
+    "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+    "seconds": 0.000603853,
+    "threads": 4
+  },
+  {
+    "command": [
+      "/home/user/target-agents/release/examples/smith_prop24",
+      "random",
+      "--p",
+      "2147483647",
+      "--n",
+      "1000000",
+      "--seed",
+      "20261014",
+      "--out",
+      "research/smith_prop24_native_20261014/data"
+    ],
+    "git_dirty_paths": "",
+    "git_head": "31d0beec8384887fdb494569090ca52d95b218ec",
+    "protocol_sha256": "d7cbe486ff79fe60c3b5c1ae5cb204432a21efa9415159de26a5cd4deec87cb1",
+    "run": "random_p2147483647",
+    "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+    "seconds": 81.716072328,
+    "threads": 4
+  },
+  {
+    "command": [
+      "/home/user/target-agents/release/examples/smith_prop24",
+      "census",
+      "--p",
+      "7",
+      "--perms",
+      "199",
+      "--seed",
+      "20261014",
+      "--out",
+      "research/smith_prop24_native_20261014/data"
+    ],
+    "git_dirty_paths": "",
+    "git_head": "31d0beec8384887fdb494569090ca52d95b218ec",
+    "protocol_sha256": "d7cbe486ff79fe60c3b5c1ae5cb204432a21efa9415159de26a5cd4deec87cb1",
+    "run": "census_p7",
+    "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+    "seconds": 15.624377357,
+    "threads": 4
+  },
+  {
+    "command": [
+      "/home/user/target-agents/release/examples/smith_prop24",
+      "census",
+      "--p",
+      "11",
+      "--perms",
+      "199",
+      "--seed",
+      "20261014",
+      "--out",
+      "research/smith_prop24_native_20261014/data"
+    ],
+    "git_dirty_paths": "",
+    "git_head": "31d0beec8384887fdb494569090ca52d95b218ec",
+    "protocol_sha256": "d7cbe486ff79fe60c3b5c1ae5cb204432a21efa9415159de26a5cd4deec87cb1",
+    "run": "census_p11",
+    "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+    "seconds": 892.117077827,
+    "threads": 4
+  }
+]

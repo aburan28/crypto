@@ -22,6 +22,7 @@ use serde_json::{json, Value};
 
 use crate::cryptanalysis::ecbench::canonical::{derive_u64, sha256_hex, short_id};
 use crate::cryptanalysis::ecbench::claw::{pair_claw, pair_claw_wide, ClawOutcome, ClawShape};
+use crate::cryptanalysis::ecbench::full_price;
 use crate::cryptanalysis::ecbench::generic::{
     bsgs_interleaved, bsgs_negation, bsgs_textbook, kangaroo, GenericOutcome,
 };
@@ -40,7 +41,7 @@ use crate::cryptanalysis::ic_framework::fiber::{
 use crate::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, CompactOrbitScanBase, CyclotomicBase, DescentAlgebraicOracle,
     FrobeniusMitmOracle, GlvOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase,
-    RootfindSubtractOracle, SubtractOracle,
+    PrimeBatchMitmOracle, RootfindSubtractOracle, SubtractOracle,
 };
 use crate::cryptanalysis::ic_framework::prime_tower::PrimeKummerBase;
 use crate::cryptanalysis::ic_framework::rootfind::{RootfindMitmOracle, RootfindPairsOracle};
@@ -91,6 +92,62 @@ pub struct MethodDecl {
     pub params: &'static [ParamDecl],
 }
 
+const IC_PIPELINE_PARAMS: &[ParamDecl] = &[
+        ParamDecl {
+            name: "factor_base",
+            default: None,
+            help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M, cyclotomic:w=W[,columns=N], koblitz-standard-subspace:dimension=D",
+        },
+        ParamDecl {
+            name: "oracle",
+            default: None,
+            help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; mitm-prime-batch:m=2 (prime folded table with batched inversions); rootfind-subtract:m=2|3 (prime curves: prime_fast's direct-subtraction root finding, one batched inversion a target); the cofactor-fiber-aware mitm-fiber:fiber=closed|lifts|blind, mitm-frobenius-fiber:fiber=closed|lifts|blind and descent-algebraic-fiber:fiber=combined|lifts|blind (ic_framework::fiber); or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N, pdp3-koblitz:m=2|3,engine=rootfind (PairSumTable), pdp3-koblitz:m=3,engine=rootfind-window (cyclic ⌈|F|/3⌉ window), pdp3-koblitz:m=2|3,engine=rootfind-negfold (PairTable negation fold, ~half set-up), and pdp3-koblitz:m=3,engine=rootfind-window-negfold on koblitz-standard-subspace",
+        },
+        ParamDecl {
+            name: "solver",
+            default: Some(""),
+            help: "descent-algebraic and descent-algebraic-fiber only: f4-f2, buchberger-f2, sat-cdcl, exhaustive (with :k=v options)",
+        },
+        ParamDecl {
+            name: "linalg",
+            default: Some("incremental-gauss"),
+            help: "incremental-gauss (stop at target pin), incremental-gauss-full-rank (all columns independent), incremental-gauss-full-rank-checked (also point-check each base column), or structured-gauss",
+        },
+        ParamDecl {
+            name: "targets",
+            default: Some("walk"),
+            help: "random ([a]G+[b]Q per trial), walk, or walk-prime-fast (same guarded stream using native Montgomery additions on prime curves)",
+        },
+        ParamDecl {
+            name: "max_trials",
+            default: Some("100000000"),
+            help: "relation trials before the run counts as exhausted",
+        },
+        ParamDecl {
+            name: "solver_budget_seconds",
+            default: Some("0"),
+            help: "per-call wall budget for an algebraic solver; nonzero makes the run nondeterministic",
+        },
+];
+
+const STRONG_PARAMS: &[ParamDecl] = &[
+    ParamDecl {
+        name: "lanes",
+        default: Some("32"),
+        help: "walks advanced in lockstep (batch-inversion width); the reference measured 32",
+    },
+    ParamDecl {
+        name: "dp_bits",
+        default: Some("4"),
+        help: "distinguished-point bits; the reference measured 4",
+    },
+    ParamDecl {
+        name: "step_cap_factor",
+        default: Some("2000"),
+        help: "give up after this multiple of the ideal step count",
+    },
+];
+
 const RHO_PARAMS: &[ParamDecl] = &[ParamDecl {
     name: "cap_multiple",
     default: Some("64"),
@@ -123,7 +180,7 @@ const IC_COUNTED_PARAMS: &[ParamDecl] = &[
     ParamDecl {
         name: "targets",
         default: Some("walk"),
-        help: "random or walk",
+        help: "random, walk, or walk-prime-fast on single-word prime curves",
     },
     ParamDecl {
         name: "max_trials",
@@ -195,23 +252,7 @@ pub fn registry() -> &'static [MethodDecl] {
             summary: "the strong single-target reference of the IC measurement rules (docs/ic/boundary_targets.json, since 2026-10-01): lockstep walks with batched inversion on signed Frobenius orbits (A = 2n), Koblitz curves only",
             entry: "koblitz_strong_rho::StrongRho::solve",
             applies: Applies::KoblitzOnly,
-            params: &[
-                ParamDecl {
-                    name: "lanes",
-                    default: Some("32"),
-                    help: "walks advanced in lockstep (batch-inversion width); the reference measured 32",
-                },
-                ParamDecl {
-                    name: "dp_bits",
-                    default: Some("4"),
-                    help: "distinguished-point bits; the reference measured 4",
-                },
-                ParamDecl {
-                    name: "step_cap_factor",
-                    default: Some("2000"),
-                    help: "give up after this multiple of the ideal step count",
-                },
-            ],
+            params: STRONG_PARAMS,
         },
         MethodDecl {
             id: "rho.signed_frobenius_strong_escape",
@@ -299,43 +340,31 @@ pub fn registry() -> &'static [MethodDecl] {
             summary: "index calculus through ic_framework::run_pipeline: factor base, oracle set-up, relations, linear algebra, verification, all charged",
             entry: "ic_framework::run_pipeline",
             applies: Applies::Any,
-            params: &[
-                ParamDecl {
-                    name: "factor_base",
-                    default: None,
-                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M, cyclotomic:w=W[,columns=N], koblitz-standard-subspace:dimension=D",
-                },
-                ParamDecl {
-                    name: "oracle",
-                    default: None,
-                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; rootfind-subtract:m=2|3 (prime curves: prime_fast's direct-subtraction root finding, one batched inversion a target); the cofactor-fiber-aware mitm-fiber:fiber=closed|lifts|blind, mitm-frobenius-fiber:fiber=closed|lifts|blind and descent-algebraic-fiber:fiber=combined|lifts|blind (ic_framework::fiber); or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N and pdp3-koblitz:m=2|3,engine=rootfind (the pair-sum table of DecompositionStrategy::PairTable) on koblitz-standard-subspace",
-                },
-                ParamDecl {
-                    name: "solver",
-                    default: Some(""),
-                    help: "descent-algebraic and descent-algebraic-fiber only: f4-f2, buchberger-f2, sat-cdcl, exhaustive (with :k=v options)",
-                },
-                ParamDecl {
-                    name: "linalg",
-                    default: Some("incremental-gauss"),
-                    help: "incremental-gauss (stop at target pin), incremental-gauss-full-rank (all columns independent), incremental-gauss-full-rank-checked (also point-check each base column), or structured-gauss",
-                },
-                ParamDecl {
-                    name: "targets",
-                    default: Some("walk"),
-                    help: "random ([a]G+[b]Q per trial) or walk (one addition per trial)",
-                },
-                ParamDecl {
-                    name: "max_trials",
-                    default: Some("100000000"),
-                    help: "relation trials before the run counts as exhausted",
-                },
-                ParamDecl {
-                    name: "solver_budget_seconds",
-                    default: Some("0"),
-                    help: "per-call wall budget for an algebraic solver; nonzero makes the run nondeterministic",
-                },
-            ],
+            params: IC_PIPELINE_PARAMS,
+        },
+        MethodDecl {
+            id: "ic.pipeline_full",
+            family: "ic",
+            summary: "ic.pipeline unchanged, then every native counter priced from src/cryptanalysis/ecbench/full_prices.json (field multiplications, squarings, inversions, Artin-Schreier solves, hash probes, canonicalisations, row operations), so the factor base's construction is charged; unknown counters stay unpriced",
+            entry: "ic_framework::run_pipeline + ecbench::full_price::reprice",
+            applies: Applies::BinaryOnly,
+            params: IC_PIPELINE_PARAMS,
+        },
+        MethodDecl {
+            id: "rho.signed_frobenius_full",
+            family: "rho",
+            summary: "rho.signed_frobenius unchanged, with its canonicalisations and distinguished-point probes priced from src/cryptanalysis/ecbench/full_prices.json",
+            entry: "ic_boundary::signed_frobenius_rho_tuned + ecbench::full_price::reprice",
+            applies: Applies::KoblitzOnly,
+            params: RHO_PARAMS,
+        },
+        MethodDecl {
+            id: "rho.signed_frobenius_strong_full",
+            family: "rho",
+            summary: "rho.signed_frobenius_strong unchanged, with its canonicalisations, partition hashes and table probes priced from src/cryptanalysis/ecbench/full_prices.json",
+            entry: "koblitz_strong_rho::StrongRho::solve + ecbench::full_price::reprice",
+            applies: Applies::KoblitzOnly,
+            params: STRONG_PARAMS,
         },
         MethodDecl {
             id: "ic.pipeline_counted",
@@ -441,7 +470,9 @@ pub fn expected_s(id: &str, a_available: u32) -> Option<f64> {
         "rho.cubic" => Some((PI / 12.0).sqrt()),
         "rho.quartic" => Some((PI / 8.0).sqrt()),
         "rho.signed_frobenius"
+        | "rho.signed_frobenius_full"
         | "rho.signed_frobenius_strong"
+        | "rho.signed_frobenius_strong_full"
         | "rho.signed_frobenius_strong_escape" => {
             Some((PI / (2.0 * a_available.max(1) as f64)).sqrt())
         }
@@ -955,6 +986,19 @@ pub fn solve(
     seed: u64,
 ) -> Result<SolveReport, String> {
     let d = decl(&m.id).ok_or("unregistered method")?;
+    // A `*_full` method runs its base unchanged and is repriced after.
+    let full = full_price::base_of(&m.id);
+    let base_m;
+    let (m, run_d) = match full {
+        Some(base) => {
+            base_m = ResolvedMethod {
+                id: base.to_string(),
+                ..m.clone()
+            };
+            (&base_m, decl(base).ok_or("unregistered base method")?)
+        }
+        None => (m, d),
+    };
     if d.applies == Applies::KoblitzOnly && curve.family != "koblitz" {
         return Err(format!(
             "`{}` runs on Koblitz curves only; {} is {}",
@@ -975,8 +1019,11 @@ pub fn solve(
         solve_wide(m, wi, tx, ty, seed)?
     } else {
         let (tx, ty) = (parse_hex(&target[0])?, parse_hex(&target[1])?);
-        solve_inner(m, inst, curve, d, tx, ty, seed)?
+        solve_inner(m, inst, curve, run_d, tx, ty, seed)?
     };
+    if full.is_some() {
+        full_price::reprice(&mut rep, d.family, &curve.slug)?;
+    }
     match session.map(|s| s.finish()) {
         Some(Ok(snap)) if rep.online.is_none() => {
             rep.online = online_window(d.family, &m.id, &snap)
@@ -1812,6 +1859,7 @@ fn solve_ic_prime(
     let ms = spec.oracle_params.u64_or("m", 2)? as u32;
     let mut subtract = SubtractOracle;
     let mut mitm = MitmOracle::new(ms);
+    let mut prime_batch = PrimeBatchMitmOracle::new();
     let mut mitm_fiber = FiberMitmOracle::new(ms);
     let mut rootfind_mitm = RootfindMitmOracle::new(ms);
     let mut rootfind_pairs = RootfindPairsOracle::new(ms);
@@ -1819,6 +1867,7 @@ fn solve_ic_prime(
     let oracle: &mut dyn DecompositionOracle<_> = match or_name.as_str() {
         "subtract" => &mut subtract,
         "mitm" => &mut mitm,
+        "mitm-prime-batch" => &mut prime_batch,
         "mitm-fiber" => &mut mitm_fiber,
         "rootfind-mitm" => &mut rootfind_mitm,
         "rootfind-pairs" => &mut rootfind_pairs,

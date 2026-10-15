@@ -1,0 +1,7 @@
+name = "descent_cycle"
+version = "0.1.0"
+defaultTargets = ["DescentCycle"]
+
+[[lean_lib]]
+name = "DescentCycle"
+roots = ["DescentCycle"]

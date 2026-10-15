@@ -55,9 +55,14 @@ fn main() {
     }
     let irr = find_irreducible(n).expect("irreducible");
     let k0 = KoblitzCurve::new(0, n);
-    let b = k0.as_ref().map(|c| c.curve.b.clone()).unwrap_or_else(|| F2mElement::one(n));
+    let b = k0
+        .as_ref()
+        .map(|c| c.curve.b.clone())
+        .unwrap_or_else(|| F2mElement::one(n));
     let st = FieldStructure::new(n, &irr);
-    let basis: Vec<F2mElement> = (0..dim).map(|k| F2mElement::from_bit_positions(&[k], n)).collect();
+    let basis: Vec<F2mElement> = (0..dim)
+        .map(|k| F2mElement::from_bit_positions(&[k], n))
+        .collect();
     let mut rng = StdRng::seed_from_u64(31);
     println!("# Macaulay rows vs rank, K_0 over F_2^{n}, subspace dim {dim}\n");
     println!("| m | vars | eqs | target | degree | rows | cols | rank | rows/rank | syzygies | seconds |");
@@ -85,7 +90,11 @@ fn main() {
                         t0.elapsed().as_secs_f64()
                     ),
                     None => {
-                        println!("| {m} | {} | {} | {t} | {d} | exceeds size limit | | | | | |", sys.n_vars, sys.equations.len());
+                        println!(
+                            "| {m} | {} | {} | {t} | {d} | exceeds size limit | | | | | |",
+                            sys.n_vars,
+                            sys.equations.len()
+                        );
                         break;
                     }
                 }

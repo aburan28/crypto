@@ -19,6 +19,11 @@ that `CLAUDE.md` asks for cannot run. This page is how to install them.
 
 ## On your own machine
 
+`scripts/setup-workstation.sh` does all of this and the rest of the stack in
+one go (toolchains, Conductor, cairn, SageMath, the claude/codex/opencode CLIs,
+and the crypto, cryptanalysis and crypto-autoresearcher checkouts); `--help`
+lists its components. By hand:
+
 You need git and curl, plus PostgreSQL 16+ or Docker for the control plane.
 Go 1.25.14+ is needed only to build from source; an older `go` downloads the
 right toolchain itself. Pick one way to install:

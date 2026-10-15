@@ -552,7 +552,7 @@ mod tests {
         assert!(!isclose(1.0, 1.0 + 1e-8, 1e-9, 0.0));
     }
 
-    /// A claim §23 checked passes here with the same record, and each
+    /// A claim §23 checked is rejected here only for the fields added since, and each
     /// tampering is refused with the autolab's own message.
     #[test]
     fn a_frozen_claim_passes_and_each_tampering_is_named() {
@@ -564,9 +564,34 @@ mod tests {
         .unwrap();
         let claim = doc.at("claim").unwrap();
         let checked = validate_claim(claim, "vs_rho", &ledger).unwrap();
+        // The claim predates the ledger's later stage fields (operation
+        // accounting, record class, phase times and intervals), so the
+        // current schema must reject it for exactly those fields and for
+        // nothing else; its recorded validation errors are unchanged.
+        let frozen = doc.at("validation").unwrap();
+        assert_eq!(checked.at("status").unwrap(), &J::Str("FAIL".into()));
         assert_eq!(
-            json::dumps(&checked, 1),
-            json::dumps(doc.at("validation").unwrap(), 1)
+            checked.at("validation_errors").unwrap(),
+            frozen.at("validation_errors").unwrap()
+        );
+        assert_eq!(
+            checked.at("missing_global_provenance").unwrap(),
+            frozen.at("missing_global_provenance").unwrap()
+        );
+        assert_eq!(
+            checked.at("missing_stage_fields").unwrap(),
+            &J::Arr(
+                [
+                    "rho_online_phase_ms",
+                    "ic_online_interval",
+                    "rho_online_interval",
+                    "operation_accounting",
+                    "record_class",
+                ]
+                .iter()
+                .map(|s| J::Str((*s).into()))
+                .collect()
+            )
         );
         let errors_with = |key: &str, value: J| {
             let mut c = claim.clone();

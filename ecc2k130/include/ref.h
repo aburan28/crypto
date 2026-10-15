@@ -14,6 +14,17 @@
 #include "bigmod.h"
 #include "tablewalk.h"
 
+// The signed sigma walk (walk.h has the same defaults).
+#ifndef ECC_SIGMA_SIGN
+#define ECC_SIGMA_SIGN 0
+#endif
+#ifndef ECC_SIGMA_SIGN_BIT
+#define ECC_SIGMA_SIGN_BIT 4
+#endif
+#ifndef ECC_STEP_KINDS
+#define ECC_STEP_KINDS (ECC_SIGMA_SIGN ? 16 : 8)
+#endif
+
 #ifndef ECC_PACKED_XONLY_23
 #define ECC_PACKED_XONLY_23 0
 #endif
@@ -494,6 +505,28 @@ struct RefT {
 
     // ---- the iteration function ----------------------------------------
     static int jOf(int hw) { return 3 + ((hw >> 1) & 7); }
+    // Whether the step subtracts sigma^j(R) (ECC_SIGMA_SIGN), and the index
+    // of the step's multiplier among (1 + s^j) [0, 8) and (1 - s^j) [8, 16).
+    // SIGMA_SIGN=1: bit 4 of the weight.  SIGMA_SIGN=2: the parity of
+    // popcount(x AND sigma^j(x)) in normal coordinates, which sigma only
+    // permutes, so it is class-invariant and nearly independent of the weight.
+    static bool minusOf(const Elem &x, int hw) { return minusOfJ(x, hw, jOf(hw)); }
+    // The same rule for a step whose j was chosen some other way (the hashed
+    // branches of walkconstant.cpp).
+    static bool minusOfJ(const Elem &x, int hw, int j) {
+#if ECC_SIGMA_SIGN == 2
+        (void)hw;
+        const Elem a = nbCoords(x), b = nbCoords(sigma(x, j));
+        int c = 0;
+        for (int l = 0; l < NL; ++l) c += __builtin_popcountll(a.v[l] & b.v[l]);
+        return c & 1;
+#else
+        (void)x;
+        (void)j;
+        return ECC_SIGMA_SIGN && ((hw >> ECC_SIGMA_SIGN_BIT) & 1);
+#endif
+    }
+    static int stepIndex(const Elem &x, int hw) { return jOf(hw) - 3 + (minusOf(x, hw) ? 8 : 0); }
     // Packed polynomial low word of a GF(2^131) normal-basis coordinate.
     // Matches packedtransform131.h with FAST_CONVERT=1, which is algebraically
     // the same map as the slower factorization.
@@ -569,7 +602,8 @@ struct RefT {
 #endif
 #endif
 #else
-        return addPt(p, frob(p, jOf(hw)));
+        const Point q = frob(p, jOf(hw));
+        return addPt(p, minusOf(p.x, hw) ? neg(q) : q);
 #endif
     }
 

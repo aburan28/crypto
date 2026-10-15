@@ -36,6 +36,7 @@ spec.json ──ecbench run──► session/                ──ecbench verif
 10. [The database](#10-the-database)
 11. [Adding a method, a curve family or a factor base](#11-adding-a-method-a-curve-family-or-a-factor-base)
 12. [Limits](#12-limits)
+13. [GPU stage runner](#13-gpu-stage-runner)
 
 Factor bases (build with `ecbench fb`, publish to Git/`store:`, run
 `ic.pipeline` with a matching plug-in string):
@@ -285,6 +286,21 @@ a bare label.
 A spec's `isolation_required` (default L2) is the level a **wall-clock**
 figure needs to be admitted. Operation counts never need one.
 
+`ecbench compare` also reports a **measurement quality score** from 0 to
+100. This is an operational rubric, not a probability that the result is
+correct and not a confidence interval. For each measured pair, an
+unverified result gets zero points; a verified pair gets the lower of its
+two isolation levels: L0=0, L1=40, L2=75, L3=90. The average is taken
+over every paired attempt. Quality admission requires at least L2, even
+if a diagnostic spec requests L0 or L1. A further 10 points are earned
+only when an L2-or-higher A/A control has a 95% interval containing 1 and
+wholly inside `[0.9, 1.1]`. The comparison records the level counts, verified and
+admitted pair counts, 95th percentile foreign CPU busy fraction, 95th
+percentile run-queue delay, and whether telemetry was missing. The
+thresholds in the L0–L3 gate still decide whether wall time is admitted.
+The separate bootstrap 95% interval measures sampling uncertainty over
+the stated targets and seeds; a high quality score does not narrow it.
+
 What hosts earn, as recorded so far:
 
 - **macOS:** L0, because there is no affinity control.
@@ -442,6 +458,14 @@ bases the Gröbner arms use, so the engines meet on one query stream
   **Counted, not charged:** one `lookup` per probe (priced only where the
   curve has a pinned ratio, like every table oracle's) and the table's
   entry count in `oracle_setup`. The record has no `solver` block.
+- `pdp3-koblitz:m=3,engine=rootfind-window` is the same table and set-up
+  charge with the cyclic third-summand window of
+  `PairSumTable::decompose_fast_window`: `⌈|F|/3⌉` probes a target, started
+  at `x(R) mod |F|` (deterministic in the public point). It is a different
+  search from full `rootfind` (and from inherited-F4), so it is a separate
+  engine id and is not compared on query-stream identity. The native
+  counters record `pair_table_points` and `scan_window_len`. Improve-loop
+  evidence: `research/ecbench_rootfind_improve_20261013/`.
 - `rootfind-subtract:m=2|3` on a prime curve is `prime_fast`'s
   direct-subtraction root finding: the Semaev `S₃` root in the third
   variable is `x(R ∓ F_i)`, so every candidate of a target comes from one
@@ -497,6 +521,20 @@ Two consequences to read every table with:
   The ratio of two such lower bounds is **not** a bound on the ratio of
   full costs. Read it as a counted-work diagnostic until both arms have
   complete, calibrated costs; do not infer an end-to-end speedup from it.
+
+- **Full pricing is opt-in.** `ic.pipeline_full`,
+  `rho.signed_frobenius_full` and `rho.signed_frobenius_strong_full` run
+  their base method unchanged, then price every native counter (field
+  multiplications, squarings and inversions, Artin–Schreier solves, hash
+  probes, canonicalisations, row operations, word XORs) from
+  `src/cryptanalysis/ecbench/full_prices.json`, one host's measured ratios to an affine
+  addition, written by `ecbench price-units --curve a:n …`.
+  `src/cryptanalysis/ecbench/full_price.rs` gives each counter an explicit
+  rule. A counter without a rule stays unpriced, so the record is still
+  marked a lower bound. The pinned `docs/ic/calibration.json` and every
+  other method are unchanged. `ecbench trend --compare …` fits how a paired
+  ratio moves with `ln r` and `ln n` across curves. First use:
+  `research/ecbench_frobenius_orbit_vs_rho_20261014/`.
 
 `ecbench resources --dir SESSION --out resources.json` reports, for every
 measured attempt including failures, the native integer counters by phase,
@@ -837,3 +875,36 @@ Stated so that nothing here is read as more than it is:
 - **One thread.** Parallel collision search is out of scope until a
   multi-thread run can be graded (a parallel change must be measured at
   one thread and at many, AGENTS.md §10).
+
+## 13. GPU stage runner
+
+`ecbench gpu-stage` runs the repository's existing CUDA ECC driver
+(`gpu/ecc/bench`) with a device self-test before a bounded benchmark. Build
+the CUDA binary on a GPU host with `make -C gpu/ecc bench`, then run, for
+example:
+
+```bash
+ecbench gpu-stage --binary gpu/ecc/bench --out /tmp/ecbench-gpu-rho-1 \
+  --mode rho --timeout-seconds 600 -- --iters 256 --fold 2
+```
+
+The command creates a new output directory and writes `selftest.stdout`,
+`selftest.stderr`, `benchmark.stdout`, `benchmark.stderr`, and
+`gpu-stage.json`, plus a private byte copy of the binary. The receipt binds
+the binary SHA-256, `CUDA_VISIBLE_DEVICES`, exact argument
+vector, exit code, timeout, timestamps, and output hashes. A failed device
+self-test prevents the benchmark. The directory is never overwritten.
+`--solve` is excluded from this stage command so a large-group solver does
+not run indefinitely under a throughput request.
+
+This entry point runs real CUDA code, but its current fixed curves and
+targets do not share `ecbench run`'s workload identity or independently
+replayed answer and operation ledger. The stage receipt therefore stays
+separate from `records.jsonl`, `ecbench compare`, and the L0–L3 CPU score.
+It has no GPU contention sensor or admitted CPU/GPU interval yet. To make
+a GPU ECDLP method fully comparable, the CUDA driver must accept the
+frozen EC Bench workload and seed, emit exact phase counts and recovered
+answer, expose GPU device and contention telemetry, and pass independent
+answer replay under the same record contract. The specific acceptance test
+and remaining device-validation gap are tracked in
+[the GPU matched-workload problem](../../problems/ecbench-gpu-matched-workload-contract.md).
