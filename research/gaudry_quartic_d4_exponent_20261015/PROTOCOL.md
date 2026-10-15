@@ -161,3 +161,19 @@ IC record existed:
    and reported missing.
 
 Arms, rungs, targets, seeds, analysis and predictions are unchanged.
+
+## Amendment 2 (2026-10-15T14:40Z, audit scope, runtime only)
+
+`--replay-all` re-executes every D₄ solve, so replaying every session costs
+about as much as the ladder (≈ 40 CPU-hours more). Partial fits had been
+computed by then to test the fit tool (scratch, not reported); the choice
+below is by size only and does not change any estimate. Audits:
+
+- `ecbench verify --replay-all` on every session with `p ≤ 197` (all arms)
+  and on every rho-only session;
+- full replays of the two IC sessions `main-p293-t0` and `main-p401-t0`, as
+  spot checks of the upper rungs;
+- `ecbench verify` (integrity, every planned run recorded, the stored
+  `[d]G = Q` verification) without re-execution on the remaining sessions.
+
+The audit receipts in `audits/` say which was done for each session.
