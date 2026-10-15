@@ -167,6 +167,7 @@ pub(crate) mod fx_hash;
 pub mod gaudry_cubic;
 pub mod gaudry_quartic;
 pub mod gaudry_quartic_d4;
+pub mod joux_vitse;
 pub mod genus2_fp;
 pub mod gf2_elim;
 pub mod gf3m;
