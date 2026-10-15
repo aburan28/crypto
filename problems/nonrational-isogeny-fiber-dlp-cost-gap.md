@@ -10,9 +10,10 @@
   [2026-10-13 non-isomorphic rational-fiber control](../research/isogeny_torsion_fibers_20261012/nonisomorphic_pair_20261013/REPORT.md),
   [four-size cold native CPU comparison](../research/isogeny_torsion_fibers_20261012/full_cost_20261013/REPORT.md),
   [three-torsion orbit support screen](../research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/REPORT.md),
-  and [quadratic-extension cold DLP comparison](../research/isogeny_torsion_fibers_20261012/extension_field_20261014/REPORT.md)
+  [quadratic-extension cold DLP comparison](../research/isogeny_torsion_fibers_20261012/extension_field_20261014/REPORT.md),
+  and [exact pairing-transfer cost result](../research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/RESULTS.md)
 - **Next action owner:** unassigned
-- **Last updated:** 2026-10-14
+- **Last updated:** 2026-10-15
 
 ## Problem
 
@@ -171,6 +172,17 @@ cannot map to their fixed non-isomorphic destinations.
   projected arms had the same relation outcomes and the χ index had higher
   median CPU cost than the plain projected table at all sizes. The V3
   seven-arm result, with 75 verified rows, remains separately retained.
+- [x] Construct and cold-price an exact pairing transfer on the first two
+  frozen quadratic-extension targets, with a certified evaluation field,
+  selected torsion input, separated H search/Miller/final exponent/field-DLP
+  costs, same-target negation rho, peak RSS, and separate native scalar replay.
+  The [V2 report](../research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/RESULTS.md)
+  records six checked pairing solves, 18 public-multiple pairing checks,
+  and six rho plus six rho A/A controls. Its cold solve plus replay median
+  paired CPU/rho ratios were 2,666.48 and 660.71 at orders 19 and 61.
+  This discharges the bounded two-cell construction/cost subtrack; growing
+  sizes, a best finite-field solver, L2 isolation, and independent-host
+  performance replay remain open.
 - [ ] Construct and price the original nonfactorable χ *polynomial-system*
   oracle and direct Semaev/quotient polynomial controls, including memory,
   isolated timing and independent-host replay. The [next gate](../research/isogeny_torsion_fibers_20261012/extension_field_20261014/NEXT_GATE.md)
@@ -222,6 +234,13 @@ It would not prove a general exponent change or a result for another curve.
   twelve paired cells. A distinct non-isomorphic extension-field
   destination requires a new curve/isogeny selection; this fixed
   `y²=x³−27` destination does not supply it on the selected fields.
+- **Pairing route, bounded result:** [V2 raw and phase records](../research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/RESULTS.md)
+  establish an exact finite-field transfer and independently checked
+  scalars at orders 19 and 61. H search used 26,469/27,169 and
+  39,115/39,673 selection extension multiplications. The one-target cold
+  route remained above rho; a reusable-H experiment would have to charge
+  setup against an actual target count. Larger evaluation fields and the
+  scaling gate remain untested.
 - **Inputs and controls:** exact ICV1/EC1 pairs, executable isogeny,
   same source target transported to destination, source relation baseline,
   matched negation rho, six-class automorphism-aware rho where rationally
@@ -298,5 +317,14 @@ The fixed destination therefore cannot isolate a degree-three-specific
 support effect. For any odd `p≠3`, every nonzero `F_p` element is a square
 in `F_(p²)`, so this fixed `x³+1 → x³−27` pair always has such a scaling
 over the quadratic extension. The χ polynomial-system oracle, a different
-non-isomorphic quadratic-extension destination, portable memory/cost pricing, isolated host
-and pairing route remain unresolved.
+non-isomorphic quadratic-extension destination, portable memory/cost pricing,
+isolated host and pairing route remained unresolved at that date.
+
+2026-10-15: the separately preregistered native pairing route completed
+on the first two frozen quadratic-extension cells. The solver received no
+answer scalar, and six separate native arithmetic replays checked the
+returned values. V1 retained a combined selection/pairing phase; V2
+separated candidate search, Miller, and final exponentiation without
+changing deterministic primitive totals. The V2 fully validated paired
+CPU/rho ratios were 2,781.81 and 698.15. Shared-host L0 noise and only
+two subgroup sizes leave scaling, reusable setup, and isolated timing open.

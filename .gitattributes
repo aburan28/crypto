@@ -95,3 +95,15 @@ research/ecbench_frontier_20261013/*.pdf binary
 research/ecbench_frontier_20261013/reports/**/*.pdf binary
 research/ecbench_frontier_20261013/reports/**/*.png binary
 research/ecbench_frontier_20261013/reports/**/*.svg -diff -whitespace
+
+# Pairing-transfer run reports and benchmark mirrors; keep raw test logs exact.
+benchmarks/20261015-torsion-pairing-transfer/*.pdf binary
+benchmarks/20261015-torsion-pairing-transfer/*.png binary
+benchmarks/20261015-torsion-pairing-transfer/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/*.pdf binary
+research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/*.png binary
+research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/reports/**/*.pdf binary
+research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/reports/**/*.png binary
+research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/reports/**/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/validation/*.log whitespace=-blank-at-eof
