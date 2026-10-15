@@ -1,0 +1,35 @@
+control A draw 0: roots found 1, exhaustive 1 -> PASS
+control A draw 10: roots found 1, exhaustive 1 -> PASS
+control A draw 16: roots found 4, exhaustive 4 -> PASS
+control A draw 20: roots found 1, exhaustive 1 -> PASS
+control A draw 30: roots found 1, exhaustive 1 -> PASS
+control A draw 35: roots found 4, exhaustive 4 -> PASS
+control A draw 40: roots found 0, exhaustive 0 -> PASS
+control A draw 46: roots found 4, exhaustive 4 -> PASS
+control A draw 50: roots found 1, exhaustive 1 -> PASS
+control A draw 54: roots found 4, exhaustive 4 -> PASS
+control A draw 60: roots found 1, exhaustive 1 -> PASS
+control A draw 70: roots found 1, exhaustive 1 -> PASS
+control A draw 80: roots found 1, exhaustive 1 -> PASS
+control A draw 88: roots found 4, exhaustive 4 -> PASS
+control A draw 90: roots found 1, exhaustive 1 -> PASS
+control A draw 96: roots found 4, exhaustive 4 -> PASS
+control A draw 100: roots found 1, exhaustive 1 -> PASS
+control A draw 108: roots found 4, exhaustive 4 -> PASS
+control A draw 110: roots found 1, exhaustive 1 -> PASS
+control A draw 120: roots found 1, exhaustive 1 -> PASS
+control A draw 130: roots found 1, exhaustive 1 -> PASS
+control A draw 140: roots found 1, exhaustive 1 -> PASS
+control A draw 143: roots found 4, exhaustive 4 -> PASS
+control A: PASS (46 roots checked; 8 draws with >= 2 roots)
+control B start 1: 2 nodes, first unblocked depth Some(1) -> PASS
+control B start 2: 17 nodes, first unblocked depth Some(1) -> PASS
+control B start 4: 2 nodes, first unblocked depth Some(1) -> PASS
+control B start 5: 2 nodes, first unblocked depth Some(1) -> PASS
+control B start 6: 8 nodes, first unblocked depth Some(2) -> PASS
+control B start 9: 2 nodes, first unblocked depth Some(1) -> PASS
+control B start 10: 2 nodes, first unblocked depth None -> PASS
+control B start 11: 2 nodes, first unblocked depth Some(1) -> PASS
+control B start 12: 8 nodes, first unblocked depth Some(1) -> PASS
+control B start 15: 2 nodes, first unblocked depth Some(1) -> PASS
+control B: PASS (10 starts with neighbours, 15 draws)

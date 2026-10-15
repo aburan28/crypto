@@ -1,0 +1,256 @@
+{
+  "schema": "identity.certificate/v1",
+  "id": "IDC1h4304bc232b34fa40",
+  "statement": {
+    "name": "third conjugate cover: (u y2)^2 - u^2 u1 u2 as a combination of the three cover relations",
+    "source": "research/ghs_cubic_genus3_build_20261012 (README construction step 1); Lean DescentCycle.third_cover",
+    "variables": [
+      "u",
+      "u1",
+      "u2",
+      "y0",
+      "y1",
+      "y2"
+    ],
+    "degree_bound": 4,
+    "lhs": {
+      "op": "add",
+      "args": [
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "u"
+                },
+                {
+                  "op": "var",
+                  "args": "y2"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "u"
+                },
+                {
+                  "op": "var",
+                  "args": "y2"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "neg",
+          "args": {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "u"
+              },
+              {
+                "op": "var",
+                "args": "u"
+              },
+              {
+                "op": "var",
+                "args": "u1"
+              },
+              {
+                "op": "var",
+                "args": "u2"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "rhs": {
+      "op": "add",
+      "args": [
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "u"
+                    },
+                    {
+                      "op": "var",
+                      "args": "y2"
+                    }
+                  ]
+                },
+                {
+                  "op": "neg",
+                  "args": {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "y0"
+                      },
+                      {
+                        "op": "var",
+                        "args": "y1"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "u"
+                    },
+                    {
+                      "op": "var",
+                      "args": "y2"
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "y0"
+                    },
+                    {
+                      "op": "var",
+                      "args": "y1"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "args": "y1"
+            },
+            {
+              "op": "var",
+              "args": "y1"
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "y0"
+                    },
+                    {
+                      "op": "var",
+                      "args": "y0"
+                    }
+                  ]
+                },
+                {
+                  "op": "neg",
+                  "args": {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "u"
+                      },
+                      {
+                        "op": "var",
+                        "args": "u2"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "args": "u"
+            },
+            {
+              "op": "var",
+              "args": "u2"
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "y1"
+                    },
+                    {
+                      "op": "var",
+                      "args": "y1"
+                    }
+                  ]
+                },
+                {
+                  "op": "neg",
+                  "args": {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "u"
+                      },
+                      {
+                        "op": "var",
+                        "args": "u1"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "modulus": 2305843009213693951,
+  "points": 32,
+  "seed": 7445294608973561857,
+  "value_digest": "4d8407f04abd33e002e0737833181b5cfdae8a965c2dd43a2f461cb53db3e837",
+  "independence": "issued by examples/identity_certificate_ghs_cubic_genus3.rs; checked by cryptanalysis::identity_certificate::check replaying from the sealed id and seed. The proof pointer is the Lean file whose lemma derives the same conclusion from the hypotheses; the checker records it and does not run Lean.",
+  "proof": {
+    "kind": "lean4",
+    "path": "research/ghs_cubic_genus3_build_20261012/lean/DescentCycle.lean",
+    "sha256": "18e0e9f0fed5cbb48f114405005d93e5a7ba27e151a64b879e343b1123a19ea0"
+  }
+}

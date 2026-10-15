@@ -1,0 +1,8 @@
+env class   ECBENV2h59034d4cd61b
+cpu         Apple M4 Pro (14 logical, Some(14) cores, 1 NUMA nodes)
+features    aes crc dotprod lse neon pmull sha2 sha3
+os          macos aarch64 25.6.0
+virtual     Some(false)
+binary      394e0c1bfe705f2bb0795425099beb02c50f04abe5027fe8b4020b91d40ec973
+commit      7cc12f568eb0a9c93b1430d348af9fd4383041dd (dirty: Some(true), source: runtime_worktree)
+note        heterogeneous cores ["Performance", "Efficiency"]: no affinity control, runs earn L0

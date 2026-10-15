@@ -1,0 +1,86 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "rootfind stride claim: stride targets vs the r-adding walk on public E_0 n=13",
+  "description": "Frozen in research/ecbench_rootfind_speedup_20261014/PROTOCOL.md before any claim data. The stride target source (R <- R + S) replaces the walk's 16-jump table; same oracle (rootfind-negfold m=2), same bases. H1: stride-d5 vs walk-d5 (paired). H2: stride-d4 vs rho-strong (paired). Engineering; no security claim.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 13
+      }
+    ],
+    "targets_per_curve": 32,
+    "target_seed": 202610141500,
+    "target_kind": "public"
+  },
+  "arms": [
+    {
+      "name": "rho-strong",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius_strong"
+      }
+    },
+    {
+      "name": "rho-frob",
+      "role": "baseline",
+      "method": {
+        "id": "rho.signed_frobenius"
+      }
+    },
+    {
+      "name": "ic-negfold-m2-d5-walk",
+      "role": "baseline",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=5",
+          "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-negfold-m2-d5-stride",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=5",
+          "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+          "max_trials": "200000",
+          "targets": "stride"
+        }
+      }
+    },
+    {
+      "name": "ic-negfold-m2-d4-stride",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=4",
+          "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+          "max_trials": "200000",
+          "targets": "stride"
+        }
+      }
+    },
+    {
+      "name": "rho-strong-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.signed_frobenius_strong"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 3,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 202610141501,
+    "isolation_required": "L0",
+    "timeout_seconds": 1800
+  }
+}
