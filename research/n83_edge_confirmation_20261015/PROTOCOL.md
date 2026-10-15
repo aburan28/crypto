@@ -15,26 +15,33 @@ the sidecar SHA-256 is
 ## Admission
 
 Read the independently replayed edge screen and final tournament artifacts.
-Require every edge arm to pass exact base, four-point relation and scalar
-replay under its 14 GiB guard, with zero new throttled periods and OOM kills.
-Require every final tournament arm to pass the same checks under its 14.5 GiB
-guard. If either set is incomplete, record `INCOMPLETE` and do not select.
+Require every final tournament arm to pass exact base, four-point relation and
+scalar replay under its 14.5 GiB guard, with zero new throttled periods and OOM
+kills. If that set is incomplete, record `INCOMPLETE` and do not select. An
+edge challenger is eligible only if every edge arm passes the same checks
+under its 14 GiB guard. Preserve an incomplete edge screen as its own result;
+it does not prevent a confirmation among unresolved tournament finalists.
 
-Let the edge challenger be the lower mirrored mean of K3500/root11/wide3
-and K3550/root11/wide3; ties break toward lower K. Admit it only when its
-mirrored mean is strictly lower than K3450/root11/wide3 in that edge screen.
-Let the tournament comparator be its 99% selected pipeline, or, when that
-decision is `BOUNDED_UNKNOWN`, its descriptive lowest eligible pipeline.
-Deduplicate an exact candidate identity. If no edge challenger qualifies or
-both identities are the same, record `NO_NEW_CHALLENGER` and stop.
+When the edge screen is eligible, let its challenger be the lower mirrored
+mean of K3500/root11/wide3 and K3550/root11/wide3; ties break toward lower K.
+Admit it only when its mirrored mean is strictly lower than K3450/root11/wide3
+in that edge screen.
+Let the final tournament's descriptive lowest mean be the leader. Admit that
+leader and every other finalist whose 99% interval for `leader minus other`
+has an upper endpoint greater than or equal to zero. If the tournament
+selected a pipeline, this rule admits only that pipeline. Append the edge
+challenger if one qualifies, then deduplicate exact candidate identities.
+Keep the original tournament order and place a new edge challenger last. If
+fewer than two distinct pipelines remain, record `NO_OPEN_COMPARISON` and stop.
 
 ## Confirmatory measurement
 
 Freeze exact candidate IDs, manifests, source hashes, base hashes, index
-sizes, target and sidecar hashes, child caps and RSS guard before running.
-Execute both complete pipelines in A/B/B/A order on the same cloud allocation
-and all 4,000 fresh points. Use fresh processes with empty indexes and logs,
-identical source and resource limits. Archive source, binary, host, cgroup,
+sizes, target and sidecar hashes, a 1,500-second per-arm cap, 330-minute job
+cap and 14.5 GiB RSS guard before running. Execute the admitted complete
+pipelines in list and reverse-list order on the same cloud allocation and all
+4,000 fresh points. Use fresh processes with empty indexes and logs, identical
+source and resource limits. Archive source, binary, host, cgroup,
 calibration, usage, full target output and base dumps for every arm. Account
 for setup and final relation linear algebra separately from each target's
 online interval. Preserve failed, timed-out and over-cap arms.
@@ -42,11 +49,14 @@ online interval. Preserve failed, timed-out and over-cap arms.
 Independently replay each subgroup point, base digest, four-point relation,
 scalar, target-online phase sum and source/host receipt. A comparison is
 eligible only if every arm passes under its frozen RSS guard with zero new
-throttled periods and OOM kills. Use the target-wise average of the two
+throttled periods and OOM kills. Require before and after SHA-256 calibration
+triples to match, each triple's max/min wall time at most 1.15, and after/before
+median ratio between 1/1.15 and 1.15. Use the target-wise average of the two
 repetitions for each pipeline, then 80 contiguous blocks of 50 public points
-and 10,000 block bootstrap resamples with seed 20261015601. The challenger
-advances only if the upper endpoint of the two-sided 99% interval for
-`challenger minus comparator` is below zero. Otherwise record
-`BOUNDED_UNKNOWN` with the measured interval. This is a secondary factor-base
-selection panel; a separate Tier 1 same-point IC/rho result is required for
-the primary one-target online comparison.
+and 10,000 block bootstrap resamples with seed `20261015601 + 16*i + j` for
+the ordered pair of candidate positions `i,j`. The lowest mirrored mean wins
+only when the upper endpoint of its two-sided 99% interval against every
+other admitted pipeline is below zero. Otherwise record `BOUNDED_UNKNOWN`
+with every measured interval. This is a secondary factor-base selection panel;
+a separate Tier 1 same-point IC/rho result is required for the primary
+one-target online comparison.
