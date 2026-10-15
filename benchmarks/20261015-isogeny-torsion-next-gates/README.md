@@ -11,6 +11,8 @@ the copies after generation. The source directories remain authoritative.
 | --- | --- |
 | `chi-exact` | [Exhaustive χ equation check](../../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1635Z/REPORT.md) |
 | `chi-solve` | [χ paired relation solve](../../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1651Z/REPORT.md) |
+| `chi-roots-exact` | [Direct Semaev and quotient polynomial exactness](../../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1827Z/REPORT.md) |
+| `chi-roots-solve` | [Direct Semaev and quotient polynomial relation solve](../../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1828Z/REPORT.md) |
 | `different-j-selector` | [Different-j selector](../../research/isogeny_torsion_fibers_20261012/different_j_20261015/reports/run-20261015T1648Z/REPORT.md) |
 | `different-j-solve` | [Paired different-j relation solve](../../research/isogeny_torsion_fibers_20261012/different_j_20261015/reports/run-20261015T1713Z/REPORT.md) |
 | `different-j-fibers` | [Exhaustive rational-fiber audit](../../research/isogeny_torsion_fibers_20261012/different_j_20261015/reports/run-20261015T1738Z/REPORT.md) |
@@ -20,6 +22,7 @@ the copies after generation. The source directories remain authoritative.
 | `pairing-v6` | [Direct prime-field rho control](../../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1740Z/REPORT.md) |
 | `pairing-v6b` | [Same-input repeat after release test exit](../../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1752Z/REPORT.md) |
 | `pairing-v7` | [Direct source-group BSGS reuse control](../../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1805Z/REPORT.md) |
+| `pairing-v7b` | [Post-suite V7B same-input repeat](../../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1822Z/REPORT.md) |
 
 The benchmark index row is prepared but cannot be inserted while Conductor
 task T-15 holds `benchmarks/README.md` exclusively. It must be added before

@@ -20,6 +20,7 @@ finite counting obstruction, independent of implementation or budget.
 - **Proved:** A group of order `r` has exactly `r-1` nonidentity elements, hence at most 18 or 60 distinct nonidentity targets here. This says nothing about the cost of setup reuse for feasible batch sizes.
 - **Suspected explanation:** None needed for the counting limit.
 - **Implemented and checked:** The [order-67 protocol](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/CELL_401_PROTOCOL.md) selected `E/F_401:y²=x³+1`, `r=67`, with a degree-two pairing field and 66 distinct nonidentity public targets. The [V4 batch](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/RUN_401_V4.jsonl) recovered all 66 scalars in each of three rounds, with [198 independent replays](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/REPLAY_401_V4.json). [V6](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/COMPACT_PRIME_401_V6.jsonl) and the [post-test V6B repeat](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/COMPACT_PRIME_401_V6B.jsonl) price the 64-target prefix against both extension-field and stronger prime-field rho; their separate replay receipts each check 594 scalar outputs.
+- **Additional direct reuse control:** [V7](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1805Z/REPORT.md) and the [same-input post-suite V7B repeat](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1822Z/REPORT.md) add a cold nine-entry source-group BSGS arm. Each run replayed 594/594 scalar outputs. At 64 targets, V7B median cold CPU was 0.378 ms for BSGS, 0.938 ms for direct prime-field rho and 1.219 ms for pairing; paired pairing/BSGS ratios were 3.224, 3.696 and 3.674. Shared-host L0 timing does not determine portable counted cost.
 - **What this evidence does not establish:** It does not rule out amortized pairing benefit on a larger group or decide the cold one-target comparison.
 
 ## What would unblock it
@@ -42,7 +43,11 @@ showed a lower CPU cost for pairing in three shared-host rounds, while the
 V6 direct prime-field rho control was lower cost in all three. The V6B
 repeat after the release tests exited kept the same ordering in all three
 further shared-host rounds. A V7 cold direct source-group BSGS control
-was lower cost than both pairing and rho at each measured prefix. Thus
+was lower cost than both pairing and rho at each measured prefix. V7B
+repeated the same comparison after the controlled release suite exited;
+direct source BSGS again had lower complete CPU at every prefix in all
+three rounds. The repeated values differ from V7 enough to retain
+host-noise uncertainty. Thus
 the V5 pairing/extension-rho contrast is a representation diagnostic on
 this cell, and the multi-target comparison must keep the direct reuse
 route. Its qualified performance question requires isolated matched native

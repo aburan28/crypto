@@ -130,9 +130,15 @@ cannot map to their fixed non-isomorphic destinations.
   recovered and independently replayed every χ arm scalar in 12/12
   rounds, while projected-pair and χ had identical relation counts,
   rank, and query trials in each round. The native χ implementation scans
-  polynomial candidates and filters them by exact group addition; a
-  direct resultant/root implementation and S3/quotient polynomial controls
-  remain missing. Its complete local CPU equivalent exceeds rho on the
+  polynomial candidates and filters them by exact group addition. A
+  subsequent [direct S3 root and quotient exactness run](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1827Z/REPORT.md)
+  matched 22/22 independent decomposition sets; its
+  [paired relation run](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1828Z/REPORT.md)
+  recovered each new arm's scalar in 12/12 rounds with unchanged
+  relation/query/rank outcomes. The independent checker replayed 123/132
+  arm-round scalars; the other nine were raw-pair cap exhaustions. The
+  direct χ-coordinate resultant remains unimplemented. Local measured
+  pipeline CPU for each polynomial arm exceeds rho on the
   four frozen cells, but the formal counted `S` for the polynomial
   primitive is still incomplete.
 - **Observed on a different-j extension-field pair:** the
@@ -234,10 +240,16 @@ cannot map to their fixed non-isomorphic destinations.
   decomposition oracle and complete relation recovery, with exhaustive
   pair-enumeration and independent scalar replay. See the
   [run report](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1651Z/REPORT.md).
-- [ ] Implement direct resultant/root and Semaev/quotient polynomial
-  controls, with a portable counted χ primitive, isolated timing and
-  independent-host replay. The existing χ implementation uses a finite
-  candidate scan; do not transfer its cost to a future algebraic solver.
+- [x] Implement and exhaustively check direct Semaev roots and the
+  degree-three quotient polynomial control, then complete the frozen
+  paired relation solves and independent replay. See the
+  [V2 exactness](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1827Z/REPORT.md)
+  and [solve](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1828Z/REPORT.md) reports.
+- [ ] Implement a direct resultant/root solver in the χ coordinate,
+  derive a portable counted cost for each polynomial primitive, and
+  repeat on isolated and independent hosts. The earlier χ finite scan
+  and the direct `S3` abscissa root are distinct implementations; do not
+  transfer either one's cost to the missing χ resultant.
 
 Meeting these conditions would settle only the measured pair and workload.
 It would not prove a general exponent change or a result for another curve.
@@ -274,8 +286,10 @@ It would not prove a general exponent change or a result for another curve.
   found two extra raw support points from torsion shifts at `p=787`, while
   projected support stayed fixed. The native χ polynomial scan then
   reproduced projected relation outcomes in all twelve rounds at higher
-  local CPU cost. The remaining polynomial test is a direct root solver
-  and direct Semaev/quotient controls at the same frozen inputs and memory.
+  local CPU cost. The direct source `S3` and quotient-root controls have
+  since been run on the same inputs and memory cap, also with unchanged
+  projected relation outcomes. A χ-coordinate resultant solver and
+  portable counted primitive pricing remain open.
 - **Quadratic-extension map attribution:** all four exact ordinary fields
   admit `u²=−3` in the base field, giving a checked public scaling map
   `ψ_u:E→E'` to the degree-three destination. The V4 paired run included
@@ -381,3 +395,15 @@ separated candidate search, Miller, and final exponentiation without
 changing deterministic primitive totals. The V2 fully validated paired
 CPU/rho ratios were 2,781.81 and 698.15. Shared-host L0 noise and only
 two subgroup sizes leave scaling, reusable setup, and isolated timing open.
+
+2026-10-15 direct-root V2: both source and quotient `S3` root arms
+matched independent enumeration on all 22 smallest-cell targets and
+recovered the scalar in all 12 paired rounds each. Their relation
+counts, useful rank and trials matched the projected-pair control in
+every round. The source-root/negation-rho paired CPU ratio medians were
+15.474, 6.014, 14.669 and 30.631 across the four frozen cells. These
+shared-host ratios include the measured pipeline but exclude common
+input parsing and calibration. The [proof map](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/PROOF_MAP_ROOTS_V2.md)
+records a checked conditional relation-transfer theorem and the open
+concrete polynomial/curve bridge. The destination full-image factor-base
+and χ-coordinate resultant questions remain open.

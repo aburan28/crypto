@@ -18,6 +18,9 @@ BSGS table construction, all lookups and candidate checks, and final scalar
 verification. The direct source table had 9 baby entries and 283 total
 lookups for the full 66-target list in each round, with zero false
 candidates. It was built anew in every round.
+The expanded independent checker also rechecked the retained
+[V5](../../RECHECK_V5_WITH_V7.json) and [V6](../../RECHECK_V6_WITH_V7.json)
+records: 396/396 and 594/594 scalar outputs, respectively.
 
 | Arm at N=64 | Round 0 CPU ms | Round 1 CPU ms | Round 2 CPU ms | Median CPU ms |
 | --- | ---: | ---: | ---: | ---: |

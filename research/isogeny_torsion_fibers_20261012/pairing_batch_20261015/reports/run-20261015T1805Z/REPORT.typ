@@ -5,6 +5,8 @@
 
 On 66 distinct public order-67 targets, cold pairing with reused H and finite-field BSGS was paired with direct F401 rho and a direct F401 BSGS arm that rebuilt its nine-entry baby table in each round. All three arms returned all 66 scalars in three rotated rounds; separate source arithmetic replayed 594/594 outputs. Public input, setup, failed work, per-target solves and verification are included.
 
+The expanded independent checker also rechecked the retained V5 and V6 records, with 396/396 and 594/594 scalar outputs confirmed.
+
 At N=64, median complete CPU was 0.303 ms for direct BSGS, 0.577 ms for direct rho, and 1.740 ms for pairing. Paired pairing/direct-BSGS ratios were 5.190, 4.178, 5.749. The median ratio rose from 2.121 at N=1 to 5.225 at N=66. Source BSGS was the cheapest complete arm at each prefix in this shared-host run.
 
 #image("GRAPH.svg", width: 100%)
