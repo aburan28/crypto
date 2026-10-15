@@ -40,3 +40,13 @@ a leaderboard is generated. Earlier performance and 2000-additional-map work
 remain separate. Canonical DLP/rho and curve-edge charts change only with new
 verified evidence relevant to their own contracts; a challenge launch creates
 no such claim.
+
+After the first full-suite run observed a valid short replay censored with zero
+RSS samples, require a supervisor acknowledgement before replay starts. The
+installed control packet is rerun from the fixed clean source. Add twenty fresh
+P192/13 judgements of the same known map as a scheduling-race stress control;
+every accepted judgement must have a positive RSS sample. These are repeated
+admission controls, not distinct discoveries. Also judge the historical
+P192/10453 artifact with a one-second replay budget before its full-budget
+leaderboard admission; retain the actual result, including censorship, without
+changing its mathematical validity classification.

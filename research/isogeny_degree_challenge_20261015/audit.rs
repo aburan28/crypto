@@ -87,12 +87,29 @@ fn main() {
         commands.push(json!({"file":f.file_name().unwrap().to_str(),"args":c["args"],"exit_code":c["exit_code"]}));
     }
     assert!(commands.len() >= 15);
+    let mut stress = vec![];
+    if data.join("resource-stress").is_dir() {
+        for n in 0..20 {
+            let entry = read(&data.join(format!("resource-stress/{n}/entry.json")));
+            assert_eq!(entry["status"], "ACCEPTED");
+            assert!(
+                entry["verification"]["sampled_peak_resident_bytes"]
+                    .as_str()
+                    .unwrap()
+                    .parse::<u64>()
+                    .unwrap()
+                    > 0
+            );
+            stress.push(entry);
+        }
+    }
     let audit = json!({"schema":"isogeny-degree-challenge-audit/v1","status":"PASS","season":policy["season"],
         "registered_prime_models":rows.len(),"construction_models":construction,"replay_models":replay,
         "unavailable_replay_models":rows.len()-replay,"shortlisted_candidates":candidates,
         "candidate_degree_interval":[plan["lower"].clone(),plan["upper"].clone()],
         "known_answer_controls":[first,second],"rejected_mutations":negatives,
         "forged_score_rejected":true,"verified_source_rows":winners.len(),"commands":commands,"roster":roster,
+        "resource_stress_count":stress.len(),"resource_stress":stress,
         "timing_claim":null,"new_discovery_count":0});
     fs::write(
         out.join("audit.json"),

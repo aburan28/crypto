@@ -87,3 +87,10 @@ The IC/rho scoreboard, IC leaderboard, progress timeline and canonical curve
 edges remain unchanged: this packet establishes admission behavior and retains
 known-answer maps without a new IC ratio, new registry model or new curve edge.
 The earlier CPU optimization and additional-map campaigns remain separate.
+
+The first full-suite attempt censored a valid short replay with zero RSS samples.
+A later installed run on that source passed, confirming a scheduling-dependent
+startup race. The fixed source makes the replay child wait until its supervisor
+records positive RSS. The follow-up packet adds twenty fresh judgements of the
+same public P192/13 map, each requiring a real sample. Earlier failed build/test
+logs and the pre-fix packet remain archived; they are not rewritten as passes.

@@ -252,7 +252,9 @@ pub fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) ->
             child.kill().unwrap();
             break child.wait().unwrap();
         }
-        match resident_bytes(child.id()).filter(|rss| resource_ready.is_none() || *rss > 0) {
+        match resident_bytes(child.id())
+            .filter(|rss| resource_ready.is_none() || resources_released || *rss > 0)
+        {
             Some(rss) => {
                 unavailable_since = None;
                 peak_rss = peak_rss.max(rss);
