@@ -17,6 +17,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Page
 
 ROOT=Path(__file__).resolve().parent
 DATA=json.loads((ROOT/"render-data.json").read_text())
+FINDINGS=json.loads((ROOT/"findings.json").read_text())
 BENCH=ROOT.parents[1]/"benchmarks/20261015-ecbench-leads"
 FONT=Path("/usr/share/fonts/truetype/dejavu")
 for name,file in [("DV","DejaVuSans.ttf"),("DVB","DejaVuSans-Bold.ttf")]:
@@ -35,6 +36,10 @@ def footer(c,doc):
     c.drawRightString(A4[0]-36,20,str(doc.page))
 def pdf(path,story):
     SimpleDocTemplate(str(path),pagesize=A4,topMargin=34,bottomMargin=36,leftMargin=36,rightMargin=36).build(story,onFirstPage=footer,onLaterPages=footer)
+def figure(path,max_height=460):
+    item=Image(str(path))
+    item._restrictSize(510,max_height)
+    return item
 def figsave(fig,path):
     fig.savefig(path.with_suffix(".svg"),bbox_inches="tight")
     fig.savefig(path.with_suffix(".png"),bbox_inches="tight",dpi=150)
@@ -68,7 +73,7 @@ def plot_session(s):
                 f'{c.get("trials",0)} total queries; {c.get("point_checked_relations",0)} checked relations; '
                 f'{c.get("table_entries",0)} total stored entries',transform=ax.transAxes,fontsize=10,
                 bbox={"boxstyle":"round,pad=.7","facecolor":"#e7eff5","edgecolor":"#9baebb"})
-        ax.text(.03,.06,"Exact E0 GF(2^83) → unknown-log base → quotient pair table → query cap; no recovery",transform=ax.transAxes)
+        ax.text(.03,.06,"Exact E0 GF(2^83) → unknown-log base → quotient pair table → bounded target pin search",transform=ax.transAxes)
         ax.axis("off")
         figsave(fig,path/"cost")
     elif not any(r["mean_s"] is not None for r in rows):
@@ -99,7 +104,7 @@ def plot_session(s):
         p(f'{ledger["records"]} attempts; {ledger["verified_records"]} verified recoveries; {ledger["replays"]} exact standard replays.'),
         p("Fresh public single-target workloads, seed20261015. Cold setup repeated; no planted scalar. Host "+meta["env_class_id"]+", L0; wall times inadmissible. Exhausted/error outcomes have a separate native replay."),
         p("Points and ranges use verified runs only: native mean and observed min/max, not confidence intervals. Failed work remains in the resource vectors. Count quotients do not bound full-cost ratios. Shape panels plot independently constructed coordinate counts; wide panels show recorded bounded outcomes.",SMALL),
-        Image(str(path/"cost.png"),width=510,height=min(460,max(180,len(rows)*14+55))),
+        figure(path/"cost.png"),
         p("Evidence: research/ecbench_leads_20261015/sessions/"+s["session"]+"; "+s["session"]+".audit.json; failed-replays-v2.json; "+s["session"]+".resources.json.",SMALL)]
     pdf(path/"REPORT.pdf",story)
     dest=BENCH/s["session"]
@@ -112,11 +117,14 @@ shape_graph(ROOT/"shape-correction")
 res=DATA["results"]
 story=[p("Pursuing the ecbench leads",TITLE),
     p(f'{res["attempts"]} fresh public single-target attempts; {res["verified"]} verified scalar recoveries. Outcomes: '+str(res["statuses"])+"."),
+    p(FINDINGS["paragraphs"][1]),
+    p(FINDINGS["paragraphs"][2]),
     p("All session audits passed; unsuccessful deterministic outcomes replayed separately. The new method uses unknown factor-base logs and exact point witnesses at both integer widths. Versioned metadata includes all intermediate coordinates and equation blocks."),
     p("The exact E0 degree83 subgroup is retained. Bounded execution does not satisfy the N83 recovery gate. All ten mathematical questions remain partial. L0; no admitted wall time, fully priced speedup, asymptotic exponent or N131 transfer."),
-    p("System shape: independently constructed inputs",HEAD),Image(str(ROOT/"shape-correction.png"),width=510,height=175),
+    p("System shape: independently constructed inputs",HEAD),figure(ROOT/"shape-correction.png",175),
     p("ell=3, m=3. The plot uses native constructed counts and preserved legacy metadata; it is not a solving-degree or solver-cost claim.",SMALL),
-    p("Sources: PROTOCOL-v1.md; results.json; shape-controls.json; per-target.json; execution-manifest.json; parent campaign literature/REPORT.md (29 references). See REPORT.md for source-linked run reports and exact remaining obligations.",SMALL),PageBreak(),p("Measured per-curve diagnostics",HEAD)]
+    p("Sources: PROTOCOL-v1.md; FINDINGS.md/findings.json; results.json; shape-controls.json; per-target.json; execution-manifest.json; parent literature/REPORT.md (29 references). The audit-reader amendment preserves the initial N83 reader failure and validates its correction against a pinned historical reader. See REPORT.md for source-linked run reports and exact remaining obligations.",SMALL),
+    Paragraph('<link href="https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md">Source-linked report and immutable evidence</link>',SMALL),PageBreak(),p("Measured per-curve diagnostics",HEAD)]
 cells=[[p(x,SMALL) for x in ["Curve","Arm","Verified","Mean S","Count / rho"]]]
 for r in DATA["rows"]:
     cells.append([p(r["curve"],SMALL),p(r["arm"],SMALL),p(f'{r["verified"]}/{r["records"]}',SMALL),

@@ -1,0 +1,133 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation",
+        "params": {}
+      },
+      "name": "rho",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "rho.negation",
+        "params": {}
+      },
+      "name": "rho-aa",
+      "role": "control"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "prime-abscissa:size=16",
+          "linalg": "incremental-gauss",
+          "max_trials": "100000",
+          "oracle": "mitm:m=2,negation_folded=1",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "abs16-mitm2",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "linalg": "incremental-gauss",
+          "max_trials": "100000",
+          "oracle": "mitm:m=2,negation_folded=1",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "abs32-mitm2",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "prime-abscissa:size=64",
+          "linalg": "incremental-gauss",
+          "max_trials": "100000",
+          "oracle": "mitm:m=2,negation_folded=1",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "abs64-mitm2",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "prime-abscissa:size=128",
+          "linalg": "incremental-gauss",
+          "max_trials": "100000",
+          "oracle": "mitm:m=2,negation_folded=1",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "abs128-mitm2",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "prime-abscissa:size=64",
+          "linalg": "incremental-gauss",
+          "max_trials": "100000",
+          "oracle": "rootfind-subtract:m=3",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "abs64-subtract3",
+      "role": "candidate"
+    }
+  ],
+  "description": "PROTOCOL-v1.md; fresh public single-target workloads, cold bounded counts; no wall or asymptotic claim",
+  "label": "Fresh-target prime factor-base balance",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261015,
+    "timeout_seconds": 180,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "bits": 16,
+        "kind": "prime_search",
+        "seed": 59297
+      },
+      {
+        "bits": 18,
+        "kind": "prime_search",
+        "seed": 59297
+      },
+      {
+        "bits": 20,
+        "kind": "prime_search",
+        "seed": 59297
+      },
+      {
+        "bits": 22,
+        "kind": "prime_search",
+        "seed": 59297
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261015,
+    "targets_per_curve": 8
+  }
+}

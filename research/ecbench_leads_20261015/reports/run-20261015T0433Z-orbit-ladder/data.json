@@ -1,0 +1,1213 @@
+{
+  "ledger": {
+    "audit_ok": true,
+    "measured": 80,
+    "name": "orbit-ladder",
+    "problems": [],
+    "records": 80,
+    "replays": 80,
+    "session_id": "ECBS1ha17d4a7fcedc",
+    "verified_records": 80
+  },
+  "metadata": {
+    "binary_sha256": "50a5739fadcb08ab8f170d4fe03ba3427fb0fd387c1a5918843fcda4d68ff1fb",
+    "child_env": {
+      "HOME": "/home/agent",
+      "LC_ALL": "C",
+      "OMP_NUM_THREADS": "1",
+      "PATH": "/workspace/toolchains/cargo/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+      "RAYON_NUM_THREADS": "1",
+      "RUST_BACKTRACE": "0",
+      "RUST_MIN_STACK": "8388608"
+    },
+    "child_env_sha256": "ae63b5dd5b3559eade83c5719a86a19a091b41ee5a2786aaf2826dc1b9176287",
+    "cpu_plan": null,
+    "env_class_id": "ECBENV2h96c931cc33fa",
+    "eviction": null,
+    "executions_planned": 80,
+    "finished_unix_ms": 1792038782756,
+    "git_commit": "0cbc86b2c828f1aa7fae62282913cce9ea6e099d",
+    "git_dirty": false,
+    "grading_version": 2,
+    "host_sha256": "a191d86f213de1a34a3d8cc4793ca118bb4f4cee5773289fbb9604ae70020dd7",
+    "label": "Width-generic exact and quotient rank ladder",
+    "options": {
+      "allow_busy": true,
+      "cpus": "none",
+      "exe": "/proc/self/exe",
+      "lock_path": "/tmp/crypto-bench.lock",
+      "thresholds": {
+        "max_other_cpu": 0.1,
+        "max_preemptions_per_second": 50.0,
+        "max_psi": 5.0,
+        "settle_seconds": 2.0
+      },
+      "wait_for_lock": true
+    },
+    "plan_sha256": "8eee62153d29cbd4785e6f80aa5edf6803bd509e6411a537bc92f2746a03b2b7",
+    "preflight": null,
+    "records_sha256": "e05e41fad6d71a622f70f941a1ef0ae6536dad68f7e6ae21649a1f5f89fa7fef",
+    "records_written": 80,
+    "runner_cpus": null,
+    "runner_on_run_cpu": false,
+    "schema": "ecbench.session/v1",
+    "session_id": "ECBS1ha17d4a7fcedc",
+    "spec_id": "ECS1h00758c03980e",
+    "spec_sha256": "00758c03980eb7eb6c40cd11eb5cbdf86ae04042cb44e9660aa462a63ce07655",
+    "started_unix_ms": 1792038780088,
+    "status": "complete",
+    "status_counts": {
+      "verified": 80
+    },
+    "ticks_per_second": 100
+  },
+  "path": "reports/run-20261015T0433Z-orbit-ladder",
+  "rows": [
+    {
+      "arm": "exact-c4",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 20,
+        "factor_base_columns": 16,
+        "factor_base_signed_points": 416,
+        "frobenius_maps_uncharged": 208,
+        "independent_rows": 17,
+        "matrix_entries_scanned_uncharged": 234,
+        "matrix_multiply_subtracts_uncharged": 112,
+        "matrix_normalizations_uncharged": 102,
+        "pair_visits": 21840,
+        "point_checked_relations": 17,
+        "rank": 17,
+        "raw_x_lifts_uncharged": 32,
+        "scalar_inversions_uncharged": 17,
+        "scalar_products_uncharged": 103,
+        "table_complete": 4,
+        "table_entries": 7700,
+        "table_inserts_uncharged": 21840,
+        "table_probes_uncharged": 17,
+        "trials": 17
+      },
+      "curve": "icv1-f2m13-t181-515ee569",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h73d477df5733"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": 128.9691530419018,
+      "mean_cold_gae": 5716.0,
+      "mean_s": 127.71789306782927,
+      "min_s": 126.55600880619052,
+      "paired_complete_counted_ratio_candidate_over_rho": 8.90943299733781,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "factor_base": 12.0,
+        "linear_algebra": 0.0,
+        "oracle_setup": 5460.0,
+        "target_PDP": 4.25,
+        "target_query": 115.0,
+        "target_relation_check": 124.75
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"frobenius_maps_uncharged\"",
+        "\"matrix_entries_scanned_uncharged\"",
+        "\"matrix_multiply_subtracts_uncharged\"",
+        "\"matrix_normalizations_uncharged\"",
+        "\"raw_x_lifts_uncharged\"",
+        "\"scalar_inversions_uncharged\"",
+        "\"scalar_products_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_probes_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "existing-orbit-c4",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 17,
+        "matrix_rows": 17,
+        "matrix_work": 158,
+        "relations_found": 17,
+        "targets_tried": 17
+      },
+      "curve": "icv1-f2m13-t181-515ee569",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h4d6e5e56924a"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": 19.931470859139957,
+      "mean_cold_gae": 885.321586,
+      "mean_s": 19.78156187043195,
+      "min_s": 19.61141732667182,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.3799358557669426,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "factor_base": 129.782856,
+        "linear_algebra": 0.6677474999999999,
+        "oracle_setup": 260.0,
+        "relations": 481.12098249999997,
+        "verify": 13.75
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"abscissae_scanned_uncharged\"",
+        "\"curve_equation_checks_uncharged\"",
+        "\"factor_base_vec_bytes_floor_uncharged\"",
+        "\"factor_point_inserts_uncharged\"",
+        "\"hash_probes_uncharged\"",
+        "\"inversions_uncharged\"",
+        "\"legacy_as_solves_uncharged\"",
+        "\"lift_field_multiplies_uncharged\"",
+        "\"lift_field_squares_uncharged\"",
+        "\"min_key_field_squares_uncharged\"",
+        "\"point_lifts_uncharged\"",
+        "\"point_negations_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "orbit-c4",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 1700,
+        "factor_base_columns": 16,
+        "factor_base_signed_points": 416,
+        "frobenius_maps_uncharged": 1056,
+        "independent_rows": 16,
+        "matrix_entries_scanned_uncharged": 222,
+        "matrix_multiply_subtracts_uncharged": 107,
+        "matrix_normalizations_uncharged": 96,
+        "pair_visits": 1664,
+        "point_checked_relations": 16,
+        "rank": 16,
+        "raw_x_lifts_uncharged": 32,
+        "scalar_inversions_uncharged": 16,
+        "scalar_products_uncharged": 100,
+        "table_complete": 4,
+        "table_entries": 300,
+        "table_inserts_uncharged": 1664,
+        "table_probes_uncharged": 16,
+        "trials": 16
+      },
+      "curve": "icv1-f2m13-t181-515ee569",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h73d477df5733"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": 16.26637966294257,
+      "mean_cold_gae": 661.75,
+      "mean_s": 14.786094425758577,
+      "min_s": 13.54042043371318,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0314585874717102,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "factor_base": 12.0,
+        "linear_algebra": 0.0,
+        "oracle_setup": 416.0,
+        "target_PDP": 4.0,
+        "target_query": 107.75,
+        "target_relation_check": 122.0
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"frobenius_maps_uncharged\"",
+        "\"matrix_entries_scanned_uncharged\"",
+        "\"matrix_multiply_subtracts_uncharged\"",
+        "\"matrix_normalizations_uncharged\"",
+        "\"raw_x_lifts_uncharged\"",
+        "\"scalar_inversions_uncharged\"",
+        "\"scalar_products_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_probes_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 259,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 3,
+        "partition_hashes_uncharged": 119,
+        "scalar_multiplications": 140,
+        "table_entries": 10,
+        "table_inserts_uncharged": 10,
+        "table_queries_uncharged": 14,
+        "walk_steps": 119,
+        "walks": 140,
+        "wasted_merges": 0
+      },
+      "curve": "icv1-f2m13-t181-515ee569",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 15.100410977166097,
+      "mean_cold_gae": 641.5672020551672,
+      "mean_s": 14.335131439452109,
+      "min_s": 13.603367793900778,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "search": 115.10576017615719,
+        "setup": 526.46144187901
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho-aa",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 259,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 3,
+        "partition_hashes_uncharged": 119,
+        "scalar_multiplications": 140,
+        "table_entries": 10,
+        "table_inserts_uncharged": 10,
+        "table_queries_uncharged": 14,
+        "walk_steps": 119,
+        "walks": 140,
+        "wasted_merges": 0
+      },
+      "curve": "icv1-f2m13-t181-515ee569",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 15.100410977166097,
+      "mean_cold_gae": 641.5672020551672,
+      "mean_s": 14.335131439452109,
+      "min_s": 13.603367793900778,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "search": 115.10576017615719,
+        "setup": 526.46144187901
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "exact-c4",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 20,
+        "factor_base_columns": 16,
+        "factor_base_signed_points": 608,
+        "frobenius_maps_uncharged": 304,
+        "independent_rows": 20,
+        "matrix_entries_scanned_uncharged": 348,
+        "matrix_multiply_subtracts_uncharged": 181,
+        "matrix_normalizations_uncharged": 120,
+        "pair_visits": 46512,
+        "point_checked_relations": 20,
+        "rank": 20,
+        "raw_x_lifts_uncharged": 32,
+        "scalar_inversions_uncharged": 20,
+        "scalar_products_uncharged": 136,
+        "table_complete": 4,
+        "table_entries": 43476,
+        "table_inserts_uncharged": 46512,
+        "table_probes_uncharged": 278,
+        "trials": 20
+      },
+      "curve": "icv1-f2m19-t797-b6cf2467",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h8a6a722a5064"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": 34.09960370452561,
+      "mean_cold_gae": 12296.75,
+      "mean_s": 33.99110747840672,
+      "min_s": 33.845294078973055,
+      "paired_complete_counted_ratio_candidate_over_rho": 10.551663925478614,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "factor_base": 12.0,
+        "linear_algebra": 0.0,
+        "oracle_setup": 11628.0,
+        "target_PDP": 69.5,
+        "target_query": 237.5,
+        "target_relation_check": 349.75
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"frobenius_maps_uncharged\"",
+        "\"matrix_entries_scanned_uncharged\"",
+        "\"matrix_multiply_subtracts_uncharged\"",
+        "\"matrix_normalizations_uncharged\"",
+        "\"raw_x_lifts_uncharged\"",
+        "\"scalar_inversions_uncharged\"",
+        "\"scalar_products_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_probes_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "existing-orbit-c4",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 19,
+        "matrix_rows": 19,
+        "matrix_work": 256,
+        "relations_found": 19,
+        "targets_tried": 19
+      },
+      "curve": "icv1-f2m19-t797-b6cf2467",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1hc023f02facf8"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": 4.201637291737916,
+      "mean_cold_gae": 1473.25,
+      "mean_s": 4.0724093026663715,
+      "min_s": 3.9113926104007577,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.2641745890752734,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "factor_base": 222.0,
+        "linear_algebra": 0.0,
+        "oracle_setup": 380.0,
+        "relations": 848.75,
+        "verify": 22.5
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"abscissae_scanned_uncharged\"",
+        "\"canonicalisations_uncharged\"",
+        "\"curve_equation_checks_uncharged\"",
+        "\"factor_base_vec_bytes_floor_uncharged\"",
+        "\"factor_point_inserts_uncharged\"",
+        "\"frobenius_maps_uncharged\"",
+        "\"hash_probes_uncharged\"",
+        "\"inversions_uncharged\"",
+        "\"legacy_as_solves_uncharged\"",
+        "\"lift_field_multiplies_uncharged\"",
+        "\"lift_field_squares_uncharged\"",
+        "\"lookups_uncharged\"",
+        "\"min_key_field_squares_uncharged\"",
+        "\"point_lifts_uncharged\"",
+        "\"point_negations_uncharged\"",
+        "\"row_ops_uncharged\"",
+        "\"target_guard_probes_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "orbit-c4",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 2730,
+        "factor_base_columns": 16,
+        "factor_base_signed_points": 608,
+        "frobenius_maps_uncharged": 1540,
+        "independent_rows": 20,
+        "matrix_entries_scanned_uncharged": 348,
+        "matrix_multiply_subtracts_uncharged": 181,
+        "matrix_normalizations_uncharged": 120,
+        "pair_visits": 2432,
+        "point_checked_relations": 20,
+        "rank": 20,
+        "raw_x_lifts_uncharged": 32,
+        "scalar_inversions_uncharged": 20,
+        "scalar_products_uncharged": 136,
+        "table_complete": 4,
+        "table_entries": 1148,
+        "table_inserts_uncharged": 2432,
+        "table_probes_uncharged": 278,
+        "trials": 20
+      },
+      "curve": "icv1-f2m19-t797-b6cf2467",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h8a6a722a5064"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": 3.637733339425722,
+      "mean_cold_gae": 1281.25,
+      "mean_s": 3.541676171078424,
+      "min_s": 3.433179944959534,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0994221566283346,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "factor_base": 12.0,
+        "linear_algebra": 0.0,
+        "oracle_setup": 608.0,
+        "target_PDP": 69.5,
+        "target_query": 237.5,
+        "target_relation_check": 354.25
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"frobenius_maps_uncharged\"",
+        "\"matrix_entries_scanned_uncharged\"",
+        "\"matrix_multiply_subtracts_uncharged\"",
+        "\"matrix_normalizations_uncharged\"",
+        "\"raw_x_lifts_uncharged\"",
+        "\"scalar_inversions_uncharged\"",
+        "\"scalar_products_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_probes_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 1088,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 0,
+        "partition_hashes_uncharged": 922,
+        "scalar_multiplications": 140,
+        "table_entries": 41,
+        "table_inserts_uncharged": 41,
+        "table_queries_uncharged": 46,
+        "walk_steps": 922,
+        "walks": 166,
+        "wasted_merges": 1
+      },
+      "curve": "icv1-f2m19-t797-b6cf2467",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 3.5309921762807877,
+      "mean_cold_gae": 1165.3849181367127,
+      "mean_s": 3.2213978495211517,
+      "min_s": 2.9118035227615158,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "search": 349.49013584028967,
+        "setup": 815.8947822964232
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho-aa",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 1088,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 0,
+        "partition_hashes_uncharged": 922,
+        "scalar_multiplications": 140,
+        "table_entries": 41,
+        "table_inserts_uncharged": 41,
+        "table_queries_uncharged": 46,
+        "walk_steps": 922,
+        "walks": 166,
+        "wasted_merges": 1
+      },
+      "curve": "icv1-f2m19-t797-b6cf2467",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 3.5309921762807877,
+      "mean_cold_gae": 1165.3849181367127,
+      "mean_s": 3.2213978495211517,
+      "min_s": 2.9118035227615158,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "search": 349.49013584028967,
+        "setup": 815.8947822964232
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "exact-c4",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 20,
+        "factor_base_columns": 16,
+        "factor_base_signed_points": 736,
+        "frobenius_maps_uncharged": 368,
+        "independent_rows": 20,
+        "matrix_entries_scanned_uncharged": 342,
+        "matrix_multiply_subtracts_uncharged": 175,
+        "matrix_normalizations_uncharged": 120,
+        "pair_visits": 68080,
+        "point_checked_relations": 20,
+        "rank": 20,
+        "raw_x_lifts_uncharged": 40,
+        "scalar_inversions_uncharged": 20,
+        "scalar_products_uncharged": 152,
+        "table_complete": 4,
+        "table_entries": 65508,
+        "table_inserts_uncharged": 68080,
+        "table_probes_uncharged": 6552,
+        "trials": 52
+      },
+      "curve": "icv1-f2m23-t5197-69e76b73",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h6ff27ae71544"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": 14.547842106013153,
+      "mean_cold_gae": 19850.0,
+      "mean_s": 13.711346365526854,
+      "min_s": 12.866561649907744,
+      "paired_complete_counted_ratio_candidate_over_rho": 12.047073503470347,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "factor_base": 12.0,
+        "linear_algebra": 0.0,
+        "oracle_setup": 17020.0,
+        "target_PDP": 1638.0,
+        "target_query": 746.5,
+        "target_relation_check": 433.5
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"frobenius_maps_uncharged\"",
+        "\"matrix_entries_scanned_uncharged\"",
+        "\"matrix_multiply_subtracts_uncharged\"",
+        "\"matrix_normalizations_uncharged\"",
+        "\"raw_x_lifts_uncharged\"",
+        "\"scalar_inversions_uncharged\"",
+        "\"scalar_products_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_probes_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "existing-orbit-c4",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 20,
+        "matrix_rows": 20,
+        "matrix_work": 261,
+        "relations_found": 20,
+        "targets_tried": 38
+      },
+      "curve": "icv1-f2m23-t5197-69e76b73",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h88c2283c2da9"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": 2.1347860084258956,
+      "mean_cold_gae": 2750.12075775,
+      "mean_s": 1.8996402144350337,
+      "min_s": 1.6415737357003268,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.6690633205054821,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "factor_base": 256.480544,
+        "linear_algebra": 0.62137575,
+        "oracle_setup": 460.0,
+        "relations": 2003.768838,
+        "verify": 29.25
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"abscissae_scanned_uncharged\"",
+        "\"curve_equation_checks_uncharged\"",
+        "\"factor_base_vec_bytes_floor_uncharged\"",
+        "\"factor_point_inserts_uncharged\"",
+        "\"hash_probes_uncharged\"",
+        "\"inversions_uncharged\"",
+        "\"legacy_as_solves_uncharged\"",
+        "\"lift_field_multiplies_uncharged\"",
+        "\"lift_field_squares_uncharged\"",
+        "\"min_key_field_squares_uncharged\"",
+        "\"point_lifts_uncharged\"",
+        "\"point_negations_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "orbit-c4",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 9516,
+        "factor_base_columns": 16,
+        "factor_base_signed_points": 736,
+        "frobenius_maps_uncharged": 1860,
+        "independent_rows": 20,
+        "matrix_entries_scanned_uncharged": 342,
+        "matrix_multiply_subtracts_uncharged": 175,
+        "matrix_normalizations_uncharged": 120,
+        "pair_visits": 2944,
+        "point_checked_relations": 20,
+        "rank": 20,
+        "raw_x_lifts_uncharged": 40,
+        "scalar_inversions_uncharged": 20,
+        "scalar_products_uncharged": 152,
+        "table_complete": 4,
+        "table_entries": 1428,
+        "table_inserts_uncharged": 2944,
+        "table_probes_uncharged": 6552,
+        "trials": 52
+      },
+      "curve": "icv1-f2m23-t5197-69e76b73",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h6ff27ae71544"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": 3.2997028507869914,
+      "mean_cold_gae": 3566.0,
+      "mean_s": 2.463207110300693,
+      "min_s": 1.6184223946815828,
+      "paired_complete_counted_ratio_candidate_over_rho": 2.164224892361474,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "factor_base": 12.0,
+        "linear_algebra": 0.0,
+        "oracle_setup": 736.0,
+        "target_PDP": 1638.0,
+        "target_query": 746.5,
+        "target_relation_check": 433.5
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"frobenius_maps_uncharged\"",
+        "\"matrix_entries_scanned_uncharged\"",
+        "\"matrix_multiply_subtracts_uncharged\"",
+        "\"matrix_normalizations_uncharged\"",
+        "\"raw_x_lifts_uncharged\"",
+        "\"scalar_inversions_uncharged\"",
+        "\"scalar_products_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_probes_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 2177,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 1,
+        "partition_hashes_uncharged": 1934,
+        "scalar_multiplications": 140,
+        "table_entries": 120,
+        "table_inserts_uncharged": 120,
+        "table_queries_uncharged": 124,
+        "walk_steps": 1934,
+        "walks": 243,
+        "wasted_merges": 0
+      },
+      "curve": "icv1-f2m23-t5197-69e76b73",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 1.3818088128511332,
+      "mean_cold_gae": 1647.7030703167784,
+      "mean_s": 1.1381474813428412,
+      "min_s": 0.9390393911734147,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "search": 639.7459774557238,
+        "setup": 1007.9570928610544
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho-aa",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 2177,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 1,
+        "partition_hashes_uncharged": 1934,
+        "scalar_multiplications": 140,
+        "table_entries": 120,
+        "table_inserts_uncharged": 120,
+        "table_queries_uncharged": 124,
+        "walk_steps": 1934,
+        "walks": 243,
+        "wasted_merges": 0
+      },
+      "curve": "icv1-f2m23-t5197-69e76b73",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 1.3818088128511332,
+      "mean_cold_gae": 1647.7030703167784,
+      "mean_s": 1.1381474813428412,
+      "min_s": 0.9390393911734147,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "search": 639.7459774557238,
+        "setup": 1007.9570928610544
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "exact-c4",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 24,
+        "factor_base_columns": 16,
+        "factor_base_signed_points": 992,
+        "frobenius_maps_uncharged": 496,
+        "independent_rows": 19,
+        "matrix_entries_scanned_uncharged": 342,
+        "matrix_multiply_subtracts_uncharged": 184,
+        "matrix_normalizations_uncharged": 114,
+        "pair_visits": 123504,
+        "point_checked_relations": 19,
+        "rank": 19,
+        "raw_x_lifts_uncharged": 48,
+        "scalar_inversions_uncharged": 19,
+        "scalar_products_uncharged": 181,
+        "table_complete": 4,
+        "table_entries": 118548,
+        "table_inserts_uncharged": 123504,
+        "table_probes_uncharged": 1683,
+        "trials": 23
+      },
+      "curve": "icv1-f2m31-tm90707-c95f16f5",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h1d00788dd1ce"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": 27.109047543855837,
+      "mean_cold_gae": 32123.5,
+      "mean_s": 26.775227179161632,
+      "min_s": 26.620611254939973,
+      "paired_complete_counted_ratio_candidate_over_rho": 22.381908134938932,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "factor_base": 105.0,
+        "linear_algebra": 0.0,
+        "oracle_setup": 30876.0,
+        "target_PDP": 420.75,
+        "target_query": 324.25,
+        "target_relation_check": 397.5
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"frobenius_maps_uncharged\"",
+        "\"matrix_entries_scanned_uncharged\"",
+        "\"matrix_multiply_subtracts_uncharged\"",
+        "\"matrix_normalizations_uncharged\"",
+        "\"raw_x_lifts_uncharged\"",
+        "\"scalar_inversions_uncharged\"",
+        "\"scalar_products_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_probes_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "existing-orbit-c4",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 20,
+        "matrix_rows": 20,
+        "matrix_work": 244,
+        "relations_found": 20,
+        "targets_tried": 25
+      },
+      "curve": "icv1-f2m31-tm90707-c95f16f5",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h0eba3f728241"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": 2.4329279715757886,
+      "mean_cold_gae": 2548.94842375,
+      "mean_s": 2.1245715166115837,
+      "min_s": 1.85960355858962,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.7759686665858294,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "factor_base": 422.983744,
+        "linear_algebra": 0.414983,
+        "oracle_setup": 620.0,
+        "relations": 1479.79969675,
+        "verify": 25.75
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"abscissae_scanned_uncharged\"",
+        "\"curve_equation_checks_uncharged\"",
+        "\"factor_base_vec_bytes_floor_uncharged\"",
+        "\"factor_point_inserts_uncharged\"",
+        "\"hash_probes_uncharged\"",
+        "\"inversions_uncharged\"",
+        "\"legacy_as_solves_uncharged\"",
+        "\"lift_field_multiplies_uncharged\"",
+        "\"lift_field_squares_uncharged\"",
+        "\"min_key_field_squares_uncharged\"",
+        "\"point_lifts_uncharged\"",
+        "\"point_negations_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "orbit-c4",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 5675,
+        "factor_base_columns": 16,
+        "factor_base_signed_points": 992,
+        "frobenius_maps_uncharged": 2499,
+        "independent_rows": 19,
+        "matrix_entries_scanned_uncharged": 342,
+        "matrix_multiply_subtracts_uncharged": 184,
+        "matrix_normalizations_uncharged": 114,
+        "pair_visits": 3968,
+        "point_checked_relations": 19,
+        "rank": 19,
+        "raw_x_lifts_uncharged": 48,
+        "scalar_inversions_uncharged": 19,
+        "scalar_products_uncharged": 181,
+        "table_complete": 4,
+        "table_entries": 1916,
+        "table_inserts_uncharged": 3968,
+        "table_probes_uncharged": 1683,
+        "trials": 23
+      },
+      "curve": "icv1-f2m31-tm90707-c95f16f5",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h1d00788dd1ce"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": 2.2004638271977437,
+      "mean_cold_gae": 2239.5,
+      "mean_s": 1.8666434625035404,
+      "min_s": 1.7120275382818808,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.5603618306907945,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "factor_base": 105.0,
+        "linear_algebra": 0.0,
+        "oracle_setup": 992.0,
+        "target_PDP": 420.75,
+        "target_query": 324.25,
+        "target_relation_check": 397.5
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"frobenius_maps_uncharged\"",
+        "\"matrix_entries_scanned_uncharged\"",
+        "\"matrix_multiply_subtracts_uncharged\"",
+        "\"matrix_normalizations_uncharged\"",
+        "\"raw_x_lifts_uncharged\"",
+        "\"scalar_inversions_uncharged\"",
+        "\"scalar_products_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_probes_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 1441,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 1,
+        "partition_hashes_uncharged": 1211,
+        "scalar_multiplications": 140,
+        "table_entries": 103,
+        "table_inserts_uncharged": 103,
+        "table_queries_uncharged": 107,
+        "walk_steps": 1211,
+        "walks": 230,
+        "wasted_merges": 0
+      },
+      "curve": "icv1-f2m31-tm90707-c95f16f5",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 1.2694292685745738,
+      "mean_cold_gae": 1435.2440286292708,
+      "mean_s": 1.1962888515910124,
+      "min_s": 1.1360678245019833,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "search": 453.3066310253661,
+        "setup": 981.9373976039049
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho-aa",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 1441,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 1,
+        "partition_hashes_uncharged": 1211,
+        "scalar_multiplications": 140,
+        "table_entries": 103,
+        "table_inserts_uncharged": 103,
+        "table_queries_uncharged": 107,
+        "walk_steps": 1211,
+        "walks": 230,
+        "wasted_merges": 0
+      },
+      "curve": "icv1-f2m31-tm90707-c95f16f5",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 1.2694292685745738,
+      "mean_cold_gae": 1435.2440286292708,
+      "mean_s": 1.1962888515910124,
+      "min_s": 1.1360678245019833,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "search": 453.3066310253661,
+        "setup": 981.9373976039049
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-ladder",
+      "session_id": "ECBS1ha17d4a7fcedc",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    }
+  ],
+  "session": "orbit-ladder"
+}

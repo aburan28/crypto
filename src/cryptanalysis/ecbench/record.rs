@@ -385,6 +385,13 @@ pub fn json_roundtrip(x: f64) -> f64 {
 /// records and all bounds derived from them retain the former result. Keep
 /// that protocol behavior explicit instead of depending on a crate feature.
 pub(crate) fn legacy_json_float(x: f64) -> Option<f64> {
+    legacy_decimal_token(&serde_json::to_string(&x).ok()?)
+}
+
+/// Parse the token itself. Kept separate from the serialize/parse contract
+/// above: distinct decimal tokens may round to the same input f64 but yield
+/// different historical integer-significand results.
+fn legacy_decimal_token(encoded: &str) -> Option<f64> {
     // The historical serde_json non-float_roundtrip path uses all309
     // literal powers, not just the first23. Keeping the old entries intact
     // preserves existing v1 values; the wider domain admits tiny N83 S.
@@ -414,10 +421,9 @@ pub(crate) fn legacy_json_float(x: f64) -> Option<f64> {
         1e301, 1e302, 1e303, 1e304, 1e305, 1e306, 1e307, 1e308,
     ];
 
-    let encoded = serde_json::to_string(&x).ok()?;
     let (negative, unsigned) = encoded
         .strip_prefix('-')
-        .map_or((false, encoded.as_str()), |rest| (true, rest));
+        .map_or((false, encoded), |rest| (true, rest));
     let (mantissa, explicit_exponent) =
         unsigned
             .split_once(['e', 'E'])
@@ -749,6 +755,36 @@ pub fn grade(g: &GradeInput) -> Grade {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn full_exponent_domain_matches_independent_historical_reader() {
+        let reference: Value = serde_json::from_str(include_str!(
+            "../../../research/ecbench_leads_20261015/decimal-reference.json"
+        ))
+        .unwrap();
+        for row in reference["rows"].as_array().unwrap() {
+            let token = row["token"].as_str().unwrap();
+            let actual = legacy_decimal_token(token).map(|x| format!("{:016x}", x.to_bits()));
+            assert_eq!(
+                actual.as_deref(),
+                row["historical_bits"].as_str(),
+                "{token}"
+            );
+        }
+        // The actual N83 record token is also the measurement serializer's
+        // canonical token, so its replay roundtrip must match this exact bit.
+        assert_eq!(
+            json_roundtrip(1.5030185107919957e-7).to_bits(),
+            0x3e842c551041b667
+        );
+        let x = 1.2345678901234567e-9;
+        let canonical = serde_json::to_string(&x).unwrap();
+        assert_ne!(canonical, "1.2345678901234567e-9");
+        assert_eq!(
+            json_roundtrip(x).to_bits(),
+            legacy_decimal_token(&canonical).unwrap().to_bits()
+        );
+    }
 
     #[derive(Deserialize)]
     struct LegacyFloatFixture {

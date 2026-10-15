@@ -1,0 +1,30 @@
+| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | med wall ms | levels |
+|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---:|---|
+| ECBS1h9debc1b32fb8 | rho | rho.negation | icv1-fp16-t295-8d3c3165 | 15.70 | 8/8 | 2.314 | [1.597, 3.286] | 0.886 | 2.611 | 2.611 | 1.000 | yes | 1.902 | L0×8 |
+| ECBS1h9debc1b32fb8 | rho | rho.negation | icv1-fp18-tm337-d28d5e09 | 17.70 | 8/8 | 1.526 | [1.157, 1.884] | 0.886 | 1.721 | 1.721 | 1.000 | yes | 1.680 | L0×8 |
+| ECBS1h9debc1b32fb8 | rho | rho.negation | icv1-fp20-t727-cd198a38 | 19.10 | 8/8 | 1.468 | [1.018, 1.940] | 0.886 | 1.657 | 1.657 | 1.000 | yes | 2.193 | L0×8 |
+| ECBS1h9debc1b32fb8 | rho | rho.negation | icv1-fp22-tm1385-475dcb5f | 21.22 | 8/8 | 0.938 | [0.648, 1.216] | 0.886 | 1.058 | 1.058 | 1.000 | yes | 2.914 | L0×8 |
+| ECBS1h9debc1b32fb8 | rho-aa | rho.negation | icv1-fp16-t295-8d3c3165 | 15.70 | 8/8 | 2.314 | [1.597, 3.286] | 0.886 | 2.611 | 2.611 | 1.000 | yes | 2.681 | L0×8 |
+| ECBS1h9debc1b32fb8 | rho-aa | rho.negation | icv1-fp18-tm337-d28d5e09 | 17.70 | 8/8 | 1.526 | [1.157, 1.884] | 0.886 | 1.721 | 1.721 | 1.000 | yes | 2.447 | L0×8 |
+| ECBS1h9debc1b32fb8 | rho-aa | rho.negation | icv1-fp20-t727-cd198a38 | 19.10 | 8/8 | 1.468 | [1.018, 1.940] | 0.886 | 1.657 | 1.657 | 1.000 | yes | 2.009 | L0×8 |
+| ECBS1h9debc1b32fb8 | rho-aa | rho.negation | icv1-fp22-tm1385-475dcb5f | 21.22 | 8/8 | 0.938 | [0.648, 1.216] | 0.886 | 1.058 | 1.058 | 1.000 | yes | 3.291 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs16-mitm2 | ic.pipeline_counted | icv1-fp16-t295-8d3c3165 | 15.70 | 8/8 | 11.025 | [9.228, 12.548] | – | – | 12.441 | 4.765 | yes | 0.370 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs16-mitm2 | ic.pipeline_counted | icv1-fp18-tm337-d28d5e09 | 17.70 | 8/8 | 14.325 | [11.821, 16.643] | – | – | 16.165 | 9.391 | yes | 0.883 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs16-mitm2 | ic.pipeline_counted | icv1-fp20-t727-cd198a38 | 19.10 | 8/8 | 22.584 | [17.450, 27.854] | – | – | 25.483 | 15.380 | yes | 2.013 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs16-mitm2 | ic.pipeline_counted | icv1-fp22-tm1385-475dcb5f | 21.22 | 8/8 | 37.402 | [30.630, 44.079] | – | – | 42.204 | 39.880 | yes | 9.391 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs32-mitm2 | ic.pipeline_counted | icv1-fp16-t295-8d3c3165 | 15.70 | 8/8 | 10.343 | [10.038, 10.700] | – | – | 11.671 | 4.470 | yes | 0.279 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs32-mitm2 | ic.pipeline_counted | icv1-fp18-tm337-d28d5e09 | 17.70 | 8/8 | 10.506 | [9.287, 11.725] | – | – | 11.855 | 6.887 | yes | 0.600 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs32-mitm2 | ic.pipeline_counted | icv1-fp20-t727-cd198a38 | 19.10 | 8/8 | 11.020 | [9.072, 12.624] | – | – | 12.434 | 7.504 | yes | 1.156 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs32-mitm2 | ic.pipeline_counted | icv1-fp22-tm1385-475dcb5f | 21.22 | 8/8 | 18.494 | [14.409, 22.787] | – | – | 20.868 | 19.719 | yes | 3.520 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs64-mitm2 | ic.pipeline_counted | icv1-fp16-t295-8d3c3165 | 15.70 | 8/8 | 22.925 | [22.587, 23.265] | – | – | 25.868 | 9.908 | yes | 0.392 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs64-mitm2 | ic.pipeline_counted | icv1-fp18-tm337-d28d5e09 | 17.70 | 8/8 | 13.737 | [13.117, 14.363] | – | – | 15.501 | 9.005 | yes | 0.596 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs64-mitm2 | ic.pipeline_counted | icv1-fp20-t727-cd198a38 | 19.10 | 8/8 | 9.744 | [9.005, 10.439] | – | – | 10.995 | 6.636 | yes | 0.687 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs64-mitm2 | ic.pipeline_counted | icv1-fp22-tm1385-475dcb5f | 21.22 | 8/8 | 10.811 | [9.421, 12.084] | – | – | 12.199 | 11.528 | yes | 2.098 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs128-mitm2 | ic.pipeline_counted | icv1-fp16-t295-8d3c3165 | 15.70 | 8/8 | 75.957 | [75.794, 76.124] | – | – | 85.708 | 32.829 | yes | 0.892 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs128-mitm2 | ic.pipeline_counted | icv1-fp18-tm337-d28d5e09 | 17.70 | 8/8 | 38.883 | [38.734, 39.025] | – | – | 43.875 | 25.489 | yes | 1.086 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs128-mitm2 | ic.pipeline_counted | icv1-fp20-t727-cd198a38 | 19.10 | 8/8 | 25.293 | [24.947, 25.532] | – | – | 28.540 | 17.224 | yes | 1.196 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs128-mitm2 | ic.pipeline_counted | icv1-fp22-tm1385-475dcb5f | 21.22 | 8/8 | 15.139 | [14.524, 15.751] | – | – | 17.082 | 16.142 | yes | 1.607 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs64-subtract3 | ic.pipeline_counted | icv1-fp16-t295-8d3c3165 | 15.70 | 8/8 | 23.720 | [23.567, 23.893] | – | – | 26.766 | 10.252 | yes | 0.443 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs64-subtract3 | ic.pipeline_counted | icv1-fp18-tm337-d28d5e09 | 17.70 | 8/8 | 18.992 | [18.335, 19.656] | – | – | 21.430 | 12.450 | yes | 0.579 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs64-subtract3 | ic.pipeline_counted | icv1-fp20-t727-cd198a38 | 19.10 | 8/8 | 21.596 | [20.590, 22.585] | – | – | 24.368 | 14.707 | yes | 0.807 | L0×8 |
+| ECBS1h9debc1b32fb8 | abs64-subtract3 | ic.pipeline_counted | icv1-fp22-tm1385-475dcb5f | 21.22 | 8/8 | 38.589 | [34.831, 42.949] | – | – | 43.543 | 41.145 | yes | 2.170 | L0×8 |

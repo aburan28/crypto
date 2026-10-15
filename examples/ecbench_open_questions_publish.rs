@@ -10,21 +10,213 @@ use std::{
     process::Command,
 };
 
+#[path = "ecbench_leads_findings.rs"]
+mod lead_findings;
+
 const BASE: &str = "f9011e5375155bd9ef7839abe4eea12718e4b401";
+const INCOMING_BASE: &str = "fd8bcacf4cc097cc0dcb55ba068ad94a3d3202ae";
 const STUDY: &str = "research/ecbench_open_questions_20261014";
+const LEADS: &str = "research/ecbench_leads_20261015";
+
+fn studies() -> Result<Vec<(String, Value)>, String> {
+    let mut studies = vec![(STUDY.into(), read(Path::new(STUDY).join("summary.json"))?)];
+    if Path::new(LEADS).join("summary.json").exists() {
+        studies.push((LEADS.into(), read(Path::new(LEADS).join("summary.json"))?));
+    }
+    Ok(studies)
+}
 
 fn read(path: impl AsRef<Path>) -> Result<Value, String> {
     serde_json::from_slice(&fs::read(path).map_err(|e| e.to_string())?).map_err(|e| e.to_string())
 }
 fn baseline(path: &str) -> Result<String, String> {
+    baseline_at(BASE, path)
+}
+fn baseline_at(commit: &str, path: &str) -> Result<String, String> {
     let out = Command::new("git")
-        .args(["show", &format!("{BASE}:{path}")])
+        .args(["show", &format!("{commit}:{path}")])
         .output()
         .map_err(|e| e.to_string())?;
     if !out.status.success() {
         return Err(format!("cannot read frozen metadata {path}"));
     }
     String::from_utf8(out.stdout).map_err(|e| e.to_string())
+}
+
+/// Index new main sessions from their exact frozen bytes, without a new claim.
+fn browser_studies() -> Result<Vec<(String, Value)>, String> {
+    let mut studies = studies()?;
+    for study in [
+        "research/ecbench_frobenius_orbit_vs_rho_20261014",
+        "research/ecbench_rootfind_speedup_20261014",
+    ] {
+        let root = Path::new(study).join("sessions");
+        if !root.exists() {
+            continue;
+        }
+        let mut dirs: Vec<_> = fs::read_dir(root)
+            .map_err(|e| e.to_string())?
+            .map(|e| e.map(|e| e.path()))
+            .collect::<Result<_, _>>()
+            .map_err(|e| e.to_string())?;
+        dirs.sort();
+        let mut sessions = Vec::new();
+        let mut rows = Vec::new();
+        for dir in dirs {
+            let path = dir.join("records.jsonl");
+            if !path.exists() {
+                continue;
+            }
+            let name = dir.file_name().unwrap().to_str().unwrap();
+            let bytes = fs::read(&path).map_err(|e| e.to_string())?;
+            let path_text = path.to_str().ok_or("non UTF8 source path")?;
+            if sha256_hex(&bytes) != sha256_hex(baseline_at(INCOMING_BASE, path_text)?.as_bytes()) {
+                return Err(format!("incoming-main evidence changed: {path_text}"));
+            }
+            let session = read(dir.join("session.json"))?;
+            if session["records_sha256"] != sha256_hex(&bytes) {
+                return Err("incoming-main session digest mismatch".into());
+            }
+            let mut groups = BTreeMap::<(String, String), Vec<Value>>::new();
+            let mut total = 0;
+            let mut verified = 0;
+            for line in std::str::from_utf8(&bytes)
+                .map_err(|e| e.to_string())?
+                .lines()
+            {
+                let r: Value = serde_json::from_str(line).map_err(|e| e.to_string())?;
+                let id = r["record_id"].as_str().ok_or("missing record id")?;
+                let blank =
+                    line.replacen(&format!("\"record_id\":\"{id}\""), "\"record_id\":\"\"", 1);
+                if id != format!("ECR1h{}", &sha256_hex(blank.as_bytes())[..12]) {
+                    return Err("incoming-main record seal mismatch".into());
+                }
+                total += 1;
+                if r["outcome"]["status"] == "verified" {
+                    verified += 1;
+                }
+                if r["warmup"] == false {
+                    groups
+                        .entry((
+                            r["workload"]["curve"]["slug"].as_str().unwrap().into(),
+                            r["arm"].as_str().unwrap().into(),
+                        ))
+                        .or_default()
+                        .push(r);
+                }
+            }
+            for ((curve, arm), records) in groups {
+                let good: Vec<_> = records
+                    .iter()
+                    .filter(|r| {
+                        r["outcome"]["status"] == "verified"
+                            && r["outcome"]["matches_target"] == true
+                    })
+                    .collect();
+                let mut statuses = BTreeMap::<String, usize>::new();
+                for r in &records {
+                    *statuses
+                        .entry(r["outcome"]["status"].as_str().unwrap().into())
+                        .or_default() += 1;
+                }
+                let mean = |key: &str| {
+                    (!good.is_empty()).then(|| {
+                        good.iter()
+                            .map(|r| r["cost"][key].as_f64().unwrap())
+                            .sum::<f64>()
+                            / good.len() as f64
+                    })
+                };
+                rows.push(json!({"session":name,"session_id":session["session_id"],"curve":curve,"arm":arm,"records":records.len(),"verified":good.len(),
+                    "statuses":statuses,"mean_s":mean("s"),"mean_cold_gae":mean("total_gae"),"paired_complete_counted_ratio_candidate_over_rho":null,
+                    "scope":"preexisting main evidence indexed without a new claim or cost verdict"}));
+            }
+            sessions.push(json!({"name":name,"session_id":session["session_id"],"records":total,"verified_records":verified,"source_commit":INCOMING_BASE}));
+        }
+        studies.push((study.into(), json!({"sessions":sessions,"rows":rows})));
+    }
+    Ok(studies)
+}
+
+fn catalog_derivative_append_only(path: &str) -> Result<bool, String> {
+    if !matches!(
+        path,
+        "docs/curves/covers.json" | "docs/curves/cover-links.yaml"
+    ) {
+        return Ok(false);
+    }
+    let old: Value = serde_json::from_str(&baseline(path)?).map_err(|e| e.to_string())?;
+    let actual = read(path)?;
+    let additions = read("docs/curves/sources/ecbench-ten-questions.json")?;
+    let allowed: BTreeSet<_> = additions["curves"]
+        .as_array()
+        .ok_or("missing model additions")?
+        .iter()
+        .map(|r| r["slug"].as_str().unwrap())
+        .collect();
+    let mut expected = old.clone();
+    expected["registry_sha256"] = json!(sha256_hex(
+        &fs::read("docs/curves/registry.json").map_err(|e| e.to_string())?
+    ));
+    let old_rows = old["curves"]
+        .as_array()
+        .ok_or("missing old catalog derivatives")?;
+    let new_rows = actual["curves"]
+        .as_array()
+        .ok_or("missing current catalog derivatives")?;
+    if !old_rows.iter().all(|row| new_rows.contains(row)) {
+        return Ok(false);
+    }
+    let extra: Vec<_> = new_rows
+        .iter()
+        .filter(|row| !old_rows.contains(row))
+        .collect();
+    if extra.len() != allowed.len()
+        || !extra.iter().all(|r| {
+            allowed.contains(if path.ends_with(".json") {
+                r["slug"].as_str().unwrap_or("")
+            } else {
+                r["icv1_identity"]["slug"].as_str().unwrap_or("")
+            })
+        })
+    {
+        return Ok(false);
+    }
+    expected["curves"] = actual["curves"].clone();
+    if path.ends_with(".json") {
+        let total = |status: &str| new_rows.iter().filter(|r| r["status"] == status).count();
+        expected["summary"] = json!({"verified":total("verified_over_declared_field"),"unsupported":total("unsupported"),"invalid_input":total("invalid_input")});
+    } else {
+        for (kind, uid) in [("covers", "cover_uid"), ("maps", "map_uid")] {
+            let a = old[kind].as_object().ok_or("missing old graph objects")?;
+            let b = actual[kind].as_object().ok_or("missing graph objects")?;
+            if !a.iter().all(|(k, v)| b.get(k) == Some(v)) {
+                return Ok(false);
+            }
+            let ids: BTreeSet<_> = extra
+                .iter()
+                .flat_map(|r| {
+                    r["cover_links"]
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .map(|l| l[uid].as_str().unwrap())
+                })
+                .collect();
+            let new_ids: BTreeSet<_> = b
+                .keys()
+                .filter(|k| !a.contains_key(*k))
+                .map(String::as_str)
+                .collect();
+            if ids != new_ids {
+                return Ok(false);
+            }
+            expected[kind] = actual[kind].clone();
+        }
+    }
+    // Construction validity and all graph identities are separately
+    // rederived by the unchanged native curve_cover_check --check in CI.
+    Ok(expected == actual)
 }
 fn guard_historical_sources() -> Result<(), String> {
     let browser: Value =
@@ -53,21 +245,22 @@ fn guard_historical_sources() -> Result<(), String> {
         }
     }
     // Never silently lose another campaign's newly committed sessions.
-    let summary = read(Path::new(STUDY).join("summary.json"))?;
     let mut indexed: BTreeSet<String> = browser["sources"]
         .as_object()
         .unwrap()
         .keys()
         .cloned()
         .collect();
-    for session in summary["sessions"]
-        .as_array()
-        .ok_or("missing campaign sessions")?
-    {
-        indexed.insert(format!(
-            "{STUDY}/sessions/{}/records.jsonl",
-            session["name"].as_str().ok_or("missing session name")?
-        ));
+    for (study, summary) in browser_studies()? {
+        for session in summary["sessions"]
+            .as_array()
+            .ok_or("missing campaign sessions")?
+        {
+            indexed.insert(format!(
+                "{study}/sessions/{}/records.jsonl",
+                session["name"].as_str().ok_or("missing session name")?
+            ));
+        }
     }
     let tracked = Command::new("git")
         .args([
@@ -102,6 +295,30 @@ fn guard_historical_sources() -> Result<(), String> {
         let actual =
             sha256_hex(&fs::read(&path).map_err(|e| format!("historical input {path}: {e}"))?);
         if actual != expected {
+            if catalog_derivative_append_only(&path)? {
+                continue;
+            }
+            if path == "docs/curves/registry.json" {
+                let mut expected: Value =
+                    serde_json::from_str(&baseline(&path)?).map_err(|e| e.to_string())?;
+                let additions = read("docs/curves/sources/ecbench-ten-questions.json")?;
+                for row in additions["curves"]
+                    .as_array()
+                    .ok_or("missing registry additions")?
+                {
+                    if !expected["curves"]
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .any(|r| r["slug"] == row["slug"])
+                    {
+                        expected["curves"].as_array_mut().unwrap().push(row.clone());
+                    }
+                }
+                if read(&path)? == expected {
+                    continue;
+                }
+            }
             return Err(format!(
                 "historical source changed: {path}; extend native regeneration before publication"
             ));
@@ -169,89 +386,105 @@ fn end_value(bytes: &[u8], i: usize) -> usize {
 }
 /// Validate through serde_json; retain byte formatting of unchanged rows.
 fn preserve(old: &str, new: &Value) -> String {
-    let previous: Value = serde_json::from_str(old).unwrap();
-    if &previous == new {
-        return old.to_string();
+    fn render(old: &str, new: &Value, depth: usize) -> String {
+        let previous = serde_json::from_str::<Value>(old).ok();
+        if previous.as_ref() == Some(new) {
+            return old.to_string();
+        }
+        let mut fields = Vec::<(String, &str)>::new();
+        let mut elements = Vec::<&str>::new();
+        if let Some(previous) = &previous {
+            if previous.is_object() || previous.is_array() {
+                let bytes = old.as_bytes();
+                let mut i = whitespace(bytes, 0) + 1;
+                let last = old.trim_end().len() - 1;
+                while {
+                    i = whitespace(bytes, i);
+                    i < last
+                } {
+                    if bytes[i] == b',' {
+                        i += 1;
+                        continue;
+                    }
+                    let key = if previous.is_object() {
+                        let stop = end_string(bytes, i);
+                        let key = serde_json::from_str::<String>(&old[i..stop]).unwrap();
+                        i = whitespace(bytes, stop) + 1;
+                        i = whitespace(bytes, i);
+                        Some(key)
+                    } else {
+                        None
+                    };
+                    let stop = end_value(bytes, i);
+                    if let Some(key) = key {
+                        fields.push((key, &old[i..stop]));
+                    } else {
+                        elements.push(&old[i..stop]);
+                    }
+                    i = stop;
+                }
+            }
+        }
+        let indent = " ".repeat(depth + 1);
+        match new {
+            Value::Object(map) if !map.is_empty() => {
+                let mut keys: Vec<_> = fields
+                    .iter()
+                    .map(|(k, _)| k.clone())
+                    .filter(|k| map.contains_key(k))
+                    .collect();
+                for key in map.keys() {
+                    if !keys.contains(key) {
+                        keys.push(key.clone());
+                    }
+                }
+                let lines: Vec<_> = keys
+                    .iter()
+                    .map(|key| {
+                        let old = fields
+                            .iter()
+                            .find(|(k, _)| k == key)
+                            .map_or("", |(_, v)| *v);
+                        format!(
+                            "{indent}{}: {}",
+                            serde_json::to_string(key).unwrap(),
+                            render(old, &map[key], depth + 1)
+                        )
+                    })
+                    .collect();
+                format!("{{\n{}\n{}}}", lines.join(",\n"), " ".repeat(depth))
+            }
+            Value::Array(values) if !values.is_empty() => {
+                let lines: Vec<_> = values
+                    .iter()
+                    .enumerate()
+                    .map(|(i, v)| {
+                        format!(
+                            "{indent}{}",
+                            render(elements.get(i).copied().unwrap_or(""), v, depth + 1)
+                        )
+                    })
+                    .collect();
+                format!("[\n{}\n{}]", lines.join(",\n"), " ".repeat(depth))
+            }
+            Value::Number(number) if number.is_f64() => {
+                let f = number.as_f64().unwrap();
+                if f != 0. && (f.abs() < 0.0001 || f.abs() >= 1e16) {
+                    let s = format!("{f:e}");
+                    let (m, e) = s.split_once('e').unwrap();
+                    format!("{m}e{:+03}", e.parse::<i32>().unwrap())
+                } else {
+                    number.to_string()
+                }
+            }
+            _ => new.to_string(),
+        }
     }
-    let b = old.as_bytes();
-    let first = whitespace(b, 0);
-    let last = old.trim_end().len() - 1;
-    let mut replacements = Vec::new();
-    let mut appended = Vec::new();
-    if let (Some(a), Some(n)) = (previous.as_object(), new.as_object()) {
-        if a.keys().any(|k| !n.contains_key(k)) {
-            return pretty(new);
-        }
-        let mut i = first + 1;
-        while {
-            i = whitespace(b, i);
-            i < last
-        } {
-            if b[i] == b',' {
-                i += 1;
-                continue;
-            }
-            let stop = end_string(b, i);
-            let key: String = serde_json::from_str(&old[i..stop]).unwrap();
-            i = whitespace(b, stop) + 1;
-            i = whitespace(b, i);
-            let end = end_value(b, i);
-            if a[&key] != n[&key] {
-                replacements.push((i, end, preserve(&old[i..end], &n[&key])));
-            }
-            i = end;
-        }
-        for (k, v) in n {
-            if !a.contains_key(k) {
-                appended.push(format!(
-                    "{}: {}",
-                    serde_json::to_string(k).unwrap(),
-                    pretty(v)
-                ));
-            }
-        }
-    } else if let (Some(a), Some(n)) = (previous.as_array(), new.as_array()) {
-        if n.len() < a.len() {
-            return pretty(new);
-        }
-        let mut i = first + 1;
-        let mut index = 0;
-        while {
-            i = whitespace(b, i);
-            i < last
-        } {
-            if b[i] == b',' {
-                i += 1;
-                continue;
-            }
-            let end = end_value(b, i);
-            if a[index] != n[index] {
-                replacements.push((i, end, preserve(&old[i..end], &n[index])));
-            }
-            index += 1;
-            i = end;
-        }
-        for v in &n[a.len()..] {
-            appended.push(pretty(v));
-        }
-    } else {
-        return pretty(new);
+    let mut output = render(old.trim_end(), new, 0);
+    if old.ends_with('\n') {
+        output.push('\n');
     }
-    let mut result = old.to_string();
-    if !appended.is_empty() {
-        let comma = if previous.as_array().is_some_and(Vec::is_empty)
-            || previous.as_object().is_some_and(serde_json::Map::is_empty)
-        {
-            ""
-        } else {
-            ","
-        };
-        result.insert_str(last, &format!("{comma}\n {}\n", appended.join(",\n ")));
-    }
-    for (start, end, value) in replacements.into_iter().rev() {
-        result.replace_range(start..end, &value);
-    }
-    result
+    output
 }
 fn write_or_check(path: &Path, bytes: &[u8], check: bool) -> Result<(), String> {
     if check {
@@ -331,7 +564,7 @@ fn yield_row(r: &Value) -> Value {
     }
     let params = &r["method"]["params"];
     let dec = &r["detail"]["decomposition"];
-    json!({"run_id":r["run_id"],"record_id":r["record_id"],"session_id":r["session_id"],"arm":r["arm"],"round":r["round"],
+    let mut result = json!({"run_id":r["run_id"],"record_id":r["record_id"],"session_id":r["session_id"],"arm":r["arm"],"round":r["round"],
         "status":r["outcome"]["status"],"curve":r["workload"]["curve"]["slug"],
         "log2_r":r["workload"]["curve"]["r"].as_f64().map(f64::log2),"target_index":r["workload"]["target_index"],"target":r["workload"]["target"],
         "method_id":r["method"]["method_id"],"fb_id":fb["fb_id"],"fb_family":fb["family"],"fb_params":fb["params"],"fb_columns":fb["columns"],"fb_signed_points":fb["signed_points"],
@@ -339,89 +572,188 @@ fn yield_row(r: &Value) -> Value {
         "summands":dec["summands"],"hit_rate":dec["hit_rate"],"trials":native["trials"],"relations":count,"yield":ratio(count,trials),"lookups":native["lookups"],"lookups_per_relation":ratio(lookups,count),
         "walk_steps":native["walk_steps"],"lift_failures":native["lift_failures"],"unliftable_systems":native["unliftable_systems"],"frobfold_mismatches":native["frobfold_mismatches"],
         "matrix_rows":la["native"]["rows"],"matrix_columns":la["native"]["columns"],"matrix_rank":la["native"]["rank"],"row_ops":la["native"]["row_ops"],
-        "gae":gae,"total_gae":r["cost"]["total_gae"],"s":r["cost"]["s"],"deterministic":r["cost"]["deterministic"],"solver":r["solver"]})
+        "gae":gae,"total_gae":r["cost"]["total_gae"],"s":r["cost"]["s"],"deterministic":r["cost"]["deterministic"],"solver":r["solver"]});
+    if r["method"]["id"] == "ic.orbit_rank_v1" {
+        let c = &r["counters"];
+        result["summands"] = json!(3);
+        result["trials"] = c["trials"].clone();
+        result["relations"] = c["point_checked_relations"].clone();
+        result["yield"] = json!(ratio(
+            c["point_checked_relations"].as_f64().or(Some(0.)),
+            c["trials"].as_f64()
+        ));
+        result["lookups"] = c["table_probes_uncharged"].clone();
+        result["matrix_rank"] = c["rank"].clone();
+        result["matrix_columns"] = c["factor_base_columns"]
+            .as_u64()
+            .map(|x| json!(x + 1))
+            .unwrap_or(Value::Null);
+        result["matrix_rows"] = c["point_checked_relations"]
+            .as_u64()
+            .map_or(json!(0), |x| json!(x));
+        result["row_ops"] = c["matrix_multiply_subtracts_uncharged"].clone();
+        result["native_counters"] = c.clone();
+        for p in r["phases"].as_array().unwrap() {
+            result["gae"][p["name"].as_str().unwrap()] = p["gae"].clone();
+        }
+    }
+    result
 }
-fn dashboard_browser(root: &Path, summary: &Value, check: bool) -> Result<(), String> {
+fn dashboard_browser(_root: &Path, _summary: &Value, check: bool) -> Result<(), String> {
     let mut data: Value =
         serde_json::from_str(&baseline("docs/browser/data.json")?).map_err(|e| e.to_string())?;
-    for s in summary["sessions"].as_array().unwrap() {
-        let name = s["name"].as_str().unwrap();
-        let dir = root.join("sessions").join(name);
-        let session = read(dir.join("session.json"))?;
-        let bytes = fs::read(dir.join("records.jsonl")).map_err(|e| e.to_string())?;
-        let mut status = BTreeMap::<String, u64>::new();
-        let mut curves = BTreeSet::new();
-        let mut arms = BTreeMap::new();
-        for line in std::str::from_utf8(&bytes)
-            .map_err(|e| e.to_string())?
-            .lines()
+    let additions = read("docs/curves/sources/ecbench-ten-questions.json")?;
+    for row in additions["curves"]
+        .as_array()
+        .ok_or("missing registered models")?
+    {
+        if data["curves"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|c| c["slug"] == row["slug"])
         {
-            let r: Value = serde_json::from_str(line).map_err(|e| e.to_string())?;
-            let slug = &r["workload"]["curve"]["slug"];
-            let m = &r["method"];
-            let id = &m["method_id"];
-            *status
-                .entry(r["outcome"]["status"].as_str().unwrap().into())
-                .or_default() += 1;
-            curves.insert(slug.as_str().unwrap().to_string());
-            arms.insert(
-                r["arm"].as_str().unwrap().to_string(),
-                json!({"arm":r["arm"],"role":r["role"],"method":m["id"],"method_id":id}),
-            );
-            let entry = upsert(
-                &mut data["methods"],
-                "method_id",
-                id,
-                json!({"method_id":id,"method_sha256":m["method_sha256"],"method":m["id"],"family":m["family"],"params":m["params"],"sessions":[],"curves":[],"runs":0,"verified":0}),
-            );
-            union(&mut entry["sessions"], session["session_id"].clone());
-            union(&mut entry["curves"], slug.clone());
-            entry["runs"] = json!(entry["runs"].as_u64().unwrap() + 1);
-            if r["outcome"]["status"] == "verified" {
-                entry["verified"] = json!(entry["verified"].as_u64().unwrap() + 1);
+            continue;
+        }
+        let rep = &row["representations"][0];
+        let order: f64 = row["order"]
+            .as_str()
+            .unwrap()
+            .parse()
+            .map_err(|_| "invalid model order")?;
+        let r: f64 = rep["curve"]["subgroup_order"]
+            .as_str()
+            .unwrap()
+            .parse()
+            .map_err(|_| "invalid subgroup")?;
+        let p: u64 = row["params"]["p"]
+            .as_str()
+            .unwrap()
+            .parse()
+            .map_err(|_| "invalid prime")?;
+        data["curves"].as_array_mut().unwrap().push(json!({"slug":row["slug"],"icv1":row["icv1"],
+            "family":"prime","field":{"characteristic":"p","p":row["params"]["p"],"bits":64-p.leading_zeros(),"degree":1,"modulus":null},
+            "a":row["params"]["a"],"b":row["params"]["b"],"trace":row["trace"],"order":row["order"],
+            "j":row["j"],"endomorphism_discriminant":null,"construction":row["params"]["generator_call"],
+            "order_bits":(order.log2()*1000.).round()/1000.,"r":rep["curve"]["subgroup_order"],"r_bits":(r.log2()*1000.).round()/1000.,
+            "cofactor":rep["curve"]["cofactor"],"generator":rep["curve"]["generator"],"ec1":[rep["ec1"]],"curve_uid":[rep["curve_uid"]],
+            "ec1_unresolved":null,"model_json":row["model_json"],"retired_names":row["aliases"],"standard_names":[],
+            "standards_provenance":[],"sources":row["sources"],"target_group":"prime-order subgroup", "leaderboard":[],
+            "on_leaderboard":false,"ecbench":[],"factor_bases":[],"tournament_cells":[],"hyperelliptic_cover":null,"cover_links":[]}));
+    }
+    for (study, summary) in browser_studies()? {
+        let root = Path::new(&study);
+        for s in summary["sessions"].as_array().unwrap() {
+            let name = s["name"].as_str().unwrap();
+            let dir = root.join("sessions").join(name);
+            let session = read(dir.join("session.json"))?;
+            let bytes = fs::read(dir.join("records.jsonl")).map_err(|e| e.to_string())?;
+            let mut status = BTreeMap::<String, u64>::new();
+            let mut curves = BTreeSet::new();
+            let mut arms = BTreeMap::new();
+            for line in std::str::from_utf8(&bytes)
+                .map_err(|e| e.to_string())?
+                .lines()
+            {
+                let r: Value = serde_json::from_str(line).map_err(|e| e.to_string())?;
+                let slug = &r["workload"]["curve"]["slug"];
+                let m = &r["method"];
+                let id = &m["method_id"];
+                *status
+                    .entry(r["outcome"]["status"].as_str().unwrap().into())
+                    .or_default() += 1;
+                curves.insert(slug.as_str().unwrap().to_string());
+                arms.insert(
+                    r["arm"].as_str().unwrap().to_string(),
+                    json!({"arm":r["arm"],"role":r["role"],"method":m["id"],"method_id":id}),
+                );
+                let entry = upsert(
+                    &mut data["methods"],
+                    "method_id",
+                    id,
+                    json!({"method_id":id,"method_sha256":m["method_sha256"],"method":m["id"],"family":m["family"],"params":m["params"],"sessions":[],"curves":[],"runs":0,"verified":0}),
+                );
+                union(&mut entry["sessions"], session["session_id"].clone());
+                union(&mut entry["curves"], slug.clone());
+                entry["runs"] = json!(entry["runs"].as_u64().unwrap() + 1);
+                if r["outcome"]["status"] == "verified" {
+                    entry["verified"] = json!(entry["verified"].as_u64().unwrap() + 1);
+                }
+                let fb = &r["factor_base"];
+                if !fb.is_null() {
+                    let mut new = fb.clone();
+                    new["curve"] = slug.clone();
+                    new["sessions"] = json!([]);
+                    new["methods"] = json!([]);
+                    let f = upsert(&mut data["factor_bases"], "fb_id", &fb["fb_id"], new);
+                    union(&mut f["sessions"], session["session_id"].clone());
+                    union(&mut f["methods"], id.clone());
+                    if let Some(c) = data["curves"]
+                        .as_array_mut()
+                        .unwrap()
+                        .iter_mut()
+                        .find(|c| &c["slug"] == slug)
+                    {
+                        union(&mut c["factor_bases"], fb["fb_id"].clone());
+                    }
+                }
+                if r["warmup"] == false && m["family"] == "ic" {
+                    data["yields"].as_array_mut().unwrap().push(yield_row(&r));
+                }
             }
-            let fb = &r["factor_base"];
-            if !fb.is_null() {
-                let mut new = fb.clone();
-                new["curve"] = slug.clone();
-                new["sessions"] = json!([]);
-                new["methods"] = json!([]);
-                let f = upsert(&mut data["factor_bases"], "fb_id", &fb["fb_id"], new);
-                union(&mut f["sessions"], session["session_id"].clone());
-                union(&mut f["methods"], id.clone());
+            for row in summary["rows"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .filter(|r| r["session"] == name)
+            {
+                let slug = &row["curve"];
+                let m = arms.get(row["arm"].as_str().unwrap()).unwrap();
                 if let Some(c) = data["curves"]
                     .as_array_mut()
                     .unwrap()
                     .iter_mut()
                     .find(|c| &c["slug"] == slug)
                 {
-                    union(&mut c["factor_bases"], fb["fb_id"].clone());
+                    c["ecbench"].as_array_mut().unwrap().push(json!({"session_id":session["session_id"],"arm":row["arm"],"method":m["method"],"method_id":m["method_id"],"runs":row["records"],"verified":row["verified"],"mean_s":row["mean_s"],"mean_ratio_to_floor":null,"scope":"counted-work diagnostic; unpriced native work; see campaign"}));
                 }
             }
-            if r["warmup"] == false && m["family"] == "ic" {
-                data["yields"].as_array_mut().unwrap().push(yield_row(&r));
-            }
+            data["sessions"].as_array_mut().unwrap().push(json!({"session_id":session["session_id"],"dir":format!("{study}/sessions/{name}"),"label":session["label"],"status":session["status"],"spec_id":session["spec_id"],"env_class_id":session["env_class_id"],"binary_sha256":session["binary_sha256"],"git_commit":session["git_commit"],"records":s["records"],"status_counts":status,"started_unix_ms":session["started_unix_ms"],"curves":curves,"arms":arms.values().collect::<Vec<_>>()}));
+            data["sources"][format!("{study}/sessions/{name}/records.jsonl")] =
+                json!(sha256_hex(&bytes));
         }
-        for row in summary["rows"]
+    }
+    let covers = read("docs/curves/covers.json")?;
+    let graph = read("docs/curves/cover-links.yaml")?;
+    for curve in data["curves"].as_array_mut().unwrap() {
+        let slug = &curve["slug"];
+        curve["hyperelliptic_cover"] = covers["curves"]
             .as_array()
             .unwrap()
             .iter()
-            .filter(|r| r["session"] == name)
-        {
-            let slug = &row["curve"];
-            let m = arms.get(row["arm"].as_str().unwrap()).unwrap();
-            if let Some(c) = data["curves"]
-                .as_array_mut()
-                .unwrap()
-                .iter_mut()
-                .find(|c| &c["slug"] == slug)
-            {
-                c["ecbench"].as_array_mut().unwrap().push(json!({"session_id":session["session_id"],"arm":row["arm"],"method":m["method"],"method_id":m["method_id"],"runs":row["records"],"verified":row["verified"],"mean_s":row["mean_s"],"mean_ratio_to_floor":null,"scope":"counted-work diagnostic; unpriced native work; see campaign"}));
-            }
-        }
-        data["sessions"].as_array_mut().unwrap().push(json!({"session_id":session["session_id"],"dir":format!("{STUDY}/sessions/{name}"),"label":session["label"],"status":session["status"],"spec_id":session["spec_id"],"env_class_id":session["env_class_id"],"binary_sha256":session["binary_sha256"],"git_commit":session["git_commit"],"records":s["records"],"status_counts":status,"started_unix_ms":session["started_unix_ms"],"curves":curves,"arms":arms.values().collect::<Vec<_>>()}));
-        data["sources"][format!("{STUDY}/sessions/{name}/records.jsonl")] =
-            json!(sha256_hex(&bytes));
+            .find(|c| &c["slug"] == slug)
+            .ok_or("missing native cover finding")?
+            .clone();
+        let node = graph["curves"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|n| n["icv1_identity"]["slug"] == curve["slug"])
+            .ok_or("missing native cover graph node")?;
+        let links: Vec<_> = node["cover_links"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|link| {
+                let mut value = link.clone();
+                value["cover_id"] =
+                    graph["covers"][link["cover_uid"].as_str().unwrap()]["cover_id"].clone();
+                value["map_id"] =
+                    graph["maps"][link["map_uid"].as_str().unwrap()]["map_id"].clone();
+                value
+            })
+            .collect();
+        curve["cover_links"] = json!(links);
     }
     for key in [
         "curves",
@@ -434,11 +766,26 @@ fn dashboard_browser(root: &Path, summary: &Value, check: bool) -> Result<(), St
     ] {
         data["counts"][key] = json!(data[key].as_array().unwrap().len());
     }
+    for (kind,name,what) in [
+        ("oracles","pdp3-koblitz-v2 / pdp3-binary-v2","Versioned complete chained-system shape; solver calls and old adapter counts preserved."),
+        ("oracles","ic.orbit_rank_v1","Width-generic exact direct or signed-Frobenius quotient pair tables, full-point witness checks and modular target pinning; native work unpriced."),
+        ("factor_base_families","projected-raw-x-orbits-v1","Raw-x lifts projected by the cofactor, retaining distinct signed Frobenius orbits with unknown logarithms.")
+    ] {
+        if !data["vocabulary"][kind].as_array().unwrap().iter().any(|v|v["name"]==name) {
+            data["vocabulary"][kind].as_array_mut().unwrap().push(json!({"name":name,"where":"native ecbench","what":what}));
+        }
+    }
     data["sources"]["docs/ic/leaderboard.json"] = json!(sha256_hex(
         &fs::read("docs/ic/leaderboard.json").map_err(|e| e.to_string())?
     ));
+    data["sources"]["docs/curves/registry.json"] = json!(sha256_hex(
+        &fs::read("docs/curves/registry.json").map_err(|e| e.to_string())?
+    ));
+    for path in ["docs/curves/covers.json", "docs/curves/cover-links.yaml"] {
+        data["sources"][path] = json!(sha256_hex(&fs::read(path).map_err(|e| e.to_string())?));
+    }
     data["generated_by"]=json!("examples/ecbench_open_questions_publish.rs (native augmentation of frozen historical metadata)");
-    data["native_campaign"] = json!({"baseline_commit":BASE,"summary":format!("{STUDY}/summary.json"),"scope":"all nine new sessions and all attempts; historical source arrays retained without recomputing their analyses"});
+    data["native_campaign"] = json!({"baseline_commit":BASE,"incoming_main_commit":INCOMING_BASE,"scope":"all campaign/follow-up sessions and incoming-main sessions indexed; historical scientific analyses retained"});
     update_json("docs/browser/data.json", &data, check)
 }
 fn table(rows: &[Value]) -> String {
@@ -458,8 +805,8 @@ fn table(rows: &[Value]) -> String {
     }
     out
 }
-fn section(rows: &[Value]) -> String {
-    let mut out=format!("<section id=\"ecbench-ten-questions-20261014\"><h2>Ten open questions: native ecbench diagnostics, 2026-10-14</h2><p>937 attempts; counts and failures preserved. Lower-bound count quotients do not bound full-cost ratios. L0 wall measurements are inadmissible. Degree83 IC remains unsupported. <a href=\"../{STUDY}/REPORT.md\">Report, sources and remaining obligations</a>.</p><div class=\"scroll\"><table><thead><tr><th>Curve</th><th>Arm</th><th>Verified / attempts</th><th>Mean cold S</th><th>Counted IC / rho</th><th>Status</th></tr></thead><tbody>");
+fn section(rows: &[Value], id: &str, title: &str, intro: &str, study: &str) -> String {
+    let mut out=format!("<section id=\"{}\"><h2>{}</h2><p>{} Count quotients do not bound full-cost ratios. L0 wall measurements are inadmissible. <a href=\"../{study}/REPORT.md\">Report, sources and remaining obligations</a>.</p><div class=\"scroll\"><table><thead><tr><th>Curve</th><th>Arm</th><th>Verified / attempts</th><th>Mean cold S</th><th>Counted IC / rho</th><th>Status</th></tr></thead><tbody>",html(id),html(title),html(intro));
     for r in rows {
         let _ = write!(
             out,
@@ -474,7 +821,7 @@ fn section(rows: &[Value]) -> String {
         );
     }
     out.push_str("</tbody></table></div></section>\n");
-    out
+    out.replace("class=\"scroll\"","class=\"table-scroll\" style=\"overflow-x:auto\"")
 }
 
 fn generate(check: bool) -> Result<(), String> {
@@ -626,30 +973,63 @@ fn generate(check: bool) -> Result<(), String> {
         check,
     )?;
     let rows = summary["rows"].as_array().unwrap();
-    let block = section(rows);
-    for path in [
-        "docs/index-calculus-scoreboard.html",
-        "docs/ic-leaderboard.html",
-    ] {
-        let output = baseline(path)?.replacen("</body>", &format!("{block}</body>"), 1);
-        write_or_check(Path::new(path), output.as_bytes(), check)?;
+    let mut block=section(rows,"ecbench-ten-questions-20261014","Ten open questions: native ecbench diagnostics, 2026-10-14","937 attempts; historical counted pipeline refused wide IC. All original resolutions remain partial.",STUDY);
+    for (study, summary) in studies()?.into_iter().filter(|(p, _)| p != STUDY) {
+        let attempts: u64 = summary["sessions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|s| s["records"].as_u64().unwrap())
+            .sum();
+        block.push_str(&section(summary["rows"].as_array().unwrap(),"ecbench-leads-20261015","Pursuing the leads: versioned shape and width-generic IC, 2026-10-15",
+            &format!("{attempts} fresh public-target attempts; exact E0 degree83 bounded IC is executable. Successful N83 recovery and the mathematical gates remain open."),&study));
     }
+    let output = baseline_at(INCOMING_BASE, "docs/index-calculus-scoreboard.html")?.replacen(
+        "</body>",
+        &format!("{block}</body>"),
+        1,
+    );
+    write_or_check(
+        Path::new("docs/index-calculus-scoreboard.html"),
+        output.as_bytes(),
+        check,
+    )?;
+    write_or_check(
+        Path::new("docs/ic/ecbench-diagnostics.fragment.html"),
+        block.as_bytes(),
+        check,
+    )?;
     let mut leaderboard: Value =
         serde_json::from_str(&baseline("docs/ic/leaderboard.json")?).map_err(|e| e.to_string())?;
-    leaderboard["diagnostic_campaigns"] = json!([{"id":"ecbench-ten-questions-20261014","scope":"partial counted-work diagnostics, no fully priced ratios","source":format!("{STUDY}/summary.json"),"sha256":sha256_hex(&fs::read(root.join("summary.json")).map_err(|e|e.to_string())?),"rows":rows}]);
+    leaderboard["diagnostic_campaigns"] = json!(studies()?.iter().map(|(p,s)|Ok(json!({"id":p,"scope":"partial counted-work diagnostics, no fully priced ratios","source":format!("{p}/summary.json"),"sha256":sha256_hex(&fs::read(Path::new(p).join("summary.json")).map_err(|e|e.to_string())?),"rows":s["rows"]}))).collect::<Result<Vec<Value>,String>>()?);
+    leaderboard["sources"]["registry"]["sha256"] = json!(sha256_hex(
+        &fs::read("docs/curves/registry.json").map_err(|e| e.to_string())?
+    ));
     leaderboard["native_augmentation"] = json!({"generator":"examples/ecbench_open_questions_publish.rs","baseline_commit":BASE,"historical_analyses_recomputed":false});
     update_json("docs/ic/leaderboard.json", &leaderboard, check)?;
     let mut timeline: Value = serde_json::from_str(&baseline("docs/ic/progress-timeline.json")?)
         .map_err(|e| e.to_string())?;
     let points:Vec<_>=rows.iter().filter(|r|r["arm"]!="rho" && r["arm"]!="rho-aa" && !r["paired_complete_counted_ratio_candidate_over_rho"].is_null()).map(|r|json!({"date":"2026-10-14","value":r["paired_complete_counted_ratio_candidate_over_rho"],"reference":"matched","label":format!("{} / {}",r["curve"].as_str().unwrap(),r["arm"].as_str().unwrap()),"detail":"paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger","class":"accounting","anchor":"#ecbench-ten-questions-20261014","source":format!("https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/{STUDY}/REPORT.md")})).collect();
     timeline["series"].as_array_mut().unwrap().push(json!({"id":"ec-ten-question-counts","label":"Ten-question campaign: counted diagnostics","role":"diagnostic","barrier_test":false,"points":points}));
-    timeline["updated"] = json!("2026-10-14");
+    for (study, summary) in studies()?.into_iter().filter(|(p, _)| p != STUDY) {
+        let points:Vec<_>=summary["rows"].as_array().unwrap().iter().filter(|r|!r["arm"].as_str().unwrap().starts_with("rho") && !r["paired_complete_counted_ratio_candidate_over_rho"].is_null())
+            .map(|r|json!({"date":"2026-10-15","value":r["paired_complete_counted_ratio_candidate_over_rho"],"reference":"matched","label":format!("{} / {}",r["curve"].as_str().unwrap(),r["arm"].as_str().unwrap()),"detail":"bounded counted quotient only; full costs and wall result unknown","class":"accounting","anchor":"#ecbench-leads-20261015","source":format!("https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/{study}/REPORT.md")})).collect();
+        timeline["series"].as_array_mut().unwrap().push(json!({"id":"ec-ten-question-leads","label":"Follow-up: counted diagnostics","role":"diagnostic","barrier_test":false,"points":points}));
+    }
+    timeline["updated"] = json!(if Path::new(LEADS).join("summary.json").exists() {
+        "2026-10-15"
+    } else {
+        "2026-10-14"
+    });
     update_json("docs/ic/progress-timeline.json", &timeline, check)?;
     dashboard_browser(root, &summary, check)?;
     Ok(())
 }
 pub fn main() -> Result<(), String> {
     let args: Vec<_> = std::env::args().skip(1).collect();
+    if args == ["--followup-findings"] {
+        return lead_findings::main();
+    }
     if args == ["--historical-inputs"] {
         return guard_historical_sources();
     }

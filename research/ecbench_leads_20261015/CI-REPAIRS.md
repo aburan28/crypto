@@ -19,3 +19,13 @@ in [comment6184186354](https://github.com/aburan28/crypto/pull/1853#issuecomment
 The native follow-up work proceeds in new source/report paths. A conflict in
 frozen evidence is reported, not resolved by choosing a side. No merge is
 admitted until the exact final head satisfies the applicable CI/review gates.
+
+After roughly50 minutes without a Copilot response, the author announced the
+AGENTS.md fallback, documented in comment6184777039, to integrate main locally
+without rebasing or force-pushing. Generated views preserve the incoming main
+scoreboard and index its12 previously added ecbench sessions from their exact
+fd8bcacf4 bytes, separately from this task's373 new attempts. No new verdict is
+derived for those earlier sessions. Historical scientific source arrays remain
+pinned to f9011e5; catalog additions preserve old entries and get an unchanged
+native cover-certificate check. The existing catalog prose renderer only lays
+out the native-generated document and diagnostic fragment.

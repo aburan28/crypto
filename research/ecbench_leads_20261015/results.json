@@ -1,0 +1,193 @@
+{
+  "all_audits_ok": true,
+  "asymptotic_claim": false,
+  "attempts": 373,
+  "failed_replays": 37,
+  "fully_priced_speedup": null,
+  "original_questions_resolved": 0,
+  "schema": "ecbench-leads-results/v1",
+  "shape_pair_checks": [
+    {
+      "actual_equations": 26,
+      "actual_shape_verified": true,
+      "actual_variables": 22,
+      "engine": "f6-ic",
+      "legacy_equations": 13,
+      "legacy_variables": 9,
+      "round": "0",
+      "stable_outcome_counts": true,
+      "workload": "\"W3516af3d96c1\""
+    },
+    {
+      "actual_equations": 26,
+      "actual_shape_verified": true,
+      "actual_variables": 22,
+      "engine": "inherited-f4",
+      "legacy_equations": 13,
+      "legacy_variables": 9,
+      "round": "0",
+      "stable_outcome_counts": true,
+      "workload": "\"W3516af3d96c1\""
+    },
+    {
+      "actual_equations": 62,
+      "actual_shape_verified": true,
+      "actual_variables": 40,
+      "engine": "f6-ic",
+      "legacy_equations": 31,
+      "legacy_variables": 9,
+      "round": "0",
+      "stable_outcome_counts": true,
+      "workload": "\"W4f7ca313e835\""
+    },
+    {
+      "actual_equations": 62,
+      "actual_shape_verified": true,
+      "actual_variables": 40,
+      "engine": "inherited-f4",
+      "legacy_equations": 31,
+      "legacy_variables": 9,
+      "round": "0",
+      "stable_outcome_counts": true,
+      "workload": "\"W4f7ca313e835\""
+    },
+    {
+      "actual_equations": 46,
+      "actual_shape_verified": true,
+      "actual_variables": 32,
+      "engine": "f6-ic",
+      "legacy_equations": 23,
+      "legacy_variables": 9,
+      "round": "0",
+      "stable_outcome_counts": true,
+      "workload": "\"W5c812c8a31ed\""
+    },
+    {
+      "actual_equations": 46,
+      "actual_shape_verified": true,
+      "actual_variables": 32,
+      "engine": "inherited-f4",
+      "legacy_equations": 23,
+      "legacy_variables": 9,
+      "round": "0",
+      "stable_outcome_counts": true,
+      "workload": "\"W5c812c8a31ed\""
+    },
+    {
+      "actual_equations": 62,
+      "actual_shape_verified": true,
+      "actual_variables": 40,
+      "engine": "f6-ic",
+      "legacy_equations": 31,
+      "legacy_variables": 9,
+      "round": "0",
+      "stable_outcome_counts": true,
+      "workload": "\"W86dc07ec2633\""
+    },
+    {
+      "actual_equations": 62,
+      "actual_shape_verified": true,
+      "actual_variables": 40,
+      "engine": "inherited-f4",
+      "legacy_equations": 31,
+      "legacy_variables": 9,
+      "round": "0",
+      "stable_outcome_counts": true,
+      "workload": "\"W86dc07ec2633\""
+    },
+    {
+      "actual_equations": 26,
+      "actual_shape_verified": true,
+      "actual_variables": 22,
+      "engine": "f6-ic",
+      "legacy_equations": 13,
+      "legacy_variables": 9,
+      "round": "0",
+      "stable_outcome_counts": true,
+      "workload": "\"W90b52e4a599f\""
+    },
+    {
+      "actual_equations": 26,
+      "actual_shape_verified": true,
+      "actual_variables": 22,
+      "engine": "inherited-f4",
+      "legacy_equations": 13,
+      "legacy_variables": 9,
+      "round": "0",
+      "stable_outcome_counts": true,
+      "workload": "\"W90b52e4a599f\""
+    },
+    {
+      "actual_equations": 38,
+      "actual_shape_verified": true,
+      "actual_variables": 28,
+      "engine": "f6-ic",
+      "legacy_equations": 19,
+      "legacy_variables": 9,
+      "round": "0",
+      "stable_outcome_counts": true,
+      "workload": "\"Wce5bd9f13726\""
+    },
+    {
+      "actual_equations": 38,
+      "actual_shape_verified": true,
+      "actual_variables": 28,
+      "engine": "inherited-f4",
+      "legacy_equations": 19,
+      "legacy_variables": 9,
+      "round": "0",
+      "stable_outcome_counts": true,
+      "workload": "\"Wce5bd9f13726\""
+    },
+    {
+      "actual_equations": 38,
+      "actual_shape_verified": true,
+      "actual_variables": 28,
+      "engine": "f6-ic",
+      "legacy_equations": 19,
+      "legacy_variables": 9,
+      "round": "0",
+      "stable_outcome_counts": true,
+      "workload": "\"Wefbba5e89698\""
+    },
+    {
+      "actual_equations": 38,
+      "actual_shape_verified": true,
+      "actual_variables": 28,
+      "engine": "inherited-f4",
+      "legacy_equations": 19,
+      "legacy_variables": 9,
+      "round": "0",
+      "stable_outcome_counts": true,
+      "workload": "\"Wefbba5e89698\""
+    },
+    {
+      "actual_equations": 46,
+      "actual_shape_verified": true,
+      "actual_variables": 32,
+      "engine": "f6-ic",
+      "legacy_equations": 23,
+      "legacy_variables": 9,
+      "round": "0",
+      "stable_outcome_counts": true,
+      "workload": "\"Wf464034fed35\""
+    },
+    {
+      "actual_equations": 46,
+      "actual_shape_verified": true,
+      "actual_variables": 32,
+      "engine": "inherited-f4",
+      "legacy_equations": 23,
+      "legacy_variables": 9,
+      "round": "0",
+      "stable_outcome_counts": true,
+      "workload": "\"Wf464034fed35\""
+    }
+  ],
+  "statuses": {
+    "error": 1,
+    "exhausted": 36,
+    "verified": 336
+  },
+  "verified": 336
+}

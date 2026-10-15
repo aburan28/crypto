@@ -18,6 +18,8 @@ on:
     paths:
       - 'scripts/build_ic_leaderboard.py'
       - 'examples/ecbench_open_questions_publish.rs'
+      - 'examples/ecbench_leads*.rs'
+      - 'research/ecbench_leads_20261015/**'
       - 'research/ecbench_open_questions_20261014/**'
       - 'scripts/check_ic_leaderboard_paths.py'
       - 'scripts/test_check_ic_leaderboard_paths.py'
@@ -67,6 +69,8 @@ on:
     paths:
       - 'scripts/build_ic_leaderboard.py'
       - 'examples/ecbench_open_questions_publish.rs'
+      - 'examples/ecbench_leads*.rs'
+      - 'research/ecbench_leads_20261015/**'
       - 'research/ecbench_open_questions_20261014/**'
       - 'scripts/check_ic_leaderboard_paths.py'
       - 'scripts/test_check_ic_leaderboard_paths.py'
@@ -138,7 +142,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.98.0
       - name: Native campaign metadata and unchanged historical inputs
         run: |
-          git fetch --no-tags --depth=1 origin f9011e5375155bd9ef7839abe4eea12718e4b401
+          git fetch --no-tags --depth=1 origin f9011e5375155bd9ef7839abe4eea12718e4b401 fd8bcacf4cc097cc0dcb55ba068ad94a3d3202ae
           cargo run --release --locked --manifest-path research/ecbench_open_questions_20261014/native-publish/Cargo.toml -- --historical-inputs
           cargo run --release --locked --manifest-path research/ecbench_open_questions_20261014/native-publish/Cargo.toml -- --check
       - name: Historical leaderboard/browser generators still validate their frozen baseline

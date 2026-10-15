@@ -23,3 +23,13 @@ and measured binary identities separately. Original successful audits stay intac
 
 The registered IC algorithm is unchanged. A tiny counted S on an exhausted N83
 attempt is censored work, not an attack cost or a win against rho.
+
+The first full-library check retained4094 passes and one new reference-test
+failure. That test incorrectly identified raw-token parsing with the existing
+serialize/parse contract: `1.2345678901234567e-9` has a different canonical
+serialization, and the historical integer-significand parser can distinguish
+the two by one bit. Factor the raw-token parser from the serialize/parse wrapper.
+Check all14 unchanged historical reference bits on raw tokens and additionally
+check the exact actual N83 token through the replay roundtrip. No expected bit
+pattern or tolerance is changed. Preserve the failed library output separately
+and rerun the required checks.

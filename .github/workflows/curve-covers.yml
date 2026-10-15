@@ -61,4 +61,8 @@ jobs:
       - run: python3 scripts/update_curve_standards.py --check
       - run: cargo run --bin curve_cover_check -- --check
       - run: python3 scripts/test_cover_catalog.py
-      - run: python3 scripts/build_lab_browser.py --check
+      - name: Check native catalog and session browser additions
+        run: |
+          git fetch --no-tags --depth=1 origin f9011e5375155bd9ef7839abe4eea12718e4b401 fd8bcacf4cc097cc0dcb55ba068ad94a3d3202ae
+          cargo run --release --locked --manifest-path research/ecbench_open_questions_20261014/native-publish/Cargo.toml -- --historical-inputs
+          cargo run --release --locked --manifest-path research/ecbench_open_questions_20261014/native-publish/Cargo.toml -- --check
