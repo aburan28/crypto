@@ -359,7 +359,7 @@ jobs:
     if: always() && !cancelled()
     needs: [meta, scope]
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && 25 || 45 }}
+    timeout-minutes: 45
     steps:
       - name: Require successful scope classification
         if: needs.scope.result != 'success' || needs.meta.result != 'success'
