@@ -130,3 +130,29 @@ v40 Fp64 11.2 s / Fp52 4.45 s; v56 Fp64 11.9 s; P-224 N = 14 Fp224 7.96 s
 (FpWide<4> 7.92 s); torus P-192 N = 14 FpP192 5.07 s (FpWide<3> 5.21 s). The
 P-224 spare-bit and P-192 Solinas backends do not change the row kernel's
 cost in the engine, so no claim compares them.
+
+## 8. Addendum (committed before the runs it describes)
+
+**A. Deviation: the measured cells are re-run on a corrected binary.** The
+first depth run (`runs/depth-v1/`, binary sha256 `eb44c14b…3c36344`) finished
+every cell of §5. Its multiply-add counts at the wide backends depend on the
+backend: the engine sized its S-row blocks by the accumulator's width, and the
+block size decides which pivot reduces a row first (found when an
+IFMA-accumulator experiment, since removed, gave a different count from
+`Fp224` on one system with the same `D`, width and steps). The fix keeps the
+`u32` engine's block sizes for every backend; `a_larger_kummer_system_…`
+(now `N = 12`) tests it. §5 is re-run unchanged with the fixed binary into
+`runs/depth/`; v1 is kept and compared row for row (`D`, width, steps must
+be equal; only multiply-adds and times may differ). The speed arms (§4) and
+equality runs (§3) used `Fp32`, `Fp52` and `Fp64` cells whose accumulators
+are at most 16 bytes; they are not re-run (G2 covered `Fp64`/`Fp52`/`FpWide<4>`
+at `N ≤ 16`, and G3 the speed arms, all with 0 differences).
+
+**B. Extension cells (one random target, target 0; `run_ext.sh`).** Same
+settings as §5. Reference rows as in §6 (K1 at p₁ for `m = 2, N = 20`; M3 for
+`m = 3, N = 15`; M4 for `m = 4, N = 12`; T31 torus R1 for P-192 `N = 20`).
+1. Kummer `m = 2, N = 20` at v48, v56 and P-224.
+2. Kummer `m = 4, N = 12` at v40 and P-224.
+3. Kummer `m = 3, N = 15` at v40.
+4. Torus `m = 2, N = 20` at P-192.
+Decision rule §6 applies; a stopped cell is not valued.

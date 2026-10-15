@@ -24,7 +24,9 @@
 //!   `row_scatter_axpy` and sets its bitset in a separate pass.
 //!
 //! Because every value the control flow reads (a coefficient's being zero,
-//! a pivot's position, a row's length) is a field fact, the engine at one
+//! a pivot's position, a row's length) is a field fact, and the
+//! elimination's block and chunk sizes are the `u32` engine's whatever the
+//! accumulator's width, the engine at one
 //! prime gives the same report — solving degree, widths, steps,
 //! multiply-adds, basis — under every backend that can hold that prime,
 //! and at `Fp32` the same report as `f4_fp_tower`. The tests check both.
@@ -819,10 +821,10 @@ fn eliminate<F: PrimeField>(
     // 2 and 3. The S-rows, in chunks.
     let mut ech: Vec<Vec<F::Elem>> = vec![Vec::new(); nq];
     let mut leads: Vec<u32> = Vec::new();
-    // Accumulators sized to stay in cache, as in the `u32` engine, scaled
-    // by the accumulator's width.
-    let wide_bytes = std::mem::size_of::<F::Wide>().max(1);
-    let per_task = ((1usize << 18) / (wide_bytes * nq.max(1))).clamp(4, 64);
+    // The `u32` engine's block and chunk sizes, whatever the accumulator's
+    // width: they decide which pivots reduce which rows first, so they set
+    // the multiply-add count, and a report must not depend on the backend.
+    let per_task = ((1usize << 18) / (8 * nq.max(1))).clamp(4, 64);
     let chunk = per_task * 2 * rayon::current_num_threads().max(1);
     type Reduced<W> = (Vec<(Option<Vec<W>>, bool)>, u64);
     let all: Vec<usize> = (0..n_s).collect();
@@ -1887,7 +1889,7 @@ mod tests {
     fn a_larger_kummer_system_matches_the_u32_engine() {
         let mut rng = StdRng::seed_from_u64(77);
         for &p in &[2_013_265_921u64, 3_221_225_473] {
-            let t = 5usize;
+            let t = 6usize;
             let ring = random_ring(&mut rng, p, 2, t, 0, false);
             let n = ring.n_vars();
             let mut raw = Vec::new();
