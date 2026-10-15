@@ -73,6 +73,13 @@ def main() -> None:
     cargo = {name: blake3.blake3(subprocess.run(
         ["git", "show", f"{commit}:{name}"], cwd=ROOT,
         check=True, capture_output=True).stdout).hexdigest() for name in ("Cargo.toml", "Cargo.lock")}
+    frozen_plan = None
+    if not prepare_only:
+        frozen_plan = json.loads((HERE / "local-prepared.json").read_text())
+        if (frozen_plan.get("status") != "PREPARED_LOCAL_ONLY"
+                or frozen_plan.get("source_commit") != commit
+                or [row.get("dimension") for row in frozen_plan.get("rows", [])] != [12, 16, 18]):
+            raise ValueError("frozen local preparation differs")
     receipts = []
     prepared = []
     for dimension in (12, 16, 18):
@@ -132,6 +139,12 @@ def main() -> None:
                              "manifest_sha256": sha256(manifest_bytes), "manifest": manifest})
             print(json.dumps({"dimension": dimension, "status": "PREPARED_LOCAL_ONLY"}), flush=True)
             continue
+        assert frozen_plan is not None
+        frozen = frozen_plan["rows"][(12, 16, 18).index(dimension)]
+        if (frozen["manifest"] != manifest
+                or frozen["object_sha256"] != sha256(compressed)
+                or frozen["manifest_sha256"] != sha256(manifest_bytes)):
+            raise ValueError(f"dimension {dimension} differs from prepared upload")
         object_key = f"{PREFIX}/{object_name}"
         manifest_key = f"{PREFIX}/d{dimension}/manifest.json"
         object_put = put(object_path, object_key, commit, "n83.standard-subspace-projection-map-v1", "application/gzip")
