@@ -570,6 +570,265 @@ impl DecompositionOracle<Curve> for ChiPolynomialOracle {
     }
 }
 
+/// Semaev's third summation polynomial as a quadratic in its second
+/// abscissa. The coefficients are for y^2 = x^3 + A*x + B.
+fn s3_quadratic(curve: &Curve, x: [u64; 2], z: [u64; 2]) -> [[u64; 2]; 3] {
+    let f = &curve.f;
+    let x2 = f.sqr(x);
+    let z2 = f.sqr(z);
+    let a = f.sqr(f.sub(z, x));
+    let b = f.neg(f.scale(
+        f.add(
+            f.add(f.mul(x, z2), f.mul(f.add(x2, curve.a), z)),
+            f.add(f.mul(x, curve.a), f.scale(curve.b, 2)),
+        ),
+        2,
+    ));
+    let c = f.sub(
+        f.sub(
+            f.mul(x2, z2),
+            f.scale(f.mul(f.add(f.mul(x, curve.a), f.scale(curve.b, 2)), z), 2),
+        ),
+        f.sub(f.scale(f.mul(curve.b, x), 4), f.sqr(curve.a)),
+    );
+    [c, b, a]
+}
+
+fn s3_eval(f: &Fp2, coefficients: [[u64; 2]; 3], x: [u64; 2]) -> [u64; 2] {
+    f.add(
+        coefficients[0],
+        f.mul(x, f.add(coefficients[1], f.mul(x, coefficients[2]))),
+    )
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum SemaevSpace {
+    Source,
+    Quotient,
+}
+
+struct SemaevRootOracle {
+    projected: Rc<RefCell<Vec<Point>>>,
+    space: SemaevSpace,
+    signed: Vec<Point>,
+    images: Vec<Point>,
+    by_x: BTreeMap<[u64; 2], Vec<usize>>,
+    dest: Option<Curve>,
+    map_evaluations: u64,
+    polynomial_calls: u64,
+    sqrt_attempts: u64,
+    linear_cases: u64,
+    all_root_cases: u64,
+    root_hits: u64,
+    exact_checks: u64,
+    rejected_candidates: u64,
+    cap_hit: bool,
+}
+
+impl SemaevRootOracle {
+    fn new(projected: Rc<RefCell<Vec<Point>>>, space: SemaevSpace) -> Self {
+        Self {
+            projected,
+            space,
+            signed: Vec::new(),
+            images: Vec::new(),
+            by_x: BTreeMap::new(),
+            dest: None,
+            map_evaluations: 0,
+            polynomial_calls: 0,
+            sqrt_attempts: 0,
+            linear_cases: 0,
+            all_root_cases: 0,
+            root_hits: 0,
+            exact_checks: 0,
+            rejected_candidates: 0,
+            cap_hit: false,
+        }
+    }
+
+    fn configure(&mut self, source: &Curve, signed: Vec<Point>) {
+        self.signed = signed;
+        self.dest = if self.space == SemaevSpace::Quotient {
+            Some(Curve {
+                f: source.f,
+                a: source.f.zero(),
+                b: source.f.from_fp(source.f.p() - 27),
+            })
+        } else {
+            None
+        };
+        self.images.clear();
+        self.by_x.clear();
+        for (i, &point) in self.signed.iter().enumerate() {
+            let image = if self.dest.is_some() {
+                self.map_evaluations += 1;
+                phi(source, point)
+            } else {
+                point
+            };
+            assert!(self.dest.as_ref().unwrap_or(source).is_on_curve(image));
+            if !image.infinity {
+                self.by_x.entry(image.x).or_default().push(i);
+            }
+            self.images.push(image);
+        }
+    }
+
+    fn roots(&mut self, curve: &Curve, coefficients: [[u64; 2]; 3]) -> Option<Vec<[u64; 2]>> {
+        let f = &curve.f;
+        let [c, b, a] = coefficients;
+        if f.is_zero(a) {
+            self.linear_cases += 1;
+            if f.is_zero(b) {
+                if f.is_zero(c) {
+                    self.all_root_cases += 1;
+                    return None;
+                }
+                return Some(Vec::new());
+            }
+            return Some(vec![f.mul(f.neg(c), f.inv(b).unwrap())]);
+        }
+        let discriminant = f.sub(f.sqr(b), f.scale(f.mul(a, c), 4));
+        self.sqrt_attempts += 1;
+        let Some(root) = f.sqrt(discriminant) else {
+            return Some(Vec::new());
+        };
+        let inverse = f.inv(f.scale(a, 2)).unwrap();
+        let x1 = f.mul(f.add(f.neg(b), root), inverse);
+        let x2 = f.mul(f.sub(f.neg(b), root), inverse);
+        if x1 == x2 {
+            Some(vec![x1])
+        } else {
+            Some(vec![x1, x2])
+        }
+    }
+
+    fn solutions(
+        &mut self,
+        source: &Curve,
+        target: Point,
+        ops: &mut GroupOps,
+    ) -> Vec<(usize, usize)> {
+        if self.cap_hit {
+            return Vec::new();
+        }
+        let mapped_target = if self.dest.is_some() {
+            self.map_evaluations += 1;
+            phi(source, target)
+        } else {
+            target
+        };
+        let curve = self.dest.unwrap_or(*source);
+        assert!(curve.is_on_curve(mapped_target));
+        let mut answers = Vec::new();
+        for i in 0..self.images.len() {
+            if self.polynomial_calls == 10_000_000 {
+                self.cap_hit = true;
+                return Vec::new();
+            }
+            let image = self.images[i];
+            let candidates = if image.infinity {
+                if mapped_target.infinity {
+                    None
+                } else {
+                    Some(vec![mapped_target.x])
+                }
+            } else if mapped_target.infinity {
+                Some(vec![image.x])
+            } else {
+                self.polynomial_calls += 1;
+                let coefficients = s3_quadratic(&curve, image.x, mapped_target.x);
+                let roots = self.roots(&curve, coefficients);
+                if let Some(xs) = &roots {
+                    for &x in xs {
+                        assert_eq!(s3_eval(&curve.f, coefficients, x), curve.f.zero());
+                    }
+                }
+                roots
+            };
+            let keys: Vec<[u64; 2]> = match candidates {
+                Some(xs) => xs,
+                None => self.by_x.keys().copied().collect(),
+            };
+            for x in keys {
+                if let Some(indices) = self.by_x.get(&x) {
+                    self.root_hits += 1;
+                    for &j in indices {
+                        if j < i {
+                            continue;
+                        }
+                        self.exact_checks += 1;
+                        if source.add(ops, self.signed[i], self.signed[j]) == target {
+                            answers.push((i, j));
+                        } else {
+                            self.rejected_candidates += 1;
+                        }
+                    }
+                }
+            }
+        }
+        answers
+    }
+}
+
+impl DecompositionOracle<Curve> for SemaevRootOracle {
+    fn name(&self) -> &str {
+        match self.space {
+            SemaevSpace::Source => "semaev-source-root",
+            SemaevSpace::Quotient => "semaev-quotient-root",
+        }
+    }
+    fn summands(&self) -> u32 {
+        2
+    }
+    fn describe(&self, _: &Params) -> String {
+        "direct S3 quadratic roots in a signed-base abscissa, exact source addition, no pair-sum index".into()
+    }
+    fn prepare(
+        &mut self,
+        ctx: &InstanceCtx<Curve>,
+        fb: &FactorBase<Point>,
+        _: &Params,
+        _ops: &mut GroupOps,
+    ) -> Result<(), String> {
+        let base = self.projected.borrow();
+        if base.len() != fb.columns {
+            return Err("projected base not built".into());
+        }
+        let mut signed = Vec::with_capacity(2 * base.len());
+        for &p in base.iter() {
+            signed.push(p);
+            signed.push(ctx.group.neg(p));
+        }
+        drop(base);
+        self.configure(ctx.group, signed);
+        Ok(())
+    }
+    fn setup_native(&self) -> BTreeMap<String, u64> {
+        BTreeMap::from([
+            ("signed_base_points".into(), self.signed.len() as u64),
+            ("distinct_root_abscissae".into(), self.by_x.len() as u64),
+            ("map_evaluations_setup".into(), self.map_evaluations),
+        ])
+    }
+    fn decompose(
+        &mut self,
+        ctx: &InstanceCtx<Curve>,
+        _fb: &FactorBase<Point>,
+        ops: &mut GroupOps,
+        counters: &mut OracleCounters,
+        point: Point,
+    ) -> Option<Vec<usize>> {
+        let hpoint = ctx.group.mul(ops, point, ctx.cofactor % ctx.r);
+        let before_calls = self.polynomial_calls;
+        let before_hits = self.root_hits;
+        let answer = self.solutions(ctx.group, hpoint, ops).first().copied();
+        counters.lookups += self.root_hits - before_hits;
+        counters.canonicalisations += self.polynomial_calls - before_calls;
+        answer.map(|(i, j)| vec![i, j])
+    }
+}
+
 fn digest(data: &str) -> String {
     sha256_hex(data.as_bytes())
 }
@@ -849,7 +1108,7 @@ fn six_class_endomorphism(
     )
 }
 
-fn solve(path: &str, include_iso: bool) {
+fn solve(path: &str, include_iso: bool, include_roots: bool) {
     let fixtures = std::fs::read_to_string(path).expect("fixture JSONL");
     for (index, line) in fixtures.lines().enumerate() {
         let v: serde_json::Value = serde_json::from_str(line).unwrap();
@@ -911,6 +1170,10 @@ fn solve(path: &str, include_iso: bool) {
             if include_iso {
                 arm_names.insert(4, "isomorphism-projected-pair");
             }
+            if include_roots {
+                arm_names.insert(4, "semaev-source-root");
+                arm_names.insert(5, "semaev-quotient-root");
+            }
             if round % 2 == 1 {
                 arm_names.reverse();
             }
@@ -946,7 +1209,11 @@ fn solve(path: &str, include_iso: bool) {
                     }
                     _ => {
                         let mut c = calib.clone();
-                        if arm != "raw-pair" && arm != "chi-polynomial" {
+                        if arm != "raw-pair"
+                            && arm != "chi-polynomial"
+                            && arm != "semaev-source-root"
+                            && arm != "semaev-quotient-root"
+                        {
                             let mode = match arm {
                                 "projected-pair" => IndexMode::Projected,
                                 "chi-orbit-index" => IndexMode::Chi,
@@ -1006,6 +1273,35 @@ fn solve(path: &str, include_iso: bool) {
                                     "exact_checks":oracle.exact_checks,
                                     "rejected_candidates":oracle.rejected_candidates,
                                     "canonical_collisions":oracle.canonical_collisions}),
+                                )
+                            } else if arm == "semaev-source-root" || arm == "semaev-quotient-root" {
+                                let space = if arm == "semaev-source-root" {
+                                    SemaevSpace::Source
+                                } else {
+                                    SemaevSpace::Quotient
+                                };
+                                let mut oracle = SemaevRootOracle::new(projected, space);
+                                let rep = run_pipeline(
+                                    &ctx,
+                                    &spec,
+                                    &base,
+                                    &mut oracle,
+                                    answers,
+                                    &c,
+                                    None,
+                                )
+                                .unwrap();
+                                (
+                                    rep,
+                                    json!({"polynomial_calls":oracle.polynomial_calls,
+                                    "sqrt_attempts":oracle.sqrt_attempts,
+                                    "linear_cases":oracle.linear_cases,
+                                    "all_root_cases":oracle.all_root_cases,
+                                    "root_hits":oracle.root_hits,
+                                    "map_evaluations":oracle.map_evaluations,
+                                    "exact_checks":oracle.exact_checks,
+                                    "rejected_candidates":oracle.rejected_candidates,
+                                    "polynomial_cap_hit":oracle.cap_hit}),
                                 )
                             } else {
                                 let mode = match arm {
@@ -1127,6 +1423,114 @@ fn exhaustive_chi(path: &str) {
         "rejected_candidates":oracle.rejected_candidates,"group_ops":ops,
         "canonical_collisions":oracle.canonical_collisions,
         "fixture_sha256":sha256_hex(input.as_bytes())})
+    );
+}
+
+fn exhaustive_roots(path: &str) {
+    let input = std::fs::read_to_string(path).expect("fixture JSONL");
+    let v: serde_json::Value = serde_json::from_str(input.lines().next().unwrap()).unwrap();
+    assert_eq!(v["p"].as_u64(), Some(61));
+    assert_eq!(v["r"].as_u64(), Some(19));
+    let f = Fp2::new(61).unwrap();
+    let source = Curve {
+        f,
+        a: f.zero(),
+        b: f.one(),
+    };
+    let dest = Curve {
+        f,
+        a: f.zero(),
+        b: f.from_fp(61 - 27),
+    };
+    let independent = CheckField { p: 61, nu: f.nu };
+    let to_check = |point: Point| -> CheckPoint {
+        if point.infinity {
+            None
+        } else {
+            Some((
+                CheckF2(point.x[0], point.x[1]),
+                CheckF2(point.y[0], point.y[1]),
+            ))
+        }
+    };
+    let mut signed = Vec::new();
+    for item in v["base_projected"].as_array().unwrap() {
+        let point = parse_point(item);
+        signed.push(point);
+        signed.push(source.neg(point));
+    }
+    for &point in &signed {
+        assert!(independent.on_curve(to_check(point)));
+    }
+    let mut direct = SemaevRootOracle::new(Rc::new(RefCell::new(Vec::new())), SemaevSpace::Source);
+    let mut quotient =
+        SemaevRootOracle::new(Rc::new(RefCell::new(Vec::new())), SemaevSpace::Quotient);
+    direct.configure(&source, signed.clone());
+    quotient.configure(&source, signed.clone());
+    let generator = parse_point(&v["generator"]);
+    let t = Point::affine(f.zero(), f.one());
+    let mut ops = GroupOps::default();
+    let mut targets: Vec<_> = (0..19u64)
+        .map(|k| (format!("subgroup/{k}"), source.mul(&mut ops, generator, k)))
+        .collect();
+    targets.extend(
+        [source.identity(), t, source.neg(t)]
+            .into_iter()
+            .enumerate()
+            .map(|(i, point)| (format!("special/{i}"), point)),
+    );
+    let mut checked_pairs = 0u64;
+    let mut decompositions = 0u64;
+    for (label, target) in targets {
+        assert!(independent.on_curve(to_check(target)));
+        let mut reference = BTreeSet::new();
+        for i in 0..signed.len() {
+            for j in i..signed.len() {
+                let sum = independent.add_points(to_check(signed[i]), to_check(signed[j]));
+                let native_sum = source.add(&mut ops, signed[i], signed[j]);
+                assert_eq!(sum, to_check(native_sum), "independent source addition");
+                let lhs = dest.add(&mut ops, phi(&source, signed[i]), phi(&source, signed[j]));
+                let rhs = phi(&source, native_sum);
+                assert_eq!(lhs, rhs, "quotient homomorphism on signed pair");
+                checked_pairs += 1;
+                if sum == to_check(target) {
+                    reference.insert((i, j));
+                }
+            }
+        }
+        let source_pairs: BTreeSet<_> = direct
+            .solutions(&source, target, &mut ops)
+            .into_iter()
+            .collect();
+        let quotient_pairs: BTreeSet<_> = quotient
+            .solutions(&source, target, &mut ops)
+            .into_iter()
+            .collect();
+        let exact = source_pairs == reference && quotient_pairs == reference;
+        println!(
+            "{}",
+            json!({"schema":"semaev_root_exhaustive_case/v1","label":label,
+                "target":target,"reference":reference,"source_roots":source_pairs,
+                "quotient_roots":quotient_pairs,"exact_set_equal":exact})
+        );
+        assert!(exact, "S3 root decomposition mismatch at {label}");
+        decompositions += reference.len() as u64;
+    }
+    println!(
+        "{}",
+        json!({"schema":"semaev_root_exhaustive_summary/v1","cases":22,
+            "signed_points":signed.len(),"decompositions":decompositions,
+            "independent_pair_and_map_checks":checked_pairs,
+            "source_polynomial_calls":direct.polynomial_calls,
+            "quotient_polynomial_calls":quotient.polynomial_calls,
+            "source_sqrt_attempts":direct.sqrt_attempts,
+            "quotient_sqrt_attempts":quotient.sqrt_attempts,
+            "source_exact_checks":direct.exact_checks,
+            "quotient_exact_checks":quotient.exact_checks,
+            "source_rejected_candidates":direct.rejected_candidates,
+            "quotient_rejected_candidates":quotient.rejected_candidates,
+            "source_cap_hit":direct.cap_hit,"quotient_cap_hit":quotient.cap_hit,
+            "group_ops":ops,"fixture_sha256":sha256_hex(input.as_bytes())})
     );
 }
 
@@ -1657,6 +2061,7 @@ fn verify_independent(
     expected_run_sha256: &str,
     include_iso: bool,
     include_chi: bool,
+    include_roots: bool,
 ) {
     let fixture_bytes = std::fs::read(fixture_path).expect("fixture bytes");
     let run_bytes = std::fs::read(run_path).expect("run bytes");
@@ -1688,9 +2093,19 @@ fn verify_independent(
     if include_chi {
         arms.insert(3, "chi-polynomial");
     }
+    if include_roots {
+        arms.insert(4, "semaev-source-root");
+        arms.insert(5, "semaev-quotient-root");
+    }
     if include_iso {
         arms.insert(
-            if include_chi { 5 } else { 4 },
+            if include_roots {
+                6
+            } else if include_chi {
+                5
+            } else {
+                4
+            },
             "isomorphism-projected-pair",
         );
     }
@@ -1739,7 +2154,12 @@ fn verify_independent(
             assert_eq!(v["result"]["verified"], true);
             verified += 1;
         } else {
-            assert!(arm == "raw-pair" || (include_chi && arm == "chi-polynomial"));
+            assert!(
+                arm == "raw-pair"
+                    || (include_chi && arm == "chi-polynomial")
+                    || (include_roots
+                        && (arm == "semaev-source-root" || arm == "semaev-quotient-root"))
+            );
             assert_eq!(v["extra"]["status"], "exhausted");
             assert_eq!(v["result"]["exhausted"], true);
             assert_eq!(v["result"]["verified"], false);
@@ -1764,7 +2184,7 @@ fn verify_independent(
     println!(
         "{}",
         json!({
-            "schema":if include_chi {"chi_polynomial_independent_replay/v1"} else if include_iso {"torsion_extension_independent_replay/v3"} else {"torsion_extension_independent_replay/v2"},
+            "schema":if include_roots {"semaev_direct_root_independent_replay/v1"} else if include_chi {"chi_polynomial_independent_replay/v1"} else if include_iso {"torsion_extension_independent_replay/v3"} else {"torsion_extension_independent_replay/v2"},
             "arithmetic":"independent_u128_fp2_chord_tangent",
             "fixture_sha256":sha256_hex(&fixture_bytes),
             "records_sha256":sha256_hex(&run_bytes),
@@ -2055,11 +2475,19 @@ fn screen() {
 fn main() {
     match std::env::args().nth(1).as_deref() {
         Some("exhaustive-chi") => exhaustive_chi(&std::env::args().nth(2).expect("fixture path")),
-        Some("solve-chi") => solve(&std::env::args().nth(2).expect("fixture path"), true),
+        Some("exhaustive-roots") => {
+            exhaustive_roots(&std::env::args().nth(2).expect("fixture path"))
+        }
+        Some("solve-roots") => solve(&std::env::args().nth(2).expect("fixture path"), true, true),
+        Some("solve-chi") => solve(&std::env::args().nth(2).expect("fixture path"), true, false),
         Some("screen") => screen(),
         Some("freeze") => freeze(),
-        Some("solve") => solve(&std::env::args().nth(2).expect("fixture path"), false),
-        Some("solve-v4") => solve(&std::env::args().nth(2).expect("fixture path"), true),
+        Some("solve") => solve(
+            &std::env::args().nth(2).expect("fixture path"),
+            false,
+            false,
+        ),
+        Some("solve-v4") => solve(&std::env::args().nth(2).expect("fixture path"), true, false),
         Some("verify") => verify(
             &std::env::args().nth(2).expect("records path"),
             &std::env::args().nth(3).expect("fixture path"),
@@ -2075,6 +2503,7 @@ fn main() {
             "ca9a0ec7e31de59c58a78ae5c269350b37963b62ff9de815c805c36c2ec26693",
             false,
             false,
+            false,
         ),
         Some("verify-independent-v4") => verify_independent(
             &std::env::args().nth(2).expect("records path"),
@@ -2082,11 +2511,21 @@ fn main() {
             "71a0e8f7d96f630d372299f64a407d398b68dc21b9a8fa04de5c11c8c3b67b6a",
             true,
             false,
+            false,
         ),
         Some("verify-independent-chi") => verify_independent(
             &std::env::args().nth(2).expect("records path"),
             &std::env::args().nth(3).expect("fixture path"),
             &std::env::args().nth(4).expect("expected records SHA-256"),
+            true,
+            true,
+            false,
+        ),
+        Some("verify-independent-roots") => verify_independent(
+            &std::env::args().nth(2).expect("records path"),
+            &std::env::args().nth(3).expect("fixture path"),
+            &std::env::args().nth(4).expect("expected records SHA-256"),
+            true,
             true,
             true,
         ),
