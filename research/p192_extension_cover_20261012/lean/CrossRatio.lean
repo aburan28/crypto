@@ -402,6 +402,14 @@ theorem p192_character_filter_integer_certificate :
       1569275433846670190958947353987675545133315652035359680560 := by
   constructor <;> norm_num
 
+/-- The independently enumerated 224 admitted support classes, together
+    with the certified accepted-set lower bound, give a 2^-182 margin.
+    The elliptic-curve enumeration establishing 224 is checked separately. -/
+theorem p192_conditioned_support_integer_certificate :
+    224 * (2 : ℕ)^182 <
+      1569275433846670190958947353987675545133315652035359680560 := by
+  norm_num
+
 /-- A fixed shift of a 16-point three-sum base still has at most 816 images. -/
 theorem shifted_three_sum_support_bound {A : Type*} [AddCommGroup A] [DecidableEq A]
     (base : Fin 16 → A) (shift : A) :
@@ -560,6 +568,7 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.conditioned_three_sum_support_bound
 #print axioms P192ExtensionCover.character_filter_acceptance_lower_bound
 #print axioms P192ExtensionCover.p192_character_filter_integer_certificate
+#print axioms P192ExtensionCover.p192_conditioned_support_integer_certificate
 #print axioms P192ExtensionCover.shifted_three_sum_support_bound
 #print axioms P192ExtensionCover.shifted_three_point_relation
 #print axioms P192ExtensionCover.six_periodic_eigenvector_zero
