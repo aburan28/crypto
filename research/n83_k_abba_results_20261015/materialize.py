@@ -223,7 +223,11 @@ def seal(root, artifact_zip, artifact_sha256, analysis_sha256):
             raise ValueError("frozen comparison definition changed")
     elif selected_k is not None:
         raise ValueError("incomplete result cannot select a factor base")
-    selected = next((row for row in eligible if row["arm"] == f"k{selected_k}_a"), None)
+    eligible_by_arm = {row["arm"]: row for row in eligible}
+    selected = eligible_by_arm.get(f"k{selected_k}_a")
+    selected_mean_ms = (sum(eligible_by_arm[f"k{selected_k}_{suffix}"]["ic_online_mean_ms_exploratory"]
+                            for suffix in ("a", "b")) / 2
+                        if selected is not None else None)
     selection = {
         "schema": "n83.k-abba-selection/v1",
         "status": (f"BALANCED_K{selected_k}_SELECTED" if selected_k is not None else
@@ -232,8 +236,7 @@ def seal(root, artifact_zip, artifact_sha256, analysis_sha256):
         "selected_arm": selected["arm"] if selected else None,
         "candidate_id": selected["candidate_id"] if selected else None,
         "candidate_manifest_sha256": None, "source_base_hash_blake3": None,
-        "mean_online_ms_exploratory": (selected["ic_online_mean_ms_exploratory"]
-                                        if selected else None),
+        "mean_online_ms_exploratory": selected_mean_ms,
         "balanced_comparison": comparison,
         "arm_order": analysis["arm_order"],
         "analysis_sha256": analysis_sha256,
