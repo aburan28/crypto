@@ -1,0 +1,20 @@
+hash-only	Check frozen sources and inputs without opening outcome rows	﻿2026-10-15T16:14:45.2988313Z ##[group]Run python3 research/sat_factor_base_review_20260908/autolab_combined_l384_coldbase_n53_20260925/check_protocol.py
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:45.2989669Z [36;1mpython3 research/sat_factor_base_review_20260908/autolab_combined_l384_coldbase_n53_20260925/check_protocol.py[0m
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:45.2990305Z [36;1mgit diff --check[0m
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:45.4406495Z shell: /usr/bin/bash -e {0}
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:45.4406973Z env:
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:45.4407419Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:45.4408368Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:45.4409849Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:45.4410919Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:45.4411998Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:45.4413101Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:45.4413952Z ##[endgroup]
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:46.0739699Z Traceback (most recent call last):
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:46.0746970Z   File "/home/runner/work/crypto/crypto/research/sat_factor_base_review_20260908/autolab_combined_l384_coldbase_n53_20260925/check_protocol.py", line 126, in <module>
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:46.0748209Z     current = preflight()
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:46.0748606Z               ^^^^^^^^^^^
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:46.0749950Z   File "/home/runner/work/crypto/crypto/research/sat_factor_base_review_20260908/autolab_combined_l384_coldbase_n53_20260925/check_protocol.py", line 74, in preflight
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:46.0751405Z     raise AssertionError(f"source hash drift: {key}")
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:46.0752097Z AssertionError: source hash drift: ic
+hash-only	Check frozen sources and inputs without opening outcome rows	2026-10-15T16:14:46.0885146Z ##[error]Process completed with exit code 1.

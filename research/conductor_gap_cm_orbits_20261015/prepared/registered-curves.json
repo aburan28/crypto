@@ -15736,8 +15736,61 @@
       ],
       "standard_names": [],
       "trace": 125000000302577
+    },
+    {
+      "aliases": [],
+      "end": "unk",
+      "family": "prime",
+      "icv1": "ICV1:fp-78125000378223625457769953627:125000000302577:78125000378223500457769651051:57837259326606143193287868139:unk:unk:r:fe20dee533cf",
+      "j": "57837259326606143193287868139",
+      "model_json": "{\"a\":\"533537857111087148857771499\",\"b\":\"48282626442868338750026455888\",\"field\":\"fp-78125000378223625457769953627\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"78125000378223625457769953627\",\"v\":\"1\"}",
+      "order": "78125000378223500457769651051",
+      "params": {
+        "a": "533537857111087148857771499",
+        "b": "48282626442868338750026455888",
+        "p": "78125000378223625457769953627"
+      },
+      "representations": [
+        {
+          "curve": {
+            "coefficients": [
+              0,
+              0,
+              0,
+              533537857111087148857771499,
+              48282626442868338750026455888
+            ],
+            "cofactor": 1,
+            "generator": [
+              "0x1",
+              "0x606c859cb2de77bd04523136"
+            ],
+            "model": "short Weierstrass",
+            "subgroup_order": "78125000378223500457769651051",
+            "target_group": "prime-order subgroup"
+          },
+          "curve_uid": "urn:ec-record:1:sha256:9cb83c0273605c857f3d5451d2f2f45fd33edd7375b956c4cf141757676864d6",
+          "ec1": "EC1P96Cfph9cb83c027360",
+          "field": {
+            "characteristic": 78125000378223625457769953627,
+            "degree": 1,
+            "element_encoding": "hex integer modulo the characteristic",
+            "representation": "prime"
+          },
+          "field_sha256": "b3e279825643102d0b2afd9b105baca3ff6e09b235b7b24aa74604f621f0c260",
+          "sources": [
+            "research/conductor_gap_cm_orbits_20261015/prepared/upper_curve_ids.json"
+          ]
+        }
+      ],
+      "slug": "icv1-fp96-t125000000302577-fe20dee5",
+      "sources": [
+        "research/conductor_gap_cm_orbits_20261015/prepared/upper_curve_ids.json"
+      ],
+      "standard_names": [],
+      "trace": 125000000302577
     }
   ],
-  "new_models": 0,
-  "registry_sha256": "6710f7df33fd959b44d6424cf1f1ce29245797598dcbdc9a7910ed9fea5cf9dd"
+  "new_models": 1,
+  "registry_sha256": "b2ef8d0684b676a5052bb02cbf372a82bba1b6bd4ee03e4ea81676a19e5ca37d"
 }

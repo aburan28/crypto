@@ -39,6 +39,28 @@ versioned launcher and fresh hashes; do not rewrite old receipts. The guarded
 stopped until the bounded constructor exits; this is resource coordination,
 not a physical-host isolation receipt.
 
+Registry updates and website rendering have separate responsibilities. Use the
+native `upper-ids` / `index` commands for independently certified model records.
+Then rebuild the repository's native cover/trait/transfer sidecars and existing
+canonical website views from the repository root:
+
+```
+cargo run --release --bin curve_cover_check
+cargo run --release --bin curve_traits -- build --budget 262144
+cargo run --release --bin jacobian_transfers -- build --budget 200000
+python scripts/build_ic_leaderboard.py
+node tools/render_ic_dashboard.mjs
+python scripts/site/panel_index.py
+python scripts/build_lab_browser.py
+```
+
+These existing website tools render frozen repository evidence and catalog
+joins; new experiment aggregation and statistics remain in native Rust.
+The obsolete partial native browser/leaderboard refresh commands were removed
+because they could leave existing rows stale when a model gained a generator.
+Preserve the ranked board when checking regenerated views. Do not run the
+native compilation/sidecar stage concurrently with a large constructor.
+
 `native/search.gp` runs in PARI/GP 2.15.2. `isprime` supplies rigorous primality
 proofs. Kernel order and generator order witnesses are explicit; floor-model
 certificates are a separate check after construction.

@@ -104,7 +104,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "6710f7df33fd959b44d6424cf1f1ce29245797598dcbdc9a7910ed9fea5cf9dd"
+   "sha256": "b2ef8d0684b676a5052bb02cbf372a82bba1b6bd4ee03e4ea81676a19e5ca37d"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -9533,8 +9533,10 @@
    "coefficients": "a = 43182, b = 57354",
    "order_bits": 19,
    "standard": [],
-   "ec1": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "ec1": [
+    "EC1P19Cfphb7d3466a27f9"
+   ],
+   "ec1_unresolved": null,
    "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
@@ -9547,8 +9549,10 @@
    "coefficients": "a = 36086, b = 72172",
    "order_bits": 19,
    "standard": [],
-   "ec1": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "ec1": [
+    "EC1P19Cfphc54d8212d6d1"
+   ],
+   "ec1_unresolved": null,
    "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
@@ -19385,6 +19389,22 @@
    "standard": [],
    "ec1": [
     "EC1P96Cfph66101fee929f"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp96-t125000000302577-fe20dee5",
+   "family": "prime",
+   "field": "GF(p), p = 78125000378223625457769953627",
+   "coefficients": "a = 533537857111087148857771499, b = 48282626442868338750026455888",
+   "order_bits": 96,
+   "standard": [],
+   "ec1": [
+    "EC1P96Cfph9cb83c027360"
    ],
    "ec1_unresolved": null,
    "legacy": [],

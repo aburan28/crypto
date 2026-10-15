@@ -8,12 +8,12 @@
 
 ## Problem
 
-The native study cannot yet certify the prepared 95/96-bit floors, price every
-native solver operation in one common cost unit, or supply a complete Lean CM
-classification proof.
+One 96-bit rational-family floor is now independently certified. Other upper
+models, the older non-rational-kernel candidate, complete common pricing and
+the Lean CM classification bridges remain open.
 
 The rational-torsion family has explicit independently checked floors through
-91 field bits. Its 95/96-bit inputs have rigorous prime and kernel certificates,
+96 field bits. Its other upper inputs have rigorous prime and kernel certificates,
 but the first large constructor was stopped after the 91-bit result when shared
 memory reached 15,982,964,736 of 17,179,869,184 bytes. This is a resource limit,
 not evidence that the floor does not exist.
@@ -26,9 +26,12 @@ family endpoint does not construct that exact old candidate's floor.
 ## Evidence and uncertainty
 
 Observed: all 100 old direct codomains match the fast moment constructor;
-15 new floors have independent PARI order/prime/stratum receipts. See
+16 additional floors have independent PARI order/prime/stratum receipts. See
 `results/pair-certificates.jsonl`, `results/floor-certificates-v2.jsonl`,
 `results/larger-construction-stop.json` in the study.
+The separate `upper-96-floor-certificate.jsonl` certifies prime conductor ratio
+125000000302579 over p=78125000378223625457769953627; the torsion certificate
+provides independent point-order and Weil-pairing witnesses.
 
 The native relation backend reports field/group work and queries, while modular
 exponentiation, table/hash work, allocation and elimination still lack a complete
@@ -43,7 +46,7 @@ homomorphism and order classification are unformalized bridges, listed in
 
 ## What would unblock it
 
-- [ ] Complete a 95/96-bit rational-family codomain under recorded memory/time
+- [x] Complete a 95/96-bit rational-family codomain under recorded memory/time
   limits and independently certify its exact model, prime group order and floor
   conductor. Preserve failed or censored attempts.
 - [ ] Construct and certify the floor for the original non-rational-kernel
@@ -62,11 +65,13 @@ timed out. A separate precomputed-tree retry of the exact input uses a 14-GiB,
 3,600-second cap after solver tables exited. Concurrent test-check compilation
 then caused a shared OOM kill (exit 137, 939.36 wall seconds). A new algebraically
 equivalent bounded-batch variant has coefficient/reference checks and a launch
-guard against local compiler/solver overlap; its separate retry is running
+guard against local compiler/solver overlap. Its separate retry completed
 under an 11-GiB, 5,400-second cap after the combined-tree checks passed.
+It used 2,697.60 wall seconds and a maximum 9,362,772 KiB RSS, with no new
+OOM kill. Independent PARI prime/order/conductor and torsion-module checks pass.
 See the versioned receipts and `native/run_96_v4_solo.sh`.
-Success requires independent PARI checks; a cap leaves
-the exact floor requirement open.
+Fast point transport and dual-map certification on this pair are the next
+construction step. Other upper models retain their individual open status.
 
 For the older candidate, test the proposed construction's rational-kernel
 prerequisite before spending on point-based evaluation. Recheck this record
@@ -81,5 +86,7 @@ attempts. All 47 session audits passed. Independent replay checked 473 IC
 records and 797 target recoveries, including controls. Orbit controls now total
 44,000 trials, including a pinned local repeat and 20 fresh-process batches.
 The primary floor/crater CPU ratio is 0.980 [0.866, 1.111]; endpoint execution
-waves and shared-host activity confound timing. Complete common pricing, upper
-floor construction and the stated CM proof bridges remain open independently.
+waves and shared-host activity confound timing. The new 96-bit floor and 137th
+torsion certificate complete this particular upper construction. Complete
+common pricing, other upper floors and the stated CM proof bridges remain open
+independently. All completed large-gap ECDLP timing comparisons remain 53-bit.

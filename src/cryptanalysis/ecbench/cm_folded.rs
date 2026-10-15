@@ -18,6 +18,21 @@ use std::{
     time::Instant,
 };
 static NEXT: AtomicU64 = AtomicU64::new(0);
+#[cfg(unix)]
+fn monotonic_ns() -> Result<u64, String> {
+    let mut stamp = libc::timespec {
+        tv_sec: 0,
+        tv_nsec: 0,
+    };
+    if unsafe { libc::clock_gettime(libc::CLOCK_MONOTONIC, &mut stamp) } != 0 {
+        return Err("monotonic clock unavailable".into());
+    }
+    Ok(stamp.tv_sec as u64 * 1_000_000_000 + stamp.tv_nsec as u64)
+}
+#[cfg(not(unix))]
+fn monotonic_ns() -> Result<u64, String> {
+    Err("native CM backend requires the Unix monotonic-clock domain".into())
+}
 struct Scratch(PathBuf);
 impl Drop for Scratch {
     fn drop(&mut self) {
@@ -39,6 +54,7 @@ pub fn solve(
     q: PrimePoint,
     seed: u64,
 ) -> Result<SolveReport, String> {
+    monotonic_ns()?;
     if inst.cofactor != 1 || inst.group_order != inst.r {
         return Err("CM folded controls require a cofactor-one prime-order curve".into());
     }
@@ -246,14 +262,7 @@ pub fn solve(
         && queries < (inst.r / 2)
         && (queries < 2 || !(1..=2 * queries - 3).contains(&(opposite_sum as u64)));
     let replay_ns = replay_start.elapsed().as_nanos() as u64;
-    let mut stamp = libc::timespec {
-        tv_sec: 0,
-        tv_nsec: 0,
-    };
-    if unsafe { libc::clock_gettime(libc::CLOCK_MONOTONIC, &mut stamp) } != 0 {
-        return Err("monotonic clock unavailable".into());
-    }
-    let online_ns = (stamp.tv_sec as u64 * 1_000_000_000 + stamp.tv_nsec as u64)
+    let online_ns = monotonic_ns()?
         .checked_sub(u(&raw, "online_start_monotonic_ns")?)
         .ok_or("invalid online clock")?;
     let mut phases_ns = BTreeMap::new();

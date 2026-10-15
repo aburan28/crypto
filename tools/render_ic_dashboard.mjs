@@ -288,6 +288,7 @@ const oldFront = between(page, START, END);
 const historical = section(oldFront, 'lab-best');
 const progressRaw = readFileSync(resolve(ROOT,'docs/ic/progress-timeline.json'));
 const retainedPanels = [
+  ['conductor-gap-native-20261015','Conductor-gap native controls: paired solves and generic recurrence · 15 October 2026'],
   ['cold-compact-orbit-20261003','Historical compact-orbit cold-cost panel'],
   ['full-rank-compact-orbit-20261003','Historical compact-orbit full-rank panel'],
   ['n61-compact-orbit-hosted-20261003','n61 compact-orbit autolab panels · hosted isolated reruns'],
@@ -304,6 +305,10 @@ const retainedPanels = [
   ['lab-currency','How new results update this dashboard']
 ].map(([id,label])=>{
   let html = section(oldFront,id);
+  if (id === 'conductor-gap-native-20261015') {
+    html = readFileSync(resolve(ROOT,'research/conductor_gap_cm_orbits_20261015/native/dashboard_panel.html'),'utf8').trimEnd();
+    assert.ok(html.includes(`id="${id}"`), 'Native conductor panel source lost its identity');
+  }
   if (id === 'lab-progress') {
     const marker = /(<script type="application\/json" id="progress-data">)[\s\S]*?(<\/script>)/;
     assert.ok(marker.test(html), 'Progress panel has no canonical data embed');

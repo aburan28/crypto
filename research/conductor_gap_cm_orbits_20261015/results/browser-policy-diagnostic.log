@@ -1,0 +1,19 @@
+{"url":"chrome-error://chromewebdata/","title":"file:///workspace/crypto/docs/index-calculus-scoreboard.html","text":"This page is blocked\n\nYour organization doesn’t allow you to view this site","charts":0}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+0 !== 2
+
+    at file:///tmp/cm-browser-debug.mjs:80:319 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 0,
+  expected: 2,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

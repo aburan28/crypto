@@ -1,0 +1,11 @@
+transfers	jacobian-transfers.json is current with registry.json	﻿2026-10-15T16:20:27.1518621Z ##[group]Run ./target/release/jacobian_transfers check
+transfers	jacobian-transfers.json is current with registry.json	2026-10-15T16:20:27.1518965Z [36;1m./target/release/jacobian_transfers check[0m
+transfers	jacobian-transfers.json is current with registry.json	2026-10-15T16:20:27.1572641Z shell: /usr/bin/bash -e {0}
+transfers	jacobian-transfers.json is current with registry.json	2026-10-15T16:20:27.1572844Z env:
+transfers	jacobian-transfers.json is current with registry.json	2026-10-15T16:20:27.1573010Z   CARGO_HOME: /home/runner/.cargo
+transfers	jacobian-transfers.json is current with registry.json	2026-10-15T16:20:27.1573223Z   CARGO_INCREMENTAL: 0
+transfers	jacobian-transfers.json is current with registry.json	2026-10-15T16:20:27.1573403Z   CARGO_TERM_COLOR: always
+transfers	jacobian-transfers.json is current with registry.json	2026-10-15T16:20:27.1573582Z   CACHE_ON_FAILURE: false
+transfers	jacobian-transfers.json is current with registry.json	2026-10-15T16:20:27.1573756Z ##[endgroup]
+transfers	jacobian-transfers.json is current with registry.json	2026-10-15T16:20:58.2152705Z docs/curves/jacobian-transfers.json is stale: run `cargo run --release --bin jacobian_transfers -- build --budget 200000`
+transfers	jacobian-transfers.json is current with registry.json	2026-10-15T16:20:58.2224215Z ##[error]Process completed with exit code 1.

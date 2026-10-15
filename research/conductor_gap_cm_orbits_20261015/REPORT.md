@@ -2,8 +2,8 @@
 
 15 October 2026. This report is cumulative; sealed run directories and the
 historical evidence archive are immutable. The 100-pair solve campaign and
-all 30 replication sessions are complete. Upper-limit construction remains
-separate work in progress; no unconstructed floor is counted as a result.
+all 30 replication sessions are complete. A separate 96-bit rational-family
+floor is now independently certified; ECDLP timing evidence remains 53-bit.
 
 ## Completed observations
 
@@ -106,9 +106,9 @@ The original checkpoint report and figures are preserved in
 
 ### Independent structural witnesses
 
-PARI point-order and Weil-pairing checks passed for 136 cases: the original
+PARI point-order and Weil-pairing checks passed for 137 cases: the original
 100 pairs, 15 newly constructed pairs, 20 extra floor vertices, and one small
-D = −43 control. On quadratic twists, the crater has invariant factors
+D = −43 control, plus the separately certified 96-bit case. On quadratic twists, the crater has invariant factors
 ℓ and qℓ, while the floor has a point of order ℓ² and is cyclic of order qℓ².
 Here q is 5 or 11. The original ECDLP endpoints both retain the same prime
 order N; this structural observation does not substitute a different subgroup
@@ -184,7 +184,7 @@ A separate independent PARI run proved primality, checked both endpoint
 orders using Hasse-unique prime-order witnesses, and checked the prime-kernel
 witness for all 100 pairs: [certificates](results/pair-certificates.jsonl).
 
-The independent checker also certified 15 newly constructed floor models:
+The independent checker initially certified 15 newly constructed floor models:
 five D = −19 fields through 91 bits and ten D = −43 controls. These include
 prime conductor gap 17,592,186,219,863 over
 p = 1547425079971670554692473983. Exact coefficients, subgroup generators,
@@ -219,14 +219,52 @@ the receipt and interrupted release rebuild are preserved.
 A new bounded-batch variant expands the same moment polynomials directly
 and delays modular reduction within finite sums. All 4,096 coefficient
 comparisons across two fields and all 100 forced-small-batch codomains pass.
-Its separate retry is running with an 11 GiB address-space cap, 5,400-second
+Its separate retry completed under an 11 GiB address-space cap, 5,400-second
 wall cap and a guard refusing active local compilers or solver tables. It
 launched after the Rust checks passed, with no active local build or solver.
-These attempts are distinct from the older non-rational-kernel
+It used 2,697.60 wall seconds, 2,639.56 user CPU seconds and 57.13 system CPU
+seconds; maximum RSS was 9,362,772 KiB. The cgroup OOM count did not increase.
+This interval measures the codomain-construction process from a prepared kernel;
+prior parameter/kernel search and independent PARI certification are outside it.
+All three giant batches completed. These attempts are distinct from the older non-rational-kernel
 96-bit candidate. See the versioned [launchers](native/run_large_batched.sh),
 [expanded retry](native/run_96_expanded.sh),
 [precomputed retry](native/run_96_precomputed.sh),
 [guarded variant](native/run_96_v4_solo.sh) and their raw time/exit receipts.
+
+### Newly certified 96-bit crater/floor pair
+
+Independent PARI checks prove p, N and ℓ prime, nonsingularity, the exact group
+order by a Hasse-unique prime-order point witness, and floor conductor ℓ.
+This makes **16 additional certified floor models**, extending construction
+through 96 bits. It is a construction result, not a 96-bit ECDLP solve.
+
+| Parameter | Exact value |
+|---|---|
+| p | 78125000378223625457769953627 |
+| N = r; cofactor | 78125000378223500457769651051; 1 |
+| t; prime conductor ratio ℓ | 125000000302577; 125000000302579 |
+| Fundamental discriminant | −19 |
+| Crater y² = x³ + ax + b | a = 73099415558571813293819839648; b = 22691276912973333709956575223 |
+| Floor y² = x³ + ax + b | a = 533537857111087148857771499; b = 48282626442868338750026455888 |
+
+The chosen floor generator is (1, 29841755896690674547236679990).
+Registry slugs are `icv1-fp96-t125000000302577-bc9e9ed5` (crater) and
+`icv1-fp96-t125000000302577-fe20dee5` (floor). Use their full registry
+identities and the certificates when identifying these exact models.
+
+A separate PARI certificate supplies a rank-two ℓ-torsion basis on the crater
+twist, a nontrivial Weil pairing, and a floor-twist point of order ℓ². The
+derived rational degree-ℓ kernel-line counts are 125000000302580 versus 1;
+these are not an enumeration of the isogenies. Both original curves have
+prime order N. Neighboring prepared 95/96-bit models and the older
+non-rational-kernel candidate remain separate open constructions. Full point
+transport and dual maps are not certified.
+
+Evidence: [construction](results/v4-96.jsonl),
+[timed process](results/v4-96-time.txt),
+[independent floor certificate](results/upper-96-floor-certificate.jsonl),
+[independent torsion certificate](results/upper-96-torsion-certificate.jsonl).
 
 ## Native end-to-end harness
 
@@ -258,8 +296,8 @@ a running shard, a censored target or an incomplete cost vector as a win.
 | A: 100-pair repeated orbit comparison | 44,000 constructions, including recurrence, A/A, locally pinned repeats and fresh-process batches. Exact vectors agree. First/later pass and process boundaries are explicit; no physical-host isolation claim. |
 | B: 200-target folded campaign plus controls | All 500 attempts verified: 300 IC and 200 rho. No complete-price IC/rho speed ratio is admitted. |
 | C: fresh targets, repeated query seeds, coordinate/floor/family replication | All 265 attempts in 30 sessions verified. Ten second-family pairs and 20 additional floor vertices certified; 45 same-crater output comparisons agree exactly. |
-| D: separate structural and generic effects | All 145 same-crater comparisons agree exactly. Generic recurrence removes most direct-scalar orbit cost; 136 torsion-module cases certified. No prime-field F4/SAT complexity claim. |
-| E: native fast codomain construction and larger gaps | All 100 direct references match; 15 new floor models independently certified through 91 bits. 95/96-bit rows and the original non-rational-kernel 96-bit floor remain open. |
+| D: separate structural and generic effects | All 145 same-crater comparisons agree exactly. Generic recurrence removes most direct-scalar orbit cost; 137 torsion-module cases certified, including one 96-bit case. No prime-field F4/SAT complexity claim. |
+| E: native fast codomain construction and larger gaps | All 100 direct references match; 16 additional floor models certified through 96 bits. The new 96-bit prime gap is 125000000302579. Neighboring upper models and the original non-rational-kernel candidate remain open; point maps are not certified. |
 | PR, reports, required checks and canonical indexes | PR #1888 pushed, base merged, indexes current. Combined-tree CM/fixture release tests and strict Clippy pass. CI and required human review remain pending. |
 
 ## Next steps supported by these results
@@ -273,11 +311,10 @@ a running shard, a censored target or an incomplete cost vector as a win.
 3. Price the missing native work before publishing an IC/rho work ratio.
    Retain complete cold process costs and separate the five online phases;
    use earned reservation/isolation for any primary wall-time claim.
-4. Finish and independently certify a 96-bit rational-family floor, retaining
-   every cap and allocation failure. The original 96-bit candidate needs a
-   different kernel representation; its extension-degree prerequisite is now
-   explicit. Full isogeny point maps and dual-point-map certification remain
-   separate work.
+4. Certify fast point evaluation and dual maps on the constructed 96-bit pair,
+   then transport G and Q to compare identical hidden scalars with explicit
+   transport costs. The older candidate needs a different kernel representation;
+   its extension-degree prerequisite remains explicit. Preserve all resource caps.
 5. Implement an independently checked prime-field algebraic backend only
    when testing algebraic IC complexity. The completed MITM experiments do
    not measure Semaev/F4/SAT regularity or establish intrinsic hardness.

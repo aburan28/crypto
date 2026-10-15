@@ -1,0 +1,11 @@
+traits	traits.json is current with registry.json	﻿2026-10-15T16:19:59.0207304Z ##[group]Run ./target/release/curve_traits check
+traits	traits.json is current with registry.json	2026-10-15T16:19:59.0207756Z [36;1m./target/release/curve_traits check[0m
+traits	traits.json is current with registry.json	2026-10-15T16:19:59.0270012Z shell: /usr/bin/bash -e {0}
+traits	traits.json is current with registry.json	2026-10-15T16:19:59.0270279Z env:
+traits	traits.json is current with registry.json	2026-10-15T16:19:59.0270493Z   CARGO_HOME: /home/runner/.cargo
+traits	traits.json is current with registry.json	2026-10-15T16:19:59.0270770Z   CARGO_INCREMENTAL: 0
+traits	traits.json is current with registry.json	2026-10-15T16:19:59.0271029Z   CARGO_TERM_COLOR: always
+traits	traits.json is current with registry.json	2026-10-15T16:19:59.0271274Z   CACHE_ON_FAILURE: false
+traits	traits.json is current with registry.json	2026-10-15T16:19:59.0271506Z ##[endgroup]
+traits	traits.json is current with registry.json	2026-10-15T16:26:05.6269745Z docs/curves/traits.json is stale: run `cargo run --release --bin curve_traits -- build --budget 262144`
+traits	traits.json is current with registry.json	2026-10-15T16:26:05.6307163Z ##[error]Process completed with exit code 1.

@@ -1,0 +1,16 @@
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	﻿2026-10-15T16:20:09.2576118Z ##[group]Run python3 -B .github/scripts/check-pr-budgets.py
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-15T16:20:09.2576647Z [36;1mpython3 -B .github/scripts/check-pr-budgets.py[0m
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-15T16:20:09.2640315Z shell: /usr/bin/bash -e {0}
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-15T16:20:09.2640629Z env:
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-15T16:20:09.2640946Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-15T16:20:09.2641476Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-15T16:20:09.2641996Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-15T16:20:09.2642460Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-15T16:20:09.2642920Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-15T16:20:09.2643382Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-15T16:20:09.2643773Z ##[endgroup]
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-15T16:20:10.7013182Z .github/workflows/conductor-gap-controls.yml: native-controls can run on pull_request/opened without a proven 1–25 minute timeout
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-15T16:20:10.7014486Z Checked routine PR/merge-group budgets in 373 workflows: 3 violations
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-15T16:20:10.7016382Z .github/workflows/conductor-gap-controls.yml: native-controls can run on pull_request/synchronize without a proven 1–25 minute timeout
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-15T16:20:10.7018069Z .github/workflows/conductor-gap-controls.yml: native-controls can run on pull_request/reopened without a proven 1–25 minute timeout
+parse	Run python3 -B .github/scripts/check-pr-budgets.py	2026-10-15T16:20:10.7116542Z ##[error]Process completed with exit code 1.

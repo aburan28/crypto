@@ -16,7 +16,7 @@ concurrency:
 jobs:
   native-controls:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -69,6 +69,9 @@ jobs:
             CM_FLOOR_INPUT="$study/prepared/upper-96-floor.gpvec" gp -q -f "$study/native/verify_floors.gp" > /tmp/upper-floor.jsonl 2> /tmp/upper-floor.stderr
             test "$(wc -l < /tmp/upper-floor.jsonl)" -eq 1
             ! grep -E 'user error|at top-level|syntax error' /tmp/upper-floor.stderr
+            CM_TORSION_INPUT="$study/prepared/upper-96-torsion.gpvec" gp -q -f "$study/native/torsion_structure.gp" > /tmp/upper-torsion.jsonl 2> /tmp/upper-torsion.stderr
+            test "$(wc -l < /tmp/upper-torsion.jsonl)" -eq 1
+            ! grep -E 'user error|at top-level|syntax error' /tmp/upper-torsion.stderr
           fi
       - name: Independent public-base, relation, matrix and target replay
         run: |

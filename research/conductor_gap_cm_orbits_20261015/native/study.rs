@@ -38,8 +38,6 @@ fn main() {
         "replay-campaign" => replay_campaign::run(),
         "cold-batches" => cold_batches(),
         "index" => index::run(),
-        "browser" => index::browser(),
-        "leaderboard" => index::leaderboard(),
         "dashboard" => index::dashboard(),
         "certificates" => certificates::run(),
         "replication" => replication::run(&args[2], &args[3]),
@@ -77,6 +75,44 @@ fn main() {
                 ),
             )
             .unwrap();
+            if args.len() > 4 {
+                assert_eq!(
+                    args.len(),
+                    6,
+                    "optional torsion output requires kernel input"
+                );
+                let kernel = fs::read_to_string(&args[5]).unwrap();
+                let f: Vec<_> = kernel.split_whitespace().collect();
+                assert_eq!(f.len(), 12);
+                assert_eq!(f[0], raw["id"].to_string());
+                assert_eq!(f[1], decimal(&crater["ell"]));
+                assert_eq!(f[2], decimal(&raw["p"]));
+                assert_eq!(f[8], decimal(&crater["a"]));
+                assert_eq!(f[9], decimal(&crater["b"]));
+                let q = (1 - crater["D"].as_i64().unwrap()) / 4;
+                assert!(q == 5 || q == 11);
+                fs::write(
+                    &args[4],
+                    format!(
+                        "[{},{},{},{},{},{},{},{},{},{},{},{},{},{}]\n",
+                        f[0],
+                        f[1],
+                        f[2],
+                        decimal(&crater["N"]),
+                        q,
+                        f[3],
+                        f[4],
+                        f[5],
+                        f[6],
+                        f[7],
+                        f[8],
+                        f[9],
+                        decimal(&raw["a"]),
+                        decimal(&raw["b"])
+                    ),
+                )
+                .unwrap();
+            }
         }
         "controls" => replication::controls(&args[2], &args[3]),
         "recurrence-inputs" => replication::recurrence_inputs(),
