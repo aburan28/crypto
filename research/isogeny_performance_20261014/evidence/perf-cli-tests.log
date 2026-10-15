@@ -1,0 +1,11 @@
+   Compiling isogeny_algos v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-isogeny-performance-20261014/isogeny_algos)
+    Finished `release` profile [optimized] target(s) in 4.90s
+     Running unittests src/bin/isogeny-perf.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/rung3/release/deps/isogeny_perf-ec7a945e6ab405df)
+
+running 3 tests
+test campaign::tests::odd_median_and_reject_unrecorded_time ... ok
+test tests::counts_are_separate_and_share_clones ... ok
+test tests::incomplete_or_mutated_runs_cannot_be_compared ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

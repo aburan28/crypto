@@ -1,0 +1,449 @@
+   Compiling isogeny_algos v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-isogeny-performance-20261014/isogeny_algos)
+    Finished `release` profile [optimized] target(s) in 9m 36s
+     Running unittests src/lib.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/isogeny_algos-cbde64ee63b6d654)
+
+running 21 tests
+test eigen_seta::tests::diagonal_masks_apply_coordinatewise ... ok
+test eigen_seta::tests::toy_parameter_checks_are_fail_closed ... ok
+test eigen_seta_toy::tests::two_halves_middle_automorphism_oracle ... ignored, bounded exploratory two-halves odd-torsion oracle; not a scalable decoder
+test cm::tests::class_numbers_from_forms ... ok
+test cm::tests::small_hilbert_polys_match_known_values ... ok
+test eigen_seta_toy::tests::invalid_parameters_rejected ... ok
+test find::modpoly::e4_tests::normalized_j_series_has_the_known_initial_coefficients ... ok
+test find::modpoly::e4_tests::sieve_matches_independent_divisor_enumeration ... ok
+test gf3n::tests::bitsliced_digits ... ok
+test gf3n::tests::moduli_match_exhaustive_scan ... ok
+test eigen_seta_toy::tests::cm_key_and_all_sender_indices_round_trip ... ok
+test eigen_seta_toy::tests::jacobian_start_dual_quotient_exposes_intermediate_product ... ok
+test eigen_seta_toy::tests::two_adic_four_division_matches_basis_coordinates ... ok
+test gf3n::tests::mul_inv_match_digit_schoolbook ... ok
+test gls_loop::tests::loop_closes_and_maps_points_on_a_small_instance ... ok
+test eigen_seta_toy::tests::single_chain_decoder_multiple_keys ... ok
+test gls_loop::tests::cheapest_loops_reproduce_known_values ... ok
+test eigen_seta_toy::tests::special_key_single_chain_splits_and_payload_factors ... ok
+test find::modpoly::e4_tests::large_index_avoids_u64_cube_and_sum_overflow ... ok
+test eigen_seta_toy::tests::two_halves_oracle_decoder_multiple_keys ... ok
+test eigen_seta_toy::tests::ciphertext_kani_first_half_reaches_jacobian ... ok
+
+test result: ok. 20 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 6.15s
+
+     Running unittests src/bin/bench.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/bench-d28356d8c0481700)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/gen_mont_adx.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/gen_mont_adx-1567d12766381d52)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/isogeny-algos.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/isogeny_algos-b552a2cfb171672e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/isogeny-perf.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/isogeny_perf-ec7a945e6ab405df)
+
+running 3 tests
+test campaign::tests::odd_median_and_reject_unrecorded_time ... ok
+test tests::counts_are_separate_and_share_clones ... ok
+test tests::incomplete_or_mutated_runs_cannot_be_compared ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/bin/micro.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/micro-e4cf4fa705973d74)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/report.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/report-e9ddeb0c20acb290)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/adx_gen.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/adx_gen-ee549ff50e194b62)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/api.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/api-713198bbf6ea6060)
+
+running 7 tests
+test field_dispatch_handles_every_limb_boundary ... ok
+test isogenies_match_modular_roots_and_velu ... ok
+test p224_small_low_limb_does_not_reject_modular_construction ... ok
+test counts_match_bsgs ... ok
+test cli_records_and_exit_codes ... ok
+test p192_order_and_split_degree_maps_are_supported ... ok
+test standard_curves_certified_and_named_as_in_the_registry ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+
+     Running tests/bigfield.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/bigfield-09bb9713256b332d)
+
+running 2 tests
+test kernel_algorithms_agree_at_256_bits ... ok
+test kernel_algorithms_agree_at_512_bits ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+     Running tests/binary.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/binary-10fb30f204f34f9d)
+
+running 5 tests
+test gf2n_arithmetic ... ok
+test phi_mod2_matches_kernel_oracle ... ok
+test group_law_and_point_counting ... ok
+test velu_kohel_and_division_polynomials ... ok
+test path_finding_on_binary_curves ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.13s
+
+     Running tests/bmss.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/bmss-9c47fbe08b35cacc)
+
+running 6 tests
+test batched_weierstrass_denominators_match_direct_division ... ok
+test bmss_family_on_galois_stable_kernels ... ok
+test end_to_end_from_phi_matches_v1 ... ok
+test bmss_family_agrees_with_kohel ... ok
+test ode_solvers_agree ... ok
+test bmss_family_larger_l_no_phi ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.92s
+
+     Running tests/chain.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/chain-c36397ec12aec948)
+
+running 2 tests
+test smooth_composite_kernel ... ok
+test sidh_key_exchange_all_strategies_agree ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/csidh.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/csidh-ae09d6aa5ccb86de)
+
+running 9 tests
+test class_number_known_values ... ok
+test batched_action_equals_stepwise ... ok
+test csidh_toy_action_is_a_group_action ... ok
+test generic_csidh_on_fpm1_matches_zp ... ok
+test fast_action_equals_stepwise ... ok
+test mitm_recovers_exponents ... ok
+test csidh512_action_commutes ... ok
+test ideal_orders_divide_class_number ... ok
+test csidh512_fast_action_matches_batched ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/dual.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/dual-189557fa2150612b)
+
+running 1 test
+test dual_composes_to_multiplication_by_l ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+     Running tests/endo.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/endo-209491e8e15b245f)
+
+running 2 tests
+test conductor_one_when_discriminant_is_squarefree ... ok
+test conductor_drops_by_l_along_ascent ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.07s
+
+     Running tests/find.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/find-81a6967e6b75b810)
+
+running 3 tests
+test phi2_matches_known ... ok
+test divpoly_kernels_are_isogenies_and_match_velu ... ok
+test elkies_bmss_matches_kohel ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+     Running tests/fpm.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/fpm-722059ffbb215390)
+
+running 2 tests
+test fpm_matches_bigint_arithmetic ... ok
+test fpm1_agrees_with_zp_on_isogenies ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+
+     Running tests/fpm_inv.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/fpm_inv-1f46a378a2740460)
+
+running 3 tests
+test adx_multiplication_matches_portable ... ok
+test miller_rabin_known_values ... ok
+test bingcd_inverse_matches_fermat ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.82s
+
+     Running tests/fpr.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/fpr-e788e295a37bf519)
+
+running 1 test
+test fpr_is_a_field ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/genus2.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/genus2-d48a6309451e4eb7)
+
+running 5 tests
+test richelot_correspondence_maps_points_to_codomain ... ok
+test degenerate_richelot_splits ... ok
+test superspecial_richelot_graph ... ok
+test richelot_preserves_l_polynomial ... ok
+test gluing_matches_product_l_polynomial ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.80s
+
+     Running tests/gf3n.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/gf3n-0205b54ed9a30904)
+
+running 1 test
+test gf3n_field_axioms ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/hessian.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/hessian-3c2ce699a2ee92b4)
+
+running 1 test
+test hessian_group_law_isogenies_and_codomain ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.30s
+
+     Running tests/icv1.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/icv1-d717b489b7b6f316)
+
+running 2 tests
+test icv1_prime_matches_the_reference_vectors ... ok
+test sha256_known_answers ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/int.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/int-e3b34a50dc242d04)
+
+running 3 tests
+test knuth_division ... ok
+test signed_arithmetic ... ok
+test miller_rabin_matches_u128_reference ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+
+     Running tests/kernel.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/kernel-3575cf83836fecb2)
+
+running 3 tests
+test order_matches_naive ... ok
+test bsgs_order_consistent ... ok
+test three_kernel_algorithms_agree ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
+
+     Running tests/kernel2.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/kernel2-d6e5a21b2491a8f9)
+
+running 5 tests
+test general_velu_even_degree ... ok
+test xonly_velu_matches_and_handles_extension_kernels ... ok
+test general_velu_cyclic_order_4_and_6 ... ok
+test fast_xonly_velu_matches ... ok
+test fast_sqrt_velu_matches_velu ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.28s
+
+     Running tests/models.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/models-1ba0ada01307443b)
+
+running 2 tests
+test huff_isogenies ... ok
+test edwards_isogenies ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mont.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/mont-9c955587eec616e5)
+
+running 1 test
+test montgomery_velu_matches_weierstrass_along_a_chain ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/path.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/path-f05ebba082b11855)
+
+running 5 tests
+test galbraith_ghs_find_paths ... ok
+test kohel_volcano_and_ghs_volcano_with_conductor ... ok
+test couveignes_recovers_exponents ... ok
+test delfs_galbraith_supersingular ... ok
+test galbraith_stolbunov_weighted_walk ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests/phi_fast.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/phi_fast-020966201ce47178)
+
+running 1 test
+test hecke_construction_matches_linear_algebra ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.33s
+
+     Running tests/polyfast.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/polyfast-91cd477048db54f0)
+
+running 3 tests
+test fast_poly_and_series_match_reference ... ok
+test composer_matches_naive_and_frobenius_powers ... ok
+test ddf_matches_exponentiation_ddf ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.67s
+
+     Running tests/quat.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/quat-c6c20a59a37f6476)
+
+running 4 tests
+test maximal_order_and_ideals ... ok
+test klpt_outputs_equivalent_two_power_norm_ideals ... ok
+test brandt_matrix_spectrum_matches_supersingular_graph ... ok
+test deuring_classes_to_supersingular_curves ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.64s
+
+     Running tests/radical.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/radical-ab805c42e1408d22)
+
+running 3 tests
+test radical7_steps_are_isogenies ... ok
+test radical_steps_are_isogenies ... ok
+test radical_chains_match_csidh_action_on_csidh512 ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running tests/relation.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/relation-69a20be5263d99aa)
+
+running 3 tests
+test form_group_and_class_number ... ok
+test relations_act_trivially_on_toy_csidh ... ok
+test explicit_lattice_handles_non_cyclic_groups ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.01s
+
+     Running tests/report.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/report-84b1bdb475f1289c)
+
+running 1 test
+test report_regenerates_committed_tables ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
+
+     Running tests/sea.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/sea-b3370602f2c29a0e)
+
+running 7 tests
+test atkin_candidate_sets_partition ... ok
+test sea_with_atkin_towers_matches_bsgs ... ok
+test isogeny_cycles_give_t_mod_l_power ... ok
+test atkin_tower_eigenvalue_matches_true_trace ... ok
+test atkin_degree_matches_gcd_definition ... ok
+test sea_at_128_bits ... ok
+test sea_matches_bsgs_at_40_and_61_bits ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.04s
+
+     Running tests/sqrt_velu_mont.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/sqrt_velu_mont-26c24bc37176d1ff)
+
+running 2 tests
+test sqrt_velu_mont_large_degree ... ok
+test sqrt_velu_mont_matches_velu_on_csidh512 ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/sutherland.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/sutherland-43fd707435446719)
+
+running 2 tests
+test sutherland_phi_crt_matches_integer_phi ... ok
+test sutherland_phi_mod_p_matches_qexpansion ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/theta.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/theta-dcbd49c637e47bb1)
+
+running 6 tests
+test theta_dimension_one ... ok
+test theta_factor_point_roundtrip ... ok
+test theta_split_detection_and_gluing_vs_hlp ... ok
+test theta_kani_chain_splits_at_e0_times_x ... ok
+test theta_kani_endomorphism_126_bit ... ok
+test theta_step_is_a_richelot_neighbour ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/theta_g.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/theta_g-2e21462c99e95df1)
+
+running 2 tests
+test theta_g2_matches_dimension_two_kani ... ok
+test theta_g4_kani_embedding_splits ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/two_power.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/two_power-c1afb178afadc855)
+
+running 2 tests
+test four_and_two_chains_agree_with_weierstrass_velu ... ok
+test fp2_generic_matches_zp2 ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/weier.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/deps/weier-00efa2201b8c1c0c)
+
+running 2 tests
+test gw_velu_characteristic_three ... ok
+test gw_velu_matches_short_form_large_char ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.13s
+
+     Running unittests examples/binary_gls_scan.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/examples/binary_gls_scan-4925322674a80c90)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/binary_gls_validate.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/examples/binary_gls_validate-b89a3135670c8c7b)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/csidh512_once.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/examples/csidh512_once-5c53a2d7c48dadbc)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/eigen_seta_toy.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/examples/eigen_seta_toy-ae74b6ee5406c5af)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/gls_loop_bench.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/examples/gls_loop_bench-bca27e63e620d310)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/gls_loop_validate.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/examples/gls_loop_validate-313f423db349c50f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/klpt_once.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/examples/klpt_once-72f94e993de12dad)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/p192_p224_large_degree_search.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/examples/p192_p224_large_degree_search-c0e9485d7ceaecfd)
+
+running 2 tests
+test tests::published_orders_give_registry_traces ... ok
+test tests::split_and_inert_predictions_match_existing_small_degree_records ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests examples/sqrtvelu_once.rs (/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/final-validation/release/examples/sqrtvelu_once-cab4b1784b9231a1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
