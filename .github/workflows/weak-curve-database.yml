@@ -85,7 +85,7 @@ jobs:
           auto-config: false
           use-mathlib-cache: true
           build: true
-          build-args: 'CrossRatio SignedBase'
+          build-args: 'CrossRatio SignedBase ScalarAnchor'
           test: false
           lint: false
           leanchecker: true
@@ -94,6 +94,8 @@ jobs:
         run: lake env lean CrossRatio.lean
       - name: Fresh-check signed-base theorem and audit axioms
         run: lake env leanchecker --fresh --verbose SignedBase && lake env lean SignedBase.lean
+      - name: Fresh-check scalar-anchor theorem and audit axioms
+        run: lake env leanchecker --fresh --verbose ScalarAnchor && lake env lean ScalarAnchor.lean
   leaderboard-lean-proof:
     runs-on: ubuntu-latest
     timeout-minutes: 25

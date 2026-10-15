@@ -8,8 +8,8 @@ static catalog. The snapshot contains 814 prior exact models, 105 named
 curves (101 standards-provenance curves, two challenge curves, and two
 source-pinned pairing variants), 36
 published odd-characteristic parameter cases, three exact prime-field
-examples and twenty-four criterion entries. The WAM1 research queue adds
-38 input- and witness-specific checks, giving the site 62 searchable attack
+examples and twenty-five criterion entries. The WAM1 research queue adds
+38 input- and witness-specific checks, giving the site 63 searchable attack
 checks in total. Each evaluated finding has a
 [WID1 identifier](IDENTIFIERS.md) distinct from its curve identity.
 
@@ -190,7 +190,7 @@ factor is expected; the exact factor maps, selected-subgroup projections and
 costed divisor relation pipeline are the further assessment gates.
 
 The [machine-readable registry](criteria.json) specifies domain, recognition,
-required witness, construction and primary source for twenty-four criteria. The
+required witness, construction and primary source for twenty-five criteria. The
 entries make four crucial separations.
 
 The new `ic_relation_support_rank` entry tests a fixed-base index-calculus
@@ -209,6 +209,14 @@ The generic finite-image and accepted-set intersection caps are also proved
 in [Lean](lean/RelationSupport.lean). Their [proof map](PROOF_MAP.md)
 separates the combinatorial theorem from the curve-specific summation map
 and the uniform-query assumption behind the probability bound.
+
+The `ic_scalar_anchor_overlap` entry adds the equation gate: for a frozen
+signed base, it compares nonzero-unknown-row support with independently
+known-scalar anchor targets and checks whether repeated target keys have
+different formal signed-point vectors. The exact [P-192 Type I audit](../p192_extension_cover_20261012/reports/run-20261015T1857Z/REPORT.md)
+finds zero anchor overlap and zero distinct formal equations among repeated
+rank-bearing targets. This criterion is indexed by the specified base and
+query law; cover geometry alone does not assign a curve-wide finding.
 
 First, the [MOV reduction](https://doi.org/10.1145/103418.103434) uses a
 Weil pairing, while [Frey–Rück](https://doi.org/10.1090/S0025-5718-1994-1218343-6)

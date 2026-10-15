@@ -6,7 +6,7 @@ and the pinned pairing roster,
 and **36 published odd-characteristic covering cases**. The named roster
 includes Oakley Groups 3 and 4, with exact GHS invariant candidates and
 separate WID1 finding IDs. It adds three exhaustively checked prime-field
-examples and a twenty-four-criterion
+examples and a twenty-five-criterion
 registry for anomalous, smooth-order, MOV, Frey–Rück, supersingular,
 binary-GHS, odd-characteristic GHS, cubic norm-one, quadratic-torus and
 proper-subfield mechanisms, plus direct extension-field decomposition,
@@ -29,7 +29,7 @@ power the site's vulnerability filters; check stages distinguish exact
 conditions, geometry, explicit maps, candidates and structural screens.
 
 The [WAM1 attack map](attack_map.json) adds 38 source-linked research checks
-to the 24 existing criteria, giving the website 62 searchable checks across
+to the 25 existing criteria, giving the website 63 searchable checks across
 curve structure, selected subgroups, auxiliary inputs, pairings, index calculus,
 hyperelliptic divisor and Jacobian decomposition, endomorphisms,
 implementations and isogeny protocols. Each WAM1 row states an
@@ -51,6 +51,16 @@ accepted-query law, verified relation yield, and useful rank as separate gates.
 The generic support and conditioning bounds are checked in
 [Lean](lean/RelationSupport.lean); the [proof map](PROOF_MAP.md) states their
 exact hypotheses and the remaining curve-specific bridge.
+
+The `ic_scalar_anchor_overlap` criterion now tests whether a geometrically
+accepted relation has an independently known scalar equation. It separates
+nonzero unknown-log rows from known-scalar anchors, counts their exact target
+intersection, and distinguishes repeated target keys from distinct formal
+signed-point equations. The [P-192 Type I collision census](../p192_extension_cover_20261012/reports/run-20261015T1857Z/REPORT.md)
+finds zero anchor overlap and zero new formal equations among repeated
+rank-bearing targets in the frozen 160-point signed base. This is a
+curve-and-base-specific screening result; a different base or query law
+requires a new census.
 
 The [genus-128 GHS cost audit](ghs_genus128_cost_audit.json) resolves the
 nominal factor-base and relation-query stages behind the two exact-invariant

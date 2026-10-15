@@ -479,3 +479,15 @@ The Conductor task template also lists `go vet ./...` and `go test ./...`.
 Both are inapplicable at this Rust repository root because it has no
 `go.mod`; the commands report `directory prefix . does not contain main
 module`. The Rust checks above are the relevant validation for this change.
+
+## 2026-10-15 scalar-anchor registry continuation
+
+`python3 research/weak_curve_leaderboard_20261012/validate_attack_map.py`
+passes with 25 indexed criteria, 38 WAM1 research checks, 1,092 graph nodes,
+and 232 certified directed maps. It checks exact byte equality between the
+registry and `website/weakcurves/dist/criteria.json`. The new
+`ic_scalar_anchor_overlap` entry is supported by the exact 160-point P-192
+Type I [collision report](../p192_extension_cover_20261012/reports/run-20261015T1857Z/REPORT.md),
+native target-key census, independent formal-vector enumeration, and two
+checked Lean collision equations. This updates the source package and static
+site data; the hosted deployment record above is an earlier snapshot.

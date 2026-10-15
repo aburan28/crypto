@@ -1,5 +1,12 @@
 # Exact extension-cover screen for standard NIST P-192
 
+**Latest relation criterion:** The [signed-base scalar-anchor audit](reports/run-20261015T1857Z/REPORT.md)
+enumerates all 695,520 three-sums in the fixed 160-point Type I quotient
+base. It finds no overlap between independently known-scalar anchors and
+nonzero-unknown-row targets, and every repeated rank-bearing target has the
+same full formal signed-point vector. The criterion and exact receipt are
+linked there.
+
 **Continuation:** The [three-branch follow-up](BRANCH_CONTINUATION.md) proves
 that the nonsplit-quadratic direct genus-3 branch is excluded as well,
 constructs a descended Type I nonhyperelliptic genus-3 cover and a

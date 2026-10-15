@@ -26,6 +26,7 @@ solutions to `y²=x³+ax+b (mod p)` for `0≤x,y<p`.
 | The minimal order of `x` divides `m·orderOf(x^m)`, and is the least positive exponent yielding one | `minimal_degree_divides_pairing_extension`, `minimal_degree_is_minimal` | Generic group-order implications, checked |
 | An unordered positive `m`-sum over `B` usable base classes has at most `binomial(B+m-1,m)` distinct target classes | `unordered_relation_support_bound` | For any target map `Sym (Fin B) m → A` with decidable equality on `A`; exact finite image cap, checked |
 | Conditioning on an accepted target set cannot enlarge that fixed-base support | `conditioned_relation_support_bound` | For any finite accepted subset of `A` under the same target map; exact intersection cap, checked |
+| A known-scalar anchor collision determines the unknown logarithm contribution; two representations of one target determine a difference equation | `P192ExtensionCover.scalar_anchor_collision_equation`, `P192ExtensionCover.repeated_target_relation_equation` in [ScalarAnchor.lean](../p192_extension_cover_20261012/lean/ScalarAnchor.lean) | Checked for an additive-group homomorphism and explicit known-log identities. Both use only `propext`; exact P-192 target-set disjointness is native and independently combinatorial, not a concrete Lean finite-field instance. |
 
 The relation-support declarations count combinations with repetition before
 any curve-specific group law. Instantiating `target` with a genus-three

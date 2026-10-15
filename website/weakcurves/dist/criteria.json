@@ -144,6 +144,18 @@
     "url": "https://github.com/aburan28/crypto/blob/029e0bb2c7b1543af9a0647457adcaef8f20e7d0/research/p192_extension_cover_20261012/BRANCH_CONTINUATION.md"
   },
   {
+    "id": "ic_scalar_anchor_overlap",
+    "name": "Known-scalar anchor overlap for index-calculus relations",
+    "method": "Exact support collision and relation-row test",
+    "domain": "A selected subgroup with a frozen signed factor base, summand policy, known-scalar anchor set, and target-query law",
+    "recognition": "Separate three-sum targets with nonzero unknown-log rows from targets with independently known scalars, including zero-row sums. A chosen known-scalar anchor supplies an unknown-log equation only at a target overlap; repeated rank-bearing targets supply a new equation only when their formal signed-point vectors differ. Count both intersections and the rank of resulting row differences modulo the subgroup order.",
+    "witness": "Exact curve and subgroup, signed base-point identities, known-scalar certificates, complete target-key and formal-vector census, independent collision replay, geometry acceptance law, useful row rank, and measured query and recovery costs.",
+    "construction": "Enumerate frozen sums, coalesce by exact group target, compare full formal vectors, include zero-row anchors, test target overlap, then sample independently known-scalar queries and measure accepted novel rows and rank. A positive overlap is a relation candidate, not a complete attack cost.",
+    "status": "exact_p192_type_i_zero_anchor_overlap_and_no_novel_formal_collisions",
+    "source": "P-192 Type I formal-collision certificate (2026)",
+    "url": "https://github.com/aburan28/crypto/pull/1914"
+  },
+  {
     "id": "cubic_jacobian_isogeny",
     "name": "Cubic Weil-restriction Jacobian isogeny",
     "method": "Direct isogeny to a genus-three Jacobian",
