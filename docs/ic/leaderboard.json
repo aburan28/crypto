@@ -102,6 +102,18 @@
    "path": "research/ecbench_frontier_20261013/frontier-data.json",
    "sha256": "765f6e8d05ebbf75e7a3dddcbb886015274311589352b9107746976fb2a670d7"
   },
+  "n83_matched": {
+   "path": "research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json",
+   "sha256": "1ba0dd87653daf737e95add3a37d08ceb905f8d9811b933db61fc156cb83377d"
+  },
+  "n83_matched_replay": {
+   "path": "research/n83_matched_20261014/records/postprocess-20261015T0018Z/independent_replay_v3_receipt.json",
+   "sha256": "94891f01e158a3a365744a2d349a685d3f1fd844a16e7f5b40e2e38763646c8b"
+  },
+  "n83_matched_supplement": {
+   "path": "research/n83_matched_20261014/records/postprocess-20261015T0018Z/presentation_supplement.json",
+   "sha256": "4804814de5e0fbb7d464b09c26738844314a045cbb60cc33379ab7a9909ef0e8"
+  },
   "registry": {
    "path": "docs/curves/registry.json",
    "sha256": "03f63efa54482b2ea37baed22da046202cd67739c76d9b43f569e2375f025ca4"
@@ -5880,6 +5892,561 @@
    "failures": 48,
    "scope": "all inherited-F4 rows differ in solver phase counts; root-finder and rho rows identical"
   }
+ },
+ "n83_matched_process_diagnostic": {
+  "source": "research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json",
+  "replay_source": "research/n83_matched_20261014/records/postprocess-20261015T0018Z/independent_replay_v3_receipt.json",
+  "presentation_source": "research/n83_matched_20261014/records/postprocess-20261015T0018Z/presentation_supplement.json",
+  "curve": "icv1-f2m83-t6151469093347-9eba6cd5",
+  "measurement_date": "2026-10-14",
+  "class": "accounting",
+  "admission": "local diagnostic only; no ranked recipe or ledger promotion",
+  "S": null,
+  "ratio_to_floor": null,
+  "controlled_speedup": null,
+  "cold": {
+   "arithmetic_mean_ic_s": 1159.34988210875,
+   "arithmetic_mean_rho_s": 3.0716487838750006,
+   "bootstrap_draws": 20000,
+   "bootstrap_seed": 202610146800,
+   "bootstrap_unit": "8 actual paired fresh-process target blocks",
+   "estimand": "ratio of arithmetic mean costs, IC/rho; below one favors IC",
+   "ic_over_rho": 377.43569127919193,
+   "interval_95": [
+    311.8128466078986,
+    499.01021039372205
+   ],
+   "method": "paired percentile bootstrap, deterministic SplitMix64 with unbiased index draws",
+   "scope": "Fresh empty algorithm setup and target state for each one-target child; retained factor-base file remains an input. These are eight measured cold targets, not32 or96 cold observations. OS caches and original retained-base construction are outside this boundary.",
+   "valid": true
+  },
+  "batch": {
+   "arithmetic_mean_ic_s": 1232.9752171726666,
+   "arithmetic_mean_rho_s": 78.95740027966667,
+   "bootstrap_draws": 20000,
+   "bootstrap_seed": 202610146799,
+   "bootstrap_unit": "3 actual paired whole-process cohorts, each32 targets",
+   "estimand": "ratio of arithmetic mean costs, IC/rho; below one favors IC",
+   "ic_over_rho": 15.615701793694768,
+   "interval_95": [
+    14.743542634654554,
+    17.614847798270176
+   ],
+   "method": "paired percentile bootstrap, deterministic SplitMix64 with unbiased index draws",
+   "scope": "All startup, reusable setup, target work, built-in verification and output charged once per actual32-target process. Only three setup/timing clusters, fixed IC rank29; percentile interval has very limited preparation-variation resolution and no independent-host scope.",
+   "valid": true
+  },
+  "online": {
+   "arithmetic_mean_ic_s": 1.7603639429062503,
+   "arithmetic_mean_rho_s": 2.4572885118541667,
+   "bootstrap_draws": 20000,
+   "bootstrap_seed": 202610146801,
+   "bootstrap_unit": "32 paired target blocks, retaining each target's three cohort observations",
+   "estimand": "ratio of arithmetic mean costs, IC/rho; below one favors IC",
+   "ic_over_rho": 0.7163847201556132,
+   "interval_95": [
+    0.4603889573963417,
+    1.013126948637089
+   ],
+   "method": "paired percentile bootstrap, deterministic SplitMix64 with unbiased index draws",
+   "scope": "Conditional on these three preparation/cohort epochs, retained K600, frozen policies and this host; repeated IC queries are timing replication, not independent IC algorithms or rank seeds. Producer online boundaries differ: stock IC excludes input validation/serialization while rho online includes Q validation. Secondary diagnostic, not the end-to-end ranking.",
+   "valid": true
+  },
+  "costs": {
+   "ic": {
+    "32_target_three_repeat_online_means_s": {
+     "max": 8.590054447,
+     "mean": 1.7603639429062503,
+     "median": 0.8521032296666667,
+     "min": 0.003999249,
+     "n": 32,
+     "p90": 4.182302217366669,
+     "p95": 6.412726784833334,
+     "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+     "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+    },
+    "actual_cold_singleton_process": {
+     "cpu_system_s": {
+      "max": 1.578449,
+      "mean": 1.408230875,
+      "median": 1.3970859999999998,
+      "min": 1.263361,
+      "n": 8,
+      "p90": 1.5371671999999998,
+      "p95": 1.5578081,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "cpu_total_s": {
+      "max": 1222.0520370000002,
+      "mean": 1159.26483675,
+      "median": 1143.687048,
+      "min": 1109.2981040000002,
+      "n": 8,
+      "p90": 1208.8657989,
+      "p95": 1215.4589179500001,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "cpu_user_s": {
+      "max": 1220.473588,
+      "mean": 1157.856605875,
+      "median": 1142.3845245,
+      "min": 1107.995816,
+      "n": 8,
+      "p90": 1207.375524,
+      "p95": 1213.924556,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "peak_rss_bytes": {
+      "max": 5811724288.0,
+      "mean": 5811620864.0,
+      "median": 5811595264.0,
+      "min": 5811519488.0,
+      "n": 8,
+      "p90": 5811701350.4,
+      "p95": 5811712819.2,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "preparation_ms": {
+      "max": 1221646.840401,
+      "mean": 1157887.7979125,
+      "median": 1143379.4838435003,
+      "min": 1108970.20397,
+      "n": 8,
+      "p90": 1204436.3044822002,
+      "p95": 1213041.5724416,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "rows": 8,
+     "scope": "all supplied observed rows, including consumed failure costs; no failed row removed; descriptive costs are not successful-completion mean estimates",
+     "verified_rows": 8,
+     "wall_s": {
+      "max": 1222.138606943,
+      "mean": 1159.34988210875,
+      "median": 1143.7608387545001,
+      "min": 1109.371728466,
+      "n": 8,
+      "p90": 1208.9495069678999,
+      "p95": 1215.54405695545,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     }
+    },
+    "all11_preparations": {
+     "cpu_system_s": {
+      "max": 6.118714,
+      "mean": 1.8290101818181819,
+      "median": 1.370446,
+      "min": 1.263361,
+      "n": 11,
+      "p90": 1.578449,
+      "p95": 3.8485815,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "cpu_total_s": {
+      "max": 1282.49286,
+      "mean": 1179.3426594545454,
+      "median": 1193.304255,
+      "min": 1109.2981040000002,
+      "n": 11,
+      "p90": 1222.0520370000002,
+      "p95": 1252.2724485,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "cpu_user_s": {
+      "max": 1276.374146,
+      "mean": 1177.5136492727274,
+      "median": 1191.78478,
+      "min": 1107.995816,
+      "n": 11,
+      "p90": 1220.473588,
+      "p95": 1248.423867,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "peak_rss_bytes": {
+      "max": 5811724288.0,
+      "mean": 5811622632.727273,
+      "median": 5811601408.0,
+      "min": 5811519488.0,
+      "n": 11,
+      "p90": 5811691520.0,
+      "p95": 5811707904.0,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "preparation_ms": {
+      "max": 1222727.200536,
+      "mean": 1162933.2668513637,
+      "median": 1149988.148124,
+      "min": 1108970.20397,
+      "n": 11,
+      "p90": 1221646.840401,
+      "p95": 1222187.0204685,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "rows": 11,
+     "scope": "all supplied observed rows, including consumed failure costs; no failed row removed; descriptive costs are not successful-completion mean estimates",
+     "verified_rows": 11,
+     "wall_s": {
+      "max": 1282.605726303,
+      "mean": 1179.4295189443635,
+      "median": 1193.387644598,
+      "min": 1109.371728466,
+      "n": 11,
+      "p90": 1222.138606943,
+      "p95": 1252.3721666229999,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     }
+    },
+    "pooled96_online_draws_s": {
+     "max": 9.482010347,
+     "mean": 1.7603639429062499,
+     "median": 0.833230443,
+     "min": 0.003933568,
+     "n": 96,
+     "p90": 4.4010287205,
+     "p95": 6.67799166125,
+     "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+     "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+    },
+    "prepared_cohort_process": {
+     "cpu_system_s": {
+      "max": 6.118714,
+      "mean": 2.951088333333333,
+      "median": 1.370446,
+      "min": 1.364105,
+      "n": 3,
+      "p90": 5.1690604,
+      "p95": 5.643887199999999,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "cpu_total_s": {
+      "max": 1282.49286,
+      "mean": 1232.8835199999999,
+      "median": 1211.4199119999998,
+      "min": 1204.737788,
+      "n": 3,
+      "p90": 1268.2782704,
+      "p95": 1275.3855652,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "cpu_user_s": {
+      "max": 1276.374146,
+      "mean": 1229.9324316666666,
+      "median": 1210.049466,
+      "min": 1203.373683,
+      "n": 3,
+      "p90": 1263.10921,
+      "p95": 1269.741678,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "peak_rss_bytes": {
+      "max": 5811691520.0,
+      "mean": 5811627349.333333,
+      "median": 5811642368.0,
+      "min": 5811548160.0,
+      "n": 3,
+      "p90": 5811681689.6,
+      "p95": 5811686604.8,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "preparation_ms": {
+      "max": 1222727.200536,
+      "mean": 1176387.8506883334,
+      "median": 1156448.203405,
+      "min": 1149988.148124,
+      "n": 3,
+      "p90": 1209471.4011098,
+      "p95": 1216099.3008229001,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "rows": 3,
+     "scope": "all supplied observed rows, including consumed failure costs; no failed row removed; descriptive costs are not successful-completion mean estimates",
+     "verified_rows": 3,
+     "wall_s": {
+      "max": 1282.605726303,
+      "mean": 1232.9752171726666,
+      "median": 1211.499169005,
+      "min": 1204.82075621,
+      "n": 3,
+      "p90": 1268.3844148434,
+      "p95": 1275.4950705731999,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     }
+    }
+   },
+   "rho": {
+    "32_target_three_repeat_online_means_s": {
+     "max": 4.016571018666667,
+     "mean": 2.4572885118541667,
+     "median": 2.3329844291666664,
+     "min": 0.8401402346666665,
+     "n": 32,
+     "p90": 3.523073263566667,
+     "p95": 3.579651811516667,
+     "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+     "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+    },
+    "actual_cold_singleton_process": {
+     "cpu_system_s": {
+      "max": 0.046021,
+      "mean": 0.021009874999999997,
+      "median": 0.0182055,
+      "min": 0.001213,
+      "n": 8,
+      "p90": 0.0402684,
+      "p95": 0.043144699999999994,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "cpu_total_s": {
+      "max": 4.323399,
+      "mean": 3.0634953749999996,
+      "median": 3.2122715,
+      "min": 1.132224,
+      "n": 8,
+      "p90": 4.1739294000000005,
+      "p95": 4.2486642,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "cpu_user_s": {
+      "max": 4.285596,
+      "mean": 3.0424855,
+      "median": 3.1940660000000003,
+      "min": 1.131011,
+      "n": 8,
+      "p90": 4.1416109,
+      "p95": 4.21360345,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "peak_rss_bytes": {
+      "max": 62115840.0,
+      "mean": 37560832.0,
+      "median": 36507648.0,
+      "min": 10928128.0,
+      "n": 8,
+      "p90": 62098636.8,
+      "p95": 62107238.4,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "preparation_ms": {
+      "max": 238.076955,
+      "mean": 211.24446074999997,
+      "median": 206.7852575,
+      "min": 201.232124,
+      "n": 8,
+      "p90": 222.9816825,
+      "p95": 230.52931875,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "rows": 8,
+     "scope": "all supplied observed rows, including consumed failure costs; no failed row removed; descriptive costs are not successful-completion mean estimates",
+     "verified_rows": 8,
+     "wall_s": {
+      "max": 4.327487118,
+      "mean": 3.0716487838750006,
+      "median": 3.2186541550000003,
+      "min": 1.14309743,
+      "n": 8,
+      "p90": 4.1808378453,
+      "p95": 4.25416248165,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     }
+    },
+    "all11_preparations": {
+     "cpu_system_s": {
+      "max": 0.314516,
+      "mean": 0.09318136363636365,
+      "median": 0.029968,
+      "min": 0.001213,
+      "n": 11,
+      "p90": 0.308669,
+      "p95": 0.31159250000000005,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "cpu_total_s": {
+      "max": 86.359203,
+      "mean": 23.757517363636364,
+      "median": 3.709245,
+      "min": 1.132224,
+      "n": 11,
+      "p90": 81.706642,
+      "p95": 84.0329225,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "cpu_user_s": {
+      "max": 86.050534,
+      "mean": 23.664336000000002,
+      "median": 3.663224,
+      "min": 1.131011,
+      "n": 11,
+      "p90": 81.392126,
+      "p95": 83.72133,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "peak_rss_bytes": {
+      "max": 70823936.0,
+      "mean": 46622533.81818182,
+      "median": 36511744.0,
+      "min": 10928128.0,
+      "n": 11,
+      "p90": 70823936.0,
+      "p95": 70823936.0,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "preparation_ms": {
+      "max": 271.937789,
+      "mean": 223.49761609090908,
+      "median": 216.287999,
+      "min": 201.232124,
+      "n": 11,
+      "p90": 254.761416,
+      "p95": 263.3496025,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "rows": 11,
+     "scope": "all supplied observed rows, including consumed failure costs; no failed row removed; descriptive costs are not successful-completion mean estimates",
+     "verified_rows": 11,
+     "wall_s": {
+      "max": 86.376504419,
+      "mean": 23.767762828181823,
+      "median": 3.720382027,
+      "min": 1.14309743,
+      "n": 11,
+      "p90": 81.718538486,
+      "p95": 84.0475214525,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     }
+    },
+    "pooled96_online_draws_s": {
+     "max": 6.193311533,
+     "mean": 2.4572885118541676,
+     "median": 2.1688249195000004,
+     "min": 0.26219928499999995,
+     "n": 96,
+     "p90": 4.4013912375,
+     "p95": 5.0169968780000005,
+     "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+     "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+    },
+    "prepared_cohort_process": {
+     "cpu_system_s": {
+      "max": 0.314516,
+      "mean": 0.2856386666666667,
+      "median": 0.308669,
+      "min": 0.233731,
+      "n": 3,
+      "p90": 0.31334660000000003,
+      "p95": 0.3139313,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "cpu_total_s": {
+      "max": 86.359203,
+      "mean": 78.941576,
+      "median": 81.706642,
+      "min": 68.75888300000001,
+      "n": 3,
+      "p90": 85.4286908,
+      "p95": 85.89394689999999,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "cpu_user_s": {
+      "max": 86.050534,
+      "mean": 78.65593733333333,
+      "median": 81.392126,
+      "min": 68.525152,
+      "n": 3,
+      "p90": 85.1188524,
+      "p95": 85.5846932,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "peak_rss_bytes": {
+      "max": 70823936.0,
+      "mean": 70787072.0,
+      "median": 70823936.0,
+      "min": 70713344.0,
+      "n": 3,
+      "p90": 70823936.0,
+      "p95": 70823936.0,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "preparation_ms": {
+      "max": 271.937789,
+      "mean": 256.172697,
+      "median": 254.761416,
+      "min": 241.818886,
+      "n": 3,
+      "p90": 268.5025144,
+      "p95": 270.22015170000003,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     },
+     "rows": 3,
+     "scope": "all supplied observed rows, including consumed failure costs; no failed row removed; descriptive costs are not successful-completion mean estimates",
+     "verified_rows": 3,
+     "wall_s": {
+      "max": 86.376504419,
+      "mean": 78.95740027966667,
+      "median": 81.718538486,
+      "min": 68.777157934,
+      "n": 3,
+      "p90": 85.4449112324,
+      "p95": 85.9107078257,
+      "quantile_rule": "linear interpolation on p*(n-1); median averages middle two for even n",
+      "tail_scope": "descriptive observed order statistics; no extreme-tail or population-tail guarantee"
+     }
+    }
+   }
+  },
+  "observed_counts": {
+   "aa_process_rows": 10,
+   "cohort_process_rows": 6,
+   "cohort_target_rows": 192,
+   "cold_process_rows": 16,
+   "process_rows": 32
+  },
+  "verification": {
+   "completed_verified_processes": 32,
+   "checked_target_rows": 218,
+   "IC_scalar_replays": 104,
+   "rho_scalar_replays": 114,
+   "IC_four_point_witness_replays": 104,
+   "checked_aa_semantic_pairs": 5,
+   "aa_semantic_gate": true,
+   "invalid_rows": 0,
+   "missing_target_rows": 0
+  },
+  "limits": "Eight actual one-target cold pairs and three actual 32-target shared-setup pairs, given retained K600; original base construction and OS-cold caching are unmeasured. Rho reuses curve/basis preparation with fresh seed-specific jumps and fresh DP state. Online is secondary because IC omits validation/output intervals charged by rho. One VM, three preparation clusters, fixed IC rank seed 29; no common S, sealed legacy-wide ecbench admission, physical-host or independent-host claim. Modeled workloads beyond 32 are not measured crossovers."
  },
  "curve_records": {
   "registry": "docs/curves/registry.json",

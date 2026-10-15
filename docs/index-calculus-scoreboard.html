@@ -791,13 +791,26 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 </tbody></table></div>
 <p class="dash-footnote">Curves <code>icv1-f2m47-t22705043-f4e44623</code> (2.07&times;) and <code>icv1-f2m59-tm943548413-98844ecc</code> (2.07&times;) are in the frozen table and omitted here for width. Extrapolation, not a measurement: with the flat ratio, strong rho on <code>EC1N83Ckb1h876c2921cb64</code> costs about 2<sup>37.1</sup> additions, the claw about 2<sup>38.3</sup> at <code>c = 1</code> and 2<sup>42.3</sup> at the PR&rsquo;s shape. Host: macOS, isolation L0, so counts are the result and wall time is descriptive (claw <code>c = 1</code> median 10.5&times; rho&rsquo;s wall). <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_pair_claw_20261003/README.md">Protocol, session, audit, table, comparisons and scored predictions</a>. Class: accounting (AGENTS.md &sect;3); the best-of table and the verdict are unchanged.</p>
 </section></div></details>
+<details class="dash-details"><summary>Matched legacy degree-83: actual cold and shared-setup process costs · measured 14 October 2026</summary><div class="dash-detail-body"><section class="dash-section" id="n83-matched-20261014" aria-labelledby="n83-matched-title" data-collapse="open"><div class="dash-section-head"><div><p class="dash-kicker">Same public targets / native whole-process accounting</p><h2 id="n83-matched-title">Actual cold and 32-target shared-setup costs, against tuned rho.</h2><p class="panel-summary">Retained K600 IC versus previously frozen Fold/reference-u64 rho, 256 lanes, DP6, escape off. All ratios are native IC/rho costs; below 1 favors IC within the stated boundary. Rho is cheaper at both measured complete-process boundaries. These local diagnostics do not change the admitted-best or boundary tables.</p></div><span class="status neutral">Accounting &middot; PR #1828 unmerged</span></div>
+<p><code>icv1-f2m83-t6151469093347-9eba6cd5</code>: degree 83, subgroup <code>r = 8569786107849059</code> (about 52.93 bits). This legacy a=1 model is distinct from the primary a=0 degree 83 curve. Thirty-two fresh targets were sampled from the declared conditional distribution excluding 617 retained/prior signed orbits; the cold panel uses its first 8 targets.</p>
+<div class="dash-detail-body" style="padding:0"><table><caption>Native ratios of arithmetic mean costs and paired percentile bootstrap intervals. Cold has 8 paired target blocks; shared-setup has only 3 paired process clusters. The secondary online estimator averages 3 repeats within each of 32 targets before target-block resampling.</caption><thead><tr><th>Boundary</th><th>Mean IC seconds</th><th>Mean rho seconds</th><th>Native IC/rho [95%]</th></tr></thead><tbody>
+<tr><td>8 actual paired cold singleton processes, retained K600 supplied</td><td class="n">1159.349882</td><td class="n">3.071649</td><td class="n">377.435691279 [311.812846608, 499.010210394]</td></tr>
+<tr><td>3 actual paired shared-setup processes per method, 32 targets each</td><td class="n">1232.975217</td><td class="n">78.957400</td><td class="n">15.615701794 [14.743542635, 17.614847798]</td></tr>
+<tr><td>32 paired target online means, each averaging 3 cohort observations; secondary</td><td class="n">1.760364</td><td class="n">2.457289</td><td class="n">0.716384720 [0.460388957, 1.013126949]</td></tr>
+</tbody></table></div>
+<p>All 32 actual processes completed with exit 0 and no process timeout or reported solve failure under the 12 GiB RLIMIT_AS envelope. The memory-limit-hit indicator is unavailable (null), so no detected-cap-hit count is asserted. Independent C++ replay passed 218 scalar answers (104 IC, 114 rho), 104 IC four-point witnesses and five identical-work A/A pairs, with zero invalid or missing rows. A/A spread is descriptive, not a universal noise ceiling. The preserved initial v2 checker and frozen collect attempts failed on copied floating-point metadata; the separately versioned v3 verifier and authenticated native extractor correct postprocessing only.</p>
+<p>CPU 3, one OS thread, 12 GiB address-space limit and common 2100-second process cap; 2654 isolation samples observed zero contention. Guest isolation does not establish exclusive physical-host use. Actual process costs charge preparation, all targets, built-in checks and output; external C++ audit is separately metered. Cold begins with retained K600 and does not price its historical construction or flush OS caches. The shared rho batch reuses curve/basis infrastructure and charges 32 seed-specific G-only jump tables plus fresh target-dependent walk/DP state. Reusing a single common jump table would be a different unmeasured policy.</p>
+<p>Online is secondary: IC omits validation/output intervals included by rho. Its target-block interval includes 1; the crossed target/cohort sensitivity interval also includes 1, so neither establishes a mean online winner. All slow cases, pooled and per-target tails, signed phase residuals, CPU and process peak RSS remain in the linked native evidence; three preparations are not 96 independent setup/host samples. No measured workload exceeds 32 targets; additive break-even projections retain per-target rho jump costs and nonfinite bootstrap mass. Full IC rank/log transcript replay, common calibrated S, sealed legacy-wide ecbench admission and independent-host replication remain absent. No asymptotic or global-optimality claim follows.</p>
+<p><strong>Publication status:</strong> measured 14 October 2026; PR #1828 is unmerged, required human review pending. Progress-point landing date 15 October 2026 is provisional and must be updated to the actual merge day. Historical studies remain unchanged.</p>
+<p><a href="https://github.com/aburan28/crypto/blob/main/research/n83_matched_20261014/PROTOCOL.md">Frozen prospective protocol</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json">Native statistics, all rows and tails</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/n83_matched_20261014/records/postprocess-20261015T0018Z/presentation_supplement.json">Native phase residuals, CPU and RSS</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/n83_matched_20261014/records/postprocess-20261015T0018Z/independent_replay_v3_receipt.json">Independent replay receipt</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/n83_matched_20261014/POSTPROCESSING.md">Preserved failures and postprocessing corrections</a></p>
+</section></div></details>
 <details class="dash-details"><summary>Research progress over time · separate regimes and references</summary><div class="dash-detail-body"><section class="dash-section" id="lab-progress" aria-labelledby="progress-title" data-collapse="open"><div class="dash-section-head"><div><p class="dash-kicker">Progress over time / The rho barrier</p><h2 id="progress-title">Where index calculus stands against rho, by the day each result landed.</h2>
 <p class="panel-summary">Plots verified IC over rho ratios in each regime by the day they landed, with early below-one points hollow because their rho later proved unmatched, citing frozen timeline data.</p></div><span class="status neutral">Log scale &middot; rho = 1</span></div>
-<p class="dash-section-intro">Every point quotes a verified comparison from the named result on the day it landed on <code>main</code>. Below one means index calculus is cheaper only when both arms have a complete common cost. The heavy series is the repository&rsquo;s whole-method, cold, one-target test against matched rho. Early below-one points used a rho later proved unmatched and remain hollow as &ldquo;was&rdquo;. Grey series are separate regimes; the n37 counted-work point is a quotient of two incomplete lower bounds and is not a barrier test.</p>
+<p class="dash-section-intro">Every point quotes a verified comparison from its named source. Historical dates are landing dates; the matched degree-83 points carry an explicit provisional 15 October 2026 date while PR #1828 awaits required human review, to be refreshed on actual merge. Below one means index calculus is cheaper only when both arms have a complete common cost. The heavy series is the repository&rsquo;s whole-method, cold, one-target test against matched rho. Early below-one points used a rho later proved unmatched and remain hollow as &ldquo;was&rdquo;. Grey series are separate regimes; the n37 counted-work point is a quotient of two incomplete lower bounds and is not a barrier test.</p>
 <figure class="dash-chart" id="progress-figure"><figcaption><strong>IC / rho on a log axis, 14 September to 5 October 2026</strong><span>Hover or focus a point for the figure, its interval and its source &middot; filled = matched or qualified reference, hollow = later shown unmatched</span></figcaption>
 <div id="progress-chart" role="img" aria-label="Index calculus over rho by date: the whole-method cold series rises above one once the reference is matched; online-only diagnostics include a near-parity n37 compact-orbit point without host isolation, an n17 F4 development result far above one, and older pair-table and genus-4 points below one."></div>
-<p class="dash-section-intro">Every point quotes a verified comparison from the named result on the day it landed on <code>main</code>. Below one means index calculus is cheaper only when both arms have a complete common cost. The heavy series is the repository&rsquo;s whole-method, cold, one-target test against matched rho. Early below-one points used a rho later proved unmatched and remain hollow as &ldquo;was&rdquo;. Grey series are separate regimes; the n37 counted-work point is a quotient of two incomplete lower bounds, and the n41/n53 example wall points lack <code>ecbench</code> and host isolation. Neither is a barrier test.</p>
-<figure class="dash-chart" id="progress-figure"><figcaption><strong>IC / rho on a log axis, 14 September to 7 October 2026</strong><span>Hover or focus a point for the figure, its interval and its source &middot; filled = matched or qualified reference, hollow = later shown unmatched</span></figcaption>
+<p class="dash-section-intro">Every point quotes a verified comparison from its named source. Historical dates are landing dates; the matched degree-83 points carry an explicit provisional 15 October 2026 date while PR #1828 awaits required human review, to be refreshed on actual merge. Below one means index calculus is cheaper only when both arms have a complete common cost. The heavy series is the repository&rsquo;s whole-method, cold, one-target test against matched rho. Early below-one points used a rho later proved unmatched and remain hollow as &ldquo;was&rdquo;. Grey series are separate regimes; the n37 counted-work point is a quotient of two incomplete lower bounds, and the n41/n53 example wall points lack <code>ecbench</code> and host isolation. Neither is a barrier test.</p>
+<figure class="dash-chart" id="progress-figure"><figcaption><strong>IC / rho on a log axis, 14 September to 15 October 2026 (newest date provisional)</strong><span>Hover or focus a point for the figure, its interval and its source &middot; filled = matched or qualified reference, hollow = later shown unmatched</span></figcaption>
 <div id="progress-chart" role="img" aria-label="Index calculus over rho by date: the whole-method cold series rises above one once the reference is matched; separate unisolated n41 and n53 compact-orbit cold diagnostics are far above one while their online diagnostics fall below one, with no admitted speedup."></div>
 <div id="progress-legend" class="progress-legend" aria-hidden="true"></div>
 <div id="progress-tip" class="progress-tip" role="tooltip" hidden></div>
@@ -870,12 +883,16 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <tr><td>2026-10-07</td><td>Weak elliptic class: cover and decomposition on E(F_p^6)</td><td>Isogeny walk stage from a non-weak start eight moves from a weak curve, p = 1,009 (subgroup 2^57.9)</td><td class="n">0.0002&times;</td><td>stage</td><td><span class="chip">accounting</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md">source</a> (&sect;17)</td></tr>
 <tr><td>2026-10-12</td><td>Elliptic curve, cold counted-work diagnostics with unpriced native work</td><td>Large-prime conductor-gap IC, ell = 8209, fixed floor, eight one-target workloads</td><td class="n">19.7311&times; <small>bounded count diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ic37-20261012">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_20261012/README.md">source</a></td></tr>
 <tr><td>2026-10-12</td><td>Elliptic curve, cold counted-work diagnostics with unpriced native work</td><td>Large-prime conductor-gap IC, ell = 131101, fixed floor, eight one-target workloads</td><td class="n">45.0827&times; <small>bounded count diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ic37-20261012">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_20261012/README.md">source</a></td></tr>
+
+<tr><td>2026-10-15</td><td>Legacy degree-83, 8 actual cold singleton pairs, local process wall</td><td>8 actual paired cold singleton processes, retained K600 supplied <small>measured 14 October; PR #1828 unmerged, landing date provisional</small></td><td class="n">377.435691279&times; <small>95%: 311.812846608&ndash;499.010210394</small></td><td>matched, qualified local boundary</td><td><span class="chip">accounting</span></td><td><a href="#n83-matched-20261014">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json">native source</a></td></tr>
+<tr><td>2026-10-15</td><td>Legacy degree-83, 3 actual 32-target shared-setup pairs, local process wall</td><td>3 actual paired shared-setup processes per method, 32 targets each <small>measured 14 October; PR #1828 unmerged, landing date provisional</small></td><td class="n">15.615701794&times; <small>95%: 14.743542635&ndash;17.614847798</small></td><td>matched, qualified local boundary</td><td><span class="chip">accounting</span></td><td><a href="#n83-matched-20261014">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json">native source</a></td></tr>
+<tr><td>2026-10-15</td><td>Legacy degree-83, 32 target online means over 3 repeats, secondary local diagnostic</td><td>32 paired target online means, each averaging 3 cohort observations; secondary <small>measured 14 October; PR #1828 unmerged, landing date provisional</small></td><td class="n">0.716384720&times; <small>95%: 0.460388957&ndash;1.013126949</small></td><td>matched, qualified local boundary</td><td><span class="chip">accounting</span></td><td><a href="#n83-matched-20261014">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json">native source</a></td></tr>
 </tbody></table></div></details>
 <noscript><div class="dash-detail-body"><p>The chart needs JavaScript; the table above lists every plotted point.</p></div></noscript>
 <p class="dash-footnote">What would move the heavy series below the line for good: a cold, one-target, every-phase-priced <code>S</code> below a matched rho&rsquo;s at growing size (AGENTS.md &sect;2, &sect;8). The nearest measured approaches are 1.36&times; (round 0025) and 1.314&times; in CPU time (n41). The exponent story is in the <a href="#boundary-ledger">boundary ledger</a>: no fitted exponent on an elliptic curve sits below rho&rsquo;s one half; the cover route&rsquo;s ratio falls with size but on a weak class.</p>
 <script type="application/json" id="progress-data">{
   "schema_version": "ic-progress-timeline/1",
-  "updated": "2026-10-12",
+  "updated": "2026-10-15",
   "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
   "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
   "series": [
@@ -1670,8 +1687,90 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           "source": "https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md"
         }
       ]
+    },
+    {
+      "id": "n83-matched-cold-process",
+      "label": "Legacy degree-83, 8 actual cold singleton pairs, local process wall",
+      "short_label": "n83 cold process",
+      "role": "context",
+      "barrier_test": false,
+      "note": "Native IC/rho copied directly; below 1 favors IC within this measured boundary. Local process/online diagnostic outside admitted-best and floor tables. Eight paired target blocks; all startup, retained-base load, rank/log reconstruction, solve, built-in verification and output charged. Historical K600 selection/construction and OS-cache flushing are unmeasured.",
+      "points": [
+        {
+          "date": "2026-10-15",
+          "measurement_date": "2026-10-14",
+          "publication_status": "PR #1828 is unmerged and human review is pending. The 2026-10-15 landing date is provisional and must be refreshed on actual merge; measurement date is 2026-10-14.",
+          "value": 377.43569127919193,
+          "interval_95": [
+            311.8128466078986,
+            499.01021039372205
+          ],
+          "reference": "matched",
+          "unit": "actual one-target fresh-process wall, local diagnostic",
+          "label": "8 actual paired cold singleton processes, retained K600 supplied",
+          "detail": "Native IC/rho 377.435691279 [95% 311.812846608, 499.010210394]. Eight paired target blocks; all startup, retained-base load, rank/log reconstruction, solve, built-in verification and output charged. Historical K600 selection/construction and OS-cache flushing are unmeasured. One VM, CPU 3, one thread; no common S/ecbench L2/physical-host or independent-host admission. PR #1828 is unmerged and human review is pending. The 2026-10-15 landing date is provisional and must be refreshed on actual merge; measurement date is 2026-10-14.",
+          "class": "accounting",
+          "anchor": "#n83-matched-20261014",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json"
+        }
+      ]
+    },
+    {
+      "id": "n83-matched-batch-process",
+      "label": "Legacy degree-83, 3 actual 32-target shared-setup pairs, local process wall",
+      "short_label": "n83 batch32 process",
+      "role": "context",
+      "barrier_test": false,
+      "note": "Native IC/rho copied directly; below 1 favors IC within this measured boundary. Local process/online diagnostic outside admitted-best and floor tables. Three paired preparation/timing clusters only. Rho genuinely reuses curve/basis infrastructure, while all seed-specific G-only jumps and fresh target-dependent DP/walk state are charged. This is a multi-target diagnostic.",
+      "points": [
+        {
+          "date": "2026-10-15",
+          "measurement_date": "2026-10-14",
+          "publication_status": "PR #1828 is unmerged and human review is pending. The 2026-10-15 landing date is provisional and must be refreshed on actual merge; measurement date is 2026-10-14.",
+          "value": 15.615701793694768,
+          "interval_95": [
+            14.743542634654554,
+            17.614847798270176
+          ],
+          "reference": "matched",
+          "unit": "actual shared-setup 32-target process wall, local diagnostic",
+          "label": "3 actual paired shared-setup processes per method, 32 targets each",
+          "detail": "Native IC/rho 15.615701794 [95% 14.743542635, 17.614847798]. Three paired preparation/timing clusters only. Rho genuinely reuses curve/basis infrastructure, while all seed-specific G-only jumps and fresh target-dependent DP/walk state are charged. This is a multi-target diagnostic. One VM, CPU 3, one thread; no common S/ecbench L2/physical-host or independent-host admission. PR #1828 is unmerged and human review is pending. The 2026-10-15 landing date is provisional and must be refreshed on actual merge; measurement date is 2026-10-14.",
+          "class": "accounting",
+          "anchor": "#n83-matched-20261014",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json"
+        }
+      ]
+    },
+    {
+      "id": "n83-matched-online-secondary",
+      "label": "Legacy degree-83, 32 target online means over 3 repeats, secondary local diagnostic",
+      "short_label": "n83 online secondary",
+      "role": "context",
+      "barrier_test": false,
+      "note": "Native IC/rho copied directly; below 1 favors IC within this measured boundary. Local process/online diagnostic outside admitted-best and floor tables. Target-block interval conditional on three shared preparations. IC target clock excludes validation/output intervals included by rho; this secondary ratio cannot determine the end-to-end winner. All slow targets are retained.",
+      "points": [
+        {
+          "date": "2026-10-15",
+          "measurement_date": "2026-10-14",
+          "publication_status": "PR #1828 is unmerged and human review is pending. The 2026-10-15 landing date is provisional and must be refreshed on actual merge; measurement date is 2026-10-14.",
+          "value": 0.7163847201556132,
+          "interval_95": [
+            0.4603889573963417,
+            1.013126948637089
+          ],
+          "reference": "matched",
+          "unit": "producer online clocks with unequal validation boundaries, secondary diagnostic",
+          "label": "32 paired target online means, each averaging 3 cohort observations; secondary",
+          "detail": "Native IC/rho 0.716384720 [95% 0.460388957, 1.013126949]. Target-block interval conditional on three shared preparations. IC target clock excludes validation/output intervals included by rho; this secondary ratio cannot determine the end-to-end winner. All slow targets are retained. One VM, CPU 3, one thread; no common S/ecbench L2/physical-host or independent-host admission. PR #1828 is unmerged and human review is pending. The 2026-10-15 landing date is provisional and must be refreshed on actual merge; measurement date is 2026-10-14.",
+          "class": "accounting",
+          "anchor": "#n83-matched-20261014",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json"
+        }
+      ]
     }
-  ]
+  ],
+  "pending_publication_note": "PR #1828 is unmerged and human review is pending. The 2026-10-15 landing date is provisional and must be refreshed on actual merge; measurement date is 2026-10-14."
 }
 </script>
 <script>
@@ -1683,7 +1782,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
   var NS = 'http://www.w3.org/2000/svg';
   function mk(n, a, parent) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (parent) parent.appendChild(e); return e; }
   function day(s) { return Date.UTC(+s.slice(0,4), +s.slice(5,7)-1, +s.slice(8,10)) / 864e5; }
-  var t0 = day('2026-09-14'), t1 = day('2026-10-07');
+  var t0 = day('2026-09-14'), t1 = day(D.updated);
   var W = 760, Hh = 360, L = 52, R = 18, T = 14, B = 44;
   var yMin = Math.log10(0.0001), yMax = Math.log10(30000);
   function X(t) { return L + (t - t0) / (t1 - t0) * (W - L - R); }
@@ -1694,7 +1793,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
     var tx = mk('text', { x: L - 8, y: Y(v) + 4, 'class': 'tick', 'text-anchor': 'end' }, svg); tx.textContent = v + '×';
   });
   var bl = mk('text', { x: L + 6, y: Y(1) - 7, 'class': 'barrier-label', 'text-anchor': 'start' }, svg); bl.textContent = 'rho, matched reference = 1';
-  ['2026-09-14','2026-09-21','2026-09-28','2026-10-05','2026-10-07'].forEach(function (s) {
+  ['2026-09-14','2026-09-21','2026-09-28','2026-10-05',D.updated].forEach(function (s) {
     var x = X(day(s)); mk('line', { x1: x, x2: x, y1: Hh - B, y2: Hh - B + 5, 'class': 'grid' }, svg);
     var tx = mk('text', { x: x, y: Hh - B + 18, 'class': 'tick', 'text-anchor': 'middle' }, svg); tx.textContent = s.slice(5).replace('-', ' ').replace('09 ', 'Sep ').replace('10 ', 'Oct ');
   });
@@ -1732,7 +1831,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
     var last = pts[pts.length - 1];
     var lx = X(day(last.date)), flip = lx > W - R - 110;
     var lab = mk('text', { x: flip ? lx - 10 : lx + 9, y: Y(last.value) + 4, 'class': 'dlabel ' + cls, 'text-anchor': flip ? 'end' : 'start' }, svg);
-    lab.textContent = ser.role === 'emphasis' ? 'whole method, cold' : ser.id === 'ec-cold-unisolated' ? 'unisolated cold' : ser.id === 'ec-batch' ? '32 targets together' : ser.id === 'ec-batch-n61' ? 'n61 batch vs KS v2' : ser.id === 'ec-online' ? 'online only' : ser.id === 'genus4' ? 'genus-4 Jacobian' : 'E(F_p^6) cover';
+    lab.textContent = ser.short_label || (ser.role === 'emphasis' ? 'whole method, cold' : ser.id === 'ec-cold-unisolated' ? 'unisolated cold' : ser.id === 'ec-batch' ? '32 targets together' : ser.id === 'ec-batch-n61' ? 'n61 batch vs KS v2' : ser.id === 'ec-online' ? 'online only' : ser.id === 'genus4' ? 'genus-4 Jacobian' : 'E(F_p^6) cover');
     var li = document.createElement('span'); li.className = 'lg ' + cls; var sw = document.createElement('i'); li.appendChild(sw); li.appendChild(document.createTextNode(ser.label)); legend.appendChild(li);
   });
   var hol = document.createElement('span'); hol.className = 'lg emph hollow'; var sw2 = document.createElement('i'); hol.appendChild(sw2); hol.appendChild(document.createTextNode('hollow: later shown measured against an unmatched rho')); legend.appendChild(hol);

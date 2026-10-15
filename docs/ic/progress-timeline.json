@@ -1,6 +1,6 @@
 {
   "schema_version": "ic-progress-timeline/1",
-  "updated": "2026-10-12",
+  "updated": "2026-10-15",
   "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
   "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
   "series": [
@@ -795,6 +795,88 @@
           "source": "https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md"
         }
       ]
+    },
+    {
+      "id": "n83-matched-cold-process",
+      "label": "Legacy degree-83, 8 actual cold singleton pairs, local process wall",
+      "short_label": "n83 cold process",
+      "role": "context",
+      "barrier_test": false,
+      "note": "Native IC/rho copied directly; below 1 favors IC within this measured boundary. Local process/online diagnostic outside admitted-best and floor tables. Eight paired target blocks; all startup, retained-base load, rank/log reconstruction, solve, built-in verification and output charged. Historical K600 selection/construction and OS-cache flushing are unmeasured.",
+      "points": [
+        {
+          "date": "2026-10-15",
+          "measurement_date": "2026-10-14",
+          "publication_status": "PR #1828 is unmerged and human review is pending. The 2026-10-15 landing date is provisional and must be refreshed on actual merge; measurement date is 2026-10-14.",
+          "value": 377.43569127919193,
+          "interval_95": [
+            311.8128466078986,
+            499.01021039372205
+          ],
+          "reference": "matched",
+          "unit": "actual one-target fresh-process wall, local diagnostic",
+          "label": "8 actual paired cold singleton processes, retained K600 supplied",
+          "detail": "Native IC/rho 377.435691279 [95% 311.812846608, 499.010210394]. Eight paired target blocks; all startup, retained-base load, rank/log reconstruction, solve, built-in verification and output charged. Historical K600 selection/construction and OS-cache flushing are unmeasured. One VM, CPU 3, one thread; no common S/ecbench L2/physical-host or independent-host admission. PR #1828 is unmerged and human review is pending. The 2026-10-15 landing date is provisional and must be refreshed on actual merge; measurement date is 2026-10-14.",
+          "class": "accounting",
+          "anchor": "#n83-matched-20261014",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json"
+        }
+      ]
+    },
+    {
+      "id": "n83-matched-batch-process",
+      "label": "Legacy degree-83, 3 actual 32-target shared-setup pairs, local process wall",
+      "short_label": "n83 batch32 process",
+      "role": "context",
+      "barrier_test": false,
+      "note": "Native IC/rho copied directly; below 1 favors IC within this measured boundary. Local process/online diagnostic outside admitted-best and floor tables. Three paired preparation/timing clusters only. Rho genuinely reuses curve/basis infrastructure, while all seed-specific G-only jumps and fresh target-dependent DP/walk state are charged. This is a multi-target diagnostic.",
+      "points": [
+        {
+          "date": "2026-10-15",
+          "measurement_date": "2026-10-14",
+          "publication_status": "PR #1828 is unmerged and human review is pending. The 2026-10-15 landing date is provisional and must be refreshed on actual merge; measurement date is 2026-10-14.",
+          "value": 15.615701793694768,
+          "interval_95": [
+            14.743542634654554,
+            17.614847798270176
+          ],
+          "reference": "matched",
+          "unit": "actual shared-setup 32-target process wall, local diagnostic",
+          "label": "3 actual paired shared-setup processes per method, 32 targets each",
+          "detail": "Native IC/rho 15.615701794 [95% 14.743542635, 17.614847798]. Three paired preparation/timing clusters only. Rho genuinely reuses curve/basis infrastructure, while all seed-specific G-only jumps and fresh target-dependent DP/walk state are charged. This is a multi-target diagnostic. One VM, CPU 3, one thread; no common S/ecbench L2/physical-host or independent-host admission. PR #1828 is unmerged and human review is pending. The 2026-10-15 landing date is provisional and must be refreshed on actual merge; measurement date is 2026-10-14.",
+          "class": "accounting",
+          "anchor": "#n83-matched-20261014",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json"
+        }
+      ]
+    },
+    {
+      "id": "n83-matched-online-secondary",
+      "label": "Legacy degree-83, 32 target online means over 3 repeats, secondary local diagnostic",
+      "short_label": "n83 online secondary",
+      "role": "context",
+      "barrier_test": false,
+      "note": "Native IC/rho copied directly; below 1 favors IC within this measured boundary. Local process/online diagnostic outside admitted-best and floor tables. Target-block interval conditional on three shared preparations. IC target clock excludes validation/output intervals included by rho; this secondary ratio cannot determine the end-to-end winner. All slow targets are retained.",
+      "points": [
+        {
+          "date": "2026-10-15",
+          "measurement_date": "2026-10-14",
+          "publication_status": "PR #1828 is unmerged and human review is pending. The 2026-10-15 landing date is provisional and must be refreshed on actual merge; measurement date is 2026-10-14.",
+          "value": 0.7163847201556132,
+          "interval_95": [
+            0.4603889573963417,
+            1.013126948637089
+          ],
+          "reference": "matched",
+          "unit": "producer online clocks with unequal validation boundaries, secondary diagnostic",
+          "label": "32 paired target online means, each averaging 3 cohort observations; secondary",
+          "detail": "Native IC/rho 0.716384720 [95% 0.460388957, 1.013126949]. Target-block interval conditional on three shared preparations. IC target clock excludes validation/output intervals included by rho; this secondary ratio cannot determine the end-to-end winner. All slow targets are retained. One VM, CPU 3, one thread; no common S/ecbench L2/physical-host or independent-host admission. PR #1828 is unmerged and human review is pending. The 2026-10-15 landing date is provisional and must be refreshed on actual merge; measurement date is 2026-10-14.",
+          "class": "accounting",
+          "anchor": "#n83-matched-20261014",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json"
+        }
+      ]
     }
-  ]
+  ],
+  "pending_publication_note": "PR #1828 is unmerged and human review is pending. The 2026-10-15 landing date is provisional and must be refreshed on actual merge; measurement date is 2026-10-14."
 }

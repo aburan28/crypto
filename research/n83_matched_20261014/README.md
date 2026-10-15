@@ -2,8 +2,10 @@
 
 Status: all32 native processes completed;218 scalar answers,104 IC witnesses
 and five identical A/A work pairs independently verified. Frozen native
-analysis passed every required row. Inspected PDF/evidence publication is
-being completed. User authorized execution on14October2026.
+analysis passed every required row. The inspected17-page addendum and87-page
+comprehensive PDF preserve all preceding70 pages. User authorized execution
+on14October2026. PR1828 remains subject to current-head CI and required human
+review; completed evidence does not bypass those gates.
 Worker/controller/analysis source freeze:
 `c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03`.
 
@@ -30,7 +32,14 @@ a newly measured rho time.
 | Complete cost, memory and failures | Verified complete | [All32 raw process directories](records/campaign-20261014T1940Z/runs/), no solver failure/timeout; internal work retained |
 | Means, medians, slow cases and uncertainty | Verified native analysis | [Input](records/postprocess-20261015T0018Z/statistics_input.json), [statistics](records/postprocess-20261015T0018Z/statistics.json); three preparation clusters and nonfinite modeled mass retained |
 | Independent correctness and provenance | Verified complete with explicit postprocessing corrections | [V3 PASS receipt](records/postprocess-20261015T0018Z/independent_replay_v3_receipt.json), [sealed extraction receipt](records/postprocess-20261015T0018Z/collector_extraction_receipt.json), [revision history](POSTPROCESSING.md) |
-| Comprehensive PDF and reviewable publication | In progress after verified native results | New addendum preserving prior70pages; extend PR1828 |
+| Comprehensive PDF and reviewable publication | Reports inspected and evidence packaged for PR1828 | [Report source and PDFs](reports/run-20261014T1940Z/README.md), [independent PDF QA](reports/run-20261014T1940Z/independent_qa/REVIEW.md), [archive receipt](delivery/EVIDENCE_ARCHIVE_RECEIPT.json) |
+
+Deliverables: [standalone addendum](reports/run-20261014T1940Z/n83_matched_ic_rho_evaluation.pdf),
+[updated comprehensive PDF](reports/run-20261014T1940Z/unified_curve_basis_report_matched_ic_rho.pdf),
+[evidence ZIP](reports/run-20261014T1940Z/n83_matched_ic_rho_evidence_bundle.zip),
+and [benchmark browsing copies](../../benchmarks/20261014-n83-matched-ic-rho/README.md).
+The [independent source review](checks/final_measurement_review.md) documents
+canonical diagnostic updates, unchanged admitted rankings and remaining limits.
 
 All ratios below are **IC/rho; below1 favors IC**. Native recorded primary
 means and paired percentile95% intervals are:

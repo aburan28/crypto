@@ -1,0 +1,12 @@
+2026-10-15 after the completed campaign released its CPU reservation.
+
+conductor check --summary 'Publish completed matched degree-83 campaign verification, native analysis and inspected reports' --scope path:research/n83_matched_20261014 --scope path:benchmarks/20261014-n83-matched-ic-rho --scope path:benchmarks/README.md
+/bin/bash: conductor: command not found
+exit:127
+
+conductor check --summary 'Publish source-linked matched N83 diagnostics on canonical progress chart and leaderboard' --scope path:docs/ic/progress-timeline.json --scope path:docs/index-calculus-scoreboard.html --scope path:scripts/build_ic_leaderboard.py --scope path:docs/ic-leaderboard.html --scope path:docs/ic/LEADERBOARD.md --scope path:docs/ic/leaderboard.json
+/bin/bash: conductor: command not found
+exit:127
+
+Derived scope includes docs/browser/data.json only when leaderboard regeneration
+makes that generated output stale; no new evidence admission is authorized by it.

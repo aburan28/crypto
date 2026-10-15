@@ -1,0 +1,55 @@
+{
+  "contract_status": "COMPLETED_NATIVE_INPUT_BINDING_FOR_LAYOUT_NOT_NEW_EVIDENCE",
+  "purpose": "Display copied native results only; the presentation does not rerun statistics or independent verification.",
+  "run_id": "run-20261014T1940Z",
+  "native_evidence_commit": "fb26ccaef5c8f5e97aa81b3503d42e5501b030e4",
+  "measurement_source_freeze_commit": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+  "protocol_sha256": "abc72a3e98367ea0ccbde40f44c68aa4e3355b43ace579f4f162355277d5b1bc",
+  "frozen_manifest_sha256": "896bd5d03e6f7d68998851aa7f9688f2fe0122546173cf74ab6b138eb19975d0",
+  "inputs": {
+    "statistics.json": {
+      "source": "records/postprocess-20261015T0018Z/statistics.json",
+      "copy": "data/statistics.json",
+      "sha256": "1ba0dd87653daf737e95add3a37d08ceb905f8d9811b933db61fc156cb83377d"
+    },
+    "statistics_input.json": {
+      "source": "records/postprocess-20261015T0018Z/statistics_input.json",
+      "copy": "data/statistics_input.json",
+      "sha256": "8c8b380646e1d1d561492634fc6bdfd10d78e34395483a0f9df7b94c599bf2d9"
+    },
+    "presentation_supplement.json": {
+      "source": "records/postprocess-20261015T0018Z/presentation_supplement.json",
+      "copy": "data/presentation_supplement.json",
+      "sha256": "4804814de5e0fbb7d464b09c26738844314a045cbb60cc33379ab7a9909ef0e8"
+    },
+    "independent_replay_v3_receipt.json": {
+      "source": "records/postprocess-20261015T0018Z/independent_replay_v3_receipt.json",
+      "copy": "data/independent_replay_v3_receipt.json",
+      "sha256": "94891f01e158a3a365744a2d349a685d3f1fd844a16e7f5b40e2e38763646c8b"
+    },
+    "collector_extraction_receipt.json": {
+      "source": "records/postprocess-20261015T0018Z/collector_extraction_receipt.json",
+      "copy": "data/collector_extraction_receipt.json",
+      "sha256": "9200c9ea22c34b7fdda4b92a87b368c95c5bd13b5f3020517c936968681aa41a"
+    },
+    "independent_replay_v3_meter.jsonl": {
+      "source": "records/postprocess-20261015T0018Z/independent_replay_v3_meter.jsonl",
+      "copy": "data/independent_replay_v3_meter.jsonl",
+      "sha256": "ff7f87807ac3846a3f7ab6f1b2147872072ad97181b6d57ac198b3aa487a345a"
+    }
+  },
+  "ratio_direction": "IC/rho; below1 favors IC",
+  "primary_boundaries": [
+    "Actual8pairedsingletonprocesses",
+    "Actual3paired32targetprocesses"
+  ],
+  "query_diagnostic": "32targetmeans/3sharedpreparations; unequalvalidation/input/outputclocks; secondary",
+  "model_status": "N>32unexecuted; nonfinitebootstrapmassretained; rhojumpschargedpertarget",
+  "historical_K600_creation_cost": null,
+  "memory_limit_hit_detection": null,
+  "calibrated_S": null,
+  "ecbench_L2": null,
+  "independent_host": null,
+  "posthoc_corrections": "VersionedV3checkerandseparatecollect-onlyextractor; failurespreserved; frozenmeasuredbytesunchanged",
+  "research_results_recomputed": false
+}

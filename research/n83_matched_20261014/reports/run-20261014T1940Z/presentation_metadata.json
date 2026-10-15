@@ -1,0 +1,156 @@
+{
+  "completion_and_admission": "All 32 processes completed: 208 main matched answers and 10 A/A answers. Independent native replay passes for all 218 scalars, all 104 IC four-point witnesses and all five same-work A/A pairs, with zero invalid or missing answers. The reservation records 2,654 samples and zero contended samples. Wall times remain conditional on one guest host; calibrated S, ecbench L2 and independent-host admission remain unset.",
+  "identity_details": "Registry representation EC1N83Ce1h35c7ced6b497; curve UID urn:ec-record:1:sha256:35c7ced6b497231fbc82fe24db596fd55379a87356962dad47a7dc774388ce9d. K600 file SHA-256 0d290b14a350db6271c9a49f0cd6ba246edd8c9bc6754387ad1ceebf08ec0c09; declared point-set digest d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7. Exact field, subgroup, generator and point-set identities are retained rather than inferred from degree alone.",
+  "fixtures_and_seeds": "All 32 fresh points and both older eight-point streams pass independent native regeneration, scalar/subgroup checks and signed-orbit exclusions. Shared rho seeds are 202610146501–596, assigned by frozen target index and cohort; actual cold seeds are 202610146601–608; A/A seeds are 202610146411–415. IC rank seed stays 29. Every actual target order and point-file/seed-file digest is in the frozen matrix.",
+  "phase_and_audit_boundary": "Producer preparation includes IC index/rank/log work and rho curve/normal-basis/seed-specific jumps. Independent final V3 scalar/witness/file replay took 1.167454 s wall, 1.089206 s user CPU and 0.075961 s system CPU, peak RSS 109,332 KiB, separately metered without observed contention. That is one post-hoc research-audit pass over the campaign, not a production per-target verification estimate. Built-in solver verification is already inside each process cost.",
+  "resources_and_failures": "All 32 processes completed under the 12-GiB RLIMIT_AS envelope with no whole-process timeout, reported solve failure or invalid scalar answer. The memory_limit_hit indicator is null for every process; memory-limit-hit detection is unavailable and is not inferred from exit status. Per-target rho work counters below retain internal capped-walk restarts. IC peak RSS is about 5.81 billion bytes on every process; exact native wait4 values remain in the records. No consumed work is dropped from the complete-process estimators.",
+  "verification_details": "Measured sources were frozen at c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03 and prospective binary/matrix metadata at ba94c10811ab48da60c9af1824c1eb767a9e17ec. The final independent V3 replay records 1,237 hash bindings, 239 distinct bound files and 336 file snapshots. The separate collect-only extractor rechecks all 336 snapshot hashes and exports 32 process rows, 192 cohort query rows and 26 auxiliary target rows. Source pins cover selected relevant sources and Cargo.lock, not a full compiled dependency-closure proof.",
+  "verifier_revision_details": "Preserved failure: the frozen V2 checker reported invalid_rows=227 after metadata-binding failures. Native diagnosis found 127 copied floating-point tokens, each exactly one decoded f64 ULP from its original after Rust parsing/reserialization. V3 changes only four observation-copy comparisons, allowing adjacent finite f64 values at explicit diagnostic paths. Integer/coordinate/scalar/seed/counter/nanosecond/hash/configuration gates remain exact; two ULPs and one-nanosecond changes are rejected. The original frozen collect command then failed exact observation reconstruction; a separate versioned collect-only program uses arbitrary-precision JSON tokens and the V3 file seal, without recalculating clocks or launching solvers. Original failures, sources, observations and all measured bytes remain unchanged. This is a post-hoc validation/extraction correction, not a newly measured solver improvement.",
+  "method_choice": "For the measured retained-base one-target workload and the actual 32-target shared workload, the optimized rho implementation has lower complete-process cost. IC's secondary producer-query mean is lower, but its target-block and crossed intervals include equal cost, its upper query tail is higher, and its clock omits validation/input/output work included by rho. The observed data therefore support using this rho configuration for these two executed workload sizes on this host. They do not establish global optimality or an executed larger-batch IC crossover.",
+  "model_details": "Native model point threshold: N=1,685, beyond the only measured shared size N=32. Of 20,000 crossed-bootstrap draws, 814 (fraction 0.0407) have no eventual IC advantage in the linear model. The unconditional extended 95% interval starts at 844 targets and has a nonfinite upper endpoint. Finite-only descriptive quantiles are median 1,602, p025 840 and p975 11,270.125; these condition on finite draws and are not an unconditional confidence interval. Native setup-plus-query prefixes are derived producer-accounted prefixes, not observed prefix wall times. No larger crossover was executed. Projected costs may exceed the current 2100 s cap; larger N requires a new prospective equal-budget protocol.",
+  "model_figure_scope": "MODEL ONLY: N=1,685 point threshold; nonfinite bootstrap fraction 0.0407; unequal query clocks",
+  "reproduction_details": "The frozen protocol, create-new execution matrix, exact build commands, source/binary/input hashes, raw records, independent replay, versioned post-hoc corrections, native statistics and supplement are committed with this report. Reproduce into new directories. Benchmark PDFs/SVG/150 dpi PNGs are browsing copies; study records remain authoritative. The renderers only format native values and inspect layout; they do not recompute results. Native evidence is pinned at fb26ccaef5c8f5e97aa81b3503d42e5501b030e4. <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/collector_extraction_receipt.json\" color=\"#087F83\">Authoritative evidence</link>.",
+  "phase_details": "Native IC residual (target_ms minus five_phase_sum_ms), n=104: mean 0.000921423 ms, median 0.000781000 ms, minimum 0.000300000 ms and maximum 0.013611000 ms, with zero negative rows. This small residual is retained; the larger omitted input/Q-validation/output boundary remains a separate issue. The supplement's source-file hashes and JSON/JSONL pointers bind each recorded field.",
+  "phase_source_note": "Sources: <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/presentation_supplement.json\" color=\"#087F83\">Native signed phase/residual supplement</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/postprocessing/src/lib.rs\" color=\"#087F83\">Native phase exporter source</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics_input.json\" color=\"#087F83\">Raw producer fields</link>.",
+  "model_table_rows": [
+    [
+      "Native additive setup coefficients",
+      "IC 1176.387851 s; rho invariant setup 0.216993 s"
+    ],
+    [
+      "Native per-target coefficients",
+      "IC query 1.760364 s; rho query 2.457289 s + seed-specific jumps 0.001224 s = 2.458513 s"
+    ],
+    [
+      "Point-estimate first favorable target count",
+      "N=1,685; modeled and outside executed N=32"
+    ],
+    [
+      "Bootstrap finite / nonfinite draws",
+      "19,186 / 814 of 20,000; nonfinite fraction 0.0407 retained"
+    ],
+    [
+      "Unconditional extended 95% interval",
+      "[844, nonfinite / no eventual IC advantage]"
+    ],
+    [
+      "Observed complete-process sizes",
+      "Actual N=1 and N=32; no larger measured crossover"
+    ]
+  ],
+  "host_table_rows": [
+    [
+      "CPU and threads",
+      "CPU3; one OS thread per child. The 256 lockstep rho lanes are not OS threads."
+    ],
+    [
+      "Common limits",
+      "12 GiB RLIMIT_AS; 2100 s process timeout; native wait4 wall/user/system/RSS. memory_limit_hit is null: detection unavailable, not inferred from exit."
+    ],
+    [
+      "Guest host",
+      "AMD EPYC 9V74; x86-64; five visible logical CPUs, cgroup four-CPU/16-GiB envelope; Linux 6.18.44 / KVM"
+    ],
+    [
+      "Reservation and contention",
+      "Native exclusive guest reservation: 2,654 samples, zero contended samples; physical-host exclusivity unknown"
+    ],
+    [
+      "Compiler and profile",
+      "Rust 1.99.0 b940084d7eb6a299eb4bfeb8e34901bc051e7ac4; LLVM 23.1.1; both workers use the same release compiler/profile"
+    ],
+    [
+      "Unadmitted scope",
+      "Calibrated operation S, ecbench L2, physical-host exclusivity and independent-host timing reproduction remain unset"
+    ]
+  ],
+  "requirement_rows": [
+    [
+      "Frozen larger matched panel",
+      "Verified complete: 32 fresh points, 617 initial orbit exclusions, prospective 32-process matrix; all attempts retained"
+    ],
+    [
+      "Actual cold and genuine reused setup",
+      "Verified complete: eight singleton pairs and three real 32-target cohort pairs; 208 main answers"
+    ],
+    [
+      "Independent scalars / IC witnesses / same-work A/A",
+      "PASS: 218 scalars, 104 IC four-point witnesses, five A/A semantic pairs; zero invalid/missing answers"
+    ],
+    [
+      "Full IC rank/log transcript",
+      "Not exported by the existing wide producer; remains unvalidated"
+    ],
+    [
+      "Pre-timing native checks",
+      "4,089 library tests passed, zero failed, 117 ignored; four strict-worker, nine controller, 14 frozen-analysis and seven metadata tests passed"
+    ],
+    [
+      "Source-linked PDFs and preserved prior report",
+      "New source-linked addendum and comprehensive PDF; page-preservation and independent inspection receipts accompany publication"
+    ],
+    [
+      "Canonical progress versus boundary promotion",
+      "Diagnostic progress entry records this run; no boundary-ledger promotion, calibrated S or independent-host claim"
+    ]
+  ],
+  "measurement_changes": [
+    [
+      "Align target-dependent clocks before an online headline",
+      "Include matching input/Q validation, output and independent-check boundaries; keep present producer query ratios secondary"
+    ],
+    [
+      "Add independent preparation clusters and hosts",
+      "Three shared preparations on one guest give limited interval resolution; target/seed repeats do not replace setup/host replication"
+    ],
+    [
+      "Distribute A/A controls across timing epochs",
+      "Current five pairs precede the multi-hour matrix; their initial range cannot bound later host/frequency drift"
+    ],
+    [
+      "Retain all cost regimes and distributions",
+      "Keep actual cold and genuine shared totals, means, conventional medians, slow cases, failures, memory and internal restart work"
+    ],
+    [
+      "Price original K600 selection/construction",
+      "This unavailable additive cost remains open for a curve-only cold-start or complete deployment crossover"
+    ],
+    [
+      "Fix producer JSON round trips prospectively",
+      "V3 verifier and token-preserving collect-only corrections are post-hoc audit/extraction changes; a future producer fix needs a new frozen protocol and new measurements"
+    ],
+    [
+      "Execute any claimed larger crossover",
+      "N>32 remains modeled; charge fresh rho seed-specific jumps, retain nonfinite uncertainty, and do not infer globally optimal amortized rho"
+    ],
+    [
+      "Keep historical and current panels separate",
+      "No multiplication of historical gains or pairing old IC timings with this newly optimized rho"
+    ]
+  ],
+  "figure_captions": {
+    "workload_boundaries": "Actual fresh singleton and genuine reused-setup process boundaries. Public-point generation, compilation and external research audit are outside both arm process clocks. Historical K600 selection/construction cost is unavailable. Run run-20261014T1940Z.",
+    "cold_pairs": "All eight predeclared actual singleton process pairs, seconds on a logarithmic y-axis. Primary complete-process boundary, given retained K600; every original pair independently verifies. Run run-20261014T1940Z.",
+    "shared_cohorts": "All three actual 32-target process pairs, seconds on a logarithmic y-axis. Each arm initializes infrastructure once and charges every target. Rho target-dependent collision state is reset. Only three preparation clusters. Run run-20261014T1940Z.",
+    "query_targets": "All 32 native target means in seconds on a logarithmic y-axis, three query observations per arm/target. The IC and rho producer validation/input/output boundaries differ; this is a secondary diagnostic. Run run-20261014T1940Z.",
+    "process_memory": "Native wait4 peak RSS in bytes for all eight cold pairs and three genuine shared pairs. These sequential process peaks are not additive concurrent footprints. Run run-20261014T1940Z.",
+    "break_even_model": "Native additive setup-plus-linear-query model. N=1,685 is a modeled point threshold; only N=1 and N=32 complete processes were executed. The nonfinite bootstrap fraction is 0.0407. Query clocks differ and process residual/original K600 construction costs are absent. Run run-20261014T1940Z.",
+    "aa_noise": "Five identical rho A/A singleton process pairs: native A/B ratios, with equality at one. This initial local range is descriptive, not a confidence band or bound on the later multi-hour matrix. Run run-20261014T1940Z."
+  },
+  "section_source_notes": {
+    "0": "Sources: <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/PROTOCOL.md\" color=\"#087F83\">Protocol</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json\" color=\"#087F83\">Native statistics</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/independent_replay_v3_receipt.json\" color=\"#087F83\">Independent replay</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/collector_extraction_receipt.json\" color=\"#087F83\">Collector seal</link>.",
+    "1": "Sources: <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/docs/curves/registry.json\" color=\"#087F83\">Exact curve registry</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/provenance/protocol.json\" color=\"#087F83\">Frozen protocol</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/provenance/build_receipt.json\" color=\"#087F83\">Build/source pins</link>.",
+    "2": "Sources: <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/verification/fixtures/generator_receipt.json\" color=\"#087F83\">Fixture generator</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/verification/fixture_replay_receipt.json\" color=\"#087F83\">Independent fixtures</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/provenance/frozen_campaign_manifest.json\" color=\"#087F83\">Frozen execution matrix</link>.",
+    "3": "Sources: <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/examples/koblitz_orbit_dlp_fast.rs\" color=\"#087F83\">IC timer source</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/examples/n83_rho_matched_eval.rs\" color=\"#087F83\">Rho timer source</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/independent_replay_v3_meter.jsonl\" color=\"#087F83\">Audit meter</link>.",
+    "4": "Sources: <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json\" color=\"#087F83\">All cold rows and native estimator</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/campaign-20261014T1940Z/runs/K01-ic/observation.json\" color=\"#087F83\">Raw cold process K01-ic</link>.",
+    "5": "Sources: <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json\" color=\"#087F83\">All shared cohorts and native estimator</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/campaign-20261014T1940Z/runs/C01-ic/observation.json\" color=\"#087F83\">Raw cohort C01-ic</link>.",
+    "6": "Sources: <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json\" color=\"#087F83\">All native query distributions/intervals</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/analysis/src/lib.rs\" color=\"#087F83\">Native statistical source</link>.",
+    "7": "Sources: <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json\" color=\"#087F83\">All native target rows</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics_input.json\" color=\"#087F83\">Raw query input</link>.",
+    "8": "Sources: <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json\" color=\"#087F83\">All native target rows</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics_input.json\" color=\"#087F83\">Raw query input</link>.",
+    "9": "Sources: <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/presentation_supplement.json\" color=\"#087F83\">Exact resource/work supplement</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics_input.json\" color=\"#087F83\">Native process records</link>.",
+    "10": "Sources: <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json\" color=\"#087F83\">Native additive model and finite/nonfinite mass</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/analysis/src/lib.rs\" color=\"#087F83\">Frozen native model source</link>.",
+    "11": "Sources: <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/main-20261014T1940Z/main_isolation.jsonl\" color=\"#087F83\">Native reservation</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json\" color=\"#087F83\">Native A/A statistics</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/provenance/build_receipt.json\" color=\"#087F83\">Build receipt</link>.",
+    "12": "Sources: <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/independent_replay_v3_receipt.json\" color=\"#087F83\">Final independent replay</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/verification/revisions/20261015-v3/README.md\" color=\"#087F83\">V3 numeric-copy correction</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/postprocessing/collector-only/README.md\" color=\"#087F83\">Separate collect-only extraction</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/checks/README.md\" color=\"#087F83\">Pre-timing checks</link>.",
+    "13": "Sources: <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json\" color=\"#087F83\">Executed workload statistics</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/PROTOCOL.md\" color=\"#087F83\">Accounting protocol</link>, <link href=\"https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/verification/revisions/20261015-v3/diagnosis.json\" color=\"#087F83\">Preserved numeric-copy diagnosis</link>."
+  }
+}

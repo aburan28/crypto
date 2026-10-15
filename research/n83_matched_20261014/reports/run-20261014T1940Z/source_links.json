@@ -1,6 +1,6 @@
 {
   "kind": "report_presentation_source_links",
-  "evidence_status": "PENDING:NATIVE_EXECUTION_ANALYSIS_AND_INDEPENDENT_VERIFICATION",
+  "evidence_status": "NATIVE_RECORDS_VERIFIED_LAYOUT_ONLY",
   "research_results_recomputed": false,
   "run_id": "run-20261014T1940Z",
   "actual_campaign_started_utc": "2026-10-14T19:40:24Z",
@@ -73,23 +73,44 @@
     },
     "M11": {
       "title": "Native recorded statistics",
-      "path": "PENDING:FINAL_STATISTICS_PATH",
-      "url": "PENDING:FINAL_STATISTICS_LINK"
+      "path": "../../records/postprocess-20261015T0018Z/statistics.json",
+      "url": "https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/statistics.json"
     },
     "M12": {
       "title": "Independent final answer and witness replay receipt",
-      "path": "PENDING:FINAL_VERIFICATION_PATH",
-      "url": "PENDING:FINAL_VERIFICATION_LINK"
+      "path": "../../records/postprocess-20261015T0018Z/independent_replay_v3_receipt.json",
+      "url": "https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/independent_replay_v3_receipt.json"
     },
     "M13": {
       "title": "Native file and matrix provenance audit",
-      "path": "PENDING:FINAL_FILE_AUDIT_PATH",
-      "url": "PENDING:FINAL_FILE_AUDIT_LINK"
+      "path": "../../records/postprocess-20261015T0018Z/collector_extraction_receipt.json",
+      "url": "https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/collector_extraction_receipt.json"
     },
     "M14": {
       "title": "Host and isolation records",
-      "path": "PENDING:FINAL_HOST_AND_RESERVATION_PATH",
-      "url": "PENDING:FINAL_HOST_AND_RESERVATION_LINK"
+      "path": "../../records/postprocess-20261015T0018Z/independent_replay_v3_meter.jsonl",
+      "url": "https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/independent_replay_v3_meter.jsonl"
+    },
+    "M15": {
+      "title": "Actual versioned V3 numeric-copy checker source",
+      "path": "../../verification/revisions/20261015-v3/verify_matched_campaign.cpp",
+      "url": "https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/verification/revisions/20261015-v3/verify_matched_campaign.cpp"
+    },
+    "M16": {
+      "title": "Actual separate collect-only extraction source",
+      "path": "../../postprocessing/collector-only/src/main.rs",
+      "url": "https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/postprocessing/collector-only/src/main.rs"
+    },
+    "M17": {
+      "title": "Native phase/work-counter supplement",
+      "path": "../../records/postprocess-20261015T0018Z/presentation_supplement.json",
+      "url": "https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/records/postprocess-20261015T0018Z/presentation_supplement.json"
+    },
+    "M18": {
+      "title": "Native phase/work-counter exporter source",
+      "path": "../../postprocessing/src/lib.rs",
+      "url": "https://github.com/aburan28/crypto/blob/fb26ccaef5c8f5e97aa81b3503d42e5501b030e4/research/n83_matched_20261014/postprocessing/src/lib.rs"
     }
-  }
+  },
+  "native_evidence_commit": "fb26ccaef5c8f5e97aa81b3503d42e5501b030e4"
 }

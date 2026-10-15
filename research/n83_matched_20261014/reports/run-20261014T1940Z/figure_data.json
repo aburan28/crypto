@@ -1,0 +1,533 @@
+{
+  "evidence_status": "NATIVE_RECORDS_VERIFIED_LAYOUT_ONLY",
+  "research_results_recomputed": false,
+  "native_statistics_source": "research/n83_matched_20261014/reports/run-20261014T1940Z/data/statistics.json",
+  "figures": [
+    {
+      "name": "cold_pairs",
+      "kind": "grouped_bars",
+      "title": "Actual one-target cold process costs",
+      "ylabel": "Whole-process wall (s; log scale)",
+      "population": "Eight actual paired public targets \u00b7 retained K600 input",
+      "source": "run-20261014T1940Z \u00b7 records/postprocess-20261015T0018Z/statistics.json",
+      "series": [
+        {
+          "label": "IC",
+          "x": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "y": [
+            1222.138606943,
+            1203.29703555,
+            1193.387644598,
+            1146.736517546,
+            1140.785159963,
+            1109.371728466,
+            1131.835701748,
+            1127.246662056
+          ],
+          "display_offset": -0.18,
+          "display_width": 0.35
+        },
+        {
+          "label": "Optimized rho",
+          "x": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "y": [
+            3.720382027,
+            1.14309743,
+            4.327487118,
+            3.315835028,
+            4.117988157,
+            1.915267017,
+            3.121473282,
+            2.911660212
+          ],
+          "display_offset": 0.18,
+          "display_width": 0.35
+        }
+      ],
+      "xlabel": "Predeclared cold target (01\u201308)",
+      "xticks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "yscale": "log",
+      "scope_note": "Primary complete-process boundary; both arms independently verified"
+    },
+    {
+      "name": "shared_cohorts",
+      "kind": "grouped_bars",
+      "title": "Actual genuine 32-target process costs",
+      "ylabel": "Whole-process wall (s; log scale)",
+      "population": "Three paired preparation cohorts \u00b7 32 points per arm/process",
+      "source": "run-20261014T1940Z \u00b7 records/postprocess-20261015T0018Z/statistics.json",
+      "series": [
+        {
+          "label": "IC",
+          "x": [
+            1,
+            2,
+            3
+          ],
+          "y": [
+            1282.605726303,
+            1204.82075621,
+            1211.499169005
+          ],
+          "display_offset": -0.18,
+          "display_width": 0.35
+        },
+        {
+          "label": "Optimized rho",
+          "x": [
+            1,
+            2,
+            3
+          ],
+          "y": [
+            86.376504419,
+            81.718538486,
+            68.777157934
+          ],
+          "display_offset": 0.18,
+          "display_width": 0.35
+        }
+      ],
+      "xlabel": "Preparation cohort",
+      "xticks": [
+        1,
+        2,
+        3
+      ],
+      "yscale": "log",
+      "scope_note": "Primary: actual shared infrastructure and every target solve charged"
+    },
+    {
+      "name": "query_targets",
+      "kind": "points",
+      "title": "All 32 target-mean producer query costs",
+      "ylabel": "Producer query wall (s; log scale)",
+      "population": "32 paired target blocks \u00b7 three shared preparations \u00b7 unequal validation boundaries",
+      "source": "run-20261014T1940Z \u00b7 records/postprocess-20261015T0018Z/statistics.json",
+      "series": [
+        {
+          "label": "IC target mean",
+          "x": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32
+          ],
+          "y": [
+            0.23940900933333334,
+            6.149988130333334,
+            0.8034209943333334,
+            0.004667445,
+            0.2916790116666667,
+            0.160129793,
+            0.8769181216666667,
+            1.4419059823333333,
+            4.284111680333333,
+            0.003999249,
+            1.6447558439999999,
+            3.1788912393333337,
+            2.284893889,
+            0.432600048,
+            3.2660170506666666,
+            2.4314720176666667,
+            0.6008941043333332,
+            1.9535817216666667,
+            8.590054447,
+            2.4324995923333335,
+            1.912043808,
+            0.4750144906666667,
+            0.7831183096666666,
+            2.2676628643333334,
+            0.23655605766666665,
+            0.15248132866666667,
+            0.8605201126666667,
+            0.27656114200000004,
+            6.733851807000001,
+            0.44705393833333334,
+            0.27120659633333327,
+            0.8436863466666668
+          ],
+          "marker": "o"
+        },
+        {
+          "label": "Rho target mean",
+          "x": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32
+          ],
+          "y": [
+            2.6090850046666665,
+            3.1296780996666667,
+            1.979616221,
+            1.1354261926666667,
+            1.8242788149999998,
+            1.7933400086666669,
+            3.5419237936666668,
+            2.130599678333333,
+            3.53379951,
+            2.857552774666667,
+            1.6662040323333336,
+            2.4127924916666665,
+            3.4265370456666666,
+            2.2119866113333333,
+            3.0001132006666666,
+            2.934398748333333,
+            1.9069473129999999,
+            0.8401402346666665,
+            2.801719209333333,
+            2.2362518206666664,
+            4.016571018666667,
+            1.9758139230000002,
+            2.7099348893333333,
+            3.6257638333333335,
+            1.7197889026666664,
+            2.920011661,
+            2.7144966290000005,
+            2.2531763666666667,
+            2.228532322,
+            1.3316351303333336,
+            2.1862249686666666,
+            2.9788919286666666
+          ],
+          "marker": "x"
+        }
+      ],
+      "xlabel": "Frozen target index",
+      "xticks": [
+        1,
+        4,
+        8,
+        12,
+        16,
+        20,
+        24,
+        28,
+        32
+      ],
+      "yscale": "log",
+      "figsize": [
+        9.8,
+        4.0
+      ],
+      "scope_note": "Secondary query comparison; not an end-to-end speedup"
+    },
+    {
+      "name": "process_memory",
+      "kind": "grouped_bars",
+      "title": "Measured process peak resident memory",
+      "ylabel": "wait4 peak RSS (bytes; log scale)",
+      "population": "Eight cold pairs and three shared pairs \u00b7 process peaks shown separately",
+      "source": "run-20261014T1940Z \u00b7 records/postprocess-20261015T0018Z/statistics.json",
+      "series": [
+        {
+          "label": "IC",
+          "x": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "y": [
+            5811691520,
+            5811589120,
+            5811601408,
+            5811519488,
+            5811568640,
+            5811724288,
+            5811585024,
+            5811687424,
+            5811691520,
+            5811642368,
+            5811548160
+          ],
+          "display_offset": -0.18,
+          "display_width": 0.35
+        },
+        {
+          "label": "Rho",
+          "x": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "y": [
+            36507648,
+            10928128,
+            62091264,
+            36417536,
+            62115840,
+            19406848,
+            36507648,
+            36511744,
+            70823936,
+            70713344,
+            70823936
+          ],
+          "display_offset": 0.18,
+          "display_width": 0.35
+        }
+      ],
+      "xlabel": "Cold targets C1\u2013C8; genuine shared cohorts B1\u2013B3",
+      "xticks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "yscale": "log",
+      "xticklabels": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C6",
+        "C7",
+        "C8",
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "figsize": [
+        9.8,
+        4.0
+      ],
+      "scope_note": "Observed RSS, not RLIMIT_AS allocation and not additive across sequential processes"
+    },
+    {
+      "name": "break_even_model",
+      "kind": "lines",
+      "title": "Additive setup + per-target model (not an observed crossover)",
+      "ylabel": "Modeled cost (s)",
+      "population": "Native model \u00b7 target count above 32 is unexecuted extrapolation",
+      "source": "run-20261014T1940Z \u00b7 records/postprocess-20261015T0018Z/statistics.json",
+      "series": [
+        {
+          "label": "IC model",
+          "x": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256,
+            512,
+            1024,
+            2048
+          ],
+          "y": [
+            1178.1482146312394,
+            1179.9085785741456,
+            1183.429306459958,
+            1190.4707622315832,
+            1204.5536737748332,
+            1232.7194968613333,
+            1289.051143034333,
+            1401.7144353803333,
+            1627.0410200723331,
+            2077.6941894563333,
+            2979.000528224333,
+            4781.613205760333
+          ]
+        },
+        {
+          "label": "Rho model",
+          "x": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256,
+            512,
+            1024,
+            2048
+          ],
+          "y": [
+            2.6755055363854163,
+            5.134018424770832,
+            10.051044201541664,
+            19.88509575508333,
+            39.55319886216666,
+            78.88940507633332,
+            157.56181750466664,
+            314.90664236133324,
+            629.5962920746665,
+            1258.9755915013332,
+            2517.734190354666,
+            5035.251388061332
+          ]
+        }
+      ],
+      "xlabel": "Modeled target count N (log scale)",
+      "xscale": "log",
+      "yscale": "log",
+      "figsize": [
+        9.8,
+        4.5
+      ],
+      "vertical_markers": [
+        {
+          "x": 32,
+          "label": "Actual shared workload N=32"
+        }
+      ],
+      "scope_note": "MODEL ONLY: N=1,685 point threshold; nonfinite bootstrap fraction 0.0407; unequal query clocks"
+    },
+    {
+      "name": "aa_noise",
+      "kind": "points",
+      "title": "Identical optimized-rho A/A process pairs",
+      "ylabel": "A/B whole-process wall ratio",
+      "population": "Five same-point, same-seed pairs \u00b7 independent semantic gate passes",
+      "source": "run-20261014T1940Z \u00b7 records/postprocess-20261015T0018Z/statistics.json",
+      "series": [
+        {
+          "label": "Observed A/B",
+          "x": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "y": [
+            1.1450331951782278,
+            0.9587596843493773,
+            0.9835767331937196,
+            0.9817601248939767,
+            0.9716402947712337
+          ]
+        }
+      ],
+      "xlabel": "Predeclared A/A pair",
+      "xticks": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "horizontal_markers": [
+        {
+          "y": 1,
+          "label": "Equal process time"
+        }
+      ],
+      "scope_note": "Descriptive noise diagnostic; no confidence band and no correction"
+    }
+  ]
+}
