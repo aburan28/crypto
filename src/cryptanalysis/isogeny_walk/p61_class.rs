@@ -269,9 +269,9 @@ pub struct VerificationReceipt {
 }
 
 #[derive(Clone, Copy)]
-struct Point {
-    model: Model,
-    j: Fe,
+pub(crate) struct Point {
+    pub(crate) model: Model,
+    pub(crate) j: Fe,
 }
 
 #[derive(Clone)]
@@ -282,12 +282,12 @@ struct LaneState {
     current: Point,
 }
 
-struct Context {
-    start: StartCurve,
-    field: Field,
-    row_phi: ModPoly,
-    coset_phi: ModPoly,
-    top_phi: ModPoly,
+pub(crate) struct Context {
+    pub(crate) start: StartCurve,
+    pub(crate) field: Field,
+    pub(crate) row_phi: ModPoly,
+    pub(crate) coset_phi: ModPoly,
+    pub(crate) top_phi: ModPoly,
 }
 
 struct GeneratedNode {
@@ -295,7 +295,7 @@ struct GeneratedNode {
     point: Point,
 }
 
-fn is_lower_hex(value: &str, length: usize) -> bool {
+pub(crate) fn is_lower_hex(value: &str, length: usize) -> bool {
     value.len() == length
         && value
             .bytes()
@@ -321,7 +321,7 @@ fn start_curve() -> Result<StartCurve, String> {
     })
 }
 
-fn build_context() -> Result<Context, String> {
+pub(crate) fn build_context() -> Result<Context, String> {
     if ROW_ORDER
         .checked_mul(u64::from(COSET_ROWS))
         .and_then(|value| value.checked_mul(u64::from(TOP_ROWS)))
@@ -372,7 +372,7 @@ fn build_context() -> Result<Context, String> {
     })
 }
 
-fn hex_fe(field: &Field, value: &Fe) -> String {
+pub(crate) fn hex_fe(field: &Field, value: &Fe) -> String {
     format!("{:016x}", field.to_big(value))
 }
 
@@ -388,7 +388,7 @@ fn parse_fe(field: &Field, value: &str, what: &str) -> Result<Fe, String> {
     Ok(field.from_big(&integer))
 }
 
-fn coefficient_bits(field: &Field, value: &Fe) -> u64 {
+pub(crate) fn coefficient_bits(field: &Field, value: &Fe) -> u64 {
     let positive = field.to_big(value);
     let negative = field.modulus() - &positive;
     positive.min(negative).bits()
@@ -425,7 +425,11 @@ fn describe_curve(
     })
 }
 
-fn parse_curve(context: &Context, record: &CurveRecord, what: &str) -> Result<Point, String> {
+pub(crate) fn parse_curve(
+    context: &Context,
+    record: &CurveRecord,
+    what: &str,
+) -> Result<Point, String> {
     let model = Model {
         a: parse_fe(&context.field, &record.a, &format!("{what} a"))?,
         b: parse_fe(&context.field, &record.b, &format!("{what} b"))?,
