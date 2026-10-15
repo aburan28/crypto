@@ -15,6 +15,9 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
 AUTH = HERE.parent / "local-gray-hash-paired-20261015" / "authorization.json"
 
+if not __debug__:
+    raise RuntimeError("the receipt audit requires Python assertions to be enabled")
+
 
 def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()

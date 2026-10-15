@@ -46,3 +46,25 @@ and absence of launch artifacts. Its [receipt](audit.json) is
 CPU output and a false launch status. This is a host-capacity observation, not
 a relation-yield or complete-runtime measurement. The exact paired search
 remains unrun, and no total-runtime factor-base winner is established.
+
+Validation after preserving the receipt passed the 63-test N83 Python suite,
+eight paired-protocol controls and five guarded-watch controls, including two
+audit tamper cases. A first release-library compile on the nearly full SSD
+failed with `ENOSPC`; its [raw error](cargo-ssd-enospc.log) is retained. The
+build cache was copied byte-for-byte to system scratch before removing its
+original worktree copy. The ensuing sandboxed [full suite](n83-guarded-watch-cargo-test-scratch-20261015.log)
+completed with 4,073 passed, 117 ignored and 11 environment failures: nine
+local socket operations were denied, and two Z3 scripts could not be written
+to the full SSD temp directory. The [Cairn](n83-cairn-focused-20261015.log)
+and [network](n83-net-focused-20261015.log) groups passed with local socket
+access. The two Z3 tests [passed sequentially](n83-z3-sequential-20261015.log)
+with scratch-backed temp files; a retained [two-thread rerun](n83-z3-focused-20261015.log)
+showed one shared temporary-filename collision.
+
+The final [complete release-library run](n83-full-unsandboxed-sequential-20261015.log)
+used the same Rust test binary, local socket access, scratch-backed temp files
+and one test thread. It exited 0 with **4,084 passed, 117 ignored and zero
+failed** in 2,547.13 harness seconds. The machine-readable
+[validation record](validation.json) pins the binary and raw log hashes and
+keeps the failed and corrected attempts distinct. No Rust source or factor-base
+input changed during these checks.
