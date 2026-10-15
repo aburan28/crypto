@@ -8,12 +8,14 @@ use std::fs;
 use std::time::Instant;
 
 use crypto_lib::cryptanalysis::ext_curve::{
-    take_field_counters, ExtCurve, ExtDiagonalAutomorphism, ExtField, ExtPoint, Fp2,
+    jacobi, take_field_counters, ExtCurve, ExtDiagonalAutomorphism, ExtField, ExtPoint, Fp2,
 };
 use crypto_lib::cryptanalysis::glv_invariant_base::{
     rho_reference_folded, Endomorphism, Negation,
 };
 use crypto_lib::cryptanalysis::ic_boundary::{rho_reference_negation, CountedGroup, GroupOps};
+use crypto_lib::cryptanalysis::residual_walk::{is_prime_u64, pow_mod};
+use crypto_lib::hash::sha256::sha256;
 use num_bigint::{BigInt, BigUint};
 use num_traits::{One, Zero};
 use rand::rngs::StdRng;
@@ -56,19 +58,23 @@ fn read_input(path: &str, cell: usize) -> Input {
     );
     let p = v["p"].as_u64().unwrap();
     let r = v["r"].as_u64().unwrap();
-    assert!((p == 61 && r == 19 && cell == 0) || (p == 271 && r == 61 && cell == 1));
+    assert!((p == 61 && r == 19 && cell == 0)
+        || (p == 271 && r == 61 && cell == 1)
+        || (p == 401 && r == 67 && cell == 2));
     Input {
         p,
         nu: v["nu"].as_u64().unwrap(),
         r,
-        degree: if cell == 0 { 9 } else { 5 },
+        degree: if cell == 0 { 9 } else if cell == 1 { 5 } else { 1 },
         trace_fp: v["trace_fp"].as_i64().unwrap(),
         g: source_point(&v["generator"]),
         q: source_point(&v["target"]),
         seed: if cell == 0 {
             0x5041_4952_0000_003d
-        } else {
+        } else if cell == 1 {
             0x5041_4952_0000_010f
+        } else {
+            0x5041_4952_0000_0191
         },
     }
 }
@@ -89,11 +95,15 @@ impl Field {
         let f = Fp2::new(input.p).unwrap();
         assert_eq!(f.nu, input.nu);
         let q = f.order();
-        let prime_divisor = if input.degree == 9 { 3 } else { 5 };
-        let a = (1..q)
-            .map(|i| f.from_coords(&[i % input.p, i / input.p]))
-            .find(|&x| f.pow(x, (q - 1) / prime_divisor) != f.one())
-            .expect("non-power coefficient");
+        let a = if input.degree == 1 {
+            f.zero()
+        } else {
+            let prime_divisor = if input.degree == 9 { 3 } else { 5 };
+            (1..q)
+                .map(|i| f.from_coords(&[i % input.p, i / input.p]))
+                .find(|&x| f.pow(x, (q - 1) / prime_divisor) != f.one())
+                .expect("non-power coefficient")
+        };
         Self {
             f,
             n: input.degree,
@@ -238,6 +248,12 @@ impl Field {
     }
 
     fn irreducibility_receipt(&self) -> Value {
+        if self.n == 1 {
+            assert_eq!(jacobi(self.f.nu, self.f.p), -1);
+            return json!({"criterion":"quadratic_nonresidue",
+                "p":self.f.p,"nu":self.f.nu,"degree_over_fp":2,
+                "legendre_nu":-1});
+        }
         // Rabin's criterion on the monic polynomial z^n-a, evaluated in
         // the quotient ring before any inverse in that ring is trusted.
         let theta = {
@@ -948,6 +964,63 @@ fn run_rho(input: Input, cell: usize, round: u64) {
     );
 }
 
+fn freeze_401(previous_inputs: &str, extended_inputs: &str, fixture_path: &str) {
+    let p = 401u64;
+    let r = 67u64;
+    assert!(is_prime_u64(p) && is_prime_u64(r));
+    let f = Fp2::new(p).unwrap();
+    let curve = ExtCurve { f, a: f.zero(), b: f.one() };
+    let mut n1 = 1u64;
+    for x in 0..p {
+        let rhs = (pow_mod(x,3,p) + 1) % p;
+        n1 += if rhs == 0 { 1 } else if jacobi(rhs,p) == 1 { 2 } else { 0 };
+    }
+    assert_eq!(n1,402);
+    let trace = p as i64 + 1 - n1 as i64;
+    assert_eq!(trace,0);
+    let n2 = (p+1)*(p+1) - (trace*trace) as u64;
+    assert_eq!(n2,161604);
+    assert_eq!(n2 % (r*r),0);
+    let mut ops = GroupOps::default();
+    let mut selected = None;
+    for x in 0..p {
+        let mut lifts = curve.lift_x([x,0]);
+        lifts.retain(|pt| pt.y[1] == 0);
+        lifts.sort_by_key(|pt| pt.y[0]);
+        for point in lifts {
+            let g = curve.mul(&mut ops, point,6);
+            if !g.infinity {
+                selected = Some((point,g));
+                break;
+            }
+        }
+        if selected.is_some() { break; }
+    }
+    let (selected_point,g) = selected.expect("order-67 source point");
+    assert!(!g.infinity && curve.mul(&mut ops,g,r).infinity);
+    assert_ne!(g.x[0],0);
+    assert_eq!(g.x[1],0);
+    let target_seed = "pairing-batch/2026-10-15/p=401/r=67";
+    let digest = sha256(target_seed.as_bytes());
+    let scalar = 1 + u64::from_be_bytes(digest[0..8].try_into().unwrap()) % (r-1);
+    let q = curve.mul(&mut ops,g,scalar);
+    assert!(!q.infinity && curve.mul(&mut ops,q,r).infinity);
+    let public = json!({"p":p,"nu":f.nu,"r":r,"trace_fp":trace,
+        "generator":g,"target":q});
+    let previous = fs::read_to_string(previous_inputs).unwrap();
+    assert_eq!(previous.lines().count(),2);
+    let extended = format!("{}\n{}\n",previous.trim_end(),public);
+    fs::write(extended_inputs,extended).unwrap();
+    fs::write(fixture_path,serde_json::to_vec_pretty(&json!({
+        "schema":"torsion_pairing_401_fixture/v1","p":p,"nu":f.nu,
+        "r":r,"n1":n1,"n2":n2,"trace_fp":trace,"selected_point":selected_point,
+        "generator":g,"target":q,"answer_scalar":scalar,
+        "target_seed":target_seed,"source_group_ops":ops})).unwrap()).unwrap();
+    println!("{}",json!({"schema":"torsion_pairing_401_freeze/v1",
+        "p":p,"r":r,"n1":n1,"n2":n2,"nu":f.nu,"generator":g,
+        "target":q,"extended_inputs":extended_inputs,"fixture":fixture_path}));
+}
+
 fn freeze_batch(
     input: Input,
     cell: usize,
@@ -956,7 +1029,11 @@ fn freeze_batch(
     answer_path: &str,
 ) {
     let fixture = fs::read_to_string(fixture_path).unwrap();
-    let row: Value = serde_json::from_str(fixture.lines().nth(cell).unwrap()).unwrap();
+    let row: Value = if cell == 2 {
+        serde_json::from_str(&fixture).unwrap()
+    } else {
+        serde_json::from_str(fixture.lines().nth(cell).unwrap()).unwrap()
+    };
     let first = row["answer_scalar"]
         .as_u64()
         .expect("post-solve fixture scalar");
@@ -1087,20 +1164,31 @@ fn run_batch(input: Input, cell: usize, round: u64, batch_path: &str, frozen_pat
             "cpu_ns":table_cpu_ns,"wall_ns":table_wall_ns},
         "peak_rss_raw":rss,"peak_rss_unit":unit})
     );
-    let six_setup_wall = Instant::now();
-    let six_setup_cpu = thread_cpu_ns();
-    take_field_counters();
-    let (six_aut, six_eigen_ops) = six_class_endomorphism(&curve, input.g, input.r);
-    let six_setup_fp = take_field_counters();
-    let six_setup_cpu_ns = thread_cpu_ns() - six_setup_cpu;
-    let six_setup_wall_ns = six_setup_wall.elapsed().as_nanos() as u64;
-    println!(
-        "{}",
-        json!({"schema":"torsion_pairing_batch_six_setup/v3","cell":cell,
-            "round":round,"eigenvalue":six_aut.eigenvalue,"eigen_ops":six_eigen_ops,
+    let mut six_setup_cpu_ns = 0u64;
+    let mut six_setup_wall_ns = 0u64;
+    let six_aut = if cell == 2 {
+        assert_eq!(input.p % 3,2);
+        assert_ne!(input.g.x[0],0);
+        assert_eq!(input.g.x[1],0);
+        println!("{}",json!({"schema":"torsion_pairing_batch_six_setup/v4",
+            "cell":cell,"round":round,"applicable":false,
+            "reason":"order-three coordinate automorphism has zeta outside Fp; nonzero Fp x-coordinate leaves the Fp-rational source subgroup"}));
+        None
+    } else {
+        let six_setup_wall = Instant::now();
+        let six_setup_cpu = thread_cpu_ns();
+        take_field_counters();
+        let (aut, eigen_ops) = six_class_endomorphism(&curve, input.g, input.r);
+        let six_setup_fp = take_field_counters();
+        six_setup_cpu_ns = thread_cpu_ns() - six_setup_cpu;
+        six_setup_wall_ns = six_setup_wall.elapsed().as_nanos() as u64;
+        println!("{}",json!({"schema":"torsion_pairing_batch_six_setup/v3",
+            "cell":cell,"round":round,"applicable":true,
+            "eigenvalue":aut.eigenvalue,"eigen_ops":eigen_ops,
             "cpu_ns":six_setup_cpu_ns,"wall_ns":six_setup_wall_ns,
-            "fp_muls":six_setup_fp.0,"fp_invs":six_setup_fp.1})
-    );
+            "fp_muls":six_setup_fp.0,"fp_invs":six_setup_fp.1}));
+        Some(aut)
+    };
     let mut cumulative_pairing_cpu = setup_cpu;
     let mut cumulative_rho_cpu = 0u64;
     let mut cumulative_six_cpu = six_setup_cpu_ns;
@@ -1194,47 +1282,46 @@ fn run_batch(input: Input, cell: usize, round: u64, batch_path: &str, frozen_pat
         let rho = final_rho.unwrap();
         cumulative_rho_cpu += rho_cpu_ns;
         cumulative_rho_wall += rho_wall_ns;
-        let neg = Negation { r: input.r };
-        let gens: [&dyn Endomorphism<ExtCurve<Fp2>>; 2] = [&neg, &six_aut];
         let mut six_attempts = Vec::new();
         let mut six_cpu_ns = 0u64;
         let mut six_wall_ns = 0u64;
         let mut six_fp_muls = 0u64;
         let mut six_fp_invs = 0u64;
         let mut final_six = None;
-        for retry in 0..32u64 {
-            let seed = seed_base.wrapping_add(retry * 0x01_00_00_00);
-            let six_wall = Instant::now();
-            let six_cpu = thread_cpu_ns();
-            take_field_counters();
-            let six = rho_reference_folded(&curve, input.g, q, input.r, seed, rho_cap, &gens)
-                .expect("valid six-class subgroup action");
-            let six_fp = take_field_counters();
-            let attempt_cpu = thread_cpu_ns() - six_cpu;
-            let attempt_wall = six_wall.elapsed().as_nanos() as u64;
-            six_cpu_ns += attempt_cpu;
-            six_wall_ns += attempt_wall;
-            six_fp_muls += six_fp.0;
-            six_fp_invs += six_fp.1;
-            six_attempts.push(json!({"retry":retry,"seed":seed,"rho":six,
-                "cpu_ns":attempt_cpu,"wall_ns":attempt_wall,
-                "fp_muls":six_fp.0,"fp_invs":six_fp.1}));
-            if six.verified && six.recovered == Some(scalar) {
-                final_six = Some(six);
-                break;
+        if let Some(aut) = &six_aut {
+            let neg = Negation { r: input.r };
+            let gens: [&dyn Endomorphism<ExtCurve<Fp2>>; 2] = [&neg, aut];
+            for retry in 0..32u64 {
+                let seed = seed_base.wrapping_add(retry * 0x01_00_00_00);
+                let six_wall = Instant::now();
+                let six_cpu = thread_cpu_ns();
+                take_field_counters();
+                let six = rho_reference_folded(&curve, input.g, q, input.r, seed, rho_cap, &gens)
+                    .expect("valid six-class subgroup action");
+                let six_fp = take_field_counters();
+                let attempt_cpu = thread_cpu_ns() - six_cpu;
+                let attempt_wall = six_wall.elapsed().as_nanos() as u64;
+                six_cpu_ns += attempt_cpu;
+                six_wall_ns += attempt_wall;
+                six_fp_muls += six_fp.0;
+                six_fp_invs += six_fp.1;
+                six_attempts.push(json!({"retry":retry,"seed":seed,"rho":six,
+                    "cpu_ns":attempt_cpu,"wall_ns":attempt_wall,
+                    "fp_muls":six_fp.0,"fp_invs":six_fp.1}));
+                if six.verified && six.recovered == Some(scalar) {
+                    final_six = Some(six);
+                    break;
+                }
             }
-        }
-        if final_six.is_none() {
-            println!(
-                "{}",
-                json!({"schema":"torsion_pairing_batch_six_exhausted/v3",
+            if final_six.is_none() {
+                println!("{}",json!({"schema":"torsion_pairing_batch_six_exhausted/v3",
                     "cell":cell,"round":round,"index":index,"target":q,
                     "recovered":scalar,"six_attempts":six_attempts,
-                    "six_cpu_ns":six_cpu_ns})
-            );
-            panic!("32 charged six-class rho attempts exhausted");
+                    "six_cpu_ns":six_cpu_ns}));
+                panic!("32 charged six-class rho attempts exhausted");
+            }
         }
-        let six = final_six.unwrap();
+        let six = final_six;
         cumulative_six_cpu += six_cpu_ns;
         cumulative_six_wall += six_wall_ns;
         let all_in_pairing_cpu = thread_cpu_ns() - global_cpu - cumulative_rho_cpu - cumulative_six_cpu;
@@ -1244,7 +1331,7 @@ fn run_batch(input: Input, cell: usize, round: u64, batch_path: &str, frozen_pat
         assert!(peak_rss_bytes() <= 512 * 1024 * 1024);
         println!(
             "{}",
-            json!({"schema":"torsion_pairing_batch_target/v3",
+            json!({"schema":if cell==2 {"torsion_pairing_batch_target/v4"} else {"torsion_pairing_batch_target/v3"},
             "cell":cell,"round":round,"index":index,"n":index+1,"p":input.p,"r":input.r,
             "target":q,"recovered":scalar,"beta_charge":beta_charge,
             "dlog_charge":dlog_charge,"source_verify_ops":verify_ops,
@@ -1269,7 +1356,7 @@ fn run_batch(input: Input, cell: usize, round: u64, batch_path: &str, frozen_pat
     }
     println!(
         "{}",
-        json!({"schema":"torsion_pairing_batch_end/v3","cell":cell,
+        json!({"schema":if cell==2 {"torsion_pairing_batch_end/v4"} else {"torsion_pairing_batch_end/v3"},"cell":cell,
         "round":round,"targets":targets.len(),"pairing_cpu_ns":cumulative_pairing_cpu,
         "rho_cpu_ns":cumulative_rho_cpu,"six_cpu_ns":cumulative_six_cpu,
         "process_cpu_ns":thread_cpu_ns()-whole_cpu,
@@ -1302,7 +1389,8 @@ fn verify_batch(
     let mut rounds = [0u64; 3];
     for line in fs::read_to_string(records_path).unwrap().lines() {
         let v: Value = serde_json::from_str(line).unwrap();
-        if v["schema"] != "torsion_pairing_batch_target/v3" {
+        if v["schema"] != "torsion_pairing_batch_target/v3"
+            && v["schema"] != "torsion_pairing_batch_target/v4" {
             continue;
         }
         assert_eq!(v["cell"].as_u64(), Some(cell as u64));
@@ -1320,8 +1408,12 @@ fn verify_batch(
         assert_eq!(scalar, scalars[index], "post-solve fixture mismatch");
         assert_eq!(v["rho"]["recovered"].as_u64(), Some(scalar));
         assert_eq!(v["rho"]["verified"], true);
-        assert_eq!(v["six_rho"]["recovered"].as_u64(), Some(scalar));
-        assert_eq!(v["six_rho"]["verified"], true);
+        if cell != 2 {
+            assert_eq!(v["six_rho"]["recovered"].as_u64(), Some(scalar));
+            assert_eq!(v["six_rho"]["verified"], true);
+        } else {
+            assert!(v["six_rho"].is_null());
+        }
         rounds[round] += 1;
         checked += 1;
     }
@@ -1495,7 +1587,7 @@ fn check_bilinearity(input: Input, cell: usize, frozen_path: &str) {
     let curve = source_curve(input);
     let mut source_ops = GroupOps::default();
     let mut checks = Vec::new();
-    for scalar in [2u64, 3, 5] {
+    for scalar in [1u64, 2, 3, 5] {
         let multiple = curve.mul(&mut source_ops, input.g, scalar);
         let value = reduced_tate(&k, multiple, &h, input.r)
             .expect("bilinearity check encountered a pairing pole");
@@ -1521,6 +1613,10 @@ fn check_bilinearity(input: Input, cell: usize, frozen_path: &str) {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
+    if args.get(1).map(String::as_str) == Some("freeze-401") {
+        freeze_401(&args[2], &args[3], &args[4]);
+        return;
+    }
     assert!(
         args.len() >= 4,
         "usage: torsion_pairing_transfer prepare|run INPUTS.jsonl CELL"
@@ -1528,6 +1624,7 @@ fn main() {
     let cell: usize = args[3].parse().unwrap();
     let input = read_input(&args[2], cell);
     match args[1].as_str() {
+        "freeze-401" => unreachable!(),
         "freeze-batch" => freeze_batch(
             input,
             cell,
