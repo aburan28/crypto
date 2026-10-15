@@ -1,0 +1,18 @@
+{
+  "schema": "different_j_order_census_spec/v1",
+  "status": "frozen_before_direct_quadratic_field_count",
+  "input": "RAW_V1.jsonl",
+  "input_sha256": "31238914df3663805efb88c3c89c420b4ca42b875668da0cfc954cd1084171b4",
+  "accepted_primes": [211, 223, 241],
+  "source": "examples/different_j_order_census.rs",
+  "source_sha256": "6086a7b8d27f94a870d70749c5478357fe37f23c2826767e36e06b53fc6ad61c",
+  "binary": "target/release/examples/different_j_order_census",
+  "binary_sha256": "1112577f003d2326f607a62a8142d55623172cd5229b2e8b0018876f8b70b974",
+  "script": "run_census_v1.zsh",
+  "script_sha256": "602fb55f415fad3b4cc6dd4724ff1fa46a4b58a7a8cd16e430daad81034b8099",
+  "command": "zsh research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/run_census_v1.zsh",
+  "arithmetic": "independent F_(p^2) multiply and Euler quadratic-character point count for both models",
+  "wall_ceiling_seconds": 120,
+  "overwrite": "refused",
+  "host": "Darwin arm64, macOS 26.6 build 25G70, shared L0"
+}
