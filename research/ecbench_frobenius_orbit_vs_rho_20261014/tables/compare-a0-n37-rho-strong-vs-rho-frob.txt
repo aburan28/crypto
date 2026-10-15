@@ -1,0 +1,25 @@
+ops (ok): rho-strong / rho-frob = 1.0795 [0.896, 1.332] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 1.0186 [0.986, 1.068]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 1.09%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | rho-strong / rho-frob | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m37-tm534059-32aad96b | 27.78 | 16 | 1.0795 | [0.8956, 1.3319] | cluster |
+
+| workload | curve | log2 r | rho-frob mean S | rho-strong mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W171c2a81d7aa | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.1794 | 0.3138 | 1.7491 |
+| W2666587522b9 | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.3115 | 0.2277 | 0.7312 |
+| W335fe5d86868 | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.3423 | 0.2491 | 0.7277 |
+| W4a7bcb0c2acf | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.2946 | 0.2483 | 0.8426 |
+| W4c880ccec714 | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.2680 | 0.3053 | 1.1391 |
+| W4daeeda73fbf | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.2879 | 0.2429 | 0.8438 |
+| W57ebd29ebf9c | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.2390 | 0.2870 | 1.2006 |
+| W656173cfb23a | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.3546 | 0.2757 | 0.7775 |
+| W916a9d29d857 | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.2089 | 0.2908 | 1.3918 |
+| Wa37db4ea49fd | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.2675 | 0.3129 | 1.1698 |
+| Waa118ed43482 | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.2520 | 0.2627 | 1.0426 |
+| Wacf84098a1b5 | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.1792 | 0.3409 | 1.9021 |
+| Wbd66ff4d3b2a | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.1795 | 0.2742 | 1.5272 |
+| Wd04a57c5d7bc | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.1578 | 0.2985 | 1.8917 |
+| Wfb29edc2ce80 | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.2560 | 0.2072 | 0.8094 |
+| Wfb35aa20cd45 | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.2628 | 0.2253 | 0.8574 |

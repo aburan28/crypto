@@ -870,16 +870,17 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <tr><td>2026-10-07</td><td>Weak elliptic class: cover and decomposition on E(F_p^6)</td><td>Isogeny walk stage from a non-weak start eight moves from a weak curve, p = 1,009 (subgroup 2^57.9)</td><td class="n">0.0002&times;</td><td>stage</td><td><span class="chip">accounting</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md">source</a> (&sect;17)</td></tr>
 <tr><td>2026-10-12</td><td>Elliptic curve, cold counted-work diagnostics with unpriced native work</td><td>Large-prime conductor-gap IC, ell = 8209, fixed floor, eight one-target workloads</td><td class="n">19.7311&times; <small>bounded count diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ic37-20261012">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_20261012/README.md">source</a></td></tr>
 <tr><td>2026-10-12</td><td>Elliptic curve, cold counted-work diagnostics with unpriced native work</td><td>Large-prime conductor-gap IC, ell = 131101, fixed floor, eight one-target workloads</td><td class="n">45.0827&times; <small>bounded count diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ic37-20261012">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_20261012/README.md">source</a></td></tr>
+<tr><td>2026-10-14</td><td>Elliptic curve, whole method, cold, one target</td><td>Frobenius-orbit IC, fully priced, stride-renew, vs rho-frob: best cell <code>icv1-f2m29-tm40309-30c52b96</code> (r = 2<sup>15.4</sup>)</td><td class="n">1.566&times; <small>S; [0.992, 2.347]; 18.2&times; at r = 2<sup>39</sup></small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#lab-ecbench-all">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_frobenius_orbit_vs_rho_20261014/README.md">source</a></td></tr>
 </tbody></table></div></details>
 <noscript><div class="dash-detail-body"><p>The chart needs JavaScript; the table above lists every plotted point.</p></div></noscript>
 <p class="dash-footnote">What would move the heavy series below the line for good: a cold, one-target, every-phase-priced <code>S</code> below a matched rho&rsquo;s at growing size (AGENTS.md &sect;2, &sect;8). The nearest measured approaches are 1.36&times; (round 0025) and 1.314&times; in CPU time (n41). The exponent story is in the <a href="#boundary-ledger">boundary ledger</a>: no fitted exponent on an elliptic curve sits below rho&rsquo;s one half; the cover route&rsquo;s ratio falls with size but on a weak class.</p>
 <script type="application/json" id="progress-data">{
-  "schema_version": "ic-progress-timeline/1",
-  "updated": "2026-10-12",
-  "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
-  "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
-  "series": [
-    {
+ "schema_version": "ic-progress-timeline/1",
+ "updated": "2026-10-15",
+ "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
+ "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
+ "series": [
+  {
       "id": "ec-cold",
       "label": "Elliptic curve, whole method, cold, one target",
       "role": "emphasis",
@@ -999,10 +1000,21 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           "class": "accounting",
           "anchor": "#ic-tool-programme-20261001",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v3/README.md"
+        },
+        {
+          "date": "2026-10-14",
+          "value": 1.566,
+          "reference": "matched",
+          "unit": "S",
+          "label": "Frobenius-orbit IC, fully priced (*_full), stride-renew, vs rho-frob: best cell icv1-f2m29-tm40309-30c52b96 (r = 2^15.4)",
+          "detail": "Orbit factor base (compact-orbit-scan, mitm-frobenius-counted m = 2) with every native priced, paired against the fully priced signed-Frobenius rho on 16 targets x 3 rounds per curve: 1.566 [0.992, 2.347] at the best cell (interval reaches 1; rho-frob heavy-tailed there), 2.96 at n = 13, 3.85 at r = 2^21, 18.2 at r = 2^39; never below 1. Slope of ln ratio 0.165 [0.117, 0.213] per ln r with ln n fitted (model 1/6): constant-only.",
+          "class": "accounting",
+          "anchor": "#lab-ecbench-all",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_frobenius_orbit_vs_rho_20261014/README.md"
         }
       ]
     },
-    {
+  {
       "id": "ec-cold-unisolated",
       "label": "Elliptic curve, one-target cold example diagnostics on an unisolated host",
       "role": "context",
@@ -1077,7 +1089,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         }
       ]
     },
-    {
+  {
       "id": "ec-bounded-counts",
       "label": "Elliptic curve, cold counted-work diagnostics with unpriced native work",
       "role": "context",
@@ -1218,7 +1230,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         }
       ]
     },
-    {
+  {
       "id": "ec-callgrind-diagnostics",
       "label": "Elliptic curve, complete method-solve simulated instructions",
       "role": "context",
@@ -1249,7 +1261,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         }
       ]
     },
-    {
+  {
       "id": "ec-online-ir",
       "label": "Elliptic curve, one-target online simulated instructions",
       "role": "context",
@@ -1269,7 +1281,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         }
       ]
     },
-    {
+  {
       "id": "ec-hosted-native-wall",
       "label": "Elliptic curve, hosted L1 native wall diagnostics",
       "role": "context",
@@ -1300,7 +1312,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         }
       ]
     },
-    {
+  {
       "id": "ec-batch",
       "label": "Elliptic curve, 32 targets together (historical diagnostic)",
       "role": "context",
@@ -1348,7 +1360,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         }
       ]
     },
-    {
+  {
       "id": "ec-native-batch-n37",
       "label": "Elliptic curve, n37 1,024-target native batch CPU diagnostic",
       "role": "context",
@@ -1379,7 +1391,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         }
       ]
     },
-    {
+  {
       "id": "ec-online",
       "label": "Elliptic curve, online phase only (reusable set-up excluded)",
       "role": "context",
@@ -1507,7 +1519,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         }
       ]
     },
-    {
+  {
       "id": "ec-batch-n61",
       "label": "Elliptic curve, n61 batch of L >= 1,024 targets vs frozen KS v2 rho (historical diagnostic)",
       "role": "context",
@@ -1537,7 +1549,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         }
       ]
     },
-    {
+  {
       "id": "genus4",
       "label": "Not an elliptic curve: hyperelliptic Jacobian, genus 4, toy size",
       "role": "context",
@@ -1565,7 +1577,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         }
       ]
     },
-    {
+  {
       "id": "cover-fp6",
       "label": "Weak elliptic class: cover and decomposition on E(F_p^6)",
       "role": "context",
@@ -1653,7 +1665,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         }
       ]
     },
-    {
+  {
       "id": "cover-walk-stage",
       "label": "Weak-class isogeny walk stage (no transported DLP)",
       "role": "context",
@@ -1670,8 +1682,864 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           "source": "https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md"
         }
       ]
+    },
+  {
+   "barrier_test": false,
+   "id": "ec-ten-question-counts",
+   "label": "Ten-question campaign: counted diagnostics",
+   "points": [
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp16-t295-8d3c3165 / abs32-subtract2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 75.5480500093301
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp16-t295-8d3c3165 / abs64-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 11.745848105989923
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp16-t295-8d3c3165 / abs64-subtract2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 70.87329725695092
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp16-t295-8d3c3165 / abs64-subtract3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 12.126702743049076
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs32-subtract2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 177.1918802449535
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs64-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 8.414379677931503
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs64-subtract2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 174.726241778181
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs64-subtract3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 11.032206849625766
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp20-t727-cd198a38 / abs32-subtract2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 536.5484493922527
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp20-t727-cd198a38 / abs64-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 11.495512893331819
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp20-t727-cd198a38 / abs64-subtract2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 521.3922526411451
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp20-t727-cd198a38 / abs64-subtract3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 21.093831648301716
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs32-subtract2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 716.3847786859144
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs64-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 6.737749000459965
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs64-subtract2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 542.8360400523653
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs64-subtract3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 23.446555567349538
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m13-tm9-6863a838 / sub3-mitm3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 36.32335907335907
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m13-tm9-6863a838 / sub4-mitm3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 13.356177606177607
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m17-t531-2048fb7c / sub3-mitm3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 153.4070981210856
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m17-t531-2048fb7c / sub4-mitm3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 78.36701461377871
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m19-tm649-a9133fe6 / sub4-mitm3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 130.95806962025316
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m19-t797-b6cf2467 / direct",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 6.222577017672308
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m19-t797-b6cf2467 / orbit-folded",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 1.3276187699837072
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-t5197-69e76b73 / direct",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 6.952688561318259
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-t5197-69e76b73 / orbit-folded",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.0536189397285267
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m31-tm90707-c95f16f5 / direct",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 12.348916708066424
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m31-tm90707-c95f16f5 / orbit-folded",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 1.8952112556216096
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m11-t67-05f5aa36 / compact-control",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.0276616821062143
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m11-t67-05f5aa36 / gamma-weight-1",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 0.7306359526516735
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m11-t67-05f5aa36 / gamma-weight-2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 1.945745265270057
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m11-t67-05f5aa36 / gamma-weight-3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 1.8660285140626818
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-tm5197-1f85e9e1 / compact-control",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.6756932484978426
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-tm5197-1f85e9e1 / gamma-weight-2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.4208767962413646
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-tm5197-1f85e9e1 / gamma-weight-3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.4551813310868913
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m11-t67-05f5aa36 / m3-lp2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.3333300237211256
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m11-t67-05f5aa36 / m4-lp0",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 15.812130549175649
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m11-t67-05f5aa36 / m6-lp0",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 49.022044194520085
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m11-t67-05f5aa36 / mn-1-lp0",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 371.1507515582342
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m19-t797-b6cf2467 / checked-rank",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 1.3982879405917845
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m19-t797-b6cf2467 / full-rank",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 1.3311969558372807
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m19-t797-b6cf2467 / shared-rank",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 0.9269737726913949
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m19-t797-b6cf2467 / target-pin",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 1.3276187699837072
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-t5197-69e76b73 / checked-rank",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.1134367608442894
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-t5197-69e76b73 / full-rank",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.0550276096553244
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-t5197-69e76b73 / shared-rank",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 1.6737950348593897
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-t5197-69e76b73 / target-pin",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.0536189397285267
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp19-t241-6012dab8 / abscissa-mitm",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 9.662611418935196
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp19-t241-6012dab8 / abscissa-subtract",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 268.94615755239704
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp19-t241-b992f548 / abscissa-mitm",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 10.14501246882793
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp19-t241-b992f548 / abscissa-subtract",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 293.94738154613464
     }
-  ]
+   ],
+   "role": "diagnostic"
+  },
+  {
+   "barrier_test": false,
+   "id": "ec-ten-question-leads",
+   "label": "Follow-up: counted diagnostics",
+   "points": [
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m37-tm534059-32aad96b / orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 29.48440128498138
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m37-tm534059-32aad96b / orbit-c8",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 9.012705021301453
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m13-t181-515ee569 / exact-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 8.90943299733781
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m13-t181-515ee569 / existing-orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 1.3799358557669426
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m13-t181-515ee569 / orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 1.0314585874717102
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m19-t797-b6cf2467 / exact-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 10.551663925478614
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m19-t797-b6cf2467 / existing-orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 1.2641745890752734
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m19-t797-b6cf2467 / orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 1.0994221566283346
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m23-t5197-69e76b73 / exact-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 12.047073503470347
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m23-t5197-69e76b73 / existing-orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 1.6690633205054821
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m23-t5197-69e76b73 / orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 2.164224892361474
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m31-tm90707-c95f16f5 / exact-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 22.381908134938932
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m31-tm90707-c95f16f5 / existing-orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 1.7759686665858294
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m31-tm90707-c95f16f5 / orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 1.5603618306907945
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp16-t295-8d3c3165 / abs128-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 32.828645100797
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp16-t295-8d3c3165 / abs16-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 4.765119549929676
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp16-t295-8d3c3165 / abs32-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 4.47022972339428
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp16-t295-8d3c3165 / abs64-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 9.908110642287857
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp16-t295-8d3c3165 / abs64-subtract3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 10.251992498827942
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs128-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 25.488533333333333
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs16-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 9.390577777777779
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs32-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 6.886933333333333
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs64-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 9.004977777777778
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs64-subtract3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 12.4496
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp20-t727-cd198a38 / abs128-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 17.22429057888763
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp20-t727-cd198a38 / abs16-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 15.379568671963678
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp20-t727-cd198a38 / abs32-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 7.504313280363224
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp20-t727-cd198a38 / abs64-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 6.635641316685585
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp20-t727-cd198a38 / abs64-subtract3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 14.706583427922816
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs128-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 16.141759180187872
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs16-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 39.87950469684031
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs32-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 19.71878736122972
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs64-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 11.527583262169086
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs64-subtract3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 41.14534585824082
+    }
+   ],
+   "role": "diagnostic"
+  }
+ ]
 }
 </script>
 <script>
@@ -13468,6 +14336,7 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 })();
 
 </script>
-<section id="ecbench-ten-questions-20261014"><h2>Ten open questions: native ecbench diagnostics, 2026-10-14</h2><p>937 attempts; counts and failures preserved. Lower-bound count quotients do not bound full-cost ratios. L0 wall measurements are inadmissible. Degree83 IC remains unsupported. <a href="../research/ecbench_open_questions_20261014/REPORT.md">Report, sources and remaining obligations</a>.</p><div class="scroll"><table><thead><tr><th>Curve</th><th>Arm</th><th>Verified / attempts</th><th>Mean cold S</th><th>Counted IC / rho</th><th>Status</th></tr></thead><tbody><tr><td>icv1-fp16-t295-8d3c3165</td><td>abs32-subtract2</td><td>12/12</td><td>146.3892</td><td>75.5481</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>abs64-mitm2</td><td>12/12</td><td>22.7599</td><td>11.7458</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>abs64-subtract2</td><td>12/12</td><td>137.3309</td><td>70.8733</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>abs64-subtract3</td><td>12/12</td><td>23.4979</td><td>12.1267</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>rho</td><td>12/12</td><td>1.9377</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>rho-aa</td><td>12/12</td><td>1.9377</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>abs32-subtract2</td><td>12/12</td><td>282.4994</td><td>177.1919</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>abs64-mitm2</td><td>12/12</td><td>13.4152</td><td>8.4144</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>abs64-subtract2</td><td>12/12</td><td>278.5684</td><td>174.7262</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>abs64-subtract3</td><td>12/12</td><td>17.5888</td><td>11.0322</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>rho</td><td>12/12</td><td>1.5943</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>rho-aa</td><td>12/12</td><td>1.5943</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>abs32-subtract2</td><td>12/12</td><td>524.8381</td><td>536.5484</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>abs64-mitm2</td><td>12/12</td><td>11.2446</td><td>11.4955</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>abs64-subtract2</td><td>12/12</td><td>510.0127</td><td>521.3923</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>abs64-subtract3</td><td>12/12</td><td>20.6335</td><td>21.0938</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>rho</td><td>12/12</td><td>0.9782</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>rho-aa</td><td>12/12</td><td>0.9782</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>abs32-subtract2</td><td>12/12</td><td>1081.0897</td><td>716.3848</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>abs64-mitm2</td><td>12/12</td><td>10.1679</td><td>6.7377</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>abs64-subtract2</td><td>12/12</td><td>819.1889</td><td>542.8360</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>abs64-subtract3</td><td>12/12</td><td>35.3830</td><td>23.4466</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>rho</td><td>12/12</td><td>1.5091</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>rho-aa</td><td>12/12</td><td>1.5091</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-f2m13-tm9-6863a838</td><td>rho</td><td>8/8</td><td>3.5026</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m13-tm9-6863a838</td><td>rho-aa</td><td>8/8</td><td>3.5026</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m13-tm9-6863a838</td><td>sub3-mitm3</td><td>8/8</td><td>127.2247</td><td>36.3234</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m13-tm9-6863a838</td><td>sub4-mitm3</td><td>8/8</td><td>46.7808</td><td>13.3562</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m17-t531-2048fb7c</td><td>rho</td><td>8/8</td><td>2.0296</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m17-t531-2048fb7c</td><td>rho-aa</td><td>8/8</td><td>2.0296</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m17-t531-2048fb7c</td><td>sub3-mitm3</td><td>8/8</td><td>311.3590</td><td>153.4071</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m17-t531-2048fb7c</td><td>sub4-mitm3</td><td>8/8</td><td>159.0557</td><td>78.3670</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-tm649-a9133fe6</td><td>rho</td><td>8/8</td><td>1.5420</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-tm649-a9133fe6</td><td>rho-aa</td><td>8/8</td><td>1.5420</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-tm649-a9133fe6</td><td>sub3-mitm3</td><td>5/8</td><td>236.8360</td><td>—</td><td>{&quot;exhausted&quot;:3,&quot;verified&quot;:5}</td></tr><tr><td>icv1-f2m19-tm649-a9133fe6</td><td>sub4-mitm3</td><td>8/8</td><td>201.9391</td><td>130.9581</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-tm4129-45500fce</td><td>rho</td><td>8/8</td><td>1.3823</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-tm4129-45500fce</td><td>rho-aa</td><td>8/8</td><td>1.3823</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-tm4129-45500fce</td><td>sub3-mitm3</td><td>0/8</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:8}</td></tr><tr><td>icv1-f2m23-tm4129-45500fce</td><td>sub4-mitm3</td><td>0/8</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:8}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>f6-ic</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>inherited-f4</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>rho</td><td>2/2</td><td>14.6759</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>rho-aa</td><td>2/2</td><td>14.6759</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>rootfind-control</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>f6-ic</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>inherited-f4</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rho</td><td>2/2</td><td>3.0459</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rho-aa</td><td>2/2</td><td>3.0459</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rootfind-control</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>f6-ic</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>inherited-f4</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rho</td><td>2/2</td><td>1.1604</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rho-aa</td><td>2/2</td><td>1.1604</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rootfind-control</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>f6-ic</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>inherited-f4</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>rho</td><td>2/2</td><td>1.2694</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>rho-aa</td><td>2/2</td><td>1.2694</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>rootfind-control</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>direct</td><td>8/8</td><td>19.2284</td><td>6.2226</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>orbit-folded</td><td>8/8</td><td>4.1025</td><td>1.3276</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rho</td><td>8/8</td><td>3.0901</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rho-aa</td><td>8/8</td><td>3.0901</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>direct</td><td>8/8</td><td>7.8934</td><td>6.9527</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>orbit-folded</td><td>8/8</td><td>2.3315</td><td>2.0536</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rho</td><td>8/8</td><td>1.1353</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rho-aa</td><td>8/8</td><td>1.1353</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>direct</td><td>8/8</td><td>14.6069</td><td>12.3489</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>orbit-folded</td><td>8/8</td><td>2.2417</td><td>1.8952</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>rho</td><td>8/8</td><td>1.1828</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>rho-aa</td><td>8/8</td><td>1.1828</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m37-tm534059-32aad96b</td><td>direct</td><td>3/8</td><td>5.2241</td><td>—</td><td>{&quot;exhausted&quot;:5,&quot;verified&quot;:3}</td></tr><tr><td>icv1-f2m37-tm534059-32aad96b</td><td>orbit-folded</td><td>3/8</td><td>4.0678</td><td>—</td><td>{&quot;exhausted&quot;:5,&quot;verified&quot;:3}</td></tr><tr><td>icv1-f2m37-tm534059-32aad96b</td><td>rho</td><td>8/8</td><td>0.2574</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m37-tm534059-32aad96b</td><td>rho-aa</td><td>8/8</td><td>0.2574</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>compact-control</td><td>8/8</td><td>48.0597</td><td>2.0277</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>gamma-weight-1</td><td>8/8</td><td>17.3176</td><td>0.7306</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>gamma-weight-2</td><td>8/8</td><td>46.1181</td><td>1.9457</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>gamma-weight-3</td><td>8/8</td><td>44.2287</td><td>1.8660</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>rho</td><td>8/8</td><td>23.7020</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>rho-aa</td><td>8/8</td><td>23.7020</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-tm5197-1f85e9e1</td><td>compact-control</td><td>8/8</td><td>2.2833</td><td>2.6757</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-tm5197-1f85e9e1</td><td>gamma-weight-1</td><td>1/8</td><td>3.1227</td><td>—</td><td>{&quot;exhausted&quot;:7,&quot;verified&quot;:1}</td></tr><tr><td>icv1-f2m23-tm5197-1f85e9e1</td><td>gamma-weight-2</td><td>8/8</td><td>2.0658</td><td>2.4209</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-tm5197-1f85e9e1</td><td>gamma-weight-3</td><td>8/8</td><td>2.0951</td><td>2.4552</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-tm5197-1f85e9e1</td><td>rho</td><td>8/8</td><td>0.8533</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-tm5197-1f85e9e1</td><td>rho-aa</td><td>8/8</td><td>0.8533</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>m3-lp0</td><td>0/8</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>m3-lp1</td><td>7/8</td><td>126.1067</td><td>—</td><td>{&quot;exhausted&quot;:1,&quot;verified&quot;:7}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>m3-lp2</td><td>8/8</td><td>55.3047</td><td>2.3333</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>m4-lp0</td><td>8/8</td><td>374.7798</td><td>15.8121</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>m6-lp0</td><td>8/8</td><td>1161.9226</td><td>49.0220</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>mn-1-lp0</td><td>8/8</td><td>8797.0309</td><td>371.1508</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>rho</td><td>8/8</td><td>23.7020</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>rho-aa</td><td>8/8</td><td>23.7020</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>checked-rank</td><td>8/8</td><td>4.3208</td><td>1.3983</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>full-rank</td><td>8/8</td><td>4.1135</td><td>1.3312</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rho</td><td>8/8</td><td>3.0901</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rho-aa</td><td>8/8</td><td>3.0901</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>shared-rank</td><td>8/8</td><td>2.8644</td><td>0.9270</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>target-pin</td><td>8/8</td><td>4.1025</td><td>1.3276</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>checked-rank</td><td>8/8</td><td>2.3994</td><td>2.1134</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>full-rank</td><td>8/8</td><td>2.3331</td><td>2.0550</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rho</td><td>8/8</td><td>1.1353</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rho-aa</td><td>8/8</td><td>1.1353</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>shared-rank</td><td>8/8</td><td>1.9003</td><td>1.6738</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>target-pin</td><td>8/8</td><td>2.3315</td><td>2.0536</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp19-t241-6012dab8</td><td>abscissa-mitm</td><td>12/12</td><td>11.4171</td><td>9.6626</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp19-t241-6012dab8</td><td>abscissa-subtract</td><td>12/12</td><td>317.7792</td><td>268.9462</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp19-t241-6012dab8</td><td>rho</td><td>12/12</td><td>1.1816</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp19-t241-6012dab8</td><td>rho-aa</td><td>12/12</td><td>1.1816</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp19-t241-b992f548</td><td>abscissa-mitm</td><td>12/12</td><td>11.5799</td><td>10.1450</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp19-t241-b992f548</td><td>abscissa-subtract</td><td>12/12</td><td>335.5223</td><td>293.9474</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp19-t241-b992f548</td><td>rho</td><td>12/12</td><td>1.1414</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp19-t241-b992f548</td><td>rho-aa</td><td>12/12</td><td>1.1414</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-f2m83-tm6151469093347-debefd74</td><td>ic-n83</td><td>0/1</td><td>—</td><td>—</td><td>{&quot;error&quot;:1}</td></tr></tbody></table></div></section>
+<section id="ecbench-ten-questions-20261014"><h2>Ten open questions: native ecbench diagnostics, 2026-10-14</h2><p>937 attempts; historical counted pipeline refused wide IC. All original resolutions remain partial. Count quotients do not bound full-cost ratios. L0 wall measurements are inadmissible. <a href="../research/ecbench_open_questions_20261014/REPORT.md">Report, sources and remaining obligations</a>.</p><div class="table-scroll" style="overflow-x:auto"><table><thead><tr><th>Curve</th><th>Arm</th><th>Verified / attempts</th><th>Mean cold S</th><th>Counted IC / rho</th><th>Status</th></tr></thead><tbody><tr><td>icv1-fp16-t295-8d3c3165</td><td>abs32-subtract2</td><td>12/12</td><td>146.3892</td><td>75.5481</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>abs64-mitm2</td><td>12/12</td><td>22.7599</td><td>11.7458</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>abs64-subtract2</td><td>12/12</td><td>137.3309</td><td>70.8733</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>abs64-subtract3</td><td>12/12</td><td>23.4979</td><td>12.1267</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>rho</td><td>12/12</td><td>1.9377</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>rho-aa</td><td>12/12</td><td>1.9377</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>abs32-subtract2</td><td>12/12</td><td>282.4994</td><td>177.1919</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>abs64-mitm2</td><td>12/12</td><td>13.4152</td><td>8.4144</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>abs64-subtract2</td><td>12/12</td><td>278.5684</td><td>174.7262</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>abs64-subtract3</td><td>12/12</td><td>17.5888</td><td>11.0322</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>rho</td><td>12/12</td><td>1.5943</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>rho-aa</td><td>12/12</td><td>1.5943</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>abs32-subtract2</td><td>12/12</td><td>524.8381</td><td>536.5484</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>abs64-mitm2</td><td>12/12</td><td>11.2446</td><td>11.4955</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>abs64-subtract2</td><td>12/12</td><td>510.0127</td><td>521.3923</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>abs64-subtract3</td><td>12/12</td><td>20.6335</td><td>21.0938</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>rho</td><td>12/12</td><td>0.9782</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>rho-aa</td><td>12/12</td><td>0.9782</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>abs32-subtract2</td><td>12/12</td><td>1081.0897</td><td>716.3848</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>abs64-mitm2</td><td>12/12</td><td>10.1679</td><td>6.7377</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>abs64-subtract2</td><td>12/12</td><td>819.1889</td><td>542.8360</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>abs64-subtract3</td><td>12/12</td><td>35.3830</td><td>23.4466</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>rho</td><td>12/12</td><td>1.5091</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>rho-aa</td><td>12/12</td><td>1.5091</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-f2m13-tm9-6863a838</td><td>rho</td><td>8/8</td><td>3.5026</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m13-tm9-6863a838</td><td>rho-aa</td><td>8/8</td><td>3.5026</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m13-tm9-6863a838</td><td>sub3-mitm3</td><td>8/8</td><td>127.2247</td><td>36.3234</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m13-tm9-6863a838</td><td>sub4-mitm3</td><td>8/8</td><td>46.7808</td><td>13.3562</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m17-t531-2048fb7c</td><td>rho</td><td>8/8</td><td>2.0296</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m17-t531-2048fb7c</td><td>rho-aa</td><td>8/8</td><td>2.0296</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m17-t531-2048fb7c</td><td>sub3-mitm3</td><td>8/8</td><td>311.3590</td><td>153.4071</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m17-t531-2048fb7c</td><td>sub4-mitm3</td><td>8/8</td><td>159.0557</td><td>78.3670</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-tm649-a9133fe6</td><td>rho</td><td>8/8</td><td>1.5420</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-tm649-a9133fe6</td><td>rho-aa</td><td>8/8</td><td>1.5420</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-tm649-a9133fe6</td><td>sub3-mitm3</td><td>5/8</td><td>236.8360</td><td>—</td><td>{&quot;exhausted&quot;:3,&quot;verified&quot;:5}</td></tr><tr><td>icv1-f2m19-tm649-a9133fe6</td><td>sub4-mitm3</td><td>8/8</td><td>201.9391</td><td>130.9581</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-tm4129-45500fce</td><td>rho</td><td>8/8</td><td>1.3823</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-tm4129-45500fce</td><td>rho-aa</td><td>8/8</td><td>1.3823</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-tm4129-45500fce</td><td>sub3-mitm3</td><td>0/8</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:8}</td></tr><tr><td>icv1-f2m23-tm4129-45500fce</td><td>sub4-mitm3</td><td>0/8</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:8}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>f6-ic</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>inherited-f4</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>rho</td><td>2/2</td><td>14.6759</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>rho-aa</td><td>2/2</td><td>14.6759</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>rootfind-control</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>f6-ic</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>inherited-f4</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rho</td><td>2/2</td><td>3.0459</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rho-aa</td><td>2/2</td><td>3.0459</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rootfind-control</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>f6-ic</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>inherited-f4</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rho</td><td>2/2</td><td>1.1604</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rho-aa</td><td>2/2</td><td>1.1604</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rootfind-control</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>f6-ic</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>inherited-f4</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>rho</td><td>2/2</td><td>1.2694</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>rho-aa</td><td>2/2</td><td>1.2694</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>rootfind-control</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>direct</td><td>8/8</td><td>19.2284</td><td>6.2226</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>orbit-folded</td><td>8/8</td><td>4.1025</td><td>1.3276</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rho</td><td>8/8</td><td>3.0901</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rho-aa</td><td>8/8</td><td>3.0901</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>direct</td><td>8/8</td><td>7.8934</td><td>6.9527</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>orbit-folded</td><td>8/8</td><td>2.3315</td><td>2.0536</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rho</td><td>8/8</td><td>1.1353</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rho-aa</td><td>8/8</td><td>1.1353</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>direct</td><td>8/8</td><td>14.6069</td><td>12.3489</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>orbit-folded</td><td>8/8</td><td>2.2417</td><td>1.8952</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>rho</td><td>8/8</td><td>1.1828</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>rho-aa</td><td>8/8</td><td>1.1828</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m37-tm534059-32aad96b</td><td>direct</td><td>3/8</td><td>5.2241</td><td>—</td><td>{&quot;exhausted&quot;:5,&quot;verified&quot;:3}</td></tr><tr><td>icv1-f2m37-tm534059-32aad96b</td><td>orbit-folded</td><td>3/8</td><td>4.0678</td><td>—</td><td>{&quot;exhausted&quot;:5,&quot;verified&quot;:3}</td></tr><tr><td>icv1-f2m37-tm534059-32aad96b</td><td>rho</td><td>8/8</td><td>0.2574</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m37-tm534059-32aad96b</td><td>rho-aa</td><td>8/8</td><td>0.2574</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>compact-control</td><td>8/8</td><td>48.0597</td><td>2.0277</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>gamma-weight-1</td><td>8/8</td><td>17.3176</td><td>0.7306</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>gamma-weight-2</td><td>8/8</td><td>46.1181</td><td>1.9457</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>gamma-weight-3</td><td>8/8</td><td>44.2287</td><td>1.8660</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>rho</td><td>8/8</td><td>23.7020</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>rho-aa</td><td>8/8</td><td>23.7020</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-tm5197-1f85e9e1</td><td>compact-control</td><td>8/8</td><td>2.2833</td><td>2.6757</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-tm5197-1f85e9e1</td><td>gamma-weight-1</td><td>1/8</td><td>3.1227</td><td>—</td><td>{&quot;exhausted&quot;:7,&quot;verified&quot;:1}</td></tr><tr><td>icv1-f2m23-tm5197-1f85e9e1</td><td>gamma-weight-2</td><td>8/8</td><td>2.0658</td><td>2.4209</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-tm5197-1f85e9e1</td><td>gamma-weight-3</td><td>8/8</td><td>2.0951</td><td>2.4552</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-tm5197-1f85e9e1</td><td>rho</td><td>8/8</td><td>0.8533</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-tm5197-1f85e9e1</td><td>rho-aa</td><td>8/8</td><td>0.8533</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>m3-lp0</td><td>0/8</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>m3-lp1</td><td>7/8</td><td>126.1067</td><td>—</td><td>{&quot;exhausted&quot;:1,&quot;verified&quot;:7}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>m3-lp2</td><td>8/8</td><td>55.3047</td><td>2.3333</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>m4-lp0</td><td>8/8</td><td>374.7798</td><td>15.8121</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>m6-lp0</td><td>8/8</td><td>1161.9226</td><td>49.0220</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>mn-1-lp0</td><td>8/8</td><td>8797.0309</td><td>371.1508</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>rho</td><td>8/8</td><td>23.7020</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m11-t67-05f5aa36</td><td>rho-aa</td><td>8/8</td><td>23.7020</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>checked-rank</td><td>8/8</td><td>4.3208</td><td>1.3983</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>full-rank</td><td>8/8</td><td>4.1135</td><td>1.3312</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rho</td><td>8/8</td><td>3.0901</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rho-aa</td><td>8/8</td><td>3.0901</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>shared-rank</td><td>8/8</td><td>2.8644</td><td>0.9270</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>target-pin</td><td>8/8</td><td>4.1025</td><td>1.3276</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>checked-rank</td><td>8/8</td><td>2.3994</td><td>2.1134</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>full-rank</td><td>8/8</td><td>2.3331</td><td>2.0550</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rho</td><td>8/8</td><td>1.1353</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rho-aa</td><td>8/8</td><td>1.1353</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>shared-rank</td><td>8/8</td><td>1.9003</td><td>1.6738</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>target-pin</td><td>8/8</td><td>2.3315</td><td>2.0536</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp19-t241-6012dab8</td><td>abscissa-mitm</td><td>12/12</td><td>11.4171</td><td>9.6626</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp19-t241-6012dab8</td><td>abscissa-subtract</td><td>12/12</td><td>317.7792</td><td>268.9462</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp19-t241-6012dab8</td><td>rho</td><td>12/12</td><td>1.1816</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp19-t241-6012dab8</td><td>rho-aa</td><td>12/12</td><td>1.1816</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp19-t241-b992f548</td><td>abscissa-mitm</td><td>12/12</td><td>11.5799</td><td>10.1450</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp19-t241-b992f548</td><td>abscissa-subtract</td><td>12/12</td><td>335.5223</td><td>293.9474</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp19-t241-b992f548</td><td>rho</td><td>12/12</td><td>1.1414</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-fp19-t241-b992f548</td><td>rho-aa</td><td>12/12</td><td>1.1414</td><td>1.0000</td><td>{&quot;verified&quot;:12}</td></tr><tr><td>icv1-f2m83-tm6151469093347-debefd74</td><td>ic-n83</td><td>0/1</td><td>—</td><td>—</td><td>{&quot;error&quot;:1}</td></tr></tbody></table></div></section>
+<section id="ecbench-leads-20261015"><h2>Pursuing the leads: versioned shape and width-generic IC, 2026-10-15</h2><p>373 fresh public-target attempts; exact E0 degree83 bounded IC is executable. Successful N83 recovery and the mathematical gates remain open. Count quotients do not bound full-cost ratios. L0 wall measurements are inadmissible. <a href="../research/ecbench_leads_20261015/REPORT.md">Report, sources and remaining obligations</a>.</p><div class="table-scroll" style="overflow-x:auto"><table><thead><tr><th>Curve</th><th>Arm</th><th>Verified / attempts</th><th>Mean cold S</th><th>Counted IC / rho</th><th>Status</th></tr></thead><tbody><tr><td>icv1-f2m13-t181-515ee569</td><td>f6-ic-v1</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>f6-ic-v2</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>inherited-f4-v1</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>inherited-f4-v2</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>rho</td><td>2/2</td><td>14.7094</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>rho-aa</td><td>2/2</td><td>14.7094</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>f6-ic-v1</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>f6-ic-v2</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>inherited-f4-v1</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>inherited-f4-v2</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rho</td><td>2/2</td><td>3.0445</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rho-aa</td><td>2/2</td><td>3.0445</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>f6-ic-v1</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>f6-ic-v2</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>inherited-f4-v1</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>inherited-f4-v2</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rho</td><td>2/2</td><td>1.0275</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rho-aa</td><td>2/2</td><td>1.0275</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>f6-ic-v1</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>f6-ic-v2</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>inherited-f4-v1</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>inherited-f4-v2</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>rho</td><td>2/2</td><td>1.1498</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>rho-aa</td><td>2/2</td><td>1.1498</td><td>1.0000</td><td>{&quot;verified&quot;:2}</td></tr><tr><td>icv1-f2m37-tm534059-32aad96b</td><td>orbit-c4</td><td>4/4</td><td>8.5663</td><td>29.4844</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m37-tm534059-32aad96b</td><td>orbit-c8</td><td>4/4</td><td>2.6185</td><td>9.0127</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m37-tm534059-32aad96b</td><td>rho</td><td>4/4</td><td>0.2905</td><td>1.0000</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m37-tm534059-32aad96b</td><td>rho-aa</td><td>4/4</td><td>0.2905</td><td>1.0000</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>exact-c4</td><td>4/4</td><td>127.7179</td><td>8.9094</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>existing-orbit-c4</td><td>4/4</td><td>19.7816</td><td>1.3799</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>orbit-c4</td><td>4/4</td><td>14.7861</td><td>1.0315</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>rho</td><td>4/4</td><td>14.3351</td><td>1.0000</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m13-t181-515ee569</td><td>rho-aa</td><td>4/4</td><td>14.3351</td><td>1.0000</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>exact-c4</td><td>4/4</td><td>33.9911</td><td>10.5517</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>existing-orbit-c4</td><td>4/4</td><td>4.0724</td><td>1.2642</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>orbit-c4</td><td>4/4</td><td>3.5417</td><td>1.0994</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rho</td><td>4/4</td><td>3.2214</td><td>1.0000</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m19-t797-b6cf2467</td><td>rho-aa</td><td>4/4</td><td>3.2214</td><td>1.0000</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>exact-c4</td><td>4/4</td><td>13.7113</td><td>12.0471</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>existing-orbit-c4</td><td>4/4</td><td>1.8996</td><td>1.6691</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>orbit-c4</td><td>4/4</td><td>2.4632</td><td>2.1642</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rho</td><td>4/4</td><td>1.1381</td><td>1.0000</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m23-t5197-69e76b73</td><td>rho-aa</td><td>4/4</td><td>1.1381</td><td>1.0000</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>exact-c4</td><td>4/4</td><td>26.7752</td><td>22.3819</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>existing-orbit-c4</td><td>4/4</td><td>2.1246</td><td>1.7760</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>orbit-c4</td><td>4/4</td><td>1.8666</td><td>1.5604</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>rho</td><td>4/4</td><td>1.1963</td><td>1.0000</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-f2m31-tm90707-c95f16f5</td><td>rho-aa</td><td>4/4</td><td>1.1963</td><td>1.0000</td><td>{&quot;verified&quot;:4}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>abs128-mitm2</td><td>8/8</td><td>75.9569</td><td>32.8286</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>abs16-mitm2</td><td>8/8</td><td>11.0252</td><td>4.7651</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>abs32-mitm2</td><td>8/8</td><td>10.3429</td><td>4.4702</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>abs64-mitm2</td><td>8/8</td><td>22.9248</td><td>9.9081</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>abs64-subtract3</td><td>8/8</td><td>23.7204</td><td>10.2520</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>rho</td><td>8/8</td><td>2.3137</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp16-t295-8d3c3165</td><td>rho-aa</td><td>8/8</td><td>2.3137</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>abs128-mitm2</td><td>8/8</td><td>38.8832</td><td>25.4885</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>abs16-mitm2</td><td>8/8</td><td>14.3255</td><td>9.3906</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>abs32-mitm2</td><td>8/8</td><td>10.5061</td><td>6.8869</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>abs64-mitm2</td><td>8/8</td><td>13.7373</td><td>9.0050</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>abs64-subtract3</td><td>8/8</td><td>18.9921</td><td>12.4496</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>rho</td><td>8/8</td><td>1.5255</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp18-tm337-d28d5e09</td><td>rho-aa</td><td>8/8</td><td>1.5255</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>abs128-mitm2</td><td>8/8</td><td>25.2926</td><td>17.2243</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>abs16-mitm2</td><td>8/8</td><td>22.5838</td><td>15.3796</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>abs32-mitm2</td><td>8/8</td><td>11.0195</td><td>7.5043</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>abs64-mitm2</td><td>8/8</td><td>9.7440</td><td>6.6356</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>abs64-subtract3</td><td>8/8</td><td>21.5956</td><td>14.7066</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>rho</td><td>8/8</td><td>1.4684</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp20-t727-cd198a38</td><td>rho-aa</td><td>8/8</td><td>1.4684</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>abs128-mitm2</td><td>8/8</td><td>15.1390</td><td>16.1418</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>abs16-mitm2</td><td>8/8</td><td>37.4020</td><td>39.8795</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>abs32-mitm2</td><td>8/8</td><td>18.4938</td><td>19.7188</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>abs64-mitm2</td><td>8/8</td><td>10.8114</td><td>11.5276</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>abs64-subtract3</td><td>8/8</td><td>38.5892</td><td>41.1453</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>rho</td><td>8/8</td><td>0.9379</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-fp22-tm1385-475dcb5f</td><td>rho-aa</td><td>8/8</td><td>0.9379</td><td>1.0000</td><td>{&quot;verified&quot;:8}</td></tr><tr><td>icv1-f2m83-tm6151469093347-debefd74</td><td>legacy-ic</td><td>0/1</td><td>—</td><td>—</td><td>{&quot;error&quot;:1}</td></tr><tr><td>icv1-f2m83-tm6151469093347-debefd74</td><td>orbit-c16</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr><tr><td>icv1-f2m83-tm6151469093347-debefd74</td><td>orbit-c4</td><td>0/2</td><td>—</td><td>—</td><td>{&quot;exhausted&quot;:2}</td></tr></tbody></table></div></section>
 </body>
 </html>

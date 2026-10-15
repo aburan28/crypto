@@ -283,7 +283,7 @@ const percent = value => (value - .85) / .25 * 100;
 const forest = `<div class="comparison-plot" data-measurement-chart role="group" aria-label="Challenger to reference ratios; the 1.00 reference line divides faster and slower costs"><div class="plot-row plot-head"><span>Curve cell</span><span class="plot-directions"><span>Faster</span><span>Slower</span></span><span>Ratio</span></div>${Object.entries(online.per_cell).map(([cell,value])=>`<div class="plot-row"><span>${escape(cell)}</span><span class="plot-track"><i class="plot-link" style="left:${Math.min(60,percent(value))}%;width:${Math.abs(60-percent(value))}%"></i><i class="plot-dot ${value>1?'plot-slower':'plot-faster'}" style="left:${percent(value)}%"></i></span><strong>${f(value)}×</strong></div>`).join('')}<div class="plot-row plot-overall"><strong>Overall</strong><span class="plot-track"><i class="plot-interval" style="left:${percent(lo)}%;width:${percent(hi)-percent(lo)}%"></i><i class="plot-dot" style="left:${percent(ratio)}%"></i></span><strong>${f(ratio)}×</strong></div><div class="plot-row plot-head"><span></span><span class="plot-directions"><span>0.85×</span><span>1.10×</span></span><span></span></div><p class="plot-reference">Dashed line = 1.00× reference time</p></div>`;
 const rhoGraph = `<div class="rho-plot" data-measurement-chart role="group" aria-label="Recorded single-target online milliseconds, shown on a zero-based linear scale">${['incumbent','stop7_word','rho_online'].map((alias,index)=>`<div class="rho-row"><div><strong>${['Incumbent IC','Challenger IC','Matched rho'][index]}</strong><span>${f(rows[alias].online_ms,6)} ms</span></div><div class="rho-track"><span style="width:${rows[alias].online_ms/rows.rho_online.online_ms*100}%;background:${index===2?'var(--lab-muted)':'var(--lab-blue)'}"></span></div></div>`).join('')}<div class="rho-axis"><span>0</span><span>0.253 ms</span></div></div>`;
 
-let page = readFileSync(PAGE, 'utf8');
+let page = readFileSync(process.argv.includes('--stdin') ? 0 : PAGE, 'utf8');
 const oldFront = between(page, START, END);
 const historical = section(oldFront, 'lab-best');
 const progressRaw = readFileSync(resolve(ROOT,'docs/ic/progress-timeline.json'));
@@ -434,7 +434,9 @@ const data = {
   progress_timeline_sha256: sha(progressRaw)
 };
 const output = JSON.stringify(data,null,2) + '\n';
-if (process.argv.includes('--check')) {
+if (process.argv.includes('--json')) {
+  process.stdout.write(JSON.stringify({page, data_text: output}) + '\n');
+} else if (process.argv.includes('--check')) {
   assert.equal(readFileSync(PAGE,'utf8'), page, 'Dashboard is stale; run node tools/render_ic_dashboard.mjs');
   assert.equal(readFileSync(resolve(ROOT,'docs/ic/dashboard-overview-data.json'),'utf8'), output, 'Dashboard data is stale');
   console.log('PASS: evidence pins, status gates, generated page/data and unchanged historical ledger');

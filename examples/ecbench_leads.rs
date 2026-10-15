@@ -325,9 +325,14 @@ fn register_gap_models(root: &Path) -> Result<(), String> {
         &mut bytes,
         serde_json::ser::PrettyFormatter::with_indent(b""),
     );
-    serde::Serialize::serialize(&aliases, &mut serializer).map_err(|e| e.to_string())?;
-    bytes.push(b'\n');
-    fs::write("src/cryptanalysis/curve_aliases.json", bytes).map_err(|e| e.to_string())?;
+    serde::Serialize::serialize(&aliases["aliases"], &mut serializer).map_err(|e| e.to_string())?;
+    let text = format!("{{\n\"schema_version\": {},\n\"generated_from\": {},\n\"generated_by\": {},\n\"aliases\": {}\n}}\n",
+        aliases["schema_version"],aliases["generated_from"],aliases["generated_by"],
+        String::from_utf8(bytes).map_err(|e|e.to_string())?);
+    if serde_json::from_str::<Value>(&text).map_err(|e| e.to_string())? != aliases {
+        return Err("alias formatting changed metadata".into());
+    }
+    fs::write("src/cryptanalysis/curve_aliases.json", text).map_err(|e| e.to_string())?;
     Ok(())
 }
 

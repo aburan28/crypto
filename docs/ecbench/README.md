@@ -338,6 +338,7 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 | `claw.pair_table` | the known-log base's seed scalar multiplications, every table addition `P_i + F_b`, both query additions `Q − (F_k + F_l)`, the addition that rebuilds a hit's table sum; phases `base`, `table`, `search`, `recover` | Frobenius maps, canonicalisations, table inserts and probes |
 | `ic.pipeline` | factor base, oracle set-up (pair tables), relation trials, linear algebra, verification, each a phase; native work (lookups, row operations, square roots, Artin–Schreier solves, …) at the pinned ratio where the repository has one | native work with no pinned ratio for this curve; algebraic-solver operations |
 | `ic.pipeline_counted` | the same pipeline with the relation phase charge rebuilt from counted work and pinned conversions for deterministic SAT/PDP replays | algebraic-solver operations without a pinned conversion, including SAT conflicts; these runs remain lower bounds |
+| `ic.orbit_rank_v1` | cofactor projection, direct or signed-Frobenius quotient pair-table additions, ordinary `aG+bQ` queries, and independent full-point relation checks; every scalar multiplication uses its actual additions/doublings | raw-x lifting, Frobenius maps, canonicalisations, table inserts/probes and modular rank operations; all native work remains unpriced |
 | `ic.large_prime` | cofactor projection, exact combination-table group additions, target probes, and relation witness checks; the external runner verifies the returned scalar | combination states, MITM lookups, large-prime merge operations, and modular row operations; the record is therefore a lower bound, not a speed claim |
 
 The counted IC method has its own method identity so frozen SAT/PDP sessions
@@ -345,6 +346,22 @@ retain their exact parameter and accounting contract. It removes solver wall
 pricing from the reported group-addition equivalents. Solver conflicts and
 other work without a pinned conversion stay visible as unpriced counters;
 the recorded `S` is therefore a lower bound on the complete pipeline cost.
+
+`ic.orbit_rank_v1` keeps factor-base logarithms unknown and collects modular
+relations until the public target's column is pinned. It uses the same collector
+with one-word and wide field/scalar types, including the exact registered E0
+degree83 subgroup. All search parameters are required; a pair-visit or query cap
+returns exhausted with its work preserved. Direct and quotient tables bind the
+same base identity. A quotient descriptor is an enumerated phase witness, not a
+compact algebraic correspondence. The [frozen follow-up](../../research/ecbench_leads_20261015/PROTOCOL-v1.md)
+records the positive narrow controls and unsuccessful ordinary N83 queries.
+The legacy wide-refusal text remains unchanged for historical replay.
+
+The versioned binary plug-ins `pdp3-koblitz-v2` and `pdp3-binary-v2` report the
+actual chained S3 layout: `m*ell+(m-2)*n` Boolean variables and `(m-1)*n`
+coordinate equations. Old plug-in IDs retain their previous informational shape
+and exact counted behavior. Correct shape metadata does not establish a solving
+degree bound; see the [constructed and paired controls](../../research/ecbench_leads_20261015/results.json).
 
 `ic.pipeline` defaults to `linalg=incremental-gauss`, which stops when the
 target scalar is pinned; the factor-base logs can still be underdetermined.
@@ -521,6 +538,20 @@ Two consequences to read every table with:
   The ratio of two such lower bounds is **not** a bound on the ratio of
   full costs. Read it as a counted-work diagnostic until both arms have
   complete, calibrated costs; do not infer an end-to-end speedup from it.
+
+- **Full pricing is opt-in.** `ic.pipeline_full`,
+  `rho.signed_frobenius_full` and `rho.signed_frobenius_strong_full` run
+  their base method unchanged, then price every native counter (field
+  multiplications, squarings and inversions, Artin–Schreier solves, hash
+  probes, canonicalisations, row operations, word XORs) from
+  `src/cryptanalysis/ecbench/full_prices.json`, one host's measured ratios to an affine
+  addition, written by `ecbench price-units --curve a:n …`.
+  `src/cryptanalysis/ecbench/full_price.rs` gives each counter an explicit
+  rule. A counter without a rule stays unpriced, so the record is still
+  marked a lower bound. The pinned `docs/ic/calibration.json` and every
+  other method are unchanged. `ecbench trend --compare …` fits how a paired
+  ratio moves with `ln r` and `ln n` across curves. First use:
+  `research/ecbench_frobenius_orbit_vs_rho_20261014/`.
 
 `ecbench resources --dir SESSION --out resources.json` reports, for every
 measured attempt including failures, the native integer counters by phase,

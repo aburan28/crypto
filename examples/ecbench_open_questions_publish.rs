@@ -6,15 +6,16 @@ use std::{
     collections::{BTreeMap, BTreeSet},
     fmt::Write as _,
     fs,
+    io::Write as _,
     path::Path,
-    process::Command,
+    process::{Command, Stdio},
 };
 
 #[path = "ecbench_leads_findings.rs"]
 mod lead_findings;
 
-const BASE: &str = "f9011e5375155bd9ef7839abe4eea12718e4b401";
-const INCOMING_BASE: &str = "fd8bcacf4cc097cc0dcb55ba068ad94a3d3202ae";
+const BASE: &str = "a80b15bbc5c1ea4f2db2b294a9bcddc31f06fdd7";
+const INCOMING_BASE: &str = BASE;
 const STUDY: &str = "research/ecbench_open_questions_20261014";
 const LEADS: &str = "research/ecbench_leads_20261015";
 
@@ -41,101 +42,6 @@ fn baseline_at(commit: &str, path: &str) -> Result<String, String> {
         return Err(format!("cannot read frozen metadata {path}"));
     }
     String::from_utf8(out.stdout).map_err(|e| e.to_string())
-}
-
-/// Index new main sessions from their exact frozen bytes, without a new claim.
-fn browser_studies() -> Result<Vec<(String, Value)>, String> {
-    let mut studies = studies()?;
-    for study in [
-        "research/ecbench_frobenius_orbit_vs_rho_20261014",
-        "research/ecbench_rootfind_speedup_20261014",
-    ] {
-        let root = Path::new(study).join("sessions");
-        if !root.exists() {
-            continue;
-        }
-        let mut dirs: Vec<_> = fs::read_dir(root)
-            .map_err(|e| e.to_string())?
-            .map(|e| e.map(|e| e.path()))
-            .collect::<Result<_, _>>()
-            .map_err(|e| e.to_string())?;
-        dirs.sort();
-        let mut sessions = Vec::new();
-        let mut rows = Vec::new();
-        for dir in dirs {
-            let path = dir.join("records.jsonl");
-            if !path.exists() {
-                continue;
-            }
-            let name = dir.file_name().unwrap().to_str().unwrap();
-            let bytes = fs::read(&path).map_err(|e| e.to_string())?;
-            let path_text = path.to_str().ok_or("non UTF8 source path")?;
-            if sha256_hex(&bytes) != sha256_hex(baseline_at(INCOMING_BASE, path_text)?.as_bytes()) {
-                return Err(format!("incoming-main evidence changed: {path_text}"));
-            }
-            let session = read(dir.join("session.json"))?;
-            if session["records_sha256"] != sha256_hex(&bytes) {
-                return Err("incoming-main session digest mismatch".into());
-            }
-            let mut groups = BTreeMap::<(String, String), Vec<Value>>::new();
-            let mut total = 0;
-            let mut verified = 0;
-            for line in std::str::from_utf8(&bytes)
-                .map_err(|e| e.to_string())?
-                .lines()
-            {
-                let r: Value = serde_json::from_str(line).map_err(|e| e.to_string())?;
-                let id = r["record_id"].as_str().ok_or("missing record id")?;
-                let blank =
-                    line.replacen(&format!("\"record_id\":\"{id}\""), "\"record_id\":\"\"", 1);
-                if id != format!("ECR1h{}", &sha256_hex(blank.as_bytes())[..12]) {
-                    return Err("incoming-main record seal mismatch".into());
-                }
-                total += 1;
-                if r["outcome"]["status"] == "verified" {
-                    verified += 1;
-                }
-                if r["warmup"] == false {
-                    groups
-                        .entry((
-                            r["workload"]["curve"]["slug"].as_str().unwrap().into(),
-                            r["arm"].as_str().unwrap().into(),
-                        ))
-                        .or_default()
-                        .push(r);
-                }
-            }
-            for ((curve, arm), records) in groups {
-                let good: Vec<_> = records
-                    .iter()
-                    .filter(|r| {
-                        r["outcome"]["status"] == "verified"
-                            && r["outcome"]["matches_target"] == true
-                    })
-                    .collect();
-                let mut statuses = BTreeMap::<String, usize>::new();
-                for r in &records {
-                    *statuses
-                        .entry(r["outcome"]["status"].as_str().unwrap().into())
-                        .or_default() += 1;
-                }
-                let mean = |key: &str| {
-                    (!good.is_empty()).then(|| {
-                        good.iter()
-                            .map(|r| r["cost"][key].as_f64().unwrap())
-                            .sum::<f64>()
-                            / good.len() as f64
-                    })
-                };
-                rows.push(json!({"session":name,"session_id":session["session_id"],"curve":curve,"arm":arm,"records":records.len(),"verified":good.len(),
-                    "statuses":statuses,"mean_s":mean("s"),"mean_cold_gae":mean("total_gae"),"paired_complete_counted_ratio_candidate_over_rho":null,
-                    "scope":"preexisting main evidence indexed without a new claim or cost verdict"}));
-            }
-            sessions.push(json!({"name":name,"session_id":session["session_id"],"records":total,"verified_records":verified,"source_commit":INCOMING_BASE}));
-        }
-        studies.push((study.into(), json!({"sessions":sessions,"rows":rows})));
-    }
-    Ok(studies)
 }
 
 fn catalog_derivative_append_only(path: &str) -> Result<bool, String> {
@@ -251,7 +157,7 @@ fn guard_historical_sources() -> Result<(), String> {
         .keys()
         .cloned()
         .collect();
-    for (study, summary) in browser_studies()? {
+    for (study, summary) in studies()? {
         for session in summary["sessions"]
             .as_array()
             .ok_or("missing campaign sessions")?
@@ -459,23 +365,21 @@ fn preserve(old: &str, new: &Value) -> String {
                     .iter()
                     .enumerate()
                     .map(|(i, v)| {
-                        format!(
-                            "{indent}{}",
-                            render(elements.get(i).copied().unwrap_or(""), v, depth + 1)
-                        )
+                        // Appended rows with the same object schema inherit the
+                        // established field order used by catalog renderers.
+                        let template = elements.get(i).copied().or_else(|| {
+                            elements.last().copied().filter(|old| {
+                                let Ok(Value::Object(previous)) = serde_json::from_str(old) else {
+                                    return false;
+                                };
+                                v.as_object()
+                                    .is_some_and(|next| previous.keys().eq(next.keys()))
+                            })
+                        });
+                        format!("{indent}{}", render(template.unwrap_or(""), v, depth + 1))
                     })
                     .collect();
                 format!("[\n{}\n{}]", lines.join(",\n"), " ".repeat(depth))
-            }
-            Value::Number(number) if number.is_f64() => {
-                let f = number.as_f64().unwrap();
-                if f != 0. && (f.abs() < 0.0001 || f.abs() >= 1e16) {
-                    let s = format!("{f:e}");
-                    let (m, e) = s.split_once('e').unwrap();
-                    format!("{m}e{:+03}", e.parse::<i32>().unwrap())
-                } else {
-                    number.to_string()
-                }
             }
             _ => new.to_string(),
         }
@@ -505,6 +409,64 @@ fn update_json(path: &str, value: &Value, check: bool) -> Result<(), String> {
         return Err(format!("native render changed JSON data: {path}"));
     }
     write_or_check(Path::new(path), out.as_bytes(), check)
+}
+fn catalog_alias_layout(check: bool) -> Result<(), String> {
+    let path = Path::new("src/cryptanalysis/curve_aliases.json");
+    let doc = read(path)?;
+    let mut aliases = Vec::new();
+    let mut serializer = serde_json::Serializer::with_formatter(
+        &mut aliases,
+        serde_json::ser::PrettyFormatter::with_indent(b""),
+    );
+    serde::Serialize::serialize(&doc["aliases"], &mut serializer).map_err(|e| e.to_string())?;
+    let text = format!("{{\n\"schema_version\": {},\n\"generated_from\": {},\n\"generated_by\": {},\n\"aliases\": {}\n}}\n",
+        doc["schema_version"],doc["generated_from"],doc["generated_by"],
+        String::from_utf8(aliases).map_err(|e|e.to_string())?);
+    if serde_json::from_str::<Value>(&text).map_err(|e| e.to_string())? != doc {
+        return Err("alias layout changed metadata".into());
+    }
+    write_or_check(path, text.as_bytes(), check)
+}
+fn dashboard_presentation(input: &str, check: bool) -> Result<(), String> {
+    // The existing source-pinned renderer owns the overview and its canonical
+    // timeline embed. Render in memory so --check never mutates a working tree.
+    let mut child = Command::new("node")
+        .args(["tools/render_ic_dashboard.mjs", "--stdin", "--json"])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| e.to_string())?;
+    child
+        .stdin
+        .take()
+        .ok_or("missing renderer input")?
+        .write_all(input.as_bytes())
+        .map_err(|e| e.to_string())?;
+    let output = child.wait_with_output().map_err(|e| e.to_string())?;
+    if !output.status.success() {
+        return Err(format!(
+            "dashboard presentation failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+        ));
+    }
+    let rendered: Value = serde_json::from_slice(&output.stdout).map_err(|e| e.to_string())?;
+    write_or_check(
+        Path::new("docs/index-calculus-scoreboard.html"),
+        rendered["page"]
+            .as_str()
+            .ok_or("missing rendered page")?
+            .as_bytes(),
+        check,
+    )?;
+    write_or_check(
+        Path::new("docs/ic/dashboard-overview-data.json"),
+        rendered["data_text"]
+            .as_str()
+            .ok_or("missing rendered data")?
+            .as_bytes(),
+        check,
+    )
 }
 fn html(s: &str) -> String {
     s.replace('&', "&amp;")
@@ -641,7 +603,7 @@ fn dashboard_browser(_root: &Path, _summary: &Value, check: bool) -> Result<(), 
             "standards_provenance":[],"sources":row["sources"],"target_group":"prime-order subgroup", "leaderboard":[],
             "on_leaderboard":false,"ecbench":[],"factor_bases":[],"tournament_cells":[],"hyperelliptic_cover":null,"cover_links":[]}));
     }
-    for (study, summary) in browser_studies()? {
+    for (study, summary) in studies()? {
         let root = Path::new(&study);
         for s in summary["sessions"].as_array().unwrap() {
             let name = s["name"].as_str().unwrap();
@@ -821,11 +783,15 @@ fn section(rows: &[Value], id: &str, title: &str, intro: &str, study: &str) -> S
         );
     }
     out.push_str("</tbody></table></div></section>\n");
-    out.replace("class=\"scroll\"","class=\"table-scroll\" style=\"overflow-x:auto\"")
+    out.replace(
+        "class=\"scroll\"",
+        "class=\"table-scroll\" style=\"overflow-x:auto\"",
+    )
 }
 
 fn generate(check: bool) -> Result<(), String> {
     guard_historical_sources()?;
+    catalog_alias_layout(check)?;
     let root = Path::new(STUDY);
     let summary = read(root.join("summary.json"))?;
     let literature = read(root.join("literature/questions.json"))?;
@@ -990,17 +956,36 @@ fn generate(check: bool) -> Result<(), String> {
         1,
     );
     write_or_check(
-        Path::new("docs/index-calculus-scoreboard.html"),
-        output.as_bytes(),
-        check,
-    )?;
-    write_or_check(
         Path::new("docs/ic/ecbench-diagnostics.fragment.html"),
         block.as_bytes(),
         check,
     )?;
     let mut leaderboard: Value =
         serde_json::from_str(&baseline("docs/ic/leaderboard.json")?).map_err(|e| e.to_string())?;
+    let additions = read("docs/curves/sources/ecbench-ten-questions.json")?;
+    for row in additions["curves"].as_array().unwrap() {
+        if leaderboard["roster"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|r| r["slug"] == row["slug"])
+        {
+            continue;
+        }
+        let p = &row["params"];
+        let order: u64 = row["order"]
+            .as_str()
+            .unwrap()
+            .parse()
+            .map_err(|_| "bad registry order")?;
+        leaderboard["roster"].as_array_mut().unwrap().push(json!({"slug":row["slug"],"family":"prime",
+            "field":format!("GF(p), p = {}",p["p"].as_str().unwrap()),
+            "coefficients":format!("a = {}, b = {}",p["a"].as_str().unwrap(),p["b"].as_str().unwrap()),
+            "order_bits":64-order.leading_zeros(),"standard":row["standard_names"],
+            "ec1":row["representations"].as_array().unwrap().iter().map(|r|r["ec1"].clone()).collect::<Vec<_>>(),
+            "ec1_unresolved":null,"legacy":row["aliases"],"on_board":false,
+            "curves_yaml_key":null,"factor_base_link_status":"no_curves_yaml_record"}));
+    }
     leaderboard["diagnostic_campaigns"] = json!(studies()?.iter().map(|(p,s)|Ok(json!({"id":p,"scope":"partial counted-work diagnostics, no fully priced ratios","source":format!("{p}/summary.json"),"sha256":sha256_hex(&fs::read(Path::new(p).join("summary.json")).map_err(|e|e.to_string())?),"rows":s["rows"]}))).collect::<Result<Vec<Value>,String>>()?);
     leaderboard["sources"]["registry"]["sha256"] = json!(sha256_hex(
         &fs::read("docs/curves/registry.json").map_err(|e| e.to_string())?
@@ -1022,6 +1007,7 @@ fn generate(check: bool) -> Result<(), String> {
         "2026-10-14"
     });
     update_json("docs/ic/progress-timeline.json", &timeline, check)?;
+    dashboard_presentation(&output, check)?;
     dashboard_browser(root, &summary, check)?;
     Ok(())
 }

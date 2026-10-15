@@ -1,10 +1,10 @@
 {
-  "schema_version": "ic-progress-timeline/1",
-  "updated": "2026-10-14",
-  "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
-  "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
-  "series": [
-    {
+ "schema_version": "ic-progress-timeline/1",
+ "updated": "2026-10-15",
+ "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
+ "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
+ "series": [
+  {
       "id": "ec-cold",
       "label": "Elliptic curve, whole method, cold, one target",
       "role": "emphasis",
@@ -124,10 +124,21 @@
           "class": "accounting",
           "anchor": "#ic-tool-programme-20261001",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v3/README.md"
+        },
+        {
+          "date": "2026-10-14",
+          "value": 1.566,
+          "reference": "matched",
+          "unit": "S",
+          "label": "Frobenius-orbit IC, fully priced (*_full), stride-renew, vs rho-frob: best cell icv1-f2m29-tm40309-30c52b96 (r = 2^15.4)",
+          "detail": "Orbit factor base (compact-orbit-scan, mitm-frobenius-counted m = 2) with every native priced, paired against the fully priced signed-Frobenius rho on 16 targets x 3 rounds per curve: 1.566 [0.992, 2.347] at the best cell (interval reaches 1; rho-frob heavy-tailed there), 2.96 at n = 13, 3.85 at r = 2^21, 18.2 at r = 2^39; never below 1. Slope of ln ratio 0.165 [0.117, 0.213] per ln r with ln n fitted (model 1/6): constant-only.",
+          "class": "accounting",
+          "anchor": "#lab-ecbench-all",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_frobenius_orbit_vs_rho_20261014/README.md"
         }
       ]
     },
-    {
+  {
       "id": "ec-cold-unisolated",
       "label": "Elliptic curve, one-target cold example diagnostics on an unisolated host",
       "role": "context",
@@ -202,7 +213,7 @@
         }
       ]
     },
-    {
+  {
       "id": "ec-bounded-counts",
       "label": "Elliptic curve, cold counted-work diagnostics with unpriced native work",
       "role": "context",
@@ -343,7 +354,7 @@
         }
       ]
     },
-    {
+  {
       "id": "ec-callgrind-diagnostics",
       "label": "Elliptic curve, complete method-solve simulated instructions",
       "role": "context",
@@ -374,7 +385,7 @@
         }
       ]
     },
-    {
+  {
       "id": "ec-online-ir",
       "label": "Elliptic curve, one-target online simulated instructions",
       "role": "context",
@@ -394,7 +405,7 @@
         }
       ]
     },
-    {
+  {
       "id": "ec-hosted-native-wall",
       "label": "Elliptic curve, hosted L1 native wall diagnostics",
       "role": "context",
@@ -425,7 +436,7 @@
         }
       ]
     },
-    {
+  {
       "id": "ec-batch",
       "label": "Elliptic curve, 32 targets together (historical diagnostic)",
       "role": "context",
@@ -473,7 +484,7 @@
         }
       ]
     },
-    {
+  {
       "id": "ec-native-batch-n37",
       "label": "Elliptic curve, n37 1,024-target native batch CPU diagnostic",
       "role": "context",
@@ -504,7 +515,7 @@
         }
       ]
     },
-    {
+  {
       "id": "ec-online",
       "label": "Elliptic curve, online phase only (reusable set-up excluded)",
       "role": "context",
@@ -632,7 +643,7 @@
         }
       ]
     },
-    {
+  {
       "id": "ec-batch-n61",
       "label": "Elliptic curve, n61 batch of L >= 1,024 targets vs frozen KS v2 rho (historical diagnostic)",
       "role": "context",
@@ -662,7 +673,7 @@
         }
       ]
     },
-    {
+  {
       "id": "genus4",
       "label": "Not an elliptic curve: hyperelliptic Jacobian, genus 4, toy size",
       "role": "context",
@@ -690,7 +701,7 @@
         }
       ]
     },
-    {
+  {
       "id": "cover-fp6",
       "label": "Weak elliptic class: cover and decomposition on E(F_p^6)",
       "role": "context",
@@ -778,7 +789,7 @@
         }
       ]
     },
-    {
+  {
       "id": "cover-walk-stage",
       "label": "Weak-class isogeny walk stage (no transported DLP)",
       "role": "context",
@@ -795,515 +806,862 @@
           "source": "https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md"
         }
       ]
+    },
+  {
+   "barrier_test": false,
+   "id": "ec-ten-question-counts",
+   "label": "Ten-question campaign: counted diagnostics",
+   "points": [
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp16-t295-8d3c3165 / abs32-subtract2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 75.5480500093301
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp16-t295-8d3c3165 / abs64-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 11.745848105989923
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp16-t295-8d3c3165 / abs64-subtract2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 70.87329725695092
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp16-t295-8d3c3165 / abs64-subtract3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 12.126702743049076
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs32-subtract2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 177.1918802449535
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs64-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 8.414379677931503
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs64-subtract2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 174.726241778181
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs64-subtract3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 11.032206849625766
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp20-t727-cd198a38 / abs32-subtract2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 536.5484493922527
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp20-t727-cd198a38 / abs64-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 11.495512893331819
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp20-t727-cd198a38 / abs64-subtract2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 521.3922526411451
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp20-t727-cd198a38 / abs64-subtract3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 21.093831648301716
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs32-subtract2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 716.3847786859144
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs64-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 6.737749000459965
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs64-subtract2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 542.8360400523653
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs64-subtract3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 23.446555567349538
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m13-tm9-6863a838 / sub3-mitm3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 36.32335907335907
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m13-tm9-6863a838 / sub4-mitm3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 13.356177606177607
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m17-t531-2048fb7c / sub3-mitm3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 153.4070981210856
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m17-t531-2048fb7c / sub4-mitm3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 78.36701461377871
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m19-tm649-a9133fe6 / sub4-mitm3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 130.95806962025316
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m19-t797-b6cf2467 / direct",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 6.222577017672308
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m19-t797-b6cf2467 / orbit-folded",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 1.3276187699837072
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-t5197-69e76b73 / direct",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 6.952688561318259
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-t5197-69e76b73 / orbit-folded",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.0536189397285267
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m31-tm90707-c95f16f5 / direct",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 12.348916708066424
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m31-tm90707-c95f16f5 / orbit-folded",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 1.8952112556216096
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m11-t67-05f5aa36 / compact-control",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.0276616821062143
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m11-t67-05f5aa36 / gamma-weight-1",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 0.7306359526516735
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m11-t67-05f5aa36 / gamma-weight-2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 1.945745265270057
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m11-t67-05f5aa36 / gamma-weight-3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 1.8660285140626818
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-tm5197-1f85e9e1 / compact-control",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.6756932484978426
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-tm5197-1f85e9e1 / gamma-weight-2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.4208767962413646
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-tm5197-1f85e9e1 / gamma-weight-3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.4551813310868913
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m11-t67-05f5aa36 / m3-lp2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.3333300237211256
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m11-t67-05f5aa36 / m4-lp0",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 15.812130549175649
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m11-t67-05f5aa36 / m6-lp0",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 49.022044194520085
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m11-t67-05f5aa36 / mn-1-lp0",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 371.1507515582342
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m19-t797-b6cf2467 / checked-rank",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 1.3982879405917845
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m19-t797-b6cf2467 / full-rank",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 1.3311969558372807
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m19-t797-b6cf2467 / shared-rank",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 0.9269737726913949
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m19-t797-b6cf2467 / target-pin",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 1.3276187699837072
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-t5197-69e76b73 / checked-rank",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.1134367608442894
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-t5197-69e76b73 / full-rank",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.0550276096553244
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-t5197-69e76b73 / shared-rank",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 1.6737950348593897
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-f2m23-t5197-69e76b73 / target-pin",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 2.0536189397285267
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp19-t241-6012dab8 / abscissa-mitm",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 9.662611418935196
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp19-t241-6012dab8 / abscissa-subtract",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 268.94615755239704
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp19-t241-b992f548 / abscissa-mitm",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 10.14501246882793
+    },
+    {
+     "anchor": "#ecbench-ten-questions-20261014",
+     "class": "accounting",
+     "date": "2026-10-14",
+     "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
+     "label": "icv1-fp19-t241-b992f548 / abscissa-subtract",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
+     "value": 293.94738154613464
     }
-  ,
- {
- "barrier_test": false,
- "id": "ec-ten-question-counts",
- "label": "Ten-question campaign: counted diagnostics",
- "points": [
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp16-t295-8d3c3165 / abs32-subtract2",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 75.5480500093301
+   ],
+   "role": "diagnostic"
   },
   {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp16-t295-8d3c3165 / abs64-mitm2",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 11.745848105989923
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp16-t295-8d3c3165 / abs64-subtract2",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 70.87329725695092
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp16-t295-8d3c3165 / abs64-subtract3",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 12.126702743049076
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp18-tm337-d28d5e09 / abs32-subtract2",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 177.1918802449535
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp18-tm337-d28d5e09 / abs64-mitm2",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 8.414379677931503
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp18-tm337-d28d5e09 / abs64-subtract2",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 174.726241778181
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp18-tm337-d28d5e09 / abs64-subtract3",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 11.032206849625766
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp20-t727-cd198a38 / abs32-subtract2",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 536.5484493922527
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp20-t727-cd198a38 / abs64-mitm2",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 11.495512893331819
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp20-t727-cd198a38 / abs64-subtract2",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 521.3922526411451
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp20-t727-cd198a38 / abs64-subtract3",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 21.093831648301716
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp22-tm1385-475dcb5f / abs32-subtract2",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 716.3847786859144
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp22-tm1385-475dcb5f / abs64-mitm2",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 6.737749000459965
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp22-tm1385-475dcb5f / abs64-subtract2",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 542.8360400523653
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp22-tm1385-475dcb5f / abs64-subtract3",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 23.446555567349538
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m13-tm9-6863a838 / sub3-mitm3",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 36.32335907335907
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m13-tm9-6863a838 / sub4-mitm3",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 13.356177606177607
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m17-t531-2048fb7c / sub3-mitm3",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 153.4070981210856
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m17-t531-2048fb7c / sub4-mitm3",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 78.36701461377871
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m19-tm649-a9133fe6 / sub4-mitm3",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 130.95806962025316
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m19-t797-b6cf2467 / direct",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 6.222577017672308
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m19-t797-b6cf2467 / orbit-folded",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 1.3276187699837072
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m23-t5197-69e76b73 / direct",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 6.952688561318259
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m23-t5197-69e76b73 / orbit-folded",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 2.0536189397285267
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m31-tm90707-c95f16f5 / direct",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 12.348916708066424
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m31-tm90707-c95f16f5 / orbit-folded",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 1.8952112556216096
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m11-t67-05f5aa36 / compact-control",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 2.0276616821062143
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m11-t67-05f5aa36 / gamma-weight-1",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 0.7306359526516735
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m11-t67-05f5aa36 / gamma-weight-2",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 1.945745265270057
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m11-t67-05f5aa36 / gamma-weight-3",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 1.8660285140626818
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m23-tm5197-1f85e9e1 / compact-control",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 2.6756932484978426
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m23-tm5197-1f85e9e1 / gamma-weight-2",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 2.4208767962413646
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m23-tm5197-1f85e9e1 / gamma-weight-3",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 2.4551813310868913
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m11-t67-05f5aa36 / m3-lp2",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 2.3333300237211256
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m11-t67-05f5aa36 / m4-lp0",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 15.812130549175649
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m11-t67-05f5aa36 / m6-lp0",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 49.022044194520085
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m11-t67-05f5aa36 / mn-1-lp0",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 371.1507515582342
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m19-t797-b6cf2467 / checked-rank",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 1.3982879405917845
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m19-t797-b6cf2467 / full-rank",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 1.3311969558372807
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m19-t797-b6cf2467 / shared-rank",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 0.9269737726913949
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m19-t797-b6cf2467 / target-pin",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 1.3276187699837072
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m23-t5197-69e76b73 / checked-rank",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 2.1134367608442894
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m23-t5197-69e76b73 / full-rank",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 2.0550276096553244
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m23-t5197-69e76b73 / shared-rank",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 1.6737950348593897
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-f2m23-t5197-69e76b73 / target-pin",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 2.0536189397285267
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp19-t241-6012dab8 / abscissa-mitm",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 9.662611418935196
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp19-t241-6012dab8 / abscissa-subtract",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 268.94615755239704
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp19-t241-b992f548 / abscissa-mitm",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 10.14501246882793
-  },
-  {
-   "anchor": "#ecbench-ten-questions-20261014",
-   "class": "accounting",
-   "date": "2026-10-14",
-   "detail": "paired counted-work quotient only; no full-cost bound or wall result; failed arms remain in the linked ledger",
-   "label": "icv1-fp19-t241-b992f548 / abscissa-subtract",
-   "reference": "matched",
-   "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_open_questions_20261014/REPORT.md",
-   "value": 293.94738154613464
+   "barrier_test": false,
+   "id": "ec-ten-question-leads",
+   "label": "Follow-up: counted diagnostics",
+   "points": [
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m37-tm534059-32aad96b / orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 29.48440128498138
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m37-tm534059-32aad96b / orbit-c8",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 9.012705021301453
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m13-t181-515ee569 / exact-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 8.90943299733781
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m13-t181-515ee569 / existing-orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 1.3799358557669426
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m13-t181-515ee569 / orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 1.0314585874717102
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m19-t797-b6cf2467 / exact-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 10.551663925478614
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m19-t797-b6cf2467 / existing-orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 1.2641745890752734
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m19-t797-b6cf2467 / orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 1.0994221566283346
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m23-t5197-69e76b73 / exact-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 12.047073503470347
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m23-t5197-69e76b73 / existing-orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 1.6690633205054821
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m23-t5197-69e76b73 / orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 2.164224892361474
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m31-tm90707-c95f16f5 / exact-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 22.381908134938932
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m31-tm90707-c95f16f5 / existing-orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 1.7759686665858294
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-f2m31-tm90707-c95f16f5 / orbit-c4",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 1.5603618306907945
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp16-t295-8d3c3165 / abs128-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 32.828645100797
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp16-t295-8d3c3165 / abs16-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 4.765119549929676
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp16-t295-8d3c3165 / abs32-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 4.47022972339428
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp16-t295-8d3c3165 / abs64-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 9.908110642287857
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp16-t295-8d3c3165 / abs64-subtract3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 10.251992498827942
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs128-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 25.488533333333333
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs16-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 9.390577777777779
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs32-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 6.886933333333333
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs64-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 9.004977777777778
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp18-tm337-d28d5e09 / abs64-subtract3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 12.4496
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp20-t727-cd198a38 / abs128-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 17.22429057888763
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp20-t727-cd198a38 / abs16-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 15.379568671963678
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp20-t727-cd198a38 / abs32-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 7.504313280363224
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp20-t727-cd198a38 / abs64-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 6.635641316685585
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp20-t727-cd198a38 / abs64-subtract3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 14.706583427922816
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs128-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 16.141759180187872
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs16-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 39.87950469684031
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs32-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 19.71878736122972
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs64-mitm2",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 11.527583262169086
+    },
+    {
+     "anchor": "#ecbench-leads-20261015",
+     "class": "accounting",
+     "date": "2026-10-15",
+     "detail": "bounded counted quotient only; full costs and wall result unknown",
+     "label": "icv1-fp22-tm1385-475dcb5f / abs64-subtract3",
+     "reference": "matched",
+     "source": "https://github.com/aburan28/crypto/blob/research/ecbench-ten-questions-20261014/research/ecbench_leads_20261015/REPORT.md",
+     "value": 41.14534585824082
+    }
+   ],
+   "role": "diagnostic"
   }
- ],
- "role": "diagnostic"
-}
-]
+ ]
 }

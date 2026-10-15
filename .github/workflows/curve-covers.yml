@@ -17,6 +17,11 @@ on:
       - 'scripts/test_cover_catalog.py'
       - 'scripts/update_curve_standards.py'
       - 'scripts/build_curve_registry.py'
+      - 'examples/ecbench_open_questions_publish.rs'
+      - 'examples/ecbench_leads*.rs'
+      - 'research/ecbench_open_questions_20261014/**'
+      - 'research/ecbench_leads_20261015/**'
+      - 'tools/render_ic_dashboard.mjs'
       - '.github/workflows/curve-covers.yml'
   push:
     branches: [main]
@@ -36,6 +41,11 @@ on:
       - 'scripts/test_cover_catalog.py'
       - 'scripts/update_curve_standards.py'
       - 'scripts/build_curve_registry.py'
+      - 'examples/ecbench_open_questions_publish.rs'
+      - 'examples/ecbench_leads*.rs'
+      - 'research/ecbench_open_questions_20261014/**'
+      - 'research/ecbench_leads_20261015/**'
+      - 'tools/render_ic_dashboard.mjs'
       - '.github/workflows/curve-covers.yml'
   workflow_dispatch:
 permissions:
@@ -52,6 +62,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: '1.98'
@@ -63,6 +76,6 @@ jobs:
       - run: python3 scripts/test_cover_catalog.py
       - name: Check native catalog and session browser additions
         run: |
-          git fetch --no-tags --depth=1 origin f9011e5375155bd9ef7839abe4eea12718e4b401 fd8bcacf4cc097cc0dcb55ba068ad94a3d3202ae
+          git fetch --no-tags --depth=1 origin a80b15bbc5c1ea4f2db2b294a9bcddc31f06fdd7
           cargo run --release --locked --manifest-path research/ecbench_open_questions_20261014/native-publish/Cargo.toml -- --historical-inputs
           cargo run --release --locked --manifest-path research/ecbench_open_questions_20261014/native-publish/Cargo.toml -- --check

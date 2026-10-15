@@ -22,10 +22,13 @@ admitted until the exact final head satisfies the applicable CI/review gates.
 
 After roughly50 minutes without a Copilot response, the author announced the
 AGENTS.md fallback, documented in comment6184777039, to integrate main locally
-without rebasing or force-pushing. Generated views preserve the incoming main
-scoreboard and index its12 previously added ecbench sessions from their exact
-fd8bcacf4 bytes, separately from this task's373 new attempts. No new verdict is
-derived for those earlier sessions. Historical scientific source arrays remain
-pinned to f9011e5; catalog additions preserve old entries and get an unchanged
-native cover-certificate check. The existing catalog prose renderer only lays
-out the native-generated document and diagnostic fragment.
+without rebasing or force-pushing. The integration baseline is
+`a80b15bbc5c1ea4f2db2b294a9bcddc31f06fdd7`. Generated views preserve that main
+scoreboard and its110 already indexed ecbench sessions, then add the parent
+campaign's9 and this follow-up's6 sessions. No new verdict is derived for
+incoming sessions. Historical scientific source arrays are pinned to that exact
+baseline; catalog additions preserve its old entries and receive the unchanged
+native cover-certificate check. The only conflicts were the benchmark index and
+generated browser view; no frozen session, ledger or claim conflicted. The
+existing catalog prose renderer only lays out the native-generated document and
+diagnostic fragment.

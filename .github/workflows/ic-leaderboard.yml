@@ -17,6 +17,8 @@ on:
   pull_request:
     paths:
       - 'scripts/build_ic_leaderboard.py'
+      - 'tools/render_ic_dashboard.mjs'
+      - 'docs/ic/ecbench-diagnostics.fragment.html'
       - 'examples/ecbench_open_questions_publish.rs'
       - 'examples/ecbench_leads*.rs'
       - 'research/ecbench_leads_20261015/**'
@@ -68,6 +70,8 @@ on:
     branches: [main]
     paths:
       - 'scripts/build_ic_leaderboard.py'
+      - 'tools/render_ic_dashboard.mjs'
+      - 'docs/ic/ecbench-diagnostics.fragment.html'
       - 'examples/ecbench_open_questions_publish.rs'
       - 'examples/ecbench_leads*.rs'
       - 'research/ecbench_leads_20261015/**'
@@ -132,6 +136,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -142,14 +149,14 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.98.0
       - name: Native campaign metadata and unchanged historical inputs
         run: |
-          git fetch --no-tags --depth=1 origin f9011e5375155bd9ef7839abe4eea12718e4b401 fd8bcacf4cc097cc0dcb55ba068ad94a3d3202ae
+          git fetch --no-tags --depth=1 origin a80b15bbc5c1ea4f2db2b294a9bcddc31f06fdd7
           cargo run --release --locked --manifest-path research/ecbench_open_questions_20261014/native-publish/Cargo.toml -- --historical-inputs
           cargo run --release --locked --manifest-path research/ecbench_open_questions_20261014/native-publish/Cargo.toml -- --check
       - name: Historical leaderboard/browser generators still validate their frozen baseline
         run: |
           set -euo pipefail
           historical_dir=$(mktemp -d)
-          git worktree add --detach "$historical_dir" f9011e5375155bd9ef7839abe4eea12718e4b401
+          git worktree add --detach "$historical_dir" a80b15bbc5c1ea4f2db2b294a9bcddc31f06fdd7
           cd "$historical_dir"
           python3 scripts/build_ic_leaderboard.py --check
           python3 scripts/build_lab_browser.py --check

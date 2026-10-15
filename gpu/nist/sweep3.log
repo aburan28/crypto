@@ -1,0 +1,114 @@
+✓ Initialized. View run at 
+https://modal.com/apps/a-buran28/main/ap-OrWzdtzdDHVGuTaOuTh7xV
+Building image im-HKDgCJjn2ATTvbekmI30qU
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 795.19ms
+
+Built image im-HKDgCJjn2ATTvbekmI30qU in 3.29s
+
+
+Building image im-6tb4GeMeLzwxnrodNDfxiL
+
+=> Step 0: FROM base
+
+=> Step 1: RUN cd /root/nist && make test
+g++ -O3 -std=c++17 -Wall -Wextra -Wno-unknown-pragmas -o test_cpu test_cpu.cpp
+test_cpu.cpp: In function 'AP addref(AP, AP, const boost::multiprecision::cpp_int&, const boost::multiprecision::cpp_int&)':
+test_cpu.cpp:36:2: warning: this 'if' clause does not guard... [-Wmisleading-indentation]
+   36 |  if(A.inf)return B;if(B.inf)return A;
+      |  ^~
+test_cpu.cpp:36:20: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the 'if'
+   36 |  if(A.inf)return B;if(B.inf)return A;
+      |                    ^~
+g++ -O3 -std=c++17 -Wall -Wextra -Wno-unknown-pragmas -o test_rho test_rho.cpp
+./test_cpu
+P-256 Montgomery: 20000 random field pairs passed
+P-384 Montgomery: 20000 random field pairs passed
+P-256 Solinas: 20000 random field pairs passed
+P-384 Solinas: 20000 random field pairs passed
+P-256 point: Jacobian double + mixed add passed
+P-384 point: Jacobian double + mixed add passed
+ALL PASSED
+./test_rho
+P-256: inversion + batch inverse (a*inv(a)=1) passed
+P-384: inversion + batch inverse (a*inv(a)=1) passed
+P-256: group laws (identity, inverse, assoc, distrib) passed
+P-384: group laws (identity, inverse, assoc, distrib) passed
+P-256: negation-map fold is a class function
+P-384: negation-map fold is a class function
+P-256: single-step walk ran 200 deterministic steps
+P-384: single-step walk ran 200 deterministic steps
+toy curve: nG=O and kG=Q verified
+batched stepper: 4453 DPs over 4000 iters, all valid abscissae
+batch step W-variant equivalence: 5/5 identical
+batch_inv_w vs batch_inv at W=2: 2000/2000 identical
+batch_inv_w vs batch_inv at W=4: 2000/2000 identical
+batch_inv_w vs batch_inv at W=8: 2000/2000 identical
+batch_inv_w vs batch_inv at W=16: 2000/2000 identical
+batch_inv_w vs batch_inv at W=32: 2000/2000 identical
+toy solve (fold 2): k=185340 after 2834 steps
+toy solve (fold 1): k=185340 after 5227 steps
+ALL PASSED
+Saving image...
+Image saved, took 444.66ms
+
+Built image im-6tb4GeMeLzwxnrodNDfxiL in 16.92s
+
+
+✓ Created objects.
+├── 🔨 Created mount /Volumes/SSD990-2/crypto/gpu/nist/modal_app.py
+├── 🔨 Created mount /Volumes/SSD990-2/crypto/gpu/nist
+├── 🔨 Created function validate.
+├── 🔨 Created function sass.
+├── 🔨 Created function run_ptx.
+├── 🔨 Created function sweep_rho.
+├── 🔨 Created function sweep_rho2.
+├── 🔨 Created function sweep_rho3.
+└── 🔨 Created function tune.
+shared 0 k_rho: [('_Z5k_rhoI7EcCurveI9NistFieldI7P384ModE7AMinus3IS3_EELi8EEv7rho_ctxIT_Ei', '204', '1360'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P384ModE7AMinus3IS3_EELi64EEv7rho_ctxIT_Ei', '255', '6800'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P384ModE7AMinus3IS3_EELi32EEv7rho_ctxIT_Ei', '255', '3456'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P384ModE7AMinus3IS3_EELi16EEv7rho_ctxIT_Ei', '255', '1856'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P384ModE7AMinus3IS3_EELi4EEv7rho_ctxIT_Ei', '198', '1136'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P384ModE7AMinus3IS3_EELi2EEv7rho_ctxIT_Ei', '198', '1024'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P256ModE7AMinus3IS3_EELi8EEv7rho_ctxIT_Ei', '116', '928'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P256ModE7AMinus3IS3_EELi64EEv7rho_ctxIT_Ei', '255', '4368'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P256ModE7AMinus3IS3_EELi32EEv7rho_ctxIT_Ei', '255', '2064'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P256ModE7AMinus3IS3_EELi16EEv7rho_ctxIT_Ei', '180', '1248'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P256ModE7AMinus3IS3_EELi4EEv7rho_ctxIT_Ei', '116', '768'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P256ModE7AMinus3IS3_EELi2EEv7rho_ctxIT_Ei', '92', '688')]
+GPU NVIDIA RTX PRO 6000 Blackwell Server Edition cc 12.0 SMs=188 regs/SM=65536 NIST_PTX=1
+P-256 rho: walks=6160384 threads/blk=128 blocks=3008 W=16  1.328 Gstep/s  (3063 DPs, dp_bits=24)
+P-384 rho: walks=6160384 threads/blk=128 blocks=3008 W=16  0.412 Gstep/s  (2998 DPs, dp_bits=24)
+GPU NVIDIA RTX PRO 6000 Blackwell Server Edition cc 12.0 SMs=188 regs/SM=65536 NIST_PTX=1
+P-256 rho: walks=12320768 threads/blk=128 blocks=3008 W=32  1.605 Gstep/s  (6094 DPs, dp_bits=24)
+P-384 rho: walks=12320768 threads/blk=128 blocks=3008 W=32  0.539 Gstep/s  (5966 DPs, dp_bits=24)
+GPU NVIDIA RTX PRO 6000 Blackwell Server Edition cc 12.0 SMs=188 regs/SM=65536 NIST_PTX=1
+P-256 rho: walks=24641536 threads/blk=128 blocks=3008 W=64  1.846 Gstep/s  (12154 DPs, dp_bits=24)
+P-384 rho: walks=24641536 threads/blk=128 blocks=3008 W=64  0.608 Gstep/s  (12000 DPs, dp_bits=24)
+GPU NVIDIA RTX PRO 6000 Blackwell Server Edition cc 12.0 SMs=188 regs/SM=65536 NIST_PTX=1
+P-256 rho: walks=12320768 threads/blk=256 blocks=3008 W=16  1.347 Gstep/s  (6094 DPs, dp_bits=24)
+P-384 rho: walks=12320768 threads/blk=256 blocks=3008 W=16  0.415 Gstep/s  (5966 DPs, dp_bits=24)
+GPU NVIDIA RTX PRO 6000 Blackwell Server Edition cc 12.0 SMs=188 regs/SM=65536 NIST_PTX=1
+P-256 rho: walks=24641536 threads/blk=256 blocks=3008 W=32  1.637 Gstep/s  (12154 DPs, dp_bits=24)
+P-384 rho: walks=24641536 threads/blk=256 blocks=3008 W=32  0.548 Gstep/s  (12000 DPs, dp_bits=24)
+GPU NVIDIA RTX PRO 6000 Blackwell Server Edition cc 12.0 SMs=188 regs/SM=65536 NIST_PTX=1
+P-256 rho: walks=49283072 threads/blk=256 blocks=3008 W=64  1.883 Gstep/s  (24115 DPs, dp_bits=24)
+P-384 rho: walks=49283072 threads/blk=256 blocks=3008 W=64  0.626 Gstep/s  (23922 DPs, dp_bits=24)
+shared 1 k_rho: [('_Z5k_rhoI7EcCurveI9NistFieldI7P384ModE7AMinus3IS3_EELi8EEv7rho_ctxIT_Ei', '176', '1688'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P384ModE7AMinus3IS3_EELi64EEv7rho_ctxIT_Ei', '255', '7136'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P384ModE7AMinus3IS3_EELi32EEv7rho_ctxIT_Ei', '255', '3800'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P384ModE7AMinus3IS3_EELi16EEv7rho_ctxIT_Ei', '255', '2248'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P384ModE7AMinus3IS3_EELi4EEv7rho_ctxIT_Ei', '176', '1464'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P384ModE7AMinus3IS3_EELi2EEv7rho_ctxIT_Ei', '154', '1352'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P256ModE7AMinus3IS3_EELi8EEv7rho_ctxIT_Ei', '148', '1192'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P256ModE7AMinus3IS3_EELi64EEv7rho_ctxIT_Ei', '255', '4656'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P256ModE7AMinus3IS3_EELi32EEv7rho_ctxIT_Ei', '255', '2352'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P256ModE7AMinus3IS3_EELi16EEv7rho_ctxIT_Ei', '184', '1512'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P256ModE7AMinus3IS3_EELi4EEv7rho_ctxIT_Ei', '138', '1032'), ('_Z5k_rhoI7EcCurveI9NistFieldI7P256ModE7AMinus3IS3_EELi2EEv7rho_ctxIT_Ei', '142', '952')]
+GPU NVIDIA RTX PRO 6000 Blackwell Server Edition cc 12.0 SMs=188 regs/SM=65536 NIST_PTX=1
+P-256 rho: walks=6160384 threads/blk=128 blocks=3008 W=16  1.292 Gstep/s  (3063 DPs, dp_bits=24)
+P-384 rho: walks=6160384 threads/blk=128 blocks=3008 W=16  0.401 Gstep/s  (2998 DPs, dp_bits=24)
+GPU NVIDIA RTX PRO 6000 Blackwell Server Edition cc 12.0 SMs=188 regs/SM=65536 NIST_PTX=1
+P-256 rho: walks=12320768 threads/blk=128 blocks=3008 W=32  1.586 Gstep/s  (6094 DPs, dp_bits=24)
+P-384 rho: walks=12320768 threads/blk=128 blocks=3008 W=32  0.536 Gstep/s  (5966 DPs, dp_bits=24)
+GPU NVIDIA RTX PRO 6000 Blackwell Server Edition cc 12.0 SMs=188 regs/SM=65536 NIST_PTX=1
+P-256 rho: walks=24641536 threads/blk=128 blocks=3008 W=64  1.824 Gstep/s  (12154 DPs, dp_bits=24)
+P-384 rho: walks=24641536 threads/blk=128 blocks=3008 W=64  0.630 Gstep/s  (12000 DPs, dp_bits=24)
+GPU NVIDIA RTX PRO 6000 Blackwell Server Edition cc 12.0 SMs=188 regs/SM=65536 NIST_PTX=1
+P-256 rho: walks=12320768 threads/blk=256 blocks=3008 W=16  1.318 Gstep/s  (6094 DPs, dp_bits=24)
+P-384 rho: walks=12320768 threads/blk=256 blocks=3008 W=16  0.411 Gstep/s  (5966 DPs, dp_bits=24)
+GPU NVIDIA RTX PRO 6000 Blackwell Server Edition cc 12.0 SMs=188 regs/SM=65536 NIST_PTX=1
+P-256 rho: walks=24641536 threads/blk=256 blocks=3008 W=32  1.622 Gstep/s  (12154 DPs, dp_bits=24)
+P-384 rho: walks=24641536 threads/blk=256 blocks=3008 W=32  0.546 Gstep/s  (12000 DPs, dp_bits=24)
+Task's current input(s) ["in-01M4WM98BRZV50BF5TQRPAB7M6:1791962161529-0"] cancelled because: Task's current input in-01M4WM98BRZV50BF5TQRPAB7M6:1791962161529-0 hit its timeout of 14400s
+Stopping app - uncaught exception raised locally: FunctionTimeoutError("Task's current input in-01M4WM98BRZV50BF5TQRPAB7M6:1791962161529-0 hit its timeout of 14400s").
+[modal-client] 2026-10-14T11:16:05+0000 Received a cancellation signal while processing input ('in-01M4WM98BRZV50BF5TQRPAB7M6:1791962161529-0',)
+[modal-client] 2026-10-14T11:16:05+0000 Successfully canceled input ('in-01M4WM98BRZV50BF5TQRPAB7M6:1791962161529-0',)
+╭─ Error ──────────────────────────────────────────────────────────────────────╮
+│ Task's current input in-01M4WM98BRZV50BF5TQRPAB7M6:1791962161529-0 hit its   │
+│ timeout of 14400s                                                            │
+╰──────────────────────────────────────────────────────────────────────────────╯

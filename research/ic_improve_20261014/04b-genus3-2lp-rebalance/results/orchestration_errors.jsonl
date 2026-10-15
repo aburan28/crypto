@@ -1,0 +1,2 @@
+{"note":"operator error, not a test job: the first test launch at 2026-10-15T03:40:59Z used an empty job list (a failed awk sort), so xargs invoked the tool once with no arguments and it exited 2 with its usage message. The job list was rebuilt (jobs/test_all.txt, 180 jobs) and launched after the rho runs. Moved here from results/test/failures.jsonl so that file holds only test-job failures."}
+{"job":"","args":"","exit":2,"reason":"exit 2","start":"2026-10-15T03:40:59Z","wall_s":.009870480}
