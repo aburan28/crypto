@@ -1,0 +1,199 @@
+{
+  "schema": "ecbench.full_prices/v1",
+  "what": "Ratios to one affine group addition of every native unit the *_full ecbench methods price (src/cryptanalysis/ecbench/full_price.rs). Read only by those methods; docs/ic/calibration.json and every method that reads it are unchanged.",
+  "unit": "ns per native unit / ns per affine addition on the same curve, dimensionless",
+  "method": "ecbench price-units --reps 15: median of 15 passes per unit per curve, one process, one host. lookup is a probe of the pipeline FastMap holding 2^20 entries (half hit), priced at or above any table in the panel; field_mul/field_sqr/field_inv are chained loops on the instance field; the rest are ic_boundary::calibrate_binary_instance.",
+  "source": "research/ecbench_frobenius_orbit_vs_rho_20261014/pricing/price-units.json",
+  "source_sha256": "df85b17c59041c5770693e62c213b4f52f50218eaec85a71bf6506d139d2f017",
+  "host": {
+    "arch": "x86_64",
+    "cpu_model": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+    "cpu_signature": "6/85/7",
+    "cpu_vendor": "GenuineIntel",
+    "features": [
+      "adx",
+      "aes",
+      "avx",
+      "avx2",
+      "avx512bw",
+      "avx512dq",
+      "avx512f",
+      "avx512vl",
+      "bmi1",
+      "bmi2",
+      "fma",
+      "pclmulqdq",
+      "popcnt",
+      "sse4.2"
+    ],
+    "flags_sha256": "e28bebf6d58da864dd355505bf305dd3bd502a1e851ac057e69aedb2dcc47735",
+    "kernel_release": "6.18.44-fc-v114",
+    "logical_cpus": 4,
+    "mem_total_kib": 16479424,
+    "microcode": "0x1",
+    "numa_nodes": 1,
+    "os": "linux",
+    "packages": 1,
+    "perf_levels": [],
+    "physical_cores": 4,
+    "rustc_vv": "rustc 1.97.0 (2d8144b78 2026-07-07)\nbinary: rustc\ncommit-hash: 2d8144b7880597b6e6d3dfd63a9a9efae3f533d3\ncommit-date: 2026-07-07\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.0\nLLVM version: 22.1.6",
+    "topology": {
+      "cpus": [
+        {
+          "core_id": 0,
+          "cpu": 0,
+          "node": 0,
+          "package": 0,
+          "siblings": [
+            0
+          ]
+        },
+        {
+          "core_id": 1,
+          "cpu": 1,
+          "node": 0,
+          "package": 0,
+          "siblings": [
+            1
+          ]
+        },
+        {
+          "core_id": 2,
+          "cpu": 2,
+          "node": 0,
+          "package": 0,
+          "siblings": [
+            2
+          ]
+        },
+        {
+          "core_id": 3,
+          "cpu": 3,
+          "node": 0,
+          "package": 0,
+          "siblings": [
+            3
+          ]
+        }
+      ],
+      "nodes": [
+        {
+          "cpus": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "distances": [
+            10
+          ],
+          "mem_total_kib": 10059512,
+          "node": 0
+        }
+      ]
+    },
+    "transparent_hugepages": "always [madvise] never",
+    "virtualization": {
+      "cpu_flag": "hypervisor",
+      "systemd_detect_virt_vm": "kvm"
+    }
+  },
+  "instances": {
+    "icv1-f2m13-t181-515ee569": {
+      "as_solve": 0.108433,
+      "canon": 0.126044,
+      "double": 0.995292,
+      "field_inv": 0.788434,
+      "field_mul": 0.053989,
+      "field_sqr": 0.055418,
+      "frobenius": 0.056094,
+      "lookup": 0.134625,
+      "row_op": 0.034072,
+      "word_xor": 0.003623
+    },
+    "icv1-f2m17-tm101-00378d4e": {
+      "as_solve": 0.137167,
+      "canon": 0.111254,
+      "double": 0.995352,
+      "field_inv": 0.81061,
+      "field_mul": 0.045714,
+      "field_sqr": 0.046744,
+      "frobenius": 0.047709,
+      "lookup": 0.114936,
+      "row_op": 0.028808,
+      "word_xor": 0.003005
+    },
+    "icv1-f2m19-t797-b6cf2467": {
+      "as_solve": 0.14445,
+      "canon": 0.10051,
+      "double": 0.981856,
+      "field_inv": 0.823345,
+      "field_mul": 0.040567,
+      "field_sqr": 0.041608,
+      "frobenius": 0.042473,
+      "lookup": 0.101926,
+      "row_op": 0.025639,
+      "word_xor": 0.002678
+    },
+    "icv1-f2m23-t5197-69e76b73": {
+      "as_solve": 0.161155,
+      "canon": 0.088902,
+      "double": 0.991836,
+      "field_inv": 0.850654,
+      "field_mul": 0.034119,
+      "field_sqr": 0.035104,
+      "frobenius": 0.035095,
+      "lookup": 0.089178,
+      "row_op": 0.021923,
+      "word_xor": 0.002337
+    },
+    "icv1-f2m29-tm40309-30c52b96": {
+      "as_solve": 0.179122,
+      "canon": 0.083266,
+      "double": 0.988662,
+      "field_inv": 0.873154,
+      "field_mul": 0.02914,
+      "field_sqr": 0.030269,
+      "frobenius": 0.030463,
+      "lookup": 0.073643,
+      "row_op": 0.018629,
+      "word_xor": 0.001983
+    },
+    "icv1-f2m31-tm90707-c95f16f5": {
+      "as_solve": 0.181424,
+      "canon": 0.078635,
+      "double": 1.002235,
+      "field_inv": 0.886137,
+      "field_mul": 0.027702,
+      "field_sqr": 0.028436,
+      "frobenius": 0.028721,
+      "lookup": 0.066405,
+      "row_op": 0.017163,
+      "word_xor": 0.001842
+    },
+    "icv1-f2m37-tm534059-32aad96b": {
+      "as_solve": 0.195254,
+      "canon": 0.07322,
+      "double": 0.996544,
+      "field_inv": 0.894603,
+      "field_mul": 0.024767,
+      "field_sqr": 0.025637,
+      "frobenius": 0.025575,
+      "lookup": 0.061633,
+      "row_op": 0.029803,
+      "word_xor": 0.001663
+    },
+    "icv1-f2m41-tm2308219-7f48b14a": {
+      "as_solve": 0.201734,
+      "canon": 0.070629,
+      "double": 1.008403,
+      "field_inv": 0.894281,
+      "field_mul": 0.022695,
+      "field_sqr": 0.023417,
+      "frobenius": 0.02362,
+      "lookup": 0.057382,
+      "row_op": 0.033222,
+      "word_xor": 0.00152
+    }
+  }
+}

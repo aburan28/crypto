@@ -1,0 +1,25 @@
+ops (ok): ic-orbit-c2-renew / rho-frob = 3.6639 [2.907, 4.476] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 0.0875 [0.082, 0.091]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 9.80%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-orbit-c2-renew / rho-frob | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m31-tm90707-c95f16f5 | 20.46 | 16 | 3.6639 | [2.9074, 4.4763] | cluster |
+
+| workload | curve | log2 r | rho-frob mean S | ic-orbit-c2-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W19adcb2e4609 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3880 | 1.5452 | 3.9827 |
+| W1c7b6f101460 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.2821 | 1.4181 | 5.0263 |
+| W2528df09abe7 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.5313 | 1.5092 | 2.8408 |
+| W2f63a6523c06 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3967 | 1.3526 | 3.4100 |
+| W34fb71c29b0d | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.2982 | 1.4245 | 4.7767 |
+| W398d9675a96f | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3759 | 1.6700 | 4.4423 |
+| W790cc8c1a87b | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.4072 | 1.5458 | 3.7966 |
+| W809ea26e5219 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3649 | 1.1738 | 3.2172 |
+| W8646f72e5ea4 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.2496 | 1.2296 | 4.9258 |
+| Wa94ef5af8a3c | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.5542 | 1.3997 | 2.5256 |
+| Wad7d4cc5c37d | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.2891 | 1.8573 | 6.4246 |
+| Wae2a4bb7b221 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.4128 | 1.4214 | 3.4434 |
+| Wd6e0e88c542c | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3312 | 1.3871 | 4.1876 |
+| We425437057cc | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.7750 | 1.3199 | 1.7032 |
+| We52edfe2425f | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3006 | 1.5166 | 5.0449 |
+| Wfd99a000a544 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3550 | 1.3551 | 3.8170 |
