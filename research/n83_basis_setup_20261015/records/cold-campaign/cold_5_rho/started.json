@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "/workspace/n83_basis_setup/frozen_binaries/rho",
+    "/workspace/n83_basis_setup/holdout-fixtures/target_05.jsonl",
+    "/workspace/n83_basis_setup/holdout-plan/cold_5_rho.seeds.json",
+    "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/provenance/rho_config.json",
+    "/workspace/n83_basis_setup/cold-campaign/cold_5_rho/answers.jsonl"
+  ],
+  "argv_existing_file_sha256": {
+    "/workspace/n83_basis_setup/holdout-fixtures/target_05.jsonl": "ec1abdaa620aa89dcfef45f4ce5b8ad3861317adcafaa3e8c2cf6b153458ad80",
+    "/workspace/n83_basis_setup/holdout-plan/cold_5_rho.seeds.json": "b1f7f38c895a460499f3d63f2c6eeb57354f0a95a2c9b91cdc019c2f71ee08e7",
+    "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/provenance/rho_config.json": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949"
+  },
+  "arm": "rho",
+  "binary_sha256": "ec4ccd60152ff53c39825898595cf4a23e6cb4afdde38db3b163e8623430ecb6",
+  "cwd": "/workspace/repos/crypto-n83-basis",
+  "environment": {
+    "KIC_RANK_THREADS": "1",
+    "KIC_RHO_THREADS": "1",
+    "KIC_TARGET_THREADS": "1",
+    "KIC_THREADS": "1",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 2100.0
+  },
+  "schema": "n83.process-start/v1",
+  "started_epoch_ms": 1792100861562,
+  "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_05.jsonl",
+  "target_sha256": "ec1abdaa620aa89dcfef45f4ce5b8ad3861317adcafaa3e8c2cf6b153458ad80"
+}

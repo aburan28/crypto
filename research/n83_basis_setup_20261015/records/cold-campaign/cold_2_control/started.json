@@ -1,0 +1,48 @@
+{
+  "argv": [
+    "/workspace/n83_basis_setup/frozen_binaries/ic",
+    "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+    "/workspace/n83_basis_setup/holdout-fixtures/target_02.jsonl",
+    "107",
+    "/workspace/n83_basis_setup/cold-campaign/cold_2_control/answers.jsonl"
+  ],
+  "argv_existing_file_sha256": {
+    "/workspace/n83_basis_setup/holdout-fixtures/target_02.jsonl": "749efff84769d93d02a34aec7d58aa8e9512788352d178491ef70873dc53d685",
+    "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl": "0d290b14a350db6271c9a49f0cd6ba246edd8c9bc6754387ad1ceebf08ec0c09"
+  },
+  "arm": "ic",
+  "binary_sha256": "5a6e39c34f59a8eb3186d2e43bac17b4c9d3e83b4a94bbeda24fc2b0b0def0a1",
+  "cwd": "/workspace/repos/crypto-n83-basis",
+  "environment": {
+    "KIC_DUMP_BASE": "/workspace/n83_basis_setup/cold-campaign/cold_2_control/base.jsonl",
+    "KIC_DUMP_RANK": "/workspace/n83_basis_setup/cold-campaign/cold_2_control/rank.jsonl",
+    "KIC_PACKED_ROOT_TABLE": "0",
+    "KIC_PACKED_ROOT_TABLE_DENSE": "0",
+    "KIC_RANK_THREADS": "1",
+    "KIC_RHO_THREADS": "1",
+    "KIC_TARGET_THREADS": "1",
+    "KIC_THREADS": "1",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 2100.0
+  },
+  "schema": "n83.process-start/v1",
+  "started_epoch_ms": 1792093458342,
+  "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_02.jsonl",
+  "target_sha256": "749efff84769d93d02a34aec7d58aa8e9512788352d178491ef70873dc53d685"
+}
