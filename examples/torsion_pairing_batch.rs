@@ -1092,15 +1092,46 @@ fn run_batch(input: Input, cell: usize, round: u64, batch_path: &str, frozen_pat
         let target_wall = beta_wall + dlog_wall_ns + verify_wall_ns;
         cumulative_pairing_cpu += target_cpu;
         cumulative_pairing_wall += target_wall;
-        let seed = 0x4241_5443_4800_1000u64 + 256 * cell as u64 + 64 * round + index as u64;
-        let rho_wall = Instant::now();
-        let rho_cpu = thread_cpu_ns();
-        take_field_counters();
-        let rho = rho_reference_negation(&curve, input.g, q, input.r, seed, 1_000_000);
-        let rho_fp = take_field_counters();
-        let rho_cpu_ns = thread_cpu_ns() - rho_cpu;
-        let rho_wall_ns = rho_wall.elapsed().as_nanos() as u64;
-        assert!(rho.verified && rho.recovered == Some(scalar));
+        let seed_base = 0x4241_5443_4800_1000u64 + 256 * cell as u64 + 64 * round + index as u64;
+        let mut rho_attempts = Vec::new();
+        let mut rho_cpu_ns = 0u64;
+        let mut rho_wall_ns = 0u64;
+        let mut rho_fp_muls = 0u64;
+        let mut rho_fp_invs = 0u64;
+        let mut final_seed = seed_base;
+        let mut final_rho = None;
+        for retry in 0..16u64 {
+            let seed = seed_base.wrapping_add(retry * 0x01_00_00_00);
+            let rho_wall = Instant::now();
+            let rho_cpu = thread_cpu_ns();
+            take_field_counters();
+            let rho = rho_reference_negation(&curve, input.g, q, input.r, seed, 1_000_000);
+            let rho_fp = take_field_counters();
+            let attempt_cpu = thread_cpu_ns() - rho_cpu;
+            let attempt_wall = rho_wall.elapsed().as_nanos() as u64;
+            rho_cpu_ns += attempt_cpu;
+            rho_wall_ns += attempt_wall;
+            rho_fp_muls += rho_fp.0;
+            rho_fp_invs += rho_fp.1;
+            rho_attempts.push(json!({"retry":retry,"seed":seed,"rho":rho,
+                "cpu_ns":attempt_cpu,"wall_ns":attempt_wall,"fp_muls":rho_fp.0,
+                "fp_invs":rho_fp.1}));
+            if rho.verified && rho.recovered == Some(scalar) {
+                final_seed = seed;
+                final_rho = Some(rho);
+                break;
+            }
+        }
+        if final_rho.is_none() {
+            println!(
+                "{}",
+                json!({"schema":"torsion_pairing_batch_rho_exhausted/v2",
+                "cell":cell,"round":round,"index":index,"target":q,"recovered":scalar,
+                "rho_attempts":rho_attempts,"rho_cpu_ns":rho_cpu_ns})
+            );
+            panic!("16 charged rho attempts exhausted");
+        }
+        let rho = final_rho.unwrap();
         cumulative_rho_cpu += rho_cpu_ns;
         cumulative_rho_wall += rho_wall_ns;
         let all_in_pairing_cpu = thread_cpu_ns() - global_cpu - cumulative_rho_cpu;
@@ -1109,7 +1140,7 @@ fn run_batch(input: Input, cell: usize, round: u64, batch_path: &str, frozen_pat
         assert!(peak_rss_bytes() <= 512 * 1024 * 1024);
         println!(
             "{}",
-            json!({"schema":"torsion_pairing_batch_target/v1",
+            json!({"schema":"torsion_pairing_batch_target/v2",
             "cell":cell,"round":round,"index":index,"n":index+1,"p":input.p,"r":input.r,
             "target":q,"recovered":scalar,"beta_charge":beta_charge,
             "dlog_charge":dlog_charge,"source_verify_ops":verify_ops,
@@ -1119,8 +1150,9 @@ fn run_batch(input: Input, cell: usize, round: u64, batch_path: &str, frozen_pat
             "cumulative_pairing_wall_ns_estimate":cumulative_pairing_wall,
             "all_in_pairing_cpu_ns":all_in_pairing_cpu,
             "all_in_pairing_wall_ns_l0":all_in_pairing_wall,
-            "rho":rho,"rho_seed":seed,"rho_cpu_ns":rho_cpu_ns,
-            "rho_wall_ns":rho_wall_ns,"rho_fp_muls":rho_fp.0,"rho_fp_invs":rho_fp.1,
+            "rho":rho,"rho_seed":final_seed,"rho_attempts":rho_attempts,
+            "rho_cpu_ns":rho_cpu_ns,"rho_wall_ns":rho_wall_ns,
+            "rho_fp_muls":rho_fp_muls,"rho_fp_invs":rho_fp_invs,
             "cumulative_rho_cpu_ns":cumulative_rho_cpu,
             "cumulative_rho_wall_ns":cumulative_rho_wall,
             "extension_cumulative":k.counts(),"peak_rss_raw":rss,"peak_rss_unit":unit})
@@ -1160,7 +1192,7 @@ fn verify_batch(
     let mut rounds = [0u64; 3];
     for line in fs::read_to_string(records_path).unwrap().lines() {
         let v: Value = serde_json::from_str(line).unwrap();
-        if v["schema"] != "torsion_pairing_batch_target/v1" {
+        if v["schema"] != "torsion_pairing_batch_target/v2" {
             continue;
         }
         assert_eq!(v["cell"].as_u64(), Some(cell as u64));
