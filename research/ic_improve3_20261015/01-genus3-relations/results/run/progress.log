@@ -335,3 +335,6 @@ JOB 1630s --bits 22 --curve 0 --kappa 1.0819 --cx 8 --streams r2 --las lpsgebw2@
 {"bits":22,"curve":1,"kappa":1.0819,"arm":"r2:lpsgebw2@8","correct":true,"cost":177770106036,"la_cost":29843124185,"cols":31643,"nnz":501865,"checks":1,"la_wall":193.0,"wall":1643.8}
 {"bits":22,"curve":1,"arm":"r2:lpsgebw2@8+R1","cost":99588564648,"rel_cost":69745440463}
 JOB 1660s --bits 22 --curve 1 --kappa 1.0819 --cx 8 --streams r2 --las lpsgebw2@8 --out results/run/b22_c1_r2.jsonl
+{"bits":22,"curve":2,"kappa":1.0819,"arm":"r2:lpsgebw2@8","correct":true,"cost":177943885432,"la_cost":29988762381,"cols":31729,"nnz":502877,"checks":1,"la_wall":186.7,"wall":1604.4}
+{"bits":22,"curve":2,"arm":"r2:lpsgebw2@8+R1","cost":99748097330,"rel_cost":69759334949}
+JOB 1611s --bits 22 --curve 2 --kappa 1.0819 --cx 8 --streams r2 --las lpsgebw2@8 --out results/run/b22_c2_r2.jsonl
