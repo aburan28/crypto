@@ -34,6 +34,13 @@
 //! `tower stop in step` line. `--targets 1` measures target 1 alone: every
 //! target is still drawn, so it is the system a full run gives it.
 //!
+//! `--kinds dickson-torus` builds the Dickson tower in its torus case
+//! (`2^t | p + 1`, `u` and `μ_{2^t}` in the norm-1 torus of `F_{p²}`; note
+//! §2.1), checked by `check_torus` before anything is measured.
+//! `--null-chain` runs the null control at `m ≥ 3` as well, with every `S₃`
+//! link of the chain given random coefficients on its own support
+//! (`research/pkm_dickson_torus_20261015/`).
+//!
 //! The committed runs, their exact flags and the scripts that tabulate and
 //! cross-check them are in `research/pkm_tower_pilot_20260924/` (the pilot,
 //! `f4_fp`) and `research/pkm_tower_round2_20260925/` (round 2,
@@ -229,6 +236,9 @@ enum Kind {
     Kummer,
     Dickson,
     Isogeny,
+    /// The Dickson tower in its torus case (`2^t | p + 1`). Last, so the
+    /// cell seeds of the other kinds (`kind as u64`) are unchanged.
+    DicksonTorus,
 }
 
 impl Kind {
@@ -237,6 +247,7 @@ impl Kind {
             Kind::Kummer => "kummer",
             Kind::Dickson => "dickson",
             Kind::Isogeny => "isogeny",
+            Kind::DicksonTorus => "dickson-torus",
         }
     }
 }
@@ -460,6 +471,152 @@ fn dickson(p: u64, t: usize, rng: &mut StdRng) -> Tower {
     }
 }
 
+// ── The Dickson torus case (note §2.1, `2^t | p + 1`) ───────────────
+//
+// `F_{p²} = F_p(i)` with `i² = −1`, which is a field because `p ≡ 3 mod 4`
+// whenever `4 | p + 1`. An element is `(re, im)`. The norm-1 torus
+// `T = {w : w·w̄ = 1}` is cyclic of order `p + 1`; on it `w̄ = w^p = w^{−1}`,
+// so `w + w^{−1} = 2·re(w)` lies in `F_p`.
+
+type Fp2 = (u64, u64);
+
+fn fp2_mul(x: Fp2, y: Fp2, p: u64) -> Fp2 {
+    (
+        subm(mulm(x.0, y.0, p), mulm(x.1, y.1, p), p),
+        addm(mulm(x.0, y.1, p), mulm(x.1, y.0, p), p),
+    )
+}
+
+fn fp2_pow(mut x: Fp2, mut e: u64, p: u64) -> Fp2 {
+    let mut r = (1u64, 0u64);
+    while e > 0 {
+        if e & 1 == 1 {
+            r = fp2_mul(r, x, p);
+        }
+        x = fp2_mul(x, x, p);
+        e >>= 1;
+    }
+    r
+}
+
+/// `x^{−1} = x̄ / N(x)`, for any non-zero `x` (not only torus elements).
+fn fp2_inv(x: Fp2, p: u64) -> Fp2 {
+    let n = addm(mulm(x.0, x.0, p), mulm(x.1, x.1, p), p);
+    let ni = invm(n, p);
+    (mulm(x.0, ni, p), mulm(subm(0, x.1, p), ni, p))
+}
+
+/// A random element of the torus `T`: `z^{p−1} = z̄/z` for a random
+/// `z ∈ F_{p²}^*`.
+fn torus_element(p: u64, rng: &mut StdRng) -> Fp2 {
+    loop {
+        let z = (rng.gen_range(0..p), rng.gen_range(0..p));
+        if z == (0, 0) {
+            continue;
+        }
+        let w = fp2_pow(z, p - 1, p);
+        debug_assert_eq!(fp2_mul(w, fp2_pow(w, p, p), p), (1, 0));
+        return w;
+    }
+}
+
+/// The checks of note §2.1 for a torus tower, beyond [`Tower::check`]
+/// (which checks `|V| = 2^t`, distinctness and every level equation):
+/// - `V ⊂ F_p`: `w + w^{−1}` has no `i`-part for every `w ∈ u·μ_{2^t}`;
+/// - the case is the torus one: `y² − 4` is a non-residue for every
+///   `y ∈ V` (so `X² − yX + 1` has its roots in `T \ F_p`);
+/// - the tower is unramified: `y_j ≠ 0` at every level on `V` (`c` avoids
+///   the critical value `−2` along the chain), and `c ≠ ±2`.
+///
+/// Panics otherwise.
+fn check_torus(tower: &Tower, u: Fp2, zeta: Fp2, p: u64) {
+    let t = tower.t;
+    assert_eq!(p % 4, 3, "the torus case needs p ≡ 3 mod 4");
+    assert!(
+        (p + 1).is_multiple_of(1u64 << t),
+        "2^{t} does not divide p + 1"
+    );
+    // ζ has exact order 2^t in T; u is in T and u² ∉ μ_{2^t}.
+    assert_eq!(fp2_pow(zeta, 1u64 << t, p), (1, 0), "ζ^(2^t) ≠ 1");
+    assert_eq!(
+        fp2_pow(zeta, 1u64 << (t - 1), p),
+        (p - 1, 0),
+        "ζ does not have exact order 2^t"
+    );
+    assert_eq!(fp2_pow(u, p + 1, p), (1, 0), "u is not in the torus");
+    assert_ne!(u.1, 0, "u lies in F_p: the split case, not the torus");
+    assert_ne!(fp2_pow(u, 1u64 << (t + 1), p), (1, 0), "u² ∈ μ_{{2^t}}");
+    let mut w = u;
+    for (k, &x) in tower.v.iter().enumerate() {
+        // By the general inverse, not by the conjugate the builder used.
+        let wi = fp2_inv(w, p);
+        let sum = (addm(w.0, wi.0, p), addm(w.1, wi.1, p));
+        assert_eq!(sum.1, 0, "w + 1/w ∉ F_p at k = {k}");
+        assert_eq!(sum.0, x, "V[{k}] is not w + 1/w");
+        let disc = subm(mulm(x, x, p), 4, p);
+        assert_eq!(
+            powm(disc, (p - 1) / 2, p),
+            p - 1,
+            "y² − 4 is not a non-residue at V[{k}]: not the torus case"
+        );
+        let y = tower.values(x, p);
+        assert!(y.iter().all(|&yj| yj != 0), "a level is ramified at V[{k}]");
+        w = fp2_mul(w, zeta, p);
+    }
+    assert!(tower.c != 2 && tower.c != p - 2, "c = ±2");
+}
+
+/// The Dickson tower in its torus case: `V = {w + w^{−1} : w ∈ u·μ_{2^t}}`
+/// with `u` and `μ_{2^t}` in the norm-1 torus `T ⊂ F_{p²}^*`, which needs
+/// `2^t | p + 1`. The step is `y ↦ y² − 2` and `c = u^{2^t} + u^{−2^t}`,
+/// as in the split case: only the numbers change, never the equations.
+fn dickson_torus(p: u64, t: usize, rng: &mut StdRng) -> Tower {
+    assert!(
+        p % 4 == 3 && (p + 1).is_multiple_of(1u64 << t),
+        "the torus case needs 2^{t} | p + 1 (and p ≡ 3 mod 4)"
+    );
+    // A primitive 2^t-th root of unity in T: h^{(p+1)/2^t} for an h ∈ T
+    // that is not a square in T.
+    let zeta = loop {
+        let h = torus_element(p, rng);
+        if fp2_pow(h, p.div_ceil(2), p) == (p - 1, 0) {
+            break fp2_pow(h, (p + 1) >> t, p);
+        }
+    };
+    loop {
+        let u = torus_element(p, rng);
+        if u.1 == 0 || fp2_pow(u, 1u64 << (t + 1), p) == (1, 0) {
+            continue;
+        }
+        let mut v = Vec::with_capacity(1 << t);
+        let mut w = u;
+        for _ in 0..1u64 << t {
+            // On T, w^{−1} = w̄, so w + w^{−1} = 2·re(w).
+            v.push(addm(w.0, w.0, p));
+            w = fp2_mul(w, zeta, p);
+        }
+        let mut s = v.clone();
+        s.sort_unstable();
+        s.dedup();
+        if s.len() != 1 << t {
+            continue;
+        }
+        let ut = fp2_pow(u, 1u64 << t, p);
+        let c = addm(ut.0, ut.0, p);
+        let tower = Tower {
+            kind: Kind::DicksonTorus,
+            t,
+            v,
+            scale: 1,
+            steps: vec![Step::Dickson; t],
+            c,
+            info: json!({"case": "torus", "u": [u.0, u.1], "zeta": [zeta.0, zeta.1], "c": c}),
+        };
+        check_torus(&tower, u, zeta, p);
+        return tower;
+    }
+}
+
 fn random_point(curve: &PrimeCurve, rng: &mut StdRng) -> PrimePoint {
     loop {
         let x = rng.gen_range(0..curve.p);
@@ -594,6 +751,7 @@ fn build_tower(kind: Kind, p: u64, t: usize, rng: &mut StdRng) -> Tower {
         Kind::Kummer => kummer(p, t, rng),
         Kind::Dickson => dickson(p, t, rng),
         Kind::Isogeny => isogeny(p, t, rng),
+        Kind::DicksonTorus => dickson_torus(p, t, rng),
     };
     tower.check(p);
     tower
@@ -774,17 +932,20 @@ fn system(
     let n = m * t + (m - 2);
     let mut eqs = summation(tower, curve, m, n, target.x_r);
     if control == Control::Null {
-        // S₃'s support, random coefficients, planted zero.
-        assert_eq!(m, 2);
-        let mut f = Pol::zero(n);
-        for e in eqs[0].terms.keys() {
-            f.terms.insert(e.clone(), rng.gen_range(1..p));
+        // S₃'s support, random coefficients, planted zero: at m = 2 the one
+        // S₃, and at m ≥ 3 (`--null-chain`) every S₃ link of the chain, in
+        // order. At m = 2 the draws are those of the pilot's null.
+        for eq in eqs.iter_mut() {
+            let mut f = Pol::zero(n);
+            for e in eq.terms.keys() {
+                f.terms.insert(e.clone(), rng.gen_range(1..p));
+            }
+            if let Some(sol) = &target.solution {
+                let c = f.eval(sol, p);
+                f = f.sub(&Pol::constant(n, c, p), p);
+            }
+            *eq = f;
         }
-        if let Some(sol) = &target.solution {
-            let c = f.eval(sol, p);
-            f = f.sub(&Pol::constant(n, c, p), p);
-        }
-        eqs[0] = f;
     }
     let towers_from = eqs.len();
     for i in 0..m {
@@ -1220,6 +1381,10 @@ struct Args {
     /// large `N` that tail, not the solve, exhausts memory.
     planted_max_t: usize,
     random: usize,
+    /// `--null-chain`: run the null control at `m ≥ 3` too, with every `S₃`
+    /// link of the chain given random coefficients on its own support (off
+    /// by default, so every committed command line runs what it ran).
+    null_chain: bool,
     budget: u64,
     seed: u64,
     ladder_ts: Vec<usize>,
@@ -1295,6 +1460,7 @@ fn parse_args() -> Args {
         planted: 3,
         planted_max_t: usize::MAX,
         random: 3,
+        null_chain: false,
         budget: 60,
         seed: 0x504B_4D54,
         ladder_ts: vec![4, 6],
@@ -1325,6 +1491,11 @@ fn parse_args() -> Args {
             i += 1;
             continue;
         }
+        if args[i] == "--null-chain" {
+            a.null_chain = true;
+            i += 1;
+            continue;
+        }
         if args[i] == "--no-full-rank-exit" {
             a.full_rank_exit = false;
             i += 1;
@@ -1340,6 +1511,7 @@ fn parse_args() -> Args {
                         "kummer" => Kind::Kummer,
                         "dickson" => Kind::Dickson,
                         "isogeny" => Kind::Isogeny,
+                        "dickson-torus" => Kind::DicksonTorus,
                         other => panic!("unknown kind `{other}`"),
                     })
                     .collect()
@@ -1823,15 +1995,15 @@ fn main() {
                 3 => a.max_t_m3,
                 _ => a.max_t_m4,
             };
-            // The null and naive controls are written for m = 2, and the
-            // naive membership for the Kummer coset only.
+            // The naive control is written for m = 2 and the Kummer coset
+            // only; the null for m = 2, and for every m with `--null-chain`.
             let controls: Vec<Control> = a
                 .controls
                 .iter()
                 .copied()
                 .filter(|c| match c {
                     Control::Tower => true,
-                    Control::Null => m == 2,
+                    Control::Null => m == 2 || a.null_chain,
                     Control::Naive => m == 2 && kind == Kind::Kummer,
                     Control::Ladder => false,
                 })
@@ -1888,5 +2060,105 @@ fn main() {
     eprintln!("{summary}");
     if let Some(f) = sink.file.as_mut() {
         writeln!(f, "{}", json!({ "summary": summary })).expect("write --out");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// `7·2^21 − 1` and `61·2^25 − 1`, the torus primes of
+    /// `research/pkm_dickson_torus_20261015/`.
+    const TORUS_PRIMES: [u64; 2] = [14_680_063, 2_046_820_351];
+
+    #[test]
+    fn torus_tower_has_2t_distinct_values_in_fp() {
+        for &p in &TORUS_PRIMES {
+            for t in 1..=12 {
+                let mut rng = StdRng::seed_from_u64(0x7031 ^ t as u64);
+                // `build_tower` runs `Tower::check`, and `dickson_torus`
+                // runs `check_torus`: both panic on a wrong tower.
+                let tower = build_tower(Kind::DicksonTorus, p, t, &mut rng);
+                assert_eq!(tower.v.len(), 1 << t);
+                let mut s = tower.v.clone();
+                s.sort_unstable();
+                s.dedup();
+                assert_eq!(s.len(), 1 << t, "|V| = 2^t, p = {p}, t = {t}");
+                assert!(s.iter().all(|&x| x < p), "V ⊂ F_p");
+                // Every value climbs the chain to c.
+                for &x in &tower.v {
+                    let y = tower.values(x, p);
+                    assert_eq!(tower.apply(t - 1, y[t - 1], p), tower.c);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn torus_values_are_traces_of_torus_elements() {
+        // Independent of the builder: y ∈ V iff the roots of X² − yX + 1
+        // are a coset element and its inverse in T \ F_p, so y² − 4 is a
+        // non-residue, and D_{2^t}(y) = c.
+        let p = TORUS_PRIMES[0];
+        let t = 8;
+        let mut rng = StdRng::seed_from_u64(5);
+        let tower = build_tower(Kind::DicksonTorus, p, t, &mut rng);
+        for &y in &tower.v {
+            let d = subm(mulm(y, y, p), 4, p);
+            assert_eq!(powm(d, (p - 1) / 2, p), p - 1);
+            let mut z = y;
+            for _ in 0..t {
+                z = subm(mulm(z, z, p), 2, p);
+            }
+            assert_eq!(z, tower.c);
+        }
+        // c itself is not ±2 and D_{2^t} has exactly 2^t roots over c in V.
+        assert!(tower.c != 2 && tower.c != p - 2);
+    }
+
+    #[test]
+    #[should_panic(expected = "the torus case needs")]
+    fn torus_refuses_a_split_prime() {
+        let mut rng = StdRng::seed_from_u64(1);
+        // p₀ = 3·2^18 + 1: p + 1 = 2·393217, so 2^2 ∤ p + 1.
+        dickson_torus(786_433, 2, &mut rng);
+    }
+
+    #[test]
+    fn torus_tower_square_rules_vanish_on_v() {
+        // The f4_fp_tower rewriting rules are the Dickson ones: every tower
+        // equation reduces to zero in the ring, and every element of V^2
+        // satisfies the raw equations.
+        let p = TORUS_PRIMES[1];
+        let t = 6;
+        let mut rng = StdRng::seed_from_u64(9);
+        let tower = build_tower(Kind::DicksonTorus, p, t, &mut rng);
+        let ring = tower_ring(&tower, 2, p);
+        let n = 2 * t;
+        for i in 0..2 {
+            for e in tower.equations(n, i * t, p) {
+                assert!(ring.from_raw(&raw_terms(&e)).is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn chain_null_keeps_planted_zero() {
+        let p = TORUS_PRIMES[1];
+        let mut rng = StdRng::seed_from_u64(11);
+        let tower = build_tower(Kind::DicksonTorus, p, 3, &mut rng);
+        let (curve, on) = target_curve(p, &tower, 3, &mut rng);
+        let target = loop {
+            if let Some(tg) = plant(&curve, &tower, 3, &on, &mut rng) {
+                break tg;
+            }
+        };
+        let (eqs, _, sol, _) = system(Control::Null, &tower, &curve, 3, &target, 1, &mut rng);
+        let sol = sol.expect("planted");
+        assert!(eqs.iter().all(|e| e.eval(&sol, p) == 0));
+        // The null changed every chain link's coefficients.
+        let (tw, _, _, _) = system(Control::Tower, &tower, &curve, 3, &target, 1, &mut rng);
+        assert_ne!(eqs[0].terms, tw[0].terms);
+        assert_ne!(eqs[1].terms, tw[1].terms);
     }
 }
