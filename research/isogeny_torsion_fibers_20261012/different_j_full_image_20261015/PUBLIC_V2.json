@@ -1,0 +1,951 @@
+{
+  "base_projected": [
+    {
+      "infinity": false,
+      "x": [
+        53,
+        0
+      ],
+      "y": [
+        0,
+        57
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        9,
+        0
+      ],
+      "y": [
+        0,
+        56
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        2,
+        0
+      ],
+      "y": [
+        0,
+        13
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        59,
+        0
+      ],
+      "y": [
+        0,
+        58
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        60,
+        0
+      ],
+      "y": [
+        0,
+        17
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        42,
+        0
+      ],
+      "y": [
+        0,
+        41
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        44,
+        0
+      ],
+      "y": [
+        0,
+        21
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        13,
+        0
+      ],
+      "y": [
+        0,
+        3
+      ]
+    }
+  ],
+  "base_raw": [
+    {
+      "infinity": false,
+      "x": [
+        0,
+        2
+      ],
+      "y": [
+        54,
+        1
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        3
+      ],
+      "y": [
+        32,
+        3
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        5
+      ],
+      "y": [
+        23,
+        25
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        9
+      ],
+      "y": [
+        49,
+        15
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        12
+      ],
+      "y": [
+        33,
+        12
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        16
+      ],
+      "y": [
+        52,
+        24
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        19
+      ],
+      "y": [
+        30,
+        2
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        21
+      ],
+      "y": [
+        32,
+        3
+      ]
+    }
+  ],
+  "cofactor": 75,
+  "destination": {
+    "ec1": "EC1P7Cfpk2h59811590f390",
+    "ec1_curve_record": "{\"a\":[53,0],\"b\":[25,0],\"cofactor\":\"75\",\"generator\":[[16,0],[0,21]],\"model\":\"short Weierstrass\",\"subgroup_order\":\"61\",\"target_group\":\"prime-order subgroup\"}",
+    "ec1_field_record": "{\"characteristic\":67,\"degree\":2,\"modulus\":[65,0,1],\"representation\":\"polynomial basis\"}",
+    "ec1_status": "self-contained extension record, not checked against registry",
+    "ec1_uid": "urn:ec-record:1:sha256:59811590f3901502060561e3a9f0bc998394c76c856272a469c0a167a8a12815",
+    "icv1": "ICV1:fpk-67-2-4083a0ca:-85:4575:11,0:unk:unk:r:3dc527efd80b",
+    "model": "{\"a\":[\"53\",\"0\"],\"b\":[\"25\",\"0\"],\"field\":\"fpk-67-2-4083a0ca\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"2\",\"modulus\":[\"65\",\"0\"],\"p\":\"67\",\"v\":\"1\"}",
+    "model_sha256": "3dc527efd80bb76ce79e0426548e89d1ac9cf20d0fa0689a957b51be0a37c700"
+  },
+  "destination_a": [
+    53,
+    0
+  ],
+  "destination_b": [
+    25,
+    0
+  ],
+  "destination_j": [
+    11,
+    0
+  ],
+  "direct_base_projected": [
+    {
+      "infinity": false,
+      "x": [
+        12,
+        0
+      ],
+      "y": [
+        0,
+        25
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        23,
+        0
+      ],
+      "y": [
+        0,
+        46
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        35,
+        0
+      ],
+      "y": [
+        0,
+        10
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        15,
+        0
+      ],
+      "y": [
+        0,
+        56
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        59,
+        0
+      ],
+      "y": [
+        0,
+        28
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        5,
+        0
+      ],
+      "y": [
+        0,
+        24
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        54,
+        0
+      ],
+      "y": [
+        0,
+        55
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        28,
+        0
+      ],
+      "y": [
+        0,
+        46
+      ]
+    }
+  ],
+  "direct_base_raw": [
+    {
+      "infinity": false,
+      "x": [
+        0,
+        4
+      ],
+      "y": [
+        36,
+        1
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        6
+      ],
+      "y": [
+        14,
+        22
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        8
+      ],
+      "y": [
+        24,
+        19
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        11
+      ],
+      "y": [
+        13,
+        14
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        15
+      ],
+      "y": [
+        24,
+        19
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        16
+      ],
+      "y": [
+        31,
+        1
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        18
+      ],
+      "y": [
+        48,
+        10
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        0,
+        22
+      ],
+      "y": [
+        44,
+        4
+      ]
+    }
+  ],
+  "direct_line": [
+    0,
+    1
+  ],
+  "direct_raw_points_scanned": 17,
+  "full_base_projected": [
+    {
+      "infinity": false,
+      "x": [
+        18,
+        0
+      ],
+      "y": [
+        0,
+        42
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        38,
+        0
+      ],
+      "y": [
+        0,
+        58
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        45,
+        0
+      ],
+      "y": [
+        0,
+        54
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        14,
+        0
+      ],
+      "y": [
+        0,
+        39
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        60,
+        0
+      ],
+      "y": [
+        0,
+        15
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        24,
+        0
+      ],
+      "y": [
+        0,
+        36
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        1,
+        0
+      ],
+      "y": [
+        0,
+        26
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        32,
+        0
+      ],
+      "y": [
+        0,
+        27
+      ]
+    }
+  ],
+  "full_base_raw": [
+    {
+      "infinity": false,
+      "x": [
+        1,
+        0
+      ],
+      "y": [
+        0,
+        26
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        2,
+        0
+      ],
+      "y": [
+        0,
+        6
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        5,
+        0
+      ],
+      "y": [
+        0,
+        24
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        7,
+        0
+      ],
+      "y": [
+        0,
+        1
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        11,
+        0
+      ],
+      "y": [
+        0,
+        20
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        12,
+        0
+      ],
+      "y": [
+        0,
+        25
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        13,
+        0
+      ],
+      "y": [
+        0,
+        22
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        14,
+        0
+      ],
+      "y": [
+        0,
+        28
+      ]
+    }
+  ],
+  "full_base_witness_source": [
+    {
+      "infinity": false,
+      "x": [
+        21,
+        0
+      ],
+      "y": [
+        0,
+        43
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        53,
+        0
+      ],
+      "y": [
+        0,
+        57
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        42,
+        0
+      ],
+      "y": [
+        0,
+        26
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        59,
+        0
+      ],
+      "y": [
+        0,
+        58
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        16,
+        0
+      ],
+      "y": [
+        0,
+        49
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        5,
+        0
+      ],
+      "y": [
+        0,
+        14
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        66,
+        0
+      ],
+      "y": [
+        0,
+        14
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        31,
+        0
+      ],
+      "y": [
+        0,
+        63
+      ]
+    }
+  ],
+  "full_image_points": 1525,
+  "full_image_selection_candidates": 21,
+  "full_image_source_points": 4575,
+  "generator": {
+    "infinity": false,
+    "x": [
+      43,
+      0
+    ],
+    "y": [
+      0,
+      5
+    ]
+  },
+  "kernel": [
+    {
+      "infinity": false,
+      "x": [
+        3,
+        0
+      ],
+      "y": [
+        1,
+        0
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        3,
+        0
+      ],
+      "y": [
+        66,
+        0
+      ]
+    }
+  ],
+  "line": [
+    0,
+    1
+  ],
+  "map_points_checked": 4574,
+  "mapped_base_projected": [
+    {
+      "infinity": false,
+      "x": [
+        2,
+        0
+      ],
+      "y": [
+        0,
+        6
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        26,
+        0
+      ],
+      "y": [
+        0,
+        3
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        61,
+        0
+      ],
+      "y": [
+        0,
+        28
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        7,
+        0
+      ],
+      "y": [
+        0,
+        1
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        24,
+        0
+      ],
+      "y": [
+        0,
+        36
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        5,
+        0
+      ],
+      "y": [
+        0,
+        43
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        15,
+        0
+      ],
+      "y": [
+        0,
+        11
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        33,
+        0
+      ],
+      "y": [
+        0,
+        53
+      ]
+    }
+  ],
+  "mapped_base_raw": [
+    {
+      "infinity": false,
+      "x": [
+        32,
+        26
+      ],
+      "y": [
+        9,
+        5
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        50,
+        60
+      ],
+      "y": [
+        46,
+        58
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        62,
+        33
+      ],
+      "y": [
+        42,
+        11
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        32,
+        55
+      ],
+      "y": [
+        17,
+        29
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        7,
+        2
+      ],
+      "y": [
+        31,
+        24
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        33,
+        60
+      ],
+      "y": [
+        29,
+        38
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        18,
+        41
+      ],
+      "y": [
+        35,
+        13
+      ]
+    },
+    {
+      "infinity": false,
+      "x": [
+        38,
+        5
+      ],
+      "y": [
+        22,
+        3
+      ]
+    }
+  ],
+  "mapped_generator": {
+    "infinity": false,
+    "x": [
+      16,
+      0
+    ],
+    "y": [
+      0,
+      21
+    ]
+  },
+  "mapped_target": {
+    "infinity": false,
+    "x": [
+      27,
+      0
+    ],
+    "y": [
+      0,
+      33
+    ]
+  },
+  "n1": 75,
+  "n2": 4575,
+  "nu": 2,
+  "ops": {
+    "adds": 9277,
+    "doubles": 189,
+    "scalar_mults": 33
+  },
+  "p": 67,
+  "r": 61,
+  "raw_points_scanned": 19,
+  "schema": "different_j_public/v2",
+  "source": {
+    "ec1": "EC1P7Cfpk2hb3c0f44fb07e",
+    "ec1_curve_record": "{\"a\":[46,0],\"b\":[37,0],\"cofactor\":\"75\",\"generator\":[[43,0],[0,5]],\"model\":\"short Weierstrass\",\"subgroup_order\":\"61\",\"target_group\":\"prime-order subgroup\"}",
+    "ec1_field_record": "{\"characteristic\":67,\"degree\":2,\"modulus\":[65,0,1],\"representation\":\"polynomial basis\"}",
+    "ec1_status": "self-contained extension record, not checked against registry",
+    "ec1_uid": "urn:ec-record:1:sha256:b3c0f44fb07e4b15c8847ffde46b21fc7cecf9ecbf585d0707403524b6111cd7",
+    "icv1": "ICV1:fpk-67-2-4083a0ca:-85:4575:7,0:unk:unk:r:653aff0a31ca",
+    "model": "{\"a\":[\"46\",\"0\"],\"b\":[\"37\",\"0\"],\"field\":\"fpk-67-2-4083a0ca\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"2\",\"modulus\":[\"65\",\"0\"],\"p\":\"67\",\"v\":\"1\"}",
+    "model_sha256": "653aff0a31cae474cdd1de7046bf472ff7ada9cd93e2e72eccd14cfa8fe19d02"
+  },
+  "source_a": [
+    46,
+    0
+  ],
+  "source_b": [
+    37,
+    0
+  ],
+  "source_j": [
+    7,
+    0
+  ],
+  "target": {
+    "infinity": false,
+    "x": [
+      7,
+      0
+    ],
+    "y": [
+      0,
+      63
+    ]
+  },
+  "target_seed": "different-j/2026-10-15/p=67/r=61"
+}

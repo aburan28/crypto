@@ -1,6 +1,8 @@
 //! Native screen and frozen instance for an explicit different-j degree-three map over F_(p^2).
 //! The selector and stop conditions are frozen in the dated study protocol.
 
+#![recursion_limit = "256"]
+
 use std::cell::Cell;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -375,6 +377,74 @@ fn scan_base(curve: &Curve, h: u64, columns: usize) -> ([u64; 2], Vec<Point>, Ve
     panic!("eight distinct projected columns absent");
 }
 
+/// Enumerate the entire rational image before choosing any subgroup columns.
+/// The first source preimage is retained as an independently checkable witness.
+fn scan_full_image(
+    src: &Curve,
+    dst: &Curve,
+    t: Point,
+    h: u64,
+    columns: usize,
+    ops: &mut GroupOps,
+) -> (Vec<Point>, Vec<Point>, Vec<Point>, u64, u64, u64) {
+    let mut image = BTreeMap::<u64, (Point, Point, u64)>::new();
+    let mut source_points = 0u64;
+    let mut visit = |point: Point, ops: &mut GroupOps| {
+        let mapped = velu(src, t, point, ops);
+        assert!(dst.is_on_curve(mapped));
+        let slot = image.entry(dst.key(&mapped)).or_insert((mapped, point, 0));
+        assert_eq!(slot.0, mapped);
+        slot.2 += 1;
+        source_points += 1;
+    };
+    visit(src.identity(), ops);
+    for x1 in 0..src.f.p {
+        for x0 in 0..src.f.p {
+            let mut lifts = src.lift_x([x0, x1]);
+            lifts.sort_by_key(|point| src.f.pack(point.y));
+            for point in lifts {
+                visit(point, ops);
+            }
+        }
+    }
+    assert_eq!(source_points, 4575);
+    assert_eq!(image.len(), 1525);
+    assert!(image.values().all(|entry| entry.2 == 3));
+    let mut raw = Vec::new();
+    let mut projected = Vec::new();
+    let mut witness = Vec::new();
+    let mut orbits = BTreeSet::new();
+    let mut image_candidates = 0u64;
+    for (_, (mapped, preimage, _)) in image {
+        if mapped.infinity {
+            continue;
+        }
+        image_candidates += 1;
+        let q = dst.mul(ops, mapped, h);
+        if q.infinity {
+            continue;
+        }
+        let orbit = dst.key(&q).min(dst.key(&dst.neg(q)));
+        if orbits.insert(orbit) {
+            raw.push(mapped);
+            projected.push(q);
+            witness.push(preimage);
+            if raw.len() == columns {
+                break;
+            }
+        }
+    }
+    assert_eq!(raw.len(), columns);
+    (
+        raw,
+        projected,
+        witness,
+        source_points,
+        1525,
+        image_candidates,
+    )
+}
+
 fn freeze_public(fixture_path: &str, public_path: &str) {
     let mut v: Value = serde_json::from_str(&fs::read_to_string(fixture_path).unwrap()).unwrap();
     assert_eq!(v["schema"], "different_j_fixture/v1");
@@ -402,9 +472,39 @@ fn freeze_public(fixture_path: &str, public_path: &str) {
     );
 }
 
+fn freeze_full_image(public_v1_path: &str, public_v2_path: &str) {
+    let mut v: Value = serde_json::from_str(&fs::read_to_string(public_v1_path).unwrap()).unwrap();
+    assert_eq!(v["schema"], "different_j_public/v1");
+    assert!(v.get("answer_scalar").is_none());
+    let src = source(67);
+    let t = parse_point(&v["kernel"][0]);
+    let dst = destination(&src, t);
+    let mut ops = GroupOps::default();
+    let (raw, projected, witnesses, source_points, image_points, image_candidates) =
+        scan_full_image(&src, &dst, t, 75, 8, &mut ops);
+    v["schema"] = json!("different_j_public/v2");
+    v["full_base_raw"] = json!(raw);
+    v["full_base_projected"] = json!(projected);
+    v["full_base_witness_source"] = json!(witnesses);
+    v["full_image_source_points"] = json!(source_points);
+    v["full_image_points"] = json!(image_points);
+    v["full_image_selection_candidates"] = json!(image_candidates);
+    fs::write(public_v2_path, serde_json::to_vec_pretty(&v).unwrap()).unwrap();
+    println!(
+        "{}",
+        json!({"schema":"different_j_full_image_freeze/v1",
+        "source_public_sha256":sha256_hex(&fs::read(public_v1_path).unwrap()),
+        "full_image_public_sha256":sha256_hex(&fs::read(public_v2_path).unwrap()),
+        "source_points":source_points,"image_points":image_points,
+        "selection_candidates":image_candidates,"columns":projected.len(),"group_ops":ops})
+    );
+}
+
 fn read_public(path: &str) -> Value {
     let v: Value = serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap();
-    assert_eq!(v["schema"], "different_j_public/v1");
+    assert!(
+        ["different_j_public/v1", "different_j_public/v2"].contains(&v["schema"].as_str().unwrap())
+    );
     assert!(v.get("answer_scalar").is_none());
     assert_eq!((v["p"].as_u64(), v["r"].as_u64()), (Some(67), Some(61)));
     v
@@ -485,8 +585,16 @@ fn signed_base(curve: &Curve, base: &[Point]) -> Vec<Point> {
 
 fn relation_run(path: &str, round: u64, arm: &str) {
     assert!(round < 3);
-    assert!(["source", "isogeny-image", "destination-direct"].contains(&arm));
+    assert!([
+        "source",
+        "isogeny-image",
+        "destination-direct",
+        "full-image"
+    ]
+    .contains(&arm));
     let public = read_public(path);
+    let is_v2 = public["schema"] == "different_j_public/v2";
+    assert!(arm != "full-image" || is_v2);
     let src = source(67);
     let t = parse_point(&public["kernel"][0]);
     let dst = destination(&src, t);
@@ -506,18 +614,29 @@ fn relation_run(path: &str, round: u64, arm: &str) {
     let setup_cpu_start = thread_cpu_ns();
     let setup_wall_start = Instant::now();
     let mut setup_ops = GroupOps::default();
-    let (curve, raw, base, scan_count) = if arm == "destination-direct" {
+    let (curve, raw, base, scan_count, image_points, selection_candidates) = if arm == "full-image"
+    {
+        let (raw, projected, witnesses, scanned, image_count, candidates) =
+            scan_full_image(&src, &dst, t, h, 8, &mut setup_ops);
+        assert_eq!(raw, points(&public["full_base_raw"]));
+        assert_eq!(projected, points(&public["full_base_projected"]));
+        assert_eq!(witnesses, points(&public["full_base_witness_source"]));
+        assert_eq!(public["full_image_source_points"], scanned);
+        assert_eq!(public["full_image_points"], image_count);
+        assert_eq!(public["full_image_selection_candidates"], candidates);
+        (&dst, raw, projected, scanned, image_count, candidates)
+    } else if arm == "destination-direct" {
         let (line, raw, projected, scanned) = scan_base(&dst, h, 8);
         assert_eq!(public["direct_line"], json!(line));
         assert_eq!(raw, points(&public["direct_base_raw"]));
         assert_eq!(projected, points(&public["direct_base_projected"]));
-        (&dst, raw, projected, scanned)
+        (&dst, raw, projected, scanned, 0, 0)
     } else {
         let (line, raw, projected, scanned) = scan_base(&src, h, 8);
         assert_eq!(public["line"], json!(line));
         assert_eq!(raw, points(&public["base_raw"]));
         assert_eq!(projected, points(&public["base_projected"]));
-        (&src, raw, projected, scanned)
+        (&src, raw, projected, scanned, 0, 0)
     };
     let signed = signed_base(curve, &base);
     let table_curve = if arm == "isogeny-image" { &dst } else { curve };
@@ -547,6 +666,7 @@ fn relation_run(path: &str, round: u64, arm: &str) {
     let mut pivots: [Option<Vec<u64>>; 9] = std::array::from_fn(|_| None);
     let mut trials = 0u64;
     let mut relations = 0u64;
+    let mut relation_witnesses = Vec::<Value>::new();
     let mut rank = 0u64;
     let mut map_queries = 0u64;
     let mut invalid_candidates = 0u64;
@@ -559,7 +679,8 @@ fn relation_run(path: &str, round: u64, arm: &str) {
         trials += 1;
         let a = rand::Rng::gen_range(&mut rng, 0..r);
         let b = rand::Rng::gen_range(&mut rng, 0..r);
-        let (query_curve, query_g, query_q) = if arm == "destination-direct" {
+        let (query_curve, query_g, query_q) = if arm == "destination-direct" || arm == "full-image"
+        {
             (&dst, mapped_g, mapped_q)
         } else {
             (&src, g, q)
@@ -602,6 +723,9 @@ fn relation_run(path: &str, round: u64, arm: &str) {
         row[8] = (r - modmul(h % r, b, r)) % r;
         row[9] = modmul(h % r, a, r);
         relations += 1;
+        if is_v2 {
+            relation_witnesses.push(json!({"a":a,"b":b,"i":i,"j":j}));
+        }
         let la_start = thread_cpu_ns();
         if insert_relation(&mut pivots, row, r) {
             rank += 1;
@@ -630,16 +754,18 @@ fn relation_run(path: &str, round: u64, arm: &str) {
     assert!(peak_rss_bytes() <= 512 * 1024 * 1024);
     println!(
         "{}",
-        json!({"schema":"different_j_relation_run/v1","arm":arm,
+        json!({"schema":if is_v2 {"different_j_relation_run/v2"} else {"different_j_relation_run/v1"},"arm":arm,
         "p":67,"r":r,"round":round,"seed":seed,"trial_cap":cap,
         "source_icv1":public["source"]["icv1"],
         "destination_icv1":public["destination"]["icv1"],
         "raw_base":raw.len(),"points_scanned":scan_count,
+        "full_image_points":image_points,"selection_candidates":selection_candidates,
         "pair_entries":pair_entries,"pair_keys":table.len(),
         "setup_cpu_ns":setup_cpu_ns,"setup_wall_ns":setup_wall_ns,
         "setup_fp_muls":setup_fp.0,"setup_fp_invs":setup_fp.1,
         "setup_group_ops":setup_ops,"trials":trials,"relations":relations,
         "rank":rank,"failed_queries":trials-relations,"map_queries":map_queries,
+        "relation_witnesses":relation_witnesses,
         "invalid_candidates":invalid_candidates,"query_group_ops":query_ops,
         "collect_cpu_ns":collect_cpu_ns,"collect_wall_ns":collect_wall_ns,
         "collect_fp_muls":collect_fp.0,"collect_fp_invs":collect_fp.1,
@@ -808,10 +934,146 @@ impl Replay {
         }
         out
     }
+    fn neg_point(&self, point: Point) -> Point {
+        if point.infinity {
+            point
+        } else {
+            Point::affine(point.x, self.sub([0, 0], point.y))
+        }
+    }
+    fn key(&self, point: Point) -> u64 {
+        if point.infinity {
+            return 0;
+        }
+        let pack = |x: [u64; 2]| x[0] + self.p * x[1];
+        let sign = u64::from(pack(point.y) > pack(self.neg_point(point).y));
+        ((pack(point.x) + 1) << 1) | sign
+    }
+    fn velu(&self, point: Point, t: Point) -> Point {
+        let neg_t = self.neg_point(t);
+        if point.infinity || point == t || point == neg_t {
+            return Point::infinity([0, 0]);
+        }
+        let plus = self.add_points(point, t, 46);
+        let minus = self.add_points(point, neg_t, 46);
+        assert!(!plus.infinity && !minus.infinity);
+        Point::affine(
+            self.sub(
+                self.add(self.add(point.x, plus.x), minus.x),
+                self.mul([2, 0], t.x),
+            ),
+            self.add(self.add(point.y, plus.y), minus.y),
+        )
+    }
 }
 
-fn replay(public_path: &str, fixture_path: &str, records_path: &str) {
+fn replay_relation_row(
+    checker: &Replay,
+    public: &Value,
+    row: &Value,
+    g: Point,
+    q: Point,
+    mapped_g: Point,
+    mapped_q: Point,
+    t: Point,
+) -> u64 {
+    let arm = row["arm"].as_str().unwrap();
+    let direct = arm == "destination-direct" || arm == "full-image";
+    let (base, curve_a) = match arm {
+        "source" | "isogeny-image" => (points(&public["base_projected"]), 46),
+        "destination-direct" => (points(&public["direct_base_projected"]), 53),
+        "full-image" => (points(&public["full_base_projected"]), 53),
+        _ => panic!("unexpected relation arm"),
+    };
+    assert_eq!(base.len(), 8);
+    let mut sign_orbits = BTreeSet::new();
+    for &point in &base {
+        assert!(!point.infinity);
+        assert!(checker.scalar_mul(point, 61, curve_a).infinity);
+        let orbit = checker
+            .key(point)
+            .min(checker.key(checker.neg_point(point)));
+        assert!(sign_orbits.insert(orbit));
+    }
+    let signed: Vec<Point> = base
+        .iter()
+        .flat_map(|&point| [point, checker.neg_point(point)])
+        .collect();
+    let table_points: Vec<Point> = if arm == "isogeny-image" {
+        signed.iter().map(|&point| checker.velu(point, t)).collect()
+    } else {
+        signed.clone()
+    };
+    let table_a = if arm == "isogeny-image" { 53 } else { curve_a };
+    let mut support = BTreeSet::new();
+    let mut entries = 0u64;
+    for i in 0..table_points.len() {
+        for j in i..table_points.len() {
+            let sum = checker.add_points(table_points[i], table_points[j], table_a);
+            if !sum.infinity {
+                support.insert(checker.key(sum));
+                entries += 1;
+            }
+        }
+    }
+    assert_eq!(row["pair_entries"], entries);
+    assert_eq!(row["pair_keys"], support.len());
+    let witnesses = row["relation_witnesses"].as_array().unwrap();
+    assert_eq!(witnesses.len(), row["relations"].as_u64().unwrap() as usize);
+    for witness in witnesses {
+        let a = witness["a"].as_u64().unwrap();
+        let b = witness["b"].as_u64().unwrap();
+        let i = witness["i"].as_u64().unwrap() as usize;
+        let j = witness["j"].as_u64().unwrap() as usize;
+        assert!(i <= j && j < table_points.len());
+        let query_a = if direct { 53 } else { 46 };
+        let query_g = if direct { mapped_g } else { g };
+        let query_q = if direct { mapped_q } else { q };
+        let candidate = checker.add_points(
+            checker.scalar_mul(query_g, a, query_a),
+            checker.scalar_mul(query_q, b, query_a),
+            query_a,
+        );
+        let projected = checker.scalar_mul(candidate, 75, query_a);
+        let searched = if arm == "isogeny-image" {
+            checker.velu(projected, t)
+        } else {
+            projected
+        };
+        assert!(!searched.infinity);
+        assert_eq!(
+            checker.add_points(table_points[i], table_points[j], table_a),
+            searched
+        );
+        if arm == "isogeny-image" {
+            assert_eq!(checker.add_points(signed[i], signed[j], 46), projected);
+        }
+    }
+    witnesses.len() as u64
+}
+
+fn replay(public_path: &str, fixture_path: &str, records_path: &str, old_public: Option<&str>) {
     let public = read_public(public_path);
+    let full_image = public["schema"] == "different_j_public/v2";
+    assert_eq!(full_image, old_public.is_some());
+    if let Some(old_path) = old_public {
+        let old = read_public(old_path);
+        assert_eq!(old["schema"], "different_j_public/v1");
+        let mut normalized = public.clone();
+        let object = normalized.as_object_mut().unwrap();
+        for name in [
+            "full_base_raw",
+            "full_base_projected",
+            "full_base_witness_source",
+            "full_image_source_points",
+            "full_image_points",
+            "full_image_selection_candidates",
+        ] {
+            assert!(object.remove(name).is_some());
+        }
+        object.insert("schema".to_string(), json!("different_j_public/v1"));
+        assert_eq!(normalized, old);
+    }
     let fixture: Value = serde_json::from_str(&fs::read_to_string(fixture_path).unwrap()).unwrap();
     let answer = fixture["answer_scalar"].as_u64().unwrap();
     let g = parse_point(&public["generator"]);
@@ -829,11 +1091,33 @@ fn replay(public_path: &str, fixture_path: &str, records_path: &str) {
             checker.scalar_mul(mapped_g, scalar, 53).infinity
         );
     }
+    let t = parse_point(&public["kernel"][0]);
+    let mut base_witness_checks = 0u64;
+    if full_image {
+        let raw = points(&public["full_base_raw"]);
+        let projected = points(&public["full_base_projected"]);
+        let witnesses = points(&public["full_base_witness_source"]);
+        assert_eq!((raw.len(), projected.len(), witnesses.len()), (8, 8, 8));
+        for ((&point, &projection), &preimage) in raw.iter().zip(&projected).zip(&witnesses) {
+            assert!(checker.on_curve(preimage, 46, 37));
+            assert!(checker.on_curve(point, 53, 25));
+            assert_eq!(checker.velu(preimage, t), point);
+            assert_eq!(checker.scalar_mul(point, 75, 53), projection);
+            assert!(checker.scalar_mul(projection, 61, 53).infinity);
+            base_witness_checks += 1;
+        }
+    }
     let mut checks = BTreeMap::<(u64, String), u64>::new();
+    let mut relation_witness_checks = 0u64;
     for line in fs::read_to_string(records_path).unwrap().lines() {
         let row: Value = serde_json::from_str(line).unwrap();
         let schema = row["schema"].as_str().unwrap();
-        assert!(["different_j_relation_run/v1", "different_j_rho_run/v1"].contains(&schema));
+        assert!([
+            "different_j_relation_run/v1",
+            "different_j_relation_run/v2",
+            "different_j_rho_run/v1"
+        ]
+        .contains(&schema));
         let arm = row["arm"].as_str().unwrap().to_string();
         let round = row["round"].as_u64().unwrap();
         assert!(round < 3);
@@ -842,17 +1126,29 @@ fn replay(public_path: &str, fixture_path: &str, records_path: &str) {
         assert_eq!(scalar, answer);
         assert_eq!(checker.scalar_mul(g, scalar, 46), q);
         assert_eq!(checker.scalar_mul(mapped_g, scalar, 53), mapped_q);
+        if full_image && schema == "different_j_relation_run/v2" {
+            relation_witness_checks +=
+                replay_relation_row(&checker, &public, &row, g, q, mapped_g, mapped_q, t);
+        }
         *checks.entry((round, arm)).or_default() += 1;
     }
-    assert_eq!(checks.len(), 15);
+    assert_eq!(checks.len(), if full_image { 18 } else { 15 });
     assert!(checks.values().all(|&v| v == 1));
+    if full_image {
+        for round in 0..3 {
+            assert_eq!(checks.get(&(round, "full-image".to_string())), Some(&1));
+        }
+    }
     println!(
         "{}",
-        json!({"schema":"different_j_replay/v1","checked":checks.len(),
+        json!({"schema":if full_image {"different_j_replay/v2"} else {"different_j_replay/v1"},
+        "checked":checks.len(),"base_witness_checks":base_witness_checks,
+        "relation_witness_checks":relation_witness_checks,
         "all_rounds_and_arms":true,"independent_fp_muls":checker.muls.get(),
         "independent_fp_invs":checker.inversions.get(),
         "independent_group_adds":checker.group_adds.get(),
         "fixture_sha256":sha256_hex(&fs::read(fixture_path).unwrap()),
+        "source_public_sha256":old_public.map(|path| sha256_hex(&fs::read(path).unwrap())),
         "public_sha256":sha256_hex(&fs::read(public_path).unwrap()),
         "records_sha256":sha256_hex(&fs::read(records_path).unwrap())})
     );
@@ -933,12 +1229,14 @@ fn main() {
         Some("screen") => screen(),
         Some("freeze") => freeze(),
         Some("freeze-public") => freeze_public(&args[2], &args[3]),
+        Some("freeze-full-image") => freeze_full_image(&args[2], &args[3]),
         Some("run") => relation_run(&args[2], args[3].parse().unwrap(), &args[4]),
         Some("rho") => rho_run(&args[2], args[3].parse().unwrap(), args[4] == "aa"),
-        Some("replay") => replay(&args[2], &args[3], &args[4]),
+        Some("replay") => replay(&args[2], &args[3], &args[4], None),
+        Some("replay-full-image") => replay(&args[2], &args[4], &args[5], Some(&args[3])),
         Some("audit-fibers") => audit_fibers(&args[2]),
         _ => panic!(
-            "usage: nonisomorphic_extension_isogeny screen|freeze|freeze-public|run|rho|replay"
+            "usage: nonisomorphic_extension_isogeny screen|freeze|freeze-public|freeze-full-image|run|rho|replay|replay-full-image|audit-fibers"
         ),
     }
 }
