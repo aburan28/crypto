@@ -1,0 +1,25 @@
+ops (ok): ic-orbit-c90-renew / ic-orbit-c90-walk = 1.0094 [0.938, 1.082] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 1.0645 [0.924, 1.114]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 3.16%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-orbit-c90-renew / ic-orbit-c90-walk | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m41-tm2308219-7f48b14a | 39.00 | 16 | 1.0094 | [0.9385, 1.0816] | cluster |
+
+| workload | curve | log2 r | ic-orbit-c90-walk mean S | ic-orbit-c90-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W11c17e62f0e3 | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 2.2316 | 2.6971 | 1.2086 |
+| W40f4e0f993ed | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 2.7171 | 2.4830 | 0.9138 |
+| W500ea583b59d | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 2.1943 | 2.4388 | 1.1114 |
+| W5f9dea23cafa | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 2.6249 | 2.0647 | 0.7866 |
+| W7bdf9e28cbae | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 2.4545 | 2.7179 | 1.1073 |
+| W8a14eef15390 | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 2.3630 | 2.2166 | 0.9380 |
+| Wadbd0cdbddcd | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 1.9196 | 2.4134 | 1.2572 |
+| Wb26fefedb711 | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 2.2752 | 2.3532 | 1.0343 |
+| Wb54a4898b32b | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 2.6658 | 2.2557 | 0.8461 |
+| Wbf533a9bcec3 | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 2.2568 | 2.4386 | 1.0806 |
+| Wd1941f72df1b | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 2.4299 | 2.4541 | 1.0100 |
+| Wd6ae5c3e16da | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 2.7793 | 2.7242 | 0.9801 |
+| Wd713c36c3e24 | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 2.3560 | 2.5730 | 1.0921 |
+| Wdb77c6ce2ca9 | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 2.3255 | 2.1837 | 0.9390 |
+| We45d038dfe33 | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 2.4369 | 2.4150 | 0.9910 |
+| Wece649e9aa79 | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 2.2078 | 2.1696 | 0.9827 |

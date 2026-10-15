@@ -314,18 +314,18 @@ and wall times do not.
 
 **The source changed after the run; the counts did not.** The recorded runs
 used the tool as committed at `9752513ea` (sha256 `595e3efa…`; see
-`results/env-run-20261015T0200Z.txt`). Afterwards both examples were passed
-through `rustfmt` and given six behaviour-preserving clippy fixes, for CI's
-lint job:
+`results/env-run-20261015T0200Z.txt`).
 
-- a slice parameter;
-- `is_multiple_of`;
-- `div_ceil(2)` for `(x + 1)/2`;
-- a method rename;
-- one collapsed `if`.
+Since then the examples have changed twice:
 
-To show nothing moved, these were re-run with the formatted source and match
-their records exactly, apart from wall time and memory:
+- On `main`, `d02c2190e` (PR #1877) applied Rust 1.98 formatting and
+  mechanical Clippy repairs. It records the original digests in
+  [`SOURCE_FORMATTING_20261015.md`](SOURCE_FORMATTING_20261015.md).
+- This PR adds one descriptive output to the analysis: `ic_over_rho`, the
+  IC/rho ratio, raw and renormalised.
+
+With the merged source, these were re-run and match their records exactly,
+apart from wall time and memory:
 
 - curve generation at k = 12;
 - six solves: `te_k10_kap2_c1_t1`, `te_k14_kap2_c3_t2`, `te_k17_kap1.4_c2_t1`,

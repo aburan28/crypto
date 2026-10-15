@@ -1269,7 +1269,7 @@ impl Ml {
     fn to_m(&self, x: u64) -> u64 {
         self.mul(x % self.n, self.r2)
     }
-    fn out_of_m(&self, x: u64) -> u64 {
+    fn decode_m(&self, x: u64) -> u64 {
         self.redc(x as u128)
     }
     fn sm(&self, c: i64) -> u64 {
@@ -1670,7 +1670,7 @@ fn lanczos_log(m: &Mat, ml: &Ml, seed: u64) -> (Option<u64>, u64, u32) {
         if sb == 0 {
             continue;
         }
-        let lg = ml.out_of_m(ml.mul(ml.neg(sa), ml.inv(sb)));
+        let lg = ml.decode_m(ml.mul(ml.neg(sa), ml.inv(sb)));
         return (Some(lg), iters, attempt);
     }
     (None, iters, 5)

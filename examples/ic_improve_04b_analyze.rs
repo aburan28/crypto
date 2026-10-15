@@ -643,7 +643,10 @@ fn cmd_report(dir: &str, rho_dir: &str, choice_path: &str, out: &str, md_path: &
                     r["mean_steps_per_sqrt_ell"].as_f64().unwrap(),
                 );
                 let ideal = (std::f64::consts::PI / 2.0).sqrt();
-                icrho.insert(format!("{}/{}", arm, k), json!({"raw": sv.as_f64().unwrap() / srho, "rho_renormalised": sv.as_f64().unwrap() / (srho * ideal / steps), "rho_steps_per_sqrt_ell": steps, "rho_n": r["n"]}));
+                icrho.insert(
+                    format!("{}/{}", arm, k),
+                    json!({"raw": sv.as_f64().unwrap() / srho, "rho_renormalised": sv.as_f64().unwrap() / (srho * ideal / steps), "rho_steps_per_sqrt_ell": steps, "rho_n": r["n"]}),
+                );
             }
         }
     }
