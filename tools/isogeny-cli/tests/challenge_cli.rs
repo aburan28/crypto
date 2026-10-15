@@ -128,6 +128,16 @@ fn native_challenge_replays_maps_rejects_forgery_and_ranks_curves_separately() {
     assert_eq!(first["score"], "13");
     assert_eq!(other["score"], "7");
     assert_ne!(first["source_icv1"], other["source_icv1"]);
+    for result in [&first, &other] {
+        assert!(
+            result["verification"]["sampled_peak_resident_bytes"]
+                .as_str()
+                .unwrap()
+                .parse::<u64>()
+                .unwrap()
+                > 0
+        );
+    }
     let original = a.join("construction");
     let before = fs::read(original.join("search.json")).unwrap();
     save(

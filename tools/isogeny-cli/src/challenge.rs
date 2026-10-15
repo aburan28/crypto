@@ -503,13 +503,24 @@ mod tests {
     #[test]
     fn catalogue_has_every_standard_prime_model_and_no_research_descendants() {
         let rows = curves();
-        let expected = catalog::registry()["curves"]
+        let canonical: Value = serde_json::from_str(crate::REGISTRY).unwrap();
+        let expected: std::collections::BTreeSet<_> = canonical["curves"]
             .as_array()
             .unwrap()
             .iter()
-            .filter(|r| standard_prime(r))
-            .count();
-        assert_eq!(rows.len(), expected);
+            .filter(|r| {
+                r["family"] == "prime"
+                    && r["standard_names"]
+                        .as_array()
+                        .is_some_and(|names| !names.is_empty())
+            })
+            .map(|r| r["slug"].as_str().unwrap())
+            .collect();
+        let actual: std::collections::BTreeSet<_> = rows
+            .iter()
+            .map(|r| r["source_icv1"].as_str().unwrap())
+            .collect();
+        assert_eq!(actual, expected);
         assert!(rows.len() > 20);
         for r in rows {
             assert_eq!(
