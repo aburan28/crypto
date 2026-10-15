@@ -83,8 +83,15 @@ for ax, metric, title in zip(axes, ["counted_total", "wall_total"],
         for j, (lab, v, c) in enumerate(items):
             m = v[metric]
             x = i + (j - 2) * 0.14
+            if m["ratio"] < 0.85:
+                # Off the scale (n = 41 against K = 255): marker at the floor, value printed.
+                ax.plot(x, 0.86, marker="v", ms=7, color=c, label=lab if i == 0 else None)
+                ax.annotate(f"{m['ratio']:.2f}\n[{m['ci95'][0]:.2f}, {m['ci95'][1]:.2f}]", (x, 0.86),
+                            textcoords="offset points", xytext=(0, 8), ha="center", fontsize=7, color=c)
+                continue
             ax.errorbar(x, m["ratio"], yerr=[[m["ratio"] - m["ci95"][0]], [m["ci95"][1] - m["ratio"]]],
                         fmt="o", ms=5, color=c, elinewidth=2, capsize=0, label=lab if i == 0 else None)
+    ax.set_ylim(0.845, 1.08)
     ax.axhline(1, color=INK2, lw=1)
     ax.set_xticks(range(len(groups)))
     lbl = []

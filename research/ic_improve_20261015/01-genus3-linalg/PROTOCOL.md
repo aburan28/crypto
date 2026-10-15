@@ -130,3 +130,15 @@ dimensions and nonzeros given to the solver. Wall time is recorded but not used.
   says it no longer does). b = 16 is dropped. kappa* = lowest geometric-mean whole cost of `lpsgewd` at b = 20.
 - Test run: `main` stream with all ten LA arms at b = 10..20; at b = 21 only `inc, wied, bfssgewd,
   lpsgewd` (time cap); `aa` stream with `inc, lpsgewd` at b = 10..21.
+
+## Amendment A2 (2026-10-15, during the test run, before any test result was read)
+
+The host ran at load 8-12 on 4 cores (three items). The first two b = 20 jobs with all ten arms had
+used 12 CPU minutes in 41 wall minutes and would have reached the 60-minute cap; one was stopped
+(curve 0) and one was left running (curve 1; its result is kept if it finishes, and is identical by
+construction to the split jobs). At b >= 19 the arms are split over two collections per curve
+(`inc, wied, sgewd` and `bfssgewd, lpsgelz, lpsgewd`). This does not change any arm's cost: an arm's
+cost is booked at its own successful check and does not depend on which other arms share the
+collection (`main:inc` is in the first group, so gate 0 still applies). The four arms that tuning
+stage 1 found dominated (`sgelz`, `bfslz`, `bfswd`, `bfssgelz`) are not run at b >= 19. b = 21 is
+dropped: at this load a b = 21 job would not fit in 60 minutes.
