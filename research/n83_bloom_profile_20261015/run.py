@@ -20,7 +20,7 @@ ARMS = (("standard_a", "standard", 1500),
         ("wide5_b", "wide5", 1500),
         ("wide3_b", "wide3", 1500),
         ("standard_b", "standard", 1500))
-SOURCE_SHA256 = "ec43159faab11ee043bb5baff6be679f5172a9f42e4ae46660176878d0402c47"
+SOURCE_SHA256 = "87ebd8d693e3e82912725017f482937f6ad2d428c95ca4a8b7ed6be3e77ba7a0"
 PARENT_SOURCE_SHA256 = "5e9fd826d22816b429a82e658c517d9387916aabe7660f708e4c29901cce647e"
 
 spec = importlib.util.spec_from_file_location("n83_root4_runner", PARENT)

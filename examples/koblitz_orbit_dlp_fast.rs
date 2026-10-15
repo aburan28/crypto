@@ -4193,9 +4193,6 @@ mod wide {
             "root_table_allocated_bytes":root_table_allocated_bytes,
             "root_bloom_enabled":index.table.bloom.is_some(),
             "root_bloom_bytes":index.table.bloom.as_ref().map_or(0, RootBloom::bytes),
-            "root_bloom_profile":index.table.bloom.as_ref().map_or("none", |bloom| bloom.profile.name()),
-            "root_bloom_hashes":index.table.bloom.as_ref().map_or(0, |bloom| bloom.hashes),
-            "root_bloom_bits_per_request":index.table.bloom.as_ref().map_or(0, |bloom| bloom.profile.bits_per_request()),
             "sparse_canonical_enabled":basis.sparse_canonical,
             "pair_table_entries":0,
             "edge_selectors":0,
@@ -4229,6 +4226,18 @@ mod wide {
             "target_threads":target_threads,
             "scope":"public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
         });
+        summary["root_bloom_profile"] = json!(index
+            .table
+            .bloom
+            .as_ref()
+            .map_or("none", |bloom| bloom.profile.name()));
+        summary["root_bloom_hashes"] =
+            json!(index.table.bloom.as_ref().map_or(0, |bloom| bloom.hashes));
+        summary["root_bloom_bits_per_request"] = json!(index
+            .table
+            .bloom
+            .as_ref()
+            .map_or(0, |bloom| bloom.profile.bits_per_request()));
         summary["symmetric_s3_states_enabled"] = json!(index.symmetric_states);
         summary["root_table_indexed4_enabled"] = json!(index.indexed4_table);
         summary["indexed5_load75_enabled"] = json!(index.indexed5_load75);
@@ -4701,7 +4710,7 @@ fn main() {
     let mut sorted = target_query_ms.clone();
     sorted.sort_by(|x, y| x.partial_cmp(y).unwrap());
     let median = sorted.get(sorted.len() / 2).copied();
-    let summary = json!({
+    let mut summary = json!({
         "kind":"compact_orbit_dlp_summary",
         "schema_version":"1.0",
         "n":n, "a":a,
@@ -4714,9 +4723,6 @@ fn main() {
         "root_table_entries":index.table.len,
         "root_bloom_enabled":index.table.bloom.is_some(),
         "root_bloom_bytes":index.table.bloom.as_ref().map_or(0, RootBloom::bytes),
-        "root_bloom_profile":index.table.bloom.as_ref().map_or("none", |bloom| bloom.profile.name()),
-        "root_bloom_hashes":index.table.bloom.as_ref().map_or(0, |bloom| bloom.hashes),
-        "root_bloom_bits_per_request":index.table.bloom.as_ref().map_or(0, |bloom| bloom.profile.bits_per_request()),
         "sparse_canonical_enabled":basis.sparse_canonical,
         "pair_table_entries":0,
         "edge_selectors":0,
@@ -4745,6 +4751,18 @@ fn main() {
         "threads":1,
         "scope":"public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
     });
+    summary["root_bloom_profile"] = json!(index
+        .table
+        .bloom
+        .as_ref()
+        .map_or("none", |bloom| bloom.profile.name()));
+    summary["root_bloom_hashes"] =
+        json!(index.table.bloom.as_ref().map_or(0, |bloom| bloom.hashes));
+    summary["root_bloom_bits_per_request"] = json!(index
+        .table
+        .bloom
+        .as_ref()
+        .map_or(0, |bloom| bloom.profile.bits_per_request()));
     println!("{summary}");
     if let Ok(path) = std::env::var("KIC_DUMP_BASE") {
         let dump = json!({
