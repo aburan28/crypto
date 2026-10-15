@@ -1,0 +1,28 @@
+   Compiling n83-matched-supplement v0.1.0 (/workspace/repos/crypto/research/n83_matched_20261014/postprocessing)
+    Finished `release` profile [optimized] target(s) in 1.16s
+     Running unittests src/lib.rs (/workspace/n83_evaluation/build/release/deps/n83_matched_supplement-600310c7d1ca0efc)
+
+running 8 tests
+test tests::failed_or_missing_independent_gate_blocks_execution ... ok
+test tests::even_median_and_negative_counts ... ok
+test tests::cpu_and_rss_identity_not_stage_double_counting ... ok
+test tests::ic_residual_is_signed_and_not_a_sixth_phase ... ok
+test tests::only_named_float_clock_fields_allow_one_ulp ... ok
+test tests::rho_integer_identity_is_exact ... ok
+test tests::missing_and_inconsistent_phase_never_become_zero ... ok
+test tests::counter_sums_remain_exact_and_overflow_fails ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (/workspace/n83_evaluation/build/release/deps/n83_matched_supplement-82e5c32c60465fd4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests n83_matched_supplement
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
