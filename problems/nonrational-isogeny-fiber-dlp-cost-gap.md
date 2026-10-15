@@ -15,6 +15,7 @@
   [2026-10-15 χ polynomial run](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1651Z/REPORT.md),
   [public-only direct-root repeat](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1851Z/REPORT.md),
   [different-j relation and fiber controls](../research/isogeny_torsion_fibers_20261012/different_j_20261015/reports/run-20261015T1713Z/REPORT.md),
+  [different-j full-image factor-base gate](../research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/RESULTS.md),
   and [three-arm pairing batch cost report](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1740Z/REPORT.md)
 - **Next action owner:** unassigned
 - **Last updated:** 2026-10-15
@@ -168,6 +169,19 @@ cannot map to their fixed non-isomorphic destinations.
   per image and 61 distinct target-subgroup images, with 3721/3721
   subgroup homomorphism checks. Thus the rational fiber multiplicity
   did not add relation yield on this projected subgroup workload.
+- **Observed with a full rational-image destination base:** the
+  [separately frozen V2 run](../research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/RESULTS.md)
+  enumerated all 1,525 rational image points, selected eight projected
+  columns from 21 deterministic candidates, and replayed 18/18 scalar
+  rows across four relation and two rho arms. All four bases had 56/60
+  nonzero two-sum support; full-image and projected-image support shared
+  52 sums and had four unique sums each. The three-round paired
+  full-image/rho local CPU ratio median was 70.281, with a 98.532%
+  median full-image setup share. The custom timer omits common parsing,
+  model construction and process startup; portable counted-`S` and
+  target-count setup reuse remain open. The checked Lean finite-support
+  proof uses frozen scalar-coordinate lists; a faithful curve-level
+  point-to-scalar and Vélu bridge remains open.
 - **Observed in the pairing batch:** the
   [V6 three-arm run](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1740Z/REPORT.md)
   replayed 594/594 scalar outputs on 66 distinct order-67 `F_401`
@@ -241,6 +255,17 @@ cannot map to their fixed non-isomorphic destinations.
   projected arms had the same relation outcomes and the χ index had higher
   median CPU cost than the plain projected table at all sizes. The V3
   seven-arm result, with 75 verified rows, remains separately retained.
+- [x] Compare a deterministically selected full rational-image base with
+  source, projected-image and destination-direct bases on the frozen
+  different-j pair. The [V2 report](../research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/RESULTS.md)
+  records exact support membership, 18/18 independently replayed scalar
+  rows and a charged local timer interval over three paired rounds.
+- [ ] Price that full-image construction over distinct reusable targets
+  against direct source BSGS and rho in one counted unit, with input/model
+  construction, setup, relation recovery, verification and memory charged.
+  The [60-target gate](../research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/NEXT_GATE.md)
+  specifies the next fixed panel; isolation and second-host replay remain
+  additional acceptance conditions.
 - [x] Construct and cold-price an exact pairing transfer on the first two
   frozen quadratic-extension targets, with a certified evaluation field,
   selected torsion input, separated H search/Miller/final exponent/field-DLP
@@ -428,3 +453,15 @@ input parsing and calibration. The [proof map](../research/isogeny_torsion_fiber
 records a checked conditional relation-transfer theorem and the open
 concrete polynomial/curve bridge. The destination full-image factor-base
 and χ-coordinate resultant questions remain open.
+
+2026-10-15 full-image V2: the separately frozen different-j destination
+base selected eight projected columns after enumerating all 1,525
+rational image points. Four relation arms solved the same order-61 target
+in three rounds each, and two rho arms did likewise; a separate native
+checker replayed all 18 scalar rows. The source and projected-image
+two-sum support sets coincided, while the full-image set exchanged four
+of 56 nonzero sums with the projected-image set. The full-image cold
+local timer interval had a paired rho ratio median of 70.281, dominated
+by construction. Reusing that construction over distinct targets,
+portable counted pricing and the direct χ-coordinate resultant remain
+open obligations.

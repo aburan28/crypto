@@ -1,0 +1,6 @@
+name = "different_j_full_image_support"
+version = "0.1.0"
+defaultTargets = ["FullImageSupport"]
+
+[[lean_lib]]
+name = "FullImageSupport"
