@@ -379,6 +379,29 @@ theorem conditioned_three_sum_support_bound {A : Type*}
           Finset.card_le_card Finset.inter_subset_right
     _ ≤ 816 := three_sum_support_bound base
 
+/-- Character-sum bounds from genus 7 and 31 double covers imply a
+    fourfold lower bound on the accepted scalar count. The geometric
+    Riemann--Hurwitz and Hasse--Weil hypotheses are explicit inputs here. -/
+theorem character_filter_acceptance_lower_bound
+    (r U T accepted s₁ s₁₂ identityAccepted : ℤ)
+    (hcount : 4 * (accepted + identityAccepted) =
+      r + 2 * s₁ + s₁₂)
+    (h₁ : -(14 * U + T) ≤ s₁)
+    (h₁₂ : -(62 * U + T) ≤ s₁₂) :
+    r - 90 * U - 3 * T - 4 * identityAccepted ≤ 4 * accepted := by
+  omega
+
+/-- Exact integer specialization of the P-192 character-density bound.
+    The geometric character-sum inequalities are supplied separately. -/
+theorem p192_character_filter_integer_certificate :
+    ((6277101735386680763835789423176059013767194773182842284081 : ℕ) -
+      90 * 79228162514264337593543950336 -
+      3 * 31607402316713927207482677199 + 3) / 4 - 1 =
+      1569275433846670190958947353987675545133315652035359680560 ∧
+    816 * (2 : ℕ)^180 <
+      1569275433846670190958947353987675545133315652035359680560 := by
+  constructor <;> norm_num
+
 /-- A fixed shift of a 16-point three-sum base still has at most 816 images. -/
 theorem shifted_three_sum_support_bound {A : Type*} [AddCommGroup A] [DecidableEq A]
     (base : Fin 16 → A) (shift : A) :
@@ -489,6 +512,8 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.canonicalTriples16_card
 #print axioms P192ExtensionCover.three_sum_support_bound
 #print axioms P192ExtensionCover.conditioned_three_sum_support_bound
+#print axioms P192ExtensionCover.character_filter_acceptance_lower_bound
+#print axioms P192ExtensionCover.p192_character_filter_integer_certificate
 #print axioms P192ExtensionCover.shifted_three_sum_support_bound
 #print axioms P192ExtensionCover.shifted_three_point_relation
 #print axioms P192ExtensionCover.six_periodic_eigenvector_zero

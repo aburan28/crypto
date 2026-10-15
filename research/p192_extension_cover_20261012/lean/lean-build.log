@@ -1,4 +1,4 @@
-⚠ [1186/1187] Built CrossRatio (58s)
+⚠ [1186/1187] Built CrossRatio (90s)
 warning: CrossRatio.lean:127:54: This simp argument is unused:
   zsmul_add
 
@@ -27,42 +27,44 @@ Hint: Omit it from the simp argument list.
   [apply] simp [N, hrD, hσD, hσ2D]
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-warning: CrossRatio.lean:415:31: This simp argument is unused:
+warning: CrossRatio.lean:438:31: This simp argument is unused:
   pow_two
 
 Hint: Omit it from the simp argument list.
   [apply] simp [pow_succ, smul_smul, mul_assoc]
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-info: CrossRatio.lean:468:0: 'P192ExtensionCover.cyclic_cross_ratio_product' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:469:0: 'P192ExtensionCover.cyclic_cross_ratio_not_norm_one' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:470:0: 'P192ExtensionCover.type_i_discriminant_factor_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:471:0: 'P192ExtensionCover.pullback_injective_of_push_pull_two' does not depend on any axioms
-info: CrossRatio.lean:472:0: 'P192ExtensionCover.legendre_j_difference_factor' depends on axioms: [propext, Quot.sound]
-info: CrossRatio.lean:473:0: 'P192ExtensionCover.scholten_palindromic_identity' depends on axioms: [propext]
-info: CrossRatio.lean:474:0: 'P192ExtensionCover.scholten_reciprocal_identity' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:475:0: 'P192ExtensionCover.quartic_projection_identity' depends on axioms: [propext]
-info: CrossRatio.lean:476:0: 'P192ExtensionCover.projected_three_point_relation' depends on axioms: [propext]
-info: CrossRatio.lean:477:0: 'P192ExtensionCover.projected_target_scalar' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:478:0: 'P192ExtensionCover.odd_power_pair_square' depends on axioms: [propext, Quot.sound]
-info: CrossRatio.lean:479:0: 'P192ExtensionCover.type_i_subfield_rhs_square' depends on axioms: [propext, Quot.sound]
-info: CrossRatio.lean:480:0: 'P192ExtensionCover.involution_norm_fixed' does not depend on any axioms
-info: CrossRatio.lean:481:0: 'P192ExtensionCover.involution_norm_torsion' depends on axioms: [propext]
-info: CrossRatio.lean:482:0: 'P192ExtensionCover.conorm_preserves_torsion' depends on axioms: [propext]
-info: CrossRatio.lean:483:0: 'P192ExtensionCover.conorm_nonzero_torsion_of_push_pull_two' depends on axioms: [propext]
-info: CrossRatio.lean:484:0: 'P192ExtensionCover.conorm_exact_prime_order_of_push_pull_two' depends on axioms: [propext,
+info: CrossRatio.lean:491:0: 'P192ExtensionCover.cyclic_cross_ratio_product' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:492:0: 'P192ExtensionCover.cyclic_cross_ratio_not_norm_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:493:0: 'P192ExtensionCover.type_i_discriminant_factor_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:494:0: 'P192ExtensionCover.pullback_injective_of_push_pull_two' does not depend on any axioms
+info: CrossRatio.lean:495:0: 'P192ExtensionCover.legendre_j_difference_factor' depends on axioms: [propext, Quot.sound]
+info: CrossRatio.lean:496:0: 'P192ExtensionCover.scholten_palindromic_identity' depends on axioms: [propext]
+info: CrossRatio.lean:497:0: 'P192ExtensionCover.scholten_reciprocal_identity' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:498:0: 'P192ExtensionCover.quartic_projection_identity' depends on axioms: [propext]
+info: CrossRatio.lean:499:0: 'P192ExtensionCover.projected_three_point_relation' depends on axioms: [propext]
+info: CrossRatio.lean:500:0: 'P192ExtensionCover.projected_target_scalar' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:501:0: 'P192ExtensionCover.odd_power_pair_square' depends on axioms: [propext, Quot.sound]
+info: CrossRatio.lean:502:0: 'P192ExtensionCover.type_i_subfield_rhs_square' depends on axioms: [propext, Quot.sound]
+info: CrossRatio.lean:503:0: 'P192ExtensionCover.involution_norm_fixed' does not depend on any axioms
+info: CrossRatio.lean:504:0: 'P192ExtensionCover.involution_norm_torsion' depends on axioms: [propext]
+info: CrossRatio.lean:505:0: 'P192ExtensionCover.conorm_preserves_torsion' depends on axioms: [propext]
+info: CrossRatio.lean:506:0: 'P192ExtensionCover.conorm_nonzero_torsion_of_push_pull_two' depends on axioms: [propext]
+info: CrossRatio.lean:507:0: 'P192ExtensionCover.conorm_exact_prime_order_of_push_pull_two' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
-info: CrossRatio.lean:485:0: 'P192ExtensionCover.cyclic_three_norm_exact_prime_order' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:486:0: 'P192ExtensionCover.three_quotients_faithful_on_odd_torsion' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:487:0: 'P192ExtensionCover.three_quotients_inverse_on_odd_torsion' depends on axioms: [propext, Quot.sound]
-info: CrossRatio.lean:488:0: 'P192ExtensionCover.mobius_quartic_clear' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:489:0: 'P192ExtensionCover.canonicalTriples16_card' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:490:0: 'P192ExtensionCover.three_sum_support_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:491:0: 'P192ExtensionCover.conditioned_three_sum_support_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:492:0: 'P192ExtensionCover.shifted_three_sum_support_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:493:0: 'P192ExtensionCover.shifted_three_point_relation' depends on axioms: [propext]
-info: CrossRatio.lean:494:0: 'P192ExtensionCover.six_periodic_eigenvector_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: CrossRatio.lean:495:0: 'P192ExtensionCover.type_i_primitive_quartic_identity' depends on axioms: [propext]
-info: CrossRatio.lean:496:0: 'P192ExtensionCover.type_i_ciani_resultant_factor' depends on axioms: [propext, Quot.sound]
+info: CrossRatio.lean:508:0: 'P192ExtensionCover.cyclic_three_norm_exact_prime_order' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:509:0: 'P192ExtensionCover.three_quotients_faithful_on_odd_torsion' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:510:0: 'P192ExtensionCover.three_quotients_inverse_on_odd_torsion' depends on axioms: [propext, Quot.sound]
+info: CrossRatio.lean:511:0: 'P192ExtensionCover.mobius_quartic_clear' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:512:0: 'P192ExtensionCover.canonicalTriples16_card' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:513:0: 'P192ExtensionCover.three_sum_support_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:514:0: 'P192ExtensionCover.conditioned_three_sum_support_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:515:0: 'P192ExtensionCover.character_filter_acceptance_lower_bound' depends on axioms: [propext, Quot.sound]
+info: CrossRatio.lean:516:0: 'P192ExtensionCover.p192_character_filter_integer_certificate' depends on axioms: [propext]
+info: CrossRatio.lean:517:0: 'P192ExtensionCover.shifted_three_sum_support_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:518:0: 'P192ExtensionCover.shifted_three_point_relation' depends on axioms: [propext]
+info: CrossRatio.lean:519:0: 'P192ExtensionCover.six_periodic_eigenvector_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:520:0: 'P192ExtensionCover.type_i_primitive_quartic_identity' depends on axioms: [propext]
+info: CrossRatio.lean:521:0: 'P192ExtensionCover.type_i_ciani_resultant_factor' depends on axioms: [propext, Quot.sound]
 Build completed successfully (1187 jobs).
