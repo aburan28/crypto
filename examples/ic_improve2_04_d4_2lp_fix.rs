@@ -633,7 +633,8 @@ fn emit(path: &str, v: &Value) {
         .append(true)
         .open(path)
         .expect("json");
-    writeln!(f, "{v}").unwrap();
+    // One write per row, so two lanes appending to one file never interleave.
+    f.write_all(format!("{v}\n").as_bytes()).unwrap();
     println!("{v}");
 }
 
@@ -939,14 +940,16 @@ fn fit(args: &[String]) {
     }
     let model = Value::Object(model);
     // Where the frozen rule first leaves plain D₄ (extrapolation).
-    let mut leave = None;
+    // Every flip of the rule's choice from 20 to 600 (below the smallest
+    // training size, 26.3, the fits are extrapolated too).
+    let mut leave = Vec::new();
+    let mut prev: Option<f64> = None;
     let mut x = 20.0;
     while x <= 600.0 {
-        if let (Some(a), c) = adapt_choice(&model, x) {
-            leave = Some(
-                json!({"log2_E": (x * 10.0f64).round() / 10.0, "alpha": a, "modelled_ratio": c}),
-            );
-            break;
+        let (ch, c) = adapt_choice(&model, x);
+        if ch != prev {
+            leave.push(json!({"log2_E": (x * 10.0f64).round() / 10.0, "alpha": ch, "modelled_ratio": c}));
+            prev = ch;
         }
         x += 0.1;
     }

@@ -116,3 +116,17 @@ dimensions and nonzeros given to the solver. Wall time is recorded but not used.
   noise floor (about +-2% with 3 curves).
 - **Correctness**: every arm's `k` is checked as `k phi(G) = phi(T)` and against the planted `k`; all
   arms agree with the incumbent, or the arm fails.
+
+## Amendment A1 (2026-10-15, after tuning stage 1, before any test-curve data)
+
+- Stage 1 ([results/tune1/](results/tune1/), training curves 5-7, kappa = 2): lowest geometric-mean
+  whole cost at b = 18 is **`lpsgewd` with `cx = 8`** (3.371e9, against 4.995e9 for `inc`; next
+  `lpsgelz` cx 8 3.571e9, `bfssgewd` cx 8 3.574e9). Frozen: `cx = 8` for every SGE arm, and
+  `lpsgewd` is "the best LA arm" for the A/A and kappa-tuned arms. `cx = 8` is the edge of the grid.
+- Stage 2 grid, changed before any stage-2 data for the machine budget (load 9 on 4 cores, three
+  items): kappa in {0.71, 1, 1.41, 2, 2.83} at b = 18 and kappa in {1, 1.41, 2, 2.83} at b = 20,
+  training curves 5-7, LA arms `inc` and `lpsgewd`. 2.83 is added because the cheaper linear
+  algebra may move the optimum above 2; 0.5 is dropped (it can only win if LA dominates, which stage 1
+  says it no longer does). b = 16 is dropped. kappa* = lowest geometric-mean whole cost of `lpsgewd` at b = 20.
+- Test run: `main` stream with all ten LA arms at b = 10..20; at b = 21 only `inc, wied, bfssgewd,
+  lpsgewd` (time cap); `aa` stream with `inc, lpsgewd` at b = 10..21.
