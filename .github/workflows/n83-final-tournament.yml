@@ -1,6 +1,11 @@
 name: N83 frozen factor-base final tournament
 
 on:
+  push:
+    branches: [codex/n83-final-tournament-20261015]
+    paths:
+      - .github/workflows/n83-final-tournament.yml
+      - research/n83_final_tournament_20261015/admission.json
   workflow_dispatch:
 
 permissions:
