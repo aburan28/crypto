@@ -772,6 +772,35 @@ mod tests {
     use super::*;
 
     #[test]
+    fn cm_generated_curve_has_requested_order_by_exhaustive_count() {
+        // 4*59 = 12^2 + 23*2^2; (59-1)^2 + 12^2 = 4*877.
+        // Compare the base-field result with direct enumeration.
+        let inst = Instance {
+            d: -23,
+            p: Int::from(59i64),
+            t: Int::from(12i64),
+            v: Int::from(2i64),
+            h: 4,
+            r: Int::from(877i64),
+            tries: 0,
+        };
+        for seed in 1..=4 {
+            let cm = build_curve(&inst, seed).expect("CM curve");
+            let (a, b) = (cm.curve.a.mod_u64(59), cm.curve.b.mod_u64(59));
+            let mut n = 1;
+            for x in 0u64..59 {
+                for y in 0u64..59 {
+                    if y * y % 59 == (x * x % 59 * x + a * x + b) % 59 {
+                        n += 1;
+                    }
+                }
+            }
+            assert_eq!(n, 48, "CM trace must equal 12, seed={seed}");
+            assert_eq!(cm.hilbert_degree, 3);
+        }
+    }
+
+    #[test]
     fn cheapest_loops_reproduce_known_values() {
         // values certified natively in research/isogeny_loop_glv_20261011 and in the paper
         for (d, cost, norm) in [
