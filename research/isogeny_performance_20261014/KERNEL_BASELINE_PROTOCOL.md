@@ -2,8 +2,10 @@
 
 This extends the requested inventory-wide baseline campaign beyond the eight
 BMSS constructors. It changes the native measurement adapter only; the seven
-constructor algorithms remain unchanged. Execution and per-CPU receipts are
-still required before this series is measured.
+constructor algorithms remain unchanged. Two complete Apple M4 Pro count runs
+now provide 84 paired fingerprints and identical counters in every case; see
+`kernel-report-20261015/`. Other physical CPU receipts and kernel optimization
+rounds remain open. No wall samples are admitted by this local series.
 
 ```sh
 isogeny-perf kernels --out FRESH.jsonl --revision FULL_SOURCE_SHA \

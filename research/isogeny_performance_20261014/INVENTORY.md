@@ -46,8 +46,10 @@ The next exact-fixture adapter is `isogeny-perf kernels`, documented in
 square-root variants, and supplied-kernel Kohel. Its 84-row matrix is separate
 from the 96-row BMSS series. It verifies degree/codomain and deterministic
 point-transport fingerprints against both Kohel and Vélu; it does not claim
-the BMSS series' full coefficient comparison. Current implementation and test
-progress do not establish a completed per-CPU baseline or a kernel speedup.
+the BMSS series' full coefficient comparison. Two Apple M4 Pro runs now pass
+84/84 paired fingerprints with all four counters identical; raw data and the
+report are in `kernel-baseline-20261015/` and `kernel-report-20261015/`. Other
+physical CPU baselines and kernel speedups remain unestablished.
 
 CPU plan: Apple M4 Pro locally; GitHub native Linux x86-64, Linux ARM64,
 Apple ARM64 and Intel macOS runners. Runner labels select architecture/OS,

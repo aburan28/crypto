@@ -82,3 +82,38 @@ Canonical charts checked: `docs/index-calculus-scoreboard.html`,
 other specialization work or curve edges; this constructor-only count result
 changes none of their records. The new graph and its 150-dpi render are copied
 into `benchmarks/20261014-isogeny-performance/` with a matching index entry.
+
+## Kernel baseline added on 2026-10-15
+
+The native `isogeny-perf kernels` adapter now measures seven additional
+constructors: affine/cyclic Vélu, two x-only variants, two square-root variants,
+and supplied-kernel Kohel. Two complete 84-case runs at source
+`5521605f86ae444a9f4a433ca9b2f80d541e8470` cover 192/224/256/511 field bits and
+degrees 7/31/101. All paired point-transport fingerprints agree, and all four
+operation counters repeat exactly in every cell. Both native shells exited 0.
+
+At 224 bits/degree 101, affine Vélu records 454 multiplication calls and 50
+inversions; fast x-only Vélu records 1,044 and 1. These are baseline counts of
+existing methods. Input boundaries are distinct. Kohel constructs all rational
+map coefficients; other rows store compact evaluation representations. Their
+build counts include different output materialization work, and admit no
+cross-boundary end-to-end ratio.
+
+The controls compare degree, codomain and full transports at `2*ell+1` distinct
+non-kernel abscissae against both Kohel and point-enumerating Vélu. Counted and
+native outputs agree. This check differs from the BMSS coefficient comparison.
+The same shared Apple M4 Pro supplied these counts, with zero timing samples
+requested or qualified. Other physical CPU baselines and kernel optimization
+rounds remain open. The field-width fixtures remain separate from named NIST
+searches and the additional-map requirement.
+
+Read [the protocol](KERNEL_BASELINE_PROTOCOL.md),
+[source-linked report](kernel-report-20261015/REPORT.md),
+[visually inspected PDF](kernel-report-20261015/REPORT.pdf),
+[graph data](kernel-report-20261015/COUNTS.csv), and
+[extraction/provenance](kernel-baseline-20261015/README.md).
+`KERNEL_BASELINE_RUNS.tar.gz` retains both raw runs, comparison, executable,
+source and validation logs. A fresh extraction passed all 14 byte/SHA256
+records. Matching PDF/SVG/150-dpi PNG copies and the index row are in
+`benchmarks/20261015-isogeny-kernel-baselines/`. The previously listed canonical
+DLP/rho and curve graphs receive no new value from these constructor counts.
