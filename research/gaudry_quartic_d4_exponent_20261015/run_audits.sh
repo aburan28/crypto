@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Audits per PROTOCOL.md amendment 2, four at a time. Thin orchestration.
+# Audits per PROTOCOL.md amendment 2, three at a time (amendment 3). Thin orchestration.
 set -uo pipefail
 cd "$(dirname "$0")"
 BIN=../../target/release/ecbench
@@ -19,5 +19,5 @@ export -f one; export BIN
 # Longest replays first.
 ls -d sessions/*/ | sed 's#/$##' | awk -F-p '{print $0}' | while read d; do
   j=$(basename "$d"); p=$(echo "$j" | sed -E 's/.*-p([0-9]+).*/\1/'); echo "$p $d"; done \
-  | sort -k1,1nr | awk '{print $2}' | xargs -P 4 -I{} bash -c 'one {}'
+  | sort -k1,1nr | awk '{print $2}' | xargs -P 3 -I{} bash -c 'one {}'
 echo "audits done" >> audits/AUDITS.txt

@@ -177,3 +177,17 @@ below is by size only and does not change any estimate. Audits:
   `[d]G = Q` verification) without re-execution on the remaining sessions.
 
 The audit receipts in `audits/` say which was done for each session.
+
+## Amendment 3 (2026-10-15T16:31Z, infrastructure, no result involved)
+
+The container's CPU set shrank during the run (4 CPUs at launch, CPUs 0–2
+by 16:30Z). At the 10 h deadline the first queue left 22 jobs to
+`run_queue2.sh`; it ran two (`main-p149-t2`, `main-p101-t2`), and the other
+20 failed at launch before any computation, with "CPU n is outside this
+process's cpuset, so the child could not be pinned" (logs kept as
+`sessions/<job>.launch-failed.log`; no session directory was created).
+Those 20 (`sessions/jobs3.txt`) were relaunched at 16:31Z by
+`run_queue3.sh`: three workers, `--cpus inherit`, the same 16 h start
+deadline (20:57Z). Audits (amendment 2) had started and were stopped; they
+are rerun from the start after the queue (`audits/AUDITS.aborted-1.txt`
+lists the two that had finished).
