@@ -291,7 +291,11 @@ fn sigma_word_formal(tags: &[u32]) -> bool {
         for _ in 0..j {
             tj = ztau_mul(tj, (0, 1));
         }
-        let m = if t & 0x100 != 0 { (1 - tj.0, -tj.1) } else { (1 + tj.0, tj.1) };
+        let m = if t & 0x100 != 0 {
+            (1 - tj.0, -tj.1)
+        } else {
+            (1 + tj.0, tj.1)
+        };
         prod = ztau_mul(prod, m);
         deg += j;
     }
@@ -596,7 +600,10 @@ fn trial(s: &Setup, rng: &mut StdRng, t: &mut Tally) {
             }
             let b = s.branch(m, &w.p, key);
             t.branch_counts[b] += 1;
-            let sigma_family = matches!(s.walk, Walk::Sigma | Walk::Sigma2 | Walk::SigmaPm | Walk::Sigma2t);
+            let sigma_family = matches!(
+                s.walk,
+                Walk::Sigma | Walk::Sigma2 | Walk::SigmaPm | Walk::Sigma2t
+            );
             let next = if sigma_family {
                 let q = s.curve.frobenius_k(w.p, 3 + b as u32);
                 let plus = s.curve.add(w.p, q);
@@ -634,8 +641,8 @@ fn trial(s: &Setup, rng: &mut StdRng, t: &mut Tally) {
                 w.len += 1;
                 if !next.infinity {
                     let nk = s.key(&next);
-                    if let Some(l) =
-                        (1..=RECENT.min(w.len)).find(|&l| s.key(&w.recent[(w.len - l) % RECENT].0) == nk)
+                    if let Some(l) = (1..=RECENT.min(w.len))
+                        .find(|&l| s.key(&w.recent[(w.len - l) % RECENT].0) == nk)
                     {
                         t.short_cycle[l] += 1;
                         let tags: Vec<u32> =
@@ -799,7 +806,10 @@ fn main() {
         |v| v.parse().expect("--branches"),
     );
     assert!(
-        !matches!(walk, Walk::Sigma | Walk::Sigma2 | Walk::SigmaPm | Walk::Sigma2t) || branches == 8,
+        !matches!(
+            walk,
+            Walk::Sigma | Walk::Sigma2 | Walk::SigmaPm | Walk::Sigma2t
+        ) || branches == 8,
         "the sigma walk has eight branches"
     );
     assert!(branches <= 1 << 16, "at most 2^16 branches");
@@ -855,7 +865,13 @@ fn main() {
         Some("sj") => SignRule::Sj,
         Some("hash") => SignRule::Hash,
         Some(v) => panic!("unknown sign {v}"),
-        None => if dist == Dist::Native { SignRule::Hw4 } else { SignRule::Hash },
+        None => {
+            if dist == Dist::Native {
+                SignRule::Hw4
+            } else {
+                SignRule::Hash
+            }
+        }
     };
     let mut setup = Setup {
         walk,
@@ -882,7 +898,10 @@ fn main() {
     let merge: u64 = get("--merge").map_or(0, |v| v.parse().expect("--merge"));
     if merge > 0 {
         assert!(
-            !matches!(walk, Walk::Sigma | Walk::Sigma2 | Walk::SigmaPm | Walk::Sigma2t),
+            !matches!(
+                walk,
+                Walk::Sigma | Walk::Sigma2 | Walk::SigmaPm | Walk::Sigma2t
+            ),
             "the sigma walks have no history to part on"
         );
         let next = AtomicU64::new(0);
@@ -998,7 +1017,10 @@ fn main() {
     // collisions are suppressed only when the frames agree, 1/2n of them.
     let injective = 1.0 / (1.0 - s2).sqrt();
     let class_frame = 1.0 / (1.0 - s2 / (2.0 * n as f64)).sqrt();
-    let model = if matches!(walk, Walk::Sigma | Walk::Sigma2 | Walk::SigmaPm | Walk::Sigma2t) {
+    let model = if matches!(
+        walk,
+        Walk::Sigma | Walk::Sigma2 | Walk::SigmaPm | Walk::Sigma2t
+    ) {
         injective
     } else {
         class_frame
