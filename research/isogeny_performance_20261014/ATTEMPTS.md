@@ -66,3 +66,14 @@ increase in multiplication calls beside reduced inversion counts.
     failed after the final root validation succeeded. T-2844 covers the distinct
     publication/CPU-evidence review phase; it reserves evidence/report/index paths
     and does not repeat the completed arithmetic implementation work.
+
+14. The post-merge root run failed the unchanged Nagao six-sum test after its
+    existing deadline expired. Its exact rerun passed. A concurrent full retry
+    remained stalled at long fixtures and was interrupted, preserving its raw
+    output. The final unfiltered serial run passed 4,095 tests, zero failures,
+    with 117 existing ignored. See `publication-20261015/` and `VALIDATION.md`.
+15. On resumption on 2026-10-15 the coordinator's project ID and task inventory
+    had changed, and old task T-2844 returned 404. Clear scopes were claimed as
+    T-15 in the current coordinator. A registered interactive work shell now
+    maintains the real publication/validation claim. Stale MCP credentials
+    returned 401; the configured CLI supplied the current authenticated access.

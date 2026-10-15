@@ -1,6 +1,14 @@
 name: isogeny-performance
 
 on:
+  # Run the research campaign on its feature branch even while an unrelated
+  # benchmark-index conflict prevents pull_request workflows from starting.
+  push:
+    branches: ['codex/isogeny-performance-20261014']
+    paths:
+      - 'isogeny_algos/**'
+      - 'research/isogeny_performance_20261014/**'
+      - '.github/workflows/isogeny-performance.yml'
   pull_request:
     paths:
       - 'isogeny_algos/**'

@@ -31,3 +31,24 @@ binary hashes and constructor inputs are in the JSONL headers and rows.
 
 CI checks for the eventual PR head and native Linux isolation execution are
 separate from these local passes; they must be verified before merging.
+
+## Post-merge validation, retained on 2026-10-15
+
+At source `0191f5b924765a0f6d7882f13787b7391413c685`, the full standalone
+release library/binary/integration/example suite passed again. The root suite
+now contains twelve additional tests inherited from main. Its final unfiltered
+run, with `RAYON_NUM_THREADS=1` and `--test-threads=1`, passed **4,095 tests,
+zero failures, 117 existing ignored**. No test or assertion was changed.
+
+The first post-merge full root attempt had 4,094 passes and one failure: the
+unchanged Nagao six-sum test exhausted its existing solver deadline and
+reported `timed_out: true`. That exact test passed alone with one Rayon worker.
+A concurrent full retry was interrupted while the Nagao and registry fixtures
+were still running; it has no complete-suite verdict. The successful serial
+run does not replace either earlier receipt. These validation intervals are
+diagnostic test-run data, excluded from algorithm speedup claims.
+
+The fresh logs and command provenance are in `publication-20261015/`.
+Earlier frozen archives and their inventories remain unchanged. The current
+coordinator no longer contains old task T-2844 (404); resumed publication is
+claimed as T-15 through a registered shell that maintains its lease.
