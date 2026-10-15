@@ -12,6 +12,8 @@ common=(--targets 2 --budget 3600 --max-nnz 2000000000)
 start=$(date +%s); deadline=$((start + 180 * 60))
 run() {
   name=$1; shift
+  # Resumable: a run whose end was recorded with exit 0 is not repeated.
+  if grep -q "end $name exit 0" ../../progress.txt 2>/dev/null; then return; fi
   if [ "$(date +%s)" -gt "$deadline" ]; then
     echo "$(date -u +%FT%TZ) not run (deadline) $name: $*" >> ../../progress.txt; return
   fi

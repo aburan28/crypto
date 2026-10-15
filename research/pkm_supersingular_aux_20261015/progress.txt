@@ -1,0 +1,48 @@
+2026-10-15T23:15:13Z q3 s20 run
+2026-10-15T23:15:20Z q3 s20 run exit 0
+2026-10-15T23:15:22Z q3 s20 audit exit 0
+2026-10-15T23:15:23Z q3 s20 tables done
+2026-10-15T23:15:23Z q3 s22 run
+2026-10-15T23:15:30Z q3 s22 run exit 0
+2026-10-15T23:15:34Z q3 s22 audit exit 0
+2026-10-15T23:15:34Z q3 s22 tables done
+2026-10-15T23:15:34Z q3 s24 run
+2026-10-15T23:15:43Z q3 s24 run exit 0
+2026-10-15T23:15:47Z q3 s24 audit exit 0
+2026-10-15T23:15:47Z q3 s24 tables done
+2026-10-15T23:15:47Z start P0-ordinary: --p 786433 --arm ordinary --m 2 --t-min 1 --t-max 5
+2026-10-15T23:15:47Z end P0-ordinary exit 0
+2026-10-15T23:15:47Z start P0-split: --p 786433 --arm split --m 2 --t-min 1 --t-max 5
+2026-10-15T23:15:47Z end P0-split exit 0
+2026-10-15T23:15:47Z start T24-ss-j1728-m2: --p 14680063 --arm ss-j1728 --m 2 --t-min 1 --t-max 9
+2026-10-15T23:16:30Z end T24-ss-j1728-m2 exit 0
+2026-10-15T23:16:30Z start T24-ss-j1728-twist-m2: --p 14680063 --arm ss-j1728-twist --m 2 --t-min 1 --t-max 9
+2026-10-15T23:17:14Z end T24-ss-j1728-twist-m2 exit 0
+2026-10-15T23:17:14Z start T24-ordinary-m2: --p 14680063 --arm ordinary --m 2 --t-min 1 --t-max 9
+2026-10-15T23:17:56Z end T24-ordinary-m2 exit 0
+2026-10-15T23:17:56Z start T24-torus-m2: --p 14680063 --arm torus --m 2 --t-min 1 --t-max 9
+2026-10-15T23:18:36Z end T24-torus-m2 exit 0
+2026-10-15T23:18:36Z start T31-ss-j1728-m2: --p 2046820351 --arm ss-j1728 --m 2 --t-min 1 --t-max 9
+2026-10-15T23:19:19Z end T31-ss-j1728-m2 exit 0
+2026-10-15T23:19:19Z start T31-ss-j1728-twist-m2: --p 2046820351 --arm ss-j1728-twist --m 2 --t-min 1 --t-max 9
+2026-10-15T23:20:00Z end T31-ss-j1728-twist-m2 exit 0
+2026-10-15T23:20:00Z start T31-ordinary-m2: --p 2046820351 --arm ordinary --m 2 --t-min 1 --t-max 9
+2026-10-15T23:20:43Z end T31-ordinary-m2 exit 0
+2026-10-15T23:20:43Z start T31-torus-m2: --p 2046820351 --arm torus --m 2 --t-min 1 --t-max 9
+2026-10-15T23:21:24Z end T31-torus-m2 exit 0
+2026-10-15T23:21:24Z start S25-ss-j1728-m2: --p 18874367 --arm ss-j1728 --m 2 --t-min 1 --t-max 9
+2026-10-15T23:22:07Z end S25-ss-j1728-m2 exit 0
+2026-10-15T23:22:07Z start S25-ss-j1728-twist-m2: --p 18874367 --arm ss-j1728-twist --m 2 --t-min 1 --t-max 9
+2026-10-15T23:22:50Z end S25-ss-j1728-twist-m2 exit 0
+2026-10-15T23:22:50Z start S25-ss-j0-m2: --p 18874367 --arm ss-j0 --m 2 --t-min 1 --t-max 9
+2026-10-15T23:23:33Z end S25-ss-j0-m2 exit 0
+2026-10-15T23:23:33Z start S25-ss-j0-twist-m2: --p 18874367 --arm ss-j0-twist --m 2 --t-min 1 --t-max 9
+2026-10-15T23:24:16Z end S25-ss-j0-twist-m2 exit 0
+2026-10-15T23:24:16Z start S25-ordinary-m2: --p 18874367 --arm ordinary --m 2 --t-min 1 --t-max 9
+2026-10-15T23:24:59Z end S25-ordinary-m2 exit 0
+2026-10-15T23:24:59Z start S25-torus-m2: --p 18874367 --arm torus --m 2 --t-min 1 --t-max 9
+2026-10-15T23:25:39Z end S25-torus-m2 exit 0
+2026-10-15T23:25:39Z start T31-ss-j1728-m34: --p 2046820351 --arm ss-j1728 --m 3,4 --t-min 2 --t-max-m3 4 --t-max-m4 3
+2026-10-15T23:26:36Z end T31-ss-j1728-m34 exit 0
+2026-10-15T23:26:36Z start T31-ordinary-m34: --p 2046820351 --arm ordinary --m 3,4 --t-min 2 --t-max-m3 4 --t-max-m4 3
+2026-10-15T23:28:00Z container restart killed run_q2.sh during T31-ordinary-m34 (partial rows moved to q2/interrupted/); resuming with completed runs skipped
