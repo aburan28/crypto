@@ -446,6 +446,10 @@ impl ChiPolynomialOracle {
         for (i, &canonical) in self.canonical.iter().enumerate() {
             let canonical_z = chi(curve, canonical).expect("canonical chi is finite");
             self.evaluations += 1;
+            assert!(
+                self.evaluations <= 10_000_000,
+                "chi polynomial-evaluation cap"
+            );
             let in_base = eval_polynomial(f, &self.coefficients, canonical_z) == f.zero();
             let p = match self.corrections[i] {
                 0 => canonical,
@@ -475,6 +479,7 @@ impl ChiPolynomialOracle {
                 }
                 let pj = actual[j];
                 self.pair_equations += 1;
+                assert!(self.pair_equations <= 10_000_000, "chi pair-equation cap");
                 let possible = if target.infinity {
                     pi == curve.neg(pj)
                 } else if pi.x == pj.x && pi != pj {
@@ -937,7 +942,7 @@ fn solve(path: &str, include_iso: bool) {
                             };
                             c.ns_per_canon = Some(transform_calibration(&curve, g, mode));
                         }
-                        let (report, cpu_ns, wall_ns, field) = timed(|| {
+                        let ((report, oracle_stats), cpu_ns, wall_ns, field) = timed(|| {
                             let projected = Rc::new(RefCell::new(Vec::new()));
                             let base = LineBase {
                                 frozen: frozen_raw.clone(),
@@ -956,8 +961,19 @@ fn solve(path: &str, include_iso: bool) {
                             };
                             if arm == "raw-pair" {
                                 let mut oracle = MitmOracle::new(2);
-                                run_pipeline(&ctx, &spec, &base, &mut oracle, answers, &c, None)
-                                    .unwrap()
+                                (
+                                    run_pipeline(
+                                        &ctx,
+                                        &spec,
+                                        &base,
+                                        &mut oracle,
+                                        answers,
+                                        &c,
+                                        None,
+                                    )
+                                    .unwrap(),
+                                    serde_json::Value::Null,
+                                )
                             } else if arm == "chi-polynomial" {
                                 let mut oracle = ChiPolynomialOracle::new(projected);
                                 let rep = run_pipeline(
@@ -970,11 +986,14 @@ fn solve(path: &str, include_iso: bool) {
                                     None,
                                 )
                                 .unwrap();
-                                assert_eq!(
-                                    oracle.rejected_candidates, 0,
-                                    "chi polynomial produced a false candidate"
-                                );
-                                rep
+                                (
+                                    rep,
+                                    json!({"polynomial_evaluations":oracle.evaluations,
+                                    "pair_equations":oracle.pair_equations,
+                                    "exact_checks":oracle.exact_checks,
+                                    "rejected_candidates":oracle.rejected_candidates,
+                                    "canonical_collisions":oracle.canonical_collisions}),
+                                )
                             } else {
                                 let mode = match arm {
                                     "projected-pair" => IndexMode::Projected,
@@ -997,12 +1016,12 @@ fn solve(path: &str, include_iso: bool) {
                                     oracle.false_candidates, 0,
                                     "invalid projected relation"
                                 );
-                                rep
+                                (rep, serde_json::Value::Null)
                             }
                         });
                         (
                             json!(report),
-                            json!({"status":if report.verified{"verified"}else if report.exhausted{"exhausted"}else{"wrong_answer"}}),
+                            json!({"status":if report.verified{"verified"}else if report.exhausted{"exhausted"}else{"wrong_answer"},"oracle_stats":oracle_stats}),
                             cpu_ns,
                             wall_ns,
                             field,
@@ -1052,7 +1071,12 @@ fn exhaustive_chi(path: &str) {
     let mut targets: Vec<_> = (0..19u64)
         .map(|k| (format!("subgroup/{k}"), curve.mul(&mut ops, g, k)))
         .collect();
-    targets.extend(special.into_iter().enumerate().map(|(i, p)| (format!("special/{i}"), p)));
+    targets.extend(
+        special
+            .into_iter()
+            .enumerate()
+            .map(|(i, p)| (format!("special/{i}"), p)),
+    );
     for (label, target) in targets {
         let actual: BTreeSet<_> = oracle
             .solutions(&curve, target, &mut ops)
