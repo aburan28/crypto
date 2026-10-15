@@ -78,5 +78,11 @@ if (( failed )); then
   exit 1
 fi
 
-gtimeout 120 "$checker_binary" "$public" "$checker_input" "$study/RUN_V1.jsonl" "$study/METERS_V1.jsonl" \
-  > "$study/REPLAY_V1.json" 2> "$study/REPLAY_V1.stderr"
+if gtimeout 120 "$checker_binary" "$public" "$checker_input" "$study/RUN_V1.jsonl" "$study/METERS_V1.jsonl" \
+  > "$study/REPLAY_V1.json" 2> "$study/REPLAY_V1.stderr"; then
+  replay_exit=0
+else
+  replay_exit=$?
+fi
+print -r -- "$replay_exit" > "$study/REPLAY_V1.exit"
+exit "$replay_exit"
