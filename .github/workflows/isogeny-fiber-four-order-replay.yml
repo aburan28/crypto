@@ -1,0 +1,64 @@
+name: Isogeny fiber four-order independent Linux replay
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/isogeny-fiber-four-order-replay.yml'
+      - 'examples/different_j_trend_batch.rs'
+      - 'examples/different_j_trend_batch_check.rs'
+      - 'examples/different_j_order_process_meter.rs'
+      - 'research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/BATCH_*_V1.public.json'
+      - 'research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/BATCH_*_V1.checker.json'
+      - 'research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/FIBER_*_V1.json'
+      - 'research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/run_batch_linux_v1.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  independent-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            Cargo.toml
+            Cargo.lock
+            src
+            docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            docs/ecbench/schema.sql
+            docs/curves/registry.json
+            docs/curves/traits.json
+            examples/different_j_trend_batch.rs
+            examples/different_j_trend_batch_check.rs
+            examples/different_j_order_process_meter.rs
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/BATCH_RUN_SPEC_V1.json
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/BATCH_409_433_V1.public.json
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/BATCH_409_433_V1.checker.json
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/BATCH_421_457_V1.public.json
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/BATCH_421_457_V1.checker.json
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/BATCH_457_421_V1.public.json
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/BATCH_457_421_V1.checker.json
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/FIBER_409_433_V1.json
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/FIBER_421_457_V1.json
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/FIBER_457_421_V1.json
+            research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/run_batch_linux_v1.sh
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build the frozen native runner and independent checker
+        run: cargo build --release --locked --example different_j_trend_batch --example different_j_trend_batch_check --example different_j_order_process_meter
+      - name: Run every cold child and replay every output
+        run: bash research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/run_batch_linux_v1.sh "${RUNNER_TEMP}/isogeny-fiber-linux-v1"
+      - name: Retain the host receipt, every child and failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: isogeny-fiber-linux-v1
+          path: ${{ runner.temp }}/isogeny-fiber-linux-v1
+          if-no-files-found: warn
+          retention-days: 90

@@ -20,6 +20,7 @@
   [bounded larger-order different-j pair screen](../research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/RESULTS.md),
   [selected order-229 full rational-fiber audit](../research/isogeny_torsion_fibers_20261012/different_j_order_screen_20261015/FIBER_REPORT.md),
   [order-229 64-target cold comparison](../research/isogeny_torsion_fibers_20261012/different_j_order_batch_20261015/RESULTS.md),
+  [four-order counted-cost and full-fiber panel](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/RESULTS_V2.md),
   and [three-arm pairing batch cost report](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1740Z/REPORT.md)
 - **Next action owner:** unassigned
 - **Last updated:** 2026-10-15
@@ -562,3 +563,30 @@ its local process cost. This discharges the selected panel's finite
 solve and local process-cost gate. The direct χ-coordinate resultant,
 portable counted `S`, isolated independent-host performance replay,
 larger-order scaling and faithful curve-level Lean bridge stay open.
+
+2026-10-15 prime-to-characteristic four-order panel: the separately
+frozen native screen selected different-j pairs at `(p,r)=(409,433),
+(421,457),(457,421)`. Independent full-fiber audits counted respectively
+167,571, 176,859 and 208,395 source points, exactly three rational
+preimages for each of 55,857, 58,953 and 69,465 image points, and all
+187,489, 208,849 and 177,241 subgroup-pair homomorphism checks passed.
+The cold 64-target panel ran 252 new children with seven arms at each
+of three rounds and four target prefixes; an independent Rust checker
+replayed all 5,355 scalar outputs and 37,061 relation witnesses. With
+the order-229 reference the [native trend receipt](../research/isogeny_torsion_fibers_20261012/portable_order_trend_20261015/TREND_V1.json)
+covers 336 children and 7,140 scalar outputs. At 64 targets, median
+counted group `S` for full image was 148.49, 405.89, 332.16 and 336.69
+at orders 229, 421, 433 and 457, against direct rho 6.64, 5.59,
+5.14 and 5.31; the paired full/rho ratios were 22.355, 72.401,
+64.275 and 63.389. This counts group additions and doublings; Fp
+operation axes are separately retained and overlap it. Field work
+outside group calls, root extraction, hash/table operations, row
+arithmetic, allocations and process work lack a common price, so a
+complete portable `S` remains open. Shared-host timing earned only L0.
+The orders span a factor of two with varying cofactors and do not
+establish a scaling exponent. The next structural experiment is a direct
+χ-coordinate resultant/root oracle whose decomposition set matches
+independent enumeration, followed by an equally frozen complete cold
+solve; isolated timing and independent-host performance replay require
+admitted host resources and a portable phase price. The curve-level
+Lean bridge remains open.
