@@ -234,3 +234,32 @@ review lists F1–F4 as owed.
   expected here.
 - F3: both systems of A11 complete within 3600 s. A0's may not.
 - F4: A0's σ ≥ 0.5. No prediction for A11.
+
+### Amendment 3, 2026-10-15: implementation details of F1–F4, before any of their rows
+
+Registered by the experiment lane (`examples/fb_designs_slope.rs`) before any
+row of F1–F4 exists. It changes no arm, threshold, decision rule or
+prediction. Items 1 and 2 settle what Amendment 2 leaves open; item 3
+corrects a statement in it that cannot hold.
+
+1. **N11's random coefficients** come from the target stream after the
+   target is planted, as N's do (Amendment 1 item 3). The `m` replaced
+   equations are the first `m` of the A11 system, in the same order.
+2. **A cell's `max_cols`** in the F1 rule and the secondary slope is the mean
+   over the cell's two systems, as a cell's D is (Amendment 1 item 4).
+   Amendment 2 does not say how a cell's width is formed.
+3. **The leading coefficient of `G` at `m = 4`.** Amendment 2 says `G` has
+   leading coefficient `1 − p₂²` (`p₂` the leading coefficient of `P`). With
+   `Q = X + q₀` monic and `deg P = 2`,
+   `N(X) = Q²(X³ + AX + B) − P² = X⁵ + (2q₀ − p₂²)X⁴ + …`: `Q²X³` reaches
+   `X⁵` and `P²` only `X⁴`. So `N` is monic and `G = N/(X − x_R)` is a monic
+   quartic. The harness checks symbolically that `lead(G)` is the constant 1
+   in every built system. Consequences: the coefficient equations read
+   `g^{4−i}·s_i − G_i = 0`, and the "leading coefficient vanishes" redraw
+   cannot trigger. The redraw that can trigger is the other degeneracy: when
+   no `f` with `Q` monic passes through the four summands (the 4 × 4 linear
+   system for `(q₀, P)` is singular), the target is replanted from the same
+   stream, as A11 replants on a vanishing lead at `m = 3`. The free
+   coefficients are ordered `q₀, c₁, c₂`, with
+   `P(X) = Q(x_R)·y(−R) + c₁(X − x_R) + c₂(X² − x_R²)`. The excess
+   (`norm_chain_excess`) is asserted to be 1 at every `m`.
