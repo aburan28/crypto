@@ -1,0 +1,61 @@
+{
+  "control_example1_passed": true,
+  "q1_fractions": [
+    {
+      "cp_hi": 0.5031233332797544,
+      "cp_lo": 0.5006246498734754,
+      "name": "curves with a rational tractable subgroup",
+      "prediction": 0.5015873015873016,
+      "value": 0.501874,
+      "verdict": "equivalent to the prediction within ±0.01"
+    },
+    {
+      "cp_hi": 0.5012446506823915,
+      "cp_lo": 0.49874735836739914,
+      "name": "tractable subgroups with a rational trigonal map (Prop. 2)",
+      "prediction": 0.5,
+      "value": 0.4999960045069162,
+      "verdict": "equivalent to the prediction within ±0.01"
+    },
+    {
+      "cp_hi": 0.5027909880110673,
+      "cp_lo": 0.49925869791024624,
+      "name": "of those, subgroups with a rational isogeny (Prop. 4)",
+      "prediction": 0.5,
+      "value": 0.5010248521655746,
+      "verdict": "equivalent to the prediction within ±0.01"
+    },
+    {
+      "cp_hi": 0.18735655174112836,
+      "cp_lo": 0.1854102680299503,
+      "name": "curves with full_success",
+      "prediction": 0.18573814194538893,
+      "value": 0.186382,
+      "verdict": "equivalent to the prediction within ±0.01"
+    }
+  ],
+  "q1_overall": "Smith §8 reproduced (all four fractions equivalent within ±0.01)",
+  "q2_overall": "near the ceiling",
+  "q2_per_prime": [
+    {
+      "C": 0.4304456476468138,
+      "D": 0.17584934848574998,
+      "U": 0.48966842047106224,
+      "null_r_median": 1.0,
+      "p": 7,
+      "r": 0.8112837041751874,
+      "r_band": "near the ceiling",
+      "verdict": "near the ceiling"
+    },
+    {
+      "C": 0.4749660045575625,
+      "D": 0.1804995707175762,
+      "U": 0.49429683764770166,
+      "null_r_median": 1.0,
+      "p": 11,
+      "r": 0.9383970635587351,
+      "r_band": "near the ceiling",
+      "verdict": "near the ceiling"
+    }
+  ]
+}

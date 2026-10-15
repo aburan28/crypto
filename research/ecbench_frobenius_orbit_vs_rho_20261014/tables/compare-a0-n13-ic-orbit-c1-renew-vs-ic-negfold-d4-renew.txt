@@ -1,0 +1,25 @@
+ops (ok): ic-orbit-c1-renew / ic-negfold-d4-renew = 0.5108 [0.465, 0.562] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 0.3554 [0.324, 0.373]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 1587.99%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-orbit-c1-renew / ic-negfold-d4-renew | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m13-t181-515ee569 | 10.97 | 16 | 0.5108 | [0.4650, 0.5620] | cluster |
+
+| workload | curve | log2 r | ic-negfold-d4-renew mean S | ic-orbit-c1-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W15ae365cd1d5 | icv1-f2m13-t181-515ee569 | 10.97 | 10.8813 | 6.1140 | 0.5619 |
+| W25d2db1af57a | icv1-f2m13-t181-515ee569 | 10.97 | 10.5663 | 5.8966 | 0.5581 |
+| W30d90ed055be | icv1-f2m13-t181-515ee569 | 10.97 | 12.1550 | 5.8167 | 0.4785 |
+| W38b2c0d2aba3 | icv1-f2m13-t181-515ee569 | 10.97 | 12.8470 | 6.0336 | 0.4696 |
+| W66d440e7d0f2 | icv1-f2m13-t181-515ee569 | 10.97 | 12.2589 | 5.7501 | 0.4690 |
+| W93163213ce4c | icv1-f2m13-t181-515ee569 | 10.97 | 12.6214 | 6.0318 | 0.4779 |
+| Wa69aa565cafd | icv1-f2m13-t181-515ee569 | 10.97 | 12.1481 | 5.8077 | 0.4781 |
+| Wb116b1c53d1f | icv1-f2m13-t181-515ee569 | 10.97 | 11.2625 | 6.1649 | 0.5474 |
+| Wb73c6757b4d6 | icv1-f2m13-t181-515ee569 | 10.97 | 9.5549 | 6.1881 | 0.6476 |
+| Wba589889423f | icv1-f2m13-t181-515ee569 | 10.97 | 12.7902 | 6.0653 | 0.4742 |
+| Wc431d8362b5e | icv1-f2m13-t181-515ee569 | 10.97 | 10.1899 | 6.0857 | 0.5972 |
+| Wc69ee092ae5e | icv1-f2m13-t181-515ee569 | 10.97 | 10.3132 | 5.6981 | 0.5525 |
+| Wd0fcff24632c | icv1-f2m13-t181-515ee569 | 10.97 | 15.2148 | 5.6188 | 0.3693 |
+| We63712432bc3 | icv1-f2m13-t181-515ee569 | 10.97 | 10.7929 | 5.9399 | 0.5503 |
+| Wfd822aaf5387 | icv1-f2m13-t181-515ee569 | 10.97 | 14.4423 | 6.2996 | 0.4362 |
+| Wfdefec758828 | icv1-f2m13-t181-515ee569 | 10.97 | 9.4516 | 6.2665 | 0.6630 |

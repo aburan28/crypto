@@ -1,0 +1,25 @@
+ops (ok): rho-strong / rho-frob = 3.2839 [2.680, 3.939] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 18.5415 [17.275, 19.987]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 2.84%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | rho-strong / rho-frob | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m31-tm90707-c95f16f5 | 20.46 | 16 | 3.2839 | [2.6796, 3.9386] | cluster |
+
+| workload | curve | log2 r | rho-frob mean S | rho-strong mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W19adcb2e4609 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3880 | 1.3218 | 3.4070 |
+| W1c7b6f101460 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.2821 | 1.3614 | 4.8254 |
+| W2528df09abe7 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.5313 | 1.2733 | 2.3968 |
+| W2f63a6523c06 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3967 | 1.2158 | 3.0652 |
+| W34fb71c29b0d | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.2982 | 1.2443 | 4.1724 |
+| W398d9675a96f | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3759 | 1.1573 | 3.0784 |
+| W790cc8c1a87b | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.4072 | 1.2544 | 3.0807 |
+| W809ea26e5219 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3649 | 1.2159 | 3.3325 |
+| W8646f72e5ea4 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.2496 | 1.3317 | 5.3347 |
+| Wa94ef5af8a3c | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.5542 | 1.3510 | 2.4377 |
+| Wad7d4cc5c37d | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.2891 | 1.1769 | 4.0712 |
+| Wae2a4bb7b221 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.4128 | 1.4474 | 3.5063 |
+| Wd6e0e88c542c | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3312 | 1.2446 | 3.7574 |
+| We425437057cc | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.7750 | 1.3996 | 1.8059 |
+| We52edfe2425f | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3006 | 1.4196 | 4.7221 |
+| Wfd99a000a544 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 0.3550 | 1.3124 | 3.6968 |

@@ -39,3 +39,7 @@ This round ran four follow-ups to [`../ic_next10_20261014/README.md`](../ic_next
 - **Small samples:** 3 curves per size in item 04. Its A/A check shows a ±2% noise floor on per-size ratio intervals.
 - **Python:** used for figures only.
 - **Conductor:** the control plane was unreachable.
+
+## Related: 04b genus-3 IC-2LP rebalance (from `main`)
+
+[`04b-genus3-2lp-rebalance/`](04b-genus3-2lp-rebalance/README.md) was added on `main` by a parallel session. When it was written, this round (`04-genus3-2lp/`, `RULES.md` and `examples/ic_improve_04_*.rs`) had not yet been merged, so 04b rebuilt the IC-2LP baseline itself. See its `PROTOCOL.md` §0. The two studies are independent.

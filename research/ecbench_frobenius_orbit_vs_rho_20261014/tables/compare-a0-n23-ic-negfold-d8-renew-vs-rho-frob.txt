@@ -1,0 +1,25 @@
+ops (ok): ic-negfold-d8-renew / rho-frob = 59.6207 [47.775, 72.892] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 1.2054 [1.163, 1.335]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 0.16%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-negfold-d8-renew / rho-frob | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m23-t5197-69e76b73 | 21.00 | 16 | 59.6207 | [47.7749, 72.8921] | cluster |
+
+| workload | curve | log2 r | rho-frob mean S | ic-negfold-d8-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W08eca30d808d | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.4048 | 27.5222 | 67.9964 |
+| W43c1403e6523 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3104 | 24.4900 | 78.9098 |
+| W4abd725f7509 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.7711 | 27.2260 | 35.3087 |
+| W5a2b6332e5b7 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3668 | 22.6513 | 61.7508 |
+| W5af51add3ac1 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3072 | 27.2662 | 88.7593 |
+| W66787602faec | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.2757 | 26.1157 | 94.7167 |
+| W74adbac221d7 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.5171 | 21.5828 | 41.7359 |
+| W7a8b9f9cdfa9 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.4773 | 26.6143 | 55.7657 |
+| W83078eff0203 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.2983 | 27.7681 | 93.0914 |
+| W8de5d6956c91 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3334 | 25.3404 | 76.0140 |
+| Wb9e3667b1aad | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.5026 | 22.2410 | 44.2551 |
+| Wc1a32e051d3c | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3932 | 23.7152 | 60.3112 |
+| We9366425a469 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.5409 | 27.4840 | 50.8142 |
+| Wf658af88683f | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3925 | 21.4036 | 54.5350 |
+| Wf9f61f36a136 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3107 | 21.8201 | 70.2385 |
+| Wfd71e38f7111 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.4556 | 23.6726 | 51.9630 |
