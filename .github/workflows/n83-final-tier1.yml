@@ -1,6 +1,10 @@
 name: N83 final candidate five same-point Tier 1 IC rho pairs
 
 on:
+  push:
+    branches: [codex/n83-final-tournament-20261015]
+    paths:
+      - research/n83_final_tier1_20261015/selection.json
   workflow_dispatch:
 
 permissions:
