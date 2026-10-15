@@ -343,6 +343,21 @@ theorem three_sum_support_bound {A : Type*} [AddCommMonoid A] [DecidableEq A]
         canonicalTriples16.card := Finset.card_image_le
     _ = 816 := canonicalTriples16_card
 
+/-- Conditioning queries on any geometric predicate cannot increase the
+    number of covered classes in a fixed 16-point three-sum base. -/
+theorem conditioned_three_sum_support_bound {A : Type*}
+    [AddCommMonoid A] [DecidableEq A]
+    (base : Fin 16 → A) (admissible : Finset A) :
+    (admissible ∩ canonicalTriples16.image
+      (fun t => base t.1 + base t.2.1 + base t.2.2)).card ≤ 816 := by
+  calc
+    (admissible ∩ canonicalTriples16.image
+      (fun t => base t.1 + base t.2.1 + base t.2.2)).card ≤
+      (canonicalTriples16.image
+        (fun t => base t.1 + base t.2.1 + base t.2.2)).card :=
+          Finset.card_le_card Finset.inter_subset_right
+    _ ≤ 816 := three_sum_support_bound base
+
 /-- A fixed shift of a 16-point three-sum base still has at most 816 images. -/
 theorem shifted_three_sum_support_bound {A : Type*} [AddCommGroup A] [DecidableEq A]
     (base : Fin 16 → A) (shift : A) :
@@ -408,6 +423,25 @@ theorem type_i_primitive_quartic_identity {K : Type*} [CommRing K]
   dsimp
   ring
 
+/-- Eliminating the base coordinate from the two quadratic quotient equations
+    factors the Sylvester resultant as w^4 times a Ciani quartic. -/
+theorem type_i_ciani_resultant_factor {K : Type*} [CommRing K]
+    (s₀ s₁ s₂ n₀ n₁ n₂ u v w : K) :
+    let a₂ := u^2-w^2
+    let a₁ := -s₀*u^2+s₁*w^2
+    let a₀ := n₀*u^2-n₁*w^2
+    let b₂ := v^2-w^2
+    let b₁ := -s₀*v^2+s₂*w^2
+    let b₀ := n₀*v^2-n₂*w^2
+    let L₀ := (n₀-n₂)*u^2+(n₁-n₀)*v^2+(n₂-n₁)*w^2
+    let L₁ := (s₂-s₀)*u^2+(s₀-s₁)*v^2+(s₁-s₂)*w^2
+    let L₂ := (s₀*n₂-n₀*s₂)*u^2+(s₁*n₀-n₁*s₀)*v^2+
+      (n₁*s₂-s₁*n₂)*w^2
+    (a₂*b₀-a₀*b₂)^2-(a₂*b₁-a₁*b₂)*(a₁*b₀-a₀*b₁) =
+      w^4*(L₀^2-L₁*L₂) := by
+  dsimp
+  ring
+
 end P192ExtensionCover
 
 #print axioms P192ExtensionCover.cyclic_cross_ratio_product
@@ -432,7 +466,9 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.mobius_quartic_clear
 #print axioms P192ExtensionCover.canonicalTriples16_card
 #print axioms P192ExtensionCover.three_sum_support_bound
+#print axioms P192ExtensionCover.conditioned_three_sum_support_bound
 #print axioms P192ExtensionCover.shifted_three_sum_support_bound
 #print axioms P192ExtensionCover.shifted_three_point_relation
 #print axioms P192ExtensionCover.six_periodic_eigenvector_zero
 #print axioms P192ExtensionCover.type_i_primitive_quartic_identity
+#print axioms P192ExtensionCover.type_i_ciani_resultant_factor
