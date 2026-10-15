@@ -1,0 +1,18 @@
+{
+  "study": "jacobian_op_count_20261014",
+  "date_utc": "2026-10-14",
+  "protocol_version": 1,
+  "protocol_sha256": "c27e54a3c7bbbb33fc1f7a23cab0925abc0fadf92299e33906c383c824ee6e0c",
+  "protocol_frozen_in_commit": "3c524896534d685fbf61135e5a907d6f21c8bdca",
+  "base_main_commit": "433431c8dcada0e6c3730a1b6155fec67b39b0bb",
+  "jacobian_transfers_sha256": "59fbf3ed4375e45bc278c7c2fd821302de0e3cf160c4b59f904709f9e7f46895",
+  "instrument": "examples/jacobian_op_count.rs",
+  "instrument_note": "the run mode is as committed in the freeze commit; the summary mode (and a lint fix and local exponents in it) was edited after the run and does not touch the counting code",
+  "toolchain": "rustc 1.97.0",
+  "host": "cloud container, no isolation; no timing enters the result",
+  "rows": 10400,
+  "runs": [
+    {"mode": "run", "args": "--seed 20261014 --trials 200 --genera 2,3,4,5,6,8,10,12,14,16,20,24,32 --primes 1009,65521", "elapsed_s": 213, "estimated_s_in_protocol": "180-240", "mismatches_against_repository": 0, "output": "rows.csv"},
+    {"mode": "summary", "args": "--rows rows.csv --jacobian docs/curves/jacobian-transfers.json", "output": "summary.csv"}
+  ]
+}
