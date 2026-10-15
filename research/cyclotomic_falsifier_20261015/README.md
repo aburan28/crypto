@@ -158,14 +158,12 @@ yield effect, which agrees with §3. Every IC arm is 2.7–30× rho-frob in `S`.
 - `yield/`: raw yield records and logs. `run_yield.sh` produced them.
 - `specs/`, `make_specs.sh`, `run_cost.sh`: the cost leg. `audits/`:
   replay-all audits. `tables/`: `ecbench table` and `compare` outputs.
-- `session-archives/<curve>.tar.gz`: the complete ecbench session
-  directories (`a1-n23`, `a0-n23`, and the errored first attempt
-  `void-a1-n23-full-unpriced`, A2). Each `records.jsonl` is about 1.6 MB, over
-  this lane's 1 MB per-file limit, so the sessions are archived instead of
-  committed as live session directories. Unpack with
-  `tar -C sessions -xzf session-archives/a1-n23.tar.gz` to re-audit
-  (`ecbench verify --dir sessions/a1-n23 --replay-all`). The void session's
-  spec is in `specs/void/`.
+- `sessions/a1-n23/`, `sessions/a0-n23/`: the complete ecbench session
+  directories, committed live like `research/pkm_tower_ecbench_20261013/sessions/`
+  so CI re-audits them (`ecbench verify --dir sessions/a1-n23 --replay-all`).
+- `session-archives/void-a1-n23-full-unpriced.tar.gz`: the errored first
+  attempt (amendment A2), kept archived so it is not audited as a live
+  session. Its spec is in `specs/void/`.
 - `figures/plot.py`: lays out recorded values only. Outputs:
   `yield-vs-null.svg|png`, `cost-s-by-arm.svg|png`.
 - `REPORT.typ` → `REPORT.pdf`; `reports/run-20261015T0728Z/`: the run report.
