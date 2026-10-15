@@ -1,0 +1,27 @@
+   Compiling n83-basis-holdout-runner v0.1.0 (/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/holdout_runner)
+    Finished `release` profile [optimized] target(s) in 1.61s
+     Running unittests src/main.rs (/workspace/n83_evaluation/build/release/deps/n83_basis_holdout_runner-95186f147e416066)
+
+running 6 tests
+test monitor::tests::ic_batch_cannot_substitute_rho_phases_or_duplicate_points ... ok
+test monitor::tests::missing_rank_or_wrong_base_rejects_ic_summary ... ok
+test monitor::tests::zero_budget_or_memory_is_rejected_before_launch ... ok
+test monitor::tests::address_space_envelope_is_retained_on_allocation_failure ... ok
+test monitor::tests::timeout_is_recorded_and_process_is_terminated ... ok
+test protocol_tests::complete_plan_preserves_counts_orders_seeds_and_bindings ... FAILED
+
+failures:
+
+---- protocol_tests::complete_plan_preserves_counts_orders_seeds_and_bindings stdout ----
+
+thread 'protocol_tests::complete_plan_preserves_counts_orders_seeds_and_bindings' (41743) panicked at src/main.rs:462:67:
+called `Option::unwrap()` on a `None` value
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    protocol_tests::complete_plan_preserves_counts_orders_seeds_and_bindings
+
+test result: FAILED. 5 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+
+error: test failed, to rerun pass `--bin n83-basis-holdout-runner`

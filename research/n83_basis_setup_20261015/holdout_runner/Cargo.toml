@@ -1,0 +1,9 @@
+[package]
+name = "n83-basis-holdout-runner"
+version = "0.1.0"
+edition = "2021"
+[dependencies]
+libc = "=0.2.190"
+serde_json = { version = "=1.0.151", features = ["arbitrary_precision"] }
+[profile.release]
+opt-level = 2

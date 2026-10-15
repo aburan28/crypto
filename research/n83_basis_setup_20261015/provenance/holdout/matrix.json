@@ -1,0 +1,853 @@
+{
+  "answers": 100,
+  "config": {
+    "candidate_manifest": "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/provenance/candidates.json",
+    "candidates": [
+      {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": false,
+        "id": "C0"
+      },
+      {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": true,
+        "id": "C1"
+      },
+      {
+        "base_hash": "2f4b86a1c110d310ca3097a1aab22aee1b823f1dbe6251e279f91cdcece5b6ec",
+        "base_spec": "construct:83:1:600:600",
+        "columns": 600,
+        "dense": true,
+        "id": "C2"
+      },
+      {
+        "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+        "base_spec": "construct:83:1:1271",
+        "columns": 1271,
+        "dense": true,
+        "id": "C3"
+      },
+      {
+        "base_hash": "e8e34092664026af82eb730ec5c0ccc3e4f249e26d49aae12783f1da8d68cd75",
+        "base_spec": "construct:83:1:1798",
+        "columns": 1798,
+        "dense": true,
+        "id": "C4"
+      }
+    ],
+    "cwd": "/workspace/repos/crypto-n83-basis",
+    "generator": [
+      "6614244651398184860292015",
+      "8868260410029249391539529"
+    ],
+    "holdout_fixtures": "/workspace/n83_basis_setup/holdout-fixtures",
+    "ic_binary": "/workspace/n83_basis_setup/frozen_binaries/ic",
+    "kind": "n83_basis_training_configuration",
+    "protocol": "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/PROTOCOL.md",
+    "rho_binary": "/workspace/n83_basis_setup/frozen_binaries/rho",
+    "rho_config": "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/provenance/rho_config.json",
+    "selection_git_binding": "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/selection/FREEZE.json",
+    "selection_receipt": "/workspace/n83_basis_setup/training-fixtures/selection_freeze.json",
+    "training_fixtures": "/workspace/n83_basis_setup/training-fixtures"
+  },
+  "config_sha256": "0401c57b3f0eb9448c5c454bcbbc5591b01ce6ea3719f5513fa98ffdf9129822",
+  "controller_sha256": "50a8f654f933c8c4e354b12b33eb76b82ce8c126f2a5e41167874d9581fb544b",
+  "ic_binary_sha256": "5a6e39c34f59a8eb3186d2e43bac17b4c9d3e83b4a94bbeda24fc2b0b0def0a1",
+  "input_bindings": {
+    "/workspace/n83_basis_setup/holdout-fixtures/generator_receipt.json": "e9540aabfe5010f6e6ed5f8abb364fa2f098276708fed37ee508d74bf995b7c9",
+    "/workspace/n83_basis_setup/holdout-fixtures/target_00.jsonl": "d890ee307ab65ae012f98e8a585d1e13af45005c179244edf08efb8acfb64cea",
+    "/workspace/n83_basis_setup/holdout-fixtures/target_01.jsonl": "b3585afd015e52d2240a2850f5b5c2463e0d2f068d2df64109dbba2d3981016f",
+    "/workspace/n83_basis_setup/holdout-fixtures/target_02.jsonl": "749efff84769d93d02a34aec7d58aa8e9512788352d178491ef70873dc53d685",
+    "/workspace/n83_basis_setup/holdout-fixtures/target_03.jsonl": "a8bb7a0847d62e109444d52f7da902703f102d1d4c55cb9375638d550cefc2a4",
+    "/workspace/n83_basis_setup/holdout-fixtures/target_04.jsonl": "77c8ace3e59e1b7b3e1a65510b3f14f570d1d11887405edbf0ddc22187560525",
+    "/workspace/n83_basis_setup/holdout-fixtures/target_05.jsonl": "ec1abdaa620aa89dcfef45f4ce5b8ad3861317adcafaa3e8c2cf6b153458ad80",
+    "/workspace/n83_basis_setup/holdout-fixtures/target_06.jsonl": "fc4e6011847185661f57e76160e255da992f1e8782e3fa559f3b2a157a813dc7",
+    "/workspace/n83_basis_setup/holdout-fixtures/target_07.jsonl": "aa0ade75d2826e7f0ff7c155302b1b57b9561c949aa1d2d05db7acdbbb333d91",
+    "/workspace/n83_basis_setup/holdout-plan/AA_training_target_00.jsonl": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c",
+    "/workspace/n83_basis_setup/holdout-plan/aa_3_0.seeds.json": "e486436976c4362f3842e19c770bcecaec403f5f37fdc6a57bba48b4f9a0ec13",
+    "/workspace/n83_basis_setup/holdout-plan/aa_3_1.seeds.json": "e486436976c4362f3842e19c770bcecaec403f5f37fdc6a57bba48b4f9a0ec13",
+    "/workspace/n83_basis_setup/holdout-plan/aa_4_0.seeds.json": "c699fc045856ae566efe36aa331389f2615a61debf682715f7f941fff5a047bd",
+    "/workspace/n83_basis_setup/holdout-plan/aa_4_1.seeds.json": "c699fc045856ae566efe36aa331389f2615a61debf682715f7f941fff5a047bd",
+    "/workspace/n83_basis_setup/holdout-plan/cohort_0.points.jsonl": "9112a715888c18c18e7a2b2bf60e70cc38a1adbca79efe6ac3e33c3f268c01e9",
+    "/workspace/n83_basis_setup/holdout-plan/cohort_0_rho.seeds.json": "2a9a484078253f430c4f71d6c5d1b50147b761392b80e1647b80f5b27e30a1d1",
+    "/workspace/n83_basis_setup/holdout-plan/cohort_1.points.jsonl": "c4ee13ca9ee09d753cd8e481f02d0ba337db6118255b4e5d6c2fe706a571b0c5",
+    "/workspace/n83_basis_setup/holdout-plan/cohort_1_rho.seeds.json": "059e77f846a6d323493df99513c413478dda2e0fd40d9242dfd14cbaf0fb0013",
+    "/workspace/n83_basis_setup/holdout-plan/cohort_2.points.jsonl": "0aa92ba99d47fa56259a393aceab6a7a166280147e1b555671742e3989e72c8c",
+    "/workspace/n83_basis_setup/holdout-plan/cohort_2_rho.seeds.json": "e80c0c5c990196802be629fdf05e6cdfa0720ab1fea40ed966f86864928dc937",
+    "/workspace/n83_basis_setup/holdout-plan/cold_0_rho.seeds.json": "a9e9a82cf57bca8fe95131df072acc65b43d662291d971924cf8842036702778",
+    "/workspace/n83_basis_setup/holdout-plan/cold_1_rho.seeds.json": "ef2bc765792bc78bc02b2eea69aed903d5ea27761c8e7ab3a8baed3d9e655e08",
+    "/workspace/n83_basis_setup/holdout-plan/cold_2_rho.seeds.json": "62a537073676705b51018bca93e35d28ee0678535bacd920f4d96be893c041f1",
+    "/workspace/n83_basis_setup/holdout-plan/cold_3_rho.seeds.json": "8f9c7a947bfe2c88d0753b13738447a28ed68e97ef09513f01932a2f60aaae10",
+    "/workspace/n83_basis_setup/holdout-plan/cold_4_rho.seeds.json": "4062c29c53354fa2bc3d2c8fd81faf825ff6071fa5c06c69b7fa28f81ce7b5f5",
+    "/workspace/n83_basis_setup/holdout-plan/cold_5_rho.seeds.json": "b1f7f38c895a460499f3d63f2c6eeb57354f0a95a2c9b91cdc019c2f71ee08e7",
+    "/workspace/n83_basis_setup/holdout-plan/cold_6_rho.seeds.json": "627b14ebe19aa9166e450020ca2f294f0ed90275f3de59b476a886096fec6d4b",
+    "/workspace/n83_basis_setup/holdout-plan/cold_7_rho.seeds.json": "82170bd549a2ede93ca607a53de52e54c87ecb2d36589c4824c7c982df1be6c7",
+    "/workspace/n83_basis_setup/training-fixtures/generator_receipt.json": "d5825ded439d903276088e87e6ecce281d36e35c9d7fb8a4d2229876affdf3c7",
+    "/workspace/n83_basis_setup/training-fixtures/selection_freeze.json": "711bc4ed3ff7f75f216306c5c083696a22f8a489dca65ee113b79eda1412b337",
+    "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/PROTOCOL.md": "116ade8c11f0143e603ac08b748c25c6a2b68ca7b21379a3603a91534f106ff9",
+    "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/provenance/candidates.json": "29512fc063fb731156b70d3b0865157e359f1851f6ad0367f241cdd08d7eca3b",
+    "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/provenance/rho_config.json": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+    "/workspace/repos/crypto-n83-basis/research/n83_basis_setup_20261015/selection/FREEZE.json": "11743886cbdd6dd6ec46b28fe7f175ea5c2bbf18fb7d62b0d2377e9eef08fa13",
+    "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl": "0d290b14a350db6271c9a49f0cd6ba246edd8c9bc6754387ad1ceebf08ec0c09"
+  },
+  "kind": "n83_basis_holdout_matrix/v1",
+  "processes": 37,
+  "rho_binary_sha256": "ec4ccd60152ff53c39825898595cf4a23e6cb4afdde38db3b163e8623430ecb6",
+  "rows": [
+    {
+      "candidate": {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": false,
+        "id": "C0"
+      },
+      "id": "cold_0_control",
+      "method": "ic",
+      "rank_seed": 101,
+      "role": "control",
+      "seed_file": null,
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_00.jsonl",
+      "target_indices": [
+        0
+      ],
+      "target_sha256": "d890ee307ab65ae012f98e8a585d1e13af45005c179244edf08efb8acfb64cea"
+    },
+    {
+      "candidate": {
+        "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+        "base_spec": "construct:83:1:1271",
+        "columns": 1271,
+        "dense": true,
+        "id": "C3"
+      },
+      "id": "cold_0_selected",
+      "method": "ic",
+      "rank_seed": 101,
+      "role": "selected",
+      "seed_file": null,
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_00.jsonl",
+      "target_indices": [
+        0
+      ],
+      "target_sha256": "d890ee307ab65ae012f98e8a585d1e13af45005c179244edf08efb8acfb64cea"
+    },
+    {
+      "candidate": null,
+      "id": "cold_0_rho",
+      "method": "rho",
+      "rank_seed": null,
+      "role": "rho",
+      "seed_file": "/workspace/n83_basis_setup/holdout-plan/cold_0_rho.seeds.json",
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_00.jsonl",
+      "target_indices": [
+        0
+      ],
+      "target_sha256": "d890ee307ab65ae012f98e8a585d1e13af45005c179244edf08efb8acfb64cea"
+    },
+    {
+      "candidate": {
+        "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+        "base_spec": "construct:83:1:1271",
+        "columns": 1271,
+        "dense": true,
+        "id": "C3"
+      },
+      "id": "cold_1_selected",
+      "method": "ic",
+      "rank_seed": 103,
+      "role": "selected",
+      "seed_file": null,
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_01.jsonl",
+      "target_indices": [
+        1
+      ],
+      "target_sha256": "b3585afd015e52d2240a2850f5b5c2463e0d2f068d2df64109dbba2d3981016f"
+    },
+    {
+      "candidate": null,
+      "id": "cold_1_rho",
+      "method": "rho",
+      "rank_seed": null,
+      "role": "rho",
+      "seed_file": "/workspace/n83_basis_setup/holdout-plan/cold_1_rho.seeds.json",
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_01.jsonl",
+      "target_indices": [
+        1
+      ],
+      "target_sha256": "b3585afd015e52d2240a2850f5b5c2463e0d2f068d2df64109dbba2d3981016f"
+    },
+    {
+      "candidate": {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": false,
+        "id": "C0"
+      },
+      "id": "cold_1_control",
+      "method": "ic",
+      "rank_seed": 103,
+      "role": "control",
+      "seed_file": null,
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_01.jsonl",
+      "target_indices": [
+        1
+      ],
+      "target_sha256": "b3585afd015e52d2240a2850f5b5c2463e0d2f068d2df64109dbba2d3981016f"
+    },
+    {
+      "candidate": null,
+      "id": "cold_2_rho",
+      "method": "rho",
+      "rank_seed": null,
+      "role": "rho",
+      "seed_file": "/workspace/n83_basis_setup/holdout-plan/cold_2_rho.seeds.json",
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_02.jsonl",
+      "target_indices": [
+        2
+      ],
+      "target_sha256": "749efff84769d93d02a34aec7d58aa8e9512788352d178491ef70873dc53d685"
+    },
+    {
+      "candidate": {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": false,
+        "id": "C0"
+      },
+      "id": "cold_2_control",
+      "method": "ic",
+      "rank_seed": 107,
+      "role": "control",
+      "seed_file": null,
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_02.jsonl",
+      "target_indices": [
+        2
+      ],
+      "target_sha256": "749efff84769d93d02a34aec7d58aa8e9512788352d178491ef70873dc53d685"
+    },
+    {
+      "candidate": {
+        "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+        "base_spec": "construct:83:1:1271",
+        "columns": 1271,
+        "dense": true,
+        "id": "C3"
+      },
+      "id": "cold_2_selected",
+      "method": "ic",
+      "rank_seed": 107,
+      "role": "selected",
+      "seed_file": null,
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_02.jsonl",
+      "target_indices": [
+        2
+      ],
+      "target_sha256": "749efff84769d93d02a34aec7d58aa8e9512788352d178491ef70873dc53d685"
+    },
+    {
+      "candidate": {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": false,
+        "id": "C0"
+      },
+      "id": "cold_3_control",
+      "method": "ic",
+      "rank_seed": 109,
+      "role": "control",
+      "seed_file": null,
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_03.jsonl",
+      "target_indices": [
+        3
+      ],
+      "target_sha256": "a8bb7a0847d62e109444d52f7da902703f102d1d4c55cb9375638d550cefc2a4"
+    },
+    {
+      "candidate": null,
+      "id": "cold_3_rho",
+      "method": "rho",
+      "rank_seed": null,
+      "role": "rho",
+      "seed_file": "/workspace/n83_basis_setup/holdout-plan/cold_3_rho.seeds.json",
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_03.jsonl",
+      "target_indices": [
+        3
+      ],
+      "target_sha256": "a8bb7a0847d62e109444d52f7da902703f102d1d4c55cb9375638d550cefc2a4"
+    },
+    {
+      "candidate": {
+        "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+        "base_spec": "construct:83:1:1271",
+        "columns": 1271,
+        "dense": true,
+        "id": "C3"
+      },
+      "id": "cold_3_selected",
+      "method": "ic",
+      "rank_seed": 109,
+      "role": "selected",
+      "seed_file": null,
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_03.jsonl",
+      "target_indices": [
+        3
+      ],
+      "target_sha256": "a8bb7a0847d62e109444d52f7da902703f102d1d4c55cb9375638d550cefc2a4"
+    },
+    {
+      "candidate": null,
+      "id": "cold_4_rho",
+      "method": "rho",
+      "rank_seed": null,
+      "role": "rho",
+      "seed_file": "/workspace/n83_basis_setup/holdout-plan/cold_4_rho.seeds.json",
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_04.jsonl",
+      "target_indices": [
+        4
+      ],
+      "target_sha256": "77c8ace3e59e1b7b3e1a65510b3f14f570d1d11887405edbf0ddc22187560525"
+    },
+    {
+      "candidate": {
+        "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+        "base_spec": "construct:83:1:1271",
+        "columns": 1271,
+        "dense": true,
+        "id": "C3"
+      },
+      "id": "cold_4_selected",
+      "method": "ic",
+      "rank_seed": 113,
+      "role": "selected",
+      "seed_file": null,
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_04.jsonl",
+      "target_indices": [
+        4
+      ],
+      "target_sha256": "77c8ace3e59e1b7b3e1a65510b3f14f570d1d11887405edbf0ddc22187560525"
+    },
+    {
+      "candidate": {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": false,
+        "id": "C0"
+      },
+      "id": "cold_4_control",
+      "method": "ic",
+      "rank_seed": 113,
+      "role": "control",
+      "seed_file": null,
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_04.jsonl",
+      "target_indices": [
+        4
+      ],
+      "target_sha256": "77c8ace3e59e1b7b3e1a65510b3f14f570d1d11887405edbf0ddc22187560525"
+    },
+    {
+      "candidate": {
+        "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+        "base_spec": "construct:83:1:1271",
+        "columns": 1271,
+        "dense": true,
+        "id": "C3"
+      },
+      "id": "cold_5_selected",
+      "method": "ic",
+      "rank_seed": 127,
+      "role": "selected",
+      "seed_file": null,
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_05.jsonl",
+      "target_indices": [
+        5
+      ],
+      "target_sha256": "ec1abdaa620aa89dcfef45f4ce5b8ad3861317adcafaa3e8c2cf6b153458ad80"
+    },
+    {
+      "candidate": {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": false,
+        "id": "C0"
+      },
+      "id": "cold_5_control",
+      "method": "ic",
+      "rank_seed": 127,
+      "role": "control",
+      "seed_file": null,
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_05.jsonl",
+      "target_indices": [
+        5
+      ],
+      "target_sha256": "ec1abdaa620aa89dcfef45f4ce5b8ad3861317adcafaa3e8c2cf6b153458ad80"
+    },
+    {
+      "candidate": null,
+      "id": "cold_5_rho",
+      "method": "rho",
+      "rank_seed": null,
+      "role": "rho",
+      "seed_file": "/workspace/n83_basis_setup/holdout-plan/cold_5_rho.seeds.json",
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_05.jsonl",
+      "target_indices": [
+        5
+      ],
+      "target_sha256": "ec1abdaa620aa89dcfef45f4ce5b8ad3861317adcafaa3e8c2cf6b153458ad80"
+    },
+    {
+      "candidate": {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": false,
+        "id": "C0"
+      },
+      "id": "cold_6_control",
+      "method": "ic",
+      "rank_seed": 131,
+      "role": "control",
+      "seed_file": null,
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_06.jsonl",
+      "target_indices": [
+        6
+      ],
+      "target_sha256": "fc4e6011847185661f57e76160e255da992f1e8782e3fa559f3b2a157a813dc7"
+    },
+    {
+      "candidate": {
+        "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+        "base_spec": "construct:83:1:1271",
+        "columns": 1271,
+        "dense": true,
+        "id": "C3"
+      },
+      "id": "cold_6_selected",
+      "method": "ic",
+      "rank_seed": 131,
+      "role": "selected",
+      "seed_file": null,
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_06.jsonl",
+      "target_indices": [
+        6
+      ],
+      "target_sha256": "fc4e6011847185661f57e76160e255da992f1e8782e3fa559f3b2a157a813dc7"
+    },
+    {
+      "candidate": null,
+      "id": "cold_6_rho",
+      "method": "rho",
+      "rank_seed": null,
+      "role": "rho",
+      "seed_file": "/workspace/n83_basis_setup/holdout-plan/cold_6_rho.seeds.json",
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_06.jsonl",
+      "target_indices": [
+        6
+      ],
+      "target_sha256": "fc4e6011847185661f57e76160e255da992f1e8782e3fa559f3b2a157a813dc7"
+    },
+    {
+      "candidate": {
+        "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+        "base_spec": "construct:83:1:1271",
+        "columns": 1271,
+        "dense": true,
+        "id": "C3"
+      },
+      "id": "cold_7_selected",
+      "method": "ic",
+      "rank_seed": 137,
+      "role": "selected",
+      "seed_file": null,
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_07.jsonl",
+      "target_indices": [
+        7
+      ],
+      "target_sha256": "aa0ade75d2826e7f0ff7c155302b1b57b9561c949aa1d2d05db7acdbbb333d91"
+    },
+    {
+      "candidate": null,
+      "id": "cold_7_rho",
+      "method": "rho",
+      "rank_seed": null,
+      "role": "rho",
+      "seed_file": "/workspace/n83_basis_setup/holdout-plan/cold_7_rho.seeds.json",
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_07.jsonl",
+      "target_indices": [
+        7
+      ],
+      "target_sha256": "aa0ade75d2826e7f0ff7c155302b1b57b9561c949aa1d2d05db7acdbbb333d91"
+    },
+    {
+      "candidate": {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": false,
+        "id": "C0"
+      },
+      "id": "cold_7_control",
+      "method": "ic",
+      "rank_seed": 137,
+      "role": "control",
+      "seed_file": null,
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-fixtures/target_07.jsonl",
+      "target_indices": [
+        7
+      ],
+      "target_sha256": "aa0ade75d2826e7f0ff7c155302b1b57b9561c949aa1d2d05db7acdbbb333d91"
+    },
+    {
+      "candidate": null,
+      "id": "aa_3_0",
+      "method": "rho",
+      "rank_seed": null,
+      "role": "rho",
+      "seed_file": "/workspace/n83_basis_setup/holdout-plan/aa_3_0.seeds.json",
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-plan/AA_training_target_00.jsonl",
+      "target_indices": [
+        0
+      ],
+      "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+    },
+    {
+      "candidate": null,
+      "id": "aa_3_1",
+      "method": "rho",
+      "rank_seed": null,
+      "role": "rho",
+      "seed_file": "/workspace/n83_basis_setup/holdout-plan/aa_3_1.seeds.json",
+      "stage": "cold",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-plan/AA_training_target_00.jsonl",
+      "target_indices": [
+        0
+      ],
+      "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+    },
+    {
+      "candidate": {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": false,
+        "id": "C0"
+      },
+      "id": "cohort_0_control",
+      "method": "ic",
+      "rank_seed": 149,
+      "role": "control",
+      "seed_file": null,
+      "stage": "cohort",
+      "target_count": 8,
+      "target_file": "/workspace/n83_basis_setup/holdout-plan/cohort_0.points.jsonl",
+      "target_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "target_sha256": "9112a715888c18c18e7a2b2bf60e70cc38a1adbca79efe6ac3e33c3f268c01e9"
+    },
+    {
+      "candidate": {
+        "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+        "base_spec": "construct:83:1:1271",
+        "columns": 1271,
+        "dense": true,
+        "id": "C3"
+      },
+      "id": "cohort_0_selected",
+      "method": "ic",
+      "rank_seed": 149,
+      "role": "selected",
+      "seed_file": null,
+      "stage": "cohort",
+      "target_count": 8,
+      "target_file": "/workspace/n83_basis_setup/holdout-plan/cohort_0.points.jsonl",
+      "target_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "target_sha256": "9112a715888c18c18e7a2b2bf60e70cc38a1adbca79efe6ac3e33c3f268c01e9"
+    },
+    {
+      "candidate": null,
+      "id": "cohort_0_rho",
+      "method": "rho",
+      "rank_seed": null,
+      "role": "rho",
+      "seed_file": "/workspace/n83_basis_setup/holdout-plan/cohort_0_rho.seeds.json",
+      "stage": "cohort",
+      "target_count": 8,
+      "target_file": "/workspace/n83_basis_setup/holdout-plan/cohort_0.points.jsonl",
+      "target_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "target_sha256": "9112a715888c18c18e7a2b2bf60e70cc38a1adbca79efe6ac3e33c3f268c01e9"
+    },
+    {
+      "candidate": {
+        "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+        "base_spec": "construct:83:1:1271",
+        "columns": 1271,
+        "dense": true,
+        "id": "C3"
+      },
+      "id": "cohort_1_selected",
+      "method": "ic",
+      "rank_seed": 151,
+      "role": "selected",
+      "seed_file": null,
+      "stage": "cohort",
+      "target_count": 8,
+      "target_file": "/workspace/n83_basis_setup/holdout-plan/cohort_1.points.jsonl",
+      "target_indices": [
+        2,
+        1,
+        0,
+        7,
+        6,
+        5,
+        4,
+        3
+      ],
+      "target_sha256": "c4ee13ca9ee09d753cd8e481f02d0ba337db6118255b4e5d6c2fe706a571b0c5"
+    },
+    {
+      "candidate": null,
+      "id": "cohort_1_rho",
+      "method": "rho",
+      "rank_seed": null,
+      "role": "rho",
+      "seed_file": "/workspace/n83_basis_setup/holdout-plan/cohort_1_rho.seeds.json",
+      "stage": "cohort",
+      "target_count": 8,
+      "target_file": "/workspace/n83_basis_setup/holdout-plan/cohort_1.points.jsonl",
+      "target_indices": [
+        2,
+        1,
+        0,
+        7,
+        6,
+        5,
+        4,
+        3
+      ],
+      "target_sha256": "c4ee13ca9ee09d753cd8e481f02d0ba337db6118255b4e5d6c2fe706a571b0c5"
+    },
+    {
+      "candidate": {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": false,
+        "id": "C0"
+      },
+      "id": "cohort_1_control",
+      "method": "ic",
+      "rank_seed": 151,
+      "role": "control",
+      "seed_file": null,
+      "stage": "cohort",
+      "target_count": 8,
+      "target_file": "/workspace/n83_basis_setup/holdout-plan/cohort_1.points.jsonl",
+      "target_indices": [
+        2,
+        1,
+        0,
+        7,
+        6,
+        5,
+        4,
+        3
+      ],
+      "target_sha256": "c4ee13ca9ee09d753cd8e481f02d0ba337db6118255b4e5d6c2fe706a571b0c5"
+    },
+    {
+      "candidate": null,
+      "id": "cohort_2_rho",
+      "method": "rho",
+      "rank_seed": null,
+      "role": "rho",
+      "seed_file": "/workspace/n83_basis_setup/holdout-plan/cohort_2_rho.seeds.json",
+      "stage": "cohort",
+      "target_count": 8,
+      "target_file": "/workspace/n83_basis_setup/holdout-plan/cohort_2.points.jsonl",
+      "target_indices": [
+        5,
+        6,
+        7,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "target_sha256": "0aa92ba99d47fa56259a393aceab6a7a166280147e1b555671742e3989e72c8c"
+    },
+    {
+      "candidate": {
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_spec": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "columns": 600,
+        "dense": false,
+        "id": "C0"
+      },
+      "id": "cohort_2_control",
+      "method": "ic",
+      "rank_seed": 157,
+      "role": "control",
+      "seed_file": null,
+      "stage": "cohort",
+      "target_count": 8,
+      "target_file": "/workspace/n83_basis_setup/holdout-plan/cohort_2.points.jsonl",
+      "target_indices": [
+        5,
+        6,
+        7,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "target_sha256": "0aa92ba99d47fa56259a393aceab6a7a166280147e1b555671742e3989e72c8c"
+    },
+    {
+      "candidate": {
+        "base_hash": "02d189c0d101e1e9918b07553da5781361f6b7cd57ef14f3d646d260764e3586",
+        "base_spec": "construct:83:1:1271",
+        "columns": 1271,
+        "dense": true,
+        "id": "C3"
+      },
+      "id": "cohort_2_selected",
+      "method": "ic",
+      "rank_seed": 157,
+      "role": "selected",
+      "seed_file": null,
+      "stage": "cohort",
+      "target_count": 8,
+      "target_file": "/workspace/n83_basis_setup/holdout-plan/cohort_2.points.jsonl",
+      "target_indices": [
+        5,
+        6,
+        7,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "target_sha256": "0aa92ba99d47fa56259a393aceab6a7a166280147e1b555671742e3989e72c8c"
+    },
+    {
+      "candidate": null,
+      "id": "aa_4_0",
+      "method": "rho",
+      "rank_seed": null,
+      "role": "rho",
+      "seed_file": "/workspace/n83_basis_setup/holdout-plan/aa_4_0.seeds.json",
+      "stage": "cohort",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-plan/AA_training_target_00.jsonl",
+      "target_indices": [
+        0
+      ],
+      "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+    },
+    {
+      "candidate": null,
+      "id": "aa_4_1",
+      "method": "rho",
+      "rank_seed": null,
+      "role": "rho",
+      "seed_file": "/workspace/n83_basis_setup/holdout-plan/aa_4_1.seeds.json",
+      "stage": "cohort",
+      "target_count": 1,
+      "target_file": "/workspace/n83_basis_setup/holdout-plan/AA_training_target_00.jsonl",
+      "target_indices": [
+        0
+      ],
+      "target_sha256": "5aa2c5b6c57dfb066b91c813292dac14eb3fcd47f72cb71b033e1874e87dfd9c"
+    }
+  ],
+  "selected_candidate": "C3"
+}
