@@ -1,0 +1,20 @@
+{
+  "schema": "torsion_pairing_batch_run_spec/v1",
+  "status": "frozen before any batch timing",
+  "source_commit": "74425b30e",
+  "source": "examples/torsion_pairing_batch.rs",
+  "source_sha256": "79759630e988800153d2583bf13cd10e3159c0dd17757d5125bcdd51b9143d14",
+  "original_public_inputs_sha256": "ef5cd2ac1d8a2cb9aa3b7edc6f5b92408fafc00e7253b97dddc0d3555998ddc5",
+  "cells": [
+    {"cell": 0, "p": 61, "r": 19, "targets": 18, "requested_prefixes": [1, 4, 16], "public_sha256": "40935b2d9d8c31103a51992bda8a99b21b54f66ca2efbec2b4d6ab4ef8c0d2d0", "post_solve_answers_sha256": "b8a7764f4074a127dc211a6ddda0e19b84713c72e72e7975f8dc5745e15d2b74", "selection_sha256": "911d9a45e554812a26e554965f117fa4397bc6e2bb9317b2dc8ba9c65d28c9c4"},
+    {"cell": 1, "p": 271, "r": 61, "targets": 60, "requested_prefixes": [1, 4, 16, 60], "public_sha256": "1d3174df436836d3770c40c0e732a181aec330c0487dc82d98d32ac022fe174b", "post_solve_answers_sha256": "c84887d97a3bc42850df925b91ef0a066419337f3432fe203ebf030e013fbcf9", "selection_sha256": "958e910e8ad22092ffbef9a97b9a4636382a261273db0bd4e971b243dab210bc"}
+  ],
+  "rounds": 3,
+  "solver_input": "public target list only; no scalar field",
+  "pairing": "same frozen evaluation field and deterministic H search; one alpha and reusable BSGS baby table per batch",
+  "reference": "same-target negation rho per target with frozen seed schedule",
+  "one_target_boundary": "N=1 cold total including all setup",
+  "limits": {"candidate_x": 4096, "acceptable_h": 512, "extension_muls": 10000000, "peak_rss_bytes": 536870912, "thread_cpu_seconds": 900},
+  "host_isolation": "shared Darwin L0; current-thread CPU is descriptive",
+  "outstanding_original_count": "N=64 requires a separate r>=67 cell with 64 distinct nonidentity targets"
+}
