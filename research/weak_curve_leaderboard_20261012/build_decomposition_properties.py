@@ -114,6 +114,8 @@ def ghs_route(route):
             "relative_degree": invariants.get("relative_degree"),
             "magic_number": invariants.get("magic_number"),
             "magic_number_bound": invariants.get("magic_number_bound"),
+            "type_i": invariants.get("type_i"),
+            "relative_trace_b_zero": invariants.get("relative_trace_b_zero"),
             "genus_projection": destination.get("genus"),
             "destination_field_bits": destination.get("field_bits"),
             "formula_class": route.get("class"),

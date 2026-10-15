@@ -1,5 +1,37 @@
 # Validation record
 
+## Oakley Type II genus reconciliation, 15 October 2026
+
+- The current binary transfer registry classifies Oakley Groups 3 and 4 as
+  Type II: each has magic number 5, nonzero relative trace of `b`, and
+  projected genus 16. The earlier leaderboard snapshot asserted genus 15
+  and carried stale formula costs. The regenerated snapshot now reads the
+  current route, records genus 16, updates both cost projections, and gives
+  the corrected GHS findings `WID1:GHS:56f762afe456` and
+  `WID1:GHS:4df6967b110c`. Each finding's `corrects` field names its old
+  genus-15 ID. The graph and per-curve decomposition exports were regenerated
+  from that snapshot and copied into the bundled site data. The binary GHS
+  criterion now asks for the type and trace certificate before assigning a
+  projected genus.
+- `CARGO_TARGET_DIR=/private/tmp/weakcurves-oakley-target cargo test --release
+  --locked --offline` passed all four exporter tests. The same environment's
+  `cargo run --release --locked --offline -- check snapshot.json` passed.
+  Both graph and decomposition builders passed `--check`; the attack-map and
+  decomposition validators passed with 922 atlas identities, 1,092 graph
+  nodes, 232 directed certified maps, and 13 decomposition filters.
+- `lake build OakleyOrders`, `lake env leanchecker --fresh --verbose
+  OakleyOrders`, and `lake env lean AxiomAudit.lean` passed. The new conditional
+  formula theorem reports only `propext`; its model-specific Type II premise
+  comes from the binary-field transfer computation. Build, fresh replay,
+  and axiom outputs are retained in `validation/oakley_genus_*.log`.
+- The preceding PR head's `leaderboard-lean-proof` CI job completed its
+  RelationSupport build and fresh replay, then failed because it had not built
+  `PrimeExamples`, which the shared axiom audit imports. The workflow now
+  builds all four imported theorem modules before either fresh replay or
+  the audit. The exact four-target `lake build` command passed locally and
+  its output is retained in `validation/leaderboard_all_build.log`; the new
+  head's CI result must be checked separately.
+
 ## Fixed-base relation support, 15 October 2026
 
 - `lake build RelationSupport` passed on pinned Lean 4.34.1 and Mathlib

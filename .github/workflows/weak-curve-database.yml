@@ -89,17 +89,19 @@ jobs:
         working-directory: research/weak_curve_leaderboard_20261012/lean
     steps:
       - uses: actions/checkout@v4
-      - name: Build relation-support theorem and replay in a fresh kernel
+      - name: Build all leaderboard theorem modules
         uses: leanprover/lean-action@v1
         with:
           lake-package-directory: research/weak_curve_leaderboard_20261012/lean
           auto-config: false
           use-mathlib-cache: true
           build: true
-          build-args: 'RelationSupport'
+          build-args: 'PrimeExamples OakleyOrders MinimalPairingField RelationSupport'
           test: false
           lint: false
           leanchecker: true
           leanchecker-args: '--fresh --verbose RelationSupport'
+      - name: Fresh-kernel replay of Oakley genus theorem
+        run: lake env leanchecker --fresh --verbose OakleyOrders
       - name: Audit leaderboard theorem axioms
         run: lake env lean AxiomAudit.lean

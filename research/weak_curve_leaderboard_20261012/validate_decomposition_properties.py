@@ -116,7 +116,9 @@ def main():
         routes = props["records"][row["id"]]["ghs_descent"]["routes"]
         assert any(route["evidence"] == "exact_invariant" and route["base_degree"] == base
                    and route["relative_degree"] == 5 and route["magic_number"] == 5
-                   and route["genus_projection"] == "15" for route in routes)
+                   and route["type_i"] is False and route["relative_trace_b_zero"] is False
+                   and route["genus_projection"] == "16" for route in routes)
+        assert row["ghs_genus_formula"] == 16
     print(f"Decomposition index OK: 922 identities, 917 source certificates, 5 formula replays, {len(props['definitions'])} property filters; 1 published Joux–Vitse case")
 
 

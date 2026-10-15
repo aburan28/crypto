@@ -17,6 +17,14 @@ theorem oakley4_full_order_factor :
 theorem oakley3_extension_factor : 155 = 5 * 31 := by decide
 theorem oakley4_extension_factor : 185 = 5 * 37 := by decide
 
+/-- The GHS genus formula conditional on the magic number and type flag.
+    The model-specific Type II flag is checked by the separate binary-field
+    transfer computation, not inferred by this arithmetic theorem. -/
+def ghsGenusForType (magic : ℕ) (typeI : Bool) : ℕ :=
+  2 ^ (magic - 1) - if typeI then 1 else 0
+
+theorem oakley_type_ii_genus_formula : ghsGenusForType 5 false = 16 := by decide
+
 /-- A published generator of order c*r yields a point of exact order r after
     multiplying by c. This is the structural subgroup step used for Oakley. -/
 theorem selected_order_of_generator {G : Type*} [AddGroup G]

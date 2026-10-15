@@ -16684,19 +16684,20 @@
       "field_modulus": "0x800000000000000000000004000000000000001",
       "findings": [
         {
+          "corrects": "WID1:GHS:d089b2bdf750",
           "criterion_id": "ghs_binary",
           "grade": "exact_invariant_candidate",
-          "id": "WID1:GHS:d089b2bdf750",
+          "id": "WID1:GHS:56f762afe456",
           "mechanism": "GHS",
           "scope": "selected_subgroup",
-          "selector": "r=3805993847215893016155463826195386266397436443;tower=5x31;g=15",
-          "statement": "The degree-five binary tower has GHS magic number five and predicted genus 15; a cover and subgroup transport are still needed."
+          "selector": "r=3805993847215893016155463826195386266397436443;tower=5x31;g=16",
+          "statement": "The degree-five binary tower has GHS magic number five and Type II formula genus 16; a cover and subgroup transport are still needed."
         }
       ],
       "full_order_cofactor": 12,
       "ghs_base_degree": 31,
       "ghs_cover_constructed": false,
-      "ghs_genus_formula": 15,
+      "ghs_genus_formula": 16,
       "ghs_magic_number": 5,
       "ghs_subgroup_map_certified": false,
       "id": "ICV1:f2m-155-dea39df2:-414891960790832521345347:45671926166590716193865565914344635196769237316:0x61a2976b585b70cc897ad03a7f74a4ecc23bf4a:unk:unk:r:b865721c660a",
@@ -16708,7 +16709,7 @@
       "projection": {
         "hypothesis_satisfied": false,
         "log2_rho_reference": 90.388,
-        "log2_total": 89.238,
+        "log2_total": 93.424,
         "model": "enge_gaudry_smoothness",
         "status": "formula_only"
       },
@@ -16993,19 +16994,20 @@
       "field_modulus": "0x20000000000000000000000000000200000000000000001",
       "findings": [
         {
+          "corrects": "WID1:GHS:419192b724ad",
           "criterion_id": "ghs_binary",
           "grade": "exact_invariant_candidate",
-          "id": "WID1:GHS:419192b724ad",
+          "id": "WID1:GHS:4df6967b110c",
           "mechanism": "GHS",
           "scope": "selected_subgroup",
-          "selector": "r=12259964326927110866866776214413170562013096250261263279;tower=5x37;g=15",
-          "statement": "The degree-five binary tower has GHS magic number five and predicted genus 15; a cover and subgroup transport are still needed."
+          "selector": "r=12259964326927110866866776214413170562013096250261263279;tower=5x37;g=16",
+          "statement": "The degree-five binary tower has GHS magic number five and Type II formula genus 16; a cover and subgroup transport are still needed."
         }
       ],
       "full_order_cofactor": 4,
       "ghs_base_degree": 37,
       "ghs_cover_constructed": false,
-      "ghs_genus_formula": 15,
+      "ghs_genus_formula": 16,
       "ghs_magic_number": 5,
       "ghs_subgroup_map_certified": false,
       "id": "ICV1:f2m-185-346c493e:11157211627747266908830216517:49039857307708443467467104857652682248052385001045053116:0x11b8d70a71b758a2ab8fcdeb3f81b2ad738e934d2dfbaf7:unk:unk:r:8dbe23c4f597",
@@ -17017,7 +17019,7 @@
       "projection": {
         "hypothesis_satisfied": false,
         "log2_rho_reference": 106.586,
-        "log2_total": 95.649,
+        "log2_total": 99.829,
         "model": "enge_gaudry_smoothness",
         "status": "formula_only"
       },
@@ -19521,10 +19523,10 @@
   "schema": "weakcurves.snapshot.v2",
   "sources": {
     "case_database_sha256": "b74448a12c09ad6f1f733593d12e0795da83f494b59cad5ec91eca5402ae6f88",
-    "curve_registry_sha256": "5520bc7e09da329603b75538182ab9c66f756f0347b2b6391cf5456b8daa4925",
+    "curve_registry_sha256": "03f63efa54482b2ea37baed22da046202cd67739c76d9b43f569e2375f025ca4",
     "model_database_sha256": "888589c5bf354be21749b3ab3afd4637f1c6af96adb7ee383d43dd7456f39a02",
     "pairing_roster_sha256": "5b89a3837ed46a7066255e32feda172b5aaa887402b7047a2930a907487ea605",
     "protocol_cases_sha256": "bd7fbf3cb4a6d3492247840c0e10a787d13ddd109880da12f9761a915a29c9b0",
-    "transfer_registry_sha256": "aec6338011158c8c1aaddb829d4e90fb96eebc43cd4027d1067979bba3e6ca40"
+    "transfer_registry_sha256": "4806c1be25d226f1946fcb52d358fbd712ce194a89972623282107331133444a"
   }
 }

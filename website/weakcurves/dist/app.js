@@ -82,7 +82,7 @@ function propertyDescription(key, value) {
   const state=propertyLabels[value.status]||value.status;
   if (key==='same_field_cover') return `${state}; genus ${value.genus}, degree ${value.degree} over the source field; ${value.certificate.construction}. Subfield descent: ${value.subfield_descent}.`;
   if (key==='cubic_cover' || key==='quadratic_cover') return `${state}; model label ${value.label||'—'}; screen ${value.screen||'—'}.`;
-  if (key==='ghs_descent') return `${state}; ${value.routes.length} recorded routes${value.routes.length?': '+value.routes.map(r=>`base degree ${r.base_degree}, relative degree ${r.relative_degree}, m=${r.magic_number||'?'}, genus ${r.genus_projection}, ${r.transport_screen}, ${r.formula_class}`).join(' | '):'.'}`;
+  if (key==='ghs_descent') return `${state}; ${value.routes.length} recorded routes${value.routes.length?': '+value.routes.map(r=>`base degree ${r.base_degree}, relative degree ${r.relative_degree}, m=${r.magic_number||'?'}, ${r.type_i===true?'Type I':r.type_i===false?'Type II':'type open'}, genus ${r.genus_projection}, ${r.transport_screen}, ${r.formula_class}`).join(' | '):'.'}`;
   if (key==='jv_intermediate_field_cover') return `${state}; ${value.towers.length?value.towers.map(r=>`H/F(p^${r.intermediate_degree}), relative degree ${r.relative_degree}, genus ${r.destination_genus}: ${r.model_status}`).join(' | '):'no sextic tower screened'}. Lower-field cover and norm–pullback subgroup kernel: open.`;
   if (key==='jv_quadratic_sieve') return `${state}; ${value.intermediate_degree===2?'H/F(p²), eight-point relations; saturated ideal, natural sieve yield, rank and descent open':'requires an assessed odd-characteristic quadratic intermediate field'}.`;
   if (key==='hyperelliptic_high_genus') return `${state}; ${value.candidate_routes.length} size-admissible exact-invariant genus projections. Smoothness measurements: open.`;
@@ -154,6 +154,8 @@ function openRecord(record) {
   if (record.source_note) facts.push(['Source note',record.source_note]);
   if (record.source) facts.push(['Source',record.source]);
   if (record.findings?.length) facts.push(['Weakness IDs',record.findings.map(f=>f.id).join(' · ')]);
+  const corrected=record.findings?.map(f=>f.corrects).filter(Boolean);
+  if (corrected?.length) facts.push(['Corrects finding',corrected.join(' · ')]);
   const property=decomposition.records[record.id];
   if (property) facts.push(['Hyperelliptic cover',`${propertyLabels[property.same_field_cover.status]} · genus ${property.same_field_cover.genus} · degree ${property.same_field_cover.degree}`]);
   const node = graphNodes.get(record.id);
@@ -221,7 +223,7 @@ function filteredCurves() {
   if (tab === 'signals' && criterionFilter.value === 'all' && checkFilter.value === 'all' && propertyFilter.value === 'all') rows = rows.filter(r => kind[r.signal].rank <= 2);
   const q = search.value.trim().toLowerCase();
   if (q) rows = rows.filter(r => [r.id,r.slug,r.legacy_id,labelFor(r),fieldFor(r),kind[r.signal].label,r.trace,
-    ...(r.aliases||[]),...(r.findings||[]).flatMap(f=>[f.id,f.mechanism,f.criterion_id]),
+    ...(r.aliases||[]),...(r.findings||[]).flatMap(f=>[f.id,f.corrects,f.mechanism,f.criterion_id]),
     ...Object.keys(graphNodes.get(r.id)?.checks||{}),
     ...Object.entries(decomposition.records[r.id]||{}).flatMap(([key,value])=>[key,value?.status])]
     .some(x => String(x||'').toLowerCase().includes(q)));

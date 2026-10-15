@@ -57,8 +57,18 @@ calculates an exact GHS magic number of five for the degree-five towers.
 
 | Standard name | Field tower | Full order | RFC generator order | Derived selected order | WID1 | Recorded route |
 | --- | --- | --- | --- | --- | --- | --- |
-| Oakley Group 3 | `2^155 = (2^31)^5` | `12r` | `4r` | `r = 3805993847215893016155463826195386266397436443` | `WID1:GHS:d089b2bdf750` | Exact magic number 5; formula genus 15 over `GF(2^31)` |
-| Oakley Group 4 | `2^185 = (2^37)^5` | `4r` | `2r` | `r = 12259964326927110866866776214413170562013096250261263279` | `WID1:GHS:419192b724ad` | Exact magic number 5; formula genus 15 over `GF(2^37)` |
+| Oakley Group 3 | `2^155 = (2^31)^5` | `12r` | `4r` | `r = 3805993847215893016155463826195386266397436443` | `WID1:GHS:56f762afe456` | Exact magic number 5, Type II; formula genus 16 over `GF(2^31)` |
+| Oakley Group 4 | `2^185 = (2^37)^5` | `4r` | `2r` | `r = 12259964326927110866866776214413170562013096250261263279` | `WID1:GHS:4df6967b110c` | Exact magic number 5, Type II; formula genus 16 over `GF(2^37)` |
+
+The current binary transfer audit gives nonzero relative trace for both
+models, hence Type II and the genus-16 formula. The previous genus-15
+selectors identified different, erroneous findings; each replacement
+record names its predecessor in `corrects`. The [GHS construction](https://www.kantmath.de/publications/papers/weil_descent.pdf)
+supplies the genus dichotomy, while the model-specific type is checked by
+the repository's binary-field transfer computation. The revised formula
+costs are about 93.424 versus 90.388 rho-reference log2 units for Group 3,
+and 99.829 versus 106.586 for Group 4. The chosen destination solver
+hypothesis is false for both rows, so these numbers remain projections.
 
 The full group cofactors 12 and 4 are **not** the selected DLP order:
 the RFC generators have respective orders `4r` and `2r`, and

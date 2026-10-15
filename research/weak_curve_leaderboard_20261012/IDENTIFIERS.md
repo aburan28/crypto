@@ -13,11 +13,16 @@ The printable form is `WID1:<MECHANISM>:<12 lowercase SHA-256 hex digits>`.
 The digest is SHA-256 of compact UTF-8 JSON with sorted keys and no whitespace:
 
 ```json
-{"criterion":"ghs_binary","mechanism":"GHS","scope":"selected_subgroup","selector":"r=3805993847215893016155463826195386266397436443;tower=5x31;g=15","subject_id":"ICV1:f2m-155-dea39df2:-414891960790832521345347:45671926166590716193865565914344635196769237316:0x61a2976b585b70cc897ad03a7f74a4ecc23bf4a:unk:unk:r:b865721c660a","v":1}
+{"criterion":"ghs_binary","mechanism":"GHS","scope":"selected_subgroup","selector":"r=3805993847215893016155463826195386266397436443;tower=5x31;g=16","subject_id":"ICV1:f2m-155-dea39df2:-414891960790832521345347:45671926166590716193865565914344635196769237316:0x61a2976b585b70cc897ad03a7f74a4ecc23bf4a:unk:unk:r:b865721c660a","v":1}
 ```
 
-The corresponding identifier is `WID1:GHS:d089b2bdf750`. Oakley Group 4's
-distinct ICV1 model and subgroup have `WID1:GHS:419192b724ad`. If a 12-digit
+The corresponding identifier is `WID1:GHS:56f762afe456`. Oakley Group 4's
+distinct ICV1 model and subgroup have `WID1:GHS:4df6967b110c`. Their
+records identify the earlier genus-15 findings
+`WID1:GHS:d089b2bdf750` and `WID1:GHS:419192b724ad` in `corrects`.
+Changing the genus changes the route selector and therefore the finding ID;
+the old IDs remain historical correction targets, not aliases for the new
+claim. If a 12-digit
 prefix collision is ever found, extend the digest for colliding records and
 retain aliases for the old display values.
 
@@ -51,7 +56,7 @@ family in this snapshot.
 Each finding has a separate `grade`: `exact_condition`,
 `covering_model`, `candidate`, or `exact_invariant_candidate`. The two Oakley
 GHS findings have the last grade. For each, the recorded magic number five is
-an exact computation on the model; genus 15 follows a GHS formula, but the
+an exact computation on the model; Type II gives genus 16 by the GHS formula, while the
 cover and selected-subgroup transport are not constructed in this snapshot.
 The repository transfer file includes a formula cost projection whose chosen
 solver's hypothesis is explicitly false. That projection is stored as

@@ -16,6 +16,10 @@ def main() -> None:
     assert attack["assessment"] == "unassessed_on_indexed_models"
     assert (HERE / "attack_map.json").read_bytes() == (SITE / "attack_map.json").read_bytes()
     assert (HERE / "criteria.json").read_bytes() == (SITE / "criteria.json").read_bytes()
+    for source, published in (("snapshot.json", "snapshot.json"),
+                              ("isogeny_graph.json", "isogeny_graph.json"),
+                              ("IDENTIFIERS.md", "identifiers.md")):
+        assert (HERE / source).read_bytes() == (SITE / published).read_bytes(), source
 
     ids = [entry["id"] for entry in criteria] + [entry["id"] for entry in attack["items"]]
     assert len(ids) == len(set(ids)), "attack and criterion IDs must be distinct"

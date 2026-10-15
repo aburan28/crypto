@@ -20,6 +20,7 @@ solutions to `y²=x³+ax+b (mod p)` for `0≤x,y<p`.
 | The selected pairing order divides the group order | `pairing_selected_order_divides_group_order` | Divisibility arithmetic, checked |
 | Oakley Groups 3 and 4 have RFC order decompositions `12r` and `4r` | `oakley3_full_order_factor`, `oakley4_full_order_factor` | Exact arithmetic on RFC-declared integers, checked; the RFC point counts themselves are hypotheses/source data |
 | Their field degrees factor as `5·31` and `5·37` | `oakley3_extension_factor`, `oakley4_extension_factor` | Exact arithmetic, checked |
+| Type II at magic number five has formula genus 16 | `oakley_type_ii_genus_formula` | Conditional formula arithmetic, checked; the binary-field trace and Type II classification are separately computed by the transfer registry |
 | Multiplying a point of order `c·r` by `c` yields order `r` | `selected_order_of_generator`; Oakley corollaries `oakley3_selected_order`, `oakley4_selected_order` | Generic additive-group theorem with the exact published point-order premise, checked |
 | For a finite-order element `x`, the order of `x^m` is `orderOf(x)/gcd(orderOf(x),m)` for `m≠0` | `embedding_degree_formula` | Generic group-order identity, checked; instantiate with `p` modulo `r` for the pairing field |
 | The minimal order of `x` divides `m·orderOf(x^m)`, and is the least positive exponent yielding one | `minimal_degree_divides_pairing_extension`, `minimal_degree_is_minimal` | Generic group-order implications, checked |

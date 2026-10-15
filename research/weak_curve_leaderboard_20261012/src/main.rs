@@ -269,7 +269,9 @@ fn named_curves() -> Result<Vec<Value>> {
                 || transfer["subgroup"]["order"] != r
                 || route["invariants"]["relative_degree"] != 5
                 || route["invariants"]["magic_number"] != 5
-                || route["destination"]["genus"] != "15"
+                || route["invariants"]["type_i"] != false
+                || route["invariants"]["relative_trace_b_zero"] != false
+                || route["destination"]["genus"] != "16"
                 || route["cost"]["destination"]["enge_gaudry_hypothesis_holds"] != false
             {
                 return Err(
@@ -277,10 +279,18 @@ fn named_curves() -> Result<Vec<Value>> {
                 );
             }
             let base_degree = route["invariants"]["base_degree"].as_i64().unwrap();
-            let selector = format!("r={r};tower=5x{base_degree};g=15");
-            let finding = finding(id,"GHS","ghs_binary","selected_subgroup",&selector,
+            let genus = route["destination"]["genus"]
+                .as_str()
+                .ok_or("Oakley genus absent")?;
+            let selector = format!("r={r};tower=5x{base_degree};g={genus}");
+            let mut finding = finding(id,"GHS","ghs_binary","selected_subgroup",&selector,
                 "exact_invariant_candidate",
-                "The degree-five binary tower has GHS magic number five and predicted genus 15; a cover and subgroup transport are still needed.");
+                "The degree-five binary tower has GHS magic number five and Type II formula genus 16; a cover and subgroup transport are still needed.");
+            finding["corrects"] = json!(if name == "Oakley Group 3" {
+                "WID1:GHS:d089b2bdf750"
+            } else {
+                "WID1:GHS:419192b724ad"
+            });
             record["signal"] = json!("binary_ghs_invariant");
             record["r"] = json!(r);
             record["full_order_cofactor"] = json!(cofactor);
@@ -288,7 +298,7 @@ fn named_curves() -> Result<Vec<Value>> {
             record["published_generator"] = json!(generator);
             record["extension_factorization"] = json!([5, base_degree]);
             record["ghs_magic_number"] = json!(5);
-            record["ghs_genus_formula"] = json!(15);
+            record["ghs_genus_formula"] = json!(genus.parse::<u64>()?);
             record["ghs_base_degree"] = json!(base_degree);
             record["ghs_cover_constructed"] = json!(false);
             record["ghs_subgroup_map_certified"] = json!(false);
@@ -675,10 +685,17 @@ mod tests {
         let mut ids = std::collections::HashSet::new();
         for c in oakley {
             assert_eq!(c["ghs_magic_number"], 5);
-            assert_eq!(c["ghs_genus_formula"], 15);
+            assert_eq!(c["ghs_genus_formula"], 16);
             assert_eq!(c["projection"]["hypothesis_satisfied"], false);
             let f = &c["findings"][0];
-            assert!(f["id"].as_str().unwrap().starts_with("WID1:GHS:"));
+            let (current, corrected) = if c["name"] == "Oakley Group 3" {
+                ("WID1:GHS:56f762afe456", "WID1:GHS:d089b2bdf750")
+            } else {
+                ("WID1:GHS:4df6967b110c", "WID1:GHS:419192b724ad")
+            };
+            assert_eq!(f["id"], current);
+            assert_eq!(f["corrects"], corrected);
+            assert!(f["selector"].as_str().unwrap().ends_with(";g=16"));
             assert!(ids.insert(f["id"].as_str().unwrap()));
         }
     }
@@ -689,7 +706,7 @@ mod tests {
             "GHS",
             "ghs_binary",
             "selected_subgroup",
-            "r=13;tower=5x31;g=15",
+            "r=13;tower=5x31;g=16",
             "candidate",
             "first statement",
         );
@@ -698,7 +715,7 @@ mod tests {
             "GHS",
             "ghs_binary",
             "selected_subgroup",
-            "r=13;tower=5x31;g=15",
+            "r=13;tower=5x31;g=16",
             "verified_map",
             "updated statement",
         );
@@ -710,7 +727,7 @@ mod tests {
                 "GHS",
                 "ghs_binary",
                 "selected_subgroup",
-                "r=13;tower=5x31;g=15",
+                "r=13;tower=5x31;g=16",
                 "candidate",
                 "first statement"
             )["id"]
