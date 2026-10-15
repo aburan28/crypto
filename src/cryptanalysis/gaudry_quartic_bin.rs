@@ -33,37 +33,41 @@
 //! and an independent meet-in-the-middle enumeration over the same base.
 
 use std::cell::Cell;
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use rayon::prelude::*;
 use serde::Serialize;
 
-use super::ic_boundary::{CountedGroup, FactorBase, GroupOps, OracleCounters};
+use super::ic_boundary::{CountedGroup, FactorBase, GroupOps, OracleCounters, Relation};
 use super::ic_framework::stages::{
     DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SolverTotals, SystemShape,
 };
 
 // ── F_{2^m} ───────────────────────────────────────────────────────────────
 
+/// An element of `F_q`, `q = 2^m ≤ 2^20`, as its bits.  It was a `u16`
+/// while `m ≤ 15`; the values, and so every count, are the same.
+pub type Fe = u32;
+
 /// Primitive polynomials of degree `m` (the `x^m` bit included).
-const PRIMITIVE: [u32; 16] = [
+const PRIMITIVE: [u32; 21] = [
     0, 0, 0x7, 0xB, 0x13, 0x25, 0x43, 0x89, 0x11D, 0x211, 0x409, 0x805, 0x1053, 0x201B, 0x4443,
-    0x8003,
+    0x8003, 0x1100B, 0x20009, 0x40081, 0x80027, 0x100009,
 ];
 
 /// The logarithm tables of `F_{2^m}`: shareable across threads, no
 /// counter (the solver's loops count for themselves).
 pub struct GfTab {
     pub q: u32,
-    exp: Vec<u16>,
+    exp: Vec<Fe>,
     log: Vec<u32>,
 }
 
 impl GfTab {
     #[inline(always)]
-    pub fn mul(&self, a: u16, b: u16) -> u16 {
+    pub fn mul(&self, a: Fe, b: Fe) -> Fe {
         if a == 0 || b == 0 {
             0
         } else {
@@ -71,13 +75,13 @@ impl GfTab {
         }
     }
     #[inline(always)]
-    pub fn inv(&self, a: u16) -> u16 {
+    pub fn inv(&self, a: Fe) -> Fe {
         assert!(a != 0, "inverse of 0");
         self.exp[((self.q - 1 - self.log[a as usize]) % (self.q - 1)) as usize]
     }
     /// `row ← row + f · piv` elementwise (`f ≠ 0`).
     #[inline(always)]
-    pub fn axpy(&self, row: &mut [u16], piv: &[u16], f: u16) {
+    pub fn axpy(&self, row: &mut [Fe], piv: &[Fe], f: Fe) {
         let lf = self.log[f as usize];
         for (r, &v) in row.iter_mut().zip(piv) {
             if v != 0 {
@@ -87,7 +91,7 @@ impl GfTab {
     }
 }
 
-/// `F_{2^m}`, `2 ≤ m ≤ 15`, by logarithm tables.  `mul` and `inv` count
+/// `F_{2^m}`, `2 ≤ m ≤ 20`, by logarithm tables.  `mul` and `inv` count
 /// one multiplication each on [`Gf2q::muls`]; the `_nc` forms are for
 /// loops that count for themselves.
 pub struct Gf2q {
@@ -95,21 +99,21 @@ pub struct Gf2q {
     pub q: u32,
     pub modulus: u32,
     pub tab: GfTab,
-    /// `t` with `t² + t = w`, or `u16::MAX` when `Tr(w) ≠ 0`.
-    artin: Vec<u16>,
+    /// `t` with `t² + t = w`, or `Fe::MAX` when `Tr(w) ≠ 0`.
+    artin: Vec<Fe>,
     muls: Cell<u64>,
 }
 
 impl Gf2q {
     pub fn new(m: u32) -> Gf2q {
-        assert!((2..=15).contains(&m), "2 ≤ m ≤ 15");
+        assert!((2..=20).contains(&m), "2 ≤ m ≤ 20");
         let q = 1u32 << m;
         let modulus = PRIMITIVE[m as usize];
-        let mut exp = vec![0u16; 2 * q as usize];
+        let mut exp = vec![0u32; 2 * q as usize];
         let mut log = vec![0u32; q as usize];
         let mut v = 1u32;
         for i in 0..(q - 1) {
-            exp[i as usize] = v as u16;
+            exp[i as usize] = v as Fe;
             assert!(i == 0 || v != 1, "x is primitive modulo {modulus:#x}");
             log[v as usize] = i;
             v <<= 1;
@@ -126,10 +130,10 @@ impl Gf2q {
             q,
             modulus,
             tab: GfTab { q, exp, log },
-            artin: vec![u16::MAX; q as usize],
+            artin: vec![Fe::MAX; q as usize],
             muls: Cell::new(0),
         };
-        for t in 0..q as u16 {
+        for t in 0..q as Fe {
             let w = f.mul_nc(t, t) ^ t;
             f.artin[w as usize] = t.min(t ^ 1);
         }
@@ -142,28 +146,28 @@ impl Gf2q {
         self.muls.set(self.muls.get() + k);
     }
     #[inline(always)]
-    pub fn mul_nc(&self, a: u16, b: u16) -> u16 {
+    pub fn mul_nc(&self, a: Fe, b: Fe) -> Fe {
         self.tab.mul(a, b)
     }
     #[inline(always)]
-    pub fn mul(&self, a: u16, b: u16) -> u16 {
+    pub fn mul(&self, a: Fe, b: Fe) -> Fe {
         self.count(1);
         self.tab.mul(a, b)
     }
-    pub fn inv_nc(&self, a: u16) -> u16 {
+    pub fn inv_nc(&self, a: Fe) -> Fe {
         self.tab.inv(a)
     }
-    pub fn inv(&self, a: u16) -> u16 {
+    pub fn inv(&self, a: Fe) -> Fe {
         self.count(1);
         self.tab.inv(a)
     }
     /// The smaller `t` with `t² + t = w`, if any (a table: no arithmetic).
-    pub fn artin_schreier(&self, w: u16) -> Option<u16> {
+    pub fn artin_schreier(&self, w: Fe) -> Option<Fe> {
         let t = self.artin[w as usize];
-        (t != u16::MAX).then_some(t)
+        (t != Fe::MAX).then_some(t)
     }
     /// `√a = a^{2^{m−1}}`: `m − 1` squarings, counted.
-    pub fn sqrt(&self, a: u16) -> u16 {
+    pub fn sqrt(&self, a: Fe) -> Fe {
         let mut r = a;
         for _ in 1..self.m {
             r = self.mul(r, r);
@@ -176,7 +180,7 @@ impl Gf2q {
 
 /// An element of `F_{q⁴}`: coefficients of `1, z, z², z³` over `F_q`.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Eb(pub [u16; 4]);
+pub struct Eb(pub [Fe; 4]);
 
 impl Eb {
     pub const ZERO: Eb = Eb([0; 4]);
@@ -195,7 +199,7 @@ impl Eb {
 pub struct Fq4 {
     pub f: Gf2q,
     /// `z⁴ = c₀ + c₁z + c₂z² + c₃z³`.
-    pub c: [u16; 4],
+    pub c: [Fe; 4],
     /// `(zⁱ)^q`, for the Frobenius.
     zq: [Eb; 4],
 }
@@ -205,7 +209,7 @@ impl Fq4 {
     /// order) irreducible over `F_q`: no factor of degree 1 or 2, i.e.
     /// `z^{q²} − z` a unit modulo it.
     pub fn new(m: u32) -> Fq4 {
-        assert!((4..=15).contains(&m), "4 ≤ m ≤ 15");
+        assert!((4..=20).contains(&m), "4 ≤ m ≤ 20");
         let mut fq = Fq4 {
             f: Gf2q::new(m),
             c: [0; 4],
@@ -213,8 +217,8 @@ impl Fq4 {
         };
         // z⁴ + c₁z + c₀ is an affine linearised polynomial in characteristic
         // 2, often reducible for every (c₁, c₀); the z³ term avoids that.
-        for (c3, c1) in (0..2u16).flat_map(|c3| (0..fq.f.q as u16).map(move |c1| (c3, c1))) {
-            for c0 in 1..fq.f.q as u16 {
+        for (c3, c1) in (0..2u32).flat_map(|c3| (0..fq.f.q as Fe).map(move |c1| (c3, c1))) {
+            for c0 in 1..fq.f.q as Fe {
                 fq.c = [c0, c1, 0, c3];
                 let z = Eb([0, 1, 0, 0]);
                 let d = fq.pow2k(&z, 2 * m).add(&z);
@@ -236,7 +240,7 @@ impl Fq4 {
     /// Rank over `F_q` of multiplication by `d` (4 means a unit).
     fn mat_rank(&self, d: &Eb) -> usize {
         let f = &self.f;
-        let mut m: Vec<[u16; 4]> = (0..4)
+        let mut m: Vec<[Fe; 4]> = (0..4)
             .map(|i| {
                 let mut e = Eb::ZERO;
                 e.0[i] = 1;
@@ -263,10 +267,10 @@ impl Fq4 {
         }
         rank
     }
-    pub fn from_fq(&self, v: u16) -> Eb {
+    pub fn from_fq(&self, v: Fe) -> Eb {
         Eb([v, 0, 0, 0])
     }
-    fn reduce(&self, p: &mut [u16; 7], counted: bool) -> Eb {
+    fn reduce(&self, p: &mut [Fe; 7], counted: bool) -> Eb {
         let f = &self.f;
         for k in (4..7).rev() {
             let v = p[k];
@@ -286,7 +290,7 @@ impl Fq4 {
     }
     fn mul_impl(&self, a: &Eb, b: &Eb, counted: bool) -> Eb {
         let f = &self.f;
-        let mut p = [0u16; 7];
+        let mut p = [0u32; 7];
         for i in 0..4 {
             if a.0[i] == 0 {
                 continue;
@@ -311,7 +315,7 @@ impl Fq4 {
     /// `a²`: the coefficients squared into even positions, then reduced.
     pub fn sq(&self, a: &Eb) -> Eb {
         let f = &self.f;
-        let mut p = [0u16; 7];
+        let mut p = [0u32; 7];
         for i in 0..4 {
             if a.0[i] != 0 {
                 p[2 * i] = f.mul(a.0[i], a.0[i]);
@@ -321,7 +325,7 @@ impl Fq4 {
     }
     fn sq_nc(&self, a: &Eb) -> Eb {
         let f = &self.f;
-        let mut p = [0u16; 7];
+        let mut p = [0u32; 7];
         for i in 0..4 {
             p[2 * i] = f.mul_nc(a.0[i], a.0[i]);
         }
@@ -335,7 +339,7 @@ impl Fq4 {
         }
         r
     }
-    pub fn scale(&self, a: &Eb, k: u16) -> Eb {
+    pub fn scale(&self, a: &Eb, k: Fe) -> Eb {
         Eb(core::array::from_fn(|i| self.f.mul(a.0[i], k)))
     }
     /// `a^q`: `F_q`-linear, `Σ aᵢ (zⁱ)^q`.
@@ -376,18 +380,19 @@ impl Fq4 {
         self.pow2k_counted(a, 4 * self.f.m - 1)
     }
     pub fn random(&self, rng: &mut StdRng) -> Eb {
-        Eb(core::array::from_fn(|_| rng.gen_range(0..self.f.q) as u16))
+        Eb(core::array::from_fn(|_| rng.gen_range(0..self.f.q) as Fe))
     }
-    /// Pack into one word: coefficient `i` in bits `[im, (i + 1)m)`.
-    pub fn pack(&self, a: &Eb) -> u64 {
-        (0..4).fold(0u64, |acc, i| {
-            acc | (a.0[i] as u64) << (i as u32 * self.f.m)
+    /// Pack into one word: coefficient `i` in bits `[im, (i + 1)m)`
+    /// (`4m ≤ 80` bits; below `2^64` while `m ≤ 16`).
+    pub fn pack(&self, a: &Eb) -> u128 {
+        (0..4).fold(0u128, |acc, i| {
+            acc | (a.0[i] as u128) << (i as u32 * self.f.m)
         })
     }
-    pub fn unpack(&self, v: u64) -> Eb {
-        let mask = (1u64 << self.f.m) - 1;
+    pub fn unpack(&self, v: u128) -> Eb {
+        let mask = (1u128 << self.f.m) - 1;
         Eb(core::array::from_fn(|i| {
-            ((v >> (i as u32 * self.f.m)) & mask) as u16
+            ((v >> (i as u32 * self.f.m)) & mask) as Fe
         }))
     }
 }
@@ -417,7 +422,7 @@ pub struct CurveB {
     pub beta: Eb,
     /// `u ↦ u² + u` over `F_2` on the packed bits, row-reduced with its
     /// transformation, for the lift.
-    as_solver: Vec<(u64, u64)>,
+    as_solver: Vec<(u128, u128)>,
     ops: Cell<u64>,
 }
 
@@ -429,18 +434,18 @@ impl CurveB {
         let n = 4 * f.f.m;
         // Rows: image of each basis bit, with the bit itself as the
         // transformation; reduce to echelon form by leading bit.
-        let mut rows: Vec<(u64, u64)> = (0..n)
+        let mut rows: Vec<(u128, u128)> = (0..n)
             .map(|i| {
-                let e = f.unpack(1u64 << i);
+                let e = f.unpack(1u128 << i);
                 let img = f.sq_nc(&e).add(&e);
-                (f.pack(&img), 1u64 << i)
+                (f.pack(&img), 1u128 << i)
             })
             .collect();
-        let mut basis: Vec<(u64, u64)> = Vec::new();
+        let mut basis: Vec<(u128, u128)> = Vec::new();
         for (mut v, mut tr) in rows.drain(..) {
             // Basis kept by leading bit, descending; each lead unique.
             for &(bv, btr) in &basis {
-                let lead = 63 - bv.leading_zeros();
+                let lead = 127 - bv.leading_zeros();
                 if v >> lead & 1 == 1 {
                     v ^= bv;
                     tr ^= btr;
@@ -448,7 +453,7 @@ impl CurveB {
             }
             if v != 0 {
                 basis.push((v, tr));
-                basis.sort_by_key(|x| std::cmp::Reverse(63 - x.0.leading_zeros()));
+                basis.sort_by_key(|x| std::cmp::Reverse(127 - x.0.leading_zeros()));
             }
         }
         f.f.muls.set(0);
@@ -468,9 +473,9 @@ impl CurveB {
     /// no field multiplication).
     fn artin_schreier(&self, c: &Eb) -> Option<Eb> {
         let mut v = self.f.pack(c);
-        let mut u = 0u64;
+        let mut u = 0u128;
         for &(bv, btr) in &self.as_solver {
-            let lead = 63 - bv.leading_zeros();
+            let lead = 127 - bv.leading_zeros();
             if v >> lead & 1 == 1 {
                 v ^= bv;
                 u ^= btr;
@@ -558,7 +563,7 @@ impl CurveB {
     pub fn sub(&self, p: &PtB, q: &PtB) -> PtB {
         self.add(p, &self.neg(q))
     }
-    pub fn mul(&self, p: &PtB, mut k: u64) -> PtB {
+    pub fn mul(&self, p: &PtB, mut k: u128) -> PtB {
         let mut acc = PtB::INF;
         let mut base = *p;
         while k > 0 {
@@ -619,7 +624,7 @@ impl CurveB {
     /// the 6 × 6 Sylvester determinant.
     pub fn s5(&self, x: &[Eb; 5]) -> Eb {
         let f = &self.f;
-        let nodes: [Eb; 5] = core::array::from_fn(|i| Eb([i as u16, 1, 0, 0]));
+        let nodes: [Eb; 5] = core::array::from_fn(|i| Eb([i as Fe, 1, 0, 0]));
         let vals: [Eb; 5] = core::array::from_fn(|i| self.s4(&x[2], &x[3], &x[4], &nodes[i]));
         let g = interpolate(f, &nodes, &vals);
         let [c, bq, a] = self.s3_quadratic(&x[0], &x[1]);
@@ -769,7 +774,7 @@ impl SymmetrisedBin {
 
     /// Nine distinct nonzero nodes for `t_R`, outside `F_q`.
     fn nodes() -> [Eb; 9] {
-        core::array::from_fn(|i| Eb([i as u16, 1, 0, 0]))
+        core::array::from_fn(|i| Eb([i as Fe, 1, 0, 0]))
     }
 
     fn coefficients_in_last(curve: &CurveB, t: &[Eb; 4], vinv: &[[Eb; 9]; 9]) -> [Eb; 9] {
@@ -891,9 +896,9 @@ impl SymmetrisedBin {
 
     /// The four Weil components in `(s₂, s₃, s₄, π)`: weighted form,
     /// weights [`WEIGHTS`].
-    pub fn system_weighted(&self, f: &Fq4, t_r: &Eb) -> Vec<HashMap<[u8; 4], u16>> {
+    pub fn system_weighted(&self, f: &Fq4, t_r: &Eb) -> Vec<HashMap<[u8; 4], Fe>> {
         let vals = self.at(f, t_r);
-        let mut out: Vec<HashMap<[u8; 4], u16>> = vec![HashMap::new(); 4];
+        let mut out: Vec<HashMap<[u8; 4], Fe>> = vec![HashMap::new(); 4];
         for (m, v) in self.monos.iter().zip(&vals) {
             for (i, comp) in out.iter_mut().enumerate() {
                 if v.0[i] != 0 {
@@ -910,7 +915,7 @@ impl SymmetrisedBin {
     /// The unweighted form in `(s₁, s₂, s₃, s₄, π)`: `π^d` reduced modulo
     /// `π² + π + s₁` to `A_d(s₁) + B_d(s₁) π` (so every term has total
     /// degree ≤ 4), and the fifth equation `π² + π + s₁`.
-    pub fn system_plain(&self, f: &Fq4, t_r: &Eb) -> Vec<HashMap<[u8; 5], u16>> {
+    pub fn system_plain(&self, f: &Fq4, t_r: &Eb) -> Vec<HashMap<[u8; 5], Fe>> {
         // π^d = Σ_k A[d][k] s₁^k + Σ_k B[d][k] s₁^k π, coefficients in F_2.
         let mut ab: Vec<(Vec<u8>, Vec<u8>)> = vec![(vec![1], vec![0])];
         for d in 1..=8usize {
@@ -927,7 +932,7 @@ impl SymmetrisedBin {
             ab.push((na, nb));
         }
         let vals = self.at(f, t_r);
-        let mut out: Vec<HashMap<[u8; 5], u16>> = vec![HashMap::new(); 4];
+        let mut out: Vec<HashMap<[u8; 5], Fe>> = vec![HashMap::new(); 4];
         for (m, v) in self.monos.iter().zip(&vals) {
             let (a, b) = &ab[m[3] as usize];
             for (part, pe) in [(a, 0u8), (b, 1u8)] {
@@ -982,13 +987,13 @@ impl SymmetrisedBin {
 
     /// The four Weil components in `(S₂, S₃, s₄, P)` (requires
     /// [`Self::frobenius_reducible`]).
-    pub fn system_frobenius(&self, f: &Fq4, t_r: &Eb) -> Vec<HashMap<[u8; 4], u16>> {
+    pub fn system_frobenius(&self, f: &Fq4, t_r: &Eb) -> Vec<HashMap<[u8; 4], Fe>> {
         assert!(
             self.frobenius_reducible(),
             "H has an odd power of s₂, s₃ or π"
         );
         let vals = self.at(f, t_r);
-        let mut out: Vec<HashMap<[u8; 4], u16>> = vec![HashMap::new(); 4];
+        let mut out: Vec<HashMap<[u8; 4], Fe>> = vec![HashMap::new(); 4];
         for (m, v) in self.monos.iter().zip(&vals) {
             if v.is_zero() {
                 continue;
@@ -1026,9 +1031,9 @@ pub fn generate_instance(m: u32, seed: u64) -> CurveB {
 }
 
 /// The base: one point per `t ∈ F_q \ {0, 1}` that lifts, with its `t`.
-pub fn t_base(curve: &CurveB, rng: &mut StdRng) -> Vec<(u16, PtB)> {
+pub fn t_base(curve: &CurveB, rng: &mut StdRng) -> Vec<(Fe, PtB)> {
     let f = &curve.f;
-    (2..f.f.q as u16)
+    (2..f.f.q as Fe)
         .filter_map(|t| {
             let x = curve.x_of_t(&f.from_fq(t));
             curve.lift_x(&x, rng).map(|p| (t, p))
@@ -1038,7 +1043,7 @@ pub fn t_base(curve: &CurveB, rng: &mut StdRng) -> Vec<(u16, PtB)> {
 
 /// Every set of four distinct base points with `±P_i ± P_j ± P_k ± P_l =
 /// R`, as sorted `t`-quadruples, by meet in the middle over pairs.
-pub fn mitm_t_decompositions(curve: &CurveB, base: &[(u16, PtB)], r: &PtB) -> BTreeSet<[u16; 4]> {
+pub fn mitm_t_decompositions(curve: &CurveB, base: &[(Fe, PtB)], r: &PtB) -> BTreeSet<[Fe; 4]> {
     let n = base.len();
     let mut table: HashMap<Eb, Vec<(usize, usize)>> = HashMap::new();
     for i in 0..n {
@@ -1102,8 +1107,8 @@ fn signed_sum(curve: &CurveB, pts: &[PtB; 4], r: &PtB) -> Option<[PtB; 4]> {
 
 // ── Weighted monomials ───────────────────────────────────────────────────
 
-fn wdeg<const N: usize>(m: &[u8; N], w: &[u8; N]) -> u16 {
-    m.iter().zip(w).map(|(&x, &k)| x as u16 * k as u16).sum()
+fn wdeg<const N: usize>(m: &[u8; N], w: &[u8; N]) -> Fe {
+    m.iter().zip(w).map(|(&x, &k)| x as Fe * k as Fe).sum()
 }
 
 /// Weighted degree, then reverse lexicographic (grevlex for weights 1).
@@ -1145,7 +1150,7 @@ fn monomials_desc<const N: usize>(d: u8, w: &[u8; N]) -> Vec<[u8; N]> {
     out
 }
 
-fn lead<const N: usize>(f: &HashMap<[u8; N], u16>, w: &[u8; N]) -> Option<[u8; N]> {
+fn lead<const N: usize>(f: &HashMap<[u8; N], Fe>, w: &[u8; N]) -> Option<[u8; N]> {
     f.iter()
         .filter(|(_, &c)| c != 0)
         .map(|(m, _)| *m)
@@ -1155,10 +1160,10 @@ fn lead<const N: usize>(f: &HashMap<[u8; N], u16>, w: &[u8; N]) -> Option<[u8; N
 /// Make the leading monomials distinct by eliminating equal leads.
 fn triangularise<const N: usize>(
     g: &GfTab,
-    comps: &[HashMap<[u8; N], u16>],
+    comps: &[HashMap<[u8; N], Fe>],
     w: &[u8; N],
     muls: &mut u64,
-) -> (Vec<HashMap<[u8; N], u16>>, Vec<Option<[u8; N]>>) {
+) -> (Vec<HashMap<[u8; N], Fe>>, Vec<Option<[u8; N]>>) {
     let mut fs = comps.to_vec();
     for _ in 0..16 {
         fs.sort_by(|a, b| match (lead(a, w), lead(b, w)) {
@@ -1195,7 +1200,7 @@ fn triangularise<const N: usize>(
 // ── Elimination ──────────────────────────────────────────────────────────
 
 struct Echelon {
-    rows: Vec<Vec<u16>>,
+    rows: Vec<Vec<Fe>>,
     pivot_row: Vec<u32>,
     zero_rows: usize,
     zero_ids: Vec<u32>,
@@ -1205,7 +1210,7 @@ struct Echelon {
 /// `echelon_by_lead_with`): one multiplication per nonzero entry of a pivot
 /// row per row it is subtracted from, and per entry normalised.  With
 /// `sparsest`, each column's pivot is the sparsest candidate row.
-fn echelon(g: &GfTab, mut rows: Vec<Vec<u16>>, muls: &mut u64, sparsest: bool) -> Echelon {
+fn echelon(g: &GfTab, mut rows: Vec<Vec<Fe>>, muls: &mut u64, sparsest: bool) -> Echelon {
     let ncols = rows.first().map_or(0, |r| r.len());
     let mut buckets: Vec<Vec<u32>> = vec![Vec::new(); ncols];
     let mut zero_rows = 0usize;
@@ -1248,7 +1253,7 @@ fn echelon(g: &GfTab, mut rows: Vec<Vec<u16>>, muls: &mut u64, sparsest: bool) -
         }
         *muls += nz.len() as u64;
         let dense = nz.len() * 8 > ncols - c;
-        let mut others: Vec<(u32, Vec<u16>, Option<usize>, u32)> = b[1..]
+        let mut others: Vec<(u32, Vec<Fe>, Option<usize>, u32)> = b[1..]
             .iter()
             .map(|&r| (r, std::mem::take(&mut rows[r as usize]), None, 0))
             .collect();
@@ -1295,7 +1300,7 @@ fn echelon(g: &GfTab, mut rows: Vec<Vec<u16>>, muls: &mut u64, sparsest: bool) -
 fn top_up(
     g: &GfTab,
     ech: &mut Echelon,
-    held: Vec<Vec<u16>>,
+    held: Vec<Vec<Fe>>,
     mut need: usize,
     muls: &mut u64,
 ) -> u64 {
@@ -1342,7 +1347,7 @@ fn top_up(
 // ── Small linear algebra and polynomials over F_q (counted) ──────────────
 
 /// Reduced row echelon form; returns pivot columns.
-fn rref(g: &GfTab, m: &mut [Vec<u16>], muls: &mut u64) -> Vec<usize> {
+fn rref(g: &GfTab, m: &mut [Vec<Fe>], muls: &mut u64) -> Vec<usize> {
     let rows = m.len();
     let cols = if rows > 0 { m[0].len() } else { 0 };
     let mut pivots = Vec::new();
@@ -1375,7 +1380,7 @@ fn rref(g: &GfTab, m: &mut [Vec<u16>], muls: &mut u64) -> Vec<usize> {
 }
 
 /// A basis of the kernel of `m − λI` (`m` square).
-fn kernel_shifted(g: &GfTab, m: &[Vec<u16>], lambda: u16, muls: &mut u64) -> Vec<Vec<u16>> {
+fn kernel_shifted(g: &GfTab, m: &[Vec<Fe>], lambda: Fe, muls: &mut u64) -> Vec<Vec<Fe>> {
     let n = m.len();
     let mut a = m.to_vec();
     for (i, row) in a.iter_mut().enumerate() {
@@ -1389,7 +1394,7 @@ fn kernel_shifted(g: &GfTab, m: &[Vec<u16>], lambda: u16, muls: &mut u64) -> Vec
     (0..n)
         .filter(|&c| !is_piv[c])
         .map(|fc| {
-            let mut v = vec![0u16; n];
+            let mut v = vec![0u32; n];
             v[fc] = 1;
             for (r, &pc) in pivots.iter().enumerate() {
                 v[pc] = a[r][fc];
@@ -1399,9 +1404,9 @@ fn kernel_shifted(g: &GfTab, m: &[Vec<u16>], lambda: u16, muls: &mut u64) -> Vec
         .collect()
 }
 
-fn det(g: &GfTab, mut a: Vec<Vec<u16>>, muls: &mut u64) -> u16 {
+fn det(g: &GfTab, mut a: Vec<Vec<Fe>>, muls: &mut u64) -> Fe {
     let k = a.len();
-    let mut d = 1u16;
+    let mut d = 1u32;
     for c in 0..k {
         let Some(r) = (c..k).find(|&r| a[r][c] != 0) else {
             return 0;
@@ -1423,14 +1428,14 @@ fn det(g: &GfTab, mut a: Vec<Vec<u16>>, muls: &mut u64) -> u16 {
     d
 }
 
-fn ptrim(a: &mut Vec<u16>) {
+fn ptrim(a: &mut Vec<Fe>) {
     while a.last() == Some(&0) {
         a.pop();
     }
 }
 
 /// `a mod h` (`h` monic).
-fn pmod(g: &GfTab, a: &[u16], h: &[u16], muls: &mut u64) -> Vec<u16> {
+fn pmod(g: &GfTab, a: &[Fe], h: &[Fe], muls: &mut u64) -> Vec<Fe> {
     let mut r = a.to_vec();
     ptrim(&mut r);
     let dh = h.len() - 1;
@@ -1448,11 +1453,11 @@ fn pmod(g: &GfTab, a: &[u16], h: &[u16], muls: &mut u64) -> Vec<u16> {
     r
 }
 
-fn pmul(g: &GfTab, a: &[u16], b: &[u16], muls: &mut u64) -> Vec<u16> {
+fn pmul(g: &GfTab, a: &[Fe], b: &[Fe], muls: &mut u64) -> Vec<Fe> {
     if a.is_empty() || b.is_empty() {
         return Vec::new();
     }
-    let mut out = vec![0u16; a.len() + b.len() - 1];
+    let mut out = vec![0u32; a.len() + b.len() - 1];
     for (i, &x) in a.iter().enumerate() {
         if x == 0 {
             continue;
@@ -1467,7 +1472,7 @@ fn pmul(g: &GfTab, a: &[u16], b: &[u16], muls: &mut u64) -> Vec<u16> {
     out
 }
 
-fn pmonic(g: &GfTab, mut a: Vec<u16>, muls: &mut u64) -> Vec<u16> {
+fn pmonic(g: &GfTab, mut a: Vec<Fe>, muls: &mut u64) -> Vec<Fe> {
     ptrim(&mut a);
     if let Some(&l) = a.last() {
         if l != 1 {
@@ -1481,7 +1486,7 @@ fn pmonic(g: &GfTab, mut a: Vec<u16>, muls: &mut u64) -> Vec<u16> {
     a
 }
 
-fn pgcd(g: &GfTab, a: &[u16], b: &[u16], muls: &mut u64) -> Vec<u16> {
+fn pgcd(g: &GfTab, a: &[Fe], b: &[Fe], muls: &mut u64) -> Vec<Fe> {
     let mut a = pmonic(g, a.to_vec(), muls);
     let mut b = pmonic(g, b.to_vec(), muls);
     while !b.is_empty() {
@@ -1492,11 +1497,11 @@ fn pgcd(g: &GfTab, a: &[u16], b: &[u16], muls: &mut u64) -> Vec<u16> {
     a
 }
 
-fn pdiv(g: &GfTab, a: &[u16], h: &[u16], muls: &mut u64) -> Vec<u16> {
+fn pdiv(g: &GfTab, a: &[Fe], h: &[Fe], muls: &mut u64) -> Vec<Fe> {
     let mut r = a.to_vec();
     ptrim(&mut r);
     let dh = h.len() - 1;
-    let mut qt = vec![0u16; r.len().saturating_sub(dh)];
+    let mut qt = vec![0u32; r.len().saturating_sub(dh)];
     while r.len() > dh {
         let c = *r.last().unwrap();
         let shift = r.len() - 1 - dh;
@@ -1515,7 +1520,7 @@ fn pdiv(g: &GfTab, a: &[u16], h: &[u16], muls: &mut u64) -> Vec<u16> {
 /// Distinct roots in `F_q` of `poly` (ascending coefficients): `gcd` with
 /// `X^q − X` (by `m` squarings modulo the polynomial), then splitting by
 /// `Tr(δX)`; every multiplication counted.
-pub fn roots(f: &Gf2q, poly: &[u16], muls: &mut u64) -> Vec<u16> {
+pub fn roots(f: &Gf2q, poly: &[Fe], muls: &mut u64) -> Vec<Fe> {
     let g = &f.tab;
     let p = pmonic(g, poly.to_vec(), muls);
     if p.len() <= 1 {
@@ -1542,7 +1547,7 @@ pub fn roots(f: &Gf2q, poly: &[u16], muls: &mut u64) -> Vec<u16> {
     out
 }
 
-fn split_roots(f: &Gf2q, h: Vec<u16>, out: &mut Vec<u16>, mut seed: u32, muls: &mut u64) {
+fn split_roots(f: &Gf2q, h: Vec<Fe>, out: &mut Vec<Fe>, mut seed: u32, muls: &mut u64) {
     let g = &f.tab;
     match h.len() {
         0 | 1 => {}
@@ -1654,12 +1659,12 @@ pub struct BinOptions {
 struct Chains {
     pos: Vec<(u32, u32)>,
     len: Vec<u32>,
-    nf: Vec<Vec<(u32, u32, u16)>>,
+    nf: Vec<Vec<(u32, u32, Fe)>>,
 }
 
 impl Chains {
-    fn powers(g: &GfTab, lam: u16, top: usize, muls: &mut u64) -> Vec<u16> {
-        let mut pw = vec![1u16; top + 1];
+    fn powers(g: &GfTab, lam: Fe, top: usize, muls: &mut u64) -> Vec<Fe> {
+        let mut pw = vec![1u32; top + 1];
         for t in 1..=top {
             pw[t] = g.mul(pw[t - 1], lam);
         }
@@ -1669,10 +1674,10 @@ impl Chains {
     fn top(&self) -> usize {
         *self.len.iter().max().unwrap_or(&0) as usize
     }
-    fn matrix(&self, g: &GfTab, lam: u16, muls: &mut u64) -> Vec<Vec<u16>> {
+    fn matrix(&self, g: &GfTab, lam: Fe, muls: &mut u64) -> Vec<Vec<Fe>> {
         let pw = Self::powers(g, lam, self.top(), muls);
         let k = self.len.len();
-        let mut a = vec![vec![0u16; k]; k];
+        let mut a = vec![vec![0u32; k]; k];
         for (j, row) in self.nf.iter().enumerate() {
             for &(i, t, c) in row {
                 a[j][i as usize] ^= g.mul(c, pw[t as usize]);
@@ -1682,7 +1687,7 @@ impl Chains {
         }
         a
     }
-    fn eigenvectors(&self, g: &GfTab, lam: u16, muls: &mut u64) -> Vec<Vec<u16>> {
+    fn eigenvectors(&self, g: &GfTab, lam: Fe, muls: &mut u64) -> Vec<Vec<Fe>> {
         let a = self.matrix(g, lam, muls);
         let ker = kernel_shifted(g, &a, 0, muls);
         let pw = Self::powers(g, lam, self.top(), muls);
@@ -1700,11 +1705,11 @@ impl Chains {
 
 /// The characteristic polynomial of a small square matrix, by its
 /// determinant at `k + 1` points interpolated (needs `q > k`).
-fn small_charpoly(f: &Gf2q, a: &[Vec<u16>], muls: &mut u64) -> Vec<u16> {
+fn small_charpoly(f: &Gf2q, a: &[Vec<Fe>], muls: &mut u64) -> Vec<Fe> {
     let g = &f.tab;
     let k = a.len();
-    let xs: Vec<u16> = (0..=k as u16).collect();
-    let vals: Vec<u16> = xs
+    let xs: Vec<Fe> = (0..=k as Fe).collect();
+    let vals: Vec<Fe> = xs
         .iter()
         .map(|&x| {
             let mut m = a.to_vec();
@@ -1719,7 +1724,7 @@ fn small_charpoly(f: &Gf2q, a: &[Vec<u16>], muls: &mut u64) -> Vec<u16> {
 
 /// The polynomial through `(xs[i], vals[i])`, ascending, by Newton's
 /// divided differences (one multiplication per division).
-fn newton_interpolate(g: &GfTab, xs: &[u16], vals: &[u16], muls: &mut u64) -> Vec<u16> {
+fn newton_interpolate(g: &GfTab, xs: &[Fe], vals: &[Fe], muls: &mut u64) -> Vec<Fe> {
     let n = xs.len();
     let mut dd = vals.to_vec();
     for lvl in 1..n {
@@ -1729,9 +1734,9 @@ fn newton_interpolate(g: &GfTab, xs: &[u16], vals: &[u16], muls: &mut u64) -> Ve
         }
         *muls += (n - lvl) as u64;
     }
-    let mut poly = vec![0u16; n];
+    let mut poly = vec![0u32; n];
     for i in (0..n).rev() {
-        let mut nxt = vec![0u16; n];
+        let mut nxt = vec![0u32; n];
         for d in 0..n - 1 {
             if poly[d] != 0 {
                 nxt[d + 1] ^= poly[d];
@@ -1749,18 +1754,18 @@ fn newton_interpolate(g: &GfTab, xs: &[u16], vals: &[u16], muls: &mut u64) -> Ve
 /// monomials `b` with `v·b` standard (`known`: `(b, v·b)` indices).
 fn split_partial(
     f: &Gf2q,
-    w: &[Vec<u16>],
+    w: &[Vec<Fe>],
     known: &[(usize, usize)],
     muls: &mut u64,
-) -> Vec<Vec<u16>> {
+) -> Vec<Vec<Fe>> {
     let g = &f.tab;
     let k = w.len();
-    let mut a = vec![vec![0u16; k]; k];
+    let mut a = vec![vec![0u32; k]; k];
     for i in 0..k {
-        let mut sys: Vec<Vec<u16>> = known
+        let mut sys: Vec<Vec<Fe>> = known
             .iter()
             .map(|&(l, t)| {
-                let mut row: Vec<u16> = (0..k).map(|j| w[j][l]).collect();
+                let mut row: Vec<Fe> = (0..k).map(|j| w[j][l]).collect();
                 row.push(w[i][t]);
                 row
             })
@@ -1773,14 +1778,14 @@ fn split_partial(
             a[i][pc] = sys[r][k];
         }
     }
-    let at: Vec<Vec<u16>> = (0..k).map(|j| (0..k).map(|i| a[i][j]).collect()).collect();
+    let at: Vec<Vec<Fe>> = (0..k).map(|j| (0..k).map(|i| a[i][j]).collect()).collect();
     let cp = small_charpoly(f, &a, muls);
     let mus = roots(f, &cp, muls);
     let dim = w[0].len();
     let mut out = Vec::new();
     for mu in mus {
         for v in kernel_shifted(g, &at, mu, muls) {
-            let mut u = vec![0u16; dim];
+            let mut u = vec![0u32; dim];
             for j in 0..k {
                 if v[j] == 0 {
                     continue;
@@ -1800,11 +1805,11 @@ fn split_partial(
 
 fn eval<const N: usize>(
     g: &GfTab,
-    comp: &HashMap<[u8; N], u16>,
-    e: &[u16; N],
+    comp: &HashMap<[u8; N], Fe>,
+    e: &[Fe; N],
     muls: &mut u64,
-) -> u16 {
-    let mut acc = 0u16;
+) -> Fe {
+    let mut acc = 0u32;
     for (m, &c) in comp {
         let mut t = c;
         for k in 0..N {
@@ -1825,7 +1830,7 @@ fn eval<const N: usize>(
 #[allow(clippy::too_many_arguments)]
 fn solve_once<const N: usize>(
     f: &Gf2q,
-    comps: &[HashMap<[u8; N], u16>],
+    comps: &[HashMap<[u8; N], Fe>],
     w: &[u8; N],
     mvar: usize,
     macaulay: u8,
@@ -1833,7 +1838,7 @@ fn solve_once<const N: usize>(
     st: &mut BinSolve,
     replay: Option<&ShapeB>,
     record: Option<&mut ShapeB>,
-) -> Result<Option<Vec<[u16; N]>>, ()> {
+) -> Result<Option<Vec<[Fe; N]>>, ()> {
     let g = &f.tab;
     let q = f.q as u64;
     let t0 = std::time::Instant::now();
@@ -1851,8 +1856,8 @@ fn solve_once<const N: usize>(
         }
     }
     let divides = |lm: &[u8; N], m: &[u8; N]| (0..N).all(|k| lm[k] <= m[k]);
-    let mut rows: Vec<Vec<u16>> = Vec::new();
-    let mut held: Vec<Vec<u16>> = Vec::new();
+    let mut rows: Vec<Vec<Fe>> = Vec::new();
+    let mut held: Vec<Vec<Fe>> = Vec::new();
     let (mut built, mut skip_at) = (0usize, 0usize);
     for (i, comp) in comps.iter().enumerate() {
         let dg = comp.keys().map(|m| wdeg(m, w)).max().unwrap_or(0) as u8;
@@ -1870,7 +1875,7 @@ fn solve_once<const N: usize>(
             }
             let index = built;
             built += 1;
-            let mut row = vec![0u16; cols.len()];
+            let mut row = vec![0u32; cols.len()];
             for (&e, &c) in comp {
                 let m: [u8; N] = core::array::from_fn(|k| e[k] + sh[k]);
                 row[col_index[&m]] ^= c;
@@ -1904,7 +1909,7 @@ fn solve_once<const N: usize>(
     st.zero_rows = ech.zero_rows;
     st.pivots = ech.pivot_row.iter().filter(|&&r| r != u32::MAX).count();
     let is_std: Vec<bool> = (0..cols.len())
-        .map(|c| ech.pivot_row[c] == u32::MAX && wdeg(&cols[c], w) < macaulay as u16)
+        .map(|c| ech.pivot_row[c] == u32::MAX && wdeg(&cols[c], w) < macaulay as Fe)
         .collect();
     let standard: Vec<usize> = (0..cols.len()).filter(|&c| is_std[c]).collect();
     let dim = standard.len();
@@ -1988,10 +1993,10 @@ fn solve_once<const N: usize>(
                 .count() as u64,
         })
         .collect();
-    let reduced: Vec<Result<(Vec<u16>, u64), ()>> = ends
+    let reduced: Vec<Result<(Vec<Fe>, u64), ()>> = ends
         .par_iter()
         .map(|&b| {
-            let mut v = vec![0u16; ncols];
+            let mut v = vec![0u32; ncols];
             v[b] = 1;
             let mut m = 0u64;
             for c in b..ncols {
@@ -2032,7 +2037,7 @@ fn solve_once<const N: usize>(
     } else {
         dim as u64 + 1
     };
-    let vals: Vec<(u16, u64)> = (0..npts as u16)
+    let vals: Vec<(Fe, u64)> = (0..npts as Fe)
         .into_par_iter()
         .map(|x| {
             let mut m = 0;
@@ -2040,11 +2045,11 @@ fn solve_once<const N: usize>(
         })
         .collect();
     st.charpoly_muls += vals.iter().map(|v| v.1).sum::<u64>();
-    let lambdas: Vec<u16> = if npts == q {
-        (0..q as u16).filter(|&x| vals[x as usize].0 == 0).collect()
+    let lambdas: Vec<Fe> = if npts == q {
+        (0..q as Fe).filter(|&x| vals[x as usize].0 == 0).collect()
     } else {
-        let xs: Vec<u16> = (0..npts as u16).collect();
-        let ys: Vec<u16> = vals.iter().map(|v| v.0).collect();
+        let xs: Vec<Fe> = (0..npts as Fe).collect();
+        let ys: Vec<Fe> = vals.iter().map(|v| v.0).collect();
         let mut cm = 0;
         let poly = newton_interpolate(g, &xs, &ys, &mut cm);
         st.charpoly_muls += cm;
@@ -2090,7 +2095,7 @@ fn solve_once<const N: usize>(
                 continue;
             }
             let inv = g.inv(v[idx[0]]);
-            let e: [u16; N] = core::array::from_fn(|k| g.mul(v[idx[k + 1]], inv));
+            let e: [Fe; N] = core::array::from_fn(|k| g.mul(v[idx[k + 1]], inv));
             if e[mvar] != lam {
                 continue;
             }
@@ -2116,14 +2121,14 @@ fn solve_once<const N: usize>(
 #[allow(clippy::too_many_arguments)]
 pub fn solve_bin<const N: usize>(
     f: &Gf2q,
-    comps: &[HashMap<[u8; N], u16>],
+    comps: &[HashMap<[u8; N], Fe>],
     w: &[u8; N],
     mvar: usize,
     macaulay: u8,
     sparsest: bool,
     st: &mut BinSolve,
     trace: Option<&mut BinTrace>,
-) -> Option<Vec<[u16; N]>> {
+) -> Option<Vec<[Fe; N]>> {
     let Some(tr) = trace else {
         st.replay = "none".into();
         return solve_once(f, comps, w, mvar, macaulay, sparsest, st, None, None)
@@ -2170,9 +2175,13 @@ pub struct BinD4Solve {
     pub solve: BinSolve,
     pub rational_solutions: usize,
     /// The decompositions as sorted `t`-quadruples.
-    pub decompositions: Vec<[u16; 4]>,
+    pub decompositions: Vec<[Fe; 4]>,
     #[serde(skip)]
     pub witness: Option<[PtB; 4]>,
+    /// Every decomposition's signed points, in the order found (the
+    /// large-prime collector picks among them).
+    #[serde(skip)]
+    pub witnesses: Vec<[PtB; 4]>,
 }
 
 /// Decompose `r` as `±P₁ ± P₂ ± P₃ ± P₄` with `t(P_i) ∈ F_q`: the Weil
@@ -2194,7 +2203,7 @@ pub fn solve_d4_bin(
     let mut out = BinD4Solve::default();
     let before = f.f.muls();
     let t_r = curve.t_of_x(&r.x);
-    let sols: Option<Vec<[u16; 5]>> = if opts.frobenius {
+    let sols: Option<Vec<[Fe; 5]>> = if opts.frobenius {
         let comps = pre.system_frobenius(f, &t_r);
         out.solve.weil_muls = f.f.muls() - before;
         let fq = &f.f;
@@ -2273,7 +2282,7 @@ pub fn solve_d4_bin(
                 for (i3, &c) in rts.iter().enumerate().skip(i2) {
                     for &d in rts.iter().skip(i3) {
                         let x = [a, b, c, d];
-                        let mut e = [1u16, 0, 0, 0, 0];
+                        let mut e = [1u32, 0, 0, 0, 0];
                         for &v in &x {
                             for k in (1..5).rev() {
                                 e[k] ^= g.mul(e[k - 1], v);
@@ -2288,13 +2297,13 @@ pub fn solve_d4_bin(
             }
         }
         for ws in multisets {
-            let base_t: Option<Vec<u16>> = ws.iter().map(|&w| f.f.artin_schreier(w)).collect();
+            let base_t: Option<Vec<Fe>> = ws.iter().map(|&w| f.f.artin_schreier(w)).collect();
             let Some(base_t) = base_t else {
                 continue;
             };
             for flips in 0..16u32 {
-                let ts: [u16; 4] = core::array::from_fn(|i| base_t[i] ^ ((flips >> i & 1) as u16));
-                if ts.iter().fold(0u16, |a, &v| a ^ v) != s[4] {
+                let ts: [Fe; 4] = core::array::from_fn(|i| base_t[i] ^ ((flips >> i & 1) as Fe));
+                if ts.iter().fold(0u32, |a, &v| a ^ v) != s[4] {
                     continue;
                 }
                 if ts.iter().any(|&v| v < 2) {
@@ -2318,7 +2327,9 @@ pub fn solve_d4_bin(
                 };
                 let pts = [pts[0], pts[1], pts[2], pts[3]];
                 if let Some(signed) = signed_sum(curve, &pts, r) {
-                    found.insert(sorted);
+                    if found.insert(sorted) {
+                        out.witnesses.push(signed);
+                    }
                     if out.witness.is_none() {
                         out.witness = Some(signed);
                     }
@@ -2337,20 +2348,20 @@ pub fn solve_d4_bin(
 /// `[q⁴ + 1 − 2q², q⁴ + 1 + 2q²]` that kills a few random points, each
 /// point's killing multiples found by baby steps and giant steps
 /// (`≈ 2q` of each over the interval's `4q² + 1` values).
-pub fn group_order_bin(c: &CurveB, rng: &mut StdRng) -> Option<u64> {
-    let q = c.f.f.q as u64;
+pub fn group_order_bin(c: &CurveB, rng: &mut StdRng) -> Option<u128> {
+    let q = c.f.f.q as u128;
     let q4 = q.pow(4);
     let (lo, hi) = (q4 + 1 - 2 * q * q, q4 + 1 + 2 * q * q);
     let width = hi - lo + 1;
-    let b = (width as f64).sqrt().ceil() as u64;
-    let key = |p: &PtB| -> u64 {
+    let b = (width as f64).sqrt().ceil() as u128;
+    let key = |p: &PtB| -> u128 {
         if p.inf {
-            u64::MAX
+            u128::MAX
         } else {
-            c.f.pack(&p.x) * 2 + u64::from(c.f.pack(&p.y) > c.f.pack(&p.x.add(&p.y)))
+            c.f.pack(&p.x) * 2 + u128::from(c.f.pack(&p.y) > c.f.pack(&p.x.add(&p.y)))
         }
     };
-    let mut cands: Option<Vec<u64>> = None;
+    let mut cands: Option<Vec<u128>> = None;
     for _ in 0..24 {
         let pt = loop {
             let x = c.f.random(rng);
@@ -2359,7 +2370,7 @@ pub fn group_order_bin(c: &CurveB, rng: &mut StdRng) -> Option<u64> {
             }
         };
         // Baby steps: j·P for 0 ≤ j < b.
-        let mut baby: HashMap<u64, Vec<u64>> = HashMap::new();
+        let mut baby: HashMap<u128, Vec<u128>> = HashMap::new();
         let mut acc = PtB::INF;
         for j in 0..b {
             baby.entry(key(&acc)).or_default().push(j);
@@ -2370,7 +2381,7 @@ pub fn group_order_bin(c: &CurveB, rng: &mut StdRng) -> Option<u64> {
         let step = c.mul(&pt, b);
         let mut g = c.mul(&pt, lo);
         let mut here = Vec::new();
-        let mut i = 0u64;
+        let mut i = 0u128;
         while lo + i * b <= hi {
             let target = key(&c.neg(&g));
             if let Some(js) = baby.get(&target) {
@@ -2397,23 +2408,62 @@ pub fn group_order_bin(c: &CurveB, rng: &mut StdRng) -> Option<u64> {
     None
 }
 
-fn is_prime(n: u64) -> bool {
-    super::residual_walk::is_prime_u64(n)
+/// Deterministic Miller–Rabin: the bases 2, 3, …, 37 decide every
+/// `n < 3.3·10²⁴` (above `2^81`), which covers `#E(F_{q⁴})` for `m ≤ 20`.
+/// Below `2^64` it is the one-word test every committed curve used.
+fn is_prime(n: u128) -> bool {
+    if let Ok(n) = u64::try_from(n) {
+        return super::residual_walk::is_prime_u64(n);
+    }
+    use super::koblitz_strong_rho::RhoScalar;
+    let mulm = |a: u128, b: u128| <u128 as RhoScalar>::mul_mod(a, b, n);
+    let powm = |mut b: u128, mut e: u128| {
+        let mut acc = 1u128;
+        while e > 0 {
+            if e & 1 == 1 {
+                acc = mulm(acc, b);
+            }
+            b = mulm(b, b);
+            e >>= 1;
+        }
+        acc
+    };
+    if n % 2 == 0 {
+        return false;
+    }
+    let s = (n - 1).trailing_zeros();
+    let d = (n - 1) >> s;
+    'bases: for a in [2u128, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
+        let mut x = powm(a % n, d);
+        if x == 1 || x == n - 1 {
+            continue;
+        }
+        for _ in 1..s {
+            x = mulm(x, x);
+            if x == n - 1 {
+                continue 'bases;
+            }
+        }
+        return false;
+    }
+    true
 }
 
 /// A curve of [`generate_instance`]'s family with `#E = h·r`, `r` prime.
 pub struct BinCurve {
     pub curve: CurveB,
     pub instance_seed: u64,
-    pub group_order: u64,
-    pub r: u64,
-    pub cofactor: u64,
+    /// Orders as `u128`: `#E(F_{q⁴}) ≈ 2^{4m}` leaves one word at `m = 16`.
+    pub group_order: u128,
+    pub r: u128,
+    pub cofactor: u128,
     pub generator: PtB,
 }
 
 /// The first instance seed from `seed` with `#E = h·r`, `r` prime,
 /// `h ≤ max_cofactor`.  Deterministic in `(m, seed, max_cofactor)`.
 pub fn find_bin_curve(m: u32, seed: u64, max_cofactor: u64) -> Result<BinCurve, String> {
+    let max_cofactor = u128::from(max_cofactor);
     for s in seed..seed + 2_000 {
         let curve = generate_instance(m, s);
         let mut rng = StdRng::seed_from_u64(s ^ 0x0c0f);
@@ -2493,14 +2543,42 @@ impl CountedGroup for CurveB {
         CurveB::neg(self, &p)
     }
     /// The packed abscissa and one bit for the ordinate (`y` or `x + y`, the
-    /// larger packed value): exact for `4m ≤ 62`.
+    /// larger packed value): exact for `4m ≤ 62`, the key every committed
+    /// session used.  Past that ([`wide_key`]) it is a 64-bit mix of the
+    /// exact `4m + 1`-bit key.
     fn key(&self, p: &PtB) -> u64 {
         if p.inf {
             return u64::MAX;
         }
         let y = self.f.pack(&p.y);
         let ny = self.f.pack(&p.x.add(&p.y));
-        self.f.pack(&p.x) * 2 + u64::from(y > ny)
+        let exact = self.f.pack(&p.x) * 2 + u128::from(y > ny);
+        if 4 * self.f.f.m < 63 {
+            exact as u64
+        } else {
+            wide_key(exact)
+        }
+    }
+}
+
+/// A 64-bit key for an exact key wider than a word (`m ≥ 16`): two rounds
+/// of the splitmix64 finaliser over the two halves.  Distinct points can
+/// share a key with probability about `2^{-64}` per pair; every use is
+/// followed by an exact check (a factor-base index is checked by the
+/// group law, a rho collision by `[d]G = Q`), so a shared key costs a
+/// wasted step, never a wrong answer.
+pub fn wide_key(exact: u128) -> u64 {
+    let mix = |mut z: u64| {
+        z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
+        z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
+        z ^ (z >> 31)
+    };
+    let k = mix(mix(exact as u64) ^ (exact >> 64) as u64);
+    // u64::MAX is the identity's key.
+    if k == u64::MAX {
+        k - 1
+    } else {
+        k
     }
 }
 
@@ -2510,16 +2588,16 @@ impl CountedGroup for CurveB {
 /// and the coordinates of an element in `1, θ, …, θ^{4m−1}`.  The curve's
 /// identity is `curve_id::binary` of `(g, a, b)` in that basis.
 pub struct TowerBasis {
-    pub modulus: u64,
+    pub modulus: u128,
     /// Rows of the inverse of the matrix whose column `i` is `θ^i` packed.
-    inv: Vec<u64>,
+    inv: Vec<u128>,
 }
 
 impl TowerBasis {
     pub fn new(f: &Fq4) -> TowerBasis {
         let n = 4 * f.f.m as usize;
-        for c0 in 0..f.f.q as u16 {
-            for c1 in 1..f.f.q as u16 {
+        for c0 in 0..f.f.q as Fe {
+            for c1 in 1..f.f.q as Fe {
                 let theta = Eb([c0, c1, 0, 0]);
                 // Powers θ⁰ … θⁿ packed; reduce θⁿ by the first n.
                 let mut pw = Vec::with_capacity(n + 1);
@@ -2530,12 +2608,12 @@ impl TowerBasis {
                 }
                 // Gaussian elimination over F_2 on columns: express each
                 // packed bit vector in the θ-power basis.
-                let mut rows: Vec<(u64, u64)> = Vec::new(); // (vector, combination)
+                let mut rows: Vec<(u128, u128)> = Vec::new(); // (vector, combination)
                 let mut ok = true;
                 for (i, &v) in pw.iter().take(n).enumerate() {
-                    let (mut v, mut comb) = (v, 1u64 << i);
+                    let (mut v, mut comb) = (v, 1u128 << i);
                     for &(bv, bc) in &rows {
-                        let lead = 63 - bv.leading_zeros();
+                        let lead = 127 - bv.leading_zeros();
                         if v >> lead & 1 == 1 {
                             v ^= bv;
                             comb ^= bc;
@@ -2546,15 +2624,15 @@ impl TowerBasis {
                         break;
                     }
                     rows.push((v, comb));
-                    rows.sort_by_key(|x| std::cmp::Reverse(63 - x.0.leading_zeros()));
+                    rows.sort_by_key(|x| std::cmp::Reverse(127 - x.0.leading_zeros()));
                 }
                 if !ok {
                     continue;
                 }
-                let solve = |mut v: u64| -> u64 {
-                    let mut comb = 0u64;
+                let solve = |mut v: u128| -> u128 {
+                    let mut comb = 0u128;
                     for &(bv, bc) in &rows {
-                        let lead = 63 - bv.leading_zeros();
+                        let lead = 127 - bv.leading_zeros();
                         if v >> lead & 1 == 1 {
                             v ^= bv;
                             comb ^= bc;
@@ -2563,20 +2641,30 @@ impl TowerBasis {
                     debug_assert_eq!(v, 0);
                     comb
                 };
-                let modulus = (1u64 << n) | solve(pw[n]);
+                let modulus = (1u128 << n) | solve(pw[n]);
                 // The inverse map: packed bit j ↦ its θ-coordinates.
-                let inv: Vec<u64> = (0..n).map(|j| solve(1u64 << j)).collect();
+                let inv: Vec<u128> = (0..n).map(|j| solve(1u128 << j)).collect();
                 return TowerBasis { modulus, inv };
             }
         }
         unreachable!("the tower has a generator over F_2")
     }
     /// `e` in the basis `1, θ, …, θ^{4m−1}`.
-    pub fn coords(&self, f: &Fq4, e: &Eb) -> u64 {
+    pub fn coords(&self, f: &Fq4, e: &Eb) -> u128 {
         let v = f.pack(e);
         (0..self.inv.len())
             .filter(|&j| v >> j & 1 == 1)
-            .fold(0u64, |acc, j| acc ^ self.inv[j])
+            .fold(0u128, |acc, j| acc ^ self.inv[j])
+    }
+}
+
+/// The coefficient of base point `i` of [`TLineBase`] modulo `r`: the
+/// points of a column come as `P, −P, P + T, −(P + T)`.
+pub fn t_line_coef(i: usize, r: u128) -> u128 {
+    if i % 2 == 0 {
+        1
+    } else {
+        r - 1
     }
 }
 
@@ -2606,7 +2694,7 @@ impl FactorBaseBuilder<CurveB> for TLineBase<'_> {
         let mut rng = StdRng::seed_from_u64(0x9b);
         let (mut points, mut col_of, mut coef_of) = (Vec::new(), Vec::new(), Vec::new());
         let (mut columns, mut lifts) = (0usize, 0u64);
-        for tv in (2..c.f.f.q as u16).step_by(2) {
+        for tv in (2..c.f.f.q as Fe).step_by(2) {
             let x = c.x_of_t(&c.f.from_fq(tv));
             lifts += 1;
             let Some(pt) = c.lift_x(&x, &mut rng) else {
@@ -2618,11 +2706,14 @@ impl FactorBaseBuilder<CurveB> for TLineBase<'_> {
                 CurveB::neg(c, &pt)
             };
             let pt_t = CountedGroup::add(c, ops, pt, t);
+            // −1 mod r; a wide `r` (`m ≥ 16`) has no one-word image, and
+            // its pipeline reads the sign from the index ([`t_line_coef`]).
+            let minus = u64::try_from(d.r - 1).unwrap_or(0);
             for (q, coef) in [
                 (pt, 1),
-                (CurveB::neg(c, &pt), d.r - 1),
+                (CurveB::neg(c, &pt), minus),
                 (pt_t, 1),
-                (CurveB::neg(c, &pt_t), d.r - 1),
+                (CurveB::neg(c, &pt_t), minus),
             ] {
                 points.push(q);
                 col_of.push(columns);
@@ -2642,7 +2733,14 @@ impl FactorBaseBuilder<CurveB> for TLineBase<'_> {
             columns,
             |q| CountedGroup::key(c, q),
             |q| CountedGroup::key(c, &CurveB::neg(c, q)),
-            |q| c.f.pack(&q.x),
+            |q| {
+                let v = c.f.pack(&q.x);
+                if 4 * c.f.f.m < 63 {
+                    v as u64
+                } else {
+                    wide_key(v)
+                }
+            },
         )?;
         fb.cost.count("sqrt_solves", lifts);
         Ok(fb)
@@ -2665,9 +2763,277 @@ pub struct BinD4Oracle<'a> {
     pre: Option<SymmetrisedBin>,
     totals: SolverTotals,
     per_add: u64,
+    /// Large primes (`large_primes`, `small_permille`); off by default.
+    pub lp: LargePrimes,
+    last_witnesses: Vec<[PtB; 4]>,
+}
+
+/// **One and two large primes** for `gaudry-d4-bin` (Gaudry–Thomé–
+/// Thériault–Diem's variant, with Thériault's single large prime as its
+/// `max_large = 1` case).
+///
+/// The base is cut to its first `small_permille`‰ columns `F′` (the
+/// t-line's columns are in increasing `t`, so this is an arbitrary,
+/// fixed subset); the other columns are *large primes*. A decomposition
+/// with every column in `F′` is a full relation. One with one or two
+/// large columns (up to `max_large`) is a partial and is eliminated
+/// against stored partials modulo `r`: each stored partial is the pivot
+/// of its largest large column, and reducing a new partial by the pivot
+/// of its largest large column replaces that column by smaller ones, so
+/// the loop ends, either with no large column left (a full relation,
+/// returned as a [`Relation::Row`] over `F′`) or as a new pivot. This is
+/// the graph method's cycle-closing step written as elimination; a
+/// two-large-prime partial is an edge, a one-large-prime partial an edge
+/// to the root. Every combination is a linear combination of group
+/// equations, so a returned row holds as one.
+///
+/// Of a target's decompositions the one with fewest large columns is
+/// used; the solver enumerates them all anyway, so the choice is free.
+/// A merge costs one multiplication modulo `r` per entry of the pivot
+/// it subtracts, plus an inversion; those are counted
+/// (`lp_merge_mulmods`) and charged like solver multiplications.
+#[derive(Clone, Debug, Default)]
+pub struct LargePrimes {
+    pub max_large: u8,
+    pub small_permille: u64,
+    small_cols: usize,
+    pivots: HashMap<usize, LpRow>,
+    pub counts: BTreeMap<String, u64>,
+}
+
+#[derive(Clone, Debug)]
+struct LpRow {
+    small: Vec<(usize, u128)>,
+    large: Vec<(usize, u128)>,
+    a: u128,
+    b: u128,
+}
+
+/// A full relation over `F′`: `h·a + h·b·d = Σ coef · x_col`.
+#[derive(Clone, Debug)]
+pub struct LpFull {
+    pub columns: Vec<(usize, u128)>,
+    pub a: u128,
+    pub b: u128,
+}
+
+/// Arithmetic modulo `r < 2^127`; exact at every width, so a one-word
+/// `r` gives the values a one-word implementation would.
+fn lp_mul(a: u128, b: u128, r: u128) -> u128 {
+    use super::koblitz_strong_rho::RhoScalar;
+    <u128 as RhoScalar>::mul_mod(a, b, r)
+}
+
+fn lp_inv(a: u128, r: u128) -> u128 {
+    // r is prime: a^(r−2).
+    let (mut base, mut e, mut acc) = (a % r, r - 2, 1u128);
+    while e > 0 {
+        if e & 1 == 1 {
+            acc = lp_mul(acc, base, r);
+        }
+        base = lp_mul(base, base, r);
+        e >>= 1;
+    }
+    acc
+}
+
+fn lp_sub(a: u128, b: u128, r: u128) -> u128 {
+    if a >= b {
+        a - b
+    } else {
+        r - (b - a)
+    }
+}
+
+fn lp_add(a: u128, b: u128, r: u128) -> u128 {
+    lp_sub(a, r - b, r)
+}
+
+/// `x − f·y` on sorted sparse vectors modulo `r`, dropping zeros.
+fn lp_axpy(x: &[(usize, u128)], f: u128, y: &[(usize, u128)], r: u128) -> Vec<(usize, u128)> {
+    let mut out = Vec::with_capacity(x.len() + y.len());
+    let (mut i, mut j) = (0, 0);
+    while i < x.len() || j < y.len() {
+        let take_x = j >= y.len() || (i < x.len() && x[i].0 < y[j].0);
+        let take_y = i >= x.len() || (j < y.len() && y[j].0 < x[i].0);
+        if take_x {
+            out.push(x[i]);
+            i += 1;
+        } else if take_y {
+            let v = lp_sub(0, lp_mul(f, y[j].1, r), r);
+            if v != 0 {
+                out.push((y[j].0, v));
+            }
+            j += 1;
+        } else {
+            let fy = lp_mul(f, y[j].1, r);
+            let v = if x[i].1 >= fy { x[i].1 - fy } else { r - (fy - x[i].1) };
+            if v != 0 {
+                out.push((x[i].0, v));
+            }
+            i += 1;
+            j += 1;
+        }
+    }
+    out
+}
+
+impl LargePrimes {
+    pub fn enabled(&self) -> bool {
+        self.max_large > 0 || (self.small_permille > 0 && self.small_permille < 1000)
+    }
+
+    fn bump(&mut self, k: &str, v: u64) {
+        *self.counts.entry(k.into()).or_insert(0) += v;
+    }
+
+    /// Feed one decomposition (columns and coefficients); a full
+    /// relation comes back when one closes. Returns the multiplications
+    /// modulo `r` it spent.
+    pub fn feed(
+        &mut self,
+        cols: &[(usize, u128)],
+        a: u128,
+        b: u128,
+        r: u128,
+    ) -> (Option<LpFull>, u64) {
+        let mut merged: BTreeMap<usize, u128> = BTreeMap::new();
+        for &(c, v) in cols {
+            let e = merged.entry(c).or_insert(0);
+            *e = lp_add(*e, v % r, r);
+        }
+        let (mut small, mut large) = (Vec::new(), Vec::new());
+        for (c, v) in merged {
+            if v == 0 {
+                continue;
+            }
+            if c < self.small_cols {
+                small.push((c, v));
+            } else {
+                large.push((c, v));
+            }
+        }
+        if large.len() > self.max_large as usize {
+            self.bump("lp_discarded", 1);
+            return (None, 0);
+        }
+        self.bump(&format!("lp_decompositions_{}_large", large.len()), 1);
+        let mut row = LpRow { small, large, a, b };
+        let mut ops = 0u64;
+        let mut merges = 0u64;
+        loop {
+            let Some(&(lc, lv)) = row.large.last() else {
+                self.bump(
+                    if merges == 0 {
+                        "lp_full_direct"
+                    } else {
+                        "lp_full_merged"
+                    },
+                    1,
+                );
+                self.bump("lp_full_weight", row.small.len() as u64);
+                self.bump("lp_merges", merges);
+                return (
+                    Some(LpFull {
+                        columns: row.small,
+                        a: row.a,
+                        b: row.b,
+                    }),
+                    ops,
+                );
+            };
+            let Some(p) = self.pivots.get(&lc) else {
+                self.bump(&format!("lp_stored_{}_large", row.large.len()), 1);
+                self.pivots.insert(lc, row);
+                self.bump("lp_merges", merges);
+                return (None, ops);
+            };
+            let pv = p.large.last().expect("a pivot has its column").1;
+            let f = lp_mul(lv, lp_inv(pv, r), r);
+            ops += 64 + p.small.len() as u64 + p.large.len() as u64 + 2;
+            row.small = lp_axpy(&row.small, f, &p.small, r);
+            row.large = lp_axpy(&row.large, f, &p.large, r);
+            row.a = lp_sub(row.a, lp_mul(f, p.a, r), r);
+            row.b = lp_sub(row.b, lp_mul(f, p.b, r), r);
+            merges += 1;
+        }
+    }
+}
+
+/// A relation from [`BinD4Oracle::relations_for`], at any width.
+pub enum BinRelation {
+    Summands(Vec<usize>),
+    Row(LpFull),
 }
 
 impl<'a> BinD4Oracle<'a> {
+    /// The large-prime seam at any width (`r < 2^127`): [`decompose`]
+    /// as one set of summands when large primes are off, else the
+    /// decomposition with fewest large columns fed to [`LargePrimes`].
+    /// The one-word pipeline and `ic_wide` both come through here.
+    ///
+    /// [`decompose`]: DecompositionOracle::decompose
+    #[allow(clippy::too_many_arguments)]
+    pub fn relations_for(
+        &mut self,
+        ctx: &InstanceCtx<CurveB>,
+        fb: &FactorBase<PtB>,
+        ops: &mut GroupOps,
+        counters: &mut OracleCounters,
+        point: PtB,
+        a: u128,
+        b: u128,
+        coef: impl Fn(usize) -> u128,
+    ) -> Vec<BinRelation> {
+        if !self.lp.enabled() {
+            return match self.decompose(ctx, fb, ops, counters, point) {
+                Some(summands) => vec![BinRelation::Summands(summands)],
+                None => Vec::new(),
+            };
+        }
+        if self.lp.small_cols == 0 {
+            let permille = if self.lp.small_permille == 0 {
+                1000
+            } else {
+                self.lp.small_permille
+            };
+            self.lp.small_cols = (fb.columns as u64 * permille / 1000).max(1) as usize;
+        }
+        self.last_witnesses.clear();
+        if self.decompose(ctx, fb, ops, counters, point).is_none() && self.last_witnesses.is_empty()
+        {
+            return Vec::new();
+        }
+        let c = &self.curve.curve;
+        let r = self.curve.r;
+        let small_cols = self.lp.small_cols;
+        // The decomposition with fewest large columns.
+        let best = self
+            .last_witnesses
+            .iter()
+            .filter_map(|w| {
+                w.iter()
+                    .map(|q| {
+                        fb.index_of_key(CountedGroup::key(c, q))
+                            .map(|i| (fb.col_of[i], coef(i)))
+                    })
+                    .collect::<Option<Vec<_>>>()
+            })
+            .min_by_key(|cols| cols.iter().filter(|&&(col, _)| col >= small_cols).count());
+        let Some(cols) = best else {
+            counters.lift_failures += 1;
+            return Vec::new();
+        };
+        let (rel, mulmods) = self.lp.feed(&cols, a % r, b % r, r);
+        self.totals.ops += mulmods;
+        *self
+            .totals
+            .extra
+            .entry("lp_merge_mulmods".into())
+            .or_insert(0) += mulmods;
+        rel.into_iter().map(BinRelation::Row).collect()
+    }
+
     pub fn new(curve: &'a BinCurve, macaulay: u8, seed: u64, opts: BinOptions) -> Self {
         BinD4Oracle {
             curve,
@@ -2683,6 +3049,8 @@ impl<'a> BinD4Oracle<'a> {
                 ..Default::default()
             },
             per_add: fq_muls_per_add(&curve.curve),
+            lp: LargePrimes::default(),
+            last_witnesses: Vec::new(),
         }
     }
     fn shape(&self) -> SystemShape {
@@ -2827,6 +3195,7 @@ impl DecompositionOracle<CurveB> for BinD4Oracle<'_> {
         self.totals.solving_degree_max =
             self.totals.solving_degree_max.max(u32::from(self.macaulay));
         self.totals.calls_with_a_degree += 1;
+        self.last_witnesses = sol.witnesses.clone();
         let w = sol.witness?;
         let idx: Option<Vec<usize>> = w
             .iter()
@@ -2836,6 +3205,39 @@ impl DecompositionOracle<CurveB> for BinD4Oracle<'_> {
             counters.lift_failures += 1;
         }
         idx
+    }
+    fn decompose_relations(
+        &mut self,
+        ctx: &InstanceCtx<CurveB>,
+        fb: &FactorBase<PtB>,
+        ops: &mut GroupOps,
+        counters: &mut OracleCounters,
+        point: PtB,
+        a: u64,
+        b: u64,
+    ) -> Vec<Relation> {
+        let r = self.curve.r;
+        let coef = |i: usize| u128::from(fb.coef_of[i]);
+        // This pipeline is the one-word one: r < 2^64 here.
+        self.relations_for(ctx, fb, ops, counters, point, u128::from(a), u128::from(b), coef)
+            .into_iter()
+            .map(|rel| match rel {
+                BinRelation::Summands(s) => Relation::Summands(s),
+                BinRelation::Row(f) => Relation::Row {
+                    columns: f.columns.iter().map(|&(c, v)| (c, (v % r) as u64)).collect(),
+                    a: f.a as u64,
+                    b: f.b as u64,
+                },
+            })
+            .collect()
+    }
+    fn relation_counters(&self) -> BTreeMap<String, u64> {
+        let mut out = self.lp.counts.clone();
+        if self.lp.enabled() {
+            out.insert("lp_small_columns".into(), self.lp.small_cols as u64);
+            out.insert("lp_stored_pivots".into(), self.lp.pivots.len() as u64);
+        }
+        out
     }
     fn last_system(&self) -> Option<SystemShape> {
         Some(self.shape())
@@ -2974,7 +3376,7 @@ mod tests {
                         if opts.frobenius { 64 } else { 512 },
                         "{opts:?}"
                     );
-                    let got: BTreeSet<[u16; 4]> = sol.decompositions.into_iter().collect();
+                    let got: BTreeSet<[Fe; 4]> = sol.decompositions.into_iter().collect();
                     assert_eq!(got, mitm, "{opts:?}");
                     assert!(!got.is_empty());
                     checked += 1;
@@ -3008,8 +3410,8 @@ mod ecbench_tests {
         let f = &c.curve.f;
         let tb = TowerBasis::new(f);
         let n = 4 * f.f.m;
-        let mulmod = |mut a: u64, mut b: u64| -> u64 {
-            let mut r = 0u64;
+        let mulmod = |mut a: u128, mut b: u128| -> u128 {
+            let mut r = 0u128;
             while b != 0 {
                 if b & 1 == 1 {
                     r ^= a;

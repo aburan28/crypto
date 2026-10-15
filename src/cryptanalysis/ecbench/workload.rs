@@ -229,10 +229,12 @@ impl CurveSpec {
                 seed,
                 max_cofactor,
             } => {
-                // Points pack into 4m ≤ 60 bits; the order search takes
-                // ≈ 2q baby and giant steps per point.
-                if !(4..=15).contains(&m) {
-                    return Err(format!("f2m4_torsion takes m from 4 to 15, not {m}"));
+                // Points pack into 4m ≤ 80 bits (one word while m ≤ 15;
+                // past that the orders are u128 and the methods go
+                // through `ic_wide`); the order search takes ≈ 2q baby
+                // and giant steps per point.
+                if !(4..=20).contains(&m) {
+                    return Err(format!("f2m4_torsion takes m from 4 to 20, not {m}"));
                 }
                 find_bin_curve(m, seed, max_cofactor).map(|c| Instance::F2m4(Box::new(c)))
             }
@@ -702,14 +704,23 @@ impl Instance {
                 Instance::F2m4(i) => {
                     let c = &i.curve;
                     let bits = 4 * c.f.f.m;
-                    let x = c.f.unpack(h & ((1u64 << bits) - 1));
+                    // One word of hash while 4m < 64 (every committed
+                    // target); past that a second, derived word on top.
+                    let raw = if bits < 64 {
+                        u128::from(h & ((1u64 << bits) - 1))
+                    } else {
+                        let hi = h.rotate_left(32).wrapping_mul(0x9e37_79b9_7f4a_7c15);
+                        (u128::from(h) | (u128::from(hi) << 64)) & ((1u128 << bits) - 1)
+                    };
+                    let x = c.f.unpack(raw);
                     let mut rng = <rand::rngs::StdRng as rand::SeedableRng>::seed_from_u64(h);
                     let Some(pt) = c.lift_x(&x, &mut rng) else {
                         continue;
                     };
                     let k = CountedGroup::key(c, &pt);
                     let pt = if (k & 1 == 1) != flip { pt } else { c.neg(&pt) };
-                    let q: PtB = CountedGroup::mul(c, &mut scratch, pt, i.cofactor);
+                    let cof = u64::try_from(i.cofactor).expect("a small cofactor");
+                    let q: PtB = CountedGroup::mul(c, &mut scratch, pt, cof);
                     if !q.inf {
                         return Some((
                             [
