@@ -94,7 +94,8 @@ pub struct BenchArgs {
     /// `random` or `walk`.
     #[arg(long, default_value = "walk")]
     pub targets: String,
-    /// The relation matrix: `incremental-gauss` or `structured-gauss`.
+    /// The relation matrix: `incremental-gauss`, `structured-gauss`,
+    /// `sparse-cado`, … (`ic bench --list` prints them all).
     #[arg(long, default_value = "incremental-gauss")]
     pub linalg: String,
     #[arg(long, default_value_t = 2_000_000)]
