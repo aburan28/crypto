@@ -11672,6 +11672,28 @@
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
+   "slug": "icv1-fp20-t1143-5bef62bd",
+   "icv1": "ICV1:fp-537599:1143:536457:52485:unk:unk:r:5bef62bdee75",
+   "family": "prime",
+   "params": {
+    "p": "537599",
+    "a": "451926",
+    "b": "332081"
+   },
+   "model_json": "{\"a\":\"451926\",\"b\":\"332081\",\"field\":\"fp-537599\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"537599\",\"v\":\"1\"}",
+   "trace": 1143,
+   "order": "536457",
+   "j": "52485",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/pkm_supersingular_aux_20261015/q3/specs/SPEC-s20.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp20-t727-cd198a38",
    "icv1": "ICV1:fp-563153:727:562427:476305:unk:unk:r:cd198a38cd5f",
    "family": "prime",
@@ -13101,6 +13123,28 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "icv1-fp22-tm1105-62a9d176",
+   "icv1": "ICV1:fp-2511871:-1105:2512977:1947206:unk:unk:r:62a9d1766881",
+   "family": "prime",
+   "params": {
+    "p": "2511871",
+    "a": "1975157",
+    "b": "977806"
+   },
+   "model_json": "{\"a\":\"1975157\",\"b\":\"977806\",\"field\":\"fp-2511871\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"2511871\",\"v\":\"1\"}",
+   "trace": -1105,
+   "order": "2512977",
+   "j": "1947206",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/pkm_supersingular_aux_20261015/q3/specs/SPEC-s22.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-fp22-tm1214-827be133",
@@ -16192,6 +16236,28 @@
     "research/pkm_tower_ecbench_20261013/sessions/p24/plan.json",
     "research/pkm_tower_ecbench_20261013/sessions/p24/spec.json",
     "research/pkm_tower_ecbench_20261013/specs/SPEC-p24.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp24-tm4507-ffb4b7f9",
+   "icv1": "ICV1:fp-11750399:-4507:11754907:5057792:unk:unk:r:ffb4b7f96cc1",
+   "family": "prime",
+   "params": {
+    "p": "11750399",
+    "a": "7617878",
+    "b": "9089328"
+   },
+   "model_json": "{\"a\":\"7617878\",\"b\":\"9089328\",\"field\":\"fp-11750399\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"11750399\",\"v\":\"1\"}",
+   "trace": -4507,
+   "order": "11754907",
+   "j": "5057792",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/pkm_supersingular_aux_20261015/q3/specs/SPEC-s24.json"
    ],
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
