@@ -34,6 +34,16 @@ jobs:
           git worktree add --detach "$RUNNER_TEMP/n83-edge-frozen-source" "$frozen"
           cd "$RUNNER_TEMP/n83-edge-frozen-source"
           export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_k3250_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k3350_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k_abba_20261015/generate.py > /dev/null
+          python3 research/n83_root4_highk_20261015/generate.py > /dev/null
+          python3 research/n83_best_e2e_20261015/generate.py > /dev/null
+          python3 research/n83_legacy_challenger_20261015/generate.py > /dev/null
+          python3 research/n83_root4_bloom_20261015/generate.py > /dev/null
+          python3 research/n83_root11_highk_20261015/generate.py > /dev/null
+          python3 research/n83_final_tournament_20261015/generate.py > /dev/null
+          python3 research/n83_final_tier1_20261015/generate.py > /dev/null
           python3 research/n83_root11_edgek_20261015/generate.py > \
             "$RUNNER_TEMP/n83-edge-fixture.json"
           test "$(sha256sum research/n83_root11_edgek_20261015/targets.jsonl | cut -d' ' -f1)" = \
