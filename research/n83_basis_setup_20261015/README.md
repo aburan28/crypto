@@ -1,43 +1,44 @@
 # IC basis and setup study
 
-Status: the18-process training stage is running under the native CPU3
-reservation after published source/protocol freeze
-`e07da4efdc092d6d7d1d7b660b29225a665d0775`.
+Status: training audited and C3 selected; fresh cold holdouts are RUNNING under
+the native CPU3 reservation. Final cohort measurements, full statistics,
+comprehensive PDF/evidence publication and review gates remain pending.
 [Draft study PR1899](https://github.com/aburan28/crypto/pull/1899).
-No selection or fresh-holdout result yet.
 
-The [prospective protocol](PROTOCOL.md) preserves all four authorized goals:
+| Authorized requirement | Actual status and evidence |
+|---|---|
+| Relation/rank/log timing, probes, rank gain and memory | Native streaming instrumentation; all8completed training rank/log transcripts independently verified. [Profiles](reports/run-20261015T1516Z/native_profiles.json) and [report](reports/run-20261015T1516Z/REPORT.md). |
+| Structurally different bases including dense against K600 | Five candidates frozen before timing. Native audit verified exact labels, prefix/window recipes and disjoint C2 support. All10IC training processes attempted;8completed,2C4allocation failures retained. C3 selected. |
+| Independently verified rank/log transcript |8native C++ full-row/rank/backsolve/representative/witness/answer audits PASS; external audit resources separately metered. [Receipts](records/training-audit/). Fresh-holdout audits pending. |
+| Complete matched costs and independent preparations | Training18processes attempted/16complete; three A/A work pairs verified. C3 selection committed before8freshholdouts. Remaining37processes/100plannedanswers frozen;26-process cold stage running,11-process cohort stage next. |
+| Reports, graphs, PDFs and evidence publication | Inspected4pagetrainingPDF+SVG/150dpiPNG published. Final addendum, updated comprehensive PDF, complete-study native statistics/evidenceZIP/canonical diagnostics pending. |
 
-| Requirement | Status | Completion evidence required |
-|---|---|---|
-| Relation/rank/log timing, probes, rank gain and memory | Implemented; native tests pass, measured validation pending | Per-attempt native transcript and process envelope |
-| Structurally different bases and dense layout control | Five candidates declared; native base audit passed | Complete training, frozen selection, fresh holdouts |
-| Independent rank/log transcript verification | Implemented; one positive/14 negative tests pass | Native independent field/group/linear-algebra audit and negatives |
-| Complete matched IC/rho costs and repeated preparations | Not yet run |55process/118answer planned matrix, retained failures and native statistics |
-| Reports, graphs, PDF and reviewable PR | Pending executed evidence | Source-linked stage reports and canonical diagnostic checks |
+[Prospective protocol](PROTOCOL.md), [frozen training selection](selection/),
+[training PDF](reports/run-20261015T1516Z/n83_basis_training_report.pdf),
+[holdout continuation](HOLDOUT_CONTINUE.md).
 
-This follows completed PR1828 without modifying its frozen sources, raw data,
-or87-page report. Dense-table layout and factor-base point selection are
-separate axes. No1685-target crossover run is part of this study. Materialized
-historical K600 construction remains an explicitly unpriced boundary component.
+Training mean actual process costs: C0 1250.669494426s, C1 1157.2533628935s,
+C2 1205.620140093s, selected C3 622.6626231075s. C4's93.4687809205s failed-
+attempt mean is ineligible, not a fast solution. No holdout IC/rho winner yet.
+Two known training failures mean118 is planned, not an actual verified count.
 
-Conductor was attempted before edits and is unavailable (exit127); see checks.
-An initial full worktree checkout exhausted available disk and Git removed its
-partial checkout. A38MiB sparse worktree replaced it; original studies intact.
+Selection commit19664f02fdcb5f3e5674f5a26e989a117be2f0bc preceded fresh
+holdout generation outside1913signedorbits. Remaining37matrix, controller,
+identities and inspectedtrainingreport published1e93e4ca1 before cold launch.
+CPU3 reserve and first cold IC worker observed active; cold.exit.txt absent.
+Private current handoff /workspace/n83_basis_setup/CONTINUE.md. Completionwatch
+remains enabled through all remaining stages and deliverables. No heavy local
+work while any measured reservation remains active.
 
-Native preparation generated two training points after excluding1911 signed
-orbits. The draft first600 candidate duplicated K600; the prospective protocol
-now uses the next600 orbits, verified disjoint from retained K600. No timed
-training/holdout has run. See reports/source-preparation/REPORT.md and checks.
+Training source freeze e07da4efdc092d6d7d1d7b660b29225a665d0775 and all frozen
+predecessors remain unchanged. Dense layout and base selection are distinct.
+The draft first600 candidate equalled K600 and was corrected before timing to
+the next600disjoint orbits. Its draft dump and all preflight failures remain.
+Original retained K600 construction and OS-cache flushing remain unpriced;
+no1685targetrun, calibratedS, L2, independent-host, asymptotic or securityclaim.
 
-Validation before training: full release library4089passed/0failed/117ignored;
-IC19/rho4 and native runner6 tests passed. Independent transcript audit passed
-one positive and14negative tests; native selection tests passed. Sources,
-binaries, five candidate identities and18-process training matrix are hashed
-under provenance. Holdout execution and final reports remain pending.
-
-The first rho A/A arm completed verified and subsequent native worker activity
-was observed after launch. Completion watch remains enabled to carry all four
-authorized goals through final reports and delivery. No heavy local work runs
-while the measured reservation is held. Current private operational handoff:
-/workspace/n83_basis_setup/CONTINUE.md.
+Validation: unchanged core release library4089pass/0fail/117ignored;
+frozenworkers19IC/4rho; trainingcontroller6 and holdoutcontroller6 tests pass;
+independent transcript1positive/14negative; native selection tests exclude
+fastest censored arm and reject missing audit/overwrite. Conductor unavailable;
+sparse/loopback/test-fixture failures retained and corrected before timing.
