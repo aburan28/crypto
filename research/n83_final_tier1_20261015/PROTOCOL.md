@@ -22,6 +22,11 @@ the paired strong-rho source SHA-256 is
 with rho configuration SHA-256
 `cf76ebb5372acfc1355b88374f875980be66cdffba1a82cb6e4c2f28bcfa723b`.
 Both use four visible CPUs within the same affinity and memory envelope.
+The versioned `selection.json` uses schema `n83.final-tier1-selection/v1` and
+retains that candidate's pipeline, ID, K, variant, Bloom profile, base hash,
+root-key count, manifest digest, the tournament ZIP and analysis digests,
+and the admission digest. The runner checks these against the admitted
+candidate before executing.
 
 Use one cloud VM or Pod allocation for all five points and record its
 provider, allocation ID, region, start/end, CPU/core/SMT/NUMA topology,
@@ -56,7 +61,8 @@ allocation and retains the first panel.
 
 For five passing pairs, report each point's verified `rho_online_ms /
 IC_online_ms`, the median ratio, arithmetic means, every phase cost, setup
-and resource peaks, and a paired uncertainty interval. A Tier 1 speedup
+and resource peaks, and a 95% paired bootstrap interval for the median ratio
+with 10,000 resamples at seed `2026101505`. A Tier 1 speedup
 requires IC to be faster on all five points. Label the result with the exact
 cloud allocation and observed envelope. Source-panel many-point rankings
 remain separate from this primary single-target comparison.
