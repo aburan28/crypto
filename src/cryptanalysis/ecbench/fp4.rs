@@ -327,6 +327,10 @@ pub struct K4Params {
     pub c4: f64,
     /// Trials before the run counts as exhausted, per column.
     pub trial_cap_per_column: u64,
+    /// Item ic_improve_20261015/04: attempt filtering after every new full
+    /// relation and solve as soon as the core is square (first-dependency
+    /// stop), instead of first at `small + 1` and then every +5 %.
+    pub eager_la: bool,
 }
 
 /// What [`solve_k4`] did, phase by phase, in GAE.
@@ -416,7 +420,7 @@ pub fn solve_k4(inst: &Fp4Instance, target: Pt4, seed: u64, prm: &K4Params) -> K
     curve.reset_ops();
     let mut elim = (prm.large_primes > 0).then(|| LargePrimeEliminator::new(small + 1, r));
     let mut full: Vec<SparseRel> = Vec::new();
-    let mut next_attempt = small + 1;
+    let mut next_attempt = if prm.eager_la { 1 } else { small + 1 };
     let (mut la_ops, mut merge_ops, mut la_attempts) = (0u64, 0u64, 0u64);
     let (mut scalar_adds, mut probe_adds, mut verify_adds, mut check_adds) = (0u64, 0, 0, 0);
     let (mut decs_total, mut used, mut decomposed) = (0u64, 0u64, 0u64);
@@ -482,7 +486,12 @@ pub fn solve_k4(inst: &Fp4Instance, target: Pt4, seed: u64, prm: &K4Params) -> K
         }
         let unknowns = small + 1;
         let Some(core) = square_core(&full, small) else {
-            next_attempt = full.len() + (unknowns / 20).max(1);
+            next_attempt = full.len()
+                + if prm.eager_la {
+                    1
+                } else {
+                    (unknowns / 20).max(1)
+                };
             continue;
         };
         la_attempts += 1;
@@ -512,7 +521,12 @@ pub fn solve_k4(inst: &Fp4Instance, target: Pt4, seed: u64, prm: &K4Params) -> K
             recovered = ok;
             core_unknowns = sel.len();
         } else {
-            next_attempt = full.len() + (sel.len() / 20).max(1);
+            next_attempt = full.len()
+                + if prm.eager_la {
+                    1
+                } else {
+                    (sel.len() / 20).max(1)
+                };
         }
     }
     let solver_gae = trials as f64 * prm.c4 / C_ADD;

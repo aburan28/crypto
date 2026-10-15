@@ -1028,9 +1028,11 @@ fn gm_ci(ly: &[f64], rng: &mut StdRng) -> Value {
 fn verdict_ratio(v: &Value) -> &'static str {
     let lo = v["ci95"][0].as_f64().unwrap();
     let hi = v["ci95"][1].as_f64().unwrap();
-    if hi < 1.0 {
+    // Exact ties (ratio 1 on every curve) are MATCHES; 1e-12 absorbs the
+    // rounding of exp2(mean log2).
+    if hi < 1.0 - 1e-12 {
         "ADVANCES"
-    } else if lo > 1.0 {
+    } else if lo > 1.0 + 1e-12 {
         "REGRESSES"
     } else {
         "MATCHES"
@@ -1040,9 +1042,9 @@ fn verdict_ratio(v: &Value) -> &'static str {
 fn verdict_slope(v: &Value) -> &'static str {
     let lo = v["ci95"][0].as_f64().unwrap();
     let hi = v["ci95"][1].as_f64().unwrap();
-    if hi < 0.0 {
+    if hi < -1e-12 {
         "ADVANCES"
-    } else if lo > 0.0 {
+    } else if lo > 1e-12 {
         "REGRESSES"
     } else {
         "MATCHES"

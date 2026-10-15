@@ -1171,14 +1171,21 @@ fn solve_fp4(
         // Item ic_improve_20261014/01: the D₄ Y-line stacked with double
         // large primes (|F'| = ⌈columns^lp_exponent⌉ of the folded columns).
         "yline-d4-lp" => K4Base::YLineD4,
-        other => return Err(format!("base `{other}`: xline, yline-d4 or yline-d4-lp")),
+        // Item ic_improve_20261015/04: the D₄ Y-line with the eager
+        // first-dependency stop (filter after every relation).
+        "yline-d4-ed" => K4Base::YLineD4,
+        other => {
+            return Err(format!(
+                "base `{other}`: xline, yline-d4, yline-d4-lp or yline-d4-ed"
+            ))
+        }
     };
     let large_primes = param_u64(m, "large_primes")? as usize;
     if large_primes != 0 && large_primes != 2 {
         return Err("large_primes is 0 or 2".into());
     }
-    if m.params["base"] == "yline-d4" && large_primes != 0 {
-        return Err("yline-d4 runs without large primes".into());
+    if (m.params["base"] == "yline-d4" || m.params["base"] == "yline-d4-ed") && large_primes != 0 {
+        return Err("yline-d4 and yline-d4-ed run without large primes".into());
     }
     let prm = K4Params {
         base,
@@ -1186,6 +1193,7 @@ fn solve_fp4(
         lp_exponent: param_f64(m, "lp_exponent")?,
         c4: param_f64(m, "c4")?,
         trial_cap_per_column: param_u64(m, "trial_cap")?,
+        eager_la: m.params["base"] == "yline-d4-ed",
     };
     let t = Instant::now();
     measurement::begin_online(Phase::RhoSolve);
