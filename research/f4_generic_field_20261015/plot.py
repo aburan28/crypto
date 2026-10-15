@@ -48,9 +48,9 @@ for y, c in zip(ys, claims):
     ax.plot(med, y, "o", color="#1a7f37" if ok else "#cf222e", ms=6)
     ax.plot(thr, y, "|", color=INK, ms=14, mew=1.6)
     ax.text(hi + 0.05, y, f"{med:.2f}× ({c['verdict']})", va="center", fontsize=8, color=INK)
-ax.set_yticks(list(ys), [f"{c['id']}: {c['baseline']}→{c['candidate']} ({c['cell']})" for c in claims])
+ax.set_yticks(list(ys), [f"{c['id']} ({c['cell']}): {c['baseline']} → {c['candidate']}" for c in claims])
 ax.invert_yaxis()
-ax.set_xlabel("paired time ratio baseline / candidate (dot: median of 7, bar: min–max, tick: threshold)")
+ax.set_xlabel("paired time ratio baseline / candidate\n(dot: median of 7, bar: min–max, tick: threshold)")
 ax.set_xlim(0.8, 3.2)
 save(fig, "fig_claims")
 
@@ -82,8 +82,8 @@ for r in rows:
     series[(r["prime"], r["kind"], int(r["m"]))].append(r)
 STYLE = {
     "29686813949953": ("Kummer v₂=40 (45-bit)", "#2e8b57", "o"),
-    "proth:48": ("Kummer v₂=48", "#0969da", "s"),
-    "proth:56": ("Kummer v₂=56", "#8250df", "^"),
+    "4222124650659841": ("Kummer v₂=48 (52-bit)", "#0969da", "s"),
+    "1945555039024054273": ("Kummer v₂=56 (61-bit)", "#8250df", "^"),
     "P-224": ("Kummer P-224 (v₂=96)", "#cf222e", "D"),
     "P-192": ("torus P-192 (v₂(p+1)=64)", "#bf8700", "v"),
     "P-256": ("torus P-256 (v₂(p+1)=96)", "#57606a", "x"),

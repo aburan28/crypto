@@ -257,7 +257,7 @@ fn speed(dir: &str, out: &str) {
         let (Some(b), Some(c)) = (b, c) else {
             let _ = writeln!(
                 claims,
-                "{},{},{},{},{},,,,,,{},MISSING",
+                "{},\"{}\",{},{},{},,,,,,{},MISSING",
                 cl.id, cl.what, cl.cell, cl.base, cl.cand, cl.threshold
             );
             continue;
@@ -282,7 +282,7 @@ fn speed(dir: &str, out: &str) {
         let (bmed, cmed) = (median(&mut bm), median(&mut cm));
         let _ = writeln!(
             claims,
-            "{},{},{},{},{},{bmed:.3},{cmed:.3},{med:.4},{lo:.4},{hi:.4},{},{verdict}",
+            "{},\"{}\",{},{},{},{bmed:.3},{cmed:.3},{med:.4},{lo:.4},{hi:.4},{},{verdict}",
             cl.id, cl.what, cl.cell, cl.base, cl.cand, cl.threshold
         );
         let _ = writeln!(
