@@ -44,6 +44,26 @@ For every \(x\in\mathbb F_p\), put \(U=(x-\zeta)(x-\beta)\). Then \(Q(x)=U^{q+1}
 
 The first automated \(\beta\)-root attempt stopped at a PARI variable-name error before producing a model; its [raw log](type_i_gate_attempt1.log) is retained. The successful run used the quadratic formula and verified both roots by Frobenius and cross-ratio replay.
 
+### Prime-field Type I criterion and larger standard curves
+
+**Criterion.** Let \(p>3\) be prime and let \(E/\mathbb F_p:y^2=x^3+ax+b\) have a nonsingular, irreducible 2-division cubic. With its three roots cyclically permuted by \(p\)-Frobenius, define \(\lambda\) as above and put \(k=\mathbb F_{p^2}\), \(K=\mathbb F_{p^6}\). Then \(N_{K/k}(\lambda)=-1\), \(\operatorname{Tr}_{K/k}(\lambda)\in\mathbb F_p\), and the Momose--Chao Type I discriminant has the square class of
+\[
+\Delta_0=(\operatorname{Tr}_{K/k}\lambda-1)^2+4\in\mathbb F_p.
+\]
+Every element of \(\mathbb F_p\) is a square in \(k\), so the Type I fixed-point quadratic has a solution in \(K\). Thus this irreducible-cubic condition supplies a Type I cover of an elliptic curve in the same Legendre \(j\)-class over \(K\). If \(p\equiv3\pmod4\), then \(\Delta_0\ne0\), and [Momose--Chao, Lemma 8](https://eprint.iacr.org/2009/236.pdf) makes this cover nonhyperelliptic. An isomorphism or suitable twist to the *specified* elliptic curve, and the subgroup transfer, remain separate checks for each instance.
+
+The proof is elementary once the paper's discriminant formula is fixed: the cyclic cross-ratio product is \(-1\); its trace is fixed by \(p\)-Frobenius because all three terms lie in \(\mathbb F_{p^3}\). For \(c\in\mathbb F_p^\times\), \(c^{(p^2-1)/2}=(c^{p-1})^{(p+1)/2}=1\). Finally \(\Delta_0=0\) would give \(((\operatorname{Tr}\lambda-1)/2)^2=-1\), impossible when \(p\equiv3\pmod4\). The abstract last implication is checked in Lean as `P192ExtensionCover.type_i_discriminant_factor_ne_zero`; the finite-field square-class and paper-to-geometry bridges remain in this written proof.
+
+The [bounded Sage screen](type_i_prime_field_screen.py) selects the first four lexicographic nonsingular irreducible \((a,b)\) pairs at each of \(p=7,11,13,17,19,23,29,31,43\), plus the exact standard P-192, P-224, and P-256 coefficients. It checks the cubic, \(j\), norm, trace, discriminant, each solved \(\beta\)'s Frobenius--Möbius equation and cross-ratio replay. For the three standard curves it also checks an exact quartic-to-cubic Möbius polynomial identity and its scale square class over \(K\). All 39 selected instances yield a verified \(\beta\); four small-prime cases have \(\Delta_0=0\), and 15 have \(\Delta_0\) nonsquare in \(\mathbb F_p\) even though it is square in \(k\). The latter require \(\beta\) in \(\mathbb F_{p^6}\) rather than \(\mathbb F_{p^3}\), including P-256.
+
+| Curve | Field bits | \(\Delta_0\) square in \(\mathbb F_p\) | First \(\beta\) field | Exact quotient isomorphism over \(\mathbb F_{p^6}\) |
+| --- | ---: | :---: | --- | :---: |
+| P-192 | 192 | yes | \(\mathbb F_{p^3}\) | yes |
+| P-224 | 224 | yes | \(\mathbb F_{p^3}\) | yes |
+| P-256 | 256 | no | \(\mathbb F_{p^6}\) | yes |
+
+The [result JSON](type_i_prime_field_screen.json), [run log](type_i_prime_field_screen.log), [runtime receipt](type_i_prime_field_runtime_info.json), and [preserved first serialization failure](type_i_prime_field_screen_attempt1.log) fix the sample and exact outputs. The Type I cover is a geometric candidate for all three standard curves; this screen does not construct their P-224/P-256 Jacobian classes or measure a relation method. In particular, the P-192 quotient-vector norm theorem above has only been instantiated for P-192.
+
 ### Explicit Type I generator fibers
 
 The [quartic generator map](type_i_generator_map.py) searches the four choices of a quartic root \(\rho\) to send to infinity and the six assignments of the other roots to P-192's three 2-division roots. It finds four valid assignments and fixes one Möbius coordinate
@@ -183,6 +203,7 @@ An initial control run failed its scalar replay: target descent omitted multipli
 | Project an exact three-point relation by an integer cofactor | `P192ExtensionCover.projected_three_point_relation` | Kernel-checked for any additive commutative group; Jacobian relations separately checked by Sage. |
 | Recover the scalar after cofactor projection | `P192ExtensionCover.projected_target_scalar` | Kernel-checked over any field with nonzero cofactor; the modular 109 instance and scalar replay checked by Sage. |
 | The Type I quartic RHS is square on fixed subfield coordinates | `P192ExtensionCover.type_i_subfield_rhs_square` | Kernel-checked for a commutative ring given the Frobenius-distributivity equation; the exact P-192 field instance is checked by Sage. |
+| The Type I discriminant factor is nonzero when minus one has no square root | `P192ExtensionCover.type_i_discriminant_factor_ne_zero` | Kernel-checked for any field of characteristic other than two under the explicit nonsquare hypothesis; the prime-field consequence and cover existence use finite-field arithmetic and the cited geometric criterion outside Lean. |
 | The nonfixed Scholten cubic is reciprocal under coefficient conjugation | `P192ExtensionCover.scholten_reciprocal_identity` | Kernel-checked field identity; the P-192 involution and descended sextic are checked by Sage. |
 | The Type I Möbius coordinate clears to a quartic polynomial identity | `P192ExtensionCover.mobius_quartic_clear` | Kernel-checked over any field when \(X\ne\rho\); the exact P-192 quartic identity and square twist are checked by Sage. |
 | The explicit Type I conorm has exact order \(r\) | `P192ExtensionCover.conorm_nonzero_torsion_of_push_pull_two`, `P192ExtensionCover.conorm_exact_prime_order_of_push_pull_two` | Kernel-checked nonzero, torsion, and exact-prime-order implications under the degree-two push-pull identity; Sage checks the exact P-192 fibers, their quotient images, primality of \(r\), and nonzero \(-2G\). |
@@ -205,6 +226,8 @@ The [continuation SHA-256 manifest](continuation_receipts.sha256) seals the revi
 /Volumes/SSD990/cryptanalysis/sage -python research/p192_extension_cover_20261012/small_field_pipeline.py > research/p192_extension_cover_20261012/small_field_pipeline.log 2>&1
 /Volumes/SSD990/cryptanalysis/sage --runtime-info > research/p192_extension_cover_20261012/type_i_runtime_info.json
 /Volumes/SSD990/cryptanalysis/sage -python research/p192_extension_cover_20261012/type_i_gate.py > research/p192_extension_cover_20261012/type_i_gate.log 2>&1
+/Volumes/SSD990/cryptanalysis/sage --runtime-info > research/p192_extension_cover_20261012/type_i_prime_field_runtime_info.json
+/Volumes/SSD990/cryptanalysis/sage -python -u research/p192_extension_cover_20261012/type_i_prime_field_screen.py > research/p192_extension_cover_20261012/type_i_prime_field_screen.log 2>&1
 /Volumes/SSD990/cryptanalysis/sage --runtime-info > research/p192_extension_cover_20261012/scholten_twist_runtime_info.json
 /Volumes/SSD990/cryptanalysis/sage -python research/p192_extension_cover_20261012/scholten_twist.py > research/p192_extension_cover_20261012/scholten_twist.log 2>&1
 /Volumes/SSD990/cryptanalysis/sage --runtime-info > research/p192_extension_cover_20261012/scholten_transfer_runtime_info.json

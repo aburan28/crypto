@@ -31,6 +31,29 @@ theorem cyclic_cross_ratio_not_norm_one {K : Type*} [Field K]
   rw [cyclic_cross_ratio_product a b c hab hbc hca]
   exact hchar
 
+/-- The Type I discriminant factor cannot vanish over a field in which
+    minus one has no square root. In particular this covers prime fields
+    of characteristic congruent to three modulo four. -/
+theorem type_i_discriminant_factor_ne_zero {K : Type*} [Field K]
+    (t : K) (htwo : (2 : K) ≠ 0)
+    (hminus : ∀ u : K, u ^ 2 ≠ -1) :
+    (t - 1) ^ 2 + 4 ≠ 0 := by
+  intro hzero
+  have hfour : (4 : K) ≠ 0 := by
+    rw [show (4 : K) = 2 * 2 by ring]
+    exact mul_ne_zero htwo htwo
+  have hid : (t - 1) ^ 2 + 4 =
+      4 * (((t - 1) / 2) ^ 2 + 1) := by
+    field_simp [htwo]
+    ring
+  rw [hid] at hzero
+  have hs : ((t - 1) / 2) ^ 2 + 1 = 0 :=
+    (mul_eq_zero.mp hzero).resolve_left hfour
+  apply hminus ((t - 1) / 2)
+  calc
+    ((t - 1) / 2) ^ 2 = ((t - 1) / 2) ^ 2 + 1 - 1 := by ring
+    _ = -1 := by rw [hs]; ring
+
 /-- Clearing denominators in equality of two Legendre j-invariants yields
     the six cross-ratio transformations. This is the algebraic part of the
     nonsplit-quadratic branch's exact-degree screen. -/
@@ -322,6 +345,7 @@ end P192ExtensionCover
 
 #print axioms P192ExtensionCover.cyclic_cross_ratio_product
 #print axioms P192ExtensionCover.cyclic_cross_ratio_not_norm_one
+#print axioms P192ExtensionCover.type_i_discriminant_factor_ne_zero
 #print axioms P192ExtensionCover.pullback_injective_of_push_pull_two
 #print axioms P192ExtensionCover.legendre_j_difference_factor
 #print axioms P192ExtensionCover.scholten_palindromic_identity

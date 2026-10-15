@@ -6,6 +6,8 @@ constructs a descended Type I nonhyperelliptic genus-3 cover and a
 nonfixed-coefficient Scholten genus-2 descent, and verifies same-field
 genus-3 and genus-2 controls. The original screen and
 receipts below remain the baseline for those results.
+The continuation also gives a prime-field Type I discriminant criterion and
+checks its quartic quotient on P-224 and P-256.
 
 **Result.** For standard P-192 viewed over \(\mathbf F_{p^6}\), every Legendre
 cross-ratio of its nonzero 2-torsion has norm \(-1\) to \(\mathbf F_{p^2}\).
@@ -129,6 +131,7 @@ axiom, or native evaluation appears in the theorem module.
 | --- | --- | --- |
 | Product of cyclic cross-ratios is \(-1\) in any field | `P192ExtensionCover.cyclic_cross_ratio_product` | Checked; `propext`, `Classical.choice`, `Quot.sound` only. |
 | Product cannot equal one in characteristic other than two | `P192ExtensionCover.cyclic_cross_ratio_not_norm_one` | Checked with explicit hypothesis \(-1\ne1\); same foundations. |
+| Type I discriminant factor is nonzero when minus one is nonsquare | `P192ExtensionCover.type_i_discriminant_factor_ne_zero` | Checked under explicit field hypotheses; finite-field and cover criteria are detailed in the continuation. |
 | Push-pull equal to doubling implies injective pullback where doubling is injective | `P192ExtensionCover.pullback_injective_of_push_pull_two` | Checked; no axioms. |
 | Full P-192 finite-field and cover theorem | Open | Formalize the P-192 field, Frobenius permutation, norm identification, smooth curve/map, and divisor push-pull identity. Sage verifies the exact instance; these bridges are not yet Lean declarations. |
 
