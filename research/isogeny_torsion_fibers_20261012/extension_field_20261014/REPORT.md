@@ -1,0 +1,82 @@
+# Torsion-coordinate DLP over quadratic extensions: paired isomorphism control
+
+Status: a frozen eight-arm, four-size, same-target comparison with independent native arithmetic replay on one shared Darwin arm64 host (L0). The [earlier seven-arm V3 report](REPORT_V3.md), its [visual](GRAPH.svg), raw records, failed timing versions, and separate run report remain versioned. This V4 report adds the public scaling-isomorphism control required to interpret the degree-three arm. It does not implement the direct Semaev or nonfactorable χ polynomial oracles from the [original protocol](PROTOCOL.md).
+
+## Exact models and the attribution check
+
+The measured ECDLP is in `E(F_(p²))[r]` for `E:y²=x³+1`, `F_(p²)=F_p[s]/(s²−ν)`, the rational three-torsion point `T=(0,1)`, and `χ=(y+1)/(y−1)` with public action `χ(P+T)=1/(1−χ(P))`. The four frozen `(p,ν,r,h)` tuples are `(61,2,19,192)`, `(271,3,61,1200)`, `(787,2,211,2928)`, and `(3319,3,811,13584)`. The source and degree-three destination have exact [ICV1 and EC1 records](IDENTITIES.jsonl), public subgroup generators, one target per curve and a [fixture byte hash](FIXTURES.jsonl) `1a63cc22a22e0fe27d44359325d502038d26d3ac616374fc5558c041939218b7`.
+
+The [precommitted isomorphism protocol](ISOMORPHISM_PROTOCOL.md) checked whether the destination `E':y²=x³−27` is also reachable by a public scaling. It is, on **all four** exact fields: the smallest `u` with `u²=−3 mod p` is respectively `27,57,28,264`, and `ψ_u(x,y)=(u²x,u³y)` satisfies `u⁶=−27`. The [native receipt](ISO_CHECK.jsonl) passed 64 group-law pairs per field plus all frozen generators, targets and raw-base points, and checked image subgroup order. Thus a difference between the degree-three and destination arms cannot be assigned to isogeny structure without the isomorphism arm. This observation is exact for these fields; a general curve-level Lean bridge remains open.
+
+The [V4 spec](RUN_SPEC_V4.json), committed before execution, pins the V3 fixtures, target, seeds, three interleaved rounds, `min(10⁶,20r)` relation cap, source revision `c68835edc4d112e3f8f5da3e606060141ad55143`, and eight arms. The [V4 run](RUN_V4.jsonl) has SHA-256 `71a0e8f7d96f630d372299f64a407d398b68dc21b9a8fa04de5c11c8c3b67b6a`; it retains four calibration and 96 arm records. The [independent verifier](REPLAY_RUN_V4.json) uses a separate `u128` modular-field and chord/tangent implementation, checks all 96 unique slots and expected seeds, and verifies 87 recovered scalars by `[k]G=Q`; nine raw-pair rows exhausted their cap. Its receipt SHA-256 is `59913f5b52e0a54ccb417ee67c57ae8de4aebe91338f470d2aa9a36900c22cb0`. The framework receives the planted scalar only for a final equality assertion; the relation oracle and collector use `G,Q,r,seed`, and this independent checker repeats the arithmetic check.
+
+The scaling equation gives an explicit algebraic proof on each field: the [certified factorization](CERTIFICATES.md) `(u²+3)(u⁴−3u²+9)=u⁶+27` and `u²=−3` give `u⁶=−27`. With `x'=u²x` and `y'=u³y`, one has `y'²=u⁶y²=u⁶(x³+1)=x'³−27`. Since `u≠0`, inverse scaling recovers `(x,y)`, and a nonsingular Weierstrass coordinate change preserves the elliptic-curve identity and chord/tangent group law. The Lean file proves the universal integer factorization and each exact coefficient congruence; the full curve-law statement is still a formalization obligation. The 64 pair checks are an implementation control, not the mathematical proof of all pairs.
+
+This scaling obstruction holds for this **fixed pair** over every quadratic extension `F_(p²)` with odd `p≠3`, not just the four measured fields. For any `a∈F_p*`, `a^(p−1)=1`, and `p−1` divides `(p²−1)/2` because `(p+1)/2` is an integer. Hence `a^((p²−1)/2)=1`; the cyclic multiplicative group of `F_(p²)` then gives `a=u²` for some `u`. Taking `a=−3` supplies the scaling above. This argument does not cover other source/isogeny pairs, nor does it price a relation algorithm. The finite-field existence and curve-isomorphism statements remain outside the current Lean model; the exact witnesses and universal coefficient identity are the compiled pieces.
+
+## One-target cold cost in one local unit
+
+The predeclared two-class generic count floor is `√(π/4)=0.886226925` counted group operations divided by `√r`. The table unit is `S_cpu_gae = cold current-thread CPU ns / locally measured source-addition ns / √r`. The current-thread interval includes all native field work, roots, allocations, table setup, queries, relation checks, modular rank/recovery and internal scalar verification. It includes public isomorphism discovery by the measured ascending `u` search in the isomorphism arm and eigenvalue discovery in six-class rho. Calibration and output serialization are outside method intervals. This is a host-dependent conversion, so the floor-ratio column is a **local equivalent-cost comparison**, not a universal generic-group lower-bound statement. Ratios to negation rho are medians of same-round complete CPU ratios, not ratios of displayed medians. `cap` rows show work spent but no valid speed or floor ratio.
+
+| `p` | `r` | arm | cold `S_cpu_gae`, median [min, max] | local ratio / fixed floor | paired cost / negation rho | scalar replay |
+| ---: | ---: | :--- | ---: | ---: | ---: | :--- |
+| 61 | 19 | chi-orbit-index | 256.79 [245.2, 636.31] | 289.76 | 14.53 | 3/3 |
+| 61 | 19 | isogeny-projected-pair | 239.44 [220.92, 502.19] | 270.18 | 12.5 | 3/3 |
+| 61 | 19 | isomorphism-projected-pair | 231.65 [215.81, 283.43] | 261.39 | 10.05 | 3/3 |
+| 61 | 19 | projected-pair | 202.85 [202.2, 260.98] | 228.89 | 9.56 | 3/3 |
+| 61 | 19 | raw-pair | 172.87 [162.4, 327.94] | 195.07 | 9.78 | 3/3 |
+| 61 | 19 | rho-negation | 27.3 [17.67, 28.21] | 30.8 | 1 | 3/3 |
+| 61 | 19 | rho-negation-aa | 23.83 [17.54, 26.58] | 26.88 | 0.94 | 3/3 |
+| 61 | 19 | rho-six-class | 32.21 [28.41, 35.28] | 36.34 | 1.18 | 3/3 |
+| 271 | 61 | chi-orbit-index | 165.85 [150.21, 169.37] | 187.14 | 11.09 | 3/3 |
+| 271 | 61 | isogeny-projected-pair | 156.96 [126.21, 166.73] | 177.11 | 8.81 | 3/3 |
+| 271 | 61 | isomorphism-projected-pair | 252.68 [118.59, 281.7] | 285.12 | 15.81 | 3/3 |
+| 271 | 61 | projected-pair | 138.26 [121.26, 298.08] | 156.01 | 9.05 | 3/3 |
+| 271 | 61 | raw-pair | 630.46 [519.36, 641.6] | — | — | 0/3; cap |
+| 271 | 61 | rho-negation | 15.28 [14.82, 17.82] | 17.24 | 1 | 3/3 |
+| 271 | 61 | rho-negation-aa | 12.54 [10.42, 19.84] | 14.15 | 0.82 | 3/3 |
+| 271 | 61 | rho-six-class | 14.17 [14.14, 51.95] | 15.99 | 0.95 | 3/3 |
+| 787 | 211 | chi-orbit-index | 190.15 [186.38, 208.22] | 214.56 | 21.46 | 3/3 |
+| 787 | 211 | isogeny-projected-pair | 156.02 [154.88, 169.29] | 176.05 | 17.45 | 3/3 |
+| 787 | 211 | isomorphism-projected-pair | 154.41 [152.03, 163.33] | 174.23 | 16.84 | 3/3 |
+| 787 | 211 | projected-pair | 157.59 [148.56, 178.94] | 177.82 | 18.44 | 3/3 |
+| 787 | 211 | raw-pair | 868.1 [866.78, 895.83] | — | — | 0/3; cap |
+| 787 | 211 | rho-negation | 9.7 [6.55, 11.54] | 10.95 | 1 | 3/3 |
+| 787 | 211 | rho-negation-aa | 8.46 [5.91, 11.95] | 9.55 | 0.9 | 3/3 |
+| 787 | 211 | rho-six-class | 13.06 [9.63, 16.2] | 14.74 | 1.67 | 3/3 |
+| 3319 | 811 | chi-orbit-index | 277.34 [271.55, 347.16] | 312.95 | 50.27 | 3/3 |
+| 3319 | 811 | isogeny-projected-pair | 200.41 [190.1, 201.84] | 226.14 | 29.23 | 3/3 |
+| 3319 | 811 | isomorphism-projected-pair | 204.56 [197.03, 205.99] | 230.83 | 28.53 | 3/3 |
+| 3319 | 811 | projected-pair | 198.17 [196.33, 211.37] | 223.61 | 28.43 | 3/3 |
+| 3319 | 811 | raw-pair | 1865.05 [1792.45, 2011.64] | — | — | 0/3; cap |
+| 3319 | 811 | rho-negation | 6.91 [3.51, 9.7] | 7.79 | 1 | 3/3 |
+| 3319 | 811 | rho-negation-aa | 5.95 [3.6, 8.42] | 6.71 | 0.87 | 3/3 |
+| 3319 | 811 | rho-six-class | 7.31 [7.17, 10.34] | 8.25 | 1.5 | 3/3 |
+
+The [paired native audit](PAIRED_AUDIT_V4.jsonl) confirms that all four projected arms had identical relation count, target-query count, rank and recovered scalar in each of the twelve `p×round` cells. At `r=811`, their medians were `198.17` projected, `277.34` χ index, `200.41` degree-three image and `204.56` scaling image `S_cpu_gae`; negation rho was `6.91` and charged six-class rho `7.31`. The paired total-cost ratios against negation rho were `28.43`, `50.27`, `29.23`, and `28.53` for those four arms, respectively. Their different CPU costs did not reflect different relation yield. At `p=271`, the scaling arm's three results span `118.59–281.70`, so its `252.68` median is not a stable map-attribution estimate. The A/A and rho ranges in the table likewise expose host noise. The observed relation outcome is exact for the frozen streams; these L0 CPU differences are descriptive and cannot establish an isolated performance effect.
+
+## Support, full cost and mathematical scope
+
+The precommitted [finite-support census](SUPPORT_PROTOCOL.md) enumerated every unordered signed-base pair. For the four fields, exact raw subgroup support under shifts by `0,T,2T` had sizes `[2,0,0]`, `[0,0,0]`, `[0,1,1]`, `[0,0,0]`. The `p=787` shifts added two raw subgroup support points, but the frozen target was in none of those shifted supports. Projected nonidentity support was `18/18`, `58/60`, `196/210`, `742/810`; the degree-three image had the same cardinality. The [census bytes](SUPPORT.jsonl) include all `128,128,450,1682` χ-identity checks and orbit-key counts `6,20,70,270`. Translation by kernel torsion cannot add a projected pair sum when `[h]T=O`. The census tests four exact bases, not the pending polynomial oracle.
+
+Each V4 cold relation interval includes native line lifting and square roots, `[h]` projection, signed factor-base construction, pair-table allocation, unsuccessful and successful queries, exact source-point relation checks, incremental modular elimination, target recovery and internal scalar verification. The map arms also charge evaluation; the scaling arm constructs `u` by the measured ascending search once during setup. The six-class rho charges its eigenvalue discovery. The complete per-phase counted operations, field multiplication/inversion counters and CPU/wall nanoseconds are in [RUN_V4.jsonl](RUN_V4.jsonl); [SUMMARY_V4.jsonl](SUMMARY_V4.jsonl) derives the table. Counted `GAE` inside the framework is secondary because some native work lacks portable primitive conversion. For the scaling arm, the canonicalisation calibration also recomputes `u` on each calibration iteration, whereas the measured cold method finds `u` once during setup; this overprices that diagnostic counted term and is why no counted scaling ratio is used. The pair tables have `128,128,450,1682` entries and 24-byte payload lower bounds of `3072,3072,10800,40368` bytes, excluding allocator/hash-table and linear-algebra memory. **Per-arm peak RSS was not captured**, so no equal-memory or portable counted-`S` claim follows. Setup reuse count is one target; no amortized result is asserted.
+
+The four exact coefficient witnesses `u²=−3` and `u⁶=−27` are formalized by four axiom-free Lean theorems in the [local proof map](PROOF_MAP.md); the general factorization is also proved there using Lean's standard `propext` and `Quot.sound` foundations. The [native identity certificate](CERTIFICATES.md) checks the same polynomial equation at 64 sealed and 64 extra points. The pinned `lake build` succeeded. A formal curve-level group-isomorphism theorem was not added. The prior [Lean proof map](../torsion_orbit_20261013/PROOF_MAP.md) links the conditional quotient-support theorem `torsion_orbit_pair_support` and integer-linear `cubicAction_order_three` theorem, each compiled on its stated hypotheses. The χ group-law and Möbius identities have the prior certificates `IDC1h41adc1f4e1c5522c` and `IDC1ha0c3d83775e32754` in the [certificate index](../torsion_orbit_20261013/CERTIFICATES.md). Exact finite map checks and group-law replay cover these models; the faithful Lean bridge to all projective curve points remains open. The measured ratios are computational observations, not theorems.
+
+The embedding degrees `ord_r(p)` are `9,10,105,810`, or `9,5,105,405` relative to `q=p²`. A pairing value, if constructed, would lie in the respective `r`-th-root-of-unity field `F_(p^9)`, `F_(p^10)`, `F_(p^105)` or `F_(p^810)`. These are output-field degrees, not a complete evaluation-field or solver cost: a field containing both the frozen `F_(p²)` input and those roots has degree `lcm(2,k)=18,10,210,810` over `F_p`, and a suitable second pairing point might need more. This is only a field-size screen. No nondegenerate pairing, multiplicative-field DLP, scalar transfer or total cost for that route has been constructed or measured. The comparison in the table is the **elliptic-curve DLP over an extension field** against matched rho on the same group. The [next gate](NEXT_GATE.md) keeps the finite-field pairing route separate from the χ polynomial oracle.
+
+The first seven-arm execution [V1](RUN_V1.jsonl) produced its rows but a sandboxed system-time wrapper exited 1; [V2](RUN_V2.jsonl) included unequal JSON serialization inside timed intervals. [The correction](CORRECTION_V4.md) produced the clean [V3 run](RUN_V3.jsonl) with 75 scalar replays and nine cap rows. V4 reran all seven original arms alongside the scaling arm on the same targets and streams; V3 is preserved in its [versioned analysis](REPORT_V3.md) and [PDF](REPORT_V3.pdf), rather than silently replaced. The native independent replay first checked V3 arithmetic and slot integrity, then [V4 of that verifier](REPLAY_INDEPENDENT_V4.json) pinned input hashes. A one-byte altered run failed the [hash-negative control](REPLAY_HASH_NEGATIVE.stderr) with exit 101. All raw and corrected receipts remain available.
+
+**Decision.** On these exact ordinary quadratic-extension groups, a public scaling map reaches the degree-three destination and the four projected arms have identical relation outcomes. The χ orbit *index* increased median cold CPU cost over the plain projected table at all four sizes; this is an engineering regression for the index, with no observed relation-yield gain. Adding the scaling arm is an attribution/accounting correction, not an algorithmic advance. The two shifted raw support points at `p=787` remain a specific torsion-fiber lead. The original nonfactorable χ **polynomial decomposition oracle**, direct Semaev control, per-arm peak memory, isolated timing, independent-host replay and any finite-field pairing comparison remain open. The exact small-group observations do not support an exponent or deployed-curve-security claim.
+
+The [V4 visual](GRAPH_V4.svg) includes all eight arms; the [V4 run report](reports/run-20261014T1617Z/RUN_REPORT.md), [results PDF](REPORT.pdf) and [benchmark copy](../../../benchmarks/20261014-torsion-extension/) contain the same comparison. The [validation record](VALIDATION.md) retains the failed environment-limited runs and the final complete release-library pass of 4,009 tests, zero failures and 113 ignored. The canonical algorithm frontier remains unchanged because no admitted advance was measured.
+
+### Requirement status
+
+- Exact four `F_(p²)` fixtures, source/destination identities, public torsion/isogeny/scaling maps: **verified complete for the recorded models** by freeze and `ISO_CHECK.jsonl`.
+- Scaling isomorphism for the fixed `x³+1 → x³−27` pair over every odd-characteristic quadratic extension except characteristic three: **written proof complete; formalization partial**. Lean checks the universal coefficient identity and four exact witnesses, while finite-field square existence and the curve-group bridge remain open.
+- Cold eight-arm same-target comparison, relations, rank, scalar recovery, matched negation/A/A/six-class rho: **verified complete at shared-host L0** by `RUN_V4.jsonl`, `PAIRED_AUDIT_V4.jsonl` and the independent 87-scalar replay.
+- Exact raw-shift and projected finite support: **verified complete for the four frozen bases** by `SUPPORT.jsonl`.
+- Direct Semaev, nonfactorable χ and quotient polynomial oracles: **not attempted**; an index is not their substitute.
+- Peak memory, isolated L2 timing, independent-host replay and portable full primitive conversion: **open**; current CPU pricing is local.
+- Pairing transfer and multiplicative extension-field DLP: **screened by embedding degree only**, with construction and costs open.

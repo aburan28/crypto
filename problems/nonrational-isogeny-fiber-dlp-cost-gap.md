@@ -8,10 +8,11 @@
   [same-target paired round](../research/isogeny_torsion_fibers_20261012/paired_round/REPORT.md),
   [2026-10-13 isomorphism and six-class controls](../research/isogeny_torsion_fibers_20261012/paired_round/iso_control_20261013/REPORT.md),
   [2026-10-13 non-isomorphic rational-fiber control](../research/isogeny_torsion_fibers_20261012/nonisomorphic_pair_20261013/REPORT.md),
-  [four-size cold native CPU comparison](../research/isogeny_torsion_fibers_20261012/full_cost_20261013/REPORT.md)
-  and [three-torsion orbit support screen](../research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/REPORT.md)
+  [four-size cold native CPU comparison](../research/isogeny_torsion_fibers_20261012/full_cost_20261013/REPORT.md),
+  [three-torsion orbit support screen](../research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/REPORT.md),
+  and [quadratic-extension cold DLP comparison](../research/isogeny_torsion_fibers_20261012/extension_field_20261014/REPORT.md)
 - **Next action owner:** unassigned
-- **Last updated:** 2026-10-13
+- **Last updated:** 2026-10-14
 
 ## Problem
 
@@ -35,8 +36,9 @@ destination relation workload at order 211. This does not assign the
 recorded difference specifically to the degree-three map. A later
 base-field non-isomorphic `F617` pair with a three-point rational kernel
 has now been solved in both relation arms. Three more non-isomorphic pairs
-and direct cold CPU timing have since been added. An isomorphism-only arm
-on the exact four-size targets remains a separate attribution control.
+and direct cold CPU timing have since been added. A separate isomorphic
+model arm on the exact four-size targets remains an attribution control; it
+cannot map to their fixed non-isomorphic destinations.
 
 ## Evidence and uncertainty
 
@@ -146,7 +148,7 @@ on the exact four-size targets remains a separate attribution control.
   recovery and matched rho, independent arithmetic replay, retained
   failures, full phase accounting, and complete local cold CPU pricing.
   See the [four-size report](../research/isogeny_torsion_fibers_20261012/full_cost_20261013/REPORT.md).
-- [ ] On those same targets, add a base-field isomorphism-only model arm
+- [ ] On those same targets, add a separate base-field isomorphic model arm
   and a duplicate relation A/A control; admit an L2 isolated run and a
   second-host exact replay. Pin all native-work conversions for a portable
   complete `S` price and interval, including construction and memory with
@@ -160,6 +162,19 @@ on the exact four-size targets remains a separate attribution control.
   curve-level bridge. Completing it would establish the coordinate identity
   under the theorem's field assumptions; it would not establish an oracle
   or a DLP speed advantage.
+- [x] Price the implemented quadratic-extension projected-pair, χ orbit-index,
+  degree-three map, public scaling-isomorphism map and matched rho controls
+  cold on four frozen groups, with exact support census and independent
+  native arithmetic replay. The
+  [2026-10-14 report](../research/isogeny_torsion_fibers_20261012/extension_field_20261014/REPORT.md)
+  records 87 verified V4 arm rows and nine capped raw-pair rows; all four
+  projected arms had the same relation outcomes and the χ index had higher
+  median CPU cost than the plain projected table at all sizes. The V3
+  seven-arm result, with 75 verified rows, remains separately retained.
+- [ ] Construct and price the original nonfactorable χ *polynomial-system*
+  oracle and direct Semaev/quotient polynomial controls, including memory,
+  isolated timing and independent-host replay. The [next gate](../research/isogeny_torsion_fibers_20261012/extension_field_20261014/NEXT_GATE.md)
+  pins its controls, stop conditions and separate pairing-transfer subtrack.
 
 Meeting these conditions would settle only the measured pair and workload.
 It would not prove a general exponent change or a result for another curve.
@@ -189,12 +204,24 @@ It would not prove a general exponent change or a result for another curve.
   scaling model, duplicate relation and rho controls, portable native
   conversion, and independent-host replay.
 - **Separate torsion lead:** the free three-lift relation-yield multiplier
-  failed its exact pair-table test. The remaining discriminating test is
-  [extension-field torsion-symmetric decomposition](../research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/NEXT_GATE.md),
-  using the explicit nonfactorable `chi` coordinate, paired with direct
-  source, source-orbit, and invariant-quotient controls on the same public targets.
-  Its oracle construction, rank, complete pricing and independent replay
-  are unimplemented, so no collection or DLP speed ratio is assigned.
+  failed its exact pair-table test. The subsequent
+  [quadratic-extension run](../research/isogeny_torsion_fibers_20261012/extension_field_20261014/REPORT.md)
+  completely priced a χ orbit *index* on frozen targets and found unchanged
+  projected relation outcomes with higher local CPU cost. A finite census
+  found two extra raw support points from torsion shifts at `p=787`, while
+  projected support stayed fixed. The remaining discriminating test is the
+  [nonfactorable χ polynomial-system oracle](../research/isogeny_torsion_fibers_20261012/extension_field_20261014/NEXT_GATE.md),
+  paired with direct source, source-orbit and invariant-quotient controls.
+  That oracle's construction, rank, complete cost and independent replay
+  remain open.
+- **Quadratic-extension map attribution:** all four exact ordinary fields
+  admit `u²=−3` in the base field, giving a checked public scaling map
+  `ψ_u:E→E'` to the degree-three destination. The V4 paired run included
+  that map arm and independently replayed all 87 recovered scalars. All
+  four projected arms had identical relation/query/rank outcomes on the
+  twelve paired cells. A distinct non-isomorphic extension-field
+  destination requires a new curve/isogeny selection; this fixed
+  `y²=x³−27` destination does not supply it on the selected fields.
 - **Inputs and controls:** exact ICV1/EC1 pairs, executable isogeny,
   same source target transported to destination, source relation baseline,
   matched negation rho, six-class automorphism-aware rho where rationally
@@ -249,3 +276,27 @@ frozen exact check established the nonfactorable degree-three coordinate
 `chi=(y+1)/(y−1)` and its order-three torsion action on every rational
 point of the four curves. This is an explicit oracle construction lead;
 it carries no measured DLP cost yet.
+
+2026-10-14: a frozen four-size quadratic-extension DLP run priced an exact
+cofactor-projected pair table, χ orbit index and explicit degree-three
+isogeny control against same-target negation, A/A and six-class rho. A
+separate Rust process replayed 75 recovered scalars; nine raw-pair rows
+reached their cap. The χ index matched projected relation outcomes and
+cost more CPU on all four sizes. Exact torsion shifts added two raw support
+points on one frozen base, with no extra projected support. The direct
+Semaev and χ polynomial oracles, pairing transfer, peak-memory equality,
+L2 isolation and independent-host cost remain open.
+
+2026-10-14 V4: a preregistered scaling check found explicit public
+isomorphisms on all four quadratic-extension pairs (`u=27,57,28,264`). The
+eight-arm rerun retained the same four targets, seeds and caps and placed
+that scaling arm next to the degree-three arm. Independent arithmetic
+checked 87 recovered scalars across 96 slots; nine raw-pair rows capped.
+A native paired audit found equal relation, query, rank and answer outcomes
+for the projected, χ-index, isogeny and scaling arms in all twelve cells.
+The fixed destination therefore cannot isolate a degree-three-specific
+support effect. For any odd `p≠3`, every nonzero `F_p` element is a square
+in `F_(p²)`, so this fixed `x³+1 → x³−27` pair always has such a scaling
+over the quadratic extension. The χ polynomial-system oracle, a different
+non-isomorphic quadratic-extension destination, portable memory/cost pricing, isolated host
+and pairing route remain unresolved.

@@ -1,0 +1,6 @@
+
+thread 'main' (2016463) panicked at examples/isogeny_torsion_extension.rs:1268:5:
+assertion `left == right` failed: run bytes differ from the frozen V3 result
+  left: "7952235575cecb1c6249074d8fed1bdce4b4684d6bd8f905360c5c8f7b1a37a6"
+ right: "ca9a0ec7e31de59c58a78ae5c269350b37963b62ff9de815c805c36c2ec26693"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

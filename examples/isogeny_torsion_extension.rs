@@ -24,6 +24,9 @@ use crypto_lib::cryptanalysis::ic_framework::stages::{
     DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, Targets,
 };
 use crypto_lib::cryptanalysis::ic_framework::{run_pipeline, PipelineSpec};
+use crypto_lib::cryptanalysis::identity_certificate::{
+    check_with_extra, issue, Expr as IdentityExpr, IdentityStatement, Verdict,
+};
 use crypto_lib::cryptanalysis::residual_walk::is_prime_u64;
 use crypto_lib::cryptanalysis::residual_walk::pow_mod;
 use crypto_lib::hash::sha256::sha256;
@@ -1554,6 +1557,40 @@ fn audit_v4(path: &str) {
     }
 }
 
+fn issue_scaling_identity() {
+    let u = IdentityExpr::var("u");
+    let u2 = IdentityExpr::times(u.clone(), u.clone());
+    let u4 = IdentityExpr::times(u2.clone(), u2.clone());
+    let u6 = IdentityExpr::times(u4.clone(), u2.clone());
+    let stmt = IdentityStatement {
+        name: "Scaling coefficient sixth-power factorization".into(),
+        source: "research/isogeny_torsion_fibers_20261012/extension_field_20261014/REPORT.md"
+            .into(),
+        variables: vec!["u".into()],
+        degree_bound: 6,
+        lhs: IdentityExpr::times(
+            IdentityExpr::plus(u2.clone(), IdentityExpr::Const(3)),
+            IdentityExpr::sum(vec![
+                u4,
+                IdentityExpr::minus(IdentityExpr::times(IdentityExpr::Const(3), u2)),
+                IdentityExpr::Const(9),
+            ]),
+        ),
+        rhs: IdentityExpr::plus(u6, IdentityExpr::Const(27)),
+    };
+    let cert = issue(
+        stmt,
+        0x2026_1014,
+        64,
+        "issued by isogeny_torsion_extension; separate native checker-seed replay",
+        None,
+    )
+    .expect("scaling polynomial identity must hold");
+    let verdict = check_with_extra(&cert, Some((0x5ca1_2026, 64))).unwrap();
+    assert!(matches!(verdict, Verdict::Accept { .. }), "{verdict:?}");
+    println!("{}", serde_json::to_string_pretty(&cert).unwrap());
+}
+
 fn base_order(p: u64) -> u64 {
     let mut n = 1;
     for x in 0..p {
@@ -1688,6 +1725,7 @@ fn main() {
         ),
         Some("iso-check") => iso_check(&std::env::args().nth(2).expect("fixture path")),
         Some("audit-v4") => audit_v4(&std::env::args().nth(2).expect("run path")),
+        Some("issue-scaling-identity") => issue_scaling_identity(),
         _ => panic!("usage: isogeny_torsion_extension screen"),
     }
 }

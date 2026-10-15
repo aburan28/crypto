@@ -1,0 +1,6 @@
+name = "torsion_extension_scaling"
+version = "0.1.0"
+defaultTargets = ["ScalingWitness"]
+
+[[lean_lib]]
+name = "ScalingWitness"
