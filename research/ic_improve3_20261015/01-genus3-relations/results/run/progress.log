@@ -71,3 +71,6 @@ JOB 109s --bits 19 --curve 0 --kappa 1.8849 --cx 8 --streams sched --las lpsgebw
 {"bits":19,"curve":1,"kappa":1.8849,"arm":"sched:lpsgebw2@8","correct":true,"cost":8656752885,"la_cost":3133461471,"cols":10429,"nnz":158288,"checks":1,"la_wall":26.3,"wall":106.5}
 {"bits":19,"curve":1,"arm":"sched:lpsgebw2@8+R1","cost":5757315161,"rel_cost":2623853690}
 JOB 108s --bits 19 --curve 1 --kappa 1.8849 --cx 8 --streams sched --las lpsgebw2@8 --out results/run/b19_c1_sched.jsonl
+{"bits":19,"curve":2,"kappa":1.8849,"arm":"sched:lpsgebw2@8","correct":true,"cost":8725514503,"la_cost":3170197491,"cols":10465,"nnz":159794,"checks":1,"la_wall":25.7,"wall":109.6}
+{"bits":19,"curve":2,"arm":"sched:lpsgebw2@8+R1","cost":5809315245,"rel_cost":2639117754}
+JOB 110s --bits 19 --curve 2 --kappa 1.8849 --cx 8 --streams sched --las lpsgebw2@8 --out results/run/b19_c2_sched.jsonl

@@ -1,8 +1,68 @@
-   Compiling crypto v0.1.0 (/home/user/crypto)
-rustc-LLVM ERROR: out of memory
-Allocation failed
-error: could not compile `crypto` (lib test)
 
-Caused by:
-  process didn't exit successfully: `/root/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name crypto_lib --edition=2021 src/lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --emit=dep-info,link -C opt-level=3 -C embed-bitcode=no '--allow=clippy::unusual_byte_groupings' --warn=unexpected_cfgs '--allow=clippy::type_complexity' '--allow=clippy::too_many_arguments' '--allow=clippy::result_unit_err' '--allow=clippy::needless_range_loop' '--allow=clippy::manual_memcpy' '--allow=clippy::chunks_exact_to_as_chunks' --check-cfg 'cfg(hashclash_linked)' --test --cfg 'feature="default"' --cfg 'feature="redis-native-tls"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("cryptopro-b-opcount", "default", "f4-five-tables", "f4-four-tables", "f4-wide-tables", "pdp-opcount", "redis-cache", "redis-native-tls", "rho_debug"))' -C metadata=9836f1330c8d107c -C extra-filename=-cc31a02c648d138c --out-dir /home/user/crypto/target/release/deps -C strip=debuginfo -L dependency=/home/user/crypto/target/release/deps --extern base64=/home/user/crypto/target/release/deps/libbase64-e66a55c8a2b6f266.rlib --extern blake3=/home/user/crypto/target/release/deps/libblake3-eba32cb34a677f3d.rlib --extern clap=/home/user/crypto/target/release/deps/libclap-543427d0867c60cd.rlib --extern flate2=/home/user/crypto/target/release/deps/libflate2-793086b588a9b8cf.rlib --extern getrandom=/home/user/crypto/target/release/deps/libgetrandom-5be0885a6ef33f08.rlib --extern hex=/home/user/crypto/target/release/deps/libhex-8028bdd1626bf515.rlib --extern libc=/home/user/crypto/target/release/deps/liblibc-d205a25cfc73043f.rlib --extern num_bigint=/home/user/crypto/target/release/deps/libnum_bigint-72cf526ce00d5673.rlib --extern num_integer=/home/user/crypto/target/release/deps/libnum_integer-efc875c5b288883b.rlib --extern num_traits=/home/user/crypto/target/release/deps/libnum_traits-8bacfe30fe9bbd48.rlib --extern rand=/home/user/crypto/target/release/deps/librand-995139fa871833e1.rlib --extern rayon=/home/user/crypto/target/release/deps/librayon-46e094ef886c2480.rlib --extern redis=/home/user/crypto/target/release/deps/libredis-19b4232e56faf0d1.rlib --extern serde=/home/user/crypto/target/release/deps/libserde-07a9da4f5e2becdf.rlib --extern serde_json=/home/user/crypto/target/release/deps/libserde_json-15598c5810c24e49.rlib --extern subtle=/home/user/crypto/target/release/deps/libsubtle-feeaad3e486488a6.rlib --extern zeroize=/home/user/crypto/target/release/deps/libzeroize-354ac2a6818a5c46.rlib -L native=/home/user/crypto/target/release/build/blake3-0755614ee3b1c653/out -L native=/home/user/crypto/target/release/build/blake3-0755614ee3b1c653/out` (signal: 6, SIGABRT: process abort signal)
-done-default
+running 256 tests
+test cryptanalysis::ic_framework::tests::inherited_f4_word_xor_unit_is_priced_when_pinned ... ok
+test cryptanalysis::inherited_f4::tests::a_refuted_child_is_one_and_stays_refuted_for_free ... ok
+test cryptanalysis::inherited_f4::tests::closed_bases_stay_in_the_ideal_and_contain_the_macaulay_space ... ok
+test cryptanalysis::inherited_f4::tests::compact_refuted_basis_survives_two_more_specialisations ... ignored, global compact-refutation toggle requires an isolated test process
+test cryptanalysis::inherited_f4::tests::completion_batch_matches_cancel_then_extend ... ok
+test cryptanalysis::inherited_f4::tests::degree_drop_completion_rows_are_added ... ok
+test cryptanalysis::inherited_f4::tests::lane_roots_match_the_sequential_rref ... ok
+test cryptanalysis::inherited_f4::tests::odd_terms_matches_sorting_parity ... ok
+test cryptanalysis::inherited_f4::tests::rewrite_plan_matches_the_bit_scatter ... ok
+test cryptanalysis::inherited_f4::tests::specialised_basis_spans_the_from_scratch_row_space ... ok
+test cryptanalysis::inherited_f4::tests::xor_words_is_wordwise_xor_over_the_common_length ... ok
+test cryptanalysis::inherited_f4::tests::zero_closure_rounds_is_the_plain_basis ... ok
+test cryptanalysis::koblitz_groebner::reference_equivalence_tests::active_suffix_rref_matches_full_width_gauss_jordan ... ok
+test cryptanalysis::koblitz_groebner::reference_equivalence_tests::add_matches_the_old_merge_on_boundary_masks ... ok
+test cryptanalysis::koblitz_groebner::reference_equivalence_tests::deserialised_templates_match_the_old_chain_on_any_fields ... ok
+test cryptanalysis::koblitz_groebner::reference_equivalence_tests::long_operands_match_the_old_code_on_either_side ... ok
+test cryptanalysis::koblitz_groebner::reference_equivalence_tests::mul_and_s3_match_the_old_code_on_any_table_and_width ... ok
+test cryptanalysis::koblitz_groebner::reference_equivalence_tests::mul_matches_the_old_code_across_the_pair_bound ... ok
+test cryptanalysis::koblitz_groebner::reference_equivalence_tests::mul_matches_the_old_code_with_rows_in_blocks ... ok
+test cryptanalysis::koblitz_groebner::reference_equivalence_tests::short_operands_match_the_old_code ... ok
+test cryptanalysis::koblitz_groebner::reference_equivalence_tests::templates_match_the_old_build_and_instantiation ... ok
+test cryptanalysis::koblitz_groebner::rref_tests::cached_layout_requires_exact_column_support ... ok
+test cryptanalysis::koblitz_groebner::rref_tests::cached_layouts_obey_changed_matrix_caps ... ok
+test cryptanalysis::koblitz_groebner::rref_tests::fast_column_index_matches_standard_hashing ... ok
+test cryptanalysis::koblitz_groebner::rref_tests::fused_flat_packing_matches_materialized_rows ... ok
+test cryptanalysis::koblitz_groebner::rref_tests::inherited_root_layout_cache_matches_uncached_builds ... ok
+test cryptanalysis::koblitz_groebner::rref_tests::m4ri_arena_matches_the_allocating_implementation ... ok
+test cryptanalysis::koblitz_groebner::rref_tests::m4ri_parallel_table_application_matches_the_serial_one ... ok
+test cryptanalysis::koblitz_groebner::rref_tests::macaulay_row_count_matches_the_materialised_rows ... ok
+test cryptanalysis::koblitz_groebner::rref_tests::masked_multiplier_schedule_matches_the_full_schedule ... ok
+test cryptanalysis::koblitz_groebner::rref_tests::paired_inherited_root_fused_packing_benchmark ... ignored, paired release benchmark for inherited-root fused packing
+test cryptanalysis::koblitz_groebner::rref_tests::paired_kernel_benchmark ... ignored, paired release benchmark; run via research/f4_linear_algebra_20260914/run.py
+test cryptanalysis::koblitz_groebner::rref_tests::paired_m4ri_arena_benchmark ... ignored, paired release benchmark for M4RI allocation policies
+test cryptanalysis::koblitz_groebner::rref_tests::paired_m4ri_semaev_root_benchmark ... ignored, paired release benchmark on Semaev root matrices
+test cryptanalysis::koblitz_groebner::rref_tests::rref_matches_reference_across_shapes_and_word_boundaries ... ok
+test cryptanalysis::koblitz_groebner::rref_tests::rref_skips_zero_prefix_words_and_preserves_padding ... ok
+test cryptanalysis::koblitz_groebner::rref_tests::solver_linear_tail_matches_full_rref_row_space_intersection ... ok
+test cryptanalysis::koblitz_groebner::tests::auto_split_rule_follows_the_engine ... ok
+test cryptanalysis::koblitz_groebner::tests::degree_reporting_duplicate_rows_can_trigger_rank_proxy ... ok
+test cryptanalysis::koblitz_groebner::tests::degree_reporting_multiple_roots_need_not_pin ... ok
+test cryptanalysis::koblitz_groebner::tests::dense_column_lookup_matches_a_map_and_preserves_missing_masks ... ok
+test cryptanalysis::koblitz_groebner::tests::direct_fused_pack_matches_sorted_parity_and_exact_layout ... ok
+test cryptanalysis::koblitz_groebner::tests::eliminate_linear_generators_refutes_and_defines ... ok
+test cryptanalysis::koblitz_groebner::tests::every_split_rule_finds_exactly_the_solutions ... ok
+test cryptanalysis::koblitz_groebner::tests::field_coefficient_products_match_pairwise_sums ... ok
+test cryptanalysis::koblitz_groebner::tests::fixed_x1_specialisation_matches_the_generic_s4_system ... ok
+test cryptanalysis::koblitz_groebner::tests::fixing_x1_leaves_a_system_in_two_summands ... ok
+test cryptanalysis::koblitz_groebner::tests::fused_f5_count_applies_the_full_f4_row_cap ... ok
+test cryptanalysis::koblitz_groebner::tests::fused_f5_count_matches_polynomial_products_at_every_cap_boundary ... ok
+test cryptanalysis::koblitz_groebner::tests::generic_cached_direct_pack_matches_sorted_and_repairs_stale_layout ... ok
+test cryptanalysis::koblitz_groebner::tests::infeasible_system_is_closed_by_the_basis ... ok
+test cryptanalysis::koblitz_groebner::tests::inherited_and_f5_engines_walk_the_same_tree_as_matrix_f4 ... ok
+test cryptanalysis::koblitz_groebner::tests::inherited_engine_matches_matrix_f4_on_random_systems ... ok
+test cryptanalysis::koblitz_groebner::tests::interleaved_chain_solve_has_the_same_roots ... ok
+test cryptanalysis::koblitz_groebner::tests::interleaved_order_puts_the_last_summand_highest ... ok
+test cryptanalysis::koblitz_groebner::tests::known_decomposition_is_a_root_of_the_system ... ok
+test cryptanalysis::koblitz_groebner::tests::linear_elimination_keeps_every_root ... ok
+test cryptanalysis::koblitz_groebner::tests::linear_harvest_keeps_every_root ... ok
+test cryptanalysis::koblitz_groebner::tests::low_columns_are_a_suffix_in_monomial_order ... ok
+test cryptanalysis::koblitz_groebner::tests::macaulay_columns_deduplicate_high_bit_support_in_monomial_order ... ok
+test cryptanalysis::koblitz_groebner::tests::macaulay_products_preserve_boolean_cancellation_and_row_order ... ok
+test cryptanalysis::koblitz_groebner::tests::macaulay_profile_agrees_with_sparse ... ok
+test cryptanalysis::koblitz_groebner::tests::node_oracle_never_treats_affine_placeholders_as_fixed_bits ... ok
+test cryptanalysis::koblitz_groebner::tests::packed_readback_preserves_canonical_order_across_words_and_padding ... ok
+test cryptanalysis::koblitz_groebner::tests::packed_rows_match_column_positions_for_dense_sparse_and_parallel_inputs ... ok
+test cryptanalysis::koblitz_groebner::tests::s3_over_supports_matches_coordinate_operations ... 
