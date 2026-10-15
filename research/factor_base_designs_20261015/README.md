@@ -1,10 +1,10 @@
 # Factor-base designs for prime and binary curves: register, Lean proofs, experiments
 
 **Date:** 2026-10-15. **Branch:** `research/factor-base-designs-lean`.
-**Kind of work:** a design round (24 factor-base strategies) and the Lean
-proofs of every statement in it that can be formalized. The experiment
-protocol is preregistered and frozen in [`PREREGISTRATION.md`](PREREGISTRATION.md);
-the runs land in `runs/` and `reports/`. Nothing here prices a pipeline or
+**Kind of work:** a design round (24 factor-base strategies), the Lean
+proofs of every statement in it that can be formalized, and the first
+preregistered experiments (protocol frozen in [`PREREGISTRATION.md`](PREREGISTRATION.md);
+rows in `runs/`, results in §6). Nothing here prices a pipeline or
 reports `S`, and nothing here is a speedup.
 
 **The rule this round follows.** A design is only *closed* when a Lean theorem
@@ -41,7 +41,7 @@ not about real systems.
 
 Status vocabulary:
 - **open (E…)**: live, with an experiment;
-- **running (A…)**: preregistered arm executing in this PR;
+- **measured**: preregistered arm run in this PR, with the outcome in §6;
 - **closed (Lean)**: a Lean theorem disposes of it, with any bridge named;
 - **closed-in-mean (Lean)**: the theorem covers the mean over targets, and
   the remainder is open;
@@ -51,10 +51,10 @@ Status vocabulary:
 
 | # | design | status | Lean | experiment |
 |:--|:--|:--|:--|:--|
-| 1 | Exponent-interval bases `{h·g^k : k < 2^t}` via bit products; no smoothness of `p ± 1` needed | **running** | `exp_interval_identity`, `bitsVal_lt`, `iterate_sq` (the presentation cuts out exactly that set) | A1z, A1g |
+| 1 | Exponent-interval bases `{h·g^k : k < 2^t}` via bit products; no smoothness of `p ± 1` needed | **measured: no** (§5: D saturated at 8; widest matrices, first to hit memory) | `exp_interval_identity`, `bitsVal_lt`, `iterate_sq` (the presentation cuts out exactly that set) | A1z, A1g |
 | 2 | Torus exponent intervals via a Lucas ladder | open | `lucas_double`, `lucas_double_succ` (ladder steps) | E2 |
 | 3 | Elliptic exponent intervals `{x(kQ′)}` on an auxiliary curve | open | — (x-only ladder correctness not formalized) | E3 |
-| 4 | Parallel (sumset) towers `x = u + v` | **running** | — | A4 |
+| 4 | Parallel (sumset) towers `x = u + v` | **measured: no** (§5: D = A0 + 1 at equal `t`; wider matrices) | — | A4 |
 | 5 | Radix-3 towers on auxiliary curves | open | `three_maximizes_bits_per_degree` (`q³ < 3^q` for all `q ≥ 2`, `q ≠ 3`); `p…_minus/plus` (field-side odd parts are tiny on the NIST primes, so the 3-power torsion must come from `E′`) | E5 |
 | 6 | P-521 torus tower | open | `p521_plus` (`p + 1 = 2^521`) | E6 |
 | 7 | Fan-in roots | open | — | E7 |
@@ -66,7 +66,7 @@ Status vocabulary:
 
 | # | design | status | Lean | experiment |
 |:--|:--|:--|:--|:--|
-| 11 | Norm-divisibility chain over a Kummer fibre (prime) | **running** | `chain_sound` (soundness at each root), `pencil_norm_factor` (the `m = 2` norm factorization), `norm_chain_excess` (one more equation than unknown, every `m`) | A11 |
+| 11 | Norm-divisibility chain over a Kummer fibre (prime) | **measured: open, replication owed** (§5: at `m = 3`, D 4 vs 6 and ≈ 4× narrower matrices, same growth per bit) | `chain_sound` (soundness at each root), `pencil_norm_factor` (the `m = 2` norm factorization), `norm_chain_excess` (one more equation than unknown, every `m`) | A11 |
 | 12 | Binary norm chain as an auxiliary-variable solver input (credits `research/nagao_relations/` open item 1) | open | `chain_sound` applies verbatim | E12 |
 | 13 | Algebraic large prime (partial divisibility) | open | — | E13 |
 
@@ -132,7 +132,41 @@ Every `decide` runs in the kernel (`decide +kernel`).
 - CI: `.github/workflows/factor-base-designs-lean.yml` runs all three and
   fails on any `sorry` or `native_decide` in the sources.
 
-## 5. What this round does not establish
+## 5. Results (p₁ = 786433, run-20261015T1657Z)
+
+Rows: `runs/*.jsonl`. Analysis: `runs/analysis.txt`. Run report:
+[`reports/run-20261015T1657Z/REPORT.pdf`](reports/run-20261015T1657Z/REPORT.pdf).
+Review: [`reports/review-20261015T2030Z/REVIEW.pdf`](reports/review-20261015T2030Z/REVIEW.pdf).
+Harness: `examples/fb_designs_slope.rs`. 140 planted systems: 116 completed,
+20 stopped at the 300 s budget and 4 aborted for memory. Every planted
+solution checked.
+
+- **Instrument check passed.** A0 rebuilt with the pilot's seeds matches all
+  20 committed pilot systems on D and on every structural field
+  (`runs/instrument-check.txt`).
+- **Preregistered verdicts.** *Candidate*: every series except A0, N and A4
+  at `m = 3`, which read *no middle ground* (σ = 0.5). The four points below
+  bear on what those labels mean. They change none of them.
+  1. At `m = 2` the incumbent and the null both read *candidate*
+     (σ = 0.19), so the threshold, which was derived at `m = 4`, does not
+     discriminate there.
+  2. N equals A0 in every cell despite different curves, sets and targets.
+     At these sizes D reflects a presentation's shape, not the curve.
+  3. A1z and A1g sit at D = 8, their input degree, while their matrices and
+     times grow fastest. σ = 0 is saturation, not cheapness.
+  4. A11 at `m = 3` is the one arm below the incumbent on both D (4 vs 6) and
+     matrix width (≈ 4× narrower, ≈ 9× faster at `t = 4`). Its growth per bit
+     is the same as A0's, though, so it is a constant-factor shift, not a
+     flatter slope. It rests on 3 cells, one prime, and no null of its own
+     shape.
+- **Predictions (§3).** A1z = A0 ± 1 failed (+2 to +4). A1g = A1z held
+  (dropping smoothness costs nothing in D). Neither A4 prediction held
+  (observed: A0 at equal `t`, plus 1).
+- **Owed before any further statement** (each by dated amendment): §5
+  replication of A11 at `m = 3` on p₂; an A11-shape null; the `t = 5` cell
+  completed; an `m = 4` series.
+
+## 6. What this round does not establish
 
 - No design here is shown to reduce any cost. The Lean theorems show that
   presentations are correct, that some designs are empty or neutral in the
