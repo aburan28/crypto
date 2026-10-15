@@ -73,6 +73,20 @@ pub enum CurveSpec {
         gx: u64,
         gy: u64,
     },
+    /// An externally supplied public point, with no logarithm in the fixture.
+    /// Restricted to cofactor-one prime-order regression cohorts. Primality
+    /// and point-count certificates accompany the input catalog.
+    PrimePublicFixture {
+        p: u64,
+        a: u64,
+        b: u64,
+        group_order: u64,
+        r: u64,
+        gx: u64,
+        gy: u64,
+        qx: u64,
+        qy: u64,
+    },
     /// A binary curve given outright in polynomial basis. `modulus` is
     /// the complete integer bitmask, including its degree-`n` leading bit.
     /// The constructor checks irreducibility, subgroup divisibility,
@@ -90,9 +104,54 @@ pub enum CurveSpec {
 }
 
 impl CurveSpec {
+    /// Preserve an external public point when making a measured-child input.
+    pub fn for_child(&self, inst: &Instance) -> CurveSpec {
+        if matches!(self, Self::PrimePublicFixture { .. }) {
+            self.clone()
+        } else {
+            Self::explicit(inst).unwrap_or_else(|| self.clone())
+        }
+    }
     /// Build the instance, or say why it cannot be built.
     pub fn build(&self) -> Result<Instance, String> {
         match *self {
+            CurveSpec::PrimePublicFixture {
+                p,
+                a,
+                b,
+                group_order,
+                r,
+                gx,
+                gy,
+                qx,
+                qy,
+            } => {
+                if r != group_order {
+                    return Err("public fixture requires cofactor one".into());
+                }
+                let inst = CurveSpec::PrimeExplicit {
+                    p,
+                    a,
+                    b,
+                    group_order,
+                    r,
+                    gx,
+                    gy,
+                }
+                .build()?;
+                let Instance::Prime(ref i) = inst else {
+                    unreachable!()
+                };
+                let q = PrimePoint::affine(qx, qy);
+                if qx >= p
+                    || qy >= p
+                    || !i.curve.is_on_curve(q)
+                    || !i.curve.mul(&mut GroupOps::default(), q, r).infinity
+                {
+                    return Err("fixture target is not in the prime subgroup".into());
+                }
+                Ok(inst)
+            }
             CurveSpec::PrimeSearch { bits, seed } => {
                 if !(8..=32).contains(&bits) {
                     return Err(format!("prime_search takes 8 ≤ bits ≤ 32, not {bits}"));
@@ -251,7 +310,8 @@ impl CurveSpec {
                 GapLevel::Crater => format!("conductor_gap::crater(params({ell}, {t}))"),
                 GapLevel::Floor => format!("conductor_gap::floor(params({ell}, {t}), {seed})"),
             },
-            CurveSpec::PrimeExplicit { p, a, b, .. } => {
+            CurveSpec::PrimeExplicit { p, a, b, .. }
+            | CurveSpec::PrimePublicFixture { p, a, b, .. } => {
                 format!("PrimeCurve {{ p: {p}, a: {a}, b: {b} }} (explicit)")
             }
             CurveSpec::BinaryExplicit {
@@ -702,48 +762,61 @@ impl Workload {
                 curve.r
             ));
         }
-        let (law, target, planted, counter) = match kind {
-            TargetKind::Planted => {
-                let k = planted_scalar(&curve, target_seed, index);
-                let q = inst
-                    .mul_generator_hex(k)
-                    .ok_or("the planted scalar gave the identity; the subgroup order is wrong")?;
-                let law = if u64::try_from(curve.r).is_ok() {
-                    TARGET_LAW
-                } else {
-                    TARGET_LAW_WIDE
-                };
-                (law, q, Some(k), None)
-            }
-            TargetKind::PlantedShared => {
-                let r = u64::try_from(curve.r)
-                    .map_err(|_| "planted_shared targets need a one-word subgroup order")?;
-                let k = shared_planted_scalar(r, target_seed, index);
-                let q = inst
-                    .mul_generator_hex(k)
-                    .ok_or("the planted scalar gave the identity; the subgroup order is wrong")?;
-                (SHARED_TARGET_LAW, q, Some(k), None)
-            }
-            TargetKind::Public => {
-                // With r | h the r-torsion can be Z/r × Z/r, and a cleared
-                // point need not lie in <G>.
-                if curve.cofactor.is_multiple_of(curve.r) {
-                    return Err(format!(
+        let (law, target, planted, counter) =
+            if let CurveSpec::PrimePublicFixture { qx, qy, .. } = *spec {
+                if kind != TargetKind::Public || index != 0 {
+                    return Err("external fixture is exactly one public target per curve".into());
+                }
+                (
+                    "ecbench.public-fixture/v1",
+                    [format!("0x{qx:x}"), format!("0x{qy:x}")],
+                    None,
+                    None,
+                )
+            } else {
+                match kind {
+                    TargetKind::Planted => {
+                        let k = planted_scalar(&curve, target_seed, index);
+                        let q = inst.mul_generator_hex(k).ok_or(
+                            "the planted scalar gave the identity; the subgroup order is wrong",
+                        )?;
+                        let law = if u64::try_from(curve.r).is_ok() {
+                            TARGET_LAW
+                        } else {
+                            TARGET_LAW_WIDE
+                        };
+                        (law, q, Some(k), None)
+                    }
+                    TargetKind::PlantedShared => {
+                        let r = u64::try_from(curve.r)
+                            .map_err(|_| "planted_shared targets need a one-word subgroup order")?;
+                        let k = shared_planted_scalar(r, target_seed, index);
+                        let q = inst.mul_generator_hex(k).ok_or(
+                            "the planted scalar gave the identity; the subgroup order is wrong",
+                        )?;
+                        (SHARED_TARGET_LAW, q, Some(k), None)
+                    }
+                    TargetKind::Public => {
+                        // With r | h the r-torsion can be Z/r × Z/r, and a cleared
+                        // point need not lie in <G>.
+                        if curve.cofactor.is_multiple_of(curve.r) {
+                            return Err(format!(
                         "r = {} divides the cofactor {}: a hashed target need not lie in <G>",
                         curve.r, curve.cofactor
                     ));
+                        }
+                        let (q, c) = inst
+                            .hash_to_subgroup(&curve, target_seed, index)
+                            .ok_or("no public target found in 10 000 hash attempts")?;
+                        let law = if u64::try_from(curve.r).is_ok() {
+                            PUBLIC_TARGET_LAW
+                        } else {
+                            PUBLIC_TARGET_LAW_WIDE
+                        };
+                        (law, q, None, Some(c))
+                    }
                 }
-                let (q, c) = inst
-                    .hash_to_subgroup(&curve, target_seed, index)
-                    .ok_or("no public target found in 10 000 hash attempts")?;
-                let law = if u64::try_from(curve.r).is_ok() {
-                    PUBLIC_TARGET_LAW
-                } else {
-                    PUBLIC_TARGET_LAW_WIDE
-                };
-                (law, q, None, Some(c))
-            }
-        };
+            };
         let (workload_id, workload_sha256) = bare_id(
             "W",
             &Self::identity_view(&curve, law, target_seed, index, &target),
@@ -764,7 +837,10 @@ impl Workload {
 
     /// The target's kind, from its law.
     pub fn kind(&self) -> TargetKind {
-        if self.target_law == PUBLIC_TARGET_LAW || self.target_law == PUBLIC_TARGET_LAW_WIDE {
+        if self.target_law == PUBLIC_TARGET_LAW
+            || self.target_law == PUBLIC_TARGET_LAW_WIDE
+            || self.target_law == "ecbench.public-fixture/v1"
+        {
             TargetKind::Public
         } else if self.target_law == SHARED_TARGET_LAW {
             TargetKind::PlantedShared
@@ -817,6 +893,33 @@ impl Workload {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn public_fixture() -> CurveSpec {
+        CurveSpec::PrimePublicFixture { p:343073,a:36086,b:72172,
+            group_order:342833,r:342833,gx:0,gy:2882,qx:314327,qy:50562 }
+    }
+
+    #[test]
+    fn public_fixture_survives_measured_child_normalization() {
+        let spec=public_fixture();
+        let (parent,inst)=Workload::build(&spec,7,0,TargetKind::Public).unwrap();
+        let child=spec.for_child(&inst);
+        let rebuilt=Workload::build(&child,7,0,TargetKind::Public).unwrap().0;
+        assert_eq!(parent.workload_id,rebuilt.workload_id);
+        assert_eq!(parent.target,rebuilt.target);
+        assert_eq!(rebuilt.kind(),TargetKind::Public);
+        assert!(rebuilt.planted.is_none());
+    }
+
+    #[test]
+    fn fixture_rejects_invalid_points_and_reuse_as_planted_or_multiple_targets() {
+        let spec=public_fixture();
+        assert!(Workload::build(&spec,7,0,TargetKind::Planted).is_err());
+        assert!(Workload::build(&spec,7,1,TargetKind::Public).is_err());
+        let mut value=serde_json::to_value(spec).unwrap();
+        value["qx"]=json!(343073);
+        assert!(serde_json::from_value::<CurveSpec>(value).unwrap().build().is_err());
+    }
 
     #[test]
     fn registered_prime_curve_resolves_its_slug_and_ec1() {

@@ -63,6 +63,7 @@
 //! report what comes out.
 
 pub mod fiber;
+pub mod cm_orbit;
 pub mod large_prime;
 pub mod linalg;
 pub mod plugins;

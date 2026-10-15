@@ -1,0 +1,5 @@
+*.pdf binary
+*.svg -whitespace
+# Preserve original receipt bytes, including CRLF in historical CSV inputs.
+inputs/*.csv -whitespace
+*.stderr -whitespace

@@ -42,6 +42,7 @@ pub mod claim;
 pub mod claw;
 pub mod compare;
 pub mod conductor_gap;
+pub mod cm_folded;
 pub mod db;
 pub mod frontier;
 pub mod full_price;

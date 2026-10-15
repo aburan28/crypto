@@ -1,0 +1,198 @@
+{
+  "id": "IDC1hd387bbbb1058c248",
+  "independence": "native issuer; domain-separated checker uses an additional seed and 64 unseen points",
+  "modulus": 2305843009213693951,
+  "points": 64,
+  "proof": null,
+  "schema": "identity.certificate/v1",
+  "seed": 20261015,
+  "statement": {
+    "degree_bound": 3,
+    "lhs": {
+      "args": [
+        {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": "u",
+                      "op": "var"
+                    },
+                    {
+                      "args": "v",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "add"
+                },
+                {
+                  "args": [
+                    {
+                      "args": "u",
+                      "op": "var"
+                    },
+                    {
+                      "args": "v",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "add"
+                }
+              ],
+              "op": "mul"
+            },
+            {
+              "args": [
+                {
+                  "args": "u",
+                  "op": "var"
+                },
+                {
+                  "args": "v",
+                  "op": "var"
+                }
+              ],
+              "op": "add"
+            }
+          ],
+          "op": "mul"
+        },
+        {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": "u",
+                      "op": "var"
+                    },
+                    {
+                      "args": {
+                        "args": "v",
+                        "op": "var"
+                      },
+                      "op": "neg"
+                    }
+                  ],
+                  "op": "add"
+                },
+                {
+                  "args": [
+                    {
+                      "args": "u",
+                      "op": "var"
+                    },
+                    {
+                      "args": {
+                        "args": "v",
+                        "op": "var"
+                      },
+                      "op": "neg"
+                    }
+                  ],
+                  "op": "add"
+                }
+              ],
+              "op": "mul"
+            },
+            {
+              "args": [
+                {
+                  "args": "u",
+                  "op": "var"
+                },
+                {
+                  "args": {
+                    "args": "v",
+                    "op": "var"
+                  },
+                  "op": "neg"
+                }
+              ],
+              "op": "add"
+            }
+          ],
+          "op": "mul"
+        }
+      ],
+      "op": "add"
+    },
+    "name": "paired-third-moment",
+    "rhs": {
+      "args": [
+        {
+          "args": [
+            {
+              "args": 2,
+              "op": "const"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": "u",
+                      "op": "var"
+                    },
+                    {
+                      "args": "u",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                },
+                {
+                  "args": "u",
+                  "op": "var"
+                }
+              ],
+              "op": "mul"
+            }
+          ],
+          "op": "mul"
+        },
+        {
+          "args": [
+            {
+              "args": 6,
+              "op": "const"
+            },
+            {
+              "args": [
+                {
+                  "args": "u",
+                  "op": "var"
+                },
+                {
+                  "args": [
+                    {
+                      "args": "v",
+                      "op": "var"
+                    },
+                    {
+                      "args": "v",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "mul"
+                }
+              ],
+              "op": "mul"
+            }
+          ],
+          "op": "mul"
+        }
+      ],
+      "op": "add"
+    },
+    "source": "research/conductor_gap_cm_orbits_20261015/native/sqrt_velu.cpp; lean/README.md specifies formalization limits",
+    "variables": [
+      "u",
+      "v"
+    ]
+  },
+  "value_digest": "e1ebe69a937fdad1dd079aba4ca695e91bf3ffe5dc15c17389f09569b1d93570"
+}

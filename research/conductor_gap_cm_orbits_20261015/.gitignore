@@ -1,0 +1,4 @@
+# Running shards are force-added only after they are sealed and audited.
+sessions/primary-*/
+campaign-logs/primary-*.log
+results/cargo-test-release-lib.log

@@ -189,3 +189,7 @@ harness = false
 name = "pqc_split"
 path = "benches/pqc_split.rs"
 harness = false
+
+[[example]]
+name = "conductor_gap_study"
+path = "research/conductor_gap_cm_orbits_20261015/native/study.rs"
