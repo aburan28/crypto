@@ -128,6 +128,7 @@ pub mod curve_construction;
 pub mod curve_id;
 pub mod curve_traits;
 pub mod cyclotomic_factor_base;
+pub mod d4_weighted_s5;
 pub mod degree_reduction;
 pub mod degree_reduction_anf;
 pub mod delta_method;
