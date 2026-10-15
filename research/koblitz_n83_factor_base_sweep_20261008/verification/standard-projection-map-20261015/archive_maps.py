@@ -94,7 +94,7 @@ def main() -> None:
                 or launch["source_commit"] != commit or launch["exit_code"] != 0):
             raise ValueError(f"dimension {dimension} local map admission failed")
         directory = scratch / f"archive-d{dimension}"
-        (directory / "objects").mkdir(parents=True)
+        (directory / "objects").mkdir(parents=True, exist_ok=True)
         compressed = gzip.compress(plain, mtime=0)
         object_hash = blake3.blake3(compressed).hexdigest()
         object_name = f"objects/{object_hash}.jsonl.gz"
@@ -154,7 +154,7 @@ def main() -> None:
         check_head(object_head, compressed, commit, "n83.standard-subspace-projection-map-v1", "application/gzip")
         check_head(manifest_head, manifest_bytes, commit, "n83.standard-subspace-projection-map-manifest-v1", "application/json")
         fetched = scratch / f"s3-d{dimension}"
-        (fetched / "objects").mkdir(parents=True)
+        (fetched / "objects").mkdir(parents=True, exist_ok=True)
         object_get = cli("get-object", "--bucket", BUCKET, "--key", object_key,
                          "--checksum-mode", "ENABLED", str(fetched / object_name))
         manifest_get = cli("get-object", "--bucket", BUCKET, "--key", manifest_key,
