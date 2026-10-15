@@ -320,3 +320,23 @@ JOB 740s --bits 21 --curve 5 --kappa 1.19 --cx 8 --las lpsgewd@8,lpsgewd@16,lpsg
 {"bits":21,"curve":6,"kappa":1.19,"arm":"main:lpsgebw2@8","correct":true,"cost":65183433392,"la_cost":12765153065,"cols":20959,"nnz":321897,"checks":1,"la_wall":81.1,"wall":737.2}
 {"bits":21,"curve":6,"kappa":1.19,"arm":"main:lpsgebw3@8","correct":true,"cost":65819300497,"la_cost":13401020170,"cols":20959,"nnz":321897,"checks":1,"la_wall":79.2,"wall":737.2}
 JOB 738s --bits 21 --curve 6 --kappa 1.19 --cx 8 --las lpsgewd@8,lpsgewd@16,lpsgebw2@8,lpsgebw3@8 --no-gp-check --out results/train/tr_b21_c6_k1.19.jsonl
+{"bits":21,"curve":7,"kappa":1.19,"arm":"main:lpsgewd@8","correct":true,"cost":67004984159,"la_cost":14457624180,"cols":21004,"nnz":323002,"checks":1,"la_wall":96.5,"wall":748.6}
+{"bits":21,"curve":7,"kappa":1.19,"arm":"main:lpsgewd@16","correct":true,"cost":67096513336,"la_cost":14549153357,"cols":19848,"nnz":346489,"checks":1,"la_wall":96.7,"wall":748.6}
+{"bits":21,"curve":7,"kappa":1.19,"arm":"main:lpsgebw2@8","correct":true,"cost":65380189174,"la_cost":12832829195,"cols":21004,"nnz":323002,"checks":1,"la_wall":81.2,"wall":748.6}
+{"bits":21,"curve":7,"kappa":1.19,"arm":"main:lpsgebw3@8","correct":true,"cost":66017558624,"la_cost":13470198645,"cols":21004,"nnz":323002,"checks":1,"la_wall":79.5,"wall":748.6}
+JOB 750s --bits 21 --curve 7 --kappa 1.19 --cx 8 --las lpsgewd@8,lpsgewd@16,lpsgebw2@8,lpsgebw3@8 --no-gp-check --out results/train/tr_b21_c7_k1.19.jsonl
+{"bits":21,"curve":5,"kappa":1.41,"arm":"main:lpsgewd@8","correct":true,"cost":63702428291,"la_cost":18718492342,"cols":23946,"nnz":366745,"checks":1,"la_wall":125.7,"wall":800.2}
+{"bits":21,"curve":5,"kappa":1.41,"arm":"main:lpsgewd@16","correct":true,"cost":63847837994,"la_cost":18863902045,"cols":22495,"nnz":396617,"checks":1,"la_wall":126.7,"wall":800.2}
+{"bits":21,"curve":5,"kappa":1.41,"arm":"main:lpsgebw2@8","correct":true,"cost":61608112072,"la_cost":16624176123,"cols":23946,"nnz":366745,"checks":1,"la_wall":107.0,"wall":800.2}
+{"bits":21,"curve":5,"kappa":1.41,"arm":"main:lpsgebw3@8","correct":true,"cost":62441537781,"la_cost":17457601832,"cols":23946,"nnz":366745,"checks":1,"la_wall":103.4,"wall":800.2}
+JOB 802s --bits 21 --curve 5 --kappa 1.41 --cx 8 --las lpsgewd@8,lpsgewd@16,lpsgebw2@8,lpsgebw3@8 --no-gp-check --out results/train/tr_b21_c5_k1.41.jsonl
+{"bits":21,"curve":6,"kappa":1.41,"arm":"main:lpsgewd@8","correct":true,"cost":63906302382,"la_cost":18774823152,"cols":23991,"nnz":367141,"checks":1,"la_wall":132.1,"wall":817.7}
+{"bits":21,"curve":6,"kappa":1.41,"arm":"main:lpsgewd@16","correct":true,"cost":64049625426,"la_cost":18918146196,"cols":22583,"nnz":396097,"checks":1,"la_wall":133.3,"wall":817.7}
+{"bits":21,"curve":6,"kappa":1.41,"arm":"main:lpsgebw2@8","correct":true,"cost":61807874213,"la_cost":16676394983,"cols":23991,"nnz":367141,"checks":1,"la_wall":109.1,"wall":817.7}
+{"bits":21,"curve":6,"kappa":1.41,"arm":"main:lpsgebw3@8","correct":true,"cost":62645345503,"la_cost":17513866273,"cols":23991,"nnz":367141,"checks":1,"la_wall":106.0,"wall":817.7}
+JOB 818s --bits 21 --curve 6 --kappa 1.41 --cx 8 --las lpsgewd@8,lpsgewd@16,lpsgebw2@8,lpsgebw3@8 --no-gp-check --out results/train/tr_b21_c6_k1.41.jsonl
+{"bits":21,"curve":7,"kappa":1.41,"arm":"main:lpsgewd@8","correct":true,"cost":64193587235,"la_cost":18951483437,"cols":24115,"nnz":368668,"checks":1,"la_wall":135.4,"wall":834.1}
+{"bits":21,"curve":7,"kappa":1.41,"arm":"main:lpsgewd@16","correct":true,"cost":64332047005,"la_cost":19089943207,"cols":22678,"nnz":398035,"checks":1,"la_wall":130.3,"wall":834.1}
+{"bits":21,"curve":7,"kappa":1.41,"arm":"main:lpsgebw2@8","correct":true,"cost":62077862167,"la_cost":16835758369,"cols":24115,"nnz":368668,"checks":1,"la_wall":111.0,"wall":834.1}
+{"bits":21,"curve":7,"kappa":1.41,"arm":"main:lpsgebw3@8","correct":true,"cost":62925924799,"la_cost":17683821001,"cols":24115,"nnz":368668,"checks":1,"la_wall":108.7,"wall":834.1}
+JOB 836s --bits 21 --curve 7 --kappa 1.41 --cx 8 --las lpsgewd@8,lpsgewd@16,lpsgebw2@8,lpsgebw3@8 --no-gp-check --out results/train/tr_b21_c7_k1.41.jsonl

@@ -137,3 +137,12 @@ For the machine budget the `main` and `aa` test collections, which do not depend
 training runs. Because m\* is not yet known, every `main` test collection carries **both** `lpsgebw2@8` and
 `lpsgebw3@8`; the frozen rule 1 then names which of them is the block-Wiedemann candidate, and the other is reported
 only. `aa` runs on curves 0-2 only. This changes no arm's cost (arms sharing a collection are booked separately).
+
+## Amendment B2 (2026-10-15 05:25, before the training rules were applied to b = 21 and before any test result was read)
+
+**b = 22 cannot be run by this instrument.** Instance building parses the order of E over F_{q^3} (about q^3 = 2^66)
+into a `u64` and panics (`ParseIntError PosOverflow`, [results/b22_overflow/panic.txt](results/b22_overflow/panic.txt));
+the Montgomery arithmetic mod ell also requires ell < 2^62. Widening it changes code shared with every arm, so the
+top size is **b = 21** (an instrument limit, not a time limit). The freed budget goes to `aa` at b = 21 and to test curves
+3 and 4 at b = 18..21 (`main` and `sched`). The schedule still covers b = 12..21; it is then an interpolation inside the
+training range 16..21 above b = 16 and an extrapolation below it.

@@ -164,3 +164,47 @@ JOB 171s --bits 20 --curve 2 --kappa 2 --cx 8 --streams aa --las lpsgewd --out r
 {"bits":21,"curve":0,"kappa":2,"arm":"main:lpsgebw2@8","correct":true,"cost":61751272939,"la_cost":28586466457,"cols":31476,"nnz":479268,"checks":1,"la_wall":182.4,"wall":824.9}
 {"bits":21,"curve":0,"kappa":2,"arm":"main:lpsgebw3@8","correct":true,"cost":63204536740,"la_cost":30039730258,"cols":31476,"nnz":479268,"checks":1,"la_wall":175.3,"wall":824.9}
 JOB 829s --bits 21 --curve 0 --kappa 2 --cx 8 --streams main --las lpsgewd,lpsgebw2@8,lpsgebw3@8 --out results/run/b21_c0_main.jsonl
+{"bits":21,"curve":1,"kappa":2,"arm":"main:lpsgewd","correct":true,"cost":65386054149,"la_cost":32145302736,"cols":31433,"nnz":479741,"checks":1,"la_wall":217.1,"wall":834.9}
+{"bits":21,"curve":1,"kappa":2,"arm":"main:lpsgebw2@8","correct":true,"cost":61802712974,"la_cost":28561961561,"cols":31433,"nnz":479741,"checks":1,"la_wall":184.0,"wall":834.9}
+{"bits":21,"curve":1,"kappa":2,"arm":"main:lpsgebw3@8","correct":true,"cost":63246058497,"la_cost":30005307084,"cols":31433,"nnz":479741,"checks":1,"la_wall":185.2,"wall":834.9}
+JOB 836s --bits 21 --curve 1 --kappa 2 --cx 8 --streams main --las lpsgewd,lpsgebw2@8,lpsgebw3@8 --out results/run/b21_c1_main.jsonl
+{"bits":21,"curve":2,"kappa":2,"arm":"main:lpsgewd","correct":true,"cost":65415332985,"la_cost":32194098711,"cols":31488,"nnz":479568,"checks":1,"la_wall":225.7,"wall":858.3}
+{"bits":21,"curve":2,"kappa":2,"arm":"main:lpsgebw2@8","correct":true,"cost":61835038118,"la_cost":28613803844,"cols":31488,"nnz":479568,"checks":1,"la_wall":190.7,"wall":858.3}
+{"bits":21,"curve":2,"kappa":2,"arm":"main:lpsgebw3@8","correct":true,"cost":63288792989,"la_cost":30067558715,"cols":31488,"nnz":479568,"checks":1,"la_wall":181.4,"wall":858.3}
+JOB 860s --bits 21 --curve 2 --kappa 2 --cx 8 --streams main --las lpsgewd,lpsgebw2@8,lpsgebw3@8 --out results/run/b21_c2_main.jsonl
+
+thread 'main' (10972) panicked at examples/ic_improve2_06_genus3_kappa_bw.rs:885:27:
+called `Result::unwrap()` on an `Err` value: ParseIntError { kind: PosOverflow }
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+   1: core::panicking::panic_fmt
+   2: core::result::unwrap_failed
+   3: ic_improve2_06_genus3_kappa_bw::build_instance
+   4: ic_improve2_06_genus3_kappa_bw::main
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+FAILED rc=101 --bits 22 --curve 0 --kappa 2 --cx 8 --streams main --las lpsgewd,lpsgebw2@8,lpsgebw3@8 --out results/run/b22_c0_main.jsonl
+JOB 0s --bits 22 --curve 0 --kappa 2 --cx 8 --streams main --las lpsgewd,lpsgebw2@8,lpsgebw3@8 --out results/run/b22_c0_main.jsonl
+
+thread 'main' (10980) panicked at examples/ic_improve2_06_genus3_kappa_bw.rs:885:27:
+called `Result::unwrap()` on an `Err` value: ParseIntError { kind: PosOverflow }
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+   1: core::panicking::panic_fmt
+   2: core::result::unwrap_failed
+   3: ic_improve2_06_genus3_kappa_bw::build_instance
+   4: ic_improve2_06_genus3_kappa_bw::main
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+FAILED rc=101 --bits 22 --curve 1 --kappa 2 --cx 8 --streams main --las lpsgewd,lpsgebw2@8,lpsgebw3@8 --out results/run/b22_c1_main.jsonl
+JOB 1s --bits 22 --curve 1 --kappa 2 --cx 8 --streams main --las lpsgewd,lpsgebw2@8,lpsgebw3@8 --out results/run/b22_c1_main.jsonl
+
+thread 'main' (10988) panicked at examples/ic_improve2_06_genus3_kappa_bw.rs:885:27:
+called `Result::unwrap()` on an `Err` value: ParseIntError { kind: PosOverflow }
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+   1: core::panicking::panic_fmt
+   2: core::result::unwrap_failed
+   3: ic_improve2_06_genus3_kappa_bw::build_instance
+   4: ic_improve2_06_genus3_kappa_bw::main
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+FAILED rc=101 --bits 22 --curve 2 --kappa 2 --cx 8 --streams main --las lpsgewd,lpsgebw2@8,lpsgebw3@8 --out results/run/b22_c2_main.jsonl
+JOB 0s --bits 22 --curve 2 --kappa 2 --cx 8 --streams main --las lpsgewd,lpsgebw2@8,lpsgebw3@8 --out results/run/b22_c2_main.jsonl
