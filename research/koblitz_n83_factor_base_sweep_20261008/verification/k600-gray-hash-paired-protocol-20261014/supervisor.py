@@ -57,7 +57,7 @@ def authorization_error(record: object, output: Path, plan_sha256: str) -> str |
 
 def source_hashes(checkout: Path) -> dict[str, str]:
     paths = (
-        "examples/koblitz_n83_mixed_orbit_worker.rs", "Cargo.lock",
+        "examples/koblitz_n83_mixed_orbit_worker.rs", "Cargo.toml", "Cargo.lock",
         str(preflight.PILOT.relative_to(ROOT) / "manifest.json"),
         str(preflight.PILOT.relative_to(ROOT) / "probe-corpus.json"),
         str(preflight.LIVE.relative_to(ROOT) / "audit.json"),
@@ -73,7 +73,9 @@ def source_hashes(checkout: Path) -> dict[str, str]:
         str((preflight.STUDY / "structured_orbit_search_supervisor.py").relative_to(ROOT)),
         str((preflight.STUDY / "compact_probe_supervisor.py").relative_to(ROOT)),
     )
-    return {relative: PRIOR.sha256_file(checkout / relative) for relative in paths}
+    sources = {relative: PRIOR.sha256_file(checkout / relative) for relative in paths}
+    sources["src:git-tree"] = preflight.rust_source_tree_oid(checkout)
+    return sources
 
 
 def stage_command(name: str, arm: dict, checkout: Path, archives: Path,

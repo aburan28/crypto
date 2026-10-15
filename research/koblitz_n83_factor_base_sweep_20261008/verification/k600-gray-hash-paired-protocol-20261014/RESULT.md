@@ -33,7 +33,9 @@ already been fully charged. No N83 solver search, relation, rank or runtime
 measurement was produced by this source-only preflight.
 
 The [preflight](preflight.py) checks byte-pinned manifest, corpus, S3 audit,
-support screen, capacity source, worker source and Cargo lock, replays all
+support screen, capacity source, worker source, Cargo manifest and Cargo lock.
+It also pins the complete committed `src/` Git tree and rejects dirty `src/`
+content, because the worker's offline build compiles library code. It replays all
 three local archive bytes through the live audit, recomputes both capacity
 rows and rank-query floors, and compares the generated JSON to the saved plan.
 It emits exact worker `verify-cross-pilot` and `run-cross-pilot` argument
@@ -59,7 +61,8 @@ requires a clean committed checkout and must be invoked explicitly using
 OUTPUT --archive-dir SCRATCH_DIR`. No such grant or run is recorded here.
 The [local Docker readiness check](DOCKER_READINESS.md) currently fails due
 to a Docker VM disk I/O error; its disposition is infrastructure failure,
-not a zero-yield observation.
+not a zero-yield observation. Adding the full-source pin changes the saved
+plan's byte digest; a grant referencing its older digest is rejected.
 
 With the three S3 archives downloaded under their compressed-BLAKE3 filenames
 to `SCRATCH_DIR`, reproduce the source-only checks with:

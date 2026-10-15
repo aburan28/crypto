@@ -46,6 +46,10 @@ class PairedSupervisorControls(unittest.TestCase):
                 "user_approval_reference": "explicit later 4800-second grant",
             }
             self.assertIsNone(supervisor.authorization_error(record, output, plan_hash))
+            record["plan_sha256"] = "c0f7181b93f7b86bcbbde10d3e9fab10ea82632610d4044ad6a672314b0cc527"
+            self.assertEqual(supervisor.authorization_error(record, output, plan_hash),
+                             "paired budget plan_sha256 mismatch")
+            record["plan_sha256"] = plan_hash
             record["additional_authorized_seconds"] = "2400"
             self.assertEqual(supervisor.authorization_error(record, output, plan_hash),
                              "paired budget additional_authorized_seconds mismatch")

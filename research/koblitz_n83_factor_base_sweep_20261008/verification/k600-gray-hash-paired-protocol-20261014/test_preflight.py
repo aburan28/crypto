@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
+from unittest import mock
 
 import preflight
 
@@ -25,6 +26,9 @@ class PairedProtocolTest(unittest.TestCase):
         self.assertFalse(value["new_n83_solver_search_executed"])
         self.assertIsNone(value["selected_best_total_runtime"])
         self.assertEqual(value["additional_seconds_requested_not_authorized"], 4800)
+        self.assertEqual(value["rust_src_git_tree_oid"], preflight.RUST_SOURCE_TREE_OID)
+        self.assertEqual(value["source_sha256"]["cargo_manifest"],
+                         preflight.PINNED_SHA256["cargo_manifest"][1])
         gray, hashed = value["arms"]
         self.assertEqual((gray["residual_signed_orbits"], hashed["residual_signed_orbits"]),
                          (97, 600))
@@ -33,6 +37,11 @@ class PairedProtocolTest(unittest.TestCase):
             self.assertEqual(arm["worker_search_argv"][1], "run-cross-pilot")
             self.assertEqual(arm["worker_search_argv"][2], preflight.BASE)
             self.assertEqual(arm["worker_search_argv"][-5:-1], ["5000", "32", "3", "2"])
+
+    def test_changed_rust_source_tree_is_rejected(self):
+        with mock.patch.object(preflight, "RUST_SOURCE_TREE_OID", "0" * 40):
+            with self.assertRaisesRegex(ValueError, "pinned Rust source tree changed"):
+                preflight.rust_source_tree_oid()
 
 
 if __name__ == "__main__":

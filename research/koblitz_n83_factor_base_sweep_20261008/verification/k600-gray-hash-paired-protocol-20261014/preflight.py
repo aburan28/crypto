@@ -8,6 +8,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 
 
 HERE = Path(__file__).resolve().parent
@@ -25,8 +26,10 @@ PINNED_SHA256 = {
     "support_screen": (SCREEN, "2c2229b9bfc78935cbc6c3ca7c6612f8fade2a40a0e0592f93a99b855d41dd45"),
     "capacity_source": (CAPACITY, "116617e9de7552e48b548e632e80121508515e7079878305de0b975c8a924c5d"),
     "worker_source": (ROOT / "examples/koblitz_n83_mixed_orbit_worker.rs", "5f310f7495989a94004a6545bed5682d54d3bc4b4f41db543ed24408a1fa1b7b"),
+    "cargo_manifest": (ROOT / "Cargo.toml", "49b5f9478f133f905d5388d8c609d097830d69fe912c46dbc95b387b5d14a3de"),
     "cargo_lock": (ROOT / "Cargo.lock", "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90"),
 }
+RUST_SOURCE_TREE_OID = "f5dac3ceb6d264227ef74b197e49f3cf01d1164e"
 BASE = "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0"
 POOLS = {
     "gray_pool": "966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47",
@@ -65,9 +68,24 @@ def load_module(name: str, path: Path):
     return module
 
 
+def rust_source_tree_oid(checkout: Path = ROOT) -> str:
+    try:
+        oid = subprocess.run(["git", "rev-parse", "HEAD:src"], cwd=checkout,
+                             check=True, capture_output=True, text=True).stdout.strip()
+        dirty = subprocess.run(["git", "status", "--porcelain", "--untracked-files=all",
+                                "--", "src"], cwd=checkout,
+                               check=True, capture_output=True, text=True).stdout.strip()
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise ValueError("Rust source-tree preflight failed") from error
+    require(oid == RUST_SOURCE_TREE_OID, "pinned Rust source tree changed")
+    require(not dirty, "Rust source worktree differs from pinned tree")
+    return oid
+
+
 def make_plan(archive_dir: Path) -> dict:
     for label, (path, expected) in PINNED_SHA256.items():
         require(sha256(path) == expected, f"{label} source bytes changed")
+    src_tree_oid = rust_source_tree_oid()
     audit_receipt = checked_json(*PINNED_SHA256["live_audit"])
     live_audit = load_module("n83_live_pair_audit", LIVE / "audit.py")
     require(live_audit.audit(archive_dir) == audit_receipt,
@@ -140,6 +158,7 @@ def make_plan(archive_dir: Path) -> dict:
         "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
         "subgroup_order": str(SUBGROUP_ORDER),
         "source_sha256": {label: expected for label, (_, expected) in PINNED_SHA256.items()},
+        "rust_src_git_tree_oid": src_tree_oid,
         "live_audit_source_sha256": audit_receipt["source_sha256"],
         "container_image": "sha256:7c4ae649a84014c467d79319bbf17ce2632ae8b8be123ac2fb2ea5be46823f31",
         "public_target": targets[0]["point"],
