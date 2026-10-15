@@ -130,3 +130,15 @@ research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/reports
 research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/reports/**/*.png binary
 research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/reports/**/*.svg -diff -whitespace
 research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/validation_*.stdout whitespace=-blank-at-eof
+
+# Different-j distinct-target setup-reuse reports and exact validation logs.
+benchmarks/20261015-different-j-reuse/*.pdf binary
+benchmarks/20261015-different-j-reuse/*.png binary
+benchmarks/20261015-different-j-reuse/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/*.pdf binary
+research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/*.png binary
+research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/reports/**/*.pdf binary
+research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/reports/**/*.png binary
+research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/reports/**/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/VALIDATION_*.stdout whitespace=-blank-at-eof

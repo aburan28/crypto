@@ -16,6 +16,7 @@
   [public-only direct-root repeat](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1851Z/REPORT.md),
   [different-j relation and fiber controls](../research/isogeny_torsion_fibers_20261012/different_j_20261015/reports/run-20261015T1713Z/REPORT.md),
   [different-j full-image factor-base gate](../research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/RESULTS.md),
+  [different-j 60-target reuse and whole-process result](../research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/RESULTS.md),
   and [three-arm pairing batch cost report](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1740Z/REPORT.md)
 - **Next action owner:** unassigned
 - **Last updated:** 2026-10-15
@@ -178,10 +179,22 @@ cannot map to their fixed non-isomorphic destinations.
   52 sums and had four unique sums each. The three-round paired
   full-image/rho local CPU ratio median was 70.281, with a 98.532%
   median full-image setup share. The custom timer omits common parsing,
-  model construction and process startup; portable counted-`S` and
-  target-count setup reuse remain open. The checked Lean finite-support
+  model construction and process startup; portable counted-`S` remains
+  open. The follow-on distinct-target reuse gate is now executed below.
+  The checked Lean finite-support
   proof uses frozen scalar-coordinate lists; a faithful curve-level
   point-to-scalar and Vélu bridge remains open.
+- **Observed over every distinct target in the frozen subgroup:** the
+  [V3/V4 reuse study](../research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/RESULTS.md)
+  solved all 60 nonidentity order-61 public targets in seven arms and
+  three rounds per version. Each independent native replay checked
+  1,260/1,260 scalars and 10,960 relation witnesses. At `N=60`, the
+  V3 full-image cold native timer median was 11,049.667 µs against
+  643.208 µs for reusable source BSGS; V4 whole-child CPU medians were
+  15,351 and 6,148 µs. The paired V4 full-image/BSGS ratio median was
+  2.483. V3 prefix timing omits startup and final stdout; V4 includes
+  those costs for the full batch only. Shared-host L0 timing and this
+  one group do not establish a portable or growing-size crossover.
 - **Observed in the pairing batch:** the
   [V6 three-arm run](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1740Z/REPORT.md)
   replayed 594/594 scalar outputs on 66 distinct order-67 `F_401`
@@ -260,12 +273,15 @@ cannot map to their fixed non-isomorphic destinations.
   different-j pair. The [V2 report](../research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/RESULTS.md)
   records exact support membership, 18/18 independently replayed scalar
   rows and a charged local timer interval over three paired rounds.
-- [ ] Price that full-image construction over distinct reusable targets
-  against direct source BSGS and rho in one counted unit, with input/model
-  construction, setup, relation recovery, verification and memory charged.
-  The [60-target gate](../research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/NEXT_GATE.md)
-  specifies the next fixed panel; isolation and second-host replay remain
-  additional acceptance conditions.
+- [x] Price that full-image construction over all 60 distinct reusable
+  targets against direct source BSGS and rho in native CPU. V4 includes
+  input/model validation, process startup, relation recovery, final
+  verification and output; memory is recorded separately as peak RSS.
+  The [V3/V4 result](../research/isogeny_torsion_fibers_20261012/different_j_reuse_20261015/RESULTS.md)
+  preserves exact receipts and independent scalar replay. A portable
+  counted-unit price, larger-order pair, isolation and second-host
+  performance replay remain open; the native CPU result does not
+  discharge those separate acceptance conditions.
 - [x] Construct and cold-price an exact pairing transfer on the first two
   frozen quadratic-extension targets, with a certified evaluation field,
   selected torsion input, separated H search/Miller/final exponent/field-DLP
