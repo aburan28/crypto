@@ -1,0 +1,77 @@
+{
+  "build": [],
+  "command": {
+    "argv": [
+      "./ecbench",
+      "run",
+      "--spec",
+      "spec.json",
+      "--out",
+      "${ISOLAB_OUTPUT_DIR}/session",
+      "--cpus",
+      "inherit",
+      "--allow-busy"
+    ],
+    "env": {
+      "RAYON_NUM_THREADS": "1"
+    }
+  },
+  "fidelity": {
+    "policy": "strict",
+    "require": [
+      "cpu_partition",
+      "numa_bind",
+      "evicted",
+      "no_steal"
+    ]
+  },
+  "inputs": [
+    {
+      "content": "{\n  \"schema\": \"ecbench.spec/v1\",\n  \"label\": \"Part E: IC (Frobenius, wiedemann), m = 18, h = 2 (r = 2^71, u128)\",\n  \"description\": \"PROTOCOL.md Part E. f2m4_torsion(18, 1, 2), 1 target(s); the IC half of the m = 18 comparison.\",\n  \"workloads\": {\n    \"curves\": [\n      {\n        \"kind\": \"f2m4_torsion\",\n        \"m\": 18,\n        \"seed\": 1,\n        \"max_cofactor\": 2\n      }\n    ],\n    \"targets_per_curve\": 1,\n    \"target_seed\": 202610150301\n  },\n  \"arms\": [\n    {\n      \"name\": \"ic-wied\",\n      \"role\": \"reference\",\n      \"method\": {\n        \"id\": \"ic.pipeline\",\n        \"params\": {\n          \"factor_base\": \"bin-t-line\",\n          \"oracle\": \"gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1\",\n          \"max_trials\": \"50000000\",\n          \"linalg\": \"wiedemann\"\n        }\n      }\n    }\n  ],\n  \"measurement\": {\n    \"rounds\": 1,\n    \"warmup\": 0,\n    \"order\": \"alternate\",\n    \"seed\": 202610150328,\n    \"isolation_required\": \"L2\",\n    \"timeout_seconds\": 259200\n  }\n}",
+      "encoding": "utf8",
+      "path": "spec.json"
+    },
+    {
+      "local_file": "target2/release/ecbench",
+      "mode": "755",
+      "path": "ecbench"
+    }
+  ],
+  "labels": {
+    "ecbench_delivery": "binary",
+    "ecbench_label": "Part E: IC (Frobenius, wiedemann), m = 18, h = 2 (r = 2^71, u128)",
+    "ecbench_spec_id": "ECS1h18b6880115fe",
+    "ecbench_spec_sha256": "18b6880115fe7a983354b387742c706f6df9f6ca212b7f323c88ba74b45f939a"
+  },
+  "limits": {
+    "timeout_s": 259800
+  },
+  "measure": {
+    "repeats": 1,
+    "warmups": 0
+  },
+  "name": "ecbench Part E: IC (Frobenius, wiedemann), m = 18, h = 2 (r = 2^71, u128)",
+  "pool": "default",
+  "resources": {
+    "cpus": 2,
+    "numa_node": "single",
+    "smt": "isolate"
+  },
+  "runtime": {
+    "backend": "auto",
+    "network": "none"
+  },
+  "schema": "isolab.job/v1",
+  "verify": {
+    "argv": [
+      "./ecbench",
+      "verify",
+      "--dir",
+      "${ISOLAB_OUTPUT_DIR}/session",
+      "--replay",
+      "3",
+      "--exit-code"
+    ],
+    "timeout_s": 3600
+  }
+}

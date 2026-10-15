@@ -1,0 +1,77 @@
+{
+  "build": [],
+  "command": {
+    "argv": [
+      "./ecbench",
+      "run",
+      "--spec",
+      "spec.json",
+      "--out",
+      "${ISOLAB_OUTPUT_DIR}/session",
+      "--cpus",
+      "inherit",
+      "--allow-busy"
+    ],
+    "env": {
+      "RAYON_NUM_THREADS": "1"
+    }
+  },
+  "fidelity": {
+    "policy": "strict",
+    "require": [
+      "cpu_partition",
+      "numa_bind",
+      "evicted",
+      "no_steal"
+    ]
+  },
+  "inputs": [
+    {
+      "content": "{\n  \"schema\": \"ecbench.spec/v1\",\n  \"label\": \"Part E: rho with the negation map, m = 18, h = 2 (r = 2^71, u128)\",\n  \"description\": \"PROTOCOL.md Part E. f2m4_torsion(18, 1, 2), 1 target(s); the rho half of the m = 18 comparison (its IC half is SPEC-E-m18-ic on the same workloads; compared by operations across sessions).\",\n  \"workloads\": {\n    \"curves\": [\n      {\n        \"kind\": \"f2m4_torsion\",\n        \"m\": 18,\n        \"seed\": 1,\n        \"max_cofactor\": 2\n      }\n    ],\n    \"targets_per_curve\": 1,\n    \"target_seed\": 202610150301\n  },\n  \"arms\": [\n    {\n      \"name\": \"rho-neg\",\n      \"role\": \"reference\",\n      \"method\": {\n        \"id\": \"rho.negation\"\n      }\n    }\n  ],\n  \"measurement\": {\n    \"rounds\": 1,\n    \"warmup\": 0,\n    \"order\": \"alternate\",\n    \"seed\": 202610150318,\n    \"isolation_required\": \"L2\",\n    \"timeout_seconds\": 259200\n  }\n}",
+      "encoding": "utf8",
+      "path": "spec.json"
+    },
+    {
+      "local_file": "target2/release/ecbench",
+      "mode": "755",
+      "path": "ecbench"
+    }
+  ],
+  "labels": {
+    "ecbench_delivery": "binary",
+    "ecbench_label": "Part E: rho with the negation map, m = 18, h = 2 (r = 2^71, u128)",
+    "ecbench_spec_id": "ECS1h408967bcce79",
+    "ecbench_spec_sha256": "408967bcce7961d8b2751490c530c6d435352679bca5dcf082cf62f526cf33b5"
+  },
+  "limits": {
+    "timeout_s": 259800
+  },
+  "measure": {
+    "repeats": 1,
+    "warmups": 0
+  },
+  "name": "ecbench Part E: rho with the negation map, m = 18, h = 2 (r = 2^71, u128)",
+  "pool": "default",
+  "resources": {
+    "cpus": 2,
+    "numa_node": "single",
+    "smt": "isolate"
+  },
+  "runtime": {
+    "backend": "auto",
+    "network": "none"
+  },
+  "schema": "isolab.job/v1",
+  "verify": {
+    "argv": [
+      "./ecbench",
+      "verify",
+      "--dir",
+      "${ISOLAB_OUTPUT_DIR}/session",
+      "--replay",
+      "3",
+      "--exit-code"
+    ],
+    "timeout_s": 3600
+  }
+}
