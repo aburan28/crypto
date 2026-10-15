@@ -68,9 +68,7 @@ fn solve_arm(eqs: &[F2BoolPoly], nv: usize, spec: &str) -> Arm {
     match spec {
         "env" => set_linear_harvest(None),
         "off" => set_linear_harvest(Some(None)),
-        s => set_linear_harvest(Some(Some(
-            parse_linear_harvest(s).expect("harvest spec"),
-        ))),
+        s => set_linear_harvest(Some(Some(parse_linear_harvest(s).expect("harvest spec")))),
     }
     let opts = SolveOptions {
         engine: SolverEngine::default(),
@@ -128,9 +126,8 @@ fn arm_json(name: &str, a: &Arm) -> String {
         a.harvests,
         a.harvested_rows,
         a.roots.len(),
-        a.roots
-            .iter()
-            .fold(0xcbf29ce484222325u64, |h, &r| (h ^ r).wrapping_mul(0x100000001b3)),
+        a.roots.iter().fold(0xcbf29ce484222325u64, |h, &r| (h ^ r)
+            .wrapping_mul(0x100000001b3)),
     )
 }
 
@@ -195,7 +192,6 @@ impl PipeCell {
         }
     }
 }
-
 
 fn main() {
     let argv: Vec<String> = std::env::args().collect();

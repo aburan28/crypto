@@ -13,6 +13,13 @@
 //! The rule picks the largest pooled geometric mean, with ties going to the
 //! larger θ.
 //!
+//! `--same a=b` (repeatable): count rows whose arms `a` and `b` agree on
+//! every counter (splits, reductions, elim, word_ops, calls, spec_ops,
+//! roots, root_hash).  `--ref FILE --ref-arm r --arm a` (repeatable `--ref`,
+//! `--arm`): match rows to FILE's rows by (cell without the `pipe-` prefix,
+//! target) and count those where arm `a` agrees with FILE's arm `r` on every
+//! counter FILE records.
+//!
 //! ```bash
 //! cargo run --release --example ic_improve2_05_fit -- --file runs/train_m3.jsonl --train
 //! ```
@@ -36,7 +43,11 @@ fn gm_ci(logs: &[f64]) -> (f64, f64, f64) {
     let mut boots: Vec<f64> = (0..B)
         .map(|_| (0..n).map(|_| logs[rng.gen_range(0..n)]).sum::<f64>() / n as f64)
         .collect();
-    (m.exp(), pct(&mut boots, 0.025).exp(), pct(&mut boots, 0.975).exp())
+    (
+        m.exp(),
+        pct(&mut boots, 0.025).exp(),
+        pct(&mut boots, 0.975).exp(),
+    )
 }
 
 fn verdict(lo: f64, hi: f64) -> &'static str {
@@ -71,6 +82,9 @@ fn f(r: &Value, k: &str) -> f64 {
 fn main() {
     let argv: Vec<String> = std::env::args().collect();
     let (mut files, mut ratios, mut medians, mut train) = (vec![], vec![], vec![], false);
+    let (mut same, mut refs, mut cmp_arms): (Vec<String>, Vec<String>, Vec<String>) =
+        (vec![], vec![], vec![]);
+    let mut ref_arm = String::from("i");
     let mut i = 1;
     while i < argv.len() {
         match argv[i].as_str() {
@@ -87,6 +101,22 @@ fn main() {
                 medians.extend(argv[i].split(',').map(str::to_string));
             }
             "--train" => train = true,
+            "--same" => {
+                i += 1;
+                same.push(argv[i].clone());
+            }
+            "--ref" => {
+                i += 1;
+                refs.push(argv[i].clone());
+            }
+            "--ref-arm" => {
+                i += 1;
+                ref_arm = argv[i].clone();
+            }
+            "--arm" => {
+                i += 1;
+                cmp_arms.push(argv[i].clone());
+            }
             _ => {}
         }
         i += 1;
@@ -128,9 +158,79 @@ fn main() {
         for (cell, rs) in &cells {
             let parts: Vec<String> = medians
                 .iter()
-                .map(|k| format!(r#""{k}":{:.6}"#, median(rs.iter().map(|r| f(r, k)).collect())))
+                .map(|k| {
+                    format!(
+                        r#""{k}":{:.6}"#,
+                        median(rs.iter().map(|r| f(r, k)).collect())
+                    )
+                })
                 .collect();
-            println!(r#"{{"medians":"{cell}","targets":{},{}}}"#, rs.len(), parts.join(","));
+            println!(
+                r#"{{"medians":"{cell}","targets":{},{}}}"#,
+                rs.len(),
+                parts.join(",")
+            );
+        }
+    }
+    const COUNTERS: [&str; 8] = [
+        "splits",
+        "reductions",
+        "elim",
+        "word_ops",
+        "calls",
+        "spec_ops",
+        "roots",
+        "root_hash",
+    ];
+    for spec in &same {
+        let (a, b) = spec.split_once('=').expect("a=b");
+        let n = rows.len();
+        let agree = rows
+            .iter()
+            .filter(|r| {
+                COUNTERS
+                    .iter()
+                    .all(|c| r[format!("{a}_{c}")] == r[format!("{b}_{c}")])
+            })
+            .count();
+        println!(r#"{{"same":"{a}={b}","rows":{n},"identical":{agree}}}"#);
+    }
+    if !refs.is_empty() {
+        let mut reference: BTreeMap<(String, u64), Value> = BTreeMap::new();
+        for file in &refs {
+            for line in std::fs::read_to_string(file).expect("read ref").lines() {
+                if let Ok(v) = serde_json::from_str::<Value>(line) {
+                    if let (Some(c), Some(t)) = (v["cell"].as_str(), v["target"].as_u64()) {
+                        reference.insert((c.trim_start_matches("pipe-").to_string(), t), v.clone());
+                    }
+                }
+            }
+        }
+        for a in &cmp_arms {
+            let (mut matched, mut agree) = (0, 0);
+            for r in &rows {
+                let key = (
+                    r["cell"]
+                        .as_str()
+                        .unwrap()
+                        .trim_start_matches("pipe-")
+                        .to_string(),
+                    r["target"].as_u64().unwrap(),
+                );
+                let Some(o) = reference.get(&key) else {
+                    continue;
+                };
+                matched += 1;
+                if COUNTERS.iter().all(|c| {
+                    let rk = format!("{ref_arm}_{c}");
+                    o.get(&rk).is_none_or(|ov| *ov == r[format!("{a}_{c}")])
+                }) {
+                    agree += 1;
+                }
+            }
+            println!(
+                r#"{{"ref_arm":"{ref_arm}","arm":"{a}","matched":{matched},"identical":{agree}}}"#
+            );
         }
     }
     if train {
@@ -152,7 +252,11 @@ fn main() {
                 let logs: Vec<f64> = rs
                     .iter()
                     .map(|r| {
-                        let g = if f(r, "gpv") < theta { f(r, "r_cpu") } else { f(r, "i_cpu") };
+                        let g = if f(r, "gpv") < theta {
+                            f(r, "r_cpu")
+                        } else {
+                            f(r, "i_cpu")
+                        };
                         (f(r, "i_cpu") / g).ln()
                     })
                     .collect();
@@ -161,16 +265,24 @@ fn main() {
                     admissible = false;
                 }
                 pooled.extend(logs);
-                per.push(format!(r#"{{"cell":"{cell}","gm":{gm:.4},"lo":{lo:.4},"hi":{hi:.4}}}"#));
+                per.push(format!(
+                    r#"{{"cell":"{cell}","gm":{gm:.4},"lo":{lo:.4},"hi":{hi:.4}}}"#
+                ));
             }
             let score = (pooled.iter().sum::<f64>() / pooled.len() as f64).exp();
-            let th = if theta.is_finite() { format!("{theta:.4}") } else { "null".into() };
+            let th = if theta.is_finite() {
+                format!("{theta:.4}")
+            } else {
+                "null".into()
+            };
             scan.push(format!(
                 r#"{{"theta":{th},"admissible":{admissible},"pooled_gm":{score:.4},"cells":[{}]}}"#,
                 per.join(",")
             ));
             if admissible
-                && best.is_none_or(|(bt, bs)| score > bs + 1e-12 || ((score - bs).abs() <= 1e-12 && theta > bt))
+                && best.is_none_or(|(bt, bs)| {
+                    score > bs + 1e-12 || ((score - bs).abs() <= 1e-12 && theta > bt)
+                })
             {
                 best = Some((theta, score));
             }
