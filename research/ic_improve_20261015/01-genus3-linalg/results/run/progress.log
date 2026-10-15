@@ -12,3 +12,6 @@ FAILED rc=143 --bits 20 --curve 1 --cx 8 --las inc,wied,sgelz,sgewd,bfslz,bfswd,
 {"bits":20,"curve":0,"kappa":2,"arm":"main:inc","correct":true,"cost":37531058849,"la_cost":24278945596,"cols":20469,"nnz":521413,"checks":1,"la_wall":605.9,"wall":1617.4}
 {"bits":20,"curve":0,"kappa":2,"arm":"main:wied","correct":true,"cost":35242991399,"la_cost":21990878146,"cols":20469,"nnz":516455,"checks":1,"la_wall":354.8,"wall":1617.4}
 {"bits":20,"curve":0,"kappa":2,"arm":"main:sgewd","correct":true,"cost":33621028344,"la_cost":20368915091,"cols":18311,"nnz":537592,"checks":1,"la_wall":298.6,"wall":1617.4}
+{"bits":20,"curve":2,"kappa":2,"arm":"main:bfssgewd","correct":true,"cost":25877562106,"la_cost":12624253914,"cols":18412,"nnz":324236,"checks":1,"la_wall":195.6,"wall":783.4}
+{"bits":20,"curve":2,"kappa":2,"arm":"main:lpsgelz","correct":true,"cost":26086086559,"la_cost":12832778367,"cols":18493,"nnz":282231,"checks":1,"la_wall":201.6,"wall":783.4}
+{"bits":20,"curve":2,"kappa":2,"arm":"main:lpsgewd","correct":true,"cost":24372792599,"la_cost":11119484407,"cols":18493,"nnz":281991,"checks":1,"la_wall":174.1,"wall":783.4}
