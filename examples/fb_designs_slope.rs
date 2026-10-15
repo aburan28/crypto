@@ -2401,7 +2401,8 @@ fn analyze2(dir: &str) {
         let f3 = s("F3", a, 3);
         let c = f3.iter().find(|c| c.t == 5);
         let both = c.is_some_and(|c| c.complete() && c.status.len() == 2);
-        f3_both.insert(a, both);
+        // None until both systems of the cell are recorded.
+        f3_both.insert(a, c.is_some_and(|c| c.status.len() == 2).then_some(both));
         let old = s("p1", a, 3);
         let base: Vec<&Cell2> = old.iter().filter(|c| c.t != 5).collect();
         print!("  {a}: ");
@@ -2483,11 +2484,12 @@ fn analyze2(dir: &str) {
         "  F2: shape, not structure                    observed: {f2:<34} {}",
         held(f2_held)
     );
-    let a11_f3 = f3_both["A11"];
+    let shown = |b: Option<bool>| b.map_or("not recorded".to_string(), |x| x.to_string());
     println!(
-        "  F3: both A11 systems complete within 3600 s observed: A11 both complete = {a11_f3:<13} {}  (A0 both complete = {}; \"A0's may not\" is not scored)",
-        held(Some(a11_f3)),
-        f3_both["A0"]
+        "  F3: both A11 systems complete within 3600 s observed: A11 both complete = {:<13} {}  (A0 both complete = {}; \"A0's may not\" is not scored)",
+        shown(f3_both["A11"]),
+        held(f3_both["A11"]),
+        shown(f3_both["A0"])
     );
     let (n0, s0, _) = f4_sigma["A0"];
     let a0_held = if n0 < 3 { None } else { s0.map(|x| x.0 >= 0.5) };
