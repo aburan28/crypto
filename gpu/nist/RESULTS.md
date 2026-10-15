@@ -129,3 +129,52 @@ discovery), control build (validate), PTX build ap-39mdjitYFxkMRHk6pFdd2P,
 round-1 sweep ap-o766pq9fqlurbzSYcqZoe6, round-2 sweep
 ap-0KNqNM8D1J4YQn5z67Ucc0 (timed out at Modal's 4 h during the last
 maxreg=160 cells; all cells reported above completed normally).
+
+## Round 3: W=64 and a shared-memory jump table
+
+`k_rho` gained a W=64 instantiation and a compile-time switch
+(`TABLE_SHARED`, default 0) that stages the r=8 jump table (256 points)
+in shared memory per block instead of reading it from global memory at
+every random per-step partition lookup. Same walk, same DP test, one
+counted step per step (8192 iters per cell, PTX build):
+
+| table | threads | W | P-256 Gstep/s | P-384 Gstep/s |
+|---|---:|---:|---:|---:|
+| global | 128 | 16 | 1.328 | 0.412 |
+| global | 128 | 32 | 1.605 | 0.539 |
+| global | 128 | 64 | 1.846 | 0.608 |
+| global | 256 | 16 | 1.347 | 0.415 |
+| global | 256 | 32 | 1.637 | 0.548 |
+| global | 256 | 64 | **1.883** | 0.626 |
+| shared | 128 | 16 | 1.292 | 0.401 |
+| shared | 128 | 32 | 1.586 | 0.536 |
+| shared | 128 | 64 | 1.824 | 0.630 |
+| shared | 256 | 16 | 1.318 | 0.411 |
+| shared | 256 | 32 | 1.622 | 0.546 |
+| shared | 256 | 64 | 1.867 | **0.639** |
+
+The W=64 instantiation spills as predicted (255 registers, 4368/6800
+bytes stack P-256/P-384 vs 2064/3456 at W=32) and still wins on both
+curves: the bigger inversion batch buys more than the spill costs. The
+shared-memory table is neutral-to-negative for P-256 (1.883 global vs
+1.867 shared at the best cell) and a small gain for P-384 (0.639 shared
+vs 0.626 global), so it stays a build-time option rather than the
+default; at the current best cells the table read is not the bottleneck.
+DPs match the 2^-24 rate in every cell (best cells: 24,115/24,140
+P-256 expected 24,140; 23,922/23,952 P-384 expected 23,952).
+
+**Verdict (engineering, same walk function, S flat).** Cumulative from
+the first working measurement (control, threads=128, W=8) to the best
+cells: P-256 1.075 → 1.883 Gstep/s (**1.75×**, global table, 256thr,
+W=64) and P-384 0.210 → 0.639 Gstep/s (**3.04×**, shared table, 256thr,
+W=64). Step counts and the DP rate are unchanged.
+
+Next rungs: the W=128 cell (the spill now dominates: W=64 already sits
+at 255 registers on both curves, so this is a confirm-and-stop cell),
+in-walk reseeding off the critical path, and a second walk per step from
+the same table read.
+
+Runs (Modal): round-3 sweep ap-UfeieuzyETwurk5q75ZnHC→ap-0hCZf0Ohl8IUzKwl3Aw9EQ
+(4 h timeout after 11 of 12 cells; every cell above completed normally),
+completion cell ap-LDEXCaui0JNYoVB319Z7mn (the shared/256/W=64 cell).
+Raw console logs: gpu/nist/sweep3.log, gpu/nist/cell-shared-256-64.log.
