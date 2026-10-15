@@ -447,7 +447,11 @@ impl Curve5 {
                         continue;
                     }
                     let n = c.f.norm(&r);
-                    s += if pow_mod(n, (p - 1) / 2, p) == 1 { 1 } else { -1 };
+                    s += if pow_mod(n, (p - 1) / 2, p) == 1 {
+                        1
+                    } else {
+                        -1
+                    };
                 }
                 s
             })
@@ -842,8 +846,16 @@ pub fn mitm_decompositions(
     for k in 0..n {
         for l in (k + 1)..n {
             for (sk, sl) in [(1, 1), (1, -1), (-1, 1), (-1, -1)] {
-                let pk = if sk == 1 { base[k] } else { curve.neg(&base[k]) };
-                let pl = if sl == 1 { base[l] } else { curve.neg(&base[l]) };
+                let pk = if sk == 1 {
+                    base[k]
+                } else {
+                    curve.neg(&base[k])
+                };
+                let pl = if sl == 1 {
+                    base[l]
+                } else {
+                    curve.neg(&base[l])
+                };
                 let v = curve.sub(&curve.sub(r, &pk), &pl);
                 if v.inf {
                     continue;
@@ -853,7 +865,12 @@ pub fn mitm_decompositions(
                         if i == k || i == l || j == k || j == l {
                             continue;
                         }
-                        let mut s = [base[i].x.0[0], base[j].x.0[0], base[k].x.0[0], base[l].x.0[0]];
+                        let mut s = [
+                            base[i].x.0[0],
+                            base[j].x.0[0],
+                            base[k].x.0[0],
+                            base[l].x.0[0],
+                        ];
                         s.sort_unstable();
                         out.insert(s);
                     }
@@ -921,7 +938,13 @@ pub struct TrialReport {
 
 /// Roots in `F_p` of `X⁴ − e₁X³ + e₂X² − e₃X + e₄`, with multiplicity.
 fn quartic_roots(e: &[u64], p: u64) -> Vec<u64> {
-    let mut c = vec![e[3] % p, (p - e[2] % p) % p, e[1] % p, (p - e[0] % p) % p, 1]; // low→high
+    let mut c = vec![
+        e[3] % p,
+        (p - e[2] % p) % p,
+        e[1] % p,
+        (p - e[0] % p) % p,
+        1,
+    ]; // low→high
     let mut roots = Vec::new();
     for x in 0..p {
         loop {
@@ -1255,7 +1278,10 @@ mod tests {
             let s = f.sq(&a);
             let r = f.sqrt(&s).unwrap();
             assert_eq!(f.sq(&r), s);
-            assert_eq!(f.is_square(&a), f.pow(&a, (f.order() / 2) as u128) == E5::ONE);
+            assert_eq!(
+                f.is_square(&a),
+                f.pow(&a, (f.order() / 2) as u128) == E5::ONE
+            );
         }
     }
 
@@ -1283,7 +1309,11 @@ mod tests {
         let sym = SymmetrisedS5x5::precompute(&c, &mut rng);
         let base = factor_base(&c);
         assert!(base.len() >= 4);
-        let index: HashMap<u64, usize> = base.iter().enumerate().map(|(i, p)| (p.x.0[0], i)).collect();
+        let index: HashMap<u64, usize> = base
+            .iter()
+            .enumerate()
+            .map(|(i, p)| (p.x.0[0], i))
+            .collect();
         let r = c.add(&c.add(&base[0], &base[1]), &c.sub(&base[2], &base[3]));
         let rep = trial(&c, &sym, &base, &index, &r, &trial_options(), None);
         assert!(rep.consistent);
@@ -1292,6 +1322,9 @@ mod tests {
             assert!(verify_relation(&c, &base, rel, &r));
         }
         let pairs = PairTable::new(&c, &base);
-        assert_eq!(mitm_decompositions(&c, &base, &pairs, &r), rep.decompositions);
+        assert_eq!(
+            mitm_decompositions(&c, &base, &pairs, &r),
+            rep.decompositions
+        );
     }
 }

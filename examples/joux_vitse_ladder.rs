@@ -348,7 +348,10 @@ fn dlp_mode(args: &[String]) {
             *agg.entry("split_repeated").or_default() += rep.split.split_repeated as u64;
             *agg.entry("undetermined").or_default() += rep.undetermined as u64;
             for rel in &rep.relations {
-                assert!(verify_relation(c, &s.base, rel, &r), "relation re-adds to R");
+                assert!(
+                    verify_relation(c, &s.base, rel, &r),
+                    "relation re-adds to R"
+                );
                 rows.push((rel.terms.clone(), a, b));
                 emit(
                     &json,
