@@ -1,0 +1,83 @@
+name: N83 root4 K3550 K3596 balanced-order comparison
+
+on:
+  push:
+    branches: [codex/n83-root4-highk-20261015]
+    paths:
+      - .github/workflows/n83-root4-highk.yml
+      - research/n83_root4_highk_20261015/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: n83-root4-highk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  four-arm-highk-confirmation:
+    if: github.repository == 'aburan28/crypto'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Freeze 4000 new high-K public points and source preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/n83-root4-highk"
+          python3 research/n83_k3250_sparse_fresh_20261015/generate.py > \
+            "$RUNNER_TEMP/n83-root4-highk/prior-fixture-check.json"
+          python3 research/n83_k3350_sparse_fresh_20261015/generate.py > \
+            "$RUNNER_TEMP/n83-root4-highk/prior-k3350-fixture-check.json"
+          python3 research/n83_k_abba_20261015/generate.py > \
+            "$RUNNER_TEMP/n83-root4-highk/prior-abba-fixture-check.json"
+          python3 research/n83_root4_highk_20261015/generate.py > \
+            "$RUNNER_TEMP/n83-root4-highk/fixture-check.json"
+          python3 research/n83_root4_highk_20261015/run.py --preflight > \
+            "$RUNNER_TEMP/n83-root4-highk/preflight.json"
+          rustc --version > "$RUNNER_TEMP/n83-root4-highk/rustc-version.txt"
+          cargo --version > "$RUNNER_TEMP/n83-root4-highk/cargo-version.txt"
+
+      - name: Build and test exact N83 producer
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-root4-highk-target"
+          export CARGO_BUILD_JOBS=2
+          cargo test --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-root4-highk/example-tests.log" 2>&1
+          cargo build --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-root4-highk/build.log" 2>&1
+
+      - name: Run four bounded K3550 K3596 K3596 K3550 arms
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-root4-highk-target"
+          python3 research/n83_root4_highk_20261015/run.py \
+            --binary "$CARGO_TARGET_DIR/release/examples/koblitz_orbit_dlp_fast" \
+            --output "$RUNNER_TEMP/n83-root4-highk/results" \
+            2>&1 | tee "$RUNNER_TEMP/n83-root4-highk/run.log"
+
+      - name: Independently replay four bases and all 16000 targets
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -d "$RUNNER_TEMP/n83-root4-highk/results" ]; then
+            python3 research/n83_root4_highk_20261015/verify.py \
+              "$RUNNER_TEMP/n83-root4-highk/results" \
+              2>&1 | tee "$RUNNER_TEMP/n83-root4-highk/verify.log"
+          fi
+
+      - name: Preserve all raw rows and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-root4-highk-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-root4-highk/
+          if-no-files-found: error
+          retention-days: 14
