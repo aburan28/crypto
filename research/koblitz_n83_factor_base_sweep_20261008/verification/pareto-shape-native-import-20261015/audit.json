@@ -1,0 +1,182 @@
+{
+  "arm_count": 24,
+  "binary_sha256": "c5b9af9930f293533de819c0a673a0b7149ad2418800fa3fee7509d772d207e7",
+  "object_count": 18,
+  "outcomes": [
+    {
+      "base_points": 99600,
+      "index": 0,
+      "pool_points": 99600,
+      "residual_signed_orbits": 600,
+      "shared_signed_orbits": 0
+    },
+    {
+      "base_points": 42496,
+      "index": 1,
+      "pool_points": 99600,
+      "residual_signed_orbits": 600,
+      "shared_signed_orbits": 0
+    },
+    {
+      "base_points": 42496,
+      "index": 2,
+      "pool_points": 99600,
+      "residual_signed_orbits": 354,
+      "shared_signed_orbits": 246
+    },
+    {
+      "base_points": 42496,
+      "index": 3,
+      "pool_points": 99600,
+      "residual_signed_orbits": 353,
+      "shared_signed_orbits": 247
+    },
+    {
+      "base_points": 42496,
+      "index": 4,
+      "pool_points": 99600,
+      "residual_signed_orbits": 352,
+      "shared_signed_orbits": 248
+    },
+    {
+      "base_points": 42496,
+      "index": 5,
+      "pool_points": 99600,
+      "residual_signed_orbits": 346,
+      "shared_signed_orbits": 254
+    },
+    {
+      "base_points": 42496,
+      "index": 6,
+      "pool_points": 99600,
+      "residual_signed_orbits": 345,
+      "shared_signed_orbits": 255
+    },
+    {
+      "base_points": 42496,
+      "index": 7,
+      "pool_points": 99600,
+      "residual_signed_orbits": 344,
+      "shared_signed_orbits": 256
+    },
+    {
+      "base_points": 42496,
+      "index": 8,
+      "pool_points": 42496,
+      "residual_signed_orbits": 256,
+      "shared_signed_orbits": 0
+    },
+    {
+      "base_points": 10624,
+      "index": 9,
+      "pool_points": 99600,
+      "residual_signed_orbits": 538,
+      "shared_signed_orbits": 62
+    },
+    {
+      "base_points": 10624,
+      "index": 10,
+      "pool_points": 99600,
+      "residual_signed_orbits": 537,
+      "shared_signed_orbits": 63
+    },
+    {
+      "base_points": 10624,
+      "index": 11,
+      "pool_points": 99600,
+      "residual_signed_orbits": 536,
+      "shared_signed_orbits": 64
+    },
+    {
+      "base_points": 10624,
+      "index": 12,
+      "pool_points": 42496,
+      "residual_signed_orbits": 256,
+      "shared_signed_orbits": 0
+    },
+    {
+      "base_points": 10624,
+      "index": 13,
+      "pool_points": 42496,
+      "residual_signed_orbits": 210,
+      "shared_signed_orbits": 46
+    },
+    {
+      "base_points": 10624,
+      "index": 14,
+      "pool_points": 42496,
+      "residual_signed_orbits": 209,
+      "shared_signed_orbits": 47
+    },
+    {
+      "base_points": 10624,
+      "index": 15,
+      "pool_points": 42496,
+      "residual_signed_orbits": 208,
+      "shared_signed_orbits": 48
+    },
+    {
+      "base_points": 10624,
+      "index": 16,
+      "pool_points": 42496,
+      "residual_signed_orbits": 194,
+      "shared_signed_orbits": 62
+    },
+    {
+      "base_points": 10624,
+      "index": 17,
+      "pool_points": 42496,
+      "residual_signed_orbits": 193,
+      "shared_signed_orbits": 63
+    },
+    {
+      "base_points": 10624,
+      "index": 18,
+      "pool_points": 42496,
+      "residual_signed_orbits": 192,
+      "shared_signed_orbits": 64
+    },
+    {
+      "base_points": 10624,
+      "index": 19,
+      "pool_points": 10624,
+      "residual_signed_orbits": 64,
+      "shared_signed_orbits": 0
+    },
+    {
+      "base_points": 10624,
+      "index": 20,
+      "pool_points": 10624,
+      "residual_signed_orbits": 24,
+      "shared_signed_orbits": 40
+    },
+    {
+      "base_points": 10624,
+      "index": 21,
+      "pool_points": 10624,
+      "residual_signed_orbits": 23,
+      "shared_signed_orbits": 41
+    },
+    {
+      "base_points": 10624,
+      "index": 22,
+      "pool_points": 10624,
+      "residual_signed_orbits": 22,
+      "shared_signed_orbits": 42
+    },
+    {
+      "base_points": 10624,
+      "index": 23,
+      "pool_points": 10624,
+      "residual_signed_orbits": 2,
+      "shared_signed_orbits": 62
+    }
+  ],
+  "plan_sha256": "ced6a67a75de8ee785d34cbd9aa9e79d9767683e84c6390d4f115e39896d20ba",
+  "result_sha256": "2bc6fa9a1903651641c25f5796c81176b94f0ec05730026360e2453414c9a564",
+  "schema": "n83.pareto-shape-native-import-audit/v1",
+  "selected_best_total_runtime": null,
+  "solver_search_executed": false,
+  "source_commit": "97b3cde9ef7ca9d5fb8b7329cb47cd5d3ba1c4c0",
+  "status": "PASS_S3_BYTES_RAW_STAGES_AND_24_ORBIT_PARTITIONS"
+}
