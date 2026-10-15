@@ -1,0 +1,15 @@
+{
+  "schema": "n83.stage-preflight-library-validation/v1",
+  "commit_under_test": "4685cc32712d14cf89842f7bc74e6e1d47935edc",
+  "command": "gtimeout 900s cargo test --release --lib --offline -- --test-threads=2",
+  "started_local": "2026-10-14T00:09:42-0700",
+  "last_log_write_local": "2026-10-14T00:11:34-0700",
+  "termination": "intentional_SIGTERM_under_host_load_above_200",
+  "exit_code": 143,
+  "expected_tests_reported": 4114,
+  "terminal_test_result_lines": 67,
+  "reported_failed_tests": 0,
+  "final_suite_summary_present": false,
+  "classification": "INTERRUPTED_VALIDATION_NOT_FULL_SUITE_PASS",
+  "compressed_log_sha256": "9dbf9bb616f5f485a0672594cacf89ee286fb7312332a6e6da8d2b326ae92642"
+}

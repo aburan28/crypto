@@ -1,0 +1,32 @@
+{
+  "schema": "n83.standard-projection-map-lib-validation-attempt/v1",
+  "command": "CARGO_TARGET_DIR=/private/tmp/n83-guarded-cargo-target-20261015 cargo test --release --offline --lib",
+  "sandbox_permissions": "use_default",
+  "source_tree_changed_from_prior_full_pass": false,
+  "exit_code": 101,
+  "elapsed_seconds_reported_by_cargo": 940.35,
+  "passed": 4071,
+  "failed": 13,
+  "ignored": 117,
+  "status": "INFRASTRUCTURE_AFFECTED_FULL_SUITE_FAILURE",
+  "failure_groups": {
+    "contended_jv_cover_tests": [
+      "cryptanalysis::jv_cover::tests::nagao_finds_planted_six_sums_and_agrees_with_the_oracle",
+      "cryptanalysis::jv_cover::tests::replayed_f4_agrees_with_the_full_solver_and_the_oracle",
+      "cryptanalysis::jv_cover::tests::stopped_f4_agrees_with_the_full_solver_and_the_oracle",
+      "cryptanalysis::jv_cover::tests::the_solver_loses_no_rational_solution_at_small_p"
+    ],
+    "sandbox_socket_permission_denied_tests": [
+      "cryptanalysis::pollard_collab::cairn::tests::a_key_submitter_signs_what_cairn_verifies",
+      "cryptanalysis::pollard_collab::cairn::tests::an_older_node_without_progress_turns_heartbeats_off_quietly",
+      "cryptanalysis::pollard_collab::cairn::tests::generic_artifacts_use_the_persisted_commit_reveal_outbox",
+      "cryptanalysis::pollard_collab::cairn::tests::heartbeats_carry_the_sessions_own_counters_at_the_cadence",
+      "cryptanalysis::pollard_collab::cairn::tests::pending_commitments_survive_a_restart",
+      "cryptanalysis::pollard_collab::cairn::tests::points_travel_through_cairn_as_commit_reveal_claims_and_solve",
+      "cryptanalysis::pollard_collab::cairn::tests::the_client_speaks_enough_http",
+      "cryptanalysis::pollard_collab::net::tests::foreign_job_is_refused",
+      "cryptanalysis::pollard_collab::net::tests::three_nodes_in_a_chain_converge"
+    ]
+  },
+  "notes": "The terminal summary and representative failure text were observed in the completed cargo session; its full stdout was not written to a durable file. The Joux-Vitse tests include timeout-sensitive assertions under severe host contention. The socket group showed Operation not permitted in this filesystem/network sandbox. The independent rerun uses local socket access and two test threads."
+}

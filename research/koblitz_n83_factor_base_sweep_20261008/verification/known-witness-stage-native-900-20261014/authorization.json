@@ -1,0 +1,10 @@
+{
+  "schema": "n83.fixed-witness-stage-authorization/v1",
+  "scope": "known_answer_encoding_control_only",
+  "approval_reference": "2026-10-14 goal chat: user replied 'yes approvef' to the additional bounded local N83 run; this receipt limits the run to 900 seconds",
+  "prior_charged_seconds": 22200,
+  "new_authorized_seconds": 900,
+  "wall_cap_seconds": 840,
+  "conflict_cap": 5000,
+  "domains_sha256": "63accc5b9dc9de6327c5b07e93b3e62717f8376a96c3f91f7bb70b77095f23bb"
+}

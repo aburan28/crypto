@@ -1,0 +1,21 @@
+{
+  "binary_sha256": "c5b9af9930f293533de819c0a673a0b7149ad2418800fa3fee7509d772d207e7",
+  "domains": {
+    "gray_pool": {
+      "base_points": 99600,
+      "residual_points": 16102,
+      "shared_signed_orbits": 503
+    },
+    "hash_pool": {
+      "base_points": 99600,
+      "residual_points": 99600,
+      "shared_signed_orbits": 0
+    }
+  },
+  "plan_sha256": "fbd3fb943bc0f181797d106c41ee9961b8d70768b5c65a5584002e3c1b5e488f",
+  "schema": "n83.k600-native-import-independent-replay/v1",
+  "selected_best_total_runtime": null,
+  "solver_search_executed": false,
+  "source_commit": "ec2b665457c9c4e76b48481af35c2318510a4c00",
+  "status": "PASS_FROZEN_SOURCE_BINARY_ARCHIVES_AND_DOMAINS"
+}
