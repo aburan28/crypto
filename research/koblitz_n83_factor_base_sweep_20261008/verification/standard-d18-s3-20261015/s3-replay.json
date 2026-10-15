@@ -1,0 +1,26 @@
+{
+  "items": {
+    "manifest": {
+      "bytes": 1315,
+      "s3_checksum_sha256_base64": "zmNfb34tLLisK+cnL7kSdnhM6B6q0Fkn/CCbgDW7xBk=",
+      "s3_etag": "\"f6744ae5eef4833f281b2142771eaed8\"",
+      "s3_last_modified": "2026-10-15T19:53:00+00:00",
+      "sha256": "ce635f6f7e2d2cb8ac2be7272fb91276784ce81eaad05927fc209b8035bbc419",
+      "source_commit": "57206517b3833045f8ff9a4e7c49681d98ebb0a5",
+      "source_schema": "n83.standard-subspace-factor-base-manifest-v1"
+    },
+    "object": {
+      "bytes": 7263179,
+      "s3_checksum_sha256_base64": "2Kje4Xn5vXZRbRDVQl8WuMMLMo16xh501emWK0cHCbQ=",
+      "s3_etag": "\"dd3975499b7d8c799884328f1620bd7b\"",
+      "s3_last_modified": "2026-10-15T19:52:53+00:00",
+      "sha256": "d8a8dee179f9bd76516d10d5425f16b8c30b328d7ac61e74d5e9962b470709b4",
+      "source_commit": "57206517b3833045f8ff9a4e7c49681d98ebb0a5",
+      "source_schema": "n83.standard-subspace-factor-base-v1"
+    }
+  },
+  "manifest_s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/standard-subspace/a0/d18/manifest.json",
+  "object_s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/standard-subspace/a0/objects/ad977df31640d06b19303f017e09c4e64b675df891dba790bdd94ec3c8e2429c.jsonl.gz",
+  "schema": "n83.standard-subspace-d18-s3-replay/v1",
+  "status": "PASS_FULL_OBJECT_AND_MANIFEST_BYTES"
+}
