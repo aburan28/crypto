@@ -5,7 +5,7 @@ isogenies, with all registered standard prime curves ranked separately.
 
 | Deliverable | Acceptance |
 |---|---|
-| Complete registered prime roster | Native policy includes every pinned prime-field row with exact ICV1 and operation capability; unsupported rows remain visible |
+| Complete registered standard prime roster | Native policy includes every pinned standard prime-field row with exact ICV1 and operation capability; unsupported rows remain visible |
 | Comparable records | One leaderboard per exact registered source; degree is an exact decimal integer; no composite product or cross-curve aggregate |
 | Native execution | Commands embedded in the dedicated ReleaseMe isogeny executable; no runtime Cargo or repository dependency |
 | Judge | Fresh process-isolated independent replay from a copied explicit map; no stored PASS or score is trusted |
@@ -33,7 +33,7 @@ independently attested by the judge. Stop and preserve output on a failed
 check, process/resource failure or artifact-limit violation. A shortlist or
 an old certificate cannot promote a challenge score.
 
-The initial examples will record the complete catalogue and candidate ladder,
+The initial examples will record the complete standard-curve roster and candidate ladder,
 P192/13 and P521/7 admission, negative controls and a fresh replay of the existing
 P192/10453 artifact where feasible. Every submitted map is replayed again when
 a leaderboard is generated. Earlier performance and 2000-additional-map work

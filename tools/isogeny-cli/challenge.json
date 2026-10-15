@@ -2,7 +2,7 @@
   "schema": "isogeny-prime-degree-rules/v1",
   "name": "Prime Degree Frontier",
   "version": 1,
-  "curve_scope": "every registered prime-field curve; one leaderboard per exact ICV1 model",
+  "curve_scope": "every registered standard prime-field curve (nonempty standard_names); one leaderboard per exact ICV1 model",
   "representation": "full normalized rational map and monic kernel polynomial",
   "score": "largest independently verified odd prime degree, represented as a decimal integer",
   "ties": "equal degrees share rank; no timing tiebreak",

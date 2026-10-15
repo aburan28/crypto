@@ -9,7 +9,7 @@ Native challenge and admission controls · 15 October 2026]
 
 = Scope and frozen identity
 The challenge ranks the largest independently verified odd prime degree
-separately for every exact registered prime-field source curve. Expanded
+separately for every exact registered standard prime-field source curve. Expanded
 normalized rational maps and monic kernel polynomials are required. Each
 leaderboard build runs fresh independent replay; saved scores never enter ranking.
 
@@ -23,7 +23,7 @@ leaderboard build runs fresh independent replay; saved scores never enter rankin
 
 = Observed coverage and controls
 #table(columns: (3fr, 1fr), inset: 5pt,
-  [Registered prime models], [#data.registered_prime_models],
+  [Registered standard prime models], [#data.registered_prime_models],
   [Construction adapter available], [#data.construction_models],
   [Independent replay available], [#data.replay_models],
   [Replay adapter unavailable, retained in roster], [#data.unavailable_replay_models],

@@ -2,9 +2,14 @@
 
 Find the largest odd prime degree for which you can produce a complete,
 independently verified isogeny from each registered prime-field curve.
-Each exact ICV1 source model has its own leaderboard. All registered prime
+Each exact ICV1 source model has its own leaderboard. All registered standard prime
 models are listed, including models whose construction or replay adapter is
 currently unavailable. No curve is substituted or silently omitted.
+
+The roster is the pinned catalogue's prime-field models with nonempty
+`standard_names`. Names that describe the same exact model share its ICV1 row.
+Registered research descendants and benchmark models do not enter the standard
+curve leaderboard. The complete catalogue remains available through `isogeny curves`.
 
 This is an open-ended computational challenge. There is no finite largest
 isogeny degree in mathematics. A result here is a record for the pinned

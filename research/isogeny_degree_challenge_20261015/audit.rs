@@ -27,6 +27,7 @@ fn main() {
     let mut candidates = 0;
     let mut roster = vec![];
     for (row, p) in rows.iter().zip(planned) {
+        assert!(!row["standard_names"].as_array().unwrap().is_empty());
         assert_eq!(row["source_icv1"], p["source_icv1"]);
         construction += usize::from(row["capabilities"]["construction"] == true);
         replay += usize::from(row["capabilities"]["independent_replay"] == true);

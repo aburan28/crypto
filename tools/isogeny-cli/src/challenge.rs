@@ -51,8 +51,14 @@ fn rules() -> Value {
 fn season() -> String {
     sha256_hex(format!("{}:{}", sha256_hex(RULES), env!("ISOGENY_REGISTRY_SHA256")).as_bytes())
 }
+fn standard_prime(row: &Value) -> bool {
+    row["family"] == "prime"
+        && row["standard_names"]
+            .as_array()
+            .is_some_and(|names| !names.is_empty())
+}
 fn curves() -> Vec<Value> {
-    catalog::registry()["curves"].as_array().unwrap().iter().filter(|r| r["family"] == "prime").map(|r| {
+    catalog::registry()["curves"].as_array().unwrap().iter().filter(|r| standard_prime(r)).map(|r| {
         json!({"source_icv1":r["slug"],"standard_names":r["standard_names"],"aliases":r["aliases"],
             "capabilities":catalog::capabilities(r),"best_prime_degree":Value::Null,"status":"UNSCORED"})
     }).collect()
@@ -66,8 +72,8 @@ fn policy() -> Value {
 }
 fn resolve(name: &str) -> Result<&'static Value, String> {
     let row = catalog::resolve(name)?;
-    if row["family"] != "prime" {
-        return Err("the main track requires a registered prime-field curve".into());
+    if !standard_prime(row) {
+        return Err("the main track requires a registered standard prime-field curve".into());
     }
     Ok(row)
 }
@@ -83,7 +89,7 @@ fn plan(o: &Options) -> Result<Value, String> {
             .as_array()
             .unwrap()
             .iter()
-            .filter(|r| r["family"] == "prime")
+            .filter(|r| standard_prime(r))
             .collect()
     } else {
         vec![resolve(o.need("curve")?)?]
@@ -476,13 +482,13 @@ pub fn execute(args: &[String]) -> Result<(Value, i32), String> {
 mod tests {
     use super::*;
     #[test]
-    fn catalogue_has_every_prime_model_and_no_other_family() {
+    fn catalogue_has_every_standard_prime_model_and_no_research_descendants() {
         let rows = curves();
         let expected = catalog::registry()["curves"]
             .as_array()
             .unwrap()
             .iter()
-            .filter(|r| r["family"] == "prime")
+            .filter(|r| standard_prime(r))
             .count();
         assert_eq!(rows.len(), expected);
         assert!(rows.len() > 20);
@@ -491,7 +497,15 @@ mod tests {
                 resolve(r["source_icv1"].as_str().unwrap()).unwrap()["family"],
                 "prime"
             );
+            assert!(!r["standard_names"].as_array().unwrap().is_empty());
         }
+        let research = catalog::registry()["curves"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| r["family"] == "prime" && !standard_prime(r))
+            .unwrap();
+        assert!(resolve(research["slug"].as_str().unwrap()).is_err());
     }
     #[test]
     fn policy_identifies_rules_and_catalogue() {

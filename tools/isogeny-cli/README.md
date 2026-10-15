@@ -131,7 +131,7 @@ lockfile versions. Runtime curve data and version/source provenance are embedded
 ## Largest prime-degree challenge
 
 `isogeny challenge policy` prints the pinned **Prime Degree Frontier** rules
-and all registered prime-field models. Each exact source curve ranks separately;
+and all registered standard prime-field models. Each exact source curve ranks separately;
 unsupported models stay visible. `challenge plan --curve all` creates a
 candidate-only ladder. `challenge run`, `challenge judge` and
 `challenge leaderboard` construct or independently replay explicit maps in
