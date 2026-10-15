@@ -146,3 +146,20 @@ the Montgomery arithmetic mod ell also requires ell < 2^62. Widening it changes 
 top size is **b = 21** (an instrument limit, not a time limit). The freed budget goes to `aa` at b = 21 and to test curves
 3 and 4 at b = 18..21 (`main` and `sched`). The schedule still covers b = 12..21; it is then an interpolation inside the
 training range 16..21 above b = 16 and an extrapolation below it.
+
+## Amendment B1 (2026-10-15 06:20, training complete, before any `sched` test data and before any test result was read)
+
+Training ([results/train/train.md](results/train/train.md), curves 5-7, all 66 jobs correct; the b = 20 `lpsgewd@8`
+records at kappa 1.41 and 2 equal item 01's `tune2` records, 6/6). The b = 21 jobs at kappa 2 on curves 6 and 7 were
+killed by a session time limit of the orchestration shell and rerun unchanged. The frozen rules give:
+
+1. **m\* = 2** (LA geometric mean at b = 21, kappa 2: `lpsgebw2@8` 2.843e10 against `lpsgebw3@8` 2.989e10; at b = 18
+   m = 4 is the most expensive).
+2. **Block** for the combination (whole cost at b = 21, kappa 2: `lpsgebw2@8` 6.162e10 against `lpsgewd@8` 6.515e10).
+3. **cx(b) = 16 for b <= 17, 8 for b >= 18** (b = 16: cx 16 best; b = 18, 20, 21: cx 8 best).
+4. kappa\*(16) = 2.380 (clamped at the grid edge), kappa\*(18) = 2.081, kappa\*(20) = 1.719, kappa\*(21) = 1.607;
+   **schedule ln kappa(b) = 0.5533 - 0.0806 (b - 20)**, i.e. kappa(b) = 1.739 x 0.9225^(b-20):
+   b = 12: 3.315, 14: 2.821, 16: 2.401, 18: 2.043, 20: 1.739, 21: 1.604.
+
+Candidates on test: (1) `sched:lpsgewd@cx(b)`, (2) `main:lpsgebw2@8`, (3) `sched:lpsgebw2@cx(b)`; all paired against
+`main:lpsgewd`. `main:lpsgebw3@8` is reported only.

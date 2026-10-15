@@ -360,3 +360,13 @@ JOB 927s --bits 21 --curve 7 --kappa 1.68 --cx 8 --las lpsgewd@8,lpsgewd@16,lpsg
 {"bits":21,"curve":5,"kappa":2,"arm":"main:lpsgebw2@8","correct":true,"cost":61624154618,"la_cost":28446919071,"cols":31652,"nnz":472262,"checks":1,"la_wall":188.8,"wall":1082.3}
 {"bits":21,"curve":5,"kappa":2,"arm":"main:lpsgebw3@8","correct":true,"cost":63145070515,"la_cost":29967834968,"cols":31652,"nnz":472262,"checks":1,"la_wall":182.7,"wall":1082.3}
 JOB 1085s --bits 21 --curve 5 --kappa 2.0 --cx 8 --las lpsgewd@8,lpsgewd@16,lpsgebw2@8,lpsgebw3@8 --no-gp-check --out results/train/tr_b21_c5_k2.0.jsonl
+{"bits":21,"curve":7,"kappa":2,"arm":"main:lpsgewd@8","correct":true,"cost":65235766961,"la_cost":32014921461,"cols":31407,"nnz":478115,"checks":1,"la_wall":236.1,"wall":1256.1}
+{"bits":21,"curve":7,"kappa":2,"arm":"main:lpsgewd@16","correct":true,"cost":65469681619,"la_cost":32248836119,"cols":29328,"nnz":520288,"checks":1,"la_wall":296.9,"wall":1256.1}
+{"bits":21,"curve":7,"kappa":2,"arm":"main:lpsgebw2@8","correct":true,"cost":61677656718,"la_cost":28456811218,"cols":31407,"nnz":478115,"checks":1,"la_wall":213.2,"wall":1256.1}
+{"bits":21,"curve":7,"kappa":2,"arm":"main:lpsgebw3@8","correct":true,"cost":63124768478,"la_cost":29903922978,"cols":31407,"nnz":478115,"checks":1,"la_wall":248.0,"wall":1256.1}
+JOB 1258s --bits 21 --curve 7 --kappa 2.0 --cx 8 --las lpsgewd@8,lpsgewd@16,lpsgebw2@8,lpsgebw3@8 --no-gp-check --out results/train/tr_b21_c7_k2.0.jsonl
+{"bits":21,"curve":6,"kappa":2,"arm":"main:lpsgewd@8","correct":true,"cost":65125500338,"la_cost":31936922131,"cols":31313,"nnz":478493,"checks":1,"la_wall":237.7,"wall":1272.0}
+{"bits":21,"curve":6,"kappa":2,"arm":"main:lpsgewd@16","correct":true,"cost":65351620884,"la_cost":32163042677,"cols":29240,"nnz":520563,"checks":1,"la_wall":304.9,"wall":1272.0}
+{"bits":21,"curve":6,"kappa":2,"arm":"main:lpsgebw2@8","correct":true,"cost":61560348451,"la_cost":28371770244,"cols":31313,"nnz":478493,"checks":1,"la_wall":217.0,"wall":1272.0}
+{"bits":21,"curve":6,"kappa":2,"arm":"main:lpsgebw3@8","correct":true,"cost":62989666566,"la_cost":29801088359,"cols":31313,"nnz":478493,"checks":1,"la_wall":251.9,"wall":1272.0}
+JOB 1274s --bits 21 --curve 6 --kappa 2.0 --cx 8 --las lpsgewd@8,lpsgewd@16,lpsgebw2@8,lpsgebw3@8 --no-gp-check --out results/train/tr_b21_c6_k2.0.jsonl
