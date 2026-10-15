@@ -1,4 +1,4 @@
-name: N83 sparse K3300 versus K3350 on 20000 fresh points
+name: N83 sparse K3300 versus K3350 fresh sealed replay
 
 on:
   push:
@@ -6,74 +6,101 @@ on:
     paths:
       - .github/workflows/n83-k3350-sparse-fresh.yml
       - research/n83_k3350_sparse_fresh_20261015/**
+      - research/n83_k3350_sparse_fresh_results_20261015/**
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: n83-k3350-sparse-fresh-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  two-arm-fresh-confirmation:
+  two-arm-fresh-sealed-replay:
     if: github.repository == 'aburan28/crypto'
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
-      - name: Freeze 20000 disjoint public points and source preflight
+      - name: Fetch the executed source snapshot
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/n83-k3350-sparse-fresh"
-          python3 research/n83_k3250_sparse_fresh_20261015/generate.py > \
-            "$RUNNER_TEMP/n83-k3350-sparse-fresh/prior-fixture-check.json"
-          python3 research/n83_k3350_sparse_fresh_20261015/generate.py > \
-            "$RUNNER_TEMP/n83-k3350-sparse-fresh/fixture-check.json"
-          python3 research/n83_k3350_sparse_fresh_20261015/run.py --preflight > \
-            "$RUNNER_TEMP/n83-k3350-sparse-fresh/preflight.json"
-          rustc --version > "$RUNNER_TEMP/n83-k3350-sparse-fresh/rustc-version.txt"
-          cargo --version > "$RUNNER_TEMP/n83-k3350-sparse-fresh/cargo-version.txt"
+          frozen=01a93f468067bc5d7599c089a0e0cc53293b3b4b
+          git fetch --no-tags --depth=1 origin "$frozen"
+          test "$(git rev-parse FETCH_HEAD)" = "$frozen"
+          mkdir -p "$RUNNER_TEMP/n83-k3350-frozen-source"
+          git archive "$frozen" Cargo.lock \
+            examples/koblitz_orbit_dlp_fast.rs \
+            examples/n83_rho_optimization_eval.rs \
+            research/n83_dense_root_20261013 \
+            research/n83_factor_base_100_20261014 \
+            research/n83_factor_base_refine_20261014 \
+            research/n83_factor_base_confirm_20261015 \
+            research/n83_indexed5_20261013 \
+            research/n83_root4_20261014 \
+            research/n83_k3250_sparse_fresh_20261015 \
+            research/n83_k3350_sparse_fresh_20261015 \
+            | tar -xf - -C "$RUNNER_TEMP/n83-k3350-frozen-source"
+          test "$(sha256sum "$RUNNER_TEMP/n83-k3350-frozen-source/examples/koblitz_orbit_dlp_fast.rs" | cut -d' ' -f1)" = \
+            c9824acebda0360416c3c507594bb07c17ca798c32cbf8f84bba95ca2c44d5b1
 
-      - name: Build and test exact N83 producer
+      - name: Download the exact completed raw artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/n83-k3350-sealed"
+          gh api repos/aburan28/crypto/actions/artifacts/11956213859/zip > \
+            "$RUNNER_TEMP/n83-k3350-sealed/raw.zip"
+          test "$(sha256sum "$RUNNER_TEMP/n83-k3350-sealed/raw.zip" | cut -d' ' -f1)" = \
+            7b83f5c57764e265ee26cfab2f76e9dffd79eabd6c9f65bec66afd4dbe5c4897
+          unzip -q "$RUNNER_TEMP/n83-k3350-sealed/raw.zip" -d \
+            "$RUNNER_TEMP/n83-k3350-sealed/raw"
+          test "$(sha256sum "$RUNNER_TEMP/n83-k3350-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            0ce80ea1a49564ce0e8bc4d797f4b7d32fef763e7a702c640e5d0308694c9006
+
+      - name: Independently replay both bases and all 40000 answers
         shell: bash
         run: |
           set -euo pipefail
-          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-k3350-sparse-fresh-target"
-          export CARGO_BUILD_JOBS=2
-          cargo test --release --locked --example koblitz_orbit_dlp_fast > \
-            "$RUNNER_TEMP/n83-k3350-sparse-fresh/example-tests.log" 2>&1
-          cargo build --release --locked --example koblitz_orbit_dlp_fast > \
-            "$RUNNER_TEMP/n83-k3350-sparse-fresh/build.log" 2>&1
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 "$RUNNER_TEMP/n83-k3350-frozen-source/research/n83_k3250_sparse_fresh_20261015/generate.py" > \
+            "$RUNNER_TEMP/n83-k3350-sealed/prior-fixture-check.json"
+          python3 "$RUNNER_TEMP/n83-k3350-frozen-source/research/n83_k3350_sparse_fresh_20261015/generate.py" > \
+            "$RUNNER_TEMP/n83-k3350-sealed/fixture-check.json"
+          python3 "$RUNNER_TEMP/n83-k3350-frozen-source/research/n83_k3350_sparse_fresh_20261015/verify.py" \
+            "$RUNNER_TEMP/n83-k3350-sealed/raw/results" > \
+            "$RUNNER_TEMP/n83-k3350-sealed/local-replay.log"
+          test "$(sha256sum "$RUNNER_TEMP/n83-k3350-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            0ce80ea1a49564ce0e8bc4d797f4b7d32fef763e7a702c640e5d0308694c9006
 
-      - name: Run bounded sparse K3300 and K3350 arms
+      - name: Reproduce the canonical current-head result records
         shell: bash
         run: |
           set -euo pipefail
-          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-k3350-sparse-fresh-target"
-          python3 research/n83_k3350_sparse_fresh_20261015/run.py \
-            --binary "$CARGO_TARGET_DIR/release/examples/koblitz_orbit_dlp_fast" \
-            --output "$RUNNER_TEMP/n83-k3350-sparse-fresh/results" \
-            2>&1 | tee "$RUNNER_TEMP/n83-k3350-sparse-fresh/run.log"
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_k3250_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k3350_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k3350_sparse_fresh_results_20261015/materialize.py \
+            --artifact-zip "$RUNNER_TEMP/n83-k3350-sealed/raw.zip" \
+            --artifact-sha256 7b83f5c57764e265ee26cfab2f76e9dffd79eabd6c9f65bec66afd4dbe5c4897 \
+            --analysis-sha256 0ce80ea1a49564ce0e8bc4d797f4b7d32fef763e7a702c640e5d0308694c9006 \
+            "$RUNNER_TEMP/n83-k3350-sealed/raw/results"
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
 
-      - name: Independently replay two bases and all 40000 targets
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ -d "$RUNNER_TEMP/n83-k3350-sparse-fresh/results" ]; then
-            python3 research/n83_k3350_sparse_fresh_20261015/verify.py \
-              "$RUNNER_TEMP/n83-k3350-sparse-fresh/results" \
-              2>&1 | tee "$RUNNER_TEMP/n83-k3350-sparse-fresh/verify.log"
-          fi
-
-      - name: Preserve all raw rows and failures
+      - name: Preserve current-head replay receipt
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: n83-k3350-sparse-fresh-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/n83-k3350-sparse-fresh/
-          if-no-files-found: error
+          name: n83-k3350-sparse-fresh-sealed-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/n83-k3350-sealed/local-replay.log
+            ${{ runner.temp }}/n83-k3350-sealed/fixture-check.json
+          if-no-files-found: ignore
           retention-days: 14
