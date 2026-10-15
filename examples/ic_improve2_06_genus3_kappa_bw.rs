@@ -1,4 +1,8 @@
-//! IC improvement round, item 04: genus-3 double-large-prime index calculus after
+//! IC improvement round 2, item 06 (`research/ic_improve_20261015/06-genus3-kappa-bw/`):
+//! a copy of `ic_improve2_01_genus3_linalg.rs` with block Wiedemann (`lpsgebw<m>`) and
+//! per-arm SGE constants (`<arm>@<cx>`) added; collection, counters and streams unchanged.
+//!
+//! Item 01's header follows. IC improvement round, item 04: genus-3 double-large-prime index calculus after
 //! the cubic GHS transfer, ported from
 //! `research/ic_next10_20261014/07-cubic-ghs-genus3/ghs3.py` to Rust and run beyond
 //! q = 2^15.
@@ -1698,6 +1702,171 @@ fn wiedemann_k(rows: &[Row], rhs: &[u64], n: usize, kc: usize, ell: u64) -> (Opt
     let mut acc: u64 = 0;
     for ii in 1..=l {
         acc = (acc + mulmod(c[l - ii], s[ii - 1], ell)) % ell;
+    }
+    let x = mulmod((ell - acc) % ell, powmod(g0, ell - 2, ell), ell);
+    (Some(x), matvecs)
+}
+
+/// Item 06: block Wiedemann with `m` coordinate projections and one right
+/// vector (Coppersmith's block Wiedemann with blocking (m, n) = (m, 1)).
+///
+/// The vector sequence a_i = X^T A^i b in K^m, X = [e_kc, e_j2, .., e_jm]
+/// (coordinate projections, read for free), needs only about N (1 + 1/m)
+/// terms to determine the minimal recurrence of b (against 2N for scalar
+/// Wiedemann, the case m = 1), so the matrix-vector products fall from ~2N to
+/// ~N (1 + 1/m). The price is the generator: an order basis of
+/// [A(x) | -I_m] (iterative mbasis of Beckermann-Labahn / Giorgi-Jeannerod-
+/// Villard, shifts (0, 1, .., 1)), whose work grows like m (m + 1) N^2 / 2.
+/// The r part of each basis column is never stored: r_c = (A f_c mod x^s) +
+/// x^s rho_c, so a column is (f_c, rho_c, delta_c).
+/// With g(x) = x^L f(1/x) the generator column (L its shifted degree),
+/// (A^{-1} b)[kc] = -(1/g_0) sum_{i>=1} g_i (A^{i-1} b)[kc], as in the
+/// scalar arm. Every product mod ell is counted (CNT[2]), every inversion
+/// (CNT[3]). A symmetric blocking (n = m right vectors) needs n (N/m + N/n) =
+/// 2N single-vector products, as scalar Wiedemann: it changes parallelism,
+/// not the single-threaded count, and is not built here.
+fn block_wiedemann_k(rows: &[Row], rhs: &[u64], n: usize, kc: usize, ell: u64, m: usize) -> (Option<u64>, u64) {
+    const ET: usize = 20;
+    if n < m + 1 {
+        return wiedemann_k(rows, rhs, n, kc, ell);
+    }
+    let a = SpMat::new(rows, ell);
+    let mt = a.mt;
+    let maxlen = n + n / m + ET + 2;
+    // projections: kc first, then m - 1 distinct pseudo-random coordinates
+    let mut proj = vec![kc];
+    let mut st: u64 = (n as u64).wrapping_mul(0x9E37_79B9_7F4A_7C15) ^ (kc as u64 + 1);
+    while proj.len() < m {
+        st ^= st << 13;
+        st ^= st >> 7;
+        st ^= st << 17;
+        let j = (st % n as u64) as usize;
+        if !proj.contains(&j) {
+            proj.push(j);
+        }
+    }
+    let red_every = ((u128::MAX / 2 / (ell as u128 * ell as u128)) as usize).clamp(1, 1024);
+    let k = m + 1;
+    let mut seq: Vec<Vec<u64>> = vec![Vec::with_capacity(maxlen); m];
+    let mut f: Vec<Vec<u64>> = vec![Vec::new(); k];
+    f[0] = vec![1];
+    let mut rho: Vec<Vec<u64>> = vec![vec![0; m]; k];
+    for t in 0..m {
+        rho[t + 1][t] = 1;
+    }
+    let mut delta: Vec<usize> = vec![1; k];
+    delta[0] = 0;
+    let mut v: Vec<u64> = rhs.to_vec();
+    let mut matvecs = 0u64;
+    let sub = |x: u64, y: u64| if x >= y { x - y } else { x + ell - y };
+    let mut sigma = 0usize; // orders processed
+    loop {
+        if sigma > 0 {
+            v = a.mul(&v);
+            matvecs += 1;
+        }
+        for t in 0..m {
+            seq[t].push(v[proj[t]]);
+        }
+        // residuals R[c][t] = coeff_sigma(A_t f_c) - rho_c[t]
+        let mut res: Vec<Vec<u64>> = vec![vec![0; m]; k];
+        for c in 0..k {
+            let fc = &f[c];
+            let len = fc.len().min(sigma + 1);
+            if len > 0 {
+                cnt(2, (m * len) as u64);
+            }
+            for t in 0..m {
+                let s = &seq[t];
+                let mut acc: u128 = 0;
+                for j in 0..len {
+                    acc += fc[j] as u128 * s[sigma - j] as u128;
+                    if (j + 1) % red_every == 0 {
+                        acc = mt.reduce(acc) as u128;
+                    }
+                }
+                let x = if len > 0 { mt.reduce(acc) } else { 0 };
+                res[c][t] = sub(x, rho[c][t]);
+            }
+        }
+        // Gaussian elimination in increasing shifted degree
+        let mut order: Vec<usize> = (0..k).collect();
+        order.sort_by_key(|&c| (delta[c], c));
+        let mut pivots: Vec<(usize, usize, u64)> = vec![]; // (column, row, inverse of pivot)
+        let mut is_piv = vec![false; k];
+        for &c in &order {
+            for pi in 0..pivots.len() {
+                let (p, tr, inv) = pivots[pi];
+                let x = res[c][tr];
+                if x == 0 {
+                    continue;
+                }
+                cnt(2, 1);
+                let fac = mulmod(x, inv, ell);
+                let fm = mt.to_mont(fac);
+                // res_c -= fac res_p ; rho_c -= fac rho_p ; f_c -= fac f_p
+                cnt(2, (2 * m) as u64);
+                for t in 0..m {
+                    res[c][t] = sub(res[c][t], mt.mulm(res[p][t], fm));
+                    rho[c][t] = sub(rho[c][t], mt.mulm(rho[p][t], fm));
+                }
+                let fp = f[p].clone();
+                if f[c].len() < fp.len() {
+                    f[c].resize(fp.len(), 0);
+                }
+                cnt(2, fp.iter().filter(|&&y| y != 0).count() as u64);
+                for (j, &y) in fp.iter().enumerate() {
+                    if y != 0 {
+                        f[c][j] = sub(f[c][j], mt.mulm(y, fm));
+                    }
+                }
+            }
+            if let Some(tr) = (0..m).find(|&t| res[c][t] != 0) {
+                cnt(3, 1);
+                let inv = powmod(res[c][tr], ell - 2, ell);
+                pivots.push((c, tr, inv));
+                is_piv[c] = true;
+            }
+        }
+        for c in 0..k {
+            if is_piv[c] {
+                if !f[c].is_empty() {
+                    f[c].insert(0, 0);
+                }
+                delta[c] += 1;
+            } else {
+                for t in 0..m {
+                    rho[c][t] = 0;
+                }
+            }
+        }
+        sigma += 1;
+        let dmin = (0..k).filter(|&c| f[c].iter().any(|&y| y != 0)).map(|c| delta[c]).min().unwrap_or(usize::MAX);
+        if dmin != usize::MAX && sigma >= dmin + dmin.div_ceil(m) + ET {
+            break;
+        }
+        if sigma >= maxlen {
+            break;
+        }
+    }
+    // generator: the nonzero-f column of least shifted degree
+    let Some(g) = (0..k).filter(|&c| f[c].iter().any(|&y| y != 0)).min_by_key(|&c| (delta[c], c)) else {
+        return (None, matvecs);
+    };
+    let l = delta[g];
+    let mut fg = f[g].clone();
+    fg.resize(l + 1, 0);
+    let g0 = fg[l];
+    if g0 == 0 || l == 0 || l > seq[0].len() {
+        return (None, matvecs);
+    }
+    cnt(2, l as u64 + 1);
+    cnt(3, 1);
+    let s = &seq[0];
+    let mut acc: u64 = 0;
+    for ii in 1..=l {
+        // g_i = f_{L - i}
+        acc = (acc + mulmod(fg[l - ii], s[ii - 1], ell)) % ell;
     }
     let x = mulmod((ell - acc) % ell, powmod(g0, ell - 2, ell), ell);
     (Some(x), matvecs)
