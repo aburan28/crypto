@@ -18,14 +18,16 @@ Read the independently replayed edge screen and final tournament artifacts.
 Require every final tournament arm to pass exact base, four-point relation and
 scalar replay under its 14.5 GiB guard, with zero new throttled periods and OOM
 kills. If that set is incomplete, record `INCOMPLETE` and do not select. An
-edge challenger is eligible only if every edge arm passes the same checks
-under its 14 GiB guard. Preserve an incomplete edge screen as its own result;
-it does not prevent a confirmation among unresolved tournament finalists.
+edge candidate is eligible only when both of its mirrored arms pass the same
+checks under the 14 GiB edge guard. Preserve every failed edge arm; it does
+not prevent another complete edge candidate or a confirmation among
+unresolved tournament finalists.
 
-When the edge screen is eligible, let its challenger be the lower mirrored
-mean of K3500/root11/wide3 and K3550/root11/wide3; ties break toward lower K.
-Admit it only when its mirrored mean is strictly lower than K3450/root11/wide3
-in that edge screen.
+When K3450/root11/wide3 has both eligible edge arms, let the challenger be the
+lower mirrored mean among the eligible K3500/root11/wide3 and
+K3550/root11/wide3 candidates; ties break toward lower K. Admit it only when
+its mirrored mean is strictly lower than K3450/root11/wide3 in that edge
+screen. With no eligible comparator or challenger, admit no edge candidate.
 Let the final tournament's descriptive lowest mean be the leader. Admit that
 leader and every other finalist whose 99% interval for `leader minus other`
 has an upper endpoint greater than or equal to zero. If the tournament
