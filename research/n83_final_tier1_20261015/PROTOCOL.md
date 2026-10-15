@@ -25,7 +25,7 @@ Both use four visible CPUs within the same affinity and memory envelope.
 The versioned `selection.json` uses schema `n83.final-tier1-selection/v1` and
 retains that candidate's pipeline, ID, K, variant, Bloom profile, base hash,
 root-key count, manifest digest, the tournament ZIP and analysis digests,
-and the admission digest. The runner checks these against the admitted
+its artifact ID, and the admission digest. The runner checks these against the admitted
 candidate before executing.
 
 Use one cloud VM or Pod allocation for all five points and record its

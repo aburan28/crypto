@@ -65,6 +65,8 @@ def selected_config():
             or data["rss_cap_bytes"] != RSS_CAP_BYTES
             or data["ic_child_cap_seconds"] != 1500
             or data["rho_child_cap_seconds"] != 120
+            or not isinstance(data["tournament_artifact_id"], int)
+            or data["tournament_artifact_id"] <= 0
             or data["admission_sha256"] != parent.digest(final_runner.ADMISSION)
             or any(len(value) != 64 or any(c not in "0123456789abcdef" for c in value)
                    for value in hashes)
