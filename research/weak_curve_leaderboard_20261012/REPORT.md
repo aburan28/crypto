@@ -109,6 +109,9 @@ The [run report](reports/run-20261015T0854Z/REPORT.md),
 The [later source-lock refresh](reports/run-20261015T0929Z/REPORT.md)
 updates the registry hashes and dependent site exports while preserving the
 same model prices.
+The [cover-source alignment](reports/run-20261015T0950Z/REPORT.md) updates
+the decomposition index's covers-inventory digest after the clean-runner
+validator exposed a third upstream source change.
 
 | Source curve | Nominal half-split base | Model smoothness | Model relation queries | Model total log2 bit cost | Registry cost |
 | --- | ---: | ---: | ---: | ---: | ---: |

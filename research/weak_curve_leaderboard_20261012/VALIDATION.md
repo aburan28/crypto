@@ -22,6 +22,17 @@
   The [refresh run](reports/run-20261015T0929Z/REPORT.md) preserves the
   quantitative comparison and inspected PDF. Current-head clean CI remains
   the final gate.
+- The next clean runner passed the snapshot, six catalog tests, native GHS
+  audit, and attack-map validator, then stopped at the decomposition index's
+  `covers_sha256` comparison. Its raw job log is
+  `validation/ghs128_ci_decomposition_source_attempt2.log` (run
+  `38713758398`, job `116351297610`). The current-main
+  `docs/curves/covers.json` was copied byte-for-byte and the research and
+  site decomposition indexes regenerated; the [alignment report](reports/run-20261015T0950Z/REPORT.md)
+  shows the source dependency. All other declared source paths for the
+  catalog, graph and GHS audit were compared with `origin/main` at
+  `f2c9202ca48ed16f086815fda9c0ab73f2aabcda` and matched or were
+  branch-local rosters. The current-head clean replay remains pending.
 
 - `cargo run --release --locked --bin ghs_genus128_cost_audit -- --check` recomputes exact
   irreducible-polynomial and smoothness counts for all 84 degree bounds in

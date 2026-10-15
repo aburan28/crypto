@@ -62,6 +62,8 @@ The [run report and cost graph](reports/run-20261015T0854Z/REPORT.md)
 show the full conditional sweep and its missing measurement stages.
 The [source-lock refresh](reports/run-20261015T0929Z/REPORT.md) records the
 same quantitative sweep against the newer main-branch registries.
+The [cover-source alignment](reports/run-20261015T0950Z/REPORT.md) records the
+current-main covers inventory used by the decomposition property index.
 
 The [decomposition property index](decomposition_properties.json) makes thirteen
 hyperelliptic checks filterable for all 922 atlas curves. It binds 917 exact
