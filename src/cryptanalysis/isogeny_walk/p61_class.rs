@@ -376,7 +376,7 @@ pub(crate) fn hex_fe(field: &Field, value: &Fe) -> String {
     format!("{:016x}", field.to_big(value))
 }
 
-fn parse_fe(field: &Field, value: &str, what: &str) -> Result<Fe, String> {
+pub(crate) fn parse_fe(field: &Field, value: &str, what: &str) -> Result<Fe, String> {
     if !is_lower_hex(value, 16) {
         return Err(format!("{what}: expected 16 lowercase hexadecimal digits"));
     }

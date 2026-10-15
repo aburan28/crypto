@@ -19,9 +19,9 @@ use super::field::{Fe, Field};
 use super::kernel;
 use super::modpoly::{self, ModPoly};
 use super::p61_class::{
-    build_context, coefficient_bits, coordinate_index, hex_fe, is_lower_hex, parse_curve, Context,
-    Coordinate, CurveRecord, NodeRecord, SegmentHeader, EXPECTED_CLASS_VERTICES, LANES, ROOT_SEED,
-    SEGMENT_SCHEMA,
+    build_context, coefficient_bits, coordinate_index, hex_fe, is_lower_hex, parse_curve, parse_fe,
+    Context, Coordinate, CurveRecord, NodeRecord, SegmentHeader, EXPECTED_CLASS_VERTICES, LANES,
+    ROOT_SEED, SEGMENT_SCHEMA,
 };
 use super::poly;
 use super::walk::{ClassInfo, EllKind};
@@ -617,6 +617,156 @@ fn expand_node(
     Ok(out)
 }
 
+fn verify_node_edges(
+    context: &AdjacencyContext,
+    node: &NodeRecord,
+    records: &[AdjacencyEdgeRecord],
+) -> Result<(), String> {
+    if node.record != "node" || node.index != coordinate_index(node.coordinate)? {
+        return Err(format!("source node {} metadata differs", node.index));
+    }
+    if records.len() != DIRECTED_EDGES_PER_VERTEX as usize {
+        return Err(format!(
+            "source node {} has {} recorded edges, expected {}",
+            node.index,
+            records.len(),
+            DIRECTED_EDGES_PER_VERTEX
+        ));
+    }
+    let source = parse_curve(
+        &context.base,
+        &node.curve,
+        &format!("source node {}", node.index),
+    )?;
+    let recomputed_source =
+        curve_record(&context.base.field, &source.model, &node.curve.order_status)?;
+    if recomputed_source != node.curve {
+        return Err(format!("source node {} detector fields differ", node.index));
+    }
+
+    let mut position = 0usize;
+    for (phi, expected_roots) in context.phis().into_iter().zip(EXPECTED_ROOT_COUNTS) {
+        let roots = rational_roots(context, phi, &source.model, expected_roots as usize)?;
+        for (root_ordinal, target_j) in roots.into_iter().enumerate() {
+            let recorded = &records[position];
+            position += 1;
+            if recorded.record != "edge"
+                || recorded.source_index != node.index
+                || recorded.source_coordinate != node.coordinate
+                || recorded.degree != phi.ell
+                || recorded.root_ordinal != root_ordinal as u8
+                || recorded.rational_root_count != expected_roots
+                || recorded.direction != "horizontal"
+                || recorded.volcano_level != 0
+                || recorded.source_curve != node.curve
+            {
+                return Err(format!(
+                    "source node {} degree-{} edge metadata differs",
+                    node.index, phi.ell
+                ));
+            }
+            let target = parse_curve(
+                &context.base,
+                &recorded.target_curve,
+                &format!("source node {} degree-{} target", node.index, phi.ell),
+            )?;
+            if target.j != target_j {
+                return Err(format!(
+                    "source node {} degree-{} target is not rational root {}",
+                    node.index, phi.ell, root_ordinal
+                ));
+            }
+            let recomputed_target = curve_record(
+                &context.base.field,
+                &target.model,
+                "transported_by_verified_isogeny",
+            )?;
+            if recorded.target_curve != recomputed_target {
+                return Err(format!(
+                    "source node {} degree-{} target detector fields differ",
+                    node.index, phi.ell
+                ));
+            }
+            let kernel_polynomial: Vec<Fe> = recorded
+                .kernel_polynomial
+                .iter()
+                .enumerate()
+                .map(|(index, value)| {
+                    parse_fe(
+                        &context.base.field,
+                        value,
+                        &format!(
+                            "source node {} degree-{} kernel coefficient {index}",
+                            node.index, phi.ell
+                        ),
+                    )
+                })
+                .collect::<Result<_, _>>()?;
+            let velu = kernel::verify_kernel(
+                &context.base.field,
+                &source.model,
+                phi.ell,
+                &kernel_polynomial,
+            )
+            .map_err(|error| {
+                format!(
+                    "source node {} degree-{} kernel replay: {error:?}",
+                    node.index, phi.ell
+                )
+            })?;
+            if recorded.velu_codomain_a != hex_fe(&context.base.field, &velu.a)
+                || recorded.velu_codomain_b != hex_fe(&context.base.field, &velu.b)
+            {
+                return Err(format!(
+                    "source node {} degree-{} Velu codomain differs",
+                    node.index, phi.ell
+                ));
+            }
+            let (canonical, canonical_u2) = curve::canonical_model(&context.base.field, &velu)
+                .ok_or("kernel replay reached an exceptional target")?;
+            let linked_u2 = kernel::link_to_target(&context.base.field, &velu, &target.model)
+                .map_err(|error| {
+                    format!(
+                        "source node {} degree-{} replay target link: {error:?}",
+                        node.index, phi.ell
+                    )
+                })?;
+            if canonical != target.model
+                || canonical_u2 != linked_u2
+                || recorded.isomorphism_u2 != hex_fe(&context.base.field, &linked_u2)
+            {
+                return Err(format!(
+                    "source node {} degree-{} canonical target link differs",
+                    node.index, phi.ell
+                ));
+            }
+            let geometry = edge_geometry(
+                &context.base.field,
+                &source.model,
+                &source.j,
+                &target.model,
+                &target.j,
+                &kernel_polynomial,
+            );
+            let identity = edge_identity(
+                node.index,
+                phi.ell,
+                root_ordinal as u8,
+                &node.curve.j,
+                &recorded.target_curve.j,
+                &recorded.kernel_polynomial,
+            );
+            if recorded.geometry != geometry || recorded.edge_identity_sha256 != identity {
+                return Err(format!(
+                    "source node {} degree-{} geometry or identity differs",
+                    node.index, phi.ell
+                ));
+            }
+        }
+    }
+    Ok(())
+}
+
 fn expected_degree_counts(source_vertices: u64) -> Result<Vec<DegreeCount>, String> {
     SELECTED_DEGREES
         .into_iter()
@@ -762,20 +912,21 @@ pub fn verify_adjacency_jsonl<SR: BufRead, AR: BufRead>(
         for _ in 0..count {
             nodes.push(source.read::<NodeRecord>(false)?);
         }
-        let expanded: Vec<Result<Vec<AdjacencyEdgeRecord>, String>> = nodes
-            .par_iter()
-            .map(|node| expand_node(&context, node))
-            .collect();
-        for edges in expanded {
-            for expected in edges? {
-                let recorded: AdjacencyEdgeRecord = adjacency.read(true)?;
-                if recorded != expected {
-                    return Err(format!(
-                        "edge {} differs from independent replay",
-                        expected.edge_identity_sha256
-                    ));
-                }
+        let mut recorded = Vec::with_capacity(count);
+        for _ in 0..count {
+            let mut edges = Vec::with_capacity(DIRECTED_EDGES_PER_VERTEX as usize);
+            for _ in 0..DIRECTED_EDGES_PER_VERTEX {
+                edges.push(adjacency.read::<AdjacencyEdgeRecord>(true)?);
             }
+            recorded.push(edges);
+        }
+        let verified: Vec<Result<(), String>> = nodes
+            .par_iter()
+            .zip(recorded.par_iter())
+            .map(|(node, edges)| verify_node_edges(&context, node, edges))
+            .collect();
+        for result in verified {
+            result?;
         }
         consumed += count as u64;
     }
