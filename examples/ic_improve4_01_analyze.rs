@@ -56,12 +56,13 @@ fn load(dir: &str) -> Data {
             let mut arm = r["arm"].as_str().unwrap().to_string();
             // the cx of every arm here is a step function of b: one arm name over all sizes
             // (`sched:lpsgebw2@16+R1` -> `sched:lpsgebw2+R1`)
-            // round 4: only the schedule's cx(b) is dropped from the name; any other cx stays
+            // round 4: the schedule cx(b) is dropped from base arms (os = 0) only; C3 arms keep their cx
             if let Some((base, rest)) = arm.split_once('@') {
                 let suffix = rest.find('+').map(|i| &rest[i..]).unwrap_or("");
                 let cxs = &rest[..rest.len() - suffix.len()];
                 let sched = if b <= 17 { 16.0 } else { 8.0 };
-                if cxs.parse::<f64>().map(|x| x == sched).unwrap_or(false) {
+                let os0 = r["os"].as_f64().unwrap_or(0.0) == 0.0;
+                if os0 && cxs.parse::<f64>().map(|x| x == sched).unwrap_or(false) {
                     arm = format!("{base}{suffix}");
                 }
             }
