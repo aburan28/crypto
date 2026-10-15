@@ -135,7 +135,7 @@ def make_plan(archive_dir: Path) -> dict:
     require(requested == 4800, "paired charge arithmetic changed")
     return {
         "schema": "n83.k600-gray-hash-paired-source-protocol/v1",
-        "status": "SOURCE_READY_SUPERVISOR_AND_AUTHORIZATION_PENDING",
+        "status": "SOURCE_READY_AUTHORIZATION_PENDING",
         "study": "koblitz_n83_factor_base_sweep_20261008",
         "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
         "subgroup_order": str(SUBGROUP_ORDER),

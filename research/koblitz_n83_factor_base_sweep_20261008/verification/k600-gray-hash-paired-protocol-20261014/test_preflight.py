@@ -21,7 +21,7 @@ class PairedProtocolTest(unittest.TestCase):
 
     def test_saved_arms_share_target_base_and_resource_contract(self):
         value = json.loads(preflight.PLAN.read_text())
-        self.assertEqual(value["status"], "SOURCE_READY_SUPERVISOR_AND_AUTHORIZATION_PENDING")
+        self.assertEqual(value["status"], "SOURCE_READY_AUTHORIZATION_PENDING")
         self.assertFalse(value["new_n83_solver_search_executed"])
         self.assertIsNone(value["selected_best_total_runtime"])
         self.assertEqual(value["additional_seconds_requested_not_authorized"], 4800)
