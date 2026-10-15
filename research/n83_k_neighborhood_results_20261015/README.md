@@ -7,8 +7,11 @@ It reuses the canonical 4,000-point workload ID `12e14f274f8c`. The
 comparison is secondary exploratory data; the selected K3300 factor base
 already has a separate fresh-target Tier 1 result.
 
-After the cloud workflow uploads its raw ZIP, record the GitHub artifact ID
-and SHA-256. Extract it outside the repository, run the frozen
+The completed raw ZIP is GitHub artifact `11946288154`, SHA-256
+`f4e1edb15db6e3a4306f5f208e8f0714ef1a1e81d738ed9b30d3d28d3c30649b`;
+its independent analysis SHA-256 is
+`fe9c87c6730befc67fa8338204e48edc35dd3c66aa1cbd21b55fa29036b8eb88`.
+Extract it outside the repository, run the frozen
 `research/n83_k_neighborhood_20261015/verify.py` against its `results/`
 directory, and compare the local `analysis.json` SHA-256 with the archived
 cloud value. Then seal the artifact:
@@ -17,8 +20,8 @@ cloud value. Then seal the artifact:
 PYTHONDONTWRITEBYTECODE=1 python3 \
   research/n83_k_neighborhood_results_20261015/materialize.py \
   --artifact-zip /absolute/path/raw.zip \
-  --artifact-sha256 <raw-zip-sha256> \
-  --analysis-sha256 <independent-analysis-sha256> \
+  --artifact-sha256 f4e1edb15db6e3a4306f5f208e8f0714ef1a1e81d738ed9b30d3d28d3c30649b \
+  --analysis-sha256 fe9c87c6730befc67fa8338204e48edc35dd3c66aa1cbd21b55fa29036b8eb88 \
   /absolute/path/extracted/results
 ```
 
