@@ -163,13 +163,19 @@ adds tracked base-class shifts and yields 0 relations in 64 queries, rank
 0/16; 64 fresh geometric cover classes also yield 0 exact three-sum matches.
 The latter class logs are unknown, so those matches would be decomposition
 observations rather than relation equations. Lean checks the shifted relation
-identity and its unchanged 816-image support bound. The continuation also gives checked Type I
-generator fibers and a conorm class of exact P-192 subgroup order, proved
+identity and its unchanged 816-image support bound. The continuation also gives
+checked Type I generator fibers and a conorm class of exact P-192 subgroup order, proved
 through degree-two push-pull and checked quotient images. Three elliptic
 quotients reduce its genus-three subgroup class to
 \((-2G,0,0)\); the three-step Frobenius norm reduces to
 \((-2G,-2G,-2G)\), giving a nonzero class of exact order \(r\) over
-\(\mathbf F_{p^2}\). P-224 and P-256 have the same checked diagonal norm
+\(\mathbf F_{p^2}\). A new frozen Type I probe builds 16 distinct nonzero
+diagonal \(r\)-torsion vectors from \(\mathbf F_p\) cover points in these
+three quotient coordinates. It finds 0 exact three-sum matches and quotient
+incidence rank 0/16 in 64 known-scalar queries; an independent verifier
+enumerates all 816 triples. Lean checks the six-periodic Frobenius eigenvector
+step that explains diagonality when \(p^6\ne1\pmod r\); the finite-field and
+Jacobian bridges are stated separately. P-224 and P-256 have the same checked diagonal norm
 pattern, using \(G\) and \(17G\), respectively; independent point-coordinate
 verifiers replay the quotient values. A separate
 \(\mathbf F_{23^3}\) Scholten instance verifies the complete relation,

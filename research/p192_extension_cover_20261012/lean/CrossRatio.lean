@@ -1,6 +1,7 @@
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
+import Mathlib.Algebra.Module.LinearMap.Basic
 import Mathlib.Data.Finset.Card
 import Mathlib.Data.Finset.Fin
 import Mathlib.Data.Finset.Prod
@@ -362,6 +363,39 @@ theorem shifted_three_point_relation {A : Type*} [AddCommGroup A]
     a • N = (a • N + U + V) - U - V := by abel
     _ = X + Y + Z - U - V := by rw [h]
 
+/-- A six-periodic eigenvector cannot have eigenvalue whose sixth power is
+    different from one. Applied to elliptic r-torsion, this isolates the
+    Frobenius-fixed line when the other eigenvalue is p and p^6 ≠ 1 mod r. -/
+theorem six_periodic_eigenvector_zero {K A : Type*} [Field K]
+    [AddCommGroup A] [Module K A] (F : A →ₗ[K] A) (p : K) (y : A)
+    (heigen : F y = p • y)
+    (hperiod : F (F (F (F (F (F y))))) = y)
+    (hp : p ^ 6 ≠ 1) : y = 0 := by
+  have h2 : F (F y) = p ^ 2 • y := by
+    rw [heigen, map_smul, heigen]
+    simp [pow_two, smul_smul]
+  have h3 : F (F (F y)) = p ^ 3 • y := by
+    rw [h2, map_smul, heigen]
+    simp [pow_succ, smul_smul, pow_two, mul_assoc]
+  have h4 : F (F (F (F y))) = p ^ 4 • y := by
+    rw [h3, map_smul, heigen]
+    simp [pow_succ, smul_smul, mul_assoc]
+  have h5 : F (F (F (F (F y)))) = p ^ 5 • y := by
+    rw [h4, map_smul, heigen]
+    simp [pow_succ, smul_smul, mul_assoc]
+  have h6 : F (F (F (F (F (F y))))) = p ^ 6 • y := by
+    rw [h5, map_smul, heigen]
+    simp [pow_succ, smul_smul, mul_assoc]
+  have hsmul : (p ^ 6 - 1) • y = 0 := by
+    rw [sub_smul, one_smul]
+    rw [← h6, hperiod]
+    simp
+  have hnonzero : p ^ 6 - 1 ≠ 0 := sub_ne_zero.mpr hp
+  calc
+    y = (p ^ 6 - 1)⁻¹ • ((p ^ 6 - 1) • y) := by
+      simp [smul_smul, hnonzero]
+    _ = 0 := by rw [hsmul, smul_zero]
+
 end P192ExtensionCover
 
 #print axioms P192ExtensionCover.cyclic_cross_ratio_product
@@ -388,3 +422,4 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.three_sum_support_bound
 #print axioms P192ExtensionCover.shifted_three_sum_support_bound
 #print axioms P192ExtensionCover.shifted_three_point_relation
+#print axioms P192ExtensionCover.six_periodic_eigenvector_zero
