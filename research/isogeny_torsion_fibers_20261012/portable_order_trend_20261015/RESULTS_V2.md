@@ -121,3 +121,6 @@ this environment. A [frozen independent Linux replay
 protocol](INDEPENDENT_HOST_PROTOCOL_V1.md) and CI workflow are prepared for
 the exact public inputs. Its hosted VM is a different host class, but its
 timing remains descriptive and does not satisfy the L2 gate.
+The [research roadmap](RESEARCH_ROADMAP_V1.md) states how this finite
+fiber result connects to the direct χ oracle, the pairing-transfer
+track, and a complete single-target ECDLP frontier test.

@@ -40,7 +40,8 @@ done
   cat /proc/self/status
 } > "$out/host.txt"
 sha256sum "$binary" "$checker" "$meter" examples/different_j_trend_batch.rs \
-  examples/different_j_trend_batch_check.rs "$spec" "$study/run_batch_linux_v1.sh" \
+  examples/different_j_trend_batch_check.rs \
+  examples/different_j_order_process_meter.rs "$spec" "$study/run_batch_linux_v1.sh" \
   > "$out/build-sha256.txt"
 cat /proc/stat > "$out/proc-stat-before.txt"
 
