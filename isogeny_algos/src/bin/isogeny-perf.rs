@@ -429,6 +429,16 @@ fn load_cases(path: &str) -> Result<(Json, Vec<Json>), String> {
     if text_field(&header, "schema")? != "isogeny-perf.run/v1" {
         return Err("incorrect run schema".into());
     }
+    let Some(Json::Arr(args)) = header.get("args") else {
+        return Err("missing requested cases".into());
+    };
+    let arg_value = |flag: &str| {
+        args.windows(2)
+            .find(|a| a[0].as_str() == Some(flag))
+            .and_then(|a| a[1].as_str())
+    };
+    let expected_bits: Vec<usize> = csv(arg_value("--bits").unwrap_or("192,224"))?;
+    let expected_ells: Vec<u64> = csv(arg_value("--ells").unwrap_or("7,31"))?;
     let mut keys = std::collections::BTreeSet::new();
     for row in &rows {
         if text_field(row, "schema")? != "isogeny-perf.case/v1"
@@ -453,11 +463,25 @@ fn load_cases(path: &str) -> Result<(Json, Vec<Json>), String> {
         )) {
             return Err("duplicate case".into());
         }
+        if !expected_bits.contains(
+            &text_field(row, "bits")?
+                .parse::<usize>()
+                .map_err(|_| "invalid field width")?,
+        ) || !expected_ells.contains(
+            &text_field(row, "ell")?
+                .parse::<u64>()
+                .map_err(|_| "invalid degree")?,
+        ) {
+            return Err("case outside the requested matrix".into());
+        }
         for op in ["add_sub", "mul", "inv", "neg"] {
             text_field(row.get("operations").ok_or("missing operations")?, op)?
                 .parse::<u64>()
                 .map_err(|_| "invalid operation count")?;
         }
+    }
+    if keys.len() != expected_bits.len() * expected_ells.len() * Method::ALL.len() {
+        return Err("missing requested field-width/degree cell".into());
     }
     // Each field-width/degree cell must contain all eight distinct BMSS methods.
     for row in &rows {
@@ -588,7 +612,18 @@ mod tests {
         let path =
             std::env::temp_dir().join(format!("isogeny-perf-parser-{}.jsonl", std::process::id()));
         let input = Json::obj(vec![("p", Json::str(101))]);
-        let header = Json::obj(vec![("schema", Json::str("isogeny-perf.run/v1"))]);
+        let header = Json::obj(vec![
+            ("schema", Json::str("isogeny-perf.run/v1")),
+            (
+                "args",
+                Json::Arr(
+                    ["--bits", "192", "--ells", "7"]
+                        .into_iter()
+                        .map(Json::str)
+                        .collect(),
+                ),
+            ),
+        ]);
         let mut rows = vec![header];
         for method in Method::ALL {
             rows.push(Json::obj(vec![

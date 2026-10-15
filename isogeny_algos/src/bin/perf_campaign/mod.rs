@@ -113,12 +113,31 @@ pub fn run(args: &[String]) -> Result<(), String> {
     let mut pairs = vec![];
     let mut reference = None;
     let mut exact = true;
+    let mut count_references: [Option<Vec<Json>>; 2] = [None, None];
+    let mut repeated_counts = true;
     for attempt in &attempts {
         if attempt.get("valid") != Some(&Json::Bool(true)) {
             exact = false;
             continue;
         }
         let (_, rows) = load_cases(dir.join(text_field(attempt, "output")?).to_str().unwrap())?;
+        let arm = if attempt.get("baseline_binary") == Some(&Json::Bool(true)) {
+            0
+        } else {
+            1
+        };
+        if let Some(previous) = &count_references[arm] {
+            if rows.len() != previous.len()
+                || rows
+                    .iter()
+                    .zip(previous)
+                    .any(|(x, y)| x.get("operations") != y.get("operations"))
+            {
+                repeated_counts = false;
+            }
+        } else {
+            count_references[arm] = Some(rows.clone());
+        }
         if let Some(ref original) = reference {
             let original: &Vec<Json> = original;
             if rows.len() != original.len()
@@ -177,14 +196,15 @@ pub fn run(args: &[String]) -> Result<(), String> {
         .filter(|a| a.get("qualified_timing") == Some(&Json::Bool(true)))
         .count();
     let result=Json::obj(vec![("schema",Json::str("isogeny-perf.campaign/v1")),
-        ("status",Json::str(if exact && valid==20 {"PASS"}else{"CENSORED_OR_MISMATCH"})),
+        ("status",Json::str(if exact && repeated_counts && valid==20 {"PASS"}else{"CENSORED_OR_MISMATCH"})),
         ("exact_outputs_all_runs",Json::Bool(exact && valid==20)),("valid_runs",Json::Num(valid as i64)),
+        ("repeatable_counts_each_binary",Json::Bool(repeated_counts && valid==20)),
         ("qualified_timing_runs",Json::Num(qualified as i64)),("requested_runs",Json::Num(20)),
-        ("wall_speedup_eligible",Json::Bool(exact && qualified==20)),
+        ("wall_speedup_eligible",Json::Bool(exact && repeated_counts && qualified==20)),
         ("timing_note",Json::str("Report five round ratios and A/A spread per case. No pooled processor or field-width claim; VM host interference remains outside the reservation.")),
         ("attempts",Json::Arr(attempts)),("qualified_pairs",Json::Arr(pairs))]);
     write_json(&dir.join("SUMMARY.json"), &result)?;
-    if !exact || valid != 20 {
+    if !exact || !repeated_counts || valid != 20 {
         return Err("campaign has censored or mismatched runs; see SUMMARY.json".into());
     }
     Ok(())
