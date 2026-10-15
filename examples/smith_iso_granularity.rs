@@ -3,7 +3,13 @@
 //!
 //! ```text
 //! cargo run --release --example smith_iso_granularity -- --p 7 --out DIR
+//! cargo run --release --example smith_iso_granularity -- summarize --dir DIR 7 11
 //! ```
+//!
+//! `summarize` reads `iso_p<p>.csv.gz` and `controls_p<p>.json`, runs the
+//! protocol's nulls (999 within-stratum permutations of the `full_success`
+//! labels over isomorphism classes, seed 20261015; and the same stratified by
+//! stratum and orbit size), and writes `summary_p<p>.json` and `verdict.json`.
 //!
 //! Analyses every census model (monic octic, zero `x^7` coefficient, and its
 //! twist by the least non-residue) exactly as `smith_prop24 census` does,
@@ -19,7 +25,9 @@ use crypto_lib::cryptanalysis::smith_prop24 as sp;
 use flate2::{write::GzEncoder, Compression};
 use rayon::prelude::*;
 use serde_json::json;
-use std::collections::HashMap;
+use serde_json::Value;
+use std::collections::{BTreeMap, HashMap};
+use std::io::Read;
 use std::io::Write;
 use std::path::PathBuf;
 use std::{fs, time::Instant};
@@ -111,6 +119,10 @@ fn orbit(code: u64, tw: bool, p: u64) -> Vec<(u64, bool)> {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
+    if args.get(1).map(String::as_str) == Some("summarize") {
+        summarize_cmd(&args);
+        return;
+    }
     let p: u64 = arg(&args, "--p").expect("--p").parse().unwrap();
     let out = PathBuf::from(arg(&args, "--out").expect("--out DIR"));
     fs::create_dir_all(&out).unwrap();
@@ -203,9 +215,7 @@ fn main() {
         .sum::<u64>();
 
     // Control C1 against the 2026-10-14 class rows.
-    let census = format!(
-        "research/smith_prop24_native_20261014/data/census_p{p}_classes.csv"
-    );
+    let census = format!("research/smith_prop24_native_20261014/data/census_p{p}_classes.csv");
     let text = fs::read_to_string(&census).expect("census class rows");
     let (mut c1_rows, mut c1_mismatch) = (0u64, 0u64);
     for line in text.lines().skip(1) {
@@ -253,4 +263,267 @@ fn main() {
     )
     .unwrap();
     println!("{}", serde_json::to_string_pretty(&ctl).unwrap());
+}
+
+const PERMS: usize = 999;
+const SEED: u64 = 20261015;
+
+struct Iso {
+    lid: Vec<usize>,
+    key: Vec<[i64; 3]>,
+    stratum: Vec<u8>,
+    full: Vec<bool>,
+    size: Vec<u64>,
+    n_l: usize,
+}
+
+fn load(dir: &std::path::Path, p: u64) -> Iso {
+    let mut text = String::new();
+    flate2::read::GzDecoder::new(fs::File::open(dir.join(format!("iso_p{p}.csv.gz"))).unwrap())
+        .read_to_string(&mut text)
+        .unwrap();
+    let mut ids: HashMap<[i64; 3], usize> = HashMap::new();
+    let mut iso = Iso {
+        lid: vec![],
+        key: vec![],
+        stratum: vec![],
+        full: vec![],
+        size: vec![],
+        n_l: 0,
+    };
+    for line in text.lines().skip(1) {
+        let v: Vec<i64> = line.split(',').map(|x| x.parse().unwrap()).collect();
+        let k = [v[2], v[3], v[4]];
+        let n = ids.len();
+        iso.lid.push(*ids.entry(k).or_insert(n));
+        iso.key.push(k);
+        iso.stratum.push(v[5] as u8);
+        iso.full.push(v[6] == 1);
+        iso.size.push(v[7] as u64);
+    }
+    iso.n_l = ids.len();
+    iso
+}
+
+/// Share of models lying in an `L`-class with a `full_success` member.
+fn class_share(iso: &Iso, full: &[bool], total: u64) -> f64 {
+    let mut hit = vec![false; iso.n_l];
+    for (i, &f) in full.iter().enumerate() {
+        if f {
+            hit[iso.lid[i]] = true;
+        }
+    }
+    let s: u64 = (0..full.len())
+        .filter(|&i| hit[iso.lid[i]])
+        .map(|i| iso.size[i])
+        .sum();
+    s as f64 / total as f64
+}
+
+/// Permute `full` within groups; quantiles of the class share.
+fn null(iso: &Iso, group: &[u64], total: u64, rng: &mut sp::SplitMix64) -> Vec<f64> {
+    let mut groups: BTreeMap<u64, Vec<usize>> = BTreeMap::new();
+    for (i, &g) in group.iter().enumerate() {
+        groups.entry(g).or_default().push(i);
+    }
+    let mut out = Vec::with_capacity(PERMS);
+    let mut f = iso.full.clone();
+    for _ in 0..PERMS {
+        for idx in groups.values() {
+            let mut lab: Vec<bool> = idx.iter().map(|&i| iso.full[i]).collect();
+            for a in (1..lab.len()).rev() {
+                let b = rng.below(a as u64 + 1) as usize;
+                lab.swap(a, b);
+            }
+            for (j, &i) in idx.iter().enumerate() {
+                f[i] = lab[j];
+            }
+        }
+        out.push(class_share(iso, &f, total));
+    }
+    out.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    out
+}
+
+fn quant(v: &[f64], x: f64) -> f64 {
+    // linear interpolation between order statistics
+    let h = x * (v.len() - 1) as f64;
+    let (lo, hi) = (h.floor() as usize, h.ceil() as usize);
+    v[lo] + (h - lo as f64) * (v[hi] - v[lo])
+}
+
+fn band(c: f64, ns: &[f64]) -> &'static str {
+    if c < quant(ns, 0.025) {
+        "residual deficit beyond granularity"
+    } else if c > quant(ns, 0.975) {
+        "excess over granularity"
+    } else {
+        "granularity explains the deficit"
+    }
+}
+
+fn null_json(ns: &[f64], c: f64) -> Value {
+    json!({
+        "perms": PERMS, "seed": SEED,
+        "median": quant(ns, 0.5), "lo": quant(ns, 0.025), "hi": quant(ns, 0.975),
+        "frac_le_observed": ns.iter().filter(|&&x| x <= c).count() as f64 / ns.len() as f64,
+    })
+}
+
+fn summarize(dir: &std::path::Path, p: u64) -> Value {
+    let ctl: Value =
+        serde_json::from_str(&fs::read_to_string(dir.join(format!("controls_p{p}.json"))).unwrap())
+            .unwrap();
+    let valid = ["c1_pass", "c2_pass", "c3_pass"]
+        .iter()
+        .all(|k| ctl[k].as_bool() == Some(true));
+    let iso = load(dir, p);
+    let n = iso.size.len();
+    let total: u64 = iso.size.iter().sum();
+    let mut tract_l = vec![false; iso.n_l];
+    for i in 0..n {
+        if iso.stratum[i] != 0 {
+            tract_l[iso.lid[i]] = true;
+        }
+    }
+    let share = |pred: &dyn Fn(usize) -> bool| -> f64 {
+        (0..n)
+            .filter(|&i| pred(i))
+            .map(|i| iso.size[i])
+            .sum::<u64>() as f64
+            / total as f64
+    };
+    let u = share(&|i| tract_l[iso.lid[i]]);
+    let d = share(&|i| iso.full[i]);
+    let c = class_share(&iso, &iso.full, total);
+    let mut rng = sp::SplitMix64(SEED);
+    let g1: Vec<u64> = iso.stratum.iter().map(|&s| s as u64).collect();
+    let prim = null(&iso, &g1, total, &mut rng);
+    let g2: Vec<u64> = (0..n)
+        .map(|i| iso.stratum[i] as u64 * 1_000_000 + iso.size[i])
+        .collect();
+    let sec = null(&iso, &g2, total, &mut rng);
+
+    // Per-stratum iso-level success rate q_s.
+    let mut qs = [[0u64; 2]; 9];
+    for i in 0..n {
+        qs[iso.stratum[i] as usize][0] += 1;
+        qs[iso.stratum[i] as usize][1] += iso.full[i] as u64;
+    }
+    let q = |s: u8| qs[s as usize][1] as f64 / qs[s as usize][0] as f64;
+    // By k = number of tractable iso classes in a tractable L-class.
+    let mut members: Vec<Vec<usize>> = vec![vec![]; iso.n_l];
+    for i in 0..n {
+        if iso.stratum[i] != 0 {
+            members[iso.lid[i]].push(i);
+        }
+    }
+    let mut kb: BTreeMap<usize, (u64, u64, f64)> = BTreeMap::new();
+    let mut ks = vec![];
+    for m in members.iter().filter(|m| !m.is_empty()) {
+        ks.push(m.len());
+        let e = kb.entry(m.len().min(10)).or_default();
+        e.0 += 1;
+        e.1 += !m.iter().any(|&i| iso.full[i]) as u64;
+        e.2 += m.iter().map(|&i| 1.0 - q(iso.stratum[i])).product::<f64>();
+    }
+    ks.sort_unstable();
+    let by_k: BTreeMap<String, Value> = kb
+        .iter()
+        .map(|(k, e)| {
+            let lab = if *k == 10 {
+                "10+".into()
+            } else {
+                k.to_string()
+            };
+            (
+                format!("{lab:>3}"),
+                json!({"classes": e.0, "no_full": e.1, "expected_no_full": e.2}),
+            )
+        })
+        .collect();
+    // Post hoc probe: success rate by stratum and v2(#J(F_p)), #J = L(1).
+    let mut probe: BTreeMap<String, [u64; 2]> = BTreeMap::new();
+    let pi = p as i64;
+    for i in 0..n {
+        if iso.stratum[i] == 0 {
+            continue;
+        }
+        let [a1, a2, a3] = iso.key[i];
+        let nj = 1 + a1 + a2 + a3 + pi * a2 + pi * pi * a1 + pi * pi * pi;
+        let v2 = (nj.trailing_zeros()).min(6);
+        let e = probe
+            .entry(format!(
+                "s{}_v2_{}",
+                sp::STRATA[iso.stratum[i] as usize],
+                v2
+            ))
+            .or_default();
+        e[0] += 1;
+        e[1] += iso.full[i] as u64;
+    }
+    let s_rates: BTreeMap<String, Value> = (1..9u8)
+        .filter(|&s| qs[s as usize][0] > 0)
+        .map(|s| {
+            (
+                format!("#S(H)={}", sp::STRATA[s as usize]),
+                json!({"iso_classes": qs[s as usize][0], "full": qs[s as usize][1], "rate": q(s)}),
+            )
+        })
+        .collect();
+    json!({
+        "p": p,
+        "controls": ctl,
+        "instrument_valid": valid,
+        "models": total,
+        "iso_classes": n,
+        "tractable_iso_classes": (0..n).filter(|&i| iso.stratum[i] != 0).count(),
+        "full_iso_classes": iso.full.iter().filter(|&&f| f).count(),
+        "l_classes": iso.n_l,
+        "tractable_l_classes": ks.len(),
+        "median_tractable_iso_classes_per_tractable_l_class": ks[ks.len() / 2],
+        "U": u, "D": d, "C": c, "r": (c - d) / (u - d),
+        "iso_level_success_by_stratum": s_rates,
+        "null_primary": null_json(&prim, c),
+        "null_secondary": null_json(&sec, c),
+        "verdict": if valid { band(c, &prim) } else { "control failed - invalid" },
+        "verdict_secondary": band(c, &sec),
+        "tractable_l_classes_without_full": {
+            "observed": kb.values().map(|e| e.1).sum::<u64>(),
+            "expected_independent_iso": kb.values().map(|e| e.2).sum::<f64>(),
+        },
+        "by_k": by_k,
+        "post_hoc_by_stratum_and_v2_of_J": probe,
+    })
+}
+
+fn summarize_cmd(args: &[String]) {
+    let dir = PathBuf::from(arg(args, "--dir").expect("--dir DIR"));
+    let ps: Vec<u64> = args[4..].iter().map(|s| s.parse().unwrap()).collect();
+    let mut verdicts = BTreeMap::new();
+    for p in ps {
+        let s = summarize(&dir, p);
+        fs::write(
+            dir.join(format!("summary_p{p}.json")),
+            serde_json::to_string_pretty(&s).unwrap() + "\n",
+        )
+        .unwrap();
+        verdicts.insert(p.to_string(), s["verdict"].clone());
+        eprintln!(
+            "p={p}: C={:.4} null [{:.4}, {:.4}] -> {}",
+            s["C"], s["null_primary"]["lo"], s["null_primary"]["hi"], s["verdict"]
+        );
+    }
+    let vs: std::collections::BTreeSet<String> = verdicts.values().map(|v| v.to_string()).collect();
+    let overall = if vs.len() == 1 {
+        verdicts.values().next().unwrap().clone()
+    } else {
+        json!("prime-dependent")
+    };
+    fs::write(
+        dir.join("verdict.json"),
+        serde_json::to_string_pretty(&json!({"per_prime": verdicts, "overall": overall})).unwrap()
+            + "\n",
+    )
+    .unwrap();
 }
