@@ -1,0 +1,80 @@
+{
+  "additional_retained_n83_charge_seconds": 0,
+  "cases": [
+    {
+      "markov_hit_probability_ceiling": "1",
+      "point_multisets": "2423643343511761316264808",
+      "residual_summands": 0,
+      "small_summands": 5,
+      "summands": 5,
+      "uniform_nonidentity_multiplicity_ceiling_denominator": "2417851639230796216685688",
+      "uniform_nonidentity_multiplicity_ceiling_numerator": "2423643343511761316264808",
+      "worker_admitted": false
+    },
+    {
+      "markov_hit_probability_ceiling": "1",
+      "point_multisets": "8878309426598156108089140",
+      "residual_summands": 1,
+      "small_summands": 4,
+      "summands": 5,
+      "uniform_nonidentity_multiplicity_ceiling_denominator": "2417851639230796216685688",
+      "uniform_nonidentity_multiplicity_ceiling_numerator": "8878309426598156108089140",
+      "worker_admitted": true
+    },
+    {
+      "markov_hit_probability_ceiling": "1",
+      "point_multisets": "13009394065076279872900344",
+      "residual_summands": 2,
+      "small_summands": 3,
+      "summands": 5,
+      "uniform_nonidentity_multiplicity_ceiling_denominator": "2417851639230796216685688",
+      "uniform_nonidentity_multiplicity_ceiling_numerator": "13009394065076279872900344",
+      "worker_admitted": true
+    },
+    {
+      "markov_hit_probability_ceiling": "1",
+      "point_multisets": "79260004322307878365588638556",
+      "residual_summands": 0,
+      "small_summands": 6,
+      "summands": 6,
+      "uniform_nonidentity_multiplicity_ceiling_denominator": "2417851639230796216685688",
+      "uniform_nonidentity_multiplicity_ceiling_numerator": "79260004322307878365588638556",
+      "worker_admitted": false
+    },
+    {
+      "markov_hit_probability_ceiling": "1",
+      "point_multisets": "348413272489876759780963738848",
+      "residual_summands": 1,
+      "small_summands": 5,
+      "summands": 6,
+      "uniform_nonidentity_multiplicity_ceiling_denominator": "2417851639230796216685688",
+      "uniform_nonidentity_multiplicity_ceiling_numerator": "348413272489876759780963738848",
+      "worker_admitted": true
+    },
+    {
+      "markov_hit_probability_ceiling": "1",
+      "point_multisets": "638159564119735563815285249490",
+      "residual_summands": 2,
+      "small_summands": 4,
+      "summands": 6,
+      "uniform_nonidentity_multiplicity_ceiling_denominator": "2417851639230796216685688",
+      "uniform_nonidentity_multiplicity_ceiling_numerator": "638159564119735563815285249490",
+      "worker_admitted": true
+    }
+  ],
+  "formula": "C(B+m-j-1,m-j)*C(L+j-1,j)",
+  "import_receipt_sha256": "8816083a0c3721eaf254f5f0880121ae0cde24af54591294b26e83ede79f374f",
+  "residual_points": 143756,
+  "residual_signed_orbits": 866,
+  "retained_n83_solver_search_executed": false,
+  "run_audit_sha256": "32420a62bb6ccf8f9df7f03dea9040e518606740968110dc8c0ac47cb50cafd5",
+  "schema": "n83.mixed-orbit-support-screen/v1",
+  "scope": "point-multiset counts, not observed solver yield",
+  "search_result_sha256": "589cd927217ccc0ff6eca875a4c8ab6c851e33b23688fe8eb22b10248d325d98",
+  "selected_best_total_runtime": null,
+  "small_points": 196212,
+  "small_signed_orbits": 1182,
+  "source_commit": "f0a1e55f7cb6d965b0791ef68cb636ec8b8a3a1a",
+  "status": "ANALYTIC_NON_DISCRIMINATING",
+  "subgroup_order": "2417851639230796216685689"
+}

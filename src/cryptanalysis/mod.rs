@@ -128,6 +128,7 @@ pub mod curve_construction;
 pub mod curve_id;
 pub mod curve_traits;
 pub mod cyclotomic_factor_base;
+pub mod d4_weighted_s5;
 pub mod degree_reduction;
 pub mod degree_reduction_anf;
 pub mod delta_method;
@@ -163,6 +164,7 @@ pub mod ffd_harness;
 pub mod fghr_full;
 pub mod fghr_line;
 pub mod fght_snfs;
+pub mod fp_backend;
 pub(crate) mod fx_hash;
 pub mod gaudry_cubic;
 pub mod gaudry_quartic;
@@ -310,6 +312,7 @@ pub mod sig_fp_tower;
 pub mod signal_ratchet;
 pub mod signature_corpus;
 pub mod smith_kernel_coverage;
+pub mod smith_prop24;
 pub mod smt_oracle;
 pub mod solinas_correlations;
 pub mod sparse_macaulay;
@@ -318,6 +321,7 @@ pub mod subfield_fp3;
 pub mod symmetrized_semaev;
 pub mod tls12_kdf;
 pub mod tls13_kdf;
+pub mod two_sylow_search;
 pub mod visual_demos;
 pub mod visualize;
 pub mod wdsat_oracle;
@@ -407,9 +411,9 @@ pub use koblitz_index_calculus::{
 pub use koblitz_sparse_la::{
     block_lanczos_solve, block_wiedemann_kernel, filter_relations, solve_sparse_system,
     BlockLanczosOptions, BlockLanczosReport, BlockWiedemannOptions, BlockWiedemannReport,
-    CsrMatrix, FilterOptions, FilterReport, FilteredSystem, ModWord, SparseCoreSolver, SparseRow,
-    SparseRows, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport, SpmvBackend,
-    SpmvOptions, Wide, WideModulus, WordWidth, U128, U192, U256,
+    CsrMatrix, FilterOptions, FilterReport, FilterStrategy, FilteredSystem, ModWord,
+    SparseCoreSolver, SparseRow, SparseRows, SparseSolveOptions, SparseSolveOutcome,
+    SparseSolveReport, SpmvBackend, SpmvOptions, Wide, WideModulus, WordWidth, U128, U192, U256,
 };
 pub use lattice::{bkz_reduce, lll_reduce};
 pub use legacy_curve_attacks::{

@@ -1,0 +1,153 @@
+
+running 4201 tests
+i....iiiiii..............................i..................................i.......... 87/4201
+..................................................................iiii...i........i.... 174/4201
+..........i..i....................i....i........i...................................... 261/4201
+...................i..................i.......................i........................ 348/4201
+....................................................................................... 435/4201
+....................................iiiiii........i.................................... 522/4201
+....................................................................................... 609/4201
+....................................................................................... 696/4201
+...................................................................i...test cryptanalysis::cyclotomic_factor_base::tests::membership_systems_find_planted_decompositions has been running for over 60 seconds
+................ 783/4201
+....................................................................................... 870/4201
+.............................................i......................................... 957/4201
+....................................................................................... 1044/4201
+....................................................................................... 1131/4201
+...............ii.i.......i............................................i.........i.i... 1218/4201
+.......................................................................i............... 1305/4201
+............i........i........................i........................................ 1392/4201
+................................................test cryptanalysis::jacobian_transfer::tests::the_whole_registry_builds_and_round_trips has been running for over 60 seconds
+...........test cryptanalysis::jv_cover::tests::replayed_f4_agrees_with_the_full_solver_and_the_oracle has been running for over 60 seconds
+.i.....test cryptanalysis::jv_cover::tests::stopped_f4_agrees_with_the_full_solver_and_the_oracle has been running for over 60 seconds
+test cryptanalysis::jv_isogeny_walk::tests::a_short_walk_reaches_a_weak_curve_at_p7 has been running for over 60 seconds
+..i.................. 1479/4201
+........i....i......................................................................... 1566/4201
+..........................iiii...................test cryptanalysis::koblitz_groebner::tests::inherited_and_f5_engines_walk_the_same_tree_as_matrix_f4 has been running for over 60 seconds
+...................................... 1653/4201
+......test cryptanalysis::koblitz_groebner::tests::s3_over_supports_matches_coordinate_operations has been running for over 60 seconds
+................................................................................. 1740/4201
+.......................i.....i............i.......................................test cryptanalysis::koblitz_index_calculus::tests::the_u64_factorisation_matches_trial_division has been running for over 60 seconds
+test cryptanalysis::koblitz_isogeny_cost::tests::full_group_probes_over_a_random_subspace_still_solve_soundly has been running for over 60 seconds
+..... 1827/4201
+..................................test cryptanalysis::koblitz_sixsum_extract::tests::non_decomposable_targets_yield_no_relation has been running for over 60 seconds
+.........................i...........i............... 1914/4201
+....................................................................................... 2001/4201
+....................................................................i.................. 2088/4201
+...................................................................i................... 2175/4201
+......................test cryptanalysis::koblitz_sym_s4::tests::symmetric_solver_agrees_with_chain_and_brute_force has been running for over 60 seconds
+...........................................iiiiiiiiii..iiii.iiiii 2262/4201
+ii...............ii........................test cryptanalysis::pdp_split::tests::plans_agree_with_exhaustive_m3 has been running for over 60 seconds
+.i..iii...........i.................. 2342/4201
+cryptanalysis::pollard_collab::cairn::tests::a_key_submitter_signs_what_cairn_verifies --- FAILED
+. 2344/4201
+cryptanalysis::pollard_collab::cairn::tests::an_older_node_without_progress_turns_heartbeats_off_quietly --- FAILED
+.. 2347/4201
+cryptanalysis::pollard_collab::cairn::tests::generic_artifacts_use_the_persisted_commit_reveal_outbox --- FAILED
+cryptanalysis::pollard_collab::cairn::tests::heartbeats_carry_the_sessions_own_counters_at_the_cadence --- FAILED
+cryptanalysis::pollard_collab::cairn::tests::pending_commitments_survive_a_restart --- FAILED
+cryptanalysis::pollard_collab::cairn::tests::points_travel_through_cairn_as_commit_reveal_claims_and_solve --- FAILED
+cryptanalysis::pollard_collab::cairn::tests::the_client_speaks_enough_http --- FAILED
+......... 2361/4201
+cryptanalysis::pollard_collab::net::tests::foreign_job_is_refused --- FAILED
+. 2363/4201
+cryptanalysis::pollard_collab::net::tests::three_nodes_in_a_chain_converge --- FAILED
+.........................i............................................................. 2451/4201
+.............................................i.....................................i... 2538/4201
+.i..................................................................................... 2625/4201
+....i..................................................................i......i........ 2712/4201
+........test cryptanalysis::sig_fp_tower::tests::long_towers_with_one_generator_match_f4 has been running for over 60 seconds
+......ii.......................... 2754/4201
+cryptanalysis::smt_oracle::tests::z3_round_trip_bool --- FAILED
+cryptanalysis::smt_oracle::tests::z3_round_trip_bv1 --- FAILED
+...................iii........ii.....i............i.................................... 2843/4201
+...............................................i..i...i.....i..ii...................... 2930/4201
+....................................................................................... 3017/4201
+....................................................................................... 3104/4201
+.................................................................i..................... 3191/4201
+....................................................................................... 3278/4201
+....................................................i.................................. 3365/4201
+....................................................................................... 3452/4201
+....................................................................................... 3539/4201
+....................................................................................... 3626/4201
+....................................................................................... 3713/4201
+...i................................................................................... 3800/4201
+....................................................................................... 3887/4201
+....................................................................................... 3974/4201
+............................................................iii........................ 4061/4201
+........................................i.............................................. 4148/4201
+.....i...i...........................................
+failures:
+
+---- cryptanalysis::pollard_collab::cairn::tests::a_key_submitter_signs_what_cairn_verifies stdout ----
+
+thread 'cryptanalysis::pollard_collab::cairn::tests::a_key_submitter_signs_what_cairn_verifies' (1075473) panicked at src/cryptanalysis/pollard_collab/cairn.rs:1217:61:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::pollard_collab::cairn::tests::an_older_node_without_progress_turns_heartbeats_off_quietly stdout ----
+
+thread 'cryptanalysis::pollard_collab::cairn::tests::an_older_node_without_progress_turns_heartbeats_off_quietly' (1075475) panicked at src/cryptanalysis/pollard_collab/cairn.rs:1217:61:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::pollard_collab::cairn::tests::generic_artifacts_use_the_persisted_commit_reveal_outbox stdout ----
+
+thread 'cryptanalysis::pollard_collab::cairn::tests::generic_artifacts_use_the_persisted_commit_reveal_outbox' (1075478) panicked at src/cryptanalysis/pollard_collab/cairn.rs:1217:61:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::pollard_collab::cairn::tests::heartbeats_carry_the_sessions_own_counters_at_the_cadence stdout ----
+
+thread 'cryptanalysis::pollard_collab::cairn::tests::heartbeats_carry_the_sessions_own_counters_at_the_cadence' (1075479) panicked at src/cryptanalysis/pollard_collab/cairn.rs:1217:61:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::pollard_collab::cairn::tests::pending_commitments_survive_a_restart stdout ----
+
+thread 'cryptanalysis::pollard_collab::cairn::tests::pending_commitments_survive_a_restart' (1075480) panicked at src/cryptanalysis/pollard_collab/cairn.rs:1217:61:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::pollard_collab::cairn::tests::points_travel_through_cairn_as_commit_reveal_claims_and_solve stdout ----
+
+thread 'cryptanalysis::pollard_collab::cairn::tests::points_travel_through_cairn_as_commit_reveal_claims_and_solve' (1075481) panicked at src/cryptanalysis/pollard_collab/cairn.rs:1217:61:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::pollard_collab::cairn::tests::the_client_speaks_enough_http stdout ----
+
+thread 'cryptanalysis::pollard_collab::cairn::tests::the_client_speaks_enough_http' (1075482) panicked at src/cryptanalysis/pollard_collab/cairn.rs:1217:61:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::pollard_collab::net::tests::foreign_job_is_refused stdout ----
+
+thread 'cryptanalysis::pollard_collab::net::tests::foreign_job_is_refused' (1075493) panicked at src/cryptanalysis/pollard_collab/net.rs:359:84:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::pollard_collab::net::tests::three_nodes_in_a_chain_converge stdout ----
+
+thread 'cryptanalysis::pollard_collab::net::tests::three_nodes_in_a_chain_converge' (1075495) panicked at src/cryptanalysis/pollard_collab/net.rs:304:88:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::smt_oracle::tests::z3_round_trip_bool stdout ----
+
+thread 'cryptanalysis::smt_oracle::tests::z3_round_trip_bool' (1098785) panicked at src/cryptanalysis/smt_oracle.rs:869:65:
+solver runs: "write script /Volumes/SSD990/llm/tmp/smt-pdp-28403-0.smt2: No space left on device (os error 28)"
+
+---- cryptanalysis::smt_oracle::tests::z3_round_trip_bv1 stdout ----
+
+thread 'cryptanalysis::smt_oracle::tests::z3_round_trip_bv1' (1098786) panicked at src/cryptanalysis/smt_oracle.rs:869:65:
+solver runs: "write script /Volumes/SSD990/llm/tmp/smt-pdp-28403-0.smt2: No space left on device (os error 28)"
+
+
+failures:
+    cryptanalysis::pollard_collab::cairn::tests::a_key_submitter_signs_what_cairn_verifies
+    cryptanalysis::pollard_collab::cairn::tests::an_older_node_without_progress_turns_heartbeats_off_quietly
+    cryptanalysis::pollard_collab::cairn::tests::generic_artifacts_use_the_persisted_commit_reveal_outbox
+    cryptanalysis::pollard_collab::cairn::tests::heartbeats_carry_the_sessions_own_counters_at_the_cadence
+    cryptanalysis::pollard_collab::cairn::tests::pending_commitments_survive_a_restart
+    cryptanalysis::pollard_collab::cairn::tests::points_travel_through_cairn_as_commit_reveal_claims_and_solve
+    cryptanalysis::pollard_collab::cairn::tests::the_client_speaks_enough_http
+    cryptanalysis::pollard_collab::net::tests::foreign_job_is_refused
+    cryptanalysis::pollard_collab::net::tests::three_nodes_in_a_chain_converge
+    cryptanalysis::smt_oracle::tests::z3_round_trip_bool
+    cryptanalysis::smt_oracle::tests::z3_round_trip_bv1
+
+test result: FAILED. 4073 passed; 11 failed; 117 ignored; 0 measured; 0 filtered out; finished in 2226.10s
+
+error: test failed, to rerun pass `--lib`

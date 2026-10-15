@@ -1,0 +1,5 @@
+# in-flight job outputs (run_jobs.sh); stderr of failed jobs is force-added when a run completes
+*.tmp
+results/tuning/*.err
+results/test/*.err
+results/rho/*.err

@@ -1,0 +1,23 @@
+m,N,x_r,D_XL,exact,method
+2,20,1914092299,24,yes,ntt_delta(d=4+delta)
+2,20,622174540,24,yes,ntt_delta(d=4+delta)
+2,22,209365541,26,yes,ntt_delta(d=4+delta)
+2,22,237440363,26,yes,ntt_delta(d=4+delta)
+2,12,464833983,16,yes,ntt_delta(d=4+delta)
+2,12,558177188,16,yes,ntt_delta(d=4+delta)
+2,14,1255255582,18,yes,ntt_delta(d=4+delta)
+2,14,1563871033,18,yes,ntt_delta(d=4+delta)
+2,16,1312284326,20,yes,ntt_delta(d=4+delta)
+2,16,1731249962,20,yes,ntt_delta(d=4+delta)
+2,18,1892822788,22,yes,ntt_delta(d=4+delta)
+2,18,417319711,22,yes,ntt_delta(d=4+delta)
+2,24,1002906059,28,yes,ntt_delta(d=4+delta)
+2,24,150938225,28,yes,ntt_delta(d=4+delta)
+2,26,1118191946,30,yes,ntt_delta(d=4+delta)
+2,26,1132329660,30,yes,ntt_delta(d=4+delta)
+2,12,464833983,16,yes,macaulay_rank
+3,9,1389271940,13,yes,macaulay_rank
+3,9,388393539,13,yes,macaulay_rank
+4,8,1102336260,12,yes,macaulay_rank
+4,8,92234565,12,yes,macaulay_rank
+3,12,334226296,14,lower_bound,macaulay_rank(1 not in span at D=13; 40-min cap)

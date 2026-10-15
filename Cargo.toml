@@ -31,6 +31,10 @@ name = "ic"
 path = "src/bin/ic.rs"
 
 [[bin]]
+name = "pkm-aux-search"
+path = "src/bin/pkm_aux_search.rs"
+
+[[bin]]
 name = "quartic-ic"
 path = "src/bin/quartic_ic.rs"
 

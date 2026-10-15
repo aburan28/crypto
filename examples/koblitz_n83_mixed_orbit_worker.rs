@@ -1,8 +1,10 @@
 //! Replay two pinned N83 bases and collect bounded one/two-residual relations.
 //!
-//! `verify` imports both S3 objects and checks their exact orbit-labelled
-//! prefix. `run` additionally requires a 4 GiB, zero-swap Linux cgroup and
+//! `verify` and `verify-alt` import pinned S3 objects and check their exact
+//! orbit-labelled prefix. `run` and `run-alt` additionally require a 4 GiB, zero-swap Linux cgroup and
 //! an external budget supervisor. Neither mode downloads an object.
+//! `verify-control` and `control-run` use a pinned known-answer witness only;
+//! their outcomes are not natural-target relation-yield measurements.
 
 use crypto_lib::binary_ecc::curve::point_neg;
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
@@ -10,8 +12,8 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_explicit_frobenius_point_factor_base, ChainS3Limits, FrobeniusFactorBase, KoblitzCurve,
 };
 use crypto_lib::cryptanalysis::koblitz_large_prime::{
-    build_exact_residual_suffix_factor_base, FeedOutcome, LargePrimeLimits, MixedOrbitDomains,
-    WideLargePrimeEliminator,
+    build_exact_residual_difference_factor_base, build_exact_residual_suffix_factor_base,
+    FeedOutcome, LargePrimeLimits, MixedOrbitDomains, WideLargePrimeEliminator,
 };
 use flate2::read::GzDecoder;
 use num_bigint::BigUint;
@@ -28,27 +30,54 @@ type Result<T> = std::result::Result<T, Box<dyn Error>>;
 const STUDY: &str = "koblitz_n83_factor_base_sweep_20261008";
 const CURVE: &str = "icv1-f2m83-tm6151469093347-debefd74";
 const PREFIX: &str = "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/a0/";
+const PILOT_PREFIX: &str =
+    "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/";
 const SMALL_MANIFEST: &[u8] = include_bytes!("../research/koblitz_n83_factor_base_sweep_20261008/verification/matched-k1182-k2048-900s-20261011/evidence-01/panel-k1182/manifest.json");
+const SMALL_600_MANIFEST: &[u8] =
+    include_bytes!("../research/koblitz_n83_factor_base_sweep_20261008/pilot-01/manifest.json");
 const ENVELOPE_MANIFEST: &[u8] = include_bytes!("../research/koblitz_n83_factor_base_sweep_20261008/verification/remaining-budget-k2048-20261010/manifest.json");
 const SMALL_HASH: &str = "76e1cbe4ea5a9d26e5b24a2d27f9401271dc471846529190a0416d8e09837a92";
+const SMALL_600_HASH: &str = "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e";
 const ENVELOPE_HASH: &str = "82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851";
 const PUBLIC_CORPUS_HASH: &str = "831eaa7be2387634fd610f6706103b2af9b4e274f0db59923c0280af3cbed74b";
+const CONTROL_FIXTURE: &[u8] = include_bytes!("../research/koblitz_n83_factor_base_sweep_20261008/verification/mixed-orbit-known-witness-source-20261012/fixture.json");
 
 struct PinnedBase {
     manifest: &'static [u8],
     object_hash: &'static str,
     columns: usize,
+    panel_schema: &'static str,
+    panel_status: &'static str,
+    panel_count: usize,
+    s3_prefix: &'static str,
 }
 
 const SMALL: PinnedBase = PinnedBase {
     manifest: SMALL_MANIFEST,
     object_hash: SMALL_HASH,
     columns: 1182,
+    panel_schema: "n83.factor-base-panel/v2-size-frontier",
+    panel_status: "completed_factor_base_object",
+    panel_count: 1,
+    s3_prefix: PREFIX,
+};
+const SMALL_600: PinnedBase = PinnedBase {
+    manifest: SMALL_600_MANIFEST,
+    object_hash: SMALL_600_HASH,
+    columns: 600,
+    panel_schema: "n83.factor-base-panel/v1",
+    panel_status: "completed_factor_base_panel",
+    panel_count: 54,
+    s3_prefix: PILOT_PREFIX,
 };
 const ENVELOPE: PinnedBase = PinnedBase {
     manifest: ENVELOPE_MANIFEST,
     object_hash: ENVELOPE_HASH,
     columns: 2048,
+    panel_schema: "n83.factor-base-panel/v2-size-frontier",
+    panel_status: "completed_factor_base_object",
+    panel_count: 1,
+    s3_prefix: PREFIX,
 };
 
 fn decimal(value: &Value) -> Result<BigUint> {
@@ -119,21 +148,32 @@ fn bound_archive(
     }
     let header: Value = serde_json::from_slice(manifest)?;
     let rows = header["bases"].as_array().ok_or("manifest bases")?;
-    let row = rows.first().ok_or("missing base")?;
     let object = format!("objects/{}.jsonl.gz", spec.object_hash);
-    if header["schema"] != "n83.factor-base-panel/v2-size-frontier"
-        || header["status"] != "completed_factor_base_object"
+    if header["schema"] != spec.panel_schema
+        || header["status"] != spec.panel_status
         || header["study"] != STUDY
-        || header["completed_base_count"] != 1
-        || rows.len() != 1
-        || row["a"] != 0
+        || header["completed_base_count"] != spec.panel_count
+        || rows.len() != spec.panel_count
+        || (spec.panel_count > 1 && header["expected_base_count"] != spec.panel_count)
+    {
+        return Err("manifest panel binding".into());
+    }
+    let selected: Vec<_> = rows
+        .iter()
+        .filter(|row| row["compressed_blake3"] == spec.object_hash)
+        .collect();
+    if selected.len() != 1 {
+        return Err("manifest selected row binding".into());
+    }
+    let row = selected[0];
+    if row["a"] != 0
         || row["policy"] != "public_x_hash"
         || row["seed"] != 2026100801u64
         || row["columns"] != spec.columns
         || row["points"] != spec.columns * 166
         || row["object"] != object
         || row["compressed_blake3"] != spec.object_hash
-        || row["s3_uri"] != format!("{PREFIX}{object}")
+        || row["s3_uri"] != format!("{}{object}", spec.s3_prefix)
         || row["bytes"].as_u64() != Some(compressed.len() as u64)
     {
         return Err("manifest row binding".into());
@@ -144,6 +184,75 @@ fn bound_archive(
         return Err("plain object hash mismatch".into());
     }
     Ok((row.clone(), plain))
+}
+
+fn pinned_pilot_row(manifest: &[u8], object_hash: &str) -> Result<Value> {
+    if manifest != SMALL_600_MANIFEST
+        || object_hash.len() != 64
+        || !object_hash
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+    {
+        return Err("pinned pilot manifest or object hash mismatch".into());
+    }
+    let header: Value = serde_json::from_slice(manifest)?;
+    let rows = header["bases"].as_array().ok_or("pilot manifest bases")?;
+    if header["schema"] != "n83.factor-base-panel/v1"
+        || header["status"] != "completed_factor_base_panel"
+        || header["study"] != STUDY
+        || header["completed_base_count"] != 54
+        || header["expected_base_count"] != 54
+        || rows.len() != 54
+    {
+        return Err("pilot manifest panel binding".into());
+    }
+    let selected: Vec<_> = rows
+        .iter()
+        .filter(|row| row["compressed_blake3"] == object_hash)
+        .collect();
+    if selected.len() != 1 {
+        return Err("pilot object is not unique in pinned manifest".into());
+    }
+    let row = selected[0];
+    let columns = row["columns"].as_u64().ok_or("pilot columns")?;
+    let policy = row["policy"].as_str().ok_or("pilot policy")?;
+    let seed = row["seed"].as_u64().ok_or("pilot seed")?;
+    let object = format!("objects/{object_hash}.jsonl.gz");
+    if row["a"] != 0
+        || ![64, 256, 600].contains(&columns)
+        || ![
+            "public_x_sequential",
+            "public_x_hash",
+            "public_x_gray_prefix",
+        ]
+        .contains(&policy)
+        || !(2026100801..=2026100803).contains(&seed)
+        || row["points"].as_u64() != Some(columns * 166)
+        || row["object"] != object
+        || row["s3_uri"] != format!("{PILOT_PREFIX}{object}")
+    {
+        return Err("pilot row is outside the primary signed-orbit panel".into());
+    }
+    Ok(row.clone())
+}
+
+fn bound_pilot_archive(
+    object_hash: &str,
+    manifest: &[u8],
+    compressed: &[u8],
+) -> Result<(Value, Vec<u8>)> {
+    let row = pinned_pilot_row(manifest, object_hash)?;
+    if blake3::hash(compressed).to_hex().as_str() != object_hash
+        || row["bytes"].as_u64() != Some(compressed.len() as u64)
+    {
+        return Err("pilot compressed object mismatch".into());
+    }
+    let mut plain = Vec::new();
+    GzDecoder::new(compressed).read_to_end(&mut plain)?;
+    if blake3::hash(&plain).to_hex().as_str() != row["plain_blake3"].as_str().ok_or("plain hash")? {
+        return Err("pilot plain object hash mismatch".into());
+    }
+    Ok((row, plain))
 }
 
 fn decode_base(row: &Value, plain: &[u8], curve: &KoblitzCurve) -> Result<FrobeniusFactorBase> {
@@ -268,17 +377,32 @@ fn import(
     decode_base(&row, &plain, curve)
 }
 
+fn import_pilot(
+    object_hash: &str,
+    manifest: &Path,
+    object: &Path,
+    curve: &KoblitzCurve,
+) -> Result<(Value, FrobeniusFactorBase)> {
+    let (row, plain) = bound_pilot_archive(object_hash, &fs::read(manifest)?, &fs::read(object)?)?;
+    let base = decode_base(&row, &plain, curve)?;
+    Ok((row, base))
+}
+
 fn import_pair(
     args: &[String],
+    small_spec: &PinnedBase,
 ) -> Result<(KoblitzCurve, FrobeniusFactorBase, FrobeniusFactorBase)> {
     let curve = KoblitzCurve::known_n83_k0().ok_or("pinned Koblitz curve")?;
     if curve.label() != CURVE || curve.cofactor != BigUint::from(4u8) {
         return Err("curve identity mismatch".into());
     }
-    let small = import(&SMALL, Path::new(&args[1]), Path::new(&args[2]), &curve)?;
+    let small = import(small_spec, Path::new(&args[1]), Path::new(&args[2]), &curve)?;
     let envelope = import(&ENVELOPE, Path::new(&args[3]), Path::new(&args[4]), &curve)?;
     let residual = build_exact_residual_suffix_factor_base(&curve, &small, &envelope)?;
-    if residual.signed_orbits.len() != 866 || residual.points.len() != 143_756 {
+    let expected_residual_orbits = ENVELOPE.columns - small_spec.columns;
+    if residual.signed_orbits.len() != expected_residual_orbits
+        || residual.points.len() != expected_residual_orbits * 166
+    {
         return Err("residual suffix size mismatch".into());
     }
     Ok((curve, small, residual))
@@ -357,7 +481,186 @@ fn trial_coefficient(label: &[u8], trial: u64, modulus: &BigUint) -> BigUint {
     BigUint::from_bytes_le(hash.finalize().as_bytes()) % modulus
 }
 
-fn run(args: &[String]) -> Result<()> {
+fn parse_control_bytes(bytes: &[u8]) -> Result<Value> {
+    if bytes != CONTROL_FIXTURE {
+        return Err("known-answer fixture differs from pinned bytes".into());
+    }
+    let fixture: Value = serde_json::from_slice(bytes)?;
+    if fixture["schema"] != "n83.mixed-orbit-known-witness/v1"
+        || fixture["scope"] != "known_answer_control_only"
+        || fixture["curve_slug"] != CURVE
+        || fixture["equation"]["a"] != "0"
+        || fixture["equation"]["b"] != "1"
+        || fixture["equation"]["small_summands"] != 3
+        || fixture["equation"]["residual_summands"] != 2
+        || fixture["archive"]["small"]["s3_uri"] != format!("{PREFIX}objects/{SMALL_HASH}.jsonl.gz")
+        || fixture["archive"]["envelope"]["s3_uri"]
+            != format!("{PREFIX}objects/{ENVELOPE_HASH}.jsonl.gz")
+    {
+        return Err("known-answer fixture metadata".into());
+    }
+    Ok(fixture)
+}
+
+fn control_target(
+    path: &Path,
+    curve: &KoblitzCurve,
+    small: &FrobeniusFactorBase,
+    residual: &FrobeniusFactorBase,
+) -> Result<BinaryPoint> {
+    let fixture = parse_control_bytes(&fs::read(path)?)?;
+    if fixture["subgroup_order"] != curve.subgroup_order.to_string() {
+        return Err("known-answer subgroup order".into());
+    }
+    let terms = fixture["terms"].as_array().ok_or("known-answer terms")?;
+    let indices = [0usize, 166, 332, 196_212, 196_378];
+    if terms.len() != indices.len() {
+        return Err("known-answer term count".into());
+    }
+    let mut sum = BinaryPoint::Infinity;
+    for (&index, term) in indices.iter().zip(terms) {
+        let selected = if index < 196_212 {
+            &small.points[index]
+        } else {
+            &residual.points[index - 196_212]
+        };
+        if term["global_point_index"] != index
+            || term["domain"] != if index < 196_212 { "small" } else { "residual" }
+            || term["column"] != index / 166
+            || term["phase"] != 0
+            || term["negative"] != false
+            || term["coefficient"] != "1"
+            || point(&term["point"])? != *selected
+        {
+            return Err("known-answer selected point differs from imported base".into());
+        }
+        sum = curve.add(&sum, selected);
+    }
+    let target = point(&fixture["equation"]["target"])?;
+    if target == BinaryPoint::Infinity
+        || !curve.curve.is_on_curve(&target)
+        || curve.mul(&target, &curve.subgroup_order) != BinaryPoint::Infinity
+        || sum != target
+    {
+        return Err("known-answer group sum mismatch".into());
+    }
+    Ok(target)
+}
+
+fn control_run(args: &[String]) -> Result<()> {
+    if args.len() != 10 {
+        return Err("usage: control-run SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT FIXTURE BUDGET_SECONDS CONFLICT_BUDGET MAX_MODELS OUTPUT_DIR".into());
+    }
+    let budget: u64 = args[6].parse()?;
+    let conflicts: u64 = args[7].parse()?;
+    let models: usize = args[8].parse()?;
+    if !(1..=7200).contains(&budget)
+        || !(1..=10_000_000).contains(&conflicts)
+        || !(1..=1024).contains(&models)
+    {
+        return Err("invalid bounded control configuration".into());
+    }
+    cgroup_gate()?;
+    let start = Instant::now();
+    let output = Path::new(&args[9]);
+    fs::create_dir(output)?;
+    write_new(
+        &output.join("config.json"),
+        &json!({
+            "schema":"n83.mixed-orbit-known-witness-config/v1",
+            "scope":"known_answer_control_only", "study":STUDY,
+            "fixture_blake3":blake3::hash(CONTROL_FIXTURE).to_hex().to_string(),
+            "small_object_blake3":SMALL_HASH, "envelope_object_blake3":ENVELOPE_HASH,
+            "budget_seconds":budget, "conflict_budget":conflicts, "max_models":models,
+            "small_summands":3, "residual_summands":2,
+            "memory_cgroup_limit_bytes":4294967296u64,
+            "memory_cgroup_swap_limit_bytes":0
+        }),
+    )?;
+    let cap_path = output.join("cap.json");
+    std::thread::spawn(move || {
+        std::thread::sleep(Duration::from_secs(budget));
+        let _ = write_new(
+            &cap_path,
+            &json!({
+                "schema":"n83.mixed-orbit-known-witness-cap/v1",
+                "status":"UNKNOWN_budget", "budget_seconds":budget,
+                "elapsed_process_wall_ms":start.elapsed().as_secs_f64()*1000.0
+            }),
+        );
+        std::process::exit(124);
+    });
+    let (curve, small, residual) = import_pair(args, &SMALL)?;
+    let target = control_target(Path::new(&args[5]), &curve, &small, &residual)?;
+    let import_ms = start.elapsed().as_secs_f64() * 1000.0;
+    let domains = MixedOrbitDomains::new(&curve, &small, &residual)?;
+    let limits = ChainS3Limits {
+        max_variables: 150_000,
+        max_domain_clauses: 12_000_000,
+        max_models: models,
+        conflict_budget: conflicts,
+    };
+    let (candidate, stats) = domains.search(
+        1,
+        &BigUint::from(0u8),
+        &BigUint::from(1u8),
+        &target,
+        3,
+        2,
+        limits,
+        true,
+    );
+    let candidate_record = candidate.as_ref().map(|row| -> Result<Value> {
+        let mut sum = BinaryPoint::Infinity;
+        for &index in &row.small_point_indices {
+            sum = curve.add(&sum, small.points.get(index).ok_or("candidate small index")?);
+        }
+        for point in &row.residual_points {
+            sum = curve.add(&sum, point);
+        }
+        if sum != target || row.coef_a != BigUint::from(0u8)
+            || row.coef_b != BigUint::from(1u8)
+        {
+            return Err("known-answer candidate failed group replay".into());
+        }
+        Ok(json!({
+            "a":row.coef_a.to_string(), "b":row.coef_b.to_string(),
+            "small_point_indices":row.small_point_indices,
+            "residual_points":row.residual_points.iter().map(point_json).collect::<Result<Vec<_>>>()?
+        }))
+    }).transpose()?;
+    let status = if stats.invalid_models != 0 {
+        "PRODUCER_FAILURE_invalid_model"
+    } else if candidate_record.is_some() {
+        "PASS_known_witness_solver_access"
+    } else if stats.exhausted && stats.patterns_attempted == 0 {
+        "UNKNOWN_preflight_cap"
+    } else if stats.exhausted {
+        "UNKNOWN_search_cap"
+    } else if stats.refuted {
+        "PRODUCER_FAILURE_known_witness_refuted"
+    } else {
+        "PRODUCER_FAILURE_unclassified_solver_result"
+    };
+    write_new(
+        &output.join("result.json"),
+        &json!({
+            "schema":"n83.mixed-orbit-known-witness-result/v1",
+            "scope":"known_answer_control_only", "status":status,
+            "candidate":candidate_record, "search":stats,
+            "target":point_json(&target)?,
+            "base_import_elapsed_ms_L0":import_ms,
+            "worker_wall_ms_L0":start.elapsed().as_secs_f64()*1000.0,
+            "memory_cgroup_peak_bytes":cgroup_peak_bytes()?,
+            "natural_relations":Value::Null,
+            "total_index_calculus_runtime_ms":Value::Null,
+            "selected_best_total_runtime":Value::Null
+        }),
+    )?;
+    Ok(())
+}
+
+fn run(args: &[String], small_spec: &PinnedBase) -> Result<()> {
     if args.len() != 13 {
         return Err("usage: run SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT CORPUS BUDGET_SECONDS MAX_TRIALS CONFLICT_BUDGET MAX_MODELS SMALL_SUMMANDS RESIDUAL_SUMMANDS OUTPUT_DIR".into());
     }
@@ -385,8 +688,8 @@ fn run(args: &[String]) -> Result<()> {
         &output.join("config.json"),
         &json!({
             "schema":"n83.mixed-orbit-partial-config/v1", "study":STUDY,
-            "small_object_blake3":SMALL_HASH, "envelope_object_blake3":ENVELOPE_HASH,
-            "small_manifest_blake3":blake3::hash(SMALL_MANIFEST).to_hex().to_string(),
+            "small_object_blake3":small_spec.object_hash, "envelope_object_blake3":ENVELOPE_HASH,
+            "small_manifest_blake3":blake3::hash(small_spec.manifest).to_hex().to_string(),
             "envelope_manifest_blake3":blake3::hash(ENVELOPE_MANIFEST).to_hex().to_string(),
             "source_blake3":blake3::hash(include_bytes!("koblitz_n83_mixed_orbit_worker.rs")).to_hex().to_string(),
             "public_corpus_path":args[5], "public_corpus_canonical_json_blake3":PUBLIC_CORPUS_HASH,
@@ -413,7 +716,7 @@ fn run(args: &[String]) -> Result<()> {
         );
         std::process::exit(124);
     });
-    let (curve, small, residual) = import_pair(args)?;
+    let (curve, small, residual) = import_pair(args, small_spec)?;
     let import_ms = start.elapsed().as_secs_f64() * 1000.0;
     let (target, corpus_hash) = public_target(Path::new(&args[5]), &curve)?;
     let domains = MixedOrbitDomains::new(&curve, &small, &residual)?;
@@ -523,7 +826,7 @@ fn run(args: &[String]) -> Result<()> {
         &output.join("result.json"),
         &json!({
             "schema":"n83.mixed-orbit-partial-result/v1", "study":STUDY,
-            "status":status, "small_object_blake3":SMALL_HASH,
+            "status":status, "small_object_blake3":small_spec.object_hash,
             "envelope_object_blake3":ENVELOPE_HASH,
             "public_corpus_canonical_json_blake3":corpus_hash,
             "small_signed_orbits":small.signed_orbits.len(),
@@ -548,14 +851,177 @@ fn run(args: &[String]) -> Result<()> {
     Ok(())
 }
 
+fn require_distinct_pilot_streams(base_row: &Value, pool_row: &Value) -> Result<()> {
+    if base_row["policy"] == pool_row["policy"] && base_row["seed"] == pool_row["seed"] {
+        return Err("cross-stream run requires distinct policy or seed".into());
+    }
+    Ok(())
+}
+
+/// One bounded natural-target call after exact replay of two different pilot streams.
+/// A separate supervisor must supply the local archive bytes and account for the run.
+fn run_cross_pilot(args: &[String]) -> Result<()> {
+    if args.len() != 14 {
+        return Err("usage: run-cross-pilot BASE_HASH BASE_MANIFEST BASE_OBJECT POOL_HASH POOL_MANIFEST POOL_OBJECT CORPUS BUDGET_SECONDS CONFLICT_BUDGET MAX_MODELS BASE_SUMMANDS RESIDUAL_SUMMANDS OUTPUT_DIR".into());
+    }
+    let budget: u64 = args[8].parse()?;
+    let conflicts: u64 = args[9].parse()?;
+    let models: usize = args[10].parse()?;
+    let base_summands: usize = args[11].parse()?;
+    let residual_summands: usize = args[12].parse()?;
+    if !(1..=7200).contains(&budget)
+        || !(1..=10_000_000).contains(&conflicts)
+        || !(1..=1024).contains(&models)
+        || base_summands < 3
+        || !(1..=2).contains(&residual_summands)
+        || !(5..=6).contains(&(base_summands + residual_summands))
+    {
+        return Err("invalid bounded cross-stream search configuration".into());
+    }
+    let base_row = pinned_pilot_row(SMALL_600_MANIFEST, &args[1])?;
+    let pool_row = pinned_pilot_row(SMALL_600_MANIFEST, &args[4])?;
+    require_distinct_pilot_streams(&base_row, &pool_row)?;
+    cgroup_gate()?;
+    let start = Instant::now();
+    let output = Path::new(&args[13]);
+    fs::create_dir(output)?;
+    write_new(
+        &output.join("config.json"),
+        &json!({
+            "schema":"n83.cross-stream-pilot-partial-config/v1", "study":STUDY,
+            "base_object_blake3":args[1], "pool_object_blake3":args[4],
+            "pilot_manifest_blake3":blake3::hash(SMALL_600_MANIFEST).to_hex().to_string(),
+            "source_blake3":blake3::hash(include_bytes!("koblitz_n83_mixed_orbit_worker.rs")).to_hex().to_string(),
+            "public_corpus_path":args[7], "public_corpus_canonical_json_blake3":PUBLIC_CORPUS_HASH,
+            "budget_seconds":budget, "conflict_budget":conflicts,
+            "max_models":models, "base_summands":base_summands,
+            "residual_summands":residual_summands, "order_first_pair":true,
+            "max_variables":150000, "max_domain_clauses":12000000,
+            "memory_cgroup_limit_bytes":4294967296u64,
+            "memory_cgroup_swap_limit_bytes":0
+        }),
+    )?;
+    let cap_path = output.join("cap.json");
+    std::thread::spawn(move || {
+        std::thread::sleep(Duration::from_secs(budget));
+        let _ = write_new(
+            &cap_path,
+            &json!({
+                "schema":"n83.cross-stream-pilot-partial-cap/v1",
+                "status":"UNKNOWN_budget", "budget_seconds":budget,
+                "elapsed_process_wall_ms":start.elapsed().as_secs_f64()*1000.0
+            }),
+        );
+        std::process::exit(124);
+    });
+    let curve = KoblitzCurve::known_n83_k0().ok_or("pinned Koblitz curve")?;
+    if curve.label() != CURVE || curve.cofactor != BigUint::from(4u8) {
+        return Err("curve identity mismatch".into());
+    }
+    let (base_row, base) =
+        import_pilot(&args[1], Path::new(&args[2]), Path::new(&args[3]), &curve)?;
+    let (pool_row, pool) =
+        import_pilot(&args[4], Path::new(&args[5]), Path::new(&args[6]), &curve)?;
+    require_distinct_pilot_streams(&base_row, &pool_row)?;
+    let residual = build_exact_residual_difference_factor_base(&curve, &base, &pool)?;
+    let shared_orbits = pool.signed_orbits.len() - residual.signed_orbits.len();
+    let import_ms = start.elapsed().as_secs_f64() * 1000.0;
+    let (public_target, corpus_hash) = public_target(Path::new(&args[7]), &curve)?;
+    let domains = MixedOrbitDomains::new(&curve, &base, &residual)?;
+    let a = trial_coefficient(b"a", 0, &curve.subgroup_order);
+    let b = trial_coefficient(b"b", 0, &curve.subgroup_order);
+    let target = curve.add(
+        &curve.mul(curve.generator(), &a),
+        &curve.mul(&public_target, &b),
+    );
+    let limits = ChainS3Limits {
+        max_variables: 150_000,
+        max_domain_clauses: 12_000_000,
+        max_models: models,
+        conflict_budget: conflicts,
+    };
+    let (candidate, stats) = domains.search(
+        1,
+        &a,
+        &b,
+        &public_target,
+        base_summands,
+        residual_summands,
+        limits,
+        true,
+    );
+    let candidate_record = candidate.as_ref().map(|row| -> Result<Value> {
+        if row.source_id != 1 || row.coef_a != a || row.coef_b != b {
+            return Err("cross-stream candidate source or coefficients differ".into());
+        }
+        let mut sum = BinaryPoint::Infinity;
+        for &index in &row.small_point_indices {
+            sum = curve.add(&sum, base.points.get(index).ok_or("candidate base index")?);
+        }
+        for point in &row.residual_points {
+            if !residual.points.contains(point) {
+                return Err("cross-stream candidate point outside residual domain".into());
+            }
+            sum = curve.add(&sum, point);
+        }
+        if sum != target {
+            return Err("cross-stream candidate failed group replay".into());
+        }
+        Ok(json!({
+            "source_id":row.source_id, "a":row.coef_a.to_string(),
+            "b":row.coef_b.to_string(),
+            "base_point_indices":row.small_point_indices,
+            "residual_points":row.residual_points.iter().map(point_json).collect::<Result<Vec<_>>>()?
+        }))
+    }).transpose()?;
+    let status = if stats.invalid_models != 0 {
+        "PRODUCER_FAILURE_invalid_model"
+    } else if candidate_record.is_some() {
+        "PASS_one_bounded_partial"
+    } else if stats.exhausted && stats.patterns_attempted == 0 {
+        "UNKNOWN_preflight_cap"
+    } else if stats.exhausted {
+        "UNKNOWN_search_cap"
+    } else if stats.refuted {
+        "PASS_one_trial_refuted"
+    } else {
+        "PRODUCER_FAILURE_unclassified_solver_result"
+    };
+    write_new(
+        &output.join("result.json"),
+        &json!({
+            "schema":"n83.cross-stream-pilot-partial-result/v1", "study":STUDY,
+            "status":status, "base_object_blake3":args[1],
+            "pool_object_blake3":args[4],
+            "base_policy":base_row["policy"], "base_seed":base_row["seed"],
+            "pool_policy":pool_row["policy"], "pool_seed":pool_row["seed"],
+            "public_corpus_canonical_json_blake3":corpus_hash,
+            "base_signed_orbits":base.signed_orbits.len(),
+            "pool_signed_orbits":pool.signed_orbits.len(),
+            "shared_signed_orbits":shared_orbits,
+            "residual_signed_orbits":residual.signed_orbits.len(),
+            "base_import_elapsed_ms_L0":import_ms,
+            "worker_wall_ms_L0":start.elapsed().as_secs_f64()*1000.0,
+            "memory_cgroup_peak_bytes":cgroup_peak_bytes()?,
+            "trial":0, "a":a.to_string(), "b":b.to_string(),
+            "search":stats, "candidate":candidate_record,
+            "graph_rows":Value::Null, "matrix_rank":Value::Null,
+            "total_index_calculus_runtime_ms":Value::Null,
+            "selected_best_total_runtime":Value::Null
+        }),
+    )?;
+    Ok(())
+}
+
 fn main() -> Result<()> {
     let args: Vec<_> = std::env::args().skip(1).collect();
     match args.first().map(String::as_str) {
-        Some("verify") if args.len() == 5 => {
-            let (curve, small, residual) = import_pair(&args)?;
+        Some("verify" | "verify-alt") if args.len() == 5 => {
+            let small_spec = if args[0] == "verify-alt" { &SMALL_600 } else { &SMALL };
+            let (curve, small, residual) = import_pair(&args, small_spec)?;
             println!("{}", json!({
                 "schema":"n83.mixed-orbit-import/v1", "status":"PASS",
-                "curve_slug":curve.label(), "small_object_blake3":SMALL_HASH,
+                "curve_slug":curve.label(), "small_object_blake3":small_spec.object_hash,
                 "envelope_object_blake3":ENVELOPE_HASH,
                 "small_points":small.points.len(), "small_signed_orbits":small.signed_orbits.len(),
                 "residual_points":residual.points.len(), "residual_signed_orbits":residual.signed_orbits.len(),
@@ -563,8 +1029,57 @@ fn main() -> Result<()> {
             }));
             Ok(())
         }
-        Some("run") => run(&args),
-        _ => Err("usage: verify SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT | run SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT CORPUS BUDGET_SECONDS MAX_TRIALS CONFLICT_BUDGET MAX_MODELS SMALL_SUMMANDS RESIDUAL_SUMMANDS OUTPUT_DIR".into()),
+        Some("verify-cross-pilot") if args.len() == 7 => {
+            let curve = KoblitzCurve::known_n83_k0().ok_or("pinned Koblitz curve")?;
+            if curve.label() != CURVE || curve.cofactor != BigUint::from(4u8) {
+                return Err("curve identity mismatch".into());
+            }
+            let (small_row, small) = import_pilot(
+                &args[1],
+                Path::new(&args[2]),
+                Path::new(&args[3]),
+                &curve,
+            )?;
+            let (pool_row, pool) = import_pilot(
+                &args[4],
+                Path::new(&args[5]),
+                Path::new(&args[6]),
+                &curve,
+            )?;
+            require_distinct_pilot_streams(&small_row, &pool_row)?;
+            let residual =
+                build_exact_residual_difference_factor_base(&curve, &small, &pool)?;
+            let shared_orbits = pool.signed_orbits.len() - residual.signed_orbits.len();
+            println!("{}", json!({
+                "schema":"n83.cross-stream-pilot-import/v1", "status":"PASS",
+                "curve_slug":curve.label(),
+                "small_object_blake3":args[1], "small_policy":small_row["policy"],
+                "small_seed":small_row["seed"], "small_columns":small_row["columns"],
+                "small_points":small.points.len(),
+                "pool_object_blake3":args[4], "pool_policy":pool_row["policy"],
+                "pool_seed":pool_row["seed"], "pool_columns":pool_row["columns"],
+                "pool_points":pool.points.len(),
+                "shared_signed_orbits":shared_orbits,
+                "small_only_signed_orbits":small.signed_orbits.len() - shared_orbits,
+                "residual_signed_orbits":residual.signed_orbits.len(),
+                "residual_points":residual.points.len(),
+                "solver_search_executed":false
+            }));
+            Ok(())
+        }
+        Some("run") => run(&args, &SMALL),
+        Some("run-alt") => run(&args, &SMALL_600),
+        Some("run-cross-pilot") => run_cross_pilot(&args),
+        Some("verify-control") if args.len() == 6 => {
+            let (curve, small, residual) = import_pair(&args, &SMALL)?;
+            let target = control_target(Path::new(&args[5]), &curve, &small, &residual)?;
+            println!("{}", json!({"schema":"n83.mixed-orbit-known-witness-verify/v1",
+                "status":"PASS", "scope":"known_answer_control_only",
+                "target":point_json(&target)?, "solver_search_executed":false}));
+            Ok(())
+        }
+        Some("control-run") => control_run(&args),
+        _ => Err("usage: verify|verify-alt SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT | verify-cross-pilot BASE_HASH BASE_MANIFEST BASE_OBJECT POOL_HASH POOL_MANIFEST POOL_OBJECT | verify-control SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT FIXTURE | run|run-alt SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT CORPUS BUDGET_SECONDS MAX_TRIALS CONFLICT_BUDGET MAX_MODELS SMALL_SUMMANDS RESIDUAL_SUMMANDS OUTPUT_DIR | run-cross-pilot BASE_HASH BASE_MANIFEST BASE_OBJECT POOL_HASH POOL_MANIFEST POOL_OBJECT CORPUS BUDGET_SECONDS CONFLICT_BUDGET MAX_MODELS BASE_SUMMANDS RESIDUAL_SUMMANDS OUTPUT_DIR | control-run SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT FIXTURE BUDGET_SECONDS CONFLICT_BUDGET MAX_MODELS OUTPUT_DIR".into()),
     }
 }
 
@@ -573,10 +1088,103 @@ mod tests {
     use super::*;
 
     #[test]
+    fn known_witness_fixture_is_pinned_and_distinct_from_natural_corpus() {
+        let fixture = parse_control_bytes(CONTROL_FIXTURE).unwrap();
+        assert_eq!(fixture["scope"], "known_answer_control_only");
+        let mut altered = CONTROL_FIXTURE.to_vec();
+        altered[0] ^= 1;
+        assert!(parse_control_bytes(&altered).is_err());
+    }
+
+    #[test]
     fn pinned_manifests_reject_wrong_bytes_or_archive() {
         assert!(bound_archive(&SMALL, ENVELOPE_MANIFEST, b"").is_err());
         assert!(bound_archive(&SMALL, SMALL_MANIFEST, b"changed archive").is_err());
+        assert!(bound_archive(&SMALL_600, SMALL_MANIFEST, b"").is_err());
+        assert!(bound_archive(&SMALL_600, SMALL_600_MANIFEST, b"changed archive").is_err());
         assert!(bound_archive(&ENVELOPE, ENVELOPE_MANIFEST, b"changed archive").is_err());
+    }
+
+    #[test]
+    fn pinned_pilot_selection_accepts_exactly_primary_arm_rows() {
+        let panel: Value = serde_json::from_slice(SMALL_600_MANIFEST).unwrap();
+        let mut accepted = 0;
+        for row in panel["bases"].as_array().unwrap() {
+            let hash = row["compressed_blake3"].as_str().unwrap();
+            let selected = pinned_pilot_row(SMALL_600_MANIFEST, hash);
+            if row["a"] == 0 {
+                assert_eq!(selected.unwrap(), *row);
+                accepted += 1;
+            } else {
+                assert!(selected.is_err());
+            }
+        }
+        assert_eq!(accepted, 27);
+        let first = panel["bases"][0]["compressed_blake3"].as_str().unwrap();
+        assert!(pinned_pilot_row(b"changed manifest", first).is_err());
+        assert!(pinned_pilot_row(SMALL_600_MANIFEST, "0").is_err());
+        assert!(bound_pilot_archive(first, SMALL_600_MANIFEST, b"changed archive").is_err());
+    }
+
+    #[test]
+    fn cross_stream_run_rejects_same_stream_before_cgroup_or_archive_io() {
+        let panel: Value = serde_json::from_slice(SMALL_600_MANIFEST).unwrap();
+        let rows = panel["bases"].as_array().unwrap();
+        let base = rows
+            .iter()
+            .find(|row| {
+                row["a"] == 0
+                    && row["policy"] == "public_x_hash"
+                    && row["seed"] == 2026100801u64
+                    && row["columns"] == 64
+            })
+            .unwrap();
+        let same = rows
+            .iter()
+            .find(|row| {
+                row["a"] == 0
+                    && row["policy"] == "public_x_hash"
+                    && row["seed"] == 2026100801u64
+                    && row["columns"] == 256
+            })
+            .unwrap();
+        let other = rows
+            .iter()
+            .find(|row| {
+                row["a"] == 0
+                    && row["policy"] == "public_x_gray_prefix"
+                    && row["seed"] == 2026100801u64
+                    && row["columns"] == 600
+            })
+            .unwrap();
+        assert!(require_distinct_pilot_streams(base, same).is_err());
+        assert!(require_distinct_pilot_streams(base, other).is_ok());
+        let args = vec![
+            "run-cross-pilot".to_string(),
+            base["compressed_blake3"].as_str().unwrap().to_string(),
+            "unread-manifest".into(),
+            "unread-base".into(),
+            same["compressed_blake3"].as_str().unwrap().to_string(),
+            "unread-manifest".into(),
+            "unread-pool".into(),
+            "unread-corpus".into(),
+            "1".into(),
+            "1".into(),
+            "1".into(),
+            "3".into(),
+            "2".into(),
+            "uncreated-output".into(),
+        ];
+        assert!(run_cross_pilot(&args)
+            .unwrap_err()
+            .to_string()
+            .contains("distinct policy or seed"));
+        let mut invalid = args;
+        invalid[8] = "0".into();
+        assert!(run_cross_pilot(&invalid)
+            .unwrap_err()
+            .to_string()
+            .contains("invalid bounded"));
     }
 
     #[test]
