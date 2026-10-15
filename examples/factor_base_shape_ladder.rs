@@ -22,6 +22,7 @@
 //! g2 --cell n:l:dmax --twist s --shapes random,fp --instances K --targets T --seed S
 //! g5 --cell n:l:dmax --betas R --instances K --targets T --seed S   (m = 2, Möbius pole)
 //! selftest
+//! score FILE.jsonl …                                (PROTOCOL.md §4 rules)
 //! ```
 //!
 //! Stage diagnostic: refutation degrees on toy fields.  No `S`, no speedup.
@@ -270,7 +271,13 @@ fn count_m3(f: &Field, bases: [&[u64]; 3], x_r: u64, b: u64) -> u64 {
 /// ≤ 2: `u₁u₂N = β²(u₁u₂)² + β(u₁²u₂ + u₁u₂²) + u₁u₂`,
 /// `N² = β⁴(u₁u₂)² + β²(u₁² + u₂²) + 1`.  `beta = None` is the plain
 /// subspace in `x` (`S₃(x₁, x₂, x₃)`), the reference arm.
-fn system_m2(f: &Field, basis: &[u64], beta: Option<u64>, x3: u64, b: u64) -> (Vec<F2BoolPoly>, usize) {
+fn system_m2(
+    f: &Field,
+    basis: &[u64],
+    beta: Option<u64>,
+    x3: u64,
+    b: u64,
+) -> (Vec<F2BoolPoly>, usize) {
     let l = basis.len();
     let n = f.n;
     let n_vars = 2 * l;
@@ -387,13 +394,18 @@ fn seed_of(seed: u64, parts: &[u64]) -> u64 {
 }
 
 fn shape_id(name: &str) -> u64 {
-    name.bytes().fold(0u64, |h, c| h.wrapping_mul(131).wrapping_add(c as u64))
+    name.bytes()
+        .fold(0u64, |h, c| h.wrapping_mul(131).wrapping_add(c as u64))
 }
 
 struct Args(Vec<String>);
 impl Args {
     fn get(&self, k: &str) -> Option<String> {
-        self.0.iter().position(|a| a == k).and_then(|i| self.0.get(i + 1)).cloned()
+        self.0
+            .iter()
+            .position(|a| a == k)
+            .and_then(|i| self.0.get(i + 1))
+            .cloned()
     }
     fn num(&self, k: &str, d: u64) -> u64 {
         self.get(k).and_then(|v| v.parse().ok()).unwrap_or(d)
@@ -477,11 +489,20 @@ fn g1(a: &Args) {
         } else {
             instances
         };
-        let per_targets = if inst == 1 { targets * instances } else { targets };
+        let per_targets = if inst == 1 {
+            targets * instances
+        } else {
+            targets
+        };
         for k in 0..inst {
-            let mut rng = StdRng::seed_from_u64(seed_of(seed, &[n as u64, l as u64, shape_id(&shape), k as u64]));
+            let mut rng = StdRng::seed_from_u64(seed_of(
+                seed,
+                &[n as u64, l as u64, shape_id(&shape), k as u64],
+            ));
             let Some((basis, detail)) = draw_shape(&shape, &f, l, &mut rng) else {
-                println!(r#"{{"goal":"G1","cell":"n{n}l{l}","shape":"{shape}","instance":{k},"absent":true}}"#);
+                println!(
+                    r#"{{"goal":"G1","cell":"n{n}l{l}","shape":"{shape}","instance":{k},"absent":true}}"#
+                );
                 continue;
             };
             let (vv, cap, tz) = profile(&f, &basis);
@@ -489,7 +510,15 @@ fn g1(a: &Args) {
                 r#""goal":"G1","cell":"n{n}l{l}","n":{n},"l":{l},"d_max":{d_max},"modulus":"{}","shape":"{shape}","instance":{k},"detail":"{detail}","basis":{basis:?},"dim_VV":{vv},"dim_V_cap_sigmaV":{cap},"trace_zero":{tz}"#,
                 f.modulus()
             );
-            run_targets_m3(&f, [&basis, &basis, &basis], d_max, per_targets, &mut rng, &tag, max_draws);
+            run_targets_m3(
+                &f,
+                [&basis, &basis, &basis],
+                d_max,
+                per_targets,
+                &mut rng,
+                &tag,
+                max_draws,
+            );
         }
     }
 }
@@ -528,7 +557,15 @@ fn g3(a: &Args) {
             f.modulus(),
             f.irr.low_terms.len() + 1
         );
-        run_targets_m3(&f, [&basis, &basis, &basis], d_max, targets, &mut rng, &tag, max_draws);
+        run_targets_m3(
+            &f,
+            [&basis, &basis, &basis],
+            d_max,
+            targets,
+            &mut rng,
+            &tag,
+            max_draws,
+        );
     }
 }
 
@@ -541,12 +578,21 @@ fn g2(a: &Args) {
     let twists: Vec<u32> = a
         .list("--twists", "1,2")
         .iter()
-        .map(|s| if s == "l" { l as u32 } else { s.parse().unwrap() })
+        .map(|s| {
+            if s == "l" {
+                l as u32
+            } else {
+                s.parse().unwrap()
+            }
+        })
         .collect();
     let f = Field::new(find_irreducible_sparse(n).expect("field"));
     for shape in a.list("--shapes", "random,fp") {
         for k in 0..instances {
-            let mut rng = StdRng::seed_from_u64(seed_of(seed, &[n as u64, l as u64, 2, shape_id(&shape), k as u64]));
+            let mut rng = StdRng::seed_from_u64(seed_of(
+                seed,
+                &[n as u64, l as u64, 2, shape_id(&shape), k as u64],
+            ));
             let (basis, detail) = draw_shape(&shape, &f, l, &mut rng).expect("shape");
             let target_seed: u64 = rng.gen();
             let tw = |s: u32| -> Vec<u64> { basis.iter().map(|&w| f.gf.sqr_k(w, s)).collect() };
@@ -554,10 +600,15 @@ fn g2(a: &Args) {
             // ("second": summand 2 squared s times) and the ordered tuple
             // ("ordered": summand j squared j·s times).  Every arm sees the
             // same target stream.
-            let mut arms: Vec<(String, [Vec<u64>; 3])> =
-                vec![("plain".into(), [basis.clone(), basis.clone(), basis.clone()])];
+            let mut arms: Vec<(String, [Vec<u64>; 3])> = vec![(
+                "plain".into(),
+                [basis.clone(), basis.clone(), basis.clone()],
+            )];
             for &s in &twists {
-                arms.push((format!("second_s{s}"), [basis.clone(), tw(s), basis.clone()]));
+                arms.push((
+                    format!("second_s{s}"),
+                    [basis.clone(), tw(s), basis.clone()],
+                ));
                 arms.push((format!("ordered_s{s}"), [basis.clone(), tw(s), tw(2 * s)]));
             }
             for (arm, bs) in &arms {
@@ -566,7 +617,15 @@ fn g2(a: &Args) {
                     r#""goal":"G2","cell":"n{n}l{l}","n":{n},"l":{l},"d_max":{d_max},"shape":"{shape}","instance":{k},"detail":"{detail}","arm":"{arm}","bases":[{:?},{:?},{:?}]"#,
                     bs[0], bs[1], bs[2]
                 );
-                run_targets_m3(&f, [&bs[0], &bs[1], &bs[2]], d_max, targets, &mut trng, &tag, max_draws);
+                run_targets_m3(
+                    &f,
+                    [&bs[0], &bs[1], &bs[2]],
+                    d_max,
+                    targets,
+                    &mut trng,
+                    &tag,
+                    max_draws,
+                );
             }
         }
     }
@@ -648,14 +707,17 @@ fn selftest() {
             let x_r = rand_not_01(&mut rng, &f);
             for bases in [[&v, &v, &v], [&v, &w, &v]] {
                 let (eqs, nv) = system_m3(&f, [bases[0], bases[1], bases[2]], x_r, 1);
-                let ex = (0..1u64 << nv).filter(|&p| eqs.iter().all(|e| e.eval(p) == 0)).count() as u64;
+                let ex = (0..1u64 << nv)
+                    .filter(|&p| eqs.iter().all(|e| e.eval(p) == 0))
+                    .count() as u64;
                 let c = count_m3(&f, [bases[0], bases[1], bases[2]], x_r, 1);
                 assert_eq!(ex, c, "m=3 count n={n} l={l}");
                 checked += 1;
             }
             // Same system as the ladder's for one basis.
             let elems: Vec<F2mElement> = v.iter().map(|&w| f.elem(w)).collect();
-            let sys = build_decomposition_system(&elems, &f.elem(x_r), &f.elem(1), 3, &f.st).unwrap();
+            let sys =
+                build_decomposition_system(&elems, &f.elem(x_r), &f.elem(1), 3, &f.st).unwrap();
             let (eqs, _) = system_m3(&f, [&v, &v, &v], x_r, 1);
             assert_eq!(sys.equations, eqs, "ladder system n={n}");
         }
@@ -667,9 +729,17 @@ fn selftest() {
             let x3 = rand_not_01(&mut rng, &f);
             for beta in [None, Some(0), Some(1), Some(rand_not_01(&mut rng, &f))] {
                 let (eqs, nv) = system_m2(&f, &v, beta, x3, 1);
-                assert!(eqs.iter().all(|e| e.terms.iter().all(|m| m.mask.count_ones() <= 2)));
-                let ex = (0..1u64 << nv).filter(|&p| eqs.iter().all(|e| e.eval(p) == 0)).count() as u64;
-                assert_eq!(ex, count_m2(&f, &v, beta, x3, 1), "m=2 count n={n} beta={beta:?}");
+                assert!(eqs
+                    .iter()
+                    .all(|e| e.terms.iter().all(|m| m.mask.count_ones() <= 2)));
+                let ex = (0..1u64 << nv)
+                    .filter(|&p| eqs.iter().all(|e| e.eval(p) == 0))
+                    .count() as u64;
+                assert_eq!(
+                    ex,
+                    count_m2(&f, &v, beta, x3, 1),
+                    "m=2 count n={n} beta={beta:?}"
+                );
                 checked += 1;
             }
             // The pole arm decomposes x3 exactly when some (β+1/u1, β+1/u2)
@@ -695,7 +765,11 @@ fn selftest() {
                 .filter(|&(a, c)| {
                     let p = gf.mul(a, c);
                     let nn = gf.mul(gf.sqr(be), p) ^ gf.mul(be, a ^ c) ^ 1;
-                    gf.mul(gf.sqr(a ^ c), x3s) ^ gf.mul(x3, gf.mul(p, nn)) ^ gf.sqr(nn) ^ gf.mul(1, gf.sqr(p)) == 0
+                    gf.mul(gf.sqr(a ^ c), x3s)
+                        ^ gf.mul(x3, gf.mul(p, nn))
+                        ^ gf.sqr(nn)
+                        ^ gf.mul(1, gf.sqr(p))
+                        == 0
                 })
                 .count() as u64;
             assert_eq!(direct + zero_pts, count_m2(&f, &v, Some(be), x3, 1));
@@ -703,6 +777,284 @@ fn selftest() {
         }
     }
     println!(r#"{{"selftest":"ok","checks":{checked}}}"#);
+}
+
+// ── scoring (the decision rules of PROTOCOL.md §4) ───────────────────────
+
+#[derive(Default, Clone)]
+struct Group {
+    degrees: Vec<u32>,
+    censored: usize,
+    caps: usize,
+    sat0: usize,
+    unsat_seen: usize,
+    inst: std::collections::BTreeMap<u64, Vec<u32>>,
+}
+
+impl Group {
+    fn mean(&self) -> Option<f64> {
+        (!self.degrees.is_empty())
+            .then(|| self.degrees.iter().sum::<u32>() as f64 / self.degrees.len() as f64)
+    }
+    fn inst_spread(&self) -> Option<f64> {
+        let ms: Vec<f64> = self
+            .inst
+            .values()
+            .filter(|v| !v.is_empty())
+            .map(|v| v.iter().sum::<u32>() as f64 / v.len() as f64)
+            .collect();
+        (ms.len() >= 2).then(|| {
+            ms.iter().cloned().fold(f64::MIN, f64::max)
+                - ms.iter().cloned().fold(f64::MAX, f64::min)
+        })
+    }
+}
+
+fn score(files: &[String]) {
+    use serde_json::Value;
+    use std::collections::BTreeMap;
+    let mut groups: BTreeMap<(String, String, String), Group> = BTreeMap::new();
+    for path in files {
+        let text = std::fs::read_to_string(path).expect("read");
+        for line in text.lines() {
+            let Ok(v) = serde_json::from_str::<Value>(line) else {
+                continue;
+            };
+            let Some(goal) = v["goal"].as_str() else {
+                continue;
+            };
+            if v["absent"].as_bool() == Some(true) {
+                continue;
+            }
+            let cell = v["cell"].as_str().unwrap_or("").to_string();
+            let arms: Vec<String> = match goal {
+                "G1" => vec![v["shape"].as_str().unwrap().to_string()],
+                "G3" => vec![v["modulus"].as_str().unwrap().to_string()],
+                "G2" => vec![format!(
+                    "{}/{}",
+                    v["shape"].as_str().unwrap(),
+                    v["arm"].as_str().unwrap()
+                )],
+                "G5" => {
+                    let a = v["arm"].as_str().unwrap().to_string();
+                    if a.starts_with("beta_rand") {
+                        vec![a, "beta_rand".into()]
+                    } else {
+                        vec![a]
+                    }
+                }
+                _ => continue,
+            };
+            let inst = v["instance"].as_u64().unwrap_or(0);
+            for arm in arms {
+                let g = groups
+                    .entry((goal.to_string(), cell.clone(), arm))
+                    .or_default();
+                if v["summary"].as_bool() == Some(true) {
+                    g.sat0 += v["class0_satisfiable"].as_u64().unwrap_or(0) as usize;
+                    g.unsat_seen += v["measured"].as_u64().unwrap_or(0) as usize;
+                    continue;
+                }
+                let o = &v["outcome"];
+                match o["kind"].as_str() {
+                    Some("resolved") | Some("at_least") => {
+                        let d = o["degree"].as_u64().unwrap() as u32;
+                        if o["kind"] == "at_least" {
+                            g.censored += 1;
+                        }
+                        g.degrees.push(d);
+                        g.inst.entry(inst).or_default().push(d);
+                    }
+                    _ => g.caps += 1,
+                }
+            }
+        }
+    }
+    println!("| goal | cell | arm | draws | mean D (censored at bound) | censored | caps | degrees | class-0 sat. fraction | instance-mean spread |");
+    println!("|:--|:--|:--|--:|--:|--:|--:|:--|--:|--:|");
+    for ((goal, cell, arm), g) in &groups {
+        let frac = if g.sat0 + g.unsat_seen > 0 {
+            format!("{:.3}", g.sat0 as f64 / (g.sat0 + g.unsat_seen) as f64)
+        } else {
+            "-".into()
+        };
+        println!(
+            "| {goal} | {cell} | {arm} | {} | {} | {} | {} | {} | {frac} | {} |",
+            g.degrees.len(),
+            g.mean().map_or("-".into(), |m| format!("{m:.3}")),
+            g.censored,
+            g.caps,
+            g.degrees
+                .iter()
+                .map(|d| d.to_string())
+                .collect::<Vec<_>>()
+                .join(" "),
+            g.inst_spread().map_or("-".into(), |s| format!("{s:.3}")),
+        );
+    }
+    let get =
+        |goal: &str, cell: &str, arm: &str| groups.get(&(goal.into(), cell.into(), arm.into()));
+    let cells = |goal: &str| -> Vec<String> {
+        let mut c: Vec<String> = groups
+            .keys()
+            .filter(|k| k.0 == goal)
+            .map(|k| k.1.clone())
+            .collect();
+        c.dedup();
+        c
+    };
+    println!();
+    // G1
+    let mut established: BTreeMap<String, usize> = BTreeMap::new();
+    for cell in cells("G1") {
+        let Some(r) = get("G1", &cell, "random") else {
+            continue;
+        };
+        let null = get("G1", &cell, "random2").and_then(|r2| Some(r.mean()? - r2.mean()?));
+        let noisy = null.is_some_and(|x| x.abs() >= 0.5);
+        for shape in ["gp", "fp", "coord", "subfield"] {
+            let Some(x) = get("G1", &cell, shape) else {
+                continue;
+            };
+            let (Some(mr), Some(mx)) = (r.mean(), x.mean()) else {
+                continue;
+            };
+            let gap = mr - mx;
+            let status = if x.censored == 0 && x.caps == 0 && gap >= 0.5 && !noisy {
+                "established"
+            } else if x.censored == 0 && r.censored == 0 && gap < 0.5 {
+                "excluded"
+            } else if x.censored > 0 && r.censored == 0 && gap < 0.5 {
+                "excluded by censoring"
+            } else if gap >= 0.5 && noisy {
+                "not distinguishable from the negative control"
+            } else {
+                "undetermined"
+            };
+            if status == "established" && (shape == "gp" || shape == "fp") {
+                *established.entry(shape.into()).or_default() += 1;
+            }
+            println!(
+                "G1 {cell} {shape}: gap = mean(random) - mean({shape}) = {gap:.3} -> {status}; negative control random-random2 = {}",
+                null.map_or("-".into(), |x| format!("{x:.3}"))
+            );
+        }
+    }
+    let best = established.values().copied().max().unwrap_or(0);
+    println!(
+        "G1 verdict (scaled cells): {}",
+        if best >= 2 {
+            "survives"
+        } else if best == 0 {
+            "killed (no cell with the gap)"
+        } else {
+            "not killed, not supported"
+        }
+    );
+    // G3
+    let mut any_survive = false;
+    let mut any_over = false;
+    for cell in cells("G3") {
+        let ms: Vec<f64> = groups
+            .iter()
+            .filter(|(k, _)| k.0 == "G3" && k.1 == cell)
+            .filter_map(|(_, g)| g.mean())
+            .collect();
+        if ms.len() < 2 {
+            continue;
+        }
+        let spread = ms.iter().cloned().fold(f64::MIN, f64::max)
+            - ms.iter().cloned().fold(f64::MAX, f64::min);
+        let noise = get("G1", &cell, "random").and_then(|g| g.inst_spread());
+        let over = spread > 0.3 + 1e-9;
+        any_over |= over;
+        let beyond = over && noise.is_some_and(|n| spread > n);
+        any_survive |= beyond;
+        println!(
+            "G3 {cell}: panel spread {spread:.3} over {} moduli; G1 random instance-mean spread {}",
+            ms.len(),
+            noise.map_or("-".into(), |x| format!("{x:.3}"))
+        );
+    }
+    println!(
+        "G3 verdict: {}",
+        if !any_over {
+            "killed (flat in the panel to 0.3)"
+        } else if any_survive {
+            "survives"
+        } else {
+            "not killed, within noise"
+        }
+    );
+    // G2
+    let mut killed = false;
+    for ((goal, cell, arm), g) in &groups {
+        if goal != "G2" || arm.ends_with("/plain") {
+            continue;
+        }
+        let shape = arm.split('/').next().unwrap();
+        let Some(p) = get("G2", cell, &format!("{shape}/plain")) else {
+            continue;
+        };
+        match (g.mean(), p.mean()) {
+            (Some(a), Some(b)) => {
+                let rise = a - b;
+                let censored = g.censored + p.censored > 0;
+                if rise >= 1.0 && !censored {
+                    killed = true;
+                }
+                println!(
+                    "G2 {cell} {arm}: rise {rise:.3} (censored draws: {})",
+                    g.censored + p.censored
+                );
+            }
+            _ => println!("G2 {cell} {arm}: no unsatisfiable class-0 draw to compare"),
+        }
+    }
+    println!(
+        "G2 verdict: {}",
+        if killed {
+            "killed (rise >= 1)"
+        } else {
+            "survives at these sizes (no rise >= 1)"
+        }
+    );
+    // G5
+    let mut over = false;
+    for cell in cells("G5") {
+        let ms: Vec<f64> = ["beta0", "beta1", "beta_rand"]
+            .iter()
+            .filter_map(|a| get("G5", &cell, a).and_then(|g| g.mean()))
+            .collect();
+        let rs: Vec<f64> = ["beta_rand0", "beta_rand1", "beta_rand2"]
+            .iter()
+            .filter_map(|a| get("G5", &cell, a).and_then(|g| g.mean()))
+            .collect();
+        let sp = |v: &[f64]| {
+            v.iter().cloned().fold(f64::MIN, f64::max) - v.iter().cloned().fold(f64::MAX, f64::min)
+        };
+        if ms.len() < 2 {
+            continue;
+        }
+        let s = sp(&ms);
+        over |= s > 0.3 + 1e-9;
+        println!(
+            "G5 {cell}: beta-spread {s:.3}; random-beta arms' own spread {}",
+            if rs.len() >= 2 {
+                format!("{:.3}", sp(&rs))
+            } else {
+                "-".into()
+            }
+        );
+    }
+    println!(
+        "G5 verdict: {}",
+        if over {
+            "not killed (spread > 0.3 somewhere)"
+        } else {
+            "killed (flat in beta to 0.3)"
+        }
+    );
 }
 
 fn main() {
@@ -714,6 +1066,7 @@ fn main() {
         Some("g3") => g3(&a),
         Some("g5") => g5(&a),
         Some("selftest") => selftest(),
+        Some("score") => score(&args[2..]),
         _ => eprintln!("usage: factor_base_shape_ladder g1|g2|g3|g5|selftest …"),
     }
 }
