@@ -1041,7 +1041,7 @@ mod tests {
     use rand::SeedableRng;
 
     fn is_prime_u64(n: u64) -> bool {
-        n >= 2 && (2..).take_while(|d| d * d <= n).all(|d| n % d != 0)
+        n >= 2 && (2..).take_while(|d| d * d <= n).all(|d| !n.is_multiple_of(d))
     }
 
     /// The exponent `b` of the 2-Sylow `Z/2 × Z/2^b` by exhaustion: the
