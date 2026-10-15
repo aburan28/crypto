@@ -6,11 +6,12 @@ on:
     paths:
       - .github/workflows/n83-root4-vs-root11.yml
       - research/n83_root4_vs_root11_20261015/**
-      - examples/koblitz_orbit_dlp_fast.rs
+      - research/n83_root4_vs_root11_results_20261015/**
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: n83-root4-vs-root11-${{ github.ref }}
@@ -20,57 +21,75 @@ jobs:
   root-index-layout-comparison:
     if: github.repository == 'aburan28/crypto'
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
 
-      - name: Freeze archived selection and reserve points
+      - name: Fetch the executed source snapshot
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/n83-root4-vs-root11"
-          python3 research/n83_root4_vs_root11_20261015/run.py --preflight \
-            > "$RUNNER_TEMP/n83-root4-vs-root11/preflight.json"
-          rustc --version > "$RUNNER_TEMP/n83-root4-vs-root11/rustc-version.txt"
-          cargo --version > "$RUNNER_TEMP/n83-root4-vs-root11/cargo-version.txt"
+          frozen=009a3025fe362c85e46170e30648edaaec11c6b3
+          git fetch --no-tags --depth=1 origin "$frozen"
+          test "$(git rev-parse FETCH_HEAD)" = "$frozen"
+          mkdir -p "$RUNNER_TEMP/n83-root-layout-frozen-source"
+          git archive "$frozen" Cargo.lock \
+            examples/koblitz_orbit_dlp_fast.rs \
+            examples/n83_rho_optimization_eval.rs \
+            research/n83_dense_root_20261013 \
+            research/n83_indexed5_20261013 \
+            research/n83_root4_20261014 \
+            research/n83_factor_base_confirm_20261015 \
+            research/n83_root4_vs_root11_20261015 \
+            | tar -xf - -C "$RUNNER_TEMP/n83-root-layout-frozen-source"
+          test "$(sha256sum "$RUNNER_TEMP/n83-root-layout-frozen-source/examples/koblitz_orbit_dlp_fast.rs" | cut -d' ' -f1)" = \
+            5e9fd826d22816b429a82e658c517d9387916aabe7660f708e4c29901cce647e
 
-      - name: Build exact producer and run example tests
+      - name: Download the exact completed raw artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/n83-root-layout-sealed"
+          gh api repos/aburan28/crypto/actions/artifacts/11942743006/zip > \
+            "$RUNNER_TEMP/n83-root-layout-sealed/raw.zip"
+          test "$(sha256sum "$RUNNER_TEMP/n83-root-layout-sealed/raw.zip" | cut -d' ' -f1)" = \
+            9abb1d09c3e52440bf0b39aeec04bf2653e6cbf998c1b2830f2d6868832db2cb
+          unzip -q "$RUNNER_TEMP/n83-root-layout-sealed/raw.zip" -d \
+            "$RUNNER_TEMP/n83-root-layout-sealed/raw"
+          test "$(sha256sum "$RUNNER_TEMP/n83-root-layout-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            e3906ebcd2bc55ffcf613f114299433ee808570f65d4e8a4c2b826b442a432cf
+
+      - name: Independently replay both bases and all 4000 targets
         shell: bash
         run: |
           set -euo pipefail
-          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-root4-vs-root11-target"
-          export CARGO_BUILD_JOBS=2
-          cargo test --release --locked --example koblitz_orbit_dlp_fast > \
-            "$RUNNER_TEMP/n83-root4-vs-root11/example-tests.log" 2>&1
-          cargo build --release --locked --example koblitz_orbit_dlp_fast > \
-            "$RUNNER_TEMP/n83-root4-vs-root11/build.log" 2>&1
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 "$RUNNER_TEMP/n83-root-layout-frozen-source/research/n83_root4_vs_root11_20261015/verify.py" \
+            "$RUNNER_TEMP/n83-root-layout-sealed/raw/results" > \
+            "$RUNNER_TEMP/n83-root-layout-sealed/local-replay.log"
+          test "$(sha256sum "$RUNNER_TEMP/n83-root-layout-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            e3906ebcd2bc55ffcf613f114299433ee808570f65d4e8a4c2b826b442a432cf
 
-      - name: Run bounded 4000-point layout arms
+      - name: Reproduce the canonical current-head result rows
         shell: bash
         run: |
           set -euo pipefail
-          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-root4-vs-root11-target"
-          python3 research/n83_root4_vs_root11_20261015/run.py \
-            --binary "$CARGO_TARGET_DIR/release/examples/koblitz_orbit_dlp_fast" \
-            --output "$RUNNER_TEMP/n83-root4-vs-root11/results" \
-            2>&1 | tee "$RUNNER_TEMP/n83-root4-vs-root11/run.log"
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_root4_vs_root11_results_20261015/materialize.py \
+            --artifact-zip "$RUNNER_TEMP/n83-root-layout-sealed/raw.zip" \
+            --artifact-sha256 9abb1d09c3e52440bf0b39aeec04bf2653e6cbf998c1b2830f2d6868832db2cb \
+            --analysis-sha256 e3906ebcd2bc55ffcf613f114299433ee808570f65d4e8a4c2b826b442a432cf \
+            "$RUNNER_TEMP/n83-root-layout-sealed/raw/results"
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
 
-      - name: Independently replay complete bases and all targets
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ -d "$RUNNER_TEMP/n83-root4-vs-root11/results" ]; then
-            python3 research/n83_root4_vs_root11_20261015/verify.py \
-              "$RUNNER_TEMP/n83-root4-vs-root11/results" \
-              2>&1 | tee "$RUNNER_TEMP/n83-root4-vs-root11/verify.log"
-          fi
-
-      - name: Preserve raw receipts and failures
+      - name: Preserve current-head replay receipt
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: n83-root4-vs-root11-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/n83-root4-vs-root11/
-          if-no-files-found: error
+          name: n83-root4-vs-root11-sealed-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-root-layout-sealed/local-replay.log
+          if-no-files-found: ignore
           retention-days: 14
