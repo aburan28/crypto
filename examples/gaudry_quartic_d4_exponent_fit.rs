@@ -452,7 +452,13 @@ fn main() {
                 let key = format!("{variant}/{label}");
                 let mut v = cross.remove(&key).unwrap_or_default();
                 let n_none = cross_none.get(&key).copied().unwrap_or(0);
-                let ci = interval(&mut v);
+                // A percentile interval only when at least 97.5 % of the
+                // replicates cross; otherwise the count says it.
+                let ci = if (n_none as f64) <= 0.025 * REPLICATES as f64 {
+                    interval(&mut v)
+                } else {
+                    Value::Null
+                };
                 crossovers.push(json!({
                     "variant": variant, "rho": label,
                     "log2_p_star": first, "log2_group_star": first.map(|x| 4.0 * x),

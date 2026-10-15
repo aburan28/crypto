@@ -43,7 +43,7 @@ def fmt_ci(f):
 w = S["arms"]["ic-d4-w"]
 pr = w["per_rung"]
 ps = [r["p"] for r in pr]
-fig, ax = plt.subplots(figsize=(7.2, 4.6))
+fig, ax = plt.subplots(figsize=(7.2, 5.4))
 series = [
     ("relations", C["rel"], "o", "relations (D₄ solves)"),
     ("linear_algebra", C["la"], "s", "linear algebra, Wiedemann (priced)"),
@@ -65,7 +65,7 @@ ax.set_xlabel("p  (curve over F_{p⁴})")
 ax.set_ylabel("cost (GAE, group-addition equivalents)")
 ax.set_title("k = 4 index calculus by phase, and rho, against p (means per rung; dots: targets)", fontsize=9, color=C["ink"])
 grid(ax)
-ax.legend(fontsize=7, frameon=False, loc="upper left")
+ax.legend(fontsize=7, frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.14), ncol=2)
 save(fig, "phases_vs_p")
 
 # 2. Extrapolation to the crossover.
@@ -80,17 +80,17 @@ ax.plot(xs, gtot, color=C["gauss"], linewidth=1.2, linestyle=":", label="IC with
 for h, st in ((4, "--"), (16, "-.")):
     ax.plot(xs, [rho["s_rho_mean"] * math.sqrt(x ** 4 / h) for x in xs], st, color=C["rho"], linewidth=1.2, label=f"rho, S̄ = {rho['s_rho_mean']:.2f}, h = {h}")
 ax.axvspan(29, ps[-1], color=C["grid"], alpha=0.6, linewidth=0)
-ax.text(math.sqrt(29 * ps[-1]), max(tot) ** 0.02, "measured", ha="center", fontsize=8, color=C["muted"])
+ax.text(math.sqrt(29 * ps[-1]), 1e6, "measured", ha="center", fontsize=8, color=C["muted"])
 for c in w["crossovers"]:
     if c["variant"] == "wiedemann" and c["rho"] == "h=4" and c["log2_p_star"]:
         x = 2 ** c["log2_p_star"]
         ax.axvline(x, color=C["muted"], linewidth=0.8)
         lo, hi = c["log2_p_star_boot95"]
         ax.axvspan(2 ** lo, 2 ** hi, color=C["rel"], alpha=0.12, linewidth=0)
-        ax.text(x, 1e3, f" measured fit, h = 4:\n p* = 2^{c['log2_p_star']:.1f}, group 2^{c['log2_group_star']:.0f}", fontsize=7, color=C["ink"])
+        ax.text(x, 1e5, f" measured fit, h = 4:\n p* = 2^{c['log2_p_star']:.1f}, group 2^{c['log2_group_star']:.0f}", fontsize=7, color=C["ink"])
 m = S["model_11_16_from_pr1863"]["log2_group_star"]["h=4"]
 ax.axvspan(2 ** (m[0] / 4), 2 ** (m[1] / 4), color=C["la"], alpha=0.25, linewidth=0)
-ax.text(2 ** (m[1] / 4), 1e1, f" §11.16 model, h = 4:\n group 2^{m[0]:.1f}…2^{m[1]:.1f}", fontsize=7, color=C["ink"])
+ax.text(2 ** (m[0] / 4), 3e1, f"§11.16 model, h = 4:  \n group 2^{m[0]:.1f}…2^{m[1]:.1f}  ", ha="right", va="bottom", fontsize=7, color=C["ink"])
 ax.set_xscale("log", base=2)
 ax.set_yscale("log")
 ax.set_xlabel("p (log₂ scale)")
