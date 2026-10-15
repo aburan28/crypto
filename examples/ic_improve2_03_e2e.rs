@@ -36,12 +36,20 @@ fn tcpu() -> f64 {
 
 fn main() {
     let argv: Vec<String> = std::env::args().collect();
-    let flag = |k: &str| argv.iter().position(|x| x == k).map(|i| argv[i + 1].clone());
+    let flag = |k: &str| {
+        argv.iter()
+            .position(|x| x == k)
+            .map(|i| argv[i + 1].clone())
+    };
     let n: u32 = flag("--n").map(|v| v.parse().unwrap()).unwrap_or(17);
     let ell: u32 = flag("--ell").map(|v| v.parse().unwrap()).unwrap_or(6);
     let m: usize = flag("--m").map(|v| v.parse().unwrap()).unwrap_or(3);
-    let seed: u64 = flag("--seed").map(|v| v.parse().unwrap()).unwrap_or(20261015);
-    let max_trials: usize = flag("--max-trials").map(|v| v.parse().unwrap()).unwrap_or(20_000);
+    let seed: u64 = flag("--seed")
+        .map(|v| v.parse().unwrap())
+        .unwrap_or(20261015);
+    let max_trials: usize = flag("--max-trials")
+        .map(|v| v.parse().unwrap())
+        .unwrap_or(20_000);
     let arm = match std::env::var("KIC_FALLROW_GATE").as_deref() {
         Ok("1") => "G",
         _ => "I",
@@ -62,26 +70,25 @@ fn main() {
     };
     let mut dispositions: Vec<KoblitzRelationAttemptDisposition> = Vec::new();
     let c0 = tcpu();
-    let report = koblitz_index_calculus_dlp_with_factor_base_and_progress(
-        &kc,
-        &q,
-        &fb,
-        &opts,
-        &mut |e| {
+    let report =
+        koblitz_index_calculus_dlp_with_factor_base_and_progress(&kc, &q, &fb, &opts, &mut |e| {
             if let KoblitzIcEvent::RelationAttemptFinished { disposition, .. } = e {
                 dispositions.push(disposition);
             }
-        },
-    );
+        });
     let cpu = tcpu() - c0;
     let mut h = DefaultHasher::new();
     for x in &dispositions {
         format!("{x:?}").hash(&mut h);
     }
-    let count = |want: KoblitzRelationAttemptDisposition| dispositions.iter().filter(|&&x| x == want).count();
+    let count = |want: KoblitzRelationAttemptDisposition| {
+        dispositions.iter().filter(|&&x| x == want).count()
+    };
     let (log_ok, relations, trials, reductions, rc_ns) = match &report {
         Some(r) => (
-            r.log.as_ref().map(|l| *l == BigUint::from(d) % &kc.subgroup_order),
+            r.log
+                .as_ref()
+                .map(|l| *l == BigUint::from(d) % &kc.subgroup_order),
             r.relations,
             r.trials,
             r.reductions,

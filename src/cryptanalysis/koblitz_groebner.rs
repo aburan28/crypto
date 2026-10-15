@@ -4948,6 +4948,43 @@ pub fn split_rule_default() -> SplitRule {
     }
 }
 
+/// Gate threshold of [`fall_row_gate_augment`]: generators per occurring
+/// variable, trained and frozen in
+/// `research/ic_improve_20261015/03-fallrow-gate/runs/gate.json`.
+pub const FALL_ROW_GATE_THETA: f64 = 2.1583;
+
+/// Is the gated fall-row augmentation on (`KIC_FALLROW_GATE=1`)?  Off by
+/// default; read once per process.
+pub fn fall_row_gate_enabled() -> bool {
+    static ON: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ON.get_or_init(|| std::env::var("KIC_FALLROW_GATE").as_deref() == Ok("1"))
+}
+
+/// **Gated fall-row augmentation** (round 2, item 03).  When the system is
+/// overdetermined — non-zero generators per occurring variable at least
+/// [`FALL_ROW_GATE_THETA`], found by counting alone — run one degree-3
+/// Macaulay pass and return the generators with every reduced row of
+/// degree `< 3` appended.  Otherwise `None`: solve the system as given.
+/// The appended rows lie in the ideal, so the roots are unchanged.
+pub fn fall_row_gate_augment(system: &[F2BoolPoly], n_vars: usize) -> Option<Vec<F2BoolPoly>> {
+    let gens = system.iter().filter(|p| !p.is_zero()).count();
+    let occurring = system
+        .iter()
+        .flat_map(|p| p.terms.iter())
+        .fold(0u64, |acc, t| acc | t.mask)
+        .count_ones();
+    if occurring == 0 || (gens as f64) < FALL_ROW_GATE_THETA * occurring as f64 {
+        return None;
+    }
+    let (rows, _) = matrix_f4_f2_counted_with(system, n_vars, 3, RowCriterion::None)?;
+    let mut out = system.to_vec();
+    out.extend(
+        rows.into_iter()
+            .filter(|p| p.terms.iter().all(|t| t.mask.count_ones() < 3)),
+    );
+    Some(out)
+}
+
 /// Pick the variable to split on among those still unassigned.
 ///
 /// Returns `None` only when every variable is assigned.  A free

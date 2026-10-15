@@ -63,7 +63,9 @@ fn median(mut v: Vec<f64>) -> f64 {
 }
 
 fn f(r: &Value, k: &str) -> f64 {
-    r.get(k).and_then(Value::as_f64).unwrap_or_else(|| panic!("field {k}"))
+    r.get(k)
+        .and_then(Value::as_f64)
+        .unwrap_or_else(|| panic!("field {k}"))
 }
 
 fn main() {
@@ -71,6 +73,7 @@ fn main() {
     let mut files = Vec::new();
     let mut ratios = Vec::new();
     let mut train = false;
+    let mut medians: Vec<String> = Vec::new();
     let mut i = 1;
     while i < argv.len() {
         match argv[i].as_str() {
@@ -83,6 +86,10 @@ fn main() {
                 ratios.push(argv[i].clone());
             }
             "--train" => train = true,
+            "--medians" => {
+                i += 1;
+                medians.extend(argv[i].split(',').map(str::to_string));
+            }
             _ => {}
         }
         i += 1;
@@ -132,14 +139,40 @@ fn main() {
         }
     }
 
+    // `--medians a,b,…`: per cell, the median of each recorded field.
+    if !medians.is_empty() {
+        for (cell, rs) in &cells {
+            let parts: Vec<String> = medians
+                .iter()
+                .map(|k| {
+                    format!(
+                        r#""{k}":{:.6}"#,
+                        median(rs.iter().map(|r| f(r, k)).collect())
+                    )
+                })
+                .collect();
+            println!(
+                r#"{{"medians":"{cell}","targets":{},{}}}"#,
+                rs.len(),
+                parts.join(",")
+            );
+        }
+    }
+
     if train {
         // §5.1: the non-firing path.
         let mut pooled = Vec::new();
         let mut lr_ok = true;
         let mut table: Vec<(String, f64, (f64, f64, f64), (f64, f64, f64))> = Vec::new();
         for (cell, rs) in &cells {
-            let lr: Vec<f64> = rs.iter().map(|r| (f(r, "i_cpu") / f(r, "lr_cpu")).ln()).collect();
-            let fl: Vec<f64> = rs.iter().map(|r| (f(r, "i_cpu") / f(r, "f_cpu")).ln()).collect();
+            let lr: Vec<f64> = rs
+                .iter()
+                .map(|r| (f(r, "i_cpu") / f(r, "lr_cpu")).ln())
+                .collect();
+            let fl: Vec<f64> = rs
+                .iter()
+                .map(|r| (f(r, "i_cpu") / f(r, "f_cpu")).ln())
+                .collect();
             pooled.extend(lr.iter().copied());
             let lr_s = gm_ci(&lr);
             let f_s = gm_ci(&fl);
@@ -177,12 +210,18 @@ fn main() {
             }
             scan.push(format!(
                 r#"{{"theta":{},"admissible":{admissible},"score":{score:.4}}}"#,
-                if theta.is_finite() { format!("{theta:.4}") } else { "null".into() }
+                if theta.is_finite() {
+                    format!("{theta:.4}")
+                } else {
+                    "null".into()
+                }
             ));
             if admissible {
                 let better = match best {
                     None => true,
-                    Some((bt, bs)) => score > bs + 1e-12 || ((score - bs).abs() <= 1e-12 && theta > bt),
+                    Some((bt, bs)) => {
+                        score > bs + 1e-12 || ((score - bs).abs() <= 1e-12 && theta > bt)
+                    }
                 };
                 if better {
                     best = Some((theta, score));
@@ -201,7 +240,11 @@ fn main() {
         let (theta, score) = best.expect("+inf with pi0 admissible or none");
         println!(
             r#"{{"pi0":"{pi0}","lr_pooled_gm":{pooled_gm:.4},"lr_no_regression":{lr_ok},"theta":{},"score":{score:.4},"scan":[{}],"cells":[{}]}}"#,
-            if theta.is_finite() { format!("{theta:.4}") } else { "null".into() },
+            if theta.is_finite() {
+                format!("{theta:.4}")
+            } else {
+                "null".into()
+            },
             scan.join(","),
             cells_json.join(",")
         );

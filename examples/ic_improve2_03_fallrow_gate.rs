@@ -21,16 +21,17 @@
 #![allow(clippy::too_many_arguments, clippy::type_complexity, dead_code)]
 
 use crypto_lib::binary_ecc::f2m::{F2mElement, IrreduciblePoly};
+use crypto_lib::cryptanalysis::inherited_f4::{InheritCost, ReducedBasis};
 use crypto_lib::cryptanalysis::koblitz_groebner::{
-    build_decomposition_system, f4_profile, f4_profile_reset, f4_word_ops_thread, matrix_f4_f2_counted_with,
-    solve_boolean_system_filtered, split_rule_default, FieldStructure, RowCriterion,
-    SolveOptions, SolverEngine,
+    build_decomposition_system, f4_profile, f4_profile_reset, f4_word_ops_thread,
+    fall_row_gate_augment, matrix_f4_f2_counted_with, solve_boolean_system_filtered,
+    split_rule_default, FieldStructure, RowCriterion, SolveOptions, SolverEngine,
+    FALL_ROW_GATE_THETA,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_standard_subspace_factor_base, decomposition_solver_equations, find_irreducible,
     KoblitzCurve,
 };
-use crypto_lib::cryptanalysis::inherited_f4::{InheritCost, ReducedBasis};
 use crypto_lib::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
 use num_bigint::BigUint;
 use rand::rngs::StdRng;
@@ -97,7 +98,11 @@ fn solve_full(eqs: &[F2BoolPoly], nv: usize) -> Arm {
 }
 
 fn poly_degree(p: &F2BoolPoly) -> u32 {
-    p.terms.iter().map(|t| t.mask.count_ones()).max().unwrap_or(0)
+    p.terms
+        .iter()
+        .map(|t| t.mask.count_ones())
+        .max()
+        .unwrap_or(0)
 }
 
 fn support(p: &F2BoolPoly) -> u64 {
@@ -176,7 +181,11 @@ fn with_falls(eqs: &[F2BoolPoly], falls: &[F2BoolPoly]) -> Vec<F2BoolPoly> {
 /// carries `x_v + c` generators so its roots are roots of the full system.
 fn deferred(eqs: &[F2BoolPoly], nv: usize, k: usize) -> (Arm, usize) {
     let occ = eqs.iter().fold(0u64, |a, p| a | support(p));
-    let vars: Vec<u32> = (0..nv as u32).rev().filter(|v| occ >> v & 1 == 1).take(k).collect();
+    let vars: Vec<u32> = (0..nv as u32)
+        .rev()
+        .filter(|v| occ >> v & 1 == 1)
+        .take(k)
+        .collect();
     let mut total = Arm::default();
     let mut extra = 0usize;
     let c0 = tcpu();
@@ -184,9 +193,16 @@ fn deferred(eqs: &[F2BoolPoly], nv: usize, k: usize) -> (Arm, usize) {
         let mut sub: Vec<F2BoolPoly> = eqs.to_vec();
         for (i, &v) in vars.iter().enumerate() {
             let val = bits >> i & 1 == 1;
-            sub = sub.iter().map(|p| p.substitute(v, val)).filter(|p| !p.is_zero()).collect();
+            sub = sub
+                .iter()
+                .map(|p| p.substitute(v, val))
+                .filter(|p| !p.is_zero())
+                .collect();
         }
-        if sub.iter().any(|p| p.terms.len() == 1 && p.terms[0].mask == 0) {
+        if sub
+            .iter()
+            .any(|p| p.terms.len() == 1 && p.terms[0].mask == 0)
+        {
             continue;
         }
         let (falls, _, _) = fall_rows(&sub, nv);
@@ -239,8 +255,9 @@ impl PipeCell {
     /// Target `t`: a uniform multiple of the generator, seeded per (n, ℓ, m, t).
     fn system(&self, t: u64, ell: u32, plain: bool) -> (Vec<F2BoolPoly>, usize, u64) {
         let ord = self.kc.subgroup_order.to_u64_digits()[0];
-        let mut rng =
-            StdRng::seed_from_u64(20261015 ^ (self.kc.n as u64 * 1_000_000 + ell as u64 * 1000 + self.m as u64 * 100 + t));
+        let mut rng = StdRng::seed_from_u64(
+            20261015 ^ (self.kc.n as u64 * 1_000_000 + ell as u64 * 1000 + self.m as u64 * 100 + t),
+        );
         loop {
             let k = rng.gen_range(1..ord);
             let target = self.kc.mul(self.kc.generator(), &BigUint::from(k));
@@ -308,8 +325,16 @@ impl BarrelCtx {
     }
     fn system(&self, r: u64) -> (Vec<F2BoolPoly>, usize) {
         let rel = elem_from_bits(r, self.n);
-        let (lay, eqs, _) =
-            build_symmetric(self.n, self.l, &self.irr, &self.f, 1, &rel, &self.normal, &self.pinv);
+        let (lay, eqs, _) = build_symmetric(
+            self.n,
+            self.l,
+            &self.irr,
+            &self.f,
+            1,
+            &rel,
+            &self.normal,
+            &self.pinv,
+        );
         let gnv = lay.n_vars - self.nn;
         assert!(gnv <= 64);
         let geqs = gauge_system(&eqs, self.nn);
@@ -322,7 +347,11 @@ impl BarrelCtx {
 // ---------------------------------------------------------------------------
 
 fn arm_json(name: &str, a: &Arm) -> String {
-    let per_node = if a.calls > 0 { a.rank_sum as f64 / a.calls as f64 } else { 0.0 };
+    let per_node = if a.calls > 0 {
+        a.rank_sum as f64 / a.calls as f64
+    } else {
+        0.0
+    };
     format!(
         r#""{name}_cpu":{:.6},"{name}_splits":{},"{name}_reductions":{},"{name}_elim":{},"{name}_word_ops":{},"{name}_calls":{},"{name}_rank_per_call":{:.1},"{name}_cols_per_call":{:.1},"{name}_spec_ops":{},"{name}_roots":{}"#,
         a.cpu,
@@ -332,7 +361,11 @@ fn arm_json(name: &str, a: &Arm) -> String {
         a.word_ops,
         a.calls,
         per_node,
-        if a.calls > 0 { a.cols_sum as f64 / a.calls as f64 } else { 0.0 },
+        if a.calls > 0 {
+            a.cols_sum as f64 / a.calls as f64
+        } else {
+            0.0
+        },
         a.spec_ops,
         a.roots.len()
     )
@@ -358,6 +391,28 @@ fn run_target(
     nonfire: &str,
     truth: Option<&Vec<u64>>,
 ) {
+    if mode == "libcheck" {
+        // The library hook (`koblitz_groebner::fall_row_gate_augment`, frozen
+        // θ) against this harness's G path: same decision, same system,
+        // same roots.
+        let lib = fall_row_gate_augment(eqs, nv);
+        let ngens = eqs.iter().filter(|p| !p.is_zero()).count();
+        let occ = eqs.iter().fold(0u64, |a, p| a | support(p)).count_ones();
+        let fires = ngens as f64 / occ as f64 >= FALL_ROW_GATE_THETA;
+        let same = match &lib {
+            Some(sys) => fires && *sys == with_falls(eqs, &fall_rows(eqs, nv).0),
+            None => !fires,
+        };
+        let roots_same = match &lib {
+            Some(sys) => solve_full(sys, nv).roots == solve_full(eqs, nv).roots,
+            None => true,
+        };
+        println!(
+            r#"{{"mode":"libcheck","family":"{family}","cell":"{label}","target":{t},"lib_fires":{},"harness_fires":{fires},"same_system":{same},"roots_same":{roots_same}}}"#,
+            lib.is_some()
+        );
+        return;
+    }
     // The gate's feature, by counting alone; its CPU is charged to G.
     let c0 = tcpu();
     let ngens = eqs.iter().filter(|p| !p.is_zero()).count();
@@ -370,7 +425,11 @@ fn run_target(
 
     let i = solve_full(eqs, nv);
     let mut ok = !i.exhausted;
-    let theta_s = if theta.is_finite() { format!("{theta}") } else { "null".to_string() };
+    let theta_s = if theta.is_finite() {
+        format!("{theta}")
+    } else {
+        "null".to_string()
+    };
     let mut out = format!(
         r#"{{"family":"{family}","cell":"{label}","mode":"{mode}","target":{t},"n_vars":{nv},"gens":{ngens},"sys_degree":{sys_deg},"occ_vars":{occ_vars},"gens_per_var":{gpv:.4},"expansion":{e:.3},"gate_cpu":{gate_cpu:.7},"theta":{theta_s},"nonfire":"{nonfire}","fires":{fires},"#
     );
@@ -437,12 +496,23 @@ fn run_target(
         let flr_pass = pass_cpu + (tcpu() - c0);
         let mut flr = solve_full(&with_falls(eqs, &frows), nv);
         flr.cpu += flr_pass;
-        out += &format!(r#","flr_rows":{},"flr_pass_cpu":{flr_pass:.6},"#, frows.len());
+        out += &format!(
+            r#","flr_rows":{},"flr_pass_cpu":{flr_pass:.6},"#,
+            frows.len()
+        );
         out += &arm_json("flr", &flr);
-        let lin: Vec<F2BoolPoly> = falls.iter().filter(|p| poly_degree(p) <= 1).cloned().collect();
+        let lin: Vec<F2BoolPoly> = falls
+            .iter()
+            .filter(|p| poly_degree(p) <= 1)
+            .cloned()
+            .collect();
         let mut fl = solve_full(&with_falls(eqs, &lin), nv);
         fl.cpu += pass_cpu;
-        let quad: Vec<F2BoolPoly> = falls.iter().filter(|p| poly_degree(p) == 2).cloned().collect();
+        let quad: Vec<F2BoolPoly> = falls
+            .iter()
+            .filter(|p| poly_degree(p) == 2)
+            .cloned()
+            .collect();
         let mut fq = solve_full(&with_falls(eqs, &quad), nv);
         fq.cpu += pass_cpu;
         let (d2, d2x) = deferred(eqs, nv, 2);
@@ -473,7 +543,11 @@ fn run_target(
 
 fn main() {
     let argv: Vec<String> = std::env::args().collect();
-    let flag = |k: &str| argv.iter().position(|x| x == k).map(|i| argv[i + 1].clone());
+    let flag = |k: &str| {
+        argv.iter()
+            .position(|x| x == k)
+            .map(|i| argv[i + 1].clone())
+    };
     let family = flag("--family").unwrap_or_else(|| "pipe".into());
     let mode = flag("--mode").unwrap_or_else(|| "diag".into());
     let n: u32 = flag("--n").map(|v| v.parse().unwrap()).unwrap_or(13);
@@ -482,7 +556,9 @@ fn main() {
     let a: u8 = flag("--a").map(|v| v.parse().unwrap()).unwrap_or(0);
     let targets: u64 = flag("--targets").map(|v| v.parse().unwrap()).unwrap_or(4);
     let first: u64 = flag("--first").map(|v| v.parse().unwrap()).unwrap_or(0);
-    let theta: f64 = flag("--theta").map(|v| v.parse().unwrap()).unwrap_or(f64::INFINITY);
+    let theta: f64 = flag("--theta")
+        .map(|v| v.parse().unwrap())
+        .unwrap_or(f64::INFINITY);
     let nonfire = flag("--nonfire").unwrap_or_else(|| "i".into());
     match family.as_str() {
         "pipe" => {
@@ -505,7 +581,17 @@ fn main() {
                 let r = cx.target(t);
                 let (eqs, nv) = cx.system(r);
                 let truth = cx.brute_roots(r);
-                run_target("barrel", &label, t, &eqs, nv, &mode, theta, &nonfire, Some(&truth));
+                run_target(
+                    "barrel",
+                    &label,
+                    t,
+                    &eqs,
+                    nv,
+                    &mode,
+                    theta,
+                    &nonfire,
+                    Some(&truth),
+                );
             }
         }
         _ => panic!("--family pipe|barrel"),
@@ -990,7 +1076,9 @@ impl BarrelCtx {
         let xs: Vec<Vec<u64>> = (0..nn)
             .map(|k| {
                 (0..(1u64 << l))
-                    .map(|c| bits_of(&elem_from_bits(c, self.n).square_k_times(k as u32, &self.irr)))
+                    .map(|c| {
+                        bits_of(&elem_from_bits(c, self.n).square_k_times(k as u32, &self.irr))
+                    })
                     .collect()
             })
             .collect();
