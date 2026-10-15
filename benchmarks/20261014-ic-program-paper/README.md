@@ -18,3 +18,4 @@ source). No experiment was run for this entry.
 | [`fig-koblitz-online`](fig-koblitz-online.svg) | one-target online rho/IC ratios, exploratory vs admitted |
 | [`fig-prime`](fig-prime.svg) | FGHR D4 vs Gaudry S4 at k = 4; PKM tower IC/rho by size |
 | [`fig-engine`](fig-engine.svg) | selected Gröbner-engine ratios |
+| [`fig-ladder`](fig-ladder.svg) | changes of 14–15 October against their index-calculus incumbents (values in `papers/ecdlp-index-calculus-program/figures/ladder.tsv`) |

@@ -66,8 +66,11 @@ widens, it does not close (816 audited records;
 $0.84\times$ at $n=17$ and $0.76$--$0.77\times$ at $n=23$, but cost
 $4.01\times$ at $n=31$ (\art{research/koblitz_symmetrised_e2e_20260927/}).
 GHS and hyperelliptic covers: ECC2K-130 does map to hyperelliptic curves,
-but the genus that would pay is missing; end-to-end GHS exists only for
-$m=1$ toys (\art{docs/GHS_SCREEN.md}, ledger implementation caps). The
+but the genus that would pay is missing. In odd characteristic the cubic
+GHS transfer from $E_0(\FF_{q^3})$ to a genus-3 Jacobian now runs end to end
+with double-large-prime index calculus, at $q^{1.380}$ against rho's
+$q^{3/2}$, still $1.7$--$2.6\times$ the negation-map rho model at
+$q=2^{20}$ (\S\ref{sec:ladder}). The
 isogeny-loop GLV/GLS work produced a measured $1.09$--$1.15\times$ faster
 four-dimensional scalar multiplication (\art{research/isogeny_loop_glv_20261012/})
 and a $\sqrt{\text{\'elu}}$ kernel cost exponent $0.822$ $[0.805,0.838]$;

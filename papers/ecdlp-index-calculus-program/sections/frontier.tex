@@ -178,7 +178,7 @@ FGHR $D_4$ vs Gaudry $S_4$, $C_4$ & St & E & $47.5$--$48.4$ & $\FF_{269^4}$ \\
 \texttt{gaudry\_quartic} solve & St & E & $1.9$--$6.4$ & $d=4..6$ \\
 \addlinespace
 \multicolumn{5}{@{}l}{\emph{One-target online}}\\
-Compact-orbit IC vs strong rho & On & E & $13.94$ & $n=61$, $[9.81,19.13]$, 64 targets \\
+Compact-orbit IC vs strong rho & On & E & $13.94$ & $n=61$; rho without a table; retired (\S\ref{sec:ladder}) \\
 \addlinespace
 \multicolumn{5}{@{}l}{\emph{Accounting (costs that went up when priced)}}\\
 F4 word XORs priced & Cold & A & $1/25.2$ & $16.75\to421.4$, K13 \\
@@ -195,6 +195,155 @@ the ratio is an upper bound); $1.69$ and $25.2$ compare means from different
 sessions with different seeds and are descriptive; F5 and F6-IC ratios are
 reciprocals of the recorded candidate/baseline word-XOR ratios.
 
+\subsection{The improvement ladder, 14--15 October}\label{sec:ladder}
+
+The repository's owner fixed the criterion for success on 15 October: a
+verified, measured improvement over the current index-calculus baseline is
+a success; each one becomes the new baseline; the gap to the matched rho is
+reported as the distance remaining, not as a pass/fail gate; and
+relabelling or accounting changes do not count. In the two days before
+that, two improvement rounds and a next-steps campaign landed about twenty
+measured changes, each paired against its own incumbent under a protocol
+frozen before data. Figure~\ref{fig:ladder} and Table~\ref{tab:ladder}
+list them, with the distance to rho that remains after each one.
+None is in the frontier campaign of \S\ref{sec:campaign}, which predates
+them, and none was priced across the band; the boundaries are the ones the
+studies used, which differ from row to row.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig-ladder.pdf}
+\caption[]{Candidate over incumbent for the changes of 14--15 October, with
+95\% intervals where the study reports one (the binary oracle's range is
+the spread over three runs). Filled: whole solve; open: one stage. Values:
+\art{papers/ecdlp-index-calculus-program/figures/ladder.tsv}; sources in
+Table~\ref{tab:ladder}.}
+\label{fig:ladder}
+\end{figure}
+
+\begin{table}[p]
+\centering\small
+\caption[]{Changes measured 14--15 October 2026 against their own
+incumbents. Ratio: candidate/incumbent, $<1$ better. Class, against the
+index-calculus incumbent (not the paper's \cls{advance}, which is against
+rho): Ie = improves the exponent, Ic = improves the constant, E =
+\cls{engineering} on one stage, R = regresses, T = trades, A =
+\cls{accounting}. ``To rho'':
+the distance left to the matched rho on the study's own boundary; ``d'' marks
+a derived or extrapolated value. Sources under \art{research/}:
+\texttt{ic\_next10\_20261014/}, \texttt{ic\_improve\_20261014/},
+\texttt{ic\_improve\_20261015/} and the named study directories.}
+\label{tab:ladder}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright}Xl>{\raggedright}p{3.6cm}>{\raggedright\arraybackslash}p{3.2cm}@{}}
+\toprule
+Change & Cl. & Ratio [95\%] & To rho \\
+\midrule
+\multicolumn{4}{@{}l}{\emph{Genus 3 after the cubic GHS transfer, $E_0(\FF_{q^3})$, cost in $\FF_q$ multiplications}}\\
+Double large primes vs full base (04) & Ie & $0.036$ $[0.035,0.036]$ at $2^{18}$; $q^{1.910}\to q^{1.385}$ & $2.58\times$ negation rho model at $q=2^{20}$ \\
+Large primes as columns, SGE, Wiedemann (01) & Ie & $0.653$ $[0.647,0.660]$ at $2^{20}$; $q^{1.398}\to q^{1.380}$ & ${\approx}1.7\times$ (d) \\
+\addlinespace
+\multicolumn{4}{@{}l}{\emph{$k=4$ over $\FF_{p^4}$, operation counts}}\\
+$D_4$ $Y$-line vs plain $\Sem4$, $p=101$--$1033$ & Ic & $0.0548$ $[0.048,0.061]$ & handover $2^{126}$--$2^{137}$ (d) \\
+$D_4$-weighted $\Sem5$, four unknowns, vs five & E & $1/18.5$--$1/17.8$ & handover $2^{135.6}\to2^{118.9}$ (d) \\
+First-dependency stop (\texttt{d4-ed}) & Ic & $0.979$ $[0.973,0.986]$ & no $k=4$ run below rho \\
+Double large primes, tuned & R & $1.025$ $[1.016,1.037]$ (LA $0.827$) & --- \\
+\addlinespace
+\multicolumn{4}{@{}l}{\emph{Koblitz, compact orbit and Gr\"obner oracle}}\\
+Free relations in production, $n=41,53,61$ & Ic & $0.960$ $[0.946,0.976]$ & $3.8$--$15\times$ rho-frob ($w=0$, \S\ref{sec:campaign}) \\
+Linear-row harvest, $(23,12)$, $m=2$ & Ic & $0.858$ $[0.803,0.916]$ & oracle stage; default on \\
+Gated fall-row augmentation & Ic & $1/11.9$ on barrel $n=13$; $1$ in production & production no-op \\
+Equivariant Macaulay oracle & T & $4.0$ ($n=5$) \ldots\ $1/15.5$ ($n=13$) & not applicable to production \\
+\texttt{stride-renew} targets, $n=13$ & E & $0.531$ $[0.506,0.557]$ & $4.7\times$ rho-strong at $n=19$ \\
+Cyclotomic $\gamma$-weight base, K1 & R & $1.022$ $[1.021,1.023]$ & yield-neutral \\
+Trace-zero pre-filter & R & $1.00003$ & vacuous on odd order \\
+\addlinespace
+\multicolumn{4}{@{}l}{\emph{Prime fields and shared stages}}\\
+PKM isogeny tower, search charged & A & $1.002$--$1.331$ & $17$--$137\times$ rho \\
+Binary MITM pair-table oracle, $\ell=8$ & E & $1/277$--$1/94$ per target & no exponent claim \\
+Filter + Wiedemann LA, $D=2^{18}$ & E & $1/10.40$; $1/1.93$ vs CADO-NFS & LA is 0.1--1.9\% of runs \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Genus three: the one exponent below rho's.} The cubic GHS
+transfer~\cite{ghs2002} maps the DLP in $E_0(\FF_{q^3})$ to the Jacobian
+of a genus-3 hyperelliptic curve over $\FF_q$, where double-large-prime
+index calculus~\cite{gtthd2007} costs $\tilde O(q^{2-2/g})=\tilde O(q^{4/3})$
+against rho's $q^{3/2}$. That is known; what is new is a priced,
+end-to-end, verified run of it on a family the repository can build
+($4\mid\#E_0(\FF_{q^3})$, split arm, $q=2^{8}$--$2^{21}$, every logarithm checked
+against the planted scalar). Adding double large primes changed the
+exponent from $q^{1.910}$ to $q^{1.385}$ $[1.379,1.391]$, and keeping the large
+primes as columns, merging them with structured Gaussian elimination and
+finishing with Wiedemann moved it to $q^{1.380}$ and the constant to
+$0.653\times$. This is the only index-calculus family in the programme whose
+fitted exponent lies below rho's, and the only one where measured
+IC beats a rho arm: the item-7 rho, which walks at $1.75\sqrt\ell$ steps,
+at $q=2^{15}$ ($0.69$ $[0.55,0.83]$). Against the negation-map rho model
+it is still $2.58\times$ dearer at $q=2^{20}$ before the new linear algebra
+and about $1.7\times$ after it (derived). The local exponents still rise by
+$0.020$ per bit, because structured elimination trades row weight for
+columns, so the $4/3$ asymptote is not yet in view, and pricing a
+multiplication mod $\ell$ at nine $\FF_q$ multiplications turns the
+exponent gain into a loss. The family is narrow: the transfer needs the
+right 2-power torsion, and $\FF_{q^3}$ curves are not deployed.
+\emph{Next improvement}: a factor-base fraction rebalanced to the new
+linear algebra (the exploratory $\kappa=1.41$ arm reached $q^{1.357}$),
+then a measured run at $q\ge2^{21}$ against the negation-map rho on the same
+instances, with the mod-$\ell$ multiplications priced.
+
+\paragraph{The $k=4$ chain.} The $D_4$ Macaulay system of
+\S\ref{sec:gaudry} entered a complete ladder ($p=101$--$1033$, 21 curves):
+$18.2\times$ cheaper than plain $\Sem4$ at the same exponent, with the
+handover with negation rho extrapolated to $2^{126}$--$2^{137}$. Writing
+the $D_4$-symmetrised $\Sem5$ in four weighted unknowns cut the per-solve
+cost another $17.8$--$18.5\times$, to $1.42\cdot10^9$ $\FF_p$
+multiplications, $854\times$ below the plain form; in the 2-torsion frame
+that moves the derived handover from $2^{157.9}$ to $2^{118.9}$. Double
+large primes cut the linear algebra ($0.827\times$) but regress the whole
+solve; stopping at the first dependency gains $2.1\%$. No $k=4$ run below
+rho exists; every handover is an extrapolation of fitted exponents through
+a measured constant. \emph{Next improvement}: put the four-unknown solve
+into the complete ladder, then keep double large primes' linear-algebra
+gain without its relation-phase cost.
+
+\paragraph{Koblitz.} Free relations---root-table self-collisions used as
+homogeneous rows---are now the production default ($0.960\times$ counted,
+$0.941\times$ wall); the linear rows the Gr\"obner oracle used to discard
+are harvested ($0.86$--$0.93\times$ where the gate fires); the gated
+fall-row and equivariant passes pay only on overdetermined systems the
+production pipeline does not build. The cyclotomic base and the trace-zero
+filter were refuted. A census closes the free-relation lever at the rungs
+run: at $n=61$, $K=600$ the self-collisions span 49 independent relations of
+the 599 needed, and full rank would need $K\approx2{,}050$. The distance to
+signed-Frobenius rho is still $3.8$--$15\times$ cold at $w=0$, and the
+fitted Koblitz ratio grows as about $r^{1/6}$ (slope $0.165$ $[0.117,0.213]$
+per $\ln r$ on eight public curves, every native priced).
+\emph{Next improvement}: relation yield per probe, which none of these
+changes touched.
+
+\paragraph{The online result is retired.} An equal-advice audit
+gave Bernstein--Lange preprocessing rho~\cite{bl2012} a distinguished-point
+table no larger than the index-calculus pair table and ran both on the same
+64 unseen targets at $n=41$, 53 and 61. Rho with the table is $53$--$317\times$
+faster online (at $n=41$, with exactly equal advice, $317$ $[137,739]$), and
+even at $1/1{,}024$ of the bytes it stays $7.7$--$32\times$ faster. The
+$13.9\times$ online win of \S\ref{sec:koblitz} and the later $7.3\times$ and
+$12.3\times$ hosted single-target points at $n=71$ and $n=83$ compared
+index calculus \emph{with} a table against rho \emph{without} one. They are
+measurements of the preprocessing model, not index-calculus improvements,
+and the online frontier belongs to preprocessing rho.
+
+\paragraph{The reference moved too.} Two rho studies shortened the
+distances above. On prime curves, choosing the better of $P+R$ and $P-R$
+at each step takes $1.129\times$ fewer steps under distinguished points
+($1.081$--$1.184$); each step costs more, so the predicted net gain is
+$1.03$--$1.12\times$ with 8--64 walks per inversion and a net loss ($0.95$)
+at 1{,}024. On ECC2K-130, signed $\sigma$ steps cut GPU time per
+solve to $0.961$--$0.970$ (derived; not rolled out). Neither is yet in a
+campaign arm. A comparison against a rho that has not adopted them would
+overstate index calculus's position by that much.
+
 \subsection{Three frontiers}
 
 \paragraph{Cold, one target, set-up included.} Unchanged: generic rho.
@@ -205,10 +354,11 @@ lower-bound arms are $1.08\times$ (compact orbit with a counted Frobenius
 table) and $6.97\times$ (matrix F4/F5 against rho-negation at K13).
 Prime-field arms are $12$--$239\times$ rho and diverge with size.
 
-\paragraph{Online, after retained set-up.} One admitted point: compact-orbit
-IC at Koblitz $n=61$, $13.9\times$ $[9.8,19.1]$ over strong rho on 64
-unseen public targets, set-up of about 28\,s excluded (cold median
-$83.4\times$ rho). The larger $n=71,73,83$ observations remain exploratory.
+\paragraph{Online, after retained set-up.} Generic again: Bernstein--Lange
+preprocessing rho. The admitted compact-orbit point at Koblitz $n=61$,
+$13.9\times$ $[9.8,19.1]$ over strong rho without a table (cold median
+$83.4\times$ rho), is $53$--$221\times$ slower online than preprocessing rho
+given equal or less advice (\S\ref{sec:ladder}).
 
 \paragraph{Stage.} Moved substantially: the decomposition oracle is two to
 five orders of magnitude cheaper than at the start of the programme on the

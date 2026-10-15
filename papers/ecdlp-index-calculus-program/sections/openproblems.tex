@@ -42,15 +42,18 @@ of 2-torsion curves---and does it change the $r^{2/3}$ cost of two-summand
 prime index calculus? A negative answer with a counting argument would be
 as useful as a positive one.
 
-\paragraph{5. The preprocessing regime.} Index calculus with retained
-preparation beats rho online on Koblitz curves (\S\ref{sec:koblitz}).
-\emph{Experiment:} measure advice size in bits $S$ and online time $T$ for
-the compact-orbit arm across sizes and place them against the
-Corrigan-Gibbs--Kogan bound $S\,T^2=\tilde\Omega(N)$; report where it sits
-relative to generic preprocessing algorithms at equal $S$.
+\paragraph{5. The preprocessing regime.} Index calculus with a retained
+table beats rho without one, and loses by $53$--$317\times$ to
+Bernstein--Lange rho with an equal or smaller table (\S\ref{sec:ladder}).
+\emph{Experiment:} measure the advice--time curve $(S,T)$ of the
+compact-orbit arm across sizes against preprocessing rho's
+$S\,T^2\approx N$; an index-calculus online result counts only if it lies
+below that curve at equal $S$.
 
-\paragraph{6. Symmetry at $k=4$, end to end.} The $D_4$ reduction moves a
-\emph{modelled} crossover over $\FF_{p^4}$ from $2^{150}$ to $2^{135}$.
+\paragraph{6. Symmetry at $k=4$, end to end.} The $D_4$ reduction and its
+four-unknown weighted form move a \emph{modelled} handover over $\FF_{p^4}$
+from about $2^{150}$ to $2^{119}$--$2^{137}$ depending on frame
+(\S\ref{sec:ladder}).
 \emph{Experiment:} a complete $k=4$ index calculus over $\FF_{p^4}$ at
 several $p$, cold, priced, against rho with the available automorphisms,
 to replace the model by a measured slope.
@@ -61,3 +64,15 @@ require every arm's native work to be counted (AGENTS.md \S5a).
 calibrate every ladder size on one fixed host; resolve the inherited-F4
 cross-host counter drift; register the $n=83$ dense root index in the
 harness.
+
+\paragraph{8. Genus three after cubic GHS, to the crossover.} The one
+family whose fitted exponent ($q^{1.380}$) lies below rho's $q^{3/2}$ is
+still $1.7$--$2.6\times$ the negation-map rho model at $q=2^{20}$, and its
+local exponent rises by $0.02$ per bit because the linear algebra grows as
+$q^{1.5}$ (\S\ref{sec:ladder}).
+\emph{Experiment:} rebalance the factor-base fraction to the structured
+linear algebra, price a multiplication mod $\ell$ at its measured cost, and
+run to $q\ge2^{22}$ against a measured negation-map rho on the same
+instances, in the harness and across the pricing band. A measured
+crossover there would be the programme's first \cls{advance} against rho,
+on a narrow and undeployed family.

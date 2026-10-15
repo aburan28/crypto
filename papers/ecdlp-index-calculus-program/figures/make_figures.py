@@ -195,6 +195,33 @@ def fig_engine():
     save(fig, "fig-engine")
 
 
+def fig_ladder():
+    """Candidate / incumbent ratios of the 14-15 October rounds (ladder.tsv)."""
+    import csv
+    rows = list(csv.DictReader(open(os.path.join(HERE, "ladder.tsv")), delimiter="\t"))
+    colour = {"improves": C[2], "engineering": C[0], "regresses": C[5], "accounting": C[6]}
+    fig, ax = plt.subplots(figsize=(6.4, 3.9))
+    n = len(rows)
+    for i, r in enumerate(rows):
+        y = n - 1 - i
+        v, lo, hi = float(r["ratio"]), float(r["lo"]), float(r["hi"])
+        col = colour[r["verdict"].split()[0]]
+        ax.plot([lo, hi], [y, y], color=col, lw=1.6)
+        ax.plot(v, y, "o", color=col, ms=4, mfc=col if r["level"] == "whole" else "white")
+    ax.axvline(1, color=INK, lw=0.8)
+    ax.set_xscale("log")
+    ax.set_yticks(range(n))
+    ax.set_yticklabels([f"{r['family']}: {r['change']}" for r in rows][::-1], fontsize=6.5)
+    ax.set_xlabel("candidate / incumbent (log scale; < 1 is an improvement)")
+    for k, col in colour.items():
+        ax.plot([], [], "o", color=col, label=k)
+    ax.plot([], [], "o", color=INK, mfc="white", label="stage only")
+    ax.legend(fontsize=6.5, loc="center left", bbox_to_anchor=(1.01, 0.5), frameon=False)
+    ax.set_title("Index-calculus changes measured 14–15 October 2026 against their incumbents",
+                 fontsize=8.5)
+    save(fig, "fig-ladder")
+
+
 if __name__ == "__main__":
     fig_timeline()
     fig_rootfinding_oracle()
@@ -203,4 +230,5 @@ if __name__ == "__main__":
     fig_online()
     fig_prime()
     fig_engine()
+    fig_ladder()
     print("ok")
