@@ -315,7 +315,11 @@ impl Metrics {
                 let (w0, s) = (o >> 6, o & 63);
                 for i in 0..words {
                     let lo = self.d[w0 + i] >> s;
-                    let hi = if s == 0 { 0 } else { self.d[w0 + i + 1] << (64 - s) };
+                    let hi = if s == 0 {
+                        0
+                    } else {
+                        self.d[w0 + i + 1] << (64 - s)
+                    };
                     self.s3[i] |= lo | hi;
                 }
             }
@@ -388,7 +392,11 @@ fn main() {
     );
     let t = Instant::now();
     let dl = DlTable::new(&inst);
-    eprintln!("dl table: {} entries [{:.1}s]", dl.map.len(), t.elapsed().as_secs_f64());
+    eprintln!(
+        "dl table: {} entries [{:.1}s]",
+        dl.map.len(),
+        t.elapsed().as_secs_f64()
+    );
     let ctx = Ctx {
         inst: &inst,
         dl,
@@ -401,7 +409,11 @@ fn main() {
     {
         let p = inst.fast.mul_u64(inst.generator, 12345 % r);
         let fp = inst.fast.frobenius_k(p, 1);
-        assert_eq!(ctx.dl.log(&fp), mulmod(ctx.dl.log(&p), lambda, r), "Frobenius ≠ λ");
+        assert_eq!(
+            ctx.dl.log(&fp),
+            mulmod(ctx.dl.log(&p), lambda, r),
+            "Frobenius ≠ λ"
+        );
     }
 
     // ── Plug-in bases (what ic.pipeline runs) ──
@@ -431,7 +443,10 @@ fn main() {
         let consistent = logs
             .iter()
             .all(|&(c, coef, l)| rep_of_col.get(&c).map(|&rl| mulmod(rl, coef, r)) == Some(l));
-        assert!(consistent, "{fb_spec}: dump coefficients disagree with logs");
+        assert!(
+            consistent,
+            "{fb_spec}: dump coefficients disagree with logs"
+        );
         let mut cols: Vec<u64> = rep_of_col.keys().copied().collect();
         cols.sort_unstable();
         let reps: Vec<u64> = cols.iter().map(|c| rep_of_col[c]).collect();
@@ -508,7 +523,10 @@ fn main() {
                 }
             }
         }
-        let cos = format!("compact-orbit-scan:columns={k},raw_x_cap={}", (1u64 << n) - 1);
+        let cos = format!(
+            "compact-orbit-scan:columns={k},raw_x_cap={}",
+            (1u64 << n) - 1
+        );
         if let Some((reps, facts)) = plugin_reps(&cos, &mut checks) {
             push("compact_orbit_scan".into(), &reps, facts, &mut m);
         }
@@ -519,7 +537,8 @@ fn main() {
             let mut seen = HashSet::new();
             let mut reps = Vec::new();
             ctx.columns_from_abscissae(
-                set.iter().map(|e| e.raw_bits().first().copied().unwrap_or(0)),
+                set.iter()
+                    .map(|e| e.raw_bits().first().copied().unwrap_or(0)),
                 k,
                 &mut seen,
                 &mut reps,
@@ -569,7 +588,9 @@ fn main() {
         }
         for &k in &ks {
             let pts = ctx.points_of(&reps[..k]);
-            null.entry(k).or_default().push(m.measure_opt(&pts, ks3.contains(&k)));
+            null.entry(k)
+                .or_default()
+                .push(m.measure_opt(&pts, ks3.contains(&k)));
         }
         if draw % 200 == 0 {
             eprintln!("  null draw {draw} [{:.1}s]", t.elapsed().as_secs_f64());
@@ -654,5 +675,9 @@ fn main() {
         "total_seconds": started.elapsed().as_secs_f64(),
     });
     std::fs::write(&args.out, serde_json::to_string(&report).unwrap() + "\n").expect("write");
-    eprintln!("wrote {} [{:.1}s]", args.out, started.elapsed().as_secs_f64());
+    eprintln!(
+        "wrote {} [{:.1}s]",
+        args.out,
+        started.elapsed().as_secs_f64()
+    );
 }
