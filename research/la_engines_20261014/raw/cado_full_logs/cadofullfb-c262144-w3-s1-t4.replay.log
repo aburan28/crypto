@@ -1,17 +1,17 @@
-# (692ecb7) /home/user/ext/cado-nfs/build/filter/replay-dl -purged /tmp/cb/cado-full.ZeGRaW/purged -his /tmp/cb/cado-full.ZeGRaW/history -out /tmp/cb/cado-full.ZeGRaW/small.bin -index /tmp/cb/cado-full.ZeGRaW/small.index -ideals /tmp/cb/cado-full.ZeGRaW/small.ideal
+# (692ecb7) /home/user/ext/cado-nfs/build/filter/replay-dl -purged /tmp/cb/cado-full.Mxwv49/purged -his /tmp/cb/cado-full.Mxwv49/history -out /tmp/cb/cado-full.Mxwv49/small.bin -index /tmp/cb/cado-full.Mxwv49/small.index -ideals /tmp/cb/cado-full.Mxwv49/small.ideal
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 Sparse matrix has 31662 rows and 262137 cols
 # Output matrices will be written in binary format
 antebuffer set to /home/user/ext/cado-nfs/build/utils/antebuffer
-Reading sparse matrix from /tmp/cb/cado-full.ZeGRaW/purged
+Reading sparse matrix from /tmp/cb/cado-full.Mxwv49/purged
 # Read 1024 relations in 0.0s -- inf MB/s -- inf rels/s
 # Read 2048 relations in 0.0s -- inf MB/s -- inf rels/s
 # Read 4096 relations in 0.0s -- inf MB/s -- inf rels/s
 # Read 8192 relations in 0.0s -- inf MB/s -- inf rels/s
 # Read 16384 relations in 0.0s -- inf MB/s -- inf rels/s
-# Done: Read 31662 relations in 0.0s -- inf MB/s -- inf rels/s
+# Done: Read 31662 relations in 0.0s -- 78.7 MB/s -- 3131526.2 rels/s
 The biggest index appearing in a relation is 262137
 Reading row additions
 # Read 1024 row additions in 0.0s -- inf lines/s
@@ -19,13 +19,13 @@ Reading row additions
 # Read 4096 row additions in 0.0s -- inf lines/s
 # Read 8192 row additions in 0.0s -- inf lines/s
 # Read 16384 row additions in 0.0s -- inf lines/s
-# Read 32768 row additions in 0.0s -- 1965641.2 lines/s
-# Read 65536 row additions in 0.0s -- 1576548.2 lines/s
-# Done: Read 81577 row additions in 0.1s -- 1165310.4 lines/s
+# Read 32768 row additions in 0.0s -- 2067624.3 lines/s
+# Read 65536 row additions in 0.0s -- 1636298.5 lines/s
+# Done: Read 82661 row additions in 0.1s -- 1214039.6 lines/s
 Renumbering columns (including sorting w.r.t. weight)
-Sorting 3528 columns by decreasing weight
-Sparse submatrix: nrows=3528 ncols=3528
-Writing sparse representation to /tmp/cb/cado-full.ZeGRaW/small.bin
+Sorting 3507 columns by decreasing weight
+Sparse submatrix: nrows=3507 ncols=3507
+Writing sparse representation to /tmp/cb/cado-full.Mxwv49/small.bin
 # Writing matrix took 0.0s
-# Weight of the sparse submatrix: 257515
+# Weight of the sparse submatrix: 265437
 Total usage: time 0s (cpu), 0s (wct) ; memory 95MiB, peak 156MiB
