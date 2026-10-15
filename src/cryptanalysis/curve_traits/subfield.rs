@@ -70,9 +70,13 @@ fn trace_sum(x: &F2mElement, step: u32, count: u32, irr: &IrreduciblePoly) -> F2
     acc
 }
 
+/// Whether the absolute trace of `x ∈ GF(2^n)` is one.  `n` is the degree of
+/// the field `x` lies in, which can be a proper subfield degree `k | m` of the
+/// ambient `GF(2^m)` that `x` and `irr` are written in; the trace is then
+/// `0` or `1` *as an element of `GF(2^m)`*.
 fn abs_trace_is_one(x: &F2mElement, n: u32, irr: &IrreduciblePoly) -> bool {
     let t = trace_sum(x, 1, n, irr);
-    debug_assert!(t.is_zero() || t == F2mElement::one(n));
+    debug_assert!(t.is_zero() || t == F2mElement::one(x.m_value()));
     !t.is_zero()
 }
 

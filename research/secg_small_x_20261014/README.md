@@ -66,4 +66,4 @@ cofactor, toy curves), `semaev_s3_cost.rs` (S₃ decision and its timing), `src/
 - S₃ times: 20 targets per run, one thread, single runs on a shared machine; rho charged √n affine additions.
 - The base is `[h]` of the small-x points; the raw variant is sampled (4000 pairs, B = 64, ten curves) and the `sect233k1` excess is unexplained.
 - Toy curves validate the method, not any SECG curve.
-- Outside this study: two `curve_traits::subfield` tests fail identically at the merge base `45efe3b33`; not touched.
+- Outside this study: two `curve_traits::subfield` tests failed at the merge base `45efe3b33` too, from a `debug_assert` comparing elements of different degree; fixed (one line in `subfield.rs`).
