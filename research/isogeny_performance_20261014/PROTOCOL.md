@@ -29,14 +29,25 @@ Counts are generic `Field` API operations, with inversion internals opaque.
 They are not instruction counts, CPU cycles or a priced total cost. The
 counted wrapper intentionally uses generic convolutions; timing uses the
 original native field backend. Never convert a multiplication-count reduction
-into a whole-search speedup. The native tool currently labels all timing
-samples unreserved and unqualified. macOS has no Linux affinity/PSI facility;
+into a whole-search speedup. Each raw sample remains diagnostic until its
+campaign has complete, independently audited isolation receipts. macOS has no Linux affinity/PSI facility;
 this stage records counts without wall samples there. The isolation requirement
 is implemented using the repository's native `isolated_bench` through a
 standalone Cargo front door. `isogeny-perf campaign` accepts timing qualification
 only from a native `isolated-bench/1` run receipt with child exit zero and no
-contention. Linux execution of that adapter remains to be verified by the
-processor matrix; macOS uses repeated counts without wall samples.
+contention. The first AMD wave passes this boundary; ARM's incomplete wave
+remains censored. macOS uses repeated counts without wall samples. See
+`cpu-evidence-38766895864/README.md` for actual native receipts.
+
+The next wave uses both the original source and the previous measured source
+`a21306ca20418a4c4bfcc8448de9b8851b8449ed`, each rebuilt with the same current
+harness. Two separate twenty-command campaigns distinguish cumulative and
+incremental changes. All original and substituted harness sources and three
+binaries are retained. One censored series does not prevent collecting the
+other; its failed job status and complete failed receipts are retained.
+Native settling increases from two to five seconds while the other-process
+CPU-rate and pressure thresholds stay unchanged. This addresses an observed
+startup housekeeping refusal, without promoting the earlier failed series.
 
 The broad legacy harness covers kernel construction, modular-polynomial and
 division-polynomial finding, path search, class-group and higher-dimensional

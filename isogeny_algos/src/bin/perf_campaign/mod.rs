@@ -44,7 +44,7 @@ pub fn run(args: &[String]) -> Result<(), String> {
                 if isolator.is_some() {
                     cmd.args(["run", "--cpus", &args[6], "--out"])
                         .arg(&isolation)
-                        .args(["--label", &name, "--"])
+                        .args(["--settle", "5", "--label", &name, "--"])
                         .arg(binary);
                 }
                 cmd.arg("--out").arg(&output).args([

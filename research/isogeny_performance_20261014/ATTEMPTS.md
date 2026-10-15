@@ -85,3 +85,20 @@ increase in multiplication calls beside reduced inversion counts.
     a private helper path and an unimported point-access trait; the adapter now
     uses the public curve helper and an explicit affine-point match. Neither
     attempt produced an accepted benchmark.
+
+17. GitHub CPU wave 38766895864 retained one ARM admission refusal: runner
+    housekeeping used 0.29 CPU-seconds during a two-second settling window
+    with a 0.20 limit; PSI remained below its limit. Nineteen later commands
+    were admitted, but the required full series is censored. The next wave
+    uses five settling seconds with the same CPU-rate and PSI thresholds.
+18. The source SSD again refused new directories while reporting about 31 MiB
+    available. A first audit-archive attempt reported extended-attribute
+    temporary-file errors; the fresh no-xattr archive uses second-SSD TMPDIR
+    and passes byte-for-byte extraction comparison. No raw records were removed.
+    A shared-clone attempt unexpectedly began packing the shallow repository;
+    it was stopped before checkout. A lightweight continuation checkout on the
+    build SSD reads the existing Git objects through an alternate, while all
+    new objects and evidence stay on that SSD. The old checkout and running
+    tests remain intact. Root library bytes and all three modified native
+    files were compared before continuing; no runtime result is inferred from
+    these infrastructure attempts.

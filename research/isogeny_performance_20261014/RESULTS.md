@@ -41,13 +41,30 @@ constructor case records. This shared macOS host has no reserved Linux core;
 **zero wall samples are qualified**, and the summary sets
 `wall_speedup_eligible: false`.
 
-The implemented GitHub matrix will measure Linux x86-64, Linux ARM64, Apple
-ARM64 and Intel macOS. Linux runs use the existing native isolation tool;
-failed admission, interference and timeouts remain censored. It also launches
-24 legacy benchmark groups as exploratory family baselines on Linux. Those
-rows lack exact output fingerprints and cannot establish an optimization gain.
-Actual remote receipts must be collected before those CPU measurements are
-credited. The complete inventory and remaining series are in [INVENTORY.md](INVENTORY.md).
+The first completed GitHub CPU wave now has immutable artifacts and independent
+native audits. All four profiles pass the full 96-case output matrix. AMD
+EPYC 7763 passes all twenty isolated commands and all 640 paired medians are
+recomputed from raw samples. At 224 bits/degree 31, linear algebra has a paired
+median baseline/candidate ratio **16.9189**, observed five-round range
+**16.8594–16.9618**, with observed A/A range **0.9947–1.0025**. These are
+constructor intervals on synthetic field-width fixtures, with setup, sigma and
+verification excluded; they do not establish whole-search or replay gains.
+
+All 64 timed cells are retained, including Atkin 1992 and modular composition
+at 256 bits/degree 7 with median ratios **0.984707** and **0.970765**. Linux
+ARM64 completed nineteen commands after the first A/A admission refusal; its
+requested full campaign is censored. Apple M1 (Virtual) and Intel i7-8700B
+each have twenty valid output/count runs and zero qualified wall samples.
+The AMD guest's native reservation/contention checks pass; physical host
+neighbours and frequency remain unobserved. A/A ranges are descriptive.
+
+The Linux wave also completed 24 legacy benchmark groups as exploratory
+baselines, preserving every verification flag. Those rows lack full output
+fingerprints and A/A controls and cannot establish an optimization gain. Read
+the [CPU report and all 64 rows](cpu-report-20261015/REPORT.md),
+[reviewed PDF](cpu-report-20261015/REPORT.pdf), and
+[frozen artifacts/audits](cpu-evidence-38766895864/README.md).
+The full inventory and remaining series are in [INVENTORY.md](INVENTORY.md).
 
 The native performance binary is packaged by the existing ReleaseMe isogeny
 archive workflow. Publication is implemented, not yet verified as an actual
@@ -61,10 +78,10 @@ Clippy, formatting and workflow lint passed. The native CLI's three correctness
 and receipt-parser tests passed. [VALIDATION.md](VALIDATION.md) links the logs.
 Storage and sparse-checkout failures remain in [ATTEMPTS.md](ATTEMPTS.md).
 
-The local constructor series is verified. The requested multi-CPU timing
-comparison, the remaining algorithm families, named P192/P224 whole-process
-costs, release publication and the earlier 2,000-additional-map search remain
-open. This PR does not replace those requirements with the 96-case series.
+The local constructor series and one AMD timing campaign are verified. Other
+CPU timing campaigns, the remaining algorithm families, named P192/P224
+whole-process costs, release publication and the earlier 2,000-additional-map
+search remain open. These requirements remain separate from the 96-case series.
 
 Source-linked [results PDF](report-rung3/REPORT.pdf),
 [run PDF](report-rung3/RUN_REPORT.pdf),

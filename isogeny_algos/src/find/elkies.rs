@@ -9,26 +9,37 @@ use crate::poly::{self, Poly};
 
 /// Coefficients c_k (k>=2) of wp(z) = z^-2 (1 + sum_{k>=2} c_k z^{2k}) as U(v) = 1 + sum c_k v^k.
 pub fn u_series<F: Field>(f: &F, e: &Curve<F::E>, n: usize) -> Vec<F::E> {
+    if n < 16 {
+        return u_series_direct(f, e, n);
+    }
+    // Keep the two precision regimes separate: the small loop needs no
+    // Option dispatch, and the batch loop needs no unused denominator conversion.
+    let mut den = vec![f.from_u64(5), f.from_u64(7)];
+    den.extend((4..=n).map(|k| f.from_u64(((2 * k + 1) * (k - 3)) as u64)));
+    let inverses = f.batch_inv(&den);
     let mut u = vec![f.zero(); n + 1];
     u[0] = f.one();
-    // Denominators depend only on the requested precision. Above the small
-    // direct-division case, invert them together with Montgomery's trick.
-    let inv_den = if n >= 16 {
-        let mut den = vec![f.from_u64(5), f.from_u64(7)];
-        den.extend((4..=n).map(|k| f.from_u64(((2 * k + 1) * (k - 3)) as u64)));
-        Some(f.batch_inv(&den))
-    } else {
-        None
-    };
-    let divide = |a, k: usize, den| match &inv_den {
-        Some(inverses) => f.mul(a, inverses[k - 2]),
-        None => f.div(a, den),
-    };
+    u[2] = f.neg(f.mul(e.a, inverses[0]));
+    u[3] = f.neg(f.mul(e.b, inverses[1]));
+    for k in 4..=n {
+        let mut s = f.zero();
+        for m in 2..=k - 2 {
+            s = f.add(s, f.mul(u[m], u[k - m]));
+        }
+        u[k] = f.mul(f.mul(f.from_u64(3), s), inverses[k - 2]);
+    }
+    u
+}
+
+#[inline]
+fn u_series_direct<F: Field>(f: &F, e: &Curve<F::E>, n: usize) -> Vec<F::E> {
+    let mut u = vec![f.zero(); n + 1];
+    u[0] = f.one();
     if n >= 2 {
-        u[2] = f.neg(divide(e.a, 2, f.from_u64(5)));
+        u[2] = f.neg(f.div(e.a, f.from_u64(5)));
     }
     if n >= 3 {
-        u[3] = f.neg(divide(e.b, 3, f.from_u64(7)));
+        u[3] = f.neg(f.div(e.b, f.from_u64(7)));
     }
     for k in 4..=n {
         let mut s = f.zero();
@@ -36,7 +47,7 @@ pub fn u_series<F: Field>(f: &F, e: &Curve<F::E>, n: usize) -> Vec<F::E> {
             s = f.add(s, f.mul(u[m], u[k - m]));
         }
         let den = f.from_u64(((2 * k + 1) * (k - 3)) as u64);
-        u[k] = divide(f.mul(f.from_u64(3), s), k, den);
+        u[k] = f.div(f.mul(f.from_u64(3), s), den);
     }
     u
 }

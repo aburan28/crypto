@@ -7,7 +7,7 @@ walkers are consumers or older, separately bounded implementations.
 
 | Input -> output | Implementations | Existing native `bench` groups | New exact-output series |
 |---|---|---|---|
-| Kernel points -> normalized map/codomain | Vélu cyclic/general, x-only Vélu, Montgomery affine/projective Vélu, Weierstrass and Montgomery square-root Vélu (`kernel/`) | `kernel`, `kernel2`, `p1kernel`, `big` | Next constructor series; preserve point-generation and map-evaluation boundaries |
+| Kernel points -> normalized map/codomain | Vélu cyclic/general, x-only Vélu, Montgomery affine/projective Vélu, Weierstrass and Montgomery square-root Vélu (`kernel/`) | `kernel`, `kernel2`, `p1kernel`, `big` | Seven-method kernel series now covers six point-input constructors and supplied-kernel Kohel; Montgomery-specific variants remain open |
 | Kernel polynomial -> normalized map | Kohel odd/even (`kernel/kohel.rs`), binary Kohel | `kernel`, `kernel2`, `char2`, `big` | Independent reference in first series; never compare its supplied-kernel input directly to a finder |
 | Isogenous curve pair -> normalized kernel/map | Linear algebra, Stark 1972, Atkin 1992, Atkin modular composition, Elkies 1992, Elkies 1998, fastElkies, fastElkies prime (`find/bmss.rs`); older Padé implementation (`find/elkies.rs`) | `bmss`, `big` | All eight BMSS methods at 192/224/256/511 bits; exact kernel, numerator, denominator and codomain fingerprints |
 | Curve and prime degree -> rational isogenies | Division-polynomial factoring (`find/divpoly.rs`); modular-polynomial roots plus Elkies/BMSS (`find/elkies.rs`) | `find`, `char2`, `bmss` | Next finder series; charge modular-polynomial creation separately and include it in cold totals |
@@ -51,7 +51,11 @@ the BMSS series' full coefficient comparison. Two Apple M4 Pro runs now pass
 report are in `kernel-baseline-20261015/` and `kernel-report-20261015/`. Other
 physical CPU baselines and kernel speedups remain unestablished.
 
-CPU plan: Apple M4 Pro locally; GitHub native Linux x86-64, Linux ARM64,
-Apple ARM64 and Intel macOS runners. Runner labels select architecture/OS,
+Actual CPU wave: AMD EPYC 7763 Linux guest (20/20 admitted wall runs), ARM64
+implementer 0x41/part 0xd49 (19/20, full campaign censored), Apple M1 (Virtual)
+and Intel i7-8700B macOS (each 20/20 valid count runs, zero admitted wall runs).
+All four pass their 96-case full output matrices. The local kernel baseline
+uses Apple M4 Pro. Reports retain VM limitations and the incomplete ARM series.
+Runner labels select architecture/OS,
 not a guaranteed processor model. Each result records the actual CPU and
 binary. [GitHub runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners).
