@@ -157,6 +157,7 @@ pub mod eds_tate;
 pub mod ext_curve;
 pub mod f4_fp;
 pub mod f4_fp_tower;
+pub mod fp_backend;
 pub mod f6_wide_geometry;
 pub mod fes_gpu;
 pub mod ffd_harness;
