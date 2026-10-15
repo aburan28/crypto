@@ -22,6 +22,7 @@ use serde_json::{json, Value};
 
 use crate::cryptanalysis::ecbench::canonical::{derive_u64, sha256_hex, short_id};
 use crate::cryptanalysis::ecbench::claw::{pair_claw, pair_claw_wide, ClawOutcome, ClawShape};
+use crate::cryptanalysis::ecbench::fp4::{self as fp4, Fp4Group, Fp4Instance, K4Base, K4Params};
 use crate::cryptanalysis::ecbench::full_price;
 use crate::cryptanalysis::ecbench::generic::{
     bsgs_interleaved, bsgs_negation, bsgs_textbook, kangaroo, GenericOutcome,
@@ -92,6 +93,34 @@ pub struct MethodDecl {
     pub applies: Applies,
     pub params: &'static [ParamDecl],
 }
+
+const K4_PARAMS: &[ParamDecl] = &[
+    ParamDecl {
+        name: "base",
+        default: None,
+        help: "`xline` ({P : x(P) ∈ F_p}) or `yline-d4` ({P : Y(P) ∈ F_p}, columns {±P, ±(P+T)})",
+    },
+    ParamDecl {
+        name: "large_primes",
+        default: None,
+        help: "0 (full relations) or 2 (double large primes)",
+    },
+    ParamDecl {
+        name: "c4",
+        default: None,
+        help: "F_p multiplications charged per trial: the algebraic solve's measured cost (§11.17 S₄: 1.213e12; D₄: 2.54e10)",
+    },
+    ParamDecl {
+        name: "lp_exponent",
+        default: Some("0.75"),
+        help: "|F'| = ⌈|F|^lp_exponent⌉ when large_primes > 0 (Gaudry's |F|^{1−1/k})",
+    },
+    ParamDecl {
+        name: "trial_cap",
+        default: Some("2000"),
+        help: "trials per column before the run counts as exhausted",
+    },
+];
 
 const IC_PIPELINE_PARAMS: &[ParamDecl] = &[
         ParamDecl {
@@ -222,6 +251,14 @@ pub fn registry() -> &'static [MethodDecl] {
             entry: "ic_boundary::rho_walk_with(NegationClasses, RhoWalk::negation())",
             applies: Applies::Any,
             params: RHO_PARAMS,
+        },
+        MethodDecl {
+            id: "ic.k4_gaudry",
+            family: "ic",
+            summary: "Gaudry's k = 4 index calculus on E(F_{p⁴}) (fp4_translation curves only): x-line or D₄ Y-line base, optional double large primes (|F'| = ⌈|F|^lp_exponent⌉), filtering + Wiedemann; each trial charged the algebraic solve's measured cost c4 (F_p mults ÷ 97), its relations from an exact enumeration oracle whose own work is counted uncharged, so S is a lower bound; expected S ∝ r^{-1/2}·p·c4 until the linear algebra (∝ p², or p^{3/2} with large primes) dominates",
+            entry: "ecbench::fp4::solve_k4",
+            applies: Applies::Any,
+            params: K4_PARAMS,
         },
         MethodDecl {
             id: "rho.cubic",
@@ -1096,6 +1133,15 @@ fn solve_inner(
     if let Instance::Wide(_) = inst {
         return Err("a wide instance goes through solve_wide".into());
     }
+    if let Instance::Fp4(i) = inst {
+        return solve_fp4(m, i, tx, ty, seed);
+    }
+    if m.id == "ic.k4_gaudry" {
+        return Err(format!(
+            "`ic.k4_gaudry` runs on fp4_translation curves only; {} is {}",
+            curve.slug, curve.family
+        ));
+    }
     match (inst, d.family) {
         (Instance::Binary(i), _) if m.id == "ic.large_prime" => {
             solve_large_prime(m, i, curve, FastPoint::affine(tx, ty), seed)
@@ -1198,8 +1244,93 @@ fn solve_inner(
             let g = BinaryGroup(&i.fast);
             solve_generic(m, &g, i.generator, FastPoint::affine(tx, ty), i.r, seed)
         }
-        (Instance::Wide(_), _) => unreachable!("returned above"),
+        (Instance::Wide(_), _) | (Instance::Fp4(_), _) => unreachable!("returned above"),
     }
+}
+
+/// `E(F_{p⁴})`: `ic.k4_gaudry`, or a generic method on [`Fp4Group`].
+fn solve_fp4(
+    m: &ResolvedMethod,
+    i: &Fp4Instance,
+    tx: u64,
+    ty: u64,
+    seed: u64,
+) -> Result<SolveReport, String> {
+    let target = i.decode(tx, ty)?;
+    if m.id != "ic.k4_gaudry" {
+        if !(m.id.starts_with("rho.plain")
+            || m.id == "rho.negation"
+            || m.id.starts_with("bsgs.")
+            || m.id == "kangaroo.vow")
+        {
+            return Err(format!("`{}` has no E(F_p⁴) implementation", m.id));
+        }
+        let g = Fp4Group(i.curve());
+        return solve_generic(m, &g, i.g, target, i.r, seed);
+    }
+    let base = match m.params["base"].as_str() {
+        "xline" => K4Base::XLine,
+        "yline-d4" => K4Base::YLineD4,
+        // Item ic_improve_20261014/01: the D₄ Y-line stacked with double
+        // large primes (|F'| = ⌈columns^lp_exponent⌉ of the folded columns).
+        "yline-d4-lp" => K4Base::YLineD4,
+        // Item ic_improve_20261015/04: the D₄ Y-line with the eager
+        // first-dependency stop (filter after every relation).
+        "yline-d4-ed" => K4Base::YLineD4,
+        other => {
+            return Err(format!(
+                "base `{other}`: xline, yline-d4, yline-d4-lp or yline-d4-ed"
+            ))
+        }
+    };
+    let large_primes = param_u64(m, "large_primes")? as usize;
+    if large_primes != 0 && large_primes != 2 {
+        return Err("large_primes is 0 or 2".into());
+    }
+    if (m.params["base"] == "yline-d4" || m.params["base"] == "yline-d4-ed") && large_primes != 0 {
+        return Err("yline-d4 and yline-d4-ed run without large primes".into());
+    }
+    let prm = K4Params {
+        base,
+        large_primes,
+        lp_exponent: param_f64(m, "lp_exponent")?,
+        c4: param_f64(m, "c4")?,
+        trial_cap_per_column: param_u64(m, "trial_cap")?,
+        eager_la: m.params["base"] == "yline-d4-ed",
+    };
+    let t = Instant::now();
+    measurement::begin_online(Phase::RhoSolve);
+    let out = fp4::solve_k4(i, target, seed, &prm);
+    measurement::end_online();
+    let phases: Vec<PhaseRecord> = out
+        .phases
+        .iter()
+        .map(|&(name, adds, gae)| PhaseRecord {
+            name: name.into(),
+            adds,
+            gae,
+            ..Default::default()
+        })
+        .collect();
+    let total = phases.iter().map(|p| p.gae).sum();
+    Ok(SolveReport {
+        recovered: out.recovered.map(u128::from),
+        exhausted: out.exhausted,
+        phases,
+        total_gae: total,
+        automorphisms_used: if base == K4Base::YLineD4 { 4 } else { 2 },
+        unpriced: unpriced_of(&out.counters),
+        counters: out.counters,
+        deterministic: true,
+        nondeterminism: vec![],
+        solve_wall_ns: t.elapsed().as_nanos() as u64,
+        factor_base: None,
+        detail: out.detail,
+        online: None,
+        online_error: None,
+        solver: None,
+        field_ops: None,
+    })
 }
 
 fn solve_large_prime(
@@ -2406,6 +2537,9 @@ pub fn dump_factor_base(
     if let Instance::Wide(_) = &inst {
         return Err("no factor-base plug-in runs on a wide (n > 62) curve yet".into());
     }
+    if let Instance::Fp4(_) = &inst {
+        return Err("no factor-base plug-in runs on E(F_p⁴); ic.k4_gaudry builds its own".into());
+    }
     match &inst {
         Instance::Prime(i) => {
             let abscissa = PrimeAbscissaBase { instance: i };
@@ -2496,7 +2630,7 @@ pub fn dump_factor_base(
                 build_doubles: total.doubles,
             })
         }
-        Instance::Wide(_) => unreachable!("returned above"),
+        Instance::Wide(_) | Instance::Fp4(_) => unreachable!("returned above"),
     }
 }
 
