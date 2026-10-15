@@ -1,5 +1,34 @@
 # Validation record
 
+## Genus-128 GHS model-stage audit, 15 October 2026
+
+- `cargo run --release --locked --bin ghs_genus128_cost_audit -- --check` recomputes exact
+  irreducible-polynomial and smoothness counts for all 84 degree bounds in
+  the declared `GF(4)`, genus-128 search envelope. The optimum is bound 15
+  for both `c2pnb176w1` and `c2pnb272w1`, with 48,921,052 nominal half-split
+  places, smoothness log2 fraction -26.328277, and model relation-query
+  log2 count 51.872229. It independently reproduces the transfer registry's
+  71.336 and 71.774 log2 destination prices from the pinned source cost
+  parameters. The receipt retains every candidate price and the exact
+  smoothness numerator, with null fields for curve-specific arithmetic and
+  measured relation stages.
+- The binary GHS criterion now requires actual usable base classes,
+  ordinary-query relation yield, independent rank, and complete cost after
+  the type/genus and subgroup-transfer checks. The cost audit checks a
+  conditional model; it does not instantiate those later witnesses.
+- The database workflow now replays the catalog exporter, both property
+  validators, this exact-integer cost audit, and the versioned artifact hashes
+  on a clean runner. Its result is tracked separately from local validation.
+- The native source, receipt, cost-sweep SVG, report source and inspected
+  one-page PDF are pinned in `ARTIFACTS.sha256`. Local
+  `cargo test --release --locked --offline` passed six tests (two GHS-audit
+  tests and four catalog tests); the native `--check`, catalog snapshot check,
+  attack-map validator, decomposition validator, site JavaScript syntax check,
+  and artifact hash check passed. Logs for native build/write/replay are in
+  `validation/ghs128_native_*.log`; the first replay command's wrong-working-
+  directory failure is retained separately from the successful study-local
+  replay.
+
 ## Oakley Type II genus reconciliation, 15 October 2026
 
 - The current binary transfer registry classifies Oakley Groups 3 and 4 as

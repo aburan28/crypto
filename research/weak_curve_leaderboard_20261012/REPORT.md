@@ -91,6 +91,43 @@ must all be fixed. None of the source corpus's 537 large-field rows currently
 has a measured selected-subgroup advantage. Covering support is a geometric
 entry, rather than a completed attack comparison.
 
+## Genus-128 binary GHS cost-stage audit
+
+The exact-invariant `GF(4)` routes for `c2pnb176w1` and `c2pnb272w1` have
+magic number eight, Type II, and projected genus 128. An [independent
+integer audit](src/bin/ghs_genus128_cost_audit.rs) of the transfer registry's
+conditional Enge–Gaudry smoothness model optimizes the factor-base degree
+over all 84 bounds examined. Both routes select degree bound 15. The count
+uses `I_d=(1/d)∑_{e|d} μ(e)4^(d/e)` monic irreducibles of degree `d` and
+counts degree-128 monic polynomials with all factors of degree at most 15.
+The [frozen receipt](ghs_genus128_cost_audit.json) pins the registry, cost-model, and native producer hashes,
+the exact polynomial counts, all degree-bound prices, and the two subgroup
+parameters.
+The [run report](reports/run-20261015T0854Z/REPORT.md),
+[cost graph](reports/run-20261015T0854Z/ghs_cost_sweep.svg), and
+[PDF](reports/run-20261015T0854Z/report.pdf) retain this model-stage evidence.
+
+| Source curve | Nominal half-split base | Model smoothness | Model relation queries | Model total log2 bit cost | Registry cost |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `c2pnb176w1` | 48,921,052 places | `2^-26.328277` | `2^51.872229` | 71.336033 | 71.336 |
+| `c2pnb272w1` | 48,921,052 places | `2^-26.328277` | `2^51.872229` | 71.773568 | 71.774 |
+
+The smoothness numerator is exactly
+`1374288545819365998587940548442445318355469588992205247403709040067002`
+out of `4^128` monic polynomials. The model assumes that half the base
+irreducibles yield usable divisor places and that polynomial smoothness
+predicts divisor relation yield on the eventual cover. These are precise
+construction and measurement gates: build the cover, certify a nonzero
+selected-subgroup image, enumerate its actual usable places, measure
+ordinary-query smoothness and independent rank, then charge final linear
+algebra and target descent. The current `ghs_descent.rs` constructs an
+abstract higher-magic-number tower and an unsmoothed affine model at magic
+number two; it does not yet construct a smooth magic-eight cover. That route
+is the next construction task. The
+[high-genus index-calculus literature](https://eprint.iacr.org/2011/098.pdf)
+provides the relevant algorithm family, while the table above is a frozen
+cost-model replay for these two exact source curves.
+
 ## Three exact prime-field models
 
 The Rust enumerator checks every `x,y` in the named prime field for the

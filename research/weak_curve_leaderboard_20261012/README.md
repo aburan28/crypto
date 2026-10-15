@@ -52,6 +52,15 @@ The generic support and conditioning bounds are checked in
 [Lean](lean/RelationSupport.lean); the [proof map](PROOF_MAP.md) states their
 exact hypotheses and the remaining curve-specific bridge.
 
+The [genus-128 GHS cost audit](ghs_genus128_cost_audit.json) resolves the
+nominal factor-base and relation-query stages behind the two exact-invariant
+`GF(4)` formula-advantage routes. Its independent integer calculation selects
+degree bound 15 and 48,921,052 nominal half-split base places for both
+`c2pnb176w1` and `c2pnb272w1`; actual cover places, relations, and rank are
+separate witness gates in the binary GHS criterion.
+The [run report and cost graph](reports/run-20261015T0854Z/REPORT.md)
+show the full conditional sweep and its missing measurement stages.
+
 The [decomposition property index](decomposition_properties.json) makes thirteen
 hyperelliptic checks filterable for all 922 atlas curves. It binds 917 exact
 same-field cover certificates by ICV1 identity and full model hash, and
@@ -91,6 +100,7 @@ python3 build_isogeny_graph.py --check
 node --check ../../website/weakcurves/dist/graph.js
 node --check ../../website/weakcurves/dist/attack-map.js
 python3 validate_attack_map.py
+cargo run --release --locked --bin ghs_genus128_cost_audit -- --check
 python3 build_decomposition_properties.py --check
 python3 validate_decomposition_properties.py
 ```
@@ -101,7 +111,8 @@ the three prime-field models, and emits stable JSON with no time- or
 host-dependent fields. The graph builder binds the snapshot to verified
 P-192/P-224 walk records and their receipt. Copy `snapshot.json`,
 `criteria.json`, `attack_map.json`, `isogeny_graph.json`, and
-`decomposition_properties.json`, and `IDENTIFIERS.md` into
+`decomposition_properties.json`, `ghs_genus128_cost_audit.json`, and
+`IDENTIFIERS.md` into
 `../../website/weakcurves/dist/` when they change.
 The site is static and reads the JSON files in the browser.
 

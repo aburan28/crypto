@@ -37,6 +37,17 @@ jobs:
       - name: Replay algebraic identity certificate
         working-directory: .
         run: cargo run --release --example weak_curve_cubic_identity -- check research/weak_curve_database_20261012/cubic_identity.certificate.json
+      - name: Check WeakCurves catalog and genus-128 GHS model audit
+        working-directory: research/weak_curve_leaderboard_20261012
+        run: |
+          cargo test --release --locked
+          cargo run --release --locked -- check snapshot.json
+          cargo run --release --locked --bin ghs_genus128_cost_audit -- --check
+          python3 validate_attack_map.py
+          python3 validate_decomposition_properties.py
+      - name: Verify WeakCurves artifact hashes
+        working-directory: .
+        run: sha256sum -c research/weak_curve_leaderboard_20261012/ARTIFACTS.sha256
   lean-proof:
     runs-on: ubuntu-latest
     timeout-minutes: ${{ github.event_name == 'workflow_dispatch' && 90 || 25 }}

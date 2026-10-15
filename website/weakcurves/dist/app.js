@@ -145,6 +145,7 @@ function openRecord(record) {
   if (record.extension_factorization) facts.push(['Extension degree split',record.extension_factorization.join(' × ')]);
   if (record.ghs_magic_number) facts.push(['GHS magic number',String(record.ghs_magic_number)]);
   if (record.ghs_genus_formula) facts.push(['Formula genus',String(record.ghs_genus_formula)]);
+  if (record.projection?.status==='formula_only') facts.push(['Formula cost (log₂ bit ops)',String(record.projection.log2_total)],['Rho reference (log₂ bit ops)',String(record.projection.log2_rho_reference)]);
   if (record.cubic) facts.push(['Cubic model',record.cubic],['Quadratic model',record.quadratic]);
   if (record.cubic_screen) facts.push(['Cubic screen',record.cubic_screen]);
   if (record.quadratic_screen) facts.push(['Quadratic screen',record.quadratic_screen]);
@@ -212,6 +213,10 @@ function openRecord(record) {
     const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener noreferrer';
     a.textContent=url.includes('rfc2412')?'RFC 2412':url.includes('rfc2409')?'RFC 2409':url.includes('JACOBIAN')?'Transfer analysis':'Source record';
     evidence.append(a);
+  }
+  if (record.name==='c2pnb176w1' || record.name==='c2pnb272w1') {
+    const a=document.createElement('a');a.href='ghs_genus128_cost_audit.json';
+    a.textContent='Genus-128 cost-stage audit ↗';a.className='source-ref';evidence.append(a);
   }
   dialog.append(evidence);
   renderPropertyDetails(record,dialog);

@@ -36,6 +36,14 @@ uniform sampling of a nonempty finite accepted set. Neither theorem proves
 that a particular query is a relation or that the resulting matrix has useful
 rank; the P-192 replay measures those separately.
 
+The native Rust genus-128 GHS receipt is an exact-integer computation of irreducible and
+smooth monic-polynomial counts followed by the declared floating-point cost
+model. It is not a theorem about the divisor distribution of either unbuilt
+cover. A Lean formalization would need the finite-field irreducible-count
+identity, the degree-128 generating-function coefficient recurrence, and the
+bridge from model polynomials to actual divisor places; those obligations
+remain open. The separate Type II genus arithmetic is checked above.
+
 The group-order formalization still needs the group construction with its
 unique point at infinity and a
 formal equivalence to this finite affine sum. Point order, Smart's trace-one

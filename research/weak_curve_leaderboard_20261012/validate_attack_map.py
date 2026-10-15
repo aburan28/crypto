@@ -16,6 +16,11 @@ def main() -> None:
     assert attack["assessment"] == "unassessed_on_indexed_models"
     assert (HERE / "attack_map.json").read_bytes() == (SITE / "attack_map.json").read_bytes()
     assert (HERE / "criteria.json").read_bytes() == (SITE / "criteria.json").read_bytes()
+    audit = json.loads((HERE / "ghs_genus128_cost_audit.json").read_text())
+    assert audit["schema"] == "weakcurves.ghs_genus128_cost_audit.v1"
+    assert audit["producer_language"] == "rust"
+    assert (HERE / "ghs_genus128_cost_audit.json").read_bytes() == \
+        (SITE / "ghs_genus128_cost_audit.json").read_bytes()
     for source, published in (("snapshot.json", "snapshot.json"),
                               ("isogeny_graph.json", "isogeny_graph.json"),
                               ("IDENTIFIERS.md", "identifiers.md")):
