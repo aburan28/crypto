@@ -46,11 +46,14 @@ the record-chain digest, and reconstructs the terminal checkpoint. The final
 segment additionally verifies all eighteen degree-13 row closures.
 
 This is a vertex census with a certified spanning set of parent edges. It is
-not yet the complete 5/13/37/59 adjacency relation. After the census passes
-global uniqueness, an adjacency pass must emit the seven distinct outgoing
-neighbors per vertex: one degree-5 neighbor and two neighbors for each of
-degrees 13, 37, and 59. That pass has 2,506,660,128 directed neighbor records
-before reciprocity reduction.
+not itself the complete 5/13/37/59 adjacency relation. The separate
+[`p61_isogeny_adjacency`](p61-isogeny-adjacency.md) producer and kernel-first
+replayer are implemented and have passed one-, 64-, and 4,096-vertex windows.
+The largest admitted window contains 28,672 directed edges and 471,040 kernel
+coefficients with exact independent replay. The full pass must emit one
+degree-5 neighbor and two neighbors for each of degrees 13, 37, and 59 at every
+vertex: 2,506,660,128 directed records before reciprocity reduction.
+Class-wide adjacency and the dense target-index join remain incomplete.
 
 ## Completion gates
 
@@ -169,7 +172,14 @@ refuses an absent, malformed, source-mismatched, or noncontiguous predecessor.
 
 ## Admission state
 
-The implementation and bounded smoke tests are suitable for a durable pilot.
-The full 358,094,304-vertex launch remains gated on unconditional selected-root
-class-number certification and the external uniqueness/manifest coordinator.
-The later complete-adjacency pass remains a separate required phase.
+The selected class number is unconditionally certified and a sustained,
+create-only census campaign is active on UGREEN. Each segment is admitted only
+after replay by the distinct `d06472954` verifier. Per-segment admission does
+not replace the global uniqueness ledger or the terminal 18-row closure gate.
+
+The separate selected-degree adjacency producer and kernel-first verifier are
+implemented. A create-only supervisor has admitted a 4,096-vertex production
+window after generation and distinct kernel-first replay, in addition to the
+smaller path and admission calibrations. Full adjacency coverage, the external
+j-to-index join, and global reciprocal-edge validation remain required phases; see
+[`p61-isogeny-adjacency.md`](p61-isogeny-adjacency.md).
