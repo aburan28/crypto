@@ -23,7 +23,7 @@ concurrency:
 jobs:
   lean:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 60 }}
     defaults:
       run:
         working-directory: research/factor_base_designs_20261015/lean
