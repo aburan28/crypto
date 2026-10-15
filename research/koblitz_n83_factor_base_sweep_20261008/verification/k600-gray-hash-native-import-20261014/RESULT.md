@@ -53,6 +53,12 @@ The first attempt stopped at a toolchain-version assertion before any build or
 import; see `PRELAUNCH_ATTEMPT.md`. The corrected run above is preserved
 separately. Raw files: `build.stdout`, `build.stderr`, `gray_pool.stdout`,
 `gray_pool.stderr`, `hash_pool.stdout`, `hash_pool.stderr`, and `result.json`.
-The locally built executable remains under
-`/private/tmp/n83-native-k600-import-20261014/target/release/examples/` at the
-time of this receipt; it is identified by its hash and is not committed to Git.
+The executable was copied to
+`/private/tmp/n83-native-k600-import-20261014/koblitz_n83_mixed_orbit_worker.preserved`
+and rehashed to the same SHA-256. Only the task-owned Cargo `target/`
+intermediates (478,112 KiB before removal) were deleted to recover system-disk
+headroom. `cleanup.json` records the exact path and hash; the independent
+replay was run again against the preserved executable and passed. Its
+`post_cleanup_replay.json` is byte-identical to the original `replay.json`.
+The executable itself is not committed to Git and can be rebuilt from the
+pinned source if this scratch path is lost.
