@@ -1,0 +1,12 @@
+{
+  "schema": "different_j_fiber_audit_spec/v1",
+  "status": "frozen before exhaustive rational-fiber audit",
+  "source_sha256": "7e93606cd1593ab42fc4a72841ebffcbe6c9bfabea6bb16bb3d44c4d7b3476c4",
+  "public_fixture_sha256": "fa41958038b0fe01ec1664ca69acf3c44cc67af9feb38a7c8dbf6bf6a3041b65",
+  "cell": {"p":67,"field_degree":2,"source_j":7,"destination_j":11,"map_degree":3,"r":61},
+  "hypothesis": "the explicit map has exactly 1525 rational image points, each with three of the 4575 rational source points, and is injective on the order-61 subgroup",
+  "work": "enumerate all source rational points including identity, evaluate the explicit map, count exact destination keys, check on-curve status, then check all 61 subgroup images and 3721 ordered subgroup pair sums",
+  "success": "all 4575 points enumerated, 1525 images of multiplicity three, 61 distinct subgroup images and 3721 exact pair homomorphism checks",
+  "failure": "preserve raw record or error and do not infer general fiber structure",
+  "reference": "the earlier paired relation runs on this exact public source and destination"
+}

@@ -764,6 +764,67 @@ fn replay(public_path: &str, fixture_path: &str, records_path: &str) {
         "records_sha256":sha256_hex(&fs::read(records_path).unwrap())}));
 }
 
+fn audit_fibers(public_path: &str) {
+    let public = read_public(public_path);
+    let src = source(67);
+    let t = parse_point(&public["kernel"][0]);
+    let wall = Instant::now();
+    let cpu = thread_cpu_ns();
+    take_field_counters();
+    let dst = destination(&src,t);
+    let mut ops = GroupOps::default();
+    let mut fibers = BTreeMap::<u64,u64>::new();
+    let mut source_points = 0u64;
+    let mut insert = |point: Point, ops: &mut GroupOps| {
+        let mapped = velu(&src,t,point,ops);
+        assert!(dst.is_on_curve(mapped));
+        *fibers.entry(dst.key(&mapped)).or_default() += 1;
+        source_points += 1;
+    };
+    insert(src.identity(),&mut ops);
+    for x0 in 0..67 {
+        for x1 in 0..67 {
+            for point in src.lift_x([x0,x1]) {
+                insert(point,&mut ops);
+            }
+        }
+    }
+    assert_eq!(source_points,4575);
+    let mut distribution = BTreeMap::<u64,u64>::new();
+    for &size in fibers.values() { *distribution.entry(size).or_default() += 1; }
+    assert_eq!(fibers.len(),1525);
+    assert_eq!(distribution.get(&3),Some(&1525));
+    let g = parse_point(&public["generator"]);
+    let mapped_g = parse_point(&public["mapped_generator"]);
+    let subgroup: Vec<Point> = (0..61).map(|i| src.mul(&mut ops,g,i)).collect();
+    let image: Vec<Point> = subgroup.iter().map(|&point| velu(&src,t,point,&mut ops)).collect();
+    assert_eq!(image[1],mapped_g);
+    let unique_images: BTreeSet<_> = image.iter().map(|point| dst.key(point)).collect();
+    assert_eq!(unique_images.len(),61);
+    let mut checked_pairs = 0u64;
+    for a in 0..61usize {
+        for b in 0..61usize {
+            let k = (a+b)%61;
+            assert_eq!(src.add(&mut ops,subgroup[a],subgroup[b]),subgroup[k]);
+            assert_eq!(dst.add(&mut ops,image[a],image[b]),image[k]);
+            assert_eq!(velu(&src,t,subgroup[k],&mut ops),image[k]);
+            checked_pairs += 1;
+        }
+    }
+    let fp = take_field_counters();
+    println!("{}",json!({"schema":"different_j_fiber_audit/v1",
+        "p":67,"r":61,"source_points":source_points,
+        "image_points":fibers.len(),"fiber_size_distribution":distribution,
+        "kernel":[t,src.neg(t)],"all_images_on_destination":true,
+        "subgroup_images":unique_images.len(),
+        "subgroup_pair_homomorphism_checks":checked_pairs,
+        "source_icv1":public["source"]["icv1"],
+        "destination_icv1":public["destination"]["icv1"],
+        "group_ops":ops,"fp_muls":fp.0,"fp_invs":fp.1,
+        "cpu_ns":thread_cpu_ns()-cpu,"wall_ns":wall.elapsed().as_nanos() as u64,
+        "peak_rss_bytes":peak_rss_bytes()}));
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     match args.get(1).map(String::as_str) {
@@ -773,6 +834,7 @@ fn main() {
         Some("run") => relation_run(&args[2],args[3].parse().unwrap(),&args[4]),
         Some("rho") => rho_run(&args[2],args[3].parse().unwrap(),args[4]=="aa"),
         Some("replay") => replay(&args[2],&args[3],&args[4]),
+        Some("audit-fibers") => audit_fibers(&args[2]),
         _ => panic!("usage: nonisomorphic_extension_isogeny screen|freeze|freeze-public|run|rho|replay"),
     }
 }
