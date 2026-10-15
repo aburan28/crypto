@@ -83,7 +83,7 @@ enum Cmd {
         #[arg(long)]
         json: bool,
     },
-    /// Measure the full-pricing units (docs/ecbench/full_prices.json) on
+    /// Measure the full-pricing units (src/cryptanalysis/ecbench/full_prices.json) on
     /// this host for Koblitz curves `a:n`, median of `reps` passes each.
     PriceUnits {
         /// Curves as `a:n`, e.g. `0:13 0:19 1:29`.

@@ -8,7 +8,7 @@
 //! `*_uncharged` names and the total is a lower bound.
 //!
 //! The `*_full` methods run the same solver unchanged and then price
-//! every counter from one table, `docs/ecbench/full_prices.json`, which
+//! every counter from one table, `src/cryptanalysis/ecbench/full_prices.json`, which
 //! `ecbench price-units` measures on one host for every unit and curve
 //! at once.  A counter the rules below do not know stays unpriced, so the
 //! record still says it is a lower bound rather than silently dropping
@@ -29,7 +29,7 @@ use crate::cryptanalysis::ic_boundary::{
 
 /// The measured table, compiled in so that a record's price is a
 /// function of its counts and this file alone.
-pub const FULL_PRICES: &str = include_str!("../../../docs/ecbench/full_prices.json");
+pub const FULL_PRICES: &str = include_str!("full_prices.json");
 
 /// The method a `*_full` id runs before repricing.
 pub fn base_of(id: &str) -> Option<&'static str> {
@@ -171,7 +171,7 @@ pub fn row(slug: &str) -> Result<BTreeMap<String, f64>, String> {
         .and_then(|i| i.get(slug))
         .and_then(Value::as_object)
         .ok_or_else(|| {
-            format!("docs/ecbench/full_prices.json has no row for {slug}; measure it with `ecbench price-units`")
+            format!("src/cryptanalysis/ecbench/full_prices.json has no row for {slug}; measure it with `ecbench price-units`")
         })?;
     let mut out = BTreeMap::new();
     for u in UNITS {
@@ -270,7 +270,7 @@ pub fn reprice(rep: &mut SolveReport, family: &str, slug: &str) -> Result<(), St
         d.insert(
             "full_pricing".into(),
             json!({
-                "table": "docs/ecbench/full_prices.json",
+                "table": "src/cryptanalysis/ecbench/full_prices.json",
                 "table_sha256": table_sha,
                 "units": units,
                 "gae_by_counter": by_counter,
@@ -279,7 +279,7 @@ pub fn reprice(rep: &mut SolveReport, family: &str, slug: &str) -> Result<(), St
     } else {
         let old = std::mem::take(&mut rep.detail);
         rep.detail = json!({"base": old, "full_pricing": {
-            "table": "docs/ecbench/full_prices.json",
+            "table": "src/cryptanalysis/ecbench/full_prices.json",
             "table_sha256": table_sha,
             "units": units,
             "gae_by_counter": by_counter,

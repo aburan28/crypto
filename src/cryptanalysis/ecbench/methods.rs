@@ -345,7 +345,7 @@ pub fn registry() -> &'static [MethodDecl] {
         MethodDecl {
             id: "ic.pipeline_full",
             family: "ic",
-            summary: "ic.pipeline unchanged, then every native counter priced from docs/ecbench/full_prices.json (field multiplications, squarings, inversions, Artin-Schreier solves, hash probes, canonicalisations, row operations), so the factor base's construction is charged; unknown counters stay unpriced",
+            summary: "ic.pipeline unchanged, then every native counter priced from src/cryptanalysis/ecbench/full_prices.json (field multiplications, squarings, inversions, Artin-Schreier solves, hash probes, canonicalisations, row operations), so the factor base's construction is charged; unknown counters stay unpriced",
             entry: "ic_framework::run_pipeline + ecbench::full_price::reprice",
             applies: Applies::BinaryOnly,
             params: IC_PIPELINE_PARAMS,
@@ -353,7 +353,7 @@ pub fn registry() -> &'static [MethodDecl] {
         MethodDecl {
             id: "rho.signed_frobenius_full",
             family: "rho",
-            summary: "rho.signed_frobenius unchanged, with its canonicalisations and distinguished-point probes priced from docs/ecbench/full_prices.json",
+            summary: "rho.signed_frobenius unchanged, with its canonicalisations and distinguished-point probes priced from src/cryptanalysis/ecbench/full_prices.json",
             entry: "ic_boundary::signed_frobenius_rho_tuned + ecbench::full_price::reprice",
             applies: Applies::KoblitzOnly,
             params: RHO_PARAMS,
@@ -361,7 +361,7 @@ pub fn registry() -> &'static [MethodDecl] {
         MethodDecl {
             id: "rho.signed_frobenius_strong_full",
             family: "rho",
-            summary: "rho.signed_frobenius_strong unchanged, with its canonicalisations, partition hashes and table probes priced from docs/ecbench/full_prices.json",
+            summary: "rho.signed_frobenius_strong unchanged, with its canonicalisations, partition hashes and table probes priced from src/cryptanalysis/ecbench/full_prices.json",
             entry: "koblitz_strong_rho::StrongRho::solve + ecbench::full_price::reprice",
             applies: Applies::KoblitzOnly,
             params: STRONG_PARAMS,

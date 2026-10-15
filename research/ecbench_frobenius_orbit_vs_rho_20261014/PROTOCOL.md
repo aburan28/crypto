@@ -23,7 +23,7 @@ exponent one. This protocol measures it instead of assuming it.
 1. **Full pricing** (`src/cryptanalysis/ecbench/full_price.rs`). New opt-in
    method ids `ic.pipeline_full`, `rho.signed_frobenius_full` and
    `rho.signed_frobenius_strong_full` run the unchanged solvers, then price
-   every native counter from `docs/ecbench/full_prices.json`, a table of
+   every native counter from `src/cryptanalysis/ecbench/full_prices.json`, a table of
    ratios to one affine addition measured by `ecbench price-units` (median of
    15 passes, one host, 2026-10-14) for every unit and every panel curve:
    Artin–Schreier solve, hash probe (a `2^20`-entry `FastMap`, so priced at or
@@ -130,3 +130,12 @@ ECC2K-130, deployed curves or security follows. The prices in
 reprices the native share of each total (material for IC at small r,
 where lookups and Frobenius maps are a large part of a short run) but not the
 operation counts, which the records keep.
+
+## Post-run housekeeping (2026-10-15, no change to data or rules)
+
+- The price table moved from `docs/ecbench/full_prices.json` to
+  `src/cryptanalysis/ecbench/full_prices.json`, byte for byte, because sparse
+  CI checkouts compile the library without `docs/ecbench/`. Records cite the
+  table by SHA-256, which did not change.
+- The retired curve name for the n = 19 Koblitz curve was replaced with its ICV1 slug,
+  `icv1-f2m19-t797-b6cf2467`, to satisfy `scripts/check_curve_names.py`.

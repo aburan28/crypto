@@ -21,7 +21,7 @@ security claim; nothing here is about ECC2K-130 or deployed curves.
    - Three new opt-in method ids, `ic.pipeline_full`,
      `rho.signed_frobenius_full` and `rho.signed_frobenius_strong_full`, run
      the unchanged solvers and then price **every** native counter from
-     [`docs/ecbench/full_prices.json`](../../docs/ecbench/full_prices.json).
+     [`src/cryptanalysis/ecbench/full_prices.json`](../../src/cryptanalysis/ecbench/full_prices.json).
    - Each counter has an explicit rule. It is either work already counted as
      an addition, or a sum of measured units: Artin–Schreier solve, hash
      probe, row operation, Frobenius map, canonicalisation, field
@@ -221,6 +221,15 @@ bound fit, because `c` differs per curve and therefore so does the method.
 - Progress chart: one `ec-cold` point added to
   `docs/ic/progress-timeline.json` and re-embedded in the scoreboard, with
   its table row.
+
+## Housekeeping after the run (2026-10-15)
+
+- The price table moved, byte for byte, from `docs/ecbench/full_prices.json`
+  to `src/cryptanalysis/ecbench/full_prices.json`, so that sparse CI checkouts
+  can compile the library. Session records still name the old path in
+  `detail.full_pricing.table`.
+- The records' `table_sha256` matches the moved file. Replays do not compare
+  `detail`, so every committed session replays unchanged.
 
 ## Reproduce
 

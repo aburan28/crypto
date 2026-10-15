@@ -527,7 +527,7 @@ Two consequences to read every table with:
   their base method unchanged, then price every native counter (field
   multiplications, squarings and inversions, Artin–Schreier solves, hash
   probes, canonicalisations, row operations, word XORs) from
-  `docs/ecbench/full_prices.json`, one host's measured ratios to an affine
+  `src/cryptanalysis/ecbench/full_prices.json`, one host's measured ratios to an affine
   addition, written by `ecbench price-units --curve a:n …`.
   `src/cryptanalysis/ecbench/full_price.rs` gives each counter an explicit
   rule. A counter without a rule stays unpriced, so the record is still

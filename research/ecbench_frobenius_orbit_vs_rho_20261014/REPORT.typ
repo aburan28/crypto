@@ -10,7 +10,7 @@
 *Verdict: constant-only.* With every native priced, Frobenius-orbit IC ($m = 2$, `compact-orbit-scan` + `mitm-frobenius-counted`, `stride-renew` targets) is not below rho-frob on any of eight Koblitz curves (log#sub[2] $r$ = 11–39). The paired ratio grows with $r$: slope $beta = 0.165 [0.117, 0.213]$ per $ln r$ with $ln n$ in the fit (model: $1/6$). Orbits are 2–15× cheaper than the subspace base (constant), and beat rho-strong only where rho-strong's fixed set-up dominates (log#sub[2] $r <= 17$). No security claim.
 
 == What was built
-- *Full pricing.* New opt-in methods `ic.pipeline_full`, `rho.signed_frobenius_full`, `rho.signed_frobenius_strong_full` run unchanged solvers, then price every native counter from `docs/ecbench/full_prices.json` (ratios to one affine addition measured by `ecbench price-units`, median of 15 passes, this host). Unknown counters stay unpriced. Existing methods and `docs/ic/calibration.json` unchanged; committed sessions replay as before.
+- *Full pricing.* New opt-in methods `ic.pipeline_full`, `rho.signed_frobenius_full`, `rho.signed_frobenius_strong_full` run unchanged solvers, then price every native counter from `src/cryptanalysis/ecbench/full_prices.json` (ratios to one affine addition measured by `ecbench price-units`, median of 15 passes, this host). Unknown counters stay unpriced. Existing methods and `docs/ic/calibration.json` unchanged; committed sessions replay as before.
 - *`ecbench trend`*: weighted least squares of $ln$(paired ratio) on $ln r$ and $ln n$ from `compare --save` files.
 
 == Panel and verification
