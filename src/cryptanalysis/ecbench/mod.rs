@@ -34,6 +34,7 @@
 //! [`CountedGroup`]: crate::cryptanalysis::ic_boundary::CountedGroup
 
 pub mod audit;
+pub mod band;
 pub mod bounds;
 pub mod callgrind;
 pub mod canonical;

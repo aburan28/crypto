@@ -1,67 +1,59 @@
-| session | curve | log2 r | arm | status | S | S complete? | unpriced counters (count or 'not emitted') |
-|:--|:--|--:|:--|:--|--:|:--|:--|
-| ECBS1h8da761a6e558 | icv1-f2m13-t181-515ee569 | 10.97 | rho-strong | verified | 14.341 | no (lower bound) | canonicalisations=65, partition_hashes=31, table_inserts=4, table_queries=5 |
-| ECBS1h8da761a6e558 | icv1-f2m13-t181-515ee569 | 10.97 | rho-frob | verified | 1.743 | no (lower bound) | canonicalisations=13 |
-| ECBS1h8da761a6e558 | icv1-f2m13-t181-515ee569 | 10.97 | bsgs-neg | verified | 1.586 | no (lower bound) | inserts=24, lookups=40 |
-| ECBS1h8da761a6e558 | icv1-f2m13-t181-515ee569 | 10.97 | ic-compact | verified | 15.747 | no (lower bound) | inversions=6, abscissae_scanned=6, curve_equation_checks=31, factor_base_vec_bytes_floor=2496, factor_point_inserts=52, hash_probes=161, legacy_as_solves=6, lift_field_multiplies=9, lift_field_squares=114, min_key_field_squares=60, point_lifts=7, point_negations=81 |
-| ECBS1h8da761a6e558 | icv1-f2m13-t181-515ee569 | 10.97 | ic-negfold | exhausted | 4555.269 | yes | — |
-| ECBS1h8da761a6e558 | icv1-f2m13-t181-515ee569 | 10.97 | ic-f4 | verified | 845.044 | yes | — |
-| ECBS1h8da761a6e558 | icv1-f2m13-t181-515ee569 | 10.97 | ic-shared | verified | 56.597 | no (lower bound) | abscissae_scanned=22, attempts=1, base_log_columns_checked=8, cofactor_projected_points=23, curve_equation_checks=127, dependent_rows=42, factor_base_vec_bytes_floor=9984, factor_point_inserts=208, field_arithmetic=n/e, hash_and_allocation=n/e, hash_probes=647, hits=50, inversions=22, legacy_as_solves=22, lift_field_multiplies=34, lift_field_squares=430, min_key_field_squares=276, modular_combination=n/e, pair_table_entries=77, pair_table_representatives=8, point_lifts=25, point_negations=324, rank=8, relation_witnesses_checked=50, rows=50, scalar_replays=1, trials=50, witnesses_checked=1 |
-| ECBS1h8da761a6e558 | icv1-f2m13-t181-515ee569 | 10.97 | rho-strong | verified | 13.603 | no (lower bound) | canonicalisations=32, table_inserts=4, table_queries=5 |
-| ECBS1h8da761a6e558 | icv1-f2m13-t181-515ee569 | 10.97 | rho-frob | verified | 1.743 | no (lower bound) | canonicalisations=14 |
-| ECBS1h8da761a6e558 | icv1-f2m13-t181-515ee569 | 10.97 | bsgs-neg | verified | 1.475 | no (lower bound) | inserts=24, lookups=35 |
-| ECBS1h8da761a6e558 | icv1-f2m13-t181-515ee569 | 10.97 | ic-compact | verified | 16.313 | no (lower bound) | inversions=6, abscissae_scanned=6, curve_equation_checks=31, factor_base_vec_bytes_floor=2496, factor_point_inserts=52, hash_probes=161, legacy_as_solves=6, lift_field_multiplies=9, lift_field_squares=114, min_key_field_squares=60, point_lifts=7, point_negations=81 |
-| ECBS1h8da761a6e558 | icv1-f2m13-t181-515ee569 | 10.97 | ic-negfold | exhausted | 4556.046 | yes | — |
-| ECBS1h8da761a6e558 | icv1-f2m13-t181-515ee569 | 10.97 | ic-f4 | verified | 1134.956 | yes | — |
-| ECBS1h8da761a6e558 | icv1-f2m13-t181-515ee569 | 10.97 | ic-shared | verified | 56.575 | no (lower bound) | abscissae_scanned=22, attempts=1, base_log_columns_checked=8, cofactor_projected_points=23, curve_equation_checks=127, dependent_rows=42, factor_base_vec_bytes_floor=9984, factor_point_inserts=208, field_arithmetic=n/e, hash_and_allocation=n/e, hash_probes=647, hits=50, inversions=22, legacy_as_solves=22, lift_field_multiplies=34, lift_field_squares=430, min_key_field_squares=276, modular_combination=n/e, pair_table_entries=77, pair_table_representatives=8, point_lifts=25, point_negations=324, rank=8, relation_witnesses_checked=50, rows=50, scalar_replays=1, trials=50, witnesses_checked=1 |
-| ECBS1h4e3c36fa57bd | icv1-f2m19-t797-b6cf2467 | 17.00 | rho-strong | verified | 2.823 | no (lower bound) | canonicalisations=128, partition_hashes=89, table_inserts=9, table_queries=10 |
-| ECBS1h4e3c36fa57bd | icv1-f2m19-t797-b6cf2467 | 17.00 | rho-frob | verified | 0.896 | no (lower bound) | canonicalisations=166 |
-| ECBS1h4e3c36fa57bd | icv1-f2m19-t797-b6cf2467 | 17.00 | bsgs-neg | verified | 1.039 | no (lower bound) | inserts=182, lookups=183 |
-| ECBS1h4e3c36fa57bd | icv1-f2m19-t797-b6cf2467 | 17.00 | ic-compact | verified | 3.118 | no (lower bound) | lookups=1478, row_ops=23, inversions=6, frobenius_maps=1408, canonicalisations=222, target_guard_probes=110, abscissae_scanned=6, curve_equation_checks=43, factor_base_vec_bytes_floor=3648, factor_point_inserts=76, hash_probes=233, legacy_as_solves=6, lift_field_multiplies=9, lift_field_squares=168, min_key_field_squares=90, point_lifts=7, point_negations=117 |
-| ECBS1h4e3c36fa57bd | icv1-f2m19-t797-b6cf2467 | 17.00 | ic-negfold | verified | 26.581 | no (lower bound) | as_solves=32, lookups=7646, row_ops=76, frobenius_maps=29, target_guard_probes=7830 |
-| ECBS1h4e3c36fa57bd | icv1-f2m19-t797-b6cf2467 | 17.00 | ic-f4 | verified | 9.761 | no (lower bound) | solver_word_XORs_(elimination,_specialisation_and_linear_elimination_only)=3490574451, as_solves=32, row_ops=211, frobenius_maps=29, target_guard_probes=2066 |
-| ECBS1h4e3c36fa57bd | icv1-f2m19-t797-b6cf2467 | 17.00 | ic-shared | verified | 6.529 | no (lower bound) | abscissae_scanned=26, attempts=1, base_log_columns_checked=8, canonicalisations=1418, cofactor_projected_points=23, curve_equation_checks=175, dependent_rows=2, factor_base_vec_bytes_floor=14592, factor_point_inserts=304, field_arithmetic=n/e, frobenius_maps=5632, hash_and_allocation=n/e, hash_probes=935, hits=10, inversions=26, legacy_as_solves=26, lift_field_multiplies=38, lift_field_squares=710, lookups=5530, min_key_field_squares=414, modular_combination=n/e, pair_table_entries=1024, pair_table_representatives=8, point_lifts=25, point_negations=468, rank=8, relation_witnesses_checked=10, row_ops=136, rows=10, scalar_replays=1, trials=10, witnesses_checked=1 |
-| ECBS1h7d1741682d1e | icv1-f2m23-t5197-69e76b73 | 21.00 | rho-strong | verified | 1.249 | no (lower bound) | canonicalisations=705, partition_hashes=638, table_inserts=35, table_queries=36 |
-| ECBS1h7d1741682d1e | icv1-f2m23-t5197-69e76b73 | 21.00 | rho-frob | verified | 0.201 | no (lower bound) | canonicalisations=119 |
-| ECBS1h7d1741682d1e | icv1-f2m23-t5197-69e76b73 | 21.00 | bsgs-neg | verified | 1.457 | no (lower bound) | inserts=725, lookups=1371 |
-| ECBS1h7d1741682d1e | icv1-f2m23-t5197-69e76b73 | 21.00 | ic-compact | verified | 3.209 | no (lower bound) | inversions=6, abscissae_scanned=6, curve_equation_checks=51, factor_base_vec_bytes_floor=4416, factor_point_inserts=92, hash_probes=281, legacy_as_solves=6, lift_field_multiplies=9, lift_field_squares=204, min_key_field_squares=110, point_lifts=7, point_negations=141 |
-| ECBS1h7d1741682d1e | icv1-f2m23-t5197-69e76b73 | 21.00 | ic-negfold | verified | 127.204 | yes | — |
-| ECBS1h7d1741682d1e | icv1-f2m23-t5197-69e76b73 | 21.00 | ic-f4 | verified | 85071.134 | yes | — |
-| ECBS1h7d1741682d1e | icv1-f2m23-t5197-69e76b73 | 21.00 | ic-shared | verified | 2.234 | no (lower bound) | abscissae_scanned=15, attempts=1, base_log_columns_checked=8, cofactor_projected_points=17, curve_equation_checks=201, factor_base_vec_bytes_floor=17664, factor_point_inserts=368, field_arithmetic=n/e, hash_and_allocation=n/e, hash_probes=1121, hits=8, inversions=15, legacy_as_solves=15, lift_field_multiplies=24, lift_field_squares=543, min_key_field_squares=374, modular_combination=n/e, pair_table_entries=1427, pair_table_representatives=8, point_lifts=19, point_negations=561, rank=8, relation_witnesses_checked=8, rows=8, scalar_replays=1, trials=8, witnesses_checked=1 |
-| ECBS1h8a85c79c72d0 | icv1-fp20-t157-e39da206 | 19.07 | rho-neg | verified | 1.996 | no (lower bound) | canonicalisations=1331 |
-| ECBS1h8a85c79c72d0 | icv1-fp20-t157-e39da206 | 19.07 | bsgs-neg | verified | 0.530 | no (lower bound) | inserts=373, lookups=8 |
-| ECBS1h8a85c79c72d0 | icv1-fp20-t157-e39da206 | 19.07 | kangaroo | verified | 2.296 | no (lower bound) | inserts=87, lookups=88 |
-| ECBS1h8a85c79c72d0 | icv1-fp20-t157-e39da206 | 19.07 | ic-pair | verified | 21.986 | no (lower bound) | sqrt_solves=64, lookups=8622, row_ops=1023, legendre_symbols=117, target_guard_probes=8680 |
-| ECBS1h8a85c79c72d0 | icv1-fp20-t157-e39da206 | 19.07 | ic-rootfind | verified | 1489.420 | no (lower bound) | sqrt_solves=64, lookups=1093088, row_ops=1023, legendre_symbols=117, inversions=8622, target_guard_probes=8680 |
-| ECBS1h8a85c79c72d0 | icv1-fp20-t157-e39da206 | 19.07 | rho-neg | verified | 2.011 | no (lower bound) | canonicalisations=1331 |
-| ECBS1h8a85c79c72d0 | icv1-fp20-t157-e39da206 | 19.07 | bsgs-neg | verified | 0.639 | no (lower bound) | inserts=373, lookups=89 |
-| ECBS1h8a85c79c72d0 | icv1-fp20-t157-e39da206 | 19.07 | kangaroo | verified | 3.283 | no (lower bound) | inserts=131, lookups=132 |
-| ECBS1h8a85c79c72d0 | icv1-fp20-t157-e39da206 | 19.07 | ic-pair | verified | 19.970 | no (lower bound) | sqrt_solves=64, lookups=7157, row_ops=908, legendre_symbols=117, target_guard_probes=7197 |
-| ECBS1h8a85c79c72d0 | icv1-fp20-t157-e39da206 | 19.07 | ic-rootfind | verified | 1237.918 | no (lower bound) | sqrt_solves=64, lookups=907954, row_ops=908, legendre_symbols=117, inversions=7157, target_guard_probes=7197 |
-| ECBS1hf28feb0fe98c | icv1-fp24-t2705-27cbb01b | 23.38 | rho-neg | verified | 1.411 | no (lower bound) | canonicalisations=4298 |
-| ECBS1hf28feb0fe98c | icv1-fp24-t2705-27cbb01b | 23.38 | bsgs-neg | verified | 0.522 | no (lower bound) | inserts=1655, lookups=56 |
-| ECBS1hf28feb0fe98c | icv1-fp24-t2705-27cbb01b | 23.38 | kangaroo | verified | 3.974 | no (lower bound) | inserts=427, lookups=428 |
-| ECBS1hf28feb0fe98c | icv1-fp24-t2705-27cbb01b | 23.38 | ic-pair | verified | 14.930 | no (lower bound) | sqrt_solves=64, lookups=42984, row_ops=393, legendre_symbols=111, target_guard_probes=43052 |
-| ECBS1hf28feb0fe98c | icv1-fp24-t2705-27cbb01b | 23.38 | ic-rootfind | verified | 1676.316 | no (lower bound) | sqrt_solves=64, lookups=5498733, row_ops=393, legendre_symbols=111, inversions=42984, target_guard_probes=43052 |
-| ECBS1hf28feb0fe98c | icv1-fp24-t2705-27cbb01b | 23.38 | ic-pkm | verified | 31.446 | no (lower bound) | sqrt_solves=245, lookups=35128, row_ops=62440, legendre_symbols=512, target_guard_probes=236 |
-| ECBS1ha6179c6e7e0d | icv1-fp28-t4155-50f492b1 | 26.20 | rho-neg | verified | 1.005 | no (lower bound) | canonicalisations=8455 |
-| ECBS1ha6179c6e7e0d | icv1-fp28-t4155-50f492b1 | 26.20 | bsgs-neg | verified | 0.515 | no (lower bound) | inserts=4395, lookups=115 |
-| ECBS1ha6179c6e7e0d | icv1-fp28-t4155-50f492b1 | 26.20 | kangaroo | verified | 2.686 | no (lower bound) | inserts=768, lookups=769 |
-| ECBS1ha6179c6e7e0d | icv1-fp28-t4155-50f492b1 | 26.20 | ic-pair | verified | 86.837 | no (lower bound) | sqrt_solves=64, lookups=753005, row_ops=286, legendre_symbols=145, target_guard_probes=756441 |
-| ECBS1ha6179c6e7e0d | icv1-fp28-t4155-50f492b1 | 26.20 | ic-rootfind | verified | 11054.586 | no (lower bound) | sqrt_solves=64, lookups=96381767, row_ops=286, legendre_symbols=145, inversions=753005, target_guard_probes=756441 |
-| ECBS1ha6179c6e7e0d | icv1-fp28-t4155-50f492b1 | 26.20 | ic-pkm | verified | 131.152 | no (lower bound) | sqrt_solves=1006, lookups=107115, row_ops=2410264, legendre_symbols=2048, target_guard_probes=844 |
-| ECBS1hfda2c8befe2c | icv1-fp32-t7319-90da43e9 | 32.00 | rho-neg | verified | 0.987 | no (lower bound) | canonicalisations=64282 |
-| ECBS1hfda2c8befe2c | icv1-fp32-t7319-90da43e9 | 32.00 | bsgs-neg | verified | 1.106 | no (lower bound) | inserts=32769, lookups=39696 |
-| ECBS1hfda2c8befe2c | icv1-fp32-t7319-90da43e9 | 32.00 | kangaroo | verified | 0.751 | no (lower bound) | inserts=403, lookups=404 |
-| ECBS1hfda2c8befe2c | icv1-fp32-t7319-90da43e9 | 32.00 | ic-pair | exhausted | 30.627 | no (lower bound) | sqrt_solves=64, lookups=1999589, row_ops=40, legendre_symbols=133, target_guard_probes=2000000 |
-| ECBS1hfda2c8befe2c | icv1-fp32-t7319-90da43e9 | 32.00 | ic-rootfind | exhausted | 3936.002 | no (lower bound) | sqrt_solves=64, lookups=255946600, row_ops=40, legendre_symbols=133, inversions=1999589, target_guard_probes=2000000 |
-| ECBS1h94b78342b569 | icv1-fp36-t454193-44a20818 | 36.00 | rho-neg | verified | 1.344 | no (lower bound) | canonicalisations=351950 |
-| ECBS1h94b78342b569 | icv1-fp36-t454193-44a20818 | 36.00 | bsgs-neg | verified | 1.413 | no (lower bound) | inserts=131073, lookups=239345 |
-| ECBS1h94b78342b569 | icv1-fp36-t454193-44a20818 | 36.00 | kangaroo | verified | 3.016 | no (lower bound) | inserts=3014, lookups=3015 |
-| ECBS1h94b78342b569 | icv1-fp36-t454193-44a20818 | 36.00 | ic-pair | exhausted | 7.658 | no (lower bound) | sqrt_solves=64, lookups=1999969, legendre_symbols=137, target_guard_probes=2000000 |
-| ECBS1h94b78342b569 | icv1-fp36-t454193-44a20818 | 36.00 | ic-rootfind | exhausted | 984.193 | no (lower bound) | sqrt_solves=64, lookups=255996032, legendre_symbols=137, inversions=1999969, target_guard_probes=2000000 |
-| ECBS1hda3b226c750b | icv1-fp40-tm924137-0ecaaeb9 | 40.00 | rho-neg | verified | 1.623 | no (lower bound) | canonicalisations=1701007 |
-| ECBS1hda3b226c750b | icv1-fp40-tm924137-0ecaaeb9 | 40.00 | bsgs-neg | verified | 0.614 | no (lower bound) | inserts=524290, lookups=119485 |
-| ECBS1hda3b226c750b | icv1-fp40-tm924137-0ecaaeb9 | 40.00 | kangaroo | verified | 3.382 | no (lower bound) | inserts=6952, lookups=6953 |
-| ECBS1hda3b226c750b | icv1-fp40-tm924137-0ecaaeb9 | 40.00 | ic-pair | exhausted | 1.914 | no (lower bound) | sqrt_solves=64, lookups=1999996, legendre_symbols=123, target_guard_probes=2000000 |
-| ECBS1hda3b226c750b | icv1-fp40-tm924137-0ecaaeb9 | 40.00 | ic-rootfind | exhausted | 246.050 | no (lower bound) | sqrt_solves=64, lookups=255999488, legendre_symbols=123, inversions=1999996, target_guard_probes=2000000 |
+# Phase 0 pilot: every record across the AGENTS.md §5a band
+
+Produced by `ecbench band --ranks` (native) over `sessions/*`. Single train targets; not a measurement.
+
+| curve | log2 r | arm | verified/runs | S(w=0) | S(w=0.1) | S(w=1) | uncounted |
+|:--|--:|:--|--:|--:|--:|--:|:--|
+| icv1-f2m13-t181-515ee569 | 10.97 | bsgs-neg | 2/2 | 1.531 | 1.668 | 2.905 | — |
+| icv1-f2m13-t181-515ee569 | 10.97 | ic-compact | 2/2 | 14.747 | 24.640 | 113.675 | — |
+| icv1-f2m13-t181-515ee569 | 10.97 | ic-f4 | 2/2 | 27.036 | 41810.222 | 417858.894 | — |
+| icv1-f2m13-t181-515ee569 | 10.97 | ic-negfold | 0/2 | — | — | — | — |
+| icv1-f2m13-t181-515ee569 | 10.97 | ic-shared | 2/2 | 56.586 | — | — | field_arithmetic_uncharged, hash_and_allocation_uncharged, modular_combination_uncharged |
+| icv1-f2m13-t181-515ee569 | 10.97 | rho-frob | 2/2 | 1.743 | 1.773 | 2.044 | — |
+| icv1-f2m13-t181-515ee569 | 10.97 | rho-strong | 2/2 | 13.972 | 14.135 | 15.603 | — |
+| icv1-f2m19-t797-b6cf2467 | 17.00 | bsgs-neg | 1/1 | 1.039 | 1.140 | 2.048 | — |
+| icv1-f2m19-t797-b6cf2467 | 17.00 | ic-compact | 1/1 | 3.118 | 5.233 | 24.264 | — |
+| icv1-f2m19-t797-b6cf2467 | 17.00 | ic-f4 | 1/1 | 9.761 | 964887.235 | 9648784.502 | — |
+| icv1-f2m19-t797-b6cf2467 | 17.00 | ic-negfold | 1/1 | 26.581 | 30.897 | 69.739 | — |
+| icv1-f2m19-t797-b6cf2467 | 17.00 | ic-shared | 1/1 | 6.529 | — | — | field_arithmetic_uncharged, hash_and_allocation_uncharged, modular_combination_uncharged |
+| icv1-f2m19-t797-b6cf2467 | 17.00 | rho-frob | 1/1 | 0.896 | 0.941 | 1.354 | — |
+| icv1-f2m19-t797-b6cf2467 | 17.00 | rho-strong | 1/1 | 2.823 | 2.889 | 3.476 | — |
+| icv1-fp20-t157-e39da206 | 19.07 | bsgs-neg | 2/2 | 0.584 | 0.641 | 1.152 | — |
+| icv1-fp20-t157-e39da206 | 19.07 | ic-pair | 2/2 | 20.978 | 23.265 | 43.853 | — |
+| icv1-fp20-t157-e39da206 | 19.07 | ic-rootfind | 2/2 | 1363.669 | 1500.786 | 2734.841 | — |
+| icv1-fp20-t157-e39da206 | 19.07 | kangaroo | 2/2 | 2.790 | 2.819 | 3.085 | — |
+| icv1-fp20-t157-e39da206 | 19.07 | rho-neg | 2/2 | 2.003 | 2.183 | 3.797 | — |
+| icv1-f2m23-t5197-69e76b73 | 21.00 | bsgs-neg | 1/1 | 1.457 | 1.602 | 2.905 | — |
+| icv1-f2m23-t5197-69e76b73 | 21.00 | ic-compact | 1/1 | 3.110 | 4.416 | 16.170 | — |
+| icv1-f2m23-t5197-69e76b73 | 21.00 | ic-f4 | 1/1 | 16.599 | 7307108.058 | 73070931.181 | — |
+| icv1-f2m23-t5197-69e76b73 | 21.00 | ic-negfold | 1/1 | 127.199 | 151.828 | 373.487 | — |
+| icv1-f2m23-t5197-69e76b73 | 21.00 | ic-shared | 1/1 | 2.234 | — | — | field_arithmetic_uncharged, hash_and_allocation_uncharged, modular_combination_uncharged |
+| icv1-f2m23-t5197-69e76b73 | 21.00 | rho-frob | 1/1 | 0.201 | 0.209 | 0.283 | — |
+| icv1-f2m23-t5197-69e76b73 | 21.00 | rho-strong | 1/1 | 1.249 | 1.347 | 2.226 | — |
+| icv1-fp24-t2705-27cbb01b | 23.38 | bsgs-neg | 1/1 | 0.522 | 0.574 | 1.040 | — |
+| icv1-fp24-t2705-27cbb01b | 23.38 | ic-pair | 1/1 | 14.930 | 17.548 | 41.116 | — |
+| icv1-fp24-t2705-27cbb01b | 23.38 | ic-pkm | 1/1 | 31.446 | 34.427 | 61.248 | — |
+| icv1-fp24-t2705-27cbb01b | 23.38 | ic-rootfind | 1/1 | 1676.316 | 1845.199 | 3365.147 | — |
+| icv1-fp24-t2705-27cbb01b | 23.38 | kangaroo | 1/1 | 3.974 | 4.000 | 4.232 | — |
+| icv1-fp24-t2705-27cbb01b | 23.38 | rho-neg | 1/1 | 1.411 | 1.541 | 2.710 | — |
+| icv1-fp28-t4155-50f492b1 | 26.20 | bsgs-neg | 1/1 | 0.515 | 0.566 | 1.028 | — |
+| icv1-fp28-t4155-50f492b1 | 26.20 | ic-pair | 1/1 | 86.837 | 104.020 | 258.668 | — |
+| icv1-fp28-t4155-50f492b1 | 26.20 | ic-pkm | 1/1 | 131.152 | 159.844 | 418.073 | — |
+| icv1-fp28-t4155-50f492b1 | 26.20 | ic-rootfind | 1/1 | 11054.586 | 12168.592 | 22194.640 | — |
+| icv1-fp28-t4155-50f492b1 | 26.20 | kangaroo | 1/1 | 2.686 | 2.703 | 2.861 | — |
+| icv1-fp28-t4155-50f492b1 | 26.20 | rho-neg | 1/1 | 1.005 | 1.101 | 1.967 | — |
+| icv1-fp32-t7319-90da43e9 | 32.00 | bsgs-neg | 1/1 | 1.106 | 1.217 | 2.212 | — |
+| icv1-fp32-t7319-90da43e9 | 32.00 | ic-pair | 0/1 | — | — | — | — |
+| icv1-fp32-t7319-90da43e9 | 32.00 | ic-rootfind | 0/1 | — | — | — | — |
+| icv1-fp32-t7319-90da43e9 | 32.00 | kangaroo | 1/1 | 0.751 | 0.752 | 0.763 | — |
+| icv1-fp32-t7319-90da43e9 | 32.00 | rho-neg | 1/1 | 0.987 | 1.085 | 1.968 | — |
+| icv1-fp36-t454193-44a20818 | 36.00 | bsgs-neg | 1/1 | 1.413 | 1.554 | 2.826 | — |
+| icv1-fp36-t454193-44a20818 | 36.00 | ic-pair | 0/1 | — | — | — | — |
+| icv1-fp36-t454193-44a20818 | 36.00 | ic-rootfind | 0/1 | — | — | — | — |
+| icv1-fp36-t454193-44a20818 | 36.00 | kangaroo | 1/1 | 3.016 | 3.018 | 3.039 | — |
+| icv1-fp36-t454193-44a20818 | 36.00 | rho-neg | 1/1 | 1.344 | 1.478 | 2.687 | — |
+| icv1-fp40-tm924137-0ecaaeb9 | 40.00 | bsgs-neg | 1/1 | 0.614 | 0.675 | 1.228 | — |
+| icv1-fp40-tm924137-0ecaaeb9 | 40.00 | ic-pair | 0/1 | — | — | — | — |
+| icv1-fp40-tm924137-0ecaaeb9 | 40.00 | ic-rootfind | 0/1 | — | — | — | — |
+| icv1-fp40-tm924137-0ecaaeb9 | 40.00 | kangaroo | 1/1 | 3.382 | 3.384 | 3.396 | — |
+| icv1-fp40-tm924137-0ecaaeb9 | 40.00 | rho-neg | 1/1 | 1.623 | 1.785 | 3.245 | — |

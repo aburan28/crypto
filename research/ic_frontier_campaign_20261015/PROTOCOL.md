@@ -1,8 +1,8 @@
 # ECDLP index-calculus frontier campaign — protocol
 
-**Status: DRAFT, not frozen.** Freezes when the Phase 0 pilot is committed
-and the per-size parameters below are filled in from it. Nothing measured
-under Phase 1 or 2 may run before the frozen protocol is committed.
+**Status: FROZEN 2026-10-15** (Phase 0 complete; parameters below). Phase 1
+specs are committed under `phase1/` before any Phase 1 run. Amendments after
+this point are labelled and dated.
 
 **Purpose.** Replace the patchwork frontier of
 `research/ecbench_frontier_20261013/` with one campaign whose numbers are
@@ -52,7 +52,7 @@ curve id is the ecbench identity, never the bit count.
 | claw | `claw.pair_table` | generic baseline with table |
 | ic-compact | `ic.pipeline`, `compact-orbit-scan` + `mitm-frobenius-counted:m=2` | IC candidate (best lower-bound arm to date) |
 | ic-negfold | `ic.pipeline`, `koblitz-standard-subspace` + `pdp3-koblitz:m=2,engine=rootfind-negfold` | IC candidate (best complete arm to date) |
-| ic-f4 | `ic.pipeline`, `pdp3-koblitz:m=3,engine=inherited-f4` | algebraic baseline, `n ≤ 23` only (about 6 min an execution at `n = 23`) |
+| ic-f4 | `ic.pipeline`, `pdp3-koblitz:m=3,engine=inherited-f4` | algebraic baseline, `n ≤ 19` only (about 6 min an execution at `n = 23`, so 48 executions would take about 5 h) |
 | ic-shared | `ic.shared_rank` | online / amortised candidate; reported as a lower bound only (three uncounted unpriced categories) |
 | rho-strong-aa | as reference | A/A control |
 
@@ -162,7 +162,7 @@ before any statement.
 - **A3** Pricing band, now AGENTS.md §5a: every arm (references included)
   is priced at 0, 0.1 and 1 GAE per native operation. Calibration-priced
   native work in an IC total is removed and re-priced at the same weight
-  (`band.py`). Two arms are ranked only where the order holds at every
+  (`ecbench band`, native). Two arms are ranked only where the order holds at every
   weight.
 - **A4** Size rules and selection. Prime pair-table arm:
   `N = ⌈(2r)^{1/3}⌉`, checked against `N/2` and `2N` on the train panel.
@@ -171,6 +171,11 @@ before any statement.
   optimum sits on a grid edge the grid is extended until it is interior,
   or until the edge is the smallest legal value (`columns = 1`). Every
   candidate and its band values are kept in `select/`.
+- **A4b** An arm none of whose candidates verifies all four train targets
+  within its trial cap (`max_trials`, 5·10⁷ for Koblitz IC) is retired at
+  that size and above, and the frontier records "does not complete at
+  this cap". This is a resource limit, not a proof of anything. Negfold
+  retires at `n = 43` on this rule (`select/sessions/K43`, `K47`).
 - **A5** The frontier is a time–memory Pareto set. Retained memory is
   reported per arm, and BSGS is never ranked against a constant-memory
   method on time alone.
@@ -178,7 +183,27 @@ before any statement.
 
 ## Frozen per-size parameters
 
-_To be filled from the Phase 0 pilot._
+| (a, n) | log₂ r | compact columns | negfold dimension |
+|:--|--:|--:|--:|
+| (0, 13) | 10.97 | 1 | 4 |
+| (1, 17) | 16.00 | 1 | 6 |
+| (1, 19) | 18.00 | 2 | 7 |
+| (1, 23) | 22.00 | 2 | 8 |
+| (0, 37) | 27.78 | 8 | 11 |
+| (1, 43) | 32.11 | 16 | retired (A4b) |
+| (1, 47) | 36.64 | 64 | retired (A4b) |
+| (0, 41) | 39.00 | 128 | retired (A4b) |
+
+| prime bits | pair-table base size N |
+|--:|--:|
+| 20 | 32 |
+| 24 | 162 |
+| 28 | 407 |
+| 32 | 1024 |
+| 36 | 2581 |
+| 40 | 3251 |
+
+PKM arm: `t` as registered in `research/pkm_tower_ecbench_20261013` (20:8, 22:9, 24:9, 26:10, 28:11). `ic-shared`: columns 8 at every size (not selected; lower bound only). Evidence: [`select/SELECTION.md`](select/SELECTION.md); machine form [`params.json`](params.json); specs `phase1/spec-*.json` (written once from these values; the generator is not kept, per AGENTS.md "no Python").
 
 ## Resources
 

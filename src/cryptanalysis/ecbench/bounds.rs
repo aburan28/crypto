@@ -342,6 +342,11 @@ pub struct FitOptions {
     pub curves: Vec<String>,
     pub resamples: usize,
     pub seed: u64,
+    /// Fit the band-priced cost at this weight (GAE per native operation,
+    /// AGENTS.md §5a, [`super::band`]) instead of the charged cost.  The
+    /// domain's unit then names the weight, so the bound never shares an
+    /// id with a charged-cost bound.
+    pub weight: Option<f64>,
 }
 
 impl Default for FitOptions {
@@ -351,6 +356,7 @@ impl Default for FitOptions {
             curves: vec![],
             resamples: RESAMPLES,
             seed: SEED,
+            weight: None,
         }
     }
 }
@@ -539,6 +545,11 @@ pub fn memory_entries(r: &Record) -> Option<f64> {
 
 /// Every counter the unit does not charge, summed, per `√r`.
 pub fn uncharged_work(r: &Record) -> f64 {
+    // Top-level `*_uncharged` counters only.  An index-calculus record keeps
+    // most of its unpriced counts in its phases' native maps, so this axis
+    // undercounts IC unpriced work; it is kept as it is because committed
+    // bound ids depend on it.  Use `ecbench band` / `bound fit --weight`
+    // (super::band, AGENTS.md §5a) for a complete count.
     let total: u64 = r
         .counters
         .iter()
@@ -689,6 +700,18 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
         ));
     }
 
+    // Band-priced or charged cost per record (AGENTS.md §5a).
+    let mut priced: BTreeMap<String, (Option<f64>, Option<f64>)> = BTreeMap::new();
+    for r in &recs {
+        let v = match opts.weight {
+            None => (r.cost.total_gae, r.cost.s),
+            Some(w) => (super::band::priced_gae(r, w)?, super::band::priced_s(r, w)?),
+        };
+        priced.insert(r.record_id.clone(), v);
+    }
+    let gae_of = |r: &Record| priced[&r.record_id].0;
+    let s_of = |r: &Record| priced[&r.record_id].1;
+
     // One domain.
     let families: BTreeSet<&str> = recs
         .iter()
@@ -710,7 +733,13 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
             "the arm ran on planted and public targets; a bound is about one target kind".into(),
         );
     }
-    let units: BTreeSet<&str> = recs.iter().map(|r| r.cost.unit.as_str()).collect();
+    let units: BTreeSet<String> = recs
+        .iter()
+        .map(|r| match opts.weight {
+            None => r.cost.unit.clone(),
+            Some(w) => format!("{}+band(w={w})", r.cost.unit),
+        })
+        .collect();
     if units.len() != 1 {
         return Err("the runs report different units".into());
     }
@@ -730,7 +759,7 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
         problem: PROBLEM.into(),
         family: families.into_iter().next().unwrap().to_string(),
         target_kind: kinds.into_iter().next().unwrap(),
-        unit: units.into_iter().next().unwrap().to_string(),
+        unit: units.into_iter().next().unwrap(),
         tier: tiers.into_iter().next().unwrap().to_string(),
         envelope: Envelope::default(),
     };
@@ -752,7 +781,7 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
         let floor = floor_s(a);
         let mut by_w: BTreeMap<&str, Vec<f64>> = BTreeMap::new();
         for r in &ok {
-            if let Some(s) = r.cost.s {
+            if let Some(s) = s_of(r) {
                 by_w.entry(r.workload.workload_id.as_str())
                     .or_default()
                     .push(s);
@@ -766,7 +795,7 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
                 .entry(r.isolation.level.name().to_string())
                 .or_insert(0) += 1;
         }
-        let gaes: Vec<f64> = ok.iter().filter_map(|r| r.cost.total_gae).collect();
+        let gaes: Vec<f64> = ok.iter().filter_map(|r| gae_of(r)).collect();
         let mems: Vec<f64> = ok.iter().filter_map(|r| memory_entries(r)).collect();
         let unch: Vec<f64> = ok.iter().map(|r| uncharged_work(r)).collect();
         let declared = expected_s(&method.id, a);
@@ -817,15 +846,15 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
         let ln_r = (row.r as f64).ln();
         strata.push(
             mine.iter()
-                .filter_map(|r| r.cost.total_gae)
+                .filter_map(|r| gae_of(r))
                 .filter(|g| *g > 0.0)
                 .map(|g| (ln_r, g.ln()))
                 .collect(),
         );
-        s_strata.push(mine.iter().filter_map(|r| r.cost.s).collect());
+        s_strata.push(mine.iter().filter_map(|r| s_of(r)).collect());
         f_strata.push(
             mine.iter()
-                .filter_map(|r| r.cost.s)
+                .filter_map(|r| s_of(r))
                 .map(|s| s / row.floor_s)
                 .collect(),
         );

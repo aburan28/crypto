@@ -6,7 +6,7 @@ repository's cloud container (4 vCPU, 15 GiB). Binary SHA-256 in
 [`ecbench.sha256`](ecbench.sha256); method inventory in
 [`methods.txt`](methods.txt). Specs `spec-*.json`; sealed sessions under
 [`sessions/`](sessions/); every record laid out in [`TABLE.md`](TABLE.md)
-(by `summarise.py`, recorded values only). **These are feasibility and
+(now produced by `ecbench band`). **These are feasibility and
 pricing probes, not measurements: one or two targets, no intervals, and
 nothing here is a comparison result.**
 
@@ -38,7 +38,7 @@ nothing here is a comparison result.**
    arms do not emit the counts they leave unpriced. That was a reading
    error in `summarise.py`, which looked only at the record's top-level
    `counters`. The counts are in each phase's `native` map.
-   `pricing.py` now finds them, and `TABLE.md` is regenerated. The one
+   `TABLE.md` is now produced by the native `ecbench band`, which finds them. The one
    genuine gap is `ic.shared_rank`. It lists `field_arithmetic`,
    `hash_and_allocation` and `modular_combination` as unpriced categories
    with no count (`src/cryptanalysis/ecbench/methods.rs`, the

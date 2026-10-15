@@ -13,24 +13,32 @@ fields~\cite{gaudry2009,diem2011}. Its open question has always been
 \emph{where the crossover is}: on which curves, at which sizes and under
 which accounting does it cost less than rho?
 
-This paper documents fourteen weeks (1 July--14 October 2026) of work on
-that question in one repository. The index-calculus programme proper ran
-from 6 September to 14 October; July and August hold the preceding
-prime-field structure work that motivated it
-(\S\ref{sec:chronology}). The output is large: about 6{,}900 commits,
-about 450 dated study directories under \art{research/}, 27 rows of the
-performance index \art{benchmarks/README.md}, a boundary ledger
-(\art{docs/ic/boundary_targets.json}), a native measurement harness
-(\art{src/cryptanalysis/ecbench/}), and a companion manuscript on
-root-finding decomposition (\art{papers/rootfinding-decomposition/}). It
-is easy, in a body of work this size, to improve a headline number by two
-orders of magnitude and establish nothing; this paper is organised to
-prevent that. Every improvement is stated with the boundary on which it
-was measured (oracle stage, complete solve, cold one-target cost, online
-cost after retained set-up), the unit, the sample, the interval, and the
-committed artefact that holds the records.
+This paper is a survey of where that question stands, in three parts.
+First, the literature (\S\ref{sec:theory}): what is proved, what rests on
+heuristics such as the first-fall-degree assumption, and what the
+experimental record says about those heuristics. Second, a measured
+frontier (\S\ref{sec:frontier}): every method family---rho variants,
+baby-step giant-step, the kangaroo and several index-calculus
+pipelines---run on the same one-target workloads in one counted unit, on
+fixed curve ladders, with the native work that each method leaves unpriced
+priced alike on every arm across a band of weights, and a ranking reported
+only where it holds across that band. Third, open problems, each stated as
+the measurement or proof that would settle it (\S\ref{sec:open}).
 
-\paragraph{The routes.} We pursued six lines, each a section below:
+The measurements come from one open repository and a programme of work
+there between July and October 2026 (\S\ref{sec:chronology}): about
+6{,}900 commits and 450 dated study directories, a boundary ledger
+(\art{docs/ic/boundary_targets.json}), a native harness
+(\art{src/cryptanalysis/ecbench/}), and the engineering results of
+\S\S\ref{sec:rootfinding}--\ref{sec:transfer}. It is easy, in a body of
+work this size, to improve a headline number by two orders of magnitude
+and establish nothing; this paper is organised to prevent that. Every
+result is stated with the boundary on which it was measured (oracle stage,
+complete solve, cold one-target cost, online cost after retained set-up),
+the unit, the sample, the interval, and the committed artefact that holds
+the records.
+
+\paragraph{The routes measured.} The engineering lines, each a section below:
 \begin{enumerate}
 \item \emph{Root-finding decomposition} (\S\ref{sec:rootfinding}):
   replacing the Gr\"obner solve of the decomposition step by closed-form
@@ -65,23 +73,21 @@ corrections that the harness forced on earlier claims.
 
 \paragraph{Contributions.}
 \begin{itemize}
-\item A unit and a boundary: $S=\text{group-addition
-  equivalents}/\sqrt{r}$, cold one-target with every phase charged, beside
-  a separately reported online window; sealed, replayable records; and a
-  frontier definition under which two numbers are comparable only when
-  every component of the measurement domain matches
-  (\S\ref{sec:method}).
-\item Root-finding decomposition taken from an observation to an
-  engineered, verified, harness-integrated oracle family, with a
-  machine-checked proof of the identity it rests on
-  (\S\ref{sec:rootfinding}).
-\item A documented map of which levers move a constant, which move nothing,
-  and which make things worse, across about 40 measured variants of the
-  decomposition, factor-base and linear-algebra stages
-  (Table~\ref{tab:improvements}).
-\item An honest frontier (\S\ref{sec:frontier}): the cold one-target
-  frontier is still rho; the retained-set-up online frontier has an
-  admitted index-calculus point; the stage frontier moved substantially.
+\item A survey of elliptic-curve index calculus organised by field type,
+  separating proved results from heuristic ones and recording where the
+  first-fall-degree debate stands (\S\ref{sec:theory}).
+\item A measurement discipline: one unit ($S=\text{group-addition
+  equivalents}/\sqrt r$), one-target cold and online boundaries, sealed
+  and replayable records, and a pricing band that treats the unpriced work
+  of rho and of index calculus alike (\S\ref{sec:method}).
+\item A measured frontier on fixed Koblitz and prime ladders, with
+  parameters chosen on separate training targets and fitted cost exponents
+  per method (\S\ref{sec:frontier}).
+\item The engineering record: root-finding decomposition (with its prior
+  art), Gr\"obner engines, compact-orbit Koblitz bases, $D_4$ symmetry at
+  $k=4$, and the negative results (\S\S\ref{sec:rootfinding}--\ref{sec:transfer}).
+\item Open problems, each with the experiment or proof that would settle it
+  (\S\ref{sec:open}).
 \end{itemize}
 
 \paragraph{What this paper does not claim.} No asymptotic sub-rho
