@@ -36,7 +36,7 @@ eliminations, specialisation included.
 
 **Replay costs more on every one of the 9 registered cells: 0.753–0.985×.**
 It splits more on 6 of them (e.g. 3,512 against 3,489 splits on
-`K_1/2^15`, `m = 4`). Verdicts, decomposed and exhausted counts are
+`icv1-f2m15-t275-b7f03703`, `m = 4`). Verdicts, decomposed and exhausted counts are
 identical everywhere. The harness skips cofactor-inadmissible cells before
 measuring them: `chain` ran 3 of its 5 listed cells, `chain-holdout` 4 of
 11.
@@ -50,10 +50,10 @@ identical to the claim run.
 
 | cell | roots recorded | roots replayed | rows dropped per replay | ratio |
 |:--|--:|--:|--:|--:|
-| `K_1/2^9`, `m = 4` | 11 | 17 | 5.1 | 0.929 |
-| `K_0/2^15`, `m = 4` | 18 | 6 | 36.3 | 0.753 |
-| `K_1/2^15`, `m = 4` | 81 | 1,832 | 3.8 | 0.985 |
-| `K_0/2^13`, `m = 3`, fresh targets | 3 | 13 | 13.9 | 0.962 |
+| `icv1-f2m9-tm5-4a3ea183`, `m = 4` | 11 | 17 | 5.1 | 0.929 |
+| `icv1-f2m15-tm275-2d22ff5d`, `m = 4` | 18 | 6 | 36.3 | 0.753 |
+| `icv1-f2m15-t275-b7f03703`, `m = 4` | 81 | 1,832 | 3.8 | 0.985 |
+| `icv1-f2m13-t181-515ee569`, `m = 3`, fresh targets | 3 | 13 | 13.9 | 0.962 |
 
 - The large, rank-deficient roots (where `RESEARCH_INHERITED_F4.md` §3.4 saw
   ~40 % deficiency) rarely repeat their exact column layout across targets,
