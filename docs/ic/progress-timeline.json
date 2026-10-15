@@ -1,6 +1,6 @@
 {
   "schema_version": "ic-progress-timeline/1",
-  "updated": "2026-10-12",
+  "updated": "2026-10-14",
   "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
   "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
   "series": [
@@ -124,6 +124,17 @@
           "class": "accounting",
           "anchor": "#ic-tool-programme-20261001",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v3/README.md"
+        },
+        {
+          "date": "2026-10-14",
+          "value": 1.566,
+          "reference": "matched",
+          "unit": "S",
+          "label": "Frobenius-orbit IC, fully priced (*_full), stride-renew, vs rho-frob: best cell icv1-f2m29-tm40309-30c52b96 (r = 2^15.4)",
+          "detail": "Orbit factor base (compact-orbit-scan, mitm-frobenius-counted m = 2) with every native priced, paired against the fully priced signed-Frobenius rho on 16 targets x 3 rounds per curve: 1.566 [0.992, 2.347] at the best cell (interval reaches 1; rho-frob heavy-tailed there), 2.96 at n = 13, 3.85 at r = 2^21, 18.2 at r = 2^39; never below 1. Slope of ln ratio 0.165 [0.117, 0.213] per ln r with ln n fitted (model 1/6): constant-only.",
+          "class": "accounting",
+          "anchor": "#lab-ecbench-all",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_frobenius_orbit_vs_rho_20261014/README.md"
         }
       ]
     },
