@@ -1,0 +1,329 @@
+[
+ {
+  "system": "V1 S3 + 1 curve eq",
+  "ell": 2,
+  "leads": [
+   [
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    2,
+    0
+   ]
+  ],
+  "ext": [
+   10,
+   9,
+   4,
+   0
+  ],
+  "delta": 0.11607142857142858,
+  "delta_exact": "13/112",
+  "dim": 64,
+  "sum_k": 52,
+  "maxes": [
+   7,
+   7,
+   0,
+   0
+  ],
+  "binds": true,
+  "milp_time_limit_hit": false,
+  "nz": 1004,
+  "nm": 550,
+  "iters": 5,
+  "seconds": 10.27
+ },
+ {
+  "system": "V1 S3 + 1 curve eq",
+  "ell": 2,
+  "leads": [
+   [
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ]
+  ],
+  "ext": [
+   10,
+   9,
+   4,
+   0
+  ],
+  "delta": 0.11607142857142858,
+  "delta_exact": "13/112",
+  "dim": 64,
+  "sum_k": 52,
+  "maxes": [
+   7,
+   7,
+   0,
+   0
+  ],
+  "binds": true,
+  "milp_time_limit_hit": false,
+  "nz": 1004,
+  "nm": 550,
+  "iters": 5,
+  "seconds": 15.11
+ },
+ {
+  "system": "V1 S3 + 1 curve eq",
+  "ell": 2,
+  "leads": [
+   [
+    0,
+    2,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    2,
+    0
+   ]
+  ],
+  "ext": [
+   10,
+   9,
+   4,
+   0
+  ],
+  "delta": 0.11607142857142858,
+  "delta_exact": "13/112",
+  "dim": 64,
+  "sum_k": 52,
+  "maxes": [
+   7,
+   7,
+   0,
+   0
+  ],
+  "binds": true,
+  "milp_time_limit_hit": false,
+  "nz": 1004,
+  "nm": 550,
+  "iters": 5,
+  "seconds": 11.38
+ },
+ {
+  "system": "V1 S3 + 1 curve eq",
+  "ell": 2,
+  "leads": [
+   [
+    0,
+    2,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ]
+  ],
+  "ext": [
+   10,
+   9,
+   4,
+   0
+  ],
+  "delta": 0.11607142857142858,
+  "delta_exact": "13/112",
+  "dim": 64,
+  "sum_k": 52,
+  "maxes": [
+   7,
+   7,
+   0,
+   0
+  ],
+  "binds": true,
+  "milp_time_limit_hit": false,
+  "nz": 1004,
+  "nm": 550,
+  "iters": 5,
+  "seconds": 8.52
+ },
+ {
+  "system": "V1 S3 + 1 curve eq",
+  "ell": 2,
+  "leads": [
+   [
+    2,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    2,
+    0
+   ]
+  ],
+  "ext": [
+   10,
+   9,
+   4,
+   0
+  ],
+  "delta": 0.11607142857142858,
+  "delta_exact": "13/112",
+  "dim": 64,
+  "sum_k": 52,
+  "maxes": [
+   7,
+   7,
+   0,
+   0
+  ],
+  "binds": true,
+  "milp_time_limit_hit": false,
+  "nz": 1004,
+  "nm": 550,
+  "iters": 5,
+  "seconds": 11.26
+ },
+ {
+  "system": "V1 S3 + 1 curve eq",
+  "ell": 2,
+  "leads": [
+   [
+    2,
+    0,
+    0,
+    0
+   ],
+   [
+    3,
+    0,
+    0,
+    0
+   ]
+  ],
+  "ext": [
+   10,
+   9,
+   4,
+   0
+  ],
+  "delta": 0.11607142857142858,
+  "delta_exact": "13/112",
+  "dim": 64,
+  "sum_k": 52,
+  "maxes": [
+   7,
+   7,
+   0,
+   0
+  ],
+  "binds": true,
+  "milp_time_limit_hit": false,
+  "nz": 1004,
+  "nm": 550,
+  "iters": 5,
+  "seconds": 12.26
+ },
+ {
+  "system": "V1 S3 + 1 curve eq",
+  "ell": 2,
+  "leads": [
+   [
+    2,
+    2,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    2,
+    0
+   ]
+  ],
+  "ext": [
+   10,
+   9,
+   4,
+   0
+  ],
+  "delta": 0.11607142857142858,
+  "delta_exact": "13/112",
+  "dim": 64,
+  "sum_k": 52,
+  "maxes": [
+   7,
+   7,
+   0,
+   0
+  ],
+  "binds": true,
+  "milp_time_limit_hit": false,
+  "nz": 1004,
+  "nm": 550,
+  "iters": 5,
+  "seconds": 8.74
+ },
+ {
+  "system": "V1 S3 + 1 curve eq",
+  "ell": 2,
+  "leads": [
+   [
+    2,
+    2,
+    0,
+    0
+   ],
+   [
+    3,
+    0,
+    0,
+    0
+   ]
+  ],
+  "ext": [
+   10,
+   9,
+   4,
+   0
+  ],
+  "delta": 0.11607142857142858,
+  "delta_exact": "13/112",
+  "dim": 64,
+  "sum_k": 52,
+  "maxes": [
+   7,
+   7,
+   0,
+   0
+  ],
+  "binds": true,
+  "milp_time_limit_hit": false,
+  "nz": 1004,
+  "nm": 550,
+  "iters": 5,
+  "seconds": 6.5
+ },
+ {
+  "system": "V1 S3 + 1 curve eq",
+  "ell": 2,
+  "best_over_leads": 0.11607142857142858,
+  "best_exact": "13/112",
+  "n_lead_choices": 8
+ }
+]
