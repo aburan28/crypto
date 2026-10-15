@@ -190,14 +190,24 @@ thread_local! {
     /// Recorded dependent rows by root shape.
     static ROOT_SHAPES: std::cell::RefCell<std::collections::HashMap<u64, std::rc::Rc<Vec<u32>>>> =
         std::cell::RefCell::new(std::collections::HashMap::new());
-    /// (roots recorded, roots replayed, rows dropped) on this thread.
-    static ROOT_REPLAY_COUNTS: std::cell::Cell<(u64, u64, u64)> = const { std::cell::Cell::new((0, 0, 0)) };
 }
 
-/// `(roots recorded, roots replayed, rows dropped)` by root shape replay on
-/// the calling thread (all zero unless `KIC_F4_ROOT_REPLAY=1`).
-pub fn root_replay_counts_thread() -> (u64, u64, u64) {
-    ROOT_REPLAY_COUNTS.with(|c| c.get())
+/// Roots recorded, roots replayed and rows dropped by root shape replay,
+/// over all threads (a diagnostic; all zero unless `KIC_F4_ROOT_REPLAY=1`).
+static ROOT_REPLAY_COUNTS: [std::sync::atomic::AtomicU64; 3] = [
+    std::sync::atomic::AtomicU64::new(0),
+    std::sync::atomic::AtomicU64::new(0),
+    std::sync::atomic::AtomicU64::new(0),
+];
+
+/// `(roots recorded, roots replayed, rows dropped)` since the start.
+pub fn root_replay_counts() -> (u64, u64, u64) {
+    use std::sync::atomic::Ordering::Relaxed;
+    (
+        ROOT_REPLAY_COUNTS[0].load(Relaxed),
+        ROOT_REPLAY_COUNTS[1].load(Relaxed),
+        ROOT_REPLAY_COUNTS[2].load(Relaxed),
+    )
 }
 
 fn root_shape_key(columns: &[u64], rows: usize, degree: u32, support_local: bool) -> u64 {
@@ -263,18 +273,14 @@ fn replay_root(
                 i += 1;
                 k
             });
-            ROOT_REPLAY_COUNTS.with(|c| {
-                let (r, p, d) = c.get();
-                c.set((r, p + 1, d + drop.len() as u64));
-            });
+            ROOT_REPLAY_COUNTS[1].fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            ROOT_REPLAY_COUNTS[2]
+                .fetch_add(drop.len() as u64, std::sync::atomic::Ordering::Relaxed);
         }
         None => {
             let dep = dependent_rows(matrix, word_ops);
             ROOT_SHAPES.with(|m| m.borrow_mut().insert(key, std::rc::Rc::new(dep)));
-            ROOT_REPLAY_COUNTS.with(|c| {
-                let (r, p, d) = c.get();
-                c.set((r + 1, p, d));
-            });
+            ROOT_REPLAY_COUNTS[0].fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         }
     }
 }
