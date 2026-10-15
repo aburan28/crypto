@@ -42,6 +42,7 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
 use crypto_lib::cryptanalysis::pdp_split::{
     build_for_instance, exhaustive_decompositions, solve_branch, summands_of, verify_decomposition,
 };
+use crypto_lib::cryptanalysis::wide_groebner::wide_groebner_decompose;
 use num_bigint::BigUint;
 use num_traits::ToPrimitive;
 use rand::rngs::StdRng;
@@ -342,6 +343,22 @@ fn solve(cell: &Cell, m: usize, arm: &str, k: u64, budget: Duration) -> Value {
             };
             extra = json!({"reductions": s.reductions, "splits": s.splits,
                 "max_degree_built": s.max_degree_built});
+            (h, s.exhausted, s.unsupported)
+        }
+        "wide-chain" => {
+            // The u128 chained-S3 solver (`wide_groebner`, up to 128 unknowns):
+            // whole-summand branching with Macaulay linearisation at each node.
+            let (h, s) = wide_groebner_decompose(
+                &cell.kc,
+                &cell.fb,
+                &index_of,
+                &st,
+                &target,
+                m,
+                node_budget,
+            );
+            extra = json!({"nodes": s.nodes, "reductions": s.reductions, "refuted": s.refuted,
+                "leaves": s.leaves, "max_rows": s.max_rows, "max_cols": s.max_cols});
             (h, s.exhausted, s.unsupported)
         }
         "sat" => {
