@@ -7,6 +7,8 @@ The finite χ polynomial scan checked 22/22 exhaustive cases, solved 12/12 paire
 
 A separately frozen V3 repeat removed four answer fields before the solver run. The solver rejected an answer-bearing input and used a framework path without a planted answer. Its source and quotient roots again matched 22/22 exhaustive target sets and each solved 12/12 paired rounds; the separate checker replayed 123/132 scalar rows. All 132 normalized relation/recovery rows matched V2 exactly. Paired source-root/rho CPU ratios were 13.237, 8.254, 13.427 and 21.844; paired finite-scan/source-root ratios were 2.125, 1.988, 3.864 and 7.571. Native preprocessing and the independent checker read the private fixture; the solver process read only the public one.
 
+The controlled post-V3 release library suite passed 4,083 tests, with zero failures and 117 ignored; its stdout and stderr are retained in the study directory. The touched examples compile, and exact native runs and independent replays provide their substantive checks.
+
 An explicit degree-three map over `F_(67²)` links curves with distinct j values, 7 and 11. Source, transported-image and destination-direct relation arms reached rank nine and recovered scalar 41 in three rounds; 15/15 arm-round values passed independent replay. An exhaustive audit mapped 4575 source points onto 1525 image points, with exactly three rational preimages each. All 61 target-subgroup images were distinct and 3721 ordered subgroup-pair homomorphism checks passed. Lean proves conditional subgroup injectivity and relation reflection; the concrete curve/map and S3 polynomial bridges remain open.
 
 #image("chi_polynomial_20261015/reports/run-20261015T1851Z/GRAPH.svg", width: 100%)
