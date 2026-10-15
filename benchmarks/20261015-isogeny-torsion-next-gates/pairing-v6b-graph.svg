@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="430" viewBox="0 0 900 430" role="img" aria-label="Pairing divided by direct prime-field rho at 64 targets in three V6 and V6B rounds">
+<rect width="900" height="430" fill="#fff"/>
+<g font-family="Arial,Helvetica,sans-serif" fill="#183148">
+<text x="32" y="42" font-size="25" font-weight="700">Pairing / direct F401 rho at 64 targets</text>
+<text x="32" y="70" font-size="15" fill="#52697a">Complete cold current-thread CPU · identical inputs, seeds and arm order · shared-host L0</text>
+<g stroke="#d9e1e6" stroke-width="1"><line x1="150" y1="330" x2="750" y2="330"/><line x1="150" y1="258" x2="750" y2="258"/><line x1="150" y1="186" x2="750" y2="186"/><line x1="150" y1="114" x2="750" y2="114"/></g>
+<line x1="150" y1="258" x2="750" y2="258" stroke="#a85038" stroke-width="2" stroke-dasharray="6 5"/>
+<g font-size="14" fill="#52697a"><text x="112" y="335">0</text><text x="112" y="263">1</text><text x="112" y="191">2</text><text x="112" y="119">3</text><text x="204" y="365">Round 0</text><text x="424" y="365">Round 1</text><text x="644" y="365">Round 2</text></g>
+<polyline points="220,149 440,214 660,114" fill="none" stroke="#427f9e" stroke-width="4"/><polyline points="220,190 440,152 660,187" fill="none" stroke="#91ad61" stroke-width="4"/>
+<g fill="#427f9e" stroke="#fff" stroke-width="2"><circle cx="220" cy="149" r="8"/><circle cx="440" cy="214" r="8"/><circle cx="660" cy="114" r="8"/></g>
+<g fill="#91ad61" stroke="#fff" stroke-width="2"><circle cx="220" cy="190" r="8"/><circle cx="440" cy="152" r="8"/><circle cx="660" cy="187" r="8"/></g>
+<g font-size="14" font-weight="700"><text x="235" y="145">2.523</text><text x="455" y="211">1.620</text><text x="675" y="111">3.000</text><text x="235" y="205">1.944</text><text x="455" y="148">2.470</text><text x="675" y="203">1.992</text></g>
+<g font-size="14"><rect x="150" y="392" width="16" height="16" fill="#427f9e"/><text x="173" y="406">V6, concurrent release tests</text><rect x="425" y="392" width="16" height="16" fill="#91ad61"/><text x="448" y="406">V6B, after release tests exited</text></g>
+</g></svg>

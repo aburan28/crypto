@@ -1,8 +1,8 @@
 # Distinct pairing-target batch exceeds the frozen subgroup sizes
 
-Status: `open`. Kind: proved finite counting obstruction to the specified
-workload, plus an open implementation and measurement gap for a replacement
-cell. Next action owner: this research task. Last updated: 2026-10-15.
+Status: `resolved by a separately frozen order-67 cell`; the counting
+obstruction on the two original groups remains true. Kind: finite counting
+obstruction to the original per-group workload. Last updated: 2026-10-15.
 
 ## Problem
 
@@ -19,40 +19,41 @@ finite counting obstruction, independent of implementation or budget.
 - **Observed:** The [frozen public fixtures](../research/isogeny_torsion_fibers_20261012/extension_field_20261014/FIXTURES.jsonl) and [pairing protocol](../research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/NEXT_TESTS.md) specify `r=19,61` and 64 distinct targets per group.
 - **Proved:** A group of order `r` has exactly `r-1` nonidentity elements, hence at most 18 or 60 distinct nonidentity targets here. This says nothing about the cost of setup reuse for feasible batch sizes.
 - **Suspected explanation:** None needed for the counting limit.
-- **Missing capability:** A separately frozen, practical pairing cell with `r>=67` and 64 distinct nonidentity public targets, plus native batch pricing and rho controls.
+- **Implemented and checked:** The [order-67 protocol](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/CELL_401_PROTOCOL.md) selected `E/F_401:y²=x³+1`, `r=67`, with a degree-two pairing field and 66 distinct nonidentity public targets. The [V4 batch](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/RUN_401_V4.jsonl) recovered all 66 scalars in each of three rounds, with [198 independent replays](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/REPLAY_401_V4.json). [V6](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/COMPACT_PRIME_401_V6.jsonl) and the [post-test V6B repeat](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/COMPACT_PRIME_401_V6B.jsonl) price the 64-target prefix against both extension-field and stronger prime-field rho; their separate replay receipts each check 594 scalar outputs.
 - **What this evidence does not establish:** It does not rule out amortized pairing benefit on a larger group or decide the cold one-target comparison.
 
 ## What would unblock it
 
-The existing one-target costs and the possibility of setup reuse remain open.
-A checkable exit is a separately frozen pairing cell with at least 65 group
-elements and a practical evaluated field, with 64 distinct nonidentity
-public targets, each independently replayed, plus matched 64-target rho.
-Until then, run `N=1,4,16` on `r=19`, `N=1,4,16` and at most `N=60` on
-`r=61`; label these as partial to the original four-count request. A new
-`r>=67` cell may supply `N=64` without changing the old inputs.
+The distinct-target workload gap is closed by the additional order-67 cell.
+The original order-19 and order-61 groups still cannot supply 64 distinct
+nonidentity targets. The new cell leaves the cold one-target and scaling
+questions separate.
 
-- [ ] Freeze and verify an explicit pairing cell of prime order at least 67 with at least 64 distinct nonidentity targets and an evaluated pairing field.
-- [ ] Recover and independently replay all 64 logarithms, charge setup plus every target and failure, and compare with 64 matched rho solves.
+- [x] Freeze and verify an explicit order-67 pairing cell with 66 distinct nonidentity targets and a degree-two evaluation field.
+- [x] Recover and independently replay the 64-target prefix in three rounds, charge setup, every target and failure, and compare with both extension-curve and direct prime-field rho.
 
 Meeting these conditions resolves the batch-size obstruction only. It does
 not establish a single-target speedup or a scaling exponent.
 
-## Next discriminating step
+## Remaining research step
 
-The next discriminating test is a bounded native screen of small explicit
-pairing cells for `r>=67` and low embedding degree. Freeze the selector and
-resource cap before the screen. A passing cell proceeds to distinct-target
-batch pricing; an exhausted screen leaves this exit open and records every
-candidate and reason. Neither outcome changes the cold single-target result.
-
-Inputs and controls: the two original groups remain fixed; a new cell must
-carry its own field/curve/subgroup identity, frozen seed, match to rho, and
-source-answer exclusion. The bounded screen and its cap belong in a committed
-protocol before execution. A passing cell proceeds to the batch; an exhausted
-screen leaves this record open. Recheck on an accepted new cell or a corrected
-target-count specification.
+The new `N=64` workload is complete. The V5 extension-curve rho control
+showed a lower CPU cost for pairing in three shared-host rounds, while the
+V6 direct prime-field rho control was lower cost in all three. The V6B
+repeat after the release tests exited kept the same ordering in all three
+further shared-host rounds. A V7 cold direct source-group BSGS control
+was lower cost than both pairing and rho at each measured prefix. Thus
+the V5 pairing/extension-rho contrast is a representation diagnostic on
+this cell, and the multi-target comparison must keep the direct reuse
+route. Its qualified performance question requires isolated matched native
+measurement, complete counted-unit conversion and growing-order cells.
+Track the remaining work
+in the study result report, not by reopening this finite-cardinality problem.
 
 ## Resolution and history
 
-2026-10-15: identified before the reusable-input run. Unresolved.
+2026-10-15: identified before the reusable-input run. The new order-67 cell
+passed field, pairing-order, bilinearity, distinct-target and independent
+replay checks. V6 supplied the stronger prime-field rho reference. Resolved
+for the requested `N=64` workload on an added cell; impossible on the two
+original frozen groups as stated.

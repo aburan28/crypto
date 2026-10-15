@@ -10,9 +10,7 @@ use std::time::Instant;
 use crypto_lib::cryptanalysis::ext_curve::{
     jacobi, take_field_counters, ExtCurve, ExtDiagonalAutomorphism, ExtField, ExtPoint, Fp2,
 };
-use crypto_lib::cryptanalysis::glv_invariant_base::{
-    rho_reference_folded, Endomorphism, Negation,
-};
+use crypto_lib::cryptanalysis::glv_invariant_base::{rho_reference_folded, Endomorphism, Negation};
 use crypto_lib::cryptanalysis::ic_boundary::{
     rho_reference_negation, CountedGroup, GroupOps, PrimeCurve, PrimePoint,
 };
@@ -60,14 +58,22 @@ fn read_input(path: &str, cell: usize) -> Input {
     );
     let p = v["p"].as_u64().unwrap();
     let r = v["r"].as_u64().unwrap();
-    assert!((p == 61 && r == 19 && cell == 0)
-        || (p == 271 && r == 61 && cell == 1)
-        || (p == 401 && r == 67 && cell == 2));
+    assert!(
+        (p == 61 && r == 19 && cell == 0)
+            || (p == 271 && r == 61 && cell == 1)
+            || (p == 401 && r == 67 && cell == 2)
+    );
     Input {
         p,
         nu: v["nu"].as_u64().unwrap(),
         r,
-        degree: if cell == 0 { 9 } else if cell == 1 { 5 } else { 1 },
+        degree: if cell == 0 {
+            9
+        } else if cell == 1 {
+            5
+        } else {
+            1
+        },
         trace_fp: v["trace_fp"].as_i64().unwrap(),
         g: source_point(&v["generator"]),
         q: source_point(&v["target"]),
@@ -971,56 +977,76 @@ fn freeze_401(previous_inputs: &str, extended_inputs: &str, fixture_path: &str) 
     let r = 67u64;
     assert!(is_prime_u64(p) && is_prime_u64(r));
     let f = Fp2::new(p).unwrap();
-    let curve = ExtCurve { f, a: f.zero(), b: f.one() };
+    let curve = ExtCurve {
+        f,
+        a: f.zero(),
+        b: f.one(),
+    };
     let mut n1 = 1u64;
     for x in 0..p {
-        let rhs = (pow_mod(x,3,p) + 1) % p;
-        n1 += if rhs == 0 { 1 } else if jacobi(rhs,p) == 1 { 2 } else { 0 };
+        let rhs = (pow_mod(x, 3, p) + 1) % p;
+        n1 += if rhs == 0 {
+            1
+        } else if jacobi(rhs, p) == 1 {
+            2
+        } else {
+            0
+        };
     }
-    assert_eq!(n1,402);
+    assert_eq!(n1, 402);
     let trace = p as i64 + 1 - n1 as i64;
-    assert_eq!(trace,0);
-    let n2 = (p+1)*(p+1) - (trace*trace) as u64;
-    assert_eq!(n2,161604);
-    assert_eq!(n2 % (r*r),0);
+    assert_eq!(trace, 0);
+    let n2 = (p + 1) * (p + 1) - (trace * trace) as u64;
+    assert_eq!(n2, 161604);
+    assert_eq!(n2 % (r * r), 0);
     let mut ops = GroupOps::default();
     let mut selected = None;
     for x in 0..p {
-        let mut lifts = curve.lift_x([x,0]);
+        let mut lifts = curve.lift_x([x, 0]);
         lifts.retain(|pt| pt.y[1] == 0);
         lifts.sort_by_key(|pt| pt.y[0]);
         for point in lifts {
-            let g = curve.mul(&mut ops, point,6);
+            let g = curve.mul(&mut ops, point, 6);
             if !g.infinity {
-                selected = Some((point,g));
+                selected = Some((point, g));
                 break;
             }
         }
-        if selected.is_some() { break; }
+        if selected.is_some() {
+            break;
+        }
     }
-    let (selected_point,g) = selected.expect("order-67 source point");
-    assert!(!g.infinity && curve.mul(&mut ops,g,r).infinity);
-    assert_ne!(g.x[0],0);
-    assert_eq!(g.x[1],0);
+    let (selected_point, g) = selected.expect("order-67 source point");
+    assert!(!g.infinity && curve.mul(&mut ops, g, r).infinity);
+    assert_ne!(g.x[0], 0);
+    assert_eq!(g.x[1], 0);
     let target_seed = "pairing-batch/2026-10-15/p=401/r=67";
     let digest = sha256(target_seed.as_bytes());
-    let scalar = 1 + u64::from_be_bytes(digest[0..8].try_into().unwrap()) % (r-1);
-    let q = curve.mul(&mut ops,g,scalar);
-    assert!(!q.infinity && curve.mul(&mut ops,q,r).infinity);
+    let scalar = 1 + u64::from_be_bytes(digest[0..8].try_into().unwrap()) % (r - 1);
+    let q = curve.mul(&mut ops, g, scalar);
+    assert!(!q.infinity && curve.mul(&mut ops, q, r).infinity);
     let public = json!({"p":p,"nu":f.nu,"r":r,"trace_fp":trace,
         "generator":g,"target":q});
     let previous = fs::read_to_string(previous_inputs).unwrap();
-    assert_eq!(previous.lines().count(),2);
-    let extended = format!("{}\n{}\n",previous.trim_end(),public);
-    fs::write(extended_inputs,extended).unwrap();
-    fs::write(fixture_path,serde_json::to_vec_pretty(&json!({
+    assert_eq!(previous.lines().count(), 2);
+    let extended = format!("{}\n{}\n", previous.trim_end(), public);
+    fs::write(extended_inputs, extended).unwrap();
+    fs::write(
+        fixture_path,
+        serde_json::to_vec_pretty(&json!({
         "schema":"torsion_pairing_401_fixture/v1","p":p,"nu":f.nu,
         "r":r,"n1":n1,"n2":n2,"trace_fp":trace,"selected_point":selected_point,
         "generator":g,"target":q,"answer_scalar":scalar,
-        "target_seed":target_seed,"source_group_ops":ops})).unwrap()).unwrap();
-    println!("{}",json!({"schema":"torsion_pairing_401_freeze/v1",
+        "target_seed":target_seed,"source_group_ops":ops}))
+        .unwrap(),
+    )
+    .unwrap();
+    println!(
+        "{}",
+        json!({"schema":"torsion_pairing_401_freeze/v1",
         "p":p,"r":r,"n1":n1,"n2":n2,"nu":f.nu,"generator":g,
-        "target":q,"extended_inputs":extended_inputs,"fixture":fixture_path}));
+        "target":q,"extended_inputs":extended_inputs,"fixture":fixture_path})
+    );
 }
 
 fn freeze_batch(
@@ -1169,12 +1195,15 @@ fn run_batch(input: Input, cell: usize, round: u64, batch_path: &str, frozen_pat
     let mut six_setup_cpu_ns = 0u64;
     let mut six_setup_wall_ns = 0u64;
     let six_aut = if cell == 2 {
-        assert_eq!(input.p % 3,2);
-        assert_ne!(input.g.x[0],0);
-        assert_eq!(input.g.x[1],0);
-        println!("{}",json!({"schema":"torsion_pairing_batch_six_setup/v4",
+        assert_eq!(input.p % 3, 2);
+        assert_ne!(input.g.x[0], 0);
+        assert_eq!(input.g.x[1], 0);
+        println!(
+            "{}",
+            json!({"schema":"torsion_pairing_batch_six_setup/v4",
             "cell":cell,"round":round,"applicable":false,
-            "reason":"order-three coordinate automorphism has zeta outside Fp; nonzero Fp x-coordinate leaves the Fp-rational source subgroup"}));
+            "reason":"order-three coordinate automorphism has zeta outside Fp; nonzero Fp x-coordinate leaves the Fp-rational source subgroup"})
+        );
         None
     } else {
         let six_setup_wall = Instant::now();
@@ -1184,11 +1213,14 @@ fn run_batch(input: Input, cell: usize, round: u64, batch_path: &str, frozen_pat
         let six_setup_fp = take_field_counters();
         six_setup_cpu_ns = thread_cpu_ns() - six_setup_cpu;
         six_setup_wall_ns = six_setup_wall.elapsed().as_nanos() as u64;
-        println!("{}",json!({"schema":"torsion_pairing_batch_six_setup/v3",
+        println!(
+            "{}",
+            json!({"schema":"torsion_pairing_batch_six_setup/v3",
             "cell":cell,"round":round,"applicable":true,
             "eigenvalue":aut.eigenvalue,"eigen_ops":eigen_ops,
             "cpu_ns":six_setup_cpu_ns,"wall_ns":six_setup_wall_ns,
-            "fp_muls":six_setup_fp.0,"fp_invs":six_setup_fp.1}));
+            "fp_muls":six_setup_fp.0,"fp_invs":six_setup_fp.1})
+        );
         Some(aut)
     };
     let mut cumulative_pairing_cpu = setup_cpu;
@@ -1316,19 +1348,23 @@ fn run_batch(input: Input, cell: usize, round: u64, batch_path: &str, frozen_pat
                 }
             }
             if final_six.is_none() {
-                println!("{}",json!({"schema":"torsion_pairing_batch_six_exhausted/v3",
+                println!(
+                    "{}",
+                    json!({"schema":"torsion_pairing_batch_six_exhausted/v3",
                     "cell":cell,"round":round,"index":index,"target":q,
                     "recovered":scalar,"six_attempts":six_attempts,
-                    "six_cpu_ns":six_cpu_ns}));
+                    "six_cpu_ns":six_cpu_ns})
+                );
                 panic!("32 charged six-class rho attempts exhausted");
             }
         }
         let six = final_six;
         cumulative_six_cpu += six_cpu_ns;
         cumulative_six_wall += six_wall_ns;
-        let all_in_pairing_cpu = thread_cpu_ns() - global_cpu - cumulative_rho_cpu - cumulative_six_cpu;
-        let all_in_pairing_wall = global_wall.elapsed().as_nanos() as u64
-            - cumulative_rho_wall - cumulative_six_wall;
+        let all_in_pairing_cpu =
+            thread_cpu_ns() - global_cpu - cumulative_rho_cpu - cumulative_six_cpu;
+        let all_in_pairing_wall =
+            global_wall.elapsed().as_nanos() as u64 - cumulative_rho_wall - cumulative_six_wall;
         let (rss, unit) = peak_rss_raw();
         assert!(peak_rss_bytes() <= 512 * 1024 * 1024);
         println!(
@@ -1392,7 +1428,8 @@ fn verify_batch(
     for line in fs::read_to_string(records_path).unwrap().lines() {
         let v: Value = serde_json::from_str(line).unwrap();
         if v["schema"] != "torsion_pairing_batch_target/v3"
-            && v["schema"] != "torsion_pairing_batch_target/v4" {
+            && v["schema"] != "torsion_pairing_batch_target/v4"
+        {
             continue;
         }
         assert_eq!(v["cell"].as_u64(), Some(cell as u64));
@@ -1471,7 +1508,9 @@ fn compact_pairing(
             assert_eq!(k.pow(&value, &BigUint::from(input.r)), k.one());
             value
         };
-        let scalar = table.solve(&k, &beta, input.r).expect("compact FFDLP exhausted");
+        let scalar = table
+            .solve(&k, &beta, input.r)
+            .expect("compact FFDLP exhausted");
         assert_eq!(k.pow(&alpha, &BigUint::from(scalar)), beta);
         let mut ops = GroupOps::default();
         assert_eq!(curve.mul(&mut ops, input.g, scalar), q);
@@ -1488,9 +1527,13 @@ fn compact_pairing(
         }
     }
     let fp = take_field_counters();
-    (samples, output, json!({"field_counts":k.counts(),
+    (
+        samples,
+        output,
+        json!({"field_counts":k.counts(),
         "fp_muls":fp.0,"fp_invs":fp.1,
-        "peak_rss_bytes":peak_rss_bytes()}))
+        "peak_rss_bytes":peak_rss_bytes()}),
+    )
 }
 
 fn compact_rho(
@@ -1509,13 +1552,12 @@ fn compact_rho(
     let mut output = Vec::with_capacity(targets.len());
     let mut samples = Vec::new();
     for (index, &q) in targets.iter().enumerate() {
-        let seed_base = 0x4241_5443_4800_1000u64 + 256*cell as u64
-            + 64*round + index as u64;
+        let seed_base = 0x4241_5443_4800_1000u64 + 256 * cell as u64 + 64 * round + index as u64;
         let mut found = None;
         for retry in 0..32u64 {
             attempts += 1;
             let seed = seed_base.wrapping_add(retry * 0x01_00_00_00);
-            let result = rho_reference_negation(&curve,input.g,q,input.r,seed,cap);
+            let result = rho_reference_negation(&curve, input.g, q, input.r, seed, cap);
             if result.verified {
                 found = result.recovered;
                 break;
@@ -1535,41 +1577,52 @@ fn compact_rho(
         }
     }
     let fp = take_field_counters();
-    (samples, output, json!({"rho_attempts":attempts,
+    (
+        samples,
+        output,
+        json!({"rho_attempts":attempts,
         "rho_step_cap":cap,"fp_muls":fp.0,"fp_invs":fp.1,
-        "peak_rss_bytes":peak_rss_bytes()}))
+        "peak_rss_bytes":peak_rss_bytes()}),
+    )
 }
 
-fn compact_prime_rho(input: Input, cell: usize, round: u64,
-                     targets: &[SourcePoint], prefixes: &[usize])
-    -> (Vec<CompactPrefix>, Vec<u64>, Value) {
-    assert_eq!((cell,input.p,input.r),(2,401,67));
+fn compact_prime_rho(
+    input: Input,
+    cell: usize,
+    round: u64,
+    targets: &[SourcePoint],
+    prefixes: &[usize],
+) -> (Vec<CompactPrefix>, Vec<u64>, Value) {
+    assert_eq!((cell, input.p, input.r), (2, 401, 67));
     let start_wall = Instant::now();
     let start_cpu = thread_cpu_ns();
-    let curve = PrimeCurve { p: input.p, a: 0, b: 1 };
-    assert_eq!(input.g.x[1],0);
-    assert_eq!(input.g.y[1],0);
-    let g = PrimePoint::affine(input.g.x[0],input.g.y[0]);
+    let curve = PrimeCurve {
+        p: input.p,
+        a: 0,
+        b: 1,
+    };
+    assert_eq!(input.g.x[1], 0);
+    assert_eq!(input.g.y[1], 0);
+    let g = PrimePoint::affine(input.g.x[0], input.g.y[0]);
     assert!(curve.is_on_curve(g));
     let mut validation_ops = GroupOps::default();
-    assert!(curve.mul(&mut validation_ops,g,input.r).infinity);
+    assert!(curve.mul(&mut validation_ops, g, input.r).infinity);
     let cap = rho_step_cap(input.r);
     let mut attempts = 0u64;
     let mut aggregate_ops = GroupOps::default();
     let mut output = Vec::with_capacity(targets.len());
     let mut samples = Vec::new();
-    for (index,&target) in targets.iter().enumerate() {
-        assert_eq!(target.x[1],0);
-        assert_eq!(target.y[1],0);
-        let q = PrimePoint::affine(target.x[0],target.y[0]);
+    for (index, &target) in targets.iter().enumerate() {
+        assert_eq!(target.x[1], 0);
+        assert_eq!(target.y[1], 0);
+        let q = PrimePoint::affine(target.x[0], target.y[0]);
         assert!(curve.is_on_curve(q));
-        let seed_base = 0x4241_5443_4800_1000u64 + 256*cell as u64
-            + 64*round + index as u64;
+        let seed_base = 0x4241_5443_4800_1000u64 + 256 * cell as u64 + 64 * round + index as u64;
         let mut found = None;
         for retry in 0..32u64 {
             attempts += 1;
             let seed = seed_base.wrapping_add(retry * 0x01_00_00_00);
-            let result = rho_reference_negation(&curve,g,q,input.r,seed,cap);
+            let result = rho_reference_negation(&curve, g, q, input.r, seed, cap);
             aggregate_ops.merge(result.group_ops);
             if result.verified {
                 found = result.recovered;
@@ -1577,55 +1630,208 @@ fn compact_prime_rho(input: Input, cell: usize, round: u64,
             }
         }
         output.push(found.expect("compact prime-field rho exhausted"));
-        if prefixes.contains(&(index+1)) {
+        if prefixes.contains(&(index + 1)) {
             samples.push(CompactPrefix {
-                n:index+1,cpu_ns:thread_cpu_ns()-start_cpu,
-                wall_ns:start_wall.elapsed().as_nanos() as u64,
-                extension_muls:0,extension_inversions:0,rho_attempts:attempts,
+                n: index + 1,
+                cpu_ns: thread_cpu_ns() - start_cpu,
+                wall_ns: start_wall.elapsed().as_nanos() as u64,
+                extension_muls: 0,
+                extension_inversions: 0,
+                rho_attempts: attempts,
             });
         }
     }
     let field_ops = aggregate_ops.field_ops;
-    (samples,output,json!({"rho_attempts":attempts,"rho_step_cap":cap,
+    (
+        samples,
+        output,
+        json!({"rho_attempts":attempts,"rho_step_cap":cap,
         "group_ops":aggregate_ops,"field_ops":field_ops,
-        "validation_ops":validation_ops,"peak_rss_bytes":peak_rss_bytes()}))
+        "validation_ops":validation_ops,"peak_rss_bytes":peak_rss_bytes()}),
+    )
 }
 
-fn run_compact_prime(input: Input, cell: usize, round: u64,
-                     batch_path: &str, frozen_path: &str) {
-    assert_eq!(cell,2);
-    assert!(round<3);
+/// A cold source-group BSGS table reused over the same public target prefix.
+/// This is the direct multi-target comparator to the pairing's reusable
+/// multiplicative-field table; no target scalar enters construction.
+fn compact_prime_bsgs(
+    input: Input,
+    cell: usize,
+    targets: &[SourcePoint],
+    prefixes: &[usize],
+) -> (Vec<Value>, Vec<u64>, Value) {
+    assert_eq!((cell, input.p, input.r), (2, 401, 67));
+    let start_wall = Instant::now();
+    let start_cpu = thread_cpu_ns();
+    let curve = PrimeCurve {
+        p: input.p,
+        a: 0,
+        b: 1,
+    };
+    assert_eq!((input.g.x[1], input.g.y[1]), (0, 0));
+    let g = PrimePoint::affine(input.g.x[0], input.g.y[0]);
+    assert!(curve.is_on_curve(g));
+    let mut validation_ops = GroupOps::default();
+    assert!(curve.mul(&mut validation_ops, g, input.r).infinity);
+    let m = (input.r as f64).sqrt().ceil() as u64;
+    assert_eq!(m, 9);
+    assert!(m * m >= input.r && (m - 1) * (m - 1) < input.r);
+    let mut ops = GroupOps::default();
+    let mut baby = BTreeMap::new();
+    let mut next = curve.identity();
+    for j in 0..m {
+        assert!(baby.insert(curve.key(&next), j).is_none());
+        next = curve.add(&mut ops, next, g);
+    }
+    let negative_stride = curve.neg(next);
+    let mut lookups = 0u64;
+    let mut failed_candidates = 0u64;
+    let mut output = Vec::with_capacity(targets.len());
+    let mut samples = Vec::new();
+    for (index, &target) in targets.iter().enumerate() {
+        assert_eq!((target.x[1], target.y[1]), (0, 0));
+        let q = PrimePoint::affine(target.x[0], target.y[0]);
+        assert!(curve.is_on_curve(q));
+        let mut giant = q;
+        let mut found = None;
+        for i in 0..=m {
+            lookups += 1;
+            if let Some(&j) = baby.get(&curve.key(&giant)) {
+                let candidate = i * m + j;
+                if candidate < input.r && curve.mul(&mut ops, g, candidate) == q {
+                    found = Some(candidate);
+                    break;
+                }
+                failed_candidates += 1;
+            }
+            if i < m {
+                giant = curve.add(&mut ops, giant, negative_stride);
+            }
+        }
+        let scalar = found.expect("compact source BSGS exhausted");
+        assert_eq!(curve.mul(&mut ops, g, scalar), q);
+        output.push(scalar);
+        if prefixes.contains(&(index + 1)) {
+            samples.push(json!({"n":index+1,"cpu_ns":thread_cpu_ns()-start_cpu,
+                "wall_ns":start_wall.elapsed().as_nanos() as u64,
+                "lookups":lookups,"failed_candidates":failed_candidates,
+                "group_ops":ops,"field_ops":ops.field_ops}));
+        }
+    }
+    (
+        samples,
+        output,
+        json!({"table_entries":baby.len(),"lookups":lookups,
+            "failed_candidates":failed_candidates,"group_ops":ops,
+            "field_ops":ops.field_ops,"validation_ops":validation_ops,
+            "peak_rss_bytes":peak_rss_bytes()}),
+    )
+}
+
+fn run_compact_bsgs(input: Input, cell: usize, round: u64, batch_path: &str, frozen_path: &str) {
+    assert_eq!(cell, 2);
+    assert!(round < 3);
     let input_wall = Instant::now();
     let input_cpu = thread_cpu_ns();
-    let targets = read_batch(batch_path,input,cell);
+    let targets = read_batch(batch_path, input, cell);
     let frozen: Value = serde_json::from_str(&fs::read_to_string(frozen_path).unwrap()).unwrap();
-    let common_cpu = thread_cpu_ns()-input_cpu;
+    let common_cpu = thread_cpu_ns() - input_cpu;
     let common_wall = input_wall.elapsed().as_nanos() as u64;
-    let prefixes = [1usize,4,16,64,66];
-    let (pair, pair_scalars, pair_counts, ext, ext_scalars, ext_counts,
-         prime, prime_scalars, prime_counts) = match round {
+    let prefixes = [1usize, 4, 16, 64, 66];
+    let (
+        pair,
+        pair_scalars,
+        pair_counts,
+        rho,
+        rho_scalars,
+        rho_counts,
+        bsgs,
+        bsgs_scalars,
+        bsgs_counts,
+    ) = match round {
         0 => {
-            let (a,b,c)=compact_pairing(input,&targets,&frozen,&prefixes);
-            let (d,e,f)=compact_rho(input,cell,round,&targets,&prefixes);
-            let (g,h,i)=compact_prime_rho(input,cell,round,&targets,&prefixes);
-            (a,b,c,d,e,f,g,h,i)
+            let (a, b, c) = compact_pairing(input, &targets, &frozen, &prefixes);
+            let (d, e, f) = compact_prime_rho(input, cell, round, &targets, &prefixes);
+            let (g, h, i) = compact_prime_bsgs(input, cell, &targets, &prefixes);
+            (a, b, c, d, e, f, g, h, i)
         }
         1 => {
-            let (g,h,i)=compact_prime_rho(input,cell,round,&targets,&prefixes);
-            let (d,e,f)=compact_rho(input,cell,round,&targets,&prefixes);
-            let (a,b,c)=compact_pairing(input,&targets,&frozen,&prefixes);
-            (a,b,c,d,e,f,g,h,i)
+            let (g, h, i) = compact_prime_bsgs(input, cell, &targets, &prefixes);
+            let (d, e, f) = compact_prime_rho(input, cell, round, &targets, &prefixes);
+            let (a, b, c) = compact_pairing(input, &targets, &frozen, &prefixes);
+            (a, b, c, d, e, f, g, h, i)
         }
         _ => {
-            let (d,e,f)=compact_rho(input,cell,round,&targets,&prefixes);
-            let (a,b,c)=compact_pairing(input,&targets,&frozen,&prefixes);
-            let (g,h,i)=compact_prime_rho(input,cell,round,&targets,&prefixes);
-            (a,b,c,d,e,f,g,h,i)
+            let (d, e, f) = compact_prime_rho(input, cell, round, &targets, &prefixes);
+            let (a, b, c) = compact_pairing(input, &targets, &frozen, &prefixes);
+            let (g, h, i) = compact_prime_bsgs(input, cell, &targets, &prefixes);
+            (a, b, c, d, e, f, g, h, i)
         }
     };
-    assert_eq!(pair_scalars,ext_scalars);
-    assert_eq!(pair_scalars,prime_scalars);
-    println!("{}",json!({"schema":"torsion_pairing_compact/v6",
+    assert_eq!(pair_scalars, rho_scalars);
+    assert_eq!(pair_scalars, bsgs_scalars);
+    println!(
+        "{}",
+        json!({"schema":"torsion_pairing_compact/v7",
+        "cell":cell,"p":input.p,"r":input.r,"round":round,
+        "order":match round {0=>"pairing,prime-rho,prime-bsgs",
+            1=>"prime-bsgs,prime-rho,pairing",
+            _=>"prime-rho,pairing,prime-bsgs"},
+        "targets":targets.len(),"prefixes":prefixes,
+        "input_cpu_ns_common":common_cpu,"input_wall_ns_common":common_wall,
+        "pairing_prefix":pair,"prime_rho_prefix":rho,"prime_bsgs_prefix":bsgs,
+        "pairing_scalars":pair_scalars,"prime_rho_scalars":rho_scalars,
+        "prime_bsgs_scalars":bsgs_scalars,
+        "pairing_counts":pair_counts,"prime_rho_counts":rho_counts,
+        "prime_bsgs_counts":bsgs_counts,"peak_rss_bytes":peak_rss_bytes()})
+    );
+}
+
+fn run_compact_prime(input: Input, cell: usize, round: u64, batch_path: &str, frozen_path: &str) {
+    assert_eq!(cell, 2);
+    assert!(round < 3);
+    let input_wall = Instant::now();
+    let input_cpu = thread_cpu_ns();
+    let targets = read_batch(batch_path, input, cell);
+    let frozen: Value = serde_json::from_str(&fs::read_to_string(frozen_path).unwrap()).unwrap();
+    let common_cpu = thread_cpu_ns() - input_cpu;
+    let common_wall = input_wall.elapsed().as_nanos() as u64;
+    let prefixes = [1usize, 4, 16, 64, 66];
+    let (
+        pair,
+        pair_scalars,
+        pair_counts,
+        ext,
+        ext_scalars,
+        ext_counts,
+        prime,
+        prime_scalars,
+        prime_counts,
+    ) = match round {
+        0 => {
+            let (a, b, c) = compact_pairing(input, &targets, &frozen, &prefixes);
+            let (d, e, f) = compact_rho(input, cell, round, &targets, &prefixes);
+            let (g, h, i) = compact_prime_rho(input, cell, round, &targets, &prefixes);
+            (a, b, c, d, e, f, g, h, i)
+        }
+        1 => {
+            let (g, h, i) = compact_prime_rho(input, cell, round, &targets, &prefixes);
+            let (d, e, f) = compact_rho(input, cell, round, &targets, &prefixes);
+            let (a, b, c) = compact_pairing(input, &targets, &frozen, &prefixes);
+            (a, b, c, d, e, f, g, h, i)
+        }
+        _ => {
+            let (d, e, f) = compact_rho(input, cell, round, &targets, &prefixes);
+            let (a, b, c) = compact_pairing(input, &targets, &frozen, &prefixes);
+            let (g, h, i) = compact_prime_rho(input, cell, round, &targets, &prefixes);
+            (a, b, c, d, e, f, g, h, i)
+        }
+    };
+    assert_eq!(pair_scalars, ext_scalars);
+    assert_eq!(pair_scalars, prime_scalars);
+    println!(
+        "{}",
+        json!({"schema":"torsion_pairing_compact/v6",
         "cell":cell,"p":input.p,"r":input.r,"round":round,
         "order":match round {0=>"pairing,extension-rho,prime-rho",
             1=>"prime-rho,extension-rho,pairing",
@@ -1636,34 +1842,41 @@ fn run_compact_prime(input: Input, cell: usize, round: u64,
         "pairing_scalars":pair_scalars,"rho_scalars":ext_scalars,
         "prime_rho_scalars":prime_scalars,"pairing_counts":pair_counts,
         "rho_counts":ext_counts,"prime_rho_counts":prime_counts,
-        "peak_rss_bytes":peak_rss_bytes()}));
+        "peak_rss_bytes":peak_rss_bytes()})
+    );
 }
 
 fn run_compact(input: Input, cell: usize, round: u64, batch_path: &str, frozen_path: &str) {
     assert!(round < 3);
     let common_wall = Instant::now();
     let common_cpu = thread_cpu_ns();
-    let targets = read_batch(batch_path,input,cell);
+    let targets = read_batch(batch_path, input, cell);
     let frozen: Value = serde_json::from_str(&fs::read_to_string(frozen_path).unwrap()).unwrap();
     let input_cpu_ns = thread_cpu_ns() - common_cpu;
     let input_wall_ns = common_wall.elapsed().as_nanos() as u64;
-    let prefixes: Vec<usize> = if cell == 0 { vec![1,4,16] }
-        else if cell == 1 { vec![1,4,16,60] }
-        else { vec![1,4,16,64,66] };
+    let prefixes: Vec<usize> = if cell == 0 {
+        vec![1, 4, 16]
+    } else if cell == 1 {
+        vec![1, 4, 16, 60]
+    } else {
+        vec![1, 4, 16, 64, 66]
+    };
     let (pair_prefix, pair_scalars, pair_counts, rho_prefix, rho_scalars, rho_counts) =
         if round % 2 == 0 {
-            let (a,b,c) = compact_pairing(input,&targets,&frozen,&prefixes);
-            let (d,e,f) = compact_rho(input,cell,round,&targets,&prefixes);
-            (a,b,c,d,e,f)
+            let (a, b, c) = compact_pairing(input, &targets, &frozen, &prefixes);
+            let (d, e, f) = compact_rho(input, cell, round, &targets, &prefixes);
+            (a, b, c, d, e, f)
         } else {
-            let (d,e,f) = compact_rho(input,cell,round,&targets,&prefixes);
-            let (a,b,c) = compact_pairing(input,&targets,&frozen,&prefixes);
-            (a,b,c,d,e,f)
+            let (d, e, f) = compact_rho(input, cell, round, &targets, &prefixes);
+            let (a, b, c) = compact_pairing(input, &targets, &frozen, &prefixes);
+            (a, b, c, d, e, f)
         };
-    assert_eq!(pair_scalars,rho_scalars);
-    assert_eq!(pair_prefix.len(),prefixes.len());
-    assert_eq!(rho_prefix.len(),prefixes.len());
-    println!("{}",json!({"schema":"torsion_pairing_compact/v5",
+    assert_eq!(pair_scalars, rho_scalars);
+    assert_eq!(pair_prefix.len(), prefixes.len());
+    assert_eq!(rho_prefix.len(), prefixes.len());
+    println!(
+        "{}",
+        json!({"schema":"torsion_pairing_compact/v5",
         "cell":cell,"p":input.p,"r":input.r,"round":round,
         "order":if round%2==0 {"pairing,rho"} else {"rho,pairing"},
         "targets":targets.len(),"prefixes":prefixes,
@@ -1671,49 +1884,79 @@ fn run_compact(input: Input, cell: usize, round: u64, batch_path: &str, frozen_p
         "pairing_prefix":pair_prefix,"rho_prefix":rho_prefix,
         "pairing_scalars":pair_scalars,"rho_scalars":rho_scalars,
         "pairing_counts":pair_counts,"rho_counts":rho_counts,
-        "peak_rss_bytes":peak_rss_bytes()}));
+        "peak_rss_bytes":peak_rss_bytes()})
+    );
 }
 
-fn verify_compact(input: Input, cell: usize, batch_path: &str,
-                  answers_path: &str, records_path: &str) {
-    let targets = read_batch(batch_path,input,cell);
+fn verify_compact(
+    input: Input,
+    cell: usize,
+    batch_path: &str,
+    answers_path: &str,
+    records_path: &str,
+) {
+    let targets = read_batch(batch_path, input, cell);
     let answers: Value = serde_json::from_str(&fs::read_to_string(answers_path).unwrap()).unwrap();
-    let expected: Vec<u64> = answers["scalars"].as_array().unwrap().iter()
-        .map(|v| v.as_u64().unwrap()).collect();
-    assert_eq!(targets.len(),expected.len());
+    let expected: Vec<u64> = answers["scalars"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|v| v.as_u64().unwrap())
+        .collect();
+    assert_eq!(targets.len(), expected.len());
     let checker = ReplayField::new(input);
-    let mut rounds = [0u64;3];
+    let mut rounds = [0u64; 3];
     let mut checked_scalars = 0usize;
+    let mut observed_schema: Option<String> = None;
     for line in fs::read_to_string(records_path).unwrap().lines() {
         let row: Value = serde_json::from_str(line).unwrap();
-        assert!(row["schema"] == "torsion_pairing_compact/v5"
-            || row["schema"] == "torsion_pairing_compact/v6");
-        assert_eq!(row["cell"].as_u64(),Some(cell as u64));
+        let schema = row["schema"].as_str().unwrap();
+        assert!(matches!(
+            schema,
+            "torsion_pairing_compact/v5"
+                | "torsion_pairing_compact/v6"
+                | "torsion_pairing_compact/v7"
+        ));
+        if let Some(previous) = observed_schema.as_deref() {
+            assert_eq!(schema, previous);
+        }
+        observed_schema = Some(schema.to_owned());
+        assert_eq!(row["cell"].as_u64(), Some(cell as u64));
         let round = row["round"].as_u64().unwrap() as usize;
         assert!(round < 3);
-        let names: &[&str] = if row["schema"] == "torsion_pairing_compact/v6" {
-            &["pairing_scalars","rho_scalars","prime_rho_scalars"]
-        } else { &["pairing_scalars","rho_scalars"] };
+        let names: &[&str] = match schema {
+            "torsion_pairing_compact/v7" => {
+                &["pairing_scalars", "prime_rho_scalars", "prime_bsgs_scalars"]
+            }
+            "torsion_pairing_compact/v6" => {
+                &["pairing_scalars", "rho_scalars", "prime_rho_scalars"]
+            }
+            _ => &["pairing_scalars", "rho_scalars"],
+        };
         for &name in names {
             let recovered = row[name].as_array().unwrap();
-            assert_eq!(recovered.len(),targets.len());
-            for (i,v) in recovered.iter().enumerate() {
+            assert_eq!(recovered.len(), targets.len());
+            for (i, v) in recovered.iter().enumerate() {
                 let scalar = v.as_u64().unwrap();
-                assert_eq!(scalar,expected[i]);
-                assert_eq!(checker.scalar_mul(input.g,scalar),targets[i]);
+                assert_eq!(scalar, expected[i]);
+                assert_eq!(checker.scalar_mul(input.g, scalar), targets[i]);
                 checked_scalars += 1;
             }
         }
         rounds[round] += 1;
     }
-    assert_eq!(rounds,[1,1,1]);
-    println!("{}",json!({"schema":if checked_scalars==9*targets.len()
-            {"torsion_pairing_compact_replay/v6"}
-            else {"torsion_pairing_compact_replay/v5"},
+    assert_eq!(rounds, [1, 1, 1]);
+    println!(
+        "{}",
+        json!({"schema":match observed_schema.as_deref().unwrap() {
+            "torsion_pairing_compact/v7"=>"torsion_pairing_compact_replay/v7",
+            "torsion_pairing_compact/v6"=>"torsion_pairing_compact_replay/v6",
+            _=>"torsion_pairing_compact_replay/v5"},
         "cell":cell,"rounds":rounds,"checked_scalars":checked_scalars,
         "independent_fp_muls":checker.muls.get(),
         "independent_fp_invs":checker.inversions.get(),
-        "independent_group_adds":checker.group_add_calls.get()}));
+        "independent_group_adds":checker.group_add_calls.get()})
+    );
 }
 
 // The replay uses separate F_p and F_(p²) arithmetic, as well as separate
@@ -1928,17 +2171,30 @@ fn main() {
             args.get(6).expect("selection path"),
         ),
         "compact-run" => run_compact(
-            input, cell, args.get(4).expect("round").parse().unwrap(),
+            input,
+            cell,
+            args.get(4).expect("round").parse().unwrap(),
             args.get(5).expect("public batch path"),
             args.get(6).expect("selection path"),
         ),
         "compact-prime-run" => run_compact_prime(
-            input, cell, args.get(4).expect("round").parse().unwrap(),
+            input,
+            cell,
+            args.get(4).expect("round").parse().unwrap(),
+            args.get(5).expect("public batch path"),
+            args.get(6).expect("selection path"),
+        ),
+        "compact-bsgs-run" => run_compact_bsgs(
+            input,
+            cell,
+            args.get(4).expect("round").parse().unwrap(),
             args.get(5).expect("public batch path"),
             args.get(6).expect("selection path"),
         ),
         "compact-verify" => verify_compact(
-            input, cell, args.get(4).expect("public batch path"),
+            input,
+            cell,
+            args.get(4).expect("public batch path"),
             args.get(5).expect("answer path"),
             args.get(6).expect("records path"),
         ),

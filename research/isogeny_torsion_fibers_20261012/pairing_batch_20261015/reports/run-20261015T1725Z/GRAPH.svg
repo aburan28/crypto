@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="410" viewBox="0 0 900 410" role="img" aria-labelledby="title desc">
+<title id="title">Instrumentation gap at order-67 batch prefix 64</title>
+<desc id="desc">For rounds zero, one and two, coarse pairing/rho ratios were 3.803, 3.372 and 3.419, while phase sums divided by rho were 1.055, 0.846 and 0.786.</desc>
+<rect width="900" height="410" fill="#fff"/>
+<text x="25" y="42" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#173047">p=401, N=64 · timing interval differs by accounting</text>
+<text x="25" y="68" font-family="Arial,sans-serif" font-size="14" fill="#526b7d">RUN_401_V4 · pairing CPU divided by charged rho CPU · three paired rounds · L0</text>
+<line x1="190" y1="100" x2="190" y2="346" stroke="#8094a3"/>
+<line x1="190" y1="346" x2="820" y2="346" stroke="#8094a3"/>
+<g stroke="#dfe6ea"><line x1="347" y1="100" x2="347" y2="346"/><line x1="505" y1="100" x2="505" y2="346"/><line x1="662" y1="100" x2="662" y2="346"/><line x1="820" y1="100" x2="820" y2="346"/></g>
+<g font-family="Arial,sans-serif" font-size="14" fill="#526b7d"><text x="185" y="369">0</text><text x="341" y="369">1</text><text x="498" y="369">2</text><text x="655" y="369">3</text><text x="813" y="369">4</text></g>
+<g font-family="Arial,sans-serif" font-size="16" fill="#173047"><text x="25" y="137">Round 0</text><text x="25" y="217">Round 1</text><text x="25" y="297">Round 2</text></g>
+<g fill="#b45134"><rect x="190" y="111" width="599" height="23" rx="3"/><rect x="190" y="191" width="531" height="23" rx="3"/><rect x="190" y="271" width="538" height="23" rx="3"/></g>
+<g fill="#377aa5"><rect x="190" y="139" width="166" height="23" rx="3"/><rect x="190" y="219" width="133" height="23" rx="3"/><rect x="190" y="299" width="124" height="23" rx="3"/></g>
+<g font-family="Arial,sans-serif" font-size="14" font-weight="700"><text x="743" y="128" fill="#fff">3.803</text><text x="674" y="208" fill="#fff">3.372</text><text x="681" y="288" fill="#fff">3.419</text><text x="362" y="156" fill="#173047">1.055</text><text x="329" y="236" fill="#173047">0.846</text><text x="320" y="316" fill="#173047">0.786</text></g>
+<g font-family="Arial,sans-serif" font-size="13" fill="#526b7d"><rect x="25" y="386" width="15" height="12" fill="#b45134"/><text x="47" y="397">coarse process residual, includes report output</text><rect x="420" y="386" width="15" height="12" fill="#377aa5"/><text x="442" y="397">sum of timed method phases</text></g>
+</svg>

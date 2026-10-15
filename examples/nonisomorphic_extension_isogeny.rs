@@ -1,9 +1,9 @@
 //! Native screen and frozen instance for an explicit different-j degree-three map over F_(p^2).
 //! The selector and stop conditions are frozen in the dated study protocol.
 
-use std::collections::BTreeSet;
-use std::collections::BTreeMap;
 use std::cell::Cell;
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 use std::fs;
 use std::time::Instant;
 
@@ -181,7 +181,8 @@ fn identities(curve: &Curve, n2: u64, r: u64, g: Point) -> serde_json::Value {
         "b":[curve.b[0].to_string(),curve.b[1].to_string()],
         "field":field,"form":"y^2=x^3+a*x+b","k":"2",
         "modulus":[c0.to_string(),"0"],"p":p.to_string(),"v":"1"
-    })).unwrap();
+    }))
+    .unwrap();
     let model_sha256 = sha256_hex(model.as_bytes());
     let jv = j(curve).unwrap();
     let trace = p as i64 * p as i64 + 1 - n2 as i64;
@@ -391,11 +392,14 @@ fn freeze_public(fixture_path: &str, public_path: &str) {
     v["direct_raw_points_scanned"] = json!(scanned);
     assert!(v.get("answer_scalar").is_none());
     fs::write(public_path, serde_json::to_vec_pretty(&v).unwrap()).unwrap();
-    println!("{}", json!({"schema":"different_j_public_freeze/v1",
+    println!(
+        "{}",
+        json!({"schema":"different_j_public_freeze/v1",
         "fixture_sha256":sha256_hex(&fs::read(fixture_path).unwrap()),
         "public_sha256":sha256_hex(&fs::read(public_path).unwrap()),
         "direct_line":line,"direct_points_scanned":scanned,
-        "direct_columns":projected.len()}));
+        "direct_columns":projected.len()})
+    );
 }
 
 fn read_public(path: &str) -> Value {
@@ -407,16 +411,29 @@ fn read_public(path: &str) -> Value {
 }
 
 fn thread_cpu_ns() -> u64 {
-    let mut ts = libc::timespec { tv_sec: 0, tv_nsec: 0 };
-    assert_eq!(unsafe { libc::clock_gettime(libc::CLOCK_THREAD_CPUTIME_ID, &mut ts) }, 0);
+    let mut ts = libc::timespec {
+        tv_sec: 0,
+        tv_nsec: 0,
+    };
+    assert_eq!(
+        unsafe { libc::clock_gettime(libc::CLOCK_THREAD_CPUTIME_ID, &mut ts) },
+        0
+    );
     ts.tv_sec as u64 * 1_000_000_000 + ts.tv_nsec as u64
 }
 
 fn peak_rss_bytes() -> u64 {
     let mut usage = std::mem::MaybeUninit::<libc::rusage>::zeroed();
-    assert_eq!(unsafe { libc::getrusage(libc::RUSAGE_SELF, usage.as_mut_ptr()) }, 0);
+    assert_eq!(
+        unsafe { libc::getrusage(libc::RUSAGE_SELF, usage.as_mut_ptr()) },
+        0
+    );
     let raw = unsafe { usage.assume_init() }.ru_maxrss as u64;
-    if cfg!(target_os = "macos") { raw } else { raw * 1024 }
+    if cfg!(target_os = "macos") {
+        raw
+    } else {
+        raw * 1024
+    }
 }
 
 fn modmul(a: u64, b: u64, r: u64) -> u64 {
@@ -425,7 +442,9 @@ fn modmul(a: u64, b: u64, r: u64) -> u64 {
 
 fn insert_relation(pivots: &mut [Option<Vec<u64>>; 9], mut row: Vec<u64>, r: u64) -> bool {
     for col in 0..9 {
-        if row[col] == 0 { continue; }
+        if row[col] == 0 {
+            continue;
+        }
         if let Some(pivot) = &pivots[col] {
             let scale = row[col];
             for j in col..10 {
@@ -433,7 +452,9 @@ fn insert_relation(pivots: &mut [Option<Vec<u64>>; 9], mut row: Vec<u64>, r: u64
             }
         } else {
             let inv = pow_mod(row[col], r - 2, r);
-            for item in row.iter_mut().skip(col) { *item = modmul(*item, inv, r); }
+            for item in row.iter_mut().skip(col) {
+                *item = modmul(*item, inv, r);
+            }
             pivots[col] = Some(row);
             return true;
         }
@@ -443,12 +464,16 @@ fn insert_relation(pivots: &mut [Option<Vec<u64>>; 9], mut row: Vec<u64>, r: u64
 }
 
 fn recover(pivots: &[Option<Vec<u64>>; 9], r: u64) -> Option<[u64; 9]> {
-    if pivots.iter().any(Option::is_none) { return None; }
+    if pivots.iter().any(Option::is_none) {
+        return None;
+    }
     let mut x = [0u64; 9];
     for i in (0..9).rev() {
         let row = pivots[i].as_ref().unwrap();
         let mut rhs = row[9];
-        for j in i+1..9 { rhs = (rhs + r - modmul(row[j], x[j], r)) % r; }
+        for j in i + 1..9 {
+            rhs = (rhs + r - modmul(row[j], x[j], r)) % r;
+        }
         x[i] = rhs;
     }
     Some(x)
@@ -497,8 +522,13 @@ fn relation_run(path: &str, round: u64, arm: &str) {
     let signed = signed_base(curve, &base);
     let table_curve = if arm == "isogeny-image" { &dst } else { curve };
     let table_points: Vec<Point> = if arm == "isogeny-image" {
-        signed.iter().map(|&p| velu(&src, t, p, &mut setup_ops)).collect()
-    } else { signed.clone() };
+        signed
+            .iter()
+            .map(|&p| velu(&src, t, p, &mut setup_ops))
+            .collect()
+    } else {
+        signed.clone()
+    };
     let mut table = BTreeMap::<u64, Vec<(usize, usize)>>::new();
     let mut pair_entries = 0u64;
     for i in 0..table_points.len() {
@@ -531,7 +561,9 @@ fn relation_run(path: &str, round: u64, arm: &str) {
         let b = rand::Rng::gen_range(&mut rng, 0..r);
         let (query_curve, query_g, query_q) = if arm == "destination-direct" {
             (&dst, mapped_g, mapped_q)
-        } else { (&src, g, q) };
+        } else {
+            (&src, g, q)
+        };
         let a_g = query_curve.mul(&mut query_ops, query_g, a);
         let b_q = query_curve.mul(&mut query_ops, query_q, b);
         let candidate = query_curve.add(&mut query_ops, a_g, b_q);
@@ -539,15 +571,27 @@ fn relation_run(path: &str, round: u64, arm: &str) {
         let searched = if arm == "isogeny-image" {
             map_queries += 1;
             velu(&src, t, projected, &mut query_ops)
-        } else { projected };
-        if searched.infinity { continue; }
-        let Some(pairs) = table.get(&table_curve.key(&searched)) else { continue; };
+        } else {
+            projected
+        };
+        if searched.infinity {
+            continue;
+        }
+        let Some(pairs) = table.get(&table_curve.key(&searched)) else {
+            continue;
+        };
         let &(i, j) = pairs.first().unwrap();
         let actual = table_curve.add(&mut query_ops, table_points[i], table_points[j]);
-        if actual != searched { invalid_candidates += 1; continue; }
+        if actual != searched {
+            invalid_candidates += 1;
+            continue;
+        }
         if arm == "isogeny-image" {
             let source_sum = src.add(&mut query_ops, signed[i], signed[j]);
-            if source_sum != projected { invalid_candidates += 1; continue; }
+            if source_sum != projected {
+                invalid_candidates += 1;
+                continue;
+            }
         }
         let mut row = vec![0u64; 10];
         for index in [i, j] {
@@ -559,9 +603,13 @@ fn relation_run(path: &str, round: u64, arm: &str) {
         row[9] = modmul(h % r, a, r);
         relations += 1;
         let la_start = thread_cpu_ns();
-        if insert_relation(&mut pivots, row, r) { rank += 1; }
+        if insert_relation(&mut pivots, row, r) {
+            rank += 1;
+        }
         la_cpu_ns += thread_cpu_ns() - la_start;
-        if rank == 9 { break; }
+        if rank == 9 {
+            break;
+        }
     }
     let collect_cpu_ns = thread_cpu_ns() - collect_cpu_start;
     let collect_wall_ns = collect_wall_start.elapsed().as_nanos() as u64;
@@ -573,15 +621,16 @@ fn relation_run(path: &str, round: u64, arm: &str) {
     let recovered = solved.map(|x| x[8]);
     let mut verify_ops = GroupOps::default();
     let verified = recovered.is_some_and(|k| {
-        src.mul(&mut verify_ops, g, k) == q
-            && dst.mul(&mut verify_ops, mapped_g, k) == mapped_q
+        src.mul(&mut verify_ops, g, k) == q && dst.mul(&mut verify_ops, mapped_g, k) == mapped_q
     });
     let verify_cpu_ns = thread_cpu_ns() - verify_start - solve_cpu_ns;
     let total_cpu_ns = thread_cpu_ns() - start_cpu;
     let total_wall_ns = start_wall.elapsed().as_nanos() as u64;
     let final_fp = take_field_counters();
     assert!(peak_rss_bytes() <= 512 * 1024 * 1024);
-    println!("{}", json!({"schema":"different_j_relation_run/v1","arm":arm,
+    println!(
+        "{}",
+        json!({"schema":"different_j_relation_run/v1","arm":arm,
         "p":67,"r":r,"round":round,"seed":seed,"trial_cap":cap,
         "source_icv1":public["source"]["icv1"],
         "destination_icv1":public["destination"]["icv1"],
@@ -599,7 +648,8 @@ fn relation_run(path: &str, round: u64, arm: &str) {
         "recovered":recovered,"verified":verified,
         "total_cpu_ns":total_cpu_ns,"total_wall_ns":total_wall_ns,
         "final_fp_muls":final_fp.0,"final_fp_invs":final_fp.1,
-        "peak_rss_bytes":peak_rss_bytes()}));
+        "peak_rss_bytes":peak_rss_bytes()})
+    );
 }
 
 fn rho_run(path: &str, round: u64, aa: bool) {
@@ -608,7 +658,8 @@ fn rho_run(path: &str, round: u64, aa: bool) {
     let src = source(67);
     let g = parse_point(&public["generator"]);
     let q = parse_point(&public["target"]);
-    let seed = (0x2026_1015u64 ^ 67).wrapping_add(round * 0x9e37_79b9)
+    let seed = (0x2026_1015u64 ^ 67)
+        .wrapping_add(round * 0x9e37_79b9)
         .wrapping_add(if aa { 0x00aa_0000 } else { 0 });
     let cap = 20 * 61;
     let wall = Instant::now();
@@ -627,17 +678,23 @@ fn rho_run(path: &str, round: u64, aa: bool) {
             "cpu_ns":thread_cpu_ns()-attempt_cpu,
             "wall_ns":attempt_wall.elapsed().as_nanos() as u64,
             "fp_muls":fp.0,"fp_invs":fp.1}));
-        if result.verified { answer = result.recovered; break; }
+        if result.verified {
+            answer = result.recovered;
+            break;
+        }
     }
     let total_fp = take_field_counters();
-    println!("{}", json!({"schema":"different_j_rho_run/v1",
+    println!(
+        "{}",
+        json!({"schema":"different_j_rho_run/v1",
         "arm":if aa {"rho-negation-aa"} else {"rho-negation"},
         "round":round,"seed":seed,"step_cap":cap,"attempts":attempts,
         "recovered":answer,"verified":answer.is_some(),
         "total_cpu_ns":thread_cpu_ns()-cpu,
         "total_wall_ns":wall.elapsed().as_nanos() as u64,
         "final_fp_muls":total_fp.0,"final_fp_invs":total_fp.1,
-        "peak_rss_bytes":peak_rss_bytes()}));
+        "peak_rss_bytes":peak_rss_bytes()})
+    );
 }
 
 // Independent replay arithmetic: separate field and point-add formulas from ExtCurve.
@@ -651,71 +708,103 @@ struct Replay {
 
 impl Replay {
     fn new() -> Self {
-        Self { p: 67, nu: 2, muls: Cell::new(0), inversions: Cell::new(0), group_adds: Cell::new(0) }
+        Self {
+            p: 67,
+            nu: 2,
+            muls: Cell::new(0),
+            inversions: Cell::new(0),
+            group_adds: Cell::new(0),
+        }
     }
     fn m(&self, a: u64, b: u64) -> u64 {
         self.muls.set(self.muls.get() + 1);
         (a * b) % self.p
     }
-    fn addm(&self, a: u64, b: u64) -> u64 { (a + b) % self.p }
-    fn subm(&self, a: u64, b: u64) -> u64 { (a + self.p - b) % self.p }
-    fn add(&self, a: [u64;2], b: [u64;2]) -> [u64;2] {
+    fn addm(&self, a: u64, b: u64) -> u64 {
+        (a + b) % self.p
+    }
+    fn subm(&self, a: u64, b: u64) -> u64 {
+        (a + self.p - b) % self.p
+    }
+    fn add(&self, a: [u64; 2], b: [u64; 2]) -> [u64; 2] {
         [self.addm(a[0], b[0]), self.addm(a[1], b[1])]
     }
-    fn sub(&self, a: [u64;2], b: [u64;2]) -> [u64;2] {
+    fn sub(&self, a: [u64; 2], b: [u64; 2]) -> [u64; 2] {
         [self.subm(a[0], b[0]), self.subm(a[1], b[1])]
     }
-    fn mul(&self, a: [u64;2], b: [u64;2]) -> [u64;2] {
-        [self.addm(self.m(a[0],b[0]), self.m(self.nu,self.m(a[1],b[1]))),
-         self.addm(self.m(a[0],b[1]), self.m(a[1],b[0]))]
+    fn mul(&self, a: [u64; 2], b: [u64; 2]) -> [u64; 2] {
+        [
+            self.addm(self.m(a[0], b[0]), self.m(self.nu, self.m(a[1], b[1]))),
+            self.addm(self.m(a[0], b[1]), self.m(a[1], b[0])),
+        ]
     }
     fn pow_fp(&self, mut a: u64, mut e: u64) -> u64 {
         let mut out = 1;
         while e > 0 {
-            if e & 1 == 1 { out = self.m(out,a); }
+            if e & 1 == 1 {
+                out = self.m(out, a);
+            }
             e >>= 1;
-            if e > 0 { a = self.m(a,a); }
+            if e > 0 {
+                a = self.m(a, a);
+            }
         }
         out
     }
-    fn inv(&self, a: [u64;2]) -> [u64;2] {
-        let norm = self.subm(self.m(a[0],a[0]),self.m(self.nu,self.m(a[1],a[1])));
-        assert_ne!(norm,0);
-        self.inversions.set(self.inversions.get()+1);
-        let ni = self.pow_fp(norm,self.p-2);
-        let result = [self.m(a[0],ni), self.m(self.subm(0,a[1]),ni)];
-        assert_eq!(self.mul(a,result),[1,0]);
+    fn inv(&self, a: [u64; 2]) -> [u64; 2] {
+        let norm = self.subm(self.m(a[0], a[0]), self.m(self.nu, self.m(a[1], a[1])));
+        assert_ne!(norm, 0);
+        self.inversions.set(self.inversions.get() + 1);
+        let ni = self.pow_fp(norm, self.p - 2);
+        let result = [self.m(a[0], ni), self.m(self.subm(0, a[1]), ni)];
+        assert_eq!(self.mul(a, result), [1, 0]);
         result
     }
     fn on_curve(&self, point: Point, a: u64, b: u64) -> bool {
-        point.infinity || self.mul(point.y,point.y) == self.add(
-            self.add(self.mul(self.mul(point.x,point.x),point.x),self.mul([a,0],point.x)),
-            [b,0])
+        point.infinity
+            || self.mul(point.y, point.y)
+                == self.add(
+                    self.add(
+                        self.mul(self.mul(point.x, point.x), point.x),
+                        self.mul([a, 0], point.x),
+                    ),
+                    [b, 0],
+                )
     }
     fn add_points(&self, lhs: Point, rhs: Point, a: u64) -> Point {
-        self.group_adds.set(self.group_adds.get()+1);
-        if lhs.infinity { return rhs; }
-        if rhs.infinity { return lhs; }
-        if lhs.x == rhs.x && self.add(lhs.y,rhs.y) == [0,0] {
-            return Point::infinity([0,0]);
+        self.group_adds.set(self.group_adds.get() + 1);
+        if lhs.infinity {
+            return rhs;
+        }
+        if rhs.infinity {
+            return lhs;
+        }
+        if lhs.x == rhs.x && self.add(lhs.y, rhs.y) == [0, 0] {
+            return Point::infinity([0, 0]);
         }
         let slope = if lhs.x == rhs.x {
-            self.mul(self.add(self.mul([3,0],self.mul(lhs.x,lhs.x)),[a,0]),
-                     self.inv(self.mul([2,0],lhs.y)))
+            self.mul(
+                self.add(self.mul([3, 0], self.mul(lhs.x, lhs.x)), [a, 0]),
+                self.inv(self.mul([2, 0], lhs.y)),
+            )
         } else {
-            self.mul(self.sub(rhs.y,lhs.y),self.inv(self.sub(rhs.x,lhs.x)))
+            self.mul(self.sub(rhs.y, lhs.y), self.inv(self.sub(rhs.x, lhs.x)))
         };
-        let x = self.sub(self.sub(self.mul(slope,slope),lhs.x),rhs.x);
-        let y = self.sub(self.mul(slope,self.sub(lhs.x,x)),lhs.y);
-        Point::affine(x,y)
+        let x = self.sub(self.sub(self.mul(slope, slope), lhs.x), rhs.x);
+        let y = self.sub(self.mul(slope, self.sub(lhs.x, x)), lhs.y);
+        Point::affine(x, y)
     }
     fn scalar_mul(&self, point: Point, mut k: u64, a: u64) -> Point {
-        let mut out = Point::infinity([0,0]);
+        let mut out = Point::infinity([0, 0]);
         let mut base = point;
         while k > 0 {
-            if k & 1 == 1 { out = self.add_points(out,base,a); }
+            if k & 1 == 1 {
+                out = self.add_points(out, base, a);
+            }
             k >>= 1;
-            if k > 0 { base = self.add_points(base,base,a); }
+            if k > 0 {
+                base = self.add_points(base, base, a);
+            }
         }
         out
     }
@@ -730,38 +819,43 @@ fn replay(public_path: &str, fixture_path: &str, records_path: &str) {
     let mapped_g = parse_point(&public["mapped_generator"]);
     let mapped_q = parse_point(&public["mapped_target"]);
     let checker = Replay::new();
-    assert!(checker.on_curve(g,46,37) && checker.on_curve(q,46,37));
-    assert!(checker.on_curve(mapped_g,53,25) && checker.on_curve(mapped_q,53,25));
-    assert!(checker.scalar_mul(g,61,46).infinity);
-    assert!(checker.scalar_mul(mapped_g,61,53).infinity);
+    assert!(checker.on_curve(g, 46, 37) && checker.on_curve(q, 46, 37));
+    assert!(checker.on_curve(mapped_g, 53, 25) && checker.on_curve(mapped_q, 53, 25));
+    assert!(checker.scalar_mul(g, 61, 46).infinity);
+    assert!(checker.scalar_mul(mapped_g, 61, 53).infinity);
     for scalar in 1..61 {
-        assert_eq!(checker.scalar_mul(g,scalar,46).infinity,
-                   checker.scalar_mul(mapped_g,scalar,53).infinity);
+        assert_eq!(
+            checker.scalar_mul(g, scalar, 46).infinity,
+            checker.scalar_mul(mapped_g, scalar, 53).infinity
+        );
     }
-    let mut checks = BTreeMap::<(u64,String),u64>::new();
+    let mut checks = BTreeMap::<(u64, String), u64>::new();
     for line in fs::read_to_string(records_path).unwrap().lines() {
         let row: Value = serde_json::from_str(line).unwrap();
         let schema = row["schema"].as_str().unwrap();
-        assert!(["different_j_relation_run/v1","different_j_rho_run/v1"].contains(&schema));
+        assert!(["different_j_relation_run/v1", "different_j_rho_run/v1"].contains(&schema));
         let arm = row["arm"].as_str().unwrap().to_string();
         let round = row["round"].as_u64().unwrap();
         assert!(round < 3);
         let scalar = row["recovered"].as_u64().expect("complete scalar");
-        assert_eq!(row["verified"],true);
-        assert_eq!(scalar,answer);
-        assert_eq!(checker.scalar_mul(g,scalar,46),q);
-        assert_eq!(checker.scalar_mul(mapped_g,scalar,53),mapped_q);
-        *checks.entry((round,arm)).or_default() += 1;
+        assert_eq!(row["verified"], true);
+        assert_eq!(scalar, answer);
+        assert_eq!(checker.scalar_mul(g, scalar, 46), q);
+        assert_eq!(checker.scalar_mul(mapped_g, scalar, 53), mapped_q);
+        *checks.entry((round, arm)).or_default() += 1;
     }
-    assert_eq!(checks.len(),15);
-    assert!(checks.values().all(|&v| v==1));
-    println!("{}",json!({"schema":"different_j_replay/v1","checked":checks.len(),
+    assert_eq!(checks.len(), 15);
+    assert!(checks.values().all(|&v| v == 1));
+    println!(
+        "{}",
+        json!({"schema":"different_j_replay/v1","checked":checks.len(),
         "all_rounds_and_arms":true,"independent_fp_muls":checker.muls.get(),
         "independent_fp_invs":checker.inversions.get(),
         "independent_group_adds":checker.group_adds.get(),
         "fixture_sha256":sha256_hex(&fs::read(fixture_path).unwrap()),
         "public_sha256":sha256_hex(&fs::read(public_path).unwrap()),
-        "records_sha256":sha256_hex(&fs::read(records_path).unwrap())}));
+        "records_sha256":sha256_hex(&fs::read(records_path).unwrap())})
+    );
 }
 
 fn audit_fibers(public_path: &str) {
@@ -771,48 +865,55 @@ fn audit_fibers(public_path: &str) {
     let wall = Instant::now();
     let cpu = thread_cpu_ns();
     take_field_counters();
-    let dst = destination(&src,t);
+    let dst = destination(&src, t);
     let mut ops = GroupOps::default();
-    let mut fibers = BTreeMap::<u64,u64>::new();
+    let mut fibers = BTreeMap::<u64, u64>::new();
     let mut source_points = 0u64;
     let mut insert = |point: Point, ops: &mut GroupOps| {
-        let mapped = velu(&src,t,point,ops);
+        let mapped = velu(&src, t, point, ops);
         assert!(dst.is_on_curve(mapped));
         *fibers.entry(dst.key(&mapped)).or_default() += 1;
         source_points += 1;
     };
-    insert(src.identity(),&mut ops);
+    insert(src.identity(), &mut ops);
     for x0 in 0..67 {
         for x1 in 0..67 {
-            for point in src.lift_x([x0,x1]) {
-                insert(point,&mut ops);
+            for point in src.lift_x([x0, x1]) {
+                insert(point, &mut ops);
             }
         }
     }
-    assert_eq!(source_points,4575);
-    let mut distribution = BTreeMap::<u64,u64>::new();
-    for &size in fibers.values() { *distribution.entry(size).or_default() += 1; }
-    assert_eq!(fibers.len(),1525);
-    assert_eq!(distribution.get(&3),Some(&1525));
+    assert_eq!(source_points, 4575);
+    let mut distribution = BTreeMap::<u64, u64>::new();
+    for &size in fibers.values() {
+        *distribution.entry(size).or_default() += 1;
+    }
+    assert_eq!(fibers.len(), 1525);
+    assert_eq!(distribution.get(&3), Some(&1525));
     let g = parse_point(&public["generator"]);
     let mapped_g = parse_point(&public["mapped_generator"]);
-    let subgroup: Vec<Point> = (0..61).map(|i| src.mul(&mut ops,g,i)).collect();
-    let image: Vec<Point> = subgroup.iter().map(|&point| velu(&src,t,point,&mut ops)).collect();
-    assert_eq!(image[1],mapped_g);
+    let subgroup: Vec<Point> = (0..61).map(|i| src.mul(&mut ops, g, i)).collect();
+    let image: Vec<Point> = subgroup
+        .iter()
+        .map(|&point| velu(&src, t, point, &mut ops))
+        .collect();
+    assert_eq!(image[1], mapped_g);
     let unique_images: BTreeSet<_> = image.iter().map(|point| dst.key(point)).collect();
-    assert_eq!(unique_images.len(),61);
+    assert_eq!(unique_images.len(), 61);
     let mut checked_pairs = 0u64;
     for a in 0..61usize {
         for b in 0..61usize {
-            let k = (a+b)%61;
-            assert_eq!(src.add(&mut ops,subgroup[a],subgroup[b]),subgroup[k]);
-            assert_eq!(dst.add(&mut ops,image[a],image[b]),image[k]);
-            assert_eq!(velu(&src,t,subgroup[k],&mut ops),image[k]);
+            let k = (a + b) % 61;
+            assert_eq!(src.add(&mut ops, subgroup[a], subgroup[b]), subgroup[k]);
+            assert_eq!(dst.add(&mut ops, image[a], image[b]), image[k]);
+            assert_eq!(velu(&src, t, subgroup[k], &mut ops), image[k]);
             checked_pairs += 1;
         }
     }
     let fp = take_field_counters();
-    println!("{}",json!({"schema":"different_j_fiber_audit/v1",
+    println!(
+        "{}",
+        json!({"schema":"different_j_fiber_audit/v1",
         "p":67,"r":61,"source_points":source_points,
         "image_points":fibers.len(),"fiber_size_distribution":distribution,
         "kernel":[t,src.neg(t)],"all_images_on_destination":true,
@@ -822,7 +923,8 @@ fn audit_fibers(public_path: &str) {
         "destination_icv1":public["destination"]["icv1"],
         "group_ops":ops,"fp_muls":fp.0,"fp_invs":fp.1,
         "cpu_ns":thread_cpu_ns()-cpu,"wall_ns":wall.elapsed().as_nanos() as u64,
-        "peak_rss_bytes":peak_rss_bytes()}));
+        "peak_rss_bytes":peak_rss_bytes()})
+    );
 }
 
 fn main() {
@@ -830,11 +932,13 @@ fn main() {
     match args.get(1).map(String::as_str) {
         Some("screen") => screen(),
         Some("freeze") => freeze(),
-        Some("freeze-public") => freeze_public(&args[2],&args[3]),
-        Some("run") => relation_run(&args[2],args[3].parse().unwrap(),&args[4]),
-        Some("rho") => rho_run(&args[2],args[3].parse().unwrap(),args[4]=="aa"),
-        Some("replay") => replay(&args[2],&args[3],&args[4]),
+        Some("freeze-public") => freeze_public(&args[2], &args[3]),
+        Some("run") => relation_run(&args[2], args[3].parse().unwrap(), &args[4]),
+        Some("rho") => rho_run(&args[2], args[3].parse().unwrap(), args[4] == "aa"),
+        Some("replay") => replay(&args[2], &args[3], &args[4]),
         Some("audit-fibers") => audit_fibers(&args[2]),
-        _ => panic!("usage: nonisomorphic_extension_isogeny screen|freeze|freeze-public|run|rho|replay"),
+        _ => panic!(
+            "usage: nonisomorphic_extension_isogeny screen|freeze|freeze-public|run|rho|replay"
+        ),
     }
 }

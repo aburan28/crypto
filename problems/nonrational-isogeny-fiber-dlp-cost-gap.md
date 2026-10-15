@@ -11,7 +11,10 @@
   [four-size cold native CPU comparison](../research/isogeny_torsion_fibers_20261012/full_cost_20261013/REPORT.md),
   [three-torsion orbit support screen](../research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/REPORT.md),
   [quadratic-extension cold DLP comparison](../research/isogeny_torsion_fibers_20261012/extension_field_20261014/REPORT.md),
-  and [exact pairing-transfer cost result](../research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/RESULTS.md)
+  [exact pairing-transfer cost result](../research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/RESULTS.md),
+  [2026-10-15 χ polynomial run](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1651Z/REPORT.md),
+  [different-j relation and fiber controls](../research/isogeny_torsion_fibers_20261012/different_j_20261015/reports/run-20261015T1713Z/REPORT.md),
+  and [three-arm pairing batch cost report](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1740Z/REPORT.md)
 - **Next action owner:** unassigned
 - **Last updated:** 2026-10-15
 
@@ -118,8 +121,52 @@ cannot map to their fixed non-isomorphic destinations.
   and [`IDC1ha0c3d83775e32754`](../research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/mobius-conjugacy.identity.certificate.json)
   certificates; the report gives the curve-law derivation.
   Lean checks the induced linear action's order but lacks the curve-level
-  bridge. A decomposition system using this nonfactorable coordinate has
-  not been built or measured.
+  bridge. The bounded χ polynomial decomposition system has since been
+  built and measured; see the next bullet.
+- **Observed in the native χ polynomial run:** the
+  [exact census](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1635Z/REPORT.md)
+  matched independent pair enumeration in 22/22 cases. The
+  [paired run](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1651Z/REPORT.md)
+  recovered and independently replayed every χ arm scalar in 12/12
+  rounds, while projected-pair and χ had identical relation counts,
+  rank, and query trials in each round. The native χ implementation scans
+  polynomial candidates and filters them by exact group addition; a
+  direct resultant/root implementation and S3/quotient polynomial controls
+  remain missing. Its complete local CPU equivalent exceeds rho on the
+  four frozen cells, but the formal counted `S` for the polynomial
+  primitive is still incomplete.
+- **Observed on a different-j extension-field pair:** the
+  [explicit degree-three map](../research/isogeny_torsion_fibers_20261012/different_j_20261015/reports/run-20261015T1713Z/REPORT.md)
+  connects `j=7` and `j=11` curves over `F_(67²)`, with order-61 target
+  subgroup. Source, image and destination-direct relation arms all
+  reached rank nine and recovered the same scalar in three rounds; the
+  independent checker verified 15/15 arm-round rows. The
+  [exhaustive fiber audit](../research/isogeny_torsion_fibers_20261012/different_j_20261015/reports/run-20261015T1738Z/REPORT.md)
+  found 4575 source points, 1525 image points, exactly three preimages
+  per image and 61 distinct target-subgroup images, with 3721/3721
+  subgroup homomorphism checks. Thus the rational fiber multiplicity
+  did not add relation yield on this projected subgroup workload.
+- **Observed in the pairing batch:** the
+  [V6 three-arm run](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1740Z/REPORT.md)
+  replayed 594/594 scalar outputs on 66 distinct order-67 `F_401`
+  targets. At `N=64`, pairing/direct-prime-rho whole CPU ratios were
+  2.523, 1.620 and 3.000. Direct prime-field rho beat pairing in all
+  three L0 rounds, even though pairing was below the weaker extension-rho
+  arm in two V6 rounds and all three earlier V5 rounds. The
+  [V6B same-input repeat](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1752Z/REPORT.md)
+  started after the release tests exited, replayed another 594/594
+  scalars, and again found direct rho faster in all three rounds; paired
+  pairing/direct ratios were 1.944, 2.470 and 1.992. A portable
+  counted-unit comparison remains open.
+- **Observed against reusable source BSGS:** the
+  [V7 cold three-arm run](../research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/run-20261015T1805Z/REPORT.md)
+  rebuilt a nine-entry direct `F_401` baby table each round and replayed
+  594/594 pairing, direct-rho and direct-BSGS scalars. At `N=64`, paired
+  pairing/direct-BSGS complete CPU ratios were 5.190, 4.178 and 5.749;
+  source BSGS was the lower-cost arm at every measured prefix in all
+  three shared-host L0 rounds. This rules out attributing a multi-target
+  CPU advantage to pairing against the available direct methods on this
+  fixed cell, while leaving counted-unit and growing-size questions open.
 - **Missing capability:** a native ecbench or equivalently audited paired
   session that prices map evaluation, factor-base lifts, table lookups,
   modular algebra and memory in a portable counted unit, with L2 isolation
@@ -183,10 +230,14 @@ cannot map to their fixed non-isomorphic destinations.
   This discharges the bounded two-cell construction/cost subtrack; growing
   sizes, a best finite-field solver, L2 isolation, and independent-host
   performance replay remain open.
-- [ ] Construct and price the original nonfactorable χ *polynomial-system*
-  oracle and direct Semaev/quotient polynomial controls, including memory,
-  isolated timing and independent-host replay. The [next gate](../research/isogeny_torsion_fibers_20261012/extension_field_20261014/NEXT_GATE.md)
-  pins its controls, stop conditions and separate pairing-transfer subtrack.
+- [x] Construct and price the bounded nonfactorable χ polynomial-pair
+  decomposition oracle and complete relation recovery, with exhaustive
+  pair-enumeration and independent scalar replay. See the
+  [run report](../research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/run-20261015T1651Z/REPORT.md).
+- [ ] Implement direct resultant/root and Semaev/quotient polynomial
+  controls, with a portable counted χ primitive, isolated timing and
+  independent-host replay. The existing χ implementation uses a finite
+  candidate scan; do not transfer its cost to a future algebraic solver.
 
 Meeting these conditions would settle only the measured pair and workload.
 It would not prove a general exponent change or a result for another curve.
@@ -221,26 +272,28 @@ It would not prove a general exponent change or a result for another curve.
   completely priced a χ orbit *index* on frozen targets and found unchanged
   projected relation outcomes with higher local CPU cost. A finite census
   found two extra raw support points from torsion shifts at `p=787`, while
-  projected support stayed fixed. The remaining discriminating test is the
-  [nonfactorable χ polynomial-system oracle](../research/isogeny_torsion_fibers_20261012/extension_field_20261014/NEXT_GATE.md),
-  paired with direct source, source-orbit and invariant-quotient controls.
-  That oracle's construction, rank, complete cost and independent replay
-  remain open.
+  projected support stayed fixed. The native χ polynomial scan then
+  reproduced projected relation outcomes in all twelve rounds at higher
+  local CPU cost. The remaining polynomial test is a direct root solver
+  and direct Semaev/quotient controls at the same frozen inputs and memory.
 - **Quadratic-extension map attribution:** all four exact ordinary fields
   admit `u²=−3` in the base field, giving a checked public scaling map
   `ψ_u:E→E'` to the degree-three destination. The V4 paired run included
   that map arm and independently replayed all 87 recovered scalars. All
   four projected arms had identical relation/query/rank outcomes on the
-  twelve paired cells. A distinct non-isomorphic extension-field
-  destination requires a new curve/isogeny selection; this fixed
-  `y²=x³−27` destination does not supply it on the selected fields.
+  twelve paired cells. The new `p=67`, different-j pair supplies the
+  separately requested non-isomorphic extension-field destination and
+  paired solve; its full rational fiber audit is linked above.
 - **Pairing route, bounded result:** [V2 raw and phase records](../research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/RESULTS.md)
   establish an exact finite-field transfer and independently checked
   scalars at orders 19 and 61. H search used 26,469/27,169 and
   39,115/39,673 selection extension multiplications. The one-target cold
-  route remained above rho; a reusable-H experiment would have to charge
-  setup against an actual target count. Larger evaluation fields and the
-  scaling gate remain untested.
+  route remained above rho. The 66-target order-67 batch now charges
+  reusable H and the finite-field table against actual distinct targets.
+  Its direct-prime-rho arm beat pairing in three V6 shared-host rounds at
+  `N=64`; a later cold direct source-BSGS arm was faster still in V7.
+  Portable counted pricing, isolation and larger-size scaling remain the
+  next cost gates.
 - **Inputs and controls:** exact ICV1/EC1 pairs, executable isogeny,
   same source target transported to destination, source relation baseline,
   matched negation rho, six-class automorphism-aware rho where rationally
