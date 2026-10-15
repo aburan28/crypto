@@ -22,8 +22,10 @@ python3 research/n83_factor_base_refine_results_20261014/materialize.py \
 ```
 
 The sealer checks the two supplied digests, executed source and fixture
-hashes, all frozen arms and selection status. It writes `workload.json`,
-candidate manifests for verified arms, `measurements.json`, and
-`selected_candidate.json` once; repeated runs accept identical content and
-reject drift. A failed or over-cap arm remains a row and prevents a complete
-selection receipt.
+hashes, all frozen arms and selection status. It writes losslessly compressed
+`workload.json.gz` and `measurements.json.gz`, candidate manifests for
+verified arms, `selected_candidate.json`, and `records_index.json` once;
+repeated runs accept identical content and reject drift. The index records
+SHA-256 digests of the compressed files and their exact decoded JSON bytes.
+Use `gzip -dc` to read either full record. A failed or over-cap arm remains
+a row and prevents a complete selection receipt.

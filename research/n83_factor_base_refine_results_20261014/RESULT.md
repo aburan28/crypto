@@ -48,9 +48,11 @@ setup is recorded separately.
 | 2600 / root22 | `7ca0dce174a8` | 431,600 | 57.564 | 54.033–61.195 | 439.1 | 11.05 |
 
 The suffix and usable-point count identify each full IC1 candidate in the
-adjacent `candidate_K*.json` manifests; `measurements.json` retains the full
-candidate, workload and run IDs, every one of the 1,000 online intervals and
-phase costs per arm, setup, final rank, memory, and process status. All 14
+adjacent `candidate_K*.json` manifests; `measurements.json.gz` retains the
+full candidate, workload and run IDs, every one of the 1,000 online
+intervals and phase costs per arm, setup, final rank, memory, and process
+status. `records_index.json` binds the compressed and decoded JSON digests.
+All 14
 arms passed full-base and 1,000-target independent replay. The incumbent
 K2940 base reproduced its previously sealed base digest. The matched
 K2940/K3300 online-mean ratio on this allocation is 1.375; the K3100/K3300

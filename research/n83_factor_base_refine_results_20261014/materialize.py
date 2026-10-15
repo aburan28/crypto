@@ -2,8 +2,10 @@
 """Seal replayed N83 refinement receipts as canonical IC1 candidates and runs."""
 
 import argparse
+import gzip
 import hashlib
 import importlib.util
+import io
 import json
 import subprocess
 from pathlib import Path
@@ -27,6 +29,24 @@ ARMS = ((2940, "root22"), (2700, "root22"), (3220, "root21"),
 spec = importlib.util.spec_from_file_location("n83_panel_materializer", PANEL)
 panel = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(panel)
+
+
+def write_gzip_once(path, value):
+    raw = (json.dumps(value, indent=2, sort_keys=True,
+                      ensure_ascii=False) + "\n").encode("utf-8")
+    buffer = io.BytesIO()
+    with gzip.GzipFile(filename="", mode="wb", fileobj=buffer,
+                       compresslevel=9, mtime=0) as stream:
+        stream.write(raw)
+    compressed = buffer.getvalue()
+    if path.exists():
+        if path.read_bytes() != compressed:
+            raise ValueError(f"existing sealed record differs: {path}")
+    else:
+        path.write_bytes(compressed)
+    return {"sha256": hashlib.sha256(compressed).hexdigest(),
+            "json_sha256": hashlib.sha256(raw).hexdigest(),
+            "compressed_bytes": len(compressed), "json_bytes": len(raw)}
 
 
 def git_file(path):
@@ -79,7 +99,8 @@ def seal(root, artifact_zip, artifact_sha256, analysis_sha256):
         "cold_or_warm": "one_fresh_process_per_candidate_with_empty_index_and_logs; 1000_target_secondary_selection_after_shared_preparation",
     }
     workload_id = panel.digest(workload)[:12]
-    panel.write_once(HERE / "workload.json", {"workload_id": workload_id, **workload})
+    workload_file = write_gzip_once(HERE / "workload.json.gz",
+                                    {"workload_id": workload_id, **workload})
     field, curve = panel.curve_record()
     verified_by_arm = {row["arm"]: row for row in analysis["arms"]}
     if set(verified_by_arm) != {f"k{k}_{variant}" for k, variant in ARMS}:
@@ -147,7 +168,7 @@ def seal(root, artifact_zip, artifact_sha256, analysis_sha256):
                 "final_la_ms": summary["timing_ms"]["linear_algebra"],
             })
         rows.append(row)
-    panel.write_once(HERE / "measurements.json", rows)
+    measurements_file = write_gzip_once(HERE / "measurements.json.gz", rows)
     eligible = [row for row in rows if row["status"] == "PASS_INDEPENDENT_REPLAY"
                 and row.get("peak_rss_bytes", RSS_CAP_BYTES + 1) <= RSS_CAP_BYTES]
     selected = (min(eligible, key=lambda row: row["ic_online_mean_ms_exploratory"])
@@ -179,6 +200,15 @@ def seal(root, artifact_zip, artifact_sha256, analysis_sha256):
                 and selection["source_base_hash_blake3"] != INCUMBENT_BASE_HASH):
             raise ValueError("selected incumbent base hash changed")
     panel.write_once(HERE / "selected_candidate.json", selection)
+    panel.write_once(HERE / "records_index.json", {
+        "schema": "n83.factor-base-refine-compressed-records/v1",
+        "workload_id": workload_id,
+        "measurement_rows": len(rows),
+        "workload": workload_file,
+        "measurements": measurements_file,
+        "analysis_sha256": analysis_sha256,
+        "artifact_sha256": artifact_sha256,
+    })
     print(json.dumps({"workload_id": workload_id,
                       "candidate_ids": [row["candidate_id"] for row in rows],
                       "statuses": [row["status"] for row in rows],
