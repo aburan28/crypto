@@ -103,4 +103,62 @@ register.
 
 ## Amendments
 
-(none yet)
+### Amendment 1, 2026-10-15: implementation details, before the first data row
+
+Registered by the experiment lane (`examples/fb_designs_slope.rs`) before any
+row exists in `runs/`. Each item settles a detail §2–§3 leave open. None
+changes an arm, a threshold or a prediction.
+
+1. **Instrument version.** `f4_fp` has applied the Gebauer–Möller pair
+   criteria by default since commit `3d4634596` (2026-10-11), after the pilot.
+   This study runs the current default. Reason: before any data, the 16 planted
+   systems of the pilot's Kummer cells (`m = 2`, `t ≤ 6`; `m = 3`, `t ≤ 3`)
+   were rebuilt with the pilot's seed rule. Their `D`, `x_R`, curve, tower,
+   unknown and equation counts, `inconsistent` and `planted_ok` equal every
+   committed pilot row. Only `degree_reached` (the certification tail, not `D`)
+   is lower. With `F4_FP_GM=0` it matches too. `degree_reached` is recorded,
+   but it is not comparable with the pilot's.
+2. **Instrument check (§5).** "The same cells" means A0 rebuilt with the
+   pilot's seed rule and draw order (`repro`), compared row by row. This
+   study's own seeds give other towers and curves, so the A0 series is also
+   compared with the pilot cell by cell at matching (`m`, `t`). That
+   comparison is reported but does not stop the study.
+3. **Seeds.** The cell seed is `0x46424453 ⊕ arm≪40 ⊕ m≪32 ⊕ t≪16`, with arm
+   index A0 = 0, N = 1, A1z = 2, A1g = 3, A4 = 4 and A11 = 5. It draws the set
+   and the target curve, which both targets of a cell share. Target `k` is
+   planted from `cell seed ⊕ (k+1)≪8`. N's random coefficients come from the
+   same stream.
+4. **Completed cell and fit.** A cell is completed when both of its planted
+   systems finish within the budget and the planted solution satisfies F4's
+   basis. The cell's `D` is the mean of the two. `σ` is the least-squares slope
+   of the cell `D` on `b`. Any verdict other than "inconclusive" needs at
+   least 3 completed cells.
+5. **Limits and the stop.** `t` rises from 2 to at most 18, because
+   `2^18 ∥ p₁ − 1`. Each system runs in its own child process under
+   `ulimit -v 13000000`, with F4's 300 s budget. The child is killed at 420 s
+   if F4 has not returned to its deadline check. A series stops after the
+   first cell in which any system hits a limit. That cell is recorded with its
+   reason and counts as missing.
+6. **N at `m = 3`.** The pilot's null is defined only at `m = 2`. Here every
+   `S₃` of the chain gets random coefficients on its own support, shifted to
+   vanish at the planted solution.
+7. **A1.** `x = π_{t−1}(1 + β_{t−1}b_{t−1})` is substituted into `S₃`; it is
+   not an unknown. That gives `2t − 1` unknowns per summand. For A1g, `h` and
+   `g` are drawn uniformly. `g` is redrawn when its order is a power of 2 or
+   when the `2^t` elements repeat. `ord(g)` is recorded.
+8. **A4.** `x` is an unknown, with the linear equation `x − h·y_0 − h'·z_0`,
+   giving `t + 1` unknowns as in §3.
+9. **A11.** The function passes through `−R`:
+   `f = y − P(X)` with `P(X) = y(−R) + Σ_{i≥1} c_i (X^i − x_R^i)`. At `m = 2`
+   this is the line `y = λ(X − x_R) + y(−R)` with `λ = c_1`. `G` comes from
+   exact division of `N(X) = X³ + AX + B − P(X)²` by `X − x_R`, and the zero
+   remainder is checked symbolically. The coefficient equations are
+   `lead(G)·g^{m−i}·s_i − G_i = 0`. At `m = 2`, `lead = 1`, so they read
+   `g·s_1 = e_1` and `g²·s_0 = e_0`. **`m = 3` is run:** `deg P = 2`, `G` is
+   a cubic with leading coefficient `−c_2²`, and each `q_j` is linear. That
+   gives `2 + 3 + 5t` unknowns and `3 + 5t + 3` equations. `m = 2` has
+   `3 + 3t` unknowns and `3t + 4` equations. `b = t`. The presentation is
+   checked in two ways. Every element of `V` is `g` times a `2^t`-th root of
+   unity. On 128 random `m`-subsets, half of them with one element outside
+   `V`, `X^{2^t} ≡ 1 mod ∏(X − v/g)` holds exactly when every element is in
+   `V`.
