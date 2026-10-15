@@ -396,6 +396,18 @@ theorem six_periodic_eigenvector_zero {K A : Type*} [Field K]
       simp [smul_smul, hnonzero]
     _ = 0 := by rw [hsmul, smul_zero]
 
+/- The primitive coordinate s = y₀+y₁+y₂ of the degree-four Type I cover
+   satisfies this quartic when y₀y₁y₂ is the chosen norm component. -/
+theorem type_i_primitive_quartic_identity {K : Type*} [CommRing K]
+    (y₀ y₁ y₂ : K) :
+    let s := y₀ + y₁ + y₂
+    let A := y₀^2 + y₁^2 + y₂^2
+    let B := y₀^2*y₁^2 + y₀^2*y₂^2 + y₁^2*y₂^2
+    let H := y₀*y₁*y₂
+    s^4 - 2*A*s^2 - 8*H*s + A^2 - 4*B = 0 := by
+  dsimp
+  ring
+
 end P192ExtensionCover
 
 #print axioms P192ExtensionCover.cyclic_cross_ratio_product
@@ -423,3 +435,4 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.shifted_three_sum_support_bound
 #print axioms P192ExtensionCover.shifted_three_point_relation
 #print axioms P192ExtensionCover.six_periodic_eigenvector_zero
+#print axioms P192ExtensionCover.type_i_primitive_quartic_identity
