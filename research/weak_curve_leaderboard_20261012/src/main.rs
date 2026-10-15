@@ -639,8 +639,32 @@ fn main() -> Result<()> {
     let data = serde_json::to_vec_pretty(&snapshot()?)?;
     if args[1] == "build" {
         fs::write(&args[2], data)?;
-    } else if fs::read(Path::new(&args[2]))? != data {
-        return Err("snapshot differs from frozen source databases".into());
+    } else {
+        let frozen = fs::read(Path::new(&args[2]))?;
+        if frozen != data {
+            let offset = frozen
+                .iter()
+                .zip(&data)
+                .position(|(old, new)| old != new)
+                .unwrap_or(frozen.len().min(data.len()));
+            let start = offset.saturating_sub(64);
+            let old_end = (offset + 96).min(frozen.len());
+            let new_end = (offset + 96).min(data.len());
+            eprintln!(
+                "snapshot first differs at byte {offset} (frozen {} bytes, rebuilt {} bytes)",
+                frozen.len(),
+                data.len()
+            );
+            eprintln!(
+                "frozen context: {}",
+                String::from_utf8_lossy(&frozen[start..old_end])
+            );
+            eprintln!(
+                "rebuilt context: {}",
+                String::from_utf8_lossy(&data[start..new_end])
+            );
+            return Err("snapshot differs from frozen source databases".into());
+        }
     }
     Ok(())
 }

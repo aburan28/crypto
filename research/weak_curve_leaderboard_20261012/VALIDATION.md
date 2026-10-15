@@ -2,6 +2,18 @@
 
 ## Genus-128 GHS model-stage audit, 15 October 2026
 
+- PR #1738 head `ae67d4a2f2` exposed a clean Linux runner mismatch in the
+  pre-existing catalog snapshot check: the six Rust tests passed, then
+  `weak-curve-leaderboard check snapshot.json` reported differing bytes. The
+  completed job log is preserved in
+  `validation/ghs128_ci_snapshot_mismatch_attempt1.log` (GitHub run
+  `38710405870`, job `116340086585`). Local source-file hashes match the
+  frozen snapshot and the same check passes on macOS. The exporter now reports
+  the first differing byte and short contexts so the next clean run can
+  isolate the field without replacing the snapshot on a guess. Its
+  deliberately altered-snapshot control is in
+  `validation/ghs128_mismatch_diagnostic_control.log`.
+
 - `cargo run --release --locked --bin ghs_genus128_cost_audit -- --check` recomputes exact
   irreducible-polynomial and smoothness counts for all 84 degree bounds in
   the declared `GF(4)`, genus-128 search envelope. The optimum is bound 15
