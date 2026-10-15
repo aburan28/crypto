@@ -18,6 +18,6 @@ Workloads: `fp4_torsion(29, 1, 16)` (ICV1 id in `plan.json`; not registered), $r
 
 Recorded counters for the IC arms on targets 0 / 1: 574 / 635 trials in both arms; 9 / 8 relations; unsolved systems 9 / 8 (committed) and 11 / 13 (new); shape replays 568 / 625 with 3 / 4 fallbacks; solver ops $1.341 dot 10^13$ / $1.475 dot 10^13$ (committed) and $3.373 dot 10^10$ / $3.632 dot 10^10$ (new) $FF_p$ multiplications, priced at 97 per addition.
 
-`ecbench compare` (`comparisons/`): ic-d4-chains / ic-d4-committed = 0.0025 in ops (cluster interval over 2 targets); ic-d4-chains / rho-neg = $1.39 dot 10^6$ (1.26–1.55). No wall comparison was admitted: no pair reached L2. Audit: `audits/k4-p29-d4cost.audit.json` (`verify --replay-all`).
+`ecbench compare` (`comparisons/`): ic-d4-chains / ic-d4-committed = 0.0025 in ops (cluster interval over 2 targets); ic-d4-chains / rho-neg = $1.39 dot 10^6$ (1.26–1.55). No wall comparison was admitted: no pair reached L2. Audit: `audits/k4-p29-d4cost.audit.json` (`verify --replay-all`): OK, 8 replays reproduced, 0 problems.
 
 #figure(image("s_by_arm.svg", width: 72%), caption: [$S$ per arm and target as recorded.])

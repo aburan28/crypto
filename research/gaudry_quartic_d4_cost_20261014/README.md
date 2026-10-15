@@ -108,7 +108,8 @@ so wall is not admitted and `S` does not depend on it.
 
 ![S by arm](figures/s_by_arm.svg)
 
-Audit: `audits/k4-p29-d4cost.audit.json` (`ecbench verify --replay-all`).
+Audit: `audits/k4-p29-d4cost.audit.json` (`ecbench verify --replay-all`):
+**OK, 8 records, 8 verified, 8 replays reproduced, 0 problems.**
 
 ## Part C — crossover (§11.16's model, extrapolated)
 
@@ -144,8 +145,8 @@ would.
   Planted targets at `p = 29`: 3/20, as for the committed oracle.
 - **A4 (sparsest ≥ 10×; weighted ≥ 5× at equal linear algebra): held.**
   26.4× and 10.95×.
-- **B1 (verified, replays identical):** 8/8 verified; replay audit —
-  see `audits/`.
+- **B1 (verified, replays identical): held.** 8/8 verified; `verify
+  --replay-all`: audit OK, 8 of 8 replays reproduced, 0 problems.
 - **B2 (trials within 5 %): held.** Identical, 574 and 635, with the same
   relation counts.
 - **B3 (`S_committed/S_new` in `[250, 500]`; target 0 about 1.7·10⁶):

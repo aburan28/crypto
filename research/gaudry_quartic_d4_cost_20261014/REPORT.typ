@@ -44,7 +44,7 @@ Paired ratios: committed/new 369.8× (367.9–371.6). Sparsest pivots alone give
   [*IC, new oracle*], [*$1.653 dot 10^6$*], [*$1.780 dot 10^6$*], [574 / 635], [11 / 13],
 )
 
-New/committed: *398× and 406×*, with identical trials and relations. IC still costs $1.39 dot 10^6$× rho (1.26–1.55) at this size. All 8 runs verified. The IC runs graded L1, so wall time (221 s against 7,321 s) is descriptive.
+New/committed: *398× and 406×*, with identical trials and relations. IC still costs $1.39 dot 10^6$× rho (1.26–1.55) at this size. All 8 runs verified; the replay audit reproduced all 8. The IC runs graded L1, so wall time (221 s against 7,321 s) is descriptive.
 
 #figure(image("figures/s_by_arm.svg", width: 68%), caption: [$S$ per arm and target, session `k4-p29-d4cost`.])
 
@@ -56,7 +56,7 @@ $S\/"rho" = sqrt(h) (181 (p\/4) C_4 \/ (126 p^2) + r_infinity \/ 4)$, with $C_4$
 
 == Predictions and limits
 
-All registered predictions held: A1 exact; A2 $C_4$ in range and ≥ 200× below; A3 ≤ 3 % unsolved; A4 26× and 11×; B2 identical trials; B3 398×, 406×; C1 $2^103$. B1: verified, with the replay audit in `audits/`.
+All registered predictions held: A1 exact; A2 $C_4$ in range and ≥ 200× below; A3 ≤ 3 % unsolved; A4 26× and 11×; B2 identical trials; B3 398×, 406×; C1 $2^103$. B1: 8/8 verified, audit OK with 8 of 8 replays reproduced.
 
 What did not work: weighted degrees below 26; chains on the plain form, where $sigma_1$ has 260 chains and $det A$ costs more than the dense characteristic polynomial; replay without top-up, which fell back on 42 % of systems at $p = 29$; and solving the degenerate systems.
 
