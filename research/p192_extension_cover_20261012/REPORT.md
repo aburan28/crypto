@@ -1,5 +1,35 @@
 # Exact extension-cover screen for standard NIST P-192
 
+**Latest relation criterion:** The [signed-base scalar-anchor audit](reports/run-20261015T1857Z/REPORT.md)
+enumerates all 695,520 three-sums in the fixed 160-point Type I quotient
+base. It finds no overlap between independently known-scalar anchors and
+nonzero-unknown-row targets, and every repeated rank-bearing target has the
+same full formal signed-point vector. The criterion and exact receipt are
+linked there.
+
+**Adaptive-base continuation:** The [64-query rank-balance audit](reports/run-20261015T1926Z/REPORT.md)
+constructs one new quotient point per known-scalar equation and checks every
+point against the old three-sum support. The 64 forced rows bring 64 private
+columns and leave the 16 old logarithms unconstrained. Its Lean theorem
+formalizes the unique extension of any old-log assignment.
+
+**Short-sum collision screen:** The [new exact audit](reports/run-20261015T1955Z/REPORT.md)
+tests the 64 selected adaptive points against all two- and four-sums of the
+160 signed old classes. It finds zero hits in 64 direct pair lookups and
+824,320 pair-complement tests, independently replayed in Python. Together
+with the earlier one- and three-sum tests, the minimum old-base sum length
+for each selected new point is at least five. Lean checks the group identity
+that would turn such a collision into an old-base equation.
+
+**Divisor-support geometry:** The [split-support audit](reports/run-20261015T2042Z/REPORT.md)
+checks all 160 fixed-origin degree-three residual divisors. Their
+\(x\)-polynomials are pairwise coprime across 12,720 class pairs; 20 split
+fully into rational points. Restricting the collector to those 20 classes
+leaves 143 geometry-accepted rank-bearing three-sum targets, with zero hits
+in the frozen 64 fresh known-scalar queries. Python and PARI independently
+replay the support and quotient-group counts, and Lean checks the support
+disjointness implication and exact uniform-query inequality.
+
 **Continuation:** The [three-branch follow-up](BRANCH_CONTINUATION.md) proves
 that the nonsplit-quadratic direct genus-3 branch is excluded as well,
 constructs a descended Type I nonhyperelliptic genus-3 cover and a
@@ -184,6 +214,15 @@ and matched one-target cost remain unknown for the tested compact policy;
 the Type I branch still needs a relation method and complete target cost;
 generic plane-quartic divisor reduction remains available as a separate
 implementation route.
+
+The [fixed-origin nonspeciality certificate](reports/run-20261015T2117Z/REPORT.md)
+now checks all 160 signed Type I degree-three representatives. Their
+squarefree residual (x)-cubics and nonzero quadratic (y)-coefficients
+make every residual triple noncollinear, so Riemann--Roch gives a unique
+effective degree-three divisor in each fixed-origin class. This identifies
+the exact geometry constraint on a collector that tries to vary those
+representatives while keeping the same origin; it does not replace the
+separate generic Jacobian arithmetic gate.
 
 ## Reproduction
 

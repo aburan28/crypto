@@ -144,6 +144,42 @@
     "url": "https://github.com/aburan28/crypto/blob/029e0bb2c7b1543af9a0647457adcaef8f20e7d0/research/p192_extension_cover_20261012/BRANCH_CONTINUATION.md"
   },
   {
+    "id": "ic_divisor_support_geometry",
+    "name": "Reduced-divisor support geometry for index calculus",
+    "method": "Fixed-origin divisor splitting and support-overlap screen",
+    "domain": "A selected subgroup transported to a genus-g Jacobian with a frozen fixed-origin divisor base and target-query law",
+    "recognition": "Reduce each usable class to a divisor relative to one origin, factor its residual support polynomial over the lower field, and compute pairwise support gcds. Check whether each degree-g divisor is special: for a smooth plane quartic at degree three, three distinct noncollinear support points give h0(D)=1 and a unique effective representative at that origin. Recompute actual factor-base size, accepted rank-bearing target support, known-scalar anchor overlap, and projected relation rank after any splitting filter. A splitting type or shared point is a collector input; the danger decision follows verified rank and complete cost.",
+    "witness": "Exact cover and subgroup map, fixed-origin divisor certificates, squarefree support polynomials, independent factorization and gcd replay, noncollinearity or Riemann-Roch certificate where uniqueness is asserted, selected usable class identities, frozen query law, known-scalar equations, target-support and rank census, and complete one-target costs.",
+    "construction": "Stratify reduced classes by rational support orbit type and specialness, screen shared residual support, select a factor-base policy, then replay ordinary known-scalar queries and eliminate fresh support-point columns before measuring rank and cost. If h0(D)=1 at the chosen origin, seek another class, origin, or higher-degree relation to vary its support.",
+    "status": "exact_p192_type_i_nonspecial_split_support_zero_rank_screen",
+    "source": "P-192 Type I divisor-support and split-base certificate (2026)",
+    "url": "https://github.com/aburan28/crypto/pull/1914"
+  },
+  {
+    "id": "ic_scalar_anchor_overlap",
+    "name": "Known-scalar anchor overlap for index-calculus relations",
+    "method": "Exact support collision and relation-row test",
+    "domain": "A selected subgroup with a frozen signed factor base, summand policy, known-scalar anchor set, and target-query law",
+    "recognition": "Separate three-sum targets with nonzero unknown-log rows from targets with independently known scalars, including zero-row sums. A chosen known-scalar anchor supplies an unknown-log equation only at a target overlap; repeated rank-bearing targets supply a new equation only when their formal signed-point vectors differ. Count both intersections and the rank of resulting row differences modulo the subgroup order.",
+    "witness": "Exact curve and subgroup, signed base-point identities, known-scalar certificates, complete target-key and formal-vector census, independent collision replay, geometry acceptance law, useful row rank, and measured query and recovery costs.",
+    "construction": "Enumerate frozen sums, coalesce by exact group target, compare full formal vectors, include zero-row anchors, test target overlap, then sample independently known-scalar queries and measure accepted novel rows and rank. A positive overlap is a relation candidate, not a complete attack cost.",
+    "status": "exact_p192_type_i_zero_anchor_overlap_and_no_novel_formal_collisions",
+    "source": "P-192 Type I formal-collision certificate (2026)",
+    "url": "https://github.com/aburan28/crypto/pull/1914"
+  },
+  {
+    "id": "ic_adaptive_base_rank_balance",
+    "name": "Adaptive factor-base rank balance",
+    "method": "Eliminate fresh logarithm columns before counting useful relations",
+    "domain": "A selected subgroup and relation collector that adds new factor-base points while constructing known-scalar equations",
+    "recognition": "Count every newly introduced unknown logarithm column. If each new row has its own private new point with unit coefficient, every old-log assignment extends uniquely and the rows constrain no old logarithm. Measure rank after eliminating new columns; require a second independent representation, a known logarithm, or a collision cycle to obtain positive projected rank.",
+    "witness": "Exact old and new point identities, independently known query scalars, subgroup and geometry checks for new points, duplicate and old-support collision census, augmented matrix columns and rank, projected rank on the old columns, and complete query and elimination costs.",
+    "construction": "For each proposed adaptive query, record its new point and row, replay the group equation independently, eliminate new columns, and count only surviving equations in the old unknowns. Test geometric eligibility and ordinary-query yield separately from algebraic rank.",
+    "status": "exact_p192_type_i_64_private_rows_zero_projected_rank",
+    "source": "P-192 Type I adaptive-base audit (2026)",
+    "url": "https://github.com/aburan28/crypto/pull/1914"
+  },
+  {
     "id": "cubic_jacobian_isogeny",
     "name": "Cubic Weil-restriction Jacobian isogeny",
     "method": "Direct isogeny to a genus-three Jacobian",

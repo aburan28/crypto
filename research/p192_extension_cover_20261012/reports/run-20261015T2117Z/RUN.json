@@ -1,0 +1,61 @@
+{
+  "artifact_sha256": {
+    ".github/workflows/weak-curve-database.yml": "c4647d7a0ff4e1742201baa55045efd5b8294b494eb5b4df509cde6f98ae0ddc",
+    "research/p192_extension_cover_20261012/REPORT.md": "df8195a59f264fb2770f8bf8262b917e65affb35073a5788d1e6c65859a450d3",
+    "research/p192_extension_cover_20261012/lean/NonspecialSupport.lean": "1c723a279b0bdd4d0213ae7e16af0e5b6e77ceaca1d3d161ff70b008e9512696",
+    "research/p192_extension_cover_20261012/lean/lake-manifest.json": "fc1b089030173d9aad95d8dafe3e47168f93fccc14274413e9645acadabbf1b9",
+    "research/p192_extension_cover_20261012/lean/lakefile.toml": "b1ff359855991c8a31aa428b4d9fc476f13a0722005d4db91941e322024a243f",
+    "research/p192_extension_cover_20261012/lean/lean-toolchain": "d5edba4e4b8faad9c1baeadb265716d20d03be4d1a2647dc5e35b0c0325bea7b",
+    "research/p192_extension_cover_20261012/lean/nonspecial-support-axioms-20261015.log": "b0cc7bd8a2d5b61f2cc1b08c1bb378cb0f9d50ae22d0e699add640e1a5b4349a",
+    "research/p192_extension_cover_20261012/lean/nonspecial-support-build-20261015.log": "c3427d9bf14eb99da928053fb17bac7dfc4fdd792c05dacb6fe7bdab8764b89e",
+    "research/p192_extension_cover_20261012/lean/nonspecial-support-fresh-20261015.log": "4c68b70e6da7b9342f198ef6c849e1e3c7ec5a69fff3f966e42f7076599a13d1",
+    "research/p192_extension_cover_20261012/nonspecial_support_screen.py": "10b3f56b6cc46cf68c6482df8e23df47a12e0d09fc0cba7df12348c41aa8f76e",
+    "research/p192_extension_cover_20261012/reports/run-20261015T2117Z/REPORT.md": "717e9626d98adef6fb0e19c64ca93fe4f1758d9f8e17279994d149e83505a0d7",
+    "research/p192_extension_cover_20261012/reports/run-20261015T2117Z/registry_validation.log": "92aeadeced41be55eb9bb19e29234d36d50fde2e13263db62991f266b59205b0",
+    "research/p192_extension_cover_20261012/type_i_divisor_support.json": "11b642cbb9026d73ee87178ac0486830b670e8d3e39a4ba6f82a319061712dbe",
+    "research/p192_extension_cover_20261012/type_i_divisor_support_gp.log": "a8297703358943ba5316877b126e4d6127e5a855875f439a74b3bdd98450a2b2",
+    "research/p192_extension_cover_20261012/type_i_nonspecial_support.json": "949be03c502dd67f5a157c9d976a1d8d622e488b4afcf85e0776772af1d84b20",
+    "research/p192_extension_cover_20261012/type_i_nonspecial_support.log": "41936e46ea40f22616566184f397e3f33f63828a5017bfccf71fd724b903da3b",
+    "research/p192_extension_cover_20261012/type_i_nonspecial_support_gp.log": "f67eb93bbaeb61ad32c535852234d7073a37f545c8771fa1f0c988f9792ef3f8",
+    "research/p192_extension_cover_20261012/type_i_nonspecial_support_independent.log": "ba138fc1e66805dbb9e1675ce5f16e31ee948fa8d5b4c151af84d932f288ed37",
+    "research/p192_extension_cover_20261012/type_i_nonspecial_support_input.gp": "e2b88d68f335829f308f464c6202ebfebcbdb2bbcb32edac02d0725d501d6b26",
+    "research/p192_extension_cover_20261012/verify_nonspecial_support.gp": "020934b55cf9f5826c67f58e117e2e870f574481b9602a04558b8bf424827d09",
+    "research/p192_extension_cover_20261012/verify_nonspecial_support_receipt.py": "90640a8a2b37c442dbe3475888d1a05f36c2e62867ad1868ee15fdebff42e8b5",
+    "research/weak_curve_leaderboard_20261012/README.md": "a4795a2663ae3d1ddf1637cad3e49cfab66cf7f59a798da93476242cbd7a292b",
+    "research/weak_curve_leaderboard_20261012/criteria.json": "0ff50ad63364667cd745116bac0ca2895358ea93aada64e66f3e61c215c605dd",
+    "website/weakcurves/dist/criteria.json": "0ff50ad63364667cd745116bac0ca2895358ea93aada64e66f3e61c215c605dd"
+  },
+  "checks": {
+    "lean_axioms_exit": 0,
+    "lean_build_exit": 0,
+    "lean_fresh_exit": 0,
+    "pari_independent_exit": 0,
+    "python_producer_exit": 0,
+    "receipt_verifier_exit": 0,
+    "registry_validator_exit": 0
+  },
+  "counts": {
+    "classes": 160,
+    "collinearity_witnesses": 0,
+    "nonzero_y_quadratic_coefficients": 160,
+    "squarefree_x_cubics": 160
+  },
+  "formalization": {
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "lean_theorem": "P192ExtensionCover.quadratic_triple_noncollinear",
+    "riemann_roch_bridge": "written; concrete genus-three divisor-class theorem remains open"
+  },
+  "parent_commit": "c385cfcd33cfabfbd0c113d5b5b2ce02b6269f22",
+  "scope": "standard P-192 Type I plane quartic; 160 signed fixed-origin degree-three classes",
+  "status": "verified_fixed_origin_nonspeciality_screen",
+  "toolchain": {
+    "gp": "2.17.3 (arm64 darwin; GMP-6.3.0)",
+    "lean": "leanprover/lean4:v4.34.1",
+    "mathlib": "d13f23b723b8a846827a245b89c10fc7d3f11612",
+    "python": "Python 3.13.1"
+  }
+}
