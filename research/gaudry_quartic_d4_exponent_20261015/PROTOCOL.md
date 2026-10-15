@@ -140,3 +140,24 @@ of every distinct `rho-neg` record (deduplicated by workload and seed).
   paired target at `p ≥ 101` (the measured range is relation-dominated).
 - **P8.** `ic-d4-lp1`: total `S` at least `ic-d4-w`'s on every paired target
   at `p ≥ 61`.
+
+## Amendment 1 (2026-10-15T08:05Z, runtime only; no IC result had been produced)
+
+Three hours after launch none of the first four jobs (`main-p1009-t0/t1`,
+`main-p701-t0/t1`) had finished: a solve under four concurrent workers
+costs about 1.2 s of wall at these `p`, not the 0.35 s the queue was sized
+on (#1863's `p = 29` session ran alone), so the queue needs about 26 h, and
+the 10 h rule would have cut the small rungs the fits rest on. Before any
+IC record existed:
+
+1. The jobs not yet started (lines 5–72 of `jobs.txt`) were **reordered**,
+   same set (`jobs.txt` now; the original order is in git at `08722a2b7`):
+   both targets of the plain arm at `p ≤ 293`, then `t = 0` at 509 and 401;
+   one target of each large-prime arm; the rho-only specs; then the rest.
+2. The stopping rule is **extended to 16 h** from launch
+   (2026-10-15T20:57Z): jobs the first queue lists in `NOT_RUN.txt` at its
+   10 h deadline are run by `run_queue2.sh` (same command, its own list)
+   until 16 h; what has not started by then is listed in `NOT_RUN2.txt`
+   and reported missing.
+
+Arms, rungs, targets, seeds, analysis and predictions are unchanged.
