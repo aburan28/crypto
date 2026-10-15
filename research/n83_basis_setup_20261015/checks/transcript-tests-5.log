@@ -1,0 +1,16 @@
+PASS rank/log and answer transcript
+FAIL: Duplicate JSON key
+FAIL: Decimal overflow
+FAIL: Relation row mismatch
+FAIL: Rank-after/gain mismatch
+FAIL: Unexpected rank seed
+FAIL: Rank-after/gain mismatch
+FAIL: Anchor metadata mismatch
+FAIL: Solution counters mismatch
+FAIL: Backsolve mismatch
+FAIL: Base label mismatch
+FAIL: Answer scalar replay failure
+FAIL: Four-point witness sum failure
+FAIL: Missing final records or trailing records
+FAIL: Truncated JSONL
+PASS: one positive and 14 negative transcript tests
