@@ -252,6 +252,10 @@ pub fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) ->
             child.kill().unwrap();
             break child.wait().unwrap();
         }
+        if resource_ready.is_some_and(|ready| ready.with_extension("done").is_file()) {
+            thread::sleep(Duration::from_millis(25));
+            continue;
+        }
         match resident_bytes(child.id())
             .filter(|rss| resource_ready.is_none() || resources_released || *rss > 0)
         {
@@ -290,6 +294,15 @@ pub fn run(cli: &Path, dir: &Path, args: &[String], stem: &str, timeout: u64) ->
         }
         thread::sleep(Duration::from_millis(25));
     };
+    // A completed worker may enter OS exit cleanup between the final RSS read
+    // and waitpid becoming ready. Its completion marker covers all algebra;
+    // a normal exit in that race is not a missing-monitor interval during work.
+    if monitor_unavailable
+        && status.code().is_some()
+        && resource_ready.is_some_and(|ready| ready.with_extension("done").is_file())
+    {
+        monitor_unavailable = false;
+    }
     let bytes = fs::read(&stdout_path).unwrap();
     let raw = String::from_utf8_lossy(&bytes);
     let parsed = Json::parse(&raw).ok();

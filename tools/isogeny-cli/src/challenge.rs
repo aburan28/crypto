@@ -370,7 +370,18 @@ pub fn execute(args: &[String]) -> Result<(Value, i32), String> {
                 }
                 std::thread::sleep(std::time::Duration::from_millis(5));
             }
-            Ok((worker(Path::new(o.need("input")?))?, 0))
+            let result = std::panic::catch_unwind(|| worker(Path::new(o.need("input").unwrap())));
+            // All parsing and algebra have completed, including failure paths.
+            // The parent can stop RSS polling during process-exit cleanup.
+            fs::OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(ready.with_extension("done"))
+                .map_err(|e| e.to_string())?;
+            match result {
+                Ok(result) => Ok((result?, 0)),
+                Err(_) => Err("independent replay rejected the submitted map".into()),
+            }
         }
         "judge" => {
             let o = Options::parse(&args[1..], &["input", "out", "timeout"])?;

@@ -77,6 +77,9 @@ may request a shorter replay budget. Map JSON is limited to 256 MiB, summary
 JSON to 1 MiB, stderr to 8 MiB. Resource figures are sampled process receipts,
 not peak-memory proofs or isolated speed measurements. Snapshot copying and
 bounded metadata handling precede the timed replay process.
+The child waits for a positive RSS sample before parsing. A completion marker
+ends RSS polling after all parsing and algebra, including rejected-map paths;
+the process deadline continues through output and operating-system exit cleanup.
 
 The bundled construction adapter uses at most 1800 seconds and 8 GiB per
 constructor. Its current degree bound is 1000000; the judge accepts larger
