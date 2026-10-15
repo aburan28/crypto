@@ -147,7 +147,7 @@ impl Field {
             count <= 10_000_000,
             "extension multiplication cap exhausted"
         );
-        if count % 2048 == 0 {
+        if count.is_multiple_of(2048) {
             assert!(
                 thread_cpu_ns() - self.budget_cpu_start_ns <= 900_000_000_000,
                 "15-minute current-thread CPU cap exhausted"
@@ -1862,7 +1862,7 @@ fn run_compact(input: Input, cell: usize, round: u64, batch_path: &str, frozen_p
         vec![1, 4, 16, 64, 66]
     };
     let (pair_prefix, pair_scalars, pair_counts, rho_prefix, rho_scalars, rho_counts) =
-        if round % 2 == 0 {
+        if round.is_multiple_of(2) {
             let (a, b, c) = compact_pairing(input, &targets, &frozen, &prefixes);
             let (d, e, f) = compact_rho(input, cell, round, &targets, &prefixes);
             (a, b, c, d, e, f)
@@ -1878,7 +1878,7 @@ fn run_compact(input: Input, cell: usize, round: u64, batch_path: &str, frozen_p
         "{}",
         json!({"schema":"torsion_pairing_compact/v5",
         "cell":cell,"p":input.p,"r":input.r,"round":round,
-        "order":if round%2==0 {"pairing,rho"} else {"rho,pairing"},
+        "order":if round.is_multiple_of(2) {"pairing,rho"} else {"rho,pairing"},
         "targets":targets.len(),"prefixes":prefixes,
         "input_cpu_ns_common":input_cpu_ns,"input_wall_ns_common":input_wall_ns,
         "pairing_prefix":pair_prefix,"rho_prefix":rho_prefix,
