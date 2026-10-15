@@ -7,7 +7,8 @@ nonfixed-coefficient Scholten genus-2 descent, and verifies same-field
 genus-3 and genus-2 controls. The original screen and
 receipts below remain the baseline for those results.
 The continuation also gives a prime-field Type I discriminant criterion and
-checks its quartic quotient on P-224 and P-256.
+constructs exact P-224 and P-256 subgroup conorms whose three-step Frobenius
+norms are nonzero over \(\mathbf F_{p^2}\).
 
 **Result.** For standard P-192 viewed over \(\mathbf F_{p^6}\), every Legendre
 cross-ratio of its nonzero 2-torsion has norm \(-1\) to \(\mathbf F_{p^2}\).
@@ -163,8 +164,9 @@ through degree-two push-pull and checked quotient images. Three elliptic
 quotients reduce its genus-three subgroup class to
 \((-2G,0,0)\); the three-step Frobenius norm reduces to
 \((-2G,-2G,-2G)\), giving a nonzero class of exact order \(r\) over
-\(\mathbf F_{p^2}\). An independent point-coordinate verifier replays the
-quotient values. A separate
+\(\mathbf F_{p^2}\). P-224 and P-256 have the same checked diagonal norm
+pattern, using \(G\) and \(17G\), respectively; independent point-coordinate
+verifiers replay the quotient values. A separate
 \(\mathbf F_{23^3}\) Scholten instance verifies the complete relation,
 rank, target, and same-point rho pipeline. P-192 final rank, target descent,
 and matched one-target cost remain unknown for the tested compact policy;
