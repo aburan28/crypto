@@ -214,6 +214,7 @@ impl Sys {
         }
     }
     /// top-corner exponent vector of poly j
+    #[allow(dead_code)]
     fn corner(&self, j: usize) -> Vec<i64> {
         let mut a = vec![0i64; self.nvars];
         for &(v, d) in &self.polys[j] {
@@ -754,7 +755,7 @@ fn is_prime(n: u64) -> bool {
         return false;
     }
     for q in [2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
-        if n % q == 0 {
+        if n.is_multiple_of(q) {
             return n == q;
         }
     }

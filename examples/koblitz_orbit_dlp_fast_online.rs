@@ -2040,7 +2040,7 @@ mod wide {
         let process_started = Instant::now();
         let constructed: Option<(u32, u8, usize)> = arguments[1]
             .strip_prefix("construct:")
-            .map(|spec| super::parse_construct_spec(spec));
+            .map(super::parse_construct_spec);
         let header: Value = match constructed {
             Some((n, a, _)) => json!({"n":n, "a":a}),
             None => {
@@ -2556,7 +2556,7 @@ fn main() -> ExitCode {
     let process_started = Instant::now();
     let constructed: Option<(u32, u8, usize)> = arguments[1]
         .strip_prefix("construct:")
-        .map(|spec| parse_construct_spec(spec));
+        .map(parse_construct_spec);
     let header: Value = match constructed {
         Some((n, a, _)) => json!({"n":n, "a":a}),
         None => {

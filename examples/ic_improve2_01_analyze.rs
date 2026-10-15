@@ -237,7 +237,7 @@ fn analyze(dir: &str, lo: u64, hi: u64, up: u64, out: &str) {
     };
     let all_bits: Vec<u64> = (lo..=hi).filter(|b| !curves(&inc, *b).is_empty()).collect();
     let lnq = |b: u64| -> f64 { f(&d[&(inc.clone(), b, curves(&inc, b)[0])], "q").ln() };
-    let metrics = ["cost", "la_cost", "cost_cl9", "la_cost_cl9", "rel_cost"];
+    let _metrics = ["cost", "la_cost", "cost_cl9", "la_cost_cl9", "rel_cost"];
     let nboot = 2000;
     let mut summary = json!({"arms": arms, "bits": all_bits, "per_arm": {}});
     // resample plan: per size, a vector of curve indices (into the inc curve list)
@@ -290,7 +290,7 @@ fn analyze(dir: &str, lo: u64, hi: u64, up: u64, out: &str) {
     };
     let est_ci = |fun: &dyn Fn(&BTreeMap<u64, Vec<u64>>) -> f64| -> (f64, [f64; 2]) {
         let e = fun(&plans[0]);
-        let v: Vec<f64> = plans[1..].iter().map(|p| fun(p)).collect();
+        let v: Vec<f64> = plans[1..].iter().map(fun).collect();
         (e, ci(v))
     };
     let fmt = |e: (f64, [f64; 2])| format!("{:.3} [{:.3}, {:.3}]", e.0, e.1[0], e.1[1]);

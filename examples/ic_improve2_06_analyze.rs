@@ -478,7 +478,7 @@ fn analyze(dir: &str, lo: u64, hi: u64, up: u64, out: &str, arms_in: &[String]) 
     };
     let est_ci = |fun: &dyn Fn(&BTreeMap<u64, Vec<u64>>) -> f64| -> (f64, [f64; 2]) {
         let e = fun(&plans[0]);
-        let v: Vec<f64> = plans[1..].iter().map(|p| fun(p)).collect();
+        let v: Vec<f64> = plans[1..].iter().map(fun).collect();
         (e, ci(v))
     };
     let fmt = |e: (f64, [f64; 2])| format!("{:.3} [{:.3}, {:.3}]", e.0, e.1[0], e.1[1]);
@@ -594,9 +594,9 @@ fn analyze(dir: &str, lo: u64, hi: u64, up: u64, out: &str, arms_in: &[String]) 
             print!("| {b0}-{b1} |");
             for a in &arms {
                 let e = est_ci(&|p| loc_of(a, b0, b1, p));
-                summary["per_arm"][a][format!("local_{m}")]
-                    .as_array_mut()
-                    .map(|v| v.push(json!([b0, e.0, e.1[0], e.1[1]])));
+                if let Some(v) = summary["per_arm"][a][format!("local_{m}")].as_array_mut() {
+                    v.push(json!([b0, e.0, e.1[0], e.1[1]]))
+                }
                 if summary["per_arm"][a][format!("local_{m}")].is_null() {
                     summary["per_arm"][a][format!("local_{m}")] =
                         json!([[b0, e.0, e.1[0], e.1[1]]]);

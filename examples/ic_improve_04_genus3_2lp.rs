@@ -189,7 +189,7 @@ fn is_prime(n: u64) -> bool {
         return false;
     }
     for &sp in &[2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
-        if n % sp == 0 {
+        if n.is_multiple_of(sp) {
             return n == sp;
         }
     }
@@ -242,7 +242,7 @@ fn sqrt_fp(a: u64, p: u64) -> u64 {
         s,
         powmod(z, q, p),
         powmod(a, q, p),
-        powmod(a, (q + 1) / 2, p),
+        powmod(a, q.div_ceil(2), p),
     );
     while t != 1 {
         let (mut i, mut tt) = (0u32, t);
@@ -658,7 +658,7 @@ impl KField {
                 }
             };
             let (mut m, mut c, mut t, mut r) =
-                (s, self.pw(z, q), self.pw(a, q), self.pw(a, (q + 1) / 2));
+                (s, self.pw(z, q), self.pw(a, q), self.pw(a, q.div_ceil(2)));
             while t != KONE {
                 let (mut i, mut tt) = (0u32, t);
                 while tt != KONE {
@@ -1112,7 +1112,7 @@ fn build_instance(p: u64, rng: &mut PyRng, cmax: u64) -> Option<Instance> {
     let mut sel = None;
     let mut cc = 4;
     while cc <= cmax {
-        if n % cc == 0 && is_prime(n / cc) && (n / cc) % 2 == 1 && n / cc > cmax {
+        if n.is_multiple_of(cc) && is_prime(n / cc) && (n / cc) % 2 == 1 && n / cc > cmax {
             sel = Some((n / cc, cc));
             break;
         }
@@ -1302,7 +1302,7 @@ fn roots_split(u: &P, p: u64, rng: &mut PyRng) -> Vec<u64> {
         let sq = sqrt_fp(disc, p);
         cnt(0, 2 + 3 * bitlen(p) / 2 + 2);
         cnt(1, 1);
-        let i2 = (p + 1) / 2;
+        let i2 = p.div_ceil(2);
         return vec![
             (2 * p - u[1] + sq) % p * i2 % p,
             (2 * p - u[1] - sq) % p * i2 % p,
@@ -1355,6 +1355,7 @@ impl Mont {
         }
     }
     #[inline(always)]
+    #[allow(clippy::wrong_self_convention)]
     fn to_mont(&self, a: u64) -> u64 {
         self.redc(a as u128 * self.r2 as u128)
     }
@@ -2048,7 +2049,7 @@ fn rho_neg(inst: &Instance, g: EP, t: EP, rng: &mut PyRng, r: usize, max_steps: 
         loop {
             if (hx(cur.0) >> 3) & mask == 0 {
                 if let Some(&(a2, b2)) = seen.get(&cur) {
-                    if (b2 + ell - b) % ell != 0 {
+                    if !(b2 + ell - b).is_multiple_of(ell) {
                         let kk = mulmod(
                             (a + ell - a2) % ell,
                             powmod((b2 + ell - b) % ell, ell - 2, ell),
@@ -2116,7 +2117,7 @@ fn rho_neg(inst: &Instance, g: EP, t: EP, rng: &mut PyRng, r: usize, max_steps: 
                 saved = None;
                 continue;
             }
-            if walk % L == 0 {
+            if walk.is_multiple_of(L) {
                 saved = Some(cur);
             }
             let Some((c2, na, nb)) = step(cur, a, b) else {

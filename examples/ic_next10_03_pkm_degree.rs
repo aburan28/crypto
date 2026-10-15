@@ -293,9 +293,9 @@ fn delta(inp: &str) {
         let mut x = p - 1;
         let mut q = 2;
         while q * q <= x {
-            if x % q == 0 {
+            if x.is_multiple_of(q) {
                 f.push(q);
-                while x % q == 0 {
+                while x.is_multiple_of(q) {
                     x /= q;
                 }
             }
@@ -321,7 +321,7 @@ fn delta(inp: &str) {
     }
     let sbar_deg = (0..n * n)
         .filter(|&i| a[i] != 0)
-        .map(|i| ((i / n).count_ones() + (i % n).count_ones()))
+        .map(|i| (i / n).count_ones() + (i % n).count_ones())
         .max()
         .unwrap();
     // evaluate on the grid
@@ -445,7 +445,7 @@ fn macaulay(inp: &str, dmax: u32) {
                     let mut x: u64 = (1u64 << ydeg) - 1;
                     while x < (1u64 << nbits) {
                         masks.push(x);
-                        let c = x & x.wrapping_neg();
+                        let c = x.isolate_lowest_one();
                         let r = x + c;
                         x = (((r ^ x) >> 2) / c) | r;
                     }

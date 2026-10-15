@@ -512,7 +512,7 @@ impl Arm {
         pick: u64,
     ) -> bool {
         let r = inst.n;
-        if t % self.cfg.stride != 0 {
+        if !t.is_multiple_of(self.cfg.stride) {
             return false;
         }
         let mut rows: Vec<(SparseRel, usize)> = decs

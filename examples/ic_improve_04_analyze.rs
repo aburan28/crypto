@@ -168,7 +168,7 @@ fn ols(x: &[f64], y: &[f64]) -> f64 {
     sxy / sxx
 }
 
-fn pct(v: &mut Vec<f64>, q: f64) -> f64 {
+fn pct(v: &mut [f64], q: f64) -> f64 {
     v.sort_by(|a, b| a.partial_cmp(b).unwrap());
     let i = ((v.len() - 1) as f64 * q).round() as usize;
     v[i]

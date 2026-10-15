@@ -640,6 +640,7 @@ fn character_orbits(n: usize) -> Vec<(usize, usize)> {
 
 /// Reduced row echelon form over `F_{2^d}`: the nonzero reduced rows and
 /// their pivot columns, in pivot order.
+#[allow(dead_code)]
 fn rref_gf(gf: &Gf, mut m: Vec<Vec<u64>>, cols: usize) -> (Vec<Vec<u64>>, Vec<usize>) {
     let mut rank = 0;
     let mut piv = Vec::new();
@@ -675,6 +676,7 @@ fn rref_gf(gf: &Gf, mut m: Vec<Vec<u64>>, cols: usize) -> (Vec<Vec<u64>>, Vec<us
 }
 
 /// Reduced row echelon form over `F₂` (bit-packed rows).
+#[allow(dead_code)]
 fn rref_bits(mut m: Vec<Vec<u64>>, cols: usize) -> (Vec<Vec<u64>>, Vec<usize>) {
     let mut rank = 0;
     let mut piv = Vec::new();

@@ -177,9 +177,7 @@ fn check_control(out: &mut std::fs::File, n: u32, a: u8, samples: u64, rng: &mut
     );
     // Subgroup points [k]G and [k]G - R for a cofactor-projected R.
     let g: FastPoint = match curve.generator() {
-        crypto_lib::binary_ecc::BinaryPoint::Affine { x, y } => {
-            Some((fast.word(&x), fast.word(&y)))
-        }
+        crypto_lib::binary_ecc::BinaryPoint::Affine { x, y } => Some((fast.word(x), fast.word(y))),
         _ => unreachable!(),
     };
     let rep = (2u64..)

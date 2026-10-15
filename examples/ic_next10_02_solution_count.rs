@@ -84,7 +84,7 @@ impl Fp {
         let p = self.p;
         let mut q = p - 1;
         let mut s = 0;
-        while q % 2 == 0 {
+        while q.is_multiple_of(2) {
             q /= 2;
             s += 1;
         }
@@ -95,7 +95,7 @@ impl Fp {
         let mut m = s;
         let mut c = self.pow(z, q);
         let mut t = self.pow(x, q);
-        let mut r = self.pow(x, (q + 1) / 2);
+        let mut r = self.pow(x, q.div_ceil(2));
         while t != 1 {
             let mut i = 0;
             let mut tt = t;
@@ -224,7 +224,7 @@ fn build_base(arm: &str, c: &Curve, n: u64, bsz: u64, rng: &mut Rng) -> Option<V
     let p = f.p;
     let v: Vec<u64> = match arm {
         "kummer" | "subgroup" => {
-            if (p - 1) % bsz != 0 {
+            if !(p - 1).is_multiple_of(bsz) {
                 return None;
             }
             let z = root_of_unity(f, bsz);
@@ -248,7 +248,7 @@ fn build_base(arm: &str, c: &Curve, n: u64, bsz: u64, rng: &mut Rng) -> Option<V
                 .collect()
         }
         "dickson" => {
-            if (p - 1) % bsz != 0 {
+            if !(p - 1).is_multiple_of(bsz) {
                 return None;
             }
             let z = root_of_unity(f, bsz);
@@ -268,7 +268,7 @@ fn build_base(arm: &str, c: &Curve, n: u64, bsz: u64, rng: &mut Rng) -> Option<V
                 .collect()
         }
         "dickson-torus" => {
-            if (p + 1) % bsz != 0 {
+            if !(p + 1).is_multiple_of(bsz) {
                 return None;
             }
             let mut nr = 2;
