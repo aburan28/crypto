@@ -4,10 +4,10 @@
 |---|---|---|
 | aa:lpsgebw2 | 30/30 | 12..21 |
 | aa:lpsgebw2+R1 | 30/30 | 12..21 |
-| r2:lpsgebw2 | 30/30 | 12..21 |
-| r2:lpsgebw2+R1 | 30/30 | 12..21 |
-| sched:lpsgebw2 | 37/37 | 12..22 |
-| sched:lpsgebw2+R1 | 37/37 | 12..22 |
+| r2:lpsgebw2 | 38/38 | 12..21 |
+| r2:lpsgebw2+R1 | 38/38 | 12..21 |
+| sched:lpsgebw2 | 41/41 | 12..22 |
+| sched:lpsgebw2+R1 | 41/41 | 12..22 |
 | sched:lpsgebw2+R1s | 2/2 | 14..16 |
 
 sizes with >= 3 common curves: [12, 13, 14, 15, 16, 17, 18, 19, 20, 21]; curves per size: [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
