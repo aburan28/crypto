@@ -11,6 +11,7 @@ on:
       - 'problems/**'
       - 'src/bin/backlog.rs'
       - 'src/bin/backlog/**'
+      - 'src/bin/backlog_check_aux2t.rs'
       - 'tests/backlog_cli.rs'
       - 'src/hash/sha1.rs'
       - '.github/workflows/backlog.yml'
@@ -25,6 +26,7 @@ on:
       - 'problems/**'
       - 'src/bin/backlog.rs'
       - 'src/bin/backlog/**'
+      - 'src/bin/backlog_check_aux2t.rs'
       - 'tests/backlog_cli.rs'
       - '.github/workflows/backlog.yml'
   workflow_dispatch:
@@ -67,10 +69,10 @@ jobs:
         with:
           toolchain: '1.98'
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build --release --bin backlog
+      - run: cargo build --release --bin backlog --bin backlog_check_aux2t
       - name: Every card validates
         run: ./target/release/backlog validate --all
-      - name: Unit tests (card rules, placeholders, schema agreement)
-        run: cargo test --release --bin backlog
+      - name: Unit tests (card rules, placeholders, schema agreement, the native checker)
+        run: cargo test --release --bin backlog --bin backlog_check_aux2t
       - name: Integration tests (cairn lab tests skip without cairn)
         run: cargo test --release --test backlog_cli -- --nocapture

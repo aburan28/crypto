@@ -8,12 +8,11 @@
     "coordinator"
   ],
   "status": "blocked",
-  "status_note": "Blocked on the wide-field tower builder and the 192-bit field backend (both in progress, not yet pushed) and on a native checker route under cairn. Recommended gate: run only after lead 1 (xp:XP-20261015-pkm-m3-n21-m4-n20) gives a bounded F4 solving degree, or run it explicitly as an infrastructure/feasibility measurement of construction cost at scale.",
+  "status_note": "Blocked on the wide-field tower builder and the 192-bit field backend (both in progress, not yet pushed) and on PR #1889. Runs as cairn lab tasks with the native checker deciding `found` (first_success); posting it as a cairn objective is the upgrade path once cairn can pin a native checker. Recommended gate: run only after lead 1 (XP-20261015-pkm-m3-n21-m4-n20) gives a bounded F4 solving degree, or run it explicitly as an infrastructure/feasibility measurement.",
   "blocked_on": [
     "branch:claude/isogeny-tower-wide wide-field isogeny-tower builder lane, in progress (not yet pushed); provides the solver binary and the 2-Sylow halving filter",
     "branch:claude/fp-backend Stage 0 192-bit prime-field backend, in progress (not yet pushed); its measured Legendre/sqrt cost fixes the per-trial cost below",
-    "pr:1889 the measured small-field tower and auxiliary-curve search (open, unmerged)",
-    "problem:problems/cairn-certificate-checker-python-only.md"
+    "pr:1889 the measured small-field tower and auxiliary-curve search (open, unmerged)"
   ],
   "links": {
     "lead": "docs/ic/factor-base-encyclopedia/README.md §0.2 (isogeny tower, the P-192 shape)",
@@ -52,7 +51,7 @@
     "gpu": null,
     "est_core_hours": 39094,
     "est_wall_hours": null,
-    "notes": "Expected total for the Z/2 x Z/2 family (k = 2) at 2 us per draw: 2^46 draws ~ 39,000 core-hours ~ 4.5 core-years; range 9,800 core-hours (k = 4, 2 us) to 391,000 core-hours (k = 2, 20 us), i.e. 1.1-45 core-years. Embarrassingly parallel: wall time is core-hours / cores. Per shard (2^32 draws): 2.4-24 core-hours. Derivation in README.md. The per-draw cost is a placeholder until claude/fp-backend measures a 192-bit Legendre symbol and square root."
+    "notes": "Expected total for the Z/2 x Z/2 family (k = 2) at 2 us per draw: 2^46 draws ~ 39,000 core-hours ~ 4.5 core-years; range 9,800 core-hours (k = 4, 2 us) to 391,000 core-hours (k = 2, 20 us), i.e. 1.1-45 core-years. Embarrassingly parallel: wall time is core-hours / cores. Per shard (2^32 draws, one core): 8,590-85,900 s = 2.4-23.9 h at 2-20 us per draw. Derivation in README.md. The per-draw cost is a placeholder until claude/fp-backend measures a 192-bit Legendre symbol and square root."
   },
   "run": {
     "argv": [
@@ -68,7 +67,7 @@
       "--seed-hi",
       "{seed_hi}",
       "--out",
-      "{out}/result.json",
+      "{out}/found/artifact.json",
       "--checkpoint",
       "{checkpoint}"
     ],
@@ -96,62 +95,75 @@
     "result_schema": "the solver's result JSON: {a, b, Q: [x, y], t, seed, draws, cpu_seconds}, frozen in PROTOCOL.md",
     "verify": [
       "target/release/backlog_check_aux2t",
-      "{out}/result.json"
+      "{out}/found/artifact.json"
     ],
     "land": "research/pkm_aux_search_p192_t48"
   },
   "cairn": {
-    "mode": "objective",
-    "notes": "A checkable search: any solver may submit a curve and the pinned checker decides. Not postable until a native checker can run under cairn (problems/cairn-certificate-checker-python-only.md); then `backlog cairn-post` posts it with this funding as the reward, piecework paying reward/65536 per seed range.",
-    "kind": "certificate",
+    "mode": "lab-task",
+    "notes": "One lab task per seed range; stop rule first_success (backlog/README.md): before each claim a runner checks `backlog cairn-found <ID> --lab DIR` (exit 3 = stop); a run that finds a curve writes {out}/found/artifact.json, which `cairn lab exec --publish runs/<ID>/shard-<k>` publishes, and the runner records it with `backlog cairn-found ... --artifact` (the checker decides). Re-claim every 2 h (ttl 6 h). Resumable from checkpoint.json, so preemptible. Upgrade path: a cairn piecework objective once cairn can pin a native checker (problems/cairn-certificate-checker-python-only.md).",
+    "space": "TBD",
+    "tasks": [
+      "XP-20261015-p192-isogeny-aux-search-t48/shard-{k}"
+    ],
+    "ttl_s": 21600,
+    "env": {
+      "name": "crypto-aux-search",
+      "recipe": "A rust:1.98 image built at the builder lane merge commit with `cargo build --release --bin pkm-aux-search --bin backlog_check_aux2t`, imported with `cairn lab env import crypto-aux-search-<sha> --docker <image>`"
+    },
+    "exec": {
+      "cpus": 1,
+      "memory_mb": 1024,
+      "timeout_s": 172800,
+      "sandbox": "auto",
+      "publish": "runs/XP-20261015-p192-isogeny-aux-search-t48"
+    },
     "checker": {
-      "status": "blocked",
-      "bin": "backlog_check_aux2t (not written; src/bin/backlog_check_aux2t.rs)",
+      "status": "available",
+      "bin": "backlog_check_aux2t (src/bin/backlog_check_aux2t.rs)",
       "argv": [
         "backlog_check_aux2t",
-        "artifact.json"
+        "{artifact}"
       ],
       "artifact_schema": {
         "type": "object",
         "required": [
+          "p",
           "a",
           "b",
-          "Q",
+          "Qx",
+          "Qy",
           "t"
         ],
         "properties": {
-          "a": {
+          "p": {
             "type": "string",
-            "description": "decimal, 0 <= a < p"
+            "description": "decimal or 0x-hex; must be the NIST P-192 prime"
+          },
+          "a": {
+            "type": "string"
           },
           "b": {
-            "type": "string",
-            "description": "decimal, 0 <= b < p"
+            "type": "string"
           },
-          "Q": {
-            "type": "array",
-            "description": "[x, y] decimal affine coordinates"
+          "Qx": {
+            "type": "string"
+          },
+          "Qy": {
+            "type": "string"
           },
           "t": {
             "type": "integer",
             "description": "48"
           }
         },
-        "checks": "p is the NIST P-192 prime 2^192 - 2^64 - 1; 4a^3 + 27b^2 != 0 mod p; Q on y^2 = x^3 + ax + b; [2^t]Q = O and [2^(t-1)]Q != O"
-      },
-      "blocked_by": "problem:problems/cairn-certificate-checker-python-only.md"
+        "checks": "4a^3 + 27b^2 != 0 mod p; Q on y^2 = x^3 + ax + b; [2^(t-1)]Q != O and [2^t]Q = O; exit 0 accept, 1 reject, 2 bad input"
+      }
     },
-    "piecework": {
-      "units": 65536,
-      "unit": "one seed range of 2^32 curve draws (shard k covers seeds [k*2^32, (k+1)*2^32))"
-    },
-    "stop": "first_success",
     "funding": {
       "units": 131072,
       "rationale": "Lowest of the four: gated on lead 1 (the base only matters if the F4 solving degree is bounded), and 1-45 core-years of construction that by itself says nothing about P-192 security."
-    },
-    "goal": "GOAL-crypto-pkm-isogeny-tower-p192",
-    "verifier": null
+    }
   },
   "owner_hint": "the wide-field isogeny-tower builder lane"
 }

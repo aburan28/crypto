@@ -822,6 +822,23 @@ fn check_link(v: &mut V, field: &str, link: &str, ctx: &Ctx) {
     }
 }
 
+/// `cairn.checker`: the native checker of a success claim.
+fn check_checker(v: &mut V, ctx: &Ctx) {
+    let st = v.one_of("cairn.checker.status", &["available", "blocked"]);
+    v.string("cairn.checker.bin");
+    v.strings("cairn.checker.argv", true);
+    v.object("cairn.checker.artifact_schema");
+    if st == Some("blocked") {
+        match v.get("cairn.checker.blocked_by").and_then(Value::as_str) {
+            Some(link) => check_link(v, "cairn.checker.blocked_by", link, ctx),
+            None => v.err(
+                "cairn.checker.blocked_by",
+                "a blocked checker names its blocker",
+            ),
+        }
+    }
+}
+
 fn check_cairn(v: &mut V, id: Option<&str>, count: Option<u64>, ctx: &Ctx) {
     if v.object("cairn").is_none() {
         return;
@@ -832,7 +849,17 @@ fn check_cairn(v: &mut V, id: Option<&str>, count: Option<u64>, ctx: &Ctx) {
         Some("lab-task") => {
             v.string("cairn.space");
             if let Some(tasks) = v.strings("cairn.tasks", true) {
+                let pattern = id.map(|id| format!("{id}/shard-{{k}}"));
+                if tasks.len() > 1 && tasks.iter().any(|t| Some(t.to_string()) == pattern) {
+                    v.err(
+                        "cairn.tasks",
+                        "<id>/shard-{k} stands for every shard and is the only entry",
+                    );
+                }
                 for (i, t) in tasks.iter().enumerate() {
+                    if Some(t.to_string()) == pattern && tasks.len() == 1 {
+                        continue;
+                    }
                     let ok = match (id, t.split_once("/shard-")) {
                         (Some(id), None) => *t == id && count == Some(1),
                         (Some(id), Some((base, k))) => {
@@ -873,6 +900,33 @@ fn check_cairn(v: &mut V, id: Option<&str>, count: Option<u64>, ctx: &Ctx) {
                     );
                 }
             }
+            // first_success on lab tasks: the finder runs the card's checker
+            // and records `found` in the lab doc (backlog/README.md), so the
+            // card names an available native checker taking {artifact}.
+            let first = v.get("shards.stop").and_then(Value::as_str) == Some("first_success");
+            if first || v.get("cairn.checker").is_some() {
+                if v.object("cairn.checker").is_some() {
+                    check_checker(v, ctx);
+                }
+                if first {
+                    if v.get("cairn.checker.status").and_then(Value::as_str) != Some("available") {
+                        v.err(
+                            "cairn.checker.status",
+                            "a first_success lab-task card needs an available checker: it decides `found`",
+                        );
+                    }
+                    let takes_artifact = v
+                        .get("cairn.checker.argv")
+                        .and_then(Value::as_array)
+                        .is_some_and(|a| {
+                            a.iter()
+                                .any(|s| s.as_str().is_some_and(|s| s.contains("{artifact}")))
+                        });
+                    if !takes_artifact {
+                        v.err("cairn.checker.argv", "takes the artifact as {artifact}");
+                    }
+                }
+            }
         }
         Some("objective") => {
             if v.one_of("cairn.kind", &["certificate", "workspace"])
@@ -880,19 +934,7 @@ fn check_cairn(v: &mut V, id: Option<&str>, count: Option<u64>, ctx: &Ctx) {
             {
                 // The verifier: native only (AGENTS.md "no Python").
                 if v.object("cairn.checker").is_some() {
-                    let st = v.one_of("cairn.checker.status", &["available", "blocked"]);
-                    v.string("cairn.checker.bin");
-                    v.strings("cairn.checker.argv", true);
-                    v.object("cairn.checker.artifact_schema");
-                    if st == Some("blocked") {
-                        match v.get("cairn.checker.blocked_by").and_then(Value::as_str) {
-                            Some(link) => check_link(v, "cairn.checker.blocked_by", link, ctx),
-                            None => v.err(
-                                "cairn.checker.blocked_by",
-                                "a blocked checker names its blocker",
-                            ),
-                        }
-                    }
+                    check_checker(v, ctx);
                 }
             }
             if v.object("cairn.piecework").is_some() {
@@ -1208,6 +1250,36 @@ mod tests {
             e.contains("sandbox_reason") && e.contains("cairn.exec.publish"),
             "{e}"
         );
+    }
+
+    #[test]
+    fn first_success_lab_tasks_need_a_checker_and_may_use_the_shard_pattern() {
+        let root = tmp("first");
+        let id = "XP-20261015-unit-first";
+        let mut c = base(id);
+        c["cairn"] = json!({"mode": "lab-task", "space": "TBD", "tasks": [format!("{id}/shard-{{k}}")], "ttl_s": 21600,
+            "env": {"name": "e", "recipe": "r"},
+            "exec": {"cpus": 1, "memory_mb": 1024, "timeout_s": 60, "sandbox": "auto", "publish": format!("runs/{id}")},
+            "checker": {"status": "available", "bin": "chk", "argv": ["chk", "{artifact}"], "artifact_schema": {}},
+            "funding": {"units": 1, "rationale": "r"}});
+        let ctx = fixture(&root, id, &c);
+        assert_eq!(errors(&validate(&c, &ctx)), Vec::<String>::new());
+        // No checker, or one that does not take the artifact: refused.
+        let mut d = c.clone();
+        d["cairn"]["checker"]["argv"] = json!(["chk"]);
+        assert!(errors(&validate(&d, &ctx))
+            .iter()
+            .any(|e| e.contains("{artifact}")));
+        d["cairn"].as_object_mut().unwrap().remove("checker");
+        assert!(errors(&validate(&d, &ctx))
+            .iter()
+            .any(|e| e.contains("needs an available checker")));
+        // The pattern is the only entry.
+        let mut e = c.clone();
+        e["cairn"]["tasks"] = json!([format!("{id}/shard-{{k}}"), format!("{id}/shard-0")]);
+        assert!(errors(&validate(&e, &ctx))
+            .iter()
+            .any(|x| x.contains("only entry")));
     }
 
     #[test]

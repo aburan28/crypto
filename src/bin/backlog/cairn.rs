@@ -334,3 +334,53 @@ pub fn post(draft: &Value, node: &str, identity: &Path, scratch: &Path) -> Resul
         ))
     }
 }
+
+/// The fields of lab doc `doc`, or `Null` when nobody has written it.
+pub fn doc_get(lab_dir: &Path, doc: &str) -> Result<Value, String> {
+    match lab(lab_dir, &["doc", doc, "--json"]) {
+        Ok(text) => serde_json::from_str(&text).map_err(|e| format!("cairn lab doc --json: {e}")),
+        Err(e) if e.contains("not found") => Ok(Value::Null),
+        Err(e) => Err(e),
+    }
+}
+
+/// Set one field of a lab doc to a JSON value.
+pub fn doc_set(
+    lab_dir: &Path,
+    identity: &Path,
+    doc: &str,
+    key: &str,
+    value: &Value,
+) -> Result<(), String> {
+    let ident = identity.to_string_lossy().into_owned();
+    lab(
+        lab_dir,
+        &[
+            "doc",
+            "set",
+            doc,
+            key,
+            &value.to_string(),
+            "--identity",
+            &ident,
+        ],
+    )
+    .map(|_| ())
+}
+
+/// Every task in the lab whose name starts with `prefix`, in shard order.
+pub fn task_keys(lab_dir: &Path, prefix: &str) -> Result<Vec<String>, String> {
+    let leases: Value = serde_json::from_str(&lab(lab_dir, &["tasks", "--json"])?)
+        .map_err(|e| format!("cairn lab tasks --json is not JSON: {e}"))?;
+    let mut keys: Vec<String> = leases
+        .as_object()
+        .map(|m| {
+            m.keys()
+                .filter(|k| k.starts_with(prefix))
+                .cloned()
+                .collect()
+        })
+        .unwrap_or_default();
+    keys.sort_by_key(|k| (k.len(), k.clone()));
+    Ok(keys)
+}

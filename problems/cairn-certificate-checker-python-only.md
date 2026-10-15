@@ -3,9 +3,11 @@
 - **Status:** `open`
 - **Kind:** implementation gap (in cairn, a separate repository); policy conflict
   between two repositories' rules. Not a mathematical obstruction.
-- **Affected work:** [`backlog/XP-20261015-p192-isogeny-aux-search-t48`](../backlog/XP-20261015-p192-isogeny-aux-search-t48/README.md)
-  (`cairn.mode = "objective"`), and any future backlog card that wants a
-  checkable search posted as a cairn objective.
+- **Affected work:** objective mode for any backlog card with a native
+  checker: the upgrade path of
+  [`backlog/XP-20261015-p192-isogeny-aux-search-t48`](../backlog/XP-20261015-p192-isogeny-aux-search-t48/README.md),
+  which since 2026-10-15 runs as cairn lab tasks with the native checker
+  deciding `found` and is no longer blocked by this record.
 - **Next action owner:** unassigned (the change, if any, is in cairn; this
   repository cannot push there).
 - **Last updated:** 2026-10-15
@@ -104,6 +106,12 @@ A planned step is not a completed experiment.
 ## Resolution and history
 
 - 2026-10-15: recorded by the backlog lane while integrating the experiment
-  backlog with cairn. Unresolved. The Rust checker itself was not written,
-  by instruction, until a route for running it under cairn exists; the card's
-  `outputs.verify` names it as the independent check owed.
+  backlog with cairn. Unresolved.
+- 2026-10-15 (later): the native checker exists
+  (`src/bin/backlog_check_aux2t.rs`, tested on small-prime analogues), and the
+  P-192 card switched to `mode: lab-task` with the first-success stop rule of
+  `backlog/README.md`, so the search no longer waits on this record. What
+  stays blocked is posting it as a cairn objective, where a stranger's claim
+  is graded by a verifier the objective pins. Whether to extend cairn so a
+  certificate verifier can pin a native executable is listed among the
+  user's decisions in `backlog/README.md`.

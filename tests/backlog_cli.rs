@@ -174,7 +174,7 @@ fn objective_card(root: &Path, id: &str) {
 }
 
 #[test]
-fn cairn_post_is_a_dry_run_by_default_and_refuses_a_blocked_checker() {
+fn cairn_post_is_a_dry_run_by_default_and_refuses_a_blocked_checker_or_a_lab_task() {
     let root = scratch_root("post");
     objective_card(&root, "XP-20261015-demo-post");
     let out = run(Command::new(bin())
@@ -196,15 +196,30 @@ fn cairn_post_is_a_dry_run_by_default_and_refuses_a_blocked_checker() {
         .output()
         .unwrap();
     assert!(!c.status.success());
-    // The committed P-192 card's checker is blocked: nothing to post.
+    // A card whose checker is blocked has nothing to post.
+    let path = root.join("backlog/XP-20261015-demo-post/card.json");
+    let mut card: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(&path).unwrap()).unwrap();
+    card["cairn"]["checker"]["status"] = serde_json::json!("blocked");
+    card["cairn"]["checker"]["blocked_by"] = serde_json::json!("pr:1 the verifier route");
+    fs::write(&path, card.to_string()).unwrap();
     let p = Command::new(bin())
+        .arg("--root")
+        .arg(&root)
+        .args(["cairn-post", "XP-20261015-demo-post"])
+        .output()
+        .unwrap();
+    assert!(!p.status.success());
+    assert!(String::from_utf8_lossy(&p.stderr).contains("pr:1 the verifier route"));
+    // The P-192 card runs as lab tasks today: not an objective yet.
+    let q = Command::new(bin())
         .arg("--root")
         .arg(repo())
         .args(["cairn-post", "XP-20261015-p192-isogeny-aux-search-t48"])
         .output()
         .unwrap();
-    assert!(!p.status.success());
-    assert!(String::from_utf8_lossy(&p.stderr).contains("cairn-certificate-checker-python-only"));
+    assert!(!q.status.success());
+    assert!(String::from_utf8_lossy(&q.stderr).contains("lab-task"));
     // A lab-task card is not an objective.
     let l = Command::new(bin())
         .arg("--root")
@@ -524,4 +539,237 @@ fn publish_claim_exec_release_and_status_round_trip() {
         other.contains("unclaimed") && other.trim_end().ends_with('-'),
         "{other}"
     );
+}
+
+// ── the native checker and the first-success rule ───────────────────────
+
+/// A point of order exactly 2^t over F_p, by brute force with repeated
+/// addition (independent of the checker's doubling chain).
+fn small_witness(p: u64, t: u32) -> (u64, u64, u64, u64) {
+    let inv = |v: u64| {
+        let (mut r, mut b, mut e) = (1u64, v % p, p - 2);
+        while e > 0 {
+            if e & 1 == 1 {
+                r = r * b % p;
+            }
+            b = b * b % p;
+            e >>= 1;
+        }
+        r
+    };
+    let order = |a: u64, x: u64, y: u64| {
+        let (mut cx, mut cy, mut n) = (x, y, 1u64);
+        loop {
+            let l = if cx == x {
+                if (cy + y).is_multiple_of(p) {
+                    return n + 1;
+                }
+                (3 * x % p * x % p + a) % p * inv(2 * y % p) % p
+            } else {
+                (y + p - cy) % p * inv((x + p - cx) % p) % p
+            };
+            let nx = (l * l % p + 2 * p - cx - x) % p;
+            let ny = (l * ((cx + p - nx) % p) % p + p - cy) % p;
+            cx = nx;
+            cy = ny;
+            n += 1;
+        }
+    };
+    for a in 0..p {
+        for b in 1..p {
+            if (4 * a * a % p * a + 27 * b % p * b).is_multiple_of(p) {
+                continue;
+            }
+            for x in 0..p {
+                let r = (x * x % p * x + a * x + b) % p;
+                if let Some(y) = (0..p).find(|y| y * y % p == r) {
+                    if order(a, x, y) == 1 << t {
+                        return (a, b, x, y);
+                    }
+                }
+            }
+        }
+    }
+    panic!("none")
+}
+
+fn write_artifact(path: &Path, p: u64, (a, b, x, y): (u64, u64, u64, u64), t: u32) {
+    let v = serde_json::json!({"p": p.to_string(), "a": a.to_string(), "b": b.to_string(),
+                               "Qx": x.to_string(), "Qy": y.to_string(), "t": t});
+    fs::write(path, v.to_string()).unwrap();
+}
+
+fn checker() -> &'static str {
+    env!("CARGO_BIN_EXE_backlog_check_aux2t")
+}
+
+#[test]
+fn the_checker_binary_exit_codes() {
+    let w = tmp("checker");
+    let good = w.join("good.json");
+    write_artifact(&good, 241, small_witness(241, 4), 4);
+    let out = run(Command::new(checker()).arg(&good).arg("--allow-test-prime"));
+    assert_eq!(out.status.code(), Some(0));
+    let v: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert_eq!(v["verdict"], "accept");
+    // The same curve is the wrong prime for the real check.
+    let o = Command::new(checker()).arg(&good).output().unwrap();
+    assert_eq!(o.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&o.stdout).contains("P-192"));
+    // Wrong order.
+    let bad = w.join("bad.json");
+    write_artifact(&bad, 241, small_witness(241, 4), 5);
+    assert_eq!(
+        Command::new(checker())
+            .arg(&bad)
+            .arg("--allow-test-prime")
+            .output()
+            .unwrap()
+            .status
+            .code(),
+        Some(1)
+    );
+    // Malformed.
+    fs::write(w.join("junk.json"), "{not json").unwrap();
+    assert_eq!(
+        Command::new(checker())
+            .arg(w.join("junk.json"))
+            .output()
+            .unwrap()
+            .status
+            .code(),
+        Some(2)
+    );
+    assert_eq!(
+        Command::new(checker()).output().unwrap().status.code(),
+        Some(2)
+    );
+}
+
+#[test]
+fn first_success_found_is_set_only_on_accept_and_stops_runners() {
+    if !have_cairn() {
+        return;
+    }
+    let w = tmp("found");
+    let (a, _b, id1, _id2) = two_replicas(&w);
+    let lab = a.to_str().unwrap();
+    // A scratch card: the P-192 card's shape with the test checker.
+    let root = scratch_root("found-root");
+    let id = "XP-20261015-demo-found";
+    let src = repo().join("backlog/XP-20261015-p192-isogeny-aux-search-t48");
+    let dir = root.join("backlog").join(id);
+    fs::create_dir_all(&dir).unwrap();
+    fs::copy(src.join("README.md"), dir.join("README.md")).unwrap();
+    let mut card: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(src.join("card.json")).unwrap()).unwrap();
+    card["id"] = serde_json::json!(id);
+    card["status"] = serde_json::json!("draft");
+    card["blocked_on"] = serde_json::json!([]);
+    card["cairn"]["tasks"] = serde_json::json!([format!("{id}/shard-{{k}}")]);
+    card["cairn"]["exec"]["publish"] = serde_json::json!(format!("runs/{id}"));
+    card["cairn"]["checker"]["argv"] = serde_json::json!([checker(), "{artifact}"]);
+    fs::write(dir.join("card.json"), card.to_string()).unwrap();
+    let backlog = |args: &[&str]| {
+        Command::new(bin())
+            .arg("--root")
+            .arg(&root)
+            .args(args)
+            .output()
+            .unwrap()
+    };
+
+    let none = backlog(&["cairn-found", id, "--lab", lab]);
+    assert_eq!(
+        none.status.code(),
+        Some(0),
+        "{}",
+        String::from_utf8_lossy(&none.stderr)
+    );
+    assert!(stdout(&none).contains("not found"));
+
+    let task = format!("{id}/shard-7");
+    let claim = stdout(&cairn(&[
+        "lab",
+        "--lab",
+        lab,
+        "claim",
+        &task,
+        "--holder",
+        "box-a",
+        "--ttl",
+        "600",
+        "--identity",
+        id1.to_str().unwrap(),
+    ]));
+    let claim_id = claim.split_whitespace().nth(1).unwrap().to_string();
+    let ident = id1.to_str().unwrap();
+    let lab_path = format!("runs/{id}/shard-7/found/artifact.json");
+    let record = |file: &Path| {
+        backlog(&[
+            "cairn-found",
+            id,
+            "--lab",
+            lab,
+            "--artifact",
+            file.to_str().unwrap(),
+            "--lab-path",
+            &lab_path,
+            "--claim",
+            &claim_id,
+            "--holder",
+            "box-a",
+            "--identity",
+            ident,
+            "--checker-arg",
+            "--allow-test-prime",
+        ])
+    };
+    // A wrong claim records nothing.
+    let bad = w.join("bad.json");
+    write_artifact(&bad, 241, small_witness(241, 4), 5);
+    assert_eq!(record(&bad).status.code(), Some(1));
+    assert_eq!(
+        backlog(&["cairn-found", id, "--lab", lab]).status.code(),
+        Some(0)
+    );
+    // A checked witness sets `found`; from then on every runner is told to stop.
+    let good = w.join("good.json");
+    write_artifact(&good, 241, small_witness(241, 4), 4);
+    let ok = record(&good);
+    assert_eq!(
+        ok.status.code(),
+        Some(0),
+        "{}{}",
+        stdout(&ok),
+        String::from_utf8_lossy(&ok.stderr)
+    );
+    let stop = backlog(&["cairn-found", id, "--lab", lab]);
+    assert_eq!(stop.status.code(), Some(3));
+    assert!(stdout(&stop).contains("box-a") && stdout(&stop).contains("accept"));
+    assert!(cairn(&[
+        "lab",
+        "--lab",
+        lab,
+        "release",
+        &claim_id,
+        "--outcome",
+        "completed",
+        "--identity",
+        ident
+    ])
+    .status
+    .success());
+    let st = stdout(&backlog(&["cairn-status", id, "--lab", lab]));
+    assert!(
+        st.contains("FOUND") && st.contains("1 of 65536 shards"),
+        "{st}"
+    );
+    assert!(
+        st.lines()
+            .any(|l| l.starts_with(&task) && l.contains("completed")),
+        "{st}"
+    );
+    // A second record is refused once found is set.
+    assert_eq!(record(&good).status.code(), Some(3));
 }

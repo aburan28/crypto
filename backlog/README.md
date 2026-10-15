@@ -40,9 +40,12 @@ backlog/
 | `backlog validate [<ID>... \| --all] [--no-git]` | the rules below; exit 1 on any error (CI runs `--all`) |
 | `backlog cairn-publish <ID> --lab DIR --identity FILE` | the card into a lab as doc `backlog/<ID>` (fields `card`, `funding`, `status`) and its README/PROTOCOL as lab files; unchanged content is not re-signed; nothing else is created |
 | `backlog cairn-status <ID> --lab DIR` | per task: lease state, holder, contended/expired/released counts, run receipts |
+| `backlog cairn-found <ID> --lab DIR [--artifact F --lab-path P --claim C --holder H --identity I]` | the first-success stop rule: without `--artifact`, exit 3 if `found` is set (stop) and 0 if not; with it, run the card's checker on the artifact and, on accept only, record `found` in lab doc `backlog/<ID>` |
 | `backlog cairn-post <ID> [--confirm --node URL --identity FILE]` | an objective-mode card as a cairn objective funded with the card's funding; prints the draft and posts nothing without `--confirm` |
 
-`cargo build --release --bin backlog`. The cairn commands shell out to
+`backlog_check_aux2t ARTIFACT.json` is the native checker of the P-192
+auxiliary-curve card (exit 0 accept, 1 reject, 2 bad input; one JSON verdict
+line). `cargo build --release --bin backlog --bin backlog_check_aux2t`. The cairn commands shell out to
 `cairn` (set `CAIRN` to use another path); nothing is reimplemented.
 
 ## The card
@@ -173,18 +176,20 @@ lab (a replicated, signed, offline-capable workspace; `cairn lab help`,
 cairn `docs/lab.md`), not in this repository. The card's `cairn` block says how:
 
 **`mode: "lab-task"`** (single heavy runs: lead 1, the G1 frozen cells, the
-P-224 depth check):
+P-224 depth check; and, with the first-success rule, searches such as the
+P-192 auxiliary curve):
 
 | field | what |
 |:--|:--|
 | `space` | the lab space id, or `TBD` until one is chosen |
-| `tasks` | the card id (one shard), or `<id>/shard-<k>` per shard |
+| `tasks` | the card id (one shard), `<id>/shard-<k>` per shard, or the single entry `<id>/shard-{k}` for every shard (large seed-range cards) |
 | `ttl_s` | the lease length; re-claim before it lapses (the heartbeat) |
 | `env` | `{name, recipe}`: how to build the environment tree from the pinned commit (usually a Docker image built at `code.commit`, imported with `cairn lab env import NAME --docker IMAGE`) |
 | `exec` | `{cpus, memory_mb, timeout_s, sandbox: auto \| none, sandbox_reason, publish: runs/<ID>…}`. `none` runs unconfined and the receipt says so; it is allowed for jobs whose memory exceeds what the host's jail can give, and needs `sandbox_reason` |
+| `checker` | required when `shards.stop = first_success`: `{status: available, bin, argv with {artifact}, artifact_schema}`, the native check that decides `found` |
 | `funding` | `{units, rationale}` |
 
-**`mode: "objective"`** (checkable searches: the P-192 auxiliary-curve search):
+**`mode: "objective"`** (checkable searches posted for anyone's solver; the upgrade path of the P-192 auxiliary-curve search):
 
 | field | what |
 |:--|:--|
@@ -203,6 +208,36 @@ certificate objective can be posted from here today. The open route is
 cairn's `workspace` verifier with a zero-dependency Rust checker crate in the
 pinned base tree; it is untested in cairn's jail. Recorded in
 [problems/cairn-certificate-checker-python-only.md](../problems/cairn-certificate-checker-python-only.md).
+Meanwhile a checkable search runs as **lab tasks with the first-success stop
+rule** (next section) and its native checker; the objective is its upgrade
+path.
+
+### First success on lab tasks
+
+A lab-task card with `shards.stop = first_success` (a search that ends at the
+first verified witness) carries an available native `cairn.checker`. The rule:
+
+1. **Before claiming each shard**, a runner syncs and runs
+   `backlog cairn-found <ID> --lab DIR`. Exit 3 means lab doc `backlog/<ID>`
+   has `found` set: stop, claim nothing more on this card.
+2. **A shard that finds a witness** writes it under its output directory
+   (`{out}/found/…`); `cairn lab exec --publish runs/<ID>/shard-<k>` publishes
+   it with the run receipt in one op.
+3. **The runner runs the checker** through
+   `backlog cairn-found <ID> --lab DIR --artifact <local file> --lab-path
+   runs/<ID>/shard-<k>/found/… --claim <lease id> --holder <name> --identity
+   <key>`. Only on the checker's accept does it set `found` =
+   `{artifact, artifact_sha256, verdict, claim, holder}`; a reject records
+   nothing and the search goes on.
+4. **It releases** the shard `completed` and syncs. `backlog cairn-status`
+   prints the `found` record above the task table.
+
+The honest limit: an offline runner does not see `found` until it syncs, so
+it may keep searching after the answer exists. That wastes work; it never
+produces a wrong result, because `found` is set only on the checker's accept,
+and a second accepted witness is simply a second valid curve. Two runners
+that record `found` concurrently leave a visible conflict in the doc register
+(cairn keeps both); either value is a checked witness.
 
 ### Runbook: a lab task, offline
 
@@ -215,6 +250,7 @@ export ID=~/.cairn/lab.identity.json L=~/lab
 cairn lab clone --space <SPACE> --dir /mnt/usb/lab --lab $L  # or --bundle F, or --peer ID@HOST:PORT
 cairn lab --lab $L sync --dir /mnt/usb/lab                   # fresh state before choosing
 cairn lab --lab $L tasks                                     # who holds what; pick by funding (doc backlog/<ID>)
+backlog cairn-found <CARD> --lab $L                          # first_success cards: exit 3 = already found, stop
 backlog show <CARD> --shard <K>                              # the exact command and resources
 cairn lab --lab $L claim <CARD>/shard-<K> --holder <host-or-person> --ttl 86400 --identity $ID
 cairn lab --lab $L sync --dir /mnt/usb/lab                   # publish the claim; re-check `tasks`: held, not contended
@@ -288,6 +324,11 @@ is not a result until that PR merges.
 - **Whether and how objectives are funded and posted** in practice: which
   node, which funder identity, and the funding numbers, which the reviewer
   approves card by card.
+- **Whether to extend cairn so a `certificate` verifier can pin a native
+  executable** (a change in `aburan28/cairn`, not here). It unblocks objective
+  mode for this repository's native checkers
+  ([problem record](../problems/cairn-certificate-checker-python-only.md));
+  until then checkable searches run as first-success lab tasks.
 
 ## Seed cards (2026-10-15)
 
@@ -296,13 +337,13 @@ is not a result until that PR merges.
 | [XP-20261015-pkm-m3-n21-m4-n20](XP-20261015-pkm-m3-n21-m4-n20/README.md) | blocked | 1,000,000 | 256/512 GB host or a disk-backed reducer; PR #1893 |
 | [XP-20261015-kummer-p224-depth](XP-20261015-kummer-p224-depth/README.md) | blocked | 400,000 | generic-field F4 lane (in progress) |
 | [XP-20261015-shape-g1-frozen-cells](XP-20261015-shape-g1-frozen-cells/README.md) | blocked | 250,000 | PR #1892; memory |
-| [XP-20261015-p192-isogeny-aux-search-t48](XP-20261015-p192-isogeny-aux-search-t48/README.md) | blocked | 131,072 | tower builder and Stage 0 (in progress); PR #1889; native checker under cairn; gate on lead 1 |
+| [XP-20261015-p192-isogeny-aux-search-t48](XP-20261015-p192-isogeny-aux-search-t48/README.md) | blocked | 131,072 | tower builder and Stage 0 (in progress); PR #1889; gate on lead 1. Lab tasks, first success; objective is the upgrade path |
 
 ## What is not built
 
 - A `backlog` command that claims, runs or heartbeats: those are `cairn lab`
   commands, used directly (runbook above).
-- The native P-192 checker (`backlog_check_aux2t`), until a route to run it
-  under cairn exists (problem record above).
+- A cairn objective for a native checker (problem record above); the
+  checker itself is `src/bin/backlog_check_aux2t.rs`.
 - Automatic status sync from the lab back to `card.json`: status in git moves
   by PR; `cairn-status` is the live view.

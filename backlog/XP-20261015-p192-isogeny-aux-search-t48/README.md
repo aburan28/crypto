@@ -2,9 +2,9 @@
 
 **Status: blocked.** Blocked on the wide-field isogeny-tower builder
 (`claude/isogeny-tower-wide`, in progress), on Stage 0's 192-bit field backend
-(`claude/fp-backend`, in progress), on PR #1889 (open), and on a native
-checker route under cairn
-([problems/cairn-certificate-checker-python-only.md](../../problems/cairn-certificate-checker-python-only.md)).
+(`claude/fp-backend`, in progress) and on PR #1889 (open). It runs as cairn
+lab tasks under the first-success stop rule, with the native checker
+`backlog_check_aux2t` deciding a claimed curve.
 **Recommended gate:** run it after lead 1
 ([XP-20261015-pkm-m3-n21-m4-n20](../XP-20261015-pkm-m3-n21-m4-n20/README.md))
 comes back with a bounded solving degree, or schedule it explicitly as an
@@ -39,7 +39,7 @@ wrong way: `D` rises at `m = 2, N = 20`. So:
 | solver binary `pkm-aux-search`: deterministic seed → curve draw, 2-Sylow halving filter, checkpoint/resume | `claude/isogeny-tower-wide` | in progress, not pushed |
 | 192-bit `F_p` Legendre symbol and square root, measured | `claude/fp-backend` (Stage 0) | in progress, not pushed |
 | the measured small-field search (`C = 1.05`) and its projection | PR #1889 | open |
-| a native checker cairn can run (`backlog_check_aux2t`) | [problem record](../../problems/cairn-certificate-checker-python-only.md) | blocked |
+| the checker `backlog_check_aux2t` (`src/bin/backlog_check_aux2t.rs`) | this repository | built |
 | `PROTOCOL.md`: seed derivation, family, filter, success check, stop rule | this directory | not written |
 
 The solver's flags in `card.json` are provisional; the builder lane fixes them.
@@ -87,7 +87,7 @@ above; the card is only worth running with the halving filter.
 
 **Parallelism.** Draws are independent, so wall time is core-hours divided by
 cores. The card splits the seed space `[0, 2^48)` into 65,536 shards of `2^32`
-draws (2.4–24 core-hours each). `2^48` seeds are 4 times the `k = 2`
+draws (2.4–23.9 core-hours each). `2^48` seeds are 4 times the `k = 2`
 expectation, so the probability that every shard fails is about `e^{−4} ≈ 2 %`
 if the hypothesis holds. `stop = first_success`: the first verified curve ends
 the search.
@@ -101,6 +101,19 @@ the search.
 - **Bounded failure:** every shard ran with no curve; reported with the exact
   seed space, family and filter. It does not show such curves are rare
   elsewhere.
-- **Execution:** a cairn objective (`cairn work` with any solver; the pinned
-  checker decides each claim), posted by `backlog cairn-post` once the checker
-  is available; see [backlog/README.md](../README.md).
+- **Execution (today):** cairn lab tasks `<ID>/shard-<k>`, one seed range of
+  `2^32` draws each, under the first-success stop rule of
+  [backlog/README.md](../README.md): before each claim a runner checks
+  `backlog cairn-found <ID> --lab DIR` (exit 3 means a curve is already
+  recorded: stop); a shard that finds a curve writes
+  `{out}/found/artifact.json`, published by `cairn lab exec` under
+  `runs/<ID>/shard-<k>/found/`, and the runner records it with
+  `backlog cairn-found … --artifact`, which runs the checker and sets `found`
+  only on accept. One shard takes 2.4–23.9 h of one core at 2–20 µs per draw,
+  so `ttl_s` is 6 h with a re-claim every 2 h; the checkpoint makes a shard
+  resumable and so preemptible.
+- **Upgrade path:** once cairn can pin a native checker
+  ([problem record](../../problems/cairn-certificate-checker-python-only.md)),
+  post the search as a piecework objective (`backlog cairn-post`, one unit per
+  seed range), so any solver can contribute and the pinned verifier decides
+  each claim.
