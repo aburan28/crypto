@@ -1,6 +1,6 @@
 # Bounded quiet-host admission for the approved local N83 pair
 
-Status: `SOURCE_READY_NO_WATCH_LAUNCHED` at this commit. The earlier
+Status: `WAIT_EXPIRED_NO_SOLVER_LAUNCH` for the first retained watch. The earlier
 [prelaunch receipt](../local-gray-hash-paired-20261015/RESULT.md) found a
 healthy pinned Docker image and exact cgroup but 0% host CPU idle. This
 watcher supplies a bounded way to use the already approved 4,800-second
@@ -29,3 +29,20 @@ the exact stage receipts and a host-isolation audit before claiming a wall
 advantage, followed by natural yield, useful rank, linear algebra,
 individual-log and matched-rho accounting before selecting a total-runtime
 factor base.
+
+The approved local watch ran for 900.010 measured seconds on 2026-10-15 and
+retained [configuration](config.json), all 18 [raw host samples](samples.jsonl)
+and its [terminal result](result.json). Every sample was `BUSY`: the Mac
+reported 0.0% idle CPU throughout, and its one-minute load ranged from 64.05
+to 90.13 on 14 logical CPUs. None formed any quiet streak. The watch never
+created an admission receipt, supervisor stream or authorized solver-output
+directory. It charged **zero** conservative solver-stage seconds; the previous
+23,100-second N83 ledger anchor therefore remains unchanged.
+
+The separate [audit](audit.py) replays the pinned source commit, watcher and
+authorization hashes, every raw host probe, admission predicate, time window
+and absence of launch artifacts. Its [receipt](audit.json) is
+`PASS_BOUNDED_NO_LAUNCH_ONLY`; the [controls](test_audit.py) reject altered raw
+CPU output and a false launch status. This is a host-capacity observation, not
+a relation-yield or complete-runtime measurement. The exact paired search
+remains unrun, and no total-runtime factor-base winner is established.
