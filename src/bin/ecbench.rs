@@ -318,6 +318,10 @@ enum BoundCmd {
         /// operation (AGENTS.md §5a) instead of the charged cost.
         #[arg(long)]
         weight: Option<f64>,
+        /// Fit an arm whose parameters follow a declared per-size rule;
+        /// the rule text enters the bound's method identity.
+        #[arg(long)]
+        param_rule: Option<String>,
         #[arg(long)]
         out: Option<PathBuf>,
     },
@@ -1116,6 +1120,7 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 resamples,
                 seed,
                 weight,
+                param_rule,
                 out,
             } => {
                 let b = bounds::bound_from_sessions(&bounds::FitInputs {
@@ -1131,6 +1136,7 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                         resamples,
                         seed,
                         weight,
+                        param_rule,
                     },
                 })?;
                 let mut b = b;

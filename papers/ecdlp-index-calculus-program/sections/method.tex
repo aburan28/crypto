@@ -111,6 +111,34 @@ as cold cost; word XORs, probes, field operations and GAE as
 interchangeable; a lower bound as a complete cost; an L0 wall ratio as an
 admitted speed-up.
 
+\subsection{The pricing band}\label{sec:band}
+
+Almost no cost in a record is complete, and the rho baselines are no
+exception. Rho, BSGS and the kangaroo leave canonicalisations, partition
+hashes and table inserts and lookups unpriced. An index-calculus arm is
+complete only on curves that have a pinned timing calibration
+(\art{docs/ic/calibration.json}), which converts lookups, row operations,
+Artin--Schreier solves, Frobenius maps and solver word XORs to GAE at
+measured ratios of roughly $10^{-3}$ to $10^{-1}$. A ``complete'' index
+calculus set against a lower-bound rho is therefore lopsided, and several
+earlier comparisons in this repository were of that kind.
+
+Since 15 October every cross-method comparison uses a \emph{pricing band}
+(repository rule, \texttt{AGENTS.md} \S5a; native implementation
+\texttt{ecbench band}). For a record with charged cost $G$, calibration-priced
+native cost $C$ over $n_C$ operations, and $U$ operations behind its
+unpriced counters,
+\[
+  S(w)=\frac{G-C+w\,(U+n_C)}{\sqrt r},\qquad w\in\{0,\ 0.1,\ 1\}
+  \text{ GAE per native operation},
+\]
+applied alike to every arm, references included. Two arms are ranked only
+if their order is the same at every weight; otherwise the pair is reported
+as unresolved. An arm that names an unpriced counter without counting it is
+a lower bound and cannot be ranked. The band brackets the pinned
+calibrations from below and above, so a ranking that survives it does not
+depend on the host the calibration came from.
+
 \subsection{Claim hygiene and change classes}
 
 Every study directory states a protocol before it runs (frozen inputs are
@@ -165,4 +193,13 @@ must be read.
   word XORs became a $64.6$--$1{,}353\times$ loss in charged $S$ once its
   batched geometry was counted---recorded as an accounting result, not an
   advance.
+\item \emph{Lopsided pricing} (\S\ref{sec:band}): comparisons of a
+  calibration-priced index calculus with a lower-bound rho. On the
+  frontier campaign's train panel at Koblitz $n=13$ the compact-orbit arm,
+  earlier quoted at $1.08\times$ rho as a lower bound, is $0.93\times$,
+  $1.53\times$ and $5.7\times$ the strong rho at $w=0$, $0.1$ and $1$
+  (columns 2, four train targets,
+  \art{research/ic_frontier_campaign_20261015/select/SELECTION.md}): below
+  rho with native work free, above it otherwise, so the pair is unresolved
+  inside the band rather than a win for either side.
 \end{enumerate}

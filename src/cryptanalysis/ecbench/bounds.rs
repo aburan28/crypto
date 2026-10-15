@@ -347,6 +347,13 @@ pub struct FitOptions {
     /// domain's unit then names the weight, so the bound never shares an
     /// id with a charged-cost bound.
     pub weight: Option<f64>,
+    /// Accept an arm whose parameters change from size to size under a
+    /// declared rule (for example a factor-base size chosen per size on a
+    /// train panel).  Every session must run the same method id with the
+    /// same parameter names; parameters whose values differ are recorded
+    /// as `per size` and the rule text becomes part of the bound's method
+    /// identity, so the bound never shares an id with a fixed-parameter one.
+    pub param_rule: Option<String>,
 }
 
 impl Default for FitOptions {
@@ -357,6 +364,7 @@ impl Default for FitOptions {
             resamples: RESAMPLES,
             seed: SEED,
             weight: None,
+            param_rule: None,
         }
     }
 }
@@ -655,11 +663,28 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
             family: arm.method.family.clone(),
             entry: arm.method.entry.clone(),
         };
-        match &method {
-            None => method = Some(m),
-            Some(prev) if prev.method_id != m.method_id => {
+        match (&mut method, &inputs.options.param_rule) {
+            (None, _) => method = Some(m),
+            (Some(prev), Some(rule)) if prev.method_id != m.method_id => {
+                let same_keys = prev.params.keys().eq(m.params.keys());
+                if prev.id != m.id || !same_keys {
+                    return Err(format!(
+                        "arm `{}` runs {} in one session and {} in another; a parameter rule \
+                         covers one method id with one set of parameter names",
+                        inputs.arm, prev.id, m.id
+                    ));
+                }
+                for (k, v) in m.params.iter() {
+                    if prev.params.get(k) != Some(v) {
+                        prev.params.insert(k.clone(), "per size".into());
+                    }
+                }
+                prev.method_id = format!("{} under rule: {rule}", prev.id);
+            }
+            (Some(prev), None) if prev.method_id != m.method_id => {
                 return Err(format!(
-                    "arm `{}` is {} in one session and {} in another; a bound is about one method",
+                    "arm `{}` is {} in one session and {} in another; a bound is about one method \
+                     (pass --param-rule to fit a size-dependent parameter rule)",
                     inputs.arm, prev.method_id, m.method_id
                 ))
             }
