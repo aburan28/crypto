@@ -231,7 +231,7 @@ fn factor(mut n: u128) -> Vec<u128> {
     let mut out = Vec::new();
     let mut d = 2u128;
     while d * d <= n {
-        while n % d == 0 {
+        while n.is_multiple_of(d) {
             out.push(d);
             n /= d;
         }

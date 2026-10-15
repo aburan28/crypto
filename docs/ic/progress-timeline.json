@@ -135,6 +135,17 @@
           "class": "accounting",
           "anchor": "#lab-ecbench-all",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_frobenius_orbit_vs_rho_20261014/README.md"
+        },
+        {
+          "date": "2026-10-15",
+          "value": 68183174.19,
+          "reference": "matched",
+          "unit": "F_p multiplications",
+          "label": "Joux-Vitse (n - 1)-decomposition at n = 5, E(F_{p^5}), complete DLP at p = 31 (ell = 2^24.8), F4 trace replay",
+          "detail": "Native complete DLPs paired with rho on the same target in F_p multiplications: 6.8e7x at p = 31 (6,688 trials, 19 relations), 4.5e7x and 1.8e8x at p = 11; one trial 5.9-9.2e9 flat in p over a 12-rung ladder (p = 11-241), about 25p trials per relation; every trial agrees with a meet-in-the-middle oracle and every answer verified; parity extrapolated at q = 2^58.2 (group 2^291). A reproduction of a published route; no ecbench session (no F_{p^k} instance on main).",
+          "class": "accounting",
+          "anchor": "#rho-parity-ledger",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/joux_vitse_n1_20261015/README.md"
         }
       ]
     },
