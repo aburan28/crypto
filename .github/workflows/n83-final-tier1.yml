@@ -38,6 +38,7 @@ jobs:
           python3 research/n83_root4_bloom_20261015/generate.py > /dev/null
           python3 research/n83_root11_highk_20261015/generate.py > /dev/null
           python3 research/n83_final_tournament_20261015/generate.py > /dev/null
+          python3 research/n83_edge_confirmation_20261015/generate.py > /dev/null
           python3 research/n83_final_tier1_20261015/generate.py > \
             "$RUNNER_TEMP/n83-final-tier1/fixture-check.json"
           test "$(sha256sum research/n83_final_tier1_20261015/targets.jsonl | cut -d' ' -f1)" = \
@@ -53,33 +54,35 @@ jobs:
           rustc --version > "$RUNNER_TEMP/n83-final-tier1/rustc-version.txt"
           cargo --version > "$RUNNER_TEMP/n83-final-tier1/cargo-version.txt"
 
-      - name: Hash and check selected tournament result
+      - name: Hash and check selected fresh confirmation result
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           selection=research/n83_final_tier1_20261015/selection.json
-          artifact_id=$(jq -r .tournament_artifact_id "$selection")
-          expected_zip=$(jq -r .tournament_artifact_sha256 "$selection")
-          expected_analysis=$(jq -r .tournament_analysis_sha256 "$selection")
+          artifact_id=$(jq -r .confirmation_artifact_id "$selection")
+          expected_zip=$(jq -r .confirmation_artifact_sha256 "$selection")
+          expected_analysis=$(jq -r .confirmation_analysis_sha256 "$selection")
           selected_pipeline=$(jq -r .pipeline "$selection")
           selected_candidate=$(jq -r .candidate_id "$selection")
-          mkdir -p "$RUNNER_TEMP/n83-tournament-reference"
+          mkdir -p "$RUNNER_TEMP/n83-confirmation-reference"
           gh api "repos/aburan28/crypto/actions/artifacts/$artifact_id/zip" > \
-            "$RUNNER_TEMP/n83-tournament-reference/raw.zip"
-          test "$(sha256sum "$RUNNER_TEMP/n83-tournament-reference/raw.zip" | cut -d' ' -f1)" = \
+            "$RUNNER_TEMP/n83-confirmation-reference/raw.zip"
+          test "$(sha256sum "$RUNNER_TEMP/n83-confirmation-reference/raw.zip" | cut -d' ' -f1)" = \
             "$expected_zip"
-          unzip -q "$RUNNER_TEMP/n83-tournament-reference/raw.zip" -d \
-            "$RUNNER_TEMP/n83-tournament-reference/raw"
-          analysis="$RUNNER_TEMP/n83-tournament-reference/raw/results/analysis.json"
+          unzip -q "$RUNNER_TEMP/n83-confirmation-reference/raw.zip" -d \
+            "$RUNNER_TEMP/n83-confirmation-reference/raw"
+          analysis="$RUNNER_TEMP/n83-confirmation-reference/raw/results/analysis.json"
           test "$(sha256sum "$analysis" | cut -d' ' -f1)" = "$expected_analysis"
+          test "$(jq -r .schema "$analysis")" = n83.edge-confirmation-analysis/v1
           test "$(jq -r .status "$analysis")" = COMPLETE
+          test "$(jq -r .decision_status "$analysis")" = SELECTED
           test "$(jq -r .selected_pipeline "$analysis")" = "$selected_pipeline"
           test "$(jq -r .balanced_comparison.selected_candidate_id "$analysis")" = \
             "$selected_candidate"
           jq '{selected_pipeline, status, selected_candidate_id: .balanced_comparison.selected_candidate_id}' \
-            "$analysis" > "$RUNNER_TEMP/n83-final-tier1/tournament-check.json"
+            "$analysis" > "$RUNNER_TEMP/n83-final-tier1/confirmation-check.json"
 
       - name: Build and test exact IC and strong-rho producers
         shell: bash

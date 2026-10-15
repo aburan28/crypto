@@ -15,6 +15,8 @@ ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 PARENT = ROOT / "research/n83_root4_20261014/run.py"
 FINAL_RUNNER = ROOT / "research/n83_final_tournament_20261015/run.py"
+CONFIRM_RUNNER = ROOT / "research/n83_edge_confirmation_20261015/run.py"
+SELECTOR = HERE / "select.py"
 TARGETS = HERE / "targets.jsonl"
 ANSWERS = HERE / "answers.jsonl"
 SELECTION = HERE / "selection.json"
@@ -31,6 +33,12 @@ parent.RSS_CAP_BYTES = RSS_CAP_BYTES
 fspec = importlib.util.spec_from_file_location("n83_final_tournament_runner", FINAL_RUNNER)
 final_runner = importlib.util.module_from_spec(fspec)
 fspec.loader.exec_module(final_runner)
+cspec = importlib.util.spec_from_file_location("n83_edge_confirmation_runner", CONFIRM_RUNNER)
+confirm_runner = importlib.util.module_from_spec(cspec)
+cspec.loader.exec_module(confirm_runner)
+sspec = importlib.util.spec_from_file_location("n83_final_tier1_selector", SELECTOR)
+selector = importlib.util.module_from_spec(sspec)
+sspec.loader.exec_module(selector)
 
 
 def frozen_inputs():
@@ -43,6 +51,8 @@ def frozen_inputs():
     hashes[str(ANSWERS.relative_to(ROOT))] = ANSWERS_SHA256
     hashes[str(SELECTION.relative_to(ROOT))] = parent.digest(SELECTION)
     hashes[str(final_runner.ADMISSION.relative_to(ROOT))] = parent.digest(final_runner.ADMISSION)
+    hashes[str(confirm_runner.ADMISSION.relative_to(ROOT))] = parent.digest(confirm_runner.ADMISSION)
+    hashes[str(selector.SOURCE.relative_to(ROOT))] = parent.digest(selector.SOURCE)
     targets = [json.loads(line) for line in TARGETS.read_text().splitlines()]
     if len(targets) != 5 or len({tuple(p) for p in targets}) != 5:
         raise ValueError("fresh target count or uniqueness changed")
@@ -51,12 +61,16 @@ def frozen_inputs():
 
 def selected_config():
     data = json.loads(SELECTION.read_text())
-    admission, _ = final_runner.frozen()
+    if data != selector.selected():
+        raise ValueError("Tier 1 selection differs from sealed confirmation winner")
+    admission, _ = confirm_runner.frozen()
     candidates = admission["candidate_order"]
     selected = [row for row in candidates if row["pipeline"] == data["pipeline"]]
-    hashes = (data["tournament_artifact_sha256"],
+    hashes = (data["confirmation_artifact_sha256"],
+              data["confirmation_analysis_sha256"],
+              data["tournament_artifact_sha256"],
               data["tournament_analysis_sha256"])
-    if (data["schema"] != "n83.final-tier1-selection/v1"
+    if (data["schema"] != "n83.final-tier1-selection/v2"
             or data["source_sha256"] != SOURCE_SHA256
             or len(selected) != 1
             or data["variant"] not in ("root4", "root11", "root21", "root22")
@@ -65,9 +79,16 @@ def selected_config():
             or data["rss_cap_bytes"] != RSS_CAP_BYTES
             or data["ic_child_cap_seconds"] != 1500
             or data["rho_child_cap_seconds"] != 120
+            or not isinstance(data["confirmation_artifact_id"], int)
+            or data["confirmation_artifact_id"] <= 0
             or not isinstance(data["tournament_artifact_id"], int)
-            or data["tournament_artifact_id"] <= 0
-            or data["admission_sha256"] != parent.digest(final_runner.ADMISSION)
+            or data["tournament_artifact_id"] != admission["source_tournament_artifact_id"]
+            or data["admission_sha256"] != parent.digest(confirm_runner.ADMISSION)
+            or data["tournament_admission_sha256"] != parent.digest(final_runner.ADMISSION)
+            or data["tournament_artifact_sha256"] !=
+               "a0762097a9f0ac62adda606ff9d4d8cbd94e585c1b4e5bb7dbc37f04e4ed80f6"
+            or data["tournament_analysis_sha256"] !=
+               "3a474962a4c8e58d7db416ca90b9746c4f3d05a047647308ab2937d46cfc147f"
             or any(len(value) != 64 or any(c not in "0123456789abcdef" for c in value)
                    for value in hashes)
             or not data["candidate_id"].startswith("IC1N83")):

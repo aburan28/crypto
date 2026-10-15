@@ -11,6 +11,7 @@ ROOT = HERE.parents[1]
 FINAL = ROOT / "research/n83_final_tournament_20261015/generate.py"
 ANALYZER = ROOT / "research/n83_indexed5_20261013/analyze.py"
 FINAL_TARGET_SHA256 = "cfa943ae538fcc41d2af8bb8fd1c8fc0f29adc340b55644e90382da25b213424"
+CONFIRM_TARGET_SHA256 = "66c4683e252f1cd321b4b6c7c9d06744c82140222ddce160faa4e7a0e0984b7e"
 ANALYZER_SHA256 = "e34d06b3275d86dcb3a659b79adf87dcdc078cebb6f510c4b5c42403d83a1804"
 DOMAIN = b"n83-final-selected-tier1-fresh-5-20261015-v1"
 COUNT = 5
@@ -43,6 +44,7 @@ def main():
     prior = set()
     sources = dict(final.PRIOR_SHA256)
     sources["n83_final_tournament_20261015/targets.jsonl"] = FINAL_TARGET_SHA256
+    sources["n83_edge_confirmation_20261015/targets.jsonl"] = CONFIRM_TARGET_SHA256
     for relative, expected in sources.items():
         path = ROOT / "research" / relative
         if digest(path) != expected:

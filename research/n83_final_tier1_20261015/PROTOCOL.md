@@ -1,32 +1,34 @@
-# Five same-point N83 Tier 1 IC/rho pairs after finalist selection
+# Five same-point N83 Tier 1 IC/rho pairs after fresh confirmation
 
 The five public subgroup points in `targets.jsonl` were fixed before the
 final factor-base tournament ran. Their SHA-256 is
 `34c530851eb135b7e348ac976caaae37c5883c52b52962ad496028c058b1dcda`.
 The verifier-only scalar sidecar SHA-256 is
 `8705b909479f4ee1eb8a19fe327c0622cd890e0d8443e08bdbdf04a4c6b99548`.
-`generate.py` excludes every prior N83 panel and all 4,000 tournament points,
-checks curve membership and subgroup scalar construction, and refuses a
-changed fixture. The curve is `EC1N83Ckb1a1haacb69ee9f37` over polynomial
+`generate.py` excludes every prior N83 panel, all 4,000 tournament points,
+and all 4,000 fresh confirmation points. It checks curve membership and
+subgroup scalar construction, and refuses a changed fixture. The curve is
+`EC1N83Ckb1a1haacb69ee9f37` over polynomial
 basis `GF(2^83)`, equation `y² + xy = x³ + x² + 1`, subgroup order
 `8569786107849059`.
 
-Execute this panel only if the final tournament's independently replayed
-analysis selects one candidate under `PROTOCOL.md` there. Pin the selected
-candidate ID, its source manifest and base hash, the tournament raw artifact
-and analysis digests, and the complete `admission.json` digest before starting
-a Tier 1 allocation. The IC producer source SHA-256 is
+Execute this panel only if the independently replayed fresh-point confirmation
+in `../n83_edge_confirmation_20261015` selects one candidate under its frozen
+rule. Pin the selected candidate ID, its source manifest and base hash, the
+confirmation and tournament raw artifact and analysis digests, and both
+admission digests before starting a Tier 1 allocation. The IC producer source
+SHA-256 is
 `f2745227d95e36ef45c73c5104a23ada6cebb0794405368581d2be17044845dc`;
 the paired strong-rho source SHA-256 is
 `fb14072f4fa5d08e18d8b79130b6d58a220adae0f76369cc9be949691c83eaa0`,
 with rho configuration SHA-256
 `cf76ebb5372acfc1355b88374f875980be66cdffba1a82cb6e4c2f28bcfa723b`.
 Both use four visible CPUs within the same affinity and memory envelope.
-The versioned `selection.json` uses schema `n83.final-tier1-selection/v1` and
+The versioned `selection.json` uses schema `n83.final-tier1-selection/v2` and
 retains that candidate's pipeline, ID, K, variant, Bloom profile, base hash,
-root-key count, manifest digest, the tournament ZIP and analysis digests,
-its artifact ID, and the admission digest. The runner checks these against the admitted
-candidate before executing.
+root-key count, manifest digest, the confirmation and tournament ZIP and
+analysis digests, their artifact IDs, and both admission digests. The runner
+checks these against the admitted candidate before executing.
 
 Use one cloud VM or Pod allocation for all five points and record its
 provider, allocation ID, region, start/end, CPU/core/SMT/NUMA topology,
