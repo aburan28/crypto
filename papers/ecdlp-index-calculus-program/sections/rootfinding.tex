@@ -35,6 +35,19 @@ Hence the two-summand system has a parametrised variety: $R=\pm F_i\pm F_j$
 iff $x(R\mp F_i)\in x(\Fb)$. No polynomial system is solved; the oracle is
 one subtraction and one table probe per base point.
 
+\paragraph{Prior art.} Neither the identity nor the oracle is new. The
+identity is a direct consequence of how $\Sem3$ is defined: it is the
+polynomial whose roots are the abscissae of $P_1\pm P_2$. The oracle
+mechanism---sum $m-1$ factor-base points in the group and test whether the
+result lies in the base---is the second algorithm of McGuire and
+Mueller~\cite{mcguire2017}, who also evaluate $\Sem m$ by iterated
+resultants instead of solving it, building on the instance-derived bases of
+Amadori, Pintore and Sala~\cite{aps2018}. What this section adds is
+engineering and measurement: a machine-checked proof, a fail-closed
+verification protocol, binary pair-sum tables for up to four summands,
+GPU, Kummer-tower and dense-index variants, and complete-cost measurements
+in one harness against rho.
+
 \paragraph{What the audit kept and corrected.} The identity is exact under
 the stated generic affine condition, and a returned witness can be re-added
 in the group for soundness. Completeness of the exhaustive enumeration

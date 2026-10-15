@@ -38,8 +38,11 @@ at a size is a row with that status, never dropped.
 
 ### K — Koblitz `E_a : y² + xy = x³ + ax² + 1` over `F_{2^n}`
 
-`n ∈ {13, 17, 19, 23, 29, 31, 37, 41}` (both `a` where the subgroup is
-large; the curve id is the ecbench identity, never the bit count).
+Chosen by prime-subgroup size, not field degree (Amendment A6): `(a, n)` ∈
+{(0,13), (1,17), (1,19), (1,23), (0,37), (1,43), (1,47), (0,41)}, with
+`log₂ r` ≈ 11.0, 16.0, 18.0, 22.0, 27.8, 32.1, 36.6, 39.0. (`n = 29, 31`
+have subgroups of only 2^15–2^20 for either `a` and are dropped.) The
+curve id is the ecbench identity, never the bit count.
 
 | arm | method | role |
 |:--|:--|:--|
@@ -49,8 +52,8 @@ large; the curve id is the ecbench identity, never the bit count).
 | claw | `claw.pair_table` | generic baseline with table |
 | ic-compact | `ic.pipeline`, `compact-orbit-scan` + `mitm-frobenius-counted:m=2` | IC candidate (best lower-bound arm to date) |
 | ic-negfold | `ic.pipeline`, `koblitz-standard-subspace` + `pdp3-koblitz:m=2,engine=rootfind-negfold` | IC candidate (best complete arm to date) |
-| ic-f4 | `ic.pipeline`, `pdp3-koblitz:m=3,engine=inherited-f4` | algebraic baseline (gated on the drift fix) |
-| ic-shared | `ic.shared_rank` | online / amortised candidate |
+| ic-f4 | `ic.pipeline`, `pdp3-koblitz:m=3,engine=inherited-f4` | algebraic baseline, `n ≤ 23` only (about 6 min an execution at `n = 23`) |
+| ic-shared | `ic.shared_rank` | online / amortised candidate; reported as a lower bound only (three uncounted unpriced categories) |
 | rho-strong-aa | as reference | A/A control |
 
 ### P — prime-order curves `y² = x³ − 3x + b` over `F_p`
@@ -151,6 +154,27 @@ and does not place them on the campaign's axes.
 A result contradicting P1 or P2 on the cold boundary at ≥ 4 sizes would be
 the first *advance* of the programme and triggers an independent replay
 before any statement.
+
+## Amendments from Phase 0 (2026-10-15)
+
+- **A1** Prime ladder from `prime_fast::find_a3_curve` (see above).
+- **A2** Target-pin linear algebra for every IC arm.
+- **A3** Pricing band, now AGENTS.md §5a: every arm (references included)
+  is priced at 0, 0.1 and 1 GAE per native operation. Calibration-priced
+  native work in an IC total is removed and re-priced at the same weight
+  (`band.py`). Two arms are ranked only where the order holds at every
+  weight.
+- **A4** Size rules and selection. Prime pair-table arm:
+  `N = ⌈(2r)^{1/3}⌉`, checked against `N/2` and `2N` on the train panel.
+  Koblitz arms: per size, the candidate with the smallest mean `S` at
+  `w = 0.1` among candidates verified on all four train targets. When the
+  optimum sits on a grid edge the grid is extended until it is interior,
+  or until the edge is the smallest legal value (`columns = 1`). Every
+  candidate and its band values are kept in `select/`.
+- **A5** The frontier is a time–memory Pareto set. Retained memory is
+  reported per arm, and BSGS is never ranked against a constant-memory
+  method on time alone.
+- **A6** Koblitz ladder chosen by subgroup size (see above).
 
 ## Frozen per-size parameters
 
