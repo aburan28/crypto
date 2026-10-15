@@ -35,7 +35,9 @@
 //! an explicit `KIC_FREE_RELATIONS=1`.
 //! Evidence: research/ic_improve_20261015/02-freerel-production.
 //!
-//! Usage: <base_header.jsonl> <target_points.jsonl|legacy_scalars.txt> <rank_seed> <out.jsonl>
+//! Usage: <base_header.jsonl | construct:<n>:<a>[:<columns>]> <target_points.jsonl|legacy_scalars.txt> <rank_seed> <out.jsonl>
+//! When `:<columns>` is omitted, `construct:` uses the tuned K: 125 / 280 / 500
+//! for n = 41 / 53 / 61 (a = 0); other sizes must pass K explicitly.
 //! Environment: KIC_FREE_RELATIONS=0|1 (default 1), KIC_PAIR_SYMMETRY,
 //! KIC_ROOT_BLOOM, KIC_RANK_PROBE_CAP, KIC_DUMP_RANK, KIC_DUMP_BASE.
 
@@ -2038,13 +2040,7 @@ mod wide {
         let process_started = Instant::now();
         let constructed: Option<(u32, u8, usize)> =
             arguments[1].strip_prefix("construct:").map(|spec| {
-                let parts: Vec<&str> = spec.split(':').collect();
-                assert_eq!(parts.len(), 3, "construct:<n>:<a>:<columns>");
-                (
-                    parts[0].parse().unwrap(),
-                    parts[1].parse().unwrap(),
-                    parts[2].parse().unwrap(),
-                )
+                super::parse_construct_spec(spec)
             });
         let header: Value = match constructed {
             Some((n, a, _)) => json!({"n":n, "a":a}),
@@ -2502,12 +2498,44 @@ mod wide {
     }
 }
 
+/// Tuned default orbit-column count `K` for `construct:<n>:<a>` when the
+/// caller omits it. Values come from the held-out tuning in
+/// `research/ic_improve_20261015/02-freerel-production` (training seeds
+/// 101–104, a = 0, free relations on). An explicit `:<columns>` always wins,
+/// so frozen experiments that pass K are unchanged.
+fn default_columns(n: u32, a: u8) -> Option<usize> {
+    match (n, a) {
+        (41, 0) => Some(125),
+        (53, 0) => Some(280),
+        (61, 0) => Some(500),
+        _ => None,
+    }
+}
+
+/// Parse `<n>:<a>[:<columns>]` from a `construct:` argument.
+fn parse_construct_spec(spec: &str) -> (u32, u8, usize) {
+    let parts: Vec<&str> = spec.split(':').collect();
+    assert!(
+        parts.len() == 2 || parts.len() == 3,
+        "construct:<n>:<a>[:<columns>]"
+    );
+    let n: u32 = parts[0].parse().unwrap();
+    let a: u8 = parts[1].parse().unwrap();
+    let columns = match parts.get(2) {
+        Some(columns) => columns.parse().unwrap(),
+        None => default_columns(n, a).unwrap_or_else(|| {
+            panic!("no tuned default K for n={n} a={a}; pass construct:{n}:{a}:<columns>")
+        }),
+    };
+    (n, a, columns)
+}
+
 fn main() -> ExitCode {
     let arguments: Vec<String> = std::env::args().collect();
     assert_eq!(
         arguments.len(),
         5,
-        "usage: <base_header.jsonl | construct:<n>:<a>:<columns>> <target_points_or_legacy_scalars.txt> <rank_seed> <out.jsonl>"
+        "usage: <base_header.jsonl | construct:<n>:<a>[:<columns>]> <target_points_or_legacy_scalars.txt> <rank_seed> <out.jsonl>"
     );
     // Wide pipeline (`u128` words) for 64 < n ≤ 127.  The degree is
     // detected here so the `u64` flow below stays byte-identical; the wide
@@ -2529,13 +2557,7 @@ fn main() -> ExitCode {
     let process_started = Instant::now();
     let constructed: Option<(u32, u8, usize)> =
         arguments[1].strip_prefix("construct:").map(|spec| {
-            let parts: Vec<&str> = spec.split(':').collect();
-            assert_eq!(parts.len(), 3, "construct:<n>:<a>:<columns>");
-            (
-                parts[0].parse().unwrap(),
-                parts[1].parse().unwrap(),
-                parts[2].parse().unwrap(),
-            )
+            parse_construct_spec(spec)
         });
     let header: Value = match constructed {
         Some((n, a, _)) => json!({"n":n, "a":a}),
@@ -3262,5 +3284,29 @@ mod pair_symmetry_tests {
         for pivot in echelon.pivots.iter().flatten() {
             assert_eq!(pivot[base.columns], 0, "free rows are homogeneous");
         }
+    }
+}
+
+#[cfg(test)]
+mod construct_spec_tests {
+    use super::parse_construct_spec;
+
+    #[test]
+    fn explicit_columns_win() {
+        assert_eq!(parse_construct_spec("61:0:600"), (61, 0, 600));
+        assert_eq!(parse_construct_spec("41:0:255"), (41, 0, 255));
+    }
+
+    #[test]
+    fn omitted_columns_use_tuned_default() {
+        assert_eq!(parse_construct_spec("41:0"), (41, 0, 125));
+        assert_eq!(parse_construct_spec("53:0"), (53, 0, 280));
+        assert_eq!(parse_construct_spec("61:0"), (61, 0, 500));
+    }
+
+    #[test]
+    #[should_panic(expected = "no tuned default K")]
+    fn untuned_size_requires_columns() {
+        parse_construct_spec("37:0");
     }
 }

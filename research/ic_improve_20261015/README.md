@@ -16,7 +16,8 @@ These are follow-ups to [`../ic_improve_20261014/README.md`](../ic_improve_20261
 
 ## Open follow-ups
 
-- **Koblitz K per size.** Retuning K alone at n = 41 (255 → 100) gives 0.46×, with no new code. The recommended values are K = 125 / 280 / 500 for n = 41 / 53 / 61. Item 02 left the callers' K unchanged; that is an owner decision.
+- **Koblitz K per size: done (2026-10-15).** `construct:<n>:<a>` with K omitted now uses the tuned K = 125 / 280 / 500 for n = 41 / 53 / 61 (a = 0). An explicit `:<columns>` still wins, so frozen experiments and CI tune grids are unchanged. Checked by an n = 41 solve: `construct:41:0` and `construct:41:0:125` gave identical summary and target records (timings excluded), 8/8 targets solved. Retuning K alone gives 0.46× at n = 41.
+- **Online-only Koblitz rows in `docs/ic/LEADERBOARD.md`: kept** (owner decision, 2026-10-15). They are retired only if there is a strong reason.
 - **Linear-harvest gate.** Generators per variable is close to (N−1)/N on pipeline systems, so the gate skips the largest gain: ungated root harvest gives 1.28× at (29,15) m2. A gate on variable count or tree size needs its own protocol.
 - **Linear harvest end to end at (23,12).** The bench gain (1.17×) does not carry through: the production path stops at the first accepted root, so its solves are shorter than the bench's.
 - **Genus-3 linear algebra.** Elimination removes a shrinking share of columns: it keeps 32% of the incumbent's columns at 2^10 but 91% at 2^20. Weight growth turns into column growth, so linear algebra stays near q^1.54 locally. The next levers are a κ retune at large q (exploratory κ = 1.41 is the cheapest arm at 2^21) and block Wiedemann.
