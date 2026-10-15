@@ -17,7 +17,7 @@
 ## 0. The lead was not "never run"
 
 The encyclopedia's §8 item 5 says the `D₄`-symmetrised `S₅` was "never run".
-That is stale.
+That entry is superseded by PR #1785, which ran it.
 
 - It copied candidate C8 of `research/pdp_root_finder_requirements_20261012`.
 - C8 was built and run on 2026-10-13: PR #1785, commit `0846e6a12`,
@@ -230,11 +230,39 @@ That is a measured tendency, not a proof.
   derived.
 - The `p = 17` degenerate target's cause is not established, nor is that of
   C8's dimension-517 target.
-- The module's unit tests (`d4_weighted_s5::tests`) could not be run in this
-  sparse checkout. The library's test target `include_str!`s research files
-  absent here. The same checks ran as the example's controls and tiny cells.
+- The module's unit tests run once the coordinator adds the missing fixtures
+  to the sparse checkout. `cargo test --release --lib -- d4_weighted
+  gaudry_quartic` then passes, 11 of 11.
+  - The first version of the small-field test planted `P₀ + P₁ + P₂ − P₃`
+    at `p = 13` (instance seed 2). On that instance this sum is `O`, so the
+    test panicked before any solve ran.
+  - The first nonzero planted sum on that instance is a degenerate system,
+    quotient dimension 514. Neither this solve nor C8's closes it, and brute
+    force finds one decomposition. This is the same failure as `p = 17`,
+    target 4, in §3.
+  - It is not a solver defect. The test now uses `p = 29`, instance seed 1,
+    where every registered target closed. The measured solve path is
+    unchanged (commit after `87de2fa83`).
 - No `identity.certificate/v1` was produced for the Bézout count. It is
   derived in PROTOCOL §1 and confirmed by the measured quotient dimensions.
+
+## Cross-check after merging `main`
+
+The shared `cargo-target` could in principle serve a stale library, so the
+example was rebuilt in a private target directory. That build is after the
+merge of `origin/main`, which changed no solver file this study uses.
+Targets 0 and 1 of seed 1 were re-run at `p = 269`, `1033` and `4093`
+(`raw/xcheck_own_target_dir.jsonl`). For all 6, `C_w`, the lift-back count
+and the decomposition count equal the recorded values exactly.
+
+## Related study on `main`
+
+`research/ic_improve_20261015/04-d4-2lp-fix` (benchmark
+`20261015-ic-improve2-04-d4-2lp-fix`) improves the relation stop and linear
+algebra of the `D₄` `k = 4` pipeline by a constant, `0.979×`. It does not
+change the per-decomposition solve this study measures. Its handover
+figures (`2^{116.5}`, `2^{128.9}`) are for the 2LP switch in its own model,
+not for `C₄`, so they are not comparable with §5.
 
 ## Figures
 

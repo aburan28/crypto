@@ -81,5 +81,6 @@ Past the handover the method tends to $0.341 times$ the negation walk, and $r_in
 - The plain arm was not paired on the same targets; it is over the cap.
 - No relation phase or linear algebra was run.
 - The degenerate targets' cause is unknown.
-- The module's unit tests could not compile in the sparse checkout. The same checks ran as controls.
+- Unit tests: 11 of 11 pass after a test-only fix. The old test planted a zero sum at $p = 13$; the test now uses $p = 29$.
+- Recorded $C_w$ values were reproduced exactly from a private-target rebuild after merging main.
 - No identity certificate was produced.
