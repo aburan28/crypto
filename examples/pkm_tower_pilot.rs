@@ -579,7 +579,7 @@ fn dickson_torus(p: u64, t: usize, rng: &mut StdRng) -> Tower {
     // that is not a square in T.
     let zeta = loop {
         let h = torus_element(p, rng);
-        if fp2_pow(h, (p + 1) / 2, p) == (p - 1, 0) {
+        if fp2_pow(h, p.div_ceil(2), p) == (p - 1, 0) {
             break fp2_pow(h, (p + 1) >> t, p);
         }
     };
