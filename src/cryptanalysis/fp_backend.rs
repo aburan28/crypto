@@ -128,7 +128,7 @@
 //! - sparse scatter (`Acc::sub_tail`): keep `vals: Vec<F::Wide>`, call
 //!   `row_scatter_axpy(&mut vals, nf, &row.cols[1..], &row.vals[1..])`
 //!   and set the bitset bits in a separate pass (per-entry `wide_mul_add`
-//!   is correct too, but measured 1.5× slower for `Fp32` above `2³¹`
+//!   is correct too, but measured 1.6× slower for `Fp32` above `2³¹`
 //!   because the regime test stays inside the loop); read an entry with `wide_reduce` before testing it for zero;
 //!   `drain_from` becomes `wide_reduce` + `mul` by the new lead's inverse.
 //! - for `Fp32` with `p < 2³¹` this is exactly today's arithmetic
