@@ -1,0 +1,797 @@
+{
+  "arm_rounds": 21,
+  "distinct_targets": 60,
+  "isolation": "shared_L0",
+  "phases": {
+    "destination-direct": {
+      "common_cpu_us": [
+        363.167,
+        573.667,
+        360.125
+      ],
+      "field_invs": [
+        25750,
+        24621,
+        23854
+      ],
+      "field_muls": [
+        692274,
+        661389,
+        641396
+      ],
+      "median_common_cpu_us": 363.167,
+      "median_residual_cpu_us": 60.751,
+      "median_setup_cpu_us": 73.958,
+      "median_target_cpu_us": 4900.374,
+      "peak_rss_bytes": [
+        8093696,
+        8077312,
+        8028160
+      ],
+      "relations": [
+        974,
+        916,
+        872
+      ],
+      "residual_cpu_us": [
+        42.707,
+        83.248,
+        60.751
+      ],
+      "setup_cpu_us": [
+        70.625,
+        73.958,
+        76.292
+      ],
+      "target_cpu_us": [
+        4701.751,
+        6919.836,
+        4900.374
+      ],
+      "trials": [
+        1064,
+        996,
+        972
+      ]
+    },
+    "full-image": {
+      "common_cpu_us": [
+        438.875,
+        376.917,
+        557.542
+      ],
+      "field_invs": [
+        41139,
+        37854,
+        37541
+      ],
+      "field_muls": [
+        1125020,
+        1036605,
+        1028332
+      ],
+      "median_common_cpu_us": 438.875,
+      "median_residual_cpu_us": 58.669,
+      "median_setup_cpu_us": 4095.917,
+      "median_target_cpu_us": 5873.456,
+      "peak_rss_bytes": [
+        8421376,
+        8388608,
+        8323072
+      ],
+      "relations": [
+        1035,
+        904,
+        901
+      ],
+      "residual_cpu_us": [
+        69.791,
+        51.586,
+        58.669
+      ],
+      "setup_cpu_us": [
+        3978.083,
+        4095.917,
+        4567.167
+      ],
+      "target_cpu_us": [
+        8371.209,
+        4819.122,
+        5873.456
+      ],
+      "trials": [
+        1145,
+        987,
+        976
+      ]
+    },
+    "isogeny-image": {
+      "common_cpu_us": [
+        405.083,
+        750.166,
+        359.25
+      ],
+      "field_invs": [
+        27780,
+        26880,
+        25319
+      ],
+      "field_muls": [
+        729191,
+        705430,
+        665607
+      ],
+      "median_common_cpu_us": 405.083,
+      "median_residual_cpu_us": 61.379,
+      "median_setup_cpu_us": 92.417,
+      "median_target_cpu_us": 5944.83,
+      "peak_rss_bytes": [
+        8028160,
+        8011776,
+        7979008
+      ],
+      "relations": [
+        939,
+        898,
+        842
+      ],
+      "residual_cpu_us": [
+        83.414,
+        61.379,
+        56.75
+      ],
+      "setup_cpu_us": [
+        92.417,
+        152.708,
+        78.75
+      ],
+      "target_cpu_us": [
+        7490.961,
+        5944.83,
+        5112.958
+      ],
+      "trials": [
+        1022,
+        972,
+        915
+      ]
+    },
+    "rho-negation": {
+      "common_cpu_us": [
+        570.084,
+        820.417,
+        400.25
+      ],
+      "field_invs": [
+        5416,
+        5469,
+        5471
+      ],
+      "field_muls": [
+        141745,
+        142904,
+        143219
+      ],
+      "median_common_cpu_us": 570.084,
+      "median_residual_cpu_us": 59.882,
+      "median_setup_cpu_us": 0.25,
+      "median_target_cpu_us": 1798.164,
+      "peak_rss_bytes": [
+        7340032,
+        7307264,
+        7241728
+      ],
+      "relations": [
+        0,
+        0,
+        0
+      ],
+      "residual_cpu_us": [
+        68.461,
+        59.882,
+        37.706
+      ],
+      "setup_cpu_us": [
+        0.25,
+        0.458,
+        0.208
+      ],
+      "target_cpu_us": [
+        1798.164,
+        2075.077,
+        1219.378
+      ],
+      "trials": [
+        0,
+        0,
+        0
+      ]
+    },
+    "rho-negation-aa": {
+      "common_cpu_us": [
+        353.5,
+        764.958,
+        946.916
+      ],
+      "field_invs": [
+        5691,
+        5436,
+        5460
+      ],
+      "field_muls": [
+        148378,
+        142442,
+        143109
+      ],
+      "median_common_cpu_us": 764.958,
+      "median_residual_cpu_us": 51.998,
+      "median_setup_cpu_us": 0.5,
+      "median_target_cpu_us": 1923.795,
+      "peak_rss_bytes": [
+        7290880,
+        7340032,
+        7323648
+      ],
+      "relations": [
+        0,
+        0,
+        0
+      ],
+      "residual_cpu_us": [
+        51.998,
+        55.997,
+        38.5
+      ],
+      "setup_cpu_us": [
+        0.459,
+        0.542,
+        0.5
+      ],
+      "target_cpu_us": [
+        1991.835,
+        1923.795,
+        1278.834
+      ],
+      "trials": [
+        0,
+        0,
+        0
+      ]
+    },
+    "source": {
+      "common_cpu_us": [
+        479.875,
+        813.542,
+        352.458
+      ],
+      "field_invs": [
+        24817,
+        24032,
+        22649
+      ],
+      "field_muls": [
+        667126,
+        645750,
+        609455
+      ],
+      "median_common_cpu_us": 479.875,
+      "median_residual_cpu_us": 64.707,
+      "median_setup_cpu_us": 81.667,
+      "median_target_cpu_us": 5251.123,
+      "peak_rss_bytes": [
+        8077312,
+        8028160,
+        7995392
+      ],
+      "relations": [
+        939,
+        898,
+        842
+      ],
+      "residual_cpu_us": [
+        57.669,
+        70.208,
+        64.707
+      ],
+      "setup_cpu_us": [
+        91.583,
+        81.667,
+        76.333
+      ],
+      "target_cpu_us": [
+        5251.123,
+        5964.542,
+        4352.835
+      ],
+      "trials": [
+        1022,
+        972,
+        915
+      ]
+    },
+    "source-bsgs": {
+      "common_cpu_us": [
+        392.458,
+        660.625,
+        369.958
+      ],
+      "field_invs": [
+        2022,
+        2022,
+        2022
+      ],
+      "field_muls": [
+        55143,
+        55143,
+        55143
+      ],
+      "median_common_cpu_us": 392.458,
+      "median_residual_cpu_us": 38.917,
+      "median_setup_cpu_us": 2.875,
+      "median_target_cpu_us": 213.294,
+      "peak_rss_bytes": [
+        6963200,
+        7012352,
+        6995968
+      ],
+      "relations": [
+        0,
+        0,
+        0
+      ],
+      "residual_cpu_us": [
+        37.206,
+        67.416,
+        38.917
+      ],
+      "setup_cpu_us": [
+        2.875,
+        5.542,
+        2.875
+      ],
+      "target_cpu_us": [
+        213.294,
+        358.333,
+        203.042
+      ],
+      "trials": [
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "portable_counted_S": null,
+  "prefixes": [
+    {
+      "arms": {
+        "destination-direct": {
+          "amortized_median_cpu_us_per_target": 613.417,
+          "max_cpu_us": 733.5,
+          "median_cpu_us": 613.417,
+          "min_cpu_us": 608.417,
+          "round_cpu_us": [
+            613.417,
+            733.5,
+            608.417
+          ]
+        },
+        "full-image": {
+          "amortized_median_cpu_us_per_target": 4538.75,
+          "max_cpu_us": 5227.667,
+          "median_cpu_us": 4538.75,
+          "min_cpu_us": 4501.917,
+          "round_cpu_us": [
+            4501.917,
+            4538.75,
+            5227.667
+          ]
+        },
+        "isogeny-image": {
+          "amortized_median_cpu_us_per_target": 727.875,
+          "max_cpu_us": 1040.125,
+          "median_cpu_us": 727.875,
+          "min_cpu_us": 510.625,
+          "round_cpu_us": [
+            727.875,
+            1040.125,
+            510.625
+          ]
+        },
+        "rho-negation": {
+          "amortized_median_cpu_us_per_target": 624.125,
+          "max_cpu_us": 905.209,
+          "median_cpu_us": 624.125,
+          "min_cpu_us": 438.792,
+          "round_cpu_us": [
+            624.125,
+            905.209,
+            438.792
+          ]
+        },
+        "rho-negation-aa": {
+          "amortized_median_cpu_us_per_target": 832.792,
+          "max_cpu_us": 1020.333,
+          "median_cpu_us": 832.792,
+          "min_cpu_us": 386.667,
+          "round_cpu_us": [
+            386.667,
+            832.792,
+            1020.333
+          ]
+        },
+        "source": {
+          "amortized_median_cpu_us_per_target": 661.666,
+          "max_cpu_us": 961.0,
+          "median_cpu_us": 661.666,
+          "min_cpu_us": 493.667,
+          "round_cpu_us": [
+            661.666,
+            961.0,
+            493.667
+          ]
+        },
+        "source-bsgs": {
+          "amortized_median_cpu_us_per_target": 407.833,
+          "max_cpu_us": 688.166,
+          "median_cpu_us": 407.833,
+          "min_cpu_us": 383.375,
+          "round_cpu_us": [
+            407.833,
+            688.166,
+            383.375
+          ]
+        }
+      },
+      "full_over_best_direct": {
+        "median": 11.038628556296327,
+        "rounds": [
+          11.038628556296327,
+          6.595429009860992,
+          13.635910009781547
+        ]
+      },
+      "full_over_bsgs": {
+        "median": 11.038628556296327,
+        "rounds": [
+          11.038628556296327,
+          6.595429009860992,
+          13.635910009781547
+        ]
+      },
+      "full_over_rho": {
+        "median": 7.213165631884639,
+        "rounds": [
+          7.213165631884639,
+          5.014035432701178,
+          11.9137700778501
+        ]
+      },
+      "targets": 1
+    },
+    {
+      "arms": {
+        "destination-direct": {
+          "amortized_median_cpu_us_per_target": 226.7605,
+          "max_cpu_us": 1065.167,
+          "median_cpu_us": 907.042,
+          "min_cpu_us": 816.542,
+          "round_cpu_us": [
+            816.542,
+            907.042,
+            1065.167
+          ]
+        },
+        "full-image": {
+          "amortized_median_cpu_us_per_target": 1188.125,
+          "max_cpu_us": 5708.292,
+          "median_cpu_us": 4752.5,
+          "min_cpu_us": 4713.708,
+          "round_cpu_us": [
+            4713.708,
+            4752.5,
+            5708.292
+          ]
+        },
+        "isogeny-image": {
+          "amortized_median_cpu_us_per_target": 277.177,
+          "max_cpu_us": 1343.833,
+          "median_cpu_us": 1108.708,
+          "min_cpu_us": 791.541,
+          "round_cpu_us": [
+            1108.708,
+            1343.833,
+            791.541
+          ]
+        },
+        "rho-negation": {
+          "amortized_median_cpu_us_per_target": 182.36475,
+          "max_cpu_us": 1046.334,
+          "median_cpu_us": 729.459,
+          "min_cpu_us": 528.75,
+          "round_cpu_us": [
+            729.459,
+            1046.334,
+            528.75
+          ]
+        },
+        "rho-negation-aa": {
+          "amortized_median_cpu_us_per_target": 240.40625,
+          "max_cpu_us": 1175.125,
+          "median_cpu_us": 961.625,
+          "min_cpu_us": 461.625,
+          "round_cpu_us": [
+            461.625,
+            961.625,
+            1175.125
+          ]
+        },
+        "source": {
+          "amortized_median_cpu_us_per_target": 207.46875,
+          "max_cpu_us": 1167.792,
+          "median_cpu_us": 829.875,
+          "min_cpu_us": 794.833,
+          "round_cpu_us": [
+            829.875,
+            1167.792,
+            794.833
+          ]
+        },
+        "source-bsgs": {
+          "amortized_median_cpu_us_per_target": 106.125,
+          "max_cpu_us": 715.958,
+          "median_cpu_us": 424.5,
+          "min_cpu_us": 399.792,
+          "round_cpu_us": [
+            424.5,
+            715.958,
+            399.792
+          ]
+        }
+      },
+      "full_over_best_direct": {
+        "median": 11.104141342756183,
+        "rounds": [
+          11.104141342756183,
+          6.6379592098977875,
+          14.278154640413018
+        ]
+      },
+      "full_over_bsgs": {
+        "median": 11.104141342756183,
+        "rounds": [
+          11.104141342756183,
+          6.6379592098977875,
+          14.278154640413018
+        ]
+      },
+      "full_over_rho": {
+        "median": 6.461923151266898,
+        "rounds": [
+          6.461923151266898,
+          4.5420487148463105,
+          10.795824113475177
+        ]
+      },
+      "targets": 4
+    },
+    {
+      "arms": {
+        "destination-direct": {
+          "amortized_median_cpu_us_per_target": 108.2865,
+          "max_cpu_us": 2043.709,
+          "median_cpu_us": 1732.584,
+          "min_cpu_us": 1638.208,
+          "round_cpu_us": [
+            1638.208,
+            1732.584,
+            2043.709
+          ]
+        },
+        "full-image": {
+          "amortized_median_cpu_us_per_target": 408.046875,
+          "max_cpu_us": 6983.709,
+          "median_cpu_us": 6528.75,
+          "min_cpu_us": 5756.834,
+          "round_cpu_us": [
+            6528.75,
+            5756.834,
+            6983.709
+          ]
+        },
+        "isogeny-image": {
+          "amortized_median_cpu_us_per_target": 169.4375,
+          "max_cpu_us": 3121.666,
+          "median_cpu_us": 2711.0,
+          "min_cpu_us": 1576.958,
+          "round_cpu_us": [
+            2711.0,
+            3121.666,
+            1576.958
+          ]
+        },
+        "rho-negation": {
+          "amortized_median_cpu_us_per_target": 62.4479375,
+          "max_cpu_us": 1610.625,
+          "median_cpu_us": 999.167,
+          "min_cpu_us": 782.542,
+          "round_cpu_us": [
+            999.167,
+            1610.625,
+            782.542
+          ]
+        },
+        "rho-negation-aa": {
+          "amortized_median_cpu_us_per_target": 86.1015625,
+          "max_cpu_us": 1408.5,
+          "median_cpu_us": 1377.625,
+          "min_cpu_us": 1096.917,
+          "round_cpu_us": [
+            1096.917,
+            1377.625,
+            1408.5
+          ]
+        },
+        "source": {
+          "amortized_median_cpu_us_per_target": 106.51825,
+          "max_cpu_us": 2697.084,
+          "median_cpu_us": 1704.292,
+          "min_cpu_us": 1695.833,
+          "round_cpu_us": [
+            1695.833,
+            2697.084,
+            1704.292
+          ]
+        },
+        "source-bsgs": {
+          "amortized_median_cpu_us_per_target": 29.3020625,
+          "max_cpu_us": 802.75,
+          "median_cpu_us": 468.833,
+          "min_cpu_us": 463.125,
+          "round_cpu_us": [
+            468.833,
+            802.75,
+            463.125
+          ]
+        }
+      },
+      "full_over_best_direct": {
+        "median": 13.925534252068433,
+        "rounds": [
+          13.925534252068433,
+          7.17139084397384,
+          15.079533603238866
+        ]
+      },
+      "full_over_bsgs": {
+        "median": 13.925534252068433,
+        "rounds": [
+          13.925534252068433,
+          7.17139084397384,
+          15.079533603238866
+        ]
+      },
+      "full_over_rho": {
+        "median": 6.534192982754634,
+        "rounds": [
+          6.534192982754634,
+          3.5742857586340704,
+          8.924388722905608
+        ]
+      },
+      "targets": 16
+    },
+    {
+      "arms": {
+        "destination-direct": {
+          "amortized_median_cpu_us_per_target": 89.83195,
+          "max_cpu_us": 7621.542,
+          "median_cpu_us": 5389.917,
+          "min_cpu_us": 5170.625,
+          "round_cpu_us": [
+            5170.625,
+            7621.542,
+            5389.917
+          ]
+        },
+        "full-image": {
+          "amortized_median_cpu_us_per_target": 184.16111666666666,
+          "max_cpu_us": 12848.542,
+          "median_cpu_us": 11049.667,
+          "min_cpu_us": 9336.209,
+          "round_cpu_us": [
+            12848.542,
+            9336.209,
+            11049.667
+          ]
+        },
+        "isogeny-image": {
+          "amortized_median_cpu_us_per_target": 115.00208333333333,
+          "max_cpu_us": 8060.833,
+          "median_cpu_us": 6900.125,
+          "min_cpu_us": 5597.291,
+          "round_cpu_us": [
+            8060.833,
+            6900.125,
+            5597.291
+          ]
+        },
+        "rho-negation": {
+          "amortized_median_cpu_us_per_target": 40.5257,
+          "max_cpu_us": 2950.625,
+          "median_cpu_us": 2431.542,
+          "min_cpu_us": 1652.083,
+          "round_cpu_us": [
+            2431.542,
+            2950.625,
+            1652.083
+          ]
+        },
+        "rho-negation-aa": {
+          "amortized_median_cpu_us_per_target": 39.88265,
+          "max_cpu_us": 2741.25,
+          "median_cpu_us": 2392.959,
+          "min_cpu_us": 2261.458,
+          "round_cpu_us": [
+            2392.959,
+            2741.25,
+            2261.458
+          ]
+        },
+        "source": {
+          "amortized_median_cpu_us_per_target": 97.86735,
+          "max_cpu_us": 6915.125,
+          "median_cpu_us": 5872.041,
+          "min_cpu_us": 4837.667,
+          "round_cpu_us": [
+            5872.041,
+            6915.125,
+            4837.667
+          ]
+        },
+        "source-bsgs": {
+          "amortized_median_cpu_us_per_target": 10.720133333333333,
+          "max_cpu_us": 1080.583,
+          "median_cpu_us": 643.208,
+          "min_cpu_us": 610.375,
+          "round_cpu_us": [
+            643.208,
+            1080.583,
+            610.375
+          ]
+        }
+      },
+      "full_over_best_direct": {
+        "median": 18.103079254556626,
+        "rounds": [
+          19.975718585589732,
+          8.639973977010559,
+          18.103079254556626
+        ]
+      },
+      "full_over_bsgs": {
+        "median": 18.103079254556626,
+        "rounds": [
+          19.975718585589732,
+          8.639973977010559,
+          18.103079254556626
+        ]
+      },
+      "full_over_rho": {
+        "median": 5.284112715305761,
+        "rounds": [
+          5.284112715305761,
+          3.164146240203347,
+          6.688324375954476
+        ]
+      },
+      "targets": 60
+    }
+  ],
+  "replay_sha256": "47d6ee15964c390968fa9636068e4e0b7a9cb4b519a548622c17053dbff85d1f",
+  "replayed_relation_witnesses": 10960,
+  "replayed_scalars": 1260,
+  "run_sha256": "ac85539489c417981adcc41ab5f1cca00539f55269c8ec83ebe4d7231a683e10",
+  "schema": "different_j_batch_summary/v1",
+  "unit": "microseconds_current_thread_cpu_including_input_validation_and_setup"
+}
