@@ -16,6 +16,11 @@
   asymptotic sub-rho, or deployed-curve-security claims; multi-target and
   amortized results stay secondary; ledger rows promote only with complete
   measurement fields and independent replay.
+- **Every big improvement updates the leaderboard** (owner, 2026-10-15).
+  A PR that lands a large measured gain, whether a whole pipeline, a phase
+  or a component (an engine, filter, oracle, solver or kernel), regenerates
+  `docs/ic-leaderboard.html` and its twins in the same PR (§7b), even when
+  no row of tables A–C moves; it is not a follow-up.
 - **Conductor:** run `conductor check --summary "…" --scope path:…` before
   editing; report scope expansion before editing outside reserved paths. Do
   not publish chat transcripts or secrets as task metadata.
@@ -722,7 +727,13 @@ until the leaderboard shows it**, in the same pull request.
   - a reference re-matched;
   - a rule change that redefines the primary comparison, as the
     one-target rule did;
-  - a change to `docs/curves/registry.json`, which the page's roster reads.
+  - a change to `docs/curves/registry.json`, which the page's roster reads;
+  - a big improvement in a phase or component (an engine, filter, oracle,
+    solver or kernel) that moves no whole-pipeline row (owner, 2026-10-15):
+    it gets its own section outside tables A–C, generated from the study's
+    frozen summary with the before figure kept and its class (usually
+    engineering) named, as the linear-algebra engine section was added for
+    `research/la_engines_20261014`.
 - **How.** The page is generated, never edited by hand.
   - Point `SOURCES` in `scripts/build_ic_leaderboard.py` at the round's
     frozen files.

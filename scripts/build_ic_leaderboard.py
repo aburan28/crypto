@@ -71,6 +71,7 @@ SOURCES = {
     "f4_f5_f6_cross_family": "research/f4_f5_f6_cross_family_20261011/ANALYSIS.json",
     "n41_n53_counted": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
     "conductor_gap_counts": "research/ecbench_conductor_gap_20261012/analysis.json",
+    "la_engines": "research/la_engines_20261014/summary.json",
     "frontier_audit": "research/ecbench_frontier_20261013/frontier-data.json",
     "registry": "docs/curves/registry.json",
     "curves_schema": "docs/curves/ic/curves.schema.json",
@@ -580,6 +581,40 @@ def families(board: list[dict]) -> dict:
     return out
 
 
+# Sizes the linear-algebra component panel shows, a subset of the study's
+# frozen amendment-5 grid (research/la_engines_20261014/PROTOCOL_AMENDMENT_5.md).
+LA_COLUMNS = (16384, 65536, 131072, 262144)
+
+
+def la_component() -> dict:
+    """The linear-algebra phase on its own: the amendment-5 session of
+    research/la_engines_20261014, copied from its summary.json (medians and
+    per-seed ratio ranges computed there from raw/grid_amend5.jsonl). A
+    component speed-up on synthetic relation matrices: it moves no row of
+    tables A-C, which keep the solver each was measured with."""
+    sm = load(SOURCES["la_engines"])
+
+    def cell(key: str, d: int):
+        return (sm.get(key) or {}).get(str(d))
+
+    rows = []
+    for d in LA_COLUMNS:
+        rows.append({
+            "columns": d,
+            "legacy_s": cell("amend5_solve_s|legacy-bw", d),
+            "cado_style_s": cell("amend5_solve_s|cado-bw", d),
+            "legacy_over_cado_style": cell("amend5_ratio|legacy-bw/cado-bw", d),
+            "cado_nfs_s": cell("amend5_solve_s|cado-nfs", d),
+            "cado_nfs_over_ours": cell("amend5_ratio|cado-nfs/cado-bw-pos", d),
+            "core_legacy": cell("amend5_core_dim|legacy-bw", d),
+            "core_cado_style": cell("amend5_core_dim|cado-bw", d),
+            "core_cado_nfs": cell("amend5_core_dim|cado-nfs", d),
+        })
+    return {"rows": rows, "study": "research/la_engines_20261014/",
+            "report": "research/la_engines_20261014/REPORT.pdf",
+            "class": "engineering"}
+
+
 def latest_frontier_audit() -> dict:
     """Copy the accounting-only frontier synthesis into the generated board.
 
@@ -966,6 +1001,7 @@ def build() -> dict:
         # Native analysis computes these observations; this view only copies
         # and renders them, outside the fully priced rankings.
         "conductor_gap_count_diagnostic": load(SOURCES["conductor_gap_counts"]),
+        "linear_algebra_component": la_component(),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
     }
 
@@ -1260,6 +1296,28 @@ def markdown(doc: dict) -> str:
         observed = session["arms"]["ic-mitm"]["cross_curve"]
         L.append(f"| {session['ell']} | {observed['ratio_floor_over_crater']:.6f} | "
                  f"{observed['ci99'][0]:.6f} to {observed['ci99'][1]:.6f} |")
+    la = doc["linear_algebra_component"]
+    L += ["", "## Linear-algebra engine, outside tables A–C", "",
+          "The linear-algebra phase alone, on synthetic m = 3 relation matrices over a 62-bit prime "
+          "(class: engineering). Whole solve from relation rows to verified logarithms, median of 3 seeds "
+          "in one session; ratios are per-seed medians [min, max]. `legacy` is the filter tables A–C were "
+          "measured with; `CADO-style` is `FilterOptions::cado()` (CADO-NFS's purge and merge, ported), "
+          "the `ic logs` default since #1861; CADO-NFS ran its own purge + merge-dl + bwc on the same "
+          "matrices (+1 coefficients). Its share of S in every row above is in the phase table, and no row moves. "
+          f"Study: [{la['study']}](../../{la['study']}).", "",
+          "| columns | legacy | CADO-style | legacy / CADO-style | CADO-NFS | CADO-NFS / ours | core: legacy → CADO-style (CADO-NFS) |",
+          "|--:|--:|--:|:--|--:|:--|:--|"]
+
+    def la_s(c):
+        return f"{c['median']:#.3g} s" if c else "—"
+
+    def la_q(c):
+        return f"{c['median']:.2f}× [{c['min']:.2f}, {c['max']:.2f}]" if c else "—"
+
+    for r in la["rows"]:
+        L.append(f"| {r['columns']:,} | {la_s(r['legacy_s'])} | {la_s(r['cado_style_s'])} | "
+                 f"{la_q(r['legacy_over_cado_style'])} | {la_s(r['cado_nfs_s'])} | {la_q(r['cado_nfs_over_ours'])} | "
+                 f"{r['core_legacy']:,.0f} → {r['core_cado_style']:,.0f} ({r['core_cado_nfs']:,.0f}) |")
     L += ["", "## Sources", ""]
     for k, v in doc["sources"].items():
         L.append(f"- `{v['path']}` — sha256 `{v['sha256'][:16]}…`")
@@ -1866,6 +1924,31 @@ def page(doc: dict, standalone: bool) -> str:
         P.append(f'<tr><td>{session["ell"]}</td><td>{observed["ratio_floor_over_crater"]:.6f}</td>'
                  f'<td>{observed["ci99"][0]:.6f} to {observed["ci99"][1]:.6f}</td></tr>')
     P.append('</tbody></table>' + gh(SOURCES["conductor_gap_counts"], 'Native analysis and source records') + '</section>')
+
+    la = doc["linear_algebra_component"]
+
+    def la_s(c):
+        return f"{c['median']:#.3g} s" if c else "—"
+
+    def la_q(c):
+        return f"{c['median']:.2f}× [{c['min']:.2f}, {c['max']:.2f}]" if c else "—"
+
+    P.append('<section id="linear-algebra-engine"><h2>Linear-algebra engine, outside tables A–C</h2>'
+             '<p>The linear-algebra phase alone, on synthetic m = 3 relation matrices over a 62-bit prime '
+             '(class: engineering). Whole solve from relation rows to verified logarithms, median of 3 seeds in one '
+             'session; ratios are per-seed medians [min, max]. <em>Legacy</em> is the filter tables A–C were measured '
+             'with; <em>CADO-style</em> is <code>FilterOptions::cado()</code> (CADO-NFS&#39;s purge and merge, ported), '
+             'the <code>ic logs</code> default since #1861; CADO-NFS ran its own purge + merge-dl + bwc on the same '
+             'matrices (+1 coefficients). Its share of S in every row above is in the phase table, and no row moves.</p>'
+             '<table><thead><tr><th>columns</th><th>legacy</th><th>CADO-style</th><th>legacy / CADO-style</th>'
+             '<th>CADO-NFS</th><th>CADO-NFS / ours</th><th>core: legacy → CADO-style (CADO-NFS)</th></tr></thead><tbody>')
+    for r in la["rows"]:
+        P.append(f'<tr><td>{r["columns"]:,}</td><td>{la_s(r["legacy_s"])}</td><td>{la_s(r["cado_style_s"])}</td>'
+                 f'<td>{la_q(r["legacy_over_cado_style"])}</td><td>{la_s(r["cado_nfs_s"])}</td>'
+                 f'<td>{la_q(r["cado_nfs_over_ours"])}</td>'
+                 f'<td>{r["core_legacy"]:,.0f} → {r["core_cado_style"]:,.0f} ({r["core_cado_nfs"]:,.0f})</td></tr>')
+    P.append('</tbody></table>' + gh(la["report"], 'Results report') + ' · '
+             + gh(SOURCES["la_engines"], 'summary.json') + '</section>')
 
     # Footer.
     P.append('<footer><p><strong>What this is not.</strong> A view of frozen measurements, class accounting: no row '

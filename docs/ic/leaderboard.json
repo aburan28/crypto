@@ -98,6 +98,10 @@
    "path": "research/ecbench_conductor_gap_20261012/analysis.json",
    "sha256": "0ff9b20fd773ea67fa8fc2c434635e77f97422b2904d687b61eac75a02c04279"
   },
+  "la_engines": {
+   "path": "research/la_engines_20261014/summary.json",
+   "sha256": "b34650a95c5f106c8302dc5311194d8e1ffb798dff59b2669cda59818712f533"
+  },
   "frontier_audit": {
    "path": "research/ecbench_frontier_20261013/frontier-data.json",
    "sha256": "765f6e8d05ebbf75e7a3dddcbb886015274311589352b9107746976fb2a670d7"
@@ -39737,6 +39741,157 @@
     "status": "observations on two fixed curves; no population hardness or speedup claim"
    }
   ]
+ },
+ "linear_algebra_component": {
+  "rows": [
+   {
+    "columns": 16384,
+    "legacy_s": {
+     "max": 0.44699776,
+     "median": 0.383569918,
+     "min": 0.374274221,
+     "n": 3
+    },
+    "cado_style_s": {
+     "max": 0.221835654,
+     "median": 0.151381725,
+     "min": 0.151210385,
+     "n": 3
+    },
+    "legacy_over_cado_style": {
+     "max": 2.53379275471,
+     "median": 2.47518859898,
+     "min": 2.01499511886,
+     "n": 3
+    },
+    "cado_nfs_s": {
+     "max": 3.826622748,
+     "median": 3.714160372,
+     "min": 3.711265208,
+     "n": 3
+    },
+    "cado_nfs_over_ours": {
+     "max": 23.0943889724,
+     "median": 20.5650214271,
+     "min": 17.7272355536,
+     "n": 3
+    },
+    "core_legacy": 1675,
+    "core_cado_style": 234,
+    "core_cado_nfs": 271
+   },
+   {
+    "columns": 65536,
+    "legacy_s": {
+     "max": 4.557014973,
+     "median": 4.46673584,
+     "min": 4.385683098,
+     "n": 3
+    },
+    "cado_style_s": {
+     "max": 1.303234311,
+     "median": 1.289269587,
+     "min": 1.255296335,
+     "n": 3
+    },
+    "legacy_over_cado_style": {
+     "max": 3.49669659135,
+     "median": 3.49374325067,
+     "min": 3.46454758961,
+     "n": 3
+    },
+    "cado_nfs_s": {
+     "max": 5.639423819,
+     "median": 5.476413178,
+     "min": 5.39253693,
+     "n": 3
+    },
+    "cado_nfs_over_ours": {
+     "max": 4.50173533383,
+     "median": 4.26155296182,
+     "min": 4.2381367166,
+     "n": 3
+    },
+    "core_legacy": 6743,
+    "core_cado_style": 852,
+    "core_cado_nfs": 921
+   },
+   {
+    "columns": 131072,
+    "legacy_s": {
+     "max": 18.988414339,
+     "median": 18.187751968,
+     "min": 17.888449091,
+     "n": 3
+    },
+    "cado_style_s": {
+     "max": 4.025794577,
+     "median": 3.804332521,
+     "min": 3.584043679,
+     "n": 3
+    },
+    "legacy_over_cado_style": {
+     "max": 5.07464573453,
+     "median": 4.71668734602,
+     "min": 4.7021255351,
+     "n": 3
+    },
+    "cado_nfs_s": {
+     "max": 8.240006964,
+     "median": 8.001721359,
+     "min": 7.950918916,
+     "n": 3
+    },
+    "cado_nfs_over_ours": {
+     "max": 2.1879557137,
+     "median": 2.09426632076,
+     "min": 2.08695043638,
+     "n": 3
+    },
+    "core_legacy": 13369,
+    "core_cado_style": 1652,
+    "core_cado_nfs": 1660
+   },
+   {
+    "columns": 262144,
+    "legacy_s": {
+     "max": 86.799408501,
+     "median": 86.569748328,
+     "min": 84.640809158,
+     "n": 3
+    },
+    "cado_style_s": {
+     "max": 8.470049787,
+     "median": 8.348963156,
+     "min": 7.824668707,
+     "n": 3
+    },
+    "legacy_over_cado_style": {
+     "max": 11.0636950355,
+     "median": 10.3964296978,
+     "min": 9.99295296799,
+     "n": 3
+    },
+    "cado_nfs_s": {
+     "max": 15.337020592,
+     "median": 14.725590671,
+     "min": 14.309045907,
+     "n": 3
+    },
+    "cado_nfs_over_ours": {
+     "max": 1.95997028141,
+     "median": 1.93167571373,
+     "min": 1.73644215035,
+     "n": 3
+    },
+    "core_legacy": 26750,
+    "core_cado_style": 3424,
+    "core_cado_nfs": 3512
+   }
+  ],
+  "study": "research/la_engines_20261014/",
+  "report": "research/la_engines_20261014/REPORT.pdf",
+  "class": "engineering"
  },
  "phases": [
   {
