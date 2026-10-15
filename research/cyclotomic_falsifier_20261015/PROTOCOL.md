@@ -211,3 +211,17 @@ rule, `N`, seed, metric, cell or critical value:
    +279% energy and −40% `cov2` at `K = 30`.
 5. **Cost-leg specs** written by the §3 rule with these `K_full`:
    `specs/cost-a1-n23.json`, `specs/cost-a0-n23.json` (`make_specs.sh`).
+
+### A2 (2026-10-15, cost leg, before any verified cost record)
+
+The first cost session (`sessions/void-a1-n23-full-unpriced/`, spec
+`specs/void/cost-a1-n23-full.json`) errored on every record before it was
+stopped: `src/cryptanalysis/ecbench/full_prices.json has no row for
+icv1-f2m23-tm5197-1f85e9e1` (the `*_full` methods need a measured price row,
+and `K_1 / F_{2^23}` has none). Kept as evidence, no values. Change: both cost
+specs use the operations-only methods `rho.signed_frobenius` and `ic.pipeline`
+(same oracle, targets, factor bases, seeds, sizes), one instrument on both
+rungs; `S` then counts group operations without pricing native field work, as
+in the 2026-10-13 smoke. A one-target, one-round smoke of the new `a = 1` spec
+(scratch, not committed) verified all five arms; its values are not evidence.
+Decision rule unchanged.

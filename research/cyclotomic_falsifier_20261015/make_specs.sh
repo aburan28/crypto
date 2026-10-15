@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 # Writes the frozen cost-leg specs of PROTOCOL.md §3. Thin orchestration only.
+# Methods: ic.pipeline and rho.signed_frobenius (operations only; amendment A2: no full_prices.json row for a=1 n=23).
 # K_full from `ecbench fb`: a=1 n=23 cyclotomic:w=2 -> 30 columns; a=0 n=23 -> 17.
 set -euo pipefail
 OUT="$(cd "$(dirname "$0")" && pwd)/specs"
 ic() { # name role factor_base
   jq -n --arg name "$1" --arg role "$2" --arg fb "$3" \
-    '{name:$name, role:$role, method:{id:"ic.pipeline_full", params:{factor_base:$fb, oracle:"mitm-frobenius-counted:m=2", max_trials:"1000000000", targets:"stride-renew"}}}'
+    '{name:$name, role:$role, method:{id:"ic.pipeline", params:{factor_base:$fb, oracle:"mitm-frobenius-counted:m=2", max_trials:"1000000000", targets:"stride-renew"}}}'
 }
 spec() { # a n seed arms...
   local a=$1 n=$2 seed=$3; shift 3
-  local arms='[{"name":"rho-frob","role":"reference","method":{"id":"rho.signed_frobenius_full"}}]'
+  local arms='[{"name":"rho-frob","role":"reference","method":{"id":"rho.signed_frobenius"}}]'
   while [ $# -gt 0 ]; do arms=$(jq --argjson x "$(ic "$1" "$2" "$3")" '. + [$x]' <<<"$arms"); shift 3; done
   jq -n --argjson arms "$arms" --argjson a "$a" --argjson n "$n" --argjson seed "$seed" '{
     schema:"ecbench.spec/v1",

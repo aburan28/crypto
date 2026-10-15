@@ -1,0 +1,50 @@
+{
+  "schema": "ecbench.session/v1",
+  "session_id": "ECBS1ha427c7b5151d",
+  "label": "D4 falsifier cost leg: cyclotomic vs compact-orbit-scan at equal columns, Koblitz a=1 n=23",
+  "spec_id": "ECS1h53d848341c8e",
+  "spec_sha256": "53d848341c8e29917b9936a68205573bbba95acb8c836f7b2ce598f5199c70c3",
+  "env_class_id": "ECBENV2ha95bed7071ef",
+  "host_sha256": "780260509d5021e53693dcb30e9db65ae8035fa0e77ee129660892ab58b42339",
+  "plan_sha256": "593eccd7ef07633a0cb09f455923927260a5a967c6f4de3b389da39eefc7666b",
+  "binary_sha256": "4d8bd56ddc49ff2c492332fa1d8125f5be95d70e4deb1636f9607402e4d427f6",
+  "git_commit": null,
+  "git_dirty": null,
+  "options": {
+    "cpus": "none",
+    "lock_path": "/tmp/crypto-bench.lock",
+    "wait_for_lock": true,
+    "allow_busy": true,
+    "thresholds": {
+      "settle_seconds": 2.0,
+      "max_other_cpu": 0.1,
+      "max_psi": 5.0,
+      "max_preemptions_per_second": 50.0
+    },
+    "exe": "/proc/self/exe"
+  },
+  "cpu_plan": null,
+  "preflight": null,
+  "eviction": null,
+  "runner_on_run_cpu": false,
+  "runner_cpus": null,
+  "ticks_per_second": 100,
+  "grading_version": 2,
+  "child_env_sha256": "db1325aca1b2e904875cd5890b474cc8090bafbf32b676ceb75a94f11fadbc5d",
+  "child_env": {
+    "HOME": "/root",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "PATH": "/nix/var/nix/profiles/default/bin:/root/.local/bin:/root/.cargo/bin:/usr/local/go/bin:/opt/node22/bin:/opt/maven/bin:/opt/gradle/bin:/opt/rbenv/bin:/root/.bun/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "RAYON_NUM_THREADS": "1",
+    "RUST_BACKTRACE": "0",
+    "RUST_MIN_STACK": "8388608"
+  },
+  "started_unix_ms": 1792049247186,
+  "finished_unix_ms": null,
+  "status": "running",
+  "executions_planned": 240,
+  "records_written": 0,
+  "records_sha256": null,
+  "status_counts": {}
+}

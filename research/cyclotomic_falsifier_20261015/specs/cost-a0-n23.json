@@ -19,14 +19,14 @@
       "name": "rho-frob",
       "role": "reference",
       "method": {
-        "id": "rho.signed_frobenius_full"
+        "id": "rho.signed_frobenius"
       }
     },
     {
       "name": "ic-cyc-w2",
       "role": "candidate",
       "method": {
-        "id": "ic.pipeline_full",
+        "id": "ic.pipeline",
         "params": {
           "factor_base": "cyclotomic:w=2",
           "oracle": "mitm-frobenius-counted:m=2",
@@ -39,7 +39,7 @@
       "name": "ic-cos-c17",
       "role": "baseline",
       "method": {
-        "id": "ic.pipeline_full",
+        "id": "ic.pipeline",
         "params": {
           "factor_base": "compact-orbit-scan:columns=17,raw_x_cap=100000000",
           "oracle": "mitm-frobenius-counted:m=2",
@@ -52,7 +52,7 @@
       "name": "ic-cyc-w3-c3",
       "role": "candidate",
       "method": {
-        "id": "ic.pipeline_full",
+        "id": "ic.pipeline",
         "params": {
           "factor_base": "cyclotomic:w=3,columns=3",
           "oracle": "mitm-frobenius-counted:m=2",
@@ -65,7 +65,7 @@
       "name": "ic-cos-c3",
       "role": "baseline",
       "method": {
-        "id": "ic.pipeline_full",
+        "id": "ic.pipeline",
         "params": {
           "factor_base": "compact-orbit-scan:columns=3,raw_x_cap=100000000",
           "oracle": "mitm-frobenius-counted:m=2",
