@@ -1,12 +1,16 @@
 {
   "files": {
     "RESULT.md": {
-      "bytes": 2421,
-      "sha256": "bc489d3290fa25e115d504f0c9cd31c9f8352ff65a48ef5f653887712c8f7fe9"
+      "bytes": 2870,
+      "sha256": "764c32cea31bd4feacf49194fa347dca3468437447f8860a26bcae95caccd16c"
     },
-    "audit.json": {
+    "audit-pilot.json": {
       "bytes": 34047,
       "sha256": "a4e6b69a1cd4c2f5c93cb816161423477beb1c134e0426ad075d786512dc60d3"
+    },
+    "audit.json": {
+      "bytes": 36400,
+      "sha256": "cf378ec08b1eb1bb3fe1ed55ec11b59e443a87922e3c4279da17fbde4b70b8d3"
     },
     "download.stderr": {
       "bytes": 0,
@@ -20,14 +24,18 @@
       "bytes": 15845,
       "sha256": "fcad2625bc75e856adc1ec0023a531289f9c5f9fbb3e6643fca543ec2b6315f3"
     },
-    "tamper-control.json": {
+    "tamper-control-v1.json": {
       "bytes": 2634,
       "sha256": "ab6538506b289186e7f70ac9bd3da87fc62cf2bfa698b19560cec4f968b8c884"
     },
+    "tamper-control.json": {
+      "bytes": 2723,
+      "sha256": "d9b0f24351b3fd551e5af8fe6b2fdb85280ec50177e2117606f20f28d67568c9"
+    },
     "verify.py": {
-      "bytes": 5795,
-      "sha256": "25e65b8847996c6a717d3165b92b998ef175778be92d01c9698c74194111c8cb"
+      "bytes": 6684,
+      "sha256": "60096f94faaeadb0d432bd1ef428d4188f308cefdb5be97beeb0b8a9b3e05a91"
     }
   },
-  "schema": "n83.live-s3-factor-base-artifact-manifest/v1"
+  "schema": "n83.live-s3-factor-base-artifact-manifest/v2"
 }

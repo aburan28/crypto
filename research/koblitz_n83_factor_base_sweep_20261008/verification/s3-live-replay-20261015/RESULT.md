@@ -5,24 +5,30 @@ objects under
 `s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/`:
 57 compressed factor-base archives and 15 other JSON objects. All 54 archive
 keys in the committed [pilot manifest](../../pilot-01/manifest.json) were
-present. The three additional archives are the two v2 size-frontier objects
-and one v3 structured-orbit object.
+present. The three additional archives are pinned by the two v2 size-frontier
+[K1182](../matched-k1182-k2048-900s-20261011/evidence-01/panel-k1182/manifest.json)
+and [K2048](../matched-k1182-k2048-900s-20261011/evidence-01/panel-k2048/manifest.json)
+manifests and the [v3 structured-orbit manifest](../structured-d12-orbit-20261010/manifest.json).
 
 The 57 archives were downloaded to task-local scratch. The independent
 [verifier](verify.py) read every compressed byte and full gzip stream,
 checked each archive's compressed BLAKE3 against its content-addressed key,
-and matched all 54 pilot compressed sizes, compressed BLAKE3 digests and plain
-BLAKE3 digests to the pilot manifest. The total is **109,656,159 compressed
-bytes** and **531,027,665 decompressed bytes**. The retained [audit](audit.json)
+and matched **all 57** compressed sizes, compressed BLAKE3 digests and plain
+BLAKE3 digests to their four construction manifests. The total is
+**109,656,159 compressed bytes** and **531,027,665 decompressed bytes**. The
+retained [audit](audit.json)
 contains each S3 URI, compressed SHA-256/BLAKE3, plain BLAKE3, sizes and pilot
-membership. Its saved result passed a second byte-for-byte replay. The
+membership, along with all four source-manifest hashes. Its saved result
+passed a second byte-for-byte replay. The narrower original
+[pilot-only audit](audit-pilot.json) remains byte-preserved. The
 [raw listing](list.json) and 57-line [download log](download.stdout) are
 retained; the download's stderr was empty. No S3 object was written or
 replaced.
 
 A separate [negative control](tamper-control.json) changed one byte in a
-scratch copy of the smallest archive. The same verifier exited nonzero on
-gzip's incorrect-length check and wrote no successful receipt. This control
+scratch copy of the smallest archive. The current verifier exited nonzero on
+gzip's incorrect-length check and wrote no successful receipt; the
+[original control](tamper-control-v1.json) also remains retained. This control
 does not replace the positive replay of the original 57 archives.
 
 This receipt establishes live storage and byte integrity of the stored

@@ -14,6 +14,15 @@ from blake3 import blake3
 
 HERE = Path(__file__).resolve().parent
 PILOT = HERE.parents[1] / "pilot-01" / "manifest.json"
+SOURCE_MANIFESTS = {
+    "pilot": PILOT,
+    "v2_k1182": HERE.parent / "matched-k1182-k2048-900s-20261011"
+    / "evidence-01" / "panel-k1182" / "manifest.json",
+    "v2_k2048": HERE.parent / "matched-k1182-k2048-900s-20261011"
+    / "evidence-01" / "panel-k2048" / "manifest.json",
+    "v3_structured_d12": HERE.parent / "structured-d12-orbit-20261010"
+    / "manifest.json",
+}
 BUCKET = "crypto-autoresearcher"
 PREFIX = "factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/"
 SUFFIX = ".jsonl.gz"
@@ -53,19 +62,24 @@ def replay(inventory_path: Path, download_root: Path) -> dict:
     objects = {item["Key"]: item for item in listed
                if item["Key"].endswith(SUFFIX)}
     require(len(objects) == 57, "expected 57 stored N83 archives")
-    pilot_bytes = PILOT.read_bytes()
-    pilot = json.loads(pilot_bytes)
-    bases = pilot["bases"]
-    require(len(bases) == 54, "expected 54 pilot bases")
     expected = {}
-    for base in bases:
-        uri = base["s3_uri"]
-        prefix = f"s3://{BUCKET}/"
-        require(uri.startswith(prefix), "pilot archive bucket differs")
-        key = uri[len(prefix):]
-        require(key not in expected, "duplicate pilot archive")
-        expected[key] = base
-    require(not (expected.keys() - objects.keys()), "pilot archive absent from S3 listing")
+    source_hashes = {}
+    for source, manifest_path in SOURCE_MANIFESTS.items():
+        raw = manifest_path.read_bytes()
+        source_hashes[source] = hashlib.sha256(raw).hexdigest()
+        parsed = json.loads(raw)
+        bases = parsed["bases"] if "bases" in parsed else [parsed]
+        require(len(bases) == (54 if source == "pilot" else 1),
+                f"unexpected source-manifest base count: {source}")
+        for base in bases:
+            uri = base["s3_uri"]
+            prefix = f"s3://{BUCKET}/"
+            require(uri.startswith(prefix), f"archive bucket differs: {source}")
+            key = uri[len(prefix):]
+            require(key not in expected, f"duplicate source archive: {key}")
+            expected[key] = (source, base)
+    require(len(expected) == 57 and expected.keys() == objects.keys(),
+            "live archive keys differ from all source manifests")
 
     rows = []
     local_names = set()
@@ -80,27 +94,28 @@ def replay(inventory_path: Path, download_root: Path) -> dict:
         require(path.stat().st_size == item["Size"], f"S3 size mismatch: {key}")
         b3, sha, plain_b3, plain_size = hashes(path)
         require(path.name == b3 + SUFFIX, f"content address mismatch: {key}")
-        base = expected.get(key)
-        if base is not None:
-            require(base["bytes"] == item["Size"], f"pilot size mismatch: {key}")
-            require(base["compressed_blake3"] == b3,
-                    f"pilot compressed digest mismatch: {key}")
-            require(base["plain_blake3"] == plain_b3,
-                    f"pilot plain digest mismatch: {key}")
+        source, base = expected[key]
+        recorded_size = base["bytes"] if "bytes" in base else base["compressed_bytes"]
+        require(recorded_size == item["Size"], f"source size mismatch: {key}")
+        require(base["compressed_blake3"] == b3,
+                f"source compressed digest mismatch: {key}")
+        require(base["plain_blake3"] == plain_b3,
+                f"source plain digest mismatch: {key}")
         rows.append({"s3_uri": f"s3://{BUCKET}/{key}",
                      "compressed_bytes": item["Size"],
                      "compressed_blake3": b3,
                      "compressed_sha256": sha,
                      "plain_blake3": plain_b3,
                      "plain_bytes": plain_size,
-                     "pilot_manifest_member": base is not None})
+                     "source_manifest": source,
+                     "pilot_manifest_member": source == "pilot"})
     actual_names = {p.relative_to(download_root).as_posix()
                     for p in download_root.rglob(f"*{SUFFIX}")}
     require(local_names == actual_names, "downloaded archive set differs from S3 listing")
     require(sum(row["pilot_manifest_member"] for row in rows) == 54,
             "pilot manifest count mismatch")
-    return {"schema": "n83.live-s3-factor-base-replay/v1",
-            "status": "PASS_57_LIVE_ARCHIVES",
+    return {"schema": "n83.live-s3-factor-base-replay/v2",
+            "status": "PASS_57_LIVE_ARCHIVES_ALL_SOURCE_MANIFESTS",
             "bucket": BUCKET,
             "prefix": PREFIX,
             "listed_object_count": len(listed),
@@ -110,7 +125,8 @@ def replay(inventory_path: Path, download_root: Path) -> dict:
             "compressed_bytes": sum(row["compressed_bytes"] for row in rows),
             "plain_bytes": sum(row["plain_bytes"] for row in rows),
             "inventory_sha256": hashlib.sha256(inventory_bytes).hexdigest(),
-            "pilot_manifest_sha256": hashlib.sha256(pilot_bytes).hexdigest(),
+            "pilot_manifest_sha256": source_hashes["pilot"],
+            "source_manifest_sha256": source_hashes,
             "archives": rows}
 
 
