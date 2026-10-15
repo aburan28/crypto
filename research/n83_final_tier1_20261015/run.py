@@ -103,9 +103,14 @@ def calibrate():
 
 
 def system_counters():
+    visible = sorted(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else []
     return {"recorded_utc": parent.now(),
             "proc_stat": parent.read_text(Path("/proc/stat")),
-            "proc_interrupts": parent.read_text(Path("/proc/interrupts"))}
+            "proc_interrupts": parent.read_text(Path("/proc/interrupts")),
+            "cpu_frequency_khz": {
+                str(cpu): parent.read_text(Path(
+                    f"/sys/devices/system/cpu/cpu{cpu}/cpufreq/scaling_cur_freq"))
+                for cpu in visible}}
 
 
 def select_execution_cpus(visible):
@@ -150,6 +155,10 @@ def run(binary, rho_binary, output):
     group = parent.cgroup_root()
     host = parent.host_receipt(group)
     host["schema"] = "n83.final-tier1-host/v1"
+    host["region_or_zone"] = (os.environ.get("RUNNER_REGION") or
+                              os.environ.get("AZURE_REGION"))
+    host["region_or_zone_status"] = (
+        "EXPOSED" if host["region_or_zone"] else "NOT_EXPOSED_BY_RUNNER")
     execution_cpus, topology = select_execution_cpus(host["visible_affinity"] or [])
     host["execution_cpus"] = execution_cpus
     host["execution_topology"] = topology
@@ -218,6 +227,12 @@ def run(binary, rho_binary, output):
                   f"{usage['wall_seconds']:.3f}s", flush=True)
         parent.write_json(pair / "system_after.json", system_counters())
         parent.write_json(pair / "calibration_after.json", calibrate())
+    parent.write_json(output / "allocation_end.json", {
+        "recorded_utc": parent.now(),
+        "instance_id": host["instance_id"],
+        "cgroup_after": parent.cgroup_snapshot(group),
+        "visible_affinity": sorted(os.sched_getaffinity(0)),
+    })
     return 0
 
 

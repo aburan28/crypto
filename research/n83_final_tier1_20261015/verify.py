@@ -268,6 +268,8 @@ def pair_noise(pair, host, ic, rho):
             "steal_fraction_visible_cpus": steal_fraction,
             "steal_limit_fraction_of_cpu_ticks": 0.01,
             "interrupt_delta": interrupt_delta,
+            "cpu_frequency_khz_before": system_before.get("cpu_frequency_khz"),
+            "cpu_frequency_khz_after": system_after.get("cpu_frequency_khz"),
             "arm_checks": checks}
 
 
@@ -314,6 +316,9 @@ def main():
     selected = runner.selected_config()
     host = one_json(output / "host.json")
     source = one_json(output / "source.json")
+    allocation_end_path = output / "allocation_end.json"
+    allocation_end = (one_json(allocation_end_path)
+                      if allocation_end_path.exists() else None)
     expected_hashes, _ = runner.frozen_inputs()
     if (source["schema"] != "n83.final-tier1-source/v1"
             or source["runner_sha256"] != runner.parent.digest(RUNNER)
@@ -334,7 +339,11 @@ def main():
     all_faster = valid and all(ratio > 1 for ratio in ratios)
     base_hashes = {row["ic"]["base_hash"] for row in rows} if valid else set()
     rank_base_consistent = len(base_hashes) == 1
-    complete = valid and rank_base_consistent
+    allocation_complete = (
+        allocation_end is not None
+        and allocation_end["instance_id"] == host["instance_id"]
+        and allocation_end["visible_affinity"] == sorted(host["execution_cpus"]))
+    complete = valid and rank_base_consistent and allocation_complete
     promote = complete and all_faster
     result = {"schema": "n83.final-tier1-analysis/v1",
               "hardware_tier": "tier1_cloud_instance",
@@ -342,6 +351,7 @@ def main():
                          "PASS_TIER1_PAIRED_RESULT" if complete else
                          "TIER1_GATE_INCOMPLETE"),
               "target_count": len(points), "candidate_id": selected["candidate_id"],
+              "allocation_end": allocation_end,
               "pairs": rows, "all_five_correct_faster": all_faster,
               "base_hash_consistent": rank_base_consistent,
               "median_ratio_rho_over_ic": statistics.median(ratios) if valid else None,
