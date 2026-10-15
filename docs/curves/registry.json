@@ -11757,6 +11757,30 @@
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
+   "slug": "icv1-fp20-t199-d1684bf5",
+   "icv1": "ICV1:fp-970267:199:970069:714132:unk:unk:r:d1684bf5e178",
+   "family": "prime",
+   "params": {
+    "p": "970267",
+    "a": "344324",
+    "b": "727299"
+   },
+   "model_json": "{\"a\":\"344324\",\"b\":\"727299\",\"field\":\"fp-970267\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"970267\",\"v\":\"1\"}",
+   "trace": 199,
+   "order": "970069",
+   "j": "714132",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/pkm_isogeny_tower_ecbench_20261015/sessions/q20/plan.json",
+    "research/pkm_isogeny_tower_ecbench_20261015/sessions/q20/spec.json",
+    "research/pkm_isogeny_tower_ecbench_20261015/specs/SPEC-q20.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp20-t1293-3c2999ba",
    "icv1": "ICV1:fp-1048291:1293:1046999:326892:unk:unk:r:3c2999ba43b0",
    "family": "prime",
@@ -13277,6 +13301,30 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "icv1-fp22-t285-9fc7e3e5",
+   "icv1": "ICV1:fp-3594223:285:3593939:2603351:unk:unk:r:9fc7e3e52246",
+   "family": "prime",
+   "params": {
+    "p": "3594223",
+    "a": "2996944",
+    "b": "1794025"
+   },
+   "model_json": "{\"a\":\"2996944\",\"b\":\"1794025\",\"field\":\"fp-3594223\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"3594223\",\"v\":\"1\"}",
+   "trace": 285,
+   "order": "3593939",
+   "j": "2603351",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/pkm_isogeny_tower_ecbench_20261015/sessions/q22/plan.json",
+    "research/pkm_isogeny_tower_ecbench_20261015/sessions/q22/spec.json",
+    "research/pkm_isogeny_tower_ecbench_20261015/specs/SPEC-q22.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-fp22-t512-155a33a4",
@@ -16257,6 +16305,30 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "icv1-fp24-t4451-d5368b2d",
+   "icv1": "ICV1:fp-13136531:4451:13132081:7654163:unk:unk:r:d5368b2ddd76",
+   "family": "prime",
+   "params": {
+    "p": "13136531",
+    "a": "848818",
+    "b": "7381302"
+   },
+   "model_json": "{\"a\":\"848818\",\"b\":\"7381302\",\"field\":\"fp-13136531\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"13136531\",\"v\":\"1\"}",
+   "trace": 4451,
+   "order": "13132081",
+   "j": "7654163",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/pkm_isogeny_tower_ecbench_20261015/sessions/q24/plan.json",
+    "research/pkm_isogeny_tower_ecbench_20261015/sessions/q24/spec.json",
+    "research/pkm_isogeny_tower_ecbench_20261015/specs/SPEC-q24.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-fp24-t1059-6df599df",
