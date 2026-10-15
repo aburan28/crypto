@@ -1865,9 +1865,11 @@ mod wide {
             assert!(states.len() > 100);
             let mut packed = RootTable128::with_capacity(states.len() * 2, 83, reps.len(), true);
             let mut indexed = RootTable128::with_capacity_indexed83(states.len() * 2);
+            let mut indexed_bloom = RootTable128::with_capacity_indexed83(states.len() * 2);
             let mut indexed26 = RootTable128::with_capacity_indexed83(states.len() * 2);
             packed.bloom = None;
             indexed.bloom = None;
+            indexed_bloom.bloom = Some(RootBloom::with_capacity(states.len() * 2));
             indexed26.bloom = None;
             let mut inserted_keys = Vec::new();
             for index in 0..states.len() {
@@ -1884,6 +1886,16 @@ mod wide {
                             .canonical_selected(states.root_at(state_index, root_selector))
                             .0
                     });
+                    indexed_bloom.insert_indexed83(
+                        key,
+                        index,
+                        selector,
+                        |state_index, root_selector| {
+                            basis
+                                .canonical_selected(states.root_at(state_index, root_selector))
+                                .0
+                        },
+                    );
                     indexed26.insert_indexed83(
                         key,
                         index,
@@ -1897,10 +1909,15 @@ mod wide {
                 }
             }
             assert_eq!(indexed.len, packed.len);
+            assert_eq!(indexed_bloom.len, packed.len);
             assert_eq!(indexed26.len, packed.len);
             for key in inserted_keys {
                 assert_eq!(
                     indexed.get_with_context(key, &states, &basis),
+                    packed.get(key)
+                );
+                assert_eq!(
+                    indexed_bloom.get_with_context(key, &states, &basis),
                     packed.get(key)
                 );
                 assert_eq!(
@@ -1914,6 +1931,10 @@ mod wide {
                     .0;
                 assert_eq!(
                     indexed.get_with_context(key, &states, &basis),
+                    packed.get(key)
+                );
+                assert_eq!(
+                    indexed_bloom.get_with_context(key, &states, &basis),
                     packed.get(key)
                 );
                 assert_eq!(
@@ -3178,12 +3199,12 @@ mod wide {
                 ((std::env::var("KIC_INDEXED_ROOT5").as_deref() == Ok("1")
                     && std::env::var("KIC_INDEXED5_FIXED30").as_deref() == Ok("1")
                     && !indexed4_table)
-                    || (indexed4_table && indexed4_fixed31
+                    || (indexed4_table
+                        && indexed4_fixed31
                         && std::env::var("KIC_INDEXED_ROOT5").as_deref() != Ok("1")))
                     && std::env::var("KIC_PACKED_ROOT_TABLE").as_deref() == Ok("1")
-                    && !indexed5_load75
-                    && !root_bloom_enabled(),
-                "one-root states require exact indexed fixed30 or fixed31 slots without a Bloom filter"
+                    && !indexed5_load75,
+                "one-root states require exact indexed fixed30 or fixed31 slots"
             );
             assert!(
                 max_states.checked_mul(2).unwrap()
