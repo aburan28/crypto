@@ -234,9 +234,14 @@ representatives for all selected points. On the 141-class projected base,
 the frozen uniform and character-conditioned 64-query known-scalar laws
 each yield zero three-sum matches and rank zero. The first 16 line-derived
 classes have 816 distinct three-sum targets, 206 admitted by the two-fiber
-character law. These point-source representatives precede cofactor
-projection; generic reduction of the projected subgroup classes remains a
-separate arithmetic step.
+character law. The [all-character quotient reduction and collector run](reports/run-20261015T2235Z/REPORT.md)
+reduces all 141 cofactor-projected quotient classes to explicit nonspecial
+fixed-origin degree-three Jacobian representatives. The exact first-16
+three-sum support splits as 206, 218, 199, and 193 across the four fiber
+character cells. A balanced four-cell known-scalar policy admits all 816
+support targets and fills 64 queries after 76 scalar trials, compared with
+241 for a ++-only control. Both 64-query arms have zero full-base matches
+and rank zero under the frozen 141-class pair-index lookup.
 
 ## Reproduction
 

@@ -63,6 +63,7 @@ jobs:
           python3 research/p192_extension_cover_20261012/verify_line_reduced_source.py
           python3 research/p192_extension_cover_20261012/verify_line_projection_receipt.py
           python3 research/p192_extension_cover_20261012/verify_line_guided_collector.py
+          python3 research/p192_extension_cover_20261012/verify_line_fixed_origin_receipt.py
   lean-proof:
     runs-on: ubuntu-latest
     timeout-minutes: ${{ github.event_name == 'workflow_dispatch' && 90 || 25 }}
@@ -127,14 +128,14 @@ jobs:
         working-directory: research/p192_extension_cover_20261012/lean
     steps:
       - uses: actions/checkout@v4
-      - name: Build the line-point inverse and support theorems
+      - name: Build line inverse, support, and Frobenius fiber theorems
         uses: leanprover/lean-action@v1
         with:
           lake-package-directory: research/p192_extension_cover_20261012/lean
           auto-config: false
           use-mathlib-cache: true
           build: true
-          build-args: 'LinePointInverse LineSupport'
+          build-args: 'LinePointInverse LineSupport LineFiberDescent'
           test: false
           lint: false
           leanchecker: true
@@ -143,6 +144,8 @@ jobs:
         run: lake env lean LinePointInverse.lean
       - name: Fresh-check line-support theorems and audit axioms
         run: lake env leanchecker --fresh --verbose LineSupport && lake env lean LineSupport.lean
+      - name: Fresh-check six-fiber descent theorem and audit axioms
+        run: lake env leanchecker --fresh --verbose LineFiberDescent && lake env lean LineFiberDescent.lean
   leaderboard-lean-proof:
     runs-on: ubuntu-latest
     timeout-minutes: 25
