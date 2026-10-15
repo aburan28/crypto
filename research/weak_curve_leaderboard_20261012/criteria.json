@@ -136,12 +136,12 @@
     "name": "Index-calculus relation support and rank",
     "method": "Fixed-base capacity and ordinary-query feasibility",
     "domain": "A selected subgroup with a frozen factor base, summand policy, and target-query law",
-    "recognition": "For B actual usable classes and unordered positive m-sums with repetition, support has at most binomial(B+m-1,m) targets. Under a uniform accepted set of size A, hit probability is at most min(1,support/A); a filter may change A but cannot enlarge fixed support. Measure useful rank separately.",
-    "witness": "Curve/subgroup and base identities, actual usable B, exact summand and sign policy, certified or bounded accepted-set size A, rejected and accepted attempts, independently verified relations, novel rank per query, matrix and target costs, and a matched one-target reference.",
-    "construction": "Freeze the curve and base, prove the support cap for the exact combination policy, construct known-scalar ordinary queries, and measure accepted-query relation yield and useful rank. Enlarge the usable base or change the relation mechanism when capacity is insufficient.",
+    "recognition": "For B actual usable classes and unordered positive m-sums with repetition, support has at most binomial(B+m-1,m) targets. A uniform accepted set of size A gives hit probability at most min(1,support/A). For a finite seeded nonuniform law with at most M preimage seeds per accepted target, supported accepted seed mass is at most binomial(B+m-1,m)*M; divide by attempted or accepted seed mass for the corresponding hit probability. Measure useful rank separately.",
+    "witness": "Curve/subgroup and base identities, actual usable B, exact summand and sign policy, frozen seed domain and known-scalar query map, accepted-set or accepted-mass denominator, a certified maximum target preimage multiplicity M when nonuniform, rejected and accepted attempts, independently verified relations, novel rank per query, matrix and target costs, and a matched one-target reference.",
+    "construction": "Freeze the curve, base and finite-seed query law; prove the fixed-base support cap and a sampler preimage bound or accepted-set size, then measure known-scalar ordinary-query relation yield and useful rank. Enlarge the usable base or change the relation mechanism when capacity is insufficient.",
     "status": "exact_p192_fixed_base_capacity_and_zero_rank_instance",
-    "source": "P-192 Type I local certificate (2026)",
-    "url": "https://github.com/aburan28/crypto/blob/029e0bb2c7b1543af9a0647457adcaef8f20e7d0/research/p192_extension_cover_20261012/BRANCH_CONTINUATION.md"
+    "source": "WeakCurves relation-support theorem and P-192 Type I certificate (2026)",
+    "url": "https://github.com/aburan28/crypto/blob/main/research/weak_curve_leaderboard_20261012/lean/WeightedSupport.lean"
   },
   {
     "id": "cubic_jacobian_isogeny",

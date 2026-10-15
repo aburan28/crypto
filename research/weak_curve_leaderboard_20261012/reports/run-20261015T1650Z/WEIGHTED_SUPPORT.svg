@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="390" viewBox="0 0 900 390">
+  <rect width="900" height="390" fill="#fffdf9"/>
+  <text x="40" y="45" font-family="sans-serif" font-size="24" font-weight="bold" fill="#17344a">Weighted relation-support criterion</text>
+  <text x="40" y="75" font-family="sans-serif" font-size="15" fill="#46627a">Derived finite-seed bound · 2026-10-15T16:50Z · no curve-specific sampler weight inferred</text>
+  <rect x="40" y="118" width="215" height="105" rx="10" fill="#e8f1f7" stroke="#5b87a6"/>
+  <text x="57" y="148" font-family="sans-serif" font-size="18" font-weight="bold" fill="#17344a">Seeded query law</text>
+  <text x="57" y="178" font-family="sans-serif" font-size="16" fill="#17344a">N attempted seeds</text>
+  <text x="57" y="203" font-family="sans-serif" font-size="15" fill="#17344a">weight(a) = # preimages</text>
+  <path d="M255 170 H325" stroke="#4d6e87" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="328" y="118" width="230" height="105" rx="10" fill="#f5efdf" stroke="#c69a42"/>
+  <text x="345" y="148" font-family="sans-serif" font-size="18" font-weight="bold" fill="#17344a">Fixed-base support</text>
+  <text x="345" y="178" font-family="sans-serif" font-size="16" fill="#17344a">at most C targets</text>
+  <text x="345" y="203" font-family="sans-serif" font-size="15" fill="#17344a">C = binomial(B+m−1,m)</text>
+  <path d="M558 170 H628" stroke="#4d6e87" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="631" y="118" width="225" height="105" rx="10" fill="#e9f4eb" stroke="#4e9b68"/>
+  <text x="648" y="148" font-family="sans-serif" font-size="18" font-weight="bold" fill="#17344a">Hit-mass cap</text>
+  <text x="648" y="178" font-family="sans-serif" font-size="16" fill="#17344a">≤ C × M seeds</text>
+  <text x="648" y="203" font-family="sans-serif" font-size="15" fill="#17344a">if each weight(a) ≤ M</text>
+  <text x="40" y="280" font-family="sans-serif" font-size="17" font-weight="bold" fill="#17344a">P-192 fixed-base illustration: B = 16, m = 3, C = 816.</text>
+  <text x="40" y="310" font-family="sans-serif" font-size="15" fill="#46627a">The existing character law has 224 admitted support targets; a new biased law needs its own M certificate.</text>
+  <text x="40" y="344" font-family="sans-serif" font-size="13" fill="#6c7f8e">Source: WeightedSupport.lean; exact P-192 support census in type_i_conditioned_support_native.json.</text>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#4d6e87"/></marker></defs>
+</svg>
