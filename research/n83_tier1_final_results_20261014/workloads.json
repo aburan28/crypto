@@ -1,0 +1,97 @@
+[
+  {
+    "cold_or_warm": "one_fresh_process_with_empty_index_and_logs; one_target_online_after_reusable_preparation",
+    "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+    "input_law": {
+      "domain": "n83-tier1-final-20261014-v1",
+      "five_point_fixture_sha256": "7d80c73fa7930ae0c22113bad3f253d8dfb5c9c71b1ce8fbeedd06f45649556b",
+      "fixture_index": 0,
+      "scalar_rule": "1+(little_endian(SHA256(domain||u32_le(index))) mod (r-1))"
+    },
+    "public_targets": [
+      [
+        "2218147722247590968358006",
+        "6573085636542935211233474"
+      ]
+    ],
+    "schema_version": 1,
+    "target_count": 1,
+    "workload_id": "8bf0a674cb71"
+  },
+  {
+    "cold_or_warm": "one_fresh_process_with_empty_index_and_logs; one_target_online_after_reusable_preparation",
+    "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+    "input_law": {
+      "domain": "n83-tier1-final-20261014-v1",
+      "five_point_fixture_sha256": "7d80c73fa7930ae0c22113bad3f253d8dfb5c9c71b1ce8fbeedd06f45649556b",
+      "fixture_index": 1,
+      "scalar_rule": "1+(little_endian(SHA256(domain||u32_le(index))) mod (r-1))"
+    },
+    "public_targets": [
+      [
+        "352266549701874399852901",
+        "6297658252192281710299877"
+      ]
+    ],
+    "schema_version": 1,
+    "target_count": 1,
+    "workload_id": "e8bd84f255b3"
+  },
+  {
+    "cold_or_warm": "one_fresh_process_with_empty_index_and_logs; one_target_online_after_reusable_preparation",
+    "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+    "input_law": {
+      "domain": "n83-tier1-final-20261014-v1",
+      "five_point_fixture_sha256": "7d80c73fa7930ae0c22113bad3f253d8dfb5c9c71b1ce8fbeedd06f45649556b",
+      "fixture_index": 2,
+      "scalar_rule": "1+(little_endian(SHA256(domain||u32_le(index))) mod (r-1))"
+    },
+    "public_targets": [
+      [
+        "4280369701650530824523757",
+        "2127630231844056680156034"
+      ]
+    ],
+    "schema_version": 1,
+    "target_count": 1,
+    "workload_id": "ac06260413ec"
+  },
+  {
+    "cold_or_warm": "one_fresh_process_with_empty_index_and_logs; one_target_online_after_reusable_preparation",
+    "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+    "input_law": {
+      "domain": "n83-tier1-final-20261014-v1",
+      "five_point_fixture_sha256": "7d80c73fa7930ae0c22113bad3f253d8dfb5c9c71b1ce8fbeedd06f45649556b",
+      "fixture_index": 3,
+      "scalar_rule": "1+(little_endian(SHA256(domain||u32_le(index))) mod (r-1))"
+    },
+    "public_targets": [
+      [
+        "704622038969357316251356",
+        "5267954278636923299909866"
+      ]
+    ],
+    "schema_version": 1,
+    "target_count": 1,
+    "workload_id": "dbc476199949"
+  },
+  {
+    "cold_or_warm": "one_fresh_process_with_empty_index_and_logs; one_target_online_after_reusable_preparation",
+    "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+    "input_law": {
+      "domain": "n83-tier1-final-20261014-v1",
+      "five_point_fixture_sha256": "7d80c73fa7930ae0c22113bad3f253d8dfb5c9c71b1ce8fbeedd06f45649556b",
+      "fixture_index": 4,
+      "scalar_rule": "1+(little_endian(SHA256(domain||u32_le(index))) mod (r-1))"
+    },
+    "public_targets": [
+      [
+        "8870300377487275834460500",
+        "3078789857349649109210543"
+      ]
+    ],
+    "schema_version": 1,
+    "target_count": 1,
+    "workload_id": "21de21a62b04"
+  }
+]

@@ -1,6 +1,6 @@
 {
   "schema_version": "ic-progress-timeline/1",
-  "updated": "2026-10-14",
+  "updated": "2026-10-15",
   "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
   "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
   "series": [
@@ -373,7 +373,7 @@
           "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_online_ir_20261004/RESULT.md"
         },
         {
-          "date": "2026-10-14",
+          "date": "2026-10-15",
           "value": 28.152537256177837,
           "reference": "matched",
           "unit": "Callgrind Ir diagnostic",
@@ -384,7 +384,7 @@
           "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md"
         },
         {
-          "date": "2026-10-14",
+          "date": "2026-10-15",
           "value": 25.276325882164183,
           "reference": "matched",
           "unit": "Callgrind Ir diagnostic",
@@ -395,7 +395,7 @@
           "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md"
         },
         {
-          "date": "2026-10-14",
+          "date": "2026-10-15",
           "value": 47.771484263859804,
           "reference": "matched",
           "unit": "Callgrind Ir diagnostic",
@@ -406,7 +406,7 @@
           "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_ir_20261014/README.md"
         },
         {
-          "date": "2026-10-14",
+          "date": "2026-10-15",
           "value": 47.078295091523685,
           "reference": "matched",
           "unit": "Callgrind Ir diagnostic",

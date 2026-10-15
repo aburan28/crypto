@@ -11,7 +11,8 @@ use crate::cryptopals::low_util::{b64_decode, pkcs7_unpad};
 use crate::cryptopals::Report;
 use crate::symmetric::aes::{decrypt_block, AesKey};
 
-const DATA: &str = include_str!("data_25.txt");
+// Challenge 25 reuses the ECB ciphertext from challenge 7.
+const DATA: &str = include_str!("data_7.txt");
 
 fn ctr_keystream_at(key: &AesKey, nonce: u64, offset: usize, len: usize) -> Vec<u8> {
     // Wrapper using ctr_xor against a zero buffer at the right offset.
