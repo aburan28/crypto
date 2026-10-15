@@ -18,7 +18,10 @@ no ECC2K-130 inference; multi-target secondary to cold single-target.
 |---|---|---|
 | 1 | single-hash probe path; real multi-target e2e | **win**: miss probe ~3×; multi N=8 → 3–5× vs cold |
 | 2 | m=2 hit reuses known key/hash | **win**: multi N=16 → 4–8× vs cold |
-| 3 | *(pending)* | |
+| 3 | ecbench smoke + prime e2e | **confirm**: negfold/rho≈1.69; negfold/F4≈0.059; prime 54–161× msolve |
+
+| binary | `ecbench` release SHA-256 `1b3ec78c9135338c0983914795c9dc25aa4913f82af024bc0b729a0329595d0d` |
+| session | `ECBS1hd5339a8cb067` (cycle-3 smoke) |
 
 ## Hard stop vs rho
 
