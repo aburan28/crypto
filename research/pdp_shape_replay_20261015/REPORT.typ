@@ -2,7 +2,7 @@
 #set text(size: 9.3pt)
 #set table(stroke: 0.4pt)
 #show table: set text(size: 8.3pt)
-= Root shape replay in the inherited-F4 oracle: a recorded negative
+= Prime-degree binary IC, three leads: all negative
 
 2026-10-15. `research/pdp_shape_replay_20261015/`. The protocol was registered (`d0b27a7f4`) before the claim ladders. *Class: engineering, a stage diagnostic.*
 
@@ -21,5 +21,13 @@ Replay costs more on all 9 registered cells (0.753–0.985×) and splits more on
 All predictions held: exact on 9/9 cells, every ratio in $[0.95, 1.10]$, and no gain. By the registered decision this lead is a *recorded null*: `KIC_F4_ROOT_REPLAY` stays off and the oracle is unchanged. The algebraic oracle remains far behind the root-finding table oracle (4.1·10#super[7] word XORs against 592 multiplications per target at (23, 8)), which itself loses to rho, so no scoreboard row moves.
 
 #figure(image("figures/ratio_by_cell.svg", width: 100%), caption: [Default ÷ replay word operations per cell. Values above 1 mean replay is cheaper.])
+
+== Leads 2 and 3
+
+*Lead 2* (a weighted or block grading of the symmetrised model) was already measured on 2026-09-12. The systems are multilinear in their blocks, so per-block bounds reproduce the plain matrix (1.00×) or enlarge it (0.21×). It was not rerun.
+
+*Lead 3* (`decompose_by_e3`, exact $m = 3$ by enumerating $e_3$) now counts its field multiplications. Against the table oracle's $5|F| - 3$ multiplications per target it costs *553–34,901×* on 8 cells $(n, ell)$ with 16 uniform targets each. It is a sealed negative, and no ecbench engine is built (`PROTOCOL-lead3.md`, registered before the run).
+
+#figure(image("figures/e3_vs_table.svg", width: 85%), caption: [$F_(2^n)$ multiplications per target: $e_3$ enumeration (counted) against the pair table.])
 
 Environment: Claude Code cloud container, Xeon \@ 2.10 GHz, 4 vCPU (shared). Counts are deterministic. Conductor task T-3.

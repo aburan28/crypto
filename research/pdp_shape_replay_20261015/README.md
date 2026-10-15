@@ -1,4 +1,4 @@
-# Root shape replay in the inherited-F4 oracle: a recorded negative (0.95–0.98× on every registered ladder)
+# Prime-degree binary IC, the three survey leads: root shape replay is a recorded negative (0.95–0.98×), block grading was already negative, e₃ enumeration is 553–34,901× the table oracle
 
 2026-10-15. Protocol: [`PROTOCOL.md`](PROTOCOL.md), registered (commit
 `d0b27a7f4`) before the claim ladders. Every run is in
@@ -81,9 +81,45 @@ on any cell.
   (`research/pdp_root_finder_20261012`: 4.1·10⁷ word XORs against 592
   multiplications a target at `(23, 8)`), and that oracle still loses to
   rho on every measured size. No scoreboard row moves.
-- The prime-degree survey's other leads (a weighted/block grading of the
-  full symmetrised model; `decompose_by_e3` as an ecbench engine) are
-  separate studies.
+- The survey's other two leads are settled below, so all three are now
+  closed.
+
+## Leads 2 and 3 ([`PROTOCOL-lead3.md`](PROTOCOL-lead3.md), registered before its run)
+
+- **Lead 2 (weighted/block grading of the symmetrised model): already a
+  recorded negative, not rerun.** The 2026-09-12 measurement in
+  `RESEARCH_KOBLITZ_INDEX_CALCULUS.md` ("The block structure, measured")
+  covers it. The systems are multilinear in their blocks, so a per-block
+  bound either reproduces the plain matrix (1.00×) or enlarges it (0.21× at
+  `n = 15`). Multihomogeneous F5 with Jacobian syzygies is the technique
+  that could use the structure; it is a different algorithm and is not
+  built.
+- **Lead 3 (`decompose_by_e3`, the exact `m = 3` decomposition by
+  enumerating `e₃`): a sealed negative at stage level.** It now counts its
+  `F_{2^n}` multiplications and word XORs. On 16 uniform targets per cell,
+  against the pair-table oracle's `5|F| − 3` multiplications per target
+  (the same unit):
+
+| `n`, `ℓ` | `dim W₁, W₂, W₃` | e₃ multiplications / target | table | e₃ ÷ table |
+|:--|:--|--:|--:|--:|
+| 13, 4 | 4, 7, 10 | 3.58·10⁴ | 37 | 968 |
+| 13, 5 | 5, 9, 13 | 1.76·10⁶ | 77 | 22,841 |
+| 17, 4 | 4, 7, 10 | 2.05·10⁴ | 37 | 553 |
+| 17, 5 | 5, 9, 13 | 2.88·10⁵ | 77 | 3,737 |
+| 19, 5 | 5, 9, 13 | 1.98·10⁵ | 77 | 2,576 |
+| 19, 6 | 6, 11, 16 | 5.48·10⁶ | 157 | 34,901 |
+| 23, 5 | 5, 9, 13 | 1.82·10⁵ | 77 | 2,366 |
+| 23, 6 | 6, 11, 16 | 1.90·10⁶ | 157 | 12,094 |
+
+- E1 (at least 100× everywhere): **held**, minimum 553×.
+- E2 (at least 4× per unit of `ℓ` at fixed `n`): **held**, 5.1–23.6×.
+- At `n = 13` the `6ℓ − 3 = 27` unknowns exceed `n`. About `2^{6ℓ−3−n}`
+  roots then each need a splitting test, and those dominate.
+- A target stops at its first decomposition, so decomposed targets cost
+  less.
+- Decision: no ecbench engine is built for it.
+
+![e3 against the table](figures/e3_vs_table.svg)
 
 ## Reproduction
 
@@ -91,6 +127,7 @@ on any cell.
 cargo build --release --example groebner_stage_bench --example pdp_shape_replay_summary
 research/pdp_shape_replay_20261015/run.sh
 target/release/examples/pdp_shape_replay_summary research/pdp_shape_replay_20261015
+cargo run --release --example e3_vs_table -- 16 > research/pdp_shape_replay_20261015/raw/e3_vs_table.jsonl
 python3 research/pdp_shape_replay_20261015/figures/plot.py   # layout only
 ```
 

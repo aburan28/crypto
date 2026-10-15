@@ -36,3 +36,22 @@ ax.set_title("root shape replay in inherited F4: every registered cell costs mor
 fig.tight_layout()
 for ext, kw in (("svg", {}), ("png", {"dpi": 150})):
     fig.savefig(os.path.join(here, f"ratio_by_cell.{ext}"), **kw)
+
+# Lead 3: decompose_by_e3 against the pair table, per cell (raw/e3_vs_table.jsonl).
+rows = [json.loads(l) for l in open(os.path.join(here, "..", "raw", "e3_vs_table.jsonl"))]
+fig, ax = plt.subplots(figsize=(7.2, 3.6))
+xs = range(len(rows))
+ax.bar([x - 0.2 for x in xs], [r["e3_field_muls_per_target"] for r in rows], width=0.4, color=C["orange"], label="decompose_by_e3 (counted)")
+ax.bar([x + 0.2 for x in xs], [r["table_muls_per_target"] for r in rows], width=0.4, color=C["blue"], label="pair table, 5|F| − 3")
+for x, r in zip(xs, rows):
+    ax.text(x - 0.2, r["e3_field_muls_per_target"] * 1.3, f"{r['e3_over_table']:.0f}×", ha="center", fontsize=7, color=C["ink"])
+ax.set_yscale("log")
+ax.set_ylim(10, 1e8)
+ax.set_xticks(list(xs), [f"n={r['n']}, ℓ={r['l']}" for r in rows], fontsize=7.5, rotation=30, ha="right")
+ax.set_ylabel("F_(2^n) multiplications per target")
+ax.grid(axis="y", color=C["grid"], lw=0.6)
+ax.legend(frameon=False, fontsize=8, loc="upper left")
+ax.set_title("m = 3 by enumerating e₃ against the root-finding table (16 uniform targets a cell)", fontsize=9)
+fig.tight_layout()
+for ext, kw in (("svg", {}), ("png", {"dpi": 150})):
+    fig.savefig(os.path.join(here, f"e3_vs_table.{ext}"), **kw)
