@@ -46,3 +46,19 @@
 2026-10-15T23:26:36Z end T31-ss-j1728-m34 exit 0
 2026-10-15T23:26:36Z start T31-ordinary-m34: --p 2046820351 --arm ordinary --m 3,4 --t-min 2 --t-max-m3 4 --t-max-m4 3
 2026-10-15T23:28:00Z container restart killed run_q2.sh during T31-ordinary-m34 (partial rows moved to q2/interrupted/); resuming with completed runs skipped
+2026-10-15T23:28:34Z start T31-ordinary-m34: --p 2046820351 --arm ordinary --m 3,4 --t-min 2 --t-max-m3 4 --t-max-m4 3
+2026-10-15T23:29:39Z end T31-ordinary-m34 exit 0
+2026-10-15T23:29:39Z start T31-torus-m34: --p 2046820351 --arm torus --m 3,4 --t-min 2 --t-max-m3 4 --t-max-m4 3
+2026-10-15T23:30:29Z end T31-torus-m34 exit 0
+2026-10-15T23:30:29Z start T31-ss-j1728-null-m2: --p 2046820351 --arm ss-j1728 --control null --m 2 --t-min 1 --t-max 9
+2026-10-15T23:31:15Z end T31-ss-j1728-null-m2 exit 0
+2026-10-15T23:31:15Z start T31-ss-j1728-null-m34: --p 2046820351 --arm ss-j1728 --control null --m 3,4 --t-min 2 --t-max-m3 4 --t-max-m4 3
+2026-10-15T23:32:34Z end T31-ss-j1728-null-m34 exit 0
+2026-10-15T23:32:34Z start T31-ss-j1728-m2-N20: --p 2046820351 --arm ss-j1728 --m 2 --t-min 10 --t-max 10
+2026-10-15T23:39:17Z end T31-ss-j1728-m2-N20 exit 0
+2026-10-15T23:39:17Z start T31-ordinary-m2-N20: --p 2046820351 --arm ordinary --m 2 --t-min 10 --t-max 10
+2026-10-15T23:46:10Z end T31-ordinary-m2-N20 exit 0
+2026-10-15T23:46:10Z start T31-torus-m2-N20: --p 2046820351 --arm torus --m 2 --t-min 10 --t-max 10
+2026-10-15T23:52:44Z end T31-torus-m2-N20 exit 0
+2026-10-15T23:52:44Z q2 all done
+2026-10-15T23:52:44Z start q1-100-399
