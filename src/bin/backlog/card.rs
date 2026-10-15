@@ -58,6 +58,25 @@ pub const CAIRN_MODES: &[&str] = &["lab-task", "objective"];
 pub const SANDBOXES: &[&str] = &["auto", "none"];
 /// Prefixes a `blocked_on` entry may use.
 pub const LINK_KINDS: &[&str] = &["pr", "branch", "problem", "xp", "hw", "url", "note"];
+/// `cairn` keys each mode requires (the schema's `allOf` says the same).
+pub const LAB_TASK_REQUIRED: &[&str] =
+    &["mode", "space", "tasks", "ttl_s", "env", "exec", "funding"];
+pub const OBJECTIVE_REQUIRED: &[&str] = &[
+    "mode",
+    "kind",
+    "goal",
+    "checker",
+    "verifier",
+    "piecework",
+    "stop",
+    "funding",
+];
+/// Checkers this repository knows, with the flags that pin what a success
+/// must prove. A card that runs one must pass every pin with a value, so a
+/// claim cannot be checked against weaker parameters than the card's.
+pub const KNOWN_CHECKERS: &[(&str, &[&str])] = &[("backlog_check_aux2t", &["--expect-t"])];
+/// The flag that lets a checker accept a small test prime: drafts only.
+pub const TEST_FLAG: &str = "--allow-test-prime";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Issue {
@@ -169,6 +188,19 @@ impl<'a> V<'a> {
             }
         }
     }
+    /// A non-negative integer or null. cairn's values have no floats, so a
+    /// card carries none (it must publish to a lab unchanged).
+    fn uint_or_null(&mut self, path: &str) -> Option<u64> {
+        match self.get(path) {
+            Some(Value::Null) => None,
+            Some(_) => self.uint(path, 0),
+            None => {
+                self.err(path, "is required (an integer, or null)");
+                None
+            }
+        }
+    }
+    #[allow(dead_code)]
     fn number(&mut self, path: &str, nullable: bool) -> Option<f64> {
         match self.get(path) {
             Some(Value::Null) if nullable => None,
@@ -483,7 +515,13 @@ pub fn validate(card: &Value, ctx: &Ctx) -> Vec<Issue> {
     }
     // Status and what blocks it.
     let status = v.one_of("status", STATUSES);
-    v.opt_string("status_note");
+    let note = v.opt_string("status_note");
+    if status == Some("abandoned") && note.is_none_or(|n| n.trim().is_empty()) {
+        v.err(
+            "status_note",
+            "an abandoned card says why (and names any successor)",
+        );
+    }
     let executable = status.is_some_and(|s| EXECUTABLE.contains(&s));
     if let Some(links) = v.strings("blocked_on", false) {
         if status == Some("blocked") && links.is_empty() {
@@ -522,7 +560,13 @@ pub fn validate(card: &Value, ctx: &Ctx) -> Vec<Issue> {
                 "a ready/running/done card needs a frozen PROTOCOL.md (path and git blob)",
             );
         }
-        if let Some(p) = path {
+        if path.is_some_and(|p| p != "PROTOCOL.md") {
+            v.err(
+                "protocol.path",
+                "is PROTOCOL.md in the card directory (the only protocol cairn-publish uploads)",
+            );
+        }
+        if let Some(p) = path.filter(|p| *p == "PROTOCOL.md") {
             let file = ctx.dir.join(p);
             match fs::read(&file) {
                 Ok(bytes) => {
@@ -532,10 +576,20 @@ pub fn validate(card: &Value, ctx: &Ctx) -> Vec<Issue> {
                             "protocol.blob",
                             format!("{p} has changed since it was frozen: blob is {actual}, card says {b}"),
                         ),
-                        Some(b) if ctx.check_git && !git_has_blob(&ctx.root, b) => v.err(
-                            "protocol.blob",
-                            format!("{b} is not in git's object database: commit {p} before marking the card {}", status.unwrap_or("?")),
-                        ),
+                        Some(b) if ctx.check_git && id.is_some() => {
+                            let rel = format!("backlog/{}/{p}", id.unwrap_or(""));
+                            match git_head_blob(&ctx.root, &rel) {
+                                Some(head) if head == b => {}
+                                Some(head) => v.err(
+                                    "protocol.blob",
+                                    format!("HEAD's {rel} is blob {head}, not {b}: commit the frozen protocol"),
+                                ),
+                                None => v.err(
+                                    "protocol.blob",
+                                    format!("{rel} is not committed at HEAD: commit it before marking the card {}", status.unwrap_or("?")),
+                                ),
+                            }
+                        }
                         None => v.warn("protocol.blob", format!("not frozen yet (current blob {actual})")),
                         _ => {}
                     }
@@ -585,16 +639,14 @@ pub fn validate(card: &Value, ctx: &Ctx) -> Vec<Issue> {
     // Resources.
     if v.object("resources").is_some() {
         v.uint("resources.cpus", 1);
-        if v.number("resources.ram_gb", false) == Some(0.0) {
-            v.err("resources.ram_gb", "must be > 0");
-        }
-        v.number("resources.disk_gb", false);
+        v.uint("resources.ram_gb", 1);
+        v.uint("resources.disk_gb", 0);
         match v.get("resources.gpu") {
             Some(Value::Null) | Some(Value::String(_)) => {}
             _ => v.err("resources.gpu", "must be a string (what GPU) or null"),
         }
-        let core = v.number("resources.est_core_hours", true);
-        v.number("resources.est_wall_hours", true);
+        let core = v.uint_or_null("resources.est_core_hours");
+        v.uint_or_null("resources.est_wall_hours");
         v.opt_string("resources.notes");
         if executable && core.is_none() {
             v.err(
@@ -708,11 +760,20 @@ pub fn validate(card: &Value, ctx: &Ctx) -> Vec<Issue> {
     if v.object("outputs").is_some() {
         v.string("outputs.result_schema");
         let verify = v.strings("outputs.verify", false);
-        if executable && verify.is_some_and(|a| a.is_empty()) {
+        if executable && verify.as_ref().is_some_and(|a| a.is_empty()) {
             v.err(
                 "outputs.verify",
                 "a ready card names an independent check of any success claim",
             );
+        }
+        if let (Some(verify), Some(count)) = (verify, count) {
+            let argv: Vec<String> = verify.iter().map(|s| s.to_string()).collect();
+            if let Err(e) = shard_vars(card, count.saturating_sub(1), "OUT")
+                .and_then(|vars| substitute(&argv, &vars))
+            {
+                v.err("outputs.verify", e);
+            }
+            check_pins(&mut v, "outputs.verify", &argv, status);
         }
         if let Some(land) = v.string("outputs.land") {
             if !land.starts_with("research/") {
@@ -723,6 +784,16 @@ pub fn validate(card: &Value, ctx: &Ctx) -> Vec<Issue> {
 
     // cairn: how the card is executed (docs: backlog/README.md).
     check_cairn(&mut v, id, count, ctx);
+
+    // cairn's values have no floats: a card with one cannot be published.
+    let mut floats = Vec::new();
+    find_floats(card, "", &mut floats);
+    for field in floats {
+        v.err(
+            &field,
+            "is a float; cards carry integers only (cairn has no floats)",
+        );
+    }
 
     // A scaffold's TODOs may stay while the card is a draft, and only then.
     let mut todos = Vec::new();
@@ -740,6 +811,80 @@ pub fn validate(card: &Value, ctx: &Ctx) -> Vec<Issue> {
         v.err("README.md", "every card directory has a README.md");
     }
     v.issues
+}
+
+fn find_floats(v: &Value, at: &str, out: &mut Vec<String>) {
+    match v {
+        Value::Number(n) if !(n.is_u64() || n.is_i64()) => out.push(at.to_string()),
+        Value::Array(a) => a
+            .iter()
+            .enumerate()
+            .for_each(|(i, x)| find_floats(x, &format!("{at}[{i}]"), out)),
+        Value::Object(m) => m.iter().for_each(|(k, x)| {
+            find_floats(
+                x,
+                &if at.is_empty() {
+                    k.clone()
+                } else {
+                    format!("{at}.{k}")
+                },
+                out,
+            )
+        }),
+        _ => {}
+    }
+}
+
+/// A shard index: decimal digits, no sign, no leading zero (so each shard
+/// has exactly one task name).
+pub fn parse_index(s: &str) -> Option<u64> {
+    if s.is_empty() || !s.bytes().all(|b| b.is_ascii_digit()) || (s.len() > 1 && s.starts_with('0'))
+    {
+        return None;
+    }
+    s.parse().ok()
+}
+
+/// The shard a task name denotes for card `id` with `count` shards: the card
+/// id itself is shard 0 of a one-shard card; `<id>/shard-<k>` is shard k.
+pub fn task_shard(id: &str, count: u64, task: &str) -> Option<u64> {
+    if task == id {
+        return (count == 1).then_some(0);
+    }
+    let k = parse_index(task.strip_prefix(id)?.strip_prefix("/shard-")?)?;
+    (k < count).then_some(k)
+}
+
+/// A lab path strictly under `runs/<id>`: `runs/<id>` itself or below it,
+/// with no empty, `.` or `..` component.
+pub fn under_runs(id: &str, path: &str, allow_root: bool) -> bool {
+    let root = format!("runs/{id}");
+    let ok_parts = path
+        .split('/')
+        .all(|c| !c.is_empty() && c != "." && c != "..");
+    ok_parts && ((allow_root && path == root) || path.starts_with(&format!("{root}/")))
+}
+
+/// Every known checker named in `argv` carries all its pin flags with a
+/// value, and the test-prime flag appears only on a draft.
+fn check_pins(v: &mut V, field: &str, argv: &[String], status: Option<&str>) {
+    let Some(prog) = argv.first() else { return };
+    let base = prog.rsplit('/').next().unwrap_or(prog);
+    if let Some((_, pins)) = KNOWN_CHECKERS.iter().find(|(name, _)| *name == base) {
+        for pin in *pins {
+            let at = argv.iter().position(|a| a == pin);
+            let value = at.and_then(|i| argv.get(i + 1));
+            if value.is_none_or(|x| x.starts_with("--")) {
+                v.err(
+                    field,
+                    format!("{base} needs {pin} <value>: it pins what a success must prove"),
+                );
+            }
+        }
+    }
+    if argv.iter().any(|a| a == TEST_FLAG) && status != Some("draft") {
+        v.err(field, format!("{TEST_FLAG} is for draft test cards only"));
+    }
 }
 
 fn find_todos(v: &Value, at: &str, out: &mut Vec<String>) {
@@ -823,10 +968,25 @@ fn check_link(v: &mut V, field: &str, link: &str, ctx: &Ctx) {
 }
 
 /// `cairn.checker`: the native checker of a success claim.
-fn check_checker(v: &mut V, ctx: &Ctx) {
+fn check_checker(v: &mut V, ctx: &Ctx, status: Option<&str>) {
     let st = v.one_of("cairn.checker.status", &["available", "blocked"]);
     v.string("cairn.checker.bin");
-    v.strings("cairn.checker.argv", true);
+    if let Some(argv) = v.strings("cairn.checker.argv", true) {
+        let argv: Vec<String> = argv.iter().map(|s| s.to_string()).collect();
+        for arg in &argv {
+            for name in placeholders(arg) {
+                if name != "artifact" {
+                    v.err(
+                        "cairn.checker.argv",
+                        format!(
+                            "unknown placeholder {{{name}}}; the checker takes only {{artifact}}"
+                        ),
+                    );
+                }
+            }
+        }
+        check_pins(v, "cairn.checker.argv", &argv, status);
+    }
     v.object("cairn.checker.artifact_schema");
     if st == Some("blocked") {
         match v.get("cairn.checker.blocked_by").and_then(Value::as_str) {
@@ -845,6 +1005,20 @@ fn check_cairn(v: &mut V, id: Option<&str>, count: Option<u64>, ctx: &Ctx) {
     }
     let mode = v.one_of("cairn.mode", CAIRN_MODES);
     v.opt_string("cairn.notes");
+    let required = match mode {
+        Some("lab-task") => LAB_TASK_REQUIRED,
+        Some("objective") => OBJECTIVE_REQUIRED,
+        _ => &[][..],
+    };
+    for key in required {
+        if v.get(&format!("cairn.{key}")).is_none() {
+            v.err(
+                &format!("cairn.{key}"),
+                format!("is required in mode {}", mode.unwrap_or("")),
+            );
+        }
+    }
+    let status = v.get("status").and_then(Value::as_str);
     match mode {
         Some("lab-task") => {
             v.string("cairn.space");
@@ -860,12 +1034,8 @@ fn check_cairn(v: &mut V, id: Option<&str>, count: Option<u64>, ctx: &Ctx) {
                     if Some(t.to_string()) == pattern && tasks.len() == 1 {
                         continue;
                     }
-                    let ok = match (id, t.split_once("/shard-")) {
-                        (Some(id), None) => *t == id && count == Some(1),
-                        (Some(id), Some((base, k))) => {
-                            base == id
-                                && k.parse::<u64>().ok().zip(count).is_some_and(|(k, c)| k < c)
-                        }
+                    let ok = match (id, count) {
+                        (Some(id), Some(c)) => task_shard(id, c, t).is_some(),
                         _ => false,
                     };
                     if !ok {
@@ -888,8 +1058,11 @@ fn check_cairn(v: &mut V, id: Option<&str>, count: Option<u64>, ctx: &Ctx) {
                 let sandbox = v.one_of("cairn.exec.sandbox", SANDBOXES);
                 if let Some(publish) = v.string("cairn.exec.publish") {
                     if let Some(id) = id {
-                        if !publish.starts_with(&format!("runs/{id}")) {
-                            v.err("cairn.exec.publish", format!("must start with runs/{id}"));
+                        if !under_runs(id, publish, true) {
+                            v.err(
+                                "cairn.exec.publish",
+                                format!("must be runs/{id} or a path below it, without . or .. components"),
+                            );
                         }
                     }
                 }
@@ -906,7 +1079,7 @@ fn check_cairn(v: &mut V, id: Option<&str>, count: Option<u64>, ctx: &Ctx) {
             let first = v.get("shards.stop").and_then(Value::as_str) == Some("first_success");
             if first || v.get("cairn.checker").is_some() {
                 if v.object("cairn.checker").is_some() {
-                    check_checker(v, ctx);
+                    check_checker(v, ctx, status);
                 }
                 if first {
                     if v.get("cairn.checker.status").and_then(Value::as_str) != Some("available") {
@@ -925,6 +1098,21 @@ fn check_cairn(v: &mut V, id: Option<&str>, count: Option<u64>, ctx: &Ctx) {
                     if !takes_artifact {
                         v.err("cairn.checker.argv", "takes the artifact as {artifact}");
                     }
+                    let prog = v
+                        .get("cairn.checker.argv")
+                        .and_then(Value::as_array)
+                        .and_then(|a| a.first())
+                        .and_then(Value::as_str)
+                        .map(|p| p.rsplit('/').next().unwrap_or(p).to_string());
+                    if !prog
+                        .as_deref()
+                        .is_some_and(|p| KNOWN_CHECKERS.iter().any(|(n, _)| *n == p))
+                    {
+                        v.err(
+                            "cairn.checker.argv",
+                            "a first_success checker must be one KNOWN_CHECKERS lists with its pin flags (card.rs)",
+                        );
+                    }
                 }
             }
         }
@@ -934,12 +1122,21 @@ fn check_cairn(v: &mut V, id: Option<&str>, count: Option<u64>, ctx: &Ctx) {
             {
                 // The verifier: native only (AGENTS.md "no Python").
                 if v.object("cairn.checker").is_some() {
-                    check_checker(v, ctx);
+                    check_checker(v, ctx, status);
                 }
             }
             if v.object("cairn.piecework").is_some() {
-                v.uint("cairn.piecework.units", 1);
+                let units = v.uint("cairn.piecework.units", 1);
                 v.string("cairn.piecework.unit");
+                let funding = v.get("cairn.funding.units").and_then(Value::as_u64);
+                if let (Some(u), Some(f)) = (units, funding) {
+                    if f < u {
+                        v.err(
+                            "cairn.funding.units",
+                            format!("{f} is below piecework.units {u}: each unit would pay 0"),
+                        );
+                    }
+                }
             }
             if let Some(stop) = v.one_of("cairn.stop", STOPS) {
                 if v.get("shards.stop").and_then(Value::as_str) != Some(stop) {
@@ -985,7 +1182,14 @@ fn check_cairn(v: &mut V, id: Option<&str>, count: Option<u64>, ctx: &Ctx) {
     // Funding is priority: it orders every runner's work and, for an
     // objective, is the reward `backlog cairn-post` funds it with.
     if v.object("cairn.funding").is_some() {
-        v.uint("cairn.funding.units", 0);
+        if v.uint("cairn.funding.units", 0)
+            .is_some_and(|f| f > i64::MAX as u64)
+        {
+            v.err(
+                "cairn.funding.units",
+                "exceeds i64::MAX, the largest reward cairn records",
+            );
+        }
         v.string("cairn.funding.rationale");
     }
 }
@@ -997,14 +1201,17 @@ pub fn funding(card: &Value) -> u64 {
         .unwrap_or(0)
 }
 
-fn git_has_blob(root: &Path, blob: &str) -> bool {
-    Command::new("git")
+/// The blob id of `rel` in HEAD's tree, if HEAD has it.
+fn git_head_blob(root: &Path, rel: &str) -> Option<String> {
+    let o = Command::new("git")
         .arg("-C")
         .arg(root)
-        .args(["cat-file", "-t", blob])
+        .args(["rev-parse", "--verify", "--quiet", &format!("HEAD:{rel}")])
         .output()
-        .map(|o| o.status.success() && String::from_utf8_lossy(&o.stdout).trim() == "blob")
-        .unwrap_or(false)
+        .ok()?;
+    o.status
+        .success()
+        .then(|| String::from_utf8_lossy(&o.stdout).trim().to_string())
 }
 
 #[cfg(test)]
@@ -1045,7 +1252,7 @@ mod tests {
             "decision_value": "If the search finds a curve within the budget we build the factor base at P-192 size; if it does not, we stop the tower line at this size and record the bounded negative result in problems/ with its exact limits.",
             "protocol": {"path": null, "blob": null},
             "code": {"repo": "crypto", "commit": null, "branch": "claude/x", "build": [["cargo", "build", "--release"]]},
-            "resources": {"cpus": 1, "ram_gb": 1, "disk_gb": 1, "gpu": null, "est_core_hours": 1.0, "est_wall_hours": null, "notes": ""},
+            "resources": {"cpus": 1, "ram_gb": 1, "disk_gb": 1, "gpu": null, "est_core_hours": 1, "est_wall_hours": null, "notes": ""},
             "run": {"argv": ["bin", "--from", "{seed_lo}", "--to", "{seed_hi}", "--out", "{out}/r.json", "--ckpt", "{checkpoint}"], "env": {}, "timeout_per_shard_s": 60},
             "shards": {"count": 4, "scheme": "seed_range", "params": {"seed_lo": "0", "range_size": "1000"}, "stop": "first_success"},
             "checkpoint": {"file": "ckpt.bin", "resume_flag": "--resume"},
@@ -1260,7 +1467,7 @@ mod tests {
         c["cairn"] = json!({"mode": "lab-task", "space": "TBD", "tasks": [format!("{id}/shard-{{k}}")], "ttl_s": 21600,
             "env": {"name": "e", "recipe": "r"},
             "exec": {"cpus": 1, "memory_mb": 1024, "timeout_s": 60, "sandbox": "auto", "publish": format!("runs/{id}")},
-            "checker": {"status": "available", "bin": "chk", "argv": ["chk", "{artifact}"], "artifact_schema": {}},
+            "checker": {"status": "available", "bin": "backlog_check_aux2t", "argv": ["backlog_check_aux2t", "{artifact}", "--expect-t", "4"], "artifact_schema": {}},
             "funding": {"units": 1, "rationale": "r"}});
         let ctx = fixture(&root, id, &c);
         assert_eq!(errors(&validate(&c, &ctx)), Vec::<String>::new());
@@ -1353,5 +1560,164 @@ mod tests {
             .map(|v| v.as_str().unwrap())
             .collect();
         assert_eq!(modes, CAIRN_MODES);
+        // status_note may be null; the id's slug is at most 64 characters.
+        let note = schema["properties"]["status_note"]["type"]
+            .as_array()
+            .unwrap();
+        assert!(note.contains(&json!("string")) && note.contains(&json!("null")));
+        assert_eq!(
+            schema["properties"]["id"]["maxLength"].as_u64(),
+            Some(3 + 8 + 1 + 64)
+        );
+        // Per-mode required cairn keys, from the schema's allOf.
+        let all_of = schema["properties"]["cairn"]["allOf"].as_array().unwrap();
+        for (mode, ours) in [
+            ("lab-task", LAB_TASK_REQUIRED),
+            ("objective", OBJECTIVE_REQUIRED),
+        ] {
+            let branch = all_of
+                .iter()
+                .find(|b| b["if"]["properties"]["mode"]["const"] == mode)
+                .unwrap_or_else(|| panic!("no allOf branch for {mode}"));
+            let theirs: BTreeSet<&str> = branch["then"]["required"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|v| v.as_str().unwrap())
+                .collect();
+            assert_eq!(
+                theirs,
+                ours.iter().copied().collect::<BTreeSet<_>>(),
+                "{mode}"
+            );
+        }
+        // Integers only where the validator says so.
+        for key in ["ram_gb", "disk_gb"] {
+            assert_eq!(
+                schema["properties"]["resources"]["properties"][key]["type"], "integer",
+                "{key}"
+            );
+        }
+        for key in ["est_core_hours", "est_wall_hours"] {
+            assert_eq!(
+                schema["properties"]["resources"]["properties"][key]["type"],
+                json!(["integer", "null"]),
+                "{key}"
+            );
+        }
+        assert_eq!(
+            schema["properties"]["protocol"]["properties"]["path"]["enum"],
+            json!(["PROTOCOL.md", null])
+        );
+    }
+
+    #[test]
+    fn review_regressions_floats_notes_paths_tasks_pins_funding() {
+        let root = tmp("rev");
+        let id = "XP-20261015-unit-rev";
+        let c = base(id);
+        let ctx = fixture(&root, id, &c);
+        let has = |c: &Value, needle: &str| {
+            errors(&validate(c, &ctx))
+                .iter()
+                .any(|e| e.contains(needle))
+        };
+        // Floats cannot be published to cairn.
+        let mut f = c.clone();
+        f["resources"]["ram_gb"] = json!(1.5);
+        assert!(has(&f, "is a float") && has(&f, "resources.ram_gb"));
+        // Abandoned says why.
+        let mut a = c.clone();
+        a["status"] = json!("abandoned");
+        assert!(has(&a, "an abandoned card says why"));
+        a["status_note"] = json!("superseded by XP-20261016-x");
+        assert!(!has(&a, "says why"));
+        // The protocol is PROTOCOL.md in the card directory.
+        for bad in ["../PROTOCOL.md", "/etc/passwd", "proto.md"] {
+            let mut p = c.clone();
+            p["protocol"]["path"] = json!(bad);
+            assert!(has(&p, "is PROTOCOL.md"), "{bad}");
+        }
+        // Publish prefix: exactly runs/<id> or below it.
+        for (path, ok) in [
+            (format!("runs/{id}"), true),
+            (format!("runs/{id}/shard-1"), true),
+            (format!("runs/{id}-evil"), false),
+            (format!("runs/{id}/../other"), false),
+            (format!("runs/{id}//x"), false),
+        ] {
+            assert_eq!(under_runs(id, &path, true), ok, "{path}");
+        }
+        // Shard indices parse strictly.
+        assert_eq!(task_shard(id, 4, &format!("{id}/shard-3")), Some(3));
+        for bad in ["shard-03", "shard-+1", "shard-4", "shard-", "shard-1x"] {
+            assert_eq!(task_shard(id, 4, &format!("{id}/{bad}")), None, "{bad}");
+        }
+        assert_eq!(task_shard(id, 4, id), None);
+        assert_eq!(task_shard(id, 1, id), Some(0));
+        // A known checker without its pin, and the test flag off a draft.
+        let mut k = c.clone();
+        k["outputs"]["verify"] = json!(["target/release/backlog_check_aux2t", "{out}/a.json"]);
+        assert!(has(&k, "needs --expect-t"));
+        k["outputs"]["verify"] = json!([
+            "backlog_check_aux2t",
+            "{out}/a.json",
+            "--expect-t",
+            "48",
+            "--allow-test-prime"
+        ]);
+        assert!(!has(&k, "--allow-test-prime is for draft"));
+        k["status"] = json!("blocked");
+        k["blocked_on"] = json!(["note:x"]);
+        assert!(has(&k, "--allow-test-prime is for draft"));
+        // outputs.verify and checker argv placeholders.
+        let mut o = c.clone();
+        o["outputs"]["verify"] = json!(["check", "{nope}"]);
+        assert!(has(&o, "{nope}"));
+        o["cairn"]["checker"]["argv"] = json!(["chk", "{out}"]);
+        assert!(has(&o, "takes only {artifact}"));
+        // Objective funding covers every piecework unit.
+        let mut u = c.clone();
+        u["cairn"]["funding"]["units"] = json!(3);
+        assert!(has(&u, "below piecework.units"));
+        // Mode-required keys.
+        let mut m = c.clone();
+        m["cairn"].as_object_mut().unwrap().remove("goal");
+        assert!(has(&m, "cairn.goal: is required in mode objective"));
+    }
+
+    #[test]
+    fn a_frozen_protocol_must_be_committed_at_head() {
+        let root = tmp("git");
+        let git = |args: &[&str]| {
+            assert!(
+                Command::new("git")
+                    .arg("-C")
+                    .arg(&root)
+                    .args(args)
+                    .output()
+                    .unwrap()
+                    .status
+                    .success(),
+                "{args:?}"
+            )
+        };
+        git(&["init", "-q"]);
+        git(&["config", "user.email", "t@example.invalid"]);
+        git(&["config", "user.name", "t"]);
+        let id = "XP-20261015-unit-git";
+        let mut c = base(id);
+        c["status"] = json!("ready");
+        c["code"]["commit"] = json!("0123456789abcdef0123456789abcdef01234567");
+        c["protocol"] = json!({"path": "PROTOCOL.md", "blob": git_blob_sha(b"frozen\n")});
+        let mut ctx = fixture(&root, id, &c);
+        ctx.check_git = true;
+        fs::write(ctx.dir.join("PROTOCOL.md"), "frozen\n").unwrap();
+        assert!(errors(&validate(&c, &ctx))
+            .iter()
+            .any(|e| e.contains("not committed at HEAD")));
+        git(&["add", "-A"]);
+        git(&["commit", "-q", "-m", "freeze"]);
+        assert_eq!(errors(&validate(&c, &ctx)), Vec::<String>::new());
     }
 }

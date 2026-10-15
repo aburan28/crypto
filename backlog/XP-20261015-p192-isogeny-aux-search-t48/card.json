@@ -95,13 +95,15 @@
     "result_schema": "the solver's result JSON: {a, b, Q: [x, y], t, seed, draws, cpu_seconds}, frozen in PROTOCOL.md",
     "verify": [
       "target/release/backlog_check_aux2t",
-      "{out}/found/artifact.json"
+      "{out}/found/artifact.json",
+      "--expect-t",
+      "48"
     ],
     "land": "research/pkm_aux_search_p192_t48"
   },
   "cairn": {
     "mode": "lab-task",
-    "notes": "One lab task per seed range; stop rule first_success (backlog/README.md): before each claim a runner checks `backlog cairn-found <ID> --lab DIR` (exit 3 = stop); a run that finds a curve writes {out}/found/artifact.json, which `cairn lab exec --publish runs/<ID>/shard-<k>` publishes, and the runner records it with `backlog cairn-found ... --artifact` (the checker decides). Re-claim every 2 h (ttl 6 h). Resumable from checkpoint.json, so preemptible. Upgrade path: a cairn piecework objective once cairn can pin a native checker (problems/cairn-certificate-checker-python-only.md).",
+    "notes": "One lab task per seed range; stop rule first_success (backlog/README.md): before each claim a runner checks `backlog cairn-found <ID> --lab DIR` (exit 3 = stop); a run that finds a curve writes {out}/found/artifact.json, which `cairn lab exec --publish runs/<ID>/shard-<k>` publishes, and the runner, still holding the lease, records it with `backlog cairn-found <ID> --lab DIR --lab-path runs/<ID>/shard-<k>/found/artifact.json --claim C --holder H --identity I --checker-bin <pinned build>/backlog_check_aux2t` (the checker decides on the lab copy). Re-claim every 2 h (ttl 6 h). Resumable from checkpoint.json, so preemptible. Upgrade path: a cairn objective once cairn can pin a native checker (problems/cairn-certificate-checker-python-only.md).",
     "space": "TBD",
     "tasks": [
       "XP-20261015-p192-isogeny-aux-search-t48/shard-{k}"
@@ -123,7 +125,9 @@
       "bin": "backlog_check_aux2t (src/bin/backlog_check_aux2t.rs)",
       "argv": [
         "backlog_check_aux2t",
-        "{artifact}"
+        "{artifact}",
+        "--expect-t",
+        "48"
       ],
       "artifact_schema": {
         "type": "object",
@@ -153,11 +157,10 @@
             "type": "string"
           },
           "t": {
-            "type": "integer",
-            "description": "48"
+            "const": 48
           }
         },
-        "checks": "4a^3 + 27b^2 != 0 mod p; Q on y^2 = x^3 + ax + b; [2^(t-1)]Q != O and [2^t]Q = O; exit 0 accept, 1 reject, 2 bad input"
+        "checks": "t = 48 (the checker is run with --expect-t 48); p is the NIST P-192 prime; 4a^3 + 27b^2 != 0 mod p; Q on y^2 = x^3 + ax + b; [2^47]Q != O and [2^48]Q = O; exit 0 accept, 1 reject, 2 bad input"
       }
     },
     "funding": {

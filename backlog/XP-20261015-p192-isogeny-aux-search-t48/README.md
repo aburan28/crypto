@@ -107,13 +107,17 @@ the search.
   `backlog cairn-found <ID> --lab DIR` (exit 3 means a curve is already
   recorded: stop); a shard that finds a curve writes
   `{out}/found/artifact.json`, published by `cairn lab exec` under
-  `runs/<ID>/shard-<k>/found/`, and the runner records it with
-  `backlog cairn-found … --artifact`, which runs the checker and sets `found`
-  only on accept. One shard takes 2.4–23.9 h of one core at 2–20 µs per draw,
+  `runs/<ID>/shard-<k>/found/`, and the runner, still holding the lease,
+  records it with `backlog cairn-found … --lab-path … --checker-bin …`, which
+  runs `backlog_check_aux2t --expect-t 48` from the pinned build on the
+  lab's copy and sets `found` only on accept. One shard takes 2.4–23.9 h of one core at 2–20 µs per draw,
   so `ttl_s` is 6 h with a re-claim every 2 h; the checkpoint makes a shard
   resumable and so preemptible.
 - **Upgrade path:** once cairn can pin a native checker
   ([problem record](../../problems/cairn-certificate-checker-python-only.md)),
-  post the search as a piecework objective (`backlog cairn-post`, one unit per
-  seed range), so any solver can contribute and the pinned verifier decides
-  each claim.
+  post the search as an objective (`backlog cairn-post`), so any solver can
+  contribute and the pinned verifier decides each claim. As piecework it
+  would pay `floor(reward / units)` per distinct accepted curve and never stop
+  at the first; to pay once for the first curve, post it without piecework,
+  so it settles on its first accepted claim. The validator's
+  `funding ≥ piecework.units` rule applies to the piecework form.

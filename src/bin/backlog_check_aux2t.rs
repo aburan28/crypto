@@ -2,7 +2,7 @@
 //! for `backlog/XP-20261015-p192-isogeny-aux-search-t48`.
 //!
 //! ```text
-//! backlog_check_aux2t ARTIFACT.json [--allow-test-prime]
+//! backlog_check_aux2t ARTIFACT.json --expect-t N [--allow-test-prime]
 //! ```
 //!
 //! The artifact is `{"p", "a", "b", "Qx", "Qy", "t"}`: integers as decimal
@@ -12,6 +12,7 @@
 //!   `--allow-test-prime`, any odd prime `p > 3`, for small-field tests);
 //! - `0 ≤ a, b, Qx, Qy < p` and `4a³ + 27b² ≠ 0 (mod p)`;
 //! - `Q = (Qx, Qy)` is on `y² = x³ + ax + b`;
+//! - `t` equals `--expect-t` (the card pins 48: a point of order 2 proves nothing);
 //! - `[2^(t−1)]Q ≠ O` and `[2^t]Q = O`, so `Q` has order exactly `2^t`.
 //!
 //! Deterministic, no randomness, no network. One JSON line on stdout; exit 0
@@ -41,8 +42,12 @@ fn parse_int(v: &Value, name: &str) -> Result<BigUint, String> {
         .get(name)
         .and_then(Value::as_str)
         .ok_or_else(|| format!("{name} must be a string holding an integer"))?;
+    // Strict: decimal digits, or `0x` and hex digits. No sign, no
+    // underscores, no whitespace (`parse_bytes` alone would take `_`).
     let parsed = if let Some(hex) = s.strip_prefix("0x") {
-        BigUint::parse_bytes(hex.as_bytes(), 16)
+        (!hex.is_empty() && hex.bytes().all(|b| b.is_ascii_hexdigit()))
+            .then(|| BigUint::parse_bytes(hex.as_bytes(), 16))
+            .flatten()
     } else if !s.is_empty() && s.bytes().all(|b| b.is_ascii_digit()) {
         BigUint::parse_bytes(s.as_bytes(), 10)
     } else {
@@ -122,7 +127,7 @@ impl Curve {
     }
 }
 
-fn check(artifact: &Value, allow_test_prime: bool) -> Verdict {
+fn check(artifact: &Value, allow_test_prime: bool, expect_t: u64) -> Verdict {
     let ints = (|| -> Result<_, String> {
         Ok((
             parse_int(artifact, "p")?,
@@ -140,6 +145,11 @@ fn check(artifact: &Value, allow_test_prime: bool) -> Verdict {
         Some(t) if (1..=1024).contains(&t) => t,
         _ => return Verdict::BadInput("t must be an integer in 1..=1024".into()),
     };
+    // The claim is about the card's t, not any t: a point of order 2 is not
+    // a point of order 2^48.
+    if t != expect_t {
+        return Verdict::Reject(format!("t = {t}, but this check is for t = {expect_t}"));
+    }
     if p != p192() {
         if !allow_test_prime {
             return Verdict::Reject("p is not the NIST P-192 prime 2^192 - 2^64 - 1".into());
@@ -179,15 +189,32 @@ fn check(artifact: &Value, allow_test_prime: bool) -> Verdict {
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let allow = args.iter().any(|a| a == "--allow-test-prime");
-    let files: Vec<&String> = args.iter().filter(|a| !a.starts_with("--")).collect();
-    let unknown: Vec<&String> = args
-        .iter()
-        .filter(|a| a.starts_with("--") && *a != "--allow-test-prime")
-        .collect();
-    let verdict = if files.len() != 1 || !unknown.is_empty() {
-        Verdict::BadInput("usage: backlog_check_aux2t ARTIFACT.json [--allow-test-prime]".into())
+    let mut allow = false;
+    let mut expect_t: Option<u64> = None;
+    let mut files: Vec<&String> = Vec::new();
+    let mut bad = false;
+    let mut it = args.iter();
+    while let Some(a) = it.next() {
+        match a.as_str() {
+            "--allow-test-prime" => allow = true,
+            "--expect-t" => match it.next().map(|v| (v, v.parse::<u64>())) {
+                Some((v, Ok(t)))
+                    if v.bytes().all(|b| b.is_ascii_digit()) && (1..=1024).contains(&t) =>
+                {
+                    expect_t = Some(t)
+                }
+                _ => bad = true,
+            },
+            s if s.starts_with("--") => bad = true,
+            _ => files.push(a),
+        }
+    }
+    let verdict = if files.len() != 1 || bad || expect_t.is_none() {
+        Verdict::BadInput(
+            "usage: backlog_check_aux2t ARTIFACT.json --expect-t N [--allow-test-prime]".into(),
+        )
     } else {
+        let expect_t = expect_t.unwrap_or(0);
         match std::fs::read_to_string(files[0]) {
             Err(e) => Verdict::BadInput(format!("{}: {e}", files[0])),
             Ok(text) => match serde_json::from_str::<Value>(&text) {
@@ -195,7 +222,7 @@ fn main() -> ExitCode {
                 Ok(v) if !v.is_object() => {
                     Verdict::BadInput("the artifact is not a JSON object".into())
                 }
-                Ok(v) => check(&v, allow),
+                Ok(v) => check(&v, allow, expect_t),
             },
         }
     };
@@ -206,7 +233,7 @@ fn main() -> ExitCode {
     };
     println!(
         "{}",
-        serde_json::json!({"checker": "backlog_check_aux2t", "verdict": word, "reason": reason, "test_prime": allow})
+        serde_json::json!({"checker": "backlog_check_aux2t", "verdict": word, "reason": reason, "test_prime": allow, "expect_t": expect_t})
     );
     ExitCode::from(code)
 }
@@ -288,23 +315,26 @@ mod tests {
         for (p, t) in [(103u64, 3u32), (241, 4), (521, 5), (1031, 6)] {
             let (a, b, x, y) = find(p, t);
             assert!(
-                matches!(check(&art(p, a, b, x, y, t), true), Verdict::Accept(_)),
+                matches!(
+                    check(&art(p, a, b, x, y, t), true, u64::from(t)),
+                    Verdict::Accept(_)
+                ),
                 "p={p} t={t}"
             );
             // Wrong order claimed, both directions.
             assert!(
-                matches!(check(&art(p, a, b, x, y, t + 1), true), Verdict::Reject(r) if r.contains("below 2^"))
+                matches!(check(&art(p, a, b, x, y, t + 1), true, u64::from(t + 1)), Verdict::Reject(r) if r.contains("below 2^"))
             );
             assert!(
-                matches!(check(&art(p, a, b, x, y, t - 1), true), Verdict::Reject(r) if r.contains("not 2^"))
+                matches!(check(&art(p, a, b, x, y, t - 1), true, u64::from(t - 1)), Verdict::Reject(r) if r.contains("not 2^"))
             );
             // Off the curve.
             assert!(
-                matches!(check(&art(p, a, b, x, (y + 1) % p, t), true), Verdict::Reject(r) if r.contains("not on"))
+                matches!(check(&art(p, a, b, x, (y + 1) % p, t), true, u64::from(t)), Verdict::Reject(r) if r.contains("not on"))
             );
             // Without --allow-test-prime a small prime is the wrong prime.
             assert!(
-                matches!(check(&art(p, a, b, x, y, t), false), Verdict::Reject(r) if r.contains("P-192"))
+                matches!(check(&art(p, a, b, x, y, t), false, u64::from(t)), Verdict::Reject(r) if r.contains("P-192"))
             );
         }
     }
@@ -313,7 +343,7 @@ mod tests {
     fn a_point_of_smaller_order_is_rejected_early() {
         let (p, t) = (241u64, 4u32);
         let (a, b, x, y) = find(p, 2);
-        let v = check(&art(p, a, b, x, y, t), true);
+        let v = check(&art(p, a, b, x, y, t), true, u64::from(t));
         assert!(
             matches!(v, Verdict::Reject(ref r) if r.contains("[2^2]Q = O")),
             "{v:?}"
@@ -324,23 +354,47 @@ mod tests {
     fn singular_composite_unreduced_and_malformed_inputs() {
         // y^2 = x^3 over F_103 is singular; (1, 1) lies on it.
         assert!(
-            matches!(check(&art(103, 0, 0, 1, 1, 3), true), Verdict::Reject(r) if r.contains("singular"))
+            matches!(check(&art(103, 0, 0, 1, 1, 3), true, 3), Verdict::Reject(r) if r.contains("singular"))
         );
         assert!(
-            matches!(check(&art(105, 1, 1, 0, 1, 3), true), Verdict::Reject(r) if r.contains("prime"))
+            matches!(check(&art(105, 1, 1, 0, 1, 3), true, 3), Verdict::Reject(r) if r.contains("prime"))
         );
         assert!(
-            matches!(check(&art(103, 103, 1, 0, 1, 3), true), Verdict::Reject(r) if r.contains("reduced"))
+            matches!(check(&art(103, 103, 1, 0, 1, 3), true, 3), Verdict::Reject(r) if r.contains("reduced"))
         );
         assert!(matches!(
-            check(&json!({"p": "103"}), true),
+            check(&json!({"p": "103"}), true, 3),
             Verdict::BadInput(_)
         ));
         let mut bad = art(103, 1, 1, 0, 1, 3);
         bad["a"] = json!(1);
-        assert!(matches!(check(&bad, true), Verdict::BadInput(_)));
+        assert!(matches!(check(&bad, true, 3), Verdict::BadInput(_)));
         bad = art(103, 1, 1, 0, 1, 0);
-        assert!(matches!(check(&bad, true), Verdict::BadInput(_)));
+        assert!(matches!(check(&bad, true, 3), Verdict::BadInput(_)));
+    }
+
+    /// Review regression: (0, 0) on y² = x³ + x has order 2 over the P-192
+    /// prime. It is a true point of order 2^1 and must not pass a t = 48 check.
+    #[test]
+    fn t_is_pinned_by_the_caller_not_the_artifact() {
+        let a = json!({"p": p192().to_string(), "a": "1", "b": "0", "Qx": "0", "Qy": "0", "t": 1});
+        assert!(matches!(check(&a, false, 48), Verdict::Reject(r) if r.contains("t = 1")));
+        assert!(matches!(check(&a, false, 1), Verdict::Accept(_)));
+    }
+
+    #[test]
+    fn integers_parse_strictly() {
+        for bad in [
+            "+5", "-5", "1_0", "0x", "0x_1", "0x1g", " 5", "5 ", "", "0X10",
+        ] {
+            let a = json!({"p": "103", "a": bad, "b": "1", "Qx": "0", "Qy": "1", "t": 3});
+            assert!(
+                matches!(check(&a, true, 3), Verdict::BadInput(_)),
+                "{bad:?}"
+            );
+        }
+        let ok = json!({"p": "0x67", "a": "0x0", "b": "1", "Qx": "0", "Qy": "1", "t": 3});
+        assert!(!matches!(check(&ok, true, 3), Verdict::BadInput(_)));
     }
 
     #[test]
@@ -361,6 +415,6 @@ mod tests {
             "Qx": "0x188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012",
             "Qy": "0x07192b95ffc8da78631011ed6b24cdd573f977a11e794811", "t": 1
         });
-        assert!(matches!(check(&g, false), Verdict::Reject(r) if r.contains("not 2^1")));
+        assert!(matches!(check(&g, false, 1), Verdict::Reject(r) if r.contains("not 2^1")));
     }
 }

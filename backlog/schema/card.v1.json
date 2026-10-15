@@ -5,146 +5,534 @@
   "description": "One experiment we would like to run: backlog/<id>/card.json. The structural rules are here; the cross-field rules (protocol frozen before ready, placeholders resolvable, blocked_on typed and non-empty when blocked, cairn tasks naming this card's shards) are enforced by `backlog validate` (src/bin/backlog/card.rs), whose unit test pins this file's required keys and enums. Prose: backlog/README.md.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "id", "title", "created", "authors", "status", "blocked_on", "links", "question", "decision_value", "protocol", "code", "resources", "run", "shards", "checkpoint", "outputs", "cairn"],
+  "required": [
+    "schema",
+    "id",
+    "title",
+    "created",
+    "authors",
+    "status",
+    "blocked_on",
+    "links",
+    "question",
+    "decision_value",
+    "protocol",
+    "code",
+    "resources",
+    "run",
+    "shards",
+    "checkpoint",
+    "outputs",
+    "cairn"
+  ],
   "properties": {
-    "schema": {"const": "backlog.card/v1"},
-    "id": {"type": "string", "pattern": "^XP-[0-9]{8}-[a-z0-9]+(-[a-z0-9]+)*$", "description": "XP-<YYYYMMDD>-<slug>; equals the directory name; the date equals `created`."},
-    "title": {"type": "string", "minLength": 1},
-    "created": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
-    "authors": {"type": "array", "minItems": 1, "items": {"type": "string", "not": {"pattern": "@"}}, "description": "People, roles or lanes. No email addresses."},
-    "status": {"enum": ["draft", "ready", "blocked", "running", "done", "failed", "abandoned"]},
-    "status_note": {"type": "string", "description": "Why the status is what it is, in one or two sentences."},
+    "schema": {
+      "const": "backlog.card/v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^XP-[0-9]{8}-[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "XP-<YYYYMMDD>-<slug>; equals the directory name; the date equals `created`.",
+      "maxLength": 76
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "authors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "not": {
+          "pattern": "@"
+        }
+      },
+      "description": "People, roles or lanes. No email addresses."
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready",
+        "blocked",
+        "running",
+        "done",
+        "failed",
+        "abandoned"
+      ]
+    },
+    "status_note": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Why the status is what it is, in one or two sentences."
+    },
     "blocked_on": {
       "type": "array",
-      "items": {"type": "string", "pattern": "^(pr|branch|problem|xp|hw|url|note):.+"},
+      "items": {
+        "type": "string",
+        "pattern": "^(pr|branch|problem|xp|hw|url|note):.+"
+      },
       "description": "Typed links: pr:<n> [text], branch:<name> [text], problem:problems/<file>.md, xp:<card id>, hw:<text>, url:https://..., note:<text>. Non-empty exactly when status is blocked (and empty for ready/running/done)."
     },
     "links": {
       "type": "object",
       "properties": {
-        "lead": {"type": "string"},
-        "notes": {"type": "array", "items": {"type": "string"}},
-        "prs": {"type": "array", "items": {"type": "integer"}}
+        "lead": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "prs": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
       }
     },
-    "question": {"type": "string", "minLength": 1},
-    "decision_value": {"type": "string", "minLength": 1, "description": "One paragraph (25+ words): which result changes which decision."},
+    "question": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision_value": {
+      "type": "string",
+      "minLength": 1,
+      "description": "One paragraph (25+ words): which result changes which decision."
+    },
     "protocol": {
       "type": "object",
-      "required": ["path", "blob"],
+      "required": [
+        "path",
+        "blob"
+      ],
       "properties": {
-        "path": {"type": ["string", "null"], "description": "PROTOCOL.md, relative to the card directory."},
-        "blob": {"type": ["string", "null"], "pattern": "^[0-9a-f]{40}$", "description": "git blob id of the committed protocol (`git hash-object PROTOCOL.md`). Required for ready/running/done; must match the file and be in git's object database."}
+        "path": {
+          "enum": [
+            "PROTOCOL.md",
+            null
+          ],
+          "description": "PROTOCOL.md in the card directory, the only protocol file cairn-publish uploads."
+        },
+        "blob": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{40}$",
+          "description": "git blob id of PROTOCOL.md (`git hash-object PROTOCOL.md`). Required for ready/running/done; must match the file, and `backlog validate` (unless --no-git) requires HEAD:backlog/<id>/PROTOCOL.md to be this blob."
+        }
       }
     },
     "code": {
       "type": "object",
-      "required": ["repo", "build"],
+      "required": [
+        "repo",
+        "build"
+      ],
       "properties": {
-        "repo": {"type": "string"},
-        "commit": {"type": ["string", "null"], "pattern": "^[0-9a-f]{40}$"},
-        "branch": {"type": ["string", "null"]},
-        "build": {"type": "array", "items": {"type": "array", "minItems": 1, "items": {"type": "string"}}}
+        "repo": {
+          "type": "string"
+        },
+        "commit": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "branch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "build": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       },
       "description": "A full commit for ready/running/done; a branch is allowed while draft or blocked."
     },
     "resources": {
       "type": "object",
-      "required": ["cpus", "ram_gb", "disk_gb", "gpu", "est_core_hours", "est_wall_hours"],
+      "required": [
+        "cpus",
+        "ram_gb",
+        "disk_gb",
+        "gpu",
+        "est_core_hours",
+        "est_wall_hours"
+      ],
       "properties": {
-        "cpus": {"type": "integer", "minimum": 1},
-        "ram_gb": {"type": "number", "exclusiveMinimum": 0},
-        "disk_gb": {"type": "number", "minimum": 0},
-        "gpu": {"type": ["string", "null"]},
-        "est_core_hours": {"type": ["number", "null"], "minimum": 0},
-        "est_wall_hours": {"type": ["number", "null"], "minimum": 0},
-        "notes": {"type": "string"}
+        "cpus": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ram_gb": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "GB, integer: cairn values have no floats"
+        },
+        "disk_gb": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gpu": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "est_core_hours": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "est_wall_hours": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "notes": {
+          "type": "string"
+        }
       }
     },
     "run": {
       "type": "object",
-      "required": ["argv", "env", "timeout_per_shard_s"],
+      "required": [
+        "argv",
+        "env",
+        "timeout_per_shard_s"
+      ],
       "properties": {
-        "argv": {"type": "array", "minItems": 1, "items": {"type": "string"}, "description": "No shell. Placeholders: {shard} {seed_lo} {seed_hi} {out} {checkpoint}, or a key every shards.params.items[*].vars defines."},
-        "env": {"type": "object", "additionalProperties": {"type": "string"}},
-        "timeout_per_shard_s": {"type": "integer", "minimum": 1}
+        "argv": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "No shell. Placeholders: {shard} {seed_lo} {seed_hi} {out} {checkpoint}, or a key every shards.params.items[*].vars defines."
+        },
+        "env": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "timeout_per_shard_s": {
+          "type": "integer",
+          "minimum": 1
+        }
       }
     },
     "shards": {
       "type": "object",
-      "required": ["count", "scheme", "params", "stop"],
+      "required": [
+        "count",
+        "scheme",
+        "params",
+        "stop"
+      ],
       "properties": {
-        "count": {"type": "integer", "minimum": 1},
-        "scheme": {"enum": ["seed_range", "list", "single"]},
-        "params": {"type": "object", "description": "seed_range: {seed_lo, range_size[, seed_hi]} as decimal strings; shard k covers [seed_lo + k*range_size, seed_lo + (k+1)*range_size). list: {items: [{name, vars: {...}}]}, one per shard."},
-        "stop": {"enum": ["all", "first_success"]}
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "scheme": {
+          "enum": [
+            "seed_range",
+            "list",
+            "single"
+          ]
+        },
+        "params": {
+          "type": "object",
+          "description": "seed_range: {seed_lo, range_size[, seed_hi]} as decimal strings; shard k covers [seed_lo + k*range_size, seed_lo + (k+1)*range_size). list: {items: [{name, vars: {...}}]}, one per shard."
+        },
+        "stop": {
+          "enum": [
+            "all",
+            "first_success"
+          ]
+        }
       }
     },
     "checkpoint": {
       "type": "object",
-      "required": ["file", "resume_flag"],
+      "required": [
+        "file",
+        "resume_flag"
+      ],
       "properties": {
-        "file": {"type": ["string", "null"], "description": "Relative to the shard's {out}."},
-        "resume_flag": {"type": ["string", "null"]}
+        "file": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Relative to the shard's {out}."
+        },
+        "resume_flag": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
       },
       "description": "Both required for ready: shard runs must be resumable."
     },
     "outputs": {
       "type": "object",
-      "required": ["result_schema", "verify", "land"],
+      "required": [
+        "result_schema",
+        "verify",
+        "land"
+      ],
       "properties": {
-        "result_schema": {"type": "string"},
-        "verify": {"type": "array", "items": {"type": "string"}, "description": "argv of an independent check of any success claim; non-empty for ready."},
-        "land": {"type": "string", "pattern": "^research/"}
+        "result_schema": {
+          "type": "string"
+        },
+        "verify": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "argv of an independent check of any success claim; non-empty for ready."
+        },
+        "land": {
+          "type": "string",
+          "pattern": "^research/"
+        }
       }
     },
     "cairn": {
       "type": "object",
-      "required": ["mode", "funding"],
+      "required": [
+        "mode",
+        "funding"
+      ],
       "properties": {
-        "mode": {"enum": ["lab-task", "objective"]},
-        "notes": {"type": "string"},
-        "space": {"type": "string", "description": "lab-task: the lab space id, or TBD."},
-        "tasks": {"type": "array", "items": {"type": "string"}, "description": "lab-task: the card id (one shard) or <id>/shard-<k>."},
-        "ttl_s": {"type": "integer", "minimum": 60},
-        "env": {"type": "object", "properties": {"name": {"type": "string"}, "recipe": {"type": "string"}}},
+        "mode": {
+          "enum": [
+            "lab-task",
+            "objective"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        },
+        "space": {
+          "type": "string",
+          "description": "lab-task: the lab space id, or TBD."
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "lab-task: the card id (one-shard card), <id>/shard-<k> with k a decimal index without sign or leading zero and k < shards.count, or the single entry <id>/shard-{k} for every shard."
+        },
+        "ttl_s": {
+          "type": "integer",
+          "minimum": 60
+        },
+        "env": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "recipe": {
+              "type": "string"
+            }
+          }
+        },
         "exec": {
           "type": "object",
           "properties": {
-            "cpus": {"type": "integer", "minimum": 1},
-            "memory_mb": {"type": "integer", "minimum": 1},
-            "timeout_s": {"type": "integer", "minimum": 1},
-            "sandbox": {"enum": ["auto", "none"]},
-            "sandbox_reason": {"type": "string"},
-            "publish": {"type": "string", "pattern": "^runs/XP-"}
+            "cpus": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "memory_mb": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "timeout_s": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "sandbox": {
+              "enum": [
+                "auto",
+                "none"
+              ]
+            },
+            "sandbox_reason": {
+              "type": "string"
+            },
+            "publish": {
+              "type": "string",
+              "description": "runs/<id> or a path below it; no empty, . or .. components"
+            }
           }
         },
-        "kind": {"enum": ["certificate", "workspace"], "description": "objective: the cairn verifier kind."},
+        "kind": {
+          "enum": [
+            "certificate",
+            "workspace"
+          ],
+          "description": "objective: the cairn verifier kind."
+        },
         "checker": {
           "type": "object",
           "properties": {
-            "status": {"enum": ["available", "blocked"]},
-            "bin": {"type": "string"},
-            "argv": {"type": "array", "items": {"type": "string"}},
-            "artifact_schema": {"type": "object"},
-            "blocked_by": {"type": "string"}
+            "status": {
+              "enum": [
+                "available",
+                "blocked"
+              ]
+            },
+            "bin": {
+              "type": "string"
+            },
+            "argv": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "argv with {artifact} as the only placeholder; a checker in KNOWN_CHECKERS (src/bin/backlog/card.rs) carries its pin flags (backlog_check_aux2t: --expect-t N); --allow-test-prime only on draft cards."
+            },
+            "artifact_schema": {
+              "type": "object"
+            },
+            "blocked_by": {
+              "type": "string"
+            }
           }
         },
-        "piecework": {"type": "object", "properties": {"units": {"type": "integer", "minimum": 1}, "unit": {"type": "string"}}},
-        "stop": {"enum": ["all", "first_success"]},
-        "goal": {"type": "string", "description": "objective: the cairn goal key it is posted under."},
-        "statement": {"type": "string", "description": "objective: what a stranger reads; defaults to title + question."},
-        "verifier": {"type": ["object", "null"], "description": "objective: the cairn verifier block, exactly as cairn takes it; null until a native route exists. Never a pinned Python script."},
+        "piecework": {
+          "type": "object",
+          "properties": {
+            "units": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "unit": {
+              "type": "string"
+            }
+          }
+        },
+        "stop": {
+          "enum": [
+            "all",
+            "first_success"
+          ]
+        },
+        "goal": {
+          "type": "string",
+          "description": "objective: the cairn goal key it is posted under."
+        },
+        "statement": {
+          "type": "string",
+          "description": "objective: what a stranger reads; defaults to title + question."
+        },
+        "verifier": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "objective: the cairn verifier block, exactly as cairn takes it; null until a native route exists. Never a pinned Python script."
+        },
         "funding": {
           "type": "object",
-          "required": ["units", "rationale"],
+          "required": [
+            "units",
+            "rationale"
+          ],
           "properties": {
-            "units": {"type": "integer", "minimum": 0, "description": "Funding is priority: runners take the highest-funded free work first, and a higher-funded task may preempt a lower-funded resumable run (backlog/README.md). For an objective it is the reward `backlog cairn-post` funds it with."},
-            "rationale": {"type": "string", "minLength": 1}
+            "units": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Funding is priority: runners take the highest-funded free work first, and a higher-funded task may preempt a lower-funded resumable run (backlog/README.md). For an objective it is the reward `backlog cairn-post` funds it with.",
+              "maximum": 9223372036854775807
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1
+            }
           }
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "lab-task"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "mode",
+              "space",
+              "tasks",
+              "ttl_s",
+              "env",
+              "exec",
+              "funding"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "objective"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "mode",
+              "kind",
+              "goal",
+              "checker",
+              "verifier",
+              "piecework",
+              "stop",
+              "funding"
+            ]
+          }
+        }
+      ]
     },
-    "owner_hint": {"type": ["string", "null"]}
+    "owner_hint": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
   }
 }

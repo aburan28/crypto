@@ -11,8 +11,8 @@
 //! backlog cairn-status <ID> --lab DIR     per-task lease holder/state and run receipts
 //! backlog cairn-post <ID> [--confirm --node URL --identity FILE]
 //!                                         an objective-mode card as a cairn objective (dry run by default)
-//! backlog cairn-found <ID> --lab DIR [--artifact F --lab-path P --claim C --holder H --identity I]
-//!                                         first_success: is `found` set (exit 3)? / check an artifact and record it
+//! backlog cairn-found <ID> --lab DIR [--lab-path P --claim C --holder H --identity I --checker-bin B]
+//!                                         first_success: is `found` set (exit 3)? / check the lab's artifact and record it
 //! ```
 //!
 //! The protocol is `backlog/README.md`.
@@ -73,6 +73,11 @@ enum Cmd {
         /// Do not ask git whether a frozen protocol's blob is committed.
         #[arg(long)]
         no_git: bool,
+        /// Also require every ready/running/done crypto card's code.commit to be
+        /// an ancestor of this ref (CI passes origin/main). Locally only the
+        /// 40-hex form is checked.
+        #[arg(long)]
+        merged_into: Option<String>,
     },
     /// Write the card into a cairn lab as doc backlog/<ID> and its README/PROTOCOL as files.
     CairnPublish {
@@ -96,6 +101,9 @@ enum Cmd {
         /// Sign with --identity and send to --node. Funding reorders everyone's work: never implicit.
         #[arg(long, conflicts_with = "dry_run")]
         confirm: bool,
+        /// Allow plain http to 127.0.0.1/localhost (a local node); otherwise https only.
+        #[arg(long)]
+        allow_local_http: bool,
     },
     /// Lease holder/state and run receipts for the card's cairn tasks.
     CairnStatus {
@@ -103,29 +111,31 @@ enum Cmd {
         #[arg(long)]
         lab: PathBuf,
     },
-    /// first_success stop rule. Without --artifact: is `found` set? (exit 3 if
-    /// so: stop claiming, 0 if not). With --artifact: run the card's checker on
-    /// it and, on accept, record `found` in lab doc backlog/<ID>.
+    /// first_success stop rule. Without --lab-path: is `found` set? (exit 3
+    /// if so, or if it is conflicted: stop claiming; 0 if not; 2 on any
+    /// error). With --lab-path: fetch the published artifact from the lab, run
+    /// the pinned checker on those bytes, and on accept record `found`.
     CairnFound {
         id: String,
         #[arg(long)]
         lab: PathBuf,
-        /// The artifact file on this machine.
-        #[arg(long, requires_all = ["lab_path", "claim", "holder", "identity"])]
-        artifact: Option<PathBuf>,
-        /// Where the run published it in the lab (runs/<ID>/found/...).
-        #[arg(long)]
+        /// Where the run published the artifact: a lab path under runs/<ID>/.
+        #[arg(long, requires_all = ["claim", "holder", "identity", "checker_bin"])]
         lab_path: Option<String>,
-        /// The lease the finding run held.
+        /// The live lease the finding run holds on one of the card's tasks.
         #[arg(long)]
         claim: Option<String>,
+        /// That lease's holder.
         #[arg(long)]
         holder: Option<String>,
         #[arg(long)]
         identity: Option<PathBuf>,
-        /// Extra arguments for the checker (e.g. --allow-test-prime in tests).
-        #[arg(long = "checker-arg", allow_hyphen_values = true)]
-        checker_args: Vec<String>,
+        /// The checker binary from the card's pinned build; its sha256 is recorded in `found`.
+        #[arg(long)]
+        checker_bin: Option<PathBuf>,
+        /// Tests only: record on a card that is not ready or running.
+        #[arg(long)]
+        allow_status: bool,
     },
 }
 
@@ -160,6 +170,10 @@ fn ctx(root: &Path, id: &str, check_git: bool) -> card::Ctx {
 }
 
 fn load(root: &Path, id: &str) -> Result<Value, String> {
+    // An id names a directory: refuse anything that is not one (no `/`, no `..`).
+    if !card::valid_id(id) {
+        return Err(format!("{id:?} is not a card id (XP-<YYYYMMDD>-<slug>)"));
+    }
     card::load(&card_dir(root, id).join("card.json"))
 }
 
@@ -299,7 +313,12 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
             println!("{}", dir.display());
             Ok(ExitCode::SUCCESS)
         }
-        Cmd::Validate { ids, all, no_git } => {
+        Cmd::Validate {
+            ids,
+            all,
+            no_git,
+            merged_into,
+        } => {
             let ids: Vec<String> = if all || ids.is_empty() {
                 card::card_ids(&root).into_iter().collect()
             } else {
@@ -311,7 +330,31 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
             let mut failed = 0;
             for id in &ids {
                 let issues = match load(&root, id) {
-                    Ok(c) => card::validate(&c, &ctx(&root, id, !no_git)),
+                    Ok(c) => {
+                        let mut issues = card::validate(&c, &ctx(&root, id, !no_git));
+                        let executable = card::EXECUTABLE.contains(&s(&c, "status"));
+                        if let (Some(r), true, "crypto") =
+                            (&merged_into, executable, s(&c, "code.repo"))
+                        {
+                            let commit = s(&c, "code.commit");
+                            let merged = std::process::Command::new("git")
+                                .arg("-C")
+                                .arg(&root)
+                                .args(["merge-base", "--is-ancestor", commit, r])
+                                .status()
+                                .is_ok_and(|st| st.success());
+                            if !merged {
+                                issues.push(card::Issue {
+                                    error: true,
+                                    field: "code.commit".into(),
+                                    msg: format!(
+                                        "{commit} is not an ancestor of {r}: pin a merged commit"
+                                    ),
+                                });
+                            }
+                        }
+                        issues
+                    }
                     Err(e) => vec![card::Issue {
                         error: true,
                         field: "card.json".into(),
@@ -336,6 +379,7 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
         }
         Cmd::CairnPublish { id, lab, identity } => {
             let c = load(&root, &id)?;
+            cairn::check_version()?;
             let issues = card::validate(&c, &ctx(&root, &id, true));
             if let Some(e) = issues.iter().find(|i| i.error) {
                 return Err(format!(
@@ -357,6 +401,7 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
             identity,
             dry_run: _,
             confirm,
+            allow_local_http,
         } => {
             let c = load(&root, &id)?;
             let issues = card::validate(&c, &ctx(&root, &id, true));
@@ -379,9 +424,10 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 return Ok(ExitCode::SUCCESS);
             }
             let node = node.ok_or("--confirm needs --node URL")?;
+            cairn::check_node(&node, allow_local_http)?;
             let identity = identity.ok_or("--confirm needs --identity FILE")?;
-            let scratch = std::env::temp_dir().join(format!("backlog-post-{}", std::process::id()));
-            std::fs::create_dir_all(&scratch).map_err(|e| e.to_string())?;
+            cairn::check_version()?;
+            let scratch = cairn::private_tempdir("post")?;
             let answer = cairn::post(&draft, &node, &identity, &scratch);
             let _ = std::fs::remove_dir_all(&scratch);
             println!("{}", answer?);
@@ -390,68 +436,143 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
         Cmd::CairnFound {
             id,
             lab,
-            artifact,
             lab_path,
             claim,
             holder,
             identity,
-            checker_args,
+            checker_bin,
+            allow_status,
         } => {
             let c = load(&root, &id)?;
+            cairn::check_version()?;
             let doc_name = format!("backlog/{id}");
-            let doc = cairn::doc_get(&lab, &doc_name)?;
-            if let Some(f) = doc.get("found").filter(|f| !f.is_null()) {
-                println!("found: {f}");
-                return Ok(ExitCode::from(3));
+            match cairn::doc_field(&lab, &doc_name, "found")? {
+                cairn::Field::One(f) => {
+                    println!("found: {f}");
+                    return Ok(ExitCode::from(3));
+                }
+                cairn::Field::Conflict(values) => {
+                    println!("found (conflict: {} concurrent records):", values.len());
+                    for v in values {
+                        println!("  {v}");
+                    }
+                    return Ok(ExitCode::from(3));
+                }
+                cairn::Field::Unset => {}
             }
-            let Some(artifact) = artifact else {
+            let Some(lab_path) = lab_path else {
                 println!("not found");
                 return Ok(ExitCode::SUCCESS);
             };
-            let argv: Vec<String> = c
-                .pointer("/cairn/checker/argv")
-                .and_then(Value::as_array)
-                .map(|a| {
-                    a.iter()
-                        .filter_map(|x| x.as_str().map(String::from))
-                        .collect()
-                })
-                .unwrap_or_default();
-            if argv.is_empty()
-                || c.pointer("/cairn/checker/status").and_then(Value::as_str) != Some("available")
+            // Only a valid, runnable card that is the one published in the lab.
+            let issues = card::validate(&c, &ctx(&root, &id, true));
+            if let Some(e) = issues.iter().find(|i| i.error) {
+                return Err(format!("{id} does not validate ({e})"));
+            }
+            let status = s(&c, "status").to_string();
+            if !allow_status && status != "ready" && status != "running" {
+                return Err(format!(
+                    "{id} is {status}: only a ready or running card records a find"
+                ));
+            }
+            let published = cairn::doc_get(&lab, &doc_name)?;
+            if published.get("card") != Some(&c) {
+                return Err(format!(
+                    "the local card differs from doc {doc_name}.card in the lab: run `backlog cairn-publish {id}` from the merged card first"
+                ));
+            }
+            if !card::under_runs(&id, &lab_path, false) {
+                return Err(format!(
+                    "--lab-path {lab_path:?} is not a path below runs/{id}/"
+                ));
+            }
+            let (claim, holder) = (claim.unwrap_or_default(), holder.unwrap_or_default());
+            let count = c
+                .pointer("/shards/count")
+                .and_then(Value::as_u64)
+                .unwrap_or(1);
+            let mut task = None;
+            for t in cairn::task_keys(&lab, &id, count)?
+                .into_iter()
+                .chain((count == 1).then(|| id.clone()))
             {
-                return Err(format!("{id} has no available checker"));
+                if cairn::live_holder(&lab, &t)? == Some((claim.clone(), holder.clone())) {
+                    task = Some(t);
+                    break;
+                }
             }
-            let path = artifact.to_string_lossy().into_owned();
-            let mut vars = std::collections::BTreeMap::new();
-            vars.insert("artifact".to_string(), path.clone());
-            let argv = card::substitute(&argv, &vars)?;
-            let out = std::process::Command::new(&argv[0])
-                .args(&argv[1..])
-                .args(&checker_args)
-                .output()
-                .map_err(|e| format!("cannot run the checker {}: {e}", argv[0]))?;
-            let line = String::from_utf8_lossy(&out.stdout).trim().to_string();
-            let verdict: Value = serde_json::from_str(&line).unwrap_or(Value::String(line.clone()));
-            if !out.status.success() {
-                println!("checker did not accept: {line}");
-                return Ok(ExitCode::from(1));
-            }
-            let bytes = std::fs::read(&artifact).map_err(|e| format!("{path}: {e}"))?;
-            let found = serde_json::json!({
-                "artifact": lab_path,
-                "artifact_sha256": hex::encode(crypto_lib::hash::sha256::sha256(&bytes)),
-                "verdict": verdict,
-                "claim": claim,
-                "holder": holder,
-            });
-            let identity = identity.ok_or("--identity is required with --artifact")?;
-            cairn::doc_set(&lab, &identity, &doc_name, "found", &found)?;
-            println!("recorded found in doc {doc_name}: {found}");
-            Ok(ExitCode::SUCCESS)
+            let Some(task) = task else {
+                return Err(format!(
+                    "{claim} is not the live lease of {holder:?} on any task of {id}: record the find before releasing"
+                ));
+            };
+            // The bytes the lab holds, in a private temp file.
+            let bytes = cairn::lab_bytes(&lab, &["cat", &lab_path])?;
+            let tmp = cairn::private_tempdir("found")?;
+            let file = tmp.join("artifact.json");
+            let result = (|| -> Result<ExitCode, String> {
+                std::fs::write(&file, &bytes).map_err(|e| e.to_string())?;
+                let checker_bin = checker_bin.ok_or("--checker-bin is required")?;
+                let bin_bytes = std::fs::read(&checker_bin)
+                    .map_err(|e| format!("{}: {e}", checker_bin.display()))?;
+                let mut argv: Vec<String> = c
+                    .pointer("/cairn/checker/argv")
+                    .and_then(Value::as_array)
+                    .map(|a| {
+                        a.iter()
+                            .filter_map(|x| x.as_str().map(String::from))
+                            .collect()
+                    })
+                    .unwrap_or_default();
+                if argv.is_empty()
+                    || c.pointer("/cairn/checker/status").and_then(Value::as_str)
+                        != Some("available")
+                {
+                    return Err(format!("{id} has no available checker"));
+                }
+                // argv[0] names the checker; the binary run is the pinned build's.
+                argv[0] = checker_bin.to_string_lossy().into_owned();
+                let mut vars = std::collections::BTreeMap::new();
+                vars.insert("artifact".to_string(), file.to_string_lossy().into_owned());
+                let argv = card::substitute(&argv, &vars)?;
+                let out = std::process::Command::new(&argv[0])
+                    .args(&argv[1..])
+                    .output()
+                    .map_err(|e| format!("cannot run the checker {}: {e}", argv[0]))?;
+                let line = String::from_utf8_lossy(&out.stdout).trim().to_string();
+                let verdict: Value =
+                    serde_json::from_str(&line).unwrap_or(Value::String(line.clone()));
+                let accepted = out.status.success()
+                    && verdict.get("verdict").and_then(Value::as_str) == Some("accept");
+                if !accepted {
+                    println!("checker did not accept: {line}");
+                    return Ok(ExitCode::from(1));
+                }
+                if verdict.get("test_prime").and_then(Value::as_bool) == Some(true)
+                    && status != "draft"
+                {
+                    return Err("a test-prime verdict on a non-draft card is refused".into());
+                }
+                let found = serde_json::json!({
+                    "artifact": lab_path,
+                    "artifact_sha256": hex::encode(crypto_lib::hash::sha256::sha256(&bytes)),
+                    "verdict": verdict,
+                    "claim": claim,
+                    "holder": holder,
+                    "task": task,
+                    "checker_sha256": hex::encode(crypto_lib::hash::sha256::sha256(&bin_bytes)),
+                });
+                let identity = identity.ok_or("--identity is required")?;
+                cairn::doc_set(&lab, &identity, &doc_name, "found", &found)?;
+                println!("recorded found in doc {doc_name}: {found}");
+                Ok(ExitCode::SUCCESS)
+            })();
+            let _ = std::fs::remove_dir_all(&tmp);
+            result
         }
         Cmd::CairnStatus { id, lab } => {
             let c = load(&root, &id)?;
+            cairn::check_version()?;
             let mut tasks: Vec<String> = c
                 .pointer("/cairn/tasks")
                 .and_then(Value::as_array)
@@ -471,19 +592,25 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 .and_then(Value::as_u64)
                 .unwrap_or(1);
             if tasks == [pattern] {
-                let seen = cairn::task_keys(&lab, &format!("{id}/shard-"))?;
+                let seen = cairn::task_keys(&lab, &id, total)?;
                 println!(
                     "{} of {total} shards have lease history in the lab; the rest are unclaimed",
                     seen.len()
                 );
                 tasks = seen;
             }
-            let doc = cairn::doc_get(&lab, &format!("backlog/{id}"))?;
-            match doc.get("found") {
-                Some(f) if !f.is_null() => {
-                    println!("FOUND (stop: every runner stops claiming): {f}")
+            match cairn::doc_field(&lab, &format!("backlog/{id}"), "found")? {
+                cairn::Field::One(f) => println!("FOUND (stop: every runner stops claiming): {f}"),
+                cairn::Field::Conflict(values) => {
+                    println!(
+                        "FOUND (conflict: {} concurrent records; every runner stops claiming):",
+                        values.len()
+                    );
+                    for v in values {
+                        println!("  {v}");
+                    }
                 }
-                _ => {}
+                cairn::Field::Unset => {}
             }
             let rows = cairn::status(&lab, &tasks)?;
             println!(
@@ -524,13 +651,14 @@ fn now_secs() -> Result<i64, String> {
         .as_secs() as i64)
 }
 
-/// Now, UTC, as `YYYY-MM-DDTHH:MM:SS+00:00` (cairn's `created_at` form).
+/// Now, UTC, as `YYYY-MM-DDTHH:MM:SS+00:00` (cairn's `created_at` form),
+/// from one reading of the clock.
 fn now_rfc3339() -> Result<String, String> {
     let secs = now_secs()?;
     let t = secs.rem_euclid(86_400);
     Ok(format!(
         "{}T{:02}:{:02}:{:02}+00:00",
-        today()?,
+        civil_date(secs),
         t / 3600,
         t % 3600 / 60,
         t % 60
@@ -539,8 +667,11 @@ fn now_rfc3339() -> Result<String, String> {
 
 /// Today's UTC date from the system clock (no date crate in this workspace).
 fn today() -> Result<String, String> {
-    let secs = now_secs()?;
-    // Civil-from-days (H. Hinnant).
+    Ok(civil_date(now_secs()?))
+}
+
+/// The UTC civil date of a Unix time (H. Hinnant's civil-from-days).
+fn civil_date(secs: i64) -> String {
     let z = secs.div_euclid(86_400) + 719_468;
     let era = z.div_euclid(146_097);
     let doe = z - era * 146_097;
@@ -550,7 +681,7 @@ fn today() -> Result<String, String> {
     let d = doy - (153 * mp + 2) / 5 + 1;
     let m = if mp < 10 { mp + 3 } else { mp - 9 };
     let y = yoe + era * 400 + i64::from(m <= 2);
-    Ok(format!("{y:04}-{m:02}-{d:02}"))
+    format!("{y:04}-{m:02}-{d:02}")
 }
 
 fn scaffold(id: &str, date: &str, title: &str) -> Value {
@@ -592,4 +723,45 @@ fn readme_template(id: &str, title: &str) -> String {
          ## Expected cost\n\nTODO: the derivation, with every input cited and every extrapolation marked as one.\n\n\
          ## What \"done\" means\n\nTODO: the stop condition, what lands in research/, and the independent check.\n"
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn civil_dates_and_one_clock_reading() {
+        assert_eq!(civil_date(0), "1970-01-01");
+        assert_eq!(civil_date(951_782_400), "2000-02-29");
+        assert_eq!(civil_date(1_792_077_870), "2026-10-15");
+        let t = now_rfc3339().unwrap();
+        assert!(
+            card::valid_date(&t[..10]) && t.ends_with("+00:00") && t.len() == 25,
+            "{t}"
+        );
+    }
+
+    #[test]
+    fn private_tempdirs_are_unpredictable_and_owner_only() {
+        use std::os::unix::fs::PermissionsExt;
+        let a = cairn::private_tempdir("t").unwrap();
+        let b = cairn::private_tempdir("t").unwrap();
+        assert_ne!(a, b);
+        assert_eq!(
+            std::fs::metadata(&a).unwrap().permissions().mode() & 0o777,
+            0o700
+        );
+        let _ = std::fs::remove_dir_all(&a);
+        let _ = std::fs::remove_dir_all(&b);
+    }
+
+    #[test]
+    fn node_urls() {
+        assert!(cairn::check_node("https://node.example", false).is_ok());
+        assert!(cairn::check_node("http://127.0.0.1:8080", true).is_ok());
+        assert!(cairn::check_node("http://127.0.0.1:8080", false).is_err());
+        assert!(cairn::check_node("http://127.0.0.1.evil.example", true).is_err());
+        assert!(cairn::check_node("http://localhost@evil.example", true).is_err());
+        assert!(cairn::check_node("-Ohttps://x", false).is_err());
+    }
 }

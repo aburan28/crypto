@@ -37,11 +37,11 @@ backlog/
 | `backlog list [--status S]...` | one line per card, highest funding first |
 | `backlog show <ID> [--shard K]` | the card, its blockers and shard `K`'s resolved command |
 | `backlog new <slug> [--title T] [--date D]` | scaffold a draft card |
-| `backlog validate [<ID>... \| --all] [--no-git]` | the rules below; exit 1 on any error (CI runs `--all`) |
+| `backlog validate [<ID>... \| --all] [--no-git] [--merged-into REF]` | the rules below; exit 1 on any error (CI runs `--all --merged-into origin/main`) |
 | `backlog cairn-publish <ID> --lab DIR --identity FILE` | the card into a lab as doc `backlog/<ID>` (fields `card`, `funding`, `status`) and its README/PROTOCOL as lab files; unchanged content is not re-signed; nothing else is created |
 | `backlog cairn-status <ID> --lab DIR` | per task: lease state, holder, contended/expired/released counts, run receipts |
-| `backlog cairn-found <ID> --lab DIR [--artifact F --lab-path P --claim C --holder H --identity I]` | the first-success stop rule: without `--artifact`, exit 3 if `found` is set (stop) and 0 if not; with it, run the card's checker on the artifact and, on accept only, record `found` in lab doc `backlog/<ID>` |
-| `backlog cairn-post <ID> [--confirm --node URL --identity FILE]` | an objective-mode card as a cairn objective funded with the card's funding; prints the draft and posts nothing without `--confirm` |
+| `backlog cairn-found <ID> --lab DIR [--lab-path P --claim C --holder H --identity I --checker-bin B]` | the first-success stop rule. Without `--lab-path`: exit 3 if `found` is set or conflicted (stop), 0 if unset, 2 on any error (a missing lab is an error, never "not found"). With it: fetch the artifact the lab holds at `P`, run the pinned checker `B` on those bytes, and on accept only record `found` in lab doc `backlog/<ID>` |
+| `backlog cairn-post <ID> [--confirm --node https://… --identity FILE] [--allow-local-http]` | an objective-mode card as a cairn objective funded with the card's funding; prints the draft and posts nothing without `--confirm` |
 
 `backlog_check_aux2t ARTIFACT.json` is the native checker of the P-192
 auxiliary-curve card (exit 0 accept, 1 reject, 2 bad input; one JSON verdict
@@ -63,9 +63,9 @@ One directory per experiment, id `XP-<YYYYMMDD>-<slug>` (the date is
 | `links` | `lead` (encyclopedia section or note), `notes`, `prs` |
 | `question` | one sentence |
 | `decision_value` | one paragraph: which result changes which decision. Required. A run whose outcome changes nothing is not worth its cost |
-| `protocol` | `{path, blob}`: `PROTOCOL.md` and its git blob id (`git hash-object PROTOCOL.md`) |
+| `protocol` | `{path, blob}`: `path` is `PROTOCOL.md` (in the card directory) or null; `blob` its git blob id (`git hash-object PROTOCOL.md`) |
 | `code` | `{repo, commit \| branch, build: [argv…]}` |
-| `resources` | `{cpus, ram_gb, disk_gb, gpu, est_core_hours, est_wall_hours, notes}`; the derivation is in README.md |
+| `resources` | `{cpus, ram_gb, disk_gb, gpu, est_core_hours, est_wall_hours, notes}`, all integers (or null for the estimates): cairn's values have no floats, so no card carries one; the derivation is in README.md |
 | `run` | `{argv, env, timeout_per_shard_s}`: no shell; placeholders `{shard} {seed_lo} {seed_hi} {out} {checkpoint}`, or a key every `shards.params.items[*].vars` defines |
 | `shards` | `{count, scheme: seed_range \| list \| single, params, stop: all \| first_success}`. `seed_range`: shard `k` covers `[seed_lo + k·range_size, seed_lo + (k+1)·range_size)`, bounds as decimal strings (exact past `2^64`) |
 | `checkpoint` | `{file, resume_flag}`: how a shard resumes; `file` is relative to `{out}` |
@@ -81,10 +81,21 @@ One directory per experiment, id `XP-<YYYYMMDD>-<slug>` (the date is
   ready, running or done; every link is typed, `problem:` files and `xp:` cards
   exist.
 - **Ready, running and done** need: a `PROTOCOL.md` whose git blob equals
-  `protocol.blob` *and* is in git's object database (frozen means committed);
-  a full 40-hex `code.commit`; `est_core_hours`; a checkpoint `file` and
-  `resume_flag`; a non-empty `outputs.verify`. Editing a frozen protocol fails
-  validation until a new blob is recorded, which is visible in review.
+  `protocol.blob`, and (unless `--no-git`) `HEAD:backlog/<ID>/PROTOCOL.md` is
+  that same blob, i.e. the frozen protocol is committed on the checked-out
+  commit; a full 40-hex `code.commit`; `est_core_hours`; a checkpoint `file`
+  and `resume_flag`; a non-empty `outputs.verify`. Editing a frozen protocol
+  fails validation until a new blob is recorded, which is visible in review.
+  Locally the commit is only checked to be 40-hex; CI runs
+  `backlog validate --all --merged-into origin/main`, which also requires it
+  to be an ancestor of `main` (a merged commit).
+- No floats anywhere (cairn has none); `abandoned` needs a `status_note`.
+- Every placeholder in `run.argv` and `outputs.verify` is known and resolves;
+  a checker's argv takes only `{artifact}`. A checker this repository knows
+  (`KNOWN_CHECKERS` in `src/bin/backlog/card.rs`) must carry its pin flags
+  with values (`backlog_check_aux2t --expect-t N`), so a claim is checked
+  against the card's parameters, not the artifact's; `--allow-test-prime`
+  appears only on draft cards.
 - Every placeholder in `run.argv` is known and resolves at the first and last
   shard; `{checkpoint}` needs `checkpoint.file`; a `seed_range` card's bounds
   do not overflow and agree with `seed_hi` when given; a `list` card has one
@@ -130,9 +141,10 @@ lower-funded one. The backlog uses the same number for both kinds of work.
 - **Who sets it.** The card's author proposes `units` and the rationale in
   the PR; the reviewer who approves and merges the PR approves the number.
   Changing it later is a PR too, because funding reorders everyone's work.
-- **Units** are relative. The seed cards span 131,072 to 1,000,000; propose a
-  new card's level against them. For an objective with piecework, each unit
-  of work pays `funding / piecework.units`, so keep `funding ≥ units`.
+- **Units** are relative integers (at most `i64::MAX`). The seed cards span
+  131,072 to 1,000,000; propose a new card's level against them. For an
+  objective with piecework the validator requires `funding ≥
+  piecework.units`; see "Runbook: an objective" for what a unit pays.
 
 ### What cairn does with it (read from its source, `aburan28/cairn`)
 
@@ -223,21 +235,47 @@ first verified witness) carries an available native `cairn.checker`. The rule:
 2. **A shard that finds a witness** writes it under its output directory
    (`{out}/found/…`); `cairn lab exec --publish runs/<ID>/shard-<k>` publishes
    it with the run receipt in one op.
-3. **The runner runs the checker** through
-   `backlog cairn-found <ID> --lab DIR --artifact <local file> --lab-path
-   runs/<ID>/shard-<k>/found/… --claim <lease id> --holder <name> --identity
-   <key>`. Only on the checker's accept does it set `found` =
-   `{artifact, artifact_sha256, verdict, claim, holder}`; a reject records
-   nothing and the search goes on.
+3. **The runner records it, before releasing** the lease:
+   `backlog cairn-found <ID> --lab DIR --lab-path runs/<ID>/shard-<k>/found/…
+   --claim <lease id> --holder <name> --identity <key> --checker-bin <path>`.
+   It refuses unless all of these hold:
+   - the local card validates, is `ready` or `running`, and equals the card
+     published in lab doc `backlog/<ID>` (`card` field);
+   - `--lab-path` is strictly below `runs/<ID>/` (no `.`/`..` components);
+   - `--claim`/`--holder` are the **live** holder of one of the card's tasks
+     in `cairn lab tasks` (after a re-claim the older live lease stays the
+     holder until it lapses; use the id `tasks` shows);
+   - the checker, run as the card's `cairn.checker.argv` with argv[0]
+     replaced by `--checker-bin` (the binary from the card's pinned build),
+     exits 0 with verdict `accept` on the bytes `cairn lab cat <lab-path>`
+     returns, written to a private temporary file (the local file is not
+     what is checked: the lab's copy is);
+   - a verdict made with `test_prime: true` is refused unless the card is a
+     draft.
+
+   Then it sets `found` = `{artifact, artifact_sha256, verdict, claim,
+   holder, task, checker_sha256}`; a reject records nothing and the search
+   goes on. The checker binary is identified by its SHA-256 in `found`, so a
+   reviewer can compare it with the pinned build.
 4. **It releases** the shard `completed` and syncs. `backlog cairn-status`
    prints the `found` record above the task table.
 
-The honest limit: an offline runner does not see `found` until it syncs, so
-it may keep searching after the answer exists. That wastes work; it never
-produces a wrong result, because `found` is set only on the checker's accept,
-and a second accepted witness is simply a second valid curve. Two runners
-that record `found` concurrently leave a visible conflict in the doc register
-(cairn keeps both); either value is a checked witness.
+The honest limits:
+
+- An offline runner does not see `found` until it syncs, so it may keep
+  searching after the answer exists. That wastes work; it never produces a
+  wrong result, because `found` is set only on the checker's accept.
+- Two runners that record `found` concurrently create a register conflict on
+  that doc field. cairn keeps both values, but `cairn lab doc backlog/<ID>`
+  does not show them reliably: 8.0.0 shows one display winner, 9.1.0 omits a
+  conflicted field. So `backlog cairn-found` and `cairn-status` read
+  `cairn lab conflicts --json` first: a conflicted `found` counts as found
+  (exit 3), and both commands print every concurrent value, each of which
+  passed the checker when it was written. `cairn lab resolve` (or a later
+  `doc set` naming both) settles it.
+- **Supported cairn:** 8.0.0 ≤ version < 10.0.0 (tested on 8.0.0 and 9.1.0);
+  the cairn commands refuse other versions, because the JSON shapes and
+  error texts they rely on are only known inside that range.
 
 ### Runbook: a lab task, offline
 
@@ -274,7 +312,19 @@ cairn work --node https://NODE --objective <OBJECTIVE-ID> --worker <name> -- <so
 
 `cairn work` asks the node for this worker's unit range each round, runs the
 solver, and commits and reveals what it prints; the pinned verifier decides
-each claim. `stop: first_success` cards end at the first accepted claim.
+each claim. `--node` must be `https://` (plain http only to
+127.0.0.1/localhost with `--allow-local-http`).
+
+What a piecework objective pays, read from cairn's schema: `unit_price =
+floor(reward / units)` for **every novel accepted claim**, until the pool is
+empty; it never settles as a whole, so it does **not** stop at the first
+success, and `reward mod units` is never paid out. With no `key`, the
+artifact itself is the unit, so for a witness search one paid unit is one
+distinct accepted witness (a curve), not a seed range: a witness checker
+cannot tell which seed range a curve came from. `piecework.units` only sizes
+the slices `work_assignment` hands out. A card wanting "pay once for the
+first witness" needs a non-piecework objective, which settles on its first
+accepted claim.
 
 ### Guarantees, and what they are not
 

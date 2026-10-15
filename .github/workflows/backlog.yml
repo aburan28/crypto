@@ -1,8 +1,15 @@
 name: backlog
 
-# backlog/README.md: every experiment card validates (`backlog validate --all`),
-# and the `backlog` binary's unit and integration tests pass. The cairn lab
-# tests skip here (no cairn on the runner) and say so. It runs no experiment.
+# backlog/README.md: every experiment card validates (`backlog validate --all`,
+# with ready cards' commits checked against origin/main), and the `backlog` and
+# `backlog_check_aux2t` binaries' unit and integration tests pass. The `lab`
+# job installs a pinned cairn so the lease, publish, found and conflict tests
+# run instead of skipping. It runs no experiment.
+#
+# The binaries link crypto_lib, so any change under src/ can break them; the
+# filters list what they use directly (src/bin/backlog*, src/hash/, src/lib.rs)
+# and the build configuration. Other library changes are compiled by the
+# repository's all-target Rust check.
 
 on:
   pull_request:
@@ -12,12 +19,13 @@ on:
       - 'src/bin/backlog.rs'
       - 'src/bin/backlog/**'
       - 'src/bin/backlog_check_aux2t.rs'
+      - 'src/hash/**'
+      - 'src/lib.rs'
       - 'tests/backlog_cli.rs'
-      - 'src/hash/sha1.rs'
       - '.github/workflows/backlog.yml'
       - 'Cargo.toml'
       - 'Cargo.lock'
-      - 'rust-toolchain.toml'
+      - 'rust-toolchain*'
       - '.cargo/**'
   push:
     branches: [main]
@@ -27,8 +35,14 @@ on:
       - 'src/bin/backlog.rs'
       - 'src/bin/backlog/**'
       - 'src/bin/backlog_check_aux2t.rs'
+      - 'src/hash/**'
+      - 'src/lib.rs'
       - 'tests/backlog_cli.rs'
       - '.github/workflows/backlog.yml'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain*'
+      - '.cargo/**'
   workflow_dispatch:
 
 permissions:
@@ -37,6 +51,11 @@ permissions:
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # cairn 9.1.0 (aburan28/cairn, release commit). A git commit id pins the
+  # exact source; `--locked` pins its dependency versions.
+  CAIRN_REV: b7f44d30d989e8e1ba7aa2a67d9ff8d2cea5db54
 
 jobs:
   validate:
@@ -70,9 +89,57 @@ jobs:
           toolchain: '1.98'
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --release --bin backlog --bin backlog_check_aux2t
-      - name: Every card validates
-        run: ./target/release/backlog validate --all
-      - name: Unit tests (card rules, placeholders, schema agreement, the native checker)
-        run: cargo test --release --bin backlog --bin backlog_check_aux2t
-      - name: Integration tests (cairn lab tests skip without cairn)
+      - name: Fetch main's history (no blobs) for the merged-commit check
+        run: git fetch --no-tags --filter=blob:none origin +refs/heads/main:refs/remotes/origin/main
+      - name: Every card validates; ready cards pin a commit on main
+        run: ./target/release/backlog validate --all --merged-into origin/main
+      - name: Unit and integration tests (cairn lab tests skip here, loudly; the lab job runs them)
+        run: cargo test --release --bin backlog --bin backlog_check_aux2t --test backlog_cli -- --nocapture
+
+  lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/scripts/
+            /Cargo.toml
+            /Cargo.lock
+            /build.rs
+            /.cargo/
+            /rust-toolchain*
+            /rustfmt.toml
+            /clippy.toml
+            /src/
+            /tests/
+            /examples/
+            /benches/
+            /experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs
+            /experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs
+            /backlog/
+            /problems/
+      - name: Materialize compile-time fixture inputs
+        run: node .github/scripts/ci-scope.mjs --materialize
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - name: Cache the pinned cairn
+        id: cairn-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/cairn
+          key: cairn-${{ env.CAIRN_REV }}-${{ runner.os }}
+      - name: Install the pinned cairn
+        if: steps.cairn-cache.outputs.cache-hit != 'true'
+        run: cargo install --locked --root ~/.local/cairn --git https://github.com/aburan28/cairn --rev "$CAIRN_REV" cairn
+      - name: cairn on PATH
+        run: |
+          echo "$HOME/.local/cairn/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/cairn/bin/cairn" version
+      - name: Integration tests with cairn (fail, not skip, if it is missing)
+        env:
+          BACKLOG_REQUIRE_CAIRN: '1'
         run: cargo test --release --test backlog_cli -- --nocapture

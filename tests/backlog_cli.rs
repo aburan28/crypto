@@ -239,7 +239,12 @@ fn have_cairn() -> bool {
         .map(|o| o.status.success())
         .unwrap_or(false);
     if !ok {
-        eprintln!("SKIPPED: `cairn` is not on PATH; the lab lease and publish tests need it (docs/CONDUCTOR.md: the cloud session hook installs it)");
+        // CI's lab job sets this, so a missing cairn there fails instead of skipping.
+        assert!(
+            std::env::var_os("BACKLOG_REQUIRE_CAIRN").is_none(),
+            "BACKLOG_REQUIRE_CAIRN is set but `cairn` is not on PATH"
+        );
+        eprintln!("SKIPPED: `cairn` is not on PATH; the lab lease, publish and found tests need it (docs/CONDUCTOR.md: the cloud session hook installs it; CI's lab job installs a pinned build)");
     }
     ok
 }
@@ -608,55 +613,146 @@ fn the_checker_binary_exit_codes() {
     let w = tmp("checker");
     let good = w.join("good.json");
     write_artifact(&good, 241, small_witness(241, 4), 4);
-    let out = run(Command::new(checker()).arg(&good).arg("--allow-test-prime"));
+    let chk = |args: &[&str]| Command::new(checker()).args(args).output().unwrap();
+    let g = good.to_str().unwrap();
+    let out = chk(&[g, "--expect-t", "4", "--allow-test-prime"]);
     assert_eq!(out.status.code(), Some(0));
     let v: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
     assert_eq!(v["verdict"], "accept");
-    // The same curve is the wrong prime for the real check.
-    let o = Command::new(checker()).arg(&good).output().unwrap();
-    assert_eq!(o.status.code(), Some(1));
-    assert!(String::from_utf8_lossy(&o.stdout).contains("P-192"));
-    // Wrong order.
-    let bad = w.join("bad.json");
-    write_artifact(&bad, 241, small_witness(241, 4), 5);
+    assert_eq!(v["test_prime"], true);
+    // --expect-t is required, and pins t.
+    assert_eq!(chk(&[g, "--allow-test-prime"]).status.code(), Some(2));
     assert_eq!(
-        Command::new(checker())
-            .arg(&bad)
-            .arg("--allow-test-prime")
-            .output()
-            .unwrap()
+        chk(&[g, "--expect-t", "5", "--allow-test-prime"])
             .status
             .code(),
         Some(1)
     );
-    // Malformed.
-    fs::write(w.join("junk.json"), "{not json").unwrap();
     assert_eq!(
-        Command::new(checker())
-            .arg(w.join("junk.json"))
-            .output()
-            .unwrap()
+        chk(&[g, "--expect-t", "x", "--allow-test-prime"])
             .status
             .code(),
         Some(2)
     );
+    // The same curve is the wrong prime for the real check.
+    let o = chk(&[g, "--expect-t", "4"]);
+    assert_eq!(o.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&o.stdout).contains("P-192"));
+    // Malformed.
+    fs::write(w.join("junk.json"), "{not json").unwrap();
     assert_eq!(
-        Command::new(checker()).output().unwrap().status.code(),
+        chk(&[w.join("junk.json").to_str().unwrap(), "--expect-t", "4"])
+            .status
+            .code(),
         Some(2)
     );
+    assert_eq!(chk(&[]).status.code(), Some(2));
+}
+
+/// Review regression (HIGH 1): a genuine point of order 2 over the P-192 prime,
+/// claimed with t = 1, is rejected by the card's own checker argv.
+#[test]
+fn the_p192_cards_checker_pins_t_48() {
+    let w = tmp("pin48");
+    let art = w.join("t1.json");
+    let p192 = "6277101735386680763835789423207666416083908700390324961279";
+    fs::write(
+        &art,
+        serde_json::json!({"p": p192, "a": "1", "b": "0", "Qx": "0", "Qy": "0", "t": 1})
+            .to_string(),
+    )
+    .unwrap();
+    let card: serde_json::Value = serde_json::from_str(
+        &fs::read_to_string(
+            repo().join("backlog/XP-20261015-p192-isogeny-aux-search-t48/card.json"),
+        )
+        .unwrap(),
+    )
+    .unwrap();
+    for field in ["/cairn/checker/argv", "/outputs/verify"] {
+        let argv: Vec<String> = card
+            .pointer(field)
+            .unwrap()
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|s| {
+                s.as_str()
+                    .unwrap()
+                    .replace("{artifact}", art.to_str().unwrap())
+                    .replace("{out}/found/artifact.json", art.to_str().unwrap())
+            })
+            .collect();
+        let out = Command::new(checker()).args(&argv[1..]).output().unwrap();
+        assert_eq!(out.status.code(), Some(1), "{field}: {}", stdout(&out));
+        assert!(
+            stdout(&out).contains("t = 1, but this check is for t = 48"),
+            "{}",
+            stdout(&out)
+        );
+    }
 }
 
 #[test]
-fn first_success_found_is_set_only_on_accept_and_stops_runners() {
-    if !have_cairn() {
-        return;
+fn ids_are_checked_on_every_subcommand() {
+    for args in [
+        vec!["show", "../etc"],
+        vec!["show", "XP-20261015-a/../b"],
+        vec!["validate", "XP-20261015-x/y"],
+        vec!["cairn-status", "../x", "--lab", "/nonexistent"],
+        vec!["cairn-found", "/abs", "--lab", "/nonexistent"],
+        vec!["cairn-post", "XP-2026-x"],
+    ] {
+        let o = Command::new(bin())
+            .arg("--root")
+            .arg(repo())
+            .args(&args)
+            .output()
+            .unwrap();
+        assert!(!o.status.success(), "{args:?}");
+        let text = format!("{}{}", stdout(&o), String::from_utf8_lossy(&o.stderr));
+        assert!(text.contains("is not a card id"), "{args:?}: {text}");
     }
-    let w = tmp("found");
-    let (a, _b, id1, _id2) = two_replicas(&w);
-    let lab = a.to_str().unwrap();
-    // A scratch card: the P-192 card's shape with the test checker.
-    let root = scratch_root("found-root");
-    let id = "XP-20261015-demo-found";
+}
+
+#[test]
+fn cairn_post_refuses_plain_http_nodes() {
+    let root = scratch_root("node");
+    objective_card(&root, "XP-20261015-demo-post");
+    for (node, extra, ok_until_identity) in [
+        ("http://example.com", vec![], false),
+        ("http://localhost:9", vec![], false),
+        ("ftp://x", vec![], false),
+        ("https://", vec![], false),
+        ("http://localhost:9", vec!["--allow-local-http"], true),
+        ("https://node.example", vec![], true),
+    ] {
+        let o = Command::new(bin())
+            .arg("--root")
+            .arg(&root)
+            .args([
+                "cairn-post",
+                "XP-20261015-demo-post",
+                "--confirm",
+                "--node",
+                node,
+            ])
+            .args(&extra)
+            .output()
+            .unwrap();
+        assert!(!o.status.success());
+        let err = String::from_utf8_lossy(&o.stderr).to_string();
+        assert_eq!(
+            err.contains("--confirm needs --identity"),
+            ok_until_identity,
+            "{node}: {err}"
+        );
+    }
+}
+
+/// A draft test card with the P-192 card's shape on a small prime: the
+/// checker argv carries --allow-test-prime and --expect-t 4.
+fn test_found_card(root: &Path, id: &str) -> PathBuf {
     let src = repo().join("backlog/XP-20261015-p192-isogeny-aux-search-t48");
     let dir = root.join("backlog").join(id);
     fs::create_dir_all(&dir).unwrap();
@@ -668,8 +764,101 @@ fn first_success_found_is_set_only_on_accept_and_stops_runners() {
     card["blocked_on"] = serde_json::json!([]);
     card["cairn"]["tasks"] = serde_json::json!([format!("{id}/shard-{{k}}")]);
     card["cairn"]["exec"]["publish"] = serde_json::json!(format!("runs/{id}"));
-    card["cairn"]["checker"]["argv"] = serde_json::json!([checker(), "{artifact}"]);
+    card["cairn"]["checker"]["argv"] = serde_json::json!([
+        "backlog_check_aux2t",
+        "{artifact}",
+        "--expect-t",
+        "4",
+        "--allow-test-prime"
+    ]);
+    card["outputs"]["verify"] = serde_json::json!([
+        "backlog_check_aux2t",
+        "{out}/found/artifact.json",
+        "--expect-t",
+        "4",
+        "--allow-test-prime"
+    ]);
     fs::write(dir.join("card.json"), card.to_string()).unwrap();
+    dir
+}
+
+#[test]
+fn the_stop_rule_fails_closed_on_a_missing_lab() {
+    if !have_cairn() {
+        return;
+    }
+    let o = Command::new(bin())
+        .arg("--root")
+        .arg(repo())
+        .args([
+            "cairn-found",
+            "XP-20261015-p192-isogeny-aux-search-t48",
+            "--lab",
+            "/nonexistent/lab",
+        ])
+        .output()
+        .unwrap();
+    assert_eq!(
+        o.status.code(),
+        Some(2),
+        "{}{}",
+        stdout(&o),
+        String::from_utf8_lossy(&o.stderr)
+    );
+    assert!(String::from_utf8_lossy(&o.stderr).contains("no lab at"));
+}
+
+#[test]
+fn every_seed_card_publishes_unchanged() {
+    if !have_cairn() {
+        return;
+    }
+    let w = tmp("publish-all");
+    let (a, _b, id1, _id2) = two_replicas(&w);
+    for entry in fs::read_dir(repo().join("backlog")).unwrap().flatten() {
+        let id = entry.file_name().to_string_lossy().to_string();
+        if !id.starts_with("XP-") {
+            continue;
+        }
+        let o = run(Command::new(bin())
+            .arg("--root")
+            .arg(repo())
+            .args(["cairn-publish", &id, "--lab"])
+            .arg(&a)
+            .arg("--identity")
+            .arg(&id1));
+        assert!(o.status.success(), "{id}");
+        let doc: serde_json::Value = serde_json::from_slice(
+            &cairn(&[
+                "lab",
+                "--lab",
+                a.to_str().unwrap(),
+                "doc",
+                &format!("backlog/{id}"),
+                "--json",
+            ])
+            .stdout,
+        )
+        .unwrap();
+        let local: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(entry.path().join("card.json")).unwrap())
+                .unwrap();
+        assert_eq!(doc["card"], local, "{id} round-trips through the lab");
+    }
+}
+
+#[test]
+fn first_success_found_is_set_only_on_a_checked_published_artifact() {
+    if !have_cairn() {
+        return;
+    }
+    let w = tmp("found");
+    let (a, _b, id1, _id2) = two_replicas(&w);
+    let lab = a.to_str().unwrap();
+    let ident = id1.to_str().unwrap();
+    let root = scratch_root("found-root");
+    let id = "XP-20261015-demo-found";
+    let dir = test_found_card(&root, id);
     let backlog = |args: &[&str]| {
         Command::new(bin())
             .arg("--root")
@@ -678,15 +867,16 @@ fn first_success_found_is_set_only_on_accept_and_stops_runners() {
             .output()
             .unwrap()
     };
+    let say = |o: &Output| format!("{}{}", stdout(o), String::from_utf8_lossy(&o.stderr));
 
     let none = backlog(&["cairn-found", id, "--lab", lab]);
-    assert_eq!(
-        none.status.code(),
-        Some(0),
-        "{}",
-        String::from_utf8_lossy(&none.stderr)
-    );
+    assert_eq!(none.status.code(), Some(0), "{}", say(&none));
     assert!(stdout(&none).contains("not found"));
+    assert!(
+        backlog(&["cairn-publish", id, "--lab", lab, "--identity", ident])
+            .status
+            .success()
+    );
 
     let task = format!("{id}/shard-7");
     let claim = stdout(&cairn(&[
@@ -700,53 +890,119 @@ fn first_success_found_is_set_only_on_accept_and_stops_runners() {
         "--ttl",
         "600",
         "--identity",
-        id1.to_str().unwrap(),
+        ident,
     ]));
     let claim_id = claim.split_whitespace().nth(1).unwrap().to_string();
-    let ident = id1.to_str().unwrap();
-    let lab_path = format!("runs/{id}/shard-7/found/artifact.json");
-    let record = |file: &Path| {
+    let put = |path: &str, file: &Path| {
+        assert!(cairn(&[
+            "lab",
+            "--lab",
+            lab,
+            "put",
+            path,
+            "--file",
+            file.to_str().unwrap(),
+            "--identity",
+            ident
+        ])
+        .status
+        .success());
+    };
+    let record = |lab_path: &str, claim: &str, holder: &str| {
         backlog(&[
             "cairn-found",
             id,
             "--lab",
             lab,
-            "--artifact",
-            file.to_str().unwrap(),
             "--lab-path",
-            &lab_path,
+            lab_path,
             "--claim",
-            &claim_id,
+            claim,
             "--holder",
-            "box-a",
+            holder,
             "--identity",
             ident,
-            "--checker-arg",
-            "--allow-test-prime",
+            "--checker-bin",
+            checker(),
+            "--allow-status",
         ])
     };
-    // A wrong claim records nothing.
-    let bad = w.join("bad.json");
-    write_artifact(&bad, 241, small_witness(241, 4), 5);
-    assert_eq!(record(&bad).status.code(), Some(1));
-    assert_eq!(
-        backlog(&["cairn-found", id, "--lab", lab]).status.code(),
-        Some(0)
-    );
-    // A checked witness sets `found`; from then on every runner is told to stop.
     let good = w.join("good.json");
     write_artifact(&good, 241, small_witness(241, 4), 4);
-    let ok = record(&good);
-    assert_eq!(
-        ok.status.code(),
-        Some(0),
-        "{}{}",
-        stdout(&ok),
-        String::from_utf8_lossy(&ok.stderr)
-    );
+    let bad = w.join("bad.json");
+    write_artifact(&bad, 241, small_witness(241, 4), 5);
+    let good_path = format!("runs/{id}/shard-7/found/artifact.json");
+    let bad_path = format!("runs/{id}/shard-7/found/wrong-t.json");
+    put(&good_path, &good);
+    put(&bad_path, &bad);
+
+    // The checker sees the lab's bytes: a wrong t records nothing.
+    assert_eq!(record(&bad_path, &claim_id, "box-a").status.code(), Some(1));
+    // Paths outside runs/<ID>/, a lease that is not live for that holder, a missing artifact: errors.
+    for (path, c, h) in [
+        (format!("runs/{id}-x/a.json"), claim_id.as_str(), "box-a"),
+        (format!("runs/{id}/../x/a.json"), claim_id.as_str(), "box-a"),
+        (
+            format!("backlog/{id}/README.md"),
+            claim_id.as_str(),
+            "box-a",
+        ),
+        (good_path.clone(), claim_id.as_str(), "box-b"),
+        (good_path.clone(), "sha256:00", "box-a"),
+        (
+            format!("runs/{id}/shard-7/found/absent.json"),
+            claim_id.as_str(),
+            "box-a",
+        ),
+    ] {
+        let o = record(&path, c, h);
+        assert_eq!(o.status.code(), Some(2), "{path} {c} {h}: {}", say(&o));
+    }
+    // Without --allow-status a draft card records nothing.
+    let o = backlog(&[
+        "cairn-found",
+        id,
+        "--lab",
+        lab,
+        "--lab-path",
+        &good_path,
+        "--claim",
+        &claim_id,
+        "--holder",
+        "box-a",
+        "--identity",
+        ident,
+        "--checker-bin",
+        checker(),
+    ]);
+    assert_eq!(o.status.code(), Some(2));
+    assert!(say(&o).contains("only a ready or running card"));
+    // A local card that differs from the published one is refused.
+    let card_file = dir.join("card.json");
+    let original = fs::read_to_string(&card_file).unwrap();
+    fs::write(
+        &card_file,
+        original.replace("\"--expect-t\",\"4\"", "\"--expect-t\",\"3\""),
+    )
+    .unwrap();
+    let o = record(&good_path, &claim_id, "box-a");
+    assert_eq!(o.status.code(), Some(2));
+    assert!(say(&o).contains("differs from doc"), "{}", say(&o));
+    fs::write(&card_file, &original).unwrap();
+
+    // The checked, published witness sets `found`; every runner then stops.
+    let ok = record(&good_path, &claim_id, "box-a");
+    assert_eq!(ok.status.code(), Some(0), "{}", say(&ok));
     let stop = backlog(&["cairn-found", id, "--lab", lab]);
     assert_eq!(stop.status.code(), Some(3));
-    assert!(stdout(&stop).contains("box-a") && stdout(&stop).contains("accept"));
+    let text = stdout(&stop);
+    assert!(
+        text.contains("box-a")
+            && text.contains("accept")
+            && text.contains("checker_sha256")
+            && text.contains(&task),
+        "{text}"
+    );
     assert!(cairn(&[
         "lab",
         "--lab",
@@ -770,6 +1026,111 @@ fn first_success_found_is_set_only_on_accept_and_stops_runners() {
             .any(|l| l.starts_with(&task) && l.contains("completed")),
         "{st}"
     );
-    // A second record is refused once found is set.
-    assert_eq!(record(&good).status.code(), Some(3));
+    assert_eq!(
+        record(&good_path, &claim_id, "box-a").status.code(),
+        Some(3)
+    );
+}
+
+/// Review regression (MEDIUM 2b): two replicas record `found` concurrently.
+/// cairn keeps both values as a register conflict; the stop rule must still
+/// read it as found.
+#[test]
+fn a_conflicted_found_still_stops_every_runner() {
+    if !have_cairn() {
+        return;
+    }
+    let w = tmp("conflict");
+    let (a, b, id1, id2) = two_replicas(&w);
+    let root = scratch_root("conflict-root");
+    let id = "XP-20261015-demo-conflict";
+    test_found_card(&root, id);
+    let doc = format!("backlog/{id}");
+    assert!(cairn(&[
+        "lab",
+        "--lab",
+        a.to_str().unwrap(),
+        "doc",
+        "set",
+        &doc,
+        "found",
+        r#"{"holder":"box-a"}"#,
+        "--identity",
+        id1.to_str().unwrap()
+    ])
+    .status
+    .success());
+    assert!(cairn(&[
+        "lab",
+        "--lab",
+        b.to_str().unwrap(),
+        "doc",
+        "set",
+        &doc,
+        "found",
+        r#"{"holder":"box-b"}"#,
+        "--identity",
+        id2.to_str().unwrap()
+    ])
+    .status
+    .success());
+    assert!(cairn(&[
+        "lab",
+        "--lab",
+        a.to_str().unwrap(),
+        "sync",
+        "--dir",
+        b.to_str().unwrap()
+    ])
+    .status
+    .success());
+    for lab in [&a, &b] {
+        let o = Command::new(bin())
+            .arg("--root")
+            .arg(&root)
+            .args(["cairn-found", id, "--lab"])
+            .arg(lab)
+            .output()
+            .unwrap();
+        assert_eq!(o.status.code(), Some(3), "{}", stdout(&o));
+        let text = stdout(&o);
+        assert!(
+            text.contains("conflict") && text.contains("box-a") && text.contains("box-b"),
+            "{text}"
+        );
+        let st = stdout(
+            &Command::new(bin())
+                .arg("--root")
+                .arg(&root)
+                .args(["cairn-status", id, "--lab"])
+                .arg(lab)
+                .output()
+                .unwrap(),
+        );
+        assert!(st.contains("FOUND (conflict: 2"), "{st}");
+    }
+}
+
+/// Review regression (MEDIUM 2): a cairn outside the supported range is refused.
+#[test]
+fn an_unsupported_cairn_version_is_refused() {
+    use std::os::unix::fs::PermissionsExt;
+    let w = tmp("version");
+    let fake = w.join("cairn");
+    fs::write(&fake, "#!/bin/sh\necho 'cairn 7.9.0'\n").unwrap();
+    fs::set_permissions(&fake, fs::Permissions::from_mode(0o755)).unwrap();
+    let o = Command::new(bin())
+        .env("CAIRN", &fake)
+        .arg("--root")
+        .arg(repo())
+        .args([
+            "cairn-found",
+            "XP-20261015-p192-isogeny-aux-search-t48",
+            "--lab",
+        ])
+        .arg(&w)
+        .output()
+        .unwrap();
+    assert_eq!(o.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&o.stderr).contains("outside the supported range"));
 }

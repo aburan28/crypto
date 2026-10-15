@@ -11,8 +11,45 @@ fn cairn() -> String {
     std::env::var("CAIRN").unwrap_or_else(|_| "cairn".to_string())
 }
 
+/// The cairn versions this tool is tested against: 8.0.0 (the cloud image)
+/// and 9.1.0 (the source it was reviewed against). Inside this range the
+/// commands and JSON shapes used here are the same; outside it, refuse.
+pub const SUPPORTED: ((u64, u64, u64), (u64, u64, u64)) = ((8, 0, 0), (10, 0, 0));
+
+/// `cairn version`'s first line, checked against [`SUPPORTED`].
+pub fn check_version() -> Result<String, String> {
+    let out = Command::new(cairn()).arg("version").output().map_err(|e| {
+        format!(
+            "cannot run {}: {e} (is cairn on PATH? set CAIRN to its path)",
+            cairn()
+        )
+    })?;
+    let text = String::from_utf8_lossy(&out.stdout).into_owned();
+    let first = text.lines().next().unwrap_or("").trim().to_string();
+    let ver = first
+        .strip_prefix("cairn ")
+        .and_then(|v| {
+            let mut it = v.split('.').map(|x| x.parse::<u64>().ok());
+            Some((it.next()??, it.next()??, it.next()??))
+        })
+        .ok_or_else(|| format!("cannot read the cairn version from {first:?}"))?;
+    let (lo, hi) = SUPPORTED;
+    if ver < lo || ver >= hi {
+        return Err(format!(
+            "{first} is outside the supported range {}.{}.{} <= v < {}.{}.{} (backlog/README.md)",
+            lo.0, lo.1, lo.2, hi.0, hi.1, hi.2
+        ));
+    }
+    Ok(first)
+}
+
 /// Run `cairn lab --lab DIR <args>` and return stdout, or the command's error.
 pub fn lab(dir: &Path, args: &[&str]) -> Result<String, String> {
+    lab_bytes(dir, args).map(|b| String::from_utf8_lossy(&b).into_owned())
+}
+
+/// The same, with stdout as raw bytes (for `cat`).
+pub fn lab_bytes(dir: &Path, args: &[&str]) -> Result<Vec<u8>, String> {
     let out = Command::new(cairn())
         .arg("lab")
         .arg("--lab")
@@ -26,7 +63,7 @@ pub fn lab(dir: &Path, args: &[&str]) -> Result<String, String> {
             )
         })?;
     if out.status.success() {
-        Ok(String::from_utf8_lossy(&out.stdout).into_owned())
+        Ok(out.stdout)
     } else {
         Err(format!(
             "cairn lab {} exited {}: {}",
@@ -58,12 +95,8 @@ pub fn publish(
 ) -> Result<Published, String> {
     let mut done = Published::default();
     let doc = format!("backlog/{id}");
-    // A doc nobody has written yet answers "not found": publish creates it.
-    let current: Value = match lab(lab_dir, &["doc", &doc, "--json"]) {
-        Ok(text) => serde_json::from_str(&text).unwrap_or(Value::Null),
-        Err(e) if e.contains("not found") => Value::Null,
-        Err(e) => return Err(e),
-    };
+    // A doc nobody has written yet: publish creates it.
+    let current = doc_get(lab_dir, &doc)?;
     let ident = identity.to_string_lossy().into_owned();
     if current.get("card") == Some(card) {
         done.unchanged.push(format!("doc {doc}.card"));
@@ -255,6 +288,11 @@ pub fn objective_draft(card: &Value, created_at: &str) -> Result<Value, String> 
         .pointer("/funding/units")
         .and_then(Value::as_u64)
         .ok_or("cairn.funding.units is missing")?;
+    if reward > i64::MAX as u64 {
+        return Err(format!(
+            "funding {reward} exceeds i64::MAX, the largest reward cairn records"
+        ));
+    }
     let title = card.get("title").and_then(Value::as_str).unwrap_or("");
     let question = card.get("question").and_then(Value::as_str).unwrap_or("");
     let statement = c
@@ -273,6 +311,10 @@ pub fn objective_draft(card: &Value, created_at: &str) -> Result<Value, String> 
     if let Some(schema) = c.pointer("/checker/artifact_schema") {
         draft["artifact_schema"] = schema.clone();
     }
+    // Piecework pays unit_price = floor(reward / units) for every *novel*
+    // accepted claim; with no `key`, the artifact itself is the unit, so for a
+    // witness search one unit is one distinct witness. reward mod units is
+    // never paid out. `units` sizes `work_assignment`'s slices.
     if let Some(units) = c.pointer("/piecework/units").and_then(Value::as_u64) {
         let price = reward / units;
         if price == 0 {
@@ -287,6 +329,43 @@ pub fn objective_draft(card: &Value, created_at: &str) -> Result<Value, String> 
 
 /// Sign the draft with `cairn sign-objective` and send it to a node's
 /// `POST /submit?kind=objective` (curl). Returns the node's answer.
+/// A node URL `cairn-post` may send to: `https://…`, or plain http to
+/// 127.0.0.1 / localhost only when `allow_local_http` (tests, a local node).
+pub fn check_node(node: &str, allow_local_http: bool) -> Result<(), String> {
+    if let Some(rest) = node.strip_prefix("https://") {
+        if !rest.is_empty() && !rest.starts_with('/') {
+            return Ok(());
+        }
+    }
+    if let Some(rest) = node.strip_prefix("http://") {
+        let host = rest.split(['/', ':']).next().unwrap_or("");
+        if allow_local_http && (host == "127.0.0.1" || host == "localhost") {
+            return Ok(());
+        }
+    }
+    Err(format!(
+        "--node {node:?}: an objective is funded and signed, so it goes over https only \
+         (plain http to 127.0.0.1/localhost with --allow-local-http)"
+    ))
+}
+
+/// A fresh directory only this user can read, with an unpredictable name
+/// (`mkdtemp(3)`). The caller removes it.
+pub fn private_tempdir(tag: &str) -> Result<std::path::PathBuf, String> {
+    let template = std::env::temp_dir().join(format!("backlog-{tag}-XXXXXX"));
+    let mut bytes = template.to_string_lossy().into_owned().into_bytes();
+    bytes.push(0);
+    // SAFETY: `bytes` is a NUL-terminated, writable buffer that mkdtemp fills in place.
+    let ptr = unsafe { libc::mkdtemp(bytes.as_mut_ptr() as *mut libc::c_char) };
+    if ptr.is_null() {
+        return Err(format!("mkdtemp: {}", std::io::Error::last_os_error()));
+    }
+    bytes.pop();
+    Ok(std::path::PathBuf::from(
+        String::from_utf8_lossy(&bytes).into_owned(),
+    ))
+}
+
 pub fn post(draft: &Value, node: &str, identity: &Path, scratch: &Path) -> Result<String, String> {
     let draft_file = scratch.join("objective.draft.json");
     std::fs::write(
@@ -321,6 +400,7 @@ pub fn post(draft: &Value, node: &str, identity: &Path, scratch: &Path) -> Resul
             "--data-binary",
         ])
         .arg(format!("@{}", signed_file.display()))
+        .arg("--url")
         .arg(&url)
         .output()
         .map_err(|e| format!("cannot run curl: {e}"))?;
@@ -335,13 +415,70 @@ pub fn post(draft: &Value, node: &str, identity: &Path, scratch: &Path) -> Resul
     }
 }
 
-/// The fields of lab doc `doc`, or `Null` when nobody has written it.
+/// The fields of lab doc `doc`, or `Null` when nobody has written it. Only
+/// cairn's exact "not found: doc <name>" means empty; any other failure (no
+/// lab at that path, a bad identity, an unreadable store) is an error, so a
+/// stop rule built on this cannot fail open.
 pub fn doc_get(lab_dir: &Path, doc: &str) -> Result<Value, String> {
     match lab(lab_dir, &["doc", doc, "--json"]) {
         Ok(text) => serde_json::from_str(&text).map_err(|e| format!("cairn lab doc --json: {e}")),
-        Err(e) if e.contains("not found") => Ok(Value::Null),
+        Err(e)
+            if e.trim_end()
+                .ends_with(&format!("cairn lab: not found: doc {doc}")) =>
+        {
+            Ok(Value::Null)
+        }
         Err(e) => Err(e),
     }
+}
+
+/// What a lab says about one doc field: unset, one value, or concurrent
+/// distinct values (a register conflict). cairn 8.0 shows a display winner
+/// for a conflicted field and 9.1 omits it, so conflicts are read from
+/// `cairn lab conflicts --json`, which both list.
+#[derive(Debug, PartialEq)]
+pub enum Field {
+    Unset,
+    One(Value),
+    Conflict(Vec<Value>),
+}
+
+pub fn doc_field(lab_dir: &Path, doc: &str, key: &str) -> Result<Field, String> {
+    let conflicts: Value = serde_json::from_str(&lab(lab_dir, &["conflicts", "--json"])?)
+        .map_err(|e| format!("cairn lab conflicts --json is not JSON: {e}"))?;
+    if let Some(c) = conflicts.as_array().and_then(|a| {
+        a.iter().find(|c| {
+            c.get("kind").and_then(Value::as_str) == Some("field")
+                && c.get("doc").and_then(Value::as_str) == Some(doc)
+                && c.get("key").and_then(Value::as_str) == Some(key)
+        })
+    }) {
+        let values = c
+            .get("values")
+            .and_then(Value::as_array)
+            .map(|vs| vs.iter().filter_map(|v| v.get("value").cloned()).collect())
+            .unwrap_or_default();
+        return Ok(Field::Conflict(values));
+    }
+    Ok(match doc_get(lab_dir, doc)?.get(key) {
+        Some(v) if !v.is_null() => Field::One(v.clone()),
+        _ => Field::Unset,
+    })
+}
+
+/// The live holder `{claim, holder}` of `task`, from `cairn lab tasks --json`.
+pub fn live_holder(lab_dir: &Path, task: &str) -> Result<Option<(String, String)>, String> {
+    let leases: Value = serde_json::from_str(&lab(lab_dir, &["tasks", "--json"])?)
+        .map_err(|e| format!("cairn lab tasks --json is not JSON: {e}"))?;
+    Ok(leases
+        .get(task)
+        .and_then(|l| l.get("holder"))
+        .and_then(|h| {
+            Some((
+                h.get("claim")?.as_str()?.to_string(),
+                h.get("holder")?.as_str()?.to_string(),
+            ))
+        }))
 }
 
 /// Set one field of a lab doc to a JSON value.
@@ -368,19 +505,19 @@ pub fn doc_set(
     .map(|_| ())
 }
 
-/// Every task in the lab whose name starts with `prefix`, in shard order.
-pub fn task_keys(lab_dir: &Path, prefix: &str) -> Result<Vec<String>, String> {
+/// Every task in the lab that is exactly one of card `id`'s shards
+/// (`<id>/shard-<k>`, k a canonical index below `count`), in shard order.
+pub fn task_keys(lab_dir: &Path, id: &str, count: u64) -> Result<Vec<String>, String> {
     let leases: Value = serde_json::from_str(&lab(lab_dir, &["tasks", "--json"])?)
         .map_err(|e| format!("cairn lab tasks --json is not JSON: {e}"))?;
-    let mut keys: Vec<String> = leases
+    let mut keys: Vec<(u64, String)> = leases
         .as_object()
         .map(|m| {
             m.keys()
-                .filter(|k| k.starts_with(prefix))
-                .cloned()
+                .filter_map(|k| crate::card::task_shard(id, count, k).map(|i| (i, k.clone())))
                 .collect()
         })
         .unwrap_or_default();
-    keys.sort_by_key(|k| (k.len(), k.clone()));
-    Ok(keys)
+    keys.sort();
+    Ok(keys.into_iter().map(|(_, k)| k).collect())
 }
