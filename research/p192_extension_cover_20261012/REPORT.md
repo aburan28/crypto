@@ -255,6 +255,14 @@ support-versus-uniform sample estimates the ++ cell hit-rate multiplier
 at 1.048 and the balanced four-cell multiplier at about 1.002; these
 exploratory estimates do not resolve a useful conditional enrichment.
 
+The [signed short-support screen](reports/run-20261015T2316Z/REPORT.md)
+extends that census to all positive and negated supports of lengths one,
+two, and three. Its 12 zero-target and support-intersection cells are
+empty, so no signed relation row of this declared shape arises on the
+141-class base. Both integer-field and Sage group laws replay the
+support sets; longer supports and known-scalar target overlap remain
+separate collector measurements.
+
 ## Reproduction
 
 From this repository's root:

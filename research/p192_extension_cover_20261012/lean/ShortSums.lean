@@ -27,7 +27,24 @@ theorem four_sum_collision_eliminates_fresh
   rw [hsecond] at hadaptive
   convert hadaptive using 1 <;> abel
 
+/-- Equal short sums give a homogeneous relation row, independent of
+    the two list lengths. Concrete support intersections are checked separately. -/
+theorem same_sign_lists_relation (left right : List K)
+    (h : left.sum = right.sum) : left.sum - right.sum = 0 := by
+  rw [h]
+  abel
+
+/-- Opposite short sums give a homogeneous signed relation row, including
+    the one-, two-, and three-term combinations used by the finite screen. -/
+theorem opposite_sign_lists_relation (left right : List K)
+    (h : left.sum = -right.sum) : left.sum + right.sum = 0 := by
+  rw [h]
+  abel
+
 end P192ExtensionCover
 
 #print axioms P192ExtensionCover.two_sum_collision_eliminates_fresh
 #print axioms P192ExtensionCover.four_sum_collision_eliminates_fresh
+
+#print axioms P192ExtensionCover.same_sign_lists_relation
+#print axioms P192ExtensionCover.opposite_sign_lists_relation
