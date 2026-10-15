@@ -646,6 +646,7 @@
       "total_muls": 1397163419
     }
   ],
+  "handover_paired_targets": 24,
   "handover_tau_frame": [
     {
       "c": 1213000000000.0,
@@ -660,15 +661,15 @@
       "solve": "C8, five unknowns"
     },
     {
-      "c": 1419924973.5,
-      "nstar_bits": 118.94580346796158,
-      "ratio": 854.2704879751874,
+      "c": 1420034974.5,
+      "nstar_bits": 118.94625051059649,
+      "ratio": 854.2043131205992,
       "solve": "w, four weighted unknowns"
     },
     {
-      "c": 1420059856.5,
-      "nstar_bits": 118.94635162591874,
-      "ratio": 854.189345926349,
+      "c": 1420248692.5,
+      "nstar_bits": 118.94711895878119,
+      "ratio": 854.0757730709898,
       "solve": "w + lift-back"
     }
   ],

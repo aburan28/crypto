@@ -76,11 +76,22 @@ On 2-torsion curves the weighted solve moves the $tau_T$ handover from $2^157.9$
 
 Past the handover the method tends to $0.341 times$ the negation walk, and $r_infinity$ is unchanged. The figure rests on the exponents $n^(1\/4)$ and $n^(1\/2)$, and on a $C$ that is flat at $p <= 4093$. No $k = 4$ run below rho exists.
 
+== Review fixes and re-run
+
+The solve now refuses to report "solved" when an eigenspace does not resolve to verified rational points. It reruns one degree higher, up to 28, and otherwise reports unsolved. The handover medians now use one paired set of 24 targets.
+
+All registered cells were re-run with the fixed binary (`raw/v2_*.jsonl`):
+- *Outcomes:* no outcome changed on any of the 84 rows.
+- *Costs:* one $C_w$ moved, by $-3.3 dot 10^5$ ($p = 17$, target 5). Target 4 at $p = 17$ is still unsolved.
+- *Handover:* the figures stay at $2^118.9$ (w) and $2^135.6$ (C8).
+
+Arm w charges the quartic split in the lift-back rather than in $C_w$. That moves at most $2 dot 10^(-4)$ of $C_w$.
+
 == Limits
 
 - The plain arm was not paired on the same targets; it is over the cap.
 - No relation phase or linear algebra was run.
 - The degenerate targets' cause is unknown.
-- Unit tests: 11 of 11 pass after a test-only fix. The old test planted a zero sum at $p = 13$; the test now uses $p = 29$.
+- Unit tests: 12 of 12 pass (after a test-only fix and the resolution test). The old test planted a zero sum at $p = 13$; the test now uses $p = 29$.
 - Recorded $C_w$ values were reproduced exactly from a private-target rebuild after merging main.
 - No identity certificate was produced.

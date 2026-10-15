@@ -80,7 +80,7 @@ target at `p ≥ 29`, and on 3 of 5 at `p = 17` (§3).
   planted quadruple: 41 of 42 for arm w, 23 of 24 for C8. The exception is
   the degenerate target below.
 
-## 3. Results (measured unless marked; `summary.txt`, `summary.json`)
+## 3. Results (measured unless marked; first run `summary.txt`, `summary.json`; re-run `v2_summary.txt`, `v2_summary.json`, identical to the precision shown, see "Review fixes")
 
 Units: `F_p` multiplications per solve, counted by `gaudry_quartic`'s
 convention. That is the unit of `C₄ = 1.213·10¹²`. Arm w's figures include
@@ -232,7 +232,7 @@ That is a measured tendency, not a proof.
   C8's dimension-517 target.
 - The module's unit tests run once the coordinator adds the missing fixtures
   to the sparse checkout. `cargo test --release --lib -- d4_weighted
-  gaudry_quartic` then passes, 11 of 11.
+  gaudry_quartic` then passes, 11 of 11 (12 of 12 with the resolution test added in the review fixes).
   - The first version of the small-field test planted `P₀ + P₁ + P₂ − P₃`
     at `p = 13` (instance seed 2). On that instance this sum is `O`, so the
     test panicked before any solve ran.
@@ -245,6 +245,69 @@ That is a measured tendency, not a proof.
     unchanged (commit after `87de2fa83`).
 - No `identity.certificate/v1` was produced for the Bézout count. It is
   derived in PROTOCOL §1 and confirmed by the measured quotient dimensions.
+
+## Review fixes and re-run (v2, PR #1895)
+
+An independent review found no error in the recorded results. It flagged
+the following, all fixed in commit `746dae63f`:
+
+1. **Unresolved eigenspaces could be reported as solved.** Before the fix,
+   a kernel vector of `M_π` that failed extraction or verification was
+   skipped, and the outcome stayed "solved". The same happened if an
+   eigenspace stayed above dimension 1 after splitting by `σ₁`, `σ₂`, `σ₃`.
+   On a spurious quotient this could lose a root silently.
+   - Now the split keeps each eigenvalue's vectors as a group.
+   - Any group left above dimension 1, and any vector with no
+     `1`-coordinate, the wrong `π`, or failing the system, makes the attempt
+     *unresolved*. The solve then reruns one degree higher, up to 28, and
+     otherwise reports unsolved, never a partial set.
+   - A unit test covers each refusal: `extraction_refuses_unresolved_eigenspaces`.
+2. **The handover medians pooled different target sets.** They now use one
+   paired set: `p = 269`, `1033`, `4093`, seed 1, solved by both arms, 24
+   targets.
+3. **Degenerate eigenspaces were double-counted across a rerun.** They are
+   now counted for the last attempt only, and reruns are counted as
+   "degree > 26".
+4. **An unsolved arm could compare equal to the ground truth.** It now never
+   does, even when the truth is empty.
+
+**Re-run.** Every registered cell was re-run with the fixed binary,
+09:53Z–10:55Z: 84 rows with both arms where registered, written to
+`raw/v2_*.jsonl`. The first run's `raw/{tiny,measured,w_only}.jsonl` are
+kept unchanged.
+
+**What changed: no outcome on any row.** Compared field by field (solved
+flag, degree used, rational solutions, decompositions, equality with brute
+force, meet in the middle and C8, outcome):
+- The resolution check never fired, including on the `p = 17` targets with
+  quotient dimension 510 and 511.
+- `p = 17`, target 4 is still the one unsolved target ("border
+  unreachable", dimension 514).
+- The one number that moved is `C_w` at `p = 17`, target 5: `2,543,011,938`
+  became `2,542,682,203` (`−3.3·10⁵`). The per-group split does slightly
+  less work than splitting the whole kernel twice.
+- Every `C₈` value is identical.
+- W2's accounting is unchanged: 101 of 102.
+
+**The handover on the paired set:** `C_w` median `1.420·10⁹` (`854.2×`),
+C8 `2.555·10¹⁰` (`47.5×`). So `n*` stays `2^{118.9}` and `2^{135.6}`;
+`w + lift-back` is `854.1×`, previously `854.2×`.
+
+The controls (generic systems and the invariance check) were not re-run.
+The generic systems solved without an unresolved eigenspace in the first
+run.
+
+**Accounting notes.**
+- *Split charge.* PROTOCOL §5 lists the split in `C_w`, as C8 charges it.
+  Arm w charges the split inside the lift-back `L_w` instead. That is a
+  deviation from the protocol. Its size is bounded by `L_w ≤ 2.8·10⁵`, at
+  most `2·10⁻⁴` of `C_w`, so no ratio moves at the reported precision.
+- *Not counted, in either arm, as in `gaudry_quartic`:*
+  - `F_p` inversions inside elimination, triangularisation and extraction;
+  - the triangularisation's scaling factor;
+  - the per-vector extraction products.
+
+  Together these are about `10⁻⁶` of `C`.
 
 ## Cross-check after merging `main`
 
@@ -272,7 +335,7 @@ not for `C₄`, so they are not comparable with §5.
   characteristic polynomial and eigenvectors for each arm.
 - [`figures/handover.svg`](figures/handover.svg): `n*` in E18's frame.
 - Source: [`figures/plot.py`](figures/plot.py), which plots only, from
-  `raw/*.jsonl` and `summary.json`.
+  `raw/v2_*.jsonl` and `v2_summary.json` (`PREFIX=""` draws the first run).
 
 ## Reproduce
 
@@ -283,6 +346,8 @@ cargo build --release --example d4_weighted_s5 --example d4_weighted_s5_summary
 # the registered cells, in order (raw/ is append-only)
 sh research/d4_symmetrised_s5_20261015/raw/run_all.sh   # paths inside point at this lane's checkout
 target/release/examples/d4_weighted_s5_summary research/d4_symmetrised_s5_20261015/raw > summary.txt
+# the re-run after the review fixes (binary at 746dae63f): raw/run_v2.sh, then
+target/release/examples/d4_weighted_s5_summary research/d4_symmetrised_s5_20261015/raw --prefix v2_ > v2_summary.txt
 python figures/plot.py
 ```
 

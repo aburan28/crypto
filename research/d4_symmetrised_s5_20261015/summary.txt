@@ -12,12 +12,13 @@
 | 4093 | 2 | 12 | 12 | 12 | 0 | 1.424e9 (1.370e9–1.505e9) | 1.30e5 (2.84e5) | 2.01e-4 | — | — | 852 (806–885) | 23 | 7 / 6 / 48 | 48 | 0/0 | 12/12 | 0/0 | 6/6 / 0/0 |
 
 Handover in E18's τ_T frame (derived; extrapolation): n* = 157.9 − 4·log2(1.213e12 / C)
-| solve | C (median, measured sizes) | C4_plain / C | n* (bits) |
+Paired set: p ∈ {269, 1033, 4093}, seed 1, solved by both arms: 24 targets.
+| solve | C (median, paired set) | C4_plain / C | n* (bits) |
 |:--|--:|--:|--:|
 | plain S₄ form (quoted) | 1.213e12 | 1.0 | 157.9 |
 | C8, five unknowns | 2.555e10 | 47.5 | 135.6 |
-| w, four weighted unknowns | 1.420e9 | 854.3 | 118.9 |
-| w + lift-back | 1.420e9 | 854.2 | 118.9 |
+| w, four weighted unknowns | 1.420e9 | 854.2 | 118.9 |
+| w + lift-back | 1.420e9 | 854.1 | 118.9 |
 
 Controls:
 {"mode":"invariance_control","p":13,"seed":1,"true_c_in_span":true,"wrong_c":11,"wrong_c_error":"H is not in the span of the D₄ invariants (check point 0, coefficient Y_R^0)","wrong_c_in_span":false}

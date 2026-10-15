@@ -16,6 +16,10 @@ import matplotlib.pyplot as plt
 HERE = Path(__file__).resolve().parent
 STUDY = HERE.parent
 RAW = STUDY / "raw"
+# The figures draw the re-run after the eigenspace-resolution fix (v2_*);
+# PREFIX="" draws the first run.
+import os
+PREFIX = os.environ.get("PREFIX", "v2_")
 
 plt.rcParams.update({"font.size": 9, "svg.fonttype": "none"})
 C_W, C_C8, C_PLAIN, C_GEN = "#1f6feb", "#d1495b", "#555555", "#2a9d8f"
@@ -28,9 +32,9 @@ def rows(name):
     return [json.loads(l) for l in p.read_text().splitlines() if l.strip()]
 
 
-data = rows("tiny.jsonl") + rows("measured.jsonl") + rows("w_only.jsonl")
-controls = rows("controls.jsonl")
-summary = json.loads((STUDY / "summary.json").read_text())
+data = rows(PREFIX + "tiny.jsonl") + rows(PREFIX + "measured.jsonl") + rows(PREFIX + "w_only.jsonl")
+controls = rows("controls.jsonl")  # not re-run: generic systems and the invariance check
+summary = json.loads((STUDY / (PREFIX + "summary.json")).read_text())
 ps = sorted({r["p"] for r in data})
 xpos = {p: i for i, p in enumerate(ps)}
 
@@ -101,7 +105,7 @@ fig.savefig(HERE / "handover.png", dpi=150)
 fig, ax = plt.subplots(figsize=(7.2, 3.0))
 phases = [("echelon_muls", "elimination"), ("nf_muls", "normal forms"),
           ("charpoly_muls", "char. poly."), ("eigenvector_muls", "eigenvectors")]
-picked = [r for r in rows("measured.jsonl")
+picked = [r for r in rows(PREFIX + "measured.jsonl")
           if r["target"] == 1 and r.get("c8_solved") and r["w_solved"]]
 width = 0.8 / max(1, 2 * len(picked))
 k = 0
