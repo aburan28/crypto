@@ -472,6 +472,34 @@ targets = 8, seed = 24269, node budget = 50000, SAT conflict budget = 2000000, t
         self.assertEqual(result["status"], "FAIL")
         self.assertIn("ffd_or_degree_of_regularity", result["missing_stage_fields"])
 
+    def test_parse_semaev_decomp_bench_stdout(self) -> None:
+        sample = """
+  ── deciding one target that does NOT decompose ──────────────────
+    l    n        triples  triples/gen  triples/1wd  pairs+solve   speedup
+    5   15           5984       0.025s       0.001s       0.001s      1.6x
+    8   24        2829056      14.299s       0.607s       0.068s      8.9x
+"""
+        parsed = lab.parse_semaev_decomp_bench_stdout(sample)
+        self.assertEqual(len(parsed["ladder"]), 2)
+        self.assertEqual(parsed["ladder"][-1]["l"], 8)
+        self.assertEqual(parsed["ladder"][-1]["pairs_s"], 0.068)
+        self.assertEqual(parsed["ladder"][-1]["speedup_vs_triples"], 8.9)
+
+    def test_parse_j0_known_answer_stdout(self) -> None:
+        sample = (
+            "curve=j0-bench-16bit p_bits≈16 n=65521 orbits=40\n"
+            '{"bits":16,"curve":"j0-bench-16bit","ic_ms":12.5,"ic_ok":true,'
+            '"ic_matches_truth":true,"rho_ms":1.25,"rho_ok":true,'
+            '"ic_agrees_rho":true,"target_orbits":40,"max_trials":200000,'
+            '"rho_steps":65536,"claim_boundary":"synthetic known-answer j=0 IC vs rho"}\n'
+        )
+        parsed = lab.parse_j0_known_answer_stdout(sample)
+        self.assertEqual(parsed["bits"], 16)
+        self.assertTrue(parsed["ic_ok"])
+        self.assertTrue(parsed["rho_ok"])
+        self.assertTrue(parsed["ic_agrees_rho"])
+        self.assertEqual(parsed["ic_ms"], 12.5)
+
 
 class HelperTests(unittest.TestCase):
     def test_nested_collection_is_rejected_and_precomputation_is_charged_once(self) -> None:

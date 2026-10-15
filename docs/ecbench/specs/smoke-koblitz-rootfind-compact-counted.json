@@ -1,0 +1,35 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "cycle-5: compact-orbit counted frob columns 2/3 vs F4",
+  "description": "Hypothesis: mitm-frobenius-counted on compact-orbit-scan columns=2 or 3 keeps cold S <= F4 m3/d5 after pricing canons/frobenius/lookups. Public synthetic; engineering; no security claim.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 13}],
+    "targets_per_curve": 2,
+    "target_seed": 202610131830,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "ic-f4-m3-d5", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192",
+      "max_trials": "200000"}}},
+    {"name": "ic-negfold-m2-d5", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=5",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+      "max_trials": "200000"}}},
+    {"name": "ic-c2-frob-m2", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "compact-orbit-scan:columns=2,raw_x_cap=10000",
+      "oracle": "mitm-frobenius:m=2", "max_trials": "200000"}}},
+    {"name": "ic-c2-frob-counted-m2", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "compact-orbit-scan:columns=2,raw_x_cap=10000",
+      "oracle": "mitm-frobenius-counted:m=2", "max_trials": "200000"}}},
+    {"name": "ic-c3-frob-counted-m2", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "compact-orbit-scan:columns=3,raw_x_cap=10000",
+      "oracle": "mitm-frobenius-counted:m=2", "max_trials": "200000"}}},
+    {"name": "ic-c3-frob-counted-m3", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "compact-orbit-scan:columns=3,raw_x_cap=10000",
+      "oracle": "mitm-frobenius-counted:m=3", "max_trials": "200000"}}}
+  ],
+  "measurement": {"rounds": 2, "warmup": 1, "order": "alternate", "seed": 202610131831, "isolation_required": "L0", "timeout_seconds": 600}
+}

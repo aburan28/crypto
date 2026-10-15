@@ -1,0 +1,241 @@
+{
+  "tool": "koblitz_sixsum_extract_probe",
+  "version": 2,
+  "date_utc": "2026-10-13T00:36:04Z",
+  "args": {
+    "a": "0",
+    "cell_wall_s": "240",
+    "columns": "[5]",
+    "early_abort": "true",
+    "kernels": "6sum_b2_s4_strided",
+    "max_s3": "400000000",
+    "max_s4": "50000000",
+    "max_targets": "4096",
+    "n": "[41]",
+    "raw_x_cap": "100000000",
+    "relations": "32",
+    "seed": "20261012"
+  },
+  "note": "Public synthetic [a]G targets on registered Koblitz rungs; every relation re-added as a group equation (fast and general arithmetic) before it counts. Units: S3/S4 root solves, targets, wall. No key-recovery, sub-rho or deployed-curve claim.",
+  "rungs": [
+    {
+      "n": 41,
+      "a": 0,
+      "name": "icv1-f2m41-tm2308219-7f48b14a",
+      "r": 549756390943,
+      "cofactor": 4,
+      "group_order": 2199025563772,
+      "bases": [
+        {
+          "columns": 5,
+          "points": 410,
+          "table": {
+            "base_points": 410,
+            "columns": 5,
+            "orbit_representatives": 5,
+            "pair_adds": 1230,
+            "states": 1010,
+            "duplicate_keys": 215,
+            "canonicalisations": 1635,
+            "frobenius_maps": 16400,
+            "coefficient_checks": 410,
+            "wall_ns": 12994167
+          },
+          "base_wall_s": 0.000582375
+        }
+      ]
+    }
+  ],
+  "cells": [
+    {
+      "n": 41,
+      "a": 0,
+      "columns": 5,
+      "kernel": "6sum_b2_s4_strided",
+      "arity": 6,
+      "r": 549756390943,
+      "cofactor": 4,
+      "base_points": 410,
+      "table_states": 1010,
+      "abscissa_states": 41410,
+      "early_abort": true,
+      "counters": {
+        "targets": 6,
+        "s3_solves": 0,
+        "s4_solves": 5596819,
+        "outer_probes": 5596819,
+        "point_adds": 30,
+        "canonicalisations": 22387271,
+        "lookups": 22387271,
+        "candidate_hits": 5,
+        "lift_failures": 0,
+        "verified_relations": 5,
+        "verification_rejects": 0,
+        "verification_adds": 30,
+        "degenerate_skips": 0,
+        "complete_scans": 0,
+        "budget_stops": 1,
+        "wall_ns": 239999833708
+      },
+      "relations": 5,
+      "full_support_relations": 5,
+      "support_histogram": {
+        "6": 5
+      },
+      "s3_solves_per_relation": 0.0,
+      "s4_solves_per_relation": 1119363.8,
+      "solves_per_relation": 1119363.8,
+      "targets_per_relation": 1.2,
+      "wall_s_per_relation": 48.0000031916,
+      "point_adds_per_relation": 6.0,
+      "lookups_per_relation": 4477454.2,
+      "outer_probes_per_relation": 1119363.8,
+      "structural_outer_probes_per_relation": 1659491.6413396522,
+      "expected_relations_per_target": 12.000528070392035,
+      "structural_targets_per_relation": 1.000006141006345,
+      "scan_unit_solves": 857394050.0,
+      "scan_unit_lambda": 12.000528070392035,
+      "structural_dense_solves_per_relation": 1659491.6413396522,
+      "structural_sparse_solves_per_relation": 71446360.10771738,
+      "structural_solves_per_relation": 71446360.10771738,
+      "models": {
+        "r_over_n2k2": 13081651.182462819,
+        "r_over_4n2k2": 3270412.7956157047,
+        "model_45r_over_n4k4": 14007.716911619915,
+        "structural_s3_solves_per_relation": 3318983.2826793045,
+        "structural_s4_solves_per_relation": 1659491.6413396522
+      },
+      "fit_c_solves": 0.08556747037412313,
+      "targets_over_model_45": 0.00008566706534485688,
+      "outer_probes_over_model_45": 79.91050983272275,
+      "scan_ends": {
+        "Budget": 1,
+        "FirstHit": 5
+      },
+      "stop_reason": "cell_wall",
+      "sample_relations": [
+        {
+          "indices": [
+            41,
+            66,
+            103,
+            354,
+            394,
+            406
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              347425033877
+            ],
+            [
+              1,
+              473169653621
+            ],
+            [
+              4,
+              122179158298
+            ]
+          ],
+          "target_x": 44705128834,
+          "target_y": 108902715987
+        },
+        {
+          "indices": [
+            47,
+            95,
+            96,
+            126,
+            207,
+            353
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              114295506163
+            ],
+            [
+              1,
+              349571335262
+            ],
+            [
+              2,
+              500675087208
+            ],
+            [
+              4,
+              13442257528
+            ]
+          ],
+          "target_x": 885053313078,
+          "target_y": 1688164324868
+        },
+        {
+          "indices": [
+            84,
+            100,
+            126,
+            132,
+            324,
+            381
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              1,
+              451118141412
+            ],
+            [
+              3,
+              64212924818
+            ],
+            [
+              4,
+              310620721103
+            ]
+          ],
+          "target_x": 168713594204,
+          "target_y": 1407339809701
+        },
+        {
+          "indices": [
+            15,
+            80,
+            198,
+            290,
+            333,
+            363
+          ],
+          "arity": 6,
+          "support": 6,
+          "row": [
+            [
+              0,
+              272637819214
+            ],
+            [
+              2,
+              337505244351
+            ],
+            [
+              3,
+              16132898693
+            ],
+            [
+              4,
+              469102845867
+            ]
+          ],
+          "target_x": 289770001796,
+          "target_y": 1390128823675
+        }
+      ]
+    }
+  ],
+  "total_wall_s": 240.015413542
+}

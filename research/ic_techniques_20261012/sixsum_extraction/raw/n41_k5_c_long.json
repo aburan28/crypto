@@ -1,0 +1,112 @@
+{
+  "tool": "koblitz_sixsum_extract_probe",
+  "version": 1,
+  "date_utc": "2026-10-12T23:36:56Z",
+  "args": {
+    "a": "0",
+    "cell_wall_s": "600",
+    "columns": "[5]",
+    "early_abort": "true",
+    "kernels": "5sum_c_control",
+    "max_s3": "400000000",
+    "max_s4": "50000000",
+    "max_targets": "4096",
+    "n": "[41]",
+    "raw_x_cap": "100000000",
+    "relations": "32",
+    "seed": "20261013"
+  },
+  "note": "Public synthetic [a]G targets on registered Koblitz rungs; every relation re-added as a group equation (fast and general arithmetic) before it counts. Units: S3/S4 root solves, targets, wall. No key-recovery, sub-rho or deployed-curve claim.",
+  "rungs": [
+    {
+      "n": 41,
+      "a": 0,
+      "name": "icv1-f2m41-tm2308219-7f48b14a",
+      "r": 549756390943,
+      "cofactor": 4,
+      "group_order": 2199025563772,
+      "bases": [
+        {
+          "columns": 5,
+          "points": 410,
+          "table": {
+            "base_points": 410,
+            "columns": 5,
+            "orbit_representatives": 5,
+            "pair_adds": 1230,
+            "states": 1010,
+            "duplicate_keys": 215,
+            "canonicalisations": 1635,
+            "frobenius_maps": 16400,
+            "coefficient_checks": 410,
+            "wall_ns": 23931500
+          },
+          "base_wall_s": 0.000849916
+        }
+      ]
+    }
+  ],
+  "cells": [
+    {
+      "n": 41,
+      "a": 0,
+      "columns": 5,
+      "kernel": "5sum_c_control",
+      "arity": 5,
+      "r": 549756390943,
+      "cofactor": 4,
+      "base_points": 410,
+      "table_states": 1010,
+      "abscissa_states": 41410,
+      "early_abort": true,
+      "counters": {
+        "targets": 6,
+        "s3_solves": 91907322,
+        "s4_solves": 0,
+        "outer_probes": 2220,
+        "point_adds": 2220,
+        "canonicalisations": 183814644,
+        "lookups": 183814644,
+        "candidate_hits": 0,
+        "lift_failures": 0,
+        "verified_relations": 0,
+        "verification_rejects": 0,
+        "verification_adds": 0,
+        "degenerate_skips": 0,
+        "complete_scans": 5,
+        "budget_stops": 1,
+        "wall_ns": 600009834793
+      },
+      "relations": 0,
+      "full_support_relations": 0,
+      "support_histogram": {},
+      "s3_solves_per_relation": null,
+      "s4_solves_per_relation": null,
+      "solves_per_relation": null,
+      "targets_per_relation": null,
+      "wall_s_per_relation": null,
+      "point_adds_per_relation": null,
+      "lookups_per_relation": null,
+      "outer_probes_per_relation": null,
+      "structural_outer_probes_per_relation": 80.14931858679799,
+      "structural_targets_per_relation": 1.0060395199791619,
+      "models": {
+        "r_over_n2k2": 13081651.182462819,
+        "r_over_4n2k2": 3270412.7956157047,
+        "model_45r_over_n4k4": 14007.716911619915,
+        "structural_s3_solves_per_relation": 3318983.2826793045,
+        "structural_s4_solves_per_relation": 1659491.6413396522
+      },
+      "fit_c_solves": null,
+      "targets_over_model_45": null,
+      "outer_probes_over_model_45": null,
+      "scan_ends": {
+        "Budget": 1,
+        "Complete": 5
+      },
+      "stop_reason": "cell_wall",
+      "sample_relations": []
+    }
+  ],
+  "total_wall_s": 600.0549705
+}

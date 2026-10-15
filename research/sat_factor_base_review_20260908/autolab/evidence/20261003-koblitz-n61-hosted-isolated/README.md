@@ -16,23 +16,26 @@ and
 |---|---|---|---:|---|---|---|---|
 | [37156127161](https://github.com/aburan28/crypto/actions/runs/37156127161) | batch panel | L=4,096, 5 blocks | 700 (fixed) | wall ratio IC/rho **0.213** (0.2125–0.2132) | IC 20,480 / 20,480, rho 20,480 / 20,480 | PASS (64 files) | `end_to_end_dlp` PASS, `vs_rho` FAIL (closed) |
 | [37159733133](https://github.com/aburan28/crypto/actions/runs/37159733133) | batch panel | L=16,384, 3 blocks | 700 (fixed) | wall ratio IC/rho **0.323** (0.3225–0.3230) | IC 49,152 / 49,152, rho 49,152 / 49,152 | PASS (46 files) | `end_to_end_dlp` PASS, `vs_rho` FAIL (closed) |
+| [38302195019](https://github.com/aburan28/crypto/actions/runs/38302195019) | batch panel | L=65,536, 3 blocks | 1,480 (same-L tune) | wall ratio IC/rho **0.239** (0.2374–0.2426) | IC 196,608 / 196,608, rho 196,608 / 196,608 | PASS (54 files, full artifact) | `end_to_end_dlp` PASS, `vs_rho` FAIL (closed) |
 | [37156392134](https://github.com/aburan28/crypto/actions/runs/37156392134) | single target | W=256 | 500 (fixed) | online speedup rho/IC **14.67** (12.40–17.21); cold IC/rho 74.8 (70.0–80.0) | 256 / 256 workloads, both arms | PASS (3,616 files) | `vs_rho` PASS 256 / 256 |
 
-All three were dispatched with `workflow_dispatch` on `main`: the L=4,096 and
-W=256 runs at `b5077d433`, the L=16,384 run at `87055a99f`. Host for all
-three: AMD EPYC 7763, 4 vCPUs, Linux 6.17 (Azure), `ubuntu-24.04`,
-reservation on CPUs {2, 3}, producers pinned to CPU 3,
-`RAYON_NUM_THREADS=1`.
+The L=4,096 and W=256 runs were dispatched with `workflow_dispatch` on `main`
+at `b5077d433`, L=16,384 at `87055a99f` (AMD EPYC 7763). The L=65,536 run
+was dispatched on `main` at `966a0dbc9` (AMD EPYC 9V74). All four: 4 vCPUs,
+Linux 6.17 (Azure), `ubuntu-24.04`, reservation on CPUs {2, 3}, producers
+pinned to CPU 3, `RAYON_NUM_THREADS=1`.
 
 ## Choice of K
 
-The batch workflow takes a fixed K or tunes on the same-L corpus. It has no
-`--tune-targets` input, so the L=4,096 and L=16,384 runs fix K=700, the pick of the
-1,024-target tune for L=4,096 (`20261002T210608Z-7c5a54a1ed`) and of the
-new tunes with K=700 offered for L=16,384 and L=65,536. The single-target run
-fixes K=500, the pick of the previous hosted single-target tune
-(`gha-36933523033-1`), to fit 256 workloads in the 300-minute job limit.
-Neither run has a tune table of its own (`k_source: fixed`).
+The batch workflow takes a fixed K or, when `k` is empty, tunes on the
+disjoint same-L corpus (it has no `--tune-targets` input). The L=4,096 and
+L=16,384 runs fix K=700, the pick of the 1,024-target tune for L=4,096
+(`20261002T210608Z-7c5a54a1ed`) and of the K=700 retunes for L=16,384 /
+L=65,536. The L=65,536 hosted run left `k` empty and tuned on
+`n61-ks-growing-tune-65536-v1`, picking **K=1,480** by lowest wall on the
+grid {1000, 1200, 1400, 1480}. The single-target run fixes K=500, the pick
+of the previous hosted single-target tune (`gha-36933523033-1`), to fit
+256 workloads in the job limit.
 
 ## Batch panel, L=4,096 (`gha-37156127161-1`)
 
@@ -151,21 +154,42 @@ they expire.
 | `gha-37156127161-1` | `compact-orbit-n61-isolated-L4096` | 11287237024 | `sha256:83dd37be3ccbbd60…` | 2027-01-01 |
 | `gha-37159733133-1` | `compact-orbit-n61-isolated-L16384` | 11289103797 | `sha256:a42d32a3c2cf8505…` | 2027-01-01 |
 | `gha-37156392134-1` | `compact-orbit-n61-single-target-W256` | 11287912438 | `sha256:8cd7bc1b6a2b137f…` | 2027-01-01 |
+| `gha-38302195019-1` | `compact-orbit-n61-isolated-L65536` | 11780627009 | `sha256:fd4b739102fbeb94…` | 2027-01-10 |
 
+## Batch panel, L=65,536 (`gha-38302195019-1`)
 
-## L=65,536 attempt (2026-10-12) — runner saturation
+Timeout bump from PR #1736 (`timeout-minutes` 480). Earlier same-day
+dispatches with fixed `k=700` ([38288893010](https://github.com/aburan28/crypto/actions/runs/38288893010)
+and siblings) sat in a saturated queue and were superseded; this run
+completed measure on 2026-10-13.
 
-Timeout bump landed in PR #1736 (`timeout-minutes` 300→480 on the measure
-job). Confirmed YAML `workflow_dispatch` inputs: `targets`, `blocks`, `k`.
+`launch-panel --beat koblitz.compact_orbit.n61_panel --targets 65536
+--blocks 3 --cpu 3` (empty `k` → tune on disjoint same-L corpus). Grid
+walls on `n61-ks-growing-tune-65536-v1`: K=1000 487.4 s, K=1200 379.2 s,
+K=1400 330.6 s, **K=1480 320.2 s** (chosen). `isolation.jsonl`: **0
+contended samples out of 2,736**, exit status 0. Measure job ~3 h 52 min
+after validate. Host: AMD EPYC 9V74, Linux 6.17.0-1022-azure.
 
-Dispatched:
+| Block | Order | IC wall s | Rho (KS v2) wall s | Wall ratio | User ratio |
+|---:|---|---:|---:|---:|---:|
+| 0 | IC→rho | 319.26 | 1336.73 | 0.2388 | 0.2316 |
+| 1 | rho→IC | 323.91 | 1335.17 | 0.2426 | 0.2354 |
+| 2 | IC→rho | 316.88 | 1334.70 | 0.2374 | 0.2301 |
 
-| Actions run | Ref | Inputs | Outcome after ~40+ min |
-|---|---|---|---|
-| [38285023608](https://github.com/aburan28/crypto/actions/runs/38285023608) | `main` @ `be456ef51` | targets=65536, blocks=2, k=700 | `validate` still **queued** (never started) |
-| [38283955374](https://github.com/aburan28/crypto/actions/runs/38283955374) | `cursor/ic-n61-l65536-hosted-20261012` @ `43a69f870` | workflow_dispatch (sibling) | `validate` still **queued** |
+- Median wall ratio **0.2388** (0.2374–0.2426); user median **0.2316**.
+- IC phases (block 0): index ~95.4 s, rank ~6.0 s, targets ~217.6 s.
+  Peak RSS IC ~11.0 GiB, rho ~2.3 GiB.
+- Both arms solve all 65,536 targets every block and walk the same points.
+  Pure-Python replays: IC 196,608 / 196,608; rho 3 × 65,536.
+- Rho untimed transcript hash `b0294263…` matches the macOS K=700 L=65,536
+  panel (`20261003T233040Z-454badefbb`); IC hash differs because K=1,480
+  here vs K=700 there.
+- Full-artifact `verify` PASS (54 files). Trimmed archive omits per-target
+  `logs/*.jsonl`, `base_n61_K*.jsonl`, and `inputs/boundary_targets.json`
+  (hashes retained in `review_manifest.json`).
+- Claim-check: `end_to_end_dlp` PASS; `vs_rho` FAIL-closed (batch
+  `target_count ≠ 1`). Status
+  **`PENDING_INDEPENDENT_VALIDATION`**. No ledger promotion.
 
-Repo Actions queue depth was ~100 queued / 0–1 in progress. Prior L=65536
-attempts on 2026-10-10 were cancelled (e.g. [38024710170](https://github.com/aburan28/crypto/actions/runs/38024710170)).
-No receipts to archive yet. Fallthrough: `koblitz.decomposition.n31_m2_dim16`
-evidence in [`../20261012-koblitz-decomposition-n31-m2-dim16/`](../20261012-koblitz-decomposition-n31-m2-dim16/README.md).
+This is still multi-target batch against frozen KS v2 batched rho, not the
+strong-rho / single-target primary ladder.

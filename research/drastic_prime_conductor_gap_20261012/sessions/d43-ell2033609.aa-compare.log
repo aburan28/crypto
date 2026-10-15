@@ -1,0 +1,25 @@
+saved research/drastic_prime_conductor_gap_20261012/sessions/d43-ell2033609/comparisons/rho-neg__rho-neg-aa.json
+ops (ok): rho-neg-aa / rho-neg = 1.0000 [1.000, 1.000] (cluster) over 16 pairs on 16 workloads, 2 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 1.0514, not a result: 16 of 16 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | rho-neg-aa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp46-tm667-53829675 | 45.34 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+| icv1-fp46-tm667-82fe8711 | 45.34 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | rho-neg-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W1d62aca8edfd | icv1-fp46-tm667-82fe8711 | 45.34 | 0.4236 | 0.4236 | 1.0000 |
+| W259714bebe99 | icv1-fp46-tm667-53829675 | 45.34 | 1.0687 | 1.0687 | 1.0000 |
+| W34297ba2e253 | icv1-fp46-tm667-53829675 | 45.34 | 0.7580 | 0.7580 | 1.0000 |
+| W491237edc747 | icv1-fp46-tm667-53829675 | 45.34 | 1.1252 | 1.1252 | 1.0000 |
+| W4a8c42347a69 | icv1-fp46-tm667-53829675 | 45.34 | 0.7422 | 0.7422 | 1.0000 |
+| W5b1808ab5c3c | icv1-fp46-tm667-82fe8711 | 45.34 | 0.3999 | 0.3999 | 1.0000 |
+| W6759b7a92666 | icv1-fp46-tm667-82fe8711 | 45.34 | 1.0000 | 1.0000 | 1.0000 |
+| W761c9390e5f9 | icv1-fp46-tm667-53829675 | 45.34 | 0.8282 | 0.8282 | 1.0000 |
+| W8e0205114924 | icv1-fp46-tm667-82fe8711 | 45.34 | 1.6841 | 1.6841 | 1.0000 |
+| W98370ac1144b | icv1-fp46-tm667-82fe8711 | 45.34 | 1.1268 | 1.1268 | 1.0000 |
+| Wc3e09af1329e | icv1-fp46-tm667-53829675 | 45.34 | 1.4780 | 1.4780 | 1.0000 |
+| Wc5b8aac38def | icv1-fp46-tm667-82fe8711 | 45.34 | 0.4341 | 0.4341 | 1.0000 |
+| We00839fb9a4f | icv1-fp46-tm667-53829675 | 45.34 | 0.4746 | 0.4746 | 1.0000 |
+| Wf2f02b7c750c | icv1-fp46-tm667-82fe8711 | 45.34 | 1.9577 | 1.9577 | 1.0000 |
+| Wf3920ac86744 | icv1-fp46-tm667-82fe8711 | 45.34 | 0.4286 | 0.4286 | 1.0000 |
+| Wf70972a2ce57 | icv1-fp46-tm667-53829675 | 45.34 | 0.5621 | 0.5621 | 1.0000 |

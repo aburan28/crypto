@@ -18,9 +18,8 @@ fn main() {
     let n: u32 = args.get(1).and_then(|s| s.parse().ok()).unwrap_or(19);
     let a: u32 = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(1);
     let eta_den: u32 = args.get(3).and_then(|s| s.parse().ok()).unwrap_or(8);
-    let bin = std::env::var("KIC_RANK_BIN").unwrap_or_else(|_| {
-        "target/release/examples/koblitz_rank_fixture".into()
-    });
+    let bin = std::env::var("KIC_RANK_BIN")
+        .unwrap_or_else(|_| "target/release/examples/koblitz_rank_fixture".into());
 
     let mut rows = Vec::new();
     for eta_num in 1..=eta_den {
@@ -58,8 +57,12 @@ fn main() {
             .find_map(|l| serde_json::from_str(l).ok())
             .or_else(|| serde_json::from_str(text.trim()).ok())
             .unwrap_or(serde_json::json!({}));
-        let reach = obj.get("reachable_nonzero_subgroup_targets").and_then(|v| v.as_u64());
-        let complete = obj.get("complete_subgroup_coverage").and_then(|v| v.as_bool());
+        let reach = obj
+            .get("reachable_nonzero_subgroup_targets")
+            .and_then(|v| v.as_u64());
+        let complete = obj
+            .get("complete_subgroup_coverage")
+            .and_then(|v| v.as_bool());
         let f = obj.get("factor_base_points").and_then(|v| v.as_u64());
         let pairs = obj.get("distinct_pair_sum_points").and_then(|v| v.as_u64());
         let base_hash = obj.get("base_hash").and_then(|v| v.as_str()).unwrap_or("");

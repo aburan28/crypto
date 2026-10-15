@@ -63,7 +63,10 @@ fn read(dir: &str) -> Result<(String, Vec<Run>), String> {
         };
         runs.push(Run {
             arm: r["arm"].as_str().unwrap_or("?").to_string(),
-            workload: r["workload"]["workload_id"].as_str().unwrap_or("?").to_string(),
+            workload: r["workload"]["workload_id"]
+                .as_str()
+                .unwrap_or("?")
+                .to_string(),
             status: r["outcome"]["status"].as_str().unwrap_or("?").to_string(),
             slug: curve["slug"].as_str().unwrap_or("?").to_string(),
             family: curve["family"].as_str().unwrap_or("?").to_string(),
@@ -117,7 +120,9 @@ fn cell(slug: &str, runs: &[&Run]) -> Value {
     // arm -> workload -> run
     let mut by: BTreeMap<&str, BTreeMap<&str, &Run>> = BTreeMap::new();
     for r in runs {
-        by.entry(r.arm.as_str()).or_default().insert(r.workload.as_str(), r);
+        by.entry(r.arm.as_str())
+            .or_default()
+            .insert(r.workload.as_str(), r);
     }
     let mut arms = serde_json::Map::new();
     let mut failed = Vec::new();
@@ -208,7 +213,10 @@ fn cell(slug: &str, runs: &[&Run]) -> Value {
     // Q2: matrix F4 against inherited
     let f4inh = ratio("matrix-f4", "inherited-f4");
     if !f4inh.is_empty() {
-        q.insert("q2_matrix_f4_over_inherited_word_xors".into(), json!({"ratio": summary(&f4inh)}));
+        q.insert(
+            "q2_matrix_f4_over_inherited_word_xors".into(),
+            json!({"ratio": summary(&f4inh)}),
+        );
     }
     // Q3: F6-IC against inherited
     let l = paired("inherited-f4", "f6-ic", &|x, y| {
@@ -236,7 +244,9 @@ fn cell(slug: &str, runs: &[&Run]) -> Value {
             let b = y.word_xors? as f64 / y.calls? as f64;
             Some((a / b).log2())
         });
-        let same_calls = paired("inherited-f4", "f6-ic", &|x, y| Some((x.calls == y.calls) as u8 as f64));
+        let same_calls = paired("inherited-f4", "f6-ic", &|x, y| {
+            Some((x.calls == y.calls) as u8 as f64)
+        });
         let wall = paired("inherited-f4", "f6-ic", &|x, y| {
             Some(x.relations_wall_ns? as f64 / y.relations_wall_ns? as f64)
         });

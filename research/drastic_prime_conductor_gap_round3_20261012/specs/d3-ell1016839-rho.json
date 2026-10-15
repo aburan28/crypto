@@ -1,0 +1,56 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg-aa",
+      "role": "control"
+    }
+  ],
+  "description": "Round-2 pair re-measured: the same planted scalars on both curves, 64 targets, for the paired quotient.",
+  "label": "Drastic gap round 3, paired rho: D=-3 ell=1016839",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261012,
+    "timeout_seconds": 900,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 0,
+        "b": 654254041891,
+        "group_order": 775471436947,
+        "gx": 1,
+        "gy": 507178549694,
+        "kind": "prime_explicit",
+        "p": 775471435903,
+        "r": 775471436947
+      },
+      {
+        "a": 483575337897,
+        "b": 620539964477,
+        "group_order": 775471436947,
+        "gx": 1,
+        "gy": 246035225889,
+        "kind": "prime_explicit",
+        "p": 775471435903,
+        "r": 775471436947
+      }
+    ],
+    "target_kind": "planted_shared",
+    "target_seed": 2026101205,
+    "targets_per_curve": 64
+  }
+}

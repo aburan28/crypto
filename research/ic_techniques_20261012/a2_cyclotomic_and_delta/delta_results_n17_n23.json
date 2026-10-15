@@ -1,0 +1,1773 @@
+{
+  "args": {
+    "a": 0,
+    "budget_secs": 1150,
+    "cell_timeout_secs": 130,
+    "degrees": [
+      17,
+      23
+    ],
+    "delta_max": 4,
+    "delta_min": -2,
+    "engine": "inherited",
+    "factor_base": "standard polynomial-basis subspace <1, z, …, z^(ℓ−1)>, every rational point above it",
+    "node_budget": 4096,
+    "oracle": "koblitz_index_calculus::groebner_decompose (chained S3 Weil descent, m·ℓ + (m−2)·n unknowns)",
+    "seed": 20261012,
+    "summands": [
+      2,
+      3
+    ],
+    "targets": 32
+  },
+  "cells": [
+    {
+      "a": 0,
+      "base_points": 1053,
+      "decomposed": 2,
+      "delta": 3,
+      "ell": 10,
+      "group_order": "8383412",
+      "m": 2,
+      "max_degree_built": 3,
+      "mean_splits": 3.09375,
+      "mean_wall_ms": 14.081286406249998,
+      "mean_word_xors": 197275.21875,
+      "measured_fraction": 0.0625,
+      "median_wall_ms": 4.1679580000000005,
+      "n": 23,
+      "n_vars": 20,
+      "net_ms_per_relation": 225.30058249999996,
+      "net_word_xors_per_relation": 3156403.5,
+      "predicted_delta_factor": 0.125,
+      "predicted_fraction": 0.06399188151628898,
+      "records": [
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 12,
+          "scalar": 901167,
+          "splits": 3,
+          "wall_ms": 1.801458,
+          "word_xors": 210803
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 213165,
+          "splits": 3,
+          "wall_ms": 1.128875,
+          "word_xors": 202222
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 1512816,
+          "splits": 3,
+          "wall_ms": 2.973792,
+          "word_xors": 221537
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 1971652,
+          "splits": 3,
+          "wall_ms": 2.42675,
+          "word_xors": 208568
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 14,
+          "scalar": 2031667,
+          "splits": 3,
+          "wall_ms": 1.186833,
+          "word_xors": 187475
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 16,
+          "scalar": 1088518,
+          "splits": 6,
+          "wall_ms": 1.319375,
+          "word_xors": 193954
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 511328,
+          "splits": 3,
+          "wall_ms": 4.1679580000000005,
+          "word_xors": 198381
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 9,
+          "scalar": 762771,
+          "splits": 2,
+          "wall_ms": 1.209042,
+          "word_xors": 206005
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 13,
+          "scalar": 1576745,
+          "splits": 3,
+          "wall_ms": 1.830959,
+          "word_xors": 218583
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 2040407,
+          "splits": 3,
+          "wall_ms": 6.782167,
+          "word_xors": 200036
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 7,
+          "scalar": 795521,
+          "splits": 2,
+          "wall_ms": 6.229958,
+          "word_xors": 194773
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 12,
+          "scalar": 1845751,
+          "splits": 3,
+          "wall_ms": 19.133125,
+          "word_xors": 199460
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 8,
+          "scalar": 1508496,
+          "splits": 3,
+          "wall_ms": 4.935875,
+          "word_xors": 193803
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 12,
+          "scalar": 193443,
+          "splits": 4,
+          "wall_ms": 1.964958,
+          "word_xors": 197473
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 982670,
+          "splits": 3,
+          "wall_ms": 18.925625,
+          "word_xors": 197724
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 651253,
+          "splits": 3,
+          "wall_ms": 6.778250000000001,
+          "word_xors": 189661
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 13,
+          "scalar": 967883,
+          "splits": 4,
+          "wall_ms": 10.195791,
+          "word_xors": 233509
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 12,
+          "scalar": 1859609,
+          "splits": 3,
+          "wall_ms": 5.635208,
+          "word_xors": 194393
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 2,
+          "reductions": 1,
+          "scalar": 314583,
+          "splits": 0,
+          "wall_ms": 0.040166999999999994,
+          "word_xors": 236
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 12,
+          "scalar": 1966828,
+          "splits": 4,
+          "wall_ms": 1.1547079999999998,
+          "word_xors": 204635
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 8,
+          "scalar": 978014,
+          "splits": 2,
+          "wall_ms": 140.59099999999998,
+          "word_xors": 205030
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 14,
+          "scalar": 11804,
+          "splits": 3,
+          "wall_ms": 5.016833,
+          "word_xors": 199481
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 10,
+          "scalar": 988821,
+          "splits": 3,
+          "wall_ms": 19.379792,
+          "word_xors": 234210
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 12,
+          "scalar": 326543,
+          "splits": 4,
+          "wall_ms": 1.522,
+          "word_xors": 199364
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 14,
+          "scalar": 309559,
+          "splits": 3,
+          "wall_ms": 4.076792,
+          "word_xors": 211069
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 1984526,
+          "splits": 3,
+          "wall_ms": 45.2695,
+          "word_xors": 182328
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 10,
+          "scalar": 1750890,
+          "splits": 3,
+          "wall_ms": 4.555458,
+          "word_xors": 187855
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 10,
+          "scalar": 1886937,
+          "splits": 3,
+          "wall_ms": 24.809292,
+          "word_xors": 251629
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 10,
+          "scalar": 474696,
+          "splits": 3,
+          "wall_ms": 102.224291,
+          "word_xors": 200418
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 17,
+          "scalar": 368142,
+          "splits": 3,
+          "wall_ms": 1.333792,
+          "word_xors": 208756
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 9,
+          "scalar": 1185967,
+          "splits": 3,
+          "wall_ms": 0.8933749999999999,
+          "word_xors": 184195
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 13,
+          "scalar": 428982,
+          "splits": 5,
+          "wall_ms": 1.108166,
+          "word_xors": 195241
+        }
+      ],
+      "split_free": false,
+      "subgroup_order": "2095853",
+      "targets_measured": 32,
+      "targets_requested": 32,
+      "truncated": false
+    },
+    {
+      "a": 0,
+      "base_points": 2079,
+      "decomposed": 5,
+      "delta": 1,
+      "ell": 11,
+      "group_order": "8383412",
+      "m": 2,
+      "max_degree_built": 3,
+      "mean_splits": 22.8125,
+      "mean_wall_ms": 25.276785218750007,
+      "mean_word_xors": 503587.0625,
+      "measured_fraction": 0.15625,
+      "median_wall_ms": 6.2780830000000005,
+      "n": 23,
+      "n_vars": 22,
+      "net_ms_per_relation": 161.77142540000006,
+      "net_word_xors_per_relation": 3222957.2,
+      "predicted_delta_factor": 0.5,
+      "predicted_fraction": 0.22723888518558477,
+      "records": [
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 63,
+          "scalar": 901167,
+          "splits": 26,
+          "wall_ms": 5.552958,
+          "word_xors": 519028
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 71,
+          "scalar": 213165,
+          "splits": 27,
+          "wall_ms": 3.386792,
+          "word_xors": 529329
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 56,
+          "scalar": 1512816,
+          "splits": 24,
+          "wall_ms": 3.423209,
+          "word_xors": 541297
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 61,
+          "scalar": 1971652,
+          "splits": 25,
+          "wall_ms": 4.01,
+          "word_xors": 555092
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 65,
+          "scalar": 2031667,
+          "splits": 28,
+          "wall_ms": 5.139125,
+          "word_xors": 490295
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 64,
+          "scalar": 1088518,
+          "splits": 25,
+          "wall_ms": 3.290375,
+          "word_xors": 531391
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 10,
+          "scalar": 511328,
+          "splits": 5,
+          "wall_ms": 77.57679200000001,
+          "word_xors": 407540
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 64,
+          "scalar": 762771,
+          "splits": 24,
+          "wall_ms": 16.50025,
+          "word_xors": 533159
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 51,
+          "scalar": 1576745,
+          "splits": 19,
+          "wall_ms": 6.2780830000000005,
+          "word_xors": 559714
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 57,
+          "scalar": 2040407,
+          "splits": 26,
+          "wall_ms": 3.12175,
+          "word_xors": 517210
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 60,
+          "scalar": 795521,
+          "splits": 23,
+          "wall_ms": 3.335625,
+          "word_xors": 527263
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 67,
+          "scalar": 1845751,
+          "splits": 26,
+          "wall_ms": 130.434292,
+          "word_xors": 522664
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 61,
+          "scalar": 1508496,
+          "splits": 25,
+          "wall_ms": 87.019125,
+          "word_xors": 515338
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 66,
+          "scalar": 193443,
+          "splits": 30,
+          "wall_ms": 7.046416,
+          "word_xors": 517047
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 65,
+          "scalar": 982670,
+          "splits": 25,
+          "wall_ms": 39.757417,
+          "word_xors": 528333
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 64,
+          "scalar": 651253,
+          "splits": 30,
+          "wall_ms": 4.487708,
+          "word_xors": 488426
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 66,
+          "scalar": 967883,
+          "splits": 24,
+          "wall_ms": 4.758209,
+          "word_xors": 534795
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 60,
+          "scalar": 1859609,
+          "splits": 26,
+          "wall_ms": 69.84625,
+          "word_xors": 483716
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 314583,
+          "splits": 4,
+          "wall_ms": 4.008291,
+          "word_xors": 406250
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 11,
+          "scalar": 1966828,
+          "splits": 5,
+          "wall_ms": 1.733541,
+          "word_xors": 404139
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 58,
+          "scalar": 978014,
+          "splits": 21,
+          "wall_ms": 8.404959,
+          "word_xors": 536111
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 68,
+          "scalar": 11804,
+          "splits": 28,
+          "wall_ms": 5.2460830000000005,
+          "word_xors": 518025
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 16,
+          "scalar": 988821,
+          "splits": 8,
+          "wall_ms": 49.697375,
+          "word_xors": 415461
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 63,
+          "scalar": 326543,
+          "splits": 28,
+          "wall_ms": 14.358459,
+          "word_xors": 502226
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 68,
+          "scalar": 309559,
+          "splits": 25,
+          "wall_ms": 3.844584,
+          "word_xors": 541532
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 71,
+          "scalar": 1984526,
+          "splits": 24,
+          "wall_ms": 37.689709,
+          "word_xors": 501803
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 62,
+          "scalar": 1750890,
+          "splits": 27,
+          "wall_ms": 42.579125000000005,
+          "word_xors": 543746
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 15,
+          "scalar": 1886937,
+          "splits": 8,
+          "wall_ms": 14.011166,
+          "word_xors": 431896
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 76,
+          "scalar": 474696,
+          "splits": 31,
+          "wall_ms": 3.865792,
+          "word_xors": 509220
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 68,
+          "scalar": 368142,
+          "splits": 27,
+          "wall_ms": 33.08025,
+          "word_xors": 509462
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 62,
+          "scalar": 1185967,
+          "splits": 28,
+          "wall_ms": 109.511917,
+          "word_xors": 490097
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 62,
+          "scalar": 428982,
+          "splits": 28,
+          "wall_ms": 5.8615,
+          "word_xors": 503181
+        }
+      ],
+      "split_free": false,
+      "subgroup_order": "2095853",
+      "targets_measured": 32,
+      "targets_requested": 32,
+      "truncated": false
+    },
+    {
+      "a": 0,
+      "base_points": 4151,
+      "decomposed": 20,
+      "delta": -1,
+      "ell": 12,
+      "group_order": "8383412",
+      "m": 2,
+      "max_degree_built": 3,
+      "mean_splits": 70.28125,
+      "mean_wall_ms": 112.32229296875,
+      "mean_word_xors": 998186.46875,
+      "measured_fraction": 0.625,
+      "median_wall_ms": 69.892417,
+      "n": 23,
+      "n_vars": 24,
+      "net_ms_per_relation": 179.71566875000002,
+      "net_word_xors_per_relation": 1597098.35,
+      "predicted_delta_factor": 2.0,
+      "predicted_fraction": 0.642161075295691,
+      "records": [
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 251,
+          "scalar": 901167,
+          "splits": 122,
+          "wall_ms": 11.125583,
+          "word_xors": 1282198
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 256,
+          "scalar": 213165,
+          "splits": 122,
+          "wall_ms": 44.061708,
+          "word_xors": 1369893
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 216,
+          "scalar": 1512816,
+          "splits": 104,
+          "wall_ms": 66.912,
+          "word_xors": 1286591
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 25,
+          "scalar": 1971652,
+          "splits": 14,
+          "wall_ms": 10.352959,
+          "word_xors": 633858
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 124,
+          "scalar": 2031667,
+          "splits": 62,
+          "wall_ms": 69.892417,
+          "word_xors": 878712
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 98,
+          "scalar": 1088518,
+          "splits": 48,
+          "wall_ms": 553.401041,
+          "word_xors": 847993
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 18,
+          "scalar": 511328,
+          "splits": 10,
+          "wall_ms": 2.582125,
+          "word_xors": 610746
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 79,
+          "scalar": 762771,
+          "splits": 38,
+          "wall_ms": 6.091082999999999,
+          "word_xors": 801030
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 248,
+          "scalar": 1576745,
+          "splits": 116,
+          "wall_ms": 139.707291,
+          "word_xors": 1450560
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 257,
+          "scalar": 2040407,
+          "splits": 120,
+          "wall_ms": 106.658375,
+          "word_xors": 1344363
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 248,
+          "scalar": 795521,
+          "splits": 117,
+          "wall_ms": 27.52075,
+          "word_xors": 1332392
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 103,
+          "scalar": 1845751,
+          "splits": 51,
+          "wall_ms": 9.9245,
+          "word_xors": 877335
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 253,
+          "scalar": 1508496,
+          "splits": 124,
+          "wall_ms": 84.062084,
+          "word_xors": 1293377
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 18,
+          "scalar": 193443,
+          "splits": 10,
+          "wall_ms": 9.479708,
+          "word_xors": 620404
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 118,
+          "scalar": 982670,
+          "splits": 57,
+          "wall_ms": 10.538209,
+          "word_xors": 914350
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 136,
+          "scalar": 651253,
+          "splits": 66,
+          "wall_ms": 192.784917,
+          "word_xors": 997898
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 254,
+          "scalar": 967883,
+          "splits": 116,
+          "wall_ms": 74.626417,
+          "word_xors": 1308638
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 254,
+          "scalar": 1859609,
+          "splits": 122,
+          "wall_ms": 645.680166,
+          "word_xors": 1301422
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 50,
+          "scalar": 314583,
+          "splits": 23,
+          "wall_ms": 14.747208,
+          "word_xors": 726932
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 16,
+          "scalar": 1966828,
+          "splits": 9,
+          "wall_ms": 7.899,
+          "word_xors": 623068
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 10,
+          "scalar": 978014,
+          "splits": 7,
+          "wall_ms": 1.735291,
+          "word_xors": 564893
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 136,
+          "scalar": 11804,
+          "splits": 68,
+          "wall_ms": 91.102459,
+          "word_xors": 978286
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 17,
+          "scalar": 988821,
+          "splits": 10,
+          "wall_ms": 4.976375,
+          "word_xors": 594956
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 250,
+          "scalar": 326543,
+          "splits": 121,
+          "wall_ms": 182.516125,
+          "word_xors": 1194915
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 251,
+          "scalar": 309559,
+          "splits": 121,
+          "wall_ms": 278.410417,
+          "word_xors": 1293003
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 254,
+          "scalar": 1984526,
+          "splits": 119,
+          "wall_ms": 136.99875,
+          "word_xors": 1283672
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 250,
+          "scalar": 1750890,
+          "splits": 118,
+          "wall_ms": 209.180542,
+          "word_xors": 1296266
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 27,
+          "scalar": 1886937,
+          "splits": 15,
+          "wall_ms": 73.027125,
+          "word_xors": 654602
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 146,
+          "scalar": 474696,
+          "splits": 73,
+          "wall_ms": 238.203292,
+          "word_xors": 955432
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 162,
+          "scalar": 368142,
+          "splits": 77,
+          "wall_ms": 14.642458,
+          "word_xors": 1129934
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 40,
+          "scalar": 1185967,
+          "splits": 21,
+          "wall_ms": 4.419666,
+          "word_xors": 681495
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 95,
+          "scalar": 428982,
+          "splits": 48,
+          "wall_ms": 271.053334,
+          "word_xors": 812753
+        }
+      ],
+      "split_free": false,
+      "subgroup_order": "2095853",
+      "targets_measured": 32,
+      "targets_requested": 32,
+      "truncated": false
+    },
+    {
+      "a": 0,
+      "base_points": 149,
+      "decomposed": 3,
+      "delta": 2,
+      "ell": 7,
+      "group_order": "8383412",
+      "m": 3,
+      "max_degree_built": 3,
+      "mean_splits": 147.09375,
+      "mean_wall_ms": 1119.69512490625,
+      "mean_word_xors": 15024131.65625,
+      "measured_fraction": 0.09375,
+      "median_wall_ms": 1086.5935419999998,
+      "n": 23,
+      "n_vars": 44,
+      "net_ms_per_relation": 11943.414665666665,
+      "net_word_xors_per_relation": 160257404.33333334,
+      "predicted_delta_factor": 0.25,
+      "predicted_fraction": 0.06364797350713736,
+      "records": [
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 138,
+          "scalar": 901167,
+          "splits": 61,
+          "wall_ms": 506.404042,
+          "word_xors": 6539392
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 366,
+          "scalar": 213165,
+          "splits": 157,
+          "wall_ms": 1541.697709,
+          "word_xors": 16016372
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 369,
+          "scalar": 1512816,
+          "splits": 157,
+          "wall_ms": 966.1625,
+          "word_xors": 16101436
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 60,
+          "scalar": 1971652,
+          "splits": 27,
+          "wall_ms": 349.442834,
+          "word_xors": 4120667
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 368,
+          "scalar": 2031667,
+          "splits": 157,
+          "wall_ms": 713.640375,
+          "word_xors": 15890689
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 369,
+          "scalar": 1088518,
+          "splits": 157,
+          "wall_ms": 988.083708,
+          "word_xors": 15954321
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 368,
+          "scalar": 511328,
+          "splits": 157,
+          "wall_ms": 1111.453625,
+          "word_xors": 15859346
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 368,
+          "scalar": 762771,
+          "splits": 157,
+          "wall_ms": 1334.7272079999998,
+          "word_xors": 15714851
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 155,
+          "scalar": 1576745,
+          "splits": 67,
+          "wall_ms": 278.958458,
+          "word_xors": 7680806
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 370,
+          "scalar": 2040407,
+          "splits": 157,
+          "wall_ms": 1243.595041,
+          "word_xors": 16554402
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 369,
+          "scalar": 795521,
+          "splits": 157,
+          "wall_ms": 1326.740791,
+          "word_xors": 15923656
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 368,
+          "scalar": 1845751,
+          "splits": 157,
+          "wall_ms": 1408.296375,
+          "word_xors": 15917302
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 370,
+          "scalar": 1508496,
+          "splits": 157,
+          "wall_ms": 981.594833,
+          "word_xors": 16164720
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 369,
+          "scalar": 193443,
+          "splits": 157,
+          "wall_ms": 948.115542,
+          "word_xors": 16293302
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 370,
+          "scalar": 982670,
+          "splits": 157,
+          "wall_ms": 1689.851333,
+          "word_xors": 15920865
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 369,
+          "scalar": 651253,
+          "splits": 157,
+          "wall_ms": 952.405167,
+          "word_xors": 16439948
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 370,
+          "scalar": 967883,
+          "splits": 157,
+          "wall_ms": 944.593,
+          "word_xors": 16110399
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 369,
+          "scalar": 1859609,
+          "splits": 157,
+          "wall_ms": 1017.323166,
+          "word_xors": 15725400
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 368,
+          "scalar": 314583,
+          "splits": 157,
+          "wall_ms": 1328.334583,
+          "word_xors": 15467865
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 368,
+          "scalar": 1966828,
+          "splits": 157,
+          "wall_ms": 891.4945829999999,
+          "word_xors": 15957399
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 369,
+          "scalar": 978014,
+          "splits": 157,
+          "wall_ms": 1372.238,
+          "word_xors": 15237412
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 370,
+          "scalar": 11804,
+          "splits": 157,
+          "wall_ms": 740.2969579999999,
+          "word_xors": 15960801
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 370,
+          "scalar": 988821,
+          "splits": 157,
+          "wall_ms": 1286.827708,
+          "word_xors": 16047572
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 370,
+          "scalar": 326543,
+          "splits": 157,
+          "wall_ms": 1511.351167,
+          "word_xors": 16040096
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 367,
+          "scalar": 309559,
+          "splits": 157,
+          "wall_ms": 2179.123875,
+          "word_xors": 15983717
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 368,
+          "scalar": 1984526,
+          "splits": 157,
+          "wall_ms": 1985.113291,
+          "word_xors": 14936338
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 368,
+          "scalar": 1750890,
+          "splits": 156,
+          "wall_ms": 1086.5935419999998,
+          "word_xors": 15794474
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 367,
+          "scalar": 1886937,
+          "splits": 157,
+          "wall_ms": 856.482833,
+          "word_xors": 16328228
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 367,
+          "scalar": 474696,
+          "splits": 157,
+          "wall_ms": 904.65325,
+          "word_xors": 15554894
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 369,
+          "scalar": 368142,
+          "splits": 157,
+          "wall_ms": 1073.3394999999998,
+          "word_xors": 16118228
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 369,
+          "scalar": 1185967,
+          "splits": 157,
+          "wall_ms": 1207.121125,
+          "word_xors": 16550519
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 368,
+          "scalar": 428982,
+          "splits": 157,
+          "wall_ms": 1104.187875,
+          "word_xors": 15866796
+        }
+      ],
+      "split_free": false,
+      "subgroup_order": "2095853",
+      "targets_measured": 32,
+      "targets_requested": 32,
+      "truncated": false
+    },
+    {
+      "a": 0,
+      "base_points": 275,
+      "decomposed": 14,
+      "delta": -1,
+      "ell": 8,
+      "group_order": "8383412",
+      "m": 3,
+      "max_degree_built": 3,
+      "mean_splits": 202.9375,
+      "mean_wall_ms": 1607.044069125,
+      "mean_word_xors": 26875811.0,
+      "measured_fraction": 0.4375,
+      "median_wall_ms": 2145.7702919999997,
+      "n": 23,
+      "n_vars": 47,
+      "net_ms_per_relation": 3673.2435865714288,
+      "net_word_xors_per_relation": 61430425.14285714,
+      "predicted_delta_factor": 2.0,
+      "predicted_fraction": 0.3386373027625649,
+      "records": [
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 139,
+          "scalar": 901167,
+          "splits": 62,
+          "wall_ms": 275.80670899999996,
+          "word_xors": 9258549
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 696,
+          "scalar": 213165,
+          "splits": 298,
+          "wall_ms": 2253.780875,
+          "word_xors": 39907946
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 699,
+          "scalar": 1512816,
+          "splits": 298,
+          "wall_ms": 2328.028542,
+          "word_xors": 38647169
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 61,
+          "scalar": 1971652,
+          "splits": 28,
+          "wall_ms": 179.603042,
+          "word_xors": 5380986
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 408,
+          "scalar": 2031667,
+          "splits": 177,
+          "wall_ms": 1204.339167,
+          "word_xors": 22913380
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 64,
+          "scalar": 1088518,
+          "splits": 29,
+          "wall_ms": 109.190833,
+          "word_xors": 5371310
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 697,
+          "scalar": 511328,
+          "splits": 298,
+          "wall_ms": 2872.359292,
+          "word_xors": 38149921
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 698,
+          "scalar": 762771,
+          "splits": 298,
+          "wall_ms": 2309.4034159999997,
+          "word_xors": 37817276
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 156,
+          "scalar": 1576745,
+          "splits": 68,
+          "wall_ms": 595.180334,
+          "word_xors": 9794399
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 700,
+          "scalar": 2040407,
+          "splits": 298,
+          "wall_ms": 2280.8030000000003,
+          "word_xors": 38616702
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 700,
+          "scalar": 795521,
+          "splits": 298,
+          "wall_ms": 2269.439375,
+          "word_xors": 40033767
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 699,
+          "scalar": 1845751,
+          "splits": 298,
+          "wall_ms": 2194.3434580000003,
+          "word_xors": 38988823
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 701,
+          "scalar": 1508496,
+          "splits": 298,
+          "wall_ms": 3439.2638340000003,
+          "word_xors": 38730815
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 698,
+          "scalar": 193443,
+          "splits": 298,
+          "wall_ms": 2335.22275,
+          "word_xors": 40598074
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 700,
+          "scalar": 982670,
+          "splits": 298,
+          "wall_ms": 2587.538584,
+          "word_xors": 37343850
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 142,
+          "scalar": 651253,
+          "splits": 63,
+          "wall_ms": 627.0405420000001,
+          "word_xors": 9139058
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 700,
+          "scalar": 967883,
+          "splits": 298,
+          "wall_ms": 2145.7702919999997,
+          "word_xors": 39124863
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 135,
+          "scalar": 1859609,
+          "splits": 61,
+          "wall_ms": 279.055875,
+          "word_xors": 8616693
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 697,
+          "scalar": 314583,
+          "splits": 298,
+          "wall_ms": 2576.9012089999997,
+          "word_xors": 37970381
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 698,
+          "scalar": 1966828,
+          "splits": 298,
+          "wall_ms": 2593.085958,
+          "word_xors": 40158334
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 700,
+          "scalar": 978014,
+          "splits": 298,
+          "wall_ms": 2368.878375,
+          "word_xors": 38092201
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 103,
+          "scalar": 11804,
+          "splits": 45,
+          "wall_ms": 571.457541,
+          "word_xors": 7515567
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 119,
+          "scalar": 988821,
+          "splits": 53,
+          "wall_ms": 278.265542,
+          "word_xors": 7850935
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 700,
+          "scalar": 326543,
+          "splits": 298,
+          "wall_ms": 2567.1421250000003,
+          "word_xors": 40014688
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 697,
+          "scalar": 309559,
+          "splits": 298,
+          "wall_ms": 2409.7490829999997,
+          "word_xors": 38761367
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 492,
+          "scalar": 1984526,
+          "splits": 213,
+          "wall_ms": 1103.322583,
+          "word_xors": 25551639
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 700,
+          "scalar": 1750890,
+          "splits": 298,
+          "wall_ms": 2086.684167,
+          "word_xors": 36850398
+        },
+        {
+          "decomposed": false,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 698,
+          "scalar": 1886937,
+          "splits": 298,
+          "wall_ms": 2062.7128749999997,
+          "word_xors": 40344524
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 103,
+          "scalar": 474696,
+          "splits": 45,
+          "wall_ms": 243.022667,
+          "word_xors": 7324581
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 202,
+          "scalar": 368142,
+          "splits": 88,
+          "wall_ms": 869.2903749999999,
+          "word_xors": 12859021
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 421,
+          "scalar": 1185967,
+          "splits": 181,
+          "wall_ms": 1266.9299170000002,
+          "word_xors": 24364943
+        },
+        {
+          "decomposed": true,
+          "exhausted": false,
+          "max_degree_built": 3,
+          "reductions": 34,
+          "scalar": 428982,
+          "splits": 17,
+          "wall_ms": 141.79787499999998,
+          "word_xors": 3933792
+        }
+      ],
+      "split_free": false,
+      "subgroup_order": "2095853",
+      "targets_measured": 32,
+      "targets_requested": 32,
+      "truncated": false
+    }
+  ],
+  "generated_utc": "unix:1791848865",
+  "host": {
+    "arch": "aarch64",
+    "os": "macos"
+  },
+  "lead": "Shantz–Teske delta method, net cost per relation",
+  "skipped": [],
+  "wall_ms": 92305.545167
+}
