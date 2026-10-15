@@ -30,16 +30,20 @@ nothing here is a comparison result.**
    n=13 and n=23 and lower bounds at n=19, which has no calibration. So
    "complete IC vs lower-bound rho" comparisons in earlier studies mixed a
    wall-time-calibrated conversion on one side with nothing on the other.
-   → **Amendment A3**: report every arm with (a) charged `S` and (b) a
+   → **Amendment A3** (now AGENTS.md §5a): report every arm with (a) charged `S` and (b) a
    sensitivity band pricing each unpriced native counter at 0, 0.1 and 1
    GAE; rank only where the conclusion holds across the band.
-2. **Some arms do not emit the counters they leave unpriced.**
-   `ic-compact` (12 counters) and both prime IC arms (sqrt solves,
-   lookups, row ops, Legendre symbols, inversions) report the names but
-   not the counts (`n/e` in `TABLE.md`), so no band can be computed.
-   → **Implementation gap** in `src/cryptanalysis/ecbench/` (outside this
-   study's reserved paths): emit the counts. Until fixed these arms are
-   reported as lower bounds only.
+2. **Where the unpriced counts live** (corrected 2026-10-15, same day).
+   The first version of this finding said `ic-compact` and the prime IC
+   arms do not emit the counts they leave unpriced. That was a reading
+   error in `summarise.py`, which looked only at the record's top-level
+   `counters`. The counts are in each phase's `native` map.
+   `pricing.py` now finds them, and `TABLE.md` is regenerated. The one
+   genuine gap is `ic.shared_rank`. It lists `field_arithmetic`,
+   `hash_and_allocation` and `modular_combination` as unpriced categories
+   with no count (`src/cryptanalysis/ecbench/methods.rs`, the
+   `unpriced.extend` after the phase loop). Under AGENTS.md §5a that arm is
+   a lower bound and cannot be ranked until those operations are counted.
 3. **Calibration coverage is per curve.** Pinned conversions exist for some
    sizes only (n=13, 23 here; not 19). → Either calibrate every ladder size
    on one fixed host before Phase 1 or report the uncalibrated sizes in
@@ -76,7 +80,8 @@ nothing here is a comparison result.**
 - Step 3, parameter selection on the train panel for each Koblitz size
   (n ∈ {13, 17, 19, 23, 29, 31, 37, 41}) and the prime size rule check.
 - Calibrations for the uncalibrated ladder sizes (finding 3).
-- The counter-emission fix (finding 2), which needs a scope expansion into
-  `src/cryptanalysis/ecbench/`.
+- Counting the three uncounted `ic.shared_rank` categories (finding 2), in
+  `src/cryptanalysis/ecbench/`; until then `ic-shared` is reported as a
+  lower bound only.
 - Phase 2 (wall time, second-host replay) needs a RunPod pod; this
   container has no `RUNPOD_API_KEY`.

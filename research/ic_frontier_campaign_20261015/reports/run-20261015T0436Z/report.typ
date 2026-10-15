@@ -21,7 +21,9 @@ $n = 13$ (2) and both prime IC arms with a fixed 64-point base at 32, 36 and 40 
 
 *Observations (no comparison is made).* Every rho, BSGS and kangaroo record is a lower bound. IC negfold and
 F4 records are complete at $n = 13$ and $n = 23$ (pinned calibrations) and lower bounds at $n = 19$.
-`ic-compact` and the prime IC arms leave counters unpriced without emitting their counts. One inherited-F4
+`ic.shared_rank` lists three unpriced categories without counts. *Correction:* an earlier version of this
+report said `ic-compact` and the prime IC arms do not emit their unpriced counts. They do, in each phase's
+`native` map; the error was in the summary script (`pilot/FINDINGS.md`, finding 2). One inherited-F4
 execution at $n = 23$ took about 6 minutes (charged $S$ = 85,071). Interpretation and protocol
 consequences: `pilot/FINDINGS.md`.
 

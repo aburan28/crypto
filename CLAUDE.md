@@ -32,3 +32,7 @@ default PR instructions say. CI follow-up and merging belong to a separate
 automation on Sonnet 5.5 or Haiku 5.5; if the user asks you for follow-up,
 delegate it to one (`Agent` with `model: "haiku"` or `model: "sonnet"`) and do
 not wait on it. AGENTS.md, "Default workflow: open the PR, then stop".
+
+Every cross-method ECDLP comparison prices the unpriced native work of
+every arm, rho references included, at 0, 0.1 and 1 GAE per operation and
+ranks two arms only where the order holds across that band (AGENTS.md §5a).

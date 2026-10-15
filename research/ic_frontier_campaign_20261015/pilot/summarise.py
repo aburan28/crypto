@@ -5,6 +5,8 @@
 import json
 import sys
 
+from pricing import unpriced_counts
+
 print("| session | curve | log2 r | arm | status | S | S complete? | unpriced counters (count or 'not emitted') |")
 print("|:--|:--|--:|:--|:--|--:|:--|:--|")
 for path in sys.argv[1:]:
@@ -16,11 +18,8 @@ for path in sys.argv[1:]:
         w = r["workload"]["curve"]
         import math
         lr = math.log2(int(w["r"]))
-        un = c.get("unpriced") or []
-        shown = []
-        for k in un:
-            v = r["counters"].get(k)
-            shown.append(f"{k.replace('_uncharged', '')}={'n/e' if v is None else v}")
+        shown = [f"{k.replace('_uncharged', '')}={'n/e' if v is None else v}"
+                 for k, v in unpriced_counts(r).items()]
         s = c.get("s")
         print(f"| {r['session_id']} | {w['slug']} | {lr:.2f} | {r['arm']} | {r['outcome']['status']} | "
               f"{'' if s is None else f'{s:.3f}'} | {'no (lower bound)' if c['lower_bound'] else 'yes'} | "
