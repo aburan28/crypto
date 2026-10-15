@@ -19,13 +19,27 @@ walkers are consumers or older, separately bounded implementations.
 | Composite-degree chain | Naive/balanced/cost-model odd chains; Montgomery 2/4-isogeny power-of-two chains | `chain`, `twopow` | Next chain series; same points pushed and strategy-generation boundary |
 | Quaternion ideals / supersingular paths | KLPT, Brandt/class sets, Deuring (`quat/`) | `quat` | Separate ideal and map boundaries; small-characteristic Deuring limits retained |
 | Abelian varieties | Richelot, gluing/splitting, dimension-2 and general theta/Kani chains | `genus2`, `theta`, `theta4` | Separate genus/dimension series; not elliptic prime-degree constructors |
+| Named NIST curve and large prime -> one descended eigenline map | Extension-field torsion, Frobenius eigenspace and descended kernel in `tools/isogeny-cli/src/constructor.rs`; exact independent replay in `replay.rs` and `verification_*` | Dedicated `isogeny search` / `walk` | Required whole-search series on published P192/P224 at 1117/2341 and larger degrees; construction and replay charged separately |
+| CM curve / ideal loop | Hilbert class polynomial and curve construction (`cm.rs`); closing CM isogeny loops (`gls_loop.rs`) | Dedicated module tests / examples | Required construction and loop series; no kernel-only or endomorphism-existence timing substituted |
+
+The root crate also contains earlier implementations in `src/isogeny/`: explicit
+kernel and odd-degree/degree-2 Vélu, naive dual/composition, CM trace/discriminant,
+binary quadratic forms/class groups, graph search and volcano traversal. Root
+cryptanalysis consumers include binary isogenies and the P256 walkers/covers.
+They need separately pinned native entrypoints and fixtures rather than being
+silently equated with the standalone crate's methods. The root test suite
+checks their correctness but is not their performance baseline.
 
 The broad existing harness exposes 24 named groups (plus aggregates). Its
 historic results are not new CPU baselines. Every subsequent series will use
 fixed fixtures and hashes with its own correctness boundary; unsupported or
 resource-censored rows remain explicit. The first series implements BMSS
 counting and output identity. Other rows are inventoried, not measured by
-that series, and remain in the campaign backlog.
+that series, and remain in the campaign backlog. The Linux matrix also invokes
+all 24 explicit legacy benchmark groups under the native isolation wrapper.
+Those exploratory rows retain failed verification flags and lack full output
+digests; they cannot establish an optimization speedup. Actual run receipts,
+rather than the implemented workflow, determine which groups were measured.
 
 CPU plan: Apple M4 Pro locally; GitHub native Linux x86-64, Linux ARM64,
 Apple ARM64 and Intel macOS runners. Runner labels select architecture/OS,

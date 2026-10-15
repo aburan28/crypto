@@ -61,6 +61,7 @@ jobs:
           cargo build --release --locked --manifest-path "$RUNNER_TEMP/isogeny-base/isogeny_algos/Cargo.toml" --bin isogeny-perf
           cargo build --release --locked --manifest-path isogeny_algos/Cargo.toml --bin isogeny-perf
           if [ "$RUNNER_OS" = Linux ]; then
+            cargo build --release --locked --manifest-path "$RUNNER_TEMP/isogeny-base/isogeny_algos/Cargo.toml" --bin bench
             cargo build --release --locked --manifest-path research/isogeny_performance_20261014/isolation/Cargo.toml
           fi
       - name: Exact-output arithmetic counts on every CPU
@@ -89,6 +90,21 @@ jobs:
             # macOS: exact repeated counts, with no wall measurements.
             "$HEAD" campaign "$BASE" "$HEAD" "$BASE_SHA" "$HEAD_SHA" evidence/campaign
           fi
+      - name: Explore baselines for the remaining algorithm families
+        if: always() && runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          ISO="$GITHUB_WORKSPACE/research/isogeny_performance_20261014/isolation/target/release/isolated-bench"
+          BENCH="$RUNNER_TEMP/isogeny-base/isogeny_algos/target/release/bench"
+          LAST_CPU=$(($(nproc) - 1))
+          CPUS=$(cat "/sys/devices/system/cpu/cpu$LAST_CPU/topology/thread_siblings_list")
+          # Legacy stage timings lack exact-output digests. Keep every row;
+          # these exploratory records do not establish an optimization gain.
+          "$ISO" run --cpus "$CPUS" --out evidence/family-baselines-isolation.jsonl \
+            --label family-baselines -- "$BENCH" --quick --out evidence/family-baselines.jsonl \
+            kernel find path kernel2 chain bmss csidh v2path p1kernel char2 quat genus2 \
+            phi sea radical relation models theta twopow theta4 nc_fields nc_atkin nc_suth big
       - name: Keep source, binaries, raw records and censored attempts
         if: always()
         shell: bash
