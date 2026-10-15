@@ -103,18 +103,18 @@ def screen(spec, artifact_dir):
                         if row.get("pipeline") is not None})
     candidates = [candidate for pipeline in pipelines
                   if (candidate := eligible_pipeline(analysis, pipeline)) is not None]
-    winner = min(candidates,
-                 key=lambda row: (row["screen_mean_online_ms"], row["pipeline"])) if candidates else None
-    if winner is not None:
+    for candidate in candidates:
         path = REPO / "research" / result_dir / (
-            f"candidate_K{winner['k']}_{winner['variant']}_{winner['bloom_profile']}.json")
+            f"candidate_K{candidate['k']}_{candidate['variant']}_{candidate['bloom_profile']}.json")
         manifest = read(path)
-        if (manifest["factor_base"]["actual_usable_points"] != winner["actual_usable_points"]
-                or manifest["factor_base"]["source_base_hash_blake3"] != winner["base_hash"]
+        if (manifest["factor_base"]["actual_usable_points"] != candidate["actual_usable_points"]
+                or manifest["factor_base"]["source_base_hash_blake3"] != candidate["base_hash"]
                 or manifest["implementation"]["source_sha256"]["ic"] != SOURCE_SHA256):
             raise ValueError(f"{label}: candidate manifest differs from replayed base")
-        winner.update({"candidate_id": manifest["candidate_id"],
-                       "candidate_manifest_sha256": digest(path)})
+        candidate.update({"candidate_id": manifest["candidate_id"],
+                          "candidate_manifest_sha256": digest(path)})
+    winner = min(candidates,
+                 key=lambda row: (row["screen_mean_online_ms"], row["pipeline"])) if candidates else None
     return {"screen": label, "run_id": run_id, "source_commit": commit,
             "artifact_sha256": artifact_sha, "analysis_sha256": analysis_sha,
             "source_status": analysis["status"],

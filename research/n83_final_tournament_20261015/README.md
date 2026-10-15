@@ -34,3 +34,21 @@ controls, takes the lowest eligible mean from each screen, and deduplicates
 exact base, kernel, and source configurations. The output is deterministic
 and refuses to overwrite a different admission record. Arm execution and
 the final 99% paired decision follow `PROTOCOL.md`.
+
+After `admission.json` is committed, `run.py --preflight` checks the complete
+candidate manifests, frozen public points, source pins, and exposed host
+capacity. Build the exact example from that commit, then run all admitted
+pipelines in list and reverse-list order on one allocation:
+
+```sh
+python3 research/n83_final_tournament_20261015/run.py \
+  --binary /absolute/path/to/koblitz_orbit_dlp_fast \
+  --output /absolute/path/to/new-result-directory
+python3 research/n83_final_tournament_20261015/verify.py \
+  /absolute/path/to/new-result-directory
+```
+
+The verifier replays every base and target relation from the scalar sidecar,
+checks the exact base digest, index size, process counters and source record,
+then applies the frozen 80-block paired bootstrap decision. It retains every
+arm status when an allocation or correctness gate fails.
