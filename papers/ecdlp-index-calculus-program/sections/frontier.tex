@@ -232,7 +232,8 @@ rho): Ie = improves the exponent, Ic = improves the constant, E =
 the distance left to the matched rho on the study's own boundary; ``d'' marks
 a derived or extrapolated value. Sources under \art{research/}:
 \texttt{ic\_next10\_20261014/}, \texttt{ic\_improve\_20261014/},
-\texttt{ic\_improve\_20261015/} and the named study directories.}
+\texttt{ic\_improve\_20261015/}, \texttt{ic\_improve3\_20261015/} and the
+named study directories.}
 \label{tab:ladder}
 \begin{tabularx}{\linewidth}{@{}>{\raggedright}Xl>{\raggedright}p{3.6cm}>{\raggedright\arraybackslash}p{3.2cm}@{}}
 \toprule
@@ -240,7 +241,9 @@ Change & Cl. & Ratio [95\%] & To rho \\
 \midrule
 \multicolumn{4}{@{}l}{\emph{Genus 3 after the cubic GHS transfer, $E_0(\FF_{q^3})$, cost in $\FF_q$ multiplications}}\\
 Double large primes vs full base (04) & Ie & $0.036$ $[0.035,0.036]$ at $2^{18}$; $q^{1.910}\to q^{1.385}$ & $2.58\times$ negation rho model at $q=2^{20}$ \\
-Large primes as columns, SGE, Wiedemann (01) & Ie & $0.653$ $[0.647,0.660]$ at $2^{20}$; $q^{1.398}\to q^{1.380}$ & ${\approx}1.7\times$ (d) \\
+Large primes as columns, SGE, Wiedemann (01) & Ie & $0.653$ $[0.647,0.660]$ at $2^{20}$; $q^{1.398}\to q^{1.380}$ & --- \\
+$\kappa(q)$ schedule + block Wiedemann (06) & T & $0.929$ at $2^{21}$ & $1.15\times$ measured negation rho at $2^{20}$ (ref.) \\
+Cheaper relation primitives + re-tuned $\kappa$ (r3-01) & Ic & $0.617$ $[0.616,0.619]$ at $2^{22}$ & no matched rho in this unit \\
 \addlinespace
 \multicolumn{4}{@{}l}{\emph{$k=4$ over $\FF_{p^4}$, operation counts}}\\
 $D_4$ $Y$-line vs plain $\Sem4$, $p=101$--$1033$ & Ic & $0.0548$ $[0.048,0.061]$ & handover $2^{126}$--$2^{137}$ (d) \\
@@ -251,6 +254,7 @@ Double large primes, tuned & R & $1.025$ $[1.016,1.037]$ (LA $0.827$) & --- \\
 \multicolumn{4}{@{}l}{\emph{Koblitz, compact orbit and Gr\"obner oracle}}\\
 Free relations in production, $n=41,53,61$ & Ic & $0.960$ $[0.946,0.976]$ & $3.8$--$15\times$ rho-frob ($w=0$, \S\ref{sec:campaign}) \\
 Linear-row harvest, $(23,12)$, $m=2$ & Ic & $0.858$ $[0.803,0.916]$ & oracle stage; default on \\
+Root-rank harvest gate, $(29,15)$, $m=2$ & Ic & $1/1.41$ $[1/1.52,1/1.32]$; end to end $1/1.20$ & oracle stage; default on \\
 Gated fall-row augmentation & Ic & $1/11.9$ on barrel $n=13$; $1$ in production & production no-op \\
 Equivariant Macaulay oracle & T & $4.0$ ($n=5$) \ldots\ $1/15.5$ ($n=13$) & not applicable to production \\
 \texttt{stride-renew} targets, $n=13$ & E & $0.531$ $[0.506,0.557]$ & $4.7\times$ rho-strong at $n=19$ \\
@@ -271,7 +275,7 @@ of a genus-3 hyperelliptic curve over $\FF_q$, where double-large-prime
 index calculus~\cite{gtthd2007} costs $\tilde O(q^{2-2/g})=\tilde O(q^{4/3})$
 against rho's $q^{3/2}$. That is known; what is new is a priced,
 end-to-end, verified run of it on a family the repository can build
-($4\mid\#E_0(\FF_{q^3})$, split arm, $q=2^{8}$--$2^{21}$, every logarithm checked
+($4\mid\#E_0(\FF_{q^3})$, split arm, $q=2^{8}$--$2^{22}$, every logarithm checked
 against the planted scalar). Adding double large primes changed the
 exponent from $q^{1.910}$ to $q^{1.385}$ $[1.379,1.391]$, and keeping the large
 primes as columns, merging them with structured Gaussian elimination and
@@ -279,18 +283,27 @@ finishing with Wiedemann moved it to $q^{1.380}$ and the constant to
 $0.653\times$. This is the only index-calculus family in the programme whose
 fitted exponent lies below rho's, and the only one where measured
 IC beats a rho arm: the item-7 rho, which walks at $1.75\sqrt\ell$ steps,
-at $q=2^{15}$ ($0.69$ $[0.55,0.83]$). Against the negation-map rho model
-it is still $2.58\times$ dearer at $q=2^{20}$ before the new linear algebra
-and about $1.7\times$ after it (derived). The local exponents still rise by
-$0.020$ per bit, because structured elimination trades row weight for
-columns, so the $4/3$ asymptote is not yet in view, and pricing a
-multiplication mod $\ell$ at nine $\FF_q$ multiplications turns the
-exponent gain into a loss. The family is narrow: the transfer needs the
+at $q=2^{15}$ ($0.69$ $[0.55,0.83]$). Two further
+rounds kept going. A frozen schedule for the factor-base fraction $\kappa(q)$
+plus block Wiedemann brought the whole solve to $0.605\times$ the first
+double-large-prime arm at $q=2^{21}$. Cheaper relation primitives
+(one-inversion Cantor addition, a Stickelberger pre-filter, reused
+exponentiations) then cut the relation phase to $0.47\times$ without
+changing a single relation, and with $\kappa$ re-tuned the whole solve to
+$0.617$ $[0.616,0.619]$ at $q=2^{22}$, in a unit that also charges
+inversions. The distance to rho shrank from $2.58\times$ the negation-map
+rho model at $q=2^{20}$ (first double-large-prime arm) to $1.15\times$ a
+measured negation-map rho there after the second round ($2.31\cdot10^{10}$
+against $2.01\cdot10^{10}$ $\FF_q$ multiplications; a reference on
+overlapping but not identical curves). The third round's $0.62\times$
+has no matched rho in its unit yet, so whether it crosses is not
+established. The local exponents sit at $1.38$--$1.41$, still above $4/3$,
+because the linear algebra grows faster than $q^{4/3}$ and the tuned
+$\kappa$ falls with $q$. The family is narrow: the transfer needs the
 right 2-power torsion, and $\FF_{q^3}$ curves are not deployed.
-\emph{Next improvement}: a factor-base fraction rebalanced to the new
-linear algebra (the exploratory $\kappa=1.41$ arm reached $q^{1.357}$),
-then a measured run at $q\ge2^{21}$ against the negation-map rho on the same
-instances, with the mod-$\ell$ multiplications priced.
+\emph{Next improvement}: a negation-map rho measured in the third round's
+unit on the same instances, then the run past $q=2^{22}$ that would show a
+crossover or rule it out.
 
 \paragraph{The $k=4$ chain.} The $D_4$ Macaulay system of
 \S\ref{sec:gaudry} entered a complete ladder ($p=101$--$1033$, 21 curves):
@@ -310,7 +323,9 @@ gain without its relation-phase cost.
 \paragraph{Koblitz.} Free relations---root-table self-collisions used as
 homogeneous rows---are now the production default ($0.960\times$ counted,
 $0.941\times$ wall); the linear rows the Gr\"obner oracle used to discard
-are harvested ($0.86$--$0.93\times$ where the gate fires); the gated
+are harvested ($0.86$--$0.93\times$ where the gate fires, and a root-rank
+gate then made it fire on more cells: $1/1.41$ at $(29,15)$, $1/1.20$ end
+to end); the gated
 fall-row and equivariant passes pay only on overdetermined systems the
 production pipeline does not build. The cyclotomic base and the trace-zero
 filter were refuted. A census closes the free-relation lever at the rungs
