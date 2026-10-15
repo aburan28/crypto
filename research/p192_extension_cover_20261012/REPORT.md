@@ -263,6 +263,17 @@ empty, so no signed relation row of this declared shape arises on the
 support sets; longer supports and known-scalar target overlap remain
 separate collector measurements.
 
+The [split-line leaf-rank analysis](reports/run-20261015T2346Z/REPORT.md)
+uses the 4,892 split line cuts to expose 9,784 additional distinct
+quotient points. Each cut has two private fresh-point columns, so the
+geometric line equations are independent but no nonzero combination
+eliminates all fresh columns to constrain the old 141 alone. The first
+32 constant-sum equations pass independent Sage and prime-field checks;
+the full incidence and distinctness are frozen. Even at the combined
+9,925-point size, the unordered three-sum ceiling is 162,993,977,475,
+giving a uniform 64-query union bound of approximately (2^{-148.754}).
+The private-column implication has a checked Lean proof.
+
 ## Reproduction
 
 From this repository's root:
