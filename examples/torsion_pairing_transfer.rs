@@ -15,6 +15,7 @@ use num_bigint::{BigInt, BigUint};
 use num_traits::{One, Zero};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
+use serde::Serialize;
 use serde_json::{json, Value};
 
 type F2 = [u64; 2];
@@ -448,6 +449,118 @@ fn reduced_tate(k: &Field, p: SourcePoint, h: &Point, r: u64) -> Option<Elt> {
     }
 }
 
+#[derive(Clone, Copy)]
+struct PhaseStart {
+    cpu_ns: u64,
+    k_muls: u64,
+    k_squares: u64,
+    k_invs: u64,
+}
+
+#[derive(Clone, Copy, Default, Serialize)]
+struct PhaseCharge {
+    cpu_ns: u64,
+    fp_muls: u64,
+    fp_invs: u64,
+    extension_muls: u64,
+    extension_squares_in_muls: u64,
+    extension_invs: u64,
+}
+
+impl PhaseStart {
+    fn now(k: &Field) -> Self {
+        Self {
+            cpu_ns: thread_cpu_ns(),
+            k_muls: k.muls.get(),
+            k_squares: k.squares.get(),
+            k_invs: k.inversions.get(),
+        }
+    }
+    fn finish(self, k: &Field) -> PhaseCharge {
+        let fp = take_field_counters();
+        PhaseCharge {
+            cpu_ns: thread_cpu_ns() - self.cpu_ns,
+            fp_muls: fp.0,
+            fp_invs: fp.1,
+            extension_muls: k.muls.get() - self.k_muls,
+            extension_squares_in_muls: k.squares.get() - self.k_squares,
+            extension_invs: k.inversions.get() - self.k_invs,
+        }
+    }
+}
+
+impl PhaseCharge {
+    fn add(&mut self, other: Self) {
+        self.cpu_ns += other.cpu_ns;
+        self.fp_muls += other.fp_muls;
+        self.fp_invs += other.fp_invs;
+        self.extension_muls += other.extension_muls;
+        self.extension_squares_in_muls += other.extension_squares_in_muls;
+        self.extension_invs += other.extension_invs;
+    }
+}
+
+#[derive(Default, Serialize)]
+struct SelectionCharges {
+    candidate_search: PhaseCharge,
+    miller: PhaseCharge,
+    final_exponentiation: PhaseCharge,
+    pairing_checks: PhaseCharge,
+}
+
+impl SelectionCharges {
+    fn total(&self) -> PhaseCharge {
+        let mut out = self.candidate_search;
+        out.add(self.miller);
+        out.add(self.final_exponentiation);
+        out.add(self.pairing_checks);
+        out
+    }
+}
+
+// The arithmetic is the same as reduced_tate; the two snapshots divide its
+// Miller fraction (including denominator inversion) from final exponentiation.
+fn reduced_tate_profiled(
+    k: &Field,
+    p: SourcePoint,
+    h: &Point,
+    r: u64,
+    charges: &mut SelectionCharges,
+) -> Option<Elt> {
+    let miller_start = PhaseStart::now(k);
+    let raw = (|| {
+        let mut numerator = k.one();
+        let mut denominator = k.one();
+        let mut t = p;
+        let bits = 64 - r.leading_zeros();
+        for i in (0..bits - 1).rev() {
+            let (line, vertical, next) = line_step(k, t, t, h)?;
+            numerator = k.mul(&k.square(&numerator), &line);
+            denominator = k.mul(&k.square(&denominator), &vertical);
+            t = next;
+            if (r >> i) & 1 == 1 {
+                let (line, vertical, next) = line_step(k, t, p, h)?;
+                numerator = k.mul(&numerator, &line);
+                denominator = k.mul(&denominator, &vertical);
+                t = next;
+            }
+        }
+        assert!(t.infinity, "Miller terminal point is not identity");
+        Some(k.mul(&numerator, &k.inv(&denominator)?))
+    })();
+    charges.miller.add(miller_start.finish(k));
+    let raw = raw?;
+    let final_start = PhaseStart::now(k);
+    let exp = (&k.order - BigUint::one()) / BigUint::from(r);
+    let value = k.pow(&raw, &exp);
+    charges.final_exponentiation.add(final_start.finish(k));
+    if value == k.zero() {
+        None
+    } else {
+        Some(value)
+    }
+}
+
 fn multiplicative_bsgs(k: &Field, alpha: &Elt, beta: &Elt, r: u64) -> Option<u64> {
     let mut width = 1u64;
     while width * width < r {
@@ -473,7 +586,9 @@ fn multiplicative_bsgs(k: &Field, alpha: &Elt, beta: &Elt, r: u64) -> Option<u64
     None
 }
 
-fn select_point(k: &Field, input: Input) -> (Point, Value, Elt, Elt) {
+fn select_point(k: &Field, input: Input) -> (Point, Value, Elt, Elt, SelectionCharges) {
+    let mut charges = SelectionCharges::default();
+    let mut search_start = PhaseStart::now(k);
     let order = field_curve_order(input);
     let r = BigUint::from(input.r);
     let mut cofactor = order.clone();
@@ -527,27 +642,38 @@ fn select_point(k: &Field, input: Input) -> (Point, Value, Elt, Elt) {
                 continue;
             }
         }
-        let Some(alpha) = reduced_tate(k, input.g, &h, input.r) else {
+        charges.candidate_search.add(search_start.finish(k));
+        let Some(alpha) = reduced_tate_profiled(k, input.g, &h, input.r, &mut charges) else {
             pairing_poles += 1;
+            search_start = PhaseStart::now(k);
             continue;
         };
-        if alpha == k.one() || k.pow(&alpha, &r) != k.one() {
+        let check_start = PhaseStart::now(k);
+        let valid_alpha = alpha != k.one() && k.pow(&alpha, &r) == k.one();
+        charges.pairing_checks.add(check_start.finish(k));
+        if !valid_alpha {
             degenerate += 1;
+            search_start = PhaseStart::now(k);
             continue;
         }
-        let Some(beta) = reduced_tate(k, input.q, &h, input.r) else {
+        let Some(beta) = reduced_tate_profiled(k, input.q, &h, input.r, &mut charges) else {
             pairing_poles += 1;
+            search_start = PhaseStart::now(k);
             continue;
         };
-        if k.pow(&beta, &r) != k.one() {
+        let check_start = PhaseStart::now(k);
+        let valid_beta = k.pow(&beta, &r) == k.one();
+        charges.pairing_checks.add(check_start.finish(k));
+        if !valid_beta {
             degenerate += 1;
+            search_start = PhaseStart::now(k);
             continue;
         }
         let receipt = json!({"attempt":attempt,"curve_order":order.to_string(),"r_valuation":valuation,
             "cofactor":cofactor.to_string(),"order_candidates":order_candidates,
             "pairing_poles":pairing_poles,"degenerate":degenerate,
             "h":{"x":h.x,"y":h.y},"alpha":alpha,"beta":beta});
-        return (h, receipt, alpha, beta);
+        return (h, receipt, alpha, beta, charges);
     }
     panic!("point search reached 4096 candidate x coordinates");
 }
@@ -617,15 +743,19 @@ fn run_prepare(input: Input, cell: usize) {
     let cpu = thread_cpu_ns();
     let k = Field::new(input);
     let cert = k.irreducibility_receipt();
-    let (h, selection, alpha, beta) = select_point(&k, input);
-    let fp = take_field_counters();
+    let setup_fp = take_field_counters();
+    let (h, selection, alpha, beta, charges) = select_point(&k, input);
+    let tail_fp = take_field_counters();
+    let charged = charges.total();
     let (rss, rss_unit) = peak_rss_raw();
     println!(
         "{}",
-        json!({"schema":"torsion_pairing_prepare/v1","cell":cell,"p":input.p,
+        json!({"schema":"torsion_pairing_prepare/v2","cell":cell,"p":input.p,
         "r":input.r,"tower_degree":k.n,"tower_a":k.a,"irreducibility":cert,
         "selection":selection,"selected_h":{"x":h.x,"y":h.y},"alpha":alpha,"beta":beta,
-        "field_counts":k.counts(),"fp_counts":{"muls":fp.0,"invs":fp.1},
+        "field_counts":k.counts(),"fp_counts":{"muls":setup_fp.0+charged.fp_muls+tail_fp.0,
+            "invs":setup_fp.1+charged.fp_invs+tail_fp.1},
+        "selection_phase_charges":charges,"selection_unclassified_fp":{"muls":tail_fp.0,"invs":tail_fp.1},
         "cpu_ns":thread_cpu_ns()-cpu,"wall_ns":wall.elapsed().as_nanos() as u64,
         "peak_rss_raw":rss,"peak_rss_unit":rss_unit})
     );
@@ -647,11 +777,19 @@ fn run_pairing(input: Input, cell: usize, frozen_path: &str) {
     assert_eq!(frozen["irreducibility"], cert);
     let select_wall = Instant::now();
     let select_cpu = thread_cpu_ns();
-    let (h, selection, alpha, beta) = select_point(&k, input);
-    let select_fp = take_field_counters();
+    let (h, selection, alpha, beta, charges) = select_point(&k, input);
+    let select_tail_fp = take_field_counters();
+    let charged = charges.total();
+    let select_fp = (
+        charged.fp_muls + select_tail_fp.0,
+        charged.fp_invs + select_tail_fp.1,
+    );
     let select_k = k.counts();
     let select_cpu_ns = thread_cpu_ns() - select_cpu;
     let select_wall_ns = select_wall.elapsed().as_nanos() as u64;
+    let select_unclassified_cpu_ns = select_cpu_ns
+        .checked_sub(charged.cpu_ns)
+        .expect("phase CPU exceeds selection interval");
     assert_eq!(frozen["selected_h"], json!({"x":h.x,"y":h.y}));
     assert_eq!(frozen["selection"], selection);
     assert_eq!(frozen["alpha"], json!(alpha));
@@ -672,10 +810,13 @@ fn run_pairing(input: Input, cell: usize, frozen_path: &str) {
     let ns_per_source_add = calibrate_source_add(&curve, input);
     println!(
         "{}",
-        json!({"schema":"torsion_pairing_run/v1","cell":cell,"p":input.p,
+        json!({"schema":"torsion_pairing_run/v2","cell":cell,"p":input.p,
         "r":input.r,"recovered":scalar,"selected_h":{"x":h.x,"y":h.y},
         "setup":{"cpu_ns":setup_cpu,"wall_ns":setup_wall,"fp_muls":setup_fp.0,"fp_invs":setup_fp.1,"k_cumulative":setup_k},
-        "selection_and_pairings":{"cpu_ns":select_cpu_ns,"wall_ns":select_wall_ns,"fp_muls":select_fp.0,"fp_invs":select_fp.1,"k_cumulative":select_k},
+        "selection_and_pairings":{"cpu_ns":select_cpu_ns,"wall_ns":select_wall_ns,
+            "fp_muls":select_fp.0,"fp_invs":select_fp.1,"k_cumulative":select_k,
+            "phase_charges":charges,"unclassified_cpu_ns":select_unclassified_cpu_ns,
+            "unclassified_fp":{"muls":select_tail_fp.0,"invs":select_tail_fp.1}},
         "multiplicative_dlp":{"cpu_ns":dlog_cpu_ns,"wall_ns":dlog_wall_ns,"fp_muls":dlog_fp.0,"fp_invs":dlog_fp.1,"k_cumulative":dlog_k},
         "cold_cpu_ns":cold_cpu_ns,"cold_wall_ns":cold_wall_ns,
         "ns_per_source_add_calibration":ns_per_source_add,
