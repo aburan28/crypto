@@ -20,5 +20,5 @@ run m2N20-v48 --p proth:48 "${K[@]}" --m 2 --t-min 10 --max-t 10
 run m2N20-v56 --p proth:56 "${K[@]}" --m 2 --t-min 10 --max-t 10
 run m3N15-v40 --p 29686813949953 "${K[@]}" --m 3 --t-min 5 --max-t-m3 5
 run m4N12-P-224 --p P-224 "${K[@]}" --m 4 --t-min 3 --max-t-m4 3 --verify
-run m2N20-P-192 --p P-192 --kinds dickson-torus --controls tower --m 2 --t-min 10 --max-t 10 --verify
 run m2N20-P-224 --p P-224 "${K[@]}" --m 2 --t-min 10 --max-t 10 --verify
+run m2N20-P-192 --p P-192 --kinds dickson-torus --controls tower --m 2 --t-min 10 --max-t 10 --verify
