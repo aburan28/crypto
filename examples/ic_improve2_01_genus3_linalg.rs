@@ -1608,6 +1608,7 @@ fn wiedemann_k(rows: &[Row], rhs: &[u64], n: usize, kc: usize, ell: u64) -> (Opt
     let mut m = 1usize;
     let mut binv = 1u64; // inverse of the last nonzero discrepancy b
     let mut matvecs = 0u64;
+    let red_every = ((u128::MAX / 2 / (ell as u128 * ell as u128)) as usize).clamp(1, 1024);
     let mut i = 0usize;
     loop {
         if i > 0 {
@@ -1622,7 +1623,8 @@ fn wiedemann_k(rows: &[Row], rhs: &[u64], n: usize, kc: usize, ell: u64) -> (Opt
             let mut acc: u128 = d as u128;
             for j in 1..=l {
                 acc += c[j] as u128 * s[i - j] as u128;
-                if j & 1023 == 0 {
+                // reduce before the u128 accumulator can overflow (ell up to 2^62)
+                if j % red_every == 0 {
                     acc = (a.mt.reduce(acc)) as u128;
                 }
             }
