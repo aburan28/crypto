@@ -486,6 +486,25 @@ theorem type_i_ciani_resultant_factor {K : Type*} [CommRing K]
   dsimp
   ring
 
+/-- The exact neighboring capacities certify the half-coverage threshold for
+    the fixed-base, unordered three-sum policy. Monotonicity of
+    `B * (B+1) * (B+2)` supplies the general integer threshold. -/
+theorem p192_conditioned_half_coverage_threshold_certificate :
+    2 * ((16759979263520929693 : ℕ) * 16759979263520929694 *
+      16759979263520929695 / 6) <
+      1569275433846670190958947353987675545133315652035359680560 ∧
+    1569275433846670190958947353987675545133315652035359680560 ≤
+      2 * ((16759979263520929694 : ℕ) * 16759979263520929695 *
+        16759979263520929696 / 6) := by
+  constructor <;> norm_num
+
+/-- A full unordered pair index at the half-coverage threshold has this many
+    entries, before implementation overhead or collision handling. -/
+theorem p192_threshold_pair_index_entries :
+    (16759979263520929694 : ℕ) * 16759979263520929695 / 2 =
+      140448452456825782461936609026805931665 := by
+  norm_num
+
 end P192ExtensionCover
 
 #print axioms P192ExtensionCover.cyclic_cross_ratio_product
@@ -519,3 +538,5 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.six_periodic_eigenvector_zero
 #print axioms P192ExtensionCover.type_i_primitive_quartic_identity
 #print axioms P192ExtensionCover.type_i_ciani_resultant_factor
+#print axioms P192ExtensionCover.p192_conditioned_half_coverage_threshold_certificate
+#print axioms P192ExtensionCover.p192_threshold_pair_index_entries
