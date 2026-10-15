@@ -1,0 +1,34 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Part E: rho with the negation map, m = 18, h = 2 (r = 2^71, u128)",
+  "description": "PROTOCOL.md Part E. f2m4_torsion(18, 1, 2), 1 target(s); the rho half of the m = 18 comparison (its IC half is SPEC-E-m18-ic on the same workloads; compared by operations across sessions).",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "f2m4_torsion",
+        "m": 18,
+        "seed": 1,
+        "max_cofactor": 2
+      }
+    ],
+    "targets_per_curve": 1,
+    "target_seed": 202610150301
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 202610150318,
+    "isolation_required": "L2",
+    "timeout_seconds": 259200
+  }
+}

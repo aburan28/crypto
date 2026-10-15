@@ -1,0 +1,98 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Part F: one and two large primes against the full base, m = 10, 12, 14",
+  "description": "PROTOCOL.md Part F. B2/B3 curves and targets; arms rho-neg, ic-wied (no large primes), lp1-700, lp2-700, lp2-500 (all wiedemann).",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "f2m4_torsion",
+        "m": 10,
+        "seed": 1,
+        "max_cofactor": 16
+      },
+      {
+        "kind": "f2m4_torsion",
+        "m": 12,
+        "seed": 1,
+        "max_cofactor": 16
+      },
+      {
+        "kind": "f2m4_torsion",
+        "m": 14,
+        "seed": 1,
+        "max_cofactor": 16
+      }
+    ],
+    "targets_per_curve": 1,
+    "target_seed": 202610150001
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-wied",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1",
+          "max_trials": "50000000",
+          "linalg": "wiedemann"
+        }
+      }
+    },
+    {
+      "name": "lp1-700",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1,large_primes=1,small_permille=700",
+          "max_trials": "50000000",
+          "linalg": "wiedemann"
+        }
+      }
+    },
+    {
+      "name": "lp2-700",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1,large_primes=2,small_permille=700",
+          "max_trials": "50000000",
+          "linalg": "wiedemann"
+        }
+      }
+    },
+    {
+      "name": "lp2-500",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1,large_primes=2,small_permille=500",
+          "max_trials": "50000000",
+          "linalg": "wiedemann"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 202610150203,
+    "isolation_required": "L2",
+    "timeout_seconds": 259200
+  }
+}

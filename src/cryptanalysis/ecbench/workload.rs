@@ -578,6 +578,18 @@ impl Instance {
                 RawPointG::Infinity => None,
             };
         }
+        // A curve over F_{(2^m)^4} may have a two-word order (m ≥ 16);
+        // its own u128 double-and-add gives the same point either way.
+        if let Instance::F2m4(i) = self {
+            let c = &i.curve;
+            let pt = c.mul(&i.generator, k % i.r);
+            return (!pt.inf).then(|| {
+                [
+                    format!("0x{:x}", c.f.pack(&pt.x)),
+                    format!("0x{:x}", c.f.pack(&pt.y)),
+                ]
+            });
+        }
         // A one-word instance's subgroup order fits a word, so a reduced
         // scalar does too.
         let k = u64::try_from(k % self.r()).ok()?;

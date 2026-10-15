@@ -1,0 +1,111 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "pilot: dense vs wiedemann, large-prime settings, m = 10",
+  "description": "Pilot P2 of research/gaudry_k4_char2_crossover_20261015 (before PROTOCOL.md): chooses small_permille for the large-prime arms. No claim.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "f2m4_torsion",
+        "m": 10,
+        "seed": 1,
+        "max_cofactor": 16
+      }
+    ],
+    "targets_per_curve": 2,
+    "target_seed": 202610150001
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-dense",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1",
+          "max_trials": "20000000"
+        }
+      }
+    },
+    {
+      "name": "ic-wied",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1",
+          "max_trials": "20000000",
+          "linalg": "wiedemann"
+        }
+      }
+    },
+    {
+      "name": "lp1-500",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1,large_primes=1,small_permille=500",
+          "max_trials": "20000000",
+          "linalg": "wiedemann"
+        }
+      }
+    },
+    {
+      "name": "lp2-300",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1,large_primes=2,small_permille=300",
+          "max_trials": "20000000",
+          "linalg": "wiedemann"
+        }
+      }
+    },
+    {
+      "name": "lp2-500",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1,large_primes=2,small_permille=500",
+          "max_trials": "20000000",
+          "linalg": "wiedemann"
+        }
+      }
+    },
+    {
+      "name": "lp2-700",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1,large_primes=2,small_permille=700",
+          "max_trials": "20000000",
+          "linalg": "wiedemann"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 202610150002,
+    "isolation_required": "L2",
+    "timeout_seconds": 86400
+  }
+}

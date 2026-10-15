@@ -1,0 +1,330 @@
+{
+  "schema": "ecbench.plan/v1",
+  "spec_id": "ECS1h401a2b7f4f5b",
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation",
+        "family": "rho",
+        "params": {
+          "cap_multiple": "64"
+        },
+        "method_id": "ECM1hefea4e0ebe79",
+        "method_sha256": "efea4e0ebe79dadfedeb75106dab92e25fc26bfe282155ee0326380d4184e995",
+        "entry": "ic_boundary::rho_walk_with(NegationClasses, RhoWalk::negation())"
+      }
+    },
+    {
+      "name": "ic-dense",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "bin-t-line",
+          "linalg": "incremental-gauss",
+          "max_trials": "20000000",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1",
+          "solver": "",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1he1dfa5e89018",
+        "method_sha256": "e1dfa5e8901821a657f9646e084a345d5673caf5aa73affd0ceabec39ff10501",
+        "entry": "ic_framework::run_pipeline"
+      }
+    },
+    {
+      "name": "ic-wied",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "bin-t-line",
+          "linalg": "wiedemann",
+          "max_trials": "20000000",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1",
+          "solver": "",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1h5cfd5ec04be4",
+        "method_sha256": "5cfd5ec04be492146c1721c21b44408253de75ecc3056f4d95d397c81a1df772",
+        "entry": "ic_framework::run_pipeline"
+      }
+    },
+    {
+      "name": "lp1-500",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "bin-t-line",
+          "linalg": "wiedemann",
+          "max_trials": "20000000",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1,large_primes=1,small_permille=500",
+          "solver": "",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1hd0f63eda068e",
+        "method_sha256": "d0f63eda068e241f2137ce6e081aeec3c86adb9f2770fb0b701b2199af63a79e",
+        "entry": "ic_framework::run_pipeline"
+      }
+    },
+    {
+      "name": "lp2-300",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "bin-t-line",
+          "linalg": "wiedemann",
+          "max_trials": "20000000",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1,large_primes=2,small_permille=300",
+          "solver": "",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1h896adc49c8c1",
+        "method_sha256": "896adc49c8c1d4410c3670943a74e0b5fcc64a457836dfd24b4947f8f37249d3",
+        "entry": "ic_framework::run_pipeline"
+      }
+    },
+    {
+      "name": "lp2-500",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "bin-t-line",
+          "linalg": "wiedemann",
+          "max_trials": "20000000",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1,large_primes=2,small_permille=500",
+          "solver": "",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1h4ede899f61e4",
+        "method_sha256": "4ede899f61e4e9f24cf46ff69e3f1b08784ccdba20fdc1831db58f1088bc9a4c",
+        "entry": "ic_framework::run_pipeline"
+      }
+    },
+    {
+      "name": "lp2-700",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "bin-t-line",
+          "linalg": "wiedemann",
+          "max_trials": "20000000",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1,large_primes=2,small_permille=700",
+          "solver": "",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1h5852073629cb",
+        "method_sha256": "5852073629cb08a81908806ee3cde608394d36bdbff7a2ab2506cccd3ae9c46d",
+        "entry": "ic_framework::run_pipeline"
+      }
+    }
+  ],
+  "workloads": [
+    {
+      "workload_id": "W845d6165060e",
+      "workload_sha256": "845d6165060eb339549ad89932b022ae7aec240f2aef92fff250ef7846c347a3",
+      "curve_spec": {
+        "kind": "f2m4_torsion",
+        "m": 10,
+        "seed": 1,
+        "max_cofactor": 16
+      },
+      "curve": {
+        "slug": "icv1-f2m40-t573363-49958dc1",
+        "icv1": "ICV1:f2m-40-1d6ebc58:573363:1099511054414:0xf11e9533ce:unk:unk:r:49958dc16466",
+        "family": "extension",
+        "construction": "gaudry_quartic_bin::find_bin_curve(10, 1, 16)",
+        "field_degree": null,
+        "field_bits": 10,
+        "group_order": 1099511054414,
+        "r": 549755527207,
+        "cofactor": 2,
+        "generator": [
+          "0x26bd58bb70",
+          "0xfe5d506190"
+        ],
+        "automorphisms_available": 2,
+        "registered": false,
+        "ec1": null,
+        "curve_uid": null
+      },
+      "target_law": "uniform_scalar_sha256_v1",
+      "target_seed": 202610150001,
+      "target_index": 0,
+      "target": [
+        "0x6edc1d01c",
+        "0xf5088f81b2"
+      ],
+      "planted": 314843283548
+    },
+    {
+      "workload_id": "Wc69dfe4568cc",
+      "workload_sha256": "c69dfe4568cc2522fd6f5aa712e41ee41495e47b0a80b91bf23d96cd1b75da22",
+      "curve_spec": {
+        "kind": "f2m4_torsion",
+        "m": 10,
+        "seed": 1,
+        "max_cofactor": 16
+      },
+      "curve": {
+        "slug": "icv1-f2m40-t573363-49958dc1",
+        "icv1": "ICV1:f2m-40-1d6ebc58:573363:1099511054414:0xf11e9533ce:unk:unk:r:49958dc16466",
+        "family": "extension",
+        "construction": "gaudry_quartic_bin::find_bin_curve(10, 1, 16)",
+        "field_degree": null,
+        "field_bits": 10,
+        "group_order": 1099511054414,
+        "r": 549755527207,
+        "cofactor": 2,
+        "generator": [
+          "0x26bd58bb70",
+          "0xfe5d506190"
+        ],
+        "automorphisms_available": 2,
+        "registered": false,
+        "ec1": null,
+        "curve_uid": null
+      },
+      "target_law": "uniform_scalar_sha256_v1",
+      "target_seed": 202610150001,
+      "target_index": 1,
+      "target": [
+        "0xea6176b420",
+        "0xa8b5ee2c03"
+      ],
+      "planted": 511434757606
+    }
+  ],
+  "executions": [
+    {
+      "seq": 0,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 560457657158547173
+    },
+    {
+      "seq": 1,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 560457657158547173
+    },
+    {
+      "seq": 2,
+      "round": 0,
+      "warmup": false,
+      "arm": 2,
+      "workload": 0,
+      "algorithm_seed": 560457657158547173
+    },
+    {
+      "seq": 3,
+      "round": 0,
+      "warmup": false,
+      "arm": 3,
+      "workload": 0,
+      "algorithm_seed": 560457657158547173
+    },
+    {
+      "seq": 4,
+      "round": 0,
+      "warmup": false,
+      "arm": 4,
+      "workload": 0,
+      "algorithm_seed": 560457657158547173
+    },
+    {
+      "seq": 5,
+      "round": 0,
+      "warmup": false,
+      "arm": 5,
+      "workload": 0,
+      "algorithm_seed": 560457657158547173
+    },
+    {
+      "seq": 6,
+      "round": 0,
+      "warmup": false,
+      "arm": 6,
+      "workload": 0,
+      "algorithm_seed": 560457657158547173
+    },
+    {
+      "seq": 7,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 1,
+      "algorithm_seed": 17274198290358653846
+    },
+    {
+      "seq": 8,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 1,
+      "algorithm_seed": 17274198290358653846
+    },
+    {
+      "seq": 9,
+      "round": 0,
+      "warmup": false,
+      "arm": 2,
+      "workload": 1,
+      "algorithm_seed": 17274198290358653846
+    },
+    {
+      "seq": 10,
+      "round": 0,
+      "warmup": false,
+      "arm": 3,
+      "workload": 1,
+      "algorithm_seed": 17274198290358653846
+    },
+    {
+      "seq": 11,
+      "round": 0,
+      "warmup": false,
+      "arm": 4,
+      "workload": 1,
+      "algorithm_seed": 17274198290358653846
+    },
+    {
+      "seq": 12,
+      "round": 0,
+      "warmup": false,
+      "arm": 5,
+      "workload": 1,
+      "algorithm_seed": 17274198290358653846
+    },
+    {
+      "seq": 13,
+      "round": 0,
+      "warmup": false,
+      "arm": 6,
+      "workload": 1,
+      "algorithm_seed": 17274198290358653846
+    }
+  ]
+}

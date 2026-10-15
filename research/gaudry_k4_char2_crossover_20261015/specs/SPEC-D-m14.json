@@ -1,0 +1,59 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Part D: dense against wiedemann on #1883 B3 workload, m = 14",
+  "description": "PROTOCOL.md Part D. The B3 curve and target; arms rho-neg, ic-dense, ic-wied.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "f2m4_torsion",
+        "m": 14,
+        "seed": 1,
+        "max_cofactor": 16
+      }
+    ],
+    "targets_per_curve": 1,
+    "target_seed": 202610150001
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-dense",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1",
+          "max_trials": "5000000"
+        }
+      }
+    },
+    {
+      "name": "ic-wied",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1",
+          "max_trials": "5000000",
+          "linalg": "wiedemann"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 202610150202,
+    "isolation_required": "L2",
+    "timeout_seconds": 259200
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "pilot: per-trial and per-step rates at m = 16, 17, 18 (budget-capped, exhausts by design)",
+  "description": "Pilot P3 of research/gaudry_k4_char2_crossover_20261015 (before PROTOCOL.md): times a capped IC run (2,000 trials) and a capped rho run (4,096 steps) per size, to plan the claim sessions. No claim.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "f2m4_torsion",
+        "m": 16,
+        "seed": 1,
+        "max_cofactor": 2
+      },
+      {
+        "kind": "f2m4_torsion",
+        "m": 17,
+        "seed": 1,
+        "max_cofactor": 2
+      },
+      {
+        "kind": "f2m4_torsion",
+        "m": 18,
+        "seed": 1,
+        "max_cofactor": 2
+      }
+    ],
+    "targets_per_curve": 1,
+    "target_seed": 202610150101
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation",
+        "params": {
+          "cap_multiple": "0"
+        }
+      }
+    },
+    {
+      "name": "ic-wied",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1",
+          "linalg": "wiedemann",
+          "max_trials": "2000"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 202610150102,
+    "isolation_required": "L2",
+    "timeout_seconds": 86400
+  }
+}

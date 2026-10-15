@@ -1,0 +1,71 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Part D: dense against wiedemann on #1883 B2 workloads, m = 8, 10, 12",
+  "description": "PROTOCOL.md Part D. The B2 curves and targets (target_seed 202610150001); arms rho-neg, ic-dense (B2's ic-frobenius exactly), ic-wied (linalg=wiedemann).",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "f2m4_torsion",
+        "m": 8,
+        "seed": 1,
+        "max_cofactor": 16
+      },
+      {
+        "kind": "f2m4_torsion",
+        "m": 10,
+        "seed": 1,
+        "max_cofactor": 16
+      },
+      {
+        "kind": "f2m4_torsion",
+        "m": 12,
+        "seed": 1,
+        "max_cofactor": 16
+      }
+    ],
+    "targets_per_curve": 2,
+    "target_seed": 202610150001
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-dense",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1",
+          "max_trials": "5000000"
+        }
+      }
+    },
+    {
+      "name": "ic-wied",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "bin-t-line",
+          "oracle": "gaudry-d4-bin:macaulay=11,frobenius=1,sparsest=1,replay=1,charge_unsolved=1",
+          "max_trials": "5000000",
+          "linalg": "wiedemann"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 202610150201,
+    "isolation_required": "L2",
+    "timeout_seconds": 259200
+  }
+}
