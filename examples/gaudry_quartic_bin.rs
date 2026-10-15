@@ -168,7 +168,7 @@ fn main() {
             mitm_t_decompositions(&curve, &base, &r)
         };
         let mitm_ms = tm.elapsed().as_secs_f64() * 1e3;
-        let mine: std::collections::BTreeSet<[u16; 4]> =
+        let mine: std::collections::BTreeSet<[u32; 4]> =
             sol.decompositions.iter().copied().collect();
         let row = Row {
             m,

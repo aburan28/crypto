@@ -217,7 +217,14 @@ impl Fq4 {
         };
         // z⁴ + c₁z + c₀ is an affine linearised polynomial in characteristic
         // 2, often reducible for every (c₁, c₀); the z³ term avoids that.
-        for (c3, c1) in (0..2u32).flat_map(|c3| (0..fq.f.q as Fe).map(move |c1| (c3, c1))) {
+        // Past m = 15 the c₃ = 0 quartics can all be reducible, and their
+        // q² candidates take hours to rule out: try c₃ = 1 first there.
+        // m ≤ 15 keeps the order every committed curve was found in.
+        let c3_order: [Fe; 2] = if m <= 15 { [0, 1] } else { [1, 0] };
+        for (c3, c1) in c3_order
+            .into_iter()
+            .flat_map(|c3| (0..fq.f.q as Fe).map(move |c1| (c3, c1)))
+        {
             for c0 in 1..fq.f.q as Fe {
                 fq.c = [c0, c1, 0, c3];
                 let z = Eb([0, 1, 0, 0]);
