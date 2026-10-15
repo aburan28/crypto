@@ -1,0 +1,33 @@
+{
+  "after_30s_pids": [
+    22317,
+    22323,
+    22324,
+    22357
+  ],
+  "after_30s_ping": "HTTP/1.1 503 Service Unavailable\r\nContent-Type: text/plain; charset=utf-8\r\nX-Content-Type-Options: nosniff\r\nDate: Thu, 15 Oct 2026 03:22:46 GMT\r\nContent-Length: 36\r\nConnection: close\r\n\r\nDocker Desktop is unable to start\n\n\n",
+  "before_pids": [
+    22317,
+    22323,
+    22324,
+    22357,
+    22360,
+    22369,
+    22370,
+    22387
+  ],
+  "before_ping": "HTTP/1.1 503 Service Unavailable\r\nContent-Type: text/plain; charset=utf-8\r\nX-Content-Type-Options: nosniff\r\nDate: Thu, 15 Oct 2026 03:22:15 GMT\r\nContent-Length: 36\r\nConnection: close\r\n\r\nDocker Desktop is unable to start\n\n\n",
+  "command": [
+    "osascript",
+    "-e",
+    "tell application id \"com.electron.dockerdesktop\" to quit"
+  ],
+  "command_elapsed_seconds_L0": 0.26806304200727027,
+  "ended_utc": "2026-10-15T03:22:46.415509+00:00",
+  "exit_code": 0,
+  "schema": "n83.docker-graceful-quit/v1",
+  "started_utc": "2026-10-15T03:22:15.910011+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timed_out": false
+}

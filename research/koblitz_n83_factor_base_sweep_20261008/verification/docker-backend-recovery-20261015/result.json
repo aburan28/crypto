@@ -1,0 +1,62 @@
+{
+  "after_term": {
+    "processes": {
+      "22317": {
+        "command": "/Applications/Docker.app/Contents/MacOS/com.docker.backend",
+        "pid": 22317,
+        "ppid": 1,
+        "state": "S"
+      },
+      "22323": null,
+      "22324": null,
+      "22357": null
+    },
+    "socket_ping": "ConnectionRefusedError: [Errno 61] Connection refused",
+    "utc": "2026-10-15T05:48:52.222959+00:00"
+  },
+  "before": {
+    "processes": {
+      "22317": {
+        "command": "/Applications/Docker.app/Contents/MacOS/com.docker.backend",
+        "pid": 22317,
+        "ppid": 1,
+        "state": "S"
+      },
+      "22323": {
+        "command": "/Applications/Docker.app/Contents/MacOS/com.docker.backend",
+        "pid": 22323,
+        "ppid": 22317,
+        "state": "S"
+      },
+      "22324": {
+        "command": "/Applications/Docker.app/Contents/MacOS/com.docker.backend",
+        "pid": 22324,
+        "ppid": 22317,
+        "state": "S"
+      },
+      "22357": {
+        "command": "/Applications/Docker.app/Contents/MacOS/com.docker.build",
+        "pid": 22357,
+        "ppid": 22324,
+        "state": "S"
+      }
+    },
+    "socket_ping": "HTTP/1.1 503 Service Unavailable\r\nContent-Type: text/plain; charset=utf-8\r\nX-Content-Type-Options: nosniff\r\nDate: Thu, 15 Oct 2026 05:48:21 GMT\r\nContent-Length: 36\r\nConnection: close\r\n\r\nDocker Desktop is unable to start\n\n\n",
+    "utc": "2026-10-15T05:48:21.051643+00:00"
+  },
+  "elapsed_wall_seconds_L0": 31.107589749997715,
+  "ended_utc": "2026-10-15T05:48:52.274966+00:00",
+  "schema": "n83.docker-backend-graceful-term/v1",
+  "selected_best_total_runtime": null,
+  "sigkill_sent": false,
+  "signal": "SIGTERM",
+  "signal_sent_utc": "2026-10-15T05:48:21.167282+00:00",
+  "signalled_pid": 22317,
+  "solver_search_executed": false,
+  "start_command": null,
+  "start_exit_code": null,
+  "start_timed_out": null,
+  "started_utc": "2026-10-15T05:48:21.167210+00:00",
+  "status": "PRODUCER_FAILURE_BACKEND_TERM_STILL_RUNNING",
+  "vm_disk_modified_directly": false
+}

@@ -20,6 +20,44 @@
   editing; report scope expansion before editing outside reserved paths. Do
   not publish chat transcripts or secrets as task metadata.
 
+## Success criterion: iterative improvement of the index-calculus baseline
+
+Owner's rule, 2026-10-15. It replaces any earlier wording that treats only
+beating rho, or only an "advance", as success.
+
+The long-term goal is an index calculus that beats Pollard rho. That will
+not come from one breakthrough. It comes from many measured improvements,
+each building on the last, until the gap closes. So **the success criterion
+is a verified, measured improvement over the current index-calculus
+baseline. Every such improvement is a success and is reported as one.**
+
+- **Baseline.** For each curve and size, the baseline is the best current
+  verified index-calculus pipeline, frozen with its protocol, receipts and
+  end-to-end `S` (every phase, cold). Name it before you optimise.
+- **Improvement.** The improvement must lower cost against that baseline on
+  the same instances, with every answer verified, under a protocol frozen
+  before timing. A stage-level win is reported as a stage improvement and
+  becomes a pipeline improvement once it moves end-to-end `S`. The
+  measurement rules still apply in full: isolation tiers, A/A and positive
+  controls, matched references, and no combining results from different
+  experiments.
+- **What counts.** Advance and engineering are both successes. Relabelling
+  (the headline count fell while total cost rose) and accounting (the
+  numbers changed but the algorithm did not) are recorded honestly and are
+  not improvements. A negative or null result is a valid outcome to record,
+  but it is not an improvement.
+- **Ratchet.** Each landed improvement becomes the new baseline. Record it
+  with its delta, so progress is cumulative and visible across the
+  sequence.
+- **Distance to rho.** Report the gap to the matched rho on every row,
+  and to precomputation rho (Bernstein–Lange) where setup is excluded. The
+  gap is the distance remaining, not a pass/fail gate. Not beating rho
+  never makes an improvement a failure. A claim to *beat* rho still needs
+  every reference rule: an end-to-end cold `S` below the matched rho's,
+  robust at growing `n`, independently replayed.
+- **Keep going.** After each result, name the next improvement to try, and
+  move on to it.
+
 ## Pointers
 
 - Boundary ledger (machine): `docs/ic/boundary_targets.json`
@@ -554,13 +592,16 @@ Classify every change, in the note, as one of:
 | class | what moved | what it means |
 |:--|:--|:--|
 | **advance** | ratio to the floor fell | the method does something a generic algorithm cannot |
-| **engineering** | `S` fell, ratio to the floor flat | legitimate, bounded, and not a finding |
+| **engineering** | `S` fell, ratio to the floor flat | an improvement to the baseline: a success (see "Success criterion") |
 | **relabelling** | headline count fell, `S` rose | work moved somewhere the headline does not look |
 | **accounting** | numbers changed, algorithm did not | a correction; say so and do not claim the gain |
 
-All four are worth committing.  Only the first is worth calling a
-result.  Label each row, because the failure mode this rule exists to
-prevent is reporting the second or third as the first.
+All four are worth committing.  Advance and engineering are both
+improvements, and every improvement over the baseline is a success
+("Success criterion: iterative improvement of the index-calculus
+baseline").  Label each row, because the failure mode this rule exists
+to prevent is reporting relabelling or accounting as an improvement, or
+engineering as an advance.
 
 The relabelling class is not hypothetical.  In §10.5 of the
 residual-walk note a triple-decomposition oracle cut the walked count
