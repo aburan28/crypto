@@ -1,7 +1,7 @@
 # Prime Degree Frontier
 
 Find the largest odd prime degree for which you can produce a complete,
-independently verified isogeny from each registered prime-field curve.
+independently verified isogeny from each registered standard prime-field curve.
 Each exact ICV1 source model has its own leaderboard. All registered standard prime
 models are listed, including models whose construction or replay adapter is
 currently unavailable. No curve is substituted or silently omitted.

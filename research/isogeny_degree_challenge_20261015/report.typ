@@ -30,6 +30,8 @@ leaderboard build runs fresh independent replay; saved scores never enter rankin
   [Candidate curve-degree pairs above 10453 through 65537], [#data.shortlisted_candidates],
   [Altered-artifact controls rejected], [#data.rejected_mutations.len()],
   [Verified source rows in control leaderboard], [#data.verified_source_rows],
+  [Short-map scheduling controls accepted / executed], [#data.resource_stress_accepted / #data.resource_stress_count],
+  [Short-map scheduling controls censored], [#data.resource_stress_censored],
 )
 Counts are exact native auditor outputs, not sampled estimates. The low-order
 Frobenius screen produces candidates only. Missing adapters remain explicit.
@@ -94,3 +96,8 @@ startup race. The fixed source makes the replay child wait until its supervisor
 records positive RSS. The follow-up packet adds twenty fresh judgements of the
 same public P192/13 map, each requiring a real sample. Earlier failed build/test
 logs and the pre-fix packet remain archived; they are not rewritten as passes.
+The intermediate stress packet accepted 19 of 20 and censored one during OS
+exit cleanup. The final correction uses a completion marker after all algebra
+and failure handling. Any missing-monitor refusal during active work stays
+censored; a later passing certificate never erases it. Zero executed stress
+controls in the table means that the earlier run did not request this phase.
