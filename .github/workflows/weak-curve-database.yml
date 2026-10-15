@@ -64,6 +64,8 @@ jobs:
           python3 research/p192_extension_cover_20261012/verify_line_projection_receipt.py
           python3 research/p192_extension_cover_20261012/verify_line_guided_collector.py
           python3 research/p192_extension_cover_20261012/verify_line_fixed_origin_receipt.py
+          python3 -B research/p192_extension_cover_20261012/verify_line_sum_coverage.py
+          python3 -B research/p192_extension_cover_20261012/verify_line_cell_sample.py
   lean-proof:
     runs-on: ubuntu-latest
     timeout-minutes: ${{ github.event_name == 'workflow_dispatch' && 90 || 25 }}
@@ -135,7 +137,7 @@ jobs:
           auto-config: false
           use-mathlib-cache: true
           build: true
-          build-args: 'LinePointInverse LineSupport LineFiberDescent'
+          build-args: 'LinePointInverse LineSupport LineFiberDescent ThreeSumCapacity'
           test: false
           lint: false
           leanchecker: true
@@ -146,6 +148,8 @@ jobs:
         run: lake env leanchecker --fresh --verbose LineSupport && lake env lean LineSupport.lean
       - name: Fresh-check six-fiber descent theorem and audit axioms
         run: lake env leanchecker --fresh --verbose LineFiberDescent && lake env lean LineFiberDescent.lean
+      - name: Fresh-check three-sum capacity theorem and audit axioms
+        run: lake env leanchecker --fresh --verbose ThreeSumCapacity && lake env lean ThreeSumCapacity.lean
   leaderboard-lean-proof:
     runs-on: ubuntu-latest
     timeout-minutes: 25

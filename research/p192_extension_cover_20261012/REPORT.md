@@ -243,6 +243,18 @@ support targets and fills 64 queries after 76 scalar trials, compared with
 241 for a ++-only control. Both 64-query arms have zero full-base matches
 and rank zero under the frozen 141-class pair-index lookup.
 
+The [complete 141-class three-sum census](reports/run-20261015T2255Z/REPORT.md)
+finds 10,011 distinct pair targets and 477,191 distinct nonidentity
+three-sum targets, saturating the unordered-three-sum capacity.
+Independent integer-field replay matches the full support digest.
+For an ideal uniform nonzero scalar query, the exact overlap probability
+is \(477191/(r-1)\); conditional character-cell hit rates require
+cell-population denominators in addition to eligible support counts.
+The general capacity bound is formalized in Lean. A frozen 512+512
+support-versus-uniform sample estimates the ++ cell hit-rate multiplier
+at 1.048 and the balanced four-cell multiplier at about 1.002; these
+exploratory estimates do not resolve a useful conditional enrichment.
+
 ## Reproduction
 
 From this repository's root:
