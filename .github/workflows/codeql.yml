@@ -71,7 +71,7 @@ jobs:
     if: always() && !cancelled() && github.event_name != 'workflow_dispatch'
     needs: scope
     # Routine PR/merge-group jobs keep the repository's 25-minute budget.
-    # Rust uses three sparse source shards on those events; main and scheduled
+    # Rust uses four sparse source shards on those events; main and scheduled
     # runs scan its full tree with the existing 60-minute budget.
     timeout-minutes: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && 25 || 60 }}
     name: Analyze (${{ matrix.check_name || matrix.language }})
@@ -123,12 +123,22 @@ jobs:
         - language: rust
           scope: rust
           build-mode: none
+          check_name: rust-boolean
+          category: /language:rust-boolean
+          rust_paths: |
+            /Cargo.toml
+            /Cargo.lock
+            /research/boolean_*/
+        - language: rust
+          scope: rust
+          build-mode: none
           check_name: rust-research
           category: /language:rust-research
           rust_paths: |
             /Cargo.toml
             /Cargo.lock
             /research/
+            !/research/boolean_*/
             /examples/
             /experiments/
             /docs/
