@@ -6,12 +6,20 @@ and the pinned pairing roster,
 and **36 published odd-characteristic covering cases**. The named roster
 includes Oakley Groups 3 and 4, with exact GHS invariant candidates and
 separate WID1 finding IDs. It adds three exhaustively checked prime-field
-examples and a twenty-six-criterion
+examples and a twenty-eight-criterion
 registry for anomalous, smooth-order, MOV, Frey–Rück, supersingular,
 binary-GHS, odd-characteristic GHS, cubic norm-one, quadratic-torus and
 proper-subfield mechanisms, plus direct extension-field decomposition,
 cover-and-decomposition, relation-support capacity and useful-rank checks, and cubic Jacobian-isogeny routes. The first [WeakCurves site](../../website/weakcurves/)
 uses this exact export.
+
+The [P-192 Type I line-section certificate](../p192_extension_cover_20261012/reports/run-20261015T2201Z/REPORT.md)
+adds the plane-quartic line relation graph criterion. It checks 9,870 pair
+lines, 9,784 new rational points, and 9,925 distinct projected first-quotient
+classes. A fixed-origin rule gives nonspecial degree-three source divisors
+for those points. The frozen known-scalar collector compares uniform and
+geometry-conditioned 64-query laws on 141 line-derived classes, with exact
+three-sum lookup and independent prime-field replay.
 
 The new [pairing roster](pairing_curves.json) contains the exact Ethereum
 BN_SNARK1 variant and BLS12-381, with separate G1, G2, and GT parameters.

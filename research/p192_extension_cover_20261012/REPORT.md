@@ -224,6 +224,20 @@ the exact geometry constraint on a collector that tries to vary those
 representatives while keeping the same origin; it does not replace the
 separate generic Jacobian arithmetic gate.
 
+The [line-section continuation](reports/run-20261015T2201Z/REPORT.md)
+enumerates all 9,870 pair-lines through the 141 rational support points,
+finds 9,784 fresh rational intersections, and independently projects all
+9,925 selected points to distinct first-quotient subgroup classes. A
+non-splitting line through two fixed support points, together with the exact
+quotient-base cover anchor, gives nonspecial fixed-origin degree-three source
+representatives for all selected points. On the 141-class projected base,
+the frozen uniform and character-conditioned 64-query known-scalar laws
+each yield zero three-sum matches and rank zero. The first 16 line-derived
+classes have 816 distinct three-sum targets, 206 admitted by the two-fiber
+character law. These point-source representatives precede cofactor
+projection; generic reduction of the projected subgroup classes remains a
+separate arithmetic step.
+
 ## Reproduction
 
 From this repository's root:
