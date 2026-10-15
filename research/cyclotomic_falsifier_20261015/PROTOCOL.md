@@ -182,4 +182,32 @@ below before the measured run.
 
 ## Amendments
 
-(none yet)
+### A1 (2026-10-15, after the disclosed dry run, before any measured cell)
+
+Dry run: `cyclotomic_falsifier_yield --a 1 --n 23 --nulls 19` on scratch output
+(not committed). It showed, and this amendment records without changing any
+rule, `N`, seed, metric, cell or critical value:
+
+1. **Census (counts of the bases, not yields).** `K_full` (projected columns):
+   `a = 1, n = 23`: w = 1 → 1, w = 2 → 30, w = 3 → 338; `a = 0, n = 23`:
+   w = 1 → none ("no gamma-weight-1 abscissa carries a subgroup point"),
+   w = 2 → 17, w = 3 → 367. `K_0 / F_{2^11}` has no usable prime-order
+   subgroup in the repository's constructor, so the `n = 11` rung is `a = 1`
+   only. Transition sizes at `a = 1, n = 23`: `K_2 = 52`, `K_3 = 6`.
+2. **The `K = 1` cells are degenerate (identity).** Every one-column base is
+   `l·{±λ^j}` for a unit `l`, and `|B+B|`, `|B+B+B|` and the energy are
+   invariant under multiplying `B` by a unit, so every 1-column base — null
+   draws, `C_1`, compact, ONB and the positive control alike — has the same
+   three numbers (seen: 921, 10534, 7314 at `a = 1`). The `w = 1` tests stay in
+   the family of 15 (conservative) and return `p = 1` by construction; the
+   `w = 1` base is therefore yield-identical to every other one-column base,
+   a derived fact rather than a test.
+3. **Speed.** About 0.9 s per null draw with `cov3` computed at every `K`;
+   the null loop now computes `cov3` only at the `K` of a `cov3` cell (it is
+   never read elsewhere; comparators still compute it at every `K`). No rule
+   changes.
+4. **Values seen in the dry run** (N = 19, not evidence): cyclotomic effects
+   within ±0.4% of the null median on every metric; the positive control at
+   +279% energy and −40% `cov2` at `K = 30`.
+5. **Cost-leg specs** written by the §3 rule with these `K_full`:
+   `specs/cost-a1-n23.json`, `specs/cost-a0-n23.json` (`make_specs.sh`).
