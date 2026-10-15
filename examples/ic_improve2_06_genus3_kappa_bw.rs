@@ -99,7 +99,8 @@ impl PyRng {
         k = n - 1;
         while k > 0 {
             let prev = r.mt[i - 1];
-            r.mt[i] = (r.mt[i] ^ (prev ^ (prev >> 30)).wrapping_mul(1566083941)).wrapping_sub(i as u32);
+            r.mt[i] =
+                (r.mt[i] ^ (prev ^ (prev >> 30)).wrapping_mul(1566083941)).wrapping_sub(i as u32);
             i += 1;
             if i >= n {
                 r.mt[0] = r.mt[n - 1];
@@ -241,7 +242,12 @@ fn sqrt_fp(a: u64, p: u64) -> u64 {
     while powmod(z, (p - 1) / 2, p) != p - 1 {
         z += 1;
     }
-    let (mut m, mut c, mut t, mut r) = (s, powmod(z, q, p), powmod(a, q, p), powmod(a, (q + 1) / 2, p));
+    let (mut m, mut c, mut t, mut r) = (
+        s,
+        powmod(z, q, p),
+        powmod(a, q, p),
+        powmod(a, (q + 1) / 2, p),
+    );
     while t != 1 {
         let (mut i, mut tt) = (0u32, t);
         while tt != 1 {
@@ -437,7 +443,11 @@ fn cadd(d1: &Div, d2: &Div, h: &P, p: u64) -> Div {
     let s3 = c2;
     let u = pdivmod(&pmul(u1, u2, p), &pmul(&d, &d, p), p).0;
     let num = padd(
-        &padd(&pmul(&pmul(&s1, u1, p), v2, p), &pmul(&pmul(&s2, u2, p), v1, p), p),
+        &padd(
+            &pmul(&pmul(&s1, u1, p), v2, p),
+            &pmul(&pmul(&s2, u2, p), v1, p),
+            p,
+        ),
         &pmul(&s3, &padd(&pmul(v1, v2, p), h, p), p),
         p,
     );
@@ -486,7 +496,13 @@ impl KField {
             for _ in 0..200 {
                 let c0 = rng.randrange(1, p);
                 if Self::irreducible(p, c1, c0) {
-                    let mut k = KField { p, c1, c0, t1: KZ, t2: KZ };
+                    let mut k = KField {
+                        p,
+                        c1,
+                        c0,
+                        t1: KZ,
+                        t2: KZ,
+                    };
                     let old = snap();
                     k.t1 = k.pw([0, 1, 0], p);
                     k.t2 = k.mul(k.t1, k.t1);
@@ -557,7 +573,11 @@ impl KField {
     #[inline]
     fn sub(&self, a: KE, b: KE) -> KE {
         let p = self.p;
-        [(a[0] + p - b[0]) % p, (a[1] + p - b[1]) % p, (a[2] + p - b[2]) % p]
+        [
+            (a[0] + p - b[0]) % p,
+            (a[1] + p - b[1]) % p,
+            (a[2] + p - b[2]) % p,
+        ]
     }
     #[inline]
     fn neg(&self, a: KE) -> KE {
@@ -641,7 +661,8 @@ impl KField {
                     break z;
                 }
             };
-            let (mut m, mut c, mut t, mut r) = (s, self.pw(z, q), self.pw(a, q), self.pw(a, (q + 1) / 2));
+            let (mut m, mut c, mut t, mut r) =
+                (s, self.pw(z, q), self.pw(a, q), self.pw(a, (q + 1) / 2));
             while t != KONE {
                 let (mut i, mut tt) = (0u32, t);
                 while tt != KONE {
@@ -755,7 +776,11 @@ fn kpxgcd(k: &KField, a: &KP, b: &KP) -> (KP, KP, KP) {
         t0 = std::mem::replace(&mut t1, nt);
     }
     let inv = k.inv(*r0.last().unwrap());
-    (kpscal(k, &r0, inv), kpscal(k, &s0, inv), kpscal(k, &t0, inv))
+    (
+        kpscal(k, &r0, inv),
+        kpscal(k, &s0, inv),
+        kpscal(k, &t0, inv),
+    )
 }
 fn kcreduce(k: &KField, mut u: KP, mut v: KP, h: &KP) -> (KP, KP) {
     while u.len() - 1 > G3 {
@@ -790,7 +815,11 @@ fn kcadd(k: &KField, d1: &(KP, KP), d2: &(KP, KP), h: &KP) -> (KP, KP) {
     let u = kpdivmod(k, &kpmul(k, u1, u2), &kpmul(k, &d, &d)).0;
     let num = kpadd(
         k,
-        &kpadd(k, &kpmul(k, &kpmul(k, &s1, u1), v2), &kpmul(k, &kpmul(k, &s2, u2), v1)),
+        &kpadd(
+            k,
+            &kpmul(k, &kpmul(k, &s1, u1), v2),
+            &kpmul(k, &kpmul(k, &s2, u2), v1),
+        ),
         &kpmul(k, &s3, &kpadd(k, &kpmul(k, v1, v2), h)),
     );
     let (v, rem) = kpdivmod(k, &num, &d);
@@ -857,7 +886,12 @@ fn gp_eval(cmd: &str) -> String {
         .stdout(Stdio::piped())
         .spawn()
         .expect("gp");
-    child.stdin.take().unwrap().write_all(cmd.as_bytes()).unwrap();
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(cmd.as_bytes())
+        .unwrap();
     let out = child.wait_with_output().unwrap();
     String::from_utf8(out.stdout).unwrap().trim().to_string()
 }
@@ -956,7 +990,10 @@ fn build_instance(p: u64, rng: &mut PyRng, cmax: u64) -> Option<Instance> {
         let (b0, b1) = (bf(sstar, e1), bf(sstar, e2));
         ktr(vec![
             k.sub(k.smul(e1, 2 * b0 % p), k.smul(sstar, q0)),
-            k.sub(k.add(k.smul(e1, 2 * b1 % p), k.smul(e2, 2 * b0 % p)), k.smul(sstar, q1)),
+            k.sub(
+                k.add(k.smul(e1, 2 * b1 % p), k.smul(e2, 2 * b0 % p)),
+                k.smul(sstar, q1),
+            ),
             k.sub(k.smul(e2, 2 * b1 % p), k.smul(sstar, q2)),
         ])
     };
@@ -985,8 +1022,20 @@ fn build_instance(p: u64, rng: &mut PyRng, cmax: u64) -> Option<Instance> {
         }
         let xdp = tr(xd.iter().map(|c| c[0]).collect());
         let xnp = tr(xn.iter().map(|c| c[0]).collect());
-        let h = pmul(&psub(&xnp, &pscal(&xdp, a, p), p), &psub(&xnp, &pscal(&xdp, b, p), p), p);
-        Some(Bf { x0, x2, delta, kap, xd: xdp, xn: xnp, h })
+        let h = pmul(
+            &psub(&xnp, &pscal(&xdp, a, p), p),
+            &psub(&xnp, &pscal(&xdp, b, p), p),
+            p,
+        );
+        Some(Bf {
+            x0,
+            x2,
+            delta,
+            kap,
+            xd: xdp,
+            xn: xnp,
+            h,
+        })
     };
     let e1 = k.rand(rng);
     let e2 = k.rand(rng);
@@ -1055,7 +1104,13 @@ fn build_instance(p: u64, rng: &mut PyRng, cmax: u64) -> Option<Instance> {
     let c1 = k.mul(l1, l3);
     let cc0 = k.sqr(l3);
     let ms = k.neg(s);
-    let eb = k.add(k.add(k.add(k.mul(k.sqr(ms), ms), k.mul(l2, k.sqr(ms))), k.mul(c1, ms)), cc0);
+    let eb = k.add(
+        k.add(
+            k.add(k.mul(k.sqr(ms), ms), k.mul(l2, k.sqr(ms))),
+            k.mul(c1, ms),
+        ),
+        cc0,
+    );
     restore(old);
     let n = gp_order_e(&k, ea, eb);
     let mut sel = None;
@@ -1068,7 +1123,11 @@ fn build_instance(p: u64, rng: &mut PyRng, cmax: u64) -> Option<Instance> {
         cc += 4;
     }
     let (ell, c) = sel?;
-    let e = Ecw { k: k.clone(), a: ea, b: eb };
+    let e = Ecw {
+        k: k.clone(),
+        a: ea,
+        b: eb,
+    };
     Some(Instance {
         p,
         k,
@@ -1138,13 +1197,28 @@ fn transfer(inst: &Instance, pt: EP) -> Result<Div, &'static str> {
     }
     let v = kpmod(k, &kpscal(k, &kpmul(k, &num, &s), yp), &u);
     let hk: KP = inst.h.iter().map(|&c| [c, 0, 0]).collect();
-    assert!(kpmod(k, &kpsub(k, &kpmul(k, &v, &v), &hk), &u).is_empty(), "v^2 != h mod U");
+    assert!(
+        kpmod(k, &kpsub(k, &kpmul(k, &v, &v), &hk), &u).is_empty(),
+        "v^2 != h mod U"
+    );
     let d = kcreduce(k, u, v, &hk);
-    let d1: (KP, KP) = (d.0.iter().map(|&c| k.frob(c)).collect(), d.1.iter().map(|&c| k.frob(c)).collect());
-    let d2: (KP, KP) = (d1.0.iter().map(|&c| k.frob(c)).collect(), d1.1.iter().map(|&c| k.frob(c)).collect());
+    let d1: (KP, KP) = (
+        d.0.iter().map(|&c| k.frob(c)).collect(),
+        d.1.iter().map(|&c| k.frob(c)).collect(),
+    );
+    let d2: (KP, KP) = (
+        d1.0.iter().map(|&c| k.frob(c)).collect(),
+        d1.1.iter().map(|&c| k.frob(c)).collect(),
+    );
     let s = kcadd(k, &kcadd(k, &d, &d1, &hk), &d2, &hk);
-    assert!(s.0.iter().chain(s.1.iter()).all(|&c| KField::in_fp(c)), "phi(P) not F_q-rational");
-    Ok((tr(s.0.iter().map(|c| c[0]).collect()), tr(s.1.iter().map(|c| c[0]).collect())))
+    assert!(
+        s.0.iter().chain(s.1.iter()).all(|&c| KField::in_fp(c)),
+        "phi(P) not F_q-rational"
+    );
+    Ok((
+        tr(s.0.iter().map(|c| c[0]).collect()),
+        tr(s.1.iter().map(|c| c[0]).collect()),
+    ))
 }
 
 // --------------------------------------------------------------- IC helpers
@@ -1164,7 +1238,11 @@ fn sqrmod3(a: [u64; 3], u: &P, p: u64) -> [u64; 3] {
     d0 -= d3 * u0;
     cnt(0, 12);
     let pp = p as i128;
-    [d0.rem_euclid(pp) as u64, d1.rem_euclid(pp) as u64, d2.rem_euclid(pp) as u64]
+    [
+        d0.rem_euclid(pp) as u64,
+        d1.rem_euclid(pp) as u64,
+        d2.rem_euclid(pp) as u64,
+    ]
 }
 
 fn xmul3(a: [u64; 3], u: &P, p: u64) -> [u64; 3] {
@@ -1229,7 +1307,10 @@ fn roots_split(u: &P, p: u64, rng: &mut PyRng) -> Vec<u64> {
         cnt(0, 2 + 3 * bitlen(p) / 2 + 2);
         cnt(1, 1);
         let i2 = (p + 1) / 2;
-        return vec![(2 * p - u[1] + sq) % p * i2 % p, (2 * p - u[1] - sq) % p * i2 % p];
+        return vec![
+            (2 * p - u[1] + sq) % p * i2 % p,
+            (2 * p - u[1] - sq) % p * i2 % p,
+        ];
     }
     loop {
         let delta = rng.randbelow(p);
@@ -1261,7 +1342,11 @@ impl Mont {
         }
         let r1 = ((1u128 << 64) % m as u128) as u64;
         let r2 = ((r1 as u128 * r1 as u128) % m as u128) as u64;
-        Mont { m, minv: inv.wrapping_neg(), r2 }
+        Mont {
+            m,
+            minv: inv.wrapping_neg(),
+            r2,
+        }
     }
     #[inline(always)]
     fn redc(&self, t: u128) -> u64 {
@@ -1315,11 +1400,23 @@ fn lanczos(rows: &[Vec<(u32, u64)>], rhs: &[u64], ncols: usize, ell: u64) -> Vec
             r.iter()
                 .map(|&(j, c)| {
                     if c < lim {
-                        Ent { col: j, s: c as i64, bm: 0 }
+                        Ent {
+                            col: j,
+                            s: c as i64,
+                            bm: 0,
+                        }
                     } else if ell - c < lim {
-                        Ent { col: j, s: -((ell - c) as i64), bm: 0 }
+                        Ent {
+                            col: j,
+                            s: -((ell - c) as i64),
+                            bm: 0,
+                        }
                     } else {
-                        Ent { col: j, s: i64::MIN, bm: mt.to_mont(c) }
+                        Ent {
+                            col: j,
+                            s: i64::MIN,
+                            bm: mt.to_mont(c),
+                        }
                     }
                 })
                 .collect()
@@ -1512,12 +1609,18 @@ struct La {
     cx: Option<f64>,
 }
 
-const LA_NAMES: [&str; 10] = ["inc", "wied", "sgelz", "sgewd", "bfslz", "bfswd", "bfssgelz", "bfssgewd", "lpsgelz", "lpsgewd"];
+const LA_NAMES: [&str; 10] = [
+    "inc", "wied", "sgelz", "sgewd", "bfslz", "bfswd", "bfssgelz", "bfssgewd", "lpsgelz", "lpsgewd",
+];
 
 impl La {
     fn name(&self) -> String {
         let i = (self.basis as usize) * 4 + (self.sge as usize) * 2 + self.wied as usize;
-        let i = if self.basis == 2 { 8 + self.wied as usize } else { i };
+        let i = if self.basis == 2 {
+            8 + self.wied as usize
+        } else {
+            i
+        };
         let mut n: String = LA_NAMES[i].into();
         if self.m >= 2 {
             n = format!("{}bw{}", &n[..n.len() - 2], self.m);
@@ -1534,16 +1637,31 @@ impl La {
             None => (s, None),
         };
         let (base, m) = match base.rfind("bw") {
-            Some(pos) if base[pos + 2..].parse::<u8>().is_ok() => (format!("{}wd", &base[..pos]), base[pos + 2..].parse::<u8>().unwrap()),
+            Some(pos) if base[pos + 2..].parse::<u8>().is_ok() => (
+                format!("{}wd", &base[..pos]),
+                base[pos + 2..].parse::<u8>().unwrap(),
+            ),
             _ => (base.to_string(), 0u8),
         };
         assert!(m == 0 || m >= 2, "block size m must be >= 2");
         for (i, n) in LA_NAMES.iter().enumerate() {
             if *n == base {
                 if i >= 8 {
-                    return La { basis: 2, sge: true, wied: i == 9, m, cx };
+                    return La {
+                        basis: 2,
+                        sge: true,
+                        wied: i == 9,
+                        m,
+                        cx,
+                    };
                 }
-                return La { basis: (i / 4) as u8, sge: i % 4 >= 2, wied: i % 2 == 1, m, cx };
+                return La {
+                    basis: (i / 4) as u8,
+                    sge: i % 4 >= 2,
+                    wied: i % 2 == 1,
+                    m,
+                    cx,
+                };
             }
         }
         panic!("unknown linear-algebra arm {s}")
@@ -1568,11 +1686,23 @@ impl SpMat {
                 r.iter()
                     .map(|&(j, c)| {
                         if c < lim {
-                            Ent { col: j, s: c as i64, bm: 0 }
+                            Ent {
+                                col: j,
+                                s: c as i64,
+                                bm: 0,
+                            }
                         } else if ell - c < lim {
-                            Ent { col: j, s: -((ell - c) as i64), bm: 0 }
+                            Ent {
+                                col: j,
+                                s: -((ell - c) as i64),
+                                bm: 0,
+                            }
                         } else {
-                            Ent { col: j, s: i64::MIN, bm: mt.to_mont(c) }
+                            Ent {
+                                col: j,
+                                s: i64::MIN,
+                                bm: mt.to_mont(c),
+                            }
                         }
                     })
                     .collect()
@@ -1725,7 +1855,14 @@ fn wiedemann_k(rows: &[Row], rhs: &[u64], n: usize, kc: usize, ell: u64) -> (Opt
 /// (CNT[3]). A symmetric blocking (n = m right vectors) needs n (N/m + N/n) =
 /// 2N single-vector products, as scalar Wiedemann: it changes parallelism,
 /// not the single-threaded count, and is not built here.
-fn block_wiedemann_k(rows: &[Row], rhs: &[u64], n: usize, kc: usize, ell: u64, m: usize) -> (Option<u64>, u64) {
+fn block_wiedemann_k(
+    rows: &[Row],
+    rhs: &[u64],
+    n: usize,
+    kc: usize,
+    ell: u64,
+    m: usize,
+) -> (Option<u64>, u64) {
     const ET: usize = 20;
     if n < m + 1 {
         return wiedemann_k(rows, rhs, n, kc, ell);
@@ -1841,7 +1978,11 @@ fn block_wiedemann_k(rows: &[Row], rhs: &[u64], n: usize, kc: usize, ell: u64, m
             }
         }
         sigma += 1;
-        let dmin = (0..k).filter(|&c| f[c].iter().any(|&y| y != 0)).map(|c| delta[c]).min().unwrap_or(usize::MAX);
+        let dmin = (0..k)
+            .filter(|&c| f[c].iter().any(|&y| y != 0))
+            .map(|c| delta[c])
+            .min()
+            .unwrap_or(usize::MAX);
         if dmin != usize::MAX && sigma >= dmin + dmin.div_ceil(m) + ET {
             break;
         }
@@ -1850,7 +1991,10 @@ fn block_wiedemann_k(rows: &[Row], rhs: &[u64], n: usize, kc: usize, ell: u64, m
         }
     }
     // generator: the nonzero-f column of least shifted degree
-    let Some(g) = (0..k).filter(|&c| f[c].iter().any(|&y| y != 0)).min_by_key(|&c| (delta[c], c)) else {
+    let Some(g) = (0..k)
+        .filter(|&c| f[c].iter().any(|&y| y != 0))
+        .min_by_key(|&c| (delta[c], c))
+    else {
         return (None, matvecs);
     };
     let l = delta[g];
@@ -1903,7 +2047,12 @@ impl Sys {
                 }
             }
         }
-        let active = col_rows.iter().enumerate().filter(|(j, v)| *j != kc && !v.is_empty()).count() + 1;
+        let active = col_rows
+            .iter()
+            .enumerate()
+            .filter(|(j, v)| *j != kc && !v.is_empty())
+            .count()
+            + 1;
         Sys {
             ell,
             kc: kc as u32,
@@ -2015,8 +2164,16 @@ impl Sys {
             cnt(3, 1);
         }
         let inv = powmod(apiv, ell - 2, ell);
-        let others: Vec<u32> = self.col_rows[j as usize].iter().copied().filter(|&i| i != pi).collect();
-        let mut touched: Vec<u32> = piv.iter().map(|e| e.0).filter(|&c| c != self.kc && c != j).collect();
+        let others: Vec<u32> = self.col_rows[j as usize]
+            .iter()
+            .copied()
+            .filter(|&i| i != pi)
+            .collect();
+        let mut touched: Vec<u32> = piv
+            .iter()
+            .map(|e| e.0)
+            .filter(|&c| c != self.kc && c != j)
+            .collect();
         for &ri in &others {
             let old = self.rows[ri as usize].take().unwrap();
             let ar = old.iter().find(|e| e.0 == j).unwrap().1;
@@ -2041,7 +2198,11 @@ impl Sys {
                     b += 1;
                 } else {
                     let x = mulmod(f, piv[b].1, ell);
-                    let y = if old[a].1 >= x { old[a].1 - x } else { old[a].1 + ell - x };
+                    let y = if old[a].1 >= x {
+                        old[a].1 - x
+                    } else {
+                        old[a].1 + ell - x
+                    };
                     if y != 0 {
                         out.push((old[a].0, y));
                     }
@@ -2120,7 +2281,9 @@ impl Sys {
             }
         }
         while let Some(Reverse((f, j))) = heap.pop() {
-            let Some((fnow, pi)) = self.fill(j) else { continue };
+            let Some((fnow, pi)) = self.fill(j) else {
+                continue;
+            };
             if fnow != f {
                 heap.push(Reverse((fnow, j)));
                 continue;
@@ -2161,13 +2324,20 @@ impl Sys {
                         n += 1;
                     }
                 }
-                let mut rr: Row = r.iter().map(|&(j, c)| (map[j as usize] as u32, c)).collect();
+                let mut rr: Row = r
+                    .iter()
+                    .map(|&(j, c)| (map[j as usize] as u32, c))
+                    .collect();
                 rr.sort();
                 rows.push(rr);
                 rhs.push(self.rhs[i]);
             }
         }
-        let kc = if map[self.kc as usize] >= 0 { Some(map[self.kc as usize] as usize) } else { None };
+        let kc = if map[self.kc as usize] >= 0 {
+            Some(map[self.kc as usize] as usize)
+        } else {
+            None
+        };
         (rows, rhs, n, kc)
     }
 }
@@ -2190,7 +2360,15 @@ struct LaInfo {
 }
 
 /// Run one linear-algebra arm on the filtered system. Returns the candidate k.
-fn run_la(la: La, srows: &[Row], srhs: &[u64], ncols: usize, kc: usize, ell: u64, cx: f64) -> (Option<u64>, LaInfo) {
+fn run_la(
+    la: La,
+    srows: &[Row],
+    srhs: &[u64],
+    ncols: usize,
+    kc: usize,
+    ell: u64,
+    cx: f64,
+) -> (Option<u64>, LaInfo) {
     let cx = la.cx.unwrap_or(cx);
     let mut info = LaInfo {
         in_rows: srows.len(),
@@ -2246,8 +2424,18 @@ fn run_la(la: La, srows: &[Row], srhs: &[u64], ncols: usize, kc: usize, ell: u64
         }
         let (rr, _, nn, _) = sys.compact();
         let wsum: usize = sys.col_rows.iter().map(|v| v.len()).sum();
-        eprintln!("actual rows {} cols {} colrows-sum {} nnz {} nnz-tracked {}", rr.len(), nn, wsum, rr.iter().map(|r| r.len()).sum::<usize>(), sys.nnz);
-        eprintln!("CHECK_SGE {:?}: rows {} cols {} bad {} bad_in {} dep {} merges {} trimmed {}", la, sys.nrows, sys.ncols, bad, bad0, sys.dependent, sys.merges, sys.trimmed);
+        eprintln!(
+            "actual rows {} cols {} colrows-sum {} nnz {} nnz-tracked {}",
+            rr.len(),
+            nn,
+            wsum,
+            rr.iter().map(|r| r.len()).sum::<usize>(),
+            sys.nnz
+        );
+        eprintln!(
+            "CHECK_SGE {:?}: rows {} cols {} bad {} bad_in {} dep {} merges {} trimmed {}",
+            la, sys.nrows, sys.ncols, bad, bad0, sys.dependent, sys.merges, sys.trimmed
+        );
     }
     let (rows, rhs, n, kc2) = sys.compact();
     info.rows = rows.len();
@@ -2473,7 +2661,11 @@ fn ic_solve(
                     st.lp1 += 1;
                     let (xl, sl) = lps[0];
                     if need_bfs {
-                        consumed.push(Edge { row: rowd.clone(), rhs: al, lps: vec![(xl, sl)] });
+                        consumed.push(Edge {
+                            row: rowd.clone(),
+                            rhs: al,
+                            lps: vec![(xl, sl)],
+                        });
                     }
                     if let Some(e) = expr.get(&xl) {
                         let (d, r2) = sub_expr(&rowd, al, sl, e, ell);
@@ -2481,7 +2673,17 @@ fn ic_solve(
                         st.cycles += 1;
                     } else {
                         expr.insert(xl, solve_for(&rowd, al, sl, ell));
-                        propagate(xl, &mut expr, &mut pend, &rels, &mut full_rows, &mut st, ell, need_bfs, &mut consumed);
+                        propagate(
+                            xl,
+                            &mut expr,
+                            &mut pend,
+                            &rels,
+                            &mut full_rows,
+                            &mut st,
+                            ell,
+                            need_bfs,
+                            &mut consumed,
+                        );
                     }
                 } else if nl == 2 {
                     st.lp2 += 1;
@@ -2491,7 +2693,11 @@ fn ic_solve(
                         let ina = expr.contains_key(&xa);
                         let inb = expr.contains_key(&xb);
                         if need_bfs && (ina || inb) {
-                            consumed.push(Edge { row: rowd.clone(), rhs: al, lps: vec![(xa, sa), (xb, sb)] });
+                            consumed.push(Edge {
+                                row: rowd.clone(),
+                                rhs: al,
+                                lps: vec![(xa, sa), (xb, sb)],
+                            });
                         }
                         if ina && inb {
                             let (d, r2) = sub_expr(&rowd, al, sa, &expr[&xa], ell);
@@ -2505,10 +2711,24 @@ fn ic_solve(
                             }
                             let (d, r2) = sub_expr(&rowd, al, sa, &expr[&xa], ell);
                             expr.insert(xb, solve_for(&d, r2, sb, ell));
-                            propagate(xb, &mut expr, &mut pend, &rels, &mut full_rows, &mut st, ell, need_bfs, &mut consumed);
+                            propagate(
+                                xb,
+                                &mut expr,
+                                &mut pend,
+                                &rels,
+                                &mut full_rows,
+                                &mut st,
+                                ell,
+                                need_bfs,
+                                &mut consumed,
+                            );
                         } else {
                             let id = rels.len();
-                            rels.push(Rel { row: rowd, rhs: al, lps: [(xa, sa), (xb, sb)] });
+                            rels.push(Rel {
+                                row: rowd,
+                                rhs: al,
+                                lps: [(xa, sa), (xb, sb)],
+                            });
                             pend.entry(xa).or_default().push((xb, id));
                             pend.entry(xb).or_default().push((xa, id));
                         }
@@ -2568,14 +2788,19 @@ fn ic_solve(
                 let mut srhs = Vec::with_capacity(nrows);
                 for (i, (rw, rh)) in full_rows.iter().enumerate() {
                     if alive[i] {
-                        srows.push(rw.iter().map(|&(j, c)| (cols[j as usize] as u32, c)).collect::<Vec<_>>());
+                        srows.push(
+                            rw.iter()
+                                .map(|&(j, c)| (cols[j as usize] as u32, c))
+                                .collect::<Vec<_>>(),
+                        );
                         srhs.push(*rh);
                     }
                 }
                 la_ncols = ncols;
                 la_nnz = srows.iter().map(|r| r.len() as u64).sum();
                 let kc = cols[kcol as usize] as usize;
-                let mut alt_sys: [Option<Option<(Vec<Row>, Vec<u64>, usize, usize)>>; 3] = [None, None, None];
+                let mut alt_sys: [Option<Option<(Vec<Row>, Vec<u64>, usize, usize)>>; 3] =
+                    [None, None, None];
                 // every arm still running solves the same filtered system; its
                 // counters are booked to the arm and removed from the shared
                 // (relation-phase) counters
@@ -2591,7 +2816,11 @@ fn ic_solve(
                             alt_sys[bi] = Some(if bi == 1 {
                                 let all = bfs_rows(&direct, &consumed, ell);
                                 if all.len() != full_rows.len() {
-                                    eprintln!("note: bfs rows {} != incumbent rows {}", all.len(), full_rows.len());
+                                    eprintln!(
+                                        "note: bfs rows {} != incumbent rows {}",
+                                        all.len(),
+                                        full_rows.len()
+                                    );
                                 }
                                 filter_rows(&all, nfb, kcol, nfb + 1)
                             } else {
@@ -2689,7 +2918,11 @@ fn propagate(
         for (w, id) in list {
             let rel = &rels[id];
             if log {
-                consumed.push(Edge { row: rel.row.clone(), rhs: rel.rhs, lps: rel.lps.to_vec() });
+                consumed.push(Edge {
+                    row: rel.row.clone(),
+                    rhs: rel.rhs,
+                    lps: rel.lps.to_vec(),
+                });
             }
             let mut d = rel.row.clone();
             let mut rr = rel.rhs;
@@ -2801,7 +3034,12 @@ fn bfs_rows(direct: &[(Row, u64)], edges: &[Edge], ell: u64) -> Vec<(Row, u64)> 
 /// Rows with the large primes kept as columns `nfb + 1 + i` (structured
 /// Gaussian elimination then decides which to merge away): the full relations
 /// and every consumed large-prime relation. Returns the rows and the column count.
-fn lpcol_rows(direct: &[(Row, u64)], edges: &[Edge], nfb: usize, ell: u64) -> (Vec<(Row, u64)>, usize) {
+fn lpcol_rows(
+    direct: &[(Row, u64)],
+    edges: &[Edge],
+    nfb: usize,
+    ell: u64,
+) -> (Vec<(Row, u64)>, usize) {
     let mut idx: HashMap<u64, u32> = HashMap::new();
     let mut out: Vec<(Row, u64)> = direct.to_vec();
     for e in edges {
@@ -2819,7 +3057,12 @@ fn lpcol_rows(direct: &[(Row, u64)], edges: &[Edge], nfb: usize, ell: u64) -> (V
 }
 
 /// The incumbent's singleton filter and column numbering, as a function.
-fn filter_rows(full_rows: &[(Row, u64)], _nfb: usize, kcol: u32, ntot: usize) -> Option<(Vec<Row>, Vec<u64>, usize, usize)> {
+fn filter_rows(
+    full_rows: &[(Row, u64)],
+    _nfb: usize,
+    kcol: u32,
+    ntot: usize,
+) -> Option<(Vec<Row>, Vec<u64>, usize, usize)> {
     let nrows_all = full_rows.len();
     let mut alive = vec![true; nrows_all];
     loop {
@@ -2862,7 +3105,11 @@ fn filter_rows(full_rows: &[(Row, u64)], _nfb: usize, kcol: u32, ntot: usize) ->
     let mut srhs = Vec::with_capacity(nrows);
     for (i, (rw, rh)) in full_rows.iter().enumerate() {
         if alive[i] {
-            srows.push(rw.iter().map(|&(j, c)| (cols[j as usize] as u32, c)).collect::<Vec<_>>());
+            srows.push(
+                rw.iter()
+                    .map(|&(j, c)| (cols[j as usize] as u32, c))
+                    .collect::<Vec<_>>(),
+            );
             srhs.push(*rh);
         }
     }
@@ -2916,7 +3163,11 @@ fn rho_neg(inst: &Instance, g: EP, t: EP, rng: &mut PyRng, r: usize, max_steps: 
     let sq = (ell as f64).sqrt();
     let dpbits = ((sq.log2() as i64) - 6).max(2) as u32;
     let mask: u64 = (1u64 << dpbits) - 1;
-    let hx = |x: KE| x[0].wrapping_mul(1000003).wrapping_add(x[1].wrapping_mul(7919)).wrapping_add(x[2]);
+    let hx = |x: KE| {
+        x[0].wrapping_mul(1000003)
+            .wrapping_add(x[1].wrapping_mul(7919))
+            .wrapping_add(x[2])
+    };
     let ordk = |x: KE| (x[2], x[1], x[0]);
     // one walk step on classes {P, -P}: returns the canonical successor and its coefficients
     let step = |cur: (KE, KE), a: u64, b: u64| -> Option<((KE, KE), u64, u64)> {
@@ -2938,16 +3189,26 @@ fn rho_neg(inst: &Instance, g: EP, t: EP, rng: &mut PyRng, r: usize, max_steps: 
     'outer: loop {
         let a0 = rng.randbelow(ell);
         let b0 = rng.randrange(1, ell);
-        let Some(st) = e.add(e.mul(a0, g), e.mul(b0, t)) else { continue };
+        let Some(st) = e.add(e.mul(a0, g), e.mul(b0, t)) else {
+            continue;
+        };
         let (mut cur, neg) = canon(k, st);
-        let (mut a, mut b) = if neg { ((ell - a0) % ell, (ell - b0) % ell) } else { (a0, b0) };
+        let (mut a, mut b) = if neg {
+            ((ell - a0) % ell, (ell - b0) % ell)
+        } else {
+            (a0, b0)
+        };
         let mut walk = 0u64;
         let mut saved: Option<(KE, KE)> = None;
         loop {
             if (hx(cur.0) >> 3) & mask == 0 {
                 if let Some(&(a2, b2)) = seen.get(&cur) {
                     if (b2 + ell - b) % ell != 0 {
-                        let kk = mulmod((a + ell - a2) % ell, powmod((b2 + ell - b) % ell, ell - 2, ell), ell);
+                        let kk = mulmod(
+                            (a + ell - a2) % ell,
+                            powmod((b2 + ell - b) % ell, ell - 2, ell),
+                            ell,
+                        );
                         let c_end = snap();
                         return RhoOut {
                             k: Some(kk),
@@ -2977,7 +3238,9 @@ fn rho_neg(inst: &Instance, g: EP, t: EP, rng: &mut PyRng, r: usize, max_steps: 
                 let (mut x, mut xa, mut xb) = (cur, a, b);
                 let (mut mn, mut ma_, mut mb) = (cur, a, b);
                 loop {
-                    let Some((y, ya, yb)) = step(x, xa, xb) else { continue 'outer };
+                    let Some((y, ya, yb)) = step(x, xa, xb) else {
+                        continue 'outer;
+                    };
                     steps += 1;
                     walk += 1;
                     if y == cur {
@@ -2992,7 +3255,9 @@ fn rho_neg(inst: &Instance, g: EP, t: EP, rng: &mut PyRng, r: usize, max_steps: 
                     xa = ya;
                     xb = yb;
                 }
-                let Some(dbl) = e.add(Some(mn), Some(mn)) else { continue 'outer };
+                let Some(dbl) = e.add(Some(mn), Some(mn)) else {
+                    continue 'outer;
+                };
                 steps += 1;
                 walk += 1;
                 let (c2, n2) = canon(k, dbl);
@@ -3009,7 +3274,9 @@ fn rho_neg(inst: &Instance, g: EP, t: EP, rng: &mut PyRng, r: usize, max_steps: 
             if walk % L == 0 {
                 saved = Some(cur);
             }
-            let Some((c2, na, nb)) = step(cur, a, b) else { continue 'outer };
+            let Some((c2, na, nb)) = step(cur, a, b) else {
+                continue 'outer;
+            };
             steps += 1;
             walk += 1;
             cur = c2;
@@ -3101,7 +3368,15 @@ fn parse_args() -> Args {
     a
 }
 
-fn ic_json(arm: &str, kappa: f64, res: &IcOut, ktrue: u64, ctr: [u64; 5], p: u64, wall_total: f64) -> serde_json::Value {
+fn ic_json(
+    arm: &str,
+    kappa: f64,
+    res: &IcOut,
+    ktrue: u64,
+    ctr: [u64; 5],
+    p: u64,
+    wall_total: f64,
+) -> serde_json::Value {
     let mut tot = [0u64; 5];
     for i in 0..5 {
         tot[i] = ctr[i] + res.counters[i];
@@ -3150,14 +3425,24 @@ fn main() {
     let id: Div = (vec![1], vec![]);
     let mut chk = serde_json::Map::new();
     chk.insert("phiG_nonzero".into(), (phig != id).into());
-    chk.insert("ell_phiG_zero".into(), (cmul(inst.ell, &phig, &inst.h, p) == id).into());
-    chk.insert("N_phiG_zero".into(), (cmul(inst.n, &phig, &inst.h, p) == id).into());
+    chk.insert(
+        "ell_phiG_zero".into(),
+        (cmul(inst.ell, &phig, &inst.h, p) == id).into(),
+    );
+    chk.insert(
+        "N_phiG_zero".into(),
+        (cmul(inst.n, &phig, &inst.h, p) == id).into(),
+    );
     let mut hom = 0;
     for _ in 0..3 {
         let p1 = random_point(&inst, &mut rng);
         let p2 = random_point(&inst, &mut rng);
         let p3 = e.add(Some(p1), Some(p2));
-        if let (Ok(a), Ok(b), Ok(c)) = (transfer(&inst, p3), transfer(&inst, Some(p1)), transfer(&inst, Some(p2))) {
+        if let (Ok(a), Ok(b), Ok(c)) = (
+            transfer(&inst, p3),
+            transfer(&inst, Some(p1)),
+            transfer(&inst, Some(p2)),
+        ) {
             if a == cadd(&b, &c, &inst.h, p) {
                 hom += 1;
             }
@@ -3165,7 +3450,10 @@ fn main() {
     }
     chk.insert("hom_ok".into(), hom.into());
     if bits <= 11 && args.gp_check {
-        chk.insert("jac_order_hyperellcharpoly_equals_N".into(), (gp_order_hyperell(&inst.h, p) == inst.n).into());
+        chk.insert(
+            "jac_order_hyperellcharpoly_equals_N".into(),
+            (gp_order_hyperell(&inst.h, p) == inst.n).into(),
+        );
     }
     chk.insert("deg_h".into(), (inst.h.len() - 1).into());
     restore(old);
@@ -3187,7 +3475,17 @@ fn main() {
         let dd1 = transfer(&inst, g).unwrap();
         let dd2 = transfer(&inst, t).unwrap();
         let ctr = snap();
-        let (res, arms) = ic_solve(&inst, &dd1, &dd2, &mut r2, Variant::Lp2, args.kappa, &las, args.cx, args.max_checks);
+        let (res, arms) = ic_solve(
+            &inst,
+            &dd1,
+            &dd2,
+            &mut r2,
+            Variant::Lp2,
+            args.kappa,
+            &las,
+            args.cx,
+            args.max_checks,
+        );
         let wall_total = tt.elapsed().as_secs_f64();
         for (la, a) in las.iter().zip(arms.iter()) {
             let mut tot = [0u64; 5];
@@ -3227,6 +3525,10 @@ fn main() {
         "a": inst.a, "b": inst.b, "r0": inst.r[0], "Kmod": [inst.k.c1, inst.k.c0],
         "build_wall": build_wall, "checks": chk, "results": results,
     });
-    let mut f = std::fs::OpenOptions::new().create(true).append(true).open(&args.out).unwrap();
+    let mut f = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&args.out)
+        .unwrap();
     writeln!(f, "{}", rec).unwrap();
 }
