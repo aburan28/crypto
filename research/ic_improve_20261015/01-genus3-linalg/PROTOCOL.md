@@ -142,3 +142,16 @@ cost is booked at its own successful check and does not depend on which other ar
 collection (`main:inc` is in the first group, so gate 0 still applies). The four arms that tuning
 stage 1 found dominated (`sgelz`, `bfslz`, `bfswd`, `bfssgelz`) are not run at b >= 19. b = 21 is
 dropped: at this load a b = 21 job would not fit in 60 minutes.
+
+## Amendment A3 (2026-10-15, after tuning stage 2 at b = 20, before any analysis of test data)
+
+- Stage 2 at b = 20 (training curves 5-7; [results/tune2/](results/tune2/)), geometric-mean whole cost
+  of `lpsgewd`: kappa 1: 2.831e10, 1.41: 2.469e10, **2: 2.446e10**, 2.83: 2.789e10 (curve 5; curves 6, 7
+  were still running and cannot change the order). **kappa* = 2**, item 04's value, so the
+  kappa-tuned arms `tuned:inc` and `tuned:lpsgewd` are `main:inc` and `main:lpsgewd` and are not run
+  separately. The b = 18 part of the stage-2 grid was stopped to free the host.
+- For the incumbent's own linear algebra the stage-2 data pick a different kappa: `inc` costs 3.272e10
+  (kappa 1), **3.204e10 (1.41)**, 3.695e10 (2), 4.946e10 (2.83, curve 5). So "re-tune kappa alone" is a
+  separate candidate. Added arm, exploratory and secondary: stream `tuned` at **kappa = 1.41** with LA
+  arms `inc` (= kappa re-tune only) and `lpsgewd` (= kappa re-tune + new LA), same instances, targets
+  and walk seed as `main`, b = 10..20 as the budget allows, paired against `main:inc`.

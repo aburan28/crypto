@@ -1,5 +1,5 @@
 #!/bin/sh
-# kappa-tuned arms (test curves 0-2): kappa = KAPPA, LA arms inc and lpsgewd (cx = 8).
+# kappa = 1.41 arms (amendment A3): LA arms inc and lpsgewd (cx = 8), test curves 0-2.
 # Usage: KAPPA=<kappa*> PAR=2 sh run_tuned.sh results/run
 OUT=$1; mkdir -p $OUT
 {
