@@ -139,5 +139,5 @@ if os.path.exists(rec):
     ax.set_ylabel("S (group-addition equivalents / √r)")
     ax.grid(axis="y", color=C["grid"], lw=0.6)
     ax.legend(frameon=False, fontsize=8)
-    ax.set_title("ecbench session k4-p29-d4cost, E(F_{29⁴}), one round", fontsize=9)
+    ax.set_title("ecbench session k4-p29-d4cost, E(F_29⁴), one round", fontsize=9)
     save(fig, "s_by_arm")
