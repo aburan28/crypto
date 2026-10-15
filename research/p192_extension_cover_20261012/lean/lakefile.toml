@@ -1,6 +1,6 @@
 name = "p192_extension_cover"
 version = "0.1.0"
-defaultTargets = ["CrossRatio"]
+defaultTargets = ["CrossRatio", "SignedBase"]
 
 [[require]]
 name = "mathlib"
@@ -9,3 +9,6 @@ rev = "d13f23b723b8a846827a245b89c10fc7d3f11612"
 
 [[lean_lib]]
 name = "CrossRatio"
+
+[[lean_lib]]
+name = "SignedBase"

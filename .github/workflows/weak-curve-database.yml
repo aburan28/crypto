@@ -85,13 +85,15 @@ jobs:
           auto-config: false
           use-mathlib-cache: true
           build: true
-          build-args: 'CrossRatio'
+          build-args: 'CrossRatio SignedBase'
           test: false
           lint: false
           leanchecker: true
           leanchecker-args: '--fresh --verbose CrossRatio'
       - name: Audit P-192 theorem axioms
         run: lake env lean CrossRatio.lean
+      - name: Fresh-check signed-base theorem and audit axioms
+        run: lake env leanchecker --fresh --verbose SignedBase && lake env lean SignedBase.lean
   leaderboard-lean-proof:
     runs-on: ubuntu-latest
     timeout-minutes: 25
