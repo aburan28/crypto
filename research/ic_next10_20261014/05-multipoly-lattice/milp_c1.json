@@ -1,0 +1,121 @@
+[
+ {
+  "system": "C1 S3 (all M)",
+  "ell": 1,
+  "leads": [
+   [
+    0,
+    0
+   ]
+  ],
+  "ext": [
+   6,
+   6
+  ],
+  "delta": 0.09,
+  "delta_exact": "9/100",
+  "dim": 25,
+  "sum_k": 9,
+  "maxes": [
+   4,
+   4
+  ],
+  "binds": false,
+  "milp_time_limit_hit": false,
+  "nz": 25,
+  "nm": 49,
+  "iters": 4,
+  "seconds": 0.13
+ },
+ {
+  "system": "C1 S3 (all M)",
+  "ell": 1,
+  "leads": [
+   [
+    0,
+    2
+   ]
+  ],
+  "ext": [
+   6,
+   6
+  ],
+  "delta": 0.09,
+  "delta_exact": "9/100",
+  "dim": 25,
+  "sum_k": 9,
+  "maxes": [
+   4,
+   4
+  ],
+  "binds": false,
+  "milp_time_limit_hit": false,
+  "nz": 25,
+  "nm": 49,
+  "iters": 4,
+  "seconds": 0.14
+ },
+ {
+  "system": "C1 S3 (all M)",
+  "ell": 1,
+  "leads": [
+   [
+    2,
+    0
+   ]
+  ],
+  "ext": [
+   6,
+   6
+  ],
+  "delta": 0.09,
+  "delta_exact": "9/100",
+  "dim": 25,
+  "sum_k": 9,
+  "maxes": [
+   4,
+   4
+  ],
+  "binds": false,
+  "milp_time_limit_hit": false,
+  "nz": 25,
+  "nm": 49,
+  "iters": 4,
+  "seconds": 0.18
+ },
+ {
+  "system": "C1 S3 (all M)",
+  "ell": 1,
+  "leads": [
+   [
+    2,
+    2
+   ]
+  ],
+  "ext": [
+   6,
+   6
+  ],
+  "delta": 0.09,
+  "delta_exact": "9/100",
+  "dim": 25,
+  "sum_k": 9,
+  "maxes": [
+   4,
+   4
+  ],
+  "binds": false,
+  "milp_time_limit_hit": false,
+  "nz": 25,
+  "nm": 49,
+  "iters": 4,
+  "seconds": 0.22
+ },
+ {
+  "system": "C1 S3 (all M)",
+  "ell": 1,
+  "best_over_leads": 0.09,
+  "best_exact": "9/100",
+  "n_lead_choices": 4
+ }
+]

@@ -15,8 +15,8 @@ app=modal.App("nist-prime-gpu-arithmetic")
 def sh(cmd,timeout=3600):
  r=subprocess.run(cmd,shell=True,cwd=ROOT,text=True,capture_output=True,timeout=timeout)
  return r.returncode,r.stdout+r.stderr
-def build(ptx,maxreg=0):
- return sh(f"make -B bench ARCH=sm_120 NIST_PTX={int(ptx)} MAXREG={maxreg}")
+def build(ptx,maxreg=0,shared=0):
+  return sh(f"make -B bench ARCH=sm_120 NIST_PTX={int(ptx)} MAXREG={maxreg} TABLE_SHARED={int(shared)}")
 @app.function(image=image,gpu=GPU,timeout=2*3600)
 def validate():
  rc,out=sh("make test");print(out)
@@ -112,6 +112,49 @@ def sweep_rho2():
     if k not in best or r_["Gstep_s"]>best[k]["Gstep_s"]: best[k]=r_
   for k,v in best.items(): print(k,v)
   return {"rows":results}
+@app.function(image=image,gpu=GPU,timeout=4*3600)
+def sweep_rho3():
+  """Round 3: shared-memory jump table (global vs shared), W up to 64.
+  Cells: (table, threads, W)."""
+  import re
+  results=[]
+  for shared in (0,1):
+    rc,log=build(1,0,shared)
+    if rc: raise RuntimeError(f"build shared={shared} failed")
+    regs=re.findall(r"Compiling entry function '(\S*k_rhoI\S*)'.*?Used (\d+) registers.*?(\d+) bytes cumulative stack",log,re.S)
+    print("shared",shared,"k_rho:",regs)
+    for th in (128,256):
+      for W in (16,32,64):
+        rc,out=sh(f"./bench {th} rho {W} 8192")
+        if rc: print("FAILED",shared,th,W,out[-400:]); continue
+        print(out.strip())
+        for curve,r,thr,blk,ww,gstep,dps in re.findall(
+          r"^(P-(?:256|384)) rho: walks=(\d+) threads/blk=(\d+) blocks=(\d+) W=(\d+)\s+([0-9.]+) Gstep/s\s+\((\d+) DPs",out,re.M):
+          results.append({"shared":shared,"threads":th,"W":W,"curve":curve,"Gstep_s":float(gstep),"DPs":int(dps),
+                          "expected_DPs":int(r)*8192/2**24})
+  print("\n=== best per curve ===")
+  best={}
+  for r_ in results:
+    k=r_["curve"]
+    if k not in best or r_["Gstep_s"]>best[k]["Gstep_s"]: best[k]=r_
+  for k,v in best.items(): print(k,v)
+  return {"rows":results}
+@app.function(image=image,gpu=GPU,timeout=4*3600)
+def cell(shared:int=1,threads:int=256,wc:int=64,iters:int=8192):
+  """Single cell: build the given table variant and time one (threads, W)."""
+  import re
+  rc,log=build(1,0,shared)
+  if rc: raise RuntimeError(f"build shared={shared} failed")
+  regs=re.findall(r"Compiling entry function '(\S*k_rhoI\S*)'.*?Used (\d+) registers.*?(\d+) bytes cumulative stack",log,re.S)
+  print("shared",shared,"k_rho:",regs)
+  rc,out=sh(f"./bench {threads} rho {wc} {iters}")
+  if rc: raise RuntimeError("run failed")
+  print(out.strip())
+  rows=[{"shared":shared,"threads":threads,"W":wc,"curve":curve,"Gstep_s":float(gstep),"DPs":int(dps),
+         "expected_DPs":int(r)*iters/2**24}
+        for curve,r,thr,blk,ww,gstep,dps in re.findall(
+          r"^(P-(?:256|384)) rho: walks=(\d+) threads/blk=(\d+) blocks=(\d+) W=(\d+)\s+([0-9.]+) Gstep/s\s+\((\d+) DPs",out,re.M)]
+  return {"rows":rows}
 @app.function(image=image,gpu=GPU,timeout=4*3600)
 def tune(repeats:int=3):
  rows=[]
