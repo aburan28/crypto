@@ -1,0 +1,394 @@
+{
+ "plan": "split",
+ "started_utc": "2026-10-14T15:13:37Z",
+ "finished_utc": "2026-10-14T15:13:45Z",
+ "commit": "be3610fa17f6c0ce3802010f73d652a655c6fe70",
+ "image": "rust:1.88-slim-bookworm",
+ "cpu_per_container": 16,
+ "jobs": [
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "0",
+    "--trials",
+    "125",
+    "--arms",
+    "base,pm_score,pm_split,mm_score"
+   ],
+   "wall_s": 2.1,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "125",
+    "--trials",
+    "125",
+    "--arms",
+    "base,pm_score,pm_split,mm_score"
+   ],
+   "wall_s": 2.2,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "250",
+    "--trials",
+    "125",
+    "--arms",
+    "base,pm_score,pm_split,mm_score"
+   ],
+   "wall_s": 2.3,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "375",
+    "--trials",
+    "125",
+    "--arms",
+    "base,pm_score,pm_split,mm_score"
+   ],
+   "wall_s": 2.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "500",
+    "--trials",
+    "125",
+    "--arms",
+    "base,pm_score,pm_split,mm_score"
+   ],
+   "wall_s": 2.1,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "625",
+    "--trials",
+    "125",
+    "--arms",
+    "base,pm_score,pm_split,mm_score"
+   ],
+   "wall_s": 2.1,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "750",
+    "--trials",
+    "125",
+    "--arms",
+    "base,pm_score,pm_split,mm_score"
+   ],
+   "wall_s": 2.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "875",
+    "--trials",
+    "125",
+    "--arms",
+    "base,pm_score,pm_split,mm_score"
+   ],
+   "wall_s": 2.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1000",
+    "--trials",
+    "125",
+    "--arms",
+    "base,pm_score,pm_split,mm_score"
+   ],
+   "wall_s": 2.1,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1125",
+    "--trials",
+    "125",
+    "--arms",
+    "base,pm_score,pm_split,mm_score"
+   ],
+   "wall_s": 2.2,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1250",
+    "--trials",
+    "125",
+    "--arms",
+    "base,pm_score,pm_split,mm_score"
+   ],
+   "wall_s": 2.5,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1375",
+    "--trials",
+    "125",
+    "--arms",
+    "base,pm_score,pm_split,mm_score"
+   ],
+   "wall_s": 2.2,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1500",
+    "--trials",
+    "125",
+    "--arms",
+    "base,pm_score,pm_split,mm_score"
+   ],
+   "wall_s": 2.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1625",
+    "--trials",
+    "125",
+    "--arms",
+    "base,pm_score,pm_split,mm_score"
+   ],
+   "wall_s": 2.7,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1750",
+    "--trials",
+    "125",
+    "--arms",
+    "base,pm_score,pm_split,mm_score"
+   ],
+   "wall_s": 2.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1-36",
+   "argv": [
+    "e1",
+    "--bits",
+    "36",
+    "--t0",
+    "1875",
+    "--trials",
+    "125",
+    "--arms",
+    "base,pm_score,pm_split,mm_score"
+   ],
+   "wall_s": 2.1,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1dp-36",
+   "argv": [
+    "e1dp",
+    "--bits",
+    "36",
+    "--t0",
+    "0",
+    "--trials",
+    "125",
+    "--arms",
+    "sel_base,sel_pm_score,sel_pm_split"
+   ],
+   "wall_s": 1.7,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1dp-36",
+   "argv": [
+    "e1dp",
+    "--bits",
+    "36",
+    "--t0",
+    "125",
+    "--trials",
+    "125",
+    "--arms",
+    "sel_base,sel_pm_score,sel_pm_split"
+   ],
+   "wall_s": 1.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1dp-36",
+   "argv": [
+    "e1dp",
+    "--bits",
+    "36",
+    "--t0",
+    "250",
+    "--trials",
+    "125",
+    "--arms",
+    "sel_base,sel_pm_score,sel_pm_split"
+   ],
+   "wall_s": 1.5,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1dp-36",
+   "argv": [
+    "e1dp",
+    "--bits",
+    "36",
+    "--t0",
+    "375",
+    "--trials",
+    "125",
+    "--arms",
+    "sel_base,sel_pm_score,sel_pm_split"
+   ],
+   "wall_s": 1.5,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1dp-36",
+   "argv": [
+    "e1dp",
+    "--bits",
+    "36",
+    "--t0",
+    "500",
+    "--trials",
+    "125",
+    "--arms",
+    "sel_base,sel_pm_score,sel_pm_split"
+   ],
+   "wall_s": 1.5,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1dp-36",
+   "argv": [
+    "e1dp",
+    "--bits",
+    "36",
+    "--t0",
+    "625",
+    "--trials",
+    "125",
+    "--arms",
+    "sel_base,sel_pm_score,sel_pm_split"
+   ],
+   "wall_s": 1.4,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1dp-36",
+   "argv": [
+    "e1dp",
+    "--bits",
+    "36",
+    "--t0",
+    "750",
+    "--trials",
+    "125",
+    "--arms",
+    "sel_base,sel_pm_score,sel_pm_split"
+   ],
+   "wall_s": 1.6,
+   "host": "16\nmodel name\t: unknown"
+  },
+  {
+   "file": "e1dp-36",
+   "argv": [
+    "e1dp",
+    "--bits",
+    "36",
+    "--t0",
+    "875",
+    "--trials",
+    "125",
+    "--arms",
+    "sel_base,sel_pm_score,sel_pm_split"
+   ],
+   "wall_s": 1.4,
+   "host": "16\nmodel name\t: unknown"
+  }
+ ]
+}
