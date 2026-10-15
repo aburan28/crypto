@@ -1,11 +1,26 @@
-# Pending order-229 full-image and direct-control gate
+# Order-229 full-image gate: execution and remaining price
+
+**2026-10-15 execution update.** The [versioned batch
+protocol](../different_j_order_batch_20261015/PROTOCOL_V1.md),
+[pre-run prefix correction](../different_j_order_batch_20261015/PROTOCOL_V2_PREFIX_CORRECTION.md),
+and [run spec](../different_j_order_batch_20261015/RUN_SPEC_V1.json)
+preceded the completed [84-child run](../different_j_order_batch_20261015/RESULTS.md).
+The independent native checker replayed 1,785/1,785 scalars and
+13,141 relation witnesses. At `N=64`, median whole-child CPU was
+72,774 µs full image, 6,383 µs source BSGS and 7,653 µs source
+negation rho; paired full/BSGS and full/rho ratio medians were 11.139
+and 9.509. Full-image and destination-direct support were 98 and 90
+keys with 40 shared. The portable counted-`S`, isolated timing,
+independent-host performance replay and growing-order assessment
+remain open. The following preregistered decision rule is retained
+as historical protocol, not as an unperformed execution checklist.
 
 The [bounded native screen](RESULTS.md) selected the first qualifying
 different-j pair at `p=211`, `r=229`: source
 `y²=x³−21x+37`, destination `y²=x³−81x−243`, rational degree-three
 kernel `{O,(3,1),(3,-1)}`, `j=77` and `160`, and direct
-`F_(211²)` point counts `44,655` on both models. This makes a
-64-distinct-target batch feasible but does not yet perform it. The
+`F_(211²)` point counts `44,655` on both models. This made the
+64-distinct-target batch feasible. The
 separately frozen [full map/fiber audit](FIBER_REPORT.md) now completed
 every enumeration, three-point fiber, exact order-229 generator and
 52,441 ordered subgroup-pair checks with independent native replay.
