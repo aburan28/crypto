@@ -285,12 +285,19 @@ fn judge(input: &Path, out: &Path, timeout: u64) -> Result<(Value, i32), String>
             "__judge".into(),
             "--input".into(),
             artifact.to_string_lossy().into_owned(),
+            "--rss-ready".into(),
+            artifact
+                .parent()
+                .unwrap()
+                .join("resources-ready")
+                .to_string_lossy()
+                .into_owned(),
         ];
         let exe = std::env::current_exe().map_err(|e| e.to_string())?;
         let receipt = supervisor::run(&exe, out, &args, "verification", timeout);
         let receipt: Value = serde_json::from_str(&receipt.dump()).map_err(|e| e.to_string())?;
         if receipt["status"] != "PASS" {
-            let invalid = receipt["status"] == "FAIL";
+            let invalid = receipt["status"] == "FAIL" && receipt["exit_code"] != 3;
             return Ok((
                 json!({"schema":"isogeny-challenge-entry/v1","status":if invalid {"REJECTED"} else {"CENSORED"},"reason":receipt["status"],"score":Value::Null,"verification":receipt}),
                 if invalid { 1 } else { 3 },
@@ -309,9 +316,10 @@ fn judge(input: &Path, out: &Path, timeout: u64) -> Result<(Value, i32), String>
             ));
         }
         let (_, verified) = read_json(&out.join("verification.json"), 16 << 20)?;
+        let expected_ell = s.ell.to_string();
         if verified["status"] != "PASS"
             || verified["season"] != season()
-            || verified["ell"] != s.ell.to_string()
+            || verified["ell"] != expected_ell.as_str()
             || verified["source_icv1"] != s.slug
             || verified["map_sha256"] != sha256_hex(&s.map)
         {
@@ -350,7 +358,18 @@ pub fn execute(args: &[String]) -> Result<(Value, i32), String> {
             Ok((plan(&o)?, 0))
         }
         "__judge" => {
-            let o = Options::parse(&args[1..], &["input"])?;
+            let o = Options::parse(&args[1..], &["input", "rss-ready"])?;
+            let ready = Path::new(o.need("rss-ready")?);
+            let started = std::time::Instant::now();
+            while !ready.is_file() {
+                if started.elapsed() >= std::time::Duration::from_secs(10) {
+                    return Ok((
+                        json!({"status":"CENSORED","reason":"RESOURCE_HANDSHAKE_UNAVAILABLE"}),
+                        3,
+                    ));
+                }
+                std::thread::sleep(std::time::Duration::from_millis(5));
+            }
             Ok((worker(Path::new(o.need("input")?))?, 0))
         }
         "judge" => {
