@@ -739,6 +739,19 @@ fn thread_cpu_ns() -> u64 {
     ts.tv_sec as u64 * 1_000_000_000 + ts.tv_nsec as u64
 }
 
+fn process_peak_rss_bytes() -> u64 {
+    let mut usage: libc::rusage = unsafe { std::mem::zeroed() };
+    assert_eq!(unsafe { libc::getrusage(libc::RUSAGE_SELF, &mut usage) }, 0);
+    #[cfg(target_os = "macos")]
+    {
+        usage.ru_maxrss as u64
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        (usage.ru_maxrss as u64) * 1024
+    }
+}
+
 fn timed<T>(f: impl FnOnce() -> T) -> (T, u64, u64, (u64, u64)) {
     take_field_counters();
     let wall_start = Instant::now();
@@ -1029,13 +1042,18 @@ fn solve(path: &str, include_iso: bool) {
                     }
                 };
                 let s_cpu = (cpu_ns as f64 / ns_add_cpu) / (r as f64).sqrt();
+                let peak_rss_bytes = process_peak_rss_bytes();
+                assert!(
+                    peak_rss_bytes <= 512 * 1024 * 1024,
+                    "shared-process memory cap"
+                );
                 println!(
                     "{}",
                     json!({
                         "kind":"run","p":p,"r":r,"round":round,"seed":seed,
                         "arm":arm,"cpu_ns":cpu_ns,"wall_ns":wall_ns,
                         "s_cpu_gae":s_cpu,"field_fp_muls":field.0,"field_fp_invs":field.1,
-                        "result":result,"extra":extra,
+                        "result":result,"extra":extra,"process_peak_rss_bytes":peak_rss_bytes,
                     })
                 );
             }
@@ -1638,6 +1656,7 @@ fn verify_independent(
     fixture_path: &str,
     expected_run_sha256: &str,
     include_iso: bool,
+    include_chi: bool,
 ) {
     let fixture_bytes = std::fs::read(fixture_path).expect("fixture bytes");
     let run_bytes = std::fs::read(run_path).expect("run bytes");
@@ -1666,8 +1685,14 @@ fn verify_independent(
         "rho-negation-aa",
         "rho-six-class",
     ];
+    if include_chi {
+        arms.insert(3, "chi-polynomial");
+    }
     if include_iso {
-        arms.insert(4, "isomorphism-projected-pair");
+        arms.insert(
+            if include_chi { 5 } else { 4 },
+            "isomorphism-projected-pair",
+        );
     }
     let mut seen = BTreeSet::new();
     let mut verified = 0;
@@ -1714,7 +1739,7 @@ fn verify_independent(
             assert_eq!(v["result"]["verified"], true);
             verified += 1;
         } else {
-            assert_eq!(arm, "raw-pair");
+            assert!(arm == "raw-pair" || (include_chi && arm == "chi-polynomial"));
             assert_eq!(v["extra"]["status"], "exhausted");
             assert_eq!(v["result"]["exhausted"], true);
             assert_eq!(v["result"]["verified"], false);
@@ -1730,14 +1755,16 @@ fn verify_independent(
             }
         }
     }
-    assert_eq!(
-        (verified, exhausted),
-        (if include_iso { 87 } else { 75 }, 9)
-    );
+    if !include_chi {
+        assert_eq!(
+            (verified, exhausted),
+            (if include_iso { 87 } else { 75 }, 9)
+        );
+    }
     println!(
         "{}",
         json!({
-            "schema":if include_iso {"torsion_extension_independent_replay/v3"} else {"torsion_extension_independent_replay/v2"},
+            "schema":if include_chi {"chi_polynomial_independent_replay/v1"} else if include_iso {"torsion_extension_independent_replay/v3"} else {"torsion_extension_independent_replay/v2"},
             "arithmetic":"independent_u128_fp2_chord_tangent",
             "fixture_sha256":sha256_hex(&fixture_bytes),
             "records_sha256":sha256_hex(&run_bytes),
@@ -2047,11 +2074,20 @@ fn main() {
             &std::env::args().nth(3).expect("fixture path"),
             "ca9a0ec7e31de59c58a78ae5c269350b37963b62ff9de815c805c36c2ec26693",
             false,
+            false,
         ),
         Some("verify-independent-v4") => verify_independent(
             &std::env::args().nth(2).expect("records path"),
             &std::env::args().nth(3).expect("fixture path"),
             "71a0e8f7d96f630d372299f64a407d398b68dc21b9a8fa04de5c11c8c3b67b6a",
+            true,
+            false,
+        ),
+        Some("verify-independent-chi") => verify_independent(
+            &std::env::args().nth(2).expect("records path"),
+            &std::env::args().nth(3).expect("fixture path"),
+            &std::env::args().nth(4).expect("expected records SHA-256"),
+            true,
             true,
         ),
         Some("iso-check") => iso_check(&std::env::args().nth(2).expect("fixture path")),
