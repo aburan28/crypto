@@ -1,0 +1,25 @@
+ops (ok): ic-cos-c1 / rho-frob = 11.7637 [8.258, 15.969] (cluster) over 32 pairs on 16 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 0.3598 [0.236, 0.453]
+measurement quality: 0 / 100; paired attempts 32, verified 32, admitted 0; levels {"L0": 32}; p95 foreign busy unknown%, p95 run queue 2114.84%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-cos-c1 / rho-frob | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 16 | 11.7637 | [8.2575, 15.9694] | cluster |
+
+| workload | curve | log2 r | rho-frob mean S | ic-cos-c1 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W2864917bd828 | icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 0.3878 | 12.3770 | 31.9143 |
+| W38de2d79bede | icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 0.3583 | 3.0726 | 8.5758 |
+| W3b3c617ad873 | icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 0.3995 | 4.5389 | 11.3605 |
+| W4ca9076f522b | icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 0.5184 | 5.7910 | 11.1711 |
+| W538ee18bebda | icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 0.3544 | 6.3525 | 17.9254 |
+| W5ab75cfb0a31 | icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 0.3639 | 4.9352 | 13.5621 |
+| W6e71784cd39a | icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 0.5311 | 4.4826 | 8.4405 |
+| W7884fbf8badd | icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 0.7266 | 2.2270 | 3.0650 |
+| Wa25e22e71eab | icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 0.3168 | 4.5410 | 14.3343 |
+| Wbba36d1f8adc | icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 0.3807 | 8.5646 | 22.4944 |
+| Wbe0335631cbd | icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 0.4313 | 5.8994 | 13.6793 |
+| Wc8c45fcadb2d | icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 0.3598 | 3.4338 | 9.5449 |
+| Wd6686a532f63 | icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 0.2655 | 4.4384 | 16.7144 |
+| Wdab8a02d4e4d | icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 0.6607 | 3.0130 | 4.5605 |
+| We6bf101eba86 | icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 0.5064 | 3.5843 | 7.0776 |
+| Wf26bacfa66dc | icv1-f2m23-tm5197-1f85e9e1 | 22.00 | 0.4593 | 5.3364 | 11.6178 |
