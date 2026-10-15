@@ -274,7 +274,7 @@ fn crossings(ic: &[(f64, f64)], rho: &dyn Fn(f64) -> f64) -> (Option<f64>, Optio
     out
 }
 
-fn interval(v: &mut Vec<f64>) -> Value {
+fn interval(v: &mut [f64]) -> Value {
     if v.is_empty() {
         return Value::Null;
     }

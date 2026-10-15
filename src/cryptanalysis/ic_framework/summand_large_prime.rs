@@ -116,7 +116,9 @@ impl SmallBase {
         if !(1..=2).contains(&large_primes) {
             return Err("large_primes is 1 or 2".into());
         }
-        if !(exponent > 0.0 && exponent <= 1.0) || !(scale > 0.0) {
+        if !(exponent > 0.0 && exponent <= 1.0)
+            || scale.partial_cmp(&0.0) != Some(std::cmp::Ordering::Greater)
+        {
             return Err("lp_small_exp is in (0, 1] and lp_small_scale is positive".into());
         }
         let mut small = vec![false; columns];
