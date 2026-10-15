@@ -179,12 +179,18 @@ def seal(root, artifact_zip, artifact_sha256, analysis_sha256):
                 and row.get("peak_rss_bytes", RSS_CAP_BYTES + 1) <= RSS_CAP_BYTES]
     eligible_by_arm = {row["arm"]: row for row in eligible}
     comparisons = analysis["paired_comparisons"]
-    if set(comparisons) != {"k3200_root11", "k3250_root11", "k3350_root11"}:
-        raise ValueError("paired contrast set changed")
+    expected_comparisons = {"k3200_root11", "k3250_root11", "k3350_root11"}
+    baseline = eligible_by_arm.get("k3300_root11")
+    if baseline is not None:
+        if set(comparisons) != expected_comparisons:
+            raise ValueError("paired contrast set changed")
+    elif comparisons:
+        raise ValueError("paired contrasts require the independently replayed baseline")
+    else:
+        comparisons = {arm: None for arm in sorted(expected_comparisons)}
     confirmed = [eligible_by_arm[arm] for arm, result in comparisons.items()
                  if (result is not None and result["confirmed_faster_than_k3300"]
                      and arm in eligible_by_arm)]
-    baseline = eligible_by_arm.get("k3300_root11")
     selected = (min(confirmed, key=lambda row: row["ic_online_mean_ms_exploratory"])
                 if confirmed else baseline)
     if analysis["selected_arm_confirmed"] != (selected["arm"] if selected else None):
