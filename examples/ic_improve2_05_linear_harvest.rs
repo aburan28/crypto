@@ -10,14 +10,15 @@
 //! the same system; the arm order rotates with the target index so no arm
 //! always runs first.  `--arms` lists `name:spec` separated by `/`, where spec is `off`,
 //! `env` (no override: whatever `KIC_LINEAR_HARVEST` says) or a
-//! `parse_linear_harvest` string such as `1`, `root`, `k=2`, `free=12`.
+//! `parse_linear_harvest` string such as `1` (the default), `every`, `root`,
+//! `k=2`, `root,gpv=0.9607`.
 //! The first arm is the reference whose roots every other arm must equal.
 //!
 //! See `research/ic_improve_20261015/05-linear-harvest/PROTOCOL.md`.
 //!
 //! ```bash
 //! cargo run --release --example ic_improve2_05_linear_harvest -- --n 17 --ell 6 --m 3 --targets 4 \
-//!     --arms i:off/h:1/r:root/i2:off
+//!     --arms i:off/h:every/r:root/i2:off
 //! ```
 #![allow(clippy::too_many_arguments, clippy::type_complexity, dead_code)]
 
@@ -211,7 +212,7 @@ fn main() {
     let first: u64 = flag("--first").map(|v| v.parse().unwrap()).unwrap_or(0);
     let phase = flag("--phase").unwrap_or_else(|| "pilot".into());
     let arms: Vec<(String, String)> = flag("--arms")
-        .unwrap_or_else(|| "i:off/h:1/i2:off".into())
+        .unwrap_or_else(|| "i:off/h:every/i2:off".into())
         .split('/')
         .map(|s| {
             let (a, b) = s.split_once(':').expect("name:spec");

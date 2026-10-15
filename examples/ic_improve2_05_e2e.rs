@@ -35,6 +35,16 @@ fn tcpu() -> f64 {
     ts.tv_sec as f64 + ts.tv_nsec as f64 * 1e-9
 }
 
+/// Process CPU (user + system, every thread) in seconds.
+fn pcpu() -> f64 {
+    let mut ru: libc::rusage = unsafe { std::mem::zeroed() };
+    unsafe {
+        libc::getrusage(libc::RUSAGE_SELF, &mut ru);
+    }
+    let tv = |t: libc::timeval| t.tv_sec as f64 + t.tv_usec as f64 * 1e-6;
+    tv(ru.ru_utime) + tv(ru.ru_stime)
+}
+
 fn main() {
     let argv: Vec<String> = std::env::args().collect();
     let flag = |k: &str| {
@@ -69,6 +79,7 @@ fn main() {
     };
     let mut dispositions: Vec<KoblitzRelationAttemptDisposition> = Vec::new();
     let c0 = tcpu();
+    let p0 = pcpu();
     let report =
         koblitz_index_calculus_dlp_with_factor_base_and_progress(&kc, &q, &fb, &opts, &mut |e| {
             if let KoblitzIcEvent::RelationAttemptFinished { disposition, .. } = e {
@@ -76,6 +87,7 @@ fn main() {
             }
         });
     let cpu = tcpu() - c0;
+    let proc_cpu = pcpu() - p0;
     let (h1, _) = crypto_lib::cryptanalysis::koblitz_groebner::linear_harvest_counts_thread();
     let harvests = h1 - h0;
     let mut h = DefaultHasher::new();
@@ -98,7 +110,7 @@ fn main() {
         None => (None, 0, 0, 0, 0),
     };
     println!(
-        r#"{{"arm":"{arm}","n":{n},"ell":{ell},"m":{m},"seed":{seed},"d":{d},"log_ok":{},"relations":{relations},"trials":{trials},"attempts":{},"found":{},"refuted":{},"unknown":{},"dispositions_hash":"{:016x}","reductions":{reductions},"harvests":{harvests},"relation_collection_s":{:.4},"cpu_s":{cpu:.4}}}"#,
+        r#"{{"arm":"{arm}","n":{n},"ell":{ell},"m":{m},"seed":{seed},"d":{d},"log_ok":{},"relations":{relations},"trials":{trials},"attempts":{},"found":{},"refuted":{},"unknown":{},"dispositions_hash":"{:016x}","reductions":{reductions},"harvests":{harvests},"relation_collection_s":{:.4},"cpu_s":{cpu:.4},"proc_cpu_s":{proc_cpu:.4}}}"#,
         match log_ok {
             Some(b) => b.to_string(),
             None => "null".into(),
