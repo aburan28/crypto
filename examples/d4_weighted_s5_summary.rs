@@ -60,9 +60,17 @@ fn f(v: &Value, k: &str) -> f64 {
 fn main() {
     let dir = env::args().nth(1).expect("RAW_DIR");
     let dir = Path::new(&dir);
-    let mut rows = read(&dir.join("tiny.jsonl"));
-    rows.extend(read(&dir.join("measured.jsonl")));
-    rows.extend(read(&dir.join("w_only.jsonl")));
+    // `--prefix v2_` reads `v2_tiny.jsonl` etc. (the re-run after the
+    // eigenspace-resolution fix); the default reads the first run.
+    let args: Vec<String> = env::args().collect();
+    let prefix = args
+        .iter()
+        .position(|a| a == "--prefix")
+        .map_or(String::new(), |i| args[i + 1].clone());
+    let out_name = format!("{prefix}summary.json");
+    let mut rows = read(&dir.join(format!("{prefix}tiny.jsonl")));
+    rows.extend(read(&dir.join(format!("{prefix}measured.jsonl"))));
+    rows.extend(read(&dir.join(format!("{prefix}w_only.jsonl"))));
     let controls = read(&dir.join("controls.jsonl"));
 
     // Exactness and structure over every target.
@@ -85,7 +93,7 @@ fn main() {
             .count();
         let reruns = solved
             .iter()
-            .filter(|r| r["w_degree_used"].as_u64() == Some(27))
+            .filter(|r| r["w_degree_used"].as_u64().is_some_and(|d| d > 26))
             .count();
         let mut cw: Vec<f64> = solved
             .iter()
@@ -170,33 +178,39 @@ fn main() {
         }));
     }
 
-    // The handover, E18's τ_T frame (derived).
-    let pooled = |seeds: &[u64], ps: &[u64], key: &str, sub: &str| -> Vec<f64> {
-        rows.iter()
-            .filter(|r| ps.contains(&r["p"].as_u64().unwrap()))
-            .filter(|r| seeds.contains(&r["seed"].as_u64().unwrap()))
-            .filter(|r| !r[key].is_null() && r[key][sub].is_number())
-            .map(|r| f(&r[key], sub))
-            .collect()
-    };
+    // The handover, E18's τ_T frame (derived), on one paired target set:
+    // the measured sizes, seed 1, targets solved by both arms.
     let measured = [269u64, 1033, 4093];
-    let mut cw_all = pooled(&[1, 2], &measured, "w_solve", "total_muls");
-    let lw_all = pooled(&[1, 2], &measured, "w_lift", "muls");
-    let mut cwl_all: Vec<f64> = rows
+    let paired: Vec<&Value> = rows
         .iter()
-        .filter(|r| measured.contains(&r["p"].as_u64().unwrap()) && r["w_solved"] == true)
+        .filter(|r| measured.contains(&r["p"].as_u64().unwrap()))
+        .filter(|r| r["seed"].as_u64() == Some(1))
+        .filter(|r| r["w_solved"] == true && r["c8_solved"] == true)
+        .collect();
+    let mut cw_all: Vec<f64> = paired
+        .iter()
+        .map(|r| f(&r["w_solve"], "total_muls"))
+        .collect();
+    let mut cwl_all: Vec<f64> = paired
+        .iter()
         .map(|r| f(&r["w_solve"], "total_muls") + f(&r["w_lift"], "muls"))
         .collect();
-    let mut c8_all = pooled(&[1], &measured, "c8_solve", "total_muls");
+    let mut c8_all: Vec<f64> = paired
+        .iter()
+        .map(|r| f(&r["c8_solve"], "total_muls"))
+        .collect();
+    let n_paired = paired.len();
     let (cwm, cwlm, c8m) = (
         median(&mut cw_all),
         median(&mut cwl_all),
         median(&mut c8_all),
     );
-    let _ = lw_all;
     println!();
     println!("Handover in E18's τ_T frame (derived; extrapolation): n* = {NSTAR_TAU_PLAIN} − 4·log2({C4_PLAIN:.3e} / C)");
-    println!("| solve | C (median, measured sizes) | C4_plain / C | n* (bits) |");
+    println!(
+        "Paired set: p ∈ {{269, 1033, 4093}}, seed 1, solved by both arms: {n_paired} targets."
+    );
+    println!("| solve | C (median, paired set) | C4_plain / C | n* (bits) |");
     println!("|:--|--:|--:|--:|");
     let hand = [
         ("plain S₄ form (quoted)", C4_PLAIN),
@@ -223,9 +237,10 @@ fn main() {
         "nstar_tau_plain_bits": NSTAR_TAU_PLAIN,
         "cells": cells,
         "handover_tau_frame": hv,
+        "handover_paired_targets": n_paired,
         "controls": controls,
     });
-    let path = dir.parent().unwrap().join("summary.json");
+    let path = dir.parent().unwrap().join(out_name);
     fs::write(&path, serde_json::to_string_pretty(&out).unwrap()).expect("write summary");
     eprintln!("wrote {}", path.display());
 }

@@ -39,7 +39,7 @@ use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use serde::Serialize;
 
-use super::gaudry_cubic::{am, mm, sm, split_eigenspace, PolyRing};
+use super::gaudry_cubic::{am, charpoly_mod_p, eigenvectors_mod_p, mm, rref_mod_p, sm, PolyRing};
 use super::gaudry_quartic::{
     charpoly_u16, echelon_by_lead, eigenvectors_u16, split_quartic, Curve4, Fp4, NormalForms4, Pt4,
     QuarticSolve, E4,
@@ -185,7 +185,130 @@ pub fn columns_at(d: u16) -> usize {
 enum Inner {
     Solved(Vec<[u64; 4]>),
     Unsolved(String),
+    /// A degenerate eigenspace needs a weight-2 unknown's multiplication
+    /// matrix, which this degree cannot build.
     NeedHigher,
+    /// An eigenspace did not resolve to rational points (a group stayed
+    /// above dimension 1, or a vector failed extraction or verification).
+    Unresolved(String),
+}
+
+/// [`super::gaudry_cubic::split_eigenspace`], keeping the vectors of each
+/// eigenvalue `μ` of the restricted map together: one group per rational
+/// `μ`.  The same operations and the same count.
+fn split_groups(
+    w: &[Vec<u64>],
+    mv: &[Vec<u64>],
+    p: u64,
+    rng: &mut StdRng,
+    muls: &mut u64,
+) -> Vec<Vec<Vec<u64>>> {
+    let k = w.len();
+    let dim = mv.len();
+    let mut y = vec![vec![0u64; dim]; k];
+    for i in 0..k {
+        for l in 0..dim {
+            if w[i][l] == 0 {
+                continue;
+            }
+            for j in 0..dim {
+                if mv[l][j] != 0 {
+                    y[i][j] = am(y[i][j], mm(w[i][l], mv[l][j], p), p);
+                    *muls += 1;
+                }
+            }
+        }
+    }
+    let mut a = vec![vec![0u64; k]; k];
+    for i in 0..k {
+        let mut sys: Vec<Vec<u64>> = (0..dim)
+            .map(|r| {
+                let mut row: Vec<u64> = (0..k).map(|j| w[j][r]).collect();
+                row.push(y[i][r]);
+                row
+            })
+            .collect();
+        let pivots = rref_mod_p(&mut sys, p, muls);
+        for (r, &pc) in pivots.iter().enumerate() {
+            if pc < k {
+                a[i][pc] = sys[r][k];
+            }
+        }
+    }
+    let mut at = vec![vec![0u64; k]; k];
+    for i in 0..k {
+        for j in 0..k {
+            at[j][i] = a[i][j];
+        }
+    }
+    let cp = charpoly_mod_p(&a, p, muls);
+    let ring = PolyRing::new(p);
+    let mus = ring.roots(&cp, rng);
+    *muls += ring.muls.get();
+    let mut out = Vec::new();
+    for mu in mus {
+        let mut group = Vec::new();
+        for v in eigenvectors_mod_p(&at, mu, p, muls) {
+            let mut u = vec![0u64; dim];
+            for j in 0..k {
+                if v[j] == 0 {
+                    continue;
+                }
+                for r in 0..dim {
+                    if w[j][r] != 0 {
+                        u[r] = am(u[r], mm(v[j], w[j][r], p), p);
+                        *muls += 1;
+                    }
+                }
+            }
+            group.push(u);
+        }
+        out.push(group);
+    }
+    out
+}
+
+/// Read the rational points off resolved eigenspace groups of `M_π` at
+/// eigenvalue `lam`.  `Err` when any group has more than one vector, or a
+/// vector has no `1`-coordinate, a `π`-coordinate other than `lam`, or
+/// fails one of the equations: the quotient's multiplication matrices are
+/// then not those of a radical zero-dimensional system here, and a root
+/// could be lost, so the solve must not report "solved".
+fn extract_points(
+    groups: &[Vec<Vec<u64>>],
+    lam: u64,
+    idx: &[usize],
+    comps: &[HashMap<[u8; 4], u64>],
+    p: u64,
+    verify_muls: &mut u64,
+) -> Result<Vec<[u64; 4]>, String> {
+    let mut out = Vec::new();
+    for g in groups {
+        if g.len() > 1 {
+            return Err(format!(
+                "an eigenspace of π = {lam} stays of dimension {} after σ₁, σ₂, σ₃",
+                g.len()
+            ));
+        }
+        for w in g {
+            if w[idx[0]] == 0 {
+                return Err(format!("an eigenvector of π = {lam} has no 1-coordinate"));
+            }
+            let inv = inv_mod(w[idx[0]], p);
+            let e: [u64; 4] = core::array::from_fn(|k| mm(w[idx[k + 1]], inv, p));
+            if e[EIG_VAR] != lam {
+                return Err(format!(
+                    "an eigenvector of π = {lam} reads π = {}",
+                    e[EIG_VAR]
+                ));
+            }
+            if !comps.iter().all(|c| eval(c, &e, p, verify_muls) == 0) {
+                return Err(format!("the point read at π = {lam} fails the system"));
+            }
+            out.push(e);
+        }
+    }
+    Ok(out)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -333,41 +456,43 @@ fn solve_at(
     let mut out = Vec::new();
     for lam in lambdas {
         let mut ev = 0u64;
-        let mut ker = eigenvectors_u16(&mt, lam, p as u32, &mut ev);
+        let ker = eigenvectors_u16(&mt, lam, p as u32, &mut ev);
         if ker.len() > 1 {
             st.degenerate_eigenspaces += 1;
-            for (k, slot) in others.iter_mut().enumerate() {
-                if ker.len() <= 1 {
-                    break;
-                }
-                if slot.is_none() {
-                    let mut nm = 0u64;
-                    *slot = mult_matrix(&mut nfs, k, &mut nm);
-                    st.nf_muls += nm;
-                }
-                let Some(mv) = slot.as_ref() else {
-                    st.eigenvector_muls += ev;
-                    return Inner::NeedHigher;
-                };
-                ker = split_eigenspace(&ker, mv, p, rng, &mut ev);
+        }
+        // Split each group of more than one vector by σ₁, then σ₂, then σ₃,
+        // keeping the vectors of each eigenvalue together.
+        let mut groups = vec![ker];
+        for (k, slot) in others.iter_mut().enumerate() {
+            if groups.iter().all(|g| g.len() <= 1) {
+                break;
             }
+            if slot.is_none() {
+                let mut nm = 0u64;
+                *slot = mult_matrix(&mut nfs, k, &mut nm);
+                st.nf_muls += nm;
+            }
+            let Some(mv) = slot.as_ref() else {
+                st.eigenvector_muls += ev;
+                return Inner::NeedHigher;
+            };
+            let mut next = Vec::new();
+            for g in groups {
+                if g.len() <= 1 {
+                    next.push(g);
+                } else {
+                    next.extend(split_groups(&g, mv, p, rng, &mut ev));
+                }
+            }
+            groups = next;
         }
         st.eigenvector_muls += ev;
-        for w in &ker {
-            if w[idx[0]] == 0 {
-                continue;
-            }
-            let inv = inv_mod(w[idx[0]], p);
-            let e: [u64; 4] = core::array::from_fn(|k| mm(w[idx[k + 1]], inv, p));
-            if e[EIG_VAR] != lam {
-                continue;
-            }
-            let mut vm = 0u64;
-            let ok = comps.iter().all(|c| eval(c, &e, p, &mut vm) == 0);
-            st.verify_muls += vm;
-            if ok {
-                out.push(e);
-            }
+        let mut vm = 0u64;
+        let got = extract_points(&groups, lam, &idx, &comps, p, &mut vm);
+        st.verify_muls += vm;
+        match got {
+            Ok(pts) => out.extend(pts),
+            Err(why) => return Inner::Unresolved(why),
         }
     }
     st.eigen_ms += t4.elapsed().as_secs_f64() * 1e3;
@@ -378,8 +503,10 @@ fn solve_at(
     Inner::Solved(out)
 }
 
-/// The weighted solve: at `d` (normally [`MACAULAY_BOUND`]), and at `d + 1`
-/// if a degenerate eigenspace of `M_π` needs a weight-2 unknown to split.
+/// The weighted solve: at `d` (normally [`MACAULAY_BOUND`]), and again one
+/// degree higher (up to `d + 2`) if a degenerate eigenspace of `M_π` needs a
+/// weight-2 unknown to split or an eigenspace does not resolve to verified
+/// rational points; past `d + 2` it reports unsolved, never a partial set.
 /// Both runs are charged in `st`.  Returns the `F_p`-rational solutions
 /// `(σ₁, σ₂, σ₃, π)` and the degree that produced them.
 pub fn solve_weighted(
@@ -394,6 +521,8 @@ pub fn solve_weighted(
     let t0 = Instant::now();
     let mut deg = d;
     let res = loop {
+        // Count the degenerate eigenspaces of the last attempt only.
+        st.degenerate_eigenspaces = 0;
         match solve_at(comps, deg, p, rng, st, row_selection, debug) {
             Inner::Solved(s) => break Some(s),
             Inner::Unsolved(why) => {
@@ -411,6 +540,16 @@ pub fn solve_weighted(
             }
             Inner::NeedHigher => {
                 st.outcome = "degenerate eigenspace unresolved".into();
+                break None;
+            }
+            Inner::Unresolved(why) if deg < d + 2 => {
+                if debug {
+                    eprintln!("  {why}: rerun at weighted degree {}", deg + 1);
+                }
+                deg += 1;
+            }
+            Inner::Unresolved(why) => {
+                st.outcome = format!("unresolved: {why}");
                 break None;
             }
         }
@@ -716,5 +855,32 @@ mod tests {
         let mine: BTreeSet<[u64; 4]> = lb.decompositions.iter().copied().collect();
         assert!(truth.contains(&ys));
         assert_eq!(mine, truth);
+    }
+
+    #[test]
+    fn extraction_refuses_unresolved_eigenspaces() {
+        let p = 101;
+        // One equation, π − 5 = 0, in (σ₁, σ₂, σ₃, π); standard basis
+        // indices: 1 → 0, σ₁ → 1, σ₂ → 2, σ₃ → 3, π → 4.
+        let mut c: HashMap<[u8; 4], u64> = HashMap::new();
+        c.insert([0, 0, 0, 1], 1);
+        c.insert([0, 0, 0, 0], p - 5);
+        let comps = vec![c];
+        let idx = [0usize, 1, 2, 3, 4];
+        let mut vm = 0u64;
+        let good = vec![1u64, 2, 3, 4, 5];
+        assert_eq!(
+            extract_points(&[vec![good.clone()]], 5, &idx, &comps, p, &mut vm),
+            Ok(vec![[2, 3, 4, 5]])
+        );
+        // A group left at dimension 2.
+        let other = vec![1u64, 7, 3, 4, 5];
+        assert!(extract_points(&[vec![good.clone(), other]], 5, &idx, &comps, p, &mut vm).is_err());
+        // No 1-coordinate.
+        assert!(extract_points(&[vec![vec![0, 2, 3, 4, 5]]], 5, &idx, &comps, p, &mut vm).is_err());
+        // A π-coordinate other than the eigenvalue.
+        assert!(extract_points(&[vec![good.clone()]], 6, &idx, &comps, p, &mut vm).is_err());
+        // A point that fails the system.
+        assert!(extract_points(&[vec![vec![1, 2, 3, 4, 6]]], 6, &idx, &comps, p, &mut vm).is_err());
     }
 }

@@ -283,10 +283,12 @@ fn main() {
             brute_ms: bms,
             mitm: mset.as_ref().map(|s| s.len()),
             mitm_ms: mms,
-            w_equals_brute: bset.as_ref().map(|s| *s == w_set),
-            w_equals_mitm: mset.as_ref().map(|s| *s == w_set),
-            c8_equals_w: if run_c8 && c8_solved {
-                Some(c8_set == w_set)
+            // An unsolved arm never "equals" the ground truth, even when the
+            // truth is empty.
+            w_equals_brute: bset.as_ref().map(|s| w_solved && *s == w_set),
+            w_equals_mitm: mset.as_ref().map(|s| w_solved && *s == w_set),
+            c8_equals_w: if run_c8 && (c8_solved || w_solved) {
+                Some(c8_solved && w_solved && c8_set == w_set)
             } else {
                 None
             },
