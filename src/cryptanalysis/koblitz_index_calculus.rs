@@ -6264,6 +6264,30 @@ impl PairSumTable {
         (sum == target).then_some(idxs)
     }
 
+    /// [`Self::decompose_fast`] for `m = 2` when the probe key and its
+    /// filter hash are already in hand (the walking descent's reject
+    /// path).  Skips a second `key_of` / `pair_filter_hash` / admit on
+    /// the rare hit; answers are unchanged because recovery still checks
+    /// the group.
+    pub fn decompose_fast_m2_known(
+        &self,
+        target: FastPoint,
+        key: u64,
+        h: u64,
+        pairs: &mut Vec<(u32, u32)>,
+    ) -> Option<Vec<usize>> {
+        self.pairs_for_key_hash(target, key, h, pairs);
+        let &(i, j) = pairs.first()?;
+        let idxs = if i <= j {
+            vec![i as usize, j as usize]
+        } else {
+            vec![j as usize, i as usize]
+        };
+        let _check = measurement::relation_check_scope();
+        let sum = self.curve.add(self.points[idxs[0]], self.points[idxs[1]]);
+        (sum == target).then_some(idxs)
+    }
+
     /// Decompose scanning only a cyclic window of the base.
     ///
     /// The full `m = 3` scan spends `|F|` filter probes per target and
@@ -13837,6 +13861,7 @@ impl<'a> IndividualLogSolver<'a> {
         let mut lambdas: Vec<u64> = Vec::with_capacity(DESCENT_WALKS);
         let mut keys: Vec<u64> = Vec::with_capacity(DESCENT_WALKS);
         let mut hashes: Vec<u64> = Vec::with_capacity(DESCENT_WALKS);
+        let mut hit_pairs: Vec<(u32, u32)> = Vec::new();
         while report.trials < self.opts.max_trials {
             // Key every state of the round first and prefetch its filter
             // word, so the 64 probes' cache misses overlap instead of
@@ -13892,8 +13917,29 @@ impl<'a> IndividualLogSolver<'a> {
                     }
                     continue;
                 }
-                if m == 2 && !pair.contains_key_hash(key, h) {
-                    report.record(*a, *b, || PdpAttempt::bare(None, PdpOutcome::Unresolved));
+                if m == 2 {
+                    if !pair.contains_key_hash(key, h) {
+                        report.record(*a, *b, || PdpAttempt::bare(None, PdpOutcome::Unresolved));
+                        continue;
+                    }
+                    // Hit: recover from the known key/hash instead of
+                    // re-canonicalising inside decompose_fast.
+                    let pdp = PdpAttempt::bare(
+                        pair.decompose_fast_m2_known(*state, key, h, &mut hit_pairs),
+                        PdpOutcome::Unresolved,
+                    );
+                    report.record(*a, *b, || pdp.clone());
+                    let Some(idxs) = pdp.points else {
+                        continue;
+                    };
+                    if let Some(d) = self.logarithm_from(fc, *g, q_fast, &idxs, *a, *b) {
+                        report.relation = Some(DescentRelation {
+                            a: *a,
+                            b: *b,
+                            points: idxs,
+                        });
+                        return Some(Some(d));
+                    }
                     continue;
                 }
                 let pdp = PdpAttempt::bare(
@@ -16349,6 +16395,30 @@ mod tests {
                 (sparse.degree, sparse.low_terms),
                 "n = {n}"
             );
+        }
+    }
+
+    #[test]
+    fn decompose_fast_m2_known_matches_decompose_fast() {
+        for (a, n) in [(0u8, 9u32), (0, 13)] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+            let pair = PairSumTable::build(&kc, &fb).unwrap();
+            let fc = pair.curve().clone();
+            let g = fc.lift(kc.generator());
+            let mut pairs = Vec::new();
+            for k in 0..128u64 {
+                let t = fc.mul_u64(g, k.wrapping_mul(4243) + 3);
+                let key = pair.probe_key(t);
+                let h = pair_filter_hash(key);
+                let slow = pair.decompose_fast(t, 2);
+                let fast = if pair.contains_key_hash(key, h) {
+                    pair.decompose_fast_m2_known(t, key, h, &mut pairs)
+                } else {
+                    None
+                };
+                assert_eq!(slow, fast, "a={a} n={n} k={k}");
+            }
         }
     }
 

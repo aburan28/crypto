@@ -17,7 +17,7 @@ no ECC2K-130 inference; multi-target secondary to cold single-target.
 | cycle | change | outcome |
 |---|---|---|
 | 1 | single-hash probe path; real multi-target e2e | **win**: miss probe ~3×; multi N=8 → 3–5× vs cold |
-| 2 | *(pending)* | |
+| 2 | m=2 hit reuses known key/hash | **win**: multi N=16 → 4–8× vs cold |
 | 3 | *(pending)* | |
 
 ## Hard stop vs rho
