@@ -491,3 +491,16 @@ Type I [collision report](../p192_extension_cover_20261012/reports/run-20261015T
 native target-key census, independent formal-vector enumeration, and two
 checked Lean collision equations. This updates the source package and static
 site data; the hosted deployment record above is an earlier snapshot.
+
+## 2026-10-15 adaptive-base rank continuation
+
+The registry adds `ic_adaptive_base_rank_balance` and the static site copy
+remains byte-identical. The [frozen P-192 audit](../p192_extension_cover_20261012/reports/run-20261015T1926Z/REPORT.md)
+checks 64 independently known-scalar equations, 64 distinct new points,
+zero old-base three-sum decompositions of those points, and the 64-row
+private identity block. An independent Python group-law implementation
+replays all 64 equations and the complete old-base support intersection.
+The new Lean module proves unique extension for every assignment of the old
+logarithms. The validator now checks 26 indexed criteria and 38 WAM1
+research checks; this is a registry and static-site-data update, not a new
+hosted deployment.

@@ -7,6 +7,12 @@ nonzero-unknown-row targets, and every repeated rank-bearing target has the
 same full formal signed-point vector. The criterion and exact receipt are
 linked there.
 
+**Adaptive-base continuation:** The [64-query rank-balance audit](reports/run-20261015T1926Z/REPORT.md)
+constructs one new quotient point per known-scalar equation and checks every
+point against the old three-sum support. The 64 forced rows bring 64 private
+columns and leave the 16 old logarithms unconstrained. Its Lean theorem
+formalizes the unique extension of any old-log assignment.
+
 **Continuation:** The [three-branch follow-up](BRANCH_CONTINUATION.md) proves
 that the nonsplit-quadratic direct genus-3 branch is excluded as well,
 constructs a descended Type I nonhyperelliptic genus-3 cover and a

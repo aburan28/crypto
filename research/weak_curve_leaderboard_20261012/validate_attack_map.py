@@ -30,6 +30,7 @@ def main() -> None:
     assert len(ids) == len(set(ids)), "attack and criterion IDs must be distinct"
     assert "ic_relation_support_rank" in ids, "relation-support criterion missing"
     assert "ic_scalar_anchor_overlap" in ids, "scalar-anchor criterion missing"
+    assert "ic_adaptive_base_rank_balance" in ids, "adaptive-base rank criterion missing"
     assert len(attack["items"]) >= 30, "the expansion index lost entries"
     for item in criteria:
         for field in ("id", "name", "method", "domain", "recognition", "witness",

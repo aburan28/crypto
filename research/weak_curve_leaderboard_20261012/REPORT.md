@@ -8,8 +8,8 @@ static catalog. The snapshot contains 814 prior exact models, 105 named
 curves (101 standards-provenance curves, two challenge curves, and two
 source-pinned pairing variants), 36
 published odd-characteristic parameter cases, three exact prime-field
-examples and twenty-five criterion entries. The WAM1 research queue adds
-38 input- and witness-specific checks, giving the site 63 searchable attack
+examples and twenty-six criterion entries. The WAM1 research queue adds
+38 input- and witness-specific checks, giving the site 64 searchable attack
 checks in total. Each evaluated finding has a
 [WID1 identifier](IDENTIFIERS.md) distinct from its curve identity.
 
@@ -190,7 +190,7 @@ factor is expected; the exact factor maps, selected-subgroup projections and
 costed divisor relation pipeline are the further assessment gates.
 
 The [machine-readable registry](criteria.json) specifies domain, recognition,
-required witness, construction and primary source for twenty-five criteria. The
+required witness, construction and primary source for twenty-six criteria. The
 entries make four crucial separations.
 
 The new `ic_relation_support_rank` entry tests a fixed-base index-calculus
@@ -217,6 +217,16 @@ different formal signed-point vectors. The exact [P-192 Type I audit](../p192_ex
 finds zero anchor overlap and zero distinct formal equations among repeated
 rank-bearing targets. This criterion is indexed by the specified base and
 query law; cover geometry alone does not assign a curve-wide finding.
+
+The `ic_adaptive_base_rank_balance` entry checks dynamic factor bases.
+Defining a new class from each known-scalar query makes a relation easy to
+write, but also creates a new unknown logarithm. The exact [P-192 audit](../p192_extension_cover_20261012/reports/run-20261015T1926Z/REPORT.md)
+constructs 64 such classes: its 64 rows have 64 private columns, leaving
+all 16 original logarithms unconstrained. The full 8,704-point pair-policy
+expansion has no duplicate or old-support decomposition. Lean proves the general unique
+extension for every old-log assignment. The criterion asks for rank after
+eliminating new columns and for an independent second decomposition or
+known-log witness before classifying a dynamic collector as useful.
 
 First, the [MOV reduction](https://doi.org/10.1145/103418.103434) uses a
 Weil pairing, while [Frey–Rück](https://doi.org/10.1090/S0025-5718-1994-1218343-6)

@@ -156,6 +156,18 @@
     "url": "https://github.com/aburan28/crypto/pull/1914"
   },
   {
+    "id": "ic_adaptive_base_rank_balance",
+    "name": "Adaptive factor-base rank balance",
+    "method": "Eliminate fresh logarithm columns before counting useful relations",
+    "domain": "A selected subgroup and relation collector that adds new factor-base points while constructing known-scalar equations",
+    "recognition": "Count every newly introduced unknown logarithm column. If each new row has its own private new point with unit coefficient, every old-log assignment extends uniquely and the rows constrain no old logarithm. Measure rank after eliminating new columns; require a second independent representation, a known logarithm, or a collision cycle to obtain positive projected rank.",
+    "witness": "Exact old and new point identities, independently known query scalars, subgroup and geometry checks for new points, duplicate and old-support collision census, augmented matrix columns and rank, projected rank on the old columns, and complete query and elimination costs.",
+    "construction": "For each proposed adaptive query, record its new point and row, replay the group equation independently, eliminate new columns, and count only surviving equations in the old unknowns. Test geometric eligibility and ordinary-query yield separately from algebraic rank.",
+    "status": "exact_p192_type_i_64_private_rows_zero_projected_rank",
+    "source": "P-192 Type I adaptive-base audit (2026)",
+    "url": "https://github.com/aburan28/crypto/pull/1914"
+  },
+  {
     "id": "cubic_jacobian_isogeny",
     "name": "Cubic Weil-restriction Jacobian isogeny",
     "method": "Direct isogeny to a genus-three Jacobian",

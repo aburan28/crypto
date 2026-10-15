@@ -6,7 +6,7 @@ and the pinned pairing roster,
 and **36 published odd-characteristic covering cases**. The named roster
 includes Oakley Groups 3 and 4, with exact GHS invariant candidates and
 separate WID1 finding IDs. It adds three exhaustively checked prime-field
-examples and a twenty-five-criterion
+examples and a twenty-six-criterion
 registry for anomalous, smooth-order, MOV, Frey–Rück, supersingular,
 binary-GHS, odd-characteristic GHS, cubic norm-one, quadratic-torus and
 proper-subfield mechanisms, plus direct extension-field decomposition,
@@ -29,7 +29,7 @@ power the site's vulnerability filters; check stages distinguish exact
 conditions, geometry, explicit maps, candidates and structural screens.
 
 The [WAM1 attack map](attack_map.json) adds 38 source-linked research checks
-to the 25 existing criteria, giving the website 63 searchable checks across
+to the 26 existing criteria, giving the website 64 searchable checks across
 curve structure, selected subgroups, auxiliary inputs, pairings, index calculus,
 hyperelliptic divisor and Jacobian decomposition, endomorphisms,
 implementations and isogeny protocols. Each WAM1 row states an
@@ -61,6 +61,15 @@ finds zero anchor overlap and zero new formal equations among repeated
 rank-bearing targets in the frozen 160-point signed base. This is a
 curve-and-base-specific screening result; a different base or query law
 requires a new census.
+
+The `ic_adaptive_base_rank_balance` criterion handles a collector that creates
+new factor-base points from known-scalar queries. The [P-192 adaptive-base audit](../p192_extension_cover_20261012/reports/run-20261015T1926Z/REPORT.md)
+constructs 64 exact new points and 64 equations, but each equation brings a
+private logarithm column. The augmented 64-row matrix has 80 unknown columns
+and leaves the original 16 free. All 8,704 points from the 64 targets and
+136 old-unknown pairs are distinct and outside old three-sum support.
+Counting row rank without the new columns
+would misidentify this construction as relation progress.
 
 The [genus-128 GHS cost audit](ghs_genus128_cost_audit.json) resolves the
 nominal factor-base and relation-query stages behind the two exact-invariant
