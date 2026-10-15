@@ -241,7 +241,7 @@ pub fn run(q5: &str, q11: &str) {
 pub fn upper_ids() {
     use num_bigint::BigUint;
     let mut models = Vec::new();
-    for (path, status) in [
+    let mut certificates = vec![
         (
             "prepared/search-certificates.jsonl",
             "crater; certified prime order",
@@ -250,7 +250,12 @@ pub fn upper_ids() {
             "results/floor-certificates-v2.jsonl",
             "floor; independently certified",
         ),
-    ] {
+    ];
+    let upper_floor = "results/precomputed-96-floor-certificate.jsonl";
+    if Path::new(ROOT).join(upper_floor).exists() {
+        certificates.push((upper_floor, "floor; independently certified"));
+    }
+    for (path, status) in certificates {
         for c in lines(&format!("{ROOT}/{path}")) {
             let gx: BigUint = c["Gx"].as_str().unwrap().parse().unwrap();
             let gy: BigUint = c["Gy"].as_str().unwrap().parse().unwrap();
