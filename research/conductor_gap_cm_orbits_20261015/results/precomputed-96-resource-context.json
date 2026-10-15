@@ -1,0 +1,13 @@
+{
+  "schema": "conductor-gap.resource-context/v1",
+  "attempt": "precomputed-96",
+  "exit": 137,
+  "signal": 9,
+  "shared_memory_limit_bytes": 17179869184,
+  "cgroup_oom_kills_before": 0,
+  "cgroup_oom_kills_after": 1,
+  "constructor_max_rss_kib": 13179144,
+  "concurrent_test_check_compiler_observed_rss_kib": 4242296,
+  "interpretation": "Shared cgroup OOM with concurrent Clippy test-check compilation; a scheduling failure, not an arithmetic result or proof of a construction barrier",
+  "corrective_action": "Complete Rust checks first; separately versioned 11 GiB constructor retry refuses active local compilers and solvers at launch"
+}

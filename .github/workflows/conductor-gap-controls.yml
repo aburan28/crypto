@@ -62,8 +62,18 @@ jobs:
           CM_FLOOR_INPUT="$study/prepared/all-certified-floors.gpvec" gp -q -f "$study/native/verify_floors.gp" > /tmp/floors.jsonl 2> /tmp/floors.stderr
           test "$(wc -l < /tmp/floors.jsonl)" -eq 136
           ! grep -E 'user error|at top-level|syntax error' /tmp/floors.stderr
+          gp -q -f "$study/native/replay_targets.gp" > /tmp/targets.jsonl 2> /tmp/targets.stderr
+          test "$(wc -l < /tmp/targets.jsonl)" -eq 797
+          ! grep -E 'user error|at top-level|syntax error' /tmp/targets.stderr
+          if [[ -f "$study/results/upper-96-floor-certificate.jsonl" ]]; then
+            CM_FLOOR_INPUT="$study/prepared/upper-96-floor.gpvec" gp -q -f "$study/native/verify_floors.gp" > /tmp/upper-floor.jsonl 2> /tmp/upper-floor.stderr
+            test "$(wc -l < /tmp/upper-floor.jsonl)" -eq 1
+            ! grep -E 'user error|at top-level|syntax error' /tmp/upper-floor.stderr
+          fi
       - name: Independent public-base, relation, matrix and target replay
-        run: cargo run --release --example conductor_gap_study -- replay-campaign
+        run: |
+          cargo run --release --example conductor_gap_study -- replay-campaign
+          cargo run --release --example conductor_gap_study -- rho-analysis
       - name: Fresh measured-child controls on both families and recurrence
         shell: bash
         run: |

@@ -251,7 +251,7 @@ pub fn upper_ids() {
             "floor; independently certified",
         ),
     ];
-    let upper_floor = "results/precomputed-96-floor-certificate.jsonl";
+    let upper_floor = "results/upper-96-floor-certificate.jsonl";
     if Path::new(ROOT).join(upper_floor).exists() {
         certificates.push((upper_floor, "floor; independently certified"));
     }

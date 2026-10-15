@@ -2,10 +2,22 @@
 
 15 October 2026. This report is cumulative; sealed run directories and the
 historical evidence archive are immutable. The 100-pair solve campaign and
-all 30 replication sessions are complete. The larger-memory 96-bit retry is
+all 30 replication sessions are complete. Upper-limit construction remains
 separate work in progress; no unconstructed floor is counted as a result.
 
 ## Completed observations
+
+The completed generic-rho panel also has a separate posthoc paired diagnostic:
+200/200 verified attempts, mean full-process CPU 14.3348 seconds crater and
+16.8338 seconds floor, ratio **1.17433 [0.99897, 1.38318]**. Its charged group-
+work lower-bound ratio is **1.15967 [0.98616, 1.36656]**, with canonicalisation
+still unpriced. Neither interval establishes a mean endpoint difference;
+CPU shares the endpoint-wave confound. These are within-rho diagnostics,
+not an admitted IC/rho comparison. The native analysis checks all session seals
+and exact public-target equality across methods. See
+[paired-rho.json](results/paired-rho.json); bootstrap seed 20261021, 10,000
+whole-gap resamples. This is posthoc analysis of the existing frozen runs.
+[Rho CPU diagnostic plot](figures/rho-controls.svg).
 
 The primary campaign verified all **500 attempts**: 300 orbit-folded IC and
 200 independent same-point rho runs on the original 200 endpoint targets.
@@ -197,12 +209,24 @@ The launcher failure caused by missing GNU time is retained separately and
 does not count as an algorithm attempt. The same near-limit rational-family
 96-bit input reached 5,242,880 of 5,590,170 giant points under an 11 GiB
 address-space cap before its 3,600-second wall cap (exit 124). A separate
-precomputed-tree retry uses a 14 GiB address-space cap and a 3,600-second
-wall cap, after all solver tables have exited. Its exact binary first matched
-all 100 direct-reference codomains. This is distinct from the older non-rational-kernel
+precomputed-tree retry used a 14 GiB address-space cap and a 3,600-second
+wall cap after all solver tables exited. Its binary first matched all 100
+references, but concurrent test-check compilation grew and caused a shared
+OOM kill after 939.36 wall seconds (exit 137). The constructor's maximum RSS
+was 13,179,144 KiB. This was a scheduling failure, not an arithmetic result;
+the receipt and interrupted release rebuild are preserved.
+
+A new bounded-batch variant expands the same moment polynomials directly
+and delays modular reduction within finite sums. All 4,096 coefficient
+comparisons across two fields and all 100 forced-small-batch codomains pass.
+Its separate retry is running with an 11 GiB address-space cap, 5,400-second
+wall cap and a guard refusing active local compilers or solver tables. It
+launched after the Rust checks passed, with no active local build or solver.
+These attempts are distinct from the older non-rational-kernel
 96-bit candidate. See the versioned [launchers](native/run_large_batched.sh),
 [expanded retry](native/run_96_expanded.sh),
-[precomputed retry](native/run_96_precomputed.sh) and their raw time/exit receipts.
+[precomputed retry](native/run_96_precomputed.sh),
+[guarded variant](native/run_96_v4_solo.sh) and their raw time/exit receipts.
 
 ## Native end-to-end harness
 
@@ -236,7 +260,7 @@ a running shard, a censored target or an incomplete cost vector as a win.
 | C: fresh targets, repeated query seeds, coordinate/floor/family replication | All 265 attempts in 30 sessions verified. Ten second-family pairs and 20 additional floor vertices certified; 45 same-crater output comparisons agree exactly. |
 | D: separate structural and generic effects | All 145 same-crater comparisons agree exactly. Generic recurrence removes most direct-scalar orbit cost; 136 torsion-module cases certified. No prime-field F4/SAT complexity claim. |
 | E: native fast codomain construction and larger gaps | All 100 direct references match; 15 new floor models independently certified through 91 bits. 95/96-bit rows and the original non-rational-kernel 96-bit floor remain open. |
-| PR, reports, required checks and canonical indexes | In progress. Passing controls and opening a PR do not complete the research ledger. |
+| PR, reports, required checks and canonical indexes | PR #1888 pushed, base merged, indexes current. Combined-tree CM/fixture release tests and strict Clippy pass. CI and required human review remain pending. |
 
 ## Next steps supported by these results
 

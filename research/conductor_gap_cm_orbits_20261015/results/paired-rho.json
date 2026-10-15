@@ -1,0 +1,2063 @@
+{
+  "analysis": "posthoc diagnostic of the completed matched-target rho panel",
+  "bootstrap": "10000 whole-gap paired resamples; xorshift seed 20261021; ratio of means",
+  "floor_over_crater_charged_group_work_lower_bound": {
+    "crater_mean": 68168137.47,
+    "floor_mean": 79052305.93,
+    "paired_percentile_95": [
+      0.986164772527876,
+      1.3665555164782413
+    ],
+    "ratio_of_means": 1.1596665079017303
+  },
+  "floor_over_crater_process_cpu_seconds": {
+    "crater_mean": 14.334789810000002,
+    "floor_mean": 16.83378554,
+    "paired_percentile_95": [
+      0.998970757058035,
+      1.3831791856331987
+    ],
+    "ratio_of_means": 1.174330824736383
+  },
+  "paired_gaps": 100,
+  "pairs": [
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 63198480.0,
+        "process_cpu_seconds": 13.988786,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W712746353c14"
+      },
+      "ell": 33555419,
+      "floor": {
+        "charged_group_work_lower_bound": 51088984.0,
+        "process_cpu_seconds": 11.13879,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W3b5650d1d2ec"
+      },
+      "p": 5629830687772387
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 76196893.0,
+        "process_cpu_seconds": 15.824542,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W028207677d39"
+      },
+      "ell": 33568643,
+      "floor": {
+        "charged_group_work_lower_bound": 81589401.0,
+        "process_cpu_seconds": 17.055889,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "We226a52ef4da"
+      },
+      "p": 5634268930738603
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 95590109.0,
+        "process_cpu_seconds": 20.783249,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W187433ad45eb"
+      },
+      "ell": 33600283,
+      "floor": {
+        "charged_group_work_lower_bound": 79818129.0,
+        "process_cpu_seconds": 16.873815,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W0fa5ebd44335"
+      },
+      "p": 5644895054800163
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 24584000.0,
+        "process_cpu_seconds": 5.31224,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wfbd024d9e3e8"
+      },
+      "ell": 33623879,
+      "floor": {
+        "charged_group_work_lower_bound": 103023971.0,
+        "process_cpu_seconds": 21.906805,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W180b8df1090d"
+      },
+      "p": 5652826161409327
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 70371586.0,
+        "process_cpu_seconds": 14.991274,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W759a35cbec7e"
+      },
+      "ell": 33684499,
+      "floor": {
+        "charged_group_work_lower_bound": 52168802.0,
+        "process_cpu_seconds": 11.218607,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W46c71d89689f"
+      },
+      "p": 5673227330720507
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 68532305.0,
+        "process_cpu_seconds": 14.600249,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W39c6ca1fb9ec"
+      },
+      "ell": 33705283,
+      "floor": {
+        "charged_group_work_lower_bound": 46598215.0,
+        "process_cpu_seconds": 9.7339,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wac0d727be33c"
+      },
+      "p": 5680230476845163
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 138277158.0,
+        "process_cpu_seconds": 28.030005,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W456030129065"
+      },
+      "ell": 33756439,
+      "floor": {
+        "charged_group_work_lower_bound": 69739930.0,
+        "process_cpu_seconds": 14.725766,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W4a36e81a49ff"
+      },
+      "p": 5697485836047167
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 64075498.0,
+        "process_cpu_seconds": 13.077649,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W0d05f46a129f"
+      },
+      "ell": 33785083,
+      "floor": {
+        "charged_group_work_lower_bound": 53026564.0,
+        "process_cpu_seconds": 11.106108,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wf72a1c8f74f1"
+      },
+      "p": 5707159132799363
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 174784294.0,
+        "process_cpu_seconds": 35.081279,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W6fd05a6f6083"
+      },
+      "ell": 33857099,
+      "floor": {
+        "charged_group_work_lower_bound": 85808736.0,
+        "process_cpu_seconds": 18.027059,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W373ac1cdb958"
+      },
+      "p": 5731515729621907
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 36157539.0,
+        "process_cpu_seconds": 7.499572,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wc8dee2b337d7"
+      },
+      "ell": 33913603,
+      "floor": {
+        "charged_group_work_lower_bound": 159873503.0,
+        "process_cpu_seconds": 33.93578,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W389b6b767fba"
+      },
+      "p": 5750662308294443
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 116151300.0,
+        "process_cpu_seconds": 24.611177,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wcfa2cce23cfe"
+      },
+      "ell": 33917803,
+      "floor": {
+        "charged_group_work_lower_bound": 38207848.0,
+        "process_cpu_seconds": 8.491563,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W660eb28a8b2c"
+      },
+      "p": 5752086767816243
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 62687996.0,
+        "process_cpu_seconds": 12.829644,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wf820985b9fc5"
+      },
+      "ell": 33938383,
+      "floor": {
+        "charged_group_work_lower_bound": 54683090.0,
+        "process_cpu_seconds": 11.408491,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W9adb6650a888"
+      },
+      "p": 5759069169335063
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 132540695.0,
+        "process_cpu_seconds": 27.183599,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W02546bb017f6"
+      },
+      "ell": 33958459,
+      "floor": {
+        "charged_group_work_lower_bound": 178600914.0,
+        "process_cpu_seconds": 37.689403,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W5bd8fcf19c69"
+      },
+      "p": 5765884654314947
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 38830261.0,
+        "process_cpu_seconds": 7.929766,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wcab09d33b64c"
+      },
+      "ell": 33970723,
+      "floor": {
+        "charged_group_work_lower_bound": 200585074.0,
+        "process_cpu_seconds": 42.545054,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Weeefbc423971"
+      },
+      "p": 5770050071742923
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 94973024.0,
+        "process_cpu_seconds": 19.77665,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W866cbac3a3c1"
+      },
+      "ell": 33982259,
+      "floor": {
+        "charged_group_work_lower_bound": 67578251.0,
+        "process_cpu_seconds": 14.407766,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wd723520b5194"
+      },
+      "p": 5773969599733147
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 11075526.0,
+        "process_cpu_seconds": 2.271523,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wbf7c9b9b946f"
+      },
+      "ell": 34001299,
+      "floor": {
+        "charged_group_work_lower_bound": 31379322.0,
+        "process_cpu_seconds": 6.548647,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wd20b22fe9022"
+      },
+      "p": 5780441634435707
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 60062496.0,
+        "process_cpu_seconds": 12.84702,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wd997615434d0"
+      },
+      "ell": 34024343,
+      "floor": {
+        "charged_group_work_lower_bound": 88810331.0,
+        "process_cpu_seconds": 18.491725,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W9f270d8a06ff"
+      },
+      "p": 5788279548883903
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 32070889.0,
+        "process_cpu_seconds": 6.931849,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W214fca92a69c"
+      },
+      "ell": 34040359,
+      "floor": {
+        "charged_group_work_lower_bound": 133000903.0,
+        "process_cpu_seconds": 27.59668,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W579f9375bef1"
+      },
+      "p": 5793730170204047
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 47273118.0,
+        "process_cpu_seconds": 10.027086,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W077116b48bf3"
+      },
+      "ell": 34042039,
+      "floor": {
+        "charged_group_work_lower_bound": 58858429.0,
+        "process_cpu_seconds": 12.673357,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W4c8815cdda72"
+      },
+      "p": 5794302062345567
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 57840098.0,
+        "process_cpu_seconds": 12.125277,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W5596639c1101"
+      },
+      "ell": 34049263,
+      "floor": {
+        "charged_group_work_lower_bound": 107284203.0,
+        "process_cpu_seconds": 22.816393,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wac7591d00c0d"
+      },
+      "p": 5796761520166583
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 67706226.0,
+        "process_cpu_seconds": 14.171508,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wd679d0cd3c9f"
+      },
+      "ell": 34050179,
+      "floor": {
+        "charged_group_work_lower_bound": 66425503.0,
+        "process_cpu_seconds": 13.972097,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W1458552388e7"
+      },
+      "p": 5797073415610027
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 117495432.0,
+        "process_cpu_seconds": 24.682,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W34c929e10b12"
+      },
+      "ell": 34058159,
+      "floor": {
+        "charged_group_work_lower_bound": 59601725.0,
+        "process_cpu_seconds": 12.391855,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wf405c6a7ba99"
+      },
+      "p": 5799790938288247
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 56113371.0,
+        "process_cpu_seconds": 11.974433,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W0c3082c8447d"
+      },
+      "ell": 34093523,
+      "floor": {
+        "charged_group_work_lower_bound": 35453858.0,
+        "process_cpu_seconds": 7.48457,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W4c2d835a535b"
+      },
+      "p": 5811841518664123
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 137307009.0,
+        "process_cpu_seconds": 29.246976,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wdbc82e046db5"
+      },
+      "ell": 34106299,
+      "floor": {
+        "charged_group_work_lower_bound": 19295299.0,
+        "process_cpu_seconds": 4.165973,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wdfaa50eb27f5"
+      },
+      "p": 5816198123280707
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 141566922.0,
+        "process_cpu_seconds": 29.303776,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Weba0f3d18422"
+      },
+      "ell": 34128859,
+      "floor": {
+        "charged_group_work_lower_bound": 76960103.0,
+        "process_cpu_seconds": 16.951574,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W422f58b7d88f"
+      },
+      "p": 5823895049080547
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 77117346.0,
+        "process_cpu_seconds": 16.823396,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wfb78da525a44"
+      },
+      "ell": 34192259,
+      "floor": {
+        "charged_group_work_lower_bound": 23583570.0,
+        "process_cpu_seconds": 4.900132,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W813d46afaf98"
+      },
+      "p": 5845552843423147
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 84081543.0,
+        "process_cpu_seconds": 18.172125,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W708a46bf79bf"
+      },
+      "ell": 34217003,
+      "floor": {
+        "charged_group_work_lower_bound": 151490079.0,
+        "process_cpu_seconds": 32.192988,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W9c6cd79b1310"
+      },
+      "p": 5854016437293043
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 3991857.0,
+        "process_cpu_seconds": 0.89872,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W9cc060430175"
+      },
+      "ell": 34227959,
+      "floor": {
+        "charged_group_work_lower_bound": 27478314.0,
+        "process_cpu_seconds": 5.948356,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W46a9db854b43"
+      },
+      "p": 5857765852300447
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 43118761.0,
+        "process_cpu_seconds": 9.331499,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wbb8e21d2c771"
+      },
+      "ell": 34228679,
+      "floor": {
+        "charged_group_work_lower_bound": 65171552.0,
+        "process_cpu_seconds": 13.752848,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W612cf6c03350"
+      },
+      "p": 5858012296196527
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 179521287.0,
+        "process_cpu_seconds": 37.889002,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wf56f570f0200"
+      },
+      "ell": 34231283,
+      "floor": {
+        "charged_group_work_lower_bound": 70610299.0,
+        "process_cpu_seconds": 15.030218,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W88a1b143db0f"
+      },
+      "p": 5858903644899163
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 20362503.0,
+        "process_cpu_seconds": 4.266448,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W5ab3f96ecc77"
+      },
+      "ell": 34268999,
+      "floor": {
+        "charged_group_work_lower_bound": 88994603.0,
+        "process_cpu_seconds": 18.880926,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W3dc985d8b938"
+      },
+      "p": 5871821428041007
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 13636845.0,
+        "process_cpu_seconds": 2.947551,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W1cf84115c892"
+      },
+      "ell": 34269343,
+      "floor": {
+        "charged_group_work_lower_bound": 29602629.0,
+        "process_cpu_seconds": 6.43397,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W0fd24b998fa3"
+      },
+      "p": 5871939313988903
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 45453331.0,
+        "process_cpu_seconds": 9.400447,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W3101efe1c074"
+      },
+      "ell": 34310279,
+      "floor": {
+        "charged_group_work_lower_bound": 49055457.0,
+        "process_cpu_seconds": 10.31976,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W145323b7bf1b"
+      },
+      "p": 5885976190978927
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 91071247.0,
+        "process_cpu_seconds": 19.004644,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W79f0688a3934"
+      },
+      "ell": 34333063,
+      "floor": {
+        "charged_group_work_lower_bound": 69501933.0,
+        "process_cpu_seconds": 14.837169,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W3b9262130483"
+      },
+      "p": 5893796040476783
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 106573131.0,
+        "process_cpu_seconds": 21.927281,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W7137ea877940"
+      },
+      "ell": 34348799,
+      "floor": {
+        "charged_group_work_lower_bound": 30100828.0,
+        "process_cpu_seconds": 6.369529,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "We24927ec0164"
+      },
+      "p": 5899199929363207
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 22111455.0,
+        "process_cpu_seconds": 4.621773,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wc24085abffac"
+      },
+      "ell": 34352803,
+      "floor": {
+        "charged_group_work_lower_bound": 70060986.0,
+        "process_cpu_seconds": 15.039387,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W9aa7055f6694"
+      },
+      "p": 5900575335431243
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 27228170.0,
+        "process_cpu_seconds": 5.629188,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wa04b4da1d2d2"
+      },
+      "ell": 34367419,
+      "floor": {
+        "charged_group_work_lower_bound": 80837348.0,
+        "process_cpu_seconds": 17.120783,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wcac04e3888b0"
+      },
+      "p": 5905597409240387
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 49119954.0,
+        "process_cpu_seconds": 10.277407,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wabf855875f18"
+      },
+      "ell": 34386683,
+      "floor": {
+        "charged_group_work_lower_bound": 26120185.0,
+        "process_cpu_seconds": 5.631066,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "We8e056bd1b69"
+      },
+      "p": 5912219804325763
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 89806247.0,
+        "process_cpu_seconds": 18.773632,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Weff2dbc5ea4b"
+      },
+      "ell": 34420543,
+      "floor": {
+        "charged_group_work_lower_bound": 120608887.0,
+        "process_cpu_seconds": 25.263359,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W89ace53c13a5"
+      },
+      "p": 5923868867653703
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 44559624.0,
+        "process_cpu_seconds": 9.437871,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wd4963d8830df"
+      },
+      "ell": 34429523,
+      "floor": {
+        "charged_group_work_lower_bound": 118931105.0,
+        "process_cpu_seconds": 25.195432,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wd7131a0ee87f"
+      },
+      "p": 5926960235608123
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 74349097.0,
+        "process_cpu_seconds": 15.806974,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W7b9dbaad5c99"
+      },
+      "ell": 34454779,
+      "floor": {
+        "charged_group_work_lower_bound": 77095354.0,
+        "process_cpu_seconds": 16.489527,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W3639f620690a"
+      },
+      "p": 5935658945239427
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 58355676.0,
+        "process_cpu_seconds": 12.202459,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W478be6e78c79"
+      },
+      "ell": 34457083,
+      "floor": {
+        "charged_group_work_lower_bound": 133935219.0,
+        "process_cpu_seconds": 28.528403,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W01e14d88d9d7"
+      },
+      "p": 5936452809887363
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 69988476.0,
+        "process_cpu_seconds": 14.682294,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W4fd546daf3d0"
+      },
+      "ell": 34460659,
+      "floor": {
+        "charged_group_work_lower_bound": 136731680.0,
+        "process_cpu_seconds": 29.084279,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W89aeb447a538"
+      },
+      "p": 5937685059110747
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 96088123.0,
+        "process_cpu_seconds": 19.780411,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wee401ceab8f0"
+      },
+      "ell": 34465399,
+      "floor": {
+        "charged_group_work_lower_bound": 12825389.0,
+        "process_cpu_seconds": 2.84735,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wc4ebbacc4897"
+      },
+      "p": 5939318606680607
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 63104879.0,
+        "process_cpu_seconds": 13.059789,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W30a76ee0695a"
+      },
+      "ell": 34486063,
+      "floor": {
+        "charged_group_work_lower_bound": 41029991.0,
+        "process_cpu_seconds": 8.808012,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W89665fcdf251"
+      },
+      "p": 5946442671713783
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 122126570.0,
+        "process_cpu_seconds": 25.734244,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W42a1f3c20d19"
+      },
+      "ell": 34489079,
+      "floor": {
+        "charged_group_work_lower_bound": 5473263.0,
+        "process_cpu_seconds": 1.197625,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wd6ce7b7e2665"
+      },
+      "p": 5947482816852127
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 80804865.0,
+        "process_cpu_seconds": 17.274291,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W7114fdd60bc5"
+      },
+      "ell": 34489703,
+      "floor": {
+        "charged_group_work_lower_bound": 114589621.0,
+        "process_cpu_seconds": 24.420522,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wc69167920fd9"
+      },
+      "p": 5947698030651343
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 71481001.0,
+        "process_cpu_seconds": 14.926121,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W93158c642901"
+      },
+      "ell": 34498543,
+      "floor": {
+        "charged_group_work_lower_bound": 114726408.0,
+        "process_cpu_seconds": 25.285416,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W0ed6baf34219"
+      },
+      "p": 5950747311115703
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 99987034.0,
+        "process_cpu_seconds": 20.662889,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wd019fbd55bd2"
+      },
+      "ell": 34518563,
+      "floor": {
+        "charged_group_work_lower_bound": 96092165.0,
+        "process_cpu_seconds": 20.708695,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W2cbbd27f92a9"
+      },
+      "p": 5957655923406283
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 165224679.0,
+        "process_cpu_seconds": 34.722766,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W344b4ef861b8"
+      },
+      "ell": 34527979,
+      "floor": {
+        "charged_group_work_lower_bound": 11601043.0,
+        "process_cpu_seconds": 2.504765,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wae925bfd4238"
+      },
+      "p": 5960906634594227
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 99956248.0,
+        "process_cpu_seconds": 21.475657,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W20fff6af8282"
+      },
+      "ell": 34539683,
+      "floor": {
+        "charged_group_work_lower_bound": 63736292.0,
+        "process_cpu_seconds": 13.591758,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wb308cbb72927"
+      },
+      "p": 5964948474162763
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 62367525.0,
+        "process_cpu_seconds": 13.383497,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wa15dc4e3ff6b"
+      },
+      "ell": 34562299,
+      "floor": {
+        "charged_group_work_lower_bound": 108170584.0,
+        "process_cpu_seconds": 23.138824,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W8dd7158d9995"
+      },
+      "p": 5972762526264707
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 31976970.0,
+        "process_cpu_seconds": 6.92471,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wd5d3f712d7ee"
+      },
+      "ell": 34562839,
+      "floor": {
+        "charged_group_work_lower_bound": 48279720.0,
+        "process_cpu_seconds": 10.268204,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wcc8acb4cc98a"
+      },
+      "p": 5972949164136767
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 35983376.0,
+        "process_cpu_seconds": 7.568254,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W27f88bb6ea3b"
+      },
+      "ell": 34563923,
+      "floor": {
+        "charged_group_work_lower_bound": 26929367.0,
+        "process_cpu_seconds": 5.90602,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wcddd20157862"
+      },
+      "p": 5973323831185723
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 56299244.0,
+        "process_cpu_seconds": 11.441871,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W10bd9b084be2"
+      },
+      "ell": 34564399,
+      "floor": {
+        "charged_group_work_lower_bound": 146997514.0,
+        "process_cpu_seconds": 31.263198,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W6aa0e361f0d7"
+      },
+      "p": 5973488356591607
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 87109663.0,
+        "process_cpu_seconds": 18.003381,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wcfc833985d33"
+      },
+      "ell": 34570279,
+      "floor": {
+        "charged_group_work_lower_bound": 56332603.0,
+        "process_cpu_seconds": 12.907489,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W1be97d0462fd"
+      },
+      "p": 5975520916118927
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 51742130.0,
+        "process_cpu_seconds": 10.714653,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W95cb20426322"
+      },
+      "ell": 34590299,
+      "floor": {
+        "charged_group_work_lower_bound": 101358064.0,
+        "process_cpu_seconds": 21.925446,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W70f26571da09"
+      },
+      "p": 5982443889956707
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 16793123.0,
+        "process_cpu_seconds": 3.507306,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wc8193458447c"
+      },
+      "ell": 34605203,
+      "floor": {
+        "charged_group_work_lower_bound": 57804682.0,
+        "process_cpu_seconds": 12.627184,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wbcd18828d4ac"
+      },
+      "p": 5987600338750843
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 61871043.0,
+        "process_cpu_seconds": 12.869803,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wdbe9c4d8dbc3"
+      },
+      "ell": 34609879,
+      "floor": {
+        "charged_group_work_lower_bound": 125584838.0,
+        "process_cpu_seconds": 27.207488,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W60bbfd1179ac"
+      },
+      "p": 5989218587363327
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 97913867.0,
+        "process_cpu_seconds": 20.283074,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wa08ea4a73c10"
+      },
+      "ell": 34614583,
+      "floor": {
+        "charged_group_work_lower_bound": 60898902.0,
+        "process_cpu_seconds": 13.090313,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W2845c61285f6"
+      },
+      "p": 5990846746704863
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 66281956.0,
+        "process_cpu_seconds": 14.581803,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W1bd43f91865d"
+      },
+      "ell": 34623283,
+      "floor": {
+        "charged_group_work_lower_bound": 163453335.0,
+        "process_cpu_seconds": 34.963265,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W56efe659aef6"
+      },
+      "p": 5993858593867163
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 24005363.0,
+        "process_cpu_seconds": 5.127108,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W931b1137c0f9"
+      },
+      "ell": 34642043,
+      "floor": {
+        "charged_group_work_lower_bound": 53591439.0,
+        "process_cpu_seconds": 11.503395,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W201927d64a15"
+      },
+      "p": 6000355681427203
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 70141246.0,
+        "process_cpu_seconds": 14.795936,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wac49d9ab2d7b"
+      },
+      "ell": 34656079,
+      "floor": {
+        "charged_group_work_lower_bound": 104343202.0,
+        "process_cpu_seconds": 22.251151,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W3b0340bbff19"
+      },
+      "p": 6005219023615127
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 10420223.0,
+        "process_cpu_seconds": 2.277548,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wa80f4ef59d5c"
+      },
+      "ell": 34669883,
+      "floor": {
+        "charged_group_work_lower_bound": 167499274.0,
+        "process_cpu_seconds": 35.541553,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W31a417c92761"
+      },
+      "p": 6010003901498563
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 42157109.0,
+        "process_cpu_seconds": 9.134912,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wedbf3adff3da"
+      },
+      "ell": 34673543,
+      "floor": {
+        "charged_group_work_lower_bound": 15069389.0,
+        "process_cpu_seconds": 3.283187,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W741fb5d4b822"
+      },
+      "p": 6011272886190703
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 10264389.0,
+        "process_cpu_seconds": 2.164001,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wcdf1f771aa90"
+      },
+      "ell": 34712443,
+      "floor": {
+        "charged_group_work_lower_bound": 82158523.0,
+        "process_cpu_seconds": 17.765768,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W48196d735efa"
+      },
+      "p": 6024768460428803
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 20138674.0,
+        "process_cpu_seconds": 4.274625,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W2c317e5de1a9"
+      },
+      "ell": 34718239,
+      "floor": {
+        "charged_group_work_lower_bound": 113343071.0,
+        "process_cpu_seconds": 24.47335,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "We28ac67e7fd8"
+      },
+      "p": 6026780561587367
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 52584977.0,
+        "process_cpu_seconds": 10.783355,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W26e7de8cabfc"
+      },
+      "ell": 34734079,
+      "floor": {
+        "charged_group_work_lower_bound": 34545137.0,
+        "process_cpu_seconds": 7.463858,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W2909136b184d"
+      },
+      "p": 6032281185157127
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 90197200.0,
+        "process_cpu_seconds": 19.000587,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Web473e93a94e"
+      },
+      "ell": 34742143,
+      "floor": {
+        "charged_group_work_lower_bound": 70979793.0,
+        "process_cpu_seconds": 15.309374,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wfe8e404a7c2e"
+      },
+      "p": 6035082466420103
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 22705012.0,
+        "process_cpu_seconds": 4.853491,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wb52b38c9f3e1"
+      },
+      "ell": 34765019,
+      "floor": {
+        "charged_group_work_lower_bound": 101082580.0,
+        "process_cpu_seconds": 21.288038,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "We4f5e73e6e26"
+      },
+      "p": 6043032695586787
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 51749479.0,
+        "process_cpu_seconds": 11.078113,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W2c9f0401afd4"
+      },
+      "ell": 34769759,
+      "floor": {
+        "charged_group_work_lower_bound": 88436809.0,
+        "process_cpu_seconds": 19.017243,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W7b04615e37a9"
+      },
+      "p": 6044680669820647
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 30908415.0,
+        "process_cpu_seconds": 6.30306,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wdaa299870dad"
+      },
+      "ell": 34773979,
+      "floor": {
+        "charged_group_work_lower_bound": 70190022.0,
+        "process_cpu_seconds": 15.192117,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W8308c0b114aa"
+      },
+      "p": 6046148042688227
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 84847936.0,
+        "process_cpu_seconds": 17.856493,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W2dcfc7d8cbbd"
+      },
+      "ell": 34788463,
+      "floor": {
+        "charged_group_work_lower_bound": 110759999.0,
+        "process_cpu_seconds": 23.665052,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W12bfe105bf7c"
+      },
+      "p": 6051185754723383
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 52474216.0,
+        "process_cpu_seconds": 11.143523,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W44fb9872642e"
+      },
+      "ell": 34788959,
+      "floor": {
+        "charged_group_work_lower_bound": 41087424.0,
+        "process_cpu_seconds": 8.640555,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "We85b4e38c199"
+      },
+      "p": 6051358306729447
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 55562940.0,
+        "process_cpu_seconds": 11.689829,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W6e610a5d0dc7"
+      },
+      "ell": 34814803,
+      "floor": {
+        "charged_group_work_lower_bound": 94273290.0,
+        "process_cpu_seconds": 20.02967,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W37189e03fe87"
+      },
+      "p": 6060352504829243
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 68190665.0,
+        "process_cpu_seconds": 14.288246,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wf1254deaa354"
+      },
+      "ell": 34825759,
+      "floor": {
+        "charged_group_work_lower_bound": 35696819.0,
+        "process_cpu_seconds": 7.608416,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W803385f76fe7"
+      },
+      "p": 6064167414804647
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 11400535.0,
+        "process_cpu_seconds": 2.364571,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W67da11a0e1bf"
+      },
+      "ell": 34829819,
+      "floor": {
+        "charged_group_work_lower_bound": 100583439.0,
+        "process_cpu_seconds": 21.45812,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W68bba8f9e302"
+      },
+      "p": 6065581423033987
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 123677615.0,
+        "process_cpu_seconds": 26.306452,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W8fa7d9f63614"
+      },
+      "ell": 34843559,
+      "floor": {
+        "charged_group_work_lower_bound": 122926581.0,
+        "process_cpu_seconds": 26.882769,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wb481bfe3ae10"
+      },
+      "p": 6070367984088847
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 82330328.0,
+        "process_cpu_seconds": 16.962841,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W6ad9c8586831"
+      },
+      "ell": 34844819,
+      "floor": {
+        "charged_group_work_lower_bound": 12890653.0,
+        "process_cpu_seconds": 2.848451,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wab6a7a21c0f1"
+      },
+      "p": 6070807020868987
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 16969342.0,
+        "process_cpu_seconds": 3.695178,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W5442b925d62f"
+      },
+      "ell": 34856719,
+      "floor": {
+        "charged_group_work_lower_bound": 114983767.0,
+        "process_cpu_seconds": 23.47646,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W74f14d515fbc"
+      },
+      "p": 6074954262368087
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 30630077.0,
+        "process_cpu_seconds": 6.463747,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wc8cfc13e57e1"
+      },
+      "ell": 34858099,
+      "floor": {
+        "charged_group_work_lower_bound": 130581823.0,
+        "process_cpu_seconds": 28.475588,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wbec7cf778c8e"
+      },
+      "p": 6075435294610907
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 106578164.0,
+        "process_cpu_seconds": 22.893524,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wc46ec307c9a1"
+      },
+      "ell": 34859183,
+      "floor": {
+        "charged_group_work_lower_bound": 95398925.0,
+        "process_cpu_seconds": 20.294354,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wda3db66a0e1c"
+      },
+      "p": 6075813162278263
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 83119252.0,
+        "process_cpu_seconds": 17.12006,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wc86de5ceeb65"
+      },
+      "ell": 34901639,
+      "floor": {
+        "charged_group_work_lower_bound": 81935585.0,
+        "process_cpu_seconds": 17.367799,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W41ba21c6a0a6"
+      },
+      "p": 6090621989529967
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 149615739.0,
+        "process_cpu_seconds": 31.507935,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "We7a63d3bcd19"
+      },
+      "ell": 34922219,
+      "floor": {
+        "charged_group_work_lower_bound": 63897396.0,
+        "process_cpu_seconds": 13.75171,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W84d80d352536"
+      },
+      "p": 6097806864497587
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 77422308.0,
+        "process_cpu_seconds": 16.335135,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W3a9643d9a851"
+      },
+      "ell": 34950463,
+      "floor": {
+        "charged_group_work_lower_bound": 45202924.0,
+        "process_cpu_seconds": 9.793737,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W2350f0ac75b8"
+      },
+      "p": 6107674284621383
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 101803807.0,
+        "process_cpu_seconds": 21.758553,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wb59f3cdf43c7"
+      },
+      "ell": 34953299,
+      "floor": {
+        "charged_group_work_lower_bound": 130053235.0,
+        "process_cpu_seconds": 27.809605,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W20b9244824b3"
+      },
+      "p": 6108665519963707
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 43846766.0,
+        "process_cpu_seconds": 9.237746,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wf8a93f839eda"
+      },
+      "ell": 34990679,
+      "floor": {
+        "charged_group_work_lower_bound": 62548328.0,
+        "process_cpu_seconds": 13.411161,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "We4fdd0dce01d"
+      },
+      "p": 6121738049414527
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 70635307.0,
+        "process_cpu_seconds": 14.816234,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W73733486ec5f"
+      },
+      "ell": 35004839,
+      "floor": {
+        "charged_group_work_lower_bound": 45088487.0,
+        "process_cpu_seconds": 9.287614,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W7ef775f3b38f"
+      },
+      "p": 6126693732074767
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 28313993.0,
+        "process_cpu_seconds": 5.934828,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W923cb30a37ad"
+      },
+      "ell": 35030543,
+      "floor": {
+        "charged_group_work_lower_bound": 78019564.0,
+        "process_cpu_seconds": 16.684456,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wf335758a90f5"
+      },
+      "p": 6135694679343703
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 46848526.0,
+        "process_cpu_seconds": 9.872032,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "We6a99de2a776"
+      },
+      "ell": 35041079,
+      "floor": {
+        "charged_group_work_lower_bound": 126470576.0,
+        "process_cpu_seconds": 26.953857,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W02fec5b50c0f"
+      },
+      "p": 6139386052380127
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 15469505.0,
+        "process_cpu_seconds": 3.310609,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W9e2b504338a3"
+      },
+      "ell": 35061743,
+      "floor": {
+        "charged_group_work_lower_bound": 10122625.0,
+        "process_cpu_seconds": 2.276289,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wf4ff5629010a"
+      },
+      "p": 6146629075928503
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 62249380.0,
+        "process_cpu_seconds": 13.102819,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W8bc75ce94977"
+      },
+      "ell": 35074679,
+      "floor": {
+        "charged_group_work_lower_bound": 33421773.0,
+        "process_cpu_seconds": 6.972608,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W74ff5351bff7"
+      },
+      "p": 6151165499690527
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 33456885.0,
+        "process_cpu_seconds": 7.104569,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wfb177cd09a38"
+      },
+      "ell": 35085983,
+      "floor": {
+        "charged_group_work_lower_bound": 70636852.0,
+        "process_cpu_seconds": 14.96868,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wef393bd8509e"
+      },
+      "p": 6155130980295463
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 89774072.0,
+        "process_cpu_seconds": 18.862195,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W5dfa8819d638"
+      },
+      "ell": 35117539,
+      "floor": {
+        "charged_group_work_lower_bound": 80585441.0,
+        "process_cpu_seconds": 17.223646,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W33bce5902641"
+      },
+      "p": 6166207691965067
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 130506829.0,
+        "process_cpu_seconds": 27.337095,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wedb740cda0cc"
+      },
+      "ell": 35121719,
+      "floor": {
+        "charged_group_work_lower_bound": 68132665.0,
+        "process_cpu_seconds": 14.124468,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wb8553f1a056d"
+      },
+      "p": 6167675692453087
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 12260762.0,
+        "process_cpu_seconds": 2.548678,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wf0023afcc0a4"
+      },
+      "ell": 35183963,
+      "floor": {
+        "charged_group_work_lower_bound": 144556428.0,
+        "process_cpu_seconds": 29.51398,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W65b14e092b3a"
+      },
+      "p": 6189556226742883
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 28910596.0,
+        "process_cpu_seconds": 6.00746,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Wc782b0440674"
+      },
+      "ell": 35237743,
+      "floor": {
+        "charged_group_work_lower_bound": 106099807.0,
+        "process_cpu_seconds": 22.714309,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W458b682a73e3"
+      },
+      "p": 6208492623432503
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 88481429.0,
+        "process_cpu_seconds": 19.414299,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W1d5fc4e77545"
+      },
+      "ell": 35241803,
+      "floor": {
+        "charged_group_work_lower_bound": 77610344.0,
+        "process_cpu_seconds": 16.708914,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W596c2975329b"
+      },
+      "p": 6209923358212243
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 143829950.0,
+        "process_cpu_seconds": 30.934889,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "Weab9ca46bf47"
+      },
+      "ell": 35271539,
+      "floor": {
+        "charged_group_work_lower_bound": 117773523.0,
+        "process_cpu_seconds": 24.37583,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W4443f879bf36"
+      },
+      "p": 6220407281871067
+    },
+    {
+      "crater": {
+        "charged_group_work_lower_bound": 99313665.0,
+        "process_cpu_seconds": 20.708345,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W8176c97aa245"
+      },
+      "ell": 35282963,
+      "floor": {
+        "charged_group_work_lower_bound": 77398184.0,
+        "process_cpu_seconds": 15.934049,
+        "unpriced": [
+          "canonicalisations_uncharged"
+        ],
+        "workload": "W237678565c81"
+      },
+      "p": 6224437355013883
+    }
+  ],
+  "same_public_target_across_methods": true,
+  "schema": "conductor-gap.rho-diagnostics/v1",
+  "scope": "L0; endpoint scheduling waves confound CPU. Charged group work omits canonicalisation; its ratio is a lower-bound diagnostic, not an eligible complete-work or IC/rho speed score.",
+  "sources": [
+    {
+      "records_sha256": "5e18f9a136af807150515646499e20e62c12d4b6023f2ef22095fefa0316533e",
+      "session": 0
+    },
+    {
+      "records_sha256": "6e2fd67a3ad4b4032e0d4adfe80aa90e6a29f9633fea7218de0d5903a920b75b",
+      "session": 1
+    },
+    {
+      "records_sha256": "4af31abb25fc8f8431cd98321a6c0318c589363e675991928b6817a09ee966bc",
+      "session": 2
+    },
+    {
+      "records_sha256": "cb37e55ee3ae2db496ef8c1cec4a2418de7400176c5e5b0823a4c182139e26c1",
+      "session": 3
+    },
+    {
+      "records_sha256": "29ab0d7cc8918dd6c80f5b8f2320368c257babf09195ccabbce2f92390c670ac",
+      "session": 4
+    },
+    {
+      "records_sha256": "4a6bb9c84435d88d112f4bdf7afc2e3f1551f7b9c4e306549e588e501c100490",
+      "session": 5
+    },
+    {
+      "records_sha256": "17137868b17c8a39bb2dd850f69ba97c16d304f01b5c396d247eea9694ceac72",
+      "session": 6
+    },
+    {
+      "records_sha256": "8444c240bbea4bb778376598acb2c66c19d963325a343c0e7400f9cd5cc0ef67",
+      "session": 7
+    }
+  ],
+  "verified_attempts": 200
+}

@@ -11,8 +11,10 @@ rebuildable and the raw sealed records remain available for audit.
 | Public fixtures | [`workload.rs`](../../src/cryptanalysis/ecbench/workload.rs) | Measured-child transport preserves G and Q; prime nonsingular cofactor-one curves, subgroup membership and Hasse-unique order checks reject malformed inputs. |
 | Generic control | [`folded_recurrence.cpp`](native/folded_recurrence.cpp) | P[k+2] = P[k+1] - [5]P[k] generates the same orbit without a floor CM map. |
 | Statistics | [`campaign_analysis.rs`](native/campaign_analysis.rs) | Only sealed sessions; all outcomes retained; exact same-crater comparisons; whole-gap bootstrap with recorded seeds. |
+| Posthoc rho control | [`rho_analysis.rs`](native/rho_analysis.rs) | Recheck seals and exact public targets across methods; pair full models; keep incomplete charged-work ratios diagnostic. |
 | Independent IC replay | [`replay_campaign.rs`](native/replay_campaign.rs) | Reconstruct the base by direct scalar arithmetic, check SHA-256, rows, ranks, query indices and [d]G=Q; reject a corrupted sign. |
 | Fast codomain | [`sqrt_velu.cpp`](native/sqrt_velu.cpp), [`batched variant`](native/sqrt_velu_batched.cpp) | Kernel-moment identities, complete known-reference comparisons, explicit caps; no point-map or dual-map claim. |
+| Optimized codomain retry | [`v4`](native/sqrt_velu_batched_v4.cpp), [`launch guard`](native/run_96_v4_solo.sh) | Compare closed-form polynomial coefficients and all known codomains; preserve old failures; refuse compiler/solver overlap before the bounded attempt. |
 | Website admission | [`build_lab_browser.py`](../../scripts/build_lab_browser.py), [`regressions`](../../scripts/test_lab_browser_cost_admission.py) | An unpriced zero charged bound is unknown, not an eligible zero-cost speed score. This is UI metadata tooling. |
 
 ## Results to cross-check
@@ -36,6 +38,15 @@ rebuildable and the raw sealed records remain available for audit.
 
 ## Reproduction boundaries
 
+The folded solver is a generic pair-table method. Under a uniform-hit heuristic,
+a B-point base has order B^2 pair sums; table work is order B^2 and relation
+query work is order N/B^2 for a constant number of seed-log columns. Balancing
+these gives square-root work, ignoring logarithmic factors and constants.
+This is an interpretation of this method, not a measured scaling law or a
+general algebraic IC lower bound. Cheap linked-orbit generation changes a
+smaller setup component; the generic recurrence is therefore a necessary
+control before attributing solve differences to the conductor.
+
 The protocol and frozen binaries define the historical experiment. Current
 sources add stronger fixture checks after the completed full library run;
 targeted regressions and pinned Rust 1.98 strict Clippy pass on those changes.
@@ -43,6 +54,8 @@ The new CI workflow independently replays evidence and runs fresh small controls
 fresh CI runs do not replace or silently amend the historical measurements.
 
 Use [`native/README.md`](native/README.md) for backend builds and
+[`constructor derivation`](native/CONSTRUCTOR.md) for kernel coverage and moments.
+Use
 [`evidence-manifest.sha256`](evidence-manifest.sha256) for checkpoint hashes.
 Run `sha256sum -c` with that manifest from the repository root. The PDF is
 rendered by `python native/render_report.py` from the study directory; research

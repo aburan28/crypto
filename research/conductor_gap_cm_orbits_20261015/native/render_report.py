@@ -16,6 +16,7 @@ load=lambda p: json.loads((R/p).read_text())
 orbit=load('results/isolated-summary.json')
 primary=load('results/paired-primary.json')
 replication=load('results/replication-metrics.json')
+rho=load('results/paired-rho.json')
 labels={0:'Crater CM map',1:'Floor scalar',2:'Crater scalar',3:'Crater scalar A/A',4:'Crater recurrence',5:'Floor recurrence'}
 (R/'figures').mkdir(exist_ok=True)
 fig,ax=plt.subplots(figsize=(8,4))
@@ -34,6 +35,16 @@ ax.set(xlim=(0,1e9),ylim=(0,1e9),xlabel='Crater CM queries',ylabel='Floor scalar
 ax.legend();fig.tight_layout()
 fig.savefig(R/'figures/paired-query-counts.svg',bbox_inches='tight')
 fig.savefig(R/'figures/paired-query-counts.png',dpi=150,bbox_inches='tight');plt.close(fig)
+
+fig,ax=plt.subplots(figsize=(6,5))
+ax.scatter([v['crater']['process_cpu_seconds'] for v in rho['pairs']],[v['floor']['process_cpu_seconds'] for v in rho['pairs']],s=20,alpha=.75,color='#486999')
+ax.set(xscale='log',yscale='log',xlabel='Crater rho process CPU seconds',ylabel='Floor rho process CPU seconds',title='100 matched gaps: generic rho (posthoc)')
+bounds=(min(ax.get_xlim()[0],ax.get_ylim()[0]),max(ax.get_xlim()[1],ax.get_ylim()[1]))
+ax.plot(bounds,bounds,color='#777',linestyle='--',label='Equal process CPU');ax.set(xlim=bounds,ylim=bounds);ax.legend()
+fig.text(.05,.01,'L0; endpoint scheduling waves confound CPU. No complete-work IC/rho claim.',fontsize=8)
+fig.tight_layout(rect=(0,.06,1,1))
+fig.savefig(R/'figures/rho-controls.svg',bbox_inches='tight')
+fig.savefig(R/'figures/rho-controls.png',dpi=150,bbox_inches='tight');plt.close(fig)
 
 pdfmetrics.registerFont(TTFont('DejaVu','/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 pdfmetrics.registerFont(TTFont('DejaVuBold','/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'))
@@ -78,13 +89,15 @@ for cell in replication['comparisons']:
 table(rows,[170,170,170])
 para('Intervals use 10,000 whole-gap cluster resamples, retaining all targets/rounds within each sampled gap. The five-round pilot has only one gap and therefore no curve-population interval. Twenty additional floor vertices completed another 40 IC/rho attempts.')
 para('The D = −43 native CPU interval narrowly excludes one in this ten-pair exploratory subset; the excess CPU accompanies extra queries. Intervals are unadjusted for multiple comparisons, and timings are L0. This is a replication lead, not a general conductor-hardness conclusion. The coordinate control transports G and Q but reruns prefix seed selection, so it also changes geometric seed points.')
+rc=rho['floor_over_crater_process_cpu_seconds']; rw=rho['floor_over_crater_charged_group_work_lower_bound']
+para(f"The completed 200-target rho panel has a posthoc floor/crater full-process CPU ratio {rc['ratio_of_means']:.3f} [{rc['paired_percentile_95'][0]:.5f}, {rc['paired_percentile_95'][1]:.5f}], with mean CPU {rc['crater_mean']:.3f}s / {rc['floor_mean']:.3f}s. Its charged group-work lower-bound ratio is {rw['ratio_of_means']:.3f} [{rw['paired_percentile_95'][0]:.3f}, {rw['paired_percentile_95'][1]:.3f}]. Both intervals include one. Canonicalisation remains unpriced; endpoint waves confound CPU. These within-rho diagnostics are not an admitted IC/rho speed comparison.")
 table([['Pair 46 parameter','Exact value'],['p','5947698030651343'],['N = r; cofactor','5947697996161643; 1'],['t; prime gap ℓ','34489701; 34489703'],['Crater y² = x³ + ax + b','a = 5757116383569871; b = 3560173328417442'],['Floor y² = x³ + ax + b','a = 2087370704375809; b = 1402887937802154']], [175,335])
 para('The generic-recurrence pilot recovered both pair-46 targets and reproduced the direct-scalar factor-base hashes and query counts exactly. Across all completed sessions, 797 target recoveries passed independent PARI replay, including prime/Hasse witnesses and rejected scalar mutations. All 473 IC transcripts passed native public-base, relation and rank replay, including corrupted-sign rejection.')
 para('Six initial small-control preflight failures exposed loss of public fixtures in measured-child normalization. CurveSpec::for_child fixes that transport. Failed receipts remain preserved. The full Rust library run passed 4,116 tests (117 ignored); current fixture and CM-map checks and pinned Rust 1.98 strict Clippy also pass. Conditional Lean recurrence/orbit/norm lemmas are axiom-free; CM classification and point-map bridges are not claimed as formalized.')
 
 story.append(PageBreak());heading('3. Larger gaps, scope and next steps')
 para('The fast codomain constructor matched all 100 direct references; the batched variant also passed forced small-batch comparisons. Independent PARI checks certify 15 new floor models through 91 bits and 20 extra floor vertices. The largest independently certified gap in this snapshot is 17,592,186,219,863 over p = 1547425079971670554692473983.')
-para('Under a 6 GiB address-space cap, the 95-bit case reached two of four giant batches before its 1,800-second wall cap; two 96-bit cases aborted on FLINT allocation failures. The 11 GiB retry reached 5,242,880 of 5,590,170 giant points before its 3,600-second cap. A separate precomputed-tree retry now uses a 14 GiB cap and 3,600 seconds, after solver tables exited. A floor counts only after independent certification. Full isogeny point maps and dual-point-map certificates remain open.')
+para('The 6 GiB upper-limit attempts hit wall or allocation caps. The 11 GiB retry reached 5,242,880 of 5,590,170 giant points before its 3,600-second cap. The 14 GiB precomputed-tree attempt was OOM-killed after 939.36 seconds when concurrent test compilation grew; that scheduling failure is preserved. A new optimized bounded-batch variant passes 4,096 coefficient checks and both 100-reference campaigns. Its guarded retry is running with an 11 GiB cap and 5,400 seconds, after local compilers exited. A floor counts only after independent certification; point-map and dual-map certification remain separate.')
 para('The older near-limit candidate, ℓ = 129149576694539 and p = 79228162511798403263235114731, is separate. Its nonzero kernel point needs extension degree 2,226,716,839,561 (twist point degree 4,453,433,679,122). A dense 96-bit basis would need about 26.7 TB per field element. This is a prerequisite barrier for the current rational-point method; other kernel representations are not excluded. Its floor is unconstructed.')
 para('The earlier depth-20 degree-2 volcano remains a separate completed export: 21 levels, 1,048,576 explicit chosen-trace models and all intermediate strata. It is a smooth conductor ratio traversed by small steps. The large-prime benchmark samples endpoints and 20 additional floors, not every vertex of every prime-degree volcano. Earlier prefix-IC censored results are preserved and are not converted into solve times.')
 for text in [

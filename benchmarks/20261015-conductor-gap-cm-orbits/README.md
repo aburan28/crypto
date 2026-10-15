@@ -3,6 +3,9 @@
 All 500 primary and 265 replication attempts verified. The 100-pair primary
 floor/crater native-backend CPU ratio is 0.980 [0.866, 1.111], descriptive L0.
 Endpoint-specific queue waves confound causal timing interpretation.
+The posthoc within-rho CPU ratio is 1.174 [0.99897, 1.38318]; its charged
+work interval also includes one. See the standalone `rho-controls` plot and
+the native `paired-rho.json` diagnostic in the study; common prices are incomplete.
 
 The orbit controls total 44,000 constructions. A generic recurrence gives
 either endpoint a cheap linked orbit; pinned means are 5.464 ms for the crater

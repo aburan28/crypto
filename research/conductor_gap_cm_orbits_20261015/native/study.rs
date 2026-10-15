@@ -4,6 +4,7 @@ mod certificates;
 mod index;
 mod replay_campaign;
 mod replication;
+mod rho_analysis;
 use crypto_lib::cryptanalysis::{
     ecbench::{
         canonical::{canonical, sha256_hex},
@@ -33,6 +34,7 @@ fn main() {
     match args[1].as_str() {
         "prepare" => prepare(&args[2]),
         "campaign-analysis" => campaign_analysis::run(),
+        "rho-analysis" => rho_analysis::run(),
         "replay-campaign" => replay_campaign::run(),
         "cold-batches" => cold_batches(),
         "index" => index::run(),

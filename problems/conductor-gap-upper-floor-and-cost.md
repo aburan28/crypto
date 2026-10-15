@@ -59,7 +59,12 @@ The bounded-batch constructor matched all 100 reference codomains. Its first
 95/96-bit attempts hit the recorded 1,800-second or 6-GiB limits. A separate
 11-GiB, 3,600-second retry reached 5,242,880/5,590,170 giant points and then
 timed out. A separate precomputed-tree retry of the exact input uses a 14-GiB,
-3,600-second cap after solver tables have exited; see `results/precomputed-96-*`.
+3,600-second cap after solver tables exited. Concurrent test-check compilation
+then caused a shared OOM kill (exit 137, 939.36 wall seconds). A new algebraically
+equivalent bounded-batch variant has coefficient/reference checks and a launch
+guard against local compiler/solver overlap; its separate retry is running
+under an 11-GiB, 5,400-second cap after the combined-tree checks passed.
+See the versioned receipts and `native/run_96_v4_solo.sh`.
 Success requires independent PARI checks; a cap leaves
 the exact floor requirement open.
 
