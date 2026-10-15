@@ -33,7 +33,7 @@ def json_lines(path):
 
 def frozen_targets():
     runner.frozen_inputs()
-    if runner.parent.digest(ANSWERS) != ANSWERS_SHA256:
+    if runner.base.parent.digest(ANSWERS) != ANSWERS_SHA256:
         raise ValueError("1000-point answer sidecar changed")
     points = [group.point_from_json(row) for row in json_lines(HOLDOUT)]
     answers = json_lines(ANSWERS)
@@ -152,7 +152,7 @@ def verify_arm(output, k, variant, points, scalars):
             "root_state_allocated_bytes": summary["root_state_allocated_bytes"],
             "peak_rss_bytes": usage["peak_rss_bytes"],
             "resource_envelope_status": (
-                "WITHIN_14_GIB" if usage["peak_rss_bytes"] <= runner.parent.RSS_CAP_BYTES
+                "WITHIN_14_GIB" if usage["peak_rss_bytes"] <= runner.base.parent.RSS_CAP_BYTES
                 else "ABOVE_14_GIB"),
             "setup_ms": summary["timing_ms"]["setup_total"],
             "mean_online_ms_exploratory": statistics.mean(times),
