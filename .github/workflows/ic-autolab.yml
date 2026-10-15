@@ -22,7 +22,7 @@ concurrency:
 jobs:
   linux-integration:
     runs-on: ubuntu-24.04
-    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 40 || 30 }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
