@@ -180,6 +180,18 @@
     "url": "https://github.com/aburan28/crypto/blob/codex/p192-three-sum-capacity-20261015/research/p192_extension_cover_20261012/reports/run-20261015T2255Z/REPORT.md"
   },
   {
+    "id": "ic_signed_short_support_overlap",
+    "name": "Signed short-support overlap and relation rank",
+    "method": "Exact positive-support joins against equal, cross-length, and negated supports",
+    "domain": "An exact prime-order elliptic subgroup, a frozen distinct usable base, and declared maximum positive and negative summand counts",
+    "recognition": "Build each unordered sum support S_n with repetition and retain a representative index multiset for each target. Count identity targets, different representations within a support, same-sign intersections S_n cap S_m for n<m, and opposite-sign intersections S_n cap (-S_m). Convert each nontrivial equality to a signed incidence row modulo r and compute useful rank. Absence through a bounded length is a scoped screen only; known-scalar target overlap, longer relations, target descent, and complete cost remain separate.",
+    "witness": "Exact field and curve, subgroup order and generator, immutable base-point list and encoding, declared summand lengths and sign convention, complete support sizes and sorted target digests, collision representatives and signed rows, independent group-law replay, row rank modulo r, and query-law and one-target cost receipts for any danger claim.",
+    "construction": "Generate usable subgroup classes, hash unordered short sums, join every support against shorter supports and negated supports, verify each candidate point equation independently, row-reduce the resulting signed relations, and extend length or base size under a frozen resource envelope when rank is insufficient.",
+    "status": "exact_p192_141_signed_short_support_zero_rank_screen",
+    "source": "P-192 Type I signed one-to-three-sum support certificate (2026)",
+    "url": "https://github.com/aburan28/crypto/blob/codex/p192-signed-short-screen-20261015/research/p192_extension_cover_20261012/reports/run-20261015T2316Z/REPORT.md"
+  },
+  {
     "id": "ic_scalar_anchor_overlap",
     "name": "Known-scalar anchor overlap for index-calculus relations",
     "method": "Exact support collision and relation-row test",
