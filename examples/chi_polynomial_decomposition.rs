@@ -23,7 +23,7 @@ use crypto_lib::cryptanalysis::ic_framework::plugins::MitmOracle;
 use crypto_lib::cryptanalysis::ic_framework::stages::{
     DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, Targets,
 };
-use crypto_lib::cryptanalysis::ic_framework::{run_pipeline, PipelineSpec};
+use crypto_lib::cryptanalysis::ic_framework::{run_pipeline, run_pipeline_public, PipelineSpec};
 use crypto_lib::cryptanalysis::identity_certificate::{
     check_with_extra, issue, Expr as IdentityExpr, IdentityStatement, Verdict,
 };
@@ -1108,7 +1108,31 @@ fn six_class_endomorphism(
     )
 }
 
-fn solve(path: &str, include_iso: bool, include_roots: bool) {
+fn freeze_public_chi(private_path: &str, public_path: &str) {
+    let private = std::fs::read_to_string(private_path).expect("private fixture JSONL");
+    let mut public = String::new();
+    let mut removed = 0u64;
+    for line in private.lines() {
+        let mut value: serde_json::Value = serde_json::from_str(line).unwrap();
+        assert!(value
+            .as_object_mut()
+            .unwrap()
+            .remove("answer_scalar")
+            .is_some());
+        removed += 1;
+        writeln!(public, "{}", serde_json::to_string(&value).unwrap()).unwrap();
+    }
+    assert_eq!(removed, 4);
+    std::fs::write(public_path, &public).expect("write public fixtures");
+    println!(
+        "{}",
+        json!({"schema":"chi_public_fixture_freeze/v1","removed_answer_fields":removed,
+            "private_sha256":sha256_hex(private.as_bytes()),
+            "public_sha256":sha256_hex(public.as_bytes())})
+    );
+}
+
+fn solve(path: &str, include_iso: bool, include_roots: bool, public_only: bool) {
     let fixtures = std::fs::read_to_string(path).expect("fixture JSONL");
     for (index, line) in fixtures.lines().enumerate() {
         let v: serde_json::Value = serde_json::from_str(line).unwrap();
@@ -1137,7 +1161,15 @@ fn solve(path: &str, include_iso: bool, include_roots: bool) {
             .collect();
         let columns = v["columns"].as_u64().unwrap() as usize;
         assert_eq!(columns, frozen_raw.len());
-        let answers = v["answer_scalar"].as_u64().unwrap();
+        let answer = if public_only {
+            assert!(
+                v.get("answer_scalar").is_none(),
+                "public input contains answer scalar"
+            );
+            None
+        } else {
+            Some(v["answer_scalar"].as_u64().unwrap())
+        };
         let (calib, ns_add_cpu) = calibrate(&curve, &[g, q, curve.neg(g), curve.neg(q)], r);
         let seed_base = 0x2026_1014u64 ^ p;
         let cap = (20 * r).min(1_000_000);
@@ -1239,33 +1271,18 @@ fn solve(path: &str, include_iso: bool, include_roots: bool) {
                                 seed,
                                 ..Default::default()
                             };
+                            let run = |oracle: &mut dyn DecompositionOracle<Curve>| match answer {
+                                Some(planted) => {
+                                    run_pipeline(&ctx, &spec, &base, oracle, planted, &c, None)
+                                }
+                                None => run_pipeline_public(&ctx, &spec, &base, oracle, &c, None),
+                            };
                             if arm == "raw-pair" {
                                 let mut oracle = MitmOracle::new(2);
-                                (
-                                    run_pipeline(
-                                        &ctx,
-                                        &spec,
-                                        &base,
-                                        &mut oracle,
-                                        answers,
-                                        &c,
-                                        None,
-                                    )
-                                    .unwrap(),
-                                    serde_json::Value::Null,
-                                )
+                                (run(&mut oracle).unwrap(), serde_json::Value::Null)
                             } else if arm == "chi-polynomial" {
                                 let mut oracle = ChiPolynomialOracle::new(projected);
-                                let rep = run_pipeline(
-                                    &ctx,
-                                    &spec,
-                                    &base,
-                                    &mut oracle,
-                                    answers,
-                                    &c,
-                                    None,
-                                )
-                                .unwrap();
+                                let rep = run(&mut oracle).unwrap();
                                 (
                                     rep,
                                     json!({"polynomial_evaluations":oracle.evaluations,
@@ -1281,16 +1298,7 @@ fn solve(path: &str, include_iso: bool, include_roots: bool) {
                                     SemaevSpace::Quotient
                                 };
                                 let mut oracle = SemaevRootOracle::new(projected, space);
-                                let rep = run_pipeline(
-                                    &ctx,
-                                    &spec,
-                                    &base,
-                                    &mut oracle,
-                                    answers,
-                                    &c,
-                                    None,
-                                )
-                                .unwrap();
+                                let rep = run(&mut oracle).unwrap();
                                 (
                                     rep,
                                     json!({"polynomial_calls":oracle.polynomial_calls,
@@ -1311,16 +1319,7 @@ fn solve(path: &str, include_iso: bool, include_roots: bool) {
                                     _ => IndexMode::Isogeny,
                                 };
                                 let mut oracle = ProjectedOracle::new(mode, projected);
-                                let rep = run_pipeline(
-                                    &ctx,
-                                    &spec,
-                                    &base,
-                                    &mut oracle,
-                                    answers,
-                                    &c,
-                                    None,
-                                )
-                                .unwrap();
+                                let rep = run(&mut oracle).unwrap();
                                 assert_eq!(
                                     oracle.false_candidates, 0,
                                     "invalid projected relation"
@@ -2193,6 +2192,55 @@ fn verify_independent(
     );
 }
 
+fn verify_public_root_run(
+    run_path: &str,
+    public_path: &str,
+    private_path: &str,
+    expected_run_sha256: &str,
+) {
+    let public_bytes = std::fs::read(public_path).expect("public fixture bytes");
+    let private_bytes = std::fs::read(private_path).expect("checker answer fixture bytes");
+    let public_lines: Vec<serde_json::Value> = String::from_utf8(public_bytes.clone())
+        .unwrap()
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    let private_lines: Vec<serde_json::Value> = String::from_utf8(private_bytes.clone())
+        .unwrap()
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    assert_eq!(public_lines.len(), 4);
+    assert_eq!(public_lines.len(), private_lines.len());
+    for (public, private) in public_lines.iter().zip(&private_lines) {
+        assert!(public.get("answer_scalar").is_none());
+        let mut redacted = private.clone();
+        assert!(redacted
+            .as_object_mut()
+            .unwrap()
+            .remove("answer_scalar")
+            .is_some());
+        assert_eq!(
+            *public, redacted,
+            "public fixture changed beyond answer custody"
+        );
+    }
+    println!(
+        "{}",
+        json!({"schema":"chi_public_fixture_custody/v1","cells":4,
+            "removed_answer_fields":4,"public_sha256":sha256_hex(&public_bytes),
+            "private_sha256":sha256_hex(&private_bytes)})
+    );
+    verify_independent(
+        run_path,
+        private_path,
+        expected_run_sha256,
+        true,
+        true,
+        true,
+    );
+}
+
 fn iso_u(p: u64) -> u64 {
     (1..p)
         .find(|u| ((*u as u128 * *u as u128) % p as u128) as u64 == p - 3)
@@ -2474,20 +2522,46 @@ fn screen() {
 
 fn main() {
     match std::env::args().nth(1).as_deref() {
+        Some("freeze-public-chi") => freeze_public_chi(
+            &std::env::args().nth(2).expect("private fixture path"),
+            &std::env::args().nth(3).expect("public fixture path"),
+        ),
         Some("exhaustive-chi") => exhaustive_chi(&std::env::args().nth(2).expect("fixture path")),
         Some("exhaustive-roots") => {
             exhaustive_roots(&std::env::args().nth(2).expect("fixture path"))
         }
-        Some("solve-roots") => solve(&std::env::args().nth(2).expect("fixture path"), true, true),
-        Some("solve-chi") => solve(&std::env::args().nth(2).expect("fixture path"), true, false),
+        Some("solve-roots-public") => solve(
+            &std::env::args().nth(2).expect("public fixture path"),
+            true,
+            true,
+            true,
+        ),
+        Some("solve-roots") => solve(
+            &std::env::args().nth(2).expect("fixture path"),
+            true,
+            true,
+            false,
+        ),
+        Some("solve-chi") => solve(
+            &std::env::args().nth(2).expect("fixture path"),
+            true,
+            false,
+            false,
+        ),
         Some("screen") => screen(),
         Some("freeze") => freeze(),
         Some("solve") => solve(
             &std::env::args().nth(2).expect("fixture path"),
             false,
             false,
+            false,
         ),
-        Some("solve-v4") => solve(&std::env::args().nth(2).expect("fixture path"), true, false),
+        Some("solve-v4") => solve(
+            &std::env::args().nth(2).expect("fixture path"),
+            true,
+            false,
+            false,
+        ),
         Some("verify") => verify(
             &std::env::args().nth(2).expect("records path"),
             &std::env::args().nth(3).expect("fixture path"),
@@ -2528,6 +2602,14 @@ fn main() {
             true,
             true,
             true,
+        ),
+        Some("verify-independent-roots-public") => verify_public_root_run(
+            &std::env::args().nth(2).expect("records path"),
+            &std::env::args().nth(3).expect("public fixture path"),
+            &std::env::args()
+                .nth(4)
+                .expect("private answer fixture path"),
+            &std::env::args().nth(5).expect("expected records SHA-256"),
         ),
         Some("iso-check") => iso_check(&std::env::args().nth(2).expect("fixture path")),
         Some("audit-v4") => audit_v4(&std::env::args().nth(2).expect("run path")),
