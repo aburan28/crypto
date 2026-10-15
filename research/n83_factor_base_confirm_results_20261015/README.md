@@ -7,7 +7,10 @@ bases, two canonical IC1 candidate IDs, the predeclared K3100-minus-K3300
 contrast, and one measurement row per arm. It keeps every target interval,
 exclusive online phase, setup, rank, memory and process status. The output
 `confirmation.json` distinguishes a replayed result from a positive
-confirmatory interval.
+confirmatory interval. The complete workload and per-target measurement
+records are losslessly stored in deterministic `workload.json.gz` and
+`measurements.json.gz`. `records_index.json` records the SHA-256 of both
+archives and their decoded JSON bytes; use `gzip -dc` to read them.
 
 Compare the downloaded artifact ZIP SHA-256 to GitHub's published artifact
 digest and independently rerun
