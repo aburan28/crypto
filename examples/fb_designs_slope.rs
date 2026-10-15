@@ -1706,8 +1706,10 @@ fn analyze(dir: &str, pilot: Option<&str>) {
                     c.3.join(","),
                     pd,
                     pr.len(),
-                    if pd.is_empty() {
+                    if pr.is_empty() {
                         "no pilot cell"
+                    } else if pd.is_empty() {
+                        "every pilot row at this cell timed out"
                     } else if same {
                         "same"
                     } else {
