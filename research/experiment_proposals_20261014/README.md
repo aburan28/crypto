@@ -106,13 +106,12 @@ minimum genus 9, 49 and 41. The problem record
 `problems/ghs-to-smith-pipeline-characteristic-mismatch.md` is **not** closed as
 an obstruction.
 
-**Consequence for existing labels (not acted on here).** 846 of the 848
-`formula_advantage` verdicts are extension-field `cover_descent` routes whose
-genus-`k` cover over `GF(p)` is "proposed" and not established. The odd-characteristic
-study finds that the GHS minimum genus at `k = 6, 10, 14` is 9, 49 and 41 when `j`
-generates the extension, not `k`. `docs/curves/jacobian-transfers.json`
-was not edited; whether to relabel those routes is a decision for the
-maintainer.
+**Consequence for existing labels (acted on 2026-10-15).** 846 of the 848
+`formula_advantage` verdicts were extension-field `cover_descent` routes priced at genus `k`, which no GHS
+cover has: the GHS minimum genus at `k = 6, 10, 14` is 9, 49 and 41 when `j` generates the
+extension. The rows are now priced at that floor and relabelled; 599 of the 846 are still
+`formula_advantage` there, 41 are `formula_marginal` and 206 are `boundary`. See
+[`../cover_descent_genus_floor_20261015/`](../cover_descent_genus_floor_20261015/REPORT.pdf).
 
 ## Order and what is left
 
