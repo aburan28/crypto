@@ -1,0 +1,202 @@
+{
+  "accounting": "Whole-process wall/CPU include launch, load, preparation, online, replay. Producer online interval is separate.",
+  "argv": [
+    "/workspace/n83_matched/frozen_binaries/rho_matched",
+    "/workspace/n83_matched/campaign/inputs/K07-rho-points.jsonl",
+    "/workspace/n83_matched/campaign/inputs/K07-rho-seeds.json",
+    "/workspace/n83_matched/campaign/inputs/rho_config.json",
+    "/workspace/n83_matched/campaign/runs/K07-rho/targets.jsonl"
+  ],
+  "argv_existing_file_sha256": {
+    "/workspace/n83_matched/campaign/inputs/K07-rho-points.jsonl": "192992a103c7b0be3f97205f91ce71f8cde1f4c9bb429265945c4dcb56ed48a2",
+    "/workspace/n83_matched/campaign/inputs/K07-rho-seeds.json": "6ed5e200dd36d36b7f4e62e4723ddc135ef3b0c96eb75faad13a6ee83aafa465",
+    "/workspace/n83_matched/campaign/inputs/rho_config.json": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949"
+  },
+  "arm": "rho",
+  "binary_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+  "cpu_system_s": 0.020448,
+  "cpu_total_s": 3.114976,
+  "cpu_user_s": 3.094528,
+  "cwd": "/workspace/repos/crypto",
+  "elapsed_process_wall_s": 3.121473282,
+  "environment": {
+    "KIC_RANK_THREADS": "1",
+    "KIC_RHO_THREADS": "1",
+    "KIC_TARGET_THREADS": "1",
+    "KIC_THREADS": "1",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "exit_observation_delay_note": "Nominal 0-5 ms plus scheduling and poll-body delays; no strict bound under arbitrary scheduling",
+  "exit_observation_poll_ms": 5,
+  "finished_epoch_ms": 1792018968665,
+  "interrupted_signal": 0,
+  "known_answer_environment_present": false,
+  "memory_limit_hit": null,
+  "memory_limit_note": "RLIMIT_AS allocation refusal may appear as nonzero/abort; no inference from exit code alone",
+  "peak_rss_bytes": 36507648,
+  "peak_rss_native_kib": 35652,
+  "peak_rss_source": "Linux wait4(2) ru_maxrss KiB multiplied by 1024; exact child process",
+  "pid": 21867,
+  "raw_wait_status": 0,
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 2100.0
+  },
+  "return_code": 0,
+  "schema": "n83.process-receipt/v1",
+  "semantic": {
+    "exit_code_field_ok": true,
+    "group_verified": true,
+    "independent_replay_required": true,
+    "online_boundary_qualified": true,
+    "producer_online_ms": 2897.485787,
+    "producer_phase_gap_ms": 0.0004210000001876324,
+    "producer_phase_sum_ms": 2897.485366,
+    "producer_phases_ms": {
+      "generic_scalar_replay": 0.23875,
+      "target_query_and_validation": 0.494107,
+      "walk_and_collision": 2896.752509
+    },
+    "producer_preparation_ms": 201.232124,
+    "public_target_match": true,
+    "recovered_scalar": "7956835551774029",
+    "scalar_is_verified_by_producer_group_replay_only": true,
+    "scalar_present": true,
+    "selected_row": {
+      "cohort_target_count": 1,
+      "cross_target_collision_sharing": false,
+      "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+      "exit_code": 0,
+      "field_modulus_low_terms": [
+        0,
+        2,
+        4,
+        7
+      ],
+      "fixture_index": 0,
+      "fresh_target_dependent_DP_walk_and_rng_state": true,
+      "generator": [
+        "6614244651398184860292015",
+        "8868260410029249391539529"
+      ],
+      "group_verified": true,
+      "jump_seed": 6460626700494319635,
+      "kind": "n83_rho_matched_target",
+      "known_answer_input": false,
+      "online_interval": {
+        "excluded": [
+          "public_input_loading",
+          "shared_curve_normal_basis",
+          "G_only_jumps",
+          "receipt_hashing_serialization_and_IO"
+        ],
+        "start_event": "before_public_target_membership_and_subgroup_validation",
+        "stop_event": "after_generic_scalar_replay"
+      },
+      "online_interval_ns": 2897485787,
+      "online_phase_ns": {
+        "generic_scalar_replay": 238750,
+        "target_query_and_validation": 494107,
+        "walk_and_collision": 2896752509
+      },
+      "online_phase_sum_ns": 2897485366,
+      "online_timer_boundary_residual_ns": 421,
+      "online_total_ms": 2897.485787,
+      "optimization_config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 256,
+        "scalar_kernel": "reference",
+        "step_cap_factor": 2000
+      },
+      "outcome": {
+        "automorphism_size": 166,
+        "capped_walks": 42,
+        "charges_jump_preparation_and_solve": {
+          "canonicalizations": 11540841,
+          "failed_collisions": 0,
+          "group_additions": 11540842,
+          "partition_hashes": 11358206,
+          "scalar_multiplications": 35,
+          "table_inserts": 180229,
+          "table_queries": 180230
+        },
+        "fruitless_cycles": 2111,
+        "fruitless_escapes": 0,
+        "ideal_steps": 9005148.640969077,
+        "table_entries": 180229,
+        "walk_steps": 11358206,
+        "walks": 182635,
+        "wasted_merges": 0
+      },
+      "preparation_charges_for_this_seed_only": {
+        "canonicalizations": 0,
+        "failed_collisions": 0,
+        "group_additions": 0,
+        "partition_hashes": 0,
+        "scalar_multiplications": 32,
+        "table_inserts": 0,
+        "table_queries": 0
+      },
+      "provenance": {
+        "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+        "compiled_source_sha256": {
+          "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+          "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+          "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+        },
+        "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+        "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+        "public_input_sha256": "192992a103c7b0be3f97205f91ce71f8cde1f4c9bb429265945c4dcb56ed48a2",
+        "seed_input_sha256": "6ed5e200dd36d36b7f4e62e4723ddc135ef3b0c96eb75faad13a6ee83aafa465",
+        "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+      },
+      "published_q": [
+        "8337050515369364035421453",
+        "2544374610085738536204806"
+      ],
+      "recovered_scalar": "7956835551774029",
+      "schema": "n83-rho-matched-target/v1",
+      "status": "PASS_VERIFIED_PUBLIC_TARGET",
+      "subgroup_order": "8569786107849059",
+      "target": [
+        "8337050515369364035421453",
+        "2544374610085738536204806"
+      ],
+      "target_count": 1,
+      "target_in_subgroup": true,
+      "target_ms": 2897.485787,
+      "target_on_curve": true,
+      "validation_sidecar_opened": false,
+      "verified": true,
+      "walk_seed": 202610146607
+    },
+    "valid": true,
+    "verified_flag_ok": true
+  },
+  "semantic_path": "/workspace/n83_matched/campaign/runs/K07-rho/targets.jsonl",
+  "semantic_sha256": "4235a765ccb59fc88c2933daa90fdf66c3aa3b89809a8cc6512fa90721cb1f5e",
+  "started_epoch_ms": 1792018965542,
+  "status": "COMPLETED_VERIFIED",
+  "stderr_path": "/workspace/n83_matched/campaign/runs/K07-rho/stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_path": "/workspace/n83_matched/campaign/runs/K07-rho/stdout.jsonl",
+  "stdout_sha256": "9ea95edda3a0027fbccf1350e2e8f1757f86e1763e414aec0ce857dc51f09219",
+  "target_sha256": "192992a103c7b0be3f97205f91ce71f8cde1f4c9bb429265945c4dcb56ed48a2",
+  "termination_signal": null,
+  "timeout": false
+}

@@ -1,0 +1,28 @@
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.151
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling n83-matched-collect-only v0.1.0 (/workspace/repos/crypto/research/n83_matched_20261014/postprocessing/collector-only)
+warning: unused import: `File`
+ --> src/main.rs:5:21
+  |
+5 | use std::fs::{self, File, OpenOptions};
+  |                     ^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `n83-matched-collect-only` (bin "n83-matched-collect-only" test) generated 1 warning (run `cargo fix --bin "n83-matched-collect-only" -p n83-matched-collect-only --tests` to apply 1 suggestion)
+    Finished `release` profile [optimized] target(s) in 6.79s
+     Running unittests src/main.rs (/workspace/n83_matched/collector_only_build/release/deps/n83_matched_collect_only-55e579aecc673c96)
+
+running 6 tests
+test tests::number_tokens_are_preserved_without_another_float_roundtrip ... ok
+test tests::exact_matrix_remains32processes218answers ... ok
+test tests::existing_or_campaign_output_is_rejected ... ok
+test tests::unsealed_observation_is_rejected ... ok
+test tests::partial_or_missing_aa_receipt_is_rejected ... ok
+test tests::changed_or_wrongly_pinned_file_is_rejected ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

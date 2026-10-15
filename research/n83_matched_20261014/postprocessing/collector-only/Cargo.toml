@@ -1,0 +1,10 @@
+[package]
+name = "n83-matched-collect-only"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+serde_json = { version = "=1.0.151", features = ["arbitrary_precision"] }
+
+[workspace]

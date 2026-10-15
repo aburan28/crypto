@@ -1,0 +1,47 @@
+In file included from research/n83_matched_20261014/verification/revisions/20261015-v3/verify_matched_campaign.cpp:30,
+                 from research/n83_matched_20261014/verification/revisions/20261015-v3/binding_self_test.cpp:2:
+research/n83_matched_20261014/verification/revisions/20261015-v3/numeric_binding.hpp: In function ‘bool canonical_index(const std::string&)’:
+research/n83_matched_20261014/verification/revisions/20261015-v3/numeric_binding.hpp:22:2: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+   22 |  if(s.empty()||(s.size()>1&&s[0]=='0'))return false;return std::all_of(s.begin(),s.end(),[](char c){return c>='0'&&c<='9';});
+      |  ^~
+research/n83_matched_20261014/verification/revisions/20261015-v3/numeric_binding.hpp:22:53: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+   22 |  if(s.empty()||(s.size()>1&&s[0]=='0'))return false;return std::all_of(s.begin(),s.end(),[](char c){return c>='0'&&c<='9';});
+      |                                                     ^~~~~~
+research/n83_matched_20261014/verification/revisions/20261015-v3/binding_self_test.cpp: In lambda function:
+research/n83_matched_20261014/verification/revisions/20261015-v3/binding_self_test.cpp:8:243: error: cannot convert ‘std::__cxx11::basic_string<char>’ to ‘const char*’
+    8 |  auto check=[&](bool expected,const std::string&a,const std::string&b,BindingContext c,const std::string&label){bool observed=equal_reserialized_json(json_text(a),json_text(b),c);require(observed==expected,"Numeric binding self-test failed: "+label);if(expected)++positive;else ++negative;};
+      |                                                                                                                                                                                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+      |                                                                                                                                                                                                                                                   |
+      |                                                                                                                                                                                                                                                   std::__cxx11::basic_string<char>
+In file included from research/n83_matched_20261014/verification/native_helpers.hpp:2,
+                 from research/n83_matched_20261014/verification/fresh_fixture_helpers.hpp:2,
+                 from research/n83_matched_20261014/verification/matched_fixture_helpers.hpp:2,
+                 from research/n83_matched_20261014/verification/revisions/20261015-v3/verify_matched_campaign.cpp:2:
+research/n83_matched_20261014/verification/native_arithmetic.hpp:59:33: note:   initializing argument 2 of ‘void require(bool, const char*)’
+   59 | void require(bool b,const char* msg){if(!b)throw std::runtime_error(msg);}
+      |                     ~~~~~~~~~~~~^~~
+research/n83_matched_20261014/verification/revisions/20261015-v3/binding_self_test.cpp: In function ‘int main(int, char**)’:
+research/n83_matched_20261014/verification/revisions/20261015-v3/binding_self_test.cpp:39:133: error: cannot convert ‘std::__cxx11::basic_string<char>’ to ‘const char*’
+   39 |   require(equal_reserialized_json(o.at("raw_process_receipt"),e,BindingContext::Process),"Actual process binding still mismatches: "+r.id);++actual;
+      |                                                                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+      |                                                                                                                                     |
+      |                                                                                                                                     std::__cxx11::basic_string<char>
+research/n83_matched_20261014/verification/native_arithmetic.hpp:59:33: note:   initializing argument 2 of ‘void require(bool, const char*)’
+   59 | void require(bool b,const char* msg){if(!b)throw std::runtime_error(msg);}
+      |                     ~~~~~~~~~~~~^~~
+research/n83_matched_20261014/verification/revisions/20261015-v3/binding_self_test.cpp:41:228: error: cannot convert ‘std::__cxx11::basic_string<char>’ to ‘const char*’
+   41 |   auto rows=lines(dir/"targets.jsonl");for(size_t i=0;i<rows.size();++i){require(equal_reserialized_json(o.at("target_rows").at(i).at("rawtargetrecord"),rows[i],BindingContext::Target),"Actual target binding still mismatches: "+r.id);++actual;}
+      |                                                                                                                                                                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+      |                                                                                                                                                                                                                                    |
+      |                                                                                                                                                                                                                                    std::__cxx11::basic_string<char>
+research/n83_matched_20261014/verification/native_arithmetic.hpp:59:33: note:   initializing argument 2 of ‘void require(bool, const char*)’
+   59 | void require(bool b,const char* msg){if(!b)throw std::runtime_error(msg);}
+      |                     ~~~~~~~~~~~~^~~
+research/n83_matched_20261014/verification/revisions/20261015-v3/binding_self_test.cpp:42:279: error: cannot convert ‘std::__cxx11::basic_string<char>’ to ‘const char*’
+   42 |   for(const auto&s:lines(dir/"stdout.jsonl"))if(has_field(s,"kind")&&s.at("kind").scalar==(r.arm=="rho"?"n83_rho_matched_summary":"compact_orbit_dlp_summary")){require(equal_reserialized_json(o.at("summary"),s,BindingContext::Summary),"Actual summary binding still mismatches: "+r.id);++actual;}
+      |                                                                                                                                                                                                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+      |                                                                                                                                                                                                                                                                                       |
+      |                                                                                                                                                                                                                                                                                       std::__cxx11::basic_string<char>
+research/n83_matched_20261014/verification/native_arithmetic.hpp:59:33: note:   initializing argument 2 of ‘void require(bool, const char*)’
+   59 | void require(bool b,const char* msg){if(!b)throw std::runtime_error(msg);}
+      |                     ~~~~~~~~~~~~^~~

@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "/workspace/n83_matched/frozen_binaries/rho_matched",
+    "/workspace/n83_matched/campaign/inputs/C03-rho-points.jsonl",
+    "/workspace/n83_matched/campaign/inputs/C03-rho-seeds.json",
+    "/workspace/n83_matched/campaign/inputs/rho_config.json",
+    "/workspace/n83_matched/campaign/runs/C03-rho/targets.jsonl"
+  ],
+  "argv_existing_file_sha256": {
+    "/workspace/n83_matched/campaign/inputs/C03-rho-points.jsonl": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+    "/workspace/n83_matched/campaign/inputs/C03-rho-seeds.json": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+    "/workspace/n83_matched/campaign/inputs/rho_config.json": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949"
+  },
+  "arm": "rho_batch",
+  "binary_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+  "cwd": "/workspace/repos/crypto",
+  "environment": {
+    "KIC_RANK_THREADS": "1",
+    "KIC_RHO_THREADS": "1",
+    "KIC_TARGET_THREADS": "1",
+    "KIC_THREADS": "1",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 2100.0
+  },
+  "schema": "n83.process-start/v1",
+  "started_epoch_ms": 1792016553230,
+  "target_file": "/workspace/n83_matched/campaign/inputs/C03-rho-points.jsonl",
+  "target_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e"
+}

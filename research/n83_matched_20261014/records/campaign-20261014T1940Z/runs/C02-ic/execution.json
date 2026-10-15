@@ -1,0 +1,2099 @@
+{
+  "accounting": "Whole-process wall/CPU include launch, load, preparation, online, replay. Producer online interval is separate.",
+  "argv": [
+    "/workspace/n83_matched/frozen_binaries/ic",
+    "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+    "/workspace/n83_matched/campaign/inputs/C02-ic-points.jsonl",
+    "29",
+    "/workspace/n83_matched/campaign/runs/C02-ic/targets.jsonl"
+  ],
+  "argv_existing_file_sha256": {
+    "/workspace/n83_matched/campaign/inputs/C02-ic-points.jsonl": "cf337293646e5948fe5d6a4544d4b6f384aca8007f34b267f25ea79b71f3c166",
+    "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl": "0d290b14a350db6271c9a49f0cd6ba246edd8c9bc6754387ad1ceebf08ec0c09"
+  },
+  "arm": "ic_batch",
+  "binary_sha256": "02d8e74211e4cccd71ad5cf7720181fa1f4b4fbab01e0860f538a7b2409dd5f3",
+  "cpu_system_s": 1.364105,
+  "cpu_total_s": 1204.7377880000001,
+  "cpu_user_s": 1203.373683,
+  "cwd": "/workspace/repos/crypto",
+  "elapsed_process_wall_s": 1204.82075621,
+  "environment": {
+    "KIC_RANK_THREADS": "1",
+    "KIC_RHO_THREADS": "1",
+    "KIC_TARGET_THREADS": "1",
+    "KIC_THREADS": "1",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "exit_observation_delay_note": "Nominal 0-5 ms plus scheduling and poll-body delays; no strict bound under arbitrary scheduling",
+  "exit_observation_poll_ms": 5,
+  "finished_epoch_ms": 1792013064866,
+  "interrupted_signal": 0,
+  "known_answer_environment_present": false,
+  "memory_limit_hit": null,
+  "memory_limit_note": "RLIMIT_AS allocation refusal may appear as nonzero/abort; no inference from exit code alone",
+  "peak_rss_bytes": 5811642368,
+  "peak_rss_native_kib": 5675432,
+  "peak_rss_source": "Linux wait4(2) ru_maxrss KiB multiplied by 1024; exact child process",
+  "pid": 21453,
+  "raw_wait_status": 0,
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 2100.0
+  },
+  "return_code": 0,
+  "schema": "n83.process-receipt/v1",
+  "semantic": {
+    "five_phase_exact_conformance": false,
+    "five_phase_residual_reported": false,
+    "independent_replay_required": true,
+    "per_target_rows": [
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.001001000000314889,
+        "producer_phase_sum_ms": 1628.6174679999997,
+        "recovered_scalar": "2360018117745995",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 0,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "5703530061513320020728444",
+            "1856960467636426770855942"
+          ],
+          "point_indices": [
+            78744,
+            91674,
+            1198,
+            23282
+          ],
+          "probes": 2147498,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "2734604834241007824499476",
+            "8664448016568697887673836"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 2360018117745995,
+          "target": [
+            "2734604834241007824499476",
+            "8664448016568697887673836"
+          ],
+          "target_descent_ms": 0.000821,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 1628.618469,
+          "target_pdp_ms": 1628.5041669999998,
+          "target_phase_sum_ms": 1628.6174679999997,
+          "target_query_ms": 0.000029999999999999997,
+          "target_recovery_check_ms": 0.110176,
+          "target_relation_check_ms": 0.002274,
+          "x_codes": [
+            "7420913546171058136306230",
+            "5616751838757696716825040",
+            "6007604954653928699770144",
+            "192017241512239145597817"
+          ]
+        },
+        "target": [
+          "2734604834241007824499476",
+          "8664448016568697887673836"
+        ],
+        "target_ms": 1628.618469,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.013610999999999596,
+        "producer_phase_sum_ms": 3.9658480000000003,
+        "recovered_scalar": "6130608281142990",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 1,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "2031044150690163137248690",
+            "3897439798842948270344992"
+          ],
+          "point_indices": [
+            82046,
+            20752,
+            33194,
+            46901
+          ],
+          "probes": 5067,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "462502678592927165319843",
+            "7920460523218174685946937"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 6130608281142990,
+          "target": [
+            "462502678592927165319843",
+            "7920460523218174685946937"
+          ],
+          "target_descent_ms": 0.000741,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 3.979459,
+          "target_pdp_ms": 3.84063,
+          "target_phase_sum_ms": 3.965848,
+          "target_query_ms": 0.000029999999999999997,
+          "target_recovery_check_ms": 0.120762,
+          "target_relation_check_ms": 0.003685,
+          "x_codes": [
+            "3919692436342940671238076",
+            "5582227065491801486307882",
+            "9014714304412697245782276",
+            "8322384160868494184696635"
+          ]
+        },
+        "target": [
+          "462502678592927165319843",
+          "7920460523218174685946937"
+        ],
+        "target_ms": 3.979459,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0008910000005926122,
+        "producer_phase_sum_ms": 4233.5556799999995,
+        "recovered_scalar": "4673914317300158",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 2,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "7583687610632533039791464",
+            "8579669439349956651245738"
+          ],
+          "point_indices": [
+            26279,
+            2350,
+            5847,
+            39468
+          ],
+          "probes": 5509642,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "7115408652463848505015016",
+            "5395330922636037724879432"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 4673914317300158,
+          "target": [
+            "7115408652463848505015016",
+            "5395330922636037724879432"
+          ],
+          "target_descent_ms": 0.000671,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 4233.556571,
+          "target_pdp_ms": 4233.412796,
+          "target_phase_sum_ms": 4233.5556799999995,
+          "target_query_ms": 0.000029999999999999997,
+          "target_recovery_check_ms": 0.124889,
+          "target_relation_check_ms": 0.017294,
+          "x_codes": [
+            "5574340957160588571029570",
+            "3132510660754793741760503",
+            "3365421873934433694906827",
+            "7133438095082057589778236"
+          ]
+        },
+        "target": [
+          "7115408652463848505015016",
+          "5395330922636037724879432"
+        ],
+        "target_ms": 4233.556571,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0007310000000870787,
+        "producer_phase_sum_ms": 1344.185843,
+        "recovered_scalar": "6244997162876351",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 3,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "6367020836994359862962585",
+            "5274972949593242927203619"
+          ],
+          "point_indices": [
+            87965,
+            26853,
+            29995,
+            40331
+          ],
+          "probes": 1864151,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "1488553892571530672031635",
+            "6295161286451305611745916"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 6244997162876351,
+          "target": [
+            "1488553892571530672031635",
+            "6295161286451305611745916"
+          ],
+          "target_descent_ms": 0.0008110000000000001,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 1344.186574,
+          "target_pdp_ms": 1344.036306,
+          "target_phase_sum_ms": 1344.185843,
+          "target_query_ms": 0.00002,
+          "target_recovery_check_ms": 0.123897,
+          "target_relation_check_ms": 0.024809,
+          "x_codes": [
+            "1630298986804005879154453",
+            "715301041598411657040306",
+            "7787195718503629896551436",
+            "6334153801236635207861827"
+          ]
+        },
+        "target": [
+          "1488553892571530672031635",
+          "6295161286451305611745916"
+        ],
+        "target_ms": 1344.186574,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0007220000001098015,
+        "producer_phase_sum_ms": 827.5092599999999,
+        "recovered_scalar": "7956835551774029",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 4,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "3734522419916538579271136",
+            "1233252480419663805306383"
+          ],
+          "point_indices": [
+            76673,
+            21421,
+            1911,
+            45332
+          ],
+          "probes": 1139054,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "8337050515369364035421453",
+            "2544374610085738536204806"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 7956835551774029,
+          "target": [
+            "8337050515369364035421453",
+            "2544374610085738536204806"
+          ],
+          "target_descent_ms": 0.000731,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 827.509982,
+          "target_pdp_ms": 827.373515,
+          "target_phase_sum_ms": 827.5092599999999,
+          "target_query_ms": 0.00002,
+          "target_recovery_check_ms": 0.111638,
+          "target_relation_check_ms": 0.023356,
+          "x_codes": [
+            "3431232496273088758996667",
+            "3525182055265897106475125",
+            "460003901139231116510201",
+            "3979595901367226603307902"
+          ]
+        },
+        "target": [
+          "8337050515369364035421453",
+          "2544374610085738536204806"
+        ],
+        "target_ms": 827.509982,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0006219999999643733,
+        "producer_phase_sum_ms": 146.21957500000002,
+        "recovered_scalar": "763026627962932",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 5,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "103338618344343271287097",
+            "8605490944296592461430834"
+          ],
+          "point_indices": [
+            46011,
+            1036,
+            33621,
+            61898
+          ],
+          "probes": 207559,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "8982802887566637286379338",
+            "4222738079155265901197116"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 763026627962932,
+          "target": [
+            "8982802887566637286379338",
+            "4222738079155265901197116"
+          ],
+          "target_descent_ms": 0.0008010000000000001,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 146.22019699999998,
+          "target_pdp_ms": 146.085252,
+          "target_phase_sum_ms": 146.21957500000002,
+          "target_query_ms": 0.00002,
+          "target_recovery_check_ms": 0.116205,
+          "target_relation_check_ms": 0.017297,
+          "x_codes": [
+            "3174048140528375894261145",
+            "8866883381202683209785682",
+            "8098265310179221457706889",
+            "3405868571903309671910957"
+          ]
+        },
+        "target": [
+          "8982802887566637286379338",
+          "4222738079155265901197116"
+        ],
+        "target_ms": 146.22019699999998,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0007510000000365835,
+        "producer_phase_sum_ms": 297.815725,
+        "recovered_scalar": "3946500346331745",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 6,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "3857142573320152286839760",
+            "4585925494758971980027839"
+          ],
+          "point_indices": [
+            61766,
+            40021,
+            36295,
+            79936
+          ],
+          "probes": 375855,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "7860948305198501059034253",
+            "697640575413550916677184"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 3946500346331745,
+          "target": [
+            "7860948305198501059034253",
+            "697640575413550916677184"
+          ],
+          "target_descent_ms": 0.000591,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 297.816476,
+          "target_pdp_ms": 297.69061600000003,
+          "target_phase_sum_ms": 297.815725,
+          "target_query_ms": 0.00004,
+          "target_recovery_check_ms": 0.113191,
+          "target_relation_check_ms": 0.011287,
+          "x_codes": [
+            "8874962570482498758670566",
+            "267880936887320063181421",
+            "2751753260300451050130252",
+            "5459629706929293313051122"
+          ]
+        },
+        "target": [
+          "7860948305198501059034253",
+          "697640575413550916677184"
+        ],
+        "target_ms": 297.816476,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0005300000000003635,
+        "producer_phase_sum_ms": 4.73437,
+        "recovered_scalar": "2693182540772093",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 7,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "7479632100571832548258654",
+            "754719183640876441771230"
+          ],
+          "point_indices": [
+            31023,
+            4639,
+            44471,
+            98500
+          ],
+          "probes": 5937,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "2617469069112253237714466",
+            "1402934360098764597093019"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 2693182540772093,
+          "target": [
+            "2617469069112253237714466",
+            "1402934360098764597093019"
+          ],
+          "target_descent_ms": 0.0008719999999999999,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 4.7349000000000006,
+          "target_pdp_ms": 4.505462,
+          "target_phase_sum_ms": 4.73437,
+          "target_query_ms": 0.000029999999999999997,
+          "target_recovery_check_ms": 0.11927,
+          "target_relation_check_ms": 0.108736,
+          "x_codes": [
+            "1197503117742194378566362",
+            "1387101230034363281650683",
+            "8839912778778147450728084",
+            "8809909521176904892828182"
+          ]
+        },
+        "target": [
+          "2617469069112253237714466",
+          "1402934360098764597093019"
+        ],
+        "target_ms": 4.7349000000000006,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0007110000001375738,
+        "producer_phase_sum_ms": 777.5180179999999,
+        "recovered_scalar": "1763069945822273",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 8,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "3314616282153589369328731",
+            "1231069818505358258552039"
+          ],
+          "point_indices": [
+            89538,
+            80433,
+            17862,
+            84402
+          ],
+          "probes": 1019701,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "7646312407037852119864756",
+            "8305163322092573219744875"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 1763069945822273,
+          "target": [
+            "7646312407037852119864756",
+            "8305163322092573219744875"
+          ],
+          "target_descent_ms": 0.000721,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 777.518729,
+          "target_pdp_ms": 777.40053,
+          "target_phase_sum_ms": 777.5180179999999,
+          "target_query_ms": 0.00002,
+          "target_recovery_check_ms": 0.108624,
+          "target_relation_check_ms": 0.008123,
+          "x_codes": [
+            "2615828321913932506578080",
+            "9583615620614353468634739",
+            "3164724182939918715133867",
+            "5523413603034305266843636"
+          ]
+        },
+        "target": [
+          "7646312407037852119864756",
+          "8305163322092573219744875"
+        ],
+        "target_ms": 777.518729,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.000691000000188069,
+        "producer_phase_sum_ms": 5957.788501,
+        "recovered_scalar": "5750682974953083",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 9,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "7323477315069842304868244",
+            "4798741716477293555831871"
+          ],
+          "point_indices": [
+            81584,
+            33626,
+            37887,
+            70527
+          ],
+          "probes": 7764643,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "8477652059012503449990510",
+            "1856350276345588936746351"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 5750682974953083,
+          "target": [
+            "8477652059012503449990510",
+            "1856350276345588936746351"
+          ],
+          "target_descent_ms": 0.0008309999999999999,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 5957.789192,
+          "target_pdp_ms": 5957.657252999999,
+          "target_phase_sum_ms": 5957.788501,
+          "target_query_ms": 0.000029999999999999997,
+          "target_recovery_check_ms": 0.123957,
+          "target_relation_check_ms": 0.00643,
+          "x_codes": [
+            "1767685893437111873742247",
+            "7718285785573191717791148",
+            "5327216141562508678184715",
+            "3621633412770159427247047"
+          ]
+        },
+        "target": [
+          "8477652059012503449990510",
+          "1856350276345588936746351"
+        ],
+        "target_ms": 5957.789192,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0009510000001000662,
+        "producer_phase_sum_ms": 260.46301399999993,
+        "recovered_scalar": "4565368788643079",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 10,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "5588628381225939089911046",
+            "1817018529173161277079666"
+          ],
+          "point_indices": [
+            96654,
+            85029,
+            38788,
+            98532
+          ],
+          "probes": 309509,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "5929377258114659728941176",
+            "2469687539490079362845334"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 4565368788643079,
+          "target": [
+            "5929377258114659728941176",
+            "2469687539490079362845334"
+          ],
+          "target_descent_ms": 0.000721,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 260.46396500000003,
+          "target_pdp_ms": 260.342443,
+          "target_phase_sum_ms": 260.46301399999993,
+          "target_query_ms": 0.000029999999999999997,
+          "target_recovery_check_ms": 0.111659,
+          "target_relation_check_ms": 0.008161,
+          "x_codes": [
+            "3607309461541625903178985",
+            "8707776498843115234960968",
+            "3660375547155333164448502",
+            "8731768177195354704928214"
+          ]
+        },
+        "target": [
+          "5929377258114659728941176",
+          "2469687539490079362845334"
+        ],
+        "target_ms": 260.46396500000003,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0010510000000749642,
+        "producer_phase_sum_ms": 838.949853,
+        "recovered_scalar": "6117711252256999",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 11,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "3626458198007581486431995",
+            "7515245342604299657699978"
+          ],
+          "point_indices": [
+            24685,
+            66313,
+            34271,
+            99520
+          ],
+          "probes": 1085541,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "2006974971268742183177546",
+            "8024799364009969733707423"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 6117711252256999,
+          "target": [
+            "2006974971268742183177546",
+            "8024799364009969733707423"
+          ],
+          "target_descent_ms": 0.000661,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 838.950904,
+          "target_pdp_ms": 838.7252329999999,
+          "target_phase_sum_ms": 838.949853,
+          "target_query_ms": 0.000029999999999999997,
+          "target_recovery_check_ms": 0.200523,
+          "target_relation_check_ms": 0.023406,
+          "x_codes": [
+            "9082811081080484447010239",
+            "6157859484144365033819923",
+            "8846157259376796237589518",
+            "6340465952156906753663985"
+          ]
+        },
+        "target": [
+          "2006974971268742183177546",
+          "8024799364009969733707423"
+        ],
+        "target_ms": 838.950904,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0007910000000492801,
+        "producer_phase_sum_ms": 280.33732,
+        "recovered_scalar": "1799731268780175",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 12,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "4185725731397767219731984",
+            "3837731054782149349411052"
+          ],
+          "point_indices": [
+            31288,
+            65872,
+            38024,
+            63070
+          ],
+          "probes": 353741,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "9292175822164452051442735",
+            "7424220586624891251315783"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 1799731268780175,
+          "target": [
+            "9292175822164452051442735",
+            "7424220586624891251315783"
+          ],
+          "target_descent_ms": 0.000611,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 280.338111,
+          "target_pdp_ms": 280.221344,
+          "target_phase_sum_ms": 280.33732,
+          "target_query_ms": 0.000029999999999999997,
+          "target_recovery_check_ms": 0.113261,
+          "target_relation_check_ms": 0.002074,
+          "x_codes": [
+            "8389442668178327675035401",
+            "8158139931378751502564145",
+            "3552246912731765439387655",
+            "9641609787559948444629723"
+          ]
+        },
+        "target": [
+          "9292175822164452051442735",
+          "7424220586624891251315783"
+        ],
+        "target_ms": 280.338111,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0007210000000554828,
+        "producer_phase_sum_ms": 476.85447899999997,
+        "recovered_scalar": "6165924353541292",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 13,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "5193078057926644068572893",
+            "1546324610866568497836005"
+          ],
+          "point_indices": [
+            37410,
+            25301,
+            25666,
+            73014
+          ],
+          "probes": 588093,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "3705146757013994100623214",
+            "8991421322600198510557957"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 6165924353541292,
+          "target": [
+            "3705146757013994100623214",
+            "8991421322600198510557957"
+          ],
+          "target_descent_ms": 0.000641,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 476.8552,
+          "target_pdp_ms": 476.732464,
+          "target_phase_sum_ms": 476.854479,
+          "target_query_ms": 0.00002,
+          "target_recovery_check_ms": 0.113231,
+          "target_relation_check_ms": 0.008123,
+          "x_codes": [
+            "2676496943585110120995712",
+            "6345754819179495295789639",
+            "5026296904851023202863215",
+            "1699037439828209799770543"
+          ]
+        },
+        "target": [
+          "3705146757013994100623214",
+          "8991421322600198510557957"
+        ],
+        "target_ms": 476.8552,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0007310000009965734,
+        "producer_phase_sum_ms": 6390.346186,
+        "recovered_scalar": "904621578727929",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 14,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "696880614515879866818898",
+            "6410745794680653410901511"
+          ],
+          "point_indices": [
+            95024,
+            5128,
+            18483,
+            96352
+          ],
+          "probes": 8741043,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "5153256413781201619384157",
+            "2935202814270289909493469"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 904621578727929,
+          "target": [
+            "5153256413781201619384157",
+            "2935202814270289909493469"
+          ],
+          "target_descent_ms": 0.000851,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 6390.346917000001,
+          "target_pdp_ms": 6390.2164999999995,
+          "target_phase_sum_ms": 6390.346186,
+          "target_query_ms": 0.00002,
+          "target_recovery_check_ms": 0.123747,
+          "target_relation_check_ms": 0.005068,
+          "x_codes": [
+            "7905398235385693775786759",
+            "6418171849500455686663401",
+            "9318278368996133069041641",
+            "4164283325900001757956254"
+          ]
+        },
+        "target": [
+          "5153256413781201619384157",
+          "2935202814270289909493469"
+        ],
+        "target_ms": 6390.346917000001,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0008719999999584616,
+        "producer_phase_sum_ms": 262.075291,
+        "recovered_scalar": "4637267480234865",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 15,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "7166519014409108483355626",
+            "1877039114240641293870948"
+          ],
+          "point_indices": [
+            48026,
+            34725,
+            23890,
+            35781
+          ],
+          "probes": 358999,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "6616016149300137093316495",
+            "1810909566925513309873915"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 4637267480234865,
+          "target": [
+            "6616016149300137093316495",
+            "1810909566925513309873915"
+          ],
+          "target_descent_ms": 0.000591,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 262.07616299999995,
+          "target_pdp_ms": 261.947128,
+          "target_phase_sum_ms": 262.075291,
+          "target_query_ms": 0.00002,
+          "target_recovery_check_ms": 0.117918,
+          "target_relation_check_ms": 0.009634,
+          "x_codes": [
+            "2967718292343346803698104",
+            "7756044517847664703844998",
+            "4250617875966671088662961",
+            "570143394594909470155957"
+          ]
+        },
+        "target": [
+          "6616016149300137093316495",
+          "1810909566925513309873915"
+        ],
+        "target_ms": 262.07616299999995,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0007420000000593063,
+        "producer_phase_sum_ms": 813.128564,
+        "recovered_scalar": "5940964754134081",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 16,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "530362224345630347538409",
+            "2754186691500266782365528"
+          ],
+          "point_indices": [
+            47752,
+            50270,
+            59170,
+            86492
+          ],
+          "probes": 1074243,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "4369227410205781321084847",
+            "2634019687805144007132465"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 5940964754134081,
+          "target": [
+            "4369227410205781321084847",
+            "2634019687805144007132465"
+          ],
+          "target_descent_ms": 0.000691,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 813.129306,
+          "target_pdp_ms": 813.0142730000001,
+          "target_phase_sum_ms": 813.128564,
+          "target_query_ms": 0.00002,
+          "target_recovery_check_ms": 0.111758,
+          "target_relation_check_ms": 0.001822,
+          "x_codes": [
+            "1931665606684035424880460",
+            "1396725556404359106618905",
+            "6065717907653618849266649",
+            "2436419602000839537243074"
+          ]
+        },
+        "target": [
+          "4369227410205781321084847",
+          "2634019687805144007132465"
+        ],
+        "target_ms": 813.129306,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0006699999999568718,
+        "producer_phase_sum_ms": 168.30985900000002,
+        "recovered_scalar": "4757442361638709",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 17,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "1208326377576373910695176",
+            "7652665745786873460784072"
+          ],
+          "point_indices": [
+            18833,
+            84000,
+            24416,
+            56669
+          ],
+          "probes": 175778,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "1732238840770670242459391",
+            "2591879477899655467248851"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 4757442361638709,
+          "target": [
+            "1732238840770670242459391",
+            "2591879477899655467248851"
+          ],
+          "target_descent_ms": 0.02609,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 168.31052899999997,
+          "target_pdp_ms": 168.14853399999998,
+          "target_phase_sum_ms": 168.30985900000002,
+          "target_query_ms": 0.000029999999999999997,
+          "target_recovery_check_ms": 0.11946,
+          "target_relation_check_ms": 0.015745,
+          "x_codes": [
+            "8277024449941494030195205",
+            "8428400332224410202683119",
+            "7198275075546354562468872",
+            "9246512646709822980352681"
+          ]
+        },
+        "target": [
+          "1732238840770670242459391",
+          "2591879477899655467248851"
+        ],
+        "target_ms": 168.31052899999997,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0007709999999860884,
+        "producer_phase_sum_ms": 216.38869400000002,
+        "recovered_scalar": "6262240001627079",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 18,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "9637434896311816649884491",
+            "3601973908661145153582939"
+          ],
+          "point_indices": [
+            68265,
+            62085,
+            31492,
+            95335
+          ],
+          "probes": 291576,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "4237108105468505475528425",
+            "5138408442492595562058774"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 6262240001627079,
+          "target": [
+            "4237108105468505475528425",
+            "5138408442492595562058774"
+          ],
+          "target_descent_ms": 0.000561,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 216.389465,
+          "target_pdp_ms": 216.239177,
+          "target_phase_sum_ms": 216.388694,
+          "target_query_ms": 0.000021,
+          "target_recovery_check_ms": 0.127072,
+          "target_relation_check_ms": 0.021863,
+          "x_codes": [
+            "6952596565517055778378902",
+            "2484133070304497354783064",
+            "5893350255067121167764908",
+            "7623403500539802875939268"
+          ]
+        },
+        "target": [
+          "4237108105468505475528425",
+          "5138408442492595562058774"
+        ],
+        "target_ms": 216.389465,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0008410000004914764,
+        "producer_phase_sum_ms": 2251.3652239999997,
+        "recovered_scalar": "3049735280064665",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 19,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "3548833814241823774202955",
+            "814883094639472114874350"
+          ],
+          "point_indices": [
+            85038,
+            66179,
+            33310,
+            80512
+          ],
+          "probes": 2944933,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "9379324424408363048115823",
+            "5737434877442273580198515"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 3049735280064665,
+          "target": [
+            "9379324424408363048115823",
+            "5737434877442273580198515"
+          ],
+          "target_descent_ms": 0.000571,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 2251.366065,
+          "target_pdp_ms": 2251.2386429999997,
+          "target_phase_sum_ms": 2251.3652239999997,
+          "target_query_ms": 0.00002,
+          "target_recovery_check_ms": 0.117868,
+          "target_relation_check_ms": 0.008122,
+          "x_codes": [
+            "5835626459614904591766374",
+            "6603289772038002429371493",
+            "1241498936306565502530597",
+            "2675523666626984137891370"
+          ]
+        },
+        "target": [
+          "9379324424408363048115823",
+          "5737434877442273580198515"
+        ],
+        "target_ms": 2251.366065,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0009419999998954154,
+        "producer_phase_sum_ms": 770.211704,
+        "recovered_scalar": "4837358603478477",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 20,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "608187912361165093187212",
+            "5278766087053335188044493"
+          ],
+          "point_indices": [
+            49508,
+            90079,
+            49257,
+            69887
+          ],
+          "probes": 1015005,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "4199768195767074791455924",
+            "7044361749705308001264013"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 4837358603478477,
+          "target": [
+            "4199768195767074791455924",
+            "7044361749705308001264013"
+          ],
+          "target_descent_ms": 0.000941,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 770.212646,
+          "target_pdp_ms": 770.081647,
+          "target_phase_sum_ms": 770.211704,
+          "target_query_ms": 0.000029999999999999997,
+          "target_recovery_check_ms": 0.116296,
+          "target_relation_check_ms": 0.01279,
+          "x_codes": [
+            "6467915713474420585271333",
+            "2846426642812478424580026",
+            "8005130774478364726977085",
+            "6965231757459416010073830"
+          ]
+        },
+        "target": [
+          "4199768195767074791455924",
+          "7044361749705308001264013"
+        ],
+        "target_ms": 770.212646,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0008009999999671891,
+        "producer_phase_sum_ms": 457.908517,
+        "recovered_scalar": "3245619119153784",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 21,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "8422993238602599866284909",
+            "23381760797201467656645"
+          ],
+          "point_indices": [
+            96561,
+            45381,
+            62696,
+            98434
+          ],
+          "probes": 638665,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "6116589083255320963046427",
+            "4413230637911642840601140"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 3245619119153784,
+          "target": [
+            "6116589083255320963046427",
+            "4413230637911642840601140"
+          ],
+          "target_descent_ms": 0.000721,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 457.909318,
+          "target_pdp_ms": 457.767904,
+          "target_phase_sum_ms": 457.908517,
+          "target_query_ms": 0.00002,
+          "target_recovery_check_ms": 0.119541,
+          "target_relation_check_ms": 0.020331,
+          "x_codes": [
+            "8396337830575604047184921",
+            "3316025791306353047635997",
+            "425323364791067333306403",
+            "4455528748415399561147261"
+          ]
+        },
+        "target": [
+          "6116589083255320963046427",
+          "4413230637911642840601140"
+        ],
+        "target_ms": 457.909318,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.000771000000213462,
+        "producer_phase_sum_ms": 1783.4835609999998,
+        "recovered_scalar": "2322049956852011",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 22,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "7160443124304455335485590",
+            "7788069025943833243809592"
+          ],
+          "point_indices": [
+            38126,
+            84665,
+            38893,
+            51180
+          ],
+          "probes": 2502178,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "7690915679479908148005832",
+            "3438927225575440675437592"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 2322049956852011,
+          "target": [
+            "7690915679479908148005832",
+            "3438927225575440675437592"
+          ],
+          "target_descent_ms": 0.000691,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 1783.484332,
+          "target_pdp_ms": 1783.35837,
+          "target_phase_sum_ms": 1783.4835609999998,
+          "target_query_ms": 0.00002,
+          "target_recovery_check_ms": 0.113171,
+          "target_relation_check_ms": 0.011309,
+          "x_codes": [
+            "9159144951024844345620013",
+            "5751929561478988143034012",
+            "8066638682194389947094803",
+            "2395862294551156499121634"
+          ]
+        },
+        "target": [
+          "7690915679479908148005832",
+          "3438927225575440675437592"
+        ],
+        "target_ms": 1783.484332,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0007609999997839623,
+        "producer_phase_sum_ms": 2399.434372,
+        "recovered_scalar": "5134956505835581",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 23,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "7360770577092144438960062",
+            "2101776991851640147496124"
+          ],
+          "point_indices": [
+            30590,
+            92502,
+            11732,
+            69413
+          ],
+          "probes": 3229126,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "9583485035316439421343843",
+            "4320160212502956361930748"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 5134956505835581,
+          "target": [
+            "9583485035316439421343843",
+            "4320160212502956361930748"
+          ],
+          "target_descent_ms": 0.000942,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 2399.435133,
+          "target_pdp_ms": 2399.3075799999997,
+          "target_phase_sum_ms": 2399.434372,
+          "target_query_ms": 0.000029999999999999997,
+          "target_recovery_check_ms": 0.122335,
+          "target_relation_check_ms": 0.003485,
+          "x_codes": [
+            "2570184349526514152892186",
+            "9636321426744631909333673",
+            "6784635456749838041913872",
+            "5131181389106152186699317"
+          ]
+        },
+        "target": [
+          "9583485035316439421343843",
+          "4320160212502956361930748"
+        ],
+        "target_ms": 2399.435133,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0008209999987229821,
+        "producer_phase_sum_ms": 8086.816298000001,
+        "recovered_scalar": "8344514735965152",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 24,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "5419253470867305815345561",
+            "4101764297834983437716676"
+          ],
+          "point_indices": [
+            55966,
+            65073,
+            93845,
+            95857
+          ],
+          "probes": 11241571,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "7356238851853662800181764",
+            "3100440519543716479466436"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 8344514735965152,
+          "target": [
+            "7356238851853662800181764",
+            "3100440519543716479466436"
+          ],
+          "target_descent_ms": 0.0008810000000000001,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 8086.817118999999,
+          "target_pdp_ms": 8086.685349,
+          "target_phase_sum_ms": 8086.816298000001,
+          "target_query_ms": 0.000029999999999999997,
+          "target_recovery_check_ms": 0.117347,
+          "target_relation_check_ms": 0.012691,
+          "x_codes": [
+            "6531751722600691518564537",
+            "1442222584635994362950873",
+            "3670051271634401444715580",
+            "489832490008414001676489"
+          ]
+        },
+        "target": [
+          "7356238851853662800181764",
+          "3100440519543716479466436"
+        ],
+        "target_ms": 8086.817118999999,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0008609999999862339,
+        "producer_phase_sum_ms": 1832.014974,
+        "recovered_scalar": "1082351015421331",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 25,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "733184546632923330558558",
+            "1549968813518557124100063"
+          ],
+          "point_indices": [
+            57799,
+            11476,
+            20440,
+            31391
+          ],
+          "probes": 2623858,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "4883805551040382121382543",
+            "3963738703877246129886522"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 1082351015421331,
+          "target": [
+            "4883805551040382121382543",
+            "3963738703877246129886522"
+          ],
+          "target_descent_ms": 0.000591,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 1832.015835,
+          "target_pdp_ms": 1831.88159,
+          "target_phase_sum_ms": 1832.014974,
+          "target_query_ms": 0.00002,
+          "target_recovery_check_ms": 0.117097,
+          "target_relation_check_ms": 0.015676,
+          "x_codes": [
+            "8333032943028693821877385",
+            "2645266776308966660873518",
+            "5547135742697650390391758",
+            "3257033065285705327536231"
+          ]
+        },
+        "target": [
+          "4883805551040382121382543",
+          "3963738703877246129886522"
+        ],
+        "target_ms": 1832.015835,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.000780999999847154,
+        "producer_phase_sum_ms": 592.3337780000002,
+        "recovered_scalar": "2425713366254185",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 26,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "7692399236572081510281516",
+            "8222128594341848718332203"
+          ],
+          "point_indices": [
+            44599,
+            88880,
+            12384,
+            13813
+          ],
+          "probes": 845162,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "8708838414030381660988284",
+            "8759093782192670188582766"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 2425713366254185,
+          "target": [
+            "8708838414030381660988284",
+            "8759093782192670188582766"
+          ],
+          "target_descent_ms": 0.0007109999999999999,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 592.334559,
+          "target_pdp_ms": 592.1563090000001,
+          "target_phase_sum_ms": 592.3337780000002,
+          "target_query_ms": 0.000029999999999999997,
+          "target_recovery_check_ms": 0.160833,
+          "target_relation_check_ms": 0.015895,
+          "x_codes": [
+            "2661011648614791215861834",
+            "2974745189645349338812924",
+            "9249168661875073970710809",
+            "9543471216025982002684915"
+          ]
+        },
+        "target": [
+          "8708838414030381660988284",
+          "8759093782192670188582766"
+        ],
+        "target_ms": 592.334559,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0008110000003398454,
+        "producer_phase_sum_ms": 2375.6595599999996,
+        "recovered_scalar": "4591422792355816",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 27,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "2678112484794810489359806",
+            "1598515201149259429199553"
+          ],
+          "point_indices": [
+            45095,
+            47127,
+            14030,
+            15311
+          ],
+          "probes": 3255145,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "7352484223315154002731490",
+            "6039652706979368298119284"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 4591422792355816,
+          "target": [
+            "7352484223315154002731490",
+            "6039652706979368298119284"
+          ],
+          "target_descent_ms": 0.000741,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 2375.660371,
+          "target_pdp_ms": 2375.49456,
+          "target_phase_sum_ms": 2375.6595599999996,
+          "target_query_ms": 0.00002,
+          "target_recovery_check_ms": 0.142415,
+          "target_relation_check_ms": 0.021824,
+          "x_codes": [
+            "5271460490073519368585503",
+            "5877699289310663624029736",
+            "7272361972968866158867064",
+            "8661556779844900330966824"
+          ]
+        },
+        "target": [
+          "7352484223315154002731490",
+          "6039652706979368298119284"
+        ],
+        "target_ms": 2375.660371,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0007709999999860884,
+        "producer_phase_sum_ms": 3253.156729,
+        "recovered_scalar": "4284501860402286",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 28,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "9460260909662301080773325",
+            "669844248928828452743774"
+          ],
+          "point_indices": [
+            99482,
+            631,
+            10943,
+            31801
+          ],
+          "probes": 4269286,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "3571157231505780270636575",
+            "8728713841771063184764901"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 4284501860402286,
+          "target": [
+            "3571157231505780270636575",
+            "8728713841771063184764901"
+          ],
+          "target_descent_ms": 0.000641,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 3253.1575,
+          "target_pdp_ms": 3253.021945,
+          "target_phase_sum_ms": 3253.156729,
+          "target_query_ms": 0.00002,
+          "target_recovery_check_ms": 0.121143,
+          "target_relation_check_ms": 0.01298,
+          "x_codes": [
+            "9232817668762569866383593",
+            "1878873269031079596211878",
+            "8880157558252276366997420",
+            "963347545149106893124112"
+          ]
+        },
+        "target": [
+          "3571157231505780270636575",
+          "8728713841771063184764901"
+        ],
+        "target_ms": 3253.1575,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0007619999999519678,
+        "producer_phase_sum_ms": 421.86180600000006,
+        "recovered_scalar": "7994045556655448",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 29,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "5313003404582810398721049",
+            "1482519638924408613899493"
+          ],
+          "point_indices": [
+            59938,
+            68070,
+            74652,
+            90699
+          ],
+          "probes": 565091,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "6169096093261076373724307",
+            "7780751145310163460762217"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 7994045556655448,
+          "target": [
+            "6169096093261076373724307",
+            "7780751145310163460762217"
+          ],
+          "target_descent_ms": 0.000691,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 421.862568,
+          "target_pdp_ms": 421.74407700000006,
+          "target_phase_sum_ms": 421.86180600000006,
+          "target_query_ms": 0.000029999999999999997,
+          "target_recovery_check_ms": 0.113372,
+          "target_relation_check_ms": 0.003636,
+          "x_codes": [
+            "6095664981704109835158297",
+            "8207504511033322053229863",
+            "3961882167763477752102070",
+            "6609289656423980492647879"
+          ]
+        },
+        "target": [
+          "6169096093261076373724307",
+          "7780751145310163460762217"
+        ],
+        "target_ms": 421.862568,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0007210000007944473,
+        "producer_phase_sum_ms": 2260.2621229999995,
+        "recovered_scalar": "5996718309895889",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 30,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "6981003461232501409126306",
+            "6120067934363086075358727"
+          ],
+          "point_indices": [
+            69445,
+            93799,
+            59760,
+            69161
+          ],
+          "probes": 3038246,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "7624141511704099635409672",
+            "9018014600764739595192734"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 5996718309895889,
+          "target": [
+            "7624141511704099635409672",
+            "9018014600764739595192734"
+          ],
+          "target_descent_ms": 0.000671,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 2260.2628440000003,
+          "target_pdp_ms": 2260.114461,
+          "target_phase_sum_ms": 2260.2621229999995,
+          "target_query_ms": 0.00002,
+          "target_recovery_check_ms": 0.125389,
+          "target_relation_check_ms": 0.021582,
+          "x_codes": [
+            "1179300618566386082498180",
+            "3709445958886309797317130",
+            "3586083096316875701401599",
+            "727513445089124582649712"
+          ]
+        },
+        "target": [
+          "7624141511704099635409672",
+          "9018014600764739595192734"
+        ],
+        "target_ms": 2260.2628440000003,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0007809999997334671,
+        "producer_phase_sum_ms": 3178.0232770000002,
+        "recovered_scalar": "6935305883442217",
+        "selected_row": {
+          "a": 1,
+          "exit_code": 0,
+          "field_value_encoding": "base-10 strings for u128 field values",
+          "fixture_index": 31,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "kind": "compact_orbit_dlp_target",
+          "n": 83,
+          "pinned_intermediates": [
+            "6320340218985309598921247",
+            "1332630003753850067855053"
+          ],
+          "point_indices": [
+            93664,
+            45533,
+            66114,
+            78716
+          ],
+          "probes": 4211170,
+          "published_fixture_scalar": null,
+          "published_q": [
+            "3290000310122922727120449",
+            "3984594806928791905213627"
+          ],
+          "recovered_matches_published": null,
+          "recovered_scalar": 6935305883442217,
+          "target": [
+            "3290000310122922727120449",
+            "3984594806928791905213627"
+          ],
+          "target_descent_ms": 0.0006010000000000001,
+          "target_generation_ms_excluded": 0.0,
+          "target_ms": 3178.024058,
+          "target_pdp_ms": 3177.892238,
+          "target_phase_sum_ms": 3178.023277,
+          "target_query_ms": 0.000029999999999999997,
+          "target_recovery_check_ms": 0.122264,
+          "target_relation_check_ms": 0.008144,
+          "x_codes": [
+            "7647504864637240219255012",
+            "2920910168487422653114874",
+            "9130809941192121262932491",
+            "529814787473259052396485"
+          ]
+        },
+        "target": [
+          "3290000310122922727120449",
+          "3984594806928791905213627"
+        ],
+        "target_ms": 3178.024058,
+        "valid": true
+      }
+    ],
+    "producer_preparation_ms": 1149988.148124,
+    "shared_preparation_is_not_cold_single_target": true,
+    "summary_validation": {
+      "base_hash_match": true,
+      "expected_base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+      "rank_ok": true,
+      "selected_summary": {
+        "a": 1,
+        "base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+        "base_scanned_x": null,
+        "base_source": "retained_header",
+        "edge_selectors": 0,
+        "factor_base_points": 99600,
+        "indexed4_fixed31_enabled": false,
+        "indexed5_fixed30_enabled": false,
+        "indexed5_load75_enabled": false,
+        "kind": "compact_orbit_dlp_summary",
+        "n": 83,
+        "orbit_columns": 600,
+        "pair_table_entries": 0,
+        "peak_rss_bytes": 5811732480,
+        "rank": 600,
+        "rank_attempts": 600,
+        "rank_failures": 0,
+        "rank_policy": "guided: decompose [a]G - R_j for the first pivotless column j",
+        "rank_probes_mean": 2396425.4633333334,
+        "rank_relations": 600,
+        "rank_rows_without_gain": 0,
+        "regular_states": 29880000,
+        "root_bloom_bytes": 0,
+        "root_bloom_enabled": false,
+        "root_only11_enabled": false,
+        "root_state_allocated_bytes": 1610612736,
+        "root_state_layout": "wide_u128_roots",
+        "root_state_slot_bytes": 48,
+        "root_table_allocated_bytes": 4294967296,
+        "root_table_dense_enabled": false,
+        "root_table_entries": 29878182,
+        "root_table_indexed4_enabled": false,
+        "root_table_indexed5_enabled": false,
+        "root_table_layout": "wide_u128_u64",
+        "root_table_load75_enabled": false,
+        "root_table_request_entries": 59760000,
+        "root_table_slot_bytes": 32,
+        "schema_version": "1.0",
+        "scope": "public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
+        "sparse_canonical_enabled": false,
+        "symmetric_s3_states_enabled": false,
+        "target_threads": 1,
+        "targets": 32,
+        "targets_failed": 0,
+        "targets_solved": 32,
+        "threads": 1,
+        "timing_ms": {
+          "base_load": 246.204364,
+          "index_build": 57651.601534999994,
+          "linear_algebra": 0.854631,
+          "normal_basis_and_selftest": 8.153134,
+          "process_total": 1204633.5312440002,
+          "rank_stage": 1092081.33401,
+          "setup_total": 57905.959483,
+          "target_median": 827.509982,
+          "targets_total": 54595.716797
+        }
+      },
+      "target_counts_ok": true,
+      "valid": true
+    },
+    "target_count": 32,
+    "valid": true
+  },
+  "semantic_path": "/workspace/n83_matched/campaign/runs/C02-ic/targets.jsonl",
+  "semantic_sha256": "76052c33d0bc1a033b1e11ea4f08a3a0ca4c2a1114d4edbe407b56be2fd68a1d",
+  "started_epoch_ms": 1792011860043,
+  "status": "COMPLETED_VERIFIED",
+  "stderr_path": "/workspace/n83_matched/campaign/runs/C02-ic/stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_path": "/workspace/n83_matched/campaign/runs/C02-ic/stdout.jsonl",
+  "stdout_sha256": "5c1bf7555200bbddb2ea8ab27cd8965693016939c47cd991eefeccd6b81de80d",
+  "target_sha256": "cf337293646e5948fe5d6a4544d4b6f384aca8007f34b267f25ea79b71f3c166",
+  "termination_signal": null,
+  "timeout": false
+}

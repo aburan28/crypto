@@ -1,0 +1,14 @@
+   Compiling n83-matched-collect-only v0.1.0 (/workspace/repos/crypto/research/n83_matched_20261014/postprocessing/collector-only)
+    Finished `release` profile [optimized] target(s) in 1.65s
+     Running unittests src/main.rs (/workspace/n83_matched/collector_only_build/release/deps/n83_matched_collect_only-55e579aecc673c96)
+
+running 6 tests
+test tests::exact_matrix_remains32processes218answers ... ok
+test tests::existing_or_campaign_output_is_rejected ... ok
+test tests::number_tokens_are_preserved_without_another_float_roundtrip ... ok
+test tests::unsealed_observation_is_rejected ... ok
+test tests::partial_or_missing_aa_receipt_is_rejected ... ok
+test tests::changed_or_wrongly_pinned_file_is_rejected ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

@@ -1,0 +1,18 @@
+cwd=/workspace/repos/crypto
+RUSTUP_HOME=/workspace/n83_evaluation/toolchain/rustup
+CARGO_HOME=/workspace/n83_evaluation/toolchain/cargo
+CARGO_TARGET_DIR=/workspace/n83_matched/collector_only_build
+CARGO_BUILD_JOBS=1
+PATH=/workspace/n83_evaluation/toolchain/rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin:/usr/bin:/bin
+
+cargo generate-lockfile --offline --manifest-path research/n83_matched_20261014/postprocessing/collector-only/Cargo.toml
+cargo fmt --manifest-path research/n83_matched_20261014/postprocessing/collector-only/Cargo.toml
+cargo test --release --locked --offline --manifest-path research/n83_matched_20261014/postprocessing/collector-only/Cargo.toml
+  tests.log: six tests passed; initial unused-import warning retained.
+cargo build --release --locked --offline --manifest-path research/n83_matched_20261014/postprocessing/collector-only/Cargo.toml
+  build.log: successful final release build, no warnings.
+cargo test --release --locked --offline --manifest-path research/n83_matched_20261014/postprocessing/collector-only/Cargo.toml
+  tests_final.log: six tests passed on final source, no warnings.
+
+Build and tests did not run the extractor against the campaign or invoke any solver.
+Root owns the reviewed extraction and unchanged frozen-analysis execution.

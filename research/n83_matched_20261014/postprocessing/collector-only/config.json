@@ -1,0 +1,15 @@
+{
+  "schema": "n83.matched-collect-only-config/v1",
+  "campaign_dir": "/workspace/n83_matched/campaign",
+  "independent_receipt": {"path": "/workspace/n83_matched/postprocess-20261015T0018Z/independent_replay_v3_receipt.json", "sha256": "94891f01e158a3a365744a2d349a685d3f1fd844a16e7f5b40e2e38763646c8b"},
+  "protocol": {"path": "/workspace/repos/crypto/research/n83_matched_20261014/provenance/protocol.json", "sha256": "abc72a3e98367ea0ccbde40f44c68aa4e3355b43ace579f4f162355277d5b1bc"},
+  "manifest": {"path": "/workspace/n83_matched/campaign/campaign_manifest.json", "sha256": "896bd5d03e6f7d68998851aa7f9688f2fe0122546173cf74ab6b138eb19975d0"},
+  "checker_source": {"path": "/workspace/repos/crypto/research/n83_matched_20261014/verification/revisions/20261015-v3/verify_matched_campaign.cpp", "sha256": "b71469aedf414e48b671675d14721c6a074dcb37200f5c3e57945b0d86efd881"},
+  "checker_executable": {"path": "/workspace/n83_matched/verification/verify_matched_campaign_v3", "sha256": "c26429c20dffa01428709fa206c4e4fb77e4e83d92f352f996fe5c95dc226acc"},
+  "numeric_helper": {"path": "/workspace/repos/crypto/research/n83_matched_20261014/verification/revisions/20261015-v3/numeric_binding.hpp", "sha256": "54ad1c02459d49df1eef3509de520515423b0fc314ad622419140ca21efd0f63"},
+  "original_v2_checker_source": {"path": "/workspace/repos/crypto/research/n83_matched_20261014/verification/verify_matched_campaign.cpp", "sha256": "4084e76329b83131f9538a48bb8376d40ffa065a8c4b70afe8b35b443bd0b5a3"},
+  "original_runner_executable": {"path": "/workspace/n83_matched/frozen_binaries/runner", "sha256": "509325d317e9b37b26e7bf70d19bcb7909e58b11415e8cf07b196c686052092c"},
+  "original_collect_stderr": {"path": "/workspace/n83_matched/postprocess-20261015T0018Z/collect.stderr.log", "sha256": "24ecd5b177112709849fdbf0f37286363d30bbcd680170f76abf0f65e67a55e5"},
+  "original_collect_stdout": {"path": "/workspace/n83_matched/postprocess-20261015T0018Z/collect.stdout.log", "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+  "original_collect_exit": {"path": "/workspace/n83_matched/postprocess-20261015T0018Z/collect.exit.txt", "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"}
+}

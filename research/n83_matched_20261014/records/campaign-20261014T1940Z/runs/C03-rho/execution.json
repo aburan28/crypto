@@ -1,0 +1,3984 @@
+{
+  "accounting": "Whole-process wall/CPU include launch, load, preparation, online, replay. Producer online interval is separate.",
+  "argv": [
+    "/workspace/n83_matched/frozen_binaries/rho_matched",
+    "/workspace/n83_matched/campaign/inputs/C03-rho-points.jsonl",
+    "/workspace/n83_matched/campaign/inputs/C03-rho-seeds.json",
+    "/workspace/n83_matched/campaign/inputs/rho_config.json",
+    "/workspace/n83_matched/campaign/runs/C03-rho/targets.jsonl"
+  ],
+  "argv_existing_file_sha256": {
+    "/workspace/n83_matched/campaign/inputs/C03-rho-points.jsonl": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+    "/workspace/n83_matched/campaign/inputs/C03-rho-seeds.json": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+    "/workspace/n83_matched/campaign/inputs/rho_config.json": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949"
+  },
+  "arm": "rho_batch",
+  "binary_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+  "cpu_system_s": 0.233731,
+  "cpu_total_s": 68.75888300000001,
+  "cpu_user_s": 68.525152,
+  "cwd": "/workspace/repos/crypto",
+  "elapsed_process_wall_s": 68.777157934,
+  "environment": {
+    "KIC_RANK_THREADS": "1",
+    "KIC_RHO_THREADS": "1",
+    "KIC_TARGET_THREADS": "1",
+    "KIC_THREADS": "1",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "exit_observation_delay_note": "Nominal 0-5 ms plus scheduling and poll-body delays; no strict bound under arbitrary scheduling",
+  "exit_observation_poll_ms": 5,
+  "finished_epoch_ms": 1792016622010,
+  "interrupted_signal": 0,
+  "known_answer_environment_present": false,
+  "memory_limit_hit": null,
+  "memory_limit_note": "RLIMIT_AS allocation refusal may appear as nonzero/abort; no inference from exit code alone",
+  "peak_rss_bytes": 70823936,
+  "peak_rss_native_kib": 69164,
+  "peak_rss_source": "Linux wait4(2) ru_maxrss KiB multiplied by 1024; exact child process",
+  "pid": 21676,
+  "raw_wait_status": 0,
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 2100.0
+  },
+  "return_code": 0,
+  "schema": "n83.process-receipt/v1",
+  "semantic": {
+    "independent_replay_required": true,
+    "per_target_rows": [
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00027099999988422496,
+        "producer_phase_sum_ms": 2925.784144,
+        "recovered_scalar": "4837358603478477",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 0,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 8239005955387536522,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 2925784415,
+          "online_phase_ns": {
+            "generic_scalar_replay": 247813,
+            "target_query_and_validation": 240002,
+            "walk_and_collision": 2925296329
+          },
+          "online_phase_sum_ns": 2925784144,
+          "online_timer_boundary_residual_ns": 271,
+          "online_total_ms": 2925.784415,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 49,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 11457200,
+              "failed_collisions": 0,
+              "group_additions": 11457201,
+              "partition_hashes": 11275954,
+              "scalar_multiplications": 35,
+              "table_inserts": 178774,
+              "table_queries": 178775
+            },
+            "fruitless_cycles": 2175,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 178774,
+            "walk_steps": 11275954,
+            "walks": 181246,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "4199768195767074791455924",
+            "7044361749705308001264013"
+          ],
+          "recovered_scalar": "4837358603478477",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "4199768195767074791455924",
+            "7044361749705308001264013"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 2925.784415,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146587
+        },
+        "target": [
+          "4199768195767074791455924",
+          "7044361749705308001264013"
+        ],
+        "target_ms": 2925.784415,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0001609999999345746,
+        "producer_phase_sum_ms": 2876.497546,
+        "recovered_scalar": "3049735280064665",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 1,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 1122069996600462289,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 2876497707,
+          "online_phase_ns": {
+            "generic_scalar_replay": 249305,
+            "target_query_and_validation": 268585,
+            "walk_and_collision": 2875979656
+          },
+          "online_phase_sum_ns": 2876497546,
+          "online_timer_boundary_residual_ns": 161,
+          "online_total_ms": 2876.497707,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 47,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 11931276,
+              "failed_collisions": 0,
+              "group_additions": 11931277,
+              "partition_hashes": 11742067,
+              "scalar_multiplications": 35,
+              "table_inserts": 186766,
+              "table_queries": 186767
+            },
+            "fruitless_cycles": 2141,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 186766,
+            "walk_steps": 11742067,
+            "walks": 189209,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "9379324424408363048115823",
+            "5737434877442273580198515"
+          ],
+          "recovered_scalar": "3049735280064665",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "9379324424408363048115823",
+            "5737434877442273580198515"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 2876.497707,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146588
+        },
+        "target": [
+          "9379324424408363048115823",
+          "5737434877442273580198515"
+        ],
+        "target_ms": 2876.497707,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00018999999997504347,
+        "producer_phase_sum_ms": 910.343439,
+        "recovered_scalar": "6262240001627079",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 2,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 11118921723963710402,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 910343629,
+          "online_phase_ns": {
+            "generic_scalar_replay": 266983,
+            "target_query_and_validation": 235045,
+            "walk_and_collision": 909841411
+          },
+          "online_phase_sum_ns": 910343439,
+          "online_timer_boundary_residual_ns": 190,
+          "online_total_ms": 910.343629,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 19,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 3605930,
+              "failed_collisions": 0,
+              "group_additions": 3605931,
+              "partition_hashes": 3548130,
+              "scalar_multiplications": 35,
+              "table_inserts": 56865,
+              "table_queries": 56866
+            },
+            "fruitless_cycles": 663,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 56865,
+            "walk_steps": 3548130,
+            "walks": 57800,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "4237108105468505475528425",
+            "5138408442492595562058774"
+          ],
+          "recovered_scalar": "6262240001627079",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "4237108105468505475528425",
+            "5138408442492595562058774"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 910.343629,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146589
+        },
+        "target": [
+          "4237108105468505475528425",
+          "5138408442492595562058774"
+        ],
+        "target_ms": 910.343629,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00020999999992454832,
+        "producer_phase_sum_ms": 1746.991594,
+        "recovered_scalar": "4757442361638709",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 3,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 6729482951634395112,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 1746991804,
+          "online_phase_ns": {
+            "generic_scalar_replay": 253142,
+            "target_query_and_validation": 232711,
+            "walk_and_collision": 1746505741
+          },
+          "online_phase_sum_ns": 1746991594,
+          "online_timer_boundary_residual_ns": 210,
+          "online_total_ms": 1746.991804,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 32,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 7025791,
+              "failed_collisions": 0,
+              "group_additions": 7025792,
+              "partition_hashes": 6914193,
+              "scalar_multiplications": 35,
+              "table_inserts": 109935,
+              "table_queries": 109936
+            },
+            "fruitless_cycles": 1375,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 109935,
+            "walk_steps": 6914193,
+            "walks": 111598,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "1732238840770670242459391",
+            "2591879477899655467248851"
+          ],
+          "recovered_scalar": "4757442361638709",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "1732238840770670242459391",
+            "2591879477899655467248851"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 1746.991804,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146590
+        },
+        "target": [
+          "1732238840770670242459391",
+          "2591879477899655467248851"
+        ],
+        "target_ms": 1746.991804,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00019000000020241714,
+        "producer_phase_sum_ms": 1790.28435,
+        "recovered_scalar": "5940964754134081",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 4,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 12575758590303787188,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 1790284540,
+          "online_phase_ns": {
+            "generic_scalar_replay": 248785,
+            "target_query_and_validation": 260803,
+            "walk_and_collision": 1789774762
+          },
+          "online_phase_sum_ns": 1790284350,
+          "online_timer_boundary_residual_ns": 190,
+          "online_total_ms": 1790.28454,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 27,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 7616934,
+              "failed_collisions": 0,
+              "group_additions": 7616935,
+              "partition_hashes": 7495967,
+              "scalar_multiplications": 35,
+              "table_inserts": 119266,
+              "table_queries": 119267
+            },
+            "fruitless_cycles": 1419,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 119266,
+            "walk_steps": 7495967,
+            "walks": 120967,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "4369227410205781321084847",
+            "2634019687805144007132465"
+          ],
+          "recovered_scalar": "5940964754134081",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "4369227410205781321084847",
+            "2634019687805144007132465"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 1790.28454,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146591
+        },
+        "target": [
+          "4369227410205781321084847",
+          "2634019687805144007132465"
+        ],
+        "target_ms": 1790.28454,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.000210000000151922,
+        "producer_phase_sum_ms": 1575.163832,
+        "recovered_scalar": "4637267480234865",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 5,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 10983820892524168457,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 1575164042,
+          "online_phase_ns": {
+            "generic_scalar_replay": 261945,
+            "target_query_and_validation": 249056,
+            "walk_and_collision": 1574652831
+          },
+          "online_phase_sum_ns": 1575163832,
+          "online_timer_boundary_residual_ns": 210,
+          "online_total_ms": 1575.164042,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 26,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 6743017,
+              "failed_collisions": 0,
+              "group_additions": 6743018,
+              "partition_hashes": 6636202,
+              "scalar_multiplications": 35,
+              "table_inserts": 105306,
+              "table_queries": 105307
+            },
+            "fruitless_cycles": 1231,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 105306,
+            "walk_steps": 6636202,
+            "walks": 106815,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "6616016149300137093316495",
+            "1810909566925513309873915"
+          ],
+          "recovered_scalar": "4637267480234865",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "6616016149300137093316495",
+            "1810909566925513309873915"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 1575.164042,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146592
+        },
+        "target": [
+          "6616016149300137093316495",
+          "1810909566925513309873915"
+        ],
+        "target_ms": 1575.164042,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00018000000000029104,
+        "producer_phase_sum_ms": 1042.105243,
+        "recovered_scalar": "904621578727929",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 6,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 6787560080990412006,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 1042105423,
+          "online_phase_ns": {
+            "generic_scalar_replay": 260723,
+            "target_query_and_validation": 248905,
+            "walk_and_collision": 1041595615
+          },
+          "online_phase_sum_ns": 1042105243,
+          "online_timer_boundary_residual_ns": 180,
+          "online_total_ms": 1042.105423,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 15,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 4466024,
+              "failed_collisions": 0,
+              "group_additions": 4466025,
+              "partition_hashes": 4395164,
+              "scalar_multiplications": 35,
+              "table_inserts": 69738,
+              "table_queries": 69739
+            },
+            "fruitless_cycles": 857,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 69738,
+            "walk_steps": 4395164,
+            "walks": 70860,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "5153256413781201619384157",
+            "2935202814270289909493469"
+          ],
+          "recovered_scalar": "904621578727929",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "5153256413781201619384157",
+            "2935202814270289909493469"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 1042.105423,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146593
+        },
+        "target": [
+          "5153256413781201619384157",
+          "2935202814270289909493469"
+        ],
+        "target_ms": 1042.105423,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00018000000000029104,
+        "producer_phase_sum_ms": 1863.671128,
+        "recovered_scalar": "6165924353541292",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 7,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 18224523688961986338,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 1863671308,
+          "online_phase_ns": {
+            "generic_scalar_replay": 239090,
+            "target_query_and_validation": 232150,
+            "walk_and_collision": 1863199888
+          },
+          "online_phase_sum_ns": 1863671128,
+          "online_timer_boundary_residual_ns": 180,
+          "online_total_ms": 1863.671308,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 37,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 7505327,
+              "failed_collisions": 0,
+              "group_additions": 7505328,
+              "partition_hashes": 7386847,
+              "scalar_multiplications": 35,
+              "table_inserts": 116770,
+              "table_queries": 116771
+            },
+            "fruitless_cycles": 1418,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 116770,
+            "walk_steps": 7386847,
+            "walks": 118480,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "3705146757013994100623214",
+            "8991421322600198510557957"
+          ],
+          "recovered_scalar": "6165924353541292",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "3705146757013994100623214",
+            "8991421322600198510557957"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 1863.671308,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146594
+        },
+        "target": [
+          "3705146757013994100623214",
+          "8991421322600198510557957"
+        ],
+        "target_ms": 1863.671308,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0001999999999497959,
+        "producer_phase_sum_ms": 2798.943522,
+        "recovered_scalar": "1799731268780175",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 8,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 7369945091283534296,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 2798943722,
+          "online_phase_ns": {
+            "generic_scalar_replay": 243908,
+            "target_query_and_validation": 263828,
+            "walk_and_collision": 2798435786
+          },
+          "online_phase_sum_ns": 2798943522,
+          "online_timer_boundary_residual_ns": 200,
+          "online_total_ms": 2798.943722,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 53,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 11335484,
+              "failed_collisions": 0,
+              "group_additions": 11335485,
+              "partition_hashes": 11155793,
+              "scalar_multiplications": 35,
+              "table_inserts": 177330,
+              "table_queries": 177331
+            },
+            "fruitless_cycles": 2055,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 177330,
+            "walk_steps": 11155793,
+            "walks": 179691,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "9292175822164452051442735",
+            "7424220586624891251315783"
+          ],
+          "recovered_scalar": "1799731268780175",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "9292175822164452051442735",
+            "7424220586624891251315783"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 2798.943722,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146595
+        },
+        "target": [
+          "9292175822164452051442735",
+          "7424220586624891251315783"
+        ],
+        "target_ms": 2798.943722,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0001899999997476698,
+        "producer_phase_sum_ms": 3164.14678,
+        "recovered_scalar": "6117711252256999",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 9,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 2874539374332032081,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 3164146970,
+          "online_phase_ns": {
+            "generic_scalar_replay": 285682,
+            "target_query_and_validation": 253252,
+            "walk_and_collision": 3163607846
+          },
+          "online_phase_sum_ns": 3164146780,
+          "online_timer_boundary_residual_ns": 190,
+          "online_total_ms": 3164.14697,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 62,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 12452968,
+              "failed_collisions": 0,
+              "group_additions": 12452969,
+              "partition_hashes": 12256837,
+              "scalar_multiplications": 35,
+              "table_inserts": 193469,
+              "table_queries": 193470
+            },
+            "fruitless_cycles": 2346,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 193469,
+            "walk_steps": 12256837,
+            "walks": 196131,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "2006974971268742183177546",
+            "8024799364009969733707423"
+          ],
+          "recovered_scalar": "6117711252256999",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "2006974971268742183177546",
+            "8024799364009969733707423"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 3164.14697,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146596
+        },
+        "target": [
+          "2006974971268742183177546",
+          "8024799364009969733707423"
+        ],
+        "target_ms": 3164.14697,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0001909999999725187,
+        "producer_phase_sum_ms": 989.931719,
+        "recovered_scalar": "4565368788643079",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 10,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 6516763843222907815,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 989931910,
+          "online_phase_ns": {
+            "generic_scalar_replay": 237518,
+            "target_query_and_validation": 248495,
+            "walk_and_collision": 989445706
+          },
+          "online_phase_sum_ns": 989931719,
+          "online_timer_boundary_residual_ns": 191,
+          "online_total_ms": 989.93191,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 14,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 3859188,
+              "failed_collisions": 0,
+              "group_additions": 3859189,
+              "partition_hashes": 3797508,
+              "scalar_multiplications": 35,
+              "table_inserts": 60671,
+              "table_queries": 60672
+            },
+            "fruitless_cycles": 742,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 60671,
+            "walk_steps": 3797508,
+            "walks": 61680,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "5929377258114659728941176",
+            "2469687539490079362845334"
+          ],
+          "recovered_scalar": "4565368788643079",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "5929377258114659728941176",
+            "2469687539490079362845334"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 989.93191,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146565
+        },
+        "target": [
+          "5929377258114659728941176",
+          "2469687539490079362845334"
+        ],
+        "target_ms": 989.93191,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00018000000000029104,
+        "producer_phase_sum_ms": 2502.272793,
+        "recovered_scalar": "5750682974953083",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 11,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 6385960875689478785,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 2502272973,
+          "online_phase_ns": {
+            "generic_scalar_replay": 316196,
+            "target_query_and_validation": 231850,
+            "walk_and_collision": 2501724747
+          },
+          "online_phase_sum_ns": 2502272793,
+          "online_timer_boundary_residual_ns": 180,
+          "online_total_ms": 2502.272973,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 42,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 9648041,
+              "failed_collisions": 0,
+              "group_additions": 9648042,
+              "partition_hashes": 9495506,
+              "scalar_multiplications": 35,
+              "table_inserts": 150574,
+              "table_queries": 150575
+            },
+            "fruitless_cycles": 1663,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 150574,
+            "walk_steps": 9495506,
+            "walks": 152535,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "8477652059012503449990510",
+            "1856350276345588936746351"
+          ],
+          "recovered_scalar": "5750682974953083",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "8477652059012503449990510",
+            "1856350276345588936746351"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 2502.272973,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146566
+        },
+        "target": [
+          "8477652059012503449990510",
+          "1856350276345588936746351"
+        ],
+        "target_ms": 2502.272973,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00021999999989930075,
+        "producer_phase_sum_ms": 2034.427582,
+        "recovered_scalar": "1763069945822273",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 12,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 9992345667362709469,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 2034427802,
+          "online_phase_ns": {
+            "generic_scalar_replay": 459643,
+            "target_query_and_validation": 236356,
+            "walk_and_collision": 2033731583
+          },
+          "online_phase_sum_ns": 2034427582,
+          "online_timer_boundary_residual_ns": 220,
+          "online_total_ms": 2034.427802,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 40,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 7895091,
+              "failed_collisions": 0,
+              "group_additions": 7895092,
+              "partition_hashes": 7770247,
+              "scalar_multiplications": 35,
+              "table_inserts": 123001,
+              "table_queries": 123002
+            },
+            "fruitless_cycles": 1547,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 123001,
+            "walk_steps": 7770247,
+            "walks": 124844,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "7646312407037852119864756",
+            "8305163322092573219744875"
+          ],
+          "recovered_scalar": "1763069945822273",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "7646312407037852119864756",
+            "8305163322092573219744875"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 2034.427802,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146567
+        },
+        "target": [
+          "7646312407037852119864756",
+          "8305163322092573219744875"
+        ],
+        "target_ms": 2034.427802,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0001700000000255386,
+        "producer_phase_sum_ms": 917.898136,
+        "recovered_scalar": "2693182540772093",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 13,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 5936628489774124301,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 917898306,
+          "online_phase_ns": {
+            "generic_scalar_replay": 253112,
+            "target_query_and_validation": 234423,
+            "walk_and_collision": 917410601
+          },
+          "online_phase_sum_ns": 917898136,
+          "online_timer_boundary_residual_ns": 170,
+          "online_total_ms": 917.898306,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 18,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 3808987,
+              "failed_collisions": 0,
+              "group_additions": 3808988,
+              "partition_hashes": 3748447,
+              "scalar_multiplications": 35,
+              "table_inserts": 59553,
+              "table_queries": 59554
+            },
+            "fruitless_cycles": 713,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 59553,
+            "walk_steps": 3748447,
+            "walks": 60540,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "2617469069112253237714466",
+            "1402934360098764597093019"
+          ],
+          "recovered_scalar": "2693182540772093",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "2617469069112253237714466",
+            "1402934360098764597093019"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 917.898306,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146568
+        },
+        "target": [
+          "2617469069112253237714466",
+          "1402934360098764597093019"
+        ],
+        "target_ms": 917.898306,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00018000000000029104,
+        "producer_phase_sum_ms": 1784.72896,
+        "recovered_scalar": "3946500346331745",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 14,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 18353137062013819112,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 1784729140,
+          "online_phase_ns": {
+            "generic_scalar_replay": 257028,
+            "target_query_and_validation": 250508,
+            "walk_and_collision": 1784221424
+          },
+          "online_phase_sum_ns": 1784728960,
+          "online_timer_boundary_residual_ns": 180,
+          "online_total_ms": 1784.72914,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 38,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 7432537,
+              "failed_collisions": 0,
+              "group_additions": 7432538,
+              "partition_hashes": 7314620,
+              "scalar_multiplications": 35,
+              "table_inserts": 116294,
+              "table_queries": 116295
+            },
+            "fruitless_cycles": 1331,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 116294,
+            "walk_steps": 7314620,
+            "walks": 117917,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "7860948305198501059034253",
+            "697640575413550916677184"
+          ],
+          "recovered_scalar": "3946500346331745",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "7860948305198501059034253",
+            "697640575413550916677184"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 1784.72914,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146569
+        },
+        "target": [
+          "7860948305198501059034253",
+          "697640575413550916677184"
+        ],
+        "target_ms": 1784.72914,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00019199999996999395,
+        "producer_phase_sum_ms": 2277.988977,
+        "recovered_scalar": "763026627962932",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 15,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 843395030874770259,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 2277989169,
+          "online_phase_ns": {
+            "generic_scalar_replay": 245961,
+            "target_query_and_validation": 460725,
+            "walk_and_collision": 2277282291
+          },
+          "online_phase_sum_ns": 2277988977,
+          "online_timer_boundary_residual_ns": 192,
+          "online_total_ms": 2277.989169,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 52,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 9269427,
+              "failed_collisions": 0,
+              "group_additions": 9269428,
+              "partition_hashes": 9122610,
+              "scalar_multiplications": 35,
+              "table_inserts": 144848,
+              "table_queries": 144849
+            },
+            "fruitless_cycles": 1663,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 144848,
+            "walk_steps": 9122610,
+            "walks": 146817,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "8982802887566637286379338",
+            "4222738079155265901197116"
+          ],
+          "recovered_scalar": "763026627962932",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "8982802887566637286379338",
+            "4222738079155265901197116"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 2277.989169,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146570
+        },
+        "target": [
+          "8982802887566637286379338",
+          "4222738079155265901197116"
+        ],
+        "target_ms": 2277.989169,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00016999999979816494,
+        "producer_phase_sum_ms": 3775.011066,
+        "recovered_scalar": "7956835551774029",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 16,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 6256951649424942322,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 3775011236,
+          "online_phase_ns": {
+            "generic_scalar_replay": 309838,
+            "target_query_and_validation": 251069,
+            "walk_and_collision": 3774450159
+          },
+          "online_phase_sum_ns": 3775011066,
+          "online_timer_boundary_residual_ns": 170,
+          "online_total_ms": 3775.011236,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 69,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 15041705,
+              "failed_collisions": 0,
+              "group_additions": 15041706,
+              "partition_hashes": 14803881,
+              "scalar_multiplications": 35,
+              "table_inserts": 234840,
+              "table_queries": 234841
+            },
+            "fruitless_cycles": 2660,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 234840,
+            "walk_steps": 14803881,
+            "walks": 237824,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "8337050515369364035421453",
+            "2544374610085738536204806"
+          ],
+          "recovered_scalar": "7956835551774029",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "8337050515369364035421453",
+            "2544374610085738536204806"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 3775.011236,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146571
+        },
+        "target": [
+          "8337050515369364035421453",
+          "2544374610085738536204806"
+        ],
+        "target_ms": 3775.011236,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0002110000000357104,
+        "producer_phase_sum_ms": 814.402664,
+        "recovered_scalar": "6244997162876351",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 17,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 17299521056903409101,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 814402875,
+          "online_phase_ns": {
+            "generic_scalar_replay": 469699,
+            "target_query_and_validation": 264700,
+            "walk_and_collision": 813668265
+          },
+          "online_phase_sum_ns": 814402664,
+          "online_timer_boundary_residual_ns": 211,
+          "online_total_ms": 814.402875,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 14,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 3418279,
+              "failed_collisions": 0,
+              "group_additions": 3418280,
+              "partition_hashes": 3364156,
+              "scalar_multiplications": 35,
+              "table_inserts": 53192,
+              "table_queries": 53193
+            },
+            "fruitless_cycles": 665,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 53192,
+            "walk_steps": 3364156,
+            "walks": 54123,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "1488553892571530672031635",
+            "6295161286451305611745916"
+          ],
+          "recovered_scalar": "6244997162876351",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "1488553892571530672031635",
+            "6295161286451305611745916"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 814.402875,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146572
+        },
+        "target": [
+          "1488553892571530672031635",
+          "6295161286451305611745916"
+        ],
+        "target_ms": 814.402875,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0002700000004551839,
+        "producer_phase_sum_ms": 4778.619674,
+        "recovered_scalar": "4673914317300158",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 18,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 18367890889294885888,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 4778619944,
+          "online_phase_ns": {
+            "generic_scalar_replay": 274184,
+            "target_query_and_validation": 232551,
+            "walk_and_collision": 4778112939
+          },
+          "online_phase_sum_ns": 4778619674,
+          "online_timer_boundary_residual_ns": 270,
+          "online_total_ms": 4778.619944,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 96,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 18862483,
+              "failed_collisions": 0,
+              "group_additions": 18862484,
+              "partition_hashes": 18563666,
+              "scalar_multiplications": 35,
+              "table_inserts": 295086,
+              "table_queries": 295087
+            },
+            "fruitless_cycles": 3379,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 295086,
+            "walk_steps": 18563666,
+            "walks": 298817,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "7115408652463848505015016",
+            "5395330922636037724879432"
+          ],
+          "recovered_scalar": "4673914317300158",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "7115408652463848505015016",
+            "5395330922636037724879432"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 4778.619944,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146573
+        },
+        "target": [
+          "7115408652463848505015016",
+          "5395330922636037724879432"
+        ],
+        "target_ms": 4778.619944,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0002210000002378365,
+        "producer_phase_sum_ms": 3570.21164,
+        "recovered_scalar": "6130608281142990",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 19,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 16444228768183887268,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 3570211861,
+          "online_phase_ns": {
+            "generic_scalar_replay": 272811,
+            "target_query_and_validation": 235164,
+            "walk_and_collision": 3569703665
+          },
+          "online_phase_sum_ns": 3570211640,
+          "online_timer_boundary_residual_ns": 221,
+          "online_total_ms": 3570.211861,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 70,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 13935614,
+              "failed_collisions": 0,
+              "group_additions": 13935615,
+              "partition_hashes": 13715088,
+              "scalar_multiplications": 35,
+              "table_inserts": 217716,
+              "table_queries": 217717
+            },
+            "fruitless_cycles": 2488,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 217716,
+            "walk_steps": 13715088,
+            "walks": 220526,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "462502678592927165319843",
+            "7920460523218174685946937"
+          ],
+          "recovered_scalar": "6130608281142990",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "462502678592927165319843",
+            "7920460523218174685946937"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 3570.211861,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146574
+        },
+        "target": [
+          "462502678592927165319843",
+          "7920460523218174685946937"
+        ],
+        "target_ms": 3570.211861,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00021000000003823516,
+        "producer_phase_sum_ms": 699.827201,
+        "recovered_scalar": "2360018117745995",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 20,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 13498142021328808815,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 699827411,
+          "online_phase_ns": {
+            "generic_scalar_replay": 355446,
+            "target_query_and_validation": 287624,
+            "walk_and_collision": 699184131
+          },
+          "online_phase_sum_ns": 699827201,
+          "online_timer_boundary_residual_ns": 210,
+          "online_total_ms": 699.827411,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 13,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 2489308,
+              "failed_collisions": 0,
+              "group_additions": 2489309,
+              "partition_hashes": 2449549,
+              "scalar_multiplications": 35,
+              "table_inserts": 39028,
+              "table_queries": 39029
+            },
+            "fruitless_cycles": 463,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 39028,
+            "walk_steps": 2449549,
+            "walks": 39759,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "2734604834241007824499476",
+            "8664448016568697887673836"
+          ],
+          "recovered_scalar": "2360018117745995",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "2734604834241007824499476",
+            "8664448016568697887673836"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 699.827411,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146575
+        },
+        "target": [
+          "2734604834241007824499476",
+          "8664448016568697887673836"
+        ],
+        "target_ms": 699.827411,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00019000000020241714,
+        "producer_phase_sum_ms": 2087.460998,
+        "recovered_scalar": "6935305883442217",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 21,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 14653463948219427533,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 2087461188,
+          "online_phase_ns": {
+            "generic_scalar_replay": 291039,
+            "target_query_and_validation": 1250216,
+            "walk_and_collision": 2085919743
+          },
+          "online_phase_sum_ns": 2087460998,
+          "online_timer_boundary_residual_ns": 190,
+          "online_total_ms": 2087.461188,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 34,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 8398885,
+              "failed_collisions": 0,
+              "group_additions": 8398886,
+              "partition_hashes": 8266518,
+              "scalar_multiplications": 35,
+              "table_inserts": 130539,
+              "table_queries": 130540
+            },
+            "fruitless_cycles": 1539,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 130539,
+            "walk_steps": 8266518,
+            "walks": 132367,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "3290000310122922727120449",
+            "3984594806928791905213627"
+          ],
+          "recovered_scalar": "6935305883442217",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "3290000310122922727120449",
+            "3984594806928791905213627"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 2087.461188,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146576
+        },
+        "target": [
+          "3290000310122922727120449",
+          "3984594806928791905213627"
+        ],
+        "target_ms": 2087.461188,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0001999999999497959,
+        "producer_phase_sum_ms": 2160.108346,
+        "recovered_scalar": "5996718309895889",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 22,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 17697668577488109609,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 2160108546,
+          "online_phase_ns": {
+            "generic_scalar_replay": 326472,
+            "target_query_and_validation": 235085,
+            "walk_and_collision": 2159546789
+          },
+          "online_phase_sum_ns": 2160108346,
+          "online_timer_boundary_residual_ns": 200,
+          "online_total_ms": 2160.108546,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 31,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 8736029,
+              "failed_collisions": 0,
+              "group_additions": 8736030,
+              "partition_hashes": 8597499,
+              "scalar_multiplications": 35,
+              "table_inserts": 136715,
+              "table_queries": 136716
+            },
+            "fruitless_cycles": 1534,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 136715,
+            "walk_steps": 8597499,
+            "walks": 138530,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "7624141511704099635409672",
+            "9018014600764739595192734"
+          ],
+          "recovered_scalar": "5996718309895889",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "7624141511704099635409672",
+            "9018014600764739595192734"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 2160.108546,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146577
+        },
+        "target": [
+          "7624141511704099635409672",
+          "9018014600764739595192734"
+        ],
+        "target_ms": 2160.108546,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00018000000000029104,
+        "producer_phase_sum_ms": 843.482998,
+        "recovered_scalar": "7994045556655448",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 23,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 15585353392716849195,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 843483178,
+          "online_phase_ns": {
+            "generic_scalar_replay": 238610,
+            "target_query_and_validation": 296387,
+            "walk_and_collision": 842948001
+          },
+          "online_phase_sum_ns": 843482998,
+          "online_timer_boundary_residual_ns": 180,
+          "online_total_ms": 843.483178,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 17,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 3541438,
+              "failed_collisions": 0,
+              "group_additions": 3541439,
+              "partition_hashes": 3484878,
+              "scalar_multiplications": 35,
+              "table_inserts": 55604,
+              "table_queries": 55605
+            },
+            "fruitless_cycles": 685,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 55604,
+            "walk_steps": 3484878,
+            "walks": 56560,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "6169096093261076373724307",
+            "7780751145310163460762217"
+          ],
+          "recovered_scalar": "7994045556655448",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "6169096093261076373724307",
+            "7780751145310163460762217"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 843.483178,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146578
+        },
+        "target": [
+          "6169096093261076373724307",
+          "7780751145310163460762217"
+        ],
+        "target_ms": 843.483178,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00016999999979816494,
+        "producer_phase_sum_ms": 3080.596453,
+        "recovered_scalar": "4284501860402286",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 24,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 3733838662913926723,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 3080596623,
+          "online_phase_ns": {
+            "generic_scalar_replay": 254774,
+            "target_query_and_validation": 233112,
+            "walk_and_collision": 3080108567
+          },
+          "online_phase_sum_ns": 3080596453,
+          "online_timer_boundary_residual_ns": 170,
+          "online_total_ms": 3080.596623,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 68,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 12444710,
+              "failed_collisions": 0,
+              "group_additions": 12444711,
+              "partition_hashes": 12247317,
+              "scalar_multiplications": 35,
+              "table_inserts": 194798,
+              "table_queries": 194799
+            },
+            "fruitless_cycles": 2274,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 194798,
+            "walk_steps": 12247317,
+            "walks": 197393,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "3571157231505780270636575",
+            "8728713841771063184764901"
+          ],
+          "recovered_scalar": "4284501860402286",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "3571157231505780270636575",
+            "8728713841771063184764901"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 3080.596623,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146579
+        },
+        "target": [
+          "3571157231505780270636575",
+          "8728713841771063184764901"
+        ],
+        "target_ms": 3080.596623,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00019199999996999395,
+        "producer_phase_sum_ms": 2063.195834,
+        "recovered_scalar": "4591422792355816",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 25,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 11887190203331377892,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 2063196026,
+          "online_phase_ns": {
+            "generic_scalar_replay": 261834,
+            "target_query_and_validation": 284238,
+            "walk_and_collision": 2062649762
+          },
+          "online_phase_sum_ns": 2063195834,
+          "online_timer_boundary_residual_ns": 192,
+          "online_total_ms": 2063.196026,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 45,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 8170951,
+              "failed_collisions": 0,
+              "group_additions": 8170952,
+              "partition_hashes": 8041674,
+              "scalar_multiplications": 35,
+              "table_inserts": 127547,
+              "table_queries": 127548
+            },
+            "fruitless_cycles": 1434,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 127547,
+            "walk_steps": 8041674,
+            "walks": 129277,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "7352484223315154002731490",
+            "6039652706979368298119284"
+          ],
+          "recovered_scalar": "4591422792355816",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "7352484223315154002731490",
+            "6039652706979368298119284"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 2063.196026,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146580
+        },
+        "target": [
+          "7352484223315154002731490",
+          "6039652706979368298119284"
+        ],
+        "target_ms": 2063.196026,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0001899999997476698,
+        "producer_phase_sum_ms": 3439.275007,
+        "recovered_scalar": "2425713366254185",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 26,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 10213056848264997371,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 3439275197,
+          "online_phase_ns": {
+            "generic_scalar_replay": 270438,
+            "target_query_and_validation": 267974,
+            "walk_and_collision": 3438736595
+          },
+          "online_phase_sum_ns": 3439275007,
+          "online_timer_boundary_residual_ns": 190,
+          "online_total_ms": 3439.275197,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 61,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 13495832,
+              "failed_collisions": 0,
+              "group_additions": 13495833,
+              "partition_hashes": 13282941,
+              "scalar_multiplications": 35,
+              "table_inserts": 210054,
+              "table_queries": 210055
+            },
+            "fruitless_cycles": 2523,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 210054,
+            "walk_steps": 13282941,
+            "walks": 212891,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "8708838414030381660988284",
+            "8759093782192670188582766"
+          ],
+          "recovered_scalar": "2425713366254185",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "8708838414030381660988284",
+            "8759093782192670188582766"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 3439.275197,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146581
+        },
+        "target": [
+          "8708838414030381660988284",
+          "8759093782192670188582766"
+        ],
+        "target_ms": 3439.275197,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00016999999991185177,
+        "producer_phase_sum_ms": 826.743858,
+        "recovered_scalar": "1082351015421331",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 27,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 15067741195174266295,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 826744028,
+          "online_phase_ns": {
+            "generic_scalar_replay": 245581,
+            "target_query_and_validation": 250058,
+            "walk_and_collision": 826248219
+          },
+          "online_phase_sum_ns": 826743858,
+          "online_timer_boundary_residual_ns": 170,
+          "online_total_ms": 826.744028,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 11,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 3350079,
+              "failed_collisions": 0,
+              "group_additions": 3350080,
+              "partition_hashes": 3296475,
+              "scalar_multiplications": 35,
+              "table_inserts": 52773,
+              "table_queries": 52774
+            },
+            "fruitless_cycles": 564,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 52773,
+            "walk_steps": 3296475,
+            "walks": 53604,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "4883805551040382121382543",
+            "3963738703877246129886522"
+          ],
+          "recovered_scalar": "1082351015421331",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "4883805551040382121382543",
+            "3963738703877246129886522"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 826.744028,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146582
+        },
+        "target": [
+          "4883805551040382121382543",
+          "3963738703877246129886522"
+        ],
+        "target_ms": 826.744028,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00018000000000029104,
+        "producer_phase_sum_ms": 1373.198722,
+        "recovered_scalar": "8344514735965152",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 28,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 17335210736211035340,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 1373198902,
+          "online_phase_ns": {
+            "generic_scalar_replay": 252521,
+            "target_query_and_validation": 246712,
+            "walk_and_collision": 1372699489
+          },
+          "online_phase_sum_ns": 1373198722,
+          "online_timer_boundary_residual_ns": 180,
+          "online_total_ms": 1373.198902,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 24,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 5691674,
+              "failed_collisions": 0,
+              "group_additions": 5691675,
+              "partition_hashes": 5601358,
+              "scalar_multiplications": 35,
+              "table_inserts": 89014,
+              "table_queries": 89015
+            },
+            "fruitless_cycles": 1026,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 89014,
+            "walk_steps": 5601358,
+            "walks": 90316,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "7356238851853662800181764",
+            "3100440519543716479466436"
+          ],
+          "recovered_scalar": "8344514735965152",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "7356238851853662800181764",
+            "3100440519543716479466436"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 1373.198902,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146583
+        },
+        "target": [
+          "7356238851853662800181764",
+          "3100440519543716479466436"
+        ],
+        "target_ms": 1373.198902,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.0001700000000255386,
+        "producer_phase_sum_ms": 1135.343537,
+        "recovered_scalar": "5134956505835581",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 29,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 3937068171769954851,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 1135343707,
+          "online_phase_ns": {
+            "generic_scalar_replay": 259031,
+            "target_query_and_validation": 232822,
+            "walk_and_collision": 1134851684
+          },
+          "online_phase_sum_ns": 1135343537,
+          "online_timer_boundary_residual_ns": 170,
+          "online_total_ms": 1135.343707,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 18,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 4822431,
+              "failed_collisions": 0,
+              "group_additions": 4822432,
+              "partition_hashes": 4746620,
+              "scalar_multiplications": 35,
+              "table_inserts": 74632,
+              "table_queries": 74633
+            },
+            "fruitless_cycles": 909,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 74632,
+            "walk_steps": 4746620,
+            "walks": 75811,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "9583485035316439421343843",
+            "4320160212502956361930748"
+          ],
+          "recovered_scalar": "5134956505835581",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "9583485035316439421343843",
+            "4320160212502956361930748"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 1135.343707,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146584
+        },
+        "target": [
+          "9583485035316439421343843",
+          "4320160212502956361930748"
+        ],
+        "target_ms": 1135.343707,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00019100000008620555,
+        "producer_phase_sum_ms": 4925.874466,
+        "recovered_scalar": "2322049956852011",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 30,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 7823168359531217423,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 4925874657,
+          "online_phase_ns": {
+            "generic_scalar_replay": 289116,
+            "target_query_and_validation": 233913,
+            "walk_and_collision": 4925351437
+          },
+          "online_phase_sum_ns": 4925874466,
+          "online_timer_boundary_residual_ns": 191,
+          "online_total_ms": 4925.874657,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 97,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 20388882,
+              "failed_collisions": 0,
+              "group_additions": 20388883,
+              "partition_hashes": 20065328,
+              "scalar_multiplications": 35,
+              "table_inserts": 319440,
+              "table_queries": 319441
+            },
+            "fruitless_cycles": 3761,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 319440,
+            "walk_steps": 20065328,
+            "walks": 323554,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "7690915679479908148005832",
+            "3438927225575440675437592"
+          ],
+          "recovered_scalar": "2322049956852011",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "7690915679479908148005832",
+            "3438927225575440675437592"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 4925.874657,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146585
+        },
+        "target": [
+          "7690915679479908148005832",
+          "3438927225575440675437592"
+        ],
+        "target_ms": 4925.874657,
+        "valid": true
+      },
+      {
+        "group_verified": true,
+        "producer_phase_gap_ms": 0.00022999999987405317,
+        "producer_phase_sum_ms": 1693.945314,
+        "recovered_scalar": "3245619119153784",
+        "selected_row": {
+          "cohort_target_count": 32,
+          "cross_target_collision_sharing": false,
+          "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+          "exit_code": 0,
+          "field_modulus_low_terms": [
+            0,
+            2,
+            4,
+            7
+          ],
+          "fixture_index": 31,
+          "fresh_target_dependent_DP_walk_and_rng_state": true,
+          "generator": [
+            "6614244651398184860292015",
+            "8868260410029249391539529"
+          ],
+          "group_verified": true,
+          "jump_seed": 10921222935592390776,
+          "kind": "n83_rho_matched_target",
+          "known_answer_input": false,
+          "online_interval": {
+            "excluded": [
+              "public_input_loading",
+              "shared_curve_normal_basis",
+              "G_only_jumps",
+              "receipt_hashing_serialization_and_IO"
+            ],
+            "start_event": "before_public_target_membership_and_subgroup_validation",
+            "stop_event": "after_generic_scalar_replay"
+          },
+          "online_interval_ns": 1693945544,
+          "online_phase_ns": {
+            "generic_scalar_replay": 265571,
+            "target_query_and_validation": 236447,
+            "walk_and_collision": 1693443296
+          },
+          "online_phase_sum_ns": 1693945314,
+          "online_timer_boundary_residual_ns": 230,
+          "online_total_ms": 1693.945544,
+          "optimization_config": {
+            "backend": "fold",
+            "dp_bits": 6,
+            "escape_fruitless": false,
+            "lanes": 256,
+            "scalar_kernel": "reference",
+            "step_cap_factor": 2000
+          },
+          "outcome": {
+            "automorphism_size": 166,
+            "capped_walks": 34,
+            "charges_jump_preparation_and_solve": {
+              "canonicalizations": 7020571,
+              "failed_collisions": 0,
+              "group_additions": 7020572,
+              "partition_hashes": 6909038,
+              "scalar_multiplications": 35,
+              "table_inserts": 109970,
+              "table_queries": 109971
+            },
+            "fruitless_cycles": 1273,
+            "fruitless_escapes": 0,
+            "ideal_steps": 9005148.640969077,
+            "table_entries": 109970,
+            "walk_steps": 6909038,
+            "walks": 111533,
+            "wasted_merges": 0
+          },
+          "preparation_charges_for_this_seed_only": {
+            "canonicalizations": 0,
+            "failed_collisions": 0,
+            "group_additions": 0,
+            "partition_hashes": 0,
+            "scalar_multiplications": 32,
+            "table_inserts": 0,
+            "table_queries": 0
+          },
+          "provenance": {
+            "compiled_source_revision": "c6e8daafb5a59d27e1be88a2f61f0bd6ee83ef03",
+            "compiled_source_sha256": {
+              "examples/n83_rho_matched_eval.rs": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a",
+              "src/cryptanalysis/koblitz_strong_rho.rs": "f426f06f82cb5ee2afe10c2c68a969637556f2bcc67562d7e4c729d9524517b9",
+              "src/cryptanalysis/semaev_decomp.rs": "4cbb0bbaee4589d4d74c3d5bb41508a82f94e77c3ad6884b50bfdbb5d67be2c3"
+            },
+            "config_input_sha256": "a46ae0a7e4f373a9ef5b65325599cfc845011febb97de8d1eb3ce438a6e03949",
+            "executable_sha256": "d3f93fb6814cfe92fe30233c9d190c6eb8c5e4f4e9330b1fff771662dd88e72e",
+            "public_input_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+            "seed_input_sha256": "44414a581423fbe34099c8df5e7e10efeecd8dc9f6fa1637ddab10e5d518c102",
+            "worker_source_sha256": "58fe037fd0e1aabf0fe56e06d38af2d093e39d3e74a84078bf361e458415979a"
+          },
+          "published_q": [
+            "6116589083255320963046427",
+            "4413230637911642840601140"
+          ],
+          "recovered_scalar": "3245619119153784",
+          "schema": "n83-rho-matched-target/v1",
+          "status": "PASS_VERIFIED_PUBLIC_TARGET",
+          "subgroup_order": "8569786107849059",
+          "target": [
+            "6116589083255320963046427",
+            "4413230637911642840601140"
+          ],
+          "target_count": 1,
+          "target_in_subgroup": true,
+          "target_ms": 1693.945544,
+          "target_on_curve": true,
+          "validation_sidecar_opened": false,
+          "verified": true,
+          "walk_seed": 202610146586
+        },
+        "target": [
+          "6116589083255320963046427",
+          "4413230637911642840601140"
+        ],
+        "target_ms": 1693.945544,
+        "valid": true
+      }
+    ],
+    "producer_preparation_ms": 241.818886,
+    "shared_preparation_is_not_cold_single_target": true,
+    "target_count": 32,
+    "valid": true
+  },
+  "semantic_path": "/workspace/n83_matched/campaign/runs/C03-rho/targets.jsonl",
+  "semantic_sha256": "0b8fdd606395e66c293442f792d46ffa2f65ed62e91c8907a931b3704a0e164e",
+  "started_epoch_ms": 1792016553230,
+  "status": "COMPLETED_VERIFIED",
+  "stderr_path": "/workspace/n83_matched/campaign/runs/C03-rho/stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_path": "/workspace/n83_matched/campaign/runs/C03-rho/stdout.jsonl",
+  "stdout_sha256": "e7900388799853a23cc63eea0c027869374a32ad4eba6610b0c1cf095f20f11d",
+  "target_sha256": "b4eb7e8d132990e7129b5770b23b9c99e924a7bf000b1ad7d78cdd339f8deb6e",
+  "termination_signal": null,
+  "timeout": false
+}
