@@ -40,11 +40,14 @@ def write_once(path, value):
 
 def gzip_once(path, value):
     blob = json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
-    packed = gzip.compress(blob, compresslevel=9, mtime=0)
-    if path.exists() and path.read_bytes() != packed:
-        raise ValueError(f"sealed file differs: {path}")
-    if not path.exists():
-        path.write_bytes(packed)
+    if path.exists():
+        try:
+            if gzip.decompress(path.read_bytes()) != blob:
+                raise ValueError(f"sealed content differs: {path}")
+        except (EOFError, OSError) as error:
+            raise ValueError(f"invalid sealed gzip: {path}") from error
+    else:
+        path.write_bytes(gzip.compress(blob, compresslevel=9, mtime=0))
     return {"path": path.name, "sha256": digest(path), "bytes": path.stat().st_size}
 
 
