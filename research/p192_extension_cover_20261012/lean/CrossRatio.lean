@@ -516,6 +516,22 @@ theorem odd_torsion_half_point {G : Type*} [AddCommGroup G]
     _ = (r + 1) • q := by congr 1; omega
     _ = q := by rw [add_nsmul, hr, one_nsmul, zero_add]
 
+/-- Two cubic sections with the same three anchor points convert a
+    six-point divisor difference into a degree-three residual pair. The
+    equality of section classes is the geometric input checked separately. -/
+theorem cubic_residual_class_identity {G : Type*} [AddCommGroup G]
+    (A B T R_A R_B : G) (hsections : A + T + R_A = B + T + R_B) :
+    A - B = R_B - R_A := by
+  have hres : A + R_A = B + R_B := by
+    calc
+      A + R_A = (A + T + R_A) - T := by abel
+      _ = (B + T + R_B) - T := by rw [hsections]
+      _ = B + R_B := by abel
+  calc
+    A - B = (A + R_A) - (B + R_A) := by abel
+    _ = (B + R_B) - (B + R_A) := by rw [hres]
+    _ = R_B - R_A := by abel
+
 end P192ExtensionCover
 
 #print axioms P192ExtensionCover.cyclic_cross_ratio_product
@@ -552,3 +568,4 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.p192_conditioned_half_coverage_threshold_certificate
 #print axioms P192ExtensionCover.p192_threshold_pair_index_entries
 #print axioms P192ExtensionCover.odd_torsion_half_point
+#print axioms P192ExtensionCover.cubic_residual_class_identity
