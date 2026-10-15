@@ -21,6 +21,15 @@ with the earlier one- and three-sum tests, the minimum old-base sum length
 for each selected new point is at least five. Lean checks the group identity
 that would turn such a collision into an old-base equation.
 
+**Divisor-support geometry:** The [split-support audit](reports/run-20261015T2042Z/REPORT.md)
+checks all 160 fixed-origin degree-three residual divisors. Their
+\(x\)-polynomials are pairwise coprime across 12,720 class pairs; 20 split
+fully into rational points. Restricting the collector to those 20 classes
+leaves 143 geometry-accepted rank-bearing three-sum targets, with zero hits
+in the frozen 64 fresh known-scalar queries. Python and PARI independently
+replay the support and quotient-group counts, and Lean checks the support
+disjointness implication and exact uniform-query inequality.
+
 **Continuation:** The [three-branch follow-up](BRANCH_CONTINUATION.md) proves
 that the nonsplit-quadratic direct genus-3 branch is excluded as well,
 constructs a descended Type I nonhyperelliptic genus-3 cover and a

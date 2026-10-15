@@ -144,6 +144,18 @@
     "url": "https://github.com/aburan28/crypto/blob/029e0bb2c7b1543af9a0647457adcaef8f20e7d0/research/p192_extension_cover_20261012/BRANCH_CONTINUATION.md"
   },
   {
+    "id": "ic_divisor_support_geometry",
+    "name": "Reduced-divisor support geometry for index calculus",
+    "method": "Fixed-origin divisor splitting and support-overlap screen",
+    "domain": "A selected subgroup transported to a genus-g Jacobian with a frozen fixed-origin divisor base and target-query law",
+    "recognition": "Reduce each usable class to a divisor relative to one origin, factor its residual support polynomial over the lower field, and compute pairwise support gcds. Recompute actual factor-base size, accepted rank-bearing target support, known-scalar anchor overlap, and projected relation rank after any splitting filter. A splitting type or shared point is a collector input; the danger decision follows verified rank and complete cost.",
+    "witness": "Exact cover and subgroup map, reduced divisor and common-origin certificates, squarefree support polynomials, independent factorization and gcd replay, selected usable class identities, frozen query law, known-scalar equations, target-support and rank census, and complete one-target costs.",
+    "construction": "Stratify reduced classes by rational support orbit type, screen shared residual support, select a factor-base policy, then replay ordinary known-scalar queries and eliminate fresh support-point columns before measuring rank and cost.",
+    "status": "exact_p192_type_i_split_support_zero_rank_screen",
+    "source": "P-192 Type I divisor-support and split-base certificate (2026)",
+    "url": "https://github.com/aburan28/crypto/pull/1914"
+  },
+  {
     "id": "ic_scalar_anchor_overlap",
     "name": "Known-scalar anchor overlap for index-calculus relations",
     "method": "Exact support collision and relation-row test",

@@ -71,6 +71,17 @@ and leaves the original 16 free. All 8,704 points from the 64 targets and
 Counting row rank without the new columns
 would misidentify this construction as relation progress.
 
+The `ic_divisor_support_geometry` criterion records a factor-base policy's
+actual reduced-divisor support: squarefreeness, rational splitting types,
+shared residual points, and the accepted rank-bearing target set after any
+splitting filter. In the [P-192 Type I support audit](../p192_extension_cover_20261012/reports/run-20261015T2042Z/REPORT.md),
+the 160 degree-three residual supports are pairwise disjoint by their
+\(x\)-polynomials. Restricting to the 20 fully split classes leaves 143
+accepted rank-bearing three-sum targets and zero hits in 64 frozen fresh
+known-scalar queries. This is evidence about the specified reduction and
+collector policy; the registry requires relation rank and complete cost
+before a curve-level weakness verdict.
+
 The [genus-128 GHS cost audit](ghs_genus128_cost_audit.json) resolves the
 nominal factor-base and relation-query stages behind the two exact-invariant
 `GF(4)` formula-advantage routes. Its independent integer calculation selects

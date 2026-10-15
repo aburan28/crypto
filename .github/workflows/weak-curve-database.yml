@@ -85,7 +85,7 @@ jobs:
           auto-config: false
           use-mathlib-cache: true
           build: true
-          build-args: 'CrossRatio SignedBase ScalarAnchor AdaptiveBase ShortSums'
+          build-args: 'CrossRatio SignedBase ScalarAnchor AdaptiveBase ShortSums DivisorSupport'
           test: false
           lint: false
           leanchecker: true
@@ -100,6 +100,8 @@ jobs:
         run: lake env leanchecker --fresh --verbose AdaptiveBase && lake env lean AdaptiveBase.lean
       - name: Fresh-check short-sum collision theorems and audit axioms
         run: lake env leanchecker --fresh --verbose ShortSums && lake env lean ShortSums.lean
+      - name: Fresh-check divisor-support theorems and audit axioms
+        run: lake env leanchecker --fresh --verbose DivisorSupport && lake env lean DivisorSupport.lean
   leaderboard-lean-proof:
     runs-on: ubuntu-latest
     timeout-minutes: 25

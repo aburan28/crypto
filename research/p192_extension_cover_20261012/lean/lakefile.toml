@@ -1,6 +1,6 @@
 name = "p192_extension_cover"
 version = "0.1.0"
-defaultTargets = ["CrossRatio", "SignedBase", "ScalarAnchor", "AdaptiveBase", "ShortSums"]
+defaultTargets = ["CrossRatio", "SignedBase", "ScalarAnchor", "AdaptiveBase", "ShortSums", "DivisorSupport"]
 
 [[require]]
 name = "mathlib"
@@ -21,3 +21,6 @@ name = "AdaptiveBase"
 
 [[lean_lib]]
 name = "ShortSums"
+
+[[lean_lib]]
+name = "DivisorSupport"
