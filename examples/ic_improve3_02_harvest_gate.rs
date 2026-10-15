@@ -126,7 +126,12 @@ fn bench_arm(eqs: &[F2BoolPoly], nv: usize, spec: &str) -> Arm {
     }
 }
 
-fn prod_arm(cell: &PipeCell, index_of: &HashMap<(BigUint, BigUint), usize>, target: &BinaryPoint, spec: &str) -> Arm {
+fn prod_arm(
+    cell: &PipeCell,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    target: &BinaryPoint,
+    spec: &str,
+) -> Arm {
     set_arm(spec);
     f4_profile_reset();
     linear_harvest_counts_reset();
@@ -148,9 +153,9 @@ fn prod_arm(cell: &PipeCell, index_of: &HashMap<(BigUint, BigUint), usize>, targ
     set_linear_harvest(None);
     let verified = match &found {
         Some(idxs) => {
-            let sum = idxs
-                .iter()
-                .fold(BinaryPoint::Infinity, |acc, &i| cell.kc.add(&acc, &cell.fb.points[i]));
+            let sum = idxs.iter().fold(BinaryPoint::Infinity, |acc, &i| {
+                cell.kc.add(&acc, &cell.fb.points[i])
+            });
             &sum == target
         }
         None => true,
@@ -174,7 +179,9 @@ fn prod_arm(cell: &PipeCell, index_of: &HashMap<(BigUint, BigUint), usize>, targ
 }
 
 fn hash64(xs: impl Iterator<Item = u64>) -> u64 {
-    xs.fold(0xcbf29ce484222325u64, |h, r| (h ^ r).wrapping_mul(0x100000001b3))
+    xs.fold(0xcbf29ce484222325u64, |h, r| {
+        (h ^ r).wrapping_mul(0x100000001b3)
+    })
 }
 
 fn arm_json(name: &str, a: &Arm) -> String {

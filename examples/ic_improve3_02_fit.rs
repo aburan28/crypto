@@ -18,6 +18,7 @@
 //! * `--ref FILE --ref-arm r --arm a`: rows whose arm `a` agrees with FILE's
 //!   arm `r` (matched by cell without `pipe-` and target) on every counter
 //!   FILE records.
+//! * `--e2e num/den`: end-to-end CPU per replicate pair and geometric mean.
 //! * `--fires a:SPEC`: check arm `a` harvested exactly where the frozen
 //!   rule SPEC (`rank=θ` or `occ=θ`) predicts from the logged features.
 //!
@@ -107,6 +108,7 @@ fn main() {
         Vec<String>,
         Vec<String>,
     ) = (vec![], vec![], vec![], vec![]);
+    let mut e2e: Vec<String> = vec![];
     let mut ref_arm = String::from("i");
     let mut i = 1;
     while i < argv.len() {
@@ -124,9 +126,44 @@ fn main() {
             "--ref-arm" => ref_arm = next(&mut i),
             "--arm" => cmp_arms.push(next(&mut i)),
             "--fires" => fires.push(next(&mut i)),
+            "--e2e" => e2e.push(next(&mut i)),
             _ => {}
         }
         i += 1;
+    }
+    // `--e2e num/den`: end-to-end runs (`ic_improve2_05_e2e` lines), per
+    // (n, ℓ): the k-th run of arm `num` over the k-th of arm `den` (the
+    // replicate rounds in file order), and their geometric mean.
+    for spec in &e2e {
+        let (num, den) = spec.split_once('/').expect("num/den");
+        let mut by: BTreeMap<(u64, u64), BTreeMap<String, Vec<f64>>> = BTreeMap::new();
+        for file in &files {
+            for line in std::fs::read_to_string(file).expect("read").lines() {
+                let Ok(v) = serde_json::from_str::<Value>(line) else {
+                    continue;
+                };
+                if v.get("cpu_s").is_none() {
+                    continue;
+                }
+                by.entry((v["n"].as_u64().unwrap(), v["ell"].as_u64().unwrap()))
+                    .or_default()
+                    .entry(v["arm"].as_str().unwrap().to_string())
+                    .or_default()
+                    .push(v["cpu_s"].as_f64().unwrap());
+            }
+        }
+        for ((n, ell), arms) in &by {
+            let (Some(a), Some(b)) = (arms.get(num), arms.get(den)) else {
+                continue;
+            };
+            let pairs: Vec<f64> = a.iter().zip(b).map(|(x, y)| x / y).collect();
+            let gm = (pairs.iter().map(|x| x.ln()).sum::<f64>() / pairs.len() as f64).exp();
+            let list: Vec<String> = pairs.iter().map(|x| format!("{x:.4}")).collect();
+            println!(
+                r#"{{"e2e":"{num}/{den}","n":{n},"ell":{ell},"pairs":[{}],"gm":{gm:.4}}}"#,
+                list.join(",")
+            );
+        }
     }
     let mut rows: Vec<Value> = Vec::new();
     for file in &files {
@@ -155,7 +192,11 @@ fn main() {
         let (label, fields) = spec.split_once(':').expect("label:num/den");
         let (num, den) = fields.split_once('/').expect("num/den");
         for (cell, rs) in &cells {
-            let rs: Vec<&Value> = rs.iter().copied().filter(|r| has(r, num) && has(r, den)).collect();
+            let rs: Vec<&Value> = rs
+                .iter()
+                .copied()
+                .filter(|r| has(r, num) && has(r, den))
+                .collect();
             if rs.is_empty() {
                 continue;
             }
@@ -242,7 +283,8 @@ fn main() {
                 matched += 1;
                 if COUNTERS.iter().all(|c| {
                     let rk = format!("{ref_arm}_{c}");
-                    o.get(&rk).is_none_or(|ov| Some(ov) == r.get(format!("{a}_{c}")))
+                    o.get(&rk)
+                        .is_none_or(|ov| Some(ov) == r.get(format!("{a}_{c}")))
                 }) {
                     agree += 1;
                 }
@@ -342,7 +384,9 @@ fn main() {
         }
         let chosen = match best {
             Some((feat, t, s)) => {
-                format!(r#""feature":"{feat}","theta":{t},"pooled_gm":{s:.4},"spec":"root,gpv=0.9607,{feat}={t}""#)
+                format!(
+                    r#""feature":"{feat}","theta":{t},"pooled_gm":{s:.4},"spec":"root,gpv=0.9607,{feat}={t}""#
+                )
             }
             None => r#""feature":null,"theta":"none admissible""#.to_string(),
         };
