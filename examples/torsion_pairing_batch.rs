@@ -13,7 +13,9 @@ use crypto_lib::cryptanalysis::ext_curve::{
 use crypto_lib::cryptanalysis::glv_invariant_base::{
     rho_reference_folded, Endomorphism, Negation,
 };
-use crypto_lib::cryptanalysis::ic_boundary::{rho_reference_negation, CountedGroup, GroupOps};
+use crypto_lib::cryptanalysis::ic_boundary::{
+    rho_reference_negation, CountedGroup, GroupOps, PrimeCurve, PrimePoint,
+};
 use crypto_lib::cryptanalysis::residual_walk::{is_prime_u64, pow_mod};
 use crypto_lib::hash::sha256::sha256;
 use num_bigint::{BigInt, BigUint};
@@ -1538,6 +1540,105 @@ fn compact_rho(
         "peak_rss_bytes":peak_rss_bytes()}))
 }
 
+fn compact_prime_rho(input: Input, cell: usize, round: u64,
+                     targets: &[SourcePoint], prefixes: &[usize])
+    -> (Vec<CompactPrefix>, Vec<u64>, Value) {
+    assert_eq!((cell,input.p,input.r),(2,401,67));
+    let start_wall = Instant::now();
+    let start_cpu = thread_cpu_ns();
+    let curve = PrimeCurve { p: input.p, a: 0, b: 1 };
+    assert_eq!(input.g.x[1],0);
+    assert_eq!(input.g.y[1],0);
+    let g = PrimePoint::affine(input.g.x[0],input.g.y[0]);
+    assert!(curve.is_on_curve(g));
+    let mut validation_ops = GroupOps::default();
+    assert!(curve.mul(&mut validation_ops,g,input.r).infinity);
+    let cap = rho_step_cap(input.r);
+    let mut attempts = 0u64;
+    let mut aggregate_ops = GroupOps::default();
+    let mut output = Vec::with_capacity(targets.len());
+    let mut samples = Vec::new();
+    for (index,&target) in targets.iter().enumerate() {
+        assert_eq!(target.x[1],0);
+        assert_eq!(target.y[1],0);
+        let q = PrimePoint::affine(target.x[0],target.y[0]);
+        assert!(curve.is_on_curve(q));
+        let seed_base = 0x4241_5443_4800_1000u64 + 256*cell as u64
+            + 64*round + index as u64;
+        let mut found = None;
+        for retry in 0..32u64 {
+            attempts += 1;
+            let seed = seed_base.wrapping_add(retry * 0x01_00_00_00);
+            let result = rho_reference_negation(&curve,g,q,input.r,seed,cap);
+            aggregate_ops.merge(result.group_ops);
+            if result.verified {
+                found = result.recovered;
+                break;
+            }
+        }
+        output.push(found.expect("compact prime-field rho exhausted"));
+        if prefixes.contains(&(index+1)) {
+            samples.push(CompactPrefix {
+                n:index+1,cpu_ns:thread_cpu_ns()-start_cpu,
+                wall_ns:start_wall.elapsed().as_nanos() as u64,
+                extension_muls:0,extension_inversions:0,rho_attempts:attempts,
+            });
+        }
+    }
+    let field_ops = aggregate_ops.field_ops;
+    (samples,output,json!({"rho_attempts":attempts,"rho_step_cap":cap,
+        "group_ops":aggregate_ops,"field_ops":field_ops,
+        "validation_ops":validation_ops,"peak_rss_bytes":peak_rss_bytes()}))
+}
+
+fn run_compact_prime(input: Input, cell: usize, round: u64,
+                     batch_path: &str, frozen_path: &str) {
+    assert_eq!(cell,2);
+    assert!(round<3);
+    let input_wall = Instant::now();
+    let input_cpu = thread_cpu_ns();
+    let targets = read_batch(batch_path,input,cell);
+    let frozen: Value = serde_json::from_str(&fs::read_to_string(frozen_path).unwrap()).unwrap();
+    let common_cpu = thread_cpu_ns()-input_cpu;
+    let common_wall = input_wall.elapsed().as_nanos() as u64;
+    let prefixes = [1usize,4,16,64,66];
+    let (pair, pair_scalars, pair_counts, ext, ext_scalars, ext_counts,
+         prime, prime_scalars, prime_counts) = match round {
+        0 => {
+            let (a,b,c)=compact_pairing(input,&targets,&frozen,&prefixes);
+            let (d,e,f)=compact_rho(input,cell,round,&targets,&prefixes);
+            let (g,h,i)=compact_prime_rho(input,cell,round,&targets,&prefixes);
+            (a,b,c,d,e,f,g,h,i)
+        }
+        1 => {
+            let (g,h,i)=compact_prime_rho(input,cell,round,&targets,&prefixes);
+            let (d,e,f)=compact_rho(input,cell,round,&targets,&prefixes);
+            let (a,b,c)=compact_pairing(input,&targets,&frozen,&prefixes);
+            (a,b,c,d,e,f,g,h,i)
+        }
+        _ => {
+            let (d,e,f)=compact_rho(input,cell,round,&targets,&prefixes);
+            let (a,b,c)=compact_pairing(input,&targets,&frozen,&prefixes);
+            let (g,h,i)=compact_prime_rho(input,cell,round,&targets,&prefixes);
+            (a,b,c,d,e,f,g,h,i)
+        }
+    };
+    assert_eq!(pair_scalars,ext_scalars);
+    assert_eq!(pair_scalars,prime_scalars);
+    println!("{}",json!({"schema":"torsion_pairing_compact/v6",
+        "cell":cell,"p":input.p,"r":input.r,"round":round,
+        "order":match round {0=>"pairing,extension-rho,prime-rho",
+            1=>"prime-rho,extension-rho,pairing",
+            _=>"extension-rho,pairing,prime-rho"},
+        "targets":targets.len(),"prefixes":prefixes,
+        "input_cpu_ns_common":common_cpu,"input_wall_ns_common":common_wall,
+        "pairing_prefix":pair,"rho_prefix":ext,"prime_rho_prefix":prime,
+        "pairing_scalars":pair_scalars,"rho_scalars":ext_scalars,
+        "prime_rho_scalars":prime_scalars,"pairing_counts":pair_counts,
+        "rho_counts":ext_counts,"prime_rho_counts":prime_counts,
+        "peak_rss_bytes":peak_rss_bytes()}));
+}
+
 fn run_compact(input: Input, cell: usize, round: u64, batch_path: &str, frozen_path: &str) {
     assert!(round < 3);
     let common_wall = Instant::now();
@@ -1582,26 +1683,34 @@ fn verify_compact(input: Input, cell: usize, batch_path: &str,
     assert_eq!(targets.len(),expected.len());
     let checker = ReplayField::new(input);
     let mut rounds = [0u64;3];
+    let mut checked_scalars = 0usize;
     for line in fs::read_to_string(records_path).unwrap().lines() {
         let row: Value = serde_json::from_str(line).unwrap();
-        assert_eq!(row["schema"],"torsion_pairing_compact/v5");
+        assert!(row["schema"] == "torsion_pairing_compact/v5"
+            || row["schema"] == "torsion_pairing_compact/v6");
         assert_eq!(row["cell"].as_u64(),Some(cell as u64));
         let round = row["round"].as_u64().unwrap() as usize;
         assert!(round < 3);
-        for name in ["pairing_scalars","rho_scalars"] {
+        let names: &[&str] = if row["schema"] == "torsion_pairing_compact/v6" {
+            &["pairing_scalars","rho_scalars","prime_rho_scalars"]
+        } else { &["pairing_scalars","rho_scalars"] };
+        for &name in names {
             let recovered = row[name].as_array().unwrap();
             assert_eq!(recovered.len(),targets.len());
             for (i,v) in recovered.iter().enumerate() {
                 let scalar = v.as_u64().unwrap();
                 assert_eq!(scalar,expected[i]);
                 assert_eq!(checker.scalar_mul(input.g,scalar),targets[i]);
+                checked_scalars += 1;
             }
         }
         rounds[round] += 1;
     }
     assert_eq!(rounds,[1,1,1]);
-    println!("{}",json!({"schema":"torsion_pairing_compact_replay/v5",
-        "cell":cell,"rounds":rounds,"checked_scalars":6*targets.len(),
+    println!("{}",json!({"schema":if checked_scalars==9*targets.len()
+            {"torsion_pairing_compact_replay/v6"}
+            else {"torsion_pairing_compact_replay/v5"},
+        "cell":cell,"rounds":rounds,"checked_scalars":checked_scalars,
         "independent_fp_muls":checker.muls.get(),
         "independent_fp_invs":checker.inversions.get(),
         "independent_group_adds":checker.group_add_calls.get()}));
@@ -1819,6 +1928,11 @@ fn main() {
             args.get(6).expect("selection path"),
         ),
         "compact-run" => run_compact(
+            input, cell, args.get(4).expect("round").parse().unwrap(),
+            args.get(5).expect("public batch path"),
+            args.get(6).expect("selection path"),
+        ),
+        "compact-prime-run" => run_compact_prime(
             input, cell, args.get(4).expect("round").parse().unwrap(),
             args.get(5).expect("public batch path"),
             args.get(6).expect("selection path"),
