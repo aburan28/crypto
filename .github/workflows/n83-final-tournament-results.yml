@@ -68,6 +68,22 @@ jobs:
           git fetch --no-tags --depth=1 origin "$frozen"
           test "$(git rev-parse FETCH_HEAD)" = "$frozen"
           git worktree add --detach "$RUNNER_TEMP/n83-tournament-frozen-source" "$frozen"
+          cd "$RUNNER_TEMP/n83-tournament-frozen-source"
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_k3250_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k3350_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k_abba_20261015/generate.py > /dev/null
+          python3 research/n83_root4_highk_20261015/generate.py > /dev/null
+          python3 research/n83_best_e2e_20261015/generate.py > /dev/null
+          python3 research/n83_legacy_challenger_20261015/generate.py > /dev/null
+          python3 research/n83_root4_bloom_20261015/generate.py > /dev/null
+          python3 research/n83_root11_highk_20261015/generate.py > /dev/null
+          python3 research/n83_final_tournament_20261015/generate.py > \
+            "$RUNNER_TEMP/n83-tournament-fixture.json"
+          test "$(sha256sum research/n83_final_tournament_20261015/targets.jsonl | cut -d' ' -f1)" = \
+            cfa943ae538fcc41d2af8bb8fd1c8fc0f29adc340b55644e90382da25b213424
+          test "$(sha256sum research/n83_final_tournament_20261015/answers.jsonl | cut -d' ' -f1)" = \
+            1dbd4250796de4434badc2458089d7ad9fe63cc59d7b9d3f6825ad431476a13b
 
       - name: Download and hash the exact raw artifact
         shell: bash
