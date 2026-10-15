@@ -108,7 +108,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "85300a415cfaef50e561a09fe8e0be56fb2b6ecc93babf5906a0d0d91c90d5fc"
+   "sha256": "ff703257ab3f426ec78532a60fe2daefa70f525304b2c24258d02f58fe1dfa6d"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -9591,6 +9591,20 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp20-t199-d1684bf5",
+   "family": "prime",
+   "field": "GF(p), p = 970267",
+   "coefficients": "a = 344324, b = 727299",
+   "order_bits": 20,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp20-t1293-3c2999ba",
    "family": "prime",
    "field": "GF(p), p = 1048291",
@@ -10099,6 +10113,20 @@
     "generated-22bit-3290411"
    ],
    "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp22-t285-9fc7e3e5",
+   "family": "prime",
+   "field": "GF(p), p = 3594223",
+   "coefficients": "a = 2996944, b = 1794025",
+   "order_bits": 22,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
   },
@@ -11030,6 +11058,20 @@
    "legacy": [
     "generated-24bit-12832957"
    ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp24-t4451-d5368b2d",
+   "family": "prime",
+   "field": "GF(p), p = 13136531",
+   "coefficients": "a = 848818, b = 7381302",
+   "order_bits": 24,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"

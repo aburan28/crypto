@@ -1090,6 +1090,14 @@ SHA-256; a name is not repointed without `--replace`, which keeps the old
 digest as superseded. Never delete remote objects from an agent session.
 See [docs/store/README.md](docs/store/README.md).
 
+### 14. Experiments to run later go in `backlog/`
+
+An experiment worth running that this session will not run (too big, blocked,
+or for another machine) is written as a card in `backlog/<ID>/` and checked
+with `backlog validate`; leases and runs go through cairn, and results return
+to `research/` by PR. The protocol, including funding as priority, is
+[backlog/README.md](backlog/README.md).
+
 ## Worked example
 
 `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` is the reference implementation of this

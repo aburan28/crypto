@@ -441,6 +441,26 @@ frozen-source replays rebuild it against pre-F6 snapshots of
 evaluations, and the tournament admits no root build script. It also
 refuses to run while a `KIC_*`, `F4_*` or `SOLVER_*` tuning override is set.
 
+`prime-kummer:t=T[,g=G]` and `prime-isogeny:t=T[,seed=S]` are Petit,
+Kosters and Messeng's tower bases for prime curves
+(`ic_framework::prime_tower`): every point whose abscissa lies in a set `V`
+of `2^t` elements that is the zero set of `t` composed degree-2 maps, both
+signs, one column an abscissa.  The Kummer base needs `2^t | p − 1` and
+costs `2^t` Legendre symbols and square roots.  The isogeny base,
+`V = x(R' + ⟨Q⟩)` for `Q` of order `2^t` on an auxiliary curve `E'/F_p`,
+needs no condition on `p`; `E'` is searched from the public seed, and the
+search is **charged to the factor-base phase**: on every curve tried, a
+baby-step giant-step over the multiples of `2^t` in the Hasse interval
+filters out curves with `2^t ∤ #E'`, and the survivors' orders are computed
+by Mestre's baby-step giant-step; with `Q`, `⟨Q⟩`, `R'`, `V` and the Vélu
+chain's kernels, every addition and doubling on `E'` is charged in the unit
+(a curve over the same field).  The phase records `aux_curves_tried`,
+`aux_search_gae`, `aux_count_gae` and `aux_tower_build_gae` apart; the
+Legendre symbols and square roots of point sampling join the phase's
+`legendre_symbols` and `sqrt_solves` (unpriced, as for every prime base),
+and the `2t` Vélu evaluations are `velu_evaluations_uncharged`
+(`research/pkm_isogeny_tower_ecbench_20261015/`).
+
 `rootfind-mitm:m=3` and `rootfind-pairs:m=3` are the root-finding
 decomposition oracles of `research/pdp_root_finder_20261012` as plug-ins
 (`ic_framework::rootfind`), on any base and both tracks. `rootfind-mitm`
