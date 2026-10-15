@@ -269,6 +269,27 @@ theorem three_quotients_faithful_on_odd_torsion
   rw [hrepr] at hrz'
   exact sub_eq_zero.mp hrz'
 
+/-- On odd-order torsion, the three quotient pullbacks give an explicit
+    inverse to the quotient-coordinate map: half their sum is the class. -/
+theorem three_quotients_inverse_on_odd_torsion
+    {J E₀ E₁ E₂ : Type*} [AddCommGroup J]
+    [AddCommGroup E₀] [AddCommGroup E₁] [AddCommGroup E₂]
+    (push₀ : J →+ E₀) (push₁ : J →+ E₁) (push₂ : J →+ E₂)
+    (pull₀ : E₀ →+ J) (pull₁ : E₁ →+ J) (pull₂ : E₂ →+ J)
+    (hdecomp : ∀ z, pull₀ (push₀ z) + pull₁ (push₁ z) +
+      pull₂ (push₂ z) = z + z)
+    (r k : ℕ) (hodd : r = 2 * k + 1)
+    (D : J) (hrD : r • D = 0) :
+    (k + 1) • (pull₀ (push₀ D) + pull₁ (push₁ D) +
+      pull₂ (push₂ D)) = D := by
+  rw [hdecomp]
+  have hcoeff : (k + 1) * 2 = r + 1 := by omega
+  calc
+    (k + 1) • (D + D) = ((k + 1) * 2) • D := by
+      simp only [mul_nsmul, two_nsmul, smul_add]
+    _ = (r + 1) • D := by rw [hcoeff]
+    _ = D := by rw [add_nsmul, hrD, one_nsmul, zero_add]
+
 set_option linter.style.haveILetI false
 
 /-- A three-step Frobenius norm is fixed and has exact prime order when
@@ -463,6 +484,7 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.conorm_exact_prime_order_of_push_pull_two
 #print axioms P192ExtensionCover.cyclic_three_norm_exact_prime_order
 #print axioms P192ExtensionCover.three_quotients_faithful_on_odd_torsion
+#print axioms P192ExtensionCover.three_quotients_inverse_on_odd_torsion
 #print axioms P192ExtensionCover.mobius_quartic_clear
 #print axioms P192ExtensionCover.canonicalTriples16_card
 #print axioms P192ExtensionCover.three_sum_support_bound
