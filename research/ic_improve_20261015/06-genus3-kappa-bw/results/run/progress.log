@@ -148,3 +148,15 @@ JOB 26s --bits 18 --curve 0 --kappa 2 --cx 8 --streams aa --las lpsgewd --out re
 JOB 26s --bits 18 --curve 1 --kappa 2 --cx 8 --streams aa --las lpsgewd --out results/run/b18_c1_aa.jsonl
 {"bits":18,"curve":2,"kappa":2,"arm":"aa:lpsgewd","correct":true,"cost":3377969498,"la_cost":1305312777,"cols":6306,"nnz":97034,"checks":1,"la_wall":9.0,"wall":25.6}
 JOB 26s --bits 18 --curve 2 --kappa 2 --cx 8 --streams aa --las lpsgewd --out results/run/b18_c2_aa.jsonl
+{"bits":19,"curve":0,"kappa":2,"arm":"aa:lpsgewd","correct":true,"cost":9112956588,"la_cost":3837705192,"cols":10854,"nnz":165777,"checks":1,"la_wall":25.9,"wall":65.4}
+JOB 65s --bits 19 --curve 0 --kappa 2 --cx 8 --streams aa --las lpsgewd --out results/run/b19_c0_aa.jsonl
+{"bits":19,"curve":1,"kappa":2,"arm":"aa:lpsgewd","correct":true,"cost":9078719884,"la_cost":3821519867,"cols":10808,"nnz":165826,"checks":1,"la_wall":25.6,"wall":65.2}
+JOB 66s --bits 19 --curve 1 --kappa 2 --cx 8 --streams aa --las lpsgewd --out results/run/b19_c1_aa.jsonl
+{"bits":19,"curve":2,"kappa":2,"arm":"aa:lpsgewd","correct":true,"cost":9166080106,"la_cost":3893656445,"cols":10927,"nnz":167083,"checks":1,"la_wall":26.0,"wall":64.8}
+JOB 65s --bits 19 --curve 2 --kappa 2 --cx 8 --streams aa --las lpsgewd --out results/run/b19_c2_aa.jsonl
+{"bits":20,"curve":0,"kappa":2,"arm":"aa:lpsgewd","correct":true,"cost":24526903692,"la_cost":11262415293,"cols":18577,"nnz":284394,"checks":1,"la_wall":74.9,"wall":168.1}
+JOB 169s --bits 20 --curve 0 --kappa 2 --cx 8 --streams aa --las lpsgewd --out results/run/b20_c0_aa.jsonl
+{"bits":20,"curve":1,"kappa":2,"arm":"aa:lpsgewd","correct":true,"cost":24436051993,"la_cost":11198302362,"cols":18490,"nnz":284173,"checks":1,"la_wall":73.7,"wall":166.9}
+JOB 169s --bits 20 --curve 1 --kappa 2 --cx 8 --streams aa --las lpsgewd --out results/run/b20_c1_aa.jsonl
+{"bits":20,"curve":2,"kappa":2,"arm":"aa:lpsgewd","correct":true,"cost":24442848697,"la_cost":11157902479,"cols":18457,"nnz":283653,"checks":1,"la_wall":75.1,"wall":169.8}
+JOB 171s --bits 20 --curve 2 --kappa 2 --cx 8 --streams aa --las lpsgewd --out results/run/b20_c2_aa.jsonl

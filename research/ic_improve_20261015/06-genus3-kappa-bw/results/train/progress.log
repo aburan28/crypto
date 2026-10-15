@@ -295,3 +295,23 @@ JOB 324s --bits 20 --curve 6 --kappa 1.68 --cx 8 --las lpsgewd@8,lpsgewd@16,lpsg
 {"bits":20,"curve":7,"kappa":1.68,"arm":"main:lpsgebw2@8","correct":true,"cost":23205915729,"la_cost":7781066907,"cols":16589,"nnz":246048,"checks":1,"la_wall":48.1,"wall":321.6}
 {"bits":20,"curve":7,"kappa":1.68,"arm":"main:lpsgebw3@8","correct":true,"cost":23628787557,"la_cost":8203938735,"cols":16589,"nnz":246048,"checks":1,"la_wall":47.7,"wall":321.6}
 JOB 322s --bits 20 --curve 7 --kappa 1.68 --cx 8 --las lpsgewd@8,lpsgewd@16,lpsgebw2@8,lpsgebw3@8 --no-gp-check --out results/train/tr_b20_c7_k1.68.jsonl
+{"bits":20,"curve":5,"kappa":2,"arm":"main:lpsgewd@8","correct":true,"cost":24504267581,"la_cost":11258059636,"cols":18845,"nnz":279704,"checks":1,"la_wall":75.4,"wall":367.3}
+{"bits":20,"curve":5,"kappa":2,"arm":"main:lpsgewd@16","correct":true,"cost":24561778984,"la_cost":11315571039,"cols":17375,"nnz":308073,"checks":1,"la_wall":73.3,"wall":367.3}
+{"bits":20,"curve":5,"kappa":2,"arm":"main:lpsgebw2@8","correct":true,"cost":23291911696,"la_cost":10045703751,"cols":18845,"nnz":279704,"checks":1,"la_wall":63.2,"wall":367.3}
+{"bits":20,"curve":5,"kappa":2,"arm":"main:lpsgebw3@8","correct":true,"cost":23836640644,"la_cost":10590432699,"cols":18845,"nnz":279704,"checks":1,"la_wall":60.8,"wall":367.3}
+JOB 368s --bits 20 --curve 5 --kappa 2.0 --cx 8 --las lpsgewd@8,lpsgewd@16,lpsgebw2@8,lpsgebw3@8 --no-gp-check --out results/train/tr_b20_c5_k2.0.jsonl
+{"bits":20,"curve":6,"kappa":2,"arm":"main:lpsgewd@8","correct":true,"cost":24415854277,"la_cost":11112698081,"cols":18483,"nnz":281980,"checks":1,"la_wall":75.2,"wall":368.2}
+{"bits":20,"curve":6,"kappa":2,"arm":"main:lpsgewd@16","correct":true,"cost":24479114414,"la_cost":11175958218,"cols":17256,"nnz":306392,"checks":1,"la_wall":74.6,"wall":368.2}
+{"bits":20,"curve":6,"kappa":2,"arm":"main:lpsgebw2@8","correct":true,"cost":23178993753,"la_cost":9875837557,"cols":18483,"nnz":281980,"checks":1,"la_wall":61.6,"wall":368.2}
+{"bits":20,"curve":6,"kappa":2,"arm":"main:lpsgebw3@8","correct":true,"cost":23679314972,"la_cost":10376158776,"cols":18483,"nnz":281980,"checks":1,"la_wall":61.1,"wall":368.2}
+JOB 370s --bits 20 --curve 6 --kappa 2.0 --cx 8 --las lpsgewd@8,lpsgewd@16,lpsgebw2@8,lpsgebw3@8 --no-gp-check --out results/train/tr_b20_c6_k2.0.jsonl
+{"bits":20,"curve":7,"kappa":2,"arm":"main:lpsgewd@8","correct":true,"cost":24452699858,"la_cost":11181821269,"cols":18588,"nnz":282037,"checks":1,"la_wall":75.4,"wall":366.6}
+{"bits":20,"curve":7,"kappa":2,"arm":"main:lpsgewd@16","correct":true,"cost":24550574354,"la_cost":11279695765,"cols":16991,"nnz":314753,"checks":1,"la_wall":72.8,"wall":366.6}
+{"bits":20,"curve":7,"kappa":2,"arm":"main:lpsgebw2@8","correct":true,"cost":23215892455,"la_cost":9945013866,"cols":18588,"nnz":282037,"checks":1,"la_wall":63.0,"wall":366.6}
+{"bits":20,"curve":7,"kappa":2,"arm":"main:lpsgebw3@8","correct":true,"cost":23726883914,"la_cost":10456005325,"cols":18588,"nnz":282037,"checks":1,"la_wall":60.7,"wall":366.6}
+JOB 368s --bits 20 --curve 7 --kappa 2.0 --cx 8 --las lpsgewd@8,lpsgewd@16,lpsgebw2@8,lpsgebw3@8 --no-gp-check --out results/train/tr_b20_c7_k2.0.jsonl
+{"bits":21,"curve":5,"kappa":1.19,"arm":"main:lpsgewd@8","correct":true,"cost":66821681862,"la_cost":14425257238,"cols":21043,"nnz":321557,"checks":1,"la_wall":98.7,"wall":737.4}
+{"bits":21,"curve":5,"kappa":1.19,"arm":"main:lpsgewd@16","correct":true,"cost":66940964727,"la_cost":14544540103,"cols":19810,"nnz":347113,"checks":1,"la_wall":96.1,"wall":737.4}
+{"bits":21,"curve":5,"kappa":1.19,"arm":"main:lpsgebw2@8","correct":true,"cost":65212580201,"la_cost":12816155577,"cols":21043,"nnz":321557,"checks":1,"la_wall":82.5,"wall":737.4}
+{"bits":21,"curve":5,"kappa":1.19,"arm":"main:lpsgebw3@8","correct":true,"cost":65859258358,"la_cost":13462833734,"cols":21043,"nnz":321557,"checks":1,"la_wall":79.1,"wall":737.4}
+JOB 740s --bits 21 --curve 5 --kappa 1.19 --cx 8 --las lpsgewd@8,lpsgewd@16,lpsgebw2@8,lpsgebw3@8 --no-gp-check --out results/train/tr_b21_c5_k1.19.jsonl
