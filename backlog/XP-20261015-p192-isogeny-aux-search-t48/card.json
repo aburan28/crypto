@@ -10,9 +10,9 @@
   "status": "blocked",
   "status_note": "Blocked on the wide-field tower builder and the 192-bit field backend (both in progress, not yet pushed) and on PR #1889. Runs as cairn lab tasks with the native checker deciding `found` (first_success); posting it as a cairn objective is the upgrade path once cairn can pin a native checker. Recommended gate: run only after lead 1 (XP-20261015-pkm-m3-n21-m4-n20) gives a bounded F4 solving degree, or run it explicitly as an infrastructure/feasibility measurement.",
   "blocked_on": [
-    "branch:claude/isogeny-tower-wide wide-field isogeny-tower builder lane, in progress (not yet pushed); provides the solver binary and the 2-Sylow halving filter",
-    "branch:claude/fp-backend Stage 0 192-bit prime-field backend, in progress (not yet pushed); its measured Legendre/sqrt cost fixes the per-trial cost below",
-    "pr:1889 the measured small-field tower and auxiliary-curve search (open, unmerged)"
+    "note:decision — the supersingular curve y^2 = x^3 + x over the P-192 prime (#E = p + 1, cyclic 2-Sylow of order 2^64) already gives a point of order exactly 2^48 in one draw, and backlog_check_aux2t accepts it; decide whether the PKM relation phase may use a supersingular E' (then this search is unnecessary) or the checker must require an ordinary curve (then this card runs as specified, ~98,000 core-hours measured)",
+    "pr:1918 merged; the solver and 2-Sylow halving filter are on branch claude/isogeny-tower-p192 (PR pending merge)",
+    "note:lead 1 of the factor-base encyclopedia (bounded F4 solving degree) is unresolved; see decision_value"
   ],
   "links": {
     "lead": "docs/ic/factor-base-encyclopedia/README.md §0.2 (isogeny tower, the P-192 shape)",
@@ -33,7 +33,7 @@
   "code": {
     "repo": "crypto",
     "commit": null,
-    "branch": "claude/isogeny-tower-wide",
+    "branch": "claude/isogeny-tower-p192",
     "build": [
       [
         "cargo",
