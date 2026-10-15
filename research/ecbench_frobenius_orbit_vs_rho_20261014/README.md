@@ -32,7 +32,7 @@ security claim; nothing here is about ECC2K-130 or deployed curves.
      curves (median of 15 passes; raw passes in [`pricing/price-units.json`](pricing/price-units.json)).
    - `docs/ic/calibration.json` and every existing method are untouched, so
      committed sessions replay as before.
-   - This also fixes `K_0 / GF(2^19)`, which has no row in the pinned table.
+   - This also fixes `icv1-f2m19-t797-b6cf2467`, which has no row in the pinned table.
 2. **`ecbench trend`** ([`src/cryptanalysis/ecbench/trend.rs`](../../src/cryptanalysis/ecbench/trend.rs)).
    It fits weighted least squares of ln(paired ratio) on ln r (and ln n) from
    `compare --save` files, plus the fixed-exponent model with only the

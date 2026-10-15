@@ -36,7 +36,7 @@ exponent one. This protocol measures it instead of assuming it.
    canonicalisations and distinguished-point probes and rho-strong's
    canonicalisations, partition hashes and table probes. A counter the rules
    do not know stays unpriced and keeps the lower-bound flag. Additions and
-   doublings are one unit each, as everywhere in ecbench. `K_0 / GF(2^19)`,
+   doublings are one unit each, as everywhere in ecbench. `icv1-f2m19-t797-b6cf2467`,
    which has no row in `docs/ic/calibration.json`, has one in the new table,
    so its IC rows are full costs. The pinned table and every existing method
    are unchanged, so committed sessions replay as before.

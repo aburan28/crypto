@@ -2,7 +2,7 @@
 //!
 //! The ordinary methods price native work with the ratios pinned in
 //! `docs/ic/calibration.json`.  That table has no field multiplication,
-//! squaring or inversion, and some curves (`K_0 / GF(2^19)`) have no row
+//! squaring or inversion, and some curves (`icv1-f2m19-t797-b6cf2467`) have no row
 //! at all, so a Frobenius-orbit factor base's construction and the
 //! canonicalisations of the Frobenius walks are counted under
 //! `*_uncharged` names and the total is a lower bound.
