@@ -2137,7 +2137,12 @@ fn verify_independent(
         );
         let nu = fix["nu"].as_u64().unwrap();
         let field = CheckField { p, nu };
-        assert!(p > 3 && (2..).take_while(|d| d * d <= p).all(|d| p % d != 0));
+        assert!(
+            p > 3
+                && (2..)
+                    .take_while(|d| d * d <= p)
+                    .all(|d| !p.is_multiple_of(d))
+        );
         assert_eq!(field.pow_fp(nu, (p - 1) / 2), p - 1);
         let g = check_point(&fix["generator"]);
         let q = check_point(&fix["target"]);
@@ -2453,7 +2458,7 @@ fn screen() {
             let anti = (p as i64 + 1 + t) as u64;
             let n2 = n1 * anti;
             let r = factor_u64(anti).last().map(|&(v, _)| v).unwrap_or(0);
-            if r < min_r || r == 3 || n1 % r == 0 || (n2 / r) % r == 0 {
+            if r < min_r || r == 3 || n1.is_multiple_of(r) || (n2 / r).is_multiple_of(r) {
                 continue;
             }
             let f = Fp2::new(p).unwrap();
