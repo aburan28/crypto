@@ -1,0 +1,43 @@
+# CI findings while pursuing the leads
+
+The prior head321a7a5e4 passed ecbench, Rust lint and all-target compilation,
+but failed these applicable checks. These are repair obligations, not research
+outcomes or permission to bypass checks.
+
+| Check | Exact finding | Action |
+|---|---|---|
+|ic-leaderboard, job116123014736|Standalone native-publish Cargo.lock was ignored, so --locked fails on a fresh checkout|Commit the exact existing lock and fix ignore-rule precedence|
+|curve-names, job116123016154|Two measured conductor-gap models were not in the registry|Register both exact models and subgroup/generator representations natively; preserve frozen old sessions|
+|IC dashboard, job116123016516|Generated overview is stale|Regenerate the presentation from its pinned evidence and review desktop/mobile output|
+|Curve cover certificates, job116123015482|Catalog display check rejects the native-augmented leaderboard|Make the native generated views and catalog consistency check agree without changing frozen measurements|
+|leaf-m10 archive replay|Existing exact-file-set assertion fails|Retain the separately reproduced baseline blocker; do not rewrite its archive or disable its verifier|
+
+At that prior head, PR1853 also had a merge conflict and an incomplete automated
+review because its evidence volume exceeds Bugbot's review limit. Per AGENTS.md, Copilot was
+asked to merge main into the head, without rebasing or changing frozen evidence,
+in [comment6184186354](https://github.com/aburan28/crypto/pull/1853#issuecomment-6184186354).
+The native follow-up work proceeds in new source/report paths. A conflict in
+frozen evidence is reported, not resolved by choosing a side. No merge is
+admitted until the exact final head satisfies the applicable CI/review gates.
+
+After roughly50 minutes without a Copilot response, the author announced the
+AGENTS.md fallback, documented in comment6184777039, to integrate main locally
+without rebasing or force-pushing. The integration baseline is
+`a80b15bbc5c1ea4f2db2b294a9bcddc31f06fdd7`. Generated views preserve that main
+scoreboard and its110 already indexed ecbench sessions, then add the parent
+campaign's9 and this follow-up's6 sessions. No new verdict is derived for
+incoming sessions. Historical scientific source arrays are pinned to that exact
+baseline; catalog additions preserve its old entries and receive the unchanged
+native cover-certificate check. The only conflicts were the benchmark index and
+generated browser view; no frozen session, ledger or claim conflicted. The
+existing catalog prose renderer only lays out the native-generated document and
+diagnostic fragment.
+
+The integrated native publisher now invokes the existing source-pinned Node
+renderer in memory, after generating the canonical timeline, and checks both
+page and overview JSON. The unchanged standards display check agrees byte for
+byte, including appended roster field order. Alias-map formatting follows the
+existing registry contract without changing identities. Relevant workflows pin
+Node22 and run both native freshness and the retained historical checks.
+All15 current integration session audits pass, with1203 successful outcomes
+replayed exactly. No frozen session bytes changed.

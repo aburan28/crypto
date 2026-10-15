@@ -1,0 +1,1049 @@
+{
+  "ledger": {
+    "audit_ok": true,
+    "measured": 48,
+    "name": "binary-shape",
+    "problems": [],
+    "records": 48,
+    "replays": 16,
+    "session_id": "ECBS1h7c93eeb972ac",
+    "verified_records": 16
+  },
+  "metadata": {
+    "binary_sha256": "50a5739fadcb08ab8f170d4fe03ba3427fb0fd387c1a5918843fcda4d68ff1fb",
+    "child_env": {
+      "HOME": "/home/agent",
+      "LC_ALL": "C",
+      "OMP_NUM_THREADS": "1",
+      "PATH": "/workspace/toolchains/cargo/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+      "RAYON_NUM_THREADS": "1",
+      "RUST_BACKTRACE": "0",
+      "RUST_MIN_STACK": "8388608"
+    },
+    "child_env_sha256": "ae63b5dd5b3559eade83c5719a86a19a091b41ee5a2786aaf2826dc1b9176287",
+    "cpu_plan": null,
+    "env_class_id": "ECBENV2h96c931cc33fa",
+    "eviction": null,
+    "executions_planned": 48,
+    "finished_unix_ms": 1792038777709,
+    "git_commit": "0cbc86b2c828f1aa7fae62282913cce9ea6e099d",
+    "git_dirty": false,
+    "grading_version": 2,
+    "host_sha256": "c7ca6a49e2ff9b323235a9c7ad2f48f5f9a846f6f987f830a93eaf1b7684ff92",
+    "label": "Versioned chained-system shape comparison",
+    "options": {
+      "allow_busy": true,
+      "cpus": "none",
+      "exe": "/proc/self/exe",
+      "lock_path": "/tmp/crypto-bench.lock",
+      "thresholds": {
+        "max_other_cpu": 0.1,
+        "max_preemptions_per_second": 50.0,
+        "max_psi": 5.0,
+        "settle_seconds": 2.0
+      },
+      "wait_for_lock": true
+    },
+    "plan_sha256": "70299b8b1af93be316839da33aa76c0af1eacdd1a2313f2a44480cad5fa13c0a",
+    "preflight": null,
+    "records_sha256": "93cec6ce7b402ad849709e3b45612c38dc0f2d4160db8a557eba3c01fee3e837",
+    "records_written": 48,
+    "runner_cpus": null,
+    "runner_on_run_cpu": false,
+    "schema": "ecbench.session/v1",
+    "session_id": "ECBS1h7c93eeb972ac",
+    "spec_id": "ECS1haed5c243b097",
+    "spec_sha256": "aed5c243b0972cdefa59ab69052b48ee75a858667e33dfe21746205b3d12dc24",
+    "started_unix_ms": 1792038636454,
+    "status": "complete",
+    "status_counts": {
+      "exhausted": 32,
+      "verified": 16
+    },
+    "ticks_per_second": 100
+  },
+  "path": "reports/run-20261015T0430Z-binary-shape",
+  "rows": [
+    {
+      "arm": "f6-ic-v1",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 0,
+        "matrix_rows": 0,
+        "matrix_work": 0,
+        "relations_found": 0,
+        "targets_tried": 16
+      },
+      "curve": "icv1-f2m13-t181-515ee569",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h30d1ef4c794d"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "exhausted": 2
+      },
+      "unpriced": [],
+      "verified": 0,
+      "wall_time_result": null
+    },
+    {
+      "arm": "f6-ic-v2",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 0,
+        "matrix_rows": 0,
+        "matrix_work": 0,
+        "relations_found": 0,
+        "targets_tried": 16
+      },
+      "curve": "icv1-f2m13-t181-515ee569",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h30d1ef4c794d"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "exhausted": 2
+      },
+      "unpriced": [],
+      "verified": 0,
+      "wall_time_result": null
+    },
+    {
+      "arm": "inherited-f4-v1",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 0,
+        "matrix_rows": 0,
+        "matrix_work": 0,
+        "relations_found": 0,
+        "targets_tried": 16
+      },
+      "curve": "icv1-f2m13-t181-515ee569",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h30d1ef4c794d"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "exhausted": 2
+      },
+      "unpriced": [],
+      "verified": 0,
+      "wall_time_result": null
+    },
+    {
+      "arm": "inherited-f4-v2",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 0,
+        "matrix_rows": 0,
+        "matrix_work": 0,
+        "relations_found": 0,
+        "targets_tried": 16
+      },
+      "curve": "icv1-f2m13-t181-515ee569",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h30d1ef4c794d"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "exhausted": 2
+      },
+      "unpriced": [],
+      "verified": 0,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 163,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 3,
+        "partition_hashes_uncharged": 89,
+        "scalar_multiplications": 70,
+        "table_entries": 7,
+        "table_inserts_uncharged": 7,
+        "table_queries_uncharged": 9,
+        "walk_steps": 89,
+        "walks": 74,
+        "wasted_merges": 0
+      },
+      "curve": "icv1-f2m13-t181-515ee569",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 15.100410977166097,
+      "mean_cold_gae": 658.3172020551672,
+      "mean_s": 14.709392235268439,
+      "min_s": 14.318373493370782,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 2,
+      "phase_mean_gae": {
+        "search": 131.8557601761572,
+        "setup": 526.46144187901
+      },
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "verified": 2
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 2,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho-aa",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 163,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 3,
+        "partition_hashes_uncharged": 89,
+        "scalar_multiplications": 70,
+        "table_entries": 7,
+        "table_inserts_uncharged": 7,
+        "table_queries_uncharged": 9,
+        "walk_steps": 89,
+        "walks": 74,
+        "wasted_merges": 0
+      },
+      "curve": "icv1-f2m13-t181-515ee569",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 15.100410977166097,
+      "mean_cold_gae": 658.3172020551672,
+      "mean_s": 14.709392235268439,
+      "min_s": 14.318373493370782,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 2,
+      "phase_mean_gae": {
+        "search": 131.8557601761572,
+        "setup": 526.46144187901
+      },
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "verified": 2
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 2,
+      "wall_time_result": null
+    },
+    {
+      "arm": "f6-ic-v1",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 0,
+        "matrix_rows": 0,
+        "matrix_work": 0,
+        "relations_found": 0,
+        "targets_tried": 16
+      },
+      "curve": "icv1-f2m19-t797-b6cf2467",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h9c323066a796"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "exhausted": 2
+      },
+      "unpriced": [
+        "\"as_solves_uncharged\"",
+        "\"frobenius_maps_uncharged\"",
+        "\"solver_word_XORs_(elimination,_specialisation_and_linear_elimination_only)_uncharged\"",
+        "\"target_guard_probes_uncharged\""
+      ],
+      "verified": 0,
+      "wall_time_result": null
+    },
+    {
+      "arm": "f6-ic-v2",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 0,
+        "matrix_rows": 0,
+        "matrix_work": 0,
+        "relations_found": 0,
+        "targets_tried": 16
+      },
+      "curve": "icv1-f2m19-t797-b6cf2467",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h9c323066a796"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "exhausted": 2
+      },
+      "unpriced": [
+        "\"as_solves_uncharged\"",
+        "\"frobenius_maps_uncharged\"",
+        "\"solver_word_XORs_(elimination,_specialisation_and_linear_elimination_only)_uncharged\"",
+        "\"target_guard_probes_uncharged\""
+      ],
+      "verified": 0,
+      "wall_time_result": null
+    },
+    {
+      "arm": "inherited-f4-v1",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 0,
+        "matrix_rows": 0,
+        "matrix_work": 0,
+        "relations_found": 0,
+        "targets_tried": 16
+      },
+      "curve": "icv1-f2m19-t797-b6cf2467",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h9c323066a796"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "exhausted": 2
+      },
+      "unpriced": [
+        "\"as_solves_uncharged\"",
+        "\"frobenius_maps_uncharged\"",
+        "\"solver_word_XORs_(elimination,_specialisation_and_linear_elimination_only)_uncharged\"",
+        "\"target_guard_probes_uncharged\""
+      ],
+      "verified": 0,
+      "wall_time_result": null
+    },
+    {
+      "arm": "inherited-f4-v2",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 0,
+        "matrix_rows": 0,
+        "matrix_work": 0,
+        "relations_found": 0,
+        "targets_tried": 16
+      },
+      "curve": "icv1-f2m19-t797-b6cf2467",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h9c323066a796"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "exhausted": 2
+      },
+      "unpriced": [
+        "\"as_solves_uncharged\"",
+        "\"frobenius_maps_uncharged\"",
+        "\"solver_word_XORs_(elimination,_specialisation_and_linear_elimination_only)_uncharged\"",
+        "\"target_guard_probes_uncharged\""
+      ],
+      "verified": 0,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 416,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 0,
+        "partition_hashes_uncharged": 340,
+        "scalar_multiplications": 70,
+        "table_entries": 13,
+        "table_inserts_uncharged": 13,
+        "table_queries_uncharged": 15,
+        "walk_steps": 340,
+        "walks": 76,
+        "wasted_merges": 0
+      },
+      "curve": "icv1-f2m19-t797-b6cf2467",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 3.1771700885554894,
+      "mean_cold_gae": 1101.3849181367127,
+      "mean_s": 3.0444868056585026,
+      "min_s": 2.9118035227615158,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 2,
+      "phase_mean_gae": {
+        "search": 285.49013584028967,
+        "setup": 815.8947822964232
+      },
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "verified": 2
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 2,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho-aa",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 416,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 0,
+        "partition_hashes_uncharged": 340,
+        "scalar_multiplications": 70,
+        "table_entries": 13,
+        "table_inserts_uncharged": 13,
+        "table_queries_uncharged": 15,
+        "walk_steps": 340,
+        "walks": 76,
+        "wasted_merges": 0
+      },
+      "curve": "icv1-f2m19-t797-b6cf2467",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 3.1771700885554894,
+      "mean_cold_gae": 1101.3849181367127,
+      "mean_s": 3.0444868056585026,
+      "min_s": 2.9118035227615158,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 2,
+      "phase_mean_gae": {
+        "search": 285.49013584028967,
+        "setup": 815.8947822964232
+      },
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "verified": 2
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 2,
+      "wall_time_result": null
+    },
+    {
+      "arm": "f6-ic-v1",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 0,
+        "matrix_rows": 0,
+        "matrix_work": 0,
+        "relations_found": 0,
+        "targets_tried": 16
+      },
+      "curve": "icv1-f2m23-t5197-69e76b73",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1ha7b4b3ac53e4"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "exhausted": 2
+      },
+      "unpriced": [],
+      "verified": 0,
+      "wall_time_result": null
+    },
+    {
+      "arm": "f6-ic-v2",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 0,
+        "matrix_rows": 0,
+        "matrix_work": 0,
+        "relations_found": 0,
+        "targets_tried": 16
+      },
+      "curve": "icv1-f2m23-t5197-69e76b73",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1ha7b4b3ac53e4"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "exhausted": 2
+      },
+      "unpriced": [],
+      "verified": 0,
+      "wall_time_result": null
+    },
+    {
+      "arm": "inherited-f4-v1",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 0,
+        "matrix_rows": 0,
+        "matrix_work": 0,
+        "relations_found": 0,
+        "targets_tried": 16
+      },
+      "curve": "icv1-f2m23-t5197-69e76b73",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1ha7b4b3ac53e4"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "exhausted": 2
+      },
+      "unpriced": [],
+      "verified": 0,
+      "wall_time_result": null
+    },
+    {
+      "arm": "inherited-f4-v2",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 0,
+        "matrix_rows": 0,
+        "matrix_work": 0,
+        "relations_found": 0,
+        "targets_tried": 16
+      },
+      "curve": "icv1-f2m23-t5197-69e76b73",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1ha7b4b3ac53e4"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "exhausted": 2
+      },
+      "unpriced": [],
+      "verified": 0,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 768,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 0,
+        "partition_hashes_uncharged": 653,
+        "scalar_multiplications": 70,
+        "table_entries": 54,
+        "table_inserts_uncharged": 54,
+        "table_queries_uncharged": 56,
+        "walk_steps": 653,
+        "walks": 115,
+        "wasted_merges": 0
+      },
+      "curve": "icv1-f2m23-t5197-69e76b73",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 1.1158708606734085,
+      "mean_cold_gae": 1487.4530703167784,
+      "mean_s": 1.0274551259234115,
+      "min_s": 0.9390393911734147,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 2,
+      "phase_mean_gae": {
+        "search": 479.49597745572385,
+        "setup": 1007.9570928610544
+      },
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "verified": 2
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 2,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho-aa",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 768,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 0,
+        "partition_hashes_uncharged": 653,
+        "scalar_multiplications": 70,
+        "table_entries": 54,
+        "table_inserts_uncharged": 54,
+        "table_queries_uncharged": 56,
+        "walk_steps": 653,
+        "walks": 115,
+        "wasted_merges": 0
+      },
+      "curve": "icv1-f2m23-t5197-69e76b73",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 1.1158708606734085,
+      "mean_cold_gae": 1487.4530703167784,
+      "mean_s": 1.0274551259234115,
+      "min_s": 0.9390393911734147,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 2,
+      "phase_mean_gae": {
+        "search": 479.49597745572385,
+        "setup": 1007.9570928610544
+      },
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "verified": 2
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 2,
+      "wall_time_result": null
+    },
+    {
+      "arm": "f6-ic-v1",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 0,
+        "matrix_rows": 0,
+        "matrix_work": 0,
+        "relations_found": 0,
+        "targets_tried": 16
+      },
+      "curve": "icv1-f2m31-tm90707-c95f16f5",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1hb485a067d5eb"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "exhausted": 2
+      },
+      "unpriced": [],
+      "verified": 0,
+      "wall_time_result": null
+    },
+    {
+      "arm": "f6-ic-v2",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 0,
+        "matrix_rows": 0,
+        "matrix_work": 0,
+        "relations_found": 0,
+        "targets_tried": 16
+      },
+      "curve": "icv1-f2m31-tm90707-c95f16f5",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1hb485a067d5eb"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "exhausted": 2
+      },
+      "unpriced": [],
+      "verified": 0,
+      "wall_time_result": null
+    },
+    {
+      "arm": "inherited-f4-v1",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 0,
+        "matrix_rows": 0,
+        "matrix_work": 0,
+        "relations_found": 0,
+        "targets_tried": 16
+      },
+      "curve": "icv1-f2m31-tm90707-c95f16f5",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1hb485a067d5eb"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "exhausted": 2
+      },
+      "unpriced": [],
+      "verified": 0,
+      "wall_time_result": null
+    },
+    {
+      "arm": "inherited-f4-v2",
+      "audit_ok": true,
+      "counter_sums": {
+        "matrix_dependent": 0,
+        "matrix_rank": 0,
+        "matrix_rows": 0,
+        "matrix_work": 0,
+        "relations_found": 0,
+        "targets_tried": 16
+      },
+      "curve": "icv1-f2m31-tm90707-c95f16f5",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1hb485a067d5eb"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "exhausted": 2
+      },
+      "unpriced": [],
+      "verified": 0,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 609,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 1,
+        "partition_hashes_uncharged": 498,
+        "scalar_multiplications": 70,
+        "table_entries": 47,
+        "table_inserts_uncharged": 47,
+        "table_queries_uncharged": 49,
+        "walk_steps": 498,
+        "walks": 111,
+        "wasted_merges": 0
+      },
+      "curve": "icv1-f2m31-tm90707-c95f16f5",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 1.163573622341955,
+      "mean_cold_gae": 1379.4940286292708,
+      "mean_s": 1.149820723421969,
+      "min_s": 1.1360678245019833,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 2,
+      "phase_mean_gae": {
+        "search": 397.5566310253661,
+        "setup": 981.9373976039049
+      },
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "verified": 2
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 2,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho-aa",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 609,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 1,
+        "partition_hashes_uncharged": 498,
+        "scalar_multiplications": 70,
+        "table_entries": 47,
+        "table_inserts_uncharged": 47,
+        "table_queries_uncharged": 49,
+        "walk_steps": 498,
+        "walks": 111,
+        "wasted_merges": 0
+      },
+      "curve": "icv1-f2m31-tm90707-c95f16f5",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 1.163573622341955,
+      "mean_cold_gae": 1379.4940286292708,
+      "mean_s": 1.149820723421969,
+      "min_s": 1.1360678245019833,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 2,
+      "phase_mean_gae": {
+        "search": 397.5566310253661,
+        "setup": 981.9373976039049
+      },
+      "ratio_null_if_censored": true,
+      "records": 2,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "binary-shape",
+      "session_id": "ECBS1h7c93eeb972ac",
+      "statuses": {
+        "verified": 2
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 2,
+      "wall_time_result": null
+    }
+  ],
+  "session": "binary-shape"
+}

@@ -1,0 +1,298 @@
+{
+  "ledger": {
+    "audit_ok": true,
+    "measured": 16,
+    "name": "orbit-heldout",
+    "problems": [],
+    "records": 16,
+    "replays": 16,
+    "session_id": "ECBS1h0a3c84bf9ac2",
+    "verified_records": 16
+  },
+  "metadata": {
+    "binary_sha256": "50a5739fadcb08ab8f170d4fe03ba3427fb0fd387c1a5918843fcda4d68ff1fb",
+    "child_env": {
+      "HOME": "/home/agent",
+      "LC_ALL": "C",
+      "OMP_NUM_THREADS": "1",
+      "PATH": "/workspace/toolchains/cargo/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+      "RAYON_NUM_THREADS": "1",
+      "RUST_BACKTRACE": "0",
+      "RUST_MIN_STACK": "8388608"
+    },
+    "child_env_sha256": "ae63b5dd5b3559eade83c5719a86a19a091b41ee5a2786aaf2826dc1b9176287",
+    "cpu_plan": null,
+    "env_class_id": "ECBENV2h96c931cc33fa",
+    "eviction": null,
+    "executions_planned": 16,
+    "finished_unix_ms": 1792038779255,
+    "git_commit": "0cbc86b2c828f1aa7fae62282913cce9ea6e099d",
+    "git_dirty": false,
+    "grading_version": 2,
+    "host_sha256": "a3d9ee8f4b91b261cd0cffbe65e5e573b1bbc3a451235674f798ae8fa9365e28",
+    "label": "Held-out degree37 rank/yield diagnostic",
+    "options": {
+      "allow_busy": true,
+      "cpus": "none",
+      "exe": "/proc/self/exe",
+      "lock_path": "/tmp/crypto-bench.lock",
+      "thresholds": {
+        "max_other_cpu": 0.1,
+        "max_preemptions_per_second": 50.0,
+        "max_psi": 5.0,
+        "settle_seconds": 2.0
+      },
+      "wait_for_lock": true
+    },
+    "plan_sha256": "4772d814854a9c555f8df76eeb55cb8d9d2d897bf6a6252fc99b3de2c676672a",
+    "preflight": null,
+    "records_sha256": "d865da5eeec96d0328518ddc6e82e3c996861812766c1a6068927b804bc3de6a",
+    "records_written": 16,
+    "runner_cpus": null,
+    "runner_on_run_cpu": false,
+    "schema": "ecbench.session/v1",
+    "session_id": "ECBS1h0a3c84bf9ac2",
+    "spec_id": "ECS1h7f80c6d5a7b9",
+    "spec_sha256": "7f80c6d5a7b98df2764cb89a2530b8a16d46f107b7776e5deff3d70d502f8378",
+    "started_unix_ms": 1792038778730,
+    "status": "complete",
+    "status_counts": {
+      "verified": 16
+    },
+    "ticks_per_second": 100
+  },
+  "path": "reports/run-20261015T0432Z-orbit-heldout",
+  "rows": [
+    {
+      "arm": "orbit-c4",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 409510,
+        "factor_base_columns": 16,
+        "factor_base_signed_points": 1184,
+        "frobenius_maps_uncharged": 2980,
+        "independent_rows": 20,
+        "matrix_entries_scanned_uncharged": 372,
+        "matrix_multiply_subtracts_uncharged": 202,
+        "matrix_normalizations_uncharged": 120,
+        "pair_visits": 4736,
+        "point_checked_relations": 20,
+        "rank": 20,
+        "raw_x_lifts_uncharged": 112,
+        "scalar_inversions_uncharged": 20,
+        "scalar_products_uncharged": 208,
+        "table_complete": 4,
+        "table_entries": 2324,
+        "table_inserts_uncharged": 4736,
+        "table_probes_uncharged": 404758,
+        "trials": 1384
+      },
+      "curve": "icv1-f2m37-tm534059-32aad96b",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h59c2afb528bf"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": 11.865762224947652,
+      "mean_cold_gae": 130085.0,
+      "mean_s": 8.566325796981587,
+      "min_s": 6.870643056678894,
+      "paired_complete_counted_ratio_candidate_over_rho": 29.48440128498138,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "factor_base": 60.0,
+        "linear_algebra": 0.0,
+        "oracle_setup": 1184.0,
+        "target_PDP": 101189.5,
+        "target_query": 27068.5,
+        "target_relation_check": 583.0
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-heldout",
+      "session_id": "ECBS1h0a3c84bf9ac2",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"frobenius_maps_uncharged\"",
+        "\"matrix_entries_scanned_uncharged\"",
+        "\"matrix_multiply_subtracts_uncharged\"",
+        "\"matrix_normalizations_uncharged\"",
+        "\"raw_x_lifts_uncharged\"",
+        "\"scalar_inversions_uncharged\"",
+        "\"scalar_products_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_probes_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "orbit-c8",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 137390,
+        "factor_base_columns": 32,
+        "factor_base_signed_points": 2368,
+        "frobenius_maps_uncharged": 10688,
+        "independent_rows": 32,
+        "matrix_entries_scanned_uncharged": 960,
+        "matrix_multiply_subtracts_uncharged": 293,
+        "matrix_normalizations_uncharged": 320,
+        "pair_visits": 18944,
+        "point_checked_relations": 32,
+        "rank": 32,
+        "raw_x_lifts_uncharged": 148,
+        "scalar_inversions_uncharged": 32,
+        "scalar_products_uncharged": 244,
+        "table_complete": 4,
+        "table_entries": 9380,
+        "table_inserts_uncharged": 18944,
+        "table_probes_uncharged": 118414,
+        "trials": 225
+      },
+      "curve": "icv1-f2m37-tm534059-32aad96b",
+      "errors": [],
+      "factor_base_ids": [
+        "FB1h911264772c4a"
+      ],
+      "fully_priced_cost_ratio": null,
+      "max_s": 3.4383177832786225,
+      "mean_cold_gae": 39764.0,
+      "mean_s": 2.618529261568788,
+      "min_s": 1.9347246178676945,
+      "paired_complete_counted_ratio_candidate_over_rho": 9.012705021301453,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "factor_base": 108.0,
+        "linear_algebra": 0.0,
+        "oracle_setup": 4736.0,
+        "target_PDP": 29603.5,
+        "target_query": 4399.25,
+        "target_relation_check": 917.25
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-heldout",
+      "session_id": "ECBS1h0a3c84bf9ac2",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"frobenius_maps_uncharged\"",
+        "\"matrix_entries_scanned_uncharged\"",
+        "\"matrix_multiply_subtracts_uncharged\"",
+        "\"matrix_normalizations_uncharged\"",
+        "\"raw_x_lifts_uncharged\"",
+        "\"scalar_inversions_uncharged\"",
+        "\"scalar_products_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_probes_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 11810,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 2,
+        "partition_hashes_uncharged": 10964,
+        "scalar_multiplications": 140,
+        "table_entries": 721,
+        "table_inserts_uncharged": 721,
+        "table_queries_uncharged": 725,
+        "walk_steps": 10964,
+        "walks": 846,
+        "wasted_merges": 0
+      },
+      "curve": "icv1-f2m37-tm534059-32aad96b",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 0.30275305376929057,
+      "mean_cold_gae": 4411.993946991288,
+      "mean_s": 0.2905375528634207,
+      "min_s": 0.27733427560397644,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "search": 3078.5137668849675,
+        "setup": 1333.4801801063204
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-heldout",
+      "session_id": "ECBS1h0a3c84bf9ac2",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    },
+    {
+      "arm": "rho-aa",
+      "audit_ok": true,
+      "counter_sums": {
+        "canonicalisations_uncharged": 11810,
+        "capped_walks": 0,
+        "failed_collisions": 0,
+        "fruitless_walks": 2,
+        "partition_hashes_uncharged": 10964,
+        "scalar_multiplications": 140,
+        "table_entries": 721,
+        "table_inserts_uncharged": 721,
+        "table_queries_uncharged": 725,
+        "walk_steps": 10964,
+        "walks": 846,
+        "wasted_merges": 0
+      },
+      "curve": "icv1-f2m37-tm534059-32aad96b",
+      "errors": [],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": 0.30275305376929057,
+      "mean_cold_gae": 4411.993946991288,
+      "mean_s": 0.2905375528634207,
+      "min_s": 0.27733427560397644,
+      "paired_complete_counted_ratio_candidate_over_rho": 1.0,
+      "paired_successes": 4,
+      "phase_mean_gae": {
+        "search": 3078.5137668849675,
+        "setup": 1333.4801801063204
+      },
+      "ratio_null_if_censored": true,
+      "records": 4,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "orbit-heldout",
+      "session_id": "ECBS1h0a3c84bf9ac2",
+      "statuses": {
+        "verified": 4
+      },
+      "unpriced": [
+        "\"canonicalisations_uncharged\"",
+        "\"partition_hashes_uncharged\"",
+        "\"table_inserts_uncharged\"",
+        "\"table_queries_uncharged\""
+      ],
+      "verified": 4,
+      "wall_time_result": null
+    }
+  ],
+  "session": "orbit-heldout"
+}

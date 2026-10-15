@@ -1,0 +1,25 @@
+   Compiling crypto v0.1.0 (/workspace/crypto)
+    Finished `release` profile [optimized] target(s) in 1.75s
+     Running unittests examples/ecbench_open_questions.rs (target/release/examples/ecbench_open_questions-5699c633356631cd)
+
+running 3 tests
+test analyze::tests::absent_cost_is_missing_not_zero ... ok
+test controls::tests::qubo_distinguishes_constraint_violation_and_rejects_wrong_auxiliary ... ok
+test controls::tests::tiny_semaev_encoding_replays_exactly ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests examples/ecbench_open_questions_publish.rs (target/release/examples/ecbench_open_questions_publish-05e3b1af098881f0)
+
+running 1 test
+test tests::preserve_unrelated_arrays_and_string_escapes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/ecbench_open_questions_replay_failures.rs (target/release/examples/ecbench_open_questions_replay_failures-7463440b2a78320d)
+
+running 1 test
+test tests::wall_time_does_not_mask_a_changed_integer_count ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

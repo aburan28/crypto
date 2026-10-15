@@ -1,0 +1,64 @@
+{
+  "observed_utc": "2026-10-15T08:30Z",
+  "head": "6351a6a3df065c5ffc7b81aba5d4a82157b022e6",
+  "api_base": "a80b15bbc5c1ea4f2db2b294a9bcddc31f06fdd7",
+  "state": "open",
+  "mergeable": false,
+  "mergeable_state": "dirty",
+  "remote_main": "f2c9202ca48ed16f086815fda9c0ab73f2aabcda",
+  "copilot_request": 6186854498,
+  "response_after_request": [],
+  "checks": [
+    {
+      "id": 116300497281,
+      "name": "Cursor Bugbot",
+      "status": "completed",
+      "conclusion": "neutral",
+      "summary": "Bugbot Analysis Progress (41s elapsed)\n\n✅ Gathered PR context (37s)\n✅ ❌ Bugbot run failed (4s)\n\n**Result:** Bugbot failed to run\n\nRequest ID: bd6fd11a-9b1e-498c-be60-44ceebf3dd9d"
+    },
+    {
+      "id": 116300247765,
+      "name": "review",
+      "status": "completed",
+      "conclusion": "success",
+      "summary": null
+    },
+    {
+      "id": 116300239436,
+      "name": "Cursor Approval Agent: Pull Request Router and Approver",
+      "status": "completed",
+      "conclusion": "success",
+      "summary": "Approval Agent run completed successfully\n\n[View agent](https://cursor.com/agents/bc-c3910392-6889-4d22-a91f-cc59698e7144)"
+    }
+  ],
+  "workflow_runs": [],
+  "commit_status": "pending",
+  "reviews": [
+    {
+      "id": "PRR_kwDOSMdswM8AAAABSVGmxw",
+      "state": "COMMENTED",
+      "submitted_at": "2026-10-14T21:42:14Z",
+      "body": "<details>\n<summary>Stale comment</summary>\n\n<blockquote>\n\nNot approved. Cursor Bugbot could not review this PR because it is too large, so the required automated-review signal is incomplete and human review is needed; no reviewers were assigned."
+    },
+    {
+      "id": "PRR_kwDOSMdswM8AAAABSVMlhg",
+      "state": "COMMENTED",
+      "submitted_at": "2026-10-14T21:50:15Z",
+      "body": "<!-- CURSOR_AUTOMATION_ID: 7b157c4c-9426-11f1-ba66-0e7d0216e441 | RUN_ID: bc-167bc0ed-6ef4-41f5-9500-457337e530fd -->\nNot approved. Cursor Bugbot could not review this PR because it is too large, so the automated-review signal is incomplete and human review is needed; no reviewers were assigned."
+    },
+    {
+      "id": "PRR_kwDOSMdswM8AAAABSYkWcA",
+      "state": "COMMENTED",
+      "submitted_at": "2026-10-15T05:44:30Z",
+      "body": "<!-- CURSOR_AUTOMATION_ID: 7b157c4c-9426-11f1-ba66-0e7d0216e441 | RUN_ID: bc-9a527eed-81af-4226-88c3-d4b438234d01 -->\nNot approved. Cursor Bugbot did not complete a review (usage limit / PR too large), so the automated-review signal is incomplete and human review is needed; no reviewers were assigned."
+    },
+    {
+      "id": "PRR_kwDOSMdswM8AAAABSZaNyg",
+      "state": "COMMENTED",
+      "submitted_at": "2026-10-15T07:24:50Z",
+      "body": "<!-- CURSOR_AUTOMATION_ID: 7b157c4c-9426-11f1-ba66-0e7d0216e441 | RUN_ID: bc-c3910392-6889-4d22-a91f-cc59698e7144 -->\nNot approved. Cursor Bugbot skipped this PR after hitting a usage limit and previously reporting it as too large, so the automated-review signal is incomplete and human review is needed; no reviewers were assigned."
+    }
+  ],
+  "review_threads": [],
+  "fallback_comment": 6187909093
+}

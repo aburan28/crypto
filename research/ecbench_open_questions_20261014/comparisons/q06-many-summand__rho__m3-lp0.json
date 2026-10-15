@@ -1,0 +1,134 @@
+{
+  "schema": "ecbench.comparison/v1",
+  "comparison_id": "ECC1h2b16dba2e3ae",
+  "a": {
+    "session_id": "ECBS1h75bd75f60dbe",
+    "arm": "rho",
+    "method_id": "ECM1hb6123afffc07",
+    "method": "rho.signed_frobenius_strong",
+    "measured": 8,
+    "verified": 8,
+    "statuses": {
+      "verified": 8
+    },
+    "mean_s": 23.702042612820563,
+    "mean_ratio_to_floor": 88.70276884397285,
+    "lower_bound": true,
+    "deterministic": true
+  },
+  "b": {
+    "session_id": "ECBS1h75bd75f60dbe",
+    "arm": "m3-lp0",
+    "method_id": "ECM1hbdb08a878221",
+    "method": "ic.large_prime",
+    "measured": 8,
+    "verified": 0,
+    "statuses": {
+      "exhausted": 8
+    },
+    "mean_s": null,
+    "mean_ratio_to_floor": null,
+    "lower_bound": true,
+    "deterministic": true
+  },
+  "workloads": [
+    {
+      "workload_id": "W76b3097f7f27",
+      "slug": "icv1-f2m11-t67-05f5aa36",
+      "r": 991,
+      "floor_s": 0.26720747189427857,
+      "pairs": 0,
+      "a_mean_s": null,
+      "b_mean_s": null,
+      "ratio_b_over_a": null
+    },
+    {
+      "workload_id": "Wb0312f6a3b65",
+      "slug": "icv1-f2m11-t67-05f5aa36",
+      "r": 991,
+      "floor_s": 0.26720747189427857,
+      "pairs": 0,
+      "a_mean_s": null,
+      "b_mean_s": null,
+      "ratio_b_over_a": null
+    },
+    {
+      "workload_id": "Wf00818753e1a",
+      "slug": "icv1-f2m11-t67-05f5aa36",
+      "r": 991,
+      "floor_s": 0.26720747189427857,
+      "pairs": 0,
+      "a_mean_s": null,
+      "b_mean_s": null,
+      "ratio_b_over_a": null
+    },
+    {
+      "workload_id": "Wf8ed0e835946",
+      "slug": "icv1-f2m11-t67-05f5aa36",
+      "r": 991,
+      "floor_s": 0.26720747189427857,
+      "pairs": 0,
+      "a_mean_s": null,
+      "b_mean_s": null,
+      "ratio_b_over_a": null
+    }
+  ],
+  "curves": [
+    {
+      "slug": "icv1-f2m11-t67-05f5aa36",
+      "log2_r": 9.952741247186488,
+      "workloads": 4,
+      "pairs": 0,
+      "ratio_b_over_a": null,
+      "ci95": null,
+      "ci_method": "within"
+    }
+  ],
+  "ops": {
+    "status": "empty",
+    "unit": "ecbench.gae",
+    "ratio_b_over_a": null,
+    "ci95": null,
+    "ci_method": "within",
+    "pairs": 0,
+    "unpaired_runs": 8,
+    "same_seeds": true,
+    "same_session": true,
+    "pooled_curves": 1,
+    "bounded": true,
+    "resamples": 4000
+  },
+  "wall": {
+    "status": "descriptive",
+    "reasons": [
+      "0 admitted pairs; at least 5 are needed"
+    ],
+    "required_level": "L2",
+    "pairs": 0,
+    "pairs_below_level": 0,
+    "median_ratio": null,
+    "ci95": null,
+    "aa_arms": null,
+    "aa_pairs": 0,
+    "aa_median_ratio": null,
+    "aa_ci95": null,
+    "outside_noise": null
+  },
+  "quality": {
+    "score": 0,
+    "rubric": "average paired isolation points (L0=0, L1=40, L2=75, L3=90); +10 only for an L2-or-higher A/A 95% interval containing 1 within [0.9,1.1]",
+    "paired_attempts": 8,
+    "verified_pairs": 0,
+    "admitted_pairs": 0,
+    "levels": {
+      "unverified": 8
+    },
+    "p95_foreign_busy_percent": null,
+    "p95_run_queue_percent": null,
+    "contention_observed_runs": 0,
+    "notes": [
+      "no admitted A/A interval; calibration bonus unavailable"
+    ]
+  },
+  "verdict": "ops (empty): m3-lp0 / rho = unknown (within) over 0 pairs on 4 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (0 admitted pairs; at least 5 are needed)"
+}

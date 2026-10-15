@@ -1,0 +1,37 @@
+{
+  "schema": "ecbench.resources/v1",
+  "session_id": "ECBS1h53a6cde45d82",
+  "records_sha256": "221c11d4af49f6eed54df0f4c8194a5f3f07b32375396f5856b6122e695277a4",
+  "scope": "all measured attempts; solve PMU excludes process startup",
+  "arms": [
+    {
+      "arm": "legacy-ic",
+      "method": "ic.pipeline_counted",
+      "measured": 1,
+      "verified": 0,
+      "statuses": {
+        "error": 1
+      },
+      "lower_bound": false,
+      "unpriced_units": [],
+      "total_gae_sum": null,
+      "process_wall_ns_sum": 28728702,
+      "user_ns_sum": 24309000,
+      "sys_ns_sum": 4051000,
+      "solve_wall_ns_sum": null,
+      "peak_rss_kib": 26872,
+      "instructions_sum": null,
+      "cycles_sum": null,
+      "pmu_complete_runs": 0,
+      "pmu_errors": [],
+      "phase_gae_totals": {},
+      "phase_wall_ns_totals": {},
+      "phase_wall_covered_runs": {},
+      "online_wall_ns_sum": null,
+      "online_complete_runs": 0,
+      "online_phase_ns_totals": {},
+      "phase_native_totals": {},
+      "method_counter_totals": {}
+    }
+  ]
+}

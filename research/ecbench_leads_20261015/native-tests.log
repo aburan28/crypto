@@ -1,0 +1,12 @@
+   Compiling crypto v0.1.0 (/workspace/crypto)
+    Finished `release` profile [optimized] target(s) in 4m 49s
+     Running unittests src/lib.rs (target/release/deps/crypto_lib-dc60caf0642b04d8)
+
+running 4 tests
+test cryptanalysis::ecbench::orbit_ic::tests::wide_rank_keeps_modulus_and_coefficients_above_one_word ... ok
+test cryptanalysis::ecbench::orbit_ic::tests::deterministic_pair_cap_preserves_incomplete_setup_work ... ok
+test cryptanalysis::ecbench::orbit_ic::tests::same_collector_recovers_with_wide_field_and_scalar_types ... ok
+test cryptanalysis::ecbench::orbit_ic::tests::exact_and_quotient_collectors_recover_and_replay_same_points ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 4206 filtered out; finished in 0.03s
+

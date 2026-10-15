@@ -1,0 +1,42 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "compact-orbit-scan:columns=4,raw_x_cap=4096",
+          "linalg": "incremental-gauss",
+          "max_trials": "256",
+          "oracle": "mitm-frobenius:m=3",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "legacy-ic",
+      "role": "candidate"
+    }
+  ],
+  "description": "PROTOCOL-v1.md; fresh public single-target workloads, cold bounded counts; no wall or asymptotic claim",
+  "label": "Preserve previous wide pipeline applicability control",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261015,
+    "timeout_seconds": 180,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 83
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261015,
+    "targets_per_curve": 1
+  }
+}

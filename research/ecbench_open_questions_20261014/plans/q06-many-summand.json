@@ -1,0 +1,303 @@
+{
+  "arms": [
+    {
+      "method": {
+        "entry": "koblitz_strong_rho::StrongRho::solve",
+        "family": "rho",
+        "id": "rho.signed_frobenius_strong",
+        "method_id": "ECM1hb6123afffc07",
+        "method_sha256": "b6123afffc07ac34d98ef18a4c1a3ec1e0f14583933b9329680417044aa15707",
+        "params": {
+          "dp_bits": "4",
+          "lanes": "32",
+          "step_cap_factor": "2000"
+        }
+      },
+      "name": "rho",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "entry": "koblitz_strong_rho::StrongRho::solve",
+        "family": "rho",
+        "id": "rho.signed_frobenius_strong",
+        "method_id": "ECM1hb6123afffc07",
+        "method_sha256": "b6123afffc07ac34d98ef18a4c1a3ec1e0f14583933b9329680417044aa15707",
+        "params": {
+          "dp_bits": "4",
+          "lanes": "32",
+          "step_cap_factor": "2000"
+        }
+      },
+      "name": "rho-aa",
+      "role": "control"
+    },
+    {
+      "method": {
+        "entry": "ecbench_large_prime::solve",
+        "family": "ic",
+        "id": "ic.large_prime",
+        "method_id": "ECM1hbdb08a878221",
+        "method_sha256": "bdb08a878221c14849794b8b122c3252f5f42216c3f4b467bf6183797785b8c3",
+        "params": {
+          "envelope_dimension": "4",
+          "large_primes": "0",
+          "max_states": "100000",
+          "max_trials": "256",
+          "small_dimension": "3",
+          "summands": "3"
+        }
+      },
+      "name": "m3-lp0",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "entry": "ecbench_large_prime::solve",
+        "family": "ic",
+        "id": "ic.large_prime",
+        "method_id": "ECM1hff51ce13c898",
+        "method_sha256": "ff51ce13c898625e0db65195e3c002094ca8b60ff440044b37f393e296f223dd",
+        "params": {
+          "envelope_dimension": "4",
+          "large_primes": "0",
+          "max_states": "100000",
+          "max_trials": "256",
+          "small_dimension": "3",
+          "summands": "4"
+        }
+      },
+      "name": "m4-lp0",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "entry": "ecbench_large_prime::solve",
+        "family": "ic",
+        "id": "ic.large_prime",
+        "method_id": "ECM1h7e1d592206de",
+        "method_sha256": "7e1d592206de6ac36af74ac46c323b0f08cbf8fcd667b39b0128ecd31427904c",
+        "params": {
+          "envelope_dimension": "4",
+          "large_primes": "0",
+          "max_states": "100000",
+          "max_trials": "256",
+          "small_dimension": "3",
+          "summands": "6"
+        }
+      },
+      "name": "m6-lp0",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "entry": "ecbench_large_prime::solve",
+        "family": "ic",
+        "id": "ic.large_prime",
+        "method_id": "ECM1h422c0d3626eb",
+        "method_sha256": "422c0d3626eb35027fff1d7c1f5aeaecd9b231514ec4445e5f1b3aedc064ae1e",
+        "params": {
+          "envelope_dimension": "4",
+          "large_primes": "0",
+          "max_states": "100000",
+          "max_trials": "256",
+          "small_dimension": "3",
+          "summands": "n-1"
+        }
+      },
+      "name": "mn-1-lp0",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "entry": "ecbench_large_prime::solve",
+        "family": "ic",
+        "id": "ic.large_prime",
+        "method_id": "ECM1h6204bafe658f",
+        "method_sha256": "6204bafe658f00c99d0b19dbbc06c8f4af1f442c4047774eff6df5b6e310635e",
+        "params": {
+          "envelope_dimension": "4",
+          "large_primes": "1",
+          "max_states": "100000",
+          "max_trials": "256",
+          "small_dimension": "3",
+          "summands": "3"
+        }
+      },
+      "name": "m3-lp1",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "entry": "ecbench_large_prime::solve",
+        "family": "ic",
+        "id": "ic.large_prime",
+        "method_id": "ECM1hc9c18a41e561",
+        "method_sha256": "c9c18a41e561369b1eadc3209582f975f7646254962b51d8dd4ea963923992da",
+        "params": {
+          "envelope_dimension": "4",
+          "large_primes": "2",
+          "max_states": "100000",
+          "max_trials": "256",
+          "small_dimension": "3",
+          "summands": "3"
+        }
+      },
+      "name": "m3-lp2",
+      "role": "candidate"
+    }
+  ],
+  "executions": 64,
+  "spec_id": "ECS1h8e0488d11238",
+  "spec_sha256": "8e0488d11238f6aa58289f8a23b02e9a0a39daed4a16a3f7ed50902a0dcea565",
+  "workloads": [
+    {
+      "curve": {
+        "automorphisms_available": 22,
+        "cofactor": 2,
+        "construction": "KoblitzCurve::new(1, 11)",
+        "curve_uid": "urn:ec-record:1:sha256:db35b3c53d5e83502d4e384af4ed5841adfdb97c9747a1eca35c242044d411e5",
+        "ec1": "EC1N11Ce1hdb35b3c53d5e",
+        "family": "koblitz",
+        "field_bits": null,
+        "field_degree": 11,
+        "generator": [
+          "0x742",
+          "0x710"
+        ],
+        "group_order": 1982,
+        "icv1": "ICV1:f2m-11-79b256b0:67:1982:0x1:-7:unk:r:05f5aa361fec",
+        "r": 991,
+        "registered": true,
+        "slug": "icv1-f2m11-t67-05f5aa36"
+      },
+      "curve_spec": {
+        "a": 1,
+        "kind": "koblitz",
+        "n": 11
+      },
+      "planted": null,
+      "target": [
+        "0x9d",
+        "0x3ec"
+      ],
+      "target_counter": 0,
+      "target_index": 0,
+      "target_law": "hash_to_subgroup_v1",
+      "target_seed": 20261014,
+      "workload_id": "Wb0312f6a3b65",
+      "workload_sha256": "b0312f6a3b652e25c433a8d662a1027efae17bf290b056d1d25a67b6ebed2555"
+    },
+    {
+      "curve": {
+        "automorphisms_available": 22,
+        "cofactor": 2,
+        "construction": "KoblitzCurve::new(1, 11)",
+        "curve_uid": "urn:ec-record:1:sha256:db35b3c53d5e83502d4e384af4ed5841adfdb97c9747a1eca35c242044d411e5",
+        "ec1": "EC1N11Ce1hdb35b3c53d5e",
+        "family": "koblitz",
+        "field_bits": null,
+        "field_degree": 11,
+        "generator": [
+          "0x742",
+          "0x710"
+        ],
+        "group_order": 1982,
+        "icv1": "ICV1:f2m-11-79b256b0:67:1982:0x1:-7:unk:r:05f5aa361fec",
+        "r": 991,
+        "registered": true,
+        "slug": "icv1-f2m11-t67-05f5aa36"
+      },
+      "curve_spec": {
+        "a": 1,
+        "kind": "koblitz",
+        "n": 11
+      },
+      "planted": null,
+      "target": [
+        "0x368",
+        "0x18d"
+      ],
+      "target_counter": 1,
+      "target_index": 1,
+      "target_law": "hash_to_subgroup_v1",
+      "target_seed": 20261014,
+      "workload_id": "Wf00818753e1a",
+      "workload_sha256": "f00818753e1a0b923e535e3f3a33ca4bf9b83e38be30f8cab2c6091e350cea89"
+    },
+    {
+      "curve": {
+        "automorphisms_available": 22,
+        "cofactor": 2,
+        "construction": "KoblitzCurve::new(1, 11)",
+        "curve_uid": "urn:ec-record:1:sha256:db35b3c53d5e83502d4e384af4ed5841adfdb97c9747a1eca35c242044d411e5",
+        "ec1": "EC1N11Ce1hdb35b3c53d5e",
+        "family": "koblitz",
+        "field_bits": null,
+        "field_degree": 11,
+        "generator": [
+          "0x742",
+          "0x710"
+        ],
+        "group_order": 1982,
+        "icv1": "ICV1:f2m-11-79b256b0:67:1982:0x1:-7:unk:r:05f5aa361fec",
+        "r": 991,
+        "registered": true,
+        "slug": "icv1-f2m11-t67-05f5aa36"
+      },
+      "curve_spec": {
+        "a": 1,
+        "kind": "koblitz",
+        "n": 11
+      },
+      "planted": null,
+      "target": [
+        "0x511",
+        "0x88"
+      ],
+      "target_counter": 0,
+      "target_index": 2,
+      "target_law": "hash_to_subgroup_v1",
+      "target_seed": 20261014,
+      "workload_id": "Wf8ed0e835946",
+      "workload_sha256": "f8ed0e83594638e9d409d68dc82f33be86e806e7f544ae29e917040a4c615a63"
+    },
+    {
+      "curve": {
+        "automorphisms_available": 22,
+        "cofactor": 2,
+        "construction": "KoblitzCurve::new(1, 11)",
+        "curve_uid": "urn:ec-record:1:sha256:db35b3c53d5e83502d4e384af4ed5841adfdb97c9747a1eca35c242044d411e5",
+        "ec1": "EC1N11Ce1hdb35b3c53d5e",
+        "family": "koblitz",
+        "field_bits": null,
+        "field_degree": 11,
+        "generator": [
+          "0x742",
+          "0x710"
+        ],
+        "group_order": 1982,
+        "icv1": "ICV1:f2m-11-79b256b0:67:1982:0x1:-7:unk:r:05f5aa361fec",
+        "r": 991,
+        "registered": true,
+        "slug": "icv1-f2m11-t67-05f5aa36"
+      },
+      "curve_spec": {
+        "a": 1,
+        "kind": "koblitz",
+        "n": 11
+      },
+      "planted": null,
+      "target": [
+        "0x1f5",
+        "0x685"
+      ],
+      "target_counter": 1,
+      "target_index": 3,
+      "target_law": "hash_to_subgroup_v1",
+      "target_seed": 20261014,
+      "workload_id": "W76b3097f7f27",
+      "workload_sha256": "76b3097f7f27b8a4df3e14b1df1909a24f545c0111eca4d8db6cda8c0ca9c403"
+    }
+  ]
+}

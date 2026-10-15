@@ -1,0 +1,11 @@
+[package]
+name = "ecbench-ten-question-publish"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+serde = "1"
+serde_json = { version = "1", features = ["arbitrary_precision", "raw_value"] }
+sha2 = "0.10"

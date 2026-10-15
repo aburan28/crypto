@@ -1,0 +1,30 @@
+....check_feed_age: feed is stale: generated_at 2026-10-14T22:50:25Z is 500 min old, over the 60 min limit.
+check_feed_age: feed is stale: generated_at 2026-10-14T22:50:25Z is 500 min old, over the 60 min limit.
+check_feed_age: --warn-only, not failing the run
+check_feed_age: cannot read /tmp/tmp0n8sbaw8/absent.json: [Errno 2] No such file or directory: '/tmp/tmp0n8sbaw8/absent.json'
+......E................ingest feed is not a usable ecc2k-130 snapshot
+.............................
+======================================================================
+ERROR: setUpClass (__main__.FetchScriptTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/rho_status/test_rho_status.py", line 1060, in setUpClass
+    port = _free_port()
+           ^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/rho_status/test_rho_status.py", line 1025, in _free_port
+    with socket.socket() as sock:
+         ^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/socket.py", line 233, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 55 tests in 0.009s
+
+FAILED (errors=1)
+check_feed_age: feed is current: generated_at 2026-10-14T22:50:25Z is 500 min old, within the 1667 min limit
+no walk rate yet: needs two published snapshots with an iteration total
+no walk rate yet: needs two published snapshots with an iteration total
+no walk rate yet: needs two published snapshots with an iteration total
+walk rate 72.528 B it/s over 1504 s
+wrote ingest-feed snapshot: dps=187000000 state=COLLECTING generated_at=2026-09-19T03:44:00Z age=2258785s

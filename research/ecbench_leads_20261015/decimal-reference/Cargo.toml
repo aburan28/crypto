@@ -1,0 +1,9 @@
+[package]
+name = "ecbench-v1-decimal-reference"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+serde_json = { version = "=1.0.145", default-features = false, features = ["std"] }

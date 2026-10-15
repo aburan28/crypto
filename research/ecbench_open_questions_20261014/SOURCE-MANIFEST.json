@@ -1,0 +1,20 @@
+{
+  "schema":"ecbench-ten-question-source/v1",
+  "measurement_commit":"c716e462934128c75e99dd458748e08623a2708c",
+  "baseline_commit":"f9011e5375155bd9ef7839abe4eea12718e4b401",
+  "measured_binary_sha256":"cc5bba39d33465ddc1b1d31af8ac25c6680d41193fc76012d9a1019b6046f02d",
+  "measurement_rustc":"1.99.0 (b940084d7 2026-09-28)",
+  "ci_lint_toolchain":"1.98.0 (88d9e12ae 2026-08-18)",
+  "input_manifest":"source-inputs.sha256",
+  "locked_dependencies":"locked/Cargo.lock",
+  "native_method_implementations_changed":false,
+  "measurement_tree_clean":true,
+  "structural_controls_v2":"controls.json",
+  "structural_controls_v3":"controls-v3.json",
+  "first_failed_replay":"failed-replays.json",
+  "accepted_failed_replay":"failed-replays-v2.json",
+  "public_target_law":"hash_to_subgroup_v1",
+  "independent_host_receipt":null,
+  "wall_speedup_claim":null,
+  "asymptotic_claim":null
+}

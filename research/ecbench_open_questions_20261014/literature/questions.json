@@ -1,0 +1,428 @@
+{
+  "title": "Ten open questions for elliptic curve index calculus",
+  "date": "2026-10-12",
+  "review_date": "2026-10-14",
+  "scope": "The ranking prioritizes potential changes to attack complexity and concrete leads in the connected aburan28/cryptanalysis repository and its prime-field companion repositories. It is a research prioritization, not a consensus ranking. Established theoretical problems and repo-derived questions are labeled separately.",
+  "definitions": "Prime-field curves are E(F_p) for prime p. Binary curves are ordinary curves over F_(2^n), with emphasis on prime n. Koblitz means binary subfield curves defined over F_2 and used over F_(2^n), a subset of binary curves. The prime-field j = 0 curve secp256k1 is included in the prime-field scope even though it is sometimes called a Koblitz curve. Throughout, r is the prime DLP subgroup order, n is an extension degree, m is the summand count, B is the actual usable factor-base point count, and C is the effective number of relation-matrix columns.",
+  "evidence": "Repository results are reported as committed measurements, controls or conjectures. Published papers were checked at their primary pages or author manuscripts. The recent sources include the 2023 solving-degree paper, the 2024 Safe Curves survey and annealing paper, and September 2026 Hamming-ideal and annealing papers. Older 2020–2021 papers define construction and Frobenius questions that remain relevant. This synthesis adds no new measured attack or proof.",
+  "current_state": "The reviewed evidence establishes no practical classical index-calculus improvement on the cryptographic prime-field or prime-degree binary/Koblitz instances considered here. Generic square-root lower bounds constrain black-box algorithms; they do not prove that coordinate-based index calculus is impossible. The repo's October 1, 2026 status note explicitly disclaims an ECDLP speedup from its volcano experiments.",
+  "solved_boundary": "Frobenius acceleration itself is already established: Galbraith et al. obtain, under their conditions, about n fewer collected relations and an n^2 saving in final relation algebra. The unresolved issue is whether usable decompositions and the rest of the pipeline make those reductions competitive with Frobenius-accelerated rho. The shifted-base m! mechanism is also prior work, and the linearized two-point splitting idea has prior art.",
+  "questions": [
+    {
+      "rank": 1,
+      "title": "Can prime-field curves admit a sparse factor base with genuinely cheap decomposition?",
+      "fields": "Prime fields",
+      "status": "Broad theoretical open problem",
+      "question": "For a nonspecial E(F_p) subgroup of order r, can a coordinate-defined factor base support enough efficiently found m-point relations to make complete classical index calculus asymptotically faster than square-root search?",
+      "basis": "The prime-field repo's interval, multiplicative-subgroup, lattice and p-adic experiments expose obstacles in those particular constructions. Its Hecke follow-up also identifies designated relations that additive-closure or Fourier tests would miss. Published prime-field algebraic methods remain limited by decomposition and polynomial solving.",
+      "open": "Find a target-independent decomposition algorithm, rather than assume a free oracle. A null closure test is not a proof against every non-generic construction. A base of size r^(1/3) and fast relation generation alone do not establish a speedup: final relation solving and target recovery must also fit the budget.",
+      "resolution": "Give a parameterized family, an explicit membership and decomposition algorithm, a natural-query success estimate, and costs for relation rank, matrix solving and target recovery. For an experimental lead, freeze unseen targets and compare the measured exponent against tuned rho.",
+      "sources": [
+        "R2",
+        "R3",
+        "R16",
+        "P10",
+        "P2"
+      ]
+    },
+    {
+      "rank": 2,
+      "title": "What is the actual solving degree of binary summation systems as the parameters grow?",
+      "fields": "Binary fields and Koblitz curves",
+      "status": "Theoretical open problem with repo evidence",
+      "question": "Can one prove, or reliably characterize, how the solving degree grows with extension degree n, base dimension l and summand count m in the regimes that could improve ECDLP complexity?",
+      "basis": "Caminata and Gorla distinguish solving degree from first fall degree and related invariants. The repo measures a strong two-summand degree predictor, but labels its degree-131 table as a structural extrapolation and has no corresponding large-parameter m >= 3 result.",
+      "open": "A small first fall degree, bounded input degree, or a fit at fixed small m does not prove efficient solving when n and m grow together. Satisfiable and unsatisfiable ordinary queries can behave differently.",
+      "resolution": "Establish bounds for a specified formulation and monomial order, including field equations; then test held-out larger systems and retain censored queries. An m = 5 or 6 result needs its own evidence.",
+      "sources": [
+        "R4",
+        "P1"
+      ]
+    },
+    {
+      "rank": 3,
+      "title": "Can Frobenius orbit decomposition retain a compact algebraic witness?",
+      "fields": "Koblitz curves",
+      "status": "Repo-derived research direction",
+      "question": "Can a low-degree or sparse correspondence represent addition among signed Frobenius orbits while keeping only a small certificate of relative phases?",
+      "basis": "Galbraith et al. already establish Frobenius-based reductions in relation count and final matrix size. The repo's phase-eliminated quotient experiment found that all eight n = 19 target predicates needed degree 9 on its valid-key domain, exactly the degree where every Boolean function on that domain became representable.",
+      "open": "That negative result applies to the tested coordinates and fully eliminated predicate. Retained relative phases, nonlinear presentations and auxiliary-variable correspondences remain candidates. Orbit folding reduces the number of log unknowns; it does not automatically remove the witness search.",
+      "resolution": "Construct an exact quotient correspondence, independently lift its witnesses to curve points, and measure ordinary-query cost and independent-row yield on the same frozen base.",
+      "sources": [
+        "R5",
+        "R6",
+        "P6"
+      ]
+    },
+    {
+      "rank": 4,
+      "title": "Which Frobenius-stable nonlinear factor bases keep both yield and decomposition cost favorable?",
+      "fields": "Koblitz curves",
+      "status": "Repo-derived research direction informed by a recent paper",
+      "question": "Can nonlinear stable bases combine many usable subgroup points, few orbit columns and cheap membership constraints without moving the cost into auxiliary variables or phase search?",
+      "basis": "The repo combines normal-basis Hamming constraints with the factorized-convolution formulation of La Scala et al. (September 2026) in a complete degree-9 toy IC pipeline. The paper itself concerns syndrome decoding. The repo records no corresponding scaling result at degrees 53, 83 or 131 for that FC-Hamming method.",
+      "open": "Frobenius invariance and a bounded-degree Hamming encoding are useful ingredients, but their interaction with Semaev equations, actual subgroup density and ordinary-query solver difficulty is unsettled. Hamming weight is not the same as a linear factor-base subspace.",
+      "resolution": "Compare exact point sets and encodings on identical inputs, and measure setup, auxiliary-variable count, failed-query cost, useful rank and one-target recovery. Retain the existing weight encoding as a matched control.",
+      "sources": [
+        "R7",
+        "R6",
+        "P3",
+        "P6"
+      ]
+    },
+    {
+      "rank": 5,
+      "title": "Can explicit quasi-subfield constructions become useful at prime extension degrees?",
+      "fields": "Binary fields and Koblitz curves",
+      "status": "Published construction problem",
+      "question": "Are there explicit quasi-subfield polynomial families at the desired prime n whose rational roots yield a usable factor base and a complete attack better than the current alternatives?",
+      "basis": "Huang et al. propose quasi-subfield factor bases. Euler and Petit provide further families and an existence limitation, while explicitly reporting no resulting speedup over prior ECDLP approaches. The repo's explicit-base frontier illustrates why actual usable point counts are essential.",
+      "open": "The desired regime requires enough rational roots, subgroup-valid points and affordable decomposition. A root-set size or tuple-count upper bound does not establish natural relation yield. Extension-field constructions do not directly give prime-field smallness.",
+      "resolution": "Supply a parameter family meeting all construction hypotheses, prove or measure its usable point count and natural success rate, and account for building the base and solving its relations.",
+      "sources": [
+        "R8",
+        "R4",
+        "P8",
+        "P9"
+      ]
+    },
+    {
+      "rank": 6,
+      "title": "Can multi-summand formulations avoid paying back their degree reduction during lifting?",
+      "fields": "Binary fields and Koblitz curves",
+      "status": "Algorithmic open problem",
+      "question": "Can symmetric coordinates, chained S3 equations or hybrid solvers find verified ordinary m-point decompositions faster than existing methods after splitting and membership checks are charged?",
+      "basis": "The repo shows that symmetric two-summand equations can be linear while the remaining affine solution space is expensive to enumerate. Three-summand behavior depends strongly on the factor-base product spaces. Its linearized-half method improves a decomposition stage without producing a rho-beating complete attack.",
+      "open": "Solving for elementary symmetric values does not guarantee that the associated polynomial splits into base coordinates with a valid group relation. Planted systems test correctness and satisfiable cost; they do not price ordinary relation collection.",
+      "resolution": "Use independently labeled ordinary and planted corpora at increasing m and l. Count all splitting, sign, rationality, subgroup and failed-query work, and compare direct, chained and symmetric formulations on the same base.",
+      "sources": [
+        "R4",
+        "R10",
+        "R9",
+        "P7",
+        "P1"
+      ]
+    },
+    {
+      "rank": 7,
+      "title": "How can a collector buy independent rank and reliable target descent efficiently?",
+      "fields": "Prime fields, binary fields and Koblitz curves",
+      "status": "Algorithmic research question",
+      "question": "Which witness selection, partial-relation recombination and stopping policies minimize cost per new rank contribution and per independently recovered target log?",
+      "basis": "The repo's monitor separates relation hits, attainable rank and descended targets. Its shifted-base audit records increased geometric coverage without a demonstrated faster collector. The published subfield framework also requires a usable relation matrix before recovery.",
+      "open": "Many hits can be duplicates or dependent, and quotient or cofactor structure can create a known nullspace. More coverage alone need not accelerate target recovery. Final relation algebra is modulo r, even when the PDP solver works over F_2.",
+      "resolution": "Freeze the query stream and rank checkpoints; compare collectors by rank gained per unit work, include partial-relation graph costs, and verify fresh-target descent. State how unavoidable kernels and anchors are handled.",
+      "sources": [
+        "R4",
+        "R9",
+        "R11",
+        "P6"
+      ]
+    },
+    {
+      "rank": 8,
+      "title": "Can isogeny and Hecke mechanisms overcome their rank and transport barriers?",
+      "fields": "Prime fields; binary and Koblitz transport variants",
+      "status": "Repo conjecture and research direction",
+      "question": "Can a concrete transport or correspondence produce enough cheap, independent relations to improve the DLP, including any links needed between modular isogeny classes?",
+      "basis": "The prime-field LEADS file verifies toy Hecke relations but reports substantial rank deficiency in its class-walk model. Those ranks use a proxy modulus, so they are not a theorem about every DLP subgroup. The binary volcano study reports nearly identical attempt counts for its source and descendants.",
+      "open": "For the Hecke mechanism, persistence of the deficit at deeper smooth conductors and a useful class-connecting relation are conjectural. For curve transport, an explicit isogeny preserves the DLP when its degree is coprime to r; any gain must come from a cheaper target representation after route costs.",
+      "resolution": "Recheck rank modulo the actual subgroup prime, prove the appropriate kernel dimension, and charge explicit map and target-transport costs. Compare complete same-target runs rather than infer a benefit from a changed conductor or j-invariant.",
+      "sources": [
+        "R3",
+        "R12",
+        "R13",
+        "R18",
+        "P2"
+      ]
+    },
+    {
+      "rank": 9,
+      "title": "Can a higher-genus cover make the elliptic component cheaper to solve?",
+      "fields": "Prime fields and binary fields, including Koblitz curves",
+      "status": "Repo-derived research direction",
+      "question": "Can a cover or Jacobian construction preserve the desired elliptic subgroup and yield cheaper relation collection and target recovery for that component?",
+      "basis": "The repo has a tiny prime-field quartic norm-projection diagnostic and binary cover transfer infrastructure. It explicitly distinguishes norm relations on E from relations in the full Jacobian, where a Prym component can remain. Diem and Thome's genus-three index calculus supplies a relevant higher-genus benchmark.",
+      "open": "A map certificate is not an attack advantage. The genus-three heuristic O-tilde(q) bound is faster than rho for a group of size about q^3, but is larger than square-root search on a same-field elliptic subgroup of size about q.",
+      "resolution": "Prove pullback injectivity on the chosen subgroup, provide exact norm or pushforward operations and valid target lifts, identify the required E-component rank, and price the full pipeline against elliptic rho in the original field.",
+      "sources": [
+        "R14",
+        "R15",
+        "P11"
+      ]
+    },
+    {
+      "rank": 10,
+      "title": "Where is the verified complete-attack crossover with tuned Pollard rho?",
+      "fields": "Prime fields, binary fields and Koblitz curves",
+      "status": "Empirical and complexity research question",
+      "question": "For a precisely specified family, can any current algebraic, SAT, hybrid or quantum-annealing IC method recover an unseen target faster than tuned rho under comparable resources, and does the advantage persist as size increases?",
+      "basis": "The repo's benchmark distinguishes one-target online recovery from reusable setup and cold cost. The 2024 Edwards annealing paper reports a tiny F_1021 example; Lin et al.'s September 2026 paper reports a 16-bit prime-field demonstration. These sizes do not establish an asymptotic or cryptographic-size advantage.",
+      "open": "The target-dependent PDP, final relation solving when required, descent, verification, memory and failure distribution must be priced coherently. Koblitz rho must receive its signed-Frobenius benefit, and prime-field j = 0 or 1728 curves need their applicable automorphism controls.",
+      "resolution": "Run repeated same-point comparisons over a frozen size ladder and held-out tier. Report online one-target time as primary, reusable preprocessing and cold totals separately, and multi-target workloads with their own target count. For annealing, include embedding, classical preprocessing, readout and repetitions; establish scaling rather than extrapolate a small demonstration.",
+      "sources": [
+        "R11",
+        "R16",
+        "P4",
+        "P5",
+        "P2"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "R1",
+      "title": "cryptanalysis status and scope",
+      "url": "https://github.com/aburan28/cryptanalysis/blob/main/README.md",
+      "kind": "repository",
+      "key": "cryptanalysis_readme",
+      "observed_file_sha": "41c7109a2df35d8a74f732a57961454f3bca9801",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R2",
+      "title": "Prime-field smallness experiments",
+      "url": "https://github.com/aburan28/ecdlp-prime-field-smallness/blob/main/README.md",
+      "kind": "repository",
+      "key": "prime_readme",
+      "observed_file_sha": "e86fdf4c4190ef506623c039726831ac4792dae0",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R3",
+      "title": "Hecke relations and the class-number barrier",
+      "url": "https://github.com/aburan28/ecdlp-prime-field-smallness/blob/main/LEADS.md",
+      "kind": "repository conjecture and toy measurements",
+      "key": "prime_leads",
+      "observed_file_sha": "d7eb87a0adcdb9836f159287b043fa2f9ed4e48c",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R4",
+      "title": "Point decomposition degree and factor-base heuristics",
+      "url": "https://github.com/aburan28/cryptanalysis/blob/main/experiments/pdp-degree-heuristics/README.md",
+      "kind": "repository",
+      "key": "pdp_heuristics",
+      "observed_file_sha": "2d4852c9fc078ad3569d6304f3254020ebb2019c",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R5",
+      "title": "Orbit-valued quotient summation",
+      "url": "https://github.com/aburan28/cryptanalysis/blob/main/experiments/orbit-quotient-summation/README.md",
+      "kind": "repository",
+      "key": "orbit_sum",
+      "observed_file_sha": "49326913e8a6753c55f1b69f12a3c926ce7f2cc2",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R6",
+      "title": "Frobenius quotient decomposition budgets",
+      "url": "https://github.com/aburan28/cryptanalysis/blob/main/experiments/frobenius-quotient-m4/README.md",
+      "kind": "repository",
+      "key": "frobenius_m4",
+      "observed_file_sha": "e6407e8e9218c9f19fae33dfbb6dab32ead1ce72",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R7",
+      "title": "FC-Hamming in a complete toy IC pipeline",
+      "url": "https://github.com/aburan28/cryptanalysis/blob/main/experiments/hamming-ic-e2e-20260929/README.md",
+      "kind": "repository",
+      "key": "hamming_e2e",
+      "observed_file_sha": "b733585623f4f3862f49ad7ba05cd2f25eae5d17",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R8",
+      "title": "Exact subgroup factor-base feasibility screen",
+      "url": "https://github.com/aburan28/cryptanalysis/blob/main/experiments/pdp-scaling/EXPLICIT_BASE_FRONTIER.md",
+      "kind": "repository",
+      "key": "ordinary_frontier",
+      "observed_file_sha": "f3cfe8b4ed06235b2cd4959481dc9e0ef3ea7313",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R9",
+      "title": "Frobenius-shifted factor-base geometry",
+      "url": "https://github.com/aburan28/cryptanalysis/blob/main/experiments/shifted-base-geometry/README.md",
+      "kind": "repository",
+      "key": "shift_geometry",
+      "observed_file_sha": "86c2c87af623c41dda1b76d425423d41a19e5dbd",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R10",
+      "title": "Linearized-half decomposition and its full cost",
+      "url": "https://github.com/aburan28/cryptanalysis/blob/main/experiments/linearized-half-decomposition/README.md",
+      "kind": "repository",
+      "key": "half_decomposition",
+      "observed_file_sha": "7ecc71be7f88ec827c366c6052b727723e903c75",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R11",
+      "title": "Verified toy IC benchmark and target descent",
+      "url": "https://github.com/aburan28/cryptanalysis/blob/main/experiments/ic-bench/README.md",
+      "kind": "repository",
+      "key": "ic_bench_readme",
+      "observed_file_sha": "264ba702013153769d4d665aa567b66e10dca378",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R12",
+      "title": "Volcano IC over GF(2^19)",
+      "url": "https://github.com/aburan28/cryptanalysis/blob/main/experiments/volcano-ic/README.md",
+      "kind": "repository",
+      "key": "volcano_results",
+      "observed_file_sha": "c9defdee3b70d3c872076c5b6949e6bf12b45e09",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R13",
+      "title": "Volcano IC committed numerical summary",
+      "url": "https://github.com/aburan28/cryptanalysis/blob/main/experiments/volcano-ic/results/summary.json",
+      "kind": "repository data",
+      "key": "volcano_summary",
+      "observed_file_sha": "1197295b0808c28406c7f0a497dca0c03fce9f64",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R14",
+      "title": "Bielliptic quartic norm-projection diagnostic",
+      "url": "https://github.com/aburan28/cryptanalysis/blob/main/experiments/bielliptic-quartic/README.md",
+      "kind": "repository",
+      "key": "bielliptic",
+      "observed_file_sha": "aa09763dda50d4a75ef7d31609d51e4c6ad05418",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R15",
+      "title": "Hyperelliptic cover transfer infrastructure",
+      "url": "https://github.com/aburan28/cryptanalysis/blob/main/experiments/hyperelliptic-cover-infrastructure/README.md",
+      "kind": "repository",
+      "key": "cover_infrastructure",
+      "observed_file_sha": "ad9205eb41e4d029f17b40deb5bfdc35aeca28a6",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R16",
+      "title": "Representation track and metering",
+      "url": "https://github.com/aburan28/ecdlp-cost-challenge/blob/main/REPR_TRACK.md",
+      "kind": "repository",
+      "key": "cost_repr",
+      "observed_file_sha": "d75e799b3fd44012ecc55b9ef009083297a44c63",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R17",
+      "title": "Exact curve registry",
+      "url": "https://github.com/aburan28/cryptanalysis/blob/main/experiments/ic-candidate-catalog/curves.yaml",
+      "kind": "repository",
+      "key": "curve_registry",
+      "observed_file_sha": "75dbaf12e44a940aa4a31fd7cedef9ebe1372043",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "R18",
+      "title": "Verified isogeny route registry",
+      "url": "https://github.com/aburan28/cryptanalysis/blob/main/experiments/ic-candidate-catalog/isogeny_routes.json",
+      "kind": "repository",
+      "key": "route_registry",
+      "observed_file_sha": "4cd81f7a7b06184a0c1d4ab9d8755e482ebcf116",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "P1",
+      "title": "Caminata and Gorla, Solving degree, last fall degree, and related invariants",
+      "year": 2023,
+      "url": "https://arxiv.org/abs/2112.05579",
+      "kind": "published paper; preprint revised June 2022, journal volume 114 January–February 2023",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "P2",
+      "title": "Bernstein and Lange, Safe curves for elliptic-curve cryptography",
+      "year": 2024,
+      "url": "https://eprint.iacr.org/2024/1265",
+      "kind": "survey",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "P3",
+      "title": "La Scala, Marchesin and Tiwari, Hamming Ideals and Grobner Bases for ISD-like Syndrome Decoding",
+      "year": 2026,
+      "url": "https://arxiv.org/abs/2609.18866v2",
+      "kind": "preprint; version 2 dated September 29, 2026; syndrome decoding, not an ECDLP result",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "P4",
+      "title": "Lin et al., Solving the elliptic curve discrete logarithm problem using quantum tunneling effects on the D-Wave Advantage2 quantum computer",
+      "year": 2026,
+      "url": "https://www.sciopen.com/article/10.23919/ICN.2026.0017",
+      "kind": "published September 21, 2026; publisher abstract reports a 16-bit prime-field demonstration",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "P5",
+      "title": "Dzierzkowski and Wronski, Solving Elliptic Curve Discrete Logarithm Problem on Twisted Edwards Curves Using Quantum Annealing and Index Calculus Method",
+      "year": 2024,
+      "url": "https://www.mat.savba.sk/ojs/index.php/TATRA/article/view/945",
+      "kind": "published in volume 87 (2024); tiny prime-field demonstration",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "P6",
+      "title": "Galbraith, Granger, Merz and Petit, On Index Calculus Algorithms for Subfield Curves",
+      "year": 2021,
+      "url": "https://sacworkshop.org/SAC20/files/preproceedings/18-IndexCalculus.pdf",
+      "kind": "SAC 2020; proceedings published 2021; linked conference version",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "P7",
+      "title": "Trimoska, Ionica and Dequen, A SAT-Based Approach for Index Calculus on Binary Elliptic Curves",
+      "year": 2020,
+      "url": "https://eprint.iacr.org/2019/313",
+      "kind": "AFRICACRYPT 2020; ePrint originally 2019",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "P8",
+      "title": "Euler and Petit, New results on quasi-subfield polynomials",
+      "year": 2021,
+      "url": "https://arxiv.org/abs/1909.11326v2",
+      "kind": "Finite Fields and Their Applications 75, 101881; explicit families and limitations",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "P9",
+      "title": "Huang, Kosters, Petit, Yeo and Yun, Quasi-subfield Polynomials and the Elliptic Curve Discrete Logarithm Problem",
+      "year": 2020,
+      "url": "https://doi.org/10.1515/jmc-2015-0049",
+      "kind": "published paper",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "P10",
+      "title": "Petit, Kosters and Messeng, Algebraic Approaches for the Elliptic Curve Discrete Logarithm Problem over Prime Fields",
+      "year": 2016,
+      "url": "https://research.birmingham.ac.uk/en/publications/algebraic-approaches-for-the-elliptic-curve-discrete-logarithm-pr/",
+      "kind": "PKC 2016; author institution abstract",
+      "checked_date": "2026-10-12"
+    },
+    {
+      "id": "P11",
+      "title": "Diem and Thome, Index calculus in class groups of non-hyperelliptic curves of genus three",
+      "year": 2008,
+      "url": "https://members.loria.fr/EThome/files/non-he-genus3.pdf",
+      "kind": "Journal of Cryptology 2008; linked author preprint March 2007",
+      "checked_date": "2026-10-12"
+    }
+  ],
+  "graph_audit": "Checked the volcano figure inventory (census.svg, ecdlp.svg and tau.png), its canonical analyze.py source and results/summary.json; the factor-base degree/yield figures referenced by pdp-degree-heuristics; and the curve and isogeny route registries. This is a synthesis with no new curve, route or corrected measurement. Existing graph facts remain current. The new pipeline diagram and attempt-ratio plot explain the reviewed evidence and do not alter canonical graph sources.",
+  "curve_context": "The principal full-width Koblitz reference is EC1N131Ckb1h136f03e58c98: y^2 + xy = x^3 + 1 over F_2[z]/(z^131 + z^13 + z^2 + z + 1), cofactor 4, subgroup order 680564733841876926932320129493409985129. The registered degree-263 descendant is EC1N131Cbinh833014327b07 and the verified route is IW1E263d1hadee4e69fa3d. Neither a route certificate nor these research proposals is a measured full-width IC candidate. The quantitative plot uses the legacy n = 19 volcano study, not a new EC1 or run ID.",
+  "plot_caption": "Committed n = 19 study: E0/descendant mean PDP-attempt ratio = 0.9964, reported 95% interval [0.9765, 1.0166], from 31 curves x 10 scalars with 310/310 verified logs. A ratio of 1 means equal attempts; below 1 favors E0. The interval includes 1. This is an attempt-count result, not a wall-time or IC-versus-rho speedup. The interval is reproduced from the repository summary, not recomputed from raw trials.",
+  "next_work": "For the next bounded repo experiment, prioritize questions 2, 3, 6 and 7: a frozen ordinary-query panel with an exact base, a solver-independent witness check and rank accounting can distinguish a useful algorithmic lead from a faster planted-system solve."
+}

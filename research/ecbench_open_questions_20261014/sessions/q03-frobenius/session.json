@@ -1,0 +1,53 @@
+{
+  "schema": "ecbench.session/v1",
+  "session_id": "ECBS1h8049199117aa",
+  "label": "Q3 same-point direct versus Frobenius orbit addition",
+  "spec_id": "ECS1he10073d5cf3d",
+  "spec_sha256": "e10073d5cf3d9d4136a18bc9a5610e3200c07927c0db1299278d2bd8ca4f797f",
+  "env_class_id": "ECBENV2h687984d4e73d",
+  "host_sha256": "99cbef60ae801ce1db97742c64fdb899c24929f02403d98dab02e4a02c799845",
+  "plan_sha256": "b0f7fb8916d3c5f7cdf126e4741a3b394516c500fe3ab84a2f9c44b943162310",
+  "binary_sha256": "cc5bba39d33465ddc1b1d31af8ac25c6680d41193fc76012d9a1019b6046f02d",
+  "git_commit": "c716e462934128c75e99dd458748e08623a2708c",
+  "git_dirty": false,
+  "options": {
+    "cpus": "none",
+    "lock_path": "/tmp/crypto-bench.lock",
+    "wait_for_lock": true,
+    "allow_busy": true,
+    "thresholds": {
+      "settle_seconds": 2.0,
+      "max_other_cpu": 0.1,
+      "max_psi": 5.0,
+      "max_preemptions_per_second": 50.0
+    },
+    "exe": "/proc/self/exe"
+  },
+  "cpu_plan": null,
+  "preflight": null,
+  "eviction": null,
+  "runner_on_run_cpu": false,
+  "runner_cpus": null,
+  "ticks_per_second": 100,
+  "grading_version": 2,
+  "child_env_sha256": "5fcca52408a68c08609b1aebe24bb4f03f94c8f0ec0e418fdf510c73a93a4e98",
+  "child_env": {
+    "HOME": "/home/agent",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "PATH": "/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+    "RAYON_NUM_THREADS": "1",
+    "RUST_BACKTRACE": "0",
+    "RUST_MIN_STACK": "8388608"
+  },
+  "started_unix_ms": 1792006524755,
+  "finished_unix_ms": 1792006529461,
+  "status": "complete",
+  "executions_planned": 128,
+  "records_written": 128,
+  "records_sha256": "0bae975e0e75ca676a5298b26431b4f1633040f679dd869b86e6fed0eed6239c",
+  "status_counts": {
+    "exhausted": 10,
+    "verified": 118
+  }
+}

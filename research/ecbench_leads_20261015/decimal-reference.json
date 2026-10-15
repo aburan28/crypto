@@ -1,0 +1,95 @@
+{
+  "arbitrary_precision": false,
+  "features": [
+    "std"
+  ],
+  "float_roundtrip": false,
+  "rows": [
+    {
+      "historical_bits": "40aebc070c740167",
+      "historical_error": null,
+      "rust_correct_bits": "40aebc070c740168",
+      "token": "3934.0137668849675"
+    },
+    {
+      "historical_bits": "3fd7d28fc1f47dbf",
+      "historical_error": null,
+      "rust_correct_bits": "3fd7d28fc1f47dc0",
+      "token": "0.37222665730402227"
+    },
+    {
+      "historical_bits": "3e842c551041b667",
+      "historical_error": null,
+      "rust_correct_bits": "3e842c551041b667",
+      "token": "1.5030185107919957e-7"
+    },
+    {
+      "historical_bits": "3e1535afdf5ae86d",
+      "historical_error": null,
+      "rust_correct_bits": "3e1535afdf5ae86d",
+      "token": "1.2345678901234567e-9"
+    },
+    {
+      "historical_bits": "3b282db34012b252",
+      "historical_error": null,
+      "rust_correct_bits": "3b282db34012b251",
+      "token": "1e-23"
+    },
+    {
+      "historical_bits": "2b2bff2ee48e0530",
+      "historical_error": null,
+      "rust_correct_bits": "2b2bff2ee48e0530",
+      "token": "1e-100"
+    },
+    {
+      "historical_bits": "01a56e1fc2f8f359",
+      "historical_error": null,
+      "rust_correct_bits": "01a56e1fc2f8f359",
+      "token": "1e-300"
+    },
+    {
+      "historical_bits": "0010000000000000",
+      "historical_error": null,
+      "rust_correct_bits": "0010000000000000",
+      "token": "2.2250738585072014e-308"
+    },
+    {
+      "historical_bits": "0000000000000001",
+      "historical_error": null,
+      "rust_correct_bits": "0000000000000001",
+      "token": "5e-324"
+    },
+    {
+      "historical_bits": "8000000000000001",
+      "historical_error": null,
+      "rust_correct_bits": "8000000000000001",
+      "token": "-5e-324"
+    },
+    {
+      "historical_bits": "0000000000000000",
+      "historical_error": null,
+      "rust_correct_bits": "0000000000000000",
+      "token": "0.0"
+    },
+    {
+      "historical_bits": "8000000000000000",
+      "historical_error": null,
+      "rust_correct_bits": "8000000000000000",
+      "token": "-0.0"
+    },
+    {
+      "historical_bits": "7fefffffffffffff",
+      "historical_error": null,
+      "rust_correct_bits": "7fefffffffffffff",
+      "token": "1.7976931348623157e308"
+    },
+    {
+      "historical_bits": "7fe1ccf385ebc8a0",
+      "historical_error": null,
+      "rust_correct_bits": "7fe1ccf385ebc8a0",
+      "token": "1e308"
+    }
+  ],
+  "schema": "ecbench-decimal-reference/v1",
+  "serde_json": "1.0.145"
+}

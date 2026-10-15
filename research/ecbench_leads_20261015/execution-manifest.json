@@ -1,0 +1,744 @@
+{
+  "commands": [
+    {
+      "arguments": [
+        "run",
+        "--spec",
+        "research/ecbench_leads_20261015/specs/binary-shape.json",
+        "--out",
+        "research/ecbench_leads_20261015/sessions/binary-shape",
+        "--cpus",
+        "none",
+        "--allow-busy",
+        "--wait"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/binary-shape.run.log",
+      "started_unix_utc": 1792038636,
+      "success": true
+    },
+    {
+      "arguments": [
+        "verify",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/binary-shape",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "research/ecbench_leads_20261015/binary-shape.audit.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/binary-shape.verify.log",
+      "started_unix_utc": 1792038777,
+      "success": true
+    },
+    {
+      "arguments": [
+        "table",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/binary-shape"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/binary-shape.table.md",
+      "started_unix_utc": 1792038778,
+      "success": true
+    },
+    {
+      "arguments": [
+        "resources",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/binary-shape",
+        "--out",
+        "research/ecbench_leads_20261015/binary-shape.resources.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/binary-shape.resources.log",
+      "started_unix_utc": 1792038778,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/binary-shape",
+        "--a",
+        "rho",
+        "--b",
+        "rho-aa",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/binary-shape__rho__rho-aa.json",
+      "started_unix_utc": 1792038778,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/binary-shape",
+        "--a",
+        "rho",
+        "--b",
+        "inherited-f4-v1",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/binary-shape__rho__inherited-f4-v1.json",
+      "started_unix_utc": 1792038778,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/binary-shape",
+        "--a",
+        "rho",
+        "--b",
+        "inherited-f4-v2",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/binary-shape__rho__inherited-f4-v2.json",
+      "started_unix_utc": 1792038778,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/binary-shape",
+        "--a",
+        "rho",
+        "--b",
+        "f6-ic-v1",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/binary-shape__rho__f6-ic-v1.json",
+      "started_unix_utc": 1792038778,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/binary-shape",
+        "--a",
+        "rho",
+        "--b",
+        "f6-ic-v2",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/binary-shape__rho__f6-ic-v2.json",
+      "started_unix_utc": 1792038778,
+      "success": true
+    },
+    {
+      "arguments": [
+        "run",
+        "--spec",
+        "research/ecbench_leads_20261015/specs/orbit-heldout.json",
+        "--out",
+        "research/ecbench_leads_20261015/sessions/orbit-heldout",
+        "--cpus",
+        "none",
+        "--allow-busy",
+        "--wait"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/orbit-heldout.run.log",
+      "started_unix_utc": 1792038778,
+      "success": true
+    },
+    {
+      "arguments": [
+        "verify",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/orbit-heldout",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "research/ecbench_leads_20261015/orbit-heldout.audit.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/orbit-heldout.verify.log",
+      "started_unix_utc": 1792038779,
+      "success": true
+    },
+    {
+      "arguments": [
+        "table",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/orbit-heldout"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/orbit-heldout.table.md",
+      "started_unix_utc": 1792038779,
+      "success": true
+    },
+    {
+      "arguments": [
+        "resources",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/orbit-heldout",
+        "--out",
+        "research/ecbench_leads_20261015/orbit-heldout.resources.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/orbit-heldout.resources.log",
+      "started_unix_utc": 1792038779,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/orbit-heldout",
+        "--a",
+        "rho",
+        "--b",
+        "rho-aa",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/orbit-heldout__rho__rho-aa.json",
+      "started_unix_utc": 1792038779,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/orbit-heldout",
+        "--a",
+        "rho",
+        "--b",
+        "orbit-c4",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/orbit-heldout__rho__orbit-c4.json",
+      "started_unix_utc": 1792038779,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/orbit-heldout",
+        "--a",
+        "rho",
+        "--b",
+        "orbit-c8",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/orbit-heldout__rho__orbit-c8.json",
+      "started_unix_utc": 1792038779,
+      "success": true
+    },
+    {
+      "arguments": [
+        "run",
+        "--spec",
+        "research/ecbench_leads_20261015/specs/orbit-ladder.json",
+        "--out",
+        "research/ecbench_leads_20261015/sessions/orbit-ladder",
+        "--cpus",
+        "none",
+        "--allow-busy",
+        "--wait"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/orbit-ladder.run.log",
+      "started_unix_utc": 1792038779,
+      "success": true
+    },
+    {
+      "arguments": [
+        "verify",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/orbit-ladder",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "research/ecbench_leads_20261015/orbit-ladder.audit.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/orbit-ladder.verify.log",
+      "started_unix_utc": 1792038782,
+      "success": true
+    },
+    {
+      "arguments": [
+        "table",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/orbit-ladder"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/orbit-ladder.table.md",
+      "started_unix_utc": 1792038784,
+      "success": true
+    },
+    {
+      "arguments": [
+        "resources",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/orbit-ladder",
+        "--out",
+        "research/ecbench_leads_20261015/orbit-ladder.resources.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/orbit-ladder.resources.log",
+      "started_unix_utc": 1792038784,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/orbit-ladder",
+        "--a",
+        "rho",
+        "--b",
+        "rho-aa",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/orbit-ladder__rho__rho-aa.json",
+      "started_unix_utc": 1792038784,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/orbit-ladder",
+        "--a",
+        "rho",
+        "--b",
+        "exact-c4",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/orbit-ladder__rho__exact-c4.json",
+      "started_unix_utc": 1792038784,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/orbit-ladder",
+        "--a",
+        "rho",
+        "--b",
+        "orbit-c4",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/orbit-ladder__rho__orbit-c4.json",
+      "started_unix_utc": 1792038785,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/orbit-ladder",
+        "--a",
+        "rho",
+        "--b",
+        "existing-orbit-c4",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/orbit-ladder__rho__existing-orbit-c4.json",
+      "started_unix_utc": 1792038785,
+      "success": true
+    },
+    {
+      "arguments": [
+        "run",
+        "--spec",
+        "research/ecbench_leads_20261015/specs/prime-balance.json",
+        "--out",
+        "research/ecbench_leads_20261015/sessions/prime-balance",
+        "--cpus",
+        "none",
+        "--allow-busy",
+        "--wait"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/prime-balance.run.log",
+      "started_unix_utc": 1792038785,
+      "success": true
+    },
+    {
+      "arguments": [
+        "verify",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/prime-balance",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "research/ecbench_leads_20261015/prime-balance.audit.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/prime-balance.verify.log",
+      "started_unix_utc": 1792038795,
+      "success": true
+    },
+    {
+      "arguments": [
+        "table",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/prime-balance"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/prime-balance.table.md",
+      "started_unix_utc": 1792038803,
+      "success": true
+    },
+    {
+      "arguments": [
+        "resources",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/prime-balance",
+        "--out",
+        "research/ecbench_leads_20261015/prime-balance.resources.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/prime-balance.resources.log",
+      "started_unix_utc": 1792038803,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/prime-balance",
+        "--a",
+        "rho",
+        "--b",
+        "rho-aa",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/prime-balance__rho__rho-aa.json",
+      "started_unix_utc": 1792038803,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/prime-balance",
+        "--a",
+        "rho",
+        "--b",
+        "abs16-mitm2",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/prime-balance__rho__abs16-mitm2.json",
+      "started_unix_utc": 1792038803,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/prime-balance",
+        "--a",
+        "rho",
+        "--b",
+        "abs32-mitm2",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/prime-balance__rho__abs32-mitm2.json",
+      "started_unix_utc": 1792038803,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/prime-balance",
+        "--a",
+        "rho",
+        "--b",
+        "abs64-mitm2",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/prime-balance__rho__abs64-mitm2.json",
+      "started_unix_utc": 1792038803,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/prime-balance",
+        "--a",
+        "rho",
+        "--b",
+        "abs128-mitm2",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/prime-balance__rho__abs128-mitm2.json",
+      "started_unix_utc": 1792038803,
+      "success": true
+    },
+    {
+      "arguments": [
+        "compare",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/prime-balance",
+        "--a",
+        "rho",
+        "--b",
+        "abs64-subtract3",
+        "--resamples",
+        "4000",
+        "--seed",
+        "20261014",
+        "--json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/comparisons/prime-balance__rho__abs64-subtract3.json",
+      "started_unix_utc": 1792038803,
+      "success": true
+    },
+    {
+      "arguments": [
+        "run",
+        "--spec",
+        "research/ecbench_leads_20261015/specs/wide-legacy-refusal.json",
+        "--out",
+        "research/ecbench_leads_20261015/sessions/wide-legacy-refusal",
+        "--cpus",
+        "none",
+        "--allow-busy",
+        "--wait"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/wide-legacy-refusal.run.log",
+      "started_unix_utc": 1792038803,
+      "success": true
+    },
+    {
+      "arguments": [
+        "verify",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/wide-legacy-refusal",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "research/ecbench_leads_20261015/wide-legacy-refusal.audit.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/wide-legacy-refusal.verify.log",
+      "started_unix_utc": 1792038803,
+      "success": true
+    },
+    {
+      "arguments": [
+        "table",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/wide-legacy-refusal"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/wide-legacy-refusal.table.md",
+      "started_unix_utc": 1792038803,
+      "success": true
+    },
+    {
+      "arguments": [
+        "resources",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/wide-legacy-refusal",
+        "--out",
+        "research/ecbench_leads_20261015/wide-legacy-refusal.resources.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/wide-legacy-refusal.resources.log",
+      "started_unix_utc": 1792038803,
+      "success": true
+    },
+    {
+      "arguments": [
+        "run",
+        "--spec",
+        "research/ecbench_leads_20261015/specs/wide-n83.json",
+        "--out",
+        "research/ecbench_leads_20261015/sessions/wide-n83",
+        "--cpus",
+        "none",
+        "--allow-busy",
+        "--wait"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 0,
+      "log": "research/ecbench_leads_20261015/wide-n83.run.log",
+      "started_unix_utc": 1792038803,
+      "success": true
+    },
+    {
+      "arguments": [
+        "verify",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/wide-n83",
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        "research/ecbench_leads_20261015/wide-n83.audit.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 2,
+      "log": "research/ecbench_leads_20261015/wide-n83.verify.log",
+      "started_unix_utc": 1792038804,
+      "success": false
+    },
+    {
+      "arguments": [
+        "table",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/wide-n83"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 2,
+      "log": "research/ecbench_leads_20261015/wide-n83.table.md",
+      "started_unix_utc": 1792038804,
+      "success": false
+    },
+    {
+      "arguments": [
+        "resources",
+        "--dir",
+        "research/ecbench_leads_20261015/sessions/wide-n83",
+        "--out",
+        "research/ecbench_leads_20261015/wide-n83.resources.json"
+      ],
+      "binary": "/workspace/measured-bin/ecbench-leads-0cbc",
+      "exit_code": 2,
+      "log": "research/ecbench_leads_20261015/wide-n83.resources.log",
+      "started_unix_utc": 1792038804,
+      "success": false
+    }
+  ],
+  "completed_through": "wide-n83",
+  "schema": "ecbench-ten-questions-execution/v1"
+}

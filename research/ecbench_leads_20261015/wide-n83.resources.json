@@ -1,0 +1,138 @@
+{
+  "schema": "ecbench.resources/v1",
+  "session_id": "ECBS1hb7a0c78a3184",
+  "records_sha256": "43726692648b2774976e0b544093b8fb1ff53d7ee0841abd337ef4e052310e73",
+  "scope": "all measured attempts; solve PMU excludes process startup",
+  "arms": [
+    {
+      "arm": "orbit-c16",
+      "method": "ic.orbit_rank_v1",
+      "measured": 2,
+      "verified": 0,
+      "statuses": {
+        "exhausted": 2
+      },
+      "lower_bound": true,
+      "unpriced_units": [
+        "canonicalisations_uncharged",
+        "frobenius_maps_uncharged",
+        "raw_x_lifts_uncharged",
+        "scalar_products_uncharged",
+        "table_inserts_uncharged",
+        "table_probes_uncharged"
+      ],
+      "total_gae_sum": 1567187.0,
+      "process_wall_ns_sum": 986750930,
+      "user_ns_sum": 973421000,
+      "sys_ns_sum": 12075000,
+      "solve_wall_ns_sum": 931179989,
+      "peak_rss_kib": 27012,
+      "instructions_sum": null,
+      "cycles_sum": null,
+      "pmu_complete_runs": 0,
+      "pmu_errors": [
+        "perf_event_open: No such file or directory (os error 2)"
+      ],
+      "phase_gae_totals": {
+        "factor_base": 80.0,
+        "linear_algebra": 0.0,
+        "oracle_setup": 84992.0,
+        "target_PDP": 1359872.0,
+        "target_query": 122243.0,
+        "target_relation_check": 0.0
+      },
+      "phase_wall_ns_totals": {},
+      "phase_wall_covered_runs": {},
+      "online_wall_ns_sum": 873516323,
+      "online_complete_runs": 2,
+      "online_phase_ns_totals": {
+        "target_PDP": 812428132,
+        "target_descent": 0,
+        "target_query": 61088191,
+        "target_recovery_check": 0,
+        "target_relation_check": 0
+      },
+      "phase_native_totals": {},
+      "method_counter_totals": {
+        "canonicalisations_uncharged": 1444902,
+        "factor_base_columns": 32,
+        "factor_base_signed_points": 5312,
+        "frobenius_maps_uncharged": 45152,
+        "pair_visits": 84992,
+        "rank": 0,
+        "raw_x_lifts_uncharged": 92,
+        "scalar_products_uncharged": 166,
+        "table_complete": 2,
+        "table_entries": 42402,
+        "table_inserts_uncharged": 84992,
+        "table_probes_uncharged": 1359872,
+        "trials": 512
+      }
+    },
+    {
+      "arm": "orbit-c4",
+      "method": "ic.orbit_rank_v1",
+      "measured": 2,
+      "verified": 0,
+      "statuses": {
+        "exhausted": 2
+      },
+      "lower_bound": true,
+      "unpriced_units": [
+        "canonicalisations_uncharged",
+        "frobenius_maps_uncharged",
+        "raw_x_lifts_uncharged",
+        "scalar_products_uncharged",
+        "table_inserts_uncharged",
+        "table_probes_uncharged"
+      ],
+      "total_gae_sum": 467547.0,
+      "process_wall_ns_sum": 303075122,
+      "user_ns_sum": 298089000,
+      "sys_ns_sum": 3988000,
+      "solve_wall_ns_sum": 252826189,
+      "peak_rss_kib": 26984,
+      "instructions_sum": null,
+      "cycles_sum": null,
+      "pmu_complete_runs": 0,
+      "pmu_errors": [
+        "perf_event_open: No such file or directory (os error 2)"
+      ],
+      "phase_gae_totals": {
+        "factor_base": 24.0,
+        "linear_algebra": 0.0,
+        "oracle_setup": 5312.0,
+        "target_PDP": 339968.0,
+        "target_query": 122243.0,
+        "target_relation_check": 0.0
+      },
+      "phase_wall_ns_totals": {},
+      "phase_wall_covered_runs": {},
+      "online_wall_ns_sum": 248781108,
+      "online_complete_runs": 2,
+      "online_phase_ns_totals": {
+        "target_PDP": 189492562,
+        "target_descent": 0,
+        "target_query": 59288546,
+        "target_recovery_check": 0,
+        "target_relation_check": 0
+      },
+      "phase_native_totals": {},
+      "method_counter_totals": {
+        "canonicalisations_uncharged": 345290,
+        "factor_base_columns": 8,
+        "factor_base_signed_points": 1328,
+        "frobenius_maps_uncharged": 3320,
+        "pair_visits": 5312,
+        "rank": 0,
+        "raw_x_lifts_uncharged": 18,
+        "scalar_products_uncharged": 166,
+        "table_complete": 2,
+        "table_entries": 2634,
+        "table_inserts_uncharged": 5312,
+        "table_probes_uncharged": 339968,
+        "trials": 512
+      }
+    }
+  ]
+}

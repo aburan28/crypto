@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/workspace/historical-metadata-check/scripts/build_ic_leaderboard.py", line 1945, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspace/historical-metadata-check/scripts/build_ic_leaderboard.py", line 1922, in main
+    sections = [int(m) for m in re.findall(r"^## (\d+)\.", (REPO / LEDGER).read_text(), re.M)]
+                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/historical-metadata-check/research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md'

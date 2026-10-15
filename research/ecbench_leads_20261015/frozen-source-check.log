@@ -1,0 +1,16 @@
+PASS src/cryptanalysis/ecbench/orbit_ic.rs
+PASS src/cryptanalysis/ecbench/methods.rs
+PASS src/cryptanalysis/ecbench/mod.rs
+PASS src/bin/ecbench/pdp3_koblitz.rs
+PASS examples/ecbench_leads.rs
+PASS examples/ecbench_open_questions_run.rs
+PASS examples/ecbench_open_questions_replay_failures.rs
+PASS Cargo.lock
+PASS research/ecbench_leads_20261015/PROTOCOL-v1.md
+PASS research/ecbench_leads_20261015/specs/binary-shape.json
+PASS research/ecbench_leads_20261015/specs/orbit-heldout.json
+PASS research/ecbench_leads_20261015/specs/orbit-ladder.json
+PASS research/ecbench_leads_20261015/specs/prime-balance.json
+PASS research/ecbench_leads_20261015/specs/wide-legacy-refusal.json
+PASS research/ecbench_leads_20261015/specs/wide-n83.json
+50a5739fadcb08ab8f170d4fe03ba3427fb0fd387c1a5918843fcda4d68ff1fb  /workspace/measured-bin/ecbench-leads-0cbc

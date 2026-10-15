@@ -1,0 +1,52 @@
+{
+  "schema": "ecbench.session/v1",
+  "session_id": "ECBS1hb7a0c78a3184",
+  "label": "Exact E0 N83 ordinary-IC bounded diagnostic",
+  "spec_id": "ECS1h57022732c667",
+  "spec_sha256": "57022732c667bdbfa4ce761e1fa64ae002e8c653fe6aca0a289edaf07d59338e",
+  "env_class_id": "ECBENV2h96c931cc33fa",
+  "host_sha256": "dcb2d3cce697c17a906b4497126023b77699381e0e2812f0da3a3842d173da97",
+  "plan_sha256": "5dc9f51127c2c33d39b62a74e1b7fdbcd174f7cfb1d329122b5e3f436a234023",
+  "binary_sha256": "50a5739fadcb08ab8f170d4fe03ba3427fb0fd387c1a5918843fcda4d68ff1fb",
+  "git_commit": "0cbc86b2c828f1aa7fae62282913cce9ea6e099d",
+  "git_dirty": false,
+  "options": {
+    "cpus": "none",
+    "lock_path": "/tmp/crypto-bench.lock",
+    "wait_for_lock": true,
+    "allow_busy": true,
+    "thresholds": {
+      "settle_seconds": 2.0,
+      "max_other_cpu": 0.1,
+      "max_psi": 5.0,
+      "max_preemptions_per_second": 50.0
+    },
+    "exe": "/proc/self/exe"
+  },
+  "cpu_plan": null,
+  "preflight": null,
+  "eviction": null,
+  "runner_on_run_cpu": false,
+  "runner_cpus": null,
+  "ticks_per_second": 100,
+  "grading_version": 2,
+  "child_env_sha256": "ae63b5dd5b3559eade83c5719a86a19a091b41ee5a2786aaf2826dc1b9176287",
+  "child_env": {
+    "HOME": "/home/agent",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "PATH": "/workspace/toolchains/cargo/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+    "RAYON_NUM_THREADS": "1",
+    "RUST_BACKTRACE": "0",
+    "RUST_MIN_STACK": "8388608"
+  },
+  "started_unix_ms": 1792038803628,
+  "finished_unix_ms": 1792038804923,
+  "status": "complete",
+  "executions_planned": 4,
+  "records_written": 4,
+  "records_sha256": "43726692648b2774976e0b544093b8fb1ff53d7ee0841abd337ef4e052310e73",
+  "status_counts": {
+    "exhausted": 4
+  }
+}

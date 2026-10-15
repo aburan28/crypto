@@ -95,3 +95,13 @@ research/ecbench_frontier_20261013/*.pdf binary
 research/ecbench_frontier_20261013/reports/**/*.pdf binary
 research/ecbench_frontier_20261013/reports/**/*.png binary
 research/ecbench_frontier_20261013/reports/**/*.svg -diff -whitespace
+
+# Native ten-question ecbench campaign: generated media and raw logs.
+research/ecbench_open_questions_20261014/**/*.pdf binary
+benchmarks/20261014-ecbench-ten-questions/**/*.pdf binary
+research/ecbench_open_questions_20261014/*.log -whitespace
+
+# Follow-up: preserve raw logs and treat rendered reports as binary.
+research/ecbench_leads_20261015/*.log -whitespace
+research/ecbench_leads_20261015/**/*.pdf binary
+benchmarks/20261015-ecbench-leads/**/*.pdf binary

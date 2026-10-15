@@ -23,6 +23,9 @@ on:
       - "docs/browser/**"
       - "scripts/build_lab_browser.py"
       - "docs/ic/progress-timeline.json"
+      - "examples/ecbench_open_questions_publish.rs"
+      - "research/ecbench_open_questions_20261014/native-publish/**"
+      - "tools/render_ic_dashboard.mjs"
       - "docs/ic-leaderboard.html"
       - "docs/ic-measurement.html"
       - "scripts/rho_gpu_emulate.mjs"
@@ -50,6 +53,9 @@ on:
       - "docs/browser/**"
       - "scripts/build_lab_browser.py"
       - "docs/ic/progress-timeline.json"
+      - "examples/ecbench_open_questions_publish.rs"
+      - "research/ecbench_open_questions_20261014/native-publish/**"
+      - "tools/render_ic_dashboard.mjs"
       - "docs/ic-leaderboard.html"
       - "docs/ic-measurement.html"
       - "scripts/rho_gpu_emulate.mjs"
@@ -90,6 +96,14 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.98.0
+      - name: Fetch the native browser's exact historical baseline
+        run: |
+          baseline_ref=$(node -p "JSON.parse(require('fs').readFileSync('docs/browser/data.json','utf8')).native_campaign?.baseline_commit || ''")
+          if [ -n "$baseline_ref" ]; then
+            [[ "$baseline_ref" =~ ^[0-9a-f]{40}$ ]] || exit 1
+            git fetch --no-tags --depth=1 origin "$baseline_ref"
+          fi
       - name: Offline snapshot tests
         run: python3 scripts/rho_status/test_rho_status.py
       - name: DP34 telemetry snapshot tests
@@ -127,6 +141,14 @@ jobs:
 
       # The test job's steps, in the same order: a failure here stops the
       # run before anything is deployed, as `needs: test` used to.
+      - uses: dtolnay/rust-toolchain@1.98.0
+      - name: Fetch the native browser's exact historical baseline
+        run: |
+          baseline_ref=$(node -p "JSON.parse(require('fs').readFileSync('docs/browser/data.json','utf8')).native_campaign?.baseline_commit || ''")
+          if [ -n "$baseline_ref" ]; then
+            [[ "$baseline_ref" =~ ^[0-9a-f]{40}$ ]] || exit 1
+            git fetch --no-tags --depth=1 origin "$baseline_ref"
+          fi
       - name: Offline snapshot tests
         run: python3 scripts/rho_status/test_rho_status.py
       - name: DP34 telemetry snapshot tests

@@ -1,0 +1,42 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "compact-orbit-scan:columns=4,raw_x_cap=4096",
+          "linalg": "incremental-gauss",
+          "max_trials": "256",
+          "oracle": "mitm-frobenius:m=3",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "ic-n83",
+      "role": "candidate"
+    }
+  ],
+  "description": "PROTOCOL-v1.md. Public single-target diagnostics; full cold counts and unpriced counters retained. No wall-time or asymptotic claim from L0 measurements.",
+  "label": "Q10 mandatory N83 IC applicability gate",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261014,
+    "timeout_seconds": 180,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 83
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261014,
+    "targets_per_curve": 1
+  }
+}

@@ -1,6 +1,11 @@
 /target
+research/ecbench_open_questions_20261014/native-publish/target/
 **/Cargo.lock
 !/Cargo.lock
+!research/ecbench_open_questions_20261014/native-publish/Cargo.lock
+!research/ecbench_open_questions_20261014/locked/Cargo.lock
+!research/ecbench_leads_20261015/decimal-reference/Cargo.lock
+research/ecbench_leads_20261015/decimal-reference/target/
 !ecc2k130/dp-ingest/Cargo.lock
 !research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/build-validation-v1/data/Cargo.lock
 

@@ -1,0 +1,142 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.26
+    Checking stable_deref_trait v1.2.1
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.14
+   Compiling libc v0.2.190
+   Compiling cc v1.6.0
+   Compiling syn v3.0.6
+    Checking cfg-if v1.0.5
+   Compiling vcpkg v0.2.15
+    Checking litemap v0.8.3
+   Compiling pkg-config v0.3.34
+   Compiling synstructure v0.14.0
+    Checking writeable v0.6.4
+   Compiling openssl-sys v0.9.117
+   Compiling icu_properties_data v2.3.0
+   Compiling icu_normalizer_data v2.3.0
+   Compiling autocfg v1.5.1
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling zerovec-derive v0.11.6
+    Checking zerofrom v0.1.8
+    Checking yoke v0.8.3
+   Compiling displaydoc v0.2.7
+    Checking zerotrie v0.2.5
+    Checking zerovec v0.11.8
+    Checking utf8_iter v1.0.4
+   Compiling num-traits v0.2.19
+   Compiling syn v2.0.119
+    Checking tinystr v0.8.4
+    Checking icu_locale_core v2.3.0
+    Checking potential_utf v0.1.6
+    Checking icu_collections v2.3.0
+    Checking icu_provider v2.3.1
+   Compiling zerocopy v0.8.60
+   Compiling crossbeam-utils v0.8.23
+    Checking smallvec v1.16.2
+   Compiling crossbeam-epoch v0.9.21
+    Checking icu_normalizer v2.3.0
+    Checking icu_properties v2.3.0
+    Checking getrandom v0.2.17
+   Compiling openssl v0.10.81
+   Compiling crossbeam-deque v0.8.8
+    Checking foreign-types-shared v0.1.1
+    Checking utf8parse v0.2.2
+   Compiling serde_core v1.0.229
+    Checking anstyle-parse v1.0.0
+    Checking foreign-types v0.3.2
+    Checking rand_core v0.6.4
+   Compiling openssl-macros v0.1.1
+    Checking idna_adapter v1.2.2
+    Checking num-integer v0.1.47
+    Checking anstyle v1.0.14
+    Checking memchr v2.8.3
+   Compiling native-tls v0.2.18
+    Checking anstyle-query v1.1.5
+   Compiling crc32fast v1.5.2
+    Checking colorchoice v1.0.5
+   Compiling rayon-core v1.13.0
+   Compiling zmij v1.0.23
+    Checking percent-encoding v2.3.2
+    Checking bitflags v2.13.2
+    Checking is_terminal_polyfill v1.70.2
+    Checking anstream v1.0.0
+    Checking ppv-lite86 v0.2.21
+    Checking rand_chacha v0.3.1
+    Checking form_urlencoded v1.2.2
+    Checking idna v1.1.0
+   Compiling blake3 v1.8.7
+    Checking adler2 v2.0.1
+    Checking strsim v0.11.1
+   Compiling serde v1.0.229
+   Compiling serde_json v1.0.151
+    Checking openssl-probe v0.2.1
+   Compiling heck v0.5.0
+    Checking clap_lex v1.1.1
+    Checking itoa v1.0.18
+    Checking bytes v1.12.1
+    Checking log v0.4.34
+    Checking simd-adler32 v0.3.10
+    Checking miniz_oxide v0.9.1
+    Checking combine v4.6.8
+   Compiling clap_derive v4.6.7
+    Checking clap_builder v4.6.7
+    Checking url v2.5.8
+    Checking rand v0.8.8
+    Checking num-bigint v0.5.1
+   Compiling zeroize_derive v1.5.0
+   Compiling serde_derive v1.0.229
+    Checking socket2 v0.6.5
+    Checking arrayvec v0.7.8
+    Checking cpufeatures v0.3.1
+    Checking either v1.18.0
+    Checking arcstr v1.2.0
+    Checking sha1_smol v1.0.1
+    Checking ryu v1.0.23
+    Checking xxhash-rust v0.8.19
+    Checking constant_time_eq v0.4.2
+    Checking redis v1.7.1
+    Checking rayon v1.12.0
+    Checking zeroize v1.9.0
+    Checking num-bigint v0.4.8
+    Checking flate2 v1.1.10
+    Checking clap v4.6.7
+    Checking subtle v2.6.1
+    Checking hex v0.4.3
+    Checking base64 v0.21.7
+    Checking crypto v0.1.0 (/workspace/crypto)
+error[E0615]: attempted to take value of method `generator` on type `&KoblitzCurve`
+   --> examples/ecbench_leads.rs:186:77
+    |
+186 |             let crypto_lib::binary_ecc::BinaryPoint::Affine { x, .. } = &kc.generator else {
+    |                                                                             ^^^^^^^^^ method, not a field
+    |
+help: use parentheses to call the method
+    |
+186 |             let crypto_lib::binary_ecc::BinaryPoint::Affine { x, .. } = &kc.generator() else {
+    |                                                                                      ++
+
+error[E0308]: mismatched types
+   --> examples/ecbench_leads.rs:189:58
+    |
+189 |             let sys = build_decomposition_system(&basis, x, &kc.curve.b, m, &st)
+    |                       --------------------------         ^ expected `&F2mElement`, found `F2mElement`
+    |                       |
+    |                       arguments to this function are incorrect
+    |
+note: function defined here
+   --> src/cryptanalysis/koblitz_groebner.rs:911:8
+    |
+911 | pub fn build_decomposition_system(
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: consider borrowing here
+    |
+189 |             let sys = build_decomposition_system(&basis, &x, &kc.curve.b, m, &st)
+    |                                                          +
+
+Some errors have detailed explanations: E0308, E0615.
+For more information about an error, try `rustc --explain E0308`.
+error: could not compile `crypto` (example "ecbench_leads") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...

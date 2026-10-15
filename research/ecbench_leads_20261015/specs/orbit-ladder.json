@@ -1,0 +1,101 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {}
+      },
+      "name": "rho",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {}
+      },
+      "name": "rho-aa",
+      "role": "control"
+    },
+    {
+      "method": {
+        "id": "ic.orbit_rank_v1",
+        "params": {
+          "columns": "4",
+          "max_pair_visits": "1000000",
+          "max_trials": "2048",
+          "raw_x_cap": "4096",
+          "table_mode": "direct"
+        }
+      },
+      "name": "exact-c4",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.orbit_rank_v1",
+        "params": {
+          "columns": "4",
+          "max_pair_visits": "1000000",
+          "max_trials": "2048",
+          "raw_x_cap": "4096",
+          "table_mode": "orbit"
+        }
+      },
+      "name": "orbit-c4",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline_counted",
+        "params": {
+          "factor_base": "compact-orbit-scan:columns=4,raw_x_cap=4096",
+          "linalg": "incremental-gauss",
+          "max_trials": "2048",
+          "oracle": "mitm-frobenius:m=3",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        }
+      },
+      "name": "existing-orbit-c4",
+      "role": "candidate"
+    }
+  ],
+  "description": "PROTOCOL-v1.md; fresh public single-target workloads, cold bounded counts; no wall or asymptotic claim",
+  "label": "Width-generic exact and quotient rank ladder",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 1,
+    "seed": 20261015,
+    "timeout_seconds": 180,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 13
+      },
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 19
+      },
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 23
+      },
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 31
+      }
+    ],
+    "target_kind": "public",
+    "target_seed": 20261015,
+    "targets_per_curve": 4
+  }
+}

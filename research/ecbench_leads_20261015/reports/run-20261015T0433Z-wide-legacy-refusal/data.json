@@ -1,0 +1,97 @@
+{
+  "ledger": {
+    "audit_ok": true,
+    "measured": 1,
+    "name": "wide-legacy-refusal",
+    "problems": [],
+    "records": 1,
+    "replays": 0,
+    "session_id": "ECBS1h53a6cde45d82",
+    "verified_records": 0
+  },
+  "metadata": {
+    "binary_sha256": "50a5739fadcb08ab8f170d4fe03ba3427fb0fd387c1a5918843fcda4d68ff1fb",
+    "child_env": {
+      "HOME": "/home/agent",
+      "LC_ALL": "C",
+      "OMP_NUM_THREADS": "1",
+      "PATH": "/workspace/toolchains/cargo/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+      "RAYON_NUM_THREADS": "1",
+      "RUST_BACKTRACE": "0",
+      "RUST_MIN_STACK": "8388608"
+    },
+    "child_env_sha256": "ae63b5dd5b3559eade83c5719a86a19a091b41ee5a2786aaf2826dc1b9176287",
+    "cpu_plan": null,
+    "env_class_id": "ECBENV2h96c931cc33fa",
+    "eviction": null,
+    "executions_planned": 1,
+    "finished_unix_ms": 1792038803346,
+    "git_commit": "0cbc86b2c828f1aa7fae62282913cce9ea6e099d",
+    "git_dirty": false,
+    "grading_version": 2,
+    "host_sha256": "4546dc66892b8837f3220ba717b408ec1305984b96a9ab7ac2c4e2aac2922449",
+    "label": "Preserve previous wide pipeline applicability control",
+    "options": {
+      "allow_busy": true,
+      "cpus": "none",
+      "exe": "/proc/self/exe",
+      "lock_path": "/tmp/crypto-bench.lock",
+      "thresholds": {
+        "max_other_cpu": 0.1,
+        "max_preemptions_per_second": 50.0,
+        "max_psi": 5.0,
+        "settle_seconds": 2.0
+      },
+      "wait_for_lock": true
+    },
+    "plan_sha256": "60549ecd30574b1b65141aa2bbc7efa79c9aca33ac9a0125c1efa7d9136c547f",
+    "preflight": null,
+    "records_sha256": "221c11d4af49f6eed54df0f4c8194a5f3f07b32375396f5856b6122e695277a4",
+    "records_written": 1,
+    "runner_cpus": null,
+    "runner_on_run_cpu": false,
+    "schema": "ecbench.session/v1",
+    "session_id": "ECBS1h53a6cde45d82",
+    "spec_id": "ECS1h3c2fa1708f01",
+    "spec_sha256": "3c2fa1708f0118093fc715bfd0957a900589c4c42381793fe5449074a40c4c57",
+    "started_unix_ms": 1792038803315,
+    "status": "complete",
+    "status_counts": {
+      "error": 1
+    },
+    "ticks_per_second": 100
+  },
+  "path": "reports/run-20261015T0433Z-wide-legacy-refusal",
+  "rows": [
+    {
+      "arm": "legacy-ic",
+      "audit_ok": true,
+      "counter_sums": {},
+      "curve": "icv1-f2m83-tm6151469093347-debefd74",
+      "errors": [
+        "`ic.pipeline_counted` has no wide-field implementation; on a curve past one word (n = 83) only the strong rho (with or without the escape) and claw.pair_table run"
+      ],
+      "factor_base_ids": [],
+      "fully_priced_cost_ratio": null,
+      "max_s": null,
+      "mean_cold_gae": null,
+      "mean_s": null,
+      "min_s": null,
+      "paired_complete_counted_ratio_candidate_over_rho": null,
+      "paired_successes": 0,
+      "phase_mean_gae": {},
+      "ratio_null_if_censored": true,
+      "records": 1,
+      "scope": "counted-work diagnostic; partial counts are not a bound on full-cost ratios",
+      "session": "wide-legacy-refusal",
+      "session_id": "ECBS1h53a6cde45d82",
+      "statuses": {
+        "error": 1
+      },
+      "unpriced": [],
+      "verified": 0,
+      "wall_time_result": null
+    }
+  ],
+  "session": "wide-legacy-refusal"
+}

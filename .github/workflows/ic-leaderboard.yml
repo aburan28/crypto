@@ -17,6 +17,12 @@ on:
   pull_request:
     paths:
       - 'scripts/build_ic_leaderboard.py'
+      - 'tools/render_ic_dashboard.mjs'
+      - 'docs/ic/ecbench-diagnostics.fragment.html'
+      - 'examples/ecbench_open_questions_publish.rs'
+      - 'examples/ecbench_leads*.rs'
+      - 'research/ecbench_leads_20261015/**'
+      - 'research/ecbench_open_questions_20261014/**'
       - 'scripts/check_ic_leaderboard_paths.py'
       - 'scripts/test_check_ic_leaderboard_paths.py'
       - 'scripts/curve_id.py'
@@ -64,6 +70,12 @@ on:
     branches: [main]
     paths:
       - 'scripts/build_ic_leaderboard.py'
+      - 'tools/render_ic_dashboard.mjs'
+      - 'docs/ic/ecbench-diagnostics.fragment.html'
+      - 'examples/ecbench_open_questions_publish.rs'
+      - 'examples/ecbench_leads*.rs'
+      - 'research/ecbench_leads_20261015/**'
+      - 'research/ecbench_open_questions_20261014/**'
       - 'scripts/check_ic_leaderboard_paths.py'
       - 'scripts/test_check_ic_leaderboard_paths.py'
       - 'scripts/curve_id.py'
@@ -124,6 +136,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -131,7 +146,17 @@ jobs:
         run: python3 scripts/test_check_ic_leaderboard_paths.py
       - name: This workflow's path filter covers every file the builder reads
         run: python3 scripts/check_ic_leaderboard_paths.py
-      - name: The leaderboard is current with its sources and the ledger
-        run: python3 scripts/build_ic_leaderboard.py --check
-      - name: The lab browser's index is current with the registry, sessions and rounds (AGENTS.md §7c)
-        run: python3 scripts/build_lab_browser.py --check
+      - uses: dtolnay/rust-toolchain@1.98.0
+      - name: Native campaign metadata and unchanged historical inputs
+        run: |
+          git fetch --no-tags --depth=1 origin a80b15bbc5c1ea4f2db2b294a9bcddc31f06fdd7
+          cargo run --release --locked --manifest-path research/ecbench_open_questions_20261014/native-publish/Cargo.toml -- --historical-inputs
+          cargo run --release --locked --manifest-path research/ecbench_open_questions_20261014/native-publish/Cargo.toml -- --check
+      - name: Historical leaderboard/browser generators still validate their frozen baseline
+        run: |
+          set -euo pipefail
+          historical_dir=$(mktemp -d)
+          git worktree add --detach "$historical_dir" a80b15bbc5c1ea4f2db2b294a9bcddc31f06fdd7
+          cd "$historical_dir"
+          python3 scripts/build_ic_leaderboard.py --check
+          python3 scripts/build_lab_browser.py --check

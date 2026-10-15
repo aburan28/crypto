@@ -1,0 +1,122 @@
+{
+  "folding": [
+    {
+      "curve": "icv1-f2m13-t181-515ee569",
+      "direct_mean_s": 127.71789306782927,
+      "direct_over_folded_count_quotient": 8.637703060068,
+      "folded_mean_s": 14.786094425758577,
+      "folded_over_rho_count_quotient": 1.0314585874717102,
+      "fully_priced_ratio": null,
+      "same_factor_base_ids": true
+    },
+    {
+      "curve": "icv1-f2m19-t797-b6cf2467",
+      "direct_mean_s": 33.99110747840672,
+      "direct_over_folded_count_quotient": 9.597463414634145,
+      "folded_mean_s": 3.541676171078424,
+      "folded_over_rho_count_quotient": 1.0994221566283346,
+      "fully_priced_ratio": null,
+      "same_factor_base_ids": true
+    },
+    {
+      "curve": "icv1-f2m23-t5197-69e76b73",
+      "direct_mean_s": 13.711346365526854,
+      "direct_over_folded_count_quotient": 5.566461020751542,
+      "folded_mean_s": 2.463207110300693,
+      "folded_over_rho_count_quotient": 2.164224892361474,
+      "fully_priced_ratio": null,
+      "same_factor_base_ids": true
+    },
+    {
+      "curve": "icv1-f2m31-tm90707-c95f16f5",
+      "direct_mean_s": 26.775227179161632,
+      "direct_over_folded_count_quotient": 14.344050011163205,
+      "folded_mean_s": 1.8666434625035404,
+      "folded_over_rho_count_quotient": 1.5603618306907945,
+      "fully_priced_ratio": null,
+      "same_factor_base_ids": true
+    }
+  ],
+  "full_cost_ratio": null,
+  "heldout": {
+    "c4_mean_s": 8.566325796981587,
+    "c4_over_c8_count_quotient": 3.2714264158535364,
+    "c8_mean_s": 2.618529261568788,
+    "c8_over_rho_count_quotient": 9.012705021301453,
+    "curve": "icv1-f2m37-tm534059-32aad96b",
+    "fully_priced_ratio": null
+  },
+  "new_theorem": false,
+  "paragraphs": [
+    "All 373 attempts completed: 336 verified recoveries, 36 exhausted searches and 1 retained legacy-width error. Of the 96 attempts in the two rank panels, 56 are IC recoveries and 40 are paired rho/A-A controls.",
+    "Both IC arms recovered all four held-out degree 37 public points, eight IC executions in total. Increasing the base from four to eight orbit columns changed mean counted S from 8.566326 to 2.618529; the four/eight count quotient is 3.271426. The eight-column/rho count quotient remains 9.012705. These are incomplete-cost diagnostics, not speedups.",
+    "The exact E0 degree 83 method now executes ordinary IC queries at both base sizes, but all four runs reached 256 queries without a point relation or rank gain. This discharges an implementation refusal; it does not pass the N83 target-recovery gate.",
+    "The zero-hit N83 result is weak evidence about mathematics: under the existing uniform-query multiset-counting model, these tiny bases cover a vanishing fraction of the subgroup. The model is not a calibrated probability for the fixed hash stream. A scalable algebraic base/witness improvement is still required.",
+    "Prime base balance changes across models: icv1-fp16-t295-8d3c3165: abs32-mitm2; icv1-fp18-tm337-d28d5e09: abs32-mitm2; icv1-fp20-t727-cd198a38: abs64-mitm2; icv1-fp22-tm1385-475dcb5f: abs64-mitm2. These are descriptive minima on this panel, not a validated tuning rule or exponent.",
+    "Next discriminating work: price the new method's native operations and compare the column-count choice on further unseen points; retain all relative phases in any proposed algebraic correspondence; demand growing base dimension and successful exact E0 N83 recovery before any N131 inference. Recent main also has versioned full-price methods; their host-specific calibration is a follow-up input, not a price silently imported into this AMD run."
+  ],
+  "prime_descriptive_minima": [
+    {
+      "arm": "abs32-mitm2",
+      "counted_over_rho": 4.47022972339428,
+      "curve": "icv1-fp16-t295-8d3c3165",
+      "mean_s": 10.34293836824307,
+      "selection_scope": "descriptive minimum on this panel, not a validated tuning rule",
+      "targets": 8
+    },
+    {
+      "arm": "abs32-mitm2",
+      "counted_over_rho": 6.886933333333333,
+      "curve": "icv1-fp18-tm337-d28d5e09",
+      "mean_s": 10.506143753552054,
+      "selection_scope": "descriptive minimum on this panel, not a validated tuning rule",
+      "targets": 8
+    },
+    {
+      "arm": "abs64-mitm2",
+      "counted_over_rho": 6.635641316685585,
+      "curve": "icv1-fp20-t727-cd198a38",
+      "mean_s": 9.743965628951512,
+      "selection_scope": "descriptive minimum on this panel, not a validated tuning rule",
+      "targets": 8
+    },
+    {
+      "arm": "abs64-mitm2",
+      "counted_over_rho": 11.527583262169086,
+      "curve": "icv1-fp22-tm1385-475dcb5f",
+      "mean_s": 10.811440447315853,
+      "selection_scope": "descriptive minimum on this panel, not a validated tuning rule",
+      "targets": 8
+    }
+  ],
+  "schema": "ecbench-leads-findings/v1",
+  "wall_speedup": null,
+  "wide": [
+    {
+      "aggregate_rank": 0,
+      "arm": "orbit-c16",
+      "attempts": 2,
+      "model_scope": "existing multiset counting argument; a conditional model for uniform a; no success-probability claim for a fixed deterministic hash stream",
+      "orbit_columns": 16,
+      "point_checked_relations": 0,
+      "signed_points_per_attempt": 2656,
+      "total_queries": 512,
+      "triples_with_repetition": "3126247456",
+      "uniform_query_counting_ceiling": 1.2929856428223896e-15,
+      "union_bound_256_uniform_queries": 3.3100432456253175e-13
+    },
+    {
+      "aggregate_rank": 0,
+      "arm": "orbit-c4",
+      "attempts": 2,
+      "model_scope": "existing multiset counting argument; a conditional model for uniform a; no success-probability claim for a fixed deterministic hash stream",
+      "orbit_columns": 4,
+      "point_checked_relations": 0,
+      "signed_points_per_attempt": 664,
+      "total_queries": 512,
+      "triples_with_repetition": "49013160",
+      "uniform_query_counting_ceiling": 2.027136785596688e-17,
+      "union_bound_256_uniform_queries": 5.1894701711275215e-15
+    }
+  ]
+}

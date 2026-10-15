@@ -1,0 +1,11 @@
+   Compiling crypto v0.1.0 (/workspace/crypto)
+    Finished `release` profile [optimized] target(s) in 0.86s
+     Running unittests examples/ecbench_open_questions.rs (target/release/examples/ecbench_open_questions-5699c633356631cd)
+
+running 3 tests
+test analyze::tests::absent_cost_is_missing_not_zero ... ok
+test controls::tests::qubo_distinguishes_constraint_violation_and_rejects_wrong_auxiliary ... ok
+test controls::tests::tiny_semaev_encoding_replays_exactly ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

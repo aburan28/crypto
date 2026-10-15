@@ -1881,6 +1881,10 @@ def page(doc: dict, standalone: bool) -> str:
              + '. Curves are named by ICV1 slug (<a href="https://github.com/aburan28/crypto/blob/main/docs/curves/ICV1.md">docs/curves/ICV1.md</a>); '
              f'curve records: {gh(SOURCES["curves_schema"])} and {gh(SOURCES["curves_yaml"])} '
              '(<a href="#curve-records">coverage</a>).</p></footer></div>')
+    # Presentation only: new diagnostic counts/ratios are derived in Rust and
+    # supplied as a native-generated fragment, never recomputed here.
+    if doc.get("native_augmentation"):
+        P.append((REPO / "docs/ic/ecbench-diagnostics.fragment.html").read_text())
     body = "\n".join(P)
     if standalone:
         return ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
