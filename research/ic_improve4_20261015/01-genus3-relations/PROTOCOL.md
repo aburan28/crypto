@@ -151,3 +151,15 @@ ratios are exactly paired; C2 and C4 run on other walks and are judged against t
   against the incumbent is a second, W-walk A/A comparison.
 - **Correctness**: every solve's k is verified (`k phi(G) = phi(T)`) and equal to the planted k; a wrong or missing
   k fails the arm.
+
+## Amendment D1 (2026-10-15 23:30, before any T-C3/C4 training job and before any test job)
+
+- **Probes** (training curve 5, `r2` stream, b = 18 and 20; `results/smoke/`): oversampling alone lowers the LA
+  cost by 5-11% for +2-6% relation cost; raising cx from 8 to 16-32 helps once rows are oversampled; clique removal
+  before SGE helps further (b = 20: `lpsgebw2o50c@16` LA 0.76x, relation 1.06x, whole 0.95x of `lpsgebw2@8`), and the
+  LA cost was still falling at the largest oversampling tried. W = 1 and W = 32 needed the same trials (b = 18).
+- **T-W** ([wtune.md](results/train/wtune.md)): batched relation cost / R1 = 0.9527 (W = 8), 0.9477 (32), 0.9467
+  (128); the smallest is 1.1446e9 (W = 32), W = 8 is 0.8% above it, so **W\* = 32**.
+- **T-C3/C4 grid**: kappa = kappa_R2(b) x {0.8, 1, 1.3, 1.7} at b = 16, 18, 20, 21, curves 5-7, stream `w` with
+  W = 32; LA arms `lpsgebw2@cx(b)`, `lpsgebw2o35c@16`, `lpsgebw2o70c@16`, `lpsgebw2o100c@16`, `lpsgebw2o70c@32`.
+  The C3 and C4 rules of the protocol pick among these five.
