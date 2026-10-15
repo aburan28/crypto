@@ -14,10 +14,12 @@ The image ID and cgroup readings are recorded at run time. This is a new host
 protocol; its wall times must be compared within the hosted pair, not spliced
 into the earlier local Linux or macOS timing series.
 
-The [manual workflow](../../../../.github/workflows/n83-hosted-paired-gate.yml) reacts
-only when label `n83-hosted-pair` is added to the existing same-repository PR
-on branch `codex/n83-mixed-orbit-supervisor-20261012`. It checks out the exact
-PR head SHA. Repository AWS secrets are used only inside that guarded job to
+The [manual workflow](../../../../.github/workflows/n83-hosted-paired-gate.yml)
+uses `workflow_dispatch` on the repository's `main` branch. Its job guard
+requires `aburan28/crypto` and `refs/heads/main`, and checkout pins the
+already merged source commit `9c92a5f5c02d4163466be4ee7edb557a468a9c2d`.
+The dispatch is prepared but has not been triggered. Repository AWS secrets
+are used only inside that guarded job to
 read the three private S3 archives. The job checks their compressed SHA-256
 values and the prior source and orbit audit before any worker stage. It pulls
 the pinned image, prepares an offline Cargo registry, separately builds each
