@@ -22,6 +22,7 @@ def load(name):
     return [json.loads(l) for l in p.read_text().splitlines() if l.strip()] if p.exists() else []
 
 grid, a1, a2, e2e = load("grid.jsonl"), load("grid_amend1.jsonl"), load("grid_amend2.jsonl"), load("e2e.jsonl")
+a4 = load("grid_amend4.jsonl")
 
 # Amendment 3: a record whose run overlapped a build or diagnostic window is
 # replaced by its idle-host re-run (matched by pass, arm, D, m, seed; the
@@ -64,6 +65,12 @@ SERIES = {
     "full-bw-m32r100": ("ours, merge (32, 100)", C[2], "D"),
     "full-bw-m128r200": ("ours, merge (128, 200)", C[6], "P"),
     "cado-full-fb": ("CADO purge + merge-dl + replay-dl + bwc", C[1], "s"),
+    "legacy-bw": ("ours before: legacy filter + block Wiedemann", C[7], "v"),
+    "cado-bw": ("ours after: CADO-style filter + block Wiedemann", C[0], "o"),
+    "cado-bl": ("ours after: CADO-style filter + block Lanczos", C[6], "P"),
+    "cado-nfs": ("CADO-NFS purge + merge-dl + bwc (+1 coeffs)", C[1], "s"),
+    "cado-bw-pos": ("ours after (+1 coeffs)", C[2], "D"),
+    "legacy-bw-pos": ("ours before (+1 coeffs)", C[3], "^"),
 }
 summary = {}
 
@@ -192,6 +199,58 @@ if e2e:
     save(fig, "e2e_split")
     summary["e2e"] = [{k: r[k] for k in ("label", "linear_algebra", "sparse_solver", "seed", "columns", "relations",
                        "elapsed_seconds", "linear_algebra_seconds", "other_seconds_derived")} for r in rows]
+
+# 6. Amendment 4: before and after the port, and CADO-NFS, one session.
+if a4:
+    fig, ax = plt.subplots(figsize=(8.5, 5))
+    lines(ax, a4, ["legacy-bw", "cado-bw", "cado-bl", "legacy-bw-pos", "cado-bw-pos", "cado-nfs"], "amend4_solve_s")
+    style(ax, "After the port: whole linear-algebra pipeline, one session (median of 3 seeds, 4 threads)", "wall seconds (log)")
+    ax.legend(fontsize=7.5, frameon=False, loc="upper left")
+    save(fig, "amend4_pipeline")
+
+    fig, ax = plt.subplots(figsize=(8.5, 4))
+    for num, den, label, color, marker in (("legacy-bw", "cado-bw", "legacy / CADO-style filter, ±1 coefficients", C[0], "o"),
+                                           ("legacy-bw-pos", "cado-bw-pos", "legacy / CADO-style filter, +1 coefficients", C[2], "D"),
+                                           ("cado-nfs", "cado-bw-pos", "CADO-NFS / ours after, +1 coefficients", C[1], "s")):
+        a = {(r["cols"], r["seed"]): r["solve_s"] for r in a4 if r.get("arm") == num and r.get("verified") is True}
+        b = {(r["cols"], r["seed"]): r["solve_s"] for r in a4 if r.get("arm") == den and r.get("verified") is True}
+        ratios = {}
+        for k in a:
+            if k in b:
+                ratios.setdefault(k[0], []).append(a[k] / b[k])
+        xs = sorted(ratios)
+        if not xs:
+            continue
+        med = [statistics.median(ratios[d]) for d in xs]
+        ax.errorbar(xs, med, yerr=[[m - min(ratios[d]) for m, d in zip(med, xs)], [max(ratios[d]) - m for m, d in zip(med, xs)]],
+                    color=color, marker=marker, linewidth=2, capsize=2, label=label, markeredgecolor="#fcfcfb", markeredgewidth=1)
+        summary[f"amend4_ratio|{num}/{den}"] = {str(d): {"median": statistics.median(ratios[d]), "min": min(ratios[d]),
+                                                         "max": max(ratios[d]), "n": len(ratios[d])} for d in xs}
+    ax.axhline(1, color="#8a8984", linewidth=1)
+    style(ax, "Speed-up of the port, per (D, seed) in one session (above 1: the denominator is faster)", "time ratio (log)")
+    ax.legend(fontsize=8, frameon=False, loc="upper left")
+    save(fig, "amend4_speedup")
+
+    fig, ax = plt.subplots(figsize=(8.5, 4))
+    for i, (arm, label) in enumerate((("cado-bw-pos-d0", "target density 0 (stop on columns × nonzeros)"),
+                                      ("cado-bw-pos-d50", "target density 50"),
+                                      ("cado-bw-pos", "target density 100 (shipped)"),
+                                      ("cado-bw-pos-d170", "target density 170"))):
+        c = cells(a4, arm)
+        xs = list(c)
+        if not xs:
+            continue
+        ax.errorbar(xs, [c[d][0] for d in xs], yerr=[[c[d][0] - c[d][1] for d in xs], [c[d][2] - c[d][0] for d in xs]],
+                    color=[C[3], C[2], C[0], C[6]][i], marker="oDsP"[i], linewidth=2, capsize=2, label=label,
+                    markeredgecolor="#fcfcfb", markeredgewidth=1)
+        summary[f"amend4_density|{arm}"] = {str(d): {"median": v[0], "min": v[1], "max": v[2], "n": v[3]} for d, v in c.items()}
+    style(ax, "CADO-style filter: sensitivity to the merge density target (+1 coefficients)", "wall seconds (log)")
+    ax.legend(fontsize=8, frameon=False, loc="upper left")
+    save(fig, "amend4_density")
+    core = lambda r: r.get("small_dim") or r["report"]["core_dimension"]
+    for arm in ("legacy-bw", "cado-bw", "legacy-bw-pos", "cado-bw-pos", "cado-nfs"):
+        c = cells(a4, arm, key=core)
+        summary[f"amend4_core_dim|{arm}"] = {str(d): c[d][0] for d in c}
 
 summary["amendment3_replaced"] = replaced
 (here / "summary.json").write_text(json.dumps(summary, indent=1, sort_keys=True))

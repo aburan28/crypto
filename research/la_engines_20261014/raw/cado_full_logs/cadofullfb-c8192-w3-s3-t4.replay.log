@@ -1,11 +1,11 @@
-# (692ecb7) /home/user/ext/cado-nfs/build/filter/replay-dl -purged /tmp/cb/cado-full.R7TlDt/purged -his /tmp/cb/cado-full.R7TlDt/history -out /tmp/cb/cado-full.R7TlDt/small.bin -index /tmp/cb/cado-full.R7TlDt/small.index -ideals /tmp/cb/cado-full.R7TlDt/small.ideal
+# (692ecb7) /home/user/ext/cado-nfs/build/filter/replay-dl -purged /tmp/cb/cado-full.xCQJ5R/purged -his /tmp/cb/cado-full.xCQJ5R/history -out /tmp/cb/cado-full.xCQJ5R/small.bin -index /tmp/cb/cado-full.xCQJ5R/small.index -ideals /tmp/cb/cado-full.xCQJ5R/small.ideal
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 Sparse matrix has 1593 rows and 8191 cols
 # Output matrices will be written in binary format
 antebuffer set to /home/user/ext/cado-nfs/build/utils/antebuffer
-Reading sparse matrix from /tmp/cb/cado-full.R7TlDt/purged
+Reading sparse matrix from /tmp/cb/cado-full.xCQJ5R/purged
 # Read 1024 relations in 0.0s -- inf MB/s -- inf rels/s
 # Done: Read 1593 relations in 0.0s -- inf MB/s -- inf rels/s
 The biggest index appearing in a relation is 8191
@@ -13,11 +13,11 @@ Reading row additions
 # Read 1024 row additions in 0.0s -- inf lines/s
 # Read 2048 row additions in 0.0s -- inf lines/s
 # Read 4096 row additions in 0.0s -- inf lines/s
-# Done: Read 4818 row additions in 0.0s -- inf lines/s
+# Done: Read 4819 row additions in 0.0s -- inf lines/s
 Renumbering columns (including sorting w.r.t. weight)
-Sorting 154 columns by decreasing weight
-Sparse submatrix: nrows=154 ncols=154
-Writing sparse representation to /tmp/cb/cado-full.R7TlDt/small.bin
+Sorting 151 columns by decreasing weight
+Sparse submatrix: nrows=151 ncols=151
+Writing sparse representation to /tmp/cb/cado-full.xCQJ5R/small.bin
 # Writing matrix took 0.0s
-# Weight of the sparse submatrix: 3127
+# Weight of the sparse submatrix: 3135
 Total usage: time 0s (cpu), 0s (wct) ; memory 87MiB, peak 156MiB

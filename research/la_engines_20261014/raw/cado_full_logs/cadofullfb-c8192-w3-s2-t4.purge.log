@@ -1,4 +1,4 @@
-# (692ecb7) /home/user/ext/cado-nfs/build/filter/purge -out /tmp/cb/cado-full.cJYTnu/purged -outdel /tmp/cb/cado-full.cJYTnu/deleted -keep 160 -t 4 /tmp/cb/cado-full.cJYTnu/rels
+# (692ecb7) /home/user/ext/cado-nfs/build/filter/purge -out /tmp/cb/cado-full.1GsRAb/purged -outdel /tmp/cb/cado-full.1GsRAb/deleted -keep 160 -t 4 /tmp/cb/cado-full.1GsRAb/rels
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
@@ -16,586 +16,589 @@ Pass 1, reading and storing columns with weight < 255
 # Read 4096 relations in 0.0s -- inf MB/s -- inf rels/s
 # Read 8192 relations in 0.0s -- inf MB/s -- inf rels/s
 # Read 16384 relations in 0.0s -- inf MB/s -- inf rels/s
-# Done: Read 26691 relations in 0.0s -- 53.0 MB/s -- 2619278.4 rels/s
+# Done: Read 26691 relations in 0.0s -- 37.5 MB/s -- 1853930.9 rels/s
 # 0 columns were ignored because they have weight >= 255
 # MEMORY: Allocated matrix: 4.00 MB
 
 Step 0: only singleton removal
-Sing. rem.: begin with: nrows=26691 ncols=8192 excess=18499 at 0.02
-Sing. rem.:   iter 001: nrows=26685 ncols=8186 excess=18499 at 0.02
-Sing. rem.:   iter 002: No more singletons, finished at 0.03
+Sing. rem.: begin with: nrows=26691 ncols=8192 excess=18499 at 0.03
+Sing. rem.:   iter 001: nrows=26685 ncols=8186 excess=18499 at 0.04
+Sing. rem.:   iter 002: No more singletons, finished at 0.04
 # INFO: number of clique removal steps: 50
 # INFO: At each step, excess will be decreased by 366
 
 Step 1 of 50: target excess is 18133
-Cliq. rem.: computed sum2 at 0.03
-Cliq. rem.: computed heaviest connected components at 0.03
+Cliq. rem.: computed sum2 at 0.04
+Cliq. rem.: computed heaviest connected components at 0.04
 Cliq. rem.: weight of last removed connected component: 1.10199
-Cliq. rem.: deleted 379 heaviest connected components at 0.03
-Sing. rem.: begin with: nrows=26301 ncols=8168 excess=18133 at 0.03
-Sing. rem.:   iter 001: nrows=26255 ncols=8122 excess=18133 at 0.03
-Sing. rem.:   iter 002: No more singletons, finished at 0.03
+Cliq. rem.: deleted 379 heaviest connected components at 0.04
+Sing. rem.: begin with: nrows=26301 ncols=8168 excess=18133 at 0.04
+Sing. rem.:   iter 001: nrows=26255 ncols=8122 excess=18133 at 0.04
+Sing. rem.:   iter 002: No more singletons, finished at 0.04
 This step removed 430 rows and decreased excess by 366
 Each excess row deleted 1.17 rows
 
 Step 2 of 50: target excess is 17767
-Cliq. rem.: computed sum2 at 0.03
-Cliq. rem.: computed heaviest connected components at 0.03
+Cliq. rem.: computed sum2 at 0.04
+Cliq. rem.: computed heaviest connected components at 0.04
 Cliq. rem.: weight of last removed connected component: 1.0789757
-Cliq. rem.: deleted 384 heaviest connected components at 0.03
-Sing. rem.: begin with: nrows=25867 ncols=8100 excess=17767 at 0.03
-Sing. rem.:   iter 001: nrows=25822 ncols=8055 excess=17767 at 0.03
-Sing. rem.:   iter 002: No more singletons, finished at 0.03
+Cliq. rem.: deleted 384 heaviest connected components at 0.04
+Sing. rem.: begin with: nrows=25867 ncols=8100 excess=17767 at 0.04
+Sing. rem.:   iter 001: nrows=25822 ncols=8055 excess=17767 at 0.04
+Sing. rem.:   iter 002: No more singletons, finished at 0.04
 This step removed 433 rows and decreased excess by 366
 Each excess row deleted 1.18 rows
 
 Step 3 of 50: target excess is 17401
-Cliq. rem.: computed sum2 at 0.03
-Cliq. rem.: computed heaviest connected components at 0.04
+Cliq. rem.: computed sum2 at 0.05
+Cliq. rem.: computed heaviest connected components at 0.05
 Cliq. rem.: weight of last removed connected component: 1.0536716
-Cliq. rem.: deleted 380 heaviest connected components at 0.04
-Sing. rem.: begin with: nrows=25440 ncols=8039 excess=17401 at 0.04
-Sing. rem.:   iter 001: nrows=25401 ncols=8000 excess=17401 at 0.04
-Sing. rem.:   iter 002: No more singletons, finished at 0.04
+Cliq. rem.: deleted 380 heaviest connected components at 0.05
+Sing. rem.: begin with: nrows=25440 ncols=8039 excess=17401 at 0.05
+Sing. rem.:   iter 001: nrows=25401 ncols=8000 excess=17401 at 0.05
+Sing. rem.:   iter 002: No more singletons, finished at 0.05
 This step removed 421 rows and decreased excess by 366
 Each excess row deleted 1.15 rows
 
 Step 4 of 50: target excess is 17035
-Cliq. rem.: computed sum2 at 0.04
-Cliq. rem.: computed heaviest connected components at 0.04
+Cliq. rem.: computed sum2 at 0.05
+Cliq. rem.: computed heaviest connected components at 0.05
 Cliq. rem.: weight of last removed connected component: 1.0363618
-Cliq. rem.: deleted 393 heaviest connected components at 0.04
-Sing. rem.: begin with: nrows=25006 ncols=7971 excess=17035 at 0.04
-Sing. rem.:   iter 001: nrows=24963 ncols=7928 excess=17035 at 0.04
-Sing. rem.:   iter 002: No more singletons, finished at 0.04
+Cliq. rem.: deleted 393 heaviest connected components at 0.05
+Sing. rem.: begin with: nrows=25006 ncols=7971 excess=17035 at 0.05
+Sing. rem.:   iter 001: nrows=24963 ncols=7928 excess=17035 at 0.05
+Sing. rem.:   iter 002: No more singletons, finished at 0.05
 This step removed 438 rows and decreased excess by 366
 Each excess row deleted 1.20 rows
 
 Step 5 of 50: target excess is 16669
-Cliq. rem.: computed sum2 at 0.04
-Cliq. rem.: computed heaviest connected components at 0.04
+Cliq. rem.: computed sum2 at 0.05
+Cliq. rem.: computed heaviest connected components at 0.06
 Cliq. rem.: weight of last removed connected component: 1.0289743
-Cliq. rem.: deleted 389 heaviest connected components at 0.04
-Sing. rem.: begin with: nrows=24567 ncols=7898 excess=16669 at 0.04
-Sing. rem.:   iter 001: nrows=24529 ncols=7860 excess=16669 at 0.04
-Sing. rem.:   iter 002: No more singletons, finished at 0.04
+Cliq. rem.: deleted 389 heaviest connected components at 0.06
+Sing. rem.: begin with: nrows=24567 ncols=7898 excess=16669 at 0.06
+Sing. rem.:   iter 001: nrows=24529 ncols=7860 excess=16669 at 0.06
+Sing. rem.:   iter 002: No more singletons, finished at 0.06
 This step removed 434 rows and decreased excess by 366
 Each excess row deleted 1.19 rows
 
 Step 6 of 50: target excess is 16303
-Cliq. rem.: computed sum2 at 0.04
-Cliq. rem.: computed heaviest connected components at 0.05
+Cliq. rem.: computed sum2 at 0.06
+Cliq. rem.: computed heaviest connected components at 0.06
 Cliq. rem.: weight of last removed connected component: 1.0289153
-Cliq. rem.: deleted 395 heaviest connected components at 0.05
-Sing. rem.: begin with: nrows=24129 ncols=7826 excess=16303 at 0.05
-Sing. rem.:   iter 001: nrows=24101 ncols=7798 excess=16303 at 0.05
-Sing. rem.:   iter 002: No more singletons, finished at 0.05
+Cliq. rem.: deleted 395 heaviest connected components at 0.06
+Sing. rem.: begin with: nrows=24129 ncols=7826 excess=16303 at 0.06
+Sing. rem.:   iter 001: nrows=24101 ncols=7798 excess=16303 at 0.06
+Sing. rem.:   iter 002: No more singletons, finished at 0.06
 This step removed 428 rows and decreased excess by 366
 Each excess row deleted 1.17 rows
 
 Step 7 of 50: target excess is 15937
-Cliq. rem.: computed sum2 at 0.05
-Cliq. rem.: computed heaviest connected components at 0.05
+Cliq. rem.: computed sum2 at 0.06
+Cliq. rem.: computed heaviest connected components at 0.06
 Cliq. rem.: weight of last removed connected component: 1.0289153
-Cliq. rem.: deleted 387 heaviest connected components at 0.05
-Sing. rem.: begin with: nrows=23711 ncols=7774 excess=15937 at 0.05
-Sing. rem.:   iter 001: nrows=23674 ncols=7737 excess=15937 at 0.05
-Sing. rem.:   iter 002: No more singletons, finished at 0.05
+Cliq. rem.: deleted 387 heaviest connected components at 0.07
+Sing. rem.: begin with: nrows=23711 ncols=7774 excess=15937 at 0.07
+Sing. rem.:   iter 001: nrows=23674 ncols=7737 excess=15937 at 0.07
+Sing. rem.:   iter 002: No more singletons, finished at 0.07
 This step removed 427 rows and decreased excess by 366
 Each excess row deleted 1.17 rows
 
 Step 8 of 50: target excess is 15571
-Cliq. rem.: computed sum2 at 0.05
-Cliq. rem.: computed heaviest connected components at 0.05
+Cliq. rem.: computed sum2 at 0.07
+Cliq. rem.: computed heaviest connected components at 0.07
 Cliq. rem.: weight of last removed connected component: 1.0226556
-Cliq. rem.: deleted 390 heaviest connected components at 0.05
-Sing. rem.: begin with: nrows=23281 ncols=7710 excess=15571 at 0.05
-Sing. rem.:   iter 001: nrows=23251 ncols=7680 excess=15571 at 0.06
-Sing. rem.:   iter 002: No more singletons, finished at 0.06
+Cliq. rem.: deleted 390 heaviest connected components at 0.07
+Sing. rem.: begin with: nrows=23281 ncols=7710 excess=15571 at 0.07
+Sing. rem.:   iter 001: nrows=23251 ncols=7680 excess=15571 at 0.07
+Sing. rem.:   iter 002: No more singletons, finished at 0.07
 This step removed 423 rows and decreased excess by 366
 Each excess row deleted 1.16 rows
 
 Step 9 of 50: target excess is 15205
-Cliq. rem.: computed sum2 at 0.06
-Cliq. rem.: computed heaviest connected components at 0.06
+Cliq. rem.: computed sum2 at 0.07
+Cliq. rem.: computed heaviest connected components at 0.07
 Cliq. rem.: weight of last removed connected component: 1.0289743
-Cliq. rem.: deleted 393 heaviest connected components at 0.06
-Sing. rem.: begin with: nrows=22849 ncols=7644 excess=15205 at 0.06
-Sing. rem.:   iter 001: nrows=22806 ncols=7601 excess=15205 at 0.06
-Sing. rem.:   iter 002: No more singletons, finished at 0.06
+Cliq. rem.: deleted 393 heaviest connected components at 0.07
+Sing. rem.: begin with: nrows=22849 ncols=7644 excess=15205 at 0.07
+Sing. rem.:   iter 001: nrows=22806 ncols=7601 excess=15205 at 0.07
+Sing. rem.:   iter 002: No more singletons, finished at 0.07
 This step removed 445 rows and decreased excess by 366
 Each excess row deleted 1.22 rows
 
 Step 10 of 50: target excess is 14839
-Cliq. rem.: computed sum2 at 0.06
-Cliq. rem.: computed heaviest connected components at 0.06
+Cliq. rem.: computed sum2 at 0.08
+Cliq. rem.: computed heaviest connected components at 0.08
 Cliq. rem.: weight of last removed connected component: 1.036288
-Cliq. rem.: deleted 390 heaviest connected components at 0.06
-Sing. rem.: begin with: nrows=22407 ncols=7568 excess=14839 at 0.06
-Sing. rem.:   iter 001: nrows=22367 ncols=7528 excess=14839 at 0.06
-Sing. rem.:   iter 002: No more singletons, finished at 0.06
+Cliq. rem.: deleted 390 heaviest connected components at 0.08
+Sing. rem.: begin with: nrows=22407 ncols=7568 excess=14839 at 0.08
+Sing. rem.:   iter 001: nrows=22367 ncols=7528 excess=14839 at 0.08
+Sing. rem.:   iter 002: No more singletons, finished at 0.08
 This step removed 439 rows and decreased excess by 366
 Each excess row deleted 1.20 rows
 
 Step 11 of 50: target excess is 14473
-Cliq. rem.: computed sum2 at 0.06
-Cliq. rem.: computed heaviest connected components at 0.07
+Cliq. rem.: computed sum2 at 0.08
+Cliq. rem.: computed heaviest connected components at 0.08
 Cliq. rem.: weight of last removed connected component: 1.0289743
-Cliq. rem.: deleted 382 heaviest connected components at 0.07
-Sing. rem.: begin with: nrows=21978 ncols=7505 excess=14473 at 0.07
-Sing. rem.:   iter 001: nrows=21940 ncols=7467 excess=14473 at 0.07
-Sing. rem.:   iter 002: No more singletons, finished at 0.07
+Cliq. rem.: deleted 382 heaviest connected components at 0.08
+Sing. rem.: begin with: nrows=21978 ncols=7505 excess=14473 at 0.08
+Sing. rem.:   iter 001: nrows=21940 ncols=7467 excess=14473 at 0.08
+Sing. rem.:   iter 002: No more singletons, finished at 0.08
 This step removed 427 rows and decreased excess by 366
 Each excess row deleted 1.17 rows
 
 Step 12 of 50: target excess is 14107
-Cliq. rem.: computed sum2 at 0.07
-Cliq. rem.: computed heaviest connected components at 0.07
+Cliq. rem.: computed sum2 at 0.08
+Cliq. rem.: computed heaviest connected components at 0.09
 Cliq. rem.: weight of last removed connected component: 1.041592
-Cliq. rem.: deleted 385 heaviest connected components at 0.07
-Sing. rem.: begin with: nrows=21541 ncols=7434 excess=14107 at 0.07
-Sing. rem.:   iter 001: nrows=21511 ncols=7404 excess=14107 at 0.07
-Sing. rem.:   iter 002: No more singletons, finished at 0.07
+Cliq. rem.: deleted 385 heaviest connected components at 0.09
+Sing. rem.: begin with: nrows=21541 ncols=7434 excess=14107 at 0.09
+Sing. rem.:   iter 001: nrows=21511 ncols=7404 excess=14107 at 0.09
+Sing. rem.:   iter 002: No more singletons, finished at 0.09
 This step removed 429 rows and decreased excess by 366
 Each excess row deleted 1.17 rows
 
 Step 13 of 50: target excess is 13741
-Cliq. rem.: computed sum2 at 0.07
-Cliq. rem.: computed heaviest connected components at 0.07
+Cliq. rem.: computed sum2 at 0.09
+Cliq. rem.: computed heaviest connected components at 0.09
 Cliq. rem.: weight of last removed connected component: 1.0558178
-Cliq. rem.: deleted 389 heaviest connected components at 0.07
-Sing. rem.: begin with: nrows=21114 ncols=7373 excess=13741 at 0.07
-Sing. rem.:   iter 001: nrows=21075 ncols=7334 excess=13741 at 0.07
-Sing. rem.:   iter 002: No more singletons, finished at 0.07
+Cliq. rem.: deleted 389 heaviest connected components at 0.09
+Sing. rem.: begin with: nrows=21114 ncols=7373 excess=13741 at 0.09
+Sing. rem.:   iter 001: nrows=21075 ncols=7334 excess=13741 at 0.09
+Sing. rem.:   iter 002: No more singletons, finished at 0.09
 This step removed 436 rows and decreased excess by 366
 Each excess row deleted 1.19 rows
 
 Step 14 of 50: target excess is 13375
-Cliq. rem.: computed sum2 at 0.07
-Cliq. rem.: computed heaviest connected components at 0.08
+Cliq. rem.: computed sum2 at 0.09
+Cliq. rem.: computed heaviest connected components at 0.10
 Cliq. rem.: weight of last removed connected component: 1.0594305
-Cliq. rem.: deleted 388 heaviest connected components at 0.08
-Sing. rem.: begin with: nrows=20679 ncols=7304 excess=13375 at 0.08
-Sing. rem.:   iter 001: nrows=20632 ncols=7257 excess=13375 at 0.08
-Sing. rem.:   iter 002: No more singletons, finished at 0.08
+Cliq. rem.: deleted 388 heaviest connected components at 0.10
+Sing. rem.: begin with: nrows=20679 ncols=7304 excess=13375 at 0.10
+Sing. rem.:   iter 001: nrows=20632 ncols=7257 excess=13375 at 0.10
+Sing. rem.:   iter 002: No more singletons, finished at 0.10
 This step removed 443 rows and decreased excess by 366
 Each excess row deleted 1.21 rows
 
 Step 15 of 50: target excess is 13009
-Cliq. rem.: computed sum2 at 0.08
-Cliq. rem.: computed heaviest connected components at 0.08
+Cliq. rem.: computed sum2 at 0.10
+Cliq. rem.: computed heaviest connected components at 0.10
 Cliq. rem.: weight of last removed connected component: 1.0558178
-Cliq. rem.: deleted 383 heaviest connected components at 0.08
-Sing. rem.: begin with: nrows=20237 ncols=7228 excess=13009 at 0.08
-Sing. rem.:   iter 001: nrows=20198 ncols=7189 excess=13009 at 0.08
-Sing. rem.:   iter 002: No more singletons, finished at 0.08
+Cliq. rem.: deleted 383 heaviest connected components at 0.10
+Sing. rem.: begin with: nrows=20237 ncols=7228 excess=13009 at 0.10
+Sing. rem.:   iter 001: nrows=20198 ncols=7189 excess=13009 at 0.10
+Sing. rem.:   iter 002: No more singletons, finished at 0.10
 This step removed 434 rows and decreased excess by 366
 Each excess row deleted 1.19 rows
 
 Step 16 of 50: target excess is 12643
-Cliq. rem.: computed sum2 at 0.08
-Cliq. rem.: computed heaviest connected components at 0.08
+Cliq. rem.: computed sum2 at 0.10
+Cliq. rem.: computed heaviest connected components at 0.10
 Cliq. rem.: weight of last removed connected component: 1.0594305
-Cliq. rem.: deleted 385 heaviest connected components at 0.08
-Sing. rem.: begin with: nrows=19804 ncols=7161 excess=12643 at 0.08
-Sing. rem.:   iter 001: nrows=19767 ncols=7124 excess=12643 at 0.08
-Sing. rem.:   iter 002: No more singletons, finished at 0.08
+Cliq. rem.: deleted 385 heaviest connected components at 0.10
+Sing. rem.: begin with: nrows=19804 ncols=7161 excess=12643 at 0.10
+Sing. rem.:   iter 001: nrows=19767 ncols=7124 excess=12643 at 0.10
+Sing. rem.:   iter 002: No more singletons, finished at 0.11
 This step removed 431 rows and decreased excess by 366
 Each excess row deleted 1.18 rows
 
 Step 17 of 50: target excess is 12277
-Cliq. rem.: computed sum2 at 0.08
-Cliq. rem.: computed heaviest connected components at 0.09
+Cliq. rem.: computed sum2 at 0.11
+Cliq. rem.: computed heaviest connected components at 0.11
 Cliq. rem.: weight of last removed connected component: 1.0784347
-Cliq. rem.: deleted 375 heaviest connected components at 0.09
-Sing. rem.: begin with: nrows=19378 ncols=7101 excess=12277 at 0.09
-Sing. rem.:   iter 001: nrows=19337 ncols=7060 excess=12277 at 0.09
-Sing. rem.:   iter 002: No more singletons, finished at 0.09
+Cliq. rem.: deleted 375 heaviest connected components at 0.11
+Sing. rem.: begin with: nrows=19378 ncols=7101 excess=12277 at 0.11
+Sing. rem.:   iter 001: nrows=19337 ncols=7060 excess=12277 at 0.11
+Sing. rem.:   iter 002: No more singletons, finished at 0.11
 This step removed 430 rows and decreased excess by 366
 Each excess row deleted 1.17 rows
 
 Step 18 of 50: target excess is 11911
-Cliq. rem.: computed sum2 at 0.09
-Cliq. rem.: computed heaviest connected components at 0.09
+Cliq. rem.: computed sum2 at 0.11
+Cliq. rem.: computed heaviest connected components at 0.11
 Cliq. rem.: weight of last removed connected component: 1.0956146
-Cliq. rem.: deleted 385 heaviest connected components at 0.09
-Sing. rem.: begin with: nrows=18937 ncols=7026 excess=11911 at 0.09
-Sing. rem.:   iter 001: nrows=18906 ncols=6995 excess=11911 at 0.09
-Sing. rem.:   iter 002: No more singletons, finished at 0.09
+Cliq. rem.: deleted 385 heaviest connected components at 0.11
+Sing. rem.: begin with: nrows=18937 ncols=7026 excess=11911 at 0.11
+Sing. rem.:   iter 001: nrows=18906 ncols=6995 excess=11911 at 0.11
+Sing. rem.:   iter 002: No more singletons, finished at 0.11
 This step removed 431 rows and decreased excess by 366
 Each excess row deleted 1.18 rows
 
 Step 19 of 50: target excess is 11545
-Cliq. rem.: computed sum2 at 0.09
-Cliq. rem.: computed heaviest connected components at 0.09
+Cliq. rem.: computed sum2 at 0.11
+Cliq. rem.: computed heaviest connected components at 0.12
 Cliq. rem.: weight of last removed connected component: 1.1018978
-Cliq. rem.: deleted 384 heaviest connected components at 0.09
-Sing. rem.: begin with: nrows=18510 ncols=6965 excess=11545 at 0.09
-Sing. rem.:   iter 001: nrows=18464 ncols=6919 excess=11545 at 0.09
-Sing. rem.:   iter 002: No more singletons, finished at 0.09
+Cliq. rem.: deleted 384 heaviest connected components at 0.12
+Sing. rem.: begin with: nrows=18510 ncols=6965 excess=11545 at 0.12
+Sing. rem.:   iter 001: nrows=18464 ncols=6919 excess=11545 at 0.12
+Sing. rem.:   iter 002: No more singletons, finished at 0.12
 This step removed 442 rows and decreased excess by 366
 Each excess row deleted 1.21 rows
 
 Step 20 of 50: target excess is 11179
-Cliq. rem.: computed sum2 at 0.09
-Cliq. rem.: computed heaviest connected components at 0.10
+Cliq. rem.: computed sum2 at 0.12
+Cliq. rem.: computed heaviest connected components at 0.12
 Cliq. rem.: weight of last removed connected component: 1.10199
-Cliq. rem.: deleted 384 heaviest connected components at 0.10
-Sing. rem.: begin with: nrows=18060 ncols=6881 excess=11179 at 0.10
-Sing. rem.:   iter 001: nrows=18025 ncols=6846 excess=11179 at 0.10
-Sing. rem.:   iter 002: No more singletons, finished at 0.10
+Cliq. rem.: deleted 384 heaviest connected components at 0.12
+Sing. rem.: begin with: nrows=18060 ncols=6881 excess=11179 at 0.12
+Sing. rem.:   iter 001: nrows=18025 ncols=6846 excess=11179 at 0.12
+Sing. rem.:   iter 002: No more singletons, finished at 0.12
 This step removed 439 rows and decreased excess by 366
 Each excess row deleted 1.20 rows
 
 Step 21 of 50: target excess is 10813
-Cliq. rem.: computed sum2 at 0.10
-Cliq. rem.: computed heaviest connected components at 0.10
+Cliq. rem.: computed sum2 at 0.12
+Cliq. rem.: computed heaviest connected components at 0.13
 Cliq. rem.: weight of last removed connected component: 1.1313152
-Cliq. rem.: deleted 381 heaviest connected components at 0.10
-Sing. rem.: begin with: nrows=17625 ncols=6812 excess=10813 at 0.10
-Sing. rem.:   iter 001: nrows=17588 ncols=6775 excess=10813 at 0.10
-Sing. rem.:   iter 002: No more singletons, finished at 0.10
+Cliq. rem.: deleted 381 heaviest connected components at 0.13
+Sing. rem.: begin with: nrows=17625 ncols=6812 excess=10813 at 0.13
+Sing. rem.:   iter 001: nrows=17588 ncols=6775 excess=10813 at 0.13
+Sing. rem.:   iter 002: No more singletons, finished at 0.13
 This step removed 437 rows and decreased excess by 366
 Each excess row deleted 1.19 rows
 
 Step 22 of 50: target excess is 10447
-Cliq. rem.: computed sum2 at 0.10
-Cliq. rem.: computed heaviest connected components at 0.10
+Cliq. rem.: computed sum2 at 0.13
+Cliq. rem.: computed heaviest connected components at 0.13
 Cliq. rem.: weight of last removed connected component: 1.1354523
-Cliq. rem.: deleted 384 heaviest connected components at 0.10
-Sing. rem.: begin with: nrows=17185 ncols=6738 excess=10447 at 0.10
-Sing. rem.:   iter 001: nrows=17152 ncols=6705 excess=10447 at 0.10
-Sing. rem.:   iter 002: No more singletons, finished at 0.10
+Cliq. rem.: deleted 384 heaviest connected components at 0.13
+Sing. rem.: begin with: nrows=17185 ncols=6738 excess=10447 at 0.13
+Sing. rem.:   iter 001: nrows=17152 ncols=6705 excess=10447 at 0.13
+Sing. rem.:   iter 002: No more singletons, finished at 0.13
 This step removed 436 rows and decreased excess by 366
 Each excess row deleted 1.19 rows
 
 Step 23 of 50: target excess is 10081
-Cliq. rem.: computed sum2 at 0.10
-Cliq. rem.: computed heaviest connected components at 0.11
+Cliq. rem.: computed sum2 at 0.13
+Cliq. rem.: computed heaviest connected components at 0.13
 Cliq. rem.: weight of last removed connected component: 1.14688
-Cliq. rem.: deleted 376 heaviest connected components at 0.11
-Sing. rem.: begin with: nrows=16757 ncols=6676 excess=10081 at 0.11
-Sing. rem.:   iter 001: nrows=16720 ncols=6639 excess=10081 at 0.11
-Sing. rem.:   iter 002: No more singletons, finished at 0.11
+Cliq. rem.: deleted 376 heaviest connected components at 0.13
+Sing. rem.: begin with: nrows=16757 ncols=6676 excess=10081 at 0.13
+Sing. rem.:   iter 001: nrows=16720 ncols=6639 excess=10081 at 0.13
+Sing. rem.:   iter 002: No more singletons, finished at 0.13
 This step removed 432 rows and decreased excess by 366
 Each excess row deleted 1.18 rows
 
 Step 24 of 50: target excess is 9715
-Cliq. rem.: computed sum2 at 0.11
-Cliq. rem.: computed heaviest connected components at 0.11
+Cliq. rem.: computed sum2 at 0.13
+Cliq. rem.: computed heaviest connected components at 0.14
 Cliq. rem.: weight of last removed connected component: 1.1673601
-Cliq. rem.: deleted 380 heaviest connected components at 0.11
-Sing. rem.: begin with: nrows=16324 ncols=6609 excess=9715 at 0.11
-Sing. rem.:   iter 001: nrows=16277 ncols=6562 excess=9715 at 0.11
-Sing. rem.:   iter 002: No more singletons, finished at 0.11
+Cliq. rem.: deleted 380 heaviest connected components at 0.14
+Sing. rem.: begin with: nrows=16324 ncols=6609 excess=9715 at 0.14
+Sing. rem.:   iter 001: nrows=16277 ncols=6562 excess=9715 at 0.14
+Sing. rem.:   iter 002: No more singletons, finished at 0.14
 This step removed 443 rows and decreased excess by 366
 Each excess row deleted 1.21 rows
 
 Step 25 of 50: target excess is 9349
-Cliq. rem.: computed sum2 at 0.11
-Cliq. rem.: computed heaviest connected components at 0.11
+Cliq. rem.: computed sum2 at 0.14
+Cliq. rem.: computed heaviest connected components at 0.14
 Cliq. rem.: weight of last removed connected component: 1.1773952
-Cliq. rem.: deleted 381 heaviest connected components at 0.11
-Sing. rem.: begin with: nrows=15866 ncols=6517 excess=9349 at 0.11
-Sing. rem.:   iter 001: nrows=15830 ncols=6481 excess=9349 at 0.11
-Sing. rem.:   iter 002: No more singletons, finished at 0.11
+Cliq. rem.: deleted 381 heaviest connected components at 0.14
+Sing. rem.: begin with: nrows=15866 ncols=6517 excess=9349 at 0.14
+Sing. rem.:   iter 001: nrows=15830 ncols=6481 excess=9349 at 0.14
+Sing. rem.:   iter 002: No more singletons, finished at 0.14
 This step removed 447 rows and decreased excess by 366
 Each excess row deleted 1.22 rows
 
 Step 26 of 50: target excess is 8983
-Cliq. rem.: computed sum2 at 0.11
-Cliq. rem.: computed heaviest connected components at 0.12
+Cliq. rem.: computed sum2 at 0.14
+Cliq. rem.: computed heaviest connected components at 0.15
 Cliq. rem.: weight of last removed connected component: 1.1837441
-Cliq. rem.: deleted 379 heaviest connected components at 0.12
-Sing. rem.: begin with: nrows=15418 ncols=6435 excess=8983 at 0.12
-Sing. rem.:   iter 001: nrows=15376 ncols=6393 excess=8983 at 0.12
-Sing. rem.:   iter 002: No more singletons, finished at 0.12
+Cliq. rem.: deleted 379 heaviest connected components at 0.15
+Sing. rem.: begin with: nrows=15418 ncols=6435 excess=8983 at 0.15
+Sing. rem.:   iter 001: nrows=15376 ncols=6393 excess=8983 at 0.15
+Sing. rem.:   iter 002: No more singletons, finished at 0.15
 This step removed 454 rows and decreased excess by 366
 Each excess row deleted 1.24 rows
 
 Step 27 of 50: target excess is 8617
-Cliq. rem.: computed sum2 at 0.12
-Cliq. rem.: computed heaviest connected components at 0.12
+Cliq. rem.: computed sum2 at 0.15
+Cliq. rem.: computed heaviest connected components at 0.15
 Cliq. rem.: weight of last removed connected component: 1.2069757
-Cliq. rem.: deleted 376 heaviest connected components at 0.12
-Sing. rem.: begin with: nrows=14958 ncols=6341 excess=8617 at 0.12
-Sing. rem.:   iter 001: nrows=14912 ncols=6295 excess=8617 at 0.12
-Sing. rem.:   iter 002: No more singletons, finished at 0.12
+Cliq. rem.: deleted 376 heaviest connected components at 0.15
+Sing. rem.: begin with: nrows=14958 ncols=6341 excess=8617 at 0.15
+Sing. rem.:   iter 001: nrows=14912 ncols=6295 excess=8617 at 0.15
+Sing. rem.:   iter 002: No more singletons, finished at 0.15
 This step removed 464 rows and decreased excess by 366
 Each excess row deleted 1.27 rows
 
 Step 28 of 50: target excess is 8251
-Cliq. rem.: computed sum2 at 0.12
-Cliq. rem.: computed heaviest connected components at 0.12
+Cliq. rem.: computed sum2 at 0.15
+Cliq. rem.: computed heaviest connected components at 0.15
 Cliq. rem.: weight of last removed connected component: 1.2298241
-Cliq. rem.: deleted 382 heaviest connected components at 0.12
-Sing. rem.: begin with: nrows=14497 ncols=6246 excess=8251 at 0.12
-Sing. rem.:   iter 001: nrows=14452 ncols=6201 excess=8251 at 0.12
-Sing. rem.:   iter 002: No more singletons, finished at 0.12
+Cliq. rem.: deleted 382 heaviest connected components at 0.15
+Sing. rem.: begin with: nrows=14497 ncols=6246 excess=8251 at 0.15
+Sing. rem.:   iter 001: nrows=14452 ncols=6201 excess=8251 at 0.15
+Sing. rem.:   iter 002: No more singletons, finished at 0.15
 This step removed 460 rows and decreased excess by 366
 Each excess row deleted 1.26 rows
 
 Step 29 of 50: target excess is 7885
-Cliq. rem.: computed sum2 at 0.12
-Cliq. rem.: computed heaviest connected components at 0.12
+Cliq. rem.: computed sum2 at 0.16
+Cliq. rem.: computed heaviest connected components at 0.16
 Cliq. rem.: weight of last removed connected component: 1.2288
-Cliq. rem.: deleted 374 heaviest connected components at 0.12
-Sing. rem.: begin with: nrows=14039 ncols=6154 excess=7885 at 0.12
-Sing. rem.:   iter 001: nrows=13997 ncols=6112 excess=7885 at 0.13
-Sing. rem.:   iter 002: nrows=13996 ncols=6111 excess=7885 at 0.13
-Sing. rem.:   iter 003: No more singletons, finished at 0.13
+Cliq. rem.: deleted 374 heaviest connected components at 0.16
+Sing. rem.: begin with: nrows=14039 ncols=6154 excess=7885 at 0.16
+Sing. rem.:   iter 001: nrows=13997 ncols=6112 excess=7885 at 0.16
+Sing. rem.:   iter 002: nrows=13996 ncols=6111 excess=7885 at 0.16
+Sing. rem.:   iter 003: No more singletons, finished at 0.16
 This step removed 456 rows and decreased excess by 366
 Each excess row deleted 1.25 rows
 
 Step 30 of 50: target excess is 7519
-Cliq. rem.: computed sum2 at 0.13
-Cliq. rem.: computed heaviest connected components at 0.13
+Cliq. rem.: computed sum2 at 0.16
+Cliq. rem.: computed heaviest connected components at 0.16
 Cliq. rem.: weight of last removed connected component: 1.2492801
-Cliq. rem.: deleted 378 heaviest connected components at 0.13
-Sing. rem.: begin with: nrows=13573 ncols=6054 excess=7519 at 0.13
-Sing. rem.:   iter 001: nrows=13536 ncols=6017 excess=7519 at 0.13
-Sing. rem.:   iter 002: No more singletons, finished at 0.13
+Cliq. rem.: deleted 378 heaviest connected components at 0.16
+Sing. rem.: begin with: nrows=13573 ncols=6054 excess=7519 at 0.16
+Sing. rem.:   iter 001: nrows=13536 ncols=6017 excess=7519 at 0.16
+Sing. rem.:   iter 002: No more singletons, finished at 0.16
 This step removed 460 rows and decreased excess by 366
 Each excess row deleted 1.26 rows
 
 Step 31 of 50: target excess is 7153
-Cliq. rem.: computed sum2 at 0.13
-Cliq. rem.: computed heaviest connected components at 0.13
+Cliq. rem.: computed sum2 at 0.16
+Cliq. rem.: computed heaviest connected components at 0.17
 Cliq. rem.: weight of last removed connected component: 1.2593743
-Cliq. rem.: deleted 375 heaviest connected components at 0.13
-Sing. rem.: begin with: nrows=13105 ncols=5952 excess=7153 at 0.13
-Sing. rem.:   iter 001: nrows=13055 ncols=5902 excess=7153 at 0.13
-Sing. rem.:   iter 002: No more singletons, finished at 0.13
+Cliq. rem.: deleted 375 heaviest connected components at 0.17
+Sing. rem.: begin with: nrows=13105 ncols=5952 excess=7153 at 0.17
+Sing. rem.:   iter 001: nrows=13055 ncols=5902 excess=7153 at 0.17
+Sing. rem.:   iter 002: No more singletons, finished at 0.17
 This step removed 481 rows and decreased excess by 366
 Each excess row deleted 1.31 rows
 
 Step 32 of 50: target excess is 6787
-Cliq. rem.: computed sum2 at 0.13
-Cliq. rem.: computed heaviest connected components at 0.13
+Cliq. rem.: computed sum2 at 0.17
+Cliq. rem.: computed heaviest connected components at 0.17
 Cliq. rem.: weight of last removed connected component: 1.286144
-Cliq. rem.: deleted 380 heaviest connected components at 0.13
-Sing. rem.: begin with: nrows=12624 ncols=5837 excess=6787 at 0.13
-Sing. rem.:   iter 001: nrows=12590 ncols=5803 excess=6787 at 0.13
-Sing. rem.:   iter 002: No more singletons, finished at 0.14
+Cliq. rem.: deleted 380 heaviest connected components at 0.17
+Sing. rem.: begin with: nrows=12624 ncols=5837 excess=6787 at 0.17
+Sing. rem.:   iter 001: nrows=12590 ncols=5803 excess=6787 at 0.17
+Sing. rem.:   iter 002: No more singletons, finished at 0.17
 This step removed 465 rows and decreased excess by 366
 Each excess row deleted 1.27 rows
 
 Step 33 of 50: target excess is 6421
-Cliq. rem.: computed sum2 at 0.14
-Cliq. rem.: computed heaviest connected components at 0.14
+Cliq. rem.: computed sum2 at 0.17
+Cliq. rem.: computed heaviest connected components at 0.17
 Cliq. rem.: weight of last removed connected component: 1.2992314
-Cliq. rem.: deleted 373 heaviest connected components at 0.14
-Sing. rem.: begin with: nrows=12152 ncols=5731 excess=6421 at 0.14
-Sing. rem.:   iter 001: nrows=12115 ncols=5694 excess=6421 at 0.14
-Sing. rem.:   iter 002: No more singletons, finished at 0.14
+Cliq. rem.: deleted 373 heaviest connected components at 0.17
+Sing. rem.: begin with: nrows=12152 ncols=5731 excess=6421 at 0.17
+Sing. rem.:   iter 001: nrows=12115 ncols=5694 excess=6421 at 0.18
+Sing. rem.:   iter 002: No more singletons, finished at 0.18
 This step removed 475 rows and decreased excess by 366
 Each excess row deleted 1.30 rows
 
 Step 34 of 50: target excess is 6055
-Cliq. rem.: computed sum2 at 0.14
-Cliq. rem.: computed heaviest connected components at 0.14
+Cliq. rem.: computed sum2 at 0.18
+Cliq. rem.: computed heaviest connected components at 0.18
 Cliq. rem.: weight of last removed connected component: 1.3197722
-Cliq. rem.: deleted 378 heaviest connected components at 0.14
-Sing. rem.: begin with: nrows=11684 ncols=5629 excess=6055 at 0.14
-Sing. rem.:   iter 001: nrows=11645 ncols=5590 excess=6055 at 0.14
-Sing. rem.:   iter 002: No more singletons, finished at 0.14
+Cliq. rem.: deleted 378 heaviest connected components at 0.18
+Sing. rem.: begin with: nrows=11684 ncols=5629 excess=6055 at 0.18
+Sing. rem.:   iter 001: nrows=11645 ncols=5590 excess=6055 at 0.18
+Sing. rem.:   iter 002: No more singletons, finished at 0.18
 This step removed 470 rows and decreased excess by 366
 Each excess row deleted 1.28 rows
 
 Step 35 of 50: target excess is 5689
-Cliq. rem.: computed sum2 at 0.14
-Cliq. rem.: computed heaviest connected components at 0.14
+Cliq. rem.: computed sum2 at 0.18
+Cliq. rem.: computed heaviest connected components at 0.18
 Cliq. rem.: weight of last removed connected component: 1.3312001
-Cliq. rem.: deleted 375 heaviest connected components at 0.14
-Sing. rem.: begin with: nrows=11196 ncols=5507 excess=5689 at 0.14
-Sing. rem.:   iter 001: nrows=11161 ncols=5472 excess=5689 at 0.15
-Sing. rem.:   iter 002: nrows=11160 ncols=5471 excess=5689 at 0.15
-Sing. rem.:   iter 003: No more singletons, finished at 0.15
+Cliq. rem.: deleted 375 heaviest connected components at 0.18
+Sing. rem.: begin with: nrows=11196 ncols=5507 excess=5689 at 0.18
+Sing. rem.:   iter 001: nrows=11161 ncols=5472 excess=5689 at 0.18
+Sing. rem.:   iter 002: nrows=11160 ncols=5471 excess=5689 at 0.18
+Sing. rem.:   iter 003: No more singletons, finished at 0.18
 This step removed 485 rows and decreased excess by 366
 Each excess row deleted 1.33 rows
 
 Step 36 of 50: target excess is 5323
-Cliq. rem.: computed sum2 at 0.15
-Cliq. rem.: computed heaviest connected components at 0.15
+Cliq. rem.: computed sum2 at 0.19
+Cliq. rem.: computed heaviest connected components at 0.19
 Cliq. rem.: weight of last removed connected component: 1.3648264
-Cliq. rem.: deleted 375 heaviest connected components at 0.15
-Sing. rem.: begin with: nrows=10716 ncols=5393 excess=5323 at 0.15
-Sing. rem.:   iter 001: nrows=10667 ncols=5344 excess=5323 at 0.15
-Sing. rem.:   iter 002: No more singletons, finished at 0.15
+Cliq. rem.: deleted 375 heaviest connected components at 0.19
+Sing. rem.: begin with: nrows=10716 ncols=5393 excess=5323 at 0.19
+Sing. rem.:   iter 001: nrows=10667 ncols=5344 excess=5323 at 0.19
+Sing. rem.:   iter 002: No more singletons, finished at 0.19
 This step removed 493 rows and decreased excess by 366
 Each excess row deleted 1.35 rows
 
 Step 37 of 50: target excess is 4957
-Cliq. rem.: computed sum2 at 0.15
-Cliq. rem.: computed heaviest connected components at 0.15
+Cliq. rem.: computed sum2 at 0.19
+Cliq. rem.: computed heaviest connected components at 0.19
 Cliq. rem.: weight of last removed connected component: 1.3836795
-Cliq. rem.: deleted 373 heaviest connected components at 0.15
-Sing. rem.: begin with: nrows=10210 ncols=5253 excess=4957 at 0.15
-Sing. rem.:   iter 001: nrows=10168 ncols=5211 excess=4957 at 0.15
-Sing. rem.:   iter 002: No more singletons, finished at 0.15
+Cliq. rem.: deleted 373 heaviest connected components at 0.19
+Sing. rem.: begin with: nrows=10210 ncols=5253 excess=4957 at 0.19
+Sing. rem.:   iter 001: nrows=10168 ncols=5211 excess=4957 at 0.19
+Sing. rem.:   iter 002: No more singletons, finished at 0.19
 This step removed 499 rows and decreased excess by 366
 Each excess row deleted 1.36 rows
 
 Step 38 of 50: target excess is 4591
-Cliq. rem.: computed sum2 at 0.15
-Cliq. rem.: computed heaviest connected components at 0.15
+Cliq. rem.: computed sum2 at 0.19
+Cliq. rem.: computed heaviest connected components at 0.20
 Cliq. rem.: weight of last removed connected component: 1.408067
-Cliq. rem.: deleted 372 heaviest connected components at 0.15
-Sing. rem.: begin with: nrows=9677 ncols=5086 excess=4591 at 0.15
-Sing. rem.:   iter 001: nrows=9643 ncols=5052 excess=4591 at 0.15
-Sing. rem.:   iter 002: No more singletons, finished at 0.16
+Cliq. rem.: deleted 372 heaviest connected components at 0.20
+Sing. rem.: begin with: nrows=9677 ncols=5086 excess=4591 at 0.20
+Sing. rem.:   iter 001: nrows=9643 ncols=5052 excess=4591 at 0.20
+Sing. rem.:   iter 002: No more singletons, finished at 0.20
 This step removed 525 rows and decreased excess by 366
 Each excess row deleted 1.43 rows
 
 Step 39 of 50: target excess is 4225
-Cliq. rem.: computed sum2 at 0.16
-Cliq. rem.: computed heaviest connected components at 0.16
+Cliq. rem.: computed sum2 at 0.20
+Cliq. rem.: computed heaviest connected components at 0.20
 Cliq. rem.: weight of last removed connected component: 1.4336001
-Cliq. rem.: deleted 370 heaviest connected components at 0.16
-Sing. rem.: begin with: nrows=9149 ncols=4924 excess=4225 at 0.16
-Sing. rem.:   iter 001: nrows=9112 ncols=4887 excess=4225 at 0.16
-Sing. rem.:   iter 002: No more singletons, finished at 0.16
+Cliq. rem.: deleted 370 heaviest connected components at 0.20
+Sing. rem.: begin with: nrows=9149 ncols=4924 excess=4225 at 0.20
+Sing. rem.:   iter 001: nrows=9112 ncols=4887 excess=4225 at 0.20
+Sing. rem.:   iter 002: No more singletons, finished at 0.20
 This step removed 531 rows and decreased excess by 366
 Each excess row deleted 1.45 rows
 
 Step 40 of 50: target excess is 3859
-Cliq. rem.: computed sum2 at 0.16
-Cliq. rem.: computed heaviest connected components at 0.16
+Cliq. rem.: computed sum2 at 0.20
+Cliq. rem.: computed heaviest connected components at 0.20
 Cliq. rem.: weight of last removed connected component: 1.4717441
-Cliq. rem.: deleted 374 heaviest connected components at 0.16
-Sing. rem.: begin with: nrows=8615 ncols=4756 excess=3859 at 0.16
-Sing. rem.:   iter 001: nrows=8569 ncols=4710 excess=3859 at 0.16
-Sing. rem.:   iter 002: nrows=8568 ncols=4709 excess=3859 at 0.16
-Sing. rem.:   iter 003: No more singletons, finished at 0.16
+Cliq. rem.: deleted 374 heaviest connected components at 0.20
+Sing. rem.: begin with: nrows=8615 ncols=4756 excess=3859 at 0.20
+Sing. rem.:   iter 001: nrows=8569 ncols=4710 excess=3859 at 0.20
+Sing. rem.:   iter 002: nrows=8568 ncols=4709 excess=3859 at 0.21
+Sing. rem.:   iter 003: No more singletons, finished at 0.21
 This step removed 544 rows and decreased excess by 366
 Each excess row deleted 1.49 rows
 
 Step 41 of 50: target excess is 3493
-Cliq. rem.: computed sum2 at 0.16
-Cliq. rem.: computed heaviest connected components at 0.16
+Cliq. rem.: computed sum2 at 0.21
+Cliq. rem.: computed heaviest connected components at 0.21
 Cliq. rem.: weight of last removed connected component: 1.4951841
-Cliq. rem.: deleted 371 heaviest connected components at 0.16
-Sing. rem.: begin with: nrows=8039 ncols=4546 excess=3493 at 0.16
-Sing. rem.:   iter 001: nrows=7989 ncols=4495 excess=3494 at 0.16
-Sing. rem.:   iter 002: No more singletons, finished at 0.16
+Cliq. rem.: deleted 371 heaviest connected components at 0.21
+Sing. rem.: begin with: nrows=8039 ncols=4546 excess=3493 at 0.21
+Sing. rem.:   iter 001: nrows=7990 ncols=4496 excess=3494 at 0.21
+Sing. rem.:   iter 002: nrows=7989 ncols=4495 excess=3494 at 0.21
+Sing. rem.:   iter 003: No more singletons, finished at 0.21
 This step removed 579 rows and decreased excess by 365
 Each excess row deleted 1.59 rows
 
 Step 42 of 50: target excess is 3128
-Cliq. rem.: computed sum2 at 0.16
-Cliq. rem.: computed heaviest connected components at 0.17
+Cliq. rem.: computed sum2 at 0.21
+Cliq. rem.: computed heaviest connected components at 0.21
 Cliq. rem.: weight of last removed connected component: 1.5421441
-Cliq. rem.: deleted 373 heaviest connected components at 0.17
-Sing. rem.: begin with: nrows=7458 ncols=4330 excess=3128 at 0.17
-Sing. rem.:   iter 001: nrows=7410 ncols=4282 excess=3128 at 0.17
-Sing. rem.:   iter 002: No more singletons, finished at 0.17
+Cliq. rem.: deleted 373 heaviest connected components at 0.21
+Sing. rem.: begin with: nrows=7458 ncols=4330 excess=3128 at 0.21
+Sing. rem.:   iter 001: nrows=7411 ncols=4283 excess=3128 at 0.21
+Sing. rem.:   iter 002: nrows=7410 ncols=4282 excess=3128 at 0.21
+Sing. rem.:   iter 003: No more singletons, finished at 0.21
 This step removed 579 rows and decreased excess by 366
 Each excess row deleted 1.58 rows
 
 Step 43 of 50: target excess is 2762
-Cliq. rem.: computed sum2 at 0.17
-Cliq. rem.: computed heaviest connected components at 0.17
+Cliq. rem.: computed sum2 at 0.22
+Cliq. rem.: computed heaviest connected components at 0.22
 Cliq. rem.: weight of last removed connected component: 1.5741441
-Cliq. rem.: deleted 373 heaviest connected components at 0.17
-Sing. rem.: begin with: nrows=6848 ncols=4086 excess=2762 at 0.17
-Sing. rem.:   iter 001: nrows=6807 ncols=4045 excess=2762 at 0.17
-Sing. rem.:   iter 002: nrows=6806 ncols=4044 excess=2762 at 0.17
-Sing. rem.:   iter 003: No more singletons, finished at 0.17
+Cliq. rem.: deleted 373 heaviest connected components at 0.22
+Sing. rem.: begin with: nrows=6848 ncols=4086 excess=2762 at 0.22
+Sing. rem.:   iter 001: nrows=6807 ncols=4045 excess=2762 at 0.22
+Sing. rem.:   iter 002: nrows=6806 ncols=4044 excess=2762 at 0.22
+Sing. rem.:   iter 003: No more singletons, finished at 0.22
 This step removed 604 rows and decreased excess by 366
 Each excess row deleted 1.65 rows
 
 Step 44 of 50: target excess is 2396
-Cliq. rem.: computed sum2 at 0.17
-Cliq. rem.: computed heaviest connected components at 0.17
+Cliq. rem.: computed sum2 at 0.22
+Cliq. rem.: computed heaviest connected components at 0.22
 Cliq. rem.: weight of last removed connected component: 1.63968
-Cliq. rem.: deleted 380 heaviest connected components at 0.17
-Sing. rem.: begin with: nrows=6225 ncols=3829 excess=2396 at 0.17
-Sing. rem.:   iter 001: nrows=6185 ncols=3789 excess=2396 at 0.17
-Sing. rem.:   iter 002: nrows=6183 ncols=3787 excess=2396 at 0.17
-Sing. rem.:   iter 003: No more singletons, finished at 0.17
+Cliq. rem.: deleted 380 heaviest connected components at 0.22
+Sing. rem.: begin with: nrows=6225 ncols=3829 excess=2396 at 0.22
+Sing. rem.:   iter 001: nrows=6185 ncols=3789 excess=2396 at 0.22
+Sing. rem.:   iter 002: nrows=6183 ncols=3787 excess=2396 at 0.22
+Sing. rem.:   iter 003: No more singletons, finished at 0.22
 This step removed 623 rows and decreased excess by 366
 Each excess row deleted 1.70 rows
 
 Step 45 of 50: target excess is 2030
-Cliq. rem.: computed sum2 at 0.17
-Cliq. rem.: computed heaviest connected components at 0.17
+Cliq. rem.: computed sum2 at 0.22
+Cliq. rem.: computed heaviest connected components at 0.23
 Cliq. rem.: weight of last removed connected component: 1.6796699
-Cliq. rem.: deleted 371 heaviest connected components at 0.17
-Sing. rem.: begin with: nrows=5593 ncols=3563 excess=2030 at 0.17
-Sing. rem.:   iter 001: nrows=5552 ncols=3522 excess=2030 at 0.17
-Sing. rem.:   iter 002: nrows=5546 ncols=3516 excess=2030 at 0.17
-Sing. rem.:   iter 003: No more singletons, finished at 0.18
+Cliq. rem.: deleted 371 heaviest connected components at 0.23
+Sing. rem.: begin with: nrows=5593 ncols=3563 excess=2030 at 0.23
+Sing. rem.:   iter 001: nrows=5552 ncols=3522 excess=2030 at 0.23
+Sing. rem.:   iter 002: nrows=5546 ncols=3516 excess=2030 at 0.23
+Sing. rem.:   iter 003: No more singletons, finished at 0.23
 This step removed 637 rows and decreased excess by 366
 Each excess row deleted 1.74 rows
 
 Step 46 of 50: target excess is 1664
-Cliq. rem.: computed sum2 at 0.18
-Cliq. rem.: computed heaviest connected components at 0.18
+Cliq. rem.: computed sum2 at 0.23
+Cliq. rem.: computed heaviest connected components at 0.23
 Cliq. rem.: weight of last removed connected component: 1.7458594
-Cliq. rem.: deleted 375 heaviest connected components at 0.18
-Sing. rem.: begin with: nrows=4926 ncols=3262 excess=1664 at 0.18
-Sing. rem.:   iter 001: nrows=4884 ncols=3220 excess=1664 at 0.18
-Sing. rem.:   iter 002: No more singletons, finished at 0.18
+Cliq. rem.: deleted 375 heaviest connected components at 0.23
+Sing. rem.: begin with: nrows=4926 ncols=3262 excess=1664 at 0.23
+Sing. rem.:   iter 001: nrows=4884 ncols=3220 excess=1664 at 0.23
+Sing. rem.:   iter 002: No more singletons, finished at 0.23
 This step removed 662 rows and decreased excess by 366
 Each excess row deleted 1.81 rows
 
 Step 47 of 50: target excess is 1298
-Cliq. rem.: computed sum2 at 0.18
-Cliq. rem.: computed heaviest connected components at 0.18
+Cliq. rem.: computed sum2 at 0.23
+Cliq. rem.: computed heaviest connected components at 0.23
 Cliq. rem.: weight of last removed connected component: 1.82696
-Cliq. rem.: deleted 374 heaviest connected components at 0.18
-Sing. rem.: begin with: nrows=4239 ncols=2941 excess=1298 at 0.18
-Sing. rem.:   iter 001: nrows=4176 ncols=2878 excess=1298 at 0.18
-Sing. rem.:   iter 002: nrows=4172 ncols=2874 excess=1298 at 0.18
-Sing. rem.:   iter 003: No more singletons, finished at 0.18
+Cliq. rem.: deleted 374 heaviest connected components at 0.23
+Sing. rem.: begin with: nrows=4239 ncols=2941 excess=1298 at 0.23
+Sing. rem.:   iter 001: nrows=4175 ncols=2877 excess=1298 at 0.23
+Sing. rem.:   iter 002: nrows=4172 ncols=2874 excess=1298 at 0.23
+Sing. rem.:   iter 003: No more singletons, finished at 0.23
 This step removed 712 rows and decreased excess by 366
 Each excess row deleted 1.95 rows
 
 Step 48 of 50: target excess is 932
-Cliq. rem.: computed sum2 at 0.18
-Cliq. rem.: computed heaviest connected components at 0.18
+Cliq. rem.: computed sum2 at 0.24
+Cliq. rem.: computed heaviest connected components at 0.24
 Cliq. rem.: weight of last removed connected component: 1.9200001
-Cliq. rem.: deleted 383 heaviest connected components at 0.18
-Sing. rem.: begin with: nrows=3490 ncols=2558 excess=932 at 0.18
-Sing. rem.:   iter 001: nrows=3421 ncols=2489 excess=932 at 0.18
-Sing. rem.:   iter 002: nrows=3419 ncols=2487 excess=932 at 0.18
-Sing. rem.:   iter 003: No more singletons, finished at 0.18
+Cliq. rem.: deleted 383 heaviest connected components at 0.24
+Sing. rem.: begin with: nrows=3490 ncols=2558 excess=932 at 0.24
+Sing. rem.:   iter 001: nrows=3421 ncols=2489 excess=932 at 0.24
+Sing. rem.:   iter 002: nrows=3419 ncols=2487 excess=932 at 0.24
+Sing. rem.:   iter 003: No more singletons, finished at 0.24
 This step removed 753 rows and decreased excess by 366
 Each excess row deleted 2.06 rows
 
 Step 49 of 50: target excess is 566
-Cliq. rem.: computed sum2 at 0.18
-Cliq. rem.: computed heaviest connected components at 0.18
+Cliq. rem.: computed sum2 at 0.24
+Cliq. rem.: computed heaviest connected components at 0.24
 Cliq. rem.: weight of last removed connected component: 2.0096
-Cliq. rem.: deleted 376 heaviest connected components at 0.18
-Sing. rem.: begin with: nrows=2698 ncols=2132 excess=566 at 0.18
-Sing. rem.:   iter 001: nrows=2629 ncols=2062 excess=567 at 0.18
-Sing. rem.:   iter 002: nrows=2624 ncols=2057 excess=567 at 0.18
-Sing. rem.:   iter 003: No more singletons, finished at 0.18
+Cliq. rem.: deleted 376 heaviest connected components at 0.24
+Sing. rem.: begin with: nrows=2698 ncols=2132 excess=566 at 0.24
+Sing. rem.:   iter 001: nrows=2629 ncols=2062 excess=567 at 0.24
+Sing. rem.:   iter 002: nrows=2624 ncols=2057 excess=567 at 0.24
+Sing. rem.:   iter 003: No more singletons, finished at 0.24
 This step removed 795 rows and decreased excess by 365
 Each excess row deleted 2.18 rows
 
 Step 50 of 50: target excess is 201
-Cliq. rem.: computed sum2 at 0.19
-Cliq. rem.: computed heaviest connected components at 0.19
+Cliq. rem.: computed sum2 at 0.24
+Cliq. rem.: computed heaviest connected components at 0.24
 Cliq. rem.: weight of last removed connected component: 2.112
-Cliq. rem.: deleted 379 heaviest connected components at 0.19
-Sing. rem.: begin with: nrows=1844 ncols=1643 excess=201 at 0.19
-Sing. rem.:   iter 001: nrows=1755 ncols=1553 excess=202 at 0.19
-Sing. rem.:   iter 002: nrows=1742 ncols=1540 excess=202 at 0.19
-Sing. rem.:   iter 003: nrows=1740 ncols=1538 excess=202 at 0.19
-Sing. rem.:   iter 004: No more singletons, finished at 0.19
+Cliq. rem.: deleted 379 heaviest connected components at 0.24
+Sing. rem.: begin with: nrows=1844 ncols=1643 excess=201 at 0.24
+Sing. rem.:   iter 001: nrows=1754 ncols=1552 excess=202 at 0.24
+Sing. rem.:   iter 002: nrows=1741 ncols=1539 excess=202 at 0.24
+Sing. rem.:   iter 003: nrows=1740 ncols=1538 excess=202 at 0.24
+Sing. rem.:   iter 004: No more singletons, finished at 0.24
 This step removed 884 rows and decreased excess by 365
 Each excess row deleted 2.42 rows
 
 Step extra: target excess is 160
-Cliq. rem.: computed sum2 at 0.19
-Cliq. rem.: computed heaviest connected components at 0.19
+Cliq. rem.: computed sum2 at 0.25
+Cliq. rem.: computed heaviest connected components at 0.25
 Cliq. rem.: weight of last removed connected component: 3.6358883
-Cliq. rem.: deleted 42 heaviest connected components at 0.19
-Sing. rem.: begin with: nrows=1575 ncols=1415 excess=160 at 0.19
-Sing. rem.:   iter 001: nrows=1564 ncols=1404 excess=160 at 0.19
-Sing. rem.:   iter 002: No more singletons, finished at 0.19
+Cliq. rem.: deleted 42 heaviest connected components at 0.25
+Sing. rem.: begin with: nrows=1575 ncols=1415 excess=160 at 0.25
+Sing. rem.:   iter 001: nrows=1566 ncols=1406 excess=160 at 0.25
+Sing. rem.:   iter 002: nrows=1564 ncols=1404 excess=160 at 0.25
+Sing. rem.:   iter 003: No more singletons, finished at 0.25
 This step removed 176 rows and decreased excess by 42
 Each excess row deleted 4.19 rows
 

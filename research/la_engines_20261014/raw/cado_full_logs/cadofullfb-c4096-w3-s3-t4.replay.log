@@ -1,21 +1,21 @@
-# (692ecb7) /home/user/ext/cado-nfs/build/filter/replay-dl -purged /tmp/cb/cado-full.u7awex/purged -his /tmp/cb/cado-full.u7awex/history -out /tmp/cb/cado-full.u7awex/small.bin -index /tmp/cb/cado-full.u7awex/small.index -ideals /tmp/cb/cado-full.u7awex/small.ideal
+# (692ecb7) /home/user/ext/cado-nfs/build/filter/replay-dl -purged /tmp/cb/cado-full.YKn7s7/purged -his /tmp/cb/cado-full.YKn7s7/history -out /tmp/cb/cado-full.YKn7s7/small.bin -index /tmp/cb/cado-full.YKn7s7/small.index -ideals /tmp/cb/cado-full.YKn7s7/small.ideal
 # Compiled with gcc 13.3.0
 # Compilation flags (C) -Werror=all -Werror=extra -std=c99 -Wall -Wextra   -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 # Compilation flags (C++) -Werror=extra -Werror=all -export-dynamic -std=c++20 -Wno-c++11-compat -Wall -Wextra   -Wno-stringop-overflow -Wno-literal-suffix -msse3 -mssse3 -msse4.1 -mpopcnt -mavx -mpclmul -mavx2 -mavx512f -mavx512vl -mavx512dq
 Sparse matrix has 984 rows and 4096 cols
 # Output matrices will be written in binary format
 antebuffer set to /home/user/ext/cado-nfs/build/utils/antebuffer
-Reading sparse matrix from /tmp/cb/cado-full.u7awex/purged
+Reading sparse matrix from /tmp/cb/cado-full.YKn7s7/purged
 # Done: Read 984 relations in 0.0s -- inf MB/s -- inf rels/s
 The biggest index appearing in a relation is 4096
 Reading row additions
 # Read 1024 row additions in 0.0s -- inf lines/s
 # Read 2048 row additions in 0.0s -- inf lines/s
-# Done: Read 3110 row additions in 0.0s -- inf lines/s
+# Done: Read 3083 row additions in 0.0s -- inf lines/s
 Renumbering columns (including sorting w.r.t. weight)
-Sorting 93 columns by decreasing weight
-Sparse submatrix: nrows=93 ncols=93
-Writing sparse representation to /tmp/cb/cado-full.u7awex/small.bin
+Sorting 91 columns by decreasing weight
+Sparse submatrix: nrows=91 ncols=91
+Writing sparse representation to /tmp/cb/cado-full.YKn7s7/small.bin
 # Writing matrix took 0.0s
-# Weight of the sparse submatrix: 1139
+# Weight of the sparse submatrix: 1118
 Total usage: time 0s (cpu), 0s (wct) ; memory 87MiB, peak 156MiB
