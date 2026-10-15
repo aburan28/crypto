@@ -1,0 +1,1 @@
+python3 tools/isolated_bench.py busy -- /workspace/toolchains/cargo/bin/cargo test --locked --release --lib cryptanalysis::ic_measurement::tests::exclusive_measurement_strict_session_rejects_foreign_boundaries -j3 -- --exact --include-ignored 

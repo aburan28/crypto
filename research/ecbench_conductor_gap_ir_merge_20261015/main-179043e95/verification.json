@@ -1,0 +1,32 @@
+{
+  "kind": "publication-correctness-validation",
+  "validated_commit": "0af35c7491e5f0725fa07d6e426d6d7930577f41",
+  "validated_tree": "2dcf20eef50729e3bd5bef7fd0c442517b5add51",
+  "library": {
+    "passed": 4105,
+    "failed": 0,
+    "ignored": 117,
+    "filtered": 0
+  },
+  "strict_session": {
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "filtered": 4221
+  },
+  "driver": {
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0
+  },
+  "cargo_check_exit": 0,
+  "native_replay_exit": 0,
+  "native_analysis_byte_identical": true,
+  "original_frozen_files_unchanged": 257,
+  "site_passed": 48,
+  "curve_name_problems": 0,
+  "benchmark_entries_union": 22,
+  "browser_sessions": 110,
+  "generated_views_current": true,
+  "new_experimental_profiles": 0
+}
