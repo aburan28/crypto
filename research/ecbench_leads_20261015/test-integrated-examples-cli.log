@@ -1,0 +1,85 @@
+   Compiling crypto v0.1.0 (/workspace/crypto)
+    Finished `release` profile [optimized] target(s) in 5m 49s
+     Running unittests src/bin/ecbench.rs (target/release/deps/ecbench-e013234a3f35743c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/ecbench.rs (target/release/deps/ecbench-c9c71e2d865073af)
+
+running 16 tests
+test a_factor_base_dump_carries_its_points ... ok
+test a_resealed_hand_edited_figure_is_caught ... ok
+test bad_specs_are_refused_before_anything_runs ... ok
+test a_public_target_session_yields_a_checked_vs_rho_claim ... ok
+test a_session_runs_verifies_compares_and_loads ... ok
+test a_candidate_session_compares_against_a_baseline_session ... ok
+test online_windows_split_into_exclusive_claim_phases ... ok
+test field_operations_are_counted_bounded_and_judged ... ok
+test pdp3_koblitz_f4_and_f6_verify_on_one_query_stream ... ok
+test pdp3_koblitz_rootfind_engine_follows_f4_query_stream_without_a_solver ... ok
+test pdp3_koblitz_rootfind_window_shortens_m3_scan_and_records_window_len ... ok
+test the_database_refuses_a_slug_with_another_identity ... ok
+session ECBS1h239b515821af complete -> /tmp/ecbench-test-55196-race/s (48 records: {"verified": 48})
+ecbench: /tmp/ecbench-test-55196-race/s exists; a session never overwrites another
+test two_sessions_queued_for_one_directory_cannot_both_write_it ... ok
+test bounds_a_frontier_and_challenge_verdicts_round_trip ... ok
+test counted_ic_sat_replays_with_different_solver_wall_times ... ok
+test pdp3_binary_runs_every_engine_on_a_generic_binary_curve ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 56.32s
+
+     Running tests/ecbench_large_prime.rs (target/release/deps/ecbench_large_prime-c3d36bdc07818684)
+
+running 5 tests
+test corpus_source_identity_is_recorded_from_exact_bytes ... ok
+test exact_state_cap_refuses_without_downscaling ... ok
+test ic_report_binds_the_exact_manifest_bytes ... ok
+test corpus_smallest_imports_and_solves_with_n_minus_one ... ok
+test native_ecbench_runs_large_prime_and_matched_rho_on_one_workload ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running unittests examples/ecbench_leads.rs (target/release/examples/ecbench_leads-8acb8377d3d87efc)
+
+running 1 test
+test analyze::tests::absent_cost_is_missing_not_zero ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/ecbench_leads_findings.rs (target/release/examples/ecbench_leads_findings-cdbecf69698e5a7d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/ecbench_open_questions.rs (target/release/examples/ecbench_open_questions-1947ebd5d7a1c639)
+
+running 3 tests
+test analyze::tests::absent_cost_is_missing_not_zero ... ok
+test controls::tests::qubo_distinguishes_constraint_violation_and_rejects_wrong_auxiliary ... ok
+test controls::tests::tiny_semaev_encoding_replays_exactly ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests examples/ecbench_open_questions_publish.rs (target/release/examples/ecbench_open_questions_publish-779c90a2e4e5dd70)
+
+running 1 test
+test tests::preserve_unrelated_arrays_and_string_escapes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/ecbench_open_questions_replay_failures.rs (target/release/examples/ecbench_open_questions_replay_failures-090526663eb9436c)
+
+running 1 test
+test tests::wall_time_does_not_mask_a_changed_integer_count ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/ecbench_open_questions_run.rs (target/release/examples/ecbench_open_questions_run-6032a01c7a3e20fa)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

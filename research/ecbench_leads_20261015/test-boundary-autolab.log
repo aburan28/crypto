@@ -1,0 +1,23 @@
+E
+======================================================================
+ERROR: test_boundary_autolab (unittest.loader._FailedTest.test_boundary_autolab)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_boundary_autolab
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+  File "/workspace/crypto/research/sat_factor_base_review_20260908/autolab/test_boundary_autolab.py", line 22, in <module>
+    import single_target_panel as panel
+  File "/workspace/crypto/research/sat_factor_base_review_20260908/autolab/single_target_panel.py", line 39, in <module>
+    import oracle_u128  # noqa: E402  (same checker, degree bound widened to the u128 rungs n = 71, 83)
+    ^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'oracle_u128'
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)

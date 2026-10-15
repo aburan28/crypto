@@ -51,3 +51,61 @@ The corrected pre-integration full library invocation completed with4095 passes,
 zero failures and117 preexisting ignored tests. The earlier4094/one-failure run
 is retained as `test-library-v1-failed.log`. The new actual-width point witness
 and all14 independent decimal-token reference cases pass.
+
+## Integration checks
+
+Integration commit7b0654c768f5b6775918d759446f400a6aebc03d merges exact main
+a80b15bbc5c1ea4f2db2b294a9bcddc31f06fdd7 without rebasing or rewriting a sealed
+session. Both conflicts concerned generated/index views. The native publisher
+preserves main's110 sessions and adds the two campaigns'15, totaling125.
+
+- `cargo +1.98.0 test --release --lib`:4115 passed, zero failures,117 existing
+  ignored; `test-library-integrated.log` and exit0. All five orbit-IC tests,
+  including the constructed actual-N83 point witness, pass. The witness does
+  not assert an unknown-target N83 recovery.
+- The standalone publisher's test and warnings-as-errors clippy pass. Native
+  metadata freshness, the exact historical-input guard, catalog display,
+  curve-name registration and three cover-catalog tests pass. The path filter
+  check covers all214 recorded presentation inputs; its nine tests pass.
+- The unchanged historical leaderboard and browser checks pass in a detached
+  exact-a80 worktree. No new campaign is analyzed by their Python builders.
+- Legacy autolab control-plane suite:47 pass. Its first import failure is
+  preserved; the retry materializes the tracked `oracle_u128.py` sparse input.
+- Every changed Rust file passes `rustfmt +1.98.0 --edition 2021 --check`.
+  The first scoped check found only the new decimal-reference layout, corrected
+  without changing token values. Whole-repository cargo fmt still reports the
+  same two incoming examples as exact a80; normalized outputs match byte for
+  byte. The unchanged leaf-m10 verifier also fails at the same assertion on a80.
+  Both are linked from the existing baseline-CI problem, not bypassed.
+- The current four-page result PDF and six one-page session PDFs have been
+  visually inspected. Pages1/4 were rechecked after the held-out point-count and
+  prose corrections. Benchmark copies and PDF hashes were regenerated together.
+- Chromium154 desktop,390px/320px mobile, dark-theme, fragment navigation,
+  no-JavaScript and no-external-request assertions pass. The runtime's managed
+  policy blocks `file:` navigation, preserved in the first browser logs. The
+  retry uses CDP's in-memory document fixture with the same local HTML and every
+  original assertion; it changes no browser policy. `presentation/browser-check.json`
+  records `document_mode: inline` and the exact page hash. Current desktop and
+  mobile screenshots were visually inspected, including the new evidence table.
+
+All frozen source/spec/Cargo hashes revalidate against measured commit0cbc;
+`frozen-source-check.log` also verifies the original measured binary digest.
+Integration audits use a separately built current verifier and add new receipts;
+the original audit/replay files and failed outputs remain unchanged.
+
+The final integrated verifier SHA256 is
+244b1ba1fc1a4cd2eb996a672ddf2e45551c5876aa144153dc8b70532c575e12.
+All15 sessions pass its audits:336 follow-up and867 parent verified outcomes
+replay exactly. integration-audits/receipt-index.jsonl indexes the new receipts.
+The supplemental37 follow-up failures and70 parent failures were already
+replayed with their exact original binaries; no unsuccessful record is omitted.
+
+The integrated CLI/examples invocation passes27 tests:16 ecbench integration,
+five large-prime and six example tests. The ecbench binary and two examples
+have no unit tests and are compiled, not described as tested cases. The final
+leads-example retry passes its one test after the needless-borrow lint fix.
+The native catalog binaries pass13 tests, then verify2101 covers and import258
+standard records, leaving seven unresolved source records explicit.
+Warnings-as-errors clippy passes for the ecbench binary and all six touched
+examples with Rust1.98. The first lint failure is retained; no lint was suppressed.
+Exact commands are in INTEGRATION-COMMANDS.md.

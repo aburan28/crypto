@@ -186,7 +186,7 @@ fn shapes(root: &Path) -> Result<(), String> {
             let crypto_lib::binary_ecc::BinaryPoint::Affine { x, .. } = kc.generator() else {
                 return Err("infinite generator".into());
             };
-            let sys = build_decomposition_system(&basis, &x, &kc.curve.b, m, &st)
+            let sys = build_decomposition_system(&basis, x, &kc.curve.b, m, &st)
                 .ok_or("presentation refused")?;
             let expected_vars = m * 3 + (m - 2) * n as usize;
             let expected_eq = (m - 1) * n as usize;

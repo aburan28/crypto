@@ -1,0 +1,19 @@
+{"url":"chrome-error://chromewebdata/","title":"file:///workspace/crypto/docs/index-calculus-scoreboard.html","state":"complete","text":"This page is blocked\n\nYour organization doesn’t allow you to view this site","html":"<html dir=\"ltr\" lang=\"en\"><head>\n  <meta charset=\"utf-8\">\n  <meta name=\"color-scheme\" content=\"light dark\">\n  <meta name=\"theme-color\" content=\"#fff\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0,\n                                 maximum-scale=1.0, user-scalable=no\">\n  <title>file:///workspace/crypto/docs/index-calculus-scoreboard.html</title>\n  <style>/* Copyright 2017 The Chromium Authors\n * Use of this source code is governed by a BSD-style license that can be\n * found in the LICENSE file. */\n\na {\n  color: var(--link-color);\n}\n\nbody {\n  --background-color: #fff;\n  "}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+0 !== 2
+
+    at file:///tmp/ecbench-dashboard-browser-diagnostic.mjs:82:10 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 0,
+  expected: 2,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

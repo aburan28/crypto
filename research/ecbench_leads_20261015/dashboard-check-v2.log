@@ -1,0 +1,519 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Dashboard is stale; run node tools/render_ic_dashboard.mjs
++ actual - expected
+... Skipped lines
+
+  '<!doctype html>\n' +
+    '<html lang="en">\n' +
+    '<head>\n' +
+    '<meta charset="utf-8">\n' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+...
+    '    background: var(--surface-sunk); font-family: var(--mono); font-size: 10.5px;\n' +
++   '    letter-spacing: .09em; text-transform: uppercase; color: var('... 1788945 more characters
+-   '    letter-spacing: .09em; text-transform: uppercase; color: var('... 1830287 more characters
+
+    at file:///workspace/crypto/tools/render_ic_dashboard.mjs:438:10
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: '<!doctype html>\n' +
+    '<html lang="en">\n' +
+    '<head>\n' +
+    '<meta charset="utf-8">\n' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+    '<meta name="description" content="Understand the IC tournament decision, solver readiness, one-target pipeline and evidence. Frozen toy-panel measurements, visible uncertainty and preserved failures.">\n' +
+    '<!--\n' +
+    '  Standalone build of the cost ledgers in\n' +
+    '  research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md (three regimes on one\n' +
+    '  axis, frozen run in docs/ic/runs/) and research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md\n' +
+    '  §§9-11 (experiments/).  Open it directly in a browser; its overview needs no network requests\n' +
+    '  or installed dependencies.  Every figure on the page\n' +
+    '  is taken from the frozen experiment JSON; see the footer for the conversion\n' +
+    '  factors and for which numbers are extrapolations rather than measurements.\n' +
+    '-->\n' +
+    '<style>\n' +
+    '  html { color-scheme: light dark; }\n' +
+    '  img { max-width: 100%; }\n' +
+    '  [hidden] { display: none !important; }\n' +
+    '.gain-overview{display:flex;gap:28px;justify-content:space-between;border:1px solid #486e68;border-radius:12px;padding:24px;margin:24px 0 32px}.gain-overview h2{font-size:23px;margin:12px 0}.gain-overview p{max-width:720px;line-height:1.65}.gain-overview nav{display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:215px}.gain-overview a{display:block;padding:10px;border:1px solid #486e68;border-radius:6px;text-decoration:none}.gain-overview a:focus-visible{outline:3px solid #ae8739;outline-offset:3px}@media(max-width:740px){.gain-overview{flex-direction:column;padding:18px}.gain-overview nav{min-width:0}}\n' +
+    '</style>\n' +
+    '<title>IC Research Lab — Decisions, Pipeline &amp; Evidence</title>\n' +
+    '\n' +
+    '<style>\n' +
+    '  :root {\n' +
+    '    --ground: #e7ebef;\n' +
+    '    --surface: #fbfcfd;\n' +
+    '    --surface-sunk: #f0f3f6;\n' +
+    '    --ink: #0e1922;\n' +
+    '    --ink-2: #354855;\n' +
+    '    --muted: #576976;\n' +
+    '    --rule: #ccd5dc;\n' +
+    '    --rule-soft: #dde4e9;\n' +
+    '    --data: #1f6fd0;\n' +
+    '    --data-soft: #d7e4f6;\n' +
+    '    --bound: #b3372a;\n' +
+    '    --bound-soft: #f3dcd8;\n' +
+    '    --shadow: 0 1px 2px rgba(14, 25, 34, .06), 0 8px 24px -16px rgba(14, 25, 34, .18);\n' +
+    '\n' +
+    '    --serif: "Newsreader", "Iowan Old Style", Georgia, serif;\n' +
+    '    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;\n' +
+    '    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;\n' +
+    '  }\n' +
+    '\n' +
+    '  @media (prefers-color-scheme: dark) {\n' +
+    '    :root:not([data-theme="light"]) {\n' +
+    '      --ground: #0d1318;\n' +
+    '      --surface: #151d24;\n' +
+    '      --surface-sunk: #101820;\n' +
+    '      --ink: #e3eaef;\n' +
+    '      --ink-2: #b6c5cf;\n' +
+    '      --muted: #8799a6;\n' +
+    '      --rule: #25323a;\n' +
+    '      --rule-soft: #1d272e;\n' +
+    '      --data: #4e92de;\n' +
+    '      --data-soft: #1c2e42;\n' +
+    '      --bound: #d9604e;\n' +
+    '      --bound-soft: #38221f;\n' +
+    '      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .7);\n' +
+    '    }\n' +
+    '  }\n' +
+    '\n' +
+    '  :root[data-theme="dark"] {\n' +
+    '    --ground: #0d1318;\n' +
+    '    --surface: #151d24;\n' +
+    '    --surface-sunk: #101820;\n' +
+    '    --ink: #e3eaef;\n' +
+    '    --ink-2: #b6c5cf;\n' +
+    '    --muted: #8799a6;\n' +
+    '    --rule: #25323a;\n' +
+    '    --rule-soft: #1d272e;\n' +
+    '    --data: #4e92de;\n' +
+    '    --data-soft: #1c2e42;\n' +
+    '    --bound: #d9604e;\n' +
+    '    --bound-soft: #38221f;\n' +
+    '    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .7);\n' +
+    '  }\n' +
+    '\n' +
+    '  * { box-sizing: border-box; }\n' +
+    '\n' +
+    '  body {\n' +
+    '    margin: 0;\n' +
+    '    padding-inline: 20px;\n' +
+    '    padding-block: 40px 64px;\n' +
+    '    background: var(--ground);\n' +
+    '    color: var(--ink);\n' +
+    '    font-family: var(--sans);\n' +
+    '    font-size: 15px;\n' +
+    '    line-height: 1.55;\n' +
+    '    -webkit-font-smoothing: antialiased;\n' +
+    '  }\n' +
+    '\n' +
+    '  .wrap { max-width: 1020px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }\n' +
+    '\n' +
+    '  /* ---------- header ---------- */\n' +
+    '  header { display: flex; flex-direction: column; gap: 14px; }\n' +
+    '\n' +
+    '  .eyebrow {\n' +
+    '    font-family: var(--mono);\n' +
+    '    font-size: 11px;\n' +
+    '    font-weight: 500;\n' +
+    '    letter-spacing: .13em;\n' +
+    '    text-transform: uppercase;\n' +
+    '    color: var(--muted);\n' +
+    '  }\n' +
+    '\n' +
+    '  h1 {\n' +
+    '    font-family: var(--serif);\n' +
+    '    font-weight: 500;\n' +
+    '    font-size: clamp(30px, 5.4vw, 45px);\n' +
+    '    line-height: 1.08;\n' +
+    '    letter-spacing: -.012em;\n' +
+    '    margin: 0;\n' +
+    '    text-wrap: balance;\n' +
+    '  }\n' +
+    '\n' +
+    '  .verdict {\n' +
+    '    font-family: var(--serif);\n' +
+    '    font-size: clamp(17px, 2.3vw, 20px);\n' +
+    '    line-height: 1.45;\n' +
+    '    color: var(--ink-2);\n' +
+    '    max-width: 62ch;\n' +
+    '    margin: 0;\n' +
+    '    text-wrap: pretty;\n' +
+    '  }\n' +
+    '\n' +
+    '  .facts {\n' +
+    '    display: grid;\n' +
+    '    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));\n' +
+    '    gap: 1px;\n' +
+    '    background: var(--rule);\n' +
+    '    border: 1px solid var(--rule);\n' +
+    '    border-radius: 3px;\n' +
+    '    overflow: hidden;\n' +
+    '    margin-top: 4px;\n' +
+    '  }\n' +
+    '  .fact { background: var(--surface); padding: 14px 16px; display: flex; flex-direction: column; gap: 3px; }\n' +
+    '  .fact dt {\n' +
+    '    font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em;\n' +
+    '    text-transform: uppercase; color: var(--muted);\n' +
+    '  }\n' +
+    '  .fact dd {\n' +
+    '    margin: 0; font-family: var(--mono); font-size: 19px; font-weight: 500;\n' +
+    '    font-variant-numeric: tabular-nums; letter-spacing: -.01em;\n' +
+    '  }\n' +
+    '  .fact p { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; }\n' +
+    '\n' +
+    '  /* ---------- panels ---------- */\n' +
+    '  section { display: flex; flex-direction: column; gap: 0; }\n' +
+    '\n' +
+    '  .panel {\n' +
+    '    background: var(--surface);\n' +
+    '    border: 1px solid var(--rule);\n' +
+    '    border-radius: 4px;\n' +
+    '    box-shadow: var(--shadow);\n' +
+    '  }\n' +
+    '  .panel-head { padding: 18px 20px 0; display: flex; flex-direction: column; gap: 5px; }\n' +
+    '  .panel-head h2 {\n' +
+    '    font-family: var(--serif); font-weight: 500; font-size: 21px;\n' +
+    '    letter-spacing: -.008em; margin: 0;\n' +
+    '  }\n' +
+    '  .panel-head p { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 66ch; line-height: 1.5; }\n' +
+    '  #joint-dimension-length .panel-body { padding: 16px 20px 20px; }\n' +
+    '  #ic-tournament-reference-history .panel-body { padding: 16px 20px 20px; }\n' +
+    '  #joint-dimension-length .panel-body > p { font-size: 13.5px; line-height: 1.55; }\n' +
+    '\n' +
+    '  .chart-scroll { overflow-x: auto; padding: 10px 8px 4px; }\n' +
+    '  .chart-scroll svg { display: block; width: 100%; min-width: 840px; height: auto; }\n' +
+    '\n' +
+    '  .legend {\n' +
+    '    display: flex; flex-wrap: wrap; gap: 6px 20px;\n' +
+    '    padding: 4px 20px 18px;\n' +
+    '    font-family: var(--mono); font-size: 11.5px; color: var(--muted);\n' +
+    '  }\n' +
+    '  .legend span { display: inline-flex; align-items: center; gap: 7px; }\n' +
+    '  /* A legend line that is prose, not a swatch key: one block of text, so the\n' +
+    '     <b>, <code> and <sup> inside it stay inline instead of becoming flex items. */\n' +
+    '  .legend > span:not(:has(> .swatch)) { display: block; }\n' +
+    '  .swatch { width: 18px; height: 9px; border-radius: 2px; background: var(--data); flex: none; }\n' +
+    '  .swatch.ghost { background: none; border-top: 1.5px dashed var(--muted); height: 0; border-radius: 0; }\n' +
+    '  .swatch.bound { background: var(--bound); width: 3px; height: 14px; }\n' +
+    '\n' +
+    '  /* ---------- two-up ---------- */\n' +
+    '  .duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }\n' +
+    '\n' +
+    '  /* ---------- ledger rows ---------- */\n' +
+    '  .ledger { padding: 14px 20px 20px; display: flex; flex-direction: column; }\n' +
+    '  .lrow { display: grid; grid-template-columns: 1fr 96px; gap: 4px 14px; padding: 9px 0; border-bottom: 1px solid var(--rule-soft); }\n' +
+    '  .lrow:last-child { border-bottom: 0; }\n' +
+    '  .lrow .name { font-size: 13.5px; line-height: 1.35; }\n' +
+    '  .lrow .num {\n' +
+    '    font-family: var(--mono); font-size: 13.5px; font-weight: 500;\n' +
+    '    font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap;\n' +
+    '  }\n' +
+    '  .lbar { grid-column: 1 / -1; height: 8px; background: var(--surface-sunk); border-radius: 0 4px 4px 0; }\n' +
+    '  .lbar i { display: block; height: 100%; background: var(--data); border-radius: 0 4px 4px 0; }\n' +
+    '\n' +
+    '  /* ---------- exponent track ---------- */\n' +
+    '  .exp { padding: 14px 20px 8px; }\n' +
+    '  .erow { display: grid; grid-template-columns: minmax(118px, 1.2fr) minmax(120px, 2fr) 44px; align-items: stretch; gap: 12px; }\n' +
+    '  .erow .name { font-size: 13px; line-height: 1.3; align-self: center; }\n' +
+    '  .erow .num {\n' +
+    '    font-family: var(--mono); font-size: 13px; font-weight: 500;\n' +
+    '    font-variant-numeric: tabular-nums; text-align: right; align-self: center;\n' +
+    '  }\n' +
+    '  .track { position: relative; min-height: 38px; }\n' +
+    '  .track::before {\n' +
+    '    content: ""; position: absolute; left: 0; right: 0; top: 50%;\n' +
+    '    height: 1px; background: var(--rule);\n' +
+    '  }\n' +
+    '  .track::after {\n' +
+    '    content: ""; position: absolute; left: 38.5%; top: 0; bottom: 0;\n' +
+    '    width: 2px; margin-left: -1px; background: var(--bound);\n' +
+    '  }\n' +
+    '  .dot {\n' +
+    '    position: absolute; top: 50%; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px;\n' +
+    '    border-radius: 50%; background: var(--data); box-shadow: 0 0 0 2px var(--surface);\n' +
+    '  }\n' +
+    '  .exp-axis {\n' +
+    '    display: grid; grid-template-columns: minmax(118px, 1.2fr) minmax(120px, 2fr) 44px; gap: 12px;\n' +
+    '    font-family: var(--mono); font-size: 10.5px; color: var(--muted); padding-bottom: 12px;\n' +
+    '  }\n' +
+    '  .exp-axis .ticks { position: relative; height: 14px; }\n' +
+    '  .exp-axis .ticks b { position: absolute; top: 0; font-weight: 400; transform: translateX(-50%); white-space: nowrap; }\n' +
+    '  .rho-flag {\n' +
+    '    position: absolute; top: 0; left: 38.5%; transform: translateX(-50%);\n' +
+    '    color: var(--bound); font-weight: 500; white-space: nowrap;\n' +
+    '  }\n' +
+    '\n' +
+    '  /* ---------- table ---------- */\n' +
+    '  .table-scroll { overflow-x: auto; padding: 4px 0 0; }\n' +
+    '  table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 13.5px; }\n' +
+    '  caption { text-align: left; padding: 0 20px 12px; font-size: 13.5px; color: var(--muted); }\n' +
+    '  th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--rule-soft); }\n' +
+    '  th:first-child, td:first-child { padding-left: 20px; }\n' +
+    '  th:last-child, td:last-child { padding-right: 20px; }\n' +
+    '  thead th {\n' +
+    '    font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em;\n' +
+    '    text-transform: uppercase; color: var(--muted); font-weight: 500;\n' +
+    '    border-bottom: 1px solid var(--rule); white-space: nowrap;\n' +
+    '  }\n' +
+    '  td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }\n' +
+    '  tbody tr.group td {\n' +
+    '    background: var(--surface-sunk); font-family: var(--mono); font-size: 10.5px;\n' +
+    '    letter-spacing: .09em; text-transform: uppercase; color: var('... 1788945 more characters,
+  expected: '<!doctype html>\n' +
+    '<html lang="en">\n' +
+    '<head>\n' +
+    '<meta charset="utf-8">\n' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+    '<meta name="description" content="Understand the IC tournament decision, solver readiness, one-target pipeline and evidence. Frozen toy-panel measurements, visible uncertainty and preserved failures.">\n' +
+    '<!--\n' +
+    '  Standalone build of the cost ledgers in\n' +
+    '  research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md (three regimes on one\n' +
+    '  axis, frozen run in docs/ic/runs/) and research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md\n' +
+    '  §§9-11 (experiments/).  Open it directly in a browser; its overview needs no network requests\n' +
+    '  or installed dependencies.  Every figure on the page\n' +
+    '  is taken from the frozen experiment JSON; see the footer for the conversion\n' +
+    '  factors and for which numbers are extrapolations rather than measurements.\n' +
+    '-->\n' +
+    '<style>\n' +
+    '  html { color-scheme: light dark; }\n' +
+    '  img { max-width: 100%; }\n' +
+    '  [hidden] { display: none !important; }\n' +
+    '.gain-overview{display:flex;gap:28px;justify-content:space-between;border:1px solid #486e68;border-radius:12px;padding:24px;margin:24px 0 32px}.gain-overview h2{font-size:23px;margin:12px 0}.gain-overview p{max-width:720px;line-height:1.65}.gain-overview nav{display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:215px}.gain-overview a{display:block;padding:10px;border:1px solid #486e68;border-radius:6px;text-decoration:none}.gain-overview a:focus-visible{outline:3px solid #ae8739;outline-offset:3px}@media(max-width:740px){.gain-overview{flex-direction:column;padding:18px}.gain-overview nav{min-width:0}}\n' +
+    '</style>\n' +
+    '<title>IC Research Lab — Decisions, Pipeline &amp; Evidence</title>\n' +
+    '\n' +
+    '<style>\n' +
+    '  :root {\n' +
+    '    --ground: #e7ebef;\n' +
+    '    --surface: #fbfcfd;\n' +
+    '    --surface-sunk: #f0f3f6;\n' +
+    '    --ink: #0e1922;\n' +
+    '    --ink-2: #354855;\n' +
+    '    --muted: #576976;\n' +
+    '    --rule: #ccd5dc;\n' +
+    '    --rule-soft: #dde4e9;\n' +
+    '    --data: #1f6fd0;\n' +
+    '    --data-soft: #d7e4f6;\n' +
+    '    --bound: #b3372a;\n' +
+    '    --bound-soft: #f3dcd8;\n' +
+    '    --shadow: 0 1px 2px rgba(14, 25, 34, .06), 0 8px 24px -16px rgba(14, 25, 34, .18);\n' +
+    '\n' +
+    '    --serif: "Newsreader", "Iowan Old Style", Georgia, serif;\n' +
+    '    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;\n' +
+    '    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;\n' +
+    '  }\n' +
+    '\n' +
+    '  @media (prefers-color-scheme: dark) {\n' +
+    '    :root:not([data-theme="light"]) {\n' +
+    '      --ground: #0d1318;\n' +
+    '      --surface: #151d24;\n' +
+    '      --surface-sunk: #101820;\n' +
+    '      --ink: #e3eaef;\n' +
+    '      --ink-2: #b6c5cf;\n' +
+    '      --muted: #8799a6;\n' +
+    '      --rule: #25323a;\n' +
+    '      --rule-soft: #1d272e;\n' +
+    '      --data: #4e92de;\n' +
+    '      --data-soft: #1c2e42;\n' +
+    '      --bound: #d9604e;\n' +
+    '      --bound-soft: #38221f;\n' +
+    '      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .7);\n' +
+    '    }\n' +
+    '  }\n' +
+    '\n' +
+    '  :root[data-theme="dark"] {\n' +
+    '    --ground: #0d1318;\n' +
+    '    --surface: #151d24;\n' +
+    '    --surface-sunk: #101820;\n' +
+    '    --ink: #e3eaef;\n' +
+    '    --ink-2: #b6c5cf;\n' +
+    '    --muted: #8799a6;\n' +
+    '    --rule: #25323a;\n' +
+    '    --rule-soft: #1d272e;\n' +
+    '    --data: #4e92de;\n' +
+    '    --data-soft: #1c2e42;\n' +
+    '    --bound: #d9604e;\n' +
+    '    --bound-soft: #38221f;\n' +
+    '    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .7);\n' +
+    '  }\n' +
+    '\n' +
+    '  * { box-sizing: border-box; }\n' +
+    '\n' +
+    '  body {\n' +
+    '    margin: 0;\n' +
+    '    padding-inline: 20px;\n' +
+    '    padding-block: 40px 64px;\n' +
+    '    background: var(--ground);\n' +
+    '    color: var(--ink);\n' +
+    '    font-family: var(--sans);\n' +
+    '    font-size: 15px;\n' +
+    '    line-height: 1.55;\n' +
+    '    -webkit-font-smoothing: antialiased;\n' +
+    '  }\n' +
+    '\n' +
+    '  .wrap { max-width: 1020px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }\n' +
+    '\n' +
+    '  /* ---------- header ---------- */\n' +
+    '  header { display: flex; flex-direction: column; gap: 14px; }\n' +
+    '\n' +
+    '  .eyebrow {\n' +
+    '    font-family: var(--mono);\n' +
+    '    font-size: 11px;\n' +
+    '    font-weight: 500;\n' +
+    '    letter-spacing: .13em;\n' +
+    '    text-transform: uppercase;\n' +
+    '    color: var(--muted);\n' +
+    '  }\n' +
+    '\n' +
+    '  h1 {\n' +
+    '    font-family: var(--serif);\n' +
+    '    font-weight: 500;\n' +
+    '    font-size: clamp(30px, 5.4vw, 45px);\n' +
+    '    line-height: 1.08;\n' +
+    '    letter-spacing: -.012em;\n' +
+    '    margin: 0;\n' +
+    '    text-wrap: balance;\n' +
+    '  }\n' +
+    '\n' +
+    '  .verdict {\n' +
+    '    font-family: var(--serif);\n' +
+    '    font-size: clamp(17px, 2.3vw, 20px);\n' +
+    '    line-height: 1.45;\n' +
+    '    color: var(--ink-2);\n' +
+    '    max-width: 62ch;\n' +
+    '    margin: 0;\n' +
+    '    text-wrap: pretty;\n' +
+    '  }\n' +
+    '\n' +
+    '  .facts {\n' +
+    '    display: grid;\n' +
+    '    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));\n' +
+    '    gap: 1px;\n' +
+    '    background: var(--rule);\n' +
+    '    border: 1px solid var(--rule);\n' +
+    '    border-radius: 3px;\n' +
+    '    overflow: hidden;\n' +
+    '    margin-top: 4px;\n' +
+    '  }\n' +
+    '  .fact { background: var(--surface); padding: 14px 16px; display: flex; flex-direction: column; gap: 3px; }\n' +
+    '  .fact dt {\n' +
+    '    font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em;\n' +
+    '    text-transform: uppercase; color: var(--muted);\n' +
+    '  }\n' +
+    '  .fact dd {\n' +
+    '    margin: 0; font-family: var(--mono); font-size: 19px; font-weight: 500;\n' +
+    '    font-variant-numeric: tabular-nums; letter-spacing: -.01em;\n' +
+    '  }\n' +
+    '  .fact p { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; }\n' +
+    '\n' +
+    '  /* ---------- panels ---------- */\n' +
+    '  section { display: flex; flex-direction: column; gap: 0; }\n' +
+    '\n' +
+    '  .panel {\n' +
+    '    background: var(--surface);\n' +
+    '    border: 1px solid var(--rule);\n' +
+    '    border-radius: 4px;\n' +
+    '    box-shadow: var(--shadow);\n' +
+    '  }\n' +
+    '  .panel-head { padding: 18px 20px 0; display: flex; flex-direction: column; gap: 5px; }\n' +
+    '  .panel-head h2 {\n' +
+    '    font-family: var(--serif); font-weight: 500; font-size: 21px;\n' +
+    '    letter-spacing: -.008em; margin: 0;\n' +
+    '  }\n' +
+    '  .panel-head p { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 66ch; line-height: 1.5; }\n' +
+    '  #joint-dimension-length .panel-body { padding: 16px 20px 20px; }\n' +
+    '  #ic-tournament-reference-history .panel-body { padding: 16px 20px 20px; }\n' +
+    '  #joint-dimension-length .panel-body > p { font-size: 13.5px; line-height: 1.55; }\n' +
+    '\n' +
+    '  .chart-scroll { overflow-x: auto; padding: 10px 8px 4px; }\n' +
+    '  .chart-scroll svg { display: block; width: 100%; min-width: 840px; height: auto; }\n' +
+    '\n' +
+    '  .legend {\n' +
+    '    display: flex; flex-wrap: wrap; gap: 6px 20px;\n' +
+    '    padding: 4px 20px 18px;\n' +
+    '    font-family: var(--mono); font-size: 11.5px; color: var(--muted);\n' +
+    '  }\n' +
+    '  .legend span { display: inline-flex; align-items: center; gap: 7px; }\n' +
+    '  /* A legend line that is prose, not a swatch key: one block of text, so the\n' +
+    '     <b>, <code> and <sup> inside it stay inline instead of becoming flex items. */\n' +
+    '  .legend > span:not(:has(> .swatch)) { display: block; }\n' +
+    '  .swatch { width: 18px; height: 9px; border-radius: 2px; background: var(--data); flex: none; }\n' +
+    '  .swatch.ghost { background: none; border-top: 1.5px dashed var(--muted); height: 0; border-radius: 0; }\n' +
+    '  .swatch.bound { background: var(--bound); width: 3px; height: 14px; }\n' +
+    '\n' +
+    '  /* ---------- two-up ---------- */\n' +
+    '  .duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }\n' +
+    '\n' +
+    '  /* ---------- ledger rows ---------- */\n' +
+    '  .ledger { padding: 14px 20px 20px; display: flex; flex-direction: column; }\n' +
+    '  .lrow { display: grid; grid-template-columns: 1fr 96px; gap: 4px 14px; padding: 9px 0; border-bottom: 1px solid var(--rule-soft); }\n' +
+    '  .lrow:last-child { border-bottom: 0; }\n' +
+    '  .lrow .name { font-size: 13.5px; line-height: 1.35; }\n' +
+    '  .lrow .num {\n' +
+    '    font-family: var(--mono); font-size: 13.5px; font-weight: 500;\n' +
+    '    font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap;\n' +
+    '  }\n' +
+    '  .lbar { grid-column: 1 / -1; height: 8px; background: var(--surface-sunk); border-radius: 0 4px 4px 0; }\n' +
+    '  .lbar i { display: block; height: 100%; background: var(--data); border-radius: 0 4px 4px 0; }\n' +
+    '\n' +
+    '  /* ---------- exponent track ---------- */\n' +
+    '  .exp { padding: 14px 20px 8px; }\n' +
+    '  .erow { display: grid; grid-template-columns: minmax(118px, 1.2fr) minmax(120px, 2fr) 44px; align-items: stretch; gap: 12px; }\n' +
+    '  .erow .name { font-size: 13px; line-height: 1.3; align-self: center; }\n' +
+    '  .erow .num {\n' +
+    '    font-family: var(--mono); font-size: 13px; font-weight: 500;\n' +
+    '    font-variant-numeric: tabular-nums; text-align: right; align-self: center;\n' +
+    '  }\n' +
+    '  .track { position: relative; min-height: 38px; }\n' +
+    '  .track::before {\n' +
+    '    content: ""; position: absolute; left: 0; right: 0; top: 50%;\n' +
+    '    height: 1px; background: var(--rule);\n' +
+    '  }\n' +
+    '  .track::after {\n' +
+    '    content: ""; position: absolute; left: 38.5%; top: 0; bottom: 0;\n' +
+    '    width: 2px; margin-left: -1px; background: var(--bound);\n' +
+    '  }\n' +
+    '  .dot {\n' +
+    '    position: absolute; top: 50%; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px;\n' +
+    '    border-radius: 50%; background: var(--data); box-shadow: 0 0 0 2px var(--surface);\n' +
+    '  }\n' +
+    '  .exp-axis {\n' +
+    '    display: grid; grid-template-columns: minmax(118px, 1.2fr) minmax(120px, 2fr) 44px; gap: 12px;\n' +
+    '    font-family: var(--mono); font-size: 10.5px; color: var(--muted); padding-bottom: 12px;\n' +
+    '  }\n' +
+    '  .exp-axis .ticks { position: relative; height: 14px; }\n' +
+    '  .exp-axis .ticks b { position: absolute; top: 0; font-weight: 400; transform: translateX(-50%); white-space: nowrap; }\n' +
+    '  .rho-flag {\n' +
+    '    position: absolute; top: 0; left: 38.5%; transform: translateX(-50%);\n' +
+    '    color: var(--bound); font-weight: 500; white-space: nowrap;\n' +
+    '  }\n' +
+    '\n' +
+    '  /* ---------- table ---------- */\n' +
+    '  .table-scroll { overflow-x: auto; padding: 4px 0 0; }\n' +
+    '  table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 13.5px; }\n' +
+    '  caption { text-align: left; padding: 0 20px 12px; font-size: 13.5px; color: var(--muted); }\n' +
+    '  th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--rule-soft); }\n' +
+    '  th:first-child, td:first-child { padding-left: 20px; }\n' +
+    '  th:last-child, td:last-child { padding-right: 20px; }\n' +
+    '  thead th {\n' +
+    '    font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em;\n' +
+    '    text-transform: uppercase; color: var(--muted); font-weight: 500;\n' +
+    '    border-bottom: 1px solid var(--rule); white-space: nowrap;\n' +
+    '  }\n' +
+    '  td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }\n' +
+    '  tbody tr.group td {\n' +
+    '    background: var(--surface-sunk); font-family: var(--mono); font-size: 10.5px;\n' +
+    '    letter-spacing: .09em; text-transform: uppercase; color: var('... 1830287 more characters,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

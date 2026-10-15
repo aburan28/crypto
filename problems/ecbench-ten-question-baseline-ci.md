@@ -46,3 +46,18 @@ check to make CI green. Recheck on a corrected contract/new workflow activity.
 ## Resolution and history
 
 2026-10-14: baseline failure reproduced; PR remains unmerged. Unresolved.
+
+2026-10-15: after integrating main at
+`a80b15bbc5c1ea4f2db2b294a9bcddc31f06fdd7`, the unchanged archive verifier
+again fails at line48 on that exact baseline. The
+[new baseline log](../research/ecbench_leads_20261015/base-a80-leaf-m10-replay.log)
+and exit1 retain the current evidence. No archive, manifest, verifier or workflow
+was modified by this campaign.
+
+An additional local whole-repository formatting check fails on incoming
+`examples/ic_improve_04b_analyze.rs` and
+`examples/ic_improve_04b_genus3_2lp.rs`. Its output is byte-identical on the
+campaign and exact a80 baseline after normalizing the worktree path; see
+[comparison](../research/ecbench_leads_20261015/format-baseline-comparison.log).
+All Rust files changed relative to a80 pass the separate scoped format check.
+This is a baseline formatting issue, not a failed experimental result.

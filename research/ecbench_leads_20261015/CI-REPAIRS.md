@@ -12,8 +12,8 @@ outcomes or permission to bypass checks.
 |Curve cover certificates, job116123015482|Catalog display check rejects the native-augmented leaderboard|Make the native generated views and catalog consistency check agree without changing frozen measurements|
 |leaf-m10 archive replay|Existing exact-file-set assertion fails|Retain the separately reproduced baseline blocker; do not rewrite its archive or disable its verifier|
 
-PR1853 also has a merge conflict and an incomplete automated review because
-its evidence volume exceeds Bugbot's review limit. Per AGENTS.md, Copilot was
+At that prior head, PR1853 also had a merge conflict and an incomplete automated
+review because its evidence volume exceeds Bugbot's review limit. Per AGENTS.md, Copilot was
 asked to merge main into the head, without rebasing or changing frozen evidence,
 in [comment6184186354](https://github.com/aburan28/crypto/pull/1853#issuecomment-6184186354).
 The native follow-up work proceeds in new source/report paths. A conflict in
@@ -32,3 +32,12 @@ native cover-certificate check. The only conflicts were the benchmark index and
 generated browser view; no frozen session, ledger or claim conflicted. The
 existing catalog prose renderer only lays out the native-generated document and
 diagnostic fragment.
+
+The integrated native publisher now invokes the existing source-pinned Node
+renderer in memory, after generating the canonical timeline, and checks both
+page and overview JSON. The unchanged standards display check agrees byte for
+byte, including appended roster field order. Alias-map formatting follows the
+existing registry contract without changing identities. Relevant workflows pin
+Node22 and run both native freshness and the retained historical checks.
+All15 current integration session audits pass, with1203 successful outcomes
+replayed exactly. No frozen session bytes changed.

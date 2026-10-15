@@ -1,0 +1,19 @@
+node:fs:622
+  return binding.open(
+                 ^
+
+Error: ENOENT: no such file or directory, open '/workspace/crypto/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/RESULTS.json'
+    at Object.openSync (node:fs:622:18)
+    at readFileSync (node:fs:488:35)
+    at source (file:///workspace/crypto/tools/render_ic_dashboard.mjs:20:17)
+    at file:///workspace/crypto/tools/render_ic_dashboard.mjs:46:28
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspace/crypto/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/RESULTS.json'
+}
+
+Node.js v24.19.0
