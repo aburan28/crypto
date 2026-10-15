@@ -155,3 +155,23 @@ dropped: at this load a b = 21 job would not fit in 60 minutes.
   separate candidate. Added arm, exploratory and secondary: stream `tuned` at **kappa = 1.41** with LA
   arms `inc` (= kappa re-tune only) and `lpsgewd` (= kappa re-tune + new LA), same instances, targets
   and walk seed as `main`, b = 10..20 as the budget allows, paired against `main:inc`.
+
+## Amendment A4 (2026-10-15 02:30, before any analysis of test data)
+
+The host load fell to about 4. b = 21 is added for `main:inc` and `main:lpsgewd` only (one collection
+per curve, test curves 0-2), as an extension: the primary fits stay on b = 10..20; b = 21 enters only
+the local exponents 20-21 and a 14..21 slope, reported separately.
+- (A4, 02:45, after reading the b = 10..20 test results) b = 21 is also run for the exploratory
+  `tuned` stream (kappa 1.41, `inc` and `lpsgewd`), because its local exponent at 19-20 is the
+  question it raises. Reported as an extension, not used in any primary verdict.
+
+## Amendment A5 (2026-10-15, b = 21 extension only)
+
+At b = 21, curve 0 has ell = 2^61.0. Both `lpsgewd` arms (`main`, `tuned`) on that curve failed all 8
+checks: the correctness gate caught it (no wrong `k` was accepted). Cause: the Berlekamp-Massey
+discrepancy summed up to 1024 unreduced products `< ell^2` in a `u128`, which overflows once
+`ell > 2^59`. Every other record has `ell <= 2^58.7` (b <= 20: `ell <= 2^55.4`), where the sum
+cannot overflow. Fix: reduce every `floor(2^127 / ell^2)` terms (at most 1024). The fixed binary
+reproduces the recorded b = 14 and b = 16 curve-0 rows of all ten arms exactly (cost, k, counters).
+The two failed records are kept in [results/b21_c0_overflow/](results/b21_c0_overflow/) and the
+b = 21 curve-0 jobs were rerun with the fixed binary.
