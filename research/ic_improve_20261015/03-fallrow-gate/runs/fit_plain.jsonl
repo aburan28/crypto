@@ -1,0 +1,12 @@
+{"ratio":"I/F","cell":"pipeplain-n13-l4-m3-a0","targets":6,"gm":0.5301,"lo":0.5030,"hi":0.5599,"verdict":"REGRESSES","fires":0,"gpv_median":1.0400,"i_cpu_median":0.008474,"failed_total":0}
+{"ratio":"I/F","cell":"pipeplain-n17-l6-m3-a1","targets":6,"gm":0.2247,"lo":0.2108,"hi":0.2370,"verdict":"REGRESSES","fires":0,"gpv_median":0.9714,"i_cpu_median":0.111019,"failed_total":0}
+{"ratio":"I/F","cell":"pipeplain-n19-l7-m3-a0","targets":6,"gm":0.3353,"lo":0.3272,"hi":0.3445,"verdict":"REGRESSES","fires":0,"gpv_median":0.9500,"i_cpu_median":0.525619,"failed_total":0}
+{"ratio":"I/LR","cell":"pipeplain-n13-l4-m3-a0","targets":6,"gm":1.1656,"lo":1.1146,"hi":1.2161,"verdict":"ADVANCES","fires":0,"gpv_median":1.0400,"i_cpu_median":0.008474,"failed_total":0}
+{"ratio":"I/LR","cell":"pipeplain-n17-l6-m3-a1","targets":6,"gm":1.2440,"lo":1.2240,"hi":1.2669,"verdict":"ADVANCES","fires":0,"gpv_median":0.9714,"i_cpu_median":0.111019,"failed_total":0}
+{"ratio":"I/LR","cell":"pipeplain-n19-l7-m3-a0","targets":6,"gm":1.3097,"lo":0.9914,"hi":1.5570,"verdict":"MATCHES","fires":0,"gpv_median":0.9500,"i_cpu_median":0.525619,"failed_total":0}
+{"ratio":"AA","cell":"pipeplain-n13-l4-m3-a0","targets":6,"gm":0.9957,"lo":0.9591,"hi":1.0338,"verdict":"MATCHES","fires":0,"gpv_median":1.0400,"i_cpu_median":0.008474,"failed_total":0}
+{"ratio":"AA","cell":"pipeplain-n17-l6-m3-a1","targets":6,"gm":0.9987,"lo":0.9629,"hi":1.0286,"verdict":"MATCHES","fires":0,"gpv_median":0.9714,"i_cpu_median":0.111019,"failed_total":0}
+{"ratio":"AA","cell":"pipeplain-n19-l7-m3-a0","targets":6,"gm":0.9556,"lo":0.9324,"hi":0.9849,"verdict":"REGRESSES","fires":0,"gpv_median":0.9500,"i_cpu_median":0.525619,"failed_total":0}
+{"medians":"pipeplain-n13-l4-m3-a0","targets":6,"i_cpu":0.008474,"f_cpu":0.015966,"i_splits":66.500000,"f_splits":22.500000,"falls":46.000000,"pass_cpu":0.000768}
+{"medians":"pipeplain-n17-l6-m3-a1","targets":6,"i_cpu":0.111019,"f_cpu":0.484445,"i_splits":843.000000,"f_splits":261.000000,"falls":62.000000,"pass_cpu":0.002292}
+{"medians":"pipeplain-n19-l7-m3-a0","targets":6,"i_cpu":0.525619,"f_cpu":1.576900,"i_splits":2068.500000,"f_splits":537.500000,"falls":70.000000,"pass_cpu":0.003515}
