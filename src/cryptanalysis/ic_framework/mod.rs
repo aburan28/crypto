@@ -510,10 +510,12 @@ pub fn run_pipeline<G: CountedGroup>(
                 ),
                 // Field multiplications counted by the same field whose
                 // additions the group charges (the `gaudry-d4` oracle on
-                // `E(F_{p⁴})`): priced by count at the curve's own
-                // multiplications per addition, which the oracle reports.
+                // `E(F_{p⁴})`, `gaudry-d4-bin` on `E(F_{q⁴})`, `q = 2^m`):
+                // priced by count at the curve's own multiplications per
+                // addition, which the oracle reports.
                 (_, _)
-                    if t.op_unit == "F_p multiplications"
+                    if (t.op_unit == "F_p multiplications"
+                        || t.op_unit == "F_q multiplications")
                         && t.extra.get("fp_muls_per_add").is_some_and(|&v| v > 0) =>
                 {
                     (
