@@ -345,7 +345,9 @@ pub struct FitOptions {
     /// Fit the band-priced cost at this weight (GAE per native operation,
     /// AGENTS.md §5a, [`super::band`]) instead of the charged cost.  The
     /// domain's unit then names the weight, so the bound never shares an
-    /// id with a charged-cost bound.
+    /// id with a charged-cost bound.  Omitted from the record when unset, so
+    /// a bound fitted without it keeps the id it had before the field existed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub weight: Option<f64>,
     /// Accept an arm whose parameters change from size to size under a
     /// declared rule (for example a factor-base size chosen per size on a
@@ -353,6 +355,8 @@ pub struct FitOptions {
     /// same parameter names; parameters whose values differ are recorded
     /// as `per size` and the rule text becomes part of the bound's method
     /// identity, so the bound never shares an id with a fixed-parameter one.
+    /// Omitted from the record when unset (see `weight`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub param_rule: Option<String>,
 }
 
@@ -1212,24 +1216,33 @@ pub fn check(path: &Path, root: &Path) -> Result<Bound, String> {
     fresh.verdict_id = recorded.verdict_id.clone();
     fresh.seal()?;
     if fresh.bound_id != recorded.bound_id {
+        // Compare each section as the JSON the seal hashes, not as parsed
+        // structs: a float read back from a record need not equal the one
+        // that was written bit for bit, so struct equality can name sections
+        // that did not change and miss the one that did.
+        fn json<T: Serialize>(v: &T) -> String {
+            serde_json::to_string(v).unwrap_or_default()
+        }
+        let raw: serde_json::Value = serde_json::from_str(
+            &std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?,
+        )
+        .map_err(|e| format!("{}: {e}", path.display()))?;
+        let fresh_v: serde_json::Value = serde_json::from_str(&json(&fresh)).unwrap_or_default();
         let mut diffs = Vec::new();
-        if fresh.sizes != recorded.sizes {
-            diffs.push("sizes");
-        }
-        if fresh.fit != recorded.fit {
-            diffs.push("fit");
-        }
-        if fresh.constant != recorded.constant {
-            diffs.push("constant");
-        }
-        if fresh.dimensions != recorded.dimensions {
-            diffs.push("dimensions");
-        }
-        if fresh.provenance != recorded.provenance {
-            diffs.push("provenance");
-        }
-        if fresh.admissibility != recorded.admissibility {
-            diffs.push("admissibility");
+        for key in [
+            "sizes",
+            "fit",
+            "constant",
+            "dimensions",
+            "provenance",
+            "admissibility",
+            "fit_options",
+            "method",
+            "domain",
+        ] {
+            if raw.get(key) != fresh_v.get(key) {
+                diffs.push(key);
+            }
         }
         return Err(format!(
             "{}: re-derived bound is {}, recorded {}; differs in: {}",

@@ -52,6 +52,12 @@ at w = 0 (overlapping at w = 0.1 and 1); every other IC/rho pair overlaps.
 L0 counts only; parameters selected on four training targets per size;
 `ic-shared` leaves three categories uncounted (lower bound only); the medium
 prime tier has two sizes; the band weighs a 64-bit word XOR like a table
-lookup, which is pessimistic for F4. `ecbench bound check` of the committed
-`docs/bounds/records/` fails in this container independently of this work
-(noted in the PR).
+lookup, which is pessimistic for F4.
+
+**Correction (2026-10-15).** An earlier version of this README said `ecbench
+bound check` of the committed `docs/bounds/records/` failed independently of
+this work. It did not: adding `weight` and `param_rule` to `FitOptions`
+serialised them as `null` into every re-derived bound, which changed every
+bound id. They are now omitted when unset; all 46 committed bounds re-derive
+with their recorded ids, and the campaign's 63 fits were refitted (values
+unchanged, ids changed).
