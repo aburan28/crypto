@@ -1428,6 +1428,185 @@ fn verify_batch(
     );
 }
 
+#[derive(Serialize)]
+struct CompactPrefix {
+    n: usize,
+    cpu_ns: u64,
+    wall_ns: u64,
+    extension_muls: u64,
+    extension_inversions: u64,
+    rho_attempts: u64,
+}
+
+fn compact_pairing(
+    input: Input,
+    targets: &[SourcePoint],
+    frozen: &Value,
+    prefixes: &[usize],
+) -> (Vec<CompactPrefix>, Vec<u64>, Value) {
+    take_field_counters();
+    let start_wall = Instant::now();
+    let start_cpu = thread_cpu_ns();
+    let curve = source_curve(input);
+    let k = Field::new(input);
+    assert_eq!(frozen["tower_a"], json!(k.a));
+    assert_eq!(frozen["irreducibility"], k.irreducibility_receipt());
+    let (h, selection, alpha, first_beta, _, _) = select_point(&k, input);
+    assert_eq!(frozen["selected_h"], json!({"x":h.x,"y":h.y}));
+    assert_eq!(frozen["selection"], selection);
+    assert_eq!(frozen["alpha"], json!(alpha));
+    assert_eq!(frozen["beta"], json!(first_beta));
+    let table = ReusableBsgs::new(&k, &alpha, input.r);
+    let mut output = Vec::with_capacity(targets.len());
+    let mut samples = Vec::new();
+    for (index, &q) in targets.iter().enumerate() {
+        let beta = if index == 0 {
+            first_beta.clone()
+        } else {
+            let mut charges = SelectionCharges::default();
+            let value = reduced_tate_profiled(&k, q, &h, input.r, &mut charges)
+                .expect("compact beta pairing pole");
+            assert_eq!(k.pow(&value, &BigUint::from(input.r)), k.one());
+            value
+        };
+        let scalar = table.solve(&k, &beta, input.r).expect("compact FFDLP exhausted");
+        assert_eq!(k.pow(&alpha, &BigUint::from(scalar)), beta);
+        let mut ops = GroupOps::default();
+        assert_eq!(curve.mul(&mut ops, input.g, scalar), q);
+        output.push(scalar);
+        if prefixes.contains(&(index + 1)) {
+            samples.push(CompactPrefix {
+                n: index + 1,
+                cpu_ns: thread_cpu_ns() - start_cpu,
+                wall_ns: start_wall.elapsed().as_nanos() as u64,
+                extension_muls: k.muls.get(),
+                extension_inversions: k.inversions.get(),
+                rho_attempts: 0,
+            });
+        }
+    }
+    let fp = take_field_counters();
+    (samples, output, json!({"field_counts":k.counts(),
+        "fp_muls":fp.0,"fp_invs":fp.1,
+        "peak_rss_bytes":peak_rss_bytes()}))
+}
+
+fn compact_rho(
+    input: Input,
+    cell: usize,
+    round: u64,
+    targets: &[SourcePoint],
+    prefixes: &[usize],
+) -> (Vec<CompactPrefix>, Vec<u64>, Value) {
+    take_field_counters();
+    let start_wall = Instant::now();
+    let start_cpu = thread_cpu_ns();
+    let curve = source_curve(input);
+    let cap = rho_step_cap(input.r);
+    let mut attempts = 0u64;
+    let mut output = Vec::with_capacity(targets.len());
+    let mut samples = Vec::new();
+    for (index, &q) in targets.iter().enumerate() {
+        let seed_base = 0x4241_5443_4800_1000u64 + 256*cell as u64
+            + 64*round + index as u64;
+        let mut found = None;
+        for retry in 0..32u64 {
+            attempts += 1;
+            let seed = seed_base.wrapping_add(retry * 0x01_00_00_00);
+            let result = rho_reference_negation(&curve,input.g,q,input.r,seed,cap);
+            if result.verified {
+                found = result.recovered;
+                break;
+            }
+        }
+        let scalar = found.expect("compact charged rho exhausted");
+        output.push(scalar);
+        if prefixes.contains(&(index + 1)) {
+            samples.push(CompactPrefix {
+                n: index + 1,
+                cpu_ns: thread_cpu_ns() - start_cpu,
+                wall_ns: start_wall.elapsed().as_nanos() as u64,
+                extension_muls: 0,
+                extension_inversions: 0,
+                rho_attempts: attempts,
+            });
+        }
+    }
+    let fp = take_field_counters();
+    (samples, output, json!({"rho_attempts":attempts,
+        "rho_step_cap":cap,"fp_muls":fp.0,"fp_invs":fp.1,
+        "peak_rss_bytes":peak_rss_bytes()}))
+}
+
+fn run_compact(input: Input, cell: usize, round: u64, batch_path: &str, frozen_path: &str) {
+    assert!(round < 3);
+    let common_wall = Instant::now();
+    let common_cpu = thread_cpu_ns();
+    let targets = read_batch(batch_path,input,cell);
+    let frozen: Value = serde_json::from_str(&fs::read_to_string(frozen_path).unwrap()).unwrap();
+    let input_cpu_ns = thread_cpu_ns() - common_cpu;
+    let input_wall_ns = common_wall.elapsed().as_nanos() as u64;
+    let prefixes: Vec<usize> = if cell == 0 { vec![1,4,16] }
+        else if cell == 1 { vec![1,4,16,60] }
+        else { vec![1,4,16,64,66] };
+    let (pair_prefix, pair_scalars, pair_counts, rho_prefix, rho_scalars, rho_counts) =
+        if round % 2 == 0 {
+            let (a,b,c) = compact_pairing(input,&targets,&frozen,&prefixes);
+            let (d,e,f) = compact_rho(input,cell,round,&targets,&prefixes);
+            (a,b,c,d,e,f)
+        } else {
+            let (d,e,f) = compact_rho(input,cell,round,&targets,&prefixes);
+            let (a,b,c) = compact_pairing(input,&targets,&frozen,&prefixes);
+            (a,b,c,d,e,f)
+        };
+    assert_eq!(pair_scalars,rho_scalars);
+    assert_eq!(pair_prefix.len(),prefixes.len());
+    assert_eq!(rho_prefix.len(),prefixes.len());
+    println!("{}",json!({"schema":"torsion_pairing_compact/v5",
+        "cell":cell,"p":input.p,"r":input.r,"round":round,
+        "order":if round%2==0 {"pairing,rho"} else {"rho,pairing"},
+        "targets":targets.len(),"prefixes":prefixes,
+        "input_cpu_ns_common":input_cpu_ns,"input_wall_ns_common":input_wall_ns,
+        "pairing_prefix":pair_prefix,"rho_prefix":rho_prefix,
+        "pairing_scalars":pair_scalars,"rho_scalars":rho_scalars,
+        "pairing_counts":pair_counts,"rho_counts":rho_counts,
+        "peak_rss_bytes":peak_rss_bytes()}));
+}
+
+fn verify_compact(input: Input, cell: usize, batch_path: &str,
+                  answers_path: &str, records_path: &str) {
+    let targets = read_batch(batch_path,input,cell);
+    let answers: Value = serde_json::from_str(&fs::read_to_string(answers_path).unwrap()).unwrap();
+    let expected: Vec<u64> = answers["scalars"].as_array().unwrap().iter()
+        .map(|v| v.as_u64().unwrap()).collect();
+    assert_eq!(targets.len(),expected.len());
+    let checker = ReplayField::new(input);
+    let mut rounds = [0u64;3];
+    for line in fs::read_to_string(records_path).unwrap().lines() {
+        let row: Value = serde_json::from_str(line).unwrap();
+        assert_eq!(row["schema"],"torsion_pairing_compact/v5");
+        assert_eq!(row["cell"].as_u64(),Some(cell as u64));
+        let round = row["round"].as_u64().unwrap() as usize;
+        assert!(round < 3);
+        for name in ["pairing_scalars","rho_scalars"] {
+            let recovered = row[name].as_array().unwrap();
+            assert_eq!(recovered.len(),targets.len());
+            for (i,v) in recovered.iter().enumerate() {
+                let scalar = v.as_u64().unwrap();
+                assert_eq!(scalar,expected[i]);
+                assert_eq!(checker.scalar_mul(input.g,scalar),targets[i]);
+            }
+        }
+        rounds[round] += 1;
+    }
+    assert_eq!(rounds,[1,1,1]);
+    println!("{}",json!({"schema":"torsion_pairing_compact_replay/v5",
+        "cell":cell,"rounds":rounds,"checked_scalars":6*targets.len(),
+        "independent_fp_muls":checker.muls.get(),
+        "independent_fp_invs":checker.inversions.get(),
+        "independent_group_adds":checker.group_add_calls.get()}));
+}
+
 // The replay uses separate F_p and F_(p²) arithmetic, as well as separate
 // curve formulas. It shares only the public coordinates with the solver.
 struct ReplayField {
@@ -1638,6 +1817,16 @@ fn main() {
             args.get(4).expect("round").parse().unwrap(),
             args.get(5).expect("public batch path"),
             args.get(6).expect("selection path"),
+        ),
+        "compact-run" => run_compact(
+            input, cell, args.get(4).expect("round").parse().unwrap(),
+            args.get(5).expect("public batch path"),
+            args.get(6).expect("selection path"),
+        ),
+        "compact-verify" => verify_compact(
+            input, cell, args.get(4).expect("public batch path"),
+            args.get(5).expect("answer path"),
+            args.get(6).expect("records path"),
         ),
         "batch-verify" => verify_batch(
             input,
