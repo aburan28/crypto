@@ -505,6 +505,17 @@ theorem p192_threshold_pair_index_entries :
       140448452456825782461936609026805931665 := by
   norm_num
 
+/-- In an odd-order subgroup, the canonical modular half of a point really
+    doubles to that point. This removes the large scalar from the Type I
+    inverse divisor when both half-point and target fibers split. -/
+theorem odd_torsion_half_point {G : Type*} [AddCommGroup G]
+    (r k : ℕ) (hodd : r = 2 * k + 1) (q : G) (hr : r • q = 0) :
+    (2 : ℕ) • ((k + 1) • q) = q := by
+  calc
+    (2 : ℕ) • ((k + 1) • q) = (2 * (k + 1)) • q := by rw [smul_smul]
+    _ = (r + 1) • q := by congr 1; omega
+    _ = q := by rw [add_nsmul, hr, one_nsmul, zero_add]
+
 end P192ExtensionCover
 
 #print axioms P192ExtensionCover.cyclic_cross_ratio_product
@@ -540,3 +551,4 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.type_i_ciani_resultant_factor
 #print axioms P192ExtensionCover.p192_conditioned_half_coverage_threshold_certificate
 #print axioms P192ExtensionCover.p192_threshold_pair_index_entries
+#print axioms P192ExtensionCover.odd_torsion_half_point

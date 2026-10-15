@@ -1,0 +1,19 @@
+{
+  "p": "6277101735386680763835789423207666416083908700390324961279",
+  "plane_receipt_sha256": "b16122e364056b30e46971b18084f7bfa6c0f6de2fa63f0cae63a1229dd224b3",
+  "source_sha256": "513a8a769c6e800e160eae3e9a8a95c538c9d7a5a0d82c4b2ccb8b782a3ca950",
+  "stages": [
+    {
+      "degree_y": 4,
+      "elapsed_ns": 476718167,
+      "stage": "affine_function_polynomial",
+      "term_count": 14
+    },
+    {
+      "message": "Factorization of multivariate polynomials over prime fields with characteristic > 2^29 is not implemented.",
+      "stage": "error",
+      "type": "NotImplementedError"
+    }
+  ],
+  "status": "bounded_function_field_probe_error"
+}
