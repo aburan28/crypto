@@ -60,6 +60,17 @@ use serde_json::{json, Value};
 
 /// `p₁ = 3·2^18 + 1`, the pilot's prime.
 const P1: u64 = 786_433;
+/// `p₂ = 15·2^27 + 1`, the replication prime (§5, Amendment 2 F1).
+const P2: u64 = 2_013_265_921;
+
+/// The prime index of the seed rule (Amendment 2): `p₁ = 0`, `p₂ = 1`.
+fn prime_index(p: u64) -> u64 {
+    match p {
+        P1 => 0,
+        P2 => 1,
+        _ => panic!("no prime index registered for p = {p}"),
+    }
+}
 /// "FBDS", the preregistered seed base.
 const SEED: u64 = 0x4642_4453;
 /// The pilot's seed base ("PKMT"), for the instrument check only.
@@ -1046,8 +1057,10 @@ fn merge(into: &mut Value, from: &Value) {
     }
 }
 
-fn cell_seed(arm: Arm, m: usize, t: usize) -> u64 {
-    SEED ^ (arm.id() << 40) ^ ((m as u64) << 32) ^ ((t as u64) << 16)
+/// `0x46424453 ⊕ prime≪48 ⊕ arm≪40 ⊕ m≪32 ⊕ t≪16` (Amendments 1 and 2;
+/// every p₁ seed is unchanged).
+fn cell_seed(p: u64, arm: Arm, m: usize, t: usize) -> u64 {
+    SEED ^ (prime_index(p) << 48) ^ (arm.id() << 40) ^ ((m as u64) << 32) ^ ((t as u64) << 16)
 }
 
 fn target_seed(cell: u64, k: usize) -> u64 {
@@ -1056,9 +1069,8 @@ fn target_seed(cell: u64, k: usize) -> u64 {
 
 /// Build and measure one system; prints a description line (`"phase":
 /// "built"`) before F4 runs, and the row after.
-fn one(arm: Arm, m: usize, t: usize, k: usize, budget: Duration) -> Value {
-    let p = P1;
-    let cs = cell_seed(arm, m, t);
+fn one(p: u64, arm: Arm, m: usize, t: usize, k: usize, budget: Duration) -> Value {
+    let cs = cell_seed(p, arm, m, t);
     let mut rng = StdRng::seed_from_u64(cs);
     let d = build_design(arm, p, t, &mut rng);
     let (curve, on) = target_curve(p, &d.v, m.max(2), &mut rng);
@@ -1097,6 +1109,7 @@ fn one(arm: Arm, m: usize, t: usize, k: usize, budget: Duration) -> Value {
         "n_vars": n,
         "n_eqs": eqs.len(),
         "p": p,
+        "prime_index": prime_index(p),
         "seed_base": SEED,
         "cell_seed": cs,
         "target_seed": ts,
@@ -1167,6 +1180,7 @@ fn host() -> Value {
 }
 
 struct RunArgs {
+    p: u64,
     arms: Vec<Arm>,
     ms: Vec<usize>,
     t_min: usize,
@@ -1188,6 +1202,8 @@ fn run_child(a: &RunArgs, arm: Arm, m: usize, t: usize, k: usize, log: &mut File
         .arg(&exe)
         .args([
             "one",
+            "--p",
+            &a.p.to_string(),
             "--arm",
             arm.name(),
             "--m",
@@ -1583,9 +1599,28 @@ fn mean(xs: &[u64]) -> f64 {
     xs.iter().sum::<u64>() as f64 / xs.len() as f64
 }
 
+/// The mean `max_cols` of a completed cell's systems, per `t`.
+fn widths_of(rows: &[(String, Value)], arm: &str, m: usize) -> BTreeMap<usize, f64> {
+    let mut by_t: BTreeMap<usize, Vec<u64>> = BTreeMap::new();
+    for (_, r) in rows {
+        if r["arm"] == arm && r["m"] == m && r["status"] == "ok" {
+            let t = r["t"].as_u64().unwrap_or(0) as usize;
+            by_t.entry(t)
+                .or_default()
+                .push(r["max_cols"].as_u64().expect("an ok row has max_cols"));
+        }
+    }
+    by_t.into_iter().map(|(t, w)| (t, mean(&w))).collect()
+}
+
 fn analyze(dir: &str, pilot: Option<&str>) {
     let rows = read_rows(dir);
-    println!("Factor-base designs on p1 = {P1}: σ = ΔD/Δb by least squares over completed cells");
+    let mut primes: Vec<u64> = rows.iter().filter_map(|(_, r)| r["p"].as_u64()).collect();
+    primes.sort_unstable();
+    primes.dedup();
+    println!(
+        "Factor-base designs on p = {primes:?}: σ = ΔD/Δb by least squares over completed cells"
+    );
     println!("(D = solving_degree_max of f4_fp grevlex; a cell is completed when every planted system in it is `ok`;");
     println!(" a cell's D is the mean over its systems; rows from {dir})");
     let mut summary = Vec::new();
@@ -1621,6 +1656,19 @@ fn analyze(dir: &str, pilot: Option<&str>) {
                 ),
                 None => println!("  completed cells {}: no slope  →  {v}", pts.len()),
             }
+            // Secondary, descriptive (Amendment 2): Δ log₂ max_cols / Δb.
+            let widths = widths_of(&rows, arm.name(), m);
+            let wpts: Vec<(f64, f64)> = cells
+                .iter()
+                .filter(|c| complete(c))
+                .filter_map(|c| widths.get(&c.0).map(|w| (c.1, w.log2())))
+                .collect();
+            if let Some((ws, _)) = lsq(&wpts) {
+                println!(
+                    "  width growth Δlog2(max_cols)/Δb = {ws:.4} over {} cells (descriptive)",
+                    wpts.len()
+                );
+            }
             summary.push((arm.name(), m, pts.len(), fit, v));
         }
     }
@@ -1633,6 +1681,55 @@ fn analyze(dir: &str, pilot: Option<&str>) {
             arm,
             fit.map_or("-".to_string(), |f| format!("{:.4}", f.0))
         );
+    }
+
+    // Amendment 2 F1: A11 against A0 at shared completed t (cell D and cell
+    // mean max_cols); the rule is registered for m = 3 on p₂.
+    println!();
+    println!(
+        "A11 against A0 at shared completed t (Amendment 2 F1 rule; registered for m = 3 on p2)"
+    );
+    for m in [2usize, 3] {
+        let a11: BTreeMap<usize, f64> = cells_of(&rows, "A11", m)
+            .into_iter()
+            .filter(complete)
+            .map(|c| (c.0, mean(&c.2)))
+            .collect();
+        let a0: BTreeMap<usize, f64> = cells_of(&rows, "A0", m)
+            .into_iter()
+            .filter(complete)
+            .map(|c| (c.0, mean(&c.2)))
+            .collect();
+        let (w11, w0) = (widths_of(&rows, "A11", m), widths_of(&rows, "A0", m));
+        let shared: Vec<usize> = a11.keys().filter(|t| a0.contains_key(t)).copied().collect();
+        if shared.is_empty() {
+            continue;
+        }
+        let mut all_pass = true;
+        let mut any_fail = false;
+        for t in &shared {
+            let (d11, d0) = (a11[t], a0[t]);
+            let (c11, c0) = (w11[t], w0[t]);
+            let pass = d11 <= d0 - 1.0 && c11 < c0;
+            all_pass &= pass;
+            any_fail |= d11 >= d0;
+            println!(
+                "  m={m} t={t:<2} A11 D {d11:.1} cols {c11:.0} | A0 D {d0:.1} cols {c0:.0} | {}",
+                if pass {
+                    "A11 D ≤ A0 D − 1 and narrower"
+                } else {
+                    "condition not met"
+                }
+            );
+        }
+        let v = if any_fail {
+            "fails to replicate (a shared cell has A11 D ≥ A0 D)"
+        } else if all_pass && shared.len() >= 3 {
+            "replicates"
+        } else {
+            "inconclusive"
+        };
+        println!("  m={m}: {} shared completed cells → {v}", shared.len());
     }
 
     // The preregistered predictions, as differences at equal b.
@@ -1743,17 +1840,21 @@ fn main() {
             let t: usize = flag(&args, "--t").expect("--t").parse().unwrap();
             let k: usize = flag(&args, "--target").map_or(0, |s| s.parse().unwrap());
             let budget = flag(&args, "--budget").map_or(300, |s| s.parse().unwrap());
-            let row = one(arm, m, t, k, Duration::from_secs(budget));
+            let p = flag(&args, "--p").map_or(P1, |s| s.parse().unwrap());
+            let row = one(p, arm, m, t, k, Duration::from_secs(budget));
             println!("{row}");
         }
         "run" => {
+            let p = flag(&args, "--p").map_or(P1, |s| s.parse().unwrap());
+            let two_adic = (p - 1).trailing_zeros() as usize;
             let a = RunArgs {
+                p,
                 arms: flag(&args, "--arms").map_or(Arm::ALL.to_vec(), |s| {
                     s.split(',').map(Arm::parse).collect()
                 }),
                 ms: flag(&args, "--m").map_or(vec![2, 3], |s| list(&s)),
                 t_min: flag(&args, "--t-min").map_or(2, |s| s.parse().unwrap()),
-                t_max: flag(&args, "--t-max").map_or(18, |s| s.parse().unwrap()),
+                t_max: flag(&args, "--t-max").map_or(two_adic, |s| s.parse().unwrap()),
                 targets: flag(&args, "--targets").map_or(2, |s| s.parse().unwrap()),
                 budget: flag(&args, "--budget").map_or(300, |s| s.parse().unwrap()),
                 vmem_kb: flag(&args, "--vmem-kb").map_or(13_000_000, |s| s.parse().unwrap()),
@@ -1761,7 +1862,7 @@ fn main() {
                 out_dir: flag(&args, "--out-dir").expect("--out-dir"),
             };
             assert!(a.t_min >= 2, "t starts at 2");
-            assert!(a.t_max <= 18, "2^t must divide p₁ − 1 = 3·2^18");
+            assert!(a.t_max <= two_adic, "2^t must divide p − 1");
             run(&a);
         }
         "repro" => {

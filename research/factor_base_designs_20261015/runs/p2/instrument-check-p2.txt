@@ -1,0 +1,13 @@
+Amendment 2 F1 pre-check at p2 = 2013265921 (p2 < 2^31; f4_fp's Barrett reduction is for p < 2^32).
+Each line: one planted system at t = 2, built and checked by 'fb_designs_slope one --p 2013265921'
+(the set and presentation checks, then every equation vanishing at the planted solution, assert before F4 runs;
+after F4, planted_ok = the planted solution satisfies F4's basis and F4 did not derive 1).
+commit 1ecf3cf6410a3773961be91fbc670d96d7d845dc + working tree of examples/fb_designs_slope.rs (prime index and --p)
+A0   m=2 t=2 target=0 p=2013265921 prime_index=1 cell_seed=281484745262163 x_r=1940321920 n_vars=4 n_eqs=5 D=4 max_cols=37 inconsistent=False planted_ok=True status=ok
+A0   m=2 t=2 target=1 p=2013265921 prime_index=1 cell_seed=281484745262163 x_r=1532393306 n_vars=4 n_eqs=5 D=4 max_cols=37 inconsistent=False planted_ok=True status=ok
+A0   m=3 t=2 target=0 p=2013265921 prime_index=1 cell_seed=281489040229459 x_r=1150465184 n_vars=7 n_eqs=8 D=5 max_cols=368 inconsistent=False planted_ok=True status=ok
+A0   m=3 t=2 target=1 p=2013265921 prime_index=1 cell_seed=281489040229459 x_r=1650717107 n_vars=7 n_eqs=8 D=5 max_cols=368 inconsistent=False planted_ok=True status=ok
+A11  m=2 t=2 target=0 p=2013265921 prime_index=1 cell_seed=286982303401043 x_r=662941857 n_vars=9 n_eqs=10 D=3 max_cols=31 inconsistent=False planted_ok=True status=ok
+A11  m=2 t=2 target=1 p=2013265921 prime_index=1 cell_seed=286982303401043 x_r=662941857 n_vars=9 n_eqs=10 D=3 max_cols=31 inconsistent=False planted_ok=True status=ok
+A11  m=3 t=2 target=0 p=2013265921 prime_index=1 cell_seed=286986598368339 x_r=1042845232 n_vars=15 n_eqs=16 D=4 max_cols=62 inconsistent=False planted_ok=True status=ok
+A11  m=3 t=2 target=1 p=2013265921 prime_index=1 cell_seed=286986598368339 x_r=1042845232 n_vars=15 n_eqs=16 D=4 max_cols=62 inconsistent=False planted_ok=True status=ok
