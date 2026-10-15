@@ -50,3 +50,19 @@ The first hoisting rung has 96 exact output matches. Its 224-bit/degree-101
 linear-algebra case has 273,659,435 versus 5,639,435 multiplication calls
 (48.526 quotient). Wall time remains unqualified. Later rungs retain any
 increase in multiplication calls beside reduced inversion counts.
+
+11. A root attempt completed with 4,077 passes and six failures because two
+    archived runtime fixtures had not been materialized. The tracked chain-set
+    constants and SOURCE42 file were loaded without changing tests. A subsequent
+    run stopped while writing test output to the full main SSD. Both logs remain.
+    The final unfiltered run wrote to the second SSD and passed 4,083 tests,
+    zero failures, 117 existing ignored, in a 1,347.49-second test interval.
+12. The main SSD also filled before rung 3 comparison receipts could be written.
+    Raw constructor results survived; the native comparisons were repeated in
+    fresh output files after space recovered. Git rejected a proposed cross-volume
+    worktree move with `Cross-device link`; the source paths stayed unchanged.
+    Live test output was directed to the durable second-SSD evidence path.
+13. Conductor exhausted the implementation task's four attempts and marked it
+    failed after the final root validation succeeded. T-2844 covers the distinct
+    publication/CPU-evidence review phase; it reserves evidence/report/index paths
+    and does not repeat the completed arithmetic implementation work.
