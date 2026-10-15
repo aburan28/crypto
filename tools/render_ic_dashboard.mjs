@@ -287,6 +287,13 @@ let page = readFileSync(process.argv.includes('--stdin') ? 0 : PAGE, 'utf8');
 const oldFront = between(page, START, END);
 const historical = section(oldFront, 'lab-best');
 const progressRaw = readFileSync(resolve(ROOT,'docs/ic/progress-timeline.json'));
+const progressDocument = JSON.parse(progressRaw);
+const progressTableRows = progressDocument.series.flatMap(series => series.points.map(point => {
+  assert.ok(Number.isFinite(point.value), 'Timeline table requires a recorded finite value');
+  const unit = point.unit ? ' · ' + escape(point.unit) : '';
+  const sourceLink = point.source ? ` &middot; <a href="${escape(point.source)}">source</a>` : '';
+  return `<tr><td>${escape(point.date)}</td><td>${escape(series.label)}</td><td title="${escape(point.detail || '')}">${escape(point.label)}</td><td class="n">${point.value.toPrecision(6)}&times;</td><td>${escape(point.reference || '')}${unit}</td><td><span class="chip">${escape(point.class || '')}</span></td><td><a href="${escape(point.anchor)}">panel</a>${sourceLink}</td></tr>`;
+})).join('\n');
 const retainedPanels = [
   ['cold-compact-orbit-20261003','Historical compact-orbit cold-cost panel'],
   ['full-rank-compact-orbit-20261003','Historical compact-orbit full-rank panel'],
@@ -308,6 +315,10 @@ const retainedPanels = [
     const marker = /(<script type="application\/json" id="progress-data">)[\s\S]*?(<\/script>)/;
     assert.ok(marker.test(html), 'Progress panel has no canonical data embed');
     html = html.replace(marker, (_, start, end) => start + progressRaw.toString('utf8') + end);
+    const tableMarker = /(<summary>Every plotted point as a table<\/summary>)[\s\S]*?(<\/details>)/;
+    assert.ok(tableMarker.test(html), 'Progress panel has no canonical point table');
+    const table = `<div class="dash-detail-body"><table><caption>Recorded IC/reference ratios by date; diagnostic count quotients are incomplete costs</caption><thead><tr><th>Date</th><th>Series</th><th>Result</th><th>IC / reference</th><th>Reference and unit</th><th>Class</th><th>Links</th></tr></thead><tbody>\n${progressTableRows}\n</tbody></table></div>`;
+    html = html.replace(tableMarker, (_, start, end) => start + table + end);
   }
   return {id,label,html};
 });

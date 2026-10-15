@@ -1,0 +1,451 @@
+{
+  "head_sha": "763ab2b06c1be26b45a2e349ddbba773435e5e19",
+  "base_sha": "a80b15bbc5c1ea4f2db2b294a9bcddc31f06fdd7",
+  "pr_url": "https://github.com/aburan28/crypto/pull/1853",
+  "collection_started_utc": "2026-10-15T06:47:16Z",
+  "checks": [
+    {
+      "id": 116278443854,
+      "name": "release",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343618/job/116278443854"
+    },
+    {
+      "id": 116272281357,
+      "name": "rust (x86_64-pc-windows-msvc, windows-latest)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343618/job/116272281357"
+    },
+    {
+      "id": 116272281339,
+      "name": "isogeny (x86_64-pc-windows-msvc, windows-latest)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343618/job/116272281339"
+    },
+    {
+      "id": 116272281299,
+      "name": "isogeny (aarch64-apple-darwin, macos-latest)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343618/job/116272281299"
+    },
+    {
+      "id": 116272281263,
+      "name": "rust (aarch64-apple-darwin, macos-latest)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343618/job/116272281263"
+    },
+    {
+      "id": 116272281244,
+      "name": "isogeny (x86_64-unknown-linux-gnu, ubuntu-latest)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343618/job/116272281244"
+    },
+    {
+      "id": 116272281239,
+      "name": "rust (x86_64-unknown-linux-gnu, ubuntu-latest)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343618/job/116272281239"
+    },
+    {
+      "id": 116272281193,
+      "name": "isogeny (x86_64-unknown-linux-musl, ubuntu-latest)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343618/job/116272281193"
+    },
+    {
+      "id": 116272281187,
+      "name": "cuda",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343618/job/116272281187"
+    },
+    {
+      "id": 116272281149,
+      "name": "native",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343618/job/116272281149"
+    },
+    {
+      "id": 116271468347,
+      "name": "CodeQL",
+      "status": "completed",
+      "conclusion": "neutral",
+      "url": "https://github.com/aburan28/crypto/runs/116271468347"
+    },
+    {
+      "id": 116270386754,
+      "name": "analyze-rust-long",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343833/job/116270386754"
+    },
+    {
+      "id": 116270384923,
+      "name": "Analyze (python)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343833/job/116270384923"
+    },
+    {
+      "id": 116270384883,
+      "name": "Analyze (c-cpp)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343833/job/116270384883"
+    },
+    {
+      "id": 116270384876,
+      "name": "Analyze (javascript-typescript)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343833/job/116270384876"
+    },
+    {
+      "id": 116270384838,
+      "name": "Analyze (actions)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343833/job/116270384838"
+    },
+    {
+      "id": 116270384767,
+      "name": "Analyze (rust)",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343833/job/116270384767"
+    },
+    {
+      "id": 116268864988,
+      "name": "rustfmt (changed files)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343674/job/116268864988"
+    },
+    {
+      "id": 116268864947,
+      "name": "clippy (crypto)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343674/job/116268864947"
+    },
+    {
+      "id": 116268864907,
+      "name": "clippy (cd_attack)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343674/job/116268864907"
+    },
+    {
+      "id": 116268732556,
+      "name": "check",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343693/job/116268732556"
+    },
+    {
+      "id": 116268574897,
+      "name": "harness",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343625/job/116268574897"
+    },
+    {
+      "id": 116268271868,
+      "name": "publish",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343776/job/116268271868"
+    },
+    {
+      "id": 116268271303,
+      "name": "record",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343720/job/116268271303"
+    },
+    {
+      "id": 116268270869,
+      "name": "certificates",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343881/job/116268270869"
+    },
+    {
+      "id": 116268270620,
+      "name": "disclosed-sat-replay (macos-latest)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343785/job/116268270620"
+    },
+    {
+      "id": 116268270613,
+      "name": "scope",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343833/job/116268270613"
+    },
+    {
+      "id": 116268270548,
+      "name": "replay",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343891/job/116268270548"
+    },
+    {
+      "id": 116268270534,
+      "name": "transfers",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343848/job/116268270534"
+    },
+    {
+      "id": 116268270526,
+      "name": "replay",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343820/job/116268270526"
+    },
+    {
+      "id": 116268270523,
+      "name": "disclosed-sat-replay (ubuntu-latest)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343785/job/116268270523"
+    },
+    {
+      "id": 116268270512,
+      "name": "replay",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343799/job/116268270512"
+    },
+    {
+      "id": 116268270493,
+      "name": "names",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343910/job/116268270493"
+    },
+    {
+      "id": 116268270471,
+      "name": "linux-integration",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343857/job/116268270471"
+    },
+    {
+      "id": 116268270427,
+      "name": "replay",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343810/job/116268270427"
+    },
+    {
+      "id": 116268270420,
+      "name": "e2e-benchmark",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343786/job/116268270420"
+    },
+    {
+      "id": 116268270408,
+      "name": "traits",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343817/job/116268270408"
+    },
+    {
+      "id": 116268270394,
+      "name": "replay",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343793/job/116268270394"
+    },
+    {
+      "id": 116268270377,
+      "name": "replay",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343789/job/116268270377"
+    },
+    {
+      "id": 116268270264,
+      "name": "harness",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343785/job/116268270264"
+    },
+    {
+      "id": 116268270219,
+      "name": "replay",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343732/job/116268270219"
+    },
+    {
+      "id": 116268270218,
+      "name": "validate-cli",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343634/job/116268270218"
+    },
+    {
+      "id": 116268270160,
+      "name": "test",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343776/job/116268270160"
+    },
+    {
+      "id": 116268270130,
+      "name": "current",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343712/job/116268270130"
+    },
+    {
+      "id": 116268270126,
+      "name": "frozen-and-archive",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343818/job/116268270126"
+    },
+    {
+      "id": 116268270117,
+      "name": "scope",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343693/job/116268270117"
+    },
+    {
+      "id": 116268270111,
+      "name": "parse",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343779/job/116268270111"
+    },
+    {
+      "id": 116268269972,
+      "name": "scope",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343618/job/116268269972"
+    },
+    {
+      "id": 116268269927,
+      "name": "scope",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343674/job/116268269927"
+    },
+    {
+      "id": 116268269898,
+      "name": "overview",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343773/job/116268269898"
+    },
+    {
+      "id": 116268269875,
+      "name": "canonical identities and upstream mirror",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343729/job/116268269875"
+    },
+    {
+      "id": 116268269855,
+      "name": "check",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343720/job/116268269855"
+    },
+    {
+      "id": 116268269824,
+      "name": "smoke-and-custody",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343659/job/116268269824"
+    },
+    {
+      "id": 116268269760,
+      "name": "meta",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343618/job/116268269760"
+    },
+    {
+      "id": 116268269727,
+      "name": "scope",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343625/job/116268269727"
+    },
+    {
+      "id": 116268269679,
+      "name": "parse",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343713/job/116268269679"
+    },
+    {
+      "id": 116268269601,
+      "name": "profile",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688343613/job/116268269601"
+    },
+    {
+      "id": 116267949136,
+      "name": "Cursor Bugbot",
+      "status": "completed",
+      "conclusion": "neutral",
+      "url": "https://github.com/aburan28/crypto/runs/116267949136"
+    },
+    {
+      "id": 116267774031,
+      "name": "review",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/actions/runs/38688184340/job/116267774031"
+    },
+    {
+      "id": 116267767720,
+      "name": "Cursor Approval Agent: Pull Request Router and Approver",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/aburan28/crypto/runs/116267767720"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "PRR_kwDOSMdswM8AAAABSVGmxw",
+      "state": "COMMENTED",
+      "submitted_at": "2026-10-14T21:42:14Z",
+      "body": "<details>\n<summary>Stale comment</summary>\n\n<blockquote>\n\nNot approved. Cursor Bugbot could not review this PR because it is too large, so the required automated-review signal is incomplete and human review is needed; no reviewers were assigned.\n\n<div><a href=\"https://cursor.com/agents/bc-d0cc0f1b-75db-4c35-81d3-4d6331b8268f?cursor_ref=pr_footer&cursor_cta=open_in_web\"><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://cursor.com/assets/images/open-in-web-dark.png\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://cursor.com/assets/images/open-in-web-light.png\"><img alt=\"Open in Web\" width=\"114\" height=\"28\" src=\"https://cursor.com/assets/images/open-in-web-dark.png\"></picture></a>&nbsp;<a href=\"https://cursor.com/automations/7b157c4c-9426-11f1-ba66-0e7d0216e441\"><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://cursor.com/assets/images/view-automation-dark.png\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://cursor.com/assets/images/view-automation-light.png\"><img alt=\"View Automation\" width=\"141\" height=\"28\" src=\"https://cursor.com/assets/images/view-automation-dark.png\"></picture></a>&nbsp;</div>\n\n<sub>Sent by Cursor Approval Agent: Pull Request Router and Approver</sub>\n\n</blockquote>\n\n</details>"
+    },
+    {
+      "id": "PRR_kwDOSMdswM8AAAABSVMlhg",
+      "state": "COMMENTED",
+      "submitted_at": "2026-10-14T21:50:15Z",
+      "body": "<!-- CURSOR_AUTOMATION_ID: 7b157c4c-9426-11f1-ba66-0e7d0216e441 | RUN_ID: bc-167bc0ed-6ef4-41f5-9500-457337e530fd -->\nNot approved. Cursor Bugbot could not review this PR because it is too large, so the automated-review signal is incomplete and human review is needed; no reviewers were assigned.\n\n<div><a href=\"https://cursor.com/agents/bc-167bc0ed-6ef4-41f5-9500-457337e530fd?cursor_ref=pr_footer&cursor_cta=open_in_web\"><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://cursor.com/assets/images/open-in-web-dark.png\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://cursor.com/assets/images/open-in-web-light.png\"><img alt=\"Open in Web\" width=\"114\" height=\"28\" src=\"https://cursor.com/assets/images/open-in-web-dark.png\"></picture></a>&nbsp;<a href=\"https://cursor.com/automations/7b157c4c-9426-11f1-ba66-0e7d0216e441\"><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://cursor.com/assets/images/view-automation-dark.png\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://cursor.com/assets/images/view-automation-light.png\"><img alt=\"View Automation\" width=\"141\" height=\"28\" src=\"https://cursor.com/assets/images/view-automation-dark.png\"></picture></a>&nbsp;</div>\n\n<sub>Sent by Cursor Approval Agent: Pull Request Router and Approver</sub>\n"
+    },
+    {
+      "id": "PRR_kwDOSMdswM8AAAABSYkWcA",
+      "state": "COMMENTED",
+      "submitted_at": "2026-10-15T05:44:30Z",
+      "body": "<!-- CURSOR_AUTOMATION_ID: 7b157c4c-9426-11f1-ba66-0e7d0216e441 | RUN_ID: bc-9a527eed-81af-4226-88c3-d4b438234d01 -->\nNot approved. Cursor Bugbot did not complete a review (usage limit / PR too large), so the automated-review signal is incomplete and human review is needed; no reviewers were assigned.\n\n<div><a href=\"https://cursor.com/agents/bc-9a527eed-81af-4226-88c3-d4b438234d01?cursor_ref=pr_footer&cursor_cta=open_in_web\"><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://cursor.com/assets/images/open-in-web-dark.png\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://cursor.com/assets/images/open-in-web-light.png\"><img alt=\"Open in Web\" width=\"114\" height=\"28\" src=\"https://cursor.com/assets/images/open-in-web-dark.png\"></picture></a>&nbsp;<a href=\"https://cursor.com/automations/7b157c4c-9426-11f1-ba66-0e7d0216e441\"><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://cursor.com/assets/images/view-automation-dark.png\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://cursor.com/assets/images/view-automation-light.png\"><img alt=\"View Automation\" width=\"141\" height=\"28\" src=\"https://cursor.com/assets/images/view-automation-dark.png\"></picture></a>&nbsp;</div>\n\n<sub>Sent by Cursor Approval Agent: Pull Request Router and Approver</sub>\n"
+    }
+  ],
+  "unresolved_review_threads": 0,
+  "merge_permitted": false,
+  "note": "Successful review automation is not approval: the current Cursor review explicitly says Not approved and requires human review. Failed/cancelled checks remain merge gates."
+}

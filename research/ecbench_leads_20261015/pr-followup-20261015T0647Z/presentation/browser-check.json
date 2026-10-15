@@ -1,0 +1,20 @@
+{
+  "status": "PASS_IC_DASHBOARD_BROWSER",
+  "chrome": "/tmp/pr1853-chromium",
+  "document_mode": "inline",
+  "checks": [
+    "desktop: visible graphs, correct readiness, quiet evidence, search, retained fragment links",
+    "mobile 390: no page overflow; whole comparison graph fits; readiness scrolls within its panel",
+    "mobile 320: no page overflow; whole comparison graph fits; readiness scrolls within its panel",
+    "dark theme rendered",
+    "JavaScript disabled: static measurements, graphs, diagrams and native details remain available"
+  ],
+  "script_errors": [],
+  "external_requests": [],
+  "viewport_widths": [
+    1280,
+    390,
+    320
+  ],
+  "page_sha256": "96366250b9b3c77aa5faa18e7cd82d2b037c0086c39fa2222832ee6b2dad92dd"
+}

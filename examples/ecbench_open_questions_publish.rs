@@ -768,7 +768,7 @@ fn table(rows: &[Value]) -> String {
     out
 }
 fn section(rows: &[Value], id: &str, title: &str, intro: &str, study: &str) -> String {
-    let mut out=format!("<section id=\"{}\"><h2>{}</h2><p>{} Count quotients do not bound full-cost ratios. L0 wall measurements are inadmissible. <a href=\"../{study}/REPORT.md\">Report, sources and remaining obligations</a>.</p><div class=\"scroll\"><table><thead><tr><th>Curve</th><th>Arm</th><th>Verified / attempts</th><th>Mean cold S</th><th>Counted IC / rho</th><th>Status</th></tr></thead><tbody>",html(id),html(title),html(intro));
+    let mut out=format!("<section id=\"{}\"><h2>{}</h2><p class=\"panel-summary\">{} Count quotients do not bound full-cost ratios. L0 wall measurements are inadmissible. <a href=\"https://github.com/aburan28/crypto/blob/763ab2b06c1be26b45a2e349ddbba773435e5e19/{study}/REPORT.md\">Report, sources and remaining obligations</a>.</p><div class=\"scroll\"><table><thead><tr><th>Curve</th><th>Arm</th><th>Verified / attempts</th><th>Mean cold S</th><th>Counted IC / rho</th><th>Status</th></tr></thead><tbody>",html(id),html(title),html(intro));
     for r in rows {
         let _ = write!(
             out,
