@@ -245,6 +245,13 @@ fn main() {
             "ic": ic.clone().unwrap_or(Value::Null),
             "relations_recorded": relations,
             "ratio_online_ic_over_rho": ic.as_ref().map(|i| i["ratio_online_ic_over_rho"].clone()),
+            // against the expected walk alone (no multiplier set-up), at the
+            // measured cost of one group operation
+            "ratio_online_ic_over_expected_rho_walk": ic.as_ref().map(|i| {
+                u(&i["online_muls"])
+                    / ((std::f64::consts::PI * u(&inst["ell"]) / 2.0).sqrt()
+                        * u(&rho["fp_muls_per_op"]))
+            }),
         }));
     }
     // ── Model (extrapolation) ─────────────────────────────────────────────

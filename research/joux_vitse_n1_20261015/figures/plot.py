@@ -56,7 +56,7 @@ ax.errorbar(x, y, yerr=[yl, yh], fmt="o", color=BLUE, capsize=3,
             label="measured: trials per decomposition (Wilson 95 %)")
 ax.plot(P, [24 * p for p in P], color=GREY, ls="--", label="thesis heuristic (n − 1)! q = 24 q")
 ax.plot(P, [1 / r["expected_decompositions_per_trial_16C"] for r in rungs], color=ORANGE, ls=":",
-        label="counting bound 1 / (16·C(|F|, 4) / p⁵)")
+        label="floor: 1 / E[#decompositions] = p⁵ / (16·C(|F|, 4))")
 ax.set_xscale("log")
 ax.set_yscale("log")
 ax.set_xlabel("p")
