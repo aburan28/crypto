@@ -1,0 +1,25 @@
+ops (ok): ic-orbit-c2-renew / rho-strong = 1.1157 [1.022, 1.226] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 0.0045 [0.004, 0.005]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 9.80%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-orbit-c2-renew / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m31-tm90707-c95f16f5 | 20.46 | 16 | 1.1157 | [1.0220, 1.2258] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | ic-orbit-c2-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W19adcb2e4609 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.3218 | 1.5452 | 1.1690 |
+| W1c7b6f101460 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.3614 | 1.4181 | 1.0417 |
+| W2528df09abe7 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.2733 | 1.5092 | 1.1853 |
+| W2f63a6523c06 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.2158 | 1.3526 | 1.1125 |
+| W34fb71c29b0d | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.2443 | 1.4245 | 1.1448 |
+| W398d9675a96f | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.1573 | 1.6700 | 1.4430 |
+| W790cc8c1a87b | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.2544 | 1.5458 | 1.2324 |
+| W809ea26e5219 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.2159 | 1.1738 | 0.9654 |
+| W8646f72e5ea4 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.3317 | 1.2296 | 0.9233 |
+| Wa94ef5af8a3c | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.3510 | 1.3997 | 1.0360 |
+| Wad7d4cc5c37d | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.1769 | 1.8573 | 1.5781 |
+| Wae2a4bb7b221 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.4474 | 1.4214 | 0.9820 |
+| Wd6e0e88c542c | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.2446 | 1.3871 | 1.1145 |
+| We425437057cc | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.3996 | 1.3199 | 0.9431 |
+| We52edfe2425f | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.4196 | 1.5166 | 1.0684 |
+| Wfd99a000a544 | icv1-f2m31-tm90707-c95f16f5 | 20.46 | 1.3124 | 1.3551 | 1.0325 |

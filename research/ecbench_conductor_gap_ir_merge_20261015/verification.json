@@ -1,0 +1,35 @@
+{
+  "kind": "publication-correctness-validation",
+  "validated_commit": "efb72d1954b2c687bdf79fa83a34aaffdc265ecb",
+  "validated_tree": "d6380d909c5628595b9cc16eec11351b79b5eb55",
+  "library": {
+    "passed": 4102,
+    "failed": 0,
+    "ignored": 117,
+    "filtered": 0,
+    "test_threads": 1
+  },
+  "driver": {
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0
+  },
+  "strict_session": {
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "filtered": 4218
+  },
+  "cargo_check_exit": 0,
+  "site_passed": 48,
+  "rho_status_passed": 65,
+  "curve_names_final_problems": 0,
+  "frozen_original_files_unchanged": 257,
+  "native_replay": "byte-identical analysis.json and analysis.md",
+  "conductor": {
+    "exit": 127,
+    "reason": "conductor: command not found"
+  },
+  "earlier_failed_validation": "Preserved unchanged in ecbench_conductor_gap_ir_20261014; not replaced by this later pass",
+  "claim_status": "No new experimental result; intrinsic hardness remains open"
+}
