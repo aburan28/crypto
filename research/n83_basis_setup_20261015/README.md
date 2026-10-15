@@ -1,6 +1,10 @@
 # IC basis and setup study
 
-Status: implementation in progress; no new experiment has run.
+Status: the18-process training stage is running under the native CPU3
+reservation after published source/protocol freeze
+`e07da4efdc092d6d7d1d7b660b29225a665d0775`.
+[Draft study PR1899](https://github.com/aburan28/crypto/pull/1899).
+No selection or fresh-holdout result yet.
 
 The [prospective protocol](PROTOCOL.md) preserves all four authorized goals:
 
@@ -31,3 +35,9 @@ IC19/rho4 and native runner6 tests passed. Independent transcript audit passed
 one positive and14negative tests; native selection tests passed. Sources,
 binaries, five candidate identities and18-process training matrix are hashed
 under provenance. Holdout execution and final reports remain pending.
+
+The first rho A/A arm completed verified and subsequent native worker activity
+was observed after launch. Completion watch remains enabled to carry all four
+authorized goals through final reports and delivery. No heavy local work runs
+while the measured reservation is held. Current private operational handoff:
+/workspace/n83_basis_setup/CONTINUE.md.
