@@ -212,6 +212,27 @@ PKM solving-degree question (encyclopedia §8 item 1) decides.
   the seed distribution.
 - **Scale-down.** Two measured rounds instead of the earlier study's three
   (to keep each `records.jsonl` under 1 MB); L0 instead of L2.
+- **Independent code review (read-only, after the runs).** No high- or
+  medium-severity defect was found in the `prime-isogeny` builder or its
+  charging. Three low-severity notes stand. Nothing here was changed after
+  the measured runs, so the sealed sessions replay as recorded.
+  1. **Curves wrongly rejected at the `Q` step.** When `v₂(#E') > t` and
+     the 2-Sylow subgroup is not cyclic (e.g. `Z/2 × Z/2^t`), the cofactor
+     `[#E'/2^t]P'` never has order `2^t`. Such curves are rejected as
+     `two_sylow_rejected` even though they hold a point of order `2^t`.
+     With Mestre's lack of a twist step, this inflates `aux_curves_tried`
+     and the charged search cost. The bias is against the isogeny base: the
+     search shares and isogeny ÷ plain ratios above are upper bounds for a
+     builder that accepted those curves. Panel 3's `C ≈ 1.05` carries the
+     same bias.
+  2. **`t` truncates silently.** `t` is read as `u64` and cast to `u32`, so
+     `t = 2^32 + 5` runs as `t = 5`. The same parse in `prime-kummer`
+     predates this branch.
+  3. **The aux point-sampling Legendre symbols and square roots are
+     reported twice**, once in the phase's `legendre_symbols`/`sqrt_solves`
+     and once as `aux_legendre_symbols`/`aux_sqrt_solves`. A consumer that
+     sums every native counter double-counts them. Both are unpriced, so
+     `S` is unaffected.
 - **Not updated:** `docs/index-calculus-scoreboard.html` (the 2026-10-13
   tower study added no row either; prime-curve tower IC has no scoreboard
   row) and the encyclopedia's §0.2/§8 entries, left for the coordinating
