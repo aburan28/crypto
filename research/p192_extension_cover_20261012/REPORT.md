@@ -158,7 +158,12 @@ quadratic-root test and constructs Type I genus-3 and nonfixed Scholten
 genus-2 covers over their lower fields. It gives explicit lower-field Mumford
 coordinates for a nonzero P-192 Scholten subgroup class, 16 verified
 subgroup-usable classes in a compact base, and a 64-query zero-yield relation
-probe with an exact three-sum coverage bound. It also gives checked Type I
+probe with an exact three-sum coverage bound. A second known-scalar policy
+adds tracked base-class shifts and yields 0 relations in 64 queries, rank
+0/16; 64 fresh geometric cover classes also yield 0 exact three-sum matches.
+The latter class logs are unknown, so those matches would be decomposition
+observations rather than relation equations. Lean checks the shifted relation
+identity and its unchanged 816-image support bound. The continuation also gives checked Type I
 generator fibers and a conorm class of exact P-192 subgroup order, proved
 through degree-two push-pull and checked quotient images. Three elliptic
 quotients reduce its genus-three subgroup class to

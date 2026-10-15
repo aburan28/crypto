@@ -1,5 +1,6 @@
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.Ring
+import Mathlib.Tactic.Abel
 import Mathlib.Data.Finset.Card
 import Mathlib.Data.Finset.Fin
 import Mathlib.Data.Finset.Prod
@@ -341,6 +342,26 @@ theorem three_sum_support_bound {A : Type*} [AddCommMonoid A] [DecidableEq A]
         canonicalTriples16.card := Finset.card_image_le
     _ = 816 := canonicalTriples16_card
 
+/-- A fixed shift of a 16-point three-sum base still has at most 816 images. -/
+theorem shifted_three_sum_support_bound {A : Type*} [AddCommGroup A] [DecidableEq A]
+    (base : Fin 16 → A) (shift : A) :
+    (canonicalTriples16.image
+      (fun t => base t.1 + base t.2.1 + base t.2.2 - shift)).card ≤ 816 := by
+  calc
+    (canonicalTriples16.image
+        (fun t => base t.1 + base t.2.1 + base t.2.2 - shift)).card ≤
+        canonicalTriples16.card := Finset.card_image_le
+    _ = 816 := canonicalTriples16_card
+
+/-- A known-scalar shifted query yields a usable base-log equation on a hit. -/
+theorem shifted_three_point_relation {A : Type*} [AddCommGroup A]
+    (a : ℤ) (N U V X Y Z : A)
+    (h : a • N + U + V = X + Y + Z) :
+    a • N = X + Y + Z - U - V := by
+  calc
+    a • N = (a • N + U + V) - U - V := by abel
+    _ = X + Y + Z - U - V := by rw [h]
+
 end P192ExtensionCover
 
 #print axioms P192ExtensionCover.cyclic_cross_ratio_product
@@ -365,3 +386,5 @@ end P192ExtensionCover
 #print axioms P192ExtensionCover.mobius_quartic_clear
 #print axioms P192ExtensionCover.canonicalTriples16_card
 #print axioms P192ExtensionCover.three_sum_support_bound
+#print axioms P192ExtensionCover.shifted_three_sum_support_bound
+#print axioms P192ExtensionCover.shifted_three_point_relation
