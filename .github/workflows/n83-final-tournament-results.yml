@@ -4,6 +4,7 @@ on:
   push:
     branches: [codex/n83-final-tournament-20261015]
     paths:
+      - .github/workflows/n83-final-tournament-results.yml
       - research/n83_final_tournament_results_20261015/records_index.json
       - research/n83_final_tournament_results_20261015/selection.json
       - research/n83_final_tournament_results_20261015/measurements.json.gz
@@ -128,6 +129,15 @@ jobs:
         run: |
           set -euo pipefail
           export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_k3250_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k3350_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k_abba_20261015/generate.py > /dev/null
+          python3 research/n83_root4_highk_20261015/generate.py > /dev/null
+          python3 research/n83_best_e2e_20261015/generate.py > /dev/null
+          python3 research/n83_legacy_challenger_20261015/generate.py > /dev/null
+          python3 research/n83_root4_bloom_20261015/generate.py > /dev/null
+          python3 research/n83_root11_highk_20261015/generate.py > /dev/null
+          python3 research/n83_final_tournament_20261015/generate.py > /dev/null
           python3 research/n83_final_tournament_results_20261015/materialize.py \
             --artifact-zip "$RUNNER_TEMP/n83-tournament-sealed/raw.zip" \
             --artifact-sha256 "$N83_ARTIFACT_SHA" \
