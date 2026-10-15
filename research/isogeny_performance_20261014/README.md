@@ -31,3 +31,10 @@ inputs and output materialization. [VALIDATION.md](VALIDATION.md),
 [ATTEMPTS.md](ATTEMPTS.md) and [PROTOCOL.md](PROTOCOL.md) retain verification,
 infrastructure failures and measurement boundaries. Canonical DLP/rho and
 curve charts receive no value from these constructor-only measurements.
+
+The [exploratory family census](family-report-20261015/REPORT.md) audits all
+395 legacy records on AMD, ARM and local M4, retaining 394 true flags and one
+false path-search flag on every profile. It does not establish a new timing
+ratio. The local executable/source/raw/resource receipts are sealed in
+`LEGACY_M4_RUN.tar.gz`; the first hosted wave's missing legacy executable
+remains an explicit provenance gap. Future waves now retain that binary.

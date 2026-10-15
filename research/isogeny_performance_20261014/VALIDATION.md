@@ -83,3 +83,11 @@ fourth-candidate PDFs were visually inspected; PDF/SVG/150-dpi PNG browsing
 copies match their study originals byte for byte. Native helper sources also
 compile and pass formatting. This validation does not make unrun CPU waves,
 other algorithm families or release publication complete.
+
+The native legacy census compiles, passes formatting, and rejects empty
+outputs and records missing their boolean verification flag. AMD, ARM and M4
+each retain 395 records, including the same false path-search row. The local
+M4 shell exits zero; a fresh archive extraction passes all eleven byte/SHA256
+records, including executable, source, compiler, startup sample and resource
+receipts. Its one-page report was visually reviewed and browsing copies match.
+This is an exploratory coverage check, not a qualified timing comparison.

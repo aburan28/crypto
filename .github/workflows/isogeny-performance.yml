@@ -174,6 +174,12 @@ jobs:
           mkdir -p evidence/binaries
           cp "$RUNNER_TEMP/isogeny-base/isogeny_algos/target/release/isogeny-perf" evidence/binaries/baseline || true
           cp "$RUNNER_TEMP/isogeny-previous/isogeny_algos/target/release/isogeny-perf" evidence/binaries/previous || true
+          # The first wave kept only performance executables. Retain the
+          # separately built legacy harness too, so future exploratory rows
+          # can be bound to its actual binary without reconstructing it.
+          if [ "$RUNNER_OS" = Linux ]; then
+            cp "$RUNNER_TEMP/isogeny-base/isogeny_algos/target/release/bench" evidence/binaries/legacy-bench || true
+          fi
           cp isogeny_algos/target/release/isogeny-perf evidence/binaries/candidate || true
           git archive HEAD isogeny_algos research/isogeny_performance_20261014/isolation src/bin/isolated_bench.rs src/bin/isolated_bench src/bin/icprog/json.rs > evidence/source.tar
       - uses: actions/upload-artifact@v4

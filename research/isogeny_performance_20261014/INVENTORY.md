@@ -59,3 +59,11 @@ uses Apple M4 Pro. Reports retain VM limitations and the incomplete ARM series.
 Runner labels select architecture/OS,
 not a guaranteed processor model. Each result records the actual CPU and
 binary. [GitHub runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners).
+
+The [legacy census](family-report-20261015/REPORT.md) now audits all 395 rows
+from AMD and ARM and a source-pinned local M4 run. Each has 394 true flags
+and one false `ghs_with_kohel_volcano` flag; no row is omitted. The emitted
+24 group labels include aliases and split subgroups of the 24 command groups.
+The first hosted legacy executable was not archived, and these legacy stages
+lack exact-output fingerprints and matched controls. Those provenance and
+measurement gaps remain explicit; no new optimization ratio is admitted.
