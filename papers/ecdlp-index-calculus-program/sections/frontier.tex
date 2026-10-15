@@ -1,5 +1,137 @@
 \section{What improved, and where the frontier stands}\label{sec:frontier}
 
+\subsection{The measured frontier: one campaign, every cost priced}\label{sec:campaign}
+
+The frontier synthesis of 13 October assembled ratios from studies that
+used different curves, sizes and accounting. To replace it we ran one
+campaign (\art{research/ic_frontier_campaign_20261015/}, protocol frozen
+before any measured run). Every method family ran on the same fixed curve
+ladders: eight Koblitz curves chosen by subgroup size
+($\log_2 r\approx11$--$39$, $n\in\{13,17,19,23,37,41,43,47\}$), six
+NIST-shaped $a=-3$ prime-order curves of 20--40 bits, and the five
+2-adic curves of the Kummer-tower ladder. Each curve had 16 public
+hash-to-subgroup targets nobody knows the logarithm of, 2 measured rounds
+and a warm-up, and every answer was checked outside the solver. That is
+4{,}848 executions, 3{,}232 of them measured: 3{,}178 verified and 54
+exhausted, all of the latter in the shared-rank arm at $n=41$ and $n=47$.
+Every session is audited by re-executing every measured run and
+requiring identical counts. Index-calculus parameters (compact-orbit
+columns, negfold subspace dimension, prime base size) were chosen per size
+on a disjoint set of training targets, with grids widened until the
+optimum was interior. Every cost is reported across the pricing band of
+\S\ref{sec:band}.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig-campaign.pdf}
+\caption[]{The campaign frontier: mean $S$ per arm and curve at $w=0.1$ GAE
+per native operation, the bar spanning $w=0$ to $w=1$; one public target
+per run, 16 targets $\times$ 2 rounds per curve, operation counts.
+Sources: \art{research/ic_frontier_campaign_20261015/analysis/band-*.json}
+(\texttt{ecbench band}).}
+\label{fig:campaign}
+\end{figure}
+
+\begin{table}[t]
+\centering\small
+\caption[]{Index calculus over the cheapest constant-memory generic arm on
+the same curve (signed-Frobenius rho on Koblitz curves, rho with negation
+on prime curves), mean $S$ ratio at three band weights. Every run verified
+(32/32 per cell). Source:
+\art{research/ic_frontier_campaign_20261015/analysis/ratios_to_rho.tsv}.}
+\label{tab:campaign}
+\begin{tabular}{@{}lrlrrr@{}}
+\toprule
+Curve & $\log_2 r$ & Arm & $w=0$ & $w=0.1$ & $w=1$ \\
+\midrule
+Koblitz $n=13$ & 11.0 & compact orbit & 6.9 & 9.3 & 27.1 \\
+               &      & negfold       & 14.4 & 14.8 & 17.5 \\
+Koblitz $n=17$ & 16.0 & compact orbit & 3.8 & 4.9 & 11.8 \\
+Koblitz $n=19$ & 18.0 & compact orbit & 4.9 & 7.5 & 23.6 \\
+Koblitz $n=23$ & 22.0 & compact orbit & 5.5 & 7.4 & 18.4 \\
+Koblitz $n=37$ & 27.8 & compact orbit & 5.2 & 8.3 & 23.3 \\
+               &      & negfold       & 1806 & 1927 & 2512 \\
+Koblitz $n=43$ & 32.1 & compact orbit & 7.4 & 10.2 & 23.1 \\
+Koblitz $n=47$ & 36.6 & compact orbit & 9.9 & 12.7 & 25.3 \\
+Koblitz $n=41$ & 39.0 & compact orbit & 15.0 & 17.8 & 30.3 \\
+\addlinespace
+prime 20 bit & 20 & pair table & 9.8 & 10.5 & 13.5 \\
+prime 24 bit & 24 & pair table & 12.1 & 12.2 & 12.9 \\
+prime 28 bit & 28 & pair table & 18.6 & 18.6 & 18.9 \\
+prime 32 bit & 32 & pair table & 40.9 & 40.9 & 41.1 \\
+prime 36 bit & 36 & pair table & 58.1 & 58.0 & 57.5 \\
+prime 40 bit & 40 & pair table & 95.2 & 101.8 & 131.4 \\
+\addlinespace
+PKM 20 bit & 18.9 & Kummer tower & 30.3 & 30.4 & 31.0 \\
+PKM 28 bit & 26.2 & Kummer tower & 141.3 & 158.7 & 238.7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{What the campaign shows.}
+\begin{itemize}
+\item \emph{No index-calculus arm beats generic rho on any curve, at any
+  weight.} Signed-Frobenius rho is below every index-calculus arm on all
+  eight Koblitz curves and across the whole band; rho with negation is
+  below every prime-field arm on all eleven prime curves
+  (Table~\ref{tab:campaign}). The one unresolved pair in the campaign is
+  compact orbit against the \emph{strong} rho reference at $n=13$, whose
+  scalar-multiplication set-up dominates on an 11-bit subgroup; the
+  cheaper signed-Frobenius walk is below both.
+\item \emph{Compact orbit is the closest index calculus.} It sits
+  $3.8$--$15\times$ the best rho with native work free and
+  $4.9$--$17.8\times$ at $w=0.1$; the ratio does not shrink with size.
+\item \emph{Prime-field index calculus falls further behind with size.}
+  The two-summand pair-table arm goes from $10.5\times$ to $101.8\times$
+  rho (at $w=0.1$) between 20 and 40 bits, the $r^{1/6}$ widening its
+  $r^{2/3}$ cost against rho's $r^{1/2}$ predicts; the Kummer-tower arm is
+  $28$--$159\times$ rho.
+\item \emph{Negfold root finding stops scaling.} It is $12$--$45\times$
+  rho up to $n=23$, about $1{,}900\times$ at $n=37$, and does not complete
+  within $5\cdot10^7$ trials from $n=43$ on (PROTOCOL A4b).
+\item \emph{Inherited F4 is not competitive once its work is priced}:
+  $S$ rises from $16$ (word XORs free) to about $2\cdot10^4$ at
+  $w=0.1$ at $n=13$. The band weighs one 64-bit word XOR like a table
+  lookup, which overstates F4 (its pinned calibration is about
+  $0.002$ GAE per XOR); even with XORs free it is above rho.
+\item \emph{BSGS has the lowest time on several curves} because it spends
+  $\sqrt r$ memory; it is reported on the time--memory Pareto set, not
+  ranked against constant-memory methods.
+\end{itemize}
+
+\paragraph{Cost exponents.} Fitting total cost $\propto r^{\alpha}$ per
+arm over each size tier with \texttt{ecbench bound fit --weight}
+(two-stage bootstrap, 95\% intervals; a tier needs at least four sizes for
+an exponent):
+\begin{itemize}
+\item prime pair table $\alpha=0.620$ $[0.557,0.663]$ at $w=0$ against
+  rho with negation $0.435$ $[0.331,0.501]$; separated at $w=0$ and
+  $w=0.1$, overlapping at $w=1$ ($0.594$ $[0.482,0.665]$ against $0.444$
+  $[0.334,0.517]$). Index calculus grows faster than rho (the predicted
+  $2/3$ against $1/2$), but under the band rule the difference is not
+  established at every weight;
+\item Koblitz compact orbit, $n=37$--$47$: $0.589$ $[0.518,0.743]$ against
+  signed-Frobenius rho $0.436$ $[0.358,0.508]$ at $w=0$, overlapping at
+  $w=0.1$ and $w=1$; on $n=13$--$23$ the two overlap at every weight
+  ($0.25$ against $0.29$ at $w=0$, both with wide intervals because the
+  automorphism count $2n$ changes with the size);
+\item Kummer tower $0.717$ $[0.358,0.940]$ against $0.438$
+  $[0.332,0.599]$, overlapping.
+\end{itemize}
+No index-calculus arm has a fitted exponent below rho's at any weight, so
+no crossover with rho is supported by these data, extrapolated or
+otherwise. The sixty-three fits are in
+\art{research/ic_frontier_campaign_20261015/analysis/bounds/}.
+
+\paragraph{Limits.} Operation counts only (isolation L0); wall time and a
+second-host replay certificate need the planned RunPod phase. Parameters
+were selected on four training targets per size. The shared-rank arm
+leaves three categories of work uncounted and is reported as a lower
+bound only. Fitted cost exponents per arm and tier are in
+\art{research/ic_frontier_campaign_20261015/analysis/bounds/}.
+
+\subsection{The engineering record}
+
 Table~\ref{tab:improvements} collects the measured improvements of the
 programme on the boundary each was measured on. Ratios are
 baseline/candidate; ``stage'' means one oracle call or one solver run;

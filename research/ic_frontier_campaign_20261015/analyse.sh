@@ -23,7 +23,7 @@ done
 
 RULE="per-size parameters chosen on the train panel by PROTOCOL.md A4 (research/ic_frontier_campaign_20261015/params.json)"
 fit() { # FAMILYGLOB ARM TIER WEIGHT OUT
-  dirs=$(ls -d $1)
+  dirs=$(for d in $1; do grep -q "\"name\": *\"$2\"" "$d/spec.json" && echo "$d"; done)
   case "$2" in ic-compact|ic-negfold|ic-pair|ic-pkm) rule="--param-rule"; ;; *) rule=""; ;; esac
   # shellcheck disable=SC2086
   "$E" bound fit --dir $dirs --arm "$2" --tier "$3" --weight "$4" --root ../.. ${rule:+$rule "$RULE"} \

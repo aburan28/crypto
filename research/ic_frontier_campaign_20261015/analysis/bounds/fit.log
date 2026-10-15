@@ -1,0 +1,150 @@
+wrote analysis/bounds/K-rho-strong-toy-w0.json (sha256 a0d118d255b32e41f44c5164b2b66a1f92260b0dbd0d51b2dca9f1332eac670d)
+ECBND1h5a54ff810537 rho.signed_frobenius_strong (toy): exponent on 4 size(s), 128 verified runs; ops 23.370× floor, α 0.134 ; admissible
+wrote analysis/bounds/K-rho-strong-medium-w0.json (sha256 1746e048913ed0e14bb4e376e1c1d363678ee2b9f3030ee49a437f695f2587e2)
+ECBND1h6634c22cda0f rho.signed_frobenius_strong (medium): exponent on 4 size(s), 128 verified runs; ops 1.329× floor, α 0.412 ; admissible
+wrote analysis/bounds/K-rho-frob-toy-w0.json (sha256 c073c1b234d49e2152f8bf47eaf3b2f35c208935be5e91ea170379a497669c21)
+ECBND1h10c1c9e169d9 rho.signed_frobenius (toy): exponent on 4 size(s), 128 verified runs; ops 4.348× floor, α 0.288 ; admissible
+wrote analysis/bounds/K-rho-frob-medium-w0.json (sha256 f83b29924aa9f9fee578ad178aeaf813747c1a8a9fef63441d811565e4c72624)
+ECBND1hb57869d3cd9e rho.signed_frobenius (medium): exponent on 4 size(s), 128 verified runs; ops 1.110× floor, α 0.436 ; admissible
+wrote analysis/bounds/K-bsgs-neg-toy-w0.json (sha256 b0c9435fb7263e725822d172dbb27422e75deeccd0ff6407b7e006045acb2067)
+ECBND1h9fdb70063c88 bsgs.negation (toy): exponent on 4 size(s), 128 verified runs; ops 5.106× floor, α 0.490 ; admissible
+wrote analysis/bounds/K-bsgs-neg-medium-w0.json (sha256 dbc2b543ce382cd8f5c9df501eb32bf16ebb8607b7acbc487c680ad2038c6586)
+ECBND1he00376bb0572 bsgs.negation (medium): exponent on 4 size(s), 128 verified runs; ops 7.255× floor, α 0.491 ; admissible
+wrote analysis/bounds/K-ic-compact-toy-w0.json (sha256 7def335faa52d5b9916bc08b582ae981af616903846bcd2f0f819cc773b9c173)
+ECBND1h8553b9de23c5 ic.pipeline (toy): exponent on 4 size(s), 128 verified runs; ops 23.885× floor, α 0.250 ; admissible
+wrote analysis/bounds/K-ic-compact-medium-w0.json (sha256 7bc66ca13f61c001fe21ddcb1dce95c9a7d20ff58dee21f651df0d66e11fcbbf)
+ECBND1ha1e41f5c5f1c ic.pipeline (medium): exponent on 4 size(s), 128 verified runs; ops 10.011× floor, α 0.589 ; admissible
+wrote analysis/bounds/K-ic-negfold-toy-w0.json (sha256 60440ca2993a6424583e5cd60ca75b784890c99298a380dd2673123c8605f8c8)
+ECBND1h15ecf5c92c88 ic.pipeline (toy): exponent on 4 size(s), 128 verified runs; ops 82.247× floor, α 0.442 ; admissible
+wrote analysis/bounds/K-ic-negfold-medium-w0.json (sha256 7e4f28c373875479ac544aea583bd7052ec508534ad7e70ca18e588ae9e3c040)
+ECBND1h5202b15a0a5b ic.pipeline (medium): constant on 1 size(s), 32 verified runs; ops 2356.445× floor, α 0.400 ; admissible
+  - 1 size(s): below 4, so the exponent is descriptive and this is a constant bound
+wrote analysis/bounds/K-ic-f4-toy-w0.json (sha256 cac3dabe1ca54c3ec5b07e5358062e512712cd46e285da086d4dbb2b094a0455)
+ECBND1h36f72663647d ic.pipeline (toy): constant on 3 size(s), 96 verified runs; ops 38.133× floor, α 0.240 ; admissible
+  - 3 size(s): below 4, so the exponent is descriptive and this is a constant bound
+ecbench: no measured runs of arm `ic-f4` after filtering
+fit refused: K-ic-f4-medium-w0 (see fit.log)
+wrote analysis/bounds/P-rho-neg-toy-w0.json (sha256 d739a817f995fc54de84ca33ef16055ea60d7d09cf9475a070433f5171ab28e8)
+ECBND1h5e548c7fc948 rho.negation (toy): exponent on 4 size(s), 128 verified runs; ops 1.227× floor, α 0.435 ; admissible
+wrote analysis/bounds/P-rho-neg-medium-w0.json (sha256 f863d05d2d950b8d72e48af3922c0437430f684568f81749f085d6a2b21ea2c4)
+ECBND1ha17adcd0997a rho.negation (medium): constant on 2 size(s), 64 verified runs; ops 0.977× floor, α 0.521 ; admissible
+  - 2 size(s): below 4, so the exponent is descriptive and this is a constant bound
+wrote analysis/bounds/P-bsgs-neg-toy-w0.json (sha256 e0b409756d5b163b6606e499153ffc4d4733034a81516c4c52283415c9f4b874)
+ECBND1ha5f3b55e8be7 bsgs.negation (toy): exponent on 4 size(s), 128 verified runs; ops 1.126× floor, α 0.484 ; admissible
+wrote analysis/bounds/P-bsgs-neg-medium-w0.json (sha256 10aa042717e39a4c99445e73686fd5ef7e96316a122579f75934e808631c893d)
+ECBND1h0b56fe564992 bsgs.negation (medium): constant on 2 size(s), 64 verified runs; ops 1.149× floor, α 0.575 ; admissible
+  - 2 size(s): below 4, so the exponent is descriptive and this is a constant bound
+wrote analysis/bounds/P-kangaroo-toy-w0.json (sha256 1de022f70b0b9249113a5c2e1714361fe493780f653821f6b64c1ad91eefacf1)
+ECBND1h1ac90f52f429 kangaroo.vow (toy): exponent on 4 size(s), 128 verified runs; ops 2.536× floor, α 0.492 ; admissible
+wrote analysis/bounds/P-kangaroo-medium-w0.json (sha256 dee2db38c7037a94b23fac94180700c658b7ee934a87f94d3a176f59970ee719)
+ECBND1h072c1941b0c1 kangaroo.vow (medium): constant on 2 size(s), 64 verified runs; ops 2.218× floor, α 0.572 ; admissible
+  - 2 size(s): below 4, so the exponent is descriptive and this is a constant bound
+wrote analysis/bounds/P-ic-pair-toy-w0.json (sha256 d870c638a2ff33a145de09b09b1f768a814c39fb9b2cda51b359b81e161b843e)
+ECBND1h8e7a6e4c265d ic.pipeline (toy): exponent on 4 size(s), 128 verified runs; ops 22.420× floor, α 0.620 ; admissible
+wrote analysis/bounds/P-ic-pair-medium-w0.json (sha256 e6e83403d78d021931ece8980a71d1f3476dfe18f3bf9bbece5936c715d2d55b)
+ECBND1hbd1ee88f89b9 ic.pipeline (medium): constant on 2 size(s), 64 verified runs; ops 75.218× floor, α 0.683 ; admissible
+  - 2 size(s): below 4, so the exponent is descriptive and this is a constant bound
+wrote analysis/bounds/PKM-rho-neg-toy-w0.json (sha256 475e7f7a6ae435d7a3d4cf392a83a720e0e1934870fd3207038fb1e4ba8839d3)
+ECBND1hb1f81df0724b rho.negation (toy): exponent on 5 size(s), 160 verified runs; ops 1.288× floor, α 0.438 ; admissible
+wrote analysis/bounds/PKM-ic-pkm-toy-w0.json (sha256 7165cd8e648fde9ef8347c629f11e8ab99e70c181a819c294e3c78ce0968e1fc)
+ECBND1h3568e31aff6d ic.pipeline (toy): exponent on 5 size(s), 160 verified runs; ops 79.148× floor, α 0.717 ; admissible
+wrote analysis/bounds/K-rho-strong-toy-w0.1.json (sha256 141bb7b4a649e76017974b14834f47cc6dac05b37860d181518468b672e1f47c)
+ECBND1hca62bd7d53ff rho.signed_frobenius_strong (toy): exponent on 4 size(s), 128 verified runs; ops 23.977× floor, α 0.140 ; admissible
+wrote analysis/bounds/K-rho-strong-medium-w0.1.json (sha256 1facb2b08b2bd16c96131c28410ceae1dae3291cfbb93382ff39ea08ea161aca)
+ECBND1h968d535bc5b6 rho.signed_frobenius_strong (medium): exponent on 4 size(s), 128 verified runs; ops 1.556× floor, α 0.420 ; admissible
+wrote analysis/bounds/K-rho-frob-toy-w0.1.json (sha256 e4fd3ac3d938cf0c2e98c8676819596e7f8e3c0ef1b82b193738f0cff075db67)
+ECBND1he6d16259e8be rho.signed_frobenius (toy): exponent on 4 size(s), 128 verified runs; ops 4.509× floor, α 0.292 ; admissible
+wrote analysis/bounds/K-rho-frob-medium-w0.1.json (sha256 12bab43a725b5da306ecb61abb8a6b4542c6575d4e6dbfeee34c277c977aec5d)
+ECBND1h7529f1a4eeb2 rho.signed_frobenius (medium): exponent on 4 size(s), 128 verified runs; ops 1.215× floor, α 0.438 ; admissible
+wrote analysis/bounds/K-bsgs-neg-toy-w0.1.json (sha256 03f009b5a86fbe69ae64069a97f5cb95758492b4cac09d802eabb3c11a02be8b)
+ECBND1hb1118ea27e1a bsgs.negation (toy): exponent on 4 size(s), 128 verified runs; ops 5.594× floor, α 0.492 ; admissible
+wrote analysis/bounds/K-bsgs-neg-medium-w0.1.json (sha256 c5bcd1dc6d883ee38ddca66a20b29e186565f4f2309b73726e7b081b9973ed87)
+ECBND1hb5c0c33b871d bsgs.negation (medium): exponent on 4 size(s), 128 verified runs; ops 7.981× floor, α 0.491 ; admissible
+wrote analysis/bounds/K-ic-compact-toy-w0.1.json (sha256 2a5354ac2db6fd539d17b6b0359e9f47bfe790f6159fa58f24d684fec3136b8c)
+ECBND1ha914c61d8af5 ic.pipeline (toy): exponent on 4 size(s), 128 verified runs; ops 33.794× floor, α 0.259 ; admissible
+wrote analysis/bounds/K-ic-compact-medium-w0.1.json (sha256 4755a98f85524a9570acd10dabd1986efea7746bf842aec07fa53d7aa3862be9)
+ECBND1hc94fef8b002a ic.pipeline (medium): exponent on 4 size(s), 128 verified runs; ops 14.483× floor, α 0.552 ; admissible
+wrote analysis/bounds/K-ic-negfold-toy-w0.1.json (sha256 eba8381586dac98c7179d06878a9c6873815cdea7f3bb8ab8b6a9a4a8a98bbcd)
+ECBND1h7f2fbb861f7d ic.pipeline (toy): exponent on 4 size(s), 128 verified runs; ops 88.535× floor, α 0.449 ; admissible
+wrote analysis/bounds/K-ic-negfold-medium-w0.1.json (sha256 8453bf6e5a8fe070270e0f9081c1442db365398257a6210850a1a1e3b519eedb)
+ECBND1hf4edfd9c47b0 ic.pipeline (medium): constant on 1 size(s), 32 verified runs; ops 2732.704× floor, α 0.400 ; admissible
+  - 1 size(s): below 4, so the exponent is descriptive and this is a constant bound
+wrote analysis/bounds/K-ic-f4-toy-w0.1.json (sha256 a75af5dfe1de068cec688134e5127ce0d67b190b35851d92880b2e77311082b0)
+ECBND1he3d04a69a917 ic.pipeline (toy): constant on 3 size(s), 96 verified runs; ops 1046885.169× floor, α 1.146 ; admissible
+  - 3 size(s): below 4, so the exponent is descriptive and this is a constant bound
+ecbench: no measured runs of arm `ic-f4` after filtering
+fit refused: K-ic-f4-medium-w0.1 (see fit.log)
+wrote analysis/bounds/P-rho-neg-toy-w0.1.json (sha256 28a05db37c80a9c3df9cb85c190ceb089f34174626a2bfd2e2e69baa07078c31)
+ECBND1h03138358e8a1 rho.negation (toy): exponent on 4 size(s), 128 verified runs; ops 1.342× floor, α 0.436 ; admissible
+wrote analysis/bounds/P-rho-neg-medium-w0.1.json (sha256 4516ec7ea66ded099c0c1e883a7de68d1c245c3c205db8262ac5b572fde88339)
+ECBND1hb7ea6cd576a2 rho.negation (medium): constant on 2 size(s), 64 verified runs; ops 1.075× floor, α 0.521 ; admissible
+  - 2 size(s): below 4, so the exponent is descriptive and this is a constant bound
+wrote analysis/bounds/P-bsgs-neg-toy-w0.1.json (sha256 e165012369f93ba78f767e0227a1909f8e659e932f8620eda723907fd3125040)
+ECBND1h1caee8238b27 bsgs.negation (toy): exponent on 4 size(s), 128 verified runs; ops 1.238× floor, α 0.484 ; admissible
+wrote analysis/bounds/P-bsgs-neg-medium-w0.1.json (sha256 ca72f52968d15edc9b6f357678db075fdae4bc6dea43cecf126f2ff12919a774)
+ECBND1h71c727988707 bsgs.negation (medium): constant on 2 size(s), 64 verified runs; ops 1.264× floor, α 0.575 ; admissible
+  - 2 size(s): below 4, so the exponent is descriptive and this is a constant bound
+wrote analysis/bounds/P-kangaroo-toy-w0.1.json (sha256 89e45269642fb22964dd14594a53cb23cc7ba555a5d9070c0b999866811b7def)
+ECBND1hbbe828c9704a kangaroo.vow (toy): exponent on 4 size(s), 128 verified runs; ops 2.551× floor, α 0.491 ; admissible
+wrote analysis/bounds/P-kangaroo-medium-w0.1.json (sha256 d65a4205db609dd774657bd9b6be3b35dcbce906d9e9cf0370b5852e7bb4cffc)
+ECBND1h751647b689de kangaroo.vow (medium): constant on 2 size(s), 64 verified runs; ops 2.220× floor, α 0.572 ; admissible
+  - 2 size(s): below 4, so the exponent is descriptive and this is a constant bound
+wrote analysis/bounds/P-ic-pair-toy-w0.1.json (sha256 1f3f51bb77a2ba0af955af61f989c73124d242cdebcea098ab88a0843b03f8fb)
+ECBND1hfd0a0ef2356f ic.pipeline (toy): exponent on 4 size(s), 128 verified runs; ops 24.892× floor, α 0.615 ; admissible
+wrote analysis/bounds/P-ic-pair-medium-w0.1.json (sha256 09b3dc2c4457feaa0371c1b9c77395a553ad741b08d216dc963cd90239fac77b)
+ECBND1hf9116951dcb4 ic.pipeline (medium): constant on 2 size(s), 64 verified runs; ops 86.259× floor, α 0.708 ; admissible
+  - 2 size(s): below 4, so the exponent is descriptive and this is a constant bound
+wrote analysis/bounds/PKM-rho-neg-toy-w0.1.json (sha256 7beb2140353a67bd5a0a74c88f701b4aa31394134363c8b68f356e61bd2630f4)
+ECBND1h88b41656a19f rho.negation (toy): exponent on 5 size(s), 160 verified runs; ops 1.403× floor, α 0.440 ; admissible
+wrote analysis/bounds/PKM-ic-pkm-toy-w0.1.json (sha256 6622a81048b4f27655bc765a14d00d9c8a516a57d370947c6913149379bd4e73)
+ECBND1hf695bfc5249f ic.pipeline (toy): exponent on 5 size(s), 160 verified runs; ops 92.184× floor, α 0.742 ; admissible
+wrote analysis/bounds/K-rho-strong-toy-w1.json (sha256 094f34609342a6100c661a84c4d84001e9031d63860f4cada937a3bd7803453b)
+ECBND1hd77c11056c0e rho.signed_frobenius_strong (toy): exponent on 4 size(s), 128 verified runs; ops 29.442× floor, α 0.183 ; admissible
+wrote analysis/bounds/K-rho-strong-medium-w1.json (sha256 8c6ba7c4071aec539d8238db5f537425ef4c7224b0e91a54631c80e814715b41)
+ECBND1h9b124a9e0577 rho.signed_frobenius_strong (medium): exponent on 4 size(s), 128 verified runs; ops 3.597× floor, α 0.448 ; admissible
+wrote analysis/bounds/K-rho-frob-toy-w1.json (sha256 289d4dc50c99e46a422e588ba9fcadbd77e87385f80bc1d5c5b0e22f90747873)
+ECBND1hc19c1db46374 rho.signed_frobenius (toy): exponent on 4 size(s), 128 verified runs; ops 5.957× floor, α 0.315 ; admissible
+wrote analysis/bounds/K-rho-frob-medium-w1.json (sha256 d6d99406bde8207c458a665f8fb3cf0c162c6e59fc2922209da4afa918964607)
+ECBND1h25fd90c92022 rho.signed_frobenius (medium): exponent on 4 size(s), 128 verified runs; ops 2.162× floor, α 0.446 ; admissible
+wrote analysis/bounds/K-bsgs-neg-toy-w1.json (sha256 7534dcd299a2c9d4fee36ae0bed0c218b4e5fa8e748c699f7ebf1f2e5f23b4b1)
+ECBND1h1887ac6feab9 bsgs.negation (toy): exponent on 4 size(s), 128 verified runs; ops 9.987× floor, α 0.500 ; admissible
+wrote analysis/bounds/K-bsgs-neg-medium-w1.json (sha256 0d855021c087444556bce1dd33a626f46eca06852c145a28137ee7ddf62c7b6d)
+ECBND1hb371084663a1 bsgs.negation (medium): exponent on 4 size(s), 128 verified runs; ops 14.508× floor, α 0.491 ; admissible
+wrote analysis/bounds/K-ic-compact-toy-w1.json (sha256 7ac115e7f1816db00b48458542626081f1c4a0bfbc7b5050ac8aa33d9ebfc523)
+ECBND1hb4350a8d7eb7 ic.pipeline (toy): exponent on 4 size(s), 128 verified runs; ops 122.973× floor, α 0.275 ; admissible
+wrote analysis/bounds/K-ic-compact-medium-w1.json (sha256 bade2b8a4170b879c262e54b24a6e8fe42e612d87d2726801cc8784670524550)
+ECBND1h94b1242c2143 ic.pipeline (medium): exponent on 4 size(s), 128 verified runs; ops 54.733× floor, α 0.497 ; admissible
+wrote analysis/bounds/K-ic-negfold-toy-w1.json (sha256 65f9abbd76409d17227e3e540c8f2ebb3128dc04e29f012aaa8940a1659397d2)
+ECBND1h10ea69d1c481 ic.pipeline (toy): exponent on 4 size(s), 128 verified runs; ops 145.125× floor, α 0.482 ; admissible
+wrote analysis/bounds/K-ic-negfold-medium-w1.json (sha256 4822ec4c1fabb5d1188a6e6fcb609901c0bf78ffda2386022f1c517858098164)
+ECBND1hf47956cb8899 ic.pipeline (medium): constant on 1 size(s), 32 verified runs; ops 6119.028× floor, α 0.400 ; admissible
+  - 1 size(s): below 4, so the exponent is descriptive and this is a constant bound
+wrote analysis/bounds/K-ic-f4-toy-w1.json (sha256 1fc319c9d7582511af0230dae735f6ff3ddfd84bbd4274226721688130abbd99)
+ECBND1ha763dbfb41f7 ic.pipeline (toy): constant on 3 size(s), 96 verified runs; ops 10468508.495× floor, α 1.146 ; admissible
+  - 3 size(s): below 4, so the exponent is descriptive and this is a constant bound
+ecbench: no measured runs of arm `ic-f4` after filtering
+fit refused: K-ic-f4-medium-w1 (see fit.log)
+wrote analysis/bounds/P-rho-neg-toy-w1.json (sha256 8bde8bee27267e52d7816010141d470fb2f33b9ee9b7aaee8b0e663f1d6d4d52)
+ECBND1h14a3fed0100f rho.negation (toy): exponent on 4 size(s), 128 verified runs; ops 2.374× floor, α 0.444 ; admissible
+wrote analysis/bounds/P-rho-neg-medium-w1.json (sha256 f7a8028c0108a8f8b9f06f22889ccaac56e52a3273b9a3b59af17c285c1dcd1b)
+ECBND1h48e468828fb7 rho.negation (medium): constant on 2 size(s), 64 verified runs; ops 1.953× floor, α 0.522 ; admissible
+  - 2 size(s): below 4, so the exponent is descriptive and this is a constant bound
+wrote analysis/bounds/P-bsgs-neg-toy-w1.json (sha256 81620ee951f30cbce226fadb10195b7a3f13a0d42ffeafd440fed5c98c44ed27)
+ECBND1h79dd64bcec42 bsgs.negation (toy): exponent on 4 size(s), 128 verified runs; ops 2.249× floor, α 0.485 ; admissible
+wrote analysis/bounds/P-bsgs-neg-medium-w1.json (sha256 b4b3f9cac117dc32a21bc0313a0431c27b6784f4d2e78ab9b03e6afe8093ef13)
+ECBND1h4d1897d1571e bsgs.negation (medium): constant on 2 size(s), 64 verified runs; ops 2.298× floor, α 0.575 ; admissible
+  - 2 size(s): below 4, so the exponent is descriptive and this is a constant bound
+wrote analysis/bounds/P-kangaroo-toy-w1.json (sha256 522deed86e01db7b845ccb04331fb04401c6ca69a93e9f77c8ec30b7f1a1987d)
+ECBND1h29f25e41c3bd kangaroo.vow (toy): exponent on 4 size(s), 128 verified runs; ops 2.681× floor, α 0.482 ; admissible
+wrote analysis/bounds/P-kangaroo-medium-w1.json (sha256 678ae77c45732bf6bca8aec55e9c9da04dce4695c1973407187adabedde096af)
+ECBND1h54cad139edb7 kangaroo.vow (medium): constant on 2 size(s), 64 verified runs; ops 2.231× floor, α 0.571 ; admissible
+  - 2 size(s): below 4, so the exponent is descriptive and this is a constant bound
+wrote analysis/bounds/P-ic-pair-toy-w1.json (sha256 d27f379959c94dc90086561d94ee2695c05fac2b15a458915b64917376d5c601)
+ECBND1h41facdea7386 ic.pipeline (toy): exponent on 4 size(s), 128 verified runs; ops 47.142× floor, α 0.594 ; admissible
+wrote analysis/bounds/P-ic-pair-medium-w1.json (sha256 7b8ef394eaad9a7c3b6ad144932d9d57f635adcce4a68ffcda5a43ece37e6645)
+ECBND1h7d0bef9bc8f9 ic.pipeline (medium): constant on 2 size(s), 64 verified runs; ops 185.627× floor, α 0.805 ; admissible
+  - 2 size(s): below 4, so the exponent is descriptive and this is a constant bound
+wrote analysis/bounds/PKM-rho-neg-toy-w1.json (sha256 f16f62cdbf921b0eef7f7dda1422a4766c26e03a491992d8e88eca4729695415)
+ECBND1hed0ca9013b4a rho.negation (toy): exponent on 5 size(s), 160 verified runs; ops 2.437× floor, α 0.453 ; admissible
+wrote analysis/bounds/PKM-ic-pkm-toy-w1.json (sha256 1944bee4a2cbba67e93bcac063231cfe4be14932b57a4c71dafa5db6da51bf18)
+ECBND1h7e22b6d4625b ic.pipeline (toy): exponent on 5 size(s), 160 verified runs; ops 209.508× floor, α 0.839 ; admissible

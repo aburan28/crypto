@@ -54,4 +54,5 @@ fig.suptitle("IC frontier campaign, Phase 1: one public target per run, 16 targe
 fig.tight_layout()
 out = os.path.join(os.path.dirname(paths[0]), "frontier")
 fig.savefig(out + ".svg")
+fig.savefig(out + ".pdf")
 fig.savefig(out + ".png", dpi=150)
