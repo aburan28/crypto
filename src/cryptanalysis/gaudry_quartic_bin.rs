@@ -984,6 +984,22 @@ impl SymmetrisedBin {
     /// equations of weighted degree 4 in the weights `(2, 2, 1, 1)`, Hilbert
     /// series `(1 + t²)²(1 + t + t² + t³)²`, 64 solutions over the closure
     /// against 512, weighted Macaulay degree 11.
+    /// `(monomials carrying H, those odd in s₂, s₃ or π)`.
+    pub fn parity_counts(&self) -> (usize, usize) {
+        let carrying: Vec<_> = self
+            .monos
+            .iter()
+            .zip(&self.coef)
+            .filter(|(_, c)| c.iter().any(|v| !v.is_zero()))
+            .map(|(m, _)| m)
+            .collect();
+        let odd = carrying
+            .iter()
+            .filter(|m| m[0] % 2 == 1 || m[1] % 2 == 1 || m[3] % 2 == 1)
+            .count();
+        (carrying.len(), odd)
+    }
+
     pub fn frobenius_reducible(&self) -> bool {
         self.monos
             .iter()
@@ -1810,12 +1826,7 @@ fn split_partial(
     out
 }
 
-fn eval<const N: usize>(
-    g: &GfTab,
-    comp: &HashMap<[u8; N], Fe>,
-    e: &[Fe; N],
-    muls: &mut u64,
-) -> Fe {
+fn eval<const N: usize>(g: &GfTab, comp: &HashMap<[u8; N], Fe>, e: &[Fe; N], muls: &mut u64) -> Fe {
     let mut acc = 0u32;
     for (m, &c) in comp {
         let mut t = c;
@@ -2874,7 +2885,11 @@ fn lp_axpy(x: &[(usize, u128)], f: u128, y: &[(usize, u128)], r: u128) -> Vec<(u
             j += 1;
         } else {
             let fy = lp_mul(f, y[j].1, r);
-            let v = if x[i].1 >= fy { x[i].1 - fy } else { r - (fy - x[i].1) };
+            let v = if x[i].1 >= fy {
+                x[i].1 - fy
+            } else {
+                r - (fy - x[i].1)
+            };
             if v != 0 {
                 out.push((x[i].0, v));
             }
@@ -3226,17 +3241,30 @@ impl DecompositionOracle<CurveB> for BinD4Oracle<'_> {
         let r = self.curve.r;
         let coef = |i: usize| u128::from(fb.coef_of[i]);
         // This pipeline is the one-word one: r < 2^64 here.
-        self.relations_for(ctx, fb, ops, counters, point, u128::from(a), u128::from(b), coef)
-            .into_iter()
-            .map(|rel| match rel {
-                BinRelation::Summands(s) => Relation::Summands(s),
-                BinRelation::Row(f) => Relation::Row {
-                    columns: f.columns.iter().map(|&(c, v)| (c, (v % r) as u64)).collect(),
-                    a: f.a as u64,
-                    b: f.b as u64,
-                },
-            })
-            .collect()
+        self.relations_for(
+            ctx,
+            fb,
+            ops,
+            counters,
+            point,
+            u128::from(a),
+            u128::from(b),
+            coef,
+        )
+        .into_iter()
+        .map(|rel| match rel {
+            BinRelation::Summands(s) => Relation::Summands(s),
+            BinRelation::Row(f) => Relation::Row {
+                columns: f
+                    .columns
+                    .iter()
+                    .map(|&(c, v)| (c, (v % r) as u64))
+                    .collect(),
+                a: f.a as u64,
+                b: f.b as u64,
+            },
+        })
+        .collect()
     }
     fn relation_counters(&self) -> BTreeMap<String, u64> {
         let mut out = self.lp.counts.clone();
