@@ -126,8 +126,52 @@ jobs:
         echo '::error::CI scope or release metadata failed; refusing to skip validation.'
         exit 1
     - name: Checkout repository
-      if: needs.scope.outputs[matrix.scope] != 'false'
+      if: needs.scope.outputs[matrix.scope] != 'false' && matrix.language != 'rust'
       uses: actions/checkout@v7
+
+    # The repository contains many research receipts that CodeQL does not
+    # parse as Rust. Keep every tracked Rust source and Cargo manifest while
+    # avoiding those unrelated blobs in the time-limited PR scan.
+    - name: Checkout complete Rust source
+      if: needs.scope.outputs[matrix.scope] != 'false' && matrix.language == 'rust'
+      uses: actions/checkout@v7
+      with:
+        filter: blob:none
+        sparse-checkout-cone-mode: false
+        sparse-checkout: |
+          /*.rs
+          /**/*.rs
+          /Cargo.toml
+          /Cargo.lock
+          /**/Cargo.toml
+          /**/Cargo.lock
+          /rust-toolchain*
+          /.cargo/**
+
+    - name: Prove complete Rust source coverage
+      if: needs.scope.outputs[matrix.scope] != 'false' && matrix.language == 'rust'
+      shell: bash
+      run: |
+        python3 - <<'PY'
+        import os
+        import subprocess
+
+        paths = subprocess.check_output(
+            ["git", "ls-tree", "-r", "-z", "--name-only", "HEAD"]
+        ).decode().split("\0")
+        required = [
+            path for path in paths
+            if path.endswith(".rs")
+            or path == "Cargo.toml" or path.endswith("/Cargo.toml")
+            or path == "Cargo.lock" or path.endswith("/Cargo.lock")
+        ]
+        missing = [path for path in required if not os.path.lexists(path)]
+        if missing:
+            raise SystemExit("Rust CodeQL checkout omitted source: " +
+                             ", ".join(missing[:20]))
+        print(f"Rust CodeQL checkout includes all {len(required)} "
+              "tracked Rust sources and Cargo manifests")
+        PY
 
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
