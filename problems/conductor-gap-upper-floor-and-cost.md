@@ -57,8 +57,10 @@ homomorphism and order classification are unformalized bridges, listed in
 
 The bounded-batch constructor matched all 100 reference codomains. Its first
 95/96-bit attempts hit the recorded 1,800-second or 6-GiB limits. A separate
-11-GiB, 3,600-second retry of the exact 96-bit input is in progress; see
-`results/expanded-96-*`. Success requires independent PARI checks; a cap leaves
+11-GiB, 3,600-second retry reached 5,242,880/5,590,170 giant points and then
+timed out. A separate precomputed-tree retry of the exact input uses a 14-GiB,
+3,600-second cap after solver tables have exited; see `results/precomputed-96-*`.
+Success requires independent PARI checks; a cap leaves
 the exact floor requirement open.
 
 For the older candidate, test the proposed construction's rational-kernel

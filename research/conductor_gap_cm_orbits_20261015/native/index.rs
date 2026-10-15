@@ -472,10 +472,9 @@ pub fn browser() {
                 link
             })
             .collect::<Vec<_>>());
-        let raw = if entry.is_some() && old_v == v {
-            entry.unwrap().1
-        } else {
-            render(&v, 2)
+        let raw = match entry {
+            Some((_, raw)) if old_v == v => raw,
+            _ => render(&v, 2),
         };
         result.push(raw);
     }

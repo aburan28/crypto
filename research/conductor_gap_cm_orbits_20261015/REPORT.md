@@ -195,10 +195,14 @@ address-space cap, the 95-bit case reached two of four blocks before its
 1,800-second wall cap; both 96-bit cases aborted on FLINT allocation failures.
 The launcher failure caused by missing GNU time is retained separately and
 does not count as an algorithm attempt. The same near-limit rational-family
-96-bit input is now being retried under an 11 GiB address-space cap and a
-3,600-second wall cap. This is distinct from the older non-rational-kernel
+96-bit input reached 5,242,880 of 5,590,170 giant points under an 11 GiB
+address-space cap before its 3,600-second wall cap (exit 124). A separate
+precomputed-tree retry uses a 14 GiB address-space cap and a 3,600-second
+wall cap, after all solver tables have exited. Its exact binary first matched
+all 100 direct-reference codomains. This is distinct from the older non-rational-kernel
 96-bit candidate. See the versioned [launchers](native/run_large_batched.sh),
-[expanded retry](native/run_96_expanded.sh) and their raw time/exit receipts.
+[expanded retry](native/run_96_expanded.sh),
+[precomputed retry](native/run_96_precomputed.sh) and their raw time/exit receipts.
 
 ## Native end-to-end harness
 

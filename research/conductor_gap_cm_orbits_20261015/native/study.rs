@@ -42,6 +42,40 @@ fn main() {
         "certificates" => certificates::run(),
         "replication" => replication::run(&args[2], &args[3]),
         "upper-ids" => replication::upper_ids(),
+        "constructed-floor-input" => {
+            let raw = read(&args[2]);
+            let searched =
+                fs::read_to_string(Path::new(ROOT).join("prepared/search-certificates.jsonl"))
+                    .unwrap();
+            let crater: Value = searched
+                .lines()
+                .map(|s| serde_json::from_str::<Value>(s).unwrap())
+                .find(|c| c["id"] == raw["id"])
+                .expect("unknown construction id");
+            assert_eq!(raw["p"], crater["p"]);
+            assert_eq!(
+                raw["ell"].as_u64().unwrap().to_string(),
+                crater["ell"].as_str().unwrap()
+            );
+            assert_eq!(raw["reference_supplied"], false);
+            let decimal = |v: &Value| v.as_str().unwrap().to_string();
+            fs::write(
+                &args[3],
+                format!(
+                    "[{},{},{},{},{},{},{},{},{}]\n",
+                    raw["id"],
+                    decimal(&raw["p"]),
+                    decimal(&raw["a"]),
+                    decimal(&raw["b"]),
+                    decimal(&crater["N"]),
+                    decimal(&crater["ell"]),
+                    crater["D"],
+                    decimal(&crater["a"]),
+                    decimal(&crater["b"])
+                ),
+            )
+            .unwrap();
+        }
         "controls" => replication::controls(&args[2], &args[3]),
         "recurrence-inputs" => replication::recurrence_inputs(),
         "torsion-inputs" => replication::torsion_inputs(),
