@@ -9,14 +9,17 @@
 //! |:--|:--|:--|:--|
 //! | [`Fp32`] | odd `p < 2³²` | `u32` | canonical, Barrett `⌊2⁶⁴/p⌋` |
 //! | [`Fp64`] | odd `p < 2⁶³` | `u64` | Montgomery, `R = 2⁶⁴` |
-//! | [`FpWide<N>`] | odd `p < 2^(64N)`, `N ≤ 8` | `[u64; N]` | Montgomery, `R = 2^(64N)` |
+//! | [`FpWide<N>`] | odd `p < 2^(64N)`, `N ≤ 8` | `[u64; N]` | Montgomery (CIOS), `R = 2^(64N)` |
+//! | [`FpWide<N, true>`](FpWide) | odd `p`, top limb `< 2⁶³ − 1` | `[u64; N]` | Montgomery, carry-free CIOS |
 //! | [`FpP192`] | NIST P-192 only | `[u64; 3]` | canonical, Solinas reduction |
 //!
-//! [`Fp192`] and [`Fp256`] are `FpWide<3>` and `FpWide<4>`. [`FpWide`] is
-//! the default and the correctness reference for wide primes; [`FpP192`]
-//! exists because it measured faster (see
-//! `research/fp_backend_20261015/README.md`). NIST P-224 has no Solinas
-//! specialisation: it runs on `FpWide<4>`.
+//! Aliases: [`Fp192`] = `FpWide<3>` (P-192), [`Fp256`] = `FpWide<4>`
+//! (P-256, any prime below `2²⁵⁶`), [`Fp224`] = `FpWide<4, true>` (P-224,
+//! the 200-bit test prime). [`FpWide`] is the default and the correctness
+//! reference for wide primes; [`FpP192`] and the `SPARE` variant exist
+//! because they measured faster (`research/fp_backend_20261015/README.md`).
+//! NIST P-224 has no Solinas specialisation (its `2¹²⁸`-free form does not
+//! align with 64-bit words); use [`Fp224`].
 //!
 //! **Nothing here is constant-time.** Inversion, square roots, the
 //! Legendre symbol, the conditional subtractions and the lazy
@@ -36,10 +39,19 @@
 //!
 //! `add`, `sub`, `neg`, `double`, `mul`, `sqr`, `inv` (returns `None` on
 //! zero), `batch_inv` (Montgomery's trick, zeros are left as zero),
-//! `pow` / `pow_u64` / `pow_biguint`, `legendre` (`1`, `−1`, or `0`),
-//! `sqrt` (`p ≡ 3 mod 4`: one exponentiation; otherwise Tonelli–Shanks
-//! with a non-residue found once at construction; `None` on a
-//! non-residue), `is_square`.
+//! `pow` / `pow_u64` / `pow_biguint` (4-bit fixed window), `legendre`
+//! (`1`, `−1`, or `0`), `sqrt` (`None` on a non-residue), `is_square`.
+//!
+//! - **Inverse:** Pornin's optimised binary GCD ([`inv_bingcd`]: 31
+//!   divsteps at a time on 64-bit approximations, then one update of the
+//!   full values) on every backend, the `u64` ones included.
+//! - **Legendre:** a binary Jacobi symbol (shifts and subtractions, no
+//!   exponentiation) on every backend.
+//! - **Square root:** `p ≡ 3 mod 4`: `a^((p+1)/4)`. Otherwise
+//!   Tonelli–Shanks from a non-residue found at construction; when
+//!   `s = v₂(p − 1) ≥ 16` (P-224 has `s = 96`) the 2-Sylow logarithm is
+//!   read 8 or 12 bits at a time from a table of `2^w` entries
+//!   ([`SqrtChunks`]).
 //!
 //! ## The lazy accumulator (`F::Wide`)
 //!
@@ -62,6 +74,7 @@
 //! f.row_axpy(&mut acc, c, &pivot);        // acc[i] += c·pivot[i]  (lazy)
 //! f.row_reduce(&acc, &mut out);           // out[i] = acc[i] mod p
 //! f.row_reduce_scaled(&acc, s, &mut out); // out[i] = s·acc[i]  (F4 makes rows monic)
+//! f.row_scatter_axpy(&mut acc, c, &cols, &vals); // acc[cols[k]] += c·vals[k]  (sparse)
 //! ```
 //!
 //! **Contract.** After a load (or `wide_zero`) at most
@@ -82,9 +95,10 @@
 //! - **`Fp32`, `2³¹ ≤ p < 2³²`.** A product no longer leaves room in a
 //!   `u64`. Rows use Shoup multiplication by the fixed `c`
 //!   (`c' = ⌊c·2³²/p⌋`, `c·y − ⌊c'·y/2³²⌋·p ∈ [0, 2p)`, three 32×32→64
-//!   multiplies), single products a Barrett reduction; either way the
-//!   addend is `< 2p < 2³³` and the same `2⁶³` invariant holds:
-//!   **unbounded**.
+//!   multiplies, result `< 2p`), single products unreduced; either way the
+//!   product is added to the `u64` entry and a carry out of the word
+//!   (worth `2⁶⁴`) is folded back in as `2⁶⁴ mod p`. Every `u64` is a
+//!   valid entry, read through Barrett reduction: **unbounded**.
 //! - **`Fp64`.** `Wide = u128` holding `W` with `W·R⁻¹` the value. A
 //!   product of two elements is `< p²`; the invariant `W < p·2⁶⁴` is
 //!   kept by subtracting `p·2⁶⁴` (a multiple of `p`) when it is reached
@@ -112,22 +126,27 @@
 //! - dense block `acc −= v·bred[j]`: `Vec<F::Wide>` per row,
 //!   `row_load` / `row_sub` / `row_reduce`; one `row_sub` per pivot row.
 //! - sparse scatter (`Acc::sub_tail`): keep `vals: Vec<F::Wide>`, call
-//!   `wide_mul_add(&mut vals[c], nf, v)` per tail entry, and read an
-//!   entry with `wide_reduce` before testing it for zero; `drain_from`
-//!   becomes `row_reduce_scaled` with the inverse of the new lead.
+//!   `row_scatter_axpy(&mut vals, nf, &row.cols[1..], &row.vals[1..])`
+//!   and set the bitset bits in a separate pass (per-entry `wide_mul_add`
+//!   is correct too, but measured 1.5× slower for `Fp32` above `2³¹`
+//!   because the regime test stays inside the loop); read an entry with `wide_reduce` before testing it for zero;
+//!   `drain_from` becomes `wide_reduce` + `mul` by the new lead's inverse.
 //! - for `Fp32` with `p < 2³¹` this is exactly today's arithmetic
 //!   (measured in the report); for `p ≥ 2³¹`, `Fp64` and wider fields the
 //!   capacities above are never reached by an F4 row, so no counting is
 //!   needed — [`LazyRow`] is there if in doubt.
 //!
-//! **Curves, square roots and Vélu (lane G).** Use `Fp192`/[`FpP192`]
-//! for NIST P-192 (`p ≡ 3 mod 4`, so `sqrt` is one exponentiation) and
-//! `FpWide<4>` for P-224/P-256. Batch inversions with `batch_inv`; keep
-//! points in projective coordinates where an inversion per step would
-//! dominate (one `inv` is ~100 multiplications at 192 bits).
+//! **Curves, square roots and Vélu (lane G).** Use [`FpP192`] for NIST
+//! P-192 (`p ≡ 3 mod 4`, so `sqrt` is one exponentiation; `Fp192` gives
+//! the same answers more slowly), [`Fp224`] for P-224 and [`Fp256`] for
+//! P-256. Batch inversions with `batch_inv`; one `inv` costs on the order
+//! of 100–250 multiplications at 192–256 bits (measured in the report), so
+//! keep points projective where an inversion per step would dominate.
+//! Elements implement `Hash`, so j-invariants can key a `HashMap`.
 //!
 //! The benchmark driver is `examples/fp_backend_bench.rs`.
 
+use std::collections::HashMap;
 use std::fmt::Debug;
 use std::hash::Hash;
 
@@ -190,6 +209,7 @@ pub trait PrimeField: Clone + Debug + Send + Sync {
         self.add(a, a)
     }
     fn mul(&self, a: Self::Elem, b: Self::Elem) -> Self::Elem;
+    #[inline(always)]
     fn sqr(&self, a: Self::Elem) -> Self::Elem {
         self.mul(a, a)
     }
@@ -291,6 +311,19 @@ pub trait PrimeField: Clone + Debug + Send + Sync {
     fn row_axpy(&self, acc: &mut [Self::Wide], c: Self::Elem, row: &[Self::Elem]) {
         for (w, &y) in acc.iter_mut().zip(row) {
             self.wide_mul_add(w, c, y);
+        }
+    }
+    /// Sparse `acc[cols[k]] += c·vals[k]` (one product per touched entry;
+    /// `cols` need not be sorted but must index `acc`).
+    fn row_scatter_axpy(
+        &self,
+        acc: &mut [Self::Wide],
+        c: Self::Elem,
+        cols: &[u32],
+        vals: &[Self::Elem],
+    ) {
+        for (&col, &y) in cols.iter().zip(vals) {
+            self.wide_mul_add(&mut acc[col as usize], c, y);
         }
     }
     /// `acc[i] −= c·row[i]`: one product per entry.
@@ -399,6 +432,22 @@ pub struct SqrtPre<E> {
     pub non_residue: u64,
     /// `z^q`, a generator of the 2-Sylow subgroup.
     pub z_q: E,
+    /// Windowed discrete-log tables for Tonelli–Shanks when `s ≥ 16`.
+    pub chunks: Option<SqrtChunks<E>>,
+}
+
+/// Tables for the windowed Tonelli–Shanks: the logarithm of `t = a^q` in
+/// the 2-Sylow subgroup `⟨g⟩`, `g = z^q`, is read `w` bits at a time from
+/// a table of `h = g^(2^(s − w))`, about `s²/(2w)` squarings instead of
+/// about `s²/4`.
+#[derive(Clone, Debug)]
+pub struct SqrtChunks<E> {
+    pub w: u32,
+    /// `h^d ↦ d` for `0 ≤ d < 2^w`.
+    pub table: HashMap<E, u32>,
+    /// `half[0] = g⁻¹`, `half[i] = g^(−2^(w·i − 1))` for `i ≥ 1`: the
+    /// square root of window `i`'s correction.
+    pub half: Vec<E>,
 }
 
 impl<E: Copy> SqrtPre<E> {
@@ -410,6 +459,7 @@ impl<E: Copy> SqrtPre<E> {
             q_minus1_half: Vec::new(),
             non_residue: 0,
             z_q: zero,
+            chunks: None,
         }
     }
 }
@@ -438,6 +488,31 @@ fn compute_sqrt_pre<F: PrimeField>(f: &F) -> SqrtPre<F::Elem> {
         z += 1;
     }
     let z_q = f.pow(f.from_u64(z), &q.to_u64_digits());
+    let chunks = (s >= 16).then(|| {
+        let w = if s >= 48 { 12 } else { 8 };
+        let g_inv = f.inv(z_q).expect("z^q is a unit");
+        let mut h = z_q;
+        for _ in 0..s - w {
+            h = f.sqr(h);
+        }
+        let mut table = HashMap::with_capacity(1 << w);
+        let mut cur = f.one();
+        for d in 0..1u32 << w {
+            table.insert(cur, d);
+            cur = f.mul(cur, h);
+        }
+        let mut half = vec![g_inv];
+        let mut gi = g_inv;
+        for i in 1..s.div_ceil(w) {
+            // g^(−2^(w·i − 1)) from g^(−2^(w·(i−1))).
+            let shift = if i == 1 { w - 1 } else { w };
+            for _ in 0..shift {
+                gi = f.sqr(gi);
+            }
+            half.push(gi);
+        }
+        SqrtChunks { w, table, half }
+    });
     SqrtPre {
         s,
         p_minus1_half,
@@ -445,6 +520,7 @@ fn compute_sqrt_pre<F: PrimeField>(f: &F) -> SqrtPre<F::Elem> {
         q_minus1_half,
         non_residue: z,
         z_q,
+        chunks,
     }
 }
 
@@ -496,8 +572,59 @@ fn sqrt_generic<F: PrimeField>(f: &F, a: F::Elem) -> Option<F::Elem> {
     }
     // x = a^((q−1)/2); t = a^q = a·x²; r = a^((q+1)/2) = a·x.
     let x = f.pow(a, &pre.q_minus1_half);
-    let mut r = f.mul(a, x);
-    let mut t = f.mul(r, x);
+    let r = f.mul(a, x);
+    let t = f.mul(r, x);
+    if let Some(ch) = &pre.chunks {
+        // r² = a·t with t = g^e (e even iff a is a square), so
+        // √a = r·g^(−e/2). Read e w bits at a time, lowest first; the
+        // window's correction is hp² with hp its share of g^(−e/2).
+        let s = pre.s;
+        let mut cur = t;
+        let mut acc = r;
+        for (i, &h) in ch.half.iter().enumerate() {
+            let lo = ch.w * i as u32;
+            let wi = ch.w.min(s - lo);
+            let mut y = cur;
+            for _ in 0..s - lo - wi {
+                y = f.sqr(y);
+            }
+            let d = ch.table[&y] >> (ch.w - wi);
+            let exp = if i == 0 {
+                if d & 1 == 1 {
+                    return None;
+                }
+                d >> 1
+            } else {
+                d
+            };
+            if exp != 0 {
+                let hp = f.pow_u64(h, u64::from(exp));
+                cur = f.mul(cur, f.sqr(hp));
+                acc = f.mul(acc, hp);
+            }
+        }
+        debug_assert!(f.is_one(cur));
+        return Some(acc);
+    }
+    ts_classic(f, r, t)
+}
+
+/// Tonelli–Shanks without the window tables (comparison arm for the
+/// benchmark; [`PrimeField::sqrt`] is the one to use).
+pub fn sqrt_tonelli_shanks_plain<F: PrimeField>(f: &F, a: F::Elem) -> Option<F::Elem> {
+    if f.is_zero(a) {
+        return Some(a);
+    }
+    let pre = f.sqrt_pre();
+    let x = f.pow(a, &pre.q_minus1_half);
+    let r = f.mul(a, x);
+    let t = f.mul(r, x);
+    ts_classic(f, r, t)
+}
+
+/// The classic Tonelli–Shanks loop from `r = a^((q+1)/2)`, `t = a^q`.
+fn ts_classic<F: PrimeField>(f: &F, mut r: F::Elem, mut t: F::Elem) -> Option<F::Elem> {
+    let pre = f.sqrt_pre();
     let mut c = pre.z_q;
     let mut m = pre.s;
     loop {
@@ -524,10 +651,12 @@ fn sqrt_generic<F: PrimeField>(f: &F, a: F::Elem) -> Option<F::Elem> {
     }
 }
 
-/// The Jacobi symbol `(a / n)` for odd `n`, binary algorithm on `u64`.
-pub fn jacobi_u64(mut a: u64, mut n: u64) -> i32 {
+/// The Jacobi symbol `(a / n)` for odd `n`, binary algorithm on `u64`
+/// (one remainder, then shifts and subtractions only).
+pub fn jacobi_u64(a: u64, n: u64) -> i32 {
     debug_assert!(n & 1 == 1);
-    a %= n;
+    let mut a = a % n;
+    let mut n = n;
     let mut t = 1i32;
     while a != 0 {
         let z = a.trailing_zeros();
@@ -535,11 +664,13 @@ pub fn jacobi_u64(mut a: u64, mut n: u64) -> i32 {
         if z & 1 == 1 && (n & 7 == 3 || n & 7 == 5) {
             t = -t;
         }
-        if a & 3 == 3 && n & 3 == 3 {
-            t = -t;
+        if a < n {
+            std::mem::swap(&mut a, &mut n);
+            if a & 3 == 3 && n & 3 == 3 {
+                t = -t;
+            }
         }
-        std::mem::swap(&mut a, &mut n);
-        a %= n;
+        a -= n;
     }
     if n == 1 {
         t
@@ -548,22 +679,58 @@ pub fn jacobi_u64(mut a: u64, mut n: u64) -> i32 {
     }
 }
 
-/// `a⁻¹ mod p` for `0 < a < p`, odd `p < 2⁶³` (signed extended Euclid).
+/// Kaliski's almost Montgomery inverse on one word: for odd `p < 2⁶³` and
+/// `0 < a < p`, returns `(x, k)` with `x = a⁻¹·2^k mod p` and
+/// `k ≤ 2·⌈log₂ p⌉ ≤ 126`; runs of zero bits are shifted out at once.
+/// Invariant `p = u·s + v·r`, so `r, s ≤ p` until the last step and
+/// `r < 2p < 2⁶⁴` at the end.
 #[inline]
-fn inv_mod_u64_euclid(a: u64, p: u64) -> u64 {
-    let (mut r0, mut r1) = (p as i128, a as i128);
-    let (mut t0, mut t1) = (0i128, 1i128);
-    while r1 != 0 {
-        let q = r0 / r1;
-        (r0, r1) = (r1, r0 - q * r1);
-        (t0, t1) = (t1, t0 - q * t1);
+fn almost_inv_u64(a: u64, p: u64) -> (u64, u32) {
+    debug_assert!(a != 0 && a < p && p & 1 == 1 && p < 1 << 63);
+    let (mut u, mut v, mut r, mut s, mut k) = (p, a, 0u64, 1u64, 0u32);
+    while v > 0 {
+        if u & 1 == 0 {
+            let t = u.trailing_zeros();
+            u >>= t;
+            s <<= t;
+            k += t;
+        } else if v & 1 == 0 {
+            let t = v.trailing_zeros();
+            v >>= t;
+            r <<= t;
+            k += t;
+        } else if u > v {
+            u = (u - v) >> 1;
+            r += s;
+            s <<= 1;
+            k += 1;
+        } else {
+            v = (v - u) >> 1;
+            s += r;
+            r <<= 1;
+            k += 1;
+        }
     }
-    debug_assert_eq!(r0, 1, "not invertible");
-    if t0 < 0 {
-        (t0 + p as i128) as u64
-    } else {
-        t0 as u64
+    debug_assert_eq!(u, 1, "not invertible");
+    if r >= p {
+        r -= p;
     }
+    (if r == 0 { 0 } else { p - r }, k)
+}
+
+/// `table[k] = c·2^(−k) mod p` for `k ≤ 128` (halving mod `p`).
+fn halving_table(c: u64, p: u64) -> Vec<u64> {
+    let mut t = Vec::with_capacity(129);
+    let mut x = c % p;
+    for _ in 0..=128 {
+        t.push(x);
+        x = if x & 1 == 0 {
+            x >> 1
+        } else {
+            ((u128::from(x) + u128::from(p)) >> 1) as u64
+        };
+    }
+    t
 }
 
 // ── Fp32: p < 2^32, canonical u32, Barrett ────────────────────────────
@@ -577,6 +744,10 @@ pub struct Fp32 {
     m: u64,
     /// The largest multiple of `p` not above `2⁶³`.
     lazy_m: u64,
+    /// `2⁶⁴ mod p` (the carry fold for `p ≥ 2³¹`).
+    fold: u64,
+    /// `2^(−k) mod p`, the correction of the almost inverse.
+    inv_pow2: Vec<u64>,
     /// `p < 2³¹`: the lazy product needs no reduction.
     small: bool,
     lanes: Lanes,
@@ -617,17 +788,18 @@ fn fp32_lazy_axpy(acc: &mut [u64], a: u32, b: &[u32], m: u64) {
     }
 }
 
-/// `acc += a·b` through Shoup's product (`p < 2³²`); vectorises.
+/// `acc += a·b` through Shoup's product (`p < 2³²`), folding a carry out
+/// of the word back in as `2⁶⁴ mod p`; vectorises.
 #[inline(always)]
-fn fp32_shoup_axpy(acc: &mut [u64], a: u32, a_sh: u64, b: &[u32], p: u64, m: u64) {
+fn fp32_shoup_axpy(acc: &mut [u64], a: u32, a_sh: u64, b: &[u32], p: u64, fold: u64) {
     let n = acc.len().min(b.len());
     let a = u64::from(a);
     for (x, &y) in acc[..n].iter_mut().zip(&b[..n]) {
         let y = u64::from(y);
         let q = (a_sh * y) >> 32;
         let r = (a * y).wrapping_sub(q * p);
-        let s = *x + r;
-        *x = s - ((s >> 63).wrapping_neg() & m);
+        let s = x.wrapping_add(r);
+        *x = s.wrapping_add(u64::from(s < r).wrapping_neg() & fold);
     }
 }
 
@@ -660,8 +832,15 @@ mod fp32_simd {
         super::fp32_lazy_axpy(acc, a, b, m)
     }
     #[target_feature(enable = "avx2")]
-    pub(super) unsafe fn shoup_avx2(acc: &mut [u64], a: u32, a_sh: u64, b: &[u32], p: u64, m: u64) {
-        super::fp32_shoup_axpy(acc, a, a_sh, b, p, m)
+    pub(super) unsafe fn shoup_avx2(
+        acc: &mut [u64],
+        a: u32,
+        a_sh: u64,
+        b: &[u32],
+        p: u64,
+        fold: u64,
+    ) {
+        super::fp32_shoup_axpy(acc, a, a_sh, b, p, fold)
     }
     #[target_feature(enable = "avx512f")]
     pub(super) unsafe fn shoup_avx512(
@@ -670,9 +849,9 @@ mod fp32_simd {
         a_sh: u64,
         b: &[u32],
         p: u64,
-        m: u64,
+        fold: u64,
     ) {
-        super::fp32_shoup_axpy(acc, a, a_sh, b, p, m)
+        super::fp32_shoup_axpy(acc, a, a_sh, b, p, fold)
     }
 }
 
@@ -699,6 +878,8 @@ impl Fp32 {
             p,
             m: ((1u128 << 64) / u128::from(p)) as u64,
             lazy_m: ((1u64 << 63) / p) * p,
+            fold: ((1u128 << 64) % u128::from(p)) as u64,
+            inv_pow2: halving_table(1, p),
             small: p < 1 << 31,
             lanes,
             modulus: BigUint::from(p),
@@ -785,7 +966,8 @@ impl PrimeField for Fp32 {
         if a == 0 {
             None
         } else {
-            Some(inv_mod_u64_euclid(u64::from(a), self.p) as u32)
+            let (x, k) = almost_inv_u64(u64::from(a), self.p);
+            Some(self.reduce(x * self.inv_pow2[k as usize]))
         }
     }
     fn sqrt_pre(&self) -> &SqrtPre<u32> {
@@ -808,14 +990,16 @@ impl PrimeField for Fp32 {
     }
     #[inline(always)]
     fn wide_mul_add(&self, w: &mut u64, a: u32, b: u32) {
-        debug_assert!(*w < 1 << 63, "Fp32 accumulator invariant");
         let prod = u64::from(a) * u64::from(b);
-        let add = if self.small {
-            prod
+        if self.small {
+            debug_assert!(*w < 1 << 63, "Fp32 accumulator invariant");
+            *w = self.renorm(*w + prod);
         } else {
-            barrett_reduce(prod, self.p, self.m)
-        };
-        *w = self.renorm(*w + add);
+            // Any u64 is valid; a carry out is 2⁶⁴ ≡ fold. After a carry
+            // s < prod < 2⁶⁴ − 2³³, so adding fold cannot carry again.
+            let s = w.wrapping_add(prod);
+            *w = s.wrapping_add(u64::from(s < prod).wrapping_neg() & self.fold);
+        }
     }
     #[inline(always)]
     fn wide_reduce(&self, w: &u64) -> u32 {
@@ -823,8 +1007,8 @@ impl PrimeField for Fp32 {
     }
     #[inline]
     fn row_axpy(&self, acc: &mut [u64], c: u32, row: &[u32]) {
-        debug_assert!(acc.iter().all(|&w| w < 1 << 63));
         if self.small {
+            debug_assert!(acc.iter().all(|&w| w < 1 << 63));
             match self.lanes {
                 #[cfg(target_arch = "x86_64")]
                 // SAFETY: `Lanes::detect` found AVX-512F on this CPU.
@@ -840,14 +1024,34 @@ impl PrimeField for Fp32 {
                 #[cfg(target_arch = "x86_64")]
                 // SAFETY: as above.
                 Lanes::Avx512 => unsafe {
-                    fp32_simd::shoup_avx512(acc, c, c_sh, row, self.p, self.lazy_m)
+                    fp32_simd::shoup_avx512(acc, c, c_sh, row, self.p, self.fold)
                 },
                 #[cfg(target_arch = "x86_64")]
                 // SAFETY: as above.
                 Lanes::Avx2 => unsafe {
-                    fp32_simd::shoup_avx2(acc, c, c_sh, row, self.p, self.lazy_m)
+                    fp32_simd::shoup_avx2(acc, c, c_sh, row, self.p, self.fold)
                 },
-                _ => fp32_shoup_axpy(acc, c, c_sh, row, self.p, self.lazy_m),
+                _ => fp32_shoup_axpy(acc, c, c_sh, row, self.p, self.fold),
+            }
+        }
+    }
+    #[inline]
+    fn row_scatter_axpy(&self, acc: &mut [u64], c: u32, cols: &[u32], vals: &[u32]) {
+        let c = u64::from(c);
+        if self.small {
+            let m = self.lazy_m;
+            for (&col, &y) in cols.iter().zip(vals) {
+                let w = &mut acc[col as usize];
+                let s = *w + c * u64::from(y);
+                *w = s - ((s >> 63).wrapping_neg() & m);
+            }
+        } else {
+            let fold = self.fold;
+            for (&col, &y) in cols.iter().zip(vals) {
+                let w = &mut acc[col as usize];
+                let prod = c * u64::from(y);
+                let (s, o) = w.overflowing_add(prod);
+                *w = if o { s + fold } else { s };
             }
         }
     }
@@ -883,6 +1087,9 @@ pub struct Fp64 {
     r3: u64,
     /// `p·2⁶⁴`, the accumulator bound.
     p_hi: u128,
+    /// `R³·2^(−k) mod p`: one Montgomery product turns the almost inverse
+    /// of `a·R` into `a⁻¹·R`.
+    inv_fix: Vec<u64>,
     modulus: BigUint,
     sqrt: SqrtPre<u64>,
 }
@@ -911,10 +1118,13 @@ impl Fp64 {
             r2,
             r3: 0,
             p_hi: u128::from(p) << 64,
+            inv_fix: Vec::new(),
             modulus: BigUint::from(p),
             sqrt: SqrtPre::placeholder(0),
         };
         f.r3 = f.mul(r2, r2);
+        // r3 is the integer R³ mod p (mul divides r2·r2 = R⁴ by R).
+        f.inv_fix = halving_table(f.r3, p);
         f.sqrt = compute_sqrt_pre(&f);
         f
     }
@@ -1018,8 +1228,9 @@ impl PrimeField for Fp64 {
             return None;
         }
         // (a·R)⁻¹ = a⁻¹·R⁻¹; times R³ through one Montgomery product.
-        let c = inv_mod_u64_euclid(a, self.p);
-        Some(self.mul(c, self.r3))
+        // (a·R)⁻¹·2^k, times R³·2^(−k) through one Montgomery product.
+        let (x, k) = almost_inv_u64(a, self.p);
+        Some(self.mul(x, self.inv_fix[k as usize]))
     }
     fn sqrt_pre(&self) -> &SqrtPre<u64> {
         &self.sqrt
@@ -1043,7 +1254,7 @@ impl PrimeField for Fp64 {
     fn wide_mul_add(&self, w: &mut u128, a: u64, b: u64) {
         debug_assert!(*w < self.p_hi, "Fp64 accumulator invariant");
         let s = *w + u128::from(a) * u128::from(b);
-        *w = if s >= self.p_hi { s - self.p_hi } else { s };
+        *w = s - (self.p_hi & u128::from(s >= self.p_hi).wrapping_neg());
     }
     #[inline(always)]
     fn wide_reduce(&self, w: &u128) -> u64 {
@@ -1056,7 +1267,7 @@ impl PrimeField for Fp64 {
         let c = u128::from(c);
         for (w, &y) in acc.iter_mut().zip(row) {
             let s = *w + c * u128::from(y);
-            *w = if s >= ph { s - ph } else { s };
+            *w = s - (ph & u128::from(s >= ph).wrapping_neg());
         }
     }
     #[inline]
@@ -1068,12 +1279,10 @@ impl PrimeField for Fp64 {
         let p = self.p;
         for (x, &y) in dst.iter_mut().zip(row) {
             let q = ((u128::from(c_sh) * u128::from(y)) >> 64) as u64;
-            let mut r = cb.wrapping_mul(y).wrapping_sub(q.wrapping_mul(p));
-            if r >= p {
-                r -= p;
-            }
+            let r = cb.wrapping_mul(y).wrapping_sub(q.wrapping_mul(p));
+            let r = r - (p & u64::from(r >= p).wrapping_neg());
             let s = *x + r;
-            *x = if s >= p { s - p } else { s };
+            *x = s - (p & u64::from(s >= p).wrapping_neg());
         }
     }
 }
@@ -1137,6 +1346,39 @@ fn limbs_add<const N: usize>(a: &[u64; N], b: &[u64; N]) -> ([u64; N], u64) {
 #[inline(always)]
 fn limbs_is_zero<const N: usize>(a: &[u64; N]) -> bool {
     a.iter().all(|&x| x == 0)
+}
+
+/// `t − p` when `extra ≠ 0` or `t ≥ p`, else `t`, without a branch
+/// (the final subtraction is a coin flip on random data).
+#[inline(always)]
+fn limbs_csub<const N: usize>(t: &[u64; N], extra: u64, p: &[u64; N]) -> [u64; N] {
+    let (d, borrow) = limbs_sub(t, p);
+    // Keep t exactly when the subtraction borrowed and nothing overflowed.
+    let keep = (borrow & (extra ^ 1)).wrapping_neg();
+    let mut r = [0u64; N];
+    for i in 0..N {
+        r[i] = (t[i] & keep) | (d[i] & !keep);
+    }
+    r
+}
+
+/// `(a + b) mod p` for `a, b < p`, branch-free.
+#[inline(always)]
+fn limbs_add_mod<const N: usize>(a: &[u64; N], b: &[u64; N], p: &[u64; N]) -> [u64; N] {
+    let (s, c) = limbs_add(a, b);
+    limbs_csub(&s, c, p)
+}
+
+/// `(a − b) mod p` for `a, b < p`, branch-free.
+#[inline(always)]
+fn limbs_sub_mod<const N: usize>(a: &[u64; N], b: &[u64; N], p: &[u64; N]) -> [u64; N] {
+    let (d, br) = limbs_sub(a, b);
+    let mask = br.wrapping_neg();
+    let mut pm = [0u64; N];
+    for i in 0..N {
+        pm[i] = p[i] & mask;
+    }
+    limbs_add(&d, &pm).0
 }
 
 fn limbs_from_biguint<const N: usize>(x: &BigUint) -> [u64; N] {
@@ -1209,16 +1451,233 @@ fn inv_binary<const N: usize>(a: &[u64; N], p: &[u64; N]) -> [u64; N] {
     }
 }
 
+/// `f·a + g·b` for non-negative `a, b < 2^(64N)` and `|f|, |g| ≤ 2⁶²`:
+/// the low `N` limbs and the signed top limb (two's complement).
+#[inline(always)]
+fn lincomb<const N: usize>(a: &[u64; N], f: i64, b: &[u64; N], g: i64) -> ([u64; N], i64) {
+    let mut r = [0u64; N];
+    let mut carry: i128 = 0;
+    for i in 0..N {
+        let t = i128::from(a[i]) * i128::from(f) + i128::from(b[i]) * i128::from(g) + carry;
+        r[i] = t as u64;
+        carry = t >> 64;
+    }
+    (r, carry as i64)
+}
+
+/// Two's-complement negation of `(lo, top)`.
+#[inline(always)]
+fn neg_signed<const N: usize>(lo: &mut [u64; N], top: &mut i64) {
+    let mut c = 1u64;
+    for x in lo.iter_mut() {
+        let (s, c2) = adc(!*x, 0, c);
+        *x = s;
+        c = c2;
+    }
+    *top = (!*top).wrapping_add(c as i64);
+}
+
+/// `(lo, top) >> k` for `0 < k < 64`, arithmetic, keeping `N` limbs and
+/// the signed top.
+#[inline(always)]
+fn shr_signed<const N: usize>(lo: &mut [u64; N], top: &mut i64, k: u32) {
+    for i in 0..N - 1 {
+        lo[i] = (lo[i] >> k) | (lo[i + 1] << (64 - k));
+    }
+    lo[N - 1] = (lo[N - 1] >> k) | ((*top as u64) << (64 - k));
+    *top >>= k;
+}
+
+/// Bit length of `a`.
+#[inline(always)]
+fn limbs_bits<const N: usize>(a: &[u64; N]) -> u32 {
+    for i in (0..N).rev() {
+        if a[i] != 0 {
+            return 64 * i as u32 + 64 - a[i].leading_zeros();
+        }
+    }
+    0
+}
+
+/// Bits `[pos, pos + 33)` of `a` as a `u64` (`pos + 33 ≤ 64N`).
+#[inline(always)]
+fn limbs_bits_at<const N: usize>(a: &[u64; N], pos: u32) -> u64 {
+    let (w, s) = ((pos / 64) as usize, pos % 64);
+    let mut v = a[w] >> s;
+    if s > 0 && w + 1 < N {
+        v |= a[w + 1] << (64 - s);
+    }
+    v & ((1u64 << 33) - 1)
+}
+
+/// `(f·u + g·v) / 2³¹ mod p`, for `u, v < p`: Montgomery division by
+/// `2³¹` (`n_inv = −p⁻¹ mod 2⁶⁴`).
+#[inline(always)]
+fn lincomb_div31<const N: usize>(
+    u: &[u64; N],
+    f: i64,
+    v: &[u64; N],
+    g: i64,
+    p: &[u64; N],
+    n_inv: u64,
+) -> [u64; N] {
+    let (mut lo, mut top) = lincomb(u, f, v, g);
+    // k = −x·p⁻¹ mod 2³¹ makes x + k·p divisible by 2³¹.
+    let k = lo[0].wrapping_mul(n_inv) & 0x7fff_ffff;
+    let mut c = 0u64;
+    for i in 0..N {
+        let (s, c2) = mac(lo[i], k, p[i], c);
+        lo[i] = s;
+        c = c2;
+    }
+    top = top.wrapping_add(c as i64);
+    shr_signed(&mut lo, &mut top, 31);
+    // |result| < 4p: fix the sign, then subtract p while ≥ p.
+    while top < 0 {
+        let (s, c) = limbs_add(&lo, p);
+        lo = s;
+        top += c as i64;
+    }
+    while top > 0 || !limbs_lt(&lo, p) {
+        let (d, b) = limbs_sub(&lo, p);
+        lo = d;
+        top -= b as i64;
+    }
+    lo
+}
+
+/// `a⁻¹ mod p` for canonical `0 < a < p`, odd `p`: Pornin's optimised
+/// binary GCD (IACR ePrint 2020/972, Algorithm 2) in its variable-time
+/// form — 31 divsteps at a time on 64-bit approximations (low 31 bits
+/// exact, top 33 bits), then one update of the full values. Falls back to
+/// [`inv_binary`] if the iteration bound is ever exceeded.
+pub fn inv_bingcd<const N: usize>(y: &[u64; N], p: &[u64; N], n_inv: u64) -> [u64; N] {
+    let mut a = *y;
+    let mut b = *p;
+    let mut u = [0u64; N];
+    u[0] = 1;
+    let mut v = [0u64; N];
+    // Invariants: a ≡ u·y, b ≡ v·y (mod p); b odd.
+    let max_outer = (2 * 64 * N as u32).div_ceil(31) + 8;
+    for _ in 0..max_outer {
+        if limbs_is_zero(&a) {
+            return v;
+        }
+        let n = limbs_bits(&a).max(limbs_bits(&b));
+        let (mut xa, mut xb) = if n <= 64 {
+            (a[0], b[0])
+        } else {
+            (
+                (a[0] & 0x7fff_ffff) | (limbs_bits_at(&a, n - 33) << 31),
+                (b[0] & 0x7fff_ffff) | (limbs_bits_at(&b, n - 33) << 31),
+            )
+        };
+        let (mut f0, mut g0, mut f1, mut g1) = (1i64, 0i64, 0i64, 1i64);
+        for _ in 0..31 {
+            if xa & 1 == 1 {
+                if xa < xb {
+                    std::mem::swap(&mut xa, &mut xb);
+                    std::mem::swap(&mut f0, &mut f1);
+                    std::mem::swap(&mut g0, &mut g1);
+                }
+                xa -= xb;
+                f0 -= f1;
+                g0 -= g1;
+            }
+            xa >>= 1;
+            f1 <<= 1;
+            g1 <<= 1;
+        }
+        let (mut na, mut ta) = lincomb(&a, f0, &b, g0);
+        let (mut nb, mut tb) = lincomb(&a, f1, &b, g1);
+        if ta < 0 {
+            neg_signed(&mut na, &mut ta);
+            f0 = -f0;
+            g0 = -g0;
+        }
+        if tb < 0 {
+            neg_signed(&mut nb, &mut tb);
+            f1 = -f1;
+            g1 = -g1;
+        }
+        shr_signed(&mut na, &mut ta, 31);
+        shr_signed(&mut nb, &mut tb, 31);
+        debug_assert!(ta == 0 && tb == 0);
+        let nu = lincomb_div31(&u, f0, &v, g0, p, n_inv);
+        let nv = lincomb_div31(&u, f1, &v, g1, p, n_inv);
+        a = na;
+        b = nb;
+        u = nu;
+        v = nv;
+    }
+    if limbs_is_zero(&a) {
+        return v;
+    }
+    #[cfg(test)]
+    BINGCD_FALLBACKS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    inv_binary(y, p)
+}
+
+#[cfg(test)]
+static BINGCD_FALLBACKS: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+
+/// The Jacobi symbol `(a / n)` for odd `n` on limbs (binary algorithm).
+pub fn jacobi_limbs<const N: usize>(a: &[u64; N], n: &[u64; N]) -> i32 {
+    let mut a = *a;
+    let mut n = *n;
+    let mut t = 1i32;
+    loop {
+        if limbs_is_zero(&a) {
+            let mut one = [0u64; N];
+            one[0] = 1;
+            return if n == one { t } else { 0 };
+        }
+        // Strip twos: (2/n) = −1 iff n ≡ 3, 5 mod 8.
+        let mut z = 0u32;
+        while a[0] == 0 {
+            a.copy_within(1.., 0);
+            a[N - 1] = 0;
+            z += 64;
+        }
+        let tz = a[0].trailing_zeros();
+        if tz > 0 {
+            for i in 0..N - 1 {
+                a[i] = (a[i] >> tz) | (a[i + 1] << (64 - tz));
+            }
+            a[N - 1] >>= tz;
+        }
+        z += tz;
+        if z & 1 == 1 && (n[0] & 7 == 3 || n[0] & 7 == 5) {
+            t = -t;
+        }
+        // Both odd: make a ≥ n by reciprocity, then a ← a − n.
+        if limbs_lt(&a, &n) {
+            std::mem::swap(&mut a, &mut n);
+            if a[0] & 3 == 3 && n[0] & 3 == 3 {
+                t = -t;
+            }
+        }
+        a = limbs_sub(&a, &n).0;
+    }
+}
+
 /// The largest supported limb count of [`FpWide`].
 pub const MAX_LIMBS: usize = 8;
 
 // ── FpWide<N>: Montgomery over N limbs ────────────────────────────────
 
 /// `F_p` for an odd prime `p < 2^(64N)`, `1 ≤ N ≤ 8`: variable-time
-/// Montgomery arithmetic (CIOS; the carry-free variant when the top limb
-/// of `p` is below `2⁶³ − 1`), binary extended-GCD inversion.
+/// Montgomery arithmetic and binary-GCD inversion.
+///
+/// `SPARE = false` (the default) is the general CIOS product with a
+/// branch-free final subtraction, for any `p < 2^(64N)`. `SPARE = true`
+/// needs a spare top bit (`p[N−1] < 2⁶³ − 1`, asserted): the carry-free
+/// CIOS of gnark-crypto with a branch for the final subtraction, which is
+/// then rarely taken when `p` is well below `R` (P-224 in four limbs). The
+/// choice is a type parameter because a run-time switch inside the
+/// product measured 15–40 % slower.
 #[derive(Clone, Debug)]
-pub struct FpWide<const N: usize> {
+pub struct FpWide<const N: usize, const SPARE: bool = false> {
     p: [u64; N],
     n_inv: u64,
     one: [u64; N],
@@ -1226,15 +1685,17 @@ pub struct FpWide<const N: usize> {
     r3: [u64; N],
     /// `2⁶⁴·R mod p`: undoes the extra word of the lazy reduction.
     k64: [u64; N],
-    no_carry: bool,
     modulus: BigUint,
     sqrt: SqrtPre<[u64; N]>,
 }
 
 /// `FpWide<3>`: primes up to 192 bits (NIST P-192).
 pub type Fp192 = FpWide<3>;
-/// `FpWide<4>`: primes up to 256 bits (NIST P-224, P-256).
+/// `FpWide<4>`: primes up to 256 bits (NIST P-256 and any other).
 pub type Fp256 = FpWide<4>;
+/// `FpWide<4, true>`: primes below `2²⁵⁵` with a spare top bit, the
+/// faster choice for NIST P-224 and the 200-bit test prime.
+pub type Fp224 = FpWide<4, true>;
 
 /// The lazy accumulator of [`FpWide<N>`]: `lo + hi·R + top·R²`.
 #[derive(Clone, Copy, Debug)]
@@ -1244,7 +1705,7 @@ pub struct WideAcc<const N: usize> {
     pub top: u64,
 }
 
-impl<const N: usize> FpWide<N> {
+impl<const N: usize, const SPARE: bool> FpWide<N, SPARE> {
     /// The field for an odd prime `p < 2^(64N)` (primality is the
     /// caller's promise; `p > 3`).
     pub fn new(p: &BigUint) -> Self {
@@ -1255,6 +1716,10 @@ impl<const N: usize> FpWide<N> {
         );
         assert!(p.bits() as usize <= 64 * N, "p does not fit {N} limbs");
         let pl: [u64; N] = limbs_from_biguint(p);
+        assert!(
+            !SPARE || pl[N - 1] < (u64::MAX >> 1) - 1,
+            "FpWide<N, true> needs p[N-1] < 2^63 - 1"
+        );
         let r = BigUint::one() << (64 * N);
         let one = limbs_from_biguint(&(&r % p));
         let r2 = limbs_from_biguint(&((&r * &r) % p));
@@ -1267,7 +1732,6 @@ impl<const N: usize> FpWide<N> {
             r2,
             r3,
             k64,
-            no_carry: pl[N - 1] < (u64::MAX >> 1) - 1,
             modulus: p.clone(),
             sqrt: SqrtPre::placeholder([0; N]),
         };
@@ -1309,10 +1773,7 @@ impl<const N: usize> FpWide<N> {
             t[N - 1] = lo;
             t_n = t_n1 + hi;
         }
-        if t_n != 0 || !limbs_lt(&t, p) {
-            t = limbs_sub(&t, p).0;
-        }
-        t
+        limbs_csub(&t, t_n, p)
     }
 
     /// CIOS without the overflow word, for `p[N−1] < 2⁶³ − 1`
@@ -1335,15 +1796,16 @@ impl<const N: usize> FpWide<N> {
             }
             t[N - 1] = cc + ca;
         }
-        if !limbs_lt(&t, p) {
-            t = limbs_sub(&t, p).0;
+        if limbs_lt(&t, p) {
+            t
+        } else {
+            limbs_sub(&t, p).0
         }
-        t
     }
 
     #[inline(always)]
     fn mont_mul(&self, a: &[u64; N], b: &[u64; N]) -> [u64; N] {
-        if self.no_carry {
+        if SPARE {
             self.mul_nc(a, b)
         } else {
             self.mul_cios(a, b)
@@ -1374,10 +1836,15 @@ impl<const N: usize> FpWide<N> {
         }
         let mut r = [0u64; N];
         r.copy_from_slice(&t[N + 1..2 * N + 1]);
-        if ex != 0 || !limbs_lt(&r, p) {
-            r = limbs_sub(&r, p).0;
+        if SPARE {
+            if ex == 0 && limbs_lt(&r, p) {
+                r
+            } else {
+                limbs_sub(&r, p).0
+            }
+        } else {
+            limbs_csub(&r, ex, p)
         }
-        r
     }
 
     /// `w < p·R·2⁶⁴`: words `N + 1 ..= 2N` compared with `p`.
@@ -1390,7 +1857,28 @@ impl<const N: usize> FpWide<N> {
 
     /// `a⁻¹ mod p` for a canonical `0 < a < p`.
     pub fn inv_canonical(&self, a: &[u64; N]) -> [u64; N] {
-        inv_binary(a, &self.p)
+        inv_bingcd(a, &self.p, self.n_inv)
+    }
+
+    /// Inverse by the plain binary extended Euclid (comparison arm).
+    pub fn inv_plain_binary(&self, a: [u64; N]) -> Option<[u64; N]> {
+        if limbs_is_zero(&a) {
+            return None;
+        }
+        Some(self.mont_mul(&inv_binary(&a, &self.p), &self.r3))
+    }
+
+    /// The Legendre symbol by Euler's criterion (comparison arm).
+    pub fn legendre_euler(&self, a: [u64; N]) -> i32 {
+        if limbs_is_zero(&a) {
+            return 0;
+        }
+        let r = self.pow(a, &self.sqrt.p_minus1_half);
+        if r == self.one {
+            1
+        } else {
+            -1
+        }
     }
 
     /// Inverse by Fermat's little theorem (comparison arm).
@@ -1403,14 +1891,16 @@ impl<const N: usize> FpWide<N> {
     }
 }
 
-impl<const N: usize> PrimeField for FpWide<N> {
+impl<const N: usize, const SPARE: bool> PrimeField for FpWide<N, SPARE> {
     type Elem = [u64; N];
     type Wide = WideAcc<N>;
 
     fn name(&self) -> &'static str {
-        match N {
-            3 => "FpWide<3>",
-            4 => "FpWide<4>",
+        match (N, SPARE) {
+            (3, false) => "FpWide<3>",
+            (4, false) => "FpWide<4>",
+            (3, true) => "FpWide<3+spare>",
+            (4, true) => "FpWide<4+spare>",
             _ => "FpWide<N>",
         }
     }
@@ -1448,21 +1938,11 @@ impl<const N: usize> PrimeField for FpWide<N> {
     }
     #[inline(always)]
     fn add(&self, a: [u64; N], b: [u64; N]) -> [u64; N] {
-        let (s, c) = limbs_add(&a, &b);
-        if c != 0 || !limbs_lt(&s, &self.p) {
-            limbs_sub(&s, &self.p).0
-        } else {
-            s
-        }
+        limbs_add_mod(&a, &b, &self.p)
     }
     #[inline(always)]
     fn sub(&self, a: [u64; N], b: [u64; N]) -> [u64; N] {
-        let (d, br) = limbs_sub(&a, &b);
-        if br != 0 {
-            limbs_add(&d, &self.p).0
-        } else {
-            d
-        }
+        limbs_sub_mod(&a, &b, &self.p)
     }
     #[inline(always)]
     fn neg(&self, a: [u64; N]) -> [u64; N] {
@@ -1476,13 +1956,22 @@ impl<const N: usize> PrimeField for FpWide<N> {
     fn mul(&self, a: [u64; N], b: [u64; N]) -> [u64; N] {
         self.mont_mul(&a, &b)
     }
+    #[inline(always)]
+    fn sqr(&self, a: [u64; N]) -> [u64; N] {
+        self.mont_mul(&a, &a)
+    }
     fn inv(&self, a: [u64; N]) -> Option<[u64; N]> {
         if limbs_is_zero(&a) {
             return None;
         }
-        // Binary inverse of the Montgomery value a·R is a⁻¹·R⁻¹.
-        let c = inv_binary(&a, &self.p);
+        // The inverse of the Montgomery value a·R is a⁻¹·R⁻¹; R³ fixes it.
+        let c = inv_bingcd(&a, &self.p, self.n_inv);
         Some(self.mont_mul(&c, &self.r3))
+    }
+    fn legendre(&self, a: [u64; N]) -> i32 {
+        let mut one = [0u64; N];
+        one[0] = 1;
+        jacobi_limbs(&self.mont_mul(&a, &one), &self.p)
     }
     fn sqrt_pre(&self) -> &SqrtPre<[u64; N]> {
         &self.sqrt
@@ -1611,20 +2100,28 @@ impl FpP192 {
             + 2 * u128::from(x6)
             + (s0 >> 64);
         let s2 = u128::from(x2) + u128::from(x4) + u128::from(x5) + u128::from(x6) + (s1 >> 64);
-        let mut r = [s0 as u64, s1 as u64, s2 as u64];
-        // Carry c = s2 >> 64 < 6: c·2^192 ≡ c·(2^64 + 1).
-        let mut c = (s2 >> 64) as u64;
-        while c != 0 {
-            let (a0, k0) = adc(r[0], c, 0);
-            let (a1, k1) = adc(r[1], c, k0);
-            let (a2, k2) = adc(r[2], 0, k1);
+        // Carry c = s2 >> 64 < 6: c·2^192 ≡ c·(2^64 + 1). Two folds:
+        // the first leaves a carry of at most one, the second (adding
+        // 2^64 + 1 to a value below 2^67) none.
+        // Both branches are rarely taken on random data (p is within
+        // 2^65 of 2^192), so they predict well.
+        let c = (s2 >> 64) as u64;
+        let (a0, k0) = adc(s0 as u64, c, 0);
+        let (a1, k1) = adc(s1 as u64, c, k0);
+        let (a2, c) = adc(s2 as u64, 0, k1);
+        let mut r = [a0, a1, a2];
+        if c != 0 {
+            let (a0, k0) = adc(r[0], 1, 0);
+            let (a1, k1) = adc(r[1], 1, k0);
+            let (a2, c2) = adc(r[2], 0, k1);
+            debug_assert_eq!(c2, 0);
             r = [a0, a1, a2];
-            c = k2;
         }
-        if !limbs_lt(&r, &P192) {
-            r = limbs_sub(&r, &P192).0;
+        if limbs_lt(&r, &P192) {
+            r
+        } else {
+            limbs_sub(&r, &P192).0
         }
-        r
     }
 
     #[inline(always)]
@@ -1683,21 +2180,11 @@ impl PrimeField for FpP192 {
     }
     #[inline(always)]
     fn add(&self, a: [u64; 3], b: [u64; 3]) -> [u64; 3] {
-        let (s, c) = limbs_add(&a, &b);
-        if c != 0 || !limbs_lt(&s, &P192) {
-            limbs_sub(&s, &P192).0
-        } else {
-            s
-        }
+        limbs_add_mod(&a, &b, &P192)
     }
     #[inline(always)]
     fn sub(&self, a: [u64; 3], b: [u64; 3]) -> [u64; 3] {
-        let (d, br) = limbs_sub(&a, &b);
-        if br != 0 {
-            limbs_add(&d, &P192).0
-        } else {
-            d
-        }
+        limbs_sub_mod(&a, &b, &P192)
     }
     #[inline(always)]
     fn neg(&self, a: [u64; 3]) -> [u64; 3] {
@@ -1716,10 +2203,13 @@ impl PrimeField for FpP192 {
         if limbs_is_zero(&a) {
             return None;
         }
-        Some(inv_binary(&a, &P192))
+        Some(inv_bingcd(&a, &P192, 1))
     }
     fn sqrt_pre(&self) -> &SqrtPre<[u64; 3]> {
         &self.sqrt
+    }
+    fn legendre(&self, a: [u64; 3]) -> i32 {
+        jacobi_limbs(&a, &P192)
     }
 
     fn lazy_capacity(&self) -> u64 {
@@ -1986,6 +2476,22 @@ mod tests {
         f.row_reduce_scaled(&acc, s, &mut out);
         let want: Vec<F::Elem> = eager.iter().map(|&x| f.mul(x, s)).collect();
         assert_eq!(out, want, "{} scaled reduce", f.name());
+        // Sparse scatter rows against the eager reference.
+        let mut sacc = vec![f.wide_zero(); n];
+        f.row_load(&start, &mut sacc);
+        let mut se = start.clone();
+        for _ in 0..300 {
+            let cols: Vec<u32> = (0..20).map(|_| rng.gen_range(0..n as u32)).collect();
+            let vals: Vec<F::Elem> = (0..20).map(|_| rand_el(rng)).collect();
+            let c = if rng.gen::<bool>() { pm1 } else { rand_el(rng) };
+            f.row_scatter_axpy(&mut sacc, c, &cols, &vals);
+            for (&col, &y) in cols.iter().zip(&vals) {
+                se[col as usize] = f.add(se[col as usize], f.mul(c, y));
+            }
+        }
+        let mut so = vec![f.zero(); n];
+        f.row_reduce(&sacc, &mut so);
+        assert_eq!(so, se, "{} scatter", f.name());
         // Scalar accumulator, scattered like the sparse F4 kernel.
         let mut w = f.wide_from(start[0]);
         let mut e = start[0];
@@ -2054,6 +2560,10 @@ mod tests {
         for p in [p192(), prime_above(189, 0xabcdef)] {
             check_field(&FpWide::<3>::new(&p), 3, 150);
         }
+        check_field(&FpWide::<3, true>::new(&prime_above(189, 0xabcdef)), 3, 150);
+        for p in [p200(), p224()] {
+            check_field(&Fp224::new(&p), 4, 150);
+        }
         for p in [p192(), p200(), p224(), p256()] {
             check_field(&FpWide::<4>::new(&p), 4, 150);
         }
@@ -2097,8 +2607,7 @@ mod tests {
         // for P-192 and P-256. Force both on one prime.
         let mut rng = StdRng::seed_from_u64(77);
         for p in [p224(), p200()] {
-            let f = Fp256::new(&p);
-            assert!(f.no_carry);
+            let f = Fp224::new(&p);
             for _ in 0..2000 {
                 let a = f.from_biguint(&rng.gen_biguint_below(&p));
                 let b = f.from_biguint(&rng.gen_biguint_below(&p));
@@ -2107,8 +2616,6 @@ mod tests {
             let a = f.from_biguint(&rng.gen_biguint_below(&p));
             assert_eq!(f.inv(a), f.inv_fermat(a));
         }
-        assert!(!Fp256::new(&p256()).no_carry);
-        assert!(!Fp192::new(&p192()).no_carry);
         // Big-p Fp32 Shoup rows against scalar dispatch.
         let p = 4_294_967_291u64;
         let (fv, fs) = (Fp32::new(p), Fp32::new_scalar(p));
@@ -2144,9 +2651,59 @@ mod tests {
             }
         }
         assert!(seen_nr > 5);
+        for _ in 0..40 {
+            let a = f.sqr(f.from_biguint(&rng.gen_biguint_below(&p224())));
+            let r1 = f.sqrt(a).unwrap();
+            let r2 = sqrt_tonelli_shanks_plain(&f, a).unwrap();
+            assert!(r1 == r2 || r1 == f.neg(r2));
+        }
         // P-192: p ≡ 3 mod 4 fast path.
         assert!(Fp192::new(&p192()).sqrt_pre().p_plus1_quarter.is_some());
         assert_eq!(Fp192::new(&p192()).sqrt_pre().s, 1);
+    }
+
+    #[test]
+    fn bingcd_and_jacobi_match_reference() {
+        let mut rng = StdRng::seed_from_u64(31);
+        fn run<const N: usize>(p: &BigUint, rng: &mut StdRng) {
+            let f = FpWide::<N>::new(p);
+            let pl = *f.p_limbs();
+            let one = BigUint::one();
+            let mut xs: Vec<BigUint> = vec![one.clone(), BigUint::from(2u32), p - &one, p - 2u32];
+            for k in 1..(64 * N as u32) {
+                let v = &one << k;
+                if &v < p {
+                    xs.push(v.clone());
+                    xs.push(&v - &one);
+                }
+            }
+            for _ in 0..3000 {
+                xs.push(rng.gen_biguint_below(p));
+            }
+            let pm2 = p - 2u32;
+            let half = (p - &one) >> 1u32;
+            for x in xs.iter().filter(|x| !x.is_zero()) {
+                let a: [u64; N] = limbs_from_biguint(x);
+                let inv = limbs_to_biguint(&inv_bingcd(&a, &pl, neg_inv_u64(pl[0])));
+                assert_eq!(inv, x.modpow(&pm2, p), "bingcd {x:x} mod {p:x}");
+                let e = x.modpow(&half, p);
+                let want = if e.is_one() { 1 } else { -1 };
+                assert_eq!(jacobi_limbs(&a, &pl), want, "jacobi {x:x}");
+            }
+        }
+        run::<3>(&p192(), &mut rng);
+        run::<3>(&prime_above(189, 0xabcdef), &mut rng);
+        run::<4>(&p224(), &mut rng);
+        run::<4>(&p256(), &mut rng);
+        run::<4>(&p200(), &mut rng);
+        run::<2>(&((BigUint::one() << 127u32) - 1u32), &mut rng);
+        run::<1>(&BigUint::from((1u64 << 61) - 1), &mut rng);
+        run::<8>(&prime_above(511, 0x1f), &mut rng);
+        assert_eq!(
+            BINGCD_FALLBACKS.load(std::sync::atomic::Ordering::Relaxed),
+            0,
+            "the binary-GCD iteration bound was reached"
+        );
     }
 
     #[test]

@@ -23,7 +23,9 @@ use std::hint::black_box;
 use std::io::Write;
 use std::time::Instant;
 
-use crypto_lib::cryptanalysis::fp_backend::{Fp192, Fp256, Fp32, Fp64, FpP192, FpWide, PrimeField};
+use crypto_lib::cryptanalysis::fp_backend::{
+    sqrt_tonelli_shanks_plain, Fp192, Fp224, Fp256, Fp32, Fp64, FpP192, FpWide, PrimeField,
+};
 use crypto_lib::cryptanalysis::prime_fast;
 use crypto_lib::ct_bignum::{MontgomeryContext, Uint};
 use num_bigint::{BigUint, RandBigInt};
@@ -611,22 +613,47 @@ fn tower_arms(arms: &mut Vec<Arm>, p: u64, prime: &str, seed: u64) {
         );
     }
     {
+        let sparse = sparse.clone();
+        let f = f.clone();
         let mut vals = vec![0u64; n_cols];
         let mut bits = vec![0u64; n_cols / 64];
         arm(arms, "Fp32", prime, "scatter_sparse", nnz, move |it| {
             for _ in 0..it {
                 vals.iter_mut().for_each(|x| *x = 0);
                 for (cols, v, c) in &sparse {
-                    let nc = f.neg(*c);
-                    for (&col, &x) in cols.iter().zip(v) {
-                        let ci = col as usize;
-                        f.wide_mul_add(&mut vals[ci], nc, x);
-                        bits[ci / 64] |= 1u64 << (ci % 64);
+                    f.row_scatter_axpy(&mut vals, f.neg(*c), cols, v);
+                    for &col in cols {
+                        bits[col as usize / 64] |= 1u64 << (col % 64);
                     }
                 }
                 black_box(&vals);
             }
         });
+    }
+    {
+        let mut vals = vec![0u64; n_cols];
+        let mut bits = vec![0u64; n_cols / 64];
+        arm(
+            arms,
+            "Fp32",
+            prime,
+            "scatter_sparse_scalar",
+            nnz,
+            move |it| {
+                for _ in 0..it {
+                    vals.iter_mut().for_each(|x| *x = 0);
+                    for (cols, v, c) in &sparse {
+                        let nc = f.neg(*c);
+                        for (&col, &x) in cols.iter().zip(v) {
+                            let ci = col as usize;
+                            f.wide_mul_add(&mut vals[ci], nc, x);
+                            bits[ci / 64] |= 1u64 << (ci % 64);
+                        }
+                    }
+                    black_box(&vals);
+                }
+            },
+        );
     }
 }
 
@@ -766,6 +793,75 @@ fn prime_fast_arms(arms: &mut Vec<Arm>, p: u64, prime: &str, seed: u64) {
     }
 }
 
+/// Comparison arms for the algorithm choices inside `FpWide`: the Fermat
+/// and plain binary inverses the binary-GCD inverse replaced, Euler's
+/// criterion against the binary Jacobi symbol, and plain Tonelli–Shanks
+/// against the windowed one (when `s ≥ 16`).
+fn choice_arms<const N: usize, const S: bool>(
+    arms: &mut Vec<Arm>,
+    f: FpWide<N, S>,
+    prime: &str,
+    seed: u64,
+) {
+    let backend = f.name().to_string();
+    let p = f.modulus().clone();
+    let mut rng = StdRng::seed_from_u64(seed);
+    let xs: Vec<[u64; N]> = (0..32)
+        .map(|_| f.from_biguint(&rng.gen_biguint_below(&p)))
+        .filter(|&x| !f.is_zero(x))
+        .collect();
+    for &x in &xs {
+        assert_eq!(f.inv_fermat(x), f.inv(x));
+        assert_eq!(f.inv_plain_binary(x), f.inv(x));
+        assert_eq!(f.legendre_euler(x), f.legendre(x));
+    }
+    let n = xs.len() as u64;
+    {
+        let (f, xs) = (f.clone(), xs.clone());
+        arm(arms, &backend, prime, "inv_fermat", n, move |it| {
+            for _ in 0..it {
+                for &x in &xs {
+                    black_box(f.inv_fermat(black_box(x)));
+                }
+            }
+        });
+    }
+    {
+        let (f, xs) = (f.clone(), xs.clone());
+        arm(arms, &backend, prime, "inv_plain_binary", n, move |it| {
+            for _ in 0..it {
+                for &x in &xs {
+                    black_box(f.inv_plain_binary(black_box(x)));
+                }
+            }
+        });
+    }
+    {
+        let (f, xs) = (f.clone(), xs.clone());
+        arm(arms, &backend, prime, "legendre_euler", n, move |it| {
+            for _ in 0..it {
+                for &x in &xs {
+                    black_box(f.legendre_euler(black_box(x)));
+                }
+            }
+        });
+    }
+    if f.sqrt_pre().chunks.is_some() {
+        let sq: Vec<[u64; N]> = xs.iter().map(|&x| f.sqr(x)).collect();
+        for &x in &sq {
+            let r = sqrt_tonelli_shanks_plain(&f, x).unwrap();
+            assert_eq!(f.sqr(r), x);
+        }
+        arm(arms, &backend, prime, "sqrt_ts_plain", n, move |it| {
+            for _ in 0..it {
+                for &x in &sq {
+                    black_box(sqrt_tonelli_shanks_plain(&f, black_box(x)));
+                }
+            }
+        });
+    }
+}
+
 fn quantile(sorted: &[f64], q: f64) -> f64 {
     let pos = q * (sorted.len() - 1) as f64;
     let (lo, hi) = (pos.floor() as usize, pos.ceil() as usize);
@@ -809,27 +905,14 @@ fn main() {
     field_arms(&mut arms, FpP192::new(), "P-192", 10);
     field_arms(&mut arms, Fp256::new(&p200), "p200", 11);
     field_arms(&mut arms, Fp256::new(&p224), "P-224", 12);
+    field_arms(&mut arms, Fp224::new(&p200), "p200", 19);
+    field_arms(&mut arms, Fp224::new(&p224), "P-224", 20);
     field_arms(&mut arms, Fp256::new(&p256), "P-256", 13);
     reference_arms::<3>(&mut arms, &p192, "P-192", 14);
     reference_arms::<4>(&mut arms, &p224, "P-224", 15);
     reference_arms::<4>(&mut arms, &p256, "P-256", 16);
-    {
-        // The Fermat inverse of FpWide, the arm the binary inverse replaced.
-        for (pr, p) in [("P-192", &p192), ("P-224", &p224)] {
-            let f = FpWide::<4>::new(p);
-            let mut rng = StdRng::seed_from_u64(17);
-            let xs: Vec<[u64; 4]> = (0..32)
-                .map(|_| f.from_biguint(&rng.gen_biguint_below(p)))
-                .collect();
-            arm(&mut arms, "FpWide<4>", pr, "inv_fermat", 32, move |it| {
-                for _ in 0..it {
-                    for &x in &xs {
-                        black_box(f.inv_fermat(black_box(x)));
-                    }
-                }
-            });
-        }
-    }
+    choice_arms(&mut arms, Fp192::new(&p192), "P-192", 17);
+    choice_arms(&mut arms, Fp256::new(&p224), "P-224", 18);
     if let Some(flt) = &filter {
         arms.retain(|a| a.name.contains(flt.as_str()));
     }
