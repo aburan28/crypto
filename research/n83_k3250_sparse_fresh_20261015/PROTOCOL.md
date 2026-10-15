@@ -25,6 +25,15 @@ before cloud execution:
 | Answer sidecar | `9cfe15c36e06a42592344db6781a47c828e55bd0bfcb31239019ec4f6977f045` |
 | Executed IC source | `c9824acebda0360416c3c507594bb07c17ca798c32cbf8f84bba95ca2c44d5b1` |
 
+The exact point and answer files are retained in executed source commit
+`402c3142fb3f1cfe70b9de58d54e51e50b2a40c5` and in the archived
+producer artifact. To recreate the byte-identical files from this branch,
+run `python3 research/n83_k3250_sparse_fresh_20261015/generate.py` from the
+repository root. The generator checks the prior panels and prints the two
+hashes above. Generated files are ignored in this branch to keep the review
+diff focused on the method and results; the source-pinned replay uses the
+executed commit's original fixtures.
+
 The K3250 base has 539,500 usable subgroup points, 3,250 folded columns,
 base hash `52ec996e34e9c2819cfb715898c9f605fcb896dd528c5dac01b6994b85900776`,
 and 876,670,157 retained roots. K3300 has 547,800 usable points, 3,300
