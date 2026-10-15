@@ -1,0 +1,97 @@
+{
+  "schema": "ecbench.plan/v1",
+  "spec_id": "ECS1h656e19dd251e",
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation",
+        "family": "rho",
+        "params": {
+          "cap_multiple": "64"
+        },
+        "method_id": "ECM1hefea4e0ebe79",
+        "method_sha256": "efea4e0ebe79dadfedeb75106dab92e25fc26bfe282155ee0326380d4184e995",
+        "entry": "ic_boundary::rho_walk_with(NegationClasses, RhoWalk::negation())"
+      }
+    },
+    {
+      "name": "ic-d4-w",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "fghr-y-line:zero=1",
+          "linalg": "wiedemann",
+          "max_trials": "400000",
+          "oracle": "gaudry-d4:macaulay=26,weighted=1,chains=1,sparsest=1,replay=1,charge_unsolved=1",
+          "solver": "",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1h61b98477c2e9",
+        "method_sha256": "61b98477c2e9fd5d510414a78d83d3a7872321fce067b73b8d83d6bec48515bc",
+        "entry": "ic_framework::run_pipeline"
+      }
+    }
+  ],
+  "workloads": [
+    {
+      "workload_id": "W1af61f439b2f",
+      "workload_sha256": "1af61f439b2fc2c10f77c6f44bea46ecf60901560fab1c92867830f7d614af9c",
+      "curve_spec": {
+        "kind": "fp4_torsion",
+        "p": 61,
+        "seed": 1,
+        "max_cofactor": 16
+      },
+      "curve": {
+        "slug": "icv1-fp6k4-t2146-7722ca0a",
+        "icv1": "ICV1:fpk-61-4-26c149ef:2146:13843696:41,1,60,44:unk:unk:r:7722ca0ae083",
+        "family": "extension",
+        "construction": "gaudry_quartic_d4::find_d4_curve(61, 1, 16)",
+        "field_degree": null,
+        "field_bits": 6,
+        "group_order": 13843696,
+        "r": 865231,
+        "cofactor": 16,
+        "generator": [
+          "0xb6f00a",
+          "0x6a1ace"
+        ],
+        "automorphisms_available": 2,
+        "registered": false,
+        "ec1": null,
+        "curve_uid": null
+      },
+      "target_law": "uniform_scalar_sha256_v1",
+      "target_seed": 2026101500610,
+      "target_index": 0,
+      "target": [
+        "0x51d234",
+        "0x6c7252"
+      ],
+      "planted": 295572
+    }
+  ],
+  "executions": [
+    {
+      "seq": 0,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 8089533938581830677
+    },
+    {
+      "seq": 1,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 8089533938581830677
+    }
+  ]
+}

@@ -335,7 +335,10 @@ fn main() {
             m.insert("s_values".into(), json!(s));
             m.insert(
                 "workloads".into(),
-                json!(idx.iter().map(|&i| recs[i].workload.clone()).collect::<Vec<_>>()),
+                json!(idx
+                    .iter()
+                    .map(|&i| recs[i].workload.clone())
+                    .collect::<Vec<_>>()),
             );
             for key in [
                 "relations.relations",
@@ -411,7 +414,8 @@ fn main() {
                 ("wiedemann", vec!["relations", "linear_algebra", "other"]),
                 ("dense_gauss", vec!["relations", "shadow_gauss", "other"]),
             ] {
-                let ic: Vec<(f64, f64)> = parts.iter().filter_map(|q| coef.get(q).copied()).collect();
+                let ic: Vec<(f64, f64)> =
+                    parts.iter().filter_map(|q| coef.get(q).copied()).collect();
                 for h in HS {
                     let rho_f = move |x: f64| (sm_b * ((4.0 * x).exp() / h).sqrt()).ln();
                     let key = format!("{variant}/h={h}");
@@ -477,9 +481,41 @@ fn main() {
             }
             push("rho_power_law".into(), &move |x: f64| rc + rb * x);
         }
+        // Sensitivity (reported beside the frozen bootstrap interval, which
+        // resamples targets within rungs and so does not see the scatter
+        // between rungs): the crossover with the relations slope moved to
+        // either end of its Student-t interval, the line pivoting about
+        // the rungs' centroid in ln p.
+        let mut sensitivity = Vec::new();
+        if let (Some(f), Some(&(c, b))) = (fits.get("relations"), point_coef.get("relations")) {
+            let xs: Vec<f64> = rungs.keys().map(|p| (*p as f64).ln()).collect();
+            let xbar = mean(&xs);
+            for (end, bb) in [
+                ("low", num(&f["slope_t95"][0])),
+                ("high", num(&f["slope_t95"][1])),
+            ] {
+                let cc = c + (b - bb) * xbar;
+                let ic: Vec<(f64, f64)> = std::iter::once((cc, bb))
+                    .chain(
+                        ["linear_algebra", "other"]
+                            .iter()
+                            .filter_map(|q| point_coef.get(q).copied()),
+                    )
+                    .collect();
+                for h in HS {
+                    let rho_f = move |x: f64| (s_rho_mean * ((4.0 * x).exp() / h).sqrt()).ln();
+                    let (first, _) = crossings(&ic, &rho_f);
+                    sensitivity.push(json!({
+                        "relations_slope_at": end, "relations_slope": bb, "h": h,
+                        "log2_group_star": first.map(|x| 4.0 * x),
+                    }));
+                }
+            }
+        }
         out_arms.insert(
             arm.into(),
-            json!({"per_rung": per_rung, "fits": fits, "crossovers": crossovers}),
+            json!({"per_rung": per_rung, "fits": fits, "crossovers": crossovers,
+                   "crossover_relations_slope_sensitivity": sensitivity}),
         );
     }
 

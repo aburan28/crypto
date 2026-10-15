@@ -88,6 +88,10 @@ for c in w["crossovers"]:
         lo, hi = c["log2_p_star_boot95"]
         ax.axvspan(2 ** lo, 2 ** hi, color=C["rel"], alpha=0.12, linewidth=0)
         ax.text(x, 1e5, f" measured fit, h = 4:\n p* = 2^{c['log2_p_star']:.1f}, group 2^{c['log2_group_star']:.0f}", fontsize=7, color=C["ink"])
+sens = [c["log2_group_star"] for c in w["crossover_relations_slope_sensitivity"] if c["h"] == 4.0 and c["log2_group_star"]]
+if len(sens) == 2:
+    ax.axvspan(2 ** (min(sens) / 4), 2 ** (max(sens) / 4), facecolor="none", alpha=0.5, linewidth=0, hatch="////", edgecolor=C["rel"])
+    ax.text(2 ** (min(sens) / 4), 1e20, f" relations slope at its t-interval ends:\n group 2^{min(sens):.0f}…2^{max(sens):.0f}", fontsize=7, color=C["muted"])
 m = S["model_11_16_from_pr1863"]["log2_group_star"]["h=4"]
 ax.axvspan(2 ** (m[0] / 4), 2 ** (m[1] / 4), color=C["la"], alpha=0.25, linewidth=0)
 ax.text(2 ** (m[0] / 4), 3e1, f"§11.16 model, h = 4:  \n group 2^{m[0]:.1f}…2^{m[1]:.1f}  ", ha="right", va="bottom", fontsize=7, color=C["ink"])
@@ -143,3 +147,28 @@ ax.invert_yaxis()
 ax.set_xlabel("fitted exponent β in cost ∝ p^β (95 % interval: union of OLS-t and bootstrap)")
 save(fig, "slopes")
 print("ok", file=sys.stderr)
+
+# 5. Run report: every recorded S, by arm, against p.
+RUN = HERE.parent / "reports/run-20261015T0457Z"
+RUN.mkdir(parents=True, exist_ok=True)
+fig, ax = plt.subplots(figsize=(7.2, 4.2))
+for arm, col, mk, lab in (("ic-d4-w", C["rel"], "o", "ic-d4-w"), ("ic-d4-lp2", C["lp2"], "s", "ic-d4-lp2"), ("ic-d4-lp1", C["lp1"], "^", "ic-d4-lp1")):
+    if arm not in S["arms"]:
+        continue
+    xs, ys = [], []
+    for r in S["arms"][arm]["per_rung"]:
+        xs += [r["p"]] * len(r["s_values"])
+        ys += r["s_values"]
+    ax.scatter(xs, ys, s=16, color=col, marker=mk, label=f"{lab} ({len(ys)} runs)", zorder=3)
+ax.scatter([r["p"] for r in rho["per_rung"]], [r["s"] for r in rho["per_rung"]], s=16, color=C["rho"], marker="D", label=f"rho-neg, rung mean ({rho['records']} distinct runs)")
+ax.set_xscale("log")
+ax.set_yscale("log")
+ax.set_xlabel("p")
+ax.set_ylabel("S (GAE / √r), counted")
+ax.set_title("Every verified run's S (sessions under sessions/; summary raw/summary.json)", fontsize=9, color=C["ink"])
+grid(ax)
+ax.legend(fontsize=7, frameon=False, loc="center right")
+fig.tight_layout()
+fig.savefig(RUN / "s_by_run.svg")
+fig.savefig(RUN / "s_by_run.png", dpi=150)
+plt.close(fig)
