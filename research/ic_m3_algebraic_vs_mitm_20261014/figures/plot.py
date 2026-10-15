@@ -1,6 +1,8 @@
 """Layout only: draws the values `ic_algebraic_floor analyze` recorded
 (cells.csv, ANALYSIS.json). No value is computed here beyond axis
-placement. Usage: python plot.py <study dir>"""
+placement. Usage: python plot.py <study dir> [<reference dir>]: arms of the
+optional reference dir (other than its floor) are overlaid, faded, labelled
+"original run"."""
 import csv
 import json
 import sys
@@ -13,6 +15,11 @@ import matplotlib.pyplot as plt
 
 study = Path(sys.argv[1])
 rows = list(csv.DictReader(open(study / "cells.csv")))
+if len(sys.argv) > 2:
+    for r in csv.DictReader(open(Path(sys.argv[2]) / "cells.csv")):
+        if r["arm"] != "floor-mitm":
+            r["arm"] = "orig:" + r["arm"]
+            rows.append(r)
 ana = json.load(open(study / "ANALYSIS.json"))
 out = study / "figures"
 out.mkdir(exist_ok=True)
@@ -25,6 +32,7 @@ STYLE = {
     "s4-hybrid-f10": ("#8f5bd6", "v", "unsplit S4 hybrid, 10 free"),
     "s4-hybrid-f12": ("#c27c0e", "P", "unsplit S4 hybrid, 12 free"),
     "s22-hybrid-g8": ("#8f5bd6", "v", "S3+S4 split hybrid, g=8"),
+    "wide-chain": ("#e36414", "X", "wide u128 chain solver (amendment 1)"),
 }
 
 
@@ -34,14 +42,18 @@ def save(fig, name):
     plt.close(fig)
 
 
-for m in sorted({r["m"] for r in rows}):
+for m in sorted({r["m"] for r in rows if r["arm"] == "floor-mitm"}):
     fig, ax = plt.subplots(figsize=(9.6, 4.6))
     arms = []
     for r in rows:
         if r["m"] == m and r["arm"] not in arms:
             arms.append(r["arm"])
     for arm in arms:
-        color, marker, label = STYLE.get(arm, ("grey", "x", arm))
+        orig = arm.startswith("orig:")
+        color, marker, label = STYLE.get(arm.removeprefix("orig:"), ("grey", "x", arm))
+        if orig:
+            label = f"{label} (original run)"
+        alpha = 0.35 if orig else 1.0
         pts = [r for r in rows if r["m"] == m and r["arm"] == arm]
         meas = [r for r in pts if r["status"] == "measured"]
         lb = [r for r in pts if r["status"] == "lower_bound"]
@@ -51,21 +63,25 @@ for m in sorted({r["m"] for r in rows}):
             lo = [y - float(r["lo"]) for y, r in zip(ys, meas)]
             hi = [float(r["hi"]) - y for y, r in zip(ys, meas)]
             ax.errorbar(xs, ys, yerr=[lo, hi], color=color, marker=marker,
-                        capsize=3, lw=1.4, ms=6, label=label)
+                        capsize=3, lw=1.4, ms=6, label=label, alpha=alpha)
         if lb:
             ax.scatter([int(r["n"]) for r in lb], [float(r["log2_cost_ns"]) for r in lb],
-                       facecolors="none", edgecolors=color, marker=marker, s=60,
+                       facecolors="none", edgecolors=color, marker=marker, s=60, alpha=alpha,
                        label=f"{label}: lower bound (censored)" if not meas else None)
             for r in lb:
                 ax.annotate("", xy=(int(r["n"]), float(r["log2_cost_ns"]) + 1.6),
                             xytext=(int(r["n"]), float(r["log2_cost_ns"])),
                             arrowprops=dict(arrowstyle="->", color=color, lw=1))
+    lo_y, hi_y = ax.get_ylim()
+    ax.set_ylim(lo_y, hi_y + 2.5)  # room for the lower-bound arrows
     ax.set_xlabel("field degree n (cells a:n:d with d = ceil(n/m))")
     ax.set_ylabel("log2 wall ns per relation (one core)")
     ax.set_title(f"m = {m}: cost per relation, algebraic/SAT arms vs MITM floor\n"
                  "bars: 95% bootstrap; open markers with arrows: lower bounds")
     ax.grid(alpha=0.3)
-    if m == "4":
+    if m == "4" and not any(
+        r["m"] == "4" and r["arm"] == "wide-chain" for r in rows
+    ):
         ax.axvspan(21.5, 32, color="#999999", alpha=0.12)
         ax.text(26.5, 31, "F4 / F6-IC / SAT unsupported here:\nchain has 4d+2n > 64 unknowns\n(MAX_VARS); floor only", ha="center", fontsize=7)
     ax.legend(fontsize=7, loc="upper left", bbox_to_anchor=(1.01, 1.0))

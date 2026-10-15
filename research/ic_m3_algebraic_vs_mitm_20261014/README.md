@@ -13,6 +13,8 @@ frozen rule.
 - **Grows faster than the floor** (95% interval of the slope difference
   entirely above 0, at least 3 measured cells): F4 on the S₃ chain and
   F6-IC, at `m = 3` and at `m = 4`. Also the unsplit-S₄ hybrids at `m = 3`.
+  Also the wide `u128` chain solver at `m = 4`, which reaches all seven `m = 4`
+  cells (amendment 1, below).
 - **Undetermined** (fewer than 3 finished cells): SAT at both `m`, and the
   S₃+S₄ split hybrid at `m = 4`. These arms censor so early that the frozen
   rule cannot fit a slope. Their recorded lower bounds sit 10⁶–10⁷ times
@@ -32,8 +34,13 @@ relation, on one core, at isolation level L0. It makes no end-to-end,
 - Analysis: [`ANALYSIS.json`](ANALYSIS.json) / [`ANALYSIS.md`](ANALYSIS.md)
   and [`cells.csv`](cells.csv), all written by `ic_algebraic_floor analyze`.
 - Report PDF: [`REPORT.pdf`](REPORT.pdf), from `REPORT.typ`.
-- Run report: [`reports/run-20261014T1854Z/`](reports/run-20261014T1854Z/).
-- Raw records: `runs/m3/`, `runs/m4/` and `runs-m{3,4}.log`.
+- Run reports: [`reports/run-20261014T1854Z/`](reports/run-20261014T1854Z/)
+  (the main grid) and [`reports/run-20261015T0024Z/`](reports/run-20261015T0024Z/)
+  (amendment 1).
+- Amendment 1: [`AMENDMENT_1.md`](AMENDMENT_1.md), frozen in commit
+  `882598e55`, with its analysis in [`amendment-1/`](amendment-1/).
+- Raw records: `runs/m3/`, `runs/m4/`, `runs/m4-wide/` and
+  `runs-m{3,4,4-wide}.log`.
 - Pilot (not claim data): `pilot/`.
 
 ## What was compared
@@ -126,6 +133,48 @@ verdict changes.
   `p = 0.009`). On n = 13, 17 and 19, F4 on the chain has slope 1.02 with
   Δ [0.41, 0.48], and F6-IC has Δ [0.42, 0.50].
 
+## Amendment 1: `m = 4` with the wide u128 solver
+
+The owner asked for the 64-variable cap to be widened to 128 and the `m = 4`
+grid rerun. The route chosen was the repository's existing `u128` solver,
+`wide_groebner::wide_groebner_decompose` (up to 128 unknowns), rather than
+rewriting the 64-bit engines.
+
+It solves the same chained-S₃ system. Its search is summand enumeration
+pruned by Macaulay linearisation, which makes it a new arm, `wide-chain`,
+not inherited F4. It ran on all seven `m = 4` cells, with the same targets,
+budgets and rules ([`AMENDMENT_1.md`](AMENDMENT_1.md)).
+
+**Exactness.** Every finished verdict agreed with the floor (40 `yes` and
+30 `no`).
+
+| n | d | unknowns | p | floor | wide-chain | ÷ floor |
+|--:|--:|--:|--:|--:|--:|--:|
+| 11 | 3 | 34 | 0.009 | 18.09 | 27.20 [26.45, 28.42] | 5.5·10² |
+| 13 | 4 | 42 | 0.562 | 14.99 | 26.05 [25.81, 26.27] | 2.1·10³ |
+| 17 | 5 | 54 | 0.181 | 16.96 | 29.85 [29.62, 30.10] | 7.6·10³ |
+| 19 | 5 | 58 | 0.093 | 18.37 | 32.27 [31.99, 32.59] | 1.5·10⁴ |
+| 23 | 6 | 70 | 0.026 | 21.06 | 35.96 [35.45, 36.63] | 3.1·10⁴ |
+| 29 | 8 | 90 | 0.281 | 21.68 | ≥ 38.58 (7 of 12 censored) | ≥ 1.2·10⁵ |
+| 31 | 8 | 94 | 0.082 | 23.48 | ≥ 40.52 (8 of 12 censored) | ≥ 1.3·10⁵ |
+
+Values are log₂ wall ns per relation.
+
+**Slope fits.**
+- **Measured cells** (n = 11–23): `wide-chain` slope 0.805 [0.717, 0.872].
+  The floor on the same cells is 0.333, giving **Δ [0.433, 0.504]: grows
+  faster than the floor.**
+- **Lower-bound fit** (all seven cells): 0.724, with Δ [0.358, 0.390]. This
+  fit is a valid lower bound, because the bounded cells lie above the mean n.
+- **Sensitivity without n = 11:** Δ [0.369, 0.410].
+
+**Overlap with F4.** On n = 11–19, where both run, the wide solver costs
+about what inherited F4 and F6-IC cost (the faded points in the figure). It
+does not change the `m = 4` picture: it extends the measured range to
+n = 23, and adds lower bounds at 29 and 31.
+
+![m = 4 with the wide solver](amendment-1/figures/cost_per_relation_m4.svg)
+
 ## Where solvers time out or cannot run
 
 - **SAT, `m = 3`.** Through n = 19 it decides every decomposable target, but
@@ -143,7 +192,15 @@ verdict changes.
   is capped at 64 (`koblitz_groebner::MAX_VARS`). This is an implementation
   limit, not a cost or a mathematical obstruction. It is recorded in
   [`problems/binary-boolean-system-64-variable-cap.md`](../../problems/binary-boolean-system-64-variable-cap.md).
-  Only the floor ran on those cells.
+  Only the floor ran on those cells in the main grid. Amendment 1 covers
+  them with the wide `u128` solver.
+- **Wide u128 solver, `m = 4` (amendment 1).**
+  - Measured through n = 23.
+  - At n = 29 and 31, every refutation exceeded 120 s single-threaded; so did
+    one decomposable target at n = 29 and two at n = 31 (one killed, one
+    finishing at 130 s). That makes those cells lower bounds.
+  - Pre-run smoke solves at n = 29 and 31 took 48–58 s, but they ran
+    multithreaded and are not claim data.
 
 ## Reading (interpretation, labelled as such)
 
@@ -169,8 +226,9 @@ verdict changes.
 
 ## Limits
 
-- **Small fields.** n ≤ 31 for `m = 3`, and ≤ 19 for the algebraic `m = 4`
-  arms. Slopes are fitted over a range, not proved asymptotically. "Faster
+- **Small fields.** n ≤ 31 for `m = 3`. For the algebraic `m = 4` arms,
+  n ≤ 19 for F4 and F6-IC, and n ≤ 23 measured (29 and 31 lower bounds) for
+  the wide solver. Slopes are fitted over a range, not proved asymptotically. "Faster
   than the floor" is a statement about n = 13…31 with this implementation.
 - **Isolation and units.**
   - L0 isolation: a shared 4-vCPU container, with the two grids running
@@ -196,7 +254,8 @@ verdict changes.
 | Survey what was measured already | done (see PROTOCOL.md §1 and the reading above) |
 | Freeze protocol before claim data | done: commit `76e88621e`, before the claim run at 18:54Z |
 | `m = 3` cost per relation against the floor, n = 13…31, exactness against enumeration | done: 6 cells; exact on every finished verdict; floor equal to exhaustive enumeration on n ≤ 23 |
-| `m = 4` if feasible | partial: n = 11–19 measured; n ≥ 23 unsupported (64-variable cap, problem record) |
+| `m = 4` if feasible | done with amendment 1: wide `u128` solver on n = 11–31 (n ≤ 23 measured, 29 and 31 lower bounds); F4 and F6-IC n = 11–19; the narrow engines' 64-variable cap itself is not widened (owner's choice; problem record) |
+| Widen to 128 variables and rerun `m = 4` (owner, 2026-10-15) | done via the existing `u128` solver (owner chose it over rewriting `MAX_VARS`); grid in `runs/m4-wide/` |
 | Slopes with intervals, timeouts, verdict | done |
 | End-to-end ecbench comparison | not triggered: no arm beat the floor (§7) |
 | Report, graph, PDF; `benchmarks/` entry | done |
@@ -210,7 +269,11 @@ S=research/ic_m3_algebraic_vs_mitm_20261014
 $B analyze --dir $S/runs/m3,$S/runs/m4 --out $S/ANALYSIS.json
 $B analyze --dir $S/runs/m3,$S/runs/m4 --floor online --out $S/sensitivity/online-floor/ANALYSIS.json
 $B analyze --dir $S/runs/m4 --exclude-n 11 --out $S/sensitivity/m4-without-n11/ANALYSIS.json
-python figures/plot.py $S      # layout only (matplotlib), reads cells.csv and ANALYSIS.json
+./research/ic_m3_algebraic_vs_mitm_20261014/run_grid_amendment1.sh   # amendment 1, writes runs/m4-wide/
+$B analyze --dir $S/runs/m4-wide --out $S/amendment-1/ANALYSIS.json
+$B analyze --dir $S/runs/m4-wide --exclude-n 11 --out $S/amendment-1/sensitivity-without-n11/ANALYSIS.json
+python figures/plot.py $S                    # layout only (matplotlib), reads cells.csv and ANALYSIS.json
+python figures/plot.py $S/amendment-1 $S     # amendment figures, original m = 4 arms faded
 ```
 
 ## Dashboard panels checked

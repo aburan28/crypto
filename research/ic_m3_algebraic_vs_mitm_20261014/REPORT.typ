@@ -14,6 +14,7 @@ On binary Koblitz curves $K_a slash FF_(2^n)$ with factor base $F = {P : x(P) in
 *No, on the measured range.*
 - *Grows faster than the floor*, with the 95% interval of slope(arm) − slope(floor) entirely above 0: F4 on the S#sub[3] chain and F6-IC, at both $m = 3$ and $m = 4$; and both unsplit-S#sub[4] hybrids at $m = 3$.
 - *Undetermined* (fewer than 3 finished cells): SAT, at both $m$, and the S#sub[3]+S#sub[4] split hybrid. These censor too early for a fit; their lower bounds lie $10^6$–$10^7 times$ above the floor.
+- *Amendment 1:* the wide `u128` chain solver reaches all seven $m = 4$ cells and also grows faster than the floor (§1.6).
 
 The prediction made before the data held. The conditional end-to-end ecbench run (protocol §7) was therefore not triggered.
 
@@ -63,7 +64,7 @@ The floor's slope over all cells is 0.207 [0.204, 0.211] at $m = 3$ and 0.363 [0
 - Without the degenerate $m = 4$, $n = 11$ cell ($|F| = 3$), F4-chain's Δ is [0.41, 0.48].
 
 #figure(image("figures/cost_per_relation_m4.svg", width: 92%),
-  caption: [$m = 4$. For $n >= 23$ the chain system has $4d + 2n > 64$ unknowns, and the library caps Boolean systems at 64 (`MAX_VARS`). That is an implementation limit (`problems/binary-boolean-system-64-variable-cap.md`), so only the floor ran there.])
+  caption: [$m = 4$, main grid. For $n >= 23$ the chain system has $4d + 2n > 64$ unknowns, and the narrow engines cap Boolean systems at 64 (`MAX_VARS`), so only the floor ran there in this grid. Amendment 1 (§1.6) covers those cells with the `u128` solver.])
 
 == Timeouts, censoring and limits
 
@@ -79,3 +80,33 @@ The floor's slope over all cells is 0.207 [0.204, 0.211] at $m = 3$ and 0.363 [0
 - *F4 and F6-IC.* The repository's best algebraic decomposers grow at about $2^(0.53 n)$–$2^(0.58 n)$ per relation, against the floor's $2^(0.21 n)$ amortized, or $2^(0.29 n)$ online. The gap widens from $3 dot 10^2$ to $4 dot 10^4$ over the range.
 - *What it would take.* Beating the floor's $|F| approx 2^(n slash 3)$ probes per target would need a solver whose per-target cost grows more slowly than that. None of these does.
 - *Consistency.* This agrees with the earlier root-finder study (no slope below a floor) and with the SAT survey (SAT behaves as an enumerator). It adds the missing binary-field fit, per relation and on the same cells, for the Gröbner arms.
+
+== Amendment 1: $m = 4$ with the wide `u128` solver (2026-10-15)
+
+The owner asked for the 64-variable cap to be widened to 128 and the $m = 4$ grid rerun. The route chosen was the existing `u128` solver, `wide_groebner_decompose` (up to 128 unknowns), rather than a rewrite of the 64-bit engines.
+
+It solves the same S#sub[3]-chain system. Its search is summand enumeration pruned by Macaulay linearisation, so it is a new arm, `wide-chain`. It ran on all seven $m = 4$ cells under the same rules (`AMENDMENT_1.md`, frozen in `882598e55`); the run is `reports/run-20261015T0024Z/`. All 70 finished verdicts agreed with the floor.
+
+#table(columns: 6, align: right,
+  [*n*], [*d*], [*unknowns*], [*floor*], [*wide-chain*], [*÷ floor*],
+  [11], [3], [34], [18.09], [27.20 [26.45, 28.42]], [$5.5 dot 10^2$],
+  [13], [4], [42], [14.99], [26.05 [25.81, 26.27]], [$2.1 dot 10^3$],
+  [17], [5], [54], [16.96], [29.85 [29.62, 30.10]], [$7.6 dot 10^3$],
+  [19], [5], [58], [18.37], [32.27 [31.99, 32.59]], [$1.5 dot 10^4$],
+  [23], [6], [70], [21.06], [35.96 [35.45, 36.63]], [$3.1 dot 10^4$],
+  [29], [8], [90], [21.68], [≥ 38.58 (censored)], [≥ $1.2 dot 10^5$],
+  [31], [8], [94], [23.48], [≥ 40.52 (censored)], [≥ $1.3 dot 10^5$],
+)
+
+*Slope fits.*
+- *Measured cells* ($n = 11$–$23$): slope 0.805 [0.717, 0.872], against the floor's 0.333 on the same cells. Δ is [0.433, 0.504]: *grows faster than the floor.*
+- *Lower-bound fit* (all seven cells, valid): Δ [0.358, 0.390].
+- *Without $n = 11$:* Δ [0.369, 0.410].
+
+*Overlap with F4.* On $n <= 19$ the wide solver costs about what inherited F4 and F6-IC cost. It extends the measured $m = 4$ range to $n = 23$, and adds lower bounds at 29 and 31. The verdict is unchanged: no arm grows more slowly than the floor.
+
+#figure(image("amendment-1/figures/cost_per_relation_m4.svg", width: 100%),
+  caption: [$m = 4$ with the wide `u128` solver (orange), on the amendment run's floor. The original run's arms are faded. Open markers with arrows are lower bounds.])
+
+#figure(image("amendment-1/figures/slopes.svg", width: 80%),
+  caption: [Amendment 1 slopes, 95% bootstrap.])

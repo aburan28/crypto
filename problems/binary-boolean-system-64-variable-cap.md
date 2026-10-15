@@ -6,7 +6,7 @@
   (the `m = 4` algebraic arms at n ≥ 23); any Gröbner/SAT decomposition of a
   binary summation-polynomial system with more than 64 Weil-descended unknowns
 - **Next action owner:** unassigned
-- **Last updated:** 2026-10-14
+- **Last updated:** 2026-10-15
 
 ## Problem
 
@@ -71,3 +71,15 @@ itself say anything about cost.
 
 - 2026-10-14: recorded from the `m = 4` grid of
   `research/ic_m3_algebraic_vs_mitm_20261014/`. Unresolved.
+- 2026-10-15 (workaround for the study, not a fix):
+  - The owner asked for 128 variables, and chose the existing `u128` solver
+    (`wide_groebner::wide_groebner_decompose`, `MAX_WIDE_VARS = 128`) over
+    rewriting the narrow engines.
+  - The study's amendment 1 ran it on all seven `m = 4` cells (34–94
+    unknowns): `runs/m4-wide/` and `amendment-1/ANALYSIS.json`.
+  - It was exact on all 70 finished verdicts, measured through n = 23, and
+    censored at n = 29 and 31.
+  - The study's `m = 4` question is therefore answered without this fix.
+  - The narrow engines (inherited F4, F6-IC, the SAT encoder) still refuse
+    more than 64 unknowns, and the acceptance conditions above remain
+    unmet. Status stays `open`.
