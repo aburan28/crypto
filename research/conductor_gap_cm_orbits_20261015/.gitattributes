@@ -4,6 +4,7 @@
 inputs/*.csv -whitespace
 *.stderr -whitespace
 results/*.log -whitespace
+results/**/*.log -whitespace
 # Generated receipts remain downloadable; source and prose use normal diffs.
 sessions/** linguist-generated=true
 prepared/** linguist-generated=true
