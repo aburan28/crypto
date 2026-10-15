@@ -52,3 +52,34 @@ The fresh logs and command provenance are in `publication-20261015/`.
 Earlier frozen archives and their inventories remain unchanged. The current
 coordinator no longer contains old task T-2844 (404); resumed publication is
 claimed as T-15 through a registered shell that maintains its lease.
+
+## Final current-root and fourth-candidate validation
+
+The unfiltered root release gate after merging main at `69c84f13a` passed
+**4,104 tests, zero failed, 117 existing ignored**, test interval 3,454.89 s.
+The registered shell returned exit zero. It used `RAYON_NUM_THREADS=1`,
+`cargo test --release --lib --locked --offline -- --test-threads=1`, and the
+build-SSD target/TMPDIR. Later commits change no root library bytes; a Git
+comparison verifies the same `src`, root Cargo.toml and lockfile. Raw output
+is sealed in `FINAL_VALIDATION.tar.gz`; its inventory is in
+`validation-final-20261015/FILES.json`. Earlier failed receipts remain intact.
+
+At fourth-candidate source `9a55ce6d22b9473c1d2afbf398bfdf51ae22b544`, the full
+standalone release library/binary/integration/example suite, strict release
+all-target Clippy, formatting and workflow lint pass. The five native CLI
+tests pass. Both complete 96-case cumulative/incremental comparisons pass;
+all four field counters match the previous rung in all 96 cases. The frozen
+archive `RUNG4_RUNS.tar.gz` passes all thirteen byte/SHA256 records after fresh
+extraction. The tested old checkout and continuation crate compare byte for
+byte. These controls establish correctness, not a timing gain for rung four.
+
+The first CPU wave independently audits all four full output matrices. AMD
+has twenty valid native isolated timing commands and 640 recomputed medians;
+the two macOS profiles have twenty valid count-only runs each. The ARM full
+campaign and a deliberately wrong-source audit are rejected. The final CPU
+packet passes ten byte/SHA256 checks, all four original ZIP CRC checks, and
+byte-for-byte extraction comparison for the audit archive. The CPU and
+fourth-candidate PDFs were visually inspected; PDF/SVG/150-dpi PNG browsing
+copies match their study originals byte for byte. Native helper sources also
+compile and pass formatting. This validation does not make unrun CPU waves,
+other algorithm families or release publication complete.

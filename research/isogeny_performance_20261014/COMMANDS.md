@@ -3,12 +3,17 @@
 The verified local executable runs directly:
 
 ```sh
-ISOGENY_PERF=/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/rung3/release/isogeny-perf
+ISOGENY_PERF=/Volumes/SSD990-2/crypto/isogeny-performance-builds-20261014/rung4-20261015/bin/isogeny-perf
 "$ISOGENY_PERF" --help
 "$ISOGENY_PERF" --out ./fresh-bmss-counts.jsonl \
-  --revision f1321f6e6550b80bfafb44bd7ae1cd30816ab10c \
+  --revision 9a55ce6d22b9473c1d2afbf398bfdf51ae22b544 \
   --bits 192,224,256,511 --ells 7,31,101
 "$ISOGENY_PERF" compare baseline.jsonl candidate.jsonl fresh-comparison.json
+
+# Seven additional supplied-kernel / supplied-generator constructors.
+"$ISOGENY_PERF" kernels --out ./fresh-kernel-counts.jsonl \
+  --revision 9a55ce6d22b9473c1d2afbf398bfdf51ae22b544 \
+  --bits 192,224,256,511 --ells 7,31,101
 ```
 
 The executable includes its algorithm implementation and fixtures. It does not
