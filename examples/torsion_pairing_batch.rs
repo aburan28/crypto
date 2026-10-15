@@ -1,5 +1,6 @@
 //! Native reusable-input Tate-pairing batch on frozen public targets.
 //! The solver input deliberately excludes every answer scalar.
+#![recursion_limit = "256"]
 
 use std::cell::Cell;
 use std::collections::BTreeMap;
@@ -7,7 +8,10 @@ use std::fs;
 use std::time::Instant;
 
 use crypto_lib::cryptanalysis::ext_curve::{
-    take_field_counters, ExtCurve, ExtField, ExtPoint, Fp2,
+    take_field_counters, ExtCurve, ExtDiagonalAutomorphism, ExtField, ExtPoint, Fp2,
+};
+use crypto_lib::cryptanalysis::glv_invariant_base::{
+    rho_reference_folded, Endomorphism, Negation,
 };
 use crypto_lib::cryptanalysis::ic_boundary::{rho_reference_negation, CountedGroup, GroupOps};
 use num_bigint::{BigInt, BigUint};
@@ -780,6 +784,45 @@ fn source_curve(input: Input) -> ExtCurve<Fp2> {
     curve
 }
 
+fn rho_step_cap(r: u64) -> u64 {
+    let root = (r as f64).sqrt().ceil() as u64;
+    64.max(16 * root)
+}
+
+fn six_class_endomorphism(
+    curve: &ExtCurve<Fp2>,
+    g: SourcePoint,
+    r: u64,
+) -> (ExtDiagonalAutomorphism<F2>, GroupOps) {
+    let p = curve.f.p;
+    let z = (2..p)
+        .map(|a| {
+            let mut x = 1u64;
+            for _ in 0..(p - 1) / 3 {
+                x = ((x as u128 * a as u128) % p as u128) as u64;
+            }
+            x
+        })
+        .find(|&x| x != 1)
+        .expect("nontrivial cube root of unity");
+    let image = SourcePoint::affine(curve.f.mul(curve.f.from_fp(z), g.x), g.y);
+    let mut ops = GroupOps::default();
+    let lambda = (1..r)
+        .filter(|&a| (a * a + a + 1) % r == 0)
+        .find(|&a| curve.mul(&mut ops, g, a) == image)
+        .expect("j=0 subgroup eigenvalue");
+    (
+        ExtDiagonalAutomorphism {
+            cx: curve.f.from_fp(z),
+            cy: curve.f.one(),
+            eigenvalue: lambda,
+            order: 3,
+            label: "j0-zeta",
+        },
+        ops,
+    )
+}
+
 fn calibrate_source_add(curve: &ExtCurve<Fp2>, input: Input) -> f64 {
     let points = [input.g, input.q, curve.neg(input.g), curve.neg(input.q)];
     let mut ops = GroupOps::default();
@@ -1044,10 +1087,27 @@ fn run_batch(input: Input, cell: usize, round: u64, batch_path: &str, frozen_pat
             "cpu_ns":table_cpu_ns,"wall_ns":table_wall_ns},
         "peak_rss_raw":rss,"peak_rss_unit":unit})
     );
+    let six_setup_wall = Instant::now();
+    let six_setup_cpu = thread_cpu_ns();
+    take_field_counters();
+    let (six_aut, six_eigen_ops) = six_class_endomorphism(&curve, input.g, input.r);
+    let six_setup_fp = take_field_counters();
+    let six_setup_cpu_ns = thread_cpu_ns() - six_setup_cpu;
+    let six_setup_wall_ns = six_setup_wall.elapsed().as_nanos() as u64;
+    println!(
+        "{}",
+        json!({"schema":"torsion_pairing_batch_six_setup/v3","cell":cell,
+            "round":round,"eigenvalue":six_aut.eigenvalue,"eigen_ops":six_eigen_ops,
+            "cpu_ns":six_setup_cpu_ns,"wall_ns":six_setup_wall_ns,
+            "fp_muls":six_setup_fp.0,"fp_invs":six_setup_fp.1})
+    );
     let mut cumulative_pairing_cpu = setup_cpu;
     let mut cumulative_rho_cpu = 0u64;
+    let mut cumulative_six_cpu = six_setup_cpu_ns;
     let mut cumulative_pairing_wall = setup_wall;
     let mut cumulative_rho_wall = 0u64;
+    let mut cumulative_six_wall = six_setup_wall_ns;
+    let rho_cap = rho_step_cap(input.r);
     for (index, &q) in targets.iter().enumerate() {
         let beta_start_wall = Instant::now();
         let beta_start_cpu = thread_cpu_ns();
@@ -1100,12 +1160,12 @@ fn run_batch(input: Input, cell: usize, round: u64, batch_path: &str, frozen_pat
         let mut rho_fp_invs = 0u64;
         let mut final_seed = seed_base;
         let mut final_rho = None;
-        for retry in 0..16u64 {
+        for retry in 0..32u64 {
             let seed = seed_base.wrapping_add(retry * 0x01_00_00_00);
             let rho_wall = Instant::now();
             let rho_cpu = thread_cpu_ns();
             take_field_counters();
-            let rho = rho_reference_negation(&curve, input.g, q, input.r, seed, 1_000_000);
+            let rho = rho_reference_negation(&curve, input.g, q, input.r, seed, rho_cap);
             let rho_fp = take_field_counters();
             let attempt_cpu = thread_cpu_ns() - rho_cpu;
             let attempt_wall = rho_wall.elapsed().as_nanos() as u64;
@@ -1125,22 +1185,66 @@ fn run_batch(input: Input, cell: usize, round: u64, batch_path: &str, frozen_pat
         if final_rho.is_none() {
             println!(
                 "{}",
-                json!({"schema":"torsion_pairing_batch_rho_exhausted/v2",
+                json!({"schema":"torsion_pairing_batch_rho_exhausted/v3",
                 "cell":cell,"round":round,"index":index,"target":q,"recovered":scalar,
                 "rho_attempts":rho_attempts,"rho_cpu_ns":rho_cpu_ns})
             );
-            panic!("16 charged rho attempts exhausted");
+            panic!("32 charged rho attempts exhausted");
         }
         let rho = final_rho.unwrap();
         cumulative_rho_cpu += rho_cpu_ns;
         cumulative_rho_wall += rho_wall_ns;
-        let all_in_pairing_cpu = thread_cpu_ns() - global_cpu - cumulative_rho_cpu;
-        let all_in_pairing_wall = global_wall.elapsed().as_nanos() as u64 - cumulative_rho_wall;
+        let neg = Negation { r: input.r };
+        let gens: [&dyn Endomorphism<ExtCurve<Fp2>>; 2] = [&neg, &six_aut];
+        let mut six_attempts = Vec::new();
+        let mut six_cpu_ns = 0u64;
+        let mut six_wall_ns = 0u64;
+        let mut six_fp_muls = 0u64;
+        let mut six_fp_invs = 0u64;
+        let mut final_six = None;
+        for retry in 0..32u64 {
+            let seed = seed_base.wrapping_add(retry * 0x01_00_00_00);
+            let six_wall = Instant::now();
+            let six_cpu = thread_cpu_ns();
+            take_field_counters();
+            let six = rho_reference_folded(&curve, input.g, q, input.r, seed, rho_cap, &gens)
+                .expect("valid six-class subgroup action");
+            let six_fp = take_field_counters();
+            let attempt_cpu = thread_cpu_ns() - six_cpu;
+            let attempt_wall = six_wall.elapsed().as_nanos() as u64;
+            six_cpu_ns += attempt_cpu;
+            six_wall_ns += attempt_wall;
+            six_fp_muls += six_fp.0;
+            six_fp_invs += six_fp.1;
+            six_attempts.push(json!({"retry":retry,"seed":seed,"rho":six,
+                "cpu_ns":attempt_cpu,"wall_ns":attempt_wall,
+                "fp_muls":six_fp.0,"fp_invs":six_fp.1}));
+            if six.verified && six.recovered == Some(scalar) {
+                final_six = Some(six);
+                break;
+            }
+        }
+        if final_six.is_none() {
+            println!(
+                "{}",
+                json!({"schema":"torsion_pairing_batch_six_exhausted/v3",
+                    "cell":cell,"round":round,"index":index,"target":q,
+                    "recovered":scalar,"six_attempts":six_attempts,
+                    "six_cpu_ns":six_cpu_ns})
+            );
+            panic!("32 charged six-class rho attempts exhausted");
+        }
+        let six = final_six.unwrap();
+        cumulative_six_cpu += six_cpu_ns;
+        cumulative_six_wall += six_wall_ns;
+        let all_in_pairing_cpu = thread_cpu_ns() - global_cpu - cumulative_rho_cpu - cumulative_six_cpu;
+        let all_in_pairing_wall = global_wall.elapsed().as_nanos() as u64
+            - cumulative_rho_wall - cumulative_six_wall;
         let (rss, unit) = peak_rss_raw();
         assert!(peak_rss_bytes() <= 512 * 1024 * 1024);
         println!(
             "{}",
-            json!({"schema":"torsion_pairing_batch_target/v2",
+            json!({"schema":"torsion_pairing_batch_target/v3",
             "cell":cell,"round":round,"index":index,"n":index+1,"p":input.p,"r":input.r,
             "target":q,"recovered":scalar,"beta_charge":beta_charge,
             "dlog_charge":dlog_charge,"source_verify_ops":verify_ops,
@@ -1155,14 +1259,20 @@ fn run_batch(input: Input, cell: usize, round: u64, batch_path: &str, frozen_pat
             "rho_fp_muls":rho_fp_muls,"rho_fp_invs":rho_fp_invs,
             "cumulative_rho_cpu_ns":cumulative_rho_cpu,
             "cumulative_rho_wall_ns":cumulative_rho_wall,
+            "rho_step_cap":rho_cap,"six_rho":six,"six_attempts":six_attempts,
+            "six_cpu_ns":six_cpu_ns,"six_wall_ns":six_wall_ns,
+            "six_fp_muls":six_fp_muls,"six_fp_invs":six_fp_invs,
+            "cumulative_six_cpu_ns":cumulative_six_cpu,
+            "cumulative_six_wall_ns":cumulative_six_wall,
             "extension_cumulative":k.counts(),"peak_rss_raw":rss,"peak_rss_unit":unit})
         );
     }
     println!(
         "{}",
-        json!({"schema":"torsion_pairing_batch_end/v1","cell":cell,
+        json!({"schema":"torsion_pairing_batch_end/v3","cell":cell,
         "round":round,"targets":targets.len(),"pairing_cpu_ns":cumulative_pairing_cpu,
-        "rho_cpu_ns":cumulative_rho_cpu,"process_cpu_ns":thread_cpu_ns()-whole_cpu,
+        "rho_cpu_ns":cumulative_rho_cpu,"six_cpu_ns":cumulative_six_cpu,
+        "process_cpu_ns":thread_cpu_ns()-whole_cpu,
         "process_wall_ns":whole_wall.elapsed().as_nanos() as u64,
         "extension_totals":k.counts(),"peak_rss_bytes":peak_rss_bytes()})
     );
@@ -1192,7 +1302,7 @@ fn verify_batch(
     let mut rounds = [0u64; 3];
     for line in fs::read_to_string(records_path).unwrap().lines() {
         let v: Value = serde_json::from_str(line).unwrap();
-        if v["schema"] != "torsion_pairing_batch_target/v2" {
+        if v["schema"] != "torsion_pairing_batch_target/v3" {
             continue;
         }
         assert_eq!(v["cell"].as_u64(), Some(cell as u64));
@@ -1210,6 +1320,8 @@ fn verify_batch(
         assert_eq!(scalar, scalars[index], "post-solve fixture mismatch");
         assert_eq!(v["rho"]["recovered"].as_u64(), Some(scalar));
         assert_eq!(v["rho"]["verified"], true);
+        assert_eq!(v["six_rho"]["recovered"].as_u64(), Some(scalar));
+        assert_eq!(v["six_rho"]["verified"], true);
         rounds[round] += 1;
         checked += 1;
     }
