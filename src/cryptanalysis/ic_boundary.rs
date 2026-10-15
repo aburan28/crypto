@@ -5468,6 +5468,12 @@ pub trait RelationSolver {
     /// The work done and what it is counted in: `row_ops` for an
     /// elimination, matrix-vector products for an iterative method.
     fn work(&self) -> (u64, &'static str);
+    /// Further counters the solver kept, folded into the linear-algebra
+    /// phase by name.  They are reported, not priced, unless a name is
+    /// one `price_phase` prices.  Default none.
+    fn native(&self) -> Vec<(&'static str, u64)> {
+        Vec::new()
+    }
 }
 
 impl RelationSolver for IncrementalGauss {
@@ -6244,6 +6250,9 @@ pub fn collect_and_solve_relations<G: CountedGroup, L: RelationSolver + ?Sized>(
     la.wall_ns = la_ns;
     let (work, work_unit) = matrix.work();
     la.count(work_unit, work);
+    for (name, value) in matrix.native() {
+        la.count(name, value);
+    }
     la.count("rows", found);
     la.count("single_column_rows", single_column_rows);
     la.count("two_column_rows", two_column_rows);

@@ -72,6 +72,7 @@ pub mod rootfind;
 pub mod shared_rank;
 pub mod solvers;
 pub mod stages;
+pub mod summand_large_prime;
 
 use std::time::Instant;
 
