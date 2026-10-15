@@ -13,8 +13,12 @@ five-byte table with the same first witness.
 
 Six arms use the same curve, rank seed 29, four rank threads, one target
 thread, and one fresh process per arm under a 14-GiB observed RSS guard.
-Each child has a 1,200-second cap. The corrected second execution uses IC
-source SHA-256
+Each child has a 1,200-second cap. The current-head lint-clean third
+execution uses IC source SHA-256
+`c9824acebda0360416c3c507594bb07c17ca798c32cbf8f84bba95ca2c44d5b1`.
+It combines two identical fixed30 request branches without changing either
+condition's value. The corrected second execution and its sealed measurement
+used IC source SHA-256
 `6b22a065d95d5481342c1b1cc37dc9479200dd4f0832bcd53ae6ce4b8c9312d5`.
 The first execution used source SHA-256
 `68f9b22972ee09511e15ae74a998ba74b82e74eed36e3014bd0460c918b6cdcb`;

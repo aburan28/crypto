@@ -3384,9 +3384,7 @@ mod wide {
         // occupancy after the constructor doubles the request.
         let root_table_request_entries = if indexed4_fixed31 {
             1usize << 30
-        } else if indexed4_fixed30 {
-            1usize << 29
-        } else if indexed5_fixed30 {
+        } else if indexed4_fixed30 || indexed5_fixed30 {
             1usize << 29
         } else if indexed5_load75 {
             states
