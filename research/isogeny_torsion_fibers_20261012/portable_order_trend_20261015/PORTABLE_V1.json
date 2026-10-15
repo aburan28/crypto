@@ -1,0 +1,2402 @@
+{
+  "checked_children": 84,
+  "checked_scalars": 1785,
+  "complete_portable_S": "unpriced_nonarithmetic_work",
+  "floor_per_target": 0.8862269254527579,
+  "paired_full_vs_control": [
+    {
+      "control": "source-bsgs",
+      "full_exceeds_control_each_axis_each_round": true,
+      "prefix": 1,
+      "ratios": [
+        {
+          "group": 1459.0806451612902,
+          "invs": 1532.9661016949153,
+          "muls": 2401.9609375,
+          "round": 0
+        },
+        {
+          "group": 1466.2096774193549,
+          "invs": 1540.4237288135594,
+          "muls": 2409.7454427083335,
+          "round": 1
+        },
+        {
+          "group": 1459.983870967742,
+          "invs": 1533.8813559322034,
+          "muls": 2402.8645833333335,
+          "round": 2
+        }
+      ]
+    },
+    {
+      "control": "rho-negation",
+      "full_exceeds_control_each_axis_each_round": true,
+      "prefix": 1,
+      "ratios": [
+        {
+          "group": 741.5,
+          "invs": 753.7083333333334,
+          "muls": 1191.2857604133033,
+          "round": 0
+        },
+        {
+          "group": 602.0198675496689,
+          "invs": 609.9664429530201,
+          "muls": 1003.625,
+          "round": 1
+        },
+        {
+          "group": 754.325,
+          "invs": 780.1637931034483,
+          "muls": 1241.4396232761521,
+          "round": 2
+        }
+      ]
+    },
+    {
+      "control": "source-bsgs",
+      "full_exceeds_control_each_axis_each_round": true,
+      "prefix": 4,
+      "ratios": [
+        {
+          "group": 627.4459459459459,
+          "invs": 653.7676056338029,
+          "muls": 1015.8452380952381,
+          "round": 0
+        },
+        {
+          "group": 626.8918918918919,
+          "invs": 653.1901408450705,
+          "muls": 1015.2318722943722,
+          "round": 1
+        },
+        {
+          "group": 628.1013513513514,
+          "invs": 654.4507042253521,
+          "muls": 1016.5427489177489,
+          "round": 2
+        }
+      ]
+    },
+    {
+      "control": "rho-negation",
+      "full_exceeds_control_each_axis_each_round": true,
+      "prefix": 4,
+      "ratios": [
+        {
+          "group": 229.85643564356437,
+          "invs": 233.2537688442211,
+          "muls": 367.2304381846635,
+          "round": 0
+        },
+        {
+          "group": 212.7981651376147,
+          "invs": 215.20417633410673,
+          "muls": 342.6755251141553,
+          "round": 1
+        },
+        {
+          "group": 227.8406862745098,
+          "invs": 231.7506234413965,
+          "muls": 366.9083984375,
+          "round": 2
+        }
+      ]
+    },
+    {
+      "control": "source-bsgs",
+      "full_exceeds_control_each_axis_each_round": true,
+      "prefix": 16,
+      "ratios": [
+        {
+          "group": 220.30188679245282,
+          "invs": 228.81917211328977,
+          "muls": 340.1300982187448,
+          "round": 0
+        },
+        {
+          "group": 217.31446540880503,
+          "invs": 225.718954248366,
+          "muls": 336.9261694689529,
+          "round": 1
+        },
+        {
+          "group": 214.37316561844864,
+          "invs": 222.66230936819173,
+          "muls": 333.7500416181122,
+          "round": 2
+        }
+      ]
+    },
+    {
+      "control": "rho-negation",
+      "full_exceeds_control_each_axis_each_round": true,
+      "prefix": 16,
+      "ratios": [
+        {
+          "group": 66.38281743524952,
+          "invs": 67.2394366197183,
+          "muls": 102.40384422614274,
+          "round": 0
+        },
+        {
+          "group": 60.54848130841121,
+          "invs": 61.123893805309734,
+          "muls": 94.97714634318027,
+          "round": 1
+        },
+        {
+          "group": 64.92444444444445,
+          "invs": 65.8942617666022,
+          "muls": 101.461904400415,
+          "round": 2
+        }
+      ]
+    },
+    {
+      "control": "source-bsgs",
+      "full_exceeds_control_each_axis_each_round": true,
+      "prefix": 64,
+      "ratios": [
+        {
+          "group": 85.19953188999415,
+          "invs": 88.62949421084704,
+          "muls": 119.74626555537598,
+          "round": 0
+        },
+        {
+          "group": 83.61790520772381,
+          "invs": 86.981718464351,
+          "muls": 118.06339897952115,
+          "round": 1
+        },
+        {
+          "group": 84.14745465184318,
+          "invs": 87.53016453382084,
+          "muls": 118.63821485466258,
+          "round": 2
+        }
+      ]
+    },
+    {
+      "control": "rho-negation",
+      "full_exceeds_control_each_axis_each_round": true,
+      "prefix": 64,
+      "ratios": [
+        {
+          "group": 23.40180006428801,
+          "invs": 23.68745928338762,
+          "muls": 33.18003275416464,
+          "round": 0
+        },
+        {
+          "group": 21.544248454696216,
+          "invs": 21.818557016202995,
+          "muls": 31.061464730214844,
+          "round": 1
+        },
+        {
+          "group": 22.35473340587595,
+          "invs": 22.637825059101655,
+          "muls": 32.01306419960751,
+          "round": 2
+        }
+      ]
+    }
+  ],
+  "r": 229,
+  "replay_sha256": "c4572cc1dda31ddbfaec37190433eac60e8862769f77333de0d6ea6940d92037",
+  "rows": [
+    {
+      "I_per_sqrt_r_target": 82.60232505688622,
+      "M_per_sqrt_r_target": 2210.0417273620023,
+      "S_group_per_target": 82.33799761670419,
+      "arm": "destination-direct",
+      "fp_invs": 1250,
+      "fp_muls": 33444,
+      "gae": 1246,
+      "peak_rss_bytes": 6799360,
+      "prefix": 1,
+      "r": 229,
+      "round": 0,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 5976.773831816059,
+      "M_per_sqrt_r_target": 243803.20743422137,
+      "S_group_per_target": 5977.963305296878,
+      "arm": "full-image",
+      "fp_invs": 90445,
+      "fp_muls": 3689412,
+      "gae": 90463,
+      "peak_rss_bytes": 12664832,
+      "prefix": 1,
+      "r": 229,
+      "round": 0,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 101.76606447008382,
+      "M_per_sqrt_r_target": 2691.580241513626,
+      "S_group_per_target": 101.50173702990179,
+      "arm": "isogeny-image",
+      "fp_invs": 1540,
+      "fp_muls": 40731,
+      "gae": 1536,
+      "peak_rss_bytes": 6815744,
+      "prefix": 1,
+      "r": 229,
+      "round": 0,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 7.929823205461077,
+      "M_per_sqrt_r_target": 204.65552056094128,
+      "S_group_per_target": 8.061986925552095,
+      "arm": "rho-negation",
+      "fp_invs": 120,
+      "fp_muls": 3097,
+      "gae": 122,
+      "peak_rss_bytes": 6832128,
+      "prefix": 1,
+      "r": 229,
+      "round": 0,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 7.929823205461077,
+      "M_per_sqrt_r_target": 204.65552056094128,
+      "S_group_per_target": 8.061986925552095,
+      "arm": "rho-negation-aa",
+      "fp_invs": 120,
+      "fp_muls": 3097,
+      "gae": 122,
+      "peak_rss_bytes": 6832128,
+      "prefix": 1,
+      "r": 229,
+      "round": 0,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 91.78770360321197,
+      "M_per_sqrt_r_target": 2466.2410987584403,
+      "S_group_per_target": 91.39121244293891,
+      "arm": "source",
+      "fp_invs": 1389,
+      "fp_muls": 37321,
+      "gae": 1383,
+      "peak_rss_bytes": 6782976,
+      "prefix": 1,
+      "r": 229,
+      "round": 0,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 3.8988297426850296,
+      "M_per_sqrt_r_target": 101.50173702990179,
+      "S_group_per_target": 4.097075322821556,
+      "arm": "source-bsgs",
+      "fp_invs": 59,
+      "fp_muls": 1536,
+      "gae": 62,
+      "peak_rss_bytes": 6701056,
+      "prefix": 1,
+      "r": 229,
+      "round": 0,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 62.51343960305149,
+      "M_per_sqrt_r_target": 1657.0687225011832,
+      "S_group_per_target": 62.24911216286945,
+      "arm": "destination-direct",
+      "fp_invs": 946,
+      "fp_muls": 25076,
+      "gae": 942,
+      "peak_rss_bytes": 6782976,
+      "prefix": 1,
+      "r": 229,
+      "round": 1,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 6005.8498502360835,
+      "M_per_sqrt_r_target": 244593.34823478552,
+      "S_group_per_target": 6007.171487436994,
+      "arm": "full-image",
+      "fp_invs": 90885,
+      "fp_muls": 3701369,
+      "gae": 90905,
+      "peak_rss_bytes": 12730368,
+      "prefix": 1,
+      "r": 229,
+      "round": 1,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 138.90406981565988,
+      "M_per_sqrt_r_target": 3678.314575713166,
+      "S_group_per_target": 138.83798795561435,
+      "arm": "isogeny-image",
+      "fp_invs": 2102,
+      "fp_muls": 55663,
+      "gae": 2101,
+      "peak_rss_bytes": 6832128,
+      "prefix": 1,
+      "r": 229,
+      "round": 1,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 9.846197146780838,
+      "M_per_sqrt_r_target": 243.7098998478371,
+      "S_group_per_target": 9.978360866871855,
+      "arm": "rho-negation",
+      "fp_invs": 149,
+      "fp_muls": 3688,
+      "gae": 151,
+      "peak_rss_bytes": 6832128,
+      "prefix": 1,
+      "r": 229,
+      "round": 1,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 9.846197146780838,
+      "M_per_sqrt_r_target": 243.7098998478371,
+      "S_group_per_target": 9.978360866871855,
+      "arm": "rho-negation-aa",
+      "fp_invs": 149,
+      "fp_muls": 3688,
+      "gae": 151,
+      "peak_rss_bytes": 6815744,
+      "prefix": 1,
+      "r": 229,
+      "round": 1,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 125.62161594651256,
+      "M_per_sqrt_r_target": 3383.5233980501507,
+      "S_group_per_target": 125.42337036637603,
+      "arm": "source",
+      "fp_invs": 1901,
+      "fp_muls": 51202,
+      "gae": 1898,
+      "peak_rss_bytes": 6832128,
+      "prefix": 1,
+      "r": 229,
+      "round": 1,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 3.8988297426850296,
+      "M_per_sqrt_r_target": 101.50173702990179,
+      "S_group_per_target": 4.097075322821556,
+      "arm": "source-bsgs",
+      "fp_invs": 59,
+      "fp_muls": 1536,
+      "gae": 62,
+      "peak_rss_bytes": 6717440,
+      "prefix": 1,
+      "r": 229,
+      "round": 1,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 78.1087585737916,
+      "M_per_sqrt_r_target": 2082.371573754079,
+      "S_group_per_target": 77.97659485370059,
+      "arm": "destination-direct",
+      "fp_invs": 1182,
+      "fp_muls": 31512,
+      "gae": 1180,
+      "peak_rss_bytes": 6782976,
+      "prefix": 1,
+      "r": 229,
+      "round": 2,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 5980.342252258517,
+      "M_per_sqrt_r_target": 243894.92905596452,
+      "S_group_per_target": 5981.663889459427,
+      "arm": "full-image",
+      "fp_invs": 90499,
+      "fp_muls": 3690800,
+      "gae": 90519,
+      "peak_rss_bytes": 12648448,
+      "prefix": 1,
+      "r": 229,
+      "round": 2,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 88.88010176120957,
+      "M_per_sqrt_r_target": 2341.6107107126104,
+      "S_group_per_target": 88.74793804111856,
+      "arm": "isogeny-image",
+      "fp_invs": 1345,
+      "fp_muls": 35435,
+      "gae": 1343,
+      "peak_rss_bytes": 6782976,
+      "prefix": 1,
+      "r": 229,
+      "round": 2,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 7.665495765279041,
+      "M_per_sqrt_r_target": 196.46136991529818,
+      "S_group_per_target": 7.929823205461077,
+      "arm": "rho-negation",
+      "fp_invs": 116,
+      "fp_muls": 2973,
+      "gae": 120,
+      "peak_rss_bytes": 6832128,
+      "prefix": 1,
+      "r": 229,
+      "round": 2,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 7.665495765279041,
+      "M_per_sqrt_r_target": 196.46136991529818,
+      "S_group_per_target": 7.929823205461077,
+      "arm": "rho-negation-aa",
+      "fp_invs": 116,
+      "fp_muls": 2973,
+      "gae": 120,
+      "peak_rss_bytes": 6832128,
+      "prefix": 1,
+      "r": 229,
+      "round": 2,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 79.56255949479281,
+      "M_per_sqrt_r_target": 2129.421858106481,
+      "S_group_per_target": 79.29823205461076,
+      "arm": "source",
+      "fp_invs": 1204,
+      "fp_muls": 32224,
+      "gae": 1200,
+      "peak_rss_bytes": 6799360,
+      "prefix": 1,
+      "r": 229,
+      "round": 2,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 3.8988297426850296,
+      "M_per_sqrt_r_target": 101.50173702990179,
+      "S_group_per_target": 4.097075322821556,
+      "arm": "source-bsgs",
+      "fp_invs": 59,
+      "fp_muls": 1536,
+      "gae": 62,
+      "peak_rss_bytes": 6701056,
+      "prefix": 1,
+      "r": 229,
+      "round": 2,
+      "targets": 1,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 83.77527807269401,
+      "M_per_sqrt_r_target": 2273.9428860260095,
+      "S_group_per_target": 83.89092132777364,
+      "arm": "destination-direct",
+      "fp_invs": 5071,
+      "fp_muls": 137644,
+      "gae": 5078,
+      "peak_rss_bytes": 6832128,
+      "prefix": 4,
+      "r": 229,
+      "round": 0,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 1533.6773693312064,
+      "M_per_sqrt_r_target": 62027.14319497659,
+      "S_group_per_target": 1534.1234218865136,
+      "arm": "full-image",
+      "fp_invs": 92835,
+      "fp_muls": 3754564,
+      "gae": 92862,
+      "peak_rss_bytes": 12713984,
+      "prefix": 4,
+      "r": 229,
+      "round": 0,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 82.85013203205688,
+      "M_per_sqrt_r_target": 2210.124329687059,
+      "S_group_per_target": 82.96577528713652,
+      "arm": "isogeny-image",
+      "fp_invs": 5015,
+      "fp_muls": 133781,
+      "gae": 5022,
+      "peak_rss_bytes": 6914048,
+      "prefix": 4,
+      "r": 229,
+      "round": 0,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 6.575145074528143,
+      "M_per_sqrt_r_target": 168.90523427632095,
+      "S_group_per_target": 6.674267864596406,
+      "arm": "rho-negation",
+      "fp_invs": 398,
+      "fp_muls": 10224,
+      "gae": 404,
+      "peak_rss_bytes": 6914048,
+      "prefix": 4,
+      "r": 229,
+      "round": 0,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 6.575145074528143,
+      "M_per_sqrt_r_target": 168.90523427632095,
+      "S_group_per_target": 6.674267864596406,
+      "arm": "rho-negation-aa",
+      "fp_invs": 398,
+      "fp_muls": 10224,
+      "gae": 404,
+      "peak_rss_bytes": 6832128,
+      "prefix": 4,
+      "r": 229,
+      "round": 0,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 74.93682929160718,
+      "M_per_sqrt_r_target": 2032.6119331398106,
+      "S_group_per_target": 74.96987022162993,
+      "arm": "source",
+      "fp_invs": 4536,
+      "fp_muls": 123036,
+      "gae": 4538,
+      "peak_rss_bytes": 6864896,
+      "prefix": 4,
+      "r": 229,
+      "round": 0,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 2.3459060316155687,
+      "M_per_sqrt_r_target": 61.05963868205029,
+      "S_group_per_target": 2.4450288216838323,
+      "arm": "source-bsgs",
+      "fp_invs": 142,
+      "fp_muls": 3696,
+      "gae": 148,
+      "peak_rss_bytes": 6750208,
+      "prefix": 4,
+      "r": 229,
+      "round": 0,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 56.863440569160474,
+      "M_per_sqrt_r_target": 1537.6257604689256,
+      "S_group_per_target": 56.92952242920598,
+      "arm": "destination-direct",
+      "fp_invs": 3442,
+      "fp_muls": 93074,
+      "gae": 3446,
+      "peak_rss_bytes": 6848512,
+      "prefix": 4,
+      "r": 229,
+      "round": 1,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 1532.3226912002735,
+      "M_per_sqrt_r_target": 61989.6913007958,
+      "S_group_per_target": 1532.7687437555808,
+      "arm": "full-image",
+      "fp_invs": 92753,
+      "fp_muls": 3752297,
+      "gae": 92780,
+      "peak_rss_bytes": 12730368,
+      "prefix": 4,
+      "r": 229,
+      "round": 1,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 79.69472321488382,
+      "M_per_sqrt_r_target": 2124.895250693364,
+      "S_group_per_target": 79.79384600495209,
+      "arm": "isogeny-image",
+      "fp_invs": 4824,
+      "fp_muls": 128622,
+      "gae": 4830,
+      "peak_rss_bytes": 6881280,
+      "prefix": 4,
+      "r": 229,
+      "round": 1,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 7.120320419903592,
+      "M_per_sqrt_r_target": 180.89909187458082,
+      "S_group_per_target": 7.202922744960478,
+      "arm": "rho-negation",
+      "fp_invs": 431,
+      "fp_muls": 10950,
+      "gae": 436,
+      "peak_rss_bytes": 6864896,
+      "prefix": 4,
+      "r": 229,
+      "round": 1,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 7.120320419903592,
+      "M_per_sqrt_r_target": 180.89909187458082,
+      "S_group_per_target": 7.202922744960478,
+      "arm": "rho-negation-aa",
+      "fp_invs": 431,
+      "fp_muls": 10950,
+      "gae": 436,
+      "peak_rss_bytes": 6897664,
+      "prefix": 4,
+      "r": 229,
+      "round": 1,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 71.97966605457066,
+      "M_per_sqrt_r_target": 1951.2982043538118,
+      "S_group_per_target": 71.99618651958203,
+      "arm": "source",
+      "fp_invs": 4357,
+      "fp_muls": 118114,
+      "gae": 4358,
+      "peak_rss_bytes": 6881280,
+      "prefix": 4,
+      "r": 229,
+      "round": 1,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 2.3459060316155687,
+      "M_per_sqrt_r_target": 61.05963868205029,
+      "S_group_per_target": 2.4450288216838323,
+      "arm": "source-bsgs",
+      "fp_invs": 142,
+      "fp_muls": 3696,
+      "gae": 148,
+      "peak_rss_bytes": 6750208,
+      "prefix": 4,
+      "r": 229,
+      "round": 1,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 73.71431488076526,
+      "M_per_sqrt_r_target": 1996.5807989499967,
+      "S_group_per_target": 73.8299581358449,
+      "arm": "destination-direct",
+      "fp_invs": 4462,
+      "fp_muls": 120855,
+      "gae": 4469,
+      "peak_rss_bytes": 6914048,
+      "prefix": 4,
+      "r": 229,
+      "round": 2,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 1535.27985443731,
+      "M_per_sqrt_r_target": 62069.73295377592,
+      "S_group_per_target": 1535.7259069926172,
+      "arm": "full-image",
+      "fp_invs": 92932,
+      "fp_muls": 3757142,
+      "gae": 92959,
+      "peak_rss_bytes": 12697600,
+      "prefix": 4,
+      "r": 229,
+      "round": 2,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 72.21095256472994,
+      "M_per_sqrt_r_target": 1927.657418922531,
+      "S_group_per_target": 72.32659581980957,
+      "arm": "isogeny-image",
+      "fp_invs": 4371,
+      "fp_muls": 116683,
+      "gae": 4378,
+      "peak_rss_bytes": 6848512,
+      "prefix": 4,
+      "r": 229,
+      "round": 2,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 6.624706469562275,
+      "M_per_sqrt_r_target": 169.16956171650298,
+      "S_group_per_target": 6.7403497246419155,
+      "arm": "rho-negation",
+      "fp_invs": 401,
+      "fp_muls": 10240,
+      "gae": 408,
+      "peak_rss_bytes": 6848512,
+      "prefix": 4,
+      "r": 229,
+      "round": 2,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 6.624706469562275,
+      "M_per_sqrt_r_target": 169.16956171650298,
+      "S_group_per_target": 6.7403497246419155,
+      "arm": "rho-negation-aa",
+      "fp_invs": 401,
+      "fp_muls": 10240,
+      "gae": 408,
+      "peak_rss_bytes": 6963200,
+      "prefix": 4,
+      "r": 229,
+      "round": 2,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 65.1236730748491,
+      "M_per_sqrt_r_target": 1767.293265057092,
+      "S_group_per_target": 65.15671400487184,
+      "arm": "source",
+      "fp_invs": 3942,
+      "fp_muls": 106976,
+      "gae": 3944,
+      "peak_rss_bytes": 6848512,
+      "prefix": 4,
+      "r": 229,
+      "round": 2,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 2.3459060316155687,
+      "M_per_sqrt_r_target": 61.05963868205029,
+      "S_group_per_target": 2.4450288216838323,
+      "arm": "source-bsgs",
+      "fp_invs": 142,
+      "fp_muls": 3696,
+      "gae": 148,
+      "peak_rss_bytes": 6782976,
+      "prefix": 4,
+      "r": 229,
+      "round": 2,
+      "targets": 4,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 64.69001086830045,
+      "M_per_sqrt_r_target": 1759.3304009216083,
+      "S_group_per_target": 64.83869505340284,
+      "arm": "destination-direct",
+      "fp_invs": 15663,
+      "fp_muls": 425976,
+      "gae": 15699,
+      "peak_rss_bytes": 7192576,
+      "prefix": 16,
+      "r": 229,
+      "round": 0,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 433.7778498037323,
+      "M_per_sqrt_r_target": 16876.989036671523,
+      "S_group_per_target": 434.0091363138916,
+      "arm": "full-image",
+      "fp_invs": 105028,
+      "fp_muls": 4086323,
+      "gae": 105084,
+      "peak_rss_bytes": 12976128,
+      "prefix": 16,
+      "r": 229,
+      "round": 0,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 71.76490000942275,
+      "M_per_sqrt_r_target": 1918.0342480534036,
+      "S_group_per_target": 71.91358419452514,
+      "arm": "isogeny-image",
+      "fp_invs": 17376,
+      "fp_muls": 464402,
+      "gae": 17412,
+      "peak_rss_bytes": 7192576,
+      "prefix": 16,
+      "r": 229,
+      "round": 0,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 6.451241586942814,
+      "M_per_sqrt_r_target": 164.80815895349937,
+      "S_group_per_target": 6.5379740282525445,
+      "arm": "rho-negation",
+      "fp_invs": 1562,
+      "fp_muls": 39904,
+      "gae": 1583,
+      "peak_rss_bytes": 7012352,
+      "prefix": 16,
+      "r": 229,
+      "round": 0,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 6.451241586942814,
+      "M_per_sqrt_r_target": 164.80815895349937,
+      "S_group_per_target": 6.5379740282525445,
+      "arm": "rho-negation-aa",
+      "fp_invs": 1562,
+      "fp_muls": 39904,
+      "gae": 1583,
+      "peak_rss_bytes": 7077888,
+      "prefix": 16,
+      "r": 229,
+      "round": 0,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 64.92129737845973,
+      "M_per_sqrt_r_target": 1764.216328448723,
+      "S_group_per_target": 64.99976958726377,
+      "arm": "source",
+      "fp_invs": 15719,
+      "fp_muls": 427159,
+      "gae": 15738,
+      "peak_rss_bytes": 7127040,
+      "prefix": 16,
+      "r": 229,
+      "round": 0,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 1.8957233600555388,
+      "M_per_sqrt_r_target": 49.61921666167155,
+      "S_group_per_target": 1.9700654526067363,
+      "arm": "source-bsgs",
+      "fp_invs": 459,
+      "fp_muls": 12014,
+      "gae": 477,
+      "peak_rss_bytes": 6766592,
+      "prefix": 16,
+      "r": 229,
+      "round": 0,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 62.8314585545205,
+      "M_per_sqrt_r_target": 1708.8934212418735,
+      "S_group_per_target": 62.95949215835868,
+      "arm": "destination-direct",
+      "fp_invs": 15213,
+      "fp_muls": 413764,
+      "gae": 15244,
+      "peak_rss_bytes": 7127040,
+      "prefix": 16,
+      "r": 229,
+      "round": 1,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 427.90069437593485,
+      "M_per_sqrt_r_target": 16718.01260186704,
+      "S_group_per_target": 428.1237206535884,
+      "arm": "full-image",
+      "fp_invs": 103605,
+      "fp_muls": 4047831,
+      "gae": 103659,
+      "peak_rss_bytes": 12943360,
+      "prefix": 16,
+      "r": 229,
+      "round": 1,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 65.24344644618158,
+      "M_per_sqrt_r_target": 1744.1398333436468,
+      "S_group_per_target": 65.38387039877828,
+      "arm": "isogeny-image",
+      "fp_invs": 15797,
+      "fp_muls": 422298,
+      "gae": 15831,
+      "peak_rss_bytes": 7143424,
+      "prefix": 16,
+      "r": 229,
+      "round": 1,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 7.000547048571107,
+      "M_per_sqrt_r_target": 176.0214245799717,
+      "S_group_per_target": 7.07075902486946,
+      "arm": "rho-negation",
+      "fp_invs": 1695,
+      "fp_muls": 42619,
+      "gae": 1712,
+      "peak_rss_bytes": 7061504,
+      "prefix": 16,
+      "r": 229,
+      "round": 1,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 7.000547048571107,
+      "M_per_sqrt_r_target": 176.0214245799717,
+      "S_group_per_target": 7.07075902486946,
+      "arm": "rho-negation-aa",
+      "fp_invs": 1695,
+      "fp_muls": 42619,
+      "gae": 1712,
+      "peak_rss_bytes": 7012352,
+      "prefix": 16,
+      "r": 229,
+      "round": 1,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 58.82524578926152,
+      "M_per_sqrt_r_target": 1598.999287986192,
+      "S_group_per_target": 58.895457765559875,
+      "arm": "source",
+      "fp_invs": 14243,
+      "fp_muls": 387156,
+      "gae": 14260,
+      "peak_rss_bytes": 7127040,
+      "prefix": 16,
+      "r": 229,
+      "round": 1,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 1.8957233600555388,
+      "M_per_sqrt_r_target": 49.61921666167155,
+      "S_group_per_target": 1.9700654526067363,
+      "arm": "source-bsgs",
+      "fp_invs": 459,
+      "fp_muls": 12014,
+      "gae": 477,
+      "peak_rss_bytes": 6750208,
+      "prefix": 16,
+      "r": 229,
+      "round": 1,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 86.65396910092649,
+      "M_per_sqrt_r_target": 2359.1182735084176,
+      "S_group_per_target": 86.81091351853458,
+      "arm": "destination-direct",
+      "fp_invs": 20981,
+      "fp_muls": 571199,
+      "gae": 21019,
+      "peak_rss_bytes": 7192576,
+      "prefix": 16,
+      "r": 229,
+      "round": 2,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 422.1061412731943,
+      "M_per_sqrt_r_target": 16560.415625891008,
+      "S_group_per_target": 422.32916755084784,
+      "arm": "full-image",
+      "fp_invs": 102202,
+      "fp_muls": 4009673,
+      "gae": 102256,
+      "peak_rss_bytes": 12959744,
+      "prefix": 16,
+      "r": 229,
+      "round": 2,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 68.00649421933443,
+      "M_per_sqrt_r_target": 1819.6755294919164,
+      "S_group_per_target": 68.14691817193113,
+      "arm": "isogeny-image",
+      "fp_invs": 16466,
+      "fp_muls": 440587,
+      "gae": 16500,
+      "peak_rss_bytes": 7127040,
+      "prefix": 16,
+      "r": 229,
+      "round": 2,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 6.405810308161526,
+      "M_per_sqrt_r_target": 163.21806419615433,
+      "S_group_per_target": 6.50493309822979,
+      "arm": "rho-negation",
+      "fp_invs": 1551,
+      "fp_muls": 39519,
+      "gae": 1575,
+      "peak_rss_bytes": 7094272,
+      "prefix": 16,
+      "r": 229,
+      "round": 2,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 6.405810308161526,
+      "M_per_sqrt_r_target": 163.21806419615433,
+      "S_group_per_target": 6.50493309822979,
+      "arm": "rho-negation-aa",
+      "fp_invs": 1551,
+      "fp_muls": 39519,
+      "gae": 1575,
+      "peak_rss_bytes": 7061504,
+      "prefix": 16,
+      "r": 229,
+      "round": 2,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 61.47678042358757,
+      "M_per_sqrt_r_target": 1672.428624845511,
+      "S_group_per_target": 61.54699239988592,
+      "arm": "source",
+      "fp_invs": 14885,
+      "fp_muls": 404935,
+      "gae": 14902,
+      "peak_rss_bytes": 7110656,
+      "prefix": 16,
+      "r": 229,
+      "round": 2,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 1.8957233600555388,
+      "M_per_sqrt_r_target": 49.61921666167155,
+      "S_group_per_target": 1.9700654526067363,
+      "arm": "source-bsgs",
+      "fp_invs": 459,
+      "fp_muls": 12014,
+      "gae": 477,
+      "peak_rss_bytes": 6733824,
+      "prefix": 16,
+      "r": 229,
+      "round": 2,
+      "targets": 16,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 69.39937592560617,
+      "M_per_sqrt_r_target": 1889.9597828246945,
+      "S_group_per_target": 69.55735287227746,
+      "arm": "destination-direct",
+      "fp_invs": 67213,
+      "fp_muls": 1830418,
+      "gae": 67366,
+      "peak_rss_bytes": 8011776,
+      "prefix": 64,
+      "r": 229,
+      "round": 0,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 150.17205948248235,
+      "M_per_sqrt_r_target": 5355.2842633786795,
+      "S_group_per_target": 150.34242677791218,
+      "arm": "full-image",
+      "fp_invs": 145441,
+      "fp_muls": 5186570,
+      "gae": 145606,
+      "peak_rss_bytes": 13713408,
+      "prefix": 64,
+      "r": 229,
+      "round": 0,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 64.21814508641297,
+      "M_per_sqrt_r_target": 1718.9275386781587,
+      "S_group_per_target": 64.37095938776822,
+      "arm": "isogeny-image",
+      "fp_invs": 62195,
+      "fp_muls": 1664774,
+      "gae": 62343,
+      "peak_rss_bytes": 7946240,
+      "prefix": 64,
+      "r": 229,
+      "round": 0,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 6.339728448116017,
+      "M_per_sqrt_r_target": 161.40081304490283,
+      "S_group_per_target": 6.424395831299326,
+      "arm": "rho-negation",
+      "fp_invs": 6140,
+      "fp_muls": 156316,
+      "gae": 6222,
+      "peak_rss_bytes": 7340032,
+      "prefix": 64,
+      "r": 229,
+      "round": 0,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 6.339728448116017,
+      "M_per_sqrt_r_target": 161.40081304490283,
+      "S_group_per_target": 6.424395831299326,
+      "arm": "rho-negation-aa",
+      "fp_invs": 6140,
+      "fp_muls": 156316,
+      "gae": 6222,
+      "peak_rss_bytes": 7323648,
+      "prefix": 64,
+      "r": 229,
+      "round": 0,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 58.08492245093918,
+      "M_per_sqrt_r_target": 1580.5056599350185,
+      "S_group_per_target": 58.1706223631857,
+      "arm": "source",
+      "fp_invs": 56255,
+      "fp_muls": 1530713,
+      "gae": 56338,
+      "peak_rss_bytes": 7913472,
+      "prefix": 64,
+      "r": 229,
+      "round": 0,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 1.6943801927293787,
+      "M_per_sqrt_r_target": 44.72193131486141,
+      "S_group_per_target": 1.764592169027732,
+      "arm": "source-bsgs",
+      "fp_invs": 1641,
+      "fp_muls": 43313,
+      "gae": 1709,
+      "peak_rss_bytes": 6897664,
+      "prefix": 64,
+      "r": 229,
+      "round": 0,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 65.29094278308929,
+      "M_per_sqrt_r_target": 1778.0677058316996,
+      "S_group_per_target": 65.44478961350774,
+      "arm": "destination-direct",
+      "fp_invs": 63234,
+      "fp_muls": 1722051,
+      "gae": 63383,
+      "peak_rss_bytes": 7880704,
+      "prefix": 64,
+      "r": 229,
+      "round": 1,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 147.3801008955596,
+      "M_per_sqrt_r_target": 5280.023219961224,
+      "S_group_per_target": 147.55150072005264,
+      "arm": "full-image",
+      "fp_invs": 142737,
+      "fp_muls": 5113680,
+      "gae": 142903,
+      "peak_rss_bytes": 13697024,
+      "prefix": 64,
+      "r": 229,
+      "round": 1,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 64.4060653759174,
+      "M_per_sqrt_r_target": 1723.9115564662786,
+      "S_group_per_target": 64.55887967727264,
+      "arm": "isogeny-image",
+      "fp_invs": 62377,
+      "fp_muls": 1669601,
+      "gae": 62525,
+      "peak_rss_bytes": 7946240,
+      "prefix": 64,
+      "r": 229,
+      "round": 1,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 6.7548051315268705,
+      "M_per_sqrt_r_target": 169.98629220550293,
+      "S_group_per_target": 6.848765276279079,
+      "arm": "rho-negation",
+      "fp_invs": 6542,
+      "fp_muls": 164631,
+      "gae": 6633,
+      "peak_rss_bytes": 7340032,
+      "prefix": 64,
+      "r": 229,
+      "round": 1,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 6.7548051315268705,
+      "M_per_sqrt_r_target": 169.98629220550293,
+      "S_group_per_target": 6.848765276279079,
+      "arm": "rho-negation-aa",
+      "fp_invs": 6542,
+      "fp_muls": 164631,
+      "gae": 6633,
+      "peak_rss_bytes": 7372800,
+      "prefix": 64,
+      "r": 229,
+      "round": 1,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 58.19333800257634,
+      "M_per_sqrt_r_target": 1583.741606019122,
+      "S_group_per_target": 58.27903791482286,
+      "arm": "source",
+      "fp_invs": 56360,
+      "fp_muls": 1533847,
+      "gae": 56443,
+      "peak_rss_bytes": 7962624,
+      "prefix": 64,
+      "r": 229,
+      "round": 1,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 1.6943801927293787,
+      "M_per_sqrt_r_target": 44.72193131486141,
+      "S_group_per_target": 1.764592169027732,
+      "arm": "source-bsgs",
+      "fp_invs": 1641,
+      "fp_muls": 43313,
+      "gae": 1709,
+      "peak_rss_bytes": 6914048,
+      "prefix": 64,
+      "r": 229,
+      "round": 1,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 75.21251455148453,
+      "M_per_sqrt_r_target": 2048.439571149773,
+      "S_group_per_target": 75.37565414347189,
+      "arm": "destination-direct",
+      "fp_invs": 72843,
+      "fp_muls": 1983905,
+      "gae": 73001,
+      "peak_rss_bytes": 8093696,
+      "prefix": 64,
+      "r": 229,
+      "round": 2,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 148.30937705244958,
+      "M_per_sqrt_r_target": 5305.730096047991,
+      "S_group_per_target": 148.48593952225866,
+      "arm": "full-image",
+      "fp_invs": 143637,
+      "fp_muls": 5138577,
+      "gae": 143808,
+      "peak_rss_bytes": 13680640,
+      "prefix": 64,
+      "r": 229,
+      "round": 2,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 65.86296388410823,
+      "M_per_sqrt_r_target": 1763.7578855446573,
+      "S_group_per_target": 66.0178432435899,
+      "arm": "isogeny-image",
+      "fp_invs": 63788,
+      "fp_muls": 1708192,
+      "gae": 63938,
+      "peak_rss_bytes": 7913472,
+      "prefix": 64,
+      "r": 229,
+      "round": 2,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 6.551396906074288,
+      "M_per_sqrt_r_target": 165.73640258132613,
+      "S_group_per_target": 6.642259463636863,
+      "arm": "rho-negation",
+      "fp_invs": 6345,
+      "fp_muls": 160515,
+      "gae": 6433,
+      "peak_rss_bytes": 7274496,
+      "prefix": 64,
+      "r": 229,
+      "round": 2,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 6.551396906074288,
+      "M_per_sqrt_r_target": 165.73640258132613,
+      "S_group_per_target": 6.642259463636863,
+      "arm": "rho-negation-aa",
+      "fp_invs": 6345,
+      "fp_muls": 160515,
+      "gae": 6433,
+      "peak_rss_bytes": 7340032,
+      "prefix": 64,
+      "r": 229,
+      "round": 2,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 59.60170764479625,
+      "M_per_sqrt_r_target": 1622.5853493771226,
+      "S_group_per_target": 59.689472615169194,
+      "arm": "source",
+      "fp_invs": 57724,
+      "fp_muls": 1571467,
+      "gae": 57809,
+      "peak_rss_bytes": 7929856,
+      "prefix": 64,
+      "r": 229,
+      "round": 2,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    },
+    {
+      "I_per_sqrt_r_target": 1.6943801927293787,
+      "M_per_sqrt_r_target": 44.72193131486141,
+      "S_group_per_target": 1.764592169027732,
+      "arm": "source-bsgs",
+      "fp_invs": 1641,
+      "fp_muls": 43313,
+      "gae": 1709,
+      "peak_rss_bytes": 6897664,
+      "prefix": 64,
+      "r": 229,
+      "round": 2,
+      "targets": 64,
+      "unpriced": [
+        "hashes",
+        "table_lookup_insert",
+        "row_arithmetic",
+        "allocation",
+        "startup",
+        "input_output",
+        "field_additions"
+      ]
+    }
+  ],
+  "run_sha256": "d0e4616236aeb8978f5ac1549dde373be294bdf52503c954a6f964904f68faf8",
+  "schema": "different_j_order_portable/v1",
+  "status": "checked_counted_axes_with_unpriced_work",
+  "summary": [
+    {
+      "arm": "source",
+      "max_S_group_per_target": 125.42337036637603,
+      "median_I_per_sqrt_r_target": 91.78770360321197,
+      "median_M_per_sqrt_r_target": 2466.2410987584403,
+      "median_S_group_per_target": 91.39121244293891,
+      "min_S_group_per_target": 79.29823205461076,
+      "prefix": 1
+    },
+    {
+      "arm": "isogeny-image",
+      "max_S_group_per_target": 138.83798795561435,
+      "median_I_per_sqrt_r_target": 101.76606447008382,
+      "median_M_per_sqrt_r_target": 2691.580241513626,
+      "median_S_group_per_target": 101.50173702990179,
+      "min_S_group_per_target": 88.74793804111856,
+      "prefix": 1
+    },
+    {
+      "arm": "destination-direct",
+      "max_S_group_per_target": 82.33799761670419,
+      "median_I_per_sqrt_r_target": 78.1087585737916,
+      "median_M_per_sqrt_r_target": 2082.371573754079,
+      "median_S_group_per_target": 77.97659485370059,
+      "min_S_group_per_target": 62.24911216286945,
+      "prefix": 1
+    },
+    {
+      "arm": "full-image",
+      "max_S_group_per_target": 6007.171487436994,
+      "median_I_per_sqrt_r_target": 5980.342252258517,
+      "median_M_per_sqrt_r_target": 243894.92905596452,
+      "median_S_group_per_target": 5981.663889459427,
+      "min_S_group_per_target": 5977.963305296878,
+      "prefix": 1
+    },
+    {
+      "arm": "source-bsgs",
+      "max_S_group_per_target": 4.097075322821556,
+      "median_I_per_sqrt_r_target": 3.8988297426850296,
+      "median_M_per_sqrt_r_target": 101.50173702990179,
+      "median_S_group_per_target": 4.097075322821556,
+      "min_S_group_per_target": 4.097075322821556,
+      "prefix": 1
+    },
+    {
+      "arm": "rho-negation",
+      "max_S_group_per_target": 9.978360866871855,
+      "median_I_per_sqrt_r_target": 7.929823205461077,
+      "median_M_per_sqrt_r_target": 204.65552056094128,
+      "median_S_group_per_target": 8.061986925552095,
+      "min_S_group_per_target": 7.929823205461077,
+      "prefix": 1
+    },
+    {
+      "arm": "rho-negation-aa",
+      "max_S_group_per_target": 9.978360866871855,
+      "median_I_per_sqrt_r_target": 7.929823205461077,
+      "median_M_per_sqrt_r_target": 204.65552056094128,
+      "median_S_group_per_target": 8.061986925552095,
+      "min_S_group_per_target": 7.929823205461077,
+      "prefix": 1
+    },
+    {
+      "arm": "source",
+      "max_S_group_per_target": 74.96987022162993,
+      "median_I_per_sqrt_r_target": 71.97966605457066,
+      "median_M_per_sqrt_r_target": 1951.2982043538118,
+      "median_S_group_per_target": 71.99618651958203,
+      "min_S_group_per_target": 65.15671400487184,
+      "prefix": 4
+    },
+    {
+      "arm": "isogeny-image",
+      "max_S_group_per_target": 82.96577528713652,
+      "median_I_per_sqrt_r_target": 79.69472321488382,
+      "median_M_per_sqrt_r_target": 2124.895250693364,
+      "median_S_group_per_target": 79.79384600495209,
+      "min_S_group_per_target": 72.32659581980957,
+      "prefix": 4
+    },
+    {
+      "arm": "destination-direct",
+      "max_S_group_per_target": 83.89092132777364,
+      "median_I_per_sqrt_r_target": 73.71431488076526,
+      "median_M_per_sqrt_r_target": 1996.5807989499967,
+      "median_S_group_per_target": 73.8299581358449,
+      "min_S_group_per_target": 56.92952242920598,
+      "prefix": 4
+    },
+    {
+      "arm": "full-image",
+      "max_S_group_per_target": 1535.7259069926172,
+      "median_I_per_sqrt_r_target": 1533.6773693312064,
+      "median_M_per_sqrt_r_target": 62027.14319497659,
+      "median_S_group_per_target": 1534.1234218865136,
+      "min_S_group_per_target": 1532.7687437555808,
+      "prefix": 4
+    },
+    {
+      "arm": "source-bsgs",
+      "max_S_group_per_target": 2.4450288216838323,
+      "median_I_per_sqrt_r_target": 2.3459060316155687,
+      "median_M_per_sqrt_r_target": 61.05963868205029,
+      "median_S_group_per_target": 2.4450288216838323,
+      "min_S_group_per_target": 2.4450288216838323,
+      "prefix": 4
+    },
+    {
+      "arm": "rho-negation",
+      "max_S_group_per_target": 7.202922744960478,
+      "median_I_per_sqrt_r_target": 6.624706469562275,
+      "median_M_per_sqrt_r_target": 169.16956171650298,
+      "median_S_group_per_target": 6.7403497246419155,
+      "min_S_group_per_target": 6.674267864596406,
+      "prefix": 4
+    },
+    {
+      "arm": "rho-negation-aa",
+      "max_S_group_per_target": 7.202922744960478,
+      "median_I_per_sqrt_r_target": 6.624706469562275,
+      "median_M_per_sqrt_r_target": 169.16956171650298,
+      "median_S_group_per_target": 6.7403497246419155,
+      "min_S_group_per_target": 6.674267864596406,
+      "prefix": 4
+    },
+    {
+      "arm": "source",
+      "max_S_group_per_target": 64.99976958726377,
+      "median_I_per_sqrt_r_target": 61.47678042358757,
+      "median_M_per_sqrt_r_target": 1672.428624845511,
+      "median_S_group_per_target": 61.54699239988592,
+      "min_S_group_per_target": 58.895457765559875,
+      "prefix": 16
+    },
+    {
+      "arm": "isogeny-image",
+      "max_S_group_per_target": 71.91358419452514,
+      "median_I_per_sqrt_r_target": 68.00649421933443,
+      "median_M_per_sqrt_r_target": 1819.6755294919164,
+      "median_S_group_per_target": 68.14691817193113,
+      "min_S_group_per_target": 65.38387039877828,
+      "prefix": 16
+    },
+    {
+      "arm": "destination-direct",
+      "max_S_group_per_target": 86.81091351853458,
+      "median_I_per_sqrt_r_target": 64.69001086830045,
+      "median_M_per_sqrt_r_target": 1759.3304009216083,
+      "median_S_group_per_target": 64.83869505340284,
+      "min_S_group_per_target": 62.95949215835868,
+      "prefix": 16
+    },
+    {
+      "arm": "full-image",
+      "max_S_group_per_target": 434.0091363138916,
+      "median_I_per_sqrt_r_target": 427.90069437593485,
+      "median_M_per_sqrt_r_target": 16718.01260186704,
+      "median_S_group_per_target": 428.1237206535884,
+      "min_S_group_per_target": 422.32916755084784,
+      "prefix": 16
+    },
+    {
+      "arm": "source-bsgs",
+      "max_S_group_per_target": 1.9700654526067363,
+      "median_I_per_sqrt_r_target": 1.8957233600555388,
+      "median_M_per_sqrt_r_target": 49.61921666167155,
+      "median_S_group_per_target": 1.9700654526067363,
+      "min_S_group_per_target": 1.9700654526067363,
+      "prefix": 16
+    },
+    {
+      "arm": "rho-negation",
+      "max_S_group_per_target": 7.07075902486946,
+      "median_I_per_sqrt_r_target": 6.451241586942814,
+      "median_M_per_sqrt_r_target": 164.80815895349937,
+      "median_S_group_per_target": 6.5379740282525445,
+      "min_S_group_per_target": 6.50493309822979,
+      "prefix": 16
+    },
+    {
+      "arm": "rho-negation-aa",
+      "max_S_group_per_target": 7.07075902486946,
+      "median_I_per_sqrt_r_target": 6.451241586942814,
+      "median_M_per_sqrt_r_target": 164.80815895349937,
+      "median_S_group_per_target": 6.5379740282525445,
+      "min_S_group_per_target": 6.50493309822979,
+      "prefix": 16
+    },
+    {
+      "arm": "source",
+      "max_S_group_per_target": 59.689472615169194,
+      "median_I_per_sqrt_r_target": 58.19333800257634,
+      "median_M_per_sqrt_r_target": 1583.741606019122,
+      "median_S_group_per_target": 58.27903791482286,
+      "min_S_group_per_target": 58.1706223631857,
+      "prefix": 64
+    },
+    {
+      "arm": "isogeny-image",
+      "max_S_group_per_target": 66.0178432435899,
+      "median_I_per_sqrt_r_target": 64.4060653759174,
+      "median_M_per_sqrt_r_target": 1723.9115564662786,
+      "median_S_group_per_target": 64.55887967727264,
+      "min_S_group_per_target": 64.37095938776822,
+      "prefix": 64
+    },
+    {
+      "arm": "destination-direct",
+      "max_S_group_per_target": 75.37565414347189,
+      "median_I_per_sqrt_r_target": 69.39937592560617,
+      "median_M_per_sqrt_r_target": 1889.9597828246945,
+      "median_S_group_per_target": 69.55735287227746,
+      "min_S_group_per_target": 65.44478961350774,
+      "prefix": 64
+    },
+    {
+      "arm": "full-image",
+      "max_S_group_per_target": 150.34242677791218,
+      "median_I_per_sqrt_r_target": 148.30937705244958,
+      "median_M_per_sqrt_r_target": 5305.730096047991,
+      "median_S_group_per_target": 148.48593952225866,
+      "min_S_group_per_target": 147.55150072005264,
+      "prefix": 64
+    },
+    {
+      "arm": "source-bsgs",
+      "max_S_group_per_target": 1.764592169027732,
+      "median_I_per_sqrt_r_target": 1.6943801927293787,
+      "median_M_per_sqrt_r_target": 44.72193131486141,
+      "median_S_group_per_target": 1.764592169027732,
+      "min_S_group_per_target": 1.764592169027732,
+      "prefix": 64
+    },
+    {
+      "arm": "rho-negation",
+      "max_S_group_per_target": 6.848765276279079,
+      "median_I_per_sqrt_r_target": 6.551396906074288,
+      "median_M_per_sqrt_r_target": 165.73640258132613,
+      "median_S_group_per_target": 6.642259463636863,
+      "min_S_group_per_target": 6.424395831299326,
+      "prefix": 64
+    },
+    {
+      "arm": "rho-negation-aa",
+      "max_S_group_per_target": 6.848765276279079,
+      "median_I_per_sqrt_r_target": 6.551396906074288,
+      "median_M_per_sqrt_r_target": 165.73640258132613,
+      "median_S_group_per_target": 6.642259463636863,
+      "min_S_group_per_target": 6.424395831299326,
+      "prefix": 64
+    }
+  ],
+  "unit": "ecbench.gae per target per sqrt(r); separate Fp multiplication and inversion axes overlap group work"
+}
