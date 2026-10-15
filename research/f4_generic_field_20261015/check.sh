@@ -16,14 +16,14 @@ tmp=$(mktemp -d)
     echo "## $b: $("$C" compare-rows eq/kummer-p2.fp32.jsonl "eq/kummer-p2.$b.jsonl" --ignore backend 2>&1 | tail -1)"
   done
   echo "# G4: pkm_tower_check verify on the u64-builder depth rows"
-  for f in depth/*.jsonl; do
+  for f in depth/*.jsonl ext/*.jsonl; do
     if grep -q '"builder":"u64"' "$f"; then
       echo "## $f"
       "$C" verify "$f" 2>&1 | tail -3
     fi
   done
   echo "# G4: wide-builder inline verification (finished tower rows)"
-  for f in depth/*.jsonl; do
+  for f in depth/*.jsonl ext/*.jsonl; do
     if grep -q '"builder":"wide"' "$f"; then
       n=$(grep -c '"verify":{' "$f" || true)
       ok=$(grep -c '"ok":true' "$f" || true)

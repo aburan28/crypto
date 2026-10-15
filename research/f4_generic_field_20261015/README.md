@@ -196,7 +196,23 @@ reference in `D`, width and steps.
 ![D against N](fig_d_vs_n.svg)
 ![time against N](fig_time_vs_n.svg)
 
-EXTENSION_PLACEHOLDER
+### Extension cells (PROTOCOL §8 B, one random target each, `runs/ext/`)
+
+| cell | prime (backend) | D / width / steps | recorded (p₁) | multiply-adds | F4 time (2 threads) | check |
+|:--|:--|:--|:--|--:|--:|:--|
+| Kummer m = 2, N = 20 | v₂ = 40 (Fp52; §5 optional cell) | 6 / 33446 / 24 | 6 / 33446 / 24 (K1) | 4.820·10¹¹ | 166 s | verify agrees |
+| Kummer m = 2, N = 20 | v₂ = 48 (Fp52) | 6 / 33446 / 24 | 6 / 33446 / 24 | 4.820·10¹¹ | 216 s | verify agrees |
+| Kummer m = 2, N = 20 | v₂ = 56 (Fp64) | 6 / 33446 / 24 | 6 / 33446 / 24 | 4.820·10¹¹ | 614 s | verify agrees |
+| Kummer m = 3, N = 15 | v₂ = 40 (Fp52) | 7 / 31397 / 24 | 7 / 31397 / 24 (M3) | 3.186·10¹² | 1330 s | verify agrees |
+| Kummer m = 4, N = 12 | v₂ = 40 (Fp52) | 7 / 9452 / 29 | 7 / 9452 / 29 (M4) | 5.160·10¹⁰ | 16 s | verify agrees |
+| Kummer m = 4, N = 12 | P-224 (Fp224) | 7 / 9452 / 29 | 7 / 9452 / 29 (M4) | 5.160·10¹⁰ | 383 s | `--verify` ok |
+| Kummer m = 2, N = 20 | P-224 | re-running (interrupted twice) | 6 / 33446 / 24 | | | |
+| torus m = 2, N = 20 | P-192 | re-running (interrupted twice) | 6 / 33426 / 24 (T31, R1) | | | |
+
+All finished extension cells equal their reference in `D`, width and steps
+(H_same supported). The two N = 20 wide-field cells were interrupted twice by
+container restarts (the engine does not checkpoint); see §5.
+
 
 **Reading under PROTOCOL §6.** H_same is supported in every series: no valued
 cell differs in `D`. Beyond the rule, width and step count also agree in every
@@ -221,9 +237,12 @@ is rarer, not commoner, at larger primes.
   block-size effect. The addendum, written before that arm had finished, said
   it had 0 differences; that was premature. It was re-run on the fixed
   binary: see `runs/checks.txt` (`kummer-p2.wide4.v1.*` kept).
-- **Container restart.** The host container restarted during the extension
-  run and the first `FpWide<4>` re-run; both were restarted (`run_ext.sh`
-  became resumable and skips cells already finished). `runs/progress.txt`.
+- **Container restarts.** The host container restarted twice: during the
+  extension run and the first `FpWide<4>` re-run, and again during the
+  P-192 `N = 20` cell. Each time the unfinished work was restarted
+  (`run_ext.sh` became resumable and skips cells already finished; the P-224
+  `N = 20` cell was moved ahead of P-192). `runs/progress.txt`,
+  `runs/ext/progress.txt`.
 - The speed arms and the equality runs used the first binary (`eb44c14b…`);
   their `Fp32`, `Fp52`, `Fp64` accumulators are ≤ 16 bytes, where the block
   size was already the `u32` engine's below the clamp, and G2/G3 show they
