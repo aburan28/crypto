@@ -368,20 +368,66 @@ fn invert(gf: &Gf2, basis: &NormalBasis, a: u64) -> u64 {
 struct RootBloom {
     words: Vec<u64>,
     bit_mask: usize,
+    hashes: usize,
+    profile: RootBloomProfile,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum RootBloomProfile {
+    Standard,
+    Wide3,
+    Wide5,
+}
+
+impl RootBloomProfile {
+    fn from_env() -> Self {
+        match std::env::var("KIC_ROOT_BLOOM_PROFILE").as_deref() {
+            Err(_) | Ok("standard") => Self::Standard,
+            Ok("wide3") => Self::Wide3,
+            Ok("wide5") => Self::Wide5,
+            _ => panic!("KIC_ROOT_BLOOM_PROFILE must be standard, wide3 or wide5"),
+        }
+    }
+
+    fn bits_per_request(self) -> usize {
+        match self {
+            Self::Standard => 8,
+            Self::Wide3 | Self::Wide5 => 16,
+        }
+    }
+
+    fn hashes(self) -> usize {
+        match self {
+            Self::Standard | Self::Wide3 => 3,
+            Self::Wide5 => 5,
+        }
+    }
+
+    fn name(self) -> &'static str {
+        match self {
+            Self::Standard => "standard",
+            Self::Wide3 => "wide3",
+            Self::Wide5 => "wide5",
+        }
+    }
 }
 
 impl RootBloom {
-    const HASHES: usize = 3;
-
     fn with_capacity(keys: usize) -> Self {
+        Self::with_profile(keys, RootBloomProfile::from_env())
+    }
+
+    fn with_profile(keys: usize, profile: RootBloomProfile) -> Self {
         let bits = keys
-            .checked_mul(8)
+            .checked_mul(profile.bits_per_request())
             .and_then(usize::checked_next_power_of_two)
             .expect("root Bloom size overflow")
             .max(64);
         Self {
             words: vec![0; bits / 64],
             bit_mask: bits - 1,
+            hashes: profile.hashes(),
+            profile,
         }
     }
 
@@ -398,7 +444,7 @@ impl RootBloom {
     #[inline(always)]
     fn insert(&mut self, key: u128) {
         let (first, step) = Self::hash_pair(key);
-        for index in 0..Self::HASHES {
+        for index in 0..self.hashes {
             let bit =
                 first.wrapping_add((index as u64).wrapping_mul(step)) as usize & self.bit_mask;
             self.words[bit >> 6] |= 1u64 << (bit & 63);
@@ -408,7 +454,7 @@ impl RootBloom {
     #[inline(always)]
     fn contains(&self, key: u128) -> bool {
         let (first, step) = Self::hash_pair(key);
-        for index in 0..Self::HASHES {
+        for index in 0..self.hashes {
             let bit =
                 first.wrapping_add((index as u64).wrapping_mul(step)) as usize & self.bit_mask;
             if self.words[bit >> 6] & (1u64 << (bit & 63)) == 0 {
@@ -504,7 +550,7 @@ impl RootTable {
 
 #[cfg(test)]
 mod root_bloom_table_tests {
-    use super::{mix_root_bloom, RootBloom, RootTable};
+    use super::{mix_root_bloom, RootBloom, RootBloomProfile, RootTable};
 
     #[test]
     fn canonical_u64_lookup_matches_unscreened_table() {
@@ -527,6 +573,24 @@ mod root_bloom_table_tests {
             if key != u64::MAX {
                 assert!(screened.bloom.as_ref().unwrap().contains(key as u128));
                 assert_eq!(screened.get(key), Some(value));
+            }
+        }
+    }
+
+    #[test]
+    fn every_bloom_profile_preserves_all_inserted_keys() {
+        for profile in [
+            RootBloomProfile::Standard,
+            RootBloomProfile::Wide3,
+            RootBloomProfile::Wide5,
+        ] {
+            let mut bloom = RootBloom::with_profile(4096, profile);
+            let keys: Vec<_> = (0..4096u64).map(|i| mix_root_bloom(i) as u128).collect();
+            for &key in &keys {
+                bloom.insert(key);
+            }
+            for key in keys {
+                assert!(bloom.contains(key), "missing key under {profile:?}");
             }
         }
     }
@@ -4129,6 +4193,9 @@ mod wide {
             "root_table_allocated_bytes":root_table_allocated_bytes,
             "root_bloom_enabled":index.table.bloom.is_some(),
             "root_bloom_bytes":index.table.bloom.as_ref().map_or(0, RootBloom::bytes),
+            "root_bloom_profile":index.table.bloom.as_ref().map_or("none", |bloom| bloom.profile.name()),
+            "root_bloom_hashes":index.table.bloom.as_ref().map_or(0, |bloom| bloom.hashes),
+            "root_bloom_bits_per_request":index.table.bloom.as_ref().map_or(0, |bloom| bloom.profile.bits_per_request()),
             "sparse_canonical_enabled":basis.sparse_canonical,
             "pair_table_entries":0,
             "edge_selectors":0,
@@ -4647,6 +4714,9 @@ fn main() {
         "root_table_entries":index.table.len,
         "root_bloom_enabled":index.table.bloom.is_some(),
         "root_bloom_bytes":index.table.bloom.as_ref().map_or(0, RootBloom::bytes),
+        "root_bloom_profile":index.table.bloom.as_ref().map_or("none", |bloom| bloom.profile.name()),
+        "root_bloom_hashes":index.table.bloom.as_ref().map_or(0, |bloom| bloom.hashes),
+        "root_bloom_bits_per_request":index.table.bloom.as_ref().map_or(0, |bloom| bloom.profile.bits_per_request()),
         "sparse_canonical_enabled":basis.sparse_canonical,
         "pair_table_entries":0,
         "edge_selectors":0,
