@@ -351,6 +351,16 @@ sparse in exactly the way a number-field-sieve matrix is. By default
    launcher executable. Worker failure emits a warning and falls back to the
    serial CPU product.
 
+The filter before the Krylov solve is selected with `--filter-strategy`:
+`cado` (the default) runs CADO-NFS's filter as ported into
+`koblitz_sparse_la` (`FilterOptions::cado()`: whole-clique purge under
+Bouvier's Ω₃₁ weight over up to 50 steps, then Markowitz-ordered merges along
+minimum spanning trees up to an average row weight of 100); `legacy` runs the
+historical filter described above. On synthetic m = 3 systems of 262,144
+columns the `cado` filter's whole solve is about 10× faster than `legacy` and
+about 1.9× faster than CADO-NFS's own pipeline; below about 4,096 columns it is
+slower by milliseconds (`research/la_engines_20261014`).
+
 The sparse path never attempts a solve before every column occurs in
 some row, and the solution is checked against every relation before
 the group certification `[x_o]G == R_o` runs. `--linear-algebra dense`
