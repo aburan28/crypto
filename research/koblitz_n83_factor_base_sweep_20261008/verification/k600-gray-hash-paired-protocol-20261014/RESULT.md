@@ -57,6 +57,9 @@ the three pinned compressed objects named by their BLAKE3 digests. The run
 requires a clean committed checkout and must be invoked explicitly using
 `uv run --with blake3 python3 supervisor.py --authorization GRANT --output-dir
 OUTPUT --archive-dir SCRATCH_DIR`. No such grant or run is recorded here.
+The [local Docker readiness check](DOCKER_READINESS.md) currently fails due
+to a Docker VM disk I/O error; its disposition is infrastructure failure,
+not a zero-yield observation.
 
 With the three S3 archives downloaded under their compressed-BLAKE3 filenames
 to `SCRATCH_DIR`, reproduce the source-only checks with:
