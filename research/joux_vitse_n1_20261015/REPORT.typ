@@ -62,7 +62,7 @@ Fits (least squares on logs): $C_"trial" prop p^(#r2(S.fit_c_trial_vs_p.slope))$
   )).flatten()
 )
 
-Rho's counts include its 20 multipliers' set-up, which dominates at these toy orders (expected walk alone $sqrt(pi ell \/ 2)$); against the walk alone the ratios are larger. $p = 11$, seed 3 drew a curve with $|F| = 1$ and was stopped (`data/dlp/p11_s3.STOPPED.md`). Target-independent set-up (symmetrised $S_5$, $1.87 dot 10^9$; trace recording, $approx 10^10$) is reported separately and excluded from "online".
+Rho's counts include its 20 multipliers' set-up, which dominates at the $p = 11$ orders; the last ratio column prices rho as its expected walk alone, $sqrt(pi ell \/ 2)$ operations at the measured cost of one. At $p = 31$ the measured walk was short (4,092 operations against 6,705 expected), so there the expected-walk ratio is the smaller one. $p = 11$, seed 3 drew a curve with $|F| = 1$ and was stopped (`data/dlp/p11_s3.STOPPED.md`). Target-independent set-up (symmetrised $S_5$, $1.87 dot 10^9$; trace recording, $approx 10^10$) is reported separately and excluded from "online".
 
 #figure(image("figures/ic_over_rho.svg", width: 88%), caption: [IC / rho: the complete DLPs (red) and the model (dashed; extrapolation on the measured $C_"trial"$, trials $= kappa q$ with $kappa = #r2(S.model_extrapolation.kappa, d: 1)$, rho with the negation map).])
 
